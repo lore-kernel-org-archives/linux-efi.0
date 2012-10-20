@@ -1,117 +1,65 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: RE: [RFC][PATCH 1/2] efi_pstore: hold multiple logs
-Date: Fri, 19 Oct 2012 14:26:33 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138796E1@USINDEM103.corp.hds.com>
-References: <A5ED84D3BB3A384992CBB9C77DEDA4D41386D119@USINDEM103.corp.hds.com>
- <CAGTjWtDgrDGN-+yCqfFsfaA8Xjbhj8nherA+puoGVRs-8vXO5g@mail.gmail.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH V2 01/10] Secure boot: Add new capability
+Date: Sat, 20 Oct 2012 08:15:42 +0800
+Message-ID: <1350692142.14835.46.camel@linux-s257.site>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+	 <1348152065-31353-2-git-send-email-mjg@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGTjWtDgrDGN-+yCqfFsfaA8Xjbhj8nherA+puoGVRs-8vXO5g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <1348152065-31353-2-git-send-email-mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Matthew Garrett (mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Mike,
+Hi Matt,=20
 
-Thank you for reviewing my patch.
-Here is my comment.
+Sorry for bother you!
 
-> >   - Write callback
-> >     - Check if there are enough spaces to write logs with QueryVariableInfo()
-> >       to avoid handling out of space situation. (It is suggested by
-> > Matthew Garrett.)
-> >
-> 
-> I would prefer to see the exposing query_variable_info callback as a separate patch.  The check in the patch looks good.
->
-
-OK. I will make a separate patch.
-
- 
-> >     - Remove a logic erasing existing entries.
-> >
-> >   - Erase callback
-> >     - Freshly create a logic rather than sharing it with a write callback because
-> >       erasing entries doesn't need in a write callback.
-> >
-> 
-> This sort of change is a lot easier to review if you copy and paste the routine in a patch separate from this one.
-> 
-
-I will separate it as well.
+I didn't see this Matthew's patchset merged in EFI git tree. Do you hav=
+e
+plan to merge it? Or those patches need wait different subsystem leader=
+s
+merge.
 
 
-> > +       /*
-> > +        * Check if there is a space enough to log.
-> > +        * size: a size of logging data
-> > +        * DUMP_NAME_LEN * 2: a maximum size of variable name
-> > +        *
-> 
-> extra line
-> 
+Thanks a lot!
+Joey Lee
 
-Will fix.
-
-> > +
-> > +       efivars->ops->set_variable(efi_name, &vendor, PSTORE_EFI_ATTRIBUTES,
-> > +                                  size, psi->buf);
-> > +
-> > +       spin_unlock(&efivars->lock);
-> > +
-> > +       if (size)
-> > +               ret = efivar_create_sysfs_entry(efivars,
-> > +                                         utf16_strsize(efi_name,
-> > +                                                       DUMP_NAME_LEN * 2),
-> > +                                         efi_name, &vendor);
-> 
-> What is happening here?  Why is size checked for non-zero?
-> 
-
-I just copied an original code sharing a logic of write callback and erase callback.. 
-But, if size is zero, we don't need to create a sysfs file because a set_variable service erases the entry.
-It is defined in EFI specification.
-So, I think this code is right.
-
-> > +++ b/fs/pstore/inode.c
-> > @@ -175,7 +175,8 @@ static int pstore_unlink(struct inode *dir, struct dentry *dentry)
-> >         struct pstore_private *p = dentry->d_inode->i_private;
-> >
-> >         if (p->psi->erase)
-> > -               p->psi->erase(p->type, p->id, p->psi);
-> > +               p->psi->erase(p->type, p->id, dentry->d_inode->i_ctime,
-> > +                             p->psi);
-> 
-> This doesn't look right.  What guarantees that the i_ctime means anything across reboots?
-> 
-
-Ctime is persistent across reboots because ctime of pstore means the date that the recode was
-originally stored. (See below.)
-
-To do this, efi_pstore saves the ctime to variable name at writing time and passes it to pstore at reading time.
-
-fs/pstore/inode.c:
-<snip>
-/*
-  * Make a regular file in the root directory of our file system.
-  * Load it up with "size" bytes of data from "buf".
-  * Set the mtime & ctime to the date that this record was originally stored.
-  */
-int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
-                   char *data, size_t size, struct timespec time,
-                   struct pstore_info *psi) {
-         struct dentry           *root = pstore_sb->s_root;
-         struct dentry           *dentry;
-         struct inode            *inode;
-         int                     rc = 0;
-         char                    name[PSTORE_NAMELEN];
-<snip>
-
-Seiji
---
-To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+=E6=96=BC =E5=9B=9B=EF=BC=8C2012-09-20 =E6=96=BC 10:40 -0400=EF=BC=8CMa=
+tthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
+> Secure boot adds certain policy requirements, including that root mus=
+t not
+> be able to do anything that could cause the kernel to execute arbitra=
+ry code.
+> The simplest way to handle this would seem to be to add a new capabil=
+ity
+> and gate various functionality on that. We'll then strip it from the =
+initial
+> capability set if required.
+>=20
+> Signed-off-by: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  include/linux/capability.h | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/include/linux/capability.h b/include/linux/capability.h
+> index d10b7ed..4345bc8 100644
+> --- a/include/linux/capability.h
+> +++ b/include/linux/capability.h
+> @@ -364,7 +364,11 @@ struct cpu_vfs_cap_data {
+> =20
+>  #define CAP_BLOCK_SUSPEND    36
+> =20
+> -#define CAP_LAST_CAP         CAP_BLOCK_SUSPEND
+> +/* Allow things that trivially permit root to modify the running ker=
+nel */
+> +
+> +#define CAP_COMPROMISE_KERNEL  37
+> +
+> +#define CAP_LAST_CAP         CAP_COMPROMISE_KERNEL
+> =20
+>  #define cap_valid(x) ((x) >=3D 0 && (x) <=3D CAP_LAST_CAP)
+> =20
