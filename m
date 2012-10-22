@@ -1,31 +1,35 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: [PATCH V2 01/10] Secure boot: Add new capability
-Date: Sat, 20 Oct 2012 10:02:32 +0100
-Message-ID: <1350723752.2393.3.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH V2 08/10] efi: Enable secure boot lockdown automatically
+ when enabled in firmware
+Date: Mon, 22 Oct 2012 14:22:28 +0100
+Message-ID: <1350912148.4951.7.camel@mfleming-mobl1.ger.corp.intel.com>
 References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	 <1348152065-31353-2-git-send-email-mjg@redhat.com>
-	 <1350692142.14835.46.camel@linux-s257.site>
+	 <1348152065-31353-9-git-send-email-mjg@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1350692142.14835.46.camel@linux-s257.site>
-Sender: linux-security-module-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, Matthew Garrett <mjg@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1348152065-31353-9-git-send-email-mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 2012-10-20 at 08:15 +0800, joeyli wrote:
-> Hi Matt, 
+On Thu, 2012-09-20 at 10:41 -0400, Matthew Garrett wrote:
+> The firmware has a set of flags that indicate whether secure boot is enabled
+> and enforcing. Use them to indicate whether the kernel should lock itself
+> down.
 > 
-> Sorry for bother you!
-> 
-> I didn't see this Matthew's patchset merged in EFI git tree. Do you have
-> plan to merge it? Or those patches need wait different subsystem leaders
-> merge.
+> Signed-off-by: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  Documentation/x86/zero-page.txt  |  2 ++
+>  arch/x86/boot/compressed/eboot.c | 32 ++++++++++++++++++++++++++++++++
+>  arch/x86/include/asm/bootparam.h |  3 ++-
+>  arch/x86/kernel/setup.c          |  3 +++
+>  include/linux/cred.h             |  2 ++
+>  5 files changed, 41 insertions(+), 1 deletion(-)
 
-I don't think it makes sense for the secure boot patch series to go
-through the EFI tree as it touches a lot of other subsystems.
+Probably wants an update to Documentation/x86/boot.txt too. But
+otherwise,
 
-
-
+Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
