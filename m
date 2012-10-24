@@ -1,46 +1,31 @@
-From: Lennart Poettering <lennart@poettering.net>
-Subject: Re: [PATCH] Add syste-firmware-efi-efivars.mount
- for support automount EFI variable filesystem
-Date: Wed, 24 Oct 2012 16:04:02 +0200
-Message-ID: <20121024140401.GA19778@tango.0pointer.de>
-References: <1351075322-3824-1-git-send-email-jlee@suse.com>
+From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH] efi: Build EFI stub with EFI-appropriate options
+Date: Wed, 24 Oct 2012 10:52:25 -0700
+Message-ID: <20121024175225.GA27553@kroah.com>
+References: <1343340000-7587-1-git-send-email-mjg@redhat.com>
+ <CAA7rmPGL827cgT6hM8h_xhokEbTbTnrptoRekVByM7AcMdRUdw@mail.gmail.com>
+ <20121018182831.GA30905@srcf.ucam.org>
+ <CAA7rmPHSX+nOfQc-rs729g7ibkH5VwvsGkiOLLxX794CAgmYSw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1351075322-3824-1-git-send-email-jlee@suse.com>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/systemd-devel>,
-	<mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/systemd-devel>
-List-Post: <mailto:systemd-devel@lists.freedesktop.org>
-List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
-	<mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
-Sender: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
-Errors-To: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-efi@vger.kernel.org, systemd-devel@lists.freedesktop.org, Kay Sievers <kay@vrfy.org>, "Lee, Chun-Yi" <jlee@suse.com>, Matt Fleming <matt.fleming@intel.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Matthew Garrett <mjg@redhat.com>
+In-Reply-To: <CAA7rmPHSX+nOfQc-rs729g7ibkH5VwvsGkiOLLxX794CAgmYSw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Vacek <neelx.g-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 24.10.12 18:42, Lee, Chun-Yi (joeyli.kernel@gmail.com) wrote:
+On Thu, Oct 18, 2012 at 10:32:50PM +0200, Daniel Vacek wrote:
+> On Thu, Oct 18, 2012 at 8:28 PM, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
+> > On Thu, Oct 18, 2012 at 08:18:51PM +0200, Daniel Vacek wrote:
+> >
+> >> s/CLFAGS/CFLAGS/
+> >>
+> >> should go to stable too?
+> >
+> > Crap. Yes. Feel free to send that.
 
-> Add units/sys-firmware-efi-efivars.mount rule for support automount
-> EFI variable filesystem
+Applied, thanks.
 
-Good in principle, but as Kay mentioned we probably should not expose
-this as units, but just mount it from PID1's C code. More specifically
-add it to the table in src/core/mount-setup.c, but make sure to set the
-"fatal" bool in the table to false for this entry, to clarify that this
-is not a reason to fail.
-
-You probably also want to add the kmod to the table in
-src/core/kmod-setup.c since the mount point is not available if the kmod
-is not loaded.
-
-Thanks!
-
-Lennart
-
--- 
-Lennart Poettering - Red Hat, Inc.
+greg k-h
