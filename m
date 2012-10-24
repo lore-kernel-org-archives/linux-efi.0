@@ -1,48 +1,50 @@
-From: Zbigniew =?utf-8?Q?J=C4=99drzejewski-Szmek?= <zbyszek@in.waw.pl>
-Subject: Re: [PATCH] Add syste-firmware-efi-efivars.mount
- for support automount EFI variable filesystem
-Date: Wed, 24 Oct 2012 14:12:46 +0200
-Message-ID: <20121024121246.GU19454@in.waw.pl>
-References: <1351075322-3824-1-git-send-email-jlee@suse.com>
+From: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+Subject: Re: [systemd-devel] [PATCH] Add syste-firmware-efi-efivars.mount for
+ support automount EFI variable filesystem
+Date: Wed, 24 Oct 2012 14:17:39 +0200
+Message-ID: <CAPXgP10Jejdu6Q=4XDy0ujjX6kKX-efgCZxmPJJiV5YRfNCJ6Q@mail.gmail.com>
+References: <1351075322-3824-1-git-send-email-jlee@suse.com> <20121024121246.GU19454@in.waw.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org>
-Content-Disposition: inline
-In-Reply-To: <1351075322-3824-1-git-send-email-jlee@suse.com>
-List-Unsubscribe: <http://lists.freedesktop.org/mailman/options/systemd-devel>,
-	<mailto:systemd-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <http://lists.freedesktop.org/archives/systemd-devel>
-List-Post: <mailto:systemd-devel@lists.freedesktop.org>
-List-Help: <mailto:systemd-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <http://lists.freedesktop.org/mailman/listinfo/systemd-devel>,
-	<mailto:systemd-devel-request@lists.freedesktop.org?subject=subscribe>
-Sender: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
-Errors-To: systemd-devel-bounces+gcssd-systemd-devel=m.gmane.org@lists.freedesktop.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-efi@vger.kernel.org, systemd-devel@lists.freedesktop.org, Kay Sievers <kay@vrfy.org>, "Lee, Chun-Yi" <jlee@suse.com>, Matt Fleming <matt.fleming@intel.com>, Jeremy Kerr <jeremy.kerr@canonical.com>, Matthew Garrett <mjg@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121024121246.GU19454-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: =?UTF-8?Q?Zbigniew_J=C4=99drzejewski=2DSzmek?= <zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>
+Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 24, 2012 at 06:42:02PM +0800, Lee, Chun-Yi wrote:
-> Add units/sys-firmware-efi-efivars.mount rule for support automount EFI variable filesystem
-> ---
-Hi,
+On Wed, Oct 24, 2012 at 2:12 PM, Zbigniew J=C4=99drzejewski-Szmek
+<zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org> wrote:
+> On Wed, Oct 24, 2012 at 06:42:02PM +0800, Lee, Chun-Yi wrote:
+>> Add units/sys-firmware-efi-efivars.mount rule for support automount =
+EFI variable filesystem
+>> ---
+> Hi,
+>
+> in systemd parlance, automount means autofs mount, but to have that, =
+a
+> second .automount unit is needed.  Please have a look at
+> http://cgit.freedesktop.org/systemd/systemd/tree/units/proc-sys-fs-bi=
+nfmt_misc.automount
+> vs
+> http://cgit.freedesktop.org/systemd/systemd/tree/units/proc-sys-fs-bi=
+nfmt_misc.mount .
+> Now the question is whether the loading of the fs is slow enough to
+> matter, ie. if it is actually beneficial to use automount instead of
+> mounting directly.  Since the fs can be compiled as a module, than it
+> probably is.
+>
+> Also, would be nice to add a Documentation=3D line like in
+> proc-sys-fs-binfmt_misc.automount.
 
-in systemd parlance, automount means autofs mount, but to have that, a
-second .automount unit is needed.  Please have a look at
-http://cgit.freedesktop.org/systemd/systemd/tree/units/proc-sys-fs-binfmt_misc.automount
-vs
-http://cgit.freedesktop.org/systemd/systemd/tree/units/proc-sys-fs-binfmt_misc.mount .
-Now the question is whether the loading of the fs is slow enough to
-matter, ie. if it is actually beneficial to use automount instead of
-mounting directly.  Since the fs can be compiled as a module, than it
-probably is.
+It might all not be worth it, and we might just add it to the
+"unconditionally mounted" list in the compiled-in code (marked with
+allowed-to-fail). It seems like the better option than having a mount
+unit, and a module-load force option.
 
-Also, would be nice to add a Documentation= line like in
-proc-sys-fs-binfmt_misc.automount.
+The current mount unit would never trigger for modules, because the
+path will not exist. An internal API mount will cause a trransparent
+kernel-forked modprobe with the mount() syscall.
 
->  units/sys-firmware-efi-efivars.mount |   17 +++++++++++++++++
->  1 files changed, 17 insertions(+), 0 deletions(-)
->  create mode 100644 units/sys-firmware-efi-efivars.mount
-
-Zbyszek
+Kay
