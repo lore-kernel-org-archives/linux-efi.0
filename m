@@ -1,51 +1,68 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] Add syste-firmware-efi-efivars.mount for support
- automount EFI variable filesystem
-Date: Thu, 25 Oct 2012 12:12:07 +0800
-Message-ID: <1351138327.30067.34.camel@linux-s257.site>
-References: <1351075322-3824-1-git-send-email-jlee@suse.com>
-	 <20121024140401.GA19778@tango.0pointer.de>
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] systemd: mount the EFI variable filesystem
+Date: Thu, 25 Oct 2012 16:23:34 +0800
+Message-ID: <1351153414-22547-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121024140401.GA19778-kS5D54t9nk0aINubkmmoJbNAH6kLmebB@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>
-Cc: systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>, =?utf-8?q?Mantas=20Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, =?utf-8?q?Zbigniew=20J=C4=99drzejewski-Szmek?= <zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=89=EF=BC=8C2012-10-24 =E6=96=BC 16:04 +0200=EF=BC=8CLe=
-nnart Poettering =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Wed, 24.10.12 18:42, Lee, Chun-Yi (joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org) wrote:
->=20
-> > Add units/sys-firmware-efi-efivars.mount rule for support automount
-> > EFI variable filesystem
->=20
-> Good in principle, but as Kay mentioned we probably should not expose
-> this as units, but just mount it from PID1's C code. More specificall=
-y
-> add it to the table in src/core/mount-setup.c, but make sure to set t=
-he
-> "fatal" bool in the table to false for this entry, to clarify that th=
-is
-> is not a reason to fail.
->=20
-> You probably also want to add the kmod to the table in
-> src/core/kmod-setup.c since the mount point is not available if the k=
-mod
-> is not loaded.
->=20
-> Thanks!
->=20
-> Lennart
->=20
+Add efivarfs to the mount_table in mount-setup.c, so the EFI variable
+filesystem will be mounted when systemd executed.
 
-Thanks for all systemd experts' review and comments.
+The EFI variable filesystem will merge in v3.7 or v3.8 linux kernel.
 
-I will follow the above suggestions to create new patch and send it
-after tested success.
+Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+Cc: Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>
+Cc: Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Zbigniew J=C4=99drzejewski-Szmek <zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ src/core/kmod-setup.c  |    1 +
+ src/core/mount-setup.c |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
 
-
-Thanks a lot!
-Joey Lee
+diff --git a/src/core/kmod-setup.c b/src/core/kmod-setup.c
+index cc2a2d9..14a4778 100644
+--- a/src/core/kmod-setup.c
++++ b/src/core/kmod-setup.c
+@@ -33,6 +33,7 @@
+ static const char * const kmod_table[] =3D {
+         "autofs4", "/sys/class/misc/autofs",
+         "ipv6",    "/sys/module/ipv6",
++	"efivarfs", "/sys/firmware/efi/efivars",
+         "unix",    "/proc/net/unix"
+ };
+=20
+diff --git a/src/core/mount-setup.c b/src/core/mount-setup.c
+index 0fd112f..8ce4ddc 100644
+--- a/src/core/mount-setup.c
++++ b/src/core/mount-setup.c
+@@ -66,6 +66,7 @@ static const MountPoint mount_table[] =3D {
+         { "sysfs",    "/sys",                   "sysfs",    NULL,     =
+           MS_NOSUID|MS_NOEXEC|MS_NODEV,                true,  true  },
+         { "devtmpfs", "/dev",                   "devtmpfs", "mode=3D75=
+5",          MS_NOSUID|MS_STRICTATIME,                    true,  true  =
+},
+         { "securityfs", "/sys/kernel/security", "securityfs", NULL,   =
+           MS_NOSUID|MS_NOEXEC|MS_NODEV,                false, false },
++	{ "efivarfs", "/sys/firmware/efi/efivars", "efivarfs", NULL,		 MS_NOS=
+UID|MS_NOEXEC|MS_NODEV,                false, false },
+         { "tmpfs",    "/dev/shm",               "tmpfs",    "mode=3D17=
+77",         MS_NOSUID|MS_NODEV|MS_STRICTATIME,           true,  true  =
+},
+         { "devpts",   "/dev/pts",               "devpts",   "mode=3D62=
+0,gid=3D" STRINGIFY(TTY_GID), MS_NOSUID|MS_NOEXEC,          false, true=
+  },
+         { "tmpfs",    "/run",                   "tmpfs",    "mode=3D75=
+5",          MS_NOSUID|MS_NODEV|MS_STRICTATIME,           true,  true  =
+},
+--=20
+1.6.0.2
