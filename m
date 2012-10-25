@@ -1,21 +1,19 @@
-From: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+From: Mike Waychison <mikew@google.com>
 Subject: Re: [PATCH v2 3/5] efi_pstore: Remove a logic erasing entries from a
  write callback to hold multiple logs
-Date: Thu, 25 Oct 2012 12:04:00 -0700
-Message-ID: <CAGTjWtC=KBrgwH+UOxj0o8XhOfoH6QBGfxeJ-=-Muo+d2jb-gQ@mail.gmail.com>
+Date: Thu, 25 Oct 2012 12:18:05 -0700
+Message-ID: <CAGTjWtDVZGq7VKou10xC-zJXGmane_kKjGo1xMjgPUkKAedFqQ@mail.gmail.com>
 References: <A5ED84D3BB3A384992CBB9C77DEDA4D4138889AD@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D4138889AD-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Matthew Garrett (mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D4138889AD@USINDEM103.corp.hds.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Seiji Aguchi <seiji.aguchi@hds.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
 List-Id: linux-efi@vger.kernel.org
 
-Acked-by: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-
-On Wed, Oct 24, 2012 at 6:54 PM, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org> wrote:
+On Wed, Oct 24, 2012 at 6:54 PM, Seiji Aguchi <seiji.aguchi@hds.com> wrote:
 > [Issue]
 >
 > Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
@@ -33,7 +31,7 @@ On Wed, Oct 24, 2012 at 6:54 PM, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.g
 > This patch removes a logic erasing existing entries in a write callback
 > because the logic is not needed in the write callback to support holding multiple logs.
 >
-> Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+> Signed-off-by: Seiji Aguchi <seiji.aguchi@hds.com>
 > ---
 >  drivers/firmware/efivars.c |   39 ++-------------------------------------
 >  1 files changed, 2 insertions(+), 37 deletions(-)
@@ -97,8 +95,12 @@ On Wed, Oct 24, 2012 at 6:54 PM, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.g
 > +       sprintf(name, "dump-type%u-%u-%lu", type, part,
 > +               get_seconds());
 
-Could you please also update Documentation/ABI/testing/pstore ?  It
-seems it was never updated with the "dump*" file prefix.
+Actually, nothing seems to be ensuring that the value used here ends
+up being the same as the ctime :\  Consider what happens if the
+get_seconds() call here happens at second N, and the i_ctime is
+collected at time N+1. The object wouldn't be able to be deleted after
+patch 4/5 is applied.  How can we better ensure that the i_ctime is
+the same value as serialized into the efi var name here?
 
 >
 >         for (i = 0; i < DUMP_NAME_LEN; i++)
