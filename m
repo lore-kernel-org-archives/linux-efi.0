@@ -1,100 +1,51 @@
-From: Seiji Aguchi <seiji.aguchi@hds.com>
-Subject: [PATCH v2 2/5] efi_pstore: Add a logic erasing entries to an erase
- callback
-Date: Thu, 25 Oct 2012 02:00:01 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D413888A03@USINDEM103.corp.hds.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] Add syste-firmware-efi-efivars.mount for support
+ automount EFI variable filesystem
+Date: Thu, 25 Oct 2012 12:12:07 +0800
+Message-ID: <1351138327.30067.34.camel@linux-s257.site>
+References: <1351075322-3824-1-git-send-email-jlee@suse.com>
+	 <20121024140401.GA19778@tango.0pointer.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
-To: Seiji Aguchi <seiji.aguchi@hds.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "mikew@google.com" <mikew@google.com>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>
-Cc: "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121024140401.GA19778-kS5D54t9nk0aINubkmmoJbNAH6kLmebB@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>
+Cc: systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Resending a patch  by changing a subject from "PATCH 2/5" to "PATCH v2 2/5".
+=E6=96=BC =E4=B8=89=EF=BC=8C2012-10-24 =E6=96=BC 16:04 +0200=EF=BC=8CLe=
+nnart Poettering =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Wed, 24.10.12 18:42, Lee, Chun-Yi (joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org) wrote:
+>=20
+> > Add units/sys-firmware-efi-efivars.mount rule for support automount
+> > EFI variable filesystem
+>=20
+> Good in principle, but as Kay mentioned we probably should not expose
+> this as units, but just mount it from PID1's C code. More specificall=
+y
+> add it to the table in src/core/mount-setup.c, but make sure to set t=
+he
+> "fatal" bool in the table to false for this entry, to clarify that th=
+is
+> is not a reason to fail.
+>=20
+> You probably also want to add the kmod to the table in
+> src/core/kmod-setup.c since the mount point is not available if the k=
+mod
+> is not loaded.
+>=20
+> Thanks!
+>=20
+> Lennart
+>=20
 
-[Issue]
+Thanks for all systemd experts' review and comments.
 
-Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
-So, in the following scenario, we will lose 1st panic messages.
- 
- 1. kernel panics.
- 2. efi_pstore is kicked and writes panic messages to NVRAM.
- 3. system reboots.
- 4. kernel panics again before a user checks the 1st panic messages in NVRAM.
+I will follow the above suggestions to create new patch and send it
+after tested success.
 
-[Solution]
 
-A reasonable solution to fix the issue is just holding multiple logs without erasing
-existing entries.
-
-This patch freshly adds a logic erasing existing entries, which shared with a write callback,
-to an erase callback.
-To support holding multiple logs, the write callback doesn't need to erase any entries and
-it will be removed in a subsequent patch.
-
-Signed-off-by: Seiji Aguchi <seiji.aguchi@hds.com>
----
- drivers/firmware/efivars.c |   46 +++++++++++++++++++++++++++++++++++++++++++-
- 1 files changed, 45 insertions(+), 1 deletions(-)
-
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 37ac21a..bee14cc 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -784,7 +784,51 @@ static int efi_pstore_write(enum pstore_type_id type,
- static int efi_pstore_erase(enum pstore_type_id type, u64 id,
- 			    struct pstore_info *psi)
- {
--	efi_pstore_write(type, 0, &id, (unsigned int)id, 0, psi);
-+	char stub_name[DUMP_NAME_LEN];
-+	efi_char16_t efi_name[DUMP_NAME_LEN];
-+	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-+	struct efivars *efivars = psi->data;
-+	struct efivar_entry *entry, *found = NULL;
-+	int i;
-+
-+	sprintf(stub_name, "dump-type%u-%u-", type, (unsigned int)id);
-+
-+	spin_lock(&efivars->lock);
-+
-+	for (i = 0; i < DUMP_NAME_LEN; i++)
-+		efi_name[i] = stub_name[i];
-+
-+	/*
-+	 * Clean up any entries with the same name
-+	 */
-+
-+	list_for_each_entry(entry, &efivars->list, list) {
-+		get_var_data_locked(efivars, &entry->var);
-+
-+		if (efi_guidcmp(entry->var.VendorGuid, vendor))
-+			continue;
-+		if (utf16_strncmp(entry->var.VariableName, efi_name,
-+				  utf16_strlen(efi_name)))
-+			continue;
-+		/* Needs to be a prefix */
-+		if (entry->var.VariableName[utf16_strlen(efi_name)] == 0)
-+			continue;
-+
-+		/* found */
-+		found = entry;
-+		efivars->ops->set_variable(entry->var.VariableName,
-+					   &entry->var.VendorGuid,
-+					   PSTORE_EFI_ATTRIBUTES,
-+					   0, NULL);
-+	}
-+
-+	if (found)
-+		list_del(&found->list);
-+
-+	spin_unlock(&efivars->lock);
-+
-+	if (found)
-+		efivar_unregister(found);
- 
- 	return 0;
- }
--- 1.7.1
+Thanks a lot!
+Joey Lee
