@@ -1,218 +1,78 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 05/20] x86, mm: Include the entire kernel memory map in trampoline_pgd
-Date: Fri, 26 Oct 2012 08:51:48 +0100
-Message-ID: <1351237923-10313-6-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 03/20] efi: add efivars kobject to efi sysfs folder
+Date: Fri, 26 Oct 2012 08:51:46 +0100
+Message-ID: <1351237923-10313-4-git-send-email-matt@console-pimps.org>
 References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1351237923-10313-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
-There are various pieces of code in arch/x86 that require a page table
-with an identity mapping. Make trampoline_pgd a proper kernel page
-table, it currently only includes the kernel text and module space
-mapping.
+UEFI variable filesystem need a new mount point, so this patch add
+efivars kobject to efi_kobj for create a /sys/firmware/efi/efivars
+folder.
 
-One new feature of trampoline_pgd is that it now has mappings for the
-physical I/O device addresses, which are inserted at ioremap()
-time. Some broken implementations of EFI firmware require these
-mappings to always be around.
-
-Acked-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Signed-off-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/mm/init_64.c    |   9 +++-
- arch/x86/mm/ioremap.c    | 105 +++++++++++++++++++++++++++++++++++++++++++++++
- arch/x86/realmode/init.c |  17 +++++++-
- 3 files changed, 128 insertions(+), 3 deletions(-)
+ drivers/firmware/efivars.c | 11 +++++++++++
+ include/linux/efi.h        |  1 +
+ 2 files changed, 12 insertions(+)
 
-diff --git a/arch/x86/mm/init_64.c b/arch/x86/mm/init_64.c
-index 2b6b4a3..fd4404f 100644
---- a/arch/x86/mm/init_64.c
-+++ b/arch/x86/mm/init_64.c
-@@ -108,13 +108,13 @@ void sync_global_pgds(unsigned long start, unsigned long end)
- 	for (address = start; address <= end; address += PGDIR_SIZE) {
- 		const pgd_t *pgd_ref = pgd_offset_k(address);
- 		struct page *page;
-+		pgd_t *pgd;
- 
- 		if (pgd_none(*pgd_ref))
- 			continue;
- 
- 		spin_lock(&pgd_lock);
- 		list_for_each_entry(page, &pgd_list, lru) {
--			pgd_t *pgd;
- 			spinlock_t *pgt_lock;
- 
- 			pgd = (pgd_t *)page_address(page) + pgd_index(address);
-@@ -130,6 +130,13 @@ void sync_global_pgds(unsigned long start, unsigned long end)
- 
- 			spin_unlock(pgt_lock);
- 		}
-+
-+		pgd = __va(real_mode_header->trampoline_pgd);
-+		pgd += pgd_index(address);
-+
-+		if (pgd_none(*pgd))
-+			set_pgd(pgd, *pgd_ref);
-+
- 		spin_unlock(&pgd_lock);
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 6d43bbd..4b12a8fd 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -1527,6 +1527,7 @@ void unregister_efivars(struct efivars *efivars)
+ 		sysfs_remove_bin_file(&efivars->kset->kobj, efivars->del_var);
+ 	kfree(efivars->new_var);
+ 	kfree(efivars->del_var);
++	kobject_put(efivars->kobject);
+ 	kset_unregister(efivars->kset);
+ }
+ EXPORT_SYMBOL_GPL(unregister_efivars);
+@@ -1558,6 +1559,13 @@ int register_efivars(struct efivars *efivars,
+ 		goto out;
  	}
- }
-diff --git a/arch/x86/mm/ioremap.c b/arch/x86/mm/ioremap.c
-index 78fe3f1..e190f7b 100644
---- a/arch/x86/mm/ioremap.c
-+++ b/arch/x86/mm/ioremap.c
-@@ -50,6 +50,107 @@ int ioremap_change_attr(unsigned long vaddr, unsigned long size,
- 	return err;
- }
  
-+#ifdef CONFIG_X86_64
-+static void ident_pte_range(unsigned long paddr, unsigned long vaddr,
-+			    pmd_t *ppmd, pmd_t *vpmd, unsigned long end)
-+{
-+	pte_t *ppte = pte_offset_kernel(ppmd, paddr);
-+	pte_t *vpte = pte_offset_kernel(vpmd, vaddr);
-+
-+	do {
-+		set_pte(ppte, *vpte);
-+	} while (ppte++, vpte++, vaddr += PAGE_SIZE, vaddr != end);
-+}
-+
-+static int ident_pmd_range(unsigned long paddr, unsigned long vaddr,
-+			    pud_t *ppud, pud_t *vpud, unsigned long end)
-+{
-+	pmd_t *ppmd = pmd_offset(ppud, paddr);
-+	pmd_t *vpmd = pmd_offset(vpud, vaddr);
-+	unsigned long next;
-+
-+	do {
-+		next = pmd_addr_end(vaddr, end);
-+
-+		if (!pmd_present(*ppmd)) {
-+			pte_t *ppte = (pte_t *)get_zeroed_page(GFP_KERNEL);
-+			if (!ppte)
-+				return 1;
-+
-+			set_pmd(ppmd, __pmd(_KERNPG_TABLE | __pa(ppte)));
-+		}
-+
-+		ident_pte_range(paddr, vaddr, ppmd, vpmd, next);
-+	} while (ppmd++, vpmd++, vaddr = next, vaddr != end);
-+
-+	return 0;
-+}
-+
-+static int ident_pud_range(unsigned long paddr, unsigned long vaddr,
-+			    pgd_t *ppgd, pgd_t *vpgd, unsigned long end)
-+{
-+	pud_t *ppud = pud_offset(ppgd, paddr);
-+	pud_t *vpud = pud_offset(vpgd, vaddr);
-+	unsigned long next;
-+
-+	do {
-+		next = pud_addr_end(vaddr, end);
-+
-+		if (!pud_present(*ppud)) {
-+			pmd_t *ppmd = (pmd_t *)get_zeroed_page(GFP_KERNEL);
-+			if (!ppmd)
-+				return 1;
-+
-+			set_pud(ppud, __pud(_KERNPG_TABLE | __pa(ppmd)));
-+		}
-+
-+		if (ident_pmd_range(paddr, vaddr, ppud, vpud, next))
-+			return 1;
-+	} while (ppud++, vpud++, vaddr = next, vaddr != end);
-+
-+	return 0;
-+}
-+
-+static int insert_identity_mapping(resource_size_t paddr, unsigned long vaddr,
-+				    unsigned long size)
-+{
-+	unsigned long end = vaddr + size;
-+	unsigned long next;
-+	pgd_t *vpgd, *ppgd;
-+
-+	/* Don't map over the guard hole. */
-+	if (paddr >= 0x800000000000 || paddr + size > 0x800000000000)
-+		return 1;
-+
-+	ppgd = __va(real_mode_header->trampoline_pgd) + pgd_index(paddr);
-+
-+	vpgd = pgd_offset_k(vaddr);
-+	do {
-+		next = pgd_addr_end(vaddr, end);
-+
-+		if (!pgd_present(*ppgd)) {
-+			pud_t *ppud = (pud_t *)get_zeroed_page(GFP_KERNEL);
-+			if (!ppud)
-+				return 1;
-+
-+			set_pgd(ppgd, __pgd(_KERNPG_TABLE | __pa(ppud)));
-+		}
-+
-+		if (ident_pud_range(paddr, vaddr, ppgd, vpgd, next))
-+			return 1;
-+	} while (ppgd++, vpgd++, vaddr = next, vaddr != end);
-+
-+	return 0;
-+}
-+#else
-+static inline int insert_identity_mapping(resource_size_t paddr,
-+					  unsigned long vaddr,
-+					  unsigned long size)
-+{
-+	return 0;
-+}
-+#endif /* CONFIG_X86_64 */
-+
- /*
-  * Remap an arbitrary physical address space into the kernel virtual
-  * address space. Needed when the kernel wants to access high addresses
-@@ -163,6 +264,10 @@ static void __iomem *__ioremap_caller(resource_size_t phys_addr,
- 	ret_addr = (void __iomem *) (vaddr + offset);
- 	mmiotrace_ioremap(unaligned_phys_addr, unaligned_size, ret_addr);
- 
-+	if (insert_identity_mapping(phys_addr, vaddr, size))
-+		printk(KERN_WARNING "ioremap: unable to map 0x%llx in identity pagetable\n",
-+					(unsigned long long)phys_addr);
-+
- 	/*
- 	 * Check if the request spans more than any BAR in the iomem resource
- 	 * tree.
-diff --git a/arch/x86/realmode/init.c b/arch/x86/realmode/init.c
-index cbca565..8e6ab61 100644
---- a/arch/x86/realmode/init.c
-+++ b/arch/x86/realmode/init.c
-@@ -78,8 +78,21 @@ void __init setup_real_mode(void)
- 	*trampoline_cr4_features = read_cr4();
- 
- 	trampoline_pgd = (u64 *) __va(real_mode_header->trampoline_pgd);
--	trampoline_pgd[0] = __pa(level3_ident_pgt) + _KERNPG_TABLE;
--	trampoline_pgd[511] = __pa(level3_kernel_pgt) + _KERNPG_TABLE;
-+
-+	/*
-+	 * Create an identity mapping for all of physical memory.
-+	 */
-+	for (i = 0; i <= pgd_index(max_pfn << PAGE_SHIFT); i++) {
-+		int index = pgd_index(PAGE_OFFSET) + i;
-+
-+		trampoline_pgd[i] = (u64)pgd_val(swapper_pg_dir[index]);
++	efivars->kobject = kobject_create_and_add("efivars", parent_kobj);
++	if (!efivars->kobject) {
++		pr_err("efivars: Subsystem registration failed.\n");
++		error = -ENOMEM;
++		goto err_unreg_vars;
 +	}
 +
-+	/*
-+	 * Copy the upper-half of the kernel pages tables.
-+	 */
-+	for (i = pgd_index(PAGE_OFFSET); i < PTRS_PER_PGD; i++)
-+		trampoline_pgd[i] = (u64)pgd_val(swapper_pg_dir[i]);
- #endif
- }
+ 	/*
+ 	 * Per EFI spec, the maximum storage allocated for both
+ 	 * the variable name and variable data is 1024 bytes.
+@@ -1602,6 +1610,9 @@ int register_efivars(struct efivars *efivars,
  
+ 	register_filesystem(&efivarfs_type);
+ 
++err_unreg_vars:
++	kset_unregister(efivars->kset);
++
+ out:
+ 	kfree(variable_name);
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index b2af157..337aefb 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -662,6 +662,7 @@ struct efivars {
+ 	spinlock_t lock;
+ 	struct list_head list;
+ 	struct kset *kset;
++	struct kobject *kobject;
+ 	struct bin_attribute *new_var, *del_var;
+ 	const struct efivar_operations *ops;
+ 	struct efivar_entry *walk_entry;
 -- 
 1.7.11.7
