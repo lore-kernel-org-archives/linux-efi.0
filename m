@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 16/20] efivarfs: Return an error if we fail to read a variable
-Date: Fri, 26 Oct 2012 08:51:59 +0100
-Message-ID: <1351237923-10313-17-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 17/20] efivarfs: Replace magic number with sizeof(attributes)
+Date: Fri, 26 Oct 2012 08:52:00 +0100
+Message-ID: <1351237923-10313-18-git-send-email-matt@console-pimps.org>
 References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1351237923-10313-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,100 +12,49 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Instead of always returning 0 in efivarfs_file_read(), even when we
-fail to successfully read the variable, convert the EFI status to
-something meaningful and return that to the caller. This way the user
-will have some hint as to why the read failed.
+Seeing "+ 4" littered throughout the functions gets a bit
+confusing. Use "sizeof(attributes)" which clearly explains what
+quantity we're adding.
 
 Acked-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/firmware/efivars.c | 58 +++++++++++++++++++++++++++-------------------
- 1 file changed, 34 insertions(+), 24 deletions(-)
+ drivers/firmware/efivars.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index c532854..3c31215 100644
+index 3c31215..a6cec2f 100644
 --- a/drivers/firmware/efivars.c
 +++ b/drivers/firmware/efivars.c
-@@ -653,6 +653,36 @@ static int efivarfs_file_open(struct inode *inode, struct file *file)
- 	return 0;
- }
+@@ -801,7 +801,7 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
+ 	if (status != EFI_BUFFER_TOO_SMALL)
+ 		return 0;
  
-+static int efi_status_to_err(efi_status_t status)
-+{
-+	int err;
-+
-+	switch (status) {
-+	case EFI_INVALID_PARAMETER:
-+		err = -EINVAL;
-+		break;
-+	case EFI_OUT_OF_RESOURCES:
-+		err = -ENOSPC;
-+		break;
-+	case EFI_DEVICE_ERROR:
-+		err = -EIO;
-+		break;
-+	case EFI_WRITE_PROTECTED:
-+		err = -EROFS;
-+		break;
-+	case EFI_SECURITY_VIOLATION:
-+		err = -EACCES;
-+		break;
-+	case EFI_NOT_FOUND:
-+		err = -ENOENT;
-+		break;
-+	default:
-+		err = -EINVAL;
-+	}
-+
-+	return err;
-+}
-+
- static ssize_t efivarfs_file_write(struct file *file,
- 		const char __user *userbuf, size_t count, loff_t *ppos)
- {
-@@ -711,29 +741,7 @@ static ssize_t efivarfs_file_write(struct file *file,
- 		spin_unlock(&efivars->lock);
- 		kfree(data);
+-	data = kmalloc(datasize + 4, GFP_KERNEL);
++	data = kmalloc(datasize + sizeof(attributes), GFP_KERNEL);
  
--		switch (status) {
--		case EFI_INVALID_PARAMETER:
--			count = -EINVAL;
--			break;
--		case EFI_OUT_OF_RESOURCES:
--			count = -ENOSPC;
--			break;
--		case EFI_DEVICE_ERROR:
--			count = -EIO;
--			break;
--		case EFI_WRITE_PROTECTED:
--			count = -EROFS;
--			break;
--		case EFI_SECURITY_VIOLATION:
--			count = -EACCES;
--			break;
--		case EFI_NOT_FOUND:
--			count = -ENOENT;
--			break;
--		default:
--			count = -EINVAL;
--		}
--		return count;
-+		return efi_status_to_err(status);
- 	}
- 
- 	/*
-@@ -805,8 +813,10 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
- 					    (data + 4));
+ 	if (!data)
+ 		return 0;
+@@ -810,7 +810,7 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
+ 	status = efivars->ops->get_variable(var->var.VariableName,
+ 					    &var->var.VendorGuid,
+ 					    &attributes, &datasize,
+-					    (data + 4));
++					    (data + sizeof(attributes)));
  	spin_unlock(&efivars->lock);
  
--	if (status != EFI_SUCCESS)
-+	if (status != EFI_SUCCESS) {
-+		size = efi_status_to_err(status);
+ 	if (status != EFI_SUCCESS) {
+@@ -818,9 +818,9 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
  		goto out_free;
-+	}
+ 	}
  
- 	memcpy(data, &attributes, 4);
+-	memcpy(data, &attributes, 4);
++	memcpy(data, &attributes, sizeof(attributes));
  	size = simple_read_from_buffer(userbuf, count, ppos,
+-					data, datasize + 4);
++				       data, datasize + sizeof(attributes));
+ out_free:
+ 	kfree(data);
+ 
 -- 
 1.7.11.7
