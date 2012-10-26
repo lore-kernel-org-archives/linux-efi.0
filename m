@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 17/20] efivarfs: Replace magic number with sizeof(attributes)
-Date: Fri, 26 Oct 2012 08:52:00 +0100
-Message-ID: <1351237923-10313-18-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 19/20] efivarfs: Make 'datasize' unsigned long
+Date: Fri, 26 Oct 2012 08:52:02 +0100
+Message-ID: <1351237923-10313-20-git-send-email-matt@console-pimps.org>
 References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1351237923-10313-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,49 +12,28 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Seeing "+ 4" littered throughout the functions gets a bit
-confusing. Use "sizeof(attributes)" which clearly explains what
-quantity we're adding.
+There's no reason to declare 'datasize' as an int, since the majority
+of the functions it's passed to expect an unsigned long anyway. Plus,
+this way we avoid any sign problems during arithmetic.
 
 Acked-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/firmware/efivars.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ drivers/firmware/efivars.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 3c31215..a6cec2f 100644
+index 057a9c8..5e4d120 100644
 --- a/drivers/firmware/efivars.c
 +++ b/drivers/firmware/efivars.c
-@@ -801,7 +801,7 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
- 	if (status != EFI_BUFFER_TOO_SMALL)
- 		return 0;
+@@ -692,7 +692,7 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 	void *data;
+ 	u32 attributes;
+ 	struct inode *inode = file->f_mapping->host;
+-	int datasize = count - sizeof(attributes);
++	unsigned long datasize = count - sizeof(attributes);
+ 	unsigned long newdatasize;
  
--	data = kmalloc(datasize + 4, GFP_KERNEL);
-+	data = kmalloc(datasize + sizeof(attributes), GFP_KERNEL);
- 
- 	if (!data)
- 		return 0;
-@@ -810,7 +810,7 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
- 	status = efivars->ops->get_variable(var->var.VariableName,
- 					    &var->var.VendorGuid,
- 					    &attributes, &datasize,
--					    (data + 4));
-+					    (data + sizeof(attributes)));
- 	spin_unlock(&efivars->lock);
- 
- 	if (status != EFI_SUCCESS) {
-@@ -818,9 +818,9 @@ static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
- 		goto out_free;
- 	}
- 
--	memcpy(data, &attributes, 4);
-+	memcpy(data, &attributes, sizeof(attributes));
- 	size = simple_read_from_buffer(userbuf, count, ppos,
--					data, datasize + 4);
-+				       data, datasize + sizeof(attributes));
- out_free:
- 	kfree(data);
- 
+ 	if (count < sizeof(attributes))
 -- 
 1.7.11.7
