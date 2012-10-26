@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 18/20] efivarfs: Add unique magic number
-Date: Fri, 26 Oct 2012 08:52:01 +0100
-Message-ID: <1351237923-10313-19-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 20/20] efivarfs: Return a consistent error when efivarfs_get_inode() fails
+Date: Fri, 26 Oct 2012 08:52:03 +0100
+Message-ID: <1351237923-10313-21-git-send-email-matt@console-pimps.org>
 References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1351237923-10313-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,40 +12,30 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Using pstore's superblock magic number is no doubt going to cause
-problems in the future. Give efivarfs its own magic number.
+Instead of returning -ENOSPC if efivarfs_get_inode() fails we should
+be returning -ENOMEM, since running out of memory is the only reason
+it can fail.  Furthermore, that's the error value used everywhere else
+in this file. It's also less likely to confuse users that hit this
+error case.
 
 Acked-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
  drivers/firmware/efivars.c | 2 +-
- include/uapi/linux/magic.h | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index a6cec2f..057a9c8 100644
+index 5e4d120..73f22d1 100644
 --- a/drivers/firmware/efivars.c
 +++ b/drivers/firmware/efivars.c
-@@ -991,7 +991,7 @@ int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
- 	sb->s_maxbytes          = MAX_LFS_FILESIZE;
- 	sb->s_blocksize         = PAGE_CACHE_SIZE;
- 	sb->s_blocksize_bits    = PAGE_CACHE_SHIFT;
--	sb->s_magic             = PSTOREFS_MAGIC;
-+	sb->s_magic             = EFIVARFS_MAGIC;
- 	sb->s_op                = &efivarfs_ops;
- 	sb->s_time_gran         = 1;
+@@ -911,7 +911,7 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
  
-diff --git a/include/uapi/linux/magic.h b/include/uapi/linux/magic.h
-index e15192c..12f68c7 100644
---- a/include/uapi/linux/magic.h
-+++ b/include/uapi/linux/magic.h
-@@ -27,6 +27,7 @@
- #define ISOFS_SUPER_MAGIC	0x9660
- #define JFFS2_SUPER_MAGIC	0x72b6
- #define PSTOREFS_MAGIC		0x6165676C
-+#define EFIVARFS_MAGIC		0xde5e81e4
+ 	inode = efivarfs_get_inode(dir->i_sb, dir, mode, 0);
+ 	if (!inode)
+-		return -ENOSPC;
++		return -ENOMEM;
  
- #define MINIX_SUPER_MAGIC	0x137F		/* minix v1 fs, 14 char names */
- #define MINIX_SUPER_MAGIC2	0x138F		/* minix v1 fs, 30 char names */
+ 	var = kzalloc(sizeof(struct efivar_entry), GFP_KERNEL);
+ 	if (!var) {
 -- 
 1.7.11.7
