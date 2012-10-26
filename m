@@ -1,61 +1,65 @@
-From: Ingo Molnar <mingo@kernel.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Subject: Re: [GIT PULL] EFI fixes for v3.7
-Date: Fri, 26 Oct 2012 10:22:23 +0200
-Message-ID: <20121026082223.GA27378@gmail.com>
+Date: Fri, 26 Oct 2012 10:51:08 +0100
+Message-ID: <1351245068.5303.50.camel@mfleming-mobl1.ger.corp.intel.com>
 References: <1351238331.5303.23.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <20121026082223.GA27378@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1351238331.5303.23.camel@mfleming-mobl1.ger.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-kernel <linux-kernel@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121026082223.GA27378-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, 2012-10-26 at 10:22 +0200, Ingo Molnar wrote:
+> * Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> 
+> > Hi guys,
+> > 
+> > The following changes since commit ddffeb8c4d0331609ef2581d84de4d763607bd37:
+> > 
+> >   Linux 3.7-rc1 (2012-10-14 14:41:04 -0700)
+> > 
+> > are available in the git repository at:
+> > 
+> >   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-for-3.7
+> > 
+> > for you to fetch changes up to 5189c2a7c7769ee9d037d76c1a7b8550ccf3481c:
+> > 
+> >   x86: efi: Turn off efi_enabled after setup on mixed fw/kernel (2012-10-25 19:09:40 +0100)
+> > 
+> > ----------------------------------------------------------------
+> > EFI updates for 3.7
+> > 
+> > Fix oops with EFI variables on mixed 32/64-bit firmware/kernels and
+> > document EFI git repository location on kernel.org.
+> > 
+> > ----------------------------------------------------------------
+> > Matt Fleming (1):
+> >       MAINTAINERS: Add EFI git repository location
+> > 
+> > Olof Johansson (1):
+> >       x86: efi: Turn off efi_enabled after setup on mixed fw/kernel
+> > 
+> >  MAINTAINERS                 |  1 +
+> >  arch/x86/include/asm/efi.h  |  1 +
+> >  arch/x86/kernel/setup.c     | 12 ++++++++++++
+> >  arch/x86/platform/efi/efi.c | 18 ++++++++++--------
+> >  4 files changed, 24 insertions(+), 8 deletions(-)
+> 
+> So, this conflicted with this pending EFI fix in tip:x86/urgent:
+> 
+>   3e8fa263a970 x86/efi: Fix oops caused by incorrect set_memory_uc() usage
+> 
+> I've pulled it and fixed up the conflict - please double check 
+> the end result.
 
-* Matt Fleming <matt@console-pimps.org> wrote:
+Damn. Sorry about that.
 
-> Hi guys,
-> 
-> The following changes since commit ddffeb8c4d0331609ef2581d84de4d763607bd37:
-> 
->   Linux 3.7-rc1 (2012-10-14 14:41:04 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-for-3.7
-> 
-> for you to fetch changes up to 5189c2a7c7769ee9d037d76c1a7b8550ccf3481c:
-> 
->   x86: efi: Turn off efi_enabled after setup on mixed fw/kernel (2012-10-25 19:09:40 +0100)
-> 
-> ----------------------------------------------------------------
-> EFI updates for 3.7
-> 
-> Fix oops with EFI variables on mixed 32/64-bit firmware/kernels and
-> document EFI git repository location on kernel.org.
-> 
-> ----------------------------------------------------------------
-> Matt Fleming (1):
->       MAINTAINERS: Add EFI git repository location
-> 
-> Olof Johansson (1):
->       x86: efi: Turn off efi_enabled after setup on mixed fw/kernel
-> 
->  MAINTAINERS                 |  1 +
->  arch/x86/include/asm/efi.h  |  1 +
->  arch/x86/kernel/setup.c     | 12 ++++++++++++
->  arch/x86/platform/efi/efi.c | 18 ++++++++++--------
->  4 files changed, 24 insertions(+), 8 deletions(-)
+The fixup looks good, thanks!
 
-So, this conflicted with this pending EFI fix in tip:x86/urgent:
-
-  3e8fa263a970 x86/efi: Fix oops caused by incorrect set_memory_uc() usage
-
-I've pulled it and fixed up the conflict - please double check 
-the end result.
-
-Thanks,
-
-	Ingo
+-- 
+Matt Fleming, Intel Open Source Technology Center
