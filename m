@@ -1,80 +1,68 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: [PATCH v3 7/7] Add a format check for an existing variable name at
- erasing time
-Date: Fri, 26 Oct 2012 21:43:47 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41388F059@USINDEM103.corp.hds.com>
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] systemd: mount the EFI variable filesystem
+Date: Sat, 27 Oct 2012 11:23:22 +0800
+Message-ID: <1351308202-14628-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org" <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Matthew Garrett (mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>
+To: systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>, =?utf-8?q?Mantas=20Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, =?utf-8?q?Zbigniew=20J=C4=99drzejewski-Szmek?= <zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-[Issue]
+Add efivarfs to the mount_table in mount-setup.c, so the EFI variable
+filesystem will be mounted when systemd executed.
 
-A format of variable name has been updated to type, id, count and ctime
-to support holding multiple logs.
+The EFI variable filesystem will merge in v3.7 or v3.8 linux kernel.
 
-Format of current variable name
-  dump-type0-1-2-12345678
-
-  type:0
-  id:1
-  count:2
-  ctime:12345678
-
-On the other hand, if an old variable name before being updated 
-remains, users can't erase it via /dev/pstore.
-
-Format of old variable name
-  dump-type0-1-12345678
-
-  type:0
-  id:1
-  ctime:12345678
-
-[Solution]
-
-This patch adds a format check for the old variable name in a erase callback to make it erasable.
-
-Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+Cc: Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>
+Cc: Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Zbigniew J=C4=99drzejewski-Szmek <zbyszek-wrcVdnn0TatmR6Xm/wNWPw@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
 ---
- drivers/firmware/efivars.c |   14 ++++++++++++--
- 1 files changed, 12 insertions(+), 2 deletions(-)
+ src/core/kmod-setup.c  |    1 +
+ src/core/mount-setup.c |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
 
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index dd228d5..b1cd028 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -777,6 +777,8 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 	struct efivars *efivars = psi->data;
- 	struct efivar_entry *entry, *found = NULL;
- 	int i;
-+	unsigned int type_old, part_old;
-+	unsigned long time_old;
- 
- 	sprintf(name, "dump-type%u-%u-%d-%lu", type, (unsigned int)id, count,
- 		time.tv_sec);
-@@ -796,8 +798,16 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 		if (efi_guidcmp(entry->var.VendorGuid, vendor))
- 			continue;
- 		if (utf16_strncmp(entry->var.VariableName, efi_name,
--				  utf16_strlen(efi_name)))
--			continue;
-+				  utf16_strlen(efi_name))) {
-+			/*
-+			 * Check if an old format,
-+			 * which doesn't support holding
-+			 * multiple logs, remains.
-+			 */
-+			if (sscanf(name, "dump-type%u-%u-%lu",
-+				   &type_old, &part_old, &time_old) != 3)
-+				continue;
-+		}
- 
- 		/* found */
- 		found = entry;
--- 1.7.1
+diff --git a/src/core/kmod-setup.c b/src/core/kmod-setup.c
+index cc2a2d9..14a4778 100644
+--- a/src/core/kmod-setup.c
++++ b/src/core/kmod-setup.c
+@@ -33,6 +33,7 @@
+ static const char * const kmod_table[] =3D {
+         "autofs4", "/sys/class/misc/autofs",
+         "ipv6",    "/sys/module/ipv6",
++	"efivarfs", "/sys/firmware/efi/efivars",
+         "unix",    "/proc/net/unix"
+ };
+=20
+diff --git a/src/core/mount-setup.c b/src/core/mount-setup.c
+index 0fd112f..8ce4ddc 100644
+--- a/src/core/mount-setup.c
++++ b/src/core/mount-setup.c
+@@ -66,6 +66,7 @@ static const MountPoint mount_table[] =3D {
+         { "sysfs",    "/sys",                   "sysfs",    NULL,     =
+           MS_NOSUID|MS_NOEXEC|MS_NODEV,                true,  true  },
+         { "devtmpfs", "/dev",                   "devtmpfs", "mode=3D75=
+5",          MS_NOSUID|MS_STRICTATIME,                    true,  true  =
+},
+         { "securityfs", "/sys/kernel/security", "securityfs", NULL,   =
+           MS_NOSUID|MS_NOEXEC|MS_NODEV,                false, false },
++	{ "efivarfs", "/sys/firmware/efi/efivars", "efivarfs", NULL,		 MS_NOS=
+UID|MS_NOEXEC|MS_NODEV,                false, false },
+         { "tmpfs",    "/dev/shm",               "tmpfs",    "mode=3D17=
+77",         MS_NOSUID|MS_NODEV|MS_STRICTATIME,           true,  true  =
+},
+         { "devpts",   "/dev/pts",               "devpts",   "mode=3D62=
+0,gid=3D" STRINGIFY(TTY_GID), MS_NOSUID|MS_NOEXEC,          false, true=
+  },
+         { "tmpfs",    "/run",                   "tmpfs",    "mode=3D75=
+5",          MS_NOSUID|MS_NODEV|MS_STRICTATIME,           true,  true  =
+},
+--=20
+1.6.0.2
