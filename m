@@ -1,40 +1,103 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efi: fix always unregister kset of efivars in
- register_efivars
-Date: Mon, 29 Oct 2012 19:11:44 +0000
-Message-ID: <1351537904.14888.44.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351493576-3094-1-git-send-email-jlee@suse.com>
+From: Mike Waychison <mikew@google.com>
+Subject: Re: [PATCH v3 6/7] efi_pstore: Add a format check for an existing
+ variable name at reading time
+Date: Mon, 29 Oct 2012 13:12:58 -0700
+Message-ID: <CAGTjWtDO=Z9y-7XxE5YdFzWsiT3MZ8Jhb4hgywYCQiG+NGcMKA@mail.gmail.com>
+References: <A5ED84D3BB3A384992CBB9C77DEDA4D41388F045@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351493576-3094-1-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D41388F045@USINDEM103.corp.hds.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seiji Aguchi <seiji.aguchi@hds.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2012-10-29 at 14:52 +0800, Lee, Chun-Yi wrote:
-> The cc9c97b76aa7235d5a1de0f74f990097f77008b4 patch introduced a
-> issue that always unregister kset of efivars in register_efivars.
-> 
-> This patch moved the kset_unregister function call to the kobject create check
-> block for fix issue.
-> 
-> Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+On Fri, Oct 26, 2012 at 2:43 PM, Seiji Aguchi <seiji.aguchi@hds.com> wrote:
+> [Issue]
+>
+> A format of variable name has been updated to type, id, count and ctime
+> to support holding multiple logs.
+>
+> Format of current variable name
+>   dump-type0-1-2-12345678
+>
+>   type:0
+>   id:1
+>   count:2
+>   ctime:12345678
+>
+> On the other hand, if an old variable name before being updated
+> remains, users can't read it via /dev/pstore.
+>
+> Format of old variable name
+>   dump-type0-1-12345678
+>
+>   type:0
+>   id:1
+>   ctime:12345678
+>
+> [Solution]
+>
+> This patch adds a format check for the old variable name in a read callback
+> to make it readable.
+>
+> Signed-off-by: Seiji Aguchi <seiji.aguchi@hds.com>
 > ---
->  drivers/firmware/efivars.c |    6 ++----
->  1 files changed, 2 insertions(+), 4 deletions(-)
+>  drivers/firmware/efivars.c |   38 ++++++++++++++++++++++++++++----------
+>  1 files changed, 28 insertions(+), 10 deletions(-)
+>
+> diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+> index dc69802..dd228d5 100644
+> --- a/drivers/firmware/efivars.c
+> +++ b/drivers/firmware/efivars.c
+> @@ -681,17 +681,35 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+>                                 *count = cnt;
+>                                 timespec->tv_sec = time;
+>                                 timespec->tv_nsec = 0;
+> -                               get_var_data_locked(efivars, &efivars->walk_entry->var);
+> -                               size = efivars->walk_entry->var.DataSize;
+> -                               *buf = kmalloc(size, GFP_KERNEL);
+> -                               if (*buf == NULL)
+> -                                       return -ENOMEM;
+> -                               memcpy(*buf, efivars->walk_entry->var.Data,
+> -                                      size);
+> -                               efivars->walk_entry = list_entry(efivars->walk_entry->list.next,
+> -                                                  struct efivar_entry, list);
+> -                               return size;
+> +                       } else if (sscanf(name, "dump-type%u-%u-%lu",
+> +                                  type, &part, &time) == 3) {
+> +                               /*
+> +                                * Check if an old format,
+> +                                * which doesn't support holding
+> +                                * multiple logs, remains.
+> +                                */
+> +                               *id = part;
+> +                               *count = 0;
+> +                               timespec->tv_sec = time;
+> +                               timespec->tv_nsec = 0;
+> +                       } else {
+> +                               efivars->walk_entry = list_entry(
+> +                                       efivars->walk_entry->list.next,
+> +                                        struct efivar_entry, list);
 
-Thanks Joey. What I ended up doing was squashing this patch with your
-previous version and rebasing my 'next' branch. That way, when this
-series is merged the bug will never appear.
+odd wrap.
 
-Please take a look to make sure everything is OK.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+> +                               continue;
+>                         }
+> +
+> +                       get_var_data_locked(efivars, &efivars->walk_entry->var);
+> +                       size = efivars->walk_entry->var.DataSize;
+> +                       *buf = kmalloc(size, GFP_KERNEL);
+> +                       if (*buf == NULL)
+> +                               return -ENOMEM;
+> +                       memcpy(*buf, efivars->walk_entry->var.Data,
+> +                              size);
+> +                       efivars->walk_entry = list_entry(
+> +                                       efivars->walk_entry->list.next,
+> +                                       struct efivar_entry, list);
+> +                       return size;
+>                 }
+>                 efivars->walk_entry = list_entry(efivars->walk_entry->list.next,
+>                                                  struct efivar_entry, list);
+> -- 1.7.1
