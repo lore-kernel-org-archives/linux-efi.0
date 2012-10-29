@@ -1,29 +1,40 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efivars: disable seeking on efivarfs files
-Date: Mon, 29 Oct 2012 18:55:36 +0000
-Message-ID: <1351536936.14888.42.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351461188.69188.706774060048.1.gpush@pororo>
+Subject: Re: [PATCH] efi: fix always unregister kset of efivars in
+ register_efivars
+Date: Mon, 29 Oct 2012 19:11:44 +0000
+Message-ID: <1351537904.14888.44.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1351493576-3094-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351461188.69188.706774060048.1.gpush@pororo>
+In-Reply-To: <1351493576-3094-1-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
-Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2012-10-28 at 22:53 +0100, Jeremy Kerr wrote:
-> Use no_llseek as the llseek callback for efivarfs files, as we don't
-> support writes to arbitrary locations.
+On Mon, 2012-10-29 at 14:52 +0800, Lee, Chun-Yi wrote:
+> The cc9c97b76aa7235d5a1de0f74f990097f77008b4 patch introduced a
+> issue that always unregister kset of efivars in register_efivars.
 > 
-> Signed-off-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> This patch moved the kset_unregister function call to the kobject create check
+> block for fix issue.
 > 
+> Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
 > ---
->  drivers/firmware/efivars.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/firmware/efivars.c |    6 ++----
+>  1 files changed, 2 insertions(+), 4 deletions(-)
 
-Applied, thanks!
+Thanks Joey. What I ended up doing was squashing this patch with your
+previous version and rebasing my 'next' branch. That way, when this
+series is merged the bug will never appear.
+
+Please take a look to make sure everything is OK.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
