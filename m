@@ -1,46 +1,29 @@
-From: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 29 Oct 2012 17:41:31 +0000
-Message-ID: <20121029174131.GC7580@srcf.ucam.org>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
- <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efivars: disable seeking on efivarfs files
+Date: Mon, 29 Oct 2012 18:55:36 +0000
+Message-ID: <1351536936.14888.42.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1351461188.69188.706774060048.1.gpush@pororo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LRH.2.00.1210290848450.10392-1ReQVI26iDCaZKY3DrU6dA@public.gmane.org>
+In-Reply-To: <1351461188.69188.706774060048.1.gpush@pororo>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 29, 2012 at 08:49:41AM +0100, Jiri Kosina wrote:
-> On Thu, 20 Sep 2012, Matthew Garrett wrote:
+On Sun, 2012-10-28 at 22:53 +0100, Jeremy Kerr wrote:
+> Use no_llseek as the llseek callback for efivarfs files, as we don't
+> support writes to arbitrary locations.
 > 
-> > This is pretty much identical to the first patchset, but with the capability
-> > renamed (CAP_COMPROMISE_KERNEL) and the kexec patch dropped. If anyone wants
-> > to deploy these then they should disable kexec until support for signed
-> > kexec payloads has been merged.
+> Signed-off-by: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 > 
-> Apparently your patchset currently doesn't handle device firmware loading, 
-> nor do you seem to mention in in the comments.
+> ---
+>  drivers/firmware/efivars.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Correct.
-
-> I believe signed firmware loading should be put on plate as well, right?
-
-I think that's definitely something that should be covered. I hadn't 
-worried about it immediately as any attack would be limited to machines 
-with a specific piece of hardware, and the attacker would need to expend 
-a significant amount of reverse engineering work on the firmware - and 
-we'd probably benefit from them doing that in the long run...
-
-Having said that, yes, we should worry about this. Firmware distribution 
-licenses often forbid any distribution of modified versions, so 
-signatures would probably need to be detached. udev could easily glue 
-together a signature and firmware when loading, but if we're moving 
-towards an in-kernel firmware loader for the common case then it'll need 
-to be implemented there as well.
+Applied, thanks!
 
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Matt Fleming, Intel Open Source Technology Center
