@@ -1,50 +1,66 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] efi: fix always unregister kset of efivars in
- register_efivars
-Date: Tue, 30 Oct 2012 11:07:02 +0800
-Message-ID: <1351566422.21227.49.camel@linux-s257.site>
-References: <1351493576-3094-1-git-send-email-jlee@suse.com>
-	 <1351537904.14888.44.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Josh Boyer <jwboyer@redhat.com>
+Subject: Re: [PATCH V3 07/10] Secure boot: Add a dummy kernel parameter that
+ will switch on Secure Boot mode
+Date: Tue, 30 Oct 2012 13:48:48 -0400
+Message-ID: <20121030174848.GD6627@hansolo.jdub.homelinux.org>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+ <1348152065-31353-8-git-send-email-mjg@redhat.com>
+ <20120920163237.GA11077@kroah.com>
+ <20120925130818.GE18546@hansolo.jdub.homelinux.org>
+ <1351501206.21227.47.camel@linux-s257.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351537904.14888.44.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1351501206.21227.47.camel@linux-s257.site>
+Sender: linux-security-module-owner@vger.kernel.org
+To: joeyli <jlee@suse.com>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, Greg KH <gregkh@linuxfoundation.org>, Matthew Garrett <mjg@redhat.com>, tiwai@suse.de
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=80=EF=BC=8C2012-10-29 =E6=96=BC 19:11 +0000=EF=BC=8CMa=
-tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Mon, 2012-10-29 at 14:52 +0800, Lee, Chun-Yi wrote:
-> > The cc9c97b76aa7235d5a1de0f74f990097f77008b4 patch introduced a
-> > issue that always unregister kset of efivars in register_efivars.
-> >=20
-> > This patch moved the kset_unregister function call to the kobject c=
-reate check
-> > block for fix issue.
-> >=20
-> > Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> > Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-> > Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> > ---
-> >  drivers/firmware/efivars.c |    6 ++----
-> >  1 files changed, 2 insertions(+), 4 deletions(-)
->=20
-> Thanks Joey. What I ended up doing was squashing this patch with your
-> previous version and rebasing my 'next' branch. That way, when this
-> series is merged the bug will never appear.
->=20
-> Please take a look to make sure everything is OK.
->=20
+On Mon, Oct 29, 2012 at 05:00:06PM +0800, joeyli wrote:
+> Hi Josh, 
+> Tahashi has a good idea for use strtobool to allow
+> 'secureboot_enable=yes' works. Please consider the following change.
+> 
+> 
+> Thanks a lot!
+> Joey Lee
+> 
+> >From f6841a476f3d332fe7b04cb716e0b518cccd5055 Mon Sep 17 00:00:00 2001
+> From: Lee, Chun-Yi <jlee@suse.com>
+> Date: Mon, 29 Oct 2012 16:36:57 +0800
+> Subject: [PATCH] efi: more user-friendly secureboot_enable parameter
+> 
+> From: Takashi Iwai <tiwai@suse.de>
+> 
+> Use strtobool can allow 'secureboot_enable=yes', it's more user-friendly.
+> 
+> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> ---
+>  kernel/cred.c |    5 +++--
+>  1 files changed, 3 insertions(+), 2 deletions(-)
+> 
+> diff --git a/kernel/cred.c b/kernel/cred.c
+> index 3f5be65..70897a2 100644
+> --- a/kernel/cred.c
+> +++ b/kernel/cred.c
+> @@ -633,9 +633,10 @@ void __init secureboot_enable()
+>  /* Dummy Secure Boot enable option to fake out UEFI SB=1 */
+>  static int __init secureboot_enable_opt(char *str)
+>  {
+> -	int sb_enable = !!simple_strtol(str, NULL, 0);
+> -	if (sb_enable)
+> +	bool sb_enable;
+> +	if (!strtobool(str, &sb_enable) && sb_enable)
+>  		secureboot_enable();
+> +
+>  	return 1;
+>  }
+>  __setup("secureboot_enable=", secureboot_enable_opt);
 
-I just check the next branch, this fix merged with patch commit eecceeb=
-,
-everything is OK.
+This seems like a good change to me.  If you don't mind, I'll rework the
+existing patch to do this since it hasn't been accepted upstream yet and
+give Takashi-san and you appropriate credit in the commit log.
 
-
-Thanks a lot!
-Joey Lee
+josh
