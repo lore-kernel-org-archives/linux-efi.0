@@ -1,80 +1,85 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH V3 07/10] Secure boot: Add a dummy kernel parameter
- that will switch on Secure Boot mode
-Date: Wed, 31 Oct 2012 03:27:42 +0800
-Message-ID: <1351625262.21227.56.camel@linux-s257.site>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	 <1348152065-31353-8-git-send-email-mjg@redhat.com>
-	 <20120920163237.GA11077@kroah.com>
-	 <20120925130818.GE18546@hansolo.jdub.homelinux.org>
-	 <1351501206.21227.47.camel@linux-s257.site>
-	 <20121030174848.GD6627@hansolo.jdub.homelinux.org>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: [PATCH v4 0/7] efi_pstore: multiple event logging support
+Date: Tue, 30 Oct 2012 20:00:09 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138B1DE6@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20121030174848.GD6627@hansolo.jdub.homelinux.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Josh Boyer <jwboyer@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, Greg KH <gregkh@linuxfoundation.org>, Matthew Garrett <mjg@redhat.com>, tiwai@suse.de
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Matthew Garrett (mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=BA=8C=EF=BC=8C2012-10-30 =E6=96=BC 13:48 -0400=EF=BC=8CJo=
-sh Boyer =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Mon, Oct 29, 2012 at 05:00:06PM +0800, joeyli wrote:
-> > Hi Josh,=20
-> > Tahashi has a good idea for use strtobool to allow
-> > 'secureboot_enable=3Dyes' works. Please consider the following chan=
-ge.
-> >=20
-> >=20
-> > Thanks a lot!
-> > Joey Lee
-> >=20
-> > >From f6841a476f3d332fe7b04cb716e0b518cccd5055 Mon Sep 17 00:00:00 =
-2001
-> > From: Lee, Chun-Yi <jlee@suse.com>
-> > Date: Mon, 29 Oct 2012 16:36:57 +0800
-> > Subject: [PATCH] efi: more user-friendly secureboot_enable paramete=
-r
-> >=20
-> > From: Takashi Iwai <tiwai@suse.de>
-> >=20
-> > Use strtobool can allow 'secureboot_enable=3Dyes', it's more user-f=
-riendly.
-> >=20
-> > Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> > ---
-> >  kernel/cred.c |    5 +++--
-> >  1 files changed, 3 insertions(+), 2 deletions(-)
-> >=20
-> > diff --git a/kernel/cred.c b/kernel/cred.c
-> > index 3f5be65..70897a2 100644
-> > --- a/kernel/cred.c
-> > +++ b/kernel/cred.c
-> > @@ -633,9 +633,10 @@ void __init secureboot_enable()
-> >  /* Dummy Secure Boot enable option to fake out UEFI SB=3D1 */
-> >  static int __init secureboot_enable_opt(char *str)
-> >  {
-> > -	int sb_enable =3D !!simple_strtol(str, NULL, 0);
-> > -	if (sb_enable)
-> > +	bool sb_enable;
-> > +	if (!strtobool(str, &sb_enable) && sb_enable)
-> >  		secureboot_enable();
-> > +
-> >  	return 1;
-> >  }
-> >  __setup("secureboot_enable=3D", secureboot_enable_opt);
->=20
-> This seems like a good change to me.  If you don't mind, I'll rework =
-the
-> existing patch to do this since it hasn't been accepted upstream yet =
-and
-> give Takashi-san and you appropriate credit in the commit log.
->=20
-> josh
->=20
 
-Thanks for your review and feel free add to your reworked patch.
+Changelog
 
-Joey Lee
+v3 -> v4
+   - Rebase to 3.7-rc3
+   - Add ctime to an argument of efi_pstore_erase to build successfully
+     in case where CONFIG_PTORE=n is specified. (Patch 4/7)
+   - Add count to an argument of efi_pstore_erase and efi_pstore_write to
+     build successfully in case where CONFIG_PTORE=n is specified (Patch 5/7)
+   - Fix a white space damage (Patch 6/7)
+   - Modify a logic checking a 3-variable format of a variable name (Patch 7/7)
+
+v2 -> v3
+   - Create patches 6/7 and 7/7 to work with an existing format of variable name
+
+v1 -> v2
+   - Separate into 5 patches in accordance with Mike's comment
+   - Erase an extra line of comment in patch 1/5
+
+[Issue]
+
+    Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
+    So, in the following scenario, we will lose 1st panic messages.
+
+    1. kernel panics.
+    2. efi_pstore is kicked and writes panic messages to NVRAM.
+    3. system reboots.
+    4. kernel panics again before a user checks the 1st panic messages in NVRAM.
+
+[Solution]
+
+   Solutions of this problem has been discussed among Tony, Matthew, Don, Mike and me.
+
+   http://marc.info/?l=linux-kernel&m=134273270704586&w=2
+
+   And there are two possible solutions right now.
+     - First one is introducing some policy overwriting existing logs.
+     - Second one is simply holding multiple log without overwriting any entries.
+
+   We haven't decided the overwriting policy which is reasonable to all users yet.
+   But I believe we agree that just holding multiple logs is a reasonable way.
+
+   We may need further discussions to find the possibility of introducing overwriting
+   policy, especially getting critical messages in multiple oops case.
+   But I would like to begin with a simple and reasonable way to everyone.
+   So, this patch takes an approach just holding multiple logs.
+
+[Patch Description]
+
+Seiji Aguchi (7):
+  efi_pstore: Check remaining space with QueryVariableInfo() before
+    writing data
+  efi_pstore: Add a logic erasing entries to an erase callback
+  efi_pstore: Remove a logic erasing entries from a write callback to
+    hold multiple logs
+  efi_pstore: Add ctime to argument of erase callback
+  efi_pstore: Add a sequence counter to a variable name
+  efi_pstore: Add a format check for an existing variable name at
+    reading time
+  efi_pstore: Add a format check for an existing variable name at erasing
+    time
+
+ drivers/acpi/apei/erst.c   |   16 ++--
+ drivers/firmware/efivars.c |  163 ++++++++++++++++++++++++++++++-------------
+ fs/pstore/inode.c          |    7 ++-
+ fs/pstore/internal.h       |    2 +-
+ fs/pstore/platform.c       |   11 ++--
+ fs/pstore/ram.c            |    9 +--
+ include/linux/efi.h        |    1 +
+ include/linux/pstore.h     |    6 +-
+ 8 files changed, 143 insertions(+), 72 deletions(-)
