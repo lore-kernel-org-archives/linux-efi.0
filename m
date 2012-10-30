@@ -1,35 +1,50 @@
-From: Seiji Aguchi <seiji.aguchi@hds.com>
-Subject: RE: [PATCH v3 7/7] Add a format check for an existing variable name
- at erasing time
-Date: Mon, 29 Oct 2012 20:40:59 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138995EA@USINDEM103.corp.hds.com>
-References: <A5ED84D3BB3A384992CBB9C77DEDA4D41388F059@USINDEM103.corp.hds.com>
- <CAGTjWtAfaXgx_v46zf_fJ7KhBUTgciU7yedX6w2niER-JQBzTA@mail.gmail.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] efi: fix always unregister kset of efivars in
+ register_efivars
+Date: Tue, 30 Oct 2012 11:07:02 +0800
+Message-ID: <1351566422.21227.49.camel@linux-s257.site>
+References: <1351493576-3094-1-git-send-email-jlee@suse.com>
+	 <1351537904.14888.44.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGTjWtAfaXgx_v46zf_fJ7KhBUTgciU7yedX6w2niER-JQBzTA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mike Waychison <mikew@google.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1351537904.14888.44.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > +                                 utf16_strlen(efi_name))) {
-> > +                       /*
-> > +                        * Check if an old format,
-> > +                        * which doesn't support holding
-> > +                        * multiple logs, remains.
-> > +                        */
-> > +                       if (sscanf(name, "dump-type%u-%u-%lu",
-> > +                                  &type_old, &part_old, &time_old) !=
-> > + 3)
-> 
-> This doesn't look right.  This should probably mirror the sprintf() at the top of the function using a new string, convert it to 16-bit
-> Unicodeand then compare it like we do for the 4-variable version above (please ignore the fact that this driver incorrectly calls these
-> strings utf16 everywhere -- that needs to be fixed).
+=E6=96=BC =E4=B8=80=EF=BC=8C2012-10-29 =E6=96=BC 19:11 +0000=EF=BC=8CMa=
+tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Mon, 2012-10-29 at 14:52 +0800, Lee, Chun-Yi wrote:
+> > The cc9c97b76aa7235d5a1de0f74f990097f77008b4 patch introduced a
+> > issue that always unregister kset of efivars in register_efivars.
+> >=20
+> > This patch moved the kset_unregister function call to the kobject c=
+reate check
+> > block for fix issue.
+> >=20
+> > Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> > Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> > Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> > ---
+> >  drivers/firmware/efivars.c |    6 ++----
+> >  1 files changed, 2 insertions(+), 4 deletions(-)
+>=20
+> Thanks Joey. What I ended up doing was squashing this patch with your
+> previous version and rebasing my 'next' branch. That way, when this
+> series is merged the bug will never appear.
+>=20
+> Please take a look to make sure everything is OK.
+>=20
 
-I will fix it as well.
+I just check the next branch, this fix merged with patch commit eecceeb=
+,
+everything is OK.
 
-Seiji
+
+Thanks a lot!
+Joey Lee
