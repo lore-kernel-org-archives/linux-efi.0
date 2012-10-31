@@ -1,32 +1,31 @@
-From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Wed, 31 Oct 2012 16:55:04 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1210311653080.12781@pobox.suse.cz>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz> <20121029174131.GC7580@srcf.ucam.org> <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz> <CA+5PVA63EHiXbGAox+FmJPvztSj_i7QgnDG8vdj=p0xE+dqgGQ@mail.gmail.com>
+Date: Wed, 31 Oct 2012 15:56:35 +0000
+Message-ID: <20121031155635.GA14294@srcf.ucam.org>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+ <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+ <20121029174131.GC7580@srcf.ucam.org>
+ <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz>
+ <CA+5PVA63EHiXbGAox+FmJPvztSj_i7QgnDG8vdj=p0xE+dqgGQ@mail.gmail.com>
  <20121031155503.1aaf4c93@pyramind.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121031155503.1aaf4c93-38n7/U1jhRXW96NNrWNlrekiAK3p4hvP@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20121031155503.1aaf4c93@pyramind.ukuu.org.uk>
+Sender: linux-security-module-owner@vger.kernel.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: Josh Boyer <jwboyer@gmail.com>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 31 Oct 2012, Alan Cox wrote:
+1) Gain root.
+2) Modify swap partition directly.
+3) Force reboot.
+4) Win.
 
-> All this depends on your threat model. If I have physical access to
-> suspend/resume your machine then you already lost. If I don't have
-> physical access then I can't boot my unsigned OS to patch your S4 image
-> so it doesn't matter.
-
-Prepare (as a root) a hand-crafted image, reboot, let the kernel resume 
-from that artificial image.
-
-It can be viewed as a very obscure way of rewriting the kernel through 
-/dev/mem (which is obviously not possible when in 'secure boot' 
-environment).
+Root should not have the ability to elevate themselves to running 
+arbitrary kernel code. Therefore, the above attack needs to be 
+impossible.
 
 -- 
-Jiri Kosina
-SUSE Labs
+Matthew Garrett | mjg59@srcf.ucam.org
