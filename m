@@ -1,42 +1,45 @@
-From: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
-Subject: Re: [systemd-devel] [PATCH] systemd: mount the EFI variable filesystem
-Date: Wed, 31 Oct 2012 14:13:30 +0100
-Message-ID: <CAPXgP10j+AGUcyaimtp=osb9mVVpPNJqCvsOdENWhPQEmfYC3A@mail.gmail.com>
-References: <1351308202-14628-1-git-send-email-jlee@suse.com>
- <20121028130025.GD7904@tango.0pointer.de> <1351477290.21227.7.camel@linux-s257.site>
- <1351688670.9230.4.camel@lenny>
+From: Jiri Kosina <jkosina@suse.cz>
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Wed, 31 Oct 2012 15:50:00 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz> <20121029174131.GC7580@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351688670.9230.4.camel@lenny>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Colin Walters <walters-gPq2gbYjIk8dnm+yROfE0A@public.gmane.org>
-Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20121029174131.GC7580@srcf.ucam.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 31, 2012 at 2:04 PM, Colin Walters <walters-gPq2gbYjIk8dnm+yROfE0A@public.gmane.org> wrote:
-> On Mon, 2012-10-29 at 10:21 +0800, joeyli wrote:
->
->> I tested this patch on my UEFI notebook with latest EFI kernel git tree,
->> the efivarfs mounted normally after system boot and I can delete/add EFI
->> variable through /sys/firmware/efi/efivars.
->
-> This causes systemd to output a warning if the kernel doesn't have an
-> efivars module.  I suppose to do this kind of thing "right" we'd
-> have to conditionalize the module loads on available kernel version they
-> first appeared in?
+On Mon, 29 Oct 2012, Matthew Garrett wrote:
 
-We should probably suppress the warning that the module cannot be
-loaded. And then maybe make the mount conditional, depending on the
-existence of the target directory.
+> > > This is pretty much identical to the first patchset, but with the capability
+> > > renamed (CAP_COMPROMISE_KERNEL) and the kexec patch dropped. If anyone wants
+> > > to deploy these then they should disable kexec until support for signed
+> > > kexec payloads has been merged.
+> > 
+> > Apparently your patchset currently doesn't handle device firmware loading, 
+> > nor do you seem to mention in in the comments.
+> 
+> Correct.
+> 
+> > I believe signed firmware loading should be put on plate as well, right?
+> 
+> I think that's definitely something that should be covered. I hadn't 
+> worried about it immediately as any attack would be limited to machines 
+> with a specific piece of hardware, and the attacker would need to expend 
+> a significant amount of reverse engineering work on the firmware - and 
+> we'd probably benefit from them doing that in the long run...
 
-This should make all that only trigger when the kernel module is
-available or it is compiled-in (libkmod tells the same), and do
-nothing on older kernel, kernels without the filesysystem, or
-platforms without EFI.
+Now -- how about resuming from S4?
 
-We generally never want to depend on specific kernel versions, because
-people are free to backport stuff to older kernel versions or free to
-disable things in the kernel which are not absolutely required.
+Reading stored memory image (potentially tampered before reboot) from disk 
+is basically DMA-ing arbitrary data over the whole RAM. I am currently not 
+able to imagine a scenario how this could be made "secure" (without 
+storing private keys to sign the hibernation image on the machine itself 
+which, well, doesn't sound secure either).
 
-Kay
+-- 
+Jiri Kosina
+SUSE Labs
