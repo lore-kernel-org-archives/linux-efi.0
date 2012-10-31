@@ -1,39 +1,28 @@
-From: Shea Levy <shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Wed, 31 Oct 2012 11:05:08 -0400
-Message-ID: <50913E24.1010009@shealevy.com>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz> <20121029174131.GC7580@srcf.ucam.org> <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz> <20121031150201.GA12394@srcf.ucam.org>
+Date: Wed, 31 Oct 2012 15:09:11 +0000
+Message-ID: <20121031150911.GA12799@srcf.ucam.org>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+ <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+ <20121029174131.GC7580@srcf.ucam.org>
+ <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz>
+ <20121031150201.GA12394@srcf.ucam.org>
+ <50913E24.1010009@shealevy.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121031150201.GA12394-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <50913E24.1010009-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Shea Levy <shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>
 Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/31/2012 11:02 AM, Matthew Garrett wrote:
-> On Wed, Oct 31, 2012 at 03:50:00PM +0100, Jiri Kosina wrote:
->
->> Reading stored memory image (potentially tampered before reboot) from disk
->> is basically DMA-ing arbitrary data over the whole RAM. I am currently not
->> able to imagine a scenario how this could be made "secure" (without
->> storing private keys to sign the hibernation image on the machine itself
->> which, well, doesn't sound secure either).
-> shim generates a public and private key. It hands the kernel the private
-> key in a boot parameter and stores the public key in a boot variable. On
-> suspend, the kernel signs the suspend image with that private key and
-> discards it. On the next boot, shim generates a new key pair and hands
-> the new private key to the kernel along with the old public key. The
-> kernel verifies the suspend image before resuming it. The only way to
-> subvert this would be to be able to access kernel memory
+On Wed, Oct 31, 2012 at 11:05:08AM -0400, Shea Levy wrote:
+> Or the boot variable where you stored the key, but in that case I'd
+> say the attacker has won too.
 
-Or the boot variable where you stored the key, but in that case I'd say 
-the attacker has won too.
+Right, in that case they can compromise MOK.
 
->   directly, which
-> means the attacker has already won.
->
-> Now someone just needs to write it.
->
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
