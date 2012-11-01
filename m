@@ -1,46 +1,50 @@
-From: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+From: Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Thu, 1 Nov 2012 13:18:49 +0000
-Message-ID: <20121101131849.752df6fd@pyramind.ukuu.org.uk>
+Date: Thu, 1 Nov 2012 10:29:17 -0400
+Message-ID: <CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com>
 References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
-	<20121029174131.GC7580@srcf.ucam.org>
-	<s5hobjia6vj.wl%tiwai@suse.de>
-	<20121031173728.GA18615@srcf.ucam.org>
-	<s5h390utqv3.wl%tiwai@suse.de>
-	<1351743715.21227.95.camel@linux-s257.site>
+	<2548314.3caaFsMVg6@linux-lqwf.site>
+	<50919EED.3020601@genband.com>
+	<36538307.gzWq1oO7Kg@linux-lqwf.site>
+	<1351760905.2391.19.camel@dabdike.int.hansenpartnership.com>
+	<alpine.LNX.2.00.1211011017230.6606@pobox.suse.cz>
+	<1351762703.2391.31.camel@dabdike.int.hansenpartnership.com>
+	<alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz>
+	<1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351743715.21227.95.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
+In-Reply-To: <1351763954.2391.37.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-> I think it make sense because the private key is still protected by
-> signer. Any hacker who modified firmware is still need use private key
-> to generate signature, but hacker's private key is impossible to match
-> with the public key that kernel used to verify firmware.
-> 
-> And, I afraid we have no choice that we need put the firmware signature
-> in a separate file. Contacting with those company's legal department
-> will be very time-consuming, and I am not sure all company will agree we
-> put the signature with firmware then distribute.
+On Thu, Nov 1, 2012 at 5:59 AM, James Bottomley
+<James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
 
-Then you'd better stop storing it on disk because your disk drive is FEC
-encoding it and adding a CRC 8)
+> But that doesn't really help me: untrusted root is an oxymoron.
 
-It does want checking with a lawyer but my understanding is that if you
-have a file which is a package that contains the firmware and a signature
-then there is not generally a problem, any more than putting it in an RPM
-file - it's packaging/aggregation. This should be referred to the Linux
-Foundation folks perhaps - no point designing something badly to work
-around a non existant issue.
+Imagine you run windows and you've never heard of Linux.  You like
+that only windows kernels can boot on your box and not those mean
+nasty hacked up malware kernels.  Now some attacker manages to take
+over your box because you clicked on that executable for young models
+in skimpy bathing suits.  That executable rewrote your bootloader to
+launch a very small carefully crafted Linux environment.  This
+environment does nothing but launch a perfectly valid signed Linux
+kernel, which gets a Windows environment all ready to launch after
+resume and goes to sleep.  Now you have to hit the power button twice
+every time you turn on your computer, weird, but Windows comes up, and
+secureboot is still on, so you must be safe!
 
-Also the interface needs to consider that a lot of device firmware is
-already signed. Nobody notices because they don't ever try and do their
-own thus many drivers don't need extra signatures in fact.
+In this case we have a completely 'untrusted' root inside Linux.  From
+the user PoV root and Linux are both malware.  Notice the EXACT same
+attack would work launching rootkit'd Linux from Linux.  So don't
+pretend not to care about Windows.  It's just that launching malware
+Linux seems like a reason to get your key revoked.  We don't want
+signed code which can be used as an attack vector on ourselves or on
+others.
 
-Alan
+That make sense?
+
+-Eric
