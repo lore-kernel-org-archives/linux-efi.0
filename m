@@ -1,48 +1,58 @@
-From: Jiri Kosina <jkosina@suse.cz>
+From: Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Thu, 1 Nov 2012 11:06:04 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1211011101240.6606@pobox.suse.cz>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>    <2548314.3caaFsMVg6@linux-lqwf.site> <50919EED.3020601@genband.com>    <36538307.gzWq1oO7Kg@linux-lqwf.site>   <1351760905.2391.19.camel@dabdike.int.hansenpartnership.com>  
- <alpine.LNX.2.00.1211011017230.6606@pobox.suse.cz>  <1351762703.2391.31.camel@dabdike.int.hansenpartnership.com>  <alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz> <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
+Date: Thu, 01 Nov 2012 11:12:55 +0100
+Message-ID: <1904191.8HVCpRFbLH@linux-lqwf.site>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <36538307.gzWq1oO7Kg@linux-lqwf.site> <1351760905.2391.19.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Matthew Garrett <mjg59@srcf.ucam.org>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1351760905.2391.19.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 1 Nov 2012, James Bottomley wrote:
-
-> > > I'm actually just struggling to understand the use case for these more
-> > > esoteric protections.
+On Thursday 01 November 2012 09:08:25 James Bottomley wrote:
+> On Wed, 2012-10-31 at 23:19 +0100, Oliver Neukum wrote:
+> > On Wednesday 31 October 2012 15:58:05 Chris Friesen wrote:
+> > > On 10/31/2012 02:14 PM, Oliver Neukum wrote:
 > > 
-> > I believe the real point is drawing a clear line between trusted and 
-> > untrusted (with root being userspace, hence implicitly untrusted), and 
-> > disallowing "legitimate crossing" of this line.
+> > > > That would do it on my system.
+> > > > Maybe in theory you could solve this by the kernel invalidating images
+> > > > it hasn't written itself and forbidding to change the resume partition from the
+> > > > kernel command line, but that would break user space hibernation.
+> > > 
+> > > If the resuming kernel refuses to resume from images it didn't create 
+> > > itself, why do you need to forbid changing the resume partition from the 
+> > > kernel command line?
+> > 
+> > You don't. Signed images solve the problem.
 > 
-> But that doesn't really help me: untrusted root is an oxymoron.  I get
-> capability separated systems, where you invest trust in layers and you
-> make each layer small and verifiable, so you have a granular trust
-> policy you build up.  I really don't understand the use case for trying
-> to remove a small portion of trust from the huge trust domain of root
-> and then doing a massive amount of fixup around the edges because
-> there's leaks all over the place from the trust that root still has.  It
-> all seems to be a bit backwards.  If you just begin with the capability
-> separated granular system, I don't see why it doesn't all just work with
-> what we have today.
+> I really don't think they do.  The proposed attack vector is to try to
+> prevent a local root exploit from running arbitrary in-kernel code,
+> because that would compromise the secure boot part of the kernel.
 
-Please don't get me wrong -- I personally don't believe in the secure boot 
-stuff at all.
+Well, it is an attempt to prevent unsigned code from altering signed
+code or data structures private to signed code. That can be seen as
+a technical question. What that is useful for is not strictly a technical
+question.
 
-But if you take the secure/trusted boot as a basic paradigma, then you 
-really need the separation.
-In such model, the root is untrusted, exactly because the code running 
-under those privileges hasn't been signed, period. If you allow such code 
-to modify the trusted/signed code, you just basically violate the complete 
-model, rendering it completely moot.
+We can of course discuss whether secure boot makes sense at all.
+But that is a different discussion. Once it is decided that it is to be
+implemented, some issues arise logically.
 
--- 
-Jiri Kosina
-SUSE Labs
+> The point I'm making is that given that the majority of exploits will
+> already be able to execute arbitrary code in-kernel, there's not much
+> point trying to consider features like this as attacker prevention.  We
+> should really be focusing on discussing why we'd want to prevent a
+> legitimate local root from writing to the suspend partition in a secure
+> boot environment.
+
+That is strictly speaking what we are discussing.
+First, it is not given that root is local.
+Second, we don't want to stop root from writing to a partition.
+We just want to prevent that from altering kernel memory.
+
+	Regards
+		Oliver
