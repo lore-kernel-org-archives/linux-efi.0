@@ -1,7 +1,7 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+From: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Thu, 1 Nov 2012 21:35:24 +0000
-Message-ID: <20121101213524.03fa2d53@pyramind.ukuu.org.uk>
+Date: Thu, 1 Nov 2012 21:37:51 +0000
+Message-ID: <20121101213751.377ebaa8@pyramind.ukuu.org.uk>
 References: <alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz>
 	<1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
 	<CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com>
@@ -11,44 +11,34 @@ References: <alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz>
 	<CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
 	<1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
 	<20121101210634.GA19723@srcf.ucam.org>
-	<1351804440.2391.99.camel@dabdike.int.hansenpartnership.com>
-	<20121101211859.GA20014@srcf.ucam.org>
+	<20121101213127.5967327f@pyramind.ukuu.org.uk>
+	<20121101212843.GA20309@srcf.ucam.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20121101211859.GA20014@srcf.ucam.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121101212843.GA20309-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 1 Nov 2012 21:18:59 +0000
-Matthew Garrett <mjg59@srcf.ucam.org> wrote:
+On Thu, 1 Nov 2012 21:28:43 +0000
+Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
 
-> On Thu, Nov 01, 2012 at 09:14:00PM +0000, James Bottomley wrote:
+> On Thu, Nov 01, 2012 at 09:31:27PM +0000, Alan Cox wrote:
+> > > Linux vendors may care about Linux on Linux attacks. It's all fun and 
+> > > games until Oracle get Microsoft to revoke Red Hat's signature.
+> > 
+> > Fear uncertainty and doubt (and if you think Oracle are going to do that
+> > I suspect your lawyers should deal with it)
 > 
-> > I agree that's a possibility.  However, I think the court of public
-> > opinion would pillory the first Commercial Linux Distribution that went
-> > to Microsoft for the express purpose of revoking their competition's
-> > right to boot.  It would be commercial suicide.
-> 
-> Oracle are something of a vexatious litigant as far as the court of 
-> public opinion is concerned, but even without that it could be a 
-> customer who complains. If you're personally comfortable with a specific 
-> level of security here, that's fine - but it's completely reasonable for 
-> others to feel that there are valid technical and commercial concerns to 
-> do this properly.
+> Lawyers won't remove blacklist entries.
 
-The main people who really really care about this the MS key stuff
-is mostly irrelevant for as they won't use the Microsoft keys
-anyway. Microsoft will have to provide signing to all sorts of other law
-enforcement bodies as a responsible provider. If the FBI have a key no
-other government security installation will have that key in their
-systems. If the Chinese state has it I doubt the US government will be
-too keen either.
+Fear Uncertainty and Doubt
 
-All those official government trojans end up creating a big problem in the
-trust department.
+Courts do, injunctions do, the possibilty of getting caught with theirs
+hands in the till does.
 
-Alan
+But I suspect your lawyers should also deal with public comments about
+Oracle such as the one you've made before you make them in public 8)
