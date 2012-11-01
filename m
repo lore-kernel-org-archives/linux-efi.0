@@ -1,40 +1,69 @@
-From: Oliver Neukum <oneukum@suse.de>
+From: joeyli <jlee@suse.com>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Wed, 31 Oct 2012 23:19:31 +0100
-Message-ID: <36538307.gzWq1oO7Kg@linux-lqwf.site>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <2548314.3caaFsMVg6@linux-lqwf.site> <50919EED.3020601@genband.com>
+Date: Thu, 01 Nov 2012 12:21:55 +0800
+Message-ID: <1351743715.21227.95.camel@linux-s257.site>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+	 <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+	 <20121029174131.GC7580@srcf.ucam.org> <s5hobjia6vj.wl%tiwai@suse.de>
+	 <20121031173728.GA18615@srcf.ucam.org>  <s5h390utqv3.wl%tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <50919EED.3020601@genband.com>
+In-Reply-To: <s5h390utqv3.wl%tiwai@suse.de>
 Sender: linux-security-module-owner@vger.kernel.org
-To: Chris Friesen <chris.friesen@genband.com>
-Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, Matthew Garrett <mjg59@srcf.ucam.org>, Jiri Kosina <jkosina@suse.cz>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+To: Takashi Iwai <tiwai@suse.de>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wednesday 31 October 2012 15:58:05 Chris Friesen wrote:
-> On 10/31/2012 02:14 PM, Oliver Neukum wrote:
+=E6=96=BC =E4=B8=89=EF=BC=8C2012-10-31 =E6=96=BC 19:53 +0100=EF=BC=8CTa=
+kashi Iwai =E6=8F=90=E5=88=B0=EF=BC=9A
+> At Wed, 31 Oct 2012 17:37:28 +0000,
+> Matthew Garrett wrote:
+> >=20
+> > On Wed, Oct 31, 2012 at 06:28:16PM +0100, Takashi Iwai wrote:
+> >=20
+> > > request_firmware() is used for microcode loading, too, so it's fa=
+irly
+> > > a core part to cover, I'm afraid.
+> > >=20
+> > > I played a bit about this yesterday.  The patch below is a proof =
+of
+> > > concept to (ab)use the module signing mechanism for firmware load=
+ing
+> > > too.  Sign firmware files via scripts/sign-file, and put to
+> > > /lib/firmware/signed directory.
+> >=20
+> > That does still leave me a little uneasy as far as the microcode=20
+> > licenses go. I don't know that we can distribute signed copies of s=
+ome=20
+> > of them, and we obviously can't sign at the user end.
+>=20
+> Yeah, that's a concern.  Although this is a sort of "container" and
+> keeping the original data as is, it might be regarded as a
+> modification.
+>=20
+> Another approach would be to a signature in a separate file, but I'm
+> not sure whether it makes sense.
+>=20
 
-> > That would do it on my system.
-> > Maybe in theory you could solve this by the kernel invalidating images
-> > it hasn't written itself and forbidding to change the resume partition from the
-> > kernel command line, but that would break user space hibernation.
-> 
-> If the resuming kernel refuses to resume from images it didn't create 
-> itself, why do you need to forbid changing the resume partition from the 
-> kernel command line?
+I think it make sense because the private key is still protected by
+signer. Any hacker who modified firmware is still need use private key
+to generate signature, but hacker's private key is impossible to match
+with the public key that kernel used to verify firmware.
 
-You don't. Signed images solve the problem.
+And, I afraid we have no choice that we need put the firmware signature
+in a separate file. Contacting with those company's legal department
+will be very time-consuming, and I am not sure all company will agree w=
+e
+put the signature with firmware then distribute.
 
-I was responding to Alan's assertation that the problem could be solved
-without signing the images. It turns out tht any such scheme would have
-unacceptable limitations.
 
-The key problem is actually safely storing the public key needed to verify
-the signature. This problem is also solvable. It just needs help from the
-UEFI infrastructure.
+Thanks a lot!
+Joey Lee
 
-	Regards
-		Oliver
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-securit=
+y-module" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
