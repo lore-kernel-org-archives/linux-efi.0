@@ -1,69 +1,59 @@
-From: joeyli <jlee@suse.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Thu, 01 Nov 2012 12:21:55 +0800
-Message-ID: <1351743715.21227.95.camel@linux-s257.site>
+Date: Thu, 01 Nov 2012 09:08:25 +0000
+Message-ID: <1351760905.2391.19.camel@dabdike.int.hansenpartnership.com>
 References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	 <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
-	 <20121029174131.GC7580@srcf.ucam.org> <s5hobjia6vj.wl%tiwai@suse.de>
-	 <20121031173728.GA18615@srcf.ucam.org>  <s5h390utqv3.wl%tiwai@suse.de>
+	 <2548314.3caaFsMVg6@linux-lqwf.site> <50919EED.3020601@genband.com>
+	 <36538307.gzWq1oO7Kg@linux-lqwf.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <s5h390utqv3.wl%tiwai@suse.de>
+In-Reply-To: <36538307.gzWq1oO7Kg@linux-lqwf.site>
 Sender: linux-security-module-owner@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+To: Oliver Neukum <oneukum@suse.de>
+Cc: Chris Friesen <chris.friesen@genband.com>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Matthew Garrett <mjg59@srcf.ucam.org>, Jiri Kosina <jkosina@suse.cz>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=89=EF=BC=8C2012-10-31 =E6=96=BC 19:53 +0100=EF=BC=8CTa=
-kashi Iwai =E6=8F=90=E5=88=B0=EF=BC=9A
-> At Wed, 31 Oct 2012 17:37:28 +0000,
-> Matthew Garrett wrote:
-> >=20
-> > On Wed, Oct 31, 2012 at 06:28:16PM +0100, Takashi Iwai wrote:
-> >=20
-> > > request_firmware() is used for microcode loading, too, so it's fa=
-irly
-> > > a core part to cover, I'm afraid.
-> > >=20
-> > > I played a bit about this yesterday.  The patch below is a proof =
-of
-> > > concept to (ab)use the module signing mechanism for firmware load=
-ing
-> > > too.  Sign firmware files via scripts/sign-file, and put to
-> > > /lib/firmware/signed directory.
-> >=20
-> > That does still leave me a little uneasy as far as the microcode=20
-> > licenses go. I don't know that we can distribute signed copies of s=
-ome=20
-> > of them, and we obviously can't sign at the user end.
->=20
-> Yeah, that's a concern.  Although this is a sort of "container" and
-> keeping the original data as is, it might be regarded as a
-> modification.
->=20
-> Another approach would be to a signature in a separate file, but I'm
-> not sure whether it makes sense.
->=20
+On Wed, 2012-10-31 at 23:19 +0100, Oliver Neukum wrote:
+> On Wednesday 31 October 2012 15:58:05 Chris Friesen wrote:
+> > On 10/31/2012 02:14 PM, Oliver Neukum wrote:
+> 
+> > > That would do it on my system.
+> > > Maybe in theory you could solve this by the kernel invalidating images
+> > > it hasn't written itself and forbidding to change the resume partition from the
+> > > kernel command line, but that would break user space hibernation.
+> > 
+> > If the resuming kernel refuses to resume from images it didn't create 
+> > itself, why do you need to forbid changing the resume partition from the 
+> > kernel command line?
+> 
+> You don't. Signed images solve the problem.
 
-I think it make sense because the private key is still protected by
-signer. Any hacker who modified firmware is still need use private key
-to generate signature, but hacker's private key is impossible to match
-with the public key that kernel used to verify firmware.
+I really don't think they do.  The proposed attack vector is to try to
+prevent a local root exploit from running arbitrary in-kernel code,
+because that would compromise the secure boot part of the kernel.
 
-And, I afraid we have no choice that we need put the firmware signature
-in a separate file. Contacting with those company's legal department
-will be very time-consuming, and I am not sure all company will agree w=
-e
-put the signature with firmware then distribute.
+I really think that's mythical: a local privilege elevation attack
+usually exploits some bug (classically a buffer overflow) which executes
+arbitrary code in kernel context.  In that case, the same attack vector
+can be used to compromise any in-kernel protection mechanism including
+turning off the secure boot capability and reading the in-kernel private
+signing key.
+
+There have been one or two privilege elevation attacks that didn't
+involve in-kernel code (usually by compromising a suid binary or other
+cross domain scripting attack) that would only compromise local root and
+thus be confined to the secure boot prison but they are, historically, a
+minority.
+
+The point I'm making is that given that the majority of exploits will
+already be able to execute arbitrary code in-kernel, there's not much
+point trying to consider features like this as attacker prevention.  We
+should really be focusing on discussing why we'd want to prevent a
+legitimate local root from writing to the suspend partition in a secure
+boot environment.
+
+James
 
 
-Thanks a lot!
-Joey Lee
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-securit=
-y-module" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
