@@ -1,38 +1,83 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Thu, 1 Nov 2012 21:57:52 +0000
-Message-ID: <20121101215752.GA21154@srcf.ucam.org>
-References: <CACLa4pvh3v3Mhq8oe3dzRL8ytBgmitPkCGUSfVCR5WdQopjRMQ@mail.gmail.com>
- <1351783096.2391.77.camel@dabdike.int.hansenpartnership.com>
- <CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
- <1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
- <20121101210634.GA19723@srcf.ucam.org>
- <20121101213127.5967327f@pyramind.ukuu.org.uk>
- <20121101212843.GA20309@srcf.ucam.org>
- <20121101213751.377ebaa8@pyramind.ukuu.org.uk>
- <20121101213452.GA20564@srcf.ucam.org>
- <20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+From: Seiji Aguchi <seiji.aguchi@hds.com>
+Subject: [RESEND][PATCH v4 0/7] efi_pstore: multiple event logging support
+Date: Thu, 1 Nov 2012 22:59:01 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138B435F@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20121101215817.79e50ec2-38n7/U1jhRXW96NNrWNlrekiAK3p4hvP@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-acpi-owner@vger.kernel.org
+To: "mikew@google.com" <mikew@google.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>
+Cc: "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 01, 2012 at 09:58:17PM +0000, Alan Cox wrote:
-> On Thu, 1 Nov 2012 21:34:52 +0000
-> Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
-> > I think you've misunderstood. Blacklist updates are append only.
-> 
-> I think you've misunderstood - thats a technical detail that merely
-> alters the cost to the people who did something improper.
+Changelog
 
-Winning a case is cold comfort if your software has been uninstallable 
-for the years it took to get through the courts. If others want to take 
-that risk, fine.
+v3 -> v4
+   - Rebase to 3.7-rc3
+   - Add ctime to an argument of efi_pstore_erase to build successfully
+     in case where CONFIG_PTORE=n is specified. (Patch 4/7)
+   - Add count to an argument of efi_pstore_erase and efi_pstore_write to
+     build successfully in case where CONFIG_PTORE=n is specified (Patch 5/7)
+   - Fix a white space damage (Patch 6/7)
+   - Modify a logic checking a 3-variable format of a variable name (Patch 7/7)
 
--- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+v2 -> v3
+   - Create patches 6/7 and 7/7 to work with an existing format of variable name
+
+v1 -> v2
+   - Separate into 5 patches in accordance with Mike's comment
+   - Erase an extra line of comment in patch 1/5
+
+[Issue]
+
+    Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
+    So, in the following scenario, we will lose 1st panic messages.
+
+    1. kernel panics.
+    2. efi_pstore is kicked and writes panic messages to NVRAM.
+    3. system reboots.
+    4. kernel panics again before a user checks the 1st panic messages in NVRAM.
+
+[Solution]
+
+   Solutions of this problem has been discussed among Tony, Matthew, Don, Mike and me.
+
+   http://marc.info/?l=linux-kernel&m=134273270704586&w=2
+
+   And there are two possible solutions right now.
+     - First one is introducing some policy overwriting existing logs.
+     - Second one is simply holding multiple log without overwriting any entries.
+
+   We haven't decided the overwriting policy which is reasonable to all users yet.
+   But I believe we agree that just holding multiple logs is a reasonable way.
+
+   We may need further discussions to find the possibility of introducing overwriting
+   policy, especially getting critical messages in multiple oops case.
+   But I would like to begin with a simple and reasonable way to everyone.
+   So, this patch takes an approach just holding multiple logs.
+
+[Patch Description]
+
+Seiji Aguchi (7):
+  efi_pstore: Check remaining space with QueryVariableInfo() before
+    writing data
+  efi_pstore: Add a logic erasing entries to an erase callback
+  efi_pstore: Remove a logic erasing entries from a write callback to
+    hold multiple logs
+  efi_pstore: Add ctime to argument of erase callback
+  efi_pstore: Add a sequence counter to a variable name
+  efi_pstore: Add a format check for an existing variable name at
+    reading time
+  Add a format check for an existing variable name at erasing time
+
+ drivers/acpi/apei/erst.c   |   16 ++--
+ drivers/firmware/efivars.c |  163 ++++++++++++++++++++++++++++++-------------
+ fs/pstore/inode.c          |    7 ++-
+ fs/pstore/internal.h       |    2 +-
+ fs/pstore/platform.c       |   11 ++--
+ fs/pstore/ram.c            |    9 +--
+ include/linux/efi.h        |    1 +
+ include/linux/pstore.h     |    6 +-
+ 8 files changed, 143 insertions(+), 72 deletions(-)
