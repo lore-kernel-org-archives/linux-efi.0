@@ -1,87 +1,50 @@
-From: Seiji Aguchi <seiji.aguchi@hds.com>
-Subject: [RESEND][PATCH v4 7/7] Add a format check for an existing variable
- name at erasing time
-Date: Thu, 1 Nov 2012 23:03:04 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138B43E7@USINDEM103.corp.hds.com>
+From: ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org (Eric W. Biederman)
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Fri, 02 Nov 2012 01:49:25 -0700
+Message-ID: <87625ogzje.fsf@xmission.com>
+References: <CACLa4pvh3v3Mhq8oe3dzRL8ytBgmitPkCGUSfVCR5WdQopjRMQ@mail.gmail.com>
+	<1351783096.2391.77.camel@dabdike.int.hansenpartnership.com>
+	<CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
+	<1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
+	<20121101210634.GA19723@srcf.ucam.org>
+	<20121101213127.5967327f@pyramind.ukuu.org.uk>
+	<20121101212843.GA20309@srcf.ucam.org>
+	<20121101213751.377ebaa8@pyramind.ukuu.org.uk>
+	<20121101213452.GA20564@srcf.ucam.org>
+	<20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+	<20121101215752.GA21154@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
-To: "mikew@google.com" <mikew@google.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>
-Cc: "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121101215752.GA21154-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> (Matthew Garrett's message
+	of "Thu, 1 Nov 2012 21:57:52 +0000")
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-[Issue]
+Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> writes:
 
-a format of variable name has been updated to type, id, count and ctime
-to support holding multiple logs.
+> On Thu, Nov 01, 2012 at 09:58:17PM +0000, Alan Cox wrote:
+>> On Thu, 1 Nov 2012 21:34:52 +0000
+>> Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
+>> > I think you've misunderstood. Blacklist updates are append only.
+>> 
+>> I think you've misunderstood - thats a technical detail that merely
+>> alters the cost to the people who did something improper.
+>
+> Winning a case is cold comfort if your software has been uninstallable 
+> for the years it took to get through the courts. If others want to take 
+> that risk, fine.
 
-Format of current variable name
-  dump-type0-1-2-12345678
+When the goal is to secure Linux I don't see how any of this helps.
+Windows 8 compromises are already available so if we turn most of these
+arguments around I am certain clever attackers can go through windows to
+run compromised kernel on a linux system, at least as easily as the
+reverse.
 
-  type:0
-  id:1
-  count:2
-  ctime:12345678
+Short of instructing UEFI to stop trusting the Microsoft signing key I
+don't see any of the secureboot dance gaining any security of computers
+running linux or security from keys being revoked for non-sense reasons.
 
-On the other hand, if an old variable name before being updated
-remains, users can't erase it via /dev/pstore.
-
-Format of old variable name
-  dump-type0-1-12345678
-
-  type:0
-  id:1
-  ctime:12345678
-
-[Solution]
-
-This patch add a format check for the old variable name in a erase callback to make it erasable.
-
-Signed-off-by: Seiji Aguchi <seiji.aguchi@hds.com>
----
- drivers/firmware/efivars.c |   20 ++++++++++++++++++--
- 1 files changed, 18 insertions(+), 2 deletions(-)
-
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index bf7a6f9..6e51c1e 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -773,6 +773,8 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- {
- 	char name[DUMP_NAME_LEN];
- 	efi_char16_t efi_name[DUMP_NAME_LEN];
-+	char name_old[DUMP_NAME_LEN];
-+	efi_char16_t efi_name_old[DUMP_NAME_LEN];
- 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
- 	struct efivars *efivars = psi->data;
- 	struct efivar_entry *entry, *found = NULL;
-@@ -796,8 +798,22 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 		if (efi_guidcmp(entry->var.VendorGuid, vendor))
- 			continue;
- 		if (utf16_strncmp(entry->var.VariableName, efi_name,
--				  utf16_strlen(efi_name)))
--			continue;
-+				  utf16_strlen(efi_name))) {
-+			/*
-+			 * Check if an old format,
-+			 * which doesn't support holding
-+			 * multiple logs, remains.
-+			 */
-+			sprintf(name_old, "dump-type%u-%u-%lu", type,
-+				(unsigned int)id, time.tv_sec);
-+
-+			for (i = 0; i < DUMP_NAME_LEN; i++)
-+				efi_name_old[i] = name_old[i];
-+
-+			if (utf16_strncmp(entry->var.VariableName, efi_name_old,
-+					  utf16_strlen(efi_name_old)))
-+				continue;
-+		}
- 
- 		/* found */
- 		found = entry;
--- 
-1.7.1
+Eric
