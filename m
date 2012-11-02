@@ -1,35 +1,47 @@
-From: Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>
+From: ebiederm@xmission.com (Eric W. Biederman)
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Fri, 2 Nov 2012 15:18:06 -0400
-Message-ID: <CACLa4psWr4xW0xrJq11q9zQM5V=8-HhQxGf6kzRRkpeEM0iS3A@mail.gmail.com>
-References: <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
-	<CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com>
-	<20121101202701.GB20817@xo-6d-61-c0.localdomain>
-	<5092E361.7080901@genband.com>
-	<20121102163302.GA6080@elf.ucw.cz>
-	<1351875164.2439.42.camel@dabdike.int.hansenpartnership.com>
-	<20121102165456.GB9997@srcf.ucam.org>
-	<1351878511.2439.44.camel@dabdike.int.hansenpartnership.com>
-	<20121102175416.GA11816@srcf.ucam.org>
-	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
-	<20121102180458.GA12052@srcf.ucam.org>
+Date: Fri, 02 Nov 2012 15:03:02 -0700
+Message-ID: <87liejacix.fsf@xmission.com>
+References: <CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
+	<1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
+	<20121101210634.GA19723@srcf.ucam.org>
+	<20121101213127.5967327f@pyramind.ukuu.org.uk>
+	<20121101212843.GA20309@srcf.ucam.org>
+	<20121101213751.377ebaa8@pyramind.ukuu.org.uk>
+	<20121101213452.GA20564@srcf.ucam.org>
+	<20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+	<20121101215752.GA21154@srcf.ucam.org> <87625ogzje.fsf@xmission.com>
+	<20121102140057.GA4668@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121102180458.GA12052-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LSM List <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20121102140057.GA4668@srcf.ucam.org> (Matthew Garrett's message
+	of "Fri, 2 Nov 2012 14:00:57 +0000")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-I know I started it, but Windows really isn't necessary to see value,
-even if it is what pushed the timing.
+Matthew Garrett <mjg59@srcf.ucam.org> writes:
 
-A user installs a package as root.  Absent any flaws in the Linux
-kernel (cough) that should be all it can do in a Secure Boot world.
-But if you can drop a small trusted Linux system in there and use that
-to boot a compromised Linux kernel, it can make itself persistent.
+> On Fri, Nov 02, 2012 at 01:49:25AM -0700, Eric W. Biederman wrote:
+>
+>> When the goal is to secure Linux I don't see how any of this helps.
+>> Windows 8 compromises are already available so if we turn most of these
+>> arguments around I am certain clever attackers can go through windows to
+>> run compromised kernel on a linux system, at least as easily as the
+>> reverse.
+>
+> And if any of them are used to attack Linux, we'd expect those versions 
+> of Windows to be blacklisted.
 
-And like I said, I know there are cloud providers out there who want
-EXACTLY this type of system.  One in which root in the guest is
-untrusted and they want to keep them out of ring 0.
+I fail to see the logic here.  It is ok to trust Microsofts signing key
+because after I have been p0wned they will blacklist the version of
+windows that has was used to compromise my system?
+
+A key revokation will help me when my system is p0wned how?
+
+I don't want my system p0wned in the first place and I don't want to run
+windows.  Why should I trust Microsoft's signing key?
+
+Eric
