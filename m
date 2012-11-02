@@ -1,87 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 21/20] efivarfs: Fix return value of efivarfs_file_write()
-Date: Fri, 02 Nov 2012 08:54:03 +0000
-Message-ID: <1351846443.14888.158.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Fri, 2 Nov 2012 14:00:57 +0000
+Message-ID: <20121102140057.GA4668@srcf.ucam.org>
+References: <CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
+ <1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
+ <20121101210634.GA19723@srcf.ucam.org>
+ <20121101213127.5967327f@pyramind.ukuu.org.uk>
+ <20121101212843.GA20309@srcf.ucam.org>
+ <20121101213751.377ebaa8@pyramind.ukuu.org.uk>
+ <20121101213452.GA20564@srcf.ucam.org>
+ <20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+ <20121101215752.GA21154@srcf.ucam.org>
+ <87625ogzje.fsf@xmission.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1351237923-10313-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <87625ogzje.fsf@xmission.com>
+Sender: linux-security-module-owner@vger.kernel.org
+To: "Eric W. Biederman" <ebiederm@xmission.com>
+Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Fri, Nov 02, 2012 at 01:49:25AM -0700, Eric W. Biederman wrote:
 
-We're stuffing a variable of type size_t (unsigned) into a ssize_t
-(signed) which, even though both types should be the same number of
-bits, it's just asking for sign issues to be introduced.
+> When the goal is to secure Linux I don't see how any of this helps.
+> Windows 8 compromises are already available so if we turn most of these
+> arguments around I am certain clever attackers can go through windows to
+> run compromised kernel on a linux system, at least as easily as the
+> reverse.
 
-Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Reported-by: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efivars.c | 13 ++++++++-----
- 1 file changed, 8 insertions(+), 5 deletions(-)
+And if any of them are used to attack Linux, we'd expect those versions 
+of Windows to be blacklisted.
 
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 58cec62..9ac9340 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -694,6 +694,7 @@ static ssize_t efivarfs_file_write(struct file *file,
- 	struct inode *inode = file->f_mapping->host;
- 	unsigned long datasize = count - sizeof(attributes);
- 	unsigned long newdatasize;
-+	ssize_t bytes = 0;
- 
- 	if (count < sizeof(attributes))
- 		return -EINVAL;
-@@ -706,22 +707,22 @@ static ssize_t efivarfs_file_write(struct file *file,
- 	efivars = var->efivars;
- 
- 	if (copy_from_user(&attributes, userbuf, sizeof(attributes))) {
--		count = -EFAULT;
-+		bytes = -EFAULT;
- 		goto out;
- 	}
- 
- 	if (attributes & ~(EFI_VARIABLE_MASK)) {
--		count = -EINVAL;
-+		bytes = -EINVAL;
- 		goto out;
- 	}
- 
- 	if (copy_from_user(data, userbuf + sizeof(attributes), datasize)) {
--		count = -EFAULT;
-+		bytes = -EFAULT;
- 		goto out;
- 	}
- 
- 	if (validate_var(&var->var, data, datasize) == false) {
--		count = -EINVAL;
-+		bytes = -EINVAL;
- 		goto out;
- 	}
- 
-@@ -744,6 +745,8 @@ static ssize_t efivarfs_file_write(struct file *file,
- 		return efi_status_to_err(status);
- 	}
- 
-+	bytes = count;
-+
- 	/*
- 	 * Writing to the variable may have caused a change in size (which
- 	 * could either be an append or an overwrite), or the variable to be
-@@ -778,7 +781,7 @@ static ssize_t efivarfs_file_write(struct file *file,
- out:
- 	kfree(data);
- 
--	return count;
-+	return bytes;
- }
- 
- static ssize_t efivarfs_file_read(struct file *file, char __user *userbuf,
 -- 
-1.7.11.7
+Matthew Garrett | mjg59@srcf.ucam.org
