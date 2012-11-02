@@ -1,46 +1,35 @@
-From: Vivek Goyal <vgoyal@redhat.com>
+From: Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Fri, 2 Nov 2012 14:30:51 -0400
-Message-ID: <20121102183051.GO3300@redhat.com>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
- <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
- <20121029174131.GC7580@srcf.ucam.org>
- <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz>
- <20121031150201.GA12394@srcf.ucam.org>
- <20121102153047.GF3300@redhat.com>
- <20121102154248.GA7681@srcf.ucam.org>
- <20121102155247.GH3300@redhat.com>
- <alpine.LNX.2.00.1211021722140.24253@pobox.suse.cz>
+Date: Fri, 2 Nov 2012 15:18:06 -0400
+Message-ID: <CACLa4psWr4xW0xrJq11q9zQM5V=8-HhQxGf6kzRRkpeEM0iS3A@mail.gmail.com>
+References: <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
+	<CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com>
+	<20121101202701.GB20817@xo-6d-61-c0.localdomain>
+	<5092E361.7080901@genband.com>
+	<20121102163302.GA6080@elf.ucw.cz>
+	<1351875164.2439.42.camel@dabdike.int.hansenpartnership.com>
+	<20121102165456.GB9997@srcf.ucam.org>
+	<1351878511.2439.44.camel@dabdike.int.hansenpartnership.com>
+	<20121102175416.GA11816@srcf.ucam.org>
+	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
+	<20121102180458.GA12052@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1211021722140.24253@pobox.suse.cz>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Jiri Kosina <jkosina@suse.cz>
-Cc: Matthew Garrett <mjg@redhat.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121102180458.GA12052-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LSM List <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 02, 2012 at 05:22:41PM +0100, Jiri Kosina wrote:
-> On Fri, 2 Nov 2012, Vivek Goyal wrote:
-> 
-> > > > "crash" utility has module which allows reading kernel memory. So leaking
-> > > > this private key will be easier then you are thinking it to be.
-> > > 
-> > > That's not upstream, right?
-> > 
-> > Yes, checked with Dave, it is not upstream. Well, still it is a concern
-> > for distro kernel.
-> 
-> Well, that's about /dev/crash, right?
+I know I started it, but Windows really isn't necessary to see value,
+even if it is what pushed the timing.
 
-Yes, I was talking about /dev/crash.
+A user installs a package as root.  Absent any flaws in the Linux
+kernel (cough) that should be all it can do in a Secure Boot world.
+But if you can drop a small trusted Linux system in there and use that
+to boot a compromised Linux kernel, it can make itself persistent.
 
-> 
-> How about /proc/kcore?
-
-Yes, we will have to lock down /proc/kcore too if we go the private
-key solution way.
-
-Thanks
-Vivek
+And like I said, I know there are cloud providers out there who want
+EXACTLY this type of system.  One in which root in the guest is
+untrusted and they want to keep them out of ring 0.
