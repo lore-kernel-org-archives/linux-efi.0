@@ -1,42 +1,40 @@
-From: Matthew Garrett <mjg@redhat.com>
+From: ebiederm@xmission.com (Eric W. Biederman)
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Sat, 3 Nov 2012 00:23:39 +0000
-Message-ID: <20121103002339.GD18691@srcf.ucam.org>
-References: <20121101212843.GA20309@srcf.ucam.org>
- <20121101213751.377ebaa8@pyramind.ukuu.org.uk>
- <20121101213452.GA20564@srcf.ucam.org>
- <20121101215817.79e50ec2@pyramind.ukuu.org.uk>
- <20121101215752.GA21154@srcf.ucam.org>
- <87625ogzje.fsf@xmission.com>
- <20121102140057.GA4668@srcf.ucam.org>
- <87liejacix.fsf@xmission.com>
- <509446FB.5000504@genband.com>
- <20121102234607.26cc2cbb@pyramind.ukuu.org.uk>
+Date: Fri, 02 Nov 2012 17:47:02 -0700
+Message-ID: <87sj8rwm0p.fsf@xmission.com>
+References: <20121101210634.GA19723@srcf.ucam.org>
+	<20121101213127.5967327f@pyramind.ukuu.org.uk>
+	<20121101212843.GA20309@srcf.ucam.org>
+	<20121101213751.377ebaa8@pyramind.ukuu.org.uk>
+	<20121101213452.GA20564@srcf.ucam.org>
+	<20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+	<20121101215752.GA21154@srcf.ucam.org> <87625ogzje.fsf@xmission.com>
+	<20121102140057.GA4668@srcf.ucam.org> <87liejacix.fsf@xmission.com>
+	<20121103002033.GA18691@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-security-module-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20121102234607.26cc2cbb@pyramind.ukuu.org.uk>
+In-Reply-To: <20121103002033.GA18691@srcf.ucam.org> (Matthew Garrett's message
+	of "Sat, 3 Nov 2012 00:20:34 +0000")
 Sender: linux-security-module-owner@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Chris Friesen <chris.friesen@genband.com>, "Eric W. Biederman" <ebiederm@xmission.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 02, 2012 at 11:46:07PM +0000, Alan Cox wrote:
-> On Fri, 02 Nov 2012 16:19:39 -0600
-> Chris Friesen <chris.friesen@genband.com> wrote:
-> > On 11/02/2012 04:03 PM, Eric W. Biederman wrote:
-> > > Matthew Garrett<mjg59@srcf.ucam.org>  writes:
-> > >> And if any of them are used to attack Linux, we'd expect those versions
-> > >> of Windows to be blacklisted.
-> 
-> This is the first laugh. So they revoke the key. For that to be useful
-> they must propogate that into all the boxes in warehouses and all the new
-> boxes. If they do that then all the existing store stock of Windows 8 DVD
-> and CD media needs replacing.
+Matthew Garrett <mjg59@srcf.ucam.org> writes:
 
-Revocation is done via Windows Update. If they refuse to do that, well, 
-lawyers, right?
+> On Fri, Nov 02, 2012 at 03:03:02PM -0700, Eric W. Biederman wrote:
+>
+>> I don't want my system p0wned in the first place and I don't want to run
+>> windows.  Why should I trust Microsoft's signing key?
+>
+> There's no reason to. Systems that don't trust Microsoft's signing key 
+> have no reason to be concerned about Microsoft revocation. 
+> Unfortunately, that's not the only set of people we have to worry
+> about.
 
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+No reason to?  How can I configure an off the shelf system originally
+sold with windows 8 installed to boot in UEFI secure boot mode using
+shim without trusting Microsoft's key?
+
+Eric
