@@ -1,61 +1,88 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Fri, 2 Nov 2012 23:46:07 +0000
-Message-ID: <20121102234607.26cc2cbb@pyramind.ukuu.org.uk>
-References: <CACLa4pu0yoB6CQX=3nuAT2vz4=oTNfM9fjMUvFXKJovYu+y4fw@mail.gmail.com>
-	<1351803800.2391.96.camel@dabdike.int.hansenpartnership.com>
-	<20121101210634.GA19723@srcf.ucam.org>
-	<20121101213127.5967327f@pyramind.ukuu.org.uk>
-	<20121101212843.GA20309@srcf.ucam.org>
-	<20121101213751.377ebaa8@pyramind.ukuu.org.uk>
-	<20121101213452.GA20564@srcf.ucam.org>
-	<20121101215817.79e50ec2@pyramind.ukuu.org.uk>
-	<20121101215752.GA21154@srcf.ucam.org>
-	<87625ogzje.fsf@xmission.com>
-	<20121102140057.GA4668@srcf.ucam.org>
-	<87liejacix.fsf@xmission.com>
-	<509446FB.5000504@genband.com>
+From: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RESEND][PATCH v4 0/7] efi_pstore: multiple event logging support
+Date: Fri, 2 Nov 2012 17:03:32 -0700
+Message-ID: <CAGTjWtBvFvx2A9FFpDw+18p_58JiX=zpqHAd0T=JS=r8YkZHiw@mail.gmail.com>
+References: <A5ED84D3BB3A384992CBB9C77DEDA4D4138B435F@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <509446FB.5000504@genband.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Chris Friesen <chris.friesen@genband.com>
-Cc: "Eric W. Biederman" <ebiederm@xmission.com>, Matthew Garrett <mjg59@srcf.ucam.org>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D4138B435F-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Matthew Garrett (mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 02 Nov 2012 16:19:39 -0600
-Chris Friesen <chris.friesen@genband.com> wrote:
+Series Acked-by: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 
-> On 11/02/2012 04:03 PM, Eric W. Biederman wrote:
-> > Matthew Garrett<mjg59@srcf.ucam.org>  writes:
-> >
-> >> On Fri, Nov 02, 2012 at 01:49:25AM -0700, Eric W. Biederman wrote:
-> >>
-> >>> When the goal is to secure Linux I don't see how any of this helps.
-> >>> Windows 8 compromises are already available so if we turn most of these
-> >>> arguments around I am certain clever attackers can go through windows to
-> >>> run compromised kernel on a linux system, at least as easily as the
-> >>> reverse.
-> >>
-> >> And if any of them are used to attack Linux, we'd expect those versions
-> >> of Windows to be blacklisted.
+Tony: Did you want to pull this?
 
-This is the first laugh. So they revoke the key. For that to be useful
-they must propogate that into all the boxes in warehouses and all the new
-boxes. If they do that then all the existing store stock of Windows 8 DVD
-and CD media needs replacing.
-
-> > I don't want my system p0wned in the first place and I don't want to run
-> > windows.  Why should I trust Microsoft's signing key?
-> 
-> In any case, you don't need to trust Microsoft's signing key...at least 
-> on x86 hardware you can install your own.  But if you want consumer 
-> hardware to be able to boot linux out-of-the-box without messing with 
-> BIOS settings then we need a bootloader that has been signed by Microsoft.
-
-Or a machine that has other keys in it, isn't sold locked down or doesn't
-have lunatic boot firmware.
-
-Alan
+On Thu, Nov 1, 2012 at 3:59 PM, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org> wrote:
+> Changelog
+>
+> v3 -> v4
+>    - Rebase to 3.7-rc3
+>    - Add ctime to an argument of efi_pstore_erase to build successfully
+>      in case where CONFIG_PTORE=n is specified. (Patch 4/7)
+>    - Add count to an argument of efi_pstore_erase and efi_pstore_write to
+>      build successfully in case where CONFIG_PTORE=n is specified (Patch 5/7)
+>    - Fix a white space damage (Patch 6/7)
+>    - Modify a logic checking a 3-variable format of a variable name (Patch 7/7)
+>
+> v2 -> v3
+>    - Create patches 6/7 and 7/7 to work with an existing format of variable name
+>
+> v1 -> v2
+>    - Separate into 5 patches in accordance with Mike's comment
+>    - Erase an extra line of comment in patch 1/5
+>
+> [Issue]
+>
+>     Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
+>     So, in the following scenario, we will lose 1st panic messages.
+>
+>     1. kernel panics.
+>     2. efi_pstore is kicked and writes panic messages to NVRAM.
+>     3. system reboots.
+>     4. kernel panics again before a user checks the 1st panic messages in NVRAM.
+>
+> [Solution]
+>
+>    Solutions of this problem has been discussed among Tony, Matthew, Don, Mike and me.
+>
+>    http://marc.info/?l=linux-kernel&m=134273270704586&w=2
+>
+>    And there are two possible solutions right now.
+>      - First one is introducing some policy overwriting existing logs.
+>      - Second one is simply holding multiple log without overwriting any entries.
+>
+>    We haven't decided the overwriting policy which is reasonable to all users yet.
+>    But I believe we agree that just holding multiple logs is a reasonable way.
+>
+>    We may need further discussions to find the possibility of introducing overwriting
+>    policy, especially getting critical messages in multiple oops case.
+>    But I would like to begin with a simple and reasonable way to everyone.
+>    So, this patch takes an approach just holding multiple logs.
+>
+> [Patch Description]
+>
+> Seiji Aguchi (7):
+>   efi_pstore: Check remaining space with QueryVariableInfo() before
+>     writing data
+>   efi_pstore: Add a logic erasing entries to an erase callback
+>   efi_pstore: Remove a logic erasing entries from a write callback to
+>     hold multiple logs
+>   efi_pstore: Add ctime to argument of erase callback
+>   efi_pstore: Add a sequence counter to a variable name
+>   efi_pstore: Add a format check for an existing variable name at
+>     reading time
+>   Add a format check for an existing variable name at erasing time
+>
+>  drivers/acpi/apei/erst.c   |   16 ++--
+>  drivers/firmware/efivars.c |  163 ++++++++++++++++++++++++++++++-------------
+>  fs/pstore/inode.c          |    7 ++-
+>  fs/pstore/internal.h       |    2 +-
+>  fs/pstore/platform.c       |   11 ++--
+>  fs/pstore/ram.c            |    9 +--
+>  include/linux/efi.h        |    1 +
+>  include/linux/pstore.h     |    6 +-
+>  8 files changed, 143 insertions(+), 72 deletions(-)
