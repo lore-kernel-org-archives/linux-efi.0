@@ -1,53 +1,36 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Sat, 3 Nov 2012 01:03:31 +0000
-Message-ID: <20121103010331.3dd593a5@pyramind.ukuu.org.uk>
-References: <20121101210634.GA19723@srcf.ucam.org>
-	<20121101213127.5967327f@pyramind.ukuu.org.uk>
-	<20121101212843.GA20309@srcf.ucam.org>
-	<20121101213751.377ebaa8@pyramind.ukuu.org.uk>
-	<20121101213452.GA20564@srcf.ucam.org>
-	<20121101215817.79e50ec2@pyramind.ukuu.org.uk>
-	<20121101215752.GA21154@srcf.ucam.org>
-	<87625ogzje.fsf@xmission.com>
-	<20121102140057.GA4668@srcf.ucam.org>
-	<87liejacix.fsf@xmission.com>
-	<20121103002033.GA18691@srcf.ucam.org>
-	<87sj8rwm0p.fsf@xmission.com>
+Date: Sat, 3 Nov 2012 01:43:32 +0000
+Message-ID: <20121103014332.GA20065@srcf.ucam.org>
+References: <20121101212843.GA20309@srcf.ucam.org>
+ <20121101213751.377ebaa8@pyramind.ukuu.org.uk>
+ <20121101213452.GA20564@srcf.ucam.org>
+ <20121101215817.79e50ec2@pyramind.ukuu.org.uk>
+ <20121101215752.GA21154@srcf.ucam.org>
+ <87625ogzje.fsf@xmission.com>
+ <20121102140057.GA4668@srcf.ucam.org>
+ <87liejacix.fsf@xmission.com>
+ <20121103002033.GA18691@srcf.ucam.org>
+ <87sj8rwm0p.fsf@xmission.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87sj8rwm0p.fsf@xmission.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Eric W. Biederman" <ebiederm@xmission.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, James Bottomley <James.Bottomley@HansenPartnership.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Chris Friesen <chris.friesen@genband.com>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <87sj8rwm0p.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
+
+On Fri, Nov 02, 2012 at 05:47:02PM -0700, Eric W. Biederman wrote:
 
 > No reason to?  How can I configure an off the shelf system originally
 > sold with windows 8 installed to boot in UEFI secure boot mode using
 > shim without trusting Microsoft's key?
 
-Assuming its an x86 and a PC class platform and thus should allow you to
-disable secure boot mode then you disable secure boot mode and boot in
-sane PC mode. You then jump through a collection of hoops to sign all
-your OS stuff, your ROMs and a few other things with a new key, remove
-the MS key and then "secure" boot it.
+Delete the installed keys, install your choice of keys, make sure your 
+bootloader is signed with a key you trust. You're guaranteed to be able 
+to do this on any Windows 8 certified hardware.
 
-That will also stop random people demonstrating how secure your "secure"
-boot is by walking up to your box and installing Windows 8 over your
-distribution by reformatting your hard drive and probably block a wide
-range of interesting law enforcement and other tools some of which will
-inevitably fall into the wrong hands.
-
-A lot of the work there is the mechanising of all of the hoop jumping and
-key management, but there isn't an intrinsic reason you can't turn this
-into a nice clean click and point self-sign my PC UI.
-
-There are some interesting uses for self signed keys or having your own
-corporate key included in your builds as a big company. One thing it
-solves if you do it with Linux and an own key is being able to remote
-install securely over a network which right now for all OS's and PC class
-devices is a problem as you have no way to verify the image.
-
-Alan
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
