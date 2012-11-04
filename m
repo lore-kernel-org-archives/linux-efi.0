@@ -1,48 +1,48 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Sun, 4 Nov 2012 13:52:51 +0000
-Message-ID: <20121104135251.GA17894@srcf.ucam.org>
-References: <20121102175416.GA11816@srcf.ucam.org>
- <1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
- <20121102180458.GA12052@srcf.ucam.org>
- <1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
- <20121103002244.GC18691@srcf.ucam.org>
- <1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
- <20121103134630.GA28166@srcf.ucam.org>
- <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
- <20121104042802.GA11295@srcf.ucam.org>
- <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH] samsung-laptop: Disable if CONFIG_EFI=y
+Date: Sun,  4 Nov 2012 17:35:06 +0000
+Message-ID: <1352050506-29317-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, platform-driver-x86-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alessandro Crismani <alessandro.crismani-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mikhail Bakhterev <mike.bakhterev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Patrick H <kernel-0BLq+tI11CLk1uMJSBkQmQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Nov 04, 2012 at 09:14:47AM +0000, James Bottomley wrote:
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-> I've actually had more than enough experience with automated installs
-> over my career: they're either done by paying someone or using a
-> provisioning system.  In either case, they provision a static image and
-> boot environment description, including EFI boot services variables, so
-> you can provision a default MOK database if you want the ignition image
-> not to pause on firstboot.
+We've started getting reports of users seeing Machine Check Exceptions
+when booting their Samsung laptops in UEFI mode,
 
-And now you've moved the attack vector to a copy of your provisioning 
-system instead.
+     https://bugzilla.kernel.org/show_bug.cgi?id=47121
 
-> There is obviously the question of making the provisioning systems
-> secure, but it's a separate one from making boot secure.
+This module seems to be the culprit as it's grovelling around in the
+0xf0000 region which has no mapping in either the e820 or EFI memory
+maps on the affected machines.
 
-You don't get to punt on making the kernel secure by simply asserting 
-that some other system can be secure instead. The chain of trust needs 
-to go all the way back - if your security model is based on all installs 
-needing a physically present end user, all installs need a physically 
-present end user. That's not acceptable, so we need a different security 
-model.
+Reported-by: Alessandro Crismani <alessandro.crismani-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Reported-by: Mikhail Bakhterev <mike.bakhterev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Tested-by: Patrick H <kernel-0BLq+tI11CLk1uMJSBkQmQ@public.gmane.org>
+Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>
+Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/platform/x86/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
+index c86bae8..0fe5200 100644
+--- a/drivers/platform/x86/Kconfig
++++ b/drivers/platform/x86/Kconfig
+@@ -717,7 +717,7 @@ config XO15_EBOOK
+ 
+ config SAMSUNG_LAPTOP
+ 	tristate "Samsung Laptop driver"
+-	depends on X86
++	depends on X86 && !EFI
+ 	depends on RFKILL || RFKILL = n
+ 	depends on BACKLIGHT_CLASS_DEVICE
+ 	select LEDS_CLASS
 -- 
-Matthew Garrett | mjg59@srcf.ucam.org
+1.7.11.7
