@@ -1,28 +1,38 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 05 Nov 2012 09:53:33 +0100
-Message-ID: <50977E8D.7090204@zytor.com>
-References: <20121102175416.GA11816@srcf.ucam.org> <1351879058.2439.46.camel@dabdike.int.hansenpartnership.com> <20121102180458.GA12052@srcf.ucam.org> <1351899503.2439.49.camel@dabdike.int.hansenpartnership.com> <20121103002244.GC18691@srcf.ucam.org> <1351944236.2417.7.camel@dabdike.int.hansenpartnership.com> <20121103134630.GA28166@srcf.ucam.org> <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com> <20121104042802.GA11295@srcf.ucam.org> <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com> <20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com> <8582ea67-beda-44e6-82cd-52d73555dda8@email.android.com> <87k3u0cu1k.fsf@xmission.com>
+From: Corentin Chary <corentincj@iksaif.net>
+Subject: Re: [PATCH] samsung-laptop: Disable if CONFIG_EFI=y
+Date: Mon, 5 Nov 2012 09:12:01 +0000
+Message-ID: <CAHR064jwe=diZ9B-D+-SroCW1ZevkRDMosB7uDuc2VXZkFxmdA@mail.gmail.com>
+References: <1352050506-29317-1-git-send-email-matt@console-pimps.org>
+	<CAHR064isMXk8qkqhBJ==9sRRP7xC_j_K5rqXApza-LNkosp5mg@mail.gmail.com>
+	<20121104193741.7b4ca37b@pyramind.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87k3u0cu1k.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20121104193741.7b4ca37b@pyramind.ukuu.org.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Alan Cox <alan@lxorguk.ukuu.org.uk>
+Cc: Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg@redhat.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, "platform-driver-x86@vger.kernel.org" <platform-driver-x86@vger.kernel.org>, Alessandro Crismani <alessandro.crismani@gmail.com>, Mikhail Bakhterev <mike.bakhterev@gmail.com>, Patrick H <kernel@feystorm.net>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/05/2012 09:50 AM, Eric W. Biederman wrote:
-> 
-> Facts are always a good thing to assume.
-> 
-> The fact is the general case does not admit an install without user
-> interaction.
-> 
+On Sun, Nov 4, 2012 at 7:37 PM, Alan Cox <alan@lxorguk.ukuu.org.uk> wrote:
+>> Acked-by: Corentin Chary <corentin.chary@gmail.com>
+>
+> This is totally bogus and prevents users build a kernel which can work in
+> either mode. As such its a regression.
 
-In the general case, no.  However, that is not a good reason to rule out
-the cases where it *can* be done; especially as vendors are starting to
-wake up to actual needs of users and of Linux in particular.
+Arg.. Sorry for that, I didn't realized that CONFIG_EFI=y was not
+something rare these days.
 
-	-hpa
+> Do the detection check at runtime. If it was booted via EFI then don't
+> grovel in places you shouldn't. Indeed its possible EFI should reserve
+> those memory regions ?
+
+I wonder how the windows driver works in this case.. Maybe they use
+something completly different, and the SABI interface is still there
+because nobody removed/disabled it ? In this case it's probably not a
+good idea to use it on these machines since the implementation is
+likely to be completly broken.
+
+--
+Corentin Chary
+http://xf.iksaif.net
