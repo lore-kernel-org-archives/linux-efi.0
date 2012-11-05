@@ -1,37 +1,69 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 5 Nov 2012 13:46:04 +0000
-Message-ID: <20121105134604.GA6068@srcf.ucam.org>
-References: <20121103134630.GA28166@srcf.ucam.org>
- <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
- <20121104042802.GA11295@srcf.ucam.org>
- <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
- <20121104135251.GA17894@srcf.ucam.org>
- <87d2zsmv8r.fsf@xmission.com>
- <509766DB.9090906@zytor.com>
- <87625kh5r2.fsf@xmission.com>
- <20121105123858.GB4374@srcf.ucam.org>
- <20121105134436.08993fd6@pyramind.ukuu.org.uk>
+Date: Mon, 5 Nov 2012 15:40:15 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1211051535060.24253@pobox.suse.cz>
+References: <50919EED.3020601@genband.com> <36538307.gzWq1oO7Kg@linux-lqwf.site> <1351760905.2391.19.camel@dabdike.int.hansenpartnership.com> <alpine.LNX.2.00.1211011017230.6606@pobox.suse.cz> <1351762703.2391.31.camel@dabdike.int.hansenpartnership.com>
+ <alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz> <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com> <CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com> <20121101202701.GB20817@xo-6d-61-c0.localdomain> <5092E361.7080901@genband.com>
+ <20121102154833.GG3300@redhat.com> <alpine.LNX.2.00.1211040008280.24253@pobox.suse.cz> <87390ok0zy.fsf@xmission.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20121105134436.08993fd6-38n7/U1jhRXW96NNrWNlrekiAK3p4hvP@public.gmane.org>
+In-Reply-To: <87390ok0zy.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 05, 2012 at 01:44:36PM +0000, Alan Cox wrote:
-> On Mon, 5 Nov 2012 12:38:58 +0000
-> Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
-> > No, in the general case the system will do that once it fails to find a 
-> > bootable OS on the drive.
-> 
-> So your "secure" system can be wiped by a random Windows 8 install media.
-> Ooh thats good stuff 8)
+On Sun, 4 Nov 2012, Eric W. Biederman wrote:
 
-Once you've booted trusted code you can change the boot order.
+> > Why is "when kernel has been securely booted, the in-kernel kexec 
+> > mechanism has to verify the signature of the supplied image before 
+> > kexecing it" not enough? (basically the same thing we are doing for signed 
+> > modules already).
+> 
+> For modules the only untrusted part of their environment are the command
+> line parameters, and several of those have already been noted for
+> needing to be ignored in a non-trusted root scenario.
+> 
+> For kexec there is a bunch of glue code and data that takes care of
+> transitioning from the environment provided by kexec and the environment
+> that the linux kernel or memtest86 or whatever we are booting is
+> expecting.
+> 
+> Figuring out what glue code and data we need and supplying that glue
+> code and data is what kexec-tools does.  The situation is a bit like
+> dealing with the modules before most of the work of insmod was moved
+> into the kernel.
+> 
+> For kexec-tools it is desirable to have glue layers outside of the
+> kernel because every boot system in existence has a different set of
+> parameter passing rules.
+> 
+> So signing in the kernel gets us into how do we sign the glue code and
+> how dow we verify the glue code will jump to our signed and verified
+> kernel image.
+
+Do I understand you correctly that by the 'glue' stuff you actually mean 
+the division of the kexec image into segments?
+
+Of course, when we are dividing the image into segments and then passing 
+those individually (even more so if some transformations are performed on 
+those segments, which I don't know whether that's the case or not), then 
+we can't do any signature verification of the image any more.
+
+But I still don't fully understand what is so magical about taking the 
+kernel image as is, and passing the whole lot to the running kernel as-is, 
+allowing for signature verification.
+
+Yes, it couldn't be sys_kexec_load(), as that would be ABI breakage, so 
+it'd mean sys_kexec_raw_load(), or whatever ... but I fail to see why that 
+would be problem in principle.
+
+If you can point me to the code where all the magic that prevents this 
+easy handling is happening, I'd appreciate it.
+
+Thanks,
 
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Jiri Kosina
+SUSE Labs
