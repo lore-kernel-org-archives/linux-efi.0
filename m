@@ -1,71 +1,43 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] samsung-laptop: Disable if CONFIG_EFI=y
-Date: Mon, 05 Nov 2012 12:13:21 +0000
-Message-ID: <1352117601.14888.278.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1352050506-29317-1-git-send-email-matt@console-pimps.org>
-	 <CAHR064isMXk8qkqhBJ==9sRRP7xC_j_K5rqXApza-LNkosp5mg@mail.gmail.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Mon, 5 Nov 2012 12:36:38 +0000
+Message-ID: <20121105123638.GA4374@srcf.ucam.org>
+References: <20121102180458.GA12052@srcf.ucam.org>
+ <1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
+ <20121103002244.GC18691@srcf.ucam.org>
+ <1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
+ <20121103134630.GA28166@srcf.ucam.org>
+ <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
+ <20121104042802.GA11295@srcf.ucam.org>
+ <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
+ <20121104135251.GA17894@srcf.ucam.org>
+ <1352103617.2456.3.camel@dabdike>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <platform-driver-x86-owner@vger.kernel.org>
-In-Reply-To: <CAHR064isMXk8qkqhBJ==9sRRP7xC_j_K5rqXApza-LNkosp5mg@mail.gmail.com>
-Sender: platform-driver-x86-owner@vger.kernel.org
-To: Corentin Chary <corentincj@iksaif.net>
-Cc: Matthew Garrett <mjg@redhat.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, "platform-driver-x86@vger.kernel.org" <platform-driver-x86@vger.kernel.org>, Alessandro Crismani <alessandro.crismani@gmail.com>, Mikhail Bakhterev <mike.bakhterev@gmail.com>, Patrick H <kernel@feystorm.net>, "H. Peter Anvin" <hpa@zytor.com>, stable@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1352103617.2456.3.camel@dabdike>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2012-11-04 at 17:44 +0000, Corentin Chary wrote:
-> On Sun, Nov 4, 2012 at 5:35 PM, Matt Fleming <matt@console-pimps.org> wrote:
-> > From: Matt Fleming <matt.fleming@intel.com>
-> >
-> > We've started getting reports of users seeing Machine Check Exceptions
-> > when booting their Samsung laptops in UEFI mode,
-> >
-> >      https://bugzilla.kernel.org/show_bug.cgi?id=47121
-> >
-> > This module seems to be the culprit as it's grovelling around in the
-> > 0xf0000 region which has no mapping in either the e820 or EFI memory
-> > maps on the affected machines.
-> >
-> > Reported-by: Alessandro Crismani <alessandro.crismani@gmail.com>
-> > Reported-by: Mikhail Bakhterev <mike.bakhterev@gmail.com>
-> > Tested-by: Patrick H <kernel@feystorm.net>
-> > Cc: H. Peter Anvin <hpa@zytor.com>
-> > Cc: Matthew Garrett <mjg@redhat.com>
-> > Cc: Corentin Chary <corentincj@iksaif.net>
-> > Cc: stable@vger.kernel.org
-> > Signed-off-by: Matt Fleming <matt.fleming@intel.com>
-> > ---
-> >  drivers/platform/x86/Kconfig | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/platform/x86/Kconfig b/drivers/platform/x86/Kconfig
-> > index c86bae8..0fe5200 100644
-> > --- a/drivers/platform/x86/Kconfig
-> > +++ b/drivers/platform/x86/Kconfig
-> > @@ -717,7 +717,7 @@ config XO15_EBOOK
-> >
-> >  config SAMSUNG_LAPTOP
-> >         tristate "Samsung Laptop driver"
-> > -       depends on X86
-> > +       depends on X86 && !EFI
-> >         depends on RFKILL || RFKILL = n
-> >         depends on BACKLIGHT_CLASS_DEVICE
-> >         select LEDS_CLASS
-> > --
-> > 1.7.11.7
-> >
+On Mon, Nov 05, 2012 at 09:20:17AM +0100, James Bottomley wrote:
+> On Sun, 2012-11-04 at 13:52 +0000, Matthew Garrett wrote:
+> > You don't get to punt on making the kernel secure by simply asserting 
+> > that some other system can be secure instead. The chain of trust needs 
+> > to go all the way back - if your security model is based on all installs 
+> > needing a physically present end user, all installs need a physically 
+> > present end user. That's not acceptable, so we need a different security 
+> > model.
 > 
-> Acked-by: Corentin Chary <corentin.chary@gmail.com>
-> 
-> Matthew could you merge this in your tree ? Thanks.
-> 
-> Matt, any idea if SABI doesn't exist on these machines, or is just
-> mapped somewhere else ?
-> By any luck, could Samsung tell you how to safely detect SABI aware machines ?
+> I didn't.  I advocated a simple security model which you asserted
+> wouldn't allow unattended installs, so I explained how they could be
+> done.  
 
-I don't know whether or not SABI exists on these machines and I don't
-have one of them to try and figure that out, sorry.
+You've explained that a hypothetical piece of software could handle key 
+provisioning without providing any explanation for how it would be able 
+to do so in a secure manner.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
