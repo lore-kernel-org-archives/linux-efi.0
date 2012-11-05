@@ -1,46 +1,52 @@
-From: Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [systemd-devel] [PATCH] systemd: mount the EFI variable filesystem
-Date: Mon, 5 Nov 2012 15:55:04 -0500
-Message-ID: <CA+5PVA55f6Gdh8myQ4D4Jd=ox7Zh=8ZHxyeiZ7gLspwWJbdoEg@mail.gmail.com>
-References: <1351308202-14628-1-git-send-email-jlee@suse.com>
-	<20121028130025.GD7904@tango.0pointer.de>
-	<1351477290.21227.7.camel@linux-s257.site>
-	<1351688670.9230.4.camel@lenny>
-	<CAPXgP10j+AGUcyaimtp=osb9mVVpPNJqCvsOdENWhPQEmfYC3A@mail.gmail.com>
+From: Florian Weimer <fw@deneb.enyo.de>
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Mon, 05 Nov 2012 22:25:29 +0100
+Message-ID: <87sj8nzqra.fsf@mid.deneb.enyo.de>
+References: <20121102163302.GA6080@elf.ucw.cz>
+	<1351875164.2439.42.camel@dabdike.int.hansenpartnership.com>
+	<20121102165456.GB9997@srcf.ucam.org>
+	<1351878511.2439.44.camel@dabdike.int.hansenpartnership.com>
+	<20121102175416.GA11816@srcf.ucam.org>
+	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
+	<20121102180458.GA12052@srcf.ucam.org>
+	<1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
+	<20121103002244.GC18691@srcf.ucam.org>
+	<1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
+	<20121103134630.GA28166@srcf.ucam.org>
+	<1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPXgP10j+AGUcyaimtp=osb9mVVpPNJqCvsOdENWhPQEmfYC3A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
-Cc: Colin Walters <walters-gPq2gbYjIk8dnm+yROfE0A@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Lennart Poettering <lennart-mdGvqq1h2p+GdvJs77BJ7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, systemd-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
+	(James Bottomley's message of "Sat, 03 Nov 2012 22:56:40 +0000")
+Sender: linux-security-module-owner@vger.kernel.org
+To: James Bottomley <James.Bottomley@HansenPartnership.com>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 31, 2012 at 9:13 AM, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org> wrote:
-> On Wed, Oct 31, 2012 at 2:04 PM, Colin Walters <walters-gPq2gbYjIk8dnm+yROfE0A@public.gmane.org> wrote:
->> On Mon, 2012-10-29 at 10:21 +0800, joeyli wrote:
->>
->>> I tested this patch on my UEFI notebook with latest EFI kernel git tree,
->>> the efivarfs mounted normally after system boot and I can delete/add EFI
->>> variable through /sys/firmware/efi/efivars.
->>
->> This causes systemd to output a warning if the kernel doesn't have an
->> efivars module.  I suppose to do this kind of thing "right" we'd
->> have to conditionalize the module loads on available kernel version they
->> first appeared in?
->
-> We should probably suppress the warning that the module cannot be
-> loaded. And then maybe make the mount conditional, depending on the
-> existence of the target directory.
->
-> This should make all that only trigger when the kernel module is
-> available or it is compiled-in (libkmod tells the same), and do
-> nothing on older kernel, kernels without the filesysystem, or
-> platforms without EFI.
+* James Bottomley:
 
-Yes to all of that.
+> Right, but what I'm telling you is that by deciding to allow automatic
+> first boot, you're causing the windows attack vector problem.  You could
+> easily do a present user test only on first boot which would eliminate
+> it.
 
-For those wanting a distro kernel to play with that has this support,
-we've included efivarfs in Fedora rawhide and soon in F18.
+Apparently, the warning will look like this:
 
-josh
+  WARNING: This Binary is unsigned
+
+  Are you sure you wish to run an unsigned binary
+  in a secure environment?
+
+  To avoid this question in future place the platform into setup mode
+  See http://www.linuxfoundation.org/uefi-setup-mode
+  And reboot.
+
+I'm not convinced this will work because users will confirm their
+presence to get back into the system.  We expect GNU/Linux users to do
+it, why wouldn't Windows users?  (And what harm can an unsigned binary
+do to a "secure environment", anyway?  If it's adversely affected, it
+can't be that secure, can it?)
+
+And what's the backup plan if users use this to boot into compromised
+Windows systems?
