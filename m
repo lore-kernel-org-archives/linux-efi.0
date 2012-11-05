@@ -1,100 +1,67 @@
 From: ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org (Eric W. Biederman)
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Sun, 04 Nov 2012 22:14:44 -0800
-Message-ID: <87d2zsmv8r.fsf@xmission.com>
-References: <20121102175416.GA11816@srcf.ucam.org>
-	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
-	<20121102180458.GA12052@srcf.ucam.org>
-	<1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
-	<20121103002244.GC18691@srcf.ucam.org>
-	<1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
-	<20121103134630.GA28166@srcf.ucam.org>
-	<1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
-	<20121104042802.GA11295@srcf.ucam.org>
-	<1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
-	<20121104135251.GA17894@srcf.ucam.org>
+Date: Sun, 04 Nov 2012 22:38:41 -0800
+Message-ID: <87390ok0zy.fsf@xmission.com>
+References: <50919EED.3020601@genband.com>
+	<36538307.gzWq1oO7Kg@linux-lqwf.site>
+	<1351760905.2391.19.camel@dabdike.int.hansenpartnership.com>
+	<alpine.LNX.2.00.1211011017230.6606@pobox.suse.cz>
+	<1351762703.2391.31.camel@dabdike.int.hansenpartnership.com>
+	<alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz>
+	<1351763954.2391.37.camel@dabdike.int.hansenpartnership.com>
+	<CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com>
+	<20121101202701.GB20817@xo-6d-61-c0.localdomain>
+	<5092E361.7080901@genband.com> <20121102154833.GG3300@redhat.com>
+	<alpine.LNX.2.00.1211040008280.24253@pobox.suse.cz>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121104135251.GA17894-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> (Matthew Garrett's message
-	of "Sun, 4 Nov 2012 13:52:51 +0000")
+In-Reply-To: <alpine.LNX.2.00.1211040008280.24253-ztGlSCb7Y1iN3ZZ/Hiejyg@public.gmane.org> (Jiri
+	Kosina's message of "Sun, 4 Nov 2012 00:09:55 +0100 (CET)")
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> writes:
+Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org> writes:
 
-> On Sun, Nov 04, 2012 at 09:14:47AM +0000, James Bottomley wrote:
+> On Fri, 2 Nov 2012, Vivek Goyal wrote:
 >
->> I've actually had more than enough experience with automated installs
->> over my career: they're either done by paying someone or using a
->> provisioning system.  In either case, they provision a static image and
->> boot environment description, including EFI boot services variables, so
->> you can provision a default MOK database if you want the ignition image
->> not to pause on firstboot.
+>> > With secure boot enabled, then the kernel should refuse to let an
+>> > unsigned kexec load new images, and kexec itself should refuse to
+>> > load unsigned images.
+>> 
+>> Yep, good in theory. Now that basically means reimplementing kexec-tools
+>> in kernel. 
 >
-> And now you've moved the attack vector to a copy of your provisioning 
-> system instead.
->
->> There is obviously the question of making the provisioning systems
->> secure, but it's a separate one from making boot secure.
->
-> You don't get to punt on making the kernel secure by simply asserting 
-> that some other system can be secure instead. The chain of trust needs 
-> to go all the way back - if your security model is based on all installs 
-> needing a physically present end user, all installs need a physically 
-> present end user. That's not acceptable, so we need a different security 
-> model.
+> Why is "when kernel has been securely booted, the in-kernel kexec 
+> mechanism has to verify the signature of the supplied image before 
+> kexecing it" not enough? (basically the same thing we are doing for signed 
+> modules already).
 
-Bzzzt.  Theory and reality disagreeing.
+For modules the only untrusted part of their environment are the command
+line parameters, and several of those have already been noted for
+needing to be ignored in a non-trusted root scenario.
 
-I have done a lot of automatic installs.  At the very least someone has
-to be present to apply power to the hardware.  So someone being present
-is not a requirement you can remove.
+For kexec there is a bunch of glue code and data that takes care of
+transitioning from the environment provided by kexec and the environment
+that the linux kernel or memtest86 or whatever we are booting is
+expecting.
 
-Furthermore in most cases an automatic install requires kicking the
-system into network boot mode or into inserting an install cd.  Both are
-actions that require a user to be present.
+Figuring out what glue code and data we need and supplying that glue
+code and data is what kexec-tools does.  The situation is a bit like
+dealing with the modules before most of the work of insmod was moved
+into the kernel.
 
-The goal is to reduce what a user must do to a minimum to remove the
-possibility of human error, not to reduce what must happen into
-absurdity.
+For kexec-tools it is desirable to have glue layers outside of the
+kernel because every boot system in existence has a different set of
+parameter passing rules.
 
-The other side is that a general purpose configuration of firmware
-almost never is suitable for a general install.  So either some small
-amount of time must be spent fixing the BIOS settings or have an
-appropriate set of BIOS settings come from your supplier.
+So signing in the kernel gets us into how do we sign the glue code and
+how dow we verify the glue code will jump to our signed and verified
+kernel image.
 
-
-
-In practice what I would expect of a UEFI system that ships ready for
-automatic installs is a system that initiall boots up in "setup mode"
-where it is possible to install your own platform signing key.
-
-What I would expect to happen in that situation is that during the first
-boot software would come over the network or from an install cd and
-install my platform signing key.  Then a bootloader signed with my key
-would be installed, and then everything would chain from there.
-
-In most cases where I would be setting up an automatic install I would
-not install Microsoft's key, and I would definitely not sign my
-bootloader with Microsoft's key.  At most I would sign my own "key
-install" with Microsoft's key.
-
-Then in cases of automatic reinstallation my key would be in the
-firmware and I could change my bootloader and my kernels at will
-with no risk that some third party could do anything to the machine
-unless they manged to get physical access.
-
-If I was a distroy my key would that I would install by default would be
-the distro's signing key.  Although honestly I would still prefer a
-solution where I could lock things down a little farther.
-
-
-
-In any case the notion that unattended install with no user interaction
-on any uefi machine in any state is complete and total rubbish.  It
-can't be done.  You need power and you need boot media.
+I will be happy to review patches for that don't through the baby out
+with the bath water.
 
 Eric
