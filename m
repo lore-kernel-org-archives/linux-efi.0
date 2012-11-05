@@ -1,58 +1,54 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: ebiederm@xmission.com (Eric W. Biederman)
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 05 Nov 2012 09:20:17 +0100
-Message-ID: <1352103617.2456.3.camel@dabdike>
+Date: Mon, 05 Nov 2012 00:50:47 -0800
+Message-ID: <87k3u0cu1k.fsf@xmission.com>
 References: <20121102175416.GA11816@srcf.ucam.org>
-	 <1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
-	 <20121102180458.GA12052@srcf.ucam.org>
-	 <1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
-	 <20121103002244.GC18691@srcf.ucam.org>
-	 <1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
-	 <20121103134630.GA28166@srcf.ucam.org>
-	 <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
-	 <20121104042802.GA11295@srcf.ucam.org>
-	 <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
-	 <20121104135251.GA17894@srcf.ucam.org>
+	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
+	<20121102180458.GA12052@srcf.ucam.org>
+	<1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
+	<20121103002244.GC18691@srcf.ucam.org>
+	<1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
+	<20121103134630.GA28166@srcf.ucam.org>
+	<1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
+	<20121104042802.GA11295@srcf.ucam.org>
+	<1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
+	<20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com>
+	<509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com>
+	<8582ea67-beda-44e6-82cd-52d73555dda8@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121104135251.GA17894-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <8582ea67-beda-44e6-82cd-52d73555dda8@email.android.com>
+	(H. Peter Anvin's message of "Mon, 05 Nov 2012 08:40:21 +0100")
+Sender: linux-security-module-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2012-11-04 at 13:52 +0000, Matthew Garrett wrote:
-> On Sun, Nov 04, 2012 at 09:14:47AM +0000, James Bottomley wrote:
-> 
-> > I've actually had more than enough experience with automated installs
-> > over my career: they're either done by paying someone or using a
-> > provisioning system.  In either case, they provision a static image and
-> > boot environment description, including EFI boot services variables, so
-> > you can provision a default MOK database if you want the ignition image
-> > not to pause on firstboot.
-> 
-> And now you've moved the attack vector to a copy of your provisioning 
-> system instead.
+"H. Peter Anvin" <hpa@zytor.com> writes:
 
-Well, no, it always exists: a lot of provisioning systems install efi
-(or previously dos) based agents not linux kernels.  However it's a
-different vector since the efi agents tend to want to PXE boot and
-contact the image server.
+> This is not a good thing to assume.  A vendor could have an external
+> button, for example.
 
-> > There is obviously the question of making the provisioning systems
-> > secure, but it's a separate one from making boot secure.
-> 
-> You don't get to punt on making the kernel secure by simply asserting 
-> that some other system can be secure instead. The chain of trust needs 
-> to go all the way back - if your security model is based on all installs 
-> needing a physically present end user, all installs need a physically 
-> present end user. That's not acceptable, so we need a different security 
-> model.
+Facts are always a good thing to assume.
 
-I didn't.  I advocated a simple security model which you asserted
-wouldn't allow unattended installs, so I explained how they could be
-done.  
+The fact is the general case does not admit an install without user
+interaction.
 
-James
+It makes a lot of sense to revisit the working assumptions when for lack
+of 3 o4 4 lines in the bootloader people are advocating turning gold
+into lead at the cost of a national banking bailout.
+
+Non-interactive installs are very interesting but they only make sense
+in a very narrow range of cases not on every in every BIOS state on
+every machine.  If the UEFI firmware will let me install a platform key
+and set ever other firmware setting in my installer, then it is a good
+starting state.  The rest of the time there will be some unpredictable
+inconsistent mess of firmware settings that someone is going to have to
+go in and fix.  Or the install cd will have blown away my existing
+partitions deleting data I forgot to back up that day.
+
+The notion that a non-interactive install is possible in the general
+case is complete and total hogwash.
+
+Eric
