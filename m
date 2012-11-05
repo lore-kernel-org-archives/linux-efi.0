@@ -1,69 +1,40 @@
-From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 5 Nov 2012 15:40:15 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1211051535060.24253@pobox.suse.cz>
-References: <50919EED.3020601@genband.com> <36538307.gzWq1oO7Kg@linux-lqwf.site> <1351760905.2391.19.camel@dabdike.int.hansenpartnership.com> <alpine.LNX.2.00.1211011017230.6606@pobox.suse.cz> <1351762703.2391.31.camel@dabdike.int.hansenpartnership.com>
- <alpine.LNX.2.00.1211011044290.6606@pobox.suse.cz> <1351763954.2391.37.camel@dabdike.int.hansenpartnership.com> <CACLa4puzLR2om6SHw3wVnfZ1nezVsKOp8+705AdHZ4_=JamYfw@mail.gmail.com> <20121101202701.GB20817@xo-6d-61-c0.localdomain> <5092E361.7080901@genband.com>
- <20121102154833.GG3300@redhat.com> <alpine.LNX.2.00.1211040008280.24253@pobox.suse.cz> <87390ok0zy.fsf@xmission.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: [PATCH] x86/EFI: additional checks in efi_bgrt_init()
+Date: Mon, 05 Nov 2012 15:26:41 +0000
+Message-ID: <5097E8C102000078000A661B@nat28.tlf.novell.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87390ok0zy.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
-Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org, mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: mingo-X9Un+BFzKDI@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 4 Nov 2012, Eric W. Biederman wrote:
+Header length should be validated for all ACPI tables before accessing
+any non-header field.
 
-> > Why is "when kernel has been securely booted, the in-kernel kexec 
-> > mechanism has to verify the signature of the supplied image before 
-> > kexecing it" not enough? (basically the same thing we are doing for signed 
-> > modules already).
-> 
-> For modules the only untrusted part of their environment are the command
-> line parameters, and several of those have already been noted for
-> needing to be ignored in a non-trusted root scenario.
-> 
-> For kexec there is a bunch of glue code and data that takes care of
-> transitioning from the environment provided by kexec and the environment
-> that the linux kernel or memtest86 or whatever we are booting is
-> expecting.
-> 
-> Figuring out what glue code and data we need and supplying that glue
-> code and data is what kexec-tools does.  The situation is a bit like
-> dealing with the modules before most of the work of insmod was moved
-> into the kernel.
-> 
-> For kexec-tools it is desirable to have glue layers outside of the
-> kernel because every boot system in existence has a different set of
-> parameter passing rules.
-> 
-> So signing in the kernel gets us into how do we sign the glue code and
-> how dow we verify the glue code will jump to our signed and verified
-> kernel image.
+The valid flags should also be check, as with it clear there's no point
+in trying to go through the rest of the code (and there's no guarantee
+that the other table contents are valid/consistent in that case).
 
-Do I understand you correctly that by the 'glue' stuff you actually mean 
-the division of the kexec image into segments?
+Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
 
-Of course, when we are dividing the image into segments and then passing 
-those individually (even more so if some transformations are performed on 
-those segments, which I don't know whether that's the case or not), then 
-we can't do any signature verification of the image any more.
+---
+ arch/x86/platform/efi/efi-bgrt.c |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-But I still don't fully understand what is so magical about taking the 
-kernel image as is, and passing the whole lot to the running kernel as-is, 
-allowing for signature verification.
-
-Yes, it couldn't be sys_kexec_load(), as that would be ABI breakage, so 
-it'd mean sys_kexec_raw_load(), or whatever ... but I fail to see why that 
-would be problem in principle.
-
-If you can point me to the code where all the magic that prevents this 
-easy handling is happening, I'd appreciate it.
-
-Thanks,
-
--- 
-Jiri Kosina
-SUSE Labs
+--- 3.7-rc4/arch/x86/platform/efi/efi-bgrt.c
++++ 3.7-rc4-x86-EFI-BGRT-checks/arch/x86/platform/efi/efi-bgrt.c
+@@ -39,7 +39,9 @@ void efi_bgrt_init(void)
+ 	if (ACPI_FAILURE(status))
+ 		return;
+ 
+-	if (bgrt_tab->version != 1)
++	if (bgrt_tab->header.length < sizeof(*bgrt_tab))
++		return;
++	if (bgrt_tab->version != 1 || !(bgrt_tab->status & 1))
+ 		return;
+ 	if (bgrt_tab->image_type != 0 || !bgrt_tab->image_address)
+ 		return;
