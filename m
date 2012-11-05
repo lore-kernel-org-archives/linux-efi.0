@@ -1,41 +1,34 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 05 Nov 2012 08:40:21 +0100
-Message-ID: <8582ea67-beda-44e6-82cd-52d73555dda8@email.android.com>
-References: <20121102175416.GA11816@srcf.ucam.org> <1351879058.2439.46.camel@dabdike.int.hansenpartnership.com> <20121102180458.GA12052@srcf.ucam.org> <1351899503.2439.49.camel@dabdike.int.hansenpartnership.com> <20121103002244.GC18691@srcf.ucam.org> <1351944236.2417.7.camel@dabdike.int.hansenpartnership.com> <20121103134630.GA28166@srcf.ucam.org> <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com> <20121104042802.GA11295@srcf.ucam.org> <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com> <20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v2 01/20] efi: Add support for a UEFI variable filesystem
+Date: Mon, 05 Nov 2012 07:42:08 +0000
+Message-ID: <1352101328.14888.211.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
+	 <1351237923-10313-2-git-send-email-matt@console-pimps.org>
+	 <1351846416.14888.155.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <20121103002249.63eb4142@pyramind.ukuu.org.uk>
+	 <20121103002132.GB18691@srcf.ucam.org>
+	 <1352060878.14888.193.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <20121104210627.6f57662a@pyramind.ukuu.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <87625kh5r2.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+In-Reply-To: <20121104210627.6f57662a-38n7/U1jhRXW96NNrWNlrekiAK3p4hvP@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is not a good thing to assume.  A vendor could have an external button, gor example.
+On Sun, 2012-11-04 at 21:06 +0000, Alan Cox wrote:
+> > +	if (datasize > remaining_size) {
+> > +		printk(KERN_ERR "efivars: Variable size too big\n");
+> > +		return -ENOSPC;
+> 
+> Why the printk - you've handed back a sensible error code. If you do have
+> a logging result you need to rate limit it as its from the user. I don't
+> think you need one - -ENOSPC is pretty clear !
 
-ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org wrote:
-
->"H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> writes:
->
->> On 11/05/2012 07:14 AM, Eric W. Biederman wrote:
->>> 
->>> In any case the notion that unattended install with no user
->interaction
->>> on any uefi machine in any state is complete and total rubbish.  It
->>> can't be done.  You need power and you need boot media.
->>> 
->>
->> That is a hugely different thing from needing a console.
->
->Not at all.
->
->In the general case user intereaction is required to tell the system to
->boot off of your choosen boot media instead of the local hard drive.
->
->Eric
+OK, I'll drop the printk.
 
 -- 
-Sent from my mobile phone. Please excuse brevity and lack of formatting.
+Matt Fleming, Intel Open Source Technology Center
