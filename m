@@ -1,39 +1,65 @@
-From: Jiri Kosina <jkosina@suse.cz>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Tue, 6 Nov 2012 16:19:56 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1211061616310.24253@pobox.suse.cz>
-References: <20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com> <20121105123858.GB4374@srcf.ucam.org> <87sj8nc137.fsf@xmission.com> <20121105202557.GA16076@srcf.ucam.org>
- <87hap3zbw7.fsf@xmission.com> <20121106031219.GB24235@srcf.ucam.org> <87fw4nv1vj.fsf@xmission.com> <20121106035352.GA24698@srcf.ucam.org> <87hap3s3yl.fsf@xmission.com> <878vafqi5q.fsf@mid.deneb.enyo.de> <50992946.4060101@genband.com>
+From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Subject: Re: [PATCH] x86/EFI: additional checks in efi_bgrt_init()
+Date: Tue, 6 Nov 2012 08:16:10 -0800
+Message-ID: <20121106161610.GA32040@leaf>
+References: <5097E8C102000078000A661B@nat28.tlf.novell.com>
+ <20121105183751.GA9031@jtriplet-mobl1>
+ <20121105184346.GA13508@srcf.ucam.org>
+ <20121105190047.GA9295@jtriplet-mobl1>
+ <5098DEF202000078000A695F@nat28.tlf.novell.com>
+ <20121106125502.GA29931@leaf>
+ <5099209602000078000A6B3C@nat28.tlf.novell.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <50992946.4060101@genband.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Chris Friesen <chris.friesen@genband.com>
-Cc: Florian Weimer <fw@deneb.enyo.de>, "Eric W. Biederman" <ebiederm@xmission.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Eric Paris <eparis@parisplace.org>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5099209602000078000A6B3C-ce6RLXgGx+vWGUEhTRrCg1aTQe2KTcn/@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+Cc: mingo-X9Un+BFzKDI@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 6 Nov 2012, Chris Friesen wrote:
-
-> > Personally, I think the only way out of this mess is to teach users
-> > how to disable Secure Boot.
+On Tue, Nov 06, 2012 at 01:37:10PM +0000, Jan Beulich wrote:
+> >>> On 06.11.12 at 13:55, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org> wrote:
+> > On Tue, Nov 06, 2012 at 08:57:06AM +0000, Jan Beulich wrote:
+> >> The question here is how to properly invalidate that data then:
+> >> So far I was assuming that clearing the valid bit would be the way
+> >> to go, as the specification says nothing on e.g. the image address
+> >> being zero having any specific meaning. I need to do that in Xen,
+> >> at least for the time being, as I'm not inclined to postpone
+> >> indefinitely the use of boot services memory for normal memory
+> >> allocations (which we would have to do if we wanted Dom0 to
+> >> be able to access the image pointed to here).
+> > 
+> > This doesn't postpone the use of boot services memory indefinitely; the
+> > BGRT driver copies the image out, and the kernel then frees boot
+> > services memory.  That does introduce a delay in the use of boot
+> > services memory, but not an indefinite one.
 > 
-> If you're going to go that far, why not just get them to install a RedHat (or
-> SuSE, or Ubuntu, or whoever) key and use that instead?
+> If and when Dom0 tells the hypervisor that it's done using that
+> data is unknown from the hypervisor perspective, so for Xen
+> this _is_ indefinitely.
 
-You always need to keep in mind the possibility of the key being revoked.
+Ah, I see.
 
-> Secure boot does arguably solve a class of problems, so it seems a bit odd to
-> recommend just throwing it out entirely.
+> >> I was quite bad a design decision to allow (and even suggest)
+> >> the image to live in boot services memory - one can't generally
+> >> expect the ACPI parser to become available in an OS before
+> >> setting up memory allocation. To Linux this already has turned
+> >> out to be a problem, on Xen dealing with this would turn out
+> >> even more cumbersome.
+> > 
+> > What problems has this caused?
+> 
+> None so far - I'm trying to prevent any from occurring.
+> 
+> Or if you're referring to my use of the term "problems" above - I
+> was referring to the fact that for this very reason the treatment
+> of boot services memory had to be changed in Linux.
 
-Not really. It doesn't solve the the most usual attack vector used (i.e. 
-exploiting the bug in the kernel ... and that's independent of the OS we 
-are talking about).
+Oh, I definitely agree about the poor design decision of putting the
+image in boot services memory.  I had specifically wondered what
+problems had occurred in Linux and Xen due to needing the ACPI parser
+before freeing boot services memory.
 
-Just because it contains "secure" in its name, doesn't really make it a 
-proper security solution. It should rather be called "vendor lock-in 
-boot", or something like that.
-
--- 
-Jiri Kosina
-SUSE Labs
+- Josh Triplett
