@@ -1,40 +1,57 @@
-From: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Tue, 6 Nov 2012 13:17:44 +0000
-Message-ID: <20121106131743.GB1818@srcf.ucam.org>
-References: <509766DB.9090906@zytor.com>
- <87625kh5r2.fsf@xmission.com>
- <20121105123858.GB4374@srcf.ucam.org>
- <87sj8nc137.fsf@xmission.com>
- <20121105202557.GA16076@srcf.ucam.org>
- <87hap3zbw7.fsf@xmission.com>
- <20121106031219.GB24235@srcf.ucam.org>
- <87fw4nv1vj.fsf@xmission.com>
- <20121106035352.GA24698@srcf.ucam.org>
- <20121106091217.4a5240f0@pyramind.ukuu.org.uk>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] x86/EFI: additional checks in efi_bgrt_init()
+Date: Tue, 06 Nov 2012 13:37:10 +0000
+Message-ID: <5099209602000078000A6B3C@nat28.tlf.novell.com>
+References: <5097E8C102000078000A661B@nat28.tlf.novell.com>
+ <20121105183751.GA9031@jtriplet-mobl1>
+ <20121105184346.GA13508@srcf.ucam.org>
+ <20121105190047.GA9295@jtriplet-mobl1>
+ <5098DEF202000078000A695F@nat28.tlf.novell.com>
+ <20121106125502.GA29931@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121106125502.GA29931@leaf>
 Content-Disposition: inline
-In-Reply-To: <20121106091217.4a5240f0-38n7/U1jhRXW96NNrWNlrekiAK3p4hvP@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Cc: mingo-X9Un+BFzKDI@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 06, 2012 at 09:12:17AM +0000, Alan Cox wrote:
-> - is it worth Red Hat doing - that's up to Red Hat's business managers
+>>> On 06.11.12 at 13:55, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org> wrote:
+> On Tue, Nov 06, 2012 at 08:57:06AM +0000, Jan Beulich wrote:
+>> The question here is how to properly invalidate that data then:
+>> So far I was assuming that clearing the valid bit would be the way
+>> to go, as the specification says nothing on e.g. the image address
+>> being zero having any specific meaning. I need to do that in Xen,
+>> at least for the time being, as I'm not inclined to postpone
+>> indefinitely the use of boot services memory for normal memory
+>> allocations (which we would have to do if we wanted Dom0 to
+>> be able to access the image pointed to here).
 > 
-> - is it worth merging into the kernel - that's not
+> This doesn't postpone the use of boot services memory indefinitely; the
+> BGRT driver copies the image out, and the kernel then frees boot
+> services memory.  That does introduce a delay in the use of boot
+> services memory, but not an indefinite one.
+
+If and when Dom0 tells the hypervisor that it's done using that
+data is unknown from the hypervisor perspective, so for Xen
+this _is_ indefinitely.
+
+>> I was quite bad a design decision to allow (and even suggest)
+>> the image to live in boot services memory - one can't generally
+>> expect the ACPI parser to become available in an OS before
+>> setting up memory allocation. To Linux this already has turned
+>> out to be a problem, on Xen dealing with this would turn out
+>> even more cumbersome.
 > 
-> The capability bit is small and clean the rest of it is beginning to look
-> far too ugly for upstream right now. Not to say it might not end up small
-> and clean in the end.
+> What problems has this caused?
 
-I absolutely agree - the code has to be good enough to be accepted 
-upstream and I've no objection to being told that better implementations 
-must be produced. I do object to being told that there's no point in 
-trying to find an acceptable implementation.
+None so far - I'm trying to prevent any from occurring.
 
--- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Or if you're referring to my use of the term "problems" above - I
+was referring to the fact that for this very reason the treatment
+of boot services memory had to be changed in Linux.
+
+Jan
