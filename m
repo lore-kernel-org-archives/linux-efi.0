@@ -1,7 +1,7 @@
-From: Ming Lei <tom.leiming@gmail.com>
+From: Alan Cox <alan@lxorguk.ukuu.org.uk>
 Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
-Date: Tue, 6 Nov 2012 19:03:58 +0800
-Message-ID: <CACVXFVOEagv_BgZCTzEgRSpaHEiM6ptNuXAePUaXDb8GfRogSw@mail.gmail.com>
+Date: Tue, 6 Nov 2012 11:15:26 +0000
+Message-ID: <20121106111526.2ab6f314@pyramind.ukuu.org.uk>
 References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
 	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
 	<20121029174131.GC7580@srcf.ucam.org>
@@ -23,34 +23,42 @@ References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
 	<CACVXFVOzRxp9owV5O9NFLuL5md04Bmu35oCuNvnVsZAzmHxH=A@mail.gmail.com>
 	<s5hy5if80kq.wl%tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <s5hy5if80kq.wl%tiwai@suse.de>
-Sender: linux-security-module-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Takashi Iwai <tiwai@suse.de>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Cc: Ming Lei <tom.leiming@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 6, 2012 at 6:53 PM, Takashi Iwai <tiwai@suse.de> wrote:
-> At Tue, 6 Nov 2012 18:40:57 +0800,
->> It is true if all firmwares are signed on safe boot. If firmware is allowed
->> to be loaded from network or other non-fs place in secure distribution,
->> your patch will break this loading.
->
+> > It is true if all firmwares are signed on safe boot. If firmware is allowed
+> > to be loaded from network or other non-fs place in secure distribution,
+> > your patch will break this loading.
+
+Actually it's not. It should be true that firmware that can harm machine
+integrity and is loaded by the OS is signed at some level. However it is
+not true that
+
+- firmware that is no integrity threat (eg USB firmware)
+- firmware that can be flash updated on another PC and not observed by
+  the target
+
+are necessarily in any way signed or secure.
+
 > Do we already have such a secure mechanism?  How is the security
 > assured?
 
-I don't know, and my comments are just on your patch and the condition.
-I understand secure guys should know if the condition may be true or false, :-)
+Another thing to consider is that a lot of hardware (particularly
+anything aimed at such 'secure boot' machines) is already digitally
+signed. Whether you need to enforce external signing is a mix of driver
+specific questions ("does this device have signed firmware anyway", "can
+bogus firmware do anything interesting") and local policy "do I as admin
+want to block any firmware that isn't corporate site approved"
 
->> The clue can be found from debug message.
->
-> Debug messages are turned off on normal machines, unfortunately.
+For USB this is quite important because there is a ton of hardware out
+there which is intended to have firmware dumped into it for hacking and
+fun purposes and should generally be totally outside of the signing
+stuff.
 
-Kernel guys will put one eye on bug report, also enabling udev log
-can help the problem too.
-
-
-Thanks,
--- 
-Ming Lei
+Alan
