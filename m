@@ -1,72 +1,102 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Tue, 6 Nov 2012 05:34:46 +0000
-Message-ID: <20121106053446.GA25697@srcf.ucam.org>
-References: <509766DB.9090906@zytor.com>
- <87625kh5r2.fsf@xmission.com>
- <20121105123858.GB4374@srcf.ucam.org>
- <87sj8nc137.fsf@xmission.com>
- <20121105202557.GA16076@srcf.ucam.org>
- <87hap3zbw7.fsf@xmission.com>
- <20121106031219.GB24235@srcf.ucam.org>
- <87fw4nv1vj.fsf@xmission.com>
- <20121106035352.GA24698@srcf.ucam.org>
- <87hap3s3yl.fsf@xmission.com>
+From: lee joey <joeyli.kernel@gmail.com>
+Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
+Date: Tue, 6 Nov 2012 13:46:08 +0800
+Message-ID: <CAGLnvc_2-ZbzFP16bdNar2x8bp8F-uU+NunHOEeg_jtOSohh_A@mail.gmail.com>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+	<20121029174131.GC7580@srcf.ucam.org>
+	<s5hobjia6vj.wl%tiwai@suse.de>
+	<20121031173728.GA18615@srcf.ucam.org>
+	<s5h390utqv3.wl%tiwai@suse.de>
+	<1351743715.21227.95.camel@linux-s257.site>
+	<20121101131849.752df6fd@pyramind.ukuu.org.uk>
+	<s5hip9k9dng.wl%tiwai@suse.de>
+	<s5hhap49den.wl%tiwai@suse.de>
+	<CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-security-module-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <87hap3s3yl.fsf@xmission.com>
+In-Reply-To: <CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
 Sender: linux-security-module-owner@vger.kernel.org
-To: "Eric W. Biederman" <ebiederm@xmission.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+To: Ming Lei <tom.leiming@gmail.com>
+Cc: Takashi Iwai <tiwai@suse.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 05, 2012 at 09:19:46PM -0800, Eric W. Biederman wrote:
-> Matthew Garrett <mjg59@srcf.ucam.org> writes:
-> 
-> > On Mon, Nov 05, 2012 at 07:36:32PM -0800, Eric W. Biederman wrote:
-> >
-> >> For automated installs you don't have to satisfy me.  Feel free to
-> >> deliver a lousy solution to your users.   Just don't use your arbitrary
-> >> design decisions to justify your kernel patches.
-> >
-> > My kernel patches are justified by genuine user requirements. 
-> 
-> Hogwash.
+2012/11/6 Ming Lei <tom.leiming@gmail.com>:
+> On Tue, Nov 6, 2012 at 1:18 AM, Takashi Iwai <tiwai@suse.de> wrote:
+>>
+>> To be noted, it doesn't support the firmwares via udev but only the
+>> direct loading, and the check for built-in firmware is missing, too.
+>
+> Generally, both direct loading and udev may request one same firmware
+> image. And after check failed, current firmware load will fallback on udev
+> to complete loading, so looks a check-failed firmware still can be loaded
+> into kernel no matter if there is firmware signature check or not.
+>
+>
+> Thanks,
+> --
+> Ming Lei
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
-You keep using that word, which is unfortunate.
+The udev direct write firmware through data attribute, maybe we can do
+the same signature verification in firmware_data_write? The following
+patch didn't test yet.
 
-> If windows is not present on a system linux can not be used to boot a
-> compromised version of windows without user knowledge because windows is
-> not present.
 
-Correct.
+Thanks
+Joey Lee
 
-> If windows is present on a system then to install linux a user must be
-> present and push buttons to get the system to boot off of install media.
+>From 035dde5fadc9e7f4b7811b18d3a5094ef88e8bbb Mon Sep 17 00:00:00 2001
+From: Lee, Chun-Yi <jlee@suse.com>
+Date: Tue, 6 Nov 2012 13:07:04 +0800
+Subject: [PATCH] firmware: Add signature check to firmware_data_write
 
-Incorrect. UEFI boot priorities can be set without physical user 
-interaction.
+---
+ drivers/base/firmware_class.c |   18 ++++++++++++++++++
+ 1 files changed, 18 insertions(+), 0 deletions(-)
 
-> If a user is present a user presence test may be used to prevent a
-> bootloader signed with  Microsoft's key from booting linux without the
-> users consent, and thus prevent Linux from attacking windows users.
+diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+index 8945f4e..40d8cc6 100644
+--- a/drivers/base/firmware_class.c
++++ b/drivers/base/firmware_class.c
+@@ -621,6 +621,7 @@ static ssize_t firmware_data_write(struct file
+*filp, struct kobject *kobj,
+        struct firmware_priv *fw_priv = to_firmware_priv(dev);
+        struct firmware_buf *buf;
+        ssize_t retval;
++       bool success = false;
 
-Correct, but precludes the kind of automated installs that I know real 
-people do. The keys a machine carries don't vary depending on whether it 
-shipped with Windows or not, so it's not possible to differentiate 
-between the "shipped with Windows" and "shipped without Windows" cases 
-when determining security models.
+        if (!capable(CAP_SYS_RAWIO))
+                return -EPERM;
+@@ -655,6 +656,23 @@ static ssize_t firmware_data_write(struct file
+*filp, struct kobject *kobj,
+        }
 
-> Therefore preventing the revokation of a signature with Microsoft's
-> signature from your bootloader does not justify elaborate kernel
-> modifications to prevent the booting a compromised version of windows.
-
-That's a stretch.
-
-Bored now. You're adding nothing new to anyone's understanding of the 
-problem, and I'm just saying the same thing I've been saying for months, 
-so I don't see any purpose in discussing this with you further.
+        buf->size = max_t(size_t, offset, buf->size);
++
++#ifdef CONFIG_FIRMWARE_SIG
++       for (i = 0; i < ARRAY_SIZE(fw_path); i++) {
++               snprintf(path, PATH_MAX, "%s/%s.sig", fw_path[i], buf->fw_id);
++               if (verify_signature(buf, path))
++                       success = true;
++       }
++       if (!success) {
++               pr_err("Invalid signature file %s\n", path);
++               if (sig_enforce) {
++                       vfree(buf->data);
++                       buf->data = NULL;
++                       buf->size = 0;
++               }
++               retval = -ENOENT;
++       }
++#endif /* CONFIG_FIRMWARE_SIG */
+ out:
+        mutex_unlock(&fw_lock);
+        return retval;
 -- 
-Matthew Garrett | mjg59@srcf.ucam.org
+1.6.4.2
