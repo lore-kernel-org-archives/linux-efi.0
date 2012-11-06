@@ -1,7 +1,7 @@
 From: Ming Lei <tom.leiming@gmail.com>
 Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
-Date: Tue, 6 Nov 2012 15:16:43 +0800
-Message-ID: <CACVXFVPDZnXshvartbTt6gaGzcb+03sVq3Qm3apQQ8AVcQWerg@mail.gmail.com>
+Date: Tue, 6 Nov 2012 15:30:57 +0800
+Message-ID: <CACVXFVMBq7PwOH_CwETW-uFrYL5sR9ChtOrpSOqhWWchC06HWQ@mail.gmail.com>
 References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
 	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
 	<20121029174131.GC7580@srcf.ucam.org>
@@ -13,52 +13,39 @@ References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
 	<s5hip9k9dng.wl%tiwai@suse.de>
 	<s5hhap49den.wl%tiwai@suse.de>
 	<CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
-	<s5h8vafi56z.wl%tiwai@suse.de>
+	<CAGB3EUTrSMDhja9Gu3h7nuZX+H2_owp8MnUNwbZuCW=_GuawqQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <s5h8vafi56z.wl%tiwai@suse.de>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGB3EUTrSMDhja9Gu3h7nuZX+H2_owp8MnUNwbZuCW=_GuawqQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Li Joey <jlee@novell.com>
+Cc: Takashi Iwai <tiwai@suse.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 6, 2012 at 3:03 PM, Takashi Iwai <tiwai@suse.de> wrote:
->
-> Yeah, it's just uncovered in the patch.  As a easy solution, apply the
-> patch like below to disallow the udev fw loading when signature check
-> is enforced.
->
->
-> thanks,
->
-> Takashi
->
-> ---
-> diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
-> index 575bc4c..93121c3 100644
-> --- a/drivers/base/firmware_class.c
-> +++ b/drivers/base/firmware_class.c
-> @@ -912,6 +912,13 @@ static int _request_firmware_load(struct firmware_priv *fw_priv, bool uevent,
->                 goto handle_fw;
+On Tue, Nov 6, 2012 at 1:36 PM, Li Joey <jlee@novell.com> wrote:
+
+> The udev direct write firmware through data attribute, maybe we can do the
+> same signature verification in firmware_data_write? The following patch
+> didn't test yet.
+
+> @@ -655,6 +656,23 @@ static ssize_t firmware_data_write(struct file *filp,
+> struct kobject *kobj,
 >         }
 >
-> +       /* signature check isn't handled via udev fw loading */
-> +       if (sig_enforce) {
-> +               fw_load_abort(fw_priv);
-> +               direct_load = 1;
-> +               goto handle_fw;
-> +       }
+>         buf->size = max_t(size_t, offset, buf->size);
 > +
+> +#ifdef CONFIG_FIRMWARE_SIG
+> +       for (i = 0; i < ARRAY_SIZE(fw_path); i++) {
+> +               snprintf(path, PATH_MAX, "%s/%s.sig", fw_path[i],
+> buf->fw_id);
+> +               if (verify_signature(buf, path))
+> +                       success = true;
+> +       }
 
-The above might be wrong if the firmware file doesn't exist in default
-search paths. You should skip loading from user space only if
-verify_signature() returns false. And the udev loading should be
-resorted to if there is no such firmware file in default search paths.
-
->         /* fall back on userspace loading */
->         buf->fmt = PAGE_BUF;
->
+When direct loading failed, it means that the firmware isn't
+under the default search path, so the above verification
+might return false always.
 
 
 Thanks,
