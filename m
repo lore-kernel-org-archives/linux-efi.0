@@ -1,69 +1,106 @@
-From: Florian Weimer <fw@deneb.enyo.de>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Tue, 06 Nov 2012 08:56:01 +0100
-Message-ID: <878vafqi5q.fsf@mid.deneb.enyo.de>
-References: <20121104135251.GA17894@srcf.ucam.org>
-	<87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com>
-	<87625kh5r2.fsf@xmission.com> <20121105123858.GB4374@srcf.ucam.org>
-	<87sj8nc137.fsf@xmission.com> <20121105202557.GA16076@srcf.ucam.org>
-	<87hap3zbw7.fsf@xmission.com> <20121106031219.GB24235@srcf.ucam.org>
-	<87fw4nv1vj.fsf@xmission.com> <20121106035352.GA24698@srcf.ucam.org>
-	<87hap3s3yl.fsf@xmission.com>
+From: Ming Lei <tom.leiming-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
+Date: Tue, 6 Nov 2012 16:04:50 +0800
+Message-ID: <CACVXFVPJ0TWf=ffFhw+UGoGgsRnrD7o+Ws5rdDxS52jSf4SZ4A@mail.gmail.com>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
+	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
+	<20121029174131.GC7580@srcf.ucam.org>
+	<s5hobjia6vj.wl%tiwai@suse.de>
+	<20121031173728.GA18615@srcf.ucam.org>
+	<s5h390utqv3.wl%tiwai@suse.de>
+	<1351743715.21227.95.camel@linux-s257.site>
+	<20121101131849.752df6fd@pyramind.ukuu.org.uk>
+	<s5hip9k9dng.wl%tiwai@suse.de>
+	<s5hhap49den.wl%tiwai@suse.de>
+	<CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
+	<s5h8vafi56z.wl%tiwai@suse.de>
+	<CACVXFVPDZnXshvartbTt6gaGzcb+03sVq3Qm3apQQ8AVcQWerg@mail.gmail.com>
+	<s5h4nl3i3u6.wl%tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <87hap3s3yl.fsf@xmission.com> (Eric W. Biederman's message of
-	"Mon, 05 Nov 2012 21:19:46 -0800")
-Sender: linux-security-module-owner@vger.kernel.org
-To: "Eric W. Biederman" <ebiederm@xmission.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <s5h4nl3i3u6.wl%tiwai-l3A5Bk7waGM@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-* Eric W. Biederman:
+On Tue, Nov 6, 2012 at 3:32 PM, Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org> wrote:
+> At Tue, 6 Nov 2012 15:16:43 +0800,
+> Ming Lei wrote:
+>>
+>> On Tue, Nov 6, 2012 at 3:03 PM, Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org> wrote:
+>> >
+>> > Yeah, it's just uncovered in the patch.  As a easy solution, apply the
+>> > patch like below to disallow the udev fw loading when signature check
+>> > is enforced.
+>> >
+>> >
+>> > thanks,
+>> >
+>> > Takashi
+>> >
+>> > ---
+>> > diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+>> > index 575bc4c..93121c3 100644
+>> > --- a/drivers/base/firmware_class.c
+>> > +++ b/drivers/base/firmware_class.c
+>> > @@ -912,6 +912,13 @@ static int _request_firmware_load(struct firmware_priv *fw_priv, bool uevent,
+>> >                 goto handle_fw;
+>> >         }
+>> >
+>> > +       /* signature check isn't handled via udev fw loading */
+>> > +       if (sig_enforce) {
+>> > +               fw_load_abort(fw_priv);
+>> > +               direct_load = 1;
+>> > +               goto handle_fw;
+>> > +       }
+>> > +
+>>
+>> The above might be wrong if the firmware file doesn't exist in default
+>> search paths.
+>
+> Heh, I didn't call it's a perfect patch.  It's just an easy solution,
+> as mentioned.
+>
+>> You should skip loading from user space only if
+>> verify_signature() returns false. And the udev loading should be
+>> resorted to if there is no such firmware file in default search paths.
+>
+> ... and the kernel should ask udev again for the corresponding
+> signature.
 
-> If windows is not present on a system linux can not be used to boot a
-> compromised version of windows without user knowledge because windows is
-> not present.
+I mean you can't skip user space loading if there is no firmware file
+in the default search path.  And you can do it if verify_signature()
+returns false. So you needn't have to implement the signature for
+user space loading.
 
-Interesting idea.  Unfortunately, it is very hard to detect reliably
-that Windows is not present from the bootloader, so it's not possible
-to use this approach to simplify matters.
+> I'm too lazy to implement that just for unknown corner
+> cases, so put the patch like above.
 
-> If windows is present on a system then to install linux a user must be
-> present and push buttons to get the system to boot off of install media.
+There might be some distributions in which the firmwares aren't stored
+under the default search path, so your change may cause regression
+on these distributions. And, it is a easy change in your patch to make
+the situation working.
 
-That's not necessarily true.
+Also the default search path in firmware_class.c is from built-in path of
+udev, and distributions may customize their firmware path by udev
+configure option.
 
-> If a user is present a user presence test may be used to prevent a
-> bootloader signed with  Microsoft's key from booting linux without the
-> users consent, and thus prevent Linux from attacking windows users.
+>
+> Honestly speaking, I have a feeling that we should rather go for
+> getting rid of udev fw loading.  The fw loader code is overly complex
 
-As already explained, I don't think that user presence accomplishes
-anything.  You need informed consent, and it's impossible to cram that
-on a 80x25 screen.  You also need to make sure that you aren't
-unnecessarily alarmist.  We don't want a "Linux may harm your
-computer" warning.
+Yes, I have the feeling too, but we need to make sure no regressions
+introduced.
 
-> Therefore preventing the revokation of a signature with Microsoft's
-> signature from your bootloader does not justify elaborate kernel
-> modifications to prevent the booting a compromised version of windows.
+> just for udev handshaking.
+>
+> Do you know how many firmwares still rely on udev...?
 
-I don't like this approach, either.
+Do you know how many distributions have switched to 3.7-rcX to
+start using direct loading?
 
-> Furthermore no matter how hard we try with current techniques there will
-> eventually be kernel bugs that allow attackers to inject code into the
-> kernel.  So attempting to fully close that attack vector is
-> questionable.
-
-I suspect we'd need to revoke old binaries after a grace period.  I
-guess the Microsoft approach is to revoke only what's actually used
-for attacks, but that leads to a lot of unpredictability for our
-users.
-
-It's also annoying if we figure out after release that we have to
-disable additional kernel functionality because it can be used to
-compromise the boot path.  Users will not like that, especially if
-they do not use Windows at all.
-
-Personally, I think the only way out of this mess is to teach users
-how to disable Secure Boot.
+Thanks,
+-- 
+Ming Lei
