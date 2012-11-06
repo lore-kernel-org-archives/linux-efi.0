@@ -1,49 +1,45 @@
-From: ebiederm@xmission.com (Eric W. Biederman)
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 05 Nov 2012 18:46:32 -0800
-Message-ID: <87hap3zbw7.fsf@xmission.com>
-References: <20121103134630.GA28166@srcf.ucam.org>
-	<1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
-	<20121104042802.GA11295@srcf.ucam.org>
-	<1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
-	<20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com>
-	<509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com>
-	<20121105123858.GB4374@srcf.ucam.org> <87sj8nc137.fsf@xmission.com>
-	<20121105202557.GA16076@srcf.ucam.org>
+Date: Tue, 6 Nov 2012 03:12:19 +0000
+Message-ID: <20121106031219.GB24235@srcf.ucam.org>
+References: <20121104042802.GA11295@srcf.ucam.org>
+ <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com>
+ <20121104135251.GA17894@srcf.ucam.org>
+ <87d2zsmv8r.fsf@xmission.com>
+ <509766DB.9090906@zytor.com>
+ <87625kh5r2.fsf@xmission.com>
+ <20121105123858.GB4374@srcf.ucam.org>
+ <87sj8nc137.fsf@xmission.com>
+ <20121105202557.GA16076@srcf.ucam.org>
+ <87hap3zbw7.fsf@xmission.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20121105202557.GA16076@srcf.ucam.org> (Matthew Garrett's message
-	of "Mon, 5 Nov 2012 20:25:57 +0000")
-Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <87hap3zbw7.fsf-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Chris Friesen <chris.friesen-b7o/lNNmKxtBDgjK7y7TUQ@public.gmane.org>, Eric Paris <eparis-FjpueFixGhCM4zKIHC2jIg@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Matthew Garrett <mjg59@srcf.ucam.org> writes:
+On Mon, Nov 05, 2012 at 06:46:32PM -0800, Eric W. Biederman wrote:
+> Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> writes:
+> 
+> > On Mon, Nov 05, 2012 at 11:16:12AM -0800, Eric W. Biederman wrote:
+> >> Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> writes:
+> >> > No, in the general case the system will do that once it fails to find a 
+> >> > bootable OS on the drive.
+> >> 
+> >> In the general case there will be a bootable OS on the drive.
+> >
+> > That's in no way a given.
+> 
+> You have it backwards.  The conclusion here is that having a case where
+> a non-interactive install is possible is not a given.
 
-> On Mon, Nov 05, 2012 at 11:16:12AM -0800, Eric W. Biederman wrote:
->> Matthew Garrett <mjg59@srcf.ucam.org> writes:
->> > No, in the general case the system will do that once it fails to find a 
->> > bootable OS on the drive.
->> 
->> In the general case there will be a bootable OS on the drive.
->
-> That's in no way a given.
+I deal with customers who perform non-interactive installs. The fact 
+that you don't care about that use case is entirely irrelevant to me, 
+because you're not the person that I am obliged to satisfy.
 
-You have it backwards.  The conclusion here is that having a case where
-a non-interactive install is possible is not a given.
-
-Therefore inflicting the entire rest of the ecosystem with requirements
-that only exist in the union of the requirements for non-interactive
-installs and installs on a machine with an existing machine does not
-make sense.
-
-In situations where a non-interactive install is interesting.  Aka
-an empty boot disk it is not interesting to guard against.
-
-In situations where interaction happens is where windows may already exists
-and so spoofing windows is a design consideration and and a user
-presence test does not break the design.
-
-Eric
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
