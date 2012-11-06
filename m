@@ -1,52 +1,27 @@
-From: Florian Weimer <fw@deneb.enyo.de>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Mon, 05 Nov 2012 22:25:29 +0100
-Message-ID: <87sj8nzqra.fsf@mid.deneb.enyo.de>
-References: <20121102163302.GA6080@elf.ucw.cz>
-	<1351875164.2439.42.camel@dabdike.int.hansenpartnership.com>
-	<20121102165456.GB9997@srcf.ucam.org>
-	<1351878511.2439.44.camel@dabdike.int.hansenpartnership.com>
-	<20121102175416.GA11816@srcf.ucam.org>
-	<1351879058.2439.46.camel@dabdike.int.hansenpartnership.com>
-	<20121102180458.GA12052@srcf.ucam.org>
-	<1351899503.2439.49.camel@dabdike.int.hansenpartnership.com>
-	<20121103002244.GC18691@srcf.ucam.org>
-	<1351944236.2417.7.camel@dabdike.int.hansenpartnership.com>
-	<20121103134630.GA28166@srcf.ucam.org>
-	<1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1351983400.2417.21.camel@dabdike.int.hansenpartnership.com>
-	(James Bottomley's message of "Sat, 03 Nov 2012 22:56:40 +0000")
-Sender: linux-security-module-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+From: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
+Date: Tue, 06 Nov 2012 00:01:52 +0000
+Message-ID: <5839.1352160112@warthog.procyon.org.uk>
+References: <s5hhap49den.wl%tiwai@suse.de> <1348152065-31353-1-git-send-email-mjg@redhat.com> <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz> <20121029174131.GC7580@srcf.ucam.org> <s5hobjia6vj.wl%tiwai@suse.de> <20121031173728.GA18615@srcf.ucam.org> <s5h390utqv3.wl%tiwai@suse.de> <1351743715.21227.95.camel@linux-s257.site> <20121101131849.752df6fd@pyramind.ukuu.org.uk> <s5hip9k9dng.wl%tiwai@suse.de>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <s5hhap49den.wl%tiwai-l3A5Bk7waGM@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Cc: dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-* James Bottomley:
+Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org> wrote:
 
-> Right, but what I'm telling you is that by deciding to allow automatic
-> first boot, you're causing the windows attack vector problem.  You could
-> easily do a present user test only on first boot which would eliminate
-> it.
+> this is a patch series to add the support for firmware signature
+> check.  At this time, the kernel checks extra signature file (*.sig)
+> for each firmware, instead of embedded signature.
+> It's just a quick hack using the existing module signing mechanism,
+> thus provided only as a proof of concept for now.
 
-Apparently, the warning will look like this:
+There is another way to do this.  If you look at the patches I proposed to
+wrap keys in PE binaries, you'll find that that can handle PKCS#7 format
+messages as that's what's in the sort of signed PE binary we're dealing with.
 
-  WARNING: This Binary is unsigned
+You could use this to put the firmware inside a signed-data PKCS#7 message.
 
-  Are you sure you wish to run an unsigned binary
-  in a secure environment?
-
-  To avoid this question in future place the platform into setup mode
-  See http://www.linuxfoundation.org/uefi-setup-mode
-  And reboot.
-
-I'm not convinced this will work because users will confirm their
-presence to get back into the system.  We expect GNU/Linux users to do
-it, why wouldn't Windows users?  (And what harm can an unsigned binary
-do to a "secure environment", anyway?  If it's adversely affected, it
-can't be that secure, can it?)
-
-And what's the backup plan if users use this to boot into compromised
-Windows systems?
+David
