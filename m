@@ -1,64 +1,75 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
-Date: Tue, 6 Nov 2012 11:15:26 +0000
-Message-ID: <20121106111526.2ab6f314@pyramind.ukuu.org.uk>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
-	<20121029174131.GC7580@srcf.ucam.org>
-	<s5hobjia6vj.wl%tiwai@suse.de>
-	<20121031173728.GA18615@srcf.ucam.org>
-	<s5h390utqv3.wl%tiwai@suse.de>
-	<1351743715.21227.95.camel@linux-s257.site>
-	<20121101131849.752df6fd@pyramind.ukuu.org.uk>
-	<s5hip9k9dng.wl%tiwai@suse.de>
-	<s5hhap49den.wl%tiwai@suse.de>
-	<CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
-	<s5h8vafi56z.wl%tiwai@suse.de>
-	<CACVXFVPDZnXshvartbTt6gaGzcb+03sVq3Qm3apQQ8AVcQWerg@mail.gmail.com>
-	<s5h4nl3i3u6.wl%tiwai@suse.de>
-	<CACVXFVPJ0TWf=ffFhw+UGoGgsRnrD7o+Ws5rdDxS52jSf4SZ4A@mail.gmail.com>
-	<s5h1ug7i1q5.wl%tiwai@suse.de>
-	<CACVXFVOOEf=Ype=2OGjjjgXZWo=5xd8Hhu2CSTaKTtGAybaA=w@mail.gmail.com>
-	<s5h4nl39gt9.wl%tiwai@suse.de>
-	<CACVXFVOzRxp9owV5O9NFLuL5md04Bmu35oCuNvnVsZAzmHxH=A@mail.gmail.com>
-	<s5hy5if80kq.wl%tiwai@suse.de>
+From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Tue, 6 Nov 2012 13:51:15 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1211061350100.24253@pobox.suse.cz>
+References: <1348152065-31353-1-git-send-email-mjg@redhat.com> <alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz> <20121029174131.GC7580@srcf.ucam.org> <alpine.LNX.2.00.1210311444080.12781@pobox.suse.cz> <20121031150201.GA12394@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <s5hy5if80kq.wl%tiwai@suse.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Ming Lei <tom.leiming@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20121031150201.GA12394-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Shea Levy <shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> > It is true if all firmwares are signed on safe boot. If firmware is allowed
-> > to be loaded from network or other non-fs place in secure distribution,
-> > your patch will break this loading.
+On Wed, 31 Oct 2012, Matthew Garrett wrote:
 
-Actually it's not. It should be true that firmware that can harm machine
-integrity and is loaded by the OS is signed at some level. However it is
-not true that
+> > Reading stored memory image (potentially tampered before reboot) from disk 
+> > is basically DMA-ing arbitrary data over the whole RAM. I am currently not 
+> > able to imagine a scenario how this could be made "secure" (without 
+> > storing private keys to sign the hibernation image on the machine itself 
+> > which, well, doesn't sound secure either).
+> 
+> shim generates a public and private key. 
 
-- firmware that is no integrity threat (eg USB firmware)
-- firmware that can be flash updated on another PC and not observed by
-  the target
+It seems to me that this brings quite a huge delay into the boot process 
+both for "regular" and resume cases (as shim has no way to know what is 
+going to happen next). Mostly because obtaining enough entropy is 
+generally very difficult when we have just shim running, right?
 
-are necessarily in any way signed or secure.
+> It hands the kernel the private key in a boot parameter and stores the 
+> public key in a boot variable. On suspend, the kernel signs the suspend 
+> image with that private key and discards it. On the next boot, shim 
+> generates a new key pair and hands the new private key to the kernel 
+> along with the old public key. The kernel verifies the suspend image 
+> before resuming it. The only way to subvert this would be to be able to 
+> access kernel memory directly, which means the attacker has already won.
 
-> Do we already have such a secure mechanism?  How is the security
-> assured?
+I like this protocol, but after some off-line discussions, I still have 
+doubts about it. Namely: how do we make sure that there is noone tampering 
+with the variable?
 
-Another thing to consider is that a lot of hardware (particularly
-anything aimed at such 'secure boot' machines) is already digitally
-signed. Whether you need to enforce external signing is a mix of driver
-specific questions ("does this device have signed firmware anyway", "can
-bogus firmware do anything interesting") and local policy "do I as admin
-want to block any firmware that isn't corporate site approved"
+Obvious step towards solving this is making the variable inaccessible 
+after ExitBootServices() has been called (by not setting runtime access 
+flag on it).
 
-For USB this is quite important because there is a ton of hardware out
-there which is intended to have firmware dumped into it for hacking and
-fun purposes and should generally be totally outside of the signing
-stuff.
+Now how about this scenario:
 
-Alan
+- consider securely booted win8 (no Linux installed on that machine, so 
+  the variable for storing public key doesn't exist yet), possibly being 
+  taken over by a malicious user
+- he/she creates this secure variable from within the win8 and stores 
+  his/her own public key into it
+- he/she supplies a signed shim (as provided by some Linux distro vendor), 
+  signed kernel (as provided by some Linux distro vendor) and specially 
+  crafted resume image, signed by his/her own private key
+- he/she reboots the machine in a way that shim+distro kernel+hacker's S4 
+  image is used to resume
+- distro kernel verifies the signature of the S4 image against the 
+  attacker's public key stored in the variable; the signature is OK
+- he/she has won, as he has managed to run an arbitrary kernel code 
+  (stored in the S4 image) in a trusted mode
+
+No?
+
+Basically, once the machine is already populated with the "secure" version 
+of Linux, this can't happen, as we will (as far as I understand) set the 
+variable for storing the public key in a way that it can't be accessed 
+from runtime environment. But how can we prevent it being *created* before 
+the machine is ever touched by Linux?
+
+Thanks,
+
+-- 
+Jiri Kosina
+SUSE Labs
