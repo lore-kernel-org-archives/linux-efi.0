@@ -1,106 +1,62 @@
-From: Ming Lei <tom.leiming-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH RFC 0/4] Add firmware signature file check
-Date: Tue, 6 Nov 2012 16:04:50 +0800
-Message-ID: <CACVXFVPJ0TWf=ffFhw+UGoGgsRnrD7o+Ws5rdDxS52jSf4SZ4A@mail.gmail.com>
-References: <1348152065-31353-1-git-send-email-mjg@redhat.com>
-	<alpine.LRH.2.00.1210290848450.10392@twin.jikos.cz>
-	<20121029174131.GC7580@srcf.ucam.org>
-	<s5hobjia6vj.wl%tiwai@suse.de>
-	<20121031173728.GA18615@srcf.ucam.org>
-	<s5h390utqv3.wl%tiwai@suse.de>
-	<1351743715.21227.95.camel@linux-s257.site>
-	<20121101131849.752df6fd@pyramind.ukuu.org.uk>
-	<s5hip9k9dng.wl%tiwai@suse.de>
-	<s5hhap49den.wl%tiwai@suse.de>
-	<CACVXFVN8qPTgiYKXaeKFJXLXMjLE=+=8Vev2otD3v1VMk+Ez_w@mail.gmail.com>
-	<s5h8vafi56z.wl%tiwai@suse.de>
-	<CACVXFVPDZnXshvartbTt6gaGzcb+03sVq3Qm3apQQ8AVcQWerg@mail.gmail.com>
-	<s5h4nl3i3u6.wl%tiwai@suse.de>
+From: Valdis.Kletnieks@vt.edu
+Subject: Re: [RFC] Second attempt at kernel secure boot support
+Date: Tue, 06 Nov 2012 03:13:52 -0500
+Message-ID: <98455.1352189632@turing-police.cc.vt.edu>
+References: <20121104042802.GA11295@srcf.ucam.org> <1352020487.2427.5.camel@dabdike.int.hansenpartnership.com> <20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com> <20121105123858.GB4374@srcf.ucam.org> <87sj8nc137.fsf@xmission.com> <20121105202557.GA16076@srcf.ucam.org> <87hap3zbw7.fsf@xmission.com>
+            <20121106031219.GB24235@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <s5h4nl3i3u6.wl%tiwai-l3A5Bk7waGM@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; boundary="==_Exmh_1352189632_2044P";
+	 micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: Your message of "Tue, 06 Nov 2012 03:12:19 +0000."
+             <20121106031219.GB24235@srcf.ucam.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: "Eric W. Biederman" <ebiederm@xmission.com>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Chris Friesen <chris.friesen@genband.com>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 6, 2012 at 3:32 PM, Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org> wrote:
-> At Tue, 6 Nov 2012 15:16:43 +0800,
-> Ming Lei wrote:
->>
->> On Tue, Nov 6, 2012 at 3:03 PM, Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org> wrote:
->> >
->> > Yeah, it's just uncovered in the patch.  As a easy solution, apply the
->> > patch like below to disallow the udev fw loading when signature check
->> > is enforced.
->> >
->> >
->> > thanks,
->> >
->> > Takashi
->> >
->> > ---
->> > diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
->> > index 575bc4c..93121c3 100644
->> > --- a/drivers/base/firmware_class.c
->> > +++ b/drivers/base/firmware_class.c
->> > @@ -912,6 +912,13 @@ static int _request_firmware_load(struct firmware_priv *fw_priv, bool uevent,
->> >                 goto handle_fw;
->> >         }
->> >
->> > +       /* signature check isn't handled via udev fw loading */
->> > +       if (sig_enforce) {
->> > +               fw_load_abort(fw_priv);
->> > +               direct_load = 1;
->> > +               goto handle_fw;
->> > +       }
->> > +
->>
->> The above might be wrong if the firmware file doesn't exist in default
->> search paths.
+--==_Exmh_1352189632_2044P
+Content-Type: text/plain; charset=us-ascii
+
+On Tue, 06 Nov 2012 03:12:19 +0000, Matthew Garrett said:
+> On Mon, Nov 05, 2012 at 06:46:32PM -0800, Eric W. Biederman wrote:
+> > You have it backwards.  The conclusion here is that having a case where
+> > a non-interactive install is possible is not a given.
 >
-> Heh, I didn't call it's a perfect patch.  It's just an easy solution,
-> as mentioned.
->
->> You should skip loading from user space only if
->> verify_signature() returns false. And the udev loading should be
->> resorted to if there is no such firmware file in default search paths.
->
-> ... and the kernel should ask udev again for the corresponding
-> signature.
+> I deal with customers who perform non-interactive installs. The fact
+> that you don't care about that use case is entirely irrelevant to me,
+> because you're not the person that I am obliged to satisfy.
 
-I mean you can't skip user space loading if there is no firmware file
-in the default search path.  And you can do it if verify_signature()
-returns false. So you needn't have to implement the signature for
-user space loading.
+You *do* realize that the fact you have some set of customers who
+perform non-interactive installs does *not* imply that being able to do
+so is a given, right?  The fact it is available and doable for your customers
+does *not* mean it's available and doable in general.
 
-> I'm too lazy to implement that just for unknown corner
-> cases, so put the patch like above.
+There's a big difference between "the design has to deal with the fact that
+some customers can do this on some subsets of hardware" and "the design
+is free to assume that this is doable".
 
-There might be some distributions in which the firmwares aren't stored
-under the default search path, so your change may cause regression
-on these distributions. And, it is a easy change in your patch to make
-the situation working.
+--==_Exmh_1352189632_2044P
+Content-Type: application/pgp-signature
 
-Also the default search path in firmware_class.c is from built-in path of
-udev, and distributions may customize their firmware path by udev
-configure option.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+Comment: Exmh version 2.5 07/13/2001
 
->
-> Honestly speaking, I have a feeling that we should rather go for
-> getting rid of udev fw loading.  The fw loader code is overly complex
+iQIVAwUBUJjGwAdmEQWDXROgAQIIhg/9Gl10cFvr5Y9fk2RvoxuquXQpuFnOgVYj
+LcUBn6wFIhTcce8bsxaKPYK48eofDzLmDC+kLSNsxFoP3tkDlwie7nNCCbd6B/RG
+po/HbFg1tk0Axsi5CdmPtmHq2NtvZcGbdGlEvSBVh6XybEzJnN2pfXuc6272Mrvf
+zLEhyopFunSvqLupymPwNNfUGuZCWrPXb90L9IeBWRhPFQJcBKQ+Q/3khkZB6hvq
+zcfA77tBQa7/04NeOW8UNHvpmTdqmoAkMab+ge10W+jfrtgErxYbEjCDuBzMYnKe
+aMZr5hjvt0Wcicl2uQSAR5wSGRRMr6G2j0jYrh1UCh9CCXZPvPMv0dg0tsPoz1b7
+1cjTbTzj297F/o7ymICwQGrhDqxZkAekRdDBftF0sCS9eguiN5LnU4xLB+lQaq7O
+gc4XN7GeW3ZUyXiNWBVZ6uGuvN1QVrgNuAW57V+ETA6acE07DvpILt3XQ4El44HP
+4+/mvlD5qG4G7XvOCHSNzY8UrNq1k4HHc0DnwsNXKHoB55K2Rh3DysL8BP4dY25f
+HHVmXgQ5Yoe/UnLpQGoaaL/Rn+kcYS+geMq0jAmVoJHB0ALUMD3J0bEy5Rw0HOM4
+rEOxpm1/Ujaf2J7x1lVxNe3p0mf1rigGnQr58JfjBPSU0/glu2t6/6+bsxWzyV3f
++NU4hYuxAec=
+=LLis
+-----END PGP SIGNATURE-----
 
-Yes, I have the feeling too, but we need to make sure no regressions
-introduced.
-
-> just for udev handshaking.
->
-> Do you know how many firmwares still rely on udev...?
-
-Do you know how many distributions have switched to 3.7-rcX to
-start using direct loading?
-
-Thanks,
--- 
-Ming Lei
+--==_Exmh_1352189632_2044P--
