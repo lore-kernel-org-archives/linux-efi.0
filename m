@@ -1,19 +1,64 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [RFC] Second attempt at kernel secure boot support
-Date: Tue, 06 Nov 2012 17:47:25 -0500
-Message-ID: <a35e035b-de9d-4253-9e7d-ae1f1c2e2f88@email.android.com>
-References: <20121104135251.GA17894@srcf.ucam.org> <87d2zsmv8r.fsf@xmission.com> <509766DB.9090906@zytor.com> <87625kh5r2.fsf@xmission.com> <20121105123858.GB4374@srcf.ucam.org> <87sj8nc137.fsf@xmission.com> <20121105202557.GA16076@srcf.ucam.org> <87hap3zbw7.fsf@xmission.com> <20121106031219.GB24235@srcf.ucam.org> <87fw4nv1vj.fsf@xmission.com> <20121106035352.GA24698@srcf.ucam.org> <87hap3s3yl.fsf@xmission.com> <878vafqi5q.fsf@mid.deneb.enyo.de> <50992946.4060101@genband.com> <87625iwgao.fsf@mid.deneb.enyo.de> <7c6b2e83-e49a-40aa-a990-da7599622f37@email.android.com> <20121106224920.3b9d4a86@pyramind.ukuu.org.uk>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] x86/EFI: additional checks in efi_bgrt_init()
+Date: Wed, 07 Nov 2012 14:48:52 +0000
+Message-ID: <509A82E402000078000A6FC8@nat28.tlf.novell.com>
+References: <5097E8C102000078000A661B@nat28.tlf.novell.com>
+ <20121105183751.GA9031@jtriplet-mobl1>
+ <20121105184346.GA13508@srcf.ucam.org>
+ <20121105190047.GA9295@jtriplet-mobl1>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20121106224920.3b9d4a86@pyramind.ukuu.org.uk>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Florian Weimer <fw@deneb.enyo.de>, Chris Friesen <chris.friesen@genband.com>, "Eric W. Biederman" <ebiederm@xmission.com>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Pavel Machek <pavel@ucw.cz>, Eric Paris <eparis@parisplace.org>, Jiri Kosina <jkosina@suse.cz>, Oliver Neukum <oneukum@suse.de>, Josh Boyer <jwboyer@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: 
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: mingo-X9Un+BFzKDI@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Sure, and scripts run as root can wipe your files too. That's really not what this is all about. 
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+>>> On 06.11.12 at 09:57, Jan Beulich wrote:
+>>>> On 05.11.12 at 20:00, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org> wrote:
+> > On Mon, Nov 05, 2012 at 06:43:46PM +0000, Matthew Garrett wrote:
+> >> On Mon, Nov 05, 2012 at 10:37:52AM -0800, Josh Triplett wrote:
+> >> > On Mon, Nov 05, 2012 at 03:26:41PM +0000, Jan Beulich wrote:
+> >> > > Header length should be validated for all ACPI tables before accessing
+> >> > > any non-header field.
+> >> > > 
+> >> > > The valid flags should also be check, as with it clear there's no point
+> >> > > in trying to go through the rest of the code (and there's no guarantee
+> >> > > that the other table contents are valid/consistent in that case).
+> >> > > 
+> >> > > Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+> >> > 
+> >> > The length check seems reasonable.  However, Matthew Garrett (already
+> >> > CCed) previously suggested to me that this code should not check the
+> >> > "valid" bit, and should instead present the information to userspace if
+> >> > otherwise valid (such as having image_address != 0).  Matthew?
+> >> 
+> >> Yeah, my interpretation of the spec is that "valid" indicates whether or 
+> >> not the contents represent what's currently on the screen, not whether 
+> >> or not the contents can be interpreted for other reasons.
+> 
+> That would be nice to get clarified.
+> 
+> > Given that, in the absence of a real BIOS that interprets the spec
+> > differently than that, it sounds like we should drop the check for the
+> > valid bit.
+> > 
+> > Jan, have you seen a real BIOS which disagrees with the above
+> > interpretation?
+> 
+> I would first have to check the rest of the data when the "valid"
+> bit is clear on the two system I have (out of which one may not
+> support BGRT at all).
+
+On my system, the table points to EfiReservedMemoryType
+and appears to have valid data despite the valid flag being
+clear. But before encoding the invalidation into Xen in a form
+other than clearing the valid bit, I'd really like to get
+confirmation that e.g. clearing the image address is indeed a
+"proper" thing to do. If no-one among you can "officially" tell
+what the intentions here are, would you know who can?
+
+Jan
