@@ -1,77 +1,143 @@
-From: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
-Subject: [PATCH RFC v2 4/4] firmware: Install firmware signature files automatically
-Date: Thu,  8 Nov 2012 18:35:09 +0100
-Message-ID: <1352396109-3989-5-git-send-email-tiwai@suse.de>
+From: Takashi Iwai <tiwai@suse.de>
+Subject: [PATCH RFC v2 2/4] firmware: Add -a option to scripts/sign-file
+Date: Thu,  8 Nov 2012 18:35:07 +0100
+Message-ID: <1352396109-3989-3-git-send-email-tiwai@suse.de>
 References: <s5hhap49den.wl%tiwai@suse.de>
  <1352396109-3989-1-git-send-email-tiwai@suse.de>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1352396109-3989-1-git-send-email-tiwai-l3A5Bk7waGM@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Ming Lei <tom.leiming-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1352396109-3989-1-git-send-email-tiwai@suse.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, Ming Lei <tom.leiming@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, Takashi Iwai <tiwai@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-... when CONFIG_FIRMWARE_SIG is set.
+Add a new option -a to sign-file for specifying the hash algorithm
+to sign a file, to make it working without .config file.
+This will be useful signing external module or firmware files.
 
-Signed-off-by: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Takashi Iwai <tiwai@suse.de>
 ---
- Makefile                |  6 ++++++
- scripts/Makefile.fwinst | 18 ++++++++++++++++--
- 2 files changed, 22 insertions(+), 2 deletions(-)
+ scripts/sign-file | 40 ++++++++++++++++++++++++++++------------
+ 1 file changed, 28 insertions(+), 12 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index a1ccf22..c6d7a3e 100644
---- a/Makefile
-+++ b/Makefile
-@@ -729,6 +729,12 @@ mod_sign_cmd = true
- endif
- export mod_sign_cmd
+diff --git a/scripts/sign-file b/scripts/sign-file
+index 5b9d44d..581cdcd 100755
+--- a/scripts/sign-file
++++ b/scripts/sign-file
+@@ -4,7 +4,7 @@
+ #
+ # Format:
+ #
+-#	./scripts/sign-file [-v] [-f] <key> <x509> <module> [<dest>]
++#	./scripts/sign-file [-v] [-f] [-a algo] <key> <x509> <module> [<dest>]
+ #
+ #
+ use strict;
+@@ -17,16 +17,19 @@ sub usage()
+     print "Format: ./scripts/sign-file [options] <key> <x509> <module> [<dest>]
+     -v       verbose output
+     -f       create a firmware signature file
++    -a algo  specify hash algorithm
+ ";
+     exit;
+ }
  
-+ifeq ($(CONFIG_FIRMWARE_SIG),y)
-+fw_sign_cmd = perl $(srctree)/scripts/sign-file -f $(MODSECKEY) $(MODPUBKEY)
-+else
-+fw_sign_cmd = true
-+endif
-+export fw_sign_cmd
+ my $verbose = 0;
++my $hashalgo = "";
+ my $sign_fw = 0;
  
- ifeq ($(KBUILD_EXTMOD),)
- core-y		+= kernel/ mm/ fs/ ipc/ security/ crypto/ block/
-diff --git a/scripts/Makefile.fwinst b/scripts/Makefile.fwinst
-index 4d908d1..df256f0 100644
---- a/scripts/Makefile.fwinst
-+++ b/scripts/Makefile.fwinst
-@@ -29,6 +29,20 @@ installed-mod-fw := $(addprefix $(INSTALL_FW_PATH)/,$(mod-fw))
- installed-fw := $(addprefix $(INSTALL_FW_PATH)/,$(fw-shipped-all))
- installed-fw-dirs := $(sort $(dir $(installed-fw))) $(INSTALL_FW_PATH)/./
+ GetOptions(
+     'v|verbose' => \$verbose,
+-    'f|firmware' => \$sign_fw) || usage();
++    'f|firmware' => \$sign_fw,
++    'a|algo=s' => \$hashalgo) || usage();
+ usage() if ($#ARGV != 2 && $#ARGV != 3);
  
-+ifeq ($(CONFIG_FIRMWARE_SIG),y)
-+installed-fw-sig := $(patsubst %,%.sig, $(installed-fw))
-+installed-mod-fw-sig := $(patsubst %,%.sig, $(installed-mod-fw))
-+else
-+installed-fw-sig :=
-+installed-mod-fw-sig :=
-+endif
+ my $private_key = $ARGV[0];
+@@ -42,10 +45,7 @@ die "Can't read $mode_name\n" unless (-r $module);
+ #
+ # Read the kernel configuration
+ #
+-my %config = (
+-    CONFIG_MODULE_SIG_SHA512 => 1
+-    );
+-
++my %config;
+ if (-r ".config") {
+     open(FD, "<.config") || die ".config";
+     while (<FD>) {
+@@ -56,6 +56,22 @@ if (-r ".config") {
+     close(FD);
+ }
+ 
++if ($hashalgo eq "") {
++    if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
++	$hashalgo="sha1";
++    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA224"}) {
++	$hashalgo="sha224";
++    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA256"}) {
++	$hashalgo="sha256";
++    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA384"}) {
++	$hashalgo="sha384";
++    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA512"}) {
++	$hashalgo="sha512";
++    } else {
++	die "Can't determine hash algorithm";
++    }
++}
 +
-+quiet_cmd_fwsig = FWSIG $@
-+      cmd_fwsig = $(fw_sign_cmd) $(patsubst %.sig,%,$@) $@
-+
-+%.sig: %
-+	$(call cmd,fwsig)
-+
- # Workaround for make < 3.81, where .SECONDEXPANSION doesn't work.
- PHONY += $(INSTALL_FW_PATH)/$$(%) install-all-dirs
- $(INSTALL_FW_PATH)/$$(%): install-all-dirs
-@@ -49,9 +63,9 @@ PHONY +=  __fw_install __fw_modinst FORCE
+ #
+ # Function to read the contents of a file into a variable.
+ #
+@@ -332,35 +348,35 @@ my $id_type = 1;	# Identifier type: X.509
+ # Digest the data
+ #
+ my ($dgst, $prologue) = ();
+-if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
++if ($hashalgo eq "sha1") {
+     $prologue = pack("C*",
+ 		     0x30, 0x21, 0x30, 0x09, 0x06, 0x05,
+ 		     0x2B, 0x0E, 0x03, 0x02, 0x1A,
+ 		     0x05, 0x00, 0x04, 0x14);
+     $dgst = "-sha1";
+     $hash = 2;
+-} elsif (exists $config{"CONFIG_MODULE_SIG_SHA224"}) {
++} elsif ($hashalgo eq "sha224") {
+     $prologue = pack("C*",
+ 		     0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09,
+ 		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04,
+ 		     0x05, 0x00, 0x04, 0x1C);
+     $dgst = "-sha224";
+     $hash = 7;
+-} elsif (exists $config{"CONFIG_MODULE_SIG_SHA256"}) {
++} elsif ($hashalgo eq "sha256") {
+     $prologue = pack("C*",
+ 		     0x30, 0x31, 0x30, 0x0d, 0x06, 0x09,
+ 		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01,
+ 		     0x05, 0x00, 0x04, 0x20);
+     $dgst = "-sha256";
+     $hash = 4;
+-} elsif (exists $config{"CONFIG_MODULE_SIG_SHA384"}) {
++} elsif ($hashalgo eq "sha384") {
+     $prologue = pack("C*",
+ 		     0x30, 0x41, 0x30, 0x0d, 0x06, 0x09,
+ 		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02,
+ 		     0x05, 0x00, 0x04, 0x30);
+     $dgst = "-sha384";
+     $hash = 5;
+-} elsif (exists $config{"CONFIG_MODULE_SIG_SHA512"}) {
++} elsif ($hashalgo eq "sha512") {
+     $prologue = pack("C*",
+ 		     0x30, 0x51, 0x30, 0x0d, 0x06, 0x09,
+ 		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03,
+@@ -368,7 +384,7 @@ if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
+     $dgst = "-sha512";
+     $hash = 6;
+ } else {
+-    die "Can't determine hash algorithm";
++    die "Invalid hash algorithm $hashalgo";
+ }
  
- .PHONY: $(PHONY)
- 
--__fw_install: $(installed-fw)
-+__fw_install: $(installed-fw) $(installed-fw-sig)
- 
--__fw_modinst: $(installed-mod-fw)
-+__fw_modinst: $(installed-mod-fw) $(installed-mod-fw-sig)
- 	@:
- 
- __fw_modbuild: $(addprefix $(obj)/,$(mod-fw))
+ #
 -- 
 1.8.0
