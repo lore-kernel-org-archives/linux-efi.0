@@ -1,36 +1,84 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v2 01/20] efi: Add support for a UEFI variable filesystem
-Date: Fri, 09 Nov 2012 19:39:06 +0000
-Message-ID: <1352489946.14888.493.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
-	 <1351237923-10313-2-git-send-email-matt@console-pimps.org>
-	 <1351846416.14888.155.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <20121103002249.63eb4142@pyramind.ukuu.org.uk>
-	 <20121103002132.GB18691@srcf.ucam.org>
-	 <1352060878.14888.193.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <20121104203437.GA23130@srcf.ucam.org>
+From: Seiji Aguchi <seiji.aguchi@hds.com>
+Subject: [PATCH v5 0/7] efi_pstore: multiple event logging support
+Date: Tue, 13 Nov 2012 16:35:29 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D4138C155D@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121104203437.GA23130-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "anton.vorontsov@linaro.org" <anton.vorontsov@linaro.org>, "mikew@google.com" <mikew@google.com>, "Matthew Garrett (mjg@redhat.com)" <mjg@redhat.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Cc: "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2012-11-04 at 20:34 +0000, Matthew Garrett wrote:
-> On Sun, Nov 04, 2012 at 08:27:58PM +0000, Matt Fleming wrote:
-> 
-> > +#ifdef CONFIG_X86
-> > +	ops.query_variable_info = efi.query_variable_info;
-> > +#endif
-> 
-> Why limit to x86? Otherwise, looks broadly good - I can try to test 
-> tomorrow.
+v4 -> v5
+   - Rebase to 3.7-rc5
+   - Add count to an argument of a write callback executed in pstore_console_write()
+     to build successfully in case where CONSIG_PSTORE_CONSOLE=y is specified. (Patch 5/7)
 
-Did anyone get chance to test this out? I'd really like to get the
-efivarfs code in a position for merging for v3.8.
+v3 -> v4
+   - Rebase to 3.7-rc3
+   - Add ctime to an argument of efi_pstore_erase to build successfully
+     in case where CONFIG_PTORE=n is specified. (Patch 4/7)
+   - Add count to an argument of efi_pstore_erase and efi_pstore_write to
+     build successfully in case where CONFIG_PTORE=n is specified (Patch 5/7)
+   - Fix a white space damage (Patch 6/7)
+   - Modify a logic checking a 3-variable format of a variable name (Patch 7/7)
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+v2 -> v3
+   - Create patches 6/7 and 7/7 to work with an existing format of variable name
+
+v1 -> v2
+   - Separate into 5 patches in accordance with Mike's comment
+   - Erase an extra line of comment in patch 1/5
+
+[Issue]
+
+    Currently, efi_pstore driver simply overwrites existing panic messages in NVRAM.
+    So, in the following scenario, we will lose 1st panic messages.
+
+    1. kernel panics.
+    2. efi_pstore is kicked and writes panic messages to NVRAM.
+    3. system reboots.
+    4. kernel panics again before a user checks the 1st panic messages in NVRAM.
+
+[Solution]
+
+   Solutions of this problem has been discussed among Tony, Matthew, Don, Mike and me.
+
+   http://marc.info/?l=linux-kernel&m=134273270704586&w=2
+
+   And there are two possible solutions right now.
+     - First one is introducing some policy overwriting existing logs.
+     - Second one is simply holding multiple log without overwriting any entries.
+
+   We haven't decided the overwriting policy which is reasonable to all users yet.
+   But I believe we agree that just holding multiple logs is a reasonable way.
+
+   We may need further discussions to find the possibility of introducing overwriting
+   policy, especially getting critical messages in multiple oops case.
+   But I would like to begin with a simple and reasonable way to everyone.
+   So, this patch takes an approach just holding multiple logs.
+
+Seiji Aguchi (7):
+  efi_pstore: Check remaining space with QueryVariableInfo() before
+    writing data
+  efi_pstore: Add a logic erasing entries to an erase callback
+  efi_pstore: Remove a logic erasing entries from a write callback to
+    hold multiple logs
+  efi_pstore: Add ctime to argument of erase callback
+  efi_pstore: Add a sequence counter to a variable name
+  efi_pstore: Add a format check for an existing variable name at
+    reading time
+  efi_pstore: Add a format check for an existing variable name at erasing time
+
+ drivers/acpi/apei/erst.c   |   16 ++--
+ drivers/firmware/efivars.c |  156 +++++++++++++++++++++++++++++++-------------
+ fs/pstore/inode.c          |    7 ++-
+ fs/pstore/internal.h       |    2 +-
+ fs/pstore/platform.c       |   13 ++--
+ fs/pstore/ram.c            |    9 +--
+ include/linux/efi.h        |    1 +
+ include/linux/pstore.h     |    6 +-
+ 8 files changed, 140 insertions(+), 70 deletions(-)
