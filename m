@@ -1,161 +1,90 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH RFC v2 1/4] firmware: Add the firmware signing support
- to scripts/sign-file
-Date: Fri, 23 Nov 2012 14:51:33 +0800
-Message-ID: <1353653493.21227.737.camel@linux-s257.site>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH RFC v2 4/4] firmware: Install firmware signature files
+ automatically
+Date: Fri, 23 Nov 2012 14:52:17 +0800
+Message-ID: <1353653537.21227.738.camel@linux-s257.site>
 References: <s5hhap49den.wl%tiwai@suse.de>
 	 <1352396109-3989-1-git-send-email-tiwai@suse.de>
-	 <1352396109-3989-2-git-send-email-tiwai@suse.de>
+	 <1352396109-3989-5-git-send-email-tiwai@suse.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1352396109-3989-2-git-send-email-tiwai@suse.de>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Takashi Iwai <tiwai@suse.de>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Jiri Kosina <jkosina@suse.cz>, David Howells <dhowells@redhat.com>, Rusty Russell <rusty@rustcorp.com.au>, Ming Lei <tom.leiming@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1352396109-3989-5-git-send-email-tiwai-l3A5Bk7waGM@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Ming Lei <tom.leiming-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 =E6=96=BC =E5=9B=9B=EF=BC=8C2012-11-08 =E6=96=BC 18:35 +0100=EF=BC=8CTa=
 kashi Iwai =E6=8F=90=E5=88=B0=EF=BC=9A
-> Add -f option to sign-file script for generating a firmware signature
-> file.
+> ... when CONFIG_FIRMWARE_SIG is set.
 >=20
-> A firmware signature file contains a pretty similar structure like a
-> signed module but in a different order (because it's a separate file
-> while the module signature is embedded at the tail of unsigned module
-> contents).  The file consists of
->  - the magic string
->  - the signature information, which is identical with the module
->    signature
->  - signer's name
->  - key id
->  - signature bytes
->=20
-> Signed-off-by: Takashi Iwai <tiwai@suse.de>
+> Signed-off-by: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
 
-Tested-by: Chun-Yi Lee <jlee@suse.com>
+Tested-by: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
 
 Joey Lee
 
 > ---
->  scripts/sign-file | 48 +++++++++++++++++++++++++++++++++++----------=
----
->  1 file changed, 35 insertions(+), 13 deletions(-)
+>  Makefile                |  6 ++++++
+>  scripts/Makefile.fwinst | 18 ++++++++++++++++--
+>  2 files changed, 22 insertions(+), 2 deletions(-)
 >=20
-> diff --git a/scripts/sign-file b/scripts/sign-file
-> index 87ca59d..5b9d44d 100755
-> --- a/scripts/sign-file
-> +++ b/scripts/sign-file
-> @@ -4,30 +4,40 @@
->  #
->  # Format:
->  #
-> -#	./scripts/sign-file [-v] <key> <x509> <module> [<dest>]
-> +#	./scripts/sign-file [-v] [-f] <key> <x509> <module> [<dest>]
->  #
->  #
->  use strict;
->  use FileHandle;
->  use IPC::Open2;
-> +use Getopt::Long;
+> diff --git a/Makefile b/Makefile
+> index a1ccf22..c6d7a3e 100644
+> --- a/Makefile
+> +++ b/Makefile
+> @@ -729,6 +729,12 @@ mod_sign_cmd =3D true
+>  endif
+>  export mod_sign_cmd
 > =20
-> -my $verbose =3D 0;
-> -if ($#ARGV >=3D 0 && $ARGV[0] eq "-v") {
-> -    $verbose =3D 1;
-> -    shift;
-> +sub usage()
-> +{
-> +    print "Format: ./scripts/sign-file [options] <key> <x509> <modul=
-e> [<dest>]
-> +    -v       verbose output
-> +    -f       create a firmware signature file
-> +";
-> +    exit;
->  }
+> +ifeq ($(CONFIG_FIRMWARE_SIG),y)
+> +fw_sign_cmd =3D perl $(srctree)/scripts/sign-file -f $(MODSECKEY) $(=
+MODPUBKEY)
+> +else
+> +fw_sign_cmd =3D true
+> +endif
+> +export fw_sign_cmd
 > =20
-> -die "Format: ./scripts/sign-file [-v] <key> <x509> <module> [<dest>]=
-\n"
-> -    if ($#ARGV !=3D 2 && $#ARGV !=3D 3);
-> +my $verbose =3D 0;
-> +my $sign_fw =3D 0;
+>  ifeq ($(KBUILD_EXTMOD),)
+>  core-y		+=3D kernel/ mm/ fs/ ipc/ security/ crypto/ block/
+> diff --git a/scripts/Makefile.fwinst b/scripts/Makefile.fwinst
+> index 4d908d1..df256f0 100644
+> --- a/scripts/Makefile.fwinst
+> +++ b/scripts/Makefile.fwinst
+> @@ -29,6 +29,20 @@ installed-mod-fw :=3D $(addprefix $(INSTALL_FW_PAT=
+H)/,$(mod-fw))
+>  installed-fw :=3D $(addprefix $(INSTALL_FW_PATH)/,$(fw-shipped-all))
+>  installed-fw-dirs :=3D $(sort $(dir $(installed-fw))) $(INSTALL_FW_P=
+ATH)/./
+> =20
+> +ifeq ($(CONFIG_FIRMWARE_SIG),y)
+> +installed-fw-sig :=3D $(patsubst %,%.sig, $(installed-fw))
+> +installed-mod-fw-sig :=3D $(patsubst %,%.sig, $(installed-mod-fw))
+> +else
+> +installed-fw-sig :=3D
+> +installed-mod-fw-sig :=3D
+> +endif
 > +
-> +GetOptions(
-> +    'v|verbose' =3D> \$verbose,
-> +    'f|firmware' =3D> \$sign_fw) || usage();
-> +usage() if ($#ARGV !=3D 2 && $#ARGV !=3D 3);
+> +quiet_cmd_fwsig =3D FWSIG $@
+> +      cmd_fwsig =3D $(fw_sign_cmd) $(patsubst %.sig,%,$@) $@
+> +
+> +%.sig: %
+> +	$(call cmd,fwsig)
+> +
+>  # Workaround for make < 3.81, where .SECONDEXPANSION doesn't work.
+>  PHONY +=3D $(INSTALL_FW_PATH)/$$(%) install-all-dirs
+>  $(INSTALL_FW_PATH)/$$(%): install-all-dirs
+> @@ -49,9 +63,9 @@ PHONY +=3D  __fw_install __fw_modinst FORCE
 > =20
->  my $private_key =3D $ARGV[0];
->  my $x509 =3D $ARGV[1];
->  my $module =3D $ARGV[2];
-> -my $dest =3D ($#ARGV =3D=3D 3) ? $ARGV[3] : $ARGV[2] . "~";
-> +my $dest =3D $ARGV[3] ? $ARGV[3] : $ARGV[2] . ($sign_fw ? ".sig" : "=
-~");
-> +my $mode_name =3D $sign_fw ? "firmware" : "module";
+>  .PHONY: $(PHONY)
 > =20
->  die "Can't read private key\n" unless (-r $private_key);
->  die "Can't read X.509 certificate\n" unless (-r $x509);
-> -die "Can't read module\n" unless (-r $module);
-> +die "Can't read $mode_name\n" unless (-r $module);
+> -__fw_install: $(installed-fw)
+> +__fw_install: $(installed-fw) $(installed-fw-sig)
 > =20
->  #
->  # Read the kernel configuration
-> @@ -393,7 +403,9 @@ die "openssl rsautl died: $?" if ($? >> 8);
->  #
->  my $unsigned_module =3D read_file($module);
+> -__fw_modinst: $(installed-mod-fw)
+> +__fw_modinst: $(installed-mod-fw) $(installed-mod-fw-sig)
+>  	@:
 > =20
-> -my $magic_number =3D "~Module signature appended~\n";
-> +my $magic_number =3D $sign_fw ?
-> +    "~Linux firmware signature~\n" :
-> +    "~Module signature appended~\n";
-> =20
->  my $info =3D pack("CCCCCxxxN",
->  		$algo, $hash, $id_type,
-> @@ -402,7 +414,7 @@ my $info =3D pack("CCCCCxxxN",
->  		length($signature));
-> =20
->  if ($verbose) {
-> -    print "Size of unsigned module: ", length($unsigned_module), "\n=
-";
-> +    print "Size of unsigned $mode_name: ", length($unsigned_module),=
- "\n";
->      print "Size of signer's name  : ", length($signers_name), "\n";
->      print "Size of key identifier : ", length($key_identifier), "\n"=
-;
->      print "Size of signature      : ", length($signature), "\n";
-> @@ -414,7 +426,16 @@ if ($verbose) {
-> =20
->  open(FD, ">$dest") || die $dest;
->  binmode FD;
-> -print FD
-> +if ($sign_fw) {
-> +    print FD
-> +    $magic_number,
-> +    $info,
-> +    $signers_name,
-> +    $key_identifier,
-> +    $signature
-> +    ;
-> +} else {
-> +    print FD
->      $unsigned_module,
->      $signers_name,
->      $key_identifier,
-> @@ -422,8 +443,9 @@ print FD
->      $info,
->      $magic_number
->      ;
-> +}
->  close FD || die $dest;
-> =20
-> -if ($#ARGV !=3D 3) {
-> +if (!$sign_fw && $#ARGV !=3D 3) {
->      rename($dest, $module) || die $module;
->  }
-
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-securit=
-y-module" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  __fw_modbuild: $(addprefix $(obj)/,$(mod-fw))
