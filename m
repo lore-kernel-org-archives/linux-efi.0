@@ -1,111 +1,154 @@
-From: Anton Vorontsov <anton.vorontsov-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: EFI pstore: BUG: scheduling while atomic, and possible circular
- locking dependency
-Date: Wed, 21 Nov 2012 20:12:40 -0800
-Message-ID: <20121122041239.GA24623@lizard.sbx14280.paloaca.wayport.net>
-References: <50AD94A4.4030100@redhat.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH RFC v2 2/4] firmware: Add -a option to scripts/sign-file
+Date: Fri, 23 Nov 2012 14:51:04 +0800
+Message-ID: <1353653464.21227.736.camel@linux-s257.site>
+References: <s5hhap49den.wl%tiwai@suse.de>
+	 <1352396109-3989-1-git-send-email-tiwai@suse.de>
+	 <1352396109-3989-3-git-send-email-tiwai@suse.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <50AD94A4.4030100-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1352396109-3989-3-git-send-email-tiwai-l3A5Bk7waGM@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Ming Lei <tom.leiming-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 22, 2012 at 10:57:40AM +0800, Lingzhu Xiang wrote:
-[..]
-> Kernel version ranges from 3.2 to 3.7-rc.
-[...]
-> [   83.505022]  [<ffffffff810d59a0>] ? print_irqtrace_events+0xd0/0xe0
-> [   83.505022]  [<ffffffff810a401d>] __might_sleep+0x18d/0x250
-> [   83.505022]  [<ffffffff811b9dc7>] __kmalloc+0x67/0x2d0
-> [   83.505022]  [<ffffffff8156375b>] ? efivar_create_sysfs_entry+0x3b/0x1b0
-> [   83.505022]  [<ffffffff8156375b>] efivar_create_sysfs_entry+0x3b/0x1b0
+=E6=96=BC =E5=9B=9B=EF=BC=8C2012-11-08 =E6=96=BC 18:35 +0100=EF=BC=8CTa=
+kashi Iwai =E6=8F=90=E5=88=B0=EF=BC=9A
+> Add a new option -a to sign-file for specifying the hash algorithm
+> to sign a file, to make it working without .config file.
+> This will be useful signing external module or firmware files.
+>=20
+> Signed-off-by: Takashi Iwai <tiwai-l3A5Bk7waGM@public.gmane.org>
 
-efi_pstore_write calls create_sysfs_entry, which is obviosly unsafe from
-the dumper code, we're in the atomic context.
+Tested-by: Chun-Yi Lee<jlee-IBi9RG/b67k@public.gmane.org>
 
-> [   83.505022]  [<ffffffff81563c03>] efi_pstore_write+0x333/0x3a0
-> [   83.505022]  [<ffffffff8106a3fe>] ? kmsg_dump_get_buffer+0x24e/0x2b0
-> [   83.505022]  [<ffffffff812ca4c5>] ? pstore_dump+0x195/0x210
-> [   83.505022]  [<ffffffff812ca45f>] pstore_dump+0x12f/0x210
-> [   83.505022]  [<ffffffff8106c459>] kmsg_dump+0xf9/0x240
-[...]
-> After reboot, mount pstore
-> ==========================
-> 
-> [root@localhost ~]# mount -t pstore -o kmsg_bytes=8000 - /dev/pstore
-> [   36.502832] BUG: sleeping function called from invalid context at mm/slub.c:928
-> [   36.504379] in_atomic(): 1, irqs_disabled(): 0, pid: 851, name: mount
-> [   36.505652] 3 locks held by mount/851:
-> [   36.506355]  #0:  (&type->s_umount_key#38/1){+.+.+.}, at: [<ffffffff811d5aed>] sget+0x37d/0x640
-> [   36.508899]  #1:  (&psinfo->read_mutex){+.+.+.}, at: [<ffffffff812ca59b>] pstore_get_records+0x3b/0x130
-> [   36.510688]  #2:  (&(&efivars->lock)->rlock){+.+.+.}, at: [<ffffffff8156273d>] efi_pstore_open+0x1d/0x40
-> [   36.512468] Pid: 851, comm: mount Tainted: G        W    3.7.0-0.rc5.git2.1.fc19.x86_64 #1
-> [   36.514001] Call Trace:
-> [   36.514440]  [<ffffffff810a401d>] __might_sleep+0x18d/0x250
-> [   36.515634]  [<ffffffff811b9dc7>] __kmalloc+0x67/0x2d0
-> [   36.516509]  [<ffffffff81562103>] ? efi_pstore_read+0x1c3/0x220
-> [   36.517525]  [<ffffffff81562103>] efi_pstore_read+0x1c3/0x220
-> [   36.518507]  [<ffffffff812ca5f1>] pstore_get_records+0x91/0x130
+Joey Lee
 
-get_records() calls pinfo->open, which is efi_pstore_open, which grabs a
-spin_lock. Then efi_pstore_read tries to kmalloc things with GFP_KERNEL,
-which clearly a bug, since we're holding the spinlock.
-
-The second issue is easy to fix, but the fix is not pretty: we must
-allocate buf with GFP_ATOMIC (the lock is required during ->read(), it
-protects efivars->list, so we can't simply drop it).
-
-The first issue requires us to not create the sysfs entry (since it must
-be done in a non-atomic context). This makes pstore efi vars invisible via
-/sys/firmware/efi. :( If anyone wants to fix it, he'd have to "sync"
-efivars with sysfs thru a workqueue.
-
-[...]
-> After reboot, rm a pstore entry
-> ===============================
-> 
-> [root@localhost ~]# rm -f /dev/pstore/dmesg-efi-9
-> [   55.572466] 
-> [   55.572767] ======================================================
-> [   55.573015] [ INFO: possible circular locking dependency detected ]
-> [   55.573015] 3.7.0-0.rc5.git2.1.fc19.x86_64 #1 Tainted: G        W
-
-I don't see an obvious problem, but let's solve the first two, and see if
-this will help, since the kernel was tainted already.
-
-Please see if the patch down below helps to solve the first two issues...
-
---
-
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 6e51c1e..773c5bb 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -701,7 +701,7 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
- 
- 			get_var_data_locked(efivars, &efivars->walk_entry->var);
- 			size = efivars->walk_entry->var.DataSize;
--			*buf = kmalloc(size, GFP_KERNEL);
-+			*buf = kmalloc(size, GFP_ATOMIC);
- 			if (*buf == NULL)
- 				return -ENOMEM;
- 			memcpy(*buf, efivars->walk_entry->var.Data,
-@@ -758,12 +758,13 @@ static int efi_pstore_write(enum pstore_type_id type,
- 
- 	spin_unlock(&efivars->lock);
- 
-+#if 0 /* FIXME: We are in the atomic context! */
- 	if (size)
- 		ret = efivar_create_sysfs_entry(efivars,
- 					  utf16_strsize(efi_name,
- 							DUMP_NAME_LEN * 2),
- 					  efi_name, &vendor);
--
-+#endif
- 	*id = part;
- 	return ret;
- };
+> ---
+>  scripts/sign-file | 40 ++++++++++++++++++++++++++++------------
+>  1 file changed, 28 insertions(+), 12 deletions(-)
+>=20
+> diff --git a/scripts/sign-file b/scripts/sign-file
+> index 5b9d44d..581cdcd 100755
+> --- a/scripts/sign-file
+> +++ b/scripts/sign-file
+> @@ -4,7 +4,7 @@
+>  #
+>  # Format:
+>  #
+> -#	./scripts/sign-file [-v] [-f] <key> <x509> <module> [<dest>]
+> +#	./scripts/sign-file [-v] [-f] [-a algo] <key> <x509> <module> [<de=
+st>]
+>  #
+>  #
+>  use strict;
+> @@ -17,16 +17,19 @@ sub usage()
+>      print "Format: ./scripts/sign-file [options] <key> <x509> <modul=
+e> [<dest>]
+>      -v       verbose output
+>      -f       create a firmware signature file
+> +    -a algo  specify hash algorithm
+>  ";
+>      exit;
+>  }
+> =20
+>  my $verbose =3D 0;
+> +my $hashalgo =3D "";
+>  my $sign_fw =3D 0;
+> =20
+>  GetOptions(
+>      'v|verbose' =3D> \$verbose,
+> -    'f|firmware' =3D> \$sign_fw) || usage();
+> +    'f|firmware' =3D> \$sign_fw,
+> +    'a|algo=3Ds' =3D> \$hashalgo) || usage();
+>  usage() if ($#ARGV !=3D 2 && $#ARGV !=3D 3);
+> =20
+>  my $private_key =3D $ARGV[0];
+> @@ -42,10 +45,7 @@ die "Can't read $mode_name\n" unless (-r $module);
+>  #
+>  # Read the kernel configuration
+>  #
+> -my %config =3D (
+> -    CONFIG_MODULE_SIG_SHA512 =3D> 1
+> -    );
+> -
+> +my %config;
+>  if (-r ".config") {
+>      open(FD, "<.config") || die ".config";
+>      while (<FD>) {
+> @@ -56,6 +56,22 @@ if (-r ".config") {
+>      close(FD);
+>  }
+> =20
+> +if ($hashalgo eq "") {
+> +    if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
+> +	$hashalgo=3D"sha1";
+> +    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA224"}) {
+> +	$hashalgo=3D"sha224";
+> +    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA256"}) {
+> +	$hashalgo=3D"sha256";
+> +    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA384"}) {
+> +	$hashalgo=3D"sha384";
+> +    } elsif (exists $config{"CONFIG_MODULE_SIG_SHA512"}) {
+> +	$hashalgo=3D"sha512";
+> +    } else {
+> +	die "Can't determine hash algorithm";
+> +    }
+> +}
+> +
+>  #
+>  # Function to read the contents of a file into a variable.
+>  #
+> @@ -332,35 +348,35 @@ my $id_type =3D 1;	# Identifier type: X.509
+>  # Digest the data
+>  #
+>  my ($dgst, $prologue) =3D ();
+> -if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
+> +if ($hashalgo eq "sha1") {
+>      $prologue =3D pack("C*",
+>  		     0x30, 0x21, 0x30, 0x09, 0x06, 0x05,
+>  		     0x2B, 0x0E, 0x03, 0x02, 0x1A,
+>  		     0x05, 0x00, 0x04, 0x14);
+>      $dgst =3D "-sha1";
+>      $hash =3D 2;
+> -} elsif (exists $config{"CONFIG_MODULE_SIG_SHA224"}) {
+> +} elsif ($hashalgo eq "sha224") {
+>      $prologue =3D pack("C*",
+>  		     0x30, 0x2d, 0x30, 0x0d, 0x06, 0x09,
+>  		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x04,
+>  		     0x05, 0x00, 0x04, 0x1C);
+>      $dgst =3D "-sha224";
+>      $hash =3D 7;
+> -} elsif (exists $config{"CONFIG_MODULE_SIG_SHA256"}) {
+> +} elsif ($hashalgo eq "sha256") {
+>      $prologue =3D pack("C*",
+>  		     0x30, 0x31, 0x30, 0x0d, 0x06, 0x09,
+>  		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01,
+>  		     0x05, 0x00, 0x04, 0x20);
+>      $dgst =3D "-sha256";
+>      $hash =3D 4;
+> -} elsif (exists $config{"CONFIG_MODULE_SIG_SHA384"}) {
+> +} elsif ($hashalgo eq "sha384") {
+>      $prologue =3D pack("C*",
+>  		     0x30, 0x41, 0x30, 0x0d, 0x06, 0x09,
+>  		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02,
+>  		     0x05, 0x00, 0x04, 0x30);
+>      $dgst =3D "-sha384";
+>      $hash =3D 5;
+> -} elsif (exists $config{"CONFIG_MODULE_SIG_SHA512"}) {
+> +} elsif ($hashalgo eq "sha512") {
+>      $prologue =3D pack("C*",
+>  		     0x30, 0x51, 0x30, 0x0d, 0x06, 0x09,
+>  		     0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03,
+> @@ -368,7 +384,7 @@ if (exists $config{"CONFIG_MODULE_SIG_SHA1"}) {
+>      $dgst =3D "-sha512";
+>      $hash =3D 6;
+>  } else {
+> -    die "Can't determine hash algorithm";
+> +    die "Invalid hash algorithm $hashalgo";
+>  }
+> =20
+>  #
