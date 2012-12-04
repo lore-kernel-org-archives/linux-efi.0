@@ -1,66 +1,50 @@
-From: Seth Forshee <seth.forshee@canonical.com>
-Subject: Re: Use PCI ROMs from EFI boot services
-Date: Mon, 3 Dec 2012 14:02:41 -0600
-Message-ID: <20121203200241.GG5906@thinkpad-t410>
-References: <1345739803-21017-1-git-send-email-mjg@redhat.com>
- <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: Random boot fail on 'cannot allocate trampoline' on Intel
+ DQ57TM board with B.11 BIOS
+Date: Tue, 04 Dec 2012 11:18:15 +0800
+Message-ID: <1354591095.21227.1355.camel@linux-s257.site>
+References: <1346212111.6836.355.camel@linux-s257.site>
+	 <50464BD6.6080106@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bjorn Helgaas <bhelgaas@google.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, mfleming@intel.com, dwmw2@infradead.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <50464BD6.6080106-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 25, 2012 at 11:35:57AM -0600, Bjorn Helgaas wrote:
-> On Thu, Aug 23, 2012 at 10:36 AM, Matthew Garrett <mjg@redhat.com> wrote:
-> > V3 just fixes all the casting issues and incorporates David's change in
-> > search ordering.
-> 
-> I think there's still a section mismatch issue with these patches, so
-> I haven't merged them yet.
-> 
-> I rebased my pci/mjg-pci-roms-from-efi branch to v3.7-rc2, and if we
-> get this issue fixed I'll put it in -next as v3.8 material.
+=E6=96=BC =E4=BA=8C=EF=BC=8C2012-09-04 =E6=96=BC 11:43 -0700=EF=BC=8CH.=
+ Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
+> On 08/28/2012 08:48 PM, joeyli wrote:
+> > Hi all experts,=20
+> >=20
+> > I tried the EFI_STUB on v3.6-rc1 kernel on Intel DQ57TM board with =
+B.11
+> > BIOS that's the only one sample board on my hand. I found it can't =
+boot
+> > success most time, fail rate is about 80% (run 6 times only 1 time =
+boot
+> > success).
+> > When issue reproduced, kernel emit a panic message like through ser=
+ial
+> > console like the following:
+> >=20
+>=20
+> This is odd... there is plenty of low memory which should have been
+> available for the trampoline.  The ACPI errors is another issue, of
+> course...
+>=20
+> 	-hpa
+>=20
 
-I still don't see this series in -next, so I take it the section
-mismatch was never fixed? How about the following?
+I moved all memory modules (have 2 in this machine) to channel A, then =
+I
+didn't reproduce this issue anymore.=20
 
-Thanks,
-Seth
+Just add this information for note to DQ57TM users.
 
 
->From ece31852159a6b2cf9a059031638354e9817a6a6 Mon Sep 17 00:00:00 2001
-From: Seth Forshee <seth.forshee@canonical.com>
-Date: Mon, 3 Dec 2012 13:55:50 -0600
-Subject: [PATCH] x86: Don't discard boot_params
-
-boot_params is now used at runtime on EFI systems to stash option ROMs
-that aren't available after exiting boot services, so it can no longer
-be marked __initdata.
-
-Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
----
- arch/x86/kernel/setup.c |    4 ----
- 1 file changed, 4 deletions(-)
-
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 468e98d..6e13035 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -143,11 +143,7 @@ int default_check_phys_apicid_present(int phys_apicid)
- }
- #endif
- 
--#ifndef CONFIG_DEBUG_BOOT_PARAMS
--struct boot_params __initdata boot_params;
--#else
- struct boot_params boot_params;
--#endif
- 
- /*
-  * Machine setup..
--- 
-1.7.9.5
+Thanks a lot!
+Joey Lee
