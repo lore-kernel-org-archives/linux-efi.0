@@ -1,75 +1,30 @@
-From: Yinghai Lu <yinghai@kernel.org>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Subject: Re: Use PCI ROMs from EFI boot services
-Date: Wed, 5 Dec 2012 16:15:56 -0800
-Message-ID: <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
+Date: Thu, 6 Dec 2012 00:18:19 +0000
+Message-ID: <20121206001819.GA30527@srcf.ucam.org>
 References: <1345739803-21017-1-git-send-email-mjg@redhat.com>
-	<CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
-	<20121203200241.GG5906@thinkpad-t410>
+ <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
+ <20121203200241.GG5906@thinkpad-t410>
+ <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <20121203200241.GG5906@thinkpad-t410>
-Sender: linux-pci-owner@vger.kernel.org
-To: Bjorn Helgaas <bhelgaas@google.com>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, mfleming@intel.com, dwmw2@infradead.org, "H. Peter Anvin" <hpa@zytor.com>, "Eric W. Biederman" <ebiederm@xmission.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mfleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 3, 2012 at 12:02 PM, Seth Forshee
-<seth.forshee@canonical.com> wrote:
-> On Thu, Oct 25, 2012 at 11:35:57AM -0600, Bjorn Helgaas wrote:
->> On Thu, Aug 23, 2012 at 10:36 AM, Matthew Garrett <mjg@redhat.com> wrote:
->> > V3 just fixes all the casting issues and incorporates David's change in
->> > search ordering.
->>
->> I think there's still a section mismatch issue with these patches, so
->> I haven't merged them yet.
->>
->> I rebased my pci/mjg-pci-roms-from-efi branch to v3.7-rc2, and if we
->> get this issue fixed I'll put it in -next as v3.8 material.
->
-> I still don't see this series in -next, so I take it the section
-> mismatch was never fixed? How about the following?
->
->
->
-> From ece31852159a6b2cf9a059031638354e9817a6a6 Mon Sep 17 00:00:00 2001
-> From: Seth Forshee <seth.forshee@canonical.com>
-> Date: Mon, 3 Dec 2012 13:55:50 -0600
-> Subject: [PATCH] x86: Don't discard boot_params
->
-> boot_params is now used at runtime on EFI systems to stash option ROMs
-> that aren't available after exiting boot services, so it can no longer
-> be marked __initdata.
->
-> Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
-> ---
->  arch/x86/kernel/setup.c |    4 ----
->  1 file changed, 4 deletions(-)
->
-> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-> index 468e98d..6e13035 100644
-> --- a/arch/x86/kernel/setup.c
-> +++ b/arch/x86/kernel/setup.c
-> @@ -143,11 +143,7 @@ int default_check_phys_apicid_present(int phys_apicid)
->  }
->  #endif
->
-> -#ifndef CONFIG_DEBUG_BOOT_PARAMS
-> -struct boot_params __initdata boot_params;
-> -#else
->  struct boot_params boot_params;
-> -#endif
->
->  /*
->   * Machine setup..
+On Wed, Dec 05, 2012 at 04:15:56PM -0800, Yinghai Lu wrote:
 
-No, that is not a right fix
+> at the same time we should export setup_data into /sys, so kexec could
+> append this pointer to command of
+> second kernel, just like kexec append acpi_rsdp.
+> That should address DavidW's concern.
 
-We should only cache pointer to setup_data.
+Why should the kernel export data to userspace just so that that data 
+can be passed back into the kernel?
 
-at the same time we should export setup_data into /sys, so kexec could
-append this pointer to command of
-second kernel, just like kexec append acpi_rsdp.
-That should address DavidW's concern.
-
-
-Yinghai
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
