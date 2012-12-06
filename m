@@ -1,44 +1,75 @@
-From: Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+From: Yinghai Lu <yinghai@kernel.org>
 Subject: Re: Use PCI ROMs from EFI boot services
-Date: Wed, 5 Dec 2012 15:21:35 -0700
-Message-ID: <CAErSpo7c5Ph+GufivPt2XFoTbRnAoLnNdZwcc69QMCFdavNJjA@mail.gmail.com>
+Date: Wed, 5 Dec 2012 16:15:56 -0800
+Message-ID: <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
 References: <1345739803-21017-1-git-send-email-mjg@redhat.com>
- <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
- <20121203200241.GG5906@thinkpad-t410> <CAErSpo7S2+Vt+9bkGLx_=AY9aSGCvAnkHfqu01gTj=eKs7btNw@mail.gmail.com>
- <20121205202254.GA25398@srcf.ucam.org>
+	<CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
+	<20121203200241.GG5906@thinkpad-t410>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20121205202254.GA25398-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <20121203200241.GG5906@thinkpad-t410>
+Sender: linux-pci-owner@vger.kernel.org
+To: Bjorn Helgaas <bhelgaas@google.com>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, mfleming@intel.com, dwmw2@infradead.org, "H. Peter Anvin" <hpa@zytor.com>, "Eric W. Biederman" <ebiederm@xmission.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 5, 2012 at 1:22 PM, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
-> On Wed, Dec 05, 2012 at 01:09:25PM -0700, Bjorn Helgaas wrote:
+On Mon, Dec 3, 2012 at 12:02 PM, Seth Forshee
+<seth.forshee@canonical.com> wrote:
+> On Thu, Oct 25, 2012 at 11:35:57AM -0600, Bjorn Helgaas wrote:
+>> On Thu, Aug 23, 2012 at 10:36 AM, Matthew Garrett <mjg@redhat.com> wrote:
+>> > V3 just fixes all the casting issues and incorporates David's change in
+>> > search ordering.
+>>
+>> I think there's still a section mismatch issue with these patches, so
+>> I haven't merged them yet.
+>>
+>> I rebased my pci/mjg-pci-roms-from-efi branch to v3.7-rc2, and if we
+>> get this issue fixed I'll put it in -next as v3.8 material.
 >
->> That's right; nobody stepped up to fix the section mismatch.  I'm
->> happy to fold in your fix, especially if Matthew acks it.
+> I still don't see this series in -next, so I take it the section
+> mismatch was never fixed? How about the following?
 >
-> Yes, sorry, I've been way behind on pretty much everything for the past
-> few months. Please do add my Ack.
 >
->> David, Eric, what about the kexec question?  It looks to me like this
->> wouldn't make things worse than they are today.  If I understand
->> correctly, today we don't use ROM data from EFI on either an initial
->> boot or a kexec.  After this patch, we could use EFI ROM data on the
->> initial boot, but not after a kexec.  So it's worse in the sense that
->> the kexec case doesn't match the initial boot, but at least it's not
->> something that used to work and is now broken.
 >
-> I think I'd agree here - it's not ideal, but it's no more broken than
-> the current situation.
+> From ece31852159a6b2cf9a059031638354e9817a6a6 Mon Sep 17 00:00:00 2001
+> From: Seth Forshee <seth.forshee@canonical.com>
+> Date: Mon, 3 Dec 2012 13:55:50 -0600
+> Subject: [PATCH] x86: Don't discard boot_params
+>
+> boot_params is now used at runtime on EFI systems to stash option ROMs
+> that aren't available after exiting boot services, so it can no longer
+> be marked __initdata.
+>
+> Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
+> ---
+>  arch/x86/kernel/setup.c |    4 ----
+>  1 file changed, 4 deletions(-)
+>
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index 468e98d..6e13035 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -143,11 +143,7 @@ int default_check_phys_apicid_present(int phys_apicid)
+>  }
+>  #endif
+>
+> -#ifndef CONFIG_DEBUG_BOOT_PARAMS
+> -struct boot_params __initdata boot_params;
+> -#else
+>  struct boot_params boot_params;
+> -#endif
+>
+>  /*
+>   * Machine setup..
 
-OK, I applied Seth's fix, added his Tested-by, and put this series in
-my -next branch.  I plan to merge it during the v3.8 merge window next
-week.
+No, that is not a right fix
 
-Thanks!
+We should only cache pointer to setup_data.
 
-Bjorn
+at the same time we should export setup_data into /sys, so kexec could
+append this pointer to command of
+second kernel, just like kexec append acpi_rsdp.
+That should address DavidW's concern.
+
+
+Yinghai
