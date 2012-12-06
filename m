@@ -1,38 +1,45 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+From: Bjorn Helgaas <bhelgaas@google.com>
 Subject: Re: Use PCI ROMs from EFI boot services
-Date: Thu, 6 Dec 2012 06:19:03 +0000
-Message-ID: <20121206061903.GA3068@srcf.ucam.org>
-References: <20121203200241.GG5906@thinkpad-t410>
- <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
- <20121206001819.GA30527@srcf.ucam.org>
- <50BFE50C.8030008@zytor.com>
- <CAE9FiQX+M+VynyERC0W3y8rvr1tBxWnuBqJ6E-ywC_=HvJE66g@mail.gmail.com>
- <50BFE890.5070109@zytor.com>
- <d8d553fb-1571-4fdc-833c-92b80e15bc25@email.android.com>
- <50BFEF09.9000408@zytor.com>
- <cd3b2e67-92af-494d-ba2d-4179ead6e06b@email.android.com>
- <50BFF328.5030406@zytor.com>
+Date: Thu, 6 Dec 2012 11:19:33 -0700
+Message-ID: <CAErSpo7-hUbvvCYPSwtSYKMKWqu99A5H5R4004rSj5Bmv0593g@mail.gmail.com>
+References: <1345739803-21017-1-git-send-email-mjg@redhat.com>
+ <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
+ <20121203200241.GG5906@thinkpad-t410> <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
+ <50BFE88D.1000800@zytor.com> <CAE9FiQXwZAAMkWYT8EjsewpuZ-OWqoaFscyzGS_pSuO9C3bf9A@mail.gmail.com>
+ <CAE9FiQX+aJi5XEyjfjc=K4eXLbQNqE-vd+coyt1dmuujsi_eoQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <50BFF328.5030406-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mfleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org, "Eric W. Biederman" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <CAE9FiQX+aJi5XEyjfjc=K4eXLbQNqE-vd+coyt1dmuujsi_eoQ@mail.gmail.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, dwmw2@infradead.org, "Eric W. Biederman" <ebiederm@xmission.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 05, 2012 at 05:21:44PM -0800, H. Peter Anvin wrote:
-> On 12/05/2012 05:13 PM, Matthew Garrett wrote:
-> >Yeah, it needs to be hidden from root - but ideally we'd be passing it to the second kernel if we kexec. Alternative would be for it to be capability bounded to a trusted signed kexec binary if we implement Vivek's IMA-based approach.
-> >
-> 
-> Either way a security flag in the type field makes sense.
+On Wed, Dec 5, 2012 at 5:52 PM, Yinghai Lu <yinghai@kernel.org> wrote:
+> On Wed, Dec 5, 2012 at 4:51 PM, Yinghai Lu <yinghai@kernel.org> wrote:
+>> On Wed, Dec 5, 2012 at 4:36 PM, H. Peter Anvin <hpa@zytor.com> wrote:
+>>> On 12/05/2012 04:15 PM, Yinghai Lu wrote:
+>>>>
+>>>
+>>> I don't see why that isn't the right fix.  We copy the data into
+>>> boot_params early in the boot; that *is* the official copy as far as the
+>>> kernel is concerned.
+>>>
+>>> So this patch very much seems like The Right Thing.
+>>
+>> it moves boot_params from __initdata  to data.
+>
+>    should be from __initdata to bss
+>
+>> and just for using pointer to setup_data.
+>>
+>> should add setup_data pointer instead. so will not waste (4096 - 8) bytes.
 
-I've no objection to that, although I'm not sure there's any real reason 
-to expose an incomplete setup_data to userspace. Any scenario in which 
-kexec can't read the full data is one where kexec won't be able to 
-call sys_kexec() anyway.
+I'm not following the whole discussion here, but my impression is that
+what's in my -next branch is acceptable
+(http://git.kernel.org/?p=linux/kernel/git/helgaas/pci.git;a=commitdiff;h=328949ff10f2e3fcb11472571294beed39488342)
 
--- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+If not, please explain further and provide a patch to fix it.
+
+Bjorn
