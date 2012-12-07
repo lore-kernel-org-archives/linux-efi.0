@@ -1,42 +1,31 @@
-From: Bjorn Helgaas <bhelgaas@google.com>
-Subject: Re: Use PCI ROMs from EFI boot services
-Date: Thu, 6 Dec 2012 14:44:15 -0700
-Message-ID: <CAErSpo4_Ob_VVY_t7X8Aczwg=DcQXS9xw-iPT4QX6JRSqwmyoA@mail.gmail.com>
-References: <1345739803-21017-1-git-send-email-mjg@redhat.com>
- <CAErSpo6dn_0b8Ngx9VT=ARs_UXQftEx=2Kczeqemtmo0XyKzuQ@mail.gmail.com>
- <20121203200241.GG5906@thinkpad-t410> <CAE9FiQVdpmmExrPrLf7HYVuo0cTY9Xjn6bWzObbuSSeQ-e1PbA@mail.gmail.com>
- <50BFE88D.1000800@zytor.com> <CAE9FiQXwZAAMkWYT8EjsewpuZ-OWqoaFscyzGS_pSuO9C3bf9A@mail.gmail.com>
- <CAE9FiQX+aJi5XEyjfjc=K4eXLbQNqE-vd+coyt1dmuujsi_eoQ@mail.gmail.com>
- <CAErSpo7-hUbvvCYPSwtSYKMKWqu99A5H5R4004rSj5Bmv0593g@mail.gmail.com>
- <50C0E339.4030607@zytor.com> <20121206185439.GA17381@srcf.ucam.org>
+From: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: [patch] x86, efi: precedence error in setup_efi_pci()
+Date: Fri, 7 Dec 2012 09:16:49 +0300
+Message-ID: <20121207061649.GA18220@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <20121206185439.GA17381@srcf.ucam.org>
-Sender: linux-pci-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Yinghai Lu <yinghai@kernel.org>, linux-kernel@vger.kernel.org, linux-pci@vger.kernel.org, linux-efi@vger.kernel.org, dwmw2@infradead.org, "Eric W. Biederman" <ebiederm@xmission.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 6, 2012 at 11:54 AM, Matthew Garrett <mjg59@srcf.ucam.org> wrote:
-> On Thu, Dec 06, 2012 at 10:26:01AM -0800, H. Peter Anvin wrote:
->
->> NAK on this bit:
->>
->> +       if (boot_params.hdr.version < 0x0209)
->> +               return 0;
->>
->> This field is kernel->bootloader documentation.  If a nonmaching
->> value somehow leaks into the kernel, the kernel could either
->> panic("Bootloader written by moron") or it should clear some fields,
->> but littering the kernel with these kinds of tests is just plain
->> braindead.
->
-> Dropping that should be fine. Bjorn, would you prefer a patch from me to
-> do that?
+Negate has higher precedence than bitwise AND so the condition is always
+false.
 
-I dropped that check and re-pushed my -next branch.
+Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
 
-Yinghai, I don't understand your pa_data_setup_pci.patch, but if
-somebody else acks it and we can come up with an intelligible
-changelog, I'll fold that in, too.
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index b1942e2..18e329c 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -302,7 +302,7 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+ 
+-		if (!attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM)
++		if (!(attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM))
+ 			continue;
+ 
+ 		if (!pci->romimage || !pci->romsize)
