@@ -1,30 +1,40 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/3] rtc-efi: register rtc-efi device when EFI enabled
-Date: Sat, 29 Dec 2012 06:17:50 +0000
-Message-ID: <E99CBA9F97C3D149AA6B19ED2E277C9B01921795@BY2PRD0510MB365.namprd05.prod.outlook.com>
-References: <1356712001-12198-1-git-send-email-jlee@suse.com>
-	 <E99CBA9F97C3D149AA6B19ED2E277C9B019215CC@BY2PRD0510MB365.namprd05.prod.outlook.com>
-	 <3fa7337e-6bbc-4462-9704-2d8ac20a9cf2@email.android.com>
-	 <E99CBA9F97C3D149AA6B19ED2E277C9B019215FA@BY2PRD0510MB365.namprd05.prod.outlook.com>
-	 <50DE03D8.9030902@zytor.com>
-	 <E99CBA9F97C3D149AA6B19ED2E277C9B01921638@BY2PRD0510MB365.namprd05.prod.outlook.com>
-	 <35da3df5-ecac-4b57-83a2-828326e5bfc3@email.android.com>
-	 <E99CBA9F97C3D149AA6B19ED2E277C9B0192169D@BY2PRD0510MB365.namprd05.prod.outlook.com>
-	 <50DE3C8F.4000405@zytor.com>
-	 <E99CBA9F97C3D149AA6B19ED2E277C9B01921744@BY2PRD0510MB365.namprd05.prod.outlook.com>
-	 <ed3971f1-8464-4406-bae2-eff914c9c2fc@email.android.com>
+From: Shea Levy <shea@shealevy.com>
+Subject: Revisiting EFI boot stub config file support
+Date: Tue, 01 Jan 2013 10:55:39 -0500
+Message-ID: <50E306FB.6080607@shealevy.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <ed3971f1-8464-4406-bae2-eff914c9c2fc-2ueSQiBKiTY7tOexoI0I+QC/G2K4zDHf@public.gmane.org>
-Content-Language: en-US
-Content-ID: <35FEFD29729E69479BBBCE18C2AF038E-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arjan van de Ven <arjan-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCAyMDEyLTEyLTI4IGF0IDIxOjE5IC0wODAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
-Cj4gQWdhaW4sIHdlIGNvdWxkIGhhY2sgYSBzaW11bGF0b3IgYW5kIHRyeSBpdC4NCg0KWWVhaCwg
-c2hvdWxkbid0IGJlIHRvbyBoYXJkIHRvIHdlZGdlIGludG8gcWVtdS9vdm1mLg0K
+Hi all,
+
+In March last year, I submitted a patch to enable the EFI boot stub to 
+read its config arguments from a file on the ESP, both to help with 
+booting from livecds and to avoid having to use efibootmgr every time 
+you change your boottime arguments. I ended up dropping the submission 
+because I ended up coming to the conclusion that tools like rEFInd and 
+gummiboot were better suited to the task of boot managing than the 
+kernel itself.
+
+Since then, however, I've received enough emails asking about the status 
+of the patch that I think there is room for a simpler entrant into the 
+field of linux EFI boot management. This could be in-kernel, as per my 
+original patch, or a very simple out-of-kernel (but maybe distributed 
+in-tree?) efi image that simply reads linux.conf and boots linux with 
+those parameters. My personal bias is still toward handling this 
+functionality outside of the kernel itself, but before I started the 
+work I thought I'd ask here if anyone thought I should instead bring my 
+old patch up-to-date.
+
+Thoughts?
+
+Thanks,
+Shea Levy
+
+P.S. I am subscribed to linux-efi but not lkml, please include me in any 
+replies to lkml.
