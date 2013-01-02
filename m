@@ -1,82 +1,27 @@
-From: Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
-Subject: BUG: unable to handle kernel paging request at 000000effd870020
-Date: Wed, 2 Jan 2013 11:21:10 -0600
-Message-ID: <20130102172107.GA26761@gulag1.americas.sgi.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: Revisiting EFI boot stub config file support
+Date: Wed, 2 Jan 2013 17:43:19 +0000
+Message-ID: <20130102174319.GA2590@srcf.ucam.org>
+References: <50E306FB.6080607@shealevy.com>
+ <50E31BB4.7040702@zytor.com>
+ <710F73BE-9F65-48C9-8739-BFCF097F4B07@shealevy.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <710F73BE-9F65-48C9-8739-BFCF097F4B07-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+To: Shea Levy <shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I am getting an early boot problem. It only happens on the larger of the
-machines I haven't seen it crop up on machines with more then 512 GB of ram.
-It shows in the latest linus kernel too.
+On Wed, Jan 02, 2013 at 08:26:29AM -0500, Shea Levy wrote:
 
-I am (wildly) guessing that what is happening is that the new_memmap that is
-being passed to bios is somehow placed incorrectly.  
-I have come up with a workaround.  By placing it the DMA area the issue goes
-away but that doesn't seem like a real fix. 
+> Hm, ok. Does the boot stub have access to CONFIG_CMDLINE? Or could 
+> another compile-time setting be added so that distros can ship livecds 
+> that automatically use a config file found at a hard-coded location?
 
+Just pass the config file as the first argument?
 
-BUG: unable to handle kernel paging request at 000000effd870020
-IP: [<0000000078bce331>] 0x78bce330
-PGD 0 
-Oops: 0000 [#1] SMP 
-Modules linked in:
-CPU 0 
-Pid: 0, comm: swapper/0 Tainted: G        W    3.8.0-rc1-next-20121224-medusa_ntz+ #2 Intel Corp. Stoutland Platform
-RIP: 0010:[<0000000078bce331>]  [<0000000078bce331>] 0x78bce330
-RSP: 0000:ffffffff81601d28  EFLAGS: 00010006
-RAX: 0000000078b80e18 RBX: 0000000000000004 RCX: 0000000000000004
-RDX: 0000000078bcf958 RSI: 0000000000002400 RDI: 8000000000000000
-RBP: 0000000078bcf760 R08: 000000effd870000 R09: 0000000000000000
-R10: 0000000000000000 R11: 00000000000000c3 R12: 0000000000000030
-R13: 000000effd870000 R14: 0000000000000000 R15: ffff88effd870000
-FS:  0000000000000000(0000) GS:ffff88effe400000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 000000effd870020 CR3: 000000000160c000 CR4: 00000000000006b0
-DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-Process swapper/0 (pid: 0, threadinfo ffffffff81600000, task ffffffff81614400)
-Stack:
- 0000000078b80d18 0000000000000004 0000000078bced7b ffff880078b81fff
- 0000000000000000 0000000000000082 0000000078bce3a8 0000000000002400
- 0000000060000202 0000000078b80da0 0000000078bce45d ffffffff8107cb5a
-Call Trace:
- [<ffffffff8107cb5a>] ? on_each_cpu+0x77/0x83
- [<ffffffff8102f4eb>] ? change_page_attr_set_clr+0x32f/0x3ed
- [<ffffffff81035946>] ? efi_call4+0x46/0x80
- [<ffffffff816c5abb>] ? efi_enter_virtual_mode+0x1f5/0x305
- [<ffffffff816aeb24>] ? start_kernel+0x34a/0x3d2
- [<ffffffff816ae5ed>] ? repair_env_string+0x60/0x60
- [<ffffffff816ae2be>] ? x86_64_start_reservations+0xba/0xc1
- [<ffffffff816ae120>] ? early_idt_handlers+0x120/0x120
- [<ffffffff816ae419>] ? x86_64_start_kernel+0x154/0x163
-Code:  Bad RIP value.
-RIP  [<0000000078bce331>] 0x78bce330
- RSP <ffffffff81601d28>
-CR2: 000000effd870020
----[ end trace ead828934fef5eab ]---
-
-
-
----
- arch/x86/platform/efi/efi.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-Index: linux/arch/x86/platform/efi/efi.c
-===================================================================
---- linux.orig/arch/x86/platform/efi/efi.c	2012-11-24 09:43:09.236997834 -0600
-+++ linux/arch/x86/platform/efi/efi.c	2012-11-24 09:53:30.264654748 -0600
-@@ -915,7 +915,7 @@
- 		}
- 		new_memmap = krealloc(new_memmap,
- 				      (count + 1) * memmap.desc_size,
--				      GFP_KERNEL);
-+				      GFP_DMA);
- 		memcpy(new_memmap + (count * memmap.desc_size), md,
- 		       memmap.desc_size);
- 		count++;
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
