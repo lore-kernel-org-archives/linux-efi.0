@@ -1,42 +1,36 @@
-From: Robin Holt <holt-sJ/iWh9BUns@public.gmane.org>
-Subject: Re: BUG: unable to handle kernel paging request at 000000effd870020
-Date: Wed, 2 Jan 2013 15:09:58 -0600
-Message-ID: <20130102210958.GD3470@sgi.com>
-References: <20130102172107.GA26761@gulag1.americas.sgi.com>
- <50E476C2.7060300@zytor.com>
- <50E486E7.1080903@sgi.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH] arch: x86: boot: compressed: eboot: fix cast warnings on
+ 32b platforms
+Date: Thu, 3 Jan 2013 13:19:52 +0100
+Message-ID: <20130103121952.GB10243@x1.alien8.de>
+References: <1356171805-16930-1-git-send-email-hasko.stevo@gmail.com>
+ <20121226080019.GB11555@liondog.tnic>
+ <50E31E18.5010404@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <50E486E7.1080903-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <50E31E18.5010404@zytor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Stefan Hasko <hasko.stevo@gmail.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jan 02, 2013 at 01:13:43PM -0600, Nathan Zimmer wrote:
-> On 01/02/2013 12:04 PM, H. Peter Anvin wrote:
-> >On 01/02/2013 09:21 AM, Nathan Zimmer wrote:
-> >>I am getting an early boot problem. It only happens on the larger of the
-> >>machines I haven't seen it crop up on machines with more then 512 GB of ram.
-> >>It shows in the latest linus kernel too.
-> >>
-> >>I am (wildly) guessing that what is happening is that the new_memmap that is
-> >>being passed to bios is somehow placed incorrectly.
-> >>I have come up with a workaround.  By placing it the DMA area the issue goes
-> >>away but that doesn't seem like a real fix.
-> >>
-> >What does your memory map look like?
+On Tue, Jan 01, 2013 at 09:34:16AM -0800, H. Peter Anvin wrote:
+> Yes, but stylistically: we don't use uintptr_t in Linux, but rather
+> "unsigned long".
 
-We reported this a few times (Russ Anderson and I both).  The problem is
-at the point in boot where the efi_enter_virtual_mode callback is, there
-is no identity mapping for most of memory.  If the allocation happens
-to be above the 512GB (or maybe something lower than that) point, the
-BIOS is not able to address this via the physical address passed to it.
+Hmmkay,
 
-Russ' solution was to not remap at all.  The interim workaround I have
-been using is adding a GFP_DMA flag to the kmalloc.  An earlier post I
-made to the list was to pass in the va to the new memmap table.
+Stefan, care to redo your patch and sum up this discussion to the commit
+message for further reference?
 
-Robin
+Btw, there is some funny usage of uintptr_t in
+arch/x86/include/asm/xor_avx.h and since this is not an uapi header,
+they need to be converted to unsigned long too, methinks.
+
+Thanks.
+
+-- 
+Regards/Gruss,
+Boris.
