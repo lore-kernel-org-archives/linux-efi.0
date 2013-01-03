@@ -1,36 +1,55 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH] arch: x86: boot: compressed: eboot: fix cast warnings on
- 32b platforms
-Date: Thu, 3 Jan 2013 13:19:52 +0100
-Message-ID: <20130103121952.GB10243@x1.alien8.de>
-References: <1356171805-16930-1-git-send-email-hasko.stevo@gmail.com>
- <20121226080019.GB11555@liondog.tnic>
- <50E31E18.5010404@zytor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <50E31E18.5010404@zytor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Stefan Hasko <hasko.stevo@gmail.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [RFC PATCH 0/2] EFI facilities bitfield
+Date: Thu,  3 Jan 2013 13:18:03 +0000
+Message-ID: <1357219085-4312-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 01, 2013 at 09:34:16AM -0800, H. Peter Anvin wrote:
-> Yes, but stylistically: we don't use uintptr_t in Linux, but rather
-> "unsigned long".
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Hmmkay,
+Various users expect different semantics from 'efi_enabled', and one
+variable can't be all things to all users. Introduce an EFI facilities
+bitfield, which informs users what EFI initialisation steps were
+completed successfully (are the system/config tables mapped, can we
+invoke runtime services, etc?) and allows users to clearly document
+which pieces of EFI firmware functionality they're using.
 
-Stefan, care to redo your patch and sum up this discussion to the commit
-message for further reference?
+The immediate motivation for this patch series is the bug report at,
 
-Btw, there is some funny usage of uintptr_t in
-arch/x86/include/asm/xor_avx.h and since this is not an uapi header,
-they need to be converted to unsigned long too, methinks.
+    https://bugzilla.kernel.org/show_bug.cgi?id=47121
 
-Thanks.
+Drivers need a new means of detecting whether they're running on an
+EFI machine, as sadly the expression,
+
+    if (!efi_enabled)
+
+hasn't been a sufficient condition for quite some time.
+
+This series has only seen minimal runtime testing since it's an RFC
+and is intended to start a discussion.
+
+Matt Fleming (2):
+  efi: Make 'efi_enabled' a function to query EFI facilities
+  samsung-laptop: Disable on EFI hardware
+
+ arch/x86/include/asm/efi.h             |  1 +
+ arch/x86/kernel/reboot.c               |  2 +-
+ arch/x86/kernel/setup.c                | 28 ++++++++---------
+ arch/x86/platform/efi/efi.c            | 55 ++++++++++++++++++++--------------
+ drivers/acpi/osl.c                     |  2 +-
+ drivers/firmware/dmi_scan.c            |  2 +-
+ drivers/firmware/efivars.c             |  4 +--
+ drivers/firmware/iscsi_ibft_find.c     |  2 +-
+ drivers/gpu/drm/radeon/radeon_device.c |  3 +-
+ drivers/platform/x86/ibm_rtl.c         |  2 +-
+ drivers/platform/x86/samsung-laptop.c  |  3 ++
+ drivers/scsi/isci/init.c               |  2 +-
+ include/linux/efi.h                    | 24 +++++++++++----
+ init/main.c                            |  4 +--
+ 14 files changed, 80 insertions(+), 54 deletions(-)
 
 -- 
-Regards/Gruss,
-Boris.
+1.7.11.7
