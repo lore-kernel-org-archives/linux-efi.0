@@ -1,56 +1,43 @@
-From: Tim Gardner <rtg.canonical-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH 1/2] efi: Make 'efi_enabled' a function to query EFI
- facilities
-Date: Fri, 04 Jan 2013 09:42:54 -0700
-Message-ID: <50E7068E.8080101@gmail.com>
-References: <1357219085-4312-1-git-send-email-matt@console-pimps.org>  <1357219085-4312-2-git-send-email-matt@console-pimps.org>  <50E6F086.5020209@gmail.com> <1357316128.8203.33.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 01/20] efi: Add support for a UEFI variable filesystem
+Date: Fri, 04 Jan 2013 20:58:36 +0000
+Message-ID: <1357333116.8203.50.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
+	 <1351237923-10313-2-git-send-email-matt@console-pimps.org>
+	 <50D3F995.5000705@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1357316128.8203.33.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <50D3F995.5000705-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>, Dave Jiang <dave.jiang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, tim.gardner-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/04/2013 09:15 AM, Matt Fleming wrote:
-> On Fri, 2013-01-04 at 08:08 -0700, Tim Gardner wrote:
->> On 01/03/2013 06:18 AM, Matt Fleming wrote:
->>> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->>>
->>
->> snip
->>
->>>   /*
->>> - * We play games with efi_enabled so that the compiler will, if possible, remove
->>> - * EFI-related code altogether.
->>> + * We play games with efi_enabled so that the compiler will, if
->>> + * possible, remove EFI-related code altogether.
->>>    */
->>> +#define EFI_BOOT		0x00000001 /* Were we booted from EFI? */
->>> +#define EFI_SYSTEM_TABLES	0x00000002 /* Can we use EFI system tables? */
->>> +#define EFI_CONFIG_TABLES	0x00000004 /* Can we use EFI config tables? */
->>> +#define EFI_RUNTIME_SERVICES	0x00000004 /* Can we use runtime services? */
->>> +#define EFI_MEMMAP		0x00000008 /* Can we use EFI memory map? */
->>> +#define EFI_64BIT		0x00000010 /* Is the firmware 64-bit? */
->>> +
->>
->> Your use of test_bit() and set_bit() imply that these macros should be
->> bit numbers, not bit masks. It'll work until you define a mask with an
->> integer value greater then 31.
->
-> They're not intended to be bitmasks in the sense that no two bits are
-> set in each constant (and I am aware of the upper limit).
->
-> I have no problem changing the above values to bit numbers if that would
-> be less confusing.
->
+On Fri, 2012-12-21 at 13:54 +0800, Lingzhu Xiang wrote:
+> On 10/26/2012 03:51 PM, Matt Fleming wrote:
+> > +static int efivarfs_unlink(struct inode *dir, struct dentry *dentry)
+> > +{
+> > +	struct efivar_entry *var = dentry->d_inode->i_private;
+> > +	struct efivars *efivars = var->efivars;
+> > +	efi_status_t status;
+> > +
+> > +	spin_lock(&efivars->lock);
+> > +
+> > +	status = efivars->ops->set_variable(var->var.VariableName,
+> > +					&var->var.VendorGuid,
+> > +					    0, 0, NULL);
+> > +
+> > +	if (status == EFI_SUCCESS || status == EFI_NOT_FOUND) {
+> > +		list_del(&var->list);
+> > +		spin_unlock(&efivars->lock);
+> > +		efivar_unregister(var);
+> > +		drop_nlink(dir);
+> 
+> This should be  drop_nlink(dentry->d_inode);
 
-When you do change them to bit numbers you should also note that 
-EFI_CONFIG_TABLES and EFI_RUNTIME_SERVICES have the same value, which I 
-believe is in error.
+Yep, this looks right. Care to send a proper patch with a Signed-off-by?
 
-rtg
 -- 
-Tim Gardner tim.gardner-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org
+Matt Fleming, Intel Open Source Technology Center
