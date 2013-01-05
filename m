@@ -1,43 +1,46 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 01/20] efi: Add support for a UEFI variable filesystem
-Date: Fri, 04 Jan 2013 20:58:36 +0000
-Message-ID: <1357333116.8203.50.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
-	 <1351237923-10313-2-git-send-email-matt@console-pimps.org>
-	 <50D3F995.5000705@redhat.com>
+From: Guo Chao <yan-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Subject: Re: [RFC PATCH 1/2] efi: Make 'efi_enabled' a function to
+Date: Sat, 5 Jan 2013 11:28:09 +0800
+Message-ID: <20130105032809.GA15166@yanx>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <50D3F995.5000705-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2012-12-21 at 13:54 +0800, Lingzhu Xiang wrote:
-> On 10/26/2012 03:51 PM, Matt Fleming wrote:
-> > +static int efivarfs_unlink(struct inode *dir, struct dentry *dentry)
-> > +{
-> > +	struct efivar_entry *var = dentry->d_inode->i_private;
-> > +	struct efivars *efivars = var->efivars;
-> > +	efi_status_t status;
-> > +
-> > +	spin_lock(&efivars->lock);
-> > +
-> > +	status = efivars->ops->set_variable(var->var.VariableName,
-> > +					&var->var.VendorGuid,
-> > +					    0, 0, NULL);
-> > +
-> > +	if (status == EFI_SUCCESS || status == EFI_NOT_FOUND) {
-> > +		list_del(&var->list);
-> > +		spin_unlock(&efivars->lock);
-> > +		efivar_unregister(var);
-> > +		drop_nlink(dir);
+query EFI facilities
+Reply-To: <1357219085-4312-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> 
+In-Reply-To: <1357219085-4312-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> 
+
+> diff --git a/init/main.c b/init/main.c
+> index e33e09d..e71d924 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -604,7 +604,7 @@ asmlinkage void __init start_kernel(void)
+>  	pidmap_init();
+>  	anon_vma_init();
+>  #ifdef CONFIG_X86
+> -	if (efi_enabled)
+> +	if (efi_enabled(EFI_RUNTIME_SERVICES))
+>  		efi_enter_virtual_mode();
+>  #endif
+>  	thread_info_cache_init();
+> @@ -632,7 +632,7 @@ asmlinkage void __init start_kernel(void)
+>  	acpi_early_init(); /* before LAPIC and SMP init */
+>  	sfi_init_late();
 > 
-> This should be  drop_nlink(dentry->d_inode);
+> -	if (efi_enabled) {
+> +	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+>  		efi_late_init();
+>  		efi_free_boot_services();
+>  	}
 
-Yep, this looks right. Care to send a proper patch with a Signed-off-by?
+I just wonder why we compile efi code away explicitly by CONFIG_X86 in
+one place and implicitly by if (0) in another place, in the same
+function.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks,
+Guo Chao
