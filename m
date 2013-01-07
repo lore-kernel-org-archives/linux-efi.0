@@ -1,28 +1,53 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efivarfs: Drop link count of the right inode
-Date: Mon, 07 Jan 2013 16:15:30 +0000
-Message-ID: <1357575330.8203.65.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1357333116.8203.50.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <44edfa54b80aedb674bdb482eef4f559030d9bf7.1357365172.git.lxiang@redhat.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] Fix efifb initialisation when the only GOP device
+ implements ConOut.
+Date: Mon, 07 Jan 2013 17:08:41 +0000
+Message-ID: <1357578521.8203.68.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1357431222.9270.73.camel@shinybook.infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <44edfa54b80aedb674bdb482eef4f559030d9bf7.1357365172.git.lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1357431222.9270.73.camel-Fexsq3y4057IgHVZqg5X0TlWvGAXklZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi<jlee"@suse.com, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+To: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 2013-01-05 at 13:59 +0800, Lingzhu Xiang wrote:
-> efivarfs_unlink() should drop the file's link count, not the directory's.
+On Sun, 2013-01-06 at 00:13 +0000, David Woodhouse wrote:
+> When booting under OVMF we have precisely one GOP device, and it
+> implements the ConOut protocol.
 > 
-> Signed-off-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  drivers/firmware/efivars.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> We break out of the loop when we look at it... and then promptly abort
+> because 'first_gop' never gets set. We should set first_gop *before*
+> breaking out of the loop. Yes, it doesn't really mean "first" any more,
+> but that doesn't matter. It's only a flag to indicate that a suitable
+> GOP was found.
+> 
+> In fact, we'd do just as well to initialise 'width' to zero in this
+> function, then just check *that* instead of first_gop. But I'll do the
+> minimal fix for now (and for stable@).
+> 
+> Signed-off-by: David Woodhouse <David.Woodhouse-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index c760e07..807330a 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -314,10 +314,9 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
+>  			 * Once we've found a GOP supporting ConOut,
+>  			 * don't bother looking any further.
+>  			 */
+> +			first_gop = gop;
+>  			if (conout_found)
+>  				break;
+> -
+> -			first_gop = gop;
+>  		}
+>  	}
+>  
+> 
+> 
 
-Thanks, I've queued this up with Joey's Tested-by.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+This looks good to me. Matthew?
