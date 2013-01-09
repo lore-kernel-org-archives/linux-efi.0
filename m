@@ -1,123 +1,89 @@
-From: Nathan Zimmer <nzimmer@sgi.com>
-Subject: [PATCH v2] efi, x86: Pass a proper identity mapping in efi_call_phys_prelog
-Date: Tue,  8 Jan 2013 09:02:43 -0600
-Message-ID: <1357657363-29930-1-git-send-email-nzimmer@sgi.com>
-References: <0130103220716.GA13995@gulag1.americas.sgi.com>
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <0130103220716.GA13995@gulag1.americas.sgi.com>
-Sender: stable-owner@vger.kernel.org
-Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Nathan Zimmer <nzimmer@sgi.com>, stable@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Robin Holt <holt@sgi.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 1/3] rtc-efi: register rtc-efi device when EFI enabled
+Date: Wed, 09 Jan 2013 14:23:11 +0800
+Message-ID: <1357712591.6113.389.camel@linux-s257.site>
+References: <1356712001-12198-1-git-send-email-jlee@suse.com>
+	 <E99CBA9F97C3D149AA6B19ED2E277C9B019215CC@BY2PRD0510MB365.namprd05.prod.outlook.com>
+	 <1356742803.6113.245.camel@linux-s257.site>  <50DE4259.7090409@zytor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <50DE4259.7090409-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Update efi_call_phys_prelog to install an identity mapping of all available
-memory.  This corrects a bug on very large systems with more then 512 GB in
-which bios would not be able to access addresses above not in the mapping.
+=E6=96=BC =E4=BA=94=EF=BC=8C2012-12-28 =E6=96=BC 17:07 -0800=EF=BC=8CH.=
+ Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
+> On 12/28/2012 05:00 PM, joeyli wrote:
+> > =E6=96=BC =E4=BA=94=EF=BC=8C2012-12-28 =E6=96=BC 17:43 +0000=EF=BC=8C=
+Matthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
+> >> On Sat, 2012-12-29 at 00:26 +0800, Lee, Chun-Yi wrote:
+> >>> UEFI time services, GetTime(), SetTime(), GetWakeupTime(), SetWak=
+eupTime() are also
+> >>> supported by other non-IA64 architecutre with UEFI BIOS, e.g. x86=
+=2E
+> >>>
+> >>> This patch changed RTC_DRV_EFI configuration to depend on EFI but=
+ not just IA64. It
+> >>> checks efi_enabled flag and efi-rtc driver should enabled.
+> >>
+> >> In theory, certainly - but do we still have machines that explode =
+if the
+> >> get_time call is made? We may also want to think about disabling t=
+he
+> >> legacy access to the RTC if the EFI calls are present.
+> >=20
+> > The legacy get_time access on my test machine is work fine, not thi=
+ng
+> > explode. :-)
+> > Just we have a function want to expose the timezone information to
+> > userspace and also store it.
+> >=20
+>=20
+> We should indeed save the timezone information if it is available --
+> either from the ACPI TAD or from the EFI RTC, or even via some
+> platform-dependent mechanism.  It is important, though, that that is
+> separate from the order of priority.
+>=20
+> 	-hpa
+>=20
 
-The result is a crash that looks much like this.
+I found Windows 8 doesn't aware/maintain the Timezone and Daylight
+fields in EFI_TIME struct.
 
-BUG: unable to handle kernel paging request at 000000effd870020
-IP: [<0000000078bce331>] 0x78bce330
-PGD 0
-Oops: 0000 [#1] SMP
-Modules linked in:
-CPU 0
-Pid: 0, comm: swapper/0 Tainted: G        W    3.8.0-rc1-next-20121224-medusa_ntz+ #2 Intel Corp. Stoutland Platform
-RIP: 0010:[<0000000078bce331>]  [<0000000078bce331>] 0x78bce330
-RSP: 0000:ffffffff81601d28  EFLAGS: 00010006
-RAX: 0000000078b80e18 RBX: 0000000000000004 RCX: 0000000000000004
-RDX: 0000000078bcf958 RSI: 0000000000002400 RDI: 8000000000000000
-RBP: 0000000078bcf760 R08: 000000effd870000 R09: 0000000000000000
-R10: 0000000000000000 R11: 00000000000000c3 R12: 0000000000000030
-R13: 000000effd870000 R14: 0000000000000000 R15: ffff88effd870000
-FS:  0000000000000000(0000) GS:ffff88effe400000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 000000effd870020 CR3: 000000000160c000 CR4: 00000000000006b0
-DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-Process swapper/0 (pid: 0, threadinfo ffffffff81600000, task ffffffff81614400)
-Stack:
- 0000000078b80d18 0000000000000004 0000000078bced7b ffff880078b81fff
- 0000000000000000 0000000000000082 0000000078bce3a8 0000000000002400
- 0000000060000202 0000000078b80da0 0000000078bce45d ffffffff8107cb5a
-Call Trace:
- [<ffffffff8107cb5a>] ? on_each_cpu+0x77/0x83
- [<ffffffff8102f4eb>] ? change_page_attr_set_clr+0x32f/0x3ed
- [<ffffffff81035946>] ? efi_call4+0x46/0x80
- [<ffffffff816c5abb>] ? efi_enter_virtual_mode+0x1f5/0x305
- [<ffffffff816aeb24>] ? start_kernel+0x34a/0x3d2
- [<ffffffff816ae5ed>] ? repair_env_string+0x60/0x60
- [<ffffffff816ae2be>] ? x86_64_start_reservations+0xba/0xc1
- [<ffffffff816ae120>] ? early_idt_handlers+0x120/0x120
- [<ffffffff816ae419>] ? x86_64_start_kernel+0x154/0x163
-Code:  Bad RIP value.
-RIP  [<0000000078bce331>] 0x78bce330
- RSP <ffffffff81601d28>
-CR2: 000000effd870020
----[ end trace ead828934fef5eab ]---
+I got a Acer UEFI notebook and I keep the Windows 8 hard drive
+(/dev/sda) but install Linux to another hard drive (/dev/sdb).=20
 
-v2: I noticed a typo on the one sent friday, also ccing the stable tree.
+On Linux, I applied my rtc-efi patches for allow user space feed
+Timezone and store it to BIOS through SetTime(). I wrote a simple user
+space program to set Timezone and Daylight fields, after set those
+fields I reboot to Windows 8 and use DateTime setting GUI to look at th=
+e
+change. Looks Windows doesn't aware the change, it just assume the time
+in DateTime filed is local time, but didn't show the Timezone that was
+set by me on Linux to GUI.
+
+Then, I select another Timezone(country) through Windows 8 GUI, and
+reboot to Linux. I read the Timezone and Daylight by program but didn't
+see the Timezone and Daylight changed by Windows 8, the value is still
+the same with my latest time setting by Linux program. Windows 8 change=
+d
+DayTime fields but didn't maintain Timezone and Daylight.
+
+I only have this machine with preloaded Windows 8 for verify the
+behavior, not sure it's normally or not. If Windows 8 ignores Timezone
+and Daylight fields in UEFI BIOS, then I think it's lower down the
+necessary for we maintain Timezone and Daylight in UEFI BIOS.=20
+
+We still can store Timezone and Daylight value to UEFI, but will have n=
+o
+any interactive with Windows 8.
+
+Appreciate for any suggestions.
 
 
-Cc: stable@vger.kernel.org
-Cc: Matt Fleming <matt.fleming@intel.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Signed-off-by: Nathan Zimmer <nzimmer@sgi.com>
-Signed-off-by: Robin Holt <holt@sgi.com>
----
- arch/x86/platform/efi/efi_64.c |   22 +++++++++++++++++-----
- 1 files changed, 17 insertions(+), 5 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 95fd505..2b20038 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -38,7 +38,7 @@
- #include <asm/cacheflush.h>
- #include <asm/fixmap.h>
- 
--static pgd_t save_pgd __initdata;
-+static pgd_t *save_pgd __initdata;
- static unsigned long efi_flags __initdata;
- 
- static void __init early_code_mapping_set_exec(int executable)
-@@ -61,12 +61,20 @@ static void __init early_code_mapping_set_exec(int executable)
- void __init efi_call_phys_prelog(void)
- {
- 	unsigned long vaddress;
-+	int pgd;
-+	int n_pgds;
- 
- 	early_code_mapping_set_exec(1);
- 	local_irq_save(efi_flags);
--	vaddress = (unsigned long)__va(0x0UL);
--	save_pgd = *pgd_offset_k(0x0UL);
--	set_pgd(pgd_offset_k(0x0UL), *pgd_offset_k(vaddress));
-+
-+	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
-+	save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_KERNEL);
-+
-+	for (pgd = 0; pgd < n_pgds; pgd++) {
-+		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
-+		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
-+		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
-+	}
- 	__flush_tlb_all();
- }
- 
-@@ -75,7 +83,11 @@ void __init efi_call_phys_epilog(void)
- 	/*
- 	 * After the lock is released, the original page table is restored.
- 	 */
--	set_pgd(pgd_offset_k(0x0UL), save_pgd);
-+	int pgd;
-+	int n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
-+	for (pgd = 0; pgd < n_pgds; pgd++)
-+		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), save_pgd[pgd]);
-+	kfree(save_pgd);
- 	__flush_tlb_all();
- 	local_irq_restore(efi_flags);
- 	early_code_mapping_set_exec(0);
--- 
-1.6.0.2
+Thanks a lot!
+Joey Lee
