@@ -1,105 +1,48 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: General protection fault in efivarfs
-Date: Fri, 11 Jan 2013 13:22:39 +0000
-Message-ID: <1357910559.8203.313.camel@mfleming-mobl1.ger.corp.intel.com>
+Subject: Re: [PATCH v2 16/20] efivarfs: Return an error if we fail to read a
+ variable
+Date: Fri, 11 Jan 2013 13:24:12 +0000
+Message-ID: <1357910652.8203.314.camel@mfleming-mobl1.ger.corp.intel.com>
 References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
-	 <1351237923-10313-2-git-send-email-matt@console-pimps.org>
-	 <50D44279.7010008@redhat.com> <1356346840.6113.45.camel@linux-s257.site>
+	  <1351237923-10313-17-git-send-email-matt@console-pimps.org>
+	 <1351846434.14888.157.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <50D40ADF.4050700@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1356346840.6113.45.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
+In-Reply-To: <50D40ADF.4050700-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, glin-IBi9RG/b67k@public.gmane.org
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2012-12-24 at 19:00 +0800, joeyli wrote:
-> =E6=96=BC =E4=BA=94=EF=BC=8C2012-12-21 =E6=96=BC 19:05 +0800=EF=BC=8C=
-Lingzhu Xiang =E6=8F=90=E5=88=B0=EF=BC=9A
-> > The following reproducer triggers certain bugs in efivarfs_file_wri=
-te.
-> >=20
-> > #!/bin/bash
-> > p=3D/sys/firmware/efi/efivars
-> > mount -t efivarfs - $p
-> > cat $p/Lang-* >$p/test-12341234-1234-1234-1234-123412341234
-> > umount $p
-> > mount -t efivarfs - $p
-> > echo -en "\0\0\0\0" >$p/test-12341234-1234-1234-1234-123412341234=20
+On Fri, 2012-12-21 at 15:08 +0800, Lingzhu Xiang wrote:
+> On 11/02/2012 04:53 PM, Matt Fleming wrote:
+> > Instead of always returning 0 in efivarfs_file_read(), even when we
+> > fail to successfully read the variable, convert the EFI status to
+> > something meaningful and return that to the caller. This way the user
+> > will have some hint as to why the read failed.
+> > ...
+> >
+> > +	case EFI_NOT_FOUND:
+> > +		err = -ENOENT;
+> 
+> This will be ambiguous for userspace. Is it file not being found by
+> efivarfs or by firmware?
+> 
+> Actually I've been confused during testing like this:
+> 
+> # ll test-12341234-1234-1234-1234-123412341234
+> ls: cannot access test-12341234-1234-1234-1234-123412341234: No such 
+> file or directory
+> # echo -en "\0\0\0\0a" >test-12341234-1234-1234-1234-123412341234
+> -bash: echo: write error: No such file or directory
+> # ll test-12341234-1234-1234-1234-123412341234
+> -rw-r--r--. 1 root root 0 Dec 21 06:19 
+> test-12341234-1234-1234-1234-123412341234
 
-Thanks for the report!
+Yeah, this file shouldn't exist. I'm working on a patch. Thanks!
 
-> The problem is check EFI_VARIABLE_MASK in efivars.c that is not enoug=
-h
-> for deny use 0x00000000 attributes.
-
-Not quite, see below.
-
-> Per UEFI spec, runtime variable at least need has attributes
-> EFI_VARIABLE_BOOTSERVICE_ACCESS and EFI_VARIABLE_RUNTIME_ACCESS.
-> Otherwise UEFI BIOS will occur unexpected error.
->=20
-> Please try the following patch.
->=20
->=20
-> Thanks a lot!
-> Joey Lee
->=20
->=20
-> >From cb0775a36f4d80f9fe2f9afee40c8b7310cbac8a Mon Sep 17 00:00:00 20=
-01
-> From: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> Date: Mon, 24 Dec 2012 18:33:52 +0800
-> Subject: [PATCH] efivars: Check attributes of variable whan writing a=
-t least need to define bootservice and runtime access
->=20
-> The EFI variable filesystem used when system in runtime. The variable
-> that wes wrote by user space application at least need to define
-> EFI_VARIABLE_BOOTSERVICE_ACCESS and EFI_VARIABLE_RUNTIME_ACCESS in
-> attributes.
->=20
-> Cc: Gary Lin <glin-IBi9RG/b67k@public.gmane.org>
-> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> ---
->  drivers/firmware/efivars.c |    4 ++++
->  1 files changed, 4 insertions(+), 0 deletions(-)
->=20
-> diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-> index 7b1c374..7aeb4a5 100644
-> --- a/drivers/firmware/efivars.c
-> +++ b/drivers/firmware/efivars.c
-> @@ -706,6 +706,10 @@ static ssize_t efivarfs_file_write(struct file *=
-file,
->  	if (attributes & ~(EFI_VARIABLE_MASK))
->  		return -EINVAL;
-> =20
-> +	if (!((attributes & EFI_VARIABLE_BOOTSERVICE_ACCESS) &&
-> +		(attributes & EFI_VARIABLE_RUNTIME_ACCESS)))
-> +		return -EINVAL;
-> +
->  	efivars =3D var->efivars;
-> =20
->  	/*
-
-This breaks the case where we want to create a variable that only has
-boot time access. It's not inconceivable that someone may want to do
-this from Linux. What you should be enforcing is that if
-EFI_VARIABLE_RUNTIME_ACCESS is set, then EFI_VARIABLE_BOOTSERVICE_ACCES=
-S
-must be also. Can you re-work your patch to handle this case? Preferabl=
-y
-with a comment above the check as for why we have this check, i.e. it's
-in the spec.
-
-Regarding zero attributes: if user tools want to delete a variable by
-using the zero attribute method, that's fine - we should handle that.
-The real problem here is that if we try to delete a non-existent
-variable or even if *creating* a variable fails, we don't delete the
-file in the file system.
-
-Thanks for the report guys, I'll cook up a patch.
-
---=20
+-- 
 Matt Fleming, Intel Open Source Technology Center
