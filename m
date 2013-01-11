@@ -1,37 +1,51 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 17/20] efivarfs: Replace magic number with
- sizeof(attributes)
-Date: Fri, 11 Jan 2013 13:30:26 +0000
-Message-ID: <1357911026.8203.315.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
-	 <1351237923-10313-18-git-send-email-matt@console-pimps.org>
-	 <50DAC252.5030308@redhat.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [patch] x86, efi: precedence error in setup_efi_pci()
+Date: Fri, 11 Jan 2013 13:52:38 +0000
+Message-ID: <1357912358.8203.316.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <20121207061649.GA18220@elgon.mountain>
+	 <50C2AE91.9060800@zytor.com> <20121210084426.GQ22569@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <50DAC252.5030308-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20121210084426.GQ22569@mwanda>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2012-12-26 at 17:24 +0800, Lingzhu Xiang wrote:
-> On 10/26/2012 03:52 PM, Matt Fleming wrote:
-> > From: Matt Fleming<matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> >
-> > Seeing "+ 4" littered throughout the functions gets a bit
-> > confusing. Use "sizeof(attributes)" which clearly explains what
-> > quantity we're adding.
-> >
-> > Acked-by: Jeremy Kerr<jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-> > Signed-off-by: Matt Fleming<matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Mon, 2012-12-10 at 11:44 +0300, Dan Carpenter wrote:
+> On Fri, Dec 07, 2012 at 07:05:53PM -0800, H. Peter Anvin wrote:
+> > On 12/06/2012 10:16 PM, Dan Carpenter wrote:
+> > >Negate has higher precedence than bitwise AND so the condition is always
+> > >false.
+> > >
+> > >Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+> > >
+> > >diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> > >index b1942e2..18e329c 100644
+> > >--- a/arch/x86/boot/compressed/eboot.c
+> > >+++ b/arch/x86/boot/compressed/eboot.c
+> > >@@ -302,7 +302,7 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
+> > >  		if (status != EFI_SUCCESS)
+> > >  			continue;
+> > >
+> > >-		if (!attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM)
+> > >+		if (!(attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM))
+> > >  			continue;
+> > >
+> > >  		if (!pci->romimage || !pci->romsize)
+> > >
+> > 
+> > What is the baseline for this patch?
+> > 
 > 
-> Looks like one +4 got left behind, in efivarfs_fill_super
+> Sorry, this is a linux-next bug.  Introduced in:
 > 
-> 		i_size_write(inode, size+4);
+> commit dd5fc854de5fd37adfcef8a366cd21a55aa01d3d
+> Author: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Date:   Wed Dec 5 14:33:26 2012 -0700
+> 
+>     EFI: Stash ROMs if they're not in the PCI BAR
 
-Yep, so it does. I'll cook something up, thanks.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks Dan, I've picked this up.
