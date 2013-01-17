@@ -1,151 +1,86 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: [PATCH v2] efi, x86: Pass a proper identity mapping in
- efi_call_phys_prelog
-Date: Wed, 16 Jan 2013 14:30:45 +0000
-Message-ID: <1358346645.8203.408.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <0130103220716.GA13995@gulag1.americas.sgi.com>
-	 <1357657363-29930-1-git-send-email-nzimmer@sgi.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1357657363-29930-1-git-send-email-nzimmer@sgi.com>
-Sender: stable-owner@vger.kernel.org
-To: Nathan Zimmer <nzimmer@sgi.com>
-Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Robin Holt <holt@sgi.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Jan Beulich <JBeulich@suse.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH] efivarfs: Delete dentry from dcache in efivarfs_file_write()
+Date: Thu, 17 Jan 2013 07:39:13 +0000
+Message-ID: <1358408353-24497-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-(Sorry for the delay in replying to this)
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-On Tue, 2013-01-08 at 09:02 -0600, Nathan Zimmer wrote:
-> Update efi_call_phys_prelog to install an identity mapping of all available
-> memory.  This corrects a bug on very large systems with more then 512 GB in
-> which bios would not be able to access addresses above not in the mapping.
-> 
-> The result is a crash that looks much like this.
-> 
-> BUG: unable to handle kernel paging request at 000000effd870020
-> IP: [<0000000078bce331>] 0x78bce330
-> PGD 0
-> Oops: 0000 [#1] SMP
-> Modules linked in:
-> CPU 0
-> Pid: 0, comm: swapper/0 Tainted: G        W    3.8.0-rc1-next-20121224-medusa_ntz+ #2 Intel Corp. Stoutland Platform
-> RIP: 0010:[<0000000078bce331>]  [<0000000078bce331>] 0x78bce330
-> RSP: 0000:ffffffff81601d28  EFLAGS: 00010006
-> RAX: 0000000078b80e18 RBX: 0000000000000004 RCX: 0000000000000004
-> RDX: 0000000078bcf958 RSI: 0000000000002400 RDI: 8000000000000000
-> RBP: 0000000078bcf760 R08: 000000effd870000 R09: 0000000000000000
-> R10: 0000000000000000 R11: 00000000000000c3 R12: 0000000000000030
-> R13: 000000effd870000 R14: 0000000000000000 R15: ffff88effd870000
-> FS:  0000000000000000(0000) GS:ffff88effe400000(0000) knlGS:0000000000000000
-> CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> CR2: 000000effd870020 CR3: 000000000160c000 CR4: 00000000000006b0
-> DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-> Process swapper/0 (pid: 0, threadinfo ffffffff81600000, task ffffffff81614400)
-> Stack:
->  0000000078b80d18 0000000000000004 0000000078bced7b ffff880078b81fff
->  0000000000000000 0000000000000082 0000000078bce3a8 0000000000002400
->  0000000060000202 0000000078b80da0 0000000078bce45d ffffffff8107cb5a
-> Call Trace:
->  [<ffffffff8107cb5a>] ? on_each_cpu+0x77/0x83
->  [<ffffffff8102f4eb>] ? change_page_attr_set_clr+0x32f/0x3ed
->  [<ffffffff81035946>] ? efi_call4+0x46/0x80
->  [<ffffffff816c5abb>] ? efi_enter_virtual_mode+0x1f5/0x305
->  [<ffffffff816aeb24>] ? start_kernel+0x34a/0x3d2
->  [<ffffffff816ae5ed>] ? repair_env_string+0x60/0x60
->  [<ffffffff816ae2be>] ? x86_64_start_reservations+0xba/0xc1
->  [<ffffffff816ae120>] ? early_idt_handlers+0x120/0x120
->  [<ffffffff816ae419>] ? x86_64_start_kernel+0x154/0x163
-> Code:  Bad RIP value.
-> RIP  [<0000000078bce331>] 0x78bce330
->  RSP <ffffffff81601d28>
-> CR2: 000000effd870020
-> ---[ end trace ead828934fef5eab ]---
-> 
-> v2: I noticed a typo on the one sent friday, also ccing the stable tree.
-> 
-> 
-> Cc: stable@vger.kernel.org
-> Cc: Matt Fleming <matt.fleming@intel.com>
-> Cc: Thomas Gleixner <tglx@linutronix.de>
-> Cc: Ingo Molnar <mingo@redhat.com>
-> Cc: "H. Peter Anvin" <hpa@zytor.com>
-> Signed-off-by: Nathan Zimmer <nzimmer@sgi.com>
-> Signed-off-by: Robin Holt <holt@sgi.com>
-> ---
->  arch/x86/platform/efi/efi_64.c |   22 +++++++++++++++++-----
->  1 files changed, 17 insertions(+), 5 deletions(-)
+Unlike the unlink path that is called from the VFS layer, we need to
+call d_delete() ourselves when a variable is deleted in
+efivarfs_file_write().
 
-The last time that the topic of introducing a proper identity pagetable
-came up was here,
+Failure to do so means we can access a stale struct efivar_entry when
+reading/writing the file, which can result in the following oops,
 
-	https://lkml.org/lkml/2012/10/5/253
+  [   59.978216] general protection fault: 0000 [#1] SMP
+  [   60.038660] CPU 9
+  [   60.040501] Pid: 1001, comm: cat Not tainted 3.7.0-2.fc19.x86_64 #1 IBM System x3550 M3 -[7944I21]-/69Y4438
+  [   60.050840] RIP: 0010:[<ffffffff810d5d1e>]  [<ffffffff810d5d1e>] __lock_acquire+0x5e/0x1bb0
+  [   60.059198] RSP: 0018:ffff880270595ce8  EFLAGS: 00010046
+  [   60.064500] RAX: 0000000000000046 RBX: 0000000000000002 RCX: 0000000000000000
+  [   60.071617] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 6b6b6b6b6b6b6b83
+  [   60.078735] RBP: ffff880270595dd8 R08: 0000000000000002 R09: 0000000000000000
+  [   60.085852] R10: 6b6b6b6b6b6b6b83 R11: 0000000000000000 R12: 0000000000000000
+  [   60.092971] R13: ffff88027170cd20 R14: 0000000000000000 R15: 0000000000000000
+  [   60.100091] FS:  00007fc0c8ff3740(0000) GS:ffff880277000000(0000) knlGS:0000000000000000
+  [   60.108164] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+  [   60.113899] CR2: 0000000001520000 CR3: 000000026d594000 CR4: 00000000000007e0
+  [   60.121016] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+  [   60.128135] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
+  [   60.135254] Process cat (pid: 1001, threadinfo ffff880270594000, task ffff88027170cd20)
+  [   60.143239] Stack:
+  [   60.145251]  ffff880270595cf8 ffffffff81021da3 ffff880270595d08 ffffffff81021e19
+  [   60.152714]  ffff880270595d38 ffffffff810acdb5 ffff880200000168 0000000000000086
+  [   60.160175]  ffff88027170d5e8 ffffffff810d25ed ffff880270595d58 ffffffff810ace7f
+  [   60.167638] Call Trace:
+  [   60.170088]  [<ffffffff81021da3>] ? native_sched_clock+0x13/0x80
+  [   60.176085]  [<ffffffff81021e19>] ? sched_clock+0x9/0x10
+  [   60.181389]  [<ffffffff810acdb5>] ? sched_clock_cpu+0xc5/0x120
+  [   60.187211]  [<ffffffff810d25ed>] ? trace_hardirqs_off+0xd/0x10
+  [   60.193121]  [<ffffffff810ace7f>] ? local_clock+0x6f/0x80
+  [   60.198513]  [<ffffffff810d2f6f>] ? lock_release_holdtime.part.26+0xf/0x180
+  [   60.205465]  [<ffffffff810d7b57>] ? lock_release_non_nested+0x2e7/0x320
+  [   60.212073]  [<ffffffff815638bb>] ? efivarfs_file_write+0x5b/0x280
+  [   60.218242]  [<ffffffff810d7f41>] lock_acquire+0xa1/0x1f0
+  [   60.223633]  [<ffffffff81563971>] ? efivarfs_file_write+0x111/0x280
+  [   60.229892]  [<ffffffff8118b47c>] ? might_fault+0x5c/0xb0
+  [   60.235287]  [<ffffffff816f1bf6>] _raw_spin_lock+0x46/0x80
+  [   60.240762]  [<ffffffff81563971>] ? efivarfs_file_write+0x111/0x280
+  [   60.247018]  [<ffffffff81563971>] efivarfs_file_write+0x111/0x280
+  [   60.253103]  [<ffffffff811d307f>] vfs_write+0xaf/0x190
+  [   60.258233]  [<ffffffff811d33d5>] sys_write+0x55/0xa0
+  [   60.263278]  [<ffffffff816fbd19>] system_call_fastpath+0x16/0x1b
+  [   60.269271] Code: 41 0f 45 d8 4c 89 75 f0 4c 89 7d f8 85 c0 0f 84 09 01 00 00 8b 05 a3 f9 ff 00 49 89 fa 41 89 f6 41 89 d3 85 c0 0f 84 12 01 00 00 <49> 8b 02 ba 01 00 00 00 48 3d a0 07 14 82 0f 44 da 41 83 fe 01
+  [   60.289431] RIP  [<ffffffff810d5d1e>] __lock_acquire+0x5e/0x1bb0
+  [   60.295444]  RSP <ffff880270595ce8>
+  [   60.298928] ---[ end trace 1bbfd41a2cf6a0d8 ]---
 
-mainly in the context of some firmware requiring physical mappings for
-I/O devices to persist even after we've called SetVirtualAddressMap().
-It turns out that there's a bunch of places in the kernel that want this
-identity mapping - the one you've pointed out being yet another.
+Cc: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efivars.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 95fd505..2b20038 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -38,7 +38,7 @@
->  #include <asm/cacheflush.h>
->  #include <asm/fixmap.h>
->  
-> -static pgd_t save_pgd __initdata;
-> +static pgd_t *save_pgd __initdata;
->  static unsigned long efi_flags __initdata;
->  
->  static void __init early_code_mapping_set_exec(int executable)
-> @@ -61,12 +61,20 @@ static void __init early_code_mapping_set_exec(int executable)
->  void __init efi_call_phys_prelog(void)
->  {
->  	unsigned long vaddress;
-> +	int pgd;
-> +	int n_pgds;
->  
->  	early_code_mapping_set_exec(1);
->  	local_irq_save(efi_flags);
-> -	vaddress = (unsigned long)__va(0x0UL);
-> -	save_pgd = *pgd_offset_k(0x0UL);
-> -	set_pgd(pgd_offset_k(0x0UL), *pgd_offset_k(vaddress));
-> +
-> +	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
-> +	save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_KERNEL);
-
-There's potential for this to be called under a spinlock, e.g. from
-phys_efi_get_time(). Maybe this should be GFP_ATOMIC?
-
-> +	for (pgd = 0; pgd < n_pgds; pgd++) {
-> +		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
-> +		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
-> +		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
-> +	}
->  	__flush_tlb_all();
->  }
->  
-> @@ -75,7 +83,11 @@ void __init efi_call_phys_epilog(void)
->  	/*
->  	 * After the lock is released, the original page table is restored.
->  	 */
-> -	set_pgd(pgd_offset_k(0x0UL), save_pgd);
-> +	int pgd;
-> +	int n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
-> +	for (pgd = 0; pgd < n_pgds; pgd++)
-> +		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), save_pgd[pgd]);
-> +	kfree(save_pgd);
->  	__flush_tlb_all();
->  	local_irq_restore(efi_flags);
->  	early_code_mapping_set_exec(0);
-
-I initially wrote a patch that was a little like this but Peter
-suggested making use of trampoline_pgd on x86-64 and switching between
-pagetables with CR3. While that's certainly the approach we should take
-going forward, this patch does look pretty trivial (making it suitable
-for stable) and it fixes a crash.
-
-So unless anyone's got an objection I'm happy to queue this up.
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 807dad4..2ed59dc 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -793,6 +793,7 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 		spin_unlock(&efivars->lock);
+ 		efivar_unregister(var);
+ 		drop_nlink(inode);
++		d_delete(file->f_dentry);
+ 		dput(file->f_dentry);
+ 
+ 	} else {
+-- 
+1.7.11.7
