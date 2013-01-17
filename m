@@ -1,47 +1,130 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH] efivarfs: Never return ENOENT from firmware
-Date: Thu, 17 Jan 2013 07:40:16 +0000
-Message-ID: <1358408416-24622-1-git-send-email-matt@console-pimps.org>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] efivarfs: Delete dentry from dcache in
+ efivarfs_file_write()
+Date: Thu, 17 Jan 2013 16:48:03 +0800
+Message-ID: <1358412483.14569.164.camel@linux-s257.site>
+References: <1358408353-24497-1-git-send-email-matt@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1358408353-24497-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-01-17 =E6=96=BC 07:39 +0000=EF=BC=8CMa=
+tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>=20
+> Unlike the unlink path that is called from the VFS layer, we need to
+> call d_delete() ourselves when a variable is deleted in
+> efivarfs_file_write().
+>=20
+> Failure to do so means we can access a stale struct efivar_entry when
+> reading/writing the file, which can result in the following oops,
+>=20
+>   [   59.978216] general protection fault: 0000 [#1] SMP
+>   [   60.038660] CPU 9
+>   [   60.040501] Pid: 1001, comm: cat Not tainted 3.7.0-2.fc19.x86_64=
+ #1 IBM System x3550 M3 -[7944I21]-/69Y4438
+>   [   60.050840] RIP: 0010:[<ffffffff810d5d1e>]  [<ffffffff810d5d1e>]=
+ __lock_acquire+0x5e/0x1bb0
+>   [   60.059198] RSP: 0018:ffff880270595ce8  EFLAGS: 00010046
+>   [   60.064500] RAX: 0000000000000046 RBX: 0000000000000002 RCX: 000=
+0000000000000
+>   [   60.071617] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 6b6=
+b6b6b6b6b6b83
+>   [   60.078735] RBP: ffff880270595dd8 R08: 0000000000000002 R09: 000=
+0000000000000
+>   [   60.085852] R10: 6b6b6b6b6b6b6b83 R11: 0000000000000000 R12: 000=
+0000000000000
+>   [   60.092971] R13: ffff88027170cd20 R14: 0000000000000000 R15: 000=
+0000000000000
+>   [   60.100091] FS:  00007fc0c8ff3740(0000) GS:ffff880277000000(0000=
+) knlGS:0000000000000000
+>   [   60.108164] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>   [   60.113899] CR2: 0000000001520000 CR3: 000000026d594000 CR4: 000=
+00000000007e0
+>   [   60.121016] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 000=
+0000000000000
+>   [   60.128135] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 000=
+0000000000400
+>   [   60.135254] Process cat (pid: 1001, threadinfo ffff880270594000,=
+ task ffff88027170cd20)
+>   [   60.143239] Stack:
+>   [   60.145251]  ffff880270595cf8 ffffffff81021da3 ffff880270595d08 =
+ffffffff81021e19
+>   [   60.152714]  ffff880270595d38 ffffffff810acdb5 ffff880200000168 =
+0000000000000086
+>   [   60.160175]  ffff88027170d5e8 ffffffff810d25ed ffff880270595d58 =
+ffffffff810ace7f
+>   [   60.167638] Call Trace:
+>   [   60.170088]  [<ffffffff81021da3>] ? native_sched_clock+0x13/0x80
+>   [   60.176085]  [<ffffffff81021e19>] ? sched_clock+0x9/0x10
+>   [   60.181389]  [<ffffffff810acdb5>] ? sched_clock_cpu+0xc5/0x120
+>   [   60.187211]  [<ffffffff810d25ed>] ? trace_hardirqs_off+0xd/0x10
+>   [   60.193121]  [<ffffffff810ace7f>] ? local_clock+0x6f/0x80
+>   [   60.198513]  [<ffffffff810d2f6f>] ? lock_release_holdtime.part.2=
+6+0xf/0x180
+>   [   60.205465]  [<ffffffff810d7b57>] ? lock_release_non_nested+0x2e=
+7/0x320
+>   [   60.212073]  [<ffffffff815638bb>] ? efivarfs_file_write+0x5b/0x2=
+80
+>   [   60.218242]  [<ffffffff810d7f41>] lock_acquire+0xa1/0x1f0
+>   [   60.223633]  [<ffffffff81563971>] ? efivarfs_file_write+0x111/0x=
+280
+>   [   60.229892]  [<ffffffff8118b47c>] ? might_fault+0x5c/0xb0
+>   [   60.235287]  [<ffffffff816f1bf6>] _raw_spin_lock+0x46/0x80
+>   [   60.240762]  [<ffffffff81563971>] ? efivarfs_file_write+0x111/0x=
+280
+>   [   60.247018]  [<ffffffff81563971>] efivarfs_file_write+0x111/0x28=
+0
+>   [   60.253103]  [<ffffffff811d307f>] vfs_write+0xaf/0x190
+>   [   60.258233]  [<ffffffff811d33d5>] sys_write+0x55/0xa0
+>   [   60.263278]  [<ffffffff816fbd19>] system_call_fastpath+0x16/0x1b
+>   [   60.269271] Code: 41 0f 45 d8 4c 89 75 f0 4c 89 7d f8 85 c0 0f 8=
+4 09 01 00 00 8b 05 a3 f9 ff 00 49 89 fa 41 89 f6 41 89 d3 85 c0 0f 84 =
+12 01 00 00 <49> 8b 02 ba 01 00 00 00 48 3d a0 07 14 82 0f 44 da 41 83 =
+fe 01
+>   [   60.289431] RIP  [<ffffffff810d5d1e>] __lock_acquire+0x5e/0x1bb0
+>   [   60.295444]  RSP <ffff880270595ce8>
+>   [   60.298928] ---[ end trace 1bbfd41a2cf6a0d8 ]---
+>=20
+> Cc: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Files are created in efivarfs_create() before a corresponding variable
-is created in the firmware. This leads to users being able to
-read/write to the file without the variable existing in the
-firmware. Reading a non-existent variable currently returns -ENOENT,
-which is confusing because the file obviously *does* exist.
+This patch works to me for fix the ghost file after remove variable fro=
+m
+EFI file system. And, I test create/remote variable then reboot system =
+a
+couple of times, didn't see problem.
 
-Convert EFI_NOT_FOUND into -EIO which is the closest thing to "error
-while interacting with firmware", and should hopefully indicate to the
-caller that the variable is in some uninitialised state.
+Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
 
-Cc: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efivars.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index fa9fa03..807dad4 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -674,7 +674,7 @@ static int efi_status_to_err(efi_status_t status)
- 		err = -EACCES;
- 		break;
- 	case EFI_NOT_FOUND:
--		err = -ENOENT;
-+		err = -EIO;
- 		break;
- 	default:
- 		err = -EINVAL;
--- 
-1.7.11.7
+Thanks a lot!
+Joey Lee
+
+> ---
+>  drivers/firmware/efivars.c | 1 +
+>  1 file changed, 1 insertion(+)
+>=20
+> diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+> index 807dad4..2ed59dc 100644
+> --- a/drivers/firmware/efivars.c
+> +++ b/drivers/firmware/efivars.c
+> @@ -793,6 +793,7 @@ static ssize_t efivarfs_file_write(struct file *f=
+ile,
+>  		spin_unlock(&efivars->lock);
+>  		efivar_unregister(var);
+>  		drop_nlink(inode);
+> +		d_delete(file->f_dentry);
+>  		dput(file->f_dentry);
+> =20
+>  	} else {
