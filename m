@@ -1,50 +1,65 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI fixes for v3.8
-Date: Fri, 18 Jan 2013 10:29:47 +0000
-Message-ID: <1358504987.8203.425.camel@mfleming-mobl1.ger.corp.intel.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: [PATCH v2] fix setup_efi_pci()
+Date: Fri, 18 Jan 2013 12:35:14 +0000
+Message-ID: <50F94F9202000078000B74EE@nat28.tlf.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Peter,
+This fixes two issues:
+- wrong memory type used for allocation intended to persist post-boot
+- four similar build warnings on 32-bit (casts between different size
+  pointers and integers)
 
-The following changes since commit 7d1f9aeff1ee4a20b1aeb377dd0f579fe9647619:
+Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+---
+v2: Drop the change that was already applied separately (commit
+    886d751a2ea99a160f2d0a472231566d9cb0cf58 "x86, efi: correct
+    precedence of operators in setup_efi_pci")
 
-  Linux 3.8-rc4 (2013-01-17 19:25:45 -0800)
+---
+ arch/x86/boot/compressed/eboot.c |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-for-3.8
-
-for you to fetch changes up to 791eb564d218dabe0f9a2212916fe54240b97afb:
-
-  efivarfs: Delete dentry from dcache in efivarfs_file_write() (2013-01-18 09:43:44 +0000)
-
-----------------------------------------------------------------
-EFI fixes for v3.8
-
-  * Fix EFI boot crash on machines with > 512GB of RAM
-  * Fix a few oopses in efivarfs
-
-----------------------------------------------------------------
-Lingzhu Xiang (1):
-      efivarfs: Drop link count of the right inode
-
-Matt Fleming (2):
-      efivarfs: Never return ENOENT from firmware
-      efivarfs: Delete dentry from dcache in efivarfs_file_write()
-
-Nathan Zimmer (1):
-      efi, x86: Pass a proper identity mapping in efi_call_phys_prelog
-
- arch/x86/platform/efi/efi_64.c | 22 +++++++++++++++++-----
- drivers/firmware/efivars.c     |  5 +++--
- 2 files changed, 20 insertions(+), 7 deletions(-)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+--- 3.8-rc4/arch/x86/boot/compressed/eboot.c
++++ 3.8-rc4-x86-EFI-PCI-ROMs/arch/x86/boot/compressed/eboot.c
+@@ -256,10 +256,10 @@ static efi_status_t setup_efi_pci(struct
+ 	int i;
+ 	struct setup_data *data;
+ 
+-	data = (struct setup_data *)params->hdr.setup_data;
++	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
+ 
+ 	while (data && data->next)
+-		data = (struct setup_data *)data->next;
++		data = (struct setup_data *)(unsigned long)data->next;
+ 
+ 	status = efi_call_phys5(sys_table->boottime->locate_handle,
+ 				EFI_LOCATE_BY_PROTOCOL, &pci_proto,
+@@ -311,7 +311,7 @@ static efi_status_t setup_efi_pci(struct
+ 		size = pci->romsize + sizeof(*rom);
+ 
+ 		status = efi_call_phys3(sys_table->boottime->allocate_pool,
+-				EFI_LOADER_DATA, size, &rom);
++					EFI_RUNTIME_SERVICES_DATA, size, &rom);
+ 
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+@@ -345,9 +345,9 @@ static efi_status_t setup_efi_pci(struct
+ 		memcpy(rom->romdata, pci->romimage, pci->romsize);
+ 
+ 		if (data)
+-			data->next = (uint64_t)rom;
++			data->next = (unsigned long)rom;
+ 		else
+-			params->hdr.setup_data = (uint64_t)rom;
++			params->hdr.setup_data = (unsigned long)rom;
+ 
+ 		data = (struct setup_data *)rom;
+ 
