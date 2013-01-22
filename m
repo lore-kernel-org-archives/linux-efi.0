@@ -1,51 +1,39 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: Fwd: 2TB USB hard drive for backing up
-Date: Mon, 21 Jan 2013 15:21:38 -0600
-Message-ID: <50FDB162.2040209@zytor.com>
-References: <jmunm9$90r$2@speranza.aioe.org> <201204301814.21525.Martin@lichtvoll.de> <CAGZeNoc82T0jS=Sg3d2umqi6PjAWjOKjqK2RbuK+QfAzN3Pmww@mail.gmail.com> <201205010044.24643.Martin@lichtvoll.de> <CAGZeNoeSEtTMK22+JcsG7xRRrbsQwgJV5iLgWenrX=rvLr-ZXQ@mail.gmail.com> <CAGZeNof6NWiXhCDPpZiLu8QhQ_6Cmp-nhSOf=h=-jAjccWaa7g@mail.gmail.com> <CAGZeNoeEoecpjvuP9uwphostOcrrAJNerxYGUtjyaMEBn04jxQ@mail.gmail.com>
+From: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: Re: [PATCH] selftests: Add tests for efivarfs
+Date: Tue, 22 Jan 2013 12:54:19 +0800
+Message-ID: <50FE1B7B.9040100@canonical.com>
+References: <1358500776.780948.518900415126.1.gpush@pecola> <50FD1B1E.5000208@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGZeNoeEoecpjvuP9uwphostOcrrAJNerxYGUtjyaMEBn04jxQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ellwood Blues <elwood.blue@gmail.com>
-Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <50FD1B1E.5000208-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/19/2013 03:40 PM, Ellwood Blues wrote:
-> Hi.
-> 
-> I've had this problem for so long that today after compiling kernel
-> 3.7.3 and not getting any improvements I decided to let you know that
-> some of us still only able to use our GPT 3TB hard disks only on
-> Windows.
-> 
-> On linux only hdparm and gdisk see 3TB but also see some kind of
-> corruption on the alternate GPT which is not true because on windows
-> works flawlessly.
-> 
-> I hope you won't take too long to make it work because this is the
-> only reason I still loging in on windows, before buying this disk I
-> didn't log in on windows at all.
-> 
-> I don't need the EFI drivers to work because the BIOS is not ready for
-> that, I only would like to read and write on the disk which is already
-> half full and cannot do any new experiments trying to fix it with
-> gdisk.
-> 
-> I only need the kernel GPT drivers to work out.
-> 
+Hi Lingzhu,
 
-This has nothing to do with GPT.  The problem is that the capacity
-reported by the drive is truncated:
+Thanks for taking a look at the patch.
 
-May  3 18:19:06 relampago3 kernel: [ 3948.472796] sd 7:0:0:0: [sdf]
-1565565872 512-byte logical blocks: (801 GB/746 GiB)
+>> +	# the open-unlink test relies on deleting the Lang variable at
+>> +	# present; we don't want to do this on an actual machine.
+>
+> It seems open-unlink already goes to delete a custom variable.
 
-Is the hdparm produced via the USB interface or by plugging the internal
-drive into an SATA/eSATA port?
+Ah, this was left over from an older version of the test. Given that 
+it's already caused problems, I'll remove the QEMU check.
 
-Either way... it is offtopic for the linux-efi mailing list.
+Unless we're planning to brick machines in other nasty ways? :)
 
-	-hpa
+> test_zero_size_delete can't reproduce the file lingering bug on unpatched
+> 3.8-rc4.
+
+It's not intended to reproduce this particular issue. Would you be okay 
+to add a specific test for this?
+
+Cheers,
+
+
+Jeremy
