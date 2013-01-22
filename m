@@ -1,22 +1,19 @@
-From: James Bottomley <James.Bottomley@HansenPartnership.com>
-Subject: Re: Fwd: 2TB USB hard drive for backing up
-Date: Tue, 22 Jan 2013 11:58:06 +0000
-Message-ID: <1358855886.2387.35.camel@dabdike.int.hansenpartnership.com>
-References: <jmunm9$90r$2@speranza.aioe.org>
-	 <CAGZeNoeEoecpjvuP9uwphostOcrrAJNerxYGUtjyaMEBn04jxQ@mail.gmail.com>
-	 <1358852735.2387.34.camel@dabdike.int.hansenpartnership.com>
-	 <2472909.UxI1EnLDV4@linux-5eaq.site>
+From: Alan Stern <stern@rowland.harvard.edu>
+Subject: Re: [usb-storage] Re: Fwd: 2TB USB hard drive for backing up
+Date: Tue, 22 Jan 2013 10:43:07 -0500 (EST)
+Message-ID: <Pine.LNX.4.44L0.1301221039350.1510-100000@iolanthe.rowland.org>
+References: <2472909.UxI1EnLDV4@linux-5eaq.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-scsi-owner@vger.kernel.org>
 In-Reply-To: <2472909.UxI1EnLDV4@linux-5eaq.site>
 Sender: linux-scsi-owner@vger.kernel.org
 To: Oliver Neukum <oneukum@suse.de>
-Cc: Ellwood Blues <elwood.blue@gmail.com>, linux-efi@vger.kernel.org, linux-scsi <linux-scsi@vger.kernel.org>, USB Storage List <usb-storage@lists.one-eyed-alien.net>
+Cc: James Bottomley <James.Bottomley@hansenpartnership.com>, Ellwood Blues <elwood.blue@gmail.com>, linux-efi@vger.kernel.org, linux-scsi <linux-scsi@vger.kernel.org>, USB Storage List <usb-storage@lists.one-eyed-alien.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-01-22 at 12:49 +0100, Oliver Neukum wrote:
+On Tue, 22 Jan 2013, Oliver Neukum wrote:
+
 > On Tuesday 22 January 2013 11:05:35 James Bottomley wrote:
 > > > May  3 18:19:06 relampago3 kernel: [ 3948.472796] sd 7:0:0:0: [sdf]
 > > > 1565565872 512-byte logical blocks: (801 GB/746 GiB)
@@ -29,10 +26,9 @@ On Tue, 2013-01-22 at 12:49 +0100, Oliver Neukum wrote:
 > What can we do? The answer the device is giving is quite ordinary.
 > Do we need another quirk and an associated flag?
 
-Well, firstly we have to verify the theory, but if it pans out,
-probably ... this time a force RC16 flag.  Unless there's any other way
-to tell that we have this problem?
+The JMicron bridges are well known to be fairly buggy.  Another quirk 
+may indeed be the only solution.  Oliver, would you like to write a 
+patch for it?
 
-James
-
+Alan Stern
 
