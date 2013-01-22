@@ -1,39 +1,51 @@
-From: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [PATCH] selftests: Add tests for efivarfs
-Date: Tue, 22 Jan 2013 12:54:19 +0800
-Message-ID: <50FE1B7B.9040100@canonical.com>
-References: <1358500776.780948.518900415126.1.gpush@pecola> <50FD1B1E.5000208@redhat.com>
+From: Ellwood Blues <elwood.blue@gmail.com>
+Subject: Re: Fwd: 2TB USB hard drive for backing up
+Date: Tue, 22 Jan 2013 10:27:52 +0000
+Message-ID: <CAGZeNoe4mg57bTPzBRWKfZ47gNdeBNvq3TxjHbHAMHYEGyQZmg@mail.gmail.com>
+References: <jmunm9$90r$2@speranza.aioe.org>
+	<201204301814.21525.Martin@lichtvoll.de>
+	<CAGZeNoc82T0jS=Sg3d2umqi6PjAWjOKjqK2RbuK+QfAzN3Pmww@mail.gmail.com>
+	<201205010044.24643.Martin@lichtvoll.de>
+	<CAGZeNoeSEtTMK22+JcsG7xRRrbsQwgJV5iLgWenrX=rvLr-ZXQ@mail.gmail.com>
+	<CAGZeNof6NWiXhCDPpZiLu8QhQ_6Cmp-nhSOf=h=-jAjccWaa7g@mail.gmail.com>
+	<CAGZeNoeEoecpjvuP9uwphostOcrrAJNerxYGUtjyaMEBn04jxQ@mail.gmail.com>
+	<50FDB162.2040209@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <50FD1B1E.5000208-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <50FDB162.2040209@zytor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Lingzhu,
+2013/1/21 H. Peter Anvin <hpa@zytor.com>:
 
-Thanks for taking a look at the patch.
-
->> +	# the open-unlink test relies on deleting the Lang variable at
->> +	# present; we don't want to do this on an actual machine.
+> This has nothing to do with GPT.  The problem is that the capacity
+> reported by the drive is truncated:
 >
-> It seems open-unlink already goes to delete a custom variable.
-
-Ah, this was left over from an older version of the test. Given that 
-it's already caused problems, I'll remove the QEMU check.
-
-Unless we're planning to brick machines in other nasty ways? :)
-
-> test_zero_size_delete can't reproduce the file lingering bug on unpatched
-> 3.8-rc4.
-
-It's not intended to reproduce this particular issue. Would you be okay 
-to add a specific test for this?
-
-Cheers,
+> May  3 18:19:06 relampago3 kernel: [ 3948.472796] sd 7:0:0:0: [sdf]
+> 1565565872 512-byte logical blocks: (801 GB/746 GiB)
+>
+> Is the hdparm produced via the USB interface or by plugging the internal
+> drive into an SATA/eSATA port?
 
 
-Jeremy
+
+USB SATA docking station which works out very well on windows.
+
+
+
+>
+> Either way... it is offtopic for the linux-efi mailing list.
+
+
+
+Sorry! I didn't know this was a list I thought it was the developer
+email address.
+
+I think that linux-efi is the most appropriate one to send this
+message because GPT is included in EFI modules, I didn't see any other
+about GPT.
+
+Cheers.
