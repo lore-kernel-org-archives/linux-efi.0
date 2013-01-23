@@ -1,58 +1,93 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [usb-storage] Re: Fwd: 2TB USB hard drive for backing up
-Date: Tue, 22 Jan 2013 13:17:20 -0600
-Message-ID: <2d90dddf-1bdc-4f43-bdf3-9ec09e38bb8b@email.android.com>
-References: <Pine.LNX.4.44L0.1301221039350.1510-100000@iolanthe.rowland.org> <50FEC6D6.3030708@zytor.com> <1358874830.2387.46.camel@dabdike.int.hansenpartnership.com>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: Re: [PATCH 1/2] efi: Make 'efi_enabled' a function to query EFI
+ facilities
+Date: Wed, 23 Jan 2013 04:16:21 +0000
+Message-ID: <1358914581.3151.6.camel@deadeye.wl.decadent.org.uk>
+References: <1358800838-10459-1-git-send-email-matt@console-pimps.org>
+	 <1358800838-10459-2-git-send-email-matt@console-pimps.org>
+	 <50FDA81B.9090602@zytor.com>
+	 <1358802778.2496.11.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1358874830.2387.46.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, Ellwood Blues <elwood.blue-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-scsi <linux-scsi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, USB Storage List <usb-storage-ijkIwGHArpdIPJnuZ7Njw4oP9KaGy4wf@public.gmane.org>
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-rc5G/xi5TRpg2q32Fy3P"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1358802778.2496.11.camel@mfleming-mobl1.ger.corp.intel.com>
+Sender: stable-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Tim Gardner <rtg.canonical@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Olof Johansson <olof@lixom.net>, Tony Luck <tony.luck@intel.com>, Steve Langasek <steve.langasek@canonical.com>, Colin Ian King <colin.king@canonical.com>, David Airlie <airlied@linux.ie>, Corentin Chary <corentincj@iksaif.net>, Dave Jiang <dave.jiang@intel.com>, Peter Jones <pjones@redhat.com>, Konrad Rzeszutek Wilk <konrad@kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Don't worry... I have lived in that world for decades... it's a lot like BIOS.
 
-James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
+--=-rc5G/xi5TRpg2q32Fy3P
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
->On Tue, 2013-01-22 at 11:05 -0600, H. Peter Anvin wrote:
->> On 01/22/2013 09:43 AM, Alan Stern wrote:
->> > On Tue, 22 Jan 2013, Oliver Neukum wrote:
->> > 
->> >> On Tuesday 22 January 2013 11:05:35 James Bottomley wrote:
->> >>>> May  3 18:19:06 relampago3 kernel: [ 3948.472796] sd 7:0:0:0:
->[sdf]
->> >>>> 1565565872 512-byte logical blocks: (801 GB/746 GiB)
->> >>>
->> >>> This looks like a wrap around of your actual size.  This appears
->to
->> >>> indicate the device isn't replying correctly to READ CAPACITY. 
->The
->> >>> conventional return from READ CAPACITY should be -1 which would
->trigger
->> >>> us to retry with READ CAPACITY(16).
->> >>
->> >> What can we do? The answer the device is giving is quite ordinary.
->> >> Do we need another quirk and an associated flag?
->> > 
->> > The JMicron bridges are well known to be fairly buggy.  Another
->quirk 
->> > may indeed be the only solution.  Oliver, would you like to write a
->
->> > patch for it?
->> > 
->> 
->> Would it make more sense to try READ CAPACITY(16) first?  Or does
->that
->> have other bad effects?
->
->That has other effect: Many USB devices crash the firmware on 16 byte
->commands (sigh, welcome to our world ...)
->
->James
+On Mon, 2013-01-21 at 21:12 +0000, Matt Fleming wrote:
+[...]
+> From 92e73f936e40a8c6562e47425d434a4e62d2b8e2 Mon Sep 17 00:00:00 2001
+> From: Matt Fleming <matt.fleming@intel.com>
+> Date: Wed, 14 Nov 2012 09:42:35 +0000
+> Subject: [PATCH] efi: Make 'efi_enabled' a function to query EFI faciliti=
+es
+>=20
+> Originally 'efi_enabled' indicated whether a kernel was booted from
+> EFI firmware. Over time its semantics have changed, and it now
+> indicates whether or not we are booted on an EFI machine with
+> bit-native firmware, e.g. 64-bit kernel with 64-bit firmware.
+>=20
+> The immediate motivation for this patch is the bug report at,
+>=20
+>     https://bugs.launchpad.net/ubuntu-cdimage/+bug/1040557
+>=20
+> which details how running a platform driver on an EFI machine that is
+> designed to run under BIOS can cause the machine to become
+> bricked. Also, the following report,
+>=20
+>     https://bugzilla.kernel.org/show_bug.cgi?id=3D47121
+>=20
+> details how running said driver can also cause Machine Check
+> Exceptions. Drivers need a new means of detecting whether they're
+> running on an EFI machine, as sadly the expression,
+>=20
+>     if (!efi_enabled)
+>=20
+> hasn't been a sufficient condition for quite some time.
+[...]
 
--- 
-Sent from my mobile phone. Please excuse brevity and lack of formatting.
+This patch maps the old efi_enabled flag to efi_enabled(EFI_BOOT).  Your
+second patch adds a test for efi_enabled(EFI_BOOT) to the samsung-laptop
+driver.  So the samsung-laptop driver could be fixed by adding a check
+for the old flag; it doesn't depend on the addition of new flags at all.
+The changes elsewhere may well be important, but the cited motivation
+here just doesn't make sense.
+
+Ben.
+
+--=20
+Ben Hutchings
+Q.  Which is the greater problem in the world today, ignorance or apathy?
+A.  I don't know and I couldn't care less.
+
+--=-rc5G/xi5TRpg2q32Fy3P
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIVAwUAUP9kFee/yOyVhhEJAQrJFg/8D5siJHJ5qKWA1wo/XnihjQuBK5nweJ5e
+RH//i2vOliehEtgGhfs5sMtGohrg/2lTXcaS8i+MxuiwrNFW73LoHdTsTf8v4xRc
+YgkLnmxkFicpvPX/X3GUqOT9fXHNgCpXnIpRlLxbMulL7G32q5I4hjLVfL21+ThG
+RH518/rZg1bOg9BdvzPEkCW6QAw1lQmObRCrnKrKtupQ5SmQyOSfPMHgll8jSUwL
+LMkQ69p/iMSYGR3fW4BIiMFfwEZw/lXFGERrTVhP4EWtIONHzqayqtz1ZlIftImI
+WvSp7GmPzyXWI8G5nkz6rl16ljSZmV1NEoXwCa8lqekZzgaTb7Q8L8juj+ilwFbG
+7Jhj/rQ6mAy2Y3Mbn5SFS9Qo8QBVutKxK7Bthfj8pb6YZqghhpeyRbz+vdhz54td
+q0NzM2b3QX9al5IMVF9qOqoyEmw2GtIkosEGtR/AmQsb0T9a+qpALbPIO/UrD8Vj
+w7yHeAoPQxNw4we9C1JS/XGvuYpptQQixfQD77czKd5qctczYyeCFkI9qtlbxpe/
+3eSITBE40gsVyNssYdSBtV3hUPJfLYmKLbuUe04KgO6kwnulS7Q6s5YWX7qg49st
+ajga1zXIqv+pIEt/c16AeeW7afQj+N7Qs9/bwhrUId5lspDjsQ0QspHSfu74rz8H
+AM3vH4XKYic=
+=eEVp
+-----END PGP SIGNATURE-----
+
+--=-rc5G/xi5TRpg2q32Fy3P--
