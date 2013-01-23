@@ -1,93 +1,69 @@
-From: Ben Hutchings <ben@decadent.org.uk>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Subject: Re: [PATCH 1/2] efi: Make 'efi_enabled' a function to query EFI
  facilities
-Date: Wed, 23 Jan 2013 04:16:21 +0000
-Message-ID: <1358914581.3151.6.camel@deadeye.wl.decadent.org.uk>
+Date: Wed, 23 Jan 2013 07:52:12 +0000
+Message-ID: <1358927532.2496.24.camel@mfleming-mobl1.ger.corp.intel.com>
 References: <1358800838-10459-1-git-send-email-matt@console-pimps.org>
 	 <1358800838-10459-2-git-send-email-matt@console-pimps.org>
 	 <50FDA81B.9090602@zytor.com>
 	 <1358802778.2496.11.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1358914581.3151.6.camel@deadeye.wl.decadent.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-rc5G/xi5TRpg2q32Fy3P"
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1358802778.2496.11.camel@mfleming-mobl1.ger.corp.intel.com>
-Sender: stable-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Tim Gardner <rtg.canonical@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Olof Johansson <olof@lixom.net>, Tony Luck <tony.luck@intel.com>, Steve Langasek <steve.langasek@canonical.com>, Colin Ian King <colin.king@canonical.com>, David Airlie <airlied@linux.ie>, Corentin Chary <corentincj@iksaif.net>, Dave Jiang <dave.jiang@intel.com>, Peter Jones <pjones@redhat.com>, Konrad Rzeszutek Wilk <konrad@kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, stable@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1358914581.3151.6.camel-nDn/Rdv9kqW9Jme8/bJn5UCKIB8iOfG2tUK59QYPAWc@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tim Gardner <rtg.canonical-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>, Dave Jiang <dave.jiang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Wed, 2013-01-23 at 04:16 +0000, Ben Hutchings wrote:
+> On Mon, 2013-01-21 at 21:12 +0000, Matt Fleming wrote:
+> [...]
+> > From 92e73f936e40a8c6562e47425d434a4e62d2b8e2 Mon Sep 17 00:00:00 2001
+> > From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > Date: Wed, 14 Nov 2012 09:42:35 +0000
+> > Subject: [PATCH] efi: Make 'efi_enabled' a function to query EFI facilities
+> > 
+> > Originally 'efi_enabled' indicated whether a kernel was booted from
+> > EFI firmware. Over time its semantics have changed, and it now
+> > indicates whether or not we are booted on an EFI machine with
+> > bit-native firmware, e.g. 64-bit kernel with 64-bit firmware.
+> > 
+> > The immediate motivation for this patch is the bug report at,
+> > 
+> >     https://bugs.launchpad.net/ubuntu-cdimage/+bug/1040557
+> > 
+> > which details how running a platform driver on an EFI machine that is
+> > designed to run under BIOS can cause the machine to become
+> > bricked. Also, the following report,
+> > 
+> >     https://bugzilla.kernel.org/show_bug.cgi?id=47121
+> > 
+> > details how running said driver can also cause Machine Check
+> > Exceptions. Drivers need a new means of detecting whether they're
+> > running on an EFI machine, as sadly the expression,
+> > 
+> >     if (!efi_enabled)
+> > 
+> > hasn't been a sufficient condition for quite some time.
+> [...]
+> 
+> This patch maps the old efi_enabled flag to efi_enabled(EFI_BOOT).  Your
+> second patch adds a test for efi_enabled(EFI_BOOT) to the samsung-laptop
+> driver.  So the samsung-laptop driver could be fixed by adding a check
+> for the old flag; it doesn't depend on the addition of new flags at all.
+> The changes elsewhere may well be important, but the cited motivation
+> here just doesn't make sense.
 
---=-rc5G/xi5TRpg2q32Fy3P
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+If we instead check for the old flag then the samsung-laptop driver
+would run if booting a 32-bit kernel with 64-bit EFI firmware, or vice
+versa, because efi_enabled == 0 in that case.
 
-On Mon, 2013-01-21 at 21:12 +0000, Matt Fleming wrote:
-[...]
-> From 92e73f936e40a8c6562e47425d434a4e62d2b8e2 Mon Sep 17 00:00:00 2001
-> From: Matt Fleming <matt.fleming@intel.com>
-> Date: Wed, 14 Nov 2012 09:42:35 +0000
-> Subject: [PATCH] efi: Make 'efi_enabled' a function to query EFI faciliti=
-es
->=20
-> Originally 'efi_enabled' indicated whether a kernel was booted from
-> EFI firmware. Over time its semantics have changed, and it now
-> indicates whether or not we are booted on an EFI machine with
-> bit-native firmware, e.g. 64-bit kernel with 64-bit firmware.
->=20
-> The immediate motivation for this patch is the bug report at,
->=20
->     https://bugs.launchpad.net/ubuntu-cdimage/+bug/1040557
->=20
-> which details how running a platform driver on an EFI machine that is
-> designed to run under BIOS can cause the machine to become
-> bricked. Also, the following report,
->=20
->     https://bugzilla.kernel.org/show_bug.cgi?id=3D47121
->=20
-> details how running said driver can also cause Machine Check
-> Exceptions. Drivers need a new means of detecting whether they're
-> running on an EFI machine, as sadly the expression,
->=20
->     if (!efi_enabled)
->=20
-> hasn't been a sufficient condition for quite some time.
-[...]
+It's not sufficient to just check the old flag, the samsung-laptop
+driver really can't be allowed to run at all if booting from EFI, and
+the old flag doesn't provide us with that guarantee.
 
-This patch maps the old efi_enabled flag to efi_enabled(EFI_BOOT).  Your
-second patch adds a test for efi_enabled(EFI_BOOT) to the samsung-laptop
-driver.  So the samsung-laptop driver could be fixed by adding a check
-for the old flag; it doesn't depend on the addition of new flags at all.
-The changes elsewhere may well be important, but the cited motivation
-here just doesn't make sense.
-
-Ben.
-
---=20
-Ben Hutchings
-Q.  Which is the greater problem in the world today, ignorance or apathy?
-A.  I don't know and I couldn't care less.
-
---=-rc5G/xi5TRpg2q32Fy3P
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.12 (GNU/Linux)
-
-iQIVAwUAUP9kFee/yOyVhhEJAQrJFg/8D5siJHJ5qKWA1wo/XnihjQuBK5nweJ5e
-RH//i2vOliehEtgGhfs5sMtGohrg/2lTXcaS8i+MxuiwrNFW73LoHdTsTf8v4xRc
-YgkLnmxkFicpvPX/X3GUqOT9fXHNgCpXnIpRlLxbMulL7G32q5I4hjLVfL21+ThG
-RH518/rZg1bOg9BdvzPEkCW6QAw1lQmObRCrnKrKtupQ5SmQyOSfPMHgll8jSUwL
-LMkQ69p/iMSYGR3fW4BIiMFfwEZw/lXFGERrTVhP4EWtIONHzqayqtz1ZlIftImI
-WvSp7GmPzyXWI8G5nkz6rl16ljSZmV1NEoXwCa8lqekZzgaTb7Q8L8juj+ilwFbG
-7Jhj/rQ6mAy2Y3Mbn5SFS9Qo8QBVutKxK7Bthfj8pb6YZqghhpeyRbz+vdhz54td
-q0NzM2b3QX9al5IMVF9qOqoyEmw2GtIkosEGtR/AmQsb0T9a+qpALbPIO/UrD8Vj
-w7yHeAoPQxNw4we9C1JS/XGvuYpptQQixfQD77czKd5qctczYyeCFkI9qtlbxpe/
-3eSITBE40gsVyNssYdSBtV3hUPJfLYmKLbuUe04KgO6kwnulS7Q6s5YWX7qg49st
-ajga1zXIqv+pIEt/c16AeeW7afQj+N7Qs9/bwhrUId5lspDjsQ0QspHSfu74rz8H
-AM3vH4XKYic=
-=eEVp
------END PGP SIGNATURE-----
-
---=-rc5G/xi5TRpg2q32Fy3P--
+-- 
+Matt Fleming, Intel Open Source Technology Center
