@@ -1,188 +1,111 @@
-From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: [PATCH] efi: split efisubsystem from efivars
-Date: Fri, 25 Jan 2013 16:36:55 +0100
-Message-ID: <1359128215-1331-1-git-send-email-teg@jklm.no>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+From: Ben Hutchings <ben@decadent.org.uk>
+Subject: Re: [PATCH 1/2] efi: Make 'efi_enabled' a function to query EFI
+ facilities
+Date: Wed, 23 Jan 2013 13:17:32 +0000
+Message-ID: <1358947052.2976.1.camel@deadeye.wl.decadent.org.uk>
+References: <1358800838-10459-1-git-send-email-matt@console-pimps.org>
+	 <1358800838-10459-2-git-send-email-matt@console-pimps.org>
+	 <50FDA81B.9090602@zytor.com>
+	 <1358802778.2496.11.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1358914581.3151.6.camel@deadeye.wl.decadent.org.uk>
+	 <1358927532.2496.24.camel@mfleming-mobl1.ger.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-eKJOdLrlPpxd5ETaO7nW"
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1358927532.2496.24.camel@mfleming-mobl1.ger.corp.intel.com>
+Sender: stable-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Tim Gardner <rtg.canonical@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Olof Johansson <olof@lixom.net>, Tony Luck <tony.luck@intel.com>, Steve Langasek <steve.langasek@canonical.com>, Colin Ian King <colin.king@canonical.com>, David Airlie <airlied@linux.ie>, Corentin Chary <corentincj@iksaif.net>, Dave Jiang <dave.jiang@intel.com>, Peter Jones <pjones@redhat.com>, Konrad Rzeszutek Wilk <konrad@kernel.org>, "Rafael J. Wysocki" <rjw@sisk.pl>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-This registers /sys/firmware/efi{,/efivars} whenever EFI is enabled
-and the system supports it.
 
-This allows
- *) userspace to check for the existence of /sys/firmware/efi as a way
-    to determine whether or it is running on an EFI system.
- *) 'mount -t efivarfs none /sys/firmware/efi/efivars' without manually
-    loading any modules.
+--=-eKJOdLrlPpxd5ETaO7nW
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
-Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
----
- drivers/firmware/Makefile    |  1 +
- drivers/firmware/efisubsys.c | 52 ++++++++++++++++++++++++++++++++++++++++++++
- drivers/firmware/efivars.c   | 30 +++++--------------------
- 3 files changed, 59 insertions(+), 24 deletions(-)
- create mode 100644 drivers/firmware/efisubsys.c
+On Wed, 2013-01-23 at 07:52 +0000, Matt Fleming wrote:
+> On Wed, 2013-01-23 at 04:16 +0000, Ben Hutchings wrote:
+> > On Mon, 2013-01-21 at 21:12 +0000, Matt Fleming wrote:
+> > [...]
+> > > From 92e73f936e40a8c6562e47425d434a4e62d2b8e2 Mon Sep 17 00:00:00 200=
+1
+> > > From: Matt Fleming <matt.fleming@intel.com>
+> > > Date: Wed, 14 Nov 2012 09:42:35 +0000
+> > > Subject: [PATCH] efi: Make 'efi_enabled' a function to query EFI faci=
+lities
+> > >=20
+> > > Originally 'efi_enabled' indicated whether a kernel was booted from
+> > > EFI firmware. Over time its semantics have changed, and it now
+> > > indicates whether or not we are booted on an EFI machine with
+> > > bit-native firmware, e.g. 64-bit kernel with 64-bit firmware.
+> > >=20
+> > > The immediate motivation for this patch is the bug report at,
+> > >=20
+> > >     https://bugs.launchpad.net/ubuntu-cdimage/+bug/1040557
+> > >=20
+> > > which details how running a platform driver on an EFI machine that is
+> > > designed to run under BIOS can cause the machine to become
+> > > bricked. Also, the following report,
+> > >=20
+> > >     https://bugzilla.kernel.org/show_bug.cgi?id=3D47121
+> > >=20
+> > > details how running said driver can also cause Machine Check
+> > > Exceptions. Drivers need a new means of detecting whether they're
+> > > running on an EFI machine, as sadly the expression,
+> > >=20
+> > >     if (!efi_enabled)
+> > >=20
+> > > hasn't been a sufficient condition for quite some time.
+> > [...]
+> >=20
+> > This patch maps the old efi_enabled flag to efi_enabled(EFI_BOOT).  You=
+r
+> > second patch adds a test for efi_enabled(EFI_BOOT) to the samsung-lapto=
+p
+> > driver.  So the samsung-laptop driver could be fixed by adding a check
+> > for the old flag; it doesn't depend on the addition of new flags at all=
+.
+> > The changes elsewhere may well be important, but the cited motivation
+> > here just doesn't make sense.
+>=20
+> If we instead check for the old flag then the samsung-laptop driver
+> would run if booting a 32-bit kernel with 64-bit EFI firmware, or vice
+> versa, because efi_enabled =3D=3D 0 in that case.
+>=20
+> It's not sufficient to just check the old flag, the samsung-laptop
+> driver really can't be allowed to run at all if booting from EFI, and
+> the old flag doesn't provide us with that guarantee.
 
-diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
-index 5a7e273..e89c5da 100644
---- a/drivers/firmware/Makefile
-+++ b/drivers/firmware/Makefile
-@@ -4,6 +4,7 @@
- obj-$(CONFIG_DMI)		+= dmi_scan.o
- obj-$(CONFIG_DMI_SYSFS)		+= dmi-sysfs.o
- obj-$(CONFIG_EDD)		+= edd.o
-+obj-$(CONFIG_EFI)		+= efisubsys.o
- obj-$(CONFIG_EFI_VARS)		+= efivars.o
- obj-$(CONFIG_EFI_PCDP)		+= pcdp.o
- obj-$(CONFIG_DELL_RBU)          += dell_rbu.o
-diff --git a/drivers/firmware/efisubsys.c b/drivers/firmware/efisubsys.c
-new file mode 100644
-index 0000000..e09c333
---- /dev/null
-+++ b/drivers/firmware/efisubsys.c
-@@ -0,0 +1,52 @@
-+/*
-+ * efi.c - EFI subsystem
-+ *
-+ * Copyright (C) 2013 Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-+ *
-+ * This code registers /sys/firmware/efi{,/efivars} when EFI is supported,
-+ * allowing the efivarfs to be mounted or the efivars module to be loaded.
-+ * The existance of /sys/firmware/efi may also be used by userspace to
-+ * determine that the system supports EFI.
-+ *
-+ * This file is released under the GPLv2.
-+ */
-+
-+#include <linux/kobject.h>
-+#include <linux/module.h>
-+#include <linux/init.h>
-+#include <linux/device.h>
-+#include <linux/efi.h>
-+
-+struct kobject *efi_kobj;
-+EXPORT_SYMBOL_GPL(efi_kobj);
-+struct kobject *efivars_kobj;
-+EXPORT_SYMBOL_GPL(efivars_kobj);
-+
-+/*
-+ * We register the efi subsystem with the firmware subsystem and the
-+ * efivars subsystem with the efi subsystem.
-+ */
-+static int __init efisubsys_init(void)
-+{
-+	if (!efi_enabled)
-+		return 0;
-+
-+	/* We register the efi directory at /sys/firmware/efi */
-+	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
-+	if (!efi_kobj) {
-+		pr_err("efivars: Firmware registration failed.\n");
-+		return -ENOMEM;
-+	}
-+
-+	/* and the mountpoint for efivarfs at /sys/firmware/efi/efivars */
-+        efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
-+	if (!efivars_kobj) {
-+		pr_err("efivars: Subsystem registration failed.\n");
-+	        kobject_put(efi_kobj);
-+		return -ENOMEM;
-+	}
-+
-+        return 0;
-+}
-+
-+subsys_initcall(efisubsys_init);
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index b7cff5c..9a929d4 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -1528,7 +1528,8 @@ static struct attribute_group efi_subsys_attr_group = {
- 	.attrs = efi_subsys_attrs,
- };
- 
--static struct kobject *efi_kobj;
-+extern struct kobject *efi_kobj;
-+extern struct kobject *efivars_kobj;
- 
- /*
-  * efivar_create_sysfs_entry()
-@@ -1708,13 +1709,7 @@ int register_efivars(struct efivars *efivars,
- 		goto out;
- 	}
- 
--	efivars->kobject = kobject_create_and_add("efivars", parent_kobj);
--	if (!efivars->kobject) {
--		pr_err("efivars: Subsystem registration failed.\n");
--		error = -ENOMEM;
--		kset_unregister(efivars->kset);
--		goto out;
--	}
-+	efivars->kobject = efivars_kobj;
- 
- 	/*
- 	 * Per EFI spec, the maximum storage allocated for both
-@@ -1768,11 +1763,7 @@ out:
- EXPORT_SYMBOL_GPL(register_efivars);
- 
- /*
-- * For now we register the efi subsystem with the firmware subsystem
-- * and the vars subsystem with the efi subsystem.  In the future, it
-- * might make sense to split off the efi subsystem into its own
-- * driver, but for now only efivars will register with it, so just
-- * include it here.
-+ * We register the vars subsystem with the efi subsystem.
-  */
- 
- static int __init
-@@ -1786,21 +1777,15 @@ efivars_init(void)
- 	if (!efi_enabled)
- 		return 0;
- 
--	/* For now we'll register the efi directory at /sys/firmware/efi */
--	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
--	if (!efi_kobj) {
--		printk(KERN_ERR "efivars: Firmware registration failed.\n");
--		return -ENOMEM;
--	}
--
- 	ops.get_variable = efi.get_variable;
- 	ops.set_variable = efi.set_variable;
- 	ops.get_next_variable = efi.get_next_variable;
- 	ops.query_variable_info = efi.query_variable_info;
- 
- 	error = register_efivars(&__efivars, &ops, efi_kobj);
-+
- 	if (error)
--		goto err_put;
-+		goto err_unregister;
- 
- 	/* Don't forget the systab entry */
- 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
-@@ -1815,8 +1800,6 @@ efivars_init(void)
- 
- err_unregister:
- 	unregister_efivars(&__efivars);
--err_put:
--	kobject_put(efi_kobj);
- 	return error;
- }
- 
-@@ -1825,7 +1808,6 @@ efivars_exit(void)
- {
- 	if (efi_enabled) {
- 		unregister_efivars(&__efivars);
--		kobject_put(efi_kobj);
- 	}
- }
- 
--- 
-1.8.1.1
+OK, yes, I misread this.  Sorry to waste your time.
+
+Ben.
+
+--=20
+Ben Hutchings
+Q.  Which is the greater problem in the world today, ignorance or apathy?
+A.  I don't know and I couldn't care less.
+
+--=-eKJOdLrlPpxd5ETaO7nW
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIVAwUAUP/i7Oe/yOyVhhEJAQrb9RAAifOOrFZmQ+udsylkDaudJkNnnYT7D8Qx
+z9ypuUyP25BvJTspysI+Xo7hNw+lGbhKKzCsxyMd/xhf9MsmdOu0hh7TKpRF9dQn
+nnVEjhuK1uqic2E7j3B6/y3C9IEPTTBU2JJA6CHi7miyydY31385Uj4S9pwbaFGU
+y7QRh3DXNgS+ffRXWNIJZOFBriJRBpUK0SQBDbwxwUsis2sAH7OkYMGG1Q4gMpQg
+LGiEqRcbaOJFlI2rPjl3UcfJAVOKrC8p8NuP03I+uQX8DJU+D6B9y+oDpl/ivhGp
+GNisFn2vJ00inmSOLJjE0vcJUR43Pg995bL67gwsddJ+XjDCuuX/7yXIfJisiJLq
+5pqBBkSDwhz+xoNTmHL7yEBxpVTEOlTiFhRRU/F9hyqn2VqRHv6enUJJ7ZieR3ab
+nfQTeShf9muNlqW7BjvB96+M0lDA2Gz3y4ruO5OnfspMFC7OHL6oDjmC7MmsHBGP
+eVU/6kitk/jvYG5OM01TDOhNFJktrshCJRcyLEPBo+93WBLPlJsliTNCiHPIK/7K
+G9VGebOVLpCf6fB1LipatNUIRE+U7CA8zTAIjdxgGu9v3dD9v/6muOksJrCNxKFL
+yHnghHdO8MGUxQ5h4rg9FvYz6b7uAub03qquuoOxqdgvA1GRXkzuR2eyVmizavOW
+7oYg0kwlMG0=
+=bWPX
+-----END PGP SIGNATURE-----
+
+--=-eKJOdLrlPpxd5ETaO7nW--
