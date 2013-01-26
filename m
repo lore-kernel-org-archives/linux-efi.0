@@ -1,26 +1,105 @@
-From: "s98105901" <s98105901-/vnaafNrc7xNUHwG+Fw1Kw@public.gmane.org>
-Subject: You have exceeded the email quota limit
-Date: Sat, 26 Jan 2013 15:43:20 +0800 (CST)
-Message-ID: <1359186200.27273.s98105901@ncnu.edu.tw>
-Reply-To: s98105901-/vnaafNrc7xNUHwG+Fw1Kw@public.gmane.org
+From: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 3/3] selftests/efivarfs: Add create-read test
+Date: Sun, 27 Jan 2013 06:47:40 +0800
+Message-ID: <1359240460.11991.960193311372.3.gpush@pororo>
+References: <1359240460.10567.220444825101.0.gpush@pororo>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=big5
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1359240460.10567.220444825101.0.gpush@pororo>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-You have exceeded the email quota limit of 450MB and you need to expand
-the e-mail quota before the next 48 hours.if you do not update your e-m=
-ail
-account in 2013, you must do it now. You can expand
-1GB email quota limit, use the following web link:
+Signed-off-by: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
 
-https://docs.google.com/spreadsheet/viewform?formkey=3DdGJzZjg5ckc0bmRR=
-ZGVydzZNZHoyLWc6MQ
+---
+ tools/testing/selftests/efivarfs/Makefile      |    2 
+ tools/testing/selftests/efivarfs/create-read.c |   38 +++++++++++++++++
+ tools/testing/selftests/efivarfs/efivarfs.sh   |    7 +++
+ 3 files changed, 46 insertions(+), 1 deletion(-)
 
-Admin: Thanks for your understanding.
-Copyright c 2013 Webmaster Central Helpdesk
-
---=3D=3DMailed via NCNU E-Mail=3D=3D--
-=BD=D0=B4L=AD=AB=B4=BC=BCz=B0]=B2=A3=C5v.
+diff --git a/tools/testing/selftests/efivarfs/Makefile b/tools/testing/selftests/efivarfs/Makefile
+index 1a943ee..b4a7aca 100644
+--- a/tools/testing/selftests/efivarfs/Makefile
++++ b/tools/testing/selftests/efivarfs/Makefile
+@@ -1,7 +1,7 @@
+ CC = $(CROSS_COMPILE)gcc
+ CFLAGS = -Wall
+ 
+-test_objs = open-unlink
++test_objs = open-unlink create-read
+ 
+ all: $(test_objs)
+ 
+diff --git a/tools/testing/selftests/efivarfs/create-read.c b/tools/testing/selftests/efivarfs/create-read.c
+new file mode 100644
+index 0000000..25b6b77
+--- /dev/null
++++ b/tools/testing/selftests/efivarfs/create-read.c
+@@ -0,0 +1,38 @@
++#include <stdio.h>
++#include <stdint.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <errno.h>
++#include <string.h>
++
++int main(int argc, char **argv)
++{
++	const char *path;
++	char buf[4];
++	int fd, rc;
++
++	if (argc < 2) {
++		fprintf(stderr, "usage: %s <path>\n", argv[0]);
++		return EXIT_FAILURE;
++	}
++
++	path = argv[1];
++
++	/* create a test variable */
++	fd = open(path, O_RDWR | O_CREAT, 0600);
++	if (fd < 0) {
++		perror("open(O_WRONLY)");
++		return EXIT_FAILURE;
++	}
++
++	rc = read(fd, buf, sizeof(buf));
++	if (!(rc < 0 && errno == EIO)) {
++		fprintf(stderr, "Reading a new var should return -EIO\n");
++		return EXIT_FAILURE;
++	}
++
++	return EXIT_SUCCESS;
++}
+diff --git a/tools/testing/selftests/efivarfs/efivarfs.sh b/tools/testing/selftests/efivarfs/efivarfs.sh
+index 3af4b37..880cdd5 100755
+--- a/tools/testing/selftests/efivarfs/efivarfs.sh
++++ b/tools/testing/selftests/efivarfs/efivarfs.sh
+@@ -70,6 +70,12 @@ test_create_empty()
+ 	fi
+ }
+ 
++test_create_read()
++{
++	local file=$efivarfs_mount/$FUNCNAME-$test_guid
++	./create-read $file
++}
++
+ test_delete()
+ {
+ 	local attrs='\x07\x00\x00\x00'
+@@ -125,6 +131,7 @@ rc=0
+ 
+ run_test test_create
+ run_test test_create_empty
++run_test test_create_read
+ run_test test_delete
+ run_test test_zero_size_delete
+ run_test test_open_unlink
