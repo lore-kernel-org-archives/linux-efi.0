@@ -1,113 +1,68 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 2/2] hibernate: Disable in a Secure Boot environment
-Date: Mon, 28 Jan 2013 11:47:42 -0500
-Message-ID: <1359391662-26120-3-git-send-email-matthew.garrett@nebula.com>
-References: <1359391662-26120-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1359391662-26120-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, linux-security-module@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 15/15] MODSIGN: Always enforce module signing in a Secure Boot environment
+Date: Mon, 28 Jan 2013 11:42:39 -0500
+Message-ID: <1359391359-25783-16-git-send-email-matthew.garrett@nebula.com>
+References: <1359391359-25783-1-git-send-email-matthew.garrett@nebula.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1359391359-25783-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@redhat.com>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-There is currently no way to verify the resume image when returning
-from hibernate.  This might compromise the secure boot trust model,
-so until we can work with signed hibernate images we disable it in
-a Secure Boot environment.
+If a machine is booted into a Secure Boot environment, we need to
+protect the trust model.  This requires that all modules be signed
+with a key that is in the kernel's _modsign keyring.  The checks for
+this are already done via the 'sig_enforce' module parameter.  Make
+this visible within the kernel and force it to be true.
 
-Signed-off-by: Josh Boyer <jwboyer@redhat.com>
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- kernel/power/hibernate.c | 14 +++++++++++++-
- kernel/power/main.c      |  7 ++++++-
- kernel/power/user.c      |  3 +++
- 3 files changed, 22 insertions(+), 2 deletions(-)
+ kernel/cred.c   | 8 ++++++++
+ kernel/module.c | 4 ++--
+ 2 files changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
-index b26f5f1..14b6344 100644
---- a/kernel/power/hibernate.c
-+++ b/kernel/power/hibernate.c
-@@ -632,6 +632,10 @@ int hibernate(void)
+diff --git a/kernel/cred.c b/kernel/cred.c
+index c3f4e3e..c5554e0 100644
+--- a/kernel/cred.c
++++ b/kernel/cred.c
+@@ -565,11 +565,19 @@ void __init cred_init(void)
+ 				     0, SLAB_HWCACHE_ALIGN|SLAB_PANIC, NULL);
+ }
+ 
++#ifdef CONFIG_MODULE_SIG
++extern bool sig_enforce;
++#endif
++
+ void __init secureboot_enable()
  {
- 	int error;
+ 	pr_info("Secure boot enabled\n");
+ 	cap_lower((&init_cred)->cap_bset, CAP_COMPROMISE_KERNEL);
+ 	cap_lower((&init_cred)->cap_permitted, CAP_COMPROMISE_KERNEL);
++#ifdef CONFIG_MODULE_SIG
++	/* Enable module signature enforcing */
++	sig_enforce = true;
++#endif
+ }
  
-+	if (!capable(CAP_COMPROMISE_KERNEL)) {
-+		return -EPERM;
-+	}
-+
- 	lock_system_sleep();
- 	/* The snapshot device should not be opened while we're running */
- 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
-@@ -723,7 +727,7 @@ static int software_resume(void)
- 	/*
- 	 * If the user said "noresume".. bail out early.
- 	 */
--	if (noresume)
-+	if (noresume || !capable(CAP_COMPROMISE_KERNEL))
- 		return 0;
+ /* Dummy Secure Boot enable option to fake out UEFI SB=1 */
+diff --git a/kernel/module.c b/kernel/module.c
+index eab0827..93a16dc 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -109,9 +109,9 @@ struct list_head *kdb_modules = &modules; /* kdb needs the list of modules */
  
- 	/*
-@@ -889,6 +893,11 @@ static ssize_t disk_show(struct kobject *kobj, struct kobj_attribute *attr,
- 	int i;
- 	char *start = buf;
- 
-+	if (!cap_capable(CAP_COMPROMISE_KERNEL)) {
-+		buf += sprintf(buf, "[%s]\n", "disabled");
-+		return buf-start;
-+	}
-+
- 	for (i = HIBERNATION_FIRST; i <= HIBERNATION_MAX; i++) {
- 		if (!hibernation_modes[i])
- 			continue;
-@@ -923,6 +932,9 @@ static ssize_t disk_store(struct kobject *kobj, struct kobj_attribute *attr,
- 	char *p;
- 	int mode = HIBERNATION_INVALID;
- 
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
-+
- 	p = memchr(buf, '\n', n);
- 	len = p ? p - buf : n;
- 
-diff --git a/kernel/power/main.c b/kernel/power/main.c
-index 1c16f91..42f5d94 100644
---- a/kernel/power/main.c
-+++ b/kernel/power/main.c
-@@ -15,6 +15,7 @@
- #include <linux/workqueue.h>
- #include <linux/debugfs.h>
- #include <linux/seq_file.h>
-+#include <linux/efi.h>
- 
- #include "power.h"
- 
-@@ -301,7 +302,11 @@ static ssize_t state_show(struct kobject *kobj, struct kobj_attribute *attr,
- 	}
- #endif
- #ifdef CONFIG_HIBERNATION
--	s += sprintf(s, "%s\n", "disk");
-+	if (capable(CAP_COMPROMISE_KERNEL) {
-+		s += sprintf(s, "%s\n", "disk");
-+	} else {
-+		s += sprintf(s, "\n");
-+	}
+ #ifdef CONFIG_MODULE_SIG
+ #ifdef CONFIG_MODULE_SIG_FORCE
+-static bool sig_enforce = true;
++bool sig_enforce = true;
  #else
- 	if (s != buf)
- 		/* convert the last space to a newline */
-diff --git a/kernel/power/user.c b/kernel/power/user.c
-index 4ed81e7..b11a0f4 100644
---- a/kernel/power/user.c
-+++ b/kernel/power/user.c
-@@ -48,6 +48,9 @@ static int snapshot_open(struct inode *inode, struct file *filp)
- 	struct snapshot_data *data;
- 	int error;
+-static bool sig_enforce = false;
++bool sig_enforce = false;
  
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
-+
- 	lock_system_sleep();
- 
- 	if (!atomic_add_unless(&snapshot_device_available, -1, 0)) {
+ static int param_set_bool_enable_only(const char *val,
+ 				      const struct kernel_param *kp)
 -- 
 1.8.0.2
