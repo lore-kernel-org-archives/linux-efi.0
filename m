@@ -1,32 +1,35 @@
 From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [RFC] efivars write(2) races
-Date: Mon, 28 Jan 2013 10:38:27 +0800
-Message-ID: <5105E4A3.9040102@redhat.com>
-References: <20130125002552.GC4503@ZenIV.linux.org.uk>  <51020120.5000500@redhat.com> <1359119883.2496.156.camel@mfleming-mobl1.ger.corp.intel.com>
+Subject: Re: [PATCH 3/3] selftests/efivarfs: Add create-read test
+Date: Mon, 28 Jan 2013 19:25:48 +0800
+Message-ID: <5106603C.5050309@redhat.com>
+References: <1359240460.11991.960193311372.3.gpush@pororo>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1359119883.2496.156.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1359240460.11991.960193311372.3.gpush@pororo>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/25/2013 09:18 PM, Matt Fleming wrote:
->> 4. EFI_VARIABLE_APPEND_WRITE with EFI_OUT_OF_RESOURCES truncates size but you
->>     can still read its content.
->
-> I'm not sure what you mean by this. Could you please explain?
+On 01/27/2013 06:47 AM, Jeremy Kerr wrote:
+> +	if (!(rc < 0 && errno == EIO)) {
+> +		fprintf(stderr, "Reading a new var should return -EIO\n");
 
-Oops, this one is incorrect. I was testing EFI_VARIABLE_APPEND_WRITE
-using this:
+What does the -EIO imply for reading a known empty file?
 
-printf "\x47\x00\x00\x00\x00" >test-1-$guid
+The file is empty. There is nothing to be read. No IO should actually 
+happens.
+The variable doesn't exist in nvram. What is the error? This won't make 
+sense
+for userspace.
 
-So it truncates the file before writing, but efivarfs figures out the right
-size afterwards. The size remains zero if the write fails.
+Empty variable never exists in nvram per spec. Userspace doesn't need an 
+extra
+EIO to figure out this known fact. In the meantime, user would wonder if
+something else has gone wrong? Returning zero for reading an empty file can
+reserve EIO for something more informational.
 
-I should be using this for appending:
-
-printf "\x47\x00\x00\x00\x00" >>test-1-$guid
+Maybe at this time we just leave it as it is for other reasons. But at least
+I don't think it's a good idea to mandate this behavior.
