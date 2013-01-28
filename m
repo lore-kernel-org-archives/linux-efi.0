@@ -1,61 +1,148 @@
 From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 06/15] x86: Lock down IO port access in secure boot environments
-Date: Mon, 28 Jan 2013 11:42:30 -0500
-Message-ID: <1359391359-25783-7-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH 04/15] efi: Enable secure boot lockdown automatically when enabled in firmware
+Date: Mon, 28 Jan 2013 11:42:28 -0500
+Message-ID: <1359391359-25783-5-git-send-email-matthew.garrett@nebula.com>
 References: <1359391359-25783-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1359391359-25783-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-IO port access would permit users to gain access to PCI configuration
-registers, which in turn (on a lot of hardware) give access to MMIO register
-space. This would potentially permit root to trigger arbitrary DMA, so lock
-it down by default.
+The firmware has a set of flags that indicate whether secure boot is enabled
+and enforcing. Use them to indicate whether the kernel should lock itself
+down.  We also indicate the machine is in secure boot mode by adding the
+EFI_SECURE_BOOT bit for use with efi_enabled.
 
 Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/x86/kernel/ioport.c | 4 ++--
- drivers/char/mem.c       | 3 +++
- 2 files changed, 5 insertions(+), 2 deletions(-)
+ Documentation/x86/zero-page.txt       |  2 ++
+ arch/x86/boot/compressed/eboot.c      | 32 ++++++++++++++++++++++++++++++++
+ arch/x86/include/uapi/asm/bootparam.h |  3 ++-
+ arch/x86/kernel/setup.c               |  5 +++++
+ include/linux/cred.h                  |  2 ++
+ include/linux/efi.h                   |  1 +
+ 6 files changed, 44 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/kernel/ioport.c b/arch/x86/kernel/ioport.c
-index 8c96897..a2578c4 100644
---- a/arch/x86/kernel/ioport.c
-+++ b/arch/x86/kernel/ioport.c
-@@ -28,7 +28,7 @@ asmlinkage long sys_ioperm(unsigned long from, unsigned long num, int turn_on)
+diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
+index cf5437d..7f9ed48 100644
+--- a/Documentation/x86/zero-page.txt
++++ b/Documentation/x86/zero-page.txt
+@@ -27,6 +27,8 @@ Offset	Proto	Name		Meaning
+ 1E9/001	ALL	eddbuf_entries	Number of entries in eddbuf (below)
+ 1EA/001	ALL	edd_mbr_sig_buf_entries	Number of entries in edd_mbr_sig_buffer
+ 				(below)
++1EB/001	ALL	kbd_status	Numlock is enabled
++1EC/001	ALL	secure_boot	Kernel should enable secure boot lockdowns
+ 290/040	ALL	edd_mbr_sig_buffer EDD MBR signatures
+ 2D0/A00	ALL	e820_map	E820 memory map table
+ 				(array of struct e820entry)
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 18e329c..f44adce 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -848,6 +848,36 @@ fail:
+ 	return status;
+ }
  
- 	if ((from + num <= from) || (from + num > IO_BITMAP_BITS))
- 		return -EINVAL;
--	if (turn_on && !capable(CAP_SYS_RAWIO))
-+	if (turn_on && (!capable(CAP_SYS_RAWIO) || !capable(CAP_COMPROMISE_KERNEL)))
- 		return -EPERM;
- 
- 	/*
-@@ -102,7 +102,7 @@ long sys_iopl(unsigned int level, struct pt_regs *regs)
- 		return -EINVAL;
- 	/* Trying to gain more privileges? */
- 	if (level > old) {
--		if (!capable(CAP_SYS_RAWIO))
-+		if (!capable(CAP_SYS_RAWIO) || !capable(CAP_COMPROMISE_KERNEL))
- 			return -EPERM;
- 	}
- 	regs->flags = (regs->flags & ~X86_EFLAGS_IOPL) | (level << 12);
-diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-index c6fa3bc..fc28099 100644
---- a/drivers/char/mem.c
-+++ b/drivers/char/mem.c
-@@ -597,6 +597,9 @@ static ssize_t write_port(struct file *file, const char __user *buf,
- 	unsigned long i = *ppos;
- 	const char __user * tmp = buf;
- 
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
++static int get_secure_boot(efi_system_table_t *_table)
++{
++	u8 sb, setup;
++	unsigned long datasize = sizeof(sb);
++	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
++	efi_status_t status;
 +
- 	if (!access_ok(VERIFY_READ, buf, count))
- 		return -EFAULT;
- 	while (count-- > 0 && i < 65536) {
++	status = efi_call_phys5(sys_table->runtime->get_variable,
++				L"SecureBoot", &var_guid, NULL, &datasize, &sb);
++
++	if (status != EFI_SUCCESS)
++		return 0;
++
++	if (sb == 0)
++		return 0;
++
++
++	status = efi_call_phys5(sys_table->runtime->get_variable,
++				L"SetupMode", &var_guid, NULL, &datasize,
++				&setup);
++
++	if (status != EFI_SUCCESS)
++		return 0;
++
++	if (setup == 1)
++		return 0;
++
++	return 1;
++}
++
+ /*
+  * Because the x86 boot code expects to be passed a boot_params we
+  * need to create one ourselves (usually the bootloader would create
+@@ -1142,6 +1172,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		goto fail;
+ 
++	boot_params->secure_boot = get_secure_boot(sys_table);
++
+ 	setup_graphics(boot_params);
+ 
+ 	setup_efi_pci(boot_params);
+diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+index 92862cd..422e056 100644
+--- a/arch/x86/include/uapi/asm/bootparam.h
++++ b/arch/x86/include/uapi/asm/bootparam.h
+@@ -115,7 +115,8 @@ struct boot_params {
+ 	__u8  eddbuf_entries;				/* 0x1e9 */
+ 	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
+ 	__u8  kbd_status;				/* 0x1eb */
+-	__u8  _pad6[5];					/* 0x1ec */
++	__u8  secure_boot;				/* 0x1ec */
++	__u8  _pad6[4];					/* 0x1ed */
+ 	struct setup_header hdr;    /* setup header */	/* 0x1f1 */
+ 	__u8  _pad7[0x290-0x1f1-sizeof(struct setup_header)];
+ 	__u32 edd_mbr_sig_buffer[EDD_MBR_SIG_MAX];	/* 0x290 */
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 8b24289..5355a54 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1042,6 +1042,11 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	io_delay_init();
+ 
++	if (boot_params.secure_boot) {
++		set_bit(EFI_SECURE_BOOT, &x86_efi_facility);
++		secureboot_enable();
++	}
++
+ 	/*
+ 	 * Parse the ACPI tables for possible boot-time SMP configuration.
+ 	 */
+diff --git a/include/linux/cred.h b/include/linux/cred.h
+index 04421e8..9e69542 100644
+--- a/include/linux/cred.h
++++ b/include/linux/cred.h
+@@ -156,6 +156,8 @@ extern int set_security_override_from_ctx(struct cred *, const char *);
+ extern int set_create_files_as(struct cred *, struct inode *);
+ extern void __init cred_init(void);
+ 
++extern void secureboot_enable(void);
++
+ /*
+  * check for validity of credentials
+  */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 7a9498a..1ae16b6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -627,6 +627,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_RUNTIME_SERVICES	3	/* Can we use runtime services? */
+ #define EFI_MEMMAP		4	/* Can we use EFI memory map? */
+ #define EFI_64BIT		5	/* Is the firmware 64-bit? */
++#define EFI_SECURE_BOOT	6	/* Are we in Secure Boot mode? */
+ 
+ #ifdef CONFIG_EFI
+ # ifdef CONFIG_X86
 -- 
 1.8.0.2
