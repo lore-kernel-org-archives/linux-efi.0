@@ -1,65 +1,44 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI fixes for v3.8
-Date: Tue, 29 Jan 2013 19:03:46 +0000
-Message-ID: <1359486226.8282.97.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1358504987.8203.425.camel@mfleming-mobl1.ger.corp.intel.com>
+Subject: Re: [PATCH 3/3] selftests/efivarfs: Add create-read test
+Date: Tue, 29 Jan 2013 20:18:28 +0000
+Message-ID: <1359490708.8282.107.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1359240460.11991.960193311372.3.gpush@pororo>
+	  <5106603C.5050309@redhat.com>
+	 <1359376629.8282.18.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <5106FE77.3030001@ozlabs.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1358504987.8203.425.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <5106FE77.3030001-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi guys,
+On Tue, 2013-01-29 at 07:40 +0900, Jeremy Kerr wrote:
+> Hi all,
+> 
+> >> Empty variable never exists in nvram per spec. Userspace doesn't need an
+> >> extra
+> >> EIO to figure out this known fact. In the meantime, user would wonder if
+> >> something else has gone wrong? Returning zero for reading an empty file can
+> >> reserve EIO for something more informational.
+> >
+> > Perhaps it's not unreasonable to expect users to understand that
+> > zero-length files don't have a corresponding EFI variable, and that the
+> > file won't persist across a reboot.
+> >
+> > Jeremy, thoughts?
+> 
+> I think that EOF would be better; it's not really an "error" condition, 
+> just that no data has been given yet.
 
-The following changes since commit 7d1f9aeff1ee4a20b1aeb377dd0f579fe9647619:
+Works for me.
 
-  Linux 3.8-rc4 (2013-01-17 19:25:45 -0800)
+> I'd be happy to change this check to suit.
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git 
-
-for you to fetch changes up to 739701888f5d98010a8960b2d974d74c77c830a2:
-
-  x86, efi: remove attribute check from setup_efi_pci (2013-01-29 17:52:06 +0000)
-
-----------------------------------------------------------------
-Various urgent EFI fixes and some warning cleanups for v3.8
-
-  * EFI boot stub fix for Macbook Pro's from Maarten Lankhorst
-  * Fix an oops in efivarfs from Lingzhu Xiang
-  * 32-bit warning cleanups from Jan Beulich
-  * Patch to Boot on >512GB RAM systems from Nathan Zimmer
-  * Set efi.runtime_version correctly
-  * efivarfs updates
-
-----------------------------------------------------------------
-Jan Beulich (1):
-      x86, efi: fix 32-bit warnings in setup_efi_pci()
-
-Lingzhu Xiang (1):
-      efivarfs: Drop link count of the right inode
-
-Maarten Lankhorst (1):
-      x86, efi: remove attribute check from setup_efi_pci
-
-Matt Fleming (3):
-      efivarfs: Never return ENOENT from firmware
-      efivarfs: Delete dentry from dcache in efivarfs_file_write()
-      x86, efi: Set runtime_version to the EFI spec revision
-
-Nathan Zimmer (1):
-      efi, x86: Pass a proper identity mapping in efi_call_phys_prelog
-
- arch/x86/boot/compressed/eboot.c | 11 ++++-------
- arch/x86/platform/efi/efi.c      |  2 +-
- arch/x86/platform/efi/efi_64.c   | 22 +++++++++++++++++-----
- drivers/firmware/efivars.c       |  5 +++--
- 4 files changed, 25 insertions(+), 15 deletions(-)
+That would be great, thank you.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
