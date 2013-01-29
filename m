@@ -1,27 +1,30 @@
 From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH 0/2] Secure Boot: More controversial changes
-Date: Tue, 29 Jan 2013 04:40:13 +0000
-Message-ID: <20130129044013.GC14395@srcf.ucam.org>
-References: <1359391662-26120-1-git-send-email-matthew.garrett@nebula.com>
- <51072E84.4080509@zytor.com>
+Subject: Re: efivarfs allows non-canonical GUID and duplicate filenames
+Date: Tue, 29 Jan 2013 04:44:18 +0000
+Message-ID: <20130129044418.GD14395@srcf.ucam.org>
+References: <1351237923-10313-1-git-send-email-matt@console-pimps.org>
+ <1351237923-10313-2-git-send-email-matt@console-pimps.org>
+ <51022DD7.4010701@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <51072E84.4080509-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <51022DD7.4010701-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Chun-Yi Lee <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 28, 2013 at 06:05:56PM -0800, H. Peter Anvin wrote:
-> These at the very least need some kind of CONFIG_WEAK_SECURE_BOOT
-> option or something like that.
+On Fri, Jan 25, 2013 at 03:01:43PM +0800, Lingzhu Xiang wrote:
 
-Given Eric's views on the kexec patch (and given that there's no point 
-in the hibernate one if kexec's available...), I'm not planning on 
-pushing these until there's a plausible story for limiting kexec to 
-signed images.
+> efivarfs_hex_to_guid does not check filename validity. 
+
+Yeah, that's a problem.
+
+> [root@qemu-ovmf efivars]# touch BootOrder-8BE4DF61-93CA-11D2-AA0D-00E098032B8C
+
+Ha ok. Other than the change in name over unmount, does this one cause 
+any problems?
 
 -- 
 Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
