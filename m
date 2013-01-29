@@ -1,34 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC,PATCH] efivarfs: Don't delete efivar_entry structures on
- unlink
-Date: Tue, 29 Jan 2013 16:08:54 +0000
-Message-ID: <1359475734.8282.93.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1359240720.964087.170020751085.1.gpush@pororo>
-	 <1359391539.8282.28.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <5106FF89.2020500@ozlabs.org>
+From: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH] x86, efi: remove attribute check from setup_efi_pci
+Date: Tue, 29 Jan 2013 17:52:24 +0100
+Message-ID: <5107FE48.7080402@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5106FF89.2020500-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Anton Vorontsov <cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org" <dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org>, Sasha Levin <sasha.levin-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-01-29 at 07:45 +0900, Jeremy Kerr wrote:
-> Yes, the intention is to bump the refcount any time we store the struct 
-> efivars_entry somewhere it might be referenced later (ie, in 
-> inode->i_private in this case). I'll add the ref when we create the 
-> inodes too.
-> 
-> One of my concerns with the current patch is using the empty list as an 
-> indicator whether the variable is present in firmware. Alternatively, we 
-> could do this with a new bool 'deleted' in the strut efivars_entry, 
-> which is set on unlink(). Any preferences?
+It looks like the original commit that copied the rom contents from efi always copied
+the rom, and the fixup in setup_efi_pci from commit 886d751a2ea99a160
+("x86, efi: correct precedence of operators in setup_efi_pci") broke that.
 
-I think using presence on the efivar list to indicate that a variable
-exists in the firmware is a nice and simple solution.
+This resulted in macbook pro's no longer finding the rom images, and thus not being able to use the radeon card any more.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+The solution is to just remove the check for now, and always copy the rom if available.
+
+Signed-off-by: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+---
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 18e329c..ce06324 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -302,9 +302,6 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
+ 		if (status != EFI_SUCCESS)
+ 			continue;
+ 
+-		if (!(attributes & EFI_PCI_IO_ATTRIBUTE_EMBEDDED_ROM))
+-			continue;
+-
+ 		if (!pci->romimage || !pci->romsize)
+ 			continue;
+ 
