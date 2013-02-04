@@ -1,30 +1,79 @@
-From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: Re: [PATCH] efi: split efisubsystem from efivars
-Date: Mon, 4 Feb 2013 15:10:55 +0100
-Message-ID: <CAG-2HqWC2XVnpck97A+ZqZtom0hr6cphrrirJC2Bx+BgBt4DZg@mail.gmail.com>
-References: <1359128215-1331-1-git-send-email-teg@jklm.no> <1359973581.7515.101.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [PATCH] ia64/mm: fix a bad_page bug when crash kernel booting
+Date: Mon, 04 Feb 2013 16:32:45 +0000
+Message-ID: <1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <51074786.5030007@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1359973581.7515.101.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <51074786.5030007@huawei.com>
+Sender: owner-linux-mm@kvack.org
+To: Xishi Qiu <qiuxishi@huawei.com>
+Cc: "Luck, Tony" <tony.luck@intel.com>, fenghua.yu@intel.com, Liujiang <jiang.liu@huawei.com>, Andrew Morton <akpm@linux-foundation.org>, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-mm@kvack.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 4, 2013 at 11:26 AM, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> Tom, this patch is still on my radar.
+On Tue, 2013-01-29 at 11:52 +0800, Xishi Qiu wrote:
+> On ia64 platform, I set "crashkernel=1024M-:600M", and dmesg shows 128M-728M
+> memory is reserved for crash kernel. Then "echo c > /proc/sysrq-trigger" to
+> test kdump.
+> 
+> When crash kernel booting, efi_init() will aligns the memory address in
+> IA64_GRANULE_SIZE(16M), so 720M-728M memory will be dropped, It means
+> crash kernel only manage 128M-720M memory.
+> 
+> But initrd start and end are fixed in boot loader, it is before efi_init(),
+> so initrd size maybe overflow when free_initrd_mem().
 
-Great, thanks for letting me know.
+[...]
 
-> It's just that I thought it was
-> *such* a good idea I decided to chainsaw the existing efivars code to
-> make it more modular and eventually split things up into a new
-> drivers/firmware/efi directory.
+> diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
+> index b755ea9..cfdb1eb 100644
+> --- a/arch/ia64/mm/init.c
+> +++ b/arch/ia64/mm/init.c
+> @@ -207,6 +207,17 @@ free_initrd_mem (unsigned long start, unsigned long end)
+>  	start = PAGE_ALIGN(start);
+>  	end = end & PAGE_MASK;
+> 
+> +	/*
+> +	 * Initrd size is fixed in boot loader, but kernel parameter max_addr
+> +	 * which aligns in granules is fixed after boot loader, so initrd size
+> +	 * maybe overflow.
+> +	 */
+> +	if (max_addr != ~0UL) {
+> +		end = GRANULEROUNDDOWN(end);
+> +		if (start > end)
+> +			start = end;
+> +	}
+> +
+>  	if (start < end)
+>  		printk(KERN_INFO "Freeing initrd memory: %ldkB freed\n", (end - start) >> 10);
 
-Nice. I was going to resend a rebased version on top of the latest
--rc, but I'll hold off on that until I see what you end up doing.
+I don't think this is the correct fix.
 
-Cheers,
+Now, my ia64-fu is weak, but could it be that there's actually a bug in
+efi_init() and that the following patch would be the best way to fix
+this?
 
-Tom
+---
+
+diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+index f034563..8d579f1 100644
+--- a/arch/ia64/kernel/efi.c
++++ b/arch/ia64/kernel/efi.c
+@@ -482,7 +482,7 @@ efi_init (void)
+ 		if (memcmp(cp, "mem=", 4) == 0) {
+ 			mem_limit = memparse(cp + 4, &cp);
+ 		} else if (memcmp(cp, "max_addr=", 9) == 0) {
+-			max_addr = GRANULEROUNDDOWN(memparse(cp + 9, &cp));
++			max_addr = GRANULEROUNDUP(memparse(cp + 9, &cp));
+ 		} else if (memcmp(cp, "min_addr=", 9) == 0) {
+ 			min_addr = GRANULEROUNDDOWN(memparse(cp + 9, &cp));
+ 		} else {
+
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
