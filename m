@@ -1,67 +1,45 @@
-From: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: CONFIG_GOOGLE_SMI and efivars
-Date: Fri, 1 Feb 2013 09:37:37 -0800
-Message-ID: <CAGTjWtBojr32cbtT8szjDt8+134KFZ7t8Ce-nEcdJ5T2PPikcA@mail.gmail.com>
-References: <1359738442.7515.82.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] efi: split efisubsystem from efivars
+Date: Mon, 04 Feb 2013 10:26:21 +0000
+Message-ID: <1359973581.7515.101.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1359128215-1331-1-git-send-email-teg@jklm.no>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1359738442.7515.82.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1359128215-1331-1-git-send-email-teg-B22kvLQNl6c@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 1, 2013 at 9:07 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> Hey Mike,
->
-> I'm taking a look at the google/gsmi.c code and wondering whether the
-> CONFIG_GOOGLE_SMI machines are expecting to use both the EFI variable
-> ops in google/gsmi.c and efivars.c simultaneously?
+On Fri, 2013-01-25 at 16:36 +0100, Tom Gundersen wrote:
+> This registers /sys/firmware/efi{,/efivars} whenever EFI is enabled
+> and the system supports it.
+> 
+> This allows
+>  *) userspace to check for the existence of /sys/firmware/efi as a way
+>     to determine whether or it is running on an EFI system.
+>  *) 'mount -t efivarfs none /sys/firmware/efi/efivars' without manually
+>     loading any modules.
+> 
+> Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Cc: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> ---
+>  drivers/firmware/Makefile    |  1 +
+>  drivers/firmware/efisubsys.c | 52 ++++++++++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efivars.c   | 30 +++++--------------------
+>  3 files changed, 59 insertions(+), 24 deletions(-)
+>  create mode 100644 drivers/firmware/efisubsys.c
 
-No.  On our systems that use gsmi.c, we wind up _not_ using the ops in
-efivars.c (the regular way to get access to these variables) and use
-those in gsmi.c instead.   We shouldn't ever need to use both
-simultaneously -- the gsmi stuff is effectively glue to get at the EFI
-variables in a non-standard way.  We do this due to a series of
-complications on our end that I can't get into here, but the effect is
-that for many of our machines, boots *look like* legacy boots
-(non-EFI), but we use gsmi to get at EFI state that isn't otherwise
-available.
+Tom, this patch is still on my radar. It's just that I thought it was
+*such* a good idea I decided to chainsaw the existing efivars code to
+make it more modular and eventually split things up into a new
+drivers/firmware/efi directory.
 
-> If not, why do we
-> hang so much state off of "struct efivars"?
-
-This was done to reduce code duplication -- I needed a way to get at
-these non-standard-access EFI vars in a clean way and didn't want to
-invent new/duplicate userland ABIs to do so.
-
-At the time, I refactored so that all state into "struct efivars" to
-clearly delineate state from the regular efivars code and the gsmi
-code I was introducing. There isn't an actual need to have
-register_efivars() work more than once on any given system though.
-
-> If these two backends *are*
-> meant to work at the same time, what happens with things like the pstore
-> code, which will only work with the first EFI variable backend to be
-> registered? I think it's the coupling/duplication all this sysfs glue
-> that is confusing me.
-
-We don't expect to boot and use both sets of ops, ever.
-
->
-> The reason I'm looking at this is because the new efivarfs filesystem
-> hard-codes access to the __efivars symbol as it just wants to access the
-> variable ops and serialising lock. It doesn't need any of the sysfs
-> glue. But it seems rather mean that efivarfs doesn't work with gsmi.c,
-> since there's no reason it shouldn't work. So I'm trying to understand
-> your usecases and arrive at a solution that doesn't break your machines,
-> before I start chainsawing things to kingdom come.
-
-It sounds like it shouldn't be too difficult to make efivarfs work for
-our case as well :)
-
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
->
+Please bear with me.
