@@ -1,78 +1,97 @@
-From: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
-Date: Thu, 7 Feb 2013 14:09:16 +0800
-Message-ID: <5113450C.1080109@huawei.com>
-References: <51074786.5030007@huawei.com> <1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com> <51131248.3080203@huawei.com>
+From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [PATCH 1/3 v3] selftests: Add tests for efivarfs
+Date: Thu, 7 Feb 2013 15:13:33 -0800
+Message-ID: <20130207151333.f01d415c.akpm@linux-foundation.org>
+References: <1360162088.142733.191120808822.0.gpush@pecola>
+	<1360162088.143076.913706486688.1.gpush@pecola>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51131248.3080203-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1360162088.143076.913706486688.1.gpush@pecola>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Liujiang <jiang.liu-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Hanjun Guo <guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, WuJianguo <wujianguo-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+To: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> Sorry, this bug will be happen when use Sparse-Memory(section is valid, but last
+On Wed, 06 Feb 2013 22:48:08 +0800
+Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org> wrote:
 
-> several pages are invalid). If use Flat-Memory, crash kernel will boot successfully.
-> I think the following patch would be better.
+> This change adds a few initial efivarfs tests to the
+> tools/testing/selftests directory.
 > 
-> Hi Andrew, will you just ignore the earlier patch and consider the following one? :>
+> The open-unlink test is based on code from
+> Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>.
 > 
-> Signed-off-by: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/ia64/mm/init.c |    2 ++
->  1 files changed, 2 insertions(+), 0 deletions(-)
-> 
-> diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
-> index 082e383..23f2ee3 100644
-> --- a/arch/ia64/mm/init.c
-> +++ b/arch/ia64/mm/init.c
-> @@ -213,6 +213,8 @@ free_initrd_mem (unsigned long start, unsigned long end)
->  	for (; start < end; start += PAGE_SIZE) {
->  		if (!virt_addr_valid(start))
->  			continue;
-> +		if ((start >> PAGE_SHIFT) >= max_low_pfn)
+> ...
+>
+> --- a/tools/testing/selftests/Makefile
+> +++ b/tools/testing/selftests/Makefile
+> @@ -1,4 +1,4 @@
+> -TARGETS = breakpoints kcmp mqueue vm cpu-hotplug memory-hotplug
+> +TARGETS = breakpoints kcmp mqueue vm cpu-hotplug memory-hotplug efivarfs
 
-I confused the vaddr and paddr, really sorry for it.
+bah.  This sort of Makefile construct is a wonderful source of patch
+rejects and fixups.  I'll covert this to
 
-In efi_init() memory aligns in IA64_GRANULE_SIZE(16M). If set "crashkernel=1024M-:600M"
-and use sparse memory model, when crash kernel booting it changes [128M-728M] to [128M-720M].
-But initrd memory is in [709M-727M], and virt_addr_valid() *can not* check the invalid pages
-when freeing initrd memory. There are some pages missed at the end of the seciton.
+--- a/tools/testing/selftests/Makefile~a
++++ a/tools/testing/selftests/Makefile
+@@ -1,4 +1,11 @@
+-TARGETS = breakpoints epoll kcmp mqueue vm cpu-hotplug memory-hotplug efivarfs
++TARGETS = breakpoints
++TARGETS += epoll
++TARGETS += kcmp
++TARGETS += mqueue
++TARGETS += vm
++TARGETS += cpu-hotplug
++TARGETS += memory-hotplug
++TARGETS += efivarfs
+ 
+ all:
+ 	for TARGET in $(TARGETS); do \
 
-ChangeLog V3:
-	fixed vaddr mistake
-ChangeLog V2:
-	add invalid pages check when freeing initrd memory
+> new file mode 100644
+> index 0000000..1a943ee
+> --- /dev/null
+> +++ b/tools/testing/selftests/efivarfs/Makefile
+> @@ -0,0 +1,12 @@
+> +CC = $(CROSS_COMPILE)gcc
+> +CFLAGS = -Wall
+> +
+> +test_objs = open-unlink
+> +
+> +all: $(test_objs)
+> +
+> +run_tests: all
+> +	@./efivarfs.sh || echo "efivarfs selftests: [FAIL]"
 
-Signed-off-by: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
----
- arch/ia64/mm/init.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+Problem.  When I apply the patch, ./efivarfs.sh doesn't have execute
+permissions.  I don't think there's a way of (reliably?) transporting
+this with patch and diff.
 
-diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
-index 082e383..8a269f8 100644
---- a/arch/ia64/mm/init.c
-+++ b/arch/ia64/mm/init.c
-@@ -173,6 +173,7 @@ void __init
- free_initrd_mem (unsigned long start, unsigned long end)
- {
- 	struct page *page;
-+	unsigned long pfn;
- 	/*
- 	 * EFI uses 4KB pages while the kernel can use 4KB or bigger.
- 	 * Thus EFI and the kernel may have different page sizes. It is
-@@ -213,6 +214,9 @@ free_initrd_mem (unsigned long start, unsigned long end)
- 	for (; start < end; start += PAGE_SIZE) {
- 		if (!virt_addr_valid(start))
- 			continue;
-+		pfn = __pa(start) >> PAGE_SHIFT;
-+		if (pfn >= max_low_pfn)
-+			continue;
- 		page = virt_to_page(start);
- 		ClearPageReserved(page);
- 		init_page_count(page);
--- 
-1.7.6.1
+So we should explicitly invoke sh or /bin/sh or $SHELL or whatever
+here.  This problem is common to several Makefiles in tools/testing/selftests/
+
+I'll do this for now:
+
+--- a/tools/testing/selftests/efivarfs/Makefile~selftests-add-tests-for-efivarfs-fix
++++ a/tools/testing/selftests/efivarfs/Makefile
+@@ -6,7 +6,7 @@ test_objs = open-unlink
+ all: $(test_objs)
+ 
+ run_tests: all
+-	@./efivarfs.sh || echo "efivarfs selftests: [FAIL]"
++	@/bin/sh ./efivarfs.sh || echo "efivarfs selftests: [FAIL]"
+ 
+ clean:
+ 	rm -f $(test_objs)
+
+but I'm not sure I did it right :(
+
+
+The general ruleset for selftests is: do as much as you can if you're not
+root and don't take too long and don't break the build on any
+architecture and don't cause the top-level "make run_tests" to fail if
+your feature is unconfigured.
+
+Does this code pass all that?
