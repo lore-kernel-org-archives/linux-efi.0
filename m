@@ -1,52 +1,55 @@
-From: Josh Boyer <jwboyer-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
-Date: Fri, 8 Feb 2013 16:14:07 -0500
-Message-ID: <CA+5PVA4EbgBRgg+ZDa4+vG0Ngw8wJ3kH6NcmDvZ=+CP=kH82_A@mail.gmail.com>
-References: <20130208191213.GA25081@www.outflux.net>
-	<00780235-deac-4f80-b936-867834e05661@email.android.com>
-	<CAGXu5jJnLY6Qp3J6HBpVg-AdUGdKYm-e4wErZO3=NuRo04ajvg@mail.gmail.com>
-	<5115553A.5000708@zytor.com>
-	<CAGXu5j+_mGzR+72YqORhErMUY1aF1H2urczZ8SwuJHZK-oZL6g@mail.gmail.com>
-	<dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>
-	<CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>
-	<1360355671.18083.18.camel@x230.lan>
-	<CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>
-	<1360357636.18083.19.camel@x230.lan>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [RFC][PATCH 3/7] efivars: New efivar_entry API
+Date: Fri, 8 Feb 2013 22:13:04 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D414A88489@USINDEM103.corp.hds.com>
+References: <1360357158-8168-1-git-send-email-matt@console-pimps.org>
+ <1360357158-8168-4-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1360357636.18083.19.camel-+5W/JHIUVxg@public.gmane.org>
+In-Reply-To: <1360357158-8168-4-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 8, 2013 at 4:07 PM, Matthew Garrett
-<matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
-> On Fri, 2013-02-08 at 13:02 -0800, Kees Cook wrote:
->
->> I don't find it unreasonable to drop all caps and lose access to
->> sensitive things. :) That's sort of the point, really. I think a cap
->> is the best match. It seems like it should either be a cap or a
->> namespace flag, but the latter seems messy.
->
-> Yeah, I think it's an expected outcome, but it means that if (say) qemu
-> drops privileges, qemu can no longer access PCI resources - even on
-> non-secure boot systems. That breaks existing userspace.
+ Matt,
 
-Right.  We've had a few reports in Fedora of things breaking on non-SB
-systems because of this.  The qemu one is the latest, but the general
-problem is people think dropping all caps blindly is making their apps
-safer.  Then they find they can't do things they could do before the new
-cap was added.  It's messy.
+> There isn't really a formalised interface for dealing with EFI
+> variables or struct efivar_entry. This has led to the efivarfs code
+> directly accessing '__efivars'.
 
-I've thought of treating CAP_COMPROMISE_KERNEL as a hidden cap, where
-only the kernel can grant or drop it.  Peter Jones suggested it might
-work to allow it to be dropped iff it is the only cap being changed.
-Either way, it's a "special" cap and I have no idea how acceptable
-something like that would be.
+I agree with you.
 
-Really though, the main issue is that you cannot introduce new caps to
-enforce finer grained access without breaking something.
+I have some comment on a pstore part.
 
-josh
+> @@ -1363,86 +1195,90 @@ static int efi_pstore_write(enum pstore_type_id type,
+>  	for (i = 0; i < DUMP_NAME_LEN; i++)
+>  		efi_name[i] = name[i];
+> 
+> -	efivars->ops->set_variable(efi_name, &vendor, PSTORE_EFI_ATTRIBUTES,
+> -				   size, psi->buf);
+> +	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
+> +	if (!entry)
+> +		return -ENOMEM;
+
+Please don't allocate memory dynamically in the efi_pstore_write() because efi_pstore_write() is 
+called in an interrupt context like oops and panic.
+
+Also, a whole process of query_info() + entry_set() should be protected by a single spin lock()
+Because if efi_pstore_write() runs concurrently, a result of query_info() may be meaningless...
+
+So, how about introducing query_info_nolock and entry_set_nolock()?
+
+spin_lock()
+query_info_nolock()
+entry_set_nolock()
+spin_unlock()
+
+IMO, efivarfs_file_write() should be fixed as above.
+
+As for efi_pstore_erase() and efi_pstore_read(), it will take some time to fully understand your change.
+
+Seiji
