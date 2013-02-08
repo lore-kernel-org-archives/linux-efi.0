@@ -1,38 +1,41 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC][PATCH 3/7] efivars: New efivar_entry API
-Date: Fri, 08 Feb 2013 22:56:35 +0000
-Message-ID: <1360364195.7515.314.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1360357158-8168-1-git-send-email-matt@console-pimps.org>
-	 <1360357158-8168-4-git-send-email-matt@console-pimps.org>
-	 <A5ED84D3BB3A384992CBB9C77DEDA4D414A88489@USINDEM103.corp.hds.com>
-	 <1360362300.7515.307.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <A5ED84D3BB3A384992CBB9C77DEDA4D414A8853D@USINDEM103.corp.hds.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
+Date: Sat, 9 Feb 2013 00:06:55 +0100
+Message-ID: <20130208230655.GB28990@pd.tnic>
+References: <20130208191213.GA25081@www.outflux.net>
+ <00780235-deac-4f80-b936-867834e05661@email.android.com>
+ <CAGXu5jJnLY6Qp3J6HBpVg-AdUGdKYm-e4wErZO3=NuRo04ajvg@mail.gmail.com>
+ <5115553A.5000708@zytor.com>
+ <CAGXu5j+_mGzR+72YqORhErMUY1aF1H2urczZ8SwuJHZK-oZL6g@mail.gmail.com>
+ <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>
+ <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>
+ <1360355671.18083.18.camel@x230.lan>
+ <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>
+ <51157C9C.6030501@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D414A8853D-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <51157C9C.6030501@zytor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Kees Cook <keescook@chromium.org>, Matthew Garrett <matthew.garrett@nebula.com>, LKML <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-02-08 at 22:46 +0000, Seiji Aguchi wrote:
->  > efi_pstore_write() already calls efivar_create_sysfs_entry() which does
-> > kzalloc() anyway. Obviously this needs fixing, but it doesn't need to be done in this series. Unless there's some pstore patches that fix
-> > that somewhere? I know you sent some patches that moved things to a thread, unfortunately I haven't had chance to look at them.
-> 
-> So, could you please take a look at my patch first?
-> We don't need to introduce bug when we know about it.
-> 
-> > Isn't the write() path protected by ->buf_lock? I didn't think it was possible to have two CPUs in the write() path simultaneously.
-> 
-> I see, actual problem will not happen.
+On Fri, Feb 08, 2013 at 02:30:52PM -0800, H. Peter Anvin wrote:
+> Also, keep in mind that there is a very simple way to deny MSR access
+> completely, which is to not include the driver in your kernel (and not
+> allow module loading, but if you can load modules you can just load a
+> module to muck with whatever MSR you want.)
 
-It's probably still possible to have a CPU creating an EFI variable via
-the sysfs files while another CPU is in the pstore write path, but I'm
-not convinced making the query_variable_info() and set_variable() atomic
-is something that we need to worry about.
+I was contemplating that too. What is the use case of having
+msr.ko in a secure boot environment? Isn't that an all-no-tools,
+you-can't-do-sh*t-except-what-you're-explicitly-allowed-to environment which
+simply doesn't need to write MSRs in the first place?
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
