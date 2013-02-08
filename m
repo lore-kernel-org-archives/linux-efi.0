@@ -1,27 +1,31 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v5 -next 0/2] make efivars/efi_pstore interrupt-safe
-Date: Fri, 08 Feb 2013 22:46:06 +0000
-Message-ID: <1360363566.7515.310.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <A5ED84D3BB3A384992CBB9C77DEDA4D414A5419C@USINDEM103.corp.hds.com>
-	 <A5ED84D3BB3A384992CBB9C77DEDA4D414A884D6@USINDEM103.corp.hds.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [RFC][PATCH 3/7] efivars: New efivar_entry API
+Date: Fri, 8 Feb 2013 22:46:49 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D414A8853D@USINDEM103.corp.hds.com>
+References: <1360357158-8168-1-git-send-email-matt@console-pimps.org>
+	 <1360357158-8168-4-git-send-email-matt@console-pimps.org>
+	 <A5ED84D3BB3A384992CBB9C77DEDA4D414A88489@USINDEM103.corp.hds.com>
+ <1360362300.7515.307.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D414A884D6-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+In-Reply-To: <1360362300.7515.307.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: "Luck, Tony (tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org)" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org" <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dzickus-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-02-08 at 22:31 +0000, Seiji Aguchi wrote:
-> Matt,
-> 
-> Can you please take a look at this patchset which removes
-> create_sysfs_entries() from efi_pstore_write()?
-> 
-> It has been updated in accordance with Mike's comment and fixes an
-> actual bug.
-> http://comments.gmane.org/gmane.linux.kernel.efi/406
-
-OK, I'll find some time to review these.
+IA0KPiBlZmlfcHN0b3JlX3dyaXRlKCkgYWxyZWFkeSBjYWxscyBlZml2YXJfY3JlYXRlX3N5c2Zz
+X2VudHJ5KCkgd2hpY2ggZG9lcw0KPiBremFsbG9jKCkgYW55d2F5LiBPYnZpb3VzbHkgdGhpcyBu
+ZWVkcyBmaXhpbmcsIGJ1dCBpdCBkb2Vzbid0IG5lZWQgdG8gYmUgZG9uZSBpbiB0aGlzIHNlcmll
+cy4gVW5sZXNzIHRoZXJlJ3Mgc29tZSBwc3RvcmUgcGF0Y2hlcyB0aGF0IGZpeA0KPiB0aGF0IHNv
+bWV3aGVyZT8gSSBrbm93IHlvdSBzZW50IHNvbWUgcGF0Y2hlcyB0aGF0IG1vdmVkIHRoaW5ncyB0
+byBhIHRocmVhZCwgdW5mb3J0dW5hdGVseSBJIGhhdmVuJ3QgaGFkIGNoYW5jZSB0byBsb29rIGF0
+IHRoZW0uDQoNClNvLCBjb3VsZCB5b3UgcGxlYXNlIHRha2UgYSBsb29rIGF0IG15IHBhdGNoIGZp
+cnN0Pw0KV2UgZG9uJ3QgbmVlZCB0byBpbnRyb2R1Y2UgYnVnIHdoZW4gd2Uga25vdyBhYm91dCBp
+dC4NCg0KPiBJc24ndCB0aGUgd3JpdGUoKSBwYXRoIHByb3RlY3RlZCBieSAtPmJ1Zl9sb2NrPyBJ
+IGRpZG4ndCB0aGluayBpdCB3YXMgcG9zc2libGUgdG8gaGF2ZSB0d28gQ1BVcyBpbiB0aGUgd3Jp
+dGUoKSBwYXRoIHNpbXVsdGFuZW91c2x5Lg0KDQpJIHNlZSwgYWN0dWFsIHByb2JsZW0gd2lsbCBu
+b3QgaGFwcGVuLg0KDQpTZWlqaQ0KDQoNCg0K
