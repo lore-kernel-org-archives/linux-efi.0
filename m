@@ -1,47 +1,62 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC][PATCH 3/7] efivars: New efivar_entry API
-Date: Fri, 08 Feb 2013 22:25:00 +0000
-Message-ID: <1360362300.7515.307.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1360357158-8168-1-git-send-email-matt@console-pimps.org>
-	 <1360357158-8168-4-git-send-email-matt@console-pimps.org>
-	 <A5ED84D3BB3A384992CBB9C77DEDA4D414A88489@USINDEM103.corp.hds.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
+Date: Fri, 08 Feb 2013 14:30:52 -0800
+Message-ID: <51157C9C.6030501@zytor.com>
+References: <20130208191213.GA25081@www.outflux.net> <00780235-deac-4f80-b936-867834e05661@email.android.com> <CAGXu5jJnLY6Qp3J6HBpVg-AdUGdKYm-e4wErZO3=NuRo04ajvg@mail.gmail.com> <5115553A.5000708@zytor.com> <CAGXu5j+_mGzR+72YqORhErMUY1aF1H2urczZ8SwuJHZK-oZL6g@mail.gmail.com> <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com> <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com> <1360355671.18083.18.camel@x230.lan> <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D414A88489-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+In-Reply-To: <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-02-08 at 22:13 +0000, Seiji Aguchi wrote:
-> Please don't allocate memory dynamically in the efi_pstore_write()
-> because efi_pstore_write() is 
-> called in an interrupt context like oops and panic.
+On 02/08/2013 01:02 PM, Kees Cook wrote:
+> On Fri, Feb 8, 2013 at 12:34 PM, Matthew Garrett
+> <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
+>> On Fri, 2013-02-08 at 12:28 -0800, Kees Cook wrote:
+>>
+>>> Maybe a capability isn't the right way to go, I'm not sure. I'll le=
+ave
+>>> that to Matthew. Whatever the flag, it should be an immutable state=
+ of
+>>> the boot. Though, it probably makes sense as a cap just so that
+>>> non-secure-boot systems can still remove it from containers, etc.
+>>
+>> There was interest in ensuring that this wasn't something special-ca=
+sed
+>> to UEFI Secure Boot, so using a capability seemed like the most
+>> straightforward way - it's fundamentally a restriction on what an
+>> otherwise privileged user is able to do, so it seemed like it fit th=
+e
+>> model. But I'm not wed to it in the slightest, and in fact it causes
+>> problems for some userspace (anything that drops all capabilities
+>> suddenly finds itself unable to do something that it expects to be a=
+ble
+>> to do), so if anyone has any suggestions for a better approach=E2=80=
+=A6
+>=20
+> I don't find it unreasonable to drop all caps and lose access to
+> sensitive things. :) That's sort of the point, really. I think a cap
+> is the best match. It seems like it should either be a cap or a
+> namespace flag, but the latter seems messy.
+>=20
 
-efi_pstore_write() already calls efivar_create_sysfs_entry() which does
-kzalloc() anyway. Obviously this needs fixing, but it doesn't need to be
-done in this series. Unless there's some pstore patches that fix that
-somewhere? I know you sent some patches that moved things to a thread,
-unfortunately I haven't had chance to look at them.
+Caps are fine; the problem is the "putting it all under one cap".  The
+semi-problem here is that to preserve backwards compatibility we really
+should have a way to have hierarchical caps in Linux (which we currentl=
+y
+don't), but it is not really an issue for this.
 
-> Also, a whole process of query_info() + entry_set() should be
-> protected by a single spin lock()
-> Because if efi_pstore_write() runs concurrently, a result of
-> query_info() may be meaningless...
-> 
-> So, how about introducing query_info_nolock and entry_set_nolock()?
-> 
-> spin_lock()
-> query_info_nolock()
-> entry_set_nolock()
-> spin_unlock()
-> 
-> IMO, efivarfs_file_write() should be fixed as above.
+Also, keep in mind that there is a very simple way to deny MSR access
+completely, which is to not include the driver in your kernel (and not
+allow module loading, but if you can load modules you can just load a
+module to muck with whatever MSR you want.)
 
-Isn't the write() path protected by ->buf_lock? I didn't think it was
-possible to have two CPUs in the write() path simultaneously.
+I am still wondering if there are any legitimate uses of CAP_RAWIO &
+~CAP_COMPROMISE_KERNEL that can't be used to subvert the latter.  I am
+not sure there are.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+	-hpa
