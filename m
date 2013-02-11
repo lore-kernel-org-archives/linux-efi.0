@@ -1,40 +1,95 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [PATCH 2/2] efivarfs: guid part of filenames are case-insensitive
-Date: Mon, 11 Feb 2013 17:30:57 +0000
-Message-ID: <20130211173057.GM4503@ZenIV.linux.org.uk>
-References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
- <1360592935-26026-3-git-send-email-matt@console-pimps.org>
- <20130211152221.GL4503@ZenIV.linux.org.uk>
- <20130211160557.GB26681@console-pimps.org>
+From: Seiji Aguchi <seiji.aguchi@hds.com>
+Subject: [PATCH v6 -next 0/2] make efivars/efi_pstore interrupt-safe
+Date: Mon, 11 Feb 2013 17:58:28 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D414A91283@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130211160557.GB26681-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Cc: "Matt Fleming (matt@console-pimps.org)" <matt@console-pimps.org>, "mikew@google.com" <mikew@google.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 11, 2013 at 04:05:57PM +0000, Matt Fleming wrote:
-> > Egads, man...
-> > [snip the horror with copying the name]
-> > 
-> >         unsigned long hash = init_name_hash();
-> > 	const unsigned char *s = qstr->name;
-> > 	int len = qstr->len;
-> > 
-> > 	if (!efivarfs_valid_name(s, len))
-> > 		return -EINVAL;
-> >         while (len-- > GUID_LEN)
-> > 		hash = partial_name_hash(*s++, hash);
-> > 	/* GUID is case-insensitive. */
-> > 	while (len--)
-> > 		hash = partial_name_hash(tolower(*s++), hash);
-> >         return end_name_hash(hash);
-> 
-> Oh, wow, yes that is much nicer. I didn't realise we could build the
-> hash incrementally like that. Very cool.
+Changelog
+v5 -> v6
+   - Rebase to a latest linux-next tree.
+   - Modify a comment from "efivar_update_sysfs_entry" to 
+     "efivar_update_sysfs_entries" in include/linux/efi.h (Patch 2/2)
 
-... except that it should end with qstr->hash = end_name_hash(hash); return 0;
-instead.  My apologies.
+v4 -> v5
+   - Rebase from a linus tree to a linux-next tree to avoid getting
+     a conflict when this patchset is merged to a linux-next tree.
+   - Merge previous patches 2/3 and 3/3 into 2/2 because they fix
+     a same problem.
+   - Modify to fit a latest upstream kernel as follows.
+    - Change spinlock operations of efivarfs which has been 
+      introduced recently.(Patch 1/2)
+    - Remove delete_all_stale_sysfs_entries() from update_sysfs_entries()
+      because a currnet efi_pstore doesn't erase existing entries
+      in a write callback and sysfs entries don't become stale. 
+      (Patch 2/2)
+
+v3 -> v4
+  - Patch 2/3
+    Move cancel_work_sync() above an efi_enabled test in efivars_exit().
+
+v2 -> v3
+  - Patch 1/3
+    Replace spin_lock_irqsave/spin_unlock_irqrestore with spin_lock_irq/spin_unlock_irq in efivars_unregister(),
+    efivar_create(), efivar_store_raw() and efivar_delete() which are called in a process context. 
+
+ - Patch 2/3
+    Change a name of delete_sysfs_entry() to delete_all_stale_sysfs_entries().
+    Also, don't release an efivar->lock while searching efivar->list in delete_all_stale_sysfs_entries().
+
+ - Patch 3/3
+    Remove a logic in efi_pstore_erase() which freshly created in patch v2.
+
+v1 -> v2
+ - Patch 1/3
+    Add spin_lock_irq/spin_unlock_irq to open/close callbacks of efi_pstore 
+    instead of moving spin_locks to a read callback.    
+
+ - Patch 2/3
+    Replace a periodical timer with schedule_work().
+
+ - Patch 3/3
+    freshly create to kick a workqueue in oops case only.
+
+[Problem]
+ There are following problems related to an interrupt context in efivars
+ including efivarfs and efi_pstore.
+
+(1)There is a scenario which efi_pstore fails to log messages 
+   in a panic case.
+
+   - CPUA holds an efi_var->lock in either efivarfs parts 
+     or efi_pstore with interrupt enabled.
+   - CPUB panics and sends IPI to CPUA in smp_send_stop().
+   - CPUA stops with holding the lock.
+   - CPUB kicks efi_pstore_write() via kmsg_dump(KSMG_DUMP_PANIC)
+     but it returns without logging messages.
+
+(2)Also, efi_pstore creates sysfs entries, which enable users to access to 
+   NVRAM, in a write callback.
+   If a kernel panic happens in an interrupt contexts, pstore may fail
+   because it could sleep due to dynamic memory allocations during creating 
+   sysfs entries.
+   An actual failure due to the create_sysfs_entry() has been reported.
+   http://comments.gmane.org/gmane.linux.kernel.efi/406
+
+To resolve problems above, this patchset makes efivars/efi_pstore
+interrupt-safe.
+
+[Patch Description]
+  Please see detailed explanations in each patch.
+
+Seiji Aguchi (2):
+  efivars: Disable external interrupt while holding efivars->lock
+  efi_pstore: Introducing workqueue updating sysfs entries
+
+ drivers/firmware/efivars.c |  171 ++++++++++++++++++++++++++++++++------------
+ include/linux/efi.h        |    3 +-
+ 2 files changed, 126 insertions(+), 48 deletions(-)
