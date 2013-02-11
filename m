@@ -1,28 +1,40 @@
-From: Seiji Aguchi <seiji.aguchi@hds.com>
-Subject: RE: [PATCH v5 -next 1/2]efivars: Disable external interrupt while
- holding efivars->lock
-Date: Mon, 11 Feb 2013 16:34:33 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D414A8FFF2@USINDEM103.corp.hds.com>
-References: <A5ED84D3BB3A384992CBB9C77DEDA4D414A541B5@USINDEM103.corp.hds.com>
- <1360440158.7515.321.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Subject: Re: [PATCH 2/2] efivarfs: guid part of filenames are case-insensitive
+Date: Mon, 11 Feb 2013 17:30:57 +0000
+Message-ID: <20130211173057.GM4503@ZenIV.linux.org.uk>
+References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
+ <1360592935-26026-3-git-send-email-matt@console-pimps.org>
+ <20130211152221.GL4503@ZenIV.linux.org.uk>
+ <20130211160557.GB26681@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1360440158.7515.321.camel@mfleming-mobl1.ger.corp.intel.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>, "Luck, Tony (tony.luck@intel.com)" <tony.luck@intel.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "mikew@google.com" <mikew@google.com>, "cbouatmailru@gmail.com" <cbouatmailru@gmail.com>, "dzickus@redhat.com" <dzickus@redhat.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Satoru Moriya <satoru.moriya@hds.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130211160557.GB26681-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-TWF0dCwNCg0KPiBBY2tlZC1ieTogTWF0dCBGbGVtaW5nIDxtYXR0LmZsZW1pbmdAaW50ZWwuY29t
-Pg0KPiANCj4gVG9ueSwgYXJlIHlvdSBwaWNraW5nIHRoaXMgdXA/DQoNClRoYW5rIHlvdSBmb3Ig
-cmV2aWV3aW5nIGFuZCBhY2tpbmcgbXkgcGF0Y2hzZXQuDQoNClRvbnksDQoNClRoaXMgcGF0Y2hz
-ZXQgY2FuJ3QgYmUgYXBwbGllZCB0byBhIGxhdGVzdCBuZXh0IHRyZWUgZHVlIHRvIGZvbGxvd2lu
-ZyBjb21taXRzLg0KSSB3aWxsIHBvc3QgdjYgc2hvcnRseSB0byBmaXQgdGhlIGxhdGVzdCBuZXh0
-IHRyZWUuDQpUaGVuLCBwbGVhc2UgYXBwbHkgaXQuDQoNCmVmaTogTWFrZSAnZWZpX2VuYWJsZWQn
-IGEgZnVuY3Rpb24gdG8gcXVlcnkgRUZJIGZhY2lsaXRpZXMNCmNvbW1pdCA4M2U2ODE4OTc0NWFk
-OTMxYzJhZmQ0NWQ4ZWUzMzAzOTI5MjMzZTdmDQoNCmVmaXZhcmZzOiBEZWxldGUgZGVudHJ5IGZy
-b20gZGNhY2hlIGluIGVmaXZhcmZzX2ZpbGVfd3JpdGUoKQ0KY29tbWl0ICA3OTFlYjU2NGQyMThk
-YWJlMGY5YTIyMTI5MTZmZTU0MjQwYjk3YWZiDQoNClNlaWppDQo=
+On Mon, Feb 11, 2013 at 04:05:57PM +0000, Matt Fleming wrote:
+> > Egads, man...
+> > [snip the horror with copying the name]
+> > 
+> >         unsigned long hash = init_name_hash();
+> > 	const unsigned char *s = qstr->name;
+> > 	int len = qstr->len;
+> > 
+> > 	if (!efivarfs_valid_name(s, len))
+> > 		return -EINVAL;
+> >         while (len-- > GUID_LEN)
+> > 		hash = partial_name_hash(*s++, hash);
+> > 	/* GUID is case-insensitive. */
+> > 	while (len--)
+> > 		hash = partial_name_hash(tolower(*s++), hash);
+> >         return end_name_hash(hash);
+> 
+> Oh, wow, yes that is much nicer. I didn't realise we could build the
+> hash incrementally like that. Very cool.
+
+... except that it should end with qstr->hash = end_name_hash(hash); return 0;
+instead.  My apologies.
