@@ -1,35 +1,34 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 1/2 v2] efivarfs: Validate filenames much more aggressively
-Date: Tue, 12 Feb 2013 12:36:13 +0000
-Message-ID: <20130212123613.GB14790@console-pimps.org>
+Subject: [PATCH 2/2 v2] efivarfs: guid part of filenames are case-insensitive
+Date: Tue, 12 Feb 2013 12:39:34 +0000
+Message-ID: <20130212123934.GC14790@console-pimps.org>
 References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
- <1360592935-26026-2-git-send-email-matt@console-pimps.org>
+ <1360592935-26026-3-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1360592935-26026-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1360592935-26026-3-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The only thing that efivarfs does to enforce a valid filename is
-ensure that the name isn't too short. We need to strongly sanitise any
-filenames, not least because variable creation is delayed until
-efivarfs_file_write(), which means we can't rely on the firmware to
-inform us of an invalid name, because if the file is never written to
-we'll never know it's invalid.
+It makes no sense to treat the following filenames as unique,
 
-Perform a couple of steps before agreeing to create a new file,
+	VarName-abcdefab-abcd-abcd-abcd-abcdefabcdef
+	VarName-ABCDEFAB-ABCD-ABCD-ABCD-ABCDEFABCDEF
+	VarName-ABcDEfAB-ABcD-ABcD-ABcD-ABcDEfABcDEf
+	VarName-aBcDEfAB-aBcD-aBcD-aBcD-aBcDEfaBcDEf
+	... etc ...
 
-  * Ensure the GUID only contains hexadecimal digits and dashes.
+since the guid will be converted into a binary representation, which
+has no case.
 
-  * Ensure that the GUID portion of the filename is the correct length
-    and format.
-
-  * The variable name portion of the filename needs to be at least one
-    character in size.
+Roll our own dentry operations so that we can treat the variable name
+part of filenames ("VarName" in the above example) as case-sensitive,
+but the guid portion as case-insensitive. That way, efivarfs will
+refuse to create the above files if any one already exists.
 
 Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
@@ -38,85 +37,141 @@ Cc: Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
 
-v2: Use Al's much improve filename parsing code and make
-    efivarfs_valid_name() return the more natural boolean type.
+v2: Use Al's non-eye-watering code for calculating the hash. Optimise
+    efivarfs_d_compare() slightly by firstly checking whether the
+    string lens match, this also avoids a possible out-of-bounds
+    condition when performing the memcmp().
 
- drivers/firmware/efivars.c | 49 +++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 44 insertions(+), 5 deletions(-)
+ drivers/firmware/efivars.c | 95 +++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 93 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 371c441..868cea5 100644
+index 868cea5..5d055dc 100644
 --- a/drivers/firmware/efivars.c
 +++ b/drivers/firmware/efivars.c
-@@ -79,6 +79,7 @@
- #include <linux/device.h>
- #include <linux/slab.h>
- #include <linux/pstore.h>
-+#include <linux/ctype.h>
- 
- #include <linux/fs.h>
- #include <linux/ramfs.h>
-@@ -900,6 +901,48 @@ static struct inode *efivarfs_get_inode(struct super_block *sb,
- 	return inode;
- }
+@@ -1043,6 +1043,84 @@ static int efivarfs_unlink(struct inode *dir, struct dentry *dentry)
+ 	return -EINVAL;
+ };
  
 +/*
-+ * Return true if 'str' is a valid efivarfs filename of the form,
++ * Compare two efivarfs file names.
 + *
-+ *	VariableName-12345678-1234-1234-1234-1234567891bc
++ * An efivarfs filename is composed of two parts,
++ *
++ *	1. A case-sensitive variable name
++ *	2. A case-insensitive GUID
++ *
++ * So we need to perform a case-sensitive match on part 1 and a
++ * case-insensitive match on part 2.
 + */
-+static bool efivarfs_valid_name(const char *str, int len)
++static int efivarfs_d_compare(const struct dentry *parent, const struct inode *pinode,
++			      const struct dentry *dentry, const struct inode *inode,
++			      unsigned int len, const char *str,
++			      const struct qstr *name)
 +{
-+	static const char dashes[GUID_LEN] = {
-+		[8] = 1, [13] = 1, [18] = 1, [23] = 1
-+	};
-+	const char *s = str + len - GUID_LEN;
-+	int i;
++	int guid = len - GUID_LEN;
 +
-+	/*
-+	 * We need a GUID, plus at least one letter for the variable name,
-+	 * plus the '-' separator
-+	 */
-+	if (len < GUID_LEN + 2)
-+		return false;
++	if (name->len != len)
++		return 1;
 +
-+	/* GUID should be right after the first '-' */
-+	if (s - 1 != strchr(str, '-'))
-+		return false;
++	/* Case-sensitive compare for the variable name */
++	if (memcmp(str, name->name, guid))
++		return 1;
 +
-+	/*
-+	 * Validate that 's' is of the correct format, e.g.
-+	 *
-+	 *	12345678-1234-1234-1234-123456789abc
-+	 */
-+	for (i = 0; i < GUID_LEN; i++) {
-+		if (dashes[i]) {
-+			if (*s++ != '-')
-+				return false;
-+		} else {
-+			if (!isxdigit(*s++))
-+				return false;
-+		}
-+	}
-+
-+	return true;
++	/* Case-insensitive compare for the GUID */
++	return strcasecmp(name->name + guid, str + guid);
 +}
 +
- static void efivarfs_hex_to_guid(const char *str, efi_guid_t *guid)
++static int efivarfs_d_hash(const struct dentry *dentry,
++			   const struct inode *inode, struct qstr *qstr)
++{
++	unsigned long hash = init_name_hash();
++	const unsigned char *s = qstr->name;
++	unsigned int len = qstr->len;
++
++	if (!efivarfs_valid_name(s, len))
++		return -EINVAL;
++
++	while (len-- > GUID_LEN)
++		hash = partial_name_hash(*s++, hash);
++
++	/* GUID is case-insensitive. */
++	while (len--)
++		hash = partial_name_hash(tolower(*s++), hash);
++
++	qstr->hash = end_name_hash(hash);
++	return 0;
++}
++
++/*
++ * Retaining negative dentries for an in-memory filesystem just wastes
++ * memory and lookup time: arrange for them to be deleted immediately.
++ */
++static int efivarfs_delete_dentry(const struct dentry *dentry)
++{
++	return 1;
++}
++
++static struct dentry_operations efivarfs_d_ops = {
++	.d_compare = efivarfs_d_compare,
++	.d_hash = efivarfs_d_hash,
++	.d_delete = efivarfs_delete_dentry,
++};
++
++static struct dentry *efivarfs_alloc_dentry(struct dentry *parent, char *name)
++{
++	struct qstr q;
++
++	q.name = name;
++	q.len = strlen(name);
++
++	if (efivarfs_d_hash(NULL, NULL, &q))
++		return NULL;
++
++	return d_alloc(parent, &q);
++}
++
+ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
  {
- 	guid->b[0] = hex_to_bin(str[6]) << 4 | hex_to_bin(str[7]);
-@@ -928,11 +971,7 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
- 	struct efivar_entry *var;
- 	int namelen, i = 0, err = 0;
+ 	struct inode *inode = NULL;
+@@ -1058,6 +1136,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
+ 	sb->s_blocksize_bits    = PAGE_CACHE_SHIFT;
+ 	sb->s_magic             = EFIVARFS_MAGIC;
+ 	sb->s_op                = &efivarfs_ops;
++	sb->s_d_op		= &efivarfs_d_ops;
+ 	sb->s_time_gran         = 1;
  
--	/*
--	 * We need a GUID, plus at least one letter for the variable name,
--	 * plus the '-' separator
--	 */
--	if (dentry->d_name.len < GUID_LEN + 2)
-+	if (!efivarfs_valid_name(dentry->d_name.name, dentry->d_name.len))
- 		return -EINVAL;
+ 	inode = efivarfs_get_inode(sb, NULL, S_IFDIR | 0755, 0);
+@@ -1098,7 +1177,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
+ 		if (!inode)
+ 			goto fail_name;
  
- 	inode = efivarfs_get_inode(dir->i_sb, dir, mode, 0);
+-		dentry = d_alloc_name(root, name);
++		dentry = efivarfs_alloc_dentry(root, name);
+ 		if (!dentry)
+ 			goto fail_inode;
+ 
+@@ -1148,8 +1227,20 @@ static struct file_system_type efivarfs_type = {
+ 	.kill_sb = efivarfs_kill_sb,
+ };
+ 
++/*
++ * Handle negative dentry.
++ */
++static struct dentry *efivarfs_lookup(struct inode *dir, struct dentry *dentry,
++				      unsigned int flags)
++{
++	if (dentry->d_name.len > NAME_MAX)
++		return ERR_PTR(-ENAMETOOLONG);
++	d_add(dentry, NULL);
++	return NULL;
++}
++
+ static const struct inode_operations efivarfs_dir_inode_operations = {
+-	.lookup = simple_lookup,
++	.lookup = efivarfs_lookup,
+ 	.unlink = efivarfs_unlink,
+ 	.create = efivarfs_create,
+ };
 -- 
 1.7.11.7
