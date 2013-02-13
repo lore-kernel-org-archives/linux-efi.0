@@ -1,42 +1,85 @@
-From: Paolo Bonzini <pbonzini@redhat.com>
-Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
-Date: Wed, 13 Feb 2013 09:27:13 +0100
-Message-ID: <511B4E61.1040604@redhat.com>
-References: <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>    <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>    <1360355671.18083.18.camel@x230.lan>    <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>    <51157C9C.6030501@zytor.com> <20130208230655.GB28990@pd.tnic>    <1360366012.18083.21.camel@x230.lan> <5115A4CC.3080102@zytor.com>    <1360373383.18083.23.camel@x230.lan>    <CAGXu5j+xvJ3L5ejxtZ-Jw3F6rV7OsrE0_HZCGu_er0rH2_PwKA@mail.gmail.com>    <20130209092925.GA17728@pd.tnic> <1360422712.18083.24.camel@x230.lan>   <511AE2CC.5040705@zytor.com> <1360733962.18083.30.camel@x230.lan>  <511B2EB9.5070406@zytor.com> <1360736860.18083.33.camel@x230.lan> <511B33BC.9080307@zytor.com>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
+Date: Wed, 13 Feb 2013 10:07:08 +0000
+Message-ID: <1360750028.24917.28.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <51074786.5030007@huawei.com>
+	 <1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <51131248.3080203@huawei.com> <5113450C.1080109@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <511B33BC.9080307@zytor.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, Borislav Petkov <bp@alien8.de>, Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>
+Return-path: <linux-ia64-owner@vger.kernel.org>
+In-Reply-To: <5113450C.1080109@huawei.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Xishi Qiu <qiuxishi@huawei.com>
+Cc: "Luck, Tony" <tony.luck@intel.com>, fenghua.yu@intel.com, Liujiang <jiang.liu@huawei.com>, Andrew Morton <akpm@linux-foundation.org>, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-mm@kvack.org, Hanjun Guo <guohanjun@huawei.com>, WuJianguo <wujianguo@huawei.com>
 List-Id: linux-efi@vger.kernel.org
 
-Il 13/02/2013 07:33, H. Peter Anvin ha scritto:
->>
->>> Sounds like you are thinking of CAP_SYS_ADMIN, but I don't really see a
->>> huge difference between MSRs and I/O control registers... just different
->>> address spaces.
->>
->> Not having CAP_SYS_RAWIO blocks various SCSI commands, for instance.
->> These might result in the ability to write individual blocks or destroy
->> the device firmware, but do any of them permit modifying the running
->> kernel?
-
-No, they cannot.
-
-> That is just batshit crazy.  If you have CAP_SYS_RAWIO you can do iopl()
-> which means you can reprogram your northbridge, at which point you most
-> definitely *can* modify the running kernel.
+On Thu, 2013-02-07 at 14:09 +0800, Xishi Qiu wrote:
+> > Sorry, this bug will be happen when use Sparse-Memory(section is valid, but last
 > 
-> And some SCSI driver requires this??!
+> > several pages are invalid). If use Flat-Memory, crash kernel will boot successfully.
+> > I think the following patch would be better.
+> > 
+> > Hi Andrew, will you just ignore the earlier patch and consider the following one? :>
+> > 
+> > Signed-off-by: Xishi Qiu <qiuxishi@huawei.com>
+> > ---
+> >  arch/ia64/mm/init.c |    2 ++
+> >  1 files changed, 2 insertions(+), 0 deletions(-)
+> > 
+> > diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
+> > index 082e383..23f2ee3 100644
+> > --- a/arch/ia64/mm/init.c
+> > +++ b/arch/ia64/mm/init.c
+> > @@ -213,6 +213,8 @@ free_initrd_mem (unsigned long start, unsigned long end)
+> >  	for (; start < end; start += PAGE_SIZE) {
+> >  		if (!virt_addr_valid(start))
+> >  			continue;
+> > +		if ((start >> PAGE_SHIFT) >= max_low_pfn)
+> 
+> I confused the vaddr and paddr, really sorry for it.
+> 
+> In efi_init() memory aligns in IA64_GRANULE_SIZE(16M). If set "crashkernel=1024M-:600M"
+> and use sparse memory model, when crash kernel booting it changes [128M-728M] to [128M-720M].
+> But initrd memory is in [709M-727M], and virt_addr_valid() *can not* check the invalid pages
+> when freeing initrd memory. There are some pages missed at the end of the seciton.
+> 
+> ChangeLog V3:
+> 	fixed vaddr mistake
+> ChangeLog V2:
+> 	add invalid pages check when freeing initrd memory
+> 
+> Signed-off-by: Xishi Qiu <qiuxishi@huawei.com>
+> ---
+>  arch/ia64/mm/init.c |    4 ++++
+>  1 files changed, 4 insertions(+), 0 deletions(-)
+> 
+> diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
+> index 082e383..8a269f8 100644
+> --- a/arch/ia64/mm/init.c
+> +++ b/arch/ia64/mm/init.c
+> @@ -173,6 +173,7 @@ void __init
+>  free_initrd_mem (unsigned long start, unsigned long end)
+>  {
+>  	struct page *page;
+> +	unsigned long pfn;
+>  	/*
+>  	 * EFI uses 4KB pages while the kernel can use 4KB or bigger.
+>  	 * Thus EFI and the kernel may have different page sizes. It is
+> @@ -213,6 +214,9 @@ free_initrd_mem (unsigned long start, unsigned long end)
+>  	for (; start < end; start += PAGE_SIZE) {
+>  		if (!virt_addr_valid(start))
+>  			continue;
+> +		pfn = __pa(start) >> PAGE_SHIFT;
+> +		if (pfn >= max_low_pfn)
+> +			continue;
+>  		page = virt_to_page(start);
+>  		ClearPageReserved(page);
+>  		init_page_count(page);
 
-No, and that's why there is a patchset floating that lets you toggle
-this ability with a sysfs control.  This way you do not need
-CAP_SYS_RAWIO anymore.
+I would have presumed that fixing this bug would involve modifying the
+ia64-specific kexec code?
 
-On non-x86 machines CAP_SYS_RAWIO is much less dangerous, especially
-when coupled with file DAC.
+Tony, Fenghua? Any thoughts?
 
-Paolo
