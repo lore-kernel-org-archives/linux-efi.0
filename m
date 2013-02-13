@@ -1,36 +1,35 @@
-From: Tony Luck <tony.luck@gmail.com>
-Subject: Re: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
-Date: Tue, 12 Feb 2013 16:32:16 -0800
-Message-ID: <CA+8MBbK7ZSkk2tOfjbeKuyCJ1mBT5OeY3GHKLS2EVFwH_nXZYA@mail.gmail.com>
-References: <51074786.5030007@huawei.com>
-	<1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>
-	<51131248.3080203@huawei.com>
-	<5113450C.1080109@huawei.com>
-	<CA+8MBb+3_xWv1wMWv0+gwWm9exPCNTZWG3mXQnBsUbc5fJnuiA@mail.gmail.com>
-	<20130212161912.6a9e9293.akpm@linux-foundation.org>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
+Date: Tue, 12 Feb 2013 16:48:12 -0800
+Message-ID: <511AE2CC.5040705@zytor.com>
+References: <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>  <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>  <1360355671.18083.18.camel@x230.lan>  <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>  <51157C9C.6030501@zytor.com> <20130208230655.GB28990@pd.tnic>  <1360366012.18083.21.camel@x230.lan> <5115A4CC.3080102@zytor.com>  <1360373383.18083.23.camel@x230.lan>  <CAGXu5j+xvJ3L5ejxtZ-Jw3F6rV7OsrE0_HZCGu_er0rH2_PwKA@mail.gmail.com>  <20130209092925.GA17728@pd.tnic> <1360422712.18083.24.camel@x230.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20130212161912.6a9e9293.akpm@linux-foundation.org>
-Sender: owner-linux-mm@kvack.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Xishi Qiu <qiuxishi@huawei.com>, Matt Fleming <matt.fleming@intel.com>, fenghua.yu@intel.com, Liujiang <jiang.liu@huawei.com>, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-mm@kvack.org, Hanjun Guo <guohanjun@huawei.com>, WuJianguo <wujianguo@huawei.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1360422712.18083.24.camel@x230.lan>
+Sender: linux-security-module-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: Borislav Petkov <bp@alien8.de>, Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 12, 2013 at 4:19 PM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> But, umm, why am I sitting here trying to maintain an ia64 bugfix and
-> handling bug reports from the ia64 maintainer?  Wanna swap?
+On 02/09/2013 07:11 AM, Matthew Garrett wrote:
+> On Sat, 2013-02-09 at 10:29 +0100, Borislav Petkov wrote:
+>> On Fri, Feb 08, 2013 at 10:45:35PM -0800, Kees Cook wrote:
+>>> Also, _reading_ MSRs from userspace arguably has utility that doesn't
+>>> compromise ring-0.
+>>
+>> And to come back to the original question: what is that utility, who
+>> would need it on a secure boot system and why?
+> 
+> Things like Turbostat are useful, although perhaps that information
+> should be exposed in a better way.
+> 
 
-That sounds like a plan.  I'll look out for a new version with the
-missing #include
-and less silly global variable names and try to take it before you
-pull it into -mm
+OK... what none of this gets into:
 
--Tony
+Why should CAP_RAWIO be allowed on a secure boot system, when there are
+2^n known ways of compromise a system with CAP_RAWIO?
 
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+	-hpa
+
