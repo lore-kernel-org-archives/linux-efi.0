@@ -1,145 +1,61 @@
-From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [RFE PATCH 2/2] rtc, add write functionality to sysfs
-Date: Thu, 14 Feb 2013 12:02:55 -0500
-Message-ID: <1360861375-24131-3-git-send-email-prarit@redhat.com>
-References: <1360861375-24131-1-git-send-email-prarit@redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/2 v2] efivarfs: guid part of filenames are
+ case-insensitive
+Date: Thu, 14 Feb 2013 17:11:16 +0000
+Message-ID: <1360861876.24917.52.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
+	 <1360592935-26026-3-git-send-email-matt@console-pimps.org>
+	 <20130212123934.GC14790@console-pimps.org>
+	 <20130214160405.GU4503@ZenIV.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1360861375-24131-1-git-send-email-prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20130214160405.GU4503-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-/sys/class/rtc/rtcX/date and /sys/class/rtc/rtcX/time currently have
-read-only access.  This patch introduces write functionality which will
-set the rtc time.
+On Thu, 2013-02-14 at 16:04 +0000, Al Viro wrote:
+> On Tue, Feb 12, 2013 at 12:39:34PM +0000, Matt Fleming wrote:
+> 
+> > +static struct dentry *efivarfs_alloc_dentry(struct dentry *parent, char *name)
+> > +{
+> > +	struct qstr q;
+> > +
+> > +	q.name = name;
+> > +	q.len = strlen(name);
+> > +
+> > +	if (efivarfs_d_hash(NULL, NULL, &q))
+> > +		return NULL;
+> > +
+> > +	return d_alloc(parent, &q);
+> > +}
+> 
+> > @@ -1098,7 +1177,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
+> >  		if (!inode)
+> >  			goto fail_name;
+> >  
+> > -		dentry = d_alloc_name(root, name);
+> > +		dentry = efivarfs_alloc_dentry(root, name);
+> >  		if (!dentry)
+> >  			goto fail_inode;
+> 
+> Umm...  That name has just been built by efivarfs_fill_super() itself, and
+> AFAICS there's no way for its GUID part to be _not_ lowercase
+> hex and with proper locations of dashes.  So
+> 	a) hash value will be exactly full_name_hash(name), unless
+> efivarfs_valid_name() manages to fail.
 
-Usage: echo YYYY-MM-DD > /sys/class/rtc/rtcX/date
-       echo HH:MM:SS > /sys/class/rtc/rtcX/time
+In my testing calling full_name_hash() and doing the partial_name_hash()
+loop returned different results. This is on x86, with
+CONFIG_DCACHE_WORD_ACCESS=y. I assumed they weren't compatible because
+most (all?) file systems that do fs-specific hashing also fill out the
+hash member using their fs-specific function, whereas efivarfs was
+previously using d_alloc_name().
 
-Signed-off-by: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
----
- drivers/rtc/rtc-sysfs.c | 86 +++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 84 insertions(+), 2 deletions(-)
+Is this mismatch indicative of a bug in efivarfs hashing?
 
-diff --git a/drivers/rtc/rtc-sysfs.c b/drivers/rtc/rtc-sysfs.c
-index b70e2bb..87d63d7 100644
---- a/drivers/rtc/rtc-sysfs.c
-+++ b/drivers/rtc/rtc-sysfs.c
-@@ -48,6 +48,46 @@ rtc_sysfs_show_date(struct device *dev, struct device_attribute *attr,
- }
- 
- static ssize_t
-+rtc_sysfs_store_date(struct device *dev, struct device_attribute *attr,
-+		     const char *buf, size_t count)
-+{
-+	ssize_t retval;
-+	struct rtc_time tm;
-+	char tmp[11] = "\0", *tmpptr = tmp;
-+	char *cyear, *cmonth, *cday;
-+	int year, month, day;
-+
-+	if (!capable(CAP_SYS_TIME))
-+		return -EPERM;
-+
-+	/* from rtc_sysfs_show_date(): date string format is YYYY-MM-DD */
-+	if (strlen(buf) != 11)
-+		return -EINVAL;
-+
-+	strncpy(tmp, buf, 11);
-+	cyear = strsep(&tmpptr, "-");
-+	sscanf(cyear, "%i", &year);
-+	cmonth = strsep(&tmpptr, "-");
-+	sscanf(cmonth, "%i", &month);
-+	cday = strsep(&tmpptr, "-");
-+	sscanf(cday, "%i", &day);
-+
-+	retval = rtc_read_time(to_rtc_device(dev), &tm);
-+	if (retval)
-+		return -ENODEV;
-+
-+	tm.tm_year = year - 1900;
-+	tm.tm_mon = month - 1;
-+	tm.tm_mday = day;
-+
-+	retval = rtc_set_time(to_rtc_device(dev), &tm);
-+	if (retval)
-+		return retval;
-+
-+	return count;
-+}
-+
-+static ssize_t
- rtc_sysfs_show_time(struct device *dev, struct device_attribute *attr,
- 		char *buf)
- {
-@@ -64,6 +104,46 @@ rtc_sysfs_show_time(struct device *dev, struct device_attribute *attr,
- }
- 
- static ssize_t
-+rtc_sysfs_store_time(struct device *dev, struct device_attribute *attr,
-+		     const char *buf, size_t count)
-+{
-+	ssize_t retval;
-+	struct rtc_time tm;
-+	char tmp[9] = "\0", *tmpptr = tmp;
-+	char *chour, *cmin, *csec;
-+	int hour, min, sec;
-+
-+	if (!capable(CAP_SYS_TIME))
-+		return -EPERM;
-+
-+	/* from rtc_sysfs_show_time(): time string format is HH:MM:SS */
-+	if (strlen(buf) != 9)
-+		return -EINVAL;
-+
-+	strncpy(tmp, buf, 9);
-+	chour = strsep(&tmpptr, ":");
-+	sscanf(chour, "%i", &hour);
-+	cmin = strsep(&tmpptr, ":");
-+	sscanf(cmin, "%i", &min);
-+	csec = strsep(&tmpptr, ":");
-+	sscanf(csec, "%i", &sec);
-+
-+	retval = rtc_read_time(to_rtc_device(dev), &tm);
-+	if (retval)
-+		return -ENODEV;
-+
-+	tm.tm_hour = hour;
-+	tm.tm_min = min;
-+	tm.tm_sec = sec;
-+
-+	retval = rtc_set_time(to_rtc_device(dev), &tm);
-+	if (retval)
-+		return retval;
-+
-+	return count;
-+}
-+
-+static ssize_t
- rtc_sysfs_show_since_epoch(struct device *dev, struct device_attribute *attr,
- 		char *buf)
- {
-@@ -124,8 +204,10 @@ rtc_sysfs_show_hctosys(struct device *dev, struct device_attribute *attr,
- 
- static struct device_attribute rtc_attrs[] = {
- 	__ATTR(name, S_IRUGO, rtc_sysfs_show_name, NULL),
--	__ATTR(date, S_IRUGO, rtc_sysfs_show_date, NULL),
--	__ATTR(time, S_IRUGO, rtc_sysfs_show_time, NULL),
-+	__ATTR(date, S_IRUGO | S_IWUGO, rtc_sysfs_show_date,
-+	       rtc_sysfs_store_date),
-+	__ATTR(time, S_IRUGO | S_IWUGO, rtc_sysfs_show_time,
-+	       rtc_sysfs_store_time),
- 	__ATTR(since_epoch, S_IRUGO, rtc_sysfs_show_since_epoch, NULL),
- 	__ATTR(max_user_freq, S_IRUGO | S_IWUSR, rtc_sysfs_show_max_user_freq,
- 			rtc_sysfs_set_max_user_freq),
 -- 
-1.8.1.2
+Matt Fleming, Intel Open Source Technology Center
