@@ -1,88 +1,50 @@
-From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Subject: [PATCH] efi: Clear EFI_RUNTIME_SERVICES rather than EFI_BOOT by "noefi"
- boot parameter
-Date: Thu, 14 Feb 2013 09:12:52 +0900
-Message-ID: <511C2C04.2070108@jp.fujitsu.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
+Date: Wed, 13 Feb 2013 16:25:48 -0800
+Message-ID: <511C2F0C.3060803@zytor.com>
+References: <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>      <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>      <1360355671.18083.18.camel@x230.lan>      <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>      <51157C9C.6030501@zytor.com> <20130208230655.GB28990@pd.tnic>      <1360366012.18083.21.camel@x230.lan> <5115A4CC.3080102@zytor.com>      <1360373383.18083.23.camel@x230.lan>      <CAGXu5j+xvJ3L5ejxtZ-Jw3F6rV7OsrE0_HZCGu_er0rH2_PwKA@mail.gmail.com>      <20130209092925.GA17728@pd.tnic> <1360422712.18083.24.camel@x230.lan>     <511AE2CC.5040705@zytor.com> <1360733962.18083.30.camel@x230.lan>    <511B2EB9.5070406@zytor.com> <1360736860.18083.33.camel@x230.lan>   <511B33BC.9080307@zytor.com> <1360737709.18083.36.camel@x230.lan>  <511
+ BCB6E.8080102@zytor.com> <1360776399.18083.39.camel@x230.lan> <511BD291.1040003@schaufler-ca.com> <511C1325.5060601@zytor.com> <511C1A94.8020804@schaufler-ca.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-2022-JP"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <511C1A94.8020804-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, linux EFI ml <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-stable ml <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux x86 ml <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Dave Jiang <dave.jiang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
+To: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+On 02/13/2013 02:58 PM, Casey Schaufler wrote:
+>>
+>> This is exactly the kind of thinking which has led to the capability
+>> system being so bloody useless.
+> 
+> The reason the capability system is "bloody useless" is
+> that no one wants to update the core system applications to
+> use it in favor of good old fashioned worked for dad and
+> works for me too superuser.
+> 
 
-There was a serious problem in samsung-laptop that its platform driver is
-designed to run under BIOS and running under EFI can cause the machine to
-become bricked or can cause Machine Check Exceptions.
+Because, in large part because a bunch of the capabilities are so close
+to equivalent to "superuser" that the distinction is meaningless... so
+why go through the hassle?  (This is especially so since it was a *long*
+time before the filesystem had any notion of capabilities, and so you
+had to make your app run as root anyway before you could drop the
+capabilities... and some of the people who tried failed spectacularly
+and opened up new security holes.)
 
-    Discussion about this problem:
-    https://bugs.launchpad.net/ubuntu-cdimage/+bug/1040557
-    https://bugzilla.kernel.org/show_bug.cgi?id=47121
+> 
+> I understand that you want capabilities to be associated with
+> resources. That is *not* what we have, and arguing that its
+> what we should have is pointless because Linux does not even
+> have a concept of resources.
+> 
 
-    The patches to fix this problem:
-    efi: Make 'efi_enabled' a function to query EFI facilities
-    83e68189745ad931c2afd45d8ee3303929233e7f
+OK, fine, call it "activities".  This is still distinct from "usage
+models", and that's where we're just broken.
 
-    samsung-laptop: Disable on EFI hardware
-    e0094244e41c4d0c7ad69920681972fc45d8ce34
+I may look into seeing if there is any sane way we can use the existing
+API to define hierarchical capabilities, which at least should let us
+split existing capabilities just like we used capabilities to split root.
 
-Unfortunately this problem comes back again if users specify "noefi" option.
-This parameter clears EFI_BOOT and that driver continues to run even if running
-under EFI. Refer to the document, this parameter should clear
-EFI_RUNTIME_SERVICES instead.
-
-Documentation/kernel-parameters.txt:
-===============================================================================
-...
-	noefi		[X86] Disable EFI runtime services support.
-...
-===============================================================================
-
-Documentation/x86/x86_64/uefi.txt:
-===============================================================================
-...
-- If some or all EFI runtime services don't work, you can try following
-  kernel command line parameters to turn off some or all EFI runtime
-  services.
-	noefi		turn off all EFI runtime services
-...
-===============================================================================
-
-Signed-off-by: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: David Airlie <airlied-cv59FeDIM0c@public.gmane.org>
-Cc: Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Dave Jiang <dave.jiang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Rafael J. Wysocki <rjw-KKrjLPT3xs0@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
----
- arch/x86/platform/efi/efi.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 77cf009..928bf83 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -87,7 +87,7 @@ EXPORT_SYMBOL(efi_enabled);
- 
- static int __init setup_noefi(char *arg)
- {
--	clear_bit(EFI_BOOT, &x86_efi_facility);
-+	clear_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
- 	return 0;
- }
- early_param("noefi", setup_noefi);
--- 1.7.10.4 
+	-hpa
