@@ -1,68 +1,81 @@
-From: Casey Schaufler <casey@schaufler-ca.com>
-Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
-Date: Wed, 13 Feb 2013 14:58:28 -0800
-Message-ID: <511C1A94.8020804@schaufler-ca.com>
-References: <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>      <CAGXu5jLAufTRm=sDST0br_WEkn4o0Hpjv2jDP2Na=cCvuM+MGg@mail.gmail.com>      <1360355671.18083.18.camel@x230.lan>      <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>      <51157C9C.6030501@zytor.com> <20130208230655.GB28990@pd.tnic>      <1360366012.18083.21.camel@x230.lan> <5115A4CC.3080102@zytor.com>      <1360373383.18083.23.camel@x230.lan>      <CAGXu5j+xvJ3L5ejxtZ-Jw3F6rV7OsrE0_HZCGu_er0rH2_PwKA@mail.gmail.com>      <20130209092925.GA17728@pd.tnic> <1360422712.18083.24.camel@x230.lan>     <511AE2CC.5040705@zytor.com> <1360733962.18083.30.camel@x230.lan>    <511B2EB9.5070406@zytor.com> <1360736860.18083.33.camel@x230.lan>   <511B33BC.9080307@zytor.com> <1360737709.18083.36.camel@x230.lan>  <511
- BCB6E.8080102@zytor.com> <1360776399.18083.39.camel@x230.lan> <511BD291.1040003@schaufler-ca.com> <511C1325.5060601@zytor.com>
+From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH] x86, efi: remove duplicate code in setup_arch() by using,
+ efi_is_native()
+Date: Thu, 14 Feb 2013 09:07:35 +0900
+Message-ID: <511C2AC7.1080105@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-2022-JP"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <511C1325.5060601@zytor.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, Borislav Petkov <bp@alien8.de>, Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-security-module <linux-security-module@vger.kernel.org>, Casey Schaufler <casey@schaufler-ca.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux x86 ml <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux EFI ml <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2/13/2013 2:26 PM, H. Peter Anvin wrote:
-> On 02/13/2013 09:51 AM, Casey Schaufler wrote:
->>
->> You can't add a new capability where there is an existing capability
->> that can be remotely argued to be appropriate.
->>
->> If you tried to "fix" CAP_SYS_RAWIO and/or CAP_SYS_ADMIN you'd end
->> up with hundreds of capabilities.
->>
->> Your particular problem is *not* so important that you get a
->> capability all to yourself.
->>
->
-> {facepalm}
->
-> This is exactly the kind of thinking which has led to the capability
-> system being so bloody useless.
+From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 
-The reason the capability system is "bloody useless" is
-that no one wants to update the core system applications to
-use it in favor of good old fashioned worked for dad and
-works for me too superuser.
+The check, "IS_ENABLED(CONFIG_X86_64) != efi_enabled(EFI_64BIT)",
+in setup_arch() can be replaced by efi_is_enabled(). This change
+remove duplicate code and improve readability.
 
->
-> Capabilities need to be associated with resources, not use cases.
+Signed-off-by: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/include/asm/efi.h  |    9 ++++++++-
+ arch/x86/kernel/setup.c     |    3 +--
+ arch/x86/platform/efi/efi.c |    5 -----
+ 3 files changed, 9 insertions(+), 8 deletions(-)
 
-There is no such thing as a "resource" in the Linux security
-policy model. The Linux security policy model is based on
-subjects (tasks) accessing objects (e.g. files). Capabilities
-provide a granular mechanism for granting privilege to
-violate the Linux security policy.
-
-Because in the Bad Old days of Unix "superuser privilege"
-also granted rights to preform configuration activities it
-was not possible to eliminate the superuser without extending
-the capability mechanism to include these. Thus, there are two
-sorts of capabilities, those controlling privileged access and
-those controlling restricted activities.
-
-In both cases what you are controlling is an activity. Sorry,
-but that is the way it is defined.
-
-I understand that you want capabilities to be associated with
-resources. That is *not* what we have, and arguing that its
-what we should have is pointless because Linux does not even
-have a concept of resources.
-
->
->     -hpa
->
->
-
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 28677c5..60c89f3 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -102,7 +102,14 @@ extern void efi_call_phys_epilog(void);
+ extern void efi_unmap_memmap(void);
+ extern void efi_memory_uc(u64 addr, unsigned long size);
+ 
+-#ifndef CONFIG_EFI
++#ifdef CONFIG_EFI
++
++static inline bool efi_is_native(void)
++{
++	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
++}
++
++#else
+ /*
+  * IF EFI is not configured, have the EFI calls return -ENOSYS.
+  */
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 8b24289..1abb796 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1135,8 +1135,7 @@ void __init setup_arch(char **cmdline_p)
+ 	 * mismatched firmware/kernel archtectures since there is no
+ 	 * support for runtime services.
+ 	 */
+-	if (efi_enabled(EFI_BOOT) &&
+-	    IS_ENABLED(CONFIG_X86_64) != efi_enabled(EFI_64BIT)) {
++	if (efi_enabled(EFI_BOOT) && !efi_is_native()) {
+ 		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
+ 		efi_unmap_memmap();
+ 	}
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 928bf83..eb9faeb 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -69,11 +69,6 @@ struct efi_memory_map memmap;
+ static struct efi efi_phys __initdata;
+ static efi_system_table_t efi_systab __initdata;
+ 
+-static inline bool efi_is_native(void)
+-{
+-	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
+-}
+-
+ unsigned long x86_efi_facility;
+ 
+ /*
+-- 1.7.10.4 
