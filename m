@@ -1,39 +1,29 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86: Lock down MSR writing in secure boot
-Date: Thu, 14 Feb 2013 02:46:58 +0000
-Message-ID: <1360810018.18083.47.camel@x230.lan>
-References: <dee64752-850c-4d78-b703-f47a985bc13e@email.android.com>
-	       <CAGXu5jKo2PfMBO4A0ZgQcrPuj8OHNaff+CjAesOAWkZc0vB9+Q@mail.gmail.com>
-	       <51157C9C.6030501@zytor.com> <20130208230655.GB28990@pd.tnic>
-	       <1360366012.18083.21.camel@x230.lan> <5115A4CC.3080102@zytor.com>
-	       <1360373383.18083.23.camel@x230.lan>
-	       <CAGXu5j+xvJ3L5ejxtZ-Jw3F6rV7OsrE0_HZCGu_er0rH2_PwKA@mail.gmail.com>
-	       <20130209092925.GA17728@pd.tnic> <1360422712.18083.24.camel@x230.lan>
-	      <511AE2CC.5040705@zytor.com> <1360733962.18083.30.camel@x230.lan>
-	     <511B2EB9.5070406@zytor.com> <1360736860.18083.33.camel@x230.lan>
-	    <511B33BC.9080307@zytor.com> <1360737709.18083.36.camel@x230.lan>
-	   <511BCB6E.8080102@zytor.com> <1360776399.18083.39.camel@x230.lan>
-	  <511BD291.1040003@schaufler-ca.com> <511C1325.5060601@zytor.com>
-	  <511C1A94.8020804@schaufler-ca.com> <511C2F0C.3060803@zytor.com >
-	  <511C3389.5090604@schaufler-ca.com> <1360803872.18083.46.camel@x230.lan>
-	 <511C3927.90603@zytor.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] efi: Clear EFI_RUNTIME_SERVICES rather than EFI_BOOT by
+ "noefi" boot parameter
+Date: Thu, 14 Feb 2013 07:37:52 +0000
+Message-ID: <1360827472.24917.35.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <511C2C04.2070108@jp.fujitsu.com> <511C3BDE.5060503@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <511C3927.90603-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <9FBCAA12208A514D9020B70E8C285B81-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <511C3BDE.5060503-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Casey Schaufler <casey-iSGtlc1asvQWG2LlvL+J4A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux EFI ml <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-stable ml <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux x86 ml <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Corentin Chary <corentincj-EjuBZuxMvz2sTnJN9+BGXg@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Dave Jiang <dave.jiang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Olof Johansson <olof-nZhT3qVonbNeoWH0uzbU5w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Steve Langasek <steve.langasek-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Konrad Rzeszutek Wilk <konrad-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDEzLTAyLTEzIGF0IDE3OjA4IC0wODAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
-Cg0KPiBXZWxsLCBmb3IgYXQgbGVhc3QgdGhpbmdzIHdpdGggZGV2aWNlIG5vZGVzICgvZGV2L21l
-bSwgL2Rldi9tc3IgYW5kIHNvDQo+IG9uKSBpdCBzaG91bGQgYmUgcG9zc2libGUsIG5vPyAgaW9w
-ZXJtKCkgYW5kIGlvcGwoKSBhcmUgYW5vdGhlciBtYXR0ZXIuDQoNClN1cmUsIGlmIHdlIGNhbiBn
-dWFyYW50ZWUgdGhhdCBhIHNpZ25lZCB1c2Vyc3BhY2UgbG9hZHMgYSBzaWduZWQgU0VMaW51eA0K
-cG9saWN5IGJlZm9yZSBhbnkgdW5zaWduZWQgY29kZSBydW5zLiBCdXQsIHJlYWxpc3RpY2FsbHks
-IHRoYXQncyBub3QNCmdvaW5nIHRvIGJlIHBvc3NpYmxlLg0KDQotLSANCk1hdHRoZXcgR2FycmV0
-dCB8IG1qZzU5QHNyY2YudWNhbS5vcmcNCg==
+On Wed, 2013-02-13 at 17:20 -0800, H. Peter Anvin wrote:
+> On 02/13/2013 04:12 PM, Satoru Takeuchi wrote:
+> > From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+> > 
+> > There was a serious problem in samsung-laptop that its platform driver is
+> > designed to run under BIOS and running under EFI can cause the machine to
+> > become bricked or can cause Machine Check Exceptions.
+> > 
+> 
+> Matt, unless you object I'll pick this one up as urgent, please take the
+> cleanup patch in normal order.
+
+No objection from me, this looks correct.
