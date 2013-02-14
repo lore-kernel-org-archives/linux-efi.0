@@ -1,68 +1,56 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [PATCH 2/2 v2] efivarfs: guid part of filenames are
- case-insensitive
-Date: Thu, 14 Feb 2013 16:04:05 +0000
-Message-ID: <20130214160405.GU4503@ZenIV.linux.org.uk>
-References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
- <1360592935-26026-3-git-send-email-matt@console-pimps.org>
- <20130212123934.GC14790@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [RFE PATCH 0/2] x86, rtc, ntp, Enable full rtc synchronization
+Date: Thu, 14 Feb 2013 12:02:53 -0500
+Message-ID: <1360861375-24131-1-git-send-email-prarit@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130212123934.GC14790-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 12, 2013 at 12:39:34PM +0000, Matt Fleming wrote:
+This patchset enables a full rtc synchronization via ntp on x86.  The current
+codebase (plus http://marc.info/?l=linux-kernel&m=136036689219340&w=2, which is
+queued for tip), will attempt to synchronize the rtc to the system time every
+11 minutes if ntp is running.
 
-> +static struct dentry *efivarfs_alloc_dentry(struct dentry *parent, char *name)
-> +{
-> +	struct qstr q;
-> +
-> +	q.name = name;
-> +	q.len = strlen(name);
-> +
-> +	if (efivarfs_d_hash(NULL, NULL, &q))
-> +		return NULL;
-> +
-> +	return d_alloc(parent, &q);
-> +}
+The problem in the current code is that the synchronization will only occur
+if the system time is within +/-15 minutes of the current rtc time.  ie)
+we only do a "partial" synchronization of the rtc.  Other architectures do
+full synchronizations and the partial sync appears to be a software limitation.
 
-> @@ -1098,7 +1177,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
->  		if (!inode)
->  			goto fail_name;
->  
-> -		dentry = d_alloc_name(root, name);
-> +		dentry = efivarfs_alloc_dentry(root, name);
->  		if (!dentry)
->  			goto fail_inode;
+This patchset introduces a full synchronization of the rtc, and allows the
+writing of the rtc date and time via sysfs (read for date and time is already
+implemented).
 
-Umm...  That name has just been built by efivarfs_fill_super() itself, and
-AFAICS there's no way for its GUID part to be _not_ lowercase
-hex and with proper locations of dashes.  So
-	a) hash value will be exactly full_name_hash(name), unless
-efivarfs_valid_name() manages to fail.
-	b) efivarfs_valid_name() is a serious overkill here - the only things
-that might go wrong are length of and dashes in entry->var.VariableName.
-Both are trivially checked while we are constructing name (before we do
-inode allocation, etc.) and IMO they would be better off there.
+I tested this patch by using the write capability introduced in 2/2 to
+write in older and newer dates into the rtc, and then rebooting with ntpdate,
+and/or ntpdate enabled and verifying the correct setting of the hwclock (and
+system time) via calls to date and hwclock (all on 64-bit x86)
 
-IOW, I think this part of the patch is better handled by doing those two
-checks several lines before d_alloc_name() and not bothering with
-efivarfs_alloc_dentry() at all.  I.e.
-		if (len + 1 + GUID_LEN > NAME_MAX)
-			goto fail;
+I have not tested the mrst/vrtc.c code, however, code inspection indicates
+that the only change required is the year offset of 1972.  I booted 32-bit
+Fedora 18 on an UEFI system and confirmed that the system time and hwclock
+were now correct at boot.
 
-		name = kmalloc(len + 1 + GUID_LEN + 1, GFP_ATOMIC);
-		if (!name)
-			goto fail;
+Signed-off-by: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-		for (i = 0; i < len; i++) {
-			name[i] = entry->var.VariableName[i] & 0xFF;
-			if (name[i] == '-')
-				goto fail_name;
-		}
-and then as in the current efivarfs_fill_super().
+Prarit Bhargava (2):
+  x86, rtc, ntp, Do full rtc synchronization with ntp
+  rtc, add write functionality to sysfs
+
+ arch/x86/kernel/rtc.c         | 69 ++++++----------------------------
+ arch/x86/platform/efi/efi.c   | 24 ++++++++----
+ arch/x86/platform/mrst/vrtc.c | 41 ++++++++++++---------
+ drivers/rtc/rtc-sysfs.c       | 86 ++++++++++++++++++++++++++++++++++++++++++-
+ 4 files changed, 136 insertions(+), 84 deletions(-)
+
+-- 
+1.8.1.2
