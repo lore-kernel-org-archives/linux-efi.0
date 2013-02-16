@@ -1,67 +1,2025 @@
 From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: Re: [PATCH] efi: split efisubsystem from efivars
-Date: Sat, 16 Feb 2013 14:12:42 +0100
-Message-ID: <CAG-2HqUYHSeip4+7-23ZzdaN3iyYJKkUjYerH0HkjSdFM00gsQ@mail.gmail.com>
-References: <1359128215-1331-1-git-send-email-teg@jklm.no> <1361008325.8381.7.camel@mfleming-mobl1.ger.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v4] efi: split efisubsystem from efivars
+Date: Sat, 16 Feb 2013 20:01:40 +0100
+Message-ID: <1361041300-3760-1-git-send-email-teg@jklm.no>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1361008325.8381.7.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tobias Powalowski <tpowa-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Feb 16, 2013 at 10:52 AM, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> On Fri, 2013-01-25 at 16:36 +0100, Tom Gundersen wrote:
->> This registers /sys/firmware/efi{,/efivars} whenever EFI is enabled
->> and the system supports it.
->>
->> This allows
->>  *) userspace to check for the existence of /sys/firmware/efi as a way
->>     to determine whether or it is running on an EFI system.
->>  *) 'mount -t efivarfs none /sys/firmware/efi/efivars' without manually
->>     loading any modules.
->>
->> Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
->> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
->> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
->> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
->> Cc: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
->> Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
->> ---
->>  drivers/firmware/Makefile    |  1 +
->>  drivers/firmware/efisubsys.c | 52 ++++++++++++++++++++++++++++++++++++++++++++
->>  drivers/firmware/efivars.c   | 30 +++++--------------------
->>  3 files changed, 59 insertions(+), 24 deletions(-)
->>  create mode 100644 drivers/firmware/efisubsys.c
->
-> Tom, could you have a go at rebasing this patch on top of the 'chainsaw'
-> branch at,
->
->     git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/linux.git
+This registers /sys/firmware/efi/{,systab,efivars/} whenever EFI is enabled
+and the system is booted with EFI.
 
-Nice stuff. I did the rebase, and will resubmit after making the
-changes you requested below.
+This allows
+ *) userspace to check for the existence of /sys/firmware/efi as a way
+    to determine whether or it is running on an EFI system.
+ *) 'mount -t efivarfs none /sys/firmware/efi/efivars' without manually
+    loading any modules.
 
-> Though, instead of drivers/firmware/efisubsys.c just put the core stuff
-> in drivers/firmware/efi/efi.c. The efivar_entry() API code should
-> probably be moved to drivers/firmware/efi/variable.c or
-> drivers/firmware/efi/vars.c, etc. That way, we can finally delete
-> efivars.c and have all the EFI code under drivers/firmware/efi/.
->
-> Make sense?
+v4: rebase on top of the chainsaw branch:
+    - split into efi.c and vars.c
+    - move systab from vars.c to efi.c
+    - address checkpatch warnings
+v3: rebase on top of new efi_enabled()
+v2: only create /sys/firmware/efi/efivars if the module is being compiled,
+    and move extern's to efi.h
 
-Yes. Will do.
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Tobias Powalowski <tpowa-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
+Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+---
+ drivers/firmware/Makefile     |   1 -
+ drivers/firmware/efi/Makefile |   2 +
+ drivers/firmware/efi/efi.c    | 107 +++++
+ drivers/firmware/efi/vars.c   | 858 +++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efivars.c    | 955 ------------------------------------------
+ include/linux/efi.h           |   2 +
+ 6 files changed, 969 insertions(+), 956 deletions(-)
+ create mode 100644 drivers/firmware/efi/efi.c
+ create mode 100644 drivers/firmware/efi/vars.c
+ delete mode 100644 drivers/firmware/efivars.c
 
-> P.s I ended up dropping your MODULE_ALIAS() patch on this branch because
-> I feel that moving the efivarfs code into fs/efivarfs is a better way to
-> fix up the confusion that efivars != efivarfs, plus building fs/efivarfs
-> as a module results in an efivarfs.ko file ;-)
-
-I noticed. Much better than my hack. Thanks!
-
-Cheers,
-
-Tom
+diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
+index 31bf68c..299fad6 100644
+--- a/drivers/firmware/Makefile
++++ b/drivers/firmware/Makefile
+@@ -4,7 +4,6 @@
+ obj-$(CONFIG_DMI)		+= dmi_scan.o
+ obj-$(CONFIG_DMI_SYSFS)		+= dmi-sysfs.o
+ obj-$(CONFIG_EDD)		+= edd.o
+-obj-$(CONFIG_EFI_VARS)		+= efivars.o
+ obj-$(CONFIG_EFI_PCDP)		+= pcdp.o
+ obj-$(CONFIG_DELL_RBU)          += dell_rbu.o
+ obj-$(CONFIG_DCDBAS)		+= dcdbas.o
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index ef5066f..9660b3d 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -1,6 +1,8 @@
+ #
+ # Makefile for linux kernel
+ #
++obj-$(CONFIG_EFI)			+= efi.o
++obj-$(CONFIG_EFI_VARS)			+= vars.o
+ obj-$(CONFIG_EFI_VARS_SYSFS)		+= sysfs.o
+ obj-$(CONFIG_EFI_VARS_PSTORE)		+= pstore.o
+ obj-$(CONFIG_EFI_VARS_GENERIC_OPS)	+= generic-ops.o
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+new file mode 100644
+index 0000000..0aafa21
+--- /dev/null
++++ b/drivers/firmware/efi/efi.c
+@@ -0,0 +1,107 @@
++/*
++ * efi.c - EFI subsystem
++ *
++ * Copyright (C) 2001,2003,2004 Dell <Matt_Domsch-8PEkshWhKlo@public.gmane.org>
++ * Copyright (C) 2004 Intel Corporation <matthew.e.tolentino-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
++ * Copyright (C) 2013 Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
++ *
++ * This code registers /sys/firmware/efi{,/efivars} when EFI is supported,
++ * allowing the efivarfs to be mounted or the efivars module to be loaded.
++ * The existance of /sys/firmware/efi may also be used by userspace to
++ * determine that the system supports EFI.
++ *
++ * This file is released under the GPLv2.
++ */
++
++#include <linux/kobject.h>
++#include <linux/module.h>
++#include <linux/init.h>
++#include <linux/device.h>
++#include <linux/efi.h>
++
++struct kobject *efi_kobj;
++EXPORT_SYMBOL_GPL(efi_kobj);
++
++struct kobject *efivars_kobj;
++
++/*
++ * Let's not leave out systab information that snuck into
++ * the efivars driver
++ */
++static ssize_t systab_show(struct kobject *kobj,
++			   struct kobj_attribute *attr, char *buf)
++{
++	char *str = buf;
++
++	if (!kobj || !buf)
++		return -EINVAL;
++
++	if (efi.mps != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "MPS=0x%lx\n", efi.mps);
++	if (efi.acpi20 != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "ACPI20=0x%lx\n", efi.acpi20);
++	if (efi.acpi != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "ACPI=0x%lx\n", efi.acpi);
++	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
++	if (efi.hcdp != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "HCDP=0x%lx\n", efi.hcdp);
++	if (efi.boot_info != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
++	if (efi.uga != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
++
++	return str - buf;
++}
++
++static struct kobj_attribute efi_attr_systab =
++			__ATTR(systab, 0400, systab_show, NULL);
++
++static struct attribute *efi_subsys_attrs[] = {
++	&efi_attr_systab.attr,
++	NULL,	/* maybe more in the future? */
++};
++
++static struct attribute_group efi_subsys_attr_group = {
++	.attrs = efi_subsys_attrs,
++};
++
++/*
++ * We register the efi subsystem with the firmware subsystem and the
++ * efivars subsystem with the efi subsystem, if the system was booted with
++ * EFI.
++ */
++static int __init efisubsys_init(void)
++{
++	int error;
++
++	if (!efi_enabled(EFI_BOOT))
++		return 0;
++
++	/* We register the efi directory at /sys/firmware/efi */
++	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
++	if (!efi_kobj) {
++		pr_err("efi: Firmware registration failed.\n");
++		return -ENOMEM;
++	}
++
++	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
++	if (error) {
++		pr_err("efi: Sysfs attribute export failed with error %d.\n",
++		       error);
++	}
++
++#if defined(CONFIG_EFIVAR_FS) || defined(CONFIG_EFIVAR_FS_MODULE)
++	/* and the standard mountpoint for efivarfs */
++	efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
++	if (!efivars_kobj) {
++		pr_err("efivars: Subsystem registration failed.\n");
++		kobject_put(efi_kobj);
++		return -ENOMEM;
++	}
++#endif /* CONFIG_EFIVAR_FS */
++
++	return 0;
++}
++
++subsys_initcall(efisubsys_init);
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+new file mode 100644
+index 0000000..1464e56
+--- /dev/null
++++ b/drivers/firmware/efi/vars.c
+@@ -0,0 +1,858 @@
++/*
++ * EFI Variables - efivars.c
++ *
++ * Copyright (C) 2001,2003,2004 Dell <Matt_Domsch-8PEkshWhKlo@public.gmane.org>
++ * Copyright (C) 2004 Intel Corporation <matthew.e.tolentino-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License as published by
++ *  the Free Software Foundation; either version 2 of the License, or
++ *  (at your option) any later version.
++ *
++ *  This program is distributed in the hope that it will be useful,
++ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *  GNU General Public License for more details.
++ *
++ *  You should have received a copy of the GNU General Public License
++ *  along with this program; if not, write to the Free Software
++ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++#include <linux/capability.h>
++#include <linux/types.h>
++#include <linux/errno.h>
++#include <linux/init.h>
++#include <linux/mm.h>
++#include <linux/module.h>
++#include <linux/string.h>
++#include <linux/smp.h>
++#include <linux/efi.h>
++#include <linux/sysfs.h>
++#include <linux/device.h>
++#include <linux/slab.h>
++#include <linux/ctype.h>
++
++/* Private pointer to registered efivars */
++static struct efivars *__efivars;
++
++static bool
++validate_device_path(struct efi_variable *var, int match, u8 *buffer,
++		     unsigned long len)
++{
++	struct efi_generic_dev_path *node;
++	int offset = 0;
++
++	node = (struct efi_generic_dev_path *)buffer;
++
++	if (len < sizeof(*node))
++		return false;
++
++	while (offset <= len - sizeof(*node) &&
++	       node->length >= sizeof(*node) &&
++		node->length <= len - offset) {
++		offset += node->length;
++
++		if ((node->type == EFI_DEV_END_PATH ||
++		     node->type == EFI_DEV_END_PATH2) &&
++		    node->sub_type == EFI_DEV_END_ENTIRE)
++			return true;
++
++		node = (struct efi_generic_dev_path *)(buffer + offset);
++	}
++
++	/*
++	 * If we're here then either node->length pointed past the end
++	 * of the buffer or we reached the end of the buffer without
++	 * finding a device path end node.
++	 */
++	return false;
++}
++
++static bool
++validate_boot_order(struct efi_variable *var, int match, u8 *buffer,
++		    unsigned long len)
++{
++	/* An array of 16-bit integers */
++	if ((len % 2) != 0)
++		return false;
++
++	return true;
++}
++
++static bool
++validate_load_option(struct efi_variable *var, int match, u8 *buffer,
++		     unsigned long len)
++{
++	u16 filepathlength;
++	int i, desclength = 0, namelen;
++
++	namelen = utf16_strnlen(var->VariableName, sizeof(var->VariableName));
++
++	/* Either "Boot" or "Driver" followed by four digits of hex */
++	for (i = match; i < match+4; i++) {
++		if (var->VariableName[i] > 127 ||
++		    hex_to_bin(var->VariableName[i] & 0xff) < 0)
++			return true;
++	}
++
++	/* Reject it if there's 4 digits of hex and then further content */
++	if (namelen > match + 4)
++		return false;
++
++	/* A valid entry must be at least 8 bytes */
++	if (len < 8)
++		return false;
++
++	filepathlength = buffer[4] | buffer[5] << 8;
++
++	/*
++	 * There's no stored length for the description, so it has to be
++	 * found by hand
++	 */
++	desclength = utf16_strsize((efi_char16_t *)(buffer + 6), len - 6) + 2;
++
++	/* Each boot entry must have a descriptor */
++	if (!desclength)
++		return false;
++
++	/*
++	 * If the sum of the length of the description, the claimed filepath
++	 * length and the original header are greater than the length of the
++	 * variable, it's malformed
++	 */
++	if ((desclength + filepathlength + 6) > len)
++		return false;
++
++	/*
++	 * And, finally, check the filepath
++	 */
++	return validate_device_path(var, match, buffer + desclength + 6,
++				    filepathlength);
++}
++
++static bool
++validate_uint16(struct efi_variable *var, int match, u8 *buffer,
++		unsigned long len)
++{
++	/* A single 16-bit integer */
++	if (len != 2)
++		return false;
++
++	return true;
++}
++
++static bool
++validate_ascii_string(struct efi_variable *var, int match, u8 *buffer,
++		      unsigned long len)
++{
++	int i;
++
++	for (i = 0; i < len; i++) {
++		if (buffer[i] > 127)
++			return false;
++
++		if (buffer[i] == 0)
++			return true;
++	}
++
++	return false;
++}
++
++struct variable_validate {
++	char *name;
++	bool (*validate)(struct efi_variable *var, int match, u8 *data,
++			 unsigned long len);
++};
++
++static const struct variable_validate variable_validate[] = {
++	{ "BootNext", validate_uint16 },
++	{ "BootOrder", validate_boot_order },
++	{ "DriverOrder", validate_boot_order },
++	{ "Boot*", validate_load_option },
++	{ "Driver*", validate_load_option },
++	{ "ConIn", validate_device_path },
++	{ "ConInDev", validate_device_path },
++	{ "ConOut", validate_device_path },
++	{ "ConOutDev", validate_device_path },
++	{ "ErrOut", validate_device_path },
++	{ "ErrOutDev", validate_device_path },
++	{ "Timeout", validate_uint16 },
++	{ "Lang", validate_ascii_string },
++	{ "PlatformLang", validate_ascii_string },
++	{ "", NULL },
++};
++
++bool
++efivar_validate(struct efi_variable *var, u8 *data, unsigned long len)
++{
++	int i;
++	u16 *unicode_name = var->VariableName;
++
++	for (i = 0; variable_validate[i].validate != NULL; i++) {
++		const char *name = variable_validate[i].name;
++		int match;
++
++		for (match = 0; ; match++) {
++			char c = name[match];
++			u16 u = unicode_name[match];
++
++			/* All special variables are plain ascii */
++			if (u > 127)
++				return true;
++
++			/* Wildcard in the matching name means we've matched */
++			if (c == '*')
++				return variable_validate[i].validate(var,
++							     match, data, len);
++
++			/* Case sensitive match */
++			if (c != u)
++				break;
++
++			/* Reached the end of the string while matching */
++			if (!c)
++				return variable_validate[i].validate(var,
++							     match, data, len);
++		}
++	}
++
++	return true;
++}
++EXPORT_SYMBOL_GPL(efivar_validate);
++
++static int efi_status_to_err(efi_status_t status)
++{
++	int err;
++
++	switch (status) {
++	case EFI_SUCCESS:
++		err = 0;
++		break;
++	case EFI_INVALID_PARAMETER:
++		err = -EINVAL;
++		break;
++	case EFI_OUT_OF_RESOURCES:
++		err = -ENOSPC;
++		break;
++	case EFI_DEVICE_ERROR:
++		err = -EIO;
++		break;
++	case EFI_WRITE_PROTECTED:
++		err = -EROFS;
++		break;
++	case EFI_SECURITY_VIOLATION:
++		err = -EACCES;
++		break;
++	case EFI_NOT_FOUND:
++		err = -ENOENT;
++		break;
++	default:
++		err = -EINVAL;
++	}
++
++	return err;
++}
++
++/**
++ * efivar_init - build the initial list of EFI variables
++ * @func: callback function to invoke for every variable
++ * @data: function-specific data to pass to @func
++ *
++ * Get every EFI variable from the firmware, construct a struct
++ * efivar_entry and invoke @func. @func should call efivar_entry_add()
++ * to build the list of variables.
++ *
++ * Returns 0 on success, or a kernel error code on failure.
++ */
++int efivar_init(int (*func)(struct efivar_entry *, void *), void *data)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	struct efivar_entry *entry;
++	unsigned long variable_name_size = 1024;
++	efi_char16_t *variable_name;
++	efi_status_t status;
++	efi_guid_t vendor_guid;
++
++	variable_name = kzalloc(variable_name_size, GFP_KERNEL);
++	if (!variable_name) {
++		pr_err("efivars: Memory allocation failed.\n");
++		return -ENOMEM;
++	}
++
++	/*
++	 * Per EFI spec, the maximum storage allocated for both
++	 * the variable name and variable data is 1024 bytes.
++	 */
++
++	do {
++		variable_name_size = 1024;
++
++		spin_lock(&__efivars->lock);
++		status = ops->get_next_variable(&variable_name_size,
++						variable_name,
++						&vendor_guid);
++		spin_unlock(&__efivars->lock);
++		switch (status) {
++		case EFI_SUCCESS:
++			entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++			if (!entry)
++				return -ENOMEM;
++
++			memcpy(entry->var.VariableName, variable_name,
++			       variable_name_size);
++			memcpy(&(entry->var.VendorGuid), &vendor_guid,
++			       sizeof(efi_guid_t));
++			func(entry, data);
++
++			break;
++		case EFI_NOT_FOUND:
++			break;
++		default:
++			pr_warn("efivars: get_next_variable: status=%lx\n",
++				status);
++			status = EFI_NOT_FOUND;
++			break;
++		}
++	} while (status != EFI_NOT_FOUND);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(efivar_init);
++
++/**
++ * efivar_entry_add - add entry to variable list
++ * @entry: entry to add to list
++ */
++void efivar_entry_add(struct efivar_entry *entry)
++{
++	spin_lock(&__efivars->lock);
++	list_add(&entry->list, &__efivars->list);
++	spin_unlock(&__efivars->lock);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_add);
++
++/**
++ * efivar_entry_remove - remove entry from variable list
++ * @entry: entry to remove from list
++ */
++void efivar_entry_remove(struct efivar_entry *entry)
++{
++	spin_lock(&__efivars->lock);
++	list_del(&entry->list);
++	spin_unlock(&__efivars->lock);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_remove);
++
++/*
++ * efivar_entry_list_del_unlock - remove entry from variable list
++ * @entry: entry to remove
++ *
++ * Remove @entry from the variable list and release the list lock.
++ *
++ * NOTE: slightly weird locking semantics here - we expect to be
++ * called with the efivars lock already held, and we release it before
++ * returning. This is because this function is usually called after
++ * set_variable() while the lock is still held.
++ */
++static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
++{
++	WARN_ON(!spin_is_locked(&__efivars->lock));
++
++	list_del(&entry->list);
++	spin_unlock(&__efivars->lock);
++}
++
++/**
++ * __efivar_entry_delete - delete an EFI variable
++ * @entry: entry containing EFI variable to delete
++ *
++ * Delete the variable from the firmware but leave @entry on the
++ * variable list.
++ *
++ * This function differs from efivar_entry_delete() because it does
++ * not remove @entry from the variable list. Also, it is safe to be
++ * called from within a efivar_entry_iter_begin() and
++ * efivar_entry_iter_end() region, unlike efivar_entry_delete().
++ *
++ * Returns 0 on success, or a converted EFI status code if
++ * set_variable() fails.
++ */
++int __efivar_entry_delete(struct efivar_entry *entry)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	WARN_ON(!spin_is_locked(&__efivars->lock));
++
++	status = ops->set_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid,
++				   0, 0, NULL);
++
++	return efi_status_to_err(status);
++}
++EXPORT_SYMBOL_GPL(__efivar_entry_delete);
++
++/**
++ * efivar_entry_delete - delete variable and remove entry from list
++ * @entry: entry containing variable to delete
++ *
++ * Delete the variable from the firmware and remove @entry from the
++ * variable list. It is the caller's responsibility to free @entry
++ * once we return.
++ *
++ * Returns 0 on success, or a converted EFI status code if
++ * set_variable() fails.
++ */
++int efivar_entry_delete(struct efivar_entry *entry)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	spin_lock(&__efivars->lock);
++	status = ops->set_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid,
++				   0, 0, NULL);
++	if (!(status == EFI_SUCCESS || status == EFI_NOT_FOUND)) {
++		spin_unlock(&__efivars->lock);
++		return efi_status_to_err(status);
++	}
++
++	efivar_entry_list_del_unlock(entry);
++	return 0;
++}
++EXPORT_SYMBOL_GPL(efivar_entry_delete);
++
++/**
++ * efivar_entry_set - call set_variable()
++ * @entry: entry containing the EFI variable to write
++ * @attributes: variable attributes
++ * @size: size of @data buffer
++ * @data: buffer containing variable data
++ * @lookup: check to see if @entry is already on the list?
++ *
++ * Calls set_variable() for an EFI variable. If creating a new EFI
++ * variable, this function is usually followed by efivar_entry_add().
++ *
++ * Returns 0 on success, -EEXIST if @lookup is true and the entry
++ * already exists on the list, or a converted EFI status code if
++ * set_variable() fails.
++ */
++int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
++		     unsigned long size, void *data, bool lookup)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++	efi_char16_t *name = entry->var.VariableName;
++	efi_guid_t vendor = entry->var.VendorGuid;
++
++	spin_lock(&__efivars->lock);
++
++	if (lookup && efivar_entry_find(name, vendor, false)) {
++		spin_unlock(&__efivars->lock);
++		return -EEXIST;
++	}
++
++	status = ops->set_variable(name, &vendor, attributes, size, data);
++
++	spin_unlock(&__efivars->lock);
++
++	return efi_status_to_err(status);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_set);
++
++/**
++ * efivar_entry_set_safe - call set_variable() if enough space in firmware
++ * @entry: entry containing the EFI variable to write
++ * @attributes: variable attributes
++ * @size: size of @data buffer
++ * @data: buffer containing variable data
++ * @total: total variable size including variable name
++ *
++ * Calls query_variable_info() to ensure that there is enough free
++ * storage in the firmware for this variable, and if so, calls
++ * set_variable(). If creating a new EFI variable, this function is
++ * usually followed by efivar_entry_add().
++ *
++ * Returns 0 on success, -ENOSPC if the firmware does not have enough
++ * space for set_variable() to succeed, or a converted EFI status code
++ * if set_variable() fails.
++ */
++int efivar_entry_set_safe(struct efivar_entry *entry, u32 attributes,
++			  unsigned long size, void *data)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++	efi_char16_t *name = entry->var.VariableName;
++	efi_guid_t vendor = entry->var.VendorGuid;
++	u64 storage_size, remaining_size, max_size;
++	u64 total;
++
++	if (!ops->query_variable_info)
++		return -ENOSYS;
++
++	spin_lock(&__efivars->lock);
++	status = ops->query_variable_info(attributes, &storage_size,
++					  &remaining_size, &max_size);
++
++	if (status != EFI_SUCCESS) {
++		spin_unlock(&__efivars->lock);
++		return -ENOSPC;
++	}
++
++	/*
++	 * Does the firmware have enough free space to successfully
++	 * write this variable?
++	 */
++	total = utf16_strsize(name, 1024) + size;
++	if (remaining_size >= total)
++		status = ops->set_variable(name, &vendor,
++					   attributes, size, data);
++
++	spin_unlock(&__efivars->lock);
++
++	return efi_status_to_err(status);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_set_safe);
++/**
++ * efivar_entry_find - search for an entry
++ * @name: the EFI variable name
++ * @guid: the EFI variable vendor's guid
++ * @remove: should we remove the entry from the list?
++ *
++ * Search for an entry on the variable list that has the EFI variable
++ * name @name and vendor guid @guid. If an entry is found on the list
++ * and @remove is true, the entry is removed from the list.
++ *
++ * The caller MUST call efivar_entry_iter_begin() and
++ * efivar_entry_iter_end() before and after the invocation of this
++ * function, respectively.
++ *
++ * Returns the entry if found on the list, %NULL otherwise.
++ */
++struct efivar_entry *efivar_entry_find(efi_char16_t *name,
++				       efi_guid_t guid, bool remove)
++{
++	struct efivar_entry *entry, *n;
++	int strsize1, strsize2;
++	bool found = false;
++
++	WARN_ON(!spin_is_locked(&__efivars->lock));
++
++	list_for_each_entry_safe(entry, n, &__efivars->list, list) {
++		strsize1 = utf16_strsize(name, 1024);
++		strsize2 = utf16_strsize(entry->var.VariableName, 1024);
++		if (strsize1 == strsize2 &&
++		    !memcmp(name, &(entry->var.VariableName), strsize1) &&
++		    !efi_guidcmp(guid, entry->var.VendorGuid)) {
++			found = true;
++			break;
++		}
++	}
++
++	if (!found)
++		return NULL;
++
++	if (remove)
++		list_del(&entry->list);
++
++	return entry;
++}
++EXPORT_SYMBOL_GPL(efivar_entry_find);
++
++/**
++ * efivar_query_info - call query_variable_info()
++ * @attributes: query for variables with these attributes
++ * @storage_size: maximum space for variables with @attributes
++ * @remaining_size: remaining space for variable with @attributes
++ * @max_size: maximum space for an individual variable with @attributes
++ *
++ * Query the amount of space available in the firmware for variables
++ * with @attributes.
++ *
++ * Returns 0 on success, -ENOSYS if the registered efivars ops do not
++ * support query_variable_info(), or a converted EFI status code if
++ * query_variable_info() fails.
++ */
++int efivar_query_info(u32 attributes, u64 *storage_size,
++		      u64 *remaining_size, u64 *max_size)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	if (!ops->query_variable_info)
++		return -ENOSYS;
++
++	spin_lock(&__efivars->lock);
++	status = ops->query_variable_info(attributes, storage_size,
++					  remaining_size, max_size);
++	spin_unlock(&__efivars->lock);
++
++	return status;
++}
++EXPORT_SYMBOL_GPL(efivar_query_info);
++
++/**
++ * efivar_entry_size - obtain the size of a variable
++ * @entry: entry for this variable
++ * @size: location to store the variable's size
++ */
++int efivar_entry_size(struct efivar_entry *entry, unsigned long *size)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	*size = 0;
++
++	spin_lock(&__efivars->lock);
++	status = ops->get_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid, NULL, size, NULL);
++	spin_unlock(&__efivars->lock);
++
++	if (status != EFI_BUFFER_TOO_SMALL)
++		return efi_status_to_err(status);
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(efivar_entry_size);
++
++/**
++ * efivar_entry_get - call get_variable()
++ * @entry: read data for this variable
++ * @attributes: variable attributes
++ * @size: size of @data buffer
++ * @data: buffer to store variable data
++ */
++int efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
++		     unsigned long *size, void *data)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	spin_lock(&__efivars->lock);
++	status = ops->get_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid,
++				   attributes, size, data);
++	spin_unlock(&__efivars->lock);
++
++	return efi_status_to_err(status);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_get);
++
++/**
++ * efivar_entry_set_get_size - call set_variable() and get new size (atomic)
++ * @entry: entry containing variable to set and get
++ * @attributes: attributes of variable to be written
++ * @size: size of data buffer
++ * @data: buffer containing data to write
++ *
++ * This is a pretty special (complex) function. See efivarfs_file_write().
++ *
++ * Atomically call set_variable() for @entry and if the set is
++ * successful, return the new size of the variable from get_variable()
++ * in @size. The success of set_variable() is indicated by @set.
++ *
++ * Returns 0 on success, -EINVAL if the variable data is invalid, or a
++ * converted EFI status code if either of set_variable() or
++ * get_variable() fail.
++ *
++ * If the EFI variable does not exist when calling set_variable()
++ * (EFI_NOT_FOUND), @entry is removed from the variable list.
++ */
++int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
++			      unsigned long *size, void *data, bool *set)
++{
++	const struct efivar_operations *ops = __efivars->ops;
++	efi_status_t status;
++
++	*set = false;
++
++	if (efivar_validate(&entry->var, data, *size) == false)
++		return -EINVAL;
++
++	/*
++	 * The lock here protects the get_variable call, the conditional
++	 * set_variable call, and removal of the variable from the efivars
++	 * list (in the case of an authenticated delete).
++	 */
++	spin_lock(&__efivars->lock);
++
++	status = ops->set_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid,
++				   attributes, *size, data);
++
++	if (status != EFI_SUCCESS) {
++		spin_unlock(&__efivars->lock);
++		return efi_status_to_err(status);
++	}
++
++	/*
++	 * Writing to the variable may have caused a change in size (which
++	 * could either be an append or an overwrite), or the variable to be
++	 * deleted. Perform a GetVariable() so we can tell what actually
++	 * happened.
++	 */
++	*size = 0;
++	status = ops->get_variable(entry->var.VariableName,
++				   &entry->var.VendorGuid,
++				   NULL, size, NULL);
++
++	if (status == EFI_NOT_FOUND)
++		efivar_entry_list_del_unlock(entry);
++	else
++		spin_unlock(&__efivars->lock);
++
++	return efi_status_to_err(status);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_set_get_size);
++
++/**
++ * efivar_entry_iter_begin - begin iterating the variable list
++ *
++ * Lock the variable list to prevent entry insertion and removal until
++ * efivar_entry_iter_end() is called. This function is usually used in
++ * conjunction with __efivar_entry_iter() or efivar_entry_iter().
++ */
++void efivar_entry_iter_begin(void)
++{
++	spin_lock(&__efivars->lock);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_iter_begin);
++
++/**
++ * efivar_entry_iter_end - finish iterating the variable list
++ *
++ * Unlock the variable list and allow modifications to the list again.
++ */
++void efivar_entry_iter_end(void)
++{
++	spin_unlock(&__efivars->lock);
++}
++EXPORT_SYMBOL_GPL(efivar_entry_iter_end);
++
++/**
++ * __efivar_entry_iter - iterate over variable list
++ * @func: callback function
++ * @data: function-specific data to pass to callback
++ * @prev: entry to begin iterating from
++ *
++ * Iterate over the list of EFI variables and call @func with every
++ * entry on the list. It is safe for @func to remove entries in the
++ * list via efivar_entry_delete().
++ *
++ * You MUST call efivar_enter_iter_begin() before this function, and
++ * efivar_entry_iter_end() afterwards.
++ *
++ * It is possible to begin iteration from an arbitrary entry within
++ * the list by passing @prev. @prev is updated on return to point to
++ * the last entry passed to @func. To begin iterating from the
++ * beginning of the list @prev must be %NULL.
++ *
++ * The restrictions for @func are the same as documented for
++ * efivar_entry_iter().
++ */
++int __efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
++			void *data, struct efivar_entry **prev)
++{
++	struct efivar_entry *entry, *n;
++	int err = 0;
++
++	if (!prev || !*prev) {
++		list_for_each_entry_safe(entry, n, &__efivars->list, list) {
++			err = func(entry, data);
++			if (err)
++				break;
++		}
++
++		if (prev)
++			*prev = entry;
++
++		return err;
++	}
++
++
++	list_for_each_entry_safe_continue((*prev), n, &__efivars->list, list) {
++		err = func(*prev, data);
++		if (err)
++			break;
++	}
++
++	return err;
++}
++EXPORT_SYMBOL_GPL(__efivar_entry_iter);
++
++/**
++ * efivar_entry_iter - iterate over variable list
++ * @func: callback function
++ * @data: function-specific data to pass to callback
++ *
++ * Iterate over the list of EFI variables and call @func with every
++ * entry on the list. It is safe for @func to remove entries in the
++ * list via efivar_entry_delete() while iterating.
++ *
++ * Some notes for the callback function:
++ *  - a non-zero return value indicates an error and terminates the loop
++ *  - @func is called from atomic context
++ */
++int efivar_entry_iter(int (*func)(struct efivar_entry *, void *), void *data)
++{
++	int err = 0;
++
++	efivar_entry_iter_begin();
++	err = __efivar_entry_iter(func, data, NULL);
++	efivar_entry_iter_end();
++
++	return err;
++}
++EXPORT_SYMBOL_GPL(efivar_entry_iter);
++
++/**
++ * efivars_register - register an efivars
++ * @efivars: efivars to register
++ * @ops: efivars operations
++ *
++ * Only a single efivars can be registered at any time.
++ */
++int efivars_register(struct efivars *efivars,
++		     const struct efivar_operations *ops)
++{
++	if (__efivars)
++		return -EBUSY;
++
++	spin_lock_init(&efivars->lock);
++	INIT_LIST_HEAD(&efivars->list);
++	efivars->ops = ops;
++
++	__efivars = efivars;
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(efivars_register);
++
++/**
++ * efivars_unregister - unregister an efivars
++ * @efivars: efivars to unregister
++ *
++ * The caller must have already removed every entry from the list,
++ * failure to do so is an error.
++ */
++int efivars_unregister(struct efivars *efivars)
++{
++	if (!__efivars) {
++		pr_err("efivars not registered\n");
++		return -EINVAL;
++	}
++
++	if (__efivars != efivars)
++		return -EINVAL;
++
++	if (!list_empty(&efivars->list)) {
++		pr_err("efivars list not empty\n");
++		return -EBUSY;
++	}
++
++	__efivars = NULL;
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(efivars_unregister);
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+deleted file mode 100644
+index 016e51f..0000000
+--- a/drivers/firmware/efivars.c
++++ /dev/null
+@@ -1,955 +0,0 @@
+-/*
+- * EFI Variables - efivars.c
+- *
+- * Copyright (C) 2001,2003,2004 Dell <Matt_Domsch-8PEkshWhKlo@public.gmane.org>
+- * Copyright (C) 2004 Intel Corporation <matthew.e.tolentino-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+- *
+- *  This program is free software; you can redistribute it and/or modify
+- *  it under the terms of the GNU General Public License as published by
+- *  the Free Software Foundation; either version 2 of the License, or
+- *  (at your option) any later version.
+- *
+- *  This program is distributed in the hope that it will be useful,
+- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- *  GNU General Public License for more details.
+- *
+- *  You should have received a copy of the GNU General Public License
+- *  along with this program; if not, write to the Free Software
+- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+- */
+-
+-#include <linux/capability.h>
+-#include <linux/types.h>
+-#include <linux/errno.h>
+-#include <linux/init.h>
+-#include <linux/mm.h>
+-#include <linux/module.h>
+-#include <linux/string.h>
+-#include <linux/smp.h>
+-#include <linux/efi.h>
+-#include <linux/sysfs.h>
+-#include <linux/kobject.h>
+-#include <linux/device.h>
+-#include <linux/slab.h>
+-#include <linux/ctype.h>
+-
+-#include <linux/fs.h>
+-#include <linux/ramfs.h>
+-#include <linux/pagemap.h>
+-
+-#include <asm/uaccess.h>
+-
+-/* Private pointer to registered efivars */
+-static struct efivars *__efivars;
+-
+-static bool
+-validate_device_path(struct efi_variable *var, int match, u8 *buffer,
+-		     unsigned long len)
+-{
+-	struct efi_generic_dev_path *node;
+-	int offset = 0;
+-
+-	node = (struct efi_generic_dev_path *)buffer;
+-
+-	if (len < sizeof(*node))
+-		return false;
+-
+-	while (offset <= len - sizeof(*node) &&
+-	       node->length >= sizeof(*node) &&
+-		node->length <= len - offset) {
+-		offset += node->length;
+-
+-		if ((node->type == EFI_DEV_END_PATH ||
+-		     node->type == EFI_DEV_END_PATH2) &&
+-		    node->sub_type == EFI_DEV_END_ENTIRE)
+-			return true;
+-
+-		node = (struct efi_generic_dev_path *)(buffer + offset);
+-	}
+-
+-	/*
+-	 * If we're here then either node->length pointed past the end
+-	 * of the buffer or we reached the end of the buffer without
+-	 * finding a device path end node.
+-	 */
+-	return false;
+-}
+-
+-static bool
+-validate_boot_order(struct efi_variable *var, int match, u8 *buffer,
+-		    unsigned long len)
+-{
+-	/* An array of 16-bit integers */
+-	if ((len % 2) != 0)
+-		return false;
+-
+-	return true;
+-}
+-
+-static bool
+-validate_load_option(struct efi_variable *var, int match, u8 *buffer,
+-		     unsigned long len)
+-{
+-	u16 filepathlength;
+-	int i, desclength = 0, namelen;
+-
+-	namelen = utf16_strnlen(var->VariableName, sizeof(var->VariableName));
+-
+-	/* Either "Boot" or "Driver" followed by four digits of hex */
+-	for (i = match; i < match+4; i++) {
+-		if (var->VariableName[i] > 127 ||
+-		    hex_to_bin(var->VariableName[i] & 0xff) < 0)
+-			return true;
+-	}
+-
+-	/* Reject it if there's 4 digits of hex and then further content */
+-	if (namelen > match + 4)
+-		return false;
+-
+-	/* A valid entry must be at least 8 bytes */
+-	if (len < 8)
+-		return false;
+-
+-	filepathlength = buffer[4] | buffer[5] << 8;
+-
+-	/*
+-	 * There's no stored length for the description, so it has to be
+-	 * found by hand
+-	 */
+-	desclength = utf16_strsize((efi_char16_t *)(buffer + 6), len - 6) + 2;
+-
+-	/* Each boot entry must have a descriptor */
+-	if (!desclength)
+-		return false;
+-
+-	/*
+-	 * If the sum of the length of the description, the claimed filepath
+-	 * length and the original header are greater than the length of the
+-	 * variable, it's malformed
+-	 */
+-	if ((desclength + filepathlength + 6) > len)
+-		return false;
+-
+-	/*
+-	 * And, finally, check the filepath
+-	 */
+-	return validate_device_path(var, match, buffer + desclength + 6,
+-				    filepathlength);
+-}
+-
+-static bool
+-validate_uint16(struct efi_variable *var, int match, u8 *buffer,
+-		unsigned long len)
+-{
+-	/* A single 16-bit integer */
+-	if (len != 2)
+-		return false;
+-
+-	return true;
+-}
+-
+-static bool
+-validate_ascii_string(struct efi_variable *var, int match, u8 *buffer,
+-		      unsigned long len)
+-{
+-	int i;
+-
+-	for (i = 0; i < len; i++) {
+-		if (buffer[i] > 127)
+-			return false;
+-
+-		if (buffer[i] == 0)
+-			return true;
+-	}
+-
+-	return false;
+-}
+-
+-struct variable_validate {
+-	char *name;
+-	bool (*validate)(struct efi_variable *var, int match, u8 *data,
+-			 unsigned long len);
+-};
+-
+-static const struct variable_validate variable_validate[] = {
+-	{ "BootNext", validate_uint16 },
+-	{ "BootOrder", validate_boot_order },
+-	{ "DriverOrder", validate_boot_order },
+-	{ "Boot*", validate_load_option },
+-	{ "Driver*", validate_load_option },
+-	{ "ConIn", validate_device_path },
+-	{ "ConInDev", validate_device_path },
+-	{ "ConOut", validate_device_path },
+-	{ "ConOutDev", validate_device_path },
+-	{ "ErrOut", validate_device_path },
+-	{ "ErrOutDev", validate_device_path },
+-	{ "Timeout", validate_uint16 },
+-	{ "Lang", validate_ascii_string },
+-	{ "PlatformLang", validate_ascii_string },
+-	{ "", NULL },
+-};
+-
+-bool
+-efivar_validate(struct efi_variable *var, u8 *data, unsigned long len)
+-{
+-	int i;
+-	u16 *unicode_name = var->VariableName;
+-
+-	for (i = 0; variable_validate[i].validate != NULL; i++) {
+-		const char *name = variable_validate[i].name;
+-		int match;
+-
+-		for (match = 0; ; match++) {
+-			char c = name[match];
+-			u16 u = unicode_name[match];
+-
+-			/* All special variables are plain ascii */
+-			if (u > 127)
+-				return true;
+-
+-			/* Wildcard in the matching name means we've matched */
+-			if (c == '*')
+-				return variable_validate[i].validate(var,
+-							     match, data, len);
+-
+-			/* Case sensitive match */
+-			if (c != u)
+-				break;
+-
+-			/* Reached the end of the string while matching */
+-			if (!c)
+-				return variable_validate[i].validate(var,
+-							     match, data, len);
+-		}
+-	}
+-
+-	return true;
+-}
+-EXPORT_SYMBOL_GPL(efivar_validate);
+-
+-static int efi_status_to_err(efi_status_t status)
+-{
+-	int err;
+-
+-	switch (status) {
+-	case EFI_SUCCESS:
+-		err = 0;
+-		break;
+-	case EFI_INVALID_PARAMETER:
+-		err = -EINVAL;
+-		break;
+-	case EFI_OUT_OF_RESOURCES:
+-		err = -ENOSPC;
+-		break;
+-	case EFI_DEVICE_ERROR:
+-		err = -EIO;
+-		break;
+-	case EFI_WRITE_PROTECTED:
+-		err = -EROFS;
+-		break;
+-	case EFI_SECURITY_VIOLATION:
+-		err = -EACCES;
+-		break;
+-	case EFI_NOT_FOUND:
+-		err = -ENOENT;
+-		break;
+-	default:
+-		err = -EINVAL;
+-	}
+-
+-	return err;
+-}
+-
+-/*
+- * Let's not leave out systab information that snuck into
+- * the efivars driver
+- */
+-static ssize_t systab_show(struct kobject *kobj,
+-			   struct kobj_attribute *attr, char *buf)
+-{
+-	char *str = buf;
+-
+-	if (!kobj || !buf)
+-		return -EINVAL;
+-
+-	if (efi.mps != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "MPS=0x%lx\n", efi.mps);
+-	if (efi.acpi20 != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "ACPI20=0x%lx\n", efi.acpi20);
+-	if (efi.acpi != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "ACPI=0x%lx\n", efi.acpi);
+-	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
+-	if (efi.hcdp != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "HCDP=0x%lx\n", efi.hcdp);
+-	if (efi.boot_info != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
+-	if (efi.uga != EFI_INVALID_TABLE_ADDR)
+-		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
+-
+-	return str - buf;
+-}
+-
+-static struct kobj_attribute efi_attr_systab =
+-			__ATTR(systab, 0400, systab_show, NULL);
+-
+-static struct attribute *efi_subsys_attrs[] = {
+-	&efi_attr_systab.attr,
+-	NULL,	/* maybe more in the future? */
+-};
+-
+-static struct attribute_group efi_subsys_attr_group = {
+-	.attrs = efi_subsys_attrs,
+-};
+-
+-struct kobject *efi_kobj;
+-
+-/**
+- * efivar_init - build the initial list of EFI variables
+- * @func: callback function to invoke for every variable
+- * @data: function-specific data to pass to @func
+- *
+- * Get every EFI variable from the firmware, construct a struct
+- * efivar_entry and invoke @func. @func should call efivar_entry_add()
+- * to build the list of variables.
+- *
+- * Returns 0 on success, or a kernel error code on failure.
+- */
+-int efivar_init(int (*func)(struct efivar_entry *, void *), void *data)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	struct efivar_entry *entry;
+-	unsigned long variable_name_size = 1024;
+-	efi_char16_t *variable_name;
+-	efi_status_t status;
+-	efi_guid_t vendor_guid;
+-
+-	variable_name = kzalloc(variable_name_size, GFP_KERNEL);
+-	if (!variable_name) {
+-		printk(KERN_ERR "efivars: Memory allocation failed.\n");
+-		return -ENOMEM;
+-	}
+-
+-	/*
+-	 * Per EFI spec, the maximum storage allocated for both
+-	 * the variable name and variable data is 1024 bytes.
+-	 */
+-
+-	do {
+-		variable_name_size = 1024;
+-
+-		spin_lock(&__efivars->lock);
+-		status = ops->get_next_variable(&variable_name_size,
+-						variable_name,
+-						&vendor_guid);
+-		spin_unlock(&__efivars->lock);
+-		switch (status) {
+-		case EFI_SUCCESS:
+-			entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+-			if (!entry)
+-				return -ENOMEM;
+-
+-			memcpy(entry->var.VariableName, variable_name, variable_name_size);
+-			memcpy(&(entry->var.VendorGuid), &vendor_guid, sizeof(efi_guid_t));
+-			func(entry, data);
+-
+-			break;
+-		case EFI_NOT_FOUND:
+-			break;
+-		default:
+-			printk(KERN_WARNING "efivars: get_next_variable: status=%lx\n",
+-				status);
+-			status = EFI_NOT_FOUND;
+-			break;
+-		}
+-	} while (status != EFI_NOT_FOUND);
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(efivar_init);
+-
+-/**
+- * efivar_entry_add - add entry to variable list
+- * @entry: entry to add to list
+- */
+-void efivar_entry_add(struct efivar_entry *entry)
+-{
+-	spin_lock(&__efivars->lock);
+-	list_add(&entry->list, &__efivars->list);
+-	spin_unlock(&__efivars->lock);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_add);
+-
+-/**
+- * efivar_entry_remove - remove entry from variable list
+- * @entry: entry to remove from list
+- */
+-void efivar_entry_remove(struct efivar_entry *entry)
+-{
+-	spin_lock(&__efivars->lock);
+-	list_del(&entry->list);
+-	spin_unlock(&__efivars->lock);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_remove);
+-
+-/*
+- * efivar_entry_list_del_unlock - remove entry from variable list
+- * @entry: entry to remove
+- *
+- * Remove @entry from the variable list and release the list lock.
+- *
+- * NOTE: slightly weird locking semantics here - we expect to be
+- * called with the efivars lock already held, and we release it before
+- * returning. This is because this function is usually called after
+- * set_variable() while the lock is still held.
+- */
+-static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
+-{
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
+-
+-	list_del(&entry->list);
+-	spin_unlock(&__efivars->lock);
+-}
+-
+-/**
+- * __efivar_entry_delete - delete an EFI variable
+- * @entry: entry containing EFI variable to delete
+- *
+- * Delete the variable from the firmware but leave @entry on the
+- * variable list.
+- *
+- * This function differs from efivar_entry_delete() because it does
+- * not remove @entry from the variable list. Also, it is safe to be
+- * called from within a efivar_entry_iter_begin() and
+- * efivar_entry_iter_end() region, unlike efivar_entry_delete().
+- *
+- * Returns 0 on success, or a converted EFI status code if
+- * set_variable() fails.
+- */
+-int __efivar_entry_delete(struct efivar_entry *entry)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
+-
+-	status = ops->set_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   0, 0, NULL);
+-
+-	return efi_status_to_err(status);
+-}
+-EXPORT_SYMBOL_GPL(__efivar_entry_delete);
+-
+-/**
+- * efivar_entry_delete - delete variable and remove entry from list
+- * @entry: entry containing variable to delete
+- *
+- * Delete the variable from the firmware and remove @entry from the
+- * variable list. It is the caller's responsibility to free @entry
+- * once we return.
+- *
+- * Returns 0 on success, or a converted EFI status code if
+- * set_variable() fails.
+- */
+-int efivar_entry_delete(struct efivar_entry *entry)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	spin_lock(&__efivars->lock);
+-	status = ops->set_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   0, 0, NULL);
+-	if (!(status == EFI_SUCCESS || status == EFI_NOT_FOUND)) {
+-		spin_unlock(&__efivars->lock);
+-		return efi_status_to_err(status);
+-	}
+-
+-	efivar_entry_list_del_unlock(entry);
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_delete);
+-
+-/**
+- * efivar_entry_set - call set_variable()
+- * @entry: entry containing the EFI variable to write
+- * @attributes: variable attributes
+- * @size: size of @data buffer
+- * @data: buffer containing variable data
+- * @lookup: check to see if @entry is already on the list?
+- *
+- * Calls set_variable() for an EFI variable. If creating a new EFI
+- * variable, this function is usually followed by efivar_entry_add().
+- *
+- * Returns 0 on success, -EEXIST if @lookup is true and the entry
+- * already exists on the list, or a converted EFI status code if
+- * set_variable() fails.
+- */
+-int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
+-		     unsigned long size, void *data, bool lookup)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-	efi_char16_t *name = entry->var.VariableName;
+-	efi_guid_t vendor = entry->var.VendorGuid;
+-
+-	spin_lock(&__efivars->lock);
+-
+-	if (lookup && efivar_entry_find(name, vendor, false)) {
+-		spin_unlock(&__efivars->lock);
+-		return -EEXIST;
+-	}
+-
+-	status = ops->set_variable(name, &vendor, attributes, size, data);
+-
+-	spin_unlock(&__efivars->lock);
+-
+-	return efi_status_to_err(status);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_set);
+-
+-/**
+- * efivar_entry_set_safe - call set_variable() if enough space in firmware
+- * @entry: entry containing the EFI variable to write
+- * @attributes: variable attributes
+- * @size: size of @data buffer
+- * @data: buffer containing variable data
+- * @total: total variable size including variable name
+- *
+- * Calls query_variable_info() to ensure that there is enough free
+- * storage in the firmware for this variable, and if so, calls
+- * set_variable(). If creating a new EFI variable, this function is
+- * usually followed by efivar_entry_add().
+- *
+- * Returns 0 on success, -ENOSPC if the firmware does not have enough
+- * space for set_variable() to succeed, or a converted EFI status code
+- * if set_variable() fails.
+- */
+-int efivar_entry_set_safe(struct efivar_entry *entry, u32 attributes,
+-			  unsigned long size, void *data)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-	efi_char16_t *name = entry->var.VariableName;
+-	efi_guid_t vendor = entry->var.VendorGuid;
+-	u64 storage_size, remaining_size, max_size;
+-	u64 total;
+-
+-	if (!ops->query_variable_info)
+-		return -ENOSYS;
+-
+-	spin_lock(&__efivars->lock);
+-	status = ops->query_variable_info(attributes, &storage_size,
+-					  &remaining_size, &max_size);
+-
+-	if (status != EFI_SUCCESS) {
+-		spin_unlock(&__efivars->lock);
+-		return -ENOSPC;
+-	}
+-
+-	/*
+-	 * Does the firmware have enough free space to successfully
+-	 * write this variable?
+-	 */
+-	total = utf16_strsize(name, 1024) + size;
+-	if (remaining_size >= total)
+-		status = ops->set_variable(name, &vendor,
+-					   attributes, size, data);
+-
+-	spin_unlock(&__efivars->lock);
+-
+-	return efi_status_to_err(status);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_set_safe);
+-/**
+- * efivar_entry_find - search for an entry
+- * @name: the EFI variable name
+- * @guid: the EFI variable vendor's guid
+- * @remove: should we remove the entry from the list?
+- *
+- * Search for an entry on the variable list that has the EFI variable
+- * name @name and vendor guid @guid. If an entry is found on the list
+- * and @remove is true, the entry is removed from the list.
+- *
+- * The caller MUST call efivar_entry_iter_begin() and
+- * efivar_entry_iter_end() before and after the invocation of this
+- * function, respectively.
+- *
+- * Returns the entry if found on the list, %NULL otherwise.
+- */
+-struct efivar_entry *efivar_entry_find(efi_char16_t *name,
+-				       efi_guid_t guid, bool remove)
+-{
+-	struct efivar_entry *entry, *n;
+-	int strsize1, strsize2;
+-	bool found = false;
+-
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
+-
+-	list_for_each_entry_safe(entry, n, &__efivars->list, list) {
+-		strsize1 = utf16_strsize(name, 1024);
+-		strsize2 = utf16_strsize(entry->var.VariableName, 1024);
+-		if (strsize1 == strsize2 &&
+-		    !memcmp(name, &(entry->var.VariableName), strsize1) &&
+-		    !efi_guidcmp(guid, entry->var.VendorGuid)) {
+-			found = true;
+-			break;
+-		}
+-	}
+-
+-	if (!found)
+-		return NULL;
+-
+-	if (remove)
+-		list_del(&entry->list);
+-
+-	return entry;
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_find);
+-
+-/**
+- * efivar_query_info - call query_variable_info()
+- * @attributes: query for variables with these attributes
+- * @storage_size: maximum space for variables with @attributes
+- * @remaining_size: remaining space for variable with @attributes
+- * @max_size: maximum space for an individual variable with @attributes
+- *
+- * Query the amount of space available in the firmware for variables
+- * with @attributes.
+- *
+- * Returns 0 on success, -ENOSYS if the registered efivars ops do not
+- * support query_variable_info(), or a converted EFI status code if
+- * query_variable_info() fails.
+- */
+-int efivar_query_info(u32 attributes, u64 *storage_size,
+-		      u64 *remaining_size, u64 *max_size)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	if (!ops->query_variable_info)
+-		return -ENOSYS;
+-
+-	spin_lock(&__efivars->lock);
+-	status = ops->query_variable_info(attributes, storage_size,
+-					  remaining_size, max_size);
+-	spin_unlock(&__efivars->lock);
+-
+-	return status;
+-}
+-EXPORT_SYMBOL_GPL(efivar_query_info);
+-
+-/**
+- * efivar_entry_size - obtain the size of a variable
+- * @entry: entry for this variable
+- * @size: location to store the variable's size
+- */
+-int efivar_entry_size(struct efivar_entry *entry, unsigned long *size)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	*size = 0;
+-
+-	spin_lock(&__efivars->lock);
+-	status = ops->get_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid, NULL, size, NULL);
+-	spin_unlock(&__efivars->lock);
+-
+-	if (status != EFI_BUFFER_TOO_SMALL)
+-	    return efi_status_to_err(status);
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_size);
+-
+-/**
+- * efivar_entry_get - call get_variable()
+- * @entry: read data for this variable
+- * @attributes: variable attributes
+- * @size: size of @data buffer
+- * @data: buffer to store variable data
+- */
+-int efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+-		     unsigned long *size, void *data)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	spin_lock(&__efivars->lock);
+-	status = ops->get_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   attributes, size, data);
+-	spin_unlock(&__efivars->lock);
+-
+-	return efi_status_to_err(status);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_get);
+-
+-/**
+- * efivar_entry_set_get_size - call set_variable() and get new size (atomic)
+- * @entry: entry containing variable to set and get
+- * @attributes: attributes of variable to be written
+- * @size: size of data buffer
+- * @data: buffer containing data to write
+- *
+- * This is a pretty special (complex) function. See efivarfs_file_write().
+- *
+- * Atomically call set_variable() for @entry and if the set is
+- * successful, return the new size of the variable from get_variable()
+- * in @size. The success of set_variable() is indicated by @set.
+- *
+- * Returns 0 on success, -EINVAL if the variable data is invalid, or a
+- * converted EFI status code if either of set_variable() or
+- * get_variable() fail.
+- *
+- * If the EFI variable does not exist when calling set_variable()
+- * (EFI_NOT_FOUND), @entry is removed from the variable list.
+- */
+-int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+-			      unsigned long *size, void *data, bool *set)
+-{
+-	const struct efivar_operations *ops = __efivars->ops;
+-	efi_status_t status;
+-
+-	*set = false;
+-
+-	if (efivar_validate(&entry->var, data, *size) == false)
+-		return -EINVAL;
+-
+-	/*
+-	 * The lock here protects the get_variable call, the conditional
+-	 * set_variable call, and removal of the variable from the efivars
+-	 * list (in the case of an authenticated delete).
+-	 */
+-	spin_lock(&__efivars->lock);
+-
+-	status = ops->set_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   attributes, *size, data);
+-
+-	if (status != EFI_SUCCESS) {
+-		spin_unlock(&__efivars->lock);
+-		return efi_status_to_err(status);
+-	}
+-
+-	/*
+-	 * Writing to the variable may have caused a change in size (which
+-	 * could either be an append or an overwrite), or the variable to be
+-	 * deleted. Perform a GetVariable() so we can tell what actually
+-	 * happened.
+-	 */
+-	*size = 0;
+-	status = ops->get_variable(entry->var.VariableName,
+-				   &entry->var.VendorGuid,
+-				   NULL, size, NULL);
+-
+-	if (status == EFI_NOT_FOUND)
+-		efivar_entry_list_del_unlock(entry);
+-	else
+-		spin_unlock(&__efivars->lock);
+-
+-	return efi_status_to_err(status);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_set_get_size);
+-
+-/**
+- * efivar_entry_iter_begin - begin iterating the variable list
+- *
+- * Lock the variable list to prevent entry insertion and removal until
+- * efivar_entry_iter_end() is called. This function is usually used in
+- * conjunction with __efivar_entry_iter() or efivar_entry_iter().
+- */
+-void efivar_entry_iter_begin(void)
+-{
+-	spin_lock(&__efivars->lock);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_iter_begin);
+-
+-/**
+- * efivar_entry_iter_end - finish iterating the variable list
+- *
+- * Unlock the variable list and allow modifications to the list again.
+- */
+-void efivar_entry_iter_end(void)
+-{
+-	spin_unlock(&__efivars->lock);
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_iter_end);
+-
+-/**
+- * __efivar_entry_iter - iterate over variable list
+- * @func: callback function
+- * @data: function-specific data to pass to callback
+- * @prev: entry to begin iterating from
+- *
+- * Iterate over the list of EFI variables and call @func with every
+- * entry on the list. It is safe for @func to remove entries in the
+- * list via efivar_entry_delete().
+- *
+- * You MUST call efivar_enter_iter_begin() before this function, and
+- * efivar_entry_iter_end() afterwards.
+- *
+- * It is possible to begin iteration from an arbitrary entry within
+- * the list by passing @prev. @prev is updated on return to point to
+- * the last entry passed to @func. To begin iterating from the
+- * beginning of the list @prev must be %NULL.
+- *
+- * The restrictions for @func are the same as documented for
+- * efivar_entry_iter().
+- */
+-int __efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
+-			void *data, struct efivar_entry **prev)
+-{
+-	struct efivar_entry *entry, *n;
+-	int err = 0;
+-
+-	if (!prev || !*prev) {
+-		list_for_each_entry_safe(entry, n, &__efivars->list, list) {
+-			err = func(entry, data);
+-			if (err)
+-				break;
+-		}
+-
+-		if (prev)
+-			*prev = entry;
+-
+-		return err;
+-	}
+-
+-
+-	list_for_each_entry_safe_continue((*prev), n, &__efivars->list, list) {
+-		err = func(*prev, data);
+-		if (err)
+-			break;
+-	}
+-
+-	return err;
+-}
+-EXPORT_SYMBOL_GPL(__efivar_entry_iter);
+-
+-/**
+- * efivar_entry_iter - iterate over variable list
+- * @func: callback function
+- * @data: function-specific data to pass to callback
+- *
+- * Iterate over the list of EFI variables and call @func with every
+- * entry on the list. It is safe for @func to remove entries in the
+- * list via efivar_entry_delete() while iterating.
+- *
+- * Some notes for the callback function:
+- *  - a non-zero return value indicates an error and terminates the loop
+- *  - @func is called from atomic context
+- */
+-int efivar_entry_iter(int (*func)(struct efivar_entry *, void *), void *data)
+-{
+-	int err = 0;
+-
+-	efivar_entry_iter_begin();
+-	err = __efivar_entry_iter(func, data, NULL);
+-	efivar_entry_iter_end();
+-
+-	return err;
+-}
+-EXPORT_SYMBOL_GPL(efivar_entry_iter);
+-
+-/**
+- * efivars_register - register an efivars
+- * @efivars: efivars to register
+- * @ops: efivars operations
+- *
+- * Only a single efivars can be registered at any time.
+- */
+-int efivars_register(struct efivars *efivars,
+-		     const struct efivar_operations *ops)
+-{
+-	if (__efivars)
+-		return -EBUSY;
+-
+-	spin_lock_init(&efivars->lock);
+-	INIT_LIST_HEAD(&efivars->list);
+-	efivars->ops = ops;
+-
+-	__efivars = efivars;
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(efivars_register);
+-
+-/**
+- * efivars_unregister - unregister an efivars
+- * @efivars: efivars to unregister
+- *
+- * The caller must have already removed every entry from the list,
+- * failure to do so is an error.
+- */
+-int efivars_unregister(struct efivars *efivars)
+-{
+-	if (!__efivars) {
+-		printk(KERN_ERR "efivars not registered\n");
+-		return -EINVAL;
+-	}
+-
+-	if (__efivars != efivars)
+-		return -EINVAL;
+-
+-	if (!list_empty(&efivars->list)) {
+-		printk(KERN_ERR "efivars list not empty\n");
+-		return -EBUSY;
+-	}
+-
+-	__efivars = NULL;
+-
+-	return 0;
+-}
+-EXPORT_SYMBOL_GPL(efivars_unregister);
+-
+-static struct kobject *efivars_kobject;
+-
+-static int __init
+-efivars_init(void)
+-{
+-	int error;
+-
+-	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+-		return 0;
+-
+-	/* Register the efi directory at /sys/firmware/efi */
+-	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
+-	if (!efi_kobj) {
+-		printk(KERN_ERR "efivars: Firmware registration failed.\n");
+-		return -ENOMEM;
+-	}
+-
+-	efivars_kobject = kobject_create_and_add("efivars", efi_kobj);
+-	if (!efivars_kobject) {
+-		pr_err("efivars: Subsystem registration failed.\n");
+-		kobject_put(efi_kobj);
+-		return -ENOMEM;
+-	}
+-
+-	/* Don't forget the systab entry */
+-	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
+-	if (error) {
+-		printk(KERN_ERR
+-		       "efivars: Sysfs attribute export failed with error %d.\n",
+-		       error);
+-	}
+-
+-	return error;
+-}
+-
+-static void __exit
+-efivars_exit(void)
+-{
+-	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+-		kobject_put(efivars_kobject);
+-		kobject_put(efi_kobj);
+-	}
+-}
+-
+-module_init(efivars_init);
+-module_exit(efivars_exit);
+-
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index b81928b..58b3cae 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -742,6 +742,8 @@ utf16_strlen(efi_char16_t *s)
+ 	return utf16_strnlen(s, ~0UL);
+ }
+ 
++extern struct kobject *efi_kobj;
++
+ #ifdef CONFIG_EFI_VARS
+ /*
+  * Return the number of bytes is the length of this string
+-- 
+1.8.1.2
