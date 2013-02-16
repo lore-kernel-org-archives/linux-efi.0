@@ -1,62 +1,66 @@
-From: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Subject: Re: [PATCH 2/2 v2] efivarfs: guid part of filenames are
- case-insensitive
-Date: Thu, 14 Feb 2013 17:55:19 +0000
-Message-ID: <20130214175519.GV4503@ZenIV.linux.org.uk>
-References: <1360592935-26026-1-git-send-email-matt@console-pimps.org>
- <1360592935-26026-3-git-send-email-matt@console-pimps.org>
- <20130212123934.GC14790@console-pimps.org>
- <20130214160405.GU4503@ZenIV.linux.org.uk>
- <1360861876.24917.52.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
+Date: Sat, 16 Feb 2013 09:55:44 +0800
+Message-ID: <511EE720.6060907@huawei.com>
+References: <51074786.5030007@huawei.com>  <1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>  <51131248.3080203@huawei.com> <5113450C.1080109@huawei.com> <1360750028.24917.28.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1360861876.24917.52.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1360750028.24917.28.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Liujiang <jiang.liu-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Hanjun Guo <guohanjun-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, WuJianguo <wujianguo-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 14, 2013 at 05:11:16PM +0000, Matt Fleming wrote:
-> On Thu, 2013-02-14 at 16:04 +0000, Al Viro wrote:
-> > On Tue, Feb 12, 2013 at 12:39:34PM +0000, Matt Fleming wrote:
-> > 
-> > > +static struct dentry *efivarfs_alloc_dentry(struct dentry *parent, char *name)
-> > > +{
-> > > +	struct qstr q;
-> > > +
-> > > +	q.name = name;
-> > > +	q.len = strlen(name);
-> > > +
-> > > +	if (efivarfs_d_hash(NULL, NULL, &q))
-> > > +		return NULL;
-> > > +
-> > > +	return d_alloc(parent, &q);
-> > > +}
-> > 
-> > > @@ -1098,7 +1177,7 @@ static int efivarfs_fill_super(struct super_block *sb, void *data, int silent)
-> > >  		if (!inode)
-> > >  			goto fail_name;
-> > >  
-> > > -		dentry = d_alloc_name(root, name);
-> > > +		dentry = efivarfs_alloc_dentry(root, name);
-> > >  		if (!dentry)
-> > >  			goto fail_inode;
-> > 
-> > Umm...  That name has just been built by efivarfs_fill_super() itself, and
-> > AFAICS there's no way for its GUID part to be _not_ lowercase
-> > hex and with proper locations of dashes.  So
-> > 	a) hash value will be exactly full_name_hash(name), unless
-> > efivarfs_valid_name() manages to fail.
-> 
-> In my testing calling full_name_hash() and doing the partial_name_hash()
-> loop returned different results. This is on x86, with
-> CONFIG_DCACHE_WORD_ACCESS=y. I assumed they weren't compatible because
-> most (all?) file systems that do fs-specific hashing also fill out the
-> hash member using their fs-specific function, whereas efivarfs was
-> previously using d_alloc_name().
-> 
-> Is this mismatch indicative of a bug in efivarfs hashing?
+On 2013/2/13 18:07, Matt Fleming wrote:
 
-No, just me forgetting about DCACHE_WORD_ACCESS.  Nevermind...
+>> In efi_init() memory aligns in IA64_GRANULE_SIZE(16M). If set "crashkernel=1024M-:600M"
+>> and use sparse memory model, when crash kernel booting it changes [128M-728M] to [128M-720M].
+>> But initrd memory is in [709M-727M], and virt_addr_valid() *can not* check the invalid pages
+>> when freeing initrd memory. There are some pages missed at the end of the seciton.
+>>
+>> ChangeLog V3:
+>> 	fixed vaddr mistake
+>> ChangeLog V2:
+>> 	add invalid pages check when freeing initrd memory
+>>
+>> Signed-off-by: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  arch/ia64/mm/init.c |    4 ++++
+>>  1 files changed, 4 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/arch/ia64/mm/init.c b/arch/ia64/mm/init.c
+>> index 082e383..8a269f8 100644
+>> --- a/arch/ia64/mm/init.c
+>> +++ b/arch/ia64/mm/init.c
+>> @@ -173,6 +173,7 @@ void __init
+>>  free_initrd_mem (unsigned long start, unsigned long end)
+>>  {
+>>  	struct page *page;
+>> +	unsigned long pfn;
+>>  	/*
+>>  	 * EFI uses 4KB pages while the kernel can use 4KB or bigger.
+>>  	 * Thus EFI and the kernel may have different page sizes. It is
+>> @@ -213,6 +214,9 @@ free_initrd_mem (unsigned long start, unsigned long end)
+>>  	for (; start < end; start += PAGE_SIZE) {
+>>  		if (!virt_addr_valid(start))
+>>  			continue;
+>> +		pfn = __pa(start) >> PAGE_SHIFT;
+>> +		if (pfn >= max_low_pfn)
+>> +			continue;
+>>  		page = virt_to_page(start);
+>>  		ClearPageReserved(page);
+>>  		init_page_count(page);
+> 
+> I would have presumed that fixing this bug would involve modifying the
+> ia64-specific kexec code?
+> 
+> Tony, Fenghua? Any thoughts?
+
+
+Hi, I had the Spring Festival a few days ago. Please ignore the earlier
+patch and consider the V3 one above.
+
+Thanks,
+Xishi Qiu
