@@ -1,63 +1,60 @@
-From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 10/15] acpi: Ignore acpi_rsdp kernel parameter in a
- secure boot environment
-Date: Wed, 20 Feb 2013 08:39:24 -0500
-Message-ID: <20130220133924.GF362@hansolo.jdub.homelinux.org>
-References: <1359391359-25783-1-git-send-email-matthew.garrett@nebula.com>
- <1359391359-25783-11-git-send-email-matthew.garrett@nebula.com>
- <CABqxG0cJGp7UEREvMW49QA0BfDXPsyEbAuMMLZwcHPdUAKT+Dw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CABqxG0cJGp7UEREvMW49QA0BfDXPsyEbAuMMLZwcHPdUAKT+Dw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <hidave.darkstar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [PATCH] x86, efi: Make "noefi" really disable EFI runtime serivces
+Date: Wed, 20 Feb 2013 20:36:12 +0000
+Message-ID: <1361392572-25657-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@linux.intel.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Feb 17, 2013 at 05:00:23PM +0800, Dave Young wrote:
-> On Tue, Jan 29, 2013 at 12:42 AM, Matthew Garrett
-> <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
-> > From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> >
-> > This option allows userspace to pass the RSDP address to the kernel.  This
-> > could potentially be used to circumvent the secure boot trust model.
-> > We ignore the setting if we don't have the CAP_COMPROMISE_KERNEL capability.
-> >
-> > Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  drivers/acpi/osl.c | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> >
-> > diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-> > index bd22f86..88251d2 100644
-> > --- a/drivers/acpi/osl.c
-> > +++ b/drivers/acpi/osl.c
-> > @@ -246,7 +246,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
-> >  acpi_physical_address __init acpi_os_get_root_pointer(void)
-> >  {
-> >  #ifdef CONFIG_KEXEC
-> > -       if (acpi_rsdp)
-> > +       if (acpi_rsdp && capable(CAP_COMPROMISE_KERNEL))
-> 
-> 
-> This caused an issue in a kdump test even without secure boot enabled.
-> Looks like security subsystem init is not initialized yet at this
-> point.
-> 
-> See redhat bug 906225:
-> https://bugzilla.redhat.com/show_bug.cgi?id=906225
+From: Matt Fleming <matt.fleming@intel.com>
 
-I've fixed this in a newer revision of the patch.  Basically we can't
-rely on capable() working at this point because security_init hasn't
-been called yet.  Sigh.
+commit 1de63d60cd5b ("efi: Clear EFI_RUNTIME_SERVICES rather than
+EFI_BOOT by "noefi" boot parameter") attempted to make "noefi" true to
+its documentation and disable EFI runtime services to prevent the
+bricking bug described in commit e0094244e41c ("samsung-laptop:
+Disable on EFI hardware"). However, it's not possible to clear
+EFI_RUNTIME_SERVICES from an early param function because
+EFI_RUNTIME_SERVICES is set in efi_init() *after* parse_early_param().
 
-Despite the desire to not sprinkle if (!secure_boot) checks all over,
-I'm thinking less and less that using a CAP is going to work.  Maybe
-I'll come up with some kind of secure_kernel() function that can be set
-per-arch or something and use that instead.  At least that would have
-the semantics we're looking for without breaking in various places or
-causing unintended side-effects in userspace.
+This resulted in "noefi" effectively becoming a no-op and no longer
+providing users with a way to disable EFI, which is bad for those
+users that have buggy machines.
 
-josh
+Reported-by: Walt Nelson Jr <walt0924@gmail.com>
+Cc: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
+Cc: H. Peter Anvin <hpa@linux.intel.com>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+---
+ arch/x86/platform/efi/efi.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 928bf83..e2cd38f 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -85,9 +85,10 @@ int efi_enabled(int facility)
+ }
+ EXPORT_SYMBOL(efi_enabled);
+ 
++static bool disable_runtime = false;
+ static int __init setup_noefi(char *arg)
+ {
+-	clear_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
++	disable_runtime = true;
+ 	return 0;
+ }
+ early_param("noefi", setup_noefi);
+@@ -734,7 +735,7 @@ void __init efi_init(void)
+ 	if (!efi_is_native())
+ 		pr_info("No EFI runtime due to 32/64-bit mismatch with kernel\n");
+ 	else {
+-		if (efi_runtime_init())
++		if (disable_runtime || efi_runtime_init())
+ 			return;
+ 		set_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
+ 	}
+-- 
+1.7.11.7
