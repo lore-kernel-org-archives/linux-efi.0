@@ -1,38 +1,52 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: rename the efivars module
-Date: Thu, 21 Feb 2013 14:25:42 +0000
-Message-ID: <1361456742.2842.21.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1361149277-1026-1-git-send-email-teg@jklm.no>
-	 <1361149277-1026-2-git-send-email-teg@jklm.no>
+From: Tony Luck <tony.luck@gmail.com>
+Subject: Re: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
+Date: Thu, 21 Feb 2013 10:21:46 -0800
+Message-ID: <CA+8MBbJdOCh5Hh-K6wRDzACy-a4S1qV2S5zxwJk2MhAhZvxbqg@mail.gmail.com>
+References: <51074786.5030007@huawei.com>
+	<1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>
+	<51131248.3080203@huawei.com>
+	<5113450C.1080109@huawei.com>
+	<CA+8MBbKuBheEj9t8whJBc=S7NdxCF8MvuD2Ajm7suP=7JC01fg@mail.gmail.com>
+	<51242908.2050308@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1361149277-1026-2-git-send-email-teg-B22kvLQNl6c@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <51242908.2050308@huawei.com>
+Sender: owner-linux-mm@kvack.org
+To: Xishi Qiu <qiuxishi@huawei.com>
+Cc: Matt Fleming <matt.fleming@intel.com>, fenghua.yu@intel.com, Liujiang <jiang.liu@huawei.com>, Andrew Morton <akpm@linux-foundation.org>, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-mm@kvack.org, Hanjun Guo <guohanjun@huawei.com>, WuJianguo <wujianguo@huawei.com>, linux-arch@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2013-02-18 at 02:01 +0100, Tom Gundersen wrote:
-> As part of the splitting up of efivars this got renamed to 'sysfs', rename it
-> back to 'efivars' for backwards compatibility.
-> 
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-> ---
->  drivers/firmware/efi/Kconfig   |   2 +
->  drivers/firmware/efi/Makefile  |   2 +-
->  drivers/firmware/efi/efivars.c | 555 +++++++++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/sysfs.c   | 555 -----------------------------------------
->  4 files changed, 558 insertions(+), 556 deletions(-)
->  create mode 100644 drivers/firmware/efi/efivars.c
->  delete mode 100644 drivers/firmware/efi/sysfs.c
+On Tue, Feb 19, 2013 at 5:38 PM, Xishi Qiu <qiuxishi@huawei.com> wrote:
+> Seems like a good idea, should we modify "\linux\Documentation\kernel-parameters.txt"?
 
-Good point!
+Perhaps in Documentation/kdump/kdump.txt (which the crashkernel entry
+in kernel-parameters.txt
+points at).  The ia64 section of kdump.txt notes that the start
+address will be rounded up to
+a GRANULE boundary, but doesn't talk about restrictions on the size.
 
-In order to avoid introducing a bisection problem we're probably going
-to have to do the sysfs and efivars split together, so that we don't end
-up with two files called efivars.c.
+I wonder if any other architectures have alignment restrictions on the
+addresses in
+"crashkernel" parameters? Does x86 like them to be 2MB aligned?
 
-I'll rejiggle the patches to avoid this problem, thanks.
+Second question is whether we should check and warn in parse_crashkernel_mem()?
+I think the answer is "yes" (since the consequences of getting this
+wrong don't show
+up till much later, and the errors aren't all that obviously connected
+back to the original
+mistake).  Perhaps each architecture that cares could provide defines:
+
+#define ARCH_CRASH_KERNEL_START_ALIGN (... arch value here ...)
+#define ARCH_CRASH_KERNEL_SIZE_ALIGN (... arch value here ...)
+
+[Suggestion provided mostly to provoke somebody to provide a more
+elegant solution]
+
+-Tony
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
