@@ -1,64 +1,123 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH v2] x86, efi: Make "noefi" really disable EFI runtime serivces
-Date: Thu, 21 Feb 2013 10:57:48 +0000
-Message-ID: <1361444268-17335-1-git-send-email-matt@console-pimps.org>
-Return-path: <stable-owner@vger.kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@linux.intel.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>, Yinghai Lu <yinghai@kernel.org>, stable@vger.kernel.org
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v4] efi: split efisubsystem from efivars
+Date: Thu, 21 Feb 2013 11:17:01 +0000
+Message-ID: <1361445421.2842.3.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1361041300-3760-1-git-send-email-teg@jklm.no>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1361041300-3760-1-git-send-email-teg-B22kvLQNl6c@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tobias Powalowski <tpowa-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+On Sat, 2013-02-16 at 20:01 +0100, Tom Gundersen wrote:
+> This registers /sys/firmware/efi/{,systab,efivars/} whenever EFI is enabled
+> and the system is booted with EFI.
+> 
+> This allows
+>  *) userspace to check for the existence of /sys/firmware/efi as a way
+>     to determine whether or it is running on an EFI system.
+>  *) 'mount -t efivarfs none /sys/firmware/efi/efivars' without manually
+>     loading any modules.
+> 
+> v4: rebase on top of the chainsaw branch:
+>     - split into efi.c and vars.c
+>     - move systab from vars.c to efi.c
+>     - address checkpatch warnings
+> v3: rebase on top of new efi_enabled()
+> v2: only create /sys/firmware/efi/efivars if the module is being compiled,
+>     and move extern's to efi.h
+> 
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Kay Sievers <kay-tD+1rO4QERM@public.gmane.org>
+> Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Cc: Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Tobias Powalowski <tpowa-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
+> Signed-off-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+> ---
+>  drivers/firmware/Makefile     |   1 -
+>  drivers/firmware/efi/Makefile |   2 +
+>  drivers/firmware/efi/efi.c    | 107 +++++
+>  drivers/firmware/efi/vars.c   | 858 +++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efivars.c    | 955 ------------------------------------------
+>  include/linux/efi.h           |   2 +
+>  6 files changed, 969 insertions(+), 956 deletions(-)
+>  create mode 100644 drivers/firmware/efi/efi.c
+>  create mode 100644 drivers/firmware/efi/vars.c
+>  delete mode 100644 drivers/firmware/efivars.c
+> 
+> diff --git a/drivers/firmware/Makefile b/drivers/firmware/Makefile
+> index 31bf68c..299fad6 100644
+> --- a/drivers/firmware/Makefile
+> +++ b/drivers/firmware/Makefile
+> @@ -4,7 +4,6 @@
+>  obj-$(CONFIG_DMI)		+= dmi_scan.o
+>  obj-$(CONFIG_DMI_SYSFS)		+= dmi-sysfs.o
+>  obj-$(CONFIG_EDD)		+= edd.o
+> -obj-$(CONFIG_EFI_VARS)		+= efivars.o
+>  obj-$(CONFIG_EFI_PCDP)		+= pcdp.o
+>  obj-$(CONFIG_DELL_RBU)          += dell_rbu.o
+>  obj-$(CONFIG_DCDBAS)		+= dcdbas.o
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index ef5066f..9660b3d 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -1,6 +1,8 @@
+>  #
+>  # Makefile for linux kernel
+>  #
+> +obj-$(CONFIG_EFI)			+= efi.o
 
-commit 1de63d60cd5b ("efi: Clear EFI_RUNTIME_SERVICES rather than
-EFI_BOOT by "noefi" boot parameter") attempted to make "noefi" true to
-its documentation and disable EFI runtime services to prevent the
-bricking bug described in commit e0094244e41c ("samsung-laptop:
-Disable on EFI hardware"). However, it's not possible to clear
-EFI_RUNTIME_SERVICES from an early param function because
-EFI_RUNTIME_SERVICES is set in efi_init() *after* parse_early_param().
+The $(CONFIG_EFI) part is redundant. We only build things in
+drivers/firmware/efi/ if CONFIG_EFI=y.
 
-This resulted in "noefi" effectively becoming a no-op and no longer
-providing users with a way to disable EFI, which is bad for those
-users that have buggy machines.
+[...]
 
-Reported-by: Walt Nelson Jr <walt0924@gmail.com>
-Cc: Satoru Takeuchi <takeuchi_satoru@jp.fujitsu.com>
-Cc: H. Peter Anvin <hpa@linux.intel.com>
-Cc: Yinghai Lu <yinghai@kernel.org>
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
----
+> +/*
+> + * We register the efi subsystem with the firmware subsystem and the
+> + * efivars subsystem with the efi subsystem, if the system was booted with
+> + * EFI.
+> + */
+> +static int __init efisubsys_init(void)
+> +{
+> +	int error;
+> +
+> +	if (!efi_enabled(EFI_BOOT))
+> +		return 0;
 
-v2: Annotate with __initdata as pointed out by Yinghai Lu.
+OK, this makes sense, and you've highlighted a really good point. We
+need to add checks in a bunch of places to see if EFI runtime services
+are available. But you don't need to worry about that, I need to do that
+in earlier patches, not this one.
 
- arch/x86/platform/efi/efi.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+> +	/* We register the efi directory at /sys/firmware/efi */
+> +	efi_kobj = kobject_create_and_add("efi", firmware_kobj);
+> +	if (!efi_kobj) {
+> +		pr_err("efi: Firmware registration failed.\n");
+> +		return -ENOMEM;
+> +	}
+> +
+> +	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
+> +	if (error) {
+> +		pr_err("efi: Sysfs attribute export failed with error %d.\n",
+> +		       error);
+> +	}
+> +
+> +#if defined(CONFIG_EFIVAR_FS) || defined(CONFIG_EFIVAR_FS_MODULE)
+> +	/* and the standard mountpoint for efivarfs */
+> +	efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
+> +	if (!efivars_kobj) {
+> +		pr_err("efivars: Subsystem registration failed.\n");
+> +		kobject_put(efi_kobj);
+> +		return -ENOMEM;
+> +	}
+> +#endif /* CONFIG_EFIVAR_FS */
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 928bf83..ec9f325 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -85,9 +85,10 @@ int efi_enabled(int facility)
- }
- EXPORT_SYMBOL(efi_enabled);
- 
-+static bool __initdata disable_runtime = false;
- static int __init setup_noefi(char *arg)
- {
--	clear_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
-+	disable_runtime = true;
- 	return 0;
- }
- early_param("noefi", setup_noefi);
-@@ -734,7 +735,7 @@ void __init efi_init(void)
- 	if (!efi_is_native())
- 		pr_info("No EFI runtime due to 32/64-bit mismatch with kernel\n");
- 	else {
--		if (efi_runtime_init())
-+		if (disable_runtime || efi_runtime_init())
- 			return;
- 		set_bit(EFI_RUNTIME_SERVICES, &x86_efi_facility);
- 	}
--- 
-1.7.11.7
+Does it make sense to hide the efivarfs mount point? I'm not crazy about
+sprinkling more #ifdef's around. If the efivarfs code isn't compiled
+into the kernel/built as a module then mounting will fail anyway.
