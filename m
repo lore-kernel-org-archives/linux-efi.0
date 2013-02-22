@@ -1,52 +1,38 @@
-From: Tony Luck <tony.luck@gmail.com>
-Subject: Re: [PATCH V3] ia64/mm: fix a bad_page bug when crash kernel booting
-Date: Thu, 21 Feb 2013 10:21:46 -0800
-Message-ID: <CA+8MBbJdOCh5Hh-K6wRDzACy-a4S1qV2S5zxwJk2MhAhZvxbqg@mail.gmail.com>
-References: <51074786.5030007@huawei.com>
-	<1359995565.7515.178.camel@mfleming-mobl1.ger.corp.intel.com>
-	<51131248.3080203@huawei.com>
-	<5113450C.1080109@huawei.com>
-	<CA+8MBbKuBheEj9t8whJBc=S7NdxCF8MvuD2Ajm7suP=7JC01fg@mail.gmail.com>
-	<51242908.2050308@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <51242908.2050308@huawei.com>
-Sender: owner-linux-mm@kvack.org
-To: Xishi Qiu <qiuxishi@huawei.com>
-Cc: Matt Fleming <matt.fleming@intel.com>, fenghua.yu@intel.com, Liujiang <jiang.liu@huawei.com>, Andrew Morton <akpm@linux-foundation.org>, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-mm@kvack.org, Hanjun Guo <guohanjun@huawei.com>, WuJianguo <wujianguo@huawei.com>, linux-arch@vger.kernel.org
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH] x86, efi: Mark disable_runtime as __initdata
+Date: Fri, 22 Feb 2013 15:03:47 +0000
+Message-ID: <1361545427-26393-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 19, 2013 at 5:38 PM, Xishi Qiu <qiuxishi@huawei.com> wrote:
-> Seems like a good idea, should we modify "\linux\Documentation\kernel-parameters.txt"?
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Perhaps in Documentation/kdump/kdump.txt (which the crashkernel entry
-in kernel-parameters.txt
-points at).  The ia64 section of kdump.txt notes that the start
-address will be rounded up to
-a GRANULE boundary, but doesn't talk about restrictions on the size.
+disable_runtime is only referenced from __init functions, so mark it
+as __initdata.
 
-I wonder if any other architectures have alignment restrictions on the
-addresses in
-"crashkernel" parameters? Does x86 like them to be 2MB aligned?
+Reported-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Cc: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Second question is whether we should check and warn in parse_crashkernel_mem()?
-I think the answer is "yes" (since the consequences of getting this
-wrong don't show
-up till much later, and the errors aren't all that obviously connected
-back to the original
-mistake).  Perhaps each architecture that cares could provide defines:
-
-#define ARCH_CRASH_KERNEL_START_ALIGN (... arch value here ...)
-#define ARCH_CRASH_KERNEL_SIZE_ALIGN (... arch value here ...)
-
-[Suggestion provided mostly to provoke somebody to provide a more
-elegant solution]
-
--Tony
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 2f81db4..5ae99f9 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -85,7 +85,7 @@ int efi_enabled(int facility)
+ }
+ EXPORT_SYMBOL(efi_enabled);
+ 
+-static bool disable_runtime = false;
++static bool __initdata disable_runtime = false;
+ static int __init setup_noefi(char *arg)
+ {
+ 	disable_runtime = true;
+-- 
+1.7.11.7
