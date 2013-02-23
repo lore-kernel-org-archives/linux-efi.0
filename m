@@ -1,40 +1,41 @@
-From: John Stultz <john.stultz@linaro.org>
+From: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
 Subject: Re: [RFE PATCH 2/2] rtc, add write functionality to sysfs
-Date: Fri, 22 Feb 2013 13:05:51 -0800
-Message-ID: <5127DDAF.2000403@linaro.org>
-References: <1360861375-24131-1-git-send-email-prarit@redhat.com> <1360861375-24131-3-git-send-email-prarit@redhat.com> <5127D884.6020701@linaro.org> <5127DB2B.3030700@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5127DB2B.3030700@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Prarit Bhargava <prarit@redhat.com>
-Cc: linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>, David Vrabel <david.vrabel@citrix.com>, Andrew Morton <akpm@linux-foundation.org>, Andi Kleen <ak@linux.intel.com>, linux-efi@vger.kernel.org, Alessandro Zummo <a.zummo@towertech.it>
+Date: Sun, 24 Feb 2013 00:11:32 +0100
+Message-ID: <B22B05C4-B8D2-44B9-971B-37913DE59EF6@towertech.it>
+References: <1360861375-24131-1-git-send-email-prarit@redhat.com> <1360861375-24131-3-git-send-email-prarit@redhat.com> <5127D884.6020701@linaro.org> <5127DB2B.3030700@redhat.com> <5127DDAF.2000403@linaro.org>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5127DDAF.2000403-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/22/2013 12:55 PM, Prarit Bhargava wrote:
->
-> On 02/22/2013 03:43 PM, John Stultz wrote:
->> On 02/14/2013 09:02 AM, Prarit Bhargava wrote:
->>> /sys/class/rtc/rtcX/date and /sys/class/rtc/rtcX/time currently have
->>> read-only access.  This patch introduces write functionality which will
->>> set the rtc time.
->>>
->>> Usage: echo YYYY-MM-DD > /sys/class/rtc/rtcX/date
->>>          echo HH:MM:SS > /sys/class/rtc/rtcX/time
->> Why do we want to add a new interface here?
-> John,
->
-> I'm not adding a new interface.  The current date/time interface only handles
-> read and I'm introducing write.
->
+On 22/feb/2013, at 22:05, John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-Right, but what benefit does that provide?
-(I'm not saying there isn't any, its just not clear from your patch why 
-this is a good thing.)
+> On 02/22/2013 12:55 PM, Prarit Bhargava wrote:
+>> 
+>> On 02/22/2013 03:43 PM, John Stultz wrote:
+>>> On 02/14/2013 09:02 AM, Prarit Bhargava wrote:
+>>>> /sys/class/rtc/rtcX/date and /sys/class/rtc/rtcX/time currently have
+>>>> read-only access.  This patch introduces write functionality which will
+>>>> set the rtc time.
+>>>> 
+>>>> Usage: echo YYYY-MM-DD > /sys/class/rtc/rtcX/date
+>>>>         echo HH:MM:SS > /sys/class/rtc/rtcX/time
+>>> Why do we want to add a new interface here?
+>> John,
+>> 
+>> I'm not adding a new interface.  The current date/time interface only handles
+>> read and I'm introducing write.
+>> 
+> 
+> Right, but what benefit does that provide?
+> (I'm not saying there isn't any, its just not clear from your patch why this is a good thing.)
+> 
+> Also CC'ing Alessandro for his input.
 
-Also CC'ing Alessandro for his input.
-
-thanks
--john
+I'd like to keep the interfaces as simple as possible but I'm open to improvements if there are good use cases.
