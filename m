@@ -1,31 +1,48 @@
-From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: register efivars with efi or gsmi from module_init
-Date: Mon, 25 Feb 2013 16:24:35 +0100
-Message-ID: <CAG-2HqVLwj61fYfA+2uDLPzevFwEkMxMb5hw8pqJx8Q1vVgr4A@mail.gmail.com>
-References: <1361149277-1026-1-git-send-email-teg@jklm.no> <1361455094.2842.15.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: Mark disable_runtime as __initdata
+Date: Tue, 26 Feb 2013 08:55:06 +0900
+Message-ID: <512BF9DA.2050906@jp.fujitsu.com>
+References: <1361545427-26393-1-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-2022-JP"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1361455094.2842.15.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1361545427-26393-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 21, 2013 at 2:58 PM, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> Guh, yes. The way I implemented this is rather silly. Thanks for the
-> report! I was trying to avoid having a struct kobject * in struct
-> efivars, because that inherently ties the efivar_entry API to the sysfs
-> code, and the whole point of this series is that you can have EFI
-> variable support without the sysfs stuff.
->
-> Instead of doing the #ifdef-ery how does this look? It keeps everything
-> contained within struct efivars just like the old code. Unfortunately
-> it's applied against some changes I've got locally, so the context might
-> look a bit weird, but you can still get the idea.
+(2013/02/23 0:03), Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> disable_runtime is only referenced from __init functions, so mark it
+> as __initdata.
+> 
+> Reported-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+> Cc: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Not tested, but as far as I can tell this looks great. Thanks!
+It looks good to me.
 
-Cheers,
+Reviewed-by: Satoru Takeuchi <takeuchi_satoru-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 
-Tom
+> ---
+>  arch/x86/platform/efi/efi.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 2f81db4..5ae99f9 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -85,7 +85,7 @@ int efi_enabled(int facility)
+>  }
+>  EXPORT_SYMBOL(efi_enabled);
+>  
+> -static bool disable_runtime = false;
+> +static bool __initdata disable_runtime = false;
+>  static int __init setup_noefi(char *arg)
+>  {
+>  	disable_runtime = true;
+> 
