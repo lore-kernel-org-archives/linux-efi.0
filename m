@@ -1,51 +1,44 @@
-From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: Re: [PATCH] efivars: Make efivarfs autoloading on mount request
-Date: Thu, 28 Feb 2013 13:18:12 +0100
-Message-ID: <CAG-2HqUK2Ak0TKPR6axrmuNhBPq0nDwQWfCuvmUjhcu4D6RFCg@mail.gmail.com>
-References: <1362047181.3128.22.camel@dabdike.int.hansenpartnership.com>
- <CAG-2HqVWx7ORjk=5x_KJGS_enMphAhBH7iitE6Cro9ktg1=wDw@mail.gmail.com> <1362052527.3128.29.camel@dabdike.int.hansenpartnership.com>
+From: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFE PATCH 2/2] rtc, add write functionality to sysfs
+Date: Thu, 28 Feb 2013 09:50:24 -0500
+Message-ID: <512F6EB0.1080706@redhat.com>
+References: <1360861375-24131-1-git-send-email-prarit@redhat.com>	<1360861375-24131-3-git-send-email-prarit@redhat.com>	<5127D884.6020701@linaro.org>	<5127DB2B.3030700@redhat.com>	<5127DDAF.2000403@linaro.org>	<B22B05C4-B8D2-44B9-971B-37913DE59EF6@towertech.it>	<512A47C5.3010500@redhat.com> <20130225155812.0758e093@linux.lan.towertech.it>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1362052527.3128.29.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20130225155812.0758e093-7UIfgwKH8t5lecnr3/Sf3RLwuzhV/fVh@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <jbottomley-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+Cc: John Stultz <john.stultz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 28, 2013 at 12:55 PM, James Bottomley
-<jbottomley-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org> wrote:
-> If you want a filesystem
-> in /sys, then you have the same problem as debugfs and cgroupfs, so it
-> can't be done without distro support: specifically a fstab entry, so
-> this patch is as far as the kernel should go.
 
-Sure, something would have to do the actual mounting for you. In
-systemd this is done during early boot to /sys/firmware/efi/efivars/
-[0], which means that until Matt's rework is in, it will only work
-when efivars is compiled into the kernel.
 
-> Even a split won't solve the problem that the directory won't exist
-> until the modules are loaded and the modules are autoloaded by the mount
-> call, so the problem is the same whether the modules are split or
-> monolithic.
+On 02/25/2013 09:58 AM, Alessandro Zummo wrote:
+> On Sun, 24 Feb 2013 12:03:01 -0500
+> Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> 
+>>
+>> AFAICT there is no way for me to "test" or use the write from userspace.
+>> hwclock uses the SET_TIME ioctl, which is a different code path AFAICT.
+>>
+>> I'd like to be at least able to test this stuff when we make changes to it so I
+>> think having write functionality for date & time is worthwhile.
+>>
+>> For me, I'm using these to heavily test ntp and ntpdate over system reboots.
+> 
+>  the point is: who will benefit from this patch? users? distributions?
+>  embedded distributions? if it's useful, then just go for it.
 
-Sorry, I was unclear. The efi subsystem itself would not be a module,
-and hence /sys/firmware/efi/efivars would always exist if the system
-supports it (similarly to, say, /sys/firmware/acpi). The relevant
-patch is here [1].
+This can be dropped IMO.
 
-> We definitely need this patch in 3.8 because that's where the efivarfs
-> filesystem was added, so it should probably have a cc stable which I
-> forgot.
+P.
 
-Yeah, that might make sense for now (though, due to the above, this
-would not really help any of the distros, so they'd need to compile
-efivars into the kernel anyway).
-
-Cheers,
-
-Tom
-
-[0]: <http://cgit.freedesktop.org/systemd/systemd/tree/src/core/mount-setup.c#n93>
-[1]: <http://www.mail-archive.com/linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/msg00785.html>
+> 
+> 
+>> OOC, Alessandro, why is the date & time split into two fields?
+> 
+>  because date and time are two different things and we expect
+>  sysfs to preferably have one value for each entry.
+> 
