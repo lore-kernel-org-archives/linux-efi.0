@@ -1,60 +1,50 @@
 From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 Subject: Re: EFI runtime and kexec
-Date: Fri, 01 Mar 2013 23:30:25 +0000
-Message-ID: <1362180625.29011.4.camel@shinybook.infradead.org>
+Date: Fri, 01 Mar 2013 23:34:13 +0000
+Message-ID: <1362180853.29011.6.camel@shinybook.infradead.org>
 References: <20130301213903.GI30938@pd.tnic> <51312C8F.8000503@zytor.com>
 	 <20130301225303.GK30938@pd.tnic> <513132B0.3050308@zytor.com>
 	 <20130301230733.GL30938@pd.tnic>
+	 <1362180625.29011.4.camel@shinybook.infradead.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg="sha1"; protocol="application/x-pkcs7-signature";
-	boundary="=-Wistl3ex5/unDGsLsM++"
+	boundary="=-iwxP6kp0JYp5j2dfdNfY"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130301230733.GL30938-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <1362180625.29011.4.camel-Fexsq3y4057IgHVZqg5X0TlWvGAXklZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 
---=-Wistl3ex5/unDGsLsM++
+--=-iwxP6kp0JYp5j2dfdNfY
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 
-On Sat, 2013-03-02 at 00:07 +0100, Borislav Petkov wrote:
-> Hmm, yeah, that's nasty. This also means option #2 can go too because
-> of the fixed addresses. Option #1 is also kinda polluting user address
-> space=20
-
-User address space is there to be polluted. Create a "kernel thread" for
-invoking EFI, except that this kernel thread actually has userspace page
-tables. Set up those page tables however the hell you like, and then
-just make sure you always invoke EFI runtime services from that thread.
-
-> so maybe the most elegant one would be #4, AFAICT.
+On Fri, 2013-03-01 at 23:30 +0000, David Woodhouse wrote:
+> On Sat, 2013-03-02 at 00:07 +0100, Borislav Petkov wrote:
+> > Hmm, yeah, that's nasty. This also means option #2 can go too because
+> > of the fixed addresses. Option #1 is also kinda polluting user address
+> > space=20
 >=20
-> We just need a nice mechanism to tell those mappings to the kexec-d
-> kernel and when it starts, to establish them right away.
+> User address space is there to be polluted. Create a "kernel thread" for
+> invoking EFI, except that this kernel thread actually has userspace page
+> tables. Set up those page tables however the hell you like, and then
+> just make sure you always invoke EFI runtime services from that thread.
 
-Well, there's a *shitload* of things we already need to hand off to the
-kexec'd kernel that we don't. We don't pass the EFI system table, which
-means that even the ACPI tables aren't found by the child kernel. And
-all of the setup_data is missing. And there's probably more.
-
-I was looking at this, but there was *other* breakage with kexec which
-was being sorted out at the time, and I kind of got distracted into
-doing CSM support in SeaBIOS.
-
-The other option, for the long term, is to fix the damn firmware to
-allow SetVirtualAddressMap to be called more than once. It was stupid
-for it to be a one-time call anyway. I have a test build of OVMF here
-which does just that, but haven't got round to testing it yet. I wish
-I'd been given the *patch* not just a binary though...
+Oh, I meant to mention: Matthew once told me about a bizarre issue on
+MacBook firmware, iirc. Some stuff doesn't work if the virtual address
+is above 2GiB. Or below 2GiB. I don't really remember what Matthew told
+me at all, to be honest. Only that Here Be Dragons and we don't quite
+have free rein about where we place stuff. But I suspect we ought to be
+able to find *somewhere* in the user address space that works, even for
+32-bit kernels.
 
 --=20
 dwmw2
 
 
---=-Wistl3ex5/unDGsLsM++
+--=-iwxP6kp0JYp5j2dfdNfY
 Content-Type: application/x-pkcs7-signature; name="smime.p7s"
 Content-Disposition: attachment; filename="smime.p7s"
 Content-Transfer-Encoding: base64
@@ -155,19 +145,19 @@ kSIc5N4d9Lk3ypCnrYMvvqLspXcWeymdD7qC0KwcuOuRKEC6LBExggNvMIIDawIBATCBlDCBjDEL
 MAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdp
 dGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFy
 eSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBAgMEJnowCQYFKw4DAhoFAKCCAa8wGAYJKoZIhvcNAQkD
-MQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwMzAxMjMzMDI1WjAjBgkqhkiG9w0BCQQx
-FgQUjLizLobPtzerRLLBuvgOzwvVZiUwgaUGCSsGAQQBgjcQBDGBlzCBlDCBjDELMAkGA1UEBhMC
+MQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwMzAxMjMzNDEzWjAjBgkqhkiG9w0BCQQx
+FgQUl9wZDe/PWflreHkLCuAsuRibxaIwgaUGCSsGAQQBgjcQBDGBlzCBlDCBjDELMAkGA1UEBhMC
 SUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRp
 ZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1l
 ZGlhdGUgQ2xpZW50IENBAgMEJnowgacGCyqGSIb3DQEJEAILMYGXoIGUMIGMMQswCQYDVQQGEwJJ
 TDEWMBQGA1UEChMNU3RhcnRDb20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlm
 aWNhdGUgU2lnbmluZzE4MDYGA1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVk
-aWF0ZSBDbGllbnQgQ0ECAwQmejANBgkqhkiG9w0BAQEFAASCAQAD18pWkG9CjlEyz0/p7IahGT0o
-cnfXoEkFmiu64frU+ote7SZYd8hPAzoAepb+pbK7udZ67tBvSKLK5AChWHbf/QrMtDTRt5HTspvG
-cqDA/wqmOz1N/sVYChnQlfc9erdgrTciTo24iDmep75wfOSM2RB7pcVPGJ0QFfGwuYRMYFhZFSs9
-tTSdEMlGA3m0k1Kzl4eh32VUFt/huAU+OpHYmElRga1em0olcG9ALplPDJam/L3E3GK+nYZXRow7
-1GW760WhC7y0Eo0GLjSMgGCRw+Bpx7IcOo4n4AzDU6dujpMoN8wLMSPJ7Ga7YNMpmJhXyc2dP+7e
-fJqFRITRsFazAAAAAAAA
+aWF0ZSBDbGllbnQgQ0ECAwQmejANBgkqhkiG9w0BAQEFAASCAQCqUb/jdFPQXvm5eV073RU76wVS
+iKuFTZVYOuAqMQTgQV26vQh5xElPzVymzy/ord4I+Frc5wZC7errUexy3sud+0vnTcjwFf1ji//l
+6rCCsU795LD80P2MkWNh88Ys3+fPHUW/hh78V+CSZvrADBAOGyCd9BK25A6OoMJo6s2Rcb8cfxNu
+6x9AQ4vv+JuycuLT4vXpVPZzMyx1F9BZQZ1xpT65wslETEWpxDiDfSk/GGCHC3HXWchjcUjwGDNF
+t/FpIQnwWLx2s2x3ZWnWfmjzszEB6rFL0ZebLfSDHGcyn16Lb65OyqDqs9jpnOoEEMaAMXyXOguQ
+suLcVf5kOk57AAAAAAAA
 
 
---=-Wistl3ex5/unDGsLsM++--
+--=-iwxP6kp0JYp5j2dfdNfY--
