@@ -1,53 +1,58 @@
-From: John Stultz <john.stultz@linaro.org>
-Subject: Re: [RFE PATCH 2/2] rtc, add write functionality to sysfs
-Date: Thu, 28 Feb 2013 10:51:30 -0800
-Message-ID: <512FA732.4010703@linaro.org>
-References: <1360861375-24131-1-git-send-email-prarit@redhat.com> <1360861375-24131-3-git-send-email-prarit@redhat.com> <5127D884.6020701@linaro.org> <5127DB2B.3030700@redhat.com> <5127DDAF.2000403@linaro.org> <B22B05C4-B8D2-44B9-971B-37913DE59EF6@towertech.it> <512A47C5.3010500@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <512A47C5.3010500@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Prarit Bhargava <prarit@redhat.com>
-Cc: Alessandro Zummo <a.zummo@towertech.it>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "x86@kernel.org" <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, David Vrabel <david.vrabel@citrix.com>, Andrew Morton <akpm@linux-foundation.org>, Andi Kleen <ak@linux.intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "rtc-linux@googlegroups.com" <rtc-linux@googlegroups.com>
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] efivarfs: fix abnormal GUID in variable name by using strcpy to replace null with dash
+Date: Fri,  1 Mar 2013 11:20:18 +0800
+Message-ID: <1362108018-13117-1-git-send-email-jlee@suse.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/24/2013 09:03 AM, Prarit Bhargava wrote:
->
-> On 02/23/2013 06:11 PM, Alessandro Zummo wrote:
->> On 22/feb/2013, at 22:05, John Stultz <john.stultz@linaro.org> wrote:
->>
->>> On 02/22/2013 12:55 PM, Prarit Bhargava wrote:
->>>> On 02/22/2013 03:43 PM, John Stultz wrote:
->>>>> On 02/14/2013 09:02 AM, Prarit Bhargava wrote:
->>>>>> /sys/class/rtc/rtcX/date and /sys/class/rtc/rtcX/time currently have
->>>>>> read-only access.  This patch introduces write functionality which will
->>>>>> set the rtc time.
->>>>>>
->>>>>> Usage: echo YYYY-MM-DD > /sys/class/rtc/rtcX/date
->>>>>>          echo HH:MM:SS > /sys/class/rtc/rtcX/time
->>>>> Why do we want to add a new interface here?
->>>> John,
->>>>
->>>> I'm not adding a new interface.  The current date/time interface only handles
->>>> read and I'm introducing write.
->>>>
->>> Right, but what benefit does that provide?
->>> (I'm not saying there isn't any, its just not clear from your patch why this is a good thing.)
->>>
-> Sorry John, I misunderstood your question.
->
->>> Also CC'ing Alessandro for his input.
->> I'd like to keep the interfaces as simple as possible but I'm open to improvements if there are good use cases.
->>
-> AFAICT there is no way for me to "test" or use the write from userspace.
-> hwclock uses the SET_TIME ioctl, which is a different code path AFAICT.
+From: Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>
 
-Yea, per your other email, I'd rather we drop this change for now.
+On HP z220 system (firmware version 1.54), some EFI variables are incorrectly
+named :
 
-If possible, instead of adding redundant userland interfaces, I'd rather 
-we consolidate the redundant internal code paths.
+ls -d /sys/firmware/efi/vars/*8be4d* | grep -v -- -8be returns
+/sys/firmware/efi/vars/dbxDefault-pport8be4df61-93ca-11d2-aa0d-00e098032b8c
+/sys/firmware/efi/vars/KEKDefault-pport8be4df61-93ca-11d2-aa0d-00e098032b8c
+/sys/firmware/efi/vars/SecureBoot-pport8be4df61-93ca-11d2-aa0d-00e098032b8c
+/sys/firmware/efi/vars/SetupMode-Information8be4df61-93ca-11d2-aa0d-00e098032b8c
 
-thanks
--john
+That causes by the following statement in efivar_create_sysfs_entry function:
+
+ *(short_name + strlen(short_name)) = '-';
+efi_guid_unparse(vendor_guid, short_name + strlen(short_name));
+
+The trailing \0 is overwritten with '-', but the next char doesn't seem to be a \0
+as well for HP. So, the second strlen return the point of next '\0', causes there
+have garbage string attached before GUID.
+
+Tested on On HP z220.
+
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>
+Reported-by: Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
+Tested-by: Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ drivers/firmware/efivars.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 8bcb595..fbf18ff 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -1708,7 +1708,7 @@ efivar_create_sysfs_entry(struct efivars *efivars,
+ 	/* This is ugly, but necessary to separate one vendor's
+ 	   private variables from another's.         */
+ 
+-	*(short_name + strlen(short_name)) = '-';
++	strcpy(short_name + strlen(short_name), "-");
+ 	efi_guid_unparse(vendor_guid, short_name + strlen(short_name));
+ 
+ 	new_efivar->kobj.kset = efivars->kset;
+-- 
+1.6.0.2
