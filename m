@@ -1,85 +1,203 @@
-From: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: sysfs: cannot create duplicate filename
-Date: Sat, 2 Mar 2013 19:03:26 +0100
-Message-ID: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] efi: be more paranoid about available space when creating variables
+Date: Sat,  2 Mar 2013 19:40:17 -0500
+Message-ID: <1362271217-31747-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+UEFI variables are typically stored in flash. For various reasons, avaiable
+space is typically not reclaimed immediately upon the deletion of a
+variable - instead, the system will garbage collect during initialisation
+after a reboot.
 
-After a BIOS update I get this in dmesg:
+Some systems appear to handle this garbage collection extremely poorly,
+failing if more than 50% of the system flash is in use. This can result in
+the machine refusing to boot. The safest thing to do for the moment is to
+forbid writes if they'd end up using more than half of the storage space.
+We can make this more finegrained later if we come up with a method for
+identifying the broken machines.
 
-[    0.581554] EFI Variables Facility v0.08 2004-May-17
-[    0.584914] ------------[ cut here ]------------
-[    0.585639] WARNING: at /home/andre/linux/fs/sysfs/dir.c:536 sysfs_add_one+0x
-d4/0x100()
-[    0.586381] Hardware name: To be filled by O.E.M.
-[    0.587123] sysfs: cannot create duplicate filename '/firmware/efi/vars/SbAsl
-BufferPtrVar-01f33c25-764d-43ea-aeea-6b5a41f3f3e8'
-[    0.588694] Modules linked in:
-[    0.589484] Pid: 1, comm: swapper/0 Not tainted 3.8.0+ #7
-[    0.590280] Call Trace:
-[    0.591066]  [<ffffffff81208954>] ? sysfs_add_one+0xd4/0x100
-[    0.591861]  [<ffffffff810587bf>] warn_slowpath_common+0x7f/0xc0
-[    0.592650]  [<ffffffff810588bc>] warn_slowpath_fmt+0x4c/0x50
-[    0.593429]  [<ffffffff8134dd85>] ? strlcat+0x65/0x80
-[    0.594203]  [<ffffffff81208954>] sysfs_add_one+0xd4/0x100
-[    0.594979]  [<ffffffff81208b78>] create_dir+0x78/0xd0
-[    0.595753]  [<ffffffff81208ec6>] sysfs_create_dir+0x86/0xe0
-[    0.596532]  [<ffffffff81347e4c>] kobject_add_internal+0x9c/0x220
-[    0.597310]  [<ffffffff81348307>] kobject_init_and_add+0x67/0x90
-[    0.598083]  [<ffffffff81584a71>] ? efivar_create_sysfs_entry+0x61/0x1c0
-[    0.598859]  [<ffffffff81584b2b>] efivar_create_sysfs_entry+0x11b/0x1c0
-[    0.599631]  [<ffffffff8158517e>] register_efivars+0xde/0x420
-[    0.600395]  [<ffffffff81d430a7>] ? edd_init+0x2f5/0x2f5
-[    0.601150]  [<ffffffff81d4315f>] efivars_init+0xb8/0x104
-[    0.601903]  [<ffffffff8100215a>] do_one_initcall+0x12a/0x180
-[    0.602659]  [<ffffffff81d05d80>] kernel_init_freeable+0x13e/0x1c6
-[    0.603418]  [<ffffffff81d05586>] ? loglevel+0x31/0x31
-[    0.604183]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
-[    0.604936]  [<ffffffff816a653e>] kernel_init+0xe/0xf0
-[    0.605681]  [<ffffffff816ce7ec>] ret_from_fork+0x7c/0xb0
-[    0.606414]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
-[    0.607143] ---[ end trace 1609741ab737eb29 ]---
-[    0.607869] ------------[ cut here ]------------
-[    0.608589] WARNING: at /home/andre/linux/lib/kobject.c:196
-kobject_add_internal+0x204/0x220()
-[    0.609342] Hardware name: To be filled by O.E.M.
-[    0.610093] kobject_add_internal failed for
-SbAslBufferPtrVar-01f33c25-764d-43ea-aeea-6b5a41f3f3e8 with -EEXIST,
-don't try to register things with the same name in the same directory.
-[    0.611703] Modules linked in:
-[    0.612497] Pid: 1, comm: swapper/0 Tainted: G        W    3.8.0+ #7
-[    0.613312] Call Trace:
-[    0.614112]  [<ffffffff81347fb4>] ? kobject_add_internal+0x204/0x220
-[    0.614931]  [<ffffffff810587bf>] warn_slowpath_common+0x7f/0xc0
-[    0.615753]  [<ffffffff810588bc>] warn_slowpath_fmt+0x4c/0x50
-[    0.616559]  [<ffffffff81347fb4>] kobject_add_internal+0x204/0x220
-[    0.617362]  [<ffffffff81348307>] kobject_init_and_add+0x67/0x90
-[    0.618152]  [<ffffffff81584a71>] ? efivar_create_sysfs_entry+0x61/0x1c0
-[    0.618936]  [<ffffffff81584b2b>] efivar_create_sysfs_entry+0x11b/0x1c0
-[    0.619732]  [<ffffffff8158517e>] register_efivars+0xde/0x420
-[    0.620518]  [<ffffffff81d430a7>] ? edd_init+0x2f5/0x2f5
-[    0.621297]  [<ffffffff81d4315f>] efivars_init+0xb8/0x104
-[    0.622072]  [<ffffffff8100215a>] do_one_initcall+0x12a/0x180
-[    0.622836]  [<ffffffff81d05d80>] kernel_init_freeable+0x13e/0x1c6
-[    0.623590]  [<ffffffff81d05586>] ? loglevel+0x31/0x31
-[    0.624314]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
-[    0.625010]  [<ffffffff816a653e>] kernel_init+0xe/0xf0
-[    0.625703]  [<ffffffff816ce7ec>] ret_from_fork+0x7c/0xb0
-[    0.626393]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
-[    0.627078] ---[ end trace 1609741ab737eb2a ]---
+Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efivars.c | 106 +++++++++++++++++++++++++++++++++------------
+ 1 file changed, 79 insertions(+), 27 deletions(-)
 
-Sounds like yet another BIOS issue, and I guess the answer is
-"complain to the manufacturer"... But we know how well that works, so
-can this be a warning instead of a scary backtrace? :)
-
-(this is: Gigabyte Technology Co., Ltd. To be filled by
-O.E.M./Z77X-UD3H, BIOS F19e 11/21/2012)"
-
-Thanks,
-Andre
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 7320bf8..0d50497 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -426,6 +426,44 @@ get_var_data(struct efivars *efivars, struct efi_variable *var)
+ 	return status;
+ }
+ 
++static efi_status_t
++check_var_size_locked(struct efivars *efivars, u32 attributes,
++			unsigned long size)
++{
++	u64 storage_size, remaining_size, max_size;
++	efi_status_t status;
++	const struct efivar_operations *fops = efivars->ops;
++
++	if (!efivars->ops->query_variable_info)
++		return EFI_UNSUPPORTED;
++
++	status = fops->query_variable_info(attributes, &storage_size,
++					   &remaining_size, &max_size);
++
++	if (status != EFI_SUCCESS)
++		return status;
++
++	if (!storage_size || size > remaining_size || size > max_size ||
++	    (remaining_size - size) < (storage_size / 2))
++		return EFI_OUT_OF_RESOURCES;
++
++	return status;
++}
++
++
++static efi_status_t
++check_var_size(struct efivars *efivars, u32 attributes, unsigned long size)
++{
++	efi_status_t status;
++	unsigned long flags;
++
++	spin_lock_irqsave(&efivars->lock, flags);
++	status = check_var_size_locked(efivars, attributes, size);
++	spin_unlock_irqrestore(&efivars->lock, flags);
++
++	return status;
++}
++
+ static ssize_t
+ efivar_guid_read(struct efivar_entry *entry, char *buf)
+ {
+@@ -547,11 +585,16 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
+ 	}
+ 
+ 	spin_lock_irq(&efivars->lock);
+-	status = efivars->ops->set_variable(new_var->VariableName,
+-					    &new_var->VendorGuid,
+-					    new_var->Attributes,
+-					    new_var->DataSize,
+-					    new_var->Data);
++
++	status = check_var_size_locked(efivars, new_var->Attributes,
++	       new_var->DataSize + utf16_strsize(new_var->VariableName, 1024));
++
++	if (status == EFI_SUCCESS || status == EFI_UNSUPPORTED)
++		status = efivars->ops->set_variable(new_var->VariableName,
++						    &new_var->VendorGuid,
++						    new_var->Attributes,
++						    new_var->DataSize,
++						    new_var->Data);
+ 
+ 	spin_unlock_irq(&efivars->lock);
+ 
+@@ -702,8 +745,7 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 	u32 attributes;
+ 	struct inode *inode = file->f_mapping->host;
+ 	unsigned long datasize = count - sizeof(attributes);
+-	unsigned long newdatasize;
+-	u64 storage_size, remaining_size, max_size;
++	unsigned long newdatasize, varsize;
+ 	ssize_t bytes = 0;
+ 
+ 	if (count < sizeof(attributes))
+@@ -722,28 +764,18 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 	 * amounts of memory. Pick a default size of 64K if
+ 	 * QueryVariableInfo() isn't supported by the firmware.
+ 	 */
+-	spin_lock_irq(&efivars->lock);
+ 
+-	if (!efivars->ops->query_variable_info)
+-		status = EFI_UNSUPPORTED;
+-	else {
+-		const struct efivar_operations *fops = efivars->ops;
+-		status = fops->query_variable_info(attributes, &storage_size,
+-						   &remaining_size, &max_size);
+-	}
+-
+-	spin_unlock_irq(&efivars->lock);
++	varsize = datasize + utf16_strsize(var->var.VariableName, 1024);
++	status = check_var_size(efivars, attributes, varsize);
+ 
+ 	if (status != EFI_SUCCESS) {
+ 		if (status != EFI_UNSUPPORTED)
+ 			return efi_status_to_err(status);
+ 
+-		remaining_size = 65536;
++		if (datasize > 65536)
++			return -ENOSPC;
+ 	}
+ 
+-	if (datasize > remaining_size)
+-		return -ENOSPC;
+-
+ 	data = kmalloc(datasize, GFP_KERNEL);
+ 	if (!data)
+ 		return -ENOMEM;
+@@ -765,6 +797,19 @@ static ssize_t efivarfs_file_write(struct file *file,
+ 	 */
+ 	spin_lock_irq(&efivars->lock);
+ 
++	/*
++	 * Ensure that the available space hasn't shrunk below the safe level
++	 */
++
++	status = check_var_size_locked(efivars, attributes, varsize);
++
++	if (status != EFI_SUCCESS && status != EFI_UNSUPPORTED) {
++		spin_unlock_irq(&efivars->lock);
++		kfree(data);
++
++		return efi_status_to_err(status);
++	}
++
+ 	status = efivars->ops->set_variable(var->var.VariableName,
+ 					    &var->var.VendorGuid,
+ 					    attributes, datasize,
+@@ -1345,7 +1390,6 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	struct efivars *efivars = psi->data;
+ 	int i, ret = 0;
+-	u64 storage_space, remaining_space, max_variable_size;
+ 	efi_status_t status = EFI_NOT_FOUND;
+ 	unsigned long flags;
+ 
+@@ -1365,11 +1409,11 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 	 * size: a size of logging data
+ 	 * DUMP_NAME_LEN * 2: a maximum size of variable name
+ 	 */
+-	status = efivars->ops->query_variable_info(PSTORE_EFI_ATTRIBUTES,
+-						   &storage_space,
+-						   &remaining_space,
+-						   &max_variable_size);
+-	if (status || remaining_space < size + DUMP_NAME_LEN * 2) {
++
++	status = check_var_size_locked(efivars, PSTORE_EFI_ATTRIBUTES,
++					 size + DUMP_NAME_LEN * 2);
++
++	if (status) {
+ 		spin_unlock_irqrestore(&efivars->lock, flags);
+ 		*id = part;
+ 		return -ENOSPC;
+@@ -1544,6 +1588,14 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
+ 		return -EINVAL;
+ 	}
+ 
++	status = check_var_size_locked(efivars, new_var->Attributes,
++	       new_var->DataSize + utf16_strsize(new_var->VariableName, 1024));
++
++	if (status && status != EFI_UNSUPPORTED) {
++		spin_unlock_irq(&efivars->lock);
++		return efi_status_to_err(status);
++	}
++
+ 	/* now *really* create the variable via EFI */
+ 	status = efivars->ops->set_variable(new_var->VariableName,
+ 					    &new_var->VendorGuid,
+-- 
+1.8.1.2
