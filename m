@@ -1,23 +1,34 @@
 From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: efivarfs: guid part of filenames are case-insensitive is broken
-Date: Wed, 06 Mar 2013 15:41:34 +0800
-Message-ID: <5136F32E.7080501@redhat.com>
-References: <CADzA9okmNOS429FJNEAMj7gUMKD9bU8jzznCoJ_=tyySGDE++A@mail.gmail.com>  <5135AEEB.9090408@redhat.com> <1362486844.15011.8.camel@mfleming-mobl1.ger.corp.intel.com>
+Subject: Re: [PATCH] efivarfs: fix abnormal GUID in variable name by using
+ strcpy to replace null with dash
+Date: Wed, 06 Mar 2013 17:20:17 +0800
+Message-ID: <51370A51.1050505@redhat.com>
+References: <1362108018-13117-1-git-send-email-jlee@suse.com>  <1362151068.2842.440.camel@mfleming-mobl1.ger.corp.intel.com>  <1362155493.2842.446.camel@mfleming-mobl1.ger.corp.intel.com>  <1362181299.23932.168.camel@linux-s257.site> <1362555258.23932.573.camel@linux-s257.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1362486844.15011.8.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1362555258.23932.573.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Joseph Yasi <joe.yasi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/05/2013 08:34 PM, Matt Fleming wrote:
-> Lingzhu, could you test the following patch? You seem to be particularly
-> good at weeding out bugs in this code.
+On 03/06/2013 03:34 PM, joeyli wrote:
+> +static unsigned long variable_name_length(efi_char16_t *variable_name)
+> +{
+> +	unsigned long len;
+> +	efi_char16_t c;
+> +
+> +	len = 2;
+> +	do {
+> +		c = variable_name[len / sizeof(c) - 1];
+> +		if (c)
+> +			len += sizeof(c);
+> +	} while (c);
+> +
+> +	return len;
+> +}
+> +
 
-Yes, bug is fixed by the patch. The selftests cases also work fine.
-
-
-Lingzhu Xiang
+It looks like this function can be replaced with utf16_strsize.
