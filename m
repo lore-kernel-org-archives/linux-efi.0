@@ -1,194 +1,253 @@
-From: Joseph Yasi <joe.yasi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: efivarfs: guid part of filenames are case-insensitive is broken
-Date: Tue, 5 Mar 2013 15:25:50 -0500
-Message-ID: <CADzA9o=BreTPL3iDrjNBoD_ztHa1v_Y-STdOROG3xCVaV1k_BA@mail.gmail.com>
-References: <CADzA9okmNOS429FJNEAMj7gUMKD9bU8jzznCoJ_=tyySGDE++A@mail.gmail.com>
-	<5135AEEB.9090408@redhat.com>
-	<1362486844.15011.8.camel@mfleming-mobl1.ger.corp.intel.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] efivarfs: fix abnormal GUID in variable name by using
+ strcpy to replace null with dash
+Date: Wed, 06 Mar 2013 15:34:18 +0800
+Message-ID: <1362555258.23932.573.camel@linux-s257.site>
+References: <1362108018-13117-1-git-send-email-jlee@suse.com>
+	 <1362151068.2842.440.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362155493.2842.446.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362181299.23932.168.camel@linux-s257.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1362486844.15011.8.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1362181299.23932.168.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The patch works for me.
+Hi Matt,=20
 
--Joe Yasi
+=E6=96=BC =E5=85=AD=EF=BC=8C2013-03-02 =E6=96=BC 07:41 +0800=EF=BC=8Cjo=
+eyli =E6=8F=90=E5=88=B0=EF=BC=9A
+> =E6=96=BC =E4=BA=94=EF=BC=8C2013-03-01 =E6=96=BC 16:31 +0000=EF=BC=8C=
+Matt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> > On Fri, 2013-03-01 at 15:17 +0000, Matt Fleming wrote:
+> > > On Fri, 2013-03-01 at 11:20 +0800, Lee, Chun-Yi wrote:
+> > > > From: Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>
+> > > >=20
+> > > > On HP z220 system (firmware version 1.54), some EFI variables a=
+re incorrectly
+> > > > named :
+> > > >=20
+> > > > ls -d /sys/firmware/efi/vars/*8be4d* | grep -v -- -8be returns
+> > > > /sys/firmware/efi/vars/dbxDefault-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> > > > /sys/firmware/efi/vars/KEKDefault-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> > > > /sys/firmware/efi/vars/SecureBoot-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> > > > /sys/firmware/efi/vars/SetupMode-Information8be4df61-93ca-11d2-=
+aa0d-00e098032b8c
+> > > >=20
+> > > > That causes by the following statement in efivar_create_sysfs_e=
+ntry function:
+> > > >=20
+> > > >  *(short_name + strlen(short_name)) =3D '-';
+> > > > efi_guid_unparse(vendor_guid, short_name + strlen(short_name));
+> > > >=20
+> > > > The trailing \0 is overwritten with '-', but the next char does=
+n't seem to be a \0
+> > > > as well for HP. So, the second strlen return the point of next =
+'\0', causes there
+> > > > have garbage string attached before GUID.
+> > > >=20
+> > > > Tested on On HP z220.
+> > >=20
+> > > What's more likely happening here is that GetNextVariable() is br=
+oken on
+> > > this HP firmware and variable_name_size is too big for the given
+> > > variable in variable_name. We've seen other reports of similar bu=
+gs,
+> > >=20
+> > > 	https://bugzilla.kernel.org/show_bug.cgi?id=3D47631
+> > >=20
+> > >=20
+> > > Could someone try this patch against Linus' tree?
+> >=20
+> > Urgh, and here's a version that isn't utterly, utterly broken...
+>=20
+> Thanks for Matt's patch, we will try it!
+>=20
+> Joey Lee
 
-On Tue, Mar 5, 2013 at 7:34 AM, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> On Tue, 2013-03-05 at 16:38 +0800, Lingzhu Xiang wrote:
->> On 03/05/2013 05:46 AM, Joseph Yasi wrote:
->> > Hi,
->> >
->> > With linux 3.8.2 I can no longer mount efivars on my Lenovo Thinkpad T530:
->> >
->> > $ sudo mount -v /sys/firmware/efi/efivars
->> > mount: Cannot allocate memory
->>
->> Looking at 47f531e8ba3bc3901a0c493f4252826c41dea1a1
->> efivarfs: Validate filenames much more aggressively
->>
->> In efivarfs_valid_name:
->>
->> +     /* GUID should be right after the first '-' */
->> +     if (s - 1 != strchr(str, '-'))
->> +             return false;
->>
->> But pstore creates entries like dump-type0-1-$timestamp-$GUID.
->>
->> efivarfs_alloc_dentry fails because it thinks pstore entry names
->> are invalid.
->>
->> EFI pstore dump is now enabled by default (as in Fedora), saving
->> dump sooner or later, so users will likely be affected by this.
->>
->> Manually creating a test-test-$GUID also reproduces this.
->
-> Guh, yes. Spot on Lingzhu.
->
-> Lingzhu, could you test the following patch? You seem to be particularly
-> good at weeding out bugs in this code.
->
-> ---
->
-> From 5fe334c9734863642ac16a9685f3912fd218956a Mon Sep 17 00:00:00 2001
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Date: Tue, 5 Mar 2013 07:40:16 +0000
-> Subject: [PATCH] efivars: efivarfs_valid_name() should handle pstore syntax
->
-> Stricter validation was introduced with commit da27a24383b2b
-> ("efivarfs: guid part of filenames are case-insensitive") and commit
-> 47f531e8ba3b ("efivarfs: Validate filenames much more aggressively"),
-> which is necessary for the guid portion of efivarfs filenames, but we
-> don't need to be so strict with the first part, the variable name. The
-> UEFI specification doesn't impose any constraints on variable names
-> other than they be a NULL-terminated string.
->
-> The above commits caused a regression that resulted in users seeing
-> the following message,
->
->   $ sudo mount -v /sys/firmware/efi/efivars mount: Cannot allocate memory
->
-> whenever pstore EFI variables were present in the variable store,
-> since their variable names failed to pass the following check,
->
->     /* GUID should be right after the first '-' */
->     if (s - 1 != strchr(str, '-'))
->
-> as a typical pstore filename is of the form, dump-type0-10-1-<guid>.
-> The fix is trivial since the guid portion of the filename is GUID_LEN
-> bytes, we can use (len - GUID_LEN) to ensure the '-' character is
-> where we expect it to be.
->
-> (The bogus ENOMEM error value will be fixed in a separate patch.)
->
-> Reported-by: Joseph Yasi <joe.yasi-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
-> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/firmware/efivars.c                   |  4 +-
->  tools/testing/selftests/efivarfs/efivarfs.sh | 59 ++++++++++++++++++++++++++++
->  2 files changed, 61 insertions(+), 2 deletions(-)
->
-> diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-> index 0d50497..1b9a6e1 100644
-> --- a/drivers/firmware/efivars.c
-> +++ b/drivers/firmware/efivars.c
-> @@ -974,8 +974,8 @@ static bool efivarfs_valid_name(const char *str, int len)
->         if (len < GUID_LEN + 2)
->                 return false;
->
-> -       /* GUID should be right after the first '-' */
-> -       if (s - 1 != strchr(str, '-'))
-> +       /* GUID must be preceded by a '-' */
-> +       if (*(s - 1) != '-')
->                 return false;
->
->         /*
-> diff --git a/tools/testing/selftests/efivarfs/efivarfs.sh b/tools/testing/selftests/efivarfs/efivarfs.sh
-> index 880cdd5..77edcdc 100644
-> --- a/tools/testing/selftests/efivarfs/efivarfs.sh
-> +++ b/tools/testing/selftests/efivarfs/efivarfs.sh
-> @@ -125,6 +125,63 @@ test_open_unlink()
->         ./open-unlink $file
->  }
->
-> +# test that we can create a range of filenames
-> +test_valid_filenames()
-> +{
-> +       local attrs='\x07\x00\x00\x00'
-> +       local ret=0
-> +
-> +       local file_list="abc dump-type0-11-1-1362436005 1234 -"
-> +       for f in $file_list; do
-> +               local file=$efivarfs_mount/$f-$test_guid
-> +
-> +               printf "$attrs\x00" > $file
-> +
-> +               if [ ! -e $file ]; then
-> +                       echo "$file could not be created" >&2
-> +                       ret=1
-> +               else
-> +                       rm $file
-> +               fi
-> +       done
-> +
-> +       exit $ret
-> +}
-> +
-> +test_invalid_filenames()
-> +{
-> +       local attrs='\x07\x00\x00\x00'
-> +       local ret=0
-> +
-> +       local file_list="
-> +               -1234-1234-1234-123456789abc
-> +               foo
-> +               foo-bar
-> +               -foo-
-> +               foo-barbazba-foob-foob-foob-foobarbazfoo
-> +               foo-------------------------------------
-> +               -12345678-1234-1234-1234-123456789abc
-> +               a-12345678=1234-1234-1234-123456789abc
-> +               a-12345678-1234=1234-1234-123456789abc
-> +               a-12345678-1234-1234=1234-123456789abc
-> +               a-12345678-1234-1234-1234=123456789abc
-> +               1112345678-1234-1234-1234-123456789abc"
-> +
-> +       for f in $file_list; do
-> +               local file=$efivarfs_mount/$f
-> +
-> +               printf "$attrs\x00" 2>/dev/null > $file
-> +
-> +               if [ -e $file ]; then
-> +                       echo "Creating $file should have failed" >&2
-> +                       rm $file
-> +                       ret=1
-> +               fi
-> +       done
-> +
-> +       exit $ret
-> +}
-> +
->  check_prereqs
->
->  rc=0
-> @@ -135,5 +192,7 @@ run_test test_create_read
->  run_test test_delete
->  run_test test_zero_size_delete
->  run_test test_open_unlink
-> +run_test test_valid_filenames
-> +run_test test_invalid_filenames
->
->  exit $rc
-> --
-> 1.7.11.7
->
->
->
+=46rederic confirmed your patch works to him for fix issue on HP machin=
+e.
+
+Tested-by: Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
+
+But, I suggest we just use the length with NULL in variable_name but no=
+t
+VariableNameSize that was returned by GetNextVariableName.
+
+My thinking is following...
+
+>=20
+> >=20
+> > ---
+> >=20
+> > >From 4b2ef72bca72039717efe4570ec858a86d565b34 Mon Sep 17 00:00:00 =
+2001
+> > From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > Date: Fri, 1 Mar 2013 14:49:12 +0000
+> > Subject: [PATCH] efivars: Sanitise string length returned by
+> >  GetNextVariableName()
+> >=20
+> > Some buggy firmware implementations return a string length from
+> > GetNextVariableName() that is actually larger than the string in
+> > 'variable_name', as Michael Schroeder writes,
+> >=20
+> >   > On HP z220 system (firmware version 1.54), some EFI variables a=
+re
+> >   > incorrectly named :
+> >   >
+> >   > ls -d /sys/firmware/efi/vars/*8be4d* | grep -v -- -8be returns
+> >   > /sys/firmware/efi/vars/dbxDefault-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> >   > /sys/firmware/efi/vars/KEKDefault-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> >   > /sys/firmware/efi/vars/SecureBoot-pport8be4df61-93ca-11d2-aa0d-=
+00e098032b8c
+> >   > /sys/firmware/efi/vars/SetupMode-Information8be4df61-93ca-11d2-=
+aa0d-00e098032b8c
+> >=20
+> > Since 'variable_name' is a string, we can validate its size by
+> > searching for the terminating NULL character.
+> >=20
+> > Reported-by: Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
+> > Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> > Cc: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>
+> > Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> > Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > ---
+> >  drivers/firmware/efivars.c | 30 ++++++++++++++++++++++++++++++
+> >  1 file changed, 30 insertions(+)
+> >=20
+> > diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.=
+c
+> > index 7320bf8..ab477b8 100644
+> > --- a/drivers/firmware/efivars.c
+> > +++ b/drivers/firmware/efivars.c
+> > @@ -1895,6 +1895,33 @@ void unregister_efivars(struct efivars *efiv=
+ars)
+> >  }
+> >  EXPORT_SYMBOL_GPL(unregister_efivars);
+> > =20
+> > +/*
+> > + * Sanity check size of a variable name.
+> > + */
+> > +static unsigned long sanity_check_size(efi_char16_t *variable_name=
+,
+> > +				       unsigned long variable_name_size)
+> > +{
+> > +	unsigned long len;
+> > +	efi_char16_t c;
+> > +
+> > +	/*
+> > +	 * The variable name is, by definition, a NULL-terminated
+> > +	 * string, so make absolutely sure that variable_name_size is
+> > +	 * the value we expect it to be. If not, return the real size.
+> > +	 */
+> > +	for (len =3D 2; len <=3D variable_name_size; len +=3D sizeof(c)) =
+{
+> > +		c =3D variable_name[(len / sizeof(c)) - 1];
+> > +		if (!c)
+> > +			break;
+> > +	}
+> > +
+
+We just direct return the len here but don't need compare with
+variable_name_size.
+
+	return len;
+
+> > +
+> > +	if (len !=3D variable_name_size)
+> > +		printk(KERN_WARNING "efivars: bogus variable_name_size: %lu %lu\=
+n", len, variable_name_size);
+> > +
+> > +	return min(len, variable_name_size);
+> > +}
+> > +
+
+In UEFI 2.3.1 spec:
+
+VariableNameSize		The size of the VariableName buffer
+
+Note that if EFI_BUFFER_TOO_SMALL is returned, the VariableName buffer
+was too small for the next variable. When such an error occurs, the
+VariableNameSize is updated to reflect the size of buffer needed. In al=
+l
+cases when calling GetNextVariableName() the VariableNameSize must not
+exceed the actual buffer size that was allocated for VariableName.
+
+
+Per spec, VariableNameSize will updated to 'the size of buffer needed'
+when EFI_BUFFER_TOO_SMALL, but spec doesn't mention VariableNameSize
+will also updated when EFI_SUCCESS. That means 'VariableNameSize =3D 10=
+24'
+when EFI_SUCCESS is not a bogus value.
+
+> >  int register_efivars(struct efivars *efivars,
+> >  		     const struct efivar_operations *ops,
+> >  		     struct kobject *parent_kobj)
+> > @@ -1941,8 +1968,11 @@ int register_efivars(struct efivars *efivars=
+,
+> >  		status =3D ops->get_next_variable(&variable_name_size,
+> >  						variable_name,
+> >  						&vendor_guid);
+> > +
+> >  		switch (status) {
+> >  		case EFI_SUCCESS:
+> > +			variable_name_size =3D sanity_check_size(variable_name,
+> > +							       variable_name_size);
+> >  			efivar_create_sysfs_entry(efivars,
+> >  						  variable_name_size,
+> >  						  variable_name,
+>=20
+
+Due to variable_name_size could be 1024, so I suggest direct feed the
+length of variable_name to efivar_create_sysfs_entry since we are need
+to count the length.
+
+This is a simply diff for my think:
+
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 7320bf8..99a4f9f 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -1895,6 +1895,21 @@ void unregister_efivars(struct efivars *efivars)
+ }
+ EXPORT_SYMBOL_GPL(unregister_efivars);
+=20
++static unsigned long variable_name_length(efi_char16_t *variable_name)
++{
++	unsigned long len;
++	efi_char16_t c;
++
++	len =3D 2;
++	do {
++		c =3D variable_name[len / sizeof(c) - 1];
++		if (c)
++			len +=3D sizeof(c);
++	} while (c);
++
++	return len;
++}
++
+ int register_efivars(struct efivars *efivars,
+ 		     const struct efivar_operations *ops,
+ 		     struct kobject *parent_kobj)
+@@ -1944,7 +1959,7 @@ int register_efivars(struct efivars *efivars,
+ 		switch (status) {
+ 		case EFI_SUCCESS:
+ 			efivar_create_sysfs_entry(efivars,
+-						  variable_name_size,
++						  variable_name_length(variable_name),
+ 						  variable_name,
+ 						  &vendor_guid);
+ 			break;
