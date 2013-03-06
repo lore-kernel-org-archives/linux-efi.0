@@ -1,44 +1,59 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efivarfs: fix abnormal GUID in variable name by using
- strcpy to replace null with dash
-Date: Wed, 06 Mar 2013 12:36:41 +0000
-Message-ID: <1362573401.15011.48.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1362108018-13117-1-git-send-email-jlee@suse.com>
-	 <1362151068.2842.440.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <1362155493.2842.446.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <1362181299.23932.168.camel@linux-s257.site>
-	 <1362555258.23932.573.camel@linux-s257.site>
-	 <1362568750.15011.24.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <1362571097.7004.66.camel@par-r81vxc7.par.novell.com>
+Subject: Re: sysfs: cannot create duplicate filename
+Date: Wed, 06 Mar 2013 13:19:01 +0000
+Message-ID: <1362575941.15011.56.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
+	 <5135BD66.1030005@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1362571097.7004.66.camel-+GqLY1utCe+GwbuyVWskRBLdbW0B08c60E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <5135BD66.1030005-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
-Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2013-03-06 at 12:58 +0100, Frederic Crozat wrote:
-> Le mercredi 06 mars 2013 =C3=A0 11:19 +0000, Matt Fleming a =C3=A9cri=
-t :
->=20
-> > Also, which machine did you see this behaviour on?
->=20
-> HP z220 desktop, System BIOS K51 v 1.54
->=20
-> this issue is only the "Secure Boot" related variables, which make me
-> think HP incorrectly created them in their latest firmware (where the=
-y
-> added Windows 8 support).
+On Tue, 2013-03-05 at 17:39 +0800, Lingzhu Xiang wrote:
+> On 03/03/2013 02:03 AM, Andre Heider wrote:
+> > After a BIOS update I get this in dmesg:
+> > 
+> > [    0.581554] EFI Variables Facility v0.08 2004-May-17
+> > [    0.584914] ------------[ cut here ]------------
+> > [    0.585639] WARNING: at /home/andre/linux/fs/sysfs/dir.c:536 sysfs_add_one+0x
+> > d4/0x100()
+> > [    0.586381] Hardware name: To be filled by O.E.M.
+> > [    0.587123] sysfs: cannot create duplicate filename '/firmware/efi/vars/SbAsl
+> > BufferPtrVar-01f33c25-764d-43ea-aeea-6b5a41f3f3e8'
+> > (snip)
+> > 
+> > Sounds like yet another BIOS issue, and I guess the answer is
+> > "complain to the manufacturer"... But we know how well that works, so
+> > can this be a warning instead of a scary backtrace? :)
+> > 
+> > (this is: Gigabyte Technology Co., Ltd. To be filled by
+> > O.E.M./Z77X-UD3H, BIOS F19e 11/21/2012)"
+> 
+> Just saw https://bugzilla.kernel.org/show_bug.cgi?id=47631
+> 
+> I think this problem is getting more and more common.
+> 
+> I had an IBM System x3100 M4 and x3850 X5 on which kernel would get stuck
+> in infinite loop creating duplicate sysfs files because, for some reason,
+> there are several duplicate boot entries in nvram getting GetNextVariableName
+> into a circle of iteration (with period > 2).
+> 
+> Granted, it's not kernel's fault for duplicate variables, but it'd be much
+> harder for users to fix their broken firmware than kernel dealing with it
+> by not dying on the never-ending GetNextVariableName.
 
-Are you saying that the behaviour regarding VariableNameSize changes
-depending on which variable is returned?
+It's not just about the manufacturers fixing their firmware and
+distributing a BIOS update. It's also the fact few users are likely to
+apply it before installing Linux on a new machine.
 
-Mercy.....
+Yeah, we need something in the kernel to handle this.
 
-Thanks for the info.
+Thanks for the report guys.
 
---=20
+-- 
 Matt Fleming, Intel Open Source Technology Center
