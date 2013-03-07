@@ -1,30 +1,37 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: Problem mounting efivarfs in 3.9
-Date: Thu, 07 Mar 2013 15:02:38 +0000
-Message-ID: <1362668558.15011.203.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <20130307145601.GA24233@thinkpad-t410>
+From: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [PATCH] efivarfs: loosen restriction on valid names
+Date: Thu, 07 Mar 2013 16:06:38 +0100
+Message-ID: <5138ACFE.30701@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20130307145601.GA24233@thinkpad-t410>
-Sender: stable-owner@vger.kernel.org
-To: Seth Forshee <seth.forshee@canonical.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, stable@vger.kernel.org, "H. Peter Anvin" <hpa@linux.intel.com>, Ingo Molnar <mingo@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-03-07 at 08:56 -0600, Seth Forshee wrote:
-> Hi Matt,
-> 
-> I found myself unable to mount efivarfs on one of my machines in 3.9.
-> This is due to your patch to be more aggressive about validating
-> filenames. This machine had some crash dumps from pstore, which start
-> with "dump-type". However now efivars expects the guid to follow the
-> first '-' character, despite the fact that the efivars pstore code is
-> creating the file names starting with dump-type. Since these names fail
-> the validation the mount fails.
+Commit da27a2438 (efivarfs: guid part of filenames are case-insensitive) fails to boot,
+because the kernel creates files in the form of dump-type-x-y-z-GUID. Since the kernel already
+created files in this form, these type of files obviously exist, so the right course of action
+is to relax the restriction in efivarfs_valid_name.
 
-A patch to allow pstore names is in the pull request I sent to Peter and
-Ingo yesterday,
+Signed-off-by: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [3.8]
+---
 
-	http://marc.info/?l=linux-kernel&m=136258373231608&w=2
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 8bcb595..3ee1882 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -921,8 +921,8 @@ static bool efivarfs_valid_name(const char *str, int len)
+ 	if (len < GUID_LEN + 2)
+ 		return false;
+ 
+-	/* GUID should be right after the first '-' */
+-	if (s - 1 != strchr(str, '-'))
++	/* GUID should be prefixed with - */
++	if (s[-1] != '-')
+ 		return false;
+ 
+ 	/*
