@@ -1,109 +1,159 @@
-From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: sysfs: cannot create duplicate filename
-Date: Sat, 09 Mar 2013 02:17:13 +0800
-Message-ID: <513A2B29.8090705@redhat.com>
-References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>  <5135BD66.1030005@redhat.com> <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] efivarfs: fix abnormal GUID in variable name by using
+ strcpy to replace null with dash
+Date: Mon, 11 Mar 2013 21:17:53 +0800
+Message-ID: <1363007873.13754.44.camel@linux-s257.site>
+References: <1362108018-13117-1-git-send-email-jlee@suse.com>
+	 <1362151068.2842.440.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362155493.2842.446.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362181299.23932.168.camel@linux-s257.site>
+	 <1362555258.23932.573.camel@linux-s257.site>
+	 <1362568750.15011.24.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362652440.28562.26.camel@linux-s257.site>
+	 <1362656348.15011.166.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <1362664663.15011.194.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1362755479.15011.238.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1362664663.15011.194.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michael Schroeder <mls-IBi9RG/b67k@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Frederic Crozat <fcrozat-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/08/2013 11:11 PM, Matt Fleming wrote:
-> +			/*
-> +			 * Some firmware implementations return the
-> +			 * same variable name on consecutive calls to
-> +			 * get_next_variable(). Terminate the loop
-> +			 * immediately as there is no guarantee that
-> +			 * we'll ever see a different variable name,
-> +			 * and may end up looping here forever.
-> +			 */
-> +			if (!efi_guidcmp(prev_guid, vendor_guid) &&
-> +			     !memcmp(prev_name, variable_name, variable_name_size)) {
-> +				printk(KERN_WARNING "efivars: duplicate variable name.\n");
-> +				status = EFI_NOT_FOUND;
-> +				break;
-> +			}
+Hi Matt,=20
 
-Comparing with the immediately previous one won't detect larger loop
-like how The IBM x3100 M4 in question was looping as below.
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-03-07 =E6=96=BC 13:57 +0000=EF=BC=8CMa=
+tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Thu, 2013-03-07 at 11:39 +0000, Matt Fleming wrote:
+> > On Thu, 2013-03-07 at 18:34 +0800, joeyli wrote:
+> > > The VariableNameSize is not reliable when EFI_SUCCESS is returned
+> > > because UEFI 2.3.1 spec only mention VariableNameSize should upda=
+ted
+> > > when EFI_BUFFER_TOO_SMALL is returned. And, the 1024 bytes of buf=
+fer is
+> > > from old UEFI spec. There doesn't have any size condition of vari=
+able
+> > > data or variable name in 2.3.1 spec.
+> >=20
+> > The spec may only mention what happens in the EFI_BUFFER_TOO_SMALL =
+case,
+> > but for EFI_SUCCESS, any behaviour other than leaving VariableNameS=
+ize
+> > alone or updating it with the required size of the buffer is just
+> > completely insane.
+> >=20
+> > > I modified the patch to grab VariableNameSize when EFI_BUFFER_TOO=
+_SMALL,
+> > > the behavior like what we do in efivarfs_file_read().
+> >=20
+> > Thanks, this does seem like the most robust solution.
+>=20
+> Also, you're probably going to need to update
+> efivar_update_sysfs_entries() too.
+>=20
 
-(There is some log loss; probably too much data for serial.)
-[    9.783119] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[    9.852017] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[    9.856520] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[    9.860840] sysfs: cannot create duplicate filename '/firmware/efi/vars/AcpiGlobalVariable-c020489e-6db2-4ef2-9aa5-ca06fc11d36a'
-[    9.865735] sysfs: cannot create duplicate filename '/firmware/efi/vars/NodalSetup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9'
-[    9.871157] sysfs: cannot create duplicate filename '/firmware/efi/vars/DIMMStatusVariable-c020489e-6db2-4fe2-a2b1-ca05cca1336a'
-[    9.876473] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0007-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   11.541964] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   11.556008] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   11.560022] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   11.564583] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   11.568977] sysfs: cannot create duplicate filename '/firmware/efi/vars/AcpiGlobalVariable-c020489e-6db2-4ef2-9aa5-ca06fc11d36a'
-[   11.573929] sysfs: cannot create duplicate filename '/firmware/efi/vars/NodalSetup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9'
-[   13.278655] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   13.292703] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   13.296716] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   13.301283] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   13.305669] sysfs: cannot create duplicate filename '/firmware/efi/vars/AcpiGlobalVariable-c020489e-6db2-4ef2-9aa5-ca06fc11d36a'
-[   13.310628] sysfs: cannot create duplicate filename '/firmware/efi/vars/NodalSetup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9'
-[   13.316108] sysfs: cannot create duplicate filename '/firmware/efi/vars/DIMMStatusVariable-c020489e-6db2-4fe2-a2b1-ca05cca1336a'
-[   15.004171] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   15.017737] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   15.031713] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   15.035730] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   15.040355] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   15.044743] sysfs: cannot create duplicate filename '/firmware/efi/vars/AcpiGlobalVariable-c020489e-6db2-4ef2-9aa5-ca06fc11d36a'
-[   15.049700] sysfs: cannot create duplicate filename '/firmware/efi/vars/NodalSetup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9'
-[   16.729287] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   16.742919] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   16.756550] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   16.770526] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   16.774532] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   16.779093] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   16.783542] sysfs: cannot create duplicate filename '/firmware/efi/vars/AcpiGlobalVariable-c020489e-6db2-4ef2-9aa5-ca06fc11d36a'
-[   18.467922] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   18.481615] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   18.495194] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   18.509242] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   18.513252] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   18.517806] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0003-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   20.193306] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   20.206649] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   20.220341] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   20.233916] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   20.247957] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   20.251970] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   21.918960] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0004-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   21.931944] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   21.945286] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   21.958984] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   21.972559] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   21.986608] sysfs: cannot create duplicate filename '/firmware/efi/vars/MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa'
-[   23.644961] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   23.657688] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0004-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   23.670724] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   23.684062] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   23.697692] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   23.711324] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBootValidate-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   25.370482] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0006-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   25.382749] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   25.395419] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0004-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   25.408343] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   25.421625] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   25.435192] sysfs: cannot create duplicate filename '/firmware/efi/vars/BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   27.087790] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0006-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   27.099845] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0006-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   27.112118] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   27.124788] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0004-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   27.137702] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   27.150990] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0001-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   28.805316] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0005-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   28.816944] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0006-8be4df61-93ca-11d2-aa0d-00e098032b8c'
-[   28.829010] sysfs: cannot create duplicate filename '/firmware/efi/vars/CFGBoot0006-d665f20a-f2b7-485e-a321-542a196f40c7'
-[   28.841278] sysfs: cannot create duplicate filename '/firmware/efi/vars/Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c'
+Sorry for after I wrote patch, I think it's better we still use your
+original patch to fix this bug, because I found the
+efi_variable->VariableName allocated 1024 size and it also used by old
+vars system.=20
+
+The following is my patch for reference, but I think your original patc=
+h
+is better for backward compatible on variable name.
+
+Please consider to merge your original patch!
+
+
+Thanks a lot!
+Joey Lee
+
+
+>From c067288dbbb963b9cf9be4c5f59f5e39e88361ad Mon Sep 17 00:00:00 2001
+=46rom: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Date: Mon, 11 Mar 2013 18:26:04 +0800
+Subject: [PATCH] efivars: Sanitise length of variable name for register
+
+
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ drivers/firmware/efivars.c |   39 ++++++++++++++++++++++++++++++------=
+---
+ 1 files changed, 30 insertions(+), 9 deletions(-)
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 3edade0..1e854b3 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -111,7 +111,7 @@ MODULE_VERSION(EFIVARS_VERSION);
+  */
+=20
+ struct efi_variable {
+-	efi_char16_t  VariableName[1024/sizeof(efi_char16_t)];
++	efi_char16_t  VariableName[1024/sizeof(efi_char16_t)];		/* PROBLEM: 1=
+024 size, need backward compatible to old vars */
+ 	efi_guid_t    VendorGuid;
+ 	unsigned long DataSize;
+ 	__u8          Data[1024];
+@@ -1903,10 +1903,11 @@ int register_efivars(struct efivars *efivars,
+ 	efi_status_t status =3D EFI_NOT_FOUND;
+ 	efi_guid_t vendor_guid;
+ 	efi_char16_t *variable_name;
+-	unsigned long variable_name_size =3D 1024;
++	unsigned long variable_name_size;
++	unsigned long variable_name_buff_size =3D 1024;
+ 	int error =3D 0;
+=20
+-	variable_name =3D kzalloc(variable_name_size, GFP_KERNEL);
++	variable_name =3D kzalloc(variable_name_buff_size, GFP_KERNEL);
+ 	if (!variable_name) {
+ 		printk(KERN_ERR "efivars: Memory allocation failed.\n");
+ 		return -ENOMEM;
+@@ -1937,17 +1938,37 @@ int register_efivars(struct efivars *efivars,
+ 	 */
+=20
+ 	do {
+-		variable_name_size =3D 1024;
++		variable_name_size =3D 0;
+=20
+ 		status =3D ops->get_next_variable(&variable_name_size,
+ 						variable_name,
+ 						&vendor_guid);
+ 		switch (status) {
+-		case EFI_SUCCESS:
+-			efivar_create_sysfs_entry(efivars,
+-						  variable_name_size,
+-						  variable_name,
+-						  &vendor_guid);
++		case EFI_BUFFER_TOO_SMALL:
++			if (variable_name_size < sizeof(efi_char16_t) * 2) {
++				/* Bogus size - expect at least one char + NULL */
++				variable_name_size =3D variable_name_buff_size;
++			} else if (variable_name_size > variable_name_buff_size) {
++				kfree(variable_name);
++				variable_name =3D kzalloc(variable_name_size, GFP_KERNEL);
++				if (!variable_name) {
++					printk(KERN_ERR "efivars: Memory allocation failed.\n");
++					return -ENOMEM;
++				}
++				variable_name_buff_size =3D variable_name_size;
++			}
++			status =3D ops->get_next_variable(&variable_name_size,
++							variable_name,
++							&vendor_guid);
++			/* Length of the variable_name, plus terminating NULL */
++			variable_name_size =3D utf16_strsize(
++					variable_name, variable_name_buff_size)
++					+ sizeof(efi_char16_t);
++			if (status =3D=3D EFI_SUCCESS)
++				efivar_create_sysfs_entry(efivars,
++							  variable_name_size,	/* PROBLEM: variable_name_size could not =
+larger then new_efivar->var.VariableName =3D 1024 */
++							  variable_name,
++							  &vendor_guid);
+ 			break;
+ 		case EFI_NOT_FOUND:
+ 			break;
+--=20
+1.6.4.2
