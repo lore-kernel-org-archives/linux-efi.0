@@ -1,11 +1,11 @@
-From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
 Subject: [PATCH] efivars: allow efi pstore variable when validate filename
-Date: Tue, 12 Mar 2013 02:57:28 +0800
-Message-ID: <1363028248-27788-1-git-send-email-jlee@suse.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Date: Tue, 12 Mar 2013 03:00:28 +0800
+Message-ID: <1363028428-27976-1-git-send-email-jlee@suse.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt.fleming@intel.com
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Seiji Aguchi <seiji.aguchi@hds.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Al Viro <viro@zeniv.linux.org.uk>, Lingzhu Xiang <lxiang@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
 We mount efivarfs fail after pstore generated 'dump-type*' variables and
@@ -18,11 +18,12 @@ The pstore variable is 'dump-type*-*-*-*-GUID'style, it could not pass
 the "GUID should be right after the first '-'" check. This patch allow
 the variable name that has 'dump-type' pass the name check.
 
-Cc: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
-Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Seiji Aguchi <seiji.aguchi@hds.com>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Al Viro <viro@zeniv.linux.org.uk>
+Cc: Lingzhu Xiang <lxiang@redhat.com>
+Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
  drivers/firmware/efivars.c |    2 +-
  1 files changed, 1 insertions(+), 1 deletions(-)
