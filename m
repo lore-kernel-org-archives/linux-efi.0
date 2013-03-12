@@ -1,205 +1,65 @@
-From: Seth Forshee <seth.forshee@canonical.com>
-Subject: Re: [PATCH] efivars: Allow disabling use as a pstore backend
-Date: Mon, 11 Mar 2013 16:17:50 -0500
-Message-ID: <20130311211750.GB8440@thinkpad-t410>
-References: <1362678017-2862-1-git-send-email-seth.forshee@canonical.com>
- <5138FAD9.7050504@zytor.com>
- <20130307205915.GF24233@thinkpad-t410>
- <1362694529.15011.211.camel@mfleming-mobl1.ger.corp.intel.com>
- <513911F9.8050308@zytor.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] efivars: allow efi pstore variable when validate
+ filename
+Date: Tue, 12 Mar 2013 11:06:19 +0800
+Message-ID: <1363057579.13754.46.camel@linux-s257.site>
+References: <1363028428-27976-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <513911F9.8050308@zytor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>, Matthew Garrett <matthew.garrett@nebula.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1363028428-27976-1-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 07, 2013 at 02:17:29PM -0800, H. Peter Anvin wrote:
-> On 03/07/2013 02:15 PM, Matt Fleming wrote:
-> >>>
-> >>> What about a command line option?
-> >>
-> >> That could be done. I'm assuming you want this instead of a config
-> >> option, defaulted to on?
-> >>
-> >> How would you feel about a config option for the default value of the
-> >> command line option? I intend to default this to off in Ubuntu for a
-> >> while as a colleague's machine was recently bricked on two different
-> >> occasions after the kernel oopsed. The config option would simplify
-> >> things a bit for us, though we could always carry a patch changing the
-> >> default value.
-> > 
-> > Not sure why a command line option would be a more natural solution to
-> > this problem? The original patch looked fine to me. All other pstore
-> > backends are guarded by Kconfig options.
-> > 
-> > Though I could see an argument for a kernel parameter to turn off the
-> > EFI pstore backend code, even if it's compiled into the kernel. But that
-> > would be better as an additional patch.
-> > 
-> 
-> That way it can be enabled if needed, without the user having to build
-> their own kernel.
+Hi Matt,=20
 
-Here's a patch that does the command line option. I'm happy with either
-one.
+Sorry for I didn't aware your 123abd76edf patch fixed issue.
+Please ignore my patch.
 
 
->From 2febf7014f6fa0abf05326504423749505430b3f Mon Sep 17 00:00:00 2001
-From: Seth Forshee <seth.forshee@canonical.com>
-Date: Wed, 6 Mar 2013 14:25:36 -0600
-Subject: [PATCH] efivars: Add module parameter to disable use as a pstore
- backend
+Thanks a lot!
+Joey Lee
 
-We know that with some firmware implementations writing too much data to
-UEFI variables can lead to bricking machines. Recent changes attempt to
-address this issue, but for some it may still be prudent to avoid
-writing large amounts of data until the solution has been proven on a
-wide variety of hardware.
-
-Crash dumps or other data from pstore can potentially be a large data
-source. Add a pstore_module parameter to efivars to allow disabling its
-use as a backend for pstore. Also add a config option,
-CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE, to allow setting the default
-value of this paramter to true (i.e. disabled by default).
-
-Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
----
- drivers/firmware/Kconfig   |    9 ++++++
- drivers/firmware/efivars.c |   70 +++++++++++++++++---------------------------
- 2 files changed, 36 insertions(+), 43 deletions(-)
-
-diff --git a/drivers/firmware/Kconfig b/drivers/firmware/Kconfig
-index 9b00072..8d556a5 100644
---- a/drivers/firmware/Kconfig
-+++ b/drivers/firmware/Kconfig
-@@ -53,6 +53,15 @@ config EFI_VARS
- 	  Subsequent efibootmgr releases may be found at:
- 	  <http://linux.dell.com/efibootmgr>
- 
-+config EFI_VARS_PSTORE_DEFAULT_DISABLE
-+	bool "Disable using efivars as a pstore backend by default"
-+	depends on EFI_VARS && PSTORE
-+	default n
-+	help
-+	  Saying Y here will disable the use of efivars as a storage
-+	  backend for pstore by default. This setting can be overridden
-+	  using the efivars module's pstore_disable parameter.
-+
- config EFI_PCDP
- 	bool "Console device selection via EFI PCDP or HCDP table"
- 	depends on ACPI && EFI && IA64
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index fe62aa3..7de25b7 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -103,6 +103,13 @@ MODULE_VERSION(EFIVARS_VERSION);
-  */
- #define GUID_LEN 36
- 
-+#ifdef CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE
-+static bool efivars_pstore_disable = true;
-+#else
-+static bool efivars_pstore_disable = false;
-+#endif
-+module_param_named(pstore_disable, efivars_pstore_disable, bool, 0644);
-+
- /*
-  * The maximum size of VariableName + Data = 1024
-  * Therefore, it's reasonable to save that much
-@@ -1309,8 +1316,6 @@ static const struct inode_operations efivarfs_dir_inode_operations = {
- 	.create = efivarfs_create,
- };
- 
--static struct pstore_info efi_pstore_info;
--
- #ifdef CONFIG_PSTORE
- 
- static int efi_pstore_open(struct pstore_info *psi)
-@@ -1514,38 +1519,6 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 
- 	return 0;
- }
--#else
--static int efi_pstore_open(struct pstore_info *psi)
--{
--	return 0;
--}
--
--static int efi_pstore_close(struct pstore_info *psi)
--{
--	return 0;
--}
--
--static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type, int *count,
--			       struct timespec *timespec,
--			       char **buf, struct pstore_info *psi)
--{
--	return -1;
--}
--
--static int efi_pstore_write(enum pstore_type_id type,
--		enum kmsg_dump_reason reason, u64 *id,
--		unsigned int part, int count, size_t size,
--		struct pstore_info *psi)
--{
--	return 0;
--}
--
--static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
--			    struct timespec time, struct pstore_info *psi)
--{
--	return 0;
--}
--#endif
- 
- static struct pstore_info efi_pstore_info = {
- 	.owner		= THIS_MODULE,
-@@ -1557,6 +1530,24 @@ static struct pstore_info efi_pstore_info = {
- 	.erase		= efi_pstore_erase,
- };
- 
-+static void efivar_pstore_register(struct efivars *efivars)
-+{
-+	efivars->efi_pstore_info = efi_pstore_info;
-+	efivars->efi_pstore_info.buf = kmalloc(4096, GFP_KERNEL);
-+	if (efivars->efi_pstore_info.buf) {
-+		efivars->efi_pstore_info.bufsize = 1024;
-+		efivars->efi_pstore_info.data = efivars;
-+		spin_lock_init(&efivars->efi_pstore_info.buf_lock);
-+		pstore_register(&efivars->efi_pstore_info);
-+	}
-+}
-+#else
-+static void efivar_pstore_register(struct efivars *efivars)
-+{
-+	return;
-+}
-+#endif
-+
- static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
- 			     struct bin_attribute *bin_attr,
- 			     char *buf, loff_t pos, size_t count)
-@@ -2025,15 +2016,8 @@ int register_efivars(struct efivars *efivars,
- 	if (error)
- 		unregister_efivars(efivars);
- 
--	efivars->efi_pstore_info = efi_pstore_info;
--
--	efivars->efi_pstore_info.buf = kmalloc(4096, GFP_KERNEL);
--	if (efivars->efi_pstore_info.buf) {
--		efivars->efi_pstore_info.bufsize = 1024;
--		efivars->efi_pstore_info.data = efivars;
--		spin_lock_init(&efivars->efi_pstore_info.buf_lock);
--		pstore_register(&efivars->efi_pstore_info);
--	}
-+	if (!efivars_pstore_disable)
-+		efivar_pstore_register(efivars);
- 
- 	register_filesystem(&efivarfs_type);
- 
--- 
-1.7.9.5
+=E6=96=BC =E4=BA=8C=EF=BC=8C2013-03-12 =E6=96=BC 03:00 +0800=EF=BC=8CLe=
+e, Chun-Yi =E6=8F=90=E5=88=B0=EF=BC=9A
+> We mount efivarfs fail after pstore generated 'dump-type*' variables =
+and
+> reboot.
+>=20
+> This issue introduced by commit 47f531e8ba3bc3901a0c493f4252826c41dea=
+1a1
+> (efivarfs: Validate filenames much more aggressively)
+>=20
+> The pstore variable is 'dump-type*-*-*-*-GUID'style, it could not pas=
+s
+> the "GUID should be right after the first '-'" check. This patch allo=
+w
+> the variable name that has 'dump-type' pass the name check.
+>=20
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Cc: Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
+> Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> ---
+>  drivers/firmware/efivars.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+>=20
+> diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+> index 3edade0..ab07f7f 100644
+> --- a/drivers/firmware/efivars.c
+> +++ b/drivers/firmware/efivars.c
+> @@ -930,7 +930,7 @@ static bool efivarfs_valid_name(const char *str, =
+int len)
+>  		return false;
+> =20
+>  	/* GUID should be right after the first '-' */
+> -	if (s - 1 !=3D strchr(str, '-'))
+> +	if (s - 1 !=3D strchr(str, '-') && !strstarts(str, "dump-type"))
+>  		return false;
+> =20
+>  	/*
