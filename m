@@ -1,42 +1,96 @@
-From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: sysfs: cannot create duplicate filename
-Date: Wed, 13 Mar 2013 18:47:31 +0800
-Message-ID: <51405943.2000601@redhat.com>
-References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>    <5135BD66.1030005@redhat.com>   <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>   <513A2B29.8090705@redhat.com>  <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>  <513F0734.80600@redhat.com> <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [PATCH] efivars: Allow disabling use as a pstore backend
+Date: Wed, 13 Mar 2013 15:49:30 +0000
+Message-ID: <1363189770.15011.300.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1362678017-2862-1-git-send-email-seth.forshee@canonical.com>
+	 <5138FAD9.7050504@zytor.com> <20130307205915.GF24233@thinkpad-t410>
+	 <1362694529.15011.211.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <513911F9.8050308@zytor.com> <20130311211750.GB8440@thinkpad-t410>
+	 <1363118073.15011.275.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <20130312211417.GC16558@thinkpad-t410>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363106125.15011.263.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130312211417.GC16558@thinkpad-t410>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seth Forshee <seth.forshee@canonical.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Matthew Garrett <matthew.garrett@nebula.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 03/13/2013 12:35 AM, Matt Fleming wrote:
->> I think using what we have is good enough for this. I'll verify
->> boot time tomorrow.
->
-> That would be great, thank you.
+On Tue, 2013-03-12 at 16:14 -0500, Seth Forshee wrote:
+> From 91df4dd0d1e20f44ea16b3653cffecd507fdb500 Mon Sep 17 00:00:00 2001
+> From: Seth Forshee <seth.forshee@canonical.com>
+> Date: Wed, 6 Mar 2013 14:25:36 -0600
+> Subject: [PATCH] efivars: Add module parameter to allow disabling use as a
+>  pstore backend
+> 
+> We know that with some firmware implementations writing too much data to
+> UEFI variables can lead to bricking machines. Recent changes attempt to
+> address this issue, but for some it may still be prudent to avoid
+> writing large amounts of data until the solution has been proven on a
+> wide variety of hardware.
+> 
+> Crash dumps or other data from pstore can potentially be a large data
+> source. Add a pstore_enable parameter to efivars to allow disabling its
+> use as a backend for pstore. Also add a config option,
+> CONFIG_EFI_VARS_PSTORE, which will specify the default value for this
+> parameter. Default this option to Y to maintain the existing behavior.
+> 
+> Signed-off-by: Seth Forshee <seth.forshee@canonical.com>
+> ---
+>  drivers/firmware/Kconfig   |    9 ++++++
+>  drivers/firmware/efivars.c |   66 +++++++++++++++-----------------------------
+>  2 files changed, 32 insertions(+), 43 deletions(-)
 
-On a Windows 8 logo desktop with 91 variables, the average time (30 runs 
-each) of variable iteration goes from 0.009672 second to 0.010180 second 
-(+0.000508 second, or +5%). Negligible.
+Thanks for sticking with this Seth. I think this is a nice solution.
+I've tossed this patch into my urgent queue and tagged it for stable and
+added some Cc's.
 
->> status = EFI_NOT_FOUND here doesn't seem to do anything.
->
-> It terminates the enclosing do-while loop.
+I did make one minor adjustment below. Let me know if you disagree.
 
-Oops, my brain fart.
+Peter, are you happy with this version?
 
->> By the way, efivar_update_sysfs_entries from Seiji's sysfs workqueue
->> patch may also get stuck in loop in the same way.
->
-> You mean if GetNextVariableName() never terminates? Yeah,
-> efivar_update_sysfs_entries() looks like it needs protecting from that
-> too, good catch.
+> diff --git a/drivers/firmware/Kconfig b/drivers/firmware/Kconfig
+> index 9b00072..35f7d16 100644
+> --- a/drivers/firmware/Kconfig
+> +++ b/drivers/firmware/Kconfig
+> @@ -53,6 +53,15 @@ config EFI_VARS
+>  	  Subsequent efibootmgr releases may be found at:
+>  	  <http://linux.dell.com/efibootmgr>
+>  
+> +config EFI_VARS_PSTORE
+> +	bool "Use efivars as a pstore backend"
+> +	depends on EFI_VARS
+> +	default y
+> +	help
+> +	  Say Y here to enable the use of efivars as a storage backend
+> +	  for pstore. This setting can be overridden using the
+> +	  efivars.pstore_enable parameter.
+> +
 
-Yes that's what I meant.
+The depends here should probably include PSTORE, which I think it did on
+previous iterations. I can't think of a situation where you'd want to
+disable CONFIG_PSTORE but enable CONFIG_EFI_VARS_PSTORE. Also, we don't
+need to use CONFIG_EFI_VARS_PSTORE solely for the purpose of setting the
+initial value of efivars_pstore_enabled - there's merit in also using it
+to leave out the pstore code in efivars.c during compilation.
 
+Granted, this change does mean that your decision at compile time may be
+final, and you can't enable the pstore code at runtime if you built your
+kernel/efivars module with CONFIG_EFI_VARS_PSTORE=n. Arguably, I think
+that's a feature that some people will want, e.g. "Don't allow enabling
+the efivars pstore backend at all... no, srsly!".
 
-Lingzhu Xiang
+[...]
+
+> @@ -1309,8 +1312,6 @@ static const struct inode_operations efivarfs_dir_inode_operations = {
+>  	.create = efivarfs_create,
+>  };
+>  
+> -static struct pstore_info efi_pstore_info;
+> -
+>  #ifdef CONFIG_PSTORE
+
+... I've changed this to #ifdef CONFIG_EFI_VARS_PSTORE, since if
+CONFIG_EFI_VARS_PSTORE=n there's no point compiling the pstore code.
