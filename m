@@ -1,45 +1,55 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: [PATCH] efivars: Allow disabling use as a pstore backend
-Date: Wed, 13 Mar 2013 19:44:33 +0000
-Message-ID: <1363203873.15011.311.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <20130307205915.GF24233@thinkpad-t410>
-	 <1362694529.15011.211.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <513911F9.8050308@zytor.com> <20130311211750.GB8440@thinkpad-t410>
-	 <1363118073.15011.275.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <20130312211417.GC16558@thinkpad-t410>
-	 <1363189770.15011.300.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <20130313170724.GB12157@thinkpad-t410> <5140B674.8070308@zytor.com>
-	 <1363199617.15011.310.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <20130313191455.GC12157@thinkpad-t410>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: sysfs: cannot create duplicate filename
+Date: Thu, 14 Mar 2013 16:33:37 +0000
+Message-ID: <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
+	    <5135BD66.1030005@redhat.com>
+	   <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>
+	   <513A2B29.8090705@redhat.com>
+	  <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>
+	  <513F0734.80600@redhat.com>
+	 <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <51405943.2000601@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130313191455.GC12157@thinkpad-t410>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seth Forshee <seth.forshee@canonical.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Matthew Garrett <matthew.garrett@nebula.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <51405943.2000601-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2013-03-13 at 14:14 -0500, Seth Forshee wrote:
-> On Wed, Mar 13, 2013 at 06:33:37PM +0000, Matt Fleming wrote:
-> > On Wed, 2013-03-13 at 10:25 -0700, H. Peter Anvin wrote:
-> > > I think there should be two compile-time options (one to compile in the
-> > > EFI pstore code at all, and one to set its default.)
-> > 
-> > OK, sorry Seth, looks like I'm the one that misunderstood. I've picked
-> > up your first two patches and pushed them out to the urgent branch.
-> > Please check that they look OK - they required minor fixups.
+On Wed, 2013-03-13 at 18:47 +0800, Lingzhu Xiang wrote:
+> On 03/13/2013 12:35 AM, Matt Fleming wrote:
+> >> I think using what we have is good enough for this. I'll verify
+> >> boot time tomorrow.
+> >
+> > That would be great, thank you.
 > 
-> A minor nit from the second patch:
+> On a Windows 8 logo desktop with 91 variables, the average time (30 runs 
+> each) of variable iteration goes from 0.009672 second to 0.010180 second 
+> (+0.000508 second, or +5%). Negligible.
+
+Thanks for testing that.
+
+[...]
+
+> >> By the way, efivar_update_sysfs_entries from Seiji's sysfs workqueue
+> >> patch may also get stuck in loop in the same way.
+> >
+> > You mean if GetNextVariableName() never terminates? Yeah,
+> > efivar_update_sysfs_entries() looks like it needs protecting from that
+> > too, good catch.
 > 
-> +static bool efivars_pstore_disable = \
-> +       IS_ENABLED(EFI_VARS_PSTORE_DEFAULT_DISABLE);
-> 
-> The backslash isn't necessary.
+> Yes that's what I meant.
 
-Whoops. Fixed.
+Hmm.. actually, I'm not at all sure how to fix that case, since the
+algorithm expects to find duplicates.
 
-> Otherwise everything looks fine afaict.
+Seiji, any thoughts here? For a recap of the discussion see,
 
-Thanks!
+	http://article.gmane.org/gmane.linux.kernel.efi/835
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
