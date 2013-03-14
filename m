@@ -1,7 +1,7 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: sysfs: cannot create duplicate filename
-Date: Thu, 14 Mar 2013 16:33:37 +0000
-Message-ID: <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: sysfs: cannot create duplicate filename
+Date: Thu, 14 Mar 2013 19:31:44 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807@USINDEM103.corp.hds.com>
 References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
 	    <5135BD66.1030005@redhat.com>
 	   <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>
@@ -10,46 +10,41 @@ References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
 	  <513F0734.80600@redhat.com>
 	 <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>
 	 <51405943.2000601@redhat.com>
+ <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51405943.2000601-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1363278817.15011.316.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2013-03-13 at 18:47 +0800, Lingzhu Xiang wrote:
-> On 03/13/2013 12:35 AM, Matt Fleming wrote:
-> >> I think using what we have is good enough for this. I'll verify
-> >> boot time tomorrow.
-> >
-> > That would be great, thank you.
-> 
-> On a Windows 8 logo desktop with 91 variables, the average time (30 runs 
-> each) of variable iteration goes from 0.009672 second to 0.010180 second 
-> (+0.000508 second, or +5%). Negligible.
-
-Thanks for testing that.
-
-[...]
-
-> >> By the way, efivar_update_sysfs_entries from Seiji's sysfs workqueue
-> >> patch may also get stuck in loop in the same way.
-> >
-> > You mean if GetNextVariableName() never terminates? Yeah,
-> > efivar_update_sysfs_entries() looks like it needs protecting from that
-> > too, good catch.
-> 
-> Yes that's what I meant.
-
-Hmm.. actually, I'm not at all sure how to fix that case, since the
-algorithm expects to find duplicates.
-
-Seiji, any thoughts here? For a recap of the discussion see,
-
-	http://article.gmane.org/gmane.linux.kernel.efi/835
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+PiBIbW0uLiBhY3R1YWxseSwgSSdtIG5vdCBhdCBhbGwgc3VyZSBob3cgdG8gZml4IHRoYXQgY2Fz
+ZSwgc2luY2UgdGhlIGFsZ29yaXRobSBleHBlY3RzIHRvIGZpbmQgZHVwbGljYXRlcy4NCj4gDQo+
+IFNlaWppLCBhbnkgdGhvdWdodHMgaGVyZT8gRm9yIGEgcmVjYXAgb2YgdGhlIGRpc2N1c3Npb24g
+c2VlLA0KPiANCj4gCWh0dHA6Ly9hcnRpY2xlLmdtYW5lLm9yZy9nbWFuZS5saW51eC5rZXJuZWwu
+ZWZpLzgzNQ0KDQpUaGFuayB5b3UgZm9yIHByb3ZpZGluZyB0aGlzLg0KDQpJZiBHZXROZXh0VmFy
+aWFibGVOYW1lKCkgbmV2ZXIgdGVybWluYXRlcywgdGhlIGZpcm13YXJlIGlzIHByb2JhYmx5IGJy
+b2tlbi4NCkluIHRoaXMgY2FzZSwgZWZpdmFycywgaW5jbHVkaW5nIGVmaV9wc3RvcmUsIGNhbid0
+IGd1YXJhbnRlZSB0byB3b3JrIHJlbGlhYmx5Li4uDQoNCj5HcmFudGVkLCBpdCdzIG5vdCBrZXJu
+ZWwncyBmYXVsdCBmb3IgZHVwbGljYXRlIHZhcmlhYmxlcywgYnV0IGl0J2QgYmUgbXVjaCBoYXJk
+ZXIgZm9yIHVzZXJzIA0KPnRvIGZpeCB0aGVpciBicm9rZW4gZmlybXdhcmUgdGhhbiBrZXJuZWwg
+ZGVhbGluZyB3aXRoIGl0IGJ5IG5vdCBkeWluZyBvbiB0aGUgbmV2ZXItZW5kaW5nIA0KPkdldE5l
+eHRWYXJpYWJsZU5hbWUuDQoNClRvIGZpeCB0aGUgYnJva2VuIGZpcm13YXJlLCB1c2VycyBuZWVk
+IHRvIGVyYXNlIHRoZSBkdXBsaWNhdGVkIHZhcmlhYmxlLg0KSXMgaXQgY29ycmVjdD8NCklmIHll
+cywgaG93IGFib3V0IHByaW50aW5nIHRoZSBkdXBsaWNhdGVkIHZhcmlhYmxlIG5hbWUgYXMgZm9s
+bG93cz8NCk9yIGFkZCBwcmludGsoKSBwZXJzdWFkZSB0byB1cGdyYWRpbmcvZG93bmdyYWRpbmcg
+ZmlybXdhcmU/DQoNCisgcHJpbnRrKEtFUk5fV0FSTklORyAiZWZpdmFyczogZHVwbGljYXRlIHZh
+cmlhYmxlIG5hbWUuICVzXG4iLCB2YXJpYWJsZV9uYW1lKTsNCg0KQXMgZm9yIHVwZGF0ZV9zeXNm
+c19lbnRyaWVzKCkgLCBhIGNhbmRpZGF0ZSBmaXggaXMgaW50cm9kdWNpbmcgYSBnbG9iYWwgdmFy
+aWFibGUgbGlrZSBpc19maXJtd2FyZV9icm9rZW4uDQpBbmQgaWYgdGhlIHZhcmlhYmxlIGlzIHNl
+dCwgdXBkYXRlX3N5c2ZzX2VudHJpZXMoKSByZXR1cm5zIHdpdGhvdXQgY2FsbGluZyBHZXROZXh0
+VmFyaWFibGVOYW1lKCkuDQpBcyBJIG1lbnRpb25lZCBhYm92ZSwgdGhlcmUgaXMgbm8gd2F5IHRv
+IG1ha2UgZWZpdmFycywgaW5jbHVkaW5nIGVmaV9wc3RvcmUsIHdvcmsgcmVsaWFibHkgb24gdGhl
+IGJyb2tlbiBmaXJtd2FyZS4uDQoNCkkgYWRtaXQgdGhhdCBpbnRyb2R1Y2luZyBhIGdsb2JhbCB2
+YXJpYWJsZSBpcyBtZXNzeS4gQnV0IEkgY2FuJ3QgZmluZCBhbnkgb3RoZXIgd2F5IHRvIGZpeC4u
+DQoNCklmIEkgc3RpbGwgbWlzdW5kZXJzdGFuZCBzb21ldGhpbmcsIHBsZWFzZSBsZXQgbWUga25v
+dy4NCg0KU2VpamkNCg0KDQoNCg==
