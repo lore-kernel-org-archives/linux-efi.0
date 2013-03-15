@@ -1,50 +1,49 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: RE: sysfs: cannot create duplicate filename
-Date: Thu, 14 Mar 2013 19:31:44 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807@USINDEM103.corp.hds.com>
-References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
-	    <5135BD66.1030005@redhat.com>
-	   <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>
-	   <513A2B29.8090705@redhat.com>
-	  <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>
-	  <513F0734.80600@redhat.com>
-	 <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <51405943.2000601@redhat.com>
- <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: re: EFI: Stash ROMs if they're not in the PCI BAR
+Date: Fri, 15 Mar 2013 11:29:28 +0300
+Message-ID: <20130315082928.GA14520@longonot.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363278817.15011.316.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-PiBIbW0uLiBhY3R1YWxseSwgSSdtIG5vdCBhdCBhbGwgc3VyZSBob3cgdG8gZml4IHRoYXQgY2Fz
-ZSwgc2luY2UgdGhlIGFsZ29yaXRobSBleHBlY3RzIHRvIGZpbmQgZHVwbGljYXRlcy4NCj4gDQo+
-IFNlaWppLCBhbnkgdGhvdWdodHMgaGVyZT8gRm9yIGEgcmVjYXAgb2YgdGhlIGRpc2N1c3Npb24g
-c2VlLA0KPiANCj4gCWh0dHA6Ly9hcnRpY2xlLmdtYW5lLm9yZy9nbWFuZS5saW51eC5rZXJuZWwu
-ZWZpLzgzNQ0KDQpUaGFuayB5b3UgZm9yIHByb3ZpZGluZyB0aGlzLg0KDQpJZiBHZXROZXh0VmFy
-aWFibGVOYW1lKCkgbmV2ZXIgdGVybWluYXRlcywgdGhlIGZpcm13YXJlIGlzIHByb2JhYmx5IGJy
-b2tlbi4NCkluIHRoaXMgY2FzZSwgZWZpdmFycywgaW5jbHVkaW5nIGVmaV9wc3RvcmUsIGNhbid0
-IGd1YXJhbnRlZSB0byB3b3JrIHJlbGlhYmx5Li4uDQoNCj5HcmFudGVkLCBpdCdzIG5vdCBrZXJu
-ZWwncyBmYXVsdCBmb3IgZHVwbGljYXRlIHZhcmlhYmxlcywgYnV0IGl0J2QgYmUgbXVjaCBoYXJk
-ZXIgZm9yIHVzZXJzIA0KPnRvIGZpeCB0aGVpciBicm9rZW4gZmlybXdhcmUgdGhhbiBrZXJuZWwg
-ZGVhbGluZyB3aXRoIGl0IGJ5IG5vdCBkeWluZyBvbiB0aGUgbmV2ZXItZW5kaW5nIA0KPkdldE5l
-eHRWYXJpYWJsZU5hbWUuDQoNClRvIGZpeCB0aGUgYnJva2VuIGZpcm13YXJlLCB1c2VycyBuZWVk
-IHRvIGVyYXNlIHRoZSBkdXBsaWNhdGVkIHZhcmlhYmxlLg0KSXMgaXQgY29ycmVjdD8NCklmIHll
-cywgaG93IGFib3V0IHByaW50aW5nIHRoZSBkdXBsaWNhdGVkIHZhcmlhYmxlIG5hbWUgYXMgZm9s
-bG93cz8NCk9yIGFkZCBwcmludGsoKSBwZXJzdWFkZSB0byB1cGdyYWRpbmcvZG93bmdyYWRpbmcg
-ZmlybXdhcmU/DQoNCisgcHJpbnRrKEtFUk5fV0FSTklORyAiZWZpdmFyczogZHVwbGljYXRlIHZh
-cmlhYmxlIG5hbWUuICVzXG4iLCB2YXJpYWJsZV9uYW1lKTsNCg0KQXMgZm9yIHVwZGF0ZV9zeXNm
-c19lbnRyaWVzKCkgLCBhIGNhbmRpZGF0ZSBmaXggaXMgaW50cm9kdWNpbmcgYSBnbG9iYWwgdmFy
-aWFibGUgbGlrZSBpc19maXJtd2FyZV9icm9rZW4uDQpBbmQgaWYgdGhlIHZhcmlhYmxlIGlzIHNl
-dCwgdXBkYXRlX3N5c2ZzX2VudHJpZXMoKSByZXR1cm5zIHdpdGhvdXQgY2FsbGluZyBHZXROZXh0
-VmFyaWFibGVOYW1lKCkuDQpBcyBJIG1lbnRpb25lZCBhYm92ZSwgdGhlcmUgaXMgbm8gd2F5IHRv
-IG1ha2UgZWZpdmFycywgaW5jbHVkaW5nIGVmaV9wc3RvcmUsIHdvcmsgcmVsaWFibHkgb24gdGhl
-IGJyb2tlbiBmaXJtd2FyZS4uDQoNCkkgYWRtaXQgdGhhdCBpbnRyb2R1Y2luZyBhIGdsb2JhbCB2
-YXJpYWJsZSBpcyBtZXNzeS4gQnV0IEkgY2FuJ3QgZmluZCBhbnkgb3RoZXIgd2F5IHRvIGZpeC4u
-DQoNCklmIEkgc3RpbGwgbWlzdW5kZXJzdGFuZCBzb21ldGhpbmcsIHBsZWFzZSBsZXQgbWUga25v
-dy4NCg0KU2VpamkNCg0KDQoNCg==
+Hello Matthew Garrett,
+
+The patch dd5fc854de5f: "EFI: Stash ROMs if they're not in the PCI 
+BAR" from Dec 5, 2012, leads to the following warning:
+"arch/x86/boot/compressed/eboot.c:290 setup_efi_pci()
+	 error: potentially dereferencing uninitialized 'pci_handle'."
+
+  254  static efi_status_t setup_efi_pci(struct boot_params *params)
+  255  {
+  256          efi_pci_io_protocol *pci;
+  257          efi_status_t status;
+  258          void **pci_handle;
+  259          efi_guid_t pci_proto = EFI_PCI_IO_PROTOCOL_GUID;
+  260          unsigned long nr_pci, size = 0;
+  261          int i;
+  262          struct setup_data *data;
+  263  
+  264          data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
+  265  
+  266          while (data && data->next)
+  267                  data = (struct setup_data *)(unsigned long)data->next;
+  268  
+  269          status = efi_call_phys5(sys_table->boottime->locate_handle,
+  270                                  EFI_LOCATE_BY_PROTOCOL, &pci_proto,
+  271                                  NULL, &size, pci_handle);
+                                                    ^^^^^^^^^^
+This hasn't been initialized yet.
+
+  272  
+  273          if (status == EFI_BUFFER_TOO_SMALL) {
+  274                  status = efi_call_phys3(sys_table->boottime->allocate_pool,
+  275                                          EFI_LOADER_DATA, size, &pci_handle);
+  276  
+
+regards,
+dan carpenter
