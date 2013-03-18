@@ -1,176 +1,219 @@
-From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Subject: Re: Curious crash with secure variables
-Date: Mon, 18 Mar 2013 14:32:18 +0000
-Message-ID: <1363617138.11342.73.camel@i7.infradead.org>
-References: <1363593684.2412.5.camel@dabdike.int.hansenpartnership.com>
-	 <1363607345.15011.339.camel@mfleming-mobl1.ger.corp.intel.com>
-	 <1363616613.2412.19.camel@dabdike.int.hansenpartnership.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: sysfs: cannot create duplicate filename
+Date: Mon, 18 Mar 2013 14:51:01 +0000
+Message-ID: <1363618261.14988.4.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>
+	 <5135BD66.1030005@redhat.com>
+	 <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <513A2B29.8090705@redhat.com>
+	 <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <513F0734.80600@redhat.com>
+	 <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <51405943.2000601@redhat.com>
+	 <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>
+	 <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="sha1"; protocol="application/x-pkcs7-signature";
-	boundary="=-N2jwLzvjp/AVB638PjnF"
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363616613.2412.19.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jordan L Justen <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, 2013-03-14 at 19:31 +0000, Seiji Aguchi wrote:
+> To fix the broken firmware, users need to erase the duplicated variable.
+> Is it correct?
 
---=-N2jwLzvjp/AVB638PjnF
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+I'm unsure whether that will fix the problem for all platforms. Lingzhu,
+do you have any idea?
 
-On Mon, 2013-03-18 at 14:23 +0000, James Bottomley wrote:
-> On Mon, 2013-03-18 at 11:49 +0000, Matt Fleming wrote:
-> > On Mon, 2013-03-18 at 08:01 +0000, James Bottomley wrote:
-> > > The crash is attached below.  The curiosity is that the failing
-> > > "virtual" address is actually a physical address inside the EFI runti=
-me.
-> > > It looks like either SetVirtualAddressMap() failed to relocate
-> > > something, or there are caching effects on pre-relocated addresses.
-> > >=20
-> > > The way to trigger this is to run tianocore in kvm and boot to an
-> > > initial ramdisk with the efi tools and a shell.  If I insert a PK in =
-the
-> > > UEFI shell and then try to remove it in the initrd, the crash happens=
-.
-> > > If, however, I try to insert and remove the PK in the initrd without
-> > > touching the secure variables in the UEFI shell, everything works
-> > >=20
-> > > James
-> >=20
-> > Crashes like this are typical of firmware that fails to update its
-> > internal pointers when SetVirtualAddressMap() is called. There's no
-> > reason that any of the EFI runtime services regions should be skipped
-> > when establishing virtual kernel mappings, unless those regions are
-> > missing the EFI_MEMORY_RUNTIME attribute, which seems unlikely.
->=20
-> Yes, it's a phenomenally complicated operation from looking at the
-> TianoCore source ... might we not be better off not bothering to
-> relocate and just using a private physical mapping for the calls?
+> If yes, how about printing the duplicated variable name as follows?
+> Or add printk() persuade to upgrading/downgrading firmware?
+> 
+> + printk(KERN_WARNING "efivars: duplicate variable name. %s\n", variable_name);
 
-There's a lot to be said for that. It would fix kexec too =E2=80=94 which i=
-s
-currently broken because you're only allowed to call
-SetVirtualAddressMap once.
+Yes, I think there's merit to printing that. Unfortunately, it's a utf16
+string, and printk() doesn't know how to print it.
 
---=20
-dwmw2
+> As for update_sysfs_entries() , a candidate fix is introducing a
+> global variable like is_firmware_broken.
+> And if the variable is set, update_sysfs_entries() returns without
+> calling GetNextVariableName().
+> As I mentioned above, there is no way to make efivars, including
+> efi_pstore, work reliably on the broken firmware..
+> 
+> I admit that introducing a global variable is messy. But I can't find
+> any other way to fix..
 
---=-N2jwLzvjp/AVB638PjnF
-Content-Type: application/x-pkcs7-signature; name="smime.p7s"
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Transfer-Encoding: base64
+Right, looks like this is the only way to go.
 
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIUbjCCBjQw
-ggQcoAMCAQICAR4wDQYJKoZIhvcNAQEFBQAwfTELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0
-Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxKTAn
-BgNVBAMTIFN0YXJ0Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA3MTAyNDIxMDE1NVoX
-DTE3MTAyNDIxMDE1NVowgYwxCzAJBgNVBAYTAklMMRYwFAYDVQQKEw1TdGFydENvbSBMdGQuMSsw
-KQYDVQQLEyJTZWN1cmUgRGlnaXRhbCBDZXJ0aWZpY2F0ZSBTaWduaW5nMTgwNgYDVQQDEy9TdGFy
-dENvbSBDbGFzcyAxIFByaW1hcnkgSW50ZXJtZWRpYXRlIENsaWVudCBDQTCCASIwDQYJKoZIhvcN
-AQEBBQADggEPADCCAQoCggEBAMcJg8zOLdgasSmkLhOrlr6KMoOMpohBllVHrdRvEg/q6r8jR+EK
-75xCGhR8ToREoqe7zM9/UnC6TS2y9UKTpT1v7RSMzR0t6ndl0TWBuUr/UXBhPk+Kmy7bI4yW4urC
-+y7P3/1/X7U8ocb8VpH/Clt+4iq7nirMcNh6qJR+xjOhV+VHzQMALuGYn5KZmc1NbJQYclsGkDxD
-z2UbFqE2+6vIZoL+jb9x4Pa5gNf1TwSDkOkikZB1xtB4ZqtXThaABSONdfmv/Z1pua3FYxnCFmdr
-/+N2JLKutIxMYqQOJebr/f/h5t95m4JgrM3Y/w7YX9d7YAL9jvN4SydHsU6n65cCAwEAAaOCAa0w
-ggGpMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRTcu2SnODaywFc
-fH6WNU7y1LhRgjAfBgNVHSMEGDAWgBROC+8apEBbpRdphzDKNGhD0EGu8jBmBggrBgEFBQcBAQRa
-MFgwJwYIKwYBBQUHMAGGG2h0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9jYTAtBggrBgEFBQcwAoYh
-aHR0cDovL3d3dy5zdGFydHNzbC5jb20vc2ZzY2EuY3J0MFsGA1UdHwRUMFIwJ6AloCOGIWh0dHA6
-Ly93d3cuc3RhcnRzc2wuY29tL3Nmc2NhLmNybDAnoCWgI4YhaHR0cDovL2NybC5zdGFydHNzbC5j
-b20vc2ZzY2EuY3JsMIGABgNVHSAEeTB3MHUGCysGAQQBgbU3AQIBMGYwLgYIKwYBBQUHAgEWImh0
-dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwNAYIKwYBBQUHAgEWKGh0dHA6Ly93d3cu
-c3RhcnRzc2wuY29tL2ludGVybWVkaWF0ZS5wZGYwDQYJKoZIhvcNAQEFBQADggIBAAqDCH14qywG
-XLhjjF6uHLkjd02hcdh9hrw+VUsv+q1eeQWB21jWj3kJ96AUlPCoEGZ/ynJNScWy6QMVQjbbMXlt
-UfO4n4bGGdKo3awPWp61tjAFgraLJgDk+DsSvUD6EowjMTNx25GQgyYJ5RPIzKKR9tQW8gGK+2+R
-HxkUCTbYFnL6kl8Ch507rUdPPipJ9CgJFws3kDS3gOS5WFMxcjO5DwKfKSETEPrHh7p5shuuNktv
-sv6hxHTLhiMKX893gxdT3XLS9OKmCv87vkINQcNEcIIoFWbP9HORz9v3vQwR4e3ksLc2JZOAFK+s
-sS5XMEoznzpihEP0PLc4dCBYjbvSD7kxgDwZ+Aj8Q9PkbvE9sIPP7ON0fz095HdThKjiVJe6vofq
-+n6b1NBc8XdrQvBmunwxD5nvtTW4vtN6VY7mUCmxsCieuoBJ9OlqmsVWQvifIYf40dJPZkk9YgGT
-zWLpXDSfLSplbY2LL9C9U0ptvjcDjefLTvqSFc7tw1sEhF0n/qpA2r0GpvkLRDmcSwVyPvmjFBGq
-Up/pNy8ZuPGQmHwFi2/14+xeSUDG2bwnsYJQG2EdJCB6luQ57GEnTA/yKZSTKI8dDQa8Sd3zfXb1
-9mOgSF0bBdXbuKhEpuP9wirslFe6fQ1t5j5R0xi72MZ8ikMu1RQZKCyDbMwazlHiMIIHFzCCBf+g
-AwIBAgIDBCZ6MA0GCSqGSIb3DQEBBQUAMIGMMQswCQYDVQQGEwJJTDEWMBQGA1UEChMNU3RhcnRD
-b20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlmaWNhdGUgU2lnbmluZzE4MDYG
-A1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVkaWF0ZSBDbGllbnQgQ0EwHhcN
-MTIwNTAxMTI1ODI3WhcNMTMwNTAzMTEzNzIwWjBdMRkwFwYDVQQNExA4Y1VOSzUzMTc0ODRYRjk3
-MRwwGgYDVQQDDBNkd213MkBpbmZyYWRlYWQub3JnMSIwIAYJKoZIhvcNAQkBFhNkd213MkBpbmZy
-YWRlYWQub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyYe7wo6MrtrB4uIGGbrY
-4IifY/Xsq22pSv605yganL0+uyUdd8rCjrYlH6Q/ra5TVJCQFTgzaepkuqPQc79DC/Cxmzm6Qo+s
-wLZy868oFsccsVokL2bPAWIPaRXfNPJKkYR1FTWQfZpWJVQmT+sPf1XFUullVBAK+d9RztopyacI
-xWoZ/W/Cmv7mseQbttYTtGKJa0btX73nsQRWl6SgErWXo59zg9friCLTy1GXMXJYB8H+PtnuwX0w
-MrAvWDdX1ABgIlA17W3FraCn0eW15ZM46eyu0/amGzJZNtemCWF73P7BAijzeV1jNmiJFXdZ0DT0
-w+hmtMO9PxdDUyt78QIDAQABo4IDrjCCA6owCQYDVR0TBAIwADALBgNVHQ8EBAMCBLAwHQYDVR0l
-BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMB0GA1UdDgQWBBTkfe5UOr3PcirsjApibyyUEfsyRzAf
-BgNVHSMEGDAWgBRTcu2SnODaywFcfH6WNU7y1LhRgjAeBgNVHREEFzAVgRNkd213MkBpbmZyYWRl
-YWQub3JnMIICIQYDVR0gBIICGDCCAhQwggIQBgsrBgEEAYG1NwECAjCCAf8wLgYIKwYBBQUHAgEW
-Imh0dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwNAYIKwYBBQUHAgEWKGh0dHA6Ly93
-d3cuc3RhcnRzc2wuY29tL2ludGVybWVkaWF0ZS5wZGYwgfcGCCsGAQUFBwICMIHqMCcWIFN0YXJ0
-Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MAMCAQEagb5UaGlzIGNlcnRpZmljYXRlIHdhcyBp
-c3N1ZWQgYWNjb3JkaW5nIHRvIHRoZSBDbGFzcyAxIFZhbGlkYXRpb24gcmVxdWlyZW1lbnRzIG9m
-IHRoZSBTdGFydENvbSBDQSBwb2xpY3ksIHJlbGlhbmNlIG9ubHkgZm9yIHRoZSBpbnRlbmRlZCBw
-dXJwb3NlIGluIGNvbXBsaWFuY2Ugb2YgdGhlIHJlbHlpbmcgcGFydHkgb2JsaWdhdGlvbnMuMIGc
-BggrBgEFBQcCAjCBjzAnFiBTdGFydENvbSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTADAgECGmRM
-aWFiaWxpdHkgYW5kIHdhcnJhbnRpZXMgYXJlIGxpbWl0ZWQhIFNlZSBzZWN0aW9uICJMZWdhbCBh
-bmQgTGltaXRhdGlvbnMiIG9mIHRoZSBTdGFydENvbSBDQSBwb2xpY3kuMDYGA1UdHwQvMC0wK6Ap
-oCeGJWh0dHA6Ly9jcmwuc3RhcnRzc2wuY29tL2NydHUxLWNybC5jcmwwgY4GCCsGAQUFBwEBBIGB
-MH8wOQYIKwYBBQUHMAGGLWh0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9zdWIvY2xhc3MxL2NsaWVu
-dC9jYTBCBggrBgEFBQcwAoY2aHR0cDovL2FpYS5zdGFydHNzbC5jb20vY2VydHMvc3ViLmNsYXNz
-MS5jbGllbnQuY2EuY3J0MCMGA1UdEgQcMBqGGGh0dHA6Ly93d3cuc3RhcnRzc2wuY29tLzANBgkq
-hkiG9w0BAQUFAAOCAQEAqDU1FKifNtCFJbLnvOi1BLRfk7mut55PMtPSZLJ4/AnG7AjmJnbBI4U5
-DELwvVq3mIpwUpGqZUkqkZMEfBPIbfq517UZB3h4iANtqif+ULfTLhg5XgcK5eF8/T6EtX2c3epq
-ylARdleCbj/0FwiUDvPlTsA6PIN4SCekjRLgjKERrL3heFz+Hteq1rtMAvMkNuyL0/0ijyyg2y45
-NASAl2Afl9SLes/fnoh9nBwzfNQfb6qDYUFpnglfpGrq/0b1NtaOUb2z1SR+H1tKlb8bVJJIdvpu
-mEi27kSRIhzk3h30uTfKkKetgy++ouyldxZ7KZ0PuoLQrBy465EoQLosETCCBxcwggX/oAMCAQIC
-AwQmejANBgkqhkiG9w0BAQUFADCBjDELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0
-ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMT
-L1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBMB4XDTEyMDUw
-MTEyNTgyN1oXDTEzMDUwMzExMzcyMFowXTEZMBcGA1UEDRMQOGNVTks1MzE3NDg0WEY5NzEcMBoG
-A1UEAwwTZHdtdzJAaW5mcmFkZWFkLm9yZzEiMCAGCSqGSIb3DQEJARYTZHdtdzJAaW5mcmFkZWFk
-Lm9yZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmHu8KOjK7aweLiBhm62OCIn2P1
-7KttqUr+tOcoGpy9PrslHXfKwo62JR+kP62uU1SQkBU4M2nqZLqj0HO/QwvwsZs5ukKPrMC2cvOv
-KBbHHLFaJC9mzwFiD2kV3zTySpGEdRU1kH2aViVUJk/rD39VxVLpZVQQCvnfUc7aKcmnCMVqGf1v
-wpr+5rHkG7bWE7RiiWtG7V+957EEVpekoBK1l6Ofc4PX64gi08tRlzFyWAfB/j7Z7sF9MDKwL1g3
-V9QAYCJQNe1txa2gp9HlteWTOOnsrtP2phsyWTbXpglhe9z+wQIo83ldYzZoiRV3WdA09MPoZrTD
-vT8XQ1Mre/ECAwEAAaOCA64wggOqMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgSwMB0GA1UdJQQWMBQG
-CCsGAQUFBwMCBggrBgEFBQcDBDAdBgNVHQ4EFgQU5H3uVDq9z3Iq7IwKYm8slBH7MkcwHwYDVR0j
-BBgwFoAUU3Ltkpzg2ssBXHx+ljVO8tS4UYIwHgYDVR0RBBcwFYETZHdtdzJAaW5mcmFkZWFkLm9y
-ZzCCAiEGA1UdIASCAhgwggIUMIICEAYLKwYBBAGBtTcBAgIwggH/MC4GCCsGAQUFBwIBFiJodHRw
-Oi8vd3d3LnN0YXJ0c3NsLmNvbS9wb2xpY3kucGRmMDQGCCsGAQUFBwIBFihodHRwOi8vd3d3LnN0
-YXJ0c3NsLmNvbS9pbnRlcm1lZGlhdGUucGRmMIH3BggrBgEFBQcCAjCB6jAnFiBTdGFydENvbSBD
-ZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTADAgEBGoG+VGhpcyBjZXJ0aWZpY2F0ZSB3YXMgaXNzdWVk
-IGFjY29yZGluZyB0byB0aGUgQ2xhc3MgMSBWYWxpZGF0aW9uIHJlcXVpcmVtZW50cyBvZiB0aGUg
-U3RhcnRDb20gQ0EgcG9saWN5LCByZWxpYW5jZSBvbmx5IGZvciB0aGUgaW50ZW5kZWQgcHVycG9z
-ZSBpbiBjb21wbGlhbmNlIG9mIHRoZSByZWx5aW5nIHBhcnR5IG9ibGlnYXRpb25zLjCBnAYIKwYB
-BQUHAgIwgY8wJxYgU3RhcnRDb20gQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwAwIBAhpkTGlhYmls
-aXR5IGFuZCB3YXJyYW50aWVzIGFyZSBsaW1pdGVkISBTZWUgc2VjdGlvbiAiTGVnYWwgYW5kIExp
-bWl0YXRpb25zIiBvZiB0aGUgU3RhcnRDb20gQ0EgcG9saWN5LjA2BgNVHR8ELzAtMCugKaAnhiVo
-dHRwOi8vY3JsLnN0YXJ0c3NsLmNvbS9jcnR1MS1jcmwuY3JsMIGOBggrBgEFBQcBAQSBgTB/MDkG
-CCsGAQUFBzABhi1odHRwOi8vb2NzcC5zdGFydHNzbC5jb20vc3ViL2NsYXNzMS9jbGllbnQvY2Ew
-QgYIKwYBBQUHMAKGNmh0dHA6Ly9haWEuc3RhcnRzc2wuY29tL2NlcnRzL3N1Yi5jbGFzczEuY2xp
-ZW50LmNhLmNydDAjBgNVHRIEHDAahhhodHRwOi8vd3d3LnN0YXJ0c3NsLmNvbS8wDQYJKoZIhvcN
-AQEFBQADggEBAKg1NRSonzbQhSWy57zotQS0X5O5rreeTzLT0mSyePwJxuwI5iZ2wSOFOQxC8L1a
-t5iKcFKRqmVJKpGTBHwTyG36ude1GQd4eIgDbaon/lC30y4YOV4HCuXhfP0+hLV9nN3qaspQEXZX
-gm4/9BcIlA7z5U7AOjyDeEgnpI0S4IyhEay94Xhc/h7Xqta7TALzJDbsi9P9Io8soNsuOTQEgJdg
-H5fUi3rP356IfZwcM3zUH2+qg2FBaZ4JX6Rq6v9G9TbWjlG9s9Ukfh9bSpW/G1SSSHb6bphItu5E
-kSIc5N4d9Lk3ypCnrYMvvqLspXcWeymdD7qC0KwcuOuRKEC6LBExggNvMIIDawIBATCBlDCBjDEL
-MAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdp
-dGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFy
-eSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBAgMEJnowCQYFKw4DAhoFAKCCAa8wGAYJKoZIhvcNAQkD
-MQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwMzE4MTQzMjE4WjAjBgkqhkiG9w0BCQQx
-FgQU8wPcojkhRp11HkNeYJaTwD3UQpgwgaUGCSsGAQQBgjcQBDGBlzCBlDCBjDELMAkGA1UEBhMC
-SUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRp
-ZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1l
-ZGlhdGUgQ2xpZW50IENBAgMEJnowgacGCyqGSIb3DQEJEAILMYGXoIGUMIGMMQswCQYDVQQGEwJJ
-TDEWMBQGA1UEChMNU3RhcnRDb20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlm
-aWNhdGUgU2lnbmluZzE4MDYGA1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVk
-aWF0ZSBDbGllbnQgQ0ECAwQmejANBgkqhkiG9w0BAQEFAASCAQAS52wMje7+vnOUCEDpH2hT5zgd
-/eeWxi3lHKPyKGGYejqdCdOGJf/1Wv967vmKh/pW8+sOZHPyuBcGUDLm91aEDnw9WgVhv5pL1SgO
-RmyAUWqabzBroI4OM4dGuB8W2YUz2T5EgWk4HH9+/C5JOugn+XT7F5Hx12Gp2ouVX+x9nkAtVhEL
-lLTtdLY0xLcaa1iM89onHAi+S0BX93GIVHCz0veTUkw4ZiBZBkrfh9FfCgqz4kJH84adCl/DTGxw
-Ol21Ptd8fIH/PKH4Lueyovut6tiZqZNf8ocUxA6biNsQgOkCX+Ez95Bj85BVGb1NnameIgKFaz/L
-cXn/HtmOSlq+AAAAAAAA
+How does everyone feel about this version? Lingzhu, if I could get a
+Tested-by for this version that would be great. This, plus some other
+patches, are sitting on the 'urgent' branch.
+
+---
+
+>From 544a6c06479e4ea4e7acc7eea589a82f0ff9aa6d Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Date: Thu, 7 Mar 2013 11:59:14 +0000
+Subject: [PATCH] efivars: Handle duplicate names from get_next_variable()
+
+Some firmware exhibits a bug where the same VariableName and
+VendorGuid values are returned on multiple invocations of
+GetNextVariableName(). See,
+
+    https://bugzilla.kernel.org/show_bug.cgi?id=47631
+
+As a consequence of such a bug, Andre reports hitting the following
+WARN_ON() in the sysfs code after updating the BIOS on his, "Gigabyte
+Technology Co., Ltd. To be filled by O.E.M./Z77X-UD3H, BIOS F19e
+11/21/2012)" machine,
+
+[    0.581554] EFI Variables Facility v0.08 2004-May-17
+[    0.584914] ------------[ cut here ]------------
+[    0.585639] WARNING: at /home/andre/linux/fs/sysfs/dir.c:536 sysfs_add_one+0xd4/0x100()
+[    0.586381] Hardware name: To be filled by O.E.M.
+[    0.587123] sysfs: cannot create duplicate filename '/firmware/efi/vars/SbAslBufferPtrVar-01f33c25-764d-43ea-aeea-6b5a41f3f3e8'
+[    0.588694] Modules linked in:
+[    0.589484] Pid: 1, comm: swapper/0 Not tainted 3.8.0+ #7
+[    0.590280] Call Trace:
+[    0.591066]  [<ffffffff81208954>] ? sysfs_add_one+0xd4/0x100
+[    0.591861]  [<ffffffff810587bf>] warn_slowpath_common+0x7f/0xc0
+[    0.592650]  [<ffffffff810588bc>] warn_slowpath_fmt+0x4c/0x50
+[    0.593429]  [<ffffffff8134dd85>] ? strlcat+0x65/0x80
+[    0.594203]  [<ffffffff81208954>] sysfs_add_one+0xd4/0x100
+[    0.594979]  [<ffffffff81208b78>] create_dir+0x78/0xd0
+[    0.595753]  [<ffffffff81208ec6>] sysfs_create_dir+0x86/0xe0
+[    0.596532]  [<ffffffff81347e4c>] kobject_add_internal+0x9c/0x220
+[    0.597310]  [<ffffffff81348307>] kobject_init_and_add+0x67/0x90
+[    0.598083]  [<ffffffff81584a71>] ? efivar_create_sysfs_entry+0x61/0x1c0
+[    0.598859]  [<ffffffff81584b2b>] efivar_create_sysfs_entry+0x11b/0x1c0
+[    0.599631]  [<ffffffff8158517e>] register_efivars+0xde/0x420
+[    0.600395]  [<ffffffff81d430a7>] ? edd_init+0x2f5/0x2f5
+[    0.601150]  [<ffffffff81d4315f>] efivars_init+0xb8/0x104
+[    0.601903]  [<ffffffff8100215a>] do_one_initcall+0x12a/0x180
+[    0.602659]  [<ffffffff81d05d80>] kernel_init_freeable+0x13e/0x1c6
+[    0.603418]  [<ffffffff81d05586>] ? loglevel+0x31/0x31
+[    0.604183]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
+[    0.604936]  [<ffffffff816a653e>] kernel_init+0xe/0xf0
+[    0.605681]  [<ffffffff816ce7ec>] ret_from_fork+0x7c/0xb0
+[    0.606414]  [<ffffffff816a6530>] ? rest_init+0x80/0x80
+[    0.607143] ---[ end trace 1609741ab737eb29 ]---
+
+There's not much we can do to work around and keep traversing the
+variable list once we hit this firmware bug. Our only solution is to
+terminate the loop because, as Lingzhu reports, some machines get
+stuck when they encounter duplicate names,
+
+  > I had an IBM System x3100 M4 and x3850 X5 on which kernel would
+  > get stuck in infinite loop creating duplicate sysfs files because,
+  > for some reason, there are several duplicate boot entries in nvram
+  > getting GetNextVariableName into a circle of iteration (with
+  > period > 2).
+
+Also disable the workqueue, as efivar_update_sysfs_entries() uses
+GetNextVariableName() to figure out which variables have been created
+since the last iteration. That algorithm isn't going to work if
+GetNextVariableName() returns duplicates. Note that we don't disable
+EFI variable creation completely on the affected machines, it's just
+that any pstore dump-* files won't appear in sysfs until the next
+boot.
+
+Reported-by: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efivars.c | 48 +++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 47 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index ae26d5e..a1a3d01 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -170,6 +170,7 @@ efivar_create_sysfs_entry(struct efivars *efivars,
+ 
+ static void efivar_update_sysfs_entries(struct work_struct *);
+ static DECLARE_WORK(efivar_work, efivar_update_sysfs_entries);
++static bool efivar_wq_enabled = true;
+ 
+ /* Return the number of unicode characters in data */
+ static unsigned long
+@@ -1443,7 +1444,7 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 
+ 	spin_unlock_irqrestore(&efivars->lock, flags);
+ 
+-	if (reason == KMSG_DUMP_OOPS)
++	if (reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+ 		schedule_work(&efivar_work);
+ 
+ 	*id = part;
+@@ -1974,6 +1975,35 @@ void unregister_efivars(struct efivars *efivars)
+ }
+ EXPORT_SYMBOL_GPL(unregister_efivars);
+ 
++/*
++ * Print a warning when duplicate EFI variables are encountered and
++ * disable the sysfs workqueue since the firmware is buggy.
++ */
++static void dup_variable_bug(efi_char16_t *s16, efi_guid_t *vendor_guid,
++			     unsigned long len16)
++{
++	size_t i, len8 = len16 / sizeof(efi_char16_t);
++	char *s8;
++
++	/*
++	 * Disable the workqueue since the algorithm it uses for
++	 * detecting new variables won't work with this buggy
++	 * implementation of GetNextVariableName().
++	 */
++	efivar_wq_enabled = false;
++
++	s8 = kzalloc(len8, GFP_KERNEL);
++	if (!s8)
++		return;
++
++	for (i = 0; i < len8; i++)
++		s8[i] = s16[i];
++
++	printk(KERN_WARNING "efivars: duplicate variable: %s-%pUl\n",
++	       s8, vendor_guid);
++	kfree(s8);
++}
++
+ int register_efivars(struct efivars *efivars,
+ 		     const struct efivar_operations *ops,
+ 		     struct kobject *parent_kobj)
+@@ -2024,6 +2054,22 @@ int register_efivars(struct efivars *efivars,
+ 		case EFI_SUCCESS:
+ 			variable_name_size = var_name_strnsize(variable_name,
+ 							       variable_name_size);
++
++			/*
++			 * Some firmware implementations return the
++			 * same variable name on multiple calls to
++			 * get_next_variable(). Terminate the loop
++			 * immediately as there is no guarantee that
++			 * we'll ever see a different variable name,
++			 * and may end up looping here forever.
++			 */
++			if (variable_is_present(variable_name, &vendor_guid)) {
++				dup_variable_bug(variable_name, &vendor_guid,
++						 variable_name_size);
++				status = EFI_NOT_FOUND;
++				break;
++			}
++
+ 			efivar_create_sysfs_entry(efivars,
+ 						  variable_name_size,
+ 						  variable_name,
+-- 
+1.7.11.7
 
 
---=-N2jwLzvjp/AVB638PjnF--
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
