@@ -1,63 +1,278 @@
 From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Curious crash with secure variables
-Date: Mon, 18 Mar 2013 08:01:24 +0000
-Message-ID: <1363593684.2412.5.camel@dabdike.int.hansenpartnership.com>
+Subject: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
+ services
+Date: Mon, 18 Mar 2013 08:40:14 +0000
+Message-ID: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The crash is attached below.  The curiosity is that the failing
-"virtual" address is actually a physical address inside the EFI runtime.
-It looks like either SetVirtualAddressMap() failed to relocate
-something, or there are caching effects on pre-relocated addresses.
+From: James Bottomley <JBottomley-MU7nAjRaF3makBO8gow8eQ@public.gmane.org>
 
-The way to trigger this is to run tianocore in kvm and boot to an
-initial ramdisk with the efi tools and a shell.  If I insert a PK in the
-UEFI shell and then try to remove it in the initrd, the crash happens.
-If, however, I try to insert and remove the PK in the initrd without
-touching the secure variables in the UEFI shell, everything works
+The object here is to make the NV+BS variables accessible (at least read only)
+at runtime so we can get a full picture of the state of the EFI variables for
+debugging and secure boot purposes.
 
-James
+The way this is done is to get the efi stub to pull all the NV+BS
+(i.e. variables without the RT flag) out into setup_data records which can
+then be read back in at runtime.  the EFI calls get_next_variable() and
+get_variable() are modified to run through these setup records when the real
+calls fail.
+
+Signed-off-by: James Bottomley <JBottomley-MU7nAjRaF3makBO8gow8eQ@public.gmane.org>
 
 ---
 
-[    0.998342] BUG: unable to handle kernel paging request at 000000001e339788
-[    1.000046] IP: [<ffff88001e3e4989>] 0xffff88001e3e4988
-[    1.000046] PGD 18211067 PUD 181e8067 PMD 0 
-[    1.000046] Oops: 0002 [#1] SMP 
-[    1.000046] Modules linked in:
-[    1.000046] CPU 0 
-[    1.000046] Pid: 34, comm: efi-updatevar Not tainted 3.9.0-rc2+ #45  
-[    1.000046] RIP: 0010:[<ffff88001e3e4989>]  [<ffff88001e3e4989>] 0xffff88001e3e4988
-[    1.000046] RSP: 0018:ffff88001821b9f0  EFLAGS: 00010086
-[    1.000046] RAX: 000000001e3396e0 RBX: ffffffff818537c0 RCX: 0000000000000000
-[    1.000046] RDX: ffff88001e36eee0 RSI: ffff88001e36eee0 RDI: 000000001e3396e0
-[    1.000046] RBP: ffff88001821ba30 R08: ffff88001f9dfd72 R09: 00000000000002cc
-[    1.000046] R10: ffff8800181ff800 R11: ffffffff8152573a R12: ffff8800181ff800
-[    1.000046] R13: ffff880018193000 R14: 0000000000000573 R15: ffff88001ed654c0
-[    1.000046] FS:  00007f161a916700(0000) GS:ffff88001d200000(0000) knlGS:0000000000000000
-[    1.000046] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[    1.000046] CR2: 000000001e339788 CR3: 00000000181f4000 CR4: 00000000000006f0
-[    1.000046] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[    1.000046] DR3: 0000000000000000 DR6: 00000000ffff0ff0 DR7: 0000000000000400
-[    1.000046] Process efi-updatevar (pid: 34, threadinfo ffff88001821a000, task ffff880018203870)
-[    1.000046] Stack:
-[    1.000046]  0000000000000000 0000000000000018 ffff88001e36eee0 000000001e3396e0
-[    1.000046]  0000000000000000 0000001800000000 ffff88001e40e670 ffff88001e36eee0
-[    1.000046]  ffff88001821ba80 ffff88001e3ab99d 11d293ca8be4df61 ffff88001e4460a0
-[    1.000046] Call Trace:
-[    1.000046]  [<ffffffff8103a25b>] ? efi_call5+0x4b/0x80
-[    1.000046]  [<ffffffff812aaa2e>] ? efivarfs_file_write+0x1f7/0x351
-[    1.000046]  [<ffffffff8117999d>] ? security_file_permission+0x15/0x2b
-[    1.000046]  [<ffffffff8110dfae>] ? vfs_write+0x96/0xf8
-[    1.000046]  [<ffffffff8110e1d6>] ? sys_write+0x51/0x80
-[    1.000046]  [<ffffffff813937ed>] ? system_call_fastpath+0x1a/0x1f
-[    1.000046] Code: 8b 45 d8 48 89 c7 48 b8 8b 56 3a 1e 00 88 ff ff ff d0 eb 01 90 c9 c3 55 48 89 e5 48 83 ec 40 48 89 7d d8 48 89 75 d0 48 8b 45 d8 <c7> 80 a8 00 00 00 00 00 00 00 48 8b 45 d8 48 8b 48 28 48 8b 45 
-[    1.000046] RIP  [<ffff88001e3e4989>] 0xffff88001e3e4988
-[    1.000046]  RSP <ffff88001821b9f0>
-[    1.000046] CR2: 000000001e339788
-[    1.000046] ---[ end trace ee19301618adf435 ]---
+This same mechanism should work for all architectures, but the method of
+transferring information from boot to runtime differs, so it can't be
+done generically
+
+James
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index c205035..6bbbb2e 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -251,6 +251,85 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ 	*size = len;
+ }
+ 
++static efi_status_t setup_efi_bootvars(struct boot_params *params)
++{
++	const int len = 1024;
++	efi_char16_t *str;
++	efi_status_t status;
++	struct setup_data **data = (struct setup_data **)&params->hdr.setup_data;
++
++	status = efi_call_phys3(sys_table->boottime->allocate_pool,
++				EFI_LOADER_DATA, len, &str);
++	if (status != EFI_SUCCESS)
++		return status;
++
++	/*
++	 * Note: this trick only works on Little Endian if hdr.setup_data
++	 * is u64 on both 64 and 32 bit
++	 */
++	while (*data)
++		data = (struct setup_data **)&(*data)->next;
++
++	memset(str, 0, len);
++
++	for (;;) {
++		unsigned long size = len, str_len;
++		efi_guid_t guid;
++		struct efi_setup_bootvars *bvs;
++		unsigned int attributes;
++
++		status = efi_call_phys3(sys_table->runtime->get_next_variable,
++					&size, str, &guid);
++		if (status != EFI_SUCCESS)
++			break;
++
++		str_len = size;
++		size = 0;
++		status = efi_call_phys5(sys_table->runtime->get_variable,
++					str, &guid, &attributes, &size, NULL);
++		if (status != EFI_SUCCESS && status != EFI_BUFFER_TOO_SMALL)
++			break;
++
++
++		/*
++		 * Please don't be tempted to optimise here: some
++		 * UEFI implementations fail to set attributes if
++		 * they return any error (including EFI_BUFFER_TOO_SMALL)
++		 */
++		status = efi_call_phys3(sys_table->boottime->allocate_pool,
++					EFI_LOADER_DATA,
++					size + sizeof(*bvs) + str_len,
++					&bvs);
++		if (status != EFI_SUCCESS)
++			continue;
++		memset(bvs, 0 , sizeof(bvs));
++		status = efi_call_phys5(sys_table->runtime->get_variable,
++					str, &guid, &attributes,
++					&size, bvs->data);
++
++		if (status != EFI_SUCCESS
++		    || (attributes & 0x07) != (EFI_VARIABLE_BOOTSERVICE_ACCESS |
++					       EFI_VARIABLE_NON_VOLATILE)) {
++			efi_call_phys1(sys_table->boottime->free_pool, bvs);
++			continue;
++		}
++		memcpy(bvs->data + size, str, str_len);
++		bvs->name_size = str_len;
++		bvs->s_d.type = SETUP_EFIVAR;
++		bvs->s_d.len = size + sizeof(*bvs) + str_len;
++		bvs->guid = guid;
++		bvs->size = size;
++		bvs->attributes = attributes;
++		*data = (struct setup_data *)bvs;
++		data = (struct setup_data **)&(*data)->next;
++	}
++	*data = NULL;
++	status = EFI_SUCCESS;
++ out:
++	efi_call_phys1(sys_table->boottime->free_pool, str);
++	return status;
++}
++
+ static efi_status_t setup_efi_pci(struct boot_params *params)
+ {
+ 	efi_pci_io_protocol *pci;
+@@ -1159,6 +1238,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 
+ 	setup_efi_pci(boot_params);
+ 
++	setup_efi_bootvars(boot_params);
++
+ 	status = efi_call_phys3(sys_table->boottime->allocate_pool,
+ 				EFI_LOADER_DATA, sizeof(*gdt),
+ 				(void **)&gdt);
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 60c89f3..2dadecd 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -122,4 +122,13 @@ static inline bool efi_is_native(void)
+ #define efi_call6(_f, _a1, _a2, _a3, _a4, _a5, _a6)	(-ENOSYS)
+ #endif /* CONFIG_EFI */
+ 
++struct efi_setup_bootvars {
++	struct setup_data s_d;
++	unsigned int attributes;
++	efi_guid_t guid;
++	unsigned long name_size;
++	unsigned long size;	/* size of the variable data (name follows) */
++	unsigned char data[0];
++};
++
+ #endif /* _ASM_X86_EFI_H */
+diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+index c15ddaf..e864d23 100644
+--- a/arch/x86/include/uapi/asm/bootparam.h
++++ b/arch/x86/include/uapi/asm/bootparam.h
+@@ -6,6 +6,7 @@
+ #define SETUP_E820_EXT			1
+ #define SETUP_DTB			2
+ #define SETUP_PCI			3
++#define SETUP_EFIVAR			4
+ 
+ /* ram_size flags */
+ #define RAMDISK_IMAGE_START_MASK	0x07FF
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index fff986d..931060a 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -153,17 +153,103 @@ static efi_status_t virt_efi_get_variable(efi_char16_t *name,
+ 					  unsigned long *data_size,
+ 					  void *data)
+ {
+-	return efi_call_virt5(get_variable,
+-			      name, vendor, attr,
+-			      data_size, data);
++	efi_status_t status = efi_call_virt5(get_variable,
++					     name, vendor, attr,
++					     data_size, data);
++	u64 pa_data;
++	struct setup_data *s_d;
++
++	if (status != EFI_NOT_FOUND)
++		return status;
++
++
++	for (pa_data = boot_params.hdr.setup_data; pa_data;
++	     pa_data = s_d->next) {
++		struct efi_setup_bootvars *bvs;
++		efi_char16_t *bvs_name;
++		int i = 0;
++
++		s_d = phys_to_virt(pa_data);
++
++		if (s_d->type != SETUP_EFIVAR)
++			continue;
++
++		bvs = (struct efi_setup_bootvars *)s_d;
++		bvs_name = (efi_char16_t *)(bvs->data + bvs->size);
++
++		for (i = 0; bvs_name[i] != 0 && name[i] != 0; i++)
++			if (bvs_name[i] != name[i])
++				break;
++
++		if (bvs_name[i] != 0 || name[i] != 0)
++			continue;
++
++		if (memcmp(&bvs->guid, vendor, sizeof(*vendor)) != 0)
++			continue;
++
++		if (attr)
++			*attr = bvs->attributes;
++
++		if (*data_size < bvs->size) {
++			*data_size = bvs->size;
++			return EFI_BUFFER_TOO_SMALL;
++		}
++		*data_size = bvs->size;
++		memcpy(data, bvs->data, bvs->size);
++
++		return EFI_SUCCESS;
++	}
++	return EFI_NOT_FOUND;
+ }
+ 
+ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
+ 					       efi_char16_t *name,
+ 					       efi_guid_t *vendor)
+ {
+-	return efi_call_virt3(get_next_variable,
+-			      name_size, name, vendor);
++	static int use_bootvars = 0;
++	efi_status_t status;
++	u64 pa_data = boot_params.hdr.setup_data;
++	int found = 0;
++	struct setup_data *data;
++
++	if (!use_bootvars) {
++		status = efi_call_virt3(get_next_variable,
++					name_size, name, vendor);
++		if (status == EFI_NOT_FOUND)
++			use_bootvars = 1;
++		else
++			return status;
++	}
++
++	for (pa_data = boot_params.hdr.setup_data; pa_data;
++	     pa_data = data->next) {
++		struct efi_setup_bootvars *bvs;
++		efi_char16_t *bvs_name;
++
++		data = phys_to_virt(pa_data);
++
++		if (data->type != SETUP_EFIVAR)
++			continue;
++
++		bvs = (struct efi_setup_bootvars *)data;
++		bvs_name = (efi_char16_t *)(bvs->data + bvs->size);
++
++		if (use_bootvars != 1 && !found) {
++			unsigned long size = min(bvs->name_size, *name_size);
++
++			if (memcmp(bvs_name, name, size) == 0)
++				found = 1;
++		} else {
++			memcpy(name, bvs_name, bvs->name_size);
++			*name_size = bvs->name_size;
++			*vendor = bvs->guid;
++			use_bootvars = 2;
++			return EFI_SUCCESS;
++		}
++	}
++	use_bootvars = 0;
++
++	return EFI_NOT_FOUND;
+ }
+ 
+ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
