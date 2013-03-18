@@ -1,8 +1,7 @@
 From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 04/12] efi: Enable secure boot lockdown automatically when
- enabled in firmware
-Date: Mon, 18 Mar 2013 17:32:25 -0400
-Message-ID: <1363642353-30749-4-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH 12/12] kexec: Require CAP_SYS_COMPROMISE_KERNEL
+Date: Mon, 18 Mar 2013 17:32:33 -0400
+Message-ID: <1363642353-30749-12-git-send-email-matthew.garrett@nebula.com>
 References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -19,143 +18,33 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The firmware has a set of flags that indicate whether secure boot is enabled
-and enforcing. Use them to indicate whether the kernel should lock itself
-down.  We also indicate the machine is in secure boot mode by adding the
-EFI_SECURE_BOOT bit for use with efi_enabled.
+kexec can easily be used to modify the security policy of a running kernel.
+CONFIG_KEXEC_JUMP makes it trivial for an attacker to simply jump to another
+kernel, modify the security policy of the previous kernel and then switch
+back, but it's still merely a matter of difficulty. Long term we'll want
+an interface for ensuring that kexec is able to launch signed code, but we
+should default to safe behaviour for now.
 
 Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/x86/zero-page.txt       |  3 ++-
- arch/x86/boot/compressed/eboot.c      | 32 ++++++++++++++++++++++++++++++++
- arch/x86/include/uapi/asm/bootparam.h |  3 ++-
- arch/x86/kernel/setup.c               |  5 +++++
- include/linux/cred.h                  |  2 ++
- include/linux/efi.h                   |  1 +
- 6 files changed, 44 insertions(+), 2 deletions(-)
+ kernel/kexec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
-index 199f453..16f2464 100644
---- a/Documentation/x86/zero-page.txt
-+++ b/Documentation/x86/zero-page.txt
-@@ -29,7 +29,8 @@ Offset	Proto	Name		Meaning
- 1E8/001	ALL	e820_entries	Number of entries in e820_map (below)
- 1E9/001	ALL	eddbuf_entries	Number of entries in eddbuf (below)
- 1EA/001	ALL	edd_mbr_sig_buf_entries	Number of entries in edd_mbr_sig_buffer
--				(below)
-+1EB/001	ALL	kbd_status	Numlock is enabled
-+1EC/001	ALL	secure_boot	Kernel should enable secure boot lockdowns
- 1EF/001	ALL	sentinel	Used to detect broken bootloaders
- 290/040	ALL	edd_mbr_sig_buffer EDD MBR signatures
- 2D0/A00	ALL	e820_map	E820 memory map table
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index c205035..96d859d 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -861,6 +861,36 @@ fail:
- 	return status;
- }
+diff --git a/kernel/kexec.c b/kernel/kexec.c
+index bddd3d7..cbdb930 100644
+--- a/kernel/kexec.c
++++ b/kernel/kexec.c
+@@ -946,7 +946,7 @@ SYSCALL_DEFINE4(kexec_load, unsigned long, entry, unsigned long, nr_segments,
+ 	int result;
  
-+static int get_secure_boot(efi_system_table_t *_table)
-+{
-+	u8 sb, setup;
-+	unsigned long datasize = sizeof(sb);
-+	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
-+	efi_status_t status;
-+
-+	status = efi_call_phys5(sys_table->runtime->get_variable,
-+				L"SecureBoot", &var_guid, NULL, &datasize, &sb);
-+
-+	if (status != EFI_SUCCESS)
-+		return 0;
-+
-+	if (sb == 0)
-+		return 0;
-+
-+
-+	status = efi_call_phys5(sys_table->runtime->get_variable,
-+				L"SetupMode", &var_guid, NULL, &datasize,
-+				&setup);
-+
-+	if (status != EFI_SUCCESS)
-+		return 0;
-+
-+	if (setup == 1)
-+		return 0;
-+
-+	return 1;
-+}
-+
- /*
-  * Because the x86 boot code expects to be passed a boot_params we
-  * need to create one ourselves (usually the bootloader would create
-@@ -1155,6 +1185,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
- 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
- 		goto fail;
+ 	/* We only trust the superuser with rebooting the system. */
+-	if (!capable(CAP_SYS_BOOT))
++	if (!capable(CAP_SYS_BOOT) || !capable(CAP_COMPROMISE_KERNEL))
+ 		return -EPERM;
  
-+	boot_params->secure_boot = get_secure_boot(sys_table);
-+
- 	setup_graphics(boot_params);
- 
- 	setup_efi_pci(boot_params);
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index c15ddaf..85d7685 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -131,7 +131,8 @@ struct boot_params {
- 	__u8  eddbuf_entries;				/* 0x1e9 */
- 	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
- 	__u8  kbd_status;				/* 0x1eb */
--	__u8  _pad5[3];					/* 0x1ec */
-+	__u8  secure_boot;				/* 0x1ec */
-+	__u8  _pad5[2];					/* 0x1ed */
  	/*
- 	 * The sentinel is set to a nonzero value (0xff) in header.S.
- 	 *
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 90d8cc9..5ef9285 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1104,6 +1104,11 @@ void __init setup_arch(char **cmdline_p)
- 
- 	io_delay_init();
- 
-+	if (boot_params.secure_boot) {
-+		set_bit(EFI_SECURE_BOOT, &x86_efi_facility);
-+		secureboot_enable();
-+	}
-+
- 	/*
- 	 * Parse the ACPI tables for possible boot-time SMP configuration.
- 	 */
-diff --git a/include/linux/cred.h b/include/linux/cred.h
-index 04421e8..9e69542 100644
---- a/include/linux/cred.h
-+++ b/include/linux/cred.h
-@@ -156,6 +156,8 @@ extern int set_security_override_from_ctx(struct cred *, const char *);
- extern int set_create_files_as(struct cred *, struct inode *);
- extern void __init cred_init(void);
- 
-+extern void secureboot_enable(void);
-+
- /*
-  * check for validity of credentials
-  */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 9bf2f1f..1bf382b 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -627,6 +627,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_RUNTIME_SERVICES	3	/* Can we use runtime services? */
- #define EFI_MEMMAP		4	/* Can we use EFI memory map? */
- #define EFI_64BIT		5	/* Is the firmware 64-bit? */
-+#define EFI_SECURE_BOOT	6	/* Are we in Secure Boot mode? */
- 
- #ifdef CONFIG_EFI
- # ifdef CONFIG_X86
 -- 
 1.8.1.2
