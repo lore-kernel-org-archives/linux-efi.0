@@ -1,58 +1,51 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 08/12] asus-wmi: Restrict debugfs interface
-Date: Mon, 18 Mar 2013 17:32:29 -0400
-Message-ID: <1363642353-30749-8-git-send-email-matthew.garrett@nebula.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 02/12] SELinux: define mapping for CAP_COMPROMISE_KERNEL
+Date: Mon, 18 Mar 2013 17:32:23 -0400
+Message-ID: <1363642353-30749-2-git-send-email-matthew.garrett@nebula.com>
 References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-We have no way of validating what all of the Asus WMI methods do on a
-given machine, and there's a risk that some will allow hardware state to
-be manipulated in such a way that arbitrary code can be executed in the
-kernel. Add a capability check to prevent that.
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+Add the name of the new CAP_COMPROMISE_KERNEL capability. This allows SELinux
+policies to properly map CAP_COMPROMISE_KERNEL to the appropriate
+capability class.
+
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/platform/x86/asus-wmi.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ security/selinux/include/classmap.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
-index c11b242..6d5f88f 100644
---- a/drivers/platform/x86/asus-wmi.c
-+++ b/drivers/platform/x86/asus-wmi.c
-@@ -1617,6 +1617,9 @@ static int show_dsts(struct seq_file *m, void *data)
- 	int err;
- 	u32 retval = -1;
- 
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
-+
- 	err = asus_wmi_get_devstate(asus, asus->debug.dev_id, &retval);
- 
- 	if (err < 0)
-@@ -1633,6 +1636,9 @@ static int show_devs(struct seq_file *m, void *data)
- 	int err;
- 	u32 retval = -1;
- 
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
-+
- 	err = asus_wmi_set_devstate(asus->debug.dev_id, asus->debug.ctrl_param,
- 				    &retval);
- 
-@@ -1657,6 +1663,9 @@ static int show_call(struct seq_file *m, void *data)
- 	union acpi_object *obj;
- 	acpi_status status;
- 
-+	if (!capable(CAP_COMPROMISE_KERNEL))
-+		return -EPERM;
-+
- 	status = wmi_evaluate_method(ASUS_WMI_MGMT_GUID,
- 				     1, asus->debug.method_id,
- 				     &input, &output);
+diff --git a/security/selinux/include/classmap.h b/security/selinux/include/classmap.h
+index 14d04e6..ed99a2d 100644
+--- a/security/selinux/include/classmap.h
++++ b/security/selinux/include/classmap.h
+@@ -146,8 +146,8 @@ struct security_class_mapping secclass_map[] = {
+ 	{ "memprotect", { "mmap_zero", NULL } },
+ 	{ "peer", { "recv", NULL } },
+ 	{ "capability2",
+-	  { "mac_override", "mac_admin", "syslog", "wake_alarm", "block_suspend",
+-	    NULL } },
++	  { "mac_override", "mac_admin", "syslog", "wake_alarm",
++	    "block_suspend", "compromise_kernel", NULL } },
+ 	{ "kernel_service", { "use_as_override", "create_files_as", NULL } },
+ 	{ "tun_socket",
+ 	  { COMMON_SOCK_PERMS, "attach_queue", NULL } },
 -- 
 1.8.1.2
