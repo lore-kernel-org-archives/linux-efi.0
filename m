@@ -1,72 +1,38 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 03/12] Secure boot: Add a dummy kernel parameter that will switch on Secure Boot mode
-Date: Mon, 18 Mar 2013 17:32:24 -0400
-Message-ID: <1363642353-30749-3-git-send-email-matthew.garrett@nebula.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 10/12] acpi: Ignore acpi_rsdp kernel parameter in a secure boot environment
+Date: Mon, 18 Mar 2013 17:32:31 -0400
+Message-ID: <1363642353-30749-10-git-send-email-matthew.garrett@nebula.com>
 References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer@redhat.com>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-This forcibly drops CAP_COMPROMISE_KERNEL from both cap_permitted and cap_bset
-in the init_cred struct, which everything else inherits from.  This works on
-any machine and can be used to develop even if the box doesn't have UEFI.
+This option allows userspace to pass the RSDP address to the kernel.  This
+could potentially be used to circumvent the secure boot trust model.
+We ignore the setting if we don't have the CAP_COMPROMISE_KERNEL capability.
 
-Signed-off-by: Josh Boyer <jwboyer@redhat.com>
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/kernel-parameters.txt |  7 +++++++
- kernel/cred.c                       | 17 +++++++++++++++++
- 2 files changed, 24 insertions(+)
+ drivers/acpi/osl.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 4609e81..7c0b137 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -2683,6 +2683,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			Note: increases power consumption, thus should only be
- 			enabled if running jitter sensitive (HPC/RT) workloads.
+diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
+index 586e7e9..0ef63f1 100644
+--- a/drivers/acpi/osl.c
++++ b/drivers/acpi/osl.c
+@@ -245,7 +245,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
+ acpi_physical_address __init acpi_os_get_root_pointer(void)
+ {
+ #ifdef CONFIG_KEXEC
+-	if (acpi_rsdp)
++	if (acpi_rsdp && capable(CAP_COMPROMISE_KERNEL))
+ 		return acpi_rsdp;
+ #endif
  
-+	secureboot_enable=
-+			[KNL] Enables an emulated UEFI Secure Boot mode.  This
-+			locks down various aspects of the kernel guarded by the
-+			CAP_COMPROMISE_KERNEL capability.  This includes things
-+			like /dev/mem, IO port access, and other areas.  It can
-+			be used on non-UEFI machines for testing purposes.
-+
- 	security=	[SECURITY] Choose a security module to enable at boot.
- 			If this boot parameter is not specified, only the first
- 			security module asking for security registration will be
-diff --git a/kernel/cred.c b/kernel/cred.c
-index e0573a4..c3f4e3e 100644
---- a/kernel/cred.c
-+++ b/kernel/cred.c
-@@ -565,6 +565,23 @@ void __init cred_init(void)
- 				     0, SLAB_HWCACHE_ALIGN|SLAB_PANIC, NULL);
- }
- 
-+void __init secureboot_enable()
-+{
-+	pr_info("Secure boot enabled\n");
-+	cap_lower((&init_cred)->cap_bset, CAP_COMPROMISE_KERNEL);
-+	cap_lower((&init_cred)->cap_permitted, CAP_COMPROMISE_KERNEL);
-+}
-+
-+/* Dummy Secure Boot enable option to fake out UEFI SB=1 */
-+static int __init secureboot_enable_opt(char *str)
-+{
-+	int sb_enable = !!simple_strtol(str, NULL, 0);
-+	if (sb_enable)
-+		secureboot_enable();
-+	return 1;
-+}
-+__setup("secureboot_enable=", secureboot_enable_opt);
-+
- /**
-  * prepare_kernel_cred - Prepare a set of credentials for a kernel service
-  * @daemon: A userspace daemon to be used as a reference
 -- 
 1.8.1.2
