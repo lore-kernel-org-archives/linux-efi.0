@@ -1,7 +1,7 @@
 From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 12/12] kexec: Require CAP_SYS_COMPROMISE_KERNEL
-Date: Mon, 18 Mar 2013 17:32:33 -0400
-Message-ID: <1363642353-30749-12-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH 11/12] x86: Require CAP_COMPROMISE_KERNEL for MSR writing
+Date: Mon, 18 Mar 2013 17:32:32 -0400
+Message-ID: <1363642353-30749-11-git-send-email-matthew.garrett@nebula.com>
 References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -18,33 +18,44 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-kexec can easily be used to modify the security policy of a running kernel.
-CONFIG_KEXEC_JUMP makes it trivial for an attacker to simply jump to another
-kernel, modify the security policy of the previous kernel and then switch
-back, but it's still merely a matter of difficulty. Long term we'll want
-an interface for ensuring that kexec is able to launch signed code, but we
-should default to safe behaviour for now.
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
+Writing to MSRs should not be allowed unless CAP_COMPROMISE_KERNEL is
+set since it could lead to execution of arbitrary code in kernel mode.
+
+Signed-off-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 ---
- kernel/kexec.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/kernel/msr.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/kernel/kexec.c b/kernel/kexec.c
-index bddd3d7..cbdb930 100644
---- a/kernel/kexec.c
-+++ b/kernel/kexec.c
-@@ -946,7 +946,7 @@ SYSCALL_DEFINE4(kexec_load, unsigned long, entry, unsigned long, nr_segments,
- 	int result;
+diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
+index ce13049..fa4dc6c 100644
+--- a/arch/x86/kernel/msr.c
++++ b/arch/x86/kernel/msr.c
+@@ -103,6 +103,9 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
+ 	int err = 0;
+ 	ssize_t bytes = 0;
  
- 	/* We only trust the superuser with rebooting the system. */
--	if (!capable(CAP_SYS_BOOT))
-+	if (!capable(CAP_SYS_BOOT) || !capable(CAP_COMPROMISE_KERNEL))
- 		return -EPERM;
++	if (!capable(CAP_COMPROMISE_KERNEL))
++		return -EPERM;
++
+ 	if (count % 8)
+ 		return -EINVAL;	/* Invalid chunk size */
  
- 	/*
+@@ -150,6 +153,10 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
+ 			err = -EBADF;
+ 			break;
+ 		}
++		if (!capable(CAP_COMPROMISE_KERNEL)) {
++			err = -EPERM;
++			break;
++		}
+ 		if (copy_from_user(&regs, uregs, sizeof regs)) {
+ 			err = -EFAULT;
+ 			break;
 -- 
 1.8.1.2
