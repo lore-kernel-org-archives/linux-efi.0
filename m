@@ -1,53 +1,47 @@
 From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Mon, 18 Mar 2013 17:32:22 -0400
-Message-ID: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH 09/12] Require CAP_COMPROMISE_KERNEL for /dev/mem and /dev/kmem access
+Date: Mon, 18 Mar 2013 17:32:30 -0400
+Message-ID: <1363642353-30749-9-git-send-email-matthew.garrett@nebula.com>
+References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+Sender: linux-security-module-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-Caring about protecting the kernel from UID 0 was previously relatively
-uninteresting, since an attacker could simply modify the kernel, a module
-or an earlier part of the boot chain in order to insert new code. However,
-there are now a range of widely-deployed mechanisms for ensuring the
-authenticity of the early boot process and kernel. The addition of module
-signing makes most of these attacks infeasible.
-
-This means we can return our focus to the kernel. There's currently a number
-of kernel interfaces that permit privileged userspace to modify the running
-kernel. These are currently protected by CAP_SYS_RAWIO, but unfortunately
-the semantics of this capability are poorly defined and it now covers a large
-superset of the desired behaviour.
-
-This patch introduces CAP_COMPROMISE_KERNEL. Holding this capability
-indicates that a process is empowered to perform tasks that may result in
-modification of the running kernel. While aimed at handling the specific
-use-case of Secure Boot, it is generalisable to any other environment where
-permitting userspace to modify the kernel is undesirable.
+Allowing users to write to address space makes it possible for the kernel
+to be subverted. Restrict this when we need to protect the kernel.
 
 Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- include/uapi/linux/capability.h | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ drivers/char/mem.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-diff --git a/include/uapi/linux/capability.h b/include/uapi/linux/capability.h
-index ba478fa..7109e650 100644
---- a/include/uapi/linux/capability.h
-+++ b/include/uapi/linux/capability.h
-@@ -343,7 +343,11 @@ struct vfs_cap_data {
+diff --git a/drivers/char/mem.c b/drivers/char/mem.c
+index 7eee4d8..772ee2b 100644
+--- a/drivers/char/mem.c
++++ b/drivers/char/mem.c
+@@ -158,6 +158,9 @@ static ssize_t write_mem(struct file *file, const char __user *buf,
+ 	unsigned long copied;
+ 	void *ptr;
  
- #define CAP_BLOCK_SUSPEND    36
- 
--#define CAP_LAST_CAP         CAP_BLOCK_SUSPEND
-+/* Allow things that trivially permit root to modify the running kernel */
++	if (!capable(CAP_COMPROMISE_KERNEL))
++		return -EPERM;
 +
-+#define CAP_COMPROMISE_KERNEL  37
+ 	if (!valid_phys_addr_range(p, count))
+ 		return -EFAULT;
+ 
+@@ -530,6 +533,9 @@ static ssize_t write_kmem(struct file *file, const char __user *buf,
+ 	char *kbuf; /* k-addr because vwrite() takes vmlist_lock rwlock */
+ 	int err = 0;
+ 
++	if (!capable(CAP_COMPROMISE_KERNEL))
++		return -EPERM;
 +
-+#define CAP_LAST_CAP         CAP_COMPROMISE_KERNEL
- 
- #define cap_valid(x) ((x) >= 0 && (x) <= CAP_LAST_CAP)
- 
+ 	if (p < (unsigned long) high_memory) {
+ 		unsigned long to_write = min_t(unsigned long, count,
+ 					       (unsigned long)high_memory - p);
 -- 
 1.8.1.2
+
