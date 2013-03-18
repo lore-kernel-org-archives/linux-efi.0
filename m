@@ -1,34 +1,44 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: EFI: Stash ROMs if they're not in the PCI BAR
-Date: Mon, 18 Mar 2013 16:02:01 +0000
-Message-ID: <1363622520.2553.8.camel@x230.sbx07502.somerma.wayport.net>
-References: <20130315082928.GA14520@longonot.mountain>
-	 <1363337872.2444.9.camel@shinybook.infradead.org>
-	 <1363606563.15011.333.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: Curious crash with secure variables
+Date: Mon, 18 Mar 2013 18:04:37 +0000
+Message-ID: <51475735.40201@console-pimps.org>
+References: <1363593684.2412.5.camel@dabdike.int.hansenpartnership.com>    <1363607345.15011.339.camel@mfleming-mobl1.ger.corp.intel.com>   <1363616613.2412.19.camel@dabdike.int.hansenpartnership.com>   <51472C81.5020801@console-pimps.org>  <1363619058.11342.74.camel@i7.infradead.org>  <51472FD2.6020205@console-pimps.org> <1363620768.11342.76.camel@i7.infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363606563.15011.333.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <80AEFD72DF8E1C469F405F5FF15C29ED-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <1363620768.11342.76.camel-W2I5cNIroUsVm/YvaOjsyQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jordan L Justen <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gTW9uLCAyMDEzLTAzLTE4IGF0IDExOjM2ICswMDAwLCBNYXR0IEZsZW1pbmcgd3JvdGU6DQo+
-IE9uIEZyaSwgMjAxMy0wMy0xNSBhdCAwODo1NyArMDAwMCwgRGF2aWQgV29vZGhvdXNlIHdyb3Rl
-Og0KPiA+IFRydWUuIEl0IHByb2JhYmx5IGRvZXNuJ3QgKm1hdHRlciogYmVjYXVzZSB0aGUgc2l6
-ZSBpcyB6ZXJvIHNvIHRoZQ0KPiA+IGZpcm13YXJlIGlzIGp1c3QgZ29pbmcgdG8gaWdub3JlIHRo
-ZSBwb2ludGVyIGFueXdheS4gQWx0aG91Z2ggaW4gdGhhdA0KPiA+IGNhc2UgSSB3b25kZXIgd2h5
-IHdlIGNvdWxkbid0IGhhdmUganVzdCBwYXNzZWQgTlVMTC4gUGVyaGFwcyB3ZSBleHBlY3RlZA0K
-PiA+IHRoYXQgc29tZSBmaXJtd2FyZSBtaWdodCBkbyBzb21lIHZhbGlkYXRpb24gb24gdGhlIHBv
-aW50ZXIgYmVmb3JlDQo+ID4gZ2V0dGluZyB0byB0aGUgc2l6ZSBjaGVjaz8NCj4gDQo+IEkgZG91
-YnQgdGhhdCB0aGUgZmlybXdhcmUgY2hlY2tzIHRoZSB2YWxpZGl0eSBvZiBwY2lfaGFuZGxlIHdo
-ZW4gc2l6ZSBpcw0KPiB6ZXJvLCBhbmQgSSBhZ3JlZSBpdCdzIHdvcnRoIHBhc3NpbmcgTlVMTCB0
-byBzaWxlbmNlIHRoZSB3YXJuaW5nICh3aGljaA0KPiBpcyBhbHNvIG1vcmUgZXhwbGljaXQgdGhh
-dCBqdXN0IGluaXRpYWxpc2luZyBwY2lfaGFuZGxlKSwgdW5sZXNzIE1hdHRoZXcNCj4ga25vd3Mg
-b2YgYSByZWFzb24gd2Ugc2hvdWxkbid0IGRvIHRoYXQ/DQoNCk5vIHJlYXNvbiBJIGNhbiB0aGlu
-ayBvZiwgYW5kIGFueSBmYWlsdXJlIHdpbGwgYmUgcHJldHR5IGltbWVkaWF0ZWx5DQpvYnZpb3Vz
-Lg0KDQotLSANCk1hdHRoZXcgR2FycmV0dCB8IG1qZzU5QHNyY2YudWNhbS5vcmcNCg==
+On 03/18/2013 03:32 PM, David Woodhouse wrote:
+> On Mon, 2013-03-18 at 15:16 +0000, Matt Fleming wrote:
+>>
+>> See,
+>>
+>>   commit 53b87cf0 ("x86, mm: Include the entire kernel memory map in trampoline_pgd"),
+>>   commit 185034e7 ("x86, efi: 1:1 pagetable mapping for virtual EFI calls"),
+>>   commit da5a108d05b4 ("x86/kernel: remove tboot 1:1 page table creation code") and 
+>>   commit bd52276fa1d4 ("x86-64/efi: Use EFI to deal with platform wall clock (again)")
+>>
+>>  and the two revert commits from Linus, be354f40 and 11520e5e.
+> 
+> Thanks. That seems like a rather scary approach. I was thinking of just
+> setting up a dedicated kernel thread for making runtime services calls,
+> and giving it some "userspace" page tables with a 1:1 mapping. No
+> messing around with %cr3 directly.
+
+How would that work? Would it be a real, executable thread context as
+opposed to just an address space? In which case would we be passing data
+to this thread for it to execute on our behalf? One thing to be aware of
+is that sometimes we need to make EFI calls when the sky is falling,
+such as writing EFI variables in the pstore code paths when crashing.
+Scheduling things at that point may be difficult.
+
+Provided that you can still do things like that, it seems like a nice
+solution.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
