@@ -1,38 +1,53 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 10/12] acpi: Ignore acpi_rsdp kernel parameter in a secure boot environment
-Date: Mon, 18 Mar 2013 17:32:31 -0400
-Message-ID: <1363642353-30749-10-git-send-email-matthew.garrett@nebula.com>
-References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
+Subject: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
+Date: Mon, 18 Mar 2013 17:32:22 -0400
+Message-ID: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Caring about protecting the kernel from UID 0 was previously relatively
+uninteresting, since an attacker could simply modify the kernel, a module
+or an earlier part of the boot chain in order to insert new code. However,
+there are now a range of widely-deployed mechanisms for ensuring the
+authenticity of the early boot process and kernel. The addition of module
+signing makes most of these attacks infeasible.
 
-This option allows userspace to pass the RSDP address to the kernel.  This
-could potentially be used to circumvent the secure boot trust model.
-We ignore the setting if we don't have the CAP_COMPROMISE_KERNEL capability.
+This means we can return our focus to the kernel. There's currently a number
+of kernel interfaces that permit privileged userspace to modify the running
+kernel. These are currently protected by CAP_SYS_RAWIO, but unfortunately
+the semantics of this capability are poorly defined and it now covers a large
+superset of the desired behaviour.
 
-Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+This patch introduces CAP_COMPROMISE_KERNEL. Holding this capability
+indicates that a process is empowered to perform tasks that may result in
+modification of the running kernel. While aimed at handling the specific
+use-case of Secure Boot, it is generalisable to any other environment where
+permitting userspace to modify the kernel is undesirable.
+
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- drivers/acpi/osl.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/uapi/linux/capability.h | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-index 586e7e9..0ef63f1 100644
---- a/drivers/acpi/osl.c
-+++ b/drivers/acpi/osl.c
-@@ -245,7 +245,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
- acpi_physical_address __init acpi_os_get_root_pointer(void)
- {
- #ifdef CONFIG_KEXEC
--	if (acpi_rsdp)
-+	if (acpi_rsdp && capable(CAP_COMPROMISE_KERNEL))
- 		return acpi_rsdp;
- #endif
+diff --git a/include/uapi/linux/capability.h b/include/uapi/linux/capability.h
+index ba478fa..7109e650 100644
+--- a/include/uapi/linux/capability.h
++++ b/include/uapi/linux/capability.h
+@@ -343,7 +343,11 @@ struct vfs_cap_data {
+ 
+ #define CAP_BLOCK_SUSPEND    36
+ 
+-#define CAP_LAST_CAP         CAP_BLOCK_SUSPEND
++/* Allow things that trivially permit root to modify the running kernel */
++
++#define CAP_COMPROMISE_KERNEL  37
++
++#define CAP_LAST_CAP         CAP_COMPROMISE_KERNEL
+ 
+ #define cap_valid(x) ((x) >= 0 && (x) <= CAP_LAST_CAP)
  
 -- 
 1.8.1.2
