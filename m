@@ -1,29 +1,57 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+From: Yves-Alexis Perez <corsac@debian.org>
 Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Tue, 19 Mar 2013 15:47:59 +1100 (EST)
-Message-ID: <alpine.LRH.2.02.1303191542200.30973@tundra.namei.org>
+Date: Tue, 19 Mar 2013 08:18:32 +0100
+Message-ID: <1363677512.30246.8.camel@scapa>
 References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; micalg="pgp-sha256";
+	protocol="application/pgp-signature"; boundary="=-eUMu4ZYo4BfAZvVev1OO"
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 18 Mar 2013, Matthew Garrett wrote:
 
-> This patch introduces CAP_COMPROMISE_KERNEL. 
+--=-eUMu4ZYo4BfAZvVev1OO
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I'd like to see this named CAP_MODIFY_KERNEL, which is more accurate and 
-less emotive.  Otherwise I think core kernel developers will be scratching 
-their head over where to sprinkle this.
+On lun., 2013-03-18 at 17:32 -0400, Matthew Garrett wrote:
+> This patch introduces CAP_COMPROMISE_KERNEL. Holding this capability
+> indicates that a process is empowered to perform tasks that may result
+> in
+> modification of the running kernel. While aimed at handling the
+> specific
+> use-case of Secure Boot, it is generalisable to any other environment
+> where
+> permitting userspace to modify the kernel is undesirable.
 
-Apart from that, I like the idea, especially when it's wired up to MAC 
-security.
+About that, did someone looked at the way securelevel(7) is handled on
+OpenBSD? This is more or less the same thing, where there's a desire to
+distinguish uid 0 from ring0. They're not using a capability but more a
+global state which allows more or less stuff depending on the value
+(securelevel=3D-1 to securelevel=3D2).
 
+Regards,
+--=20
+Yves-Alexis
 
--- 
-James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+--=-eUMu4ZYo4BfAZvVev1OO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.19 (GNU/Linux)
+
+iQEcBAABCAAGBQJRSBFIAAoJEG3bU/KmdcClL0gIAJRs+oqqdMUUXqQFHoXRqSD9
+LEcmDlaSh/QAkPr7TQjYMS40AGoY9j4aUzgNlCsQjXjGLYCledGtiZP2rUTWUEfV
+5x3vxb9Kv9rGb8GJ6LieRwqvoDEmtOg9nUbnr7/iHtzYYmuEhWUOdki2XuQ2n85q
+dO22Pd6aXtWQzFL/l91oHTOll9VB2iIwnKzUcQLpW241Be238YSB5tqD6Gc5yN4E
+uFu+NN7lDxSNPYa57WJvaPXQTwMtDBJZV2RekeLp+5DEVCPDjoXQP2h/KxUTmhBj
+EgvcQ8fxlKzb9UHMUDsFQHIRIpozCOuvVzIZdjZU0jSDEh9duNPmoMr4oOYIKm0=
+=z+Fj
+-----END PGP SIGNATURE-----
+
+--=-eUMu4ZYo4BfAZvVev1OO--
