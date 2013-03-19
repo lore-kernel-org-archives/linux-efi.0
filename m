@@ -1,49 +1,35 @@
-From: Josh Boyer <jwboyer@redhat.com>
-Subject: [PATCH v2] acpi: Ignore acpi_rsdp kernel parameter in a secure boot
- environment
-Date: Tue, 19 Mar 2013 13:07:48 -0400
-Message-ID: <20130319170747.GA15821@hansolo.jdub.homelinux.org>
-References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
- <1363642353-30749-10-git-send-email-matthew.garrett@nebula.com>
- <5148261F.3030806@redhat.com>
- <20130319111916.GI11243@hansolo.jdub.homelinux.org>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
+ services
+Date: Tue, 19 Mar 2013 17:17:27 +0000
+Message-ID: <1363713447.2377.60.camel@dabdike.int.hansenpartnership.com>
+References: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
+	 <20130319014850.GA28934@srcf.ucam.org>
+	 <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
+	 <20130319163531.GA10879@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pci-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130319111916.GI11243@hansolo.jdub.homelinux.org>
-Sender: linux-pci-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130319163531.GA10879@srcf.ucam.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-This option allows userspace to pass the RSDP address to the kernel.  This
-could potentially be used to circumvent the secure boot trust model.
-This is setup through the setup_arch function, which is called before the
-security_init function sets up the security_ops, so we cannot use a
-capable call here.  We ignore the setting if we are booted in Secure Boot
-mode.
+On Tue, 2013-03-19 at 16:35 +0000, Matthew Garrett wrote:
+> On Tue, Mar 19, 2013 at 08:14:45AM +0000, James Bottomley wrote:
+> 
+> > Any security assumptions that rely on inability to read certain
+> > information aren't really going to be that secure.  Inability to modify,
+> > sure, but inability to read, not really.
+> 
+> Well, I guess that's public/private key cryptography screwed.
 
-Signed-off-by: Josh Boyer <jwboyer@redhat.com>
----
+Well, OK, it's ex-BIOS writers we're dealing with, so I won't say no-one
+would be stupid enough to come up with a security scheme embedding
+Private Keys in BS+NV variables, but I would have thought the fact that
+Linux would blow the lid off it might be a good incentive not to do it
+and thus a plus point for this patch.
 
- v2: Actually send it to Matthew this time
-
- drivers/acpi/osl.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-index 586e7e9..8950454 100644
---- a/drivers/acpi/osl.c
-+++ b/drivers/acpi/osl.c
-@@ -245,7 +245,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
- acpi_physical_address __init acpi_os_get_root_pointer(void)
- {
- #ifdef CONFIG_KEXEC
--	if (acpi_rsdp)
-+	if (acpi_rsdp && !efi_enabled(EFI_SECURE_BOOT))
- 		return acpi_rsdp;
- #endif
- 
--- 
-1.8.1.2
+James
