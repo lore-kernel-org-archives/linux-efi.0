@@ -1,42 +1,54 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
- services
-Date: Tue, 19 Mar 2013 18:50:03 +0000
-Message-ID: <20130319185003.GA13301@srcf.ucam.org>
-References: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
- <20130319014850.GA28934@srcf.ucam.org>
- <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
- <20130319163531.GA10879@srcf.ucam.org>
- <1363713447.2377.60.camel@dabdike.int.hansenpartnership.com>
- <20130319172506.GA11969@srcf.ucam.org>
- <1363717411.2377.68.camel@dabdike.int.hansenpartnership.com>
- <20130319182810.GA13003@srcf.ucam.org>
- <1363718456.2377.71.camel@dabdike.int.hansenpartnership.com>
+From: shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org
+Subject: efivarfs: Bad directory entry when variable has / in name
+Date: Tue, 19 Mar 2013 16:36:30 -0400
+Message-ID: <4764b7f1f5e6d79938d476ea68b99199@shealevy.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1363718456.2377.71.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 19, 2013 at 06:40:56PM +0000, James Bottomley wrote:
-> On Tue, 2013-03-19 at 18:28 +0000, Matthew Garrett wrote:
-> > It requires the key to survive the system being entirely powered down, 
-> > which means it needs to be BS+NV. It shouldn't be possible for userspace 
-> > to access this key.
-> 
-> It requires the *public* key to survive power down, certainly.  The
-> private key can be thrown away once the hibernate image is signed.  I
-> think the scheme can be constructed so the private key is never in NV
-> storage ... that also makes it more secure against tampering.
+Hello,
 
-Well, that somewhat complicates implementation - we'd be encrypting the 
-entire contents of memory except for the key that we're using to encrypt 
-memory. Keeping the public key away from userspace avoids having to care 
-about that.
+When there is an EFI variable with a forward slash in its name, 
+/sys/firmware/efi/efivars contains a directory entry with a forward 
+slash, which of course causes all sorts of problems (e.g. EINVAL from 
+stat(2)). Off the top of my head, I can think of two ways to handle 
+this:
 
--- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+1. Simply skip such variables when making the sysfs entries
+2. Come up with an escaping scheme, e.g. "a single backslash is 
+actually a forward slash, two backslashes are actually a single 
+backslash" or some such.
+
+Thoughts?
+
+Cheers,
+Shea Levy
+
+P.S. Here is the program I ran to get the problematic efi variable, 
+which worked on qemu+OMVF and a macbook pro 9,2:
+
+EFI_STATUS EFIAPI Main(
+                 IN EFI_HANDLE ImageHandle,
+                 IN EFI_SYSTEM_TABLE *SystemTable
+                 )
+{
+         EFI_GUID var_guid = { 0x38bd6e09, 0x70b3, 0x48f0, {0x8e, 0xa2, 
+0x87, 0x25, 0x0c, 0xc3, 0x27, 0x71} };
+         CHAR16 *var_name = L"a/directory";
+         CHAR8 data = '\0';
+         EFI_STATUS status;
+
+         return SystemTable->RuntimeServices->SetVariable(
+                         var_name,
+                         &var_guid,
+                         
+EFI_VARIABLE_BOOTSERVICE_ACCESS|EFI_VARIABLE_RUNTIME_ACCESS,
+                         sizeof data,
+                         &data
+                         );
+}
