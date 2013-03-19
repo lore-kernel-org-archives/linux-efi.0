@@ -1,32 +1,28 @@
-From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: sysfs: cannot create duplicate filename
-Date: Wed, 20 Mar 2013 00:00:00 +0800
-Message-ID: <51488B80.6000105@redhat.com>
-References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>  <5135BD66.1030005@redhat.com>  <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>  <513A2B29.8090705@redhat.com>  <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>  <513F0734.80600@redhat.com>  <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>  <51405943.2000601@redhat.com>  <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>  <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807@USINDEM103.corp.hds.com> <1363618261.14988.4.camel@mfleming-mobl1.ger.corp.intel.com> <51483A88.6060509@redhat.com> <A5ED84D3BB3A384992CBB9C77DEDA4D41AF6E1F9@USINDEM103.corp.hds.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
+ services
+Date: Tue, 19 Mar 2013 16:35:31 +0000
+Message-ID: <20130319163531.GA10879@srcf.ucam.org>
+References: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
+ <20130319014850.GA28934@srcf.ucam.org>
+ <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF6E1F9-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1363680885.2377.11.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/19/2013 10:25 PM, Seiji Aguchi wrote:
->> If the firmware is broken, the variable interfaces probably are also broken
->> and can't be used to erase variable. 
-> 
-> I see, you are concerned that a set_variable service may not work correctly.
-> If so,  the set_variable service should be disabled in addition to get_next_variable service.
+On Tue, Mar 19, 2013 at 08:14:45AM +0000, James Bottomley wrote:
 
-Since you're suggesting fixing firmware by erasing, I'm wondering
-SetVariable may not actually remove duplicate variables since the way
-they exist is already an undefined behavior. And some variables can't
-be removed.
+> Any security assumptions that rely on inability to read certain
+> information aren't really going to be that secure.  Inability to modify,
+> sure, but inability to read, not really.
 
-GetNextVariable is clearly causing harm in this case. But the rest of efi
-runtime services should be left as they are.
+Well, I guess that's public/private key cryptography screwed.
 
-
-Lingzhu Xiang
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
