@@ -1,57 +1,43 @@
-From: Yves-Alexis Perez <corsac@debian.org>
-Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Tue, 19 Mar 2013 08:18:32 +0100
-Message-ID: <1363677512.30246.8.camel@scapa>
-References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
+ services
+Date: Tue, 19 Mar 2013 08:14:45 +0000
+Message-ID: <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
+References: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
+	 <20130319014850.GA28934@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha256";
-	protocol="application/pgp-signature"; boundary="=-eUMu4ZYo4BfAZvVev1OO"
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-pci-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-pci@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130319014850.GA28934-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Tue, 2013-03-19 at 01:48 +0000, Matthew Garrett wrote:
+> On Mon, Mar 18, 2013 at 08:40:14AM +0000, James Bottomley wrote:
+> 
+> > The object here is to make the NV+BS variables accessible (at least read only)
+> > at runtime so we can get a full picture of the state of the EFI variables for
+> > debugging and secure boot purposes.
+> 
+> I'd really prefer not to do this - the reason these aren't flagged as RT 
+> is that they're not supposed to be visible at runtime and may break 
+> certain security assumptions.
 
---=-eUMu4ZYo4BfAZvVev1OO
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+I suppose they could be flagged as read only by root, but I haven't seen
+anything non-innocuous in them yet.  It's mostly shell redirects and a
+bit more useful information about the secure boot configuration.
 
-On lun., 2013-03-18 at 17:32 -0400, Matthew Garrett wrote:
-> This patch introduces CAP_COMPROMISE_KERNEL. Holding this capability
-> indicates that a process is empowered to perform tasks that may result
-> in
-> modification of the running kernel. While aimed at handling the
-> specific
-> use-case of Secure Boot, it is generalisable to any other environment
-> where
-> permitting userspace to modify the kernel is undesirable.
+Any security assumptions that rely on inability to read certain
+information aren't really going to be that secure.  Inability to modify,
+sure, but inability to read, not really.
 
-About that, did someone looked at the way securelevel(7) is handled on
-OpenBSD? This is more or less the same thing, where there's a desire to
-distinguish uid 0 from ring0. They're not using a capability but more a
-global state which allows more or less stuff depending on the value
-(securelevel=3D-1 to securelevel=3D2).
+>  If there's a real development purpose to 
+> this then it ought to be guarded as a config option.
 
-Regards,
---=20
-Yves-Alexis
+I've no objection to them going under the secure boot lockdown config
+option if that's what you're thinking.
 
---=-eUMu4ZYo4BfAZvVev1OO
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.19 (GNU/Linux)
-
-iQEcBAABCAAGBQJRSBFIAAoJEG3bU/KmdcClL0gIAJRs+oqqdMUUXqQFHoXRqSD9
-LEcmDlaSh/QAkPr7TQjYMS40AGoY9j4aUzgNlCsQjXjGLYCledGtiZP2rUTWUEfV
-5x3vxb9Kv9rGb8GJ6LieRwqvoDEmtOg9nUbnr7/iHtzYYmuEhWUOdki2XuQ2n85q
-dO22Pd6aXtWQzFL/l91oHTOll9VB2iIwnKzUcQLpW241Be238YSB5tqD6Gc5yN4E
-uFu+NN7lDxSNPYa57WJvaPXQTwMtDBJZV2RekeLp+5DEVCPDjoXQP2h/KxUTmhBj
-EgvcQ8fxlKzb9UHMUDsFQHIRIpozCOuvVzIZdjZU0jSDEh9duNPmoMr4oOYIKm0=
-=z+Fj
------END PGP SIGNATURE-----
-
---=-eUMu4ZYo4BfAZvVev1OO--
+James
