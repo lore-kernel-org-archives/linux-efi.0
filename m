@@ -1,54 +1,152 @@
-From: shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org
-Subject: efivarfs: Bad directory entry when variable has / in name
-Date: Tue, 19 Mar 2013 16:36:30 -0400
-Message-ID: <4764b7f1f5e6d79938d476ea68b99199@shealevy.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: [PATCH] efivar: Disable get_next_variable when firmware is broken
+Date: Tue, 19 Mar 2013 21:17:15 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF6FBF6@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
- format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Matt Fleming (matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org)" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Andre Heider (a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org)" <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Lingzhu Xiang (lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org)" <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org" <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Satoru Moriya <satoru.moriya-7rDLJAbr9SE@public.gmane.org>, Tomoki Sekiyama <tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello,
+[Problem]
+Some firmware implementations return the same variable name on multiple calls to
+get_next_variable().
+In this case, an efivar driver gets stuck in a infinite loop at initializing time, 
+register_efivars().
+It is hard for users to fix the broken firmware.
 
-When there is an EFI variable with a forward slash in its name, 
-/sys/firmware/efi/efivars contains a directory entry with a forward 
-slash, which of course causes all sorts of problems (e.g. EINVAL from 
-stat(2)). Off the top of my head, I can think of two ways to handle 
-this:
+Here is an actual result of the case above.
+http://article.gmane.org/gmane.linux.kernel.efi/835
 
-1. Simply skip such variables when making the sysfs entries
-2. Come up with an escaping scheme, e.g. "a single backslash is 
-actually a forward slash, two backslashes are actually a single 
-backslash" or some such.
+[Solution]
+This patch terminates the loop immediately and disables get_next_variable()
+at the initializing time when the same variable name is found on multiple 
+calls to get_next_variable().
 
-Thoughts?
+Also, to avoid stucking in the infinite loop,
+update_sysfs_entries returns without calling get_next_variable if the case above happens.
 
-Cheers,
-Shea Levy
+Reported-by: Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Reported-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+---
+ drivers/firmware/efivars.c     |   34 ++++++++++++++++++++++++++++++++--
+ drivers/firmware/google/gsmi.c |    4 +++-
+ include/linux/efi.h            |    3 ++-
+ 3 files changed, 37 insertions(+), 4 deletions(-)
 
-P.S. Here is the program I ran to get the problematic efi variable, 
-which worked on qemu+OMVF and a macbook pro 9,2:
-
-EFI_STATUS EFIAPI Main(
-                 IN EFI_HANDLE ImageHandle,
-                 IN EFI_SYSTEM_TABLE *SystemTable
-                 )
-{
-         EFI_GUID var_guid = { 0x38bd6e09, 0x70b3, 0x48f0, {0x8e, 0xa2, 
-0x87, 0x25, 0x0c, 0xc3, 0x27, 0x71} };
-         CHAR16 *var_name = L"a/directory";
-         CHAR8 data = '\0';
-         EFI_STATUS status;
-
-         return SystemTable->RuntimeServices->SetVariable(
-                         var_name,
-                         &var_guid,
-                         
-EFI_VARIABLE_BOOTSERVICE_ACCESS|EFI_VARIABLE_RUNTIME_ACCESS,
-                         sizeof data,
-                         &data
-                         );
-}
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index fe62aa3..fa601c6 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -1725,6 +1725,14 @@ static void efivar_update_sysfs_entries(struct work_struct *work)
+ 	efi_status_t status = EFI_NOT_FOUND;
+ 	bool found;
+ 
++	spin_lock_irq(&efivars->lock);
++	if (!efivars->ops->get_next_variable) {
++			spin_unlock_irq(&efivars->lock);
++			pr_warn("efivars: Skip updating sysfs entries\n");
++			return;
++	}
++	spin_unlock_irq(&efivars->lock);
++
+ 	/* Add new sysfs entries */
+ 	while (1) {
+ 		variable_name = kzalloc(variable_name_size, GFP_KERNEL);
+@@ -1960,7 +1968,8 @@ EXPORT_SYMBOL_GPL(unregister_efivars);
+ 
+ int register_efivars(struct efivars *efivars,
+ 		     const struct efivar_operations *ops,
+-		     struct kobject *parent_kobj)
++		     struct kobject *parent_kobj,
++		     bool *get_next_variable_cannot_call)
+ {
+ 	efi_status_t status = EFI_NOT_FOUND;
+ 	efi_guid_t vendor_guid;
+@@ -2006,6 +2015,21 @@ int register_efivars(struct efivars *efivars,
+ 						&vendor_guid);
+ 		switch (status) {
+ 		case EFI_SUCCESS:
++			/*
++			 * Some firmware implementations return the
++			 * same variable name on multiple calls to
++			 * get_next_variable(). Terminate the loop
++			 * immediately as there is no guarantee that
++			 * we'll ever see a different variable name,
++			 * and may end up looping here forever.
++			 */
++			if (variable_is_present(variable_name, &vendor_guid)) {
++				pr_warn("efivars: duplicate variable name.\n");
++				*get_next_variable_cannot_call = true;
++				status = EFI_NOT_FOUND;
++				break;
++			}
++
+ 			efivar_create_sysfs_entry(efivars,
+ 						  variable_name_size,
+ 						  variable_name,
+@@ -2056,6 +2080,7 @@ static int __init
+ efivars_init(void)
+ {
+ 	int error = 0;
++	bool get_next_variable_cannot_call = false;
+ 
+ 	printk(KERN_INFO "EFI Variables Facility v%s %s\n", EFIVARS_VERSION,
+ 	       EFIVARS_DATE);
+@@ -2075,7 +2100,12 @@ efivars_init(void)
+ 	ops.get_next_variable = efi.get_next_variable;
+ 	ops.query_variable_info = efi.query_variable_info;
+ 
+-	error = register_efivars(&__efivars, &ops, efi_kobj);
++	error = register_efivars(&__efivars, &ops, efi_kobj,
++				 &get_next_variable_cannot_call);
++	if (get_next_variable_cannot_call) {
++		pr_warn("efivars: Disable get_next_variable service\n");
++		ops.get_next_variable = NULL;
++	}
+ 	if (error)
+ 		goto err_put;
+ 
+diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
+index 91ddf0f..0c205c8 100644
+--- a/drivers/firmware/google/gsmi.c
++++ b/drivers/firmware/google/gsmi.c
+@@ -778,6 +778,7 @@ static __init int gsmi_init(void)
+ {
+ 	unsigned long flags;
+ 	int ret;
++	bool get_next_variable_cannot_call = false;
+ 
+ 	ret = gsmi_system_valid();
+ 	if (ret)
+@@ -893,7 +894,8 @@ static __init int gsmi_init(void)
+ 		goto out_remove_bin_file;
+ 	}
+ 
+-	ret = register_efivars(&efivars, &efivar_ops, gsmi_kobj);
++	ret = register_efivars(&efivars, &efivar_ops, gsmi_kobj,
++			       &get_next_variable_cannot_call);
+ 	if (ret) {
+ 		printk(KERN_INFO "gsmi: Failed to register efivars\n");
+ 		goto out_remove_sysfs_files;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9bf2f1f..9db51b1 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -756,7 +756,8 @@ struct efivars {
+ 
+ int register_efivars(struct efivars *efivars,
+ 		     const struct efivar_operations *ops,
+-		     struct kobject *parent_kobj);
++		     struct kobject *parent_kobj,
++		     bool *get_next_variable_cannot_call);
+ void unregister_efivars(struct efivars *efivars);
+ 
+ #endif /* CONFIG_EFI_VARS */
+-- 1.7.1
