@@ -1,43 +1,50 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
- services
-Date: Tue, 19 Mar 2013 08:14:45 +0000
-Message-ID: <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
-References: <1363596014.2412.8.camel@dabdike.int.hansenpartnership.com>
-	 <20130319014850.GA28934@srcf.ucam.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 10/12] acpi: Ignore acpi_rsdp kernel parameter in a secure
+ boot environment
+Date: Tue, 19 Mar 2013 16:47:27 +0800
+Message-ID: <5148261F.3030806@redhat.com>
+References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com> <1363642353-30749-10-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130319014850.GA28934-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+In-Reply-To: <1363642353-30749-10-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-03-19 at 01:48 +0000, Matthew Garrett wrote:
-> On Mon, Mar 18, 2013 at 08:40:14AM +0000, James Bottomley wrote:
+On 03/19/2013 05:32 AM, Matthew Garrett wrote:
+> From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > 
-> > The object here is to make the NV+BS variables accessible (at least read only)
-> > at runtime so we can get a full picture of the state of the EFI variables for
-> > debugging and secure boot purposes.
+> This option allows userspace to pass the RSDP address to the kernel.  This
+> could potentially be used to circumvent the secure boot trust model.
+> We ignore the setting if we don't have the CAP_COMPROMISE_KERNEL capability.
 > 
-> I'd really prefer not to do this - the reason these aren't flagged as RT 
-> is that they're not supposed to be visible at runtime and may break 
-> certain security assumptions.
+> Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/acpi/osl.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
+> index 586e7e9..0ef63f1 100644
+> --- a/drivers/acpi/osl.c
+> +++ b/drivers/acpi/osl.c
+> @@ -245,7 +245,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
+>  acpi_physical_address __init acpi_os_get_root_pointer(void)
+>  {
+>  #ifdef CONFIG_KEXEC
+> -	if (acpi_rsdp)
+> +	if (acpi_rsdp && capable(CAP_COMPROMISE_KERNEL))
+>  		return acpi_rsdp;
+>  #endif
+>  
+> 
 
-I suppose they could be flagged as read only by root, but I haven't seen
-anything non-innocuous in them yet.  It's mostly shell redirects and a
-bit more useful information about the secure boot configuration.
+This does not work because capable is not usable at this early point.
 
-Any security assumptions that rely on inability to read certain
-information aren't really going to be that secure.  Inability to modify,
-sure, but inability to read, not really.
+Josh, could you update your fix here?
 
->  If there's a real development purpose to 
-> this then it ought to be guarded as a config option.
-
-I've no objection to them going under the secure boot lockdown config
-option if that's what you're thinking.
-
-James
+-- 
+Thanks
+Dave
