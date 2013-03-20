@@ -1,31 +1,29 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Wed, 20 Mar 2013 09:45:55 -0700
-Message-ID: <5149E7C3.3080707@zytor.com>
-References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>  <51490ABD.3050205@zytor.com>  <1363785354.2553.15.camel@x230.sbx07502.somerma.wayport.net>  <db71c48c-4ec4-4611-935b-bb1b0441112d@email.android.com> <1363792462.2553.24.camel@x230.sbx07502.somerma.wayport.net>
+Date: Wed, 20 Mar 2013 16:49:26 +0000
+Message-ID: <1363798166.2553.29.camel@x230.sbx07502.somerma.wayport.net>
+References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+	 <alpine.LRH.2.02.1303191542200.30973@tundra.namei.org>
+	 <1363797717.2580.10.camel@falcor1.watson.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <1363792462.2553.24.camel@x230.sbx07502.somerma.wayport.net>
-Sender: linux-pci-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1363797717.2580.10.camel@falcor1.watson.ibm.com>
+Content-Language: en-US
+Content-ID: <CFFF9AAF2DD7E140831E2625553BC0C9@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mimi Zohar <zohar@linux.vnet.ibm.com>
+Cc: James Morris <jmorris@namei.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/20/2013 08:14 AM, Matthew Garrett wrote:
-> On Wed, 2013-03-20 at 08:03 -0700, H. Peter Anvin wrote:
->> CAP_SYS_RAWIO is definitely inappropriate there.
-> 
-> Ok. How do we fix that without breaking userspace that expects
-> CAP_SYS_RAWIO to be sufficient?
-> 
-
-I don't think we can to some way, because when what you have is
-fundamentally broken, it's hard to fix.
-
-However, it is extremely likely that the number of affected applications
-is vanishingly small.  There probably are a handful of apps that do
-this, and I wouldn't be surprised if most of them simply run as root.
-
-	-hpa
+T24gV2VkLCAyMDEzLTAzLTIwIGF0IDEyOjQxIC0wNDAwLCBNaW1pIFpvaGFyIHdyb3RlOg0KDQo+
+IE1hdHRocmV3LCBwZXJoYXBzIHlvdSBjb3VsZCBjbGFyaWZ5IHdoZXRoZXIgdGhpcyB3aWxsIGJl
+IHRpZWQgdG8gTUFDDQo+IHNlY3VyaXR5LiAgQmFzZWQgb24gdGhlIGtleGVjIHRocmVhZCwgSSdt
+IHVuZGVyIHRoZSBpbXByZXNzaW9uIHRoYXQgaXMNCj4gbm90IHRoZSBpbnRlbnRpb24sIG9yIGF0
+IGxlYXN0IG5vdCBmb3Iga2V4ZWMuICBBcyByb290IGlzbid0IHRydXN0ZWQsDQo+IG5laXRoZXIg
+aXMgdGhlIGJvb3QgY29tbWFuZCBsaW5lLCBub3IgYW55IHBvbGljeSB0aGF0IGlzIGxvYWRlZCBi
+eSByb290LA0KPiBpbmNsdWRpbmcgdGhvc2UgZm9yIE1BQy4NCg0KVGhlIHdvcmsgZG9uZSBvbiBz
+aWduZWQgaW5pdHJhbWZzIGZyYWdtZW50cyB3b3VsZCBzZWVtIHRvIGJlIHRoZSBiZXN0DQpvcHRp
+b24gaGVyZSBzbyBmYXI/DQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IHwgbWpnNTlAc3JjZi51Y2Ft
+Lm9yZw0K
