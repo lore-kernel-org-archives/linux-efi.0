@@ -1,34 +1,62 @@
-From: Alex Williamson <alex.williamson-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Tue, 19 Mar 2013 21:27:20 -0600
-Message-ID: <1363750040.24132.483.camel@bling.home>
-References: <3pfl8u1ugprwkcs5xmtjth3l.1363742692541@email.android.com>
-	  <51492379.3090302@zytor.com> <51492828.5070803@zytor.com>
-	 <1363749503.24132.482.camel@bling.home> <51492B78.7020404@zytor.com>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
+ services
+Date: Wed, 20 Mar 2013 08:00:03 +0000
+Message-ID: <1363766403.2373.3.camel@dabdike.int.hansenpartnership.com>
+References: <20130319014850.GA28934@srcf.ucam.org>
+	 <1363680885.2377.11.camel@dabdike.int.hansenpartnership.com>
+	 <20130319163531.GA10879@srcf.ucam.org>
+	 <1363713447.2377.60.camel@dabdike.int.hansenpartnership.com>
+	 <20130319172506.GA11969@srcf.ucam.org>
+	 <1363717411.2377.68.camel@dabdike.int.hansenpartnership.com>
+	 <20130319182810.GA13003@srcf.ucam.org>
+	 <1363718456.2377.71.camel@dabdike.int.hansenpartnership.com>
+	 <20130319185003.GA13301@srcf.ucam.org>
+	 <1363734031.2377.77.camel@dabdike.int.hansenpartnership.com>
+	 <20130319231756.GA21071@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="ISO-8859-15"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51492B78.7020404-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20130319231756.GA21071-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-03-19 at 20:22 -0700, H. Peter Anvin wrote:
-> On 03/19/2013 08:18 PM, Alex Williamson wrote:
-> >>
-> >> The "pinning" process needs to involve a call to the kernel to process
-> >> the page for DMA (pinning the page and opening it in the iommu) and
-> >> return a transaction address, of course.
-> >>
-> >> I think we have the interface for that in vfio, but I haven't followed
-> >> that work.
+On Tue, 2013-03-19 at 23:17 +0000, Matthew Garrett wrote:
+> On Tue, Mar 19, 2013 at 11:00:31PM +0000, James Bottomley wrote:
+> > On Tue, 2013-03-19 at 18:50 +0000, Matthew Garrett wrote:
+> > > Well, that somewhat complicates implementation - we'd be encrypting the 
+> > > entire contents of memory except for the key that we're using to encrypt 
+> > > memory. Keeping the public key away from userspace avoids having to care 
+> > > about that.
 > > 
-> > Yes, vfio does this and is meant to provide a secure-boot-friendly PCI
-> > passthrough interface.  Thanks,
-> > 
+> > I don't quite understand what you're getting at: the principle of public
+> > key cryptography is that you can make the public key, well public.  You
+> > only need to guard the private key.
 > 
-> Right, and presumably vfio does *not* require CAP_SYS_RAWIO, right?
+> Ok, so let's just rephrase it as asymmetric cryptography. The aim is to 
+> ensure that there's never a situation where userspace can decrypt a 
+> hibernation file, modify it and reencrypt it. So, shim (or whatever) 
+> generates a keypair. The encryption key is passed to the kernel being 
+> booted. The decryption key is stashed in a variable in order to be 
+> passed to the resume kernel.
+> 
+> If the decryption key is available to userspace then the kernel needs to 
+> discard the encryption key during image write-out - otherwise the 
+> encryption key will be in the encrypted image. If the decryption key 
+> isn't available to userspace then this isn't a concern.
+> 
+> If the decryption key *is* available to userspace (as it would be in 
+> your case), there's a requirement to discard the encryption key during 
+> the hibernation process. This isn't impossible, but it does add a little 
+> to the complexity.
 
-Correct
+I agree with this.  But I do think the volatile secret key scheme, where
+you discard the key immediately after use is the more secure one because
+it relies on fewer secrets (and, indeed, no secrets at all after the
+event).  It's a case where transparency encourages better security
+architecture.
+
+James
