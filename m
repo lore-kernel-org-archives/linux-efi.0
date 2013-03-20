@@ -1,29 +1,81 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
-Date: Wed, 20 Mar 2013 16:49:26 +0000
-Message-ID: <1363798166.2553.29.camel@x230.sbx07502.somerma.wayport.net>
-References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
-	 <alpine.LRH.2.02.1303191542200.30973@tundra.namei.org>
-	 <1363797717.2580.10.camel@falcor1.watson.ibm.com>
+From: shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org
+Subject: Re: efivarfs: Bad directory entry when variable has / in name
+Date: Wed, 20 Mar 2013 13:02:39 -0400
+Message-ID: <4f094ba2ae2b4de3d834be5a24d2a45c@shealevy.com>
+References: <4764b7f1f5e6d79938d476ea68b99199@shealevy.com>
+ <5149762D.6080907@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1363797717.2580.10.camel@falcor1.watson.ibm.com>
-Content-Language: en-US
-Content-ID: <CFFF9AAF2DD7E140831E2625553BC0C9@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mimi Zohar <zohar@linux.vnet.ibm.com>
-Cc: James Morris <jmorris@namei.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8;
+ format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <5149762D.6080907-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDEzLTAzLTIwIGF0IDEyOjQxIC0wNDAwLCBNaW1pIFpvaGFyIHdyb3RlOg0KDQo+
-IE1hdHRocmV3LCBwZXJoYXBzIHlvdSBjb3VsZCBjbGFyaWZ5IHdoZXRoZXIgdGhpcyB3aWxsIGJl
-IHRpZWQgdG8gTUFDDQo+IHNlY3VyaXR5LiAgQmFzZWQgb24gdGhlIGtleGVjIHRocmVhZCwgSSdt
-IHVuZGVyIHRoZSBpbXByZXNzaW9uIHRoYXQgaXMNCj4gbm90IHRoZSBpbnRlbnRpb24sIG9yIGF0
-IGxlYXN0IG5vdCBmb3Iga2V4ZWMuICBBcyByb290IGlzbid0IHRydXN0ZWQsDQo+IG5laXRoZXIg
-aXMgdGhlIGJvb3QgY29tbWFuZCBsaW5lLCBub3IgYW55IHBvbGljeSB0aGF0IGlzIGxvYWRlZCBi
-eSByb290LA0KPiBpbmNsdWRpbmcgdGhvc2UgZm9yIE1BQy4NCg0KVGhlIHdvcmsgZG9uZSBvbiBz
-aWduZWQgaW5pdHJhbWZzIGZyYWdtZW50cyB3b3VsZCBzZWVtIHRvIGJlIHRoZSBiZXN0DQpvcHRp
-b24gaGVyZSBzbyBmYXI/DQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IHwgbWpnNTlAc3JjZi51Y2Ft
-Lm9yZw0K
+On 2013-03-20 04:41, Matt Fleming wrote:
+> On 03/19/2013 08:36 PM, shea-yfkUTty7RcRWk0Htik3J/w@public.gmane.org wrote:
+>> Hello,
+>>
+>> When there is an EFI variable with a forward slash in its name,
+>> /sys/firmware/efi/efivars contains a directory entry with a forward
+>> slash, which of course causes all sorts of problems (e.g. EINVAL 
+>> from
+>> stat(2)). Off the top of my head, I can think of two ways to handle
+>> this:
+>>
+>> 1. Simply skip such variables when making the sysfs entries
+>> 2. Come up with an escaping scheme, e.g. "a single backslash is
+>> actually a forward slash, two backslashes are actually a single
+>> backslash" or some such.
+>>
+>> Thoughts?
+>
+> Right. Have you seen machines with such variable names in the wild?
+>
+
+No, I just thought of testing it when I saw that variable names only 
+require null termination.
+
+>
+> There's nothing in the specification that prohibits the use of 
+> slashes
+> in variable names, so I'm not in favour of option 1 above and 
+> mangling
+> the variable name would likely cause too much confusion.
+>
+> The best solution I can come up with is to create directories for any
+> variable names that contain "/" (which would also make it possible to
+> build filesystem hierarchies with EFI variables). The user could 
+> choose
+> to ignore the actual layout of the filesystem since opening the 
+> variable
+> "adirectory/file" with,
+>
+> 	open("adirectory/file-<guid>");
+>
+> would work without it being necessary for the user to handle slashes 
+> in
+> variable names.
+>
+> What do you think?
+>
+
+What happens when I create a variable starting with a slash or ending 
+with a slash, or something like "dir/../../../../root/private-file"? 
+Also, how would you create such a variable from linux, mkdir followed by 
+creating the file?
+
+Looks like an escaping scheme (though of course my proposed one was 
+braindead and wouldn't work) might be the best option here, I might spin 
+up a patch this weekend.
+
+>
+> Presumably this is also an issue with the old EFI vars sysfs code?
+
+Never used that directly myself (only through efibootmgr).
+
+Cheers,
+Shea Levy
