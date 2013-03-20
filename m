@@ -1,42 +1,41 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: pull NV+BS variables out before we exit boot
- services
-Date: Wed, 20 Mar 2013 11:47:45 +0000
-Message-ID: <20130320114745.GA448@srcf.ucam.org>
-References: <20130319163531.GA10879@srcf.ucam.org>
- <1363713447.2377.60.camel@dabdike.int.hansenpartnership.com>
- <20130319172506.GA11969@srcf.ucam.org>
- <1363717411.2377.68.camel@dabdike.int.hansenpartnership.com>
- <20130319182810.GA13003@srcf.ucam.org>
- <1363718456.2377.71.camel@dabdike.int.hansenpartnership.com>
- <20130319185003.GA13301@srcf.ucam.org>
- <1363734031.2377.77.camel@dabdike.int.hansenpartnership.com>
- <20130319231756.GA21071@srcf.ucam.org>
- <1363766403.2373.3.camel@dabdike.int.hansenpartnership.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 01/12] Security: Add CAP_COMPROMISE_KERNEL
+Date: Wed, 20 Mar 2013 13:15:55 +0000
+Message-ID: <1363785354.2553.15.camel@x230.sbx07502.somerma.wayport.net>
+References: <1363642353-30749-1-git-send-email-matthew.garrett@nebula.com>
+ <51490ABD.3050205@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1363766403.2373.3.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <51490ABD.3050205-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <DC5092F7787488468759C704BBD7BF60-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 20, 2013 at 08:00:03AM +0000, James Bottomley wrote:
+On Tue, 2013-03-19 at 18:02 -0700, H. Peter Anvin wrote:
 
-> I agree with this.  But I do think the volatile secret key scheme, where
-> you discard the key immediately after use is the more secure one because
-> it relies on fewer secrets (and, indeed, no secrets at all after the
-> event).  It's a case where transparency encourages better security
-> architecture.
+> Looking at it in detail, EVERYTHING in CAP_SYS_RAWIO has the possibility
+> of compromising the kernel, because they let device drivers be bypassed,
+> which means arbitrary DMA, which means you have everything.
 
-That somewhat depends what you're securing against. There's an argument 
-that reusing this key is actually sufficiently secure so long as the 
-only way to obtain it is with physical access to the machine - that way 
-you don't have an nvram update cycle every boot. Exposing these 
-variables to userspace doesn't make it impossible to produce a secure 
-system, but it does remove some choices that were previously available.
+Having checked again, I don't think this is true. The most obvious case
+is libata, which uses CAP_SYS_RAWIO to limit the ability to send raw ATA
+commands. Being able to do so clearly permits userspace to avoid any
+kind of policy the vfs has put in place, but there's no obvious way for
+the user to modify the running kernel. Are you suggesting that removing
+the CAP_SYS_RAWIO check there would be reasonable?
 
 -- 
 Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
