@@ -1,43 +1,55 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: sysfs: cannot create duplicate filename
-Date: Thu, 21 Mar 2013 07:44:15 +0000
-Message-ID: <514ABA4F.2000601@console-pimps.org>
-References: <CAHsu+b-cG+ED6TX5evRTBjR-LwHugW+8-9hnHXAz5DnAioJnUQ@mail.gmail.com>  <5135BD66.1030005@redhat.com>  <1362755479.15011.238.camel@mfleming-mobl1.ger.corp.intel.com>  <513A2B29.8090705@redhat.com>  <1363082900.15011.257.camel@mfleming-mobl1.ger.corp.intel.com>  <513F0734.80600@redhat.com>  <1363106125.15011.263.camel@mfleming-mobl1.ger.corp.intel.com>  <51405943.2000601@redhat.com>  <1363278817.15011.316.camel@mfleming-mobl1.ger.corp.intel.com>  <A5ED84D3BB3A384992CBB9C77DEDA4D41AF68807@USINDEM103.corp.hds.com> <1363618261.14988.4.camel@mfleming-mobl1.ger.corp.intel.com> <514AB534.8080209@redhat.com>
+Subject: [GIT PULL] EFI changes for v3.9-rc3
+Date: Thu, 21 Mar 2013 13:17:28 +0000
+Message-ID: <514B0868.8040905@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <514AB534.8080209-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Andre Heider <a.heider-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/21/2013 07:22 AM, Lingzhu Xiang wrote:
-> Tested-by: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Hi guys,
 
-Great, thanks!
+The following changes since commit f6161aa153581da4a3867a2d1a7caf4be19b6ec9:
 
-> Reproduced with 3.9-rc3 in QEMU/OVMF. The kernel gets stuck in a loop.
-> 
-> Verified with 3.9-rc3 with this patch. The kernel survives. efivarfs
-> continues working, though some variables won't show up, as expected.
-> 
-> [    2.033855] efivars: duplicate variable: Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> 
-> This patch has no real impact for users with normal firmware as tested
-> before on a Windows 8 logo desktop.
-> 
-> For the record, here is how I create duplicate variables in QEMU/OVMF:
-> 
-> OVMF EmuVariableFvbRuntimeDxe emulates nvram with a reserved area of
-> memory (ReserveEmuVariableNvStore). But there seems to be some layers
-> of cache above this, so directly writing a new duplicate variable here
-> won't make a difference. I ended up writing an EFI app to scan the
-> entire memory and replace all L"Boot0004" with L"Boot0001", which
-> seemed to actually break things (e.g. dmpstore will get stuck).
+  Linux 3.9-rc2 (2013-03-10 16:54:19 -0700)
 
-Thanks for going to such lengths to test this.
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-for-3.9-rc3
+
+for you to fetch changes up to e971318bbed610e28bb3fde9d548e6aaf0a6b02e:
+
+  efivars: Handle duplicate names from get_next_variable() (2013-03-21 12:43:46 +0000)
+
+----------------------------------------------------------------
+EFI changes for v3.9-rc3,
+
+  * A new config option and efivars module parameter have been added to
+    allow the efivars pstore backend to be disabled as we're still seeing
+    issues on machines despite adding heuristics to workaround known bugs.
+    Distributions now have a way to disable EFI variable pstore code
+    completely - from Seth Forshee.
+
+  * A couple of efivars patches to workaround quirky implementations
+    of GetNextVariableName() which resulted in machines hanging and
+    sysfs files being created with garbage names.
+
+----------------------------------------------------------------
+Matt Fleming (2):
+      efivars: explicitly calculate length of VariableName
+      efivars: Handle duplicate names from get_next_variable()
+
+Seth Forshee (2):
+      efivars: Allow disabling use as a pstore backend
+      efivars: Add module parameter to disable use as a pstore backend
+
+ drivers/firmware/Kconfig   |  18 ++++++
+ drivers/firmware/efivars.c | 150 +++++++++++++++++++++++++++++++--------------
+ 2 files changed, 122 insertions(+), 46 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
