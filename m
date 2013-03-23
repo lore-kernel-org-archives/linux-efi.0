@@ -1,35 +1,40 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: Re: efi: be more paranoid about available space when creating
- variables
-Date: Sat, 23 Mar 2013 20:32:11 +0000
-Message-ID: <1364070731.2553.47.camel@x230.sbx07502.somerma.wayport.net>
-References: <1364004995.3728.76.camel@deadeye.wl.decadent.org.uk>
-	 <1364010441.3728.82.camel@deadeye.wl.decadent.org.uk>
-	 <CAL01qpvaP7_YWS+vhjTskvisCyjxg-28WBAjSQftrSmnCphwdw@mail.gmail.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: efi: be more paranoid about available space when creating variables
+Date: Sat, 23 Mar 2013 22:50:24 +0000
+Message-ID: <514E31B0.4030305@intel.com>
+References: <1364004995.3728.76.camel@deadeye.wl.decadent.org.uk>  <1364010441.3728.82.camel@deadeye.wl.decadent.org.uk>  <CAL01qpvaP7_YWS+vhjTskvisCyjxg-28WBAjSQftrSmnCphwdw@mail.gmail.com> <1364070731.2553.47.camel@x230.sbx07502.somerma.wayport.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <CAL01qpvaP7_YWS+vhjTskvisCyjxg-28WBAjSQftrSmnCphwdw@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <EEE4DFD9A68A414AB03E8DE48B4B6675@namprd05.prod.outlook.com>
-Sender: stable-owner@vger.kernel.org
-To: "Fleming, Matt" <matt.fleming@intel.com>
-Cc: Ben Hutchings <ben@decadent.org.uk>, Josh Boyer <jwboyer@redhat.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Seth Forshee <seth.forshee@canonical.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1364070731.2553.47.camel-tCUS0Eywp2Pehftex57rkxo58HMYffqeLoYNBG0abjxeoWH0uzbU5w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gU2F0LCAyMDEzLTAzLTIzIGF0IDIwOjI0ICswMDAwLCBGbGVtaW5nLCBNYXR0IHdyb3RlOg0K
-DQo+IExvb2tzIGxpa2Ugd2UncmUgZ29pbmcgdG8gaGF2ZSB0byBnbyBkb3duIHRoZSByb2FkIG9m
-IGJsYWNrbGlzdGluZw0KPiBrbm93biBiYWQgbWFjaGluZXMgYWZ0ZXIgYWxsLiBJIHdhcyByZWx1
-Y3RhbnQgdG8gcHVzaCBmb3IgdGhhdA0KPiBvcmlnaW5hbGx5IGFzIHRoZSByZXN1bHQgb2YgbWlz
-c2luZyBhIG1hY2hpbmUgZnJvbSB0aGUgYmxhY2tsaXN0IG1pZ2h0DQo+IHJlc3VsdCBpbiBzYWlk
-IG1hY2hpbmUgYmVjb21pbmcgYnJpY2tlZCwgYnV0IHdlJ3ZlIG5vdyBnb3QgcGF0Y2hlcyBpbg0K
-PiBwbGFjZSB0byB0dXJuIG9mZiB0aGUgcHN0b3JlIGVmaXZhcnMgY29kZSwgYW5kIEkgc3VzcGVj
-dCB0aGF0IG1vc3QNCj4gZGlzdHJvcyBpbmRlZWQgZG8gdGhhdC4NCg0KSGFuZHdhdmluZyBpZGVh
-IC0gbGVhdmUgdGhlIHNpemUgcmVzdHJpY3Rpb24gaW4gcGxhY2UgZm9yIHBzdG9yZS4gUmVtb3Zl
-DQppdCBmb3Igbm9ybWFsIHNldHZhcmlhYmxlIGNhbGxzLiBEb3duc2lkZSBvZiB0aGlzIGlzIHRo
-YXQgcHN0b3JlIHdpbGwgYmUNCmJyb2tlbiBvbiBtYWNoaW5lcyB0aGF0IG9ubHkgY2xlYXIgc3Bh
-Y2Ugd2hlbiB0aGUgdmFyaWFibGUgc3RvcmUgaXMNCm1vc3RseSBmdWxsLCBidXQgaXQgc2hvdWxk
-IGF2b2lkIGNhc2VzIHdoZXJlIHdlIGF1dG9tYXRpY2FsbHkga2lsbA0KbWFjaGluZXMgd2l0aG91
-dCBhbHNvIGhhdmluZyB0byBkaXNhYmxlIGEgdXNlZnVsIGZlYXR1cmUuDQoNCi0tIA0KTWF0dGhl
-dyBHYXJyZXR0IHwgbWpnNTlAc3JjZi51Y2FtLm9yZw0K
+(Let's try this again without using HTML)
+
+On 23/03/13 20:32, Matthew Garrett wrote:
+> On Sat, 2013-03-23 at 20:24 +0000, Fleming, Matt wrote:
+> 
+>> Looks like we're going to have to go down the road of blacklisting
+>> known bad machines after all. I was reluctant to push for that
+>> originally as the result of missing a machine from the blacklist might
+>> result in said machine becoming bricked, but we've now got patches in
+>> place to turn off the pstore efivars code, and I suspect that most
+>> distros indeed do that.
+> 
+> Handwaving idea - leave the size restriction in place for pstore. Remove
+> it for normal setvariable calls. Downside of this is that pstore will be
+> broken on machines that only clear space when the variable store is
+> mostly full, but it should avoid cases where we automatically kill
+> machines without also having to disable a useful feature.
+
+Right, but it will still be possible to brick machines via the code path
+that doesnt check the remaining storage space. Its less likely sure, but
+its still entirely possible.
+
+The most robust solution may be to combine the two approaches - remove the
+size checks from everything but the pstore paths but enforce them across
+the board for known problem machines?
