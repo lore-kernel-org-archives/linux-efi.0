@@ -1,251 +1,98 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 1/2] efi: Determine how much space is used by boot services-only variables
-Date: Mon,  1 Apr 2013 11:13:59 -0400
-Message-ID: <1364829240-26475-1-git-send-email-matthew.garrett@nebula.com>
+From: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: Determine how much space is used by boot
+ services-only variables
+Date: Mon, 01 Apr 2013 16:42:47 +0100
+Message-ID: <1364830967.3557.90.camel@deadeye.wl.decadent.org.uk>
 References: <515150EC.7040203@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <515150EC.7040203@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt.fleming@intel.com
-Cc: ben@decadent.org.uk, jwboyer@redhat.com, linux-efi@vger.kernel.org, seth.forshee@canonical.com, linux-kernel@vger.kernel.org, x86@kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
+	 <1364829240-26475-1-git-send-email-matthew.garrett@nebula.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-Axxx66Hgs5PL/rHcoQYJ"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1364829240-26475-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-EFI variables can be flagged as being accessible only within boot services.
-This makes it awkward for us to figure out how much space they use at
-runtime. In theory we could figure this out by simply comparing the results
-from QueryVariableInfo() to the space used by all of our variables, but
-that fails if the platform doesn't garbage collect on every boot. Thankfully,
-calling QueryVariableInfo() while still inside boot services gives a more
-reliable answer. This patch passes that information from the EFI boot stub
-up to the efivars code, letting us calculate a reasonably accurate value.
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
----
- arch/x86/boot/compressed/eboot.c      | 47 +++++++++++++++++++++++++++++++++++
- arch/x86/include/asm/efi.h            | 10 ++++++++
- arch/x86/include/uapi/asm/bootparam.h |  1 +
- arch/x86/platform/efi/efi.c           | 21 ++++++++++++++++
- drivers/firmware/efivars.c            | 29 +++++++++++++++++++++
- 5 files changed, 108 insertions(+)
+--=-Axxx66Hgs5PL/rHcoQYJ
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index c205035..8615f75 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -251,6 +251,51 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
- 	*size = len;
- }
- 
-+static efi_status_t setup_efi_vars(struct boot_params *params)
-+{
-+	struct setup_data *data;
-+	struct efi_var_bootdata *efidata;
-+	u64 store_size, remaining_size, var_size;
-+	efi_status_t status;
-+
-+	if (!sys_table->runtime->query_variable_info)
-+		return EFI_UNSUPPORTED;
-+
-+	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
-+
-+	while (data && data->next)
-+		data = (struct setup_data *)(unsigned long)data->next;
-+
-+	status = efi_call_phys4(sys_table->runtime->query_variable_info,
-+				EFI_VARIABLE_NON_VOLATILE |
-+				EFI_VARIABLE_BOOTSERVICE_ACCESS |
-+				EFI_VARIABLE_RUNTIME_ACCESS, &store_size,
-+				&remaining_size, &var_size);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = efi_call_phys3(sys_table->boottime->allocate_pool,
-+				EFI_LOADER_DATA, sizeof(*efidata), &efidata);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	efidata->data.type = SETUP_EFI_VARS;
-+	efidata->data.len = sizeof(struct efi_var_bootdata) -
-+		sizeof(struct setup_data);
-+	efidata->data.next = 0;
-+	efidata->store_size = store_size;
-+	efidata->remaining_size = remaining_size;
-+	efidata->max_var_size = var_size;
-+
-+	if (data)
-+		data->next = (unsigned long)efidata;
-+	else
-+		params->hdr.setup_data = (unsigned long)efidata;
-+
-+}
-+
- static efi_status_t setup_efi_pci(struct boot_params *params)
- {
- 	efi_pci_io_protocol *pci;
-@@ -1157,6 +1202,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
- 
- 	setup_graphics(boot_params);
- 
-+	setup_efi_vars(boot_params);
-+
- 	setup_efi_pci(boot_params);
- 
- 	status = efi_call_phys3(sys_table->boottime->allocate_pool,
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 60c89f3..6c3a154 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -93,6 +93,9 @@ extern void __iomem *efi_ioremap(unsigned long addr, unsigned long size,
- 
- #endif /* CONFIG_X86_32 */
- 
-+extern u64 efi_var_store_size;
-+extern u64 efi_var_remaining_size;
-+extern u64 efi_var_max_var_size;
- extern int add_efi_memmap;
- extern unsigned long x86_efi_facility;
- extern void efi_set_executable(efi_memory_desc_t *md, bool executable);
-@@ -102,6 +105,13 @@ extern void efi_call_phys_epilog(void);
- extern void efi_unmap_memmap(void);
- extern void efi_memory_uc(u64 addr, unsigned long size);
- 
-+struct efi_var_bootdata {
-+	struct setup_data data;
-+	u64 store_size;
-+	u64 remaining_size;
-+	u64 max_var_size;
-+};
-+
- #ifdef CONFIG_EFI
- 
- static inline bool efi_is_native(void)
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index c15ddaf..0874424 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -6,6 +6,7 @@
- #define SETUP_E820_EXT			1
- #define SETUP_DTB			2
- #define SETUP_PCI			3
-+#define SETUP_EFI_VARS			4
- 
- /* ram_size flags */
- #define RAMDISK_IMAGE_START_MASK	0x07FF
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 5f2ecaf..cd2f020 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -71,6 +71,10 @@ static efi_system_table_t efi_systab __initdata;
- 
- unsigned long x86_efi_facility;
- 
-+u64 efi_var_store_size;
-+u64 efi_var_remaining_size;
-+u64 efi_var_max_var_size;
-+
- /*
-  * Returns 1 if 'facility' is enabled, 0 otherwise.
-  */
-@@ -682,6 +686,9 @@ void __init efi_init(void)
- 	char vendor[100] = "unknown";
- 	int i = 0;
- 	void *tmp;
-+	struct setup_data *data;
-+	struct efi_var_bootdata *efi_var_data;
-+	u64 pa_data;
- 
- #ifdef CONFIG_X86_32
- 	if (boot_params.efi_info.efi_systab_hi ||
-@@ -699,6 +706,20 @@ void __init efi_init(void)
- 	if (efi_systab_init(efi_phys.systab))
- 		return;
- 
-+	pa_data = boot_params.hdr.setup_data;
-+	while (pa_data) {
-+		data = early_ioremap(pa_data, sizeof(*efi_var_data));
-+		if (data->type == SETUP_EFI_VARS) {
-+			efi_var_data = (struct efi_var_bootdata *)data;
-+
-+			efi_var_store_size = efi_var_data->store_size;
-+			efi_var_remaining_size = efi_var_data->remaining_size;
-+			efi_var_max_var_size = efi_var_data->max_var_size;
-+		}
-+		pa_data = data->next;
-+		early_iounmap(data, sizeof(*efi_var_data));
-+	}
-+
- 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
- 
- 	/*
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 7acafb8..60e7d8f 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -85,6 +85,7 @@
- #include <linux/ramfs.h>
- #include <linux/pagemap.h>
- 
-+#include <asm/efi.h>
- #include <asm/uaccess.h>
- 
- #define EFIVARS_VERSION "0.08"
-@@ -139,6 +140,8 @@ struct efivar_attribute {
- 
- static struct efivars __efivars;
- static struct efivar_operations ops;
-+static u64 boot_var_size;
-+static u64 boot_used_size;
- 
- #define PSTORE_EFI_ATTRIBUTES \
- 	(EFI_VARIABLE_NON_VOLATILE | \
-@@ -2014,6 +2017,9 @@ int register_efivars(struct efivars *efivars,
- 	efi_char16_t *variable_name;
- 	unsigned long variable_name_size = 1024;
- 	int error = 0;
-+	struct efivar_entry *entry;
-+	struct efi_variable *var;
-+	u64 active_size = 0;
- 
- 	variable_name = kzalloc(variable_name_size, GFP_KERNEL);
- 	if (!variable_name) {
-@@ -2086,6 +2092,25 @@ int register_efivars(struct efivars *efivars,
- 		}
- 	} while (status != EFI_NOT_FOUND);
- 
-+	if (boot_used_size) {
-+		list_for_each_entry(entry, &efivars->list, list) {
-+			var = &entry->var;
-+			status = get_var_data(efivars, var);
-+
-+			if (status ||
-+			    !(var->Attributes & EFI_VARIABLE_NON_VOLATILE))
-+				continue;
-+
-+			active_size += var->DataSize;
-+			active_size += utf16_strsize(var->VariableName, 1024);
-+		}
-+
-+		if (active_size < boot_used_size)
-+			boot_var_size = boot_used_size - active_size;
-+		else
-+			printk(KERN_WARNING FW_BUG  "efivars: Inconsistent initial sizes\n");
-+	}
-+
- 	error = create_efivars_bin_attributes(efivars);
- 	if (error)
- 		unregister_efivars(efivars);
-@@ -2133,6 +2158,10 @@ efivars_init(void)
- 	ops.get_next_variable = efi.get_next_variable;
- 	ops.query_variable_info = efi.query_variable_info;
- 
-+#ifdef CONFIG_X86
-+	boot_used_size = efi_var_store_size - efi_var_remaining_size;
-+#endif
-+
- 	error = register_efivars(&__efivars, &ops, efi_kobj);
- 	if (error)
- 		goto err_put;
--- 
-1.8.1.2
+On Mon, 2013-04-01 at 11:13 -0400, Matthew Garrett wrote:
+> EFI variables can be flagged as being accessible only within boot service=
+s.
+> This makes it awkward for us to figure out how much space they use at
+> runtime. In theory we could figure this out by simply comparing the resul=
+ts
+> from QueryVariableInfo() to the space used by all of our variables, but
+> that fails if the platform doesn't garbage collect on every boot. Thankfu=
+lly,
+> calling QueryVariableInfo() while still inside boot services gives a more
+> reliable answer. This patch passes that information from the EFI boot stu=
+b
+> up to the efivars code, letting us calculate a reasonably accurate value.
+
+Good thinking.
+
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> ---
+[...]
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -71,6 +71,10 @@ static efi_system_table_t efi_systab __initdata;
+> =20
+>  unsigned long x86_efi_facility;
+> =20
+> +u64 efi_var_store_size;
+> +u64 efi_var_remaining_size;
+> +u64 efi_var_max_var_size;
+[...]
+> --- a/drivers/firmware/efivars.c
+> +++ b/drivers/firmware/efivars.c
+[...]
+> @@ -2133,6 +2158,10 @@ efivars_init(void)
+>  	ops.get_next_variable =3D efi.get_next_variable;
+>  	ops.query_variable_info =3D efi.query_variable_info;
+> =20
+> +#ifdef CONFIG_X86
+> +	boot_used_size =3D efi_var_store_size - efi_var_remaining_size;
+> +#endif
+
+efivars can be built as a module, but these aren't exported.
+
+Ben.
+
+>  	error =3D register_efivars(&__efivars, &ops, efi_kobj);
+>  	if (error)
+>  		goto err_put;
+
+--=20
+Ben Hutchings
+DNRC Motto:  I can please only one person per day.
+Today is not your day.  Tomorrow isn't looking good either.
+
+--=-Axxx66Hgs5PL/rHcoQYJ
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIVAwUAUVmq9+e/yOyVhhEJAQpZTg/+J0pfOg26xDd8udCaG3lzcp4ESRmdTImZ
+YxCKkP24f1xnLSJWgB6THAmLSAnIFJAxm0hvt+pMo4vMCtaC/o1Or/Z3xzRdaqJo
+nYzl8eY7U4cv4rMhwN/BvVCanJi4HqPlEA8fcB59kjeJMUpQkVW23MojsvuNEZ5S
+T9UjLbtnxxcs8ZH0xNxgDCFyFWTzKL1wPHcUvLgpzA2RFz/72ikSKdUmAXvdzXZx
+omMP9ogg4U+/WahFhNq8qTIAV+tGvu3YiVPoH+iwoZlgLwna9uTb3tOv1emkUReD
+r2AcgW6W3FWgL/BvbAGaq8gtj0CW6xqqkcCVuTQt5NxEfs19oEM6/dUaLWFeWlcA
+P4c6zwv2WQ8tIm3PqTuB4tHxOaDLnXJ8ajAn6WTxtnUkgxS+npM5sBBQayp4RcYV
+P/ftjwszkm/3HVSRZOraIVJF4v8Gsx34lIe7BQZbd6XUSYvQ9jpDBnF4dKKSIvnm
+ufnJrFqBjx9n/NHneBgyGiQvXj7rxBerd7qNxgS0H+PmYk+1W02/r5/t4zpXt1Of
+p8sIsaht4c+bU5a91vgpb2kJwryovrJl5Pe+xUTEvYGSqNR8Lh+bbWv7ecR/OtDF
+NQfoB6rw3LR6ZzFe+kpOmZfWwHQANzjnp4KBrWl5u3hBxtmzlZKKdC4S7NtfQcds
+Abfn4W1764U=
+=BTKV
+-----END PGP SIGNATURE-----
+
+--=-Axxx66Hgs5PL/rHcoQYJ--
