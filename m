@@ -1,46 +1,144 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Distinguish between "remaining space" and
- actually used space
-Date: Wed, 3 Apr 2013 17:20:30 +0000
-Message-ID: <1365009630.19098.16.camel@x230>
-References: <515150EC.7040203@redhat.com>
-	  <1364829240-26475-1-git-send-email-matthew.garrett@nebula.com>
-	  <1364829240-26475-2-git-send-email-matthew.garrett@nebula.com>
-	  <515C2A86.6070606@console-pimps.org> <1364996911.19098.9.camel@x230>
-	 <515C62E6.1070004@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH 1/6] efi: move utf16 string functions to efi.h
+Date: Thu,  4 Apr 2013 13:18:50 +0100
+Message-ID: <1365077935-6859-2-git-send-email-matt@console-pimps.org>
+References: <1365077935-6859-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <515C62E6.1070004-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Content-Language: en-US
-Content-ID: <96B0B8E853769340B45CAFFFF359E053-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <1365077935-6859-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org" <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, "jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org" <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDEzLTA0LTAzIGF0IDE4OjEyICswMTAwLCBNYXR0IEZsZW1pbmcgd3JvdGU6DQoN
-Cj4gVGhlIHNvbHV0aW9uIHlvdSdyZSBwcm9wb3NpbmcgaGFzIHRoZSBzYW1lIGRvd25zaWRlcyBh
-cyAzKSAtIHdlIHJpc2sNCj4gaGF2aW5nIHRvIHR3ZWFrIHRoaW5ncyBlaXRoZXIgd2F5LiBUaGUg
-ZGlmZmVyZW5jZSBpcyB0aGF0IGluIHRoZSBjYXNlIG9mDQo+IDMpIHRoZSB0d2Vha2luZyBpcyBh
-ZGRpbmcgZW50cmllcyB0byB0aGUgd2hpdGVsaXN0LCB3aGVyZWFzIHR3ZWFraW5nDQo+IHlvdXIg
-c29sdXRpb24gaGFzIG1vcmUgY2hhbmNlIG9mIGludHJvZHVjaW5nIGZ1cnRoZXIgdW53YW50ZWQN
-Cj4gcmVncmVzc2lvbnMgYmVjYXVzZSB5b3UnZCBiZSB0d2Vha2luZyBhbiBhbGdvcml0aG0sIGFu
-IGFsZ29yaXRobSB0aGF0DQo+IHJlbGllcyBvbiB0aGUgaW50ZXJuYWwgaW1wbGVtZW50YXRpb24g
-b2YgdGhlIHZhcmlhYmxlIHN0b3JhZ2UgY29kZS4NCg0KV2UgKnJpc2sqIGhhdmluZyB0byB0d2Vh
-ayB0aGluZ3MsIGFuZCB3ZSBmYWlsIG9uIHRoZSBzaWRlIG9mIHNhZmV0eS4gDQoNCj4gPiBEZWFs
-aW5nIHdpdGggZmlybXdhcmUgaXMgaGFyZC4gVGhpcyBmaXhlcyAoMSkgd2l0aG91dCBsZWF2aW5n
-IHVzIHdpdGgNCj4gPiAoMiksIHdoaWNoIHNlZW1zIGxpa2UgYSBuZXQgd2luLg0KPiANCj4gSSdt
-IG5vdCBjb252aW5jZWQgdGhhdCBpbXBsZW1lbnRpbmcgMykgd291bGQgaW5ldml0YWJseSBsZWFk
-IHRvIDIpLA0KPiBwcm92aWRlZCB0aGF0IHdlIGFwcGx5IGEgYml0IG9mIGNvbW1vbiBzZW5zZSB3
-aGVuIGFkZGluZyBlbnRyaWVzLiBJJ20NCj4gbm90IGFkdm9jYXRpbmcgc29tZSBraW5kIG9mIGZs
-YWcgZGF5IHdoZXJlIHdlIGFkZCB1bXB0ZWVuIG1hY2hpbmVzIHRvDQo+IHRoZSB3aGl0ZWxpc3Qu
-DQo+IA0KPiBGb3IgcmVmZXJlbmNlLCBJIGp1c3QgcHVzaGVkIHR3byBwYXRjaGVzIHRvIHRoZSAn
-d2hpdGVsaXN0JyBicmFuY2ggYXQsDQo+IA0KPiAgIGdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9z
-Y20vbGludXgva2VybmVsL2dpdC9tZmxlbWluZy9lZmkuZ2l0DQo+IA0KPiB3aGljaCBzaG91bGQg
-aG9wZWZ1bGx5IGlsbHVzdHJhdGUgdGhlIGtpbmQgb2YgdGhpbmcgdGhhdCBJJ20gdGFsa2luZyBh
-Ym91dC4NCg0KSSBkb24ndCB0aGluayB0aGF0IHdvcmtzLiBQZW9wbGUgYXJlIGNvbXBsYWluaW5n
-IHRoYXQgd2UgYnJva2Ugc29tZQ0KVGhpbmtwYWRzIGFzIHdlbGwsIGJ1dCB3ZSBhbHNvIGhhdmUg
-cmVwb3J0cyB0aGF0IFRoaW5rcGFkcyBjYW4gYmUNCmJyaWNrZWQgaWYgd2UgdXNlIHRvbyBtdWNo
-IHNwYWNlLg0KDQotLSANCk1hdHRoZXcgR2FycmV0dCB8IG1qZzU5QHNyY2YudWNhbS5vcmcNCg==
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+There are currently two implementations of the utf16 string functions.
+Somewhat confusingly, they've got different names.
+
+Centralise the functions in efi.h.
+
+Cc: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+Cc: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efivars.c     |   17 -----------------
+ drivers/firmware/google/gsmi.c |   19 ++++---------------
+ include/linux/efi.h            |   17 +++++++++++++++++
+ 3 files changed, 21 insertions(+), 32 deletions(-)
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 7acafb8..34c8783 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -172,23 +172,6 @@ static void efivar_update_sysfs_entries(struct work_struct *);
+ static DECLARE_WORK(efivar_work, efivar_update_sysfs_entries);
+ static bool efivar_wq_enabled = true;
+ 
+-/* Return the number of unicode characters in data */
+-static unsigned long
+-utf16_strnlen(efi_char16_t *s, size_t maxlength)
+-{
+-	unsigned long length = 0;
+-
+-	while (*s++ != 0 && length < maxlength)
+-		length++;
+-	return length;
+-}
+-
+-static inline unsigned long
+-utf16_strlen(efi_char16_t *s)
+-{
+-	return utf16_strnlen(s, ~0UL);
+-}
+-
+ /*
+  * Return the number of bytes is the length of this string
+  * Note: this is NOT the same as the number of unicode characters
+diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
+index 91ddf0f..c409a75 100644
+--- a/drivers/firmware/google/gsmi.c
++++ b/drivers/firmware/google/gsmi.c
+@@ -288,17 +288,6 @@ static int gsmi_exec(u8 func, u8 sub)
+ 	return rc;
+ }
+ 
+-/* Return the number of unicode characters in data */
+-static size_t
+-utf16_strlen(efi_char16_t *data, unsigned long maxlength)
+-{
+-	unsigned long length = 0;
+-
+-	while (*data++ != 0 && length < maxlength)
+-		length++;
+-	return length;
+-}
+-
+ static efi_status_t gsmi_get_variable(efi_char16_t *name,
+ 				      efi_guid_t *vendor, u32 *attr,
+ 				      unsigned long *data_size,
+@@ -311,7 +300,7 @@ static efi_status_t gsmi_get_variable(efi_char16_t *name,
+ 	};
+ 	efi_status_t ret = EFI_SUCCESS;
+ 	unsigned long flags;
+-	size_t name_len = utf16_strlen(name, GSMI_BUF_SIZE / 2);
++	size_t name_len = utf16_strnlen(name, GSMI_BUF_SIZE / 2);
+ 	int rc;
+ 
+ 	if (name_len >= GSMI_BUF_SIZE / 2)
+@@ -380,7 +369,7 @@ static efi_status_t gsmi_get_next_variable(unsigned long *name_size,
+ 		return EFI_BAD_BUFFER_SIZE;
+ 
+ 	/* Let's make sure the thing is at least null-terminated */
+-	if (utf16_strlen(name, GSMI_BUF_SIZE / 2) == GSMI_BUF_SIZE / 2)
++	if (utf16_strnlen(name, GSMI_BUF_SIZE / 2) == GSMI_BUF_SIZE / 2)
+ 		return EFI_INVALID_PARAMETER;
+ 
+ 	spin_lock_irqsave(&gsmi_dev.lock, flags);
+@@ -408,7 +397,7 @@ static efi_status_t gsmi_get_next_variable(unsigned long *name_size,
+ 
+ 		/* Copy the name back */
+ 		memcpy(name, gsmi_dev.name_buf->start, GSMI_BUF_SIZE);
+-		*name_size = utf16_strlen(name, GSMI_BUF_SIZE / 2) * 2;
++		*name_size = utf16_strnlen(name, GSMI_BUF_SIZE / 2) * 2;
+ 
+ 		/* copy guid to return buffer */
+ 		memcpy(vendor, &param.guid, sizeof(param.guid));
+@@ -434,7 +423,7 @@ static efi_status_t gsmi_set_variable(efi_char16_t *name,
+ 			      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 			      EFI_VARIABLE_RUNTIME_ACCESS,
+ 	};
+-	size_t name_len = utf16_strlen(name, GSMI_BUF_SIZE / 2);
++	size_t name_len = utf16_strnlen(name, GSMI_BUF_SIZE / 2);
+ 	efi_status_t ret = EFI_SUCCESS;
+ 	int rc;
+ 	unsigned long flags;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9bf2f1f..d1d782a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -719,6 +719,23 @@ static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+ 	*addr &= PAGE_MASK;
+ }
+ 
++/* Return the number of unicode characters in data */
++static inline unsigned long
++utf16_strnlen(efi_char16_t *s, size_t maxlength)
++{
++	unsigned long length = 0;
++
++	while (*s++ != 0 && length < maxlength)
++		length++;
++	return length;
++}
++
++static inline unsigned long
++utf16_strlen(efi_char16_t *s)
++{
++	return utf16_strnlen(s, ~0UL);
++}
++
+ #if defined(CONFIG_EFI_VARS) || defined(CONFIG_EFI_VARS_MODULE)
+ /*
+  * EFI Variable support.
+-- 
+1.7.10.4
