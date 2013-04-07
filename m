@@ -1,19 +1,49 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 1/2] efivars: Check max_size only if it is non-zero.
-Date: Fri, 05 Apr 2013 15:03:39 +0100
-Message-ID: <515ED9BB.3060506@intel.com>
-References: <1365080500-13677-1-git-send-email-richard@nod.at> <3908561D78D1C84285E8C5FCA982C28F1E0987DE@ORSMSX108.amr.corp.intel.com> <515DA677.8050805@nod.at>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <515DA677.8050805-/L3Ra7n9ekc@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>
-Cc: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org" <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org" <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: Richard Weinberger <richard@nod.at>
+Subject: [PATCH 2/2] efivars: Implement no_storage_paranoia parameter
+Date: Mon,  8 Apr 2013 00:32:18 +0200
+Message-ID: <1365373938-25993-2-git-send-email-richard@nod.at>
+References: <1365373938-25993-1-git-send-email-richard@nod.at>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365373938-25993-1-git-send-email-richard@nod.at>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt.fleming@intel.com
+Cc: cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, tony.luck@intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matthew.garrett@nebula.com, Richard Weinberger <richard@nod.at>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/04/13 17:12, Richard Weinberger wrote:
-> Fair point. I'll add such a printk() to my patch and resend.
+Using this parameter one can disable the storage_size/2 check if
+he is really sure that the UEFI does sane gc.
 
-Also take a look at FW_BUG.
+Signed-off-by: Richard Weinberger <richard@nod.at>
+---
+ drivers/firmware/efivars.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 60c9899..0926471 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -105,8 +105,10 @@ MODULE_VERSION(EFIVARS_VERSION);
+ 
+ static bool efivars_pstore_disable =
+ 	IS_ENABLED(CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE);
++static bool efivars_no_storage_paranoia;
+ 
+ module_param_named(pstore_disable, efivars_pstore_disable, bool, 0644);
++module_param_named(no_storage_paranoia, efivars_no_storage_paranoia, bool, 0644);
+ 
+ /*
+  * The maximum size of VariableName + Data = 1024
+@@ -453,7 +455,10 @@ check_var_size_locked(struct efivars *efivars, u32 attributes,
+ 		printk_once(KERN_ERR FW_BUG "Broken EFI implementation is returning MaxVariableSize=0\n");
+ 
+ 	if (!storage_size || size > remaining_size ||
+-	    (max_size && size > max_size) ||
++	    (max_size && size > max_size))
++		return EFI_OUT_OF_RESOURCES;
++
++	if (!efivars_no_storage_paranoia &&
+ 	    (remaining_size - size) < (storage_size / 2))
+ 		return EFI_OUT_OF_RESOURCES;
+ 
+-- 
+1.8.1.4
