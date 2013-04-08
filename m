@@ -1,90 +1,45 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Patch "efi: Build EFI stub with EFI-appropriate options" has
- been added to the 3.6-stable tree
-Date: Mon, 08 Apr 2013 10:32:05 +0100
-Message-ID: <51628E95.1090707@console-pimps.org>
-References: <13511021101759@kroah.org> <CAA7rmPF4oZjvwQ5LU1pJAydWhbwmCmzgUudUvQ5_YPpS_Rnjvg@mail.gmail.com> <1364614121.3557.11.camel@deadeye.wl.decadent.org.uk> <CAA7rmPFxzoOgcrYRetyx3hY-Y_cj0jzuY=sGAj-v2X59vCrrDg@mail.gmail.com> <515C043B.4070401@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [GIT PULL] EFI changes for v3.9
+Date: Mon, 08 Apr 2013 12:15:28 +0100
+Message-ID: <5162A6D0.6060107@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <515C043B.4070401-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Vacek <neelx.g-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/04/13 11:28, Matt Fleming wrote:
-> I applied this by hand. Your patch appears to be whitespace damaged. Also, I
-> expanded the commit message and turned it into,
-> 
->   efi: fix typo in Makefile
-> 
->   commit 9dead5bbb825 ("efi: Build EFI stub with EFI-appropriate options")
->   contains a typo which means that the efi_stub_$(BITS).o code is still not
->   compiled with -fshort-wchar and -mno-red-zone.
-> 
->   Fix it with s/KBUILD_CLFAGS/KBUILD_CFLAGS/
 
-I ended up dropping this patch because the following has been applied to -tip,
+Hi folks,
 
-commit 918708245e92941df16a634dc201b407d12bcd91
-Author: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
-Date:   Wed Apr 3 15:47:33 2013 +0100
+There's a couple of minor changes sitting in the 'next' branch that I've been
+holding off sending until v3.9, just because this release cycle has been kinda
+busy with bug fixes. Please consider pulling.
 
-    x86: Fix rebuild with EFI_STUB enabled
-    
-    eboot.o and efi_stub_$(BITS).o didn't get added to "targets", and hence
-    their .cmd files don't get included by the build machinery, leading to
-    the files always getting rebuilt.
-    
-    Rather than adding the two files individually, take the opportunity and
-    add $(VMLINUX_OBJS) to "targets" instead, thus allowing the assignment
-    at the top of the file to be shrunk quite a bit.
-    
-    At the same time, remove a pointless flags override line - the variable
-    assigned to was misspelled anyway, and the options added are
-    meaningless for assembly sources.
-    
-    [ hpa: the patch is not minimal, but I am taking it for -urgent anyway
-      since the excess impact of the patch seems to be small enough. ]
-    
-    Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
-    Link: http://lkml.kernel.org/r/515C5D2502000078000CA6AD-ce6RLXgGx+vWGUEhTRrCg1aTQe2KTcn/@public.gmane.org
-    Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-    Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-    Signed-off-by: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+The following changes since commit 6b59e366e074d3962e04f01efb8acc10a33c0e1e:
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 8a84501..5ef205c 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -4,7 +4,7 @@
- # create a compressed vmlinux image from the original vmlinux
- #
- 
--targets := vmlinux.lds vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma vmlinux.bin.xz vmlinux.bin.lzo head_$(BITS).o misc.o string.o cmdline.o early_serial_console.o piggy.o
-+targets := vmlinux vmlinux.bin vmlinux.bin.gz vmlinux.bin.bz2 vmlinux.bin.lzma vmlinux.bin.xz vmlinux.bin.lzo
- 
- KBUILD_CFLAGS := -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2
- KBUILD_CFLAGS += -fno-strict-aliasing -fPIC
-@@ -29,7 +29,6 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
- 	$(obj)/piggy.o
- 
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
--$(obj)/efi_stub_$(BITS).o: KBUILD_CLFAGS += -fshort-wchar -mno-red-zone
- 
- ifeq ($(CONFIG_EFI_STUB), y)
- 	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
-@@ -43,7 +42,7 @@ OBJCOPYFLAGS_vmlinux.bin :=  -R .comment -S
- $(obj)/vmlinux.bin: vmlinux FORCE
- 	$(call if_changed,objcopy)
- 
--targets += vmlinux.bin.all vmlinux.relocs
-+targets += $(patsubst $(obj)/%,%,$(VMLINUX_OBJS)) vmlinux.bin.all vmlinux.relocs
- 
- CMD_RELOCS = arch/x86/tools/relocs
- quiet_cmd_relocs = RELOCS  $@
+  x86, efi: remove duplicate code in setup_arch() by using, efi_is_native() (2013-02-14 10:36:18 +0000)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
+
+for you to fetch changes up to 15b9c359f288b09003cb70f7ed204affc0c6614d:
+
+  x86, efi: Make efi_memblock_x86_reserve_range more readable (2013-03-04 15:23:56 +0000)
+
+----------------------------------------------------------------
+Borislav Petkov (1):
+      x86, efi: Make efi_memblock_x86_reserve_range more readable
+
+Wei Yongjun (1):
+      efivarfs: convert to use simple_open()
+
+ arch/x86/platform/efi/efi.c |   19 ++++++++++---------
+ drivers/firmware/efivars.c  |    8 +-------
+ 2 files changed, 11 insertions(+), 16 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
