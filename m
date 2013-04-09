@@ -1,45 +1,29 @@
 From: Matt Fleming <matt@console-pimps.org>
-Subject: [GIT PULL] EFI changes for v3.9
-Date: Mon, 08 Apr 2013 12:15:28 +0100
-Message-ID: <5162A6D0.6060107@console-pimps.org>
+Subject: Re: [PATCH 2/2] efivars: Implement no_storage_paranoia parameter
+Date: Tue, 09 Apr 2013 10:38:38 +0100
+Message-ID: <5163E19E.5000507@console-pimps.org>
+References: <1365373938-25993-1-git-send-email-richard@nod.at> <1365373938-25993-2-git-send-email-richard@nod.at>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1365373938-25993-2-git-send-email-richard@nod.at>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: Richard Weinberger <richard@nod.at>
+Cc: matt.fleming@intel.com, cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, tony.luck@intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
+On 07/04/13 23:32, Richard Weinberger wrote:
+> Using this parameter one can disable the storage_size/2 check if
+> he is really sure that the UEFI does sane gc.
+> 
+> Signed-off-by: Richard Weinberger <richard@nod.at>
+> ---
+>  drivers/firmware/efivars.c | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 
-Hi folks,
-
-There's a couple of minor changes sitting in the 'next' branch that I've been
-holding off sending until v3.9, just because this release cycle has been kinda
-busy with bug fixes. Please consider pulling.
-
-The following changes since commit 6b59e366e074d3962e04f01efb8acc10a33c0e1e:
-
-  x86, efi: remove duplicate code in setup_arch() by using, efi_is_native() (2013-02-14 10:36:18 +0000)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
-
-for you to fetch changes up to 15b9c359f288b09003cb70f7ed204affc0c6614d:
-
-  x86, efi: Make efi_memblock_x86_reserve_range more readable (2013-03-04 15:23:56 +0000)
-
-----------------------------------------------------------------
-Borislav Petkov (1):
-      x86, efi: Make efi_memblock_x86_reserve_range more readable
-
-Wei Yongjun (1):
-      efivarfs: convert to use simple_open()
-
- arch/x86/platform/efi/efi.c |   19 ++++++++++---------
- drivers/firmware/efivars.c  |    8 +-------
- 2 files changed, 11 insertions(+), 16 deletions(-)
+You need to make it clear that enabling this option may brick your
+machine if your firmware is buggy.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
