@@ -1,29 +1,26 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 2/2] efivars: Implement no_storage_paranoia parameter
-Date: Tue, 09 Apr 2013 10:38:38 +0100
-Message-ID: <5163E19E.5000507@console-pimps.org>
-References: <1365373938-25993-1-git-send-email-richard@nod.at> <1365373938-25993-2-git-send-email-richard@nod.at>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 0/6] Chainsaw efivars.c
+Date: Tue, 09 Apr 2013 09:25:25 -0700
+Message-ID: <516440F5.7040904@zytor.com>
+References: <1365077935-6859-1-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1365373938-25993-2-git-send-email-richard@nod.at>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Richard Weinberger <richard@nod.at>
-Cc: matt.fleming@intel.com, cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, tony.luck@intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matthew.garrett@nebula.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1365077935-6859-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 07/04/13 23:32, Richard Weinberger wrote:
-> Using this parameter one can disable the storage_size/2 check if
-> he is really sure that the UEFI does sane gc.
+On 04/04/2013 05:18 AM, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> Signed-off-by: Richard Weinberger <richard@nod.at>
-> ---
->  drivers/firmware/efivars.c | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> drivers/firmware/efivars.c has grown pretty large and is ~2K lines.
+> 
 
-You need to make it clear that enabling this option may brick your
-machine if your firmware is buggy.
+Hi Matt,
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Are you expecting me or Matt G. to take this one?
+
+	-hpa
