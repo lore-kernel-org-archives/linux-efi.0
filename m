@@ -1,204 +1,192 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: RE: [PATCH 3/6] efivars: efivar_entry API
-Date: Wed, 10 Apr 2013 15:25:54 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF8CFEE@USINDEM103.corp.hds.com>
-References: <1365077935-6859-1-git-send-email-matt@console-pimps.org>
- <1365077935-6859-4-git-send-email-matt@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH V4 3/3] efi: Distinguish between "remaining space" and actually used space
+Date: Wed, 10 Apr 2013 13:46:07 -0400
+Message-ID: <1365615967-27346-3-git-send-email-matthew.garrett@nebula.com>
+References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com>
+ <1365615967-27346-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1365077935-6859-4-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <1365615967-27346-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> -static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
-> -			       int *count, struct timespec *timespec,
-> -			       char **buf, struct pstore_info *psi)
-> +struct pstore_read_data {
-> +	u64 *id;
-> +	enum pstore_type_id *type;
-> +	int *count;
-> +	struct timespec *timespec;
-> +	char **buf;
-> +};
-> +
-> +static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->  {
->  	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-> -	struct efivars *efivars = __efivars;
-> +	struct pstore_read_data *cb_data = data;
->  	char name[DUMP_NAME_LEN];
->  	int i;
->  	int cnt;
-> -	unsigned int part, size;
-> -	unsigned long time;
-> -
-> -	while (&efivars->walk_entry->list != &efivars->list) {
-> -		if (!efi_guidcmp(efivars->walk_entry->var.VendorGuid,
-> -				 vendor)) {
-> -			for (i = 0; i < DUMP_NAME_LEN; i++) {
-> -				name[i] = efivars->walk_entry->var.VariableName[i];
-> -			}
-> -			if (sscanf(name, "dump-type%u-%u-%d-%lu",
-> -				   type, &part, &cnt, &time) == 4) {
-> -				*id = part;
-> -				*count = cnt;
-> -				timespec->tv_sec = time;
-> -				timespec->tv_nsec = 0;
-> -			} else if (sscanf(name, "dump-type%u-%u-%lu",
-> -				   type, &part, &time) == 3) {
-> -				/*
-> -				 * Check if an old format,
-> -				 * which doesn't support holding
-> -				 * multiple logs, remains.
-> -				 */
-> -				*id = part;
-> -				*count = 0;
-> -				timespec->tv_sec = time;
-> -				timespec->tv_nsec = 0;
-> -			} else {
-> -				efivars->walk_entry = list_entry(
-> -						efivars->walk_entry->list.next,
-> -						struct efivar_entry, list);
-> -				continue;
-> -			}
-> +	unsigned int part;
-> +	unsigned long time, size;
-> 
-> -			get_var_data_locked(efivars, &efivars->walk_entry->var);
-> -			size = efivars->walk_entry->var.DataSize;
-> -			*buf = kmalloc(size, GFP_KERNEL);
-> -			if (*buf == NULL)
-> -				return -ENOMEM;
-> -			memcpy(*buf, efivars->walk_entry->var.Data,
-> -			       size);
-> -			efivars->walk_entry = list_entry(
-> -					efivars->walk_entry->list.next,
-> -					struct efivar_entry, list);
-> -			return size;
-> -		}
-> -		efivars->walk_entry = list_entry(efivars->walk_entry->list.next,
-> -						 struct efivar_entry, list);
-> -	}
-> -	return 0;
-> +	if (efi_guidcmp(entry->var.VendorGuid, vendor))
-> +		return 0;
-> +
-> +	for (i = 0; i < DUMP_NAME_LEN; i++)
-> +		name[i] = entry->var.VariableName[i];
-> +
-> +	if (sscanf(name, "dump-type%u-%u-%d-%lu",
-> +		   cb_data->type, &part, &cnt, &time) == 4) {
-> +		*cb_data->id = part;
-> +		*cb_data->count = cnt;
-> +		cb_data->timespec->tv_sec = time;
-> +		cb_data->timespec->tv_nsec = 0;
-> +	} else if (sscanf(name, "dump-type%u-%u-%lu",
-> +			  cb_data->type, &part, &time) == 3) {
-> +		/*
-> +		 * Check if an old format,
-> +		 * which doesn't support holding
-> +		 * multiple logs, remains.
-> +		 */
-> +		*cb_data->id = part;
-> +		*cb_data->count = 0;
-> +		cb_data->timespec->tv_sec = time;
-> +		cb_data->timespec->tv_nsec = 0;
-> +	} else
-> +		return 0;
-> +
-> +	efivar_entry_size(entry, &size);
+EFI implementations distinguish between space that is actively used by a
+variable and space that merely hasn't been garbage collected yet. Space
+that hasn't yet been garbage collected isn't available for use and so isn't
+counted in the remaining_space field returned by QueryVariableInfo().
 
-Deadlocking will happen in this efivar_entry_size() because __efivars->lock is already hold 
-in efivar_entry_iter_begin().
+Combined with commit 68d9298 this can cause problems. Some implementations
+don't garbage collect until the remaining space is smaller than the maximum
+variable size, and as a result check_var_size() will always fail once more
+than 50% of the variable store has been used even if most of that space is
+marked as available for garbage collection. The user is unable to create
+new variables, and deleting variables doesn't increase the remaining space.
 
+The problem that 68d9298 was attempting to avoid was one where certain
+platforms fail if the actively used space is greater than 50% of the
+available storage space. We should be able to calculate that by simply
+summing the size of each available variable and subtracting that from
+the total storage space. With luck this will fix the problem described in
+https://bugzilla.kernel.org/show_bug.cgi?id=55471 without permitting
+damage to occur to the machines 68d9298 was attempting to fix.
 
-> +	*cb_data->buf = kmalloc(size, GFP_KERNEL);
-> +	if (*cb_data->buf == NULL)
-> +		return -ENOMEM;
-> +	memcpy(*cb_data->buf, entry->var.Data, size);
-> +	return size;
-> +}
-> +
-> +static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
-> +			       int *count, struct timespec *timespec,
-> +			       char **buf, struct pstore_info *psi)
-> +{
-> +	struct pstore_read_data data;
-> +
-> +	data.id = id;
-> +	data.type = type;
-> +	data.count = count;
-> +	data.timespec = timespec;
-> +	data.buf = buf;
-> +
-> +	return __efivar_entry_iter(efi_pstore_read_func, &efivar_sysfs_list, &data,
-> +				   (struct efivar_entry **)&psi->data);
->  }
-> 
->  static int efi_pstore_write(enum pstore_type_id type,
-> @@ -1382,36 +1221,7 @@ static int efi_pstore_write(enum pstore_type_id type,
->  	char name[DUMP_NAME_LEN];
->  	efi_char16_t efi_name[DUMP_NAME_LEN];
->  	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-> -	struct efivars *efivars = __efivars;
->  	int i, ret = 0;
-> -	efi_status_t status = EFI_NOT_FOUND;
-> -	unsigned long flags;
-> -
-> -	if (pstore_cannot_block_path(reason)) {
-> -		/*
-> -		 * If the lock is taken by another cpu in non-blocking path,
-> -		 * this driver returns without entering firmware to avoid
-> -		 * hanging up.
-> -		 */
-> -		if (!spin_trylock_irqsave(&efivars->lock, flags))
-> -			return -EBUSY;
-> -	} else
-> -		spin_lock_irqsave(&efivars->lock, flags);
-> -
-> -	/*
-> -	 * Check if there is a space enough to log.
-> -	 * size: a size of logging data
-> -	 * DUMP_NAME_LEN * 2: a maximum size of variable name
-> -	 */
-> -
-> -	status = check_var_size_locked(efivars, PSTORE_EFI_ATTRIBUTES,
-> -					 size + DUMP_NAME_LEN * 2);
-> -
-> -	if (status) {
-> -		spin_unlock_irqrestore(&efivars->lock, flags);
-> -		*id = part;
-> -		return -ENOSPC;
-> -	}
-> 
->  	sprintf(name, "dump-type%u-%u-%d-%lu", type, part, count,
->  		get_seconds());
-> @@ -1419,81 +1229,90 @@ static int efi_pstore_write(enum pstore_type_id type,
->  	for (i = 0; i < DUMP_NAME_LEN; i++)
->  		efi_name[i] = name[i];
-> 
-> -	efivars->ops->set_variable(efi_name, &vendor, PSTORE_EFI_ATTRIBUTES,
-> -				   size, psi->buf);
-> +	ret = efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
-> +				    !pstore_cannot_block_path(reason),
-> +				    size, psi->buf);
-> 
-> -	spin_unlock_irqrestore(&efivars->lock, flags);
-> -
-> -	if (reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
-> +	if (size && !ret && reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efivars.c | 104 +++++++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 101 insertions(+), 3 deletions(-)
 
-Why do you add (size && !ret) checking?
-If the purpose of this patch is just adding new API, we don't need to modify the logic.
-
-
->  		schedule_work(&efivar_work);
-> 
->  	*id = part;
->  	return ret;
->  };
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 60e7d8f..33a2be0 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -104,6 +104,13 @@ MODULE_VERSION(EFIVARS_VERSION);
+  */
+ #define GUID_LEN 36
+ 
++/*
++ * There's some additional metadata associated with each
++ * variable. Intel's reference implementation is 60 bytes - bump that
++ * to account for potential alignment constraints
++ */
++#define VAR_METADATA_SIZE 64
++
+ static bool efivars_pstore_disable =
+ 	IS_ENABLED(CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE);
+ 
+@@ -405,6 +412,52 @@ validate_var(struct efi_variable *var, u8 *data, unsigned long len)
+ }
+ 
+ static efi_status_t
++get_var_size_locked(struct efivars *efivars, struct efi_variable *var)
++{
++	efi_status_t status;
++	void *dummy;
++
++	var->DataSize = 0;
++	status = efivars->ops->get_variable(var->VariableName,
++					    &var->VendorGuid,
++					    &var->Attributes,
++					    &var->DataSize,
++					    var->Data);
++
++	if (status != EFI_BUFFER_TOO_SMALL)
++		return status;
++
++	dummy = kmalloc(var->DataSize, GFP_ATOMIC);
++
++	status = efivars->ops->get_variable(var->VariableName,
++					    &var->VendorGuid,
++					    &var->Attributes,
++					    &var->DataSize,
++					    dummy);
++
++	kfree(dummy);
++
++	return status;
++}
++
++static efi_status_t
++get_var_size(struct efivars *efivars, struct efi_variable *var)
++{
++	efi_status_t status;
++	unsigned long flags;
++
++	spin_lock_irqsave(&efivars->lock, flags);
++	status = get_var_size_locked(efivars, var);
++	spin_unlock_irqrestore(&efivars->lock, flags);
++
++	if (status != EFI_SUCCESS) {
++		printk(KERN_WARNING "efivars: Failed to get var size 0x%lx!\n",
++			status);
++	}
++	return status;
++}
++
++static efi_status_t
+ get_var_data_locked(struct efivars *efivars, struct efi_variable *var)
+ {
+ 	efi_status_t status;
+@@ -415,6 +468,10 @@ get_var_data_locked(struct efivars *efivars, struct efi_variable *var)
+ 					    &var->Attributes,
+ 					    &var->DataSize,
+ 					    var->Data);
++
++	if (status != EFI_SUCCESS)
++		var->DataSize = 0;
++
+ 	return status;
+ }
+ 
+@@ -440,8 +497,18 @@ check_var_size_locked(struct efivars *efivars, u32 attributes,
+ 			unsigned long size)
+ {
+ 	u64 storage_size, remaining_size, max_size;
++	struct efivar_entry *entry;
++	struct efi_variable *var;
+ 	efi_status_t status;
+ 	const struct efivar_operations *fops = efivars->ops;
++	unsigned long active_size = 0;
++
++	/*
++	 * Any writes other than EFI_VARIABLE_NON_VOLATILE will only hit
++	 * RAM, not flash, so ignore them.
++	 */
++	if (!(attributes & EFI_VARIABLE_NON_VOLATILE))
++		return EFI_SUCCESS;
+ 
+ 	if (!efivars->ops->query_variable_info)
+ 		return EFI_UNSUPPORTED;
+@@ -452,8 +519,39 @@ check_var_size_locked(struct efivars *efivars, u32 attributes,
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	if (!storage_size || size > remaining_size || size > max_size ||
+-	    (remaining_size - size) < (storage_size / 2))
++	list_for_each_entry(entry, &efivars->list, list) {
++		var = &entry->var;
++		status = EFI_SUCCESS;
++
++		if (var->DataSize == 0)
++			status = get_var_size_locked(efivars, var);
++
++		if (status || !(var->Attributes & EFI_VARIABLE_NON_VOLATILE))
++				continue;
++
++		active_size += var->DataSize;
++		active_size += utf16_strsize(var->VariableName, 1024);
++		active_size += VAR_METADATA_SIZE;
++	}
++
++	/*
++	 * Add on the size of any boot services-only variables
++	 */
++	active_size += boot_var_size;
++
++	/*
++	 * Some firmware implementations refuse to boot if there's insufficient
++	 * space in the variable store. We account for that by refusing the
++	 * write if permitting it would reduce the available space to under
++	 * 50%. However, some firmware won't reclaim variable space until
++	 * after the used (not merely the actively used) space drops below
++	 * a threshold. We can approximate that case with the value calculated
++	 * above. If both the firmware and our calculations indicate that the
++	 * available space would drop below 50%, refuse the write.
++	 */
++	if (!storage_size || size > remaining_size ||
++	    ((active_size + size + VAR_METADATA_SIZE > storage_size / 2) &&
++	     (remaining_size - size < storage_size / 2)))
+ 		return EFI_OUT_OF_RESOURCES;
+ 
+ 	return status;
+@@ -2095,7 +2193,7 @@ int register_efivars(struct efivars *efivars,
+ 	if (boot_used_size) {
+ 		list_for_each_entry(entry, &efivars->list, list) {
+ 			var = &entry->var;
+-			status = get_var_data(efivars, var);
++			status = get_var_size(efivars, var);
+ 
+ 			if (status ||
+ 			    !(var->Attributes & EFI_VARIABLE_NON_VOLATILE))
+-- 
+1.8.1.2
