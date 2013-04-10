@@ -1,159 +1,204 @@
-From: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Subject: Re: [PATCH 1/6] efi: move utf16 string functions to efi.h
-Date: Wed, 10 Apr 2013 12:18:37 +0100
-Message-ID: <1365592717.3072.57.camel@shinybook.infradead.org>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH 3/6] efivars: efivar_entry API
+Date: Wed, 10 Apr 2013 15:25:54 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF8CFEE@USINDEM103.corp.hds.com>
 References: <1365077935-6859-1-git-send-email-matt@console-pimps.org>
-	 <1365077935-6859-2-git-send-email-matt@console-pimps.org>
-	 <CAGTjWtCFSxJMKf=Xp+5MKLSb3qH4YpWVYYmUb6fkjwctMc1bDQ@mail.gmail.com>
+ <1365077935-6859-4-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="sha1"; protocol="application/x-pkcs7-signature";
-	boundary="=-x7wD0WsDNovM6KMPKxIe"
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGTjWtCFSxJMKf=Xp+5MKLSb3qH4YpWVYYmUb6fkjwctMc1bDQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1365077935-6859-4-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+> -static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+> -			       int *count, struct timespec *timespec,
+> -			       char **buf, struct pstore_info *psi)
+> +struct pstore_read_data {
+> +	u64 *id;
+> +	enum pstore_type_id *type;
+> +	int *count;
+> +	struct timespec *timespec;
+> +	char **buf;
+> +};
+> +
+> +static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+>  {
+>  	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+> -	struct efivars *efivars = __efivars;
+> +	struct pstore_read_data *cb_data = data;
+>  	char name[DUMP_NAME_LEN];
+>  	int i;
+>  	int cnt;
+> -	unsigned int part, size;
+> -	unsigned long time;
+> -
+> -	while (&efivars->walk_entry->list != &efivars->list) {
+> -		if (!efi_guidcmp(efivars->walk_entry->var.VendorGuid,
+> -				 vendor)) {
+> -			for (i = 0; i < DUMP_NAME_LEN; i++) {
+> -				name[i] = efivars->walk_entry->var.VariableName[i];
+> -			}
+> -			if (sscanf(name, "dump-type%u-%u-%d-%lu",
+> -				   type, &part, &cnt, &time) == 4) {
+> -				*id = part;
+> -				*count = cnt;
+> -				timespec->tv_sec = time;
+> -				timespec->tv_nsec = 0;
+> -			} else if (sscanf(name, "dump-type%u-%u-%lu",
+> -				   type, &part, &time) == 3) {
+> -				/*
+> -				 * Check if an old format,
+> -				 * which doesn't support holding
+> -				 * multiple logs, remains.
+> -				 */
+> -				*id = part;
+> -				*count = 0;
+> -				timespec->tv_sec = time;
+> -				timespec->tv_nsec = 0;
+> -			} else {
+> -				efivars->walk_entry = list_entry(
+> -						efivars->walk_entry->list.next,
+> -						struct efivar_entry, list);
+> -				continue;
+> -			}
+> +	unsigned int part;
+> +	unsigned long time, size;
+> 
+> -			get_var_data_locked(efivars, &efivars->walk_entry->var);
+> -			size = efivars->walk_entry->var.DataSize;
+> -			*buf = kmalloc(size, GFP_KERNEL);
+> -			if (*buf == NULL)
+> -				return -ENOMEM;
+> -			memcpy(*buf, efivars->walk_entry->var.Data,
+> -			       size);
+> -			efivars->walk_entry = list_entry(
+> -					efivars->walk_entry->list.next,
+> -					struct efivar_entry, list);
+> -			return size;
+> -		}
+> -		efivars->walk_entry = list_entry(efivars->walk_entry->list.next,
+> -						 struct efivar_entry, list);
+> -	}
+> -	return 0;
+> +	if (efi_guidcmp(entry->var.VendorGuid, vendor))
+> +		return 0;
+> +
+> +	for (i = 0; i < DUMP_NAME_LEN; i++)
+> +		name[i] = entry->var.VariableName[i];
+> +
+> +	if (sscanf(name, "dump-type%u-%u-%d-%lu",
+> +		   cb_data->type, &part, &cnt, &time) == 4) {
+> +		*cb_data->id = part;
+> +		*cb_data->count = cnt;
+> +		cb_data->timespec->tv_sec = time;
+> +		cb_data->timespec->tv_nsec = 0;
+> +	} else if (sscanf(name, "dump-type%u-%u-%lu",
+> +			  cb_data->type, &part, &time) == 3) {
+> +		/*
+> +		 * Check if an old format,
+> +		 * which doesn't support holding
+> +		 * multiple logs, remains.
+> +		 */
+> +		*cb_data->id = part;
+> +		*cb_data->count = 0;
+> +		cb_data->timespec->tv_sec = time;
+> +		cb_data->timespec->tv_nsec = 0;
+> +	} else
+> +		return 0;
+> +
+> +	efivar_entry_size(entry, &size);
 
---=-x7wD0WsDNovM6KMPKxIe
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
-
-On Tue, 2013-04-09 at 15:00 -0700, Mike Waychison wrote:
-> fwiw, I was tempted to rename these to ucs2_*() last time I was here.
-
-We should definitely do that. The functions aren't implementing UTF-16.
-
-Note that Windows *does* now implement UTF16 I think, but EFI still
-claims to be UCS2 only.=20
-
-If I interpret this correctly, the claim is basically that Windows was
-"always" actually UTF16, but just never used any of the code points
-where you'd be able to notice the difference:
-http://blogs.msdn.com/b/michkap/archive/2005/05/11/416552.aspx
-
---=20
-David Woodhouse                            Open Source Technology Centre
-David.Woodhouse-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org                              Intel Corporation
-
-
-
-
---=-x7wD0WsDNovM6KMPKxIe
-Content-Type: application/x-pkcs7-signature; name="smime.p7s"
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Transfer-Encoding: base64
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIUbjCCBjQw
-ggQcoAMCAQICAR4wDQYJKoZIhvcNAQEFBQAwfTELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0
-Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxKTAn
-BgNVBAMTIFN0YXJ0Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA3MTAyNDIxMDE1NVoX
-DTE3MTAyNDIxMDE1NVowgYwxCzAJBgNVBAYTAklMMRYwFAYDVQQKEw1TdGFydENvbSBMdGQuMSsw
-KQYDVQQLEyJTZWN1cmUgRGlnaXRhbCBDZXJ0aWZpY2F0ZSBTaWduaW5nMTgwNgYDVQQDEy9TdGFy
-dENvbSBDbGFzcyAxIFByaW1hcnkgSW50ZXJtZWRpYXRlIENsaWVudCBDQTCCASIwDQYJKoZIhvcN
-AQEBBQADggEPADCCAQoCggEBAMcJg8zOLdgasSmkLhOrlr6KMoOMpohBllVHrdRvEg/q6r8jR+EK
-75xCGhR8ToREoqe7zM9/UnC6TS2y9UKTpT1v7RSMzR0t6ndl0TWBuUr/UXBhPk+Kmy7bI4yW4urC
-+y7P3/1/X7U8ocb8VpH/Clt+4iq7nirMcNh6qJR+xjOhV+VHzQMALuGYn5KZmc1NbJQYclsGkDxD
-z2UbFqE2+6vIZoL+jb9x4Pa5gNf1TwSDkOkikZB1xtB4ZqtXThaABSONdfmv/Z1pua3FYxnCFmdr
-/+N2JLKutIxMYqQOJebr/f/h5t95m4JgrM3Y/w7YX9d7YAL9jvN4SydHsU6n65cCAwEAAaOCAa0w
-ggGpMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRTcu2SnODaywFc
-fH6WNU7y1LhRgjAfBgNVHSMEGDAWgBROC+8apEBbpRdphzDKNGhD0EGu8jBmBggrBgEFBQcBAQRa
-MFgwJwYIKwYBBQUHMAGGG2h0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9jYTAtBggrBgEFBQcwAoYh
-aHR0cDovL3d3dy5zdGFydHNzbC5jb20vc2ZzY2EuY3J0MFsGA1UdHwRUMFIwJ6AloCOGIWh0dHA6
-Ly93d3cuc3RhcnRzc2wuY29tL3Nmc2NhLmNybDAnoCWgI4YhaHR0cDovL2NybC5zdGFydHNzbC5j
-b20vc2ZzY2EuY3JsMIGABgNVHSAEeTB3MHUGCysGAQQBgbU3AQIBMGYwLgYIKwYBBQUHAgEWImh0
-dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwNAYIKwYBBQUHAgEWKGh0dHA6Ly93d3cu
-c3RhcnRzc2wuY29tL2ludGVybWVkaWF0ZS5wZGYwDQYJKoZIhvcNAQEFBQADggIBAAqDCH14qywG
-XLhjjF6uHLkjd02hcdh9hrw+VUsv+q1eeQWB21jWj3kJ96AUlPCoEGZ/ynJNScWy6QMVQjbbMXlt
-UfO4n4bGGdKo3awPWp61tjAFgraLJgDk+DsSvUD6EowjMTNx25GQgyYJ5RPIzKKR9tQW8gGK+2+R
-HxkUCTbYFnL6kl8Ch507rUdPPipJ9CgJFws3kDS3gOS5WFMxcjO5DwKfKSETEPrHh7p5shuuNktv
-sv6hxHTLhiMKX893gxdT3XLS9OKmCv87vkINQcNEcIIoFWbP9HORz9v3vQwR4e3ksLc2JZOAFK+s
-sS5XMEoznzpihEP0PLc4dCBYjbvSD7kxgDwZ+Aj8Q9PkbvE9sIPP7ON0fz095HdThKjiVJe6vofq
-+n6b1NBc8XdrQvBmunwxD5nvtTW4vtN6VY7mUCmxsCieuoBJ9OlqmsVWQvifIYf40dJPZkk9YgGT
-zWLpXDSfLSplbY2LL9C9U0ptvjcDjefLTvqSFc7tw1sEhF0n/qpA2r0GpvkLRDmcSwVyPvmjFBGq
-Up/pNy8ZuPGQmHwFi2/14+xeSUDG2bwnsYJQG2EdJCB6luQ57GEnTA/yKZSTKI8dDQa8Sd3zfXb1
-9mOgSF0bBdXbuKhEpuP9wirslFe6fQ1t5j5R0xi72MZ8ikMu1RQZKCyDbMwazlHiMIIHFzCCBf+g
-AwIBAgIDBCZ6MA0GCSqGSIb3DQEBBQUAMIGMMQswCQYDVQQGEwJJTDEWMBQGA1UEChMNU3RhcnRD
-b20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlmaWNhdGUgU2lnbmluZzE4MDYG
-A1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVkaWF0ZSBDbGllbnQgQ0EwHhcN
-MTIwNTAxMTI1ODI3WhcNMTMwNTAzMTEzNzIwWjBdMRkwFwYDVQQNExA4Y1VOSzUzMTc0ODRYRjk3
-MRwwGgYDVQQDDBNkd213MkBpbmZyYWRlYWQub3JnMSIwIAYJKoZIhvcNAQkBFhNkd213MkBpbmZy
-YWRlYWQub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyYe7wo6MrtrB4uIGGbrY
-4IifY/Xsq22pSv605yganL0+uyUdd8rCjrYlH6Q/ra5TVJCQFTgzaepkuqPQc79DC/Cxmzm6Qo+s
-wLZy868oFsccsVokL2bPAWIPaRXfNPJKkYR1FTWQfZpWJVQmT+sPf1XFUullVBAK+d9RztopyacI
-xWoZ/W/Cmv7mseQbttYTtGKJa0btX73nsQRWl6SgErWXo59zg9friCLTy1GXMXJYB8H+PtnuwX0w
-MrAvWDdX1ABgIlA17W3FraCn0eW15ZM46eyu0/amGzJZNtemCWF73P7BAijzeV1jNmiJFXdZ0DT0
-w+hmtMO9PxdDUyt78QIDAQABo4IDrjCCA6owCQYDVR0TBAIwADALBgNVHQ8EBAMCBLAwHQYDVR0l
-BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMB0GA1UdDgQWBBTkfe5UOr3PcirsjApibyyUEfsyRzAf
-BgNVHSMEGDAWgBRTcu2SnODaywFcfH6WNU7y1LhRgjAeBgNVHREEFzAVgRNkd213MkBpbmZyYWRl
-YWQub3JnMIICIQYDVR0gBIICGDCCAhQwggIQBgsrBgEEAYG1NwECAjCCAf8wLgYIKwYBBQUHAgEW
-Imh0dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwNAYIKwYBBQUHAgEWKGh0dHA6Ly93
-d3cuc3RhcnRzc2wuY29tL2ludGVybWVkaWF0ZS5wZGYwgfcGCCsGAQUFBwICMIHqMCcWIFN0YXJ0
-Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MAMCAQEagb5UaGlzIGNlcnRpZmljYXRlIHdhcyBp
-c3N1ZWQgYWNjb3JkaW5nIHRvIHRoZSBDbGFzcyAxIFZhbGlkYXRpb24gcmVxdWlyZW1lbnRzIG9m
-IHRoZSBTdGFydENvbSBDQSBwb2xpY3ksIHJlbGlhbmNlIG9ubHkgZm9yIHRoZSBpbnRlbmRlZCBw
-dXJwb3NlIGluIGNvbXBsaWFuY2Ugb2YgdGhlIHJlbHlpbmcgcGFydHkgb2JsaWdhdGlvbnMuMIGc
-BggrBgEFBQcCAjCBjzAnFiBTdGFydENvbSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTADAgECGmRM
-aWFiaWxpdHkgYW5kIHdhcnJhbnRpZXMgYXJlIGxpbWl0ZWQhIFNlZSBzZWN0aW9uICJMZWdhbCBh
-bmQgTGltaXRhdGlvbnMiIG9mIHRoZSBTdGFydENvbSBDQSBwb2xpY3kuMDYGA1UdHwQvMC0wK6Ap
-oCeGJWh0dHA6Ly9jcmwuc3RhcnRzc2wuY29tL2NydHUxLWNybC5jcmwwgY4GCCsGAQUFBwEBBIGB
-MH8wOQYIKwYBBQUHMAGGLWh0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9zdWIvY2xhc3MxL2NsaWVu
-dC9jYTBCBggrBgEFBQcwAoY2aHR0cDovL2FpYS5zdGFydHNzbC5jb20vY2VydHMvc3ViLmNsYXNz
-MS5jbGllbnQuY2EuY3J0MCMGA1UdEgQcMBqGGGh0dHA6Ly93d3cuc3RhcnRzc2wuY29tLzANBgkq
-hkiG9w0BAQUFAAOCAQEAqDU1FKifNtCFJbLnvOi1BLRfk7mut55PMtPSZLJ4/AnG7AjmJnbBI4U5
-DELwvVq3mIpwUpGqZUkqkZMEfBPIbfq517UZB3h4iANtqif+ULfTLhg5XgcK5eF8/T6EtX2c3epq
-ylARdleCbj/0FwiUDvPlTsA6PIN4SCekjRLgjKERrL3heFz+Hteq1rtMAvMkNuyL0/0ijyyg2y45
-NASAl2Afl9SLes/fnoh9nBwzfNQfb6qDYUFpnglfpGrq/0b1NtaOUb2z1SR+H1tKlb8bVJJIdvpu
-mEi27kSRIhzk3h30uTfKkKetgy++ouyldxZ7KZ0PuoLQrBy465EoQLosETCCBxcwggX/oAMCAQIC
-AwQmejANBgkqhkiG9w0BAQUFADCBjDELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0
-ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMT
-L1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBMB4XDTEyMDUw
-MTEyNTgyN1oXDTEzMDUwMzExMzcyMFowXTEZMBcGA1UEDRMQOGNVTks1MzE3NDg0WEY5NzEcMBoG
-A1UEAwwTZHdtdzJAaW5mcmFkZWFkLm9yZzEiMCAGCSqGSIb3DQEJARYTZHdtdzJAaW5mcmFkZWFk
-Lm9yZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMmHu8KOjK7aweLiBhm62OCIn2P1
-7KttqUr+tOcoGpy9PrslHXfKwo62JR+kP62uU1SQkBU4M2nqZLqj0HO/QwvwsZs5ukKPrMC2cvOv
-KBbHHLFaJC9mzwFiD2kV3zTySpGEdRU1kH2aViVUJk/rD39VxVLpZVQQCvnfUc7aKcmnCMVqGf1v
-wpr+5rHkG7bWE7RiiWtG7V+957EEVpekoBK1l6Ofc4PX64gi08tRlzFyWAfB/j7Z7sF9MDKwL1g3
-V9QAYCJQNe1txa2gp9HlteWTOOnsrtP2phsyWTbXpglhe9z+wQIo83ldYzZoiRV3WdA09MPoZrTD
-vT8XQ1Mre/ECAwEAAaOCA64wggOqMAkGA1UdEwQCMAAwCwYDVR0PBAQDAgSwMB0GA1UdJQQWMBQG
-CCsGAQUFBwMCBggrBgEFBQcDBDAdBgNVHQ4EFgQU5H3uVDq9z3Iq7IwKYm8slBH7MkcwHwYDVR0j
-BBgwFoAUU3Ltkpzg2ssBXHx+ljVO8tS4UYIwHgYDVR0RBBcwFYETZHdtdzJAaW5mcmFkZWFkLm9y
-ZzCCAiEGA1UdIASCAhgwggIUMIICEAYLKwYBBAGBtTcBAgIwggH/MC4GCCsGAQUFBwIBFiJodHRw
-Oi8vd3d3LnN0YXJ0c3NsLmNvbS9wb2xpY3kucGRmMDQGCCsGAQUFBwIBFihodHRwOi8vd3d3LnN0
-YXJ0c3NsLmNvbS9pbnRlcm1lZGlhdGUucGRmMIH3BggrBgEFBQcCAjCB6jAnFiBTdGFydENvbSBD
-ZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTADAgEBGoG+VGhpcyBjZXJ0aWZpY2F0ZSB3YXMgaXNzdWVk
-IGFjY29yZGluZyB0byB0aGUgQ2xhc3MgMSBWYWxpZGF0aW9uIHJlcXVpcmVtZW50cyBvZiB0aGUg
-U3RhcnRDb20gQ0EgcG9saWN5LCByZWxpYW5jZSBvbmx5IGZvciB0aGUgaW50ZW5kZWQgcHVycG9z
-ZSBpbiBjb21wbGlhbmNlIG9mIHRoZSByZWx5aW5nIHBhcnR5IG9ibGlnYXRpb25zLjCBnAYIKwYB
-BQUHAgIwgY8wJxYgU3RhcnRDb20gQ2VydGlmaWNhdGlvbiBBdXRob3JpdHkwAwIBAhpkTGlhYmls
-aXR5IGFuZCB3YXJyYW50aWVzIGFyZSBsaW1pdGVkISBTZWUgc2VjdGlvbiAiTGVnYWwgYW5kIExp
-bWl0YXRpb25zIiBvZiB0aGUgU3RhcnRDb20gQ0EgcG9saWN5LjA2BgNVHR8ELzAtMCugKaAnhiVo
-dHRwOi8vY3JsLnN0YXJ0c3NsLmNvbS9jcnR1MS1jcmwuY3JsMIGOBggrBgEFBQcBAQSBgTB/MDkG
-CCsGAQUFBzABhi1odHRwOi8vb2NzcC5zdGFydHNzbC5jb20vc3ViL2NsYXNzMS9jbGllbnQvY2Ew
-QgYIKwYBBQUHMAKGNmh0dHA6Ly9haWEuc3RhcnRzc2wuY29tL2NlcnRzL3N1Yi5jbGFzczEuY2xp
-ZW50LmNhLmNydDAjBgNVHRIEHDAahhhodHRwOi8vd3d3LnN0YXJ0c3NsLmNvbS8wDQYJKoZIhvcN
-AQEFBQADggEBAKg1NRSonzbQhSWy57zotQS0X5O5rreeTzLT0mSyePwJxuwI5iZ2wSOFOQxC8L1a
-t5iKcFKRqmVJKpGTBHwTyG36ude1GQd4eIgDbaon/lC30y4YOV4HCuXhfP0+hLV9nN3qaspQEXZX
-gm4/9BcIlA7z5U7AOjyDeEgnpI0S4IyhEay94Xhc/h7Xqta7TALzJDbsi9P9Io8soNsuOTQEgJdg
-H5fUi3rP356IfZwcM3zUH2+qg2FBaZ4JX6Rq6v9G9TbWjlG9s9Ukfh9bSpW/G1SSSHb6bphItu5E
-kSIc5N4d9Lk3ypCnrYMvvqLspXcWeymdD7qC0KwcuOuRKEC6LBExggNvMIIDawIBATCBlDCBjDEL
-MAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdp
-dGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFy
-eSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBAgMEJnowCQYFKw4DAhoFAKCCAa8wGAYJKoZIhvcNAQkD
-MQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTMwNDEwMTExODM3WjAjBgkqhkiG9w0BCQQx
-FgQUasTHy/XcUA06L697q9HSAnV+AqAwgaUGCSsGAQQBgjcQBDGBlzCBlDCBjDELMAkGA1UEBhMC
-SUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRp
-ZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1l
-ZGlhdGUgQ2xpZW50IENBAgMEJnowgacGCyqGSIb3DQEJEAILMYGXoIGUMIGMMQswCQYDVQQGEwJJ
-TDEWMBQGA1UEChMNU3RhcnRDb20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlm
-aWNhdGUgU2lnbmluZzE4MDYGA1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVk
-aWF0ZSBDbGllbnQgQ0ECAwQmejANBgkqhkiG9w0BAQEFAASCAQAq/KYaUYFiAFQwgGW75jhK02aQ
-9Z4Z0b40OvlWzoleGDm5Mi3Ju9h3QzHdR+IKOGKahN8He2hkQPcbylM5glvviIm8M2YoKXDUckxI
-+C5bFoMGYQHEocGhXh6mFaiaGRfbxrV6q8aRRYmJr59AUSfVseNO9LlU0PzM2OYl6o5FaqEsX9gO
-0wDpYSlmai8IP7Ci+Fq5xbphNA+L6jF/BCn4bPtC47qzDfWd5Xww5mTx9n/a7HFFtTlqK2Q0nPZ3
-uitWmJ3oX4ckxXeb864483RyCs9EX/E+RWnRsBQRO4Ud3Yd/EyrAaTB/6W3LlcEbonr7kz6wFb1t
-S7Xzu4TOQfj8AAAAAAAA
+Deadlocking will happen in this efivar_entry_size() because __efivars->lock is already hold 
+in efivar_entry_iter_begin().
 
 
---=-x7wD0WsDNovM6KMPKxIe--
+> +	*cb_data->buf = kmalloc(size, GFP_KERNEL);
+> +	if (*cb_data->buf == NULL)
+> +		return -ENOMEM;
+> +	memcpy(*cb_data->buf, entry->var.Data, size);
+> +	return size;
+> +}
+> +
+> +static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+> +			       int *count, struct timespec *timespec,
+> +			       char **buf, struct pstore_info *psi)
+> +{
+> +	struct pstore_read_data data;
+> +
+> +	data.id = id;
+> +	data.type = type;
+> +	data.count = count;
+> +	data.timespec = timespec;
+> +	data.buf = buf;
+> +
+> +	return __efivar_entry_iter(efi_pstore_read_func, &efivar_sysfs_list, &data,
+> +				   (struct efivar_entry **)&psi->data);
+>  }
+> 
+>  static int efi_pstore_write(enum pstore_type_id type,
+> @@ -1382,36 +1221,7 @@ static int efi_pstore_write(enum pstore_type_id type,
+>  	char name[DUMP_NAME_LEN];
+>  	efi_char16_t efi_name[DUMP_NAME_LEN];
+>  	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+> -	struct efivars *efivars = __efivars;
+>  	int i, ret = 0;
+> -	efi_status_t status = EFI_NOT_FOUND;
+> -	unsigned long flags;
+> -
+> -	if (pstore_cannot_block_path(reason)) {
+> -		/*
+> -		 * If the lock is taken by another cpu in non-blocking path,
+> -		 * this driver returns without entering firmware to avoid
+> -		 * hanging up.
+> -		 */
+> -		if (!spin_trylock_irqsave(&efivars->lock, flags))
+> -			return -EBUSY;
+> -	} else
+> -		spin_lock_irqsave(&efivars->lock, flags);
+> -
+> -	/*
+> -	 * Check if there is a space enough to log.
+> -	 * size: a size of logging data
+> -	 * DUMP_NAME_LEN * 2: a maximum size of variable name
+> -	 */
+> -
+> -	status = check_var_size_locked(efivars, PSTORE_EFI_ATTRIBUTES,
+> -					 size + DUMP_NAME_LEN * 2);
+> -
+> -	if (status) {
+> -		spin_unlock_irqrestore(&efivars->lock, flags);
+> -		*id = part;
+> -		return -ENOSPC;
+> -	}
+> 
+>  	sprintf(name, "dump-type%u-%u-%d-%lu", type, part, count,
+>  		get_seconds());
+> @@ -1419,81 +1229,90 @@ static int efi_pstore_write(enum pstore_type_id type,
+>  	for (i = 0; i < DUMP_NAME_LEN; i++)
+>  		efi_name[i] = name[i];
+> 
+> -	efivars->ops->set_variable(efi_name, &vendor, PSTORE_EFI_ATTRIBUTES,
+> -				   size, psi->buf);
+> +	ret = efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+> +				    !pstore_cannot_block_path(reason),
+> +				    size, psi->buf);
+> 
+> -	spin_unlock_irqrestore(&efivars->lock, flags);
+> -
+> -	if (reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+> +	if (size && !ret && reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+
+Why do you add (size && !ret) checking?
+If the purpose of this patch is just adding new API, we don't need to modify the logic.
+
+
+>  		schedule_work(&efivar_work);
+> 
+>  	*id = part;
+>  	return ret;
+>  };
