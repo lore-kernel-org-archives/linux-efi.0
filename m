@@ -1,24 +1,39 @@
-From: Lingzhu Xiang <lxiang@redhat.com>
-Subject: Re: [PATCH 3/3] efi: Distinguish between "remaining space" and actually
- used space
-Date: Wed, 10 Apr 2013 14:02:52 +0800
-Message-ID: <5165008C.1000504@redhat.com>
-References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com> <1365561717-12343-3-git-send-email-matthew.garrett@nebula.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Richard Weinberger <richard@nod.at>
+Subject: [PATCH 1/2] x86,efi: Check max_size only if it is non-zero.
+Date: Wed, 10 Apr 2013 10:59:34 +0200
+Message-ID: <1365584375-9372-1-git-send-email-richard@nod.at>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1365561717-12343-3-git-send-email-matthew.garrett@nebula.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: matt.fleming@intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org
+To: matt.fleming@intel.com
+Cc: cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, tony.luck@intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matthew.garrett@nebula.com, Richard Weinberger <richard@nod.at>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/10/2013 10:41 AM, Matthew Garrett wrote:
-> +	if (!storage_size || size > remaining_size ||
-> +	    ((active_size + size + VAR_METADATA_SIZE > storage_size / 2) &&
-> +	     (remaining_size - size - VAR_METADATA_SIZE < storage_size / 2)))
+Some EFI implementations return always a MaximumVariableSize of 0,
+check against max_size only if it is non-zero.
+My Intel DQ67SW desktop board has such an implementation.
 
-This could overflow.
+Signed-off-by: Richard Weinberger <richard@nod.at>
+---
+ arch/x86/platform/efi/efi.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-(u64)32768 - (u64)32768 - VAR_METADATA_SIZE < (u64)65536 / 2 == false
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index c89c245..3f96a48 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1018,7 +1018,12 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size)
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+-	if (!storage_size || size > remaining_size || size > max_size ||
++	if (!max_size && remaining_size > size)
++		printk_once(KERN_ERR FW_BUG "Broken EFI implementation"
++			    " is returning MaxVariableSize=0\n");
++
++	if (!storage_size || size > remaining_size ||
++	    (max_size && size > max_size) ||
+ 	    (remaining_size - size) < (storage_size / 2))
+ 		return EFI_OUT_OF_RESOURCES;
+ 
+-- 
+1.8.1.4
