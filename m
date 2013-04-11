@@ -1,254 +1,34 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH V4 1/3] efi: Determine how much space is used by boot services-only variables
-Date: Wed, 10 Apr 2013 13:46:05 -0400
-Message-ID: <1365615967-27346-1-git-send-email-matthew.garrett@nebula.com>
-References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt.fleming@intel.com
-Cc: linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/6] efivars: Keep a private global pointer to efivars
+Date: Thu, 11 Apr 2013 14:10:07 +0100
+Message-ID: <5166B62F.4000206@console-pimps.org>
+References: <1365077935-6859-1-git-send-email-matt@console-pimps.org> <1365077935-6859-3-git-send-email-matt@console-pimps.org> <CAGTjWtAhLQVrpJSUWU=HgxuBkcjfPj_o4hN9o-ELK1g89eGA_Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGTjWtAhLQVrpJSUWU=HgxuBkcjfPj_o4hN9o-ELK1g89eGA_Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-EFI variables can be flagged as being accessible only within boot services.
-This makes it awkward for us to figure out how much space they use at
-runtime. In theory we could figure this out by simply comparing the results
-from QueryVariableInfo() to the space used by all of our variables, but
-that fails if the platform doesn't garbage collect on every boot. Thankfully,
-calling QueryVariableInfo() while still inside boot services gives a more
-reliable answer. This patch passes that information from the EFI boot stub
-up to the efivars code, letting us calculate a reasonably accurate value.
+On 09/04/13 23:07, Mike Waychison wrote:
+>> +config EFI_VARS_GENERIC_OPS
+>> +       bool
+>> +       depends on EFI
+>> +       depends on !GOOGLE_SMI
+>> +       default y
+>> +
+> 
+> So while we have no need to support both the gsmi and real efi
+> entrypoints on any given machine, we still need to be able to support
+> the operation of both from the same kernel build.  How do you feel
+> about removing this bit and leaving it such that efivars_init
+> continues to register the "generic" efivars regardless of
+> CONFIG_GOOGLE_SMI?  The rest of the patch seems fine to me.
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
----
- arch/x86/boot/compressed/eboot.c      | 47 +++++++++++++++++++++++++++++++++++
- arch/x86/include/asm/efi.h            | 10 ++++++++
- arch/x86/include/uapi/asm/bootparam.h |  1 +
- arch/x86/platform/efi/efi.c           | 24 ++++++++++++++++++
- drivers/firmware/efivars.c            | 29 +++++++++++++++++++++
- 5 files changed, 111 insertions(+)
+OK sure, we can do that. Thanks for the review.
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index c205035..8615f75 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -251,6 +251,51 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
- 	*size = len;
- }
- 
-+static efi_status_t setup_efi_vars(struct boot_params *params)
-+{
-+	struct setup_data *data;
-+	struct efi_var_bootdata *efidata;
-+	u64 store_size, remaining_size, var_size;
-+	efi_status_t status;
-+
-+	if (!sys_table->runtime->query_variable_info)
-+		return EFI_UNSUPPORTED;
-+
-+	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
-+
-+	while (data && data->next)
-+		data = (struct setup_data *)(unsigned long)data->next;
-+
-+	status = efi_call_phys4(sys_table->runtime->query_variable_info,
-+				EFI_VARIABLE_NON_VOLATILE |
-+				EFI_VARIABLE_BOOTSERVICE_ACCESS |
-+				EFI_VARIABLE_RUNTIME_ACCESS, &store_size,
-+				&remaining_size, &var_size);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	status = efi_call_phys3(sys_table->boottime->allocate_pool,
-+				EFI_LOADER_DATA, sizeof(*efidata), &efidata);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	efidata->data.type = SETUP_EFI_VARS;
-+	efidata->data.len = sizeof(struct efi_var_bootdata) -
-+		sizeof(struct setup_data);
-+	efidata->data.next = 0;
-+	efidata->store_size = store_size;
-+	efidata->remaining_size = remaining_size;
-+	efidata->max_var_size = var_size;
-+
-+	if (data)
-+		data->next = (unsigned long)efidata;
-+	else
-+		params->hdr.setup_data = (unsigned long)efidata;
-+
-+}
-+
- static efi_status_t setup_efi_pci(struct boot_params *params)
- {
- 	efi_pci_io_protocol *pci;
-@@ -1157,6 +1202,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
- 
- 	setup_graphics(boot_params);
- 
-+	setup_efi_vars(boot_params);
-+
- 	setup_efi_pci(boot_params);
- 
- 	status = efi_call_phys3(sys_table->boottime->allocate_pool,
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 60c89f3..6c3a154 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -93,6 +93,9 @@ extern void __iomem *efi_ioremap(unsigned long addr, unsigned long size,
- 
- #endif /* CONFIG_X86_32 */
- 
-+extern u64 efi_var_store_size;
-+extern u64 efi_var_remaining_size;
-+extern u64 efi_var_max_var_size;
- extern int add_efi_memmap;
- extern unsigned long x86_efi_facility;
- extern void efi_set_executable(efi_memory_desc_t *md, bool executable);
-@@ -102,6 +105,13 @@ extern void efi_call_phys_epilog(void);
- extern void efi_unmap_memmap(void);
- extern void efi_memory_uc(u64 addr, unsigned long size);
- 
-+struct efi_var_bootdata {
-+	struct setup_data data;
-+	u64 store_size;
-+	u64 remaining_size;
-+	u64 max_var_size;
-+};
-+
- #ifdef CONFIG_EFI
- 
- static inline bool efi_is_native(void)
-diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-index c15ddaf..0874424 100644
---- a/arch/x86/include/uapi/asm/bootparam.h
-+++ b/arch/x86/include/uapi/asm/bootparam.h
-@@ -6,6 +6,7 @@
- #define SETUP_E820_EXT			1
- #define SETUP_DTB			2
- #define SETUP_PCI			3
-+#define SETUP_EFI_VARS			4
- 
- /* ram_size flags */
- #define RAMDISK_IMAGE_START_MASK	0x07FF
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index c89c245..659da48 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -71,6 +71,13 @@ static efi_system_table_t efi_systab __initdata;
- 
- unsigned long x86_efi_facility;
- 
-+u64 efi_var_store_size;
-+EXPORT_SYMBOL(efi_var_store_size);
-+u64 efi_var_remaining_size;
-+EXPORT_SYMBOL(efi_var_remaining_size);
-+u64 efi_var_max_var_size;
-+EXPORT_SYMBOL(efi_var_max_var_size);
-+
- /*
-  * Returns 1 if 'facility' is enabled, 0 otherwise.
-  */
-@@ -682,6 +689,9 @@ void __init efi_init(void)
- 	char vendor[100] = "unknown";
- 	int i = 0;
- 	void *tmp;
-+	struct setup_data *data;
-+	struct efi_var_bootdata *efi_var_data;
-+	u64 pa_data;
- 
- #ifdef CONFIG_X86_32
- 	if (boot_params.efi_info.efi_systab_hi ||
-@@ -699,6 +709,20 @@ void __init efi_init(void)
- 	if (efi_systab_init(efi_phys.systab))
- 		return;
- 
-+	pa_data = boot_params.hdr.setup_data;
-+	while (pa_data) {
-+		data = early_ioremap(pa_data, sizeof(*efi_var_data));
-+		if (data->type == SETUP_EFI_VARS) {
-+			efi_var_data = (struct efi_var_bootdata *)data;
-+
-+			efi_var_store_size = efi_var_data->store_size;
-+			efi_var_remaining_size = efi_var_data->remaining_size;
-+			efi_var_max_var_size = efi_var_data->max_var_size;
-+		}
-+		pa_data = data->next;
-+		early_iounmap(data, sizeof(*efi_var_data));
-+	}
-+
- 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
- 
- 	/*
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index bf15d81..684a118 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -85,6 +85,7 @@
- #include <linux/ramfs.h>
- #include <linux/pagemap.h>
- 
-+#include <asm/efi.h>
- #include <asm/uaccess.h>
- 
- #define EFIVARS_VERSION "0.08"
-@@ -139,6 +140,8 @@ struct efivar_attribute {
- 
- static struct efivars __efivars;
- static struct efivar_operations ops;
-+static u64 boot_var_size;
-+static u64 boot_used_size;
- 
- #define PSTORE_EFI_ATTRIBUTES \
- 	(EFI_VARIABLE_NON_VOLATILE | \
-@@ -2002,6 +2005,9 @@ int register_efivars(struct efivars *efivars,
- 	efi_char16_t *variable_name;
- 	unsigned long variable_name_size = 1024;
- 	int error = 0;
-+	struct efivar_entry *entry;
-+	struct efi_variable *var;
-+	u64 active_size = 0;
- 
- 	variable_name = kzalloc(variable_name_size, GFP_KERNEL);
- 	if (!variable_name) {
-@@ -2074,6 +2080,25 @@ int register_efivars(struct efivars *efivars,
- 		}
- 	} while (status != EFI_NOT_FOUND);
- 
-+	if (boot_used_size) {
-+		list_for_each_entry(entry, &efivars->list, list) {
-+			var = &entry->var;
-+			status = get_var_data(efivars, var);
-+
-+			if (status ||
-+			    !(var->Attributes & EFI_VARIABLE_NON_VOLATILE))
-+				continue;
-+
-+			active_size += var->DataSize;
-+			active_size += utf16_strsize(var->VariableName, 1024);
-+		}
-+
-+		if (active_size < boot_used_size)
-+			boot_var_size = boot_used_size - active_size;
-+		else
-+			printk(KERN_WARNING FW_BUG  "efivars: Inconsistent initial sizes\n");
-+	}
-+
- 	error = create_efivars_bin_attributes(efivars);
- 	if (error)
- 		unregister_efivars(efivars);
-@@ -2121,6 +2146,10 @@ efivars_init(void)
- 	ops.get_next_variable = efi.get_next_variable;
- 	ops.query_variable_store = efi_query_variable_store;
- 
-+#ifdef CONFIG_X86
-+	boot_used_size = efi_var_store_size - efi_var_remaining_size;
-+#endif
-+
- 	error = register_efivars(&__efivars, &ops, efi_kobj);
- 	if (error)
- 		goto err_put;
 -- 
-1.8.1.2
+Matt Fleming, Intel Open Source Technology Center
