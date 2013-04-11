@@ -1,37 +1,71 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: Re: [PATCH V4 2/3] Revert "x86, efivars: firmware bug workarounds
- should be in platform code"
-Date: Thu, 11 Apr 2013 13:30:35 +0000
-Message-ID: <1365687035.13667.5.camel@x230.lan>
-References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com>
-	 <1365615967-27346-1-git-send-email-matthew.garrett@nebula.com>
-	 <1365615967-27346-2-git-send-email-matthew.garrett@nebula.com>
-	 <5166B97B.6080806@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 3/6] efivars: efivar_entry API
+Date: Thu, 11 Apr 2013 14:34:51 +0100
+Message-ID: <5166BBFB.5030200@console-pimps.org>
+References: <1365077935-6859-1-git-send-email-matt@console-pimps.org> <1365077935-6859-4-git-send-email-matt@console-pimps.org> <A5ED84D3BB3A384992CBB9C77DEDA4D41AF8CFEE@USINDEM103.corp.hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <5166B97B.6080806@console-pimps.org>
-Content-Language: en-US
-Content-ID: <E472668B9646F54DB4F377FDD4FE77D0@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "matt.fleming@intel.com" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D41AF8CFEE-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jeremy Kerr <jeremy.kerr-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCAyMDEzLTA0LTExIGF0IDE0OjI0ICswMTAwLCBNYXR0IEZsZW1pbmcgd3JvdGU6DQo+
-IE9uIDEwLzA0LzEzIDE4OjQ2LCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQo+ID4gVGhpcyByZXZl
-cnRzIGNvbW1pdCBhNmU0ZDVhMDNlOWUzNTg3ZTg4YWJhNjg3ZDhmMjI1ZjRmMDRjNzkyLiBEb2lu
-ZyB0aGlzDQo+ID4gd29ya2Fyb3VuZCBwcm9wZXJseSByZXF1aXJlcyB1cyB0byB3b3JrIHdpdGhp
-biB0aGUgdmFyaWFibGUgY29kZS4NCj4gPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBNYXR0aGV3IEdh
-cnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0KPiA+IC0tLQ0KPiA+ICBhcmNoL3g4
-Ni9wbGF0Zm9ybS9lZmkvZWZpLmMgfCAyNSAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tDQo+ID4g
-IGRyaXZlcnMvZmlybXdhcmUvZWZpdmFycy5jICB8IDE4ICsrKysrKysrKysrKysrKy0tLQ0KPiA+
-ICBpbmNsdWRlL2xpbnV4L2VmaS5oICAgICAgICAgfCAgOSArLS0tLS0tLS0NCj4gPiAgMyBmaWxl
-cyBjaGFuZ2VkLCAxNiBpbnNlcnRpb25zKCspLCAzNiBkZWxldGlvbnMoLSkNCj4gDQo+IERvZXMg
-aXQgcmVhbGx5PyBXaHkgY2FuJ3QgeW91IGp1c3QgaG9vayBpbnRvIHRoZSBnZXRfbmV4dF92YXJp
-YWJsZSgpIGFuZA0KPiBzZXRfdmFyaWFibGUoKSBmdW5jdGlvbnMgaW4gYXJjaC94ODYvcGxhdGZv
-cm0vZWZpL2VmaS5jPw0KDQpzdHJ1Y3QgZWZpX3ZhcmlhYmxlIGlzbid0IGV4cG9ydGVkIGZyb20g
-ZWZpdmFycy5jLCBhbmQgY2h1bmtzIG9mIHRoZQ0Kd29ya2Fyb3VuZCBuZWVkIHRvIGJlIGNhbGxl
-ZCBhdCBlZml2YXJzIGluaXQgYW55d2F5Lg0KDQotLSANCk1hdHRoZXcgR2FycmV0dCB8IG1qZzU5
-QHNyY2YudWNhbS5vcmcNCg==
+On 10/04/13 16:25, Seiji Aguchi wrote:
+>> +	if (efi_guidcmp(entry->var.VendorGuid, vendor))
+>> +		return 0;
+>> +
+>> +	for (i = 0; i < DUMP_NAME_LEN; i++)
+>> +		name[i] = entry->var.VariableName[i];
+>> +
+>> +	if (sscanf(name, "dump-type%u-%u-%d-%lu",
+>> +		   cb_data->type, &part, &cnt, &time) == 4) {
+>> +		*cb_data->id = part;
+>> +		*cb_data->count = cnt;
+>> +		cb_data->timespec->tv_sec = time;
+>> +		cb_data->timespec->tv_nsec = 0;
+>> +	} else if (sscanf(name, "dump-type%u-%u-%lu",
+>> +			  cb_data->type, &part, &time) == 3) {
+>> +		/*
+>> +		 * Check if an old format,
+>> +		 * which doesn't support holding
+>> +		 * multiple logs, remains.
+>> +		 */
+>> +		*cb_data->id = part;
+>> +		*cb_data->count = 0;
+>> +		cb_data->timespec->tv_sec = time;
+>> +		cb_data->timespec->tv_nsec = 0;
+>> +	} else
+>> +		return 0;
+>> +
+>> +	efivar_entry_size(entry, &size);
+> 
+> Deadlocking will happen in this efivar_entry_size() because __efivars->lock is already hold 
+> in efivar_entry_iter_begin().
+
+Good catch, thanks.
+
+>> @@ -1419,81 +1229,90 @@ static int efi_pstore_write(enum pstore_type_id type,
+>>  	for (i = 0; i < DUMP_NAME_LEN; i++)
+>>  		efi_name[i] = name[i];
+>>
+>> -	efivars->ops->set_variable(efi_name, &vendor, PSTORE_EFI_ATTRIBUTES,
+>> -				   size, psi->buf);
+>> +	ret = efivar_entry_set_safe(efi_name, vendor, PSTORE_EFI_ATTRIBUTES,
+>> +				    !pstore_cannot_block_path(reason),
+>> +				    size, psi->buf);
+>>
+>> -	spin_unlock_irqrestore(&efivars->lock, flags);
+>> -
+>> -	if (reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+>> +	if (size && !ret && reason == KMSG_DUMP_OOPS && efivar_wq_enabled)
+> 
+> Why do you add (size && !ret) checking?
+> If the purpose of this patch is just adding new API, we don't need to modify the logic.
+
+That looks like a bug that slipped in. I'll fix it. Thanks!
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
