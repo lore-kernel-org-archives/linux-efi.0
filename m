@@ -1,27 +1,25 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: [PATCH 1/2] x86/Kconfig: Make EFI select UCS2_STRING
-Date: Tue, 16 Apr 2013 17:39:35 +0100
-Message-ID: <516D7EC7.7010908@intel.com>
-References: <1366056587-24414-4-git-send-email-matthew.garrett@nebula.com> <1366122669-20898-1-git-send-email-vsu@altlinux.ru>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 2/2] efi: Export efi_query_variable_store() for efivars.ko
+Date: Tue, 16 Apr 2013 17:39:55 +0100
+Message-ID: <516D7EDB.6090201@intel.com>
+References: <1366056587-24414-4-git-send-email-matthew.garrett@nebula.com> <1366122669-20898-1-git-send-email-vsu@altlinux.ru> <1366122669-20898-2-git-send-email-vsu@altlinux.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1366122669-20898-1-git-send-email-vsu@altlinux.ru>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Sergey Vlasov <vsu@altlinux.ru>
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366122669-20898-2-git-send-email-vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Sergey Vlasov <vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 On 16/04/13 15:31, Sergey Vlasov wrote:
-> The commit "efi: Distinguish between "remaining space" and actually used
-> space" added usage of ucs2_*() functions to arch/x86/platform/efi/efi.c,
-> but the only thing which selected UCS2_STRING was EFI_VARS, which is
-> technically optional and can be built as a module.
+> Fixes build with CONFIG_EFI_VARS=m which was broken after the commit
+> "x86, efivars: firmware bug workarounds should be in platform code".
 > 
-> Signed-off-by: Sergey Vlasov <vsu@altlinux.ru>
+> Signed-off-by: Sergey Vlasov <vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
 > ---
->  arch/x86/Kconfig | 1 +
+>  arch/x86/platform/efi/efi.c | 1 +
 >  1 file changed, 1 insertion(+)
 
 Applied, thanks!
