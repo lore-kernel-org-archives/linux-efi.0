@@ -1,22 +1,23 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: Cannot add new efi boot entry
-Date: Tue, 16 Apr 2013 11:11:01 +0100
-Message-ID: <516D23B5.4070209@intel.com>
-References: <516B1ED3.9040900@suse.cz> <1366106168.23707.9.camel@linux-s257.site>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: Fix UEFI variable paranoia
+Date: Tue, 16 Apr 2013 11:15:07 +0100
+Message-ID: <516D24AB.8040604@console-pimps.org>
+References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com> <1366056587-24414-1-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1366106168.23707.9.camel@linux-s257.site>
-Sender: linux-kernel-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: Jiri Slaby <jslaby@suse.cz>, matthew.garrett@nebula.com, cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, Linux kernel mailing list <linux-kernel@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366056587-24414-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 16/04/13 10:56, joeyli wrote:
-> I think I just got the same situation on my side with Acer machine. I am
-> trying Matthew's new patchset hope can avoid this situation:
-> 
-> https://lkml.org/lkml/2013/4/15/473
+On 15/04/13 21:09, Matthew Garrett wrote:
+> Identical to V5, except with the UCS2 helper functions included this time.
 
-Please do let us know whether the patches work for you.
+Thanks these looks good to me. I've applied all three patches to the
+'urgent' branch.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
