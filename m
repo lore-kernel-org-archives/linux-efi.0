@@ -1,50 +1,40 @@
-From: David Howells <dhowells@redhat.com>
-Subject: [PATCH 02/28] Include missing linux/magic.h inclusions [RFC]
-Date: Tue, 16 Apr 2013 19:25:58 +0100
-Message-ID: <20130416182558.27773.22728.stgit@warthog.procyon.org.uk>
-References: <20130416182550.27773.89310.stgit@warthog.procyon.org.uk>
+From: Joel Schopp <jschopp-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Subject: unusual uefi call/mapping problem
+Date: Tue, 16 Apr 2013 16:31:17 -0500
+Message-ID: <516DC325.6090604@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130416182550.27773.89310.stgit@warthog.procyon.org.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, linux-efi@vger.kernel.org, viro@zeniv.linux.org.uk
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Leonidas da Silva Barbosa <leosilva-xuelUoVDAHHQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Include missing linux/magic.h inclusions where the source file is currently
-expecting to get magic numbers through linux/proc_fs.h.
+I'm working on the Linux kernel implementation of an draft standard that 
+has a uefi component.  The interesting part is that the uefi component 
+isn't in the uefi runtime table, but instead has a physical address 
+stored an ACPI table.  Other than not being in the runtime table it 
+behaves exactly like the other runtime services.
 
-Signed-off-by: David Howells <dhowells@redhat.com>
-cc: linux-efi@vger.kernel.org
----
+After extracting the physical address of the UEFI service we can't 
+successfully map it or call it.  I'm sure this is straightforward to 
+somebody with experience in this area.  Here's a few of the things I've 
+tried unsuccessfully, any pointers here would be appreciated.
 
- drivers/firmware/efivars.c |    1 +
- fs/proc/inode.c            |    1 +
- 2 files changed, 2 insertions(+)
+1) Call the physical address
+efi_call_phys_prelog();
+efi_call_phys5(...);
+efi_call_phys_epilog();
 
-diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
-index 7acafb8..0f102601 100644
---- a/drivers/firmware/efivars.c
-+++ b/drivers/firmware/efivars.c
-@@ -80,6 +80,7 @@
- #include <linux/slab.h>
- #include <linux/pstore.h>
- #include <linux/ctype.h>
-+#include <linux/magic.h>
- 
- #include <linux/fs.h>
- #include <linux/ramfs.h>
-diff --git a/fs/proc/inode.c b/fs/proc/inode.c
-index d50224c..bd2f764 100644
---- a/fs/proc/inode.c
-+++ b/fs/proc/inode.c
-@@ -22,6 +22,7 @@
- #include <linux/seq_file.h>
- #include <linux/slab.h>
- #include <linux/mount.h>
-+#include <linux/magic.h>
- 
- #include <asm/uaccess.h>
- 
+This generates some nasty scheduling while atomic errors
+
+2) Various methods to map in the physical address into virtual address 
+space and then call the virtual address.  All of these have failed.
+
+3) I've started looking at adding an entry to the efi struct and a line 
+to efi_enter_virtual_mode(...) with the new function name but haven't 
+found the right spot to add an extra entry on to the mmap structure. 
+Does this seem like a sane approach?
+
+-Joel Schopp
