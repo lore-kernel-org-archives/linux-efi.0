@@ -1,40 +1,96 @@
-From: Joel Schopp <jschopp-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Subject: unusual uefi call/mapping problem
-Date: Tue, 16 Apr 2013 16:31:17 -0500
-Message-ID: <516DC325.6090604@linux.vnet.ibm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH v2 0/6] Chainsaw efivars.c
+Date: Tue, 16 Apr 2013 22:41:54 +0100
+Message-ID: <1366148520-29954-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Leonidas da Silva Barbosa <leosilva-xuelUoVDAHHQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I'm working on the Linux kernel implementation of an draft standard that 
-has a uefi component.  The interesting part is that the uefi component 
-isn't in the uefi runtime table, but instead has a physical address 
-stored an ACPI table.  Other than not being in the runtime table it 
-behaves exactly like the other runtime services.
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-After extracting the physical address of the UEFI service we can't 
-successfully map it or call it.  I'm sure this is straightforward to 
-somebody with experience in this area.  Here's a few of the things I've 
-tried unsuccessfully, any pointers here would be appreciated.
+drivers/firmware/efivars.c has grown pretty large and is ~2K lines.
 
-1) Call the physical address
-efi_call_phys_prelog();
-efi_call_phys5(...);
-efi_call_phys_epilog();
+Inside efivars.c there's currently,
 
-This generates some nasty scheduling while atomic errors
+  o code for handling EFI variables at the firmware-level
+  o sysfs code for exposing EFI variables
+  o a new EFI variable filesystem
+  o a persistent storage backend
 
-2) Various methods to map in the physical address into virtual address 
-space and then call the virtual address.  All of these have failed.
+all intertwined and smushed together. This situation is only going to get worse
+as new EFI support is added.
 
-3) I've started looking at adding an entry to the efi struct and a line 
-to efi_enter_virtual_mode(...) with the new function name but haven't 
-found the right spot to add an extra entry on to the mmap structure. 
-Does this seem like a sane approach?
+We need an interface that hides the EFI variable operations in use so code
+isn't tempted to access them directly, e.g. efivarfs currently uses '__efivars'
+which means it doesn't work for CONFIG_GOOGLE_SMI as that uses different
+variable ops. With this interface in place, we can start moving independent
+code out into separate files, allowing users to only turn on the functionality
+that they want.
 
--Joel Schopp
+This patch series introduces the new efivar_entry API, and splits out the major
+parts of efivars.c into new files. In particular, having the efivarfs code
+under fs/ allows building an efivarfs.ko module, which means mount(8) can
+automatically load it.
+
+The remaining EFI code is repositioned under drivers/firmware/efi/.
+
+The series is also available on the 'chainsaw' branch at,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/linux.git
+
+Changes in v2:
+
+ - Add Reviewed-by/Acked-by tags from Mike
+ - Allow both EFI variable ops to be built as requested by Mike (PATCH 2)
+ - Fix deadlock and remove unnecessary logic changes in the pstore patch
+   reported by Seiji (PATCH 3)
+
+Matt Fleming (5):
+  efi: move utf16 string functions to efi.h
+  efivars: Keep a private global pointer to efivars
+  efivars: efivar_entry API
+  efivars: Move pstore code into the new EFI directory
+  efivarfs: Move to fs/efivarfs
+
+Tom Gundersen (1):
+  efi: split efisubsystem from efivars
+
+ MAINTAINERS                       |   13 +-
+ drivers/firmware/Kconfig          |   36 +-
+ drivers/firmware/Makefile         |    2 +-
+ drivers/firmware/efi/Kconfig      |   39 +
+ drivers/firmware/efi/Makefile     |    6 +
+ drivers/firmware/efi/efi-pstore.c |  244 +++++
+ drivers/firmware/efi/efi.c        |  134 +++
+ drivers/firmware/efi/efivars.c    |  615 +++++++++++
+ drivers/firmware/efi/vars.c       | 1046 ++++++++++++++++++
+ drivers/firmware/efivars.c        | 2171 -------------------------------------
+ drivers/firmware/google/gsmi.c    |   30 +-
+ fs/Kconfig                        |    1 +
+ fs/Makefile                       |    1 +
+ fs/efivarfs/Kconfig               |   12 +
+ fs/efivarfs/Makefile              |    7 +
+ fs/efivarfs/file.c                |  111 ++
+ fs/efivarfs/inode.c               |  173 +++
+ fs/efivarfs/internal.h            |   22 +
+ fs/efivarfs/super.c               |  266 +++++
+ include/linux/efi.h               |  133 ++-
+ 20 files changed, 2828 insertions(+), 2234 deletions(-)
+ create mode 100644 drivers/firmware/efi/Kconfig
+ create mode 100644 drivers/firmware/efi/Makefile
+ create mode 100644 drivers/firmware/efi/efi-pstore.c
+ create mode 100644 drivers/firmware/efi/efi.c
+ create mode 100644 drivers/firmware/efi/efivars.c
+ create mode 100644 drivers/firmware/efi/vars.c
+ delete mode 100644 drivers/firmware/efivars.c
+ create mode 100644 fs/efivarfs/Kconfig
+ create mode 100644 fs/efivarfs/Makefile
+ create mode 100644 fs/efivarfs/file.c
+ create mode 100644 fs/efivarfs/inode.c
+ create mode 100644 fs/efivarfs/internal.h
+ create mode 100644 fs/efivarfs/super.c
+
+-- 
+1.7.10.4
