@@ -1,23 +1,36 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Fix UEFI variable paranoia
-Date: Tue, 16 Apr 2013 11:15:07 +0100
-Message-ID: <516D24AB.8040604@console-pimps.org>
-References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com> <1366056587-24414-1-git-send-email-matthew.garrett@nebula.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Sergey Vlasov <vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
+Subject: [PATCH 1/2] x86/Kconfig: Make EFI select UCS2_STRING
+Date: Tue, 16 Apr 2013 18:31:08 +0400
+Message-ID: <1366122669-20898-1-git-send-email-vsu@altlinux.ru>
+References: <1366056587-24414-4-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1366056587-24414-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1366056587-24414-4-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sergey Vlasov <vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 15/04/13 21:09, Matthew Garrett wrote:
-> Identical to V5, except with the UCS2 helper functions included this time.
+The commit "efi: Distinguish between "remaining space" and actually used
+space" added usage of ucs2_*() functions to arch/x86/platform/efi/efi.c,
+but the only thing which selected UCS2_STRING was EFI_VARS, which is
+technically optional and can be built as a module.
 
-Thanks these looks good to me. I've applied all three patches to the
-'urgent' branch.
+Signed-off-by: Sergey Vlasov <vsu-u2l5PoMzF/Uox3rIn2DAYQ@public.gmane.org>
+---
+ arch/x86/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
 
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index a4f24f5..01af853 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1549,6 +1549,7 @@ config X86_SMAP
+ config EFI
+ 	bool "EFI runtime service support"
+ 	depends on ACPI
++	select UCS2_STRING
+ 	---help---
+ 	  This enables the kernel to use EFI runtime services that are
+ 	  available (such as the EFI variable services).
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.1.1
