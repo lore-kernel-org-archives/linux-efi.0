@@ -1,31 +1,57 @@
 From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [PATCH 01/28] Include missing linux/slab.h inclusions [RFC]
-Date: Tue, 16 Apr 2013 17:56:53 -0700
-Message-ID: <20130417005653.GA11541@kroah.com>
-References: <20130416182550.27773.89310.stgit@warthog.procyon.org.uk>
- <20130416182554.27773.86004.stgit@warthog.procyon.org.uk>
+Subject: Re: unusual uefi call/mapping problem
+Date: Tue, 16 Apr 2013 19:40:56 -0700
+Message-ID: <20130417024056.GA13609@kroah.com>
+References: <516DC325.6090604@linux.vnet.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130416182554.27773.86004.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
+In-Reply-To: <516DC325.6090604-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joel Schopp <jschopp-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leonidas da Silva Barbosa <leosilva-xuelUoVDAHHQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 16, 2013 at 07:25:54PM +0100, David Howells wrote:
-> Include missing linux/slab.h inclusions where the source file is currently
-> expecting to get kmalloc() and co. through linux/proc_fs.h.
-> 
-> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> cc: linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> cc: sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> cc: linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> cc: devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org
-> cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-> ---
->
+On Tue, Apr 16, 2013 at 04:31:17PM -0500, Joel Schopp wrote:
+> I'm working on the Linux kernel implementation of an draft standard
+> that has a uefi component.
 
-Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+What standard would that be?
+
+> The interesting part is that the uefi
+> component isn't in the uefi runtime table, but instead has a
+> physical address stored an ACPI table.  Other than not being in the
+> runtime table it behaves exactly like the other runtime services.
+> 
+> After extracting the physical address of the UEFI service we can't
+> successfully map it or call it.
+
+You want to call it from the kernel?  Why?  Usually you get a "virtual"
+address to call UEFI things, and then use efi_call_virt?(), why can't
+you do that here as well?
+
+> I'm sure this is straightforward to
+> somebody with experience in this area.  Here's a few of the things
+> I've tried unsuccessfully, any pointers here would be appreciated.
+> 
+> 1) Call the physical address
+> efi_call_phys_prelog();
+> efi_call_phys5(...);
+> efi_call_phys_epilog();
+> 
+> This generates some nasty scheduling while atomic errors
+
+As it should :)
+
+> 2) Various methods to map in the physical address into virtual
+> address space and then call the virtual address.  All of these have
+> failed.
+
+Why?  What have you done that failed?  Any pointers to code anywhere?
+
+Are you trying to do this before we switch to virtual mode, or after?
+
+thanks,
+
+greg k-h
