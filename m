@@ -1,33 +1,31 @@
-From: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
-Subject: Re: [PATCH v2 0/6] Chainsaw efivars.c
-Date: Wed, 17 Apr 2013 02:30:40 +0200
-Message-ID: <CAG-2HqVBiSMp648F=zdUBDWQ49_a=rEPJ_TH__zWtaPSjju-KQ@mail.gmail.com>
-References: <1366148520-29954-1-git-send-email-matt@console-pimps.org>
+From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH 01/28] Include missing linux/slab.h inclusions [RFC]
+Date: Tue, 16 Apr 2013 17:56:53 -0700
+Message-ID: <20130417005653.GA11541@kroah.com>
+References: <20130416182550.27773.89310.stgit@warthog.procyon.org.uk>
+ <20130416182554.27773.86004.stgit@warthog.procyon.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1366148520-29954-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130416182554.27773.86004.stgit-S6HVgzuS8uM4Awkfq6JHfwNdhmdF6hFW@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,
-
-On Tue, Apr 16, 2013 at 11:41 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> This patch series introduces the new efivar_entry API, and splits out the major
-> parts of efivars.c into new files. In particular, having the efivarfs code
-> under fs/ allows building an efivarfs.ko module, which means mount(8) can
-> automatically load it.
+On Tue, Apr 16, 2013 at 07:25:54PM +0100, David Howells wrote:
+> Include missing linux/slab.h inclusions where the source file is currently
+> expecting to get kmalloc() and co. through linux/proc_fs.h.
+> 
+> Signed-off-by: David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> cc: linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> cc: sparclinux-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> cc: linux-mtd-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> cc: devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org
+> cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+> ---
 >
-> The remaining EFI code is repositioned under drivers/firmware/efi/.
 
-These all look good to me, so feel free to add my Reviewed-by.
-
-Tested on top of 3.9-rc7, with everything built as modules. Everything
-works as intended: systemd correctly detects it is on an EFI system,
-so mounts efivarfs, which auto-loads the required modules.
-
-Thanks a lot!
-
-Tom
+Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
