@@ -1,46 +1,145 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: Cannot add new efi boot entry
-Date: Wed, 17 Apr 2013 19:33:17 +0800
-Message-ID: <1366198397.23707.68.camel@linux-s257.site>
-References: <516B1ED3.9040900@suse.cz>
-	 <1366106168.23707.9.camel@linux-s257.site>  <516D23B5.4070209@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <516D23B5.4070209@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>
-Cc: Jiri Slaby <jslaby@suse.cz>, matthew.garrett@nebula.com, cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, Linux kernel mailing list <linux-kernel@vger.kernel.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH 1/6] efi: move utf16 string functions to efi.h
+Date: Wed, 17 Apr 2013 13:47:23 +0100
+Message-ID: <1366202848-5871-2-git-send-email-matt@console-pimps.org>
+References: <1366202848-5871-1-git-send-email-matt@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1366202848-5871-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=BA=8C=EF=BC=8C2013-04-16 =E6=96=BC 11:11 +0100=EF=BC=8CMa=
-tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
-> On 16/04/13 10:56, joeyli wrote:
-> > I think I just got the same situation on my side with Acer machine.=
- I am
-> > trying Matthew's new patchset hope can avoid this situation:
-> >=20
-> > https://lkml.org/lkml/2013/4/15/473
->=20
-> Please do let us know whether the patches work for you.
->=20
->=20
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-I applied Matthew's patches to v3.9-rc7 then tested...
+There are currently two implementations of the utf16 string functions.
+Somewhat confusingly, they've got different names.
 
-The active_size checking works to me on my Acer machine for avoid the
-storage_size/2 issue, I can use efibootmgr to create new boot entry,
-now.
+Centralise the functions in efi.h.
 
-But, I found there have the following warning:
+Reviewed-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+Tested-by: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>
+Reviewed-by: Mike Waychison <mikew-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efivars.c     |   17 -----------------
+ drivers/firmware/google/gsmi.c |   19 ++++---------------
+ include/linux/efi.h            |   17 +++++++++++++++++
+ 3 files changed, 21 insertions(+), 32 deletions(-)
 
-[    1.347581] [Firmware Bug]: efi: Inconsistent initial size
-
-Then, I add printk to print the values of var_size and active_size,
-found the values always 0 after system reboot. I am doing to add more
-log for locate if this is a BIOS issue.
-
-
-Thanks a lot!
-Joey Lee
+diff --git a/drivers/firmware/efivars.c b/drivers/firmware/efivars.c
+index 7acafb8..34c8783 100644
+--- a/drivers/firmware/efivars.c
++++ b/drivers/firmware/efivars.c
+@@ -172,23 +172,6 @@ static void efivar_update_sysfs_entries(struct work_struct *);
+ static DECLARE_WORK(efivar_work, efivar_update_sysfs_entries);
+ static bool efivar_wq_enabled = true;
+ 
+-/* Return the number of unicode characters in data */
+-static unsigned long
+-utf16_strnlen(efi_char16_t *s, size_t maxlength)
+-{
+-	unsigned long length = 0;
+-
+-	while (*s++ != 0 && length < maxlength)
+-		length++;
+-	return length;
+-}
+-
+-static inline unsigned long
+-utf16_strlen(efi_char16_t *s)
+-{
+-	return utf16_strnlen(s, ~0UL);
+-}
+-
+ /*
+  * Return the number of bytes is the length of this string
+  * Note: this is NOT the same as the number of unicode characters
+diff --git a/drivers/firmware/google/gsmi.c b/drivers/firmware/google/gsmi.c
+index 91ddf0f..c409a75 100644
+--- a/drivers/firmware/google/gsmi.c
++++ b/drivers/firmware/google/gsmi.c
+@@ -288,17 +288,6 @@ static int gsmi_exec(u8 func, u8 sub)
+ 	return rc;
+ }
+ 
+-/* Return the number of unicode characters in data */
+-static size_t
+-utf16_strlen(efi_char16_t *data, unsigned long maxlength)
+-{
+-	unsigned long length = 0;
+-
+-	while (*data++ != 0 && length < maxlength)
+-		length++;
+-	return length;
+-}
+-
+ static efi_status_t gsmi_get_variable(efi_char16_t *name,
+ 				      efi_guid_t *vendor, u32 *attr,
+ 				      unsigned long *data_size,
+@@ -311,7 +300,7 @@ static efi_status_t gsmi_get_variable(efi_char16_t *name,
+ 	};
+ 	efi_status_t ret = EFI_SUCCESS;
+ 	unsigned long flags;
+-	size_t name_len = utf16_strlen(name, GSMI_BUF_SIZE / 2);
++	size_t name_len = utf16_strnlen(name, GSMI_BUF_SIZE / 2);
+ 	int rc;
+ 
+ 	if (name_len >= GSMI_BUF_SIZE / 2)
+@@ -380,7 +369,7 @@ static efi_status_t gsmi_get_next_variable(unsigned long *name_size,
+ 		return EFI_BAD_BUFFER_SIZE;
+ 
+ 	/* Let's make sure the thing is at least null-terminated */
+-	if (utf16_strlen(name, GSMI_BUF_SIZE / 2) == GSMI_BUF_SIZE / 2)
++	if (utf16_strnlen(name, GSMI_BUF_SIZE / 2) == GSMI_BUF_SIZE / 2)
+ 		return EFI_INVALID_PARAMETER;
+ 
+ 	spin_lock_irqsave(&gsmi_dev.lock, flags);
+@@ -408,7 +397,7 @@ static efi_status_t gsmi_get_next_variable(unsigned long *name_size,
+ 
+ 		/* Copy the name back */
+ 		memcpy(name, gsmi_dev.name_buf->start, GSMI_BUF_SIZE);
+-		*name_size = utf16_strlen(name, GSMI_BUF_SIZE / 2) * 2;
++		*name_size = utf16_strnlen(name, GSMI_BUF_SIZE / 2) * 2;
+ 
+ 		/* copy guid to return buffer */
+ 		memcpy(vendor, &param.guid, sizeof(param.guid));
+@@ -434,7 +423,7 @@ static efi_status_t gsmi_set_variable(efi_char16_t *name,
+ 			      EFI_VARIABLE_BOOTSERVICE_ACCESS |
+ 			      EFI_VARIABLE_RUNTIME_ACCESS,
+ 	};
+-	size_t name_len = utf16_strlen(name, GSMI_BUF_SIZE / 2);
++	size_t name_len = utf16_strnlen(name, GSMI_BUF_SIZE / 2);
+ 	efi_status_t ret = EFI_SUCCESS;
+ 	int rc;
+ 	unsigned long flags;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9bf2f1f..d1d782a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -719,6 +719,23 @@ static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+ 	*addr &= PAGE_MASK;
+ }
+ 
++/* Return the number of unicode characters in data */
++static inline unsigned long
++utf16_strnlen(efi_char16_t *s, size_t maxlength)
++{
++	unsigned long length = 0;
++
++	while (*s++ != 0 && length < maxlength)
++		length++;
++	return length;
++}
++
++static inline unsigned long
++utf16_strlen(efi_char16_t *s)
++{
++	return utf16_strnlen(s, ~0UL);
++}
++
+ #if defined(CONFIG_EFI_VARS) || defined(CONFIG_EFI_VARS_MODULE)
+ /*
+  * EFI Variable support.
+-- 
+1.7.10.4
