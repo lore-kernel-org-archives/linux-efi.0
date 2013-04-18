@@ -1,45 +1,42 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Josh Triplett <josh@joshtriplett.org>
 Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
-Date: Thu, 18 Apr 2013 17:19:58 +0100
-Message-ID: <51701D2E.6060903@console-pimps.org>
-References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie> <516EAC4A.6040202@console-pimps.org> <516F1B90.9040508@nexus-software.ie> <516FD24A.3070502@console-pimps.org> <51700876.1000305@intel.com>
+Date: Thu, 18 Apr 2013 09:33:26 -0700
+Message-ID: <20130418163325.GA6884@leaf>
+References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
+ <516EAC4A.6040202@console-pimps.org>
+ <516F1B90.9040508@nexus-software.ie>
+ <516FD24A.3070502@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51700876.1000305-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <516FD24A.3070502@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Bryan O'Donoghue <bryan.odonoghue.lkml@nexus-software.ie>, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, Darren Hart <darren.hart@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Josh Boyer <jwboyer@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 18/04/13 15:51, Darren Hart wrote:
-> I don't believe I have seen a 32-bit EFI system with a BGRT, but then
-> again, I had to look it up today! That said, I suspect the MinnowBoard
-> would benefit from such a thing, so we should have an example of it
-> there in the near future.
- 
-That's fine and things will work as-is provided that the BGRT image is
-not in highmem.
-
-> Is this in anyway related to the following patch from Josh Boyer? We're
-> carrying this in the Yocto Project trees currently.
+On Thu, Apr 18, 2013 at 12:00:26PM +0100, Matt Fleming wrote:
+> > No, no - we *don't* have a BGRT object at all.
+> > 
+> > We have a completely clean memory map - but the BGRT code is causing the
+> > is_ram() failure.
+>  
+> You assume that mapping of the Boot Services regions is done purely for
+> the benefit of pulling out the bgrt image - it's not, see the above
+> commit log - and I assumed that you had an ACPI bgrt pointer in your
+> memory map, but you don't.
 > 
->      commit 6f3e186bc7721c5b24ad90d4a751cccfccd445e6
->      Author: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->      Date:   Fri Aug 5 08:47:23 2011 -0400
-> 
->         Add patch to fix 32bit EFI service mapping (rhbz 726701)
-> 
->     Signed-off-by: Tom Zanussi <tom.zanussi-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->     Signed-off-by: Darren Hart <dvhart-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> Darren, Josh, have you ever seen an i386 machine with a bgrt pointer? If
+> not, and given that we've never seen an i386 firmware that requires the
+> above workaround from Matthew, combined with the fact that there are so
+> few i386 implementations out there, I'm inclined to apply the patch
+> below, because anything else is a lot more work. We can address this
+> properly if we ever start seeing i386 machines with bgrt pointers that
+> reference highmem.
 
-Yep, it's basically the same fix. My patch just avoids the #ifdef and
-prints an error message if we have EFI Boot services regions we can't
-access directly. The error message will at least be useful if we do
-start seeing BGRT pointers in highmem.
+The machine I developed the BGRT changes on kept the image below the 4G
+mark, inside one of the memory regions reclaimable via
+ExitBootServices().
 
-Could you give it a spin on your MinnowBoard?
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+- Josh Triplett
