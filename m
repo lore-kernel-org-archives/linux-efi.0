@@ -1,38 +1,37 @@
-From: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: Cannot add new efi boot entry
-Date: Thu, 18 Apr 2013 20:07:32 +0200
-Message-ID: <51703664.40003@suse.cz>
-References: <516B1ED3.9040900@suse.cz> <1366106168.23707.9.camel@linux-s257.site> <516D23B5.4070209@intel.com> <516EB1B6.7050506@suse.cz> <516EB6F2.6070806@console-pimps.org>
+From: leosilva <leosilva-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Subject: EFI phys_prelog, run a physical address directly in kernel space
+ with efi api.
+Date: Thu, 18 Apr 2013 15:15:01 -0300
+Message-ID: <1366308901.14115.16.camel@lain-ibm>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <516EB6F2.6070806-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux kernel mailing list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 04/17/2013 04:51 PM, Matt Fleming wrote:
-> On 17/04/13 15:29, Jiri Slaby wrote:
->> On 04/16/2013 12:11 PM, Matt Fleming wrote:
->>> On 16/04/13 10:56, joeyli wrote:
->>>> I think I just got the same situation on my side with Acer machine. I am
->>>> trying Matthew's new patchset hope can avoid this situation:
->>>>
->>>> https://lkml.org/lkml/2013/4/15/473
->>>
->>> Please do let us know whether the patches work for you.
->>
->> Hmm, where did efi_query_variable_store in 3/3 come from?
-> 
-> It's in a patch on the 'urgent' branch at,
-> 
->     git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+Hi,
 
-The 3 patches plus that one work for me.
+I'm faced with that issue where I have a physical address that was
+mapped by EFI memap (I did check it using efi_lookup_mapped_addr). It is
+not or an EFI run time services neither an EFI boot service. 
+In my attempts I was able to map the physical address to a virtual in
+Kernel space, but when I try call it using some __inline__ asm, I
+realized that into this function (pointed by the physical address I
+mapped),it tries to do an access to another physical address and I grab
+an oops: 'unable to access the page in the address.'
 
-thanks,
+Now I'm supposing I need to run that physical address function directly
+without map it to virtual space and seems that the way to do it is using
+some EFI API. In short I'm thinking in run that code in physical space
+(something like real mode). I took a look in efi_phys_prelog
+and ..epilog to do that. But I was surprised with a long stack trace
+that point me to a oops: 'schedule while atomic'.
+
+So, I'd like to know if is there anyway to do it using EFI API that we
+have in kernel (arch x86_64)?
+
+
 -- 
-js
-suse labs
+leosilva <leosilva-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
