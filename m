@@ -1,37 +1,38 @@
-From: leosilva <leosilva-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Subject: EFI phys_prelog, run a physical address directly in kernel space
- with efi api.
-Date: Thu, 18 Apr 2013 15:15:01 -0300
-Message-ID: <1366308901.14115.16.camel@lain-ibm>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
+Date: Thu, 18 Apr 2013 20:55:20 +0100
+Message-ID: <51704FA8.7060801@console-pimps.org>
+References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie> <516EAC4A.6040202@console-pimps.org> <516F1B90.9040508@nexus-software.ie> <516FD24A.3070502@console-pimps.org> <20130418163325.GA6884@leaf> <5170216C.9020300@zytor.com> <20130418164457.GB6884@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130418164457.GB6884@leaf>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On 04/18/2013 05:44 PM, Josh Triplett wrote:
+>>> The machine I developed the BGRT changes on kept the image below the 4G
+>>> mark, inside one of the memory regions reclaimable via
+>>> ExitBootServices().
+>>
+>> Well, highmem is >= ~896M.  Do you have a machine with BGRT over the
+>> highmem mark?
+> 
+> I don't have the machine in question anymore, and I don't remember.
 
-I'm faced with that issue where I have a physical address that was
-mapped by EFI memap (I did check it using efi_lookup_mapped_addr). It is
-not or an EFI run time services neither an EFI boot service. 
-In my attempts I was able to map the physical address to a virtual in
-Kernel space, but when I try call it using some __inline__ asm, I
-realized that into this function (pointed by the physical address I
-mapped),it tries to do an access to another physical address and I grab
-an oops: 'unable to access the page in the address.'
+Sorry, I should have been more clear - having a BGRT image in highmem
+has never worked for the reasons I outlined in my previous mail. What I
+was really asking was: is it OK that we now explicitly don't support
+that case? I'm working on the assumption that it's pointless writing
+support for the BGRT in highmem because no such i386 machines exist. If
+the BGRT code works for your i386 right now, the address isn't in highmem.
 
-Now I'm supposing I need to run that physical address function directly
-without map it to virtual space and seems that the way to do it is using
-some EFI API. In short I'm thinking in run that code in physical space
-(something like real mode). I took a look in efi_phys_prelog
-and ..epilog to do that. But I was surprised with a long stack trace
-that point me to a oops: 'schedule while atomic'.
-
-So, I'd like to know if is there anyway to do it using EFI API that we
-have in kernel (arch x86_64)?
-
+If there are machines out there that would require us to write support,
+it's probably worth doing now instead of punting. But it sounds like
+there aren't any.
 
 -- 
-leosilva <leosilva-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Matt Fleming, Intel Open Source Technology Center
