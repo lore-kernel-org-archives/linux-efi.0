@@ -1,51 +1,38 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
-Date: Thu, 18 Apr 2013 09:44:58 -0700
-Message-ID: <20130418164457.GB6884@leaf>
-References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
- <516EAC4A.6040202@console-pimps.org>
- <516F1B90.9040508@nexus-software.ie>
- <516FD24A.3070502@console-pimps.org>
- <20130418163325.GA6884@leaf>
- <5170216C.9020300@zytor.com>
+From: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>
+Subject: Re: Cannot add new efi boot entry
+Date: Thu, 18 Apr 2013 20:07:32 +0200
+Message-ID: <51703664.40003@suse.cz>
+References: <516B1ED3.9040900@suse.cz> <1366106168.23707.9.camel@linux-s257.site> <516D23B5.4070209@intel.com> <516EB1B6.7050506@suse.cz> <516EB6F2.6070806@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <5170216C.9020300@zytor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Bryan O'Donoghue <bryan.odonoghue.lkml@nexus-software.ie>, matthew.garrett@nebula.com, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, Darren Hart <darren.hart@intel.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Josh Boyer <jwboyer@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <516EB6F2.6070806-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, cbouatmailru-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux kernel mailing list <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 18, 2013 at 09:38:04AM -0700, H. Peter Anvin wrote:
-> On 04/18/2013 09:33 AM, Josh Triplett wrote:
-> > On Thu, Apr 18, 2013 at 12:00:26PM +0100, Matt Fleming wrote:
-> >>> No, no - we *don't* have a BGRT object at all.
-> >>>
-> >>> We have a completely clean memory map - but the BGRT code is causing the
-> >>> is_ram() failure.
-> >>  
-> >> You assume that mapping of the Boot Services regions is done purely for
-> >> the benefit of pulling out the bgrt image - it's not, see the above
-> >> commit log - and I assumed that you had an ACPI bgrt pointer in your
-> >> memory map, but you don't.
-> >>
-> >> Darren, Josh, have you ever seen an i386 machine with a bgrt pointer? If
-> >> not, and given that we've never seen an i386 firmware that requires the
-> >> above workaround from Matthew, combined with the fact that there are so
-> >> few i386 implementations out there, I'm inclined to apply the patch
-> >> below, because anything else is a lot more work. We can address this
-> >> properly if we ever start seeing i386 machines with bgrt pointers that
-> >> reference highmem.
-> > 
-> > The machine I developed the BGRT changes on kept the image below the 4G
-> > mark, inside one of the memory regions reclaimable via
-> > ExitBootServices().
+On 04/17/2013 04:51 PM, Matt Fleming wrote:
+> On 17/04/13 15:29, Jiri Slaby wrote:
+>> On 04/16/2013 12:11 PM, Matt Fleming wrote:
+>>> On 16/04/13 10:56, joeyli wrote:
+>>>> I think I just got the same situation on my side with Acer machine. I am
+>>>> trying Matthew's new patchset hope can avoid this situation:
+>>>>
+>>>> https://lkml.org/lkml/2013/4/15/473
+>>>
+>>> Please do let us know whether the patches work for you.
+>>
+>> Hmm, where did efi_query_variable_store in 3/3 come from?
 > 
-> Well, highmem is >= ~896M.  Do you have a machine with BGRT over the
-> highmem mark?
+> It's in a patch on the 'urgent' branch at,
+> 
+>     git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
 
-I don't have the machine in question anymore, and I don't remember.
+The 3 patches plus that one work for me.
 
-- Josh Triplett
+thanks,
+-- 
+js
+suse labs
