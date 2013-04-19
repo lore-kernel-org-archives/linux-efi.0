@@ -1,56 +1,49 @@
-From: Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode V2
-Date: Fri, 19 Apr 2013 12:15:23 +0100
-Message-ID: <5171274B.7090500@nexus-software.ie>
-References: <1366236341-22615-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie> <20130419055813.GA16443@kroah.com>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
+Date: Fri, 19 Apr 2013 08:01:19 -0400
+Message-ID: <20130419120119.GL18383@hansolo.jdub.homelinux.org>
+References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
+ <516EAC4A.6040202@console-pimps.org>
+ <516F1B90.9040508@nexus-software.ie>
+ <516FD24A.3070502@console-pimps.org>
+ <51700876.1000305@intel.com>
+ <51701D2E.6060903@console-pimps.org>
+ <51708D3D.9010707@intel.com>
+ <5170F736.2060803@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130419055813.GA16443-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5170F736.2060803-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 19/04/13 06:58, Greg KH wrote:
->> This patch gives the option to switch off that behavior - if your BIOS
->> has neither BGRT - nor bugs that require mapping of EFI boot code/data
->
-> No, never add new boot options, no users, or distros, know to set them.
-> Isn't there some way we can dynamically determine this instead?
+On Fri, Apr 19, 2013 at 08:50:14AM +0100, Matt Fleming wrote:
+> On 04/19/2013 01:18 AM, Darren Hart wrote:
+> > On 04/18/2013 09:19 AM, Matt Fleming wrote:
+> >>
+> >> Could you give it a spin on your MinnowBoard?
+> > 
+> > I've removed the patch I reference above and applied your patch to my
+> > 3.8.4 MinnowBoard dev tree. It panics with:
+> 
+> D'oh. OK, at this point I'm inclined to apply Josh Boyer's patch on top
+> of my urgent branch which will address the WARNING people are hitting on
+> i386. I updated the commit message a little.
+> 
+> Josh (Boyer), are you guys still carrying this patch and have you seen
+> any fallout? I notice your SoB isn't on the patch that Darren posted, am
+> I OK to add it?
 
-Peter, Greg.
+Yeah, we're still carrying it.  We've had it around since August of 2011
+to cover the bug mentioned.  I'm not aware of any further fallout it
+might have caused, but again we don't support 32-bit EFI in Fedora.
+That's not to say Fedora won't work, we just don't focus on it.
 
-There are three issues to consider here
+I don't actually remember authoring the patch, but it's been a while so:
 
-1: Some UEFI BIOS is buggy and the EFI_RUNTIME_SERVICES code - actually 
-touches EFI_BOOT_MEMORY. Boot memory should be completely untouched 
-after an entity calls ExitBootServices() - typically done by an EFI 
-aware bootloader before handing off to Linux.
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-2: Existing code maps EFI_BOOT_MEMORY in arch/x86/platform/efi/efi.c.
-Initially it looked to me as though you could probe for ACPI::BGRT - 
-look for an ACPI object sometimes stored in EFI_BOOT_MEMORY and use that 
-to determine if EFI_BOOT_MEMORY should be mapped. I wasn't aware #1 
-above was also a concern. So just probing for something - doesn't appear 
-to fly
-
-3: Standards compliant EFI BIOS - like the reference EFI 2.3.1 code we 
-have on my project, has neither of the two above problems to work around
-
-So we can.
-
-1. Just silently map EFI_BOOT_MEMORY - even on unbuggy platforms like #3 
-- or we can
-
-2. Introduce some sort of intelligence - a parameter somewhere to tell 
-the efi_enter_virtual mode if/when to map EFI_BOOT_MEMORY.
-
-3. Just go the suggested route from Josh
-#ifdef CONFIG_X86_64
-			if (md->type != EFI_BOOT_SERVICES_CODE &&
-			    md->type != EFI_BOOT_SERVICES_DATA)
-#endif
-
-Option #3 - so long as it doesn't break ia32::BGRT systems works for me.
+josh
