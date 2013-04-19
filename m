@@ -1,49 +1,66 @@
-From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
-Date: Fri, 19 Apr 2013 08:01:19 -0400
-Message-ID: <20130419120119.GL18383@hansolo.jdub.homelinux.org>
-References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
- <516EAC4A.6040202@console-pimps.org>
- <516F1B90.9040508@nexus-software.ie>
- <516FD24A.3070502@console-pimps.org>
- <51700876.1000305@intel.com>
- <51701D2E.6060903@console-pimps.org>
- <51708D3D.9010707@intel.com>
- <5170F736.2060803@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [GIT PULL] EFI fixes for v3.10
+Date: Fri, 19 Apr 2013 18:38:48 +0100
+Message-ID: <51718128.7010405@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <5170F736.2060803-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 19, 2013 at 08:50:14AM +0100, Matt Fleming wrote:
-> On 04/19/2013 01:18 AM, Darren Hart wrote:
-> > On 04/18/2013 09:19 AM, Matt Fleming wrote:
-> >>
-> >> Could you give it a spin on your MinnowBoard?
-> > 
-> > I've removed the patch I reference above and applied your patch to my
-> > 3.8.4 MinnowBoard dev tree. It panics with:
-> 
-> D'oh. OK, at this point I'm inclined to apply Josh Boyer's patch on top
-> of my urgent branch which will address the WARNING people are hitting on
-> i386. I updated the commit message a little.
-> 
-> Josh (Boyer), are you guys still carrying this patch and have you seen
-> any fallout? I notice your SoB isn't on the patch that Darren posted, am
-> I OK to add it?
+Hi guys,
 
-Yeah, we're still carrying it.  We've had it around since August of 2011
-to cover the bug mentioned.  I'm not aware of any further fallout it
-might have caused, but again we don't support 32-bit EFI in Fedora.
-That's not to say Fedora won't work, we just don't focus on it.
+There's a few bug fixes sitting in the EFI urgent branch. Please
+consider pulling.
 
-I don't actually remember authoring the patch, but it's been a while so:
+The following changes since commit ca0ba26fbbd2d81c43085df49ce0abfe34535a90:
 
-Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+  efivars: Fix check for CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE (2013-03-22 20:08:01 +0000)
 
-josh
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git urgent
+
+for you to fetch changes up to 8c58bf3eec3b8fc8162fe557e9361891c20758f2:
+
+  x86,efi: Implement efi_no_storage_paranoia parameter (2013-04-17 15:13:38 +0100)
+
+----------------------------------------------------------------
+Matt Fleming (1):
+      x86, efivars: firmware bug workarounds should be in platform code
+
+Matthew Garrett (3):
+      Move utf16 functions to kernel core and rename
+      efi: Pass boot services variable info to runtime code
+      efi: Distinguish between "remaining space" and actually used space
+
+Richard Weinberger (2):
+      x86,efi: Check max_size only if it is non-zero.
+      x86,efi: Implement efi_no_storage_paranoia parameter
+
+Sergey Vlasov (2):
+      x86/Kconfig: Make EFI select UCS2_STRING
+      efi: Export efi_query_variable_store() for efivars.ko
+
+ Documentation/kernel-parameters.txt   |   6 ++
+ arch/x86/Kconfig                      |   1 +
+ arch/x86/boot/compressed/eboot.c      |  47 ++++++++++
+ arch/x86/include/asm/efi.h            |   7 ++
+ arch/x86/include/uapi/asm/bootparam.h |   1 +
+ arch/x86/platform/efi/efi.c           | 168 +++++++++++++++++++++++++++++++++-
+ drivers/firmware/Kconfig              |   1 +
+ drivers/firmware/efivars.c            |  98 +++++---------------
+ include/linux/efi.h                   |   9 +-
+ include/linux/ucs2_string.h           |  14 +++
+ lib/Kconfig                           |   3 +
+ lib/Makefile                          |   2 +
+ lib/ucs2_string.c                     |  51 +++++++++++
+ 13 files changed, 325 insertions(+), 83 deletions(-)
+ create mode 100644 include/linux/ucs2_string.h
+ create mode 100644 lib/ucs2_string.c
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
