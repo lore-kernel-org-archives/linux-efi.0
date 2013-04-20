@@ -1,26 +1,46 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [GIT PULL] EFI fixes for v3.10
-Date: Fri, 19 Apr 2013 17:13:37 -0700
-Message-ID: <5171DDB1.3020306@zytor.com>
-References: <51718128.7010405@console-pimps.org>
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: Re: Cannot add new efi boot entry
+Date: Sat, 20 Apr 2013 09:40:27 +0200
+Message-ID: <5172466B.9080105@suse.cz>
+References: <516B1ED3.9040900@suse.cz> <1366106168.23707.9.camel@linux-s257.site> <516D23B5.4070209@intel.com> <516EB1B6.7050506@suse.cz> <516EB6F2.6070806@console-pimps.org> <51703664.40003@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51718128.7010405-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <51703664.40003@suse.cz>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, joeyli <jlee@suse.com>, matthew.garrett@nebula.com, cbouatmailru@gmail.com, ccross@android.com, keescook@chromium.org, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, Linux kernel mailing list <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 04/19/2013 10:38 AM, Matt Fleming wrote:
+On 04/18/2013 08:07 PM, Jiri Slaby wrote:
+> On 04/17/2013 04:51 PM, Matt Fleming wrote:
+>> On 17/04/13 15:29, Jiri Slaby wrote:
+>>> On 04/16/2013 12:11 PM, Matt Fleming wrote:
+>>>> On 16/04/13 10:56, joeyli wrote:
+>>>>> I think I just got the same situation on my side with Acer machine. I am
+>>>>> trying Matthew's new patchset hope can avoid this situation:
+>>>>>
+>>>>> https://lkml.org/lkml/2013/4/15/473
+>>>>
+>>>> Please do let us know whether the patches work for you.
+>>>
+>>> Hmm, where did efi_query_variable_store in 3/3 come from?
+>>
+>> It's in a patch on the 'urgent' branch at,
+>>
+>>     git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
 > 
-> Richard Weinberger (2):
->       x86,efi: Check max_size only if it is non-zero.
->       x86,efi: Implement efi_no_storage_paranoia parameter
-> 
+> The 3 patches plus that one work for me.
 
-OK, I'll pull this for now, but this *really* need to be an automatic
-quirk of some sort, especially when there is a named board in the mix...
+Actually they don't :(:
+open("/sys/firmware/efi/vars/new_var", O_WRONLY) = 3
+write(3,
+"B\0o\0o\0t\0000\0000\0001\0003\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"...,
+2084) = -1 ENOSPC (No space left on device)
+close(3)                                = 0
 
-	-hpa
+thanks,
+-- 
+js
+suse labs
