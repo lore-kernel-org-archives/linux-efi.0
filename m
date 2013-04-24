@@ -1,45 +1,44 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH V6 3/3] efi: Distinguish between "remaining space" and
- actually used space
-Date: Wed, 24 Apr 2013 21:23:56 +0800
-Message-ID: <1366809836.23707.331.camel@linux-s257.site>
-References: <1365561717-12343-1-git-send-email-matthew.garrett@nebula.com>
-	 <1366056587-24414-1-git-send-email-matthew.garrett@nebula.com>
-	 <1366056587-24414-4-git-send-email-matthew.garrett@nebula.com>
-	 <1366798111.23707.293.camel@linux-s257.site>
-	 <1366798497.13667.25.camel@x230.lan>
-	 <1366801173.23707.323.camel@linux-s257.site>
-	 <1366804640.13667.27.camel@x230.lan>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] efi: Check EFI revision in setup_efi_vars
+Date: Wed, 24 Apr 2013 10:37:38 -0400
+Message-ID: <20130424143738.GB15272@hansolo.jdub.homelinux.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1366804640.13667.27.camel-+5W/JHIUVxg@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=89=EF=BC=8C2013-04-24 =E6=96=BC 11:57 +0000=EF=BC=8CMa=
-tthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Wed, 2013-04-24 at 18:59 +0800, joeyli wrote:
->=20
-> > Then why we don't just remove the "remaining_size" condition but on=
-ly
-> > monitor the active_size should not larger then 1/2 storage_size?
->=20
-> If we calculate active_size as using more than 50% of the storage spa=
-ce
-> but remaining_size says we still have more than 50% available, we sho=
-uld
-> trust remaining_size instead of active_size.
->=20
-> --=20
-> Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+We need to check the runtime sys_table for the EFI version the firmware
+specifies instead of just checking for a NULL QueryVariableInfo.  Older
+implementations of EFI don't have QueryVariableInfo but the runtime is
+a smaller structure, so the pointer to it may be pointing off into garbage.
 
-That makes sense because BIOS base on remaining_size to trigger garbage
-collection.
+This is apparently the case with several Apple firmwares that support EFI
+1.10, and the current check causes them to no longer boot.  Fix based on
+a suggestion from Matthew Garrett.
 
-Thanks for your clarification!
+Signed-off-by: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-Joey Lee
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 8615f75..b46efbf 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -258,7 +258,9 @@ static efi_status_t setup_efi_vars(struct boot_params *params)
+ 	u64 store_size, remaining_size, var_size;
+ 	efi_status_t status;
+ 
+-	if (!sys_table->runtime->query_variable_info)
++	if (sys_table->runtime->hdr.revision < EFI_2_00_SYSTEM_TABLE_REVISION)
++		return EFI_UNSUPPORTED;
++	else if(!sys_table->runtime->query_variable_info)
+ 		return EFI_UNSUPPORTED;
+ 
+ 	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
+-- 
+1.8.1.4
