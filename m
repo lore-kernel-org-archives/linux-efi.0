@@ -1,49 +1,47 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Thu, 25 Apr 2013 09:49:10 +0100
-Message-ID: <5178EE06.8020107@console-pimps.org>
+Subject: [GIT PULL] EFI urgent fix
+Date: Fri, 26 Apr 2013 17:30:22 +0100
+Message-ID: <20130426163022.GC23038@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Michel Lespinasse <walken-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi folks,
+Hi Peter, Linus,
 
-The following changes since commit 8c58bf3eec3b8fc8162fe557e9361891c20758f2:
+I've got a small patch that fixes a crash for the Google folks and their
+EFI SMI driver, which was caused by dereferencing a garbage pointer.
 
-  x86,efi: Implement efi_no_storage_paranoia parameter (2013-04-17 15:13:38 +0100)
+Please consider pulling.
+
+The following changes since commit f697036b93aa7345d4cbb3c854a76456c0ddac45:
+
+  efi: Check EFI revision in setup_efi_vars (2013-04-24 16:19:01 +0100)
 
 are available in the git repository at:
 
   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-for you to fetch changes up to f697036b93aa7345d4cbb3c854a76456c0ddac45:
+for you to fetch changes up to 45432323ef7038a91599959173700fdb8a0adb2f:
 
-  efi: Check EFI revision in setup_efi_vars (2013-04-24 16:19:01 +0100)
-
-----------------------------------------------------------------
- * The EFI variable anti-bricking algorithm merged in -rc8 broke booting
-   on some Apple machines because they implement EFI spec 1.10, which
-   doesn't provide a QueryVariableInfo() runtime function and the logic
-   used to check for the existence of that function was insufficient.
-   Fix from Josh Boyer.
-
- * The anti-bricking algorithm also introduced a compiler warning on
-   32-bit. Fix from Borislav Petkov.
+  efivars: only check for duplicates on the registered list (2013-04-26 16:50:01 +0100)
 
 ----------------------------------------------------------------
-Borislav Petkov (1):
-      x86, efi: Fix a build warning
+ * Last minute bugfix for the efivars code. The google EFI SMI driver
+   maintains its own list of EFI variables but the efivars core was
+   directly accessing a different (and in this case, uninitialised) list
+   resulting in a crash.
 
-Josh Boyer (1):
-      efi: Check EFI revision in setup_efi_vars
+----------------------------------------------------------------
+Matt Fleming (1):
+      efivars: only check for duplicates on the registered list
 
- arch/x86/boot/compressed/eboot.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/firmware/efivars.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
