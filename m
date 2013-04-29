@@ -1,22 +1,64 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Stephen Rothwell <sfr@canb.auug.org.au>
 Subject: Re: linux-next: Tree for Apr 26
-Date: Mon, 29 Apr 2013 09:11:13 +0100
-Message-ID: <517E2B21.8070009@intel.com>
-References: <20130426180357.7599d1b6b7965470905dcdf3@canb.auug.org.au> <CAMuHMdWQ0rMuoH+peGMZ3=AdsYrMPpeV4_vSsLD3kaJukx=83w@mail.gmail.com> <20130429093628.b739ef3b879b6f8759bd31af@canb.auug.org.au>
+Date: Mon, 29 Apr 2013 18:53:22 +1000
+Message-ID: <20130429185322.afaed9fd11269fba9bb09a54@canb.auug.org.au>
+References: <20130426180357.7599d1b6b7965470905dcdf3@canb.auug.org.au>
+	<CAMuHMdWQ0rMuoH+peGMZ3=AdsYrMPpeV4_vSsLD3kaJukx=83w@mail.gmail.com>
+	<20130429093628.b739ef3b879b6f8759bd31af@canb.auug.org.au>
+	<517E2B21.8070009@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130429093628.b739ef3b879b6f8759bd31af-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>
-Cc: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Linux-Next <linux-next-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: multipart/signed; protocol="application/pgp-signature";
+ micalg="PGP-SHA256";
+ boundary="Signature=_Mon__29_Apr_2013_18_53_22_+1000_gV90cMuZJ3LM=K/J"
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <517E2B21.8070009@intel.com>
+Sender: linux-next-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>, Matthew Garrett <matthew.garrett@nebula.com>, Linux-Next <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@elte.hu>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, "Luck, Tony" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 29/04/13 00:36, Stephen Rothwell wrote:
-> Commit e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip") by Matt
-> Fleming from the tip tree merged v3.9-rc8 (which has 0635eb8a54cf) with
-> the branch that contains 048517722cde but lost the "select UCS2_STRING"
-> which should be in drivers/firmware/efi/Kconfig.
+--Signature=_Mon__29_Apr_2013_18_53_22_+1000_gV90cMuZJ3LM=K/J
+Content-Type: text/plain; charset=US-ASCII
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Eek, yes. Sorry about that. How should we resolve this?
+On Mon, 29 Apr 2013 09:11:13 +0100 Matt Fleming <matt.fleming@intel.com> wr=
+ote:
+>
+> On 29/04/13 00:36, Stephen Rothwell wrote:
+> > Commit e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip") by Matt
+> > Fleming from the tip tree merged v3.9-rc8 (which has 0635eb8a54cf) with
+> > the branch that contains 048517722cde but lost the "select UCS2_STRING"
+> > which should be in drivers/firmware/efi/Kconfig.
+>=20
+> Eek, yes. Sorry about that. How should we resolve this?
+
+You should probably add a commit that puts the line back in your tree and
+get that merged into the tip tree.
+
+--=20
+Cheers,
+Stephen Rothwell                    sfr@canb.auug.org.au
+
+--Signature=_Mon__29_Apr_2013_18_53_22_+1000_gV90cMuZJ3LM=K/J
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.12 (GNU/Linux)
+
+iQIbBAEBCAAGBQJRfjUCAAoJEECxmPOUX5FEfkoP92Oji3PIqDoIu5x0669xM7bC
+azbDd7U8PFmwaiFGSpfhtpLXuzZai7B9gDGHmPuUU8F0vjXUdVUDnkBYp421FPDa
+uEnUe/Tjghx/W+/NIS5/vDMQQu46bEhswJlgrt9iNHogyfB/dqJLxvKP7rYPe5V1
+gcgwQMBIEAk6zbDXNyCkeh0hZeTRjDe3gUBNI7oPTNXYFP2MGUqHuenP1anaUPeK
+Frd6+gGVu+6veuCVmDE+KXs0tHZ7orhQfI6x6TDy70VKfYpLIxk+/p+iWGiQ2y6W
+FJq/19mvs1vLZTTiLhXthzv42H17ZfxSqn1WH/cKSkJgXa7MG3yH6xfF9UNvHtEk
+OE/fi8YbfQVyGEiuqnxNPnt5fRQr/Bmy0oqVEH4vKcGc/EZxT6sq3Ca7f3oX/PS2
+PV4JQUKoML/GVjLboaFGYaDu3n1fcbkU5eHlInqw/qXLfvlYNhbeylshGL9SBlyz
+4e9uFsveo4eY9qzXPAt4u5LSn7BWOplCDq/1jfABCTF7E2RkIn67Wny/8kyaFb5T
+xgKJBUxlm+JhgYSiD37WxnoPGvuyfdRLvNRCfLaWjG+OO9daAj7izkElVrGhEXKl
+9/J+02Mnvc55f0ai/t7P5+kCM73TtyKpbzXfvrfL9M1ckoQNlg65F1jghlJXYCNM
+M/rNSIiT/FjYDHv4IGY=
+=ZYgd
+-----END PGP SIGNATURE-----
+
+--Signature=_Mon__29_Apr_2013_18_53_22_+1000_gV90cMuZJ3LM=K/J--
