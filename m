@@ -1,63 +1,43 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: linux-next: Tree for Apr 26
-Date: Mon, 29 Apr 2013 14:50:47 +0100
-Message-ID: <517E7AB7.6050101@intel.com>
-References: <20130426180357.7599d1b6b7965470905dcdf3@canb.auug.org.au> <CAMuHMdWQ0rMuoH+peGMZ3=AdsYrMPpeV4_vSsLD3kaJukx=83w@mail.gmail.com> <20130429093628.b739ef3b879b6f8759bd31af@canb.auug.org.au> <517E2B21.8070009@intel.com> <20130429185322.afaed9fd11269fba9bb09a54@canb.auug.org.au>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI merge botch fix
+Date: Mon, 29 Apr 2013 19:18:19 +0100
+Message-ID: <20130429181819.GA2254@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-next-owner@vger.kernel.org>
-In-Reply-To: <20130429185322.afaed9fd11269fba9bb09a54@canb.auug.org.au>
-Sender: linux-next-owner@vger.kernel.org
-To: Ingo Molnar <mingo@elte.hu>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Geert Uytterhoeven <geert@linux-m68k.org>, Matthew Garrett <matthew.garrett@nebula.com>, Linux-Next <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, "Luck, Tony" <tony.luck@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 29/04/13 09:53, Stephen Rothwell wrote:
-> On Mon, 29 Apr 2013 09:11:13 +0100 Matt Fleming <matt.fleming@intel.com> wrote:
->>
->> On 29/04/13 00:36, Stephen Rothwell wrote:
->>> Commit e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip") by Matt
->>> Fleming from the tip tree merged v3.9-rc8 (which has 0635eb8a54cf) with
->>> the branch that contains 048517722cde but lost the "select UCS2_STRING"
->>> which should be in drivers/firmware/efi/Kconfig.
->>
->> Eek, yes. Sorry about that. How should we resolve this?
-> 
-> You should probably add a commit that puts the line back in your tree and
-> get that merged into the tip tree.
+Hi folks,
 
-Tip folks,
+This commit fixes the merge botch I created when merging -rc8 into
+tip/x86/efi, where I dropped the "select UCS2_STRING" string from
+drivers/firmware/Kconfig. The string actually needs to be moved to
+arch/ia64 because parts of the core EFI support in drivers/firmware/efi/
+require the ucs2 string functions.
 
-I applied the following to the 'efi-for-tip' branch in the EFI
-repository. Unless someone complains I'll send a pull request shortly.
+The following changes since commit e29c2de5f591490fd51225081e5d7579c6699247:
 
-commit da74caa6cead3f6c55dabcaa7b397b2fddd655e3
-Author: Matt Fleming <matt.fleming@intel.com>
-Date:   Mon Apr 29 14:30:28 2013 +0100
+  Merge tag 'v3.9-rc8' into efi-for-tip (2013-04-22 12:53:22 +0100)
 
-    ia64, efi: select UCS2_STRING when building EFI support
-    
-    The ucs2 string library functions are required by the core EFI code.
-    Select UCS2_STRING from the EFI symbol entry in arch/ia64/Kconfig, just
-    like we do for x86. This Kconfig bug was caused by a mis-merge in commit
-    e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip").
-    
-    Cc: Ingo Molnar <mingo@kernel.org>
-    CC: H. Peter Anvin <hpa@zytor.com>
-    Cc: Tony Luck <tony.luck@intel.com>
-    Cc: Matthew Garrett <matthew.garrett@nebula.com>
-    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+are available in the git repository at:
 
-diff --git a/arch/ia64/Kconfig b/arch/ia64/Kconfig
-index 9a02f71..da18c8e 100644
---- a/arch/ia64/Kconfig
-+++ b/arch/ia64/Kconfig
-@@ -110,6 +110,7 @@ config DMI
- 
- config EFI
- 	bool
-+	select UCS2_STRING
- 	default y
- 
- config SCHED_OMIT_FRAME_POINTER
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git efi-for-tip
+
+for you to fetch changes up to da74caa6cead3f6c55dabcaa7b397b2fddd655e3:
+
+  ia64, efi: select UCS2_STRING when building EFI support (2013-04-29 14:46:15 +0100)
+
+----------------------------------------------------------------
+Matt Fleming (1):
+      ia64, efi: select UCS2_STRING when building EFI support
+
+ arch/ia64/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
