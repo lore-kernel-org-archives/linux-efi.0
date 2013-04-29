@@ -1,104 +1,63 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: initial the local variable of DataSize to
- zero
-Date: Mon, 29 Apr 2013 18:34:28 +0800
-Message-ID: <1367231668.22858.56.camel@linux-s257.site>
-References: <1366996767-8234-1-git-send-email-jlee@suse.com>
-	 <1367231111.22858.55.camel@linux-s257.site>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: linux-next: Tree for Apr 26
+Date: Mon, 29 Apr 2013 14:50:47 +0100
+Message-ID: <517E7AB7.6050101@intel.com>
+References: <20130426180357.7599d1b6b7965470905dcdf3@canb.auug.org.au> <CAMuHMdWQ0rMuoH+peGMZ3=AdsYrMPpeV4_vSsLD3kaJukx=83w@mail.gmail.com> <20130429093628.b739ef3b879b6f8759bd31af@canb.auug.org.au> <517E2B21.8070009@intel.com> <20130429185322.afaed9fd11269fba9bb09a54@canb.auug.org.au>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1367231111.22858.55.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <20130429185322.afaed9fd11269fba9bb09a54@canb.auug.org.au>
+Sender: linux-next-owner@vger.kernel.org
+To: Ingo Molnar <mingo@elte.hu>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Geert Uytterhoeven <geert@linux-m68k.org>, Matthew Garrett <matthew.garrett@nebula.com>, Linux-Next <linux-next@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>, "Luck, Tony" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=80=EF=BC=8C2013-04-29 =E6=96=BC 18:25 +0800=EF=BC=8Cjo=
-eyli =E6=8F=90=E5=88=B0=EF=BC=9A
-> =E6=96=BC =E5=85=AD=EF=BC=8C2013-04-27 =E6=96=BC 01:19 +0800=EF=BC=8C=
-Lee, Chun-Yi =E6=8F=90=E5=88=B0=EF=BC=9A
-> > That will be better initial the value of DataSize to zero for the i=
-nput of
-> > GetVariable(), otherwise we will feed a random value. The debug log=
- of input
-> > DataSize like this:
-> >=20
-> > ...
-> > [  195.915612] EFI Variables Facility v0.08 2004-May-17
-> > [  195.915819] efi: size: 18446744071581821342
-> > [  195.915969] efi:  size': 18446744071581821342
-> > [  195.916324] efi: size: 18446612150714306560
-> > [  195.916632] efi:  size': 18446612150714306560
-> > [  195.917159] efi: size: 18446612150714306560
-> > [  195.917453] efi:  size': 18446612150714306560
-> > ...
->=20
-> After applied patch, the log of size like this:
->=20
-> [   82.442042] EFI Variables Facility v0.08 2004-May-17
-> [   82.442202] efi: size: 0
-> [   82.442360] efi:  size': 1039
-> [   82.443828] efi: size: 0
-> [   82.444127] efi:  size': 2616
-> [   82.447057] efi: size: 0
-> [   82.447356] efi:  size': 5832
-> [   82.452669] efi: size: 0
-> [   82.453128] efi:  size': 1
-> [   82.454339] efi: size: 0
-> [   82.454843] efi:  size': 1
-> [   82.456173] efi: size: 0
-> [   82.456764] efi:  size': 8
-> [   82.458194] efi: size: 0
-> [   82.458905] efi:  size': 4
->=20
-> The size' is the return value of Acer BIOS, it return right size valu=
-e
-> then we feed zero DataSize.
-^^^^^^^^^ when=20
+On 29/04/13 09:53, Stephen Rothwell wrote:
+> On Mon, 29 Apr 2013 09:11:13 +0100 Matt Fleming <matt.fleming@intel.com> wrote:
+>>
+>> On 29/04/13 00:36, Stephen Rothwell wrote:
+>>> Commit e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip") by Matt
+>>> Fleming from the tip tree merged v3.9-rc8 (which has 0635eb8a54cf) with
+>>> the branch that contains 048517722cde but lost the "select UCS2_STRING"
+>>> which should be in drivers/firmware/efi/Kconfig.
+>>
+>> Eek, yes. Sorry about that. How should we resolve this?
+> 
+> You should probably add a commit that puts the line back in your tree and
+> get that merged into the tip tree.
 
-Sorry for typo!
-Joey Lee
+Tip folks,
 
->=20
->=20
-> Thanks a lot!
-> Joey Lee
->=20
-> >=20
-> > Found on Acer Aspire V3 BIOS, it will not return the size of data i=
-f we input a
-> > non-zero DataSize.
-> >=20
-> > Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> > ---
-> >  arch/x86/platform/efi/efi.c |    2 +-
-> >  1 files changed, 1 insertions(+), 1 deletions(-)
-> >=20
-> > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/ef=
-i.c
-> > index e4a86a6..cb59732 100644
-> > --- a/arch/x86/platform/efi/efi.c
-> > +++ b/arch/x86/platform/efi/efi.c
-> > @@ -204,7 +204,7 @@ static efi_status_t virt_efi_get_next_variable(=
-unsigned long *name_size,
-> >  	}
-> > =20
-> >  	if (boot_used_size && !finished) {
-> > -		unsigned long size;
-> > +		unsigned long size =3D 0;
-> >  		u32 attr;
-> >  		efi_status_t s;
-> >  		void *tmp;
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" =
-in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
+I applied the following to the 'efi-for-tip' branch in the EFI
+repository. Unless someone complains I'll send a pull request shortly.
+
+commit da74caa6cead3f6c55dabcaa7b397b2fddd655e3
+Author: Matt Fleming <matt.fleming@intel.com>
+Date:   Mon Apr 29 14:30:28 2013 +0100
+
+    ia64, efi: select UCS2_STRING when building EFI support
+    
+    The ucs2 string library functions are required by the core EFI code.
+    Select UCS2_STRING from the EFI symbol entry in arch/ia64/Kconfig, just
+    like we do for x86. This Kconfig bug was caused by a mis-merge in commit
+    e29c2de5f591 ("Merge tag 'v3.9-rc8' into efi-for-tip").
+    
+    Cc: Ingo Molnar <mingo@kernel.org>
+    CC: H. Peter Anvin <hpa@zytor.com>
+    Cc: Tony Luck <tony.luck@intel.com>
+    Cc: Matthew Garrett <matthew.garrett@nebula.com>
+    Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+
+diff --git a/arch/ia64/Kconfig b/arch/ia64/Kconfig
+index 9a02f71..da18c8e 100644
+--- a/arch/ia64/Kconfig
++++ b/arch/ia64/Kconfig
+@@ -110,6 +110,7 @@ config DMI
+ 
+ config EFI
+ 	bool
++	select UCS2_STRING
+ 	default y
+ 
+ config SCHED_OMIT_FRAME_POINTER
