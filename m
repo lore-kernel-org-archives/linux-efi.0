@@ -1,51 +1,47 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI merge botch fix
-Date: Tue, 30 Apr 2013 12:54:30 +0100
-Message-ID: <517FB0F6.9030103@console-pimps.org>
-References: <20130429181819.GA2254@console-pimps.org> <20130430084731.GB21473@gmail.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: unusual uefi call/mapping problem
+Date: Tue, 30 Apr 2013 13:52:25 +0100
+Message-ID: <20130430125225.GA4197@srcf.ucam.org>
+References: <516DC325.6090604@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130430084731.GB21473-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <516DC325.6090604-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Joel Schopp <jschopp-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leonidas da Silva Barbosa <leosilva-xuelUoVDAHHQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 30/04/13 09:47, Ingo Molnar wrote:
-> The other problem is that tip:x86/efi also conflicts with current -git, as 
-> of v3.9 - due to interaction with an EFI fix tree ...
-> 
-> This is getting ugly pretty fast, so I'd suggest to re-do the merges 
-> cleanly, not by rebasing the tree, but by redoing the first merge in 
-> essence:
-> 
->   e29c2de5f591 Merge tag 'v3.9-rc8' into efi-for-tip
-> 
-> By correctly merging v3.9-final into f53f292 - making sure the changes to 
-> drivers/firmware/efivars.c correctly merge over, and making sure the ia64 
-> select does not get lost.
-> 
-> Something like this would do:
-> 
->   git checkout -b x86-new-efi-branch f53f292
->   git merge v3.9
->   < ... resolve all the conflicts ...>
->   git commit
-> 
-> I can then (non-fast-forward) fetch this new EFI branch as the new 
-> tip:x86/efi.
+On Tue, Apr 16, 2013 at 04:31:17PM -0500, Joel Schopp wrote:
+> I'm working on the Linux kernel implementation of an draft standard
+> that has a uefi component.  The interesting part is that the uefi
+> component isn't in the uefi runtime table, but instead has a
+> physical address stored an ACPI table.  Other than not being in the
+> runtime table it behaves exactly like the other runtime services.
 
-OK, I re-did the merge against v3.9 as requested and published it as
-'efi-for-tip2'. Would you like me to send a proper pull request if
-that's easier to pull into the tip machinery?
+Sigh. Is the spec final yet? Doing this in ACPI is inconvenient - ACPI 
+isn't available at the stage where we do early UEFI setup, so it would 
+have been much easier if this had been a UEFI table rather than an ACPI 
+one.
 
-I have also started accumulating fixes against the EFI changes in
-tip/x86/efi. Would you like those as a separate pull request? The fixes
-branch is 'efi-for-tip-fixes' and is based on the above merge branch,
-'efi-for-tip2'. It mainly includes fixes for bugs in the pstore paths
-which Seiji Aguchi found.
+> 2) Various methods to map in the physical address into virtual
+> address space and then call the virtual address.  All of these have
+> failed.
+
+If the function pointer to the ACPI table is to a UEFI runtime region, 
+the kernel should already have set up a virtual to physical mapping for 
+the code. Does SetVirtualAddressMap() update the pointer in the ACPI 
+table? If so, you're good to go - just pass it to the appropriate 
+efi_call_virt*() wrapper. If not, and if the spec isn't final, go back 
+and fix that.
+
+> 3) I've started looking at adding an entry to the efi struct and a
+> line to efi_enter_virtual_mode(...) with the new function name but
+> haven't found the right spot to add an extra entry on to the mmap
+> structure. Does this seem like a sane approach?
+
+You mean the memmap structure? No, you shouldn't need to do that.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
