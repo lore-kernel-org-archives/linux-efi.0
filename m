@@ -1,75 +1,52 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL] EFI merge botch fix
-Date: Tue, 30 Apr 2013 10:47:31 +0200
-Message-ID: <20130430084731.GB21473@gmail.com>
-References: <20130429181819.GA2254@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [patch] efi: locking fix in efivar_entry_set_safe()
+Date: Tue, 30 Apr 2013 12:33:27 +0100
+Message-ID: <517FAC07.8000405@console-pimps.org>
+References: <20130430074312.GD7237@elgon.mountain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130429181819.GA2254@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Tony Luck <tony.luck@intel.com>, Matthew Garrett <matthew.garrett@nebula.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130430074312.GD7237-mgFCXtclrQlZLf2FXnZxJA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Cc: Tom Gundersen <teg-B22kvLQNl6c@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matt Fleming <matt@console-pimps.org> wrote:
-
-> Hi folks,
+On 30/04/13 08:43, Dan Carpenter wrote:
+> The intent is that if we aren't allowed to block because we're in an
+> NMI or an emergency then we only take the lock if it is uncontended.
 > 
-> This commit fixes the merge botch I created when merging -rc8 into
-> tip/x86/efi, where I dropped the "select UCS2_STRING" string from
-> drivers/firmware/Kconfig. The string actually needs to be moved to
-> arch/ia64 because parts of the core EFI support in drivers/firmware/efi/
-> require the ucs2 string functions.
+> Part of the problem is the test is reversed so we return -EBUSY if we
+> acquire the lock.
 > 
-> The following changes since commit e29c2de5f591490fd51225081e5d7579c6699247:
-> 
->   Merge tag 'v3.9-rc8' into efi-for-tip (2013-04-22 12:53:22 +0100)
-> 
-> are available in the git repository at:
-> 
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git efi-for-tip
-> 
-> for you to fetch changes up to da74caa6cead3f6c55dabcaa7b397b2fddd655e3:
-> 
->   ia64, efi: select UCS2_STRING when building EFI support (2013-04-29 14:46:15 +0100)
-> 
-> ----------------------------------------------------------------
-> Matt Fleming (1):
->       ia64, efi: select UCS2_STRING when building EFI support
-> 
->  arch/ia64/Kconfig | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+> Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+> ---
+> Static checker stuff.  I haven't tested this.
 
-The other problem is that tip:x86/efi also conflicts with current -git, as 
-of v3.9 - due to interaction with an EFI fix tree ...
+This looks correct to me. Thanks!
 
-This is getting ugly pretty fast, so I'd suggest to re-do the merges 
-cleanly, not by rebasing the tree, but by redoing the first merge in 
-essence:
+> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> index 1d80c1c..f34d8fe 100644
+> --- a/drivers/firmware/efi/vars.c
+> +++ b/drivers/firmware/efi/vars.c
+> @@ -622,10 +622,12 @@ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
+>  	if (!ops->query_variable_store)
+>  		return -ENOSYS;
+>  
+> -	if (!block && spin_trylock_irqsave(&__efivars->lock, flags))
+> -		return -EBUSY;
+> -	else
+> +	if (!block) {
+> +		if (!spin_trylock_irqsave(&__efivars->lock, flags))
+> +			return -EBUSY;
+> +	} else {
+>  		spin_lock_irqsave(&__efivars->lock, flags);
+> +	}
+>  
+>  	status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
+>  	if (status != EFI_SUCCESS) {
 
-  e29c2de5f591 Merge tag 'v3.9-rc8' into efi-for-tip
 
-By correctly merging v3.9-final into f53f292 - making sure the changes to 
-drivers/firmware/efivars.c correctly merge over, and making sure the ia64 
-select does not get lost.
-
-Something like this would do:
-
-  git checkout -b x86-new-efi-branch f53f292
-  git merge v3.9
-  < ... resolve all the conflicts ...>
-  git commit
-
-I can then (non-fast-forward) fetch this new EFI branch as the new 
-tip:x86/efi.
-
-Thanks,
-
-	Ingo
+-- 
+Matt Fleming, Intel Open Source Technology Center
