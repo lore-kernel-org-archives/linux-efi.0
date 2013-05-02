@@ -1,52 +1,62 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: unusual uefi call/mapping problem
-Date: Tue, 30 Apr 2013 17:23:29 +0100
-Message-ID: <20130430162329.GA7962@srcf.ucam.org>
-References: <516DC325.6090604@linux.vnet.ibm.com>
- <20130430125225.GA4197@srcf.ucam.org>
- <517FE891.9070103@linux.vnet.ibm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] x86, efi: initial the local variable of DataSize to zero
+Date: Thu,  2 May 2013 22:07:01 +0800
+Message-ID: <1367503621-13004-1-git-send-email-jlee@suse.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <517FE891.9070103-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Joel Schopp <jschopp-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leonidas da Silva Barbosa <leosilva-xuelUoVDAHHQT0dZR+AlfA@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 30, 2013 at 10:51:45AM -0500, Joel Schopp wrote:
-> On 04/30/2013 07:52 AM, Matthew Garrett wrote:
-> >On Tue, Apr 16, 2013 at 04:31:17PM -0500, Joel Schopp wrote:
-> >>I'm working on the Linux kernel implementation of an draft standard
-> >>that has a uefi component.  The interesting part is that the uefi
-> >>component isn't in the uefi runtime table, but instead has a
-> >>physical address stored an ACPI table.  Other than not being in the
-> >>runtime table it behaves exactly like the other runtime services.
-> >
-> >Sigh. Is the spec final yet? Doing this in ACPI is inconvenient - ACPI
-> >isn't available at the stage where we do early UEFI setup, so it would
-> >have been much easier if this had been a UEFI table rather than an ACPI
-> >one.
-> 
-> The spec appears to currently be in purgatory, finished but not
-> published.  Do you happen to know offhand what spec defines the UEFI
-> runtime services table?
+That will be better initial the value of DataSize to zero for the input of
+GetVariable(), otherwise we will feed a random value. The debug log of input
+DataSize like this:
 
-That's in the UEFI spec, but it wouldn't be appropriate to put it there. 
-Instead, you can add another UEFI table with a different UUID and have a 
-pointer to that from the ConfigurationTables pointer in the UEFI system 
-table.
+...
+[  195.915612] EFI Variables Facility v0.08 2004-May-17
+[  195.915819] efi: size: 18446744071581821342
+[  195.915969] efi:  size': 18446744071581821342
+[  195.916324] efi: size: 18446612150714306560
+[  195.916632] efi:  size': 18446612150714306560
+[  195.917159] efi: size: 18446612150714306560
+[  195.917453] efi:  size': 18446612150714306560
+...
 
-> >
-> >>2) Various methods to map in the physical address into virtual
-> >>address space and then call the virtual address.  All of these have
-> >>failed.
-> 
-> Turns out there was a bug in the UEFI implementation, I'm pretty
-> sure we have a way to map it in and call it now.
+The size' is value that was returned by BIOS.
 
-Cool.
+After applied this patch:
+[   82.442042] EFI Variables Facility v0.08 2004-May-17
+[   82.442202] efi: size: 0
+[   82.442360] efi:  size': 1039
+[   82.443828] efi: size: 0
+[   82.444127] efi:  size': 2616
+[   82.447057] efi: size: 0
+[   82.447356] efi:  size': 5832
+...
 
+Found on Acer Aspire V3 BIOS, it will not return the size of data if we input a
+non-zero DataSize.
+
+Cc: Matthew Garrett <mjg-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index e4a86a6..cb59732 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -204,7 +204,7 @@ static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
+ 	}
+ 
+ 	if (boot_used_size && !finished) {
+-		unsigned long size;
++		unsigned long size = 0;
+ 		u32 attr;
+ 		efi_status_t s;
+ 		void *tmp;
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+1.6.0.2
