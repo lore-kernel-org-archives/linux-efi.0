@@ -1,22 +1,27 @@
-From: "kopejka1" <sp13-KGIM6MEEbx+k2G6E/hewhQ@public.gmane.org>
-Subject: =?koi8-r?B?5MnLz9fJzs7ZyiDT1dfFzsnSIMTM0SDExdTFyg==?=
-Date: Sun, 12 May 2013 16:59:57 +0300
-Message-ID: <EE093177DEE04D0EB16A036BD2D93DDB@hsrlkz>
-Reply-To: "kopejka1" <kopejka1-5XlsqHWz4s5Wk0Htik3J/w@public.gmane.org>
+From: =?iso-8859-5?B?3Njd0A==?= <damiano.michele-1Ph4/jfBtgs@public.gmane.org>
+Subject: =?iso-8859-5?B?wdDc3tUg4NXd4tDR1dvs3d7VIN/g1dTb3tbV3djV?=
+	=?iso-8859-5?B?IODQ1Ngg2tvY1d3i3tIg3dDo1dPeIOHQ2eLQ?=
+Date: Mon, 13 May 2013 12:42:05 +0300
+Message-ID: <D86CCA3AB0D74E849B07B46B3552162D@uycvfk>
+Reply-To: =?iso-8859-5?B?3Njd0A==?= <markisa76-mqYQcwHqw41MF9gUVOqKsdBPR1lH4CV8@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=koi8-r
+Content-Type: text/plain; charset=iso-8859-5
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: emily_fox-JGs/UdohzUI@public.gmane.org, gromov-6XA8sgDrlCrgpPdqW2hMVpXTHnhVAWZu@public.gmane.org, dzr_alfiya-JGs/UdohzUI@public.gmane.org, friedrich.georg-RbZlAiThDcE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-   =F0=CF=C4=D2=CF=C2=CE=CF: http://tinyurl.com/bodm4mv =F7=D3=D1=CB=C9=
-=CA =D2=C5=C2=C5=CE=CF=CB =C2=D5=C4=C5=D4 =D2=C1=C4=CF=D3=D4=C5=CE =CE=C1=
-=D6=C9=D4=D8 =DC=C4=C1=CB=CF=CA =C4=C1=D2. =E1=CB=D5=CC=D9 =D0=D2=C9=D7=
-=CF=D2=CF=D6=C9=CC=C9 =D4=D5=DE=D5 =D0=CF=D2=C1=D6=C5=CE=CE=D9=C8 =D7=DA=
-=C7=CC=D1=C4=CF=D7, =D0=D2=CF=CC=C5=D4=C1=D1 =CE=C1=C4 =C7=CF=CC=CF=D7=C1=
-=CD=C9 =DA=C1=CB=CF=CC=C4=CF=D7=C1=CE=CE=D9=C8 =D3=D7=C9=C4=C5=D4=C5=CC=
-=C5=CA.=20
-=20
-=20
+=DB=E3=E7=E8=D5=D5 =DF=E0=D5=D4=DB=DE=D6=D5=DD=D8=D5 =DD=D0 =E1=D5=D3=DE=
+=D4=DD=EF http://snurl.com/270pnfb
+
+=BD=D5 =D7=DD=D0=EE, =E1=DA=DE=DB=EC=DA=DE =E3=E8=DB=DE =D2=E0=D5=DC=D5=
+=DD=D8 =DD=D0 =E0=D0=D7=D2=EF=D7=EB=D2=D0=DD=D8=D5 =D2=D5=E0=D5=D2=DE=DA=
+, =DD=DE =E1 =ED=E2=DE=D9 =E0=D0=D1=DE=E2=DE=D9 =EF =E1=DF=E0=D0=D2=D8=DB=
+=E1=EF. =BE=D4=DD=D0=DA=DE =D2=EB=EF=E1=DD=D8=DB=DE=E1=EC, =E7=E2=DE =BA=
+=D0=D7=D0=E7=D5=DD=DA=DE =D8=D4=E2=D8 =DD=D5 =D2 =E1=DE=E1=E2=DE=EF=DD=D8=
+=D8, =DD=D5 =D3=DE=D2=DE=E0=EF =E3=D6 =DE =B1=E0=DE=DD=D5=D2=D8=E7 =D8 =
+=B7=D8=DC=D8=DD=DE=D9. =BD=DE=D3=D8 =BD=D0=E2=D0=DB=EC=EE =DD=D5 =E1=DB=
+=E3=E8=D0=DB=D8=E1=EC, =D4=D0 =D8 =E1=D8=DB =D8=D4=E2=D8 =E3 =DD=D5=D5 =
+=DD=D5 =D1=EB=DB=DE.
+=B7=D0=E5=DE=D4=D8=DB=D0 =D2 =DC=D0=D3=D0=D7=D8=DD=EB,
