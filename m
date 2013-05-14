@@ -1,56 +1,25 @@
-From: joeyli <jlee@suse.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH] efivarfs: Never return ENOENT from firmware again
-Date: Tue, 14 May 2013 12:36:37 +0800
-Message-ID: <1368506197.21417.172.camel@linux-s257.site>
-References: <5b6476bf31dc699a0e6f3983e78447eeac34d831.1368180585.git.lxiang@redhat.com>
-	 <51913D4B.2000606@intel.com>
+Date: Tue, 14 May 2013 08:16:48 +0100
+Message-ID: <5191E4E0.7020505@intel.com>
+References: <5b6476bf31dc699a0e6f3983e78447eeac34d831.1368180585.git.lxiang@redhat.com>  <51913D4B.2000606@intel.com> <1368506197.21417.172.camel@linux-s257.site>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <51913D4B.2000606@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>
-Cc: Lingzhu Xiang <lxiang@redhat.com>, Jeremy Kerr <jk@ozlabs.org>, Matthew Garrett <matthew.garrett@nebula.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Boyer <jwboyer@redhat.com>, Andy Whitcroft <apw@canonical.com>
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1368506197.21417.172.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Whitcroft <apw-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,=20
+On 05/14/2013 05:36 AM, joeyli wrote:
+> I found the "[PATCH] x86, efi: initial the local variable of DataSize to
+> zero" lost in urgent branch, and it also didn't in Linus's v3.10-rc1.
+> 
+> Did this patch move to other branch?
 
-=E6=96=BC =E4=B8=80=EF=BC=8C2013-05-13 =E6=96=BC 20:21 +0100=EF=BC=8CMa=
-tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
-> On 05/10/2013 11:29 AM, Lingzhu Xiang wrote:
-> > Previously in 1fa7e69 efi_status_to_err() translated firmware statu=
-s
-> > EFI_NOT_FOUND to -EIO instead of -ENOENT for efivarfs operations to
-> > avoid confusion. After refactoring in e14ab23, it is also used in o=
-ther
-> > places where the translation may be unnecessary.
-> >=20
-> > So move the translation to efivarfs specific code. Also return EOF
-> > for reading zero-length files, which is what users would expect.
-> >=20
-> > Cc: Josh Boyer <jwboyer@redhat.com>
-> > Cc: Jeremy Kerr <jk@ozlabs.org>
-> > Cc: Lee, Chun-Yi <jlee@suse.com>
-> > Cc: Andy Whitcroft <apw@canonical.com>
-> > Signed-off-by: Lingzhu Xiang <lxiang@redhat.com>
-> > ---
-> > This is to be applied against mainline or Matt Fleming's chainsaw b=
-ranch.
->=20
-> Applied, thanks.
->=20
-> FYI, I rebased my 'urgent' branch on v3.10-rc1, so your patch now
-> applies there too.
->=20
->=20
+It appears I dropped this patch when doing the rebase against -rc1. I'm
+really sorry about that. I've applied it again.
 
-I found the "[PATCH] x86, efi: initial the local variable of DataSize t=
-o
-zero" lost in urgent branch, and it also didn't in Linus's v3.10-rc1.
-
-Did this patch move to other branch?
-
-
-Thanks a lot!
-Joey Lee
+Thanks for being so diligent.
