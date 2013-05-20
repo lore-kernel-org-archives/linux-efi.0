@@ -1,59 +1,16 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Fri, 17 May 2013 11:18:13 +0100
-Message-ID: <20130517101813.GB14575@console-pimps.org>
+From: =?iso-8859-5?B?3NDa4djc2NDd?= <m.seiter-R6+BWeTfTmGq4xYlCpU2bHgRjnEvrCe7@public.gmane.org>
+Subject: =?iso-8859-5?B?vdDY19DR0NLd1dno2Nkg397U0ODe59XaINTb7yDU?=
+	=?iso-8859-5?B?1eLV2Q==?=
+Date: Mon, 20 May 2013 23:32:52 +0300
+Message-ID: <B5C7E1C7E266485BB95E096F521DD022@bfqqkcg>
+Reply-To: =?iso-8859-5?B?3NDa4djc2NDd?= <galbnia84-vY62qUBevqxwFqzsTH5u/w@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="iso-8859-5";
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: beste99-JGs/UdohzUI@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dzr_alfiya-JGs/UdohzUI@public.gmane.org, egor-vDwMBRByWuw@public.gmane.org, domskif-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi guys,
-
-I've queued up some fixes for bugs that were introduced in the merge
-window. Please consider pulling, thanks.
-
-The following changes since commit f722406faae2d073cc1d01063d1123c35425939e:
-
-  Linux 3.10-rc1 (2013-05-11 17:14:08 -0700)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to eccaf52fee8305d5207ff110950a82c100e459bc:
-
-  x86, efi: initial the local variable of DataSize to zero (2013-05-14 08:13:05 +0100)
-
-----------------------------------------------------------------
- * Avoid confusing the user by returning -EIO instead of -ENOENT in
-   efivarfs if an EFI variable gets deleted from under us and return EOF
-   when reading from a zero-length file - Lingzhu Xiang
-
- * Fix an oops in efivar_update_sysfs_entries() caused by reusing (and
-   therefore corrupting) a kzalloc() allocation - Seiji Aguchi
-
- * Initialise the DataSize argument to GetVariable() otherwise it will
-   not be updated with the actual size of the variable on return.
-   Discovered on a Acer Aspire V3 BIOS - Lee, Chun-Yi
-
-----------------------------------------------------------------
-Lee, Chun-Yi (1):
-      x86, efi: initial the local variable of DataSize to zero
-
-Lingzhu Xiang (1):
-      efivarfs: Never return ENOENT from firmware again
-
-Seiji Aguchi (1):
-      efivar: fix oops in efivar_update_sysfs_entries() caused by memory reuse
-
- arch/x86/platform/efi/efi.c    |  2 +-
- drivers/firmware/efi/efivars.c |  8 +++-----
- fs/efivarfs/file.c             | 14 ++++++++++++--
- 3 files changed, 16 insertions(+), 8 deletions(-)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+vdXe0evn3dDvILjT4OPo2tAgaHR0cDovL2dvby5nbC9OdHIwZz8vVkpVb20NCg==
