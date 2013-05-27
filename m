@@ -1,19 +1,62 @@
-From: "kriskobra" <admin-22st+ISarqun/ri/8nottw@public.gmane.org>
-Subject: =?koi8-r?Q?=F3=C1=CD=CF=C5_=D7=DA=C1=C9=CD=CF=D7=D9=C7=CF?=
-	=?koi8-r?Q?=C4=CE=CF=C5_=D0=D2=C5=C4=CC=CF=D6=C5=CE=C9=C5?=
-	=?koi8-r?Q?_=C4=CC=D1_=D7=C9=DA=C9=D4=C5=D2=CF=D7_=CE=C1?=
-	=?koi8-r?Q?=DB=C5=C7=CF_=D3=C1=CA=D4=C1?=
-Date: Sun, 26 May 2013 21:38:27 +0300
-Message-ID: <9578238.20130526213844@practicalci.com>
-Reply-To: "kriskobra" <vip.chuvatov-cucl3prQ12u6c6uEtOJ/EA@public.gmane.org>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [regression, bisected] x86: efi: Pass boot services variable
+ info to runtime code
+Date: Mon, 27 May 2013 12:27:12 +0800
+Message-ID: <1369628832.19026.22.camel@linux-s257.site>
+References: <20130522162747.GA20816@sgi.com>
+	 <20130523115801.GJ14575@console-pimps.org> <20130523203234.GD20913@sgi.com>
+	 <20130524074331.GL14575@console-pimps.org> <20130524161111.GE3672@sgi.com>
+	 <20130524170214.GA30179@sgi.com>  <20130524210534.GA15466@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="koi8-r";
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130524210534.GA15466-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkuras92-JGs/UdohzUI@public.gmane.org, info-UCSEKdMUFqyg44NsM9K9wg@public.gmane.org, concurs-2kwFMaCeg/LJGZLnVCOepw@public.gmane.org, info-fZFfxWhgXTQY5+rA0MJWLQC/G2K4zDHf@public.gmane.org
+To: Dave Jones <davej-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Robin Holt <holt-sJ/iWh9BUns@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-4cvDydEg0sHEySDMwMLZyCDLzMnFztTP1y4g2sHIwdbJ18HK1MUgwsXT0NLPzcXEzMnUxczYzs8h
-IGh0dHA6Ly9nb28uZ2wvOHdhVGc/L1FncXcNCg==
+Hi Dave,=20
+
+=E6=96=BC =E4=BA=94=EF=BC=8C2013-05-24 =E6=96=BC 17:05 -0400=EF=BC=8CDa=
+ve Jones =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Fri, May 24, 2013 at 12:02:15PM -0500, Russ Anderson wrote:
+>  > On Fri, May 24, 2013 at 11:11:11AM -0500, Robin Holt wrote:
+>  > > Russ,
+>  > >=20
+>  > > Can we open a bug for the BIOS folks and see if we can get this =
+addressed?
+>  >=20
+>  > I already talked with them.  It is not in an area that we
+>  > normally change, so if there is a bug may be in the Intel
+>  > reference code.  More investigation is needed to track down
+>  > the actual problem, and that could take help from Intel.
+>  >=20
+>  > Regardless of that, it is a kernel patch that triggers the
+>  > problem.  This isn't the first time a kernel change does
+>  > the "right thing" but trips across questionable bios/EFI/bootloade=
+r
+>  > implementation.  That still makes it a kernel bug.
+>  >=20
+>  > I'm still digging to better understand the root problem.
+> =20
+> When we rebased the Fedora 18 kernel to 3.9 we had a bunch of reports
+> from people who can no longer boot with what looks like similar sympt=
+oms.
+>=20
+> https://bugzilla.redhat.com/show_bug.cgi?id=3D964335
+>=20
+> 	Dave
+>=20
+
+The oops on the above bug is similar to my problem on Acer machine,
+could you please ask the reporter try the eccaf52f patch in urgent
+branch on Matt's efi git tree:
+
+https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=
+=3Durgent&id=3Deccaf52fee8305d5207ff110950a82c100e459bc
+
+
+Thanks!
+Joey Lee
