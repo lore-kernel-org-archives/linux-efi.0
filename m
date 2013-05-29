@@ -1,58 +1,40 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Unable to set efi boot variables on 3.10-rc3
-Date: Wed, 29 May 2013 10:43:25 +0100
-Message-ID: <20130529094325.GA2004@console-pimps.org>
-References: <1369766432.2827.13.camel@eressea>
+From: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [regression, bisected] x86: efi: Pass boot services variable
+	info to runtime code
+Date: Wed, 29 May 2013 15:16:17 -0500
+Message-ID: <20130529201616.GB28027@sgi.com>
+References: <20130522162747.GA20816@sgi.com> <20130523115801.GJ14575@console-pimps.org> <20130523222321.GB31880@sgi.com> <20130524074544.GM14575@console-pimps.org>
+Reply-To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1369766432.2827.13.camel@eressea>
+In-Reply-To: <20130524074544.GM14575-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Felix Braun <Felix.Braun-Qbh6zKbeHLYtq+zhY6Lx4A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 28 May, at 08:40:32PM, Felix Braun wrote:
-> Hi there,
+On Fri, May 24, 2013 at 08:45:44AM +0100, Matt Fleming wrote:
+> On Thu, 23 May, at 05:23:21PM, Russ Anderson wrote:
+> > Interesting data point.  The failure is on a rhel7/grub2 root.
+> > The identical kernel on a rhel6/grub root boots.  So maybe
+> > grub2 brings out the failure?  I suspect Fedora19/grub2 on
+> > EFI should hit the problem (for someone looking to reproduce
+> > it).
+> > 
+> > In both cases the kernel boot line options are the same.
 > 
-> I'm unable to set efi boot variables using efibootmgr 0.6.0 using
-> kernels 3.9.x (x=0..4) and 3.10-rc3 on an ASUS E45M1-M PRO Board using
-> the most current firmware (1202). Things worked fine with kernels 3.7.x
-> (x=4..10). I have not been able to boot 3.8 for unrelated reasons.
-> 
-> When I try to write something to the efi boot variables, I get an kernel
-> error
-> 
-> # efibootmgr
-> BootCurrent: 0000
-> Timeout: 1 seconds
-> BootOrder: 0000,0002,0003
-> Boot0000* Linux
-> Boot0002* Hard Drive
-> Boot0003* CD/DVD Drive
-> # efibootmgr -n2
-> # tail /var/log/messages
->  [Firmware Bug]: Broken EFI implementation is returning
-> MaxVariableSize=0
- 
-Yeah, this is a common bug on ASUS machines. The 'max' argument to
-QueryVariableInfo() isn't filled out correctly.
+> I'll bet that rhel7 is using the EFI handover protocol which uses the
+> internal mechanisms of the EFI boot stub.
 
-It sounds like your machine isn't initiating garbage collection. Try
-adding the efi_no_storage_paranoia kernel parameter to your kernel
-cmdline. 
+To be more specific (now that I've dug through the code), grub2 (used
+by rhel7) uses EFI boot stubs.  grub and elilo apparently do not use
+EFI boot stubs, so they don't hit the problem (at least on my test
+systems).
 
-> On boot up, I get a number of the following error messages:
-> 
-> e820: too many entries; ignoring [mem 0x01d8a000-0x01d8ffff]
-> e820: too many entries; ignoring [mem 0x01d90000-0x01d91fff]
-> ...
-> 
-> is that maybe related?
 
-I doubt that's related but it's certainly not good. Could you paste your
-full dmesg? What boot loader are you using?
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Russ Anderson, OS RAS/Partitioning Project Lead  
+SGI - Silicon Graphics Inc          rja-sJ/iWh9BUns@public.gmane.org
