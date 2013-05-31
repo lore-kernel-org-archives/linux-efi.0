@@ -1,61 +1,52 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: [regression, bisected] x86: efi: Pass boot services variable
- info to runtime code
-Date: Fri, 31 May 2013 10:35:32 -0700
-Message-ID: <1370021732.6250.4.camel@dabdike>
-References: <20130530221737.GA11105@sgi.com>
-	 <alpine.LNX.2.00.1305310023020.30576@pobox.suse.cz>
-	 <20130531101250.GD30394@gmail.com>
-	 <alpine.LNX.2.00.1305311259520.30576@pobox.suse.cz>
-	 <20130531123015.GC17843@nazgul.tnic> <20130531124356.GA8212@gmail.com>
-	 <20130531143425.GA5850@srcf.ucam.org>
-	 <1370011357.1913.15.camel@dabdike.int.hansenpartnership.com>
-	 <20130531144826.GB5850@srcf.ucam.org> <20130531154348.GA17145@sgi.com>
-	 <20130531162815.GA8082@srcf.ucam.org>
+From: Joseph Salisbury <joseph.salisbury-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: [v3.8] [v3.9] [v3.10] [Regression]  efi: be more paranoid about available
+ space when creating variables
+Date: Fri, 31 May 2013 14:59:57 -0400
+Message-ID: <51A8F32D.90401@canonical.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130531162815.GA8082-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+To: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-05-31 at 17:28 +0100, Matthew Garrett wrote:
-> On Fri, May 31, 2013 at 10:43:49AM -0500, Russ Anderson wrote:
-> 
-> > When did writing EFI variables to nvram become necessary to boot on 
-> > UEFI? And if it is necessary, why is it that only linux boot loaders 
-> > that use EFI stubs (generally grub2) need it?  The current kernel 
-> > boots using EFI/grub and EFI/elilo.  It is just when EFI stubs are 
-> > used that the boot fails.
-> 
-> I think you've misunderstood the problem. If nvram becaomes full, some 
-> systems crash during firmware initialisation. So we can't let nvram 
-> become full. The obvious thing to do here is to look at the values from 
-> QueryVariableInfo, but many systems won't perform any garbage collection 
-> until they're almost out of space and so variables that have been 
-> deleted still show up as used space. We can work around that by adding 
-> up the size of the variables ourselves, but that only gives us the value 
-> for runtime-visible variables. We also need to know how much space is 
-> used by variables that are only visible during boot, hence calling 
-> QueryVariableInfo before ExitBootServices.
-> 
-> > Which means the previous patch(es) that caused the bricking should
-> > get pulled, too.
-> 
-> There are no patches that cause the bricking.
+Hi Matthew,
 
-This is the description of the original problem:
+A bug was opened that reports a regression that prevents a system from
+booting[0].  After a kernel bisect, it was found that reverting the
+following commit resolved this bug:
 
-http://www.h-online.com/open/news/item/Booting-Linux-using-UEFI-can-brick-Samsung-laptops-1793958.html
+commit 68d929862e29a8b52a7f2f2f86a0600423b093cd
+Author: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Date:   Sat Mar 2 19:40:17 2013 -0500
 
-And the further investigation:
+    efi: be more paranoid about available space when creating variables
 
-http://mjg59.dreamwidth.org/22855.html
 
-If you read the latter, it shows you why we have to use
-QueryVariableInfo to try to work out how much space we have available.
+The regression was introduced as of v3.9-rc2, but it also made it's way
+into the stable trees(Commit 9f677cf in v3.8).
 
-James
+I see the following commit was introduced to address this issue:
+
+commit 31ff2f20d9003e74991d135f56e503fe776c127c
+Author: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Date:   Mon Apr 15 13:09:47 2013 -0700
+
+    efi: Distinguish between "remaining space" and actually used space
+
+However, the issue still in 3.9.4, 3.10-rc3 and v3.8.13 after
+backporting 31ff2f2.
+
+I see that you are the author of this patch, so I wanted to run this by
+you and see if reverting commit 68d9298 is an option.  There are several
+folks reporting this, so it should be easy to collect any additional
+data/information or perform testing, if needed.
+
+
+Thanks,
+
+Joe
+
+[0] http://pad.lv/1173423
