@@ -1,84 +1,65 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+From: Ingo Molnar <mingo@kernel.org>
 Subject: Re: [regression, bisected] x86: efi: Pass boot services variable
  info to runtime code
-Date: Fri, 31 May 2013 11:28:45 +0800
-Message-ID: <1369970925.17397.80.camel@linux-s257.site>
-References: <20130524074331.GL14575@console-pimps.org>
-	 <20130529210115.GC28027@sgi.com>
-	 <alpine.LRH.2.00.1305300018180.1111@twin.jikos.cz>
-	 <20130529224645.GA16582@sgi.com>
-	 <alpine.LNX.2.00.1305300048520.30576@pobox.suse.cz>
-	 <1369880172.17397.11.camel@linux-s257.site>
-	 <20130530221737.GA11105@sgi.com> <1369952512.11620.14.camel@x230>
-	 <20130530222836.GB11105@sgi.com>
-	 <alpine.LNX.2.00.1305310029560.30576@pobox.suse.cz>
-	 <20130531021749.GA24287@sgi.com>
+Date: Fri, 31 May 2013 12:06:06 +0200
+Message-ID: <20130531100606.GC30394@gmail.com>
+References: <20130529210115.GC28027@sgi.com>
+ <alpine.LRH.2.00.1305300018180.1111@twin.jikos.cz>
+ <20130529224645.GA16582@sgi.com>
+ <alpine.LNX.2.00.1305300048520.30576@pobox.suse.cz>
+ <1369880172.17397.11.camel@linux-s257.site>
+ <20130530221737.GA11105@sgi.com>
+ <1369952512.11620.14.camel@x230>
+ <20130530222836.GB11105@sgi.com>
+ <1369953129.11620.15.camel@x230>
+ <20130531025438.GB24287@sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130531021749.GA24287-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
-Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20130531025438.GB24287@sgi.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Russ Anderson <rja@sgi.com>
+Cc: Matthew Garrett <matthew.garrett@nebula.com>, joeyli <jlee@suse.com>, Jiri Kosina <jkosina@suse.cz>, Matt Fleming <matt@console-pimps.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@linux.intel.com>, Borislav Petkov <bp@alien8.de>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2013-05-30 =E6=96=BC 21:17 -0500=EF=BC=8CRu=
-ss Anderson =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Fri, May 31, 2013 at 12:30:43AM +0200, Jiri Kosina wrote:
-> > On Thu, 30 May 2013, Russ Anderson wrote:
-> >=20
-> > > > > That's a great idea.  This patch moves the QueryVariableInfo(=
-)
-> > > > > call from bootime to runtime, in efi_late_init().  The attach=
-ed
-> > > > > patch is consistent with the UEFI spec and avoids the problem=
-=2E
-> > > >=20
+
+* Russ Anderson <rja@sgi.com> wrote:
+
+> On Thu, May 30, 2013 at 10:32:09PM +0000, Matthew Garrett wrote:
+> > On Thu, 2013-05-30 at 17:28 -0500, Russ Anderson wrote:
+> > > On Thu, May 30, 2013 at 10:21:53PM +0000, Matthew Garrett wrote:
+> > > > On Thu, 2013-05-30 at 17:17 -0500, Russ Anderson wrote:
+> > > > 
+> > > > > That's a great idea.  This patch moves the QueryVariableInfo()
+> > > > > call from bootime to runtime, in efi_late_init().  The attached
+> > > > > patch is consistent with the UEFI spec and avoids the problem.
+> > > > 
 > > > > No, that defeats the entire point of the original patch.
-> > >=20
+> > > 
 > > > How so?  It is still calling QueryVariableInfo()
 > > > before the data is used.
-> >=20
-> > You lose information provided by QueryVariableInfo() about boot-onl=
-y=20
-> > variables once the transition boot -> runtime has happened.
->=20
-> Is that information really more important than the ability
-> to boot?
->=20
-> Correct me if I'm wrong, but linux was able to boot without
-> the boottime QueryVariableInfo() call up until 3.9-rc7,
-> and it still does on systems that do not use EFI stubs (ie
-> grub and elilo).  It is only when linux uses EFI stubs (ie
-> grub2) that linux makes the boottime QueryVariableInfo()
-> call.  So why is that call, or whatever is dependent on it,
-> more important than booting?
->=20
->=20
->=20
-> Thanks,
+> > 
+> > We want to know how much space is used by variables that aren't visible
+> > at runtime.
+> 
+> We want to boot.  We could boot up through 3.9-rc7.
+> 
+> Knowing how much space is used by variables that aren't
+> visible at runtime it moot if you can't boot.
 
-It related to BIOS's garbage collection behavior of UEFI variable
-storage.
+Exactly - fixing a boot regression is _WAY_ more important than pretty 
+much any other concern.
 
-The used space of non volatile boottime variables is useful to us for
-calculate the active_size, please reference 31ff2f2 patch:
+and the boot breakage is not limited to UV systems - the thread mentioned 
+a couple of other systems as well.
 
-https://lkml.org/lkml/2013/4/15/476
+So it's an absolute no-brainer that this change should be reverted or 
+fixed via your patch.
 
-An earlier 68d9298 patch to avoid some machines bricked when more than
-50% of the system flash is in use, because the garbage collection will
-not trigger on those machines.
+Once a safer mechanism is implemented to call QueryVariableInfo() earlier 
+(Boris's patches?) the change can be reintroduced.
 
-We need find out the size of system flash space indeed usage for avoid
-this problem. So, cc5a080c5 patch call QueryVariableInfo() to grab the
-usage information in boot time.
+Thanks,
 
-Calling QueryVariableInfo() at boot time should not causes side effect
-until your issue show up. Before this issue happen, avoid bricking some
-machines is also important.
-
-
-Thanks a lot!
-Joey Lee
+	Ingo
