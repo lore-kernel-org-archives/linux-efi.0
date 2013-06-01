@@ -1,126 +1,79 @@
-From: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Subject: Re: [regression, bisected] x86: efi: Pass boot services variable
-	info to runtime code
-Date: Fri, 31 May 2013 23:20:59 -0500
-Message-ID: <20130601042058.GB15199@sgi.com>
-References: <alpine.LNX.2.00.1305311259520.30576@pobox.suse.cz> <20130531123015.GC17843@nazgul.tnic> <20130531124356.GA8212@gmail.com> <20130531143425.GA5850@srcf.ucam.org> <1370011357.1913.15.camel@dabdike.int.hansenpartnership.com> <20130531144826.GB5850@srcf.ucam.org> <20130531154348.GA17145@sgi.com> <20130531162815.GA8082@srcf.ucam.org> <20130531225730.GB14752@sgi.com> <20130601000311.GA15126@srcf.ucam.org>
-Reply-To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+ info to runtime code
+Date: Sat, 1 Jun 2013 05:41:00 +0100
+Message-ID: <20130601044100.GA18453@srcf.ucam.org>
+References: <20130531123015.GC17843@nazgul.tnic>
+ <20130531124356.GA8212@gmail.com>
+ <20130531143425.GA5850@srcf.ucam.org>
+ <1370011357.1913.15.camel@dabdike.int.hansenpartnership.com>
+ <20130531144826.GB5850@srcf.ucam.org>
+ <20130531154348.GA17145@sgi.com>
+ <20130531162815.GA8082@srcf.ucam.org>
+ <20130531225730.GB14752@sgi.com>
+ <20130601000311.GA15126@srcf.ucam.org>
+ <20130601042058.GB15199@sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130601000311.GA15126-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+In-Reply-To: <20130601042058.GB15199-sJ/iWh9BUns@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Jun 01, 2013 at 01:03:11AM +0100, Matthew Garrett wrote:
-> On Fri, May 31, 2013 at 05:57:31PM -0500, Russ Anderson wrote:
-> > On Fri, May 31, 2013 at 05:28:16PM +0100, Matthew Garrett wrote:
-> > >                                           If nvram becaomes full, some 
-> > > systems crash during firmware initialisation. So we can't let nvram 
-> > > become full. The obvious thing to do here is to look at the values from 
-> > > QueryVariableInfo, but many systems won't perform any garbage collection 
-> > > until they're almost out of space and so variables that have been 
-> > > deleted still show up as used space.
-> > 
-> > OK.  I get nvram looks full due to lack of garbage collection
-> > on some systems.  Does QueryVariableInfo (at runtime) tell you
-> > it is full?  Is the problem that it says it is full when it
-> > is not, or does not tell you it is full when it is?
+On Fri, May 31, 2013 at 11:20:59PM -0500, Russ Anderson wrote:
+
+> And when QueryVariableInfo reports insufficient space, don't write
+> and everything is fine.
+
+And then installs fail, which is why we implemented this additional 
+code.
+
+> But when QueryVariableInfo reports insufficient space and you
+> write anyway, the system can get bricked.  Is that the problem?
+
+No.
+
+> Some bios implementation may be "*including garbage*", but can
+> you definitively say ALL do?  The spec explicitly says "the
+> implementation of variable storage is not defined in this
+> specification".  You can't assume any form of garbage collection.
+
+No. We can't assume that. But nor can we rely upon the spec, because 
+behaving according to the spec results in dead computers. So we're 
+forced to write code that behaves according to reality rather than 
+paper, which is unfortunate, but if *your* firmware behaved according to 
+the specification then you wouldn't be seeing any problems with the 
+current code, so I think there's a lesson for us all here.
+
+> I don't see anything in here about the OS being free to use
+> more nvram than QueryVariableInfo() reported as being available.
+> What happened to following the spec?
+
+That would be the same spec that tells you not to use physical addresses 
+after SetVirtualAddressMap() has been called, right? Regardless, we 
+don't use more space than QueryVariableInfo() reports as being 
+available. We would expect that any attempt to do so would fail. But nor 
+can we assume that we're free to use as much space as 
+QueryVariableInfo() *does* report, because doing so results in dead 
+computers. So instead we're forced to rely on workarounds that happen to 
+break your broken firmware, so now we're going to have to find a 
+different set of workarounds and hope that they don't break someone 
+else's computer instead.
+
+> > There's a limited number of situations where the firmware can write to 
+> > nvram, but they're basically uninteresting. Practically speaking, it's 
+> > always via the kernel once ExitBootServices() has been called.
 > 
-> QueryVariableInfo reports the amount used *including garbage*. This 
-> makes it useless for determining how much space is available for the 
-> firmware to use.
+> How can you say "they're basically uninteresting"???
+> Do you know what EVERY bios implementation does???
 
-So when QueryVariableInfo reports there is space available, the
-write works and everything is fine.
-
-And when QueryVariableInfo reports insufficient space, don't write
-and everything is fine.
-
-But when QueryVariableInfo reports insufficient space and you
-write anyway, the system can get bricked.  Is that the problem?
-
-
-
-According to the UEFI spec for QueryVariableInfo()
-
-  RemainingVariableStorageSize
-                      Returns the remaining size of the storage
-                      space available for EFI variables associated
-                      with the attributes specified.
-
-It also says:
-
-   The returned MaximumVariableStorageSize, RemainingVariableStorageSize,
-   MaximumVariableSize information may change immediately after
-   the call based on other runtime activities including asynchronous
-   error events. Also, these values associated with different
-   attributes are not additive in nature.
-
-Note that "other runtime activities including asynchronous error
-events."  That means runtime services may be using nvram without
-the OS knowing about it.
-
-
-Some bios implementation may be "*including garbage*", but can
-you definitively say ALL do?  The spec explicitly says "the
-implementation of variable storage is not defined in this
-specification".  You can't assume any form of garbage collection.
-
-   7.2 Variable Services
-
-   Although the implementation of variable storage is not defined
-   in this specification, variables must be persistent in most cases.
-   This implies that the EFI implementation on a platform must arrange
-   it so that variables passed in for storage are retained and
-   available for use each time the system boots, at least until they
-   are explicitly deleted or overwritten. Provision of this type of
-   nonvolatile storage may be very limited on some platforms, so
-   variables should be used sparingly in cases where other means of
-   communicating information cannot be used.
-
-I don't see anything in here about the OS being free to use
-more nvram than QueryVariableInfo() reported as being available.
-What happened to following the spec?
-
-
-> > >                                       We can work around that by adding 
-> > > up the size of the variables ourselves, but that only gives us the value 
-> > > for runtime-visible variables. We also need to know how much space is 
-> > > used by variables that are only visible during boot,
-> > 
-> > Is it valid to assume that only the kernel writes to nvram at
-> > runtime?  Can bios log error information to nvram on an SMM
-> > interrupt (for example)?
-> 
-> There's a limited number of situations where the firmware can write to 
-> nvram, but they're basically uninteresting. Practically speaking, it's 
-> always via the kernel once ExitBootServices() has been called.
-
-How can you say "they're basically uninteresting"???
-Do you know what EVERY bios implementation does???
-
-
-> > >                                                      hence calling 
-> > > QueryVariableInfo before ExitBootServices.
-> > 
-> > Correct me if I am wrong, but that is called from EFI stubs,
-> > which is only used by some bootloaders (sometimes grub2).
-> > Does that mean EFI/grub and EFI/elilo will not hit the problem,
-> > or will not have your fix?
-> 
-> Will not have the fix. Boot EFI systems via the EFI stub.
-
-Thanks for that clarification.
-
-> Boot EFI systems via the EFI stub.
-
-Fortunately all our shipping systems are EFI/grub and EFI/elilo
-right now, so they boot.
+We have to assume that firmware doesn't behave in a pathological manner, 
+because the alternative is to give up entirely and declare that Linux 
+doesn't run on UEFI systems. I suspect that that would be problematic 
+for your employers.
 
 -- 
-Russ Anderson, OS RAS/Partitioning Project Lead  
-SGI - Silicon Graphics Inc          rja-sJ/iWh9BUns@public.gmane.org
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
