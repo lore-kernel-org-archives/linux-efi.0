@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 2/4] x86, cpa: Map in an arbitrary pgd
-Date: Sun,  2 Jun 2013 14:56:08 +0200
-Message-ID: <1370177770-26661-3-git-send-email-bp@alien8.de>
+Subject: [PATCH 4/4] x86, efi: Map runtime services 1:1
+Date: Sun,  2 Jun 2013 14:56:10 +0200
+Message-ID: <1370177770-26661-5-git-send-email-bp@alien8.de>
 References: <1370177770-26661-1-git-send-email-bp@alien8.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1370177770-26661-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
@@ -12,198 +12,375 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Add the ability to map pages in an arbitrary pgd.
+Due to the braindead design of EFI, we cannot map runtime services more
+than once for the duration of a booted system. Thus, if we want to use
+EFI runtime services in a kexec'ed kernel, maybe the only possible and
+sensible approach would be to map them 1:1 so that when the kexec kernel
+loads, it can simply call those addresses without the need for remapping
+(which doesn't work anyway).
+
+Furthermore, this mapping approach could be of help with b0rked EFI
+implementations for a different set of reasons.
+
+This implementation is 64-bit only for now and it boots fine in kvm with
+OVMF BIOS.
 
 Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- arch/x86/include/asm/pgtable_types.h |  3 +-
- arch/x86/mm/pageattr.c               | 80 ++++++++++++++++++++++++++++--------
- 2 files changed, 65 insertions(+), 18 deletions(-)
+ arch/x86/include/asm/efi.h          |   2 +
+ arch/x86/platform/efi/efi.c         | 161 +++++++++++++++++++++++++++++-------
+ arch/x86/platform/efi/efi_stub_64.S |  48 +++++++++++
+ 3 files changed, 180 insertions(+), 31 deletions(-)
 
-diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
-index e6423002c10b..0613e147f083 100644
---- a/arch/x86/include/asm/pgtable_types.h
-+++ b/arch/x86/include/asm/pgtable_types.h
-@@ -352,7 +352,8 @@ static inline void update_page_count(int level, unsigned long pages) { }
-  */
- extern pte_t *lookup_address(unsigned long address, unsigned int *level);
- extern phys_addr_t slow_virt_to_phys(void *__address);
--
-+extern void kernel_map_pages_in_pgd(pgd_t *pgd, unsigned long address,
-+				    unsigned numpages, unsigned long page_flags);
- #endif	/* !__ASSEMBLY__ */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 5b33686b6995..1c9c0a5cc280 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -41,6 +41,8 @@ extern unsigned long asmlinkage efi_call_phys(void *, ...);
  
- #endif /* _ASM_X86_PGTABLE_DEFS_H */
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index bb32480c2d71..3d64e5fc2adc 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -30,6 +30,7 @@
+ #define EFI_LOADER_SIGNATURE	"EL64"
+ 
++extern pgd_t *efi_pgt;
++
+ extern u64 efi_call0(void *fp);
+ extern u64 efi_call1(void *fp, u64 arg1);
+ extern u64 efi_call2(void *fp, u64 arg1, u64 arg2);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index aea4337f7023..36ecefb54495 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -93,6 +93,8 @@ unsigned long x86_efi_facility;
+ 
+ static unsigned long efi_config;
+ 
++extern bool use_11_map;
++
+ /*
+  * Returns 1 if 'facility' is enabled, 0 otherwise.
   */
- struct cpa_data {
- 	unsigned long	*vaddr;
-+	pgd_t		*pgd;
- 	pgprot_t	mask_set;
- 	pgprot_t	mask_clr;
- 	int		numpages;
-@@ -322,17 +323,9 @@ static inline pgprot_t static_protections(pgprot_t prot, unsigned long address,
- 	return prot;
+@@ -763,6 +765,25 @@ static int __init efi_runtime_init(void)
+ 	 * virtual mode.
+ 	 */
+ 	efi.get_time = phys_efi_get_time;
++
++	if (efi_config & EFI_CFG_MAP11) {
++#define efi_phys_assign(f) \
++	efi_phys.f = (efi_ ##f## _t *)runtime->f
++
++		efi_phys_assign(set_time);
++		efi_phys_assign(get_wakeup_time);
++		efi_phys_assign(set_wakeup_time);
++		efi_phys_assign(get_variable);
++		efi_phys_assign(get_next_variable);
++		efi_phys_assign(set_variable);
++		efi_phys_assign(get_next_high_mono_count);
++		efi_phys_assign(reset_system);
++		efi_phys_assign(set_virtual_address_map);
++		efi_phys_assign(query_variable_info);
++		efi_phys_assign(update_capsule);
++		efi_phys_assign(query_capsule_caps);
++	}
++
+ 	early_iounmap(runtime, sizeof(efi_runtime_services_t));
+ 
+ 	return 0;
+@@ -954,6 +975,61 @@ void efi_memory_uc(u64 addr, unsigned long size)
+ 	set_memory_uc(addr, npages);
  }
  
--/*
-- * Lookup the page table entry for a virtual address. Return a pointer
-- * to the entry and the level of the mapping.
-- *
-- * Note: We return pud and pmd either when the entry is marked large
-- * or when the present bit is not set. Otherwise we would return a
-- * pointer to a nonexisting mapping.
-- */
--pte_t *lookup_address(unsigned long address, unsigned int *level)
-+static pte_t *
-+__lookup_address_in_pgd(pgd_t *pgd, unsigned long address, unsigned int *level)
++static void __init __runtime_map_11(efi_memory_desc_t *md)
++{
++	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
++	unsigned long page_flags = 0;
++
++	if (md->type == EFI_RUNTIME_SERVICES_DATA ||
++	    md->type == EFI_BOOT_SERVICES_DATA)
++		page_flags |= _PAGE_NX;
++
++	if (!(md->attribute & EFI_MEMORY_WB))
++		page_flags |= _PAGE_PCD;
++
++	kernel_map_pages_in_pgd(pgd + pgd_index(md->phys_addr),
++				md->phys_addr,
++				md->num_pages,
++				page_flags);
++
++	md->virt_addr = md->phys_addr;
++}
++
++static int __init __runtime_ioremap(efi_memory_desc_t *md)
++{
++	u64 end, systab, start_pfn, end_pfn;
++	unsigned long size;
++	void *va;
++
++	size	  = md->num_pages << EFI_PAGE_SHIFT;
++	end	  = md->phys_addr + size;
++	start_pfn = PFN_DOWN(md->phys_addr);
++	end_pfn   = PFN_UP(end);
++
++	if (pfn_range_is_mapped(start_pfn, end_pfn)) {
++		va = __va(md->phys_addr);
++
++		if (!(md->attribute & EFI_MEMORY_WB))
++			efi_memory_uc((u64)(unsigned long)va, size);
++	} else
++		va = efi_ioremap(md->phys_addr, size, md->type, md->attribute);
++
++	md->virt_addr = (u64) (unsigned long) va;
++	if (!va) {
++		pr_err("ioremap of 0x%llX failed!\n",
++			(unsigned long long)md->phys_addr);
++			return 1;
++	}
++
++	systab = (u64) (unsigned long) efi_phys.systab;
++	if (md->phys_addr <= systab && systab < end) {
++		systab += md->virt_addr - md->phys_addr;
++		efi.systab = (efi_system_table_t *) (unsigned long) systab;
++	}
++
++	return 0;
++}
++
+ /*
+  * This function will switch the EFI runtime services to virtual mode.
+  * Essentially, look through the EFI memmap and map every region that
+@@ -964,11 +1040,11 @@ void efi_memory_uc(u64 addr, unsigned long size)
+  */
+ void __init efi_enter_virtual_mode(void)
  {
--	pgd_t *pgd = pgd_offset_k(address);
- 	pud_t *pud;
- 	pmd_t *pmd;
++	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+ 	efi_memory_desc_t *md, *prev_md = NULL;
+ 	efi_status_t status;
+-	unsigned long size;
+-	u64 end, systab, start_pfn, end_pfn;
+-	void *p, *va, *new_memmap = NULL;
++	void *p, *new_memmap = NULL;
++	unsigned num_pgds;
+ 	int count = 0;
  
-@@ -361,8 +354,30 @@ pte_t *lookup_address(unsigned long address, unsigned int *level)
+ 	efi.systab = NULL;
+@@ -1017,33 +1093,18 @@ void __init efi_enter_virtual_mode(void)
+ 		    md->type != EFI_BOOT_SERVICES_DATA)
+ 			continue;
  
- 	return pte_offset_kernel(pmd, address);
+-		size = md->num_pages << EFI_PAGE_SHIFT;
+-		end = md->phys_addr + size;
+-
+-		start_pfn = PFN_DOWN(md->phys_addr);
+-		end_pfn = PFN_UP(end);
+-		if (pfn_range_is_mapped(start_pfn, end_pfn)) {
+-			va = __va(md->phys_addr);
+-
+-			if (!(md->attribute & EFI_MEMORY_WB))
+-				efi_memory_uc((u64)(unsigned long)va, size);
+-		} else
+-			va = efi_ioremap(md->phys_addr, size,
+-					 md->type, md->attribute);
+-
+-		md->virt_addr = (u64) (unsigned long) va;
+-
+-		if (!va) {
+-			pr_err("ioremap of 0x%llX failed!\n",
+-			       (unsigned long long)md->phys_addr);
++		/*
++		 * XXX: need to map the region which contains
++		 * SetVirtualAddressMap so that we can call it here.
++		 * Probably can be removed after we map boot services 1:1
++		 * too.
++		 */
++		if (__runtime_ioremap(md))
+ 			continue;
+-		}
+ 
+-		systab = (u64) (unsigned long) efi_phys.systab;
+-		if (md->phys_addr <= systab && systab < end) {
+-			systab += md->virt_addr - md->phys_addr;
+-			efi.systab = (efi_system_table_t *) (unsigned long) systab;
+-		}
++		if (efi_config & EFI_CFG_MAP11)
++			__runtime_map_11(md);
++
+ 		new_memmap = krealloc(new_memmap,
+ 				      (count + 1) * memmap.desc_size,
+ 				      GFP_KERNEL);
+@@ -1052,7 +1113,8 @@ void __init efi_enter_virtual_mode(void)
+ 		count++;
+ 	}
+ 
+-	BUG_ON(!efi.systab);
++	if (!(efi_config & EFI_CFG_MAP11))
++		BUG_ON(!efi.systab);
+ 
+ 	status = phys_efi_set_virtual_address_map(
+ 		memmap.desc_size * count,
+@@ -1072,6 +1134,41 @@ void __init efi_enter_virtual_mode(void)
+ 	 *
+ 	 * Call EFI services through wrapper functions.
+ 	 */
++	if (efi_config & EFI_CFG_MAP11) {
++#define efi_assign(efi, f)						\
++	efi.systab->runtime->f = efi_phys.f
++
++		efi.systab->runtime = kzalloc(sizeof(efi_runtime_services_t),
++					      GFP_KERNEL);
++		BUG_ON(!efi.systab->runtime);
++
++		efi_assign(efi, get_time);
++		efi_assign(efi, set_time);
++		efi_assign(efi, get_wakeup_time);
++		efi_assign(efi, set_wakeup_time);
++		efi_assign(efi, get_variable);
++		efi_assign(efi, get_next_variable);
++		efi_assign(efi, set_variable);
++		efi_assign(efi, get_next_high_mono_count);
++		efi_assign(efi, reset_system);
++		efi_assign(efi, query_variable_info);
++		efi_assign(efi, update_capsule);
++		efi_assign(efi, query_capsule_caps);
++
++		/*
++		 * map-in low kernel mapping for passing arguments to EFI
++		 * functions.
++		 */
++		num_pgds = pgd_index(VMALLOC_START - 1) - pgd_index(PAGE_OFFSET);
++
++		memcpy(pgd + pgd_index(PAGE_OFFSET),
++			init_mm.pgd + pgd_index(PAGE_OFFSET),
++			sizeof(pgd_t) * num_pgds);
++
++		efi_pgt = (pgd_t *)(unsigned long)real_mode_header->trampoline_pgd;;
++		use_11_map = true;
++	}
++
+ 	efi.runtime_version = efi_systab.hdr.revision;
+ 	efi.get_time = virt_efi_get_time;
+ 	efi.set_time = virt_efi_set_time;
+@@ -1086,8 +1183,10 @@ void __init efi_enter_virtual_mode(void)
+ 	efi.query_variable_info = virt_efi_query_variable_info;
+ 	efi.update_capsule = virt_efi_update_capsule;
+ 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
+-	if (__supported_pte_mask & _PAGE_NX)
+-		runtime_code_page_mkexec();
++
++	if (!(efi_config & EFI_CFG_MAP11))
++		if (__supported_pte_mask & _PAGE_NX)
++			runtime_code_page_mkexec();
+ 
+ 	kfree(new_memmap);
  }
+diff --git a/arch/x86/platform/efi/efi_stub_64.S b/arch/x86/platform/efi/efi_stub_64.S
+index 4c07ccab8146..2f93dcad3804 100644
+--- a/arch/x86/platform/efi/efi_stub_64.S
++++ b/arch/x86/platform/efi/efi_stub_64.S
+@@ -34,10 +34,40 @@
+ 	mov %rsi, %cr0;			\
+ 	mov (%rsp), %rsp
+ 
++/* happily stolen from gcc, see __flush_tlb_global() */
++#define FLUSH_TLB_ALL			\
++	movq %cr4, %r14;		\
++	movq %r14, %r13;		\
++	and $0x7f, %r13b;		\
++	movq %r13, %cr4;		\
++	movq %r14, %cr4
 +
 +/*
-+ * Lookup the page table entry for a virtual address. Return a pointer
-+ * to the entry and the level of the mapping.
-+ *
-+ * Note: We return pud and pmd either when the entry is marked large
-+ * or when the present bit is not set. Otherwise we would return a
-+ * pointer to a nonexisting mapping.
++ * %r15 is a non-volatile register and is preserved by UEFI so use
++ * it for stashing previous PGD in there.
 + */
-+pte_t *lookup_address(unsigned long address, unsigned int *level)
-+{
-+	return __lookup_address_in_pgd(pgd_offset_k(address), address, level);
-+}
- EXPORT_SYMBOL_GPL(lookup_address);
- 
-+pte_t *_lookup_address_cpa(struct cpa_data *cpa, unsigned long address,
-+			  unsigned int *level)
-+{
-+	if (cpa->pgd)
-+		return __lookup_address_in_pgd(cpa->pgd, address, level);
++#define SWITCH_PGT			\
++	cmpb $0, use_11_map;		\
++	je 1f;				\
++	movq %cr3, %r15;		\
++	movq efi_pgt, %rax;		\
++	movq %rax, %cr3;		\
++	FLUSH_TLB_ALL;			\
++	1:
 +
-+	return lookup_address(address, level);
-+}
++#define RESTORE_PGT			\
++	cmpb $0, use_11_map;		\
++	je 2f;				\
++	movq %r15, %cr3;		\
++	FLUSH_TLB_ALL;			\
++	2:
 +
- /*
-  * This is necessary because __pa() does not work on some
-  * kinds of memory, like vmalloc() or the alloc_remap()
-@@ -437,7 +452,7 @@ try_preserve_large_page(pte_t *kpte, unsigned long address,
- 	 * Check for races, another CPU might have split this page
- 	 * up already:
- 	 */
--	tmp = lookup_address(address, &level);
-+	tmp = _lookup_address_cpa(cpa, address, &level);
- 	if (tmp != kpte)
- 		goto out_unlock;
- 
-@@ -543,7 +558,8 @@ out_unlock:
- }
- 
- static int
--__split_large_page(pte_t *kpte, unsigned long address, struct page *base)
-+__split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
-+		   struct page *base)
- {
- 	pte_t *pbase = (pte_t *)page_address(base);
- 	unsigned long pfn, pfninc = 1;
-@@ -556,7 +572,7 @@ __split_large_page(pte_t *kpte, unsigned long address, struct page *base)
- 	 * Check for races, another CPU might have split this page
- 	 * up for us already:
- 	 */
--	tmp = lookup_address(address, &level);
-+	tmp = _lookup_address_cpa(cpa, address, &level);
- 	if (tmp != kpte) {
- 		spin_unlock(&pgd_lock);
- 		return 1;
-@@ -632,7 +648,8 @@ __split_large_page(pte_t *kpte, unsigned long address, struct page *base)
- 	return 0;
- }
- 
--static int split_large_page(pte_t *kpte, unsigned long address)
-+static int split_large_page(struct cpa_data *cpa, pte_t *kpte,
-+			    unsigned long address)
- {
- 	struct page *base;
- 
-@@ -644,7 +661,7 @@ static int split_large_page(pte_t *kpte, unsigned long address)
- 	if (!base)
- 		return -ENOMEM;
- 
--	if (__split_large_page(kpte, address, base))
-+	if (__split_large_page(cpa, kpte, address, base))
- 		__free_page(base);
- 
- 	return 0;
-@@ -697,7 +714,10 @@ static int __change_page_attr(struct cpa_data *cpa, int primary)
- 	else
- 		address = *cpa->vaddr;
- repeat:
--	kpte = lookup_address(address, &level);
-+	if (cpa->pgd)
-+		kpte = __lookup_address_in_pgd(cpa->pgd, address, &level);
-+	else
-+		kpte = _lookup_address_cpa(cpa, address, &level);
- 	if (!kpte)
- 		return __cpa_process_fault(cpa, address, primary);
- 
-@@ -761,7 +781,7 @@ repeat:
- 	/*
- 	 * We have to split the large page:
- 	 */
--	err = split_large_page(kpte, address);
-+	err = split_large_page(cpa, kpte, address);
- 	if (!err) {
- 		/*
- 	 	 * Do a global flush tlb after splitting the large page
-@@ -910,6 +930,8 @@ static int change_page_attr_set_clr(unsigned long *addr, int numpages,
- 	int ret, cache, checkalias;
- 	unsigned long baddr = 0;
- 
-+	memset(&cpa, 0, sizeof(cpa));
+ ENTRY(efi_call0)
+ 	SAVE_XMM
+ 	subq $32, %rsp
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $32, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -47,7 +77,9 @@ ENTRY(efi_call1)
+ 	SAVE_XMM
+ 	subq $32, %rsp
+ 	mov  %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $32, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -57,7 +89,9 @@ ENTRY(efi_call2)
+ 	SAVE_XMM
+ 	subq $32, %rsp
+ 	mov  %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $32, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -68,7 +102,9 @@ ENTRY(efi_call3)
+ 	subq $32, %rsp
+ 	mov  %rcx, %r8
+ 	mov  %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $32, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -80,7 +116,9 @@ ENTRY(efi_call4)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $32, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -93,7 +131,9 @@ ENTRY(efi_call5)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $48, %rsp
+ 	RESTORE_XMM
+ 	ret
+@@ -109,8 +149,16 @@ ENTRY(efi_call6)
+ 	mov %r8, %r9
+ 	mov %rcx, %r8
+ 	mov %rsi, %rcx
++	SWITCH_PGT
+ 	call *%rdi
++	RESTORE_PGT
+ 	addq $48, %rsp
+ 	RESTORE_XMM
+ 	ret
+ ENDPROC(efi_call6)
 +
- 	/*
- 	 * Check, if we are requested to change a not supported
- 	 * feature:
-@@ -1434,6 +1456,30 @@ bool kernel_page_present(struct page *page)
- 
- #endif /* CONFIG_DEBUG_PAGEALLOC */
- 
-+void kernel_map_pages_in_pgd(pgd_t *pgd, unsigned long address,
-+			     unsigned numpages, unsigned long page_flags)
-+{
-+	struct cpa_data cpa = {
-+		.vaddr = &address,
-+		.pgd = pgd,
-+		.numpages = numpages,
-+		.mask_set = __pgprot(0),
-+		.mask_clr = __pgprot(0),
-+		.flags = 0
-+	};
++GLOBAL(efi_pgt)
++	.quad 0
 +
-+	if (!(__supported_pte_mask & _PAGE_NX))
-+		return;
-+
-+	if (!(page_flags & _PAGE_NX))
-+		cpa.mask_clr = __pgprot(_PAGE_NX);
-+
-+	cpa.mask_set = __pgprot(_PAGE_PRESENT | page_flags);
-+
-+	__change_page_attr_set_clr(&cpa, 0);
-+	__flush_tlb_all();
-+}
-+
- /*
-  * The testcases use internal knowledge of the implementation that shouldn't
-  * be exposed to the rest of the kernel. Include these directly here.
++ENTRY(use_11_map)
++	.byte 0
 -- 
 1.8.3.rc1.25.g423ecb0
