@@ -1,73 +1,83 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH 0/4] EFI 1:1 mapping
-Date: Mon, 3 Jun 2013 16:21:22 +0100
-Message-ID: <20130603152122.GA21312@srcf.ucam.org>
-References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <20130602225620.GA5496@srcf.ucam.org>
- <20130603081148.GB13607@nazgul.tnic>
- <1370269642.2910.4.camel@dabdike>
- <20130603143010.GA20252@srcf.ucam.org>
- <1370270282.2910.9.camel@dabdike>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH] Modify UEFI anti-bricking code
+Date: Tue, 04 Jun 2013 00:13:40 +0800
+Message-ID: <1370276021.30695.4.camel@linux-s257.site>
+References: <1370117180-1712-1-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1370270282.2910.9.camel@dabdike>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1370117180-1712-1-git-send-email-matthew.garrett@nebula.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: rja@sgi.com, mingo@kernel.org, torvalds@linux-foundation.org, bp@alien8.de, jkosina@suse.cz, matt.fleming@intel.com, linux-efi@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, tglx@linutronix.de, hpa@linux.intel.com, akpm@linux-foundation.org, oneukum@suse.de
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 03, 2013 at 07:38:02AM -0700, James Bottomley wrote:
-> On Mon, 2013-06-03 at 15:30 +0100, Matthew Garrett wrote:
-> > Windows calls SetVirtualAddressMap(), so the only way these systems have 
-> > been tested is with SetVirtualAddressMap().
-> 
-> I know, but that's not what I said.
-> 
-> If you look at the implementation, SetVirtualAddressMap() does a massive
-> pointer chase through the images.  It not only tries to relocate the
-> text and data, but it also tries to relocate all the users of the data.
-> Some of these sources of data are boot time and some runtime.  Those
-> both need to be relocated by a separate pointer chase.  What we saw with
-> the QueryVariableInfo() problem was that a boot time pointer wasn't
-> relocated.  That's got to mean that windows only calls QueryVariableInfo
-> from runtime.
+=E6=96=BC =E5=85=AD=EF=BC=8C2013-06-01 =E6=96=BC 16:06 -0400=EF=BC=8CMa=
+tthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
+> +               unsigned long dummy_size =3D remaining_size + 1024;
+> +               void *dummy =3D kmalloc(dummy_size, GFP_ATOMIC);
+> +               efi_char16_t efi_name[6] =3D { 'D', 'U', 'M', 'M', 'Y=
+', 0 };
+> +               efi_guid_t guid =3D EFI_GUID(0x4424ac57, 0xbe4b, 0x47=
+dd, 0x9e,
+> +                                          0x97, 0xed, 0x50, 0xf0, 0x=
+9f, 0x92,
+> +                                          0xa9);
+> +
+> +               status =3D efi.set_variable(efi_name, &guid, attribut=
+es,
+> +                                         dummy_size, dummy);
+> +
+> +               if (status =3D=3D EFI_SUCCESS) {
+> +                       /*
+> +                        * This should have failed, so if it didn't m=
+ake sure
+> +                        * that we delete it...
+> +                        */
+> +                       efi.set_variable(efi_name, &guid, attributes,=
+ 0,
+> +                                        dummy);
+> +               }=20
 
-Sure.
+Oliver raised a question for if power fails between that succesful
+attempt and the deletion?
 
-> My point is that if we elect to call SetVirtualAddressMap() we'll be
-> restricted to only making the calls at boot time that windows does
-> otherwise we'll end up with these unrelocated pointers.  That's a huge
-> nasty verification burden on us.  Alternatively, if we never call
-> SetVirtualAddressMap() it seems to me that we just don't have to worry
-> about pointer relocation issues.  Thus, I think it would be better we
-> use the 1:1 mapping instead of calling SetVirtualAddressMap().
+Due to the create/delete operating are not atomic, I think that will be
+better we try to delete DUMMY object in efi_enter_virtual_mode() or whe=
+n
+efivars initial.
 
-Some hardware just arbitrarily fails some calls if 
-SetVirtualAddressMap() isn't called. As you pointed out, the only 
-situation that these systems are ever tested in is the one where calls 
-are made in roughly the same order as Windows, ie:
+The following diff tested on OVMF for delete DUMMY object when system
+boot, for reference.
 
-Calls made in boot services:
 
-GetTime()
-Getvariable()
-ExitBootServices()
+Thanks a lot!
+Joey Lee
 
-Calls made in runtime:
 
-SetVirtualAddressMap()
-GetNextVariable()
-GetVariable()
-SetVariable()
-
-So far I haven't been able to convince Windows to make any other runtime 
-calls, which makes me a little unhappy about even calling 
-QueryVariableInfo() during runtime, but on the other hand our options 
-there are either to call it or to kill Samsungs, so I think we're stuck 
-with it. But, overall, refusing to call SetVirtualAddressMap() simply 
-isn't an option.
-
--- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 63e167a..72770b0 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -861,6 +861,10 @@ void __init efi_enter_virtual_mode(void)
+ 	u64 end, systab, start_pfn, end_pfn;
+ 	void *p, *va, *new_memmap =3D NULL;
+ 	int count =3D 0;
++	efi_char16_t efi_name[6] =3D { 'D', 'U', 'M', 'M', 'Y', 0 };
++	efi_guid_t guid =3D EFI_GUID(0x4424ac57, 0xbe4b, 0x47dd, 0x9e,
++				   0x97, 0xed, 0x50, 0xf0, 0x9f, 0x92,
++				   0xa9);
+=20
+ 	efi.systab =3D NULL;
+=20
+@@ -981,6 +985,9 @@ void __init efi_enter_virtual_mode(void)
+ 		runtime_code_page_mkexec();
+=20
+ 	kfree(new_memmap);
++
++	/* clean DUMMY object */
++	efi.set_variable(efi_name, &guid, 0, 0, NULL);
+ }
+=20
+ /*
