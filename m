@@ -1,34 +1,49 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
 Subject: Re: [PATCH 0/4] EFI 1:1 mapping
-Date: Mon, 3 Jun 2013 15:32:52 +0100
-Message-ID: <20130603143252.GB20252@srcf.ucam.org>
+Date: Mon, 03 Jun 2013 07:38:02 -0700
+Message-ID: <1370270282.2910.9.camel@dabdike>
 References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <20130602225620.GA5496@srcf.ucam.org>
- <20130603081148.GB13607@nazgul.tnic>
+	 <20130602225620.GA5496@srcf.ucam.org> <20130603081148.GB13607@nazgul.tnic>
+	 <1370269642.2910.4.camel@dabdike> <20130603143010.GA20252@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130603081148.GB13607@nazgul.tnic>
+In-Reply-To: <20130603143010.GA20252@srcf.ucam.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Linux EFI <linux-efi@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>, Jiri Kosina <jkosina@suse.cz>, X86-ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Borislav Petkov <bp@alien8.de>, Linux EFI <linux-efi@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>, Jiri Kosina <jkosina@suse.cz>, X86-ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 03, 2013 at 10:11:48AM +0200, Borislav Petkov wrote:
-> On Sun, Jun 02, 2013 at 11:56:20PM +0100, Matthew Garrett wrote:
-> > I've just run Windows 8 under a hacked up copy of OVMF that dumps
-> > the data passed to SetVirtualAddressMap. It seems that Windows *is*
-> > mapping the runtime services to higher addresses - so presumably the
-> > 1:1 mapping is in addition to the virtual mapping.
+On Mon, 2013-06-03 at 15:30 +0100, Matthew Garrett wrote:
+> On Mon, Jun 03, 2013 at 07:27:22AM -0700, James Bottomley wrote:
 > 
-> But but, once we call SetVirtualAddressMap with the set of addresses of
-> the runtime services, only those can be used after, right? If so, we
-> can't have both (this is at least my understanding)...
+> > That's correct.  I think not calling SetVirtualAddressMap() and just
+> > using a 1:1 mapping is far safer (having looked at what tianocore does
+> > for SetVirtualAddressMap()).  The chances are that all the UEFI bioses
+> > are only tested with windows, so the pointer chases it has to do to
+> > switch address maps only work with the operations windows does.
+> 
+> Windows calls SetVirtualAddressMap(), so the only way these systems have 
+> been tested is with SetVirtualAddressMap().
 
-We can only pass one set of addresses to SetVirtualAddressMap(), but it 
-doesn't seem like there's any intrinsic reason we can't the runtime 
-regions mapped to multiple virtual addresses.
+I know, but that's not what I said.
 
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+If you look at the implementation, SetVirtualAddressMap() does a massive
+pointer chase through the images.  It not only tries to relocate the
+text and data, but it also tries to relocate all the users of the data.
+Some of these sources of data are boot time and some runtime.  Those
+both need to be relocated by a separate pointer chase.  What we saw with
+the QueryVariableInfo() problem was that a boot time pointer wasn't
+relocated.  That's got to mean that windows only calls QueryVariableInfo
+from runtime.
+
+My point is that if we elect to call SetVirtualAddressMap() we'll be
+restricted to only making the calls at boot time that windows does
+otherwise we'll end up with these unrelocated pointers.  That's a huge
+nasty verification burden on us.  Alternatively, if we never call
+SetVirtualAddressMap() it seems to me that we just don't have to worry
+about pointer relocation issues.  Thus, I think it would be better we
+use the 1:1 mapping instead of calling SetVirtualAddressMap().
+
+James
