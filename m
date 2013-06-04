@@ -1,43 +1,65 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 0/4] EFI 1:1 mapping
-Date: Tue, 4 Jun 2013 10:15:44 +0200
-Message-ID: <20130604081544.GA23640@pd.tnic>
+Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
+Date: Tue, 4 Jun 2013 14:18:52 +0200
+Message-ID: <20130604121852.GE23640@pd.tnic>
 References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <20130602225620.GA5496@srcf.ucam.org>
- <20130603081148.GB13607@nazgul.tnic>
- <20130603143252.GB20252@srcf.ucam.org>
- <20130603145412.GJ2004@console-pimps.org>
+ <1370177770-26661-4-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130603145412.GJ2004-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1370177770-26661-4-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 03, 2013 at 03:54:12PM +0100, Matt Fleming wrote:
-> On Mon, 03 Jun, at 03:32:52PM, Matthew Garrett wrote:
-> > We can only pass one set of addresses to SetVirtualAddressMap(), but it 
-> > doesn't seem like there's any intrinsic reason we can't the runtime 
-> > regions mapped to multiple virtual addresses.
+On Sun, Jun 02, 2013 at 02:56:09PM +0200, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 > 
-> Indeed. That's the approach I took with my 1:1 series from last year. If
-> Windows is mapping things at higher addresses like you said, then
-> they're probably doing the same.
+> .. for passing miscellaneous options from the kernel command line.
+> 
+> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi.c | 16 ++++++++++++++++
+>  1 file changed, 16 insertions(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 82089d8b1954..aea4337f7023 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -88,6 +88,11 @@ static u64 active_size;
+>  
+>  unsigned long x86_efi_facility;
+>  
+> + /* 1:1 mapping of services regions */
+> +#define EFI_CFG_MAP11	BIT(0)
+> +
+> +static unsigned long efi_config;
+> +
+>  /*
+>   * Returns 1 if 'facility' is enabled, 0 otherwise.
+>   */
+> @@ -1167,3 +1172,14 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size)
+>  	return EFI_SUCCESS;
+>  }
+>  EXPORT_SYMBOL_GPL(efi_query_variable_store);
+> +
+> +static int __init parse_efi_cmdline(char *str)
 
-Right, the way I've done it now is to do the virtual mapping
-unconditionally, then do the 1:1 mapping and call SetVirtualAddressMap
-(f*cking camelcase is so nasty to type - that's why they need whole IDEs
-to program :-)) with that map, if "efi=1:1_map" has been passed on the
-cmd line.
+note to self:
 
-After the call, we use *only* the 1:1 map but the virtual mapping is
-still there.
+#ifdef CONFIG_X86_64
 
-The initial approach to addressing the b0rked Macs would then be to
-never use the 1:1 map on them.
+> +{
+> +	if (*str == '=')
+> +		str++;
+> +	if (!strncmp(str, "1:1_map", 7))
+> +		efi_config |= EFI_CFG_MAP11;
+
+#endif
+
+to temporarily workaround the 64-bit only requirement.
 
 -- 
 Regards/Gruss,
