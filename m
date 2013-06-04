@@ -1,51 +1,47 @@
-From: Lingzhu Xiang <lxiang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] Modify UEFI anti-bricking code
-Date: Tue, 04 Jun 2013 13:29:41 +0800
-Message-ID: <51AD7B45.1040603@redhat.com>
-References: <1370117180-1712-1-git-send-email-matthew.garrett@nebula.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 0/4] EFI 1:1 mapping
+Date: Tue, 4 Jun 2013 10:15:44 +0200
+Message-ID: <20130604081544.GA23640@pd.tnic>
+References: <1370177770-26661-1-git-send-email-bp@alien8.de>
+ <20130602225620.GA5496@srcf.ucam.org>
+ <20130603081148.GB13607@nazgul.tnic>
+ <20130603143252.GB20252@srcf.ucam.org>
+ <20130603145412.GJ2004@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1370117180-1712-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130603145412.GJ2004-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: rja-sJ/iWh9BUns@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, jkosina-AlSwsSmVLrQ@public.gmane.org, jlee-IBi9RG/b67k@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/02/2013 04:06 AM, Matthew Garrett wrote:
-> This patch reworks the UEFI anti-bricking code, including an effective
-> reversion of cc5a080c and 31ff2f20. It turns out that calling
-> QueryVariableInfo() from boot services results in some firmware
-> implementations jumping to physical addresses even after entering virtual
-> mode, so until we have 1:1 mappings for UEFI runtime space this isn't
-> going to work so well.
->
-> Reverting these gets us back to the situation where we'd refuse to create
-> variables on some systems because they classify deleted variables as "used"
-> until the firmware triggers a garbage collection run, which they won't do
-> until they reach a lower threshold. This results in it being impossible to
-> install a bootloader, which is unhelpful.
->
-> Feedback from Samsung indicates that the firmware doesn't need more than
-> 5KB of storage space for its own purposes, so that seems like a reasonable
-> threshold. However, there's still no guarantee that a platform will attempt
-> garbage collection merely because it drops below this threshold. It seems
-> that this is often only triggered if an attempt to write generates a
-> genuine EFI_OUT_OF_RESOURCES error. We can force that by attempting to
-> create a variable larger than the remaining space. This should fail, but if
-> it somehow succeeds we can then immediately delete it.
->
-> I've tested this on the UEFI machines I have available, but I don't have
-> a Samsung and so can't verify that it avoids the bricking problem.
+On Mon, Jun 03, 2013 at 03:54:12PM +0100, Matt Fleming wrote:
+> On Mon, 03 Jun, at 03:32:52PM, Matthew Garrett wrote:
+> > We can only pass one set of addresses to SetVirtualAddressMap(), but it 
+> > doesn't seem like there's any intrinsic reason we can't the runtime 
+> > regions mapped to multiple virtual addresses.
+> 
+> Indeed. That's the approach I took with my 1:1 series from last year. If
+> Windows is mapping things at higher addresses like you said, then
+> they're probably doing the same.
 
-This patch works well on my Dell Windows 8 logo machine.
+Right, the way I've done it now is to do the virtual mapping
+unconditionally, then do the 1:1 mapping and call SetVirtualAddressMap
+(f*cking camelcase is so nasty to type - that's why they need whole IDEs
+to program :-)) with that map, if "efi=1:1_map" has been passed on the
+cmd line.
 
-This Dell machine will use up ~2K nvram space on each reboot and do 
-garbage collection at boot time when full. With the new 5K threshold, it 
-is only a few reboots away from boot time garbage collection anyway.
+After the call, we use *only* the 1:1 map but the virtual mapping is
+still there.
 
-Run time garbage collection also works. But the write takes 5 seconds.
+The initial approach to addressing the b0rked Macs would then be to
+never use the 1:1 map on them.
 
+-- 
+Regards/Gruss,
+    Boris.
 
-Lingzhu Xiang
+Sent from a fat crate under my desk. Formatting is fine.
+--
