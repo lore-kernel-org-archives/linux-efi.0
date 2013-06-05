@@ -1,69 +1,40 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
-Date: Tue, 4 Jun 2013 14:18:52 +0200
-Message-ID: <20130604121852.GE23640@pd.tnic>
-References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <1370177770-26661-4-git-send-email-bp@alien8.de>
+From: "Fleming, Matt" <matt.fleming@intel.com>
+Subject: Re: [PATCH] Modify UEFI anti-bricking code
+Date: Wed, 5 Jun 2013 15:49:45 +0100
+Message-ID: <CAL01qptzxe5L6Vq+nBZLq+bQNxbe_i_2OdKMNJGZQDfMihaHOw@mail.gmail.com>
+References: <1370117180-1712-1-git-send-email-matthew.garrett@nebula.com>
+	<1370276021.30695.4.camel@linux-s257.site>
+	<1370277079.6315.14.camel@x230.lan>
+	<1370316933.30695.7.camel@linux-s257.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1370177770-26661-4-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Content-Type: text/plain; charset=Big5
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1370316933.30695.7.camel@linux-s257.site>
+Sender: linux-kernel-owner@vger.kernel.org
+To: joeyli <jlee@suse.com>
+Cc: Matthew Garrett <matthew.garrett@nebula.com>, "rja@sgi.com" <rja@sgi.com>, "mingo@kernel.org" <mingo@kernel.org>, "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>, "bp@alien8.de" <bp@alien8.de>, "jkosina@suse.cz" <jkosina@suse.cz>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "hpa@linux.intel.com" <hpa@linux.intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "oneukum@suse.de" <oneukum@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Jun 02, 2013 at 02:56:09PM +0200, Borislav Petkov wrote:
-> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> 
-> .. for passing miscellaneous options from the kernel command line.
-> 
-> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c | 16 ++++++++++++++++
->  1 file changed, 16 insertions(+)
-> 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 82089d8b1954..aea4337f7023 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -88,6 +88,11 @@ static u64 active_size;
->  
->  unsigned long x86_efi_facility;
->  
-> + /* 1:1 mapping of services regions */
-> +#define EFI_CFG_MAP11	BIT(0)
-> +
-> +static unsigned long efi_config;
-> +
->  /*
->   * Returns 1 if 'facility' is enabled, 0 otherwise.
->   */
-> @@ -1167,3 +1172,14 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size)
->  	return EFI_SUCCESS;
->  }
->  EXPORT_SYMBOL_GPL(efi_query_variable_store);
-> +
-> +static int __init parse_efi_cmdline(char *str)
+On 4 June 2013 04:35, joeyli <jlee@suse.com> wrote:
+> =A9=F3 =A4@=A1A2013-06-03 =A9=F3 16:31 +0000=A1AMatthew Garrett =B4=A3=
+=A8=EC=A1G
+>> On Tue, 2013-06-04 at 00:13 +0800, joeyli wrote:
+>>
+>> > Oliver raised a question for if power fails between that succesful
+>> > attempt and the deletion?
+>>
+>> It's a pretty tiny window, but sure. Making sure we delete it seems
+>> sensible. In that case we should make the GUID a #define rather than
+>> write it out twice.
+>>
+>
+> Base on your patch, the following diff moved DUMMY GUID to #define, a=
+nd
+> add a static efi name string:
 
-note to self:
+=46olks, what do you want me to do with this? Merge it with Matthew's p=
+atch?
 
-#ifdef CONFIG_X86_64
-
-> +{
-> +	if (*str == '=')
-> +		str++;
-> +	if (!strncmp(str, "1:1_map", 7))
-> +		efi_config |= EFI_CFG_MAP11;
-
-#endif
-
-to temporarily workaround the 64-bit only requirement.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+The feedback from the original patch has been pretty good so I'm happy
+to pick it up and get it sent to Linus.
