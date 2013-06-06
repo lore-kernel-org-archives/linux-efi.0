@@ -1,42 +1,33 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
-Date: Thu, 6 Jun 2013 15:26:03 +0200
-Message-ID: <20130606132603.GD20972@pd.tnic>
+Subject: Re: [PATCH 4/4] x86, efi: Map runtime services 1:1
+Date: Thu, 6 Jun 2013 15:29:08 +0200
+Message-ID: <20130606132908.GE20972@pd.tnic>
 References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <1370177770-26661-4-git-send-email-bp@alien8.de>
- <20130606104224.GH30420@console-pimps.org>
+ <1370177770-26661-5-git-send-email-bp@alien8.de>
+ <20130606131439.GI30420@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130606104224.GH30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20130606131439.GI30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 06, 2013 at 11:42:24AM +0100, Matt Fleming wrote:
-> On Sun, 02 Jun, at 02:56:09PM, Borislav Petkov wrote:
-> > +
-> > +static int __init parse_efi_cmdline(char *str)
-> > +{
-> > +	if (*str == '=')
-> > +		str++;
-> > +	if (!strncmp(str, "1:1_map", 7))
-> > +		efi_config |= EFI_CFG_MAP11;
-> > +
-> > +	return 0;
-> > +}
-> > +early_param("efi", parse_efi_cmdline);
-> 
-> This is fine for testing, but I genuinely think that this should be on
-> by default once these patches are final.
+On Thu, Jun 06, 2013 at 02:14:39PM +0100, Matt Fleming wrote:
+> This patch makes my TunnelMountain machine spin in handle_pte_fault()
+> when triggering one of the "firmware makes references to physical
+> addresses" code paths.
+>
+> I'll try and dig into this tomorrow to figure out what's going on.
 
-This would break the Macs, remember?
+Hmmm, looks like we have forgotten to map an EFI region and we do a #PF
+when executing the EFI code.
 
-We could make it be the default though and flip the logic so that users
-can fall back to the current ioremap functionality, i.e. boot with
-"efi=no_1:1_map".
+If so, I'm thinking we don't want to touch the #PF code and teach it
+about EFI so maybe we should make sure we've mapped *everything* EFI
+runtime would need before we switch PGDs...
 
 -- 
 Regards/Gruss,
