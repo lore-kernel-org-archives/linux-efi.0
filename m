@@ -1,34 +1,57 @@
-From: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
-Subject: Re: [PATCH] Modify UEFI anti-bricking code
-Date: Thu, 6 Jun 2013 10:28:43 -0500
-Message-ID: <20130606152843.GB10393@sgi.com>
-References: <1370316933.30695.7.camel@linux-s257.site> <CAL01qptzxe5L6Vq+nBZLq+bQNxbe_i_2OdKMNJGZQDfMihaHOw@mail.gmail.com> <1370444007.6315.32.camel@x230.lan> <20130605155904.GC30420@console-pimps.org> <1370495110.6523.35.camel@linux-s257.site> <1370497321.6315.44.camel@x230.lan> <1370504426.6523.49.camel@linux-s257.site> <20130606092542.GE30420@console-pimps.org> <20130606144846.GA10393@sgi.com> <20130606150039.GL30420@console-pimps.org>
-Reply-To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 4/4] x86, efi: Map runtime services 1:1
+Date: Thu, 6 Jun 2013 17:58:22 +0200
+Message-ID: <20130606155822.GH20972@pd.tnic>
+References: <1370177770-26661-1-git-send-email-bp@alien8.de>
+ <1370177770-26661-5-git-send-email-bp@alien8.de>
+ <20130606131439.GI30420@console-pimps.org>
+ <20130606132908.GE20972@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130606150039.GL30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20130606132908.GE20972-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "jkosina-AlSwsSmVLrQ@public.gmane.org" <jkosina-AlSwsSmVLrQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "oneukum-l3A5Bk7waGM@public.gmane.org" <oneukum-l3A5Bk7waGM@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 06, 2013 at 04:00:39PM +0100, Matt Fleming wrote:
-> On Thu, 06 Jun, at 09:48:46AM, Russ Anderson wrote:
-> > This looks like it will try to allocate more than the remaining size.
-> > Is that intended?
+On Thu, Jun 06, 2013 at 03:29:08PM +0200, Borislav Petkov wrote:
+> On Thu, Jun 06, 2013 at 02:14:39PM +0100, Matt Fleming wrote:
+> > This patch makes my TunnelMountain machine spin in handle_pte_fault()
+> > when triggering one of the "firmware makes references to physical
+> > addresses" code paths.
+> >
+> > I'll try and dig into this tomorrow to figure out what's going on.
 > 
-> Yes, the intention is to trigger garbage collection.
+> Hmmm, looks like we have forgotten to map an EFI region and we do a #PF
+> when executing the EFI code.
 
-OK, if that's what it takes.  It just struck me as something
-that would fail initial parameter checking in the bios,
-before getting far enough to trigger garbage collection.
+How about this one - I don't know whether it would flood dmesg, I guess
+you'll have to try.
 
-Since I really want the rest of this patch to go in, I'm certainly
-not going to object.  :-)
+We could try using blockconsole to catch dmesg to an usb drive, though,
+even if you don't have serial or netconsole or such. :-).
 
-Thanks,
+--
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 654be4ae3047..7a6129afdff1 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -1021,6 +1021,9 @@ __do_page_fault(struct pt_regs *regs, unsigned long error_code)
+ 	/* Get the faulting address: */
+ 	address = read_cr2();
+ 
++	if (read_cr3() == (unsigned long)real_mode_header->trampoline_pgd)
++		pr_err("%s: #PF addr: 0x%lx\n", __func__, address);
++
+ 	/*
+ 	 * Detect and handle instructions that would cause a page fault for
+ 	 * both a tracked kernel page and a userspace page.
+
 -- 
-Russ Anderson, OS RAS/Partitioning Project Lead  
-SGI - Silicon Graphics Inc          rja-sJ/iWh9BUns@public.gmane.org
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
