@@ -1,34 +1,38 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 4/4] x86, efi: Map runtime services 1:1
-Date: Thu, 06 Jun 2013 12:38:10 -0700
-Message-ID: <51B0E522.4070005@zytor.com>
-References: <1370177770-26661-1-git-send-email-bp@alien8.de> <1370177770-26661-5-git-send-email-bp@alien8.de> <20130606131439.GI30420@console-pimps.org> <20130606132908.GE20972@pd.tnic> <20130606155822.GH20972@pd.tnic> <51B0E2D4.3040007@zytor.com> <20130606193612.GM20972@pd.tnic>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
+Date: Thu, 6 Jun 2013 21:41:34 +0200
+Message-ID: <20130606194134.GN20972@pd.tnic>
+References: <1370177770-26661-1-git-send-email-bp@alien8.de>
+ <1370177770-26661-4-git-send-email-bp@alien8.de>
+ <20130606104224.GH30420@console-pimps.org>
+ <20130606132603.GD20972@pd.tnic>
+ <20130606175052.GA1285@srcf.ucam.org>
+ <20130606185140.GK20972@pd.tnic>
+ <20130606193548.GA2946@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130606193612.GM20972-fF5Pk5pvG8Y@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130606193548.GA2946-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/06/2013 12:36 PM, Borislav Petkov wrote:
-> On Thu, Jun 06, 2013 at 12:28:20PM -0700, H. Peter Anvin wrote:
->> Or we could materialize mappings for this specific PGD. However,
->> adding a read of %cr3 in __do_page_fault sounds expensive.
-> 
-> Yes, I think we want to make sure all mappings are there when we do an
-> EFI runtime call so that we never #PF while it executes.
-> 
-> Matt mentioned on IRC that the it could be that his EFI runtime is
-> referencing EFI_RESERVED area which we don't map. However, we need to
-> confirm/disprove that first, as it is currently only a hunch.
+On Thu, Jun 06, 2013 at 08:35:48PM +0100, Matthew Garrett wrote:
+> No, I think that's the wrong thing to do. We should set up the current
+> mappings and the 1:1 mappings, and pass the current mappings through
+> SetVirtualAddressMap(). That matches the behaviour of Windows.
 
-If it is true, then maybe a #PF handler which materializes mappings on
-demand might be the right thing to do.
+And when do we use the 1:1 mappings and when the current mappings when
+doing runtime calls?
 
-Again, it would be interesting to stop a WinX VM in the process of doing
-an EFI call and see exactly what it has set up in its page tables.
+Also, would the 1:1 mappings even work if not passed through
+SetVirtualAddressMap? I'm sensing a "yes" but I don't know...
 
-	-hpa
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
