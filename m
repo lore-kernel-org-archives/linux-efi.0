@@ -1,57 +1,27 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 4/4] x86, efi: Map runtime services 1:1
-Date: Thu, 6 Jun 2013 17:58:22 +0200
-Message-ID: <20130606155822.GH20972@pd.tnic>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
+Date: Thu, 6 Jun 2013 18:50:52 +0100
+Message-ID: <20130606175052.GA1285@srcf.ucam.org>
 References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <1370177770-26661-5-git-send-email-bp@alien8.de>
- <20130606131439.GI30420@console-pimps.org>
- <20130606132908.GE20972@pd.tnic>
+ <1370177770-26661-4-git-send-email-bp@alien8.de>
+ <20130606104224.GH30420@console-pimps.org>
+ <20130606132603.GD20972@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130606132908.GE20972-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20130606132603.GD20972-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 06, 2013 at 03:29:08PM +0200, Borislav Petkov wrote:
-> On Thu, Jun 06, 2013 at 02:14:39PM +0100, Matt Fleming wrote:
-> > This patch makes my TunnelMountain machine spin in handle_pte_fault()
-> > when triggering one of the "firmware makes references to physical
-> > addresses" code paths.
-> >
-> > I'll try and dig into this tomorrow to figure out what's going on.
-> 
-> Hmmm, looks like we have forgotten to map an EFI region and we do a #PF
-> when executing the EFI code.
+On Thu, Jun 06, 2013 at 03:26:03PM +0200, Borislav Petkov wrote:
 
-How about this one - I don't know whether it would flood dmesg, I guess
-you'll have to try.
+> This would break the Macs, remember?
 
-We could try using blockconsole to catch dmesg to an usb drive, though,
-even if you don't have serial or netconsole or such. :-).
-
---
-diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
-index 654be4ae3047..7a6129afdff1 100644
---- a/arch/x86/mm/fault.c
-+++ b/arch/x86/mm/fault.c
-@@ -1021,6 +1021,9 @@ __do_page_fault(struct pt_regs *regs, unsigned long error_code)
- 	/* Get the faulting address: */
- 	address = read_cr2();
- 
-+	if (read_cr3() == (unsigned long)real_mode_header->trampoline_pgd)
-+		pr_err("%s: #PF addr: 0x%lx\n", __func__, address);
-+
- 	/*
- 	 * Detect and handle instructions that would cause a page fault for
- 	 * both a tracked kernel page and a userspace page.
+I think the Macs will be fine as long as we're passing the high mappings 
+into SetVirtualAddressMap().
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
