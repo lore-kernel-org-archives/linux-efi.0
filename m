@@ -1,43 +1,53 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Subject: Re: [PATCH 3/4] x86, efi: Add an efi= kernel command line parameter
-Date: Thu, 6 Jun 2013 22:03:43 +0100
-Message-ID: <20130606210343.GA4939@srcf.ucam.org>
-References: <20130606193548.GA2946@srcf.ucam.org>
- <20130606194134.GN20972@pd.tnic>
- <20130606195450.GA3252@srcf.ucam.org>
- <20130606200705.GO20972@pd.tnic>
- <20130606201828.GA3950@srcf.ucam.org>
- <20130606202717.GP20972@pd.tnic>
- <20130606203057.GA4237@srcf.ucam.org>
- <20130606204410.GQ20972@pd.tnic>
- <20130606205057.GA4363@srcf.ucam.org>
- <20130606210218.GR20972@pd.tnic>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fixes
+Date: Fri, 7 Jun 2013 12:50:46 +0100
+Message-ID: <20130607115046.GN30420@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130606210218.GR20972-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 06, 2013 at 11:02:18PM +0200, Borislav Petkov wrote:
-> On Thu, Jun 06, 2013 at 09:50:57PM +0100, Matthew Garrett wrote:
-> > What do you mean by "call them"? I don't think we ever want to call by
-> > physical address, other than maybe in the kexec case. The only reason
-> > we really care about the physical addresses being mapped 1:1 is that
-> > some pointers may not have been updated.
-> 
-> I want to be able to call the runtime services in the kexec kernel.
-> Which means, the kexec kernel would simply map the runtime code/data
-> regions 1:1 and then use the physical addresses to call the runtime
-> services.
-> 
-> Question is: would that work even if SetVirtualAddressMap has already
-> run in the original kernel and with virtual addresses?
+Hi folks,
 
-No. You'll need to have an option for that case.
+The following changes since commit eccaf52fee8305d5207ff110950a82c100e459bc:
+
+  x86, efi: initial the local variable of DataSize to zero (2013-05-14 08:13:05 +0100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to d70005bfc5f47f74fb5cb77a84983ed26bf65557:
+
+  efi: Convert runtime services function ptrs (2013-06-06 11:07:07 +0100)
+
+----------------------------------------------------------------
+ * More tweaking to the EFI variable anti-bricking algorithm. Quite a
+   few users were reporting boot regressions in v3.9. This has now been
+   fixed with a more accurate "minimum storage requirement to avoid
+   bricking" value from Samsung (5K instead of 50%) and code to trigger
+   garbage collection when we near our limit - Matthew Garrett.
+
+ * A small cleanup to get rid of all the void * casting that is
+   prevalent in the EFI code - Borislav Petkov
+
+----------------------------------------------------------------
+Borislav Petkov (1):
+      efi: Convert runtime services function ptrs
+
+Matthew Garrett (1):
+      Modify UEFI anti-bricking code
+
+ arch/x86/boot/compressed/eboot.c      |  47 ---------
+ arch/x86/include/asm/efi.h            |  35 +++----
+ arch/x86/include/uapi/asm/bootparam.h |   1 -
+ arch/x86/platform/efi/efi.c           | 188 ++++++++++++----------------------
+ include/linux/efi.h                   |  28 ++---
+ 5 files changed, 93 insertions(+), 206 deletions(-)
 
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+Matt Fleming, Intel Open Source Technology Center
