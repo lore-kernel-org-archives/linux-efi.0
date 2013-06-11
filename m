@@ -1,48 +1,32 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: retry ExitBootServices() on failure
-Date: Tue, 11 Jun 2013 08:22:22 +0100
-Message-ID: <20130611072222.GH31198@console-pimps.org>
-References: <1370933558-10128-1-git-send-email-matt@console-pimps.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 1/4] efi: Convert runtime services function ptrs
+Date: Tue, 11 Jun 2013 11:33:14 +0200
+Message-ID: <20130611093314.GA15624@pd.tnic>
+References: <1370177770-26661-1-git-send-email-bp@alien8.de>
+ <1370177770-26661-2-git-send-email-bp@alien8.de>
+ <20130606100745.GF30420@console-pimps.org>
+ <20130611064912.GG31198@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1370933558-10128-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20130611064912.GG31198-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 11 Jun, at 07:52:38AM, Matt Fleming wrote:
-> From: Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>
-> 
-> ExitBootServices is absolutely supposed to return a failure if any
-> ExitBootServices event handler changes the memory map.  Basically the
-> get_map loop should run again if ExitBootServices returns an error the
-> first time.  I would say it would be fair that if ExitBootServices gives
-> an error the second time then Linux would be fine in returning control
-> back to BIOS.
-> 
-> The second change is the following line:
-> 
-> again:
->         size += sizeof(*mem_map) * 2;
-> 
-> Originally you were incrementing it by the size of one memory map entry.
-> The issue here is all related to the low_alloc routine you are using.
-> In this routine you are making allocations to get the memory map itself.
-> Doing this allocation or allocations can affect the memory map by more
-> than one record.
-> 
-> [ mfleming - changelog, code style ]
-> Signed-off-by: Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/boot/compressed/eboot.c | 20 +++++++++++++++++---
->  1 file changed, 17 insertions(+), 3 deletions(-)
+On Tue, Jun 11, 2013 at 07:49:12AM +0100, Matt Fleming wrote:
+> OK, I chickened out of sending this in my latest pull request
+> after reading Linus' -rc5 email about him not wanting to see any
+> non-critical changes. I've stuck it in the 'next' branch with the rest
+> of the stuff for v3.11.
 
-I've queued this patch up for v3.11 in my 'next' branch.
+Yep, did the same with a couple of edac patches too - cleanups can wait.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
