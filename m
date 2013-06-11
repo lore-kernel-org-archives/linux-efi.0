@@ -1,29 +1,89 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 1/4] efi: Convert runtime services function ptrs
-Date: Tue, 11 Jun 2013 07:49:12 +0100
-Message-ID: <20130611064912.GG31198@console-pimps.org>
-References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <1370177770-26661-2-git-send-email-bp@alien8.de>
- <20130606100745.GF30420@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] x86, efi: retry ExitBootServices() on failure
+Date: Tue, 11 Jun 2013 07:52:38 +0100
+Message-ID: <1370933558-10128-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130606100745.GF30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 06 Jun, at 11:07:45AM, Matt Fleming wrote:
-> Thanks! I've chucked this into my 'urgent' queue because it's a pretty
-> straight forward cleanup and there's no point in allowing it to bitrot
-> any further (the change to eboot.c is already stale).
+From: Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>
 
-OK, I chickened out of sending this in my latest pull request after
-reading Linus' -rc5 email about him not wanting to see any non-critical
-changes. I've stuck it in the 'next' branch with the rest of the stuff
-for v3.11.
+ExitBootServices is absolutely supposed to return a failure if any
+ExitBootServices event handler changes the memory map.  Basically the
+get_map loop should run again if ExitBootServices returns an error the
+first time.  I would say it would be fair that if ExitBootServices gives
+an error the second time then Linux would be fine in returning control
+back to BIOS.
 
+The second change is the following line:
+
+again:
+        size += sizeof(*mem_map) * 2;
+
+Originally you were incrementing it by the size of one memory map entry.
+The issue here is all related to the low_alloc routine you are using.
+In this routine you are making allocations to get the memory map itself.
+Doing this allocation or allocations can affect the memory map by more
+than one record.
+
+[ mfleming - changelog, code style ]
+Signed-off-by: Zach Bobroff <zacharyb-gH/BEeFdNRQ@public.gmane.org>
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c | 20 +++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 35ee62f..7c6e5d9 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -1037,18 +1037,20 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
+ 	efi_memory_desc_t *mem_map;
+ 	efi_status_t status;
+ 	__u32 desc_version;
++	bool called_exit = false;
+ 	u8 nr_entries;
+ 	int i;
+ 
+ 	size = sizeof(*mem_map) * 32;
+ 
+ again:
+-	size += sizeof(*mem_map);
++	size += sizeof(*mem_map) * 2;
+ 	_size = size;
+ 	status = low_alloc(size, 1, (unsigned long *)&mem_map);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
++get_map:
+ 	status = efi_call_phys5(sys_table->boottime->get_memory_map, &size,
+ 				mem_map, &key, &desc_size, &desc_version);
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+@@ -1074,8 +1076,20 @@ again:
+ 	/* Might as well exit boot services now */
+ 	status = efi_call_phys2(sys_table->boottime->exit_boot_services,
+ 				handle, key);
+-	if (status != EFI_SUCCESS)
+-		goto free_mem_map;
++	if (status != EFI_SUCCESS) {
++		/*
++		 * ExitBootServices() will fail if any of the event
++		 * handlers change the memory map. In which case, we
++		 * must be prepared to retry, but only once so that
++		 * we're guaranteed to exit on repeated failures instead
++		 * of spinning forever.
++		 */
++		if (called_exit)
++			goto free_mem_map;
++
++		called_exit = true;
++		goto get_map;
++	}
+ 
+ 	/* Historic? */
+ 	boot_params->alt_mem_k = 32 * 1024;
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.1.4
