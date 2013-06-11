@@ -1,48 +1,29 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Mon, 10 Jun 2013 22:36:32 +0100
-Message-ID: <20130610213632.GF31198@console-pimps.org>
-References: <20130607115046.GN30420@console-pimps.org>
+Subject: Re: [PATCH 1/4] efi: Convert runtime services function ptrs
+Date: Tue, 11 Jun 2013 07:49:12 +0100
+Message-ID: <20130611064912.GG31198@console-pimps.org>
+References: <1370177770-26661-1-git-send-email-bp@alien8.de>
+ <1370177770-26661-2-git-send-email-bp@alien8.de>
+ <20130606100745.GF30420@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130607115046.GN30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20130606100745.GF30420-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi folks,
- 
-The following changes since commit eccaf52fee8305d5207ff110950a82c100e459bc:
+On Thu, 06 Jun, at 11:07:45AM, Matt Fleming wrote:
+> Thanks! I've chucked this into my 'urgent' queue because it's a pretty
+> straight forward cleanup and there's no point in allowing it to bitrot
+> any further (the change to eboot.c is already stale).
 
-  x86, efi: initial the local variable of DataSize to zero (2013-05-14 08:13:05 +0100)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to f8b8404337de4e2466e2e1139ea68b1f8295974f:
-
-  Modify UEFI anti-bricking code (2013-06-10 21:59:37 +0100)
-
-----------------------------------------------------------------
- * More tweaking to the EFI variable anti-bricking algorithm. Quite a
-   few users were reporting boot regressions in v3.9. This has now been
-   fixed with a more accurate "minimum storage requirement to avoid
-   bricking" value from Samsung (5K instead of 50%) and code to trigger
-   garbage collection when we near our limit - Matthew Garrett.
-
-----------------------------------------------------------------
-Matthew Garrett (1):
-      Modify UEFI anti-bricking code
-
- arch/x86/boot/compressed/eboot.c      |  47 ---------
- arch/x86/include/asm/efi.h            |   7 --
- arch/x86/include/uapi/asm/bootparam.h |   1 -
- arch/x86/platform/efi/efi.c           | 188 ++++++++++++----------------------
- 4 files changed, 65 insertions(+), 178 deletions(-)
+OK, I chickened out of sending this in my latest pull request after
+reading Linus' -rc5 email about him not wanting to see any non-critical
+changes. I've stuck it in the 'next' branch with the rest of the stuff
+for v3.11.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
