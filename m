@@ -1,32 +1,54 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 1/4] efi: Convert runtime services function ptrs
-Date: Tue, 11 Jun 2013 11:33:14 +0200
-Message-ID: <20130611093314.GA15624@pd.tnic>
-References: <1370177770-26661-1-git-send-email-bp@alien8.de>
- <1370177770-26661-2-git-send-email-bp@alien8.de>
- <20130606100745.GF30420@console-pimps.org>
- <20130611064912.GG31198@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v3.11
+Date: Thu, 13 Jun 2013 14:46:46 +0100
+Message-ID: <20130613134646.GU31198@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130611064912.GG31198-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, X86-ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 11, 2013 at 07:49:12AM +0100, Matt Fleming wrote:
-> OK, I chickened out of sending this in my latest pull request
-> after reading Linus' -rc5 email about him not wanting to see any
-> non-critical changes. I've stuck it in the 'next' branch with the rest
-> of the stuff for v3.11.
+The following changes since commit f722406faae2d073cc1d01063d1123c35425939e:
 
-Yep, did the same with a couple of edac patches too - cleanups can wait.
+  Linux 3.10-rc1 (2013-05-11 17:14:08 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to d3768d885c6ccbf8a137276843177d76c49033a7:
+
+  x86, efi: retry ExitBootServices() on failure (2013-06-11 07:51:54 +0100)
+
+----------------------------------------------------------------
+ * Only pass memory regions that are marked as required for runtime to
+   SetVirtualAddressMap() - Matthew Garrett
+
+ * A small cleanup to get rid of all the void * casting that is
+   prevalent in the EFI code - Borislav Petkov
+
+ * Handle the case where ExitBootServices() wants us to call it a second
+   time because some of the firmware signal handlers have changed the
+   memory map - Zach Bobroff
+
+----------------------------------------------------------------
+Borislav Petkov (1):
+      efi: Convert runtime services function ptrs
+
+Matthew Garrett (1):
+      UEFI: Don't pass boot services regions to SetVirtualAddressMap()
+
+Zach Bobroff (1):
+      x86, efi: retry ExitBootServices() on failure
+
+ arch/x86/boot/compressed/eboot.c | 20 +++++++++++++++++---
+ arch/x86/include/asm/efi.h       | 28 ++++++++++++++--------------
+ arch/x86/platform/efi/efi.c      |  7 +++++++
+ include/linux/efi.h              | 28 ++++++++++++++--------------
+ 4 files changed, 52 insertions(+), 31 deletions(-)
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
