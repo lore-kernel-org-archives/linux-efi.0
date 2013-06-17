@@ -1,35 +1,42 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Fix dummy variable buffer allocation
-Date: Mon, 17 Jun 2013 11:08:16 +0100
-Message-ID: <20130617100816.GA8569@console-pimps.org>
-References: <1371414432.3321.7.camel@deadeye.wl.decadent.org.uk>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] x86, efi: retry ExitBootServices() on failure
+Date: Mon, 17 Jun 2013 11:17:45 +0100
+Message-ID: <20130617101745.GB8569@console-pimps.org>
+References: <1370933558-10128-1-git-send-email-matt@console-pimps.org>
+ <1371139233.6523.272.camel@linux-s257.site>
+ <20130617092107.GA5440@console-pimps.org>
+ <51BEF71402000078000DEC12@nat28.tlf.novell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1371414432.3321.7.camel-nDn/Rdv9kqW9Jme8/bJn5UCKIB8iOfG2tUK59QYPAWc@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <51BEF71402000078000DEC12@nat28.tlf.novell.com>
+Sender: stable-owner@vger.kernel.org
+To: Jan Beulich <JBeulich@suse.com>
+Cc: Joey Lee <JLee@suse.com>, Zach Bobroff <zacharyb@ami.com>, Matt Fleming <matt.fleming@intel.com>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 16 Jun, at 09:27:12PM, Ben Hutchings wrote:
-> 1. Check for allocation failure
-> 2. Clear the buffer contents, as they may actually be written to flash
-> 3. Don't leak the buffer
+On Mon, 17 Jun, at 10:46:28AM, Jan Beulich wrote:
+> To me, all this looks like it is being done on phenomenological basis,
+> taking a particular build of a particular firmware implementation as
+> the reference. Imo we shouldn't change the code in this way. This
+> also applies to the fact that the step is being doubled rather than
+> e.g. tripled: With it ending up a "again" anyway (see below), what's
+> the point of avoiding one more of the iterations?
 > 
-> Compile-tested only.
-> 
-> Signed-off-by: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> ---
->  arch/x86/platform/efi/efi.c |    7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
+> Generic considerations would result in the increment being at least
+> 3 * element size; twice the element size assumes that the allocator
+> would behave in certain ways (like returning the head or tail part of
+> a larger piece of memory).
+ 
+I have no issue with changing the multiplier. But let's get
+clarification from Zach as to what exactly is going on here.
 
-Oops. This looks good to me, Ben. The writing of random kernel memory to
-flash is particularly bad.
+> I agree that there ought to be an upper limit. But a single retry here
+> again looks like a tailored solution to a particular observed (mis-)
+> behavior, rather than something resulting from general considerations.
 
-Matthew, care to Ack? I'll add this to my urgent queue.
+What value would you suggest for the retry?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
