@@ -1,9 +1,8 @@
-From: Borislav Petkov <bp@alien8.de>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
 Subject: Re: [PATCH -v2 0/4] EFI 1:1 mapping
-Date: Thu, 20 Jun 2013 19:01:24 +0200
-Message-ID: <20130620170124.GA19877@pd.tnic>
-References: <20130619160804.GB27832@srcf.ucam.org>
- <20130620091321.GB6811@gmail.com>
+Date: Thu, 20 Jun 2013 18:12:10 +0100
+Message-ID: <20130620171210.GA26593@srcf.ucam.org>
+References: <20130620091321.GB6811@gmail.com>
  <20130620091537.GA17159@srcf.ucam.org>
  <20130620092237.GA6943@gmail.com>
  <20130620093337.GI32694@pd.tnic>
@@ -12,34 +11,25 @@ References: <20130619160804.GB27832@srcf.ucam.org>
  <20130620162916.GA25727@srcf.ucam.org>
  <1371746775.2372.11.camel@dabdike>
  <20130620165426.GB26214@srcf.ucam.org>
+ <20130620170124.GA19877@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20130620165426.GB26214@srcf.ucam.org>
+In-Reply-To: <20130620170124.GA19877@pd.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@srcf.ucam.org>
+To: Borislav Petkov <bp@alien8.de>
 Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, Ingo Molnar <mingo@kernel.org>, Linux EFI <linux-efi@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 20, 2013 at 05:54:26PM +0100, Matthew Garrett wrote:
-> On Thu, Jun 20, 2013 at 09:46:15AM -0700, James Bottomley wrote:
-> 
-> > Unless you can think of the way out of this, we seem to have the stark
-> > choice of behave like windows or allow kexec.  For the server market,
-> > kexec wins, so either we find a way not to have to make the choice or we
-> > do something automatic to make it fairly painless.
-> 
-> hpa suggested ensuring that UEFI regions are mapped at fixed high 
-> offsets. Someone who cares about kexec should probably make that happen.
+On Thu, Jun 20, 2013 at 07:01:24PM +0200, Borislav Petkov wrote:
 
-If we can detect the Macs, we can make this decision automatic. And
-since no Mac boots windoze, a single DMI check of the sort "if (Mac)"
-should suffice.
+> If we can detect the Macs, we can make this decision automatic. And
+> since no Mac boots windoze, a single DMI check of the sort "if (Mac)"
+> should suffice.
+
+Yes, we can special-case Macs. But since our behaviour is then obviously 
+different to Windows, we'll inevitably break some other system.
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matthew Garrett | mjg59@srcf.ucam.org
