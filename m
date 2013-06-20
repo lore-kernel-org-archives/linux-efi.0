@@ -1,7 +1,7 @@
-From: Ingo Molnar <mingo@kernel.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH -v2 0/4] EFI 1:1 mapping
-Date: Thu, 20 Jun 2013 11:22:37 +0200
-Message-ID: <20130620092237.GA6943@gmail.com>
+Date: Thu, 20 Jun 2013 11:33:37 +0200
+Message-ID: <20130620093337.GI32694@pd.tnic>
 References: <1371491416-11037-1-git-send-email-bp@alien8.de>
  <20130619125243.GD11209@gmail.com>
  <20130619130225.GA28311@pd.tnic>
@@ -9,39 +9,48 @@ References: <1371491416-11037-1-git-send-email-bp@alien8.de>
  <20130619160804.GB27832@srcf.ucam.org>
  <20130620091321.GB6811@gmail.com>
  <20130620091537.GA17159@srcf.ucam.org>
+ <20130620092237.GA6943@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130620091537.GA17159@srcf.ucam.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: Borislav Petkov <bp@alien8.de>, Linux EFI <linux-efi@vger.kernel.org>, Matt Fleming <matt@console-pimps.org>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>
+In-Reply-To: <20130620092237.GA6943-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matthew Garrett <mjg59@srcf.ucam.org> wrote:
-
-> On Thu, Jun 20, 2013 at 11:13:21AM +0200, Ingo Molnar wrote:
+On Thu, Jun 20, 2013 at 11:22:37AM +0200, Ingo Molnar wrote:
+> > > Cool - and supposedly this will work in a Mac environment as well? Would 
+> > > be very nice to avoid fundamentally fragile system specific quirks for 
+> > > something as fundamental as the EFI runtime memory mapping model ...
+> > 
+> > Apple is the only case where I'd expect there to be an issue, since they 
+> > only started supporting booting Windows via UEFI on very recent systems. 
+> > However, unless they're actually sniffing the page tables on UEFI entry, 
+> > I can't see any way that this could break things???
 > 
-> > Cool - and supposedly this will work in a Mac environment as well? Would 
-> > be very nice to avoid fundamentally fragile system specific quirks for 
-> > something as fundamental as the EFI runtime memory mapping model ...
+> Agreed - I was susprised to see that the runtime was able to _break_ in 
+> any way due to 1:1: my assumption was that it can only get better.
 > 
-> Apple is the only case where I'd expect there to be an issue, since they 
-> only started supporting booting Windows via UEFI on very recent systems. 
-> However, unless they're actually sniffing the page tables on UEFI entry, 
-> I can't see any way that this could break things???
+> But I did not realize that the 1:1 boot flag also changed what was passed 
+> down, which probably explains the breakages.
 
-Agreed - I was susprised to see that the runtime was able to _break_ in 
-any way due to 1:1: my assumption was that it can only get better.
+Right, in the next version, the boot flag will influence only what's
+being passed down.
 
-But I did not realize that the 1:1 boot flag also changed what was passed 
-down, which probably explains the breakages.
+> I'd even argue to not do this whole boot flag thing at all - just 
+> standardize on the Windows compatibility model as closely as possible.
 
-I'd even argue to not do this whole boot flag thing at all - just 
-standardize on the Windows compatibility model as closely as possible.
+This will break the Macs so maybe we can do
 
-Thanks,
+efi=no_11_map
 
-	Ingo
+so the Macs can still boot but use the 1:1 map by default.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
