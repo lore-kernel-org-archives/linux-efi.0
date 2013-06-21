@@ -1,49 +1,47 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Subject: Re: [PATCH -v2 0/4] EFI 1:1 mapping
-Date: Thu, 20 Jun 2013 15:35:24 -0700
-Message-ID: <51C383AC.4060706@zytor.com>
-References: <1371740019.2372.3.camel@dabdike> <20130620162916.GA25727@srcf.ucam.org> <1371746775.2372.11.camel@dabdike> <20130620165426.GB26214@srcf.ucam.org> <20130620170124.GA19877@pd.tnic> <20130620171210.GA26593@srcf.ucam.org> <20130620180808.GB19877@pd.tnic> <20130620181015.GA27833@srcf.ucam.org> <20130620181445.GA791@pd.tnic> <20130620181731.GA27960@srcf.ucam.org> <20130620184736.GC19877@pd.tnic>
+Date: Fri, 21 Jun 2013 07:34:43 +0100
+Message-ID: <20130621063443.GC5386@console-pimps.org>
+References: <1371491416-11037-1-git-send-email-bp@alien8.de>
+ <20130619125243.GD11209@gmail.com>
+ <20130619130225.GA28311@pd.tnic>
+ <20130619130434.GB24957@gmail.com>
+ <20130619160804.GB27832@srcf.ucam.org>
+ <20130619161827.GF28300@pd.tnic>
+ <20130619162115.GA28119@srcf.ucam.org>
+ <20130619163804.GG28300@pd.tnic>
+ <20130619164822.GA28240@srcf.ucam.org>
+ <20130619165902.GH28300@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130620184736.GC19877-fF5Pk5pvG8Y@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130619165902.GH28300-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 06/20/2013 11:47 AM, Borislav Petkov wrote:
+On Wed, 19 Jun, at 06:59:02PM, Borislav Petkov wrote:
+> On Wed, Jun 19, 2013 at 05:48:22PM +0100, Matthew Garrett wrote:
+> > > Ok, so it sounds like we want to *always* create both mappings but,
+> > > depending on what we want, to shove down SetVirtualAddressMap a
+> > > different set. And the 1:1 map will be the optional one which we give
+> > > SetVirtualAddressMap only when user wants it, i.e. when booting with
+> > > "efi=1:1_map".
+> > 
+> > Yup, I think that sounds ideal.
 > 
-> I guess we can do a top-down allocation, starting from the highest
-> virtual addresses:
+> Crap, I got completely sidetracked. The 1:1 mappings go in a different
+> pagetable (real_mode_header->trampoline_pgd) than the kernel one
+> (i.e. init_mm.pgd). However, the ->trampoline_pgd has all mappings
+> anyway, which means that if we want to do EFI runtime calls with the
+> high mappings but *also* have the 1:1 mappings established, we should
+> *always* switch to that pagetable when doing those calls.
 > 
-> EFI_HIGHEST_ADDRESS
-> |
-> | size1
-> |
-> --> region1
-> |
-> | size2
-> |
-> --> region2
-> 
-> ...
-> 
-> and we make EFI_HIGHEST_ADDRESS be the same absolute number on every
-> system.
-> 
-> hpa, is this close to what you had in mind? It would be prudent to
-> verify whether this will suit well with the kexec virtual space layout
-> though...
-> 
+> hpa, MattF, agreed?
 
-This would work really well, I think.  The tricky part here is to pick a
-safe EFI_HIGHEST_ADDRESS as it is an ABI.
+Yep.
 
-My preference would be to make EFI_HIGHEST_ADDRESS = -4 GB, which is
-*not* what Windows uses, but will leave the high negative range clear,
-and allows a range where we can grow down without much risk of
-interfering with anything else.
-
-	-hpa
+-- 
+Matt Fleming, Intel Open Source Technology Center
