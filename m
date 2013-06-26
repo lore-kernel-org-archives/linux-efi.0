@@ -1,25 +1,28 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 2/4] x86: efi: break efi_lookup_mapped_addr out to generic code
-Date: Wed, 26 Jun 2013 14:30:34 +0100
-Message-ID: <CACxGe6u+8ac2a2EzAvTvo53xOHNU=14ve+8oMYe3_a4vO38VEQ@mail.gmail.com>
-References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org> <1372183863-11333-3-git-send-email-leif.lindholm@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/4] x86: efi: break efi_lookup_mapped_addr out to
+ generic code
+Date: Wed, 26 Jun 2013 14:32:17 +0100
+Message-ID: <20130626133217.GO22026@console-pimps.org>
+References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org>
+ <1372183863-11333-3-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1372183863-11333-3-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "H. Peter Anvin" <hpa@linux.intel.com>, Thomas Gleixner <tglx@linutronix.de>, matt.fleming@intel.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1372183863-11333-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 25, 2013 at 7:11 PM, Leif Lindholm <leif.lindholm@linaro.org> wrote:
+On Tue, 25 Jun, at 07:11:01PM, Leif Lindholm wrote:
 > efi_lookup_mapped_addr is a handy helper function for translating
 > a physical address to the corresponding virtual one by scanning
 > through memmap.map.
->
+> 
 > This patch breaks it out into a new file for use elsewhere.
->
-> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+> 
+> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
 >  arch/x86/platform/efi/efi.c       |   28 ----------------------------
 >  drivers/firmware/efi/Makefile     |    2 +-
@@ -27,31 +30,8 @@ On Tue, Jun 25, 2013 at 7:11 PM, Leif Lindholm <leif.lindholm@linaro.org> wrote:
 >  3 files changed, 34 insertions(+), 29 deletions(-)
 >  create mode 100644 drivers/firmware/efi/efi-helper.c
 
-I /think/ you should be able to put this directly into
-drivers/firmware/efi/efi.c
+I'm not sure this function needs its own file. drivers/firmware/efi/efi.c
+is a suitable place for this.
 
-> diff --git a/drivers/firmware/efi/efi-helper.c b/drivers/firmware/efi/efi-helper.c
-> new file mode 100644
-> index 0000000..c5c2c72
-> --- /dev/null
-> +++ b/drivers/firmware/efi/efi-helper.c
-> @@ -0,0 +1,33 @@
-> +/*
-> + * Common [U]EFI support helper functions across architectures.
-> + */
-> +
-> +#include <linux/efi.h>
-> +
-> +/*
-> + * We can't ioremap data in EFI boot services RAM, because we've already mapped
-> + * it as RAM.  So, look it up in the existing EFI memory map instead.  Only
-> + * callable after efi_enter_virtual_mode and before efi_free_boot_services.
-> + */
-> +void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
-
-Can be __init annotated. Although it's a good idea to do that in a
-separate patch.
-
-Otherwise looks good to me.
-
-Reviewed-by: Grant Likely <grant.likely@linaro.org>
+-- 
+Matt Fleming, Intel Open Source Technology Center
