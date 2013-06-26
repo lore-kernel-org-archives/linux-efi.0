@@ -1,67 +1,109 @@
-From: "matt@console-pimps.org" <matt@console-pimps.org>
-Subject: Re: [PATCH] x86, efi: retry ExitBootServices() on failure
-Date: Wed, 26 Jun 2013 14:12:00 +0100
-Message-ID: <20130626131200.GN22026@console-pimps.org>
-References: <51BEF71402000078000DEC12@nat28.tlf.novell.com>
- <20130617101745.GB8569@console-pimps.org>
- <51BF08CD02000078000DEC99@nat28.tlf.novell.com>
- <20130617123052.GE8569@console-pimps.org>
- <7BD74F8E52BFD147B6C83AE7A1E893FFE285F690@atlms1.us.megatrends.com>
- <51C068C1020000780009C995@nat28.tlf.novell.com>
- <7BD74F8E52BFD147B6C83AE7A1E893FFE286040C@atlms1.us.megatrends.com>
- <20130619084329.GA5386@console-pimps.org>
- <298f16e6-7ada-4f2e-8dae-f3919e7c8225@email.android.com>
- <7BD74F8E52BFD147B6C83AE7A1E893FFE28622FD@atlms1.us.megatrends.com>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 1/4] Documentation: arm: [U]EFI runtime services
+Date: Wed, 26 Jun 2013 14:13:39 +0100
+Message-ID: <CACxGe6tUpo31p6N0BZt_jdonuPP8ijvLBygC76wQ044EFsqOwA@mail.gmail.com>
+References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org> <1372183863-11333-2-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <7BD74F8E52BFD147B6C83AE7A1E893FFE28622FD@atlms1.us.megatrends.com>
-Sender: stable-owner@vger.kernel.org
-To: Zachary Bobroff <zacharyb@ami.com>
-Cc: "'H. Peter Anvin'" <hpa@zytor.com>, 'Jan Beulich' <jbeulich@suse.com>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "mjg59@srcf.ucam.org" <mjg59@srcf.ucam.org>, Joey Lee <JLee@suse.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1372183863-11333-2-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "H. Peter Anvin" <hpa@linux.intel.com>, Thomas Gleixner <tglx@linutronix.de>, matt.fleming@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 20 Jun, at 06:04:50PM, Zachary Bobroff wrote:
-> All,
->=20
-> I am attaching a further updated version of eboot.c .  We removed the
-> low_alloc routine from the exit_boot function only.  We also removed
-> the goto statements(sorry we just aren=E2=80=99t huge fans of goto's =
-in c, you
-> can change it back to be goto oriented if you want though) and put it
-> in a loop that is counting down from retry count.  You can see the
-> loop is based upon this conditional:
+On Tue, Jun 25, 2013 at 7:11 PM, Leif Lindholm <leif.lindholm@linaro.org> wrote:
+> This patch provides documentation of the [U]EFI runtime services and
+> configuration features.
+>
+> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+> ---
+>  Documentation/arm/00-INDEX |    3 +++
+>  Documentation/arm/uefi.txt |   39 +++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 42 insertions(+)
+>  create mode 100644 Documentation/arm/uefi.txt
+>
+> diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
+> index 4978456..87e01d1 100644
+> --- a/Documentation/arm/00-INDEX
+> +++ b/Documentation/arm/00-INDEX
+> @@ -36,3 +36,6 @@ nwfpe/
+>         - NWFPE floating point emulator documentation
+>  swp_emulation
+>         - SWP/SWPB emulation handler/logging description
+> +
+> +uefi.txt
+> +       - [U]EFI configuration and runtime services documentation
+> diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
+> new file mode 100644
+> index 0000000..5c48271
+> --- /dev/null
+> +++ b/Documentation/arm/uefi.txt
+> @@ -0,0 +1,39 @@
+> +The nomenclature EFI and UEFI are used interchangeably in this document.
+> +
+> +The implementation depends on receiving pointers to the UEFI memory map
+> +and System Table in a Flattened Device Tree - so is only available with
+> +CONFIG_OF.
+> +
+> +It (early) parses the FDT for the following parameters:
 
-It would be much easier to review these changes if you sent them as a
-patch against a git tree, using git to generate the patch. Failing that=
-,
-even a plain old diff-format file would be acceptable.
+Need to state which node these properties can be found in. I recommend /chosen
 
-> while((ExitRetryCount > 0) && (status !=3D EFI_SUCCESS)) {
->=20
-> So we have currently set ExitRetryCount to 2 (a couple of lines above=
-):
-> int ExitRetryCount =3D 2;
->=20
-> However, I have a suggestion and im not entirely sure how difficult i=
-t
-> would be, im just suggesting it might not be a bad idea.  We can
-> initialize this ExitRetryCount to be some default value, but if
-> grub(or a different bootloader) passes some updated value,
-> ExitRetryCount could be updated with this value.  Myself, I don=E2=80=
-=99t know
-> the level of complexity it creates pulling a kernel parameter, but
-> given a decent example, I could see about adding that support.
-> Allowing passing of a parameter could eliminate problems with the
-> systems that may be out of specification.
-=20
-We try to pull workarounds for these problems into the kernel, rather
-than relying on bootloaders to pass in the necessary flags. People
-rarely want to update their boot loaders, but most distributions releas=
-e
-updates for installed kernels semi-regularly.
+I would also prefix all of the following properties with "linux,"
+since they are very much about what the Linux kernel needs for
+booting. EFI stub will be creating these properties specifically for
+Linux, and the LinuxLoader should do the same (until we eventually
+kill it).
 
---=20
-Matt Fleming, Intel Open Source Technology Center
+> +- 'efi-system-table':
+> +  Physical address of the system table. (required)
+
+Need to mention the size of this address. Is it 64 bit or 32 bit? I
+would follow the lead of 'linux,initrd-start' here and make the size
+of property the size of the address. ie. If it is 8 bytes long, then
+it is a 64 bit address.
+
+> +- 'efi-runtime-mmap':
+> +  Physical address of an EFI memory map, containing at least
+> +  the regions to be preserved. (required)
+> +- 'efi-runtime-mmap-size':
+> +  Size in bytes of the provided memory map. (required)
+
+I would collapse the above two properties into a single property that
+actually contains the memory map instead of pointing to it. You will
+also need to specify the exact format of the data in this property.
+
+> +- 'efi-mmap-desc-size':
+> +  Size of each descriptor in the memory map. (override default)
+> +- 'efi-mmap-desc-ver':
+> +  Memory descriptor format version. (override default)
+
+I don't understand how these properties will actually work. What
+changes in the parsing if these properties are set?
+
+> +
+> +Since UEFI firmware on ARM systems are required to use a 1:1 memory map
+> +even on LPAE-capable systems, the above fields are 32-bit regardless.
+> +
+> +It also depends on early_ioremap to parse the memory map and preserve
+> +the regions required for runtime services.
+> +
+> +For actually enabling [U]EFI support, enable:
+> +- CONFIG_EFI=y
+> +- CONFIG_EFI_VARS=y or m
+> +
+> +After the kernel has mapped the required regions into its address space,
+> +a SetVirtualAddressMap() call is made into UEFI in order to update
+> +relocations. This call must be performed with all the code in a 1:1
+> +mapping. This implementation achieves this by temporarily disabling the
+> +MMU for the duration of this call. This can only be done safely:
+> +- before secondary CPUs are brought online.
+> +- after early_initcalls have completed, sinze it uses setup_mm_for_reboot().
+> +
+> +For verbose debug messages, specify 'uefi_debug' on the kernel command
+> +line.
+
+Looks good otherwise, Thanks!
+
+g.
