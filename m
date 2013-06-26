@@ -1,45 +1,57 @@
-From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Subject: Re: [PATCH 4/4] init: efi: arm: enable (U)EFI runtime services on arm
-Date: Wed, 26 Jun 2013 14:24:11 +0100
-Message-ID: <CACxGe6tRBQdxN=5SrO7ES0N3R+nPeVpJDkBx5WHtKQSxPHb01Q@mail.gmail.com>
-References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org> <1372183863-11333-5-git-send-email-leif.lindholm@linaro.org>
+From: Grant Likely <grant.likely@secretlab.ca>
+Subject: Re: [PATCH 2/4] x86: efi: break efi_lookup_mapped_addr out to generic code
+Date: Wed, 26 Jun 2013 14:30:34 +0100
+Message-ID: <CACxGe6u+8ac2a2EzAvTvo53xOHNU=14ve+8oMYe3_a4vO38VEQ@mail.gmail.com>
+References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org> <1372183863-11333-3-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1372183863-11333-5-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1372183863-11333-3-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "H. Peter Anvin" <hpa@linux.intel.com>, Thomas Gleixner <tglx@linutronix.de>, matt.fleming@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 25, 2013 at 7:11 PM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Since the efi_set_virtual_address_map call has strict init ordering
-> requirements, add an explicit hook in the required place.
+On Tue, Jun 25, 2013 at 7:11 PM, Leif Lindholm <leif.lindholm@linaro.org> wrote:
+> efi_lookup_mapped_addr is a handy helper function for translating
+> a physical address to the corresponding virtual one by scanning
+> through memmap.map.
 >
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> This patch breaks it out into a new file for use elsewhere.
+>
+> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 > ---
->  init/main.c |    6 ++++++
->  1 file changed, 6 insertions(+)
->
-> diff --git a/init/main.c b/init/main.c
-> index 9484f4b..c61706e 100644
-> --- a/init/main.c
-> +++ b/init/main.c
-> @@ -872,6 +872,12 @@ static noinline void __init kernel_init_freeable(void)
->         smp_prepare_cpus(setup_max_cpus);
->
->         do_pre_smp_initcalls();
+>  arch/x86/platform/efi/efi.c       |   28 ----------------------------
+>  drivers/firmware/efi/Makefile     |    2 +-
+>  drivers/firmware/efi/efi-helper.c |   33 +++++++++++++++++++++++++++++++++
+>  3 files changed, 34 insertions(+), 29 deletions(-)
+>  create mode 100644 drivers/firmware/efi/efi-helper.c
+
+I /think/ you should be able to put this directly into
+drivers/firmware/efi/efi.c
+
+> diff --git a/drivers/firmware/efi/efi-helper.c b/drivers/firmware/efi/efi-helper.c
+> new file mode 100644
+> index 0000000..c5c2c72
+> --- /dev/null
+> +++ b/drivers/firmware/efi/efi-helper.c
+> @@ -0,0 +1,33 @@
+> +/*
+> + * Common [U]EFI support helper functions across architectures.
+> + */
 > +
-> +#ifdef CONFIG_ARM
-> +       if (efi_enabled(EFI_RUNTIME_SERVICES))
-> +               efi_enter_virtual_mode();
-> +#endif
+> +#include <linux/efi.h>
+> +
+> +/*
+> + * We can't ioremap data in EFI boot services RAM, because we've already mapped
+> + * it as RAM.  So, look it up in the existing EFI memory map instead.  Only
+> + * callable after efi_enter_virtual_mode and before efi_free_boot_services.
+> + */
+> +void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
 
-Nitpick:  Alternately you could use:
+Can be __init annotated. Although it's a good idea to do that in a
+separate patch.
 
-        if (IS_ENABLED(CONFIG_ARM) && efi_enabled(EFI_RUNTIME_SERVICES))
-                efi_enter_virtual_mode();
+Otherwise looks good to me.
 
-That would get away from the #ifdef
-
-g.
+Reviewed-by: Grant Likely <grant.likely@linaro.org>
