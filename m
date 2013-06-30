@@ -1,66 +1,114 @@
-From: Grant Likely <grant.likely@secretlab.ca>
+From: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
 Subject: Re: [PATCH 1/4] Documentation: arm: [U]EFI runtime services
-Date: Thu, 27 Jun 2013 21:11:45 +0100
-Message-ID: <CACxGe6s-TZoNUaRZ+XpAC83OGPWeg41L9F7YHYjpXVeLR6vbEw@mail.gmail.com>
-References: <1372183863-11333-1-git-send-email-leif.lindholm@linaro.org>
- <1372183863-11333-2-git-send-email-leif.lindholm@linaro.org>
- <51CA2B03.4080106@wwwdotorg.org> <CACxGe6vsBKnbipR-Zd1T9Ox1J2ugFmShrGXGUzPa_=D9TJvFQw@mail.gmail.com>
- <51CB33BE.2020601@wwwdotorg.org> <20130626193158.GF9078@rocoto.smurfnet.nu> <51CC7EA1.1040509@wwwdotorg.org>
+Date: Sat, 29 Jun 2013 22:21:32 -0500
+Message-ID: <1372562492.2776.163@driftwood>
+References: <1372183863-11333-2-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <51CC7EA1.1040509@wwwdotorg.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Warren <swarren@wwwdotorg.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, "H. Peter Anvin" <hpa@linux.intel.com>, Thomas Gleixner <tglx@linutronix.de>, matt.fleming@intel.com
+Content-Type: text/plain; charset=us-ascii; DelSp=Yes; Format=Flowed
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1372183863-11333-2-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+	(from leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org on Tue Jun 25 13:11:00 2013)
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jun 27, 2013 at 7:04 PM, Stephen Warren <swarren@wwwdotorg.org> wrote:
-> On 06/26/2013 01:31 PM, Leif Lindholm wrote:
->> On Wed, Jun 26, 2013 at 12:32:30PM -0600, Stephen Warren wrote:
->>>>> What about ARMv8? Is the intention to have a separate definition for the
->>>>> UEFI bindings on ARMv8, so that compatibility isn't an issue? What if a
->>>>> future version of UEFI allows LPAE usage?
->>>>
->>>> It is unlikely that will happen on v7 since newer versions of UEFI are
->>>> expected to remain backwards compatible with the current spec.
->>>
->>> The expectation of backwards-compatibility sounds nice, but it seems a
->>> little dangerous to outright rely on it.
->>>
->>> Even if not a regular compatible property, can we define a property that
->>> indicates the UEFI revision or revision of this DT binding, so that if
->>> we ever have to change it, there is some way of explicitly indicating
->>> which exact schema the DT corresponds to, rather than having to
->>> reverse-engineer it from the set of properties that "just happen" to be
->>> present in DT?
->>>
->>> This is rather like the firmware node discussion that happened recently,
->>> where we were expecting to represent a firmware (secure mode) interface
->>> by a DT node, which would have a compatible value, which in turn would
->>> convey information about which "OS" the secure firmware was running, and
->>> well as any potential SoC-/OEM-/board-specific interface provided by it.
->>>
->>> And who knows, what if UEFI gets replaced someday; presumably we'd want
->>> some way of explicitly stating "running under UEFI" vs. "running under
->>> something else"?
->>
->> To me, these concerns are all covered by the existence of the
->> efi-system-table node, and the version number that you can extract
->> from the table (mandatory in any UEFI implementation) located at that
->> address. There is no reverse-engineering involved.
->
-> So, what you're saying is that the existence (or lack thereof) of the
-> efi-system-table property is the indicator whether EFI is present? I
-> guess if we assume that EFI will always evolve at least compatibly
-> enough that the system table will always exist and be formatted
-> identically at least to the extent of allowing the EFI version number to
-> be parsed then that's workable. If that guarantee is broken, then we can
-> always define a different property that points at the new format of the
-> table.
+On 06/25/2013 01:11:00 PM, Leif Lindholm wrote:
+> This patch provides documentation of the [U]EFI runtime services and
+> configuration features.
+> 
+> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  Documentation/arm/00-INDEX |    3 +++
+>  Documentation/arm/uefi.txt |   39  
+> +++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 42 insertions(+)
+>  create mode 100644 Documentation/arm/uefi.txt
+> 
+> diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
+> index 4978456..87e01d1 100644
+> --- a/Documentation/arm/00-INDEX
+> +++ b/Documentation/arm/00-INDEX
+> @@ -36,3 +36,6 @@ nwfpe/
+>  	- NWFPE floating point emulator documentation
+>  swp_emulation
+>  	- SWP/SWPB emulation handler/logging description
+> +
+> +uefi.txt
+> +	- [U]EFI configuration and runtime services documentation
+> diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
+> new file mode 100644
+> index 0000000..5c48271
+> --- /dev/null
+> +++ b/Documentation/arm/uefi.txt
+> @@ -0,0 +1,39 @@
+> +The nomenclature EFI and UEFI are used interchangeably in this  
+> document.
+> +
 
-Yes, that is what it means, and there is *immense* pressure from the
-OEM market to not break that contract in a non-backwards-compatible
-way.
+And the acronym expands to...?
 
-g.
+> +The implementation depends on receiving pointers to the UEFI memory  
+> map
+> +and System Table in a Flattened Device Tree - so is only available  
+> with
+> +CONFIG_OF.
+> +
+> +It (early) parses the FDT for the following parameters:
+> +- 'efi-system-table':
+> +  Physical address of the system table. (required)
+> +- 'efi-runtime-mmap':
+> +  Physical address of an EFI memory map, containing at least
+> +  the regions to be preserved. (required)
+> +- 'efi-runtime-mmap-size':
+> +  Size in bytes of the provided memory map. (required)
+> +- 'efi-mmap-desc-size':
+> +  Size of each descriptor in the memory map. (override default)
+> +- 'efi-mmap-desc-ver':
+> +  Memory descriptor format version. (override default)
+> +
+> +Since UEFI firmware on ARM systems are required to use a 1:1 memory  
+> map
+> +even on LPAE-capable systems, the above fields are 32-bit regardless.
+> +
+> +It also depends on early_ioremap to parse the memory map and preserve
+> +the regions required for runtime services.
+> +
+> +For actually enabling [U]EFI support, enable:
+> +- CONFIG_EFI=y
+> +- CONFIG_EFI_VARS=y or m
+> +
+> +After the kernel has mapped the required regions into its address  
+> space,
+> +a SetVirtualAddressMap() call is made into UEFI in order to update
+> +relocations. This call must be performed with all the code in a 1:1
+> +mapping. This implementation achieves this by temporarily disabling  
+> the
+> +MMU for the duration of this call. This can only be done safely:
+> +- before secondary CPUs are brought online.
+> +- after early_initcalls have completed, sinze it uses  
+> setup_mm_for_reboot().
+
+Typo: since
+
+> +
+> +For verbose debug messages, specify 'uefi_debug' on the kernel  
+> command
+> +line.
+
+At a wild guess, this parses a memory descriptor table to find out  
+where the physical and device memory on an arm board live, according to  
+some standard? I'm guessing because the file never quite says what this  
+mechanism is _for_, just describes knobs on a black box...
+
+(I can google, but it's a touch newbie-unfriendly. I tend to prefer  
+documentation that's aimed at people who _don't_ already know whatever  
+it is. Personal idiosyncrasy.)
+
+Acked-by: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
+
+Rob--
+To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
