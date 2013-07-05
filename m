@@ -1,46 +1,20 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for v3.11
-Date: Wed, 3 Jul 2013 09:19:03 +0100
-Message-ID: <20130703081903.GI25291@console-pimps.org>
-References: <20130626122331.GK22026@console-pimps.org>
+From: "igrok_88_88_88" <ganov-DQAgW3c33DA@public.gmane.org>
+Subject: =?windows-1251?B?wuD44CDz8ezl+OrgIPHt5ebt4P8g4CDy4Oog?=
+	=?windows-1251?B?5uUg6PHq8P/54P/x/w==?=
+Date: Fri, 5 Jul 2013 12:47:26 +0400
+Message-ID: <201307050847.r658lQU3018838@ns.parma.ru>
+Reply-To: "igrok_88_88_88" <ganov-DQAgW3c33DA@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1251
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130626122331.GK22026-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: vladimir.bavaev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, yug-yFjDnNZk898ox3rIn2DAYQ@public.gmane.org, parketpro-uiMcrn6V0Vs@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 26 Jun, at 01:23:31PM, Matt Fleming wrote:
-> The following changes since commit d3768d885c6ccbf8a137276843177d76c49033a7:
-> 
->   x86, efi: retry ExitBootServices() on failure (2013-06-11 07:51:54 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 5d32cf1e590bcdc879f8f862e836c542f6ba7ecb:
-> 
->   [IA64] sim: Add casts to avoid assignment warnings (2013-06-21 11:22:21 +0100)
-> 
-> ----------------------------------------------------------------
->  * Add casts to avoid compiler warnings about assignments making
->    pointers from integers of different types. The warnings were
->    introduced with Borislav's patch to move the EFI runtime service
->    pointers to void * - Tony Luck
-> 
-> ----------------------------------------------------------------
-> Tony Luck (1):
->       [IA64] sim: Add casts to avoid assignment warnings
-> 
->  arch/ia64/hp/sim/boot/fw-emu.c | 20 ++++++++++----------
->  1 file changed, 10 insertions(+), 10 deletions(-)
+=CF=F0=E8=E2=E5=F2=F1=F2=E2=F3=FE
+=E8=E7=FF=F9=ED=E0=FF =F3=EB=FB=E1=EA=E0 =EE=F2=EA=F0=FB=E2=E0=E5=F2 =E2=
+=F1=FF=EA=E8=E5 =E4=E2=E5=F0=EA=E8 http://bit.ly/12zUtC7
 
-I don't see this commit in Linus' tree so presumably Tony is still
-seeing these warnings.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+=D2=EE=E3=E4=E0, =E1=E5=F1=E5=E4=F3=FF =F1 =F0=E0=F1=EA=EE=E2=E0=ED=ED=EE=
+=E9 =E4=F3=F8=EE=E9,
