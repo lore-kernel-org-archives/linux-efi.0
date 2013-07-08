@@ -1,20 +1,38 @@
-From: "igrok_88_88_88" <ganov-DQAgW3c33DA@public.gmane.org>
-Subject: =?windows-1251?B?wuD44CDz8ezl+OrgIPHt5ebt4P8g4CDy4Oog?=
-	=?windows-1251?B?5uUg6PHq8P/54P/x/w==?=
-Date: Fri, 5 Jul 2013 12:47:26 +0400
-Message-ID: <201307050847.r658lQU3018838@ns.parma.ru>
-Reply-To: "igrok_88_88_88" <ganov-DQAgW3c33DA@public.gmane.org>
+From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [GIT PULL] EFI changes for v3.11
+Date: Mon, 8 Jul 2013 17:29:59 +0000
+Message-ID: <3908561D78D1C84285E8C5FCA982C28F31C76880@ORSMSX106.amr.corp.intel.com>
+References: <20130626122331.GK22026@console-pimps.org>
+ <20130703081903.GI25291@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1251
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130703081903.GI25291-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: vladimir.bavaev-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, yug-yFjDnNZk898ox3rIn2DAYQ@public.gmane.org, parketpro-uiMcrn6V0Vs@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=CF=F0=E8=E2=E5=F2=F1=F2=E2=F3=FE
-=E8=E7=FF=F9=ED=E0=FF =F3=EB=FB=E1=EA=E0 =EE=F2=EA=F0=FB=E2=E0=E5=F2 =E2=
-=F1=FF=EA=E8=E5 =E4=E2=E5=F0=EA=E8 http://bit.ly/12zUtC7
+>> ----------------------------------------------------------------
+>> Tony Luck (1):
+>>       [IA64] sim: Add casts to avoid assignment warnings
+>> 
+>>  arch/ia64/hp/sim/boot/fw-emu.c | 20 ++++++++++----------
+>>  1 file changed, 10 insertions(+), 10 deletions(-)
+>
+> I don't see this commit in Linus' tree so presumably Tony is still
+> seeing these warnings.
 
-=D2=EE=E3=E4=E0, =E1=E5=F1=E5=E4=F3=FF =F1 =F0=E0=F1=EA=EE=E2=E0=ED=ED=EE=
-=E9 =E4=F3=F8=EE=E9,
+Correct - I see 10 warning about "assignment makes pointer from integer"
+when building Linus' tree (HEAD = d2b4a646).
+
+My patch doesn't appear to be in linux-next either (next-20130708).
+
+I had hoped to have this patch follow in the same path that the
+one that changed the types and introduced the warnings took ...
+but since that didn't work perhaps I should just ask Linus to pull
+it from my ia64 tree.
+
+-Tony
