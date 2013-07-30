@@ -1,27 +1,44 @@
-From: Tony Luck <tony.luck@gmail.com>
-Subject: Re: [PATCH 1/4] efi: provide a generic efi_config_init()
-Date: Tue, 30 Jul 2013 11:14:51 -0700
-Message-ID: <CA+8MBbLbsrH=gNJ4oc5VzphY6xFMthWoq5R905Rzaow2SmA9uw@mail.gmail.com>
-References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
-	<1375202858-28470-2-git-send-email-leif.lindholm@linaro.org>
-	<CA+8MBbK5S3z+VQhhuT5WT7=7zYy=5zyvZEWfnfTfc1NxXBa=Sg@mail.gmail.com>
-	<20130730180230.GJ18151@rocoto.smurfnet.nu>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL] urgent fix
+Date: Tue, 30 Jul 2013 20:52:12 +0200
+Message-ID: <20130730185212.GA21687@gmail.com>
+References: <20130729080836.GD2515@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-ia64-owner@vger.kernel.org>
-In-Reply-To: <20130730180230.GJ18151@rocoto.smurfnet.nu>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, patches@linaro.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20130729080836.GD2515@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 30, 2013 at 11:02 AM, Leif Lindholm
-<leif.lindholm@linaro.org> wrote:
-> So I guess the clean way to deal with that would be to make the
-> memremap definition a separate patch?
 
-Or just pull:
-+#define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
-out of part 3 and put it into part1 (along with some of the commit commentary).
+* Matt Fleming <matt@console-pimps.org> wrote:
 
--Tony
+> The following changes since commit 3b2f64d00c46e1e4e9bd0bb9bb12619adac27a4b:
+> 
+>   Linux 3.11-rc2 (2013-07-21 12:05:29 -0700)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394:
+> 
+>   x86, efi: correct call to free_pages (2013-07-26 15:22:32 +0100)
+> 
+> ----------------------------------------------------------------
+>  * The size of memory that gets freed by free_pages() needs to be
+>    specified in pages, not bytes - Roy Franz.
+> 
+> ----------------------------------------------------------------
+> Roy Franz (1):
+>       x86, efi: correct call to free_pages
+> 
+>  arch/x86/boot/compressed/eboot.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+
+Pulled into tip:x86/urgent, thanks Matt!
+
+	Ingo
