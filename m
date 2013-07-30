@@ -1,32 +1,35 @@
-From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
 Subject: Re: [PATCH 1/4] efi: provide a generic efi_config_init()
-Date: Tue, 30 Jul 2013 10:53:10 -0700
-Message-ID: <CA+8MBbK5S3z+VQhhuT5WT7=7zYy=5zyvZEWfnfTfc1NxXBa=Sg@mail.gmail.com>
+Date: Tue, 30 Jul 2013 20:02:30 +0200
+Message-ID: <20130730180230.GJ18151@rocoto.smurfnet.nu>
 References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
-	<1375202858-28470-2-git-send-email-leif.lindholm@linaro.org>
+ <1375202858-28470-2-git-send-email-leif.lindholm@linaro.org>
+ <CA+8MBbK5S3z+VQhhuT5WT7=7zYy=5zyvZEWfnfTfc1NxXBa=Sg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1375202858-28470-2-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ia64-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+8MBbK5S3z+VQhhuT5WT7=7zYy=5zyvZEWfnfTfc1NxXBa=Sg@mail.gmail.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Tony Luck <tony.luck@gmail.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, patches@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 30, 2013 at 9:47 AM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> +       /*
-> +        * Let's see what config tables the firmware passed to us.
-> +        */
-> +       config_tables = early_mememap(efi.systab->tables,
-> +                                      efi.systab->nr_tables * sz);
+On Tue, Jul 30, 2013 at 10:53:10AM -0700, Tony Luck wrote:
+> On Tue, Jul 30, 2013 at 9:47 AM, Leif Lindholm <leif.lindholm@linaro.org> wrote:
+> > +       /*
+> > +        * Let's see what config tables the firmware passed to us.
+> > +        */
+> > +       config_tables = early_mememap(efi.systab->tables,
+> > +                                      efi.systab->nr_tables * sz);
+> 
+> Breaks bisection on ia64 ... you use early_mememap() here, but don't
+> define it on ia64 until patch 3/4.  So I get:
 
-Breaks bisection on ia64 ... you use early_mememap() here, but don't
-define it on ia64 until patch 3/4.  So I get:
+Ugh, OK.
 
-drivers/firmware/efi/efi.c: In function 'efi_config_init':
-drivers/firmware/efi/efi.c:200: error: implicit declaration of
-function 'early_memremap'
-drivers/firmware/efi/efi.c:201: warning: assignment makes pointer from
-integer without a cast
+So I guess the clean way to deal with that would be to make the
+memremap definition a separate patch?
 
--Tony
+/
+    Leif
