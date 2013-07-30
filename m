@@ -1,143 +1,32 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH 3/4] efi: ia64: use common code for (U)EFI configuration scanning
-Date: Tue, 30 Jul 2013 17:47:37 +0100
-Message-ID: <1375202858-28470-4-git-send-email-leif.lindholm@linaro.org>
+From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/4] efi: provide a generic efi_config_init()
+Date: Tue, 30 Jul 2013 10:53:10 -0700
+Message-ID: <CA+8MBbK5S3z+VQhhuT5WT7=7zYy=5zyvZEWfnfTfc1NxXBa=Sg@mail.gmail.com>
 References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-ia64-owner@vger.kernel.org>
-In-Reply-To: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-ia64-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, hpa@zytor.com, tglx@linutronix.de, patches@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
+	<1375202858-28470-2-git-send-email-leif.lindholm@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1375202858-28470-2-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This patch makes ia64 use the new common code for configuration
-table scanning. It also removes the local definition of the global
-"efi" data structure.
+On Tue, Jul 30, 2013 at 9:47 AM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> +       /*
+> +        * Let's see what config tables the firmware passed to us.
+> +        */
+> +       config_tables = early_mememap(efi.systab->tables,
+> +                                      efi.systab->nr_tables * sz);
 
-Introduces an early_memremap() alias for early_ioremap(), which
-should be fine given that early_ioremap() parses the memory map for
-determining type of mapping anyway.
+Breaks bisection on ia64 ... you use early_mememap() here, but don't
+define it on ia64 until patch 3/4.  So I get:
 
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
----
- arch/ia64/include/asm/io.h |    1 +
- arch/ia64/kernel/efi.c     |   54 +++++++++-----------------------------------
- 2 files changed, 12 insertions(+), 43 deletions(-)
+drivers/firmware/efi/efi.c: In function 'efi_config_init':
+drivers/firmware/efi/efi.c:200: error: implicit declaration of
+function 'early_memremap'
+drivers/firmware/efi/efi.c:201: warning: assignment makes pointer from
+integer without a cast
 
-diff --git a/arch/ia64/include/asm/io.h b/arch/ia64/include/asm/io.h
-index 74a7cc3..c439d28 100644
---- a/arch/ia64/include/asm/io.h
-+++ b/arch/ia64/include/asm/io.h
-@@ -424,6 +424,7 @@ extern void __iomem * ioremap(unsigned long offset, unsigned long size);
- extern void __iomem * ioremap_nocache (unsigned long offset, unsigned long size);
- extern void iounmap (volatile void __iomem *addr);
- extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
-+#define early_memremap(phys_addr, size)	early_ioremap(phys_addr, size)
- extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
- static inline void __iomem * ioremap_cache (unsigned long phys_addr, unsigned long size)
- {
-diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index 51bce59..da5b462 100644
---- a/arch/ia64/kernel/efi.c
-+++ b/arch/ia64/kernel/efi.c
-@@ -44,10 +44,15 @@
- 
- #define EFI_DEBUG	0
- 
-+static __initdata unsigned long palo_phys;
-+
-+static __initdata efi_config_table_type_t arch_tables[] = {
-+	{PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID, "PALO", &palo_phys},
-+	{NULL_GUID, NULL, 0},
-+};
-+
- extern efi_status_t efi_call_phys (void *, ...);
- 
--struct efi efi;
--EXPORT_SYMBOL(efi);
- static efi_runtime_services_t *runtime;
- static u64 mem_limit = ~0UL, max_addr = ~0UL, min_addr = 0UL;
- 
-@@ -423,9 +428,9 @@ static u8 __init palo_checksum(u8 *buffer, u32 length)
-  * Parse and handle PALO table which is published at:
-  * http://www.dig64.org/home/DIG64_PALO_R1_0.pdf
-  */
--static void __init handle_palo(unsigned long palo_phys)
-+static void __init handle_palo(unsigned long phys_addr)
- {
--	struct palo_table *palo = __va(palo_phys);
-+	struct palo_table *palo = __va(phys_addr);
- 	u8  checksum;
- 
- 	if (strncmp(palo->signature, PALO_SIG, sizeof(PALO_SIG) - 1)) {
-@@ -467,12 +472,10 @@ void __init
- efi_init (void)
- {
- 	void *efi_map_start, *efi_map_end;
--	efi_config_table_t *config_tables;
- 	efi_char16_t *c16;
- 	u64 efi_desc_size;
- 	char *cp, vendor[100] = "unknown";
- 	int i;
--	unsigned long palo_phys;
- 
- 	/*
- 	 * It's too early to be able to use the standard kernel command line
-@@ -514,8 +517,6 @@ efi_init (void)
- 		       efi.systab->hdr.revision >> 16,
- 		       efi.systab->hdr.revision & 0xffff);
- 
--	config_tables = __va(efi.systab->tables);
--
- 	/* Show what we know for posterity */
- 	c16 = __va(efi.systab->fw_vendor);
- 	if (c16) {
-@@ -528,43 +529,10 @@ efi_init (void)
- 	       efi.systab->hdr.revision >> 16,
- 	       efi.systab->hdr.revision & 0xffff, vendor);
- 
--	efi.mps        = EFI_INVALID_TABLE_ADDR;
--	efi.acpi       = EFI_INVALID_TABLE_ADDR;
--	efi.acpi20     = EFI_INVALID_TABLE_ADDR;
--	efi.smbios     = EFI_INVALID_TABLE_ADDR;
--	efi.sal_systab = EFI_INVALID_TABLE_ADDR;
--	efi.boot_info  = EFI_INVALID_TABLE_ADDR;
--	efi.hcdp       = EFI_INVALID_TABLE_ADDR;
--	efi.uga        = EFI_INVALID_TABLE_ADDR;
--
- 	palo_phys      = EFI_INVALID_TABLE_ADDR;
- 
--	for (i = 0; i < (int) efi.systab->nr_tables; i++) {
--		if (efi_guidcmp(config_tables[i].guid, MPS_TABLE_GUID) == 0) {
--			efi.mps = config_tables[i].table;
--			printk(" MPS=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, ACPI_20_TABLE_GUID) == 0) {
--			efi.acpi20 = config_tables[i].table;
--			printk(" ACPI 2.0=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, ACPI_TABLE_GUID) == 0) {
--			efi.acpi = config_tables[i].table;
--			printk(" ACPI=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, SMBIOS_TABLE_GUID) == 0) {
--			efi.smbios = config_tables[i].table;
--			printk(" SMBIOS=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, SAL_SYSTEM_TABLE_GUID) == 0) {
--			efi.sal_systab = config_tables[i].table;
--			printk(" SALsystab=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, HCDP_TABLE_GUID) == 0) {
--			efi.hcdp = config_tables[i].table;
--			printk(" HCDP=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid,
--			 PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID) == 0) {
--			palo_phys = config_tables[i].table;
--			printk(" PALO=0x%lx", config_tables[i].table);
--		}
--	}
--	printk("\n");
-+	if (efi_config_init(arch_tables) != 0)
-+		return;
- 
- 	if (palo_phys != EFI_INVALID_TABLE_ADDR)
- 		handle_palo(palo_phys);
--- 
-1.7.10.4
-
+-Tony
