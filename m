@@ -1,44 +1,22 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL] urgent fix
-Date: Tue, 30 Jul 2013 20:52:12 +0200
-Message-ID: <20130730185212.GA21687@gmail.com>
-References: <20130729080836.GD2515@console-pimps.org>
+From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 0/4] Make commonly useful UEFI functions common
+Date: Tue, 30 Jul 2013 12:57:49 -0700
+Message-ID: <CA+8MBb+VzakCg0NAfxTxQ+LipvKhjTL4QaU5Q-vEU=hVZViq_A@mail.gmail.com>
+References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130729080836.GD2515@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1375202858-28470-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Tue, Jul 30, 2013 at 9:47 AM, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> IA64 code compile tested only.
 
-* Matt Fleming <matt@console-pimps.org> wrote:
+Compiled on a bunch of ia64 configurations, Boot tested. But not on machine that
+does the PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID thingy.
+Code to do the arch specific thing looks ok though.
 
-> The following changes since commit 3b2f64d00c46e1e4e9bd0bb9bb12619adac27a4b:
-> 
->   Linux 3.11-rc2 (2013-07-21 12:05:29 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394:
-> 
->   x86, efi: correct call to free_pages (2013-07-26 15:22:32 +0100)
-> 
-> ----------------------------------------------------------------
->  * The size of memory that gets freed by free_pages() needs to be
->    specified in pages, not bytes - Roy Franz.
-> 
-> ----------------------------------------------------------------
-> Roy Franz (1):
->       x86, efi: correct call to free_pages
-> 
->  arch/x86/boot/compressed/eboot.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-
-Pulled into tip:x86/urgent, thanks Matt!
-
-	Ingo
+-Tony
