@@ -1,37 +1,41 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] urgent fix
-Date: Mon, 29 Jul 2013 09:08:36 +0100
-Message-ID: <20130729080836.GD2515@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/4] Make commonly useful UEFI functions common
+Date: Tue, 30 Jul 2013 17:47:34 +0100
+Message-ID: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The following changes since commit 3b2f64d00c46e1e4e9bd0bb9bb12619adac27a4b:
+This set breaks out some common code from x86/ia64 EFI support
+code and puts it into drivers/firmware/efi.
 
-  Linux 3.11-rc2 (2013-07-21 12:05:29 -0700)
+First it takes the definition of the global "efi" data structure
+and moves it into global efi.c. Then it implements a common version
+of efi_config_init().
 
-are available in the git repository at:
+Secondly it breaks the efi_lookup_mapped_addr() function out of x86
+and places it in global efi.c, for shared use with future ARM
+patches.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+IA64 code compile tested only.
 
-for you to fetch changes up to df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394:
+Pardon the delay in getting this out - back to back conferences
+followed by a bad case of the man flu.
 
-  x86, efi: correct call to free_pages (2013-07-26 15:22:32 +0100)
+Leif Lindholm (4):
+  efi: provide a generic efi_config_init()
+  efi: x86: use common code for (U)EFI configuration scanning
+  efi: ia64: use common code for (U)EFI configuration scanning
+  efi: x86: make efi_lookup_mapped_addr() a common function
 
-----------------------------------------------------------------
- * The size of memory that gets freed by free_pages() needs to be
-   specified in pages, not bytes - Roy Franz.
+ arch/ia64/include/asm/io.h  |    1 +
+ arch/ia64/kernel/efi.c      |   54 ++++-------------
+ arch/x86/platform/efi/efi.c |  124 +++------------------------------------
+ drivers/firmware/efi/efi.c  |  136 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h         |    7 +++
+ 5 files changed, 163 insertions(+), 159 deletions(-)
 
-----------------------------------------------------------------
-Roy Franz (1):
-      x86, efi: correct call to free_pages
-
- arch/x86/boot/compressed/eboot.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.7.10.4
