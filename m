@@ -1,50 +1,20 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: "Fleming, Matt" <matt.fleming@intel.com>
 Subject: Re: [PATCH 0/4] Make commonly useful UEFI functions common
-Date: Thu, 01 Aug 2013 13:26:41 -0700
-Message-ID: <51FAC481.2050905@zytor.com>
+Date: Thu, 1 Aug 2013 21:45:21 +0100
+Message-ID: <CAL01qpvhoCJH8mnS89_L=zEeUO1DD24myPEV6BzeyA4ZSd-Uqg@mail.gmail.com>
 References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
+	<51FAC481.2050905@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1375202858-28470-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-ia64-owner@vger.kernel.org>
+In-Reply-To: <51FAC481.2050905@zytor.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-ia64@vger.kernel.org, "tglx@linutronix.de" <tglx@linutronix.de>, patches@linaro.org, "Luck, Tony" <tony.luck@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 07/30/2013 09:47 AM, Leif Lindholm wrote:
-> This set breaks out some common code from x86/ia64 EFI support
-> code and puts it into drivers/firmware/efi.
-> 
-> First it takes the definition of the global "efi" data structure
-> and moves it into global efi.c. Then it implements a common version
-> of efi_config_init().
-> 
-> Secondly it breaks the efi_lookup_mapped_addr() function out of x86
-> and places it in global efi.c, for shared use with future ARM
-> patches.
-> 
-> IA64 code compile tested only.
-> 
-> Pardon the delay in getting this out - back to back conferences
-> followed by a bad case of the man flu.
-> 
-> Leif Lindholm (4):
->   efi: provide a generic efi_config_init()
->   efi: x86: use common code for (U)EFI configuration scanning
->   efi: ia64: use common code for (U)EFI configuration scanning
->   efi: x86: make efi_lookup_mapped_addr() a common function
-> 
->  arch/ia64/include/asm/io.h  |    1 +
->  arch/ia64/kernel/efi.c      |   54 ++++-------------
->  arch/x86/platform/efi/efi.c |  124 +++------------------------------------
->  drivers/firmware/efi/efi.c  |  136 +++++++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h         |    7 +++
->  5 files changed, 163 insertions(+), 159 deletions(-)
-> 
+On 1 August 2013 21:26, H. Peter Anvin <hpa@zytor.com> wrote:
+> Matt, I assume you're picking this up once the missing bits are plugged
+> in, right?
 
-Matt, I assume you're picking this up once the missing bits are plugged
-in, right?
-
-	-hpa
+Yep, that was my plan.
