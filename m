@@ -1,20 +1,40 @@
-From: "Fleming, Matt" <matt.fleming@intel.com>
-Subject: Re: [PATCH 0/4] Make commonly useful UEFI functions common
-Date: Thu, 1 Aug 2013 21:45:21 +0100
-Message-ID: <CAL01qpvhoCJH8mnS89_L=zEeUO1DD24myPEV6BzeyA4ZSd-Uqg@mail.gmail.com>
-References: <1375202858-28470-1-git-send-email-leif.lindholm@linaro.org>
-	<51FAC481.2050905@zytor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v2 0/5] Make commonly useful UEFI functions common
+Date: Fri,  2 Aug 2013 17:56:17 +0100
+Message-ID: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-ia64-owner@vger.kernel.org>
-In-Reply-To: <51FAC481.2050905@zytor.com>
 Sender: linux-ia64-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-ia64@vger.kernel.org, "tglx@linutronix.de" <tglx@linutronix.de>, patches@linaro.org, "Luck, Tony" <tony.luck@intel.com>
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 1 August 2013 21:26, H. Peter Anvin <hpa@zytor.com> wrote:
-> Matt, I assume you're picking this up once the missing bits are plugged
-> in, right?
+This set breaks out some common code from x86/ia64 EFI support
+code and puts it into drivers/firmware/efi.
 
-Yep, that was my plan.
+First it takes the definition of the global "efi" data structure
+and moves it into global efi.c. Then it implements a common version
+of efi_config_init().
+
+Secondly it breaks the efi_lookup_mapped_addr() function out of x86
+and places it in global efi.c, for shared use with future ARM
+patches.
+
+IA64 code compile tested only.
+
+Leif Lindholm (5):
+  ia64: add early_memremap() alias for early_ioremap()
+  efi: provide a generic efi_config_init()
+  efi: x86: use common code for (U)EFI configuration scanning
+  efi: ia64: use common code for (U)EFI configuration scanning
+  efi: x86: make efi_lookup_mapped_addr() a common function
+
+ arch/ia64/include/asm/io.h  |    1 +
+ arch/ia64/kernel/efi.c      |   54 ++++-------------
+ arch/x86/platform/efi/efi.c |  126 ++++-----------------------------------
+ drivers/firmware/efi/efi.c  |  138 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h         |    8 +++
+ 5 files changed, 168 insertions(+), 159 deletions(-)
+
+-- 
+1.7.10.4
+
