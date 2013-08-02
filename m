@@ -1,155 +1,63 @@
 From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH 4/7] Add proper definitions for some EFI function pointers.
-Date: Fri,  2 Aug 2013 14:29:05 -0700
-Message-ID: <1375478948-22562-5-git-send-email-roy.franz@linaro.org>
-References: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Subject: [PATCH 0/7] RFC: EFI stub for ARM
+Date: Fri,  2 Aug 2013 14:29:01 -0700
+Message-ID: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
-Cc: leif.lindholm@linaro.org, Roy Franz <roy.franz@linaro.org>
+Cc: Roy Franz <roy.franz@linaro.org>, leif.lindholm@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-The x86/AMD64 EFI stubs must us a call wrapper to convert between
-the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
-the ABIs are compatible, so we can directly invoke the function
-pointers.  The functions that are used by the ARM stub are updated
-to match the EFI definitions.
+This RFC patch series adds EFI stub support for the ARM architecture.
+Some code that was previously only used by x86/x86_64 is now shared
+and has been made more general.  The stub for ARM is implemented in
+a similar manner to x86 in that it is a shim layer between EFI and
+the normal zImage/bzImage boot process, and that an image with the
+stub configured is bootable as both a zImage and EFI application.
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
----
- include/linux/efi.h |   61 +++++++++++++++++++++++++++++++++++++--------------
- 1 file changed, 44 insertions(+), 17 deletions(-)
+This patchset depends on a separately submitted bugfix to the
+EFI stub: "correct call to free_pages"
+http://git.kernel.org/cgit/linux/kernel/git/tip/tip.git/commit/?id=df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 51f5641..779ec8c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -39,6 +39,8 @@
- typedef unsigned long efi_status_t;
- typedef u8 efi_bool_t;
- typedef u16 efi_char16_t;		/* UNICODE character */
-+typedef u64 efi_physical_addr_t;
-+typedef void *efi_handle_t;
- 
- 
- typedef struct {
-@@ -96,6 +98,26 @@ typedef	struct {
- #define EFI_MEMORY_DESCRIPTOR_VERSION	1
- 
- #define EFI_PAGE_SHIFT		12
-+#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
-+
-+typedef enum {
-+	EfiReservedMemoryType,
-+	EfiLoaderCode,
-+	EfiLoaderData,
-+	EfiBootServicesCode,
-+	EfiBootServicesData,
-+	EfiRuntimeServicesCode,
-+	EfiRuntimeServicesData,
-+	EfiConventionalMemory,
-+	EfiUnusableMemory,
-+	EfiACPIReclaimMemory,
-+	EfiACPIMemoryNVS,
-+	EfiMemoryMappedIO,
-+	EfiMemoryMappedIOPortSpace,
-+	EfiPalCode,
-+	EfiMaxMemoryType
-+} EFI_MEMORY_TYPE;
-+
- 
- typedef struct {
- 	u32 type;
-@@ -157,11 +179,12 @@ typedef struct {
- 	efi_table_hdr_t hdr;
- 	void *raise_tpl;
- 	void *restore_tpl;
--	void *allocate_pages;
--	void *free_pages;
--	void *get_memory_map;
--	void *allocate_pool;
--	void *free_pool;
-+	int (*allocate_pages)(int, int, unsigned long, efi_physical_addr_t *);
-+	int (*free_pages)(efi_physical_addr_t, unsigned long);
-+	int (*get_memory_map)(unsigned long *, void *, unsigned long *,
-+			      unsigned long *, u32 *);
-+	int (*allocate_pool)(int, unsigned long, void **);
-+	int (*free_pool)(void *);
- 	void *create_event;
- 	void *set_timer;
- 	void *wait_for_event;
-@@ -171,7 +194,7 @@ typedef struct {
- 	void *install_protocol_interface;
- 	void *reinstall_protocol_interface;
- 	void *uninstall_protocol_interface;
--	void *handle_protocol;
-+	int (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
- 	void *locate_handle;
-@@ -181,7 +204,7 @@ typedef struct {
- 	void *start_image;
- 	void *exit;
- 	void *unload_image;
--	void *exit_boot_services;
-+	int (*exit_boot_services)(efi_handle_t, unsigned long);
- 	void *get_next_monotonic_count;
- 	void *stall;
- 	void *set_watchdog_timer;
-@@ -488,10 +511,6 @@ typedef struct {
- 	unsigned long unload;
- } efi_loaded_image_t;
- 
--typedef struct {
--	u64 revision;
--	void *open_volume;
--} efi_file_io_interface_t;
- 
- typedef struct {
- 	u64 size;
-@@ -504,20 +523,28 @@ typedef struct {
- 	efi_char16_t filename[1];
- } efi_file_info_t;
- 
--typedef struct {
-+typedef struct _efi_file_handle {
- 	u64 revision;
--	void *open;
--	void *close;
-+	int (*open)(struct _efi_file_handle *, struct _efi_file_handle **,
-+		    efi_char16_t *, u64, u64);
-+	int (*close)(struct _efi_file_handle *);
- 	void *delete;
--	void *read;
-+	int (*read)(struct _efi_file_handle *, unsigned long *, void *);
- 	void *write;
- 	void *get_position;
- 	void *set_position;
--	void *get_info;
-+	int (*get_info)(struct _efi_file_handle *, efi_guid_t *,
-+			unsigned long *, void *);
- 	void *set_info;
- 	void *flush;
- } efi_file_handle_t;
- 
-+typedef struct _efi_file_io_interface {
-+	u64 revision;
-+	int (*open_volume)(struct _efi_file_io_interface *,
-+			   efi_file_handle_t **);
-+} efi_file_io_interface_t;
-+
- #define EFI_FILE_MODE_READ	0x0000000000000001
- #define EFI_FILE_MODE_WRITE	0x0000000000000002
- #define EFI_FILE_MODE_CREATE	0x8000000000000000
-@@ -787,7 +814,7 @@ struct efivar_entry {
- 
- struct efi_simple_text_output_protocol {
- 	void *reset;
--	void *output_string;
-+	int (*output_string)(void *, void *);
- 	void *test_string;
- };
- 
+Roy Franz (7):
+  EFI stub documentation updates
+  Move common EFI stub code from x86 arch code to common location
+  Change EFI helper APIs to be more flexible
+  Add proper definitions for some EFI function pointers.
+  Add strstr to compressed string.c for ARM.
+  Add EFI stub for ARM
+  Add config EFI_STUB for ARM
+
+ Documentation/efi-stub.txt             |   78 +++++
+ Documentation/x86/efi-stub.txt         |   65 ----
+ arch/arm/Kconfig                       |   10 +
+ arch/arm/boot/compressed/Makefile      |   18 +-
+ arch/arm/boot/compressed/efi-header.S  |  114 +++++++
+ arch/arm/boot/compressed/efi-stub.c    |  514 ++++++++++++++++++++++++++++++++
+ arch/arm/boot/compressed/head.S        |   90 +++++-
+ arch/arm/boot/compressed/string.c      |   21 ++
+ arch/x86/Kconfig                       |    2 +-
+ arch/x86/boot/compressed/eboot.c       |  488 ++----------------------------
+ arch/x86/boot/compressed/eboot.h       |    6 -
+ drivers/firmware/efi/efi-stub-helper.c |  506 +++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |   67 ++++-
+ 13 files changed, 1428 insertions(+), 551 deletions(-)
+ create mode 100644 Documentation/efi-stub.txt
+ delete mode 100644 Documentation/x86/efi-stub.txt
+ create mode 100644 arch/arm/boot/compressed/efi-header.S
+ create mode 100644 arch/arm/boot/compressed/efi-stub.c
+ create mode 100644 drivers/firmware/efi/efi-stub-helper.c
+
 -- 
 1.7.10.4
