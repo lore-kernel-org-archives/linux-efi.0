@@ -1,126 +1,128 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 4/5] efi: ia64: use common code for (U)EFI configuration scanning
-Date: Fri,  2 Aug 2013 17:56:21 +0100
-Message-ID: <1375462582-16423-5-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v2 5/5] efi: x86: make efi_lookup_mapped_addr() a common function
+Date: Fri,  2 Aug 2013 17:56:22 +0100
+Message-ID: <1375462582-16423-6-git-send-email-leif.lindholm@linaro.org>
 References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-ia64-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-ia64-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org
 Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch makes ia64 use the new common code for configuration table
-scanning. It also removes the local definition of the global "efi"
-data structure.
+efi_lookup_mapped_addr() is a handy utility for other platforms than
+x86. Move it from arch/x86 to drivers/firmware. Add memmap pointer
+to global efi structure, and initialise it on x86.
 
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- arch/ia64/kernel/efi.c |   54 ++++++++++--------------------------------------
- 1 file changed, 11 insertions(+), 43 deletions(-)
+ arch/x86/platform/efi/efi.c |   30 ++----------------------------
+ drivers/firmware/efi/efi.c  |   32 ++++++++++++++++++++++++++++++++
+ include/linux/efi.h         |    1 +
+ 3 files changed, 35 insertions(+), 28 deletions(-)
 
-diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index 51bce59..da5b462 100644
---- a/arch/ia64/kernel/efi.c
-+++ b/arch/ia64/kernel/efi.c
-@@ -44,10 +44,15 @@
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ed2be58..fbc1d70 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -393,6 +393,8 @@ int __init efi_memblock_x86_reserve_range(void)
  
- #define EFI_DEBUG	0
+ 	memblock_reserve(pmap, memmap.nr_map * memmap.desc_size);
  
-+static __initdata unsigned long palo_phys;
++	efi.memmap = &memmap;
 +
-+static __initdata efi_config_table_type_t arch_tables[] = {
-+	{PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID, "PALO", &palo_phys},
-+	{NULL_GUID, NULL, 0},
-+};
-+
- extern efi_status_t efi_call_phys (void *, ...);
+ 	return 0;
+ }
  
--struct efi efi;
--EXPORT_SYMBOL(efi);
- static efi_runtime_services_t *runtime;
- static u64 mem_limit = ~0UL, max_addr = ~0UL, min_addr = 0UL;
+@@ -736,34 +738,6 @@ static void __init runtime_code_page_mkexec(void)
+ 	}
+ }
  
-@@ -423,9 +428,9 @@ static u8 __init palo_checksum(u8 *buffer, u32 length)
-  * Parse and handle PALO table which is published at:
-  * http://www.dig64.org/home/DIG64_PALO_R1_0.pdf
-  */
--static void __init handle_palo(unsigned long palo_phys)
-+static void __init handle_palo(unsigned long phys_addr)
- {
--	struct palo_table *palo = __va(palo_phys);
-+	struct palo_table *palo = __va(phys_addr);
- 	u8  checksum;
- 
- 	if (strncmp(palo->signature, PALO_SIG, sizeof(PALO_SIG) - 1)) {
-@@ -467,12 +472,10 @@ void __init
- efi_init (void)
- {
- 	void *efi_map_start, *efi_map_end;
--	efi_config_table_t *config_tables;
- 	efi_char16_t *c16;
- 	u64 efi_desc_size;
- 	char *cp, vendor[100] = "unknown";
- 	int i;
--	unsigned long palo_phys;
- 
- 	/*
- 	 * It's too early to be able to use the standard kernel command line
-@@ -514,8 +517,6 @@ efi_init (void)
- 		       efi.systab->hdr.revision >> 16,
- 		       efi.systab->hdr.revision & 0xffff);
- 
--	config_tables = __va(efi.systab->tables);
--
- 	/* Show what we know for posterity */
- 	c16 = __va(efi.systab->fw_vendor);
- 	if (c16) {
-@@ -528,43 +529,10 @@ efi_init (void)
- 	       efi.systab->hdr.revision >> 16,
- 	       efi.systab->hdr.revision & 0xffff, vendor);
- 
--	efi.mps        = EFI_INVALID_TABLE_ADDR;
--	efi.acpi       = EFI_INVALID_TABLE_ADDR;
--	efi.acpi20     = EFI_INVALID_TABLE_ADDR;
--	efi.smbios     = EFI_INVALID_TABLE_ADDR;
--	efi.sal_systab = EFI_INVALID_TABLE_ADDR;
--	efi.boot_info  = EFI_INVALID_TABLE_ADDR;
--	efi.hcdp       = EFI_INVALID_TABLE_ADDR;
--	efi.uga        = EFI_INVALID_TABLE_ADDR;
--
- 	palo_phys      = EFI_INVALID_TABLE_ADDR;
- 
--	for (i = 0; i < (int) efi.systab->nr_tables; i++) {
--		if (efi_guidcmp(config_tables[i].guid, MPS_TABLE_GUID) == 0) {
--			efi.mps = config_tables[i].table;
--			printk(" MPS=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, ACPI_20_TABLE_GUID) == 0) {
--			efi.acpi20 = config_tables[i].table;
--			printk(" ACPI 2.0=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, ACPI_TABLE_GUID) == 0) {
--			efi.acpi = config_tables[i].table;
--			printk(" ACPI=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, SMBIOS_TABLE_GUID) == 0) {
--			efi.smbios = config_tables[i].table;
--			printk(" SMBIOS=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, SAL_SYSTEM_TABLE_GUID) == 0) {
--			efi.sal_systab = config_tables[i].table;
--			printk(" SALsystab=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid, HCDP_TABLE_GUID) == 0) {
--			efi.hcdp = config_tables[i].table;
--			printk(" HCDP=0x%lx", config_tables[i].table);
--		} else if (efi_guidcmp(config_tables[i].guid,
--			 PROCESSOR_ABSTRACTION_LAYER_OVERWRITE_GUID) == 0) {
--			palo_phys = config_tables[i].table;
--			printk(" PALO=0x%lx", config_tables[i].table);
+-/*
+- * We can't ioremap data in EFI boot services RAM, because we've already mapped
+- * it as RAM.  So, look it up in the existing EFI memory map instead.  Only
+- * callable after efi_enter_virtual_mode and before efi_free_boot_services.
+- */
+-void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
+-{
+-	void *p;
+-	if (WARN_ON(!memmap.map))
+-		return NULL;
+-	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+-		efi_memory_desc_t *md = p;
+-		u64 size = md->num_pages << EFI_PAGE_SHIFT;
+-		u64 end = md->phys_addr + size;
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+-		    md->type != EFI_BOOT_SERVICES_CODE &&
+-		    md->type != EFI_BOOT_SERVICES_DATA)
+-			continue;
+-		if (!md->virt_addr)
+-			continue;
+-		if (phys_addr >= md->phys_addr && phys_addr < end) {
+-			phys_addr += md->virt_addr - md->phys_addr;
+-			return (__force void __iomem *)(unsigned long)phys_addr;
 -		}
 -	}
--	printk("\n");
-+	if (efi_config_init(arch_tables) != 0)
-+		return;
+-	return NULL;
+-}
+-
+ void efi_memory_uc(u64 addr, unsigned long size)
+ {
+ 	unsigned long page_shift = 1UL << EFI_PAGE_SHIFT;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 4fa944a..afdd1c0 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -148,6 +148,38 @@ err_put:
+ subsys_initcall(efisubsys_init);
  
- 	if (palo_phys != EFI_INVALID_TABLE_ADDR)
- 		handle_palo(palo_phys);
+ 
++/*
++ * We can't ioremap data in EFI boot services RAM, because we've already mapped
++ * it as RAM.  So, look it up in the existing EFI memory map instead.  Only
++ * callable after efi_enter_virtual_mode and before efi_free_boot_services.
++ */
++void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
++{
++	struct efi_memory_map *map;
++	void *p;
++	map = efi.memmap;
++	if (!map)
++		return NULL;
++	if (WARN_ON(!map->map))
++		return NULL;
++	for (p = map->map; p < map->map_end; p += map->desc_size) {
++		efi_memory_desc_t *md = p;
++		u64 size = md->num_pages << EFI_PAGE_SHIFT;
++		u64 end = md->phys_addr + size;
++		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
++		    md->type != EFI_BOOT_SERVICES_CODE &&
++		    md->type != EFI_BOOT_SERVICES_DATA)
++			continue;
++		if (!md->virt_addr)
++			continue;
++		if (phys_addr >= md->phys_addr && phys_addr < end) {
++			phys_addr += md->virt_addr - md->phys_addr;
++			return (__force void __iomem *)(unsigned long)phys_addr;
++		}
++	}
++	return NULL;
++}
++
+ static __initdata efi_config_table_type_t common_tables[] = {
+ 	{ACPI_20_TABLE_GUID, "ACPI 2.0", &efi.acpi20},
+ 	{ACPI_TABLE_GUID, "ACPI", &efi.acpi},
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 09d9e42..c084b6d 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -558,6 +558,7 @@ extern struct efi {
+ 	efi_get_next_high_mono_count_t *get_next_high_mono_count;
+ 	efi_reset_system_t *reset_system;
+ 	efi_set_virtual_address_map_t *set_virtual_address_map;
++	struct efi_memory_map *memmap;
+ } efi;
+ 
+ static inline int
 -- 
 1.7.10.4
-
