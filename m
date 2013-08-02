@@ -1,35 +1,40 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 1/5] ia64: add early_memremap() alias for early_ioremap()
-Date: Fri,  2 Aug 2013 17:56:18 +0100
-Message-ID: <1375462582-16423-2-git-send-email-leif.lindholm@linaro.org>
-References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 7/7] Add config EFI_STUB for ARM
+Date: Fri,  2 Aug 2013 14:29:08 -0700
+Message-ID: <1375478948-22562-8-git-send-email-roy.franz@linaro.org>
+References: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
+In-Reply-To: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: leif.lindholm@linaro.org, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-early_ioremap() on IA64 chooses its mapping type based on the EFI
-memory map. This patch adds an alias "early_memremap()" to be used
-where the targeted location is memory rather than an i/o device.
-
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- arch/ia64/include/asm/io.h |    1 +
- 1 file changed, 1 insertion(+)
+ arch/arm/Kconfig |   10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/ia64/include/asm/io.h b/arch/ia64/include/asm/io.h
-index 74a7cc3..0d2bcb3 100644
---- a/arch/ia64/include/asm/io.h
-+++ b/arch/ia64/include/asm/io.h
-@@ -424,6 +424,7 @@ extern void __iomem * ioremap(unsigned long offset, unsigned long size);
- extern void __iomem * ioremap_nocache (unsigned long offset, unsigned long size);
- extern void iounmap (volatile void __iomem *addr);
- extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
-+#define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
- extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
- static inline void __iomem * ioremap_cache (unsigned long phys_addr, unsigned long size)
- {
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index 37c0f4e..192968c 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -1805,6 +1805,16 @@ config UACCESS_WITH_MEMCPY
+ 	  However, if the CPU data cache is using a write-allocate mode,
+ 	  this option is unlikely to provide any performance gain.
+ 
++config EFI_STUB
++	bool "EFI stub support"
++	---help---
++	  This kernel feature allows a zImage to be loaded directly
++	  by EFI firmware without the use of a bootloader.  A PE/COFF
++	  header is added to the zImage in a way that makes the binary
++	  both a Linux zImage and an PE/COFF executable that can be
++	  executed directly by EFI firmware.
++	  See Documentation/efi-stub.txt for more information.
++
+ config SECCOMP
+ 	bool
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
 -- 
 1.7.10.4
