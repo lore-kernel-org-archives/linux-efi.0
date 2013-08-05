@@ -1,62 +1,91 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: Andrew Fish <afish@apple.com>
 Subject: Re: [edk2] Corrupted EFI region
-Date: Mon, 05 Aug 2013 08:34:49 -0700
-Message-ID: <1375716889.2163.12.camel@dabdike.int.hansenpartnership.com>
+Date: Mon, 05 Aug 2013 08:50:17 -0700
+Message-ID: <2DBE3EA4-E321-4A7B-B9AF-EDE55BC2E358@apple.com>
 References: <20130731205431.GG4724@pd.tnic>
-	 <1375307727.22084.103.camel@shinybook.infradead.org>
-	 <20130801164927.GA7445@pd.tnic> <51FF8C14.2070405@redhat.com>
-	 <20130805130258.GB31845@pd.tnic> <51FFAB13.4090603@redhat.com>
-	 <20130805140306.GD31845@pd.tnic> <51FFB660.4060400@redhat.com>
-	 <20130805144010.GE31845@pd.tnic> <51FFC19A.1020204@redhat.com>
+	<1375307727.22084.103.camel@shinybook.infradead.org>
+	<20130801164927.GA7445@pd.tnic> <51FF8C14.2070405@redhat.com>
+	<20130805130258.GB31845@pd.tnic> <51FFAB13.4090603@redhat.com>
+	<20130805140306.GD31845@pd.tnic> <51FFB660.4060400@redhat.com>
+	<20130805144010.GE31845@pd.tnic>
+Reply-To: edk2-devel@lists.sourceforge.net
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <51FFC19A.1020204-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Return-path: <edk2-devel-bounces@lists.sourceforge.net>
+In-reply-to: <20130805144010.GE31845@pd.tnic>
+List-Unsubscribe: <https://lists.sourceforge.net/lists/listinfo/edk2-devel>,
+	<mailto:edk2-devel-request@lists.sourceforge.net?subject=unsubscribe>
+List-Archive: <http://sourceforge.net/mailarchive/forum.php?forum_name=edk2-devel>
+List-Post: <mailto:edk2-devel@lists.sourceforge.net>
+List-Help: <mailto:edk2-devel-request@lists.sourceforge.net?subject=help>
+List-Subscribe: <https://lists.sourceforge.net/lists/listinfo/edk2-devel>,
+	<mailto:edk2-devel-request@lists.sourceforge.net?subject=subscribe>
+Errors-To: edk2-devel-bounces@lists.sourceforge.net
+To: edk2-devel@lists.sourceforge.net
+Cc: David Woodhouse <dwmw2@infradead.org>, linux-efi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Gleb Natapov <gleb@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2013-08-05 at 17:15 +0200, Laszlo Ersek wrote:
-> On 08/05/13 16:40, Borislav Petkov wrote:
-> > On Mon, Aug 05, 2013 at 04:27:44PM +0200, Laszlo Ersek wrote:
-> >> I wouldn't call the design of SetVirtualAddressMap() braindead.
-> > 
-> > Ok, I've always wondered and you could probably shed some light on the
-> > matter: why is SetVirtualAddressMap() a call-once only? Why can't I
-> > simply call it again and update the mappings?
+
+On Aug 5, 2013, at 7:40 AM, Borislav Petkov <bp@alien8.de> wrote:
+
+> On Mon, Aug 05, 2013 at 04:27:44PM +0200, Laszlo Ersek wrote:
+>> I wouldn't call the design of SetVirtualAddressMap() braindead.
 > 
-> The current implementation (how pointers are converted) probably doesn't
-> accommodate a second call.
-
-Having actually looked at the code (trying to find why we were getting
-an unconverted pointer), I second that.  However, the ugliness of the
-massive pointer chase should have been an indication that something was
-not quite right architecturally (or implementation wise) with
-SetVirtualAddressMap().
-
-> Of course you want to know why SetVirtualAddressMap() was designed like
-> that... I didn't participate in the design so I don't know :)
+> Ok, I've always wondered and you could probably shed some light on the
+> matter: why is SetVirtualAddressMap() a call-once only? Why can't I
+> simply call it again and update the mappings?
 > 
-> But, as I said, a kernel directly executing another kernel is an
-> unexpected idea. IMHO the second kernel in question doesn't fit the UEFI
-> phases at all. The OS booted like that (ie. the OS whose kernel is the
-> 2nd (=kexec) kernel) never goes through SEC, PEI, DXE, BDS.
+>> I'd rather call kexec unique and somewhat unexpected :)
+> 
+> In all fairness, it was there before UEFI, AFAICT.
+> 
 
-That thinking is a bit last century (not that I'm blaming you for it, it
-seems to be ingrained in the way UEFI sometimes goes about things) ...
-in the old days, DOS was bootstrapped by the 512 byte jump code in a
-well known sector.  In the current century, almost every OS is
-bootstrapped by a sophisticated loader, which is effectively another OS
-(if you don't believe this, try looking at the grub source code one
-day); it's a short step from this to one OS booting another, and that's
-really what kexec is.  The utility of kexec has proven itself over the
-past couple of decades or so by allowing us to dump (kexec to a dump
-kernel), short circuit the boot process (simply re-kexec the kernel on
-crash) and now do rebootless upgrades (checkpoint the userspace and
-kexec to the new kernel).  It's not even unique to Linux: Solaris used a
-hidden kexec system call to do live upgrades as well and I believe
-several other UNIXs have this feature.
+AFAICT EFI pre-dates kexec merge into mainline by a number of years as SetVirtualaddressMap() was part of EFI 1.0 (previous millennium) 
 
-James
+The EFI to UEFI conversion was placing EFI 1.10  into an industry standard, UEFI 2.0. UEFI is an industry standard so some one just needs to make a proposal to update the spec. The edk2 open source project is not part of the standards body so complaining on this mailing list is not going to get anything changed. 
+
+The conversion of C code to run from address A to address B is a non trivial operation, and a single conversion is bad enough. The infrastructure code required to do the conversion from physical to virtual addressing currently only runs from physical mode, so a call to change virtual address mappings from virtual mode is more complex than the current scheme. 
+In general you don't want complexity in the locked NOR FLASH of the platform that can only be updated by the platform vendor. Even if the platform firmware is easy to update you want to have complexity in the OS as it is easier to change and easier to get right.
+
+Thanks,
+
+Andrew Fish 
+
+>>> I wouldn't wonder if we f*cked it up again like the last time. I'll give
+>>> it a long hard look.
+>> 
+>> Ah sorry, by "and you guys suspect" I didn't mean to imply anything
+>> between the lines, I was simply trying to ascertain your working idea :)
+> 
+> As long as we get to the bottom of this, we're all fine. And I'd
+> pretty much expect everyone who is dealing with EFI to have grown a
+> sufficiently thick skin before starting to do so, so don't worry.
+> 
+> :-)
+> 
+> -- 
+> Regards/Gruss,
+>    Boris.
+> 
+> Sent from a fat crate under my desk. Formatting is fine.
+> --
+> 
+> ------------------------------------------------------------------------------
+> Get your SQL database under version control now!
+> Version control is standard for application code, but databases havent 
+> caught up. So what steps can you take to put your SQL databases under 
+> version control? Why should you start doing it? Read more to find out.
+> http://pubads.g.doubleclick.net/gampad/clk?id=49501711&iu=/4140/ostg.clktrk
+> _______________________________________________
+> edk2-devel mailing list
+> edk2-devel@lists.sourceforge.net
+> https://lists.sourceforge.net/lists/listinfo/edk2-devel
+
+
+------------------------------------------------------------------------------
+Get your SQL database under version control now!
+Version control is standard for application code, but databases havent 
+caught up. So what steps can you take to put your SQL databases under 
+version control? Why should you start doing it? Read more to find out.
+http://pubads.g.doubleclick.net/gampad/clk?id=49501711&iu=/4140/ostg.clktrk
