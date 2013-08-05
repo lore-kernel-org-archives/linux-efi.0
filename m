@@ -1,80 +1,92 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Mon, 05 Aug 2013 13:27:16 +0200
-Message-ID: <51FF8C14.2070405@redhat.com>
-References: <20130731205431.GG4724@pd.tnic> <1375307727.22084.103.camel@shinybook.infradead.org> <20130801164927.GA7445@pd.tnic>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v2 2/5] efi: provide a generic efi_config_init()
+Date: Mon, 5 Aug 2013 13:15:40 +0100
+Message-ID: <20130805121540.GP2515@console-pimps.org>
+References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
+ <1375462582-16423-3-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130801164927.GA7445-fF5Pk5pvG8Y@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1375462582-16423-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/01/13 18:49, Borislav Petkov wrote:
-> On Wed, Jul 31, 2013 at 10:55:27PM +0100, David Woodhouse wrote:
->> On Wed, 2013-07-31 at 22:54 +0200, Borislav Petkov wrote:
->>> so I'm seeing this funny thing where an EFI region changes when we enter
->>> efi_enter_virtual_mode when booting with edk2 on kvm. Here's the diff:
->>
->> Perhaps the edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org list should be in Cc?
+On Fri, 02 Aug, at 05:56:19PM, Leif Lindholm wrote:
+> Common to (U)EFI support on all platforms is the global "efi" data
+> structure, and the code that parses the System Table to locate
+> addresses to populate that structure with.
 > 
-> Good idea and message repeated below.
+> This patch adds both of these to the global EFI driver code.
 > 
-> One more thing: I'm using a self-built OVMF with top commit from March:
-> 
-> ------------------------------------------------------------------------
-> r14165 | sfu5 | 2013-03-06 02:42:04 +0100 (Wed, 06 Mar 2013) | 4 lines
-> 
-> Fix a bug that IsSignatureFoundInDatabase() incorrectly computes CertCount.
-> 
+> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
-> 
-> Hi guys,
-> 
-> so I'm seeing this funny thing where an EFI region changes when we enter
-> efi_enter_virtual_mode when booting with edk2 on kvm. Here's the diff:
-> 
-> --- before      2013-07-31 22:20:52.316039492 +0200
-> +++ after       2013-07-31 22:21:30.960731706 +0200
-> @@ -9,7 +9,7 @@ efi: mem07: type=2, attr=0xf, range=[0x0
->  efi: mem08: type=7, attr=0xf, range=[0x0000000040000000-0x000000007c000000) (960MB)
->  efi: mem09: type=4, attr=0xf, range=[0x000000007c000000-0x000000007c020000) (0MB)
->  efi: mem10: type=7, attr=0xf, range=[0x000000007c020000-0x000000007e0ad000) (32MB)
-> -efi: mem11: type=4, attr=0xf, range=[0x000000007e0ad000-0x000000007e0cc000) (0MB)
-> +efi: mem11: type=4, attr=0xf, range=[0x000000007e0ad000-0x000000007e0ad000) (0MB)
+>  drivers/firmware/efi/efi.c |  106 ++++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/efi.h        |    7 +++
+>  2 files changed, 113 insertions(+)
 
-(type 4 is EfiBootServicesData)
+[...]
 
->  efi: mem12: type=7, attr=0xf, range=[0x000000007e0cc000-0x000000007e0cd000) (0MB)
->  efi: mem13: type=4, attr=0xf, range=[0x000000007e0cd000-0x000000007e55d000) (4MB)
->  efi: mem14: type=3, attr=0xf, range=[0x000000007e55d000-0x000000007e59c000) (0MB)
-> 
-> That second boundary of region mem11 suddenly changes *before* we merge
-> the regions. edk2 bug?
+> +static __init int match_config_table(efi_guid_t *guid,
+> +				     unsigned long table,
+> +				     efi_config_table_type_t *table_types)
+> +{
+> +	u8 str[38];
 
-I take it you mean this change (ie. appearance of the zero-sized range)
-occurs when you enable KVM acceleration in qemu?
+Shouldn't this be 37? You get 36 bytes for your GUID, plus a trailing
+NUL? Either way, this should be a #define. The closest thing we have in
+include/linux/efi.h is EFI_VARIABLE_GUID_LEN. Perhaps we need a
+EFI_GUID_LEN that includes the trailing NUL?
 
-If so, please locate "gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel"
-in OvmfPkg/OvmfPkgX64.dsc, and set the following bit in its value:
+> +	int i;
+> +
+> +	if (table_types) {
+> +		efi_guid_unparse(guid, str);
+> +
+> +		for (i = 0; efi_guidcmp(table_types[i].guid, NULL_GUID); i++) {
+> +			efi_guid_unparse(&table_types[i].guid, str);
+> +
+> +			if (!efi_guidcmp(*guid, table_types[i].guid)) {
+> +				*(table_types[i].ptr) = table;
+> +				pr_cont(" %s=0x%lx ",
+> +					table_types[i].name, table);
+> +				return 1;
+> +			}
+> +		}
+> +	}
+> +
+> +	return 0;
+> +}
 
-  # DEBUG_GCD      0x00100000 Global Coherency Database changes
+One thing I just noticed that's worth pointing out is that 'pr_fmt'
+isn't defined in drivers/firmware/efi/efi.c. Before your patch series
+you get,
 
-Then please rebuild OVMF, and capture the debug port output of qemu
-("-debugcon file:debug.log -global isa-debugcon.iobase=0x402") both with
-and without KVM.
+[    0.000000] efi:  SMBIOS=0xbae41a98  ACPI=0xbac6f000  ACPI 2.0=0xbac6f000  MPS=0xfca90 
 
-DEBUG_GCD should produce messages related to CoreAllocateSpace(), and
-might help us find the spot the difference is introduced.
+and after,
 
-BTW does this have anything to do with the NX bit report of yours, or
-have you noticed this independently?
+[    0.000000]  SMBIOS=0xbae41a98  ACPI=0xbac6f000  ACPI 2.0=0xbac6f000 MPS=0xfca90 
 
-(I'm not subscribed to lkml so apologies if this email doesn't end up in
-those archives / doesn't reach everyone.)
+which isn't the end of the world, but it does mean that the error
+messages are now much less informative, e.g.
 
-Thanks
-Laszlo
+> +	config_tables = early_memremap(efi.systab->tables,
+> +				       efi.systab->nr_tables * sz);
+> +	if (config_tables == NULL) {
+> +		pr_err("could not map configuration table!\n");
+> +		return -ENOMEM;
+> +	}
+
+Which goes from,
+
+  efi: could not map configuration table!
+
+to become,
+
+  could not map configuration table!
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
