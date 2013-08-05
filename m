@@ -1,31 +1,43 @@
-From: "Clea F. Rees" <reescf-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: EFI stub boots only with setup_efi_pc() commented
-Date: Sat, 3 Aug 2013 00:06:23 +0100
-Message-ID: <CA+n4xYYJhoXp6KSeROda9ErrXZ0hFEBM-x-0Obvk3fmHwABfKw@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v2 1/5] ia64: add early_memremap() alias for
+ early_ioremap()
+Date: Mon, 5 Aug 2013 11:56:20 +0100
+Message-ID: <20130805105620.GO2515@console-pimps.org>
+References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
+ <1375462582-16423-2-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ia64-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1375462582-16423-2-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-Matt Fleming asked me to email describing a problem I am experiencing
-with the EFI stub loader. Matt has been trying to diagnose the cause
-of consistent failures of the stub loader in recent kernels on my
-machine.
+On Fri, 02 Aug, at 05:56:18PM, Leif Lindholm wrote:
+> early_ioremap() on IA64 chooses its mapping type based on the EFI
+> memory map. This patch adds an alias "early_memremap()" to be used
+> where the targeted location is memory rather than an i/o device.
+> 
+> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+> ---
+>  arch/ia64/include/asm/io.h |    1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/ia64/include/asm/io.h b/arch/ia64/include/asm/io.h
+> index 74a7cc3..0d2bcb3 100644
+> --- a/arch/ia64/include/asm/io.h
+> +++ b/arch/ia64/include/asm/io.h
+> @@ -424,6 +424,7 @@ extern void __iomem * ioremap(unsigned long offset, unsigned long size);
+>  extern void __iomem * ioremap_nocache (unsigned long offset, unsigned long size);
+>  extern void iounmap (volatile void __iomem *addr);
+>  extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
+> +#define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
+>  extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
+>  static inline void __iomem * ioremap_cache (unsigned long phys_addr, unsigned long size)
 
-Background: All kernels I tried in 3.7.* booted fine using the stub
-loader (via rEFInd). No kernels tried from 3.8.* through 3.9.* and now
-into 3.10.* boot using the stub loader. None of the workarounds which
-others have used work for me. The problem is reproducible using a
-direct NVRAM entry rather than rEFInd. All kernels boot fine with
-GRUB.
+Tony, can I get your Acked-by for this?
 
-The problem is reproducible with a kernel compiled from git. A series
-of experiments (following Matt's instructions) have determined that
-commenting out the call to setup_efi_pc() in eboot.c makes the kernels
-boot.
-
-I would be happy to provide any further information which might be
-helpful or to run further tests.
+-- 
+Matt Fleming, Intel Open Source Technology Center
