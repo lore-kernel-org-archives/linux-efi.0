@@ -1,27 +1,45 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Mon, 5 Aug 2013 18:47:31 +0200
-Message-ID: <20130805164731.GG31845@pd.tnic>
-References: <20130801164927.GA7445@pd.tnic>
- <51FF8C14.2070405@redhat.com>
- <20130805130258.GB31845@pd.tnic>
- <51FFAB13.4090603@redhat.com>
- <20130805140306.GD31845@pd.tnic>
- <51FFB660.4060400@redhat.com>
- <20130805144010.GE31845@pd.tnic>
- <51FFC19A.1020204@redhat.com>
- <20130805161247.GF31845@pd.tnic>
- <51FFD5B0.9080000@redhat.com>
+From: "Kinney, Michael D" <michael.d.kinney-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [edk2] Corrupted EFI region
+Date: Mon, 5 Aug 2013 17:00:56 +0000
+Message-ID: <E92EE9817A31E24EB0585FDF735412F5624B203B@ORSMSX106.amr.corp.intel.com>
+References: <20130801164927.GA7445@pd.tnic> <51FF8C14.2070405@redhat.com>
+	<20130805130258.GB31845@pd.tnic> <51FFAB13.4090603@redhat.com>
+	<20130805140306.GD31845@pd.tnic> <51FFB660.4060400@redhat.com>
+	<20130805144010.GE31845@pd.tnic> <51FFC19A.1020204@redhat.com>
+	<20130805161247.GF31845@pd.tnic> <51FFD5B0.9080000@redhat.com>
+ <20130805164731.GG31845@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <51FFD5B0.9080000-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20130805164731.GG31845-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: "edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
+
+Boris,
+
+A memory map entry with zero size does not look right to me.
+
+The memory map passed into SetVirtualAddressMap() must contain the exact same set of memory map entries that existed when ExitBootServices() was called with a return result of EFI_SUCCESS.
+
+When you are showing comparisons of memory maps, are you showing the ExitBootServices() one and the SeVirtualAddressMap() one?  If the memory maps are not identical, then somehow the memory map is being modified, and we need to figure that out.
+
+If the ExitBootServices() memory map has the zero sized entry, then we need to see how GetMemoryMap() is returning a zero sized entry.  It is not clear that a zero sized entry would actually break anything, but it is a good idea to root cause that issue and make sure those types of memory map entries are not pass from the FW to the OS.
+
+Thanks,
+
+Mike
+
+
+-----Original Message-----
+From: Borislav Petkov [mailto:bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org] 
+Sent: Monday, August 05, 2013 9:48 AM
+To: Laszlo Ersek
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; Gleb Natapov; edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org; lkml; David Woodhouse
+Subject: Re: [edk2] Corrupted EFI region
 
 On Mon, Aug 05, 2013 at 06:41:20PM +0200, Laszlo Ersek wrote:
 > I didn't realize the timestamps survive kexec. (As far as I remember
@@ -452,3 +470,14 @@ Regards/Gruss,
 
 Sent from a fat crate under my desk. Formatting is fine.
 --
+
+------------------------------------------------------------------------------
+Get your SQL database under version control now!
+Version control is standard for application code, but databases havent 
+caught up. So what steps can you take to put your SQL databases under 
+version control? Why should you start doing it? Read more to find out.
+http://pubads.g.doubleclick.net/gampad/clk?id=49501711&iu=/4140/ostg.clktrk
+_______________________________________________
+edk2-devel mailing list
+edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+https://lists.sourceforge.net/lists/listinfo/edk2-devel
