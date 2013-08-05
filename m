@@ -1,35 +1,26 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v2 5/5] efi: x86: make efi_lookup_mapped_addr() a common
- function
-Date: Mon, 5 Aug 2013 13:26:28 +0100
-Message-ID: <20130805122628.GS2515@console-pimps.org>
-References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
- <1375462582-16423-6-git-send-email-leif.lindholm@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [GIT PULL] urgent fix
+Date: Mon, 5 Aug 2013 14:02:42 +0100
+Message-ID: <20130805130242.GU2515@console-pimps.org>
+References: <20130729080836.GD2515@console-pimps.org>
+ <20130730185212.GA21687@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ia64-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1375462582-16423-6-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org
+In-Reply-To: <20130730185212.GA21687-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 02 Aug, at 05:56:22PM, Leif Lindholm wrote:
-> efi_lookup_mapped_addr() is a handy utility for other platforms than
-> x86. Move it from arch/x86 to drivers/firmware. Add memmap pointer
-> to global efi structure, and initialise it on x86.
-> 
-> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-> ---
->  arch/x86/platform/efi/efi.c |   30 ++----------------------------
->  drivers/firmware/efi/efi.c  |   32 ++++++++++++++++++++++++++++++++
->  include/linux/efi.h         |    1 +
->  3 files changed, 35 insertions(+), 28 deletions(-)
+On Tue, 30 Jul, at 08:52:12PM, Ingo Molnar wrote:
+> Pulled into tip:x86/urgent, thanks Matt!
 
-Looks good.
+Thanks Ingo.
 
-Tony, shout if you have any objection to modifying 'struct efi'.
+Any chance we can get this to Linus for -rc5? The ARM EFI boot stub
+patches depend on the bug fix in this pull request.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
