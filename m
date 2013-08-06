@@ -1,61 +1,54 @@
 From: Dave P Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 1/7] EFI stub documentation updates
-Date: Tue, 6 Aug 2013 11:30:44 +0100
-Message-ID: <20130806103044.GC2791@e103592.cambridge.arm.com>
+Subject: Re: [PATCH 6/7] Add EFI stub for ARM
+Date: Tue, 6 Aug 2013 11:31:08 +0100
+Message-ID: <20130806103108.GD2791@e103592.cambridge.arm.com>
 References: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
- <1375478948-22562-2-git-send-email-roy.franz@linaro.org>
- <20130805141221.GC2755@localhost.localdomain>
- <CAFECyb9h7aSzOAHC0t-xT1mNxW_CuMqpU8zGD50ZzZYQ74d0fg@mail.gmail.com>
+ <1375478948-22562-7-git-send-email-roy.franz@linaro.org>
+ <20130805141149.GB2755@localhost.localdomain>
+ <20130805153318.GL18151@rocoto.smurfnet.nu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAFECyb9h7aSzOAHC0t-xT1mNxW_CuMqpU8zGD50ZzZYQ74d0fg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20130805153318.GL18151-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Aug 06, 2013 at 12:56:12AM +0100, Roy Franz wrote:
-> On Mon, Aug 5, 2013 at 7:12 AM, Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On Fri, Aug 02, 2013 at 02:29:02PM -0700, Roy Franz wrote:
-> >> The ARM kernel also has an EFI stub which works largely the same way
-> >> as the x86 stub, so move the documentation out of x86 directory and
-> >> update to reflect that it is generic, and add ARM specific text.
-> >>
-> >> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> ---
-> >>  Documentation/efi-stub.txt     |   78 ++++++++++++++++++++++++++++++++++++++++
-> >>  Documentation/x86/efi-stub.txt |   65 ---------------------------------
-> >>  arch/x86/Kconfig               |    2 +-
-> >>  3 files changed, 79 insertions(+), 66 deletions(-)
-> >>  create mode 100644 Documentation/efi-stub.txt
-> >>  delete mode 100644 Documentation/x86/efi-stub.txt
-> >>
-> >> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-> >> new file mode 100644
-> >> index 0000000..7837df1
-> >> --- /dev/null
-> >> +++ b/Documentation/efi-stub.txt
-> >> @@ -0,0 +1,78 @@
-> >> +                       The EFI Boot Stub
-> >> +                  ---------------------------
-> >> +
-> >> +On the x86 and ARM platforms, a bzImage can masquerade as a PE/COFF image,
-> >> +thereby convincing EFI firmware loaders to load it as an EFI
-> >> +executable. The code that modifies the bzImage header, along with the
-> >
-> >
-> > Minor nit, I don't think there is such a thing as "bzImage" for ARM.
-> >
-> > Cheers
-> > ---Dave
-> >
-> Yeah, I don't thinks so either...  How about:
+On Mon, Aug 05, 2013 at 04:33:19PM +0100, Leif Lindholm wrote:
+> On Mon, Aug 05, 2013 at 03:11:49PM +0100, Dave Martin wrote:
+> > > diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+> > > index 75189f1..4c70b9e 100644
+> > > --- a/arch/arm/boot/compressed/head.S
+> > > +++ b/arch/arm/boot/compressed/head.S
+> > > @@ -122,19 +122,106 @@
+> > >  		.arm				@ Always enter in ARM state
+> > >  start:
+> > >  		.type	start,#function
+> > > -		.rept	7
+> > > +#ifdef CONFIG_EFI_STUB
+> > > +		@ Magic MSDOS signature for PE/COFF + ADD opcode
+> > > +		.word	0x62805a4d
+> > 
+> > What about BE32?
+>  
+> The ARM bindings for UEFI specify that the processor must be in
+> little-endian mode.
 > 
-> On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade....
+> > In that case, the instruction is a coprocessor load, that loads from a
+> > random address to a coprocessor that almost certainly doesn't exist.
+> > This will probably fault.
+> > 
+> > Since BE32 is only for older platforms (<v6) and this is not easily
+> > solvable, it might be sensible to make the EFI stub support depend on
+> > !CPU_ENDIAN_BE32.
+>  
+> Well, it would make more sense to make EFI_STUB depend on EFI and
+> EFI depend on !CPU_ENDIAN_BE32. Which is something I can add to
+> my next set of general ARM UEFI patches. Thanks.
 
-Souds fine to me
+That sounds fair enough.
 
 Cheers
 ---Dave
