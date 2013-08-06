@@ -1,47 +1,61 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Tue, 06 Aug 2013 09:26:57 +0200
-Message-ID: <5200A541.7050203@redhat.com>
-References: <20130801164927.GA7445@pd.tnic> <51FF8C14.2070405@redhat.com>  <20130805130258.GB31845@pd.tnic> <51FFAB13.4090603@redhat.com>  <20130805140306.GD31845@pd.tnic> <51FFB660.4060400@redhat.com>  <20130805144010.GE31845@pd.tnic>  <2DBE3EA4-E321-4A7B-B9AF-EDE55BC2E358@apple.com>  <20130805181225.GH31845@pd.tnic> <52001B04.2050806@zytor.com>  <20130805214140.GB14067@pd.tnic> <52001F6B.4000800@redhat.com> <1375743157.18481.14.camel@dabdike.int.hansenpartnership.com>
+From: Dave P Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 1/7] EFI stub documentation updates
+Date: Tue, 6 Aug 2013 11:30:44 +0100
+Message-ID: <20130806103044.GC2791@e103592.cambridge.arm.com>
+References: <1375478948-22562-1-git-send-email-roy.franz@linaro.org>
+ <1375478948-22562-2-git-send-email-roy.franz@linaro.org>
+ <20130805141221.GC2755@localhost.localdomain>
+ <CAFECyb9h7aSzOAHC0t-xT1mNxW_CuMqpU8zGD50ZzZYQ74d0fg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1375743157.18481.14.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAFECyb9h7aSzOAHC0t-xT1mNxW_CuMqpU8zGD50ZzZYQ74d0fg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Andrew Fish <afish-2kanFRK1NckAvxtiuMwx3w@public.gmane.org>, edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/06/13 00:52, James Bottomley wrote:
-> On Mon, 2013-08-05 at 23:55 +0200, Laszlo Ersek wrote:
->> On 08/05/13 23:41, Borislav Petkov wrote:
->>> On Mon, Aug 05, 2013 at 02:37:08PM -0700, H. Peter Anvin wrote:
->>>> All of this would be a non-problem if there weren't buggy
->>>> implementations which can't run *without* SetVirtualAddressMap().
->>>
->>> Oh, you mean, if we were to call the runtime services through their
->>> physical addresses?
->>
->> I heard that there was a (U)EFI firmware implementation that didn't even
->> implement SetVirtualAddressMap(). It was okay because the main OS for
->> that platform didn't want to call it, it thunked to physical mode for
->> each runtime service call.
->>
->> (This is not hearsay; I'm omitting the specifics because I'm not sure if
->> I'm allowed to give any. I've heard about this stuff from a direct
->> colleague who used to work on these systems.)
+On Tue, Aug 06, 2013 at 12:56:12AM +0100, Roy Franz wrote:
+> On Mon, Aug 5, 2013 at 7:12 AM, Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On Fri, Aug 02, 2013 at 02:29:02PM -0700, Roy Franz wrote:
+> >> The ARM kernel also has an EFI stub which works largely the same way
+> >> as the x86 stub, so move the documentation out of x86 directory and
+> >> update to reflect that it is generic, and add ARM specific text.
+> >>
+> >> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> ---
+> >>  Documentation/efi-stub.txt     |   78 ++++++++++++++++++++++++++++++++++++++++
+> >>  Documentation/x86/efi-stub.txt |   65 ---------------------------------
+> >>  arch/x86/Kconfig               |    2 +-
+> >>  3 files changed, 79 insertions(+), 66 deletions(-)
+> >>  create mode 100644 Documentation/efi-stub.txt
+> >>  delete mode 100644 Documentation/x86/efi-stub.txt
+> >>
+> >> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+> >> new file mode 100644
+> >> index 0000000..7837df1
+> >> --- /dev/null
+> >> +++ b/Documentation/efi-stub.txt
+> >> @@ -0,0 +1,78 @@
+> >> +                       The EFI Boot Stub
+> >> +                  ---------------------------
+> >> +
+> >> +On the x86 and ARM platforms, a bzImage can masquerade as a PE/COFF image,
+> >> +thereby convincing EFI firmware loaders to load it as an EFI
+> >> +executable. The code that modifies the bzImage header, along with the
+> >
+> >
+> > Minor nit, I don't think there is such a thing as "bzImage" for ARM.
+> >
+> > Cheers
+> > ---Dave
+> >
+> Yeah, I don't thinks so either...  How about:
 > 
-> That's actually the way all non-x86 unix systems operate.  If you look
-> in the firmware mechanisms for almost every non-x86 system in the Linux
-> kernel architecture directories they do this if they have to access
-> firmware from Linux (we do it a lot on parisc to get the IODC to give us
-> the device inventory for instance).
-> 
-> I strongly suspect the origin of this weirdness is that once upon a time
-> windows didn't run with a separated address space and so needed a way of
-> accessing firmware in the same address space, hence the pointer
-> relocation trick, but even windows hasn't needed this for a while.
+> On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade....
 
-Thank you for educating me.
-Laszlo
+Souds fine to me
+
+Cheers
+---Dave
