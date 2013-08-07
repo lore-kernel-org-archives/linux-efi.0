@@ -1,62 +1,39 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: Re: [PATCH 16/17] Add EFI stub for ARM
-Date: Wed, 7 Aug 2013 20:33:57 +0200
-Message-ID: <20130807183357.GN18151@rocoto.smurfnet.nu>
-References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
- <1375847113-24884-17-git-send-email-roy.franz@linaro.org>
- <20130807180548.GA12592@localhost.localdomain>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130807180548.GA12592@localhost.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Martin <Dave.Martin@arm.com>
-Cc: Roy Franz <roy.franz@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 0/5] Make commonly useful UEFI functions common
+Date: Wed,  7 Aug 2013 19:54:15 +0100
+Message-ID: <1375901660-23541-1-git-send-email-leif.lindholm@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 07, 2013 at 07:05:54PM +0100, Dave Martin wrote:
-> Is it possible for this allocation to fail -- i.e., because UEFI has
-> put us in an unsuitable location which is within the first 128MB of
-> RAM, such that we can't pick a suitable location without overlap?
-> 
-> For the time being though, I think this is impossible because the
-> decompressed Image can't exceed ~32MB (so the zImage should not
-> exceed that either, and both can fit inside 128MB.  It doesn't
-> matter if UEFI's initial load location overlaps the decompressed
-> Image).
-> 
-> If UEFI put reserved regions with the first 128MB we're likely to
-> be dead anyway, so we shouldn't assume we'll have to cope with that
-> for now...
+This set breaks out some common code from x86/ia64 EFI support
+code and puts it into drivers/firmware/efi.
 
-There is no reason we would be dead unless we end up not being able
-to allocate regions for FDT and initrd within range.
+First it takes the definition of the global "efi" data structure
+and moves it into global efi.c. Then it implements a common version
+of efi_config_init().
 
-There could be some boot services region lying around, that will
-be reusable before we even jump to the decompressor. Or there could
-be some badly placed runtime code lying where it can safely remain.
+Secondly it breaks the efi_lookup_mapped_addr() function out of x86
+and places it in global efi.c, for shared use with future ARM
+patches.
 
-Are there additional kernel regions to worry about?
+IA64 code compile tested only.
 
-> > +		@ Save return values of efi_entry
-> > +		stmfd	sp!, {r0, r3}
-> > +		bl	cache_clean_flush
-> > +		bl	cache_off
-> 
-> Why turn the cache off?  Does that mean that EFI may launch images with
-> the cache enabled?
- 
-Yup.
+Leif Lindholm (5):
+  ia64: add early_memremap() alias for early_ioremap()
+  efi: provide a generic efi_config_init()
+  efi: x86: use common code for (U)EFI configuration scanning
+  efi: ia64: use common code for (U)EFI configuration scanning
+  efi: x86: make efi_lookup_mapped_addr() a common function
 
-> If so, are we guaranteed that VA=PA?  Otherwise simply turning the MMU
-> off is not safe.
+ arch/ia64/include/asm/io.h  |    1 +
+ arch/ia64/kernel/efi.c      |   54 ++++-------------
+ arch/x86/platform/efi/efi.c |  126 ++++----------------------------------
+ drivers/firmware/efi/efi.c  |  140 +++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h         |    8 +++
+ 5 files changed, 170 insertions(+), 159 deletions(-)
 
-Yes, VA=PA is guaranteed.
- 
-> (Hmm, the UEFI spec seems to suggest "yes" for these questions)
- 
-:)
-
-/
-    Leif
+-- 
+1.7.10.4
