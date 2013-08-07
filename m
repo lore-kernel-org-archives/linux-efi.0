@@ -1,24 +1,50 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH V2 00/17] EFI stub for ARM
-Date: Wed, 7 Aug 2013 08:44:10 +0100
-Message-ID: <20130807074410.GB2515@console-pimps.org>
-References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: Re: [PATCH v2 2/5] efi: provide a generic efi_config_init()
+Date: Wed, 7 Aug 2013 13:54:58 +0200
+Message-ID: <20130807115458.GM18151@rocoto.smurfnet.nu>
+References: <1375462582-16423-1-git-send-email-leif.lindholm@linaro.org>
+ <1375462582-16423-3-git-send-email-leif.lindholm@linaro.org>
+ <20130805121540.GP2515@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-ia64-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Roy Franz <roy.franz@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk, leif.lindholm@linaro.org, dave.martin@arm.com
+In-Reply-To: <20130805121540.GP2515@console-pimps.org>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, patches@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 06 Aug, at 08:44:56PM, Roy Franz wrote:
-> This patchset depends (trivially) on a separately submitted bugfix to the
-> EFI stub: "correct call to free_pages"
-> http://git.kernel.org/cgit/linux/kernel/git/tip/tip.git/commit/?id=df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394
+On Mon, Aug 05, 2013 at 01:15:40PM +0100, Matt Fleming wrote:
+> > +static __init int match_config_table(efi_guid_t *guid,
+> > +				     unsigned long table,
+> > +				     efi_config_table_type_t *table_types)
+> > +{
+> > +	u8 str[38];
+> 
+> Shouldn't this be 37? You get 36 bytes for your GUID, plus a trailing
+> NUL? Either way, this should be a #define. The closest thing we have in
+> include/linux/efi.h is EFI_VARIABLE_GUID_LEN. Perhaps we need a
+> EFI_GUID_LEN that includes the trailing NUL?
+ 
+Err, yes. Don't recall where I decided on that now.
+I think EFI_VARIABLE_GUID_LEN + 1 makes enough sense.
 
-For those playing at home, this bugfix is now in Linus' tree.
+> One thing I just noticed that's worth pointing out is that 'pr_fmt'
+> isn't defined in drivers/firmware/efi/efi.c. Before your patch series
+> you get,
+> 
+> [    0.000000] efi:  SMBIOS=0xbae41a98  ACPI=0xbac6f000  ACPI 2.0=0xbac6f000  MPS=0xfca90 
+> 
+> and after,
+> 
+> [    0.000000]  SMBIOS=0xbae41a98  ACPI=0xbac6f000  ACPI 2.0=0xbac6f000 MPS=0xfca90 
+> 
+> which isn't the end of the world, but it does mean that the error
+> messages are now much less informative, e.g.
+ 
+I had completely missed that - sorry.
+Adding in new series.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+/
+    Leif
