@@ -1,246 +1,206 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 10/17] Renames in handle_cmdline_files() to complete generalization.
-Date: Tue,  6 Aug 2013 20:45:06 -0700
-Message-ID: <1375847113-24884-11-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 01/17] EFI stub documentation updates
+Date: Tue,  6 Aug 2013 20:44:57 -0700
+Message-ID: <1375847113-24884-2-git-send-email-roy.franz@linaro.org>
 References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1375847113-24884-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: Roy Franz <roy.franz@linaro.org>, dave.martin@arm.com, leif.lindholm@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-Rename variables to be not initrd specific, as now the function
-loads arbitrary files.
+The ARM kernel also has an EFI stub which works largely the same way
+as the x86 stub, so move the documentation out of x86 directory and
+update to reflect that it is generic, and add ARM specific text.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- drivers/firmware/efi/efi-stub-helper.c |   92 ++++++++++++++++----------------
- 1 file changed, 46 insertions(+), 46 deletions(-)
+ Documentation/efi-stub.txt     |   78 ++++++++++++++++++++++++++++++++++++++++
+ Documentation/x86/efi-stub.txt |   65 ---------------------------------
+ arch/x86/Kconfig               |    2 +-
+ 3 files changed, 79 insertions(+), 66 deletions(-)
+ create mode 100644 Documentation/efi-stub.txt
+ delete mode 100644 Documentation/x86/efi-stub.txt
 
-diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 854aada..0a41638 100644
---- a/drivers/firmware/efi/efi-stub-helper.c
-+++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -11,7 +11,7 @@
-  */
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+new file mode 100644
+index 0000000..19e897c
+--- /dev/null
++++ b/Documentation/efi-stub.txt
+@@ -0,0 +1,78 @@
++			  The EFI Boot Stub
++		     ---------------------------
++
++On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
++as a PE/COFF image, thereby convincing EFI firmware loaders to load
++it as an EFI executable. The code that modifies the bzImage header,
++along with the EFI-specific entry point that the firmware loader
++jumps to are collectively known as the "EFI boot stub", and live in
++arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
++respectively.  For ARM the EFI stub is implemented in
++arch/arm/boot/compressed/efi-header.S and
++arch/arm/boot/compressed/efi-stub.c.  EFI stub code that is shared
++between architectures is in drivers/firmware/efi/efi-stub-helper.c.
++
++By using the EFI boot stub it's possible to boot a Linux kernel
++without the use of a conventional EFI boot loader, such as grub or
++elilo. Since the EFI boot stub performs the jobs of a boot loader, in
++a certain sense it *IS* the boot loader.
++
++The EFI boot stub is enabled with the CONFIG_EFI_STUB kernel option.
++
++
++**** How to install bzImage.efi
++
++The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
++System Partiion (ESP) and renamed with the extension ".efi". Without
++the extension the EFI firmware loader will refuse to execute it. It's
++not possible to execute bzImage.efi from the usual Linux file systems
++because EFI firmware doesn't have support for them.  For ARM the
++arch/arm/boot/zImage should be copied to the system partition, and it
++may not need to be renamed.
++
++
++**** Passing kernel parameters from the EFI shell
++
++Arguments to the kernel can be passed after bzImage.efi, e.g.
++
++	fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
++
++
++**** The "initrd=" option
++
++Like most boot loaders, the EFI stub allows the user to specify
++multiple initrd files using the "initrd=" option. This is the only EFI
++stub-specific command line parameter, everything else is passed to the
++kernel when it boots.
++
++The path to the initrd file must be an absolute path from the
++beginning of the ESP, relative path names do not work. Also, the path
++is an EFI-style path and directory elements must be separated with
++backslashes (\). For example, given the following directory layout,
++
++fs0:>
++	Kernels\
++			bzImage.efi
++			initrd-large.img
++
++	Ramdisks\
++			initrd-small.img
++			initrd-medium.img
++
++to boot with the initrd-large.img file if the current working
++directory is fs0:\Kernels, the following command must be used,
++
++	fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
++
++Notice how bzImage.efi can be specified with a relative path. That's
++because the image we're executing is interpreted by the EFI shell,
++which understands relative paths, whereas the rest of the command line
++is passed to bzImage.efi.
++
++
++**** The "dtb=" option
++
++For the ARM architecture, we also need to be able to provide a device
++tree to the kernel.  This is done with the "dtb=" command line option,
++and is process in the same manner as the "initrd=" option that is described
++above.
+diff --git a/Documentation/x86/efi-stub.txt b/Documentation/x86/efi-stub.txt
+deleted file mode 100644
+index 44e6bb6..0000000
+--- a/Documentation/x86/efi-stub.txt
++++ /dev/null
+@@ -1,65 +0,0 @@
+-			  The EFI Boot Stub
+-		     ---------------------------
+-
+-On the x86 platform, a bzImage can masquerade as a PE/COFF image,
+-thereby convincing EFI firmware loaders to load it as an EFI
+-executable. The code that modifies the bzImage header, along with the
+-EFI-specific entry point that the firmware loader jumps to are
+-collectively known as the "EFI boot stub", and live in
+-arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+-respectively.
+-
+-By using the EFI boot stub it's possible to boot a Linux kernel
+-without the use of a conventional EFI boot loader, such as grub or
+-elilo. Since the EFI boot stub performs the jobs of a boot loader, in
+-a certain sense it *IS* the boot loader.
+-
+-The EFI boot stub is enabled with the CONFIG_EFI_STUB kernel option.
+-
+-
+-**** How to install bzImage.efi
+-
+-The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
+-System Partiion (ESP) and renamed with the extension ".efi". Without
+-the extension the EFI firmware loader will refuse to execute it. It's
+-not possible to execute bzImage.efi from the usual Linux file systems
+-because EFI firmware doesn't have support for them.
+-
+-
+-**** Passing kernel parameters from the EFI shell
+-
+-Arguments to the kernel can be passed after bzImage.efi, e.g.
+-
+-	fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
+-
+-
+-**** The "initrd=" option
+-
+-Like most boot loaders, the EFI stub allows the user to specify
+-multiple initrd files using the "initrd=" option. This is the only EFI
+-stub-specific command line parameter, everything else is passed to the
+-kernel when it boots.
+-
+-The path to the initrd file must be an absolute path from the
+-beginning of the ESP, relative path names do not work. Also, the path
+-is an EFI-style path and directory elements must be separated with
+-backslashes (\). For example, given the following directory layout,
+-
+-fs0:>
+-	Kernels\
+-			bzImage.efi
+-			initrd-large.img
+-
+-	Ramdisks\
+-			initrd-small.img
+-			initrd-medium.img
+-
+-to boot with the initrd-large.img file if the current working
+-directory is fs0:\Kernels, the following command must be used,
+-
+-	fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
+-
+-Notice how bzImage.efi can be specified with a relative path. That's
+-because the image we're executing is interpreted by the EFI shell,
+-which understands relative paths, whereas the rest of the command line
+-is passed to bzImage.efi.
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index b32ebf9..ec65b51 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1579,7 +1579,7 @@ config EFI_STUB
+           This kernel feature allows a bzImage to be loaded directly
+ 	  by EFI firmware without the use of a bootloader.
  
+-	  See Documentation/x86/efi-stub.txt for more information.
++	  See Documentation/efi-stub.txt for more information.
  
--struct initrd {
-+struct file_info {
- 	efi_file_handle_t *handle;
- 	u64 size;
- };
-@@ -262,10 +262,10 @@ static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
- 
- 
- /*
-- * Check the cmdline for a LILO-style initrd= arguments.
-+ * Check the cmdline for a LILO-style file= arguments.
-  *
-- * We only support loading an initrd from the same filesystem as the
-- * kernel image.
-+ * We only support loading a file from the same filesystem as
-+ * the kernel image.
-  */
- static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 					 efi_loaded_image_t *image,
-@@ -273,19 +273,19 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 					 u64 max_addr,
- 					 u64 *load_addr, u64 *load_size)
- {
--	struct initrd *initrds;
--	unsigned long initrd_addr;
-+	struct file_info *files;
-+	unsigned long file_addr;
- 	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
--	u64 initrd_total;
-+	u64 file_size_total;
- 	efi_file_io_interface_t *io;
- 	efi_file_handle_t *fh;
- 	efi_status_t status;
--	int nr_initrds;
-+	int nr_files;
- 	char *str;
- 	int i, j, k;
- 
--	initrd_addr = 0;
--	initrd_total = 0;
-+	file_addr = 0;
-+	file_size_total = 0;
- 
- 	str = cmd_line;
- 
-@@ -300,7 +300,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 	if (!str || !*str)
- 		return EFI_SUCCESS;
- 
--	for (nr_initrds = 0; *str; nr_initrds++) {
-+	for (nr_files = 0; *str; nr_files++) {
- 		str = strstr(str, option_string);
- 		if (!str)
- 			break;
-@@ -315,21 +315,21 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 			str++;
- 	}
- 
--	if (!nr_initrds)
-+	if (!nr_files)
- 		return EFI_SUCCESS;
- 
- 	status = efi_call_phys3(sys_table_arg->boottime->allocate_pool,
- 				EFI_LOADER_DATA,
--				nr_initrds * sizeof(*initrds),
--				&initrds);
-+				nr_files * sizeof(*files),
-+				&files);
- 	if (status != EFI_SUCCESS) {
--		efi_printk(sys_table_arg, "Failed to alloc mem for file load\n");
-+		efi_printk(sys_table_arg, "Failed to alloc mem for file handle list\n");
- 		goto fail;
- 	}
- 
- 	str = cmd_line;
--	for (i = 0; i < nr_initrds; i++) {
--		struct initrd *initrd;
-+	for (i = 0; i < nr_files; i++) {
-+		struct file_info *file;
- 		efi_file_handle_t *h;
- 		efi_file_info_t *info;
- 		efi_char16_t filename_16[256];
-@@ -344,7 +344,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 
- 		str += strlen(option_string);
- 
--		initrd = &initrds[i];
-+		file = &files[i];
- 		p = filename_16;
- 
- 		/* Skip any leading slashes */
-@@ -375,13 +375,13 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 					image->device_handle, &fs_proto, &io);
- 			if (status != EFI_SUCCESS) {
- 				efi_printk(sys_table_arg, "Failed to handle fs_proto\n");
--				goto free_initrds;
-+				goto free_files;
- 			}
- 
- 			status = efi_call_phys2(io->open_volume, io, &fh);
- 			if (status != EFI_SUCCESS) {
- 				efi_printk(sys_table_arg, "Failed to open volume\n");
--				goto free_initrds;
-+				goto free_files;
- 			}
- 		}
- 
-@@ -394,7 +394,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
- 			goto close_handles;
- 		}
- 
--		initrd->handle = h;
-+		file->handle = h;
- 
- 		info_sz = 0;
- 		status = efi_call_phys4(h->get_info, h, &info_guid,
-@@ -428,37 +428,37 @@ grow:
- 			goto close_handles;
- 		}
- 
--		initrd->size = file_sz;
--		initrd_total += file_sz;
-+		file->size = file_sz;
-+		file_size_total += file_sz;
- 	}
- 
--	if (initrd_total) {
-+	if (file_size_total) {
- 		unsigned long addr;
- 
- 		/*
--		 * Multiple initrd's need to be at consecutive
--		 * addresses in memory, so allocate enough memory for
--		 * all the initrd's.
-+		 * Multiple files need to be at consecutive addresses in memory,
-+		 * so allocate enough memory for all the files.  This is used
-+		 * for loading multiple files.
- 		 */
--		status = efi_high_alloc(sys_table_arg, initrd_total, 0x1000,
--				    &initrd_addr, max_addr);
-+		status = efi_high_alloc(sys_table_arg, file_size_total, 0x1000,
-+				    &file_addr, max_addr);
- 		if (status != EFI_SUCCESS) {
--			efi_printk(sys_table_arg, "Failed to alloc highmem for initrds\n");
-+			efi_printk(sys_table_arg, "Failed to alloc highmem for files\n");
- 			goto close_handles;
- 		}
- 
- 		/* We've run out of free low memory. */
--		if (initrd_addr > max_addr) {
-+		if (file_addr > max_addr) {
- 			efi_printk(sys_table_arg, "We've run out of free low memory\n");
- 			status = EFI_INVALID_PARAMETER;
--			goto free_initrd_total;
-+			goto free_file_total;
- 		}
- 
--		addr = initrd_addr;
--		for (j = 0; j < nr_initrds; j++) {
-+		addr = file_addr;
-+		for (j = 0; j < nr_files; j++) {
- 			u64 size;
- 
--			size = initrds[j].size;
-+			size = files[j].size;
- 			while (size) {
- 				u64 chunksize;
- 				if (size > EFI_READ_CHUNK_SIZE)
-@@ -466,36 +466,36 @@ grow:
- 				else
- 					chunksize = size;
- 				status = efi_call_phys3(fh->read,
--							initrds[j].handle,
-+							files[j].handle,
- 							&chunksize, addr);
- 				if (status != EFI_SUCCESS) {
- 					efi_printk(sys_table_arg, "Failed to read file\n");
--					goto free_initrd_total;
-+					goto free_file_total;
- 				}
- 				addr += chunksize;
- 				size -= chunksize;
- 			}
- 
--			efi_call_phys1(fh->close, initrds[j].handle);
-+			efi_call_phys1(fh->close, files[j].handle);
- 		}
- 
- 	}
- 
--	efi_call_phys1(sys_table_arg->boottime->free_pool, initrds);
-+	efi_call_phys1(sys_table_arg->boottime->free_pool, files);
- 
--	*load_addr = initrd_addr;
--	*load_size = initrd_total;
-+	*load_addr = file_addr;
-+	*load_size = file_size_total;
- 
- 	return status;
- 
--free_initrd_total:
--	efi_free(sys_table_arg, initrd_total, initrd_addr);
-+free_file_total:
-+	efi_free(sys_table_arg, file_size_total, file_addr);
- 
- close_handles:
- 	for (k = j; k < i; k++)
--		efi_call_phys1(fh->close, initrds[k].handle);
--free_initrds:
--	efi_call_phys1(sys_table_arg->boottime->free_pool, initrds);
-+		efi_call_phys1(fh->close, files[k].handle);
-+free_files:
-+	efi_call_phys1(sys_table_arg->boottime->free_pool, files);
- fail:
- 	*load_addr = 0;
- 	*load_size = 0;
+ config SECCOMP
+ 	def_bool y
 -- 
 1.7.10.4
