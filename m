@@ -1,123 +1,81 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Tue, 06 Aug 2013 17:31:29 +0200
-Message-ID: <520116D1.2010000@redhat.com>
-References: <51FFAB13.4090603@redhat.com> <20130805140306.GD31845@pd.tnic> <51FFB660.4060400@redhat.com> <20130805144010.GE31845@pd.tnic> <51FFC19A.1020204@redhat.com> <20130805161247.GF31845@pd.tnic> <51FFD5B0.9080000@redhat.com> <20130805164731.GG31845@pd.tnic> <52001896.1030509@redhat.com> <20130805220808.GC14067@pd.tnic> <20130806141036.GD14891@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130806141036.GD14891-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH V2 00/17] EFI stub for ARM
+Date: Tue,  6 Aug 2013 20:44:56 -0700
+Message-ID: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: leif.lindholm@linaro.org, dave.martin@arm.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/06/13 16:10, Borislav Petkov wrote:
-> On Tue, Aug 06, 2013 at 12:08:08AM +0200, Borislav Petkov wrote:
->> Ok, thanks again for finding it, I'll go and try to figure out the whole
->> mess tomorrow.
-> 
-> Ok, some more observations:
-> 
-> Decompressing Linux... Parsing ELF... done.
-> Booting the kernel.
-> [    0.000000] memblock_reserve: [0x0000000009f000-0x00000000100000] reserve_ebda_region+0x56/0x58
-> [    0.000000] Initializing cgroup subsys cpu
-> [    0.000000] Linux version 3.11.0-rc4+ (boris@nazgul) (gcc version 4.7.3 (Debian 4.7.3-4) ) #4 SMP PREEMPT Tue Aug 6 15:15:07 CEST 2013
-> [    0.000000] memblock_reserve: [0x00000002000000-0x000000036c0000] setup_arch+0x47/0xa63
-> [    0.000000] Command line: root=/dev/sda1 debug ignore_loglevel log_buf_len=10M earlyprintk=ttyS0,115200 console=ttyS0,115200 console=tty0 memblock=debug
-> [    0.000000] efi: efi_memblock_x86_reserve_range: pmap: 0x7e0ad018
-> [    0.000000] memblock_reserve: [0x0000007e0ad018-0x0000007e0ad588] efi_memblock_x86_reserve_range+0x70/0x75
-> 
-> And this is it:
-> 
-> efi_memblock_x86_reserve_range() reserves the region which overlaps with
-> the following region:
-> 
-> [    0.000000] efi: mem11: type=4, attr=0xf, range=[0x000000007e0ad000-0x000000007e0cc000) (0MB)
-> 
-> Now, this address 0x7e0ad018 is boot_params.efi_info.efi_memmap which,
-> AFAICT, we write to in exit_boot() after calling GetMemoryMap(). IOW,
-> this the EFI memory map descriptor which we mark as reserved.
-> 
-> So, hmm, I'm not sure what we want to do here.
+This patch series adds EFI stub support for the ARM architecture.
+Some code that was previously only used by x86/x86_64 is now shared
+and has been made more general.  The stub for ARM is implemented in
+a similar manner to x86 in that it is a shim layer between EFI and
+the normal zImage/bzImage boot process, and that an image with the
+stub configured is bootable as both a zImage and EFI application.
 
-To me this looks like a genuine conflict.
+This patchset depends (trivially) on a separately submitted bugfix to the
+EFI stub: "correct call to free_pages"
+http://git.kernel.org/cgit/linux/kernel/git/tip/tip.git/commit/?id=df981edcb9bce00b9c5e4f3cc33f3f98bc9a2394
 
-01 efi_main()
-02  exit_boot()
-03    low_alloc()
-04    GetMemoryMap()
-05    ExitBootServices()
-06
-07 start_kernel()
-08   setup_arch()
-09    efi_memblock_x86_reserve_range()
-10    efi_reserve_boot_services()
-11  efi_enter_virtual_mode()
-12    SetVirtualAddressMap()
 
-GetMemoryMap() does not itself allocate memory of any kind (which could
-potentially change the memory map in-flight). It requires an input
-buffer, tries to squeeze all map entries into it. If they fit, OK, if
-they don't, the caller will know to allocate a bigger buffer
-(potentially changing the memory map) and call GetMemoryMap() again.
+Changes since V1:
+* Updated head.S based on feedback from Dave Martin.  ARM/THUMB
+  switches now much cleaner.
+* Broke up changes to x86 and common code into more patches.
+  10 more patches in this series.
 
-So, on line 03 we allocate memory for GetMemoryMap(). As you say, this
-exact area of 0x570 bytes, holding the memory map, is then marked as
-reserved on line 09.
 
-At line 10, when we want to reserve a boot services data region, we find
-out that part of it has already been reserved.
 
-I see two problems here. The first problem is what you mention -- the
-decision *not* to reserve a region because part of it is already
-reserved is hard to comprehend:
+Roy Franz (17):
+  EFI stub documentation updates
+  Move common EFI stub code from x86 arch code to common location
+  Add system pointer argument to shared EFI stub related     functions
+    so they no longer use global system table     pointer as they did
+    when part of eboot.c.
+  Rename memory allocation/free functions
+  Add minimum address parameter to efi_low_alloc()
+  rename __get_map() to efi_get_memory_map(), add parameter     to
+    optionally return mmap key. The mmap key is required     to exit
+    EFI boot services, and allows efi_get_memory_map()     to be used
+    for getting final memory map.
+  Enforce minimum alignment of 1 page on allocations.     The
+    efi_high_alloc() and efi_low_alloc() functions     use the
+    EFI_ALLOCATE_ADDRESS option to the EFI     function
+    allocate_pages(), which requires a minimum     of page alignment,
+    and rejects all other requests.
+  Allow efi_free() to be called with size of 0, and do nothing in that
+    case.
+  Generalize handle_ramdisks() and rename to handle_cmdline_files().
+  Renames in handle_cmdline_files() to complete generalization.
+  Move EFI_READ_CHUNK_SIZE define to shared location.
+  Add proper definitions for some EFI function pointers.
+  Fix types in EFI calls to match EFI function definitions.
+  resolve warnings found on ARM compile
+  Add strstr to compressed string.c for ARM.
+  Add EFI stub for ARM
+  Add config EFI_STUB for ARM to Kconfig
 
-> Off the top of my head, I'm thinking this: efi_reserve_boot_services()
-> which truncates this region to 0 should actually check that this special
-> region is reserved, and *enlarge* it instead of making it of size 0, no?
+ Documentation/efi-stub.txt             |   78 +++++
+ Documentation/x86/efi-stub.txt         |   65 ----
+ arch/arm/Kconfig                       |   10 +
+ arch/arm/boot/compressed/Makefile      |   18 +-
+ arch/arm/boot/compressed/efi-header.S  |  114 +++++++
+ arch/arm/boot/compressed/efi-stub.c    |  514 ++++++++++++++++++++++++++++++++
+ arch/arm/boot/compressed/head.S        |   90 +++++-
+ arch/arm/boot/compressed/string.c      |   21 ++
+ arch/x86/Kconfig                       |    2 +-
+ arch/x86/boot/compressed/eboot.c       |  490 ++----------------------------
+ arch/x86/boot/compressed/eboot.h       |    7 -
+ drivers/firmware/efi/efi-stub-helper.c |  505 +++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |   48 ++-
+ 13 files changed, 1405 insertions(+), 557 deletions(-)
+ create mode 100644 Documentation/efi-stub.txt
+ delete mode 100644 Documentation/x86/efi-stub.txt
+ create mode 100644 arch/arm/boot/compressed/efi-header.S
+ create mode 100644 arch/arm/boot/compressed/efi-stub.c
+ create mode 100644 drivers/firmware/efi/efi-stub-helper.c
 
-The second problem is orthogonal and maybe "deeper":
-
-  The memory allocated by low_alloc() on line 03, of type
-  EFI_LOADER_DATA, intersects with a region of type
-  EFI_BOOT_SERVICES_DATA, according to the GetMemoryMap() call on line
-  04.
-
-Something is very wrong here.
-
-Clearly, if the 2nd problem didn't exist, then the 1st one wouldn't either.
-
-Allocating the backing store for the memory map itself (on line 03) as
-EFI_LOADER_DATA is a good choice. This kind of memory survives
-ExitBootServices(), is not relocated, etc.
-
-But, I cannot understand how the subsequent GetMemoryMap() call can
-report an overlapping EFI_BOOT_SERVICES_DATA range. (Actually, the
-EFI_BOOT_SERVICES_DATA range *surrounds* the EFI_LOADER_DATA range.)
-
-This problem could be related to the logic in low_alloc(). It figures
-out an address and allocates (rounded up) pages exactly at that address,
-the firmware doesn't have any leeway to change it. The address to
-allocate at is a hard requirement (EFI_ALLOCATE_ADDRESS) rather than a hint.
-
-Normally this logic would cleave out a bit of memory from an
-EFI_CONVENTIONAL_MEMORY range, and convert it to type EFI_LOADER_DATA.
-Which makes it even less understandable how the subsequent
-GetMemoryMap() call can report a surrounding EFI_BOOT_SERVICES_DATA range.
-
-Can you capture the OVMF debug output? Do you see
-
-  ConvertPages: Incompatible memory types
-
-there?
-
-Can you set the following bits too in the debug mask?
-
-#define DEBUG_POOL      0x00000010  // Alloc & Free's
-#define DEBUG_PAGE      0x00000020  // Alloc & Free's
-
-Thanks
-Laszlo
+-- 
+1.7.10.4
