@@ -1,136 +1,173 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 12/17] Add proper definitions for some EFI function pointers.
-Date: Tue,  6 Aug 2013 20:45:08 -0700
-Message-ID: <1375847113-24884-13-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 04/17] Rename memory allocation/free functions
+Date: Tue,  6 Aug 2013 20:45:00 -0700
+Message-ID: <1375847113-24884-5-git-send-email-roy.franz@linaro.org>
 References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1375847113-24884-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: Roy Franz <roy.franz@linaro.org>, dave.martin@arm.com, leif.lindholm@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-The x86/AMD64 EFI stubs must us a call wrapper to convert between
-the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
-the ABIs are compatible, so we can directly invoke the function
-pointers.  The functions that are used by the ARM stub are updated
-to match the EFI definitions.
+Rename them to be more similar, as low_free() could be used to free
+memory allocated by both high_alloc() and low_alloc().
+high_alloc() -> efi_high_alloc()
+low_alloc()  -> efi_low_alloc()
+low_free()   -> efi_free()
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- include/linux/efi.h |   42 +++++++++++++++++++++++++-----------------
- 1 file changed, 25 insertions(+), 17 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |   19 ++++++++++---------
+ drivers/firmware/efi/efi-stub-helper.c |   16 ++++++++--------
+ 2 files changed, 18 insertions(+), 17 deletions(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 51f5641..96bb866 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -39,6 +39,8 @@
- typedef unsigned long efi_status_t;
- typedef u8 efi_bool_t;
- typedef u16 efi_char16_t;		/* UNICODE character */
-+typedef u64 efi_physical_addr_t;
-+typedef void *efi_handle_t;
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 65b6a34..2a4430a 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -457,7 +457,8 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 		return NULL;
+ 	}
  
+-	status = low_alloc(sys_table, 0x4000, 1, (unsigned long *)&boot_params);
++	status = efi_low_alloc(sys_table, 0x4000, 1,
++			       (unsigned long *)&boot_params);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to alloc lowmem for boot params\n");
+ 		return NULL;
+@@ -503,7 +504,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
  
- typedef struct {
-@@ -96,6 +98,7 @@ typedef	struct {
- #define EFI_MEMORY_DESCRIPTOR_VERSION	1
+ 			options_size++;	/* NUL termination */
  
- #define EFI_PAGE_SHIFT		12
-+#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
+-			status = low_alloc(sys_table, options_size, 1,
++			status = efi_low_alloc(sys_table, options_size, 1,
+ 					   &cmdline);
+ 			if (status != EFI_SUCCESS) {
+ 				efi_printk(sys_table, "Failed to alloc mem for cmdline\n");
+@@ -537,9 +538,9 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 	return boot_params;
+ fail2:
+ 	if (options_size)
+-		low_free(sys_table, options_size, hdr->cmd_line_ptr);
++		efi_free(sys_table, options_size, hdr->cmd_line_ptr);
+ fail:
+-	low_free(sys_table, 0x4000, (unsigned long)boot_params);
++	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
+ 	return NULL;
+ }
  
- typedef struct {
- 	u32 type;
-@@ -157,11 +160,12 @@ typedef struct {
- 	efi_table_hdr_t hdr;
- 	void *raise_tpl;
- 	void *restore_tpl;
--	void *allocate_pages;
--	void *free_pages;
--	void *get_memory_map;
--	void *allocate_pool;
--	void *free_pool;
-+	int (*allocate_pages)(int, int, unsigned long, efi_physical_addr_t *);
-+	int (*free_pages)(efi_physical_addr_t, unsigned long);
-+	int (*get_memory_map)(unsigned long *, void *, unsigned long *,
-+			      unsigned long *, u32 *);
-+	int (*allocate_pool)(int, unsigned long, void **);
-+	int (*free_pool)(void *);
- 	void *create_event;
- 	void *set_timer;
- 	void *wait_for_event;
-@@ -171,7 +175,7 @@ typedef struct {
- 	void *install_protocol_interface;
- 	void *reinstall_protocol_interface;
- 	void *uninstall_protocol_interface;
--	void *handle_protocol;
-+	int (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
- 	void *locate_handle;
-@@ -181,7 +185,7 @@ typedef struct {
- 	void *start_image;
- 	void *exit;
- 	void *unload_image;
--	void *exit_boot_services;
-+	int (*exit_boot_services)(efi_handle_t, unsigned long);
- 	void *get_next_monotonic_count;
- 	void *stall;
- 	void *set_watchdog_timer;
-@@ -488,10 +492,6 @@ typedef struct {
- 	unsigned long unload;
- } efi_loaded_image_t;
+@@ -562,7 +563,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
+ again:
+ 	size += sizeof(*mem_map) * 2;
+ 	_size = size;
+-	status = low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
++	status = efi_low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
  
--typedef struct {
--	u64 revision;
--	void *open_volume;
--} efi_file_io_interface_t;
+@@ -570,7 +571,7 @@ get_map:
+ 	status = efi_call_phys5(sys_table->boottime->get_memory_map, &size,
+ 				mem_map, &key, &desc_size, &desc_version);
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+-		low_free(sys_table, _size, (unsigned long)mem_map);
++		efi_free(sys_table, _size, (unsigned long)mem_map);
+ 		goto again;
+ 	}
  
- typedef struct {
- 	u64 size;
-@@ -504,20 +504,28 @@ typedef struct {
- 	efi_char16_t filename[1];
- } efi_file_info_t;
+@@ -672,7 +673,7 @@ get_map:
+ 	return EFI_SUCCESS;
  
--typedef struct {
-+typedef struct _efi_file_handle {
- 	u64 revision;
--	void *open;
--	void *close;
-+	int (*open)(struct _efi_file_handle *, struct _efi_file_handle **,
-+		    efi_char16_t *, u64, u64);
-+	int (*close)(struct _efi_file_handle *);
- 	void *delete;
--	void *read;
-+	int (*read)(struct _efi_file_handle *, unsigned long *, void *);
- 	void *write;
- 	void *get_position;
- 	void *set_position;
--	void *get_info;
-+	int (*get_info)(struct _efi_file_handle *, efi_guid_t *,
-+			unsigned long *, void *);
- 	void *set_info;
- 	void *flush;
- } efi_file_handle_t;
+ free_mem_map:
+-	low_free(sys_table, _size, (unsigned long)mem_map);
++	efi_free(sys_table, _size, (unsigned long)mem_map);
+ 	return status;
+ }
  
-+typedef struct _efi_file_io_interface {
-+	u64 revision;
-+	int (*open_volume)(struct _efi_file_io_interface *,
-+			   efi_file_handle_t **);
-+} efi_file_io_interface_t;
-+
- #define EFI_FILE_MODE_READ	0x0000000000000001
- #define EFI_FILE_MODE_WRITE	0x0000000000000002
- #define EFI_FILE_MODE_CREATE	0x8000000000000000
-@@ -787,7 +795,7 @@ struct efivar_entry {
+@@ -695,7 +696,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
+ 				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+ 				nr_pages, &start);
+ 	if (status != EFI_SUCCESS) {
+-		status = low_alloc(sys_table, hdr->init_size,
++		status = efi_low_alloc(sys_table, hdr->init_size,
+ 				   hdr->kernel_alignment, &start);
+ 		if (status != EFI_SUCCESS)
+ 			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
+@@ -743,7 +744,7 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 	}
  
- struct efi_simple_text_output_protocol {
- 	void *reset;
--	void *output_string;
-+	int (*output_string)(void *, void *);
- 	void *test_string;
- };
+ 	gdt->size = 0x800;
+-	status = low_alloc(sys_table, gdt->size, 8,
++	status = efi_low_alloc(sys_table, gdt->size, 8,
+ 			   (unsigned long *)&gdt->address);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to alloc mem for gdt\n");
+diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+index bd6c1a2..8e6a7f9 100644
+--- a/drivers/firmware/efi/efi-stub-helper.c
++++ b/drivers/firmware/efi/efi-stub-helper.c
+@@ -86,7 +86,7 @@ fail:
+ /*
+  * Allocate at the highest possible address that is not above 'max'.
+  */
+-static efi_status_t high_alloc(efi_system_table_t *sys_table_arg,
++static efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			       unsigned long size, unsigned long align,
+ 			       unsigned long *addr, unsigned long max)
+ {
+@@ -163,10 +163,10 @@ fail:
+ }
  
+ /*
+- * Allocate at the lowest possible address.
++ * Allocate at the lowest possible address, that is not below 'min'
+  */
+-static efi_status_t low_alloc(efi_system_table_t *sys_table_arg,
+-		unsigned long size, unsigned long align,
++static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
++			      unsigned long size, unsigned long align,
+ 			      unsigned long *addr)
+ {
+ 	unsigned long map_size, desc_size;
+@@ -226,7 +226,7 @@ fail:
+ 	return status;
+ }
+ 
+-static void low_free(efi_system_table_t *sys_table_arg, unsigned long size,
++static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 		     unsigned long addr)
+ {
+ 	unsigned long nr_pages;
+@@ -407,8 +407,8 @@ grow:
+ 		 * addresses in memory, so allocate enough memory for
+ 		 * all the initrd's.
+ 		 */
+-		status = high_alloc(sys_table_arg, initrd_total, 0x1000,
+-				   &initrd_addr, hdr->initrd_addr_max);
++		status = efi_high_alloc(sys_table_arg, initrd_total, 0x1000,
++				    &initrd_addr, hdr->initrd_addr_max);
+ 		if (status != EFI_SUCCESS) {
+ 			efi_printk(sys_table_arg, "Failed to alloc highmem for initrds\n");
+ 			goto close_handles;
+@@ -456,7 +456,7 @@ grow:
+ 	return status;
+ 
+ free_initrd_total:
+-	low_free(sys_table_arg, initrd_total, initrd_addr);
++	efi_free(sys_table_arg, initrd_total, initrd_addr);
+ 
+ close_handles:
+ 	for (k = j; k < i; k++)
 -- 
 1.7.10.4
