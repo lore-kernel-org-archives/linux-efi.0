@@ -1,179 +1,52 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v3 2/5] efi: provide a generic efi_config_init()
-Date: Wed,  7 Aug 2013 19:54:17 +0100
-Message-ID: <1375901660-23541-3-git-send-email-leif.lindholm@linaro.org>
-References: <1375901660-23541-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1375901660-23541-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, grant.likely@secretlab.ca, Leif Lindholm <leif.lindholm@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [edk2] Corrupted EFI region
+Date: Wed, 7 Aug 2013 21:19:08 +0100
+Message-ID: <20130807201908.GG2515@console-pimps.org>
+References: <51FFC19A.1020204@redhat.com>
+ <20130805161247.GF31845@pd.tnic>
+ <51FFD5B0.9080000@redhat.com>
+ <20130805164731.GG31845@pd.tnic>
+ <52001896.1030509@redhat.com>
+ <20130805220808.GC14067@pd.tnic>
+ <20130806141036.GD14891@pd.tnic>
+ <520116D1.2010000@redhat.com>
+ <20130807151935.GJ17920@pd.tnic>
+ <CCFD3CBD-62B0-4046-B96D-18CB1A815F72@apple.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CCFD3CBD-62B0-4046-B96D-18CB1A815F72-2kanFRK1NckAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Fish <afish-2kanFRK1NckAvxtiuMwx3w@public.gmane.org>
+Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Common to (U)EFI support on all platforms is the global "efi" data
-structure, and the code that parses the System Table to locate
-addresses to populate that structure with.
+[ Readding Matthew Garrett to the Cc list, seeing as we both got removed
+  for some unknown reason ]
 
-This patch adds both of these to the global EFI driver code.
+On Wed, 07 Aug, at 10:23:56AM, Andrew Fish wrote:
 
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
----
- drivers/firmware/efi/efi.c |  108 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h        |    7 +++
- 2 files changed, 115 insertions(+)
+> OK so I think I need some Cliff Notes here to help me understand what
+> is going on...
+> 
+> type 4 is EfiBootServicesData and attr 0x0f is cache attributes with
+> no request for a runtime mapping. This is not runtime memory so to the
+> OS loader it is just memory EFI has used that will get freed back to
+> the OS after ExitBootServices(), along with EfiBootServicesCode,
+> EfiLoaderCode, and EfiLoaderData. The EfiLoaderCode and EfiLoaderData
+> also get freed back to the OS and they just exist for the convenience
+> of the OS loader. 
+> 
+> So I can't figure out why this maters? Given:
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 5145fa3..e1010d4 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -13,11 +13,27 @@
-  * This file is released under the GPLv2.
-  */
+We've seen a bunch of systems that make calls into EfiBootServicesCode
+after ExitBootServices(). There were some Apple machines in that list,
+though I don't have the details but Matthew should.
  
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
- #include <linux/kobject.h>
- #include <linux/module.h>
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/io.h>
-+
-+struct efi __read_mostly efi = {
-+	.mps        = EFI_INVALID_TABLE_ADDR,
-+	.acpi       = EFI_INVALID_TABLE_ADDR,
-+	.acpi20     = EFI_INVALID_TABLE_ADDR,
-+	.smbios     = EFI_INVALID_TABLE_ADDR,
-+	.sal_systab = EFI_INVALID_TABLE_ADDR,
-+	.boot_info  = EFI_INVALID_TABLE_ADDR,
-+	.hcdp       = EFI_INVALID_TABLE_ADDR,
-+	.uga        = EFI_INVALID_TABLE_ADDR,
-+	.uv_systab  = EFI_INVALID_TABLE_ADDR,
-+};
-+EXPORT_SYMBOL(efi);
- 
- static struct kobject *efi_kobj;
- static struct kobject *efivars_kobj;
-@@ -132,3 +148,95 @@ err_put:
- }
- 
- subsys_initcall(efisubsys_init);
-+
-+
-+static __initdata efi_config_table_type_t common_tables[] = {
-+	{ACPI_20_TABLE_GUID, "ACPI 2.0", &efi.acpi20},
-+	{ACPI_TABLE_GUID, "ACPI", &efi.acpi},
-+	{HCDP_TABLE_GUID, "HCDP", &efi.hcdp},
-+	{MPS_TABLE_GUID, "MPS", &efi.mps},
-+	{SAL_SYSTEM_TABLE_GUID, "SALsystab", &efi.sal_systab},
-+	{SMBIOS_TABLE_GUID, "SMBIOS", &efi.smbios},
-+	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
-+	{NULL_GUID, NULL, 0},
-+};
-+
-+static __init int match_config_table(efi_guid_t *guid,
-+				     unsigned long table,
-+				     efi_config_table_type_t *table_types)
-+{
-+	u8 str[EFI_VARIABLE_GUID_LEN + 1];
-+	int i;
-+
-+	if (table_types) {
-+		efi_guid_unparse(guid, str);
-+
-+		for (i = 0; efi_guidcmp(table_types[i].guid, NULL_GUID); i++) {
-+			efi_guid_unparse(&table_types[i].guid, str);
-+
-+			if (!efi_guidcmp(*guid, table_types[i].guid)) {
-+				*(table_types[i].ptr) = table;
-+				pr_cont(" %s=0x%lx ",
-+					table_types[i].name, table);
-+				return 1;
-+			}
-+		}
-+	}
-+
-+	return 0;
-+}
-+
-+int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+{
-+	void *config_tables, *tablep;
-+	int i, sz;
-+
-+	if (efi_enabled(EFI_64BIT))
-+		sz = sizeof(efi_config_table_64_t);
-+	else
-+		sz = sizeof(efi_config_table_32_t);
-+
-+	/*
-+	 * Let's see what config tables the firmware passed to us.
-+	 */
-+	config_tables = early_memremap(efi.systab->tables,
-+				       efi.systab->nr_tables * sz);
-+	if (config_tables == NULL) {
-+		pr_err("Could not map Configuration table!\n");
-+		return -ENOMEM;
-+	}
-+
-+	tablep = config_tables;
-+	pr_info("");
-+	for (i = 0; i < efi.systab->nr_tables; i++) {
-+		efi_guid_t guid;
-+		unsigned long table;
-+
-+		if (efi_enabled(EFI_64BIT)) {
-+			u64 table64;
-+			guid = ((efi_config_table_64_t *)tablep)->guid;
-+			table64 = ((efi_config_table_64_t *)tablep)->table;
-+			table = table64;
-+#ifndef CONFIG_64BIT
-+			if (table64 >> 32) {
-+				pr_cont("\n");
-+				pr_err("Table located above 4GB, disabling EFI.\n");
-+				early_iounmap(config_tables,
-+					       efi.systab->nr_tables * sz);
-+				return -EINVAL;
-+			}
-+#endif
-+		} else {
-+			guid = ((efi_config_table_32_t *)tablep)->guid;
-+			table = ((efi_config_table_32_t *)tablep)->table;
-+		}
-+
-+		if (!match_config_table(&guid, table, common_tables))
-+			match_config_table(&guid, table, arch_tables);
-+
-+		tablep += sz;
-+	}
-+	pr_cont("\n");
-+	early_iounmap(config_tables, efi.systab->nr_tables * sz);
-+	return 0;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5f8f176..09d9e42 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -404,6 +404,12 @@ typedef struct {
- 	unsigned long table;
- } efi_config_table_t;
- 
-+typedef struct {
-+	efi_guid_t guid;
-+	const char *name;
-+	unsigned long *ptr;
-+} efi_config_table_type_t;
-+
- #define EFI_SYSTEM_TABLE_SIGNATURE ((u64)0x5453595320494249ULL)
- 
- #define EFI_2_30_SYSTEM_TABLE_REVISION  ((2 << 16) | (30))
-@@ -587,6 +593,7 @@ static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned lon
- }
- #endif
- extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
-+extern int efi_config_init(efi_config_table_type_t *arch_tables);
- extern u64 efi_get_iobase (void);
- extern u32 efi_mem_type (unsigned long phys_addr);
- extern u64 efi_mem_attributes (unsigned long phys_addr);
+So we map these regions unconditionally and in their original state,
+otherwise the firmware will generate fatal page faults when trying to
+access those memory regions.
+
 -- 
-1.7.10.4
+Matt Fleming, Intel Open Source Technology Center
