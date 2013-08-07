@@ -1,175 +1,1061 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Wed, 07 Aug 2013 19:49:16 +0200
-Message-ID: <5202889C.2080608@redhat.com>
-References: <51FFB660.4060400@redhat.com> <20130805144010.GE31845@pd.tnic> <51FFC19A.1020204@redhat.com> <20130805161247.GF31845@pd.tnic> <51FFD5B0.9080000@redhat.com> <20130805164731.GG31845@pd.tnic> <52001896.1030509@redhat.com> <20130805220808.GC14067@pd.tnic> <20130806141036.GD14891@pd.tnic> <520116D1.2010000@redhat.com> <20130807151935.GJ17920@pd.tnic>
+From: Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 16/17] Add EFI stub for ARM
+Date: Wed, 7 Aug 2013 19:05:54 +0100
+Message-ID: <20130807180548.GA12592@localhost.localdomain>
+References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+ <1375847113-24884-17-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------070205040006040609090302"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130807151935.GJ17920-fF5Pk5pvG8Y@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1375847113-24884-17-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Jordan Justen (Intel address)" <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------070205040006040609090302
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+On Tue, Aug 06, 2013 at 08:45:12PM -0700, Roy Franz wrote:
+> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
+> operations similarly to the x86 stub: it is a shim between the EFI firmware
+> and the normal zImage entry point, and sets up the environment that the
+> zImage is expecting.  This includes loading the initrd (optionaly) and
+> device tree from the system partition based on the kernel command line.
+> The stub updates the device tree as necessary, including adding reserved
+> memory regions and adding entries for EFI runtime services. The PE/COFF
+> "MZ" header at offset 0 results in the first instruction being an add
+> that corrupts r5, which is not used by the zImage interface.
 
-On 08/07/13 17:19, Borislav Petkov wrote:
-> On Tue, Aug 06, 2013 at 05:31:29PM +0200, Laszlo Ersek wrote:
->> Can you capture the OVMF debug output? Do you see
->>
->>   ConvertPages: Incompatible memory types
->>
->> there?
->>
->> Can you set the following bits too in the debug mask?
->>
->> #define DEBUG_POOL      0x00000010  // Alloc & Free's
->> #define DEBUG_PAGE      0x00000020  // Alloc & Free's
+Some more comments below ... note that I haven't really looked at the C
+code in depth.
+
+Cheers
+---Dave
+
 > 
-> Ok, I got debug output; I have to be careful now of not missing
-> anything. Ok, so here we go:
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm/boot/compressed/Makefile     |   18 +-
+>  arch/arm/boot/compressed/efi-header.S |  114 ++++++++
+>  arch/arm/boot/compressed/efi-stub.c   |  514 +++++++++++++++++++++++++++++++++
+>  arch/arm/boot/compressed/head.S       |   90 +++++-
+>  4 files changed, 728 insertions(+), 8 deletions(-)
+>  create mode 100644 arch/arm/boot/compressed/efi-header.S
+>  create mode 100644 arch/arm/boot/compressed/efi-stub.c
 > 
-> First of all, I changed debugging mask to:
+> diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+> index 7ac1610..c62826a 100644
+> --- a/arch/arm/boot/compressed/Makefile
+> +++ b/arch/arm/boot/compressed/Makefile
+> @@ -106,8 +106,22 @@ $(addprefix $(obj)/,$(libfdt) $(libfdt_hdrs)): $(obj)/%: $(srctree)/scripts/dtc/
+>  $(addprefix $(obj)/,$(libfdt_objs) atags_to_fdt.o): \
+>  	$(addprefix $(obj)/,$(libfdt_hdrs))
+>  
+> +$(addprefix $(obj)/,$(libfdt_objs) efi-stub.o): \
+> +	$(addprefix $(obj)/,$(libfdt_hdrs))
+> +
+
+Don't we make $(libfdt_objs) depend on $(libfdt_hdrs) twice, now?
+
+Would it make sense just to add efi-stub.o to the list of targets in the
+original rule?
+
+>  ifeq ($(CONFIG_ARM_ATAG_DTB_COMPAT),y)
+> -OBJS	+= $(libfdt_objs) atags_to_fdt.o
+> +OBJS	+= atags_to_fdt.o
+> +USE_LIBFDT = y
+> +endif
+> +
+> +ifeq ($(CONFIG_EFI_STUB),y)
+> +CFLAGS_efi-stub.o += -DTEXT_OFFSET=$(TEXT_OFFSET)
+> +OBJS	+= efi-stub.o
+> +USE_LIBFDT = y
+> +endif
+> +
+> +ifeq ($(USE_LIBFDT),y)
+> +OBJS	+= $(libfdt_objs)
+>  endif
+>  
+>  targets       := vmlinux vmlinux.lds \
+> @@ -125,7 +139,7 @@ ORIG_CFLAGS := $(KBUILD_CFLAGS)
+>  KBUILD_CFLAGS = $(subst -pg, , $(ORIG_CFLAGS))
+>  endif
+>  
+> -ccflags-y := -fpic -mno-single-pic-base -fno-builtin -I$(obj)
+> +ccflags-y := -fpic -mno-single-pic-base -fno-builtin -I$(obj) -fno-stack-protector
+
+You don't appear to explain this change anywhere.
+
+>  asflags-y := -DZIMAGE
+>  
+>  # Supply kernel BSS size to the decompressor via a linker symbol.
+> diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+> new file mode 100644
+> index 0000000..6ff32cc
+> --- /dev/null
+> +++ b/arch/arm/boot/compressed/efi-header.S
+> @@ -0,0 +1,114 @@
+> +@ Copyright (C) 2013 Linaro Ltd;  <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> +@
+> +@ This file contains the PE/COFF header that is part of the
+> +@ EFI stub.
+> +@
+> +
+> +	.org	0x3c
+> +	@
+> +	@ The PE header can be anywhere in the file, but for
+> +	@ simplicity we keep it together with the MSDOS header
+> +	@ The offset to the PE/COFF header needs to be at offset
+> +	@ 0x3C in the MSDOS header.
+> +	@ The only 2 fields of the MSDOS header that are used are this
+> +	@ PE/COFF offset, and the "MZ" bytes at offset 0x0.
+> +	@
+> +	.long	pe_header			@ Offset to the PE header.
+
+Is there any chance of merging this with the equivalent x86 code?
+
+The PE/COFF header is much the same in both cases, although there
+are some differences.  Maybe it would be more trouble than it is
+worth...
+ 
+> +
+> +      .align 3
+> +pe_header:
+> +
+> +
+> +pe_header:
+
+Duplicate label?
+
+> +	.ascii	"PE"
+> +	.short 	0
+> +
+> +coff_header:
+> +	.short	0x01c2				@ ARM or Thumb
+> +	.short	2				@ nr_sections
+> +	.long	0 				@ TimeDateStamp
+> +	.long	0				@ PointerToSymbolTable
+> +	.long	1				@ NumberOfSymbols
+> +	.short	section_table - optional_header	@ SizeOfOptionalHeader
+> +	.short	0x306				@ Characteristics.
+> +						@ IMAGE_FILE_32BIT_MACHINE |
+> +						@ IMAGE_FILE_DEBUG_STRIPPED |
+> +						@ IMAGE_FILE_EXECUTABLE_IMAGE |
+> +						@ IMAGE_FILE_LINE_NUMS_STRIPPED
+> +
+> +optional_header:
+> +	.short	0x10b				@ PE32 format
+> +	.byte	0x02				@ MajorLinkerVersion
+> +	.byte	0x14				@ MinorLinkerVersion
+> +
+> +	.long	0				@ SizeOfCode
+
+Do we need to fill in SizeOfCode with a real value?  It looks like x86
+does.
+
+We should probably fill this in unless there's a documented ABI for EFI
+boot on ARM which explicitly doesn't require these.
+
+> +
+> +	.long	0				@ SizeOfInitializedData
+> +	.long	0				@ SizeOfUninitializedData
+> +
+> +	.long	efi_stub_entry			@ AddressOfEntryPoint
+> +	.long	efi_stub_entry			@ BaseOfCode
+> +	.long	0				@ data
+> +
+> +extra_header_fields:
+> +	.long	0				@ ImageBase
+> +	.long	0x20				@ SectionAlignment
+> +	.long	0x20				@ FileAlignment
+> +	.short	0				@ MajorOperatingSystemVersion
+> +	.short	0				@ MinorOperatingSystemVersion
+> +	.short	0				@ MajorImageVersion
+> +	.short	0				@ MinorImageVersion
+> +	.short	0				@ MajorSubsystemVersion
+> +	.short	0				@ MinorSubsystemVersion
+> +	.long	0				@ Win32VersionValue
+> +
+> +	.long	_edata				@ SizeOfImage
+> +
+> +	@ Everything before the entry point is considered part of the header
+> +	.long	efi_stub_entry			@ SizeOfHeaders
+> +	.long	0				@ CheckSum
+> +	.short	0xa				@ Subsystem (EFI application)
+> +	.short	0				@ DllCharacteristics
+> +	.long	0				@ SizeOfStackReserve
+> +	.long	0				@ SizeOfStackCommit
+> +	.long	0				@ SizeOfHeapReserve
+> +	.long	0				@ SizeOfHeapCommit
+> +	.long	0				@ LoaderFlags
+> +	.long	0x0				@ NumberOfRvaAndSizes
+> +
+> +	# Section table
+> +section_table:
+> +
+> +	#
+> +	# The EFI application loader requires a relocation section
+> +	# because EFI applications must be relocatable.  This is a
+> +	# dummy section as far as we are concerned.
+> +	#
+> +	.ascii	".reloc"
+> +	.byte	0
+> +	.byte	0			@ end of 0 padding of section name
+> +	.long	0
+> +	.long	0
+> +	.long	0			@ SizeOfRawData
+> +	.long	0			@ PointerToRawData
+> +	.long	0			@ PointerToRelocations
+> +	.long	0			@ PointerToLineNumbers
+> +	.short	0			@ NumberOfRelocations
+> +	.short	0			@ NumberOfLineNumbers
+> +	.long	0x42100040		@ Characteristics (section flags)
+> +
+> +
+> +	.ascii	".text"
+> +	.byte	0
+> +	.byte	0
+> +	.byte	0        		@ end of 0 padding of section name
+> +	.long	_edata - efi_stub_entry		@ VirtualSize
+> +	.long	efi_stub_entry			@ VirtualAddress
+> +	.long	_edata - efi_stub_entry		@ SizeOfRawData
+> +	.long	efi_stub_entry			@ PointerToRawData
+> +
+> +	.long	0		@ PointerToRelocations (0 for executables)
+> +	.long	0		@ PointerToLineNumbers (0 for executables)
+> +	.short	0		@ NumberOfRelocations  (0 for executables)
+> +	.short	0		@ NumberOfLineNumbers  (0 for executables)
+> +	.long	0xe0500020	@ Characteristics (section flags)
+
+Can you explain why x86 needs an extra section (the .setup thing)?
+I haven't dug into that in enough detail to understand it yet...
+
+> diff --git a/arch/arm/boot/compressed/efi-stub.c b/arch/arm/boot/compressed/efi-stub.c
+> new file mode 100644
+> index 0000000..b817ea3
+> --- /dev/null
+> +++ b/arch/arm/boot/compressed/efi-stub.c
+> @@ -0,0 +1,514 @@
+> +/*
+> + * linux/arch/arm/boot/compressed/efi-stub.c
+> + *
+> + * Copyright (C) 2013 Linaro Ltd;  <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> + *
+> + * This file implements the EFI boot stub for the ARM kernel
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + */
+> +#include <linux/efi.h>
+> +#include <libfdt.h>
+> +
+> +
+> +/* Error code returned to ASM code instead of valid FDT address. */
+> +#define EFI_STUB_ERROR		(~0)
+
+Can we put that into a suitable hedaer and use it in compressed/head.S,
+instead of the magic 0xffffffff?  (Assuming that value is supposed to
+match EFI_STUB_ERROR)
+
+> +
+> +/* EFI function call wrappers.  These are not required for
+> + * ARM, but wrappers are required for X86 to convert between
+> + * ABIs.  These wrappers are provided to allow code sharing
+> + * between X86 and ARM.  Since these wrappers directly invoke the
+> + * EFI function pointer, the function pointer type must be properly
+> + * defined, which is not the case for X86  One advantage of this is
+> + * it allows for type checking of arguments, which is not
+> + * possible with the X86 wrappers.
+> + */
+> +#define efi_call_phys0(f)			f()
+> +#define efi_call_phys1(f, a1)			f(a1)
+> +#define efi_call_phys2(f, a1, a2)		f(a1, a2)
+> +#define efi_call_phys3(f, a1, a2, a3)		f(a1, a2, a3)
+> +#define efi_call_phys4(f, a1, a2, a3, a4)	f(a1, a2, a3, a4)
+> +#define efi_call_phys5(f, a1, a2, a3, a4, a5)	f(a1, a2, a3, a4, a5)
+> +
+> +/* The maximum uncompressed kernel size is 32 MBytes, so we will reserve
+> + * that for the decompressed kernel.  We have no easy way to tell what
+> + * the actuall size of code + data the uncompressed kernel will use.
+> + */
+> +#define MAX_UNCOMP_KERNEL_SIZE	0x02000000
+
+Can we fish the decompressed data size out of zImage, like the existing
+zImage code does?  (see compressed/head.S:207).  I don't see why this
+needs to be compile-time constant.
+
+Someday, someone may try to grow the kernel image beyond 32M.  It would
+be nice to keep the number of things that breaks to a minimum, to ease
+potential pain later.
+
+> +
+> +/* The kernel zImage should be located between 32 Mbytes
+> + * and 128 MBytes from the base of DRAM.  The min
+> + * address leaves space for a maximal size uncompressed image,
+> + * and the max address is due to how the zImage decompressor
+> + * picks a destination address.
+> + */
+> +#define MAX_ZIMAGE_OFFSET	0x08000000
+
+The maximum zImage offset is actually 1 less than this.  I think it's
+just the name of the macro that is misleading, since you use it
+correctly as an upper bound for memory allocation, so far as I can
+see.
+
+Maybe ZIMAGE_OFFSET_LIMIT or something similar would work.
+
+> +#define MIN_ZIMAGE_OFFSET	MAX_UNCOMP_KERNEL_SIZE
+> +
+> +#define MAX_CMDLINE_LEN		500
+
+This is a random looking number.  Is this supposed to match something
+somewhere?  Does it serve any purpose other than acting as a sanity
+limit?
+
+If this limit doesn't exist, then an unreasonably large command-line
+passed by EFI would just lead to a memory allocation failure somewhere,
+which feels like the right behaviour...
+
+If we can avoid building in arbitrary limits, it helps avoid surprises
+later.
+
+> +
+> +struct fdt_region {
+> +	u64 base;
+> +	u64 size;
+> +};
+> +
+> +/*
+> + * Additional size that could be used for FDT entries added by
+> + * the UEFI OS Loader Estimation based on:
+> + * EDID (300bytes) + bootargs  + initrd region (20bytes)
+> + * + system memory region (20bytes) + mp_core entries (200
+> + * bytes)
+> + */
+
+What does 0x300 have to do with those numbers?
+
+When you say "estimate", are we guaranteed never to exceed that?
+What happens if we do?
+
+> +#define FDT_ADDITIONAL_ENTRIES_SIZE     (0x300 + MAX_CMDLINE_LEN)
+> +
+> +/* Include shared EFI stub code */
+> +#include "../../../../drivers/firmware/efi/efi-stub-helper.c"
+> +
+> +
+> +static int is_linux_reserved_region(int memory_type)
+> +{
+> +	switch (memory_type) {
+> +	case EFI_RUNTIME_SERVICES_CODE:
+> +	case EFI_RUNTIME_SERVICES_DATA:
+> +	case EFI_UNUSABLE_MEMORY:
+> +	case EFI_ACPI_RECLAIM_MEMORY:
+> +	case EFI_ACPI_MEMORY_NVS:
+> +		return 1;
+> +	default:
+> +		return 0;
+> +	}
+> +}
+> +
+> +
+> +static int relocate_kernel(efi_system_table_t *sys_table,
+> +			   unsigned long *load_addr, unsigned long *load_size,
+> +			   unsigned long min_addr, unsigned long max_addr)
+> +{
+> +	/* Get current address of kernel. */
+> +	unsigned long cur_zimage_addr = *load_addr;
+> +	unsigned long zimage_size = *load_size;
+> +	unsigned long new_addr = 0;
+> +	unsigned long nr_pages;
+> +
+> +	efi_status_t status;
+> +
+> +	if (!load_addr || !load_size)
+> +		return EFI_INVALID_PARAMETER;
+> +
+> +	*load_size = 0;
+> +	if (cur_zimage_addr > min_addr
+> +	    && (cur_zimage_addr + zimage_size) < max_addr) {
+> +		/* We don't need to do anything, as kernel at an acceptable
+> +		 * address already.
+> +		 */
+> +		return EFI_SUCCESS;
+> +	}
+> +	/*
+> +	 * The EFI firmware loader could have placed the kernel image
+> +	 * anywhere in memory, but the kernel has restrictions on the
+> +	 * min and max physical address it can run at.
+> +	 */
+> +	nr_pages = round_up(zimage_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+
+It looks like nr_pages is never used in this function.
+
+> +
+> +	status = efi_low_alloc(sys_table, zimage_size, 0,
+> +			   &new_addr, min_addr);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "Failed to alloc memory for kernel.\n");
+
+Does efi_printk automatically prepend a suitable prefix?  If not,
+it might be useful to define a macro to add a standard prefix to all
+efi_printks here ("zImage: " or similar).
+
+Minor nit: can we have "allocate" instead of "alloc"?
+
+I think both messages should say "failed to allocate usable memory".
+EFI has already allocated memory for the kernel after all: it's
+just in the wrong place initially.
+
+> +		return status;
+> +	}
+> +
+> +	if (new_addr > (max_addr - zimage_size)) {
+> +		efi_free(sys_table, zimage_size, new_addr);
+> +		efi_printk(sys_table, "Failed to alloc usable memory for kernel.\n");
+> +		return EFI_INVALID_PARAMETER;
+> +	}
+> +
+> +	/* We know source/dest won't overlap since both memory ranges
+> +	 * have been allocated by UEFI, so we can safely use memcpy.
+> +	 */
+> +	memcpy((void *)new_addr, (void *)(unsigned long)cur_zimage_addr,
+> +	       zimage_size);
+
+Is it possible for this allocation to fail -- i.e., because UEFI has
+put us in an unsuitable location which is within the first 128MB of
+RAM, such that we can't pick a suitable location without overlap?
+
+For the time being though, I think this is impossible because the
+decompressed Image can't exceed ~32MB (so the zImage should not
+exceed that either, and both can fit inside 128MB.  It doesn't
+matter if UEFI's initial load location overlaps the decompressed
+Image).
+
+If UEFI put reserved regions with the first 128MB we're likely to
+be dead anyway, so we shouldn't assume we'll have to cope with that
+for now...
+
+> +
+> +	/* Return the load address and size */
+> +	*load_addr = new_addr;
+> +	*load_size = zimage_size;
+
+Is zimage_size ever changed?  It looks like it is still equal to the
+initial value of *load_size at this point.
+
+> +
+> +
+> +	return status;
+> +}
+> +
+> +
+> +/* Convert the unicode UEFI command line to ASCII to pass to kernel.
+> + * Size of memory allocated return in *cmd_line_len.
+> + * Returns NULL on error.
+> + */
+> +static char *convert_cmdline_to_ascii(efi_system_table_t *sys_table,
+> +				      efi_loaded_image_t *image,
+> +				      unsigned long *cmd_line_len,
+> +				      u32 max_addr)
+> +{
+> +	u16 *s2;
+> +	u8 *s1 = NULL;
+> +	unsigned long cmdline_addr = 0;
+> +	int load_options_size = image->load_options_size / 2; /* ASCII */
+> +	void *options = (u16 *)image->load_options;
+> +	int options_size = 0;
+> +	int status;
+> +	int i;
+> +	u16 zero = 0;
+> +
+> +	if (options) {
+> +		s2 = options;
+> +		while (*s2 && *s2 != '\n' && options_size < load_options_size) {
+> +			s2++;
+> +			options_size++;
+> +		}
+> +	}
+> +
+> +	if (options_size == 0) {
+> +		/* No command line options, so return empty string*/
+> +		options_size = 1;
+> +		options = &zero;
+> +	}
+> +
+> +	if (options_size > MAX_CMDLINE_LEN)
+> +		options_size = MAX_CMDLINE_LEN;
+> +
+> +	options_size++;  /* NUL termination */
+
+Do we care that options_size can now be > load_options_size?
+
+I guess image->load_options isn't realistically going to be right at
+the end of a RAM bank, so probably nothing disastrous will happen if
+we read off the end of it.
+
+It would be tidier to avoid this, though.
+
+> +
+> +	status = efi_high_alloc(sys_table, options_size, 0,
+> +			    &cmdline_addr, max_addr);
+> +	if (status != EFI_SUCCESS)
+> +		return NULL;
+> +
+> +	s1 = (u8 *)(unsigned long)cmdline_addr;
+> +	s2 = (u16 *)options;
+> +
+> +	for (i = 0; i < options_size - 1; i++)
+> +		*s1++ = *s2++;
+> +
+> +	*s1 = '\0';
+> +
+> +	*cmd_line_len = options_size;
+> +	return (char *)(unsigned long)cmdline_addr;
+> +}
+> +
+> +static u32 update_fdt_and_exit_boot(efi_system_table_t *sys_table,
+> +				    void *handle, unsigned long dram_base,
+> +				    void *orig_fdt, u64 *orig_fdt_size,
+> +				    char *cmdline_ptr,
+> +				    unsigned long *cmdline_size,
+> +				    u64 initrd_addr, u64 initrd_size)
+> +{
+> +	unsigned long new_fdt_size;
+> +	unsigned long new_fdt_addr;
+> +	void *fdt;
+> +	int node;
+> +	int status;
+> +	int i;
+> +	unsigned long map_size, desc_size;
+> +	unsigned long mmap_key;
+> +	efi_memory_desc_t *memory_map;
+> +	unsigned long fdt_val;
+> +
+> +	new_fdt_size = *orig_fdt_size + FDT_ADDITIONAL_ENTRIES_SIZE;
+> +	status = efi_high_alloc(sys_table, new_fdt_size, 0, &new_fdt_addr,
+> +			    dram_base + MAX_ZIMAGE_OFFSET);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "ERROR: Unable to allocate memory for new device tree.\n");
+> +		goto fail;
+> +	}
+
+There are too many error messages in this function (and elsewhere).
+Many of them are only useful for debugging: for real use, the only
+interesting kinds of failure for the DT which will be meaningful to the
+user are "bad device tree" and "out of memory".
+
+Also, it would be desirable to make the error messages more consistent;
+currently we have "Failed to foo", "ERROR: bar", "ERROR moo", "Error baz",
+and more.
+
+We also have "FDT", "fdt", "DTB", "Device Tree", "device tree", all of
+which mean basically the same thing.
+
+You could try wrapping fdt_setprop() with a function which tries to set
+the property and prints a suitable message if it fails, without having
+to put explicit efi_printks all over the place.
+
+> +
+> +
+> +	fdt = (void *)new_fdt_addr;
+> +	status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
+> +	if (status != 0) {
+> +		efi_printk(sys_table, "ERROR: Device Tree open_int failed.\n");
+> +		goto fail_free_new_fdt;
+> +	}
+> +	/* We are done with the original DTB, so free it. */
+> +	efi_free(sys_table, *orig_fdt_size, (u32)orig_fdt);
+> +	*orig_fdt_size = 0;
+> +
+> +	node = fdt_subnode_offset(fdt, 0, "chosen");
+> +	if (node < 0) {
+> +		node = fdt_add_subnode(fdt, 0, "chosen");
+> +		if (node < 0) {
+> +			efi_printk(sys_table, "Error on finding 'chosen' node\n");
+> +			goto fail_free_new_fdt;
+> +		}
+> +	}
+> +
+> +	if ((cmdline_ptr != NULL) && (strlen(cmdline_ptr) > 0)) {
+> +		status = fdt_setprop(fdt, node, "bootargs", cmdline_ptr,
+> +				     strlen(cmdline_ptr) + 1);
+> +		if (status) {
+> +			efi_printk(sys_table, "Failed to set new bootarg\n");
+> +			goto fail_free_new_fdt;
+> +		}
+> +	}
+> +	/* We are done with original command line, so free it. */
+> +	efi_free(sys_table, *cmdline_size, (u32)cmdline_ptr);
+> +	*cmdline_size = 0;
+> +
+> +	/* Set intird address/end in device tree, if present */
+> +	if (initrd_size != 0) {
+> +		u64 initrd_image_end;
+> +		u64 initrd_image_start = cpu_to_fdt64(initrd_addr);
+> +		status = fdt_setprop(fdt, node, "linux,initrd-start",
+> +				     &initrd_image_start, sizeof(u64));
+> +		if (status) {
+> +			efi_printk(sys_table, "Failed to set new 'linux,initrd-start'\n");
+> +			goto fail_free_new_fdt;
+> +		}
+> +		initrd_image_end = cpu_to_fdt64(initrd_addr + initrd_size);
+> +		status = fdt_setprop(fdt, node, "linux,initrd-end",
+> +				     &initrd_image_end, sizeof(u64));
+> +		if (status) {
+> +			efi_printk(sys_table, "Failed to set new 'linux,initrd-end'\n");
+> +			goto fail_free_new_fdt;
+> +		}
+> +	}
+> +
+> +	/* Update memory map in the device tree. The memory node must
+> +	 * be present in the tree.*/
+> +	node = fdt_subnode_offset(fdt, 0, "memory");
+> +	if (node < 0) {
+> +		efi_printk(sys_table, "ERROR: FDT memory node does not exist in DTB.\n");
+> +		goto fail_free_new_fdt;
+> +	}
+> +
+> +	status = efi_get_memory_map(sys_table, &memory_map, &map_size,
+> +				    &desc_size, &mmap_key);
+> +	if (status != EFI_SUCCESS)
+> +		goto fail_free_new_fdt;
+> +
+> +	for (i = 0; i < (map_size / sizeof(efi_memory_desc_t)); i++) {
+> +		efi_memory_desc_t *desc;
+> +		unsigned long m = (unsigned long)memory_map;
+> +		desc = (efi_memory_desc_t *)(m + (i * desc_size));
+> +
+> +		if (is_linux_reserved_region(desc->type)) {
+> +			status = fdt_add_mem_rsv(fdt, desc->phys_addr,
+> +						 desc->num_pages * EFI_PAGE_SIZE);
+> +			if (status != 0) {
+> +				efi_printk(sys_table, "ERROR: Failed to add 'memreserve' to fdt.\n");
+> +				goto fail_free_mmap;
+> +			}
+> +		}
+> +	}
+> +
+> +
+> +	/* Add FDT entries for EFI runtime services in chosen node.
+> +	 * We need to add the final memory map, so this is done at
+> +	 * the very end.
+> +	 */
+> +	node = fdt_subnode_offset(fdt, 0, "chosen");
+> +	fdt_val = cpu_to_fdt32((unsigned long)sys_table);
+> +	status = fdt_setprop(fdt, node, "efi-system-table",
+> +			     &fdt_val, sizeof(fdt_val));
+> +	if (status) {
+> +		efi_printk(sys_table, "Failed to set new 'efi-system-table'\n");
+> +		goto fail_free_new_fdt;
+> +	}
+> +	fdt_val = cpu_to_fdt32(desc_size);
+> +	status = fdt_setprop(fdt, node, "efi-mmap-desc-size",
+> +			     &fdt_val, sizeof(fdt_val));
+> +	if (status) {
+> +		efi_printk(sys_table, "Failed to set new 'efi-mmap-desc-size'\n");
+> +		goto fail_free_new_fdt;
+> +	}
+> +	fdt_val = cpu_to_fdt32(map_size);
+> +	status = fdt_setprop(fdt, node, "efi-runtime-mmap-size",
+> +			     &fdt_val, sizeof(fdt_val));
+> +	if (status) {
+> +		efi_printk(sys_table, "Failed to set new 'efi-runtime-mmap-size'\n");
+> +		goto fail_free_new_fdt;
+> +	}
+> +	fdt_val = cpu_to_fdt32((unsigned long)memory_map);
+> +	status = fdt_setprop(fdt, node, "efi-runtime-mmap",
+> +			     &fdt_val, sizeof(fdt_val));
+> +	if (status) {
+> +		efi_printk(sys_table, "Failed to set new 'efi-runtime-mmap'\n");
+> +		goto fail_free_new_fdt;
+> +	}
+
+We have one function doing two completely different jobs here (as
+documented by the name).  Can it be split?
+
+> +
+> +	/* Now we need to exit boot services.  We need the key from
+> +	 * the most recent read of the memory map to do this.  We can't
+> +	 * free this buffer in the normal case, but do free it when
+> +	 * exit_boot_services() fails or adding the memory map to the FDT
+> +	 * fails.
+> +	 */
+> +	status = efi_call_phys2(sys_table->boottime->exit_boot_services,
+> +				handle, mmap_key);
+> +
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "exit boot services failed.\n");
+> +		goto fail_free_mmap;
+> +	}
+> +
+> +	return new_fdt_addr;
+> +
+> +fail_free_mmap:
+> +	efi_call_phys1(sys_table->boottime->free_pool, memory_map);
+> +
+> +fail_free_new_fdt:
+> +	efi_free(sys_table, new_fdt_size, new_fdt_addr);
+> +
+> +fail:
+> +	return 0;
+> +}
+> +
+> +
+> +int efi_entry(void *handle, efi_system_table_t *sys_table,
+> +	      unsigned long *zimage_addr)
+> +{
+> +	efi_loaded_image_t *image;
+> +	int status;
+> +	unsigned long nr_pages;
+> +	const struct fdt_region *region;
+> +
+> +	void *fdt;
+> +	int err;
+> +	int node;
+> +	unsigned long zimage_size = 0;
+> +	unsigned long dram_base;
+> +	/* addr/point and size pairs for memory management*/
+> +	u64 initrd_addr;
+> +	u64 initrd_size = 0;
+> +	u64 fdt_addr;  /* Original DTB */
+> +	u64 fdt_size = 0;
+> +	u64 kernel_reserve_addr;
+> +	u64 kernel_reserve_size = 0;
+> +	char *cmdline_ptr;
+> +	unsigned long cmdline_size = 0;
+> +	unsigned long new_fdt_addr;
+> +
+> +	efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+> +
+> +	/* Check if we were booted by the EFI firmware */
+> +	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+> +		goto fail;
+> +
+> +	efi_printk(sys_table, "Booting Linux using EFI stub.\n");
+> +
+> +
+> +	/* get the command line from EFI, using the LOADED_IMAGE protocol */
+> +	status = efi_call_phys3(sys_table->boottime->handle_protocol,
+> +				handle, &proto, (void *)&image);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "Failed to get handle for LOADED_IMAGE_PROTOCOL\n");
+> +		goto fail;
+> +	}
+> +
+> +	/* We are going to copy this into device tree, so we don't care where in
+> +	 * memory it is.
+> +	 */
+> +	cmdline_ptr = convert_cmdline_to_ascii(sys_table, image,
+> +					       &cmdline_size, 0xFFFFFFFF);
+> +	if (!cmdline_ptr) {
+> +		efi_printk(sys_table, "ERROR converting command line to ascii.\n");
+> +		goto fail;
+> +	}
+> +
+> +	/* We first load the device tree, as we need to get the base address of
+> +	 * DRAM from the device tree.  The zImage, device tree, and initrd
+> +	 * have address restrictions that are relative to the base of DRAM.
+> +	 */
+> +	status = handle_cmdline_files(sys_table, image, cmdline_ptr, "dtb=",
+> +				      0xffffffff, &fdt_addr, &fdt_size);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "Error loading dtb blob\n");
+> +		goto fail_free_cmdline;
+> +	}
+> +
+> +	err = fdt_check_header((void *)(unsigned long)fdt_addr);
+> +	if (err != 0) {
+> +		efi_printk(sys_table, "ERROR: Device Tree header not valid\n");
+> +		goto fail_free_dtb;
+> +	}
+> +	if (fdt_totalsize((void *)(unsigned long)fdt_addr) > fdt_size) {
+> +		efi_printk(sys_table, "ERROR: Incomplete device tree.\n");
+> +		goto fail_free_dtb;
+> +
+> +	}
+> +
+> +
+> +	/* Look up the base of DRAM from the device tree.*/
+> +	fdt = (void *)(u32)fdt_addr;
+> +	node = fdt_subnode_offset(fdt, 0, "memory");
+> +	region = fdt_getprop(fdt, node, "reg", NULL);
+> +	if (region) {
+> +		dram_base = fdt64_to_cpu(region->base);
+> +	} else {
+> +		efi_printk(sys_table, "Error: no 'memory' node in device tree.\n");
+> +		goto fail_free_dtb;
+> +	}
+> +
+> +	/* Reserve memory for the uncompressed kernel image. */
+> +	kernel_reserve_addr = dram_base;
+> +	kernel_reserve_size = MAX_UNCOMP_KERNEL_SIZE;
+> +	nr_pages = round_up(kernel_reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+> +	status = efi_call_phys4(sys_table->boottime->allocate_pages,
+> +				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+> +				nr_pages, &kernel_reserve_addr);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "ERROR allocating memory for uncompressed kernel.\n");
+> +		goto fail_free_dtb;
+> +	}
+> +
+> +	/* Relocate the zImage, if required. */
+> +	zimage_size = image->image_size;
+> +	status = relocate_kernel(sys_table, zimage_addr, &zimage_size,
+> +				 dram_base + MIN_ZIMAGE_OFFSET,
+> +				 dram_base + MAX_ZIMAGE_OFFSET);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "Failed to relocate kernel\n");
+> +		goto fail_free_kernel_reserve;
+> +	}
+> +
+> +	status = handle_cmdline_files(sys_table, image, cmdline_ptr, "initrd=",
+> +				      dram_base + MAX_ZIMAGE_OFFSET,
+> +				      &initrd_addr, &initrd_size);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "Error loading initrd\n");
+> +		goto fail_free_zimage;
+> +	}
+> +
+> +	new_fdt_addr = update_fdt_and_exit_boot(sys_table, handle,
+> +						dram_base, fdt, &fdt_size,
+> +						cmdline_ptr, &cmdline_size,
+> +						initrd_addr, initrd_size);
+> +
+> +	if (new_fdt_addr == 0) {
+> +		efi_printk(sys_table, "Error updating device tree and exiting boot services.\n");
+> +		goto fail_free_initrd;
+> +	}
+
+Ideally, we shouldn't have one error message for two completely
+different causes.
+
+The printk could move into update_fdt_and_exit_boot() and split
+into more specific cases.
+
+> +
+> +
+> +	/* Now we need to return the FDT address to the calling
+> +	 * assembly to this can be used as part of normal boot.
+> +	 */
+> +	return new_fdt_addr;
+> +
+> +fail_free_initrd:
+> +	efi_free(sys_table, initrd_size, initrd_addr);
+> +
+> +fail_free_zimage:
+> +	efi_free(sys_table, zimage_size, *zimage_addr);
+> +
+> +fail_free_kernel_reserve:
+> +	efi_free(sys_table, kernel_reserve_addr, kernel_reserve_size);
+> +
+> +fail_free_dtb:
+> +	efi_free(sys_table, fdt_size, fdt_addr);
+> +
+> +fail_free_cmdline:
+> +	efi_free(sys_table, cmdline_size, (u32)cmdline_ptr);
+> +
+> +fail:
+> +	return EFI_STUB_ERROR;
+> +}
+> diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+> index 75189f1..491e752 100644
+> --- a/arch/arm/boot/compressed/head.S
+> +++ b/arch/arm/boot/compressed/head.S
+> @@ -120,21 +120,100 @@
+>   */
+>  		.align
+>  		.arm				@ Always enter in ARM state
+> +		.text
+>  start:
+>  		.type	start,#function
+> -		.rept	7
+> +#ifdef CONFIG_EFI_STUB
+> +		@ Magic MSDOS signature for PE/COFF + ADD opcode
+> +		.word	0x62805a4d
+
+Did you get a chance to respond to the endianness issue I raised?
+
+> +#else
+> +		mov	r0, r0
+> +#endif
+> +		.rept	5
+>  		mov	r0, r0
+>  		.endr
+> -   ARM(		mov	r0, r0		)
+> -   ARM(		b	1f		)
+> - THUMB(		adr	r12, BSYM(1f)	)
+> - THUMB(		bx	r12		)
+> +
+> +		@ zimage_continue will be in ARM or thumb mode as configured
+> + THUMB(		adrl	r12, BSYM(zimage_continue))
+> + ARM(		adrl	r12, zimage_continue)
+> +		bx	r12
+
+Note that BSYM() can be used both in ARM and Thumb kernels.
+
+In any case, ARM kernels cannot contain BX instructions because we still
+support ARMv4 (which doesn't have it).
+
+I'm presuming you found zimage_continue is too far away for adr here,
+which is why you changed it.  Assuming that't the case, this might make
+sense:
+
+	adrl	r12, BSYM(zimage_continue)
+ ARM(	mov	pc, r12	)
+ THUMB(	bx	r12	)
+
+> + THUMB(		.thumb			)
+
+For tidiness, it's better to avoid this dangling .thumb ... move it
+to just before zimage_continue instead, since efi_stub_entry has to be
+ARM anyway.
+
+>  
+>  		.word	0x016f2818		@ Magic numbers to help the loader
+>  		.word	start			@ absolute load/run zImage address
+>  		.word	_edata			@ zImage end address
+> +
+> +#ifdef CONFIG_EFI_STUB
+> +		@ Portions of the MSDOS file header must be at offset
+> +		@ 0x3c from the start of the file.  All PE/COFF headers
+> +		@ are kept contiguous for simplicity.
+> +#include "efi-header.S"
+> +
+> +efi_stub_entry:
+> +		@ The EFI stub entry point is not at a fixed address, however
+> +		@ this address must be set in the PE/COFF header.
+> +		@ EFI entry point is in A32 mode, switch to T32 if configured.
+> + THUMB(		.arm			)
+
+^So, you can lose .arm here too (but keep the comment -- that's valuable
+info)
+
+> + THUMB(		adr	r12, BSYM(1f)	)
+> + THUMB(		bx	r12		)
+>   THUMB(		.thumb			)
+>  1:
+> +		@ Save lr on stack for possible return to EFI firmware.
+> +		@ Don't care about fp, but need 64 bit alignment....
+> +		stmfd	sp!, {fp, lr}
+> +
+> +		@ Save args to EFI app across got fixup call
+> +		stmfd	sp!, {r0, r1}
+
+Mostly minor coding nits follow...
+
+
+stmfd sp!, {r0, r1, fp, lr} ?
+
+> +		ldmfd	sp!, {r0, r1}
+> +
+> +		@ allocate space on stack for return of new entry point of
+> +		@ zImage, as EFI stub may copy the kernel.  Pass address
+> +		@ of space in r2 - EFI stub will fill in the pointer.
+> +
+> +		sub	sp, #8			@ we only need 4 bytes,
+
+I presume EFI guarantees a valid stack with 8-byte-aligned sp on entry?
+
+kernel asm is written in the traditional syntax, which means explicit
+source and destination registers for instructions like this:
+
+	sub	sp, sp, #8
+
+Since the EFI stub code will only be built with new toolchains it
+probably doesn't matter, but it's best to be consistent for readability
+purposes.
+
+> +						@ but keep stack 8 byte aligned.
+> +		mov	r2, sp
+> +		@ Pass our actual runtime start address in pointer data
+> +		adr	r11, LC0		@ address of LC0 at run time
+> +		ldr	r12, [r11, #0]		@ address of LC0 at link time
+> +
+> +		sub	r3, r11, r12		@ calculate the delta offset
+> +		str	r3, [r2, #0]
+> +		bl	efi_entry
+> +
+> +		@ get new zImage entry address from stack, put into r3
+> +		ldr	r3, [sp, #0]
+> +		add	sp, #8  @ restore stack
+
+	add	sp, sp, #8
+
+> +
+> +		@ Check for error return from EFI stub (0xFFFFFFFF)
+> +		ldr	r1, =0xffffffff
+
+Minor nit, but ldr= is wasteful for this.
+
+You could use mvn r1, #0 (or mov r1, #0xffffffff -- the assembler is
+smart enough to translate this)...
+
+> +		cmp	r0, r1
+
+...alternatively, don't use r1 at all and do:
+
+	cmn	r0, #1
+
+> +		beq	efi_load_fail
+> +
+> +
+> +		@ Save return values of efi_entry
+> +		stmfd	sp!, {r0, r3}
+> +		bl	cache_clean_flush
+> +		bl	cache_off
+
+Why turn the cache off?  Does that mean that EFI may launch images with
+the cache enabled?
+
+If so, are we guaranteed that VA=PA?  Otherwise simply turning the MMU
+off is not safe.
+
+(Hmm, the UEFI spec seems to suggest "yes" for these questions)
+
+> +		ldmfd   sp!, {r0, r3}
+> +
+> +		@ put DTB address in r2, it was returned by EFI entry
+> +		mov	r2, r0
+> +		ldr	r1, =0xffffffff		@ DTB machine type
+
+mov/mvn: see above
+
+> +		mov	r0, #0  @ r0 is 0
+
+Useless comment: maybe say why you're doing this ("r0 is 0, as required
+by the kernel boot protocol", or something like that).
+
+> +
+> +		@ Branch to (possibly) relocated zImage entry that is in r3
+> +		bx	r3
+> +
+> +efi_load_fail:
+> +		@ Return EFI_LOAD_ERROR to EFI firmware on error.
+> +		@ Switch back to ARM mode for EFI is done based on
+> +		@ return address on stack
+> +		ldr	r0, =0x80000001
+> +		ldmfd	sp!, {fp, pc}
+> +#endif
+> +
+> +zimage_continue:
+>  		mrs	r9, cpsr
+>  #ifdef CONFIG_ARM_VIRT_EXT
+>  		bl	__hyp_stub_install	@ get into SVC mode, reversibly
+> @@ -167,7 +246,6 @@ not_angel:
+>  		 * by the linker here, but it should preserve r7, r8, and r9.
+>  		 */
+>  
+> -		.text
+>  
+>  #ifdef CONFIG_AUTO_ZRELADDR
+>  		@ determine final kernel image address
+> -- 
+> 1.7.10.4
 > 
->   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8010007F
 > 
-> (I just set all three bits you requested).
-> 
-> Using the new OVMF.id changed the addresses, of course, so we're looking
-> at 0x7dc59XXX ones now.
-> 
-> [    0.000000] memblock_reserve: [0x0000007dc59018-0x0000007dc59618] efi_memblock_x86_reserve_range+0x70/0x75
-> 
-> So, I've attached an archive of the debug logs. The initial observations
-> I could do is that the region still gets "squashed" to:
-> 
-> [    0.014041] efi: mem11: type=4, attr=0xf, range=[0x000000007dc59000-0x000000007dc59000) (0MB)
-> 
-> from
-> 
-> [    0.000000] efi: mem11: type=4, attr=0xf, range=[0x000000007dc59000-0x000000007e146000) (4MB)
-> 
-> And the interesting stuff in the OVMF output is right at the end:
-> 
-> ConvertRange: 7DC59000-7DC5AFFF to 4
-> AddRange: 7DC59000-7DC5AFFF to 4
-> AllocatePoolI: Type 4, Addr 7DC59018 (len 16F0) 26,735,072
-> Jumping to kernel
-> 
-> We get that same output no matter if I boot it with "-enable-kvm" or
-> not.
-> 
-> If the order of the debug messages is the same as the calls actually
-> happen, we AllocatePoolI to address 7DC59018 which we already have added
-> as a range. But I'm not going to pretend I even know the code so I'll
-> let you comment instead :).
-
-I think this allows us to solve the bug :)
-
-First, forget everything I said :) I was completely lost.
-
-Remember this?
-
-01 efi_main()
-02  exit_boot()
-03    low_alloc()
-04    GetMemoryMap()
-05    ExitBootServices()
-06
-07 start_kernel()
-08   setup_arch()
-09    efi_memblock_x86_reserve_range()
-10    efi_reserve_boot_services()
-11  efi_enter_virtual_mode()
-12    SetVirtualAddressMap()
-
-Now, lines 01 to 05 *do not happen*.
-
-More precisely, they don't happen in the kernel. They happen in the firmware. Specifically, "OvmfPkg/Library/LoadLinuxLib/Linux.c".
-
-You're booting the kernel from the qemu command line. The kernel you run is also an "[o]ld kernel[] without EFI handover protocol". So what happens is, OVMF downloads the kernel image from qemu over fw_cfg, figures it's an old kernel...
-
-PlatformBdsPolicyBehavior() [OvmfPkg/Library/PlatformBdsLib/BdsPlatform.c]
-  // Process QEMU's -kernel command line option:
-  TryRunningQemuKernel()    [OvmfPkg/Library/PlatformBdsLib/QemuKernel.c]
-    LoadLinux()             [OvmfPkg/Library/LoadLinuxLib/Linux.c]
-      // Old kernels without EFI handover protocol
-      SetupLinuxBootParams()
-        SetupLinuxMemmap()
-          AllocatePool() <-------------- !!!
-          gBS->GetMemoryMap()
-          gBS->ExitBootServices()
-      prints "Jumping to kernel"
-      JumpToKernel()
-
-Now pull up efi_memblock_x86_reserve_range(). It reserves "boot_params.efi_info->efi_memmap".
-
-I assumed this field would come from the exit_boot() kernel function. It doesn't. It comes from SetupLinuxMemmap(). The former allocates the backing store as EFI_LOADER_DATA. The latter, alas, marked with !!! above, as boot services data. :)
-
-So, what you're seeing in the OVMF debug log:
-
-> ConvertRange: 7DC59000-7DC5AFFF to 4
-> AddRange: 7DC59000-7DC5AFFF to 4
-> AllocatePoolI: Type 4, Addr 7DC59018 (len 16F0) 26,735,072
-
-This is self-consistent. It just documents that the AllocatePool() call marked with !!! needs to grab two full pages first (two first lines), carve them up into pool chunks, and then serve the request from them (third line).
-
-The address displayed here shows up in the linux dmesg later on because the storage for the memory map itself is allocated, and populated, by OVMF, not the EFI stub in the kernel.
-
-In one sentence, efi_memblock_x86_reserve_range() expects that "boot_params.efi_info->efi_memmap" has been allocated as "loader data" (by whomever), but SetupLinuxMemmap() violates this by allocating the storage as "boot services data".
-
-This leads to double reservation attempts between efi_memblock_x86_reserve_range(), and efi_reserve_boot_services().
-
-The attached edk2 patch should fix it. Please confirm.
-
-Thanks,
-Laszlo
-
-
---------------070205040006040609090302
-Content-Type: text/plain; charset=ISO-8859-2;
- name="0001-OvmfPkg-allocate-the-EFI-memory-map-for-Linux-as-Loa.patch"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment;
- filename*0="0001-OvmfPkg-allocate-the-EFI-memory-map-for-Linux-as-Loa.pa";
- filename*1="tch"
-
-RnJvbSA0YTllMWYxMGZhMmQwNjQ5NmYxOTgzYzI1YzQ3YzZhMTM3M2QyZjQyIE1vbiBTZXAg
-MTcgMDA6MDA6MDAgMjAwMQpGcm9tOiBMYXN6bG8gRXJzZWsgPGxlcnNla0ByZWRoYXQuY29t
-PgpEYXRlOiBXZWQsIDcgQXVnIDIwMTMgMTk6Mzk6MzAgKzAyMDAKU3ViamVjdDogW1BBVENI
-XSBPdm1mUGtnOiBhbGxvY2F0ZSB0aGUgRUZJIG1lbW9yeSBtYXAgZm9yIExpbnV4IGFzIExv
-YWRlciBEYXRhCgpJbiBMaW51eCwgZWZpX21lbWJsb2NrX3g4Nl9yZXNlcnZlX3JhbmdlKCkg
-YW5kIGVmaV9yZXNlcnZlX2Jvb3Rfc2VydmljZXMoKQpleHBlY3QgdGhhdCB3aG9ldmVyIGFs
-bG9jYXRlcyB0aGUgRUZJIG1lbW1hcCBhbGxvY2F0ZXMgaXQgaW4gTG9hZGVyIERhdGEKdHlw
-ZSBtZW1vcnkuIExpbnV4J3Mgb3duIGV4aXRfYm9vdCgpLS0+bG93X2FsbG9jKCkgY29tcGxp
-ZXMsIGJ1dApTZXR1cExpbnV4TWVtbWFwKCkgaW4gTG9hZExpbnV4TGliIGRvZXNuJ3QuCgpU
-aGUgbWVtb3J5IHR5cGUgZGlzY3JlcGFuY3kgbGVhZHMgdG8gZWZpX21lbWJsb2NrX3g4Nl9y
-ZXNlcnZlX3JhbmdlKCkgYW5kCmVmaV9yZXNlcnZlX2Jvb3Rfc2VydmljZXMoKSBib3RoIHRy
-eWluZyB0byByZXNlcnZlIHRoZSByYW5nZSBiYWNraW5nIHRoZQptZW1tYXAsIHJlc3VsdGlu
-ZyBpbiBtZW1tYXAgZW50cnkgdHJ1bmNhdGlvbiBpbgplZmlfcmVzZXJ2ZV9ib290X3NlcnZp
-Y2VzKCkuCgpUaGlzIGZpeCBhbHNvIG1ha2VzIHRoaXMgYWxsb2NhdGlvbiBjb25zaXN0ZW50
-IHdpdGggYWxsIG90aGVyIHBlcnNpc3RlbnQKYWxsb2NhdGlvbnMgaW4gICJPdm1mUGtnL0xp
-YnJhcnkvTG9hZExpbnV4TGliL0xpbnV4LmMiLgoKQ29udHJpYnV0ZWQtdW5kZXI6IFRpYW5v
-Q29yZSBDb250cmlidXRpb24gQWdyZWVtZW50IDEuMAoKU2lnbmVkLW9mZi1ieTogTGFzemxv
-IEVyc2VrIDxsZXJzZWtAcmVkaGF0LmNvbT4KLS0tCiBPdm1mUGtnL0xpYnJhcnkvTG9hZExp
-bnV4TGliL0xpbnV4LmMgfCAgICA4ICsrKysrKy0tCiAxIGZpbGVzIGNoYW5nZWQsIDYgaW5z
-ZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9Pdm1mUGtnL0xpYnJh
-cnkvTG9hZExpbnV4TGliL0xpbnV4LmMgYi9Pdm1mUGtnL0xpYnJhcnkvTG9hZExpbnV4TGli
-L0xpbnV4LmMKaW5kZXggY2Q2NzNhYS4uNGEzZTJjMSAxMDA2NDQKLS0tIGEvT3ZtZlBrZy9M
-aWJyYXJ5L0xvYWRMaW51eExpYi9MaW51eC5jCisrKyBiL092bWZQa2cvTGlicmFyeS9Mb2Fk
-TGludXhMaWIvTGludXguYwpAQCAtMjgwLDggKzI4MCwxMiBAQCBTZXR1cExpbnV4TWVtbWFw
-ICgKICAgLy8gRW5sYXJnZSBzcGFjZSBoZXJlLCBiZWNhdXNlIHdlIHdpbGwgYWxsb2NhdGUg
-cG9vbCBub3cuDQogICAvLw0KICAgTWVtb3J5TWFwU2l6ZSArPSBFRklfUEFHRV9TSVpFOw0K
-LSAgTWVtb3J5TWFwID0gQWxsb2NhdGVQb29sIChNZW1vcnlNYXBTaXplKTsNCi0gIEFTU0VS
-VCAoTWVtb3J5TWFwICE9IE5VTEwpOw0KKyAgU3RhdHVzID0gZ0JTLT5BbGxvY2F0ZVBvb2wg
-KA0KKyAgICAgICAgICAgICAgICAgIEVmaUxvYWRlckRhdGEsDQorICAgICAgICAgICAgICAg
-ICAgTWVtb3J5TWFwU2l6ZSwNCisgICAgICAgICAgICAgICAgICAoVk9JRCAqKikgJk1lbW9y
-eU1hcA0KKyAgICAgICAgICAgICAgICAgICk7DQorICBBU1NFUlRfRUZJX0VSUk9SIChTdGF0
-dXMpOw0KIA0KICAgLy8NCiAgIC8vIEdldCBTeXN0ZW0gTWVtb3J5TWFwDQotLSAKMS43LjEK
-Cg==
---------------070205040006040609090302--
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
