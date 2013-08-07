@@ -1,55 +1,58 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 04/17] Rename memory allocation/free functions
-Date: Wed, 7 Aug 2013 10:12:33 -0700
-Message-ID: <CAFECyb_r9yMVeWnBLe3Fn2Zg4i6L=7E7RDQQqVe_DfC6oTmqgw@mail.gmail.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 12/17] Add proper definitions for some EFI function pointers.
+Date: Wed, 7 Aug 2013 10:20:42 -0700
+Message-ID: <CAFECyb_ZoCCMs75FLtGewfFQy1m5aVw6s5Jv1H1vaxg976qFNA@mail.gmail.com>
 References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-	<1375847113-24884-5-git-send-email-roy.franz@linaro.org>
-	<20130807130906.GD2515@console-pimps.org>
+	<1375847113-24884-13-git-send-email-roy.franz@linaro.org>
+	<20130807130950.GF2515@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130807130906.GD2515@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Dave Martin <dave.martin@arm.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130807130950.GF2515-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 7, 2013 at 6:09 AM, Matt Fleming <matt@console-pimps.org> wrote:
-> On Tue, 06 Aug, at 08:45:00PM, Roy Franz wrote:
->> Rename them to be more similar, as low_free() could be used to free
->> memory allocated by both high_alloc() and low_alloc().
->> high_alloc() -> efi_high_alloc()
->> low_alloc()  -> efi_low_alloc()
->> low_free()   -> efi_free()
+On Wed, Aug 7, 2013 at 6:09 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Tue, 06 Aug, at 08:45:08PM, Roy Franz wrote:
+>> The x86/AMD64 EFI stubs must us a call wrapper to convert between
+>> the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
+>> the ABIs are compatible, so we can directly invoke the function
+>> pointers.  The functions that are used by the ARM stub are updated
+>> to match the EFI definitions.
 >>
->> Signed-off-by: Roy Franz <roy.franz@linaro.org>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >> ---
->>  arch/x86/boot/compressed/eboot.c       |   19 ++++++++++---------
->>  drivers/firmware/efi/efi-stub-helper.c |   16 ++++++++--------
->>  2 files changed, 18 insertions(+), 17 deletions(-)
->
-> [...]
->
->> @@ -163,10 +163,10 @@ fail:
->>  }
+>>  include/linux/efi.h |   42 +++++++++++++++++++++++++-----------------
+>>  1 file changed, 25 insertions(+), 17 deletions(-)
 >>
->>  /*
->> - * Allocate at the lowest possible address.
->> + * Allocate at the lowest possible address, that is not below 'min'
->>   */
->> -static efi_status_t low_alloc(efi_system_table_t *sys_table_arg,
->> -             unsigned long size, unsigned long align,
->> +static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
->> +                           unsigned long size, unsigned long align,
->>                             unsigned long *addr)
->>  {
->>       unsigned long map_size, desc_size;
+>> diff --git a/include/linux/efi.h b/include/linux/efi.h
+>> index 51f5641..96bb866 100644
+>> --- a/include/linux/efi.h
+>> +++ b/include/linux/efi.h
+>> @@ -39,6 +39,8 @@
+>>  typedef unsigned long efi_status_t;
+>>  typedef u8 efi_bool_t;
+>>  typedef u16 efi_char16_t;            /* UNICODE character */
+>> +typedef u64 efi_physical_addr_t;
+>> +typedef void *efi_handle_t;
+>>
+>>
+>>  typedef struct {
+>> @@ -96,6 +98,7 @@ typedef     struct {
+>>  #define EFI_MEMORY_DESCRIPTOR_VERSION        1
+>>
+>>  #define EFI_PAGE_SHIFT               12
+>> +#define EFI_PAGE_SIZE                (1UL << EFI_PAGE_SHIFT)
 >
-> Whoops, did this change to the comment slip in from some other patch?
+> It would be worth getting rid of the EFI_PAGE_SIZE definition in
+> arch/x86/boot/compressed/eboot.h now that we have one here.
 >
 > --
 > Matt Fleming, Intel Open Source Technology Center
 
-Yes it did - that should be in a later patch that makes that change.
+I'll get this in the next version.
 
+Thanks,
 Roy
