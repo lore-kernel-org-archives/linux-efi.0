@@ -1,77 +1,55 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 03/17] Add system pointer argument to shared EFI stub
- related functions so they no longer use global system table pointer as they
- did when part of eboot.c.
-Date: Wed, 7 Aug 2013 10:10:54 -0700
-Message-ID: <CAFECyb8NbZ=hrAGyoV-UPUhh-Jst6ZVRk9RUQj_Kb1qq_xuUAg@mail.gmail.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH 04/17] Rename memory allocation/free functions
+Date: Wed, 7 Aug 2013 10:12:33 -0700
+Message-ID: <CAFECyb_r9yMVeWnBLe3Fn2Zg4i6L=7E7RDQQqVe_DfC6oTmqgw@mail.gmail.com>
 References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-	<1375847113-24884-4-git-send-email-roy.franz@linaro.org>
-	<20130807130851.GC2515@console-pimps.org>
+	<1375847113-24884-5-git-send-email-roy.franz@linaro.org>
+	<20130807130906.GD2515@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130807130851.GC2515-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130807130906.GD2515@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Dave Martin <dave.martin@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 7, 2013 at 6:08 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Tue, 06 Aug, at 08:44:59PM, Roy Franz wrote:
->> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Wed, Aug 7, 2013 at 6:09 AM, Matt Fleming <matt@console-pimps.org> wrote:
+> On Tue, 06 Aug, at 08:45:00PM, Roy Franz wrote:
+>> Rename them to be more similar, as low_free() could be used to free
+>> memory allocated by both high_alloc() and low_alloc().
+>> high_alloc() -> efi_high_alloc()
+>> low_alloc()  -> efi_low_alloc()
+>> low_free()   -> efi_free()
+>>
+>> Signed-off-by: Roy Franz <roy.franz@linaro.org>
 >> ---
->>  arch/x86/boot/compressed/eboot.c       |   38 +++++++------
->>  drivers/firmware/efi/efi-stub-helper.c |   96 +++++++++++++++++---------------
->>  2 files changed, 72 insertions(+), 62 deletions(-)
->
-> For future reference you should really use a shorter first line in your
-> git commit message, which would produe a shorter subject when mailing
-> your patches.
->
-> I'll fix up the commit messages when I apply these patches, so don't
-> worry about it for now.
+>>  arch/x86/boot/compressed/eboot.c       |   19 ++++++++++---------
+>>  drivers/firmware/efi/efi-stub-helper.c |   16 ++++++++--------
+>>  2 files changed, 18 insertions(+), 17 deletions(-)
 >
 > [...]
 >
->> @@ -19,15 +19,16 @@ struct initrd {
->>
->>
->>
->> -static void efi_char16_printk(efi_char16_t *str)
->> +static void efi_char16_printk(efi_system_table_t *sys_table_arg,
->> +                           efi_char16_t *str)
->>  {
->>       struct efi_simple_text_output_protocol *out;
->>
->> -     out = (struct efi_simple_text_output_protocol *)sys_table->con_out;
->> +     out = (struct efi_simple_text_output_protocol *)sys_table_arg->con_out;
->>       efi_call_phys2(out->output_string, out, str);
+>> @@ -163,10 +163,10 @@ fail:
 >>  }
 >>
->> -static void efi_printk(char *str)
->> +static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+>>  /*
+>> - * Allocate at the lowest possible address.
+>> + * Allocate at the lowest possible address, that is not below 'min'
+>>   */
+>> -static efi_status_t low_alloc(efi_system_table_t *sys_table_arg,
+>> -             unsigned long size, unsigned long align,
+>> +static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>> +                           unsigned long size, unsigned long align,
+>>                             unsigned long *addr)
 >>  {
->>       char *s8;
->>
+>>       unsigned long map_size, desc_size;
 >
-> Hmm... I'm not necessarily convinced this is an improvement over using
-> some kind of a global pointer to the EFI System Table.
->
-> Parameterizing stuff like this is useful when the argument changes at
-> runtime from call to call, but that isn't the case for the boot stubs. I
-> don't think there's anything wrong with a global in this scenario, and
-> this patch is a fair amount of churn for no real improvement.
+> Whoops, did this change to the comment slip in from some other patch?
 >
 > --
 > Matt Fleming, Intel Open Source Technology Center
 
-Hi Matt,
-
-I went this way since the shared code is in a separate file - I really
-didn't like using a global variable as part of the interface to
-the shared code.  This has the nice side benefit of allowing the ARM
-stub to not use any global variables, so we don't have to do
-any GOT fixups to relocate the code - it is position independent if we
-don't use global variables.
+Yes it did - that should be in a later patch that makes that change.
 
 Roy
