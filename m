@@ -1,58 +1,32 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Wed, 7 Aug 2013 22:23:02 +0100
-Message-ID: <20130807212302.GA10905@srcf.ucam.org>
-References: <51FFD5B0.9080000@redhat.com>
- <20130805164731.GG31845@pd.tnic>
- <52001896.1030509@redhat.com>
- <20130805220808.GC14067@pd.tnic>
- <20130806141036.GD14891@pd.tnic>
- <520116D1.2010000@redhat.com>
- <20130807151935.GJ17920@pd.tnic>
- <CCFD3CBD-62B0-4046-B96D-18CB1A815F72@apple.com>
- <20130807201908.GG2515@console-pimps.org>
- <D5982201-6DC4-469F-812A-74A8402ADEE9@apple.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH 03/17] Add system pointer argument to shared EFI stub
+ related functions so they no longer use global system table pointer as they
+ did when part of eboot.c.
+Date: Wed, 7 Aug 2013 22:55:54 +0100
+Message-ID: <20130807215554.GI2515@console-pimps.org>
+References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
+ <1375847113-24884-4-git-send-email-roy.franz@linaro.org>
+ <20130807130851.GC2515@console-pimps.org>
+ <CAFECyb8NbZ=hrAGyoV-UPUhh-Jst6ZVRk9RUQj_Kb1qq_xuUAg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <D5982201-6DC4-469F-812A-74A8402ADEE9@apple.com>
+In-Reply-To: <CAFECyb8NbZ=hrAGyoV-UPUhh-Jst6ZVRk9RUQj_Kb1qq_xuUAg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Fish <afish@apple.com>
-Cc: Matt Fleming <matt@console-pimps.org>, edk2-devel@lists.sourceforge.net, Laszlo Ersek <lersek@redhat.com>, linux-efi@vger.kernel.org, Gleb Natapov <gleb@redhat.com>, lkml <linux-kernel@vger.kernel.org>, David Woodhouse <dwmw2@infradead.org>
+To: Roy Franz <roy.franz@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Dave Martin <dave.martin@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 07, 2013 at 02:10:28PM -0700, Andrew Fish wrote:
+On Wed, 07 Aug, at 10:10:54AM, Roy Franz wrote:
+> I went this way since the shared code is in a separate file - I really
+> didn't like using a global variable as part of the interface to
+> the shared code.  This has the nice side benefit of allowing the ARM
+> stub to not use any global variables, so we don't have to do
+> any GOT fixups to relocate the code - it is position independent if we
+> don't use global variables.
 
-> Well the issue I see is I don't think OS X or Windows are doing this. 
-> So I'm guessing there is some unique thing beings done on the Linux 
-> side and we don't have good tests to catch bugs in the EFI 
-> implementations. If the Linux loader hides the bugs and we don't hit 
-> them with other operating systems they are never going to get fixed. 
-> It would be good if we could track down some of these issues and make 
-> a request for some tests that can help catch these issues. The tests 
-> would be part of UEFI.org, but since some of us play in both worlds we 
-> can forward the known issues to the UEFI test work group.
-
-Linux enables NX before calling SetVirtualAddressMap(). If other OSes 
-don't do that, you probably won't see the bug.
-
-> Is it possible to have a switch to turn off the not required behavior 
-> (hiding EFI implementation bugs) so that bad platforms could be 
-> detected? This would be a good thing to try on platforms at the 
-> upcoming UEFI Plugfest hosted by the Linux Foundation and the UEFI 
-> Forum, so the bad behavior can be detected and the vendors can fix the 
-> issue.
-
-It's behaviour that we already have to work around due to shipping 
-hardware exhibiting it, so while we could certainly develop a test, 
-Linux is always going to need to include the workaround code.
-
-That being said, some of what we do with the memory map in Linux right 
-now is probably unnecessary - we're modifying the memory map because 
-that's a convenient place to store the information, rather than because 
-the memory map actually needs to be modified. We could do a better job 
-of that.
+OK, that would be a win. Please include this rationale in the patch.
 
 -- 
-Matthew Garrett | mjg59@srcf.ucam.org
+Matt Fleming, Intel Open Source Technology Center
