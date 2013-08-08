@@ -1,77 +1,105 @@
-From: Andrew Fish <afish-2kanFRK1NckAvxtiuMwx3w@public.gmane.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [edk2] Corrupted EFI region
-Date: Thu, 08 Aug 2013 06:46:02 -0700
-Message-ID: <1AEC7AA8-D49E-485F-A634-31B4F0D07083@apple.com>
-References: <51FFD5B0.9080000@redhat.com> <20130805164731.GG31845@pd.tnic>
- <52001896.1030509@redhat.com> <20130805220808.GC14067@pd.tnic>
- <20130806141036.GD14891@pd.tnic> <520116D1.2010000@redhat.com>
+Date: Thu, 8 Aug 2013 17:02:49 +0200
+Message-ID: <20130808150249.GB27974@pd.tnic>
+References: <51FFC19A.1020204@redhat.com>
+ <20130805161247.GF31845@pd.tnic>
+ <51FFD5B0.9080000@redhat.com>
+ <20130805164731.GG31845@pd.tnic>
+ <52001896.1030509@redhat.com>
+ <20130805220808.GC14067@pd.tnic>
+ <20130806141036.GD14891@pd.tnic>
+ <520116D1.2010000@redhat.com>
  <20130807151935.GJ17920@pd.tnic>
- <CCFD3CBD-62B0-4046-B96D-18CB1A815F72@apple.com>
- <20130807201908.GG2515@console-pimps.org>
- <D5982201-6DC4-469F-812A-74A8402ADEE9@apple.com>
- <20130808101730.GJ2515@console-pimps.org>
+ <5202889C.2080608@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; CHARSET=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20130808101730.GJ2515-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5202889C.2080608-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Brian Richardson <brian.richardson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Jordan Justen (Intel address)" <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Wed, Aug 07, 2013 at 07:49:16PM +0200, Laszlo Ersek wrote:
 
-On Aug 8, 2013, at 3:17 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+[=E2=80=A6]
 
-> On Wed, 07 Aug, at 02:10:28PM, Andrew Fish wrote:
->> Well the issue I see is I don't think OS X or Windows are doing this.
->> So I'm guessing there is some unique thing beings done on the Linux
->> side and we don't have good tests to catch bugs in the EFI
->> implementations. If the Linux loader hides the bugs and we don't hit
->> them with other operating systems they are never going to get fixed.
->> It would be good if we could track down some of these issues and make
->> a request for some tests that can help catch these issues. The tests
->> would be part of UEFI.org, but since some of us play in both worlds we
->> can forward the known issues to the UEFI test work group. 
-> 
-> I'm all for helping to develop tests that catch these kind of bugs.
-> What's the next step?
-> 
+> Now, lines 01 to 05 *do not happen*.
+>
+> More precisely, they don't happen in the kernel. They happen in the
+> firmware. Specifically, "OvmfPkg/Library/LoadLinuxLib/Linux.c".
+>
+> You're booting the kernel from the qemu command line. The kernel you
+> run is also an "[o]ld kernel[] without EFI handover protocol". So wha=
+t
+> happens is, OVMF downloads the kernel image from qemu over fw_cfg,
+> figures it's an old kernel...
 
-I'll bring this up with UEFI.org.
+Right, I think this is easier than having to go into the EFI shell each
+time and run bzImage.efi. Unless there's a faster way to do that along
+with passing it kernel command line parameters...
 
->> Is it possible to have a switch to turn off the not required behavior
->> (hiding EFI implementation bugs) so that bad platforms could be
->> detected? This would be a good thing to try on platforms at the
->> upcoming UEFI Plugfest hosted by the Linux Foundation and the UEFI
->> Forum, so the bad behavior can be detected and the vendors can fix the
->> issue. 
-> 
-> We don't tend to provide switches for the kernel to turn off workarounds
-> because users run the risk of inadvertently stopping their machines from
-> booting correctly. Also, because the major distributions will always
-> enable the workarounds, the kernel would need to be built manually to
-> see any kind of informative error message.
-> 
-> What we do have though is the Firmware Testsuite - fwts,
-> 
->  https://wiki.ubuntu.com/Kernel/Reference/fwts
-> 
-> I know that Brian (Cc'd) has been doing some excellent advocacy work,
-> getting people at plugfetsts to run this testsuite which tests for
-> implementation bugs from within a Linux environment.
-> 
->> PS Also maybe it would be possible to key this work around behavior on
->> the EFI/UEFI version. So for example no work-around after UEFI v2.3.1?
-> 
-> That would really depend on who has seen this bug and on which
-> platforms. Is there a particular reason that mapping the boot services
-> regions as-is would cause problems?
-> 
+[=E2=80=A6]
 
-1) The firmware bug could also be a security hole and thus needs to get fixed. 
-2) The kernel gets locked into a design that does not follow the specification, and this limits future design options.
-3) Makes the code more complex to maintain and test. 
+> In one sentence, efi_memblock_x86_reserve_range() expects that
+> "boot_params.efi_info->efi_memmap" has been allocated as "loader data=
+"
+> (by whomever), but SetupLinuxMemmap() violates this by allocating the
+> storage as "boot services data".
+>
+> This leads to double reservation attempts between
+> efi_memblock_x86_reserve_range(), and efi_reserve_boot_services().
 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+Ok, this makes sense.
+
+> The attached edk2 patch should fix it. Please confirm.
+>=20
+> Thanks,
+> Laszlo
+>=20
+
+> From 4a9e1f10fa2d06496f1983c25c47c6a1373d2f42 Mon Sep 17 00:00:00 200=
+1
+> From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Date: Wed, 7 Aug 2013 19:39:30 +0200
+> Subject: [PATCH] OvmfPkg: allocate the EFI memory map for Linux as Lo=
+ader Data
+>=20
+> In Linux, efi_memblock_x86_reserve_range() and efi_reserve_boot_servi=
+ces()
+> expect that whoever allocates the EFI memmap allocates it in Loader D=
+ata
+> type memory. Linux's own exit_boot()-->low_alloc() complies, but
+> SetupLinuxMemmap() in LoadLinuxLib doesn't.
+>=20
+> The memory type discrepancy leads to efi_memblock_x86_reserve_range()=
+ and
+> efi_reserve_boot_services() both trying to reserve the range backing =
+the
+> memmap, resulting in memmap entry truncation in
+> efi_reserve_boot_services().
+>=20
+> This fix also makes this allocation consistent with all other persist=
+ent
+> allocations in  "OvmfPkg/Library/LoadLinuxLib/Linux.c".
+>=20
+> Contributed-under: TianoCore Contribution Agreement 1.0
+>=20
+> Signed-off-by: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+Reported-and-tested-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+
+Great, thanks for this.
+
+I guess we got that out of the way too. I finally can concentrate on my
+patches again :-)
+
+--=20
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
