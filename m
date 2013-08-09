@@ -1,153 +1,67 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 16/17] Add EFI stub for ARM
-Date: Thu, 8 Aug 2013 17:53:16 -0700
-Message-ID: <CAFECyb9Qh1TzGcjK2AMkKWZTsvTh2MgF1yeDzxYpLE7skMLg7g@mail.gmail.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 12/17] Add proper definitions for some EFI function
+ pointers.
+Date: Fri, 09 Aug 2013 10:10:13 -0400
+Message-ID: <1376057413.12443.91.camel@t520.redhat.com>
 References: <1375847113-24884-1-git-send-email-roy.franz@linaro.org>
-	<1375847113-24884-17-git-send-email-roy.franz@linaro.org>
-	<20130807180548.GA12592@localhost.localdomain>
-	<CAFECyb-aAHk0RzBGPmGOhRkm8=chwyAM=DdwE=6Z4VLR9sqFRA@mail.gmail.com>
+	 <1375847113-24884-13-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFECyb-aAHk0RzBGPmGOhRkm8=chwyAM=DdwE=6Z4VLR9sqFRA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Martin <Dave.Martin@arm.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1375847113-24884-13-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Dave - here is an updated patch for head.S, I'm still working on the
-rest.  I will make the EFI stub depend on !CPU_ENDIAN_BE32 to make the
-stub LE only for now.  I think I have addressed the rest of your
-comments in head.S in the patch below.  I will send a complete new
-series once I have the other changes, mostly in efi-stub.c, complete.
+On Tue, 2013-08-06 at 20:45 -0700, Roy Franz wrote:
+> The x86/AMD64 EFI stubs must us a call wrapper to convert between
+> the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
+> the ABIs are compatible, so we can directly invoke the function
+> pointers.  The functions that are used by the ARM stub are updated
+> to match the EFI definitions.
+> 
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  include/linux/efi.h |   42 +++++++++++++++++++++++++-----------------
+>  1 file changed, 25 insertions(+), 17 deletions(-)
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 51f5641..96bb866 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -39,6 +39,8 @@
+>  typedef unsigned long efi_status_t;
+>  typedef u8 efi_bool_t;
+>  typedef u16 efi_char16_t;		/* UNICODE character */
+> +typedef u64 efi_physical_addr_t;
+> +typedef void *efi_handle_t;
+>  
+> 
+>  typedef struct {
+> @@ -96,6 +98,7 @@ typedef	struct {
+>  #define EFI_MEMORY_DESCRIPTOR_VERSION	1
+>  
+>  #define EFI_PAGE_SHIFT		12
+> +#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
+>  
+>  typedef struct {
+>  	u32 type;
+> @@ -157,11 +160,12 @@ typedef struct {
+>  	efi_table_hdr_t hdr;
+>  	void *raise_tpl;
+>  	void *restore_tpl;
+> -	void *allocate_pages;
+> -	void *free_pages;
+> -	void *get_memory_map;
+> -	void *allocate_pool;
+> -	void *free_pool;
+> +	int (*allocate_pages)(int, int, unsigned long, efi_physical_addr_t *);
+> +	int (*free_pages)(efi_physical_addr_t, unsigned long);
 
-Thanks,
-Roy
+All of the actual function pointers that were added should return an
+efi_status_t instead of int. On arm64, I was seeing an unrecognizable
+error status because the truncation from 64 to 32 bits.
 
-
-
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 75189f1..5401a3a 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -10,6 +10,7 @@
-  */
- #include <linux/linkage.h>
- #include <asm/assembler.h>
-+#include "efi-stub.h"
-
-  .arch armv7-a
- /*
-@@ -120,21 +121,99 @@
-  */
-  .align
-  .arm @ Always enter in ARM state
-+ .text
- start:
-  .type start,#function
-- .rept 7
-+#ifdef CONFIG_EFI_STUB
-+ @ Magic MSDOS signature for PE/COFF + ADD opcode
-+ .word 0x62805a4d
-+#else
-+ mov r0, r0
-+#endif
-+ .rept 5
-  mov r0, r0
-  .endr
--   ARM( mov r0, r0 )
--   ARM( b 1f )
-- THUMB( adr r12, BSYM(1f) )
-- THUMB( bx r12 )
-+
-+ adrl r12, BSYM(zimage_continue)
-+ ARM( mov     pc, r12 )
-+ THUMB( bx r12     )
-+ @ zimage_continue will be in ARM or thumb mode as configured
-
-  .word 0x016f2818 @ Magic numbers to help the loader
-  .word start @ absolute load/run zImage address
-  .word _edata @ zImage end address
-+
-+#ifdef CONFIG_EFI_STUB
-+ @ Portions of the MSDOS file header must be at offset
-+ @ 0x3c from the start of the file.  All PE/COFF headers
-+ @ are kept contiguous for simplicity.
-+#include "efi-header.S"
-+
-+efi_stub_entry:
-+ @ The EFI stub entry point is not at a fixed address, however
-+ @ this address must be set in the PE/COFF header.
-+ @ EFI entry point is in A32 mode, switch to T32 if configured.
-+ THUMB( adr r12, BSYM(1f) )
-+ THUMB( bx r12 )
-  THUMB( .thumb )
- 1:
-+ @ Save lr on stack for possible return to EFI firmware.
-+ @ Don't care about fp, but need 64 bit alignment....
-+ stmfd sp!, {fp, lr}
-+
-+ @ allocate space on stack for return of new entry point of
-+ @ zImage, as EFI stub may copy the kernel.  Pass address
-+ @ of space in r2 - EFI stub will fill in the pointer.
-+
-+ sub sp, sp, #8 @ we only need 4 bytes,
-+ @ but keep stack 8 byte aligned.
-+ mov r2, sp
-+ @ Pass our actual runtime start address in pointer data
-+ adr r11, LC0 @ address of LC0 at run time
-+ ldr r12, [r11, #0] @ address of LC0 at link time
-+
-+ sub r3, r11, r12 @ calculate the delta offset
-+ str r3, [r2, #0]
-+ bl efi_entry
-+
-+ @ get new zImage entry address from stack, put into r3
-+ ldr r3, [sp, #0]
-+ add sp, sp, #8   @ restore stack
-+
-+ @ Check for error return from EFI stub
-+ mov r1, #EFI_STUB_ERROR
-+ cmp r0, r1
-+ beq efi_load_fail
-+
-+
-+ @ Save return values of efi_entry
-+ stmfd sp!, {r0, r3}
-+ bl cache_clean_flush
-+ bl cache_off
-+ ldmfd   sp!, {r0, r3}
-+
-+ @ Set parameters for booting zImage according to boot protocol
-+ @ put FDT address in r2, it was returned by efi_entry()
-+ @ r1 is FDT machine type, and r0 needs to be 0
-+ mov r2, r0
-+ mov r1, #0xFFFFFFFF
-+ mov r0, #0
-+
-+ @ Branch to (possibly) relocated zImage that is in r3
-+ @ Make sure we are in A32 mode, as zImage requires
-+ THUMB( bx r3 )
-+ ARM( mov pc, r3 )
-+
-+efi_load_fail:
-+ @ Return EFI_LOAD_ERROR to EFI firmware on error.
-+ @ Switch back to ARM mode for EFI is done based on
-+ @ return address on stack
-+ ldr r0, =0x80000001
-+ ldmfd sp!, {fp, pc}
-+#endif
-+
-+ THUMB( .thumb )
-+zimage_continue:
-  mrs r9, cpsr
- #ifdef CONFIG_ARM_VIRT_EXT
-  bl __hyp_stub_install @ get into SVC mode, reversibly
-@@ -167,7 +246,6 @@ not_angel:
-  * by the linker here, but it should preserve r7, r8, and r9.
-  */
-
-- .text
-
- #ifdef CONFIG_AUTO_ZRELADDR
-  @ determine final kernel image address
+--Mark
