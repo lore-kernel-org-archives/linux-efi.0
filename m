@@ -1,40 +1,117 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: RFC: default CONFIG_EFI_STUB=y
-Date: Fri, 09 Aug 2013 08:38:43 -0700
-Message-ID: <52050D03.4030805@zytor.com>
-References: <52050985.9070107@zytor.com> <1376062345.2087.16.camel@dabdike.int.hansenpartnership.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-15
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376062345.2087.16.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH V3 RFC 00/16]  EFI stub for ARM
+Date: Fri,  9 Aug 2013 16:26:01 -0700
+Message-ID: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: leif.lindholm@linaro.org, dave.martin@arm.com, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/09/2013 08:32 AM, James Bottomley wrote:
-> On Fri, 2013-08-09 at 08:23 -0700, H. Peter Anvin wrote:
->> I would like to change the defaults for CONFIG_EFI and CONFIG_EFI_STUB
->> to y.  There is little reason to omit this since EFI now is a
->> significant percentage of all systems.
-> 
-> You didn't actually attach the patch, but I presume this is for 64 bit
-> compiles on x86 only?  We still have significant problems getting 64 bit
-> EFI to interact with 32 bit kernels, so I don't believe we should enable
-> CONFIG_EFI globally for all of x86.
-> 
 
-Well, it doesn't *solve* the problem with cross-mode, but it should work
-as-is for EFI32->32-bit kernel and EFI64->64-bit kernel.  For the
-cross-mode kernels they will simply not do anything.
+This patch series adds EFI stub support for the ARM architecture.
+Some code that was previously only used by x86/x86_64 is now shared
+and has been made more general.  The stub for ARM is implemented in
+a similar manner to x86 in that it is a shim layer between EFI and
+the normal zImage/bzImage boot process, and that an image with the
+stub configured is bootable as both a zImage and EFI application.
 
-Either way, nothing bad should come from it.  The worst thing that will
-happen is that the kernel says "I don't have any EFI that I recognize."
+This patch now (new for v3) series depends on the 
+"arm: Add [U]EFI runtime services support" patches by leif.lindholm@linaro.org.
+The Kconfig option now depends on the "CONFIG_EFI" option that his series
+adds, and this option will ensure a little endian configuration.  Also, the
+EFI support is used to handle the EFI memory map the stub passes to the kernel.
+There are some minor changes to be coordinated with the EFI runtime services
+patch series, so I have put this back to RFC status.  These changes should be
+minor and relate to final device tree bindings.
 
-Cross-mode support will always require a secondary bootloader (since as
-far as I know there is no concept of "fat binaries" for EFI), but Matt
-Fleming is working on genuine cross-mode support for both the boot stub
-and (eventually) run time support.
+Changes since v2:
+* EFI bugfix "correct call to free_pages" that patch series
+  depends on now in mainline
+* remove "-fno-stack-protector" from decompressor Makefile.  The current code doesn't
+  trigger the stack protection, so the decompressor now compiles with it still
+  on.  Note that there has never been any stack protection in the decompressor
+  since the stack usage doesn't trigger the heuristic in GCC, so right now
+  the "-fno-stack-protector" is a noop.
+* Changed EFI command line handling to not have a fixed limit.
+* Change FDT memory allocation to retry with a larger allocation if
+  first educated guess is inadequate.
+* Correctly set 'SizeOfCode' in PE/COFF header.
+* Reviewed ".setup" section that is in x86 PE/COFF header.  This is used for x86
+  to account for code that is not in the .text section.  We don't need this
+  for ARM, as all of our code is in the .text section, or in the PE/COFF header
+  itself.
+* Moved EFI_STUB_ERROR #define to header file to share between stub C and ASM.
+* Variety of cleanups and fixes in head.S.
+* Changed update_fdt_and_exit_boot() to just update the device tree, and
+  renamed appropriately.  Memory allocations moved out of this function as
+  well, which enables the retries if the initial FDT size is too small.
+  Note that in order to do the retried allocations, the original FDT and 
+  command line memory regions are left allocated.  This is OK since the kernel
+  has the memory map and will free these allocations along with the initrd
+  and new fdt allocations.
+* Added prefix to all prints, reduced number of prints, and reviewed all
+  messages.
+* Change mixed usage of dtb/fdt to all be fdt or "device tree" in efi-stub.c
+* remove unnecessary zimage_size variable from relocate_kernel()
+* correct return types on EFI functions - should be efi_status_t, not int.
 
-	-hpa
+
+
+Changes since V1:
+* Updated head.S based on feedback from Dave Martin.  ARM/THUMB
+  switches now much cleaner.
+* Broke up changes to x86 and common code into more patches.
+  10 more patches in this series.
+
+Roy Franz (16):
+  Move common EFI stub code from x86 arch code to common location
+  Add system pointer argument to shared EFI stub related     functions
+    so they no longer use global system table     pointer as they did
+    when part of eboot.c.     This code is now shared, so using a
+    global variable     as part of the interface is not that nice.
+    Also,     by avoiding any global variables in the ARM EFI stub,    
+    this allows the code to be position independent without    
+    requiring GOT fixups.
+  Rename memory allocation/free functions
+  Add minimum address parameter to efi_low_alloc()
+  rename __get_map() to efi_get_memory_map(), add parameter     to
+    optionally return mmap key. The mmap key is required     to exit
+    EFI boot services, and allows efi_get_memory_map()     to be used
+    for getting final memory map.
+  Enforce minimum alignment of 1 page on allocations.     The
+    efi_high_alloc() and efi_low_alloc() functions     use the
+    EFI_ALLOCATE_ADDRESS option to the EFI     function
+    allocate_pages(), which requires a minimum     of page alignment,
+    and rejects all other requests.
+  Allow efi_free() to be called with size of 0, and do nothing in that
+    case.
+  Generalize handle_ramdisks() and rename to handle_cmdline_files().
+  Renames in handle_cmdline_files() to complete generalization.
+  Move EFI_READ_CHUNK_SIZE define to shared location.
+  Add proper definitions for some EFI function pointers.
+  Fix types in EFI calls to match EFI function definitions.
+  resolve warnings found on ARM compile
+  Add strstr to compressed string.c for ARM.
+  Add EFI stub for ARM
+  Add config EFI_STUB for ARM to Kconfig
+
+ arch/arm/Kconfig                       |   11 +
+ arch/arm/boot/compressed/Makefile      |   15 +-
+ arch/arm/boot/compressed/efi-header.S  |  111 +++++++
+ arch/arm/boot/compressed/efi-stub.c    |  448 ++++++++++++++++++++++++++++
+ arch/arm/boot/compressed/efi-stub.h    |    5 +
+ arch/arm/boot/compressed/head.S        |   90 +++++-
+ arch/arm/boot/compressed/string.c      |   21 ++
+ arch/x86/boot/compressed/eboot.c       |  490 ++-----------------------------
+ arch/x86/boot/compressed/eboot.h       |    9 -
+ drivers/firmware/efi/efi-stub-helper.c |  505 ++++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |   51 +++-
+ 11 files changed, 1263 insertions(+), 493 deletions(-)
+ create mode 100644 arch/arm/boot/compressed/efi-header.S
+ create mode 100644 arch/arm/boot/compressed/efi-stub.c
+ create mode 100644 arch/arm/boot/compressed/efi-stub.h
+ create mode 100644 drivers/firmware/efi/efi-stub-helper.c
+
+-- 
+1.7.10.4
