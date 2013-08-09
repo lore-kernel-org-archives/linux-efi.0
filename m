@@ -1,153 +1,53 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 11/16] Add proper definitions for some EFI function pointers.
-Date: Fri,  9 Aug 2013 16:26:12 -0700
-Message-ID: <1376090777-20090-12-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 07/16] Allow efi_free() to be called with size of 0, and do nothing in that case.
+Date: Fri,  9 Aug 2013 16:26:08 -0700
+Message-ID: <1376090777-20090-8-git-send-email-roy.franz@linaro.org>
 References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376090777-20090-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
+Cc: leif.lindholm@linaro.org, dave.martin@arm.com, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-The x86/AMD64 EFI stubs must us a call wrapper to convert between
-the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
-the ABIs are compatible, so we can directly invoke the function
-pointers.  The functions that are used by the ARM stub are updated
-to match the EFI definitions.
+Make efi_free() safely callable with size of 0, similar to free() being
+callable with NULL pointers.
+Remove size checks that this makes redundant.  This also avoids some
+size checks in the ARM EFI stub code that will be added as well.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.h |    2 --
- include/linux/efi.h              |   45 ++++++++++++++++++++++++--------------
- 2 files changed, 28 insertions(+), 19 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |    3 +--
+ drivers/firmware/efi/efi-stub-helper.c |    3 +++
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
-index bafbd94..81b6b65 100644
---- a/arch/x86/boot/compressed/eboot.h
-+++ b/arch/x86/boot/compressed/eboot.h
-@@ -11,8 +11,6 @@
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index f44ef2f..bcfdcc2 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -537,8 +537,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
  
- #define DESC_TYPE_CODE_DATA	(1 << 0)
+ 	return boot_params;
+ fail2:
+-	if (options_size)
+-		efi_free(sys_table, options_size, hdr->cmd_line_ptr);
++	efi_free(sys_table, options_size, hdr->cmd_line_ptr);
+ fail:
+ 	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
+ 	return NULL;
+diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+index 647b3ba..c45e287 100644
+--- a/drivers/firmware/efi/efi-stub-helper.c
++++ b/drivers/firmware/efi/efi-stub-helper.c
+@@ -253,6 +253,9 @@ static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ {
+ 	unsigned long nr_pages;
  
--#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
--
- #define EFI_CONSOLE_OUT_DEVICE_GUID    \
- 	EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, 0x9a, 0x46, 0x0, 0x90, 0x27, \
- 		  0x3f, 0xc1, 0x4d)
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 51f5641..1a7ae34 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -39,6 +39,8 @@
- typedef unsigned long efi_status_t;
- typedef u8 efi_bool_t;
- typedef u16 efi_char16_t;		/* UNICODE character */
-+typedef u64 efi_physical_addr_t;
-+typedef void *efi_handle_t;
- 
- 
- typedef struct {
-@@ -96,6 +98,7 @@ typedef	struct {
- #define EFI_MEMORY_DESCRIPTOR_VERSION	1
- 
- #define EFI_PAGE_SHIFT		12
-+#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
- 
- typedef struct {
- 	u32 type;
-@@ -157,11 +160,13 @@ typedef struct {
- 	efi_table_hdr_t hdr;
- 	void *raise_tpl;
- 	void *restore_tpl;
--	void *allocate_pages;
--	void *free_pages;
--	void *get_memory_map;
--	void *allocate_pool;
--	void *free_pool;
-+	efi_status_t (*allocate_pages)(int, int, unsigned long,
-+				       efi_physical_addr_t *);
-+	efi_status_t (*free_pages)(efi_physical_addr_t, unsigned long);
-+	efi_status_t (*get_memory_map)(unsigned long *, void *, unsigned long *,
-+				       unsigned long *, u32 *);
-+	efi_status_t (*allocate_pool)(int, unsigned long, void **);
-+	efi_status_t (*free_pool)(void *);
- 	void *create_event;
- 	void *set_timer;
- 	void *wait_for_event;
-@@ -171,7 +176,7 @@ typedef struct {
- 	void *install_protocol_interface;
- 	void *reinstall_protocol_interface;
- 	void *uninstall_protocol_interface;
--	void *handle_protocol;
-+	efi_status_t (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
- 	void *locate_handle;
-@@ -181,7 +186,7 @@ typedef struct {
- 	void *start_image;
- 	void *exit;
- 	void *unload_image;
--	void *exit_boot_services;
-+	efi_status_t (*exit_boot_services)(efi_handle_t, unsigned long);
- 	void *get_next_monotonic_count;
- 	void *stall;
- 	void *set_watchdog_timer;
-@@ -488,10 +493,6 @@ typedef struct {
- 	unsigned long unload;
- } efi_loaded_image_t;
- 
--typedef struct {
--	u64 revision;
--	void *open_volume;
--} efi_file_io_interface_t;
- 
- typedef struct {
- 	u64 size;
-@@ -504,20 +505,30 @@ typedef struct {
- 	efi_char16_t filename[1];
- } efi_file_info_t;
- 
--typedef struct {
-+typedef struct _efi_file_handle {
- 	u64 revision;
--	void *open;
--	void *close;
-+	efi_status_t (*open)(struct _efi_file_handle *,
-+			     struct _efi_file_handle **,
-+			     efi_char16_t *, u64, u64);
-+	efi_status_t (*close)(struct _efi_file_handle *);
- 	void *delete;
--	void *read;
-+	efi_status_t (*read)(struct _efi_file_handle *, unsigned long *,
-+			     void *);
- 	void *write;
- 	void *get_position;
- 	void *set_position;
--	void *get_info;
-+	efi_status_t (*get_info)(struct _efi_file_handle *, efi_guid_t *,
-+			unsigned long *, void *);
- 	void *set_info;
- 	void *flush;
- } efi_file_handle_t;
- 
-+typedef struct _efi_file_io_interface {
-+	u64 revision;
-+	int (*open_volume)(struct _efi_file_io_interface *,
-+			   efi_file_handle_t **);
-+} efi_file_io_interface_t;
++	if (!size)
++		return;
 +
- #define EFI_FILE_MODE_READ	0x0000000000000001
- #define EFI_FILE_MODE_WRITE	0x0000000000000002
- #define EFI_FILE_MODE_CREATE	0x8000000000000000
-@@ -787,7 +798,7 @@ struct efivar_entry {
- 
- struct efi_simple_text_output_protocol {
- 	void *reset;
--	void *output_string;
-+	efi_status_t (*output_string)(void *, void *);
- 	void *test_string;
- };
- 
+ 	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+ 	efi_call_phys2(sys_table_arg->boottime->free_pages, addr, nr_pages);
+ }
 -- 
 1.7.10.4
