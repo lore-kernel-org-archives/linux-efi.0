@@ -1,58 +1,48 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH 06/16] Enforce minimum alignment of 1 page on allocations. The efi_high_alloc() and efi_low_alloc() functions use the EFI_ALLOCATE_ADDRESS option to the EFI function allocate_pages(), which requires a minimum of page alignment, and rejects all other requests.
-Date: Fri,  9 Aug 2013 16:26:07 -0700
-Message-ID: <1376090777-20090-7-git-send-email-roy.franz@linaro.org>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V3 RFC 00/16]  EFI stub for ARM
+Date: Mon, 12 Aug 2013 10:02:40 -0400
+Message-ID: <1376316160.32237.17.camel@t520.redhat.com>
 References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
-Cc: leif.lindholm@linaro.org, dave.martin@arm.com, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1376090777-20090-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-The existing code could fail to allocate depending
-on allocation size, as although repeated allocation
-attempts were made, none were guaranteed to be page
-aligned.
+On Fri, 2013-08-09 at 16:26 -0700, Roy Franz wrote:
+> * Change FDT memory allocation to retry with a larger allocation if
+>   first educated guess is inadequate.
+
+With this change, it looks like you no longer free the original cmdline
+and fdt memory. The current flow looks like:
+
+  retry:
+     allocate_memory_for_expanded_fdt
+     get_memory_map
+     if (update_fdt() fails) {
+        free new_fdt and memory_map
+        goto retry
+     }
+
+So, this keeps the original fdt around and uses it as a starting point
+for newly allocated expanded fdt. You don't know if the new fdt is big
+enough until update_fdt() succeeds. But at that point, you already wrote
+the efi-runtime-mmap property with the memory_map still having the
+original cmdline and fdt in it.
+
+I think you should be able to have an expand_fdt() function which bumps
+the fdt size and uses the current fdt as the starting point instead of
+the original fdt. That way you can free the original fdt on the first
+iteration and free the original cmdline as soon as it is successfully
+written. Then the last thing you do if get the memory_map and write it.
+
+--Mark
 
 
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
----
- drivers/firmware/efi/efi-stub-helper.c |   14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 1d0a079..647b3ba 100644
---- a/drivers/firmware/efi/efi-stub-helper.c
-+++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -105,6 +105,13 @@ static efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
-+	/* Enforce minimum alignment that EFI requires when requesting
-+	 * a specific address.  We are doing page-based allocations,
-+	 * so we must be aligned to a page.
-+	 */
-+	if (align < EFI_PAGE_SIZE)
-+		align = EFI_PAGE_SIZE;
-+
- 	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
- again:
- 	for (i = 0; i < map_size / desc_size; i++) {
-@@ -184,6 +191,13 @@ static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
- 	if (status != EFI_SUCCESS)
- 		goto fail;
- 
-+	/* Enforce minimum alignment that EFI requires when requesting
-+	 * a specific address.  We are doing page-based allocations,
-+	 * so we must be aligned to a page.
-+	 */
-+	if (align < EFI_PAGE_SIZE)
-+		align = EFI_PAGE_SIZE;
-+
- 	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
- 	for (i = 0; i < map_size / desc_size; i++) {
- 		efi_memory_desc_t *desc;
--- 
-1.7.10.4
+        
+     
