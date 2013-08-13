@@ -1,66 +1,64 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V3 RFC 00/16] EFI stub for ARM
-Date: Mon, 12 Aug 2013 18:13:09 -0700
-Message-ID: <CAFECyb93p3Wct9DWYAzhU2cU1J=F6sN=67Vw3ofXFa8wW0EKrw@mail.gmail.com>
+From: Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 16/16] Add config EFI_STUB for ARM to Kconfig
+Date: Tue, 13 Aug 2013 14:18:59 +0100
+Message-ID: <20130813131857.GE2823@localhost.localdomain>
 References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-	<1376316160.32237.17.camel@t520.redhat.com>
+ <1376090777-20090-17-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376316160.32237.17.camel-CeaHKw3YYu2ny3qCrzbmXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1376090777-20090-17-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 12, 2013 at 7:02 AM, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Fri, 2013-08-09 at 16:26 -0700, Roy Franz wrote:
->> * Change FDT memory allocation to retry with a larger allocation if
->>   first educated guess is inadequate.
->
-> With this change, it looks like you no longer free the original cmdline
-> and fdt memory. The current flow looks like:
->
->   retry:
->      allocate_memory_for_expanded_fdt
->      get_memory_map
->      if (update_fdt() fails) {
->         free new_fdt and memory_map
->         goto retry
->      }
->
-> So, this keeps the original fdt around and uses it as a starting point
-> for newly allocated expanded fdt. You don't know if the new fdt is big
-> enough until update_fdt() succeeds. But at that point, you already wrote
-> the efi-runtime-mmap property with the memory_map still having the
-> original cmdline and fdt in it.
->
-> I think you should be able to have an expand_fdt() function which bumps
-> the fdt size and uses the current fdt as the starting point instead of
-> the original fdt. That way you can free the original fdt on the first
-> iteration and free the original cmdline as soon as it is successfully
-> written. Then the last thing you do if get the memory_map and write it.
->
-> --Mark
+On Fri, Aug 09, 2013 at 04:26:17PM -0700, Roy Franz wrote:
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm/Kconfig |   11 +++++++++++
+>  1 file changed, 11 insertions(+)
+> 
+> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> index 43594d5..8607d03 100644
+> --- a/arch/arm/Kconfig
+> +++ b/arch/arm/Kconfig
+> @@ -1805,6 +1805,17 @@ config UACCESS_WITH_MEMCPY
+>  	  However, if the CPU data cache is using a write-allocate mode,
+>  	  this option is unlikely to provide any performance gain.
+>  
+> +config EFI_STUB
+> +	bool "EFI stub support"
+> +	depends on EFI
 
-Hi Mark,
+&& !CPU_BIG_ENDIAN, in case you didn't get around to that.
 
-I think this will work with the current FDT fields that are being set
-by the stub.  In earlier
-versions, I was also updating the reserved memory map using
-fdt_add_mem_rsv(), so
-iteratively updating the device tree wouldn't work. The reserved
-regions would change,
-and so the repeated updates would cause there to be repeated and
-incorrect reserved regions.
-I'm inclined to leave it as is, which should correctly update the
-device tree even if methods like
-fdt_add_mem_rsv() are used, with the tradeoff being there will be a
-few more memory regions
-for the kernel to free when it processes the EFI memory map.  The
-kernel already needs to process
-the EFI memory map to free the buffers use to load the kernel and
-initrd, so these buffers will get freed, just not
-by the stub.
+Sooner or later, someone may try to fix that, so there should be a
+comment somewhere explaining what is broken for BE.
 
-Roy
+Either in efi-stub.c or in the commit message accompanying this patch, I
+guess.
+
+Cheers
+---Dave
+
+> +	---help---
+> +	  This kernel feature allows a zImage to be loaded directly
+> +	  by EFI firmware without the use of a bootloader.  A PE/COFF
+> +	  header is added to the zImage in a way that makes the binary
+> +	  both a Linux zImage and an PE/COFF executable that can be
+> +	  executed directly by EFI firmware.
+> +	  See Documentation/efi-stub.txt for more information.
+> +
+>  config SECCOMP
+>  	bool
+>  	prompt "Enable seccomp to safely compute untrusted bytecode"
+> -- 
+> 1.7.10.4
+> 
+> 
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
