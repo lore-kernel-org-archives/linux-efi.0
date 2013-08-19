@@ -1,7 +1,7 @@
 From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH V2 01/10] Add secure_modules() call
-Date: Mon, 19 Aug 2013 13:26:02 -0400
-Message-ID: <1376933171-9854-2-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH V2 05/10] asus-wmi: Restrict debugfs interface when module loading is restricted
+Date: Mon, 19 Aug 2013 13:26:06 -0400
+Message-ID: <1376933171-9854-6-git-send-email-matthew.garrett@nebula.com>
 References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
@@ -10,57 +10,50 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, jwboyer@redhat.com, keescook@chromium.org, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-Provide a single call to allow kernel code to determine whether the system
-has been configured to either disable module loading entirely or to load
-only modules signed with a trusted key.
+We have no way of validating what all of the Asus WMI methods do on a
+given machine, and there's a risk that some will allow hardware state to
+be manipulated in such a way that arbitrary code can be executed in the
+kernel, circumventing module loading restrictions. Prevent that if any of
+these features are enabled.
 
 Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- include/linux/module.h | 7 +++++++
- kernel/module.c        | 9 +++++++++
- 2 files changed, 16 insertions(+)
+ drivers/platform/x86/asus-wmi.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/include/linux/module.h b/include/linux/module.h
-index 46f1ea0..0c266b2 100644
---- a/include/linux/module.h
-+++ b/include/linux/module.h
-@@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_block * nb);
+diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+index 19c313b..db18ef66 100644
+--- a/drivers/platform/x86/asus-wmi.c
++++ b/drivers/platform/x86/asus-wmi.c
+@@ -1618,6 +1618,9 @@ static int show_dsts(struct seq_file *m, void *data)
+ 	int err;
+ 	u32 retval = -1;
  
- extern void print_modules(void);
- 
-+extern bool secure_modules(void);
++	if (secure_modules())
++		return -EPERM;
 +
- #else /* !CONFIG_MODULES... */
+ 	err = asus_wmi_get_devstate(asus, asus->debug.dev_id, &retval);
  
- /* Given an address, look for it in the exception tables. */
-@@ -619,6 +621,11 @@ static inline int unregister_module_notifier(struct notifier_block * nb)
- static inline void print_modules(void)
- {
- }
-+
-+static inline bool secure_modules(void)
-+{
-+	return false;
-+}
- #endif /* CONFIG_MODULES */
+ 	if (err < 0)
+@@ -1634,6 +1637,9 @@ static int show_devs(struct seq_file *m, void *data)
+ 	int err;
+ 	u32 retval = -1;
  
- #ifdef CONFIG_SYSFS
-diff --git a/kernel/module.c b/kernel/module.c
-index 2069158..801021e 100644
---- a/kernel/module.c
-+++ b/kernel/module.c
-@@ -3852,3 +3852,12 @@ void module_layout(struct module *mod,
- }
- EXPORT_SYMBOL(module_layout);
- #endif
++	if (secure_modules())
++		return -EPERM;
 +
-+bool secure_modules(void)
-+{
-+#ifdef CONFIG_MODULE_SIG
-+	return (sig_enforce || modules_disabled);
-+#else
-+	return modules_disabled;
-+#endif
-+}
+ 	err = asus_wmi_set_devstate(asus->debug.dev_id, asus->debug.ctrl_param,
+ 				    &retval);
+ 
+@@ -1658,6 +1664,9 @@ static int show_call(struct seq_file *m, void *data)
+ 	union acpi_object *obj;
+ 	acpi_status status;
+ 
++	if (secure_modules())
++		return -EPERM;
++
+ 	status = wmi_evaluate_method(ASUS_WMI_MGMT_GUID,
+ 				     1, asus->debug.method_id,
+ 				     &input, &output);
 -- 
 1.8.3.1
