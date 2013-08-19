@@ -1,69 +1,48 @@
-From: Linn Crosetto <linn@hp.com>
-Subject: Re: [RFC PATCH 0/4] EFI boot stub memory map fix
-Date: Mon, 19 Aug 2013 15:09:39 -0600
-Message-ID: <20130819210939.GJ14273@oranje.fc.hp.com>
-References: <1376942419-5684-1-git-send-email-linn@hp.com>
- <e7fc4e2f-4cda-4eef-8d37-bb87773f58e8@email.android.com>
- <CAE9FiQWRp+AMeTnC3MPSWi4as6qaoFiZEsAfjr3+75YT9XMPcQ@mail.gmail.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: UEFI Plugfest 2013 -- New Orleans
+Date: Mon, 19 Aug 2013 22:30:05 +0100
+Message-ID: <20130819213005.GA30211@srcf.ucam.org>
+References: <1376925765.2069.24.camel@dabdike.int.hansenpartnership.com>
+ <20130819160018.GA22532@srcf.ucam.org>
+ <1376931775.2069.46.camel@dabdike.int.hansenpartnership.com>
+ <20130819172139.GA24393@srcf.ucam.org>
+ <1376933926.2069.52.camel@dabdike.int.hansenpartnership.com>
+ <1376942994.2322.39.camel@shinybook.infradead.org>
+ <20130819201952.GA28740@srcf.ucam.org>
+ <1376943671.2322.40.camel@shinybook.infradead.org>
+ <20130819203937.GA28967@srcf.ucam.org>
+ <1376946411.5087.2.camel@shinybook.infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAE9FiQWRp+AMeTnC3MPSWi4as6qaoFiZEsAfjr3+75YT9XMPcQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, the arch/x86 maintainers <x86@kernel.org>, Pekka Enberg <penberg@kernel.org>, Jacob Shin <jacob.shin@amd.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+In-Reply-To: <1376946411.5087.2.camel-Fexsq3y4057IgHVZqg5X0TlWvGAXklZc@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, "John W. Linville" <linville-2XuSBdqkA4R54TAoqtyWWQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 19, 2013 at 01:47:41PM -0700, Yinghai Lu wrote:
-> On Mon, Aug 19, 2013 at 1:06 PM, H. Peter Anvin <hpa@zytor.com> wrote:
-> > I would strongly disagree that option 2 is the cleaner solution.
-> 
-> Agreed.
-> 
-> >
-> > Linn Crosetto <linn@hp.com> wrote:
-> >>I realize the EFI stub for ARM patches are in flight,
-> >>
-> >>https://lkml.org/lkml/2013/8/9/554
-> >>
-> >>and overlap with some of the files but I wanted to send these out for
-> >>comment.
-> >>
-> >>This series fixes a problem with EFI memory maps larger than 128
-> >>entries when
-> >>booting using the EFI boot stub, which results in overflowing the
-> >>e820_map in
-> >>boot_params and an eventual halt when checking the map size in
-> >>sanitize_e820_map().
-> >>
-> >>The fix implemented is to add the EFI memory map from setup_arch() via
-> >>a
-> >>memory_setup hook.
-> >>
-> >>Two options were considered:
-> >>
-> >> 1. Use the SETUP_E820_EXT setup_data type to add the extra entries.
-> >>
-> >>2. Create a memory_setup function to be enabled when the EFI memory map
-> >>is
-> >>    needed.
-> >>
-> >>Option 2 appeared to be the cleaner solution, reducing duplication with
-> >>existing code, given a reasonable mechanism for determining when to
-> >>replace the default memory_setup function.
-> 
-> If boot_loader could create setup_data with SETUP_E820_EXT,
-> efi_stub should go that path too.
-> We should not add another path.
+On Mon, Aug 19, 2013 at 10:06:51PM +0100, David Woodhouse wrote:
 
-My consideration was in leveraging do_add_efi_memmap(), which duplicates what is
-done with the map in exit_boot(), and can already be called via the
-"add_efi_memmap" parameter. One complication with SETUP_E820_EXT is in
-determining the size needed, since a call to allocate_pool will change the
-memory map. 
+> You effectively seem to be suggesting that nothing will ever get better
+> on the UEFI side, and the only benefit of the plugfest is that we get to
+> see the latest brokenness and try to come up with a workaround for it
+> before the consumers are afflicted with it?
 
-I will send another version which uses SETUP_E820_EXT.
+Pretty much. There's a decent chance that board vendors already have the 
+broken code before we end up testing against it.
 
-Thanks,
-Linn
+> That's a really pessimistic view, and I'd really like us to be a little
+> more optimistic. Things can't be, or at least can't *stay*, that bad.
+> Surely?
+
+Most vendors don't care about testing against Linux, and we can't make 
+them care. What they're more likely to test against is the SCT, and 
+extending that to cover a wider range of test cases (such as exhausting 
+variable space) is much more likely to result in things being caught 
+before anything is shipped - but even then, board vendors are going to 
+take IBV code, perform "value add", never run a test suite and just make 
+sure it boots Windows.
+
+-- 
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
