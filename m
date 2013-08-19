@@ -1,145 +1,153 @@
-From: Jordan Justen <jljusten-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [edk2] Corrupted EFI region
-Date: Sun, 18 Aug 2013 00:33:51 -0700
-Message-ID: <CAFe8ug9yuqyO11ZXUWzKiVbh+4VqTZrb3LMLoOj4XUk-emk9ag@mail.gmail.com>
-References: <51FFB660.4060400@redhat.com>
-	<20130805144010.GE31845@pd.tnic>
-	<51FFC19A.1020204@redhat.com>
-	<20130805161247.GF31845@pd.tnic>
-	<51FFD5B0.9080000@redhat.com>
-	<20130805164731.GG31845@pd.tnic>
-	<52001896.1030509@redhat.com>
-	<20130805220808.GC14067@pd.tnic>
-	<20130806141036.GD14891@pd.tnic>
-	<520116D1.2010000@redhat.com>
-	<20130807151935.GJ17920@pd.tnic>
-	<5202889C.2080608@redhat.com>
+From: David Woodhouse <dwmw2@infradead.org>
+Subject: Re: UEFI Plugfest 2013 -- New Orleans
+Date: Mon, 19 Aug 2013 09:25:35 +0100
+Message-ID: <1376900735.2322.26.camel@shinybook.infradead.org>
+References: <20130816152030.GL2133@tuxdriver.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5202889C.2080608-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Jordan Justen (Intel address)" <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: multipart/signed; micalg="sha-1"; protocol="application/x-pkcs7-signature";
+	boundary="=-8bAcJrGiBwu5kn+RYvsL"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130816152030.GL2133@tuxdriver.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "John W. Linville" <linville@tuxdriver.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-0001-OvmfPkg-allocate-the-EFI-memory-map-for-Linux-as-Loa.patch
-was applied in r14555.
 
-Thanks for the contribution.
+--=-8bAcJrGiBwu5kn+RYvsL
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-And thanks for the bug report & testing Boris.
+On Fri, 2013-08-16 at 11:20 -0400, John W. Linville wrote:
+> All,
+>=20
+> The Linux Foundation and The UEFI Forum are hosting a UEFI Plugfest
+> event in New Orleans on September 19-20, 2013.  This event will run
+> concurrent with Linux Plumbers Conference, just after LinuxCon at the
+> Hyatt Regency New Orleans.
 
-On Wed, Aug 7, 2013 at 10:49 AM, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 08/07/13 17:19, Borislav Petkov wrote:
->> On Tue, Aug 06, 2013 at 05:31:29PM +0200, Laszlo Ersek wrote:
->>> Can you capture the OVMF debug output? Do you see
->>>
->>>   ConvertPages: Incompatible memory types
->>>
->>> there?
->>>
->>> Can you set the following bits too in the debug mask?
->>>
->>> #define DEBUG_POOL      0x00000010  // Alloc & Free's
->>> #define DEBUG_PAGE      0x00000020  // Alloc & Free's
->>
->> Ok, I got debug output; I have to be careful now of not missing
->> anything. Ok, so here we go:
->>
->> First of all, I changed debugging mask to:
->>
->>   gEfiMdePkgTokenSpaceGuid.PcdDebugPrintErrorLevel|0x8010007F
->>
->> (I just set all three bits you requested).
->>
->> Using the new OVMF.id changed the addresses, of course, so we're looking
->> at 0x7dc59XXX ones now.
->>
->> [    0.000000] memblock_reserve: [0x0000007dc59018-0x0000007dc59618] efi_memblock_x86_reserve_range+0x70/0x75
->>
->> So, I've attached an archive of the debug logs. The initial observations
->> I could do is that the region still gets "squashed" to:
->>
->> [    0.014041] efi: mem11: type=4, attr=0xf, range=[0x000000007dc59000-0x000000007dc59000) (0MB)
->>
->> from
->>
->> [    0.000000] efi: mem11: type=4, attr=0xf, range=[0x000000007dc59000-0x000000007e146000) (4MB)
->>
->> And the interesting stuff in the OVMF output is right at the end:
->>
->> ConvertRange: 7DC59000-7DC5AFFF to 4
->> AddRange: 7DC59000-7DC5AFFF to 4
->> AllocatePoolI: Type 4, Addr 7DC59018 (len 16F0) 26,735,072
->> Jumping to kernel
->>
->> We get that same output no matter if I boot it with "-enable-kvm" or
->> not.
->>
->> If the order of the debug messages is the same as the calls actually
->> happen, we AllocatePoolI to address 7DC59018 which we already have added
->> as a range. But I'm not going to pretend I even know the code so I'll
->> let you comment instead :).
->
-> I think this allows us to solve the bug :)
->
-> First, forget everything I said :) I was completely lost.
->
-> Remember this?
->
-> 01 efi_main()
-> 02  exit_boot()
-> 03    low_alloc()
-> 04    GetMemoryMap()
-> 05    ExitBootServices()
-> 06
-> 07 start_kernel()
-> 08   setup_arch()
-> 09    efi_memblock_x86_reserve_range()
-> 10    efi_reserve_boot_services()
-> 11  efi_enter_virtual_mode()
-> 12    SetVirtualAddressMap()
->
-> Now, lines 01 to 05 *do not happen*.
->
-> More precisely, they don't happen in the kernel. They happen in the firmware. Specifically, "OvmfPkg/Library/LoadLinuxLib/Linux.c".
->
-> You're booting the kernel from the qemu command line. The kernel you run is also an "[o]ld kernel[] without EFI handover protocol". So what happens is, OVMF downloads the kernel image from qemu over fw_cfg, figures it's an old kernel...
->
-> PlatformBdsPolicyBehavior() [OvmfPkg/Library/PlatformBdsLib/BdsPlatform.c]
->   // Process QEMU's -kernel command line option:
->   TryRunningQemuKernel()    [OvmfPkg/Library/PlatformBdsLib/QemuKernel.c]
->     LoadLinux()             [OvmfPkg/Library/LoadLinuxLib/Linux.c]
->       // Old kernels without EFI handover protocol
->       SetupLinuxBootParams()
->         SetupLinuxMemmap()
->           AllocatePool() <-------------- !!!
->           gBS->GetMemoryMap()
->           gBS->ExitBootServices()
->       prints "Jumping to kernel"
->       JumpToKernel()
->
-> Now pull up efi_memblock_x86_reserve_range(). It reserves "boot_params.efi_info->efi_memmap".
->
-> I assumed this field would come from the exit_boot() kernel function. It doesn't. It comes from SetupLinuxMemmap(). The former allocates the backing store as EFI_LOADER_DATA. The latter, alas, marked with !!! above, as boot services data. :)
->
-> So, what you're seeing in the OVMF debug log:
->
->> ConvertRange: 7DC59000-7DC5AFFF to 4
->> AddRange: 7DC59000-7DC5AFFF to 4
->> AllocatePoolI: Type 4, Addr 7DC59018 (len 16F0) 26,735,072
->
-> This is self-consistent. It just documents that the AllocatePool() call marked with !!! needs to grab two full pages first (two first lines), carve them up into pool chunks, and then serve the request from them (third line).
->
-> The address displayed here shows up in the linux dmesg later on because the storage for the memory map itself is allocated, and populated, by OVMF, not the EFI stub in the kernel.
->
-> In one sentence, efi_memblock_x86_reserve_range() expects that "boot_params.efi_info->efi_memmap" has been allocated as "loader data" (by whomever), but SetupLinuxMemmap() violates this by allocating the storage as "boot services data".
->
-> This leads to double reservation attempts between efi_memblock_x86_reserve_range(), and efi_reserve_boot_services().
->
-> The attached edk2 patch should fix it. Please confirm.
->
-> Thanks,
-> Laszlo
->
+Hm. It would be really useful to have a kernel build option which
+*disables* all the workarounds we've ever put in for broken firmware.
+
+Every deviation from the spec (or common sense), however minor, should
+show up as a clear failure. Even the ones we *have* been able to work
+around, because we still want them *fixed*.
+
+And there's a school of thought that says we should brick as many
+Samsung machines as possible, if they actually turn up without having
+fixed that. A stress test for the NV storage is actually a really good
+idea...
+
+--=20
+dwmw2
+
+
+--=-8bAcJrGiBwu5kn+RYvsL
+Content-Type: application/x-pkcs7-signature; name="smime.p7s"
+Content-Disposition: attachment; filename="smime.p7s"
+Content-Transfer-Encoding: base64
+
+MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIISxDCCBjQw
+ggQcoAMCAQICAR4wDQYJKoZIhvcNAQEFBQAwfTELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0
+Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxKTAn
+BgNVBAMTIFN0YXJ0Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MB4XDTA3MTAyNDIxMDE1NVoX
+DTE3MTAyNDIxMDE1NVowgYwxCzAJBgNVBAYTAklMMRYwFAYDVQQKEw1TdGFydENvbSBMdGQuMSsw
+KQYDVQQLEyJTZWN1cmUgRGlnaXRhbCBDZXJ0aWZpY2F0ZSBTaWduaW5nMTgwNgYDVQQDEy9TdGFy
+dENvbSBDbGFzcyAxIFByaW1hcnkgSW50ZXJtZWRpYXRlIENsaWVudCBDQTCCASIwDQYJKoZIhvcN
+AQEBBQADggEPADCCAQoCggEBAMcJg8zOLdgasSmkLhOrlr6KMoOMpohBllVHrdRvEg/q6r8jR+EK
+75xCGhR8ToREoqe7zM9/UnC6TS2y9UKTpT1v7RSMzR0t6ndl0TWBuUr/UXBhPk+Kmy7bI4yW4urC
++y7P3/1/X7U8ocb8VpH/Clt+4iq7nirMcNh6qJR+xjOhV+VHzQMALuGYn5KZmc1NbJQYclsGkDxD
+z2UbFqE2+6vIZoL+jb9x4Pa5gNf1TwSDkOkikZB1xtB4ZqtXThaABSONdfmv/Z1pua3FYxnCFmdr
+/+N2JLKutIxMYqQOJebr/f/h5t95m4JgrM3Y/w7YX9d7YAL9jvN4SydHsU6n65cCAwEAAaOCAa0w
+ggGpMA8GA1UdEwEB/wQFMAMBAf8wDgYDVR0PAQH/BAQDAgEGMB0GA1UdDgQWBBRTcu2SnODaywFc
+fH6WNU7y1LhRgjAfBgNVHSMEGDAWgBROC+8apEBbpRdphzDKNGhD0EGu8jBmBggrBgEFBQcBAQRa
+MFgwJwYIKwYBBQUHMAGGG2h0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9jYTAtBggrBgEFBQcwAoYh
+aHR0cDovL3d3dy5zdGFydHNzbC5jb20vc2ZzY2EuY3J0MFsGA1UdHwRUMFIwJ6AloCOGIWh0dHA6
+Ly93d3cuc3RhcnRzc2wuY29tL3Nmc2NhLmNybDAnoCWgI4YhaHR0cDovL2NybC5zdGFydHNzbC5j
+b20vc2ZzY2EuY3JsMIGABgNVHSAEeTB3MHUGCysGAQQBgbU3AQIBMGYwLgYIKwYBBQUHAgEWImh0
+dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwNAYIKwYBBQUHAgEWKGh0dHA6Ly93d3cu
+c3RhcnRzc2wuY29tL2ludGVybWVkaWF0ZS5wZGYwDQYJKoZIhvcNAQEFBQADggIBAAqDCH14qywG
+XLhjjF6uHLkjd02hcdh9hrw+VUsv+q1eeQWB21jWj3kJ96AUlPCoEGZ/ynJNScWy6QMVQjbbMXlt
+UfO4n4bGGdKo3awPWp61tjAFgraLJgDk+DsSvUD6EowjMTNx25GQgyYJ5RPIzKKR9tQW8gGK+2+R
+HxkUCTbYFnL6kl8Ch507rUdPPipJ9CgJFws3kDS3gOS5WFMxcjO5DwKfKSETEPrHh7p5shuuNktv
+sv6hxHTLhiMKX893gxdT3XLS9OKmCv87vkINQcNEcIIoFWbP9HORz9v3vQwR4e3ksLc2JZOAFK+s
+sS5XMEoznzpihEP0PLc4dCBYjbvSD7kxgDwZ+Aj8Q9PkbvE9sIPP7ON0fz095HdThKjiVJe6vofq
++n6b1NBc8XdrQvBmunwxD5nvtTW4vtN6VY7mUCmxsCieuoBJ9OlqmsVWQvifIYf40dJPZkk9YgGT
+zWLpXDSfLSplbY2LL9C9U0ptvjcDjefLTvqSFc7tw1sEhF0n/qpA2r0GpvkLRDmcSwVyPvmjFBGq
+Up/pNy8ZuPGQmHwFi2/14+xeSUDG2bwnsYJQG2EdJCB6luQ57GEnTA/yKZSTKI8dDQa8Sd3zfXb1
+9mOgSF0bBdXbuKhEpuP9wirslFe6fQ1t5j5R0xi72MZ8ikMu1RQZKCyDbMwazlHiMIIGQjCCBSqg
+AwIBAgIDBoXOMA0GCSqGSIb3DQEBBQUAMIGMMQswCQYDVQQGEwJJTDEWMBQGA1UEChMNU3RhcnRD
+b20gTHRkLjErMCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlmaWNhdGUgU2lnbmluZzE4MDYG
+A1UEAxMvU3RhcnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVkaWF0ZSBDbGllbnQgQ0EwHhcN
+MTMwNTAyMDYyMDQ2WhcNMTQwNTAzMTIxNDAyWjBdMRkwFwYDVQQNExBNd0k3ODIxNTRpV21lZVkw
+MRwwGgYDVQQDDBNkd213MkBpbmZyYWRlYWQub3JnMSIwIAYJKoZIhvcNAQkBFhNkd213MkBpbmZy
+YWRlYWQub3JnMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWGuRDHiXVpOgaFkBaz8
+c3jQTfiEw7j0iKZnktCQi0xjY29QJ7GwL+fgQlbofXgYTm8E9fWERvw2tAy2BxHzAPguBzziS7JN
+hsGP9lf3L8hFJBvmdyyyj8b9A6Oi7s3JLtMRWIvyvE+DbuTkP+htuT4+XuTJr8Y5yIqd1WXr2gJk
+ANr77vTyjeNxceevP58Tqr0f+4v5g6+vNARO3bk3SaVQPDUTwGrpoPtLh3d+mQzZ4iiW3MwQS7Wr
+UVT3l2aTVHCpgtAaBs3zHWarvmIqhbWj8zdcnELNzwqTrOjaoWxuWY4k05GGfzmdjOBUiL7FDNvI
+ZwweJEPwJAQI72YhUwIDAQABo4IC2TCCAtUwCQYDVR0TBAIwADALBgNVHQ8EBAMCBLAwHQYDVR0l
+BBYwFAYIKwYBBQUHAwIGCCsGAQUFBwMEMB0GA1UdDgQWBBSs0hZhUgQwqGVXzLuH6pJH0hMZwTAf
+BgNVHSMEGDAWgBRTcu2SnODaywFcfH6WNU7y1LhRgjAeBgNVHREEFzAVgRNkd213MkBpbmZyYWRl
+YWQub3JnMIIBTAYDVR0gBIIBQzCCAT8wggE7BgsrBgEEAYG1NwECAzCCASowLgYIKwYBBQUHAgEW
+Imh0dHA6Ly93d3cuc3RhcnRzc2wuY29tL3BvbGljeS5wZGYwgfcGCCsGAQUFBwICMIHqMCcWIFN0
+YXJ0Q29tIENlcnRpZmljYXRpb24gQXV0aG9yaXR5MAMCAQEagb5UaGlzIGNlcnRpZmljYXRlIHdh
+cyBpc3N1ZWQgYWNjb3JkaW5nIHRvIHRoZSBDbGFzcyAxIFZhbGlkYXRpb24gcmVxdWlyZW1lbnRz
+IG9mIHRoZSBTdGFydENvbSBDQSBwb2xpY3ksIHJlbGlhbmNlIG9ubHkgZm9yIHRoZSBpbnRlbmRl
+ZCBwdXJwb3NlIGluIGNvbXBsaWFuY2Ugb2YgdGhlIHJlbHlpbmcgcGFydHkgb2JsaWdhdGlvbnMu
+MDYGA1UdHwQvMC0wK6ApoCeGJWh0dHA6Ly9jcmwuc3RhcnRzc2wuY29tL2NydHUxLWNybC5jcmww
+gY4GCCsGAQUFBwEBBIGBMH8wOQYIKwYBBQUHMAGGLWh0dHA6Ly9vY3NwLnN0YXJ0c3NsLmNvbS9z
+dWIvY2xhc3MxL2NsaWVudC9jYTBCBggrBgEFBQcwAoY2aHR0cDovL2FpYS5zdGFydHNzbC5jb20v
+Y2VydHMvc3ViLmNsYXNzMS5jbGllbnQuY2EuY3J0MCMGA1UdEgQcMBqGGGh0dHA6Ly93d3cuc3Rh
+cnRzc2wuY29tLzANBgkqhkiG9w0BAQUFAAOCAQEACFLDQnyO8+XA/TiTltjJ/ZAvM+qmBEKN43Vd
++Wio2lM/Wq/scJpkupXGHrl9CueobkDxMAogXbMxqLZYO13PvgjMh+PHxDPnQv8EGxOig+k/Hqvc
+qEdTlm9YEHcbXbWS6XB+zRO7VVIpGMYQ1f1qCOcukxmwIm6iMSHXbOr/7paQm4bO0ULptjBotfiO
+Zo6q8No6SroQlOSyc6v8FYSxTNIAXMaM2FYkjqrxgdnJmSIAfr11gROuF69WuOICxP0zTEjJle+7
+aO9lUWNaWMWPMyFSNCxF6kkRuvUCami7vlhLOTRC1kb+OMhx7keN9At3tdTI3rtuFeSB1Pa3VXVs
+0DCCBkIwggUqoAMCAQICAwaFzjANBgkqhkiG9w0BAQUFADCBjDELMAkGA1UEBhMCSUwxFjAUBgNV
+BAoTDVN0YXJ0Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNp
+Z25pbmcxODA2BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1lZGlhdGUgQ2xp
+ZW50IENBMB4XDTEzMDUwMjA2MjA0NloXDTE0MDUwMzEyMTQwMlowXTEZMBcGA1UEDRMQTXdJNzgy
+MTU0aVdtZWVZMDEcMBoGA1UEAwwTZHdtdzJAaW5mcmFkZWFkLm9yZzEiMCAGCSqGSIb3DQEJARYT
+ZHdtdzJAaW5mcmFkZWFkLm9yZzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL1hrkQx
+4l1aToGhZAWs/HN40E34hMO49IimZ5LQkItMY2NvUCexsC/n4EJW6H14GE5vBPX1hEb8NrQMtgcR
+8wD4Lgc84kuyTYbBj/ZX9y/IRSQb5ncsso/G/QOjou7NyS7TEViL8rxPg27k5D/obbk+Pl7kya/G
+OciKndVl69oCZADa++708o3jcXHnrz+fE6q9H/uL+YOvrzQETt25N0mlUDw1E8Bq6aD7S4d3fpkM
+2eIoltzMEEu1q1FU95dmk1RwqYLQGgbN8x1mq75iKoW1o/M3XJxCzc8Kk6zo2qFsblmOJNORhn85
+nYzgVIi+xQzbyGcMHiRD8CQECO9mIVMCAwEAAaOCAtkwggLVMAkGA1UdEwQCMAAwCwYDVR0PBAQD
+AgSwMB0GA1UdJQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDBDAdBgNVHQ4EFgQUrNIWYVIEMKhlV8y7
+h+qSR9ITGcEwHwYDVR0jBBgwFoAUU3Ltkpzg2ssBXHx+ljVO8tS4UYIwHgYDVR0RBBcwFYETZHdt
+dzJAaW5mcmFkZWFkLm9yZzCCAUwGA1UdIASCAUMwggE/MIIBOwYLKwYBBAGBtTcBAgMwggEqMC4G
+CCsGAQUFBwIBFiJodHRwOi8vd3d3LnN0YXJ0c3NsLmNvbS9wb2xpY3kucGRmMIH3BggrBgEFBQcC
+AjCB6jAnFiBTdGFydENvbSBDZXJ0aWZpY2F0aW9uIEF1dGhvcml0eTADAgEBGoG+VGhpcyBjZXJ0
+aWZpY2F0ZSB3YXMgaXNzdWVkIGFjY29yZGluZyB0byB0aGUgQ2xhc3MgMSBWYWxpZGF0aW9uIHJl
+cXVpcmVtZW50cyBvZiB0aGUgU3RhcnRDb20gQ0EgcG9saWN5LCByZWxpYW5jZSBvbmx5IGZvciB0
+aGUgaW50ZW5kZWQgcHVycG9zZSBpbiBjb21wbGlhbmNlIG9mIHRoZSByZWx5aW5nIHBhcnR5IG9i
+bGlnYXRpb25zLjA2BgNVHR8ELzAtMCugKaAnhiVodHRwOi8vY3JsLnN0YXJ0c3NsLmNvbS9jcnR1
+MS1jcmwuY3JsMIGOBggrBgEFBQcBAQSBgTB/MDkGCCsGAQUFBzABhi1odHRwOi8vb2NzcC5zdGFy
+dHNzbC5jb20vc3ViL2NsYXNzMS9jbGllbnQvY2EwQgYIKwYBBQUHMAKGNmh0dHA6Ly9haWEuc3Rh
+cnRzc2wuY29tL2NlcnRzL3N1Yi5jbGFzczEuY2xpZW50LmNhLmNydDAjBgNVHRIEHDAahhhodHRw
+Oi8vd3d3LnN0YXJ0c3NsLmNvbS8wDQYJKoZIhvcNAQEFBQADggEBAAhSw0J8jvPlwP04k5bYyf2Q
+LzPqpgRCjeN1XfloqNpTP1qv7HCaZLqVxh65fQrnqG5A8TAKIF2zMai2WDtdz74IzIfjx8Qz50L/
+BBsTooPpPx6r3KhHU5ZvWBB3G121kulwfs0Tu1VSKRjGENX9agjnLpMZsCJuojEh12zq/+6WkJuG
+ztFC6bYwaLX4jmaOqvDaOkq6EJTksnOr/BWEsUzSAFzGjNhWJI6q8YHZyZkiAH69dYETrhevVrji
+AsT9M0xIyZXvu2jvZVFjWljFjzMhUjQsRepJEbr1Ampou75YSzk0QtZG/jjIce5HjfQLd7XUyN67
+bhXkgdT2t1V1bNAxggNvMIIDawIBATCBlDCBjDELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0
+Q29tIEx0ZC4xKzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2
+BgNVBAMTL1N0YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBAgMG
+hc4wCQYFKw4DAhoFAKCCAa8wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUx
+DxcNMTMwODE5MDgyNTM1WjAjBgkqhkiG9w0BCQQxFgQUFNsSTYSIy7ECQzV7T4xmucdiz3MwgaUG
+CSsGAQQBgjcQBDGBlzCBlDCBjDELMAkGA1UEBhMCSUwxFjAUBgNVBAoTDVN0YXJ0Q29tIEx0ZC4x
+KzApBgNVBAsTIlNlY3VyZSBEaWdpdGFsIENlcnRpZmljYXRlIFNpZ25pbmcxODA2BgNVBAMTL1N0
+YXJ0Q29tIENsYXNzIDEgUHJpbWFyeSBJbnRlcm1lZGlhdGUgQ2xpZW50IENBAgMGhc4wgacGCyqG
+SIb3DQEJEAILMYGXoIGUMIGMMQswCQYDVQQGEwJJTDEWMBQGA1UEChMNU3RhcnRDb20gTHRkLjEr
+MCkGA1UECxMiU2VjdXJlIERpZ2l0YWwgQ2VydGlmaWNhdGUgU2lnbmluZzE4MDYGA1UEAxMvU3Rh
+cnRDb20gQ2xhc3MgMSBQcmltYXJ5IEludGVybWVkaWF0ZSBDbGllbnQgQ0ECAwaFzjANBgkqhkiG
+9w0BAQEFAASCAQC01oQ117g7UEg10B0D4pngwX4dlVfoU3uOgMxs2DZhAmXUx5XxtYP7TMkMr4D1
+qGEgyRXunrQGEGOcROHsf9k2ADlk9rHJ68BvdrHud4IJL9PpfsHodpIx1ddVDGJLxC38Apl02FuR
+CGOP+XlcDb0QssrfeyyNV/cdEkZQuWyTpn0TJb1Z8mTUPBHlUEvTrXZkg5cCdB7PGMpZK+4Qz04b
+UeffqUwQSIJ8MQpb4u751WOTpsFasEfEBvJVDn7aCnlUEO6YKY9LErNs2VVfRd23UwqQku7wUd6r
+duFrUIIWK3k84uC6C1O4D4Yt7ilhjfOc9a8VnWiM8eso1sWoDZlZAAAAAAAA
+
+
+--=-8bAcJrGiBwu5kn+RYvsL--
