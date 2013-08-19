@@ -1,45 +1,78 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 04/10] ACPI: Limit access to custom_method
-Date: Mon, 19 Aug 2013 12:10:13 -0400
-Message-ID: <1376928619-3775-4-git-send-email-matthew.garrett@nebula.com>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 05/10] asus-wmi: Restrict debugfs interface when module
+ loading is restricted
+Date: Mon, 19 Aug 2013 09:20:17 -0700
+Message-ID: <CAGXu5jJtvVx76ZZrk+s4KwopT-ocZcMbwWNM1ELxH4crm=QGLw@mail.gmail.com>
 References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com>
+	<1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376928619-3775-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1376928619-3775-5-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-custom_method effectively allows arbitrary access to system memory, making
-it possible for an attacker to circumvent restrictions on module loading.
-Disable it if any such restrictions have been enabled.
+On Mon, Aug 19, 2013 at 9:10 AM, Matthew Garrett
+<matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
+> We have no way of validating what all of the Asus WMI methods do on a
+> given machine, and there's a risk that some will allow hardware state to
+> be manipulated in such a way that arbitrary code can be executed in the
+> kernel, circumventing module loading restrictions. Prevent that if any of
+> these features are enabled.
+>
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/platform/x86/asus-wmi.c | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+>
+> diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
+> index 19c313b..8105530 100644
+> --- a/drivers/platform/x86/asus-wmi.c
+> +++ b/drivers/platform/x86/asus-wmi.c
+> @@ -1618,6 +1618,9 @@ static int show_dsts(struct seq_file *m, void *data)
+>         int err;
+>         u32 retval = -1;
+>
+> +       if (secure_modules())
+> +               return -EPERM;
+> +
+>         err = asus_wmi_get_devstate(asus, asus->debug.dev_id, &retval);
+>
+>         if (err < 0)
+> @@ -1634,6 +1637,9 @@ static int show_devs(struct seq_file *m, void *data)
+>         int err;
+>         u32 retval = -1;
+>
+> +       if (!capable(CAP_COMPROMISE_KERNEL))
 
-Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
----
- drivers/acpi/custom_method.c | 4 ++++
- 1 file changed, 4 insertions(+)
+Looks like this and the next chunk weren't changed to the
+secure_modules() API...
 
-diff --git a/drivers/acpi/custom_method.c b/drivers/acpi/custom_method.c
-index 12b62f2..55a013f 100644
---- a/drivers/acpi/custom_method.c
-+++ b/drivers/acpi/custom_method.c
-@@ -7,6 +7,7 @@
- #include <linux/kernel.h>
- #include <linux/uaccess.h>
- #include <linux/debugfs.h>
-+#include <linux/module.h>
- #include <acpi/acpi_drivers.h>
- 
- #include "internal.h"
-@@ -29,6 +30,9 @@ static ssize_t cm_write(struct file *file, const char __user * user_buf,
- 	struct acpi_table_header table;
- 	acpi_status status;
- 
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	if (!(*ppos)) {
- 		/* parse the table header to get the table length */
- 		if (count <= sizeof(struct acpi_table_header))
+-Kees
+
+> +               return -EPERM;
+> +
+>         err = asus_wmi_set_devstate(asus->debug.dev_id, asus->debug.ctrl_param,
+>                                     &retval);
+>
+> @@ -1658,6 +1664,9 @@ static int show_call(struct seq_file *m, void *data)
+>         union acpi_object *obj;
+>         acpi_status status;
+>
+> +       if (!capable(CAP_COMPROMISE_KERNEL))
+> +               return -EPERM;
+> +
+>         status = wmi_evaluate_method(ASUS_WMI_MGMT_GUID,
+>                                      1, asus->debug.method_id,
+>                                      &input, &output);
+> --
+> 1.8.3.1
+>
+
+
+
 -- 
-1.8.3.1
+Kees Cook
+Chrome OS Security
