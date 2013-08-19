@@ -1,123 +1,45 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH V2 02/10] PCI: Lock down BAR access when module security is enabled
-Date: Mon, 19 Aug 2013 13:26:03 -0400
-Message-ID: <1376933171-9854-3-git-send-email-matthew.garrett@nebula.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH 0/10] Add additional security checks when module loading
+ is restricted
+Date: Mon, 19 Aug 2013 10:34:35 -0700
+Message-ID: <CAGXu5jKX0vFSaVT+nqUjR7K-p0dCo3Uw=6y17ShuEDkRoOJA8g@mail.gmail.com>
 References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376933171-9854-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Josh Boyer <jwboyer@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Any hardware that can potentially generate DMA has to be locked down from
-userspace in order to avoid it being possible for an attacker to modify
-kernel code, allowing them to circumvent disabled module loading or module
-signing. Default to paranoid - in future we can potentially relax this for
-sufficiently IOMMU-isolated devices.
+On Mon, Aug 19, 2013 at 10:26 AM, Matthew Garrett
+<matthew.garrett@nebula.com> wrote:
+> We have two in-kernel mechanisms for restricting module loading - disabling
+> it entirely, or limiting it to the loading of modules signed with a trusted
+> key. These can both be configured in such a way that even root is unable to
+> relax the restrictions.
+>
+> However, right now, there's several other straightforward ways for root to
+> modify running kernel code. At the most basic level these allow root to
+> reset the configuration such that modules can be loaded again, rendering
+> the existing restrictions useless.
+>
+> This patchset adds additional restrictions to various kernel entry points
+> that would otherwise make it straightforward for root to disable enforcement
+> of module loading restrictions. It also provides a patch that allows the
+> kernel to be configured such that module signing will be automatically
+> enabled when the system is booting via UEFI Secure Boot, allowing a stronger
+> guarantee of kernel integrity.
 
-Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
----
- drivers/pci/pci-sysfs.c | 10 ++++++++++
- drivers/pci/proc.c      |  8 +++++++-
- drivers/pci/syscall.c   |  3 ++-
- 3 files changed, 19 insertions(+), 2 deletions(-)
+I like this approach of attaching it to the module loading logic.
+Given the LSM hook for loading modules, I think I'd like to add a hook
+for the secure_modules() check so that an LSM can respond "secure" as
+well, if it doing module loading mediation (for example, in the case
+of Chrome OS's modules-only-from-rootfs). I'll work up a patch...
 
-diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
-index c0dbe1f..cd4e35f 100644
---- a/drivers/pci/pci-sysfs.c
-+++ b/drivers/pci/pci-sysfs.c
-@@ -29,6 +29,7 @@
- #include <linux/slab.h>
- #include <linux/vgaarb.h>
- #include <linux/pm_runtime.h>
-+#include <linux/module.h>
- #include "pci.h"
- 
- static int sysfs_initialized;	/* = 0 */
-@@ -624,6 +625,9 @@ pci_write_config(struct file* filp, struct kobject *kobj,
- 	loff_t init_off = off;
- 	u8 *data = (u8*) buf;
- 
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	if (off > dev->cfg_size)
- 		return 0;
- 	if (off + count > dev->cfg_size) {
-@@ -930,6 +934,9 @@ pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
- 	resource_size_t start, end;
- 	int i;
- 
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	for (i = 0; i < PCI_ROM_RESOURCE; i++)
- 		if (res == &pdev->resource[i])
- 			break;
-@@ -1037,6 +1044,9 @@ pci_write_resource_io(struct file *filp, struct kobject *kobj,
- 		      struct bin_attribute *attr, char *buf,
- 		      loff_t off, size_t count)
- {
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
- }
- 
-diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
-index cdc7836..e3d498b 100644
---- a/drivers/pci/proc.c
-+++ b/drivers/pci/proc.c
-@@ -117,6 +117,9 @@ proc_bus_pci_write(struct file *file, const char __user *buf, size_t nbytes, lof
- 	int size = dev->cfg_size;
- 	int cnt;
- 
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	if (pos >= size)
- 		return 0;
- 	if (nbytes >= size)
-@@ -196,6 +199,9 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
- #endif /* HAVE_PCI_MMAP */
- 	int ret = 0;
- 
-+	if (secure_modules())
-+		return -EPERM;
-+
- 	switch (cmd) {
- 	case PCIIOC_CONTROLLER:
- 		ret = pci_domain_nr(dev->bus);
-@@ -234,7 +240,7 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
- 	struct pci_filp_private *fpriv = file->private_data;
- 	int i, ret;
- 
--	if (!capable(CAP_SYS_RAWIO))
-+	if (!capable(CAP_SYS_RAWIO) || secure_modules())
- 		return -EPERM;
- 
- 	/* Make sure the caller is mapping a real resource for this device */
-diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
-index e1c1ec5..bffbf71 100644
---- a/drivers/pci/syscall.c
-+++ b/drivers/pci/syscall.c
-@@ -10,6 +10,7 @@
- #include <linux/errno.h>
- #include <linux/pci.h>
- #include <linux/syscalls.h>
-+#include <linux/module.h>
- #include <asm/uaccess.h>
- #include "pci.h"
- 
-@@ -92,7 +93,7 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
- 	u32 dword;
- 	int err = 0;
- 
--	if (!capable(CAP_SYS_ADMIN))
-+	if (!capable(CAP_SYS_ADMIN) || secure_modules())
- 		return -EPERM;
- 
- 	dev = pci_get_bus_and_slot(bus, dfn);
+-Kees
+
 -- 
-1.8.3.1
+Kees Cook
+Chrome OS Security
