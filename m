@@ -1,47 +1,66 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH V2 06/10] Restrict /dev/mem and /dev/kmem when module loading is restricted
-Date: Mon, 19 Aug 2013 13:26:07 -0400
-Message-ID: <1376933171-9854-7-git-send-email-matthew.garrett@nebula.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
+Subject: [PATCH V2 01/10] Add secure_modules() call
+Date: Mon, 19 Aug 2013 13:26:02 -0400
+Message-ID: <1376933171-9854-2-git-send-email-matthew.garrett@nebula.com>
 References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376933171-9854-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, jwboyer@redhat.com, keescook@chromium.org, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-Allowing users to write to address space makes it possible for the kernel
-to be subverted, avoiding module loading restrictions. Prevent this when
-any restrictions have been imposed on loading modules.
+Provide a single call to allow kernel code to determine whether the system
+has been configured to either disable module loading entirely or to load
+only modules signed with a trusted key.
 
-Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- drivers/char/mem.c | 6 ++++++
- 1 file changed, 6 insertions(+)
+ include/linux/module.h | 7 +++++++
+ kernel/module.c        | 9 +++++++++
+ 2 files changed, 16 insertions(+)
 
-diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-index 1af8664..61406c8 100644
---- a/drivers/char/mem.c
-+++ b/drivers/char/mem.c
-@@ -159,6 +159,9 @@ static ssize_t write_mem(struct file *file, const char __user *buf,
- 	unsigned long copied;
- 	void *ptr;
+diff --git a/include/linux/module.h b/include/linux/module.h
+index 46f1ea0..0c266b2 100644
+--- a/include/linux/module.h
++++ b/include/linux/module.h
+@@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_block * nb);
  
-+	if (secure_modules())
-+		return -EPERM;
+ extern void print_modules(void);
+ 
++extern bool secure_modules(void);
 +
- 	if (!valid_phys_addr_range(p, count))
- 		return -EFAULT;
+ #else /* !CONFIG_MODULES... */
  
-@@ -497,6 +500,9 @@ static ssize_t write_kmem(struct file *file, const char __user *buf,
- 	char *kbuf; /* k-addr because vwrite() takes vmlist_lock rwlock */
- 	int err = 0;
- 
-+	if (secure_modules())
-+		return -EPERM;
+ /* Given an address, look for it in the exception tables. */
+@@ -619,6 +621,11 @@ static inline int unregister_module_notifier(struct notifier_block * nb)
+ static inline void print_modules(void)
+ {
+ }
 +
- 	if (p < (unsigned long) high_memory) {
- 		unsigned long to_write = min_t(unsigned long, count,
- 					       (unsigned long)high_memory - p);
++static inline bool secure_modules(void)
++{
++	return false;
++}
+ #endif /* CONFIG_MODULES */
+ 
+ #ifdef CONFIG_SYSFS
+diff --git a/kernel/module.c b/kernel/module.c
+index 2069158..801021e 100644
+--- a/kernel/module.c
++++ b/kernel/module.c
+@@ -3852,3 +3852,12 @@ void module_layout(struct module *mod,
+ }
+ EXPORT_SYMBOL(module_layout);
+ #endif
++
++bool secure_modules(void)
++{
++#ifdef CONFIG_MODULE_SIG
++	return (sig_enforce || modules_disabled);
++#else
++	return modules_disabled;
++#endif
++}
 -- 
 1.8.3.1
