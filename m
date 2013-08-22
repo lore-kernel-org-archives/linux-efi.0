@@ -1,397 +1,232 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: [RFC][PATCH] efivars,efi-pstore: Hold off deletion of sysfs entry
- until the scan is completed
-Date: Tue, 20 Aug 2013 17:22:40 -0400
-Message-ID: <5213DE20.5040405@hds.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org
+From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Subject: [PATCH 00/18 v3] Signature verification of hibernate snapshot
+Date: Thu, 22 Aug 2013 19:00:25 +0800
+Message-ID: <1377169243-5875-1-git-send-email-jlee@suse.com>
+Return-path: <linux-pm-owner@vger.kernel.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-Currently, when mounting pstore file system, a read callback of efi_pstore
-driver runs mutiple times as below.
+Hi experts,
 
-- In the first read callback, scan efivar_sysfs_list from head and pass
-  a kmsg buffer of a entry to an upper pstore layer.
-- In the second read callback, rescan efivar_sysfs_list from the entry and pass
-  another kmsg buffer to it.
-- Repeat the scan and pass until the end of efivar_sysfs_list.
+This patchset is the implementation for signature verification of hibernate
+snapshot image. The origin idea is from Jiri Kosina: Let EFI bootloader
+generate key-pair in UEFI secure boot environment, then pass it to kernel
+for sign/verify S4 image.
 
-In this process, an entry is read across the multiple read function calls.
-To avoid race between the read and erasion, the whole process above is
-protected by a spinlock, holding in open() and releasing in close().
+Due to there have potential threat from the S4 image hacked, it may causes
+kernel lost the trust in UEFI secure boot. Hacker attack the S4 snapshot
+image in swap partition through whatever exploit from another trusted OS,
+and the exploit may don't need physical access machine.
 
-At the same time, kmemdup() is called to pass the buffer to pstore filesystem
-during it.
-And then, it causes a following lockdep warning.
+So, this patchset give the ability to kernel for parsing the RSA private key
+from EFI bootloader, then using the private key to generate the signature
+of S4 snapshot image. Kernel put the signature to snapshot header, and
+verify the signature when kernel try to recover snapshot image to memory.
 
-To make the read callback runnable without taking spinlok,
-holding off a deletion of sysfs entry if it happens while scanning it
-via efi_pstore, and deleting it after the scan is completed.
+==============
+How To Enable
+==============
 
-To implement it, this patch introduces two flags, scanning and deleting,
-to efivar_entry.
-Also, __efivar_entry_get() is removed because it was used in efi_pstore only.
+Set enable the CONFIG_SNAPSHOT_VERIFICATION kernel config. And you can also
+choice which hash algorithm should snapshot be signed with. Then rebuild
+kernel.
 
-[    1.143710] ------------[ cut here ]------------
-[    1.144058] WARNING: CPU: 1 PID: 1 at kernel/lockdep.c:2740
-lockdep_trace_alloc+0x104/0x110()
-[    1.144058] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
-[    1.144058] Modules linked in:
+Please note this function need UEFI bootloader's support to generate key-pair
+in UEFI secure boot environment, e.g. shim. Current shim implementation by
+Gary Lin:
 
-[    1.144058] CPU: 1 PID: 1 Comm: systemd Not tainted 3.11.0-rc5 #2
-[    1.144058]  0000000000000009 ffff8800797e9ae0 ffffffff816614a5
-ffff8800797e9b28
-[    1.144058]  ffff8800797e9b18 ffffffff8105510d 0000000000000080
-0000000000000046
-[    1.144058]  00000000000000d0 00000000000003af ffffffff81ccd0c0
-ffff8800797e9b78
-[    1.144058] Call Trace:
-[    1.144058]  [<ffffffff816614a5>] dump_stack+0x54/0x74
-[    1.144058]  [<ffffffff8105510d>] warn_slowpath_common+0x7d/0xa0
-[    1.144058]  [<ffffffff8105517c>] warn_slowpath_fmt+0x4c/0x50
-[    1.144058]  [<ffffffff8131290f>] ? vsscanf+0x57f/0x7b0
-[    1.144058]  [<ffffffff810bbd74>] lockdep_trace_alloc+0x104/0x110
-[    1.144058]  [<ffffffff81192da0>] __kmalloc_track_caller+0x50/0x280
-[    1.144058]  [<ffffffff815147bb>] ?
-efi_pstore_read_func.part.1+0x12b/0x170
-[    1.144058]  [<ffffffff8115b260>] kmemdup+0x20/0x50
-[    1.144058]  [<ffffffff815147bb>] efi_pstore_read_func.part.1+0x12b/0x170
-[    1.144058]  [<ffffffff81514800>] ?
-efi_pstore_read_func.part.1+0x170/0x170
-[    1.144058]  [<ffffffff815148b4>] efi_pstore_read_func+0xb4/0xe0
-[    1.144058]  [<ffffffff81512b7b>] __efivar_entry_iter+0xfb/0x120
-[    1.144058]  [<ffffffff8151428f>] efi_pstore_read+0x3f/0x50
-[    1.144058]  [<ffffffff8128d7ba>] pstore_get_records+0x9a/0x150
-[    1.158207]  [<ffffffff812af25c>] ? selinux_d_instantiate+0x1c/0x20
-[    1.158207]  [<ffffffff8128ce30>] ? parse_options+0x80/0x80
-[    1.158207]  [<ffffffff8128ced5>] pstore_fill_super+0xa5/0xc0
-[    1.158207]  [<ffffffff811ae7d2>] mount_single+0xa2/0xd0
-[    1.158207]  [<ffffffff8128ccf8>] pstore_mount+0x18/0x20
-[    1.158207]  [<ffffffff811ae8b9>] mount_fs+0x39/0x1b0
-[    1.158207]  [<ffffffff81160550>] ? __alloc_percpu+0x10/0x20
-[    1.158207]  [<ffffffff811c9493>] vfs_kern_mount+0x63/0xf0
-[    1.158207]  [<ffffffff811cbb0e>] do_mount+0x23e/0xa20
-[    1.158207]  [<ffffffff8115b51b>] ? strndup_user+0x4b/0xf0
-[    1.158207]  [<ffffffff811cc373>] SyS_mount+0x83/0xc0
-[    1.158207]  [<ffffffff81673cc2>] system_call_fastpath+0x16/0x1b
-[    1.158207] ---[ end trace 61981bc62de9f6f4 ]---
+Git:
+     https://github.com/lcp/shim/tree/s4-key-upstream
+RPM:
+     https://build.opensuse.org/package/show/home:gary_lin:UEFI/shim
 
-Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
----
- drivers/firmware/efi/efi-pstore.c | 145 +++++++++++++++++++++++++++++++++++---
- drivers/firmware/efi/efivars.c    |   3 +-
- drivers/firmware/efi/vars.c       |  39 +++-------
- include/linux/efi.h               |   4 +-
- 4 files changed, 151 insertions(+), 40 deletions(-)
+Please use the shim from above URL if you want to try. Please remember add
+the hash of shim to db in UEFI BIOS because it didn't sign by Microsoft or
+any OSV key.
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 73de5a9..db96b0d 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -18,14 +18,12 @@ module_param_named(pstore_disable, efivars_pstore_disable, bool, 0644);
- 
- static int efi_pstore_open(struct pstore_info *psi)
- {
--	efivar_entry_iter_begin();
- 	psi->data = NULL;
- 	return 0;
- }
- 
- static int efi_pstore_close(struct pstore_info *psi)
- {
--	efivar_entry_iter_end();
- 	psi->data = NULL;
- 	return 0;
- }
-@@ -38,6 +36,23 @@ struct pstore_read_data {
- 	char **buf;
- };
- 
-+/**
-+ * efi_pstore_read_func
-+ * @entry: reading entry
-+ * @data:  data of the entry
-+ *
-+ * This function runs in non-atomic context.
-+ *
-+ * Also, it returns a size of NVRAM entry logged via efi_pstore_write().
-+ * pstore in accordance with the returned value as below.
-+ *
-+ * size > 0: Got data of an entry logged via efi_pstore_write() successfully,
-+ *           and pstore filesystem will continue reading subsequent entries.
-+ * size == 0: Entry was not logged via efi_pstore_write(),
-+ *            and efi_pstore driver will continue reading subsequent entries.
-+ * size < 0: Failed to get data of entry logging via efi_pstore_write(),
-+ *           and pstore will stop reading entry.
-+ */
- static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- {
- 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-@@ -75,8 +90,9 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 		return 0;
- 
- 	entry->var.DataSize = 1024;
--	__efivar_entry_get(entry, &entry->var.Attributes,
--			   &entry->var.DataSize, entry->var.Data);
-+	efivar_entry_get(entry, &entry->var.Attributes,
-+			 &entry->var.DataSize, entry->var.Data);
-+
- 	size = entry->var.DataSize;
- 
- 	*cb_data->buf = kmemdup(entry->var.Data, size, GFP_KERNEL);
-@@ -85,11 +101,113 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 	return size;
- }
- 
-+/**
-+ * efi_pstore_scan_sysfs_enter
-+ * @entry: scanning entry
-+ * @next: next entry
-+ * @head: list head
-+ */
-+static void efi_pstore_scan_sysfs_enter(struct efivar_entry *pos,
-+					struct efivar_entry *next,
-+					struct list_head *head)
-+{
-+	pos->scanning = true;
-+	if (&next->list != head)
-+		next->scanning = true;
-+
-+	/*
-+	 * Release a spin_lock because efi_pstore_read_func() should
-+	 * run in non-atomic context to allocate buffer dynamically.
-+	 */
-+	efivar_entry_iter_end();
-+}
-+
-+/**
-+ * __efi_pstore_scan_sysfs_exit
-+ * @entry: deleting entry
-+ * @turn_off_scanning: Check if a scanning flag should be turned off
-+ */
-+static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
-+						bool turn_off_scanning)
-+{
-+	if (entry->deleting) {
-+		list_del(&entry->list);
-+		efivar_entry_iter_end();
-+		efivar_unregister(entry);
-+		efivar_entry_iter_begin();
-+	} else if (turn_off_scanning)
-+		entry->scanning = false;
-+}
-+
-+/**
-+ * efi_pstore_scan_sysfs_exit
-+ * @pos: scanning entry
-+ * @next: next entry
-+ * @head: list head
-+ * @stop: a flag checking if scanning will stop
-+ */
-+static void efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
-+				       struct efivar_entry *next,
-+				       struct list_head *head, bool stop)
-+{
-+	/* Hold a spinlock to access efivar_entry safely. */
-+	efivar_entry_iter_begin();
-+	__efi_pstore_scan_sysfs_exit(pos, true);
-+	if (stop)
-+		__efi_pstore_scan_sysfs_exit(next, &next->list != head);
-+}
-+
-+/**
-+ * efi_pstore_sysfs_entry_iter
-+ *
-+ * @data: function-specific data to pass to callback
-+ * @pos: entry to begin iterating from
-+ *
-+ * You MUST call efivar_enter_iter_begin() before this function, and
-+ * efivar_entry_iter_end() afterwards.
-+ *
-+ * It is possible to begin iteration from an arbitrary entry within
-+ * the list by passing @pos. @pos is updated on return to point to
-+ * the next entry of the last one passed to efi_pstore_read_func().
-+ * To begin iterating from the beginning of the list @pos must be %NULL.
-+ */
-+static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
-+{
-+	struct efivar_entry *entry, *n;
-+	struct list_head *head = &efivar_sysfs_list;
-+	int size = 0;
-+
-+	if (!*pos) {
-+		list_for_each_entry_safe(entry, n, head, list) {
-+			efi_pstore_scan_sysfs_enter(entry, n, head);
-+
-+			size = efi_pstore_read_func(entry, data);
-+			efi_pstore_scan_sysfs_exit(entry, n, head, size < 0);
-+			if (size)
-+				break;
-+		}
-+		*pos = n;
-+		return size;
-+	}
-+
-+	list_for_each_entry_safe_from((*pos), n, head, list) {
-+		efi_pstore_scan_sysfs_enter((*pos), n, head);
-+
-+		size = efi_pstore_read_func((*pos), data);
-+		efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
-+		if (size)
-+			break;
-+	}
-+	*pos = n;
-+	return size;
-+}
-+
- static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
- 			       int *count, struct timespec *timespec,
- 			       char **buf, struct pstore_info *psi)
- {
- 	struct pstore_read_data data;
-+	ssize_t size;
- 
- 	data.id = id;
- 	data.type = type;
-@@ -97,8 +215,11 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
- 	data.timespec = timespec;
- 	data.buf = buf;
- 
--	return __efivar_entry_iter(efi_pstore_read_func, &efivar_sysfs_list, &data,
--				   (struct efivar_entry **)&psi->data);
-+	efivar_entry_iter_begin();
-+	size = efi_pstore_sysfs_entry_iter(&data,
-+					   (struct efivar_entry **)&psi->data);
-+	efivar_entry_iter_end();
-+	return size;
- }
- 
- static int efi_pstore_write(enum pstore_type_id type,
-@@ -169,9 +290,17 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
- 			return 0;
- 	}
- 
-+	if (entry->scanning) {
-+		/*
-+		 * Skip deletion because this entry will be deleted
-+		 * after scanning is completed.
-+		 */
-+		entry->deleting = true;
-+	} else
-+		list_del(&entry->list);
-+
- 	/* found */
- 	__efivar_entry_delete(entry);
--	list_del(&entry->list);
- 
- 	return 1;
- }
-@@ -201,7 +330,7 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 	found = __efivar_entry_iter(efi_pstore_erase_func, &efivar_sysfs_list, &edata, &entry);
- 	efivar_entry_iter_end();
- 
--	if (found)
-+	if (found && !entry->scanning)
- 		efivar_unregister(entry);
- 
- 	return 0;
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 8a7432a..831bc5c 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -388,7 +388,8 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
- 	if (err)
- 		return err;
- 
--	efivar_unregister(entry);
-+	if (!entry->scanning)
-+		efivar_unregister(entry);
- 
- 	/* It's dead Jim.... */
- 	return count;
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 391c67b..573ed92 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -683,8 +683,16 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
- 	if (!found)
- 		return NULL;
- 
--	if (remove)
--		list_del(&entry->list);
-+	if (remove) {
-+		if (entry->scanning) {
-+			/*
-+			 * The entry will be deleted
-+			 * after scanning is completed.
-+			 */
-+			entry->deleting = true;
-+		} else
-+			list_del(&entry->list);
-+	}
- 
- 	return entry;
- }
-@@ -715,33 +723,6 @@ int efivar_entry_size(struct efivar_entry *entry, unsigned long *size)
- EXPORT_SYMBOL_GPL(efivar_entry_size);
- 
- /**
-- * __efivar_entry_get - call get_variable()
-- * @entry: read data for this variable
-- * @attributes: variable attributes
-- * @size: size of @data buffer
-- * @data: buffer to store variable data
-- *
-- * The caller MUST call efivar_entry_iter_begin() and
-- * efivar_entry_iter_end() before and after the invocation of this
-- * function, respectively.
-- */
--int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
--		       unsigned long *size, void *data)
--{
--	const struct efivar_operations *ops = __efivars->ops;
--	efi_status_t status;
--
--	WARN_ON(!spin_is_locked(&__efivars->lock));
--
--	status = ops->get_variable(entry->var.VariableName,
--				   &entry->var.VendorGuid,
--				   attributes, size, data);
--
--	return efi_status_to_err(status);
--}
--EXPORT_SYMBOL_GPL(__efivar_entry_get);
--
--/**
-  * efivar_entry_get - call get_variable()
-  * @entry: read data for this variable
-  * @attributes: variable attributes
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5f8f176..1e3388e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -782,6 +782,8 @@ struct efivar_entry {
- 	struct efi_variable var;
- 	struct list_head list;
- 	struct kobject kobj;
-+	bool scanning;
-+	bool deleting;
- };
- 
- extern struct list_head efivar_sysfs_list;
-@@ -809,8 +811,6 @@ int __efivar_entry_delete(struct efivar_entry *entry);
- int efivar_entry_delete(struct efivar_entry *entry);
- 
- int efivar_entry_size(struct efivar_entry *entry, unsigned long *size);
--int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
--		       unsigned long *size, void *data);
- int efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
- 		     unsigned long *size, void *data);
- int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
--- 
-1.8.2.1
+=========
+Behavior
+=========
+
+The RSA key-pair are generated by EFI bootloader(e.g. shim) in UEFI secure
+boot environment, so this function binding with EFI secure boot enabled.
+The kernel behavior is:
+
+ + UEFI Secure Boot ON. Kernel found private key from shim:
+   Kernel will run the signature check when S4.
+
+ + UEFI Secure Boot ON. Kernel didn't find key from shim:
+   Kernel will lock down S4 function.
+
+ + UEFI Secure Boot OFF
+   Kernel will disable S4 signature check, and ignore any keys
+   from EFI bootloader. Unconditional allow hibernate launch.
+
+On EFI bootloader side, the behavior as following:
+
+ + First, kernel will check the following 2 EFI variable:
+   S4SignKey-fe141863-c070-478e-b8a3-878a5dc9ef21    [BootService]
+   S4WakeKey-fe141863-c070-478e-b8a3-878a5dc9ef21    [Runtime][Volatile]
+
+   S4SignKey and S4WakeKey is a RSA key-pair:
+    - S4SignKey is a private key that's used to generate signature of S4
+      snapshot.
+      The blob format of S4SignKey is PKCS#8 uncompressed format, it should
+      packaged a RSA private key that's followed PKCS#1.
+
+    - S4WakeKey is a public key that's used to verify signature of S4
+      snapshot.
+      The blob format of S4WakeKey is X.509 format, it should packaged a RSA
+      public key that's followed PKCS#1.
+
+ + EFI bootloader must generate RSA key-pair when system boot:
+   - Bootloader store the public key to EFI boottime variable by itself
+   - Bootloader put The private key to S4SignKey EFI variable for forward to
+     kernel.
+
+ + EFI stub kernel will load the S4SignKey blob to RAM before ExitBootServices,
+   then copy to a memory page to maintain by hibernate_key.c. This private key
+   will used to sign snapshot when S4.
+
+ + When machine resume from hibernate:
+   - EFI bootloader should copy the public key from boottime variable to
+     S4WakeKey EFI variable.
+   - Bootloader need generates a new key-pair for next round S4 usage.
+     It should put new private key to S4SignKey variable.
+
+ + EFI bootlaoder need check the following EFI runtime variable for regenerate
+   new key-pair:
+   GenS4Key-fe141863-c070-478e-b8a3-878a5dc9ef21
+
+   The size of GenS4Key is 1 byte, OS(kernel or userland tool) will set it to
+   "1" for notify efi bootloader regenerate key-pair.
+
+==============
+Implementation
+==============
+
+Whole implementation including 3 parts: shim, asymmetric keys and hibernate:
+
+ + shim:
+   Current solution implemented by Gary Lin:
+     https://github.com/lcp/shim/tree/s4-key-upstream
+
+   Please use shim from the above URL if you want to try. Please remember add
+   this shim to db because it didn't sign by Microsoft or any OSV key.
+
+ + Asymmetric keys:
+   This patchset implemented uncompressed PKCS#8 and RSA private key parser,
+   it also implement the signature generation operation of RSASSA-PKCS1-v_5
+   in PKCS#1 spec. [RFC3447 sec 8.2.2]
+   Set CONFIG_PKCS8_PRIVATE_KEY_INFO_PARSER=y will give kernel the abilities
+   to parsing private key in uncompressed PKCS#8 blob and generate signature.
+
+ + Hibernate:
+   Set CONFIG_SNAPSHOT_VERIFICATION=y will enable the function of snapshot
+   signature generation and verification. I reserved 512 byes size in snapshot
+   header for store the signature that's generated from the digest with SHA
+   algorithms.
+
+For adapt S4 signature check to secure boot, I have porting 3 patches from
+Fedora kernel, authors are Josh Boyer and Matthew Garrett. I also add Cc. to
+them.
+
+Please help review this RFC patchset! Appreciate for any comments!
+
+
+v3:
+ - Load S4 sign key before ExitBootServices in efi stub.
+ - In Makefile, moved hibernate_keys.o before hibernate.o for load S4 sign
+   key before check hibernate image. It makes sure the new sign key will be
+   transfer to resume target kernel.
+ - Set "depends on EFI_STUB" in Kconfig. 
+
+v2:
+ - Moved SNAPSHOT_VERIFICATION kernel config to earlier patch.
+ - Add dummy functions to simplify the ifdef check. 
+ - Sent to opensuse-kernel@opensuse.org for review:
+   http://lists.opensuse.org/opensuse-kernel/2013-08/msg00025.html
+
+v1:
+ - Internal review
+ - github:
+   https://github.com/joeyli/linux-s4sign/commits/devel-s4sign
+
+
+Josh Boyer (1):
+  Secure boot: Add a dummy kernel parameter that will switch on Secure
+    Boot mode
+
+Lee, Chun-Yi (15):
+  asymmetric keys: add interface and skeleton for implement signature
+    generation
+  asymmetric keys: implement EMSA_PKCS1-v1_5-ENCODE in rsa
+  asymmetric keys: separate the length checking of octet string from
+    RSA_I2OSP
+  asymmetric keys: implement OS2IP in rsa
+  asymmetric keys: implement RSASP1
+  asymmetric keys: support parsing PKCS #8 private key information
+  asymmetric keys: explicitly add the leading zero byte to encoded
+    message
+  Hibernate: introduced RSA key-pair to verify signature of snapshot
+  Hibernate: generate and verify signature of snapshot
+  Hibernate: Avoid S4 sign key data included in snapshot image
+  Hibernate: applied SNAPSHOT_VERIFICATION config to switch signature
+    check
+  Hibernate: adapt to UEFI secure boot with signature check
+  Hibernate: show the verification time for monitor performance
+  Hibernate: introduced SNAPSHOT_SIG_HASH config for select hash
+    algorithm
+  Hibernate: notify bootloader regenerate key-pair for snapshot
+    verification
+
+Matthew Garrett (2):
+  Secure boot: Add new capability
+  efi: Enable secure boot lockdown automatically when enabled in
+    firmware
+
+ Documentation/kernel-parameters.txt        |    7 +
+ Documentation/x86/zero-page.txt            |    2 +
+ arch/x86/boot/compressed/eboot.c           |  121 ++++++++++
+ arch/x86/include/asm/bootparam_utils.h     |    8 +-
+ arch/x86/include/asm/efi.h                 |    9 +
+ arch/x86/include/uapi/asm/bootparam.h      |    4 +-
+ arch/x86/kernel/setup.c                    |    7 +
+ arch/x86/platform/efi/efi.c                |   68 ++++++
+ crypto/asymmetric_keys/Kconfig             |   11 +
+ crypto/asymmetric_keys/Makefile            |   16 ++
+ crypto/asymmetric_keys/pkcs8.asn1          |   19 ++
+ crypto/asymmetric_keys/pkcs8_info_parser.c |  152 ++++++++++++
+ crypto/asymmetric_keys/pkcs8_parser.h      |   23 ++
+ crypto/asymmetric_keys/pkcs8_private_key.c |  148 ++++++++++++
+ crypto/asymmetric_keys/pkcs8_rsakey.asn1   |   29 +++
+ crypto/asymmetric_keys/private_key.h       |   29 +++
+ crypto/asymmetric_keys/public_key.c        |   32 +++
+ crypto/asymmetric_keys/rsa.c               |  283 ++++++++++++++++++++++-
+ crypto/asymmetric_keys/signature.c         |   28 +++
+ include/crypto/public_key.h                |   28 +++
+ include/keys/asymmetric-subtype.h          |    6 +
+ include/linux/cred.h                       |    2 +
+ include/linux/efi.h                        |   18 ++
+ include/uapi/linux/capability.h            |    6 +-
+ kernel/cred.c                              |   17 ++
+ kernel/power/Kconfig                       |   77 ++++++-
+ kernel/power/Makefile                      |    1 +
+ kernel/power/hibernate.c                   |   37 +++
+ kernel/power/hibernate_keys.c              |  329 ++++++++++++++++++++++++++
+ kernel/power/main.c                        |   11 +-
+ kernel/power/power.h                       |   35 +++
+ kernel/power/snapshot.c                    |  345 +++++++++++++++++++++++++++-
+ kernel/power/swap.c                        |   22 ++
+ kernel/power/user.c                        |   22 ++
+ 34 files changed, 1925 insertions(+), 27 deletions(-)
+ create mode 100644 crypto/asymmetric_keys/pkcs8.asn1
+ create mode 100644 crypto/asymmetric_keys/pkcs8_info_parser.c
+ create mode 100644 crypto/asymmetric_keys/pkcs8_parser.h
+ create mode 100644 crypto/asymmetric_keys/pkcs8_private_key.c
+ create mode 100644 crypto/asymmetric_keys/pkcs8_rsakey.asn1
+ create mode 100644 crypto/asymmetric_keys/private_key.h
+ create mode 100644 kernel/power/hibernate_keys.c
+
