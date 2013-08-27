@@ -2,16 +2,16 @@ From: joeyli <jlee@suse.com>
 Subject: Re: [PATCH 17/18] Hibernate: introduced SNAPSHOT_SIG_HASH config
  for select hash algorithm
 Date: Tue, 27 Aug 2013 18:22:17 +0800
-Message-ID: <1377598937.20140.12.camel__23167.353627696$1377599043$gmane$org@linux-s257.site>
+Message-ID: <1377598937.20140.12.camel__28941.5436717265$1377599049$gmane$org@linux-s257.site>
 References: <1377169317-5959-1-git-send-email-jlee@suse.com>
 	 <1377169317-5959-18-git-send-email-jlee@suse.com>
 	 <20130825164329.GL5171@amd.pavel.ucw.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-crypto-owner@vger.kernel.org>
 In-Reply-To: <20130825164329.GL5171@amd.pavel.ucw.cz>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-crypto-owner@vger.kernel.org
 To: Pavel Machek <pavel@ucw.cz>
 Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
