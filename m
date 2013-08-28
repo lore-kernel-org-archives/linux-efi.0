@@ -1,47 +1,46 @@
-From: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH 0/10] Add additional security checks when module loading
  is restricted
-Date: Wed, 28 Aug 2013 18:58:12 -0400 (EDT)
-Message-ID: <761791749.8594444.1377730692707.JavaMail.root@redhat.com>
-References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com> <1241952070.8587861.1377729463830.JavaMail.root@redhat.com> <1377729714.27493.2.camel@x230>
+Date: Wed, 28 Aug 2013 23:05:51 +0000
+Message-ID: <1377731151.27493.9.camel@x230>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+	 <1241952070.8587861.1377729463830.JavaMail.root@redhat.com>
+	 <1377729714.27493.2.camel@x230>
+	 <761791749.8594444.1377730692707.JavaMail.root@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1377729714.27493.2.camel@x230>
+In-Reply-To: <761791749.8594444.1377730692707.JavaMail.root-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+Content-ID: <D248729DCEAE394EB36B0005A502DBA0-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
+To: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-
------ Original Message -----
-> From: "Matthew Garrett" <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> To: "Lenny Szubowicz" <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
-> Sent: Wednesday, August 28, 2013 6:41:55 PM
-> Subject: Re: [PATCH 0/10] Add additional security checks when module loading is restricted
-> 
-> On Wed, 2013-08-28 at 18:37 -0400, Lenny Szubowicz wrote:
-> 
-> > Did you purposely exclude similar checks for hibernate that were covered
-> > by earlier versions of your patch set?
-> 
-> Yes, I think it's worth tying it in with the encrypted hibernation
-> support. The local attack is significantly harder in the hibernation
-> case - in the face of unknown hardware it basically involves a
-> pre-generated memory image corresponding to your system or the ability
-> to force a reboot into an untrusted environment. I think it's probably
-> more workable to just add a configuration option for forcing encrypted
-> hibernation when secure boot is in use.
-> 
-> --
-> Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-
-I'm root. So I can write anything I want to the swap file that looks
-like a valid hibernate image but is code of my choosing. I can read
-anything I need from /dev/mem or /dev/kmem to help me do that.
-I can then immediately initiate a reboot.
-
-                               -Lenny.
+T24gV2VkLCAyMDEzLTA4LTI4IGF0IDE4OjU4IC0wNDAwLCBMZW5ueSBTenVib3dpY3ogd3JvdGU6
+DQoNCj4gSSdtIHJvb3QuIFNvIEkgY2FuIHdyaXRlIGFueXRoaW5nIEkgd2FudCB0byB0aGUgc3dh
+cCBmaWxlIHRoYXQgbG9va3MNCj4gbGlrZSBhIHZhbGlkIGhpYmVybmF0ZSBpbWFnZSBidXQgaXMg
+Y29kZSBvZiBteSBjaG9vc2luZy4gSSBjYW4gcmVhZA0KPiBhbnl0aGluZyBJIG5lZWQgZnJvbSAv
+ZGV2L21lbSBvciAvZGV2L2ttZW0gdG8gaGVscCBtZSBkbyB0aGF0Lg0KPiBJIGNhbiB0aGVuIGlt
+bWVkaWF0ZWx5IGluaXRpYXRlIGEgcmVib290Lg0KDQpObywgeW91J3JlIGJsb2NrZWQgZnJvbSAv
+ZGV2L21lbSBhbmQgL2Rldi9rbWVtLiBUaGF0IGRvZXNuJ3QgbWFrZSBpdA0KaW1wb3NzaWJsZSwg
+YnV0IGl0IGRvZXMgbWFrZSBpdCBtdWNoIGhhcmRlci4gQSBtb3JlIHJlYWxpc3RpYyBhdHRhY2sg
+aXMNCnRvIHdyaXRlIHNvbWV0aGluZyB0aGF0IGxvb2tzIGxpa2UgKGJ1dCBpc24ndCkgYSBoaWJl
+cm5hdGlvbiBpbWFnZSB3aGljaA0KZWZmZWN0aXZlbHkganVtcHMgYmFjayBpbnRvIHRoZSByZXN1
+bWUga2VybmVsIGFmdGVyIG1vZGlmeWluZyBpdCwgYnV0DQp5b3UnZCBzdGlsbCBuZWVkIHRvIGdl
+bmVyYXRlIGEgYnVuY2ggb2Yga2VybmVsIHN0YXRlLg0KDQpUaGUgbmVlZCBmb3IgYSByZWJvb3Qg
+bWFrZXMgaXQgYSBsZXNzIHNpZ25pZmljYW50IGF0dGFjayB0aGFuIHRoZSBvdGhlcnMNCnRoYXQg
+dGhpcyBwYXRjaHNldCBwcm90ZWN0cyBhZ2FpbnN0LCB3aGljaCBhbGwgYWxsb3cgdGhlIG1vZGlm
+aWNhdGlvbiBvZg0KdGhlIGFscmVhZHkgcnVubmluZyBrZXJuZWwuIElmIHlvdSBhbHNvIHdhbnQg
+dG8gcHJvdGVjdCBhZ2FpbnN0IGF0dGFja3MNCmludm9sdmluZyByZWJvb3RzIHRoZW4geW91IG5l
+ZWQgdG8gc2VjdXJlIHRoZSBvbi1kaXNrIHJlcHJlc2VudGF0aW9uIG9mDQp0aGUga2VybmVsIGFz
+IHdlbGwsIHdoaWNoIG1lYW5zIFNlY3VyZSBCb290LCBhbmQgdGhhdCBhbHNvIG1lYW5zIHlvdQ0K
+d2FudCBlbmNyeXB0ZWQgaGliZXJuYXRpb24gc3VwcG9ydC4NCg0KSWYgeW91IG5lZWQgc29tZXRo
+aW5nIGZvciB0aGUgc2hvcnQgdGVybSB0aGVuIEknZCBzdWdnZXN0IGp1c3QgYWRkaW5nIGENCmNv
+bmZpZyBvcHRpb24gdGhhdCBkaXNhYmxlcyBoaWJlcm5hdGlvbiB3aGVuIGEgc3lzdGVtIGlzIGlu
+IFNlY3VyZSBCb290DQptb2RlLCBidXQgdGhlIGJlc3QgcGxhbiBpcyBwcmV0dHkgbXVjaCB0byBy
+ZXZpZXcgdGhlIGVuY3J5cHRlZA0KaGliZXJuYXRpb24gcGF0Y2hlcyB0aGF0IGdvdCBwb3N0ZWQg
+cmVjZW50bHkuIEl0J2QgYmUgZWFzeSB0byB0aWUgdGhvc2UNCmludG8gYXBwcm9wcmlhdGUgcG9s
+aWN5Lg0KLS0gDQpNYXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
