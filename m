@@ -1,59 +1,31 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 0/10] Add additional security checks when module loading
  is restricted
-Date: Wed, 28 Aug 2013 16:07:06 -0700
-Message-ID: <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
+Date: Wed, 28 Aug 2013 23:12:57 +0000
+Message-ID: <1377731577.27493.11.camel@x230>
 References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
-	<1241952070.8587861.1377729463830.JavaMail.root@redhat.com>
-	<1377729714.27493.2.camel@x230>
-	<761791749.8594444.1377730692707.JavaMail.root@redhat.com>
+	 <1241952070.8587861.1377729463830.JavaMail.root@redhat.com>
+	 <1377729714.27493.2.camel@x230>
+	 <761791749.8594444.1377730692707.JavaMail.root@redhat.com>
+	 <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <761791749.8594444.1377730692707.JavaMail.root-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <516A42F5872C9848A2BAE370C4DB096C@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kees Cook <keescook@chromium.org>
+Cc: Lenny Szubowicz <lszubowi@redhat.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Josh Boyer <jwboyer@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 28, 2013 at 3:58 PM, Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
->
-> ----- Original Message -----
->> From: "Matthew Garrett" <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->> To: "Lenny Szubowicz" <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
->> Sent: Wednesday, August 28, 2013 6:41:55 PM
->> Subject: Re: [PATCH 0/10] Add additional security checks when module loading is restricted
->>
->> On Wed, 2013-08-28 at 18:37 -0400, Lenny Szubowicz wrote:
->>
->> > Did you purposely exclude similar checks for hibernate that were covered
->> > by earlier versions of your patch set?
->>
->> Yes, I think it's worth tying it in with the encrypted hibernation
->> support. The local attack is significantly harder in the hibernation
->> case - in the face of unknown hardware it basically involves a
->> pre-generated memory image corresponding to your system or the ability
->> to force a reboot into an untrusted environment. I think it's probably
->> more workable to just add a configuration option for forcing encrypted
->> hibernation when secure boot is in use.
->>
->> --
->> Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->
-> I'm root. So I can write anything I want to the swap file that looks
-> like a valid hibernate image but is code of my choosing. I can read
-> anything I need from /dev/mem or /dev/kmem to help me do that.
-> I can then immediately initiate a reboot.
-
-Strictly speaking, RAM contents are not available via /dev/*mem, even
-to root. However, you can request a suspend image be written, but to
-not enter hibernation. Then modify the image, and request a resume
-from it.
-
--Kees
-
--- 
-Kees Cook
-Chrome OS Security
+T24gV2VkLCAyMDEzLTA4LTI4IGF0IDE2OjA3IC0wNzAwLCBLZWVzIENvb2sgd3JvdGU6DQoNCj4g
+U3RyaWN0bHkgc3BlYWtpbmcsIFJBTSBjb250ZW50cyBhcmUgbm90IGF2YWlsYWJsZSB2aWEgL2Rl
+di8qbWVtLCBldmVuDQo+IHRvIHJvb3QuIEhvd2V2ZXIsIHlvdSBjYW4gcmVxdWVzdCBhIHN1c3Bl
+bmQgaW1hZ2UgYmUgd3JpdHRlbiwgYnV0IHRvDQo+IG5vdCBlbnRlciBoaWJlcm5hdGlvbi4gVGhl
+biBtb2RpZnkgdGhlIGltYWdlLCBhbmQgcmVxdWVzdCBhIHJlc3VtZQ0KPiBmcm9tIGl0Lg0KDQpJ
+cyB0aGF0IHRydWU/IE9oLCBobSAtIEkgZ3Vlc3MgeW91IGNvdWxkIGRvIGl0IHdpdGggdXN3c3Vz
+cC4gVWdoLiBOb3cgSQ0Kd29uZGVyIHdoYXQgZWxzZSB5b3UgY2FuIGRvIHdpdGggdXN3c3VzcC4g
+WWVhaCwgb2ssIEkgdGhpbmsgdGhhdCBjYXNlDQpjZXJ0YWlubHkgbmVlZHMgaGFuZGxpbmcuDQoN
+Ci0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
