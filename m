@@ -1,160 +1,35 @@
-From: Josh Boyer <jwboyer@redhat.com>
-Subject: Re: [PATCH V2 10/10] Add option to automatically enforce module
- signatures when in Secure Boot mode
-Date: Thu, 29 Aug 2013 14:37:13 -0400
-Message-ID: <20130829183713.GT20828@hansolo.jdub.homelinux.org>
-References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
- <1376933171-9854-11-git-send-email-matthew.garrett@nebula.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 05/10] asus-wmi: Restrict debugfs interface when module
+ loading is restricted
+Date: Thu, 29 Aug 2013 11:46:32 -0700
+Message-ID: <521F9708.6040902@zytor.com>
+References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com>  <1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>  <521F9162.9060405@zytor.com> <1377801331.27493.17.camel@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1376933171-9854-11-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, keescook@chromium.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1377801331.27493.17.camel@x230>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 19, 2013 at 01:26:11PM -0400, Matthew Garrett wrote:
-> UEFI Secure Boot provides a mechanism for ensuring that the firmware will
-> only load signed bootloaders and kernels. Certain use cases may also
-> require that all kernel modules also be signed. Add a configuration option
-> that enforces this automatically when enabled.
+On 08/29/2013 11:35 AM, Matthew Garrett wrote:
+> On Thu, 2013-08-29 at 11:22 -0700, H. Peter Anvin wrote:
+>> On 08/19/2013 09:10 AM, Matthew Garrett wrote:
+>>> +	if (!capable(CAP_COMPROMISE_KERNEL))
+>>> +		return -EPERM;
+>>> +
+>>
+>> Stale bits?
 > 
-> Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
-> ---
->  Documentation/x86/zero-page.txt       |  2 ++
->  arch/x86/Kconfig                      | 10 ++++++++++
->  arch/x86/boot/compressed/eboot.c      | 33 +++++++++++++++++++++++++++++++++
->  arch/x86/include/uapi/asm/bootparam.h |  3 ++-
->  arch/x86/kernel/setup.c               |  6 ++++++
->  include/linux/module.h                |  6 ++++++
->  kernel/module.c                       |  7 +++++++
->  7 files changed, 66 insertions(+), 1 deletion(-)
+> Yeah. Did I manage to send out the old copy of that again? I'm sorry,
+> spending a few months concentrating on cloud stuff seems to have
+> entirely destroyed my ability to deal with git :(
 > 
-> diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
-> index 199f453..ec38acf 100644
-> --- a/Documentation/x86/zero-page.txt
-> +++ b/Documentation/x86/zero-page.txt
-> @@ -30,6 +30,8 @@ Offset	Proto	Name		Meaning
->  1E9/001	ALL	eddbuf_entries	Number of entries in eddbuf (below)
->  1EA/001	ALL	edd_mbr_sig_buf_entries	Number of entries in edd_mbr_sig_buffer
->  				(below)
-> +1EB/001	ALL     kbd_status      Numlock is enabled
-> +1EC/001	ALL     secure_boot	Secure boot is enabled in the firmware
->  1EF/001	ALL	sentinel	Used to detect broken bootloaders
->  290/040	ALL	edd_mbr_sig_buffer EDD MBR signatures
->  2D0/A00	ALL	e820_map	E820 memory map table
-> diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-> index b32ebf9..6a6c19b 100644
-> --- a/arch/x86/Kconfig
-> +++ b/arch/x86/Kconfig
-> @@ -1581,6 +1581,16 @@ config EFI_STUB
->  
->  	  See Documentation/x86/efi-stub.txt for more information.
->  
-> +config EFI_SECURE_BOOT_SIG_ENFORCE
-> +        def_bool n
-> +	prompt "Force module signing when UEFI Secure Boot is enabled"
-> +	---help---
-> +	  UEFI Secure Boot provides a mechanism for ensuring that the
-> +	  firmware will only load signed bootloaders and kernels. Certain
-> +	  use cases may also require that all kernel modules also be signed.
-> +	  Say Y here to automatically enable module signature enforcement
-> +	  when a system boots with UEFI Secure Boot enabled.
-> +
->  config SECCOMP
->  	def_bool y
->  	prompt "Enable seccomp to safely compute untrusted bytecode"
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index b7388a4..145294d 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -861,6 +861,37 @@ fail:
->  	return status;
->  }
->  
-> +static int get_secure_boot(efi_system_table_t *_table)
-> +{
-> +	u8 sb, setup;
-> +	unsigned long datasize = sizeof(sb);
-> +	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
-> +	efi_status_t status;
-> +
-> +	status = efi_call_phys5(sys_table->runtime->get_variable,
-> +				L"SecureBoot", &var_guid, NULL, &datasize, &sb);
-> +
-> +	if (status != EFI_SUCCESS)
-> +		return 0;
-> +
-> +	if (sb == 0)
-> +		return 0;
-> +
-> +
-> +	status = efi_call_phys5(sys_table->runtime->get_variable,
-> +				L"SetupMode", &var_guid, NULL, &datasize,
-> +				&setup);
-> +
-> +	if (status != EFI_SUCCESS)
-> +		return 0;
-> +
-> +	if (setup == 1)
-> +		return 0;
-> +
-> +	return 1;
-> +}
-> +
-> +
->  /*
->   * Because the x86 boot code expects to be passed a boot_params we
->   * need to create one ourselves (usually the bootloader would create
-> @@ -1169,6 +1200,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
->  	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
->  		goto fail;
->  
-> +	boot_params->secure_boot = get_secure_boot(sys_table);
-> +
->  	setup_graphics(boot_params);
->  
->  	setup_efi_pci(boot_params);
-> diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
-> index c15ddaf..d35da96 100644
-> --- a/arch/x86/include/uapi/asm/bootparam.h
-> +++ b/arch/x86/include/uapi/asm/bootparam.h
-> @@ -131,7 +131,8 @@ struct boot_params {
->  	__u8  eddbuf_entries;				/* 0x1e9 */
->  	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
->  	__u8  kbd_status;				/* 0x1eb */
-> -	__u8  _pad5[3];					/* 0x1ec */
-> +	__u8  secure_boot;				/* 0x1ec */
-> +	__u8  _pad5[2];					/* 0x1ec */
->  	/*
->  	 * The sentinel is set to a nonzero value (0xff) in header.S.
->  	 *
 
-You need to include the following chunk of code with this, otherwise the
-secure_boot variable gets cleared.
+No, you mixed and matched in a single patch...
 
-diff --git a/arch/x86/include/asm/bootparam_utils.h b/arch/x86/include/asm/bootparam_utils.h
-index 4a8cb8d..25f9cf1 100644
---- a/arch/x86/include/asm/bootparam_utils.h
-+++ b/arch/x86/include/asm/bootparam_utils.h
-@@ -38,9 +38,13 @@ static void sanitize_boot_params(struct boot_params *boot_params)
- 		memset(&boot_params->ext_ramdisk_image, 0,
- 		       (char *)&boot_params->efi_info -
- 			(char *)&boot_params->ext_ramdisk_image);
--		memset(&boot_params->kbd_status, 0,
-+		memset(&boot_params->kbd_status, 0, sizeof(boot_params->kbd_status));
-+		/* don't clear boot_params->secure_boot.  we set that ourselves
-+		 * earlier.
-+		 */
-+		memset(&boot_params->_pad5[0], 0,
- 		       (char *)&boot_params->hdr -
--		       (char *)&boot_params->kbd_status);
-+		       (char *)&boot_params->_pad5[0]);
- 		memset(&boot_params->_pad7[0], 0,
- 		       (char *)&boot_params->edd_mbr_sig_buffer[0] -
- 			(char *)&boot_params->_pad7[0]);
+I still believe that CAP_RAWIO should be forbidden in this case.
 
-
-josh
+	-hpa
