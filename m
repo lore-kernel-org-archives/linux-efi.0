@@ -1,52 +1,74 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: EFI mode after running kexec
-Date: Thu, 29 Aug 2013 16:35:23 +0400
-Message-ID: <1377779723.2223.105.camel@dabdike>
-References: <20130829022632.GA26862@kroah.com>
-	 <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg@mail.gmail.com>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 01/10] Add secure_modules() call
+Date: Thu, 29 Aug 2013 11:01:46 -0400
+Message-ID: <20130829150146.GR20828@hansolo.jdub.homelinux.org>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+ <1376933171-9854-2-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1376933171-9854-2-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Cc: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-08-29 at 08:18 -0400, Josh Boyer wrote:
-> On Wed, Aug 28, 2013 at 10:26 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > Hi all,
-> >
-> > I've been messing with UEFI booting a kernel and then later on, using
-> > kexec to boot another kernel, and noticed that the kexec'ed kernel is
-> > not really in EFI mode, although the EFI framebuffer seems present and
-> > able to be used.
-> >
-> > Is this to be expected?  I'd think that the EFI framebuffer wouldn't be
-> > around anymore.  Odds are this is a BIOS bug, given that the machine I'm
-> > using is a really old UEFI mode (i.e. before secure boot mode ever
-> > showed up), but should it work this way?
+On Mon, Aug 19, 2013 at 01:26:02PM -0400, Matthew Garrett wrote:
+> Provide a single call to allow kernel code to determine whether the system
+> has been configured to either disable module loading entirely or to load
+> only modules signed with a trusted key.
 > 
-> AFAIK, it's to be expected at this point.  kexec doesn't work as it
-> should with UEFI.  I believe Matthew and/or Matt can elaborate
-> further, but it has to do with only being able to call
-> ExitBootServices once and providing mappings to the UEFI Runtime
-> services functions.
-
-There's also the SetVirtualAddressMap() problem ...
-
-> > And, to get kexec to run the kernel in EFI mode, would require kexec to
-> > treat the kernel as a EFI binary and run it that way, instead of the
-> > "normal" way it currently is, right?
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> ---
+>  include/linux/module.h | 7 +++++++
+>  kernel/module.c        | 9 +++++++++
+>  2 files changed, 16 insertions(+)
 > 
-> I think so.
+> diff --git a/include/linux/module.h b/include/linux/module.h
+> index 46f1ea0..0c266b2 100644
+> --- a/include/linux/module.h
+> +++ b/include/linux/module.h
+> @@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_block * nb);
+>  
+>  extern void print_modules(void);
+>  
+> +extern bool secure_modules(void);
+> +
+>  #else /* !CONFIG_MODULES... */
+>  
+>  /* Given an address, look for it in the exception tables. */
+> @@ -619,6 +621,11 @@ static inline int unregister_module_notifier(struct notifier_block * nb)
+>  static inline void print_modules(void)
+>  {
+>  }
+> +
+> +static inline bool secure_modules(void)
+> +{
+> +	return false;
+> +}
+>  #endif /* CONFIG_MODULES */
+>  
+>  #ifdef CONFIG_SYSFS
+> diff --git a/kernel/module.c b/kernel/module.c
+> index 2069158..801021e 100644
+> --- a/kernel/module.c
+> +++ b/kernel/module.c
+> @@ -3852,3 +3852,12 @@ void module_layout(struct module *mod,
+>  }
+>  EXPORT_SYMBOL(module_layout);
+>  #endif
+> +
+> +bool secure_modules(void)
+> +{
+> +#ifdef CONFIG_MODULE_SIG
+> +	return (sig_enforce || modules_disabled);
+> +#else
+> +	return modules_disabled;
+> +#endif
+> +}
 
-There are two ways we boot a kernel in EFI mode: one is with
-BootServices intact (because the bootloader didn't call
-ExitBootServices()) which is becoming more common and the other with
-only RunTime Services.  The best that can be hoped for in kexec is the
-latter, since it's practically impossible to reinitialise the
-BootServices once they've been trashed.
+Needs an EXPORT_SYMBOL/EXPORT_SYMBOL_GPL here, or the patches to drivers
+later in the series will fail to link.
 
-James
+josh
