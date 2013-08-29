@@ -1,31 +1,46 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 05/10] asus-wmi: Restrict debugfs interface when module
- loading is restricted
-Date: Thu, 29 Aug 2013 19:07:26 +0000
-Message-ID: <1377803245.27493.19.camel@x230>
-References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com>
-	 <1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>
-	 <521F9162.9060405@zytor.com> <1377801331.27493.17.camel@x230>
-	 <521F9708.6040902@zytor.com> <1377802153.27493.18.camel@x230>
-	 <521F9B8B.6090300@zytor.com>
+From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: EFI mode after running kexec
+Date: Thu, 29 Aug 2013 12:15:43 -0700
+Message-ID: <20130829191543.GA11624@kroah.com>
+References: <20130829022632.GA26862@kroah.com>
+ <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <521F9B8B.6090300-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <1D4BF91FBB7B1A4DB8715F13A2B576CE-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCAyMDEzLTA4LTI5IGF0IDEyOjA1IC0wNzAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
-Cj4gT24gMDgvMjkvMjAxMyAxMTo0OSBBTSwgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiA+Pg0K
-PiA+PiBObywgeW91IG1peGVkIGFuZCBtYXRjaGVkIGluIGEgc2luZ2xlIHBhdGNoLi4uDQo+ID4g
-DQo+ID4gUmlnaHQsIGJ1dCBJJ2QgZml4ZWQgdGhhdCBpbiBWMiAod2hpY2ggSSBzZWUgSSAqZGlk
-KiBzZW5kIGNvcnJlY3RseSwgYW5kDQo+ID4geW91J3JlIGp1c3QgcmVwbHlpbmcgdG8gdGhlIG9s
-ZCBvbmUgOikpDQo+ID4gDQo+IA0KPiBXZWxsLCBJJ20gcmVzcG9uZGluZyB0byB0aGUgb25lIHRo
-YXQgd2FzIHNlbnQgMzEgbWludXRlcyBhZ28uDQoNClJlYWxseT8gSXQncyBkYXRlc3RhbXBlZCB0
-aGUgMTl0aC4NCg0KLS0gDQpNYXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEu
-Y29tPg0K
+On Thu, Aug 29, 2013 at 08:18:39AM -0400, Josh Boyer wrote:
+> On Wed, Aug 28, 2013 at 10:26 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
+> > Hi all,
+> >
+> > I've been messing with UEFI booting a kernel and then later on, using
+> > kexec to boot another kernel, and noticed that the kexec'ed kernel is
+> > not really in EFI mode, although the EFI framebuffer seems present and
+> > able to be used.
+> >
+> > Is this to be expected?  I'd think that the EFI framebuffer wouldn't be
+> > around anymore.  Odds are this is a BIOS bug, given that the machine I'm
+> > using is a really old UEFI mode (i.e. before secure boot mode ever
+> > showed up), but should it work this way?
+> 
+> AFAIK, it's to be expected at this point.  kexec doesn't work as it
+> should with UEFI.
+
+How "should" it work?  It seems to boot a kernel just fine, although not
+in EFI mode, which makes sense (I had forgotten about the BootServices
+stuff.)
+
+> I believe Matthew and/or Matt can elaborate further, but it has to do
+> with only being able to call ExitBootServices once and providing
+> mappings to the UEFI Runtime services functions.
+
+That makes sense.
+
+thanks,
+
+greg k-h
