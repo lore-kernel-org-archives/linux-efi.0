@@ -1,62 +1,37 @@
-From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: EFI mode after running kexec
-Date: Thu, 29 Aug 2013 12:20:01 -0700
-Message-ID: <20130829192001.GB11624@kroah.com>
-References: <20130829022632.GA26862@kroah.com>
- <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg@mail.gmail.com>
- <1377779723.2223.105.camel@dabdike>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 05/10] asus-wmi: Restrict debugfs interface when module
+ loading is restricted
+Date: Thu, 29 Aug 2013 15:28:13 -0400
+Message-ID: <20130829192813.GU20828@hansolo.jdub.homelinux.org>
+References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com>
+ <1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>
+ <521F9162.9060405@zytor.com>
+ <1377801331.27493.17.camel@x230>
+ <521F9708.6040902@zytor.com>
+ <1377802153.27493.18.camel@x230>
+ <521F9B8B.6090300@zytor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1377779723.2223.105.camel@dabdike>
+In-Reply-To: <521F9B8B.6090300-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Aug 29, 2013 at 04:35:23PM +0400, James Bottomley wrote:
-> On Thu, 2013-08-29 at 08:18 -0400, Josh Boyer wrote:
-> > On Wed, Aug 28, 2013 at 10:26 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > > Hi all,
-> > >
-> > > I've been messing with UEFI booting a kernel and then later on, using
-> > > kexec to boot another kernel, and noticed that the kexec'ed kernel is
-> > > not really in EFI mode, although the EFI framebuffer seems present and
-> > > able to be used.
-> > >
-> > > Is this to be expected?  I'd think that the EFI framebuffer wouldn't be
-> > > around anymore.  Odds are this is a BIOS bug, given that the machine I'm
-> > > using is a really old UEFI mode (i.e. before secure boot mode ever
-> > > showed up), but should it work this way?
+On Thu, Aug 29, 2013 at 12:05:47PM -0700, H. Peter Anvin wrote:
+> On 08/29/2013 11:49 AM, Matthew Garrett wrote:
+> >>
+> >> No, you mixed and matched in a single patch...
 > > 
-> > AFAIK, it's to be expected at this point.  kexec doesn't work as it
-> > should with UEFI.  I believe Matthew and/or Matt can elaborate
-> > further, but it has to do with only being able to call
-> > ExitBootServices once and providing mappings to the UEFI Runtime
-> > services functions.
-> 
-> There's also the SetVirtualAddressMap() problem ...
-
-Ugh, that would be a real mess...
-
-> > > And, to get kexec to run the kernel in EFI mode, would require kexec to
-> > > treat the kernel as a EFI binary and run it that way, instead of the
-> > > "normal" way it currently is, right?
+> > Right, but I'd fixed that in V2 (which I see I *did* send correctly, and
+> > you're just replying to the old one :))
 > > 
-> > I think so.
 > 
-> There are two ways we boot a kernel in EFI mode: one is with
-> BootServices intact (because the bootloader didn't call
-> ExitBootServices()) which is becoming more common and the other with
-> only RunTime Services.  The best that can be hoped for in kexec is the
-> latter, since it's practically impossible to reinitialise the
-> BootServices once they've been trashed.
+> Well, I'm responding to the one that was sent 31 minutes ago.
 
-So that would take some kexec work.  I'm currently working on xen
-support in kexec, I'll add this to my "TODO" list for after that gets
-done.
+No patches were sent 31 minutes ago.  And this is definitely in the
+first series thread in my inbox.
 
-thanks,
-
-greg k-h
+josh
