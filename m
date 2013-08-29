@@ -1,61 +1,44 @@
-From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: EFI mode after running kexec
-Date: Thu, 29 Aug 2013 13:53:08 -0700
-Message-ID: <20130829205308.GA23141@kroah.com>
-References: <20130829022632.GA26862@kroah.com>
- <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg@mail.gmail.com>
- <20130829191543.GA11624@kroah.com>
- <CA+5PVA5PHc4vOcWwCgTHS=CP8oei-Jc5GK2dfi=EdD_wGVZpXQ@mail.gmail.com>
+From: Pavel Machek <pavel-ynQEQJNshbs@public.gmane.org>
+Subject: Re: [RFC PATCH 00/18 v3] Signature verification of hibernate
+ snapshot
+Date: Thu, 29 Aug 2013 23:32:50 +0200
+Message-ID: <20130829213249.GA25940@amd.pavel.ucw.cz>
+References: <1377169317-5959-1-git-send-email-jlee@suse.com>
+ <87eh9dzg00.fsf@mid.deneb.enyo.de>
+ <1377734505.19568.39.camel@linux-s257.site>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CA+5PVA5PHc4vOcWwCgTHS=CP8oei-Jc5GK2dfi=EdD_wGVZpXQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1377734505.19568.39.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Florian Weimer <fw-d32yF4oPJVt0XxTmqZlbVQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, opensuse-kernel-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, James Bottomley <james.bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, JKosina-IBi9RG/b67k@public.gmane.org, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michal Marek <mmarek-AlSwsSmVLrQ@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Aug 29, 2013 at 04:36:53PM -0400, Josh Boyer wrote:
-> On Thu, Aug 29, 2013 at 3:15 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > On Thu, Aug 29, 2013 at 08:18:39AM -0400, Josh Boyer wrote:
-> >> On Wed, Aug 28, 2013 at 10:26 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> >> > Hi all,
-> >> >
-> >> > I've been messing with UEFI booting a kernel and then later on, using
-> >> > kexec to boot another kernel, and noticed that the kexec'ed kernel is
-> >> > not really in EFI mode, although the EFI framebuffer seems present and
-> >> > able to be used.
-> >> >
-> >> > Is this to be expected?  I'd think that the EFI framebuffer wouldn't be
-> >> > around anymore.  Odds are this is a BIOS bug, given that the machine I'm
-> >> > using is a really old UEFI mode (i.e. before secure boot mode ever
-> >> > showed up), but should it work this way?
-> >>
-> >> AFAIK, it's to be expected at this point.  kexec doesn't work as it
-> >> should with UEFI.
-> >
-> > How "should" it work?  It seems to boot a kernel just fine, although not
-> > in EFI mode, which makes sense (I had forgotten about the BootServices
-> > stuff.)
+Hi!
+
+> > >    - Bootloader store the public key to EFI boottime variable by itself
+> > >    - Bootloader put The private key to S4SignKey EFI variable for forward to
+> > >      kernel.
+> > 
+> > Is the UEFI NVRAM really suited for such regular updates?
+> > 
 > 
-> Right, well in my ideal world if you kexec a kernel on a UEFI machine,
-> the resulting kernel is up and running as the previous kernel was.
-> Which is to say, it's in UEFI mode.
+> Yes, Matthew raised this concern at before. I modified patch to load
+> private key in efi stub kernel, before ExitBootServices(), that means we
+> don't need generate key-pair at every system boot. So, the above
+> procedure of efi bootloader will only run one time. 
+> 
+> User can enable SNAPSHOT_REGEN_KEYS kernel config to notify efi
+> booloader regenerate key-pair for every S4 to improve security if he
+> want. So, the key-pair re-generate procedure will only launched when S4
+> resume, not every system boot.
 
-I agree, that would be ideal.
+How many writes can UEFI NVRAM survive? (Is it NOR?)
 
-> Maybe that's more hassle than it's worth but that was what I was
-> thinking when I said "should".  It may be possible to use a kexec'd
-> kernel as it boots today on these machines.  I believe the current
-> line of thought from the kdump people is that kdump kernels could
-> operate in this mode, for example.  That's a short-lived uptime and
-> scoped usecase though.
-
-For kdump, yes, but other people use kexec for "real" kernels.  Some
-people use kexec as the bootloader itself, as that's the only way to
-boot Linux on a platform, so they are not always short-lived at all.
-
-thanks,
-
-greg k-h
+"every S4 resume" may be approximately "every boot" for some users...
+									Pavel
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
