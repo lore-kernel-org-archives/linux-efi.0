@@ -1,74 +1,76 @@
-From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V2 01/10] Add secure_modules() call
-Date: Thu, 29 Aug 2013 11:01:46 -0400
-Message-ID: <20130829150146.GR20828@hansolo.jdub.homelinux.org>
-References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
- <1376933171-9854-2-git-send-email-matthew.garrett@nebula.com>
+From: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 08/10] kexec: Disable at runtime if the kernel
+ enforces module loading restrictions
+Date: Thu, 29 Aug 2013 11:57:36 -0400 (EDT)
+Message-ID: <410604531.9664777.1377791856786.JavaMail.root@redhat.com>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com> <1376933171-9854-9-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1376933171-9854-2-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1376933171-9854-9-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Aug 19, 2013 at 01:26:02PM -0400, Matthew Garrett wrote:
-> Provide a single call to allow kernel code to determine whether the system
-> has been configured to either disable module loading entirely or to load
-> only modules signed with a trusted key.
+
+
+----- Original Message -----
+> From: "Matthew Garrett" <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, "Matthew Garrett"
+> <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> Sent: Monday, August 19, 2013 1:26:09 PM
+> Subject: [PATCH V2 08/10] kexec: Disable at runtime if the kernel enforces module loading restrictions
+> 
+> kexec permits the loading and execution of arbitrary code in ring 0, which
+> is something that module signing enforcement is meant to prevent. It makes
+> sense to disable kexec in this situation.
 > 
 > Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 > ---
->  include/linux/module.h | 7 +++++++
->  kernel/module.c        | 9 +++++++++
->  2 files changed, 16 insertions(+)
+>  kernel/kexec.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 > 
-> diff --git a/include/linux/module.h b/include/linux/module.h
-> index 46f1ea0..0c266b2 100644
-> --- a/include/linux/module.h
-> +++ b/include/linux/module.h
-> @@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_block * nb);
+> diff --git a/kernel/kexec.c b/kernel/kexec.c
+> index 59f7b55..1a7690f 100644
+> --- a/kernel/kexec.c
+> +++ b/kernel/kexec.c
+> @@ -32,6 +32,7 @@
+>  #include <linux/vmalloc.h>
+>  #include <linux/swap.h>
+>  #include <linux/syscore_ops.h>
+> +#include <linux/module.h>
 >  
->  extern void print_modules(void);
+>  #include <asm/page.h>
+>  #include <asm/uaccess.h>
+> @@ -1645,6 +1646,9 @@ int kernel_kexec(void)
+>  		goto Unlock;
+>  	}
 >  
-> +extern bool secure_modules(void);
+> +	if (secure_modules())
+> +		return -EPERM;
 > +
->  #else /* !CONFIG_MODULES... */
->  
->  /* Given an address, look for it in the exception tables. */
-> @@ -619,6 +621,11 @@ static inline int unregister_module_notifier(struct notifier_block * nb)
->  static inline void print_modules(void)
->  {
->  }
-> +
-> +static inline bool secure_modules(void)
-> +{
-> +	return false;
-> +}
->  #endif /* CONFIG_MODULES */
->  
->  #ifdef CONFIG_SYSFS
-> diff --git a/kernel/module.c b/kernel/module.c
-> index 2069158..801021e 100644
-> --- a/kernel/module.c
-> +++ b/kernel/module.c
-> @@ -3852,3 +3852,12 @@ void module_layout(struct module *mod,
->  }
->  EXPORT_SYMBOL(module_layout);
->  #endif
-> +
-> +bool secure_modules(void)
-> +{
-> +#ifdef CONFIG_MODULE_SIG
-> +	return (sig_enforce || modules_disabled);
-> +#else
-> +	return modules_disabled;
-> +#endif
-> +}
+>  #ifdef CONFIG_KEXEC_JUMP
+>  	if (kexec_image->preserve_context) {
+>  		lock_system_sleep();
+> --
+> 1.8.3.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
 
-Needs an EXPORT_SYMBOL/EXPORT_SYMBOL_GPL here, or the patches to drivers
-later in the series will fail to link.
 
-josh
+Shouldn't that be:
+
++	if (secure_modules()) {
++		error = -EPERM;
++		goto Unlock;
++	}
+
+-Lenny.
