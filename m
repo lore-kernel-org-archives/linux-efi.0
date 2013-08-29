@@ -1,31 +1,62 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: Re: [PATCH 0/10] Add additional security checks when module loading
- is restricted
-Date: Wed, 28 Aug 2013 23:12:57 +0000
-Message-ID: <1377731577.27493.11.camel@x230>
-References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
-	 <1241952070.8587861.1377729463830.JavaMail.root@redhat.com>
-	 <1377729714.27493.2.camel@x230>
-	 <761791749.8594444.1377730692707.JavaMail.root@redhat.com>
-	 <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFC PATCH 00/18 v3] Signature verification of hibernate
+ snapshot
+Date: Thu, 29 Aug 2013 08:01:45 +0800
+Message-ID: <1377734505.19568.39.camel__12233.3224201158$1377734617$gmane$org@linux-s257.site>
+References: <1377169317-5959-1-git-send-email-jlee@suse.com>
+	 <87eh9dzg00.fsf@mid.deneb.enyo.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <516A42F5872C9848A2BAE370C4DB096C@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: Lenny Szubowicz <lszubowi@redhat.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Josh Boyer <jwboyer@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <87eh9dzg00.fsf@mid.deneb.enyo.de>
+Sender: linux-security-module-owner@vger.kernel.org
+To: Florian Weimer <fw@deneb.enyo.de>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDEzLTA4LTI4IGF0IDE2OjA3IC0wNzAwLCBLZWVzIENvb2sgd3JvdGU6DQoNCj4g
-U3RyaWN0bHkgc3BlYWtpbmcsIFJBTSBjb250ZW50cyBhcmUgbm90IGF2YWlsYWJsZSB2aWEgL2Rl
-di8qbWVtLCBldmVuDQo+IHRvIHJvb3QuIEhvd2V2ZXIsIHlvdSBjYW4gcmVxdWVzdCBhIHN1c3Bl
-bmQgaW1hZ2UgYmUgd3JpdHRlbiwgYnV0IHRvDQo+IG5vdCBlbnRlciBoaWJlcm5hdGlvbi4gVGhl
-biBtb2RpZnkgdGhlIGltYWdlLCBhbmQgcmVxdWVzdCBhIHJlc3VtZQ0KPiBmcm9tIGl0Lg0KDQpJ
-cyB0aGF0IHRydWU/IE9oLCBobSAtIEkgZ3Vlc3MgeW91IGNvdWxkIGRvIGl0IHdpdGggdXN3c3Vz
-cC4gVWdoLiBOb3cgSQ0Kd29uZGVyIHdoYXQgZWxzZSB5b3UgY2FuIGRvIHdpdGggdXN3c3VzcC4g
-WWVhaCwgb2ssIEkgdGhpbmsgdGhhdCBjYXNlDQpjZXJ0YWlubHkgbmVlZHMgaGFuZGxpbmcuDQoN
-Ci0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
+Hi Florian,=20
+
+Thanks for your response.
+
+=E6=96=BC =E4=B8=89=EF=BC=8C2013-08-28 =E6=96=BC 23:01 +0200=EF=BC=8CFl=
+orian Weimer =E6=8F=90=E5=88=B0=EF=BC=9A
+> * Chun-Yi Lee:
+>=20
+> >  + EFI bootloader must generate RSA key-pair when system boot:
+
+I should add more information on this sentence for mention need GenS4Ke=
+y
+runtime variable then re-generate key-pair.
+
+Thanks!
+
+> >    - Bootloader store the public key to EFI boottime variable by it=
+self
+> >    - Bootloader put The private key to S4SignKey EFI variable for f=
+orward to
+> >      kernel.
+>=20
+> Is the UEFI NVRAM really suited for such regular updates?
+>=20
+
+Yes, Matthew raised this concern at before. I modified patch to load
+private key in efi stub kernel, before ExitBootServices(), that means w=
+e
+don't need generate key-pair at every system boot. So, the above
+procedure of efi bootloader will only run one time.=20
+
+User can enable SNAPSHOT_REGEN_KEYS kernel config to notify efi
+booloader regenerate key-pair for every S4 to improve security if he
+want. So, the key-pair re-generate procedure will only launched when S4
+resume, not every system boot.
+
+
+Thanks a lot!
+Joey Lee
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-securit=
+y-module" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
