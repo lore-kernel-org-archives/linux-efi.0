@@ -1,24 +1,28 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 05/10] asus-wmi: Restrict debugfs interface when module
  loading is restricted
-Date: Thu, 29 Aug 2013 11:22:26 -0700
-Message-ID: <521F9162.9060405@zytor.com>
-References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com> <1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>
+Date: Thu, 29 Aug 2013 18:35:32 +0000
+Message-ID: <1377801331.27493.17.camel@x230>
+References: <1376928619-3775-1-git-send-email-matthew.garrett@nebula.com>
+	 <1376928619-3775-5-git-send-email-matthew.garrett@nebula.com>
+	 <521F9162.9060405@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1376928619-3775-5-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <521F9162.9060405@zytor.com>
+Content-Language: en-US
+Content-ID: <FFE8D3DD9711C04795D8A5BCCCB2A0B1@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jwboyer@redhat.com" <jwboyer@redhat.com>, "keescook@chromium.org" <keescook@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/19/2013 09:10 AM, Matthew Garrett wrote:
-> +	if (!capable(CAP_COMPROMISE_KERNEL))
-> +		return -EPERM;
-> +
-
-Stale bits?
-
-	-hpa
+T24gVGh1LCAyMDEzLTA4LTI5IGF0IDExOjIyIC0wNzAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
+Cj4gT24gMDgvMTkvMjAxMyAwOToxMCBBTSwgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiA+ICsJ
+aWYgKCFjYXBhYmxlKENBUF9DT01QUk9NSVNFX0tFUk5FTCkpDQo+ID4gKwkJcmV0dXJuIC1FUEVS
+TTsNCj4gPiArDQo+IA0KPiBTdGFsZSBiaXRzPw0KDQpZZWFoLiBEaWQgSSBtYW5hZ2UgdG8gc2Vu
+ZCBvdXQgdGhlIG9sZCBjb3B5IG9mIHRoYXQgYWdhaW4/IEknbSBzb3JyeSwNCnNwZW5kaW5nIGEg
+ZmV3IG1vbnRocyBjb25jZW50cmF0aW5nIG9uIGNsb3VkIHN0dWZmIHNlZW1zIHRvIGhhdmUNCmVu
+dGlyZWx5IGRlc3Ryb3llZCBteSBhYmlsaXR5IHRvIGRlYWwgd2l0aCBnaXQgOigNCg0KLS0gDQpN
+YXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
