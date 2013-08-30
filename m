@@ -1,28 +1,50 @@
 From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: EFI mode after running kexec
-Date: Fri, 30 Aug 2013 09:44:30 -0700
-Message-ID: <5220CBEE.20706@zytor.com>
-References: <20130829022632.GA26862@kroah.com> <CA+5PVA7jec5DAxgKachkBw1VFobz4rVMQwcqzYQ7ynk7=+d+zg@mail.gmail.com> <1377779723.2223.105.camel@dabdike> <20130829192001.GB11624@kroah.com>
+Subject: Re: [PATCH V2 10/10] Add option to automatically enforce module signatures
+ when in Secure Boot mode
+Date: Fri, 30 Aug 2013 13:46:30 -0700
+Message-ID: <522104A6.5000700@zytor.com>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com> <1376933171-9854-11-git-send-email-matthew.garrett@nebula.com> <20130829183713.GT20828@hansolo.jdub.homelinux.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130829192001.GB11624-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20130829183713.GT20828-dHPIJuKSOV01V+h/cAXI7w8O6CCKKCg3HZ5vskTnxNA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/29/2013 12:20 PM, Greg KH wrote:
->>
->> There's also the SetVirtualAddressMap() problem ...
+On 08/29/2013 11:37 AM, Josh Boyer wrote:
+>>  	setup_efi_pci(boot_params);
+>> diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+>> index c15ddaf..d35da96 100644
+>> --- a/arch/x86/include/uapi/asm/bootparam.h
+>> +++ b/arch/x86/include/uapi/asm/bootparam.h
+>> @@ -131,7 +131,8 @@ struct boot_params {
+>>  	__u8  eddbuf_entries;				/* 0x1e9 */
+>>  	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
+>>  	__u8  kbd_status;				/* 0x1eb */
+>> -	__u8  _pad5[3];					/* 0x1ec */
+>> +	__u8  secure_boot;				/* 0x1ec */
+>> +	__u8  _pad5[2];					/* 0x1ec */
+>>  	/*
+>>  	 * The sentinel is set to a nonzero value (0xff) in header.S.
+>>  	 *
 > 
-> Ugh, that would be a real mess...
+> You need to include the following chunk of code with this, otherwise the
+> secure_boot variable gets cleared.
 > 
 
-I and Borislav actually came up with a reasonable solution for SVAM().
-It sadly creates a new ABI, but at least is (a) reasonable and (b) seems
-to match Windows close enough.  Basically the regions should get mapped
-one by one from -4 GB downwards.
+Not really.
+
+There are three cases:
+
+1. Boot stub only.  Here we do the right thing with the bootparams.
+2. Boot loader bypasses the boot stub completely.  Here we MUST NOT do
+   what you suggest above.
+3. Boot stub with a boot_params structure passed in.  Here we should
+   run sanitize_boot_params() (an inline for a reason) in the boot
+   stub, before we set the secure_boot field.  Once that is done, we
+   again don't need that modification.
 
 	-hpa
