@@ -1,171 +1,123 @@
-From: Grant Likely <grant.likely@secretlab.ca>
-Subject: Re: [PATCH 03/16] Rename memory allocation/free functions
-Date: Fri, 30 Aug 2013 13:54:25 +0100
-Message-ID: <20130830125425.B79393E102A@localhost>
-References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org> <1376090777-20090-4-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1376090777-20090-4-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
-Cc: Roy Franz <roy.franz@linaro.org>, dave.martin@arm.com, leif.lindholm@linaro.org, msalter@redhat.com
+From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Subject: Re: [PATCH 04/16] Add minimum address parameter to efi_low_alloc()
+Date: Fri, 30 Aug 2013 14:01:31 +0100
+Message-ID: <20130830130131.D7CE63E102A@localhost>
+References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org> <1376090777-20090-5-git-send-email-roy.franz@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1376090777-20090-5-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, dave.martin-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri,  9 Aug 2013 16:26:04 -0700, Roy Franz <roy.franz@linaro.org> wrote:
-> Rename them to be more similar, as low_free() could be used to free
-> memory allocated by both high_alloc() and low_alloc().
-> high_alloc() -> efi_high_alloc()
-> low_alloc()  -> efi_low_alloc()
-> low_free()   -> efi_free()
+On Fri,  9 Aug 2013 16:26:05 -0700, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This allows allocations to be made low in memory while
+> avoiding allocations at the base of memory.
+
+Your commit message should include /why/ the change is needed. From the
+above I understand what the patch does, but I don't understand why it is
+necessary.
+
+The patch looks fine to me, but it would be worth investigating merging
+alloc_low and alloc_high. It looks like they both do pretty close to the
+same calculations. A single core function could do both, could have both
+minimum and maximum constraints, and could have a flag to determine if
+low or high addresses should be preferred.
+
+g.
+
+Reviewed-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
 > 
-> Signed-off-by: Roy Franz <roy.franz@linaro.org>
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
-
-Looks reasonable.
-
-Reviewed-by: Grant Likely <grant.likely@linaro.org>
-
->  arch/x86/boot/compressed/eboot.c       |   19 ++++++++++---------
->  drivers/firmware/efi/efi-stub-helper.c |   14 +++++++-------
->  2 files changed, 17 insertions(+), 16 deletions(-)
+>  arch/x86/boot/compressed/eboot.c       |   11 ++++++-----
+>  drivers/firmware/efi/efi-stub-helper.c |    7 +++++--
+>  2 files changed, 11 insertions(+), 7 deletions(-)
 > 
 > diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 65b6a34..2a4430a 100644
+> index 2a4430a..f44ef2f 100644
 > --- a/arch/x86/boot/compressed/eboot.c
 > +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -457,7 +457,8 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
->  		return NULL;
+> @@ -458,7 +458,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
 >  	}
 >  
-> -	status = low_alloc(sys_table, 0x4000, 1, (unsigned long *)&boot_params);
-> +	status = efi_low_alloc(sys_table, 0x4000, 1,
-> +			       (unsigned long *)&boot_params);
+>  	status = efi_low_alloc(sys_table, 0x4000, 1,
+> -			       (unsigned long *)&boot_params);
+> +			       (unsigned long *)&boot_params, 0);
 >  	if (status != EFI_SUCCESS) {
 >  		efi_printk(sys_table, "Failed to alloc lowmem for boot params\n");
 >  		return NULL;
-> @@ -503,7 +504,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
->  
+> @@ -505,7 +505,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
 >  			options_size++;	/* NUL termination */
 >  
-> -			status = low_alloc(sys_table, options_size, 1,
-> +			status = efi_low_alloc(sys_table, options_size, 1,
->  					   &cmdline);
+>  			status = efi_low_alloc(sys_table, options_size, 1,
+> -					   &cmdline);
+> +					   &cmdline, 0);
 >  			if (status != EFI_SUCCESS) {
 >  				efi_printk(sys_table, "Failed to alloc mem for cmdline\n");
-> @@ -537,9 +538,9 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
->  	return boot_params;
->  fail2:
->  	if (options_size)
-> -		low_free(sys_table, options_size, hdr->cmd_line_ptr);
-> +		efi_free(sys_table, options_size, hdr->cmd_line_ptr);
->  fail:
-> -	low_free(sys_table, 0x4000, (unsigned long)boot_params);
-> +	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
->  	return NULL;
->  }
->  
-> @@ -562,7 +563,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
+>  				goto fail;
+> @@ -563,7 +563,8 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
 >  again:
 >  	size += sizeof(*mem_map) * 2;
 >  	_size = size;
-> -	status = low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
-> +	status = efi_low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
+> -	status = efi_low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
+> +	status = efi_low_alloc(sys_table, size, 1,
+> +			       (unsigned long *)&mem_map, 0);
 >  	if (status != EFI_SUCCESS)
 >  		return status;
 >  
-> @@ -570,7 +571,7 @@ get_map:
->  	status = efi_call_phys5(sys_table->boottime->get_memory_map, &size,
->  				mem_map, &key, &desc_size, &desc_version);
->  	if (status == EFI_BUFFER_TOO_SMALL) {
-> -		low_free(sys_table, _size, (unsigned long)mem_map);
-> +		efi_free(sys_table, _size, (unsigned long)mem_map);
->  		goto again;
->  	}
->  
-> @@ -672,7 +673,7 @@ get_map:
->  	return EFI_SUCCESS;
->  
->  free_mem_map:
-> -	low_free(sys_table, _size, (unsigned long)mem_map);
-> +	efi_free(sys_table, _size, (unsigned long)mem_map);
->  	return status;
->  }
->  
-> @@ -695,7 +696,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
->  				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+> @@ -697,7 +698,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
 >  				nr_pages, &start);
 >  	if (status != EFI_SUCCESS) {
-> -		status = low_alloc(sys_table, hdr->init_size,
-> +		status = efi_low_alloc(sys_table, hdr->init_size,
->  				   hdr->kernel_alignment, &start);
+>  		status = efi_low_alloc(sys_table, hdr->init_size,
+> -				   hdr->kernel_alignment, &start);
+> +				   hdr->kernel_alignment, &start, 0);
 >  		if (status != EFI_SUCCESS)
 >  			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
-> @@ -743,7 +744,7 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
 >  	}
+> @@ -745,7 +746,7 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
 >  
 >  	gdt->size = 0x800;
-> -	status = low_alloc(sys_table, gdt->size, 8,
-> +	status = efi_low_alloc(sys_table, gdt->size, 8,
->  			   (unsigned long *)&gdt->address);
+>  	status = efi_low_alloc(sys_table, gdt->size, 8,
+> -			   (unsigned long *)&gdt->address);
+> +			   (unsigned long *)&gdt->address, 0);
 >  	if (status != EFI_SUCCESS) {
 >  		efi_printk(sys_table, "Failed to alloc mem for gdt\n");
+>  		goto fail;
 > diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-> index bd6c1a2..0218d535 100644
+> index 0218d535..40cd16e 100644
 > --- a/drivers/firmware/efi/efi-stub-helper.c
 > +++ b/drivers/firmware/efi/efi-stub-helper.c
-> @@ -86,7 +86,7 @@ fail:
->  /*
->   * Allocate at the highest possible address that is not above 'max'.
->   */
-> -static efi_status_t high_alloc(efi_system_table_t *sys_table_arg,
-> +static efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
->  			       unsigned long size, unsigned long align,
->  			       unsigned long *addr, unsigned long max)
->  {
-> @@ -165,8 +165,8 @@ fail:
->  /*
->   * Allocate at the lowest possible address.
->   */
-> -static efi_status_t low_alloc(efi_system_table_t *sys_table_arg,
-> -		unsigned long size, unsigned long align,
-> +static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
-> +			      unsigned long size, unsigned long align,
->  			      unsigned long *addr)
->  {
->  	unsigned long map_size, desc_size;
-> @@ -226,7 +226,7 @@ fail:
->  	return status;
+> @@ -163,11 +163,11 @@ fail:
 >  }
 >  
-> -static void low_free(efi_system_table_t *sys_table_arg, unsigned long size,
-> +static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
->  		     unsigned long addr)
+>  /*
+> - * Allocate at the lowest possible address.
+> + * Allocate at the lowest possible address, that is not below min.
+>   */
+>  static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>  			      unsigned long size, unsigned long align,
+> -			      unsigned long *addr)
+> +			      unsigned long *addr, unsigned long min)
 >  {
->  	unsigned long nr_pages;
-> @@ -407,8 +407,8 @@ grow:
->  		 * addresses in memory, so allocate enough memory for
->  		 * all the initrd's.
->  		 */
-> -		status = high_alloc(sys_table_arg, initrd_total, 0x1000,
-> -				   &initrd_addr, hdr->initrd_addr_max);
-> +		status = efi_high_alloc(sys_table_arg, initrd_total, 0x1000,
-> +				    &initrd_addr, hdr->initrd_addr_max);
->  		if (status != EFI_SUCCESS) {
->  			efi_printk(sys_table_arg, "Failed to alloc highmem for initrds\n");
->  			goto close_handles;
-> @@ -456,7 +456,7 @@ grow:
->  	return status;
+>  	unsigned long map_size, desc_size;
+>  	efi_memory_desc_t *map;
+> @@ -204,6 +204,9 @@ static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>  		if (start == 0x0)
+>  			start += 8;
 >  
->  free_initrd_total:
-> -	low_free(sys_table_arg, initrd_total, initrd_addr);
-> +	efi_free(sys_table_arg, initrd_total, initrd_addr);
->  
->  close_handles:
->  	for (k = j; k < i; k++)
+> +		if (start < min)
+> +			start = min;
+> +
+>  		start = round_up(start, align);
+>  		if ((start + size) > end)
+>  			continue;
 > -- 
 > 1.7.10.4
 > 
 > 
 > _______________________________________________
 > linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 > http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
