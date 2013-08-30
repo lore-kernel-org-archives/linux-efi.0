@@ -1,84 +1,56 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [RFC PATCH 00/18 v3] Signature verification of hibernate
- snapshot
-Date: Fri, 30 Aug 2013 06:30:17 +0800
-Message-ID: <1377815417.7080.28.camel__32935.8000810773$1377815619$gmane$org@linux-s257.site>
-References: <1377169317-5959-1-git-send-email-jlee@suse.com>
-	 <87eh9dzg00.fsf@mid.deneb.enyo.de>
-	 <1377734505.19568.39.camel@linux-s257.site>
-	 <20130829213249.GA25940@amd.pavel.ucw.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20130829213249.GA25940@amd.pavel.ucw.cz>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Pavel Machek <pavel@denx.de>
-Cc: Florian Weimer <fw@deneb.enyo.de>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
+From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Subject: Re: [PATCH 16/16] Add config EFI_STUB for ARM to Kconfig
+Date: Fri, 30 Aug 2013 12:17:10 +0100
+Message-ID: <20130830111710.911FC3E102A@localhost>
+References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org> <1376090777-20090-17-git-send-email-roy.franz@linaro.org> <20130813131857.GE2823@localhost.localdomain> <CAFECyb8m=5kExhusmepcebyUyBN5R9f7Kjah8NzXJ26Pmo=MNA@mail.gmail.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAFECyb8m=5kExhusmepcebyUyBN5R9f7Kjah8NzXJ26Pmo=MNA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2013-08-29 =E6=96=BC 23:32 +0200=EF=BC=8CPa=
-vel Machek =E6=8F=90=E5=88=B0=EF=BC=9A
-> Hi!
->=20
-> > > >    - Bootloader store the public key to EFI boottime variable b=
-y itself
-> > > >    - Bootloader put The private key to S4SignKey EFI variable f=
-or forward to
-> > > >      kernel.
-> > >=20
-> > > Is the UEFI NVRAM really suited for such regular updates?
-> > >=20
-> >=20
-> > Yes, Matthew raised this concern at before. I modified patch to loa=
-d
-> > private key in efi stub kernel, before ExitBootServices(), that mea=
-ns we
-> > don't need generate key-pair at every system boot. So, the above
-> > procedure of efi bootloader will only run one time.=20
-> >=20
-> > User can enable SNAPSHOT_REGEN_KEYS kernel config to notify efi
-> > booloader regenerate key-pair for every S4 to improve security if h=
-e
-> > want. So, the key-pair re-generate procedure will only launched whe=
-n S4
-> > resume, not every system boot.
->=20
-> How many writes can UEFI NVRAM survive? (Is it NOR?)
+On Tue, 13 Aug 2013 10:37:13 -0700, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Aug 13, 2013 at 6:18 AM, Dave Martin <Dave.Martin-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On Fri, Aug 09, 2013 at 04:26:17PM -0700, Roy Franz wrote:
+> >> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> ---
+> >>  arch/arm/Kconfig |   11 +++++++++++
+> >>  1 file changed, 11 insertions(+)
+> >>
+> >> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+> >> index 43594d5..8607d03 100644
+> >> --- a/arch/arm/Kconfig
+> >> +++ b/arch/arm/Kconfig
+> >> @@ -1805,6 +1805,17 @@ config UACCESS_WITH_MEMCPY
+> >>         However, if the CPU data cache is using a write-allocate mode,
+> >>         this option is unlikely to provide any performance gain.
+> >>
+> >> +config EFI_STUB
+> >> +     bool "EFI stub support"
+> >> +     depends on EFI
+> >
+> > && !CPU_BIG_ENDIAN, in case you didn't get around to that.
+> >
+> > Sooner or later, someone may try to fix that, so there should be a
+> > comment somewhere explaining what is broken for BE.
+> >
+> > Either in efi-stub.c or in the commit message accompanying this patch, I
+> > guess.
+> >
+> EFI will be !CPU_BIG_ENDIAN, so we will get the dependency
+> transitively through EFI.
+> That said, I think it may be better to have both be explicitly
+> !CPU_BIG_ENDIAN, as even
+> though the underlying reasons are the same (EFI services calls being
+> little endian), both
+> the stub and runtime services would need to be fixed to enable the
+> stub to run in BE mode.
+> I'll make this explicit in the stub Kconfig, and add a comment by the
+> PE/COFF magic number
+> regarding the LE requirement.
 
-Currently doesn't have enough information for normal. Yes, I don't know=
-=2E
+Actually, not true! Steve McIntyre is currently doing some of the BE
+porting work on TC2 running UEFI. Eventually he will need this.
 
->=20
-> "every S4 resume" may be approximately "every boot" for some users...
-> 									Pavel
-
-Yes, it's possible.
-
-So, this option will be disabled by default. Default will only generate
-one key-pair for every hibernate.
-If "re-generate key-pair for every S4" is still hurt lift of UEFI NVRAM
-too much, then another thinking for re-generate key-pair are:
-=20
- + Re-generate key-pair after a number of hibernates.
-   e.g. after 5, 10, 20... times
-or
- + Random re-generate key-pair?
-
-
-On the other hand...
-In current design, GenS4Key EFI variable could be write by userland
-hibernate tool, kernel will respect GenS4Key value from userland when
-hibernate launch. So, userland can tell bootloader to lunch the key-pai=
-r
-regeneration procedure.
-
-
-Thanks a lot!
-Joey LEe
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-securit=
-y-module" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+g.
