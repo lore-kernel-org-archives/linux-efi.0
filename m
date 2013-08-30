@@ -1,56 +1,62 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 12/16] Fix types in EFI calls to match EFI function definitions.
-Date: Fri, 30 Aug 2013 16:16:53 -0700
-Message-ID: <CAFECyb8Jz7BatDUzdaiPvAvJg11-zWwAv5ZN1soMcXCvGPPHCw@mail.gmail.com>
-References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-	<1376090777-20090-13-git-send-email-roy.franz@linaro.org>
-	<20130830133902.AEA7A3E102A@localhost>
-	<CAFECyb-J4gTiAQkKVT8qt94Tk6-_jVdX=sNM7VkXkyvPdEeZFA@mail.gmail.com>
-	<CACxGe6tJyGDN5nTePuwcV_W44Fk+mku+V8EoOvPaos72mbKdEw@mail.gmail.com>
+From: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH V2 10/10] Add option to automatically enforce module
+ signatures when in Secure Boot mode
+Date: Fri, 30 Aug 2013 19:41:33 -0400
+Message-ID: <20130830234133.GR20828@hansolo.jdub.homelinux.org>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+ <1376933171-9854-11-git-send-email-matthew.garrett@nebula.com>
+ <20130829183713.GT20828@hansolo.jdub.homelinux.org>
+ <522104A6.5000700@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACxGe6tJyGDN5nTePuwcV_W44Fk+mku+V8EoOvPaos72mbKdEw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: matt.fleming@intel.com, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Dave Martin <dave.martin@arm.com>, Mark Salter <msalter@redhat.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <522104A6.5000700-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 30, 2013 at 4:14 PM, Grant Likely <grant.likely@secretlab.ca> wrote:
-> On Sat, Aug 31, 2013 at 12:12 AM, Roy Franz <roy.franz@linaro.org> wrote:
->> On Fri, Aug 30, 2013 at 6:39 AM, Grant Likely <grant.likely@secretlab.ca> wrote:
->>> I think you need some description in the commit text about why the type
->>> of chunksize is changing. It's not clear why you're making this change.
->>> It is a bug fix?
->>
->> The type was changed to match the EFI_FILE_PROTOCOL specification -
->> chunk size is
->> defined as a native width unsigned integer.  So yes, this is a bug in
->> that this is wrong for
->> ia32, since that really should be a u32 in that case.
->> Since the x86 wrappers break type checking by the compiler these types
->> were never checked at compile time
->> before.  chunksize is the the only change that isn't a cast to a type
->> of void pointer.
->>
->> I can break this change out as a separate patch if desired.
->
-> I don't think it needs to be in a separate patch, but it does need to
-> be described in the patch description.
->
-> g.
+On Fri, Aug 30, 2013 at 01:46:30PM -0700, H. Peter Anvin wrote:
+> On 08/29/2013 11:37 AM, Josh Boyer wrote:
+> >>  	setup_efi_pci(boot_params);
+> >> diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+> >> index c15ddaf..d35da96 100644
+> >> --- a/arch/x86/include/uapi/asm/bootparam.h
+> >> +++ b/arch/x86/include/uapi/asm/bootparam.h
+> >> @@ -131,7 +131,8 @@ struct boot_params {
+> >>  	__u8  eddbuf_entries;				/* 0x1e9 */
+> >>  	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
+> >>  	__u8  kbd_status;				/* 0x1eb */
+> >> -	__u8  _pad5[3];					/* 0x1ec */
+> >> +	__u8  secure_boot;				/* 0x1ec */
+> >> +	__u8  _pad5[2];					/* 0x1ec */
+> >>  	/*
+> >>  	 * The sentinel is set to a nonzero value (0xff) in header.S.
+> >>  	 *
+> > 
+> > You need to include the following chunk of code with this, otherwise the
+> > secure_boot variable gets cleared.
+> > 
+> 
+> Not really.
+> 
+> There are three cases:
+> 
+> 1. Boot stub only.  Here we do the right thing with the bootparams.
+> 2. Boot loader bypasses the boot stub completely.  Here we MUST NOT do
+>    what you suggest above.
+> 3. Boot stub with a boot_params structure passed in.  Here we should
+>    run sanitize_boot_params() (an inline for a reason) in the boot
+>    stub, before we set the secure_boot field.  Once that is done, we
+>    again don't need that modification.
 
-Did that - how about:
+OK.  If 3 works, then great.  All I know is that Fedora has been
+carrying the above hunk for months and it was missing in this patch set.
+So when I went to test it, the patches didn't do anything because the
+secure_boot field was getting cleared.
 
-Fix types in EFI calls to match EFI function definitions.
+I'm more than happy to try option 3, and I'll poke at it next week
+unless someone beats me to it.
 
-EFI calls can made directly on ARM, so the function pointers
-are directly invoked.  This allows types to be checked at
-compile time, so here we ensure that the parameters match
-the function signature. The wrappers used by x86 prevent
-any type checking.
-Correct the type of chunksize to be based on native
-width as specified by the EFI_FILE_PROTOCOL read()
-function.
-
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
+josh
