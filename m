@@ -1,138 +1,69 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 04/16] Add minimum address parameter to efi_low_alloc()
-Date: Fri, 30 Aug 2013 15:12:44 -0700
-Message-ID: <CAFECyb_FkxzmbFJhMO8L1T2ZKV1OOru3uqpQOfou6NwugF3+tg@mail.gmail.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 10/16] Move EFI_READ_CHUNK_SIZE define to shared location.
+Date: Fri, 30 Aug 2013 15:49:46 -0700
+Message-ID: <CAFECyb-cdnr0rC167-14gYw0rXD42i3BXzCaZWsUJ6RvE0hz=Q@mail.gmail.com>
 References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-	<1376090777-20090-5-git-send-email-roy.franz@linaro.org>
-	<20130830130131.D7CE63E102A@localhost>
+	<1376090777-20090-11-git-send-email-roy.franz@linaro.org>
+	<20130830133302.E163A3E102A@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130830130131.D7CE63E102A@localhost>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Grant Likely <grant.likely@secretlab.ca>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Dave Martin <dave.martin@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20130830133302.E163A3E102A@localhost>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 30, 2013 at 6:01 AM, Grant Likely <grant.likely@secretlab.ca> wrote:
-> On Fri,  9 Aug 2013 16:26:05 -0700, Roy Franz <roy.franz@linaro.org> wrote:
->> This allows allocations to be made low in memory while
->> avoiding allocations at the base of memory.
+On Fri, Aug 30, 2013 at 6:33 AM, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org> wrote:
+> On Fri,  9 Aug 2013 16:26:11 -0700, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> This #define is only used the the shared code, so move
+>> it there.
+>>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >
-> Your commit message should include /why/ the change is needed. From the
-> above I understand what the patch does, but I don't understand why it is
-> necessary.
+> Can this be squashed into patch 1?
 
-This was used to avoid relocating the zImage so low in memory that it
-would conflict
-with memory range that it was decompressed into.  This is now handled
-by allocating
-the memory for the decompressed kernel, so the lower limit is no
-longer required.
-I'll remove it, as it is not necessary any more.
+Yes, that makes sense.
 
->
-> The patch looks fine to me, but it would be worth investigating merging
-> alloc_low and alloc_high. It looks like they both do pretty close to the
-> same calculations. A single core function could do both, could have both
-> minimum and maximum constraints, and could have a flag to determine if
-> low or high addresses should be preferred.
 >
 > g.
 >
-> Reviewed-by: Grant Likely <grant.likely@linaro.org>
->
->>
->> Signed-off-by: Roy Franz <roy.franz@linaro.org>
 >> ---
->>  arch/x86/boot/compressed/eboot.c       |   11 ++++++-----
->>  drivers/firmware/efi/efi-stub-helper.c |    7 +++++--
->>  2 files changed, 11 insertions(+), 7 deletions(-)
+>>  arch/x86/boot/compressed/eboot.h       |    1 -
+>>  drivers/firmware/efi/efi-stub-helper.c |    2 +-
+>>  2 files changed, 1 insertion(+), 2 deletions(-)
 >>
->> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
->> index 2a4430a..f44ef2f 100644
->> --- a/arch/x86/boot/compressed/eboot.c
->> +++ b/arch/x86/boot/compressed/eboot.c
->> @@ -458,7 +458,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
->>       }
+>> diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+>> index faa0bdf..bafbd94 100644
+>> --- a/arch/x86/boot/compressed/eboot.h
+>> +++ b/arch/x86/boot/compressed/eboot.h
+>> @@ -12,7 +12,6 @@
+>>  #define DESC_TYPE_CODE_DATA  (1 << 0)
 >>
->>       status = efi_low_alloc(sys_table, 0x4000, 1,
->> -                            (unsigned long *)&boot_params);
->> +                            (unsigned long *)&boot_params, 0);
->>       if (status != EFI_SUCCESS) {
->>               efi_printk(sys_table, "Failed to alloc lowmem for boot params\n");
->>               return NULL;
->> @@ -505,7 +505,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
->>                       options_size++; /* NUL termination */
+>>  #define EFI_PAGE_SIZE                (1UL << EFI_PAGE_SHIFT)
+>> -#define EFI_READ_CHUNK_SIZE  (1024 * 1024)
 >>
->>                       status = efi_low_alloc(sys_table, options_size, 1,
->> -                                        &cmdline);
->> +                                        &cmdline, 0);
->>                       if (status != EFI_SUCCESS) {
->>                               efi_printk(sys_table, "Failed to alloc mem for cmdline\n");
->>                               goto fail;
->> @@ -563,7 +563,8 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
->>  again:
->>       size += sizeof(*mem_map) * 2;
->>       _size = size;
->> -     status = efi_low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
->> +     status = efi_low_alloc(sys_table, size, 1,
->> +                            (unsigned long *)&mem_map, 0);
->>       if (status != EFI_SUCCESS)
->>               return status;
->>
->> @@ -697,7 +698,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
->>                               nr_pages, &start);
->>       if (status != EFI_SUCCESS) {
->>               status = efi_low_alloc(sys_table, hdr->init_size,
->> -                                hdr->kernel_alignment, &start);
->> +                                hdr->kernel_alignment, &start, 0);
->>               if (status != EFI_SUCCESS)
->>                       efi_printk(sys_table, "Failed to alloc mem for kernel\n");
->>       }
->> @@ -745,7 +746,7 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
->>
->>       gdt->size = 0x800;
->>       status = efi_low_alloc(sys_table, gdt->size, 8,
->> -                        (unsigned long *)&gdt->address);
->> +                        (unsigned long *)&gdt->address, 0);
->>       if (status != EFI_SUCCESS) {
->>               efi_printk(sys_table, "Failed to alloc mem for gdt\n");
->>               goto fail;
+>>  #define EFI_CONSOLE_OUT_DEVICE_GUID    \
+>>       EFI_GUID(0xd3b36f2c, 0xd551, 0x11d4, 0x9a, 0x46, 0x0, 0x90, 0x27, \
 >> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
->> index 0218d535..40cd16e 100644
+>> index 0f4d6e6..b707a9f 100644
 >> --- a/drivers/firmware/efi/efi-stub-helper.c
 >> +++ b/drivers/firmware/efi/efi-stub-helper.c
->> @@ -163,11 +163,11 @@ fail:
->>  }
->>
->>  /*
->> - * Allocate at the lowest possible address.
->> + * Allocate at the lowest possible address, that is not below min.
+>> @@ -9,7 +9,7 @@
+>>   * under the terms of the GNU General Public License version 2.
+>>   *
 >>   */
->>  static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
->>                             unsigned long size, unsigned long align,
->> -                           unsigned long *addr)
->> +                           unsigned long *addr, unsigned long min)
->>  {
->>       unsigned long map_size, desc_size;
->>       efi_memory_desc_t *map;
->> @@ -204,6 +204,9 @@ static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
->>               if (start == 0x0)
->>                       start += 8;
+>> -
+>> +#define EFI_READ_CHUNK_SIZE  (1024 * 1024)
 >>
->> +             if (start < min)
->> +                     start = min;
->> +
->>               start = round_up(start, align);
->>               if ((start + size) > end)
->>                       continue;
+>>  struct file_info {
+>>       efi_file_handle_t *handle;
 >> --
 >> 1.7.10.4
 >>
->>
->> _______________________________________________
->> linux-arm-kernel mailing list
->> linux-arm-kernel@lists.infradead.org
->> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+>> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> Please read the FAQ at  http://www.tux.org/lkml/
 >
