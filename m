@@ -1,68 +1,84 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [RFC PATCH 00/18 v3] Signature verification of hibernate
- snapshot
-Date: Mon, 02 Sep 2013 10:12:22 +0800
-Message-ID: <1378087942.7080.75.camel__36664.9624695585$1378088155$gmane$org@linux-s257.site>
-References: <1377169317-5959-1-git-send-email-jlee@suse.com>
-	 <87eh9dzg00.fsf@mid.deneb.enyo.de>
-	 <1377734505.19568.39.camel@linux-s257.site>
-	 <87r4d8vn71.fsf@mid.deneb.enyo.de> <20130901160429.GA1375@srcf.ucam.org>
-	 <87vc2ksdfa.fsf@mid.deneb.enyo.de>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 0/10] Add additional security checks when module
+ loading is restricted
+Date: Mon, 02 Sep 2013 13:22:57 +0800
+Message-ID: <1378099377.7080.113.camel@linux-s257.site>
+References: <1376933171-9854-1-git-send-email-matthew.garrett@nebula.com>
+	 <1241952070.8587861.1377729463830.JavaMail.root@redhat.com>
+	 <1377729714.27493.2.camel@x230>
+	 <761791749.8594444.1377730692707.JavaMail.root@redhat.com>
+	 <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87vc2ksdfa.fsf@mid.deneb.enyo.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Florian Weimer <fw@deneb.enyo.de>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGXu5jKQtx1OEn8qT8+LgHL+xFgK_pHGrxtdwFfKT1q3FHhaNg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E6=97=A5=EF=BC=8C2013-09-01 =E6=96=BC 18:40 +0200=EF=BC=8CFl=
-orian Weimer =E6=8F=90=E5=88=B0=EF=BC=9A
-> * Matthew Garrett:
->=20
-> > On Sun, Sep 01, 2013 at 12:41:22PM +0200, Florian Weimer wrote:
+=E6=96=BC =E4=B8=89=EF=BC=8C2013-08-28 =E6=96=BC 16:07 -0700=EF=BC=8CKe=
+es Cook =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Wed, Aug 28, 2013 at 3:58 PM, Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org=
+> wrote:
 > >
-> >> But if you don't generate fresh keys on every boot, the persistent
-> >> keys are mor exposed to other UEFI applications.  Correct me if I'=
-m
-> >> wrong, but I don't think UEFI variables are segregated between
-> >> different UEFI applications, so if anyone gets a generic UEFI vari=
-able
-> >> dumper (or setter) signed by the trusted key, this cryptographic
-> >> validation of hibernate snapshots is bypassable.
 > >
-> > If anyone can execute arbitrary code in your UEFI environment then=20
-> > you've already lost.
+> > ----- Original Message -----
+> >> From: "Matthew Garrett" <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> >> To: "Lenny Szubowicz" <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboy=
+er-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org
+> >> Sent: Wednesday, August 28, 2013 6:41:55 PM
+> >> Subject: Re: [PATCH 0/10] Add additional security checks when modu=
+le loading is restricted
+> >>
+> >> On Wed, 2013-08-28 at 18:37 -0400, Lenny Szubowicz wrote:
+> >>
+> >> > Did you purposely exclude similar checks for hibernate that were=
+ covered
+> >> > by earlier versions of your patch set?
+> >>
+> >> Yes, I think it's worth tying it in with the encrypted hibernation
+> >> support. The local attack is significantly harder in the hibernati=
+on
+> >> case - in the face of unknown hardware it basically involves a
+> >> pre-generated memory image corresponding to your system or the abi=
+lity
+> >> to force a reboot into an untrusted environment. I think it's prob=
+ably
+> >> more workable to just add a configuration option for forcing encry=
+pted
+> >> hibernation when secure boot is in use.
+> >>
+> >> --
+> >> Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> >
+> > I'm root. So I can write anything I want to the swap file that look=
+s
+> > like a valid hibernate image but is code of my choosing. I can read
+> > anything I need from /dev/mem or /dev/kmem to help me do that.
+> > I can then immediately initiate a reboot.
 >=20
-> This is not about arbitrary code execution.  The problematic
-> applications which conflict with this proposed functionality are not
-> necessarily malicious by themselves and even potentially useful.
+> Strictly speaking, RAM contents are not available via /dev/*mem, even
+> to root. However, you can request a suspend image be written, but to
+> not enter hibernation. Then modify the image, and request a resume
+> from it.
 >=20
-> For example, if you want to provision a bunch of machines and you hav=
-e
-> to set certain UEFI variables, it might be helpful to do so in an
-> unattended fashion, just by booting from a USB stick with a suitable
-> UEFI application.  Is this evil?  I don't think so.
-> --
+> -Kees
+>=20
 
-Yes, if there have the kind of UEFI tools like you said, and it leak to
-attacker, then we lost.
+I agreed!
 
-Even we re-generate key-pair for every S4, the tool, if it can set
-variable, means it can replace the public key that was stored by efi
-bootloader in bootservices variable. Then we still lost.
+As a userland hibernate tool, it possible trigger kernel to generate a
+snapshot image of current memory, read the snapshot, modify and upload
+it back to the temporary memory space of snapshot, trigger S4 resume to
+restore it.
 
-When the tool can only dump variable but not set, then re-generate
-key-pair to every S4 can prevent it. If the tool can also set variable,
-then I don't think there have any way to protect key-pair in UEFI
-variables.
-
-Using TPM is a way to protect key-pair, but user need key-in password
-when generate and use key to sign stuff. It noises to user, but the bes=
-t
-way to keep the password is in brain.
+The signature check of S4 snapshot can prevent this attack because the
+patches put the signature of snapshot image to snapshot header. Even
+attacker change the signature of header or modified the data page in
+snapshot. The modified snapshot image will not pass by signature check.
 
 
 Thanks a lot!
