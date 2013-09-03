@@ -1,7 +1,7 @@
 From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH V3 01/11] Add secure_modules() call
-Date: Tue,  3 Sep 2013 19:50:08 -0400
-Message-ID: <1378252218-18798-2-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH V3 08/11] kexec: Disable at runtime if the kernel enforces module loading restrictions
+Date: Tue,  3 Sep 2013 19:50:15 -0400
+Message-ID: <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
@@ -10,58 +10,40 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, keescook@chromium.org, hpa@zytor.com, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-Provide a single call to allow kernel code to determine whether the system
-has been configured to either disable module loading entirely or to load
-only modules signed with a trusted key.
+kexec permits the loading and execution of arbitrary code in ring 0, which
+is something that module signing enforcement is meant to prevent. It makes
+sense to disable kexec in this situation.
 
 Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- include/linux/module.h |  7 +++++++
- kernel/module.c        | 10 ++++++++++
- 2 files changed, 17 insertions(+)
+ kernel/kexec.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
-diff --git a/include/linux/module.h b/include/linux/module.h
-index 46f1ea0..0c266b2 100644
---- a/include/linux/module.h
-+++ b/include/linux/module.h
-@@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_block * nb);
+diff --git a/kernel/kexec.c b/kernel/kexec.c
+index 59f7b55..3e2b63a 100644
+--- a/kernel/kexec.c
++++ b/kernel/kexec.c
+@@ -32,6 +32,7 @@
+ #include <linux/vmalloc.h>
+ #include <linux/swap.h>
+ #include <linux/syscore_ops.h>
++#include <linux/module.h>
  
- extern void print_modules(void);
+ #include <asm/page.h>
+ #include <asm/uaccess.h>
+@@ -943,6 +944,13 @@ SYSCALL_DEFINE4(kexec_load, unsigned long, entry, unsigned long, nr_segments,
+ 		return -EPERM;
  
-+extern bool secure_modules(void);
+ 	/*
++	 * kexec can be used to circumvent module loading restrictions, so
++	 * prevent loading in that case
++	 */
++	if (secure_modules())
++		return -EPERM;
 +
- #else /* !CONFIG_MODULES... */
- 
- /* Given an address, look for it in the exception tables. */
-@@ -619,6 +621,11 @@ static inline int unregister_module_notifier(struct notifier_block * nb)
- static inline void print_modules(void)
- {
- }
-+
-+static inline bool secure_modules(void)
-+{
-+	return false;
-+}
- #endif /* CONFIG_MODULES */
- 
- #ifdef CONFIG_SYSFS
-diff --git a/kernel/module.c b/kernel/module.c
-index 2069158..0e94acf 100644
---- a/kernel/module.c
-+++ b/kernel/module.c
-@@ -3852,3 +3852,13 @@ void module_layout(struct module *mod,
- }
- EXPORT_SYMBOL(module_layout);
- #endif
-+
-+bool secure_modules(void)
-+{
-+#ifdef CONFIG_MODULE_SIG
-+	return (sig_enforce || modules_disabled);
-+#else
-+	return modules_disabled;
-+#endif
-+}
-+EXPORT_SYMBOL(secure_modules);
++	/*
+ 	 * Verify we have a legal set of flags
+ 	 * This leaves us room for future extensions.
+ 	 */
 -- 
 1.8.3.1
