@@ -1,48 +1,33 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH V3 RFC 00/16] EFI stub for ARM
-Date: Mon, 2 Sep 2013 08:49:52 -0700
-Message-ID: <CAFECyb8u0oZAGMx2M4QbnF7CjXT=3K+cmUUWbQY_1=5WmkGvCQ@mail.gmail.com>
-References: <1376090777-20090-1-git-send-email-roy.franz@linaro.org>
-	<CAFECyb_OMY6eEbkbYTC4sE56Za0rC+KFNFRbGWb2ECEqhiKbTQ@mail.gmail.com>
-	<20130902103310.GF28598@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20130902103310.GF28598@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-efi@vger.kernel.org, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Dave Martin <dave.martin@arm.com>, Mark Salter <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Russell King - ARM Linux <linux@arm.linux.org.uk>
+From: Bojan Prtvar <prtvar.b-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] efivars: Mark local function as static
+Date: Tue,  3 Sep 2013 08:56:20 +0200
+Message-ID: <1378191380-6048-1-git-send-email-prtvar.b@gmail.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Bojan Prtvar <prtvar.b-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 2, 2013 at 3:33 AM, Matt Fleming <matt@console-pimps.org> wrote:
-> On Tue, 13 Aug, at 10:58:16AM, Roy Franz wrote:
->> Hi Matt,
->>
->>    Do you have any more feedback on the X86 and common code (patches
->> 1-13) that needs to be addressed?  Mark Salter has a working ARM64 EFI
->> stub implemented based on these patches, so the common code has now
->> been tested with another architecture, and he has acked these patches.
->> If the current patches are OK, can this be queued for 3.12? (and into
->> linux-next, if appropriate)
->> The ARM portion may take a little longer based on the EFI runtime
->> services patch dependencies, but getting the common code merged would
->> allow the ARM64 EFI stub work to go forward independently.
->>
->> I can resend patches 1-13 as a new series of x86/common only changes
->> if you would like.
->
-> I think resending the common patches as a new series, including Acked-by
-> and Reviewed-by tags, and after addressing Grant's comments is the best
-> idea.
->
-> We've missed the v3.12 merge window now, but we can certainly get these
-> into linux-next for some testing.
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+This fixes the following sparse warning
+drivers/firmware/efi/efivars.c:567:6: warning: symbol 'efivars_sysfs_exit' was not declared. Should it be static?
 
-Thanks Matt - I'll split the common patches out to a new series and resubmit
-after taking care of Grant's feeback.
+Signed-off-by: Bojan Prtvar <prtvar.b-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efi/efivars.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Thanks,
-Roy
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 8a7432a..933eb02 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -564,7 +564,7 @@ static int efivar_sysfs_destroy(struct efivar_entry *entry, void *data)
+ 	return 0;
+ }
+ 
+-void efivars_sysfs_exit(void)
++static void efivars_sysfs_exit(void)
+ {
+ 	/* Remove all entries and destroy */
+ 	__efivar_entry_iter(efivar_sysfs_destroy, &efivar_sysfs_list, NULL, NULL);
+-- 
+1.7.1
