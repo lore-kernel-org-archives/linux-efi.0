@@ -1,28 +1,27 @@
-From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH V3 11/11] Add option to automatically enforce module
  signatures when in Secure Boot mode
-Date: Wed, 4 Sep 2013 11:42:35 +1000 (EST)
-Message-ID: <alpine.LRH.2.02.1309041142080.20116@tundra.namei.org>
-References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com> <1378252218-18798-12-git-send-email-matthew.garrett@nebula.com>
+Date: Wed, 4 Sep 2013 01:42:12 +0000
+Message-ID: <1378258931.11730.49.camel@x230>
+References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
+	 <1378252218-18798-12-git-send-email-matthew.garrett@nebula.com>
+	 <alpine.LRH.2.02.1309041142080.20116@tundra.namei.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1378252218-18798-12-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.LRH.2.02.1309041142080.20116@tundra.namei.org>
+Content-Language: en-US
+Content-ID: <6F2D0CE854AD39468701B7DD872215B4@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: James Morris <jmorris@namei.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "hpa@zytor.com" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 3 Sep 2013, Matthew Garrett wrote:
-
-> +	status = efi_call_phys5(sys_table->runtime->get_variable,
-> +				L"SecureBoot", &var_guid, NULL, &datasize, &sb);
-> +
-
-
-What's 'L' ?
-
-
--- 
-James Morris
-<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+T24gV2VkLCAyMDEzLTA5LTA0IGF0IDExOjQyICsxMDAwLCBKYW1lcyBNb3JyaXMgd3JvdGU6DQo+
+IE9uIFR1ZSwgMyBTZXAgMjAxMywgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiANCj4gPiArCXN0
+YXR1cyA9IGVmaV9jYWxsX3BoeXM1KHN5c190YWJsZS0+cnVudGltZS0+Z2V0X3ZhcmlhYmxlLA0K
+PiA+ICsJCQkJTCJTZWN1cmVCb290IiwgJnZhcl9ndWlkLCBOVUxMLCAmZGF0YXNpemUsICZzYik7
+DQo+ID4gKw0KPiANCj4gDQo+IFdoYXQncyAnTCcgPw0KDQpXaWRlLWNoYXJhY3RlciBzdHJpbmcg
+Y29uc3RhbnQuIFVFRkkgdmFyaWFibGUgbmFtZXMgYXJlIDE2LWJpdHMgcGVyDQpjaGFyYWN0ZXIu
+DQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
