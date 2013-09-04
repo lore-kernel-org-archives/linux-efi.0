@@ -1,100 +1,58 @@
-From: James Morris <jmorris@namei.org>
-Subject: Re: [PATCH V3 03/11] x86: Lock down IO port access when module
- security is enabled
-Date: Wed, 4 Sep 2013 10:45:57 +1000 (EST)
-Message-ID: <alpine.LRH.2.02.1309041045470.20116@tundra.namei.org>
-References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com> <1378252218-18798-4-git-send-email-matthew.garrett@nebula.com>
+From: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+Subject: Re: [PATCH V3 04/11] ACPI: Limit access to custom_method
+Date: Wed, 4 Sep 2013 10:46:18 +1000 (EST)
+Message-ID: <alpine.LRH.2.02.1309041046090.20116@tundra.namei.org>
+References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com> <1378252218-18798-5-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1378252218-18798-4-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, keescook@chromium.org, hpa@zytor.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1378252218-18798-5-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 On Tue, 3 Sep 2013, Matthew Garrett wrote:
 
-> IO port access would permit users to gain access to PCI configuration
-> registers, which in turn (on a lot of hardware) give access to MMIO register
-> space. This would potentially permit root to trigger arbitrary DMA, so lock
-> it down by default.
+> custom_method effectively allows arbitrary access to system memory, making
+> it possible for an attacker to circumvent restrictions on module loading.
+> Disable it if any such restrictions have been enabled.
 > 
-> Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 
-
-Reviewed-by: James Morris <jmorris@namei.org>
+Reviewed-by: James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
 
 
 
 
 > ---
->  arch/x86/kernel/ioport.c | 5 +++--
->  drivers/char/mem.c       | 4 ++++
->  2 files changed, 7 insertions(+), 2 deletions(-)
+>  drivers/acpi/custom_method.c | 3 +++
+>  1 file changed, 3 insertions(+)
 > 
-> diff --git a/arch/x86/kernel/ioport.c b/arch/x86/kernel/ioport.c
-> index 4ddaf66..00b4403 100644
-> --- a/arch/x86/kernel/ioport.c
-> +++ b/arch/x86/kernel/ioport.c
-> @@ -15,6 +15,7 @@
->  #include <linux/thread_info.h>
->  #include <linux/syscalls.h>
->  #include <linux/bitmap.h>
-> +#include <linux/module.h>
->  #include <asm/syscalls.h>
->  
->  /*
-> @@ -28,7 +29,7 @@ asmlinkage long sys_ioperm(unsigned long from, unsigned long num, int turn_on)
->  
->  	if ((from + num <= from) || (from + num > IO_BITMAP_BITS))
->  		return -EINVAL;
-> -	if (turn_on && !capable(CAP_SYS_RAWIO))
-> +	if (turn_on && (!capable(CAP_SYS_RAWIO) || secure_modules()))
->  		return -EPERM;
->  
->  	/*
-> @@ -103,7 +104,7 @@ SYSCALL_DEFINE1(iopl, unsigned int, level)
->  		return -EINVAL;
->  	/* Trying to gain more privileges? */
->  	if (level > old) {
-> -		if (!capable(CAP_SYS_RAWIO))
-> +		if (!capable(CAP_SYS_RAWIO) || secure_modules())
->  			return -EPERM;
->  	}
->  	regs->flags = (regs->flags & ~X86_EFLAGS_IOPL) | (level << 12);
-> diff --git a/drivers/char/mem.c b/drivers/char/mem.c
-> index f895a8c..1af8664 100644
-> --- a/drivers/char/mem.c
-> +++ b/drivers/char/mem.c
-> @@ -28,6 +28,7 @@
->  #include <linux/export.h>
->  #include <linux/io.h>
->  #include <linux/aio.h>
-> +#include <linux/module.h>
->  
->  #include <asm/uaccess.h>
->  
-> @@ -563,6 +564,9 @@ static ssize_t write_port(struct file *file, const char __user *buf,
->  	unsigned long i = *ppos;
->  	const char __user *tmp = buf;
+> diff --git a/drivers/acpi/custom_method.c b/drivers/acpi/custom_method.c
+> index 12b62f2..50647b3 100644
+> --- a/drivers/acpi/custom_method.c
+> +++ b/drivers/acpi/custom_method.c
+> @@ -29,6 +29,9 @@ static ssize_t cm_write(struct file *file, const char __user * user_buf,
+>  	struct acpi_table_header table;
+>  	acpi_status status;
 >  
 > +	if (secure_modules())
 > +		return -EPERM;
 > +
->  	if (!access_ok(VERIFY_READ, buf, count))
->  		return -EFAULT;
->  	while (count-- > 0 && i < 65536) {
+>  	if (!(*ppos)) {
+>  		/* parse the table header to get the table length */
+>  		if (count <= sizeof(struct acpi_table_header))
 > -- 
 > 1.8.3.1
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > Please read the FAQ at  http://www.tux.org/lkml/
 > 
 
 -- 
 James Morris
-<jmorris@namei.org>
+<jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
