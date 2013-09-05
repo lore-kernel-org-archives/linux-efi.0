@@ -1,41 +1,78 @@
-From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel enforces
- module loading restrictions
-Date: Wed, 4 Sep 2013 16:14:00 -0400
-Message-ID: <CA+5PVA6HayQJEDFisvXYJKyoKDbJh53fWki=Arbn_9t=NppGrw@mail.gmail.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH V3 01/11] Add secure_modules() call
+Date: Thu, 05 Sep 2013 10:14:18 +0800
+Message-ID: <1378347258.6380.77.camel@linux-s257.site>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
-	<1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
-	<20130904200959.GE8540@anatevka.fc.hp.com>
+	 <1378252218-18798-2-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130904200959.GE8540-dMAi7lA+vBPDUbYHzcRnttBPR1lH4CV8@public.gmane.org>
+In-Reply-To: <1378252218-18798-2-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: jerry.hoemann-VXdhtT5mjnY@public.gmane.org
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, kexec <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 4, 2013 at 4:09 PM,  <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
-> On Tue, Sep 03, 2013 at 07:50:15PM -0400, Matthew Garrett wrote:
->> kexec permits the loading and execution of arbitrary code in ring 0, which
->> is something that module signing enforcement is meant to prevent. It makes
->> sense to disable kexec in this situation.
->>
->> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->
->
-> Matthew,
->
-> Disabling kexec will disable kdump, correct?
+=E6=96=BC =E4=BA=8C=EF=BC=8C2013-09-03 =E6=96=BC 19:50 -0400=EF=BC=8CMa=
+tthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
+> Provide a single call to allow kernel code to determine whether the s=
+ystem
+> has been configured to either disable module loading entirely or to l=
+oad
+> only modules signed with a trusted key.
+>=20
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 
-Yes.
+Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
 
-> Are there plans to enable kdump on a system where secure
-> boot is enabled?
-
-Vivek Goyal has been working on this.  I've not seen the code yet, but
-I believe it should be posted somewhere relatively soon.  We're also
-planning on talking about it at the Secure Boot microconference at
-Linux Plumbers in two weeks.
-
-josh
+> ---
+>  include/linux/module.h |  7 +++++++
+>  kernel/module.c        | 10 ++++++++++
+>  2 files changed, 17 insertions(+)
+>=20
+> diff --git a/include/linux/module.h b/include/linux/module.h
+> index 46f1ea0..0c266b2 100644
+> --- a/include/linux/module.h
+> +++ b/include/linux/module.h
+> @@ -509,6 +509,8 @@ int unregister_module_notifier(struct notifier_bl=
+ock * nb);
+> =20
+>  extern void print_modules(void);
+> =20
+> +extern bool secure_modules(void);
+> +
+>  #else /* !CONFIG_MODULES... */
+> =20
+>  /* Given an address, look for it in the exception tables. */
+> @@ -619,6 +621,11 @@ static inline int unregister_module_notifier(str=
+uct notifier_block * nb)
+>  static inline void print_modules(void)
+>  {
+>  }
+> +
+> +static inline bool secure_modules(void)
+> +{
+> +	return false;
+> +}
+>  #endif /* CONFIG_MODULES */
+> =20
+>  #ifdef CONFIG_SYSFS
+> diff --git a/kernel/module.c b/kernel/module.c
+> index 2069158..0e94acf 100644
+> --- a/kernel/module.c
+> +++ b/kernel/module.c
+> @@ -3852,3 +3852,13 @@ void module_layout(struct module *mod,
+>  }
+>  EXPORT_SYMBOL(module_layout);
+>  #endif
+> +
+> +bool secure_modules(void)
+> +{
+> +#ifdef CONFIG_MODULE_SIG
+> +	return (sig_enforce || modules_disabled);
+> +#else
+> +	return modules_disabled;
+> +#endif
+> +}
+> +EXPORT_SYMBOL(secure_modules);
