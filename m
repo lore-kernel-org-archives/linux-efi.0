@@ -1,42 +1,79 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: EFI stub boots only with setup_efi_pc() commented
-Date: Thu, 5 Sep 2013 09:29:24 +0100
-Message-ID: <20130905082924.GI28598@console-pimps.org>
-References: <CA+n4xYYJhoXp6KSeROda9ErrXZ0hFEBM-x-0Obvk3fmHwABfKw@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH 11/18] Hibernate: introduced RSA key-pair to verify
+ signature of snapshot
+Date: Thu, 5 Sep 2013 09:53:48 +0100
+Message-ID: <20130905085348.GJ28598@console-pimps.org>
+References: <1377169317-5959-1-git-send-email-jlee@suse.com>
+ <1377169317-5959-12-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-security-module-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CA+n4xYYJhoXp6KSeROda9ErrXZ0hFEBM-x-0Obvk3fmHwABfKw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Clea F. Rees" <reescf-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1377169317-5959-12-git-send-email-jlee@suse.com>
+Sender: linux-security-module-owner@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>, Takashi Iwai <tiwai@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 03 Aug, at 12:06:23AM, Clea F. Rees wrote:
-> Matt Fleming asked me to email describing a problem I am experiencing
-> with the EFI stub loader. Matt has been trying to diagnose the cause
-> of consistent failures of the stub loader in recent kernels on my
-> machine.
-> 
-> Background: All kernels I tried in 3.7.* booted fine using the stub
-> loader (via rEFInd). No kernels tried from 3.8.* through 3.9.* and now
-> into 3.10.* boot using the stub loader. None of the workarounds which
-> others have used work for me. The problem is reproducible using a
-> direct NVRAM entry rather than rEFInd. All kernels boot fine with
-> GRUB.
-> 
-> The problem is reproducible with a kernel compiled from git. A series
-> of experiments (following Matt's instructions) have determined that
-> commenting out the call to setup_efi_pc() in eboot.c makes the kernels
-> boot.
-> 
-> I would be happy to provide any further information which might be
-> helpful or to run further tests.
+On Thu, 22 Aug, at 07:01:50PM, Lee, Chun-Yi wrote:
+> +static int efi_status_to_err(efi_status_t status)
+> +{
+> +	int err;
+> +
+> +	switch (status) {
+> +	case EFI_INVALID_PARAMETER:
+> +		err = -EINVAL;
+> +		break;
+> +	case EFI_OUT_OF_RESOURCES:
+> +		err = -ENOSPC;
+> +		break;
+> +	case EFI_DEVICE_ERROR:
+> +		err = -EIO;
+> +		break;
+> +	case EFI_WRITE_PROTECTED:
+> +		err = -EROFS;
+> +		break;
+> +	case EFI_SECURITY_VIOLATION:
+> +		err = -EACCES;
+> +		break;
+> +	case EFI_NOT_FOUND:
+> +		err = -ENODATA;
+> +		break;
+> +	default:
+> +		err = -EINVAL;
+> +	}
+> +
+> +	return err;
+> +}
 
-Sorry for the delay in replying to this.
+Please don't reimplement this. Instead make the existing function
+global.
 
-Does your machine hang during setup_efi_pci() or later on in boot?
+[...]
+
+> +static void *load_wake_key_data(unsigned long *datasize)
+> +{
+> +	u32 attr;
+> +	void *wkey_data;
+> +	efi_status_t status;
+> +
+> +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+> +		return ERR_PTR(-EPERM);
+> +
+> +	/* obtain the size */
+> +	*datasize = 0;
+> +	status = efi.get_variable(EFI_S4_WAKE_KEY_NAME, &EFI_HIBERNATE_GUID,
+> +				  NULL, datasize, NULL);
+> +	if (status != EFI_BUFFER_TOO_SMALL) {
+> +		wkey_data = ERR_PTR(efi_status_to_err(status));
+> +		pr_err("PM: Couldn't get wake key data size: 0x%lx\n", status);
+> +		goto error;
+> +	}
+
+Is it safe to completely bypass the efivars interface and access
+efi.get_variable() directly? I wouldn't have thought so, unless you can
+guarantee that the kernel isn't going to access any of the EFI runtime
+services while you execute this function.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
