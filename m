@@ -1,57 +1,46 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v4 0/3] Make commonly useful UEFI functions common
-Date: Thu, 5 Sep 2013 14:21:06 +0100
-Message-ID: <20130905132106.GA7579@console-pimps.org>
-References: <1378377295-32758-1-git-send-email-leif.lindholm@linaro.org>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH 11/18] Hibernate: introduced RSA key-pair to verify
+ signature of snapshot
+Date: Thu, 05 Sep 2013 21:28:57 +0800
+Message-ID: <1378387737.6193.75.camel__11042.2406382442$1378387729$gmane$org@linux-s257.site>
+References: <1377169317-5959-1-git-send-email-jlee@suse.com>
+	 <1377169317-5959-12-git-send-email-jlee@suse.com>
+	 <20130905085348.GJ28598@console-pimps.org>
+	 <1378376016.6193.71.camel@linux-s257.site>
+	 <20130905103158.GM28598@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ia64-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1378377295-32758-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, tony.luck@gmail.com, grant.likely@secretlab.ca, x86@kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <20130905103158.GM28598@console-pimps.org>
+Sender: linux-pm-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, Takashi Iwai <tiwai@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 05 Sep, at 11:34:52AM, Leif Lindholm wrote:
-> This set breaks out some common code from x86/ia64 EFI support
-> code and puts it into drivers/firmware/efi.
-> 
-> First it takes the definition of the global "efi" data structure
-> and moves it into global efi.c. Then it implements a common version
-> of efi_config_init().
-> 
-> Secondly it breaks the efi_lookup_mapped_addr() function out of x86
-> and places it in global efi.c, for shared use with future ARM
-> patches.
-> 
-> IA64 code compile tested only.
-> 
-> Leif Lindholm (3):
->   ia64: add early_memremap() alias for early_ioremap()
->   efi: x86: ia64: provide a generic efi_config_init()
->   efi: x86: make efi_lookup_mapped_addr() a common function
-> 
->  arch/ia64/include/asm/io.h  |    1 +
->  arch/ia64/kernel/efi.c      |   54 ++++-------------
->  arch/x86/platform/efi/efi.c |  126 ++++----------------------------------
->  drivers/firmware/efi/efi.c  |  140 +++++++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h         |    8 +++
->  5 files changed, 170 insertions(+), 159 deletions(-)
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-09-05 =E6=96=BC 11:31 +0100=EF=BC=8CMa=
+tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Thu, 05 Sep, at 06:13:36PM, joeyli wrote:
+> > This S4WakeKey is a VOLATILE variable that could not modify by
+> > SetVariable() at runtime. So, it's read only even through efivars.=20
+> >=20
+> > Does it what your concern?
+> =20
+> No, the UEFI spec probibits certain runtime functions from being
+> executed concurrently on separate cpus and the spinlock used in the
+> efivars code ensures that we adhere to that restriction. See table 31=
+ in
+> section 7.1 of the UEFI 2.4 spec for the list of services that are
+> non-reentrant.
+>=20
+> The problem isn't that we want to avoid simultaneous access to
+> S4WakeKey, it's that we can't invoke any of the variable runtime serv=
+ice
+> functions concurrently.
+>=20
 
-Thanks Leif.
+I see! I will use efivar api to access EFI variable.
 
-I've pulled this patch series into the 'arm/efi-stub' branch at,
+Thanks a lot!
+Joey Lee
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
-
-as I know that Grant wanted these changes (and the subsequent patches)
-in a clean branch.
-
-Tip folks, how can we get the 'arm/efi-stub' branch into linux-next? My
-plan was to merge 'arm/efi-stub' into my 'next' branch and ask you to
-pull that into whichever branch you include in linux-next. Does that
-work?
-
--- 
-Matt Fleming, Intel Open Source Technology Center
