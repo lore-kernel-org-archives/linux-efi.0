@@ -1,52 +1,40 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH V3 11/11] Add option to automatically enforce module
- signatures when in Secure Boot mode
-Date: Thu, 5 Sep 2013 11:16:49 +0100
-Message-ID: <20130905101649.GL28598@console-pimps.org>
-References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
- <1378252218-18798-12-git-send-email-matthew.garrett@nebula.com>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 2/5] efi: provide a generic efi_config_init()
+Date: Thu, 5 Sep 2013 12:23:52 +0200
+Message-ID: <20130905102352.GV18151@rocoto.smurfnet.nu>
+References: <1375901660-23541-1-git-send-email-leif.lindholm@linaro.org>
+ <1375901660-23541-3-git-send-email-leif.lindholm@linaro.org>
+ <20130902092902.GE28598@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1378252218-18798-12-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20130902092902.GE28598-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 03 Sep, at 07:50:18PM, Matthew Garrett wrote:
-> UEFI Secure Boot provides a mechanism for ensuring that the firmware will
-> only load signed bootloaders and kernels. Certain use cases may also
-> require that all kernel modules also be signed. Add a configuration option
-> that enforces this automatically when enabled.
-> 
-> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> ---
->  Documentation/x86/zero-page.txt       |  2 ++
->  arch/x86/Kconfig                      | 10 ++++++++++
->  arch/x86/boot/compressed/eboot.c      | 36 +++++++++++++++++++++++++++++++++++
->  arch/x86/include/uapi/asm/bootparam.h |  3 ++-
->  arch/x86/kernel/setup.c               |  6 ++++++
->  include/linux/module.h                |  6 ++++++
->  kernel/module.c                       |  7 +++++++
->  7 files changed, 69 insertions(+), 1 deletion(-)
+On Mon, Sep 02, 2013 at 10:29:02AM +0100, Matt Fleming wrote:
+> This patch actually breaks git bisection,
+=20
+Urgh, sorry about that.
 
-[...]
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:581:19: error: confli=
+cting types for =E2=80=98efi_config_init=E2=80=99
+> In file included from /home/build/git/efi/arch/x86/platform/efi/efi.c=
+:33:0:
+> /home/build/git/efi/include/linux/efi.h:596:12: note: previous declar=
+ation of =E2=80=98efi_config_init=E2=80=99 was here
+>=20
+> I've merged patches 2,3 and 4 into the following single patch so that
+> the ability to bisect isn't lost. Does it look OK? It boots fine on m=
+y
+> test machines.
 
-> @@ -1129,6 +1129,12 @@ void __init setup_arch(char **cmdline_p)
->  
->  	io_delay_init();
->  
-> +#ifdef CONFIG_EFI_SECURE_BOOT_SIG_ENFORCE
-> +	if (boot_params.secure_boot) {
-> +		enforce_signed_modules();
-> +	}
-> +#endif
-> +
+Looks fine to me, and works on the ARM port.
+I'm about to send out an updated patch set, including this squash.
 
-I'd advise checking efi_enabled(EFI_BOOT) along with .secure_boot to
-guard against garbage values in boot_params.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+/
+    Leif
