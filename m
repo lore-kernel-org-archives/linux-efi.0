@@ -1,41 +1,52 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH V3 03/11] x86: Lock down IO port access when module security is enabled
-Date: Thu, 05 Sep 2013 08:36:51 -0700
-Message-ID: <69eec644-f26f-410c-bb76-0b7695dde65c@email.android.com>
-References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com> <1378252218-18798-4-git-send-email-matthew.garrett@nebula.com> <5227FFE8.5050102@zytor.com> <1378353524.13193.26.camel@x230>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] x86: EFI stub support for large memory maps
+Date: Fri, 6 Sep 2013 11:03:25 +0100
+Message-ID: <20130906100325.GB7579@console-pimps.org>
+References: <1377291771-21302-1-git-send-email-linn@hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1378353524.13193.26.camel@x230>
+Content-Disposition: inline
+In-Reply-To: <1377291771-21302-1-git-send-email-linn-VXdhtT5mjnY@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Sigh.  That capability really is fscked up.
+On Fri, 23 Aug, at 03:02:51PM, Linn Crosetto wrote:
+> This patch fixes a problem with EFI memory maps larger than 128 entries
+> when booting using the EFI stub, which results in overflowing e820_map
+> in boot_params and an eventual halt when checking the map size in
+> sanitize_e820_map().
+> 
+> If the number of map entries is greater than what can fit in e820_map,
+> add the extra entries to the setup_data list using type SETUP_E820_EXT.
+> These extra entries are then picked up when the setup_data list is
+> parsed in parse_e820_ext().
+> 
+> Signed-off-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c | 220 ++++++++++++++++++++++++++++-----------
+>  1 file changed, 157 insertions(+), 63 deletions(-)
 
-Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
->On Wed, 2013-09-04 at 20:52 -0700, H. Peter Anvin wrote:
->> On 09/03/2013 04:50 PM, Matthew Garrett wrote:
->> > IO port access would permit users to gain access to PCI
->configuration
->> > registers, which in turn (on a lot of hardware) give access to MMIO
->register
->> > space. This would potentially permit root to trigger arbitrary DMA,
->so lock
->> > it down by default.
->> > 
->> > Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
->> 
->> Seriously... just deny CAP_SYS_RAWIO to any system in secure mode.
->
->No. CAP_SYS_RAWIO blocks things that we don't want blocked (x86
->microcode updates, various disk ioctls, *device firmware uploads* and a
->few others) - the semantics just don't match. We could relax those
->permissions, but then we'd potentially break someone else's security
->considerations.
+[...]
+
+> @@ -1016,6 +1154,19 @@ get_map:
+>  	if (status != EFI_SUCCESS)
+>  		goto free_mem_map;
+>  
+> +	prev_nr_desc = nr_desc;
+> +	nr_desc = size / desc_size;
+> +	if (nr_desc > prev_nr_desc &&
+> +	    nr_desc > ARRAY_SIZE(boot_params->e820_map)) {
+> +		u32 nr_e820ext = nr_desc - ARRAY_SIZE(boot_params->e820_map);
+> +
+> +		status = alloc_e820ext(nr_e820ext, &e820ext, &e820ext_size);
+> +		if (status != EFI_SUCCESS)
+> +			return status;
+
+In the error path shouldn't we jump to free_mem_map to avoid leaking
+memory?
 
 -- 
-Sent from my mobile phone.  Please pardon brevity and lack of formatting.
+Matt Fleming, Intel Open Source Technology Center
