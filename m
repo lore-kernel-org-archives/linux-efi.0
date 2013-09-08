@@ -1,94 +1,36 @@
-From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
  enforces module loading restrictions
-Date: Sun, 8 Sep 2013 09:18:59 -0700
-Message-ID: <20130908161859.GA18946@kroah.com>
+Date: Sun, 8 Sep 2013 16:24:47 +0000
+Message-ID: <1378657487.2300.10.camel@x230>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
- <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
- <20130908064027.GA3587@kroah.com>
- <1378622648.2300.4.camel@x230>
- <20130908072408.GA5092@kroah.com>
- <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA@mail.gmail.com>
+	 <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
+	 <20130908064027.GA3587@kroah.com> <1378622648.2300.4.camel@x230>
+	 <20130908072408.GA5092@kroah.com>
+	 <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA@mail.gmail.com>
+	 <20130908161859.GA18946@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20130908161859.GA18946-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <D150D3EC24417E46BFA92298CEB99488-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Sep 08, 2013 at 08:51:27AM -0700, Kees Cook wrote:
-> On Sun, Sep 8, 2013 at 12:24 AM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > On Sun, Sep 08, 2013 at 06:44:08AM +0000, Matthew Garrett wrote:
-> >> On Sat, 2013-09-07 at 23:40 -0700, Greg KH wrote:
-> >> > If you apply this, you break everyone who is currently relying on kexec
-> >> > (i.e. kdump, bootloaders, etc.), from using signed kernel modules, which
-> >> > personally, seems like a very bad idea.
-> >>
-> >> Enforcing signed modules provides you with no additional security if you
-> >> have kexec enabled. It's better to make that obvious.
-> >
-> > Then document the heck out of it, don't disable a valid use case just
-> > because it possibly could be used in some way that is different from the
-> > original system.
-> >
-> > If you take this to an extreme, kexec shouldn't be here at all, as it
-> > can do anything in the kernel wherever it wants to.
-> >
-> > kexec has nothing to do with signed modules, don't tie them together.
-> 
-> It's not accurate to say it has "nothing to do" with signed modules.
-> The purpose of signed modules is to ensure the integrity of the
-> running system against the root user.
-
-For one type of thing, modules, not for all types of ways a root user
-could do "bad" things.
-
-If you want to create a flag/option for "don't trust a privileged root
-user", great, I have no objection to that.
-
-I do object to changing the functionality of random other options based
-on the state of signed kernel modules being enabled or not.
-
-> It was, however, incomplete. Terrible analogy follows: signed modules
-> was locking the front door, but we have all sorts of windows still
-> open. This closes those windows. You're trying to say that shutting
-> windows has nothing to do with lumber locks. While technically true,
-> this is about the intent of the barriers.
-
-Then be specific about the intent and don't say that "if we lock the
-front door with our key, suddenly all of the windows close and lock
-automatically".  I wanted fresh air in some of those windows for various
-reasons.  Provide a "lock this house completely down" option that does
-this instead, don't overload an already usable option to do more than it
-was supposed to do.
-
-That way people can pick and choose the security they want, based on
-their specific situation and systems.
-
-> Anyone currently using signed modules (with sig_enforce) AND kexec is
-> deluding themselves about what the state of their system's ring-0
-> security stance is. Those people should be running without
-> sig_enforce, and if they want both sig_enforce and kexec, then I would
-> expect a follow-up patch from them to provide signed kexec support.
-
-I want both, but I don't need signed kexec support because I want to use
-kexec for a program that I "know" is correct because I validated the
-disk image it was on before I mounted it.  We already have other ways to
-"verify" things without having to add individual verification of
-specific pieces.
-
-Just like ChromeOS was "trusting" kernel modules on partitions that it
-"knew" were ok because they were verified before mounting.  You didn't
-need signed kernel modules to be able to create your own chain-of-trust
-any more than we need to provide signed kexec for some people to be able
-to trust the binary they are going to kexec.
-
-Not to say that signed kexec support isn't a good idea, I'm all for
-that, but it's a tangential issue here.
-
-thanks,
-
-greg k-h
+T24gU3VuLCAyMDEzLTA5LTA4IGF0IDA5OjE4IC0wNzAwLCBHcmVnIEtIIHdyb3RlOg0KDQo+IEkg
+d2FudCBib3RoLCBidXQgSSBkb24ndCBuZWVkIHNpZ25lZCBrZXhlYyBzdXBwb3J0IGJlY2F1c2Ug
+SSB3YW50IHRvIHVzZQ0KPiBrZXhlYyBmb3IgYSBwcm9ncmFtIHRoYXQgSSAia25vdyIgaXMgY29y
+cmVjdCBiZWNhdXNlIEkgdmFsaWRhdGVkIHRoZQ0KPiBkaXNrIGltYWdlIGl0IHdhcyBvbiBiZWZv
+cmUgSSBtb3VudGVkIGl0LiAgV2UgYWxyZWFkeSBoYXZlIG90aGVyIHdheXMgdG8NCj4gInZlcmlm
+eSIgdGhpbmdzIHdpdGhvdXQgaGF2aW5nIHRvIGFkZCBpbmRpdmlkdWFsIHZlcmlmaWNhdGlvbiBv
+Zg0KPiBzcGVjaWZpYyBwaWVjZXMuDQoNClRoZSBrZXJuZWwgaGFzIG5vIHdheSB0byBrbm93IHRo
+YXQgeW91ciBrZXhlYyBwYXlsb2FkIGlzIGNvbWluZyBmcm9tIGENCnZlcmlmaWVkIGltYWdlLiBJ
+dCdsbCBqdXN0IGFzIGhhcHBpbHkgdGFrZSBzb21ldGhpbmcgZnJvbSBhbiB1bnZlcmlmaWVkDQpp
+bWFnZS4gSWYgeW91J3ZlIGVuc3VyZWQgdGhhdCB0aGVyZSdzIG5vIHdheSBhbiBhdHRhY2tlciBj
+YW4gY2FsbA0Ka2V4ZWNfbG9hZCgpIG9uIGFuIHVudmVyaWZpZWQgaW1hZ2UsIHRoZW4geW91IGRv
+bid0IG5lZWQgc2lnbmVkIG1vZHVsZXMuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3
+LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
