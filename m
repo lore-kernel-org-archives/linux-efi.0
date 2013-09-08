@@ -1,52 +1,71 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
  enforces module loading restrictions
-Date: Sun, 08 Sep 2013 10:22:55 -0700
-Message-ID: <1378660975.2429.14.camel@dabdike.int.hansenpartnership.com>
+Date: Sun, 8 Sep 2013 17:25:31 +0000
+Message-ID: <1378661130.2300.24.camel@x230>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
 	 <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
 	 <20130908064027.GA3587@kroah.com> <1378622648.2300.4.camel@x230>
 	 <20130908072408.GA5092@kroah.com>
 	 <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA@mail.gmail.com>
-	 <1378660284.2429.11.camel@dabdike.int.hansenpartnership.com>
-	 <1378660541.2300.19.camel@x230>
+	 <20130908161859.GA18946@kroah.com> <1378657487.2300.10.camel@x230>
+	 <20130908163926.GA19665@kroah.com> <1378659580.2300.15.camel@x230>
+	 <20130908172249.GB20959@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1378660541.2300.19.camel@x230>
+In-Reply-To: <20130908172249.GB20959-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <BE461A51FEDADC488415ECA54C5A74D6-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2013-09-08 at 17:15 +0000, Matthew Garrett wrote:
-> On Sun, 2013-09-08 at 10:11 -0700, James Bottomley wrote:
-> 
-> > That's not true if you look at the use cases.  Distros use signed
-> > modules to taint the kernel:  insert an unsigned one and the kernel
-> > taints; insert a properly signed one and it doesn't.  They use it for
-> > support to tell if you've been adhering to your contract.  That use case
-> > has nothing to do with security.
-> 
-> That use case has nothing to do with this patch, either. It's completely
-> unaffected. This only triggers if the kernel is configured to refuse the
-> loading of unsigned modules.
-> 
-> > The analogy is rubbish.  I can give away CAP_SYS_MODULE and enforce what
-> > modules those I've given the permission to can insert by signing them.
-> > I keep CAP_SYS_BOOT, so they can't use kexec to subvert this.
-> 
-> Yeah, that's a good argument for why capabilities are mostly pointless.
-> If I have CAP_SYS_BOOT I can give myself any other capabilities. Why
-> bother?
-
-It's an argument that CAP_SYS_BOOT is too powerful yes, but if you
-recall, I said I keep that one.  In the rather lame analogy, what I do
-by giving away CAP_SYS_MODULE and enforcing module signing while keeping
-CAP_SYS_BOOT is allow people into my conservatory to play with the
-plants but not into my house to steal the silver ... saying CAP_SYS_BOOT
-is too powerful doesn't affect that use case because I haven't given
-away CAP_SYS_BOOT.
-
-James
+T24gU3VuLCAyMDEzLTA5LTA4IGF0IDEwOjIyIC0wNzAwLCBHcmVnIEtIIHdyb3RlOg0KPiBPbiBT
+dW4sIFNlcCAwOCwgMjAxMyBhdCAwNDo1OTo0MFBNICswMDAwLCBNYXR0aGV3IEdhcnJldHQgd3Jv
+dGU6DQo+ID4gT24gU3VuLCAyMDEzLTA5LTA4IGF0IDA5OjM5IC0wNzAwLCBHcmVnIEtIIHdyb3Rl
+Og0KPiA+IA0KPiA+ID4gQnV0IEkgd2FudCwgZm9yIG90aGVyIHJlYXNvbnMgKGkuZS4gc2FmZXR5
+IGluIGxheWVycyksIHNpZ25lZCBrZXJuZWwNCj4gPiA+IG1vZHVsZXMuICBJIGFsc28gbWlnaHQg
+YWN0dWFsbHkgd2FudCBzb21lIGRlYnVnZnMgZmlsZXMgaW4gc29tZSByYW5kb20NCj4gPiA+IGRy
+aXZlciAobGlrZSB0aGlzIHNlcmllcyByZW1vdmVzKS4NCj4gPiANCj4gPiBZb3Ugd2FudCBhIGNv
+bmZpZ3VyYXRpb24gdGhhdCBtYWtlcyBubyBzZW5zZS4gVGhlcmUncyBubyByZWFzb24gdGhhdCB0
+aGUNCj4gPiBrZXJuZWwgc2hvdWxkIG1ha2UgdGhhdCBlYXN5Lg0KPiANCj4gSXQgbWFrZXMgc2Vu
+c2UgdG8gbWUgaW4gdGhhdCBpdCBpcyBzb21ldGhpbmcgSSBjYW4gZG8gdG9kYXksIHdoeSBzdG9w
+DQo+IHRoYXQ/DQoNCllvdSB1c2VkIHRvIGJlIGFibGUgdG8gbW9kaWZ5IE1TUnMgd2l0aG91dCBD
+QVBfU1lTX0FETUlOLiBXaHkgc3RvcCB0aGF0Pw0KDQo+ID4gPiBIZWNrLCBsb29rIGF0IFJlZCBI
+YXQuICBUaGV5IGhhdmUgYmVlbiBzaGlwcGluZyBzaWduZWQga2VybmVsIG1vZHVsZXMNCj4gPiA+
+IGZvciBfeWVhcnNfIGFuZCB5ZXQgdGhleSBkbyBub3QgZGlzYWJsZSBrZXhlYy4gIEhhdmUgdGhl
+eSBiZWVuICJkb2luZyBpdA0KPiA+ID4gd3JvbmciIGFsbCBvZiB0aGlzIHRpbWU/ICAgUGVyaGFw
+cyBwZW9wbGUgd2FudCBzaWduZWQgbW9kdWxlcyBqdXN0IGZvcg0KPiA+ID4gc3VwcG9ydCByZWFz
+b25zLCBub3QgInNlY3VyaXR5IiByZWFzb25zLg0KPiA+IA0KPiA+IFRoZW4gdGhleSBkbyB3aGF0
+IFJlZCBIYXQgZG9lcyBhbmQgZG9uJ3Qgc2V0IENPTkZJR19TSUdfRU5GT1JDRS4NCj4gDQo+IEJ1
+dCB3aGF0IGlmIEkgb25seSB3YW50IHNpZ25lZCBtb2R1bGVzIHRvIGJlIGxvYWRlZD8gIElzbid0
+IHRoYXQgYSB2YWxpZA0KPiB0aGluZyB0byB3YW50LCB5ZXQgc3RpbGwgYmUgYWJsZSB0byBhbHNv
+IGRvIG90aGVyIHRoaW5ncyB3aXRoIG15IHN5c3RlbT8NCg0KSWYgeW91IG9ubHkgd2FudCBzaWdu
+ZWQgbW9kdWxlcyB0byBiZSBsb2FkZWQgdGhlbiB5b3UgY2FuJ3QgcGVybWl0IHRoZQ0Ka2V4ZWMg
+b2YgdW50cnVzdGVkIG9iamVjdHMsIGJlY2F1c2UgdGhhdCB3b3VsZCBhbGxvdyB1bnNpZ25lZCBt
+b2R1bGVzIHRvDQpiZSBsb2FkZWQuDQoNCj4gPiBXaGVyZSdzIHRoZSBvcHRpb24gdG8gbGV0IG1l
+IGxldCB1bnByaXZpbGVnZWQgdXNlcnMgc2V0IHJhbmRvbSBNU1JzPw0KPiANCj4gQ2FuIHRoYXQg
+aGFwcGVuIHRvZGF5Pw0KDQpOby4gV2UgdG9vayBpdCBhd2F5Lg0KDQo+ID4gV2hlcmUncyB0aGUg
+b3B0aW9uIHRvIGxldCByb290IGRpc2FibGUgU1RSSUNUX0RFVk1FTSBhdCBydW50aW1lPw0KPiAN
+Cj4gQWdhaW4sIGNhbiB0aGF0IGhhcHBlbiB0b2RheT8NCg0KTm8sIGJlY2F1c2UgaXQgbWFrZXMg
+bm8gc2Vuc2UgLSB0aGUgZW50aXJlIHBvaW50IG9mIFNUUklDVF9ERVZNRU0gaXMgdG8NCnJlc3Ry
+aWN0IHdoYXQgcm9vdCBjYW4gZG8uDQoNCj4gPiBXZSBkb24ndCBvZmZlciB0aGVzZSBvcHRpb25z
+IGJlY2F1c2UgKnRoZXkgbWFrZSBubyBzZW5zZSouIExvY2tpbmcNCj4gPiB5b3VyIGRvb3Igd2hp
+bGUgbGVhdmluZyB5b3VyIHdpbmRvdyBvcGVuIG1heSBtYWtlIHlvdSBmZWVsIGJldHRlciwgYnV0
+DQo+ID4gaXQgZG9lc24ndCBpbXByb3ZlIHRoZSBzZWN1cml0eSBvZiB5b3VyIGhvdXNlLg0KPiAN
+Cj4gWWVzIGl0IGRvZXMsIGl0IGtlZXBzIHRoZSBwZW9wbGUgd2hvIG9ubHkgdHJ5IHRoZSBmcm9u
+dCBkb29yIGZyb20gY29taW5nDQo+IGluLCBhIHZlcnkgY29tbW9uIHRocmVhdCBtb2RlbC4gIEl0
+IGlzbid0ICJwZXJmZWN0IiBzZWN1cml0eSwgYnV0IEknbQ0KPiBub3Qgc2F5aW5nIHRoYXQgaXQg
+aXMsIGFuZCBubyBvbmUgZWxzZSBpcyBlaXRoZXIuDQoNCldoeSB3b3VsZCBzb21lb25lIG9ubHkg
+dHJ5IHRoZSBmcm9udCBkb29yIHdoZW4gdGhlcmUncyBhbiBvYnZpb3VzbHkgb3Blbg0Kd2luZG93
+IG5leHQgdG8gaXQ/DQoNCj4gU2VjdXJpdHkgaXMgYSBzZXJpZXMgb2YgImxldmVscyIsIGFsbCBv
+ZiB3aGljaCBkZXBlbmQgb24gZGlmZmVyZW50DQo+IHRocmVhdCBtb2RlbHMgYW5kIHNjZW5hcmlv
+cy4gIFByb3ZpZGUgdGhlIGFiaWxpdHkgdG8gYWNoaWV2ZSBkaWZmZXJlbnQNCj4gbGV2ZWxzIG9m
+IHNlY3VyaXR5LCBidXQgZG9uJ3QgZm9yY2UgeW91ciBpZGVhIG9mIHN5c3RlbS13aWRlIHNlY3Vy
+aXR5IG9uDQo+IG90aGVycyB3aG8gbWF5IG5vdCBhZ3JlZSB3aXRoIGl0Lg0KDQpQcm92aWRpbmcg
+YSBzZWN1cml0eSBmZWF0dXJlIHRoYXQgY2FuIGJlIHRyaXZpYWxseSBjaXJjdW12ZW50ZWQgaXNu
+J3QNCnNlY3VyaXR5LCBpdCdzIHNlY3VyaXR5IHRoZWF0cmUuDQotLSANCk1hdHRoZXcgR2FycmV0
+dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+DQo=
