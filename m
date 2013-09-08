@@ -1,70 +1,41 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
  enforces module loading restrictions
-Date: Sun, 08 Sep 2013 10:11:24 -0700
-Message-ID: <1378660284.2429.11.camel@dabdike.int.hansenpartnership.com>
+Date: Sun, 8 Sep 2013 17:15:42 +0000
+Message-ID: <1378660541.2300.19.camel@x230>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
 	 <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
 	 <20130908064027.GA3587@kroah.com> <1378622648.2300.4.camel@x230>
 	 <20130908072408.GA5092@kroah.com>
 	 <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA@mail.gmail.com>
+	 <1378660284.2429.11.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGXu5jLwCt6RtQC+kxcUC69tMydx8DO2QWDv3jK6_mOyT_iNbA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1378660284.2429.11.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <254C8BA269DE7E40A11C6FC7D4CBEE43-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2013-09-08 at 08:51 -0700, Kees Cook wrote:
-> On Sun, Sep 8, 2013 at 12:24 AM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > On Sun, Sep 08, 2013 at 06:44:08AM +0000, Matthew Garrett wrote:
-> >> On Sat, 2013-09-07 at 23:40 -0700, Greg KH wrote:
-> >> > If you apply this, you break everyone who is currently relying on kexec
-> >> > (i.e. kdump, bootloaders, etc.), from using signed kernel modules, which
-> >> > personally, seems like a very bad idea.
-> >>
-> >> Enforcing signed modules provides you with no additional security if you
-> >> have kexec enabled. It's better to make that obvious.
-> >
-> > Then document the heck out of it, don't disable a valid use case just
-> > because it possibly could be used in some way that is different from the
-> > original system.
-> >
-> > If you take this to an extreme, kexec shouldn't be here at all, as it
-> > can do anything in the kernel wherever it wants to.
-> >
-> > kexec has nothing to do with signed modules, don't tie them together.
-> 
-> It's not accurate to say it has "nothing to do" with signed modules.
-> The purpose of signed modules is to ensure the integrity of the
-> running system against the root user.
-
-That's not true if you look at the use cases.  Distros use signed
-modules to taint the kernel:  insert an unsigned one and the kernel
-taints; insert a properly signed one and it doesn't.  They use it for
-support to tell if you've been adhering to your contract.  That use case
-has nothing to do with security.
-
-> It was, however, incomplete. Terrible analogy follows: signed modules
-> was locking the front door, but we have all sorts of windows still
-> open. This closes those windows. You're trying to say that shutting
-> windows has nothing to do with lumber locks. While technically true,
-> this is about the intent of the barriers.
-> 
-> Anyone currently using signed modules (with sig_enforce) AND kexec is
-> deluding themselves about what the state of their system's ring-0
-> security stance is. Those people should be running without
-> sig_enforce, and if they want both sig_enforce and kexec, then I would
-> expect a follow-up patch from them to provide signed kexec support.
-
-The analogy is rubbish.  I can give away CAP_SYS_MODULE and enforce what
-modules those I've given the permission to can insert by signing them.
-I keep CAP_SYS_BOOT, so they can't use kexec to subvert this.
-
-Your analogy seems to be giving away the whole root and then crying Dr
-it hurts when I do this ...
-
-James
+T24gU3VuLCAyMDEzLTA5LTA4IGF0IDEwOjExIC0wNzAwLCBKYW1lcyBCb3R0b21sZXkgd3JvdGU6
+DQoNCj4gVGhhdCdzIG5vdCB0cnVlIGlmIHlvdSBsb29rIGF0IHRoZSB1c2UgY2FzZXMuICBEaXN0
+cm9zIHVzZSBzaWduZWQNCj4gbW9kdWxlcyB0byB0YWludCB0aGUga2VybmVsOiAgaW5zZXJ0IGFu
+IHVuc2lnbmVkIG9uZSBhbmQgdGhlIGtlcm5lbA0KPiB0YWludHM7IGluc2VydCBhIHByb3Blcmx5
+IHNpZ25lZCBvbmUgYW5kIGl0IGRvZXNuJ3QuICBUaGV5IHVzZSBpdCBmb3INCj4gc3VwcG9ydCB0
+byB0ZWxsIGlmIHlvdSd2ZSBiZWVuIGFkaGVyaW5nIHRvIHlvdXIgY29udHJhY3QuICBUaGF0IHVz
+ZSBjYXNlDQo+IGhhcyBub3RoaW5nIHRvIGRvIHdpdGggc2VjdXJpdHkuDQoNClRoYXQgdXNlIGNh
+c2UgaGFzIG5vdGhpbmcgdG8gZG8gd2l0aCB0aGlzIHBhdGNoLCBlaXRoZXIuIEl0J3MgY29tcGxl
+dGVseQ0KdW5hZmZlY3RlZC4gVGhpcyBvbmx5IHRyaWdnZXJzIGlmIHRoZSBrZXJuZWwgaXMgY29u
+ZmlndXJlZCB0byByZWZ1c2UgdGhlDQpsb2FkaW5nIG9mIHVuc2lnbmVkIG1vZHVsZXMuDQoNCj4g
+VGhlIGFuYWxvZ3kgaXMgcnViYmlzaC4gIEkgY2FuIGdpdmUgYXdheSBDQVBfU1lTX01PRFVMRSBh
+bmQgZW5mb3JjZSB3aGF0DQo+IG1vZHVsZXMgdGhvc2UgSSd2ZSBnaXZlbiB0aGUgcGVybWlzc2lv
+biB0byBjYW4gaW5zZXJ0IGJ5IHNpZ25pbmcgdGhlbS4NCj4gSSBrZWVwIENBUF9TWVNfQk9PVCwg
+c28gdGhleSBjYW4ndCB1c2Uga2V4ZWMgdG8gc3VidmVydCB0aGlzLg0KDQpZZWFoLCB0aGF0J3Mg
+YSBnb29kIGFyZ3VtZW50IGZvciB3aHkgY2FwYWJpbGl0aWVzIGFyZSBtb3N0bHkgcG9pbnRsZXNz
+Lg0KSWYgSSBoYXZlIENBUF9TWVNfQk9PVCBJIGNhbiBnaXZlIG15c2VsZiBhbnkgb3RoZXIgY2Fw
+YWJpbGl0aWVzLiBXaHkNCmJvdGhlcj8NCg0KLS0gDQpNYXR0aGV3IEdhcnJldHQgPG1hdHRoZXcu
+Z2FycmV0dEBuZWJ1bGEuY29tPg0K
