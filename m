@@ -1,39 +1,49 @@
-From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
  enforces module loading restrictions
-Date: Sat, 7 Sep 2013 23:40:27 -0700
-Message-ID: <20130908064027.GA3587@kroah.com>
+Date: Sun, 8 Sep 2013 06:44:08 +0000
+Message-ID: <1378622648.2300.4.camel@x230>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
- <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
+	 <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
+	 <20130908064027.GA3587@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1378252218-18798-9-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20130908064027.GA3587-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <7666AC1992BDE74E8AC4EB4DD507C51A-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 03, 2013 at 07:50:15PM -0400, Matthew Garrett wrote:
-> kexec permits the loading and execution of arbitrary code in ring 0, which
-> is something that module signing enforcement is meant to prevent. It makes
-> sense to disable kexec in this situation.
-
-I see no match between kexec and signed kernel modules.
-
-In fact, I personally _want_ signed kernel modules, and still the option
-to run kexec.  kexec is to run a whole new kernel/OS, not a tiny kernel
-module.
-
-If you apply this, you break everyone who is currently relying on kexec
-(i.e. kdump, bootloaders, etc.), from using signed kernel modules, which
-personally, seems like a very bad idea.
-
-Please just rely on the existing permission checks for kexec, to add on
-another layer of restrictions seems unneeded, and will force some users
-to have to patch this out.
-
-thanks,
-
-greg k-h
+T24gU2F0LCAyMDEzLTA5LTA3IGF0IDIzOjQwIC0wNzAwLCBHcmVnIEtIIHdyb3RlOg0KPiBPbiBU
+dWUsIFNlcCAwMywgMjAxMyBhdCAwNzo1MDoxNVBNIC0wNDAwLCBNYXR0aGV3IEdhcnJldHQgd3Jv
+dGU6DQo+ID4ga2V4ZWMgcGVybWl0cyB0aGUgbG9hZGluZyBhbmQgZXhlY3V0aW9uIG9mIGFyYml0
+cmFyeSBjb2RlIGluIHJpbmcgMCwgd2hpY2gNCj4gPiBpcyBzb21ldGhpbmcgdGhhdCBtb2R1bGUg
+c2lnbmluZyBlbmZvcmNlbWVudCBpcyBtZWFudCB0byBwcmV2ZW50LiBJdCBtYWtlcw0KPiA+IHNl
+bnNlIHRvIGRpc2FibGUga2V4ZWMgaW4gdGhpcyBzaXR1YXRpb24uDQo+IA0KPiBJIHNlZSBubyBt
+YXRjaCBiZXR3ZWVuIGtleGVjIGFuZCBzaWduZWQga2VybmVsIG1vZHVsZXMuDQoNCnNpZ19lbmZv
+cmNlIGlzIHRoZXJlIHRvIHByZXZlbnQgYW55b25lIChpbmNsdWRpbmcgcm9vdCkgZnJvbSBpbnN0
+YWxsaW5nDQpuZXcga2VybmVsIGNvZGUgaW4gdGhlIHJ1bm5pbmcga2VybmVsLiBBbGxvd2luZyBr
+ZXhlYyB0byBydW4gdW50cnVzdGVkDQpjb2RlIGFsbG93cyByb290IHRvIGluc3RhbGwgbmV3IGtl
+cm5lbCBjb2RlIGluIHRoZSBydW5uaW5nIGtlcm5lbC4gQXQNCnRoZSBtb3N0IHRyaXZpYWwgbGV2
+ZWwsIGdyYWIgdGhlIGFkZHJlc3Mgb2Ygc2lnX2VuZm9yY2UgZnJvbSBrYWxsc3ltcywNCmp1bXAg
+dG8gYSBrZXJuZWwgdGhhdCBkb2Vzbid0IGVuZm9yY2UgU1RSSUNUX0RFVk1FTSwgbW9kaWZ5IHNp
+Z19lbmZvcmNlLA0KanVtcCBiYWNrIHRvIHRoZSBvbGQga2VybmVsLg0KDQoNCj4gSW4gZmFjdCwg
+SSBwZXJzb25hbGx5IF93YW50XyBzaWduZWQga2VybmVsIG1vZHVsZXMsIGFuZCBzdGlsbCB0aGUg
+b3B0aW9uDQo+IHRvIHJ1biBrZXhlYy4gIGtleGVjIGlzIHRvIHJ1biBhIHdob2xlIG5ldyBrZXJu
+ZWwvT1MsIG5vdCBhIHRpbnkga2VybmVsDQo+IG1vZHVsZS4NCg0KTm8sIGtleGVjIGlzIHRvIHJ1
+biBhbnl0aGluZy4gSXQncyBleHByZXNzbHkgbm90IGxpbWl0ZWQgdG8gbGF1bmNoaW5nDQpuZXcg
+a2VybmVscy4gSXQncyBlYXNpZXN0IHRvIGRlbW9uc3RyYXRlIGFuIGF0dGFjayB1c2luZyBhIExp
+bnV4IGtlcm5lbCwNCmJ1dCB5b3UgY291bGQgbGF1bmNoIGEgdG95IHBheWxvYWQgdGhhdCBkaWQg
+bm90aGluZyBvdGhlciB0aGFuIG1vZGlmeQ0Kb25lIGJ5dGUgYW5kIHRoZW4gcmV0dXJuZWQgdG8g
+dGhlIGxhdW5jaCBrZXJuZWwuDQoNCj4gSWYgeW91IGFwcGx5IHRoaXMsIHlvdSBicmVhayBldmVy
+eW9uZSB3aG8gaXMgY3VycmVudGx5IHJlbHlpbmcgb24ga2V4ZWMNCj4gKGkuZS4ga2R1bXAsIGJv
+b3Rsb2FkZXJzLCBldGMuKSwgZnJvbSB1c2luZyBzaWduZWQga2VybmVsIG1vZHVsZXMsIHdoaWNo
+DQo+IHBlcnNvbmFsbHksIHNlZW1zIGxpa2UgYSB2ZXJ5IGJhZCBpZGVhLg0KDQpFbmZvcmNpbmcg
+c2lnbmVkIG1vZHVsZXMgcHJvdmlkZXMgeW91IHdpdGggbm8gYWRkaXRpb25hbCBzZWN1cml0eSBp
+ZiB5b3UNCmhhdmUga2V4ZWMgZW5hYmxlZC4gSXQncyBiZXR0ZXIgdG8gbWFrZSB0aGF0IG9idmlv
+dXMuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4N
+Cg==
