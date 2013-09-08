@@ -1,8 +1,8 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
  enforces module loading restrictions
-Date: Sun, 8 Sep 2013 17:27:32 +0000
-Message-ID: <1378661252.2300.26.camel@x230>
+Date: Sun, 08 Sep 2013 10:32:56 -0700
+Message-ID: <1378661576.2429.16.camel@dabdike.int.hansenpartnership.com>
 References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
 	 <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
 	 <20130908064027.GA3587@kroah.com> <1378622648.2300.4.camel@x230>
@@ -11,29 +11,32 @@ References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
 	 <1378660284.2429.11.camel@dabdike.int.hansenpartnership.com>
 	 <1378660541.2300.19.camel@x230>
 	 <1378660975.2429.14.camel@dabdike.int.hansenpartnership.com>
+	 <1378661252.2300.26.camel@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1378660975.2429.14.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <2085C08576D76846B95261618AF3E0BC-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <1378661252.2300.26.camel@x230>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-DQo+IEl0J3MgYW4gYXJndW1lbnQgdGhhdCBDQVBfU1lTX0JPT1QgaXMgdG9vIHBvd2VyZnVsIHll
-cywgYnV0IGlmIHlvdQ0KPiByZWNhbGwsIEkgc2FpZCBJIGtlZXAgdGhhdCBvbmUuICBJbiB0aGUg
-cmF0aGVyIGxhbWUgYW5hbG9neSwgd2hhdCBJIGRvDQo+IGJ5IGdpdmluZyBhd2F5IENBUF9TWVNf
-TU9EVUxFIGFuZCBlbmZvcmNpbmcgbW9kdWxlIHNpZ25pbmcgd2hpbGUga2VlcGluZw0KPiBDQVBf
-U1lTX0JPT1QgaXMgYWxsb3cgcGVvcGxlIGludG8gbXkgY29uc2VydmF0b3J5IHRvIHBsYXkgd2l0
-aCB0aGUNCj4gcGxhbnRzIGJ1dCBub3QgaW50byBteSBob3VzZSB0byBzdGVhbCB0aGUgc2lsdmVy
-IC4uLiBzYXlpbmcgQ0FQX1NZU19CT09UDQo+IGlzIHRvbyBwb3dlcmZ1bCBkb2Vzbid0IGFmZmVj
-dCB0aGF0IHVzZSBjYXNlIGJlY2F1c2UgSSBoYXZlbid0IGdpdmVuDQo+IGF3YXkgQ0FQX1NZU19C
-T09ULg0KDQpPaywgc29ycnksIEkgaGFkIHlvdXIgbWVhbmluZyBpbnZlcnRlZC4gWWVzLCBwZXJt
-aXR0aW5nIHRoZSBsb2FkaW5nIG9mDQpzaWduZWQgbW9kdWxlcyB3aGlsZSBwcmV2ZW50aW5nIHRo
-ZSB1c2Ugb2Yga2V4ZWMgaXMgYSBjb21wbGV0ZWx5DQpyZWFzb25hYmxlIGNvbmZpZ3VyYXRpb24g
-LSBzbyByZWFzb25hYmxlIHRoYXQgaXQncyB3aGF0IHRoaXMgcGF0Y2gNCmNhdXNlcyB0aGUga2Vy
-bmVsIHRvIGRvIGF1dG9tYXRpY2FsbHkuIA0KDQotLSANCk1hdHRoZXcgR2FycmV0dCA8bWF0dGhl
-dy5nYXJyZXR0QG5lYnVsYS5jb20+DQo=
+On Sun, 2013-09-08 at 17:27 +0000, Matthew Garrett wrote:
+> > It's an argument that CAP_SYS_BOOT is too powerful yes, but if you
+> > recall, I said I keep that one.  In the rather lame analogy, what I do
+> > by giving away CAP_SYS_MODULE and enforcing module signing while keeping
+> > CAP_SYS_BOOT is allow people into my conservatory to play with the
+> > plants but not into my house to steal the silver ... saying CAP_SYS_BOOT
+> > is too powerful doesn't affect that use case because I haven't given
+> > away CAP_SYS_BOOT.
+> 
+> Ok, sorry, I had your meaning inverted. Yes, permitting the loading of
+> signed modules while preventing the use of kexec is a completely
+> reasonable configuration - so reasonable that it's what this patch
+> causes the kernel to do automatically. 
+
+Well, no, it doesn't because with this patch, *I* can't use kexec ...
+you've just locked me out of my own house.
+
+James
