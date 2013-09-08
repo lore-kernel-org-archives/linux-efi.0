@@ -1,293 +1,39 @@
-From: Linn Crosetto <linn@hp.com>
-Subject: [PATCHv2] x86: EFI stub support for large memory maps
-Date: Fri,  6 Sep 2013 11:04:16 -0600
-Message-ID: <1378487056-9857-1-git-send-email-linn@hp.com>
-References: <1377291771-21302-1-git-send-email-linn@hp.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1377291771-21302-1-git-send-email-linn@hp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt.fleming@intel.com, hpa@zytor.com, tglx@linutronix.de, mingo@redhat.com, x86@kernel.org, yinghai@kernel.org
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Linn Crosetto <linn@hp.com>
+From: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH V3 08/11] kexec: Disable at runtime if the kernel
+ enforces module loading restrictions
+Date: Sat, 7 Sep 2013 23:40:27 -0700
+Message-ID: <20130908064027.GA3587@kroah.com>
+References: <1378252218-18798-1-git-send-email-matthew.garrett@nebula.com>
+ <1378252218-18798-9-git-send-email-matthew.garrett@nebula.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1378252218-18798-9-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This patch fixes a problem with EFI memory maps larger than 128 entries
-when booting using the EFI stub, which results in overflowing e820_map
-in boot_params and an eventual halt when checking the map size in
-sanitize_e820_map().
+On Tue, Sep 03, 2013 at 07:50:15PM -0400, Matthew Garrett wrote:
+> kexec permits the loading and execution of arbitrary code in ring 0, which
+> is something that module signing enforcement is meant to prevent. It makes
+> sense to disable kexec in this situation.
 
-If the number of map entries is greater than what can fit in e820_map,
-add the extra entries to the setup_data list using type SETUP_E820_EXT.
-These extra entries are then picked up when the setup_data list is
-parsed in parse_e820_ext().
+I see no match between kexec and signed kernel modules.
 
-Signed-off-by: Linn Crosetto <linn@hp.com>
----
-Changes in v2:
-* Free memory when error is returned from alloc_e820ext() as suggested by Matt
-  Fleming
-* Set pointer to NULL and size to 0 after freeing memory in alloc_e820ext()
+In fact, I personally _want_ signed kernel modules, and still the option
+to run kexec.  kexec is to run a whole new kernel/OS, not a tiny kernel
+module.
 
- arch/x86/boot/compressed/eboot.c | 223 ++++++++++++++++++++++++++++-----------
- 1 file changed, 160 insertions(+), 63 deletions(-)
+If you apply this, you break everyone who is currently relying on kexec
+(i.e. kdump, bootloaders, etc.), from using signed kernel modules, which
+personally, seems like a very bad idea.
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index b7388a4..2ac395e 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -982,20 +982,161 @@ fail:
- 	return NULL;
- }
- 
-+static void add_e820ext(struct boot_params *params,
-+			struct setup_data *e820ext, u32 nr_entries)
-+{
-+	struct setup_data *data;
-+	efi_status_t status;
-+	unsigned long size;
-+
-+	e820ext->type = SETUP_E820_EXT;
-+	e820ext->len = nr_entries * sizeof(struct e820entry);
-+	e820ext->next = 0;
-+
-+	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
-+
-+	while (data && data->next)
-+		data = (struct setup_data *)(unsigned long)data->next;
-+
-+	if (data)
-+		data->next = (unsigned long)e820ext;
-+	else
-+		params->hdr.setup_data = (unsigned long)e820ext;
-+}
-+
-+static efi_status_t setup_e820(struct boot_params *params,
-+			       struct setup_data *e820ext, u32 e820ext_size)
-+{
-+	struct e820entry *e820_map = &params->e820_map[0];
-+	struct efi_info *efi = &params->efi_info;
-+	struct e820entry *prev = NULL;
-+	u32 nr_entries;
-+	u32 nr_desc;
-+	int i;
-+
-+	nr_entries = 0;
-+	nr_desc = efi->efi_memmap_size / efi->efi_memdesc_size;
-+
-+	for (i = 0; i < nr_desc; i++) {
-+		efi_memory_desc_t *d;
-+		unsigned int e820_type = 0;
-+		unsigned long m = efi->efi_memmap;
-+
-+		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
-+		switch (d->type) {
-+		case EFI_RESERVED_TYPE:
-+		case EFI_RUNTIME_SERVICES_CODE:
-+		case EFI_RUNTIME_SERVICES_DATA:
-+		case EFI_MEMORY_MAPPED_IO:
-+		case EFI_MEMORY_MAPPED_IO_PORT_SPACE:
-+		case EFI_PAL_CODE:
-+			e820_type = E820_RESERVED;
-+			break;
-+
-+		case EFI_UNUSABLE_MEMORY:
-+			e820_type = E820_UNUSABLE;
-+			break;
-+
-+		case EFI_ACPI_RECLAIM_MEMORY:
-+			e820_type = E820_ACPI;
-+			break;
-+
-+		case EFI_LOADER_CODE:
-+		case EFI_LOADER_DATA:
-+		case EFI_BOOT_SERVICES_CODE:
-+		case EFI_BOOT_SERVICES_DATA:
-+		case EFI_CONVENTIONAL_MEMORY:
-+			e820_type = E820_RAM;
-+			break;
-+
-+		case EFI_ACPI_MEMORY_NVS:
-+			e820_type = E820_NVS;
-+			break;
-+
-+		default:
-+			continue;
-+		}
-+
-+		/* Merge adjacent mappings */
-+		if (prev && prev->type == e820_type &&
-+		    (prev->addr + prev->size) == d->phys_addr) {
-+			prev->size += d->num_pages << 12;
-+			continue;
-+		}
-+
-+		if (nr_entries == ARRAY_SIZE(params->e820_map)) {
-+			u32 need = (nr_desc - i) * sizeof(struct e820entry) +
-+				   sizeof(struct setup_data);
-+
-+			if (!e820ext || e820ext_size < need)
-+				return EFI_BUFFER_TOO_SMALL;
-+
-+			/* boot_params map full, switch to e820 extended */
-+			e820_map = (struct e820entry *)e820ext->data;
-+		}
-+
-+		e820_map->addr = d->phys_addr;
-+		e820_map->size = d->num_pages << PAGE_SHIFT;
-+		e820_map->type = e820_type;
-+		prev = e820_map++;
-+		nr_entries++;
-+	}
-+
-+	if (nr_entries > ARRAY_SIZE(params->e820_map)) {
-+		u32 nr_e820ext = nr_entries - ARRAY_SIZE(params->e820_map);
-+
-+		add_e820ext(params, e820ext, nr_e820ext);
-+		nr_entries -= nr_e820ext;
-+	}
-+
-+	params->e820_entries = (u8)nr_entries;
-+
-+	return EFI_SUCCESS;
-+}
-+
-+static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
-+				  u32 *e820ext_size)
-+{
-+	efi_status_t status;
-+	unsigned long size;
-+
-+	size = sizeof(struct setup_data) +
-+		sizeof(struct e820entry) * nr_desc;
-+
-+	if (*e820ext && size <= *e820ext_size)
-+		return EFI_SUCCESS; /* Already allocated */
-+
-+	if (*e820ext) {
-+		efi_call_phys1(sys_table->boottime->free_pool, *e820ext);
-+		*e820ext = NULL;
-+		*e820ext_size = 0;
-+	}
-+
-+	status = efi_call_phys3(sys_table->boottime->allocate_pool,
-+				EFI_LOADER_DATA, size, e820ext);
-+
-+	if (status == EFI_SUCCESS)
-+		*e820ext_size = size;
-+
-+	return status;
-+}
-+
- static efi_status_t exit_boot(struct boot_params *boot_params,
- 			      void *handle)
- {
- 	struct efi_info *efi = &boot_params->efi_info;
--	struct e820entry *e820_map = &boot_params->e820_map[0];
--	struct e820entry *prev = NULL;
- 	unsigned long size, key, desc_size, _size;
- 	efi_memory_desc_t *mem_map;
-+	struct setup_data *e820ext;
-+	__u32 e820ext_size;
-+	__u32 nr_desc, prev_nr_desc;
- 	efi_status_t status;
- 	__u32 desc_version;
- 	bool called_exit = false;
--	u8 nr_entries;
--	int i;
- 
-+	nr_desc = 0;
-+	e820ext = NULL;
-+	e820ext_size = 0;
- 	size = sizeof(*mem_map) * 32;
- 
- again:
-@@ -1016,6 +1157,19 @@ get_map:
- 	if (status != EFI_SUCCESS)
- 		goto free_mem_map;
- 
-+	prev_nr_desc = nr_desc;
-+	nr_desc = size / desc_size;
-+	if (nr_desc > prev_nr_desc &&
-+	    nr_desc > ARRAY_SIZE(boot_params->e820_map)) {
-+		u32 nr_e820ext = nr_desc - ARRAY_SIZE(boot_params->e820_map);
-+
-+		status = alloc_e820ext(nr_e820ext, &e820ext, &e820ext_size);
-+		if (status != EFI_SUCCESS)
-+			goto free_mem_map;
-+
-+		goto get_map; /* Allocated memory, get map again */
-+	}
-+
- 	memcpy(&efi->efi_loader_signature, EFI_LOADER_SIGNATURE, sizeof(__u32));
- 	efi->efi_systab = (unsigned long)sys_table;
- 	efi->efi_memdesc_size = desc_size;
-@@ -1049,66 +1203,9 @@ get_map:
- 	/* Historic? */
- 	boot_params->alt_mem_k = 32 * 1024;
- 
--	/*
--	 * Convert the EFI memory map to E820.
--	 */
--	nr_entries = 0;
--	for (i = 0; i < size / desc_size; i++) {
--		efi_memory_desc_t *d;
--		unsigned int e820_type = 0;
--		unsigned long m = (unsigned long)mem_map;
-+	status = setup_e820(boot_params, e820ext, e820ext_size);
- 
--		d = (efi_memory_desc_t *)(m + (i * desc_size));
--		switch (d->type) {
--		case EFI_RESERVED_TYPE:
--		case EFI_RUNTIME_SERVICES_CODE:
--		case EFI_RUNTIME_SERVICES_DATA:
--		case EFI_MEMORY_MAPPED_IO:
--		case EFI_MEMORY_MAPPED_IO_PORT_SPACE:
--		case EFI_PAL_CODE:
--			e820_type = E820_RESERVED;
--			break;
--
--		case EFI_UNUSABLE_MEMORY:
--			e820_type = E820_UNUSABLE;
--			break;
--
--		case EFI_ACPI_RECLAIM_MEMORY:
--			e820_type = E820_ACPI;
--			break;
--
--		case EFI_LOADER_CODE:
--		case EFI_LOADER_DATA:
--		case EFI_BOOT_SERVICES_CODE:
--		case EFI_BOOT_SERVICES_DATA:
--		case EFI_CONVENTIONAL_MEMORY:
--			e820_type = E820_RAM;
--			break;
--
--		case EFI_ACPI_MEMORY_NVS:
--			e820_type = E820_NVS;
--			break;
--
--		default:
--			continue;
--		}
--
--		/* Merge adjacent mappings */
--		if (prev && prev->type == e820_type &&
--		    (prev->addr + prev->size) == d->phys_addr)
--			prev->size += d->num_pages << 12;
--		else {
--			e820_map->addr = d->phys_addr;
--			e820_map->size = d->num_pages << 12;
--			e820_map->type = e820_type;
--			prev = e820_map++;
--			nr_entries++;
--		}
--	}
--
--	boot_params->e820_entries = nr_entries;
--
--	return EFI_SUCCESS;
-+	return status;
- 
- free_mem_map:
- 	low_free(_size, (unsigned long)mem_map);
--- 
-1.7.11.3
+Please just rely on the existing permission checks for kexec, to add on
+another layer of restrictions seems unneeded, and will force some users
+to have to patch this out.
+
+thanks,
+
+greg k-h
