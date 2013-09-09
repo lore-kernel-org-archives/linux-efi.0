@@ -1,33 +1,32 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 19:08:16 +0000
-Message-ID: <1378753695.17982.17.camel@x230.lan>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	 <19562.1378747124@turing-police.cc.vt.edu>
-	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-	 <27562.1378753264@turing-police.cc.vt.edu>
+Date: Mon, 09 Sep 2013 12:41:59 -0700
+Message-ID: <522E2487.90109@zytor.com>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com> <19562.1378747124@turing-police.cc.vt.edu>            <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz> <27562.1378753264@turing-police.cc.vt.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <27562.1378753264@turing-police.cc.vt.edu>
-Content-Language: en-US
-Content-ID: <C1AEED5C55AFCE43A291A75B206CC97D@namprd05.prod.outlook.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>
-Cc: David Lang <david@lang.hm>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <27562.1378753264-+bZmOdGhbsPr6rcHtW+onFJE71vCis6O@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org
+Cc: David Lang <david-gFPdbfVZQbY@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gTW9uLCAyMDEzLTA5LTA5IGF0IDE1OjAxIC0wNDAwLCBWYWxkaXMuS2xldG5pZWtzQHZ0LmVk
-dSB3cm90ZToNCj4gT24gTW9uLCAwOSBTZXAgMjAxMyAxMToyNTozOCAtMDcwMCwgRGF2aWQgTGFu
-ZyBzYWlkOg0KPiANCj4gPiBHaXZlbiB0aGF0IHdlIGtub3cgdGhhdCBwZW9wbGUgd2FudCBzaWdu
-ZWQgYmluYXJpZXMgd2l0aG91dCBibG9ja2luZyBrZXhlYywgeW91DQo+ID4gc2hvdWxkIGhhdmUg
-JzEnIGp1c3QgZW5mb3JjZSBtb2R1bGUgc2lnbmluZyBhbmQgJzInIChvciBoaWdoZXIpIGltcGxl
-bWVudCBhIGZ1bGwNCj4gPiBsb2NrZG93biBpbmNsdWRpbmcga2V4ZWMuDQo+IA0KPiA+IE9yLCBl
-bGltaW5hdGUgdGhlIC0xICBwZXJtYW5lbnRseSBpbnNlY3VyZSBvcHRpb24gYW5kIG1ha2UgdGhp
-cyBhIGJpdG1hc2ssIGlmDQo+ID4gc29tZW9uZSB3YW50cyB0byBlbmFibGUgZXZlcnkgcG9zc2li
-bGUgbG9ja2Rvd24sIGhhdmUgdGhlbSBzZXQgaXQgdG8gImFsbCAxJ3MiLA0KPiA+IGRlZmluZSB0
-aGUgYml0cyBvbmx5IGFzIHlvdSBuZWVkIHRoZW0uDQo+IA0KPiBUaGlzIHN0cmlrZXMgbWUgYXMg
-bXVjaCBtb3JlIHdvcmthYmxlIHRoYW4gb25lIGJpZyBzbGVkZ2VoYW1tZXIuDQoNCldoaWNoIGNv
-bWJpbmF0aW9ucyBhcmUgeW91IGVudmlzaW9uaW5nIGFzIGJlaW5nIHVzZWZ1bD8NCg0KLS0gDQpN
-YXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
+On 09/09/2013 12:01 PM, Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org wrote:
+> On Mon, 09 Sep 2013 11:25:38 -0700, David Lang said:
+> 
+>> Given that we know that people want signed binaries without
+>> blocking kexec, you should have '1' just enforce module signing
+>> and '2' (or higher) implement a full lockdown including kexec.
+> 
+>> Or, eliminate the -1  permanently insecure option and make this a
+>> bitmask, if someone wants to enable every possible lockdown, have
+>> them set it to "all 1's", define the bits only as you need them.
+> 
+> This strikes me as much more workable than one big sledgehammer.
+> 
+
+I.e. capabilities ;)
+
+	-hpa
