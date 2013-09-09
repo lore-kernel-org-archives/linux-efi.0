@@ -1,47 +1,26 @@
-From: David Lang <david@lang.hm>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 11:25:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com> <19562.1378747124@turing-police.cc.vt.edu>
+Date: Mon, 9 Sep 2013 18:28:38 +0000
+Message-ID: <1378751318.17982.10.camel@x230.lan>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
+	 <19562.1378747124@turing-police.cc.vt.edu>
+	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <19562.1378747124@turing-police.cc.vt.edu>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Valdis.Kletnieks@vt.edu
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, linux-kernel@vger.kernel.org, keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+Content-Language: en-US
+Content-ID: <63EBBBCD32C4F8429673D8F0533598BF@namprd05.prod.outlook.com>
+Sender: linux-security-module-owner@vger.kernel.org
+To: David Lang <david@lang.hm>
+Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 9 Sep 2013, Valdis.Kletnieks@vt.edu wrote:
-
-> On Mon, 09 Sep 2013 11:49:34 -0400, Matthew Garrett said:
->
->> So, this is my final attempt at providing the functionality I'm interested
->> in without inherently tying it to Secure Boot. There's strong parallels
->> between the functionality that I'm interested in and the BSD securelevel
->> interface, so here's a trivial implementation.
->
-> Although all the individual patches look like sane and reasonable things
-> to do, I'm not at all convinced that sticking them all under control of one
-> flag is really the right way to do it.  In particular, there probably needs
-> to be some re-thinking of the kexec, signed-module, and secure-boot stuff,
-> as it's still a moving target.
-
-Given that we know that people want signed binaries without blocking kexec, you 
-should have '1' just enforce module signing and '2' (or higher) implement a full 
-lockdown including kexec.
-
-Or, eliminate the -1  permanently insecure option and make this a bitmask, if 
-someone wants to enable every possible lockdown, have them set it to "all 1's", 
-define the bits only as you need them.
-
-right now
-1 lock down modules
-2 lock down kexec
-
-etc
-
-you may also want to have a 'disable module loading after this point' in the 
-future.
-
-David Lang
+T24gTW9uLCAyMDEzLTA5LTA5IGF0IDExOjI1IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KDQo+
+IEdpdmVuIHRoYXQgd2Uga25vdyB0aGF0IHBlb3BsZSB3YW50IHNpZ25lZCBiaW5hcmllcyB3aXRo
+b3V0IGJsb2NraW5nIGtleGVjLCB5b3UgDQo+IHNob3VsZCBoYXZlICcxJyBqdXN0IGVuZm9yY2Ug
+bW9kdWxlIHNpZ25pbmcgYW5kICcyJyAob3IgaGlnaGVyKSBpbXBsZW1lbnQgYSBmdWxsIA0KPiBs
+b2NrZG93biBpbmNsdWRpbmcga2V4ZWMuDQoNClRoZXJlJ3MgYWxyZWFkeSBhIGtlcm5lbCBvcHRp
+b24gZm9yIHRoYXQuDQotLSANCk1hdHRoZXcgR2FycmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVs
+YS5jb20+DQo=
