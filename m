@@ -1,35 +1,63 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 01/12] Add BSD-style securelevel support
-Date: Mon, 9 Sep 2013 16:55:18 +0000
-Message-ID: <1378745717.17982.6.camel@x230.lan>
+From: Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org
+Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
+Date: Mon, 09 Sep 2013 13:18:44 -0400
+Message-ID: <19562.1378747124@turing-police.cc.vt.edu>
 References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	 <1378741786-18430-2-git-send-email-matthew.garrett@nebula.com>
-	 <522DF6DC.1050303@zytor.com> <1378744207.17982.3.camel@x230.lan>
-	 <522DFA93.50308@zytor.com> <1378745082.17982.4.camel@x230.lan>
-	 <522DFCAC.40607@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: multipart/signed; boundary="==_Exmh_1378747124_1775P";
+	 micalg=pgp-sha1; protocol="application/pgp-signature"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <522DFCAC.40607-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <732A9583FBC1474EAC05180D77E76AB9-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: Your message of "Mon, 09 Sep 2013 11:49:34 -0400."
+             <1378741786-18430-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gTW9uLCAyMDEzLTA5LTA5IGF0IDA5OjUxIC0wNzAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
-Cj4gT24gMDkvMDkvMjAxMyAwOTo0NCBBTSwgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiA+IE9u
-IE1vbiwgMjAxMy0wOS0wOSBhdCAwOTo0MiAtMDcwMCwgSC4gUGV0ZXIgQW52aW4gd3JvdGU6DQo+
-ID4gDQo+ID4+IE5laXRoZXIgb2YgdGhpcyB0ZW5kIHRvIGJlIHRydWUgbG9uZyB0aW1lLi4uIHdo
-aWNoIGxlYWRzIG9uZSBiYWNrIHRvDQo+ID4+IGNhcGFiaWxpdGllcy4NCj4gPiANCj4gPiBXZSBj
-YW4ndCB1c2UgY2FwYWJpbGl0aWVzLiBEb2luZyBzbyBicmVha3MgZXhpc3RpbmcgdXNlcnNwYWNl
-Lg0KPiA+IA0KPiANCj4gQ2FwYWJpbGl0aWVzIGRvbid0IGhhdmUgdG8gbWVhbiAiUE9TSVggY2Fw
-YWJpbGl0aWVzIi4uLiBhbHRob3VnaCB0aGUNCj4gUE9TSVggY2FwYWJpbGl0eSBzeXN0ZW0gaW4g
-TGludXggcmVhbGx5IGlzIGEgbWFzc2l2ZSBmYWlsIHdoaWNoIGl0IHdvdWxkDQo+IGJlIG5pY2Ug
-dG8gZmluZCBzb21lIGtpbmQgb2YgZml4IGZvci4NCg0KRGVzaWduaW5nIGEgd29ydGh3aGlsZSBj
-YXBhYmlsaXRpZXMgaW50ZXJmYWNlIGNlcnRhaW5seSBzZWVtcyBsaWtlIGENCmdyZWF0IHRoaW5n
-IGZvciBzb21lb25lIHRvIHNwZW5kIGEgZmV3IHllYXJzIG9uLCBidXQgSSdtIG5vdCBnb2luZyB0
-byBiZQ0KaGFwcHkgaWYgaXQncyB0aGUgb25seSB3YXkgdG8gc29sdmUgdGhpcyBwcm9ibGVtLg0K
-DQotLSANCk1hdHRoZXcgR2FycmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+DQo=
+--==_Exmh_1378747124_1775P
+Content-Type: text/plain; charset=us-ascii
+
+On Mon, 09 Sep 2013 11:49:34 -0400, Matthew Garrett said:
+
+> So, this is my final attempt at providing the functionality I'm interested
+> in without inherently tying it to Secure Boot. There's strong parallels
+> between the functionality that I'm interested in and the BSD securelevel
+> interface, so here's a trivial implementation.
+
+Although all the individual patches look like sane and reasonable things
+to do, I'm not at all convinced that sticking them all under control of one
+flag is really the right way to do it.  In particular, there probably needs
+to be some re-thinking of the kexec, signed-module, and secure-boot stuff,
+as it's still a moving target.
+
+> So, this is my final attempt at providing the functionality I'm interested
+> in without inherently tying it to Secure Boot.
+
+You may as well bite the bullet on this one, and tie it together.  Without
+Secure Boot, by the time your code runs it's already too late.  That's the
+whole point of Secure Boot, after all.
+
+--==_Exmh_1378747124_1775P
+Content-Type: application/pgp-signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.14 (GNU/Linux)
+Comment: Exmh version 2.5 07/13/2001
+
+iQIVAwUBUi4C8wdmEQWDXROgAQLVEBAAtkNSnNCYkHDRZJYPQGPLfT89WkYWZweL
+S36AojErYjA5uRhro8JxWthZ2tt2LoB+1EDwyhPmAVxsr40z48tehtpqfMpzIABN
+A+GDtdudo2kB5HS9LzTuO2N9f03Vert1/mbF7th9XfoSde2iQpPap3jYvLS5bkBA
+Wn29EsRQ/Er3rN5+TKRbUjNjlZJz8vuqBEh7vwnvV9VCox3L/bmAwYfM22pMrP7j
+rQfpyNq0bR7IxJPxapFuB6ispdwgBiHB+XMgJoSi17FGei9BilpSCVVXcEdD+YVJ
+dfCQItk9gK7IZ+/M+mHqWgVQI/ISakWD2AKMPtUVa+cXDne9kRYRGC4YifOVvTyA
+kpTXBd37RWvInK+l+LAxyOkko3nps0UfuShbA7W19IYqOGbh1aDQ3zAV5gKaP1Xy
+qK6Jvmhc4JLMp9v5Gj1zFXHV3+1DyGLciPgYvC3lXgmXsA0duZAx1bE3ovVm9uu8
+/nQ1wbFmMzrssMgK2A4vyqqPWMsyzA1IGH/eU6N5Mp7i1HYw4jhthdiD+SPCOG/D
+uQh/xMTRk+hqqOxfCqohhyHoKz3SfRni1Ka5xhf8+IU++wgBSDLlS0D8DZU1jfx3
+ZPrwJHLsRqkYdgxifRIS+aTgjQY2+7V2jUHGQPV6uShv69JtWw76DAPsWCGcTPT1
+zzuXcyuUuTY=
+=bWJx
+-----END PGP SIGNATURE-----
+
+--==_Exmh_1378747124_1775P--
