@@ -1,39 +1,37 @@
-From: Mimi Zohar <zohar@linux.vnet.ibm.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 09 Sep 2013 16:30:47 -0400
-Message-ID: <1378758647.2257.136.camel@dhcp-9-2-203-236.watson.ibm.com>
+Date: Mon, 9 Sep 2013 23:02:05 +0000
+Message-ID: <1378767723.17982.27.camel@x230.lan>
 References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
+	 <19562.1378747124@turing-police.cc.vt.edu>
+	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org, David Lang <david@lang.hm>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+Content-Language: en-US
+Content-ID: <4ADAF0E2F2A954468B9E59094147F8DF@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Lang <david@lang.hm>
+Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2013-09-09 at 11:49 -0400, Matthew Garrett wrote:
-> Some use cases require the ability to ensure that anything running in ring 0
-> is trusted code. We have support for signing the kernel and kernel modules,
-> but there's still a range of exported kernel interfaces that make it easy to
-> modify the running kernel. Previous attempts to implement a generic interface
-> to restrict this have included a new capability (breaks existing userspace)
-> and tying it to a requirement for signed modules (breaks assumptions in
-> certain situations where userspace is already running with restricted
-> privileges).
-> 
-> So, this is my final attempt at providing the functionality I'm interested
-> in without inherently tying it to Secure Boot. There's strong parallels
-> between the functionality that I'm interested in and the BSD securelevel
-> interface, so here's a trivial implementation. 
-
-Thank you for not tying this functionality to UEFI secure boot.  There
-are, and will continue to be, many systems out there that don't support
-UEFI secure boot, yet would be interested in this functionality.
-
-As David Lang aptly said, "... security is not a binary thing, just
-because there is one hole, it isn't worthless to close another one."
-
-Mimi
-
+T24gTW9uLCAyMDEzLTA5LTA5IGF0IDExOjI1IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KDQo+
+IDEgbG9jayBkb3duIG1vZHVsZXMNCj4gMiBsb2NrIGRvd24ga2V4ZWMNCg0KSGF2aW5nIHRob3Vn
+aHQgYWJvdXQgdGhpcywgdGhlIGFuc3dlciBpcyBuby4gSXQgcHJlc2VudHMgZXhhY3RseSB0aGUN
+CnNhbWUgcHJvYmxlbSBhcyBjYXBhYmlsaXRpZXMgZG8gLSB0aGUgc2V0IGNhbiBuZXZlciBiZSBt
+ZWFuaW5nZnVsbHkNCmV4dGVuZGVkLiBJZiBhbiBhcHBsaWNhdGlvbiBzZXRzIG9ubHkgdGhlIGJp
+dHMgaXQga25vd3MgYWJvdXQsIGFuZCBpZiBhDQpuZXcgc2VjdXJpdHktc2Vuc2l0aXZlIGZlYXR1
+cmUgaXMgYWRkZWQgdG8gdGhlIGtlcm5lbCwgdGhlIGZlYXR1cmUgd2lsbA0KYmUgbGVmdCBlbmFi
+bGVkIGFuZCB0aGUgc3lzdGVtIHdpbGwgYmUgaW5zZWN1cmUuIEFsdGVybmF0aXZlbHksIGlmIGFu
+DQphcHBsaWNhdGlvbiBzZXRzIGFsbCB0aGUgYml0cyByZWdhcmRsZXNzIG9mIHdoZXRoZXIgaXQg
+a25vd3MgdGhlbSBvcg0Kbm90LCBpdCBtYXkgZW5hYmxlIGEgbG9ja2Rvd24gZmVhdHVyZSB0aGF0
+IGl0IG90aGVyd2lzZSByZXF1aXJlZC4NCg0KVGhlIG9ubHkgd2F5IHRoaXMgaXMgdXNlZnVsIGlz
+IGlmIGFsbCB0aGUgYml0cyBhcmUgc2VtYW50aWNhbGx5DQplcXVpdmFsZW50LCBhbmQgaW4gdGhh
+dCBjYXNlIHRoZXJlJ3Mgbm8gcG9pbnQgaW4gaGF2aW5nIGFueXRoaW5nIG90aGVyDQp0aGFuIGEg
+c2luZ2xlIGJpdC4gVXNlcnMgd2hvIHdhbnQgYSBtb3JlIGZpbmUtZ3JhaW5lZCBpbnRlcmZhY2Ug
+c2hvdWxkDQp1c2Ugb25lIG9mIHRoZSBleGlzdGluZyBtZWNoYW5pc21zIGZvciBkb2luZyBzbyAt
+IGxlYXZlIHRoZSBrZXJuZWwgb3Blbg0KYW5kIGltcG9zZSB0aGUgc2VjdXJpdHkgcG9saWN5IGZy
+b20gdXNlcnNwYWNlIHVzaW5nIGVpdGhlciBjYXBhYmlsaXRpZXMNCm9yIHNlbGludXguDQoNCi0t
+IA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
