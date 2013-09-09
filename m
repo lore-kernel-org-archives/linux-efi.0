@@ -1,43 +1,71 @@
-From: Josh Boyer <jwboyer@gmail.com>
+From: David Lang <david@lang.hm>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 15:58:16 -0400
-Message-ID: <CA+5PVA70Lw2f_4K6ys_xTyodo2VBWD+cOvTYHxWmqyQEX8784A@mail.gmail.com>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	<19562.1378747124@turing-police.cc.vt.edu>
-	<alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-	<27562.1378753264@turing-police.cc.vt.edu>
-	<522E2487.90109@zytor.com>
-	<CA+5PVA4mu=ykBMgWYaEagCsDexR-qFYH0tfjK+4B+xOCPonNXg@mail.gmail.com>
-	<522E27DF.8020409@zytor.com>
+Date: Mon, 9 Sep 2013 12:59:50 -0700 (PDT)
+Message-ID: <alpine.DEB.2.02.1309091247340.2479@nftneq.ynat.uz>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>  <19562.1378747124@turing-police.cc.vt.edu>  <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>  <1378751318.17982.10.camel@x230.lan>  <alpine.DEB.2.02.1309091139490.2479@nftneq.ynat.uz>
+  <1378752158.17982.15.camel@x230.lan>  <alpine.DEB.2.02.1309091150570.2479@nftneq.ynat.uz> <1378753619.17982.16.camel@x230.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <522E27DF.8020409@zytor.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Valdis Kletnieks <Valdis.Kletnieks@vt.edu>, David Lang <david@lang.hm>, Matthew Garrett <matthew.garrett@nebula.com>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Greg KH <gregkh@linuxfoundation.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, James Morris <jmorris@namei.org>, linux-security-module <linux-security-module@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1378753619.17982.16.camel@x230.lan>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 9, 2013 at 3:56 PM, H. Peter Anvin <hpa@zytor.com> wrote:
->>>
->>> I.e. capabilities ;)
->>
->> Circles.  All I see here are circles.
->>
->> Having lived an entire release with a capabilities based mechanism for
->> this in Fedora, please no.
->>
->> And if you are talking about non-POSIX capabilities as you mentioned
->> earlier, that seems to be no different than having securelevel being a
->> bitmask of, well, levels.  I don't have much opinion on securelevel
->> being a big hammer or a bitmask of finer grained things, but I do
->> think it's a more manageable way forward.  Calling the implementation
->> "capabilities" seems to just be unnecessarily confusing.
->>
+On Mon, 9 Sep 2013, Matthew Garrett wrote:
+
+> On Mon, 2013-09-09 at 11:53 -0700, David Lang wrote:
 >
-> This is the term "capability" in the general sense, not the POSIX
-> implementation thereof.
+>> So is there a way to unify these different things rather than creating yet
+>> another different knob?
+>
+> We haven't found one that people consider generally acceptable.
 
-See the whole last paragraph.  Particularly the last sentence.
+At least you should be able to unify the implementation, even if you don't unify 
+the user visible knob
 
-josh
+If you do this with a capabilities approach, then you can implement the 'only 
+load signed modules' bit and then have that bit call the existing kernel code, 
+or change that existing kernel code to internally set the capabilities bit.
+
+I see you looking for two key things
+
+1. a sledgehammer to say "I want to be as secure as possible"
+
+2. no way to unset the setting (barring kernel bugs/vulnerabilities)
+
+implementing this as capabilities will still let you meet your goals, just have 
+your tools that lock things down set the value to -1 (all 1's)
+
+As long as a bit cannot be unset, only set, it still satisfies your second 
+requirement to not be able to back out.
+
+And for people who want a partial lockdown, the various capabilities bits allow 
+them to get the amount of lockdown that they want.
+
+but if you are really trying to lock down a system, there are things that you 
+want to do that will break normal users (things like disabling all module 
+loading, disabling mounting of filesystems, disable the connection of new USB 
+devices, etc)
+
+These are good tools to have available, but since using them will break some 
+normal use cases, you really do want to be able to enable some things without 
+enabling others.
+
+What you are seeing in this discussion is that even for the set of things that 
+you consider 'essential' to lock down, other people see valid cases to not lock 
+them down.
+
+If your tools only set 'known' or 'allocated' bits, you run the risk of not 
+locking things down as tightly as you could, but if new bits are only allocated 
+for new lockdown features, this is not a regression since you are no worse off 
+than you would have been with an old kernel.
+
+
+Since we are not talking POSIX capabilities here, we are talking 'secure the 
+system from even root' capabilities, there is no other system that we need to 
+copy. The BSD securelevel approach is a simple big hammer approach, and it's 
+easy to emulate with capabilities.
+
+David Lang
