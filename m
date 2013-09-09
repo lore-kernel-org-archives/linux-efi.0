@@ -1,7 +1,7 @@
 From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 03/12] PCI: Lock down BAR access when securelevel is enabled
-Date: Mon,  9 Sep 2013 11:49:37 -0400
-Message-ID: <1378741786-18430-4-git-send-email-matthew.garrett@nebula.com>
+Subject: [PATCH 01/12] Add BSD-style securelevel support
+Date: Mon,  9 Sep 2013 11:49:35 -0400
+Message-ID: <1378741786-18430-2-git-send-email-matthew.garrett@nebula.com>
 References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
 Return-path: <linux-security-module-owner@vger.kernel.org>
 In-Reply-To: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
@@ -10,115 +10,221 @@ To: linux-kernel@vger.kernel.org
 Cc: keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
 List-Id: linux-efi@vger.kernel.org
 
-Any hardware that can potentially generate DMA has to be locked down from
-userspace in order to avoid it being possible for an attacker to modify
-kernel code. This should be prevented if securelevel has been set. Default
-to paranoid - in future we can potentially relax this for sufficiently
-IOMMU-isolated devices.
+Provide a coarse-grained runtime configuration option for restricting
+userspace's ability to modify the running kernel.
 
 Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
 ---
- drivers/pci/pci-sysfs.c | 9 +++++++++
- drivers/pci/proc.c      | 9 ++++++++-
- drivers/pci/syscall.c   | 3 ++-
- 3 files changed, 19 insertions(+), 2 deletions(-)
+ Documentation/security/securelevel.txt |  23 +++++++
+ include/linux/security.h               |   8 +++
+ security/Kconfig                       |   8 +++
+ security/Makefile                      |   1 +
+ security/securelevel.c                 | 116 +++++++++++++++++++++++++++++++++
+ 5 files changed, 156 insertions(+)
+ create mode 100644 Documentation/security/securelevel.txt
+ create mode 100644 security/securelevel.c
 
-diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
-index 7128cfd..0a3fca2 100644
---- a/drivers/pci/pci-sysfs.c
-+++ b/drivers/pci/pci-sysfs.c
-@@ -634,6 +634,9 @@ pci_write_config(struct file* filp, struct kobject *kobj,
- 	loff_t init_off = off;
- 	u8 *data = (u8*) buf;
- 
-+	if (get_securelevel() > 0)
-+		return -EPERM;
+diff --git a/Documentation/security/securelevel.txt b/Documentation/security/securelevel.txt
+new file mode 100644
+index 0000000..a1355a0
+--- /dev/null
++++ b/Documentation/security/securelevel.txt
+@@ -0,0 +1,23 @@
++Linux securelevel interface
++---------------------------
 +
- 	if (off > dev->cfg_size)
- 		return 0;
- 	if (off + count > dev->cfg_size) {
-@@ -940,6 +943,9 @@ pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
- 	resource_size_t start, end;
- 	int i;
- 
-+	if (get_securelevel() > 0)
-+		return -EPERM;
++The Linux securelevel interface (inspired by the BSD securelevel interface)
++is a runtime mechanism for configuring coarse-grained kernel-level security
++restrictions. It provides a runtime configuration variable at
++/sys/kernel/security/securelevel which can be written to by root. The
++following values are supported:
 +
- 	for (i = 0; i < PCI_ROM_RESOURCE; i++)
- 		if (res == &pdev->resource[i])
- 			break;
-@@ -1047,6 +1053,9 @@ pci_write_resource_io(struct file *filp, struct kobject *kobj,
- 		      struct bin_attribute *attr, char *buf,
- 		      loff_t off, size_t count)
- {
-+	if (get_securelevel() > 0)
-+		return -EPERM;
++-1: Permanently insecure mode. This level is equivalent to level 0, but once
++    set cannot be changed.
 +
- 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
- }
++0:  Insecure mode (default). This level imposes no additional kernel
++    restrictions.
++
++1:  Secure mode. If set, userspace will be unable to perform direct access
++    to PCI devices, port IO access, access system memory directly via
++    /dev/mem and /dev/kmem, perform kexec_load(), use the userspace
++    software suspend mechanism, insert new ACPI code at runtime via the
++    custom_method interface or modify CPU MSRs (on x86). Certain drivers
++    may also limit additional interfaces.
++
++Once the securelevel value is increased, it may not be decreased.
+diff --git a/include/linux/security.h b/include/linux/security.h
+index 9d37e2b..e8b69e0 100644
+--- a/include/linux/security.h
++++ b/include/linux/security.h
+@@ -3081,6 +3081,14 @@ static inline void security_audit_rule_free(void *lsmrule)
+ #endif /* CONFIG_SECURITY */
+ #endif /* CONFIG_AUDIT */
  
-diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
-index cdc7836..45c59e9 100644
---- a/drivers/pci/proc.c
-+++ b/drivers/pci/proc.c
-@@ -11,6 +11,7 @@
- #include <linux/proc_fs.h>
- #include <linux/seq_file.h>
- #include <linux/capability.h>
++#ifdef CONFIG_SECURITY_SECURELEVEL
++extern int get_securelevel(void);
++extern int set_securelevel(int new_securelevel);
++#else
++static inline int get_securelevel(void) { return 0; }
++static inline int set_securelevel(int new_securelevel) { return 0; }
++#endif /* CONFIG_SECURELEVEL */
++
+ #ifdef CONFIG_SECURITYFS
+ 
+ extern struct dentry *securityfs_create_file(const char *name, umode_t mode,
+diff --git a/security/Kconfig b/security/Kconfig
+index e9c6ac7..3605d24 100644
+--- a/security/Kconfig
++++ b/security/Kconfig
+@@ -70,6 +70,14 @@ config SECURITY_PATH
+ 	  implement pathname based access controls.
+ 	  If you are unsure how to answer this question, answer N.
+ 
++config SECURITY_SECURELEVEL
++        bool "Securelevel kernel restriction interface"
++	depends on SECURITY
++	help
++	  This enables support for adding a set of additional kernel security
++	  restrictions at runtime. See Documentation/security/securelevel.txt
++	  for further information.
++
+ config INTEL_TXT
+ 	bool "Enable Intel(R) Trusted Execution Technology (Intel(R) TXT)"
+ 	depends on HAVE_INTEL_TXT
+diff --git a/security/Makefile b/security/Makefile
+index c26c81e..d6c98ab 100644
+--- a/security/Makefile
++++ b/security/Makefile
+@@ -16,6 +16,7 @@ obj-$(CONFIG_MMU)			+= min_addr.o
+ # Object file lists
+ obj-$(CONFIG_SECURITY)			+= security.o capability.o
+ obj-$(CONFIG_SECURITYFS)		+= inode.o
++obj-$(CONFIG_SECURITY_SECURELEVEL)	+= securelevel.o
+ # Must precede capability.o in order to stack properly.
+ obj-$(CONFIG_SECURITY_SELINUX)		+= selinux/built-in.o
+ obj-$(CONFIG_SECURITY_SMACK)		+= smack/built-in.o
+diff --git a/security/securelevel.c b/security/securelevel.c
+new file mode 100644
+index 0000000..7128430
+--- /dev/null
++++ b/security/securelevel.c
+@@ -0,0 +1,116 @@
++/*
++ *  securelevel.c - support for generic kernel lockdown
++ *
++ *  Copyright Nebula, Inc <matthew.garrett@nebula.com>
++ *
++ *  This program is free software; you can redistribute it and/or modify
++ *  it under the terms of the GNU General Public License version 2 as
++ *  published by the Free Software Foundation.
++ *
++ */
++
++#include <linux/fs.h>
++#include <linux/init.h>
 +#include <linux/security.h>
- #include <asm/uaccess.h>
- #include <asm/byteorder.h>
- #include "pci.h"
-@@ -117,6 +118,9 @@ proc_bus_pci_write(struct file *file, const char __user *buf, size_t nbytes, lof
- 	int size = dev->cfg_size;
- 	int cnt;
- 
-+	if (get_securelevel() > 0)
-+		return -EPERM;
++#include <linux/uaccess.h>
 +
- 	if (pos >= size)
- 		return 0;
- 	if (nbytes >= size)
-@@ -196,6 +200,9 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
- #endif /* HAVE_PCI_MMAP */
- 	int ret = 0;
- 
-+	if (get_securelevel() > 0)
-+		return -EPERM;
++static int securelevel;
 +
- 	switch (cmd) {
- 	case PCIIOC_CONTROLLER:
- 		ret = pci_domain_nr(dev->bus);
-@@ -234,7 +241,7 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
- 	struct pci_filp_private *fpriv = file->private_data;
- 	int i, ret;
- 
--	if (!capable(CAP_SYS_RAWIO))
-+	if (!capable(CAP_SYS_RAWIO) || (get_securelevel() > 0))
- 		return -EPERM;
- 
- 	/* Make sure the caller is mapping a real resource for this device */
-diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
-index e1c1ec5..d922577 100644
---- a/drivers/pci/syscall.c
-+++ b/drivers/pci/syscall.c
-@@ -10,6 +10,7 @@
- #include <linux/errno.h>
- #include <linux/pci.h>
- #include <linux/syscalls.h>
-+#include <linux/security.h>
- #include <asm/uaccess.h>
- #include "pci.h"
- 
-@@ -92,7 +93,7 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
- 	u32 dword;
- 	int err = 0;
- 
--	if (!capable(CAP_SYS_ADMIN))
-+	if (!capable(CAP_SYS_ADMIN) || (get_securelevel() > 0))
- 		return -EPERM;
- 
- 	dev = pci_get_bus_and_slot(bus, dfn);
++static DEFINE_SPINLOCK(securelevel_lock);
++
++#define MAX_SECURELEVEL 1
++
++int get_securelevel(void)
++{
++	return securelevel;
++}
++EXPORT_SYMBOL(get_securelevel);
++
++int set_securelevel(int new_securelevel)
++{
++	int ret = 0;
++
++	spin_lock(&securelevel_lock);
++
++	if ((securelevel == -1) || (new_securelevel < securelevel) ||
++	    (new_securelevel > MAX_SECURELEVEL)) {
++		ret = -EINVAL;
++		goto out;
++	}
++
++	securelevel = new_securelevel;
++out:
++	spin_unlock(&securelevel_lock);
++	return ret;
++}
++EXPORT_SYMBOL(set_securelevel);
++
++static ssize_t securelevel_read(struct file *filp, char __user *buf,
++				size_t count, loff_t *ppos)
++{
++	char tmpbuf[12];
++	ssize_t length;
++
++	length = scnprintf(tmpbuf, sizeof(tmpbuf), "%d", securelevel);
++	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
++}
++
++static ssize_t securelevel_write(struct file *file, const char __user *buf,
++				 size_t count, loff_t *ppos)
++{
++	char *page = NULL;
++	ssize_t length;
++	int new_securelevel;
++
++	length = -ENOMEM;
++	if (count >= PAGE_SIZE)
++		goto out;
++
++	length = -EINVAL;
++	if (*ppos != 0)
++		goto out;
++
++	length = -ENOMEM;
++	page = (char *)get_zeroed_page(GFP_KERNEL);
++	if (!page)
++		goto out;
++
++	length = -EFAULT;
++	if (copy_from_user(page, buf, count))
++		goto out;
++
++	length = -EINVAL;
++	if (sscanf(page, "%d", &new_securelevel) != 1)
++		goto out;
++
++	length = set_securelevel(new_securelevel);
++	if (length)
++		goto out;
++
++	length = count;
++out:
++	free_page((unsigned long) page);
++	return length;
++}
++
++static const struct file_operations securelevel_fops = {
++	.read 	= securelevel_read,
++	.write 	= securelevel_write,
++	.llseek	= generic_file_llseek,
++};
++
++static __init int setup_securelevel(void)
++{
++	struct dentry *securelevel_file;
++
++	securelevel_file = securityfs_create_file("securelevel",
++						  S_IWUSR | S_IRUGO,
++						  NULL, NULL,
++						  &securelevel_fops);
++
++	if (IS_ERR(securelevel_file))
++		return PTR_ERR(securelevel_file);
++
++	return 0;
++}
++late_initcall(setup_securelevel);
 -- 
 1.8.3.1
 
