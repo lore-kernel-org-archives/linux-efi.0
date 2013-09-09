@@ -1,37 +1,60 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
+From: David Lang <david@lang.hm>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 23:02:05 +0000
-Message-ID: <1378767723.17982.27.camel@x230.lan>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	 <19562.1378747124@turing-police.cc.vt.edu>
-	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+Date: Mon, 9 Sep 2013 16:19:11 -0700 (PDT)
+Message-ID: <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>  <19562.1378747124@turing-police.cc.vt.edu>  <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz> <1378767723.17982.27.camel@x230.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-Content-Language: en-US
-Content-ID: <4ADAF0E2F2A954468B9E59094147F8DF@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Lang <david@lang.hm>
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <1378767723.17982.27.camel@x230.lan>
+Sender: linux-security-module-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
 Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gTW9uLCAyMDEzLTA5LTA5IGF0IDExOjI1IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KDQo+
-IDEgbG9jayBkb3duIG1vZHVsZXMNCj4gMiBsb2NrIGRvd24ga2V4ZWMNCg0KSGF2aW5nIHRob3Vn
-aHQgYWJvdXQgdGhpcywgdGhlIGFuc3dlciBpcyBuby4gSXQgcHJlc2VudHMgZXhhY3RseSB0aGUN
-CnNhbWUgcHJvYmxlbSBhcyBjYXBhYmlsaXRpZXMgZG8gLSB0aGUgc2V0IGNhbiBuZXZlciBiZSBt
-ZWFuaW5nZnVsbHkNCmV4dGVuZGVkLiBJZiBhbiBhcHBsaWNhdGlvbiBzZXRzIG9ubHkgdGhlIGJp
-dHMgaXQga25vd3MgYWJvdXQsIGFuZCBpZiBhDQpuZXcgc2VjdXJpdHktc2Vuc2l0aXZlIGZlYXR1
-cmUgaXMgYWRkZWQgdG8gdGhlIGtlcm5lbCwgdGhlIGZlYXR1cmUgd2lsbA0KYmUgbGVmdCBlbmFi
-bGVkIGFuZCB0aGUgc3lzdGVtIHdpbGwgYmUgaW5zZWN1cmUuIEFsdGVybmF0aXZlbHksIGlmIGFu
-DQphcHBsaWNhdGlvbiBzZXRzIGFsbCB0aGUgYml0cyByZWdhcmRsZXNzIG9mIHdoZXRoZXIgaXQg
-a25vd3MgdGhlbSBvcg0Kbm90LCBpdCBtYXkgZW5hYmxlIGEgbG9ja2Rvd24gZmVhdHVyZSB0aGF0
-IGl0IG90aGVyd2lzZSByZXF1aXJlZC4NCg0KVGhlIG9ubHkgd2F5IHRoaXMgaXMgdXNlZnVsIGlz
-IGlmIGFsbCB0aGUgYml0cyBhcmUgc2VtYW50aWNhbGx5DQplcXVpdmFsZW50LCBhbmQgaW4gdGhh
-dCBjYXNlIHRoZXJlJ3Mgbm8gcG9pbnQgaW4gaGF2aW5nIGFueXRoaW5nIG90aGVyDQp0aGFuIGEg
-c2luZ2xlIGJpdC4gVXNlcnMgd2hvIHdhbnQgYSBtb3JlIGZpbmUtZ3JhaW5lZCBpbnRlcmZhY2Ug
-c2hvdWxkDQp1c2Ugb25lIG9mIHRoZSBleGlzdGluZyBtZWNoYW5pc21zIGZvciBkb2luZyBzbyAt
-IGxlYXZlIHRoZSBrZXJuZWwgb3Blbg0KYW5kIGltcG9zZSB0aGUgc2VjdXJpdHkgcG9saWN5IGZy
-b20gdXNlcnNwYWNlIHVzaW5nIGVpdGhlciBjYXBhYmlsaXRpZXMNCm9yIHNlbGludXguDQoNCi0t
-IA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
+On Mon, 9 Sep 2013, Matthew Garrett wrote:
+
+> On Mon, 2013-09-09 at 11:25 -0700, David Lang wrote:
+>
+>> 1 lock down modules
+>> 2 lock down kexec
+>
+> Having thought about this, the answer is no. It presents exactly the
+> same problem as capabilities do - the set can never be meaningfully
+> extended. If an application sets only the bits it knows about, and if a
+> new security-sensitive feature is added to the kernel, the feature will
+> be left enabled and the system will be insecure. Alternatively, if an
+> application sets all the bits regardless of whether it knows them or
+> not, it may enable a lockdown feature that it otherwise required.
+
+In this case you are no less secure than you were before the feature was added, 
+you just can't take advantage of the new feature without updating userspace.
+
+That's a very common situation
+
+> The only way this is useful is if all the bits are semantically
+> equivalent, and in that case there's no point in having anything other
+> than a single bit. Users who want a more fine-grained interface should
+> use one of the existing mechanisms for doing so - leave the kernel open
+> and impose the security policy from userspace using either capabilities
+> or selinux.
+
+so if you only have a single bit, how do you deal with the case where that bit 
+locks down something that's required? (your reason for not just setting all bits 
+in the first approach)
+
+your arguments don't seem self consistent.
+
+
+why should there only be one way to lock down a system? there are lots of 
+different use cases.
+
+If I'm building a kiosk PC (or voting machine), I want to disable a lot of 
+things that I could not get away with disabling on a generic laptop. Are we 
+going to have Securelevel, ReallySecurelevel, ReallyReallySecurelevel, etc? or 
+can we accept that security is not binary and allow users to disable features 
+in a more granualar way?
+
+And if SELinux can do the job, what is the reason for creating this new option?
+
+David Lang
