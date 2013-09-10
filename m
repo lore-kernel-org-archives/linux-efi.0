@@ -1,44 +1,69 @@
-From: Kees Cook <keescook@chromium.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 16:34:07 -0700
-Message-ID: <CAGXu5jLYEPwvjF=RffK2eBv5=3Fd+t1qJj9zuNuGLajyJLMzXw@mail.gmail.com>
+Date: Tue, 10 Sep 2013 00:53:14 +0000
+Message-ID: <1378774394.17982.36.camel@x230.lan>
 References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	<19562.1378747124@turing-police.cc.vt.edu>
-	<alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-	<1378767723.17982.27.camel@x230.lan>
-	<alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
-	<CAGXu5jJdMXP84TPP-=dtExFkpcGKPGLWnOu1-PZMokz5WhCLwQ@mail.gmail.com>
-	<1378769438.6973.43.camel@dabdike.int.hansenpartnership.com>
+	 <19562.1378747124@turing-police.cc.vt.edu>
+	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+	 <1378767723.17982.27.camel@x230.lan>
+	 <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1378769438.6973.43.camel@dabdike.int.hansenpartnership.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@hansenpartnership.com>
-Cc: David Lang <david@lang.hm>, Matthew Garrett <matthew.garrett@nebula.com>, "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
+Content-Language: en-US
+Content-ID: <C6F5DB27F4467445BC5576EE74DD9198@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: David Lang <david@lang.hm>
+Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 9, 2013 at 4:30 PM, James Bottomley
-<James.Bottomley@hansenpartnership.com> wrote:
-> On Mon, 2013-09-09 at 16:20 -0700, Kees Cook wrote:
->> On Mon, Sep 9, 2013 at 4:19 PM, David Lang <david@lang.hm> wrote:
->> > And if SELinux can do the job, what is the reason for creating this new
->> > option?
->>
->> Not everyone uses SELinux. :) Also, it's rarely controlled the things
->> we want to control here.
->
-> It comes on by default (or its equivalent: AppArmour) in almost every
-> shipping distro.
-
-Right, if "LSM" was meant here, yeah, I do use an LSM. But they, as a
-class of security policy in the kernel, handle isolation of entirely
-different things. The goal of "no way to mess with ring-0" isn't
-really related to the goals of the LSM in general, or specific MACs in
-particular.
-
--Kees
-
--- 
-Kees Cook
-Chrome OS Security
+T24gTW9uLCAyMDEzLTA5LTA5IGF0IDE2OjE5IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KPiBP
+biBNb24sIDkgU2VwIDIwMTMsIE1hdHRoZXcgR2FycmV0dCB3cm90ZToNCj4gPiBIYXZpbmcgdGhv
+dWdodCBhYm91dCB0aGlzLCB0aGUgYW5zd2VyIGlzIG5vLiBJdCBwcmVzZW50cyBleGFjdGx5IHRo
+ZQ0KPiA+IHNhbWUgcHJvYmxlbSBhcyBjYXBhYmlsaXRpZXMgZG8gLSB0aGUgc2V0IGNhbiBuZXZl
+ciBiZSBtZWFuaW5nZnVsbHkNCj4gPiBleHRlbmRlZC4gSWYgYW4gYXBwbGljYXRpb24gc2V0cyBv
+bmx5IHRoZSBiaXRzIGl0IGtub3dzIGFib3V0LCBhbmQgaWYgYQ0KPiA+IG5ldyBzZWN1cml0eS1z
+ZW5zaXRpdmUgZmVhdHVyZSBpcyBhZGRlZCB0byB0aGUga2VybmVsLCB0aGUgZmVhdHVyZSB3aWxs
+DQo+ID4gYmUgbGVmdCBlbmFibGVkIGFuZCB0aGUgc3lzdGVtIHdpbGwgYmUgaW5zZWN1cmUuIEFs
+dGVybmF0aXZlbHksIGlmIGFuDQo+ID4gYXBwbGljYXRpb24gc2V0cyBhbGwgdGhlIGJpdHMgcmVn
+YXJkbGVzcyBvZiB3aGV0aGVyIGl0IGtub3dzIHRoZW0gb3INCj4gPiBub3QsIGl0IG1heSBlbmFi
+bGUgYSBsb2NrZG93biBmZWF0dXJlIHRoYXQgaXQgb3RoZXJ3aXNlIHJlcXVpcmVkLg0KPiANCj4g
+SW4gdGhpcyBjYXNlIHlvdSBhcmUgbm8gbGVzcyBzZWN1cmUgdGhhbiB5b3Ugd2VyZSBiZWZvcmUg
+dGhlIGZlYXR1cmUgd2FzIGFkZGVkLCANCj4geW91IGp1c3QgY2FuJ3QgdGFrZSBhZHZhbnRhZ2Ug
+b2YgdGhlIG5ldyBmZWF0dXJlIHdpdGhvdXQgdXBkYXRpbmcgdXNlcnNwYWNlLg0KDQpOby4gU2F5
+IHNvbWVvbmUgYWRkcyBhbiBhZGRpdGlvbmFsIGxvY2tkb3duIGJpdCB0byBmb3JiaWQgcmF3IGFj
+Y2VzcyB0bw0KbW91bnRlZCBibG9jayBkZXZpY2VzLiBUaGUgIlR1cm4gZXZlcnl0aGluZyBvZmYi
+IGFwcHJvYWNoIG5vdyBtZWFucyB0aGF0DQpJIHdvbid0IGJlIGFibGUgdG8gcGVyZm9ybSByYXcg
+YWNjZXNzIHRvIG1vdW50ZWQgYmxvY2sgZGV2aWNlcywgZXZlbiBpZg0KdGhhdCdzIHNvbWV0aGlu
+ZyB0aGF0IG15IHVzZSBjYXNlIHJlbGllcyBvbi4NCg0KPiA+IFRoZSBvbmx5IHdheSB0aGlzIGlz
+IHVzZWZ1bCBpcyBpZiBhbGwgdGhlIGJpdHMgYXJlIHNlbWFudGljYWxseQ0KPiA+IGVxdWl2YWxl
+bnQsIGFuZCBpbiB0aGF0IGNhc2UgdGhlcmUncyBubyBwb2ludCBpbiBoYXZpbmcgYW55dGhpbmcg
+b3RoZXINCj4gPiB0aGFuIGEgc2luZ2xlIGJpdC4gVXNlcnMgd2hvIHdhbnQgYSBtb3JlIGZpbmUt
+Z3JhaW5lZCBpbnRlcmZhY2Ugc2hvdWxkDQo+ID4gdXNlIG9uZSBvZiB0aGUgZXhpc3RpbmcgbWVj
+aGFuaXNtcyBmb3IgZG9pbmcgc28gLSBsZWF2ZSB0aGUga2VybmVsIG9wZW4NCj4gPiBhbmQgaW1w
+b3NlIHRoZSBzZWN1cml0eSBwb2xpY3kgZnJvbSB1c2Vyc3BhY2UgdXNpbmcgZWl0aGVyIGNhcGFi
+aWxpdGllcw0KPiA+IG9yIHNlbGludXguDQo+IA0KPiBzbyBpZiB5b3Ugb25seSBoYXZlIGEgc2lu
+Z2xlIGJpdCwgaG93IGRvIHlvdSBkZWFsIHdpdGggdGhlIGNhc2Ugd2hlcmUgdGhhdCBiaXQgDQo+
+IGxvY2tzIGRvd24gc29tZXRoaW5nIHRoYXQncyByZXF1aXJlZD8gKHlvdXIgcmVhc29uIGZvciBu
+b3QganVzdCBzZXR0aW5nIGFsbCBiaXRzIA0KPiBpbiB0aGUgZmlyc3QgYXBwcm9hY2gpDQoNCkJl
+Y2F1c2UgdGhhdCBiaXQgaXMgd2VsbC1kZWZpbmVkLCBhbmQgaWYgYW55dGhpbmcgaXMgYWRkZWQg
+dG8gaXQgdGhhdA0KZG9lc24ndCBtYXRjaCB0aGF0IGRlZmluaXRpb24gdGhlbiBpdCdzIGEgYnVn
+Lg0KDQo+IHlvdXIgYXJndW1lbnRzIGRvbid0IHNlZW0gc2VsZiBjb25zaXN0ZW50Lg0KDQpZb3Ug
+ZG9uJ3Qgc2VlbSB0byBoYXZlIGJlZW4gcGF5aW5nIGF0dGVudGlvbiB0byB0aGUgcGFzdCAxMiBt
+b250aHMgb2YNCmRpc2N1c3Npb24uDQoNCj4gSWYgSSdtIGJ1aWxkaW5nIGEga2lvc2sgUEMgKG9y
+IHZvdGluZyBtYWNoaW5lKSwgSSB3YW50IHRvIGRpc2FibGUgYSBsb3Qgb2YgDQo+IHRoaW5ncyB0
+aGF0IEkgY291bGQgbm90IGdldCBhd2F5IHdpdGggZGlzYWJsaW5nIG9uIGEgZ2VuZXJpYyBsYXB0
+b3AuIEFyZSB3ZSANCj4gZ29pbmcgdG8gaGF2ZSBTZWN1cmVsZXZlbCwgUmVhbGx5U2VjdXJlbGV2
+ZWwsIFJlYWxseVJlYWxseVNlY3VyZWxldmVsLCBldGM/IG9yIA0KPiBjYW4gd2UgYWNjZXB0IHRo
+YXQgc2VjdXJpdHkgaXMgbm90IGJpbmFyeSBhbmQgYWxsb3cgdXNlcnMgdG8gZGlzYWJsZSBmZWF0
+dXJlcyANCj4gaW4gYSBtb3JlIGdyYW51YWxhciB3YXk/DQoNCkFueXRoaW5nIG1vcmUgZ3JhbnVs
+YXIgbWVhbnMgdGhhdCB5b3UgdHJ1c3QgeW91ciB1c2Vyc3BhY2UsIGFuZCBpZiB5b3UNCnRydXN0
+IHlvdXIgdXNlcnNwYWNlIHRoZW4geW91IGNhbiBhbHJlYWR5IHNldCB1cCBhIGdyYW51bGFyIHBv
+bGljeSB1c2luZw0KdGhlIGV4aXN0aW5nIHRvb2xzIGZvciB0aGF0IGpvYi4gU28ganVzdCB1c2Ug
+dGhlIGV4aXN0aW5nIHRvb2xzLg0KDQo+IEFuZCBpZiBTRUxpbnV4IGNhbiBkbyB0aGUgam9iLCB3
+aGF0IGlzIHRoZSByZWFzb24gZm9yIGNyZWF0aW5nIHRoaXMgbmV3IG9wdGlvbj8NCg0KQmVjYXVz
+ZSB5b3UgY2FuJ3QgZW1iZWQgYW4gdW5tb2RpZmlhYmxlIHNlbGludXggcG9saWN5IGluIHRoZSBr
+ZXJuZWwuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNv
+bT4NCg==
