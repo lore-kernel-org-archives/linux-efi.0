@@ -1,110 +1,68 @@
-From: David Lang <david@lang.hm>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 20:09:05 -0700 (PDT)
-Message-ID: <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>  <19562.1378747124@turing-police.cc.vt.edu>  <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>  <1378767723.17982.27.camel@x230.lan>  <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
-  <1378774394.17982.36.camel@x230.lan>  <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz> <1378781715.17982.42.camel@x230.lan>
+Date: Tue, 10 Sep 2013 03:53:32 +0000
+Message-ID: <1378785208.17982.54.camel@x230.lan>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
+	 <19562.1378747124@turing-police.cc.vt.edu>
+	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+	 <1378767723.17982.27.camel@x230.lan>
+	 <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
+	 <1378774394.17982.36.camel@x230.lan>
+	 <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz>
+	 <1378781715.17982.42.camel@x230.lan>
+	 <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1378781715.17982.42.camel@x230.lan>
+In-Reply-To: <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
+Content-Language: en-US
+Content-ID: <142CB707003E2D4F94939C0D3F9BE56B@namprd05.prod.outlook.com>
 Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
+To: David Lang <david@lang.hm>
 Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 10 Sep 2013, Matthew Garrett wrote:
-
-> On Mon, 2013-09-09 at 19:44 -0700, David Lang wrote:
->> On Tue, 10 Sep 2013, Matthew Garrett wrote:
->>> No. Say someone adds an additional lockdown bit to forbid raw access to
->>> mounted block devices. The "Turn everything off" approach now means that
->>> I won't be able to perform raw access to mounted block devices, even if
->>> that's something that my use case relies on.
->>
->> I was meaning that if you only turn off features that you know about, the
->> addition of a new thing that can be disabled doesn't make you any worse off than
->> you were.
->
-> Someone adds a new "install_evil()" syscall and adds a disable bit. If I
-> don't disable it, I'm now vulnerable. Please pay attention to earlier
-> discussion.
-
-so instead they add install_evil() and don't have it be disabled by your big 
-switch.
-
-or do you think the existance of this switch will give you veto power over any 
-new system calls unless they include the ability for them to be disabled if they 
-don't match your security model.
-
->>>> so if you only have a single bit, how do you deal with the case where that bit
->>>> locks down something that's required? (your reason for not just setting all bits
->>>> in the first approach)
->>>
->>> Because that bit is well-defined, and if anything is added to it that
->>> doesn't match that definition then it's a bug.
->>
->> it may be well defined, but that doesn't mean that it actually matches what the
->> system owner wants to do.
->
-> If it doesn't match what the system owner wants to do, the system owner
-> doesn't set it. The system owner uses a more appropriate security
-> mechanism instead.
-
-SELinux is a wonderful example of how making a system that users cannot change 
-doesn't improve security, it just gets disabled instead.
-
->> The idea that the programmer can possibly anticipate all possible needs and
->> provide a switch for exactly that need is just wrong. Users will have needs that
->> you never thought of. The best systems are the ones where the creators look at
->> what users are doing and react with "I never imagined doing that"
->
-> Describe the security case for disabling PCI BAR access but permitting
-> i/o port access.
-
-Simple, I have some device that lives on those I/O ports that I want to be able 
-to use.
-
->>> Anything more granular means that you trust your userspace, and if you
->>> trust your userspace then you can already set up a granular policy using
->>> the existing tools for that job. So just use the existing tools.
->>
->> If you can't trust your userspace, how do you know that the userspace has set
->> the big hammer flag in the first place? if you can trust it to throw that
->> switch, you can trust it to throw multiple smaller switches.
->
-> Hence the final patch in the series, and hence also the suggestion for
-> exposing it as a command line option that can be set by the bootloader
-> during an attested boot.
->
->>>> And if SELinux can do the job, what is the reason for creating this new option?
->>>
->>> Because you can't embed an unmodifiable selinux policy in the kernel.
->>
->> Why not, have the policy set in an initramfs that's part of the kernel and have
->> part of that policy be to block all access to the selinux controls.
->
-> Because then someone disables selinux on the kernel command line.
-
-If they can modify the command line, they can remove your command line switch to 
-turn this on.
-
-If you really care about this, why are you using a bootloader that lets you 
-modify the kernel command line in the first place?
-
-In any case, even if you make it impossible to change from the command line, you 
-won't prevent people from changing your system (unless you take control 
-completely away from them with TPM or similar)
-
-remember that the system integrity checking of the original Tivo was defeated by 
-someone dong a binary patch to bypass a routine that they didn't understand that 
-took a lot of time, so they did a binary patch to the bios to speed up boot and 
-discovered that what they did was disable the system integrity checking.
-
-users who own the systems are going to modify them and bypass any restrictions 
-you want to impose.
-
-users who don't own the systems can be defeated by simply not offering them the 
-option to change the settings in the first place.
-
-David Lang
+T24gTW9uLCAyMDEzLTA5LTA5IGF0IDIwOjA5IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KPiBP
+biBUdWUsIDEwIFNlcCAyMDEzLCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQoNCj4gPiBTb21lb25l
+IGFkZHMgYSBuZXcgImluc3RhbGxfZXZpbCgpIiBzeXNjYWxsIGFuZCBhZGRzIGEgZGlzYWJsZSBi
+aXQuIElmIEkNCj4gPiBkb24ndCBkaXNhYmxlIGl0LCBJJ20gbm93IHZ1bG5lcmFibGUuIFBsZWFz
+ZSBwYXkgYXR0ZW50aW9uIHRvIGVhcmxpZXINCj4gPiBkaXNjdXNzaW9uLg0KPiANCj4gc28gaW5z
+dGVhZCB0aGV5IGFkZCBpbnN0YWxsX2V2aWwoKSBhbmQgZG9uJ3QgaGF2ZSBpdCBiZSBkaXNhYmxl
+ZCBieSB5b3VyIGJpZyANCj4gc3dpdGNoLg0KDQpBbmQgdGhhdCdzIGEgYnVnLCBzbyB3ZSBmaXgg
+aXQuDQoNCj4gPiBEZXNjcmliZSB0aGUgc2VjdXJpdHkgY2FzZSBmb3IgZGlzYWJsaW5nIFBDSSBC
+QVIgYWNjZXNzIGJ1dCBwZXJtaXR0aW5nDQo+ID4gaS9vIHBvcnQgYWNjZXNzLg0KPiANCj4gU2lt
+cGxlLCBJIGhhdmUgc29tZSBkZXZpY2UgdGhhdCBsaXZlcyBvbiB0aG9zZSBJL08gcG9ydHMgdGhh
+dCBJIHdhbnQgdG8gYmUgYWJsZSANCj4gdG8gdXNlLg0KDQpUaGF0J3MgYSBncmVhdCBhcmd1bWVu
+dCBmb3IgcGVybWl0dGluZyBpL28gcG9ydCBhY2Nlc3MuIEJ1dCBpbiB0aGF0DQpjYXNlLCB3aHkg
+YXJlIHlvdSBkaXNhYmxpbmcgQkFSIGFjY2Vzcz8gWW91IGNhbiB1c2UgdGhlIGkvbyBwb3J0IGFj
+Y2Vzcw0KdG8gcmVwcm9ncmFtIHRoZSBkZXZpY2UgaW4gcXVlc3Rpb24gaW50byBhIHJhbmdlIHlv
+dSBjYW4gbW9kaWZ5LCB3aGljaA0KYWxsb3dzIHlvdSB0byBhdm9pZCB0aGUgQkFSIHJlc3RyaWN0
+aW9uLg0KDQo+ID4gQmVjYXVzZSB0aGVuIHNvbWVvbmUgZGlzYWJsZXMgc2VsaW51eCBvbiB0aGUg
+a2VybmVsIGNvbW1hbmQgbGluZS4NCj4gDQo+IElmIHRoZXkgY2FuIG1vZGlmeSB0aGUgY29tbWFu
+ZCBsaW5lLCB0aGV5IGNhbiByZW1vdmUgeW91ciBjb21tYW5kIGxpbmUgc3dpdGNoIHRvIA0KPiB0
+dXJuIHRoaXMgb24uDQoNCk5vdCBpbiB0aGUgc2VjdXJlIGJvb3QgY2FzZS4NCg0KPiBJZiB5b3Ug
+cmVhbGx5IGNhcmUgYWJvdXQgdGhpcywgd2h5IGFyZSB5b3UgdXNpbmcgYSBib290bG9hZGVyIHRo
+YXQgbGV0cyB5b3UgDQo+IG1vZGlmeSB0aGUga2VybmVsIGNvbW1hbmQgbGluZSBpbiB0aGUgZmly
+c3QgcGxhY2U/DQoNCkFuZCB0aGVuIHRoZSB1c2VyIGp1c3QgbW9kaWZpZXMgdGhlIGNvbmZpZ3Vy
+YXRpb24gZmlsZSBpbnN0ZWFkLg0KDQo+IEluIGFueSBjYXNlLCBldmVuIGlmIHlvdSBtYWtlIGl0
+IGltcG9zc2libGUgdG8gY2hhbmdlIGZyb20gdGhlIGNvbW1hbmQgbGluZSwgeW91IA0KPiB3b24n
+dCBwcmV2ZW50IHBlb3BsZSBmcm9tIGNoYW5naW5nIHlvdXIgc3lzdGVtICh1bmxlc3MgeW91IHRh
+a2UgY29udHJvbCANCj4gY29tcGxldGVseSBhd2F5IGZyb20gdGhlbSB3aXRoIFRQTSBvciBzaW1p
+bGFyKQ0KDQpUaGF0J3MgZmluZS4gUGVvcGxlIGFyZSBmcmVlIHRvIG1vZGlmeSB0aGVpciBvd24g
+c3lzdGVtcy4NCg0KPiByZW1lbWJlciB0aGF0IHRoZSBzeXN0ZW0gaW50ZWdyaXR5IGNoZWNraW5n
+IG9mIHRoZSBvcmlnaW5hbCBUaXZvIHdhcyBkZWZlYXRlZCBieSANCj4gc29tZW9uZSBkb25nIGEg
+YmluYXJ5IHBhdGNoIHRvIGJ5cGFzcyBhIHJvdXRpbmUgdGhhdCB0aGV5IGRpZG4ndCB1bmRlcnN0
+YW5kIHRoYXQgDQo+IHRvb2sgYSBsb3Qgb2YgdGltZSwgc28gdGhleSBkaWQgYSBiaW5hcnkgcGF0
+Y2ggdG8gdGhlIGJpb3MgdG8gc3BlZWQgdXAgYm9vdCBhbmQgDQo+IGRpc2NvdmVyZWQgdGhhdCB3
+aGF0IHRoZXkgZGlkIHdhcyBkaXNhYmxlIHRoZSBzeXN0ZW0gaW50ZWdyaXR5IGNoZWNraW5nLg0K
+DQpUaGF0J3Mgd2h5IG1vZGVybiBzeXN0ZW1zIHJlcXVpcmUgc2lnbmVkIGZpcm13YXJlIHVwZGF0
+ZXMuDQoNCj4gdXNlcnMgd2hvIG93biB0aGUgc3lzdGVtcyBhcmUgZ29pbmcgdG8gbW9kaWZ5IHRo
+ZW0gYW5kIGJ5cGFzcyBhbnkgcmVzdHJpY3Rpb25zIA0KPiB5b3Ugd2FudCB0byBpbXBvc2UuDQoN
+ClRoZSBpZGVhIGlzbid0IHRvIHByb2R1Y2Ugc29tZXRoaW5nIHRoYXQncyBpbXBvc3NpYmxlIGZv
+ciB0aGUgb3duZXIgb2YgYQ0Kc3lzdGVtIHRvIGRpc2FibGUuIFRoZSBpZGVhIGlzIHRvIHByb2R1
+Y2Ugc29tZXRoaW5nIHRoYXQgY2FuJ3QgYmUgdXNlZA0KdG8gY2lyY3VtdmVudCB0aGUgc2VjdXJp
+dHkgcG9saWN5IHRoYXQgdGhlIHN5c3RlbSBvd25lciBoYXMgY2hvc2VuLg0KQ291bGQgeW91IHBs
+ZWFzZSBnaXZlIG1lIHRoZSBiZW5lZml0IG9mIHRoZSBkb3VidCBhbmQgYXNzdW1lIHRoYXQgSSdt
+DQpub3QgY29tcGxldGVseSB1bmF3YXJlIG9mIGhvdyBjb21wdXRlcnMgd29yaz8NCg0KLS0gDQpN
+YXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
