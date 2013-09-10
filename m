@@ -1,90 +1,73 @@
-From: David Lang <david@lang.hm>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Mon, 9 Sep 2013 19:44:38 -0700 (PDT)
-Message-ID: <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>  <19562.1378747124@turing-police.cc.vt.edu>  <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>  <1378767723.17982.27.camel@x230.lan>  <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
- <1378774394.17982.36.camel@x230.lan>
+Date: Tue, 10 Sep 2013 02:55:15 +0000
+Message-ID: <1378781715.17982.42.camel@x230.lan>
+References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
+	 <19562.1378747124@turing-police.cc.vt.edu>
+	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+	 <1378767723.17982.27.camel@x230.lan>
+	 <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
+	 <1378774394.17982.36.camel@x230.lan>
+	 <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1378774394.17982.36.camel@x230.lan>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.02.1309091938420.1820-UEhY+ZBZOcqqLGM74eQ/YA@public.gmane.org>
+Content-Language: en-US
+Content-ID: <717980D93F543F408B29467DC1C0C3D9-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Lang <david-gFPdbfVZQbY@public.gmane.org>
+Cc: "Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org" <Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 10 Sep 2013, Matthew Garrett wrote:
-
-> On Mon, 2013-09-09 at 16:19 -0700, David Lang wrote:
->> On Mon, 9 Sep 2013, Matthew Garrett wrote:
->>> Having thought about this, the answer is no. It presents exactly the
->>> same problem as capabilities do - the set can never be meaningfully
->>> extended. If an application sets only the bits it knows about, and if a
->>> new security-sensitive feature is added to the kernel, the feature will
->>> be left enabled and the system will be insecure. Alternatively, if an
->>> application sets all the bits regardless of whether it knows them or
->>> not, it may enable a lockdown feature that it otherwise required.
->>
->> In this case you are no less secure than you were before the feature was added,
->> you just can't take advantage of the new feature without updating userspace.
->
-> No. Say someone adds an additional lockdown bit to forbid raw access to
-> mounted block devices. The "Turn everything off" approach now means that
-> I won't be able to perform raw access to mounted block devices, even if
-> that's something that my use case relies on.
-
-I was meaning that if you only turn off features that you know about, the 
-addition of a new thing that can be disabled doesn't make you any worse off than 
-you were.
-
->>> The only way this is useful is if all the bits are semantically
->>> equivalent, and in that case there's no point in having anything other
->>> than a single bit. Users who want a more fine-grained interface should
->>> use one of the existing mechanisms for doing so - leave the kernel open
->>> and impose the security policy from userspace using either capabilities
->>> or selinux.
->>
->> so if you only have a single bit, how do you deal with the case where that bit
->> locks down something that's required? (your reason for not just setting all bits
->> in the first approach)
->
-> Because that bit is well-defined, and if anything is added to it that
-> doesn't match that definition then it's a bug.
-
-it may be well defined, but that doesn't mean that it actually matches what the 
-system owner wants to do.
-
-The idea that the programmer can possibly anticipate all possible needs and 
-provide a switch for exactly that need is just wrong. Users will have needs that 
-you never thought of. The best systems are the ones where the creators look at 
-what users are doing and react with "I never imagined doing that"
-
-defining the "one true way" of operating is just wrong.
-
->> your arguments don't seem self consistent.
->
-> You don't seem to have been paying attention to the past 12 months of
-> discussion.
->
->> If I'm building a kiosk PC (or voting machine), I want to disable a lot of
->> things that I could not get away with disabling on a generic laptop. Are we
->> going to have Securelevel, ReallySecurelevel, ReallyReallySecurelevel, etc? or
->> can we accept that security is not binary and allow users to disable features
->> in a more granualar way?
->
-> Anything more granular means that you trust your userspace, and if you
-> trust your userspace then you can already set up a granular policy using
-> the existing tools for that job. So just use the existing tools.
-
-If you can't trust your userspace, how do you know that the userspace has set 
-the big hammer flag in the first place? if you can trust it to throw that 
-switch, you can trust it to throw multiple smaller switches.
-
->> And if SELinux can do the job, what is the reason for creating this new option?
->
-> Because you can't embed an unmodifiable selinux policy in the kernel.
-
-Why not, have the policy set in an initramfs that's part of the kernel and have 
-part of that policy be to block all access to the selinux controls.
-
-David Lang
+T24gTW9uLCAyMDEzLTA5LTA5IGF0IDE5OjQ0IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KPiBP
+biBUdWUsIDEwIFNlcCAyMDEzLCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQo+ID4gTm8uIFNheSBz
+b21lb25lIGFkZHMgYW4gYWRkaXRpb25hbCBsb2NrZG93biBiaXQgdG8gZm9yYmlkIHJhdyBhY2Nl
+c3MgdG8NCj4gPiBtb3VudGVkIGJsb2NrIGRldmljZXMuIFRoZSAiVHVybiBldmVyeXRoaW5nIG9m
+ZiIgYXBwcm9hY2ggbm93IG1lYW5zIHRoYXQNCj4gPiBJIHdvbid0IGJlIGFibGUgdG8gcGVyZm9y
+bSByYXcgYWNjZXNzIHRvIG1vdW50ZWQgYmxvY2sgZGV2aWNlcywgZXZlbiBpZg0KPiA+IHRoYXQn
+cyBzb21ldGhpbmcgdGhhdCBteSB1c2UgY2FzZSByZWxpZXMgb24uDQo+IA0KPiBJIHdhcyBtZWFu
+aW5nIHRoYXQgaWYgeW91IG9ubHkgdHVybiBvZmYgZmVhdHVyZXMgdGhhdCB5b3Uga25vdyBhYm91
+dCwgdGhlIA0KPiBhZGRpdGlvbiBvZiBhIG5ldyB0aGluZyB0aGF0IGNhbiBiZSBkaXNhYmxlZCBk
+b2Vzbid0IG1ha2UgeW91IGFueSB3b3JzZSBvZmYgdGhhbiANCj4geW91IHdlcmUuDQoNClNvbWVv
+bmUgYWRkcyBhIG5ldyAiaW5zdGFsbF9ldmlsKCkiIHN5c2NhbGwgYW5kIGFkZHMgYSBkaXNhYmxl
+IGJpdC4gSWYgSQ0KZG9uJ3QgZGlzYWJsZSBpdCwgSSdtIG5vdyB2dWxuZXJhYmxlLiBQbGVhc2Ug
+cGF5IGF0dGVudGlvbiB0byBlYXJsaWVyDQpkaXNjdXNzaW9uLg0KDQo+ID4+IHNvIGlmIHlvdSBv
+bmx5IGhhdmUgYSBzaW5nbGUgYml0LCBob3cgZG8geW91IGRlYWwgd2l0aCB0aGUgY2FzZSB3aGVy
+ZSB0aGF0IGJpdA0KPiA+PiBsb2NrcyBkb3duIHNvbWV0aGluZyB0aGF0J3MgcmVxdWlyZWQ/ICh5
+b3VyIHJlYXNvbiBmb3Igbm90IGp1c3Qgc2V0dGluZyBhbGwgYml0cw0KPiA+PiBpbiB0aGUgZmly
+c3QgYXBwcm9hY2gpDQo+ID4NCj4gPiBCZWNhdXNlIHRoYXQgYml0IGlzIHdlbGwtZGVmaW5lZCwg
+YW5kIGlmIGFueXRoaW5nIGlzIGFkZGVkIHRvIGl0IHRoYXQNCj4gPiBkb2Vzbid0IG1hdGNoIHRo
+YXQgZGVmaW5pdGlvbiB0aGVuIGl0J3MgYSBidWcuDQo+IA0KPiBpdCBtYXkgYmUgd2VsbCBkZWZp
+bmVkLCBidXQgdGhhdCBkb2Vzbid0IG1lYW4gdGhhdCBpdCBhY3R1YWxseSBtYXRjaGVzIHdoYXQg
+dGhlIA0KPiBzeXN0ZW0gb3duZXIgd2FudHMgdG8gZG8uDQoNCklmIGl0IGRvZXNuJ3QgbWF0Y2gg
+d2hhdCB0aGUgc3lzdGVtIG93bmVyIHdhbnRzIHRvIGRvLCB0aGUgc3lzdGVtIG93bmVyDQpkb2Vz
+bid0IHNldCBpdC4gVGhlIHN5c3RlbSBvd25lciB1c2VzIGEgbW9yZSBhcHByb3ByaWF0ZSBzZWN1
+cml0eQ0KbWVjaGFuaXNtIGluc3RlYWQuDQoNCj4gVGhlIGlkZWEgdGhhdCB0aGUgcHJvZ3JhbW1l
+ciBjYW4gcG9zc2libHkgYW50aWNpcGF0ZSBhbGwgcG9zc2libGUgbmVlZHMgYW5kIA0KPiBwcm92
+aWRlIGEgc3dpdGNoIGZvciBleGFjdGx5IHRoYXQgbmVlZCBpcyBqdXN0IHdyb25nLiBVc2VycyB3
+aWxsIGhhdmUgbmVlZHMgdGhhdCANCj4geW91IG5ldmVyIHRob3VnaHQgb2YuIFRoZSBiZXN0IHN5
+c3RlbXMgYXJlIHRoZSBvbmVzIHdoZXJlIHRoZSBjcmVhdG9ycyBsb29rIGF0IA0KPiB3aGF0IHVz
+ZXJzIGFyZSBkb2luZyBhbmQgcmVhY3Qgd2l0aCAiSSBuZXZlciBpbWFnaW5lZCBkb2luZyB0aGF0
+Ig0KDQpEZXNjcmliZSB0aGUgc2VjdXJpdHkgY2FzZSBmb3IgZGlzYWJsaW5nIFBDSSBCQVIgYWNj
+ZXNzIGJ1dCBwZXJtaXR0aW5nDQppL28gcG9ydCBhY2Nlc3MuDQoNCj4gPiBBbnl0aGluZyBtb3Jl
+IGdyYW51bGFyIG1lYW5zIHRoYXQgeW91IHRydXN0IHlvdXIgdXNlcnNwYWNlLCBhbmQgaWYgeW91
+DQo+ID4gdHJ1c3QgeW91ciB1c2Vyc3BhY2UgdGhlbiB5b3UgY2FuIGFscmVhZHkgc2V0IHVwIGEg
+Z3JhbnVsYXIgcG9saWN5IHVzaW5nDQo+ID4gdGhlIGV4aXN0aW5nIHRvb2xzIGZvciB0aGF0IGpv
+Yi4gU28ganVzdCB1c2UgdGhlIGV4aXN0aW5nIHRvb2xzLg0KPiANCj4gSWYgeW91IGNhbid0IHRy
+dXN0IHlvdXIgdXNlcnNwYWNlLCBob3cgZG8geW91IGtub3cgdGhhdCB0aGUgdXNlcnNwYWNlIGhh
+cyBzZXQgDQo+IHRoZSBiaWcgaGFtbWVyIGZsYWcgaW4gdGhlIGZpcnN0IHBsYWNlPyBpZiB5b3Ug
+Y2FuIHRydXN0IGl0IHRvIHRocm93IHRoYXQgDQo+IHN3aXRjaCwgeW91IGNhbiB0cnVzdCBpdCB0
+byB0aHJvdyBtdWx0aXBsZSBzbWFsbGVyIHN3aXRjaGVzLg0KDQpIZW5jZSB0aGUgZmluYWwgcGF0
+Y2ggaW4gdGhlIHNlcmllcywgYW5kIGhlbmNlIGFsc28gdGhlIHN1Z2dlc3Rpb24gZm9yDQpleHBv
+c2luZyBpdCBhcyBhIGNvbW1hbmQgbGluZSBvcHRpb24gdGhhdCBjYW4gYmUgc2V0IGJ5IHRoZSBi
+b290bG9hZGVyDQpkdXJpbmcgYW4gYXR0ZXN0ZWQgYm9vdC4NCg0KPiA+PiBBbmQgaWYgU0VMaW51
+eCBjYW4gZG8gdGhlIGpvYiwgd2hhdCBpcyB0aGUgcmVhc29uIGZvciBjcmVhdGluZyB0aGlzIG5l
+dyBvcHRpb24/DQo+ID4NCj4gPiBCZWNhdXNlIHlvdSBjYW4ndCBlbWJlZCBhbiB1bm1vZGlmaWFi
+bGUgc2VsaW51eCBwb2xpY3kgaW4gdGhlIGtlcm5lbC4NCj4gDQo+IFdoeSBub3QsIGhhdmUgdGhl
+IHBvbGljeSBzZXQgaW4gYW4gaW5pdHJhbWZzIHRoYXQncyBwYXJ0IG9mIHRoZSBrZXJuZWwgYW5k
+IGhhdmUgDQo+IHBhcnQgb2YgdGhhdCBwb2xpY3kgYmUgdG8gYmxvY2sgYWxsIGFjY2VzcyB0byB0
+aGUgc2VsaW51eCBjb250cm9scy4NCg0KQmVjYXVzZSB0aGVuIHNvbWVvbmUgZGlzYWJsZXMgc2Vs
+aW51eCBvbiB0aGUga2VybmVsIGNvbW1hbmQgbGluZS4NCg0KLS0gDQpNYXR0aGV3IEdhcnJldHQg
+PG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
