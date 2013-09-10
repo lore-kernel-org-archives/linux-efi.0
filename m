@@ -1,68 +1,35 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
+From: Henrique de Moraes Holschuh <hmh-N3TV7GIv+o9fyO9Q7EP/yw@public.gmane.org>
 Subject: Re: [PATCH 00/12] One more attempt at useful kernel lockdown
-Date: Tue, 10 Sep 2013 03:53:32 +0000
-Message-ID: <1378785208.17982.54.camel@x230.lan>
+Date: Tue, 10 Sep 2013 14:23:18 -0300
+Message-ID: <20130910172318.GB21530@khazad-dum.debian.net>
 References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	 <19562.1378747124@turing-police.cc.vt.edu>
-	 <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
-	 <1378767723.17982.27.camel@x230.lan>
-	 <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
-	 <1378774394.17982.36.camel@x230.lan>
-	 <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz>
-	 <1378781715.17982.42.camel@x230.lan>
-	 <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
+ <19562.1378747124@turing-police.cc.vt.edu>
+ <alpine.DEB.2.02.1309091119330.2479@nftneq.ynat.uz>
+ <1378767723.17982.27.camel@x230.lan>
+ <alpine.DEB.2.02.1309091614010.2479@nftneq.ynat.uz>
+ <1378774394.17982.36.camel@x230.lan>
+ <alpine.DEB.2.02.1309091938420.1820@nftneq.ynat.uz>
+ <1378781715.17982.42.camel@x230.lan>
+ <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
+ <1378785208.17982.54.camel@x230.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.02.1309092002060.1820@nftneq.ynat.uz>
-Content-Language: en-US
-Content-ID: <142CB707003E2D4F94939C0D3F9BE56B@namprd05.prod.outlook.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: David Lang <david@lang.hm>
-Cc: "Valdis.Kletnieks@vt.edu" <Valdis.Kletnieks@vt.edu>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1378785208.17982.54.camel-+5W/JHIUVxg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: David Lang <david-gFPdbfVZQbY@public.gmane.org>, "Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org" <Valdis.Kletnieks-PjAqaU27lzQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gTW9uLCAyMDEzLTA5LTA5IGF0IDIwOjA5IC0wNzAwLCBEYXZpZCBMYW5nIHdyb3RlOg0KPiBP
-biBUdWUsIDEwIFNlcCAyMDEzLCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQoNCj4gPiBTb21lb25l
-IGFkZHMgYSBuZXcgImluc3RhbGxfZXZpbCgpIiBzeXNjYWxsIGFuZCBhZGRzIGEgZGlzYWJsZSBi
-aXQuIElmIEkNCj4gPiBkb24ndCBkaXNhYmxlIGl0LCBJJ20gbm93IHZ1bG5lcmFibGUuIFBsZWFz
-ZSBwYXkgYXR0ZW50aW9uIHRvIGVhcmxpZXINCj4gPiBkaXNjdXNzaW9uLg0KPiANCj4gc28gaW5z
-dGVhZCB0aGV5IGFkZCBpbnN0YWxsX2V2aWwoKSBhbmQgZG9uJ3QgaGF2ZSBpdCBiZSBkaXNhYmxl
-ZCBieSB5b3VyIGJpZyANCj4gc3dpdGNoLg0KDQpBbmQgdGhhdCdzIGEgYnVnLCBzbyB3ZSBmaXgg
-aXQuDQoNCj4gPiBEZXNjcmliZSB0aGUgc2VjdXJpdHkgY2FzZSBmb3IgZGlzYWJsaW5nIFBDSSBC
-QVIgYWNjZXNzIGJ1dCBwZXJtaXR0aW5nDQo+ID4gaS9vIHBvcnQgYWNjZXNzLg0KPiANCj4gU2lt
-cGxlLCBJIGhhdmUgc29tZSBkZXZpY2UgdGhhdCBsaXZlcyBvbiB0aG9zZSBJL08gcG9ydHMgdGhh
-dCBJIHdhbnQgdG8gYmUgYWJsZSANCj4gdG8gdXNlLg0KDQpUaGF0J3MgYSBncmVhdCBhcmd1bWVu
-dCBmb3IgcGVybWl0dGluZyBpL28gcG9ydCBhY2Nlc3MuIEJ1dCBpbiB0aGF0DQpjYXNlLCB3aHkg
-YXJlIHlvdSBkaXNhYmxpbmcgQkFSIGFjY2Vzcz8gWW91IGNhbiB1c2UgdGhlIGkvbyBwb3J0IGFj
-Y2Vzcw0KdG8gcmVwcm9ncmFtIHRoZSBkZXZpY2UgaW4gcXVlc3Rpb24gaW50byBhIHJhbmdlIHlv
-dSBjYW4gbW9kaWZ5LCB3aGljaA0KYWxsb3dzIHlvdSB0byBhdm9pZCB0aGUgQkFSIHJlc3RyaWN0
-aW9uLg0KDQo+ID4gQmVjYXVzZSB0aGVuIHNvbWVvbmUgZGlzYWJsZXMgc2VsaW51eCBvbiB0aGUg
-a2VybmVsIGNvbW1hbmQgbGluZS4NCj4gDQo+IElmIHRoZXkgY2FuIG1vZGlmeSB0aGUgY29tbWFu
-ZCBsaW5lLCB0aGV5IGNhbiByZW1vdmUgeW91ciBjb21tYW5kIGxpbmUgc3dpdGNoIHRvIA0KPiB0
-dXJuIHRoaXMgb24uDQoNCk5vdCBpbiB0aGUgc2VjdXJlIGJvb3QgY2FzZS4NCg0KPiBJZiB5b3Ug
-cmVhbGx5IGNhcmUgYWJvdXQgdGhpcywgd2h5IGFyZSB5b3UgdXNpbmcgYSBib290bG9hZGVyIHRo
-YXQgbGV0cyB5b3UgDQo+IG1vZGlmeSB0aGUga2VybmVsIGNvbW1hbmQgbGluZSBpbiB0aGUgZmly
-c3QgcGxhY2U/DQoNCkFuZCB0aGVuIHRoZSB1c2VyIGp1c3QgbW9kaWZpZXMgdGhlIGNvbmZpZ3Vy
-YXRpb24gZmlsZSBpbnN0ZWFkLg0KDQo+IEluIGFueSBjYXNlLCBldmVuIGlmIHlvdSBtYWtlIGl0
-IGltcG9zc2libGUgdG8gY2hhbmdlIGZyb20gdGhlIGNvbW1hbmQgbGluZSwgeW91IA0KPiB3b24n
-dCBwcmV2ZW50IHBlb3BsZSBmcm9tIGNoYW5naW5nIHlvdXIgc3lzdGVtICh1bmxlc3MgeW91IHRh
-a2UgY29udHJvbCANCj4gY29tcGxldGVseSBhd2F5IGZyb20gdGhlbSB3aXRoIFRQTSBvciBzaW1p
-bGFyKQ0KDQpUaGF0J3MgZmluZS4gUGVvcGxlIGFyZSBmcmVlIHRvIG1vZGlmeSB0aGVpciBvd24g
-c3lzdGVtcy4NCg0KPiByZW1lbWJlciB0aGF0IHRoZSBzeXN0ZW0gaW50ZWdyaXR5IGNoZWNraW5n
-IG9mIHRoZSBvcmlnaW5hbCBUaXZvIHdhcyBkZWZlYXRlZCBieSANCj4gc29tZW9uZSBkb25nIGEg
-YmluYXJ5IHBhdGNoIHRvIGJ5cGFzcyBhIHJvdXRpbmUgdGhhdCB0aGV5IGRpZG4ndCB1bmRlcnN0
-YW5kIHRoYXQgDQo+IHRvb2sgYSBsb3Qgb2YgdGltZSwgc28gdGhleSBkaWQgYSBiaW5hcnkgcGF0
-Y2ggdG8gdGhlIGJpb3MgdG8gc3BlZWQgdXAgYm9vdCBhbmQgDQo+IGRpc2NvdmVyZWQgdGhhdCB3
-aGF0IHRoZXkgZGlkIHdhcyBkaXNhYmxlIHRoZSBzeXN0ZW0gaW50ZWdyaXR5IGNoZWNraW5nLg0K
-DQpUaGF0J3Mgd2h5IG1vZGVybiBzeXN0ZW1zIHJlcXVpcmUgc2lnbmVkIGZpcm13YXJlIHVwZGF0
-ZXMuDQoNCj4gdXNlcnMgd2hvIG93biB0aGUgc3lzdGVtcyBhcmUgZ29pbmcgdG8gbW9kaWZ5IHRo
-ZW0gYW5kIGJ5cGFzcyBhbnkgcmVzdHJpY3Rpb25zIA0KPiB5b3Ugd2FudCB0byBpbXBvc2UuDQoN
-ClRoZSBpZGVhIGlzbid0IHRvIHByb2R1Y2Ugc29tZXRoaW5nIHRoYXQncyBpbXBvc3NpYmxlIGZv
-ciB0aGUgb3duZXIgb2YgYQ0Kc3lzdGVtIHRvIGRpc2FibGUuIFRoZSBpZGVhIGlzIHRvIHByb2R1
-Y2Ugc29tZXRoaW5nIHRoYXQgY2FuJ3QgYmUgdXNlZA0KdG8gY2lyY3VtdmVudCB0aGUgc2VjdXJp
-dHkgcG9saWN5IHRoYXQgdGhlIHN5c3RlbSBvd25lciBoYXMgY2hvc2VuLg0KQ291bGQgeW91IHBs
-ZWFzZSBnaXZlIG1lIHRoZSBiZW5lZml0IG9mIHRoZSBkb3VidCBhbmQgYXNzdW1lIHRoYXQgSSdt
-DQpub3QgY29tcGxldGVseSB1bmF3YXJlIG9mIGhvdyBjb21wdXRlcnMgd29yaz8NCg0KLS0gDQpN
-YXR0aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
+On Tue, 10 Sep 2013, Matthew Garrett wrote:
+> That's why modern systems require signed firmware updates.
+
+Linux doesn't.  Is someone working on adding signature support to the
+runtime firmware loader?
+
+-- 
+  "One disk to rule them all, One disk to find them. One disk to bring
+  them all and in the darkness grind them. In the Land of Redmond
+  where the shadows lie." -- The Silicon Valley Tarot
+  Henrique Holschuh
