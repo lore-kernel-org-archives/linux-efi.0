@@ -1,51 +1,37 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] EFI: use nr_tables param directly in efi_config_init
-Date: Thu, 12 Sep 2013 16:45:28 +0800
-Message-ID: <20130912084528.GA13448@dhcp-16-126.nay.redhat.com>
+From: Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
+Date: Thu, 12 Sep 2013 15:30:52 -0700
+Message-ID: <1379025052.1285.52.camel@dvhart-mobl4.amr.corp.intel.com>
+References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
+	 <516EAC4A.6040202@console-pimps.org> <516F1B90.9040508@nexus-software.ie>
+	 <516FD24A.3070502@console-pimps.org> <51700876.1000305@intel.com>
+	 <51701D2E.6060903@console-pimps.org> <51708D3D.9010707@intel.com>
+	 <5170F736.2060803@console-pimps.org>
+	 <1378835007.19978.125.camel@dvhart-mobl4.amr.corp.intel.com>
+	 <20130912075500.GC895@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <20130912075500.GC895-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-efi_config_init has the parameter nr_tables. Just use it instead of
-dereference efi.systab->nr_tables.
+On Thu, 2013-09-12 at 08:55 +0100, Matt Fleming wrote:
+> On Tue, 10 Sep, at 10:43:27AM, Darren Hart wrote:
+> > Josh OK'd this, but as far as I can tell, it hasn't made it upstream
+> > yet. Matt was there an alternate fixed pushed?
+> 
+> Nope, this one slipped through the cracks. Thanks for following up!
+> 
+> Here's the patch I just applied on the 'urgent' branch.
+> 
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/x86/platform/efi/efi.c |    7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+Excellent, thank you Matt.
 
---- linux-2.6.orig/arch/x86/platform/efi/efi.c
-+++ linux-2.6/arch/x86/platform/efi/efi.c
-@@ -599,7 +599,7 @@ static int __init efi_config_init(u64 ta
- 
- 	tablep = config_tables;
- 	pr_info("");
--	for (i = 0; i < efi.systab->nr_tables; i++) {
-+	for (i = 0; i < nr_tables; i++) {
- 		efi_guid_t guid;
- 		unsigned long table;
- 
-@@ -612,8 +612,7 @@ static int __init efi_config_init(u64 ta
- 			if (table64 >> 32) {
- 				pr_cont("\n");
- 				pr_err("Table located above 4GB, disabling EFI.\n");
--				early_iounmap(config_tables,
--					      efi.systab->nr_tables * sz);
-+				early_iounmap(config_tables, nr_tables * sz);
- 				return -EINVAL;
- 			}
- #endif
-@@ -648,7 +647,7 @@ static int __init efi_config_init(u64 ta
- 		tablep += sz;
- 	}
- 	pr_cont("\n");
--	early_iounmap(config_tables, efi.systab->nr_tables * sz);
-+	early_iounmap(config_tables, nr_tables * sz);
- 	return 0;
- }
- 
+-- 
+Darren Hart
+Intel Open Source Technology Center
+Yocto Project - Linux Kernel
