@@ -1,37 +1,39 @@
-From: Darren Hart <darren.hart-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] Remove warning in efi_enter_virtual_mode
-Date: Thu, 12 Sep 2013 15:30:52 -0700
-Message-ID: <1379025052.1285.52.camel@dvhart-mobl4.amr.corp.intel.com>
-References: <1366127886-31460-1-git-send-email-bryan.odonoghue.lkml@nexus-software.ie>
-	 <516EAC4A.6040202@console-pimps.org> <516F1B90.9040508@nexus-software.ie>
-	 <516FD24A.3070502@console-pimps.org> <51700876.1000305@intel.com>
-	 <51701D2E.6060903@console-pimps.org> <51708D3D.9010707@intel.com>
-	 <5170F736.2060803@console-pimps.org>
-	 <1378835007.19978.125.camel@dvhart-mobl4.amr.corp.intel.com>
-	 <20130912075500.GC895@console-pimps.org>
+From: "Arend van Spriel" <arend-dY08KVG/lbpWk0Htik3J/w@public.gmane.org>
+Subject: access efi variables
+Date: Fri, 13 Sep 2013 17:37:29 +0200
+Message-ID: <52333139.6020203@broadcom.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain;
+ charset=iso-8859-1;
+ format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130912075500.GC895-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Bryan O'Donoghue <bryan.odonoghue.lkml-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-09-12 at 08:55 +0100, Matt Fleming wrote:
-> On Tue, 10 Sep, at 10:43:27AM, Darren Hart wrote:
-> > Josh OK'd this, but as far as I can tell, it hasn't made it upstream
-> > yet. Matt was there an alternate fixed pushed?
-> 
-> Nope, this one slipped through the cracks. Thanks for following up!
-> 
-> Here's the patch I just applied on the 'urgent' branch.
-> 
+I need to obtain a uefi variable so I went looking at the API in 
+include/linux/efi.h. I found the following definition:
 
-Excellent, thank you Matt.
+/*
+  * The maximum size of VariableName + Data = 1024
+  * Therefore, it's reasonable to save that much
+  * space in each part of the structure,
+  * and we use a page for reading/writing.
+  */
 
--- 
-Darren Hart
-Intel Open Source Technology Center
-Yocto Project - Linux Kernel
+struct efi_variable {
+	efi_char16_t  VariableName[1024/sizeof(efi_char16_t)];
+	efi_guid_t    VendorGuid;
+	unsigned long DataSize;
+	__u8          Data[1024];
+	efi_status_t  Status;
+	__u32         Attributes;
+} __attribute__((packed));
+
+But according to the specs the variable I need to obtain is 2k bytes. 
+Should I expect trouble :-p
+
+Regards,
+Arend
