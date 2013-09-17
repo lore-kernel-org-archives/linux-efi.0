@@ -1,53 +1,148 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 13/17] Allow efi_free() to be called with size of 0, and do nothing in that case.
-Date: Mon, 16 Sep 2013 21:11:29 -0700
-Message-ID: <1379391093-27948-14-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 08/17] Generalize relocate_kernel() for use by other architectures.
+Date: Mon, 16 Sep 2013 21:11:24 -0700
+Message-ID: <1379391093-27948-9-git-send-email-roy.franz@linaro.org>
 References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com
+Cc: leif.lindholm@linaro.org, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Make efi_free() safely callable with size of 0, similar to free() being
-callable with NULL pointers.
-Remove size checks that this makes redundant.  This also avoids some
-size checks in the ARM EFI stub code that will be added as well.
+Rename relocate_kernel() to efi_relocate_kernel(), and take
+parameters rather than x86 specific structure.  Add max_addr
+argument as for ARM we have some address constraints that we
+need to enforce when relocating the kernel.  Add alloc_size
+parameter for use by ARM64 which uses an uncompressed kernel,
+and needs to allocate space for BSS.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c       |    3 +--
- drivers/firmware/efi/efi-stub-helper.c |    3 +++
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |   12 ++++--
+ drivers/firmware/efi/efi-stub-helper.c |   74 ++++++++++++++++++++++----------
+ 2 files changed, 60 insertions(+), 26 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index e1fbb2e..2bf1f83 100644
+index 5bbba86..7fe2754 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -506,8 +506,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+@@ -730,13 +730,19 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
  
- 	return boot_params;
- fail2:
--	if (options_size)
--		efi_free(sys_table, options_size, hdr->cmd_line_ptr);
-+	efi_free(sys_table, options_size, hdr->cmd_line_ptr);
- fail:
- 	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
- 	return NULL;
+ 	/*
+ 	 * If the kernel isn't already loaded at the preferred load
+-	 * address, relocate it.
++	 * address, relocate it.  Enforce allocation in 32 bit
++	 * addressable space.
+ 	 */
+ 	if (hdr->pref_address != hdr->code32_start) {
+-		status = relocate_kernel(hdr);
+-
++		unsigned long bzimage_addr = hdr->code32_start;
++		status = efi_relocate_kernel(sys_table, &bzimage_addr,
++					     hdr->init_size, hdr->init_size,
++					     hdr->pref_address);
+ 		if (status != EFI_SUCCESS)
+ 			goto fail;
++
++		hdr->pref_address = hdr->code32_start;
++		hdr->code32_start = bzimage_addr;
+ 	}
+ 
+ 	status = exit_boot(boot_params, handle);
 diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index ca1592b..06ef01c 100644
+index 1d5f219..e34040e 100644
 --- a/drivers/firmware/efi/efi-stub-helper.c
 +++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -253,6 +253,9 @@ static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
- {
- 	unsigned long nr_pages;
+@@ -483,38 +483,66 @@ fail:
  
-+	if (!size)
-+		return;
+ 	return status;
+ }
+-
+-static efi_status_t relocate_kernel(struct setup_header *hdr)
++/* Relocate a kernel image, either compressed or uncompressed.
++ * In the ARM64 case, all kernel images are currently
++ * uncompressed, and as such when we relocate it we need to
++ * allocate additional space for the BSS segment. Any low
++ * memory that this function should avoid needs to be
++ * unavailable in the EFI memory map, as if the preferred
++ * address is not available the lowest available address will
++ * be used.
++ */
++static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
++					unsigned long *image_addr,
++					unsigned long image_size,
++					unsigned long alloc_size,
++					unsigned long preferred_addr)
+ {
+-	unsigned long start, nr_pages;
++	unsigned long cur_image_addr;
++	unsigned long new_addr = 0;
+ 	efi_status_t status;
++	unsigned long nr_pages;
++	efi_physical_addr_t efi_addr = preferred_addr;
+ 
+-	/*
+-	 * The EFI firmware loader could have placed the kernel image
+-	 * anywhere in memory, but the kernel has various restrictions
+-	 * on the max physical address it can run at. Attempt to move
+-	 * the kernel to boot_params.pref_address, or as low as
+-	 * possible.
+-	 */
+-	start = hdr->pref_address;
+-	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	if (!image_addr || !image_size || !alloc_size)
++		return EFI_INVALID_PARAMETER;
++	if (alloc_size < image_size)
++		return EFI_INVALID_PARAMETER;
+ 
+-	status = efi_call_phys4(sys_table->boottime->allocate_pages,
++	cur_image_addr = *image_addr;
 +
- 	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
- 	efi_call_phys2(sys_table_arg->boottime->free_pages, addr, nr_pages);
++	/* The EFI firmware loader could have placed the kernel image
++	 * anywhere in memory, but the kernel has restrictions on the
++	 * anywhere in memory, but the kernel has restrictions on the
++	 * max physical address it can run at.  Some architectures
++	 * also have a prefered address, so first try to relocate
++	 * to the preferred address.
++	 */
++	nr_pages = round_up(alloc_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	status = efi_call_phys4(sys_table_arg->boottime->allocate_pages,
+ 				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+-				nr_pages, &start);
++				nr_pages, &efi_addr);
++	new_addr = efi_addr;
++	/* If preferred address allocation failed allocate as low as
++	 * possible. */
+ 	if (status != EFI_SUCCESS) {
+-		status = efi_low_alloc(sys_table, hdr->init_size,
+-				   hdr->kernel_alignment, &start);
+-		if (status != EFI_SUCCESS)
+-			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
++		status = efi_low_alloc(sys_table_arg, alloc_size, 0,
++				       &new_addr);
++	}
++	if (status != EFI_SUCCESS) {
++		efi_printk(sys_table_arg, "ERROR: Failed to allocate usable memory for kernel.\n");
++		return status;
+ 	}
+ 
+-	if (status == EFI_SUCCESS)
+-		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
+-		       hdr->init_size);
++	/* We know source/dest won't overlap since both memory ranges
++	 * have been allocated by UEFI, so we can safely use memcpy.
++	 */
++	memcpy((void *)new_addr, (void *)cur_image_addr, image_size);
++	/* Zero any extra space we may have allocated for BSS. */
++	memset((void *)(new_addr + image_size), alloc_size - image_size, 0);
+ 
+-	hdr->pref_address = hdr->code32_start;
+-	hdr->code32_start = (__u32)start;
++	/* Return the new address of the relocated image. */
++	*image_addr = new_addr;
+ 
+ 	return status;
  }
 -- 
 1.7.10.4
