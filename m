@@ -1,79 +1,181 @@
 From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH V4 00/17] ARM EFI stub common code
-Date: Mon, 16 Sep 2013 21:11:16 -0700
-Message-ID: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+Subject: [PATCH 01/17] EFI stub documentation updates
+Date: Mon, 16 Sep 2013 21:11:17 -0700
+Message-ID: <1379391093-27948-2-git-send-email-roy.franz@linaro.org>
+References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch is the common/x86 portion of the ARM EFI stub
-patchset broken out.  These changes support the addition
-of EFI stub support for the ARM and ARM64 architectures.
-The common code that is now shared in efi-stub-helper.c
-is based on code in the x86 stub that has been generalized
-to support other architectures.
+Move efi-stub.txt out of x86 directory and into common directory
+in preparation for adding ARM EFI stub support.
 
-
-
-(Previously these changes were submitted as part of
-the "EFI stub for ARM" patch series that included the
-common/x86 changes as well as the ARM changes.)
-Changes since V3:
-* Made relocate_kernel() a shared function.
-* Made command line unicode to ASCII conversion ASCII
-  a shared function
-* Updated efi_get_memory_map() to return descriptor version,
-  and updated x86 stub to use it to retrieve final memory map.
-* removed min_address argument of efi_low_alloc(), as it is
-  no longer used.
-* Squashed very tiny patch moving EFI_READ_CHUNK_SIZE into
-  related patch.
-
-
-Changes since v2:
-* EFI bugfix "correct call to free_pages" that patch series
-  depends on now in mainline
-* remove unnecessary zimage_size variable from relocate_kernel()
-* correct return types on EFI functions - should be efi_status_t, not int.
-
-Changes since V1:
-* Broke up changes to x86 and common code into more patches.
-  10 more patches in this series.
-
-
-Roy Franz (17):
-  EFI stub documentation updates
-  Add proper definitions for some EFI function pointers.
-  Move common EFI stub code from x86 arch code to common location
-  Add system table pointer argument to shared functions.
-  Rename memory allocation/free functions
-  Enforce minimum alignment of 1 page on allocations.
-  Move relocate_kernel() to shared file.
-  Generalize relocate_kernel() for use by other architectures.
-  Move unicode to ASCII conversion to shared function.
-  Rename __get_map() to efi_get_memory_map()
-  generalize efi_get_memory_map()
-  use efi_get_memory_map() to get final map for x86
-  Allow efi_free() to be called with size of 0, and do nothing in that
-    case.
-  Generalize handle_ramdisks() and rename to handle_cmdline_files().
-  Renames in handle_cmdline_files() to complete generalization.
-  Fix types in EFI calls to match EFI function definitions.
-  resolve warnings found on ARM compile
-
- Documentation/efi-stub.txt             |   65 ++++
- Documentation/x86/efi-stub.txt         |   65 ----
- arch/x86/Kconfig                       |    2 +-
- arch/x86/boot/compressed/eboot.c       |  582 ++---------------------------
- arch/x86/boot/compressed/eboot.h       |    9 -
- drivers/firmware/efi/efi-stub-helper.c |  627 ++++++++++++++++++++++++++++++++
- include/linux/efi.h                    |   50 ++-
- 7 files changed, 767 insertions(+), 633 deletions(-)
+Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ Documentation/efi-stub.txt     |   65 ++++++++++++++++++++++++++++++++++++++++
+ Documentation/x86/efi-stub.txt |   65 ----------------------------------------
+ arch/x86/Kconfig               |    2 +-
+ 3 files changed, 66 insertions(+), 66 deletions(-)
  create mode 100644 Documentation/efi-stub.txt
  delete mode 100644 Documentation/x86/efi-stub.txt
- create mode 100644 drivers/firmware/efi/efi-stub-helper.c
 
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+new file mode 100644
+index 0000000..44e6bb6
+--- /dev/null
++++ b/Documentation/efi-stub.txt
+@@ -0,0 +1,65 @@
++			  The EFI Boot Stub
++		     ---------------------------
++
++On the x86 platform, a bzImage can masquerade as a PE/COFF image,
++thereby convincing EFI firmware loaders to load it as an EFI
++executable. The code that modifies the bzImage header, along with the
++EFI-specific entry point that the firmware loader jumps to are
++collectively known as the "EFI boot stub", and live in
++arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
++respectively.
++
++By using the EFI boot stub it's possible to boot a Linux kernel
++without the use of a conventional EFI boot loader, such as grub or
++elilo. Since the EFI boot stub performs the jobs of a boot loader, in
++a certain sense it *IS* the boot loader.
++
++The EFI boot stub is enabled with the CONFIG_EFI_STUB kernel option.
++
++
++**** How to install bzImage.efi
++
++The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
++System Partiion (ESP) and renamed with the extension ".efi". Without
++the extension the EFI firmware loader will refuse to execute it. It's
++not possible to execute bzImage.efi from the usual Linux file systems
++because EFI firmware doesn't have support for them.
++
++
++**** Passing kernel parameters from the EFI shell
++
++Arguments to the kernel can be passed after bzImage.efi, e.g.
++
++	fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
++
++
++**** The "initrd=" option
++
++Like most boot loaders, the EFI stub allows the user to specify
++multiple initrd files using the "initrd=" option. This is the only EFI
++stub-specific command line parameter, everything else is passed to the
++kernel when it boots.
++
++The path to the initrd file must be an absolute path from the
++beginning of the ESP, relative path names do not work. Also, the path
++is an EFI-style path and directory elements must be separated with
++backslashes (\). For example, given the following directory layout,
++
++fs0:>
++	Kernels\
++			bzImage.efi
++			initrd-large.img
++
++	Ramdisks\
++			initrd-small.img
++			initrd-medium.img
++
++to boot with the initrd-large.img file if the current working
++directory is fs0:\Kernels, the following command must be used,
++
++	fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
++
++Notice how bzImage.efi can be specified with a relative path. That's
++because the image we're executing is interpreted by the EFI shell,
++which understands relative paths, whereas the rest of the command line
++is passed to bzImage.efi.
+diff --git a/Documentation/x86/efi-stub.txt b/Documentation/x86/efi-stub.txt
+deleted file mode 100644
+index 44e6bb6..0000000
+--- a/Documentation/x86/efi-stub.txt
++++ /dev/null
+@@ -1,65 +0,0 @@
+-			  The EFI Boot Stub
+-		     ---------------------------
+-
+-On the x86 platform, a bzImage can masquerade as a PE/COFF image,
+-thereby convincing EFI firmware loaders to load it as an EFI
+-executable. The code that modifies the bzImage header, along with the
+-EFI-specific entry point that the firmware loader jumps to are
+-collectively known as the "EFI boot stub", and live in
+-arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+-respectively.
+-
+-By using the EFI boot stub it's possible to boot a Linux kernel
+-without the use of a conventional EFI boot loader, such as grub or
+-elilo. Since the EFI boot stub performs the jobs of a boot loader, in
+-a certain sense it *IS* the boot loader.
+-
+-The EFI boot stub is enabled with the CONFIG_EFI_STUB kernel option.
+-
+-
+-**** How to install bzImage.efi
+-
+-The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
+-System Partiion (ESP) and renamed with the extension ".efi". Without
+-the extension the EFI firmware loader will refuse to execute it. It's
+-not possible to execute bzImage.efi from the usual Linux file systems
+-because EFI firmware doesn't have support for them.
+-
+-
+-**** Passing kernel parameters from the EFI shell
+-
+-Arguments to the kernel can be passed after bzImage.efi, e.g.
+-
+-	fs0:> bzImage.efi console=ttyS0 root=/dev/sda4
+-
+-
+-**** The "initrd=" option
+-
+-Like most boot loaders, the EFI stub allows the user to specify
+-multiple initrd files using the "initrd=" option. This is the only EFI
+-stub-specific command line parameter, everything else is passed to the
+-kernel when it boots.
+-
+-The path to the initrd file must be an absolute path from the
+-beginning of the ESP, relative path names do not work. Also, the path
+-is an EFI-style path and directory elements must be separated with
+-backslashes (\). For example, given the following directory layout,
+-
+-fs0:>
+-	Kernels\
+-			bzImage.efi
+-			initrd-large.img
+-
+-	Ramdisks\
+-			initrd-small.img
+-			initrd-medium.img
+-
+-to boot with the initrd-large.img file if the current working
+-directory is fs0:\Kernels, the following command must be used,
+-
+-	fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
+-
+-Notice how bzImage.efi can be specified with a relative path. That's
+-because the image we're executing is interpreted by the EFI shell,
+-which understands relative paths, whereas the rest of the command line
+-is passed to bzImage.efi.
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index b32ebf9..ec65b51 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1579,7 +1579,7 @@ config EFI_STUB
+           This kernel feature allows a bzImage to be loaded directly
+ 	  by EFI firmware without the use of a bootloader.
+ 
+-	  See Documentation/x86/efi-stub.txt for more information.
++	  See Documentation/efi-stub.txt for more information.
+ 
+ config SECCOMP
+ 	def_bool y
 -- 
 1.7.10.4
