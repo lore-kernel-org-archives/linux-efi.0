@@ -1,172 +1,111 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH 02/17] Add proper definitions for some EFI function pointers.
-Date: Mon, 16 Sep 2013 21:11:18 -0700
-Message-ID: <1379391093-27948-3-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 07/17] Move relocate_kernel() to shared file.
+Date: Mon, 16 Sep 2013 21:11:23 -0700
+Message-ID: <1379391093-27948-8-git-send-email-roy.franz@linaro.org>
 References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com
-Cc: leif.lindholm@linaro.org, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The x86/AMD64 EFI stubs must use a call wrapper to convert between
-the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
-the ABIs are compatible, so we can directly invoke the function
-pointers.  The functions that are used by the ARM stub are updated
-to match the EFI definitions.
-Also add some EFI types used by EFI functions.
+The relocate_kernel() function will be generalized and used
+by all architectures, as they all have similar requirements.
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
-Acked-by: Mark Salter <msalter@redhat.com>
-Reviewed-by: Grant Likely <grant.likely@linaro.org>
+Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.h |    8 ------
- include/linux/efi.h              |   50 ++++++++++++++++++++++++++------------
- 2 files changed, 34 insertions(+), 24 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |   34 -------------------------------
+ drivers/firmware/efi/efi-stub-helper.c |   35 ++++++++++++++++++++++++++++++++
+ 2 files changed, 35 insertions(+), 34 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
-index e5b0a8f..0226510 100644
---- a/arch/x86/boot/compressed/eboot.h
-+++ b/arch/x86/boot/compressed/eboot.h
-@@ -10,8 +10,6 @@
- #define SEG_GRANULARITY_4KB	(1 << 0)
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 2a4430a..5bbba86 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -677,40 +677,6 @@ free_mem_map:
+ 	return status;
+ }
  
- #define DESC_TYPE_CODE_DATA	(1 << 0)
+-static efi_status_t relocate_kernel(struct setup_header *hdr)
+-{
+-	unsigned long start, nr_pages;
+-	efi_status_t status;
 -
--#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
- #define EFI_READ_CHUNK_SIZE	(1024 * 1024)
- 
- #define EFI_CONSOLE_OUT_DEVICE_GUID    \
-@@ -62,10 +60,4 @@ struct efi_uga_draw_protocol {
- 	void *blt;
- };
- 
--struct efi_simple_text_output_protocol {
--	void *reset;
--	void *output_string;
--	void *test_string;
--};
+-	/*
+-	 * The EFI firmware loader could have placed the kernel image
+-	 * anywhere in memory, but the kernel has various restrictions
+-	 * on the max physical address it can run at. Attempt to move
+-	 * the kernel to boot_params.pref_address, or as low as
+-	 * possible.
+-	 */
+-	start = hdr->pref_address;
+-	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
 -
- #endif /* BOOT_COMPRESSED_EBOOT_H */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5f8f176..840ab28 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -39,6 +39,8 @@
- typedef unsigned long efi_status_t;
- typedef u8 efi_bool_t;
- typedef u16 efi_char16_t;		/* UNICODE character */
-+typedef u64 efi_physical_addr_t;
-+typedef void *efi_handle_t;
+-	status = efi_call_phys4(sys_table->boottime->allocate_pages,
+-				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+-				nr_pages, &start);
+-	if (status != EFI_SUCCESS) {
+-		status = efi_low_alloc(sys_table, hdr->init_size,
+-				   hdr->kernel_alignment, &start);
+-		if (status != EFI_SUCCESS)
+-			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
+-	}
+-
+-	if (status == EFI_SUCCESS)
+-		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
+-		       hdr->init_size);
+-
+-	hdr->pref_address = hdr->code32_start;
+-	hdr->code32_start = (__u32)start;
+-
+-	return status;
+-}
  
+ /*
+  * On success we return a pointer to a boot_params structure, and NULL
+diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+index 9e451c6..1d5f219 100644
+--- a/drivers/firmware/efi/efi-stub-helper.c
++++ b/drivers/firmware/efi/efi-stub-helper.c
+@@ -483,3 +483,38 @@ fail:
  
- typedef struct {
-@@ -96,6 +98,7 @@ typedef	struct {
- #define EFI_MEMORY_DESCRIPTOR_VERSION	1
- 
- #define EFI_PAGE_SHIFT		12
-+#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
- 
- typedef struct {
- 	u32 type;
-@@ -157,11 +160,13 @@ typedef struct {
- 	efi_table_hdr_t hdr;
- 	void *raise_tpl;
- 	void *restore_tpl;
--	void *allocate_pages;
--	void *free_pages;
--	void *get_memory_map;
--	void *allocate_pool;
--	void *free_pool;
-+	efi_status_t (*allocate_pages)(int, int, unsigned long,
-+				       efi_physical_addr_t *);
-+	efi_status_t (*free_pages)(efi_physical_addr_t, unsigned long);
-+	efi_status_t (*get_memory_map)(unsigned long *, void *, unsigned long *,
-+				       unsigned long *, u32 *);
-+	efi_status_t (*allocate_pool)(int, unsigned long, void **);
-+	efi_status_t (*free_pool)(void *);
- 	void *create_event;
- 	void *set_timer;
- 	void *wait_for_event;
-@@ -171,7 +176,7 @@ typedef struct {
- 	void *install_protocol_interface;
- 	void *reinstall_protocol_interface;
- 	void *uninstall_protocol_interface;
--	void *handle_protocol;
-+	efi_status_t (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
- 	void *locate_handle;
-@@ -181,7 +186,7 @@ typedef struct {
- 	void *start_image;
- 	void *exit;
- 	void *unload_image;
--	void *exit_boot_services;
-+	efi_status_t (*exit_boot_services)(efi_handle_t, unsigned long);
- 	void *get_next_monotonic_count;
- 	void *stall;
- 	void *set_watchdog_timer;
-@@ -488,10 +493,6 @@ typedef struct {
- 	unsigned long unload;
- } efi_loaded_image_t;
- 
--typedef struct {
--	u64 revision;
--	void *open_volume;
--} efi_file_io_interface_t;
- 
- typedef struct {
- 	u64 size;
-@@ -504,20 +505,30 @@ typedef struct {
- 	efi_char16_t filename[1];
- } efi_file_info_t;
- 
--typedef struct {
-+typedef struct _efi_file_handle {
- 	u64 revision;
--	void *open;
--	void *close;
-+	efi_status_t (*open)(struct _efi_file_handle *,
-+			     struct _efi_file_handle **,
-+			     efi_char16_t *, u64, u64);
-+	efi_status_t (*close)(struct _efi_file_handle *);
- 	void *delete;
--	void *read;
-+	efi_status_t (*read)(struct _efi_file_handle *, unsigned long *,
-+			     void *);
- 	void *write;
- 	void *get_position;
- 	void *set_position;
--	void *get_info;
-+	efi_status_t (*get_info)(struct _efi_file_handle *, efi_guid_t *,
-+			unsigned long *, void *);
- 	void *set_info;
- 	void *flush;
- } efi_file_handle_t;
- 
-+typedef struct _efi_file_io_interface {
-+	u64 revision;
-+	int (*open_volume)(struct _efi_file_io_interface *,
-+			   efi_file_handle_t **);
-+} efi_file_io_interface_t;
+ 	return status;
+ }
 +
- #define EFI_FILE_MODE_READ	0x0000000000000001
- #define EFI_FILE_MODE_WRITE	0x0000000000000002
- #define EFI_FILE_MODE_CREATE	0x8000000000000000
-@@ -784,6 +795,13 @@ struct efivar_entry {
- 	struct kobject kobj;
- };
- 
++static efi_status_t relocate_kernel(struct setup_header *hdr)
++{
++	unsigned long start, nr_pages;
++	efi_status_t status;
 +
-+struct efi_simple_text_output_protocol {
-+	void *reset;
-+	efi_status_t (*output_string)(void *, void *);
-+	void *test_string;
-+};
++	/*
++	 * The EFI firmware loader could have placed the kernel image
++	 * anywhere in memory, but the kernel has various restrictions
++	 * on the max physical address it can run at. Attempt to move
++	 * the kernel to boot_params.pref_address, or as low as
++	 * possible.
++	 */
++	start = hdr->pref_address;
++	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
 +
- extern struct list_head efivar_sysfs_list;
- 
- static inline void
++	status = efi_call_phys4(sys_table->boottime->allocate_pages,
++				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
++				nr_pages, &start);
++	if (status != EFI_SUCCESS) {
++		status = efi_low_alloc(sys_table, hdr->init_size,
++				   hdr->kernel_alignment, &start);
++		if (status != EFI_SUCCESS)
++			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
++	}
++
++	if (status == EFI_SUCCESS)
++		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
++		       hdr->init_size);
++
++	hdr->pref_address = hdr->code32_start;
++	hdr->code32_start = (__u32)start;
++
++	return status;
++}
 -- 
 1.7.10.4
