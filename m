@@ -1,21 +1,18 @@
 From: Dmitry Kasatkin <dmitry.kasatkin@gmail.com>
 Subject: Re: [PATCH V4 02/15] asymmetric keys: implement EMSA_PKCS1-v1_5-ENCODE
  in rsa
-Date: Tue, 17 Sep 2013 16:51:15 -0500
-Message-ID: <CACE9dm-7HKz4VFR1bNTTFd-YpYhnkNVwiW81iXSJZbqjUTBR_Q@mail.gmail.com>
+Date: Tue, 17 Sep 2013 17:29:55 -0500
+Message-ID: <CACE9dm8dBdQFD55ABa1nXEAsW0-t3w71PwkDxEFtjO9OqDP=0w@mail.gmail.com>
 References: <1379206621-18639-1-git-send-email-jlee@suse.com>
 	<1379206621-18639-3-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 In-Reply-To: <1379206621-18639-3-git-send-email-jlee@suse.com>
-Sender: linux-security-module-owner@vger.kernel.org
+Sender: linux-pm-owner@vger.kernel.org
 To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, "Lee, Chun-Yi" <jlee@suse.>
 List-Id: linux-efi@vger.kernel.org
-
-Hello,
-
 
 On Sat, Sep 14, 2013 at 7:56 PM, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
 > Implement EMSA_PKCS1-v1_5-ENCODE [RFC3447 sec 9.2] in rsa.c. It's the
@@ -89,11 +86,6 @@ On Sat, Sep 14, 2013 at 7:56 PM, Lee, Chun-Yi <joeyli.kernel@gmail.com> wrote:
 > +       pr_info("EMSA_PKCS1_v1_5_ENCODE start\n");
 > +
 > +       if (!RSA_ASN1_templates[hash_algo].data)
-
-What about checking hash_algo against PKEY_HASH__LAST, or it relies on
-the caller?
-
-
 > +               ret = -ENOTSUPP;
 > +       else
 > +               pks->pkey_hash_algo = hash_algo;
@@ -114,11 +106,6 @@ the caller?
 > +       pks->digest = digest;
 > +       pks->digest_size = digest_size;
 > +
-
-Ok. You allocated tfm to get hash size, right?
-
-But why do you allocate descriptor even it might not be needed?
-
 > +       if (hash) {
 > +               desc = (void *) digest + digest_size;
 > +               desc->tfm = tfm;
@@ -128,24 +115,12 @@ But why do you allocate descriptor even it might not be needed?
 > +               if (ret < 0)
 > +                       goto error_shash;
 > +               ret = crypto_shash_finup(desc, M, sizeof(M), pks->digest);
-
-This is I completely fail to understand... You expect sizeof(M) to be
-the message length?????
-Have you ever tested it?
-
 > +               if (ret < 0)
 > +                       goto error_shash;
 > +       } else {
 > +               memcpy(pks->digest, M, pks->digest_size);
 > +               pks->digest_size = digest_size;
 > +       }
-
-Does caller use pks->digest and pks->digest_size after return?
-I think it needs encoded value, not the hash...
-So why do you pass pks?
-
-
-
 > +       crypto_free_shash(tfm);
 > +
 > +       /* 2) Encode the algorithm ID for the hash function and the hash value into
@@ -158,9 +133,7 @@ So why do you pass pks?
 > +               goto error_T;
 > +
 
-Why do you need T and PS memory allocations at all?
-You need only EM_tmp allocation and copy directly to the destination...
-
+as I said, remove it... see bellow....
 
 > +       memcpy(T, RSA_ASN1_templates[hash_algo].data, RSA_ASN1_templates[hash_algo].size);
 > +       memcpy(T + RSA_ASN1_templates[hash_algo].size, pks->digest, pks->digest_size);
@@ -176,12 +149,15 @@ You need only EM_tmp allocation and copy directly to the destination...
 > +       if (!PS)
 > +               goto error_P;
 > +
-
-ditto
+as I said remove it...
+see bellow..
 
 > +       for (i = 0; i < (emLen - tLen - 3); i++)
 > +               PS[i] = 0xff;
 > +
+
+memset() does not work here?
+
 > +       /* 5) Concatenate PS, the DER encoding T, and other padding to form the encoded
 > +        * message EM as EM = 0x00 || 0x01 || PS || 0x00 || T
 > +        */
@@ -191,21 +167,38 @@ ditto
 > +
 > +       EM_tmp[0] = 0x00;
 > +       EM_tmp[1] = 0x01;
+
 > +       memcpy(EM_tmp + 2, PS, emLen - tLen - 3);
 > +       EM_tmp[2 + emLen - tLen - 3] = 0x00;
+
+           above 2 lines can be replaced by:
+
+           PS = &EM_tmp[2];
+           PS_len = emLen - tLen - 3
+           memset(PS, 0xff, PS_len);
+           EM_tmp[2 + PS_len] = 0x00;
+
+
 > +       memcpy(EM_tmp + 2 + emLen - tLen - 3 + 1, T, tLen);
 > +
+       This can be replaced by:
+
+         T = &EM_tmp[2+ PS_Len + 1];
+         memcpy(T, RSA_ASN1_templates[hash_algo].data,
+RSA_ASN1_templates[hash_algo].size);
+         memcpy(T + RSA_ASN1_templates[hash_algo].size, pks->digest,
+pks->digest_size);
+
 > +       *EM = EM_tmp;
 > +
 > +       kfree(PS);
 > +       kfree(T);
-
-get rid of it...
-
-
-- Dmitry
-
 > +
+
+Right? So please remove unneeded allocations...
+
+Dmitry
+
 > +       return 0;
 > +
 > +error_EM:
