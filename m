@@ -1,111 +1,161 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 07/17] Move relocate_kernel() to shared file.
-Date: Mon, 16 Sep 2013 21:11:23 -0700
-Message-ID: <1379391093-27948-8-git-send-email-roy.franz@linaro.org>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: [PATCH 05/17] Rename memory allocation/free functions
+Date: Mon, 16 Sep 2013 21:11:21 -0700
+Message-ID: <1379391093-27948-6-git-send-email-roy.franz@linaro.org>
 References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com
+Cc: leif.lindholm@linaro.org, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-The relocate_kernel() function will be generalized and used
-by all architectures, as they all have similar requirements.
+Rename them to be more similar, as low_free() could be used to free
+memory allocated by both high_alloc() and low_alloc().
+high_alloc() -> efi_high_alloc()
+low_alloc()  -> efi_low_alloc()
+low_free()   -> efi_free()
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
+Acked-by: Mark Salter <msalter@redhat.com>
+Reviewed-by: Grant Likely <grant.likely@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c       |   34 -------------------------------
- drivers/firmware/efi/efi-stub-helper.c |   35 ++++++++++++++++++++++++++++++++
- 2 files changed, 35 insertions(+), 34 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |   19 ++++++++++---------
+ drivers/firmware/efi/efi-stub-helper.c |   14 +++++++-------
+ 2 files changed, 17 insertions(+), 16 deletions(-)
 
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 2a4430a..5bbba86 100644
+index 65b6a34..2a4430a 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -677,40 +677,6 @@ free_mem_map:
+@@ -457,7 +457,8 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 		return NULL;
+ 	}
+ 
+-	status = low_alloc(sys_table, 0x4000, 1, (unsigned long *)&boot_params);
++	status = efi_low_alloc(sys_table, 0x4000, 1,
++			       (unsigned long *)&boot_params);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to alloc lowmem for boot params\n");
+ 		return NULL;
+@@ -503,7 +504,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 
+ 			options_size++;	/* NUL termination */
+ 
+-			status = low_alloc(sys_table, options_size, 1,
++			status = efi_low_alloc(sys_table, options_size, 1,
+ 					   &cmdline);
+ 			if (status != EFI_SUCCESS) {
+ 				efi_printk(sys_table, "Failed to alloc mem for cmdline\n");
+@@ -537,9 +538,9 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 	return boot_params;
+ fail2:
+ 	if (options_size)
+-		low_free(sys_table, options_size, hdr->cmd_line_ptr);
++		efi_free(sys_table, options_size, hdr->cmd_line_ptr);
+ fail:
+-	low_free(sys_table, 0x4000, (unsigned long)boot_params);
++	efi_free(sys_table, 0x4000, (unsigned long)boot_params);
+ 	return NULL;
+ }
+ 
+@@ -562,7 +563,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
+ again:
+ 	size += sizeof(*mem_map) * 2;
+ 	_size = size;
+-	status = low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
++	status = efi_low_alloc(sys_table, size, 1, (unsigned long *)&mem_map);
+ 	if (status != EFI_SUCCESS)
+ 		return status;
+ 
+@@ -570,7 +571,7 @@ get_map:
+ 	status = efi_call_phys5(sys_table->boottime->get_memory_map, &size,
+ 				mem_map, &key, &desc_size, &desc_version);
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+-		low_free(sys_table, _size, (unsigned long)mem_map);
++		efi_free(sys_table, _size, (unsigned long)mem_map);
+ 		goto again;
+ 	}
+ 
+@@ -672,7 +673,7 @@ get_map:
+ 	return EFI_SUCCESS;
+ 
+ free_mem_map:
+-	low_free(sys_table, _size, (unsigned long)mem_map);
++	efi_free(sys_table, _size, (unsigned long)mem_map);
  	return status;
  }
  
--static efi_status_t relocate_kernel(struct setup_header *hdr)
--{
--	unsigned long start, nr_pages;
--	efi_status_t status;
--
--	/*
--	 * The EFI firmware loader could have placed the kernel image
--	 * anywhere in memory, but the kernel has various restrictions
--	 * on the max physical address it can run at. Attempt to move
--	 * the kernel to boot_params.pref_address, or as low as
--	 * possible.
--	 */
--	start = hdr->pref_address;
--	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
--
--	status = efi_call_phys4(sys_table->boottime->allocate_pages,
--				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
--				nr_pages, &start);
--	if (status != EFI_SUCCESS) {
--		status = efi_low_alloc(sys_table, hdr->init_size,
--				   hdr->kernel_alignment, &start);
--		if (status != EFI_SUCCESS)
--			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
--	}
--
--	if (status == EFI_SUCCESS)
--		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
--		       hdr->init_size);
--
--	hdr->pref_address = hdr->code32_start;
--	hdr->code32_start = (__u32)start;
--
--	return status;
--}
+@@ -695,7 +696,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
+ 				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+ 				nr_pages, &start);
+ 	if (status != EFI_SUCCESS) {
+-		status = low_alloc(sys_table, hdr->init_size,
++		status = efi_low_alloc(sys_table, hdr->init_size,
+ 				   hdr->kernel_alignment, &start);
+ 		if (status != EFI_SUCCESS)
+ 			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
+@@ -743,7 +744,7 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 	}
  
- /*
-  * On success we return a pointer to a boot_params structure, and NULL
+ 	gdt->size = 0x800;
+-	status = low_alloc(sys_table, gdt->size, 8,
++	status = efi_low_alloc(sys_table, gdt->size, 8,
+ 			   (unsigned long *)&gdt->address);
+ 	if (status != EFI_SUCCESS) {
+ 		efi_printk(sys_table, "Failed to alloc mem for gdt\n");
 diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 9e451c6..1d5f219 100644
+index 05c539e..2f528fb 100644
 --- a/drivers/firmware/efi/efi-stub-helper.c
 +++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -483,3 +483,38 @@ fail:
- 
+@@ -86,7 +86,7 @@ fail:
+ /*
+  * Allocate at the highest possible address that is not above 'max'.
+  */
+-static efi_status_t high_alloc(efi_system_table_t *sys_table_arg,
++static efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 			       unsigned long size, unsigned long align,
+ 			       unsigned long *addr, unsigned long max)
+ {
+@@ -165,8 +165,8 @@ fail:
+ /*
+  * Allocate at the lowest possible address.
+  */
+-static efi_status_t low_alloc(efi_system_table_t *sys_table_arg,
+-		unsigned long size, unsigned long align,
++static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
++			      unsigned long size, unsigned long align,
+ 			      unsigned long *addr)
+ {
+ 	unsigned long map_size, desc_size;
+@@ -226,7 +226,7 @@ fail:
  	return status;
  }
-+
-+static efi_status_t relocate_kernel(struct setup_header *hdr)
-+{
-+	unsigned long start, nr_pages;
-+	efi_status_t status;
-+
-+	/*
-+	 * The EFI firmware loader could have placed the kernel image
-+	 * anywhere in memory, but the kernel has various restrictions
-+	 * on the max physical address it can run at. Attempt to move
-+	 * the kernel to boot_params.pref_address, or as low as
-+	 * possible.
-+	 */
-+	start = hdr->pref_address;
-+	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
-+
-+	status = efi_call_phys4(sys_table->boottime->allocate_pages,
-+				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
-+				nr_pages, &start);
-+	if (status != EFI_SUCCESS) {
-+		status = efi_low_alloc(sys_table, hdr->init_size,
-+				   hdr->kernel_alignment, &start);
-+		if (status != EFI_SUCCESS)
-+			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
-+	}
-+
-+	if (status == EFI_SUCCESS)
-+		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
-+		       hdr->init_size);
-+
-+	hdr->pref_address = hdr->code32_start;
-+	hdr->code32_start = (__u32)start;
-+
-+	return status;
-+}
+ 
+-static void low_free(efi_system_table_t *sys_table_arg, unsigned long size,
++static void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 		     unsigned long addr)
+ {
+ 	unsigned long nr_pages;
+@@ -407,8 +407,8 @@ grow:
+ 		 * addresses in memory, so allocate enough memory for
+ 		 * all the initrd's.
+ 		 */
+-		status = high_alloc(sys_table_arg, initrd_total, 0x1000,
+-				   &initrd_addr, hdr->initrd_addr_max);
++		status = efi_high_alloc(sys_table_arg, initrd_total, 0x1000,
++				    &initrd_addr, hdr->initrd_addr_max);
+ 		if (status != EFI_SUCCESS) {
+ 			efi_printk(sys_table_arg, "Failed to alloc highmem for initrds\n");
+ 			goto close_handles;
+@@ -456,7 +456,7 @@ grow:
+ 	return status;
+ 
+ free_initrd_total:
+-	low_free(sys_table_arg, initrd_total, initrd_addr);
++	efi_free(sys_table_arg, initrd_total, initrd_addr);
+ 
+ close_handles:
+ 	for (k = j; k < i; k++)
 -- 
 1.7.10.4
