@@ -1,29 +1,83 @@
-From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
-Subject: Re: [PATCH V4 13/15] Hibernate: introduced SNAPSHOT_SIG_HASH
- config for select hash algorithm
-Date: Wed, 18 Sep 2013 15:45:35 +0200
-Message-ID: <20130918134535.GA3748@amd.pavel.ucw.cz>
-References: <1379206621-18639-1-git-send-email-jlee@suse.com>
- <1379206621-18639-14-git-send-email-jlee@suse.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 08/17] Generalize relocate_kernel() for use by other architectures.
+Date: Wed, 18 Sep 2013 09:31:21 -0700
+Message-ID: <CAFECyb849wjbL9SWhK74Y1dfjKFuYpNwf=c5PYe15VeLwz3AFQ@mail.gmail.com>
+References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+	<1379391093-27948-9-git-send-email-roy.franz@linaro.org>
+	<20130918121240.GJ3409@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1379206621-18639-14-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
+In-Reply-To: <20130918121240.GJ3409-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, opensuse-kernel-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, James Bottomley <james.bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, JKosina-IBi9RG/b67k@public.gmane.org, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Herbert Xu <herbert-lOAM2aK0SrRLBo1qDEOMRrpzq4S04n8Q@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michal Marek <mmarek-AlSwsSmVLrQ@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun 2013-09-15 08:56:59, Lee, Chun-Yi wrote:
-> This patch introduced SNAPSHOT_SIG_HASH config for user to select which
-> hash algorithm will be used during signature generation of snapshot.
+On Wed, Sep 18, 2013 at 5:12 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Mon, 16 Sep, at 09:11:24PM, Roy Franz wrote:
+>> Rename relocate_kernel() to efi_relocate_kernel(), and take
+>> parameters rather than x86 specific structure.  Add max_addr
+>> argument as for ARM we have some address constraints that we
+>> need to enforce when relocating the kernel.  Add alloc_size
+>> parameter for use by ARM64 which uses an uncompressed kernel,
+>> and needs to allocate space for BSS.
+>>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  arch/x86/boot/compressed/eboot.c       |   12 ++++--
+>>  drivers/firmware/efi/efi-stub-helper.c |   74 ++++++++++++++++++++++----------
+>>  2 files changed, 60 insertions(+), 26 deletions(-)
+>
+> This commit breaks my ASUS machine.
+>
+>> -     /*
+>> -      * The EFI firmware loader could have placed the kernel image
+>> -      * anywhere in memory, but the kernel has various restrictions
+>> -      * on the max physical address it can run at. Attempt to move
+>> -      * the kernel to boot_params.pref_address, or as low as
+>> -      * possible.
+>> -      */
+>
+> [...]
+>
+>> +
+>> +     /* The EFI firmware loader could have placed the kernel image
+>> +      * anywhere in memory, but the kernel has restrictions on the
+>> +      * anywhere in memory, but the kernel has restrictions on the
+>> +      * max physical address it can run at.  Some architectures
+>> +      * also have a prefered address, so first try to relocate
+>> +      * to the preferred address.
+>> +      */
+>
+> Please don't change the comment style of code in the future.
+Sorry about that.
+>
+>> +     nr_pages = round_up(alloc_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+>> +     status = efi_call_phys4(sys_table_arg->boottime->allocate_pages,
+>>                               EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+>> -                             nr_pages, &start);
+>> +                             nr_pages, &efi_addr);
+>> +     new_addr = efi_addr;
+>> +     /* If preferred address allocation failed allocate as low as
+>> +      * possible. */
+>>       if (status != EFI_SUCCESS) {
+>> -             status = efi_low_alloc(sys_table, hdr->init_size,
+>> -                                hdr->kernel_alignment, &start);
+>> -             if (status != EFI_SUCCESS)
+>> -                     efi_printk(sys_table, "Failed to alloc mem for kernel\n");
+>> +             status = efi_low_alloc(sys_table_arg, alloc_size, 0,
+>> +                                    &new_addr);
+>
+> This is wrong. You've dropped the hdr->kernel_alignment argument, and
+> the relaxed alignment of this allocation stops my machine from booting.
+Dropping the alignment was an oversight, and my testing on OVMF didn't
+catch that.  I'll add the alignment
+and resend the series.
 
-This series is big enough already... and who is going to test it?
-There's no need to make hash configurable. Just select one that works.
-	
-									Pavel
+Thanks,
+Roy
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
