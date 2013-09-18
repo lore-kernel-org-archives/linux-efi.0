@@ -1,50 +1,117 @@
-From: Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] x86 efi: bugfix interrupt disabling sequence
-Date: Wed, 18 Sep 2013 19:28:53 +0200
-Message-ID: <1379525333-4373-1-git-send-email-bemk@redhat.com>
+From: jerry.hoemann-VXdhtT5mjnY@public.gmane.org
+Subject: Re: [edk2] Corrupted EFI region
+Date: Wed, 18 Sep 2013 13:24:14 -0600
+Message-ID: <20130918192414.GB3345@anatevka.fc.hp.com>
+References: <20130805220808.GC14067@pd.tnic>
+ <20130806141036.GD14891@pd.tnic>
+ <520116D1.2010000@redhat.com>
+ <20130807151935.GJ17920@pd.tnic>
+ <CCFD3CBD-62B0-4046-B96D-18CB1A815F72@apple.com>
+ <20130807201908.GG2515@console-pimps.org>
+ <D5982201-6DC4-469F-812A-74A8402ADEE9@apple.com>
+ <20130808101730.GJ2515@console-pimps.org>
+ <20130913203812.GA312@anatevka.fc.hp.com>
+ <20130916105920.GB2697@console-pimps.org>
+Reply-To: jerry.hoemann-VXdhtT5mjnY@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130916105920.GB2697-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Andrew Fish <afish-2kanFRK1NckAvxtiuMwx3w@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Gleb Natapov <gleb-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Woodhouse <dwmw2-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Brian Richardson <brian.richardson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Randy Wright <rwright-VXdhtT5mjnY@public.gmane.org>, Linn Crosetto <linn.crosetto-VXdhtT5mjnY@public.gmane.org>, terry.lee-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, randy.pawell-VXdhtT5mjnY@public.gmane.org, chrisp-VXdhtT5mjnY@public.gmane.org, linda.knippers-VXdhtT5mjnY@public.gmane.org, dong.wei-VXdhtT5mjnY@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, kexec <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The problem in efi_main was that the idt was cleared before the
-interrupts were disabled.
+On Mon, Sep 16, 2013 at 11:59:20AM +0100, Matt Fleming wrote:
+> On Fri, 13 Sep, at 02:38:12PM, jerry.hoemann-VXdhtT5mjnY@public.gmane.org wrote:
+> > Matt,
+> > 
+> > We have hit an issue on our new platform in development related to the
+> > call of efi_reserve_boot_services() from setup_arch().
+> > 
+> > The reservation can interfere with allocation of the crash kernel.
+>  
+> Jerry, thanks for bringing this up.
+> 
+> > In pre 3.9(?) kernels,  the crash kernel is required to be allocated from
+> > physically contiguous memory below 896 MB.
+> > 
+> > Our new platforms are large in both the amount of memory and the amount
+> > of IO. This requires large crash kernels for kdump to work.  This is even
+> > after the work done for makedumpfile v 1.5 to allow it to work with a
+> > smaller foot print.
+> > 
+> > 
+> > One of the problems is that drivers will allocate memory as boot code and/or
+> > data in the region < 896 that effectively fragments this memory.
+> > With the reservation, we can't reuse the memory when needed for the
+> > crash kernels.   If we remove the reservation and allow the kernel
+> > to reuse the memory,  we the reservation of the crash kernel succeeds.
+> > 
+> > This is definitely a problem for distros that are pre 3.9.  Probably less
+> > so for top of tree, but i haven't been focused there.
+> > 
+> > So we are definitely interested in finding a mechanism to not
+> > do this reservation on platforms that don't have the issues described
+> > earlier in this thread.
+> 
+> OK, in an ideal world we'd move the crash kernel reservation after
+> efi_free_boot_services(), because at that point the boot regions are
+> available again. But it seems that we reserve the boot regions really
+> early during startup and release them relatively late. The reason is
+> that the Boot Graphics Resource Table (BGRT) data, if present, is
+> located in the Boot Services Data regions but we can't extract the
+> address of the region from the ACPI tables until we've setup the ACPI
+> subsystem, which happens quite late.
+> 
+> I wonder whether performing the reservation of the crash kernel memory
+> first, before efi_reserve_boot_services(), would help. That way we'd
+> only need to reserve remaining regions in efi_reserve_boot_services().
+> This scheme would rely on nothing writing into the crash kernel area
+> before we've extracted the BGRT data, however.
+> 
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
 
-The UEFI spec states that interrupts aren't used so this shouldn't be
-too much of a problem. Peripherals however don't necessarily know about
-this and thus might cause interrupts to happen anyway. Even if
-ExitBootServices() has been called.
 
-This means there is a risk of an interrupt being triggered while the IDT
-register is nullified and the interrupt bit hasn't been cleared,
-allowing for a triple fault.
+Matt,
 
-This patch fixes this by clearing the interrupt bit before the lidt
-instruction.
+I conducted the following experiments on a 3.11 kernel:
 
-Signed-off-by: Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+1)  Moved the call of reserve_crashkernel to after efi_free_boot_services.
+    Booted with crashkernel=512M
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index b7388a4..100b812 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1267,11 +1267,11 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
- 	desc->base2 = 0x00;
- #endif /* CONFIG_X86_64 */
- 
-+	asm volatile("cli");
-+
- 	asm volatile ("lidt %0" : : "m" (*idt));
- 	asm volatile ("lgdt %0" : : "m" (*gdt));
- 
--	asm volatile("cli");
--
- 	return boot_params;
- fail:
- 	return NULL;
+    a)  when memory below 896M was *not* fragmented by BootCode segments
+	reserve_crashkernel succeeded.
+
+    b)  when memory below 896M *was* fragmented by BootCode segments
+	reserve_crashkernel failed.
+
+2)  Moved the call to reserve_crashkernel to before call to efi_reserve_boot_services.
+    Booted with crashkernel=512M
+
+    reserve_crashkernel succeeded irrespective of whether the memory below 896M was
+    fragmented by BootCode segments.
+
+
+I haven't determined why reserve_crashkernel failed in 1b) above.
+
+I don't see the memory reserved for the crash kernel being accessed
+before call to efi_free_boot_services.
+
+CC'ing kexec list for their input as I may have missed something.
+
+
+Jerry
+
+
 -- 
-1.8.4
+
+----------------------------------------------------------------------------
+Jerry Hoemann            Software Engineer              Hewlett-Packard/MODL
+
+3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
+Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
+                                                email:  jerry.hoemann-VXdhtT5mjnY@public.gmane.org
+----------------------------------------------------------------------------
