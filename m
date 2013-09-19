@@ -1,8 +1,10 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 00/11] EFI runtime services virtual mapping
-Date: Thu, 19 Sep 2013 16:54:43 +0200
-Message-ID: <1379602494-26684-1-git-send-email-bp@alien8.de>
+Subject: [PATCH 06/11] x86, pageattr: Add a PMD pagetable populating function
+Date: Thu, 19 Sep 2013 16:54:49 +0200
+Message-ID: <1379602494-26684-7-git-send-email-bp@alien8.de>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: X86 ML <x86@kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>, linux-efi@vger.kernel.org
@@ -10,56 +12,112 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp@suse.de>
 
-Hi all,
+Handle PMD-level mappings the same as PUD ones.
 
-here's finally a new version of the runtime services VA mapping patchset
-which hopefully implements hpa's idea of statically mapping EFI runtime
-regions in a top-down manner starting at -4Gb virtual.
+Signed-off-by: Borislav Petkov <bp@suse.de>
+---
+ arch/x86/mm/pageattr.c | 82 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 81 insertions(+), 1 deletion(-)
 
-We're also using a different pagetable so as not to pollute kernel
-address space. For that, we switch to that table before doing an EFI
-call, and afterwards we switch back to the previous one.
-
-To the patches:
-
-1-2 are simple cleanups which Matt probably can take now
-
-3-10 add the machinery to map regions into an arbitrary PGD. Those I've
-split deliberately into very small bites so that they can be reviewed
-more thoroughly and easily for my pagetable skills are pretty basic.
-
-11 is the actual patch which implements that mapping so that we can use
-runtime services in kexec (which is the whole reason for this fuss :))
-
-So please take a long hard look at those, hammer on them on your
-boxes and let me know. They boot fine on my Dell UEFI box and in OVMF
-(obviously :)).
-
-Thanks.
-
-Borislav Petkov (11):
-  efi: Simplify EFI_DEBUG
-  efi: Remove EFI_PAGE_SHIFT and EFI_PAGE_SIZE
-  x86, pageattr: Lookup address in an arbitrary PGD
-  x86, pageattr: Add a PGD pagetable populating function
-  x86, pageattr: Add a PUD pagetable populating function
-  x86, pageattr: Add a PMD pagetable populating function
-  x86, pageattr: Add a PTE pagetable populating function
-  x86, pageattr: Add a PUD error unwinding path
-  x86, pageattr: Add last levels of error path
-  x86, cpa: Map in an arbitrary pgd
-  EFI: Runtime services virtual mapping
-
- arch/x86/boot/compressed/eboot.c     |  12 +-
- arch/x86/boot/compressed/eboot.h     |   1 -
- arch/x86/include/asm/efi.h           |  58 +++--
- arch/x86/include/asm/pgtable_types.h |   3 +-
- arch/x86/mm/pageattr.c               | 461 +++++++++++++++++++++++++++++++++--
- arch/x86/platform/efi/efi.c          | 126 +++++-----
- arch/x86/platform/efi/efi_64.c       |  56 +----
- arch/x86/platform/efi/efi_stub_64.S  |  47 ++++
- include/linux/efi.h                  |   6 +-
- 9 files changed, 615 insertions(+), 155 deletions(-)
-
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 41c6fdbbfab0..c56d71591617 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -666,6 +666,16 @@ static int split_large_page(pte_t *kpte, unsigned long address)
+ 	return 0;
+ }
+ 
++static int alloc_pte_page(pmd_t *pmd)
++{
++	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
++	if (!pte)
++		return -1;
++
++	set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
++	return 0;
++}
++
+ static int alloc_pmd_page(pud_t *pud)
+ {
+ 	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
+@@ -676,7 +686,77 @@ static int alloc_pmd_page(pud_t *pud)
+ 	return 0;
+ }
+ 
+-#define populate_pmd(cpa, start, end, pages, pud, pgprot)	(-1)
++#define populate_pte(cpa, start, end, pages, pmd, pgprot)	do {} while (0)
++
++static int populate_pmd(struct cpa_data *cpa,
++			unsigned long start, unsigned long end,
++			unsigned num_pages, pud_t *pud, pgprot_t pgprot)
++{
++	unsigned int cur_pages = 0;
++	pmd_t *pmd;
++
++	/*
++	 * Not on a 2M boundary?
++	 */
++	if (start & (PMD_SIZE - 1)) {
++		unsigned long pre_end = start + (num_pages << PAGE_SHIFT);
++		unsigned long next_page = (start + PMD_SIZE) & PMD_MASK;
++
++		pre_end   = min_t(unsigned long, pre_end, next_page);
++		cur_pages = (pre_end - start) >> PAGE_SHIFT;
++		cur_pages = min_t(unsigned int, num_pages, cur_pages);
++
++		/*
++		 * Need a PTE page?
++		 */
++		pmd = pmd_offset(pud, start);
++		if (pmd_none(*pmd))
++			if (alloc_pte_page(pmd))
++				return -1;
++
++		populate_pte(cpa, start, pre_end, cur_pages, pmd, pgprot);
++
++		start = pre_end;
++	}
++
++	/*
++	 * We mapped them all?
++	 */
++	if (num_pages == cur_pages)
++		return cur_pages;
++
++	while (end - start >= PMD_SIZE) {
++
++		/*
++		 * We cannot use a 1G page so allocate a PMD page if needed.
++		 */
++		if (pud_none(*pud))
++			if (alloc_pmd_page(pud))
++				return -1;
++
++		pmd = pmd_offset(pud, start);
++
++		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE | massage_pgprot(pgprot)));
++
++		start	  += PMD_SIZE;
++		cpa->pfn  += PMD_SIZE;
++		cur_pages += PMD_SIZE >> PAGE_SHIFT;
++	}
++
++	/*
++	 * Map trailing 4K pages.
++	 */
++	if (start < end) {
++		pmd = pmd_offset(pud, start);
++		if (pmd_none(*pmd))
++			if (alloc_pte_page(pmd))
++				return -1;
++
++		populate_pte(cpa, start, end, num_pages - cur_pages,
++			     pmd, pgprot);
++	}
++	return num_pages;
++}
+ 
+ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+ 			pgprot_t pgprot)
 -- 
 1.8.4
