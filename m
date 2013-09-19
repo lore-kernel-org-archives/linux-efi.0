@@ -1,135 +1,40 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 09/17] Move unicode to ASCII conversion to shared function.
-Date: Wed, 18 Sep 2013 21:48:44 -0700
-Message-ID: <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw@mail.gmail.com>
-References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
-	<1379391093-27948-10-git-send-email-roy.franz@linaro.org>
-	<20130919034406.GA26385@angband.pl>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fix
+Date: Thu, 19 Sep 2013 13:41:59 +0100
+Message-ID: <20130919124159.GA4785@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130919034406.GA26385-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
-Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 18, 2013 at 8:44 PM, Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org> wr=
-ote:
-> On Mon, Sep 16, 2013 at 09:11:25PM -0700, Roy Franz wrote:
->> +/* Convert the unicode UEFI command line to ASCII to pass to kernel=
-=2E
->> + * Size of memory allocated return in *cmd_line_len.
->> + * Returns NULL on error.
->> + */
->> +static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_t=
-able_arg,
->
->> +       int load_options_size =3D image->load_options_size / 2; /* A=
-SCII */
->
->> +     for (i =3D 0; i < options_size - 1; i++)
->> +             *s1++ =3D *s2++;
->
-> I'm afraid both this commit and comments inside are misnamed.  What y=
-ou're
-> changing here is the encoding rather than character set.
->
-> In fact, these days it's 8-bit encodings that are more likely to be U=
-nicode
-> than 16-bit ones: UTF-8 is ubiquitous, while you usually get UCS2 at =
-most.
-> In either case, though, we have here is a 7-bit charset encoded as ei=
-ther
-> 8-bit or 16-bit units.  What this function does is blindly truncating=
- upper
-> byte.  The supported payload is in both cases ASCII.
->
-> I'd thus rename the function to what it already does: truncating u16 =
-to u8,
-> and adjust comments accordingly.
->
-> Replacing values above 126 with a token character like '?' would be g=
-ood
-> too: that'd avoid producing corrupted characters and/or random ASCII =
-chars.
+Hi,
 
-I stuck to re-arranging the code that was there, as I don't know
-enough about character encodings
-to propose changes.  Also, this code is running as part of the kernel
-decompressor, rather
-than the kernel itself, so it doesn't have access to any kernel
-facilities, and it also needs to
-be position independent.  It's running in a quite limited environment
--  the decompressor has
-its own copy of strstr(), and other string functions.
+The following changes since commit 272b98c6455f00884f0350f775c5342358ebb73f:
 
-I checked the UEFI specification, and it states that all 16 bit
-strings are UCS-2, unless
-otherwise noted.  The load options that the command line is provided
-through a void pointer
-specified as:
+  Linux 3.12-rc1 (2013-09-16 16:17:51 -0400)
 
-    "LoadOptions A pointer to the image's binary load options."
+are available in the git repository at:
 
-I couldn't quickly find any other mentions of LoadOptions in the
-spec., so I don't know what
-other types of values could be, or are typically provided.  The spec
-isn't helpful regarding the type
-of this data, and I don't know what common practice is here among the
-various EFI/UEFI firmwares
-out there.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-Would it be acceptable to fix the naming/comments, and convert values
-above 126 to '?'
-in the current patchset, and address a more thorough fix in another pat=
-ch set?
-The ARM and ARM64 EFI stub patchsets that are mostly complete depend
-on this one,
-so getting this merged soon would be helpful.
+for you to fetch changes up to 700870119f49084da004ab588ea2b799689efaf7:
 
-Something like:
->> +/* Convert the UEFI command line from 16 bit to 8 bit encoding to p=
-ass to kernel.
->> + * by truncating to 7 bits.  Values above 126 are converted to 63 (=
-ASCII '?')
->> + * Size of memory allocated return in *cmd_line_len.
->> + * Returns NULL on error.
->> + */
-+static char *efi_truncate_cmdline_to_8bit_encoding(efi_system_table_t
-*sys_table_arg,
-(update code to truncate and convert to '?')
+  x86, efi: Don't map Boot Services on i386 (2013-09-18 14:42:33 +0100)
 
->
-> Your commit only moves things around, so it might be out of scope for=
- now,
-> but I wonder: what if the kernel actually supported Unicode here?  Fe=
-w
-> cmdline arguments take values where non-ASCII makes sense, but at lea=
-st some
-> do: for example, a Russian guy is not unlikely to name subvolumes usi=
-ng
-> cyrillic.  Supporting that would be easy (estimating the length then
-> tf16us_to_utf8s()).  There's just one problem: which encoding to use,=
- but
-> these days, most distributions have either dropped non-UTF8 or hardly=
- pay
-> lip service, so we could get away with hard-coding UTF-8: those few w=
-ho
-> use ancient charsets can stick to ASCII.  Would this be ok?  If so, s=
-hout,
-> I can code this if you don't care enough.
+----------------------------------------------------------------
+ * Fix WARNING on i386 by only enabling a workaround for x86-64 since
+   we've never encountered the bug on i386 - Josh Boyer
 
-I would certainly appreciate your help improving this, although I think=
- we'll
-need to have a better understanding of what the UEFI firmware is provid=
-ing
-before we can implement something better.
+----------------------------------------------------------------
+Josh Boyer (1):
+      x86, efi: Don't map Boot Services on i386
 
+ arch/x86/platform/efi/efi.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
->
-> --
-> =E1=9B=8A=E1=9A=A8=E1=9A=BE=E1=9B=81=E1=9B=8F=E1=9A=A3=E1=9B=AB=E1=9B=
-=81=E1=9B=8A=E1=9B=AB=E1=9A=A0=E1=9B=9F=E1=9A=B1=E1=9B=AB=E1=9A=A6=E1=9B=
-=96=E1=9B=AB=E1=9A=B9=E1=9B=96=E1=9A=A8=E1=9A=B2
+-- 
+Matt Fleming, Intel Open Source Technology Center
