@@ -1,10 +1,8 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 10/11] x86, cpa: Map in an arbitrary pgd
-Date: Thu, 19 Sep 2013 16:54:53 +0200
-Message-ID: <1379602494-26684-11-git-send-email-bp@alien8.de>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+Subject: [PATCH 00/11] EFI runtime services virtual mapping
+Date: Thu, 19 Sep 2013 16:54:43 +0200
+Message-ID: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Sender: linux-kernel-owner@vger.kernel.org
 To: X86 ML <x86@kernel.org>
 Cc: LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, Dave Young <dyoung@redhat.com>, linux-efi@vger.kernel.org
@@ -12,155 +10,56 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp@suse.de>
 
-Add the ability to map pages in an arbitrary pgd. This wires in the
-remaining stuff so that there's a new interface with which you can map a
-region into an arbitrary PGD.
+Hi all,
 
-Signed-off-by: Borislav Petkov <bp@suse.de>
----
- arch/x86/mm/pageattr.c | 53 +++++++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 46 insertions(+), 7 deletions(-)
+here's finally a new version of the runtime services VA mapping patchset
+which hopefully implements hpa's idea of statically mapping EFI runtime
+regions in a top-down manner starting at -4Gb virtual.
 
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index ca76481c09e8..991386bf3aad 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -453,7 +453,7 @@ try_preserve_large_page(pte_t *kpte, unsigned long address,
- 	 * Check for races, another CPU might have split this page
- 	 * up already:
- 	 */
--	tmp = lookup_address(address, &level);
-+	tmp = _lookup_address_cpa(cpa, address, &level);
- 	if (tmp != kpte)
- 		goto out_unlock;
- 
-@@ -559,7 +559,8 @@ out_unlock:
- }
- 
- static int
--__split_large_page(pte_t *kpte, unsigned long address, struct page *base)
-+__split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
-+		   struct page *base)
- {
- 	pte_t *pbase = (pte_t *)page_address(base);
- 	unsigned long pfn, pfninc = 1;
-@@ -572,7 +573,7 @@ __split_large_page(pte_t *kpte, unsigned long address, struct page *base)
- 	 * Check for races, another CPU might have split this page
- 	 * up for us already:
- 	 */
--	tmp = lookup_address(address, &level);
-+	tmp = _lookup_address_cpa(cpa, address, &level);
- 	if (tmp != kpte) {
- 		spin_unlock(&pgd_lock);
- 		return 1;
-@@ -648,7 +649,8 @@ __split_large_page(pte_t *kpte, unsigned long address, struct page *base)
- 	return 0;
- }
- 
--static int split_large_page(pte_t *kpte, unsigned long address)
-+static int split_large_page(struct cpa_data *cpa, pte_t *kpte,
-+			    unsigned long address)
- {
- 	struct page *base;
- 
-@@ -660,7 +662,7 @@ static int split_large_page(pte_t *kpte, unsigned long address)
- 	if (!base)
- 		return -ENOMEM;
- 
--	if (__split_large_page(kpte, address, base))
-+	if (__split_large_page(cpa, kpte, address, base))
- 		__free_page(base);
- 
- 	return 0;
-@@ -1041,6 +1043,9 @@ static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
- static int __cpa_process_fault(struct cpa_data *cpa, unsigned long vaddr,
- 			       int primary)
- {
-+	if (cpa->pgd)
-+		return populate_pgd(cpa, vaddr);
-+
- 	/*
- 	 * Ignore all non primary paths.
- 	 */
-@@ -1085,7 +1090,7 @@ static int __change_page_attr(struct cpa_data *cpa, int primary)
- 	else
- 		address = *cpa->vaddr;
- repeat:
--	kpte = lookup_address(address, &level);
-+	kpte = _lookup_address_cpa(cpa, address, &level);
- 	if (!kpte)
- 		return __cpa_process_fault(cpa, address, primary);
- 
-@@ -1149,7 +1154,7 @@ repeat:
- 	/*
- 	 * We have to split the large page:
- 	 */
--	err = split_large_page(kpte, address);
-+	err = split_large_page(cpa, kpte, address);
- 	if (!err) {
- 		/*
- 	 	 * Do a global flush tlb after splitting the large page
-@@ -1298,6 +1303,8 @@ static int change_page_attr_set_clr(unsigned long *addr, int numpages,
- 	int ret, cache, checkalias;
- 	unsigned long baddr = 0;
- 
-+	memset(&cpa, 0, sizeof(cpa));
-+
- 	/*
- 	 * Check, if we are requested to change a not supported
- 	 * feature:
-@@ -1744,6 +1751,7 @@ static int __set_pages_p(struct page *page, int numpages)
- {
- 	unsigned long tempaddr = (unsigned long) page_address(page);
- 	struct cpa_data cpa = { .vaddr = &tempaddr,
-+				.pgd = 0,
- 				.numpages = numpages,
- 				.mask_set = __pgprot(_PAGE_PRESENT | _PAGE_RW),
- 				.mask_clr = __pgprot(0),
-@@ -1762,6 +1770,7 @@ static int __set_pages_np(struct page *page, int numpages)
- {
- 	unsigned long tempaddr = (unsigned long) page_address(page);
- 	struct cpa_data cpa = { .vaddr = &tempaddr,
-+				.pgd = 0,
- 				.numpages = numpages,
- 				.mask_set = __pgprot(0),
- 				.mask_clr = __pgprot(_PAGE_PRESENT | _PAGE_RW),
-@@ -1822,6 +1831,36 @@ bool kernel_page_present(struct page *page)
- 
- #endif /* CONFIG_DEBUG_PAGEALLOC */
- 
-+int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
-+			    unsigned numpages, unsigned long page_flags)
-+{
-+	int retval = 0;
-+
-+	struct cpa_data cpa = {
-+		.vaddr = &address,
-+		.pfn = pfn,
-+		.pgd = pgd,
-+		.numpages = numpages,
-+		.mask_set = __pgprot(0),
-+		.mask_clr = __pgprot(0),
-+		.flags = 0,
-+	};
-+
-+	if (!(__supported_pte_mask & _PAGE_NX))
-+		goto out;
-+
-+	if (!(page_flags & _PAGE_NX))
-+		cpa.mask_clr = __pgprot(_PAGE_NX);
-+
-+	cpa.mask_set = __pgprot(_PAGE_PRESENT | page_flags);
-+
-+	retval = __change_page_attr_set_clr(&cpa, 0);
-+	__flush_tlb_all();
-+
-+out:
-+	return retval;
-+}
-+
- /*
-  * The testcases use internal knowledge of the implementation that shouldn't
-  * be exposed to the rest of the kernel. Include these directly here.
+We're also using a different pagetable so as not to pollute kernel
+address space. For that, we switch to that table before doing an EFI
+call, and afterwards we switch back to the previous one.
+
+To the patches:
+
+1-2 are simple cleanups which Matt probably can take now
+
+3-10 add the machinery to map regions into an arbitrary PGD. Those I've
+split deliberately into very small bites so that they can be reviewed
+more thoroughly and easily for my pagetable skills are pretty basic.
+
+11 is the actual patch which implements that mapping so that we can use
+runtime services in kexec (which is the whole reason for this fuss :))
+
+So please take a long hard look at those, hammer on them on your
+boxes and let me know. They boot fine on my Dell UEFI box and in OVMF
+(obviously :)).
+
+Thanks.
+
+Borislav Petkov (11):
+  efi: Simplify EFI_DEBUG
+  efi: Remove EFI_PAGE_SHIFT and EFI_PAGE_SIZE
+  x86, pageattr: Lookup address in an arbitrary PGD
+  x86, pageattr: Add a PGD pagetable populating function
+  x86, pageattr: Add a PUD pagetable populating function
+  x86, pageattr: Add a PMD pagetable populating function
+  x86, pageattr: Add a PTE pagetable populating function
+  x86, pageattr: Add a PUD error unwinding path
+  x86, pageattr: Add last levels of error path
+  x86, cpa: Map in an arbitrary pgd
+  EFI: Runtime services virtual mapping
+
+ arch/x86/boot/compressed/eboot.c     |  12 +-
+ arch/x86/boot/compressed/eboot.h     |   1 -
+ arch/x86/include/asm/efi.h           |  58 +++--
+ arch/x86/include/asm/pgtable_types.h |   3 +-
+ arch/x86/mm/pageattr.c               | 461 +++++++++++++++++++++++++++++++++--
+ arch/x86/platform/efi/efi.c          | 126 +++++-----
+ arch/x86/platform/efi/efi_64.c       |  56 +----
+ arch/x86/platform/efi/efi_stub_64.S  |  47 ++++
+ include/linux/efi.h                  |   6 +-
+ 9 files changed, 615 insertions(+), 155 deletions(-)
+
 -- 
 1.8.4
