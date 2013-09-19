@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 04/11] x86, pageattr: Add a PGD pagetable populating function
-Date: Thu, 19 Sep 2013 16:54:47 +0200
-Message-ID: <1379602494-26684-5-git-send-email-bp@alien8.de>
+Subject: [PATCH 03/11] x86, pageattr: Lookup address in an arbitrary PGD
+Date: Thu, 19 Sep 2013 16:54:46 +0200
+Message-ID: <1379602494-26684-4-git-send-email-bp@alien8.de>
 References: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1379602494-26684-1-git-send-email-bp@alien8.de>
@@ -12,65 +12,77 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp@suse.de>
 
-This allocates, if necessary, and populates the corresponding PGD entry
-with a PUD page. The next population level is a dummy macro which will
-be removed by the next patch and it is added here to keep the patch
-small and easily reviewable but not break bisection, at the same time.
+This is preparatory work in order to be able to map pages into a
+specified PGD and not implicitly and only into init_mm.
 
 Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/mm/pageattr.c | 39 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
+ arch/x86/mm/pageattr.c | 36 ++++++++++++++++++++++++++----------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
 
 diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index c53de62a1170..21a31e85283c 100644
+index bb32480c2d71..c53de62a1170 100644
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
-@@ -666,6 +666,45 @@ static int split_large_page(pte_t *kpte, unsigned long address)
- 	return 0;
+@@ -30,6 +30,7 @@
+  */
+ struct cpa_data {
+ 	unsigned long	*vaddr;
++	pgd_t		*pgd;
+ 	pgprot_t	mask_set;
+ 	pgprot_t	mask_clr;
+ 	int		numpages;
+@@ -322,17 +323,9 @@ static inline pgprot_t static_protections(pgprot_t prot, unsigned long address,
+ 	return prot;
  }
  
-+#define populate_pud(cpa, addr, pgd, pgprot)	(-1)
+-/*
+- * Lookup the page table entry for a virtual address. Return a pointer
+- * to the entry and the level of the mapping.
+- *
+- * Note: We return pud and pmd either when the entry is marked large
+- * or when the present bit is not set. Otherwise we would return a
+- * pointer to a nonexisting mapping.
+- */
+-pte_t *lookup_address(unsigned long address, unsigned int *level)
++static pte_t *__lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
++				      unsigned int *level)
+ {
+-	pgd_t *pgd = pgd_offset_k(address);
+ 	pud_t *pud;
+ 	pmd_t *pmd;
+ 
+@@ -361,8 +354,31 @@ pte_t *lookup_address(unsigned long address, unsigned int *level)
+ 
+ 	return pte_offset_kernel(pmd, address);
+ }
 +
 +/*
-+ * Restrictions for kernel page table do not necessarily apply when mapping in
-+ * an alternate PGD.
++ * Lookup the page table entry for a virtual address. Return a pointer
++ * to the entry and the level of the mapping.
++ *
++ * Note: We return pud and pmd either when the entry is marked large
++ * or when the present bit is not set. Otherwise we would return a
++ * pointer to a nonexisting mapping.
 + */
-+static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
++pte_t *lookup_address(unsigned long address, unsigned int *level)
 +{
-+	pgprot_t pgprot = __pgprot(_KERNPG_TABLE);
-+	bool allocd_pgd = false;
-+	pgd_t *pgd_entry;
-+	pud_t *pud;
-+	int ret;
++        return __lookup_address_in_pgd(pgd_offset_k(address), address, level);
++}
+ EXPORT_SYMBOL_GPL(lookup_address);
+ 
++static pte_t *_lookup_address_cpa(struct cpa_data *cpa, unsigned long address,
++				  unsigned int *level)
++{
++        if (cpa->pgd)
++		return __lookup_address_in_pgd(cpa->pgd + pgd_index(address),
++					       address, level);
 +
-+	pgd_entry = cpa->pgd + pgd_index(addr);
-+
-+	/*
-+	 * Allocate a PUD page and hand it down for mapping.
-+	 */
-+	if (pgd_none(*pgd_entry)) {
-+		pud = (pud_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-+		if (!pud)
-+			return -1;
-+
-+		set_pgd(pgd_entry, __pgd(__pa(pud) | _KERNPG_TABLE));
-+		allocd_pgd = true;
-+	}
-+
-+	pgprot_val(pgprot) &= ~pgprot_val(cpa->mask_clr);
-+	pgprot_val(pgprot) |=  pgprot_val(cpa->mask_set);
-+
-+	ret = populate_pud(cpa, addr, pgd_entry, pgprot);
-+	if (ret < 0)
-+		return ret;
-+
-+	cpa->numpages = ret;
-+	return 0;
++        return lookup_address(address, level);
 +}
 +
- static int __cpa_process_fault(struct cpa_data *cpa, unsigned long vaddr,
- 			       int primary)
- {
+ /*
+  * This is necessary because __pa() does not work on some
+  * kinds of memory, like vmalloc() or the alloc_remap()
 -- 
 1.8.4
