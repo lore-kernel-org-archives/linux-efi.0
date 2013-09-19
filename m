@@ -1,124 +1,100 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 05/11] x86, pageattr: Add a PUD pagetable populating function
-Date: Thu, 19 Sep 2013 16:54:48 +0200
-Message-ID: <1379602494-26684-6-git-send-email-bp@alien8.de>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+From: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
+Subject: Re: [PATCH 09/17] Move unicode to ASCII conversion to shared
+ function.
+Date: Fri, 20 Sep 2013 01:02:41 +0200
+Message-ID: <20130919230241.GA18666@angband.pl>
+References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+ <1379391093-27948-10-git-send-email-roy.franz@linaro.org>
+ <20130919034406.GA26385@angband.pl>
+ <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379602494-26684-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+On Wed, Sep 18, 2013 at 09:48:44PM -0700, Roy Franz wrote:
+> On Wed, Sep 18, 2013 at 8:44 PM, Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org> =
+wrote:
+> > [UCS2 truncation]
+>=20
+> I stuck to re-arranging the code that was there, as I don't know enou=
+gh
+> about character encodings to propose changes.
 
-Add the next level of the pagetable populating function, we handle
-chunks around a 1G boundary by mapping them with the lower level
-functions - otherwise we use 1G pages for the mappings, thus using as
-less amount of pagetable pages as possible.
+I on the other hand don't know the kernel (lurking because of my first
+patch), but I'm on a crusade against mangled Unicode (so far in the
+userland).  Can't let such a blatant error slip through on my watch :)
 
-Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
----
- arch/x86/mm/pageattr.c | 87 +++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 86 insertions(+), 1 deletion(-)
+> Also, this code is running as part of the kernel decompressor, rather=
+ than
+> the kernel itself, so it doesn't have access to any kernel facilities=
+, and
+> it also needs to be position independent.
 
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 21a31e85283c..41c6fdbbfab0 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -666,7 +666,92 @@ static int split_large_page(pte_t *kpte, unsigned long address)
- 	return 0;
- }
- 
--#define populate_pud(cpa, addr, pgd, pgprot)	(-1)
-+static int alloc_pmd_page(pud_t *pud)
-+{
-+	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-+	if (!pmd)
-+		return -1;
-+
-+	set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
-+	return 0;
-+}
-+
-+#define populate_pmd(cpa, start, end, pages, pud, pgprot)	(-1)
-+
-+static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
-+			pgprot_t pgprot)
-+{
-+	pud_t *pud;
-+	unsigned long end;
-+	int cur_pages = 0;
-+
-+	end = start + (cpa->numpages << PAGE_SHIFT);
-+
-+	/*
-+	 * Not on a Gb page boundary? => map everything up to it with
-+	 * smaller pages.
-+	 */
-+	if (start & (PUD_SIZE - 1)) {
-+		unsigned long pre_end;
-+		unsigned long next_page = (start + PUD_SIZE) & PUD_MASK;
-+
-+		pre_end   = min_t(unsigned long, end, next_page);
-+		cur_pages = (pre_end - start) >> PAGE_SHIFT;
-+		cur_pages = min_t(int, (int)cpa->numpages, cur_pages);
-+
-+		pud = pud_offset(pgd, start);
-+
-+		/*
-+		 * Need a PMD page?
-+		 */
-+		if (pud_none(*pud))
-+			if (alloc_pmd_page(pud))
-+				return -1;
-+
-+		cur_pages = populate_pmd(cpa, start, pre_end, cur_pages,
-+					 pud, pgprot);
-+		if (cur_pages < 0)
-+			return cur_pages;
-+
-+		start = pre_end;
-+	}
-+
-+	/* We mapped them all? */
-+	if (cpa->numpages == cur_pages)
-+		return cur_pages;
-+
-+	pud = pud_offset(pgd, start);
-+
-+	/*
-+	 * Map everything starting from the Gb boundary, possibly with 1G pages
-+	 */
-+	while (end - start >= PUD_SIZE) {
-+		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE | massage_pgprot(pgprot)));
-+
-+		start	  += PUD_SIZE;
-+		cpa->pfn  += PUD_SIZE;
-+		cur_pages += PUD_SIZE >> PAGE_SHIFT;
-+		pud++;
-+	}
-+
-+	/* Map trailing leftover */
-+	if (start < end) {
-+		int tmp;
-+
-+		pud = pud_offset(pgd, start);
-+		if (pud_none(*pud))
-+			if (alloc_pmd_page(pud))
-+				return -1;
-+
-+		tmp = populate_pmd(cpa, start, end, cpa->numpages - cur_pages,
-+				   pud, pgprot);
-+		if (tmp < 0)
-+			return cur_pages;
-+
-+		cur_pages += tmp;
-+	}
-+	return cur_pages;
-+}
- 
- /*
-  * Restrictions for kernel page table do not necessarily apply when mapping in
--- 
-1.8.4
+Ok, so it can't reuse common libraries.  No problem, a simplified, sani=
+tized
+and optimized copy of utf16s_to_utf8s() can be done in quite less code =
+than
+the original.
+
+> It's running in a quite limited environment - the decompressor has
+> its own copy of strstr(), and other string functions.
+
+I'd need nothing but a way to alloc the new string.  And I see this is
+already done (efi_{low,high_alloc()).
+
+> I checked the UEFI specification, and it states that all 16 bit strin=
+gs
+> are UCS-2, unless otherwise noted.
+
+=2E.. which means it will either get upgraded to UTF-16 in a subsequent
+version, or some Unicode strings get mangled.  I'd ignore this bit and
+implement full UTF-16 from the start: every legal UCS-2 string can be
+decoded as UTF-16 so it's a strict superset.
+
+> The load options that the command line is provided through a void poi=
+nter
+> specified as: [snip]
+
+Either a null pointer or a 16-bit string, that sounds clear enough.
+
+I see not a word about endianness (does anything do EFI on big endian?)=
+,
+but "same as host" seems to be a reasonable assumption.
+
+> Would it be acceptable to fix the naming/comments, and convert values
+> above 126 to '?' in the current patchset, and address a more thorough=
+ fix
+> in another patch set?  The ARM and ARM64 EFI stub patchsets that are
+> mostly complete depend on this one, so getting this merged soon would=
+ be
+> helpful.
+
+I don't want to hinder your work, so what about putting in your version
+as-is and fixing it later?
+
+> > There's just one problem: which encoding to use, but
+> > these days, most distributions have either dropped non-UTF8 or hard=
+ly pay
+> > lip service, so we could get away with hard-coding UTF-8: those few=
+ who
+> > use ancient charsets can stick to ASCII.
+
+Not being able to use regular kernel facilities makes supporting ancien=
+t
+charsets a lost cause.  I'm so weeping about them... not.
+
+> I would certainly appreciate your help improving this
+
+Are we on the same page so far?  If so, I can make a patch atop yours.
+
+--=20
+=E1=9B=8A=E1=9A=A8=E1=9A=BE=E1=9B=81=E1=9B=8F=E1=9A=A3=E1=9B=AB=E1=9B=81=
+=E1=9B=8A=E1=9B=AB=E1=9A=A0=E1=9B=9F=E1=9A=B1=E1=9B=AB=E1=9A=A6=E1=9B=96=
+=E1=9B=AB=E1=9A=B9=E1=9B=96=E1=9A=A8=E1=9A=B2
