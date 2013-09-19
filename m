@@ -1,47 +1,135 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH 09/17] Move unicode to ASCII conversion to shared function.
-Date: Wed, 18 Sep 2013 22:46:39 -0500
-Message-ID: <523A739F.9050103@zytor.com>
-References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org> <1379391093-27948-10-git-send-email-roy.franz@linaro.org> <20130919034406.GA26385@angband.pl>
+Date: Wed, 18 Sep 2013 21:48:44 -0700
+Message-ID: <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw@mail.gmail.com>
+References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
+	<1379391093-27948-10-git-send-email-roy.franz@linaro.org>
+	<20130919034406.GA26385@angband.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20130919034406.GA26385-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/18/2013 10:44 PM, Adam Borowski wrote:
-> 
-> In fact, these days it's 8-bit encodings that are more likely to be Unicode
-> than 16-bit ones: UTF-8 is ubiquitous, while you usually get UCS2 at most.
-> In either case, though, we have here is a 7-bit charset encoded as either
-> 8-bit or 16-bit units.  What this function does is blindly truncating upper
+On Wed, Sep 18, 2013 at 8:44 PM, Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org> wr=
+ote:
+> On Mon, Sep 16, 2013 at 09:11:25PM -0700, Roy Franz wrote:
+>> +/* Convert the unicode UEFI command line to ASCII to pass to kernel=
+=2E
+>> + * Size of memory allocated return in *cmd_line_len.
+>> + * Returns NULL on error.
+>> + */
+>> +static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_t=
+able_arg,
+>
+>> +       int load_options_size =3D image->load_options_size / 2; /* A=
+SCII */
+>
+>> +     for (i =3D 0; i < options_size - 1; i++)
+>> +             *s1++ =3D *s2++;
+>
+> I'm afraid both this commit and comments inside are misnamed.  What y=
+ou're
+> changing here is the encoding rather than character set.
+>
+> In fact, these days it's 8-bit encodings that are more likely to be U=
+nicode
+> than 16-bit ones: UTF-8 is ubiquitous, while you usually get UCS2 at =
+most.
+> In either case, though, we have here is a 7-bit charset encoded as ei=
+ther
+> 8-bit or 16-bit units.  What this function does is blindly truncating=
+ upper
 > byte.  The supported payload is in both cases ASCII.
-> 
-> I'd thus rename the function to what it already does: truncating u16 to u8,
+>
+> I'd thus rename the function to what it already does: truncating u16 =
+to u8,
 > and adjust comments accordingly.
-> 
-> Replacing values above 126 with a token character like '?' would be good
-> too: that'd avoid producing corrupted characters and/or random ASCII chars.
-> 
-> Your commit only moves things around, so it might be out of scope for now,
-> but I wonder: what if the kernel actually supported Unicode here?  Few
-> cmdline arguments take values where non-ASCII makes sense, but at least some
-> do: for example, a Russian guy is not unlikely to name subvolumes using
+>
+> Replacing values above 126 with a token character like '?' would be g=
+ood
+> too: that'd avoid producing corrupted characters and/or random ASCII =
+chars.
+
+I stuck to re-arranging the code that was there, as I don't know
+enough about character encodings
+to propose changes.  Also, this code is running as part of the kernel
+decompressor, rather
+than the kernel itself, so it doesn't have access to any kernel
+facilities, and it also needs to
+be position independent.  It's running in a quite limited environment
+-  the decompressor has
+its own copy of strstr(), and other string functions.
+
+I checked the UEFI specification, and it states that all 16 bit
+strings are UCS-2, unless
+otherwise noted.  The load options that the command line is provided
+through a void pointer
+specified as:
+
+    "LoadOptions A pointer to the image's binary load options."
+
+I couldn't quickly find any other mentions of LoadOptions in the
+spec., so I don't know what
+other types of values could be, or are typically provided.  The spec
+isn't helpful regarding the type
+of this data, and I don't know what common practice is here among the
+various EFI/UEFI firmwares
+out there.
+
+Would it be acceptable to fix the naming/comments, and convert values
+above 126 to '?'
+in the current patchset, and address a more thorough fix in another pat=
+ch set?
+The ARM and ARM64 EFI stub patchsets that are mostly complete depend
+on this one,
+so getting this merged soon would be helpful.
+
+Something like:
+>> +/* Convert the UEFI command line from 16 bit to 8 bit encoding to p=
+ass to kernel.
+>> + * by truncating to 7 bits.  Values above 126 are converted to 63 (=
+ASCII '?')
+>> + * Size of memory allocated return in *cmd_line_len.
+>> + * Returns NULL on error.
+>> + */
++static char *efi_truncate_cmdline_to_8bit_encoding(efi_system_table_t
+*sys_table_arg,
+(update code to truncate and convert to '?')
+
+>
+> Your commit only moves things around, so it might be out of scope for=
+ now,
+> but I wonder: what if the kernel actually supported Unicode here?  Fe=
+w
+> cmdline arguments take values where non-ASCII makes sense, but at lea=
+st some
+> do: for example, a Russian guy is not unlikely to name subvolumes usi=
+ng
 > cyrillic.  Supporting that would be easy (estimating the length then
-> utf16s_to_utf8s()).  There's just one problem: which encoding to use, but
-> these days, most distributions have either dropped non-UTF8 or hardly pay
-> lip service, so we could get away with hard-coding UTF-8: those few who
-> use ancient charsets can stick to ASCII.  Would this be ok?  If so, shout,
+> tf16us_to_utf8s()).  There's just one problem: which encoding to use,=
+ but
+> these days, most distributions have either dropped non-UTF8 or hardly=
+ pay
+> lip service, so we could get away with hard-coding UTF-8: those few w=
+ho
+> use ancient charsets can stick to ASCII.  Would this be ok?  If so, s=
+hout,
 > I can code this if you don't care enough.
-> 
 
-We should, indeed, do proper conversion to UTF-8 here.
+I would certainly appreciate your help improving this, although I think=
+ we'll
+need to have a better understanding of what the UEFI firmware is provid=
+ing
+before we can implement something better.
 
-I also suspect we should assume the input is UTF-16 rather than UCS-2,
-although that is a bit more exotic.
 
-	-hpa
+>
+> --
+> =E1=9B=8A=E1=9A=A8=E1=9A=BE=E1=9B=81=E1=9B=8F=E1=9A=A3=E1=9B=AB=E1=9B=
+=81=E1=9B=8A=E1=9B=AB=E1=9A=A0=E1=9B=9F=E1=9A=B1=E1=9B=AB=E1=9A=A6=E1=9B=
+=96=E1=9B=AB=E1=9A=B9=E1=9B=96=E1=9A=A8=E1=9A=B2
