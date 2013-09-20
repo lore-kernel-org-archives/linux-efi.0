@@ -1,39 +1,240 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 00/11] EFI runtime services virtual mapping
-Date: Fri, 20 Sep 2013 18:07:25 +0800
-Message-ID: <20130920100725.GD21922@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 02/11] efi: Remove EFI_PAGE_SHIFT and EFI_PAGE_SIZE
+Date: Fri, 20 Sep 2013 11:42:49 +0100
+Message-ID: <20130920104249.GA21381@console-pimps.org>
 References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <20130920072904.GA21922@dhcp-16-126.nay.redhat.com>
- <20130920081940.GC21922@dhcp-16-126.nay.redhat.com>
- <20130920093352.GB9574@pd.tnic>
+ <1379602494-26684-3-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130920093352.GB9574@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, linux-efi@vger.kernel.org
+In-Reply-To: <1379602494-26684-3-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/20/13 at 11:33am, Borislav Petkov wrote:
-> On Fri, Sep 20, 2013 at 04:19:40PM +0800, Dave Young wrote:
-> > Actually the ovmf testing is "qemu-system-x86_64 -kernel ", boot from grub
-> > fails as well. Nothing printed on serial. I guess '-kernel' is using efi stub
-> > to boot?
+On Thu, 19 Sep, at 04:54:45PM, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 > 
-> Yes.
+> ... and use the good old standard defines which we all know. Also,
+> simplify math to shift by PAGE_SHIFT instead of multiplying by
+> PAGE_SIZE.
 > 
-> Which OVMF are you using? Mine is pretty recent: svn revision 14530 from August.
+> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c | 12 ++++++------
+>  arch/x86/boot/compressed/eboot.h |  1 -
+>  arch/x86/platform/efi/efi.c      | 22 +++++++++++-----------
+>  include/linux/efi.h              |  6 ++----
+>  4 files changed, 19 insertions(+), 22 deletions(-)
 
-It's a fresh clone at 2013-09-12.
+I'm pulling in Leif and Roy just so they're aware of this change,
+because while PAGE_SHIFT is always 12 on x86, that's not true for arm64.
 
-> 
-> Thanks.
-> 
+However, I imagine that much work would be needed to allow for page
+sizes other than 4K, so I am definitely going to take this patch.
+
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index b7388a425f09..5c440bf769a8 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -96,7 +96,7 @@ static efi_status_t high_alloc(unsigned long size, unsigned long align,
+>  	if (status != EFI_SUCCESS)
+>  		goto fail;
+>  
+> -	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+> +	nr_pages = round_up(size, PAGE_SIZE) / PAGE_SIZE;
+>  again:
+>  	for (i = 0; i < map_size / desc_size; i++) {
+>  		efi_memory_desc_t *desc;
+> @@ -111,7 +111,7 @@ again:
+>  			continue;
+>  
+>  		start = desc->phys_addr;
+> -		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +		end = start + (desc->num_pages << PAGE_SHIFT);
+>  
+>  		if ((start + size) > end || (start + size) > max)
+>  			continue;
+> @@ -173,7 +173,7 @@ static efi_status_t low_alloc(unsigned long size, unsigned long align,
+>  	if (status != EFI_SUCCESS)
+>  		goto fail;
+>  
+> -	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+> +	nr_pages = round_up(size, PAGE_SIZE) / PAGE_SIZE;
+>  	for (i = 0; i < map_size / desc_size; i++) {
+>  		efi_memory_desc_t *desc;
+>  		unsigned long m = (unsigned long)map;
+> @@ -188,7 +188,7 @@ static efi_status_t low_alloc(unsigned long size, unsigned long align,
+>  			continue;
+>  
+>  		start = desc->phys_addr;
+> -		end = start + desc->num_pages * (1UL << EFI_PAGE_SHIFT);
+> +		end = start + (desc->num_pages << PAGE_SHIFT);
+>  
+>  		/*
+>  		 * Don't allocate at 0x0. It will confuse code that
+> @@ -224,7 +224,7 @@ static void low_free(unsigned long size, unsigned long addr)
+>  {
+>  	unsigned long nr_pages;
+>  
+> -	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+> +	nr_pages = round_up(size, PAGE_SIZE) / PAGE_SIZE;
+>  	efi_call_phys2(sys_table->boottime->free_pages, addr, nr_pages);
+>  }
+>  
+> @@ -1128,7 +1128,7 @@ static efi_status_t relocate_kernel(struct setup_header *hdr)
+>  	 * possible.
+>  	 */
+>  	start = hdr->pref_address;
+> -	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+> +	nr_pages = round_up(hdr->init_size, PAGE_SIZE) / PAGE_SIZE;
+>  
+>  	status = efi_call_phys4(sys_table->boottime->allocate_pages,
+>  				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+> diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+> index e5b0a8f91c5f..786398c1bb9a 100644
+> --- a/arch/x86/boot/compressed/eboot.h
+> +++ b/arch/x86/boot/compressed/eboot.h
+> @@ -11,7 +11,6 @@
+>  
+>  #define DESC_TYPE_CODE_DATA	(1 << 0)
+>  
+> -#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
+>  #define EFI_READ_CHUNK_SIZE	(1024 * 1024)
+>  
+>  #define EFI_CONSOLE_OUT_DEVICE_GUID    \
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 7cec1e9e5494..538c1e6b7b2c 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -339,7 +339,7 @@ static void __init do_add_efi_memmap(void)
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		efi_memory_desc_t *md = p;
+>  		unsigned long long start = md->phys_addr;
+> -		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+> +		unsigned long long size = md->num_pages << PAGE_SHIFT;
+>  		int e820_type;
+>  
+>  		switch (md->type) {
+> @@ -416,8 +416,8 @@ static void __init print_efi_memmap(void)
+>  		pr_info("mem%02u: type=%u, attr=0x%llx, "
+>  			"range=[0x%016llx-0x%016llx) (%lluMB)\n",
+>  			i, md->type, md->attribute, md->phys_addr,
+> -			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
+> -			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+> +			md->phys_addr + (md->num_pages << PAGE_SHIFT),
+> +			(md->num_pages >> (20 - PAGE_SHIFT)));
+>  	}
+>  #endif  /*  EFI_DEBUG  */
+>  }
+> @@ -429,7 +429,7 @@ void __init efi_reserve_boot_services(void)
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		efi_memory_desc_t *md = p;
+>  		u64 start = md->phys_addr;
+> -		u64 size = md->num_pages << EFI_PAGE_SHIFT;
+> +		u64 size = md->num_pages << PAGE_SHIFT;
+>  
+>  		if (md->type != EFI_BOOT_SERVICES_CODE &&
+>  		    md->type != EFI_BOOT_SERVICES_DATA)
+> @@ -473,7 +473,7 @@ void __init efi_free_boot_services(void)
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		efi_memory_desc_t *md = p;
+>  		unsigned long long start = md->phys_addr;
+> -		unsigned long long size = md->num_pages << EFI_PAGE_SHIFT;
+> +		unsigned long long size = md->num_pages << PAGE_SHIFT;
+>  
+>  		if (md->type != EFI_BOOT_SERVICES_CODE &&
+>  		    md->type != EFI_BOOT_SERVICES_DATA)
+> @@ -825,7 +825,7 @@ void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
+>  		return NULL;
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		efi_memory_desc_t *md = p;
+> -		u64 size = md->num_pages << EFI_PAGE_SHIFT;
+> +		u64 size = md->num_pages << PAGE_SHIFT;
+>  		u64 end = md->phys_addr + size;
+>  		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+>  		    md->type != EFI_BOOT_SERVICES_CODE &&
+> @@ -843,7 +843,7 @@ void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
+>  
+>  void efi_memory_uc(u64 addr, unsigned long size)
+>  {
+> -	unsigned long page_shift = 1UL << EFI_PAGE_SHIFT;
+> +	unsigned long page_shift = 1UL << PAGE_SHIFT;
+>  	u64 npages;
+>  
+>  	npages = round_up(size, page_shift) / page_shift;
+> @@ -896,7 +896,7 @@ void __init efi_enter_virtual_mode(void)
+>  			continue;
+>  		}
+>  
+> -		prev_size = prev_md->num_pages << EFI_PAGE_SHIFT;
+> +		prev_size = prev_md->num_pages << PAGE_SHIFT;
+>  
+>  		if (md->phys_addr == (prev_md->phys_addr + prev_size)) {
+>  			prev_md->num_pages += md->num_pages;
+> @@ -914,7 +914,7 @@ void __init efi_enter_virtual_mode(void)
+>  		    md->type != EFI_BOOT_SERVICES_DATA)
+>  			continue;
+>  
+> -		size = md->num_pages << EFI_PAGE_SHIFT;
+> +		size = md->num_pages << PAGE_SHIFT;
+>  		end = md->phys_addr + size;
+>  
+>  		start_pfn = PFN_DOWN(md->phys_addr);
+> @@ -1011,7 +1011,7 @@ u32 efi_mem_type(unsigned long phys_addr)
+>  		md = p;
+>  		if ((md->phys_addr <= phys_addr) &&
+>  		    (phys_addr < (md->phys_addr +
+> -				  (md->num_pages << EFI_PAGE_SHIFT))))
+> +				  (md->num_pages << PAGE_SHIFT))))
+>  			return md->type;
+>  	}
+>  	return 0;
+> @@ -1026,7 +1026,7 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+>  		md = p;
+>  		if ((md->phys_addr <= phys_addr) &&
+>  		    (phys_addr < (md->phys_addr +
+> -				  (md->num_pages << EFI_PAGE_SHIFT))))
+> +				  (md->num_pages << PAGE_SHIFT))))
+>  			return md->attribute;
+>  	}
+>  	return 0;
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 5f8f176154f7..fa47d80ab4b5 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -95,8 +95,6 @@ typedef	struct {
+>  #define EFI_MEMORY_RUNTIME	((u64)0x8000000000000000ULL)	/* range requires runtime mapping */
+>  #define EFI_MEMORY_DESCRIPTOR_VERSION	1
+>  
+> -#define EFI_PAGE_SHIFT		12
+> -
+>  typedef struct {
+>  	u32 type;
+>  	u32 pad;
+> @@ -611,7 +609,7 @@ static inline int efi_range_is_wc(unsigned long start, unsigned long len)
+>  {
+>  	unsigned long i;
+>  
+> -	for (i = 0; i < len; i += (1UL << EFI_PAGE_SHIFT)) {
+> +	for (i = 0; i < len; i += PAGE_SIZE) {
+>  		unsigned long paddr = __pa(start + i);
+>  		if (!(efi_mem_attributes(paddr) & EFI_MEMORY_WC))
+>  			return 0;
+> @@ -728,7 +726,7 @@ struct efi_generic_dev_path {
+>  
+>  static inline void memrange_efi_to_native(u64 *addr, u64 *npages)
+>  {
+> -	*npages = PFN_UP(*addr + (*npages<<EFI_PAGE_SHIFT)) - PFN_DOWN(*addr);
+> +	*npages = PFN_UP(*addr + (*npages << PAGE_SHIFT)) - PFN_DOWN(*addr);
+>  	*addr &= PAGE_MASK;
+>  }
+>  
 > -- 
-> Regards/Gruss,
->     Boris.
+> 1.8.4
 > 
-> Sent from a fat crate under my desk. Formatting is fine.
-> --
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
