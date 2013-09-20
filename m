@@ -1,100 +1,96 @@
-From: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>
-Subject: Re: [PATCH 09/17] Move unicode to ASCII conversion to shared
- function.
-Date: Fri, 20 Sep 2013 01:02:41 +0200
-Message-ID: <20130919230241.GA18666@angband.pl>
-References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
- <1379391093-27948-10-git-send-email-roy.franz@linaro.org>
- <20130919034406.GA26385@angband.pl>
- <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 00/11] EFI runtime services virtual mapping
+Date: Fri, 20 Sep 2013 15:29:04 +0800
+Message-ID: <20130920072904.GA21922@dhcp-16-126.nay.redhat.com>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1379602494-26684-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 18, 2013 at 09:48:44PM -0700, Roy Franz wrote:
-> On Wed, Sep 18, 2013 at 8:44 PM, Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org> =
-wrote:
-> > [UCS2 truncation]
->=20
-> I stuck to re-arranging the code that was there, as I don't know enou=
-gh
-> about character encodings to propose changes.
+On 09/19/13 at 04:54pm, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> 
+> Hi all,
+> 
+> here's finally a new version of the runtime services VA mapping patchset
+> which hopefully implements hpa's idea of statically mapping EFI runtime
+> regions in a top-down manner starting at -4Gb virtual.
+> 
+> We're also using a different pagetable so as not to pollute kernel
+> address space. For that, we switch to that table before doing an EFI
+> call, and afterwards we switch back to the previous one.
+> 
+> To the patches:
+> 
+> 1-2 are simple cleanups which Matt probably can take now
+> 
+> 3-10 add the machinery to map regions into an arbitrary PGD. Those I've
+> split deliberately into very small bites so that they can be reviewed
+> more thoroughly and easily for my pagetable skills are pretty basic.
+> 
+> 11 is the actual patch which implements that mapping so that we can use
+> runtime services in kexec (which is the whole reason for this fuss :))
+> 
+> So please take a long hard look at those, hammer on them on your
+> boxes and let me know. They boot fine on my Dell UEFI box and in OVMF
+> (obviously :)).
 
-I on the other hand don't know the kernel (lurking because of my first
-patch), but I'm on a crusade against mangled Unicode (so far in the
-userland).  Can't let such a blatant error slip through on my watch :)
+Thanks for your update!
 
-> Also, this code is running as part of the kernel decompressor, rather=
- than
-> the kernel itself, so it doesn't have access to any kernel facilities=
-, and
-> it also needs to be position independent.
+Just tested this series, for 1st kernel It boots ok in qemu+ovmf. But it immediately
+reboot on my Thinkpad T420. Unfortunately there's no way to debug this
+very early problem because there's no serial port also earlyprintk does
+not work for efi boot. No usb debug as well on this machine. I will test
+it when I go back to work after the china holiday.
 
-Ok, so it can't reuse common libraries.  No problem, a simplified, sani=
-tized
-and optimized copy of utf16s_to_utf8s() can be done in quite less code =
-than
-the original.
+OTOH, for 2nd kernel testing because kexec tools does not fill efi_info[]
+in bootparam so kernel will disable efi, also it pass acpi_rsdp pointer
+automaticlly to make 2nd kernel boot ok.
 
-> It's running in a quite limited environment - the decompressor has
-> its own copy of strstr(), and other string functions.
+I tested with a user space patch which copy efi_info from 1st kernel to
+bootparams, as I said previously this is not enough because several fields
+in systab, fw_vendor, runtime and tables are converted to virtual address
+but in kernel efi init function they are assumed physical addresses. Thus
+we need save these physical address. I have a patch to save them and pass
+them to 2nd kernel in bootparams.
+Since the mapping are same, I wonder if we can calculate the physical
+address from virtual address.  Idea?
 
-I'd need nothing but a way to alloc the new string.  And I see this is
-already done (efi_{low,high_alloc()).
+Another concern is that is it safe for i386 efi boot?
 
-> I checked the UEFI specification, and it states that all 16 bit strin=
-gs
-> are UCS-2, unless otherwise noted.
-
-=2E.. which means it will either get upgraded to UTF-16 in a subsequent
-version, or some Unicode strings get mangled.  I'd ignore this bit and
-implement full UTF-16 from the start: every legal UCS-2 string can be
-decoded as UTF-16 so it's a strict superset.
-
-> The load options that the command line is provided through a void poi=
-nter
-> specified as: [snip]
-
-Either a null pointer or a 16-bit string, that sounds clear enough.
-
-I see not a word about endianness (does anything do EFI on big endian?)=
-,
-but "same as host" seems to be a reasonable assumption.
-
-> Would it be acceptable to fix the naming/comments, and convert values
-> above 126 to '?' in the current patchset, and address a more thorough=
- fix
-> in another patch set?  The ARM and ARM64 EFI stub patchsets that are
-> mostly complete depend on this one, so getting this merged soon would=
- be
-> helpful.
-
-I don't want to hinder your work, so what about putting in your version
-as-is and fixing it later?
-
-> > There's just one problem: which encoding to use, but
-> > these days, most distributions have either dropped non-UTF8 or hard=
-ly pay
-> > lip service, so we could get away with hard-coding UTF-8: those few=
- who
-> > use ancient charsets can stick to ASCII.
-
-Not being able to use regular kernel facilities makes supporting ancien=
-t
-charsets a lost cause.  I'm so weeping about them... not.
-
-> I would certainly appreciate your help improving this
-
-Are we on the same page so far?  If so, I can make a patch atop yours.
-
---=20
-=E1=9B=8A=E1=9A=A8=E1=9A=BE=E1=9B=81=E1=9B=8F=E1=9A=A3=E1=9B=AB=E1=9B=81=
-=E1=9B=8A=E1=9B=AB=E1=9A=A0=E1=9B=9F=E1=9A=B1=E1=9B=AB=E1=9A=A6=E1=9B=96=
-=E1=9B=AB=E1=9A=B9=E1=9B=96=E1=9A=A8=E1=9A=B2
+> 
+> Thanks.
+> 
+> Borislav Petkov (11):
+>   efi: Simplify EFI_DEBUG
+>   efi: Remove EFI_PAGE_SHIFT and EFI_PAGE_SIZE
+>   x86, pageattr: Lookup address in an arbitrary PGD
+>   x86, pageattr: Add a PGD pagetable populating function
+>   x86, pageattr: Add a PUD pagetable populating function
+>   x86, pageattr: Add a PMD pagetable populating function
+>   x86, pageattr: Add a PTE pagetable populating function
+>   x86, pageattr: Add a PUD error unwinding path
+>   x86, pageattr: Add last levels of error path
+>   x86, cpa: Map in an arbitrary pgd
+>   EFI: Runtime services virtual mapping
+> 
+>  arch/x86/boot/compressed/eboot.c     |  12 +-
+>  arch/x86/boot/compressed/eboot.h     |   1 -
+>  arch/x86/include/asm/efi.h           |  58 +++--
+>  arch/x86/include/asm/pgtable_types.h |   3 +-
+>  arch/x86/mm/pageattr.c               | 461 +++++++++++++++++++++++++++++++++--
+>  arch/x86/platform/efi/efi.c          | 126 +++++-----
+>  arch/x86/platform/efi/efi_64.c       |  56 +----
+>  arch/x86/platform/efi/efi_stub_64.S  |  47 ++++
+>  include/linux/efi.h                  |   6 +-
+>  9 files changed, 615 insertions(+), 155 deletions(-)
+> 
+> -- 
+> 1.8.4
+> 
