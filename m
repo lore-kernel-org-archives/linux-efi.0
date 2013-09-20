@@ -1,32 +1,32 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: [PATCH 09/17] Move unicode to ASCII conversion to shared
  function.
-Date: Fri, 20 Sep 2013 10:27:13 +0100
-Message-ID: <20130920092713.GD4785@console-pimps.org>
+Date: Fri, 20 Sep 2013 10:30:01 +0100
+Message-ID: <20130920093001.GE4785@console-pimps.org>
 References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
  <1379391093-27948-10-git-send-email-roy.franz@linaro.org>
  <20130919034406.GA26385@angband.pl>
  <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw@mail.gmail.com>
+ <20130919230241.GA18666@angband.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAFECyb-tTaCEqUHUh23MaJf-P42ZpodFKeNG=kE+vmmi-gyKrw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Adam Borowski <kilobyte-b9QjgO8OEXPVItvQsEIGlw@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20130919230241.GA18666@angband.pl>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Adam Borowski <kilobyte@angband.pl>
+Cc: Roy Franz <roy.franz@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 18 Sep, at 09:48:44PM, Roy Franz wrote:
-> Would it be acceptable to fix the naming/comments, and convert values
-> above 126 to '?'
-> in the current patchset, and address a more thorough fix in another patch set?
-> The ARM and ARM64 EFI stub patchsets that are mostly complete depend
-> on this one,
-> so getting this merged soon would be helpful.
+On Fri, 20 Sep, at 01:02:41AM, Adam Borowski wrote:
+> Are we on the same page so far?  If so, I can make a patch atop yours.
 
-Just fixing the function name and comments is enough for this patch
-series. Anything else should be separate.
+Patches to fix this would be most welcome, though I'd wait until Roy
+sends out another version of this patch with the name/comment changes.
+
+This series will eventually end up in the 'next' branch at,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
