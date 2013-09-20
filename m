@@ -1,64 +1,46 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 00/11] EFI runtime services virtual mapping
-Date: Fri, 20 Sep 2013 22:04:18 +0800
-Message-ID: <20130920140418.GF21922@dhcp-16-126.nay.redhat.com>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <20130920072904.GA21922@dhcp-16-126.nay.redhat.com>
- <20130920090544.GA9574@pd.tnic>
- <20130920122915.GB21381@console-pimps.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH V4 00/17] ARM EFI stub common code
+Date: Fri, 20 Sep 2013 09:32:16 -0500
+Message-ID: <523C5C70.40908@zytor.com>
+References: <1379391093-27948-1-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130920122915.GB21381-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1379391093-27948-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 09/20/13 at 01:29pm, Matt Fleming wrote:
-> On Fri, 20 Sep, at 11:05:44AM, Borislav Petkov wrote:
-> > On Fri, Sep 20, 2013 at 03:29:04PM +0800, Dave Young wrote:
-> > > Just tested this series, for 1st kernel It boots ok in qemu+ovmf. But
-> > > it immediately reboot on my Thinkpad T420. Unfortunately there's no
-> > > way to debug this very early problem because there's no serial port
-> > > also earlyprintk does not work for efi boot. No usb debug as well on
-> > > this machine. I will test it when I go back to work after the china
-> > > holiday.
-> > 
-> > Hmm, I'm booting with the efi boot stub, how do you do it?
-> 
-> Dave, could you try this patch?
+A general note:
 
-Matt,
+In multiline comments like:
 
-It works for me, thanks for the quick fix.
+/* Relocate a kernel image, either compressed or uncompressed.
+ * In the ARM64 case, all kernel images are currently
+ * uncompressed, and as such when we relocate it we need to
+ * allocate additional space for the BSS segment. Any low
+ * memory that this function should avoid needs to be
+ * unavailable in the EFI memory map, as if the preferred
+ * address is not available the lowest available address will
+ * be used.
+ */
 
-> 
-> ---
-> 
-> diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-> index 06e71c2..9bcc15c 100644
-> --- a/arch/x86/boot/compressed/head_64.S
-> +++ b/arch/x86/boot/compressed/head_64.S
-> @@ -207,6 +207,8 @@ ENTRY(startup_64)
->  	jmp	preferred_addr
->  
->  ENTRY(efi_pe_entry)
-> +	movq	%cr3, %r15
-> +	movq	%r15, efi_scratch+16(%rip)
->  	mov	%rcx, %rdi
->  	mov	%rdx, %rsi
->  	pushq	%rdi
-> @@ -219,6 +221,8 @@ ENTRY(efi_pe_entry)
->  	popq	%rdi
->  
->  ENTRY(efi_stub_entry)
-> +	movq	%cr3, %r15
-> +	movq	%r15, efi_scratch+16(%rip)
->  	call	efi_main
->  	movq	%rax,%rsi
->  	cmpq	$0,%rax
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+Please have a blank line at the beginning:
+
+/*
+ * Relocate a kernel image, either compressed or uncompressed.
+ * In the ARM64 case, all kernel images are currently
+ * uncompressed, and as such when we relocate it we need to
+ * allocate additional space for the BSS segment. Any low
+ * memory that this function should avoid needs to be
+ * unavailable in the EFI memory map, as if the preferred
+ * address is not available the lowest available address will
+ * be used.
+ */
+
+Also, if this a comment at the head of a function, have a blank line
+before the comment.
+
+	-hpa
