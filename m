@@ -1,7 +1,7 @@
 From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH 07/18] Move relocate_kernel() to shared file.
-Date: Sun, 22 Sep 2013 15:45:31 -0700
-Message-ID: <1379889942-3135-8-git-send-email-roy.franz@linaro.org>
+Subject: [PATCH 12/18] generalize efi_get_memory_map()
+Date: Sun, 22 Sep 2013 15:45:36 -0700
+Message-ID: <1379889942-3135-13-git-send-email-roy.franz@linaro.org>
 References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
@@ -10,102 +10,60 @@ To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.
 Cc: leif.lindholm@linaro.org, grant.likely@linaro.org, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-The relocate_kernel() function will be generalized and used
-by all architectures, as they all have similar requirements.
+Add arguments for returning the descriptor version and also
+the memory map key.  The key is required for calling
+exit_boot_services().
 
 Signed-off-by: Roy Franz <roy.franz@linaro.org>
 ---
- arch/x86/boot/compressed/eboot.c       |   34 -------------------------------
- drivers/firmware/efi/efi-stub-helper.c |   35 ++++++++++++++++++++++++++++++++
- 2 files changed, 35 insertions(+), 34 deletions(-)
+ drivers/firmware/efi/efi-stub-helper.c |   14 +++++++++++---
+ 1 file changed, 11 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 2a4430a..5bbba86 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -677,40 +677,6 @@ free_mem_map:
- 	return status;
- }
- 
--static efi_status_t relocate_kernel(struct setup_header *hdr)
--{
--	unsigned long start, nr_pages;
--	efi_status_t status;
--
--	/*
--	 * The EFI firmware loader could have placed the kernel image
--	 * anywhere in memory, but the kernel has various restrictions
--	 * on the max physical address it can run at. Attempt to move
--	 * the kernel to boot_params.pref_address, or as low as
--	 * possible.
--	 */
--	start = hdr->pref_address;
--	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
--
--	status = efi_call_phys4(sys_table->boottime->allocate_pages,
--				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
--				nr_pages, &start);
--	if (status != EFI_SUCCESS) {
--		status = efi_low_alloc(sys_table, hdr->init_size,
--				   hdr->kernel_alignment, &start);
--		if (status != EFI_SUCCESS)
--			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
--	}
--
--	if (status == EFI_SUCCESS)
--		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
--		       hdr->init_size);
--
--	hdr->pref_address = hdr->code32_start;
--	hdr->code32_start = (__u32)start;
--
--	return status;
--}
- 
- /*
-  * On success we return a pointer to a boot_params structure, and NULL
 diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 9e451c6..1d5f219 100644
+index 4ac274b..b0b2f15 100644
 --- a/drivers/firmware/efi/efi-stub-helper.c
 +++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -483,3 +483,38 @@ fail:
+@@ -49,7 +49,9 @@ static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+ static efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 				       efi_memory_desc_t **map,
+ 				       unsigned long *map_size,
+-				       unsigned long *desc_size)
++				       unsigned long *desc_size,
++				       u32 *desc_ver,
++				       unsigned long *key_ptr)
+ {
+ 	efi_memory_desc_t *m = NULL;
+ 	efi_status_t status;
+@@ -77,6 +79,10 @@ again:
  
- 	return status;
- }
-+
-+static efi_status_t relocate_kernel(struct setup_header *hdr)
-+{
-+	unsigned long start, nr_pages;
-+	efi_status_t status;
-+
-+	/*
-+	 * The EFI firmware loader could have placed the kernel image
-+	 * anywhere in memory, but the kernel has various restrictions
-+	 * on the max physical address it can run at. Attempt to move
-+	 * the kernel to boot_params.pref_address, or as low as
-+	 * possible.
-+	 */
-+	start = hdr->pref_address;
-+	nr_pages = round_up(hdr->init_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
-+
-+	status = efi_call_phys4(sys_table->boottime->allocate_pages,
-+				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
-+				nr_pages, &start);
-+	if (status != EFI_SUCCESS) {
-+		status = efi_low_alloc(sys_table, hdr->init_size,
-+				   hdr->kernel_alignment, &start);
-+		if (status != EFI_SUCCESS)
-+			efi_printk(sys_table, "Failed to alloc mem for kernel\n");
-+	}
-+
-+	if (status == EFI_SUCCESS)
-+		memcpy((void *)start, (void *)(unsigned long)hdr->code32_start,
-+		       hdr->init_size);
-+
-+	hdr->pref_address = hdr->code32_start;
-+	hdr->code32_start = (__u32)start;
-+
-+	return status;
-+}
+ 	if (status != EFI_SUCCESS)
+ 		efi_call_phys1(sys_table_arg->boottime->free_pool, m);
++	if (key_ptr && status == EFI_SUCCESS)
++		*key_ptr = key;
++	if (desc_ver && status == EFI_SUCCESS)
++		*desc_ver = desc_version;
+ 
+ fail:
+ 	*map = m;
+@@ -97,7 +103,8 @@ static efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 	u64 max_addr = 0;
+ 	int i;
+ 
+-	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size);
++	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
++				    NULL, NULL);
+ 	if (status != EFI_SUCCESS)
+ 		goto fail;
+ 
+@@ -182,7 +189,8 @@ static efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 	unsigned long nr_pages;
+ 	int i;
+ 
+-	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size);
++	status = efi_get_memory_map(sys_table_arg, &map, &map_size, &desc_size,
++				    NULL, NULL);
+ 	if (status != EFI_SUCCESS)
+ 		goto fail;
+ 
 -- 
 1.7.10.4
