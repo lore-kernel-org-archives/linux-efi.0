@@ -1,172 +1,191 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 02/18] Add proper definitions for some EFI function pointers.
-Date: Sun, 22 Sep 2013 15:45:26 -0700
-Message-ID: <1379889942-3135-3-git-send-email-roy.franz@linaro.org>
-References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 10/18] Do proper conversion from UTF-16 to UTF-8
+Date: Sun, 22 Sep 2013 15:54:03 -0700
+Message-ID: <e69e8c38-b195-4797-8ae2-65d69ed9d7aa@email.android.com>
+References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org> <1379889942-3135-11-git-send-email-roy.franz@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1379889942-3135-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1379889942-3135-11-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-The x86/AMD64 EFI stubs must use a call wrapper to convert between
-the Linux and EFI ABIs, so void pointers are sufficient.  For ARM,
-the ABIs are compatible, so we can directly invoke the function
-pointers.  The functions that are used by the ARM stub are updated
-to match the EFI definitions.
-Also add some EFI types used by EFI functions.
+Sorry this version is broken and doesn't even compile due to remaining options_size references.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Reviewed-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.h |    8 ------
- include/linux/efi.h              |   50 ++++++++++++++++++++++++++------------
- 2 files changed, 34 insertions(+), 24 deletions(-)
+Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+>
+>Improve the conversion of the UTF-16 EFI command line
+>to UTF-8 for passing to the kernel.
+>
+>Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>---
+> arch/x86/boot/compressed/eboot.c       |    3 +-
+>drivers/firmware/efi/efi-stub-helper.c |   92
+>++++++++++++++++++++++++--------
+> 2 files changed, 72 insertions(+), 23 deletions(-)
+>
+>diff --git a/arch/x86/boot/compressed/eboot.c
+>b/arch/x86/boot/compressed/eboot.c
+>index 5e708c0..4723dc89 100644
+>--- a/arch/x86/boot/compressed/eboot.c
+>+++ b/arch/x86/boot/compressed/eboot.c
+>@@ -486,8 +486,7 @@ struct boot_params *make_boot_params(void *handle,
+>efi_system_table_t *_table)
+> 	hdr->type_of_loader = 0x21;
+> 
+> 	/* Convert unicode cmdline to ascii */
+>-	cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
+>-						   &options_size);
+>+	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
+> 	if (!cmdline_ptr)
+> 		goto fail;
+> 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
+>diff --git a/drivers/firmware/efi/efi-stub-helper.c
+>b/drivers/firmware/efi/efi-stub-helper.c
+>index 335d17d..8331892 100644
+>--- a/drivers/firmware/efi/efi-stub-helper.c
+>+++ b/drivers/firmware/efi/efi-stub-helper.c
+>@@ -548,61 +548,111 @@ static efi_status_t
+>efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+> 
+> 	return status;
+> }
+>-/* Convert the unicode UEFI command line to ASCII to pass to kernel.
+>+
+>+/*
+>+ * Get the number of UTF-8 bytes corresponding to an UTF-16 character.
+>+ * This overestimates for surrogates, but that is okay.
+>+ */
+>+static int efi_utf8_bytes(u16 c)
+>+{
+>+	return 1 + (c >= 0x80) + (c >= 0x800);
+>+}
+>+
+>+/*
+>+ * Convert an UTF-16 string, not necessarily null terminated, to
+>UTF-8.
+>+ */
+>+static u8 *efi_utf16_to_utf8(u8 *dst, const u16 *src, int n)
+>+{
+>+	unsigned int c;
+>+
+>+	while (n--) {
+>+		c = *src++;
+>+		if (n && c >= 0xd800 && c <= 0xdbff &&
+>+		    *src >= 0xdc00 && *src <= 0xdfff) {
+>+			c = 0x10000 + ((c & 0x3ff) << 10) + (*src & 0x3ff);
+>+			src++;
+>+			n--;
+>+		}
+>+		if (c >= 0xd800 && c <= 0xdfff)
+>+			c = 0xfffd; /* Unmatched surrogate */
+>+		if (c < 0x80) {
+>+			*dst++ = c;
+>+			continue;
+>+		}
+>+		if (c < 0x800) {
+>+			*dst++ = 0xc0 + (c >> 6);
+>+			goto t1;
+>+		}
+>+		if (c < 0x10000) {
+>+			*dst++ = 0xe0 + (c >> 12);
+>+			goto t2;
+>+		}
+>+		*dst++ = 0xf0 + (c >> 18);
+>+		*dst++ = 0x80 + ((c >> 12) & 0x3f);
+>+t2:
+>+		*dst++ = 0x80 + ((c >> 6) & 0x3f);
+>+t1:
+>+		*dst++ = 0x80 + (c & 0x3f);
+>+	}
+>+
+>+	return dst;
+>+}
+>+
+>+/*
+>+ * Convert the unicode UEFI command line to ASCII to pass to kernel.
+>  * Size of memory allocated return in *cmd_line_len.
+>  * Returns NULL on error.
+>  */
+>-static char *efi_convert_cmdline_to_ascii(efi_system_table_t
+>*sys_table_arg,
+>-				      efi_loaded_image_t *image,
+>-				      int *cmd_line_len)
+>+static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
+>+				 efi_loaded_image_t *image,
+>+				 int *cmd_line_len)
+> {
+>-	u16 *s2;
+>+	const u16 *s2;
+> 	u8 *s1 = NULL;
+> 	unsigned long cmdline_addr = 0;
+> 	int load_options_size = image->load_options_size / 2; /* ASCII */
+>-	void *options = image->load_options;
+>-	int options_size = 0;
+>+	const u16 *options = image->load_options;
+>+	int options_bytes = 0;	/* UTF-8 bytes */
+>+	int options_chars = 0;	/* UTF-16 chars */
+> 	efi_status_t status;
+>-	int i;
+> 	u16 zero = 0;
+> 
+> 	if (options) {
+> 		s2 = options;
+>-		while (*s2 && *s2 != '\n' && options_size < load_options_size) {
+>+		while (*s2 && *s2 != '\n' && options_bytes < load_options_size) {
+>+			options_bytes += efi_utf8_bytes(*s2);
+> 			s2++;
+>-			options_size++;
+> 		}
+>+		options_chars = s2 - options;
+> 	}
+> 
+>-	if (options_size == 0) {
+>-		/* No command line options, so return empty string*/
+>-		options_size = 1;
+>+	if (!options_chars) {
+>+		/* No command line options, so return empty string */
+> 		options = &zero;
+> 	}
+> 
+>-	options_size++;  /* NUL termination */
+>+	options_bytes++;	/* NUL termination */
+>+
+> #ifdef CONFIG_ARM
+> 	/* For ARM, allocate at a high address to avoid reserved
+> 	 * regions at low addresses that we don't know the specfics of
+> 	 * at the time we are processing the command line.
+> 	 */
+>-	status = efi_high_alloc(sys_table_arg, options_size, 0,
+>+	status = efi_high_alloc(sys_table_arg, options_bytes, 0,
+> 			    &cmdline_addr, 0xfffff000);
+> #else
+>-	status = efi_low_alloc(sys_table_arg, options_size, 0,
+>+	status = efi_low_alloc(sys_table_arg, options_bytes, 0,
+> 			    &cmdline_addr);
+> #endif
+> 	if (status != EFI_SUCCESS)
+> 		return NULL;
+> 
+> 	s1 = (u8 *)cmdline_addr;
+>-	s2 = (u16 *)options;
+>-
+>-	for (i = 0; i < options_size - 1; i++)
+>-		*s1++ = *s2++;
+>+	s2 = (const u16 *)options;
+> 
+>+	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
+> 	*s1 = '\0';
+> 
+>-	*cmd_line_len = options_size;
+>+	*cmd_line_len = options_bytes;
+> 	return (char *)cmdline_addr;
+> }
 
-diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
-index e5b0a8f..0226510 100644
---- a/arch/x86/boot/compressed/eboot.h
-+++ b/arch/x86/boot/compressed/eboot.h
-@@ -10,8 +10,6 @@
- #define SEG_GRANULARITY_4KB	(1 << 0)
- 
- #define DESC_TYPE_CODE_DATA	(1 << 0)
--
--#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
- #define EFI_READ_CHUNK_SIZE	(1024 * 1024)
- 
- #define EFI_CONSOLE_OUT_DEVICE_GUID    \
-@@ -62,10 +60,4 @@ struct efi_uga_draw_protocol {
- 	void *blt;
- };
- 
--struct efi_simple_text_output_protocol {
--	void *reset;
--	void *output_string;
--	void *test_string;
--};
--
- #endif /* BOOT_COMPRESSED_EBOOT_H */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5f8f176..840ab28 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -39,6 +39,8 @@
- typedef unsigned long efi_status_t;
- typedef u8 efi_bool_t;
- typedef u16 efi_char16_t;		/* UNICODE character */
-+typedef u64 efi_physical_addr_t;
-+typedef void *efi_handle_t;
- 
- 
- typedef struct {
-@@ -96,6 +98,7 @@ typedef	struct {
- #define EFI_MEMORY_DESCRIPTOR_VERSION	1
- 
- #define EFI_PAGE_SHIFT		12
-+#define EFI_PAGE_SIZE		(1UL << EFI_PAGE_SHIFT)
- 
- typedef struct {
- 	u32 type;
-@@ -157,11 +160,13 @@ typedef struct {
- 	efi_table_hdr_t hdr;
- 	void *raise_tpl;
- 	void *restore_tpl;
--	void *allocate_pages;
--	void *free_pages;
--	void *get_memory_map;
--	void *allocate_pool;
--	void *free_pool;
-+	efi_status_t (*allocate_pages)(int, int, unsigned long,
-+				       efi_physical_addr_t *);
-+	efi_status_t (*free_pages)(efi_physical_addr_t, unsigned long);
-+	efi_status_t (*get_memory_map)(unsigned long *, void *, unsigned long *,
-+				       unsigned long *, u32 *);
-+	efi_status_t (*allocate_pool)(int, unsigned long, void **);
-+	efi_status_t (*free_pool)(void *);
- 	void *create_event;
- 	void *set_timer;
- 	void *wait_for_event;
-@@ -171,7 +176,7 @@ typedef struct {
- 	void *install_protocol_interface;
- 	void *reinstall_protocol_interface;
- 	void *uninstall_protocol_interface;
--	void *handle_protocol;
-+	efi_status_t (*handle_protocol)(efi_handle_t, efi_guid_t *, void **);
- 	void *__reserved;
- 	void *register_protocol_notify;
- 	void *locate_handle;
-@@ -181,7 +186,7 @@ typedef struct {
- 	void *start_image;
- 	void *exit;
- 	void *unload_image;
--	void *exit_boot_services;
-+	efi_status_t (*exit_boot_services)(efi_handle_t, unsigned long);
- 	void *get_next_monotonic_count;
- 	void *stall;
- 	void *set_watchdog_timer;
-@@ -488,10 +493,6 @@ typedef struct {
- 	unsigned long unload;
- } efi_loaded_image_t;
- 
--typedef struct {
--	u64 revision;
--	void *open_volume;
--} efi_file_io_interface_t;
- 
- typedef struct {
- 	u64 size;
-@@ -504,20 +505,30 @@ typedef struct {
- 	efi_char16_t filename[1];
- } efi_file_info_t;
- 
--typedef struct {
-+typedef struct _efi_file_handle {
- 	u64 revision;
--	void *open;
--	void *close;
-+	efi_status_t (*open)(struct _efi_file_handle *,
-+			     struct _efi_file_handle **,
-+			     efi_char16_t *, u64, u64);
-+	efi_status_t (*close)(struct _efi_file_handle *);
- 	void *delete;
--	void *read;
-+	efi_status_t (*read)(struct _efi_file_handle *, unsigned long *,
-+			     void *);
- 	void *write;
- 	void *get_position;
- 	void *set_position;
--	void *get_info;
-+	efi_status_t (*get_info)(struct _efi_file_handle *, efi_guid_t *,
-+			unsigned long *, void *);
- 	void *set_info;
- 	void *flush;
- } efi_file_handle_t;
- 
-+typedef struct _efi_file_io_interface {
-+	u64 revision;
-+	int (*open_volume)(struct _efi_file_io_interface *,
-+			   efi_file_handle_t **);
-+} efi_file_io_interface_t;
-+
- #define EFI_FILE_MODE_READ	0x0000000000000001
- #define EFI_FILE_MODE_WRITE	0x0000000000000002
- #define EFI_FILE_MODE_CREATE	0x8000000000000000
-@@ -784,6 +795,13 @@ struct efivar_entry {
- 	struct kobject kobj;
- };
- 
-+
-+struct efi_simple_text_output_protocol {
-+	void *reset;
-+	efi_status_t (*output_string)(void *, void *);
-+	void *test_string;
-+};
-+
- extern struct list_head efivar_sysfs_list;
- 
- static inline void
 -- 
-1.7.10.4
+Sent from my mobile phone.  Please pardon brevity and lack of formatting.
