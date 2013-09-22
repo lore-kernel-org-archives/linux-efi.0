@@ -1,61 +1,69 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
-Date: Sun, 22 Sep 2013 15:37:22 +0200
-Message-ID: <20130922133722.GC28718@pd.tnic>
+Date: Sun, 22 Sep 2013 22:00:39 +0800
+Message-ID: <20130922140038.GB7476@dhcp-16-126.nay.redhat.com>
 References: <1379602494-26684-1-git-send-email-bp@alien8.de>
  <1379602494-26684-12-git-send-email-bp@alien8.de>
  <20130921113929.GB1587@pd.tnic>
  <20130922123515.GA7476@dhcp-16-126.nay.redhat.com>
+ <20130922133722.GC28718@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130922123515.GA7476-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <20130922133722.GC28718-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Sep 22, 2013 at 08:35:15PM +0800, Dave Young wrote:
-> I tested your new patch, it works both with efi stub and grub boot in
-> 1st kernel.
-
-Good, thanks!
-
-> But it paniced in kexec boot with my kexec related patcheset, the patchset
-
-That's the second kernel, right?
-
-> contains 3 patch:
-> 1. introduce cmdline kexecboot=<0|1|2>; 1 == kexec, 2 == kdump
-> 2. export physical addr fw_vendor, runtime, tables to /sys/firmware/efi/systab
-> 3. if kexecboot != 0, use fw_vendor, runtime, tables from bootparams; Also do not
->    call SetVirtualAddressMao in case kexecboot.
+On 09/22/13 at 03:37pm, Borislav Petkov wrote:
+> On Sun, Sep 22, 2013 at 08:35:15PM +0800, Dave Young wrote:
+> > I tested your new patch, it works both with efi stub and grub boot in
+> > 1st kernel.
 > 
-> The panic happens at the last line of efi_init:
->         /* clean DUMMY object */
->         efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
->                          EFI_VARIABLE_NON_VOLATILE |
->                          EFI_VARIABLE_BOOTSERVICE_ACCESS |
->                          EFI_VARIABLE_RUNTIME_ACCESS,
->                          0, NULL);
+> Good, thanks!
 > 
-> Below is the dmesg:
-> [    0.003359] pid_max: default: 32768 minimum: 301
-> [    0.004792] BUG: unable to handle kernel paging request at fffffffefde97e70
-> [    0.006666] IP: [<ffffffff8103a1db>] virt_efi_set_variable+0x40/0x54
-> [    0.006666] PGD 36981067 PUD 35828063 PMD 0
+> > But it paniced in kexec boot with my kexec related patcheset, the patchset
+> 
+> That's the second kernel, right?
 
-Here it is - fffffffefde97e70 is not mapped in the pagetable, PMD is 0.
+Yes, it's 2nd kernel.
 
-Ok, can you upload your patches somewhere and tell me exactly how to
-reproduce this so that I can take a look too?
+> 
+> > contains 3 patch:
+> > 1. introduce cmdline kexecboot=<0|1|2>; 1 == kexec, 2 == kdump
+> > 2. export physical addr fw_vendor, runtime, tables to /sys/firmware/efi/systab
+> > 3. if kexecboot != 0, use fw_vendor, runtime, tables from bootparams; Also do not
+> >    call SetVirtualAddressMao in case kexecboot.
+> > 
+> > The panic happens at the last line of efi_init:
+> >         /* clean DUMMY object */
+> >         efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
+> >                          EFI_VARIABLE_NON_VOLATILE |
+> >                          EFI_VARIABLE_BOOTSERVICE_ACCESS |
+> >                          EFI_VARIABLE_RUNTIME_ACCESS,
+> >                          0, NULL);
+> > 
+> > Below is the dmesg:
+> > [    0.003359] pid_max: default: 32768 minimum: 301
+> > [    0.004792] BUG: unable to handle kernel paging request at fffffffefde97e70
+> > [    0.006666] IP: [<ffffffff8103a1db>] virt_efi_set_variable+0x40/0x54
+> > [    0.006666] PGD 36981067 PUD 35828063 PMD 0
+> 
+> Here it is - fffffffefde97e70 is not mapped in the pagetable, PMD is 0.
+> 
+> Ok, can you upload your patches somewhere and tell me exactly how to
+> reproduce this so that I can take a look too?
 
-Thanks.
+Ok, will put somewhere after a little cleanup today.
 
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+> 
+> Thanks.
+> 
+> -- 
+> Regards/Gruss,
+>     Boris.
+> 
+> Sent from a fat crate under my desk. Formatting is fine.
+> --
