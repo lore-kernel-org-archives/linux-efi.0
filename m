@@ -1,41 +1,93 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
-Date: Sun, 22 Sep 2013 18:38:01 +0200
-Message-ID: <20130922163801.GD28718@pd.tnic>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <1379602494-26684-12-git-send-email-bp@alien8.de>
- <20130921113929.GB1587@pd.tnic>
- <20130922123515.GA7476@dhcp-16-126.nay.redhat.com>
- <20130922133722.GC28718@pd.tnic>
- <1ba7eca6-419c-4181-9927-9ba0927a6abf@email.android.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH V5 00/18] ARM EFI stub common code
+Date: Sun, 22 Sep 2013 15:45:24 -0700
+Message-ID: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1ba7eca6-419c-4181-9927-9ba0927a6abf-2ueSQiBKiTY7tOexoI0I+QC/G2K4zDHf@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Sep 22, 2013 at 08:27:34AM -0700, H. Peter Anvin wrote:a
-> The address that faults is interesting in that it is indeed just below
-> -4G. The question at hand is probably what information you are using
-> to build the EFI mappings in the secondary kernel and what could make
-> it not match the primary.
+This patch is the common/x86 portion of the ARM EFI stub
+patchset broken out.  These changes support the addition
+of EFI stub support for the ARM and ARM64 architectures.
+The common code that is now shared in efi-stub-helper.c
+is based on code in the x86 stub that has been generalized
+to support other architectures.
 
-Yep, so obviously we're not building the pagetable in the second kernel
-the same way as the first or we're missing some pieces.
 
-Btw, for debugging situations like this one, one could use
-arch/x86/mm/dump_pagetables.c successfully by sticking in the right CR3
-value into *start.
 
-:-)
+(Previously these changes were submitted as part of
+the "EFI stub for ARM" patch series that included the
+common/x86 changes as well as the ARM changes.)
+
+
+Changes since V4:
+* Fix relocate_kernel() on x86/x86_64 by adding alignment parameter.
+  The alignment was previously read from the setup_header structure
+  passed to relocate_kernel was was missed when converting to passing
+  all values as parameters.
+* Undo comment reformatting in efi-stub-helper.c
+* Fix incorrect comment in eboot.c (obsolete, based on older intermediate
+  version.
+* Include HPA's patch for command line conversion.
+
+Changes since V3:
+* Made relocate_kernel() a shared function.
+* Made command line unicode to ASCII conversion ASCII
+  a shared function
+* Updated efi_get_memory_map() to return descriptor version,
+  and updated x86 stub to use it to retrieve final memory map.
+* removed min_address argument of efi_low_alloc(), as it is
+  no longer used.
+* Squashed very tiny patch moving EFI_READ_CHUNK_SIZE into
+  related patch.
+
+
+Changes since v2:
+* EFI bugfix "correct call to free_pages" that patch series
+  depends on now in mainline
+* remove unnecessary zimage_size variable from relocate_kernel()
+* correct return types on EFI functions - should be efi_status_t, not int.
+
+Changes since V1:
+* Broke up changes to x86 and common code into more patches.
+  10 more patches in this series.
+
+H. Peter Anvin (1):
+  Do proper conversion from UTF-16 to UTF-8
+
+Roy Franz (17):
+  EFI stub documentation updates
+  Add proper definitions for some EFI function pointers.
+  Move common EFI stub code from x86 arch code to common location
+  Add system table pointer argument to shared functions.
+  Rename memory allocation/free functions
+  Enforce minimum alignment of 1 page on allocations.
+  Move relocate_kernel() to shared file.
+  Generalize relocate_kernel() for use by other architectures.
+  Move unicode to ASCII conversion to shared function.
+  Rename __get_map() to efi_get_memory_map()
+  generalize efi_get_memory_map()
+  use efi_get_memory_map() to get final map for x86
+  Allow efi_free() to be called with size of 0, and do nothing in that
+    case.
+  Generalize handle_ramdisks() and rename to handle_cmdline_files().
+  Renames in handle_cmdline_files() to complete generalization.
+  Fix types in EFI calls to match EFI function definitions.
+  resolve warnings found on ARM compile
+
+ Documentation/efi-stub.txt             |   65 +++
+ Documentation/x86/efi-stub.txt         |   65 ---
+ arch/x86/Kconfig                       |    2 +-
+ arch/x86/boot/compressed/eboot.c       |  579 ++-------------------------
+ arch/x86/boot/compressed/eboot.h       |    9 -
+ drivers/firmware/efi/efi-stub-helper.c |  679 ++++++++++++++++++++++++++++++++
+ include/linux/efi.h                    |   50 ++-
+ 7 files changed, 817 insertions(+), 632 deletions(-)
+ create mode 100644 Documentation/efi-stub.txt
+ delete mode 100644 Documentation/x86/efi-stub.txt
+ create mode 100644 drivers/firmware/efi/efi-stub-helper.c
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+1.7.10.4
