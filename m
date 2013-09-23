@@ -1,58 +1,58 @@
-From: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCHv2] x86: EFI stub support for large memory maps
-Date: Sun, 22 Sep 2013 18:23:28 -0600
-Message-ID: <20130923002328.GC24764@oranje.fc.hp.com>
-References: <1377291771-21302-1-git-send-email-linn@hp.com>
- <1378487056-9857-1-git-send-email-linn@hp.com>
- <20130917201452.GI3409@console-pimps.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 10/18] Do proper conversion from UTF-16 to UTF-8
+Date: Sun, 22 Sep 2013 17:24:28 -0700
+Message-ID: <523F8A3C.7010209@zytor.com>
+References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org> <1379889942-3135-11-git-send-email-roy.franz@linaro.org> <e69e8c38-b195-4797-8ae2-65d69ed9d7aa@email.android.com> <CAFECyb_8hqLFajMUfwctVee8e8UvErmu4jmbPguWaeMc-MZuNA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20130917201452.GI3409-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <CAFECyb_8hqLFajMUfwctVee8e8UvErmu4jmbPguWaeMc-MZuNA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 17, 2013 at 09:14:52PM +0100, Matt Fleming wrote:
-> > +static efi_status_t alloc_e820ext(u32 nr_desc, struct setup_data **e820ext,
-> > +				  u32 *e820ext_size)
-> > +{
-> > +	efi_status_t status;
-> > +	unsigned long size;
-> > +
-> > +	size = sizeof(struct setup_data) +
-> > +		sizeof(struct e820entry) * nr_desc;
-> > +
-> > +	if (*e820ext && size <= *e820ext_size)
-> > +		return EFI_SUCCESS; /* Already allocated */
+On 09/22/2013 04:07 PM, Roy Franz wrote:
+> On Sun, Sep 22, 2013 at 3:54 PM, H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> wrote:
+>> Sorry this version is broken and doesn't even compile due to remaining options_size references.
 > 
-> Do we actually need this check? I thought the 'prev_nr_desc' below
-> ensures we only allocate 'e820ext' if we need more memory.
+> I compiled and tested this series on both x86_64 (using OVMF) and on
+> the ARM simulator.  I just doubled checked
+> my kernel .config to verify this was not being omitted and I'm pretty
+> sure this doesn't have any compilation problems.
+> I did make a few changes to get the untested version you sent out to
+> compile, but they all seemed to be straightforward typo type fixes.
+> I'll gladly address any defects in this patch, but I don't see an
+> compilation problems.
+> 
 
-I am okay with removing the check. There is another bug in exit_boot, when
-jumping to get_map the call to get the memory map is passed the previous map
-size instead of the size of the allocated buffer. I'll make the changes and
-resend.
+Ah yes, I see now... you fixed up the compile problem but did so
+incorrectly.
 
-> 
-> [...]
-> 
-> > @@ -1016,6 +1157,19 @@ get_map:
-> >  	if (status != EFI_SUCCESS)
-> >  		goto free_mem_map;
-> >  
-> > +	prev_nr_desc = nr_desc;
-> > +	nr_desc = size / desc_size;
-> > +	if (nr_desc > prev_nr_desc &&
-> > +	    nr_desc > ARRAY_SIZE(boot_params->e820_map)) {
-> > +		u32 nr_e820ext = nr_desc - ARRAY_SIZE(boot_params->e820_map);
-> > +
-> > +		status = alloc_e820ext(nr_e820ext, &e820ext, &e820ext_size);
-> > +		if (status != EFI_SUCCESS)
-> > +			goto free_mem_map;
-> > +
-> > +		goto get_map; /* Allocated memory, get map again */
-> > +	}
-> > +
+      int load_options_size = image->load_options_size / 2; /* ASCII */
+
+This is a number of UTF-16 chars, the comment is completely wrong;
+
+-              while (*s2 && *s2 != '\n' && options_size <
+load_options_size) {
++              while (*s2 && *s2 != '\n' && options_bytes <
+load_options_size) {
++                      options_bytes += efi_utf8_bytes(*s2);
+                      s2++;
+-                      options_size++;
+              }
++              options_chars = s2 - options;
+
+You can't compare options_bytes against load_options_size; the latter
+being a UTF-16 shortword count.
+
+So the loop really needs to update options_chars in the loop to compare
+it against load_options_size:
+
+	while (*s2 && *s2 != '\n' && options_chars < load_options_size) {
+		options_bytes += efi_utf8_bytes(*s2++);
+		option_chars++;
+	}
+
+	-hpa
