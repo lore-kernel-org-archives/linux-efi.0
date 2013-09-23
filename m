@@ -1,59 +1,68 @@
 From: Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86 efi: bugfix interrupt disabling sequence
-Date: Mon, 23 Sep 2013 11:27:43 +0200
-Message-ID: <1379928463.1953.30.camel@dhcp-128-237.ams.redhat.com>
-References: <1379525333-4373-1-git-send-email-bemk@redhat.com>
-	 <20130920152859.GC21381@console-pimps.org>
-	 <1379708486.12705.131.camel@dhcp-128-237.ams.redhat.com>
-	 <20130921154127.GD21381@console-pimps.org>
-Reply-To: bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] x86 efi: bugfix interrupt disabling sequence
+Date: Mon, 23 Sep 2013 11:45:28 +0200
+Message-ID: <1379929528-7534-1-git-send-email-bemk@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20130921154127.GD21381-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 2013-09-21 at 16:41 +0100, Matt Fleming wrote:
-> On Fri, 20 Sep, at 10:21:26PM, Bart Kuivenhoven wrote:
-> > Well, isn't it so, that the kernel expects a setup in which interrupts
-> > are disabled before the decompressed image is loaded?
->  
-> Yes, but I wasn't advocating leaving interrupts enabled, rather, because
-> interrupts are disabled we don't need to build an empty IDT, which will
-> never be used.
+The problem in efi_main was that the idt was cleared before the
+interrupts were disabled.
 
-Ah, well in that case I think you'll like the new version of my patch
-that I'll send out soon.
+The UEFI spec states that interrupts aren't used so this shouldn't be
+too much of a problem. Peripherals however don't necessarily know about
+this and thus might cause interrupts to happen anyway. Even if
+ExitBootServices() has been called.
 
-> > What we can do is remove the lidt instruction and IDT pointer, but that
-> > still doesn't change anything with regards to the kernels expectations.
-> > 
-> > And no, I haven't witnessed a triple fault, this is purely theoretical,
-> > with a very slim chance of it actually happening. That does not mean
-> > that it can't happen though.
->  
-> Right, but the answer to my question will dictate how aggressively we
-> apply your patch - whether it goes in the 'urgent' queue to be pushed
-> quickly or whether we give it more testing. Patches that fix serious
-> issues that users are hitting tend to make it into the next release. For
-> patches that fix theoretical bugs, we'll usually put it through more
-> strenuous testing first.
+This means there is a risk of an interrupt being triggered while the IDT
+register is nullified and the interrupt bit hasn't been cleared,
+allowing for a triple fault.
 
-I haven't seen it happen.
+This patch disables the interrupt flag, while leaving the existing IDT
+in place. The CPU won't care about the IDT at all as long as the
+interrupt bit is off, so it's safe to leave it in place as nothing will
+ever happen to it.
 
-Even if it happens, the CPU will just reset and try again, with a very
-high likelihood that it will succeed that time.
+Signed-off-by: Bart Kuivenhoven <bemk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c | 15 +--------------
+ 1 file changed, 1 insertion(+), 14 deletions(-)
 
-Given these circumstances, I'd say you're more than welcome to put my
-work through some serious tests rather than giving it 'urgent' status.
-
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index b7388a4..689b1ba 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -1188,17 +1188,6 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 		goto fail;
+ 	}
+ 
+-	status = efi_call_phys3(sys_table->boottime->allocate_pool,
+-				EFI_LOADER_DATA, sizeof(*idt),
+-				(void **)&idt);
+-	if (status != EFI_SUCCESS) {
+-		efi_printk("Failed to alloc mem for idt structure\n");
+-		goto fail;
+-	}
+-
+-	idt->size = 0;
+-	idt->address = 0;
+-
+ 	/*
+ 	 * If the kernel isn't already loaded at the preferred load
+ 	 * address, relocate it.
+@@ -1267,10 +1256,8 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 	desc->base2 = 0x00;
+ #endif /* CONFIG_X86_64 */
+ 
+-	asm volatile ("lidt %0" : : "m" (*idt));
+-	asm volatile ("lgdt %0" : : "m" (*gdt));
+-
+ 	asm volatile("cli");
++	asm volatile ("lgdt %0" : : "m" (*gdt));
+ 
+ 	return boot_params;
+ fail:
 -- 
-Kind regards/Met vriendelijke groet,
-Bart Kuivenhoven.
-
-Intern Fedora ARM,
-Red Hat.
+1.8.4
