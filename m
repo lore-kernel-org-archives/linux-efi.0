@@ -1,7 +1,7 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
-Date: Tue, 24 Sep 2013 18:01:22 +0800
-Message-ID: <20130924100122.GA14098@dhcp-16-126.nay.redhat.com>
+Date: Tue, 24 Sep 2013 20:45:56 +0800
+Message-ID: <20130924124555.GA4690@dhcp-16-126.nay.redhat.com>
 References: <1379602494-26684-1-git-send-email-bp@alien8.de>
  <1379602494-26684-12-git-send-email-bp@alien8.de>
  <20130921113929.GB1587@pd.tnic>
@@ -82,7 +82,11 @@ On 09/24/13 at 11:43am, Borislav Petkov wrote:
 > size,
 > 
 
-Ok, I got it, it it what what Peter mentioned problem 1.
+Think again about this, how about 1:1 map them from a base address like -64G
+phy_addr  ->  (-64G + phy_addr), in this way we can avoid depending on the
+previous region size.
+
+For the zero region problem, we can resolve it as a standalone problem.
 
 --
 Thanks
