@@ -1,271 +1,123 @@
-From: Phil Carmody <phil.carmody@partner.samsung.com>
-Subject: Re: [PATCH V4 02/15] asymmetric keys: implement EMSA_PKCS1-v1_5-ENCODE
- in rsa
-Date: Mon, 23 Sep 2013 19:49:44 +0300
-Message-ID: <20130923164931.GD6772@samsung.com>
-References: <1379206621-18639-1-git-send-email-jlee@suse.com>
- <1379206621-18639-3-git-send-email-jlee@suse.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
+Date: Tue, 24 Sep 2013 10:52:09 +0800
+Message-ID: <20130924025209.GA5561@dhcp-16-126.nay.redhat.com>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <1379602494-26684-12-git-send-email-bp@alien8.de>
+ <20130921113929.GB1587@pd.tnic>
+ <20130922123515.GA7476@dhcp-16-126.nay.redhat.com>
+ <20130922133722.GC28718@pd.tnic>
+ <1ba7eca6-419c-4181-9927-9ba0927a6abf@email.android.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
-Content-disposition: inline
-In-reply-to: <1379206621-18639-3-git-send-email-jlee@suse.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.uc>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1ba7eca6-419c-4181-9927-9ba0927a6abf-2ueSQiBKiTY7tOexoI0I+QC/G2K4zDHf@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Sep 15, 2013 at 08:56:48AM +0800, Lee, Chun-Yi wrote:
-> Implement EMSA_PKCS1-v1_5-ENCODE [RFC3447 sec 9.2] in rsa.c. It's the
-> first step of signature generation operation (RSASSA-PKCS1-v1_5-SIGN).
+On 09/22/13 at 08:27am, H. Peter Anvin wrote:
+> The address that faults is interesting in that it is indeed just below -4G.  The question at hand is probably what information you are using to build the EFI mappings in the secondary kernel and what could make it not match the primary.
 > 
-> This patch is temporary set emLen to pks->k, and temporary set EM to
-> pks->S for debugging. We will replace the above values to real signature
-> after implement RSASP1.
+> Assuming it isn't as simple as the mappings never get built at all.
+
+Here is my debug output, diff efi-mapping-1st-kernel efi-mapping-2nd-kernel:
+Obviously, the high address mapping is not same:
+
+--- efi-mapping-1.txt	2013-09-24 10:46:09.977746047 +0800
++++ efi-mapping-2.txt	2013-09-24 10:46:33.871421806 +0800
+@@ -1,30 +1,30 @@
+ efi mapping PA 0x800000 -> VA 0x800000
+ efi mapping PA 0x800000 -> VA 0xffffffff00000000
+ efi mapping PA 0x7c000000 -> VA 0x7c000000
+-efi mapping PA 0x7c000000 -> VA 0xfffffffefffe0000
++efi mapping PA 0x7c000000 -> VA 0xffffffff00000000
+ efi mapping PA 0x7d5e2000 -> VA 0x7d5e2000
+-efi mapping PA 0x7d5e2000 -> VA 0xfffffffefffdf000
++efi mapping PA 0x7d5e2000 -> VA 0xfffffffefffff000
+ efi mapping PA 0x7d77d000 -> VA 0x7d77d000
+-efi mapping PA 0x7d77d000 -> VA 0xfffffffefffde000
++efi mapping PA 0x7d77d000 -> VA 0xfffffffeffffe000
+ efi mapping PA 0x7d864000 -> VA 0x7d864000
+-efi mapping PA 0x7d864000 -> VA 0xfffffffeff8d4000
++efi mapping PA 0x7d864000 -> VA 0xfffffffeff8f4000
+ efi mapping PA 0x7df6e000 -> VA 0x7df6e000
+-efi mapping PA 0x7df6e000 -> VA 0xfffffffeff6ae000
++efi mapping PA 0x7df6e000 -> VA 0xfffffffeff6ce000
+ efi mapping PA 0x7e194000 -> VA 0x7e194000
+-efi mapping PA 0x7e194000 -> VA 0xfffffffeff6ac000
++efi mapping PA 0x7e194000 -> VA 0xfffffffeff6cc000
+ efi mapping PA 0x7e196000 -> VA 0x7e196000
+-efi mapping PA 0x7e196000 -> VA 0xfffffffeff696000
++efi mapping PA 0x7e196000 -> VA 0xfffffffeff6b6000
+ efi mapping PA 0x7e1ac000 -> VA 0x7e1ac000
+-efi mapping PA 0x7e1ac000 -> VA 0xfffffffeff681000
++efi mapping PA 0x7e1ac000 -> VA 0xfffffffeff6a1000
+ efi mapping PA 0x7e1c1000 -> VA 0x7e1c1000
+-efi mapping PA 0x7e1c1000 -> VA 0xfffffffefe041000
++efi mapping PA 0x7e1c1000 -> VA 0xfffffffefe061000
+ efi mapping PA 0x7f802000 -> VA 0x7f802000
+-efi mapping PA 0x7f802000 -> VA 0xfffffffefdec2000
++efi mapping PA 0x7f802000 -> VA 0xfffffffefdee2000
+ efi mapping PA 0x7f981000 -> VA 0x7f981000
+-efi mapping PA 0x7f981000 -> VA 0xfffffffefde92000
++efi mapping PA 0x7f981000 -> VA 0xfffffffefdeb2000
+ efi mapping PA 0x7f9b1000 -> VA 0x7f9b1000
+-efi mapping PA 0x7f9b1000 -> VA 0xfffffffefde6e000
++efi mapping PA 0x7f9b1000 -> VA 0xfffffffefde8e000
+ efi mapping PA 0x7f9e5000 -> VA 0x7f9e5000
+-efi mapping PA 0x7f9e5000 -> VA 0xfffffffefd873000
++efi mapping PA 0x7f9e5000 -> VA 0xfffffffefd893000
+ efi mapping PA 0x7ffe0000 -> VA 0x7ffe0000
+-efi mapping PA 0x7ffe0000 -> VA 0xfffffffefd853000
++efi mapping PA 0x7ffe0000 -> VA 0xfffffffefd873000
+
 > 
-> The naming of EMSA_PKCS1_v1_5_ENCODE and the variables used in this function
-> accord PKCS#1 spec but not follow kernel naming convention, it useful when look
-> at them with spec.
 > 
-> Reference: ftp://ftp.rsasecurity.com/pub/pkcs/pkcs-1v2/pkcs1ietffinal.txt
-> Reference: http://www.emc.com/collateral/white-papers/h11300-pkcs-1v2-2-rsa-cryptography-standard-wp.pdf
+> Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org> wrote:
+> >On Sun, Sep 22, 2013 at 08:35:15PM +0800, Dave Young wrote:
+> >> I tested your new patch, it works both with efi stub and grub boot in
+> >> 1st kernel.
+> >
+> >Good, thanks!
+> >
+> >> But it paniced in kexec boot with my kexec related patcheset, the
+> >patchset
+> >
+> >That's the second kernel, right?
+> >
+> >> contains 3 patch:
+> >> 1. introduce cmdline kexecboot=<0|1|2>; 1 == kexec, 2 == kdump
+> >> 2. export physical addr fw_vendor, runtime, tables to
+> >/sys/firmware/efi/systab
+> >> 3. if kexecboot != 0, use fw_vendor, runtime, tables from bootparams;
+> >Also do not
+> >>    call SetVirtualAddressMao in case kexecboot.
+> >> 
+> >> The panic happens at the last line of efi_init:
+> >>         /* clean DUMMY object */
+> >>         efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
+> >>                          EFI_VARIABLE_NON_VOLATILE |
+> >>                          EFI_VARIABLE_BOOTSERVICE_ACCESS |
+> >>                          EFI_VARIABLE_RUNTIME_ACCESS,
+> >>                          0, NULL);
+> >> 
+> >> Below is the dmesg:
+> >> [    0.003359] pid_max: default: 32768 minimum: 301
+> >> [    0.004792] BUG: unable to handle kernel paging request at
+> >fffffffefde97e70
+> >> [    0.006666] IP: [<ffffffff8103a1db>]
+> >virt_efi_set_variable+0x40/0x54
+> >> [    0.006666] PGD 36981067 PUD 35828063 PMD 0
+> >
+> >Here it is - fffffffefde97e70 is not mapped in the pagetable, PMD is 0.
+> >
+> >Ok, can you upload your patches somewhere and tell me exactly how to
+> >reproduce this so that I can take a look too?
+> >
+> >Thanks.
 > 
-> V2:
-
-You're now at V4.
-
-> - Clean up naming of variable: replace _EM by EM, replace EM by EM_tmp.
-> - Add comment to EMSA_PKCS1-v1_5-ENCODE function.
-> 
-> Cc: Pavel Machek <pavel@ucw.cz>
-> Reviewed-by: Jiri Kosina <jkosina@suse.cz>
-> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> ---
->  crypto/asymmetric_keys/rsa.c |  163 +++++++++++++++++++++++++++++++++++++++++-
->  include/crypto/public_key.h  |    2 +
->  2 files changed, 164 insertions(+), 1 deletions(-)
-> 
-> diff --git a/crypto/asymmetric_keys/rsa.c b/crypto/asymmetric_keys/rsa.c
-> index 47f3be4..352ba45 100644
-> --- a/crypto/asymmetric_keys/rsa.c
-> +++ b/crypto/asymmetric_keys/rsa.c
-> @@ -13,6 +13,7 @@
->  #include <linux/module.h>
->  #include <linux/kernel.h>
->  #include <linux/slab.h>
-> +#include <crypto/hash.h>
->  #include "public_key.h"
->  #include "private_key.h"
->  
-> @@ -152,6 +153,132 @@ static int RSA_I2OSP(MPI x, size_t xLen, u8 **_X)
->  }
->  
->  /*
-> + * EMSA_PKCS1-v1_5-ENCODE [RFC3447 sec 9.2]
-> + * @M: message to be signed, an octet string
-> + * @emLen: intended length in octets of the encoded message
-> + * @hash_algo: hash function (option)
-> + * @hash: true means hash M, otherwise M is already a digest
-> + * @EM: encoded message, an octet string of length emLen
-> + *
-> + * This function is a implementation of the EMSA-PKCS1-v1_5 encoding operation
-> + * in RSA PKCS#1 spec. It used by the signautre generation operation of
-> + * RSASSA-PKCS1-v1_5 to encode message M to encoded message EM.
-> + *
-> + * The variables used in this function accord PKCS#1 spec but not follow kernel
-> + * naming convention, it useful when look at them with spec.
-> + */
-> +static int EMSA_PKCS1_v1_5_ENCODE(const u8 *M, size_t emLen,
-> +		enum pkey_hash_algo hash_algo, const bool hash,
-> +		u8 **EM, struct public_key_signature *pks)
-> +{
-> +	u8 *digest;
-> +	struct crypto_shash *tfm;
-> +	struct shash_desc *desc;
-> +	size_t digest_size, desc_size;
-> +	size_t tLen;
-> +	u8 *T, *PS, *EM_tmp;
-> +	int i, ret;
-> +
-> +	pr_info("EMSA_PKCS1_v1_5_ENCODE start\n");
-> +
-> +	if (!RSA_ASN1_templates[hash_algo].data)
-> +		ret = -ENOTSUPP;
-
-...
-
-> +	else
-> +		pks->pkey_hash_algo = hash_algo;
-> +
-> +	/* 1) Apply the hash function to the message M to produce a hash value H */
-> +	tfm = crypto_alloc_shash(pkey_hash_algo[hash_algo], 0, 0);
-> +	if (IS_ERR(tfm))
-> +		return (PTR_ERR(tfm) == -ENOENT) ? -ENOPKG : PTR_ERR(tfm);
-> +
-> +	desc_size = crypto_shash_descsize(tfm) + sizeof(*desc);
-> +	digest_size = crypto_shash_digestsize(tfm);
-> +
-> +	ret = -ENOMEM;
-
-The earlier "ret = -ENOTSUPP;" is either unused because you return at the IS_ERR,
-or unused because you overwrite it here. I'm a little disappointed that
-the compiler didn't recognise that something was assigned to a value that 
-is never used.
-
-Phil
-
-> +
-> +	digest = kzalloc(digest_size + desc_size, GFP_KERNEL);
-> +	if (!digest)
-> +		goto error_digest;
-> +	pks->digest = digest;
-> +	pks->digest_size = digest_size;
-> +
-> +	if (hash) {
-> +		desc = (void *) digest + digest_size;
-> +		desc->tfm = tfm;
-> +		desc->flags = CRYPTO_TFM_REQ_MAY_SLEEP;
-> +
-> +		ret = crypto_shash_init(desc);
-> +		if (ret < 0)
-> +			goto error_shash;
-> +		ret = crypto_shash_finup(desc, M, sizeof(M), pks->digest);
-> +		if (ret < 0)
-> +			goto error_shash;
-> +	} else {
-> +		memcpy(pks->digest, M, pks->digest_size);
-> +		pks->digest_size = digest_size;
-> +	}
-> +	crypto_free_shash(tfm);
-> +
-> +	/* 2) Encode the algorithm ID for the hash function and the hash value into
-> +	 * an ASN.1 value of type DigestInfo with the DER. Let T be the DER encoding of
-> +	 * the DigestInfo value and let tLen be the length in octets of T.
-> +	 */
-> +	tLen = RSA_ASN1_templates[hash_algo].size + pks->digest_size;
-> +	T = kmalloc(tLen, GFP_KERNEL);
-> +	if (!T)
-> +		goto error_T;
-> +
-> +	memcpy(T, RSA_ASN1_templates[hash_algo].data, RSA_ASN1_templates[hash_algo].size);
-> +	memcpy(T + RSA_ASN1_templates[hash_algo].size, pks->digest, pks->digest_size);
-> +
-> +	/* 3) check If emLen < tLen + 11, output "intended encoded message length too short" */
-> +	if (emLen < tLen + 11) {
-> +		ret = -EINVAL;
-> +		goto error_emLen;
-> +	}
-> +
-> +	/* 4) Generate an octet string PS consisting of emLen - tLen - 3 octets with 0xff. */
-> +	PS = kmalloc(emLen - tLen - 3, GFP_KERNEL);
-> +	if (!PS)
-> +		goto error_P;
-> +
-> +	for (i = 0; i < (emLen - tLen - 3); i++)
-> +		PS[i] = 0xff;
-> +
-> +	/* 5) Concatenate PS, the DER encoding T, and other padding to form the encoded
-> +	 * message EM as EM = 0x00 || 0x01 || PS || 0x00 || T
-> +	 */
-> +	EM_tmp = kmalloc(3 + emLen - tLen - 3 + tLen, GFP_KERNEL);
-> +	if (!EM_tmp)
-> +		goto error_EM;
-> +
-> +	EM_tmp[0] = 0x00;
-> +	EM_tmp[1] = 0x01;
-> +	memcpy(EM_tmp + 2, PS, emLen - tLen - 3);
-> +	EM_tmp[2 + emLen - tLen - 3] = 0x00;
-> +	memcpy(EM_tmp + 2 + emLen - tLen - 3 + 1, T, tLen);
-> +
-> +	*EM = EM_tmp;
-> +
-> +	kfree(PS);
-> +	kfree(T);
-> +
-> +	return 0;
-> +
-> +error_EM:
-> +	kfree(PS);
-> +error_P:
-> +error_emLen:
-> +	kfree(T);
-> +error_T:
-> +error_shash:
-> +	kfree(digest);
-> +error_digest:
-> +	crypto_free_shash(tfm);
-> +	return ret;
-> +}
-> +
-> +/*
->   * Perform the RSA signature verification.
->   * @H: Value of hash of data and metadata
->   * @EM: The computed signature value
-> @@ -275,9 +402,43 @@ static struct public_key_signature *RSA_generate_signature(
->  		const struct private_key *key, u8 *M,
->  		enum pkey_hash_algo hash_algo, const bool hash)
->  {
-> +	struct public_key_signature *pks;
-> +	u8 *EM = NULL;
-> +	size_t emLen;
-> +	int ret;
-> +
->  	pr_info("RSA_generate_signature start\n");
->  
-> -	return 0;
-> +	ret = -ENOMEM;
-> +	pks = kzalloc(sizeof(*pks), GFP_KERNEL);
-> +	if (!pks)
-> +		goto error_no_pks;
-> +
-> +	/* 1): EMSA-PKCS1-v1_5 encoding: */
-> +	/* Use the private key modulus size to be EM length */
-> +	emLen = mpi_get_nbits(key->rsa.n);
-> +	emLen = (emLen + 7) / 8;
-> +
-> +	ret = EMSA_PKCS1_v1_5_ENCODE(M, emLen, hash_algo, hash, &EM, pks);
-> +	if (ret < 0)
-> +		goto error_v1_5_encode;
-> +
-> +	/* TODO 2): m = OS2IP (EM) */
-> +
-> +	/* TODO 3): s = RSASP1 (K, m) */
-> +
-> +	/* TODO 4): S = I2OSP (s, k) */
-> +
-> +	/* TODO: signature S to a u8* S or set to sig->rsa.s? */
-> +	pks->S = EM;            /* TODO: temporary set S to EM */
-> +
-> +	return pks;
-> +
-> +error_v1_5_encode:
-> +	kfree(pks);
-> +error_no_pks:
-> +	pr_info("<==%s() = %d\n", __func__, ret);
-> +	return ERR_PTR(ret);
->  }
->  
->  const struct public_key_algorithm RSA_public_key_algorithm = {
-> diff --git a/include/crypto/public_key.h b/include/crypto/public_key.h
-> index d44b29f..1cdf457 100644
-> --- a/include/crypto/public_key.h
-> +++ b/include/crypto/public_key.h
-> @@ -110,6 +110,8 @@ extern void public_key_destroy(void *payload);
->  struct public_key_signature {
->  	u8 *digest;
->  	u8 digest_size;			/* Number of bytes in digest */
-> +	u8 *S;				/* signature S of length k octets */
-> +	size_t k;			/* length k of signature S */
->  	u8 nr_mpi;			/* Occupancy of mpi[] */
->  	enum pkey_hash_algo pkey_hash_algo : 8;
->  	union {
 > -- 
-> 1.6.0.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> 
+> Sent from my mobile phone.  Please pardon brevity and lack of formatting.
