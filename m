@@ -1,43 +1,39 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 10/18] Do proper conversion from UTF-16 to UTF-8
-Date: Wed, 25 Sep 2013 13:01:49 +0100
-Message-ID: <20130925120149.GH21381@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH V5 00/18] ARM EFI stub common code
+Date: Wed, 25 Sep 2013 13:11:20 +0100
+Message-ID: <20130925121120.GI21381@console-pimps.org>
 References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
- <1379889942-3135-11-git-send-email-roy.franz@linaro.org>
- <e69e8c38-b195-4797-8ae2-65d69ed9d7aa@email.android.com>
- <CAFECyb_8hqLFajMUfwctVee8e8UvErmu4jmbPguWaeMc-MZuNA@mail.gmail.com>
- <523F8A3C.7010209@zytor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <523F8A3C.7010209@zytor.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Roy Franz <roy.franz@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, Grant Likely <grant.likely@linaro.org>, Mark Salter <msalter@redhat.com>
+In-Reply-To: <1379889942-3135-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 22 Sep, at 05:24:28PM, H. Peter Anvin wrote:
-> On 09/22/2013 04:07 PM, Roy Franz wrote:
-> > On Sun, Sep 22, 2013 at 3:54 PM, H. Peter Anvin <hpa@zytor.com> wrote:
-> >> Sorry this version is broken and doesn't even compile due to remaining options_size references.
-> > 
-> > I compiled and tested this series on both x86_64 (using OVMF) and on
-> > the ARM simulator.  I just doubled checked
-> > my kernel .config to verify this was not being omitted and I'm pretty
-> > sure this doesn't have any compilation problems.
-> > I did make a few changes to get the untested version you sent out to
-> > compile, but they all seemed to be straightforward typo type fixes.
-> > I'll gladly address any defects in this patch, but I don't see an
-> > compilation problems.
-> > 
-> 
-> Ah yes, I see now... you fixed up the compile problem but did so
-> incorrectly.
+On Sun, 22 Sep, at 03:45:24PM, Roy Franz wrote:
+> This patch is the common/x86 portion of the ARM EFI stub
+> patchset broken out.  These changes support the addition
+> of EFI stub support for the ARM and ARM64 architectures.
+> The common code that is now shared in efi-stub-helper.c
+> is based on code in the x86 stub that has been generalized
+> to support other architectures.
 
-Folks, I'm gonna drop this patch for now. Feel free to resend it once
-everyone's happy with it. There's plenty of time to get this patch
-applied, it just doesn't make sense to hold up the rest of the series.
+OK, I've applied this patch series (excluding PATCH 10) to the
+'arm/common' branch in the EFI repository at,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+
+At the request of Grant, the patches series from both Roy and Leif are
+available in a clean branch with a linear history at 'efi-arm', which is
+based on v3.11. Grant, feel free to pull that branch into wherever it is
+required. If this layout doesn't work for you guys then just shout and
+we can come up with a scheme that does.
+
+I'm going to send a pull request for the 'next' branch to the tip folks,
+so that these patches can get some testing via linux-next.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
