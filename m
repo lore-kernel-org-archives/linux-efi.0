@@ -1,42 +1,43 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 09/18] Move unicode to ASCII conversion to shared
- function.
-Date: Wed, 25 Sep 2013 13:01:29 +0100
-Message-ID: <20130925120129.GG21381@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH 10/18] Do proper conversion from UTF-16 to UTF-8
+Date: Wed, 25 Sep 2013 13:01:49 +0100
+Message-ID: <20130925120149.GH21381@console-pimps.org>
 References: <1379889942-3135-1-git-send-email-roy.franz@linaro.org>
- <1379889942-3135-10-git-send-email-roy.franz@linaro.org>
+ <1379889942-3135-11-git-send-email-roy.franz@linaro.org>
+ <e69e8c38-b195-4797-8ae2-65d69ed9d7aa@email.android.com>
+ <CAFECyb_8hqLFajMUfwctVee8e8UvErmu4jmbPguWaeMc-MZuNA@mail.gmail.com>
+ <523F8A3C.7010209@zytor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1379889942-3135-10-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <523F8A3C.7010209@zytor.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Roy Franz <roy.franz@linaro.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, Grant Likely <grant.likely@linaro.org>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 22 Sep, at 03:45:33PM, Roy Franz wrote:
-> Move the open-coded conversion to a shared function for
-> use by all architectures.  Change the allocation to prefer
-> a high address for ARM, as this is required to avoid conflicts
-> with reserved regions in low memory.  We don't know the specifics
-> of these regions until after we process the command line and
-> device tree.
+On Sun, 22 Sep, at 05:24:28PM, H. Peter Anvin wrote:
+> On 09/22/2013 04:07 PM, Roy Franz wrote:
+> > On Sun, Sep 22, 2013 at 3:54 PM, H. Peter Anvin <hpa@zytor.com> wrote:
+> >> Sorry this version is broken and doesn't even compile due to remaining options_size references.
+> > 
+> > I compiled and tested this series on both x86_64 (using OVMF) and on
+> > the ARM simulator.  I just doubled checked
+> > my kernel .config to verify this was not being omitted and I'm pretty
+> > sure this doesn't have any compilation problems.
+> > I did make a few changes to get the untested version you sent out to
+> > compile, but they all seemed to be straightforward typo type fixes.
+> > I'll gladly address any defects in this patch, but I don't see an
+> > compilation problems.
+> > 
 > 
-> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/x86/boot/compressed/eboot.c       |   43 ++++-------------------
->  drivers/firmware/efi/efi-stub-helper.c |   58 ++++++++++++++++++++++++++++++++
->  2 files changed, 64 insertions(+), 37 deletions(-)
+> Ah yes, I see now... you fixed up the compile problem but did so
+> incorrectly.
 
-[...]
-
-> +/* Convert the unicode UEFI command line to ASCII to pass to kernel.
-> + * Size of memory allocated return in *cmd_line_len.
-> + * Returns NULL on error.
-> + */
-
-I futzed with the comments in this patch too.
+Folks, I'm gonna drop this patch for now. Feel free to resend it once
+everyone's happy with it. There's plenty of time to get this patch
+applied, it just doesn't make sense to hold up the rest of the series.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
