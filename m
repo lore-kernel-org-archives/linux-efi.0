@@ -1,67 +1,80 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
-Date: Thu, 26 Sep 2013 11:12:42 +0800
-Message-ID: <20130926031242.GA4487@dhcp-16-126.nay.redhat.com>
-References: <e39e1065bddc2afee2cb6eed957e3ba8.squirrel@www.skyhub.de>
- <52422A6A.8080305@zytor.com>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate
+ snapshot
+Date: Thu, 26 Sep 2013 12:40:03 +0800
+Message-ID: <1380170403.32302.52.camel__28178.3024584458$1380170422$gmane$org@linux-s257.site>
+References: <Pine.LNX.4.44L0.1309251723001.26508-100000@netrider.rowland.org>
+	 <1380147414.18835.36.camel@dabdike.int.hansenpartnership.com>
+	 <20130926002730.GA26857@amd.pavel.ucw.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <52422A6A.8080305-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <james.bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <20130926002730.GA26857@amd.pavel.ucw.cz>
+Sender: linux-pm-owner@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: James Bottomley <James.Bottomley@HansenPartnership.com>, Alan Stern <stern@rowland.harvard.edu>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.hengli.com.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/24/13 at 05:12pm, H. Peter Anvin wrote:
-> On 09/24/2013 07:56 AM, Borislav Petkov wrote:
-> > On Tue, September 24, 2013 2:45 pm, Dave Young wrote:
-> >> Think again about this, how about 1:1 map them from a base address
-> >> like -64G phy_addr -> (-64G + phy_addr), in this way we can avoid
-> >> depending on the previous region size.
-> > 
-> > Right, how we layout the regions is arbitrary as long as we start at
-> > the same VA and use the same regions, in the same order and of the same
-> > size...
-> > 
-> >> For the zero region problem, we can resolve it as a standalone
-> >> problem.
-> > 
-> > ... however, we still need to understand why it fails mapping the boot
-> > services region as some implementations apparently do call boot services
-> > even after ExitBootServices(). IOW, we need that region mapped in the
-> > kexec'ed kernel too.
-> > 
-> 
-> I am starting to think that we really should explicitly pass along the
-> EFI mappings to the secondary kernel.  This will also help if we have to
-> change the algorithm in a future kernel.
-> 
-> The most logical way to do this is to define a new setup_data type and
-> pass the entire set of physical-to-virtual mappings that way.
-> 
-> For example:
-> 
-> struct efi_mapping {
-> 	u64 va;			/* Virtual start address */
-> 	u64 pa;			/* Physical start address */
-> 	u64 len;		/* Length in bytes */
-> 	u64 type;		/* Mapping type */
-> 	u64 reserved[3];	/* Reserved, must be zero */
-> };
-> 
-> Adding some reserved fields seems like a prudent precaution; the map
-> shouldn't be all that large anyway.
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-09-26 =E6=96=BC 02:27 +0200=EF=BC=8CPa=
+vel Machek =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Wed 2013-09-25 15:16:54, James Bottomley wrote:
+> > On Wed, 2013-09-25 at 17:25 -0400, Alan Stern wrote:
+> > > On Wed, 25 Sep 2013, David Howells wrote:
+> > >=20
+> > > > I have pushed some keyrings patches that will likely affect thi=
+s to:
+> > > >=20
+> > > > 	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.=
+git/log/?h=3Dkeys-devel
+> > > >=20
+> > > > I intend to ask James to pull these into his next branch.  If h=
+e's happy to do
+> > > > so, I can look at pulling at least your asymmetric keys patch o=
+n top of them.
+> > >=20
+> > > This suggests a point that I raised at the Linux Plumbers confere=
+nce:
+> > >=20
+> > > Why are asymmetric keys used for verifying the hibernation image?=
+  It
+> > > seems that a symmetric key would work just as well.  And it would=
+ be a
+> > > lot quicker to generate, because it wouldn't need any high-precis=
+ion
+> > > integer computations.
+> >=20
+> > The reason is the desire to validate that the previous kernel creat=
+ed
+> > something which it passed on to the current kernel (in this case, t=
+he
+> > hibernation image) untampered with.  To do that, something must be
+> > passed to the prior kernel that can be validated but *not* recreate=
+d by
+> > the current kernel.
+>=20
+> I don't get this. Why is it important that current kernel can't
+> recreate the signature?
+>=20
+> Current kernel is not considered malicious (if it were, you have wors=
+e
+> problems).
+>=20
 
-Hmm, since len is saved in efi_mapping so the previous 0 size range would
-not a problem.
+Current boot kernel should not malicious especially when UEFI secure
+boot enabled.
 
-If we choose this approach, can we save not only the efi_mapping, but also
-the fields which will be converted to virt addr, like fw_vendor, runtime,
-tables? During my test on a HP workstation, the config table item (SMBIOS) also is 
-converted to virt addr though spec only mention fw_vendor/runtime/tables.
+> 								Pavel
+>=20
+> PS: And yes, it would be nice to have
+> Documentation/power/swsusp-uefi.txt (or something) explaining the
+> design.
+>=20
 
---
-Thanks
-Dave
+Thanks for your suggestion, I will write the swsusp-uefi.txt to
+explaining the design in next version.
+
+
+Thanks a lot!
+Joey Lee
+
