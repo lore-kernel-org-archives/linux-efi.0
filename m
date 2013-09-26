@@ -1,59 +1,70 @@
-From: joeyli <jlee@suse.com>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
 Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate
  snapshot
-Date: Thu, 26 Sep 2013 21:20:38 +0800
-Message-ID: <1380201638.32302.90.camel__35511.0042532489$1380201701$gmane$org@linux-s257.site>
+Date: Thu, 26 Sep 2013 07:44:14 -0700
+Message-ID: <1380206654.18835.56.camel@dabdike.int.hansenpartnership.com>
 References: <Pine.LNX.4.44L0.1309251723001.26508-100000@netrider.rowland.org>
-	 <1380161957.32302.42.camel@linux-s257.site>
-	 <1380192218.32302.69.camel@linux-s257.site>
-	 <20130926120621.GA7537@amd.pavel.ucw.cz>  <20130926122210.GA30225@suse.cz>
+	  <1380147414.18835.36.camel@dabdike.int.hansenpartnership.com>
+	  <20130926002730.GA26857@amd.pavel.ucw.cz>
+	 <1380162771.18835.47.camel@dabdike.int.hansenpartnership.com>
+	 <alpine.LNX.2.00.1309260819490.18703@pobox.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <20130926122210.GA30225@suse.cz>
+In-Reply-To: <alpine.LNX.2.00.1309260819490.18703@pobox.suse.cz>
 Sender: linux-security-module-owner@vger.kernel.org
-To: Vojtech Pavlik <vojtech@suse.cz>
-Cc: Pavel Machek <pavel@ucw.cz>, Alan Stern <stern@rowland.harvard.edu>, David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.hengli.com.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
+To: Jiri Kosina <jiri.kosina@suse.com>
+Cc: Pavel Machek <pavel@ucw.cz>, Alan Stern <stern@rowland.harvard.edu>, David Howells <dhowells@redhat.com>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Greg KH <gregkh@linuxfoundation.org>, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.hengli.com.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2013-09-26 =E6=96=BC 14:22 +0200=EF=BC=8CVo=
-jtech Pavlik =E6=8F=90=E5=88=B0=EF=BC=9A
-> On Thu, Sep 26, 2013 at 02:06:21PM +0200, Pavel Machek wrote:
->=20
-> > > For the symmetric key solution, I will try HMAC (Hash Message
-> > > Authentication Code). It's already used in networking, hope the
-> > > performance is not too bad to a big image.
-> >=20
-> > Kernel already supports crc32 of the hibernation image, you may wan=
-t
-> > to take a look how that is done.
-> >=20
-> > Maybe you want to replace crc32 with cryptographics hash (sha1?) an=
-d
-> > then use only hash for more crypto? That way speed of whatever
-> crypto
-> > you do should not be an issue.
->=20
-> Well, yes, one could skip the CRC when the signing is enabled to gain
-> a
-> little speedup.=20
+On Thu, 2013-09-26 at 08:24 +0200, Jiri Kosina wrote:
+> On Wed, 25 Sep 2013, James Bottomley wrote:
+> 
+> > > I don't get this. Why is it important that current kernel can't
+> > > recreate the signature?
+> > 
+> > The thread model is an attack on the saved information (i.e. the suspend
+> > image) between it being saved by the old kernel and used by the new one.
+> > The important point isn't that the new kernel doesn't have access to
+> > K_{N-1} it's that no-one does: the key is destroyed as soon as the old
+> > kernel terminates however the verification public part P_{N-1} survives.
+> 
+> James,
+> 
+> could you please describe the exact scenario you think that the symmetric 
+> keys aproach doesn't protect against, while the assymetric key aproach 
+> does?
+> 
+> The crucial points, which I believe make the symmetric key aproach work 
+> (and I feel quite embarassed by the fact that I haven't realized this 
+> initially when coming up with the assymetric keys aproach) are:
+> 
+> - the kernel that is performing the actual resumption is trusted in the 
+>   secure boot model, i.e. you trust it to perform proper verification
+> 
+> - potentially malicious userspace (which is what we are protecting against 
+>   -- malicious root creating fake hibernation image and issuing reboot) 
+>   doesn't have access to the symmetric key
 
-In current kernel, CRC is for check the integrity of LZO compressed
-image, the purpose is different to check the integrity of snapshot
-image.
-So, CRC will not in non-compress hibernate or userspace hibernate code
-path
+OK, so the scheme is to keep a symmetric key in BS that is passed into
+the kernel each time (effectively a secret key) for signing and
+validation?
 
-On the other hand, attacker can easily change the CRC code in the heade=
-r
-of LZO hibernate image.
+The only two problems I see are
 
-Thanks a lot!
-Joey Lee
+     1. The key isn't generational (any compromise obtains it).  This
+        can be fixed by using a set of keys generated on each boot and
+        passing in both K_{N-1} and K_N
+     2. No external agency other than the next kernel can do the
+        validation since the validating key has to be secret
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-securit=
-y-module" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The importance of 2 is just tripwire like detection ... perhaps it
+doesn't really matter in a personal computer situation.  It would matter
+in an enterprise where images are stored and re-used but until servers
+have UEFI secure boot, that's not going to be an issue.
+
+James
+
+
+
