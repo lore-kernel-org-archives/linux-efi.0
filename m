@@ -1,92 +1,106 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate
- snapshot
-Date: Thu, 26 Sep 2013 18:43:38 +0800
-Message-ID: <1380192218.32302.69.camel__16864.3804303885$1380192284$gmane$org@linux-s257.site>
-References: <Pine.LNX.4.44L0.1309251723001.26508-100000@netrider.rowland.org>
-	 <1380161957.32302.42.camel@linux-s257.site>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCHv3] x86: EFI stub support for large memory maps
+Date: Thu, 26 Sep 2013 12:34:00 +0100
+Message-ID: <20130926113400.GM21381@console-pimps.org>
+References: <1378487056-9857-1-git-send-email-linn@hp.com>
+ <1379901548-70954-1-git-send-email-linn@hp.com>
+ <20130925125840.GK21381@console-pimps.org>
+ <20130925224541.GT13098@oranje.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <1380161957.32302.42.camel@linux-s257.site>
-Sender: linux-pm-owner@vger.kernel.org
-To: Alan Stern <stern@rowland.harvard.edu>
-Cc: David Howells <dhowells@redhat.com>, linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.hengli.com.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130925224541.GT13098-QpTgeCMhooRo/CpIj0byZw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2013-09-26 =E6=96=BC 10:19 +0800=EF=BC=8Cjo=
-eyli =E6=8F=90=E5=88=B0=EF=BC=9A
-> =E6=96=BC =E4=B8=89=EF=BC=8C2013-09-25 =E6=96=BC 17:25 -0400=EF=BC=8C=
-Alan Stern =E6=8F=90=E5=88=B0=EF=BC=9A
-> > On Wed, 25 Sep 2013, David Howells wrote:
-> >=20
-> > > I have pushed some keyrings patches that will likely affect this =
-to:
-> > >=20
-> > > 	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.gi=
-t/log/?h=3Dkeys-devel
-> > >=20
-> > > I intend to ask James to pull these into his next branch.  If he'=
-s happy to do
-> > > so, I can look at pulling at least your asymmetric keys patch on =
-top of them.
-> >=20
-> > This suggests a point that I raised at the Linux Plumbers conferenc=
-e:
-> >=20
-> > Why are asymmetric keys used for verifying the hibernation image?  =
-It
-> > seems that a symmetric key would work just as well.  And it would b=
-e a
-> > lot quicker to generate, because it wouldn't need any high-precisio=
-n
-> > integer computations.
-> >=20
-> > Alan Stern
-> >=20
-> >=20
->=20
-> Per my understood, it's like add salt to snapshot when generate
-> signature, then remove the salt when store the snapshot to swap. (or
-> pass snapshot to userland).
->=20
-> Let me explain the symmetric key solution base on my understand:
->=20
->  + EFI stub kernel generate a hash value from a random seed, then sto=
-re
-> it to EFi boot varaible. It should protected by UEFI secure boot
-> environment.
->=20
->  + When hibernate launched:
->     - Kernel create the snapshot image of memory. It's included the
-> random hash value(salt) that generated in EFI stub stage.
->     - Then kernel hash the snapshot image, put the hash to snapshot
-> header, just like current asymmetric keys solution.
->     - Kernel erase the salt in snapshot image before it go to swap or
-> pass to userspace tool.
->=20
->  + When hibernate resume:
->     - Kernel or userspace tool load the snapshot(without salt) from s=
-wap
-> to temporary memory space.
->     - Kernel fill the salt back to snapshot image in memory, hash it.
->     - Kernel compare the hash with the hash that put in snapshot head=
-er.
->     - Verification done! The follow-up action as current solution.
->=20
-> Please current me if I missed anything.
->=20
->=20
-> Thanks a lot!
-> Joey Lee
->=20
+On Wed, 25 Sep, at 04:45:41PM, Linn Crosetto wrote:
+> On Wed, Sep 25, 2013 at 01:58:40PM +0100, Matt Fleming wrote:
+> > On Sun, 22 Sep, at 07:59:08PM, Linn Crosetto wrote:
+> > > This patch fixes a problem with EFI memory maps larger than 128 entries
+> > > when booting using the EFI stub, which results in overflowing e820_map
+> > > in boot_params and an eventual halt when checking the map size in
+> > > sanitize_e820_map().
+> > > 
+> > > If the number of map entries is greater than what can fit in e820_map,
+> > > add the extra entries to the setup_data list using type SETUP_E820_EXT.
+> > > These extra entries are then picked up when the setup_data list is
+> > > parsed in parse_e820_ext().
+> > > 
+> > > Signed-off-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+> > > ---
+> > > Changes from v2:
+> > >  * Removed unnecessary optimization in alloc_e820ext() (Matt Fleming)
+> > >  * Fixed a bug where an incorrect buffer size may be passed to
+> > >    get_memory_map when jumping to get_map
+> > > 
+> > >  arch/x86/boot/compressed/eboot.c | 239 +++++++++++++++++++++++++++------------
+> > >  1 file changed, 167 insertions(+), 72 deletions(-)
+> > 
+> > Thanks Linn. I applied this to the 'next' branch at,
+> > 
+> >   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+> > 
+> > but it required a bit of massaging to apply on top of the changes
+> > already there. Could you confirm that my changes are OK? I've included
+> > the modified commit below.
+> 
+> I have tested the 'next' branch on a system with a large number of entries in
+> the memory map and the merge appears to be functionally correct. 
+ 
+Excellent, thank you for verifying.
 
-=46or the symmetric key solution, I will try HMAC (Hash Message
-Authentication Code). It's already used in networking, hope the
-performance is not too bad to a big image.
+> With the change in commit ae8e9060, I noticed the memory map is no longer placed
+> in memory allocated with low_alloc(). I have not looked into what effect it
+> could have, if any.
+ 
+Correct. I haven't run into any problems on my test machines.
+
+> > +	/* Historic? */
+> > +	boot_params->alt_mem_k = 32 * 1024;
+> > +
+> > +	status = setup_e820(boot_params, e820ext, e820ext_size);
+> >  
+> >  	return EFI_SUCCESS;
+> 
+> I might add the following to your merge for semantic reasons:
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index 04b228d..a7677ba 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -730,6 +730,8 @@ get_map:
+>         boot_params->alt_mem_k = 32 * 1024;
+>  
+>         status = setup_e820(boot_params, e820ext, e820ext_size);
+> +       if (status != EFI_SUCCESS)
+> +               return status;
+>  
+>         return EFI_SUCCESS;
+
+Aha, nice catch! Though if setup_e820() fails we should be jumping to
+the 'free_mem_map' label so we don't leak the memory map, like so,
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 04b228d..602950b 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -730,8 +730,8 @@ get_map:
+ 	boot_params->alt_mem_k = 32 * 1024;
+ 
+ 	status = setup_e820(boot_params, e820ext, e820ext_size);
+-
+-	return EFI_SUCCESS;
++	if (status == EFI_SUCCESS)
++		return status;
+ 
+ free_mem_map:
+ 	efi_call_phys1(sys_table->boottime->free_pool, mem_map);
 
 
-Thanks
-Joey Lee
+I've fixed this up and pushed out a new patch.
 
+-- 
+Matt Fleming, Intel Open Source Technology Center
