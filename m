@@ -1,75 +1,56 @@
-From: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCHv3] x86: EFI stub support for large memory maps
-Date: Wed, 25 Sep 2013 16:45:41 -0600
-Message-ID: <20130925224541.GT13098@oranje.fc.hp.com>
-References: <1378487056-9857-1-git-send-email-linn@hp.com>
- <1379901548-70954-1-git-send-email-linn@hp.com>
- <20130925125840.GK21381@console-pimps.org>
+From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
+Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate
+ snapshot
+Date: Thu, 26 Sep 2013 02:27:30 +0200
+Message-ID: <20130926002730.GA26857@amd.pavel.ucw.cz>
+References: <Pine.LNX.4.44L0.1309251723001.26508-100000@netrider.rowland.org>
+ <1380147414.18835.36.camel@dabdike.int.hansenpartnership.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20130925125840.GK21381-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1380147414.18835.36.camel-sFMDBYUN5F8GjUHQrlYNx2Wm91YjaHnnhRte9Li2A+AAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, opensuse-kernel-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, JKosina-IBi9RG/b67k@public.gmane.org, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Herbert Xu <herbert-F6s6mLieUQo7FNHlEwC/lvQIK84fMopw@public.gmane.org>, "David S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michal Marek <mmarek-AlSwsSmVLrQ@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 25, 2013 at 01:58:40PM +0100, Matt Fleming wrote:
-> On Sun, 22 Sep, at 07:59:08PM, Linn Crosetto wrote:
-> > This patch fixes a problem with EFI memory maps larger than 128 entries
-> > when booting using the EFI stub, which results in overflowing e820_map
-> > in boot_params and an eventual halt when checking the map size in
-> > sanitize_e820_map().
+On Wed 2013-09-25 15:16:54, James Bottomley wrote:
+> On Wed, 2013-09-25 at 17:25 -0400, Alan Stern wrote:
+> > On Wed, 25 Sep 2013, David Howells wrote:
 > > 
-> > If the number of map entries is greater than what can fit in e820_map,
-> > add the extra entries to the setup_data list using type SETUP_E820_EXT.
-> > These extra entries are then picked up when the setup_data list is
-> > parsed in parse_e820_ext().
+> > > I have pushed some keyrings patches that will likely affect this to:
+> > > 
+> > > 	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-devel
+> > > 
+> > > I intend to ask James to pull these into his next branch.  If he's happy to do
+> > > so, I can look at pulling at least your asymmetric keys patch on top of them.
 > > 
-> > Signed-off-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-> > ---
-> > Changes from v2:
-> >  * Removed unnecessary optimization in alloc_e820ext() (Matt Fleming)
-> >  * Fixed a bug where an incorrect buffer size may be passed to
-> >    get_memory_map when jumping to get_map
+> > This suggests a point that I raised at the Linux Plumbers conference:
 > > 
-> >  arch/x86/boot/compressed/eboot.c | 239 +++++++++++++++++++++++++++------------
-> >  1 file changed, 167 insertions(+), 72 deletions(-)
+> > Why are asymmetric keys used for verifying the hibernation image?  It
+> > seems that a symmetric key would work just as well.  And it would be a
+> > lot quicker to generate, because it wouldn't need any high-precision
+> > integer computations.
 > 
-> Thanks Linn. I applied this to the 'next' branch at,
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
-> 
-> but it required a bit of massaging to apply on top of the changes
-> already there. Could you confirm that my changes are OK? I've included
-> the modified commit below.
+> The reason is the desire to validate that the previous kernel created
+> something which it passed on to the current kernel (in this case, the
+> hibernation image) untampered with.  To do that, something must be
+> passed to the prior kernel that can be validated but *not* recreated by
+> the current kernel.
 
-I have tested the 'next' branch on a system with a large number of entries in
-the memory map and the merge appears to be functionally correct. 
+I don't get this. Why is it important that current kernel can't
+recreate the signature?
 
-With the change in commit ae8e9060, I noticed the memory map is no longer placed
-in memory allocated with low_alloc(). I have not looked into what effect it
-could have, if any.
+Current kernel is not considered malicious (if it were, you have worse
+problems).
 
-> +	/* Historic? */
-> +	boot_params->alt_mem_k = 32 * 1024;
-> +
-> +	status = setup_e820(boot_params, e820ext, e820ext_size);
->  
->  	return EFI_SUCCESS;
+								Pavel
 
-I might add the following to your merge for semantic reasons:
+PS: And yes, it would be nice to have
+Documentation/power/swsusp-uefi.txt (or something) explaining the
+design.
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 04b228d..a7677ba 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -730,6 +730,8 @@ get_map:
-        boot_params->alt_mem_k = 32 * 1024;
- 
-        status = setup_e820(boot_params, e820ext, e820ext_size);
-+       if (status != EFI_SUCCESS)
-+               return status;
- 
-        return EFI_SUCCESS;
+-- 
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
