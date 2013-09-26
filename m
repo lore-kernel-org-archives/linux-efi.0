@@ -1,68 +1,67 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate
- snapshot
-Date: Wed, 25 Sep 2013 19:32:51 -0700
-Message-ID: <1380162771.18835.47.camel@dabdike.int.hansenpartnership.com>
-References: <Pine.LNX.4.44L0.1309251723001.26508-100000@netrider.rowland.org>
-	 <1380147414.18835.36.camel@dabdike.int.hansenpartnership.com>
-	 <20130926002730.GA26857@amd.pavel.ucw.cz>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
+Date: Thu, 26 Sep 2013 11:12:42 +0800
+Message-ID: <20130926031242.GA4487@dhcp-16-126.nay.redhat.com>
+References: <e39e1065bddc2afee2cb6eed957e3ba8.squirrel@www.skyhub.de>
+ <52422A6A.8080305@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-15"
-Content-Transfer-Encoding: 7bit
-Return-path: <opensuse-kernel+bounces-5139-glsk-opensuse-kernel=m.gmane.org-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-In-Reply-To: <20130926002730.GA26857-tWAi6jLit6GreWDznjuHag@public.gmane.org>
-List-Post: <mailto:opensuse-kernel-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-List-Help: <mailto:opensuse-kernel+help-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-List-Subscribe: <mailto:opensuse-kernel+subscribe-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-List-Unsubscribe: <mailto:opensuse-kernel+unsubscribe-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-List-Owner: <mailto:opensuse-kernel+owner-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org>
-List-Archive: <http://lists.opensuse.org/opensuse-kernel/>
-To: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
-Cc: Alan Stern <stern-nwvwT67g6+6dFdvTe/nMLpVzexx5G7lz@public.gmane.org>, David Howells <dhowells-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-crypto-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, opensuse-kernel-stAJ6ESoqRxg9hUCZPvPmw@public.gmane.org, "Rafael J.  Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, JKosina-IBi9RG/b67k@public.gmane.org, Rusty Russell <rusty-8n+1lVoiYb80n/F98K4Iww@public.gmane.org>, Herbert Xu <herbert-F6s6mLieUQo7FNHlEwC/lvQIK84fMopw@public.gmane.org>, "David  S. Miller" <davem-fT/PcQaiUtIeIZ0/mPfg9Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michal Marek <mmarek-AlSwsSmVLrQ@public.gmane.org>, Gary Lin <GLin-IBi9RG/b67k@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <52422A6A.8080305-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <james.bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-09-26 at 02:27 +0200, Pavel Machek wrote:
-> On Wed 2013-09-25 15:16:54, James Bottomley wrote:
-> > On Wed, 2013-09-25 at 17:25 -0400, Alan Stern wrote:
-> > > On Wed, 25 Sep 2013, David Howells wrote:
-> > > 
-> > > > I have pushed some keyrings patches that will likely affect this to:
-> > > > 
-> > > > 	http://git.kernel.org/cgit/linux/kernel/git/dhowells/linux-fs.git/log/?h=keys-devel
-> > > > 
-> > > > I intend to ask James to pull these into his next branch.  If he's happy to do
-> > > > so, I can look at pulling at least your asymmetric keys patch on top of them.
-> > > 
-> > > This suggests a point that I raised at the Linux Plumbers conference:
-> > > 
-> > > Why are asymmetric keys used for verifying the hibernation image?  It
-> > > seems that a symmetric key would work just as well.  And it would be a
-> > > lot quicker to generate, because it wouldn't need any high-precision
-> > > integer computations.
+On 09/24/13 at 05:12pm, H. Peter Anvin wrote:
+> On 09/24/2013 07:56 AM, Borislav Petkov wrote:
+> > On Tue, September 24, 2013 2:45 pm, Dave Young wrote:
+> >> Think again about this, how about 1:1 map them from a base address
+> >> like -64G phy_addr -> (-64G + phy_addr), in this way we can avoid
+> >> depending on the previous region size.
 > > 
-> > The reason is the desire to validate that the previous kernel created
-> > something which it passed on to the current kernel (in this case, the
-> > hibernation image) untampered with.  To do that, something must be
-> > passed to the prior kernel that can be validated but *not* recreated by
-> > the current kernel.
+> > Right, how we layout the regions is arbitrary as long as we start at
+> > the same VA and use the same regions, in the same order and of the same
+> > size...
+> > 
+> >> For the zero region problem, we can resolve it as a standalone
+> >> problem.
+> > 
+> > ... however, we still need to understand why it fails mapping the boot
+> > services region as some implementations apparently do call boot services
+> > even after ExitBootServices(). IOW, we need that region mapped in the
+> > kexec'ed kernel too.
+> > 
 > 
-> I don't get this. Why is it important that current kernel can't
-> recreate the signature?
+> I am starting to think that we really should explicitly pass along the
+> EFI mappings to the secondary kernel.  This will also help if we have to
+> change the algorithm in a future kernel.
+> 
+> The most logical way to do this is to define a new setup_data type and
+> pass the entire set of physical-to-virtual mappings that way.
+> 
+> For example:
+> 
+> struct efi_mapping {
+> 	u64 va;			/* Virtual start address */
+> 	u64 pa;			/* Physical start address */
+> 	u64 len;		/* Length in bytes */
+> 	u64 type;		/* Mapping type */
+> 	u64 reserved[3];	/* Reserved, must be zero */
+> };
+> 
+> Adding some reserved fields seems like a prudent precaution; the map
+> shouldn't be all that large anyway.
 
-The thread model is an attack on the saved information (i.e. the suspend
-image) between it being saved by the old kernel and used by the new one.
-The important point isn't that the new kernel doesn't have access to
-K_{N-1} it's that no-one does: the key is destroyed as soon as the old
-kernel terminates however the verification public part P_{N-1} survives.
+Hmm, since len is saved in efi_mapping so the previous 0 size range would
+not a problem.
 
-James
+If we choose this approach, can we save not only the efi_mapping, but also
+the fields which will be converted to virt addr, like fw_vendor, runtime,
+tables? During my test on a HP workstation, the config table item (SMBIOS) also is 
+converted to virt addr though spec only mention fw_vendor/runtime/tables.
 
-> Current kernel is not considered malicious (if it were, you have worse
-> problems).
-> 
-> 								Pavel
-> 
-> PS: And yes, it would be nice to have
-> Documentation/power/swsusp-uefi.txt (or something) explaining the
-> design.
-> 
+--
+Thanks
+Dave
