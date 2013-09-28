@@ -1,56 +1,31 @@
 From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH 3/6] Add strstr to compressed string.c for ARM.
-Date: Sat, 28 Sep 2013 09:23:20 -0700
-Message-ID: <1380385403-31904-4-git-send-email-roy.franz@linaro.org>
-References: <1380385403-31904-1-git-send-email-roy.franz@linaro.org>
+Subject: [PATCH V2 ] Improve EFI stub command line conversion
+Date: Sat, 28 Sep 2013 10:32:56 -0700
+Message-ID: <1380389577-27039-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380385403-31904-1-git-send-email-roy.franz@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
-Cc: leif.lindholm@linaro.org, grant.likely@linaro.org, dave.martin@arm.com, msalter@redhat.com, Roy Franz <roy.franz@linaro.org>
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk
+Cc: msalter@redhat.com, hpa@zytor.com, Roy Franz <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-The shared efi-stub-helper.c functions require a strstr
-implementation.
-Implementation copied from arch/x86/boot/string.c
+Improve the conversion of the UTF-16 EFI command line
+to UTF-8 for passing to the kernel.
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
-Reviewed-by: Grant Likely <grant.likely@linaro.org>
----
- arch/arm/boot/compressed/string.c |   21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+Depends on series:
+[PATCH V4 0/6] ADD ARM EFI stub
 
-diff --git a/arch/arm/boot/compressed/string.c b/arch/arm/boot/compressed/string.c
-index 36e53ef..5397792 100644
---- a/arch/arm/boot/compressed/string.c
-+++ b/arch/arm/boot/compressed/string.c
-@@ -111,6 +111,27 @@ char *strchr(const char *s, int c)
- 	return (char *)s;
- }
- 
-+/**
-+ * strstr - Find the first substring in a %NUL terminated string
-+ * @s1: The string to be searched
-+ * @s2: The string to search for
-+ */
-+char *strstr(const char *s1, const char *s2)
-+{
-+	size_t l1, l2;
-+
-+	l2 = strlen(s2);
-+	if (!l2)
-+		return (char *)s1;
-+	l1 = strlen(s1);
-+	while (l1 >= l2) {
-+		l1--;
-+		if (!memcmp(s1, s2, l2))
-+			return (char *)s1;
-+		s1++;
-+	}
-+	return NULL;
-+}
- #undef memset
- 
- void *memset(void *s, int c, size_t count)
+Changes from V1:
+* Fix loop limit when processing UTF-16 EFI command line
+* Break out from series: [PATCH V5 00/18] ARM EFI stub common code
+* Now includes caller fixup in ARM EFI stub.
+
+H. Peter Anvin (1):
+  Improve EFI stub command line conversion
+
+ arch/arm/boot/compressed/efi-stub.c    |    2 +-
+ arch/x86/boot/compressed/eboot.c       |    3 +-
+ drivers/firmware/efi/efi-stub-helper.c |   93 ++++++++++++++++++++++++--------
+ 3 files changed, 72 insertions(+), 26 deletions(-)
+
 -- 
 1.7.10.4
