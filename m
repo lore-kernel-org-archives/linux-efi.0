@@ -1,191 +1,30 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH] Improve EFI stub command line conversion
-Date: Sat, 28 Sep 2013 10:32:57 -0700
-Message-ID: <1380389577-27039-2-git-send-email-roy.franz@linaro.org>
-References: <1380389577-27039-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1380389577-27039-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, linux-arm-kernel@lists.infradead.org, linux@arm.linux.org.uk
-Cc: msalter@redhat.com, hpa@zytor.com, Roy Franz <roy.franz@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCHv3] x86: EFI stub support for large memory maps
+Date: Mon, 30 Sep 2013 10:22:07 +0100
+Message-ID: <20130930092207.GN21381@console-pimps.org>
+References: <1378487056-9857-1-git-send-email-linn@hp.com>
+ <1379901548-70954-1-git-send-email-linn@hp.com>
+ <20130925125840.GK21381@console-pimps.org>
+ <20130925224541.GT13098@oranje.fc.hp.com>
+ <20130926113400.GM21381@console-pimps.org>
+ <20130927234607.GA17867@oranje.fc.hp.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20130927234607.GA17867-QpTgeCMhooRo/CpIj0byZw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: "H. Peter Anvin" <hpa@zytor.com>
+On Fri, 27 Sep, at 05:46:07PM, Linn Crosetto wrote:
+> Given that we have already successfully called exit_boot_services, can
+> we still make this call to free_pool?
 
-Improve the conversion of the UTF-16 EFI command line
-to UTF-8 for passing to the kernel.
+Urgh, good point. The answer is "no, not really".
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
----
- arch/arm/boot/compressed/efi-stub.c    |    2 +-
- arch/x86/boot/compressed/eboot.c       |    3 +-
- drivers/firmware/efi/efi-stub-helper.c |   93 ++++++++++++++++++++++++--------
- 3 files changed, 72 insertions(+), 26 deletions(-)
+I'll add your change verbatim and push out the 'next' branch again.
 
-diff --git a/arch/arm/boot/compressed/efi-stub.c b/arch/arm/boot/compressed/efi-stub.c
-index a77cc4f..f720284 100644
---- a/arch/arm/boot/compressed/efi-stub.c
-+++ b/arch/arm/boot/compressed/efi-stub.c
-@@ -109,7 +109,7 @@ int efi_entry(void *handle, efi_system_table_t *sys_table,
- 	 * so this memory just needs to not conflict with boot protocol
- 	 * requirements.
- 	 */
--	cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
-+	cmdline_ptr = efi_convert_cmdline(sys_table, image,
- 						   &cmdline_size);
- 	if (!cmdline_ptr) {
- 		efi_printk(sys_table, PRINTK_PREFIX"ERROR: Unable to allocate memory for command line.\n");
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index beb07a4..a5628cd 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -488,8 +488,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
- 	hdr->type_of_loader = 0x21;
- 
- 	/* Convert unicode cmdline to ascii */
--	cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
--						   &options_size);
-+	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
- 	if (!cmdline_ptr)
- 		goto fail;
- 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
-diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index d3448a9..6602001 100644
---- a/drivers/firmware/efi/efi-stub-helper.c
-+++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -578,63 +578,110 @@ static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
- }
- 
- /*
-- * Convert the unicode UEFI command line to ASCII to pass to kernel.
-+ * Get the number of UTF-8 bytes corresponding to an UTF-16 character.
-+ * This overestimates for surrogates, but that is okay.
-+ */
-+static int efi_utf8_bytes(u16 c)
-+{
-+	return 1 + (c >= 0x80) + (c >= 0x800);
-+}
-+
-+/*
-+ * Convert an UTF-16 string, not necessarily null terminated, to UTF-8.
-+ */
-+static u8 *efi_utf16_to_utf8(u8 *dst, const u16 *src, int n)
-+{
-+	unsigned int c;
-+
-+	while (n--) {
-+		c = *src++;
-+		if (n && c >= 0xd800 && c <= 0xdbff &&
-+		    *src >= 0xdc00 && *src <= 0xdfff) {
-+			c = 0x10000 + ((c & 0x3ff) << 10) + (*src & 0x3ff);
-+			src++;
-+			n--;
-+		}
-+		if (c >= 0xd800 && c <= 0xdfff)
-+			c = 0xfffd; /* Unmatched surrogate */
-+		if (c < 0x80) {
-+			*dst++ = c;
-+			continue;
-+		}
-+		if (c < 0x800) {
-+			*dst++ = 0xc0 + (c >> 6);
-+			goto t1;
-+		}
-+		if (c < 0x10000) {
-+			*dst++ = 0xe0 + (c >> 12);
-+			goto t2;
-+		}
-+		*dst++ = 0xf0 + (c >> 18);
-+		*dst++ = 0x80 + ((c >> 12) & 0x3f);
-+t2:
-+		*dst++ = 0x80 + ((c >> 6) & 0x3f);
-+t1:
-+		*dst++ = 0x80 + (c & 0x3f);
-+	}
-+
-+	return dst;
-+}
-+
-+/*
-+ * Do proper conversion from UTF-16 to UTF-8
-  * Size of memory allocated return in *cmd_line_len.
-  * Returns NULL on error.
-  */
--static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
--				      efi_loaded_image_t *image,
--				      int *cmd_line_len)
-+static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
-+				 efi_loaded_image_t *image,
-+				 int *cmd_line_len)
- {
--	u16 *s2;
-+	const u16 *s2;
- 	u8 *s1 = NULL;
- 	unsigned long cmdline_addr = 0;
--	int load_options_size = image->load_options_size / 2; /* ASCII */
--	void *options = image->load_options;
--	int options_size = 0;
-+	int load_options_chars = image->load_options_size / 2; /* UTF-16 chars */
-+	const u16 *options = image->load_options;
-+	int options_bytes = 0;	/* UTF-8 bytes */
-+	int options_chars = 0;	/* UTF-16 chars */
- 	efi_status_t status;
--	int i;
- 	u16 zero = 0;
- 
- 	if (options) {
- 		s2 = options;
--		while (*s2 && *s2 != '\n' && options_size < load_options_size) {
--			s2++;
--			options_size++;
-+		while (*s2 && *s2 != '\n' && options_chars < load_options_chars) {
-+			options_bytes += efi_utf8_bytes(*s2++);
-+			options_chars++;
- 		}
- 	}
- 
--	if (options_size == 0) {
--		/* No command line options, so return empty string*/
--		options_size = 1;
-+	if (!options_chars) {
-+		/* No command line options, so return empty string */
- 		options = &zero;
- 	}
- 
--	options_size++;  /* NUL termination */
-+	options_bytes++;	/* NUL termination */
-+
- #ifdef CONFIG_ARM
- 	/*
- 	 * For ARM, allocate at a high address to avoid reserved
- 	 * regions at low addresses that we don't know the specfics of
- 	 * at the time we are processing the command line.
- 	 */
--	status = efi_high_alloc(sys_table_arg, options_size, 0,
-+	status = efi_high_alloc(sys_table_arg, options_bytes, 0,
- 			    &cmdline_addr, 0xfffff000);
- #else
--	status = efi_low_alloc(sys_table_arg, options_size, 0,
-+	status = efi_low_alloc(sys_table_arg, options_bytes, 0,
- 			    &cmdline_addr);
- #endif
- 	if (status != EFI_SUCCESS)
- 		return NULL;
- 
- 	s1 = (u8 *)cmdline_addr;
--	s2 = (u16 *)options;
--
--	for (i = 0; i < options_size - 1; i++)
--		*s1++ = *s2++;
-+	s2 = (const u16 *)options;
- 
-+	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
- 	*s1 = '\0';
- 
--	*cmd_line_len = options_size;
-+	*cmd_line_len = options_bytes;
- 	return (char *)cmdline_addr;
- }
- 
 -- 
-1.7.10.4
+Matt Fleming, Intel Open Source Technology Center
