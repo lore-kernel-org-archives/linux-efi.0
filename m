@@ -1,131 +1,97 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v2 1/3] Documentation: arm: add UEFI support
- documentation
-Date: Thu, 3 Oct 2013 18:10:54 +0100
-Message-ID: <20131003171053.GB6999@e106331-lin.cambridge.arm.com>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] Documentation: arm: add UEFI support documentation
+Date: Thu, 3 Oct 2013 19:18:02 +0200
+Message-ID: <20131003171800.GC1557@rocoto.smurfnet.nu>
 References: <1380799481-5470-1-git-send-email-leif.lindholm@linaro.org>
  <1380799481-5470-2-git-send-email-leif.lindholm@linaro.org>
+ <524D9726.6080501@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1380799481-5470-2-git-send-email-leif.lindholm@linaro.org>
-Content-Language: en-US
-Sender: linux-doc-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "msalter@redhat.com" <msalter@redhat.com>
+In-Reply-To: <524D9726.6080501-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, arnd-r2nGTMty4D4@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Leif,
-
-On Thu, Oct 03, 2013 at 12:24:39PM +0100, Leif Lindholm wrote:
-> This patch provides documentation of the [U]EFI runtime services and
-> configuration features.
+On Thu, Oct 03, 2013 at 11:11:18AM -0500, Rob Herring wrote:
+> Adding devicetree list since you are defining bindings...
 > 
-> Cc: linux-doc@vger.kernel.org
-> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-> Acked-by: Rob Landley <rob@landley.net>
-> ---
->  Documentation/arm/00-INDEX |    3 +++
->  Documentation/arm/uefi.txt |   47 ++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 50 insertions(+)
->  create mode 100644 Documentation/arm/uefi.txt
+> > +with CONFIG_OF.
+> > +
+> > +It parses the FDT /chosen node for the following parameters:
 > 
-> diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
-> index 4978456..87e01d1 100644
-> --- a/Documentation/arm/00-INDEX
-> +++ b/Documentation/arm/00-INDEX
-> @@ -36,3 +36,6 @@ nwfpe/
->  	- NWFPE floating point emulator documentation
->  swp_emulation
->  	- SWP/SWPB emulation handler/logging description
-> +
-> +uefi.txt
-> +	- [U]EFI configuration and runtime services documentation
-> diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
-> new file mode 100644
-> index 0000000..e6e4d41
-> --- /dev/null
-> +++ b/Documentation/arm/uefi.txt
-> @@ -0,0 +1,47 @@
-> +UEFI, the Unified Extensible Firmware Interface is a speifcication
-> +governing the behaviours of compatible firmware interfaces. It is
-> +maintained by the UEFI Forum - http://www.uefi.org/.
-> +
-> +Since UEFI is an evolution of its predecessor 'EFI', the terms EFI and
-> +UEFI are used somewhat interchangeably in this document and associated
-> +source code.
-> +
-> +The implementation depends on receiving the UEFI runtime memory map and a
-> +pointer to the System Table in a Flattened Device Tree - so is only available
-> +with CONFIG_OF.
-> +
-> +It parses the FDT /chosen node for the following parameters:
-> +- 'linux,efi-system-table':
-> +  Physical address of the system table. (required)
-> +  64-bit value since an ARMv7 plattform may support LPAE, and to facilitate
-
-s/plattform/platform/
-
-> +  code sharing with arm64. Top 32 bits will be ignored, since UEFI specification
-> +  mandates a 1:1 mapping of all RAM.
-
-You could use something like #size-cells to describe how big this is
-going to be. Is this Linux-specific -- it looks like something provided
-by EFI rather than the kernel itself.
-
-> +- 'linux,efi-mmap':
-> +  The EFI memory map as an embedded property. (required)
-> +  An array of type EFI_MEMORY_DESCRIPTOR as described by the UEFI
-> +  specification, current version described in Linux by efi_memory_desc_t.
-> +  The memory map is represented in little-endian, not DT, byte order.
-> +  This map needs to contain at least the regions to be preserved for runtime
-> +  services, but would normally just be the map retreieved by calling UEFI
-> +  GetMemoryMap() immediately before ExitBootServices().
-
-This is a little scary. If the format is so complicated, should it
-really be embedded? How big is this likely to be?
-
-Given that this is in a format defined externally, this isn't really
-Linux-specific. Maybe we need an "efi" pseudo-vendor prefix.
-
-> +- 'linux,efi-mmap-desc-size':
-> +  Size of each descriptor in the memory map. (override default)
-
-What units is this in? How many u32 cells does this take up (one
-presumably)?
-
-> +- 'linux,efi-mmap-desc-ver':
-> +  Memory descriptor format version. (override default)
-
-Type, format, valid values and their meaning?
-
-Thanks,
-Mark.
-
-> +
-> +It also depends on early_memremap() to parse the UEFI configuration tables.
-> +
-> +For actually enabling [U]EFI support, enable:
-> +- CONFIG_EFI=y
-> +- CONFIG_EFI_VARS=y or m
-> +
-> +After the kernel has mapped the required regions into its address space,
-> +a SetVirtualAddressMap() call is made into UEFI in order to update
-> +relocations. This call must be performed with all the code in a 1:1
-> +mapping. This implementation achieves this by temporarily disabling the
-> +MMU for the duration of this call. This can only be done safely:
-> +- before secondary CPUs are brought online.
-> +- after early_initcalls have completed, since it uses setup_mm_for_reboot().
-> +
-> +For verbose debug messages, specify 'uefi_debug' on the kernel command
-> +line.
-> -- 
-> 1.7.10.4
+> DT bindings should be documented in Documentation/devicetree/bindings.
 > 
+> I also wonder if this would be more appropriately placed in a /firmware
+> node.
+
+This is information passed to the kernel by the bootloader - not
+system descriptiont - so I don't quite see why it needs different
+treatment from initrd and bootargs.
+
+Feedback on v1 was:
+https://lkml.org/lkml/2013/6/26/378
+and
+https://lkml.org/lkml/2013/6/27/420
+
+I don't really mind either way, but the current layout is now used
+across 3 sets of kernel patches, so we need to reach some sort of
+consensus. Interested parties so far: me, you, Grant, Arnd, Mark.
+
+> > +- 'linux,efi-mmap':
+> > +  The EFI memory map as an embedded property. (required)
+> > +  An array of type EFI_MEMORY_DESCRIPTOR as described by the UEFI
+> > +  specification, current version described in Linux by efi_memory_desc_t.
 > 
-`> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel@lists.infradead.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+> Is that too complex to describe here?
+ 
+No, just felt a bit redundant, and also not architecture-specific.
+
+> > +  The memory map is represented in little-endian, not DT, byte order.
+> > +  This map needs to contain at least the regions to be preserved for runtime
+> > +  services, but would normally just be the map retreieved by calling UEFI
+> > +  GetMemoryMap() immediately before ExitBootServices().
+> > +- 'linux,efi-mmap-desc-size':
+> > +  Size of each descriptor in the memory map. (override default)
 > 
+> 32-bit value?
+
+Value as returned by the above mentioned GetMemoryMap().
+Defined in UEFI specification (and <linux/efi.h>) as 32-bit (native
+int). But yes, I can be explicit.
+
+> > +- 'linux,efi-mmap-desc-ver':
+> > +  Memory descriptor format version. (override default)
+> 
+> String? Number?
+ 
+Value as returned by the above mentioned GetMemoryMap().
+Defined in the UEFI specification as 32-bit (uint32), not
+architecture specific. And I can add that too.
+
+> Are these all generated by UEFI at runtime or could they be statically
+> set in a platform's DTB?
+
+Generated at runtime.
+This is not the platform memory map, this is the UEFI memory map,
+which tells us which regions we need to preserve for runtime
+services, ACPI and such.
+
+> How would other OS's get this information? Is this really linux specific?
+
+The way it is passed through DT is. Other operating systems might keep
+boot services running for longer, and make calls into UEFI later, so
+not needing to cache the data. Since boot services means the timer
+interrupt is active, the ARM Linux boot protocol effectively prohibits
+this.
+
+Many of these questions are about generic UEFI mechanisms.
+If they need to be documented outside the UEFI specification,
+Documentation/arm is not the right place for it.
+
+If you want, I could give a basic Documentation/uefi.txt a shot.
+
+/
+    Leif
