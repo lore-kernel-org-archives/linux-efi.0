@@ -1,75 +1,91 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 2/6] Add shared update_fdt() function for ARM/ARM64
-Date: Thu, 3 Oct 2013 10:52:24 +0100
-Message-ID: <20131003095224.GX21381@console-pimps.org>
-References: <1380385403-31904-1-git-send-email-roy.franz@linaro.org>
- <1380385403-31904-3-git-send-email-roy.franz@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1380385403-31904-3-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v2 1/3] Documentation: arm: add UEFI support documentation
+Date: Thu,  3 Oct 2013 12:24:39 +0100
+Message-ID: <1380799481-5470-2-git-send-email-leif.lindholm@linaro.org>
+References: <1380799481-5470-1-git-send-email-leif.lindholm@linaro.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1380799481-5470-1-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matt.fleming@intel.com, grant.likely@secretlab.ca, roy.franz@linaro.org, msalter@redhat.com, Leif Lindholm <leif.lindholm@linaro.org>, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 28 Sep, at 09:23:19AM, Roy Franz wrote:
-> Both ARM and ARM64 stubs will update the device tree
-> that they pass to the kernel.  In both cases they
-> primarily need to add the same UEFI related information,
-> so the function can be shared.
-> 
-> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/efi-stub-helper.c |   86 ++++++++++++++++++++++++++++++++
->  1 file changed, 86 insertions(+)
-> 
-> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-> index cc0581d..d3448a9 100644
-> --- a/drivers/firmware/efi/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/efi-stub-helper.c
-> @@ -4,6 +4,7 @@
->   * implementation files.
->   *
->   * Copyright 2011 Intel Corporation; author Matt Fleming
-> + * Copyright 2013 Linaro Limited; author Roy Franz
->   *
->   * This file is part of the Linux kernel, and is made available
->   * under the terms of the GNU General Public License version 2.
-> @@ -636,3 +637,88 @@ static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
->  	*cmd_line_len = options_size;
->  	return (char *)cmdline_addr;
->  }
-> +
-> +#if defined(CONFIG_ARM) || defined(CONFIG_ARM64)
-> +static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
-> +			       void *fdt, int new_fdt_size, char *cmdline_ptr,
-> +			       u64 initrd_addr, u64 initrd_size,
-> +			       efi_memory_desc_t *memory_map,
-> +			       unsigned long map_size, unsigned long desc_size,
-> +			       u32 desc_ver)
+This patch provides documentation of the [U]EFI runtime services and
+configuration features.
 
-Hmm... does this function really belong in efi-stub-helper.c? That file
-should be for architecture independent functionality only.
+Cc: linux-doc@vger.kernel.org
+Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+Acked-by: Rob Landley <rob@landley.net>
+---
+ Documentation/arm/00-INDEX |    3 +++
+ Documentation/arm/uefi.txt |   47 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 50 insertions(+)
+ create mode 100644 Documentation/arm/uefi.txt
 
-While it currently does include this little snippet,
-
-#ifdef CONFIG_ARM
-	/*
-	 * For ARM, allocate at a high address to avoid reserved
-	 * regions at low addresses that we don't know the specfics of
-	 * at the time we are processing the command line.
-	 */
-	status = efi_high_alloc(sys_table_arg, options_size, 0,
-			    &cmdline_addr, 0xfffff000);
-#else
-	status = efi_low_alloc(sys_table_arg, options_size, 0,
-			    &cmdline_addr);
-#endif
-
-I think that single #ifdef is justifiable. But including entire
-functions that are only used by ARM/ARM64 or x86 isn't.
-
+diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
+index 4978456..87e01d1 100644
+--- a/Documentation/arm/00-INDEX
++++ b/Documentation/arm/00-INDEX
+@@ -36,3 +36,6 @@ nwfpe/
+ 	- NWFPE floating point emulator documentation
+ swp_emulation
+ 	- SWP/SWPB emulation handler/logging description
++
++uefi.txt
++	- [U]EFI configuration and runtime services documentation
+diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
+new file mode 100644
+index 0000000..e6e4d41
+--- /dev/null
++++ b/Documentation/arm/uefi.txt
+@@ -0,0 +1,47 @@
++UEFI, the Unified Extensible Firmware Interface is a speifcication
++governing the behaviours of compatible firmware interfaces. It is
++maintained by the UEFI Forum - http://www.uefi.org/.
++
++Since UEFI is an evolution of its predecessor 'EFI', the terms EFI and
++UEFI are used somewhat interchangeably in this document and associated
++source code.
++
++The implementation depends on receiving the UEFI runtime memory map and a
++pointer to the System Table in a Flattened Device Tree - so is only available
++with CONFIG_OF.
++
++It parses the FDT /chosen node for the following parameters:
++- 'linux,efi-system-table':
++  Physical address of the system table. (required)
++  64-bit value since an ARMv7 plattform may support LPAE, and to facilitate
++  code sharing with arm64. Top 32 bits will be ignored, since UEFI specification
++  mandates a 1:1 mapping of all RAM.
++- 'linux,efi-mmap':
++  The EFI memory map as an embedded property. (required)
++  An array of type EFI_MEMORY_DESCRIPTOR as described by the UEFI
++  specification, current version described in Linux by efi_memory_desc_t.
++  The memory map is represented in little-endian, not DT, byte order.
++  This map needs to contain at least the regions to be preserved for runtime
++  services, but would normally just be the map retreieved by calling UEFI
++  GetMemoryMap() immediately before ExitBootServices().
++- 'linux,efi-mmap-desc-size':
++  Size of each descriptor in the memory map. (override default)
++- 'linux,efi-mmap-desc-ver':
++  Memory descriptor format version. (override default)
++
++It also depends on early_memremap() to parse the UEFI configuration tables.
++
++For actually enabling [U]EFI support, enable:
++- CONFIG_EFI=y
++- CONFIG_EFI_VARS=y or m
++
++After the kernel has mapped the required regions into its address space,
++a SetVirtualAddressMap() call is made into UEFI in order to update
++relocations. This call must be performed with all the code in a 1:1
++mapping. This implementation achieves this by temporarily disabling the
++MMU for the duration of this call. This can only be done safely:
++- before secondary CPUs are brought online.
++- after early_initcalls have completed, since it uses setup_mm_for_reboot().
++
++For verbose debug messages, specify 'uefi_debug' on the kernel command
++line.
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.7.10.4
+
