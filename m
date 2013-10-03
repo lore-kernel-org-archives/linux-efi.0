@@ -1,70 +1,88 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 2/6] Add shared update_fdt() function for ARM/ARM64
-Date: Thu, 3 Oct 2013 12:28:03 -0700
-Message-ID: <CAFECyb-=2osh_j_9FCnWjAjLX-xbzanQeFjCLNTz4JKAk5d30w@mail.gmail.com>
-References: <1380385403-31904-1-git-send-email-roy.franz@linaro.org>
-	<1380385403-31904-3-git-send-email-roy.franz@linaro.org>
-	<20131003095224.GX21381@console-pimps.org>
-	<1380807804.17503.9.camel@deneb.redhat.com>
-	<20131003142721.GB2781@console-pimps.org>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] Documentation: arm: add UEFI support documentation
+Date: Thu, 3 Oct 2013 21:44:25 +0200
+Message-ID: <20131003194425.GD1557@rocoto.smurfnet.nu>
+References: <1380799481-5470-1-git-send-email-leif.lindholm@linaro.org>
+ <1380799481-5470-2-git-send-email-leif.lindholm@linaro.org>
+ <20131003171053.GB6999@e106331-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20131003142721.GB2781@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Mark Salter <msalter@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, matt.fleming@intel.com, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Grant Likely <grant.likely@linaro.org>, Dave Martin <dave.martin@arm.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131003171053.GB6999-NuALmloUBlrZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org" <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 3, 2013 at 7:27 AM, Matt Fleming <matt@console-pimps.org> wrote:
-> On Thu, 03 Oct, at 09:43:24AM, Mark Salter wrote:
->> On Thu, 2013-10-03 at 10:52 +0100, Matt Fleming wrote:
->> > > +#if defined(CONFIG_ARM) || defined(CONFIG_ARM64)
->> > > +static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->> > > +                            void *fdt, int new_fdt_size, char *cmdline_ptr,
->> > > +                            u64 initrd_addr, u64 initrd_size,
->> > > +                            efi_memory_desc_t *memory_map,
->> > > +                            unsigned long map_size, unsigned long desc_size,
->> > > +                            u32 desc_ver)
->> >
->> > Hmm... does this function really belong in efi-stub-helper.c? That file
->> > should be for architecture independent functionality only.
->> >
->>
->> It isn't really arm-specific although arm is the only user right now.
->> We're using the FDT to pass EFI boot info that is passed in the boot
->> params block on x86. So potentially other architectures could use the
->> same code.
->
-> It's not EFI-specific either, apart from the fdt property names.
->
->> How about making it someting like:
->>
->> #ifdef ARCH_NEEDS_EFI_FDT
->> static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->> ...
->> #endif
->>
->> so the architecture can decide whether to include it or not.
->
-> Is one implementation of this function going to fit all architectures?
-> Can we be sure of that ahead of time?
->
-> I'd prefer this to be kept in arch/ for now, and possibly moved into
-> efi-stub-helper.c at a later date if indeed it turns out to be generally
-> useful.
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+On Thu, Oct 03, 2013 at 06:10:54PM +0100, Mark Rutland wrote:
+> > +The implementation depends on receiving the UEFI runtime memory map and a
+> > +pointer to the System Table in a Flattened Device Tree - so is only available
+> > +with CONFIG_OF.
+> > +
+> > +It parses the FDT /chosen node for the following parameters:
+> > +- 'linux,efi-system-table':
+> > +  Physical address of the system table. (required)
+> > +  64-bit value since an ARMv7 plattform may support LPAE, and to facilitate
+> 
+> s/plattform/platform/
+ 
+Indeed, thanks.
 
-Hi Matt,
+> > +  code sharing with arm64. Top 32 bits will be ignored, since UEFI specification
+> > +  mandates a 1:1 mapping of all RAM.
+> 
+> You could use something like #size-cells to describe how big this is
+> going to be. Is this Linux-specific -- it looks like something provided
+> by EFI rather than the kernel itself.
+ 
+Provided by the bootloader, which may be the kernel's UEFI stub, or
+something else (like GRUB). Extracted from UEFI by stub (or other
+loader) which executes as a UEFI application.
 
-   This  function is shared between ARM and ARM64, which are separate
-architectures so to keep this in arch code would require it to be
-duplicated for ARM/ARM64.  Would moving this function to a new
-"efi-stub-fdt.c" file be satisfactory?  This file would just be used
-the ARM and ARM64, so this would remove
-the need for the top-level #ifdefs.
+> > +- 'linux,efi-mmap':
+> > +  The EFI memory map as an embedded property. (required)
+> > +  An array of type EFI_MEMORY_DESCRIPTOR as described by the UEFI
+> > +  specification, current version described in Linux by efi_memory_desc_t.
+> > +  The memory map is represented in little-endian, not DT, byte order.
+> > +  This map needs to contain at least the regions to be preserved for runtime
+> > +  services, but would normally just be the map retreieved by calling UEFI
+> > +  GetMemoryMap() immediately before ExitBootServices().
+> 
+> This is a little scary. If the format is so complicated, should it
+> really be embedded? How big is this likely to be?
 
-Thanks,
-Roy
+With current format, and it has yet to be extended beyond v1, it is
+40 bytes per entry. Number of entries will vary depending on how many
+regions are allocated in UEFI (1 entry per region). I have heard of
+some x86 systems with 128 or more regions, but my devboards have more
+like 16, and my desktop ~60.
+
+Having it embedded in the DT means the data passed by the bootloader
+to the kernel is automatically kept together (for kexec or such).
+Not vital, but nice.
+ 
+> Given that this is in a format defined externally, this isn't really
+> Linux-specific. Maybe we need an "efi" pseudo-vendor prefix.
+
+A discussion for the other thread.
+
+> > +- 'linux,efi-mmap-desc-size':
+> > +  Size of each descriptor in the memory map. (override default)
+> 
+> What units is this in? How many u32 cells does this take up (one
+> presumably)?
+ 
+Value as returned by UEFI GetMemoryMap() boot service call.
+Yes, one for ARM.
+
+> > +- 'linux,efi-mmap-desc-ver':
+> > +  Memory descriptor format version. (override default)
+> 
+> Type, format, valid values and their meaning?
+
+Meaning defined by UEFI specification, currently providing the only
+valid value as 1. 32-bit uint.
+
+/
+    Leif
