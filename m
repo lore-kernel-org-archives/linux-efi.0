@@ -1,20 +1,44 @@
-From: "Fleming, Matt" <matt.fleming@intel.com>
-Subject: Re: [RFC][PATCH v2] efivars,efi-pstore: Hold off deletion of sysfs
- entry until the scan is completed
-Date: Fri, 4 Oct 2013 17:02:41 +0100
-Message-ID: <CAL01qpuWFEodBbs+LVOALbXUfFpi6=CBTiir8d6NNmi9PRfYnQ@mail.gmail.com>
-References: <5245E958.5040602@hds.com>
-	<A5ED84D3BB3A384992CBB9C77DEDA4D443EE8B0B@USINDEM103.corp.hds.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH] Remove redundant and incorrect memset()
+Date: Fri, 4 Oct 2013 19:33:10 +0200
+Message-ID: <20131004173310.GA15689@gmail.com>
+References: <20131003131054.GB27835@gmail.com>
+ <1380902566-30867-1-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D443EE8B0B@USINDEM103.corp.hds.com>
+Content-Disposition: inline
+In-Reply-To: <1380902566-30867-1-git-send-email-roy.franz@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Seiji Aguchi <seiji.aguchi@hds.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "tony.luck@intel.com" <tony.luck@intel.com>, "dle-develop@lists.sourceforge.net" <dle-develop@lists.sourceforge.net>, Tomoki Sekiyama <tomoki.sekiyama@hds.com>
+To: Roy Franz <roy.franz@linaro.org>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, hpa@zytor.com, msalter@redhat.com, patches@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On 4 October 2013 16:46, Seiji Aguchi <seiji.aguchi@hds.com> wrote:
-> Are there anyone who can review this bugfix?
 
-Sorry I haven't got to it yet (or the previous version). It is on my TODO list.
+* Roy Franz <roy.franz@linaro.org> wrote:
+
+> Remove a redundant memset() call from efi_relocate_kernel() that
+> was clearing memory that would be used by BSS in non-compressed
+> images loaded with this function.  This clear was redundant with
+> the clearing done in the image itself, and also implemented incorrectly
+> with a 0 length.
+> 
+> Signed-off-by: Roy Franz <roy.franz@linaro.org>
+> Acked-by: Mark Salter <msalter@redhat.com>
+
+Note the title:
+
+   [PATCH] Remove redundant and incorrect memset()
+
+if it's both redundant *and* incorrect then the other memset() must be 
+incorrect too and must be removed as well ;-)
+
+I suspect you wanted the title to say:
+
+   [PATCH] Remove redundant memset()
+
+?
+
+Thanks,
+
+	Ingo
