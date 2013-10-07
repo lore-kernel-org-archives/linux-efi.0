@@ -1,53 +1,163 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes
-Date: Sun, 6 Oct 2013 11:27:32 +0200
-Message-ID: <20131006092732.GA4535@gmail.com>
-References: <20131004195550.GA21783@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [RFC][PATCH v2] efivars,efi-pstore: Hold off deletion of sysfs
+ entry until the scan is completed
+Date: Mon, 7 Oct 2013 12:42:18 +0100
+Message-ID: <20131007114218.GA14773@console-pimps.org>
+References: <5245E958.5040602@hds.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131004195550.GA21783-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <5245E958.5040602@hds.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Seiji Aguchi <seiji.aguchi@hds.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, tony.luck@intel.com, matt.fleming@intel.com, dle-develop@lists.sourceforge.net, tomoki.sekiyama@hds.com
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, 27 Sep, at 04:23:52PM, Seiji Aguchi wrote:
+> Change form v1
+>  - Rebase to 3.12-rc2
+> 
+> Currently, when mounting pstore file system, a read callback of efi_pstore
+> driver runs mutiple times as below.
+> 
+> - In the first read callback, scan efivar_sysfs_list from head and pass
+>   a kmsg buffer of a entry to an upper pstore layer.
+> - In the second read callback, rescan efivar_sysfs_list from the entry and pass
+>   another kmsg buffer to it.
+> - Repeat the scan and pass until the end of efivar_sysfs_list.
+> 
+> In this process, an entry is read across the multiple read function calls.
+> To avoid race between the read and erasion, the whole process above is
+> protected by a spinlock, holding in open() and releasing in close().
+> 
+> At the same time, kmemdup() is called to pass the buffer to pstore filesystem
+> during it.
+> And then, it causes a following lockdep warning.
+> 
+> To make the read callback runnable without taking spinlok,
+> holding off a deletion of sysfs entry if it happens while scanning it
+> via efi_pstore, and deleting it after the scan is completed.
+> 
+> To implement it, this patch introduces two flags, scanning and deleting,
+> to efivar_entry.
+> Also, __efivar_entry_get() is removed because it was used in efi_pstore only.
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+[...]
 
-> These changes fix a couple of sparse warnings introduced in the last
-> pull.
-> 
-> The following changes since commit 0ce6cda2c75d64175394341ef60e6e1d27dd9c10:
-> 
->   x86 efi: bugfix interrupt disabling sequence (2013-09-30 10:23:11 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
-> 
->   boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix a recently introduced sparse warning caused by using 0 instead of
->    NULL - Leif Lindholm
-> 
->  * Remove a useless memset from the common EFI stub code - Roy Franz
-> 
-> ----------------------------------------------------------------
-> Leif Lindholm (1):
->       x86/efi: Fix config_table_type array termination
-> 
-> Roy Franz (1):
->       boot, efi: Remove redundant memset()
-> 
->  arch/x86/platform/efi/efi.c            | 2 +-
->  drivers/firmware/efi/efi-stub-helper.c | 2 --
->  2 files changed, 1 insertion(+), 3 deletions(-)
+> @@ -88,8 +103,9 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+>  		return 0;
+>  
+>  	entry->var.DataSize = 1024;
+> -	__efivar_entry_get(entry, &entry->var.Attributes,
+> -			   &entry->var.DataSize, entry->var.Data);
+> +	efivar_entry_get(entry, &entry->var.Attributes,
+> +			 &entry->var.DataSize, entry->var.Data);
+> +
+>  	size = entry->var.DataSize;
+>  
+>  	*cb_data->buf = kmemdup(entry->var.Data, size, GFP_KERNEL);
 
-Pulled into tip:x86/efi, thanks Matt!
+This isn't safe to do without holding the __efivars->lock, because
+there's the potential for someone else to update entry->var.Data and
+entry->var.DataSize while you're in the middle of copying the data in
+kmemdup(). This could leak to an information leak, though I think you're
+safe from an out-of-bounds access because DataSize is never > 1024.
 
-	Ingo
+> +/**
+> + * __efi_pstore_scan_sysfs_exit
+> + * @entry: deleting entry
+> + * @turn_off_scanning: Check if a scanning flag should be turned off
+> + */
+> +static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
+> +						bool turn_off_scanning)
+> +{
+> +	if (entry->deleting) {
+> +		list_del(&entry->list);
+> +		efivar_entry_iter_end();
+> +		efivar_unregister(entry);
+> +		efivar_entry_iter_begin();
+> +	} else if (turn_off_scanning)
+> +		entry->scanning = false;
+> +}
+
+[...]
+
+> @@ -184,9 +305,17 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
+>  			return 0;
+>  	}
+>  
+> +	if (entry->scanning) {
+> +		/*
+> +		 * Skip deletion because this entry will be deleted
+> +		 * after scanning is completed.
+> +		 */
+> +		entry->deleting = true;
+> +	} else
+> +		list_del(&entry->list);
+> +
+>  	/* found */
+>  	__efivar_entry_delete(entry);
+> -	list_del(&entry->list);
+>  
+>  	return 1;
+>  }
+> @@ -216,7 +345,7 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+>  	found = __efivar_entry_iter(efi_pstore_erase_func, &efivar_sysfs_list, &edata, &entry);
+>  	efivar_entry_iter_end();
+>  
+> -	if (found)
+> +	if (found && !entry->scanning)
+>  		efivar_unregister(entry);
+>  
+>  	return 0;
+> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+> index 8a7432a..831bc5c 100644
+> --- a/drivers/firmware/efi/efivars.c
+> +++ b/drivers/firmware/efi/efivars.c
+> @@ -388,7 +388,8 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
+>  	if (err)
+>  		return err;
+>  
+> -	efivar_unregister(entry);
+> +	if (!entry->scanning)
+> +		efivar_unregister(entry);
+>  
+>  	/* It's dead Jim.... */
+>  	return count;
+> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> index 391c67b..573ed92 100644
+> --- a/drivers/firmware/efi/vars.c
+> +++ b/drivers/firmware/efi/vars.c
+> @@ -683,8 +683,16 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
+>  	if (!found)
+>  		return NULL;
+>  
+> -	if (remove)
+> -		list_del(&entry->list);
+> +	if (remove) {
+> +		if (entry->scanning) {
+> +			/*
+> +			 * The entry will be deleted
+> +			 * after scanning is completed.
+> +			 */
+> +			entry->deleting = true;
+> +		} else
+> +			list_del(&entry->list);
+> +	}
+>  
+>  	return entry;
+>  }
+
+This doesn't look correct to me. You can't access 'entry' outside of the
+*_iter_begin() and *_iter_end() blocks. You can't do,
+
+	efivar_entry_iter_end():
+
+	if (!entry->scanning)
+		efivar_unregister(entry);
+
+because 'entry' may have already been freed by another CPU.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
