@@ -1,163 +1,54 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [RFC][PATCH v2] efivars,efi-pstore: Hold off deletion of sysfs
- entry until the scan is completed
-Date: Mon, 7 Oct 2013 12:42:18 +0100
-Message-ID: <20131007114218.GA14773@console-pimps.org>
-References: <5245E958.5040602@hds.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH -v2] EFI: Runtime services virtual mapping
+Date: Tue, 8 Oct 2013 17:18:35 +0800
+Message-ID: <20131008091834.GB23216@dhcp-16-126.nay.redhat.com>
+References: <e39e1065bddc2afee2cb6eed957e3ba8.squirrel@www.skyhub.de>
+ <52422A6A.8080305@zytor.com>
+ <20130926031242.GA4487@dhcp-16-126.nay.redhat.com>
+ <20130930201730.GD16383@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <5245E958.5040602@hds.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Seiji Aguchi <seiji.aguchi@hds.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, tony.luck@intel.com, matt.fleming@intel.com, dle-develop@lists.sourceforge.net, tomoki.sekiyama@hds.com
+In-Reply-To: <20130930201730.GD16383-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, James Bottomley <james.bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 27 Sep, at 04:23:52PM, Seiji Aguchi wrote:
-> Change form v1
->  - Rebase to 3.12-rc2
+Sorry for reply late because I was in a long holiday...
+
+On 09/30/13 at 10:17pm, Borislav Petkov wrote:
+> On Thu, Sep 26, 2013 at 11:12:42AM +0800, Dave Young wrote:
+> > If we choose this approach, can we save not only the efi_mapping, but
+> > also the fields which will be converted to virt addr, like fw_vendor,
+> > runtime, tables? During my test on a HP workstation, the config table
+> > item (SMBIOS) also is converted to virt addr though spec only mention
+> > fw_vendor/runtime/tables.
 > 
-> Currently, when mounting pstore file system, a read callback of efi_pstore
-> driver runs mutiple times as below.
+> Btw, I was about to ask: how do you pass boot_params to the kexec
+> kernel?
+
+As Vivek mentioned, just kexec-tools will get the saved info from sysfs
+or procfs, then it as a boot loader will prepare the linux boot setup
+struct with these 1st efi values.
+
 > 
-> - In the first read callback, scan efivar_sysfs_list from head and pass
->   a kmsg buffer of a entry to an upper pstore layer.
-> - In the second read callback, rescan efivar_sysfs_list from the entry and pass
->   another kmsg buffer to it.
-> - Repeat the scan and pass until the end of efivar_sysfs_list.
+> Because I'm looking into hpa's idea to pass an efi_mapping array of
+> regions with setup_data but how does this get passed to the kexec'ed
+> kernel? I see in your patches you have boot_params.saved_*** for the
+> needed info but you're not writing to them anywhere. Is that why you've
+> added them to the systab_show function so that userspace can parse it
+> and build the boot_params thing?
+
+Yes, I just printed them in systab_show, kexec-tools will parse it.
+
 > 
-> In this process, an entry is read across the multiple read function calls.
-> To avoid race between the read and erasion, the whole process above is
-> protected by a spinlock, holding in open() and releasing in close().
+> Thanks.
 > 
-> At the same time, kmemdup() is called to pass the buffer to pstore filesystem
-> during it.
-> And then, it causes a following lockdep warning.
+> -- 
+> Regards/Gruss,
+>     Boris.
 > 
-> To make the read callback runnable without taking spinlok,
-> holding off a deletion of sysfs entry if it happens while scanning it
-> via efi_pstore, and deleting it after the scan is completed.
-> 
-> To implement it, this patch introduces two flags, scanning and deleting,
-> to efivar_entry.
-> Also, __efivar_entry_get() is removed because it was used in efi_pstore only.
-
-[...]
-
-> @@ -88,8 +103,9 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->  		return 0;
->  
->  	entry->var.DataSize = 1024;
-> -	__efivar_entry_get(entry, &entry->var.Attributes,
-> -			   &entry->var.DataSize, entry->var.Data);
-> +	efivar_entry_get(entry, &entry->var.Attributes,
-> +			 &entry->var.DataSize, entry->var.Data);
-> +
->  	size = entry->var.DataSize;
->  
->  	*cb_data->buf = kmemdup(entry->var.Data, size, GFP_KERNEL);
-
-This isn't safe to do without holding the __efivars->lock, because
-there's the potential for someone else to update entry->var.Data and
-entry->var.DataSize while you're in the middle of copying the data in
-kmemdup(). This could leak to an information leak, though I think you're
-safe from an out-of-bounds access because DataSize is never > 1024.
-
-> +/**
-> + * __efi_pstore_scan_sysfs_exit
-> + * @entry: deleting entry
-> + * @turn_off_scanning: Check if a scanning flag should be turned off
-> + */
-> +static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
-> +						bool turn_off_scanning)
-> +{
-> +	if (entry->deleting) {
-> +		list_del(&entry->list);
-> +		efivar_entry_iter_end();
-> +		efivar_unregister(entry);
-> +		efivar_entry_iter_begin();
-> +	} else if (turn_off_scanning)
-> +		entry->scanning = false;
-> +}
-
-[...]
-
-> @@ -184,9 +305,17 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
->  			return 0;
->  	}
->  
-> +	if (entry->scanning) {
-> +		/*
-> +		 * Skip deletion because this entry will be deleted
-> +		 * after scanning is completed.
-> +		 */
-> +		entry->deleting = true;
-> +	} else
-> +		list_del(&entry->list);
-> +
->  	/* found */
->  	__efivar_entry_delete(entry);
-> -	list_del(&entry->list);
->  
->  	return 1;
->  }
-> @@ -216,7 +345,7 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
->  	found = __efivar_entry_iter(efi_pstore_erase_func, &efivar_sysfs_list, &edata, &entry);
->  	efivar_entry_iter_end();
->  
-> -	if (found)
-> +	if (found && !entry->scanning)
->  		efivar_unregister(entry);
->  
->  	return 0;
-> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-> index 8a7432a..831bc5c 100644
-> --- a/drivers/firmware/efi/efivars.c
-> +++ b/drivers/firmware/efi/efivars.c
-> @@ -388,7 +388,8 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
->  	if (err)
->  		return err;
->  
-> -	efivar_unregister(entry);
-> +	if (!entry->scanning)
-> +		efivar_unregister(entry);
->  
->  	/* It's dead Jim.... */
->  	return count;
-> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-> index 391c67b..573ed92 100644
-> --- a/drivers/firmware/efi/vars.c
-> +++ b/drivers/firmware/efi/vars.c
-> @@ -683,8 +683,16 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
->  	if (!found)
->  		return NULL;
->  
-> -	if (remove)
-> -		list_del(&entry->list);
-> +	if (remove) {
-> +		if (entry->scanning) {
-> +			/*
-> +			 * The entry will be deleted
-> +			 * after scanning is completed.
-> +			 */
-> +			entry->deleting = true;
-> +		} else
-> +			list_del(&entry->list);
-> +	}
->  
->  	return entry;
->  }
-
-This doesn't look correct to me. You can't access 'entry' outside of the
-*_iter_begin() and *_iter_end() blocks. You can't do,
-
-	efivar_entry_iter_end():
-
-	if (!entry->scanning)
-		efivar_unregister(entry);
-
-because 'entry' may have already been freed by another CPU.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+> Sent from a fat crate under my desk. Formatting is fine.
+> --
