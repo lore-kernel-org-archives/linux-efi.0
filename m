@@ -1,29 +1,105 @@
-From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+From: Peter Jones <pjones@redhat.com>
 Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Thu, 10 Oct 2013 18:58:28 +0100
-Message-ID: <20131010175828.GA9065@srcf.ucam.org>
+Date: Thu, 10 Oct 2013 14:09:37 -0400
+Message-ID: <20131010180937.GD18821@fenchurch.internal.datastacks.com>
 References: <1381423261-30566-1-git-send-email-matt@console-pimps.org>
  <20131010172844.GA26430@gmail.com>
  <20131010173710.GA18821@fenchurch.internal.datastacks.com>
  <20131010174521.GA27218@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131010174521.GA27218-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+In-Reply-To: <20131010174521.GA27218@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Matt Fleming <matt@console-pimps.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
 On Thu, Oct 10, 2013 at 07:45:21PM +0200, Ingo Molnar wrote:
+> 
+> * Peter Jones <pjones@redhat.com> wrote:
+> 
+> > On Thu, Oct 10, 2013 at 07:28:44PM +0200, Ingo Molnar wrote:
+> > > 
+> > > Is a non-32-bit framebuffer a possibility? If yes then it might be nice to 
+> > > emit an informative printk() here, so that users who try to enable EFI 
+> > > early-printk can at least see why it's not working. (Assuming they get to 
+> > > look at regular printk output, on a safe/working kernel.)
+> > 
+> > Not really - the spec allows RGBx, BGRx, and for custom bit masks, but
+> > they're define like:
+> > 
+> > typedef struct {
+> > 	UINT32 RedMask;
+> > 	UINT32 GreenMask;
+> > 	UINT32 BlueMask;
+> > 	UINT32 ReservedMask;
+> > } EFI_PIXEL_BITMASK;
+> 
+> Hm, that structure does not show up anywhere in the kernel that I can see.
+
+It's the thing being interpretted in arch/x86/boot/compressed/eboot.c in
+setup_gop() in the code that looks like:
+
+        if (pixel_format == PIXEL_RGB_RESERVED_8BIT_PER_COLOR) {
+		si->lfb_depth = 32;
+		si->lfb_linelength = pixels_per_scan_line * 4;
+		...
+	} else if (pixel_format == PIXEL_BGR_RESERVED_8BIT_PER_COLOR) {
+		...
+	} else if (pixel_format == PIXEL_BIT_MASK) {
+		find_bits(pixel_info.red_mask, &si->red_pos, &si->red_size);
+		...
+	...
+
+> How are those mask values to be interpreted? As regular bitmasks? Are bits 
+> in the masks set to 1 consecutively, starting from bit 0?
+
+So, the spec actually has some sample code in it:
+
+INTN
+GetPixelElementSize (
+IN EFI_PIXEL_BITMASK *PixelBits
+)
+{
+	INTN HighestPixel = -1;
+	INTN BluePixel;
+	INTN RedPixel;
+	INTN GreenPixel;
+	INTN RsvdPixel;
+	BluePixel = FindHighestSetBit (PixelBits->BlueMask);
+	RedPixel = FindHighestSetBit (PixelBits->RedMask);
+	GreenPixel = FindHighestSetBit (PixelBits->GreenMask);
+	RsvdPixel = FindHighestSetBit (PixelBits->ReservedMask);
+	HighestPixel = max (BluePixel, RedPixel);
+	HighestPixel = max (HighestPixel, GreenPixel);
+	HighestPixel = max (HighestPixel, RsvdPixel);
+	return HighestPixel;
+}
+EFI_PHYSICAL_ADDRESS NewPixelAddress;
+EFI_PHYSICAL_ADDRESS CurrentPixelAddress;
+EFI_GRAPHICS_OUTPUT_MODE_INFORMATION OutputInfo;
+INTN PixelElementSize;
+
+switch (OutputInfo.PixelFormat) {
+	case PixelBitMask:
+		PixelElementSize = GetPixelElementSize (&OutputInfo.PixelInformation);
+		break;
+	case PixelBlueGreenRedReserved8BitPerColor:
+	case PixelRedGreenBlueReserved8BitPerColor:
+		PixelElementSize = sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+		break;
+}
+
+Which makes this painfully clear.
 
 > Also, the main question would be, what is the typical value for 
 > si->lfb_depth. 32 on almost all EFI systems? All around the map? Depends 
 > on what graphics state the EFI bootloader passes us?
 
-Microsoft require that it be 32, so in practice I suspect it'll always 
-be 32. It's possible that Itanium decides to be different.
+Yes, 32 on almost all systems that implement a framebuffer console at
+all.
 
 -- 
-Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
+        Peter
