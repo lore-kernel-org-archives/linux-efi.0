@@ -1,75 +1,50 @@
-From: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Fri, 11 Oct 2013 09:08:14 +0200
-Message-ID: <CAMuHMdV8rgy=_njpXcWuZ6zkB_Lox2k0tPJy7x1Vb7ZyGN-q5g@mail.gmail.com>
-References: <1381423261-30566-1-git-send-email-matt@console-pimps.org>
-	<20131010172844.GA26430@gmail.com>
-	<20131010173710.GA18821@fenchurch.internal.datastacks.com>
-	<20131010174521.GA27218@gmail.com>
-	<20131010180937.GD18821@fenchurch.internal.datastacks.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Fri, 11 Oct 2013 09:41:44 +0200
+Message-ID: <20131011074144.GA18719@pd.tnic>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <20131008164551.GB16793@pd.tnic>
+ <20131008164831.GD16793@pd.tnic>
+ <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
+ <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
+ <20131010085827.GA9929@pd.tnic>
+ <20131010123453.GA12321@console-pimps.org>
+ <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131010180937.GD18821-FS9oOTXHwv9t4tGkRPVz9tcb/sdHg95EuydrBrBl+0sAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131011062437.GA14115-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 10, 2013 at 8:09 PM, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> INTN
-> GetPixelElementSize (
-> IN EFI_PIXEL_BITMASK *PixelBits
-> )
-> {
->         INTN HighestPixel = -1;
->         INTN BluePixel;
->         INTN RedPixel;
->         INTN GreenPixel;
->         INTN RsvdPixel;
->         BluePixel = FindHighestSetBit (PixelBits->BlueMask);
->         RedPixel = FindHighestSetBit (PixelBits->RedMask);
->         GreenPixel = FindHighestSetBit (PixelBits->GreenMask);
->         RsvdPixel = FindHighestSetBit (PixelBits->ReservedMask);
->         HighestPixel = max (BluePixel, RedPixel);
->         HighestPixel = max (HighestPixel, GreenPixel);
->         HighestPixel = max (HighestPixel, RsvdPixel);
->         return HighestPixel;
-> }
-> EFI_PHYSICAL_ADDRESS NewPixelAddress;
-> EFI_PHYSICAL_ADDRESS CurrentPixelAddress;
-> EFI_GRAPHICS_OUTPUT_MODE_INFORMATION OutputInfo;
-> INTN PixelElementSize;
->
-> switch (OutputInfo.PixelFormat) {
->         case PixelBitMask:
->                 PixelElementSize = GetPixelElementSize (&OutputInfo.PixelInformation);
+On Fri, Oct 11, 2013 at 02:24:37PM +0800, Dave Young wrote:
+> But for current implementation from Boris, getting same mapping
+> between diffrent kernel depends on same md order (same start and
+> size for each one) How about using this mapping solution but at the
+> same time for kexec kernel we also pass the virtual mappings via
+> setup_data, only thing diffrent is we only need map the non boot
+> region and just use the boot region size to ensure the other regions
+> are mapped with same virtual address.
 
-So this can be less than 32.
+Actually, as hpa suggested, we will need to be passing the explicit
+virtual addresses to the kexec kernel in case we change the mapping
+algorithm in the future. So all should go through setup_data.
 
->                 break;
->         case PixelBlueGreenRedReserved8BitPerColor:
->         case PixelRedGreenBlueReserved8BitPerColor:
->                 PixelElementSize = sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
->                 break;
-> }
->
-> Which makes this painfully clear.
->
->> Also, the main question would be, what is the typical value for
->> si->lfb_depth. 32 on almost all EFI systems? All around the map? Depends
->> on what graphics state the EFI bootloader passes us?
->
-> Yes, 32 on almost all systems that implement a framebuffer console at
-> all.
+> OTOH, if we only passing ioremapped data without Boris's current patch
+> the problem I worry about is how can we ensure the addresses are not
+> used by other code before we mapping the in 2nd kernel efi_init.
 
-Gr{oetje,eeting}s,
+Right, the old method of mapping EFI runtime regions used ioremap and
+was mapping the regions in the same address space. Now we have reserved
+a 64G in the VA space ending at -4G (i.e. 0xffff_ffff_0000_0000) which
+is reserved only for EFI RT usage.
 
-                        Geert
+-- 
+Regards/Gruss,
+    Boris.
 
+Sent from a fat crate under my desk. Formatting is fine.
 --
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
