@@ -1,123 +1,63 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: RE: [RFC][PATCH v2] efivars,efi-pstore: Hold off deletion of sysfs
- entry until the scan is completed
-Date: Fri, 11 Oct 2013 18:34:16 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D443EF15D4@USINDEM103.corp.hds.com>
-References: <5245E958.5040602@hds.com>
- <20131007114218.GA14773@console-pimps.org>
- <A5ED84D3BB3A384992CBB9C77DEDA4D443EED4D0@USINDEM103.corp.hds.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Sat, 12 Oct 2013 10:14:39 +0800
+Message-ID: <20131012021439.GA4464@dhcp-16-126.nay.redhat.com>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <20131008164831.GD16793@pd.tnic>
+ <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
+ <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
+ <20131010085827.GA9929@pd.tnic>
+ <20131010123453.GA12321@console-pimps.org>
+ <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
+ <20131011102706.GE12321@console-pimps.org>
+ <643121905.4545046.1381498954428.JavaMail.root@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D443EED4D0-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <643121905.4545046.1381498954428.JavaMail.root-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, Tomoki Sekiyama <tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Matt,
+CCing Peter Jones .., Peter, any idea about the grub related problem?
 
-I submitted a v3 patch based on my comment below..
-
-Seiji
-
-> -----Original Message-----
-> From: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Seiji Aguchi
-> Sent: Wednesday, October 09, 2013 12:37 PM
-> To: Matt Fleming
-> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org; matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org; dle-
-> develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org; Tomoki Sekiyama
-> Subject: RE: [RFC][PATCH v2] efivars,efi-pstore: Hold off deletion of sysfs entry until the scan is completed
+On 10/11/13 at 09:42am, Dave Young wrote:
+> Matt,
 > 
-> Thank you for reviewing.
-> In my understanding, your point is that all accesses to efivar_entry should be done while holding __efivars->lock.
+> The kernel I referring is the boot kernel aka the 1st kernel,
+> the boot loader is grub2 from Fedora 19.
 > 
-> > > @@ -88,8 +103,9 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
-> > >  		return 0;
-> > >
-> > >  	entry->var.DataSize = 1024;
-> > > -	__efivar_entry_get(entry, &entry->var.Attributes,
-> > > -			   &entry->var.DataSize, entry->var.Data);
-> > > +	efivar_entry_get(entry, &entry->var.Attributes,
-> > > +			 &entry->var.DataSize, entry->var.Data);
-> > > +
-> > >  	size = entry->var.DataSize;
-> > >
-> > >  	*cb_data->buf = kmemdup(entry->var.Data, size, GFP_KERNEL);
-> >
-> > This isn't safe to do without holding the __efivars->lock, because
-> > there's the potential for someone else to update entry->var.Data and
-> > entry->var.DataSize while you're in the middle of copying the data in
-> > kmemdup(). This could leak to an information leak, though I think you're
-> > safe from an out-of-bounds access because DataSize is never > 1024.
-> >
-> 
-> I see...
-> Bu, kmemdup() cannot be called while holding the spinlock.
-> 
-> So, for protecting efivar_entry, I will call kzalloc() before holding the lock in efi_pstore_read().
-> and use memcpy() in efi_pstore_read_func().
-> 
-> The pseudo code is as below.
-> 
-> 	static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
->  				       struct pstore_info *psi)
->  	{
-> 		*data.buf = kzalloc(1024, GFP_KERNEL);
-> 		if (!*data.buf)
-> 			return -ENOMEM;
-> 
-> 		efivar_entry_iter_begin();
-> 		size = efi_pstore_sysfs_entry_iter(&data,
-> 						   (struct efivar_entry **)&psi->data);
-> 		efivar_entry_iter_end();
-> 		if (size <= 0)
-> 			kfree(*data.buf);
-> 		return size;
->  	}
-> 
-> 	static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->  	{
-> 	[...]
-> 		entry->var.DataSize = 1024;
->  		__efivar_entry_get(entry, &entry->var.Attributes,
-> 				 &entry->var.DataSize, entry->var.Data);
-> 
->  		size = entry->var.DataSize;
-> 		memcpy(*cb_data->buf, entry->var.Data, (size_t)min_t(unsigned long,
-> 								     1024, size));
-> 		return size;
-> 	}
+> [sorry for top reply because of using webmail]
 > 
 > 
-> > This doesn't look correct to me. You can't access 'entry' outside of the
-> > *_iter_begin() and *_iter_end() blocks. You can't do,
-> >
-> > 	efivar_entry_iter_end():
-> >
-> > 	if (!entry->scanning)
-> > 		efivar_unregister(entry);
-> >
-> > because 'entry' may have already been freed by another CPU.
+> ----- Original Message -----
+> From: "Matt Fleming" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+> To: "Dave Young" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: "Borislav Petkov" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "X86 ML" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "LKML" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Borislav Petkov" <bp-l3A5Bk7waGM@public.gmane.org>, "Matthew Garrett" <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "James Bottomley" <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, "Vivek Goyal" <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+> Sent: Friday, October 11, 2013 6:27:06 PM
+> Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
 > 
->  I will fix it as follows.
+> On Fri, 11 Oct, at 02:24:37PM, Dave Young wrote:
+> > For the boot efi_reserve_boot_services code, it's mainly for the
+> > SetVirtualAddressMap callback use, so boot regions should not be reused
+> > before SetVirtualAddressMap, but the overlapping happens before the
+> > efi_reserve_boot_services, isn't it a problem?
 > 
-> 	if (!entry->scanning) {
-> 			efivar_entry_iter_end();
->  			efivar_unregister(entry);
-> 	}  else
-> 			efivar_entry_iter_end();
+> Hang on, which kernel are you referring to here? The boot kernel or the
+> kexec'd kernel? I thought you were saying you noticed the overlap when
+> running in the second (kexec'd) kernel?
 > 
-> (efivar_unregister(entry) still runs concurrently.
-> But, it cannot move inside spinlock because kzalloc() may run while freeing kobject.)
+> The only reason that you would see this overlap in the first (boot)
+> kernel is if the bootloader messed up and allocated the kernel text as
+> EfiBootServicesCode/Data. I'd like to believe no bootloaders are still
+> doing that.
 > 
-> Is it your expectation?
-> 
-> Seiji
-> 
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
 > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
