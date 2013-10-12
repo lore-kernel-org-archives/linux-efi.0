@@ -1,15 +1,14 @@
 From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Sat, 12 Oct 2013 19:49:34 +0200
-Message-ID: <20131012174934.GA18849@gmail.com>
-References: <1381423261-30566-1-git-send-email-matt@console-pimps.org>
- <20131010172844.GA26430@gmail.com>
- <20131011140039.GF12321@console-pimps.org>
+Subject: Re: [PATCH v2 2/2] x86/efi: Add EFI framebuffer earlyprintk support
+Date: Sat, 12 Oct 2013 19:56:15 +0200
+Message-ID: <20131012175615.GB18849@gmail.com>
+References: <1381502037-22225-1-git-send-email-matt@console-pimps.org>
+ <1381502037-22225-3-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131011140039.GF12321-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1381502037-22225-3-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -18,83 +17,50 @@ List-Id: linux-efi@vger.kernel.org
 
 * Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
 
-> On Thu, 10 Oct, at 07:28:44PM, Ingo Molnar wrote:
-> > Btw., could we perhaps remap the whole framebuffer at init time, or is it 
-> > too large? If early_ioremap() fails for whatever reason then that will 
-> > emit a WARN_ON(), which will recurse in a fairly nasty way ...
->  
-> The framebuffer memory will be quite large, so I don't think it makes 
-> sense to map it all this early, because it's likely we'll run out of 
-> fixmap entries.
-
-Fair enough.
-
-> > > +static __init void early_efi_clear_screen(void)
-> > > +{
-> > > +	struct screen_info *si;
-> > > +	int y;
-> > > +
-> > > +	si = &boot_params.screen_info;
-> > > +	for (y = 0; y < si->lfb_height; y++)
-> > > +		early_efi_clear_line(y);
-> > 
-> > Looks a bit superfluous to introduce 'si' just for that single use?
->  
-> I did this to reduce the length of the "for (y = 0..." line.
-
-But that line looks fine with that included. If it goes slightly above 80 
-chars that's still OK IMHO.
-
-> > > +static void early_efi_write_char(void *dst, char c, int h)
-> > > +{
-> > > +	const u8 *src;
-> > > +	u32 fgcolor = 0xaaaaaa;
-> > 
-> > That's RGB grey, right? Why not 0xffffff for a very visible white?
->  
-> The VGA earlyprintk code uses the equivalent grey, AFAIK, which is why I 
-> picked this value.
-
-The VGA code should be changed to white too I suspect ;-)
-
-> > > +		if (efi_y + font->height >= si->lfb_height) {
-> > > +			early_efi_clear_screen();
-> > > +			efi_y = 0;
-> > 
-> > So, if I understand it correctly this clears the screen and starts at 
-> > the top when we scroll off the bottom, right?
-> > 
-> > That might make the recovery of oopses hard when the number of log 
-> > lines is unlucky.
-> > 
-> > Would scrolling a few lines up instead, via a well-calculated memcpy 
-> > and memset be doable?
->  
-> Yeah we can do that. I thought about this originally but decided against 
-> it because I figured it would complicate the code unnecessarily. But it 
-> turned out to be fairly trivial.
-
-Cool!
-
-> > > +	if (!font)
-> > > +		return -ENODEV;
-> > > +
-> > > +	early_efi_clear_screen();
-> > 
-> > Assuming we implement scrolling above, here too it might make sense to 
-> > scroll up the framebuffer - if the crash is early enough then some 
-> > firmware and boot stub info might still be present in the framebuffer?
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> It's possible that some info will be in the framebuffer, but we can't 
-> begin writing immediately after the boot stub info because we don't know 
-> the last xy coordinates the firmware wrote to.
+> It's incredibly difficult to diagnose early EFI boot issues without
+> special hardware because earlyprintk=vga doesn't work on EFI systems.
 > 
-> But yeah, leaving it intact and beginning our output from the last line 
-> of the framebuffer makes more sense than clearing the screen entirely.
+> Add support for writing to the EFI framebuffer, via earlyprintk=efi,
+> which will actually give users a chance of providing debug output.
+> 
+> Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+>  Documentation/kernel-parameters.txt  |   8 +-
+>  arch/x86/Kconfig.debug               |   9 ++
+>  arch/x86/include/asm/efi.h           |   2 +
+>  arch/x86/kernel/early_printk.c       |   6 ++
+>  arch/x86/platform/efi/Makefile       |   1 +
+>  arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
+>  6 files changed, 214 insertions(+), 3 deletions(-)
+>  create mode 100644 arch/x86/platform/efi/early_printk.c
 
-Especially with scrolling it should not matter where the previous info is 
-on the screen: if we start with a scroll event then we can make some space 
-at the bottom and start our printout there, or so.
+Looks really nice now!
+
+Reviewed-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+
+One detail:
+
+> +static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
+> +{
+> +	const u32 color_black = 0x00000000;
+> +	const u32 color_grey = 0x00aaaaaa;
+
+I still think this should be white - that should be more visible than 
+grey, especially in brightly lit places. (And I'm really sorry about nerds 
+in the basement getting eye damage.)
+
+Also, what is the highest byte typically, can that ever be part of 
+multiple framebuffers and can it mean an alpha channel? If yes then '0x00' 
+(read: fully translucent) might not be the best of choices for console 
+output. In that case -1 (0xffffffff) would work in a natural way.
+
+(If it's reserved bits then it has to be all zeroes.)
 
 Thanks,
 
