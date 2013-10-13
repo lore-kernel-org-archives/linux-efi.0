@@ -1,67 +1,60 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/2] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Sat, 12 Oct 2013 19:56:15 +0200
-Message-ID: <20131012175615.GB18849@gmail.com>
-References: <1381502037-22225-1-git-send-email-matt@console-pimps.org>
- <1381502037-22225-3-git-send-email-matt@console-pimps.org>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Sun, 13 Oct 2013 11:06:03 +0800
+Message-ID: <20131013030602.GA1914@darkstar.nay.redhat.com>
+References: <20131008164551.GB16793@pd.tnic>
+ <20131008164831.GD16793@pd.tnic>
+ <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
+ <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
+ <20131010085827.GA9929@pd.tnic>
+ <20131010123453.GA12321@console-pimps.org>
+ <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
+ <20131011074144.GA18719@pd.tnic>
+ <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
+ <20131012101308.GI12321@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1381502037-22225-3-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20131012101308.GI12321@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Borislav Petkov <bp@alien8.de>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, linux-efi@vger.kernel.org, fwts-devel@lists.ubuntu.com
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Sat, Oct 12, 2013 at 11:13:08AM +0100, Matt Fleming wrote:
+> On Sat, 12 Oct, at 03:54:44PM, Dave Young wrote:
+> > Boris:
+> > 
+> > For the boot service region overlapping problem I have another idea,
+> > how about modify your mapping code to always mapping the RUNTIME region
+> > (non boot service region) firstly from the efi_va, then mapping other
+> > regions in order, in this way kexec 2nd kernel will be happy because
+> > it does not call SetVirtualAddressMap and it does not need the boot
+> > service area at all.
 > 
-> It's incredibly difficult to diagnose early EFI boot issues without
-> special hardware because earlyprintk=vga doesn't work on EFI systems.
+> Coalescing the runtime regions together implies that the second kernel
+> would care about the fragmentation caused by unmapping the boot service
+> regions - it shouldn't. We've sliced up a considerable chunk of kernel
+> virtual address space (64G) and fragmentation shouldn't be an issue
+> right now.
 > 
-> Add support for writing to the EFI framebuffer, via earlyprintk=efi,
-> which will actually give users a chance of providing debug output.
+> Even if we run out of address space in the future due to fragmentation,
+> and end up needing to coalesce runtime regions, this would be
+> transparent to the kexec kernel because it's passed the memmap entries
+> through setup_data.
+
+Ok, so passing setup_data looks better like hpa said previously.
+
 > 
-> Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Though we are defining an ABI around the EFI address range
+> (0xffffffef00000000 - 0xffffffff00000000), such that it needs to be the
+> same between kernels, we must not make the layout of regions within that
+> range part of the ABI. We need the freedom to change the layout in the
+> future.
+
+Agree.
+
 > 
->  Documentation/kernel-parameters.txt  |   8 +-
->  arch/x86/Kconfig.debug               |   9 ++
->  arch/x86/include/asm/efi.h           |   2 +
->  arch/x86/kernel/early_printk.c       |   6 ++
->  arch/x86/platform/efi/Makefile       |   1 +
->  arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
->  6 files changed, 214 insertions(+), 3 deletions(-)
->  create mode 100644 arch/x86/platform/efi/early_printk.c
-
-Looks really nice now!
-
-Reviewed-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-
-One detail:
-
-> +static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
-> +{
-> +	const u32 color_black = 0x00000000;
-> +	const u32 color_grey = 0x00aaaaaa;
-
-I still think this should be white - that should be more visible than 
-grey, especially in brightly lit places. (And I'm really sorry about nerds 
-in the basement getting eye damage.)
-
-Also, what is the highest byte typically, can that ever be part of 
-multiple framebuffers and can it mean an alpha channel? If yes then '0x00' 
-(read: fully translucent) might not be the best of choices for console 
-output. In that case -1 (0xffffffff) would work in a natural way.
-
-(If it's reserved bits then it has to be all zeroes.)
-
-Thanks,
-
-	Ingo
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
