@@ -1,55 +1,38 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Sun, 13 Oct 2013 11:25:21 +0200
-Message-ID: <20131013092521.GA22866@pd.tnic>
-References: <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
- <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
- <20131010085827.GA9929@pd.tnic>
- <20131010123453.GA12321@console-pimps.org>
- <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
- <20131011074144.GA18719@pd.tnic>
- <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
- <20131012101308.GI12321@console-pimps.org>
- <20131012103054.GA13739@pd.tnic>
- <20131013031126.GB1914@darkstar.nay.redhat.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
+Date: Sun, 13 Oct 2013 13:47:07 -0700
+Message-ID: <525B06CB.6090602@zytor.com>
+References: <1381423261-30566-1-git-send-email-matt@console-pimps.org> <20131010172844.GA26430@gmail.com> <20131011140039.GF12321@console-pimps.org> <20131012174934.GA18849@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131013031126.GB1914-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
+In-Reply-To: <20131012174934.GA18849-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Oct 13, 2013 at 11:11:27AM +0800, Dave Young wrote:
-> Boris, I think we have got the agreement about passing setup_data?
+On 10/12/2013 10:49 AM, Ingo Molnar wrote:
+> 
+>>>> +static void early_efi_write_char(void *dst, char c, int h)
+>>>> +{
+>>>> +	const u8 *src;
+>>>> +	u32 fgcolor = 0xaaaaaa;
+>>>
+>>> That's RGB grey, right? Why not 0xffffff for a very visible white?
+>>  
+>> The VGA earlyprintk code uses the equivalent grey, AFAIK, which is why I 
+>> picked this value.
+> 
+> The VGA code should be changed to white too I suspect ;-)
+> 
 
-Yes.
+For compatibility with the classical text console we use light grey as
+the default color and a double-stroked font (which was necessary on the
+CGA display since it didn't have enough bandwidth to handle
+single-stroked fonts well).  The problem with changing that to white is
+that you end up with a mismatch between the earlyprintk console and the
+"real" console, *or* we change the behavior of everyone's consoles...
 
-Basically, we want to start with what hpa suggested and see where it
-gets us:
-
-http://marc.info/?l=linux-kernel&m=138006799131051
-
-> I think it should be on top of your patch series,
-
-Yep.
-
-> I can work on that along with other kexec related patches. Or if you
-> would like to do it please let me know.
-
-Absolutely, please feel free to do so - it's not like I don't have
-anything else to do :-)
-
-In the meantime, I'll finish randconfigs testing of the patches and
-upload the latest version to k-org, I'll let you know.
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+	-hpa
