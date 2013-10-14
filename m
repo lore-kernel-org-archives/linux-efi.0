@@ -1,52 +1,45 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Mon, 14 Oct 2013 09:57:26 +0200
-Message-ID: <20131014075726.GB20435@gmail.com>
-References: <1381423261-30566-1-git-send-email-matt@console-pimps.org>
- <20131010172844.GA26430@gmail.com>
- <20131011140039.GF12321@console-pimps.org>
- <20131012174934.GA18849@gmail.com>
- <525B06CB.6090602@zytor.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 00/11] EFI runtime services virtual mapping
+Date: Mon, 14 Oct 2013 14:04:51 +0100
+Message-ID: <20131014130451.GA10834@console-pimps.org>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <20131008164551.GB16793@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <525B06CB.6090602-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20131008164551.GB16793-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Tue, 08 Oct, at 06:45:51PM, Borislav Petkov wrote:
+> @@ -141,34 +151,75 @@ static long efi_runtime_ioctl(struct file *file, unsigned int cmd,
+>  			return -EFAULT;
+>  
+>  		convert_from_guid(&vendor, &vendor_guid);
+> -		status = efi.get_variable(pgetvariable->VariableName, &vendor,
+> -					&attr, &datasize, pgetvariable->Data);
+> +
+> +		vardata = kmalloc(datasize, GFP_KERNEL);
+> +		if (!vardata)
+> +			return -ENOMEM;
+> +
+> +		namelen = ucs2_strsize(pgetvariable->VariableName, 1024);
+> +
+> +		varname = kmalloc(namelen, GFP_KERNEL);
+> +		if (!varname)
+> +			return -ENOMEM;
+> +
+> +		if (copy_from_user(varname, pgetvariable->VariableName, namelen))
+> +			return -EFAULT;
+> +
 
-* H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> wrote:
+		varname = kmalloc(namelen + 1, GFP_KERNEL);
+		varname[namelen] = 0;
 
-> On 10/12/2013 10:49 AM, Ingo Molnar wrote:
-> > 
-> >>>> +static void early_efi_write_char(void *dst, char c, int h)
-> >>>> +{
-> >>>> +	const u8 *src;
-> >>>> +	u32 fgcolor = 0xaaaaaa;
-> >>>
-> >>> That's RGB grey, right? Why not 0xffffff for a very visible white?
-> >>  
-> >> The VGA earlyprintk code uses the equivalent grey, AFAIK, which is why I 
-> >> picked this value.
-> > 
-> > The VGA code should be changed to white too I suspect ;-)
-> > 
-> 
-> For compatibility with the classical text console we use light grey as 
-> the default color and a double-stroked font (which was necessary on the 
-> CGA display since it didn't have enough bandwidth to handle 
-> single-stroked fonts well).  The problem with changing that to white is 
-> that you end up with a mismatch between the earlyprintk console and the 
-> "real" console, *or* we change the behavior of everyone's consoles...
+Note that ucs2_strsize() doesn't count the terminating NUL.
 
-Btw., I have no problem at all with making the early console look separate 
-and making it clear when we switch to the 'real' console.
-
-earlyprintk is a debug method, and more information can only be good. 
-
-Thanks,
-
-	Ingo
+-- 
+Matt Fleming, Intel Open Source Technology Center
