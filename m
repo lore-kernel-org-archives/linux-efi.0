@@ -1,72 +1,45 @@
-From: Peter Jones <pjones@redhat.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Mon, 14 Oct 2013 11:57:26 -0400
-Message-ID: <20131014155725.GD19665@fenchurch.internal.datastacks.com>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <20131008164831.GD16793@pd.tnic>
- <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
- <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
+Date: Mon, 14 Oct 2013 17:58:52 +0200
+Message-ID: <20131014155851.GJ4009@pd.tnic>
+References: <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
  <20131010085827.GA9929@pd.tnic>
  <20131010123453.GA12321@console-pimps.org>
  <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
- <20131011102706.GE12321@console-pimps.org>
- <643121905.4545046.1381498954428.JavaMail.root@redhat.com>
- <20131012021439.GA4464@dhcp-16-126.nay.redhat.com>
+ <20131011074144.GA18719@pd.tnic>
+ <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
+ <20131012101308.GI12321@console-pimps.org>
+ <20131012103054.GA13739@pd.tnic>
+ <20131013031126.GB1914@darkstar.nay.redhat.com>
+ <20131013092521.GA22866@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131012021439.GA4464@dhcp-16-126.nay.redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Borislav Petkov <bp@alien8.de>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, linux-efi@vger.kernel.org, fwts-devel@lists.ubuntu.com
+In-Reply-To: <20131013092521.GA22866-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Oct 12, 2013 at 10:14:39AM +0800, Dave Young wrote:
-> CCing Peter Jones .., Peter, any idea about the grub related problem?
+On Sun, Oct 13, 2013 at 11:25:21AM +0200, Borislav Petkov wrote:
+> In the meantime, I'll finish randconfigs testing of the patches and
+> upload the latest version to k-org, I'll let you know.
 
-What grub problem?  As Matt was saying, grub2 isn't loading it as
-EfiBootServicesCode/Data.  grub2 is loading it as EfiLoaderData .
+Ok, here it is:
 
-> 
-> On 10/11/13 at 09:42am, Dave Young wrote:
-> > Matt,
-> > 
-> > The kernel I referring is the boot kernel aka the 1st kernel,
-> > the boot loader is grub2 from Fedora 19.
-> > 
-> > [sorry for top reply because of using webmail]
-> > 
-> > 
-> > ----- Original Message -----
-> > From: "Matt Fleming" <matt@console-pimps.org>
-> > To: "Dave Young" <dyoung@redhat.com>
-> > Cc: "Borislav Petkov" <bp@alien8.de>, "X86 ML" <x86@kernel.org>, "LKML" <linux-kernel@vger.kernel.org>, "Borislav Petkov" <bp@suse.de>, "Matthew Garrett" <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, "James Bottomley" <James.Bottomley@HansenPartnership.com>, "Vivek Goyal" <vgoyal@redhat.com>, linux-efi@vger.kernel.org, fwts-devel@lists.ubuntu.com
-> > Sent: Friday, October 11, 2013 6:27:06 PM
-> > Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-> > 
-> > On Fri, 11 Oct, at 02:24:37PM, Dave Young wrote:
-> > > For the boot efi_reserve_boot_services code, it's mainly for the
-> > > SetVirtualAddressMap callback use, so boot regions should not be reused
-> > > before SetVirtualAddressMap, but the overlapping happens before the
-> > > efi_reserve_boot_services, isn't it a problem?
-> > 
-> > Hang on, which kernel are you referring to here? The boot kernel or the
-> > kexec'd kernel? I thought you were saying you noticed the overlap when
-> > running in the second (kexec'd) kernel?
-> > 
-> > The only reason that you would see this overlap in the first (boot)
-> > kernel is if the bootloader messed up and allocated the kernel text as
-> > EfiBootServicesCode/Data. I'd like to believe no bootloaders are still
-> > doing that.
-> > 
-> > -- 
-> > Matt Fleming, Intel Open Source Technology Center
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > Please read the FAQ at  http://www.tux.org/lkml/
+git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi
+
+This version seems to work on most boxes except Matt's Asus half-life
+zombie.
+
+Let me know if there are issues,
+
+Thanks.
 
 -- 
-        Peter
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
