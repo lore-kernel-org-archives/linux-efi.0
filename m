@@ -1,38 +1,50 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Sun, 13 Oct 2013 13:47:07 -0700
-Message-ID: <525B06CB.6090602@zytor.com>
-References: <1381423261-30566-1-git-send-email-matt@console-pimps.org> <20131010172844.GA26430@gmail.com> <20131011140039.GF12321@console-pimps.org> <20131012174934.GA18849@gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v2 2/2] x86/efi: Add EFI framebuffer earlyprintk support
+Date: Mon, 14 Oct 2013 06:08:20 +0100
+Message-ID: <20131014050820.GK12321@console-pimps.org>
+References: <1381502037-22225-1-git-send-email-matt@console-pimps.org>
+ <1381502037-22225-3-git-send-email-matt@console-pimps.org>
+ <20131012175615.GB18849@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131012174934.GA18849-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131012175615.GB18849-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/12/2013 10:49 AM, Ingo Molnar wrote:
+On Sat, 12 Oct, at 07:56:15PM, Ingo Molnar wrote:
+> > +static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
+> > +{
+> > +	const u32 color_black = 0x00000000;
+> > +	const u32 color_grey = 0x00aaaaaa;
 > 
->>>> +static void early_efi_write_char(void *dst, char c, int h)
->>>> +{
->>>> +	const u8 *src;
->>>> +	u32 fgcolor = 0xaaaaaa;
->>>
->>> That's RGB grey, right? Why not 0xffffff for a very visible white?
->>  
->> The VGA earlyprintk code uses the equivalent grey, AFAIK, which is why I 
->> picked this value.
+> I still think this should be white - that should be more visible than 
+> grey, especially in brightly lit places. (And I'm really sorry about nerds 
+> in the basement getting eye damage.)
 > 
-> The VGA code should be changed to white too I suspect ;-)
+> Also, what is the highest byte typically, can that ever be part of 
+> multiple framebuffers and can it mean an alpha channel? If yes then '0x00' 
+> (read: fully translucent) might not be the best of choices for console 
+> output. In that case -1 (0xffffffff) would work in a natural way.
 > 
+> (If it's reserved bits then it has to be all zeroes.)
 
-For compatibility with the classical text console we use light grey as
-the default color and a double-stroked font (which was necessary on the
-CGA display since it didn't have enough bandwidth to handle
-single-stroked fonts well).  The problem with changing that to white is
-that you end up with a mismatch between the earlyprintk console and the
-"real" console, *or* we change the behavior of everyone's consoles...
+The GOP part of the spec says that the top byte is reserved, and must be
+set to zero, and looking at the efifb driver it disables transparency
+support when allocating the color map,
 
-	-hpa
+int fb_alloc_cmap(struct fb_cmap *cmap, int len, int transp)
+
+[...]
+
+	if ((err = fb_alloc_cmap(&info->cmap, 256, 0)) < 0) {
+		printk(KERN_ERR "efifb: cannot allocate colormap\n");
+		goto err_unmap;
+	}
+
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
