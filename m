@@ -1,86 +1,36 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Wed, 16 Oct 2013 14:27:09 +0800
-Message-ID: <20131016062709.GA18241@dhcp-16-126.nay.redhat.com>
-References: <20131008164831.GD16793@pd.tnic>
- <20131010080635.GA3692@dhcp-16-126.nay.redhat.com>
- <20131010081434.GB3692@dhcp-16-126.nay.redhat.com>
- <20131010085827.GA9929@pd.tnic>
- <20131010123453.GA12321@console-pimps.org>
- <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
- <20131011102706.GE12321@console-pimps.org>
- <643121905.4545046.1381498954428.JavaMail.root@redhat.com>
- <20131012021439.GA4464@dhcp-16-126.nay.redhat.com>
- <20131014155725.GD19665@fenchurch.internal.datastacks.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] x86 efi: efi reverve boot service fix
+Date: Wed, 16 Oct 2013 15:03:01 +0800
+Message-ID: <20131016070301.GA26752@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131014155725.GD19665@fenchurch.internal.datastacks.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Jones <pjones@redhat.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Borislav Petkov <bp@alien8.de>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, linux-efi@vger.kernel.org, fwts-devel@lists.ubuntu.com
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hw@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/14/13 at 11:57am, Peter Jones wrote:
-> On Sat, Oct 12, 2013 at 10:14:39AM +0800, Dave Young wrote:
-> > CCing Peter Jones .., Peter, any idea about the grub related problem?
-> 
-> What grub problem?  As Matt was saying, grub2 isn't loading it as
-> EfiBootServicesCode/Data.  grub2 is loading it as EfiLoaderData .
 
-Today I did printk debug, it is in fact an off by one bug:
+Current code check boot service region with kernel text region by: 
+start+size >= __pa_symbol(_text)
+The end of the above region should be start + size - 1 instead.
+
+I see this problem in ovmf + Fedora 19 grub boot:
 text start: 1000000 md start: 800000 md size: 800000
 
-Below is the code:
-                if ((start+size >= __pa_symbol(_text)
-                                && start <= __pa_symbol(_end)) ||
-                        !e820_all_mapped(start, start+size, E820_RAM) ||
-                        memblock_is_region_reserved(start, size)) {
-                        /* Could not reserve, skip it */
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Will post a patch to fix it.
-
-> 
-> > 
-> > On 10/11/13 at 09:42am, Dave Young wrote:
-> > > Matt,
-> > > 
-> > > The kernel I referring is the boot kernel aka the 1st kernel,
-> > > the boot loader is grub2 from Fedora 19.
-> > > 
-> > > [sorry for top reply because of using webmail]
-> > > 
-> > > 
-> > > ----- Original Message -----
-> > > From: "Matt Fleming" <matt@console-pimps.org>
-> > > To: "Dave Young" <dyoung@redhat.com>
-> > > Cc: "Borislav Petkov" <bp@alien8.de>, "X86 ML" <x86@kernel.org>, "LKML" <linux-kernel@vger.kernel.org>, "Borislav Petkov" <bp@suse.de>, "Matthew Garrett" <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, "James Bottomley" <James.Bottomley@HansenPartnership.com>, "Vivek Goyal" <vgoyal@redhat.com>, linux-efi@vger.kernel.org, fwts-devel@lists.ubuntu.com
-> > > Sent: Friday, October 11, 2013 6:27:06 PM
-> > > Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-> > > 
-> > > On Fri, 11 Oct, at 02:24:37PM, Dave Young wrote:
-> > > > For the boot efi_reserve_boot_services code, it's mainly for the
-> > > > SetVirtualAddressMap callback use, so boot regions should not be reused
-> > > > before SetVirtualAddressMap, but the overlapping happens before the
-> > > > efi_reserve_boot_services, isn't it a problem?
-> > > 
-> > > Hang on, which kernel are you referring to here? The boot kernel or the
-> > > kexec'd kernel? I thought you were saying you noticed the overlap when
-> > > running in the second (kexec'd) kernel?
-> > > 
-> > > The only reason that you would see this overlap in the first (boot)
-> > > kernel is if the bootloader messed up and allocated the kernel text as
-> > > EfiBootServicesCode/Data. I'd like to believe no bootloaders are still
-> > > doing that.
-> > > 
-> > > -- 
-> > > Matt Fleming, Intel Open Source Technology Center
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > Please read the FAQ at  http://www.tux.org/lkml/
-> 
-> -- 
->         Peter
+--- linux-2.6.orig/arch/x86/platform/efi/efi.c
++++ linux-2.6/arch/x86/platform/efi/efi.c
+@@ -440,7 +440,7 @@ void __init efi_reserve_boot_services(vo
+ 		 * - Not within any part of the kernel
+ 		 * - Not the bios reserved area
+ 		*/
+-		if ((start+size >= __pa_symbol(_text)
++		if ((start + size - 1 >= __pa_symbol(_text)
+ 				&& start <= __pa_symbol(_end)) ||
+ 			!e820_all_mapped(start, start+size, E820_RAM) ||
+ 			memblock_is_region_reserved(start, size)) {
