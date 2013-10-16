@@ -1,33 +1,41 @@
-From: Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH 5/5] efi: Capsule update support and pstore backend
-Date: Wed, 16 Oct 2013 13:14:16 -0700
-Message-ID: <20131016201416.GG7456@tassilo.jf.intel.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH 2/5] efi: Introduce a Runtime Services lock
+Date: Wed, 16 Oct 2013 23:36:54 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D443EF85DC@USINDEM103.corp.hds.com>
 References: <1381931460-6999-1-git-send-email-matt@console-pimps.org>
- <1381931460-6999-6-git-send-email-matt@console-pimps.org>
+ <1381931460-6999-3-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1381931460-6999-6-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1381931460-6999-3-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> +	  It should be noted that enabling this opton will pass a capsule
-> +	  to the firmware on every boot. Some firmware will not allow a
-> +	  user to enter the BIOS setup when a capsule has been registered
-> +	  on the previous boot.
+> +#define efi_call_reset_virt(f, args...)					\
+> +({									\
+> +	unsigned long __flags;						\
+> +	bool __nmi = in_nmi();						\
+> +									\
+> +	if (__nmi)							\
+> +		spin_lock_irqsave(&efi_runtime_lock, __flags);		\
 
-That sounds like a problem. Can this be fixed to only do it on demand?
+If the lock is not held in the nmi context, runtime service may run concurrently
+in non-nmi context as follows.
+ - In nmi context, cpu0 calls a runtime service (no lock is held.)
+ - In non-nmi context, cpu1 call can take the lock and call the runtime service.
 
-> +
-> +	  Many EFI machines have buggy implementations of the UpdateCapsule()
-> +	  runtime service. This option will enable code that may not function
-> +	  correctly with your firmware.
+To avoid this, using try_lock in nmi context is better..
 
-Do we need white/black lists? 
+If(in_nmi())
+	try_spin_lock_irqsave();
+else
+	spin_lock_irqsave();
 
-Controlling such things form CONFIG is not very good.
+Please see the commit abd4d5587be911f63592537284dad78766d97d62,
+which is introduced to pstore by Don Zickus.
 
--Andi
+Seiji
