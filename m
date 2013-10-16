@@ -1,52 +1,132 @@
 From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH 0/5] EFI capsule pstore support
-Date: Wed, 16 Oct 2013 14:50:55 +0100
-Message-ID: <1381931460-6999-1-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 3/5] efi: Add common efi_reboot() implementation
+Date: Wed, 16 Oct 2013 14:50:58 +0100
+Message-ID: <1381931460-6999-4-git-send-email-matt@console-pimps.org>
+References: <1381931460-6999-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1381931460-6999-1-git-send-email-matt@console-pimps.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Andi Kleen <ak@linux.intel.com>, Tony Luck <tony.luck@intel.com>, Seiji Aguchi <seiji.aguchi@hds.com>, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>
+Cc: linux-kernel@vger.kernel.org, Andi Kleen <ak@linux.intel.com>, Tony Luck <tony.luck@intel.com>, Seiji Aguchi <seiji.aguchi@hds.com>, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming@intel.com>
 
-The UEFI spec describes a capsule mechanism that allows data blobs to be
-handed to the firmware at runtime. If the firmware doesn't recognise the
-guid of the capsule and if certain flags are set in the capsule header,
-the firmware will preserve the memory region containing the capsule
-across a reboot. We can utilise this feature to perform crash dumps and
-function tracing to aid in crash analysis.
+The reboot functionality is the same for all EFI implementations, so
+provide a wrapper that is useable by all architectures.
 
-The capsule buffers containing pstore data can be much larger than is
-possible with the EFI variable pstore backend, which makes it
-particularly attractive for function tracing. Futhermore, because the
-memory regions containing the capsule data are registered with the
-firmware prior to the crash (as opposed to efi-pstore.c which invokes
-variable services from the crash handler) it's more useful for debugging
-hard hangs.
-
-Matt Fleming (5):
-  pstore/ftrace: Don't increment initial data offset
-  efi: Introduce a Runtime Services lock
-  efi: Add common efi_reboot() implementation
-  efi: Move efi_status_to_err() to efi.h
-  efi: Capsule update support and pstore backend
-
- arch/ia64/kernel/efi.c         |  33 +-
- arch/ia64/kernel/process.c     |   2 +-
- arch/x86/kernel/reboot.c       |  21 +-
- arch/x86/platform/efi/efi.c    | 108 +++++-
- drivers/firmware/efi/Kconfig   |  19 +
- drivers/firmware/efi/Makefile  |   3 +-
- drivers/firmware/efi/capsule.c | 802 +++++++++++++++++++++++++++++++++++++++++
- drivers/firmware/efi/efi.c     |  12 +
- drivers/firmware/efi/reboot.c  |  37 ++
- drivers/firmware/efi/vars.c    |  52 +--
- fs/pstore/inode.c              |   1 -
- include/linux/efi.h            |  54 +++
- 12 files changed, 1072 insertions(+), 72 deletions(-)
- create mode 100644 drivers/firmware/efi/capsule.c
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Tony Luck <tony.luck@intel.com>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+---
+ arch/ia64/kernel/process.c    |  2 +-
+ arch/x86/kernel/reboot.c      | 14 +++++++++-----
+ drivers/firmware/efi/Makefile |  2 +-
+ drivers/firmware/efi/reboot.c | 25 +++++++++++++++++++++++++
+ include/linux/efi.h           |  2 ++
+ 5 files changed, 38 insertions(+), 7 deletions(-)
  create mode 100644 drivers/firmware/efi/reboot.c
 
+diff --git a/arch/ia64/kernel/process.c b/arch/ia64/kernel/process.c
+index 55d4ba4..2b55b8e 100644
+--- a/arch/ia64/kernel/process.c
++++ b/arch/ia64/kernel/process.c
+@@ -662,7 +662,7 @@ void
+ machine_restart (char *restart_cmd)
+ {
+ 	(void) notify_die(DIE_MACHINE_RESTART, restart_cmd, NULL, 0, 0, 0);
+-	(*efi.reset_system)(EFI_RESET_WARM, 0, 0, NULL);
++	efi_reboot(EFI_RESET_WARM);
+ }
+ 
+ void
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index 563ed91..78a1c67 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -497,11 +497,15 @@ static void native_machine_emergency_restart(void)
+ 			break;
+ 
+ 		case BOOT_EFI:
+-			if (efi_enabled(EFI_RUNTIME_SERVICES))
+-				efi.reset_system(reboot_mode == REBOOT_WARM ?
+-						 EFI_RESET_WARM :
+-						 EFI_RESET_COLD,
+-						 EFI_SUCCESS, 0, NULL);
++			if (efi_enabled(EFI_RUNTIME_SERVICES)) {
++				int mode = EFI_RESET_COLD;
++
++				if (reboot_mode == REBOOT_WARM)
++					mode = EFI_RESET_WARM;
++
++				efi_reboot(mode);
++			}
++
+ 			reboot_type = BOOT_KBD;
+ 			break;
+ 
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 99245ab..6375e14 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -1,6 +1,6 @@
+ #
+ # Makefile for linux kernel
+ #
+-obj-y					+= efi.o vars.o
++obj-y					+= efi.o vars.o reboot.o
+ obj-$(CONFIG_EFI_VARS)			+= efivars.o
+ obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+new file mode 100644
+index 0000000..f9f34eb
+--- /dev/null
++++ b/drivers/firmware/efi/reboot.c
+@@ -0,0 +1,25 @@
++/*
++ * Copyright 2013 Intel Corporation <matt.fleming@intel.com>
++ *
++ * This software is licensed under the terms of the GNU General Public
++ * License version 2, as published by the Free Software Foundation, and
++ * may be copied, distributed, and modified under those terms.
++ */
++
++#include <linux/efi.h>
++
++void efi_reboot(int mode)
++{
++	switch (mode) {
++	case EFI_RESET_COLD:
++	case EFI_RESET_WARM:
++	case EFI_RESET_SHUTDOWN:
++	case EFI_RESET_PLATFORM_SPECIFIC:
++		break;
++	default:
++		printk("efi: invalid reboot mode %d\n", mode);
++		return;
++	}
++
++	efi.reset_system(mode, EFI_SUCCESS, 0, NULL);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 153df45..eed69c9 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -283,6 +283,7 @@ typedef struct {
+ #define EFI_RESET_COLD 0
+ #define EFI_RESET_WARM 1
+ #define EFI_RESET_SHUTDOWN 2
++#define EFI_RESET_PLATFORM_SPECIFIC 3
+ 
+ /*
+  * EFI Runtime Services table
+@@ -591,6 +592,7 @@ extern void efi_map_pal_code (void);
+ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
+ extern void efi_gettimeofday (struct timespec *ts);
+ extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
++extern void efi_reboot(int mode);
+ #ifdef CONFIG_X86
+ extern void efi_late_init(void);
+ extern void efi_free_boot_services(void);
 -- 
 1.8.1.4
