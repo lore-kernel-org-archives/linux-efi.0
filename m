@@ -1,36 +1,52 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: [PATCH 5/5] efi: Capsule update support and pstore backend
-Date: Thu, 17 Oct 2013 13:05:19 +0100
-Message-ID: <20131017120519.GF10834@console-pimps.org>
+Date: Thu, 17 Oct 2013 13:14:01 +0100
+Message-ID: <20131017121401.GG10834@console-pimps.org>
 References: <1381931460-6999-1-git-send-email-matt@console-pimps.org>
  <1381931460-6999-6-git-send-email-matt@console-pimps.org>
- <20131016141939.GA28684@srcf.ucam.org>
- <3908561D78D1C84285E8C5FCA982C28F31D31122@ORSMSX106.amr.corp.intel.com>
+ <20131016201416.GG7456@tassilo.jf.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F31D31122-P5GAC/sN6hlZtRGVdHMbwrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andi Kleen <ak-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20131016201416.GG7456@tassilo.jf.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andi Kleen <ak@linux.intel.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Tony Luck <tony.luck@intel.com>, Seiji Aguchi <seiji.aguchi@hds.com>, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 16 Oct, at 02:52:25PM, Luck, Tony wrote:
-> > Where by "May not function correctly" you mean "May crash the system"? 
-> > I'm a little uneasy having this run by default if enabled, even if it's 
-> > disabled by default in the config.
+On Wed, 16 Oct, at 01:14:16PM, Andi Kleen wrote:
+> > +	  It should be noted that enabling this opton will pass a capsule
+> > +	  to the firmware on every boot. Some firmware will not allow a
+> > +	  user to enter the BIOS setup when a capsule has been registered
+> > +	  on the previous boot.
 > 
-> There's also an "either/or" choice between using efi-capsule with pstore, and the
-> traditional kexec/kdump method for getting a memory dump from a crash.  We
-> have to go through a reset to save the capsule - but we don't want a reset for
-> kexec.   Perhaps we can pass the reset parameters through the kexec path to
-> the new kernel to make it do the right kind of reset ... but the value of the capsule
-> dump is minimal if kdump managed to dump everything.
+> That sounds like a problem. Can this be fixed to only do it on demand?
+
+Incorporating something along the lines of,
+
+    echo 1 > /sys/kernel/debug/capsule_enable
+
+would fix this. Assuming that's the kind of thing Matthew had in mind.
  
-I admit that using kexec with the EFI capsule + pstore code is not
-something I'd considered. Though as you say, if you manage to jump to
-your crash kernel I'm not sure how much use the capsule would be.
+> > +
+> > +	  Many EFI machines have buggy implementations of the UpdateCapsule()
+> > +	  runtime service. This option will enable code that may not function
+> > +	  correctly with your firmware.
+> 
+> Do we need white/black lists? 
+> 
+> Controlling such things form CONFIG is not very good.
+
+We have, so far, avoided creating black/white lists in any of the EFI
+code and because this is an optional debug feature and is in no way
+required for a user's machine to boot, I'm not sure how much value there
+would be in trying to maintain such a list.
+
+On the other hand, the case could be made for failing more gracefully if
+we discover the QueryCapsuleCapabilities()/UpdateCapsule() runtime
+services are broken when enabling this feature, i.e. through gratuitous
+use of FW_BUG.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
