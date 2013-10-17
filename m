@@ -1,71 +1,70 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] arm: Add [U]EFI runtime services support
-Date: Thu, 17 Oct 2013 15:07:39 +0100
-Message-ID: <20131017140739.GI10834@console-pimps.org>
-References: <1380799481-5470-1-git-send-email-leif.lindholm@linaro.org>
- <1380799481-5470-3-git-send-email-leif.lindholm@linaro.org>
+Subject: Re: [PATCH 1/2] efi: Add asm-generic/efi.h for non-x86
+Date: Thu, 17 Oct 2013 15:16:53 +0100
+Message-ID: <20131017141653.GJ10834@console-pimps.org>
+References: <1382012355-8846-1-git-send-email-matt@console-pimps.org>
+ <1382012355-8846-2-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1380799481-5470-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1382012355-8846-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 03 Oct, at 12:24:40PM, Leif Lindholm wrote:
-> +/*
-> + * If you need to (temporarily) support buggy firmware.
-> + */
-> +#define KEEP_BOOT_SERVICES_REGIONS
+On Thu, 17 Oct, at 01:19:14PM, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> From the #ifdef CONFIG_X86 in linux/efi.h it's clear we need a place to
+> declare functions that are implemented differently for each
+> architecture.
+> 
+> Since it's only x86 that needs to do special things, add a generic EFI
+> header file that can be used by everyone else and move the x86-specific
+> stuff to arch/x86/include/asm/efi.h.
+> 
+> Because the asm files are now included from linux/efi.h directly, this
+> change means we no longer have to include the asm file explicitly from C
+> files, allowing us to delete quite a few #include lines.
+> 
+> Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
 
-Have you seen firmware that requires this? I'm just curious more than
-anything else.
+[...]
 
-> +/*
-> + * Returns 1 if 'facility' is enabled, 0 otherwise.
-> + */
-> +int efi_enabled(int facility)
-> +{
-> +	return test_bit(facility, &arm_efi_facility) != 0;
-> +}
-> +EXPORT_SYMBOL(efi_enabled);
-
-This should move to drivers/firmware/efi/efi.c. Let me write a patch
-that moves the x86 stuff out of arch/x86 and means you can get rid of
-this hunk.
-
-> +/*
-> + * Called explicitly from init/mm.c
-> + */
-
-That's init/main.c.
-
-> +void __init efi_enter_virtual_mode(void)
-> +{
-> +	efi_status_t status;
+> diff --git a/include/asm-generic/efi.h b/include/asm-generic/efi.h
+> new file mode 100644
+> index 0000000..8a31713
+> --- /dev/null
+> +++ b/include/asm-generic/efi.h
+> @@ -0,0 +1,17 @@
+> +#ifndef _ASM_GENERIC_EFI_H
+> +#define _ASM_GENERIC_EFI_H
 > +
-> +	if (!efi_enabled(EFI_BOOT)) {
-> +		pr_info("EFI services will not be available.\n");
-> +		return;
+> +static inline void efi_late_init(void) {}
+> +static inline void efi_free_boot_services(void) {}
+> +
+> +static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned long size)
+> +{
+> +	return EFI_SUCCESS;
+> +}
+> +
+> +static inline int efi_enabled(int facility)
+> +{
+> +	return IS_ENABLED(CONFIG_EFI);
+> +}
+> +
+> +#endif /* _ASM_GENERIC_EFI_H */
 
-This is dead code as PATCH 3 does,
-
-diff --git a/init/main.c b/init/main.c
-index af310af..ec6d76e 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -875,6 +875,10 @@ static noinline void __init
-kernel_init_freeable(void)
-	smp_prepare_cpus(setup_max_cpus);
-
-	do_pre_smp_initcalls();
-+
-+	if (IS_ENABLED(CONFIG_ARM) && efi_enabled(EFI_BOOT))
-+		efi_enter_virtual_mode();
-+
-
+After reading Leif's arm runtime patches this patch obviously doesn't
+make much sense. I'll work on something better.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
