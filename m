@@ -1,37 +1,38 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v3] efivars,efi-pstore: Hold off deletion of sysfs entry
- until, the scan is completed
-Date: Thu, 17 Oct 2013 14:18:21 +0100
-Message-ID: <20131017131821.GH10834@console-pimps.org>
-References: <52584373.3010202@hds.com>
+From: "Rafael J. Wysocki" <rjw@sisk.pl>
+Subject: Re: [RFC V4 PATCH 00/15] Signature verification of hibernate snapshot
+Date: Thu, 17 Oct 2013 16:18:47 +0200
+Message-ID: <3744955.cCTmoQ1ejp@vostro.rjw.lan>
+References: <1379206621-18639-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <52584373.3010202-7rDLJAbr9SE@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org, dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <1379206621-18639-1-git-send-email-jlee@suse.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-security-module@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, linux-crypto@vger.kernel.org, opensuse-kernel@opensuse.org, David Howells <dhowells@redhat.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, James Bottomley <james.bottomley@hansenpartnership.com>, Greg KH <gregkh@linuxfoundation.org>, JKosina@suse.com, Rusty Russell <rusty@rustcorp.com.au>, Herbert Xu <herbert@gondor.apana.org.au>, "David S. Miller" <davem@davemloft.net>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Gary Lin <GLin@suse.com>, Vivek Goyal <vgoyal@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 11 Oct, at 02:29:07PM, Seiji Aguchi wrote:
-> Change from v2:
-> - Move dynamic memory allocation to efi_pstore_read() before holding
->   efivars->lock to protect entry->var.Data.
-> - Access to entry->scanning while holding efivars->lock.
-> - Move a comment about a returned value from efi_pstore_read_func() to
->   efi_pstore_read() because "size < 0" case may happen in efi_pstore_read().
+On Sunday, September 15, 2013 08:56:46 AM Lee, Chun-Yi wrote:
+> Hi experts,
+> 
+> This patchset is the implementation for signature verification of hibernate
+> snapshot image. The origin idea is from Jiri Kosina: Let EFI bootloader
+> generate key-pair in UEFI secure boot environment, then pass it to kernel
+> for sign/verify S4 image.
+> 
+> Due to there have potential threat from the S4 image hacked, it may causes
+> kernel lost the trust in UEFI secure boot. Hacker attack the S4 snapshot
+> image in swap partition through whatever exploit from another trusted OS,
+> and the exploit may don't need physical access machine.
+> 
+> So, this patchset give the ability to kernel for parsing RSA private key
+> from EFI bootloader, then using the private key to generate the signature
+> of S4 snapshot image. Kernel put the signature to snapshot header, and
+> verify the signature when kernel try to recover snapshot image to memory.
 
-It seems to me that because you're no longer dropping __efivars->lock
-when reading from the EFI variable store, you actually don't need all
-the ->scanning and ->deleting logic because anything that sets those
-flags runs to completion while holding the lock.
+I wonder what the status of this work is?  Is it considered ready for inclusion
+or are you still going to work on it and resubmit?
 
-Can't the patch be simplified to just allocating data.buf at the
-beginning of efi_pstore_read()? Also, it would be a good idea to
-introduce a #define for the 1024 magic number, e.g.
+Rafael
 
-#define EFIVARS_DATA_SIZE_MAX	1024
-
--- 
-Matt Fleming, Intel Open Source Technology Center
