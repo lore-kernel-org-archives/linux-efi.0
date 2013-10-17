@@ -1,353 +1,391 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH v3 2/2] x86/efi: Add EFI framebuffer earlyprintk support
-Date: Thu, 17 Oct 2013 13:19:15 +0100
-Message-ID: <1382012355-8846-3-git-send-email-matt@console-pimps.org>
-References: <1382012355-8846-1-git-send-email-matt@console-pimps.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1382012355-8846-1-git-send-email-matt@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Jones <pjones@redhat.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH v3] efivars,efi-pstore: Hold off deletion of sysfs entry
+ until, the scan is completed
+Date: Thu, 17 Oct 2013 13:07:39 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D443F0BEB4@USINDEM103.corp.hds.com>
+References: <52584373.3010202@hds.com> <878uxssarf.fsf@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <878uxssarf.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tomoki Sekiyama <tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+Hi Madper,
 
-It's incredibly difficult to diagnose early EFI boot issues without
-special hardware because earlyprintk=vga doesn't work on EFI systems.
+I tested this patch on 3.12-rc4.
+Could you please send me the log when you failed to apply?
 
-Add support for writing to the EFI framebuffer, via earlyprintk=efi,
-which will actually give users a chance of providing debug output.
+Seiji
 
-Cc: H. Peter Anvin <hpa@zytor.com>
-Acked-by: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Peter Jones <pjones@redhat.com>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
----
-
-v3:
-
- - use white as foreground text colour
-
-v2:
-
- - add asm/efi.h to efi/early_printk.c for console prototype
- - Kconfig.debug: clear up grammar
- - remove uneeded paranthesis, due to precedence
- - multiply without spaces
- - make char unsigned
- - make 'dst' u32 * and get rid of memcpy()
- - delete mask code and write color directly
- - move efi_x, efi_y to top of file
- - standardize on unsigned int over int
- - s++ on separate line
- - switch ~(u32)0 for -1
- - scroll instead of clearing screen
- - rename early_efi_clear_line() early_efi_clear_scanline()
-
- Documentation/kernel-parameters.txt  |   8 +-
- arch/x86/Kconfig.debug               |   9 ++
- arch/x86/include/asm/efi.h           |   2 +
- arch/x86/kernel/early_printk.c       |   6 ++
- arch/x86/platform/efi/Makefile       |   1 +
- arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
- 6 files changed, 214 insertions(+), 3 deletions(-)
- create mode 100644 arch/x86/platform/efi/early_printk.c
-
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index fcbb736..c07cb09 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -847,6 +847,7 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 
- 	earlyprintk=	[X86,SH,BLACKFIN,ARM]
- 			earlyprintk=vga
-+			earlyprintk=efi
- 			earlyprintk=xen
- 			earlyprintk=serial[,ttySn[,baudrate]]
- 			earlyprintk=serial[,0x...[,baudrate]]
-@@ -860,7 +861,8 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			Append ",keep" to not disable it when the real console
- 			takes over.
- 
--			Only vga or serial or usb debug port at a time.
-+			Only one of vga, efi, serial, or usb debug port can
-+			be used at a time.
- 
- 			Currently only ttyS0 and ttyS1 may be specified by
- 			name.  Other I/O ports may be explicitly specified
-@@ -874,8 +876,8 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			Interaction with the standard serial driver is not
- 			very good.
- 
--			The VGA output is eventually overwritten by the real
--			console.
-+			The VGA and EFI output is eventually overwritten by
-+			the real console.
- 
- 			The xen output can only be used by Xen PV guests.
- 
-diff --git a/arch/x86/Kconfig.debug b/arch/x86/Kconfig.debug
-index 78d91af..b6fe388 100644
---- a/arch/x86/Kconfig.debug
-+++ b/arch/x86/Kconfig.debug
-@@ -59,6 +59,15 @@ config EARLY_PRINTK_DBGP
- 	  with klogd/syslogd or the X server. You should normally N here,
- 	  unless you want to debug such a crash. You need usb debug device.
- 
-+config EARLY_PRINTK_EFI
-+	bool "Early printk via the EFI framebuffer"
-+	depends on EFI && EARLY_PRINTK && FONT_SUPPORT
-+	---help---
-+	  Write kernel log output directly into the EFI framebuffer.
-+
-+	  This is useful for kernel debugging when your machine crashes very
-+	  early before the console code is initialized.
-+
- config X86_PTDUMP
- 	bool "Export kernel pagetable layout to userspace via debugfs"
- 	depends on DEBUG_KERNEL
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 4c8f5c2..485f48c4 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -114,6 +114,8 @@ static inline bool efi_is_native(void)
- 	return IS_ENABLED(CONFIG_X86_64) == efi_enabled(EFI_64BIT);
- }
- 
-+extern struct console early_efi_console;
-+
- #else
- /*
-  * IF EFI is not configured, have the EFI calls return -ENOSYS.
-diff --git a/arch/x86/kernel/early_printk.c b/arch/x86/kernel/early_printk.c
-index d15f575..2b99124 100644
---- a/arch/x86/kernel/early_printk.c
-+++ b/arch/x86/kernel/early_printk.c
-@@ -17,6 +17,7 @@
- #include <asm/mrst.h>
- #include <asm/pgtable.h>
- #include <linux/usb/ehci_def.h>
-+#include <linux/efi.h>
- 
- /* Simple VGA output */
- #define VGABASE		(__ISA_IO_base + 0xb8000)
-@@ -234,6 +235,11 @@ static int __init setup_early_printk(char *buf)
- 			early_console_register(&early_hsu_console, keep);
- 		}
- #endif
-+#ifdef CONFIG_EARLY_PRINTK_EFI
-+		if (!strncmp(buf, "efi", 3))
-+			early_console_register(&early_efi_console, keep);
-+#endif
-+
- 		buf++;
- 	}
- 	return 0;
-diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
-index 6db1cc4..b7b0b35 100644
---- a/arch/x86/platform/efi/Makefile
-+++ b/arch/x86/platform/efi/Makefile
-@@ -1,2 +1,3 @@
- obj-$(CONFIG_EFI) 		+= efi.o efi_$(BITS).o efi_stub_$(BITS).o
- obj-$(CONFIG_ACPI_BGRT) += efi-bgrt.o
-+obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
-diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
-new file mode 100644
-index 0000000..6599a00
---- /dev/null
-+++ b/arch/x86/platform/efi/early_printk.c
-@@ -0,0 +1,191 @@
-+/*
-+ * Copyright (C) 2013 Intel Corporation; author Matt Fleming
-+ *
-+ *  This file is part of the Linux kernel, and is made available under
-+ *  the terms of the GNU General Public License version 2.
-+ */
-+
-+#include <linux/console.h>
-+#include <linux/efi.h>
-+#include <linux/font.h>
-+#include <linux/io.h>
-+#include <linux/kernel.h>
-+#include <asm/setup.h>
-+
-+static const struct font_desc *font;
-+static u32 efi_x, efi_y;
-+
-+static __init void early_efi_clear_scanline(unsigned int y)
-+{
-+	unsigned long base, *dst;
-+	u16 len;
-+
-+	base = boot_params.screen_info.lfb_base;
-+	len = boot_params.screen_info.lfb_linelength;
-+
-+	dst = early_ioremap(base + y*len, len);
-+	if (!dst)
-+		return;
-+
-+	memset(dst, 0, len);
-+	early_iounmap(dst, len);
-+}
-+
-+static __init void early_efi_scroll_up(void)
-+{
-+	unsigned long base, *dst, *src;
-+	u16 len;
-+	u32 i, height;
-+
-+	base = boot_params.screen_info.lfb_base;
-+	len = boot_params.screen_info.lfb_linelength;
-+	height = boot_params.screen_info.lfb_height;
-+
-+	for (i = 0; i < height - font->height; i++) {
-+		dst = early_ioremap(base + i*len, len);
-+		if (!dst)
-+			return;
-+
-+		src = early_ioremap(base + (i + font->height) * len, len);
-+		if (!src) {
-+			early_iounmap(dst, len);
-+			return;
-+		}
-+
-+		memmove(dst, src, len);
-+
-+		early_iounmap(src, len);
-+		early_iounmap(dst, len);
-+	}
-+}
-+
-+static void early_efi_write_char(u32 *dst, unsigned char c, unsigned int h)
-+{
-+	const u32 color_black = 0x00000000;
-+	const u32 color_white = 0x00ffffff;
-+	const u8 *src;
-+	u8 s8;
-+	int m;
-+
-+	src = font->data + c * font->height;
-+	s8 = *(src + h);
-+
-+	for (m = 0; m < 8; m++) {
-+		if ((s8 >> (7 - m)) & 1)
-+			*dst = color_white;
-+		else
-+			*dst = color_black;
-+		dst++;
-+	}
-+}
-+
-+static __init void
-+early_efi_write(struct console *con, const char *str, unsigned int num)
-+{
-+	struct screen_info *si;
-+	unsigned long base;
-+	unsigned int len;
-+	const char *s;
-+	void *dst;
-+
-+	base = boot_params.screen_info.lfb_base;
-+	si = &boot_params.screen_info;
-+	len = si->lfb_linelength;
-+
-+	while (num) {
-+		unsigned int linemax;
-+		unsigned int h, count = 0;
-+
-+		for (s = str; *s && *s != '\n'; s++) {
-+			if (count == num)
-+				break;
-+			count++;
-+		}
-+
-+		linemax = (si->lfb_width - efi_x) / font->width;
-+		if (count > linemax)
-+			count = linemax;
-+
-+		for (h = 0; h < font->height; h++) {
-+			unsigned int n, x;
-+
-+			dst = early_ioremap(base + (efi_y + h) * len, len);
-+			if (!dst)
-+				return;
-+
-+			s = str;
-+			n = count;
-+			x = efi_x;
-+
-+			while (n-- > 0) {
-+				early_efi_write_char(dst + x*4, *s, h);
-+				x += font->width;
-+				s++;
-+			}
-+
-+			early_iounmap(dst, len);
-+		}
-+
-+		num -= count;
-+		efi_x += count * font->width;
-+		str += count;
-+
-+		if (num > 0 && *s == '\n') {
-+			efi_x = 0;
-+			efi_y += font->height;
-+			str++;
-+			num--;
-+		}
-+
-+		if (efi_x >= si->lfb_width) {
-+			efi_x = 0;
-+			efi_y += font->height;
-+		}
-+
-+		if (efi_y + font->height >= si->lfb_height) {
-+			u32 i;
-+
-+			efi_y -= font->height;
-+			early_efi_scroll_up();
-+
-+			for (i = 0; i < font->height; i++)
-+				early_efi_clear_scanline(efi_y + i);
-+		}
-+	}
-+}
-+
-+static __init int early_efi_setup(struct console *con, char *options)
-+{
-+	struct screen_info *si;
-+	u16 xres, yres;
-+	u32 i;
-+
-+	si = &boot_params.screen_info;
-+	xres = si->lfb_width;
-+	yres = si->lfb_height;
-+
-+	/*
-+	 * early_efi_write_char() implicitly assumes a framebuffer with
-+	 * 32-bits per pixel.
-+	 */
-+	if (si->lfb_depth != 32)
-+		return -ENODEV;
-+
-+	font = get_default_font(xres, yres, -1, -1);
-+	if (!font)
-+		return -ENODEV;
-+
-+	efi_y = rounddown(yres, font->height) - font->height;
-+	for (i = 0; i < (yres - efi_y) / font->height; i++)
-+		early_efi_scroll_up();
-+
-+	return 0;
-+}
-+
-+struct console early_efi_console = {
-+	.name =		"earlyefi",
-+	.write =	early_efi_write,
-+	.setup =	early_efi_setup,
-+	.flags =	CON_PRINTBUFFER,
-+	.index =	-1,
-+};
--- 
-1.8.1.4
+> -----Original Message-----
+> From: Madper Xie [mailto:cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org]
+> Sent: Thursday, October 17, 2013 1:54 AM
+> To: Seiji Aguchi
+> Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org; tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org; Tomoki Sekiyama; dle-
+> develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org
+> Subject: Re: [PATCH v3] efivars,efi-pstore: Hold off deletion of sysfs entry until, the scan is completed
+> 
+> Howdy Seiji,
+>   I failed appily this patch to both 3.12-rc2 and 3.12-rc4. Could you
+>   please let me know which is the right tree for this patch?
+> 
+>   Thanks,
+>   Madper.
+> seiji.aguchi-7rDLJAbr9SE@public.gmane.org writes:
+> 
+> > Change from v2:
+> > - Move dynamic memory allocation to efi_pstore_read() before holding
+> >   efivars->lock to protect entry->var.Data.
+> > - Access to entry->scanning while holding efivars->lock.
+> > - Move a comment about a returned value from efi_pstore_read_func() to
+> >   efi_pstore_read() because "size < 0" case may happen in efi_pstore_read().
+> >
+> > Currently, when mounting pstore file system, a read callback of efi_pstore
+> > driver runs mutiple times as below.
+> >
+> > - In the first read callback, scan efivar_sysfs_list from head and pass
+> >   a kmsg buffer of a entry to an upper pstore layer.
+> > - In the second read callback, rescan efivar_sysfs_list from the entry and pass
+> >   another kmsg buffer to it.
+> > - Repeat the scan and pass until the end of efivar_sysfs_list.
+> >
+> > In this process, an entry is read across the multiple read function calls.
+> > To avoid race between the read and erasion, the whole process above is
+> > protected by a spinlock, holding in open() and releasing in close().
+> >
+> > At the same time, kmemdup() is called to pass the buffer to pstore filesystem
+> > during it.
+> > And then, it causes a following lockdep warning.
+> >
+> > To make the dynamic memory allocation runnable without taking spinlock,
+> > holding off a deletion of sysfs entry if it happens while scanning it
+> > via efi_pstore, and deleting it after the scan is completed.
+> >
+> > To implement it, this patch introduces two flags, scanning and deleting,
+> > to efivar_entry.
+> >
+> > [    1.143710] ------------[ cut here ]------------
+> > [    1.144058] WARNING: CPU: 1 PID: 1 at kernel/lockdep.c:2740
+> > lockdep_trace_alloc+0x104/0x110()
+> > [    1.144058] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
+> > [    1.144058] Modules linked in:
+> >
+> > [    1.144058] CPU: 1 PID: 1 Comm: systemd Not tainted 3.11.0-rc5 #2
+> > [    1.144058]  0000000000000009 ffff8800797e9ae0 ffffffff816614a5
+> > ffff8800797e9b28
+> > [    1.144058]  ffff8800797e9b18 ffffffff8105510d 0000000000000080
+> > 0000000000000046
+> > [    1.144058]  00000000000000d0 00000000000003af ffffffff81ccd0c0
+> > ffff8800797e9b78
+> > [    1.144058] Call Trace:
+> > [    1.144058]  [<ffffffff816614a5>] dump_stack+0x54/0x74
+> > [    1.144058]  [<ffffffff8105510d>] warn_slowpath_common+0x7d/0xa0
+> > [    1.144058]  [<ffffffff8105517c>] warn_slowpath_fmt+0x4c/0x50
+> > [    1.144058]  [<ffffffff8131290f>] ? vsscanf+0x57f/0x7b0
+> > [    1.144058]  [<ffffffff810bbd74>] lockdep_trace_alloc+0x104/0x110
+> > [    1.144058]  [<ffffffff81192da0>] __kmalloc_track_caller+0x50/0x280
+> > [    1.144058]  [<ffffffff815147bb>] ?
+> > efi_pstore_read_func.part.1+0x12b/0x170
+> > [    1.144058]  [<ffffffff8115b260>] kmemdup+0x20/0x50
+> > [    1.144058]  [<ffffffff815147bb>] efi_pstore_read_func.part.1+0x12b/0x170
+> > [    1.144058]  [<ffffffff81514800>] ?
+> > efi_pstore_read_func.part.1+0x170/0x170
+> > [    1.144058]  [<ffffffff815148b4>] efi_pstore_read_func+0xb4/0xe0
+> > [    1.144058]  [<ffffffff81512b7b>] __efivar_entry_iter+0xfb/0x120
+> > [    1.144058]  [<ffffffff8151428f>] efi_pstore_read+0x3f/0x50
+> > [    1.144058]  [<ffffffff8128d7ba>] pstore_get_records+0x9a/0x150
+> > [    1.158207]  [<ffffffff812af25c>] ? selinux_d_instantiate+0x1c/0x20
+> > [    1.158207]  [<ffffffff8128ce30>] ? parse_options+0x80/0x80
+> > [    1.158207]  [<ffffffff8128ced5>] pstore_fill_super+0xa5/0xc0
+> > [    1.158207]  [<ffffffff811ae7d2>] mount_single+0xa2/0xd0
+> > [    1.158207]  [<ffffffff8128ccf8>] pstore_mount+0x18/0x20
+> > [    1.158207]  [<ffffffff811ae8b9>] mount_fs+0x39/0x1b0
+> > [    1.158207]  [<ffffffff81160550>] ? __alloc_percpu+0x10/0x20
+> > [    1.158207]  [<ffffffff811c9493>] vfs_kern_mount+0x63/0xf0
+> > [    1.158207]  [<ffffffff811cbb0e>] do_mount+0x23e/0xa20
+> > [    1.158207]  [<ffffffff8115b51b>] ? strndup_user+0x4b/0xf0
+> > [    1.158207]  [<ffffffff811cc373>] SyS_mount+0x83/0xc0
+> > [    1.158207]  [<ffffffff81673cc2>] system_call_fastpath+0x16/0x1b
+> > [    1.158207] ---[ end trace 61981bc62de9f6f4 ]---
+> >
+> > Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+> > ---
+> >  drivers/firmware/efi/efi-pstore.c | 143 +++++++++++++++++++++++++++++++++++---
+> >  drivers/firmware/efi/efivars.c    |  12 ++--
+> >  drivers/firmware/efi/vars.c       |  12 +++-
+> >  include/linux/efi.h               |   2 +
+> >  4 files changed, 153 insertions(+), 16 deletions(-)
+> >
+> > diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+> > index 5002d50..ebd5dbc 100644
+> > --- a/drivers/firmware/efi/efi-pstore.c
+> > +++ b/drivers/firmware/efi/efi-pstore.c
+> > @@ -18,14 +18,12 @@ module_param_named(pstore_disable, efivars_pstore_disable, bool, 0644);
+> >
+> >  static int efi_pstore_open(struct pstore_info *psi)
+> >  {
+> > -	efivar_entry_iter_begin();
+> >  	psi->data = NULL;
+> >  	return 0;
+> >  }
+> >
+> >  static int efi_pstore_close(struct pstore_info *psi)
+> >  {
+> > -	efivar_entry_iter_end();
+> >  	psi->data = NULL;
+> >  	return 0;
+> >  }
+> > @@ -91,19 +89,125 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+> >  	__efivar_entry_get(entry, &entry->var.Attributes,
+> >  			   &entry->var.DataSize, entry->var.Data);
+> >  	size = entry->var.DataSize;
+> > +	memcpy(*cb_data->buf, entry->var.Data, (size_t)min_t(unsigned long,
+> > +							     1024, size));
+> >
+> > -	*cb_data->buf = kmemdup(entry->var.Data, size, GFP_KERNEL);
+> > -	if (*cb_data->buf == NULL)
+> > -		return -ENOMEM;
+> >  	return size;
+> >  }
+> >
+> > +/**
+> > + * efi_pstore_scan_sysfs_enter
+> > + * @entry: scanning entry
+> > + * @next: next entry
+> > + * @head: list head
+> > + */
+> > +static void efi_pstore_scan_sysfs_enter(struct efivar_entry *pos,
+> > +					struct efivar_entry *next,
+> > +					struct list_head *head)
+> > +{
+> > +	pos->scanning = true;
+> > +	if (&next->list != head)
+> > +		next->scanning = true;
+> > +}
+> > +
+> > +/**
+> > + * __efi_pstore_scan_sysfs_exit
+> > + * @entry: deleting entry
+> > + * @turn_off_scanning: Check if a scanning flag should be turned off
+> > + */
+> > +static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
+> > +						bool turn_off_scanning)
+> > +{
+> > +	if (entry->deleting) {
+> > +		list_del(&entry->list);
+> > +		efivar_entry_iter_end();
+> > +		efivar_unregister(entry);
+> > +		efivar_entry_iter_begin();
+> > +	} else if (turn_off_scanning)
+> > +		entry->scanning = false;
+> > +}
+> > +
+> > +/**
+> > + * efi_pstore_scan_sysfs_exit
+> > + * @pos: scanning entry
+> > + * @next: next entry
+> > + * @head: list head
+> > + * @stop: a flag checking if scanning will stop
+> > + */
+> > +static void efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
+> > +				       struct efivar_entry *next,
+> > +				       struct list_head *head, bool stop)
+> > +{
+> > +	__efi_pstore_scan_sysfs_exit(pos, true);
+> > +	if (stop)
+> > +		__efi_pstore_scan_sysfs_exit(next, &next->list != head);
+> > +}
+> > +
+> > +/**
+> > + * efi_pstore_sysfs_entry_iter
+> > + *
+> > + * @data: function-specific data to pass to callback
+> > + * @pos: entry to begin iterating from
+> > + *
+> > + * You MUST call efivar_enter_iter_begin() before this function, and
+> > + * efivar_entry_iter_end() afterwards.
+> > + *
+> > + * It is possible to begin iteration from an arbitrary entry within
+> > + * the list by passing @pos. @pos is updated on return to point to
+> > + * the next entry of the last one passed to efi_pstore_read_func().
+> > + * To begin iterating from the beginning of the list @pos must be %NULL.
+> > + */
+> > +static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
+> > +{
+> > +	struct efivar_entry *entry, *n;
+> > +	struct list_head *head = &efivar_sysfs_list;
+> > +	int size = 0;
+> > +
+> > +	if (!*pos) {
+> > +		list_for_each_entry_safe(entry, n, head, list) {
+> > +			efi_pstore_scan_sysfs_enter(entry, n, head);
+> > +
+> > +			size = efi_pstore_read_func(entry, data);
+> > +			efi_pstore_scan_sysfs_exit(entry, n, head, size < 0);
+> > +			if (size)
+> > +				break;
+> > +		}
+> > +		*pos = n;
+> > +		return size;
+> > +	}
+> > +
+> > +	list_for_each_entry_safe_from((*pos), n, head, list) {
+> > +		efi_pstore_scan_sysfs_enter((*pos), n, head);
+> > +
+> > +		size = efi_pstore_read_func((*pos), data);
+> > +		efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
+> > +		if (size)
+> > +			break;
+> > +	}
+> > +	*pos = n;
+> > +	return size;
+> > +}
+> > +
+> > +/**
+> > + * efi_pstore_read
+> > + *
+> > + * This function returns a size of NVRAM entry logged via efi_pstore_write().
+> > + * The meaning and behavior of efi_pstore/pstore are as below.
+> > + *
+> > + * size > 0: Got data of an entry logged via efi_pstore_write() successfully,
+> > + *           and pstore filesystem will continue reading subsequent entries.
+> > + * size == 0: Entry was not logged via efi_pstore_write(),
+> > + *            and efi_pstore driver will continue reading subsequent entries.
+> > + * size < 0: Failed to get data of entry logging via efi_pstore_write(),
+> > + *           and pstore will stop reading entry.
+> > + */
+> >  static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+> >  			       int *count, struct timespec *timespec,
+> >  			       char **buf, bool *compressed,
+> >  			       struct pstore_info *psi)
+> >  {
+> >  	struct pstore_read_data data;
+> > +	ssize_t size;
+> >
+> >  	data.id = id;
+> >  	data.type = type;
+> > @@ -112,8 +216,17 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+> >  	data.compressed = compressed;
+> >  	data.buf = buf;
+> >
+> > -	return __efivar_entry_iter(efi_pstore_read_func, &efivar_sysfs_list, &data,
+> > -				   (struct efivar_entry **)&psi->data);
+> > +	*data.buf = kzalloc(1024, GFP_KERNEL);
+> > +	if (!*data.buf)
+> > +		return -ENOMEM;
+> > +
+> > +	efivar_entry_iter_begin();
+> > +	size = efi_pstore_sysfs_entry_iter(&data,
+> > +					   (struct efivar_entry **)&psi->data);
+> > +	efivar_entry_iter_end();
+> > +	if (size <= 0)
+> > +		kfree(*data.buf);
+> > +	return size;
+> >  }
+> >
+> >  static int efi_pstore_write(enum pstore_type_id type,
+> > @@ -184,9 +297,17 @@ static int efi_pstore_erase_func(struct efivar_entry *entry, void *data)
+> >  			return 0;
+> >  	}
+> >
+> > +	if (entry->scanning) {
+> > +		/*
+> > +		 * Skip deletion because this entry will be deleted
+> > +		 * after scanning is completed.
+> > +		 */
+> > +		entry->deleting = true;
+> > +	} else
+> > +		list_del(&entry->list);
+> > +
+> >  	/* found */
+> >  	__efivar_entry_delete(entry);
+> > -	list_del(&entry->list);
+> >
+> >  	return 1;
+> >  }
+> > @@ -214,10 +335,12 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+> >
+> >  	efivar_entry_iter_begin();
+> >  	found = __efivar_entry_iter(efi_pstore_erase_func, &efivar_sysfs_list, &edata, &entry);
+> > -	efivar_entry_iter_end();
+> >
+> > -	if (found)
+> > +	if (found && !entry->scanning) {
+> > +		efivar_entry_iter_end();
+> >  		efivar_unregister(entry);
+> > +	} else
+> > +		efivar_entry_iter_end();
+> >
+> >  	return 0;
+> >  }
+> > diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+> > index 8a7432a..8c5a61a 100644
+> > --- a/drivers/firmware/efi/efivars.c
+> > +++ b/drivers/firmware/efi/efivars.c
+> > @@ -383,12 +383,16 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
+> >  	else if (__efivar_entry_delete(entry))
+> >  		err = -EIO;
+> >
+> > -	efivar_entry_iter_end();
+> > -
+> > -	if (err)
+> > +	if (err) {
+> > +		efivar_entry_iter_end();
+> >  		return err;
+> > +	}
+> >
+> > -	efivar_unregister(entry);
+> > +	if (!entry->scanning) {
+> > +		efivar_entry_iter_end();
+> > +		efivar_unregister(entry);
+> > +	} else
+> > +		efivar_entry_iter_end();
+> >
+> >  	/* It's dead Jim.... */
+> >  	return count;
+> > diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> > index 391c67b..b22659c 100644
+> > --- a/drivers/firmware/efi/vars.c
+> > +++ b/drivers/firmware/efi/vars.c
+> > @@ -683,8 +683,16 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
+> >  	if (!found)
+> >  		return NULL;
+> >
+> > -	if (remove)
+> > -		list_del(&entry->list);
+> > +	if (remove) {
+> > +		if (entry->scanning) {
+> > +			/*
+> > +			 * The entry will be deleted
+> > +			 * after scanning is completed.
+> > +			 */
+> > +			entry->deleting = true;
+> > +		} else
+> > +			list_del(&entry->list);
+> > +	}
+> >
+> >  	return entry;
+> >  }
+> > diff --git a/include/linux/efi.h b/include/linux/efi.h
+> > index 5f8f176..04088fb 100644
+> > --- a/include/linux/efi.h
+> > +++ b/include/linux/efi.h
+> > @@ -782,6 +782,8 @@ struct efivar_entry {
+> >  	struct efi_variable var;
+> >  	struct list_head list;
+> >  	struct kobject kobj;
+> > +	bool scanning;
+> > +	bool deleting;
+> >  };
+> >
+> >  extern struct list_head efivar_sysfs_list;
+> 
+> 
+> --
+> Best,
+> Madper Xie.
