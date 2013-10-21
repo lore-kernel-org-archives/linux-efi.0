@@ -1,94 +1,80 @@
-From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Subject: RE: [PATCH v3] efivars,efi-pstore: Hold off deletion of sysfs entry
- until, the scan is completed
-Date: Fri, 18 Oct 2013 22:30:58 +0000
-Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D443F0F2D6@USINDEM103.corp.hds.com>
-References: <52584373.3010202@hds.com>
- <20131017131821.GH10834@console-pimps.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Mon, 21 Oct 2013 20:47:39 +0800
+Message-ID: <20131021124739.GA4515@dhcp-16-126.nay.redhat.com>
+References: <20131010085827.GA9929@pd.tnic>
+ <20131010123453.GA12321@console-pimps.org>
+ <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
+ <20131011074144.GA18719@pd.tnic>
+ <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
+ <20131012101308.GI12321@console-pimps.org>
+ <20131012103054.GA13739@pd.tnic>
+ <20131013031126.GB1914@darkstar.nay.redhat.com>
+ <20131013092521.GA22866@pd.tnic>
+ <20131014155851.GJ4009@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131017131821.GH10834-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <20131014155851.GJ4009-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tomoki Sekiyama <tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Matt,
-
-> It seems to me that because you're no longer dropping __efivars->lock
-> when reading from the EFI variable store, you actually don't need all
-> the ->scanning and ->deleting logic because anything that sets those
-> flags runs to completion while holding the lock.
-
-The scanning and deleting logic is still needed.
-In case an entry(A) is found, the pointer is saved to psi->data.
-And efi_pstore_read() passes the entry(A) to a pstore filesystem by releasing  __efivars->lock.
-
-And then, the pstore filesystem calls efi_pstore_read() again and the same entry(A), which is saved to
-psi->data, is used for re-scanning a sysfs-list.
-(That is why list_for_each_entry_safe_from () is used in efi_pstore_sysfs_entry_iter().)
-
-So, to protect the entry(A), the logic is needed because, in pstore filesystem,  __efivars->lock
-Is released. 
-
-> Can't the patch be simplified to just allocating data.buf at the
-> beginning of efi_pstore_read()? 
-
-I think data.buf is simply allocated at the beginning of efi_pstore_read() with this patch v3.
-If you are not satisfied with it, could you please show me your pseudo code?
-
->Also, it would be a good idea to
-> introduce a #define for the 1024 magic number, e.g.
+On 10/14/13 at 05:58pm, Borislav Petkov wrote:
+> On Sun, Oct 13, 2013 at 11:25:21AM +0200, Borislav Petkov wrote:
+> > In the meantime, I'll finish randconfigs testing of the patches and
+> > upload the latest version to k-org, I'll let you know.
 > 
-> #define EFIVARS_DATA_SIZE_MAX	1024
+> Ok, here it is:
+> 
+> git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi
+> 
+> This version seems to work on most boxes except Matt's Asus half-life
+> zombie.
 
-It is good idea. I can fix it.
+What's the status of this series?
 
-Seiji
+> 
+> Let me know if there are issues,
 
-<snip>
-+/**
-+ * efi_pstore_read
-+ *
-+ * This function returns a size of NVRAM entry logged via efi_pstore_write().
-+ * The meaning and behavior of efi_pstore/pstore are as below.
-+ *
-+ * size > 0: Got data of an entry logged via efi_pstore_write() successfully,
-+ *           and pstore filesystem will continue reading subsequent entries.
-+ * size == 0: Entry was not logged via efi_pstore_write(),
-+ *            and efi_pstore driver will continue reading subsequent entries.
-+ * size < 0: Failed to get data of entry logging via efi_pstore_write(),
-+ *           and pstore will stop reading entry.
-+ */
- static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
- 			       int *count, struct timespec *timespec,
- 			       char **buf, bool *compressed,
- 			       struct pstore_info *psi)
- {
- 	struct pstore_read_data data;
-+	ssize_t size;
- 
- 	data.id = id;
- 	data.type = type;
-@@ -112,8 +216,17 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
- 	data.compressed = compressed;
- 	data.buf = buf;
- 
--	return __efivar_entry_iter(efi_pstore_read_func, &efivar_sysfs_list, &data,
--				   (struct efivar_entry **)&psi->data);
-+	*data.buf = kzalloc(1024, GFP_KERNEL);
-+	if (!*data.buf)
-+		return -ENOMEM;
-+
-+	efivar_entry_iter_begin();
-+	size = efi_pstore_sysfs_entry_iter(&data,
-+					   (struct efivar_entry **)&psi->data);
-+	efivar_entry_iter_end();
-+	if (size <= 0)
-+		kfree(*data.buf);
-+	return size;
+I need below patch for mapping to fixed virt addr passed
+from 1st kernel. Would you like to add it to your series
+or I send out it later?
+
+BTW, what tree should my patches based on? Matt's next tree?
+Looks like your tree is not consistant with Matt's tree.
+
+--
+
+Add function efi_map_region_fixed for mapping to a specific
+virt address. 
+
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c |   13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+--- bp.orig/arch/x86/platform/efi/efi.c
++++ bp/arch/x86/platform/efi/efi.c
+@@ -1086,6 +1086,19 @@ static void efi_merge_regions(void)
+ 	}
  }
-<snip>
+ 
++void __init efi_map_region_fixed(efi_memory_desc_t *md, u64 virt_addr)
++{
++	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
++	unsigned long pf = 0;
++
++	if (!(md->attribute & EFI_MEMORY_WB))
++		pf |= _PAGE_PCD;
++
++	if(kernel_map_pages_in_pgd(pgd, md->phys_addr, virt_addr, md->num_pages, pf))
++		pr_warning("Error mapping PA 0x%llx -> VA 0x%llx!\n",
++			   md->phys_addr, virt_addr);
++}
++
+ /*
+  * Map efi memory ranges for runtime serivce
+  * Return the new memmap with updated virtual addrresses.
