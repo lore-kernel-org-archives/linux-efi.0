@@ -1,239 +1,45 @@
-From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [BUG] pstore: failed to load 76 record(s) from 'efi'
-Date: Wed, 23 Oct 2013 17:46:29 +0800
-Message-ID: <87ppqwwc96.fsf@redhat.com>
-References: <87zjq0llwi.fsf@redhat.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Wed, 23 Oct 2013 14:25:31 +0200
+Message-ID: <20131023122531.GA15848@nazgul.tnic>
+References: <20131012101308.GI12321@console-pimps.org>
+ <20131012103054.GA13739@pd.tnic>
+ <20131013031126.GB1914@darkstar.nay.redhat.com>
+ <20131013092521.GA22866@pd.tnic>
+ <20131014155851.GJ4009@pd.tnic>
+ <20131021124739.GA4515@dhcp-16-126.nay.redhat.com>
+ <20131021133741.GA5716@nazgul.tnic>
+ <20131021150426.GB4515@dhcp-16-126.nay.redhat.com>
+ <20131022111857.GA10660@nazgul.tnic>
+ <20131023021730.GE4594@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <87zjq0llwi.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131023021730.GE4594-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Seiji Aguchi <saguchi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-It seems pstore dump the messages with a same guid. But when loading
-them, pstore check if they are exist by id in pstore_mkfile():
-	list_for_each_entry(pos, &allpstore, list) {
-		if (pos->type == type &&
-		    pos->id == id &&
-		    pos->psi == psi) {
-			rc = -EEXIST;
-			break;
-		}
-	}
-So pstore incorrectly mark many entries as -EEXIST.
-Please correct me if I am wrong.  :-) And I'm preparing a patch for it.
-cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org writes:
+On Wed, Oct 23, 2013 at 10:17:31AM +0800, Dave Young wrote:
+> The reason is that I only pass runtime regions from 1st kernel to
+> kexec kernel, your efi mapping function uses the region size to
+> determin the virtual address from top to down. Because the passed-in
+> md ranges in kexec kernel are different from ranges booting from
+> firmware so the virtual address will be different.
 
-> Hi folks,
->   after mount pstore with efi as backend there are only 11 entries in
->   pstore dir. Although I have about 80 pstore entries in my nvram.
->   I can reproduce it 100% on my DELL XPS. And will try it on one more
->   vendor.
->
->   my kernel version is 3.12-rc4. Please let me know if it's not a kernel
->   bug but a buggy firmware. :-)
->   
->   Here is my dmesg out put:
->   [   17.076222] IPv6: ADDRCONF(NETDEV_CHANGE): p3p1: link becomes ready
->   [  104.749604] pstore: failed to load 76 record(s) from 'efi'  <-- this line appear when I mount pstore.
->   [  104.749610] SELinux: initialized (dev pstore, type pstore), not configured for labeling
->
->   Here is the output of `ls /sys/firmware/efi/vars`:
-> AcpiGlobalVariable-af9ffd67-ec10-488a-9dfc-6cbf5ee22c2e
-> AMITSESetup-c811fa38-42c8-4579-a9bb-60e94eddfb34
-> Boot0000-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Boot0001-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Boot0002-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Boot0003-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Boot0004-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Boot0005-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> BootCurrent-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> BootOptionSupport-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> BootOrder-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> CmosError-ceab3323-daab-92ee-c112-abee5a6ebe2c
-> ConIn-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ConInDev-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ConOut-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ConOutChild1-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ConOutChildNumber-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ConOutDev-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> db-d719b2cb-3d3a-4596-a3bc-dad00e67656f
-> dbx-d719b2cb-3d3a-4596-a3bc-dad00e67656f
-> DebuggerSerialPortsEnabledVar-97ca1a5b-b760-4d1f-a54b-d19092032c90
-> DefaultConOutChild-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> DefaultFBOSetDevOrder-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> DefaultFBOSetDevOrderUEFI-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> DELLDIAG_EEPROM-86fd3e21-8683-4f2e-bcc1-2c52493bd1f6
-> del_var
-> DriverHealthCount-7459a7d4-6533-4480-bba7-79e25a4443c9
-> DriverHlthEnable-0885f288-418c-4be1-a6af-8bad61da08fe
-> dump-type0-10-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380015708-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380016446-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380460890-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1380467798-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-10-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1380015708-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1380016446-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1380441691-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-11-1-1382496074-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1379387012-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380015706-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380016444-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380441689-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380460875-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380467797-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380524664-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380526061-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1380527153-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-1-1-1382496055-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1379387012-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380015706-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380441689-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380460888-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380467797-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380524664-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1380526061-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-2-1-1382496055-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1379387012-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380015706-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380441689-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380467797-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1380524664-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-3-1-1382496055-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1379387012-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1380441689-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-4-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1379387012-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1380467797-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-5-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1380448559-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-6-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1380016445-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-7-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1380016446-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1380460889-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-8-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1379387013-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380015707-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380016446-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380460890-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> EfiTime-9d0da369-540b-46f8-85a0-2b5f2c301e15
-> ErrOut-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> ErrOutDev-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> FBOSetDevOrder-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> FBOSetDevOrderUEFI-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> FixedBoot-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> FixedBootUEFI-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> FPDT_Variable-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> GnvsAreaVar-69917fed-3857-45fd-b687-434b5614ced4
-> HddSmartError-40ba5790-a9d1-4709-b49e-930567634ffb
-> HobRomImage-dde1bc72-d45e-4209-ab85-14462d2f5074
-> IccAdvancedSetupDataVar-7b77fb8b-1e0d-4d7e-953f-3980a261e077
-> KEK-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> Lang-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> LangCodes-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> LegacyDevOrder-a56074db-65fe-45f7-bd21-2d2bdd8e9652
-> MemCeil.-40312829-7891-4abd-b200-0c541b061939
-> MemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa
-> MonotonicCounter-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> MrcS3Resume2-87f22dcb-7304-4105-bb7c-317143ccc23b
-> NBGopPlatformData-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> NBPlatformData-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> NetworkStackVar-d1405d16-7afc-4695-bb12-41459d3695a2
-> new_var
-> NvRamSpdMap-717fc150-abd9-4614-8015-0b3323eab95c
-> OA3DellMSDMvariable-fdad31fb-ef81-49ec-aed2-1ddacca1268d
-> OA3MSDMvariable-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> OemCpuData-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> OldFBOSetDevOrder-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> OldFBOSetDevOrderUEFI-0c923ca9-df73-4ac8-b6d2-98ddc30d99fc
-> OldLegacyDevOrder-a56074db-65fe-45f7-bd21-2d2bdd8e9652
-> OsIndications-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> OsIndicationsSupported-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> PBRDevicePath-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> PchInit-e6c2f70a-b604-4877-85ba-deec89e117eb
-> PchS3Peim-e6c2f70a-b604-4877-85ba-deec89e117eb
-> PciSerialPortsLocationVar-560bf58a-1e0d-4d7e-953f-2980a261e031
-> PK-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> PlatformLang-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> PlatformLangCodes-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> PNP0501_0_NV-560bf58a-1e0d-4d7e-953f-2980a261e031
-> PNP0501_0_VV-560bf58a-1e0d-4d7e-953f-2980a261e031
-> PNP0510_0_NV-560bf58a-1e0d-4d7e-953f-2980a261e031
-> PNP0510_0_VV-560bf58a-1e0d-4d7e-953f-2980a261e031
-> PreviousMemoryTypeInformation-4c19049f-4137-4dd3-9c10-8b97a83ffdfa
-> RestorePostScreen-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> S3SS-4bafc2b4-02dc-4104-b236-d6f1b98d9e84
-> SaPegData-c4975200-64f1-4fb6-9773-f6a9f89d985e
-> SbAslBufferPtrVar-01f33c25-764d-43ea-aeea-6b5a41f3f3e8
-> ScramblerBaseSeed-87f22dcb-7304-4105-bb7c-317143ccc23b
-> SecureBoot-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> SerialPortsEnabledVar-560bf58a-1e0d-4d7e-953f-2980a261e031
-> Setup-80e1202e-2697-4264-9cc9-80762c3e5863
-> Setup-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> SetupMode-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> SetupPlatformData-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> SetupSnbPpmFeatures-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> SignatureSupport-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> SioSerialPortsLocationVar-560bf58a-1e0d-4d7e-953f-2980a261e031
-> SMBIOS_START_ADDR-0a602c5b-05a0-40c4-9181-edcd891d0036
-> StdDefaults-4599d26f-1a11-49b8-b91f-858745cff824
-> TdtAdvancedSetupDataVar-7b77fb8b-1e0d-4d7e-953f-3980a261e076
-> test1-12341234-1234-1234-1234-123412341234
-> test-12341234-1234-1234-1234-123412341234
-> test2-12341234-1234-2134-1234-123412341234
-> test3-12341234-1234-1234-1234-123412341234
-> test4-12341234-1234-1234-1234-123412341234
-> test5-12341234-1234-1234-1234-123412341234
-> test6-12341234-1234-1234-1234-123412341234
-> Timeout-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> UsbHandOnOffEntry-0a602c5b-05a0-40c4-9181-edcd891d0018
-> UsbMassDevNum-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> UsbMassDevValid-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> USB_POINT-8be4df61-93ca-11d2-aa0d-00e098032b8c
-> UsbSupport-ec87d643-eba4-4bb5-a1e5-3f3e36b20da9
-> WdtPersistentData-78ce2354-cfbc-4643-aeba-07a27fa892bf
+Well, this shouldn't be because SetVirtualAddressMap has already fixed
+the virtual addresses for us. And if they're different, then runtime
+services won't work anyway. Or am I missing something...?
 
+> Even I pass the whole untouched ranges including BOOT_SERVICE there's
+> still chance the function for reserving boot regions overwrite the
+> boot region size to 0, and 1st kernel will leave it to be used as
+> normal memory after efi init. I think we have talked about this issue
+> previously.
 
--- 
-Best,
-Madper Xie.
+Matt, didn't you question the need to keep boot services regions
+mapped indefinitely? What was the story there?
+
+Thanks.
