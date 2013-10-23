@@ -1,67 +1,80 @@
-From: Richard Weinberger <richard.weinberger@gmail.com>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH] pstore: avoid incorrectly mark entry as duplicate
-Date: Wed, 23 Oct 2013 17:58:33 +0200
-Message-ID: <CAFLxGvxT1S3km=LordqFGbAb_pWc0cf3oE2ciS9uY4BBJJ231A@mail.gmail.com>
-References: <87r4bcdok1.fsf@redhat.com>
+Date: Thu, 24 Oct 2013 00:11:22 +0800
+Message-ID: <87ob6g55n9.fsf@redhat.com>
+References: <87r4bcdok1.fsf@redhat.com> <CAFLxGvxT1S3km=LordqFGbAb_pWc0cf3oE2ciS9uY4BBJJ231A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <87r4bcdok1.fsf@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Madper Xie <cxie@redhat.com>
-Cc: "Luck, Tony" <tony.luck@intel.com>, Anton Vorontsov <anton@enomsg.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seiji Aguchi <seiji.aguchi@hds.com>, Lenny Szubowicz <lszubowi@redhat.com>, =?UTF-8?B?5oiQ6aqPIOiwog==?= <bbboson@gmail.com>
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <CAFLxGvxT1S3km=LordqFGbAb_pWc0cf3oE2ciS9uY4BBJJ231A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Richard Weinberger <richard.weinberger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?utf-8?B?5oiQ6aqPIOiwog==?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 23, 2013 at 4:55 PM, Madper Xie <cxie@redhat.com> wrote:
-> pstore try to find duplicate entries by check both ID, type and psi.
-> They are not really enough for efi backend. dumped vars always have
-> the same type, psi and ID. like follows:
-> dump-type0-9-1-1382511508-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1382515661-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
->
-> The "duplicate" entries won't appear in pstorefs. And a complain will be
-> print -- pstore: failed to load 76 record(s) from 'efi'
-> So I add one more check: timespec.
->
-> Signed-off-by: Madper Xie <cxie@redhat.com>
-> ---
->  fs/pstore/inode.c | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
-> index 1282384..f70f1e5 100644
-> --- a/fs/pstore/inode.c
-> +++ b/fs/pstore/inode.c
-> @@ -47,6 +47,7 @@ static LIST_HEAD(allpstore);
->  struct pstore_private {
->         struct list_head list;
->         struct pstore_info *psi;
-> +       struct timespec time;
->         enum pstore_type_id type;
->         u64     id;
->         int     count;
-> @@ -290,7 +291,8 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
->         list_for_each_entry(pos, &allpstore, list) {
->                 if (pos->type == type &&
->                     pos->id == id &&
-> -                   pos->psi == psi) {
-> +                   pos->psi == psi &&
-> +                   !timespec_compare(&pos->time, &time)) {
->                         rc = -EEXIST;
->                         break;
->                 }
-> @@ -312,6 +314,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
->         private->id = id;
->         private->count = count;
->         private->psi = psi;
-> +       memcpy(&private->time, &time, sizeof(struct timespec));
->
->         switch (type) {
->         case PSTORE_TYPE_DMESG:
 
+richard.weinberger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org writes:
 
-As discussed on IRC, why don't you compare the variable names?
-
+> On Wed, Oct 23, 2013 at 4:55 PM, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> pstore try to find duplicate entries by check both ID, type and psi.
+>> They are not really enough for efi backend. dumped vars always have
+>> the same type, psi and ID. like follows:
+>> dump-type0-9-1-1382511508-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+>> dump-type0-9-1-1382515661-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+>>
+>> The "duplicate" entries won't appear in pstorefs. And a complain will be
+>> print -- pstore: failed to load 76 record(s) from 'efi'
+>> So I add one more check: timespec.
+>>
+>> Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  fs/pstore/inode.c | 5 ++++-
+>>  1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+>> index 1282384..f70f1e5 100644
+>> --- a/fs/pstore/inode.c
+>> +++ b/fs/pstore/inode.c
+>> @@ -47,6 +47,7 @@ static LIST_HEAD(allpstore);
+>>  struct pstore_private {
+>>         struct list_head list;
+>>         struct pstore_info *psi;
+>> +       struct timespec time;
+>>         enum pstore_type_id type;
+>>         u64     id;
+>>         int     count;
+>> @@ -290,7 +291,8 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+>>         list_for_each_entry(pos, &allpstore, list) {
+>>                 if (pos->type == type &&
+>>                     pos->id == id &&
+>> -                   pos->psi == psi) {
+>> +                   pos->psi == psi &&
+>> +                   !timespec_compare(&pos->time, &time)) {
+>>                         rc = -EEXIST;
+>>                         break;
+>>                 }
+>> @@ -312,6 +314,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+>>         private->id = id;
+>>         private->count = count;
+>>         private->psi = psi;
+>> +       memcpy(&private->time, &time, sizeof(struct timespec));
+>>
+>>         switch (type) {
+>>         case PSTORE_TYPE_DMESG:
+>
+>
+> As discussed on IRC, why don't you compare the variable names?
+Howdy Richard,
+  Let's analyze the name of "duplicate" entries:
+>> dump-type0-9-1-1382511508-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+>> dump-type0-9-1-1382515661-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+  The have the same name except timestamp. In this case, there is no
+  difference between compare names and compare timestamps.
+  ( Yeah, I'm pretty sure the guid will be the same one --
+  LINUX_EFI_CRASH_GUID )
+  But efi is only one backend. For other backends, we don't sure if they
+  will add timestamp to name. So...
+  
 -- 
-Thanks,
-//richard
+Best,
+Madper Xie.
