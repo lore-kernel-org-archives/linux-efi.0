@@ -1,48 +1,54 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Sat, 26 Oct 2013 16:50:30 +0100
-Message-ID: <20131026155030.GA1982@console-pimps.org>
-References: <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
- <20131011074144.GA18719@pd.tnic>
- <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
- <20131012101308.GI12321@console-pimps.org>
- <20131012103054.GA13739@pd.tnic>
- <20131013031126.GB1914@darkstar.nay.redhat.com>
- <20131013092521.GA22866@pd.tnic>
- <20131014155851.GJ4009@pd.tnic>
- <20131021124739.GA4515@dhcp-16-126.nay.redhat.com>
- <20131021133741.GA5716@nazgul.tnic>
+Subject: Re: EFI boot problem in 3.11
+Date: Sat, 26 Oct 2013 16:51:00 +0100
+Message-ID: <20131026155100.GC1982@console-pimps.org>
+References: <32EA1272-FF5B-4FAA-B136-1447BF6F9876@rf.net.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131021133741.GA5716-K5JNixvcfoxupOikMc4+xw@public.gmane.org>
+In-Reply-To: <32EA1272-FF5B-4FAA-B136-1447BF6F9876-NpJDBqUeXo2lVyrhU4qvOw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+To: Jasper Bryant-Greene <jbg-NpJDBqUeXo2lVyrhU4qvOw@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 21 Oct, at 03:37:41PM, Borislav Petkov wrote:
-> On Mon, Oct 21, 2013 at 08:47:39PM +0800, Dave Young wrote:
-> > What's the status of this series?
-> 
-> They should appear at some point in Matt's efi-next branch, I think.
-> 
-> > I need below patch for mapping to fixed virt addr passed
-> > from 1st kernel.
-> 
-> You need this to map the runtime regions in the kexec kernel, right?
-> Please write that in the commit message.
-> 
-> > Would you like to add it to your series or I send out it later?
-> 
-> Yeah, just add it to your patchset.
-> 
-> > BTW, what tree should my patches based on? Matt's next tree?
-> 
-> Yeah, I think efi-next. Matt?
+On Thu, 24 Oct, at 12:14:26PM, Jasper Bryant-Greene wrote:
+> I have a box here which is set up for EFI boot with no boot loader.
+>=20
+> The kernel is compiled with a built-in initrd and command line.
+>=20
+> In 3.10 this was all working well. However, after updating to 3.11.5 =
+a
+> reboot leads to the EFI firmware boot screen appearing followed by th=
+e
+> middle section of it going black (just leaving two vertical stripes o=
+f
+> the EFI firmware boot screen on either side of the screen) and the
+> system locking up (numlock etc do not work).
+>=20
+> However, if I hit =E2=80=98delete=E2=80=99 quickly when powering on, =
+and enter the
+> firmware setup screen, I can then =E2=80=98exit without saving=E2=80=99=
+ and the system
+> will boot successfully =E2=80=94 =E2=80=98save and exit=E2=80=99 does=
+ not work as that
+> performs a full reboot while =E2=80=98exit without saving=E2=80=99 se=
+ems to continue
+> the boot where it left off.
+>=20
+> Due to the aforementioned graphics corruption, I am wondering whether
+> it is somehow related to the frame buffer? As this is a production
+> system I unfortunately do not have flexibility to try a number of
+> kernel versions in-between to locate where the issue was introduced.
 
-Yes please.
+Nothing springs to mind and nothing jumps out of the log in
+drivers/video or arch/x86/platform/efi.
 
--- 
+The best way to figure out what's causing this issue really is to bisec=
+t
+the kernel versions. What hardware are you running on?
+
+--=20
 Matt Fleming, Intel Open Source Technology Center
