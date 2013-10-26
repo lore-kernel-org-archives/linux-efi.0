@@ -1,94 +1,48 @@
-From: Madper Xie <cxie@redhat.com>
-Subject: Re: [PATCH] pstore: avoid incorrectly mark entry as duplicate
-Date: Thu, 24 Oct 2013 08:21:40 +0800
-Message-ID: <87k3h35xij.fsf@redhat.com>
-References: <87r4bcdok1.fsf@redhat.com> <CA+8MBb+0wruR-T8Rkk_WQ6Try4ct2ZCm8o=js4eO8s7cogcs+g@mail.gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Sat, 26 Oct 2013 16:50:30 +0100
+Message-ID: <20131026155030.GA1982@console-pimps.org>
+References: <20131011062437.GA14115@dhcp-16-126.nay.redhat.com>
+ <20131011074144.GA18719@pd.tnic>
+ <20131012075443.GD7550@dhcp-16-126.nay.redhat.com>
+ <20131012101308.GI12321@console-pimps.org>
+ <20131012103054.GA13739@pd.tnic>
+ <20131013031126.GB1914@darkstar.nay.redhat.com>
+ <20131013092521.GA22866@pd.tnic>
+ <20131014155851.GJ4009@pd.tnic>
+ <20131021124739.GA4515@dhcp-16-126.nay.redhat.com>
+ <20131021133741.GA5716@nazgul.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-reply-to: <CA+8MBb+0wruR-T8Rkk_WQ6Try4ct2ZCm8o=js4eO8s7cogcs+g@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Tony Luck <tony.luck@gmail.com>
-Cc: Madper Xie <cxie@redhat.com>, Anton Vorontsov <anton@enomsg.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Seiji Aguchi <seiji.aguchi@hds.com>, Lenny Szubowicz <lszubowi@redhat.com>, =?utf-8?B?5oiQ6aqPIOiwog==?= <bbboson@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131021133741.GA5716-K5JNixvcfoxupOikMc4+xw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, 21 Oct, at 03:37:41PM, Borislav Petkov wrote:
+> On Mon, Oct 21, 2013 at 08:47:39PM +0800, Dave Young wrote:
+> > What's the status of this series?
+> 
+> They should appear at some point in Matt's efi-next branch, I think.
+> 
+> > I need below patch for mapping to fixed virt addr passed
+> > from 1st kernel.
+> 
+> You need this to map the runtime regions in the kexec kernel, right?
+> Please write that in the commit message.
+> 
+> > Would you like to add it to your series or I send out it later?
+> 
+> Yeah, just add it to your patchset.
+> 
+> > BTW, what tree should my patches based on? Matt's next tree?
+> 
+> Yeah, I think efi-next. Matt?
 
-tony.luck@gmail.com writes:
-
-> On Wed, Oct 23, 2013 at 7:55 AM, Madper Xie <cxie@redhat.com> wrote:
->> The "duplicate" entries won't appear in pstorefs. And a complain will be
->> print -- pstore: failed to load 76 record(s) from 'efi'
->
-> Maybe I don't quite get this - but it sounds like you have a whole lot
-> of entries using up space in efivars that have similar names - differing
-> just in the timestamp - that won't show up in the pstore filesystem - because
-> we'd try to name them all the same thing.
->
-Maybe I misunderstand you...
-
-Sure pstore try to name them all the same thing, but it's another
-issue. and it doesn't prevent entries showing up in pstore fs.
-
-Consider the following case: (after efi-pstore support append mode, it
-always like this case):
-
-I choose four dumped efivars from my DELL XPS:
-dump-type0-9-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-dump-type0-9-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-dump-type0-9-1-1380460890-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-dump-type0-9-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-         ^        ^       [              ^                   ]
-         !        !                      !
-       type    timestamp                GUID
-
-When pstore load them from efivars, pstore incorrectly assuming that
-efivars with the same TYPE, ID and GUID are duplicate.
-
-list_for_each_entry(pos, &allpstore, list) {
-	if (pos->type == type &&    /---
-	    pos->id == id &&     <-| as I said, it only check type,id,psi
-	    pos->psi == psi) {      \---
-		rc = -EEXIST;    <- then set -EEXIST, and ignore *dup* entry
-		break;
-	}
-}
-You can see the code above, for those four entries, only one could be
-showed in pstorefs, all others will get a -EEXIST. So I add a timestamp
-check here, it's the only different part.
-
-> How did all those things end up in efivars?
-before the patch I can see 
-dmesg-efi-1   dmesg-efi-11  dmesg-efi-3  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-10  dmesg-efi-2   dmesg-efi-4  dmesg-efi-6  dmesg-efi-8
-after apply the patch:
-[root@dhcp-13-41 vars]# ls /dev/pstore/
-dmesg-efi-1  dmesg-efi-1   dmesg-efi-11  dmesg-efi-2  dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-11  dmesg-efi-2  dmesg-efi-3  dmesg-efi-5  dmesg-efi-7  dmesg-efi-8
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-12  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-8
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-13  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-14  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-15  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-16  dmesg-efi-3  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-7  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-
->
-> Wouldn't the right fix be to make pstore allow them all to appear (using the
-> timestamp to differentiate names?) so that we could see them, log them,
-> and then remove them from pstore (in turn freeing up efivars space - which
-> people keep telling me is in short supply).
->
-Yeah, many file have the same name, just like my case above. But it not
-really block the file shows up and should be solved in another
-patch. And I'm trying fix it.
-> -Tony
+Yes please.
 
 -- 
-Best,
-Madper Xie.
+Matt Fleming, Intel Open Source Technology Center
