@@ -1,88 +1,64 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 4/6] export more efi table variable to sysfs
-Date: Sun, 27 Oct 2013 11:47:17 +0800
-Message-ID: <20131027035923.233598770@dhcp-16-126.nay.redhat.com>
-References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
+Subject: [patch 0/6] kexec kernel efi runtime support
+Date: Sun, 27 Oct 2013 11:47:13 +0800
+Message-ID: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline; filename=03-export-more-efi-sysfs-vars.patch
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Export fw_vendor, runtime and config tables physical
-addresses to /sys/firmware/efi/systab becaue kexec
-kernel will need them.
+Hi,
 
->From EFI spec these 3 variables will be updated to
-virtual address after entering virtual mode. But
-kernel startup code will need the physical address.
+Here is the 1st version for supporting kexec kernel efi runtime.
+Per pervious discussion I pass the 1st kernel efi runtime mapping
+via setup_data to 2nd kernel. Besides of the runtime mapping
+info I also pass the fw_vendor, runtime, config table, smbios
+physical address in setup_data. EFI spec mentioned fw_vendor,
+runtime, config table addresses will be converted to virt address
+after entering virtual mode, but we will use it as physical address
+in efi_init. For smbios EFI spec did not mention about the address
+updating, but during my test on a HP workstation, the bios will
+convert it to Virt addr, thus pass it in setup_data as well.
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/x86/platform/efi/efi.c |    4 ++++
- drivers/firmware/efi/efi.c  |    9 +++++++++
- include/linux/efi.h         |    3 +++
- 3 files changed, 16 insertions(+)
+=46or fw_vendor, runtime, config table, I export them in /sys/firmware/
+efi/systab, smbios is already in that file.
 
---- efi.orig/drivers/firmware/efi/efi.c
-+++ efi/drivers/firmware/efi/efi.c
-@@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
- 	.hcdp       = EFI_INVALID_TABLE_ADDR,
- 	.uga        = EFI_INVALID_TABLE_ADDR,
- 	.uv_systab  = EFI_INVALID_TABLE_ADDR,
-+	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
-+	.runtime    = EFI_INVALID_TABLE_ADDR,
-+	.config_tables  = EFI_INVALID_TABLE_ADDR,
- };
- EXPORT_SYMBOL(efi);
- 
-@@ -64,6 +67,12 @@ static ssize_t systab_show(struct kobjec
- 		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
- 	if (efi.uga != EFI_INVALID_TABLE_ADDR)
- 		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
-+	if (efi.fw_vendor!= EFI_INVALID_TABLE_ADDR)
-+		str += sprintf(str, "fw_vendor=0x%lx\n", efi.fw_vendor);
-+	if (efi.runtime!= EFI_INVALID_TABLE_ADDR)
-+		str += sprintf(str, "runtime=0x%lx\n", efi.runtime);
-+	if (efi.config_tables != EFI_INVALID_TABLE_ADDR)
-+		str += sprintf(str, "config_tables=0x%lx\n", efi.config_tables);
- 
- 	return str - buf;
- }
---- efi.orig/include/linux/efi.h
-+++ efi/include/linux/efi.h
-@@ -556,6 +556,9 @@ extern struct efi {
- 	unsigned long hcdp;		/* HCDP table */
- 	unsigned long uga;		/* UGA table */
- 	unsigned long uv_systab;	/* UV system table */
-+	unsigned long fw_vendor;
-+	unsigned long runtime;
-+	unsigned long config_tables;
- 	efi_get_time_t *get_time;
- 	efi_set_time_t *set_time;
- 	efi_get_wakeup_time_t *get_wakeup_time;
---- efi.orig/arch/x86/platform/efi/efi.c
-+++ efi/arch/x86/platform/efi/efi.c
-@@ -670,6 +670,10 @@ void __init efi_init(void)
- 
- 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
- 
-+	efi.fw_vendor = (unsigned long)efi.systab->fw_vendor;
-+	efi.runtime = (unsigned long)efi.systab->runtime;
-+	efi.config_tables = (unsigned long)efi.systab->tables;
-+
- 	/*
- 	 * Show what we know for posterity
- 	 */
+=46or efi runtime mapping I add a new directory /sys/firmware/efi/
+efi-runtime-map/ like below
+[dave@darkstar ~]$ tree /sys/firmware/efi/efi-runtime-map/
+/sys/firmware/efi/efi-runtime-map/
+=E2=94=9C=E2=94=80=E2=94=80 0
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 attribute
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 num_pages
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 phys_addr
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 type
+=E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80 virt_addr
+=E2=94=9C=E2=94=80=E2=94=80 1
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 attribute
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 num_pages
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 phys_addr
+=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 type
+=E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80 virt_addr
+[snip]
+=20
+kexec-tools will assemble them as setup_data and pass to 2nd kernel.
+I will send userspace patches as well.
+
+Limitation is I only write support for x86_64, test on below machines:
+Lenovo thinkpad t420
+Dell inspiron 14 - 3421
+HP Z420 workstation
+Qemu + OVMF
+
+Please help to review the patches.
+
+The patches are based on linus tree (3.12.0-rc6+) + matt's next tree + =
+bp's efi mapping patches
+Boris's last patch can not directly apply, need a little line shifting.
+--
+Thanks
+Dave
