@@ -1,64 +1,143 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 0/6] kexec kernel efi runtime support
-Date: Sun, 27 Oct 2013 11:47:13 +0800
-Message-ID: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
+Subject: [patch 3/6] Cleanup efi_enter_virtual_mode function
+Date: Sun, 27 Oct 2013 11:47:16 +0800
+Message-ID: <20131027035923.081819853@dhcp-16-126.nay.redhat.com>
+References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline; filename=02-efi-enter-virtual-mode-cleanup-1.patch
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+Add two small functions:
+efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+calls them instead of embedding two long for loop.
 
-Here is the 1st version for supporting kexec kernel efi runtime.
-Per pervious discussion I pass the 1st kernel efi runtime mapping
-via setup_data to 2nd kernel. Besides of the runtime mapping
-info I also pass the fw_vendor, runtime, config table, smbios
-physical address in setup_data. EFI spec mentioned fw_vendor,
-runtime, config table addresses will be converted to virt address
-after entering virtual mode, but we will use it as physical address
-in efi_init. For smbios EFI spec did not mention about the address
-updating, but during my test on a HP workstation, the bios will
-convert it to Virt addr, thus pass it in setup_data as well.
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c |   83 +++++++++++++++++++++++++++-----------------
+ 1 file changed, 52 insertions(+), 31 deletions(-)
 
-=46or fw_vendor, runtime, config table, I export them in /sys/firmware/
-efi/systab, smbios is already in that file.
-
-=46or efi runtime mapping I add a new directory /sys/firmware/efi/
-efi-runtime-map/ like below
-[dave@darkstar ~]$ tree /sys/firmware/efi/efi-runtime-map/
-/sys/firmware/efi/efi-runtime-map/
-=E2=94=9C=E2=94=80=E2=94=80 0
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 attribute
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 num_pages
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 phys_addr
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 type
-=E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80 virt_addr
-=E2=94=9C=E2=94=80=E2=94=80 1
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 attribute
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 num_pages
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 phys_addr
-=E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 type
-=E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80 virt_addr
-[snip]
-=20
-kexec-tools will assemble them as setup_data and pass to 2nd kernel.
-I will send userspace patches as well.
-
-Limitation is I only write support for x86_64, test on below machines:
-Lenovo thinkpad t420
-Dell inspiron 14 - 3421
-HP Z420 workstation
-Qemu + OVMF
-
-Please help to review the patches.
-
-The patches are based on linus tree (3.12.0-rc6+) + matt's next tree + =
-bp's efi mapping patches
-Boris's last patch can not directly apply, need a little line shifting.
---
-Thanks
-Dave
+--- efi.orig/arch/x86/platform/efi/efi.c
++++ efi/arch/x86/platform/efi/efi.c
+@@ -789,35 +789,13 @@ void __init old_map_region(efi_memory_de
+ 		pr_err("ioremap of 0x%llX failed!\n",
+ 		       (unsigned long long)md->phys_addr);
+ }
+-/*
+- * This function will switch the EFI runtime services to virtual mode.
+- * Essentially, look through the EFI memmap and map every region that
+- * has the runtime attribute bit set in its memory descriptor and update
+- * that memory descriptor with the virtual address obtained from ioremap().
+- * This enables the runtime services to be called without having to
+- * thunk back into physical mode for every invocation.
+- */
+-void __init efi_enter_virtual_mode(void)
+-{
+-	efi_memory_desc_t *md, *prev_md = NULL;
+-	void *p, *new_memmap = NULL;
+-	unsigned long size;
+-	efi_status_t status;
+-	u64 end, systab;
+-	int count = 0;
+ 
+-	efi.systab = NULL;
+-
+-	/*
+-	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
+-	 */
+-	if (!efi_is_native()) {
+-		efi_unmap_memmap();
+-		return;
+-	}
++/* Merge contiguous regions of the same type and attribute */
++static void efi_merge_regions(void)
++{
++	void *p;
++ 	efi_memory_desc_t *md, *prev_md = NULL;
+ 
+-	/* Merge contiguous regions of the same type and attribute */
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		u64 prev_size;
+ 		md = p;
+@@ -844,6 +822,19 @@ void __init efi_enter_virtual_mode(void)
+ 		prev_md = md;
+ 
+ 	}
++}
++
++/*
++ * Map efi memory ranges for runtime serivce
++ * Return the new memmap with updated virtual addrresses.
++ */
++void efi_map_regions(void **new_memmap, int *count)
++{
++	efi_memory_desc_t *md, *prev_md = NULL;
++	void *p;
++	unsigned long size;
++	efi_status_t status;
++	u64 end, systab;
+ 
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+@@ -862,14 +853,44 @@ void __init efi_enter_virtual_mode(void)
+ 			systab += md->virt_addr - md->phys_addr;
+ 			efi.systab = (efi_system_table_t *) (unsigned long) systab;
+ 		}
+-		new_memmap = krealloc(new_memmap,
+-				      (count + 1) * memmap.desc_size,
++		*new_memmap = krealloc(*new_memmap,
++				      (*count + 1) * memmap.desc_size,
+ 				      GFP_KERNEL);
+-		memcpy(new_memmap + (count * memmap.desc_size), md,
++		memcpy(*new_memmap + (*count * memmap.desc_size), md,
+ 		       memmap.desc_size);
+-		count++;
++		(*count)++;
++	}
++}
++
++/*
++ * This function will switch the EFI runtime services to virtual mode.
++ * Essentially, look through the EFI memmap and map every region that
++ * has the runtime attribute bit set in its memory descriptor and update
++ * that memory descriptor with the virtual address obtained from ioremap().
++ * This enables the runtime services to be called without having to
++ * thunk back into physical mode for every invocation.
++ */
++void __init efi_enter_virtual_mode(void)
++{
++	efi_status_t status;
++	void *p, *new_memmap = NULL;
++	int count = 0;
++
++	efi.systab = NULL;
++
++	/*
++	 * We don't do virtual mode, since we don't do runtime services, on
++	 * non-native EFI
++	 */
++	if (!efi_is_native()) {
++		efi_unmap_memmap();
++		return;
+ 	}
+ 
++	efi_merge_regions();
++
++	efi_map_regions(&new_memmap, &count);
++
+ #ifdef CONFIG_X86_64
+ 	efi_scratch.efi_pgt = (pgd_t *)(unsigned long)real_mode_header->trampoline_pgd;
