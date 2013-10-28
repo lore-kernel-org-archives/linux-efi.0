@@ -1,59 +1,77 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI changes
-Date: Mon, 28 Oct 2013 12:35:28 +0000
-Message-ID: <20131028123528.GM1982@console-pimps.org>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] Differentiating names by adding a timestamp.
+Date: Mon, 28 Oct 2013 21:22:25 +0800
+Message-ID: <87li1dv8by.fsf@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Anton Vorontsov <cbou-JGs/UdohzUI@public.gmane.org>, Colin Cross <ccross-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <kees-oSa+0FWJbaXR7s880joybQ@public.gmane.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is a respin of the EFI earlyprintk support with the fix for the
-allmodconfig build breakage that Ingo reported.
 
-The following changes since commit c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
+pstore denominate dumped file as type-psname-id. it makes many file have
+the same name if there are many entries in backend have the same id.
+So adding a timestamp to file name.
 
-  boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
+Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ fs/pstore/inode.c | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 265434a91cf3377d65dc2b6d80065271514b5696:
-
-  x86/efi: Add EFI framebuffer earlyprintk support (2013-10-28 11:57:58 +0000)
-
-----------------------------------------------------------------
- * Add support for earlyprintk=efi which uses the EFI framebuffer. Very
-   useful for debugging boot issues.
-
-----------------------------------------------------------------
-Matt Fleming (2):
-      efi: Add asm-generic/efi.h for non-x86
-      x86/efi: Add EFI framebuffer earlyprintk support
-
- Documentation/kernel-parameters.txt  |   8 +-
- arch/ia64/include/asm/efi.h          |   6 ++
- arch/x86/Kconfig.debug               |  10 ++
- arch/x86/boot/compressed/eboot.c     |   1 -
- arch/x86/include/asm/efi.h           |  12 +++
- arch/x86/kernel/early_printk.c       |   6 ++
- arch/x86/kernel/setup.c              |   1 -
- arch/x86/platform/efi/Makefile       |   1 +
- arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
- arch/x86/platform/efi/efi.c          |   1 -
- arch/x86/platform/efi/efi_32.c       |   1 -
- arch/x86/platform/efi/efi_64.c       |   1 -
- arch/x86/platform/uv/bios_uv.c       |   1 -
- include/asm-generic/efi.h            |  17 ++++
- include/linux/efi.h                  |  31 +-----
- 15 files changed, 250 insertions(+), 38 deletions(-)
- create mode 100644 arch/ia64/include/asm/efi.h
- create mode 100644 arch/x86/platform/efi/early_printk.c
- create mode 100644 include/asm-generic/efi.h
-
+diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+index 1282384..bf6ed3a 100644
+--- a/fs/pstore/inode.c
++++ b/fs/pstore/inode.c
+@@ -315,32 +315,38 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 
+ 	switch (type) {
+ 	case PSTORE_TYPE_DMESG:
+-		sprintf(name, "dmesg-%s-%lld%s", psname, id,
+-						compressed ? ".enc.z" : "");
++		sprintf(name, "dmesg-%s-%lld-%lld%s", psname, id,
++			timespec_to_ns(&time), compressed ? ".enc.z" : "");
+ 		break;
+ 	case PSTORE_TYPE_CONSOLE:
+-		sprintf(name, "console-%s", psname);
++		sprintf(name, "console-%s-%lld", psname, timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_FTRACE:
+-		sprintf(name, "ftrace-%s", psname);
++		sprintf(name, "ftrace-%s-%lld", psname, timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_MCE:
+-		sprintf(name, "mce-%s-%lld", psname, id);
++		sprintf(name, "mce-%s-%lld-%lld", psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_PPC_RTAS:
+-		sprintf(name, "rtas-%s-%lld", psname, id);
++		sprintf(name, "rtas-%s-%lld-%lld", psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_PPC_OF:
+-		sprintf(name, "powerpc-ofw-%s-%lld", psname, id);
++		sprintf(name, "powerpc-ofw-%s-%lld-%lld", psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_PPC_COMMON:
+-		sprintf(name, "powerpc-common-%s-%lld", psname, id);
++		sprintf(name, "powerpc-common-%s-%lld-%lld", psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	case PSTORE_TYPE_UNKNOWN:
+-		sprintf(name, "unknown-%s-%lld", psname, id);
++		sprintf(name, "unknown-%s-%lld-%lld", psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	default:
+-		sprintf(name, "type%d-%s-%lld", type, psname, id);
++		sprintf(name, "type%d-%s-%lld-%lld", type, psname, id,
++			timespec_to_ns(&time));
+ 		break;
+ 	}
+ 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.4.1
