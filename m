@@ -1,74 +1,61 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes
-Date: Mon, 28 Oct 2013 14:44:13 +0100
-Message-ID: <20131028134413.GA10163@gmail.com>
-References: <20131028123528.GM1982@console-pimps.org>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
+Date: Mon, 28 Oct 2013 15:58:01 +0100
+Message-ID: <20131028145801.GM4314@pd.tnic>
+References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
+ <20131027035923.081819853@dhcp-16-126.nay.redhat.com>
+ <20131028093206.GB4314@pd.tnic>
+ <20131028094049.GC25527@dhcp-16-126.nay.redhat.com>
+ <20131028095117.GD25527@dhcp-16-126.nay.redhat.com>
+ <20131028100402.GC4314@pd.tnic>
+ <20131028101011.GF25527@dhcp-16-126.nay.redhat.com>
+ <20131028112045.GH4314@pd.tnic>
+ <20131028112458.GD29133@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131028123528.GM1982-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20131028112458.GD29133@dhcp-16-126.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.fedoraproject.org, kexec@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, Oct 28, 2013 at 07:24:58PM +0800, Dave Young wrote:
+> I use linus tree, git pull Matt's efi-next tree, then apply your 12
+> patches and my patches. I applied your previous 11 patches + the last
+> update patch 12/12, but the last one does not apply, I manually shift
+> a hunk to make it apply.
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+Nope, still doesn't apply.
 
-> This is a respin of the EFI earlyprintk support with the fix for the
-> allmodconfig build breakage that Ingo reported.
-> 
-> The following changes since commit c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
-> 
->   boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 265434a91cf3377d65dc2b6d80065271514b5696:
-> 
->   x86/efi: Add EFI framebuffer earlyprintk support (2013-10-28 11:57:58 +0000)
-> 
-> ----------------------------------------------------------------
->  * Add support for earlyprintk=efi which uses the EFI framebuffer. Very
->    useful for debugging boot issues.
-> 
-> ----------------------------------------------------------------
-> Matt Fleming (2):
->       efi: Add asm-generic/efi.h for non-x86
->       x86/efi: Add EFI framebuffer earlyprintk support
-> 
->  Documentation/kernel-parameters.txt  |   8 +-
->  arch/ia64/include/asm/efi.h          |   6 ++
->  arch/x86/Kconfig.debug               |  10 ++
->  arch/x86/boot/compressed/eboot.c     |   1 -
->  arch/x86/include/asm/efi.h           |  12 +++
->  arch/x86/kernel/early_printk.c       |   6 ++
->  arch/x86/kernel/setup.c              |   1 -
->  arch/x86/platform/efi/Makefile       |   1 +
->  arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
->  arch/x86/platform/efi/efi.c          |   1 -
->  arch/x86/platform/efi/efi_32.c       |   1 -
->  arch/x86/platform/efi/efi_64.c       |   1 -
->  arch/x86/platform/uv/bios_uv.c       |   1 -
->  include/asm-generic/efi.h            |  17 ++++
->  include/linux/efi.h                  |  31 +-----
->  15 files changed, 250 insertions(+), 38 deletions(-)
->  create mode 100644 arch/ia64/include/asm/efi.h
->  create mode 100644 arch/x86/platform/efi/early_printk.c
->  create mode 100644 include/asm-generic/efi.h
+patch -p1 --dry-run -i ~/efi/dy/03-efi-enter-virtual-mode-cleanup.patch 
+checking file arch/x86/platform/efi/efi.c
+Hunk #1 succeeded at 788 (offset -1 lines).
+Hunk #2 succeeded at 821 (offset -1 lines).
+Hunk #3 FAILED at 853.
+1 out of 3 hunks FAILED
 
-and this breaks the ARM build:
+and this time I took your patches from here: https://people.redhat.com/ruyang/kexec-efi/for-bp/kernel-patches/
 
-In file included from /home/mingo/tip/init/main.c:44:
-/home/mingo/tip/include/linux/efi.h:842:21: error: asm/efi.h: No such file or directory
-/home/mingo/tip/init/main.c: In function 'start_kernel':
-/home/mingo/tip/init/main.c:638: error: implicit declaration of function 'efi_enabled'
-/home/mingo/tip/init/main.c:639: error: implicit declaration of function 'efi_late_init'
-/home/mingo/tip/init/main.c:640: error: implicit declaration of function 'efi_free_boot_services'
+What I did is:
 
-Thanks,
+1. I took Linus' tree from today
 
-	Ingo
+2. Merged the 'next' branch of
+git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git. Mind
+you, not the 'efi-next' tag!
+
+3. Then I merged the 'efi' branch of
+git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git ontop.
+It gave a simple merge conflict which is trivial to resolve:
+http://paste.debian.net/62579/
+
+Here I started applying your patches and the 3rd one still fails.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
