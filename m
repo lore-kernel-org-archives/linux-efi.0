@@ -1,43 +1,43 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes
-Date: Mon, 28 Oct 2013 12:17:41 +0100
-Message-ID: <20131028111741.GA7830@gmail.com>
-References: <20131027214815.GH1982@console-pimps.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
+Date: Mon, 28 Oct 2013 12:20:45 +0100
+Message-ID: <20131028112045.GH4314@pd.tnic>
+References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
+ <20131027035923.081819853@dhcp-16-126.nay.redhat.com>
+ <20131028093206.GB4314@pd.tnic>
+ <20131028094049.GC25527@dhcp-16-126.nay.redhat.com>
+ <20131028095117.GD25527@dhcp-16-126.nay.redhat.com>
+ <20131028100402.GC4314@pd.tnic>
+ <20131028101011.GF25527@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131027214815.GH1982-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20131028101011.GF25527-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, Oct 28, 2013 at 06:10:11PM +0800, Dave Young wrote:
+> Sorry, I have not any public git account. Attached the patch I applied
+> with git
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+Still doesn't work:
 
-> Guys, do you think we could get the EFI earlyprintk support into the
-> 'x86/efi' branch for the upcoming merge window? I know it's quite late
-> in the game but since it's a new feature it shouldn't introduce any kind
-> of regression and is a much needed feature.
-> 
-> The following changes since commit c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
-> 
->   boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 32c9e70fc3912c3b9c7d53ce016960ce99ff93d4:
-> 
->   x86/efi: Add EFI framebuffer earlyprintk support (2013-10-27 21:18:48 +0000)
+$ patch -p1 --dry-run -i /tmp/02-efi-enter-virtual-mode-cleanup-1.patch.new 
+checking file arch/x86/platform/efi/efi.c
+Hunk #1 succeeded at 788 (offset -1 lines).
+Hunk #2 succeeded at 821 (offset -1 lines).
+Hunk #3 FAILED at 853.
+1 out of 3 hunks FAILED
 
-This breaks on x86-64 allmodconfig with:
+I'm using Matt's next branch + my efi runtime branch. What are you
+basing your stuff ontop?
 
-arch/x86/built-in.o: In function `early_efi_setup':
-early_printk.c:(.init.text+0x27e9f): undefined reference to `get_default_font'
+-- 
+Regards/Gruss,
+    Boris.
 
-Thanks,
-
-	Ingo
+Sent from a fat crate under my desk. Formatting is fine.
+--
