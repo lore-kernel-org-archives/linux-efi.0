@@ -1,53 +1,47 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [patch 2/6] x86 efi: reserve boot service fix
-Date: Mon, 28 Oct 2013 10:27:05 +0000
-Message-ID: <20131028102705.GI1982@console-pimps.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
+Date: Mon, 28 Oct 2013 18:39:18 +0800
+Message-ID: <20131028103918.GH25527@dhcp-16-126.nay.redhat.com>
 References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
- <20131027035922.924386710@dhcp-16-126.nay.redhat.com>
- <20131027105009.GA21868@pd.tnic>
- <20131027203058.GE1982@console-pimps.org>
- <20131028011824.GD4397@dhcp-16-126.nay.redhat.com>
- <20131028084440.GA4314@pd.tnic>
+ <20131027035923.081819853@dhcp-16-126.nay.redhat.com>
+ <20131028093206.GB4314@pd.tnic>
+ <20131028094049.GC25527@dhcp-16-126.nay.redhat.com>
+ <20131028095117.GD25527@dhcp-16-126.nay.redhat.com>
+ <20131028100402.GC4314@pd.tnic>
+ <20131028101011.GF25527@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131028084440.GA4314-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20131028101011.GF25527-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 28 Oct, at 09:44:41AM, Borislav Petkov wrote:
-> On Mon, Oct 28, 2013 at 09:18:24AM +0800, Dave Young wrote:
-> > There should be some people see below message with non-kexec kernel:
-> > "Could not reserve boot range ..."
+On 10/28/13 at 06:10pm, Dave Young wrote:
+> On 10/28/13 at 11:04am, Borislav Petkov wrote:
+> > On Mon, Oct 28, 2013 at 05:51:17PM +0800, Dave Young wrote:
+> > > It does have a warning, but it applied successfully, no idea though: 
+> > > patches/02-efi-enter-virtual-mode-cleanup.patch
+> > > Applying: Cleanup efi_enter_virtual_mode function
+> > > /home/dave/git/efi/.git/rebase-apply/patch:42: space before tab in indent.
+> > >  	efi_memory_desc_t *md, *prev_md = NULL;
+> > > warning: 1 line adds whitespace errors.
+> > 
+> > Hmm, ok, can you upload the patches somewhere so that I can pull them?
 > 
-> I can find one other report like that: https://lkml.org/lkml/2013/7/16/309
-> 
-> [    0.000000] efi: Could not reserve boot range [0x0000000000-0x0000000fff]
-> 
-> for
-> 
-> efi: mem00: type=3, attr=0xf, range=[0x0000000000000000-0x0000000000001000) (0MB)
-> 
-> which is EFI_BOOT_SERVICES_CODE and
-> 
-> efi: Could not reserve boot range [0x000005f000-0x000009ffff]
-> 
-> for
-> 
-> efi: mem06: type=3, attr=0xf, range=[0x000000000005f000-0x00000000000a0000) (0MB)
-> 
-> which is of the same type.
- 
-But that doesn't look like the issue that the user was complaining
-about. Rather, it's that the higher EFI regions are unable to be mapped
-because of the user's mem= kernel parameter setting.
+> Sorry, I have not any public git account. Attached the patch I applied with git
 
-However, even though this bug isn't the main focus of the above report,
-since people are hitting it (and since the fix is trivial), I agree it's
-worth tagging for stable.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Here is the kernel patche files if you would like to try,
+I have not got time to update them based on comments.
+https://people.redhat.com/ruyang/kexec-efi/for-bp/kernel-patches/
