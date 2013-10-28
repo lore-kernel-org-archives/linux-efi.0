@@ -1,61 +1,53 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI changes
-Date: Sun, 27 Oct 2013 21:48:15 +0000
-Message-ID: <20131027214815.GH1982@console-pimps.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 2/6] x86 efi: reserve boot service fix
+Date: Mon, 28 Oct 2013 09:18:24 +0800
+Message-ID: <20131028011824.GD4397@dhcp-16-126.nay.redhat.com>
+References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
+ <20131027035922.924386710@dhcp-16-126.nay.redhat.com>
+ <20131027105009.GA21868@pd.tnic>
+ <20131027203058.GE1982@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20131027203058.GE1982-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Guys, do you think we could get the EFI earlyprintk support into the
-'x86/efi' branch for the upcoming merge window? I know it's quite late
-in the game but since it's a new feature it shouldn't introduce any kind
-of regression and is a much needed feature.
+On 10/27/13 at 08:30pm, Matt Fleming wrote:
+> On Sun, 27 Oct, at 11:50:09AM, Borislav Petkov wrote:
+> > On Sun, Oct 27, 2013 at 11:47:15AM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> > > Current code check boot service region with kernel text region by: 
+> > > start+size >= __pa_symbol(_text)
+> > > The end of the above region should be start + size - 1 instead.
+> > > 
+> > > I see this problem in ovmf + Fedora 19 grub boot:
+> > > text start: 1000000 md start: 800000 md size: 800000
+> > > 
+> > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > 
+> > Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> > 
+> > Btw, Matt, this being a bugfix and all, shouldn't it be tagged for
+> > stable?
+> 
+> Well that depends. Dave, am I correct in thinking that you only noticed
+> this bug when writing kexec support? I'm inclined not to bother with a
+> stable tag if no one has ever noticed any fallout from this bug until
+> now.
 
-The following changes since commit c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
-
-  boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 32c9e70fc3912c3b9c7d53ce016960ce99ff93d4:
-
-  x86/efi: Add EFI framebuffer earlyprintk support (2013-10-27 21:18:48 +0000)
-
-----------------------------------------------------------------
- * Add support for earlyprintk=efi which uses the EFI framebuffer. Very
-   useful for debugging boot issues.
-
-----------------------------------------------------------------
-Matt Fleming (2):
-      efi: Add asm-generic/efi.h for non-x86
-      x86/efi: Add EFI framebuffer earlyprintk support
-
- Documentation/kernel-parameters.txt  |   8 +-
- arch/ia64/include/asm/efi.h          |   6 ++
- arch/x86/Kconfig.debug               |   9 ++
- arch/x86/boot/compressed/eboot.c     |   1 -
- arch/x86/include/asm/efi.h           |  12 +++
- arch/x86/kernel/early_printk.c       |   6 ++
- arch/x86/kernel/setup.c              |   1 -
- arch/x86/platform/efi/Makefile       |   1 +
- arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
- arch/x86/platform/efi/efi.c          |   1 -
- arch/x86/platform/efi/efi_32.c       |   1 -
- arch/x86/platform/efi/efi_64.c       |   1 -
- arch/x86/platform/uv/bios_uv.c       |   1 -
- include/asm-generic/efi.h            |  17 ++++
- include/linux/efi.h                  |  31 +-----
- 15 files changed, 249 insertions(+), 38 deletions(-)
- create mode 100644 arch/ia64/include/asm/efi.h
- create mode 100644 arch/x86/platform/efi/early_printk.c
- create mode 100644 include/asm-generic/efi.h
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+There should be some people see below message with non-kexec kernel:
+"Could not reserve boot range ..."
+But it's hard for them to notice the bad functionality because it's only
+one mem range which might be not the boot range what SetVirtualAddressMap need
