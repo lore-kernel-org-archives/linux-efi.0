@@ -1,46 +1,49 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Mon, 28 Oct 2013 17:00:53 +0100
-Message-ID: <20131028160053.GO4314@pd.tnic>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <20131008164551.GB16793@pd.tnic>
- <20131008164831.GD16793@pd.tnic>
- <20131028112246.GK1982@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [GIT PULL] EFI changes
+Date: Mon, 28 Oct 2013 20:30:52 +0000
+Message-ID: <20131028203052.GO1982@console-pimps.org>
+References: <20131028123528.GM1982@console-pimps.org>
+ <20131028134413.GA10163@gmail.com>
+ <20131028155215.GN1982@console-pimps.org>
+ <20131028155525.GA13987@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131028112246.GK1982-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20131028155525.GA13987-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 28, 2013 at 11:22:46AM +0000, Matt Fleming wrote:
-> Could you use the efi_enabled() function to test for EFI_OLD_MEMMAP
-> instead of test_bit()?
-
-Sure.
-
-> This way we won't exhaust the bitspace quite so soon (since ARM/ARM64
-
-Yeah, very foresightful.
-
-> can reuse EFI_ARCH_1 if they need it), plus this memory mapping method
-> is a very architecture-specific thing and so makes sense to hide it in
-> the bowels of arch/x86. If it turns out that ARM/ARM64 need the exact
-> same config option we can delete EFI_ARCH_1 and move EFI_OLD_MEMMAP to
-> include/linux/efi.h just like in your original patch. 
+On Mon, 28 Oct, at 04:55:25PM, Ingo Molnar wrote:
 > 
-> What do you think?
+> * Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> 
+> > On Mon, 28 Oct, at 02:44:13PM, Ingo Molnar wrote:
+> > > and this breaks the ARM build:
+> > > 
+> > > In file included from /home/mingo/tip/init/main.c:44:
+> > > /home/mingo/tip/include/linux/efi.h:842:21: error: asm/efi.h: No such file or directory
+> > > /home/mingo/tip/init/main.c: In function 'start_kernel':
+> > > /home/mingo/tip/init/main.c:638: error: implicit declaration of function 'efi_enabled'
+> > > /home/mingo/tip/init/main.c:639: error: implicit declaration of function 'efi_late_init'
+> > > /home/mingo/tip/init/main.c:640: error: implicit declaration of function 'efi_free_boot_services'
+> > 
+> > Ah, that's my own fault because my 'next' branch doesn't include 
+> > the ARM EFI support. Where did you get the patches from? Are they 
+> > in linux-next?
+> 
+> It's all in tip:x86/efi.
+> 
+> > I'm inclined to drop the cleanup patch for now and do it later, 
+> > once things have settled because it's also causing conflicts for 
+> > Borislav's work.
+> 
+> Sure.
 
-Yep, done and pushed out.
-
-Thanks.
+OK, I've pushed out the 'next' branch and retagged it as 'efi-next'
+(again), which hopefully should be finally free from build errors.
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
