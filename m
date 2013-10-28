@@ -1,82 +1,94 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
-Date: Mon, 28 Oct 2013 23:10:48 +0800
-Message-ID: <20131028151048.GA14984@dhcp-16-126.nay.redhat.com>
-References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
- <20131027035923.081819853@dhcp-16-126.nay.redhat.com>
- <20131028093206.GB4314@pd.tnic>
- <20131028094049.GC25527@dhcp-16-126.nay.redhat.com>
- <20131028095117.GD25527@dhcp-16-126.nay.redhat.com>
- <20131028100402.GC4314@pd.tnic>
- <20131028101011.GF25527@dhcp-16-126.nay.redhat.com>
- <20131028112045.GH4314@pd.tnic>
- <20131028112458.GD29133@dhcp-16-126.nay.redhat.com>
- <20131028145801.GM4314@pd.tnic>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH] Differentiating names by adding a timestamp.
+Date: Mon, 28 Oct 2013 15:46:01 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D47F9D0EFB@USINDEM103.corp.hds.com>
+References: <87li1dv8by.fsf@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131028145801.GM4314-fF5Pk5pvG8Y@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <87li1dv8by.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Anton Vorontsov <cbou-JGs/UdohzUI@public.gmane.org>, Colin Cross <ccross-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Kees Cook <kees-oSa+0FWJbaXR7s880joybQ@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/28/13 at 03:58pm, Borislav Petkov wrote:
-> On Mon, Oct 28, 2013 at 07:24:58PM +0800, Dave Young wrote:
-> > I use linus tree, git pull Matt's efi-next tree, then apply your 12
-> > patches and my patches. I applied your previous 11 patches + the last
-> > update patch 12/12, but the last one does not apply, I manually shift
-> > a hunk to make it apply.
-> 
-> Nope, still doesn't apply.
-> 
-> patch -p1 --dry-run -i ~/efi/dy/03-efi-enter-virtual-mode-cleanup.patch 
-> checking file arch/x86/platform/efi/efi.c
-> Hunk #1 succeeded at 788 (offset -1 lines).
-> Hunk #2 succeeded at 821 (offset -1 lines).
-> Hunk #3 FAILED at 853.
-> 1 out of 3 hunks FAILED
-> 
-> and this time I took your patches from here: https://people.redhat.com/ruyang/kexec-efi/for-bp/kernel-patches/
-> 
-> What I did is:
-> 
-> 1. I took Linus' tree from today
-> 
-> 2. Merged the 'next' branch of
-> git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git. Mind
-> you, not the 'efi-next' tag!
+To distinguish all events more precisely, "count" is needed to add to the name.
+Please see the commit below.
+755d4fe46529018ae45bc7c86df682de45ace764
 
-I used the above tree origin/next branch
+Seiji
 
+> -----Original Message-----
+> From: Madper Xie [mailto:cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org]
+> Sent: Monday, October 28, 2013 9:22 AM
+> To: Tony Luck; Seiji Aguchi; Anton Vorontsov; Colin Cross; Kees Cook
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Subject: [PATCH] Differentiating names by adding a timestamp.
 > 
-> 3. Then I merged the 'efi' branch of
-> git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git ontop.
-
-I used the patches from mailbox directly.
-Fixed an conflict and merge them one by one.
-
-> It gave a simple merge conflict which is trivial to resolve:
-> http://paste.debian.net/62579/
-
-Looks like I can not access above link.
-
 > 
-> Here I started applying your patches and the 3rd one still fails.
+> pstore denominate dumped file as type-psname-id. it makes many file have
+> the same name if there are many entries in backend have the same id.
+> So adding a timestamp to file name.
 > 
-
-It's strange to me. There must be something wrong in the steps
-But sorry, it's time to sleep for me, will track this tommrrow.
-
-Thanks
-Dave
+> Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  fs/pstore/inode.c | 26 ++++++++++++++++----------
+>  1 file changed, 16 insertions(+), 10 deletions(-)
+> 
+> diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+> index 1282384..bf6ed3a 100644
+> --- a/fs/pstore/inode.c
+> +++ b/fs/pstore/inode.c
+> @@ -315,32 +315,38 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+> 
+>  	switch (type) {
+>  	case PSTORE_TYPE_DMESG:
+> -		sprintf(name, "dmesg-%s-%lld%s", psname, id,
+> -						compressed ? ".enc.z" : "");
+> +		sprintf(name, "dmesg-%s-%lld-%lld%s", psname, id,
+> +			timespec_to_ns(&time), compressed ? ".enc.z" : "");
+>  		break;
+>  	case PSTORE_TYPE_CONSOLE:
+> -		sprintf(name, "console-%s", psname);
+> +		sprintf(name, "console-%s-%lld", psname, timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_FTRACE:
+> -		sprintf(name, "ftrace-%s", psname);
+> +		sprintf(name, "ftrace-%s-%lld", psname, timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_MCE:
+> -		sprintf(name, "mce-%s-%lld", psname, id);
+> +		sprintf(name, "mce-%s-%lld-%lld", psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_PPC_RTAS:
+> -		sprintf(name, "rtas-%s-%lld", psname, id);
+> +		sprintf(name, "rtas-%s-%lld-%lld", psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_PPC_OF:
+> -		sprintf(name, "powerpc-ofw-%s-%lld", psname, id);
+> +		sprintf(name, "powerpc-ofw-%s-%lld-%lld", psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_PPC_COMMON:
+> -		sprintf(name, "powerpc-common-%s-%lld", psname, id);
+> +		sprintf(name, "powerpc-common-%s-%lld-%lld", psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	case PSTORE_TYPE_UNKNOWN:
+> -		sprintf(name, "unknown-%s-%lld", psname, id);
+> +		sprintf(name, "unknown-%s-%lld-%lld", psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	default:
+> -		sprintf(name, "type%d-%s-%lld", type, psname, id);
+> +		sprintf(name, "type%d-%s-%lld-%lld", type, psname, id,
+> +			timespec_to_ns(&time));
+>  		break;
+>  	}
+> 
+> --
+> 1.8.4.1
