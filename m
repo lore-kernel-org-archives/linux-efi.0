@@ -1,99 +1,74 @@
-From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] pstore: avoid incorrectly mark entry as duplicate
-Date: Mon, 28 Oct 2013 21:36:57 +0800
-Message-ID: <87iowhv7nq.fsf@redhat.com>
-References: <87r4bcdok1.fsf@redhat.com> <CA+8MBb+0wruR-T8Rkk_WQ6Try4ct2ZCm8o=js4eO8s7cogcs+g@mail.gmail.com> <87k3h35xij.fsf@redhat.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI changes
+Date: Mon, 28 Oct 2013 14:44:13 +0100
+Message-ID: <20131028134413.GA10163@gmail.com>
+References: <20131028123528.GM1982@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <87k3h35xij.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131028123528.GM1982-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, Lenny Szubowicz <lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, =?utf-8?B?5oiQ6aqPIOiwog==?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Howdy Tony,
-  Does this patch still need some rework?
-  
-cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org writes:
 
-> tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org writes:
->
->> On Wed, Oct 23, 2013 at 7:55 AM, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->>> The "duplicate" entries won't appear in pstorefs. And a complain will be
->>> print -- pstore: failed to load 76 record(s) from 'efi'
->>
->> Maybe I don't quite get this - but it sounds like you have a whole lot
->> of entries using up space in efivars that have similar names - differing
->> just in the timestamp - that won't show up in the pstore filesystem - because
->> we'd try to name them all the same thing.
->>
-> Maybe I misunderstand you...
->
-> Sure pstore try to name them all the same thing, but it's another
-> issue. and it doesn't prevent entries showing up in pstore fs.
->
-> Consider the following case: (after efi-pstore support append mode, it
-> always like this case):
->
-> I choose four dumped efivars from my DELL XPS:
-> dump-type0-9-1-1380441690-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380448560-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1380460890-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
-> dump-type0-9-1-1382496073-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
->          ^        ^       [              ^                   ]
->          !        !                      !
->        type    timestamp                GUID
->
-> When pstore load them from efivars, pstore incorrectly assuming that
-> efivars with the same TYPE, ID and GUID are duplicate.
->
-> list_for_each_entry(pos, &allpstore, list) {
-> 	if (pos->type == type &&    /---
-> 	    pos->id == id &&     <-| as I said, it only check type,id,psi
-> 	    pos->psi == psi) {      \---
-> 		rc = -EEXIST;    <- then set -EEXIST, and ignore *dup* entry
-> 		break;
-> 	}
-> }
-> You can see the code above, for those four entries, only one could be
-> showed in pstorefs, all others will get a -EEXIST. So I add a timestamp
-> check here, it's the only different part.
->
->> How did all those things end up in efivars?
-> before the patch I can see 
-> dmesg-efi-1   dmesg-efi-11  dmesg-efi-3  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-10  dmesg-efi-2   dmesg-efi-4  dmesg-efi-6  dmesg-efi-8
-> after apply the patch:
-> [root@dhcp-13-41 vars]# ls /dev/pstore/
-> dmesg-efi-1  dmesg-efi-1   dmesg-efi-11  dmesg-efi-2  dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-11  dmesg-efi-2  dmesg-efi-3  dmesg-efi-5  dmesg-efi-7  dmesg-efi-8
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-12  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-8
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-13  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-14  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-15  dmesg-efi-2  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-16  dmesg-efi-3  dmesg-efi-4  dmesg-efi-5  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-7  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-10  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-4  dmesg-efi-6  dmesg-efi-8  dmesg-efi-9
-> dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-> dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
-> dmesg-efi-1  dmesg-efi-11  dmesg-efi-2   dmesg-efi-3  dmesg-efi-5  dmesg-efi-6  dmesg-efi-8
->
->>
->> Wouldn't the right fix be to make pstore allow them all to appear (using the
->> timestamp to differentiate names?) so that we could see them, log them,
->> and then remove them from pstore (in turn freeing up efivars space - which
->> people keep telling me is in short supply).
->>
-> Yeah, many file have the same name, just like my case above. But it not
-> really block the file shows up and should be solved in another
-> patch. And I'm trying fix it.
->> -Tony
+* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
 
+> This is a respin of the EFI earlyprintk support with the fix for the
+> allmodconfig build breakage that Ingo reported.
+> 
+> The following changes since commit c158c3bf59951bbb44bd7ccca9e6665dfd1617c5:
+> 
+>   boot, efi: Remove redundant memset() (2013-10-04 20:07:47 +0100)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+> 
+> for you to fetch changes up to 265434a91cf3377d65dc2b6d80065271514b5696:
+> 
+>   x86/efi: Add EFI framebuffer earlyprintk support (2013-10-28 11:57:58 +0000)
+> 
+> ----------------------------------------------------------------
+>  * Add support for earlyprintk=efi which uses the EFI framebuffer. Very
+>    useful for debugging boot issues.
+> 
+> ----------------------------------------------------------------
+> Matt Fleming (2):
+>       efi: Add asm-generic/efi.h for non-x86
+>       x86/efi: Add EFI framebuffer earlyprintk support
+> 
+>  Documentation/kernel-parameters.txt  |   8 +-
+>  arch/ia64/include/asm/efi.h          |   6 ++
+>  arch/x86/Kconfig.debug               |  10 ++
+>  arch/x86/boot/compressed/eboot.c     |   1 -
+>  arch/x86/include/asm/efi.h           |  12 +++
+>  arch/x86/kernel/early_printk.c       |   6 ++
+>  arch/x86/kernel/setup.c              |   1 -
+>  arch/x86/platform/efi/Makefile       |   1 +
+>  arch/x86/platform/efi/early_printk.c | 191 +++++++++++++++++++++++++++++++++++
+>  arch/x86/platform/efi/efi.c          |   1 -
+>  arch/x86/platform/efi/efi_32.c       |   1 -
+>  arch/x86/platform/efi/efi_64.c       |   1 -
+>  arch/x86/platform/uv/bios_uv.c       |   1 -
+>  include/asm-generic/efi.h            |  17 ++++
+>  include/linux/efi.h                  |  31 +-----
+>  15 files changed, 250 insertions(+), 38 deletions(-)
+>  create mode 100644 arch/ia64/include/asm/efi.h
+>  create mode 100644 arch/x86/platform/efi/early_printk.c
+>  create mode 100644 include/asm-generic/efi.h
 
--- 
-Best,
-Madper Xie.
+and this breaks the ARM build:
+
+In file included from /home/mingo/tip/init/main.c:44:
+/home/mingo/tip/include/linux/efi.h:842:21: error: asm/efi.h: No such file or directory
+/home/mingo/tip/init/main.c: In function 'start_kernel':
+/home/mingo/tip/init/main.c:638: error: implicit declaration of function 'efi_enabled'
+/home/mingo/tip/init/main.c:639: error: implicit declaration of function 'efi_late_init'
+/home/mingo/tip/init/main.c:640: error: implicit declaration of function 'efi_free_boot_services'
+
+Thanks,
+
+	Ingo
