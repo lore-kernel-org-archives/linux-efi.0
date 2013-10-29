@@ -1,51 +1,32 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 5/6] export efi runtime memory mapping to sysfs
-Date: Tue, 29 Oct 2013 13:34:27 +0800
-Message-ID: <20131029053427.GH5185@dhcp-16-126.nay.redhat.com>
-References: <20131027034713.481920209@dhcp-16-126.nay.redhat.com>
- <20131027035923.442470867@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Tue, 29 Oct 2013 14:47:20 +0800
+Message-ID: <20131029064720.GA16009@dhcp-16-126.nay.redhat.com>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <20131008164551.GB16793@pd.tnic>
+ <20131008164831.GD16793@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131027035923.442470867-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20131008164831.GD16793-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/27/13 at 11:47am, Dave Young wrote:
-> kexec kernel will need exactly same mapping for
-> efi runtime memory ranges. Thus here export the
-> runtime ranges mapping to sysfs, kexec-tools
-> will assemble them and pass to 2nd kernel via
-> setup_data.
-> 
-> Introducing a new directly /sys/firmware/efi/efi-runtime-map
-> Just like /sys/firmware/memmap. Containing below attribute
-> in each file of that directory:
-> attribute  num_pages  phys_addr  type  virt_addr
-> 
-> It will not work for efi 32bit. Only x86_64 currently.
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/include/asm/efi.h             |    3 
->  arch/x86/platform/efi/efi.c            |   11 ++
->  drivers/firmware/efi/Kconfig           |   10 +
->  drivers/firmware/efi/Makefile          |    1 
->  drivers/firmware/efi/efi-runtime-map.c |  166 +++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/efi.c             |    3 
->  6 files changed, 193 insertions(+), 1 deletion(-)
+>  /*
+>   * This function will switch the EFI runtime services to virtual mode.
+>   * Essentially, look through the EFI memmap and map every region that
+> @@ -862,10 +906,10 @@ void efi_memory_uc(u64 addr, unsigned long size)
+>  void __init efi_enter_virtual_mode(void)
 
-Remind myself: add below to Documentaion in next version:
-Documentation/ABI/testing/sysfs-efi-runtime-map
+Boris, could you update the comment? it says below:
+ update that memory descriptor with the virtual address obtained
+ from ioremap().
+
+Logiclly your patch should update it, then my patch update it again with
+the case of mapping to fixed address for kexec.
+
+Thanks
+Dave
