@@ -1,54 +1,36 @@
-From: "Geyslan G. Bem" <geyslan@gmail.com>
-Subject: [PATCH v2] efivarfs: 'efivarfs_file_write' function reorganization
-Date: Wed, 30 Oct 2013 15:57:41 -0300
-Message-ID: <1383159461-29668-1-git-send-email-geyslan@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: kernel-br@googlegroups.com
-Cc: "Geyslan G. Bem" <geyslan@gmail.com>, Matthew Garrett <matthew.garrett@nebula.com>, Jeremy Kerr <jk@ozlabs.org>, Matt Fleming <matt.fleming@intel.com>, "open list:EFI VARIABLE FILE..." <linux-efi@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+From: =?ISO-8859-1?Q?Geyslan_Greg=F3rio_Bem?= <geyslan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] efivarfs: 'efivarfs_file_write' function reorganization
+Date: Wed, 30 Oct 2013 17:13:00 -0200
+Message-ID: <CAGG-pUTYhJZvjosykckFjRiKE-isKbCPTtomY3jTxrU2_a1LJA@mail.gmail.com>
+References: <1381775837-26023-1-git-send-email-geyslan@gmail.com>
+	<20131030123850.GA8193@console-pimps.org>
+	<CAGG-pUQZ2R0JMZuGi07cL5q4EABYouZJfMpkO6YPy+ry2WkbNw@mail.gmail.com>
+	<20131030143923.GA9996@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131030143923.GA9996-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, kernel-br <kernel-br-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This reorganization:
+2013/10/30 Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>:
+> On Wed, 30 Oct, at 10:44:16AM, Geyslan Greg=F3rio Bem wrote:
+>> Do you want that I undo that? I aggre that the variable use only
+>> reduces the line code.
+>
+> Yes please.
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
 
-Removes useless 'bytes' prior assignment.
+Done:
+[PATCH v2] efivarfs: 'efivarfs_file_write' function reorganization
 
-Uses 'memdup_user' instead 'kmalloc' + 'copy_from_user'.
+--=20
+Regards,
 
-Signed-off-by: Geyslan G. Bem <geyslan@gmail.com>
----
- fs/efivarfs/file.c | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
-
-diff --git a/fs/efivarfs/file.c b/fs/efivarfs/file.c
-index 8dd524f..cdb2971 100644
---- a/fs/efivarfs/file.c
-+++ b/fs/efivarfs/file.c
-@@ -21,7 +21,7 @@ static ssize_t efivarfs_file_write(struct file *file,
- 	u32 attributes;
- 	struct inode *inode = file->f_mapping->host;
- 	unsigned long datasize = count - sizeof(attributes);
--	ssize_t bytes = 0;
-+	ssize_t bytes;
- 	bool set = false;
- 
- 	if (count < sizeof(attributes))
-@@ -33,14 +33,9 @@ static ssize_t efivarfs_file_write(struct file *file,
- 	if (attributes & ~(EFI_VARIABLE_MASK))
- 		return -EINVAL;
- 
--	data = kmalloc(datasize, GFP_KERNEL);
--	if (!data)
--		return -ENOMEM;
--
--	if (copy_from_user(data, userbuf + sizeof(attributes), datasize)) {
--		bytes = -EFAULT;
--		goto out;
--	}
-+	data = memdup_user(userbuf + sizeof(attributes), datasize);
-+	if (IS_ERR(data))
-+		return PTR_ERR(data);
- 
- 	bytes = efivar_entry_set_get_size(var, attributes, &datasize,
- 					  data, &set);
--- 
-1.8.4
+Geyslan G. Bem
+hackingbits.com
