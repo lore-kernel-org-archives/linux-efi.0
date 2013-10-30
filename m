@@ -1,91 +1,46 @@
-From: Madper Xie <cxie@redhat.com>
-Subject: [PATCH 2/2] pstore: Differentiating names by adding count and timestamp
-Date: Wed, 30 Oct 2013 17:44:54 +0800
-Message-ID: <1383126294-28793-3-git-send-email-cxie@redhat.com>
-References: <1383126294-28793-1-git-send-email-cxie@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1383126294-28793-1-git-send-email-cxie@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: tony.luck@intel.com, keescook@chromium.org, ccross@android.com, anton@enomsg.org, seiji.aguchi@hds.com
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, bbboson@gmail.com, Madper Xie <cxie@redhat.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
+Date: Wed, 30 Oct 2013 11:45:26 +0100
+Message-ID: <20131030104526.GA13290@pd.tnic>
+References: <1379602494-26684-1-git-send-email-bp@alien8.de>
+ <20131008164551.GB16793@pd.tnic>
+ <20131008164831.GD16793@pd.tnic>
+ <20131029064720.GA16009@dhcp-16-126.nay.redhat.com>
+ <20131029094033.GA10972@pd.tnic>
+ <20131030093227.GA5791@dhcp-16-126.nay.redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131030093227.GA5791-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Madper Xie <bbboson@gmail.com>
+On Wed, Oct 30, 2013 at 05:32:27PM +0800, Dave Young wrote:
+> Boris, thanks for update, it's very elaborate, I have still wonder if
+> 32 bit case should be mentioned as well.
 
-pstore denominates dumped file as type-psname-id. it makes many file have
-the same name if there are many entries in backend have the same id.
-So adding count and timestamp to file name for differentiating.
+Ah, so that's why is mfleming bugging me about it on IRC :)
 
-Signed-off-by: Madper Xie <cxie@redhat.com>
----
- fs/pstore/inode.c | 29 ++++++++++++++++++-----------
- 1 file changed, 18 insertions(+), 11 deletions(-)
+Well, I left out the 32-bit case simply because I don't think anyone
+cares about it.
 
-diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
-index 0ae994c..36b502f 100644
---- a/fs/pstore/inode.c
-+++ b/fs/pstore/inode.c
-@@ -285,7 +285,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
- 	int			rc = 0;
- 	char			name[PSTORE_NAMELEN];
- 	struct pstore_private	*private, *pos;
--	unsigned long		flags;
-+	unsigned long		flags, timestamp;
- 
- 	spin_lock_irqsave(&allpstore_lock, flags);
- 	list_for_each_entry(pos, &allpstore, list) {
-@@ -316,35 +316,42 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
- 	private->count = count;
- 	private->psi = psi;
- 	memcpy(&private->time, &time, sizeof(struct timespec));
-+	timestamp = time.tv_sec;
- 
- 	switch (type) {
- 	case PSTORE_TYPE_DMESG:
--		sprintf(name, "dmesg-%s-%lld%s", psname, id,
--						compressed ? ".enc.z" : "");
-+		sprintf(name, "dmesg-%s-%lld-%d-%ld%s", psname, id, count,
-+			timestamp, compressed ? ".enc.z" : "");
- 		break;
- 	case PSTORE_TYPE_CONSOLE:
--		sprintf(name, "console-%s", psname);
-+		sprintf(name, "console-%s-%d-%ld", psname, count, timestamp);
- 		break;
- 	case PSTORE_TYPE_FTRACE:
--		sprintf(name, "ftrace-%s", psname);
-+		sprintf(name, "ftrace-%s-%d-%ld", psname, count, timestamp);
- 		break;
- 	case PSTORE_TYPE_MCE:
--		sprintf(name, "mce-%s-%lld", psname, id);
-+		sprintf(name, "mce-%s-%lld-%d-%ld", psname, id, count,
-+			timestamp);
- 		break;
- 	case PSTORE_TYPE_PPC_RTAS:
--		sprintf(name, "rtas-%s-%lld", psname, id);
-+		sprintf(name, "rtas-%s-%lld-%d-%ld", psname, id, count,
-+			timestamp);
- 		break;
- 	case PSTORE_TYPE_PPC_OF:
--		sprintf(name, "powerpc-ofw-%s-%lld", psname, id);
-+		sprintf(name, "powerpc-ofw-%s-%lld-%d-%ld", psname, id, count,
-+			timestamp);
- 		break;
- 	case PSTORE_TYPE_PPC_COMMON:
--		sprintf(name, "powerpc-common-%s-%lld", psname, id);
-+		sprintf(name, "powerpc-common-%s-%lld-%d-%ld", psname, id,
-+			count, timestamp);
- 		break;
- 	case PSTORE_TYPE_UNKNOWN:
--		sprintf(name, "unknown-%s-%lld", psname, id);
-+		sprintf(name, "unknown-%s-%lld-%d-%ld", psname, id, count,
-+			timestamp);
- 		break;
- 	default:
--		sprintf(name, "type%d-%s-%lld", type, psname, id);
-+		sprintf(name, "type%d-%s-%lld-%d-%ld", type, psname, id, count,
-+			timestamp);
- 		break;
- 	}
- 
+> Waiting for you next version of the patch series. I will redo my
+> patches based on that.
+
+Since I'm doing only minor fixups, I didn't want to spam
+the lists again.
+
+The latest version is my 'efi' branch at
+git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git
+
+and you can pull it from there.
+
 -- 
-1.8.4.2
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
