@@ -1,36 +1,86 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v3] efivars,efi-pstore: Hold off deletion of sysfs entry
- until, the scan is completed
+From: Seiji Aguchi <seiji.aguchi@hds.com>
+Subject: RE: [PATCH 1/2] pstore: avoid incorrectly mark entry as duplicate
 Date: Wed, 30 Oct 2013 14:35:27 +0000
-Message-ID: <20131030143527.GB8193@console-pimps.org>
-References: <52584373.3010202@hds.com>
- <20131017131821.GH10834@console-pimps.org>
- <A5ED84D3BB3A384992CBB9C77DEDA4D443F0F2D6@USINDEM103.corp.hds.com>
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D47F9D388F@USINDEM103.corp.hds.com>
+References: <1383126294-28793-1-git-send-email-cxie@redhat.com>
+ <1383126294-28793-2-git-send-email-cxie@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D443F0F2D6-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tomoki Sekiyama <tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org>, "dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1383126294-28793-2-git-send-email-cxie@redhat.com>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Madper Xie <cxie@redhat.com>, "tony.luck@intel.com" <tony.luck@intel.com>, "keescook@chromium.org" <keescook@chromium.org>, "ccross@android.com" <ccross@android.com>, "anton@enomsg.org" <anton@enomsg.org>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "bbboson@gmail.com" <bbboson@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 18 Oct, at 10:30:58PM, Seiji Aguchi wrote:
-> The scanning and deleting logic is still needed.  In case an entry(A)
-> is found, the pointer is saved to psi->data.  And efi_pstore_read()
-> passes the entry(A) to a pstore filesystem by releasing
-> __efivars->lock.
-> 
-> And then, the pstore filesystem calls efi_pstore_read() again and the
-> same entry(A), which is saved to psi->data, is used for re-scanning a
-> sysfs-list.  (That is why list_for_each_entry_safe_from () is used in
-> efi_pstore_sysfs_entry_iter().)
-> 
-> So, to protect the entry(A), the logic is needed because, in pstore
-> filesystem,  __efivars->lock Is released. 
- 
-Very good point.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+
+> -----Original Message-----
+> From: Madper Xie [mailto:cxie@redhat.com]
+> Sent: Wednesday, October 30, 2013 5:45 AM
+> To: tony.luck@intel.com; keescook@chromium.org; ccross@android.com; anton@enomsg.org; Seiji Aguchi
+> Cc: linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org; bbboson@gmail.com; Madper Xie
+> Subject: [PATCH 1/2] pstore: avoid incorrectly mark entry as duplicate
+> 
+> From: Madper Xie <bbboson@gmail.com>
+> 
+> pstore try to find duplicate entries by check both ID, type and psi.
+> They are not really enough for efi backend. dumped vars always have
+> the same type, psi and ID. like follows:
+> dump-type0-9-1-1382511508-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+> dump-type0-9-1-1382515661-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+> 
+> The "duplicate" entries won't appear in pstorefs. And a complain will be
+> print -- pstore: failed to load 76 record(s) from 'efi'
+> So I add two more checks: timespec and count.
+> 
+> Signed-off-by: Madper Xie <cxie@redhat.com>
+
+Looks good to me.
+Acked-by: Seiji Aguchi <seiji.aguchi@hds.com>
+
+But, this patch has to be tested by other backend drivers like erst and ramoops.
+In my understanding, erst has supported to log multiple events.
+So, I'm interested why the same error hasn't happened in the other drivers.
+
+Seiji
+
+> ---
+>  fs/pstore/inode.c | 6 +++++-
+>  1 file changed, 5 insertions(+), 1 deletion(-)
+> 
+> diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+> index 1282384..0ae994c 100644
+> --- a/fs/pstore/inode.c
+> +++ b/fs/pstore/inode.c
+> @@ -47,6 +47,7 @@ static LIST_HEAD(allpstore);
+>  struct pstore_private {
+>  	struct list_head list;
+>  	struct pstore_info *psi;
+> +	struct timespec time;
+>  	enum pstore_type_id type;
+>  	u64	id;
+>  	int	count;
+> @@ -290,7 +291,9 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+>  	list_for_each_entry(pos, &allpstore, list) {
+>  		if (pos->type == type &&
+>  		    pos->id == id &&
+> -		    pos->psi == psi) {
+> +		    pos->psi == psi &&
+> +		    pos->count == count &&
+> +		    !timespec_compare(&pos->time, &time)) {
+>  			rc = -EEXIST;
+>  			break;
+>  		}
+> @@ -312,6 +315,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+>  	private->id = id;
+>  	private->count = count;
+>  	private->psi = psi;
+> +	memcpy(&private->time, &time, sizeof(struct timespec));
+> 
+>  	switch (type) {
+>  	case PSTORE_TYPE_DMESG:
+> --
+> 1.8.4.2
