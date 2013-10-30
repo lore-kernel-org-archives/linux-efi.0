@@ -1,22 +1,62 @@
-From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 0/2] make all stored entries accessible.
-Date: Wed, 30 Oct 2013 17:44:52 +0800
-Message-ID: <1383126294-28793-1-git-send-email-cxie@redhat.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org, anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org, seiji.aguchi-7rDLJAbr9SE@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Madper Xie <cxie@redhat.com>
+Subject: [PATCH 1/2] pstore: avoid incorrectly mark entry as duplicate
+Date: Wed, 30 Oct 2013 17:44:53 +0800
+Message-ID: <1383126294-28793-2-git-send-email-cxie@redhat.com>
+References: <1383126294-28793-1-git-send-email-cxie@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1383126294-28793-1-git-send-email-cxie@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: tony.luck@intel.com, keescook@chromium.org, ccross@android.com, anton@enomsg.org, seiji.aguchi@hds.com
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, bbboson@gmail.com, Madper Xie <cxie@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-1. checking type, id, psi, count and timespec when finding duplicate entries.
-2. adding count and timestamp  for differentiating.
+From: Madper Xie <bbboson@gmail.com>
 
-Madper Xie (2):
-  pstore: avoid incorrectly mark entry as duplicate
-  pstore: Differentiating names by adding count and timestamp
+pstore try to find duplicate entries by check both ID, type and psi.
+They are not really enough for efi backend. dumped vars always have
+the same type, psi and ID. like follows:
+dump-type0-9-1-1382511508-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
+dump-type0-9-1-1382515661-C-cfc8fc79-be2e-4ddc-97f0-9f98bfe298a0
 
- fs/pstore/inode.c | 35 +++++++++++++++++++++++------------
- 1 file changed, 23 insertions(+), 12 deletions(-)
+The "duplicate" entries won't appear in pstorefs. And a complain will be
+print -- pstore: failed to load 76 record(s) from 'efi'
+So I add two more checks: timespec and count.
 
+Signed-off-by: Madper Xie <cxie@redhat.com>
+---
+ fs/pstore/inode.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/fs/pstore/inode.c b/fs/pstore/inode.c
+index 1282384..0ae994c 100644
+--- a/fs/pstore/inode.c
++++ b/fs/pstore/inode.c
+@@ -47,6 +47,7 @@ static LIST_HEAD(allpstore);
+ struct pstore_private {
+ 	struct list_head list;
+ 	struct pstore_info *psi;
++	struct timespec time;
+ 	enum pstore_type_id type;
+ 	u64	id;
+ 	int	count;
+@@ -290,7 +291,9 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 	list_for_each_entry(pos, &allpstore, list) {
+ 		if (pos->type == type &&
+ 		    pos->id == id &&
+-		    pos->psi == psi) {
++		    pos->psi == psi &&
++		    pos->count == count &&
++		    !timespec_compare(&pos->time, &time)) {
+ 			rc = -EEXIST;
+ 			break;
+ 		}
+@@ -312,6 +315,7 @@ int pstore_mkfile(enum pstore_type_id type, char *psname, u64 id, int count,
+ 	private->id = id;
+ 	private->count = count;
+ 	private->psi = psi;
++	memcpy(&private->time, &time, sizeof(struct timespec));
+ 
+ 	switch (type) {
+ 	case PSTORE_TYPE_DMESG:
 -- 
 1.8.4.2
