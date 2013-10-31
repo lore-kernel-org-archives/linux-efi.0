@@ -1,55 +1,123 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
-Date: Wed, 30 Oct 2013 20:07:45 -0700
-Message-ID: <5271C981.2050705@zytor.com>
-References: <20131028101011.GF25527@dhcp-16-126.nay.redhat.com>
- <20131028112045.GH4314@pd.tnic>
- <20131028112458.GD29133@dhcp-16-126.nay.redhat.com>
- <20131028145801.GM4314@pd.tnic>
- <20131028151048.GA14984@dhcp-16-126.nay.redhat.com>
- <20131029023203.GB5185@dhcp-16-126.nay.redhat.com>
- <20131029134302.GI10972@pd.tnic>
- <20131030020348.GA4332@dhcp-16-126.nay.redhat.com>
- <20131030104718.GB13290@pd.tnic>
- <20131031020405.GA4377@dhcp-16-126.nay.redhat.com>
- <20131031020714.GB4377@dhcp-16-126.nay.redhat.com>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4] efivars,efi-pstore: Hold off deletion of sysfs entry until the scan is completed
+Date: Thu, 31 Oct 2013 14:35:39 +0800
+Message-ID: <87a9hq6j7o.fsf@redhat.com>
+References: <52715D9E.10701@hds.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20131031020714.GB4377-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <52715D9E.10701-7rDLJAbr9SE@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tomoki.sekiyama-7rDLJAbr9SE@public.gmane.org, dle-develop-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/30/2013 07:07 PM, Dave Young wrote:
-> On 10/31/13 at 10:04am, Dave Young wrote:
->> On 10/30/13 at 11:47am, Borislav Petkov wrote:
->>> On Wed, Oct 30, 2013 at 10:03:49AM +0800, Dave Young wrote:
->>>> Will try, but please keep the posted patches in mailing list up-to-date,
->>>
->>> Would you like me to send them to you privately?
->>
->> Thanks, do not bother to send me privately I can get it from your git tree.
->>
->> But Frankly I'd like to see them in list instead even with only small fixes
->> beacuse in this way there might be more people to review it carefully.
-> 
-> There's another shorcoming for keeping new patches in git is that nobody know
-> when you push it and when is the proper date to pull from your git. I think
-> it's better to use git only for the patches which have already been accepted
-> and is waiting for maintainer to pull.
-> 
 
-You can use git for your own purposes, still.
+seiji.aguchi-7rDLJAbr9SE@public.gmane.org writes:
 
-	-hpa
+> Change from v3:
+> - Introduce EFI_VARS_DATA_SIZE_MAX macro.
+> - Add some description why a scanning/deleting logic is needed.
+>
+> Currently, when mounting pstore file system, a read callback of efi_pstore
+> driver runs mutiple times as below.
+>
+> - In the first read callback, scan efivar_sysfs_list from head and pass
+>   a kmsg buffer of a entry to an upper pstore layer.
+> - In the second read callback, rescan efivar_sysfs_list from the entry and pass
+>   another kmsg buffer to it.
+> - Repeat the scan and pass until the end of efivar_sysfs_list.
+>
+> In this process, an entry is read across the multiple read function calls.
+> To avoid race between the read and erasion, the whole process above is
+> protected by a spinlock, holding in open() and releasing in close().
+>
+> At the same time, kmemdup() is called to pass the buffer to pstore filesystem
+> during it.
+> And then, it causes a following lockdep warning.
+>
+> To make the dynamic memory allocation runnable without taking spinlock,
+> holding off a deletion of sysfs entry if it happens while scanning it
+> via efi_pstore, and deleting it after the scan is completed.
+>
+> To implement it, this patch introduces two flags, scanning and deleting,
+> to efivar_entry.
+>
+> On the code basis, it seems that all the scanning and deleting logic is not
+> needed because __efivars->lock are not dropped when reading from the EFI
+> variable store.
+>
+> But, the scanning and deleting logic is still needed because an efi-pstore and
+> a pstore filesystem works as follows.
+>
+> In case an entry(A) is found, the pointer is saved to psi->data.
+> And efi_pstore_read() passes the entry(A) to a pstore filesystem by
+> releasing  __efivars->lock.
+>
+> And then, the pstore filesystem calls efi_pstore_read() again and the same
+> entry(A), which is saved to psi->data, is used for resuming to scan
+> a sysfs-list.
+>
+> So, to protect the entry(A), the logic is needed.
+>
+> [    1.143710] ------------[ cut here ]------------
+> [    1.144058] WARNING: CPU: 1 PID: 1 at kernel/lockdep.c:2740
+> lockdep_trace_alloc+0x104/0x110()
+> [    1.144058] DEBUG_LOCKS_WARN_ON(irqs_disabled_flags(flags))
+> [    1.144058] Modules linked in:
+>
+> [    1.144058] CPU: 1 PID: 1 Comm: systemd Not tainted 3.11.0-rc5 #2
+> [    1.144058]  0000000000000009 ffff8800797e9ae0 ffffffff816614a5
+> ffff8800797e9b28
+> [    1.144058]  ffff8800797e9b18 ffffffff8105510d 0000000000000080
+> 0000000000000046
+> [    1.144058]  00000000000000d0 00000000000003af ffffffff81ccd0c0
+> ffff8800797e9b78
+> [    1.144058] Call Trace:
+> [    1.144058]  [<ffffffff816614a5>] dump_stack+0x54/0x74
+> [    1.144058]  [<ffffffff8105510d>] warn_slowpath_common+0x7d/0xa0
+> [    1.144058]  [<ffffffff8105517c>] warn_slowpath_fmt+0x4c/0x50
+> [    1.144058]  [<ffffffff8131290f>] ? vsscanf+0x57f/0x7b0
+> [    1.144058]  [<ffffffff810bbd74>] lockdep_trace_alloc+0x104/0x110
+> [    1.144058]  [<ffffffff81192da0>] __kmalloc_track_caller+0x50/0x280
+> [    1.144058]  [<ffffffff815147bb>] ?
+> efi_pstore_read_func.part.1+0x12b/0x170
+> [    1.144058]  [<ffffffff8115b260>] kmemdup+0x20/0x50
+> [    1.144058]  [<ffffffff815147bb>] efi_pstore_read_func.part.1+0x12b/0x170
+> [    1.144058]  [<ffffffff81514800>] ?
+> efi_pstore_read_func.part.1+0x170/0x170
+> [    1.144058]  [<ffffffff815148b4>] efi_pstore_read_func+0xb4/0xe0
+> [    1.144058]  [<ffffffff81512b7b>] __efivar_entry_iter+0xfb/0x120
+> [    1.144058]  [<ffffffff8151428f>] efi_pstore_read+0x3f/0x50
+> [    1.144058]  [<ffffffff8128d7ba>] pstore_get_records+0x9a/0x150
+> [    1.158207]  [<ffffffff812af25c>] ? selinux_d_instantiate+0x1c/0x20
+> [    1.158207]  [<ffffffff8128ce30>] ? parse_options+0x80/0x80
+> [    1.158207]  [<ffffffff8128ced5>] pstore_fill_super+0xa5/0xc0
+> [    1.158207]  [<ffffffff811ae7d2>] mount_single+0xa2/0xd0
+> [    1.158207]  [<ffffffff8128ccf8>] pstore_mount+0x18/0x20
+> [    1.158207]  [<ffffffff811ae8b9>] mount_fs+0x39/0x1b0
+> [    1.158207]  [<ffffffff81160550>] ? __alloc_percpu+0x10/0x20
+> [    1.158207]  [<ffffffff811c9493>] vfs_kern_mount+0x63/0xf0
+> [    1.158207]  [<ffffffff811cbb0e>] do_mount+0x23e/0xa20
+> [    1.158207]  [<ffffffff8115b51b>] ? strndup_user+0x4b/0xf0
+> [    1.158207]  [<ffffffff811cc373>] SyS_mount+0x83/0xc0
+> [    1.158207]  [<ffffffff81673cc2>] system_call_fastpath+0x16/0x1b
+> [    1.158207] ---[ end trace 61981bc62de9f6f4 ]---
+>
+> Signed-off-by: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+
+After applied this patch, I can't see the warning again when I mounting
+pstore fs and deleting pstore entries. 
+
+Tested-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi-pstore.c | 143 +++++++++++++++++++++++++++++++++++---
+>  drivers/firmware/efi/efivars.c    |  12 ++--
+>  drivers/firmware/efi/vars.c       |  12 +++-
+>  include/linux/efi.h               |   4 ++
+>  4 files changed, 155 insertions(+), 16 deletions(-)
+>
+
+-- 
+Best,
+Madper Xie.
