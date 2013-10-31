@@ -1,52 +1,50 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 12/12] EFI: Runtime services virtual mapping
-Date: Thu, 31 Oct 2013 15:07:52 +0800
-Message-ID: <20131031070751.GD4377@dhcp-16-126.nay.redhat.com>
-References: <1379602494-26684-1-git-send-email-bp@alien8.de>
- <20131008164551.GB16793@pd.tnic>
- <20131008164831.GD16793@pd.tnic>
- <20131029064720.GA16009@dhcp-16-126.nay.redhat.com>
- <20131029094033.GA10972@pd.tnic>
- <20131030093227.GA5791@dhcp-16-126.nay.redhat.com>
- <20131030104526.GA13290@pd.tnic>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
+Date: Thu, 31 Oct 2013 11:44:26 +0100
+Message-ID: <20131031104426.GA10544@pd.tnic>
+References: <20131028112045.GH4314@pd.tnic>
+ <20131028112458.GD29133@dhcp-16-126.nay.redhat.com>
+ <20131028145801.GM4314@pd.tnic>
+ <20131028151048.GA14984@dhcp-16-126.nay.redhat.com>
+ <20131029023203.GB5185@dhcp-16-126.nay.redhat.com>
+ <20131029134302.GI10972@pd.tnic>
+ <20131030020348.GA4332@dhcp-16-126.nay.redhat.com>
+ <20131030104718.GB13290@pd.tnic>
+ <20131031020405.GA4377@dhcp-16-126.nay.redhat.com>
+ <20131031020714.GB4377@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131030104526.GA13290-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20131031020714.GB4377-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fwts-devel-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 10/30/13 at 11:45am, Borislav Petkov wrote:
-> On Wed, Oct 30, 2013 at 05:32:27PM +0800, Dave Young wrote:
-> > Boris, thanks for update, it's very elaborate, I have still wonder if
-> > 32 bit case should be mentioned as well.
-> 
-> Ah, so that's why is mfleming bugging me about it on IRC :)
-> 
-> Well, I left out the 32-bit case simply because I don't think anyone
-> cares about it.
+Dear Mr. Young,
 
-Ok, that's fine, thanks for telling me.
+On Thu, Oct 31, 2013 at 10:07:14AM +0800, Dave Young wrote:
+> > But Frankly I'd like to see them in list instead even with only small fixes
+> > beacuse in this way there might be more people to review it carefully.
+> 
+> There's another shorcoming for keeping new patches in git is that nobody know
+> when you push it and when is the proper date to pull from your git. I think
+> it's better to use git only for the patches which have already been accepted
+> and is waiting for maintainer to pull.
 
-> 
-> > Waiting for you next version of the patch series. I will redo my
-> > patches based on that.
-> 
-> Since I'm doing only minor fixups, I didn't want to spam
-> the lists again.
-> 
-> The latest version is my 'efi' branch at
-> git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git
-> 
-> and you can pull it from there.
+thank you for teaching me how to do kernel development!
 
-Just pulled your git, the function comment has not yet to be updated,
-so could you send me privately your new patches if you would not update
-in list.
+The actual and real reason why I didn't send them yet is because I
+didn't want to be that kaffeine-inflated dork who spams the lists every
+other day with a new version of his patches.
 
+I am running build smoketests now and will send the latest version of
+the patchset later today so don't worry, the world will see them :)
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
 --
-Thanks a lot!
-Dave
