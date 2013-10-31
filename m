@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 03/11] x86, pageattr: Add a PGD pagetable populating function
-Date: Thu, 31 Oct 2013 17:25:01 +0100
-Message-ID: <1383236709-19716-4-git-send-email-bp@alien8.de>
+Subject: [PATCH 06/11] x86, pageattr: Add a PTE pagetable populating function
+Date: Thu, 31 Oct 2013 17:25:04 +0100
+Message-ID: <1383236709-19716-7-git-send-email-bp@alien8.de>
 References: <1383236709-19716-1-git-send-email-bp@alien8.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1383236709-19716-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
@@ -12,65 +12,46 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-This allocates, if necessary, and populates the corresponding PGD entry
-with a PUD page. The next population level is a dummy macro which will
-be removed by the next patch and it is added here to keep the patch
-small and easily reviewable but not break bisection, at the same time.
+Handle last level by unconditionally writing the PTEs into the PTE page
+while paying attention to the NX bit.
 
 Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- arch/x86/mm/pageattr.c | 39 +++++++++++++++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
+ arch/x86/mm/pageattr.c | 22 +++++++++++++++++++++-
+ 1 file changed, 21 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index c53de62a1170..4b47ae0602e1 100644
+index 968398b023c0..2a1308a8c072 100644
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
-@@ -666,6 +666,45 @@ static int split_large_page(pte_t *kpte, unsigned long address)
+@@ -686,7 +686,27 @@ static int alloc_pmd_page(pud_t *pud)
  	return 0;
  }
  
-+#define populate_pud(cpa, addr, pgd, pgprot)	(-1)
-+
-+/*
-+ * Restrictions for kernel page table do not necessarily apply when mapping in
-+ * an alternate PGD.
-+ */
-+static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
+-#define populate_pte(cpa, start, end, pages, pmd, pgprot)	do {} while (0)
++static void populate_pte(struct cpa_data *cpa,
++			 unsigned long start, unsigned long end,
++			 unsigned num_pages, pmd_t *pmd, pgprot_t pgprot)
 +{
-+	pgprot_t pgprot = __pgprot(_KERNPG_TABLE);
-+	bool allocd_pgd = false;
-+	pgd_t *pgd_entry;
-+	pud_t *pud = NULL;	/* shut up gcc */
-+	int ret;
++	pte_t *pte;
 +
-+	pgd_entry = cpa->pgd + pgd_index(addr);
++	pte = pte_offset_kernel(pmd, start);
 +
-+	/*
-+	 * Allocate a PUD page and hand it down for mapping.
-+	 */
-+	if (pgd_none(*pgd_entry)) {
-+		pud = (pud_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-+		if (!pud)
-+			return -1;
++	while (num_pages-- && start < end) {
 +
-+		set_pgd(pgd_entry, __pgd(__pa(pud) | _KERNPG_TABLE));
-+		allocd_pgd = true;
++		/* deal with the NX bit */
++		if (!(pgprot_val(pgprot) & _PAGE_NX))
++			cpa->pfn &= ~_PAGE_NX;
++
++		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
++
++		start	 += PAGE_SIZE;
++		cpa->pfn += PAGE_SIZE;
++		pte++;
 +	}
-+
-+	pgprot_val(pgprot) &= ~pgprot_val(cpa->mask_clr);
-+	pgprot_val(pgprot) |=  pgprot_val(cpa->mask_set);
-+
-+	ret = populate_pud(cpa, addr, pgd_entry, pgprot);
-+	if (ret < 0)
-+		return ret;
-+
-+	cpa->numpages = ret;
-+	return 0;
 +}
-+
- static int __cpa_process_fault(struct cpa_data *cpa, unsigned long vaddr,
- 			       int primary)
- {
+ 
+ static int populate_pmd(struct cpa_data *cpa,
+ 			unsigned long start, unsigned long end,
 -- 
 1.8.4
