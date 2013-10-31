@@ -1,104 +1,123 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 07/11] x86, pageattr: Add a PUD error unwinding path
-Date: Thu, 31 Oct 2013 17:25:05 +0100
-Message-ID: <1383236709-19716-8-git-send-email-bp@alien8.de>
+From: Borislav Petkov <bp@alien8.de>
+Subject: [PATCH 05/11] x86, pageattr: Add a PMD pagetable populating function
+Date: Thu, 31 Oct 2013 17:25:03 +0100
+Message-ID: <1383236709-19716-6-git-send-email-bp@alien8.de>
 References: <1383236709-19716-1-git-send-email-bp@alien8.de>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1383236709-19716-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1383236709-19716-1-git-send-email-bp@alien8.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linux EFI <linux-efi@vger.kernel.org>
+Cc: Borislav Petkov <bp@suse.de>, Dave Young <dyoung@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+From: Borislav Petkov <bp@suse.de>
 
-In case we encounter an error during the mapping of a region, we want to
-unwind what we've established so far exactly the way we did the mapping.
-This is the PUD part kept deliberately small for easier review.
+Handle PMD-level mappings the same as PUD ones.
 
-Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/mm/pageattr.c | 60 ++++++++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 58 insertions(+), 2 deletions(-)
+ arch/x86/mm/pageattr.c | 82 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 81 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 2a1308a8c072..1cbdbbc35b47 100644
+index 81deca77b871..968398b023c0 100644
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
-@@ -666,6 +666,51 @@ static int split_large_page(pte_t *kpte, unsigned long address)
+@@ -666,6 +666,16 @@ static int split_large_page(pte_t *kpte, unsigned long address)
  	return 0;
  }
  
-+#define unmap_pmd_range(pud, start, pre_end)		do {} while (0)
-+
-+static void unmap_pud_range(pgd_t *pgd, unsigned long start, unsigned long end)
++static int alloc_pte_page(pmd_t *pmd)
 +{
-+	pud_t *pud = pud_offset(pgd, start);
++	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
++	if (!pte)
++		return -1;
 +
-+	/*
-+	 * Not on a GB page boundary?
-+	 */
-+	if (start & (PUD_SIZE - 1)) {
-+		unsigned long next_page = (start + PUD_SIZE) & PUD_MASK;
-+		unsigned long pre_end	= min_t(unsigned long, end, next_page);
-+
-+		unmap_pmd_range(pud, start, pre_end);
-+
-+		start = pre_end;
-+		pud++;
-+	}
-+
-+	/*
-+	 * Try to unmap in 1G chunks?
-+	 */
-+	while (end - start >= PUD_SIZE) {
-+
-+		if (pud_large(*pud))
-+			pud_clear(pud);
-+		else
-+			unmap_pmd_range(pud, start, start + PUD_SIZE);
-+
-+		start += PUD_SIZE;
-+		pud++;
-+	}
-+
-+	/*
-+	 * 2M leftovers?
-+	 */
-+	if (start < end)
-+		unmap_pmd_range(pud, start, end);
-+
-+	/*
-+	 * No need to try to free the PUD page because we'll free it in
-+	 * populate_pgd's error path
-+	 */
++	set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
++	return 0;
 +}
 +
- static int alloc_pte_page(pmd_t *pmd)
+ static int alloc_pmd_page(pud_t *pud)
  {
- 	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-@@ -883,9 +928,20 @@ static int populate_pgd(struct cpa_data *cpa, unsigned long addr)
- 	pgprot_val(pgprot) |=  pgprot_val(cpa->mask_set);
- 
- 	ret = populate_pud(cpa, addr, pgd_entry, pgprot);
--	if (ret < 0)
--		return ret;
-+	if (ret < 0) {
-+		unmap_pud_range(pgd_entry, addr,
-+				addr + (cpa->numpages << PAGE_SHIFT));
- 
-+		if (allocd_pgd) {
-+			/*
-+			 * If I allocated this PUD page, I can just as well
-+			 * free it in this error path.
-+			 */
-+			pgd_clear(pgd_entry);
-+			free_page((unsigned long)pud);
-+		}
-+		return ret;
-+	}
- 	cpa->numpages = ret;
+ 	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
+@@ -676,7 +686,77 @@ static int alloc_pmd_page(pud_t *pud)
  	return 0;
  }
+ 
+-#define populate_pmd(cpa, start, end, pages, pud, pgprot)	(-1)
++#define populate_pte(cpa, start, end, pages, pmd, pgprot)	do {} while (0)
++
++static int populate_pmd(struct cpa_data *cpa,
++			unsigned long start, unsigned long end,
++			unsigned num_pages, pud_t *pud, pgprot_t pgprot)
++{
++	unsigned int cur_pages = 0;
++	pmd_t *pmd;
++
++	/*
++	 * Not on a 2M boundary?
++	 */
++	if (start & (PMD_SIZE - 1)) {
++		unsigned long pre_end = start + (num_pages << PAGE_SHIFT);
++		unsigned long next_page = (start + PMD_SIZE) & PMD_MASK;
++
++		pre_end   = min_t(unsigned long, pre_end, next_page);
++		cur_pages = (pre_end - start) >> PAGE_SHIFT;
++		cur_pages = min_t(unsigned int, num_pages, cur_pages);
++
++		/*
++		 * Need a PTE page?
++		 */
++		pmd = pmd_offset(pud, start);
++		if (pmd_none(*pmd))
++			if (alloc_pte_page(pmd))
++				return -1;
++
++		populate_pte(cpa, start, pre_end, cur_pages, pmd, pgprot);
++
++		start = pre_end;
++	}
++
++	/*
++	 * We mapped them all?
++	 */
++	if (num_pages == cur_pages)
++		return cur_pages;
++
++	while (end - start >= PMD_SIZE) {
++
++		/*
++		 * We cannot use a 1G page so allocate a PMD page if needed.
++		 */
++		if (pud_none(*pud))
++			if (alloc_pmd_page(pud))
++				return -1;
++
++		pmd = pmd_offset(pud, start);
++
++		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE | massage_pgprot(pgprot)));
++
++		start	  += PMD_SIZE;
++		cpa->pfn  += PMD_SIZE;
++		cur_pages += PMD_SIZE >> PAGE_SHIFT;
++	}
++
++	/*
++	 * Map trailing 4K pages.
++	 */
++	if (start < end) {
++		pmd = pmd_offset(pud, start);
++		if (pmd_none(*pmd))
++			if (alloc_pte_page(pmd))
++				return -1;
++
++		populate_pte(cpa, start, end, num_pages - cur_pages,
++			     pmd, pgprot);
++	}
++	return num_pages;
++}
+ 
+ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+ 			pgprot_t pgprot)
 -- 
 1.8.4
