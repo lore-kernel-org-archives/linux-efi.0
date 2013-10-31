@@ -1,123 +1,124 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 05/11] x86, pageattr: Add a PMD pagetable populating function
-Date: Thu, 31 Oct 2013 17:25:03 +0100
-Message-ID: <1383236709-19716-6-git-send-email-bp@alien8.de>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH 04/11] x86, pageattr: Add a PUD pagetable populating function
+Date: Thu, 31 Oct 2013 17:25:02 +0100
+Message-ID: <1383236709-19716-5-git-send-email-bp@alien8.de>
 References: <1383236709-19716-1-git-send-email-bp@alien8.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1383236709-19716-1-git-send-email-bp@alien8.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linux EFI <linux-efi@vger.kernel.org>
-Cc: Borislav Petkov <bp@suse.de>, Dave Young <dyoung@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1383236709-19716-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp@suse.de>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Handle PMD-level mappings the same as PUD ones.
+Add the next level of the pagetable populating function, we handle
+chunks around a 1G boundary by mapping them with the lower level
+functions - otherwise we use 1G pages for the mappings, thus using as
+less amount of pagetable pages as possible.
 
-Signed-off-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- arch/x86/mm/pageattr.c | 82 +++++++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 81 insertions(+), 1 deletion(-)
+ arch/x86/mm/pageattr.c | 87 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 86 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 81deca77b871..968398b023c0 100644
+index 4b47ae0602e1..81deca77b871 100644
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
-@@ -666,6 +666,16 @@ static int split_large_page(pte_t *kpte, unsigned long address)
+@@ -666,7 +666,92 @@ static int split_large_page(pte_t *kpte, unsigned long address)
  	return 0;
  }
  
-+static int alloc_pte_page(pmd_t *pmd)
+-#define populate_pud(cpa, addr, pgd, pgprot)	(-1)
++static int alloc_pmd_page(pud_t *pud)
 +{
-+	pte_t *pte = (pte_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-+	if (!pte)
++	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
++	if (!pmd)
 +		return -1;
 +
-+	set_pmd(pmd, __pmd(__pa(pte) | _KERNPG_TABLE));
++	set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
 +	return 0;
 +}
 +
- static int alloc_pmd_page(pud_t *pud)
- {
- 	pmd_t *pmd = (pmd_t *)get_zeroed_page(GFP_KERNEL | __GFP_NOTRACK);
-@@ -676,7 +686,77 @@ static int alloc_pmd_page(pud_t *pud)
- 	return 0;
- }
- 
--#define populate_pmd(cpa, start, end, pages, pud, pgprot)	(-1)
-+#define populate_pte(cpa, start, end, pages, pmd, pgprot)	do {} while (0)
++#define populate_pmd(cpa, start, end, pages, pud, pgprot)	(-1)
 +
-+static int populate_pmd(struct cpa_data *cpa,
-+			unsigned long start, unsigned long end,
-+			unsigned num_pages, pud_t *pud, pgprot_t pgprot)
++static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
++			pgprot_t pgprot)
 +{
-+	unsigned int cur_pages = 0;
-+	pmd_t *pmd;
++	pud_t *pud;
++	unsigned long end;
++	int cur_pages = 0;
++
++	end = start + (cpa->numpages << PAGE_SHIFT);
 +
 +	/*
-+	 * Not on a 2M boundary?
++	 * Not on a Gb page boundary? => map everything up to it with
++	 * smaller pages.
 +	 */
-+	if (start & (PMD_SIZE - 1)) {
-+		unsigned long pre_end = start + (num_pages << PAGE_SHIFT);
-+		unsigned long next_page = (start + PMD_SIZE) & PMD_MASK;
++	if (start & (PUD_SIZE - 1)) {
++		unsigned long pre_end;
++		unsigned long next_page = (start + PUD_SIZE) & PUD_MASK;
 +
-+		pre_end   = min_t(unsigned long, pre_end, next_page);
++		pre_end   = min_t(unsigned long, end, next_page);
 +		cur_pages = (pre_end - start) >> PAGE_SHIFT;
-+		cur_pages = min_t(unsigned int, num_pages, cur_pages);
++		cur_pages = min_t(int, (int)cpa->numpages, cur_pages);
++
++		pud = pud_offset(pgd, start);
 +
 +		/*
-+		 * Need a PTE page?
-+		 */
-+		pmd = pmd_offset(pud, start);
-+		if (pmd_none(*pmd))
-+			if (alloc_pte_page(pmd))
-+				return -1;
-+
-+		populate_pte(cpa, start, pre_end, cur_pages, pmd, pgprot);
-+
-+		start = pre_end;
-+	}
-+
-+	/*
-+	 * We mapped them all?
-+	 */
-+	if (num_pages == cur_pages)
-+		return cur_pages;
-+
-+	while (end - start >= PMD_SIZE) {
-+
-+		/*
-+		 * We cannot use a 1G page so allocate a PMD page if needed.
++		 * Need a PMD page?
 +		 */
 +		if (pud_none(*pud))
 +			if (alloc_pmd_page(pud))
 +				return -1;
 +
-+		pmd = pmd_offset(pud, start);
++		cur_pages = populate_pmd(cpa, start, pre_end, cur_pages,
++					 pud, pgprot);
++		if (cur_pages < 0)
++			return cur_pages;
 +
-+		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE | massage_pgprot(pgprot)));
-+
-+		start	  += PMD_SIZE;
-+		cpa->pfn  += PMD_SIZE;
-+		cur_pages += PMD_SIZE >> PAGE_SHIFT;
++		start = pre_end;
 +	}
++
++	/* We mapped them all? */
++	if (cpa->numpages == cur_pages)
++		return cur_pages;
++
++	pud = pud_offset(pgd, start);
 +
 +	/*
-+	 * Map trailing 4K pages.
++	 * Map everything starting from the Gb boundary, possibly with 1G pages
 +	 */
++	while (end - start >= PUD_SIZE) {
++		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE | massage_pgprot(pgprot)));
++
++		start	  += PUD_SIZE;
++		cpa->pfn  += PUD_SIZE;
++		cur_pages += PUD_SIZE >> PAGE_SHIFT;
++		pud++;
++	}
++
++	/* Map trailing leftover */
 +	if (start < end) {
-+		pmd = pmd_offset(pud, start);
-+		if (pmd_none(*pmd))
-+			if (alloc_pte_page(pmd))
++		int tmp;
++
++		pud = pud_offset(pgd, start);
++		if (pud_none(*pud))
++			if (alloc_pmd_page(pud))
 +				return -1;
 +
-+		populate_pte(cpa, start, end, num_pages - cur_pages,
-+			     pmd, pgprot);
++		tmp = populate_pmd(cpa, start, end, cpa->numpages - cur_pages,
++				   pud, pgprot);
++		if (tmp < 0)
++			return cur_pages;
++
++		cur_pages += tmp;
 +	}
-+	return num_pages;
++	return cur_pages;
 +}
  
- static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
- 			pgprot_t pgprot)
+ /*
+  * Restrictions for kernel page table do not necessarily apply when mapping in
 -- 
 1.8.4
