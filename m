@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 02/11] x86, pageattr: Lookup address in an arbitrary PGD
-Date: Thu, 31 Oct 2013 17:25:00 +0100
-Message-ID: <1383236709-19716-3-git-send-email-bp@alien8.de>
+Subject: [PATCH 01/11] efi: Simplify EFI_DEBUG
+Date: Thu, 31 Oct 2013 17:24:59 +0100
+Message-ID: <1383236709-19716-2-git-send-email-bp@alien8.de>
 References: <1383236709-19716-1-git-send-email-bp@alien8.de>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1383236709-19716-1-git-send-email-bp@alien8.de>
@@ -12,77 +12,57 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp@suse.de>
 
-This is preparatory work in order to be able to map pages into a
-specified PGD and not implicitly and only into init_mm.
+... and lose one #ifdef .. #endif sandwich.
 
 Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/mm/pageattr.c | 36 ++++++++++++++++++++++++++----------
- 1 file changed, 26 insertions(+), 10 deletions(-)
+ arch/x86/platform/efi/efi.c | 9 +++------
+ 1 file changed, 3 insertions(+), 6 deletions(-)
 
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index bb32480c2d71..c53de62a1170 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -30,6 +30,7 @@
-  */
- struct cpa_data {
- 	unsigned long	*vaddr;
-+	pgd_t		*pgd;
- 	pgprot_t	mask_set;
- 	pgprot_t	mask_clr;
- 	int		numpages;
-@@ -322,17 +323,9 @@ static inline pgprot_t static_protections(pgprot_t prot, unsigned long address,
- 	return prot;
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 1d3372ac9c66..f396163b0402 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -51,7 +51,7 @@
+ #include <asm/x86_init.h>
+ #include <asm/rtc.h>
+ 
+-#define EFI_DEBUG	1
++#define EFI_DEBUG
+ 
+ #define EFI_MIN_RESERVE 5120
+ 
+@@ -398,9 +398,9 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	return 0;
  }
  
--/*
-- * Lookup the page table entry for a virtual address. Return a pointer
-- * to the entry and the level of the mapping.
-- *
-- * Note: We return pud and pmd either when the entry is marked large
-- * or when the present bit is not set. Otherwise we would return a
-- * pointer to a nonexisting mapping.
-- */
--pte_t *lookup_address(unsigned long address, unsigned int *level)
-+static pte_t *__lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
-+				      unsigned int *level)
+-#if EFI_DEBUG
+ static void __init print_efi_memmap(void)
  {
--	pgd_t *pgd = pgd_offset_k(address);
- 	pud_t *pud;
- 	pmd_t *pmd;
++#ifdef EFI_DEBUG
+ 	efi_memory_desc_t *md;
+ 	void *p;
+ 	int i;
+@@ -415,8 +415,8 @@ static void __init print_efi_memmap(void)
+ 			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
+ 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+ 	}
+-}
+ #endif  /*  EFI_DEBUG  */
++}
  
-@@ -361,8 +354,31 @@ pte_t *lookup_address(unsigned long address, unsigned int *level)
- 
- 	return pte_offset_kernel(pmd, address);
+ void __init efi_reserve_boot_services(void)
+ {
+@@ -696,10 +696,7 @@ void __init efi_init(void)
+ 		x86_platform.set_wallclock = efi_set_rtc_mmss;
+ 	}
+ #endif
+-
+-#if EFI_DEBUG
+ 	print_efi_memmap();
+-#endif
  }
-+
-+/*
-+ * Lookup the page table entry for a virtual address. Return a pointer
-+ * to the entry and the level of the mapping.
-+ *
-+ * Note: We return pud and pmd either when the entry is marked large
-+ * or when the present bit is not set. Otherwise we would return a
-+ * pointer to a nonexisting mapping.
-+ */
-+pte_t *lookup_address(unsigned long address, unsigned int *level)
-+{
-+        return __lookup_address_in_pgd(pgd_offset_k(address), address, level);
-+}
- EXPORT_SYMBOL_GPL(lookup_address);
  
-+static pte_t *_lookup_address_cpa(struct cpa_data *cpa, unsigned long address,
-+				  unsigned int *level)
-+{
-+        if (cpa->pgd)
-+		return __lookup_address_in_pgd(cpa->pgd + pgd_index(address),
-+					       address, level);
-+
-+        return lookup_address(address, level);
-+}
-+
- /*
-  * This is necessary because __pa() does not work on some
-  * kinds of memory, like vmalloc() or the alloc_remap()
+ void __init efi_late_init(void)
 -- 
 1.8.4
