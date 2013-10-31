@@ -1,57 +1,88 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 06/11] x86, pageattr: Add a PTE pagetable populating function
-Date: Thu, 31 Oct 2013 17:25:04 +0100
-Message-ID: <1383236709-19716-7-git-send-email-bp@alien8.de>
+From: Borislav Petkov <bp@alien8.de>
+Subject: [PATCH 02/11] x86, pageattr: Lookup address in an arbitrary PGD
+Date: Thu, 31 Oct 2013 17:25:00 +0100
+Message-ID: <1383236709-19716-3-git-send-email-bp@alien8.de>
 References: <1383236709-19716-1-git-send-email-bp@alien8.de>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1383236709-19716-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1383236709-19716-1-git-send-email-bp@alien8.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linux EFI <linux-efi@vger.kernel.org>
+Cc: Borislav Petkov <bp@suse.de>, Dave Young <dyoung@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+From: Borislav Petkov <bp@suse.de>
 
-Handle last level by unconditionally writing the PTEs into the PTE page
-while paying attention to the NX bit.
+This is preparatory work in order to be able to map pages into a
+specified PGD and not implicitly and only into init_mm.
 
-Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/mm/pageattr.c | 22 +++++++++++++++++++++-
- 1 file changed, 21 insertions(+), 1 deletion(-)
+ arch/x86/mm/pageattr.c | 36 ++++++++++++++++++++++++++----------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
 
 diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 968398b023c0..2a1308a8c072 100644
+index bb32480c2d71..c53de62a1170 100644
 --- a/arch/x86/mm/pageattr.c
 +++ b/arch/x86/mm/pageattr.c
-@@ -686,7 +686,27 @@ static int alloc_pmd_page(pud_t *pud)
- 	return 0;
+@@ -30,6 +30,7 @@
+  */
+ struct cpa_data {
+ 	unsigned long	*vaddr;
++	pgd_t		*pgd;
+ 	pgprot_t	mask_set;
+ 	pgprot_t	mask_clr;
+ 	int		numpages;
+@@ -322,17 +323,9 @@ static inline pgprot_t static_protections(pgprot_t prot, unsigned long address,
+ 	return prot;
  }
  
--#define populate_pte(cpa, start, end, pages, pmd, pgprot)	do {} while (0)
-+static void populate_pte(struct cpa_data *cpa,
-+			 unsigned long start, unsigned long end,
-+			 unsigned num_pages, pmd_t *pmd, pgprot_t pgprot)
-+{
-+	pte_t *pte;
-+
-+	pte = pte_offset_kernel(pmd, start);
-+
-+	while (num_pages-- && start < end) {
-+
-+		/* deal with the NX bit */
-+		if (!(pgprot_val(pgprot) & _PAGE_NX))
-+			cpa->pfn &= ~_PAGE_NX;
-+
-+		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
-+
-+		start	 += PAGE_SIZE;
-+		cpa->pfn += PAGE_SIZE;
-+		pte++;
-+	}
-+}
+-/*
+- * Lookup the page table entry for a virtual address. Return a pointer
+- * to the entry and the level of the mapping.
+- *
+- * Note: We return pud and pmd either when the entry is marked large
+- * or when the present bit is not set. Otherwise we would return a
+- * pointer to a nonexisting mapping.
+- */
+-pte_t *lookup_address(unsigned long address, unsigned int *level)
++static pte_t *__lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
++				      unsigned int *level)
+ {
+-	pgd_t *pgd = pgd_offset_k(address);
+ 	pud_t *pud;
+ 	pmd_t *pmd;
  
- static int populate_pmd(struct cpa_data *cpa,
- 			unsigned long start, unsigned long end,
+@@ -361,8 +354,31 @@ pte_t *lookup_address(unsigned long address, unsigned int *level)
+ 
+ 	return pte_offset_kernel(pmd, address);
+ }
++
++/*
++ * Lookup the page table entry for a virtual address. Return a pointer
++ * to the entry and the level of the mapping.
++ *
++ * Note: We return pud and pmd either when the entry is marked large
++ * or when the present bit is not set. Otherwise we would return a
++ * pointer to a nonexisting mapping.
++ */
++pte_t *lookup_address(unsigned long address, unsigned int *level)
++{
++        return __lookup_address_in_pgd(pgd_offset_k(address), address, level);
++}
+ EXPORT_SYMBOL_GPL(lookup_address);
+ 
++static pte_t *_lookup_address_cpa(struct cpa_data *cpa, unsigned long address,
++				  unsigned int *level)
++{
++        if (cpa->pgd)
++		return __lookup_address_in_pgd(cpa->pgd + pgd_index(address),
++					       address, level);
++
++        return lookup_address(address, level);
++}
++
+ /*
+  * This is necessary because __pa() does not work on some
+  * kinds of memory, like vmalloc() or the alloc_remap()
 -- 
 1.8.4
