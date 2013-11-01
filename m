@@ -1,42 +1,42 @@
-From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] Make efi-pstore return a unique id
-Date: Fri, 1 Nov 2013 11:58:17 -0700
-Message-ID: <CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w@mail.gmail.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH] Make efi-pstore return a unique id
+Date: Fri, 1 Nov 2013 19:22:12 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D47F9DD941@USINDEM103.corp.hds.com>
 References: <87ppqk6qvx.fsf@redhat.com>
 	<CAFLxGvz3pCevxE43zGnrbX4MxPmwyb=9MVNpzFRpELt1+AmtrA@mail.gmail.com>
+ <CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFLxGvz3pCevxE43zGnrbX4MxPmwyb=9MVNpzFRpELt1+AmtrA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Richard Weinberger <richard.weinberger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?UTF-8?B?6LCi5oiQ6aqP?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Richard Weinberger <richard.weinberger-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?gb2312?B?0Luzyb+l?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
->> +static u64 efi_generate_id(unsigned long timestamp, unsigned int part, int count)
-
-I don't think the "efi_" prefix is needed here. For one thing the
-function is static, so
-no name space pollution worries. For another - it makes it look like
-this is some thing
-defined in EFI standard.  If "generate_id()" is too generic for your
-tastes ... then a
-"pstore_" prefix might be more appropriate.
-
->> +{
->> +       char id_str[64];
->> +       u64 id = 0;
->> +
->> +       sprintf(id_str, "%lu%u%d", timestamp, part, count);
->> +       if (kstrtoull(id_str, 10, &id))
->> +               pr_warn("efi-pstore: failed to generate id\n");
->> +       return id;
->> +}
->
-> This is just odd. You make a string from three ints and then a parse
-> it to a int again.
-
-Agreed.  I liked your ((timestamp * 100 + part) * 100 + count function much
-more than this.
-
--Tony
+PiA+PiArew0KPiA+PiArICAgICAgIGNoYXIgaWRfc3RyWzY0XTsNCj4gPj4gKyAgICAgICB1NjQg
+aWQgPSAwOw0KPiA+PiArDQo+ID4+ICsgICAgICAgc3ByaW50ZihpZF9zdHIsICIlbHUldSVkIiwg
+dGltZXN0YW1wLCBwYXJ0LCBjb3VudCk7DQo+ID4+ICsgICAgICAgaWYgKGtzdHJ0b3VsbChpZF9z
+dHIsIDEwLCAmaWQpKQ0KPiA+PiArICAgICAgICAgICAgICAgcHJfd2FybigiZWZpLXBzdG9yZTog
+ZmFpbGVkIHRvIGdlbmVyYXRlIGlkXG4iKTsNCj4gPj4gKyAgICAgICByZXR1cm4gaWQ7DQo+ID4+
+ICt9DQo+ID4NCj4gPiBUaGlzIGlzIGp1c3Qgb2RkLiBZb3UgbWFrZSBhIHN0cmluZyBmcm9tIHRo
+cmVlIGludHMgYW5kIHRoZW4gYSBwYXJzZQ0KPiA+IGl0IHRvIGEgaW50IGFnYWluLg0KPiANCj4g
+QWdyZWVkLiAgSSBsaWtlZCB5b3VyICgodGltZXN0YW1wICogMTAwICsgcGFydCkgKiAxMDAgKyBj
+b3VudCBmdW5jdGlvbiBtdWNoDQo+IG1vcmUgdGhhbiB0aGlzLg0KDQpJIHdhcyB3b3JyaWVkIHRo
+YXQgdGhlIHBhcnQgYW5kIGNvdW50IGNvdWxkIGJlIG1vcmUgdGhhbiAxMDAuDQpJZiBpdCBoYXBw
+ZW5zLCB0aGUgaWQgbWF5IG5vdCBiZSB1bmlxdWUuLi4NCg0KQnV0LCBjdXJyZW50bHksIHNpemUg
+b2YgbnZyYW0gc3RvcmFnZSBpcyBsaW1pdGVkLCBzbyBpdCBpcyBhIGNvcm5lciBjYXNlLg0KSSBy
+ZXNwZWN0IHlvdXIgb3Bpbmlvbi4NCg0KPiBAQCAtMTI1LDkgKzEzNywxMSBAQCBzdGF0aWMgaW50
+IGVmaV9wc3RvcmVfd3JpdGUoZW51bSBwc3RvcmVfdHlwZV9pZCB0eXBlLA0KPiAgCWVmaV9jaGFy
+MTZfdCBlZmlfbmFtZVtEVU1QX05BTUVfTEVOXTsNCj4gIAllZmlfZ3VpZF90IHZlbmRvciA9IExJ
+TlVYX0VGSV9DUkFTSF9HVUlEOw0KPiAgCWludCBpLCByZXQgPSAwOw0KPiArCXVuc2lnbmVkIGxv
+bmcgdGltZXN0YW1wOw0KPiANCj4gKwl0aW1lc3RhbXAgPSBnZXRfc2Vjb25kcygpOw0KPiAgCXNw
+cmludGYobmFtZSwgImR1bXAtdHlwZSV1LSV1LSVkLSVsdS0lYyIsIHR5cGUsIHBhcnQsIGNvdW50
+LA0KPiAtCQlnZXRfc2Vjb25kcygpLCBjb21wcmVzc2VkID8gJ0MnIDogJ0QnKTsNCj4gKwkJdGlt
+ZXN0YW1wLCBjb21wcmVzc2VkID8gJ0MnIDogJ0QnKTsNCj4gDQoNCkkgZG9uJ3QgdGhpbmsgeW91
+IG5lZWQgdG8gY2hhbmdlIGVmaV9wc3RvcmVfd3JpdGUoKS4NCkl0IGlzIGp1c3QgYWRkIGEgbG9j
+YWwgdGltZXN0YW1wIHZhcmlhYmxlLg0KDQpTZWlqaQ0KDQo+ICAJZm9yIChpID0gMDsgaSA8IERV
+TVBfTkFNRV9MRU47IGkrKykNCj4gIAkJZWZpX25hbWVbaV0gPSBuYW1lW2ldOw0KPiAtLQ0KPiAx
+LjguNC4yDQo=
