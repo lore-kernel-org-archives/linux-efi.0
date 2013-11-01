@@ -1,37 +1,45 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [patch 3/6] Cleanup efi_enter_virtual_mode function
-Date: Fri, 1 Nov 2013 12:32:12 +0100
-Message-ID: <20131101113212.GA7508@pd.tnic>
-References: <20131028145801.GM4314@pd.tnic>
- <20131028151048.GA14984@dhcp-16-126.nay.redhat.com>
- <20131029023203.GB5185@dhcp-16-126.nay.redhat.com>
- <20131029134302.GI10972@pd.tnic>
- <20131030020348.GA4332@dhcp-16-126.nay.redhat.com>
- <20131030104718.GB13290@pd.tnic>
- <20131031020405.GA4377@dhcp-16-126.nay.redhat.com>
- <20131031020714.GB4377@dhcp-16-126.nay.redhat.com>
- <20131031104426.GA10544@pd.tnic>
- <20131101011825.GB4378@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 10/11] EFI: Runtime services virtual mapping
+Date: Fri, 1 Nov 2013 12:50:57 +0000
+Message-ID: <20131101125057.GA21688@console-pimps.org>
+References: <1383236709-19716-1-git-send-email-bp@alien8.de>
+ <1383236709-19716-11-git-send-email-bp@alien8.de>
+ <20131101032551.GC4378@dhcp-16-126.nay.redhat.com>
+ <20131101033508.GA13527@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131101011825.GB4378-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <20131101033508.GA13527-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-TuqUDEhatI4ANWPb/1PvSmm0pvjS0E/A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 01, 2013 at 09:18:25AM +0800, Dave Young wrote:
-> Great, thank you. BTW, I have managed to test original patch set on a
-> Macboot Air of my friend with usb boot, it works ok.
+On Fri, 01 Nov, at 11:35:08AM, Dave Young wrote:
+> > The conflict is caused by missing one commit in matt's efi next tree:
+> > 
+> > commit 700870119f49084da004ab588ea2b799689efaf7
+> > Author: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Date:   Thu Apr 18 07:51:34 2013 -0700
+> > 
+> >     x86, efi: Don't map Boot Services on i386
+> >     
+> >     Add patch to fix 32bit EFI service mapping (rhbz 726701)
+> >     
+> >     Multiple people are reporting hitting the following WARNING on i386,
+> >     
+> >       WARNING: at arch/x86/mm/ioremap.c:102 __ioremap_caller+0x3d3/0x440()
+> >       Modules linked in:
+> >       Pid: 0, comm: swapper Not tainted 3.9.0-rc7+ #95
+> 
+> Rethinking about above commit, it is actually a workaround for
+> mapping boot service, I suspect the problem connect to the off-by-one
+> problem in boot service reserve function. Matt, idea?
 
-Ok, that's actually a very good news - the apples tend to be special wrt
-uefi implementation.
+No, it's not the same problem. And just to make absolutely sure I
+reverted the above commit and applied your patch, but I still see the
+WARN_ON() described above.
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
