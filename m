@@ -1,45 +1,89 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 10/11] EFI: Runtime services virtual mapping
-Date: Fri, 1 Nov 2013 12:50:57 +0000
-Message-ID: <20131101125057.GA21688@console-pimps.org>
-References: <1383236709-19716-1-git-send-email-bp@alien8.de>
- <1383236709-19716-11-git-send-email-bp@alien8.de>
- <20131101032551.GC4378@dhcp-16-126.nay.redhat.com>
- <20131101033508.GA13527@dhcp-16-126.nay.redhat.com>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] Make efi-pstore return a unique id
+Date: Sat, 02 Nov 2013 00:14:26 +0800
+Message-ID: <87ppqk6qvx.fsf@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131101033508.GA13527-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "matt.fleming@intel.com" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 01 Nov, at 11:35:08AM, Dave Young wrote:
-> > The conflict is caused by missing one commit in matt's efi next tree:
-> > 
-> > commit 700870119f49084da004ab588ea2b799689efaf7
-> > Author: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Date:   Thu Apr 18 07:51:34 2013 -0700
-> > 
-> >     x86, efi: Don't map Boot Services on i386
-> >     
-> >     Add patch to fix 32bit EFI service mapping (rhbz 726701)
-> >     
-> >     Multiple people are reporting hitting the following WARNING on i386,
-> >     
-> >       WARNING: at arch/x86/mm/ioremap.c:102 __ioremap_caller+0x3d3/0x440()
-> >       Modules linked in:
-> >       Pid: 0, comm: swapper Not tainted 3.9.0-rc7+ #95
-> 
-> Rethinking about above commit, it is actually a workaround for
-> mapping boot service, I suspect the problem connect to the off-by-one
-> problem in boot service reserve function. Matt, idea?
 
-No, it's not the same problem. And just to make absolutely sure I
-reverted the above commit and applied your patch, but I still see the
-WARN_ON() described above.
+Pstore fs expects that backends provide a uniqued id which could avoid
+pstore making entries as duplication or denominating entries the same
+name. So I combine the timestamp, part and count into id.
 
+Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/efi-pstore.c | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index 5002d50..0de9179 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -39,6 +39,17 @@ struct pstore_read_data {
+ 	char **buf;
+ };
+ 
++static u64 efi_generate_id(unsigned long timestamp, unsigned int part, int count)
++{
++	char id_str[64];
++	u64 id = 0;
++
++	sprintf(id_str, "%lu%u%d", timestamp, part, count);
++	if (kstrtoull(id_str, 10, &id))
++		pr_warn("efi-pstore: failed to generate id\n");
++	return id;
++}
++
+ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ {
+ 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+@@ -57,17 +68,18 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 
+ 	if (sscanf(name, "dump-type%u-%u-%d-%lu-%c",
+ 		   cb_data->type, &part, &cnt, &time, &data_type) == 5) {
+-		*cb_data->id = part;
++		*cb_data->id = efi_generate_id(time, part, cnt);
+ 		*cb_data->count = cnt;
+ 		cb_data->timespec->tv_sec = time;
+ 		cb_data->timespec->tv_nsec = 0;
++
+ 		if (data_type == 'C')
+ 			*cb_data->compressed = true;
+ 		else
+ 			*cb_data->compressed = false;
+ 	} else if (sscanf(name, "dump-type%u-%u-%d-%lu",
+ 		   cb_data->type, &part, &cnt, &time) == 4) {
+-		*cb_data->id = part;
++		*cb_data->id = efi_generate_id(time, part, cnt);
+ 		*cb_data->count = cnt;
+ 		cb_data->timespec->tv_sec = time;
+ 		cb_data->timespec->tv_nsec = 0;
+@@ -79,7 +91,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 		 * which doesn't support holding
+ 		 * multiple logs, remains.
+ 		 */
+-		*cb_data->id = part;
++		*cb_data->id = efi_generate_id(time, part, 0);
+ 		*cb_data->count = 0;
+ 		cb_data->timespec->tv_sec = time;
+ 		cb_data->timespec->tv_nsec = 0;
+@@ -125,9 +137,11 @@ static int efi_pstore_write(enum pstore_type_id type,
+ 	efi_char16_t efi_name[DUMP_NAME_LEN];
+ 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
+ 	int i, ret = 0;
++	unsigned long timestamp;
+ 
++	timestamp = get_seconds();
+ 	sprintf(name, "dump-type%u-%u-%d-%lu-%c", type, part, count,
+-		get_seconds(), compressed ? 'C' : 'D');
++		timestamp, compressed ? 'C' : 'D');
+ 
+ 	for (i = 0; i < DUMP_NAME_LEN; i++)
+ 		efi_name[i] = name[i];
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.4.2
