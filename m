@@ -1,37 +1,62 @@
-From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Madper Xie <cxie@redhat.com>
 Subject: Re: [PATCH] Make efi-pstore return a unique id
-Date: Fri, 1 Nov 2013 17:17:00 -0700
-Message-ID: <CA+8MBbKMRw28Ubr5F8U=5SKuaeutR+KEVDgJC70Xebj4O5BzpA@mail.gmail.com>
-References: <87ppqk6qvx.fsf@redhat.com>
-	<CAFLxGvz3pCevxE43zGnrbX4MxPmwyb=9MVNpzFRpELt1+AmtrA@mail.gmail.com>
-	<CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w@mail.gmail.com>
-	<A5ED84D3BB3A384992CBB9C77DEDA4D47F9DD941@USINDEM103.corp.hds.com>
-	<52740A3A.70202@nod.at>
-	<A5ED84D3BB3A384992CBB9C77DEDA4D47F9DDA4D@USINDEM103.corp.hds.com>
+Date: Sat, 02 Nov 2013 09:15:35 +0800
+Message-ID: <87mwln7geg.fsf@redhat.com>
+References: <87ppqk6qvx.fsf@redhat.com> <CAFLxGvz3pCevxE43zGnrbX4MxPmwyb=9MVNpzFRpELt1+AmtrA@mail.gmail.com> <CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w@mail.gmail.com> <A5ED84D3BB3A384992CBB9C77DEDA4D47F9DD941@USINDEM103.corp.hds.com> <52740A3A.70202@nod.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A5ED84D3BB3A384992CBB9C77DEDA4D47F9DDA4D-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?UTF-8?B?6LCi5oiQ6aqP?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-reply-to: <52740A3A.70202@nod.at>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Richard Weinberger <richard@nod.at>
+Cc: Seiji Aguchi <seiji.aguchi@hds.com>, Tony Luck <tony.luck@gmail.com>, Madper Xie <cxie@redhat.com>, "matt.fleming@intel.com" <matt.fleming@intel.com>, linux-kernel <linux-kernel@vger.kernel.org>, Linux EFI <linux-efi@vger.kernel.org>, =?utf-8?B?6LCi5oiQ6aqP?= <bbboson@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 1, 2013 at 1:57 PM, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org> wrote:
->> What about feeding the bytes of all three integers into a non-cryptographic hash function?
->> Using this way you get a cheap unique id.
+
+richard@nod.at writes:
+
+> Am 01.11.2013 20:22, schrieb Seiji Aguchi:
+>>>>> +{
+>>>>> +       char id_str[64];
+>>>>> +       u64 id = 0;
+>>>>> +
+>>>>> +       sprintf(id_str, "%lu%u%d", timestamp, part, count);
+>>>>> +       if (kstrtoull(id_str, 10, &id))
+>>>>> +               pr_warn("efi-pstore: failed to generate id\n");
+>>>>> +       return id;
+>>>>> +}
+>>>>
+>>>> This is just odd. You make a string from three ints and then a parse
+>>>> it to a int again.
+>>>
+>>> Agreed.  I liked your ((timestamp * 100 + part) * 100 + count function much
+>>> more than this.
+>> 
+>> I was worried that the part and count could be more than 100.
+>> If it happens, the id may not be unique...
+>> 
+>> But, currently, size of nvram storage is limited, so it is a corner case.
+>> I respect your opinion.
 >
-> It is reasonable to me.
+Is it really safe? for now I have more than 100 entries:
+[root@dhcp-13-41 rhel6]# ls -l /dev/pstore/ | wc -l
+124
+The maximum part of my records is 16. But I not sure if overflow will
+happen in some special case, like a very long dmesg output. or a server
+never reboot, and too many warnings make count++...
+So is it necessary to check count < 100 or 100 =< count < 1000 ?
+> What about feeding the bytes of all three integers into a non-cryptographic hash function?
+> Using this way you get a cheap unique id.
+>
+> Thanks,
+> //richard
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
-How does efivars backend handle "unlink(2)" in the pstore file system.
-pstore will call the backend->erase function passing the "id".  The
-backend should then erase the right record from persistent storage.
 
-With the  ((timestamp * 100 + part) * 100 + count function - you can
-easily reverse it to find timestamp, part and count - would that make life
-easier for the backend to find the record to be erased?  If you use a
-hash function you will need to check each record and compute the
-hash to see if it matches (probably not a big deal because the backend
-will generally only hold a handful of records).
-
--Tony
+-- 
+Best,
+Madper Xie.
