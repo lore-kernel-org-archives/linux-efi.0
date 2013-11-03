@@ -1,60 +1,126 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] efi earlyprintk fix
-Date: Sun, 3 Nov 2013 20:16:47 +0800
-Message-ID: <20131103121647.GA4770@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH 10/11] EFI: Runtime services virtual mapping
+Date: Sun, 3 Nov 2013 20:31:15 +0800
+Message-ID: <20131103123115.GA5313@dhcp-16-126.nay.redhat.com>
+References: <1383236709-19716-1-git-send-email-bp@alien8.de>
+ <1383236709-19716-11-git-send-email-bp@alien8.de>
+ <20131101032551.GC4378@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <20131101032551.GC4378-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On 11/01/13 at 11:25am, Dave Young wrote:
+> On 10/31/13 at 05:25pm, Borislav Petkov wrote:
+> > From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> > 
+> > We map the EFI regions needed for runtime services non-contiguously,
+> > with preserved alignment on virtual addresses starting from -4G down
+> > for a total max space of 64G. This way, we provide for stable runtime
+> > services addresses across kernels so that a kexec'd kernel can still use
+> > them.
+> > 
+> > Thus, they're mapped in a separate pagetable so that we don't pollute
+> > the kernel namespace.
+> > 
+> > Add an efi= kernel command line parameter for passing miscellaneous
+> > options and chicken bits from the command line.
+> > 
+> > While at it, add a chicken bit called "efi=old_map" which can be used as
+> > a fallback to the old runtime services mapping method in case there's
+> > some b0rkage with a particular EFI implementation (haha, it is hard to
+> > hold up the sarcasm here...).
+> > 
+> > Also, add the UEFI RT VA space to Documentation/x86/x86_64/mm.txt.
+> > 
+> > Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> > ---
+> >  Documentation/kernel-parameters.txt  |   6 ++
+> >  Documentation/x86/x86_64/mm.txt      |   7 +++
+> >  arch/x86/include/asm/efi.h           |  64 ++++++++++++++------
+> >  arch/x86/include/asm/pgtable_types.h |   3 +-
+> >  arch/x86/platform/efi/efi.c          |  94 +++++++++++++++++++++---------
+> >  arch/x86/platform/efi/efi_32.c       |   9 ++-
+> >  arch/x86/platform/efi/efi_64.c       | 109 +++++++++++++++++++++++++++++++++++
+> >  arch/x86/platform/efi/efi_stub_64.S  |  54 +++++++++++++++++
+> >  include/linux/efi.h                  |   1 +
+> >  9 files changed, 300 insertions(+), 47 deletions(-)
+> > 
+> 
+> Hi,
+> 
+> This one still does not apply:
+> 
+> [dave@darkstar linux-2.6]$ git am ~/Mail/bp/new/*
+> Applying: efi: Simplify EFI_DEBUG
+> Applying: x86, pageattr: Lookup address in an arbitrary PGD
+> Applying: x86, pageattr: Add a PGD pagetable populating function
+> Applying: x86, pageattr: Add a PUD pagetable populating function
+> Applying: x86, pageattr: Add a PMD pagetable populating function
+> Applying: x86, pageattr: Add a PTE pagetable populating function
+> Applying: x86, pageattr: Add a PUD error unwinding path
+> Applying: x86, pageattr: Add last levels of error path
+> Applying: x86, cpa: Map in an arbitrary pgd
+> Applying: EFI: Runtime services virtual mapping
+> error: patch failed: arch/x86/platform/efi/efi.c:808
+> error: arch/x86/platform/efi/efi.c: patch does not apply
+> Patch failed at 0010 EFI: Runtime services virtual mapping
+> The copy of the patch that failed is found in:
+>    /home/dave/git/linux-2.6/.git/rebase-apply/patch
+> When you have resolved this problem, run "git am --resolved".
+> If you prefer to skip this patch, run "git am --skip" instead.
+> To restore the original branch and stop patching, run "git am --abort".
+> 
+> I found the reason, here is the diff of the efi.c
+> between (linus tree + matt next) and the one in matt next:
+> 
+> --- efi.c.linus-tree	2013-11-01 11:16:44.731554778 +0800
+> +++ efi.c.matt-next	2013-11-01 11:17:41.662316832 +0800
+> @@ -806,13 +806,10 @@ void __init efi_enter_virtual_mode(void)
+>  
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		md = p;
+> -		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+> -#ifdef CONFIG_X86_64
+> -			if (md->type != EFI_BOOT_SERVICES_CODE &&
+> -			    md->type != EFI_BOOT_SERVICES_DATA)
+> -#endif
+> -				continue;
+> -		}
+> +		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
+> +		    md->type != EFI_BOOT_SERVICES_CODE &&
+> +		    md->type != EFI_BOOT_SERVICES_DATA)
+> +			continue;
+>  
+>  		size = md->num_pages << EFI_PAGE_SHIFT;
+>  		end = md->phys_addr + size;
+> 
+> The conflict is caused by missing one commit in matt's efi next tree:
+> 
+> commit 700870119f49084da004ab588ea2b799689efaf7
+> Author: Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Date:   Thu Apr 18 07:51:34 2013 -0700
+> 
+>     x86, efi: Don't map Boot Services on i386
+>     
+>     Add patch to fix 32bit EFI service mapping (rhbz 726701)
+>     
+>     Multiple people are reporting hitting the following WARNING on i386,
+>     
+>       WARNING: at arch/x86/mm/ioremap.c:102 __ioremap_caller+0x3d3/0x440()
+>       Modules linked in:
+>       Pid: 0, comm: swapper Not tainted 3.9.0-rc7+ #95
 
-there's below one line shift problem:
+Hi, Matt
 
-                     ACPI=0xdabfe000  ACPI 2.0=0xdabfe014  SMBIOS=0xdaa9e000
-[    0.000000] efi:  
+How should I handle this problem, would you take above commit or rebase efi
+next branch?
 
-In fact check efi_y and the lfb_height should be compared at the begin of the
-loop of early_efi_write
-
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/x86/platform/efi/early_printk.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
---- linux-2.6.orig/arch/x86/platform/efi/early_printk.c
-+++ linux-2.6/arch/x86/platform/efi/early_printk.c
-@@ -106,6 +106,15 @@ early_efi_write(struct console *con, con
- 		if (count > linemax)
- 			count = linemax;
- 
-+		if (efi_y + font->height >= si->lfb_height) {
-+			u32 i;
-+
-+			efi_y -= font->height;
-+			early_efi_scroll_up();
-+
-+			for (i = 0; i < font->height; i++)
-+				early_efi_clear_scanline(efi_y + i);
-+		}
- 		for (h = 0; h < font->height; h++) {
- 			unsigned int n, x;
- 
-@@ -142,15 +151,6 @@ early_efi_write(struct console *con, con
- 			efi_y += font->height;
- 		}
- 
--		if (efi_y + font->height >= si->lfb_height) {
--			u32 i;
--
--			efi_y -= font->height;
--			early_efi_scroll_up();
--
--			for (i = 0; i < font->height; i++)
--				early_efi_clear_scanline(efi_y + i);
--		}
- 	}
- }
- 
+--
+Thanks
+Dave
