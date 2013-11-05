@@ -1,13 +1,13 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 2/3 v2] Add efi_info in x86 setup header
-Date: Tue, 05 Nov 2013 16:29:49 +0800
-Message-ID: <20131105083429.095506010@dhcp-16-126.nay.redhat.com>
-References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+Subject: [patch 4/7 v2] export more efi table variable to sysfs
+Date: Tue, 05 Nov 2013 16:20:11 +0800
+Message-ID: <20131105082717.561020034@dhcp-16-126.nay.redhat.com>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline; filename=02-kexec-padd-efi_info.patch
+Content-Disposition: inline; filename=04-export-more-efi-sysfs-vars.patch
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -17,115 +17,72 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-For supporting efi runtime on kexec kernel we need to
-fill the efi_info struct in setup_header. I just get
-the info in kernel exported boot_params data in debugfs.
+Export fw_vendor, runtime and config tables physical
+addresses to /sys/firmware/efi/systab becaue kexec
+kernel will need them.
 
-v1->v2:
-update comment for offset of reserved4_1[] in x87_linux_param_header
-Address comment from mjg59: do not break old kernel when use newer kexec-tools.
-  add checking for xloadflags bit 4 XLF_EFI_KEXEC. Only fill
-  efi_info and pass acpi_rsdp when the kexec kernel support efi boot.
-coding style fix, change internal function to be static
+>From EFI spec these 3 variables will be updated to
+virtual address after entering virtual mode. But
+kernel startup code will need the physical address.
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- include/x86/x86-linux.h             |    3 ++-
- kexec/arch/i386/crashdump-x86.c     |    4 +++-
- kexec/arch/i386/x86-linux-setup.c   |    9 +++++++++
- kexec/arch/i386/x86-linux-setup.h   |    1 +
- kexec/arch/x86_64/kexec-bzImage64.c |    6 ++++++
- 5 files changed, 21 insertions(+), 2 deletions(-)
+ arch/x86/platform/efi/efi.c |    4 ++++
+ drivers/firmware/efi/efi.c  |    9 +++++++++
+ include/linux/efi.h         |    3 +++
+ 3 files changed, 16 insertions(+)
 
---- kexec-tools.orig/include/x86/x86-linux.h
-+++ kexec-tools/include/x86/x86-linux.h
-@@ -115,7 +115,8 @@ struct x86_linux_param_header {
- 	uint32_t ext_ramdisk_image;		/* 0xc0 */
- 	uint32_t ext_ramdisk_size;		/* 0xc4 */
- 	uint32_t ext_cmd_line_ptr;		/* 0xc8 */
--	uint8_t reserved4_1[0x1e0 - 0xcc];	/* 0xcc */
-+	uint8_t reserved4_1[0x1c0 - 0xcc];	/* 0xe4 */
-+	uint8_t efi_info[32];			/* 0x1c0 */
- 	uint32_t alt_mem_k;			/* 0x1e0 */
- 	uint8_t  reserved5[4];			/* 0x1e4 */
- 	uint8_t  e820_map_nr;			/* 0x1e8 */
---- kexec-tools.orig/kexec/arch/i386/x86-linux-setup.c
-+++ kexec-tools/kexec/arch/i386/x86-linux-setup.c
-@@ -466,6 +466,13 @@ void setup_subarch(struct x86_linux_para
- 	get_bootparam(&real_mode->hardware_subarch, offset, sizeof(uint32_t));
+--- linux-2.6.orig/drivers/firmware/efi/efi.c
++++ linux-2.6/drivers/firmware/efi/efi.c
+@@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
+ 	.hcdp       = EFI_INVALID_TABLE_ADDR,
+ 	.uga        = EFI_INVALID_TABLE_ADDR,
+ 	.uv_systab  = EFI_INVALID_TABLE_ADDR,
++	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
++	.runtime    = EFI_INVALID_TABLE_ADDR,
++	.config_tables  = EFI_INVALID_TABLE_ADDR,
+ };
+ EXPORT_SYMBOL(efi);
+ 
+@@ -64,6 +67,12 @@ static ssize_t systab_show(struct kobjec
+ 		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
+ 	if (efi.uga != EFI_INVALID_TABLE_ADDR)
+ 		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
++	if (efi.fw_vendor != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "fw_vendor=0x%lx\n", efi.fw_vendor);
++	if (efi.runtime != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "runtime=0x%lx\n", efi.runtime);
++	if (efi.config_tables != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "config_tables=0x%lx\n", efi.config_tables);
+ 
+ 	return str - buf;
  }
+--- linux-2.6.orig/include/linux/efi.h
++++ linux-2.6/include/linux/efi.h
+@@ -556,6 +556,9 @@ extern struct efi {
+ 	unsigned long hcdp;		/* HCDP table */
+ 	unsigned long uga;		/* UGA table */
+ 	unsigned long uv_systab;	/* UV system table */
++	unsigned long fw_vendor;
++	unsigned long runtime;
++	unsigned long config_tables;
+ 	efi_get_time_t *get_time;
+ 	efi_set_time_t *set_time;
+ 	efi_get_wakeup_time_t *get_wakeup_time;
+--- linux-2.6.orig/arch/x86/platform/efi/efi.c
++++ linux-2.6/arch/x86/platform/efi/efi.c
+@@ -653,6 +653,10 @@ void __init efi_init(void)
  
-+static void setup_efi_info(struct x86_linux_param_header *real_mode)
-+{
-+	off_t offset = offsetof(typeof(*real_mode), efi_info);
+ 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
+ 
++	efi.fw_vendor = (unsigned long)efi.systab->fw_vendor;
++	efi.runtime = (unsigned long)efi.systab->runtime;
++	efi.config_tables = (unsigned long)efi.systab->tables;
 +
-+	get_bootparam(&real_mode->efi_info, offset, 32);
-+}
-+
- void setup_linux_system_parameters(struct kexec_info *info,
- 				   struct x86_linux_param_header *real_mode)
- {
-@@ -475,6 +482,8 @@ void setup_linux_system_parameters(struc
- 
- 	/* get subarch from running kernel */
- 	setup_subarch(real_mode);
-+	if (bzImage_support_efi_boot)
-+		setup_efi_info(real_mode);
- 	
- 	/* Default screen size */
- 	real_mode->orig_x = 0;
---- kexec-tools.orig/kexec/arch/i386/crashdump-x86.c
-+++ kexec-tools/kexec/arch/i386/crashdump-x86.c
-@@ -41,6 +41,7 @@
- #include "../../crashdump.h"
- #include "kexec-x86.h"
- #include "crashdump-x86.h"
-+#include "x86-linux-setup.h"
- 
- #ifdef HAVE_LIBXENCTRL
- #ifdef HAVE_XC_GET_MACHINE_MEMORY_MAP
-@@ -1046,7 +1047,8 @@ int load_crashdump_segments(struct kexec
- 	if (delete_memmap(memmap_p, elfcorehdr, memsz) < 0)
- 		return -1;
- 	cmdline_add_memmap(mod_cmdline, memmap_p);
--	cmdline_add_efi(mod_cmdline);
-+	if (!bzImage_support_efi_boot)
-+		cmdline_add_efi(mod_cmdline);
- 	cmdline_add_elfcorehdr(mod_cmdline, elfcorehdr);
- 
- 	/* Inform second kernel about the presence of ACPI tables. */
---- kexec-tools.orig/kexec/arch/i386/x86-linux-setup.h
-+++ kexec-tools/kexec/arch/i386/x86-linux-setup.h
-@@ -28,5 +28,6 @@ void setup_linux_system_parameters(struc
- 
- /* command line parameter may be appended by purgatory */
- #define PURGATORY_CMDLINE_SIZE 64
-+extern int bzImage_support_efi_boot;
- 
- #endif /* X86_LINUX_SETUP_H */
---- kexec-tools.orig/kexec/arch/x86_64/kexec-bzImage64.c
-+++ kexec-tools/kexec/arch/x86_64/kexec-bzImage64.c
-@@ -42,6 +42,7 @@
- #include <arch/options.h>
- 
- static const int probe_debug = 0;
-+int bzImage_support_efi_boot;
- 
- int bzImage64_probe(const char *buf, off_t len)
- {
-@@ -82,6 +83,11 @@ int bzImage64_probe(const char *buf, off
- 		/* Must be KERNEL_64 and CAN_BE_LOADED_ABOVE_4G */
- 		return -1;
- 	}
-+
-+#define XLF_EFI_KEXEC   (1 << 4)
-+	if ((header->xloadflags & XLF_EFI_KEXEC) == XLF_EFI_KEXEC)
-+		bzImage_support_efi_boot = 1;
-+
- 	/* I've got a relocatable bzImage64 */
- 	if (probe_debug)
- 		fprintf(stderr, "It's a relocatable bzImage64\n");
+ 	/*
+ 	 * Show what we know for posterity
+ 	 */
