@@ -1,79 +1,25 @@
-From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 1/3 v2] Add function get_bootparam
-Date: Tue, 05 Nov 2013 16:29:48 +0800
-Message-ID: <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
-References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [patch 0/7 v2] kexec kernel efi runtime support
+Date: Tue, 5 Nov 2013 15:40:41 +0100
+Message-ID: <20131105144041.GC25067@x1.alien8.de>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline;
- filename=01-kexec-add-function-get-boot-param.patch
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131105082007.872550445-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Not only setup_subarch will get data from debugfs file
-boot_params/data, later code for adding efi_info will
-also need do same thing. Thus add a common function here
-for later use.
+On Tue, Nov 05, 2013 at 04:20:07PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> Please help to review the patches.
 
-v1->v2: make get_bootparam() static
+Sure, but will have to wait 'til next week when I get back.
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- kexec/arch/i386/x86-linux-setup.c |   14 ++++++++++----
- 1 file changed, 10 insertions(+), 4 deletions(-)
+Thanks.
 
---- kexec-tools.orig/kexec/arch/i386/x86-linux-setup.c
-+++ kexec-tools/kexec/arch/i386/x86-linux-setup.c
-@@ -436,10 +436,9 @@ char *find_mnt_by_fsname(char *fsname)
- 	return mntdir;
- }
- 
--void setup_subarch(struct x86_linux_param_header *real_mode)
-+static void get_bootparam(void *buf, off_t offset, size_t size)
- {
- 	int data_file;
--	const off_t offset = offsetof(typeof(*real_mode), hardware_subarch);
- 	char *debugfs_mnt;
- 	char filename[PATH_MAX];
- 
-@@ -447,7 +446,7 @@ void setup_subarch(struct x86_linux_para
- 	if (!debugfs_mnt)
- 		return;
- 	snprintf(filename, PATH_MAX, "%s/%s", debugfs_mnt, "boot_params/data");
--	filename[PATH_MAX-1] = 0;
-+	filename[PATH_MAX - 1] = 0;
- 	free(debugfs_mnt);
- 
- 	data_file = open(filename, O_RDONLY);
-@@ -455,11 +454,18 @@ void setup_subarch(struct x86_linux_para
- 		return;
- 	if (lseek(data_file, offset, SEEK_SET) < 0)
- 		goto close;
--	read(data_file, &real_mode->hardware_subarch, sizeof(uint32_t));
-+	read(data_file, buf, size);
- close:
- 	close(data_file);
- }
- 
-+void setup_subarch(struct x86_linux_param_header *real_mode)
-+{
-+	off_t offset = offsetof(typeof(*real_mode), hardware_subarch);
-+
-+	get_bootparam(&real_mode->hardware_subarch, offset, sizeof(uint32_t));
-+}
-+
- void setup_linux_system_parameters(struct kexec_info *info,
- 				   struct x86_linux_param_header *real_mode)
- {
+-- 
+Regards/Gruss,
+Boris.
