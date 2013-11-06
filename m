@@ -1,25 +1,41 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [patch 0/7 v2] kexec kernel efi runtime support
-Date: Tue, 5 Nov 2013 15:40:41 +0100
-Message-ID: <20131105144041.GC25067@x1.alien8.de>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efi earlyprintk fix
+Date: Wed, 6 Nov 2013 08:49:21 +0000
+Message-ID: <20131106084921.GA22856@console-pimps.org>
+References: <20131103121647.GA4770@dhcp-16-126.nay.redhat.com>
+ <20131104103739.GD21688@console-pimps.org>
+ <20131104125853.GB5118@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131105082007.872550445-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <20131104125853.GB5118-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 05, 2013 at 04:20:07PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> Please help to review the patches.
+On Mon, 04 Nov, at 08:58:53PM, Dave Young wrote:
+> On 11/04/13 at 10:37am, Matt Fleming wrote:
+> > On Sun, 03 Nov, at 08:16:47PM, Dave Young wrote:
+> > > 
+> > > there's below one line shift problem:
+> > > 
+> > >                      ACPI=0xdabfe000  ACPI 2.0=0xdabfe014  SMBIOS=0xdaa9e000
+> > > [    0.000000] efi:  
+> > > 
+> > > In fact check efi_y and the lfb_height should be compared at the begin of the
+> > > loop of early_efi_write
+> >  
+> > Hmm... this is interesting. I can't produce this on any of my machines.
+> > Where did you see this? What hardware?
+> 
+> It's my laptop Thinkpad T420, the screen scolls very fast, I use boot_delay=500
+> to verify it with my patch for moving boot_delay param an early param.
 
-Sure, but will have to wait 'til next week when I get back.
-
-Thanks.
+Dave, how are you booting your laptop? Are you using grub? Does the
+earlyprintk output start at the bottom of the screen? Do you set any
+parameters for efifb?
 
 -- 
-Regards/Gruss,
-Boris.
+Matt Fleming, Intel Open Source Technology Center
