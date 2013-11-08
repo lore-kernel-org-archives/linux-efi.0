@@ -1,61 +1,94 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI runtime mapping work for v3.14
-Date: Fri, 8 Nov 2013 10:57:19 +0000
-Message-ID: <20131108105719.GB2318@console-pimps.org>
+Subject: Re: [patch 0/7 v2] kexec kernel efi runtime support
+Date: Fri, 8 Nov 2013 14:31:18 +0000
+Message-ID: <20131108143118.GA22636@console-pimps.org>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <20131105082007.872550445-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Folks, could you queue up the following for the v3.14 merge window? It
-would be good to get these patches into linux-next for a full release
-cycle of testing. They pass all of my tests.
+On Tue, 05 Nov, at 04:20:07PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> Hi,
+> 
+> Here is the V2 for supporting kexec kernel efi runtime.
+> Per pervious discussion I pass the 1st kernel efi runtime mapping
+> via setup_data to 2nd kernel. Besides of the runtime mapping
+> info I also pass the fw_vendor, runtime, config table, smbios
+> physical address in setup_data. EFI spec mentioned fw_vendor,
+> runtime, config table addresses will be converted to virt address
+> after entering virtual mode, but we will use it as physical address
+> in efi_init. For smbios EFI spec did not mention about the address
+> updating, but during my test on a HP workstation, the bios will
+> convert it to Virt addr, thus pass it in setup_data as well.
 
-The following changes since commit 72548e836b0c4abbb652e791dee9c91203a9a4c6:
+I see this in the dmesg,
 
-  x86/efi: Add EFI framebuffer earlyprintk support (2013-10-28 18:09:58 +0000)
+[    0.000000] efi: skipping setup_data on EFI 32BIT!
 
-are available in the git repository at:
+despite the fact that this is on an x86-64 box. Turns out it's because
+CONFIG_DEBUG_BOOT_PARAMS isn't set in my config. You may want to turn
+that on automatically. After doing that things work on my ASUS box (good
+work!) but the SATA controller craps out on my Tunnelmountain machine,
+but that's probably unrelated and I'll debug that separately.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+I see a bunch of section mismatch warnings,
 
-for you to fetch changes up to ee41143027706d9f342dfe05487a00b20887fde7:
+WARNING: arch/x86/platform/efi/built-in.o(.text+0xd1e): Section mismatch in reference from the function efi_map_regions_fixed() to the function .init.text:efi_map_region_fixed()
+The function efi_map_regions_fixed() references
+the function __init efi_map_region_fixed().
+This is often because efi_map_regions_fixed lacks a __init 
+annotation or the annotation of efi_map_region_fixed is wrong.
 
-  x86/efi: Check krealloc return value (2013-11-02 11:09:36 +0000)
+WARNING: arch/x86/platform/efi/built-in.o(.text+0xd2a): Section mismatch in reference from the function efi_map_regions_fixed() to the variable .init.data:efi_phys
+The function efi_map_regions_fixed() references
+the variable __initdata efi_phys.
+This is often because efi_map_regions_fixed lacks a __initdata 
+annotation or the annotation of efi_phys is wrong.
 
-----------------------------------------------------------------
- * New static EFI runtime services virtual mapping layout which is
-   groundwork for kexec support on EFI - Borislav Petkov
+WARNING: arch/x86/platform/built-in.o(.text+0xd1e): Section mismatch in reference from the function efi_map_regions_fixed() to the function .init.text:efi_map_region_fixed()
+The function efi_map_regions_fixed() references
+the function __init efi_map_region_fixed().
+This is often because efi_map_regions_fixed lacks a __init 
+annotation or the annotation of efi_map_region_fixed is wrong.
 
-----------------------------------------------------------------
-Borislav Petkov (11):
-      x86/efi: Simplify EFI_DEBUG
-      x86/mm/pageattr: Lookup address in an arbitrary PGD
-      x86/mm/pageattr: Add a PGD pagetable populating function
-      x86/mm/pageattr: Add a PUD pagetable populating function
-      x86/mm/pageattr: Add a PMD pagetable populating function
-      x86/mm/pageattr: Add a PTE pagetable populating function
-      x86/mm/pageattr: Add a PUD error unwinding path
-      x86/mm/pageattr: Add last levels of error path
-      x86/mm/cpa: Map in an arbitrary pgd
-      x86/efi: Runtime services virtual mapping
-      x86/efi: Check krealloc return value
+WARNING: arch/x86/platform/built-in.o(.text+0xd2a): Section mismatch in reference from the function efi_map_regions_fixed() to the variable .init.data:efi_phys
+The function efi_map_regions_fixed() references
+the variable __initdata efi_phys.
+This is often because efi_map_regions_fixed lacks a __initdata 
+annotation or the annotation of efi_phys is wrong.
 
- Documentation/kernel-parameters.txt  |   6 +
- Documentation/x86/x86_64/mm.txt      |   7 +
- arch/x86/include/asm/efi.h           |  64 +++--
- arch/x86/include/asm/pgtable_types.h |   3 +-
- arch/x86/mm/pageattr.c               | 461 +++++++++++++++++++++++++++++++++--
- arch/x86/platform/efi/efi.c          | 111 ++++++---
- arch/x86/platform/efi/efi_32.c       |   9 +-
- arch/x86/platform/efi/efi_64.c       | 109 +++++++++
- arch/x86/platform/efi/efi_stub_64.S  |  54 ++++
- include/linux/efi.h                  |   1 +
- 10 files changed, 755 insertions(+), 70 deletions(-)
+WARNING: arch/x86/built-in.o(.text+0x7c357): Section mismatch in reference from the function parse_efi_setup() to the function .init.text:early_memremap()
+The function parse_efi_setup() references
+the function __init early_memremap().
+This is often because parse_efi_setup lacks a __init 
+annotation or the annotation of early_memremap is wrong.
+
+WARNING: arch/x86/built-in.o(.text+0x7c390): Section mismatch in reference from the function parse_efi_setup() to the function .init.text:early_iounmap()
+The function parse_efi_setup() references
+the function __init early_iounmap().
+This is often because parse_efi_setup lacks a __init 
+annotation or the annotation of early_iounmap is wrong.
+
+WARNING: arch/x86/built-in.o(.text+0x7c5ce): Section mismatch in reference from the function efi_map_regions_fixed() to the function .init.text:efi_map_region_fixed()
+The function efi_map_regions_fixed() references
+the function __init efi_map_region_fixed().
+This is often because efi_map_regions_fixed lacks a __init 
+annotation or the annotation of efi_map_region_fixed is wrong.
+
+WARNING: arch/x86/built-in.o(.text+0x7c5da): Section mismatch in reference from the function efi_map_regions_fixed() to the variable .init.data:vdso32_sysenter_end
+The function efi_map_regions_fixed() references
+the variable __initdata vdso32_sysenter_end.
+This is often because efi_map_regions_fixed lacks a __initdata 
+annotation or the annotation of vdso32_sysenter_end is wrong.
+
+Also, many of your patch descriptions are missing subsystem tags. Please
+fix this in your next submission.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
