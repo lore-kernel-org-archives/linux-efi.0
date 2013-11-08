@@ -1,92 +1,98 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi earlyprintk fix
-Date: Thu, 7 Nov 2013 20:09:06 +0800
-Message-ID: <20131107120906.GB4116@dhcp-16-126.nay.redhat.com>
-References: <20131103121647.GA4770@dhcp-16-126.nay.redhat.com>
- <20131104103739.GD21688@console-pimps.org>
- <20131104125853.GB5118@dhcp-16-126.nay.redhat.com>
- <20131106092335.GA3952@dhcp-16-126.nay.redhat.com>
- <20131106093832.GC22856@console-pimps.org>
+From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH] x86, efi: change name of efi_no_storage_paranoia parameter
+ to efi_storage_paranoia
+Date: Fri, 8 Nov 2013 16:33:09 +0900
+Message-ID: <527C93B5.7010407@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-2022-JP"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131106093832.GC22856-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, richard-/L3Ra7n9ekc@public.gmane.org, jlee-IBi9RG/b67k@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/06/13 at 09:38am, Matt Fleming wrote:
-> On Wed, 06 Nov, at 05:23:35PM, Dave Young wrote:
-> > On 11/04/13 at 08:58pm, Dave Young wrote:
-> > > On 11/04/13 at 10:37am, Matt Fleming wrote:
-> > > > On Sun, 03 Nov, at 08:16:47PM, Dave Young wrote:
-> > > > > 
-> > > > > there's below one line shift problem:
-> > > > > 
-> > > > >                      ACPI=0xdabfe000  ACPI 2.0=0xdabfe014  SMBIOS=0xdaa9e000
-> > > > > [    0.000000] efi:  
-> > > > > 
-> > > > > In fact check efi_y and the lfb_height should be compared at the begin of the
-> > > > > loop of early_efi_write
-> > > >  
-> > > > Hmm... this is interesting. I can't produce this on any of my machines.
-> > > > Where did you see this? What hardware?
-> > > 
-> > > It's my laptop Thinkpad T420, the screen scolls very fast, I use boot_delay=500
-> > > to verify it with my patch for moving boot_delay param an early param.
-> > > 
-> > > Even without boot_delay, there's always a line at bottom with only the prefix:
-> > > "efi:"
-> > 
-> > I will do further debug if I got time on this. It's really helpful for having efi
-> > earlyprintk, thanks for your excellent idea of printing to efi fb!
-> 
-> Thanks. I suspect the code in early_efi_setup() that sets up efi_y is
-> somehow wrong.
+By following works, my system very often fails set_variable() to set new
+variable to efi variable storage and shows "efivars: set_variable() failed:
+status=-28" message.
 
-Here is my debug message about the efifb params (all hex values):
-[    0.000000] efi fb lfb width: 280
-[    0.000000] efi fb lfb height: 1e0
-[    0.000000] efi fb lfb base: e0000000
-[    0.000000] efi fb lfb linelength: a00
-[    0.000000] efi fb font height: 10
-[    0.000000] efi fb font width: 8
+- commit 31ff2f20d9003e74991d135f56e503fe776c127c
+    efi: Distinguish between "remaining space" and actually used space
+- commit 8c58bf3eec3b8fc8162fe557e9361891c20758f2
+    x86,efi: Implement efi_no_storage_paranoia parameter
+- commit f8b8404337de4e2466e2e1139ea68b1f8295974f
+    Modify UEFI anti-bricking code
 
-The problem looks related to the pr_cont(), here is what I observed:
-[    0.000000] efi: EFI v2.00 by Lenovo
-                    ACPI=0xdabfe000  ACPI 2.0=0xdabfe014  SMBIOS=0xdaa9e000
-[    0.000000] efi: 
+When booting my system, remaining space of efi variable storage is about
+5KB. So there is no room that sets a new variable to the storage.
 
-After relooking the code, below fix is more reasonable than my original one,
-But I still confused why it only happens on this machine.
+According to above works, efi_no_storage_paranoia parameter was prepared
+for sane UEFI which can do gc and fulfills spec. But why need a system
+with a sane UEFI set the parameter? It is wrong. A system with a broken
+UEFI should set the parameter.
 
---- efi.orig/arch/x86/platform/efi/early_printk.c
-+++ efi/arch/x86/platform/efi/early_printk.c
-@@ -95,6 +95,7 @@ early_efi_write(struct console *con, con
- 	while (num) {
- 		unsigned int linemax;
- 		unsigned int h, count = 0;
-+		bool linebreak = false;
- 
- 		for (s = str; *s && *s != '\n'; s++) {
- 			if (count == num)
-@@ -135,14 +136,16 @@ early_efi_write(struct console *con, con
- 			efi_y += font->height;
- 			str++;
- 			num--;
-+			linebreak = true;
- 		}
- 
- 		if (efi_x >= si->lfb_width) {
- 			efi_x = 0;
- 			efi_y += font->height;
-+			linebreak = true;
- 		}
- 
--		if (efi_y + font->height >= si->lfb_height) {
-+		if (linebreak && (efi_y + font->height >= si->lfb_height)) {
- 			u32 i;
- 
- 			efi_y -= font->height;
+This patch changes name of the parameter to efi_storage_paranoia and uses
+all efi variable storage with no parameter.
+
+Signed-off-by: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+CC: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+CC: Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>
+CC: Lee, Chun-Y <jlee-IBi9RG/b67k@public.gmane.org>
+CC: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ Documentation/kernel-parameters.txt | 10 +++++-----
+ arch/x86/platform/efi/efi.c         |  8 ++++----
+ 2 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+index fcbb736..2157c8e 100644
+--- a/Documentation/kernel-parameters.txt
++++ b/Documentation/kernel-parameters.txt
+@@ -888,11 +888,11 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+ 	edd=		[EDD]
+ 			Format: {"off" | "on" | "skip[mbr]"}
+
+-	efi_no_storage_paranoia [EFI; X86]
+-			Using this parameter you can use more than 50% of
+-			your efi variable storage. Use this parameter only if
+-			you are really sure that your UEFI does sane gc and
+-			fulfills the spec otherwise your board may brick.
++	efi_storage_paranoia [EFI; X86]
++			Using this parameter you cannot use your efi variable
++			storage when the remaining space of the storage becomes
++			less than 5KB. Use this parameter if your UEFI does
++			not sane gc and fulfills the spec.
+
+ 	eisa_irq_edge=	[PARISC,HW]
+ 			See header of drivers/parisc/eisa.c.
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index c7e22ab..010a0eb 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -107,14 +107,14 @@ static int __init setup_add_efi_memmap(char *arg)
+ }
+ early_param("add_efi_memmap", setup_add_efi_memmap);
+
+-static bool efi_no_storage_paranoia;
++static bool efi_storage_paranoia;
+
+ static int __init setup_storage_paranoia(char *arg)
+ {
+-	efi_no_storage_paranoia = true;
++	efi_storage_paranoia = true;
+ 	return 0;
+ }
+-early_param("efi_no_storage_paranoia", setup_storage_paranoia);
++early_param("efi_storage_paranoia", setup_storage_paranoia);
+
+
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+@@ -1066,7 +1066,7 @@ efi_status_t efi_query_variable_store(u32 attributes, unsigned long size)
+ 	 * 5KB. This figure was provided by Samsung, so should be safe.
+ 	 */
+ 	if ((remaining_size - size < EFI_MIN_RESERVE) &&
+-		!efi_no_storage_paranoia) {
++		efi_storage_paranoia) {
+
+ 		/*
+ 		 * Triggering garbage collection may require that the firmware
