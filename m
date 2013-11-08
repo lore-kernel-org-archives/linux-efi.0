@@ -1,71 +1,56 @@
-From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: change name of efi_no_storage_paranoia parameter
- to efi_storage_paranoia
-Date: Fri, 8 Nov 2013 19:32:51 +0900
-Message-ID: <527CBDD3.2020609@jp.fujitsu.com>
-References: <527C93B5.7010407@jp.fujitsu.com> <527C9B5C.6040509@nod.at> <527CB013.30200@jp.fujitsu.com> <527CB0F4.8080606@nod.at> <527CBC05.6080505@jp.fujitsu.com> <527CBD01.1000908@nod.at>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efi earlyprintk fix
+Date: Fri, 8 Nov 2013 10:36:48 +0000
+Message-ID: <20131108103648.GA2318@console-pimps.org>
+References: <20131103121647.GA4770@dhcp-16-126.nay.redhat.com>
+ <20131104103739.GD21688@console-pimps.org>
+ <20131104125853.GB5118@dhcp-16-126.nay.redhat.com>
+ <20131106092335.GA3952@dhcp-16-126.nay.redhat.com>
+ <20131106093832.GC22856@console-pimps.org>
+ <20131107120906.GB4116@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-2022-JP"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <527CBD01.1000908-/L3Ra7n9ekc@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131107120906.GB4116-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, jlee-IBi9RG/b67k@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-(2013/11/08 19:29), Richard Weinberger wrote:
-> Am 08.11.2013 11:25, schrieb Yasuaki Ishimatsu:
->> (2013/11/08 18:37), Richard Weinberger wrote:
->>> Am 08.11.2013 10:34, schrieb Yasuaki Ishimatsu:
->>>> (2013/11/08 17:05), Richard Weinberger wrote:
->>>>> Am 08.11.2013 08:33, schrieb Yasuaki Ishimatsu:
->>>>>> By following works, my system very often fails set_variable() to set new
->>>>>> variable to efi variable storage and shows "efivars: set_variable() failed:
->>>>>> status=-28" message.
->>>>>>
->>>>>> - commit 31ff2f20d9003e74991d135f56e503fe776c127c
->>>>>>        efi: Distinguish between "remaining space" and actually used space
->>>>>> - commit 8c58bf3eec3b8fc8162fe557e9361891c20758f2
->>>>>>        x86,efi: Implement efi_no_storage_paranoia parameter
->>>>>> - commit f8b8404337de4e2466e2e1139ea68b1f8295974f
->>>>>>        Modify UEFI anti-bricking code
->>>>>>
->>>>>> When booting my system, remaining space of efi variable storage is about
->>>>>> 5KB. So there is no room that sets a new variable to the storage.
->>>>>>
->>>>>> According to above works, efi_no_storage_paranoia parameter was prepared
->>>>>> for sane UEFI which can do gc and fulfills spec. But why need a system
->>>>>> with a sane UEFI set the parameter? It is wrong. A system with a broken
->>>>>> UEFI should set the parameter.
->>>>>
->>>>> And how does one know that his UEFI is broken?
->>>>
->>>> I have no idea. But at least, bricked board is broken UEFI.
->>>> Do you know the issue occurs on several boards or specific board?
->>>
->>> On *many* boards including laptops....
->>> Please read the history of the whole issue.
->>
->> Thank you for your comment.
->> I has read git log. But there is no information like this.
->> So I will read them of related threads again. Do you know good threads
->> to know the history of the issue?
+On Thu, 07 Nov, at 08:09:06PM, Dave Young wrote:
+> Here is my debug message about the efifb params (all hex values):
+> [    0.000000] efi fb lfb width: 280
+> [    0.000000] efi fb lfb height: 1e0
+> [    0.000000] efi fb lfb base: e0000000
+> [    0.000000] efi fb lfb linelength: a00
+> [    0.000000] efi fb font height: 10
+> [    0.000000] efi fb font width: 8
 > 
-
-> Everything started with an issue that killed Samsung laptops:
-> http://mjg59.dreamwidth.org/22855.html
+> The problem looks related to the pr_cont(), here is what I observed:
+> [    0.000000] efi: EFI v2.00 by Lenovo
+>                     ACPI=0xdabfe000  ACPI 2.0=0xdabfe014  SMBIOS=0xdaa9e000
+> [    0.000000] efi: 
 > 
-> Later it was found that if you write too much into UEFI variables many
-> UEFI implementations will do bad things.
+> After relooking the code, below fix is more reasonable than my original one,
+> But I still confused why it only happens on this machine.
 
-Thanks for the information.
-I will read it.
+Dave, could you try this patch?
 
-Thanks,
-Yasuaki Ishimatsu
+---
 
-> 
-> Thanks,
-> //richard
-> 
+diff --git a/arch/x86/platform/efi/early_printk.c b/arch/x86/platform/efi/early_printk.c
+index 6599a0027b76..81b506d5befd 100644
+--- a/arch/x86/platform/efi/early_printk.c
++++ b/arch/x86/platform/efi/early_printk.c
+@@ -142,7 +142,7 @@ early_efi_write(struct console *con, const char *str, unsigned int num)
+ 			efi_y += font->height;
+ 		}
+ 
+-		if (efi_y + font->height >= si->lfb_height) {
++		if (efi_y + font->height > si->lfb_height) {
+ 			u32 i;
+ 
+ 			efi_y -= font->height;
+-- 
+Matt Fleming, Intel Open Source Technology Center
