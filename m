@@ -1,38 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [BUG]: DELL XPS 8500 become a brick after fill too many entries
- to nvram.
-Date: Mon, 11 Nov 2013 11:07:01 +0000
-Message-ID: <20131111110701.GE22636@console-pimps.org>
-References: <87fvr3h3b9.fsf@redhat.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI runtime mapping work for v3.14
+Date: Mon, 11 Nov 2013 12:17:54 +0100
+Message-ID: <20131111111754.GB15810@gmail.com>
+References: <20131108105719.GB2318@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <87fvr3h3b9.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20131108105719.GB2318-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 11 Nov, at 02:15:22PM, Madper Xie wrote:
-> Howdy all,
->   For now we ensure at least ~5kb free space. But my dell xps still
->   become a brick after I add too many entries to my nvram. So maybe 5kb
->   is not safe enough. and 5kb is just aginst Samsung's laptop.
->   So should we enlarge EFI_MIN_RESERVE?
 
-Urgh.............
+* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
 
-Thanks for the report. Could you provide some more details?
+> Folks, could you queue up the following for the v3.14 merge window? It
+> would be good to get these patches into linux-next for a full release
+> cycle of testing. They pass all of my tests.
+> 
+> The following changes since commit 72548e836b0c4abbb652e791dee9c91203a9a4c6:
+> 
+>   x86/efi: Add EFI framebuffer earlyprintk support (2013-10-28 18:09:58 +0000)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
 
- - Is your machine definitely bricked?
- - Exactly which Dell machine is this?
- - What were you doing to cause your machine to not boot? Using
-   efibootmgr?
- - Please send your .config
- - Have you reported this to any BIOS engineers to confirm the cause of
-   the bricking?
- - Have you got a dmesg from the machine before it broke?
+Mind resending this in about a week or so? The merge window has just 
+started and we don't want to potentially destabilize -next with v3.14 
+problems.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks,
+
+	Ingo
