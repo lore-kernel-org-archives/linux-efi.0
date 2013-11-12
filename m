@@ -1,41 +1,45 @@
 From: Jerry Hoemann <jerry.hoemann@hp.com>
-Subject: [PATCH 0/3] Early use of boot service memory
-Date: Mon, 11 Nov 2013 19:15:55 -0700
-Message-ID: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
+Subject: [PATCH 2/3] x86: avoid efi_reserve_boot_services
+Date: Mon, 11 Nov 2013 19:15:57 -0700
+Message-ID: <1384222558-38527-3-git-send-email-jerry.hoemann@hp.com>
+References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
 Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
 Sender: linux-doc-owner@vger.kernel.org
 To: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, penberg@kernel.org, akpm@linux-foundation.org, linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, vgoyal@redhat.com
 Cc: linux-kernel@vger.kernel.org, jerry.hoemann@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-Some platform have firmware that violates UEFI spec and access boot service
+Some platform have firmware that violate UEFI spec and access boot service
 code or data segments after the system has called Exit Boot Services.
-The call to efi_reserve_boot_services in setup_arch is a work around to
-avoid using boot service memory until after the kernel has done
-Set Virtual Map.
+
+The call to efi_reserve_boot_services is a work around to avoid using
+boot service memory until after the kernel has done Set Virtual Map.
 
 However, this reservation fragments memory which can cause
 large allocations early in boot (e.g. crash kernel) to fail.
 
-This patch set extends the add_efi_memmap with an optional
-argument to specify that firmware "correctly" doesn't resuse
-boot services memory after Exit Boot Services.
+Avoid calling efi_reserve_boot_services if the memmap
+is "correct."
 
-With this information, setup_arch avoids calling
-efi_reserve_boot_services and fragmenting memory.
+Signed-off-by: Jerry Hoemann <jerry.hoemann@hp.com>
+---
+ arch/x86/kernel/setup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-Jerry Hoemann (3):
-  efi: Early use of boot service memory
-  x86: avoid efi_reserve_boot_services
-  x86, efi: Early use of boot service memory
-
- Documentation/kernel-parameters.txt |  8 ++++++++
- arch/x86/kernel/setup.c             |  2 +-
- arch/x86/platform/efi/efi.c         | 13 +++++++++++--
- include/linux/efi.h                 |  1 +
- 4 files changed, 21 insertions(+), 3 deletions(-)
-
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index f0de629..1186ff9 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1074,7 +1074,7 @@ void __init setup_arch(char **cmdline_p)
+ 	 * The EFI specification says that boot service code won't be called
+ 	 * after ExitBootServices(). This is, in fact, a lie.
+ 	 */
+-	if (efi_enabled(EFI_MEMMAP))
++	if (efi_enabled(EFI_MEMMAP) && !efi_enabled(EFI_MEMMAP_CORRECT))
+ 		efi_reserve_boot_services();
+ 
+ 	/* preallocate 4k for mptable mpc */
 -- 
 1.7.11.3
 
