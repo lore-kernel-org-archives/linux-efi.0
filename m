@@ -1,104 +1,40 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: arm/arm64 UEFI boot protocol
-Date: Mon, 11 Nov 2013 18:43:21 +0100
-Message-ID: <20131111174321.GQ1557@rocoto.smurfnet.nu>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [patch 1/3 v2] Add function get_bootparam
+Date: Mon, 11 Nov 2013 18:27:38 -0700
+Message-ID: <1384219658.1847.84.camel@misato.fc.hp.com>
+References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+	 <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <20131105083428.411624560-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, olivier.martin-5wv7dgnIgG8@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi all,
+On Tue, 2013-11-05 at 16:29 +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> Not only setup_subarch will get data from debugfs file
+> boot_params/data, later code for adding efi_info will
+> also need do same thing. Thus add a common function here
+> for later use.
 
-We currently have a few sets of patches floating around, for UEFI
-runtime services, UEFI stub and GRUB support for Linux/UEFI on
-arm/arm64.
+get_bootparam() calls find_mnt_by_fsname("debugfs"), which assumes that
+debugfs is mounted with device name "debugfs".  This function fails
+when:
+ - debugfs is not mounted, or
+ - debugfs is mounted with a different device name, such as nodev [1].
 
-The last version of Documentation/arm/uefi.txt I sent out raised a few
-questions with regards to the boot protocol between UEFI and Linux, and
-there is also upcoming support for ACPI which could use a few
-clarifications in this area.
+This issue is not introduced by this patch.  But the original code,
+which sets hardware_subarch, seems to work even if it failed to access
+debugfs (which is ignored) since hardware_subarch is zero most of the
+cases anyway.  With this change, however, this failure now makes the 2nd
+kernel unbootable.  So, it needs to be addressed to make this code path
+work reliably (or kexec should fail at least).
 
-So, rather than sending out complete sets of patches for all these until
-consensus is reached, below is my proposed suggestion for a
-Documentation/arm/uefi.txt, to be shared for arm and arm64. If noone has
-strong objections to this, we can quickly send updated (and hopefully
-final-ish) versions of these sets.
+[1]
+https://access.redhat.com/site/documentation/en-US/Red_Hat_Enterprise_MRG/2/html/Realtime_Tuning_Guide/sect-Realtime_Tuning_Guide-Realtime_Specific_Tuning-Mount_debugfs.html
 
-/
-    Leif
-
----
-
-UEFI, the Unified Extensible Firmware Interface is a specification
-governing the behaviours of compatible firmware interfaces.
-It is maintained by the UEFI Forum - http://www.uefi.org/.
-Support for the AArch32 (arm) architecture was added in version 2.3 of
-the specification, and support for AAaarch64 (arm64) was added in
-version 2.4.
-
-UEFI is an evolution of its predecessor 'EFI', so the terms EFI and
-EFI are used somewhat interchangeably in this document and associated
-source code. As a rule, anything new uses 'UEFI', whereas 'EFI' refers
-to legacy code or specifications.  
-
-UEFI support in Linux                                                           
-=====================                                                           
-Booting on a platform with firmware compliant with the UEFI
-specification makes it possible for the kernel to support additional
-features:
-- UEFI Runtime Services
-- Retrieving various configuration information through the standardised
-  interface of UEFI configuration tables. (ACPI, SMBIOS, ...)
-
-For actually enabling [U]EFI support, enable:
-- CONFIG_EFI=y
-- CONFIG_EFI_VARS=y or m
-
-UEFI stub
-=========
-The "stub" is a feature that turns the Image/zImage/bzImage into a valid
-UEFI PE/COFF executable, including a loader application that makes it
-possible to load the kernel directly from the UEFI shell, boot menu, or
-one of the lightweight bootloaders like Gummiboot or rEFInd. 
-The kernel image built with stub support remains a valid kernel image
-for booting in the legacy fashion.
-
-UEFI kernel support on ARM
-==========================
-The implementation depends on receiving information about the UEFI
-environment in a Flattened Device Tree (FDT) - so is only available with
-CONFIG_OF.
-
-UEFI support also depends on early_memremap().
-
-UEFI kernel support on the ARM architectures (arm and arm64) is only
-available when boot is performed through the stub.
-
-When booting in UEFI mode, the kernel ignores any memory nodes in the
-DT, and instead reads the UEFI memory map. To prevent confusion, the
-stub deletes any memory nodes from a provided DT.
-
-The stub populates the FDT /chosen node with, and the kernel scans for
-the following parameters:
-________________________________________________________________________________
-Name                      | Size   | Description
-================================================================================
-linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
---------------------------------------------------------------------------------
-linux,uefi-mmap           | 64-bit | Physical address of the UEFI memory map,
-                          |        | populated by the UEFI GetMemoryMap() call.
---------------------------------------------------------------------------------
-linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
-                          |        | pointed to in previous entry.
---------------------------------------------------------------------------------
-linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
-                          |        | memory map.
---------------------------------------------------------------------------------
-linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
---------------------------------------------------------------------------------
-
-For verbose debug messages, specify 'uefi_debug' on the kernel command line.
+Thanks,
+Toshi
