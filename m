@@ -1,17 +1,16 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 1/3 v2] Add function get_bootparam
-Date: Tue, 12 Nov 2013 16:08:54 +0800
-Message-ID: <20131112080854.GD6999@dhcp-16-126.nay.redhat.com>
-References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
- <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
- <1384219658.1847.84.camel@misato.fc.hp.com>
- <52819E71.70201@zytor.com> <20131112075831.GA6213@kroah.com>
+Subject: Re: [patch 4/7 v2] export more efi table variable to sysfs
+Date: Tue, 12 Nov 2013 16:19:37 +0800
+Message-ID: <20131112081937.GE6999@dhcp-16-126.nay.redhat.com>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+ <20131105082717.561020034@dhcp-16-126.nay.redhat.com>
+ <20131112004014.GA15377@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131112075831.GA6213-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20131112004014.GA15377-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -21,53 +20,26 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gMTEvMTEvMTMgYXQgMTE6NThwbSwgR3JlZyBLSCB3cm90ZToKPiBPbiBNb24sIE5vdiAxMSwg
-MjAxMyBhdCAwNzoyMDoxN1BNIC0wODAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToKPiA+IE9uIDEx
-LzExLzIwMTMgMDU6MjcgUE0sIFRvc2hpIEthbmkgd3JvdGU6Cj4gPiA+IE9uIFR1ZSwgMjAxMy0x
-MS0wNSBhdCAxNjoyOSArMDgwMCwgZHlvdW5nQHJlZGhhdC5jb20gd3JvdGU6Cj4gPiA+PiBOb3Qg
-b25seSBzZXR1cF9zdWJhcmNoIHdpbGwgZ2V0IGRhdGEgZnJvbSBkZWJ1Z2ZzIGZpbGUKPiA+ID4+
-IGJvb3RfcGFyYW1zL2RhdGEsIGxhdGVyIGNvZGUgZm9yIGFkZGluZyBlZmlfaW5mbyB3aWxsCj4g
-PiA+PiBhbHNvIG5lZWQgZG8gc2FtZSB0aGluZy4gVGh1cyBhZGQgYSBjb21tb24gZnVuY3Rpb24g
-aGVyZQo+ID4gPj4gZm9yIGxhdGVyIHVzZS4KPiA+ID4gCj4gPiA+IGdldF9ib290cGFyYW0oKSBj
-YWxscyBmaW5kX21udF9ieV9mc25hbWUoImRlYnVnZnMiKSwgd2hpY2ggYXNzdW1lcyB0aGF0Cj4g
-PiA+IGRlYnVnZnMgaXMgbW91bnRlZCB3aXRoIGRldmljZSBuYW1lICJkZWJ1Z2ZzIi4gIFRoaXMg
-ZnVuY3Rpb24gZmFpbHMKPiA+ID4gd2hlbjoKPiA+ID4gIC0gZGVidWdmcyBpcyBub3QgbW91bnRl
-ZCwgb3IKPiA+ID4gIC0gZGVidWdmcyBpcyBtb3VudGVkIHdpdGggYSBkaWZmZXJlbnQgZGV2aWNl
-IG5hbWUsIHN1Y2ggYXMgbm9kZXYgWzFdLgo+ID4gPiAKPiA+ID4gVGhpcyBpc3N1ZSBpcyBub3Qg
-aW50cm9kdWNlZCBieSB0aGlzIHBhdGNoLiAgQnV0IHRoZSBvcmlnaW5hbCBjb2RlLAo+ID4gPiB3
-aGljaCBzZXRzIGhhcmR3YXJlX3N1YmFyY2gsIHNlZW1zIHRvIHdvcmsgZXZlbiBpZiBpdCBmYWls
-ZWQgdG8gYWNjZXNzCj4gPiA+IGRlYnVnZnMgKHdoaWNoIGlzIGlnbm9yZWQpIHNpbmNlIGhhcmR3
-YXJlX3N1YmFyY2ggaXMgemVybyBtb3N0IG9mIHRoZQo+ID4gPiBjYXNlcyBhbnl3YXkuICBXaXRo
-IHRoaXMgY2hhbmdlLCBob3dldmVyLCB0aGlzIGZhaWx1cmUgbm93IG1ha2VzIHRoZSAybmQKPiA+
-ID4ga2VybmVsIHVuYm9vdGFibGUuICBTbywgaXQgbmVlZHMgdG8gYmUgYWRkcmVzc2VkIHRvIG1h
-a2UgdGhpcyBjb2RlIHBhdGgKPiA+ID4gd29yayByZWxpYWJseSAob3Iga2V4ZWMgc2hvdWxkIGZh
-aWwgYXQgbGVhc3QpLgo+ID4gPiAKPiA+IAo+ID4gR3JlZywgSW5nbywKPiA+IAo+ID4gU2luY2Ug
-dGhlcmUgaXMgbm93IGEgbGVnaXRpbWF0ZSB1c2VyIG9mIHRoaXMgc3R1ZmYsIGNhbiB3ZSBhY3R1
-YWxseQo+ID4gZXhwb3J0IHRoaXMgaW4gc3lzZnMgKG9yIHNvbWV0aGluZyBlbHNlIG90aGVyIHRo
-YW4gc3Bsb2l0XldkZWJ1Z2ZzKT8KPiAKPiBIZXksIGFmdGVyIFRlanVuIGlzIGRvbmUgd2l0aCB0
-aGUga2VybmVsZnMgd29yaywgSSdsbCBiZSBwb3J0aW5nIGRlYnVnZnMKPiB0byBpdCBzbyB5b3Ug
-Y2FuJ3QgY2FsbCBpdCBzcGxvaXRmcyBhbnltb3JlIDopCgpHb29kIG5ld3MuCgo+IAo+ID4ga2V4
-ZWMtdG9vbHMgY2FuIGhhdmUgYSBmYWxsYmFjayB0byBkZWJ1Z2ZzIGlmIHdlIHJlYWxseSBuZWVk
-IGl0LCBidXQKPiA+IG1ha2luZyBwZW9wbGUgbW91bnQgZGVidWdmcyB0byBoYXZlIHNvbWUgZXNz
-ZW50aWFsIHBpZWNlIG9mCj4gPiBmdW5jdGlvbmFsaXR5IHNjYXJlcyB0aGUgaGVjayBvdXQgb2Yg
-bWUuCj4gCj4gSSBhZ3JlZSwgdGhhdCB3b3VsZCBub3QgYmUgZ29vZC4KPiAKPiBJJ20gbm90IHN1
-cmUgd2hhdCBleGFjdGx5IHRoZSBzeXNmcyBmaWxlIGlzIHdhbnRpbmcgdG8gbG9vayBsaWtlPyAg
-VGhlCj4gZWZpIHNlY3Rpb24gdmFyaWFibGUgc3lzZnMgZmlsZSBpc24ndCBvayAobXVsdGlwbGUg
-bGluZXMgd2l0aCBtdWx0aXBsZQo+IHZhbHVlcy4pICBXaGF0IGlzIHRoaXMgZ29pbmcgdG8gbG9v
-ayBsaWtlPwoKVGhlIGN1cnJlbnQgc3RydWN0dXJlIGluIGRlYnVnZnMgaXMgbGlrZSBiZWxvdywg
-ZXhwb3J0IGV2ZXJ5IGZpZWxkIG9mIHNldHVwCmhlYWRlciBhcyBvbmUgZmlsZSB3aWxsIGJlIHRv
-byBtdWNoIElNSE86Cltyb290QGRhcmtzdGFyIGRlYnVnXSMgdHJlZSBib290X3BhcmFtcwpib290
-X3BhcmFtcwrilJzilIDilIAgZGF0YSAvKiBiaW5hcnkgZGF0YSBvZiBzZXR1cCBoZWFkZXIgKi8K
-4pSc4pSA4pSAIHNldHVwX2RhdGEgLyogc2V0dXBfZGF0YSBsaW5rIGxpc3Qgbm9kZXMgKi8K4pSC
-wqDCoCDilJzilIDilIAgMArilILCoMKgIOKUgsKgwqAg4pSc4pSA4pSAIGRhdGEgLyogYmluYXJ5
-IGRhdGEgb2Ygc2V0dXAgZGF0YSAqLwrilILCoMKgIOKUgsKgwqAg4pSU4pSA4pSAIHR5cGUgLyog
-dHlwZSBvZiBzZXR1cCBkYXRhICovCuKUgsKgwqAg4pSU4pSA4pSAIDEK4pSCwqDCoCAgICAg4pSc
-4pSA4pSAIGRhdGEK4pSCwqDCoCAgICAg4pSU4pSA4pSAIHR5cGUK4pSU4pSA4pSAIHZlcnNpb24g
-LyogYm9vdCBwcm90b2NvbCB2ZXJzaW9uICovCgpUaGFua3MKRGF2ZQoKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18Ka2V4ZWMgbWFpbGluZyBsaXN0CmtleGVj
-QGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9s
-aXN0aW5mby9rZXhlYwo=
+On 11/11/13 at 04:40pm, Greg KH wrote:
+> On Tue, Nov 05, 2013 at 04:20:11PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> > Export fw_vendor, runtime and config tables physical
+> > addresses to /sys/firmware/efi/systab becaue kexec
+> > kernel will need them.
+> 
+> sysfs files are one-value-per-file.
+> 
+> Please don't abuse this and add more values to this single file, in
+> fact, it should be broken up into individual sysfs files as it is,
+> because this isn't ok now.
+> 
+> Sorry, you don't get to abuse this anymore :(
+
+Ok, I know this, just creating this without thinking about carefully.
+Will redo the patch, thanks for catching.
+
+Thanks
+Dave
