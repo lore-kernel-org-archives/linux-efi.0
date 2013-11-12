@@ -1,37 +1,29 @@
-From: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [patch 1/3 v2] Add function get_bootparam
-Date: Tue, 12 Nov 2013 18:51:14 +0900
-Message-ID: <20131112095114.GA20100@kroah.com>
-References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
- <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
- <1384219658.1847.84.camel@misato.fc.hp.com>
- <52819E71.70201@zytor.com>
- <20131112075831.GA6213@kroah.com>
- <20131112080854.GD6999@dhcp-16-126.nay.redhat.com>
- <20131112083012.GB7708@kroah.com>
- <5281F6D5.4090700@zytor.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: Re: [PATCH 0/3] Early use of boot service memory
+Date: Tue, 12 Nov 2013 12:37:29 +0200
+Message-ID: <CAOJsxLEoN2uYR9V3bowv2O7F8L5t+kVrdehHW151cEcfgx-oJg@mail.gmail.com>
+References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <5281F6D5.4090700-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Jerry Hoemann <jerry.hoemann@hp.com>
+Cc: Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Yinghai Lu <yinghai@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
+	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 12, 2013 at 01:37:25AM -0800, H. Peter Anvin wrote:
-> On 11/12/2013 12:30 AM, Greg KH wrote:
-> > 
-> > And these binary data blobs are a "standard" somewhere, and will not
-> > change per kernel version change?
-> > 
-> > If so, that structure is fine with me.
-> > 
-> 
-> Correct.  The structure is documented in Documentation/x86/boot.txt, and
-> has been largely invariant (but extended) since the beginning of Linux.
->  It has sometimes taken some serious work to keep it that way.
+On Tue, Nov 12, 2013 at 4:15 AM, Jerry Hoemann <jerry.hoemann@hp.com> wrote:
+> Some platform have firmware that violates UEFI spec and access boot service
+> code or data segments after the system has called Exit Boot Services.
+> The call to efi_reserve_boot_services in setup_arch is a work around to
+> avoid using boot service memory until after the kernel has done
+> Set Virtual Map.
+>
+> However, this reservation fragments memory which can cause
+> large allocations early in boot (e.g. crash kernel) to fail.
 
-Ok, then use the binary sysfs file interface for these blobs, and
-everyone will be happy.
+What is the exact problem you're trying to solve here? How will the
+problem be fixed for platforms that break the UEFI specification?
+
+                        Pekka
