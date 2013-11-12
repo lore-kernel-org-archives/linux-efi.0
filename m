@@ -1,62 +1,56 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH] efi earlyprintk fix
-Date: Tue, 12 Nov 2013 10:22:56 +0800
-Message-ID: <20131112022256.GC4341@dhcp-16-126.nay.redhat.com>
-References: <20131103121647.GA4770@dhcp-16-126.nay.redhat.com>
- <20131104103739.GD21688@console-pimps.org>
- <20131104125853.GB5118@dhcp-16-126.nay.redhat.com>
- <20131106092335.GA3952@dhcp-16-126.nay.redhat.com>
- <20131106093832.GC22856@console-pimps.org>
- <20131107120906.GB4116@dhcp-16-126.nay.redhat.com>
- <20131108103648.GA2318@console-pimps.org>
- <20131109034429.GA4294@dhcp-16-126.nay.redhat.com>
- <20131111161347.GH22636@console-pimps.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [patch 1/3 v2] Add function get_bootparam
+Date: Mon, 11 Nov 2013 19:20:17 -0800
+Message-ID: <52819E71.70201@zytor.com>
+References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>	
+ <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
+ <1384219658.1847.84.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131111161347.GH22636@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: matt.fleming@intel.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1384219658.1847.84.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/11/13 at 04:13pm, Matt Fleming wrote:
-> On Sat, 09 Nov, at 11:44:29AM, Dave Young wrote:
-> > Hi, Matt
-> > 
-> > Confirmed, your patch work ok for the pr_cont issue.
->  
-> Excellent, thanks for testing.
+On 11/11/2013 05:27 PM, Toshi Kani wrote:
+> On Tue, 2013-11-05 at 16:29 +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+>> Not only setup_subarch will get data from debugfs file
+>> boot_params/data, later code for adding efi_info will
+>> also need do same thing. Thus add a common function here
+>> for later use.
 > 
-> > Actually I mixed two problems in my report, one is there's always one blank line
-> > at the bottom of screen, the other is the pr_cont issue. For the second problem
-> > change >= to > looks better. For the previous problem still need to move the
-> > hunk below to the beginning point of early_efi_write function. It just works for me
-> > but I'm not sure why this is not necessary for other machines. 
-> > 
-> > +		if (efi_y + font->height > si->lfb_height) {
-> > +			u32 i;
-> > +
-> > +			efi_y -= font->height;
-> > +			early_efi_scroll_up();
-> > +
-> > +			for (i = 0; i < font->height; i++)
-> > +				early_efi_clear_scanline(efi_y + i);
-> > +		}
+> get_bootparam() calls find_mnt_by_fsname("debugfs"), which assumes that
+> debugfs is mounted with device name "debugfs".  This function fails
+> when:
+>  - debugfs is not mounted, or
+>  - debugfs is mounted with a different device name, such as nodev [1].
 > 
-> Dave, unfortunately you're going to need to debug this further because
-> it doesn't make any sense that your patch is needed, unless there's a
-> bug in the existing code.
-
-Ok, will dig more about this and find out why it only happens on this machine.
-
+> This issue is not introduced by this patch.  But the original code,
+> which sets hardware_subarch, seems to work even if it failed to access
+> debugfs (which is ignored) since hardware_subarch is zero most of the
+> cases anyway.  With this change, however, this failure now makes the 2nd
+> kernel unbootable.  So, it needs to be addressed to make this code path
+> work reliably (or kexec should fail at least).
 > 
-> You may also want to rule out that your boot_delay patches are not
-> inserting delays after printing pr_fmt().
 
-In fact with or without the delay testing results are same. There's might be
-something wrong in the setup as you said. I will update once I have got something.
+Greg, Ingo,
 
-Thanks
-Dave
+Since there is now a legitimate user of this stuff, can we actually
+export this in sysfs (or something else other than sploit^Wdebugfs)?
+
+kexec-tools can have a fallback to debugfs if we really need it, but
+making people mount debugfs to have some essential piece of
+functionality scares the heck out of me.
+
+	-hpa
