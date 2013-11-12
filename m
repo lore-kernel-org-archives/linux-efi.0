@@ -1,139 +1,104 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: arm/arm64 UEFI boot protocol
-Date: Tue, 12 Nov 2013 16:42:41 +0000
-Message-ID: <20131112164241.GD25953@mudshark.cambridge.arm.com>
-References: <20131111174321.GQ1557@rocoto.smurfnet.nu>
+From: jerry.hoemann@hp.com
+Subject: Re: [PATCH 0/3] Early use of boot service memory
+Date: Tue, 12 Nov 2013 10:55:01 -0700
+Message-ID: <20131112175500.GA22363@anatevka.fc.hp.com>
+References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
+ <CAOJsxLEoN2uYR9V3bowv2O7F8L5t+kVrdehHW151cEcfgx-oJg@mail.gmail.com>
+Reply-To: jerry.hoemann@hp.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131111174321.GQ1557-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Olivier Martin <Olivier.Martin-5wv7dgnIgG8@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+In-Reply-To: <CAOJsxLEoN2uYR9V3bowv2O7F8L5t+kVrdehHW151cEcfgx-oJg@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Pekka Enberg <penberg@kernel.org>
+Cc: Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Yinghai Lu <yinghai@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
+	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Leif,
-
-On Mon, Nov 11, 2013 at 05:43:21PM +0000, Leif Lindholm wrote:
-> We currently have a few sets of patches floating around, for UEFI
-> runtime services, UEFI stub and GRUB support for Linux/UEFI on
-> arm/arm64.
+On Tue, Nov 12, 2013 at 12:37:29PM +0200, Pekka Enberg wrote:
+> On Tue, Nov 12, 2013 at 4:15 AM, Jerry Hoemann <jerry.hoemann@hp.com> wrote:
+> > Some platform have firmware that violates UEFI spec and access boot service
+> > code or data segments after the system has called Exit Boot Services.
+> > The call to efi_reserve_boot_services in setup_arch is a work around to
+> > avoid using boot service memory until after the kernel has done
+> > Set Virtual Map.
+> >
+> > However, this reservation fragments memory which can cause
+> > large allocations early in boot (e.g. crash kernel) to fail.
 > 
-> The last version of Documentation/arm/uefi.txt I sent out raised a few
-> questions with regards to the boot protocol between UEFI and Linux, and
-> there is also upcoming support for ACPI which could use a few
-> clarifications in this area.
+> What is the exact problem you're trying to solve here?
+
+Pekka,
+
+My primary motivation is fixing an issue that can causes kdump
+to be disabled on a system.
+
+
+Sequence of events:
+
+1. The kernel calls efi_reserve_boot_services during setup_arch.
+
+2. efi_reserve_boot_services reserves memory regions of type
+   EFI_BOOT_SERVICES_CODE & EFI_BOOT_SERVICES_DATA.
+
+3. setup_arch calls reserve_crashkernel().
+
+4. start_kernel calls efi_free_boot_services which frees up the
+   memory reserved by efi_reserve_boot_services().
+
+
+The problem is that dependent upon the size of the crash kernel reservation,
+the layout of the memory, and the location of the Boot Service Code and
+Data segments,  reserve_crashkernel could fail where it would have
+succeeded if the call to efi_reserve_boot_services hadn't been
+made.
+
+When reserve_crashkernel fails, kdump will be disabled.
+
+The problem is made more apparent as large servers need large crash
+kernel allocations.
+
+The UEFI spec states that BS Code and Data segments are free
+to be reused by an operating system after call to Exit Boot
+Services.   Unfortunately,  some platforms apparently violate this 
+portion of the spec and will use these segments as part of
+the call to Set Virtual Map.  This can cause the system to crash
+if Linux changed the content of the memory.
+
+Hence,  the call to efi_reserve_boot_services was added as
+a work around to platforms that violated this portion of the
+UEFI spec.
+
+Unfortunately,  the work around causes problems as described above.
+
+
+
+For more background on efi_reserve_boot_services, please consult the thread:
+https://lkml.org/lkml/2013/7/31/553
+
+
+
+> How will the 
+> problem be fixed for platforms that break the UEFI specification?
 > 
-> So, rather than sending out complete sets of patches for all these until
-> consensus is reached, below is my proposed suggestion for a
-> Documentation/arm/uefi.txt, to be shared for arm and arm64. If noone has
-> strong objections to this, we can quickly send updated (and hopefully
-> final-ish) versions of these sets.
+>                         Pekka
 
-In the absence of code, I'll play English teacher then :)
+My change does not address platforms that have misbehaving firmware.
+It just allows platforms that don't have this issue to avoid issues
+that the call to efi_reserve_boot_services presents.
 
-> UEFI, the Unified Extensible Firmware Interface is a specification
 
-Interface, is
+Jerry
 
-> governing the behaviours of compatible firmware interfaces.
-> It is maintained by the UEFI Forum - http://www.uefi.org/.
-> Support for the AArch32 (arm) architecture was added in version 2.3 of
-> the specification, and support for AAaarch64 (arm64) was added in
-> version 2.4.
 
-AArch64
+-- 
 
-> UEFI is an evolution of its predecessor 'EFI', so the terms EFI and
-> EFI are used somewhat interchangeably in this document and associated
+----------------------------------------------------------------------------
+Jerry Hoemann            Software Engineer              Hewlett-Packard/MODL
 
-UEFI
+3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
+Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
+                                                email:  jerry.hoemann@hp.com
+----------------------------------------------------------------------------
 
-> source code. As a rule, anything new uses 'UEFI', whereas 'EFI' refers
-> to legacy code or specifications.  
-> 
-> UEFI support in Linux                                                           
-> =====================                                                           
-> Booting on a platform with firmware compliant with the UEFI
-> specification makes it possible for the kernel to support additional
-> features:
-> - UEFI Runtime Services
-> - Retrieving various configuration information through the standardised
->   interface of UEFI configuration tables. (ACPI, SMBIOS, ...)
-> 
-> For actually enabling [U]EFI support, enable:
-> - CONFIG_EFI=y
-> - CONFIG_EFI_VARS=y or m
-> 
-> UEFI stub
-> =========
-> The "stub" is a feature that turns the Image/zImage/bzImage into a valid
-
-We don't support bzImage for arm or arm64.
-
-> UEFI PE/COFF executable, including a loader application that makes it
-> possible to load the kernel directly from the UEFI shell, boot menu, or
-> one of the lightweight bootloaders like Gummiboot or rEFInd. 
-> The kernel image built with stub support remains a valid kernel image
-> for booting in the legacy fashion.
-
-By legacy, you mean non-UEFI rather than EFI? I consider UEFI as a choice
-rather than the future ;p
-
-> UEFI kernel support on ARM
-> ==========================
-
-Wait, isn't this all under Documentation/arm/? You could probably combine
-some of these sections together, since the scope is really tied to ARM here.
-
-> The implementation depends on receiving information about the UEFI
-> environment in a Flattened Device Tree (FDT) - so is only available with
-> CONFIG_OF.
-
-You could mention this in your earlier list of dependencies.
-
-> UEFI support also depends on early_memremap().
-
-Why is that worthy of note? Can a user even turn that off?
-
-> UEFI kernel support on the ARM architectures (arm and arm64) is only
-> available when boot is performed through the stub.
-> 
-> When booting in UEFI mode, the kernel ignores any memory nodes in the
-> DT, and instead reads the UEFI memory map. To prevent confusion, the
-> stub deletes any memory nodes from a provided DT.
-> 
-> The stub populates the FDT /chosen node with, and the kernel scans for
-> the following parameters:
-
-Sentence doesn't read very well. Maybe stick some brackets around (and the
-kernel scans for)?
-
-> ______________________________________________________________________________
-> Name                      | Size   | Description
-> ================================================================================
-> linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
-> --------------------------------------------------------------------------------
-> linux,uefi-mmap           | 64-bit | Physical address of the UEFI memory map,
->                           |        | populated by the UEFI GetMemoryMap() call.
-> --------------------------------------------------------------------------------
-> linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
->                           |        | pointed to in previous entry.
-> --------------------------------------------------------------------------------
-> linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
->                           |        | memory map.
-
-Do we actually need to define these sizes here, or can they be dealt with
-using the usual #address-cells property? Also, I think you should describe
-the binding in a separate document somewhere under Documentation/devicetree,
-then cross-reference it from here.
-
-> --------------------------------------------------------------------------------
-> linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
-> --------------------------------------------------------------------------------
-
-Are you sure you want to refer to kernel symbols here? If somebody renames
-that variable, they're not going to fix this file.
-
-Will
