@@ -1,34 +1,50 @@
-From: Pekka Enberg <penberg@kernel.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Tue, 12 Nov 2013 20:48:51 +0200
-Message-ID: <CAOJsxLEU1SPd=1C8QPgrZGWeOuyOVkozuMR014xBpJTxyFviKA@mail.gmail.com>
+Date: Tue, 12 Nov 2013 10:58:42 -0800
+Message-ID: <d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
 References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
-	<CAOJsxLEoN2uYR9V3bowv2O7F8L5t+kVrdehHW151cEcfgx-oJg@mail.gmail.com>
-	<20131112175500.GA22363@anatevka.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20131112175500.GA22363@anatevka.fc.hp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Jerry Hoemann <jerry.hoemann@hp.com>
-Cc: Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Yinghai Lu <yinghai@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
-	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1384222558-38527-1-git-send-email-jerry.hoemann-VXdhtT5mjnY@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jerry Hoemann <jerry.hoemann-VXdhtT5mjnY@public.gmane.org>, rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Jerry,
+The problem with the crashkernel is that it by default has to sit very low in memory because the tools don't know if the crashkernel is me enough to sit anywhere.  That is the real fix.
 
-On Tue, Nov 12, 2013 at 7:55 PM,  <jerry.hoemann@hp.com> wrote:
-> My change does not address platforms that have misbehaving firmware.
-> It just allows platforms that don't have this issue to avoid issues
-> that the call to efi_reserve_boot_services presents.
+Jerry Hoemann <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
+>Some platform have firmware that violates UEFI spec and access boot
+>service
+>code or data segments after the system has called Exit Boot Services.
+>The call to efi_reserve_boot_services in setup_arch is a work around to
+>avoid using boot service memory until after the kernel has done
+>Set Virtual Map.
+>
+>However, this reservation fragments memory which can cause
+>large allocations early in boot (e.g. crash kernel) to fail.
+>
+>This patch set extends the add_efi_memmap with an optional
+>argument to specify that firmware "correctly" doesn't resuse
+>boot services memory after Exit Boot Services.
+>
+>With this information, setup_arch avoids calling
+>efi_reserve_boot_services and fragmenting memory.
+>
+>
+>Jerry Hoemann (3):
+>  efi: Early use of boot service memory
+>  x86: avoid efi_reserve_boot_services
+>  x86, efi: Early use of boot service memory
+>
+> Documentation/kernel-parameters.txt |  8 ++++++++
+> arch/x86/kernel/setup.c             |  2 +-
+> arch/x86/platform/efi/efi.c         | 13 +++++++++++--
+> include/linux/efi.h                 |  1 +
+> 4 files changed, 21 insertions(+), 3 deletions(-)
 
-The problem I have with your patch is that it (1) relies on users to
-pass a kernel option and (2) leaves machines with "faulty firmware" out
-in the cold.  So I'm wondering if we can fix reserve_crashkernel() to
-deal with reality that there indeed are broken firmware out there?
-
-If someone is able to come up with a convincing argument why crashkernel
-cannot be fixed on such machines, we'd need to start whitelisting known
-good firmwares, no?
-
-                           Pekka
+-- 
+Sent from my mobile phone.  Please pardon brevity and lack of formatting.
