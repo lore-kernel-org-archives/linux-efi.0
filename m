@@ -1,51 +1,62 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 4/7 v2] export more efi table variable to sysfs
-Date: Tue, 12 Nov 2013 16:24:01 +0800
-Message-ID: <20131112082401.GA13899@dhcp-16-126.nay.redhat.com>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
- <20131105082717.561020034@dhcp-16-126.nay.redhat.com>
- <20131112004014.GA15377@kroah.com>
- <20131112081937.GE6999@dhcp-16-126.nay.redhat.com>
+From: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [patch 1/3 v2] Add function get_bootparam
+Date: Tue, 12 Nov 2013 00:30:12 -0800
+Message-ID: <20131112083012.GB7708@kroah.com>
+References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+ <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
+ <1384219658.1847.84.camel@misato.fc.hp.com>
+ <52819E71.70201@zytor.com>
+ <20131112075831.GA6213@kroah.com>
+ <20131112080854.GD6999@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131112081937.GE6999-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20131112080854.GD6999-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/12/13 at 04:19pm, Dave Young wrote:
-> On 11/11/13 at 04:40pm, Greg KH wrote:
-> > On Tue, Nov 05, 2013 at 04:20:11PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> > > Export fw_vendor, runtime and config tables physical
-> > > addresses to /sys/firmware/efi/systab becaue kexec
-> > > kernel will need them.
-> > 
-> > sysfs files are one-value-per-file.
-> > 
-> > Please don't abuse this and add more values to this single file, in
-> > fact, it should be broken up into individual sysfs files as it is,
-> > because this isn't ok now.
-> > 
-> > Sorry, you don't get to abuse this anymore :(
-> 
-> Ok, I know this, just creating this without thinking about carefully.
-> Will redo the patch, thanks for catching.
+On Tue, Nov 12, 2013 at 04:08:54PM +0800, Dave Young wrote:
+> On 11/11/13 at 11:58pm, Greg KH wrote:
+> > > kexec-tools can have a fallback to debugfs if we really need it, =
+but
+> > > making people mount debugfs to have some essential piece of
+> > > functionality scares the heck out of me.
+> >=20
+> > I agree, that would not be good.
+> >=20
+> > I'm not sure what exactly the sysfs file is wanting to look like?  =
+The
+> > efi section variable sysfs file isn't ok (multiple lines with multi=
+ple
+> > values.)  What is this going to look like?
+>=20
+> The current structure in debugfs is like below, export every field of=
+ setup
+> header as one file will be too much IMHO:
+> [root@darkstar debug]# tree boot_params
+> boot_params
+> =E2=94=9C=E2=94=80=E2=94=80 data /* binary data of setup header */
+> =E2=94=9C=E2=94=80=E2=94=80 setup_data /* setup_data link list nodes =
+*/
+> =E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80 0
+> =E2=94=82=C2=A0=C2=A0 =E2=94=82=C2=A0=C2=A0 =E2=94=9C=E2=94=80=E2=94=80=
+ data /* binary data of setup data */
+> =E2=94=82=C2=A0=C2=A0 =E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80=
+ type /* type of setup data */
+> =E2=94=82=C2=A0=C2=A0 =E2=94=94=E2=94=80=E2=94=80 1
+> =E2=94=82=C2=A0=C2=A0     =E2=94=9C=E2=94=80=E2=94=80 data
+> =E2=94=82=C2=A0=C2=A0     =E2=94=94=E2=94=80=E2=94=80 type
+> =E2=94=94=E2=94=80=E2=94=80 version /* boot protocol version */
 
-I would like to add new files for the values used in this patchset.
-And will split the original systab later in another patchset.
+And these binary data blobs are a "standard" somewhere, and will not
+change per kernel version change?
 
-> 
-> Thanks
-> Dave
+If so, that structure is fine with me.
+
+thanks,
+
+greg k-h
