@@ -1,58 +1,79 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [BUG]: DELL XPS 8500 become a brick after fill too many entries
- to nvram.
-Date: Wed, 13 Nov 2013 14:08:14 +0000
-Message-ID: <20131113140647.GK22636@console-pimps.org>
-References: <87fvr3h3b9.fsf@redhat.com>
- <20131111110701.GE22636@console-pimps.org>
- <87eh6nt8oo.fsf@redhat.com>
- <20131113112052.GJ22636@console-pimps.org>
- <878uws1msy.fsf@redhat.com>
+Subject: Re: [patch 1/7 v2] Add function efi_remap_region for remapping to
+ saved virt address
+Date: Wed, 13 Nov 2013 15:50:08 +0000
+Message-ID: <20131113155008.GA17248@console-pimps.org>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+ <20131105082715.502723229@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <878uws1msy.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20131105082715.502723229-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 13 Nov, at 08:57:49PM, Madper Xie wrote:
+On Tue, 05 Nov, at 04:20:08PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> Kexec kernel will use saved runtime virtual mapping, so add a
+> new function efi_remap_region to remapping it directly without
+> calculate the virt addr from efi_va.
 > 
-> matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org writes:
+> The md is passed in from 1st kernel, the virtual addr is
+> saved in md->virt_addr.
 > 
-> > On Mon, 11 Nov, at 08:38:31PM, Madper Xie wrote:
-> >> 
-> >> matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org writes:
-> >> 
-> >> > On Mon, 11 Nov, at 02:15:22PM, Madper Xie wrote:
-> >> >> Howdy all,
-> >> >>   For now we ensure at least ~5kb free space. But my dell xps still
-> >> >>   become a brick after I add too many entries to my nvram. So maybe 5kb
-> >> >>   is not safe enough. and 5kb is just aginst Samsung's laptop.
-> >> >>   So should we enlarge EFI_MIN_RESERVE?
-> >> >
-> >
-> > OK, that's pretty conclusive. Thanks.
-> >
-> Ouch, Sorry. My mistake. Seems filling too much entries to nvram is not
-> the murderer...
-> For testing, I using following command to fill my nvram:
-> head -c20480 /dev/urandom | efibootmgr --quiet --create --append-binary-args - 
-> 
-> For occupy lots of nvram space, I run it many times. But when I try to
-> find the threshold, I find the real murderer is that command. I mean my
-> dell xps will bricked even if I just run the command once and have more
-> than 100kb free space...
-> 
-> So the murderer is the new added boot entry. I don't really know if it's
-> still a bug. And I apologize for my mistake. :-(
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/x86/include/asm/efi.h     |    1 +
+>  arch/x86/platform/efi/efi_32.c |    3 +++
+>  arch/x86/platform/efi/efi_64.c |   19 +++++++++++++++++++
+>  3 files changed, 23 insertions(+)
 
-OK, it looks like the firmware Boot Manager gets very confused when it
-tries to parse the Boot Load Option you created with efibootmgr. This
-looks like a general firmware bug and not something we need to worry
-about in the kernel.
+[...]
+
+> @@ -203,6 +203,25 @@ void __init efi_map_region(efi_memory_de
+>  	md->virt_addr = efi_va;
+>  }
+>  
+> +/*
+> + * kexec kernel will use efi_map_region_fixed to map efi
+> + * runtime memory ranges. md->virt_addr is the original virtual
+> + * address which had been mapped in kexec 1st kernel.
+> + */
+> +void __init efi_map_region_fixed(efi_memory_desc_t *md)
+> +{
+> +	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+> +	unsigned long pf = 0;
+> +
+> +	if (!(md->attribute & EFI_MEMORY_WB))
+> +		pf |= _PAGE_PCD;
+> +
+> +	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, md->virt_addr,
+> +			md->num_pages, pf))
+> +		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+> +			   md->phys_addr, md->virt_addr);
+> +}
+> +
+
+This function is almost identical to __map_region(). Please implement
+efi_map_region_fixed() in terms of __map_region(), e.g.
+
+void __init efi_map_region_fixed(efi_memory_desc_t *md)
+{
+	__map_region(md, md->virt_addr);
+}
+
+> @@ -47,6 +47,9 @@ void __init efi_map_region(efi_memory_de
+>  	old_map_region(md);
+>  }
+>  
+> +void __init efi_map_region_fixed(efi_memory_desc_t *md)
+> +{}
+> +
+
+The braces should be on the same line as the rest of the function
+prototype. Look at how it's done elsewhere in this file.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
