@@ -1,37 +1,50 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: arm/arm64 UEFI boot protocol
-Date: Wed, 13 Nov 2013 00:12:16 +0100
-Message-ID: <20131112231216.GS1557@rocoto.smurfnet.nu>
-References: <20131111174321.GQ1557@rocoto.smurfnet.nu>
- <20131112164241.GD25953@mudshark.cambridge.arm.com>
- <20131112180050.GR1557@rocoto.smurfnet.nu>
- <CACxGe6uCMjNiSm7qN4fTBN=WgzdJriod9d7qKOr-P-UaiWhULQ@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 1/3 v2] Add function get_bootparam
+Date: Wed, 13 Nov 2013 08:50:32 +0800
+Message-ID: <20131113005032.GB5069@dhcp-16-126.nay.redhat.com>
+References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+ <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
+ <1384219658.1847.84.camel@misato.fc.hp.com>
+ <52819E71.70201@zytor.com> <20131112075831.GA6213@kroah.com>
+ <20131112080854.GD6999@dhcp-16-126.nay.redhat.com>
+ <20131112083012.GB7708@kroah.com> <5281F6D5.4090700@zytor.com>
+ <20131112095114.GA20100@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CACxGe6uCMjNiSm7qN4fTBN=WgzdJriod9d7qKOr-P-UaiWhULQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Olivier Martin <Olivier.Martin-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+In-Reply-To: <20131112095114.GA20100-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 13, 2013 at 07:14:28AM +0900, Grant Likely wrote:
-> In the interest of bike shedding, I would name the properties
-> "linux,uefi-mmap-start" and "linux,uefi-mmap-size", but otherwise it
-> is fine by me.
+On 11/12/13 at 06:51pm, Greg KH wrote:
+> On Tue, Nov 12, 2013 at 01:37:25AM -0800, H. Peter Anvin wrote:
+> > On 11/12/2013 12:30 AM, Greg KH wrote:
+> > > 
+> > > And these binary data blobs are a "standard" somewhere, and will not
+> > > change per kernel version change?
+> > > 
+> > > If so, that structure is fine with me.
+> > > 
+> > 
+> > Correct.  The structure is documented in Documentation/x86/boot.txt, and
+> > has been largely invariant (but extended) since the beginning of Linux.
+> >  It has sometimes taken some serious work to keep it that way.
+> 
+> Ok, then use the binary sysfs file interface for these blobs, and
+> everyone will be happy.
 
-That makes sense to me, and makes for a prettier table :)
+Since we got an agreement I will move them to sysfs in next version.
 
-> Should you have a property for the descriptor version
-> as returned by GetMemoryMap()?
- 
-Yes, I should, really. I did in an earlier version, but dropped it on
-realising that this value has not changed since the inception of EFI.
-But it needs to be passed back to SetVirtualAddressMap(), so it should
-be kept. Mark never dropped it from his.
-
-So, "linux,uefi-mmap-desc-ver"?
-
-/
-    Leif
+Thanks everyone.
