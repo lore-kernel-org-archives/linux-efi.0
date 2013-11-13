@@ -1,15 +1,14 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [patch 7/7 v2] x86: add xloadflags bit for efi runtime support
  on kexec
-Date: Wed, 13 Nov 2013 15:50:37 +0000
-Message-ID: <20131113155037.GE17248@console-pimps.org>
+Date: Wed, 13 Nov 2013 08:20:45 -0800
+Message-ID: <5283A6DD.2030808@zytor.com>
 References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
  <20131105082719.416282009@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
 In-Reply-To: <20131105082719.416282009-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
@@ -20,11 +19,11 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 05 Nov, at 04:20:14PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+On 11/05/2013 12:20 AM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
 > Old kexec-tools can not load new kernel. The reason is previously kexec-tools
 > do not fill efi_info in x86 setup header thus efi init fail and switch
 > to noefi boot. In new kexec-tools it will by default fill efi_info and
@@ -49,14 +48,28 @@ On Tue, 05 Nov, at 04:20:14PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wr
 > -			.word XLF0 | XLF1 | XLF23
 > +
 > +#if defined(CONFIG_X86_64) && defined(CONFIG_EFI)
-
-&& defined(CONFIG_KEXEC) ?
-
 > +# define XLF4 XLF_EFI_KEXEC
 > +#else
 > +# define XLF4 0
 > +#endif
 > +
+> +			.word XLF0 | XLF1 | XLF23 | XLF4
+>  
+>  cmdline_size:   .long   COMMAND_LINE_SIZE-1     #length of the command line,
+>                                                  #added with boot protocol
+> --- linux-2.6.orig/arch/x86/include/uapi/asm/bootparam.h
+> +++ linux-2.6/arch/x86/include/uapi/asm/bootparam.h
+> @@ -24,6 +24,7 @@
+>  #define XLF_CAN_BE_LOADED_ABOVE_4G	(1<<1)
+>  #define XLF_EFI_HANDOVER_32		(1<<2)
+>  #define XLF_EFI_HANDOVER_64		(1<<3)
+> +#define XLF_EFI_KEXEC			(1<<4)
+>  
+>  #ifndef __ASSEMBLY__
+>  
+> 
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Also needs to be added to Documentation/x86/boot.txt with the exact
+semantics being exposed.
+
+	-hpa
