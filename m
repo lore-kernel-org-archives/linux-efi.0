@@ -1,61 +1,115 @@
-From: jerry.hoemann@hp.com
-Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Wed, 13 Nov 2013 18:40:43 -0700
-Message-ID: <20131114014043.GD25344@anatevka.fc.hp.com>
-References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
- <d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
- <20131113224503.GB25344@anatevka.fc.hp.com>
- <52840206.5020006@zytor.com>
- <20131113235708.GC25344@anatevka.fc.hp.com>
- <528413DE.1090203@zytor.com>
-Reply-To: jerry.hoemann@hp.com
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 5/7 v2] export efi runtime memory mapping to sysfs
+Date: Thu, 14 Nov 2013 09:50:47 +0800
+Message-ID: <20131114015047.GD4081@dhcp-16-126.nay.redhat.com>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+ <20131105082718.185728964@dhcp-16-126.nay.redhat.com>
+ <20131113155027.GC17248@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <528413DE.1090203@zytor.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, penberg@kernel.org, akpm@linux-foundation.org, linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, vgoyal@redhat.com, linux-kernel@vger.kernel.org
+In-Reply-To: <20131113155027.GC17248-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 13, 2013 at 04:05:50PM -0800, H. Peter Anvin wrote:
-> On 11/13/2013 03:57 PM, jerry.hoemann@hp.com wrote:
+On 11/13/13 at 03:50pm, Matt Fleming wrote:
+> On Tue, 05 Nov, at 04:20:12PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> > kexec kernel will need exactly same mapping for
+> > efi runtime memory ranges. Thus here export the
+> > runtime ranges mapping to sysfs, kexec-tools
+> > will assemble them and pass to 2nd kernel via
+> > setup_data.
 > > 
-> > I think i can go to a date based black list, that removes the manual
-> > step.  System running firmware before certain date assumes we need
-> > to do the work around.  If firmware is newer than that date, we don't
-> > use the workaround.  Blacklist overrides and allows current behavior
-> > for new firmware that is subsequently found to be broken and for
-> > which we can't convenience the manufacturer to fix.
+> > Introducing a new directly /sys/firmware/efi/efi-runtime-map
+> > Just like /sys/firmware/memmap. Containing below attribute
+> > in each file of that directory:
+> > attribute  num_pages  phys_addr  type  virt_addr
 > > 
-> 
-> No, we can't, at least not for now.  We are continually finding new
-> platforms with the bug.
-
-  Does you have a list of systems that require efi_reserve_boot_services?
-  might be useful from a testing standpoint to get access to one.
-
-
-> 
+> > It will not work for efi 32bit. Only x86_64 currently.
 > > 
-> > I will still point out that as currently used, efi_reserve_boot_services
-> > is wrong.  A work around for firmware bugs on one platform shouldn't be
-> > breaking platforms that don't have that bug.  Its just much less likely
-> > to cause problems with higher crash kernel allocation.
-> > 
+> > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  Documentation/ABI/testing/sysfs-efi-runtime-map |   45 ++++++
+> >  arch/x86/include/asm/efi.h                      |    3 
+> >  arch/x86/platform/efi/efi.c                     |   11 +
+> >  drivers/firmware/efi/Kconfig                    |   10 +
+> >  drivers/firmware/efi/Makefile                   |    1 
+> >  drivers/firmware/efi/efi-runtime-map.c          |  164 ++++++++++++++++++++++++
+> >  drivers/firmware/efi/efi.c                      |    3 
+> >  include/linux/efi.h                             |    6 
+> >  8 files changed, 242 insertions(+), 1 deletion(-)
 > 
-> It is wrong, yes, but it seems like a ubiquitous problem.
+> [...]
 > 
-> 	-hpa
+> > @@ -852,6 +855,14 @@ static void efi_map_regions(void **new_m
+> >  
+> >  		memcpy(*new_memmap + (*count * memmap.desc_size), md,
+> >  		       memmap.desc_size);
+> > +		if (md->type != EFI_BOOT_SERVICES_CODE &&
+> > +			md->type != EFI_BOOT_SERVICES_DATA) {
+> > +			efi_runtime_map = krealloc(efi_runtime_map,
+> > +					(nr_efi_runtime_map + 1) *
+> > +					sizeof(efi_memory_desc_t), GFP_KERNEL);
+> > +			*(efi_runtime_map + nr_efi_runtime_map) = *md;
+> > +			nr_efi_runtime_map++;
+> > +		}
+> >  		(*count)++;
+> >  	}
+> 
+> You really need to be using 'memmap.desc_size' here and not
+> sizeof(efi_memory_desc_t) as the two may differ. Also, you should be
+> checking for failure of krealloc() and using memcpy() instead of
+> directly dereferencing 'md'.
 
--- 
+I'm a bit confused with the desc_size and sizeof(efi_memory_desc_t),
+Because I intended to same struct efi_memory_desc_t in userspace to pass the
+setup_data, so I worry about if desc_size will cause problems.
 
-----------------------------------------------------------------------------
-Jerry Hoemann            Software Engineer              Hewlett-Packard/MODL
+Will double check it.
 
-3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
-Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
-                                                email:  jerry.hoemann@hp.com
-----------------------------------------------------------------------------
+> 
+> > --- linux-2.6.orig/drivers/firmware/efi/Makefile
+> > +++ linux-2.6/drivers/firmware/efi/Makefile
+> > @@ -4,3 +4,4 @@
+> >  obj-y					+= efi.o vars.o
+> >  obj-$(CONFIG_EFI_VARS)			+= efivars.o
+> >  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+> > +obj-$(CONFIG_EFI_RUNTIME_MAP)		+= efi-runtime-map.o
+> > --- /dev/null
+> > +++ linux-2.6/drivers/firmware/efi/efi-runtime-map.c
+> 
+> Small nit but I wouldn't bother prefixing the filename with "efi-",
+> since you can't build this file as a module.
 
+Ok, will do
+
+> 
+> > +/*
+> > + * These are default attributes that are added for every memmap entry.
+> > + */
+> > +static struct attribute *def_attrs[] = {
+> > +	&map_type_attr.attr,
+> > +	&map_phys_addr_attr.attr,
+> > +	&map_virt_addr_attr.attr,
+> > +	&map_num_pages_attr.attr,
+> > +	&map_attribute_attr.attr,
+> > +	NULL
+> > +};
+> 
+> If the UEFI spec ever releases an update for the memory descriptor
+> structure, and bumps 'memmap.desc_version', how are we going to signal
+> the incompatibility to legacy versions of kexec tools?
+
+Hmm, that is a problem. I will consider to export memmap according to
+what firmware provided with extra desc_version instead of using attrs from kernel
+data structure efi_memory_desc_t
+
+Now it's clear for previous question about desc_size and sizeof(efi_memory_desc_t)
+Will switch to use desc_size.
+
+> 
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
