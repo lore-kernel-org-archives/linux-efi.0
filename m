@@ -1,67 +1,42 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 7/7 v2] x86: add xloadflags bit for efi runtime support
- on kexec
-Date: Thu, 14 Nov 2013 09:53:46 +0800
-Message-ID: <20131114015346.GF4081@dhcp-16-126.nay.redhat.com>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
- <20131105082719.416282009@dhcp-16-126.nay.redhat.com>
- <20131113155037.GE17248@console-pimps.org>
+From: Pekka Enberg <penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 0/3] Early use of boot service memory
+Date: Thu, 14 Nov 2013 10:24:17 +0200
+Message-ID: <CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>
+References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
+	<d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
+	<20131113224503.GB25344@anatevka.fc.hp.com>
+	<52840206.5020006@zytor.com>
+	<20131113235708.GC25344@anatevka.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131113155037.GE17248-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131113235708.GC25344-dMAi7lA+vBPDUbYHzcRnttBPR1lH4CV8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jerry Hoemann <jerry.hoemann-VXdhtT5mjnY@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "list-T1Yj925okcpg9hUCZPvPmw@public.gmane.org:DOCUMENTATION <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>,
+	list-T1Yj925okcpg9hUCZPvPmw@public.gmane.org:MEMORY MANAGEMENT <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>," <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/13/13 at 03:50pm, Matt Fleming wrote:
-> On Tue, 05 Nov, at 04:20:14PM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> > Old kexec-tools can not load new kernel. The reason is previously kexec-tools
-> > do not fill efi_info in x86 setup header thus efi init fail and switch
-> > to noefi boot. In new kexec-tools it will by default fill efi_info and
-> > pass other efi required infomation to 2nd kernel so kexec kernel efi
-> > initialization will success finally.
-> > 
-> > To prevent from breaking userspace, add a new xloadflags bit so kexec-tools
-> > will check the flag and switch to old logic.
-> > 
-> > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  arch/x86/boot/header.S                |    9 ++++++++-
-> >  arch/x86/include/uapi/asm/bootparam.h |    1 +
-> >  2 files changed, 9 insertions(+), 1 deletion(-)
-> > 
-> > --- linux-2.6.orig/arch/x86/boot/header.S
-> > +++ linux-2.6/arch/x86/boot/header.S
-> > @@ -391,7 +391,14 @@ xloadflags:
-> >  #else
-> >  # define XLF23 0
-> >  #endif
-> > -			.word XLF0 | XLF1 | XLF23
-> > +
-> > +#if defined(CONFIG_X86_64) && defined(CONFIG_EFI)
-> 
-> && defined(CONFIG_KEXEC) ?
+Hi Jerry,
 
-Will add above.
+On Thu, Nov 14, 2013 at 1:57 AM,  <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
+> I will still point out that as currently used, efi_reserve_boot_services
+> is wrong.  A work around for firmware bugs on one platform shouldn't be
+> breaking platforms that don't have that bug.  Its just much less likely
+> to cause problems with higher crash kernel allocation.
 
-> 
-> > +# define XLF4 XLF_EFI_KEXEC
-> > +#else
-> > +# define XLF4 0
-> > +#endif
-> > +
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+Wrong in what way exactly?
+
+We need efi_reserve_boot_services on _some_ platforms and it's only practical
+to do it on all platforms to be able to boot a generic kernel.  Likewise, it
+would be more practical to fix crashkernel on all platforms instead of adding a
+new code path in the kernel that won't receive as much testing coverage (we
+need to reserve boot services by default).
+
+And frankly, I don't understand why 'violating the UEFI specification' is even
+brought up.  It's shipped firmware that matters here no matter how broken it
+is.  As long as there's a reasonable solution for crashkernel that works on all
+platforms, we should go for it instead of special-casing for 'proper firmware'
+because it makes testing the kernel more difficult.
+
+                        Pekka
