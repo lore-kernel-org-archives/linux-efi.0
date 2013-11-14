@@ -1,40 +1,82 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Wed, 13 Nov 2013 16:05:50 -0800
-Message-ID: <528413DE.1090203@zytor.com>
-References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com> <d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com> <20131113224503.GB25344@anatevka.fc.hp.com> <52840206.5020006@zytor.com> <20131113235708.GC25344@anatevka.fc.hp.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 7/7 v2] x86: add xloadflags bit for efi runtime support
+ on kexec
+Date: Thu, 14 Nov 2013 09:36:49 +0800
+Message-ID: <20131114013649.GA4081@dhcp-16-126.nay.redhat.com>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+ <20131105082719.416282009@dhcp-16-126.nay.redhat.com>
+ <5283A6DD.2030808@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20131113235708.GC25344@anatevka.fc.hp.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: jerry.hoemann@hp.com
-Cc: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, penberg@kernel.org, akpm@linux-foundation.org, linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, vgoyal@redhat.com, linux-kernel@vger.kernel.org
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5283A6DD.2030808-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/13/2013 03:57 PM, jerry.hoemann@hp.com wrote:
+On 11/13/13 at 08:20am, H. Peter Anvin wrote:
+> On 11/05/2013 12:20 AM, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> > Old kexec-tools can not load new kernel. The reason is previously kexec-tools
+> > do not fill efi_info in x86 setup header thus efi init fail and switch
+> > to noefi boot. In new kexec-tools it will by default fill efi_info and
+> > pass other efi required infomation to 2nd kernel so kexec kernel efi
+> > initialization will success finally.
+> > 
+> > To prevent from breaking userspace, add a new xloadflags bit so kexec-tools
+> > will check the flag and switch to old logic.
+> > 
+> > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  arch/x86/boot/header.S                |    9 ++++++++-
+> >  arch/x86/include/uapi/asm/bootparam.h |    1 +
+> >  2 files changed, 9 insertions(+), 1 deletion(-)
+> > 
+> > --- linux-2.6.orig/arch/x86/boot/header.S
+> > +++ linux-2.6/arch/x86/boot/header.S
+> > @@ -391,7 +391,14 @@ xloadflags:
+> >  #else
+> >  # define XLF23 0
+> >  #endif
+> > -			.word XLF0 | XLF1 | XLF23
+> > +
+> > +#if defined(CONFIG_X86_64) && defined(CONFIG_EFI)
+> > +# define XLF4 XLF_EFI_KEXEC
+> > +#else
+> > +# define XLF4 0
+> > +#endif
+> > +
+> > +			.word XLF0 | XLF1 | XLF23 | XLF4
+> >  
+> >  cmdline_size:   .long   COMMAND_LINE_SIZE-1     #length of the command line,
+> >                                                  #added with boot protocol
+> > --- linux-2.6.orig/arch/x86/include/uapi/asm/bootparam.h
+> > +++ linux-2.6/arch/x86/include/uapi/asm/bootparam.h
+> > @@ -24,6 +24,7 @@
+> >  #define XLF_CAN_BE_LOADED_ABOVE_4G	(1<<1)
+> >  #define XLF_EFI_HANDOVER_32		(1<<2)
+> >  #define XLF_EFI_HANDOVER_64		(1<<3)
+> > +#define XLF_EFI_KEXEC			(1<<4)
+> >  
+> >  #ifndef __ASSEMBLY__
+> >  
+> > 
 > 
-> I think i can go to a date based black list, that removes the manual
-> step.  System running firmware before certain date assumes we need
-> to do the work around.  If firmware is newer than that date, we don't
-> use the workaround.  Blacklist overrides and allows current behavior
-> for new firmware that is subsequently found to be broken and for
-> which we can't convenience the manufacturer to fix.
-> 
+> Also needs to be added to Documentation/x86/boot.txt with the exact
+> semantics being exposed.
 
-No, we can't, at least not for now.  We are continually finding new
-platforms with the bug.
+Will do
 
 > 
-> I will still point out that as currently used, efi_reserve_boot_services
-> is wrong.  A work around for firmware bugs on one platform shouldn't be
-> breaking platforms that don't have that bug.  Its just much less likely
-> to cause problems with higher crash kernel allocation.
+> 	-hpa
 > 
-
-It is wrong, yes, but it seems like a ubiquitous problem.
-
-	-hpa
-
-
