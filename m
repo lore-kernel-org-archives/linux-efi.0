@@ -1,33 +1,41 @@
-From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [patch 3/7 v2] Cleanup efi_enter_virtual_mode function
-Date: Fri, 15 Nov 2013 16:21:22 -0700
-Message-ID: <1384557682.1791.9.camel@misato.fc.hp.com>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
-	 <20131105082716.825753041@dhcp-16-126.nay.redhat.com>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: Re: [PATCH 0/3] Early use of boot service memory
+Date: Fri, 15 Nov 2013 15:43:12 -0800
+Message-ID: <CAE9FiQVOeDmdKMgnuV1kt6_aEbLG9aNKcRJqoL61pUzermMDbg@mail.gmail.com>
+References: <20131114180455.GA32212@anatevka.fc.hp.com>
+	<CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
+	<20131115005049.GJ5116@anatevka.fc.hp.com>
+	<20131115062417.GB9237@gmail.com>
+	<CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
+	<5285C639.5040203@zytor.com>
+	<20131115140738.GB6637@redhat.com>
+	<CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com>
+	<20131115180324.GD6637@redhat.com>
+	<CAE9FiQU_OstEq3VWwBB879O4EY0DE+zVWVens+w0MLFUQmr3sw@mail.gmail.com>
+	<20131115225540.GA5485@anatevka.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131105082716.825753041-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20131115225540.GA5485@anatevka.fc.hp.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: jerry.hoemann@hp.com
+Cc: Vivek Goyal <vgoyal@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-11-05 at 16:20 +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> Add two small functions:
-> efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
-> calls them instead of embedding two long for loop.
+On Fri, Nov 15, 2013 at 2:55 PM,  <jerry.hoemann@hp.com> wrote:
+>> You may need bunch of PCIe cards installed.
+>>
+>> The system with 6TiB + 16 PCIe cards, second kernel OOM.
+>> The system with 4.5TiB + 16 PCIe cards, second kernel works with vmcore dumped.
+>
+> Yinghai,
+>
+> Your original email said you were using "legacy mode".  Does this mean
+> you're not running makedumpfile in cyclic mode?  Cyclic mode makes
+> a *big* difference in memory foot print of makedumpfile.
 
- :
+I mean: boot linux with legacy bios mode instead UEFI native boot.
 
-> +void __init efi_enter_virtual_mode(void)
-> +{
-> +	efi_status_t status;
-> +	void *p, *new_memmap = NULL;
+Thanks
 
-*p is unused.
-
-
-Thanks,
--Toshi
+Yinghai
