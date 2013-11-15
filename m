@@ -1,126 +1,56 @@
-From: jerry.hoemann@hp.com
+From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Fri, 15 Nov 2013 12:13:08 -0700
-Message-ID: <20131115191308.GB2748@anatevka.fc.hp.com>
-References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
- <d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
- <20131113224503.GB25344@anatevka.fc.hp.com>
- <52840206.5020006@zytor.com>
- <20131113235708.GC25344@anatevka.fc.hp.com>
- <CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>
- <20131114180455.GA32212@anatevka.fc.hp.com>
- <CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
- <20131115005049.GJ5116@anatevka.fc.hp.com>
- <20131115062417.GB9237@gmail.com>
-Reply-To: jerry.hoemann@hp.com
+Date: Fri, 15 Nov 2013 11:16:25 -0800
+Message-ID: <52867309.4040406@zytor.com>
+References: <CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com> <20131114180455.GA32212@anatevka.fc.hp.com> <CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com> <20131115005049.GJ5116@anatevka.fc.hp.com> <20131115062417.GB9237@gmail.com> <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com> <5285C639.5040203@zytor.com> <20131115140738.GB6637@redhat.com> <CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com> <52865CA1.5020309@zytor.com> <20131115183002.GE6637@redhat.com> <52866C0D.3050006@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131115062417.GB9237@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Pekka Enberg <penberg@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Yinghai Lu <yinghai@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
-	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <52866C0D.3050006@zytor.com>
+Sender: owner-linux-mm@kvack.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: Yinghai Lu <yinghai@kernel.org>, Ingo Molnar <mingo@kernel.org>, jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 15, 2013 at 07:24:17AM +0100, Ingo Molnar wrote:
+On 11/15/2013 10:46 AM, H. Peter Anvin wrote:
+> On 11/15/2013 10:30 AM, Vivek Goyal wrote:
+>>
+>> I agree taking assistance of hypervisor should be useful.
+>>
+>> One reason we use kdump for VM too because it makes life simple. There
+>> is no difference in how we configure, start and manage crash dumps
+>> in baremetal or inside VM. And in practice have not heard of lot of
+>> failures of kdump in VM environment.
+>>
+>> So while reliability remains a theoritical concern, in practice it
+>> has not been a real concern and that's one reason I think we have
+>> not seen a major push for alternative method in VM environment.
+>>
 > 
-> * jerry.hoemann@hp.com <jerry.hoemann@hp.com> wrote:
+> Another reason, again, is that it doesn't sit on all that memory.
 > 
-> > On Thu, Nov 14, 2013 at 08:44:04PM +0200, Pekka Enberg wrote:
-> > > On Thu, Nov 14, 2013 at 8:04 PM,  <jerry.hoemann@hp.com> wrote:
-> > > > Making this issue a quirk will be a lot more practical.  Its a small, focused
-> > > > change whose implications are limited and more easily understood.
-> > > 
-> > > There's nothing practical with requiring users to pass a kernel option
-> > > to make kdump work.  It's a workaround, sure, but it's not a proper
-> > > fix.
-> > 
-> > One already has to specify command line arguments to enable kdump. 
-> > See "crashkernel=" in Documentation/kernel-parameters.txt.
-> 
-> That option is already a usability barrier. Adding yet another 
-> usability barrier improves things how?
 
-  Because of the bug in the way efi_reserve_boot_services is used:
+This led me to a potentially interesting idea.  If we can tell the
+hypervisor about which memory blocks belong to kdump, we can still use
+kdump in its current form with only a few hypervisor calls thrown in.
 
-  On pre 3.9 kernel crash dump doesn't work at all w/ fragmented memory < 896M.
+One set of calls would mark memory ranges as belonging to kdump.  This
+would (a) make them protected, and (b) tell the hypervisor that these
+memory ranges will not be accessed and don't need to occupy physical RAM.
 
-  On post 3.9 it doesn't work by default and even when changing
-  invocation, has some issue (see vivek's email.)
+On a crash, we would them execute another hypercall to reanimate the
+kdump areas.  Since this is a once-in-a-lifetime (literally) event, this
+can be arbitrarily slow.
 
-  i am looking for a solution for all these cases.
+This would only require a small number of hypercalls inserted into
+already existing code paths, and provide most of the benefit of
+hypervisor-assisted crash dumping.
 
-> 
-> > As i said in an earlier mail we are working w/ distros. [...]
-> 
-> The point being?
+	-hpa
 
-  Earlier reviewer asserted:
-
-	"There's nothing practical with requiring users to pass a kernel option"
-
-  I pointed out that these type of arguments can and do get added by distros
-  and that users need not be actively involved.  the tools abstract
-  these details out.
-
-  we are working w/ distros to get kdump working on large servers which
-  it currently does not do.  as such, this change would be seamless to
-  users.
-
-  but as i've said in earlier replies, i'm willing to do a white list.
-  its not as flexible, but its much better than the current situation
-  that we face (especially on pre 3.9 kernels.)
-
-
-> 
-> > [...]  distros can and do specify lots of interesting command line 
-> > arguments for their systems.  Distros have tools for configuring 
-> > kdump. User must already use these tools or manually edit multiple 
-> > config files, to get kdump to work.  I would work with distros to 
-> > help integrate this change into their tools.
-> 
-> Here you describe a method that has already successfully cut the kdump 
-> user base to a fraction of its potential size. Why should we assist to 
-> that effort of engineered obscurity?
-> 
-> > As i said in earlier mail, i am willing to change implementation to 
-> > some type of black/white listing.
-> 
-> Is it possible to fix it the way hpa suggested?
-
-  I think the changes to enable ,high is a step in the
-  right direction. its an improvement  But it is still green.
-
-  We are having lots more problems w/ upstream kdump than we are having
-  w/ the kdump in distros.
-
-  So, to answer your question with a slight twist:
-
-  Is it possible to back ports lots of green code across multiple
-  versions and distros and get a bug free user experiences?  I guess so.
-
-  is it the right way to go?  i personally don't think so.
-
-  but hey, others may have a different view.
-
-
-  Jerry
-
-
-> 
-> Thanks,
-> 
-> 	Ingo
-
--- 
-
-----------------------------------------------------------------------------
-Jerry Hoemann            Software Engineer              Hewlett-Packard
-
-3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
-Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
-                                                email:  jerry.hoemann@hp.com
-----------------------------------------------------------------------------
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
