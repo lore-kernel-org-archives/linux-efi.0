@@ -1,7 +1,7 @@
-From: jerry.hoemann@hp.com
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Thu, 14 Nov 2013 17:50:49 -0700
-Message-ID: <20131115005049.GJ5116@anatevka.fc.hp.com>
+Date: Fri, 15 Nov 2013 07:24:17 +0100
+Message-ID: <20131115062417.GB9237@gmail.com>
 References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
  <d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
  <20131113224503.GB25344@anatevka.fc.hp.com>
@@ -10,92 +10,55 @@ References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
  <CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>
  <20131114180455.GA32212@anatevka.fc.hp.com>
  <CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
-Reply-To: jerry.hoemann@hp.com
+ <20131115005049.GJ5116@anatevka.fc.hp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Yinghai Lu <yinghai@kernel.org>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
-	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
+In-Reply-To: <20131115005049.GJ5116-dMAi7lA+vBPDUbYHzcRnttBPR1lH4CV8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: jerry.hoemann-VXdhtT5mjnY@public.gmane.org
+Cc: Pekka Enberg <penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "list-T1Yj925okcpg9hUCZPvPmw@public.gmane.org:DOCUMENTATION <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>,
+	list-T1Yj925okcpg9hUCZPvPmw@public.gmane.org:MEMORY MANAGEMENT <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>," <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 14, 2013 at 08:44:04PM +0200, Pekka Enberg wrote:
-> On Thu, Nov 14, 2013 at 8:04 PM,  <jerry.hoemann@hp.com> wrote:
-> > Making this issue a quirk will be a lot more practical.  Its a small, focused
-> > change whose implications are limited and more easily understood.
+
+* jerry.hoemann-VXdhtT5mjnY@public.gmane.org <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
+
+> On Thu, Nov 14, 2013 at 08:44:04PM +0200, Pekka Enberg wrote:
+> > On Thu, Nov 14, 2013 at 8:04 PM,  <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
+> > > Making this issue a quirk will be a lot more practical.  Its a small, focused
+> > > change whose implications are limited and more easily understood.
+> > 
+> > There's nothing practical with requiring users to pass a kernel option
+> > to make kdump work.  It's a workaround, sure, but it's not a proper
+> > fix.
 > 
-> There's nothing practical with requiring users to pass a kernel option
-> to make kdump work.  It's a workaround, sure, but it's not a proper
-> fix.
+> One already has to specify command line arguments to enable kdump. 
+> See "crashkernel=" in Documentation/kernel-parameters.txt.
 
+That option is already a usability barrier. Adding yet another 
+usability barrier improves things how?
 
-One already has to specify command line arguments to enable kdump.
-See "crashkernel=" in Documentation/kernel-parameters.txt.
+> As i said in an earlier mail we are working w/ distros. [...]
 
-As i said in an earlier mail we are working w/ distros.  distros
-can and do specify lots of interesting command line arguments for
-their systems.  Distros have tools for configuring kdump.
-User must already use these tools or manually edit multiple config files,
-to get kdump to work.  I would work with distros to help integrate this
-change into their tools.
+The point being?
 
+> [...]  distros can and do specify lots of interesting command line 
+> arguments for their systems.  Distros have tools for configuring 
+> kdump. User must already use these tools or manually edit multiple 
+> config files, to get kdump to work.  I would work with distros to 
+> help integrate this change into their tools.
 
-As i said in earlier mail, i am willing to change implementation
-to some type of black/white listing.
+Here you describe a method that has already successfully cut the kdump 
+user base to a fraction of its potential size. Why should we assist to 
+that effort of engineered obscurity?
 
-> 
-> And once you add whitelisting to make it practical, implications are
-> no longer limited nor easily understood nor actually testable unless
-> you happen to have access every single firmware out there.
+> As i said in earlier mail, i am willing to change implementation to 
+> some type of black/white listing.
 
-Perhaps we have a different understanding of black/white listings.
+Is it possible to fix it the way hpa suggested?
 
-Here is what i mean:
+Thanks,
 
-the use of efi_reserve_boot_services is a work around for system
-with fw bugs.
-
-Black list:
-1. In general, assume systems don't need the work around.
-2. The black list are those specific system on which the work around
-   is applied.
-
-White list:
-1. In general, assume systems require the work around.
-2. The white list are those specific system in which the work around
-   is not applied.
-
-
-In the white list case, the list of platforms would be the ones
-that i specifically test and verify don't need the work around.
-the only difference is whether BootService Code/Data is reserved/freed
-early.
-
-all other platforms remain the same.
-
-
-> 
-> Yes, we have plenty of quirks in the x86 boot code but that doesn't
-> mean it's a good idea to add more of the unless we absolutely must.
-
-given that life is optional, how can one argue any piece of software be
-an absolute must?  :)  :)
-
-Jerry
-
-> 
->                                 Pekka
-
--- 
-
-----------------------------------------------------------------------------
-Jerry Hoemann            Software Engineer              Hewlett-Packard/MODL
-
-3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
-Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
-                                                email:  jerry.hoemann@hp.com
-----------------------------------------------------------------------------
-
+	Ingo
