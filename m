@@ -1,56 +1,69 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Yinghai Lu <yinghai@kernel.org>
 Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Fri, 15 Nov 2013 11:16:25 -0800
-Message-ID: <52867309.4040406@zytor.com>
-References: <CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com> <20131114180455.GA32212@anatevka.fc.hp.com> <CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com> <20131115005049.GJ5116@anatevka.fc.hp.com> <20131115062417.GB9237@gmail.com> <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com> <5285C639.5040203@zytor.com> <20131115140738.GB6637@redhat.com> <CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com> <52865CA1.5020309@zytor.com> <20131115183002.GE6637@redhat.com> <52866C0D.3050006@zytor.com>
+Date: Fri, 15 Nov 2013 14:24:25 -0800
+Message-ID: <CAE9FiQU_OstEq3VWwBB879O4EY0DE+zVWVens+w0MLFUQmr3sw@mail.gmail.com>
+References: <20131113235708.GC25344@anatevka.fc.hp.com>
+	<CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>
+	<20131114180455.GA32212@anatevka.fc.hp.com>
+	<CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
+	<20131115005049.GJ5116@anatevka.fc.hp.com>
+	<20131115062417.GB9237@gmail.com>
+	<CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
+	<5285C639.5040203@zytor.com>
+	<20131115140738.GB6637@redhat.com>
+	<CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com>
+	<20131115180324.GD6637@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <52866C0D.3050006@zytor.com>
-Sender: owner-linux-mm@kvack.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <20131115180324.GD6637@redhat.com>
+Sender: linux-doc-owner@vger.kernel.org
 To: Vivek Goyal <vgoyal@redhat.com>
-Cc: Yinghai Lu <yinghai@kernel.org>, Ingo Molnar <mingo@kernel.org>, jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/15/2013 10:46 AM, H. Peter Anvin wrote:
-> On 11/15/2013 10:30 AM, Vivek Goyal wrote:
+On Fri, Nov 15, 2013 at 10:03 AM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> On Fri, Nov 15, 2013 at 09:33:41AM -0800, Yinghai Lu wrote:
+
+>> I have one system with 6TiB memory, kdump does not work even
+>> crashkernel=512M in legacy mode. ( it only work on system with
+>> 4.5TiB).
+>
+> Recently I tested one system with 6TB of memory and dumped successfully
+> with 512MB reserved under 896MB. Also I have heard reports of successful
+> dump of 12TB system with 512MB reserved below 896MB (due to cyclic
+> mode of makedumpfile).
+>
+> So with newer releases only reason one might want to reserve more
+> memory is that it might provide speed benefits. We need more testing
+> to quantify this.
+
+You may need bunch of PCIe cards installed.
+
+The system with 6TiB + 16 PCIe cards, second kernel OOM.
+The system with 4.5TiB + 16 PCIe cards, second kernel works with vmcore dumped.
+
+>
+>> --- first kernel can reserve the 512M under 896M, second kernel will
+>> OOM as it load driver for every pci devices...
 >>
->> I agree taking assistance of hypervisor should be useful.
->>
->> One reason we use kdump for VM too because it makes life simple. There
->> is no difference in how we configure, start and manage crash dumps
->> in baremetal or inside VM. And in practice have not heard of lot of
->> failures of kdump in VM environment.
->>
->> So while reliability remains a theoritical concern, in practice it
->> has not been a real concern and that's one reason I think we have
->> not seen a major push for alternative method in VM environment.
->>
-> 
-> Another reason, again, is that it doesn't sit on all that memory.
-> 
+>> So why would RH guys not spend some time on optimizing your kdump initrd
+>> build scripts and only put dump device related driver in it?
+>
+> Try latest Fedora and that's what we do. Now we have moved to dracut
+> based initramfs generation and we tell dracut that build initramfs for
+> host and additional dump destination and dracut builds it for those only.
+> I think there might be scope for further optimization, but I don't think
+> that's the problem any more.
 
-This led me to a potentially interesting idea.  If we can tell the
-hypervisor about which memory blocks belong to kdump, we can still use
-kdump in its current form with only a few hypervisor calls thrown in.
+Good. Assume that will be in RHEL 7.
 
-One set of calls would mark memory ranges as belonging to kdump.  This
-would (a) make them protected, and (b) tell the hypervisor that these
-memory ranges will not be accessed and don't need to occupy physical RAM.
+>
+> So issue remains that crashkernel=X,high is not a good default choice
+> because it consumes extra 72M which we don't have to.
 
-On a crash, we would them execute another hypercall to reanimate the
-kdump areas.  Since this is a once-in-a-lifetime (literally) event, this
-can be arbitrarily slow.
+then if it falls into 896~4G, user may still need to update kexec-tools ?
 
-This would only require a small number of hypercalls inserted into
-already existing code paths, and provide most of the benefit of
-hypervisor-assisted crash dumping.
+Thanks
 
-	-hpa
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Yinghai
