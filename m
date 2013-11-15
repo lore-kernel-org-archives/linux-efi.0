@@ -1,59 +1,32 @@
-From: Yinghai Lu <yinghai@kernel.org>
+From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Thu, 14 Nov 2013 22:55:28 -0800
-Message-ID: <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
-References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>
-	<d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>
-	<20131113224503.GB25344@anatevka.fc.hp.com>
-	<52840206.5020006@zytor.com>
-	<20131113235708.GC25344@anatevka.fc.hp.com>
-	<CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>
-	<20131114180455.GA32212@anatevka.fc.hp.com>
-	<CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>
-	<20131115005049.GJ5116@anatevka.fc.hp.com>
-	<20131115062417.GB9237@gmail.com>
+Date: Thu, 14 Nov 2013 22:59:05 -0800
+Message-ID: <5285C639.5040203@zytor.com>
+References: <1384222558-38527-1-git-send-email-jerry.hoemann@hp.com>	<d73ccce9-6a0d-4470-bda3-f0c6eb96b5e4@email.android.com>	<20131113224503.GB25344@anatevka.fc.hp.com>	<52840206.5020006@zytor.com>	<20131113235708.GC25344@anatevka.fc.hp.com>	<CAOJsxLFkHQ6_f+=CMwfNLykh59TZH5VrWeVEDPCWPF1wiw7tjQ@mail.gmail.com>	<20131114180455.GA32212@anatevka.fc.hp.com>	<CAOJsxLFWMi8DoFp+ufri7XoFO27v+2=0oksh8+NhM6P-OdkOwg@mail.gmail.com>	<20131115005049.GJ5116@anatevka.fc.hp.com>	<20131115062417.GB9237@gmail.com> <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20131115062417.GB9237@gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION <linux-doc@vger.kernel.org>,
-	list@ebiederm.org:MEMORY MANAGEMENT <linux-mm@kvack.org>," <linux-doc@vger.kernel.org>, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Yinghai Lu <yinghai@kernel.org>, Ingo Molnar <mingo@kernel.org>
+Cc: jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, Vivek Goyal <vgoyal@redhat.com>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 14, 2013 at 10:24 PM, Ingo Molnar <mingo@kernel.org> wrote:
->
-> * jerry.hoemann@hp.com <jerry.hoemann@hp.com> wrote:
->
->> On Thu, Nov 14, 2013 at 08:44:04PM +0200, Pekka Enberg wrote:
->> > On Thu, Nov 14, 2013 at 8:04 PM,  <jerry.hoemann@hp.com> wrote:
->> > > Making this issue a quirk will be a lot more practical.  Its a small, focused
->> > > change whose implications are limited and more easily understood.
->> >
->> > There's nothing practical with requiring users to pass a kernel option
->> > to make kdump work.  It's a workaround, sure, but it's not a proper
->> > fix.
->>
->> One already has to specify command line arguments to enable kdump.
->> See "crashkernel=" in Documentation/kernel-parameters.txt.
->
->> As i said in an earlier mail we are working w/ distros. [...]
+On 11/14/2013 10:55 PM, Yinghai Lu wrote:
+> 
+> Why just asking distros to append ",high" in their installation
+> program for 64bit by default?
+> 
+[...]
+> 
+> What is hpa's suggestion?
+> 
 
-Why just asking distros to append ",high" in their installation
-program for 64bit by default?
+Pretty much what you just said ;)
 
-If they don't want to do that, you can add instruction in your product notes, to
-ask user/admin to add that if kdump fails.
-
->
->
->> As i said in earlier mail, i am willing to change implementation to
->> some type of black/white listing.
->
-> Is it possible to fix it the way hpa suggested?
->
-
-What is hpa's suggestion?
-
-Yinghai
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
