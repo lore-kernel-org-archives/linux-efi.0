@@ -1,17 +1,21 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 5/7 v2] export efi runtime memory mapping to sysfs
-Date: Mon, 18 Nov 2013 10:16:41 +0800
-Message-ID: <20131118021641.GC4025@dhcp-16-126.nay.redhat.com>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
- <20131105082718.185728964@dhcp-16-126.nay.redhat.com>
- <20131113155027.GC17248@console-pimps.org>
- <20131114015047.GD4081@dhcp-16-126.nay.redhat.com>
+Subject: Re: [patch 1/3 v2] Add function get_bootparam
+Date: Mon, 18 Nov 2013 10:22:34 +0800
+Message-ID: <20131118022234.GD4025@dhcp-16-126.nay.redhat.com>
+References: <20131105082947.500512312@dhcp-16-126.nay.redhat.com>
+ <20131105083428.411624560@dhcp-16-126.nay.redhat.com>
+ <1384219658.1847.84.camel@misato.fc.hp.com>
+ <52819E71.70201@zytor.com> <20131112075831.GA6213@kroah.com>
+ <20131112080854.GD6999@dhcp-16-126.nay.redhat.com>
+ <20131112083012.GB7708@kroah.com> <5281F6D5.4090700@zytor.com>
+ <20131112095114.GA20100@kroah.com>
+ <20131113005032.GB5069@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131114015047.GD4081-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <20131113005032.GB5069-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -21,39 +25,35 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-> > > +/*
-> > > + * These are default attributes that are added for every memmap entry.
-> > > + */
-> > > +static struct attribute *def_attrs[] = {
-> > > +	&map_type_attr.attr,
-> > > +	&map_phys_addr_attr.attr,
-> > > +	&map_virt_addr_attr.attr,
-> > > +	&map_num_pages_attr.attr,
-> > > +	&map_attribute_attr.attr,
-> > > +	NULL
-> > > +};
+On 11/13/13 at 08:50am, Dave Young wrote:
+> On 11/12/13 at 06:51pm, Greg KH wrote:
+> > On Tue, Nov 12, 2013 at 01:37:25AM -0800, H. Peter Anvin wrote:
+> > > On 11/12/2013 12:30 AM, Greg KH wrote:
+> > > > 
+> > > > And these binary data blobs are a "standard" somewhere, and will not
+> > > > change per kernel version change?
+> > > > 
+> > > > If so, that structure is fine with me.
+> > > > 
+> > > 
+> > > Correct.  The structure is documented in Documentation/x86/boot.txt, and
+> > > has been largely invariant (but extended) since the beginning of Linux.
+> > >  It has sometimes taken some serious work to keep it that way.
 > > 
-> > If the UEFI spec ever releases an update for the memory descriptor
-> > structure, and bumps 'memmap.desc_version', how are we going to signal
-> > the incompatibility to legacy versions of kexec tools?
+> > Ok, then use the binary sysfs file interface for these blobs, and
+> > everyone will be happy.
 > 
-> Hmm, that is a problem. I will consider to export memmap according to
-> what firmware provided with extra desc_version instead of using attrs from kernel
-> data structure efi_memory_desc_t
-> 
+> Since we got an agreement I will move them to sysfs in next version.
 
-Matt, desc_version is already in boot_params.efi_info, so kexec-tools can get
-the version from there. I do not need to export it as another file.
+I have created one patch for the sysfs part this weekend, bug I'm hesitating to
+remove the debugfs part because currently there's already user, I tend to
+keep them in debugfs for now.
 
-I think for now we do not need worry much about the compatibility issue, do you
-think I need add version checking in kexec-tools currently? like below?
-
-if (desc_version != 1) /* current version is 1? */
-	error out it is not supported
+What do you think, Peter?
 
 --
 Thanks
