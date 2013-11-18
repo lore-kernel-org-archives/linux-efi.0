@@ -1,20 +1,45 @@
-From: alan-Hp07MnWEnFUpAS55Wn97og@public.gmane.org
-Subject: =?windows-1251?Q?=EC=E0=F1=F2=E5=F0=F1=EA=E8=E9_=EC=E5=F2?=
-	=?windows-1251?Q?=EE=E4_=F1=EF=E0=F1=F2=E8_=E3=EB=E0=E7?=
-	=?windows-1251?Q?=E8=EA=E8?=
-Date: Sun, 17 Nov 2013 04:15:01 -0500
-Message-ID: <1414129.20131117001817@zpower.com.au>
-Reply-To: alan-Hp07MnWEnFUpAS55Wn97og@public.gmane.org
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 3/7 v2] Cleanup efi_enter_virtual_mode function
+Date: Mon, 18 Nov 2013 10:08:51 +0800
+Message-ID: <20131118020850.GA4025@dhcp-16-126.nay.redhat.com>
+References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
+ <20131105082716.825753041@dhcp-16-126.nay.redhat.com>
+ <1384557682.1791.9.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1251
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: www-vgYS9+/UA8Uox3rIn2DAYQ@public.gmane.org, info-sH7Y/zSedn/i5M5QGetScg@public.gmane.org, shop-aNsA7oSDqsa5kNr71WiJjw@public.gmane.org, v-c-h-k+OT61UuxXo@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1384557682.1791.9.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-http://xn--m3cab3cc8gyeb9d.net/modules/mod_backup2/jwmhl.htm =E1=F3=E4=E5=
-=F2=E5 =EB=F3=F7=F8=E5 =EF=EE=F1=F2=E8=E3=E0=F2=FC. =F2=E0=EA =ED=E5=F1=
-=F0=E0=E2=ED=E5=ED=ED=EE =EF=F0=E8=E2=EB=E5=EA=E0=F2=E5=EB=FC=ED=E5=E9.=
- =CF=EE=E6=E0=EB=F3=E9 =E2=FB=F1=EE=F7=E0=E9=F8=E5=E5 =EB=E5=EA=E0=F0=F1=
-=F2=E2=EE.
+On 11/15/13 at 04:21pm, Toshi Kani wrote:
+> On Tue, 2013-11-05 at 16:20 +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> > Add two small functions:
+> > efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+> > calls them instead of embedding two long for loop.
+> 
+>  :
+> 
+> > +void __init efi_enter_virtual_mode(void)
+> > +{
+> > +	efi_status_t status;
+> > +	void *p, *new_memmap = NULL;
+> 
+> *p is unused.
+
+The *p was removed in later patch, will remove it in this patch.
+
+Thanks for review.
+Dave
