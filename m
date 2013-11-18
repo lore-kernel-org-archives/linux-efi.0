@@ -1,55 +1,35 @@
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: Re: [PATCH 0/3] Early use of boot service memory
-Date: Mon, 18 Nov 2013 13:52:24 -0500
-Message-ID: <20131118185224.GD32168@redhat.com>
-References: <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
- <5285C639.5040203@zytor.com>
- <20131115140738.GB6637@redhat.com>
- <CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com>
- <52865CA1.5020309@zytor.com>
- <20131115183002.GE6637@redhat.com>
- <52866C0D.3050006@zytor.com>
- <52867309.4040406@zytor.com>
- <20131118152255.GA32168@redhat.com>
- <528A5C7E.5080007@zytor.com>
+From: Matthew Garrett <mjg59@srcf.ucam.org>
+Subject: Re: [BUG]: DELL XPS 8500 become a brick after fill too many
+ entries to nvram.
+Date: Mon, 18 Nov 2013 19:07:20 +0000
+Message-ID: <20131118190720.GA20875@srcf.ucam.org>
+References: <87fvr3h3b9.fsf@redhat.com>
+ <20131111110701.GE22636@console-pimps.org>
+ <87eh6nt8oo.fsf@redhat.com>
+ <20131113112052.GJ22636@console-pimps.org>
+ <878uws1msy.fsf@redhat.com>
+ <20131113140647.GK22636@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <528A5C7E.5080007@zytor.com>
-Sender: owner-linux-mm@kvack.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Yinghai Lu <yinghai@kernel.org>, Ingo Molnar <mingo@kernel.org>, jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+In-Reply-To: <20131113140647.GK22636@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Madper Xie <cxie@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 18, 2013 at 10:29:18AM -0800, H. Peter Anvin wrote:
-> On 11/18/2013 07:22 AM, Vivek Goyal wrote:
-> > 
-> > And if that's true, then reserving 72M extra due to crashkernel=X,high
-> > should not be a big issue in KVM guests. It will still be an issue on
-> > physical servers though.
-> > 
-> 
-> Yes, but there it is a single instance and not a huge amount of RAM.
+On Wed, Nov 13, 2013 at 02:08:14PM +0000, Matt Fleming wrote:
 
-Agreed. But for some people it is. For example, we don't enable kdump
-by default on fedora. Often people don't like 128MB of their laptop
-memory not being used. And I have been thinking how to reduce memory
-usage further so that I can enable kdump by default on Fedora.
+> OK, it looks like the firmware Boot Manager gets very confused when it
+> tries to parse the Boot Load Option you created with efibootmgr. This
+> looks like a general firmware bug and not something we need to worry
+> about in the kernel.
 
-Instead, now this 72MB increase come in picture which does not bring
-us any benefit for most of the people. Only people who benefit from
-it are large memory servers and everybody else (having memory more
-than 4G) pays this penalty.
+Well, we do do some parsing of the boot parameters in the kernel in 
+order to avoid hitting a Tianocore bug. But if the problem is just that 
+the Dell firmware falls over if it sees something that isn't Unicode, I 
+don't think we can really work around that.
 
-I rather prefer that this penalty of 72M is paid only by those who need
-to have memory reservation above 4G.
-
-Thanks
-Vivek
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+-- 
+Matthew Garrett | mjg59@srcf.ucam.org
