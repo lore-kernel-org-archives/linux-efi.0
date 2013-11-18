@@ -1,58 +1,77 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 1/7 v2] Add function efi_remap_region for remapping to
- saved virt address
-Date: Mon, 18 Nov 2013 17:37:49 +0800
-Message-ID: <20131118093749.GA16381@dhcp-16-126.nay.redhat.com>
-References: <20131105082007.872550445@dhcp-16-126.nay.redhat.com>
- <20131105082715.502723229@dhcp-16-126.nay.redhat.com>
- <1384556525.1791.4.camel@misato.fc.hp.com>
- <20131118020939.GB4025@dhcp-16-126.nay.redhat.com>
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: Re: [PATCH 0/3] Early use of boot service memory
+Date: Mon, 18 Nov 2013 10:22:55 -0500
+Message-ID: <20131118152255.GA32168@redhat.com>
+References: <20131115005049.GJ5116@anatevka.fc.hp.com>
+ <20131115062417.GB9237@gmail.com>
+ <CAE9FiQWzSTtW8N=0hoUe6iCSM-k64Mv97n0whAS0_vZ+psuOsg@mail.gmail.com>
+ <5285C639.5040203@zytor.com>
+ <20131115140738.GB6637@redhat.com>
+ <CAE9FiQUnw9Ujmdtq-AgC4VctQ=fZSBkzehoTbvw=aZeARL+pwA@mail.gmail.com>
+ <52865CA1.5020309@zytor.com>
+ <20131115183002.GE6637@redhat.com>
+ <52866C0D.3050006@zytor.com>
+ <52867309.4040406@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <20131118020939.GB4025-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <52867309.4040406@zytor.com>
+Sender: owner-linux-mm@kvack.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Yinghai Lu <yinghai@kernel.org>, Ingo Molnar <mingo@kernel.org>, jerry.hoemann@hp.com, Pekka Enberg <penberg@kernel.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, "list@ebiederm.org:DOCUMENTATION" <linux-doc@vger.kernel.org>, "list@ebiederm.org:MEMORY MANAGEMENT" <linux-mm@kvack.org>, linux-efi@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/18/13 at 10:09am, Dave Young wrote:
-> On 11/15/13 at 04:02pm, Toshi Kani wrote:
-> > On Tue, 2013-11-05 at 16:20 +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> > > Kexec kernel will use saved runtime virtual mapping, so add a
-> > > new function efi_remap_region to remapping it directly without
-> > > calculate the virt addr from efi_va.
-> > > 
-> > > The md is passed in from 1st kernel, the virtual addr is
-> > > saved in md->virt_addr.
+On Fri, Nov 15, 2013 at 11:16:25AM -0800, H. Peter Anvin wrote:
+> On 11/15/2013 10:46 AM, H. Peter Anvin wrote:
+> > On 11/15/2013 10:30 AM, Vivek Goyal wrote:
+> >>
+> >> I agree taking assistance of hypervisor should be useful.
+> >>
+> >> One reason we use kdump for VM too because it makes life simple. There
+> >> is no difference in how we configure, start and manage crash dumps
+> >> in baremetal or inside VM. And in practice have not heard of lot of
+> >> failures of kdump in VM environment.
+> >>
+> >> So while reliability remains a theoritical concern, in practice it
+> >> has not been a real concern and that's one reason I think we have
+> >> not seen a major push for alternative method in VM environment.
+> >>
 > > 
-> >  :
+> > Another reason, again, is that it doesn't sit on all that memory.
 > > 
-> > > +/*
-> > > + * kexec kernel will use efi_map_region_fixed to map efi
-> > > + * runtime memory ranges. md->virt_addr is the original virtual
-> > > + * address which had been mapped in kexec 1st kernel.
-> > > + */
-> > > +void __init efi_map_region_fixed(efi_memory_desc_t *md)
-> > 
-> > Can you simply use __map_region() instead of creating this function?
-> > Both functions seem to do the same thing.  (In __map_region(), size and
-> > end are not used.)
 > 
-> Matt also suggest to reuse __map_region in another apply, will do.
+> This led me to a potentially interesting idea.  If we can tell the
+> hypervisor about which memory blocks belong to kdump, we can still use
+> kdump in its current form with only a few hypervisor calls thrown in.
+> 
+> One set of calls would mark memory ranges as belonging to kdump.  This
+> would (a) make them protected,
 
-Will remove the unused variables in another patch.
+This sounds good. We already have arch hooks to map/unmap crash kernel
+ranges, crash_map_reserved_pages() and crash_unmap_reserved_pages(). Now x86,
+should be able to use these hooks to tell hypervisor to remove mappings
+for certain physical certain ranges and remap these back when needed. s390
+already does some magic there.
+
+> and (b) tell the hypervisor that these
+> memory ranges will not be accessed and don't need to occupy physical RAM.
+
+I am not sure if we need to do anything here. I am assuming that most of
+the crashkernel memory has not been touched and does not occupy physical
+memory till crash actually happens. We probably will touch only 20-30MB
+of crashkernel memory during kernel load and that should ultimately make
+its way to swap at some point of time.
+
+And if that's true, then reserving 72M extra due to crashkernel=X,high
+should not be a big issue in KVM guests. It will still be an issue on
+physical servers though.
+
+Thanks
+Vivek
 
 --
-Thanks
-Dave
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
