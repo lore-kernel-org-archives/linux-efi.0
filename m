@@ -1,104 +1,101 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: change name of efi_no_storage_paranoia
- parameter to efi_storage_paranoia
-Date: Wed, 20 Nov 2013 16:08:01 +0800
-Message-ID: <1384934881.6516.4082.camel@linux-s257.site>
-References: <527C93B5.7010407@jp.fujitsu.com> <527C9B5C.6040509@nod.at>
-	 <527CB013.30200@jp.fujitsu.com> <527CB0F4.8080606@nod.at>
-	 <527CBC05.6080505@jp.fujitsu.com> <527CBD01.1000908@nod.at>
-	 <527CBDD3.2020609@jp.fujitsu.com>
-	 <20131108143421.GB22636@console-pimps.org>
-	 <52809AEB.9080100@jp.fujitsu.com>
-	 <20131111105424.GD22636@console-pimps.org>
-	 <528AD50D.6060503@jp.fujitsu.com> <87siutqdwv.fsf@redhat.com>
-	 <528C562B.3070008@jp.fujitsu.com>
+From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH] x86, efi: add no_bricked_efi whitelist
+Date: Wed, 20 Nov 2013 17:34:18 +0900
+Message-ID: <528C740A.6010407@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-2022-JP"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <528C562B.3070008-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, richard-/L3Ra7n9ekc@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, jlee-IBi9RG/b67k@public.gmane.org, cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=B8=89=EF=BC=8C2013-11-20 =E6=96=BC 15:26 +0900=EF=BC=8CYa=
-suaki Ishimatsu =E6=8F=90=E5=88=B0=EF=BC=9A
-> (2013/11/19 12:16), Madper Xie wrote:
-> >=20
-> > isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org writes:
-> >=20
-> >> Hi Matt,
-> >>
-> >> Sorry for late the reply.
-> >>
-> >>
-> >> (2013/11/11 19:54), Matt Fleming wrote:
-> >>> On Mon, 11 Nov, at 05:52:59PM, Yasuaki Ishimatsu wrote:
-> >>>> Hi Matt,
-> >>>>
-> >>>> I uses FUJITSU's x86 box.
-> >>>> This does not become bricked even if I use all efi variable stor=
-age.
-> >>>> Thus I want a way to not need to specify efi_no_storage_paranoia
-> >>>> parameter.
-> >>>
-> >>> The efi_no_storage_paranoia parameter was introduced because some
-> >>> machines do not initiate garbage collection of the NVRAM until yo=
-u
-> >>> allocate all space - basically it's a switch to turn off the "sav=
-e 5KB
-> >>> of stoarge at all times" workaround that is needed to avoid brick=
-ing
-> >>> some machines.
-> >>>
-> >>> The intention of the switch is not to allow you to fill your NVRA=
-M just
-> >>> because you can. If that is something you want to do then I think=
- it's
-> >>> fair to require you to explicitly turn on efi_no_storage_paranoia=
-=2E But
-> >>> I'm assuming here that you are doing something like writing lots =
-and
-> >>> lots of pstore entries and just want to write as many as your var=
-iable
-> >>> storage will allow? Or are you doing something more fundamental l=
-ike
-> >>> creating BootXXXX entries?
-> >>>
-> >>> What are you doing to run into the 5KB reserve? How much NVRAM do=
-es your
-> >>> machine come with?
-> >>
-> >> I just add boot entry to NVRAM by efibootmgr command. But when Lin=
-ux boots up,
-> >> the remaining NVRAM is less than 5Kbyte. So I cannnot add new entr=
-y.
-> >>
-> > Howdy Yasuaki,
-> >    If the remaining NVRAM is less than 5Kb, your writing will trigg=
-er a
-> >    NVRAM storage reclamation. However you still failed creating ent=
-ry. So
-> >    I'm just curious what itmes occupy lots of nvram storage space.
->=20
-> Even if we got EFI_OUT_OF_RESOURCES while running Linux, gc does not =
-run.
-> Trigger of gc is when EFI_OUT_OF_RESOURCES occurs on pre OS environme=
-nt with
-> UEFI. So on my system, if EFI_OUT_OF_RESOURCES occurs by the 5Kbyte t=
-hreshold,
-> we cannot use nvram storage until EFI_OUT_OF_RESOURCES occurs on pre =
-OS
-> environment with UEFI.
->=20
-> Thanks,
-> Yasuaki Ishimatsu
+By following works, my system very often fails set_variable() to set new
+variable to efi variable storage and shows "efivars: set_variable() failed:
+status=-28" message.
 
-Can we try to trigger gc by EFI_OUT_OF_RESOURCE in EFI stub kernel or
-EFI boot loader to recover NVRAM space? Does work with the BIOS on this
-machine?
+- commit 68d929862e29a8b52a7f2f2f86a0600423b093cd
+    efi: be more paranoid about available space when creating variables
+- commit 31ff2f20d9003e74991d135f56e503fe776c127c
+    efi: Distinguish between "remaining space" and actually used space
+- commit 8c58bf3eec3b8fc8162fe557e9361891c20758f2
+    x86,efi: Implement efi_no_storage_paranoia parameter
+- commit f8b8404337de4e2466e2e1139ea68b1f8295974f
+    Modify UEFI anti-bricking code
 
+When booting my system, remaining space of efi variable storage is about
+5KB. So there is no room that sets a new variable to the storage. On my
+system, trigger of gc is when EFI_OUT_OF_RESOURCES occurs on pre OS
+environment with UEFI. So if EFI_OUT_OF_RESOURCES occurs by the 5Kbyte
+threshold, nvram storage cannot be used until EFI_OUT_OF_RESOURCES occurs
+on pre OS environment with UEFI.
 
-Thanks a lot!
-Joey Lee
+This patch adds whitelist. If a server is in the whitelist,
+efi_no_storage_paranoia is set to true. And the system can use all efi
+variable storage.
+
+Signed-off-by: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+CC: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+CC: Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>
+CC: Lee, Chun-Y <jlee-IBi9RG/b67k@public.gmane.org>
+CC: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+CC: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index c7e22ab..9fadf5d 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -116,6 +116,15 @@ static int __init setup_storage_paranoia(char *arg)
+ }
+ early_param("efi_no_storage_paranoia", setup_storage_paranoia);
+
++struct no_bricked_efi {
++	char vendor[100];
++	u32 revision;
++};
++
++static struct no_bricked_efi efi_whitelist[] __initdata = {
++	{"FUJITSU LIMITED", 0},
++	{""}
++};
+
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ {
+@@ -704,6 +713,24 @@ static int __init efi_memmap_init(void)
+ 	return 0;
+ }
+
++static bool __init is_no_bricked_efi(char *vendor, u32 revision)
++{
++	int i = 0;
++
++	while (efi_whitelist[i].vendor[0] != '\0') {
++		if (strncmp(efi_whitelist[i].vendor, vendor,
++			    sizeof(efi_whitelist[i].vendor))) {
++			i++;
++			continue;
++		}
++
++		if (revision >= efi_whitelist[i].revision)
++			return true;
++	}
++
++	return false;
++}
++
+ void __init efi_init(void)
+ {
+ 	efi_char16_t *c16;
+@@ -778,6 +805,8 @@ void __init efi_init(void)
+ #if EFI_DEBUG
+ 	print_efi_memmap();
+ #endif
++	if (is_no_bricked_efi(vendor, efi.systab->hdr.revision))
++		efi_no_storage_paranoia = true;
+ }
+
+ void __init efi_late_init(void)
