@@ -1,39 +1,26 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [patch 5/9 v3] efi: export more efi table variable to sysfs
-Date: Thu, 21 Nov 2013 17:57:42 +0100
-Message-ID: <20131121165742.GN26009@pd.tnic>
-References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
- <20131121061754.887381332@dhcp-16-126.nay.redhat.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: add no_bricked_efi whitelist
+Date: Thu, 21 Nov 2013 20:12:05 +0000
+Message-ID: <1385064722.12107.1.camel@x230>
+References: <528C740A.6010407@jp.fujitsu.com>
+	 <1384963376.20536.3.camel@x230> <528DD3E0.3050606@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131121061754.887381332-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <528DD3E0.3050606-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Content-Language: en-US
+Content-ID: <AAA9EEF3E8E8834D8C669432D4B9A770-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+To: "isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org" <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, "cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 21, 2013 at 02:17:09PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
-> --- efi.orig/arch/x86/platform/efi/efi.c
-> +++ efi/arch/x86/platform/efi/efi.c
-> @@ -653,6 +653,10 @@ void __init efi_init(void)
->  
->  	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
->  
-> +	efi.fw_vendor = (unsigned long)efi.systab->fw_vendor;
-> +	efi.runtime = (unsigned long)efi.systab->runtime;
-> +	efi.config_table = (unsigned long)efi.systab->tables;
-
-A bit more readable:
-
-	efi.config_table = (unsigned long)efi.systab->tables;
-	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
-	efi.runtime	 = (unsigned long)efi.systab->runtime;
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+T24gVGh1LCAyMDEzLTExLTIxIGF0IDE4OjM1ICswOTAwLCBZYXN1YWtpIElzaGltYXRzdSB3cm90
+ZToNCg0KPiBSZW1haW5pbmcgc3BhY2UgaXMgZnJlZSBzcGFjZSB0aGF0IGNhbiBiZSB1c2VkIGJ5
+IGVmaSB2YXJpYWJsZS4gQnV0IGJ5IDVLQg0KPiB0aHJlc2hvbGQsIHdlIGNhbm5vdCB1c2UgdGhl
+IHNwYWNlIHdoaWxlIHJ1bm5pbmcgT1MuDQoNCklzIHRoZSBzaXR1YXRpb24gc29tZXRoaW5nIGxp
+a2UoYXNzdW1pbmcgYSAxMjhLQiBmbGFzaCBwYXJ0KToNCg0KMSkgNjRLQiBvZiB2YXJpYWJsZXMs
+IDU5S0Igb2YgZGVsZXRlZCB2YXJpYWJsZXMsIDVLQiBvZiBmcmVlIHNwYWNlLA0KDQpvcg0KDQoy
+KSAxMjNLQiBvZiB2YXJpYWJsZXMsIDVLQiBvZiBmcmVlIHNwYWNlDQoNCj8NCi0tIA0KTWF0dGhl
+dyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
