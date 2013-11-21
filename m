@@ -1,138 +1,86 @@
-From: Greg KH <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [patch 9/9 v3] x86: export x86 boot_params to sysfs
-Date: Thu, 21 Nov 2013 08:45:54 -0800
-Message-ID: <20131121164554.GB15083@kroah.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [patch 4/9 v3] efi: cleanup efi_enter_virtual_mode function
+Date: Thu, 21 Nov 2013 17:49:29 +0100
+Message-ID: <20131121164929.GM26009@pd.tnic>
 References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
- <20131121061757.030007746@dhcp-16-126.nay.redhat.com>
+ <20131121061754.304016344@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131121061757.030007746-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20131121061754.304016344@dhcp-16-126.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: dyoung@redhat.com
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCBOb3YgMjEsIDIwMTMgYXQgMDI6MTc6MTNQTSArMDgwMCwgZHlvdW5nQHJlZGhhdC5j
-b20gd3JvdGU6Cj4ga2V4ZWMtdG9vbHMgdXNlIGJvb3RfcGFyYW1zIGZvciBnZXR0aW5nIHRoZSAx
-c3Qga2VybmVsIGhhcmR3YXJlX3N1YmFyY2gsCj4gdGhlIGtleGVjIGtlcm5lbCBlZmkgcnVudGlt
-ZSBzdXBwb3J0IGFsc28gbmVlZCByZWFkIHRoZSBvbGQgZWZpX2luZm8gZnJvbQo+IGJvb3RfcGFy
-YW1zLiBDdXJyZW50bHkgaXQgZXhpc3RzIGluIGRlYnVnZnMgd2hpY2ggaXMgbm90IGEgZ29vZCBw
-bGFjZSBmb3IKPiBzdWNoIGluZm9tYXRpb24uIFBlciBIUEEsIHdlIHNob3VsZCBhdm9pZCBvZiAi
-c3Bsb2l0IGRlYnVnZnMiLgo+IAo+IEluIHRoaXMgcGF0Y2ggL3N5cy9rZXJuZWwvYm9vdF9wYXJh
-bXMgYXJlIGV4cG9ydGVkLCBhbHNvIHRoZSBzZXR1cF9kYXRhCj4gaXMgZXhwb3J0ZWQgYXMgYSBz
-dWJkaXJlY3RvcnkuIEZvciBvcmlnaW5hbCBkZWJ1Z2ZzIHNpbmNlIGl0J3MgYWxyZWFkeQo+IHRo
-ZXJlIGZvciBsb25nIHRpbWUgYW5kIGtleGVjLXRvb2xzIGlzIHVzaW5nIGl0IGZvciBoYXJkd2Fy
-ZV9zdWJhcmNoIHNvCj4gbGV0J3MgZG8gbm90IHJlbW92ZSB0aGVtIGZvciBub3cuCj4gCj4gU3Ry
-dWN0dXJlIGFyZSBsaWtlIGJlbG93Ogo+IAo+IC9zeXMva2VybmVsL2Jvb3RfcGFyYW1zCj4g4pSc
-4pSA4pSAIGRhdGEJCS8qIGJpbmFyeSBkYXRhIGZvciBib290X3BhcmFtcyAqLwo+IOKUnOKUgOKU
-gCBzZXR1cF9kYXRhICAJLyogc3ViZGlyZWN0b3J5IGZvciBzZXR1cF9kYXRhIGlmIHRoZXJlJ3Mg
-YW55ICovCj4g4pSCwqDCoCDilJzilIDilIAgMAkJLyogdGhlIGZpcnN0IHNldHVwX2RhdGEgbm9k
-ZSAqLwo+IOKUgsKgwqAg4pSCwqDCoCDilJzilIDilIAgZGF0YQkvKiBiaW5hcnkgZGF0YSBmb3Ig
-c2V0dXBfZGF0YSBub2RlIDAgKi8KPiDilILCoMKgIOKUgsKgwqAg4pSU4pSA4pSAIHR5cGUJLyog
-c2V0dXBfZGF0YSB0eXBlIG9mIHNldHVwX2RhdGEgbm9kZSAwLCBoZXggc3RyaW5nICovCj4gfCAg
-IFtzbmlwXQkJLyogb3RoZXIgc2V0dXBfZGF0YSBub2RlcyAuLi4gKi8KPiDilJTilIDilIAgdmVy
-c2lvbgkJLyogaGV4IHN0cmluZyBmb3IgYm9vdCBwcm90b2NhbCB2ZXJzaW9uICovCj4gCj4gU2ln
-bmVkLW9mZi1ieTogRGF2ZSBZb3VuZyA8ZHlvdW5nQHJlZGhhdC5jb20+Cj4gLS0tCj4gIERvY3Vt
-ZW50YXRpb24vQUJJL3Rlc3Rpbmcvc3lzZnMta2VybmVsLWJvb3RfcGFyYW1zIHwgICA0MCArKwo+
-ICBhcmNoL3g4Ni9rZXJuZWwvTWFrZWZpbGUgICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAg
-IDIgCj4gIGFyY2gveDg2L2tlcm5lbC9rc3lzZnMuYyAgICAgICAgICAgICAgICAgICAgICAgICAg
-IHwgIDMyNiArKysrKysrKysrKysrKysrKysrKysKPiAgMyBmaWxlcyBjaGFuZ2VkLCAzNjcgaW5z
-ZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQo+IAo+IC0tLSAvZGV2L251bGwKPiArKysgZWZpL0Rv
-Y3VtZW50YXRpb24vQUJJL3Rlc3Rpbmcvc3lzZnMta2VybmVsLWJvb3RfcGFyYW1zCj4gQEAgLTAs
-MCArMSw0MCBAQAo+ICtXaGF0OgkJL3N5cy9rZXJuZWwvYm9vdF9wYXJhbXMKPiArRGF0ZToJCU5v
-dmVtYmVyIDIwMTMKPiArQ29udGFjdDoJRGF2ZSBZb3VuZyA8ZHlvdW5nQHJlZGhhdC5jb20+Cj4g
-K0Rlc2NyaXB0aW9uOgo+ICsJCVRoZSAvc3lzL2tlcm5lbC9ib290X3BhcmFtcyBkaXJlY3Rvcnkg
-Y29udGFpbnMgdHdvCj4gKwkJZmlsZXM6ICJkYXRhIiBhbmQgInZlcnNpb24iIGFuZCBvbmUgc3Vi
-ZGlyZWN0b3J5ICJzZXR1cF9kYXRhIi4KPiArCQlJdCBpcyB1c2VkIHRvIGV4cG9ydCB0aGUga2Vy
-bmVsIGJvb3QgcGFyYW1ldGVycyBvZiB4ODYKPiArCQlwbGF0Zm9ybSB0byB1c2VyIHNwYWNlIGZv
-ciBrZXhlYyBhbmQgZGVidWdnaW5nIHB1cnBvc2UuCj4gKwo+ICsJCUlmIHRoZXJlJ3Mgbm8gc2V0
-dXBfZGF0YSBpbiBib290X3BhcmFtcyB0aGUgc3ViZGlyZWN0b3J5IHdpbGwKPiArCQlub3QgYmUg
-Y3JlYXRlZC4KPiArCj4gKwkJImRhdGEiIGZpbGUgaXMgdGhlIGJpbmFyeSByZXByZXNlbnRhdGlv
-biBvZiBzdHJ1Y3QgYm9vdF9wYXJhbXMuCj4gKwo+ICsJCSJ2ZXJzaW9uIiBmaWxlIGlzIHRoZSBz
-dHJpbmcgcmVwcmVzZW50YXRpb24gb2YgYm9vdAo+ICsJCXByb3RvY29sIHZlcnNpb24uCj4gKwo+
-ICsJCSJzZXR1cF9kYXRhIiBzdWJkaXJlY3RvcnkgY29udGFpbnMgdGhlIHNldHVwX2RhdGEgZGF0
-YQo+ICsJCXN0cnVjdHVyZSBpbiBib290X3BhcmFtcy4gc2V0dXBfZGF0YSBpcyBtYWludGFpbmVk
-IGluIGtlcm5lbAo+ICsJCWFzIGEgbGluayBsaXN0LiBJbiAic2V0dXBfZGF0YSIgc3ViZGlyZWN0
-b3J5IHRoZXJlJ3Mgb25lCj4gKwkJc3ViZGlyZWN0b3J5IGZvciBlYWNoIGxpbmsgbGlzdCBub2Rl
-IG5hbWVkIHdpdGggdGhlIG51bWJlcgo+ICsJCW9mIHRoZSBsaXN0IG5vZGVzLiBUaGUgbGlzdCBu
-b2RlIHN1YmRpcmVjdG9yeSBjb250YWlucyB0d28KPiArCQlmaWxlcyAidHlwZSIgYW5kICJkYXRh
-Ii4gInR5cGUiIGZpbGUgaXMgdGhlIHN0cmluZwo+ICsJCXJlcHJlc2VudGF0aW9uIG9mIHNldHVw
-X2RhdGEgdHlwZS4gImRhdGEiIGZpbGUgaXMgdGhlIGJpbmFyeQo+ICsJCXJlcHJlc2VudGF0aW9u
-IG9mIHNldHVwX2RhdGEgcGF5bG9hZC4KPiArCj4gKwkJVGhlIHdob2xlIGJvb3RfcGFyYW1zIGRp
-cmVjdG9yeSBzdHJ1Y3R1cmUgaXMgbGlrZSBiZWxvdzoKPiArCQkvc3lzL2tlcm5lbC9ib290X3Bh
-cmFtcwo+ICsJCeKUnOKUgOKUgCBkYXRhCj4gKwkJ4pSc4pSA4pSAIHNldHVwX2RhdGEKPiArCQni
-lILCoMKgIOKUnOKUgOKUgCAwCj4gKwkJ4pSCwqDCoCDilILCoMKgIOKUnOKUgOKUgCBkYXRhCj4g
-KwkJ4pSCwqDCoCDilILCoMKgIOKUlOKUgOKUgCB0eXBlCj4gKwkJ4pSCwqDCoCDilJTilIDilIAg
-MQo+ICsJCeKUgsKgwqAgICAgIOKUnOKUgOKUgCBkYXRhCj4gKwkJ4pSCwqDCoCAgICAg4pSU4pSA
-4pSAIHR5cGUKPiArCQnilJTilIDilIAgdmVyc2lvbgo+ICsKPiArVXNlcnM6Cj4gKwkJS2V4ZWMg
-TWFpbGluZyBMaXN0IDxrZXhlY0BsaXN0cy5pbmZyYWRlYWQub3JnPgo+IC0tLSBlZmkub3JpZy9h
-cmNoL3g4Ni9rZXJuZWwvTWFrZWZpbGUKPiArKysgZWZpL2FyY2gveDg2L2tlcm5lbC9NYWtlZmls
-ZQo+IEBAIC0zNSw3ICszNSw3IEBAIG9iai15CQkJKz0gYWx0ZXJuYXRpdmUubyBpODI1My5vIHBj
-aS1ub20KPiAgb2JqLXkJCQkrPSB0c2MubyBpb19kZWxheS5vIHJ0Yy5vCj4gIG9iai15CQkJKz0g
-cGNpLWlvbW11X3RhYmxlLm8KPiAgb2JqLXkJCQkrPSByZXNvdXJjZS5vCj4gLQo+ICtvYmotJChD
-T05GSUdfU1lTRlMpCSs9IGtzeXNmcy5vCj4gIG9iai15CQkJCSs9IHByb2Nlc3Mubwo+ICBvYmot
-eQkJCQkrPSBpMzg3Lm8geHNhdmUubwo+ICBvYmoteQkJCQkrPSBwdHJhY2Uubwo+IC0tLSAvZGV2
-L251bGwKPiArKysgZWZpL2FyY2gveDg2L2tlcm5lbC9rc3lzZnMuYwo+IEBAIC0wLDAgKzEsMzI2
-IEBACj4gKy8qCj4gKyAqIEFyY2hpdGVjdHVyZSBzcGVjaWZpYyBzeXNmcyBhdHRyaWJ1dGVzIGlu
-IC9zeXMva2VybmVsCj4gKyAqCj4gKyAqIENvcHlyaWdodCAoQykgMjAwNywgSW50ZWwgQ29ycC4K
-PiArICogICAgICBIdWFuZyBZaW5nIDx5aW5nLmh1YW5nQGludGVsLmNvbT4KPiArICogQ29weXJp
-Z2h0IChDKSAyMDEzLCAyMDEzIFJlZCBIYXQsIEluYy4KPiArICogICAgICBEYXZlIFlvdW5nIDxk
-eW91bmdAcmVkaGF0LmNvbT4KPiArICoKPiArICogVGhpcyBmaWxlIGlzIHJlbGVhc2VkIHVuZGVy
-IHRoZSBHUEx2Mgo+ICsgKi8KPiArCj4gKyNpbmNsdWRlIDxsaW51eC9rb2JqZWN0Lmg+Cj4gKyNp
-bmNsdWRlIDxsaW51eC9zdHJpbmcuaD4KPiArI2luY2x1ZGUgPGxpbnV4L3N5c2ZzLmg+Cj4gKyNp
-bmNsdWRlIDxsaW51eC9pbml0Lmg+Cj4gKyNpbmNsdWRlIDxsaW51eC9zdGF0Lmg+Cj4gKyNpbmNs
-dWRlIDxsaW51eC9zbGFiLmg+Cj4gKyNpbmNsdWRlIDxsaW51eC9tbS5oPgo+ICsKPiArI2luY2x1
-ZGUgPGFzbS9zZXR1cC5oPgo+ICsKPiArc3RhdGljIHNzaXplX3QgYm9vdF9wYXJhbXNfdmVyc2lv
-bl9zaG93KHN0cnVjdCBrb2JqZWN0ICprb2JqLAo+ICsJCQkJCXN0cnVjdCBrb2JqX2F0dHJpYnV0
-ZSAqYXR0ciwgY2hhciAqYnVmKQo+ICt7Cj4gKwlyZXR1cm4gc3ByaW50ZihidWYsICIweCUwNHhc
-biIsIGJvb3RfcGFyYW1zLmhkci52ZXJzaW9uKTsKPiArfQo+ICsKPiArc3RhdGljIHN0cnVjdCBr
-b2JqX2F0dHJpYnV0ZSBib290X3BhcmFtc192ZXJzaW9uX2F0dHIgPQo+ICsJX19BVFRSKHZlcnNp
-b24sIFNfSVJVR08sIGJvb3RfcGFyYW1zX3ZlcnNpb25fc2hvdywgTlVMTCk7CgpfX0FUVFJfUk8o
-KSBwbGVhc2UuCgo+ICtzdGF0aWMgc3RydWN0IGtvYmpfYXR0cmlidXRlIHR5cGVfYXR0ciA9Cj4g
-KwkJX19BVFRSKHR5cGUsIFNfSVJVR08sIHNldHVwX2RhdGFfdHlwZV9zaG93LCBOVUxMKTsKCl9f
-QVRUUl9STygpIGhlcmUgdG9vLgoKCj4gK3N0YXRpYyBzdHJ1Y3QgYmluX2F0dHJpYnV0ZSBkYXRh
-X2F0dHIgPSB7Cj4gKwkuYXR0ciA9IHsKPiArCQkubmFtZSA9ICJkYXRhIiwKPiArCQkubW9kZSA9
-IFNfSVJVR08sCj4gKwl9LAo+ICsJLnJlYWQgPSBzZXR1cF9kYXRhX2RhdGFfcmVhZCwKPiArfTsK
-PiArCj4gK3N0YXRpYyBpbnQgX19pbml0IGNyZWF0ZV9zZXR1cF9kYXRhX25vZGUoc3RydWN0IGtv
-YmplY3QgKnBhcmVudCwKPiArCQkJCQlzdHJ1Y3Qga29iamVjdCAqKmtvYmpwLCBpbnQgbnIpCj4g
-K3sKPiArCWludCByZXQgPSAwOwo+ICsJc2l6ZV90IHNpemU7Cj4gKwlzdHJ1Y3Qga29iamVjdCAq
-a29iajsKPiArCWNoYXIgbmFtZVsxNl07IC8qIHNob3VsZCBiZSBlbm91Z2ggZm9yIHNldHVwX2Rh
-dGEgbm9kZXMgbnVtYmVycyAqLwo+ICsJc25wcmludGYobmFtZSwgMTYsICIlZCIsIG5yKTsKPiAr
-Cj4gKwlrb2JqID0ga29iamVjdF9jcmVhdGVfYW5kX2FkZChuYW1lLCBwYXJlbnQpOwo+ICsJaWYg
-KCFrb2JqKQo+ICsJCXJldHVybiAtRU5PTUVNOwo+ICsKPiArCXJldCA9IHN5c2ZzX2NyZWF0ZV9m
-aWxlKGtvYmosICZ0eXBlX2F0dHIuYXR0cik7Cj4gKwlpZiAocmV0KQo+ICsJCWdvdG8gb3V0X2tv
-Ymo7Cj4gKwo+ICsJcmV0ID0gZ2V0X3NldHVwX2RhdGFfc2l6ZShuciwgJnNpemUpOwo+ICsJaWYg
-KHJldCkKPiArCQlnb3RvIG91dF9rb2JqOwo+ICsKPiArCWRhdGFfYXR0ci5zaXplID0gc2l6ZTsK
-PiArCXJldCA9IHN5c2ZzX2NyZWF0ZV9iaW5fZmlsZShrb2JqLCAmZGF0YV9hdHRyKTsKPiArCWlm
-IChyZXQpCj4gKwkJZ290byBvdXRfZmlsZTsKPiArCSprb2JqcCA9IGtvYmo7CgpZb3UganVzdCBy
-YWNlZCB3aXRoIHVzZXJzcGFjZSAoY3JlYXRpbmcgYW5kIGFubm91bmNpbmcgdGhlIGtvYmplY3Qg
-YW5kCnRoZW4sIGFmdGVyd2FyZCwgYXQgc29tZSBsYXRlciBwb2ludCBpbiB0aW1lLCBjcmVhdGVk
-IHRoZSBzeXNmcyBmaWxlcy4KUGxlYXNlIHVzZSB0aGUgZ3JvdXBzIG9wdGlvbiB0byBjcmVhdGUg
-dGhlIGZpbGVzIHByb3Blcmx5IGJlZm9yZQphbm5vdW5jaW5nIHRoZSBrb2JqZWN0IHRvIHVzZXJz
-cGFjZS4KCj4gK3N0YXRpYyBpbnQgX19pbml0IGJvb3RfcGFyYW1zX2tzeXNmc19pbml0KHZvaWQp
-Cj4gK3sKPiArCWludCByZXQ7Cj4gKwlzdHJ1Y3Qga29iamVjdCAqYm9vdF9wYXJhbXNfa29iajsK
-PiArCj4gKwlib290X3BhcmFtc19rb2JqID0ga29iamVjdF9jcmVhdGVfYW5kX2FkZCgiYm9vdF9w
-YXJhbXMiLAo+ICsJCQkJCQkgICAgICAga2VybmVsX2tvYmopOwo+ICsJaWYgKCFib290X3BhcmFt
-c19rb2JqKSB7Cj4gKwkJcmV0ID0gLUVOT01FTTsKPiArCQlnb3RvIG91dDsKPiArCX0KPiArCXJl
-dCA9IHN5c2ZzX2NyZWF0ZV9maWxlKGJvb3RfcGFyYW1zX2tvYmosCj4gKwkJCQkmYm9vdF9wYXJh
-bXNfdmVyc2lvbl9hdHRyLmF0dHIpOwo+ICsJaWYgKHJldCkKPiArCQlnb3RvIG91dF9ib290X3Bh
-cmFtc19rb2JqOwo+ICsJcmV0ID0gc3lzZnNfY3JlYXRlX2Jpbl9maWxlKGJvb3RfcGFyYW1zX2tv
-YmosCj4gKwkJCQkgICAgICAmYm9vdF9wYXJhbXNfZGF0YV9hdHRyKTsKPiArCWlmIChyZXQpCj4g
-KwkJZ290byBvdXRfY3JlYXRlX2ZpbGU7Cj4gKwo+ICsJcmV0ID0gY3JlYXRlX3NldHVwX2RhdGFf
-bm9kZXMoYm9vdF9wYXJhbXNfa29iaik7Cj4gKwlpZiAocmV0KQo+ICsJCWdvdG8gb3V0X2NyZWF0
-ZV9iaW47Cj4gKwo+ICsJcmV0dXJuIDA7CgpTYW1lIHJhY2UgY29uZGl0aW9uIGhlcmUgYXMgd2Vs
-bC4gIFVzZSBhIGdyb3VwcyBzdHJ1Y3R1cmUgcGxlYXNlLgoKdGhhbmtzLAoKZ3JlZyBrLWgKCl9f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmtleGVjIG1haWxp
-bmcgbGlzdAprZXhlY0BsaXN0cy5pbmZyYWRlYWQub3JnCmh0dHA6Ly9saXN0cy5pbmZyYWRlYWQu
-b3JnL21haWxtYW4vbGlzdGluZm8va2V4ZWMK
+On Thu, Nov 21, 2013 at 02:17:08PM +0800, dyoung@redhat.com wrote:
+> Add two small functions:
+> efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+> calls them instead of embedding two long for loop.
+>=20
+> v1->v2:
+> refresh; coding style fixes.
+>=20
+> v2->v3:
+> Toshi Kani:
+> remove unused variable
+> Matt: check return value of krealloc.
+>=20
+> Signed-off-by: Dave Young <dyoung@redhat.com>
+
+Same short comment nitpick as earlier :)
+
+Otherwise:
+
+Acked-by: Borislav Petkov <bp@suse.de>
+
+> ---
+>  arch/x86/platform/efi/efi.c |  109 ++++++++++++++++++++++++++-------=
+-----------
+>  1 file changed, 66 insertions(+), 43 deletions(-)
+>=20
+> --- efi.orig/arch/x86/platform/efi/efi.c
+> +++ efi/arch/x86/platform/efi/efi.c
+
+[ =E2=80=A6 ]
+
+> @@ -837,6 +805,18 @@ void __init efi_enter_virtual_mode(void)
+>  		prev_md =3D md;
+> =20
+>  	}
+> +}
+> +
+> +/*
+> + * Map efi memory ranges for runtime serivce and
+> + * update new_memmap with virtual addresses.
+> + */
+
+Stretch comment to 80 cols:
+
+/*
+ * Map efi memory ranges for runtime serivce and update new_memmap with=
+ virtual
+ * addresses.
+ */
+
+like it is customary for the rest of the file.
+
+> +static void * __init efi_map_regions(int *count)
+> +{
+> +	efi_memory_desc_t *md;
+> +	void *p, *new_memmap =3D NULL;
+> +	unsigned long size;
+> +	u64 end, systab;
+> =20
+>  	for (p =3D memmap.map; p < memmap.map_end; p +=3D memmap.desc_size)=
+ {
+>  		md =3D p;
+
+--=20
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
