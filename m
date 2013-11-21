@@ -1,45 +1,32 @@
-From: Madper Xie <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] Make efi-pstore return a unique id
-Date: Thu, 21 Nov 2013 21:53:07 +0800
-Message-ID: <87txf5n9oc.fsf@gmail.com>
-References: <87ppqk6qvx.fsf@redhat.com> <CAFLxGvz3pCevxE43zGnrbX4MxPmwyb=9MVNpzFRpELt1+AmtrA@mail.gmail.com> <CA+8MBbJefz7L-C-LnhAAXB5zf-8XoMPhESPU4yd0wnuZ_YqO1w@mail.gmail.com> <A5ED84D3BB3A384992CBB9C77DEDA4D47F9DD941@USINDEM103.corp.hds.com> <52740A3A.70202@nod.at> <87r4abmnfb.fsf@redhat.com> <A5ED84D3BB3A384992CBB9C77DEDA4D47FA0B6EF@USINDEM103.corp.hds.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [patch 1/9 v3] efi: remove unused variables in __map_region
+Date: Thu, 21 Nov 2013 16:54:48 +0100
+Message-ID: <20131121155448.GJ26009@pd.tnic>
+References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
+ <20131121061752.715177297@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <A5ED84D3BB3A384992CBB9C77DEDA4D47FA0B6EF-ohthHghroY0jroPwUH3sq+6wyyQG6/Uh@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131121061752.715177297-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
-Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "matt.fleming@intel.com" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, =?utf-8?B?6LCi5oiQ6aqP?= <bbboson-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Nov 21, 2013 at 02:17:05PM +0800, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
+> variables size and end is useless in this function, thus remove them.
+> 
+> Reported-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-seiji.aguchi-7rDLJAbr9SE@public.gmane.org writes:
+Good catch.
 
->> Then will lost the sequence of our log. We will get lots of entries like
->> "dmesg-efi-`unique but meaningless number here`" in pstore fs. Who will
->> know which file is the latest record?
->
-> Ah, that's good point.
->
->> And another side, the combin of timestamp, count and part is unique. Why
->> we generate a unique number from a unique number?
->> if you think "making a string from three ints and then a parse it to a
->> int again" is odd, i'd like to use ((timestamp * 100 + part) * 100 +
->> count.
->
-> How about calculating the number of digit of part /count, instead of using fixed "100"?
-> We can ensure the uniqueness of each id by doing it.
->
-> digit_num = log2(part)/log2(10) + 1
-> timestamp * 10^(digit_num + 1)
->
-Then we must implement a log10 and a pow func...
-And reverting id to timestamp, part and count will hard if we using
-unfixed length of count and id.
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-So i'd like to using fixed length. My dell xps has 128kb nvram
-space. and it at most store 126 pstore entries. So I think 1000 will be
-a safe value for count. For part, 100 should be okay. I don't think
-there will be a large kmsg and we must split it into more than 100 parts.
+-- 
+Regards/Gruss,
+    Boris.
 
-> Seiji
+Sent from a fat crate under my desk. Formatting is fine.
+--
