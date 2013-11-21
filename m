@@ -1,26 +1,106 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 0/9 v3] kexec kernel efi runtime support
-Date: Thu, 21 Nov 2013 14:52:06 +0800
-Message-ID: <20131121065206.GB4189@dhcp-16-126.nay.redhat.com>
-References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
+From: Yasuaki Ishimatsu <isimatu.yasuaki@jp.fujitsu.com>
+Subject: Re: [PATCH] x86, efi: change name of efi_no_storage_paranoia parameter
+ to efi_storage_paranoia
+Date: Thu, 21 Nov 2013 18:13:59 +0900
+Message-ID: <528DCED7.5070806@jp.fujitsu.com>
+References: <527C93B5.7010407@jp.fujitsu.com> <527C9B5C.6040509@nod.at>  <527CB013.30200@jp.fujitsu.com> <527CB0F4.8080606@nod.at>  <527CBC05.6080505@jp.fujitsu.com> <527CBD01.1000908@nod.at>  <527CBDD3.2020609@jp.fujitsu.com>  <20131108143421.GB22636@console-pimps.org>  <52809AEB.9080100@jp.fujitsu.com>  <20131111105424.GD22636@console-pimps.org>  <528AD50D.6060503@jp.fujitsu.com> <87siutqdwv.fsf@redhat.com>  <528C562B.3070008@jp.fujitsu.com> <1384934881.6516.4082.camel@linux-s257.site>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131121061704.363730447-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1384934881.6516.4082.camel@linux-s257.site>
+Sender: linux-kernel-owner@vger.kernel.org
+To: joeyli <jlee@suse.com>
+Cc: Madper Xie <cxie@redhat.com>, Matt Fleming <matt@console-pimps.org>, Richard Weinberger <richard@nod.at>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, matt.fleming@intel.com, matthew.garrett@nebula.com
 List-Id: linux-efi@vger.kernel.org
 
-kexec-tools patches see below:
-http://lists.infradead.org/pipermail/kexec/2013-November/010229.html
+(2013/11/20 17:08), joeyli wrote:
+> =E6=96=BC =E4=B8=89=EF=BC=8C2013-11-20 =E6=96=BC 15:26 +0900=EF=BC=8C=
+Yasuaki Ishimatsu =E6=8F=90=E5=88=B0=EF=BC=9A
+>> (2013/11/19 12:16), Madper Xie wrote:
+>>>
+>>> isimatu.yasuaki@jp.fujitsu.com writes:
+>>>
+>>>> Hi Matt,
+>>>>
+>>>> Sorry for late the reply.
+>>>>
+>>>>
+>>>> (2013/11/11 19:54), Matt Fleming wrote:
+>>>>> On Mon, 11 Nov, at 05:52:59PM, Yasuaki Ishimatsu wrote:
+>>>>>> Hi Matt,
+>>>>>>
+>>>>>> I uses FUJITSU's x86 box.
+>>>>>> This does not become bricked even if I use all efi variable stor=
+age.
+>>>>>> Thus I want a way to not need to specify efi_no_storage_paranoia
+>>>>>> parameter.
+>>>>>
+>>>>> The efi_no_storage_paranoia parameter was introduced because some
+>>>>> machines do not initiate garbage collection of the NVRAM until yo=
+u
+>>>>> allocate all space - basically it's a switch to turn off the "sav=
+e 5KB
+>>>>> of stoarge at all times" workaround that is needed to avoid brick=
+ing
+>>>>> some machines.
+>>>>>
+>>>>> The intention of the switch is not to allow you to fill your NVRA=
+M just
+>>>>> because you can. If that is something you want to do then I think=
+ it's
+>>>>> fair to require you to explicitly turn on efi_no_storage_paranoia=
+=2E But
+>>>>> I'm assuming here that you are doing something like writing lots =
+and
+>>>>> lots of pstore entries and just want to write as many as your var=
+iable
+>>>>> storage will allow? Or are you doing something more fundamental l=
+ike
+>>>>> creating BootXXXX entries?
+>>>>>
+>>>>> What are you doing to run into the 5KB reserve? How much NVRAM do=
+es your
+>>>>> machine come with?
+>>>>
+>>>> I just add boot entry to NVRAM by efibootmgr command. But when Lin=
+ux boots up,
+>>>> the remaining NVRAM is less than 5Kbyte. So I cannnot add new entr=
+y.
+>>>>
+>>> Howdy Yasuaki,
+>>>     If the remaining NVRAM is less than 5Kb, your writing will trig=
+ger a
+>>>     NVRAM storage reclamation. However you still failed creating en=
+try. So
+>>>     I'm just curious what itmes occupy lots of nvram storage space.
+>>
+>> Even if we got EFI_OUT_OF_RESOURCES while running Linux, gc does not=
+ run.
+>> Trigger of gc is when EFI_OUT_OF_RESOURCES occurs on pre OS environm=
+ent with
+>> UEFI. So on my system, if EFI_OUT_OF_RESOURCES occurs by the 5Kbyte =
+threshold,
+>> we cannot use nvram storage until EFI_OUT_OF_RESOURCES occurs on pre=
+ OS
+>> environment with UEFI.
+>>
+>> Thanks,
+>> Yasuaki Ishimatsu
+>
+> Can we try to trigger gc by EFI_OUT_OF_RESOURCE in EFI stub kernel or
+> EFI boot loader to recover NVRAM space? Does work with the BIOS on th=
+is
+> machine?
+
+Yes. I can trigger gc by EFI_OUT_OF_RESOUCE in EFI shell on my machine.
+
+Thanks,
+Yasuaki Ishimatu
+
+>
+>
+> Thanks a lot!
+> Joey Lee
+>
