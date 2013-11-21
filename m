@@ -1,9 +1,10 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 0/9 v3] kexec kernel efi runtime support
-Date: Thu, 21 Nov 2013 14:17:04 +0800
-Message-ID: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
+Subject: [patch 9/9 v3] x86: export x86 boot_params to sysfs
+Date: Thu, 21 Nov 2013 14:17:13 +0800
+Message-ID: <20131121061757.030007746@dhcp-16-126.nay.redhat.com>
+References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============5348399902769380362=="
+Content-Type: multipart/mixed; boundary="===============1865461742862548976=="
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
@@ -15,89 +16,427 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
---===============5348399902769380362==
-Content-Type: text/plain
+--===============1865461742862548976==
+Content-Disposition: inline; filename=09-add-sysfs-boot-param.patch
 
-Hi,
+kexec-tools use boot_params for getting the 1st kernel hardware_subarch,
+the kexec kernel efi runtime support also need read the old efi_info from
+boot_params. Currently it exists in debugfs which is not a good place for
+such infomation. Per HPA, we should avoid of "sploit debugfs".
 
-Here is the V3 for supporting kexec kernel efi runtime.
-Per pervious discussion I pass the 1st kernel efi runtime mapping
-via setup_data to 2nd kernel. Besides of the runtime mapping
-info I also pass the fw_vendor, runtime, config table, smbios
-physical address in setup_data. EFI spec mentioned fw_vendor,
-runtime, config table addresses will be converted to virt address
-after entering virtual mode, but we will use it as physical address
-in efi_init. For smbios EFI spec did not mention about the address
-updating, but during my test on a HP workstation, the bios will
-convert it to Virt addr, thus pass it in setup_data as well.
+In this patch /sys/kernel/boot_params are exported, also the setup_data
+is exported as a subdirectory. For original debugfs since it's already
+there for long time and kexec-tools is using it for hardware_subarch so
+let's do not remove them for now.
 
-For fw_vendor, runtime, config table, I export them in /sys/firmware/
-efi/, smbios is already in /sys/firmware/efi/systab.
+Structure are like below:
 
-For efi runtime mapping I add a new directory /sys/firmware/efi/
-runtime-map/ like below
-[dave@darkstar ~]$ tree /sys/firmware/efi/runtime-map/
-/sys/firmware/efi/runtime-map/
-├── 0
-│   ├── attribute
-│   ├── num_pages
-│   ├── phys_addr
-│   ├── type
-│   └── virt_addr
-├── 1
-│   ├── attribute
-│   ├── num_pages
-│   ├── phys_addr
-│   ├── type
-│   └── virt_addr
-[snip]
- 
-kexec-tools will assemble them as setup_data and pass to 2nd kernel.
-I will send userspace patches as well.
+/sys/kernel/boot_params
+├── data		/* binary data for boot_params */
+├── setup_data  	/* subdirectory for setup_data if there's any */
+│   ├── 0		/* the first setup_data node */
+│   │   ├── data	/* binary data for setup_data node 0 */
+│   │   └── type	/* setup_data type of setup_data node 0, hex string */
+|   [snip]		/* other setup_data nodes ... */
+└── version		/* hex string for boot protocal version */
 
-Limitation is I only write support for x86_64, test on below machines:
-Lenovo thinkpad t420
-Dell inspiron 14 - 3421
-HP Z420 workstation
-Qemu + OVMF
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ Documentation/ABI/testing/sysfs-kernel-boot_params |   40 ++
+ arch/x86/kernel/Makefile                           |    2 
+ arch/x86/kernel/ksysfs.c                           |  326 +++++++++++++++++++++
+ 3 files changed, 367 insertions(+), 1 deletion(-)
 
-Please help to review the patches.
+--- /dev/null
++++ efi/Documentation/ABI/testing/sysfs-kernel-boot_params
+@@ -0,0 +1,40 @@
++What:		/sys/kernel/boot_params
++Date:		November 2013
++Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++Description:
++		The /sys/kernel/boot_params directory contains two
++		files: "data" and "version" and one subdirectory "setup_data".
++		It is used to export the kernel boot parameters of x86
++		platform to user space for kexec and debugging purpose.
++
++		If there's no setup_data in boot_params the subdirectory will
++		not be created.
++
++		"data" file is the binary representation of struct boot_params.
++
++		"version" file is the string representation of boot
++		protocol version.
++
++		"setup_data" subdirectory contains the setup_data data
++		structure in boot_params. setup_data is maintained in kernel
++		as a link list. In "setup_data" subdirectory there's one
++		subdirectory for each link list node named with the number
++		of the list nodes. The list node subdirectory contains two
++		files "type" and "data". "type" file is the string
++		representation of setup_data type. "data" file is the binary
++		representation of setup_data payload.
++
++		The whole boot_params directory structure is like below:
++		/sys/kernel/boot_params
++		├── data
++		├── setup_data
++		│   ├── 0
++		│   │   ├── data
++		│   │   └── type
++		│   └── 1
++		│       ├── data
++		│       └── type
++		└── version
++
++Users:
++		Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+--- efi.orig/arch/x86/kernel/Makefile
++++ efi/arch/x86/kernel/Makefile
+@@ -35,7 +35,7 @@ obj-y			+= alternative.o i8253.o pci-nom
+ obj-y			+= tsc.o io_delay.o rtc.o
+ obj-y			+= pci-iommu_table.o
+ obj-y			+= resource.o
+-
++obj-$(CONFIG_SYSFS)	+= ksysfs.o
+ obj-y				+= process.o
+ obj-y				+= i387.o xsave.o
+ obj-y				+= ptrace.o
+--- /dev/null
++++ efi/arch/x86/kernel/ksysfs.c
+@@ -0,0 +1,326 @@
++/*
++ * Architecture specific sysfs attributes in /sys/kernel
++ *
++ * Copyright (C) 2007, Intel Corp.
++ *      Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
++ * Copyright (C) 2013, 2013 Red Hat, Inc.
++ *      Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++ *
++ * This file is released under the GPLv2
++ */
++
++#include <linux/kobject.h>
++#include <linux/string.h>
++#include <linux/sysfs.h>
++#include <linux/init.h>
++#include <linux/stat.h>
++#include <linux/slab.h>
++#include <linux/mm.h>
++
++#include <asm/setup.h>
++
++static ssize_t boot_params_version_show(struct kobject *kobj,
++					struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%04x\n", boot_params.hdr.version);
++}
++
++static struct kobj_attribute boot_params_version_attr =
++	__ATTR(version, S_IRUGO, boot_params_version_show, NULL);
++
++static ssize_t boot_params_data_read(struct file *fp, struct kobject *kobj,
++				     struct bin_attribute *bin_attr,
++				     char *buf, loff_t off, size_t count)
++{
++	memcpy(buf, (void *)&boot_params + off, count);
++	return count;
++}
++
++static struct bin_attribute boot_params_data_attr = {
++	.attr = {
++		.name = "data",
++		.mode = S_IRUGO,
++	},
++	.read = boot_params_data_read,
++	.size = sizeof(boot_params),
++};
++
++static int kobj_to_setup_data_nr(struct kobject *kobj, int *nr)
++{
++	const char *name;
++
++	name = kobject_name(kobj);
++	return kstrtoint(name, 10, nr);
++}
++
++static int get_setup_data_paddr(int nr, u64 *paddr)
++{
++	int i = 0;
++	struct setup_data *data;
++	u64 pa_data = boot_params.hdr.setup_data;
++
++	while (pa_data) {
++		if (nr == i) {
++			*paddr = pa_data;
++			return 0;
++		}
++		data = ioremap_cache(pa_data, sizeof(*data));
++		if (!data)
++			return -ENOMEM;
++
++		pa_data = data->next;
++		iounmap(data);
++		i++;
++	}
++	return -EINVAL;
++}
++
++static int __init get_setup_data_size(int nr, size_t *size)
++{
++	int i = 0;
++	struct setup_data *data;
++	u64 pa_data = boot_params.hdr.setup_data;
++
++	while (pa_data) {
++		data = ioremap_cache(pa_data, sizeof(*data));
++		if (!data)
++			return -ENOMEM;
++		if (nr == i) {
++			*size = data->len;
++			iounmap(data);
++			return 0;
++		}
++
++		pa_data = data->next;
++		iounmap(data);
++		i++;
++	}
++	return -EINVAL;
++}
++
++static ssize_t setup_data_type_show(struct kobject *kobj,
++					struct kobj_attribute *attr, char *buf)
++{
++	int nr, ret;
++	u64 paddr;
++	struct setup_data *data;
++
++	ret = kobj_to_setup_data_nr(kobj, &nr);
++	if (ret)
++		return ret;
++
++	ret = get_setup_data_paddr(nr, &paddr);
++	if (ret)
++		return ret;
++	data = ioremap_cache(paddr, sizeof(*data));
++	if (!data)
++		return -ENOMEM;
++
++	ret = sprintf(buf, "0x%x\n", data->type);
++	iounmap(data);
++	return ret;
++}
++
++static ssize_t setup_data_data_read(struct file *fp,
++				    struct kobject *kobj,
++				    struct bin_attribute *bin_attr,
++				    char *buf,
++				    loff_t off, size_t count)
++{
++	int nr, ret = 0;
++	u64 paddr;
++	struct setup_data *data;
++	void *p;
++
++	ret = kobj_to_setup_data_nr(kobj, &nr);
++	if (ret)
++		return ret;
++
++	ret = get_setup_data_paddr(nr, &paddr);
++	if (ret)
++		return ret;
++	data = ioremap_cache(paddr, sizeof(*data));
++	if (!data)
++		return -ENOMEM;
++
++	if (off > data->len) {
++		ret = -EINVAL;
++		goto out;
++	}
++
++	if (count > data->len - off)
++		count = data->len - off;
++
++	if (!count)
++		goto out;
++
++	ret = count;
++	p = ioremap_cache(paddr + sizeof(*data), data->len);
++	if (!p) {
++		ret = -ENOMEM;
++		goto out;
++	}
++	memcpy(buf, p + off, count);
++	iounmap(p);
++out:
++	iounmap(data);
++	return ret;
++}
++
++static struct kobj_attribute type_attr =
++		__ATTR(type, S_IRUGO, setup_data_type_show, NULL);
++static struct bin_attribute data_attr = {
++	.attr = {
++		.name = "data",
++		.mode = S_IRUGO,
++	},
++	.read = setup_data_data_read,
++};
++
++static int __init create_setup_data_node(struct kobject *parent,
++					struct kobject **kobjp, int nr)
++{
++	int ret = 0;
++	size_t size;
++	struct kobject *kobj;
++	char name[16]; /* should be enough for setup_data nodes numbers */
++	snprintf(name, 16, "%d", nr);
++
++	kobj = kobject_create_and_add(name, parent);
++	if (!kobj)
++		return -ENOMEM;
++
++	ret = sysfs_create_file(kobj, &type_attr.attr);
++	if (ret)
++		goto out_kobj;
++
++	ret = get_setup_data_size(nr, &size);
++	if (ret)
++		goto out_kobj;
++
++	data_attr.size = size;
++	ret = sysfs_create_bin_file(kobj, &data_attr);
++	if (ret)
++		goto out_file;
++	*kobjp = kobj;
++
++	return 0;
++
++out_file:
++	sysfs_remove_file(kobj, &type_attr.attr);
++out_kobj:
++	kobject_put(kobj);
++	return ret;
++}
++
++static void __init cleanup_setup_data_node(struct kobject *kobj)
++{
++	sysfs_remove_file(kobj, &type_attr.attr);
++	sysfs_remove_bin_file(kobj, &data_attr);
++	kobject_put(kobj);
++}
++
++static int __init get_setup_data_total_num(u64 pa_data, int *nr)
++{
++	int ret = 0;
++	struct setup_data *data;
++
++	*nr = 0;
++	while (pa_data) {
++		*nr += 1;
++		data = ioremap_cache(pa_data, sizeof(*data));
++		if (!data) {
++			ret = -ENOMEM;
++			goto out;
++		}
++		pa_data = data->next;
++		iounmap(data);
++	}
++
++out:
++	return ret;
++}
++
++static int __init create_setup_data_nodes(struct kobject *parent)
++{
++	struct kobject *setup_data_kobj, **kobjp;
++	u64 pa_data;
++	int i, j, nr, ret = 0;
++
++	pa_data = boot_params.hdr.setup_data;
++	if (!pa_data)
++		return 0;
++
++	setup_data_kobj = kobject_create_and_add("setup_data", parent);
++	if (!setup_data_kobj) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	ret = get_setup_data_total_num(pa_data, &nr);
++	if (ret)
++		goto out_setup_data_kobj;
++
++	kobjp = kmalloc(sizeof(*kobjp) * nr, GFP_KERNEL);
++	if (!kobjp) {
++		ret = -ENOMEM;
++		goto out_setup_data_kobj;
++	}
++
++	for (i = 0; i < nr; i++) {
++		ret = create_setup_data_node(setup_data_kobj, kobjp + i, i);
++		if (ret) {
++			for (j = i - 1; j > 0; j--)
++				cleanup_setup_data_node(*(kobjp + j));
++			goto out_kmalloc;
++		}
++	}
++
++	kfree(kobjp);
++	return 0;
++
++out_kmalloc:
++	kfree(kobjp);
++out_setup_data_kobj:
++	kobject_put(setup_data_kobj);
++out:
++	return ret;
++}
++
++static int __init boot_params_ksysfs_init(void)
++{
++	int ret;
++	struct kobject *boot_params_kobj;
++
++	boot_params_kobj = kobject_create_and_add("boot_params",
++						       kernel_kobj);
++	if (!boot_params_kobj) {
++		ret = -ENOMEM;
++		goto out;
++	}
++	ret = sysfs_create_file(boot_params_kobj,
++				&boot_params_version_attr.attr);
++	if (ret)
++		goto out_boot_params_kobj;
++	ret = sysfs_create_bin_file(boot_params_kobj,
++				      &boot_params_data_attr);
++	if (ret)
++		goto out_create_file;
++
++	ret = create_setup_data_nodes(boot_params_kobj);
++	if (ret)
++		goto out_create_bin;
++
++	return 0;
++
++out_create_bin:
++	sysfs_remove_bin_file(boot_params_kobj, &boot_params_data_attr);
++out_create_file:
++	sysfs_remove_file(boot_params_kobj, &boot_params_version_attr.attr);
++out_boot_params_kobj:
++	kobject_put(boot_params_kobj);
++out:
++	return ret;
++}
++
++arch_initcall(boot_params_ksysfs_init);
 
-The patches are based on matt's efi master tree
-
-Changes from v1:
-add one flag in xloadflags, so kexec-tools can safely load old kernel
-without efi support.
-coding style fixes
-function name for map phys_addr to fixed virt_addr
-Add ABI documentation for sysfs files
-
-Changes from v2:
-01/09: a new patch to remove unused variables in __map_region function
-       catched by Toshi Kani
-09/09: a new patch to export x86 boot_params to sysfs instead of use
-       debugfs files
-Matt: reuse __map_region instead do same thing in another function.
-      add a wrapper function efi_map_region_fixed [02/09]
-      check return value of krealloc
-      sysfs dir name s/efi-runtime-map/runtime-map [06/09]
-      use desc_size in efi_runtime_map
-      for the xloadflags defination: +&& defined(CONFIG_KEXEC)
-Greg: sysfs : one file one value for fw_vendor, runtime, tables. [05/09]
-      Document them in ABI testing
-HPA:  Document the new xloadflag
-
-Also there's other function cleanup and improvement for error handling.
-
---
-Thanks
-Dave
 
 
---===============5348399902769380362==
+--===============1865461742862548976==
 Content-Type: text/plain; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -108,4 +447,4 @@ kexec mailing list
 kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 http://lists.infradead.org/mailman/listinfo/kexec
 
---===============5348399902769380362==--
+--===============1865461742862548976==--
