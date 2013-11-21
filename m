@@ -1,35 +1,129 @@
-From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: add no_bricked_efi whitelist
-Date: Thu, 21 Nov 2013 18:35:28 +0900
-Message-ID: <528DD3E0.3050606@jp.fujitsu.com>
-References: <528C740A.6010407@jp.fujitsu.com> <1384963376.20536.3.camel@x230>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: change name of efi_no_storage_paranoia
+ parameter to efi_storage_paranoia
+Date: Thu, 21 Nov 2013 17:53:43 +0800
+Message-ID: <1385027623.6516.4090.camel@linux-s257.site>
+References: <527C93B5.7010407@jp.fujitsu.com> <527C9B5C.6040509@nod.at>
+	 <527CB013.30200@jp.fujitsu.com> <527CB0F4.8080606@nod.at>
+	 <527CBC05.6080505@jp.fujitsu.com> <527CBD01.1000908@nod.at>
+	 <527CBDD3.2020609@jp.fujitsu.com>
+	 <20131108143421.GB22636@console-pimps.org>
+	 <52809AEB.9080100@jp.fujitsu.com>
+	 <20131111105424.GD22636@console-pimps.org>
+	 <528AD50D.6060503@jp.fujitsu.com> <87siutqdwv.fsf@redhat.com>
+	 <528C562B.3070008@jp.fujitsu.com>
+	 <1384934881.6516.4082.camel@linux-s257.site>
+	 <528DCED7.5070806@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1384963376.20536.3.camel@x230>
+In-Reply-To: <528DCED7.5070806-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, "cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Richard Weinberger <richard-/L3Ra7n9ekc@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-(2013/11/21 1:02), Matthew Garrett wrote:
-> On Wed, 2013-11-20 at 17:34 +0900, Yasuaki Ishimatsu wrote:
->
->> When booting my system, remaining space of efi variable storage is about
->> 5KB. So there is no room that sets a new variable to the storage. On my
->> system, trigger of gc is when EFI_OUT_OF_RESOURCES occurs on pre OS
->> environment with UEFI. So if EFI_OUT_OF_RESOURCES occurs by the 5Kbyte
->> threshold, nvram storage cannot be used until EFI_OUT_OF_RESOURCES occurs
->> on pre OS environment with UEFI.
->
-> By "remaining space is about 5KB", do you mean that the rest of the
-> space is filled with variables or do you mean that there is more free
-> space but it hasn't been garbage collected?
->
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-11-21 =E6=96=BC 18:13 +0900=EF=BC=8CYa=
+suaki Ishimatsu =E6=8F=90=E5=88=B0=EF=BC=9A
+> (2013/11/20 17:08), joeyli wrote:
+> > =E6=96=BC =E4=B8=89=EF=BC=8C2013-11-20 =E6=96=BC 15:26 +0900=EF=BC=8C=
+Yasuaki Ishimatsu =E6=8F=90=E5=88=B0=EF=BC=9A
+> >> (2013/11/19 12:16), Madper Xie wrote:
+> >>>
+> >>> isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org writes:
+> >>>
+> >>>> Hi Matt,
+> >>>>
+> >>>> Sorry for late the reply.
+> >>>>
+> >>>>
+> >>>> (2013/11/11 19:54), Matt Fleming wrote:
+> >>>>> On Mon, 11 Nov, at 05:52:59PM, Yasuaki Ishimatsu wrote:
+> >>>>>> Hi Matt,
+> >>>>>>
+> >>>>>> I uses FUJITSU's x86 box.
+> >>>>>> This does not become bricked even if I use all efi variable st=
+orage.
+> >>>>>> Thus I want a way to not need to specify efi_no_storage_parano=
+ia
+> >>>>>> parameter.
+> >>>>>
+> >>>>> The efi_no_storage_paranoia parameter was introduced because so=
+me
+> >>>>> machines do not initiate garbage collection of the NVRAM until =
+you
+> >>>>> allocate all space - basically it's a switch to turn off the "s=
+ave 5KB
+> >>>>> of stoarge at all times" workaround that is needed to avoid bri=
+cking
+> >>>>> some machines.
+> >>>>>
+> >>>>> The intention of the switch is not to allow you to fill your NV=
+RAM just
+> >>>>> because you can. If that is something you want to do then I thi=
+nk it's
+> >>>>> fair to require you to explicitly turn on efi_no_storage_parano=
+ia. But
+> >>>>> I'm assuming here that you are doing something like writing lot=
+s and
+> >>>>> lots of pstore entries and just want to write as many as your v=
+ariable
+> >>>>> storage will allow? Or are you doing something more fundamental=
+ like
+> >>>>> creating BootXXXX entries?
+> >>>>>
+> >>>>> What are you doing to run into the 5KB reserve? How much NVRAM =
+does your
+> >>>>> machine come with?
+> >>>>
+> >>>> I just add boot entry to NVRAM by efibootmgr command. But when L=
+inux boots up,
+> >>>> the remaining NVRAM is less than 5Kbyte. So I cannnot add new en=
+try.
+> >>>>
+> >>> Howdy Yasuaki,
+> >>>     If the remaining NVRAM is less than 5Kb, your writing will tr=
+igger a
+> >>>     NVRAM storage reclamation. However you still failed creating =
+entry. So
+> >>>     I'm just curious what itmes occupy lots of nvram storage spac=
+e.
+> >>
+> >> Even if we got EFI_OUT_OF_RESOURCES while running Linux, gc does n=
+ot run.
+> >> Trigger of gc is when EFI_OUT_OF_RESOURCES occurs on pre OS enviro=
+nment with
+> >> UEFI. So on my system, if EFI_OUT_OF_RESOURCES occurs by the 5Kbyt=
+e threshold,
+> >> we cannot use nvram storage until EFI_OUT_OF_RESOURCES occurs on p=
+re OS
+> >> environment with UEFI.
+> >>
+> >> Thanks,
+> >> Yasuaki Ishimatsu
+> >
+> > Can we try to trigger gc by EFI_OUT_OF_RESOURCE in EFI stub kernel =
+or
+> > EFI boot loader to recover NVRAM space? Does work with the BIOS on =
+this
+> > machine?
+>=20
+> Yes. I can trigger gc by EFI_OUT_OF_RESOUCE in EFI shell on my machin=
+e.
+>=20
+> Thanks,
+> Yasuaki Ishimatu
+>=20
 
-Remaining space is free space that can be used by efi variable. But by 5KB
-threshold, we cannot use the space while running OS.
+OK, then maybe can try to trigger gc in EFI stub before
+ExitBootService().=20
 
-Thanks,
-Yasuaki Ishimatsu
+Another problem is what's the reasonable threshold. The threshold shoul=
+d
+bigger then 5Kbyte, then we write a dummy BootTime NV variable to
+trigger gc.
+
+
+Thanks
+Joey Lee
