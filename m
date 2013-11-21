@@ -1,26 +1,55 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: add no_bricked_efi whitelist
-Date: Thu, 21 Nov 2013 20:12:05 +0000
-Message-ID: <1385064722.12107.1.camel@x230>
-References: <528C740A.6010407@jp.fujitsu.com>
-	 <1384963376.20536.3.camel@x230> <528DD3E0.3050606@jp.fujitsu.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <528DD3E0.3050606-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Content-Language: en-US
-Content-ID: <AAA9EEF3E8E8834D8C669432D4B9A770-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org" <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, "cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Jerry Hoemann <jerry.hoemann@hp.com>
+Subject: [RFC v2 0/2] Early use of boot service memory
+Date: Thu, 21 Nov 2013 14:01:24 -0700
+Message-ID: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, akpm@linux-foundation.org, bp@suse.de, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Cc: penberg@kernel.org, mingo.kernel.org@gmail.com, vgoyal@redhat.com, jerry.hoemann@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCAyMDEzLTExLTIxIGF0IDE4OjM1ICswOTAwLCBZYXN1YWtpIElzaGltYXRzdSB3cm90
-ZToNCg0KPiBSZW1haW5pbmcgc3BhY2UgaXMgZnJlZSBzcGFjZSB0aGF0IGNhbiBiZSB1c2VkIGJ5
-IGVmaSB2YXJpYWJsZS4gQnV0IGJ5IDVLQg0KPiB0aHJlc2hvbGQsIHdlIGNhbm5vdCB1c2UgdGhl
-IHNwYWNlIHdoaWxlIHJ1bm5pbmcgT1MuDQoNCklzIHRoZSBzaXR1YXRpb24gc29tZXRoaW5nIGxp
-a2UoYXNzdW1pbmcgYSAxMjhLQiBmbGFzaCBwYXJ0KToNCg0KMSkgNjRLQiBvZiB2YXJpYWJsZXMs
-IDU5S0Igb2YgZGVsZXRlZCB2YXJpYWJsZXMsIDVLQiBvZiBmcmVlIHNwYWNlLA0KDQpvcg0KDQoy
-KSAxMjNLQiBvZiB2YXJpYWJsZXMsIDVLQiBvZiBmcmVlIHNwYWNlDQoNCj8NCi0tIA0KTWF0dGhl
-dyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
+
+Some platform have firmware that violates the UEFI spec and access boot
+service code or data segments after the system has called ExitBootServices().
+The call to efi_reserve_boot_services in setup_arch is a workaround to
+avoid using boot service memory until after the kernel has done
+SetVirtualAddressMap.  However, this reservation fragments memory
+which can cause large allocations early in boot (e.g. crash kernel)
+to fail.
+
+This patch set creates a quirk list that governs whether
+efi_reserve_boot_services is called.
+
+A new kernel parameter is added that overrides the quirk list
+and allows engineers developing new platforms to test whether
+they need to have the quirk applied or not.
+
+With this information, setup_arch avoids calling efi_reserve_boot_services
+when it doesn't need to, thus avoiding fragmenting memory.
+
+
+ChangeLog
+
+V1 => v2)
+
+In version 1 the control of the workaround was only by command line argument.
+In version 2, the quirk list is the primary control of the whether
+the workaround is applied.  This allows for seamless integration with
+tools and doesn't require any special knowledge from the user.
+
+The command line argument is retained for platform developers to
+be able to test whether their platforms require the workaround.
+
+Jerry Hoemann (2):
+  efi: Early use of boot service memory
+  x86, efi: Early use of boot service memory
+
+ Documentation/kernel-parameters.txt |  5 +++
+ arch/x86/kernel/setup.c             |  5 ++-
+ arch/x86/platform/efi/efi.c         | 77 ++++++++++++++++++++++++++++++++++++-
+ include/linux/efi.h                 |  2 +
+ 4 files changed, 86 insertions(+), 3 deletions(-)
+
+-- 
+1.7.11.3
+
