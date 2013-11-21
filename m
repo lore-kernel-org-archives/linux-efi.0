@@ -1,15 +1,13 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 8/9 v3] x86: add xloadflags bit for efi runtime support on
- kexec
-Date: Thu, 21 Nov 2013 14:17:12 +0800
-Message-ID: <20131121061756.482263617@dhcp-16-126.nay.redhat.com>
+Subject: [patch 5/9 v3] efi: export more efi table variable to sysfs
+Date: Thu, 21 Nov 2013 14:17:09 +0800
+Message-ID: <20131121061754.887381332@dhcp-16-126.nay.redhat.com>
 References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline;
- filename=08-add-xloadflags-for-kexec-efi-runtime-feature.patch
+Content-Disposition: inline; filename=05-export-more-efi-sysfs-vars.patch
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -23,63 +21,183 @@ To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Old kexec-tools can not load new kernel. The reason is previously kexec-tools
-do not fill efi_info in x86 setup header thus efi init fail and switch
-to noefi boot. In new kexec-tools it will by default fill efi_info and
-pass other efi required infomation to 2nd kernel so kexec kernel efi
-initialization will success finally.
+Export fw_vendor, runtime and config tables physical
+addresses to /sys/firmware/efi/systab becaue kexec
+kernel will need them.
 
-To prevent from breaking userspace, add a new xloadflags bit so kexec-tools
-will check the flag and switch to old logic.
+>From EFI spec these 3 variables will be updated to
+virtual address after entering virtual mode. But
+kernel startup code will need the physical address.
 
 changelog:
-Matt: +&& defined(CONFIG_KEXEC)
-HPA: document the flag.
+Greg: add standalone sysfs files instead of add lines to systab
+Document them as testing ABI
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/x86/boot.txt            |    3 +++
- arch/x86/boot/header.S                |    9 ++++++++-
- arch/x86/include/uapi/asm/bootparam.h |    1 +
- 3 files changed, 12 insertions(+), 1 deletion(-)
+ Documentation/ABI/testing/sysfs-firmware-efi |   26 +++++++++
+ arch/x86/platform/efi/efi.c                  |    4 +
+ drivers/firmware/efi/efi.c                   |   71 +++++++++++++++++++++++++--
+ include/linux/efi.h                          |    3 +
+ 4 files changed, 101 insertions(+), 3 deletions(-)
 
---- efi.orig/arch/x86/boot/header.S
-+++ efi/arch/x86/boot/header.S
-@@ -391,7 +391,14 @@ xloadflags:
- #else
- # define XLF23 0
- #endif
--			.word XLF0 | XLF1 | XLF23
+--- efi.orig/drivers/firmware/efi/efi.c
++++ efi/drivers/firmware/efi/efi.c
+@@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
+ 	.hcdp       = EFI_INVALID_TABLE_ADDR,
+ 	.uga        = EFI_INVALID_TABLE_ADDR,
+ 	.uv_systab  = EFI_INVALID_TABLE_ADDR,
++	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
++	.runtime    = EFI_INVALID_TABLE_ADDR,
++	.config_table  = EFI_INVALID_TABLE_ADDR,
+ };
+ EXPORT_SYMBOL(efi);
+ 
+@@ -71,6 +74,31 @@ static ssize_t systab_show(struct kobjec
+ static struct kobj_attribute efi_attr_systab =
+ 			__ATTR(systab, 0400, systab_show, NULL);
+ 
++static ssize_t fw_vendor_show(struct kobject *kobj,
++				struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%lx\n", efi.fw_vendor);
++}
 +
-+#if defined(CONFIG_X86_64) && defined(CONFIG_EFI) && defined(CONFIG_KEXEC)
-+# define XLF4 XLF_EFI_KEXEC
-+#else
-+# define XLF4 0
-+#endif
++static ssize_t runtime_show(struct kobject *kobj,
++				struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%lx\n", efi.runtime);
++}
 +
-+			.word XLF0 | XLF1 | XLF23 | XLF4
- 
- cmdline_size:   .long   COMMAND_LINE_SIZE-1     #length of the command line,
-                                                 #added with boot protocol
---- efi.orig/arch/x86/include/uapi/asm/bootparam.h
-+++ efi/arch/x86/include/uapi/asm/bootparam.h
-@@ -24,6 +24,7 @@
- #define XLF_CAN_BE_LOADED_ABOVE_4G	(1<<1)
- #define XLF_EFI_HANDOVER_32		(1<<2)
- #define XLF_EFI_HANDOVER_64		(1<<3)
-+#define XLF_EFI_KEXEC			(1<<4)
- 
- #ifndef __ASSEMBLY__
- 
---- efi.orig/Documentation/x86/boot.txt
-+++ efi/Documentation/x86/boot.txt
-@@ -608,6 +608,9 @@ Protocol:       2.12+
- 	- If 1, the kernel supports the 64-bit EFI handoff entry point
-           given at handover_offset + 0x200.
- 
-+  Bit 4 (read): XLF_EFI_KEXEC
-+	- If 1, the kernel supports kexec EFI boot with EFI runtime support.
++static ssize_t config_table_show(struct kobject *kobj,
++				struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "0x%lx\n", efi.config_table);
++}
 +
- Field name:	cmdline_size
- Type:		read
- Offset/size:	0x238/4
++static struct kobj_attribute efi_attr_fw_vendor =
++				__ATTR(fw_vendor, 0400, fw_vendor_show, NULL);
++static struct kobj_attribute efi_attr_runtime =
++			__ATTR(runtime, 0400, runtime_show, NULL);
++static struct kobj_attribute efi_attr_config_table =
++			__ATTR(config_table, 0400, config_table_show, NULL);
++
+ static struct attribute *efi_subsys_attrs[] = {
+ 	&efi_attr_systab.attr,
+ 	NULL,	/* maybe more in the future? */
+@@ -123,21 +151,58 @@ static int __init efisubsys_init(void)
+ 
+ 	error = sysfs_create_group(efi_kobj, &efi_subsys_attr_group);
+ 	if (error) {
+-		pr_err("efi: Sysfs attribute export failed with error %d.\n",
+-		       error);
++		pr_err("efi: Sysfs attribute %s export failed with error %d.\n",
++		       efi_attr_systab.attr.name, error);
+ 		goto err_unregister;
+ 	}
+ 
++	if (efi.fw_vendor != EFI_INVALID_TABLE_ADDR) {
++		error = sysfs_create_file(efi_kobj, &efi_attr_fw_vendor.attr);
++		if (error) {
++			pr_err("efi: Sysfs attribute %s export failed with error %d.\n",
++				efi_attr_fw_vendor.attr.name, error);
++			goto err_remove_group;
++		}
++	}
++
++	if (efi.runtime != EFI_INVALID_TABLE_ADDR) {
++		error = sysfs_create_file(efi_kobj, &efi_attr_runtime.attr);
++		if (error) {
++			pr_err("efi: Sysfs attribute %s export failed with error %d.\n",
++				efi_attr_runtime.attr.name, error);
++			goto err_remove_fw_vendor;
++		}
++	}
++
++	if (efi.config_table != EFI_INVALID_TABLE_ADDR) {
++		error = sysfs_create_file(efi_kobj,
++					&efi_attr_config_table.attr);
++		if (error) {
++			pr_err("efi: Sysfs attribute %s export failed with error %d.\n",
++				efi_attr_config_table.attr.name, error);
++			goto err_remove_runtime;
++		}
++	}
++
+ 	/* and the standard mountpoint for efivarfs */
+ 	efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
+ 	if (!efivars_kobj) {
+ 		pr_err("efivars: Subsystem registration failed.\n");
+ 		error = -ENOMEM;
+-		goto err_remove_group;
++		goto err_remove_config_table;
+ 	}
+ 
+ 	return 0;
+ 
++err_remove_config_table:
++	if (efi.config_table != EFI_INVALID_TABLE_ADDR)
++		sysfs_remove_file(efi_kobj, &efi_attr_config_table.attr);
++err_remove_runtime:
++	if (efi.runtime != EFI_INVALID_TABLE_ADDR)
++		sysfs_remove_file(efi_kobj, &efi_attr_runtime.attr);
++err_remove_fw_vendor:
++	if (efi.fw_vendor != EFI_INVALID_TABLE_ADDR)
++		sysfs_remove_file(efi_kobj, &efi_attr_fw_vendor.attr);
+ err_remove_group:
+ 	sysfs_remove_group(efi_kobj, &efi_subsys_attr_group);
+ err_unregister:
+--- efi.orig/include/linux/efi.h
++++ efi/include/linux/efi.h
+@@ -556,6 +556,9 @@ extern struct efi {
+ 	unsigned long hcdp;		/* HCDP table */
+ 	unsigned long uga;		/* UGA table */
+ 	unsigned long uv_systab;	/* UV system table */
++	unsigned long fw_vendor;	/* fw_vendor */
++	unsigned long runtime;		/* runtime table */
++	unsigned long config_table;	/* config tables */
+ 	efi_get_time_t *get_time;
+ 	efi_set_time_t *set_time;
+ 	efi_get_wakeup_time_t *get_wakeup_time;
+--- efi.orig/arch/x86/platform/efi/efi.c
++++ efi/arch/x86/platform/efi/efi.c
+@@ -653,6 +653,10 @@ void __init efi_init(void)
+ 
+ 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
+ 
++	efi.fw_vendor = (unsigned long)efi.systab->fw_vendor;
++	efi.runtime = (unsigned long)efi.systab->runtime;
++	efi.config_table = (unsigned long)efi.systab->tables;
++
+ 	/*
+ 	 * Show what we know for posterity
+ 	 */
+--- /dev/null
++++ efi/Documentation/ABI/testing/sysfs-firmware-efi
+@@ -0,0 +1,26 @@
++What:		/sys/firmware/efi/fw_vendor
++Date:		Nov 2013
++Contact:	Dave Young <dyoung-8RVElS0ezzQdnm+yROfE0A@public.gmane.org>
++Description:
++		Shows the physical address of firmware vendor in the EFI
++		system table.
++Users:
++		Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
++
++What:		/sys/firmware/efi/runtime
++Date:		Nov 2013
++Contact:	Dave Young <dyoung-8RVElS0ezzQdnm+yROfE0A@public.gmane.org>
++Description:
++		Shows the physical address of runtime service table in the
++		EFI system table.
++Users:
++		Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
++
++What:		/sys/firmware/efi/config_table
++Date:		Nov 2013
++Contact:	Dave Young <dyoung-8RVElS0ezzQdnm+yROfE0A@public.gmane.org>
++Description:
++		Shows the physical address of config table in the EFI
++		system table.
++Users:
++		Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
