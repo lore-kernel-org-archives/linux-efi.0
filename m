@@ -1,13 +1,14 @@
-From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 4/4 v3] Passing efi related data via setup_data
-Date: Thu, 21 Nov 2013 14:40:47 +0800
-Message-ID: <20131121064126.128801193@dhcp-16-126.nay.redhat.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 0/4 v3] kexec-tools: efi runtime support
+Date: Thu, 21 Nov 2013 14:47:18 +0800
+Message-ID: <20131121064718.GA4189@dhcp-16-126.nay.redhat.com>
 References: <20131121064043.969000753@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline; filename=03-kexec-add-efi-setup-data.patch
+Content-Disposition: inline
+In-Reply-To: <20131121064043.969000753-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -18,251 +19,67 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-For supporting efi runtime, several efi physical addresses
-fw_vendor, runtime, config tables, smbios and the whole runtime
-mapping info need to be used in kexec kernel. Thus introduce
-setup_data struct for passing these data.
+On 11/21/13 at 02:40pm, Dave Young wrote:
+> Hi,
+> 
+> This is the v3 patchset for adding efi runtime support on kexec kernel
+> kernel patches was sent a while ago, not yet updated in archive. 
 
-collect the varialbes from /sys/firmware/efi/systab and
-/sys/firmware/efi/runtime-map
+Here it is:
+https://lkml.org/lkml/2013/11/21/22
 
-Tested on qemu+ovmf, dell laptop, lenovo laptop and HP workstation.
-
-v1->v2:
-HPA: use uint*_t instead of __uint*_t
-Simon: indention fix; fix a memory leak
-move offset change update to previous patch in setup header
-only passing setup_data when the bzImage support efi boot
-Vivek: export a value in bzImage probe so it can be used
-      to check if we should pass acpi_rsdp.
-coding style
-
-v2->v3:
-code cleanup
-bail out if efi mm desc_version != 1
-bhe: define macro for SETUP_EFI
-     break loop if find matched string in systab.
-
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- kexec/arch/i386/x86-linux-setup.c |  189 +++++++++++++++++++++++++++++++++++++-
- 1 file changed, 186 insertions(+), 3 deletions(-)
-
---- kexec-tools.orig/kexec/arch/i386/x86-linux-setup.c
-+++ kexec-tools/kexec/arch/i386/x86-linux-setup.c
-@@ -36,6 +36,8 @@
- #include "x86-linux-setup.h"
- #include "../../kexec/kexec-syscall.h"
- 
-+#define SETUP_EFI	4
-+
- void init_linux_parameters(struct x86_linux_param_header *real_mode)
- {
- 	/* Fill in the values that are usually provided by the kernel. */
-@@ -480,11 +482,192 @@ void setup_subarch(struct x86_linux_para
- 	get_bootparam(&real_mode->hardware_subarch, offset, sizeof(uint32_t));
- }
- 
--static void setup_efi_info(struct x86_linux_param_header *real_mode)
-+struct efi_mem_descriptor {
-+	uint32_t type;
-+	uint32_t pad;
-+	uint64_t phys_addr;
-+	uint64_t virt_addr;
-+	uint64_t num_pages;
-+	uint64_t attribute;
-+};
-+
-+struct efi_setup_data {
-+	uint64_t fw_vendor;
-+	uint64_t runtime;
-+	uint64_t tables;
-+	uint64_t smbios;
-+	uint64_t reserved[8];
-+	struct efi_mem_descriptor map[0];
-+};
-+
-+struct setup_data {
-+	uint64_t next;
-+	uint32_t type;
-+	uint32_t len;
-+	uint8_t data[0];
-+} __attribute__((packed));
-+
-+static int __get_efi_value(char *line, const char *pattern, uint64_t *val)
-+{
-+	char *s, *end;
-+	s = strstr(line, pattern);
-+	if (s)
-+		*val = strtoull(s + strlen(pattern), &end, 16);
-+
-+	if (!s || *val == ULONG_MAX)
-+		return 1;
-+	return 0;
-+}
-+
-+static void _get_efi_value(const char *filename,
-+			const char *pattern, uint64_t *val)
-+{
-+	FILE *fp;
-+	char line[1024];
-+	int ret;
-+
-+	fp = fopen(filename, "r");
-+	if (!fp)
-+		return;
-+
-+	while (fgets(line, sizeof(line), fp) != 0) {
-+		ret = __get_efi_value(line, pattern, val);
-+		if (!ret)
-+			break;
-+	}
-+
-+	fclose(fp);
-+}
-+
-+static void get_efi_values(struct efi_setup_data *esd)
- {
-+	_get_efi_value("/sys/firmware/efi/systab", "SMBIOS=0x",
-+			&esd->smbios);
-+	_get_efi_value("/sys/firmware/efi/fw_vendor", "0x",
-+			&esd->fw_vendor);
-+	_get_efi_value("/sys/firmware/efi/runtime", "0x",
-+			&esd->runtime);
-+	_get_efi_value("/sys/firmware/efi/config_table", "0x",
-+			&esd->tables);
-+}
-+
-+static int get_efi_runtime_map(struct efi_setup_data **esd)
-+{
-+	DIR *dirp;
-+	struct dirent *entry;
-+	char filename[1024];
-+	struct efi_mem_descriptor md;
-+	int nr_maps = 0;
-+
-+	dirp = opendir("/sys/firmware/efi/runtime-map");
-+	if (!dirp)
-+		return 0;
-+	while ((entry = readdir(dirp)) != NULL) {
-+		sprintf(filename,
-+			"/sys/firmware/efi/runtime-map/%s",
-+			(char *)entry->d_name);
-+		if (*entry->d_name == '.')
-+			continue;
-+		file_scanf(filename, "type", "0x%x", (unsigned int *)&md.type);
-+		file_scanf(filename, "phys_addr", "0x%llx",
-+			   (unsigned long long *)&md.phys_addr);
-+		file_scanf(filename, "virt_addr", "0x%llx",
-+			   (unsigned long long *)&md.virt_addr);
-+		file_scanf(filename, "num_pages", "0x%llx",
-+			   (unsigned long long *)&md.num_pages);
-+		file_scanf(filename, "attribute", "0x%llx",
-+			   (unsigned long long *)&md.attribute);
-+		*esd = realloc(*esd, sizeof(struct efi_setup_data) +
-+			   (nr_maps + 1) * sizeof(struct efi_mem_descriptor));
-+		*((*esd)->map + nr_maps) = md;
-+		nr_maps++;
-+	}
-+
-+	closedir(dirp);
-+	return nr_maps;
-+}
-+
-+static int setup_efi_setup_data(struct kexec_info *info,
-+			struct x86_linux_param_header *real_mode)
-+{
-+	int nr_maps;
-+	int64_t setup_data_paddr;
-+	struct setup_data *sd;
-+	struct efi_setup_data *esd;
-+	int size, sdsize;
-+	int has_efi = 0;
-+
-+	has_efi = access("/sys/firmware/efi/systab", F_OK);
-+	if (has_efi < 0)
-+		return 1;
-+
-+	esd = malloc(sizeof(struct efi_setup_data));
-+	if (!esd)
-+		return 1;
-+	memset(esd, 0, sizeof(struct efi_setup_data));
-+	get_efi_values(esd);
-+	nr_maps = get_efi_runtime_map(&esd);
-+	if (!nr_maps) {
-+		free(esd);
-+		return 1;
-+	}
-+	size = nr_maps * sizeof(struct efi_mem_descriptor) +
-+		sizeof(struct efi_setup_data);
-+	sd = malloc(sizeof(struct setup_data) + size);
-+	if (!sd) {
-+		free(esd);
-+		return 1;
-+	}
-+
-+	memset(sd, 0, sizeof(struct setup_data) + size);
-+	sd->next = 0;
-+	sd->type = SETUP_EFI;
-+	sd->len = size;
-+	memcpy(sd->data, esd, size);
-+	free(esd);
-+	sdsize = sd->len + sizeof(struct setup_data);
-+	setup_data_paddr = add_buffer(info, sd, sdsize, sdsize, getpagesize(),
-+					0x100000, ULONG_MAX, INT_MAX);
-+
-+	real_mode->setup_data = setup_data_paddr;
-+
-+	return 0;
-+}
-+
-+struct efi_info {
-+	uint32_t pad[3];
-+	uint32_t efi_memdesc_version;
-+	uint32_t pad1[4];
-+};
-+
-+static int
-+get_efi_mem_desc_version(struct x86_linux_param_header *real_mode)
-+{
-+	struct efi_info *ei = (struct efi_info *)real_mode->efi_info;
-+
-+	return ei->efi_memdesc_version;
-+}
-+
-+static void setup_efi_info(struct kexec_info *info,
-+			   struct x86_linux_param_header *real_mode)
-+{
-+	int ret, desc_version;
- 	off_t offset = offsetof(typeof(*real_mode), efi_info);
- 
--	get_bootparam(&real_mode->efi_info, offset, 32);
-+	ret = get_bootparam(&real_mode->efi_info, offset, 32);
-+	if (ret)
-+		return;
-+	desc_version = get_efi_mem_desc_version(real_mode);
-+	if (desc_version != 1) {
-+		fprintf(stderr,
-+			"efi memory descriptor version %d is not supported!\n",
-+			desc_version);
-+		memset(&real_mode->efi_info, 0, 32);
-+		return;
-+	}
-+	ret = setup_efi_setup_data(info, real_mode);
-+	if (ret)
-+		memset(&real_mode->efi_info, 0, 32);
- }
- 
- void setup_linux_system_parameters(struct kexec_info *info,
-@@ -497,7 +680,7 @@ void setup_linux_system_parameters(struc
- 	/* get subarch from running kernel */
- 	setup_subarch(real_mode);
- 	if (bzImage_support_efi_boot)
--		setup_efi_info(real_mode);
-+		setup_efi_info(info, real_mode);
- 	
- 	/* Default screen size */
- 	real_mode->orig_x = 0;
+> 
+> in kexec-tools, this patchset will do below:
+> 1. retrieve efi_info from sysfs boot_params, and fill the
+> x86 setup header. If kernel does not export sysfs boot_params,
+> still try to find them in debugfs.
+> 
+> 2. collect data efi runtime needed:
+> /sys/firmware/efi/systab: smbios
+> /sys/firmware/efi/fw_vendor
+> /sys/firmware/efi/runtime
+> /sys/firmware/efi/config_table
+> 
+> /sys/firmware/efi/runtime-map/*, the phys-virt mappings in 1st kernel
+> 
+> 3. assemble setup_data based on data get in 2) then pass it to 2nd kernel
+> 
+> Tested on OVMF, dell laptop, lenovo laptop and HP workstation
+> 
+> TODO: add functions for easily adding setup_data, arrange them as link list
+> because we probably will add e820 memory ranges as setup_data as well.
+> I do not prefer to bloat this patchset anymore, so I'd likt to address this
+> issue after the efi runtime issue finished unless people request.
+> 
+> V2 changelog:
+> Address comments from
+> Simon:
+>   coding style, fixed a mem leak
+> HPA:
+>   use type uint64_t instead of __uint64_t
+> mjg:
+>   do not cause regression for loading old kernel
+>   use xloadflags to check the bzImage support for efi.
+>   in case old kernel, do not pass efi_info and setup_data
+>   for new kernel, do not pass acpi_rsdp
+> Vivek:
+>   suggest to export a value in bzImage probe for efi support
+>   so it can be used to check if we should pass acpi_rsdp.
+> 
+> V3 changelog:
+> 01/04: new patch of a building fix
+> try sysfs firstly for boot params
+> add checking of efi memory range description version, bail out if it's not 1
+> error handling improvement and some cleanups
+> 
+> --
+> Thanks
+> Dave
+> 
+> _______________________________________________
+> kexec mailing list
+> kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/kexec
