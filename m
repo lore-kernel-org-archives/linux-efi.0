@@ -1,13 +1,11 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 4/9 v3] efi: cleanup efi_enter_virtual_mode function
-Date: Thu, 21 Nov 2013 14:17:08 +0800
-Message-ID: <20131121061754.304016344@dhcp-16-126.nay.redhat.com>
-References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
+Subject: [patch 0/4 v3] kexec-tools: efi runtime support
+Date: Thu, 21 Nov 2013 14:40:43 +0800
+Message-ID: <20131121064043.969000753@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline; filename=04-efi-enter-virtual-mode-cleanup.patch
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -17,169 +15,58 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Add two small functions:
-efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
-calls them instead of embedding two long for loop.
+Hi,
 
-v1->v2:
-refresh; coding style fixes.
+This is the v3 patchset for adding efi runtime support on kexec kernel
+kernel patches was sent a while ago, not yet updated in archive. 
 
-v2->v3:
-Toshi Kani:
-remove unused variable
-Matt: check return value of krealloc.
+in kexec-tools, this patchset will do below:
+1. retrieve efi_info from sysfs boot_params, and fill the
+x86 setup header. If kernel does not export sysfs boot_params,
+still try to find them in debugfs.
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- arch/x86/platform/efi/efi.c |  109 ++++++++++++++++++++++++++------------------
- 1 file changed, 66 insertions(+), 43 deletions(-)
+2. collect data efi runtime needed:
+/sys/firmware/efi/systab: smbios
+/sys/firmware/efi/fw_vendor
+/sys/firmware/efi/runtime
+/sys/firmware/efi/config_table
 
---- efi.orig/arch/x86/platform/efi/efi.c
-+++ efi/arch/x86/platform/efi/efi.c
-@@ -773,44 +773,12 @@ void __init old_map_region(efi_memory_de
- 		       (unsigned long long)md->phys_addr);
- }
- 
--/*
-- * This function will switch the EFI runtime services to virtual mode.
-- * Essentially, we look through the EFI memmap and map every region that
-- * has the runtime attribute bit set in its memory descriptor into the
-- * ->trampoline_pgd page table using a top-down VA allocation scheme.
-- *
-- * The old method which used to update that memory descriptor with the
-- * virtual address obtained from ioremap() is still supported when the
-- * kernel is booted with efi=old_map on its command line. Same old
-- * method enabled the runtime services to be called without having to
-- * thunk back into physical mode for every invocation.
-- *
-- * The new method does a pagetable switch in a preemption-safe manner
-- * so that we're in a different address space when calling a runtime
-- * function. For function arguments passing we do copy the PGDs of the
-- * kernel page table into ->trampoline_pgd prior to each call.
-- */
--void __init efi_enter_virtual_mode(void)
-+/* Merge contiguous regions of the same type and attribute */
-+static void __init efi_merge_regions(void)
- {
-+	void *p;
- 	efi_memory_desc_t *md, *prev_md = NULL;
--	void *p, *new_memmap = NULL;
--	unsigned long size;
--	efi_status_t status;
--	u64 end, systab;
--	int count = 0;
--
--	efi.systab = NULL;
--
--	/*
--	 * We don't do virtual mode, since we don't do runtime services, on
--	 * non-native EFI
--	 */
--	if (!efi_is_native()) {
--		efi_unmap_memmap();
--		return;
--	}
- 
--	/* Merge contiguous regions of the same type and attribute */
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		u64 prev_size;
- 		md = p;
-@@ -837,6 +805,18 @@ void __init efi_enter_virtual_mode(void)
- 		prev_md = md;
- 
- 	}
-+}
-+
-+/*
-+ * Map efi memory ranges for runtime serivce and
-+ * update new_memmap with virtual addresses.
-+ */
-+static void * __init efi_map_regions(int *count)
-+{
-+	efi_memory_desc_t *md;
-+	void *p, *new_memmap = NULL;
-+	unsigned long size;
-+	u64 end, systab;
- 
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		md = p;
-@@ -861,14 +841,60 @@ void __init efi_enter_virtual_mode(void)
- 		}
- 
- 		new_memmap = krealloc(new_memmap,
--				      (count + 1) * memmap.desc_size,
--				      GFP_KERNEL);
-+					(*count + 1) * memmap.desc_size,
-+					GFP_KERNEL);
- 		if (!new_memmap)
--			goto err_out;
-+			goto ret;
- 
--		memcpy(new_memmap + (count * memmap.desc_size), md,
-+		memcpy(new_memmap + (*count * memmap.desc_size), md,
- 		       memmap.desc_size);
--		count++;
-+		(*count)++;
-+	}
-+
-+ret:
-+	return new_memmap;
-+}
-+
-+/*
-+ * This function will switch the EFI runtime services to virtual mode.
-+ * Essentially, we look through the EFI memmap and map every region that
-+ * has the runtime attribute bit set in its memory descriptor into the
-+ * ->trampoline_pgd page table using a top-down VA allocation scheme.
-+ *
-+ * The old method which used to update that memory descriptor with the
-+ * virtual address obtained from ioremap() is still supported when the
-+ * kernel is booted with efi=old_map on its command line. Same old
-+ * method enabled the runtime services to be called without having to
-+ * thunk back into physical mode for every invocation.
-+ *
-+ * The new method does a pagetable switch in a preemption-safe manner
-+ * so that we're in a different address space when calling a runtime
-+ * function. For function arguments passing we do copy the PGDs of the
-+ * kernel page table into ->trampoline_pgd prior to each call.
-+ */
-+void __init efi_enter_virtual_mode(void)
-+{
-+	efi_status_t status;
-+	void *new_memmap = NULL;
-+	int count = 0;
-+
-+	efi.systab = NULL;
-+
-+	/*
-+	 * We don't do virtual mode, since we don't do runtime services, on
-+	 * non-native EFI
-+	 */
-+	if (!efi_is_native()) {
-+		efi_unmap_memmap();
-+		return;
-+	}
-+
-+	efi_merge_regions();
-+
-+	new_memmap = efi_map_regions(&count);
-+	if (!new_memmap) {
-+		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
-+		return;
- 	}
- 
- 	BUG_ON(!efi.systab);
-@@ -922,9 +948,6 @@ void __init efi_enter_virtual_mode(void)
- 			 0, NULL);
- 
- 	return;
--
-- err_out:
--	pr_err("Error reallocating memory, EFI runtime non-functional!\n");
- }
- 
- /*
+/sys/firmware/efi/runtime-map/*, the phys-virt mappings in 1st kernel
+
+3. assemble setup_data based on data get in 2) then pass it to 2nd kernel
+
+Tested on OVMF, dell laptop, lenovo laptop and HP workstation
+
+TODO: add functions for easily adding setup_data, arrange them as link list
+because we probably will add e820 memory ranges as setup_data as well.
+I do not prefer to bloat this patchset anymore, so I'd likt to address this
+issue after the efi runtime issue finished unless people request.
+
+V2 changelog:
+Address comments from
+Simon:
+  coding style, fixed a mem leak
+HPA:
+  use type uint64_t instead of __uint64_t
+mjg:
+  do not cause regression for loading old kernel
+  use xloadflags to check the bzImage support for efi.
+  in case old kernel, do not pass efi_info and setup_data
+  for new kernel, do not pass acpi_rsdp
+Vivek:
+  suggest to export a value in bzImage probe for efi support
+  so it can be used to check if we should pass acpi_rsdp.
+
+V3 changelog:
+01/04: new patch of a building fix
+try sysfs firstly for boot params
+add checking of efi memory range description version, bail out if it's not 1
+error handling improvement and some cleanups
+
+--
+Thanks
+Dave
