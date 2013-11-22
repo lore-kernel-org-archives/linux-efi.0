@@ -1,30 +1,38 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [RFC v2 0/2] Early use of boot service memory
-Date: Thu, 21 Nov 2013 23:38:31 +0000
-Message-ID: <20131121233831.GB32121@srcf.ucam.org>
-References: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com>
- <20131121230744.GA31592@srcf.ucam.org>
- <20131121233104.GF1106@anatevka.fc.hp.com>
+From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: add no_bricked_efi whitelist
+Date: Fri, 22 Nov 2013 09:00:50 +0900
+Message-ID: <528E9EB2.3060808@jp.fujitsu.com>
+References: <528C740A.6010407@jp.fujitsu.com>  <1384963376.20536.3.camel@x230> <528DD3E0.3050606@jp.fujitsu.com> <1385064722.12107.1.camel@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131121233104.GF1106@anatevka.fc.hp.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: jerry.hoemann@hp.com
-Cc: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, akpm@linux-foundation.org, bp@suse.de, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, penberg@kernel.org, mingo.kernel.org@gmail.com, vgoyal@redhat.com
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1385064722.12107.1.camel@x230>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, "cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Nov 21, 2013 at 04:31:04PM -0700, jerry.hoemann@hp.com wrote:
+(2013/11/22 5:12), Matthew Garrett wrote:
+> On Thu, 2013-11-21 at 18:35 +0900, Yasuaki Ishimatsu wrote:
+>
+>> Remaining space is free space that can be used by efi variable. But by 5KB
+>> threshold, we cannot use the space while running OS.
+>
+> Is the situation something like(assuming a 128KB flash part):
+>
+> 1) 64KB of variables, 59KB of deleted variables, 5KB of free space,
 
-> I tried this back on 3.11 kernel and reserve_crashkernel after free of
-> boot services failed.  I will admit to not digging in too deeply as to
-> why it failed.
+My situation looks like this. The free space spreads out if gc runs.
 
-Hm. If the problem is fragmentation, then yeah, I can imagine this 
-causing problems. In that case we could take a two-pass approach - find 
-a gap that *will* be big enough, reserve everything that isn't currently 
-reserved, and then reserve the rest after ExitBootServices()?
+Thanks,
+Yasuaki Ishimatsu
 
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+
+>
+> or
+>
+> 2) 123KB of variables, 5KB of free space
+>
+> ?
+>
