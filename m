@@ -1,7 +1,7 @@
-From: Vivek Goyal <vgoyal@redhat.com>
+From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [RFC v2 0/2] Early use of boot service memory
-Date: Thu, 21 Nov 2013 21:29:57 -0500
-Message-ID: <20131122022957.GE31921@redhat.com>
+Date: Thu, 21 Nov 2013 21:32:48 -0500
+Message-ID: <20131122023248.GF31921@redhat.com>
 References: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com>
  <20131121230744.GA31592@srcf.ucam.org>
  <528E94D1.2050809@zytor.com>
@@ -11,44 +11,26 @@ References: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com>
  <CAE9FiQUx5rnA0kpqXRQYtpj9Qk-4bPGaUKEbbF=XHsZbnSd6Rg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAE9FiQUx5rnA0kpqXRQYtpj9Qk-4bPGaUKEbbF=XHsZbnSd6Rg@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: jerry.hoemann@hp.com, "H. Peter Anvin" <hpa@zytor.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Rob Landley <rob@landley.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, the arch/x86 maintainers <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@suse.de>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Pekka Enberg <penberg@kernel.org>, Ingo Molnar <mingo.kernel.org@gmail.com>, HATAYAMA Daisuke <d.hatayama@jp.fujitsu.com>, Atsushi Kumagai <kumagai-atsushi@mxc.nes.nec.co.jp>
+In-Reply-To: <CAE9FiQUx5rnA0kpqXRQYtpj9Qk-4bPGaUKEbbF=XHsZbnSd6Rg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: jerry.hoemann-VXdhtT5mjnY@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Pekka Enberg <penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo.kernel.org-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-[..]
-> > makedumpfile going to cyclic buffer has helped out greatly, but on
-> > our new systems we're still looking at 512 MB crash kernels.
+On Thu, Nov 21, 2013 at 05:29:01PM -0800, Yinghai Lu wrote:
+> On Thu, Nov 21, 2013 at 5:25 PM,  <jerry.hoemann-VXdhtT5mjnY@public.gmane.org> wrote:
+> > On Thu, Nov 21, 2013 at 05:12:57PM -0800, H. Peter Anvin wrote:
+> >
+> > Large systems w/ lots of IO require large crash kernel allocations for
+> > the kernel to boot.  Then you have to worry about the OOM killer.....
 > 
-> I tried 6TiB system/16 PCIE cards, kdump on RHEL 6.5 beta still does not work.
-> still get OOM.
+> so go with crashkernel=1024M,high.
 
-What crashkernel= option you are using?
-
-Interesting. So something is consuming lot of memory. How about setting
-"debug_mem_level 1" in /etc/kdump.conf and regenerate initrd and retry.
-This time it should output some memory usage info at various points 
-during boot and that can give us some idea who is consuming how much
-memory.
-
-If some module are consuming lot of memory, then you can try "blacklist"
-option in /etc/kdump.conf to disable those.
-
-If it is not modules, then it will concern me because then either
-kernel is consuming too much memory (which it should not) or for
-some reason makedumpfile cyclic mode did not work for you properly.
-
-While you are re-testing, how about also increasing debug message
-level of makedumpfile. makedumpfile developers should be able to 
-have a look at that. In /etc/kdump.conf, specify.
-
-core_collector makedumpfile -c --message-level 31 -d 31
-
-If message level 31 turns out to be too verbose, reduce it as per
-makedumpfile man page.
+He trying to solve problem with older distributions on these machines and
+there we do not have crashkernel=X,high option nor do we have capability
+to load and boot bzImage above 896MB.
 
 Thanks
 Vivek
