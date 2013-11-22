@@ -1,63 +1,41 @@
-From: HATAYAMA Daisuke <d.hatayama-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-Subject: Re: [RFC v2 0/2] Early use of boot service memory
-Date: Fri, 22 Nov 2013 12:32:30 +0900
-Message-ID: <528ED04E.4060606@jp.fujitsu.com>
-References: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com> <20131121230744.GA31592@srcf.ucam.org> <528E94D1.2050809@zytor.com> <20131121233705.GA32121@srcf.ucam.org> <528EAF99.1010503@zytor.com> <20131122012524.GA5627@anatevka.fc.hp.com> <CAE9FiQUx5rnA0kpqXRQYtpj9Qk-4bPGaUKEbbF=XHsZbnSd6Rg@mail.gmail.com> <20131122022957.GE31921@redhat.com>
+From: Yasuaki Ishimatsu <isimatu.yasuaki-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: add no_bricked_efi whitelist
+Date: Fri, 22 Nov 2013 15:23:57 +0900
+Message-ID: <528EF87D.4050300@jp.fujitsu.com>
+References: <528C740A.6010407@jp.fujitsu.com>  <1384963376.20536.3.camel@x230> <528DD3E0.3050606@jp.fujitsu.com>  <1385064722.12107.1.camel@x230> <528E9EB2.3060808@jp.fujitsu.com> <1385078632.12107.3.camel@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131122022957.GE31921-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1385078632.12107.3.camel@x230>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, jerry.hoemann-VXdhtT5mjnY@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Pekka Enberg <penberg-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo.kernel.org-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Atsushi Kumagai <kumagai-atsushi-biTfD1RFvDe45+QrQBaojngSJqDPrsil@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, "cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-(2013/11/22 11:29), Vivek Goyal wrote:
-> [..]
->>> makedumpfile going to cyclic buffer has helped out greatly, but on
->>> our new systems we're still looking at 512 MB crash kernels.
+(2013/11/22 9:03), Matthew Garrett wrote:
+> On Fri, 2013-11-22 at 09:00 +0900, Yasuaki Ishimatsu wrote:
+>> (2013/11/22 5:12), Matthew Garrett wrote:
+>>> On Thu, 2013-11-21 at 18:35 +0900, Yasuaki Ishimatsu wrote:
+>>>
+>>>> Remaining space is free space that can be used by efi variable. But by 5KB
+>>>> threshold, we cannot use the space while running OS.
+>>>
+>>> Is the situation something like(assuming a 128KB flash part):
+>>>
+>>> 1) 64KB of variables, 59KB of deleted variables, 5KB of free space,
 >>
->> I tried 6TiB system/16 PCIE cards, kdump on RHEL 6.5 beta still does not work.
->> still get OOM.
+>> My situation looks like this. The free space spreads out if gc runs.
 >
-> What crashkernel= option you are using?
+> Ok. In that case Joey's suggestion that we try forcing a GC run in the
+> boot stub if free space < (threshold * 2) might be the best plan.
 >
-> Interesting. So something is consuming lot of memory. How about setting
-> "debug_mem_level 1" in /etc/kdump.conf and regenerate initrd and retry.
-> This time it should output some memory usage info at various points
-> during boot and that can give us some idea who is consuming how much
-> memory.
->
-> If some module are consuming lot of memory, then you can try "blacklist"
-> option in /etc/kdump.conf to disable those.
->
-> If it is not modules, then it will concern me because then either
-> kernel is consuming too much memory (which it should not) or for
-> some reason makedumpfile cyclic mode did not work for you properly.
->
-> While you are re-testing, how about also increasing debug message
-> level of makedumpfile. makedumpfile developers should be able to
-> have a look at that. In /etc/kdump.conf, specify.
->
-> core_collector makedumpfile -c --message-level 31 -d 31
->
-> If message level 31 turns out to be too verbose, reduce it as per
-> makedumpfile man page.
->
+ > 2) 123KB of variables, 5KB of free space
 
-The following configuration is more flexible:
+I don't know how to implement your idea. But if GC run by your idea, the free
+space may spread out. So 1) case is solved. But it does not solve 2) case.
+In my opinion, if system has sane firmware, all nvram strage should be used.
+I will send whiltelist version which used DMI infomation. Please review it.
 
-core_collector false
-default shell
-
-Then crash dump collection fails and emergency shell shows up,
-where you can type a variety of commands.
-
-If 2nd kernel keeps failing even on this configuration, it's likely
-that kernel side already causes the OOM you're facing before reaching
-invocation of the command specified by core_collector directive.
-
--- 
-Thanks.
-HATAYAMA, Daisuke
+Thanks,
+Yasuaki Ishimatsu
