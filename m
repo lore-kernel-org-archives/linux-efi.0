@@ -1,87 +1,44 @@
-From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2] efi-pstore: Make efi-pstore return a unique id
-Date: Sat, 23 Nov 2013 19:55:37 +0800
-Message-ID: <87bo1bnxhi.fsf@redhat.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [patch 5/9 v3] efi: export more efi table variable to sysfs
+Date: Sat, 23 Nov 2013 14:15:18 +0100
+Message-ID: <20131123131518.GC24148@pd.tnic>
+References: <20131121061704.363730447@dhcp-16-126.nay.redhat.com>
+ <20131121061754.887381332@dhcp-16-126.nay.redhat.com>
+ <20131121165742.GN26009@pd.tnic>
+ <20131122024850.GC3874@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131122024850.GC3874-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "'linux-kernel@vger.kernel.org'" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: "matt.fleming@intel.com" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "richard@nod.at" <richard-/L3Ra7n9ekc@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+On Fri, Nov 22, 2013 at 10:48:50AM +0800, Dave Young wrote:
+> > 	efi.config_table = (unsigned long)efi.systab->tables;
+> > 	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
+> > 	efi.runtime	 = (unsigned long)efi.systab->runtime;
+> 
+> Hmm, UEFI spec mentions the them like below so I use the order:
 
-Pstore fs expects that backends provide a uniqued id which could avoid
-pstore making entries as duplication or denominating entries the same
-name. So I combine the timestamp, part and count into id.
+I'm sure by now you know you should not really trust the UEFI spec, or
+any other spec for that matter :)
 
-Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- drivers/firmware/efi/efi-pstore.c | 19 +++++++++++++------
- 1 file changed, 13 insertions(+), 6 deletions(-)
+> Several fields of the EFI System Table must be converted from
+> physical pointers to virtual pointers using the ConvertPointer()
+> service. These fields include FirmwareVendor, RuntimeServices,
+> and ConfigurationTable.
+> 
+> But since you like the reverse I can change it in next version.
 
-diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-index 5002d50..c6075f8 100644
---- a/drivers/firmware/efi/efi-pstore.c
-+++ b/drivers/firmware/efi/efi-pstore.c
-@@ -39,6 +39,12 @@ struct pstore_read_data {
- 	char **buf;
- };
- 
-+static inline u64 generic_id(unsigned long timestamp,
-+			     unsigned int part, int count)
-+{
-+	return (timestamp * 100 + part) * 1000 + count;
-+}
-+
- static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- {
- 	efi_guid_t vendor = LINUX_EFI_CRASH_GUID;
-@@ -57,7 +63,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 
- 	if (sscanf(name, "dump-type%u-%u-%d-%lu-%c",
- 		   cb_data->type, &part, &cnt, &time, &data_type) == 5) {
--		*cb_data->id = part;
-+		*cb_data->id = generic_id(time, part, cnt);
- 		*cb_data->count = cnt;
- 		cb_data->timespec->tv_sec = time;
- 		cb_data->timespec->tv_nsec = 0;
-@@ -67,7 +73,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 			*cb_data->compressed = false;
- 	} else if (sscanf(name, "dump-type%u-%u-%d-%lu",
- 		   cb_data->type, &part, &cnt, &time) == 4) {
--		*cb_data->id = part;
-+		*cb_data->id = generic_id(time, part, cnt);
- 		*cb_data->count = cnt;
- 		cb_data->timespec->tv_sec = time;
- 		cb_data->timespec->tv_nsec = 0;
-@@ -79,7 +85,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
- 		 * which doesn't support holding
- 		 * multiple logs, remains.
- 		 */
--		*cb_data->id = part;
-+		*cb_data->id = generic_id(time, part, 0);
- 		*cb_data->count = 0;
- 		cb_data->timespec->tv_sec = time;
- 		cb_data->timespec->tv_nsec = 0;
-@@ -199,14 +205,15 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
- 	char name[DUMP_NAME_LEN];
- 	efi_char16_t efi_name[DUMP_NAME_LEN];
- 	int found, i;
-+	unsigned int part;
- 
--	sprintf(name, "dump-type%u-%u-%d-%lu", type, (unsigned int)id, count,
--		time.tv_sec);
-+	part = (id / 1000) % 100;
-+	sprintf(name, "dump-type%u-%u-%d-%lu", type, part, count, time.tv_sec);
- 
- 	for (i = 0; i < DUMP_NAME_LEN; i++)
- 		efi_name[i] = name[i];
- 
--	edata.id = id;
-+	edata.id = part;
- 	edata.type = type;
- 	edata.count = count;
- 	edata.time = time;
+The reverse was simply a suggestion. The vertical alignment was more
+what I aimed at because it makes this chunk much more readable IMO.
+
 -- 
-1.8.4.2
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
