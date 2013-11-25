@@ -1,8 +1,8 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 11/12 v4] x86: reserve setup_data ranges late after parsing
- memmap cmdline
-Date: Mon, 25 Nov 2013 16:56:41 +0800
-Message-ID: <20131125090039.610406184@dhcp-16-126.nay.redhat.com>
+Subject: [patch 08/12 v4] x86: add xloadflags bit for efi runtime support on
+ kexec
+Date: Mon, 25 Nov 2013 16:56:38 +0800
+Message-ID: <20131125090037.951515290@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
@@ -22,34 +22,65 @@ List-Id: linux-efi@vger.kernel.org
 
 Hi,
 References: <20131125085630.417850406-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Content-Disposition: inline; filename=11-reserve-setup-data-late.patch
+Content-Disposition: inline; filename=08-add-xloadflags-for-kexec-efi-runtime-feature.patch
 
-Kdump kernel using memmap=exactmap, move e820_reserve_setup_data after
-parsing early params so they can be set reserved finally. Or kdump kernel
-will warn about ioremap a normal ram range.
+Old kexec-tools can not load new kernel. The reason is previously kexec-tools
+do not fill efi_info in x86 setup header thus efi init fail and switch
+to noefi boot. In new kexec-tools it will by default fill efi_info and
+pass other efi required infomation to 2nd kernel so kexec kernel efi
+initialization will success finally.
+
+To prevent from breaking userspace, add a new xloadflags bit so kexec-tools
+will check the flag and switch to old logic.
+
+changelog:
+Matt: +&& defined(CONFIG_KEXEC)
+HPA: document the flag.
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/x86/kernel/setup.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Documentation/x86/boot.txt            |    3 +++
+ arch/x86/boot/header.S                |    9 ++++++++-
+ arch/x86/include/uapi/asm/bootparam.h |    1 +
+ 3 files changed, 12 insertions(+), 1 deletion(-)
 
---- efi.orig/arch/x86/kernel/setup.c
-+++ efi/arch/x86/kernel/setup.c
-@@ -927,8 +927,6 @@ void __init setup_arch(char **cmdline_p)
- 	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;
- 	setup_memory_map();
- 	parse_setup_data();
--	/* update the e820_saved too */
--	e820_reserve_setup_data();
- 
- 	copy_edd();
- 
-@@ -990,6 +988,8 @@ void __init setup_arch(char **cmdline_p)
- 		early_dump_pci_devices();
+--- efi.orig/arch/x86/boot/header.S
++++ efi/arch/x86/boot/header.S
+@@ -391,7 +391,14 @@ xloadflags:
+ #else
+ # define XLF23 0
  #endif
+-			.word XLF0 | XLF1 | XLF23
++
++#if defined(CONFIG_X86_64) && defined(CONFIG_EFI) && defined(CONFIG_KEXEC)
++# define XLF4 XLF_EFI_KEXEC
++#else
++# define XLF4 0
++#endif
++
++			.word XLF0 | XLF1 | XLF23 | XLF4
  
-+	/* update the e820_saved too */
-+	e820_reserve_setup_data();
- 	finish_e820_parsing();
+ cmdline_size:   .long   COMMAND_LINE_SIZE-1     #length of the command line,
+                                                 #added with boot protocol
+--- efi.orig/arch/x86/include/uapi/asm/bootparam.h
++++ efi/arch/x86/include/uapi/asm/bootparam.h
+@@ -24,6 +24,7 @@
+ #define XLF_CAN_BE_LOADED_ABOVE_4G	(1<<1)
+ #define XLF_EFI_HANDOVER_32		(1<<2)
+ #define XLF_EFI_HANDOVER_64		(1<<3)
++#define XLF_EFI_KEXEC			(1<<4)
  
- 	if (efi_enabled(EFI_BOOT))
+ #ifndef __ASSEMBLY__
+ 
+--- efi.orig/Documentation/x86/boot.txt
++++ efi/Documentation/x86/boot.txt
+@@ -608,6 +608,9 @@ Protocol:       2.12+
+ 	- If 1, the kernel supports the 64-bit EFI handoff entry point
+           given at handover_offset + 0x200.
+ 
++  Bit 4 (read): XLF_EFI_KEXEC
++	- If 1, the kernel supports kexec EFI boot with EFI runtime support.
++
+ Field name:	cmdline_size
+ Type:		read
+ Offset/size:	0x238/4
