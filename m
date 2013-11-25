@@ -1,60 +1,40 @@
 From: dyoung@redhat.com
-Subject: Only print saved efi runtime maps instead of all memmap ranges.
-Date: Mon, 25 Nov 2013 16:47:09 +0800
-Message-ID: <20131125084810.820708838@dhcp-16-126.nay.redhat.com>
+Subject: efi: remove unused variables in __map_region
+Date: Mon, 25 Nov 2013 16:47:00 +0800
+Message-ID: <20131125084805.769680812@dhcp-16-126.nay.redhat.com>
 References: <20131125084659.182036023@dhcp-16-126.nay.redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline; filename=10-print-efi-runtime-memmap.patch
+Content-Disposition: inline; filename=01-remove-unused-var-in-map-region.patch
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com, Dave Young <dyoung@redhat.com>
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com, Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-For kexec/kdump kernel efi runtime mappings are saved, printing original whole
-memmap ranges does not make sense anymore. So introduce a new function to only
-print runtime maps in case kexec/kdump kernel is used.
+variables size and end is useless in this function, thus remove them.
 
+Reported-by: Toshi Kani <toshi.kani@hp.com>
 Signed-off-by: Dave Young <dyoung@redhat.com>
+Acked-by: Borislav Petkov <bp@suse.de>
 ---
- arch/x86/platform/efi/efi.c |   23 ++++++++++++++++++++++-
- 1 file changed, 22 insertions(+), 1 deletion(-)
+ arch/x86/platform/efi/efi_64.c |    6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
 
---- efi.orig/arch/x86/platform/efi/efi.c
-+++ efi/arch/x86/platform/efi/efi.c
-@@ -430,6 +430,24 @@ int __init efi_memblock_x86_reserve_rang
- 	return 0;
- }
- 
-+/* for kexec kernel runtime maps are passed in setup_data */
-+static void __init print_saved_runtime_map(void)
-+{
-+#ifdef EFI_DEBUG
-+	int i;
-+	efi_memory_desc_t *md;
-+
-+	for (i = 0; i < nr_efi_runtime_map; i++) {
-+		md = esdata->map + i;
-+		pr_info("mem%02u: type=%u, attr=0x%llx, "
-+			"range=[0x%016llx-0x%016llx) (%lluMB)\n",
-+			i, md->type, md->attribute, md->phys_addr,
-+			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
-+			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
-+	}
-+#endif  /*  EFI_DEBUG  */
-+}
-+
- static void __init print_efi_memmap(void)
+--- efi.orig/arch/x86/platform/efi/efi_64.c
++++ efi/arch/x86/platform/efi/efi_64.c
+@@ -148,15 +148,11 @@ void efi_setup_page_tables(void)
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
- #ifdef EFI_DEBUG
-@@ -782,7 +800,10 @@ void __init efi_init(void)
- 		x86_platform.set_wallclock = efi_set_rtc_mmss;
- 	}
- #endif
--	print_efi_memmap();
-+	if (esdata)
-+		print_saved_runtime_map();
-+	else
-+		print_efi_memmap();
- }
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+-	unsigned long pf = 0, size;
+-	u64 end;
++	unsigned long pf = 0;
  
- void __init efi_late_init(void)
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		pf |= _PAGE_PCD;
+ 
+-	size = md->num_pages << PAGE_SHIFT;
+-	end  = va + size;
+-
+ 	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+ 			   md->phys_addr, va);
