@@ -1,93 +1,60 @@
 From: dyoung@redhat.com
-Subject: do not use __va for getting setup_data virt addr
-Date: Mon, 25 Nov 2013 16:47:11 +0800
-Message-ID: <20131125084811.956664794@dhcp-16-126.nay.redhat.com>
+Subject: Only print saved efi runtime maps instead of all memmap ranges.
+Date: Mon, 25 Nov 2013 16:47:09 +0800
+Message-ID: <20131125084810.820708838@dhcp-16-126.nay.redhat.com>
 References: <20131125084659.182036023@dhcp-16-126.nay.redhat.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline; filename=12-x86-kdebugfs-use-ioremap.patch
+Content-Disposition: inline; filename=10-print-efi-runtime-memmap.patch
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-__va does not work in case memmap=exactmap, so let's always use ioremap_cache.
+For kexec/kdump kernel efi runtime mappings are saved, printing original whole
+memmap ranges does not make sense anymore. So introduce a new function to only
+print runtime maps in case kexec/kdump kernel is used.
 
 Signed-off-by: Dave Young <dyoung@redhat.com>
 ---
- arch/x86/kernel/kdebugfs.c |   35 +++++++++++------------------------
- 1 file changed, 11 insertions(+), 24 deletions(-)
+ arch/x86/platform/efi/efi.c |   23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
 
---- efi.orig/arch/x86/kernel/kdebugfs.c
-+++ efi/arch/x86/kernel/kdebugfs.c
-@@ -33,7 +33,6 @@ static ssize_t setup_data_read(struct fi
- 	struct setup_data_node *node = file->private_data;
- 	unsigned long remain;
- 	loff_t pos = *ppos;
--	struct page *pg;
- 	void *p;
- 	u64 pa;
+--- efi.orig/arch/x86/platform/efi/efi.c
++++ efi/arch/x86/platform/efi/efi.c
+@@ -430,6 +430,24 @@ int __init efi_memblock_x86_reserve_rang
+ 	return 0;
+ }
  
-@@ -47,18 +46,12 @@ static ssize_t setup_data_read(struct fi
- 		count = node->len - pos;
++/* for kexec kernel runtime maps are passed in setup_data */
++static void __init print_saved_runtime_map(void)
++{
++#ifdef EFI_DEBUG
++	int i;
++	efi_memory_desc_t *md;
++
++	for (i = 0; i < nr_efi_runtime_map; i++) {
++		md = esdata->map + i;
++		pr_info("mem%02u: type=%u, attr=0x%llx, "
++			"range=[0x%016llx-0x%016llx) (%lluMB)\n",
++			i, md->type, md->attribute, md->phys_addr,
++			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
++			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
++	}
++#endif  /*  EFI_DEBUG  */
++}
++
+ static void __init print_efi_memmap(void)
+ {
+ #ifdef EFI_DEBUG
+@@ -782,7 +800,10 @@ void __init efi_init(void)
+ 		x86_platform.set_wallclock = efi_set_rtc_mmss;
+ 	}
+ #endif
+-	print_efi_memmap();
++	if (esdata)
++		print_saved_runtime_map();
++	else
++		print_efi_memmap();
+ }
  
- 	pa = node->paddr + sizeof(struct setup_data) + pos;
--	pg = pfn_to_page((pa + count - 1) >> PAGE_SHIFT);
--	if (PageHighMem(pg)) {
--		p = ioremap_cache(pa, count);
--		if (!p)
--			return -ENXIO;
--	} else
--		p = __va(pa);
-+	p = ioremap_cache(pa, count);
-+	if (!p)
-+		return -ENXIO;
- 
- 	remain = copy_to_user(user_buf, p, count);
--
--	if (PageHighMem(pg))
--		iounmap(p);
-+	iounmap(p);
- 
- 	if (remain)
- 		return -EFAULT;
-@@ -109,7 +102,6 @@ static int __init create_setup_data_node
- 	struct setup_data *data;
- 	int error;
- 	struct dentry *d;
--	struct page *pg;
- 	u64 pa_data;
- 	int no = 0;
- 
-@@ -126,16 +118,12 @@ static int __init create_setup_data_node
- 			goto err_dir;
- 		}
- 
--		pg = pfn_to_page((pa_data+sizeof(*data)-1) >> PAGE_SHIFT);
--		if (PageHighMem(pg)) {
--			data = ioremap_cache(pa_data, sizeof(*data));
--			if (!data) {
--				kfree(node);
--				error = -ENXIO;
--				goto err_dir;
--			}
--		} else
--			data = __va(pa_data);
-+		data = ioremap_cache(pa_data, sizeof(*data));
-+		if (!data) {
-+			kfree(node);
-+			error = -ENXIO;
-+			goto err_dir;
-+		}
- 
- 		node->paddr = pa_data;
- 		node->type = data->type;
-@@ -143,8 +131,7 @@ static int __init create_setup_data_node
- 		error = create_setup_data_node(d, no, node);
- 		pa_data = data->next;
- 
--		if (PageHighMem(pg))
--			iounmap(data);
-+		iounmap(data);
- 		if (error)
- 			goto err_dir;
- 		no++;
+ void __init efi_late_init(void)
