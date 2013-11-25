@@ -1,9 +1,10 @@
 From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 09/12 v4] x86: export x86 boot_params to sysfs
-Date: Mon, 25 Nov 2013 16:56:39 +0800
-Message-ID: <20131125090038.510734938@dhcp-16-126.nay.redhat.com>
+Subject: [patch 04/12 v4] efi: cleanup efi_enter_virtual_mode function
+Date: Mon, 25 Nov 2013 16:56:34 +0800
+Message-ID: <20131125090035.723913471@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============6034380730127478146=="
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
@@ -15,455 +16,175 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
-
---===============6034380730127478146==
-Content-Type: text/plain
 
 Hi,
 References: <20131125085630.417850406-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Content-Disposition: inline; filename=09-add-sysfs-boot-param.patch
+Content-Disposition: inline; filename=04-efi-enter-virtual-mode-cleanup.patch
 
-kexec-tools use boot_params for getting the 1st kernel hardware_subarch,
-the kexec kernel efi runtime support also need read the old efi_info from
-boot_params. Currently it exists in debugfs which is not a good place for
-such infomation. Per HPA, we should avoid of "sploit debugfs".
+Add two small functions:
+efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+calls them instead of embedding two long for loop.
 
-In this patch /sys/kernel/boot_params are exported, also the setup_data
-is exported as a subdirectory. For original debugfs since it's already
-there for long time and kexec-tools is using it for hardware_subarch so
-let's do not remove them for now.
+v1->v2:
+refresh; coding style fixes.
 
-Structure are like below:
-
-/sys/kernel/boot_params
-├── data		/* binary data for boot_params */
-├── setup_data  	/* subdirectory for setup_data if there's any */
-│   ├── 0		/* the first setup_data node */
-│   │   ├── data	/* binary data for setup_data node 0 */
-│   │   └── type	/* setup_data type of setup_data node 0, hex string */
-|   [snip]		/* other setup_data nodes ... */
-└── version		/* hex string for boot protocal version */
-
-Changelog:
-Greg: use __ATTR_RO() and group attr.
+v2->v3:
+Toshi Kani:
+remove unused variable
+Matt: check return value of krealloc.
+v3->v4:
+Boris: Stretch comment to 80 cols
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- Documentation/ABI/testing/sysfs-kernel-boot_params |   40 ++
- arch/x86/kernel/Makefile                           |    2 
- arch/x86/kernel/ksysfs.c                           |  339 +++++++++++++++++++++
- 3 files changed, 380 insertions(+), 1 deletion(-)
+ arch/x86/platform/efi/efi.c |  109 ++++++++++++++++++++++++++------------------
+ 1 file changed, 66 insertions(+), 43 deletions(-)
 
---- /dev/null
-+++ efi/Documentation/ABI/testing/sysfs-kernel-boot_params
-@@ -0,0 +1,40 @@
-+What:		/sys/kernel/boot_params
-+Date:		November 2013
-+Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+Description:
-+		The /sys/kernel/boot_params directory contains two
-+		files: "data" and "version" and one subdirectory "setup_data".
-+		It is used to export the kernel boot parameters of x86
-+		platform to user space for kexec and debugging purpose.
-+
-+		If there's no setup_data in boot_params the subdirectory will
-+		not be created.
-+
-+		"data" file is the binary representation of struct boot_params.
-+
-+		"version" file is the string representation of boot
-+		protocol version.
-+
-+		"setup_data" subdirectory contains the setup_data data
-+		structure in boot_params. setup_data is maintained in kernel
-+		as a link list. In "setup_data" subdirectory there's one
-+		subdirectory for each link list node named with the number
-+		of the list nodes. The list node subdirectory contains two
-+		files "type" and "data". "type" file is the string
-+		representation of setup_data type. "data" file is the binary
-+		representation of setup_data payload.
-+
-+		The whole boot_params directory structure is like below:
-+		/sys/kernel/boot_params
-+		├── data
-+		├── setup_data
-+		│   ├── 0
-+		│   │   ├── data
-+		│   │   └── type
-+		│   └── 1
-+		│       ├── data
-+		│       └── type
-+		└── version
-+
-+Users:
-+		Kexec Mailing List <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
---- efi.orig/arch/x86/kernel/Makefile
-+++ efi/arch/x86/kernel/Makefile
-@@ -35,7 +35,7 @@ obj-y			+= alternative.o i8253.o pci-nom
- obj-y			+= tsc.o io_delay.o rtc.o
- obj-y			+= pci-iommu_table.o
- obj-y			+= resource.o
--
-+obj-$(CONFIG_SYSFS)	+= ksysfs.o
- obj-y				+= process.o
- obj-y				+= i387.o xsave.o
- obj-y				+= ptrace.o
---- /dev/null
-+++ efi/arch/x86/kernel/ksysfs.c
-@@ -0,0 +1,339 @@
-+/*
-+ * Architecture specific sysfs attributes in /sys/kernel
-+ *
-+ * Copyright (C) 2007, Intel Corp.
-+ *      Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ * Copyright (C) 2013, 2013 Red Hat, Inc.
-+ *      Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+ *
-+ * This file is released under the GPLv2
-+ */
-+
-+#include <linux/kobject.h>
-+#include <linux/string.h>
-+#include <linux/sysfs.h>
-+#include <linux/init.h>
-+#include <linux/stat.h>
-+#include <linux/slab.h>
-+#include <linux/mm.h>
-+
-+#include <asm/setup.h>
-+
-+static ssize_t version_show(struct kobject *kobj,
-+					struct kobj_attribute *attr, char *buf)
-+{
-+	return sprintf(buf, "0x%04x\n", boot_params.hdr.version);
-+}
-+
-+static struct kobj_attribute boot_params_version_attr = __ATTR_RO(version);
-+
-+static ssize_t boot_params_data_read(struct file *fp, struct kobject *kobj,
-+				     struct bin_attribute *bin_attr,
-+				     char *buf, loff_t off, size_t count)
-+{
-+	memcpy(buf, (void *)&boot_params + off, count);
-+	return count;
-+}
-+
-+static struct bin_attribute boot_params_data_attr = {
-+	.attr = {
-+		.name = "data",
-+		.mode = S_IRUGO,
-+	},
-+	.read = boot_params_data_read,
-+	.size = sizeof(boot_params),
-+};
-+
-+static struct attribute *boot_params_version_attrs[] = {
-+	&boot_params_version_attr.attr,
-+	NULL,
-+};
-+
-+static struct bin_attribute *boot_params_data_attrs[] = {
-+	&boot_params_data_attr,
-+	NULL,
-+};
-+
-+static struct attribute_group boot_params_attr_group = {
-+	.attrs = boot_params_version_attrs,
-+	.bin_attrs = boot_params_data_attrs,
-+};
-+
-+static int kobj_to_setup_data_nr(struct kobject *kobj, int *nr)
-+{
-+	const char *name;
-+
-+	name = kobject_name(kobj);
-+	return kstrtoint(name, 10, nr);
-+}
-+
-+static int get_setup_data_paddr(int nr, u64 *paddr)
-+{
-+	int i = 0;
-+	struct setup_data *data;
-+	u64 pa_data = boot_params.hdr.setup_data;
-+
-+	while (pa_data) {
-+		if (nr == i) {
-+			*paddr = pa_data;
-+			return 0;
-+		}
-+		data = ioremap_cache(pa_data, sizeof(*data));
-+		if (!data)
-+			return -ENOMEM;
-+
-+		pa_data = data->next;
-+		iounmap(data);
-+		i++;
-+	}
-+	return -EINVAL;
-+}
-+
-+static int __init get_setup_data_size(int nr, size_t *size)
-+{
-+	int i = 0;
-+	struct setup_data *data;
-+	u64 pa_data = boot_params.hdr.setup_data;
-+
-+	while (pa_data) {
-+		data = ioremap_cache(pa_data, sizeof(*data));
-+		if (!data)
-+			return -ENOMEM;
-+		if (nr == i) {
-+			*size = data->len;
-+			iounmap(data);
-+			return 0;
-+		}
-+
-+		pa_data = data->next;
-+		iounmap(data);
-+		i++;
-+	}
-+	return -EINVAL;
-+}
-+
-+static ssize_t type_show(struct kobject *kobj,
-+					struct kobj_attribute *attr, char *buf)
-+{
-+	int nr, ret;
-+	u64 paddr;
-+	struct setup_data *data;
-+
-+	ret = kobj_to_setup_data_nr(kobj, &nr);
-+	if (ret)
-+		return ret;
-+
-+	ret = get_setup_data_paddr(nr, &paddr);
-+	if (ret)
-+		return ret;
-+	data = ioremap_cache(paddr, sizeof(*data));
-+	if (!data)
-+		return -ENOMEM;
-+
-+	ret = sprintf(buf, "0x%x\n", data->type);
-+	iounmap(data);
-+	return ret;
-+}
-+
-+static ssize_t setup_data_data_read(struct file *fp,
-+				    struct kobject *kobj,
-+				    struct bin_attribute *bin_attr,
-+				    char *buf,
-+				    loff_t off, size_t count)
-+{
-+	int nr, ret = 0;
-+	u64 paddr;
-+	struct setup_data *data;
+--- efi.orig/arch/x86/platform/efi/efi.c
++++ efi/arch/x86/platform/efi/efi.c
+@@ -773,44 +773,12 @@ void __init old_map_region(efi_memory_de
+ 		       (unsigned long long)md->phys_addr);
+ }
+ 
+-/*
+- * This function will switch the EFI runtime services to virtual mode.
+- * Essentially, we look through the EFI memmap and map every region that
+- * has the runtime attribute bit set in its memory descriptor into the
+- * ->trampoline_pgd page table using a top-down VA allocation scheme.
+- *
+- * The old method which used to update that memory descriptor with the
+- * virtual address obtained from ioremap() is still supported when the
+- * kernel is booted with efi=old_map on its command line. Same old
+- * method enabled the runtime services to be called without having to
+- * thunk back into physical mode for every invocation.
+- *
+- * The new method does a pagetable switch in a preemption-safe manner
+- * so that we're in a different address space when calling a runtime
+- * function. For function arguments passing we do copy the PGDs of the
+- * kernel page table into ->trampoline_pgd prior to each call.
+- */
+-void __init efi_enter_virtual_mode(void)
++/* Merge contiguous regions of the same type and attribute */
++static void __init efi_merge_regions(void)
+ {
 +	void *p;
-+
-+	ret = kobj_to_setup_data_nr(kobj, &nr);
-+	if (ret)
-+		return ret;
-+
-+	ret = get_setup_data_paddr(nr, &paddr);
-+	if (ret)
-+		return ret;
-+	data = ioremap_cache(paddr, sizeof(*data));
-+	if (!data)
-+		return -ENOMEM;
-+
-+	if (off > data->len) {
-+		ret = -EINVAL;
-+		goto out;
-+	}
-+
-+	if (count > data->len - off)
-+		count = data->len - off;
-+
-+	if (!count)
-+		goto out;
-+
-+	ret = count;
-+	p = ioremap_cache(paddr + sizeof(*data), data->len);
-+	if (!p) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+	memcpy(buf, p + off, count);
-+	iounmap(p);
-+out:
-+	iounmap(data);
-+	return ret;
+ 	efi_memory_desc_t *md, *prev_md = NULL;
+-	void *p, *new_memmap = NULL;
+-	unsigned long size;
+-	efi_status_t status;
+-	u64 end, systab;
+-	int count = 0;
+-
+-	efi.systab = NULL;
+-
+-	/*
+-	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
+-	 */
+-	if (!efi_is_native()) {
+-		efi_unmap_memmap();
+-		return;
+-	}
+ 
+-	/* Merge contiguous regions of the same type and attribute */
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		u64 prev_size;
+ 		md = p;
+@@ -837,6 +805,18 @@ void __init efi_enter_virtual_mode(void)
+ 		prev_md = md;
+ 
+ 	}
 +}
 +
-+static struct kobj_attribute type_attr = __ATTR_RO(type);
-+
-+static struct bin_attribute data_attr = {
-+	.attr = {
-+		.name = "data",
-+		.mode = S_IRUGO,
-+	},
-+	.read = setup_data_data_read,
-+};
-+
-+static struct attribute *setup_data_type_attrs[] = {
-+	&type_attr.attr,
-+	NULL,
-+};
-+
-+static struct bin_attribute *setup_data_data_attrs[] = {
-+	&data_attr,
-+	NULL,
-+};
-+
-+static struct attribute_group setup_data_attr_group = {
-+	.attrs = setup_data_type_attrs,
-+	.bin_attrs = setup_data_data_attrs,
-+};
-+
-+static int __init create_setup_data_node(struct kobject *parent,
-+					struct kobject **kobjp, int nr)
++/*
++ * Map efi memory ranges for runtime serivce and update new_memmap with virtual
++ * addresses.
++ */
++static void * __init efi_map_regions(int *count)
 +{
-+	int ret = 0;
-+	size_t size;
-+	struct kobject *kobj;
-+	char name[16]; /* should be enough for setup_data nodes numbers */
-+	snprintf(name, 16, "%d", nr);
++	efi_memory_desc_t *md;
++	void *p, *new_memmap = NULL;
++	unsigned long size;
++	u64 end, systab;
+ 
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+@@ -861,14 +841,60 @@ void __init efi_enter_virtual_mode(void)
+ 		}
+ 
+ 		new_memmap = krealloc(new_memmap,
+-				      (count + 1) * memmap.desc_size,
+-				      GFP_KERNEL);
++					(*count + 1) * memmap.desc_size,
++					GFP_KERNEL);
+ 		if (!new_memmap)
+-			goto err_out;
++			goto ret;
+ 
+-		memcpy(new_memmap + (count * memmap.desc_size), md,
++		memcpy(new_memmap + (*count * memmap.desc_size), md,
+ 		       memmap.desc_size);
+-		count++;
++		(*count)++;
++	}
 +
-+	kobj = kobject_create_and_add(name, parent);
-+	if (!kobj)
-+		return -ENOMEM;
-+
-+	ret = get_setup_data_size(nr, &size);
-+	if (ret)
-+		goto out_kobj;
-+
-+	data_attr.size = size;
-+	ret = sysfs_create_group(kobj, &setup_data_attr_group);
-+	if (ret)
-+		goto out_kobj;
-+	*kobjp = kobj;
-+
-+	return 0;
-+out_kobj:
-+	kobject_put(kobj);
-+	return ret;
++ret:
++	return new_memmap;
 +}
 +
-+static void __init cleanup_setup_data_node(struct kobject *kobj)
++/*
++ * This function will switch the EFI runtime services to virtual mode.
++ * Essentially, we look through the EFI memmap and map every region that
++ * has the runtime attribute bit set in its memory descriptor into the
++ * ->trampoline_pgd page table using a top-down VA allocation scheme.
++ *
++ * The old method which used to update that memory descriptor with the
++ * virtual address obtained from ioremap() is still supported when the
++ * kernel is booted with efi=old_map on its command line. Same old
++ * method enabled the runtime services to be called without having to
++ * thunk back into physical mode for every invocation.
++ *
++ * The new method does a pagetable switch in a preemption-safe manner
++ * so that we're in a different address space when calling a runtime
++ * function. For function arguments passing we do copy the PGDs of the
++ * kernel page table into ->trampoline_pgd prior to each call.
++ */
++void __init efi_enter_virtual_mode(void)
 +{
-+	sysfs_remove_group(kobj, &setup_data_attr_group);
-+	kobject_put(kobj);
-+}
++	efi_status_t status;
++	void *new_memmap = NULL;
++	int count = 0;
 +
-+static int __init get_setup_data_total_num(u64 pa_data, int *nr)
-+{
-+	int ret = 0;
-+	struct setup_data *data;
++	efi.systab = NULL;
 +
-+	*nr = 0;
-+	while (pa_data) {
-+		*nr += 1;
-+		data = ioremap_cache(pa_data, sizeof(*data));
-+		if (!data) {
-+			ret = -ENOMEM;
-+			goto out;
-+		}
-+		pa_data = data->next;
-+		iounmap(data);
++	/*
++	 * We don't do virtual mode, since we don't do runtime services, on
++	 * non-native EFI
++	 */
++	if (!efi_is_native()) {
++		efi_unmap_memmap();
++		return;
 +	}
 +
-+out:
-+	return ret;
-+}
++	efi_merge_regions();
 +
-+static int __init create_setup_data_nodes(struct kobject *parent)
-+{
-+	struct kobject *setup_data_kobj, **kobjp;
-+	u64 pa_data;
-+	int i, j, nr, ret = 0;
-+
-+	pa_data = boot_params.hdr.setup_data;
-+	if (!pa_data)
-+		return 0;
-+
-+	setup_data_kobj = kobject_create_and_add("setup_data", parent);
-+	if (!setup_data_kobj) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	ret = get_setup_data_total_num(pa_data, &nr);
-+	if (ret)
-+		goto out_setup_data_kobj;
-+
-+	kobjp = kmalloc(sizeof(*kobjp) * nr, GFP_KERNEL);
-+	if (!kobjp) {
-+		ret = -ENOMEM;
-+		goto out_setup_data_kobj;
-+	}
-+
-+	for (i = 0; i < nr; i++) {
-+		ret = create_setup_data_node(setup_data_kobj, kobjp + i, i);
-+		if (ret)
-+			goto out_clean_nodes;
-+	}
-+
-+	kfree(kobjp);
-+	return 0;
-+
-+out_clean_nodes:
-+	for (j = i - 1; j > 0; j--)
-+		cleanup_setup_data_node(*(kobjp + j));
-+	kfree(kobjp);
-+out_setup_data_kobj:
-+	kobject_put(setup_data_kobj);
-+out:
-+	return ret;
-+}
-+
-+static int __init boot_params_ksysfs_init(void)
-+{
-+	int ret;
-+	struct kobject *boot_params_kobj;
-+
-+	boot_params_kobj = kobject_create_and_add("boot_params",
-+						  kernel_kobj);
-+	if (!boot_params_kobj) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	ret = sysfs_create_group(boot_params_kobj, &boot_params_attr_group);
-+	if (ret)
-+		goto out_boot_params_kobj;
-+
-+	ret = create_setup_data_nodes(boot_params_kobj);
-+	if (ret)
-+		goto out_create_group;
-+
-+	return 0;
-+out_create_group:
-+	sysfs_remove_group(boot_params_kobj, &boot_params_attr_group);
-+out_boot_params_kobj:
-+	kobject_put(boot_params_kobj);
-+out:
-+	return ret;
-+}
-+
-+arch_initcall(boot_params_ksysfs_init);
-
-
-
---===============6034380730127478146==
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
-
-_______________________________________________
-kexec mailing list
-kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-http://lists.infradead.org/mailman/listinfo/kexec
-
---===============6034380730127478146==--
++	new_memmap = efi_map_regions(&count);
++	if (!new_memmap) {
++		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
++		return;
+ 	}
+ 
+ 	BUG_ON(!efi.systab);
+@@ -922,9 +948,6 @@ void __init efi_enter_virtual_mode(void)
+ 			 0, NULL);
+ 
+ 	return;
+-
+- err_out:
+-	pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+ }
+ 
+ /*
