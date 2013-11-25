@@ -1,84 +1,24 @@
-From: dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Subject: [patch 02/12 v4] efi: add a wrapper function efi_map_region_fixed
-Date: Mon, 25 Nov 2013 16:56:32 +0800
-Message-ID: <20131125090034.636810276@dhcp-16-126.nay.redhat.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [patch 01/12 v4] efi: remove unused variables in __map_region
+Date: Mon, 25 Nov 2013 17:19:57 +0800
+Message-ID: <20131125091957.GA3921@dhcp-16-126.nay.redhat.com>
+References: <20131125090034.143510822@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131125090034.143510822-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
-References: <20131125085630.417850406-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Content-Disposition: inline; filename=02-efi-map-fixed-addr.patch
+On 11/25/13 at 04:56pm, Dave Young wrote:
+> Hi,
+> References: <20131125085630.417850406-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+> Content-Disposition: inline; filename=01-remove-unused-var-in-map-region.patch
 
-Kexec kernel will use saved runtime virtual mapping, so add a
-new function efi_map_region_fixed for directly mapping a md
-to md->virt.
+Not sure why above references are added in content, another mistake.
+please ignore them when you review the patches.
 
-The md is passed in from 1st kernel, the virtual addr is
-saved in md->virt_addr.
-
-Matt: coding style
-      reuse __map_region
-Boris: Strenthen comment lines to 80 cols.
-
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
----
- arch/x86/include/asm/efi.h     |    1 +
- arch/x86/platform/efi/efi_32.c |    2 ++
- arch/x86/platform/efi/efi_64.c |   10 ++++++++++
- 3 files changed, 13 insertions(+)
-
---- efi.orig/arch/x86/include/asm/efi.h
-+++ efi/arch/x86/include/asm/efi.h
-@@ -128,6 +128,7 @@ extern void efi_call_phys_epilog(void);
- extern void efi_unmap_memmap(void);
- extern void efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
-+extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
- extern void efi_setup_page_tables(void);
- extern void __init old_map_region(efi_memory_desc_t *md);
---- efi.orig/arch/x86/platform/efi/efi_64.c
-+++ efi/arch/x86/platform/efi/efi_64.c
-@@ -199,6 +199,16 @@ void __init efi_map_region(efi_memory_de
- 	md->virt_addr = efi_va;
- }
- 
-+/*
-+ * kexec kernel will use efi_map_region_fixed to map efi runtime memory ranges.
-+ * md->virt_addr is the original virtual address which had been mapped in kexec
-+ * 1st kernel.
-+ */
-+void __init efi_map_region_fixed(efi_memory_desc_t *md)
-+{
-+	__map_region(md, md->virt_addr);
-+}
-+
- void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
- 				 u32 type, u64 attribute)
- {
---- efi.orig/arch/x86/platform/efi/efi_32.c
-+++ efi/arch/x86/platform/efi/efi_32.c
-@@ -47,6 +47,8 @@ void __init efi_map_region(efi_memory_de
- 	old_map_region(md);
- }
- 
-+void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
-+
- void efi_call_phys_prelog(void)
- {
- 	struct desc_ptr gdt_descr;
+Sigh, looks like I should move to git-send-email for less error prone.
