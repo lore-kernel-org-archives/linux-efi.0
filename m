@@ -1,51 +1,93 @@
-From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [patch 0/4 v3] kexec-tools: efi runtime support
-Date: Tue, 26 Nov 2013 08:59:13 -0700
-Message-ID: <1385481553.1791.179.camel@misato.fc.hp.com>
-References: <20131121064043.969000753@dhcp-16-126.nay.redhat.com>
-	 <1385159448.1791.161.camel@misato.fc.hp.com>
-	 <20131124031228.GA1754@dhcp-16-126.nay.redhat.com>
-	 <1385393451.1791.168.camel@misato.fc.hp.com>
-	 <20131126061124.GB9727@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
+Date: Tue, 26 Nov 2013 19:30:16 +0000
+Message-ID: <20131126193016.GA18170@console-pimps.org>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-7-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131126061124.GB9727-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1385445477-9665-7-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-11-26 at 14:11 +0800, Dave Young wrote:
-> On 11/25/13 at 08:30am, Toshi Kani wrote:
-> > HI Dave,
-> > 
-> > I will test v4 again.  This time, I will test "memmap=exactmap" option
-> > as well.  I have tested the following cases before.  Are there any other
-> > cases you'd like me to test?
-> > 
-> >  - kdump
-> >  - multiple fast reboots and then kdump
-> >  - old kexec and new kernel w/ noefi & acpi_rsdp option
-> >  - new kexec and old kernel w/ noefi & acpi_rsdp option
+On Tue, 26 Nov, at 01:57:51PM, Dave Young wrote:
+> kexec kernel will need exactly same mapping for
+> efi runtime memory ranges. Thus here export the
+> runtime ranges mapping to sysfs, kexec-tools
+> will assemble them and pass to 2nd kernel via
+> setup_data.
+> 
+> Introducing a new directly /sys/firmware/efi/runtime-map
 
-Retested the above cases with v4 patchset.
+I'm not sure why the word "directly" is used here?
 
-> There's one more test case is w/ debugfs mounted in 1st kernel due to the
-> new version exports setup_data to sysfs.
+> Just like /sys/firmware/memmap. Containing below attribute
+> in each file of that directory:
+> attribute  num_pages  phys_addr  type  virt_addr
+> 
+> It will not work for efi 32bit. Only x86_64 currently.
+ 
+Actually, exporting the tables does work for 32-bit, right? It's just
+that kexec doesn't work for 32-bit EFI?
 
-Tested w/ debugfs mounted.
+> Matt: s/efi-runtime-map.c/runtime-map.c
+>       change dir name to runtime-map
+> update to use desc_size in efi_runtime_map
+> cleaup the code, add function efi_save_runtime_map
+> improve err handling
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  .../ABI/testing/sysfs-firmware-efi-runtime-map     |  45 +++++
+>  arch/x86/platform/efi/efi.c                        |  26 +++
+>  drivers/firmware/efi/Kconfig                       |  10 ++
+>  drivers/firmware/efi/Makefile                      |   1 +
+>  drivers/firmware/efi/efi.c                         |   3 +-
+>  drivers/firmware/efi/runtime-map.c                 | 199 +++++++++++++++++++++
+>  include/linux/efi.h                                |   6 +
+>  7 files changed, 289 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+>  create mode 100644 drivers/firmware/efi/runtime-map.c
+> 
+> diff --git a/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> new file mode 100644
+> index 0000000..dab8d41
+> --- /dev/null
+> +++ b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> @@ -0,0 +1,45 @@
+> +What:		/sys/firmware/efi/runtime-map/
+> +Date:		Oct 2013
+> +Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> +Description:
+> +		Switching efi runtime services to virtual mode requires
+> +		that all efi memory ranges which has the runtime attribute
+> +		bit set to be mapped to virtual addresses.
+> +
+> +		In kexec kernel kernel can not entering virtual mode again
+> +		because there's a limitation that SetVirtualAddressMap can
+> +		only be called once for entering virtual mode. But kexec
+> +		kernel still need maintain same physical address to virtual
+> +		address mapping as the 1st kernel. The mappings are exported
+> +		to sysfs so userspace tools can reassemble them and pass them
+> +		into kexec kernel.
 
-> For the exactmap I think it's a corner case, I just tested it in virtual
-> machine I think setup a right cmdline is hard. But feel free to test it if
-> you can.
+How about,
 
-Tested with exactmap for multiple fast reboots.  I was not able to setup
-kdump properly with this case, but it's not related with your changes
-since I was not able to do it without your changes, either.
+		"The efi runtime services can only be switched to virtual
+		 mode once without rebooting. The kexec kernel must maintain
+		 the same physical to virtual address mappings as the first
+		 kernel. The mappings are exported to sysfs so userspace tools
+		 can reassemble them and pass them into the kexec kernel."
 
-Feel free to add my tested-by.
+?
 
-Thanks,
--Toshi
+> +		/sys/firmware/efi/runtim-map/ is what kernel export for
+
+				^^ runtime-map/
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
