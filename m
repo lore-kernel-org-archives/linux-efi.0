@@ -1,69 +1,19 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v4 05/12] efi: export more efi table variable to sysfs
-Date: Tue, 26 Nov 2013 09:50:35 +0100
-Message-ID: <20131126085035.GC20917@pd.tnic>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-6-git-send-email-dyoung@redhat.com>
+From: "gordeydd" <ieptb_sp-MOc09CjOZ4SsUUxmy46qI/a1Bb7k7eHm@public.gmane.org>
+Subject: =?windows-1251?Q?=F2=E0_=E8=EB=E8_=E4=F0=F3=E3=E0=FF_=F1?=
+	=?windows-1251?Q?=E8=ED=FC=EE=F0=E0_=E1=F3=E4=E5=F2_=EE?=
+	=?windows-1251?Q?=F2_=C2=E0=F1_=E2_=E2=EE=F1=F2=EE=F0=E3?=
+	=?windows-1251?Q?=E5?=
+Date: Tue, 26 Nov 2013 06:35:16 -0200 (BRST)
+Message-ID: <20131126083516.9FF3EE900E9BD@bart0110.correio.pw>
+Reply-To: "gordeydd" <karina.naumova.92-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1385445477-9665-6-git-send-email-dyoung@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
+Content-Type: text/plain; charset=windows-1251
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: marinak-r9nTsDCPQ4iHXe+LvDLADg@public.gmane.org, nast-/Lt70lGnTiwYv9T5Wd1d0Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, conf-tpANB4sOW4aHXe+LvDLADg@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 26, 2013 at 01:57:50PM +0800, Dave Young wrote:
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 2e2fbde..5d85956 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
->  	.hcdp       = EFI_INVALID_TABLE_ADDR,
->  	.uga        = EFI_INVALID_TABLE_ADDR,
->  	.uv_systab  = EFI_INVALID_TABLE_ADDR,
-> +	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
-> +	.runtime    = EFI_INVALID_TABLE_ADDR,
-> +	.config_table  = EFI_INVALID_TABLE_ADDR,
-
-See what I mean with alignment?
-
-Now this config_table thing sticks out and completely destroys the
-balance in the universe.
-
-:-)
-
->  };
->  EXPORT_SYMBOL(efi);
->  
-> @@ -71,13 +74,54 @@ static ssize_t systab_show(struct kobject *kobj,
->  static struct kobj_attribute efi_attr_systab =
->  			__ATTR(systab, 0400, systab_show, NULL);
->  
-> +static ssize_t fw_vendor_show(struct kobject *kobj,
-> +				struct kobj_attribute *attr, char *buf)
-> +{
-> +	return sprintf(buf, "0x%lx\n", efi.fw_vendor);
-> +}
-> +
-> +static ssize_t runtime_show(struct kobject *kobj,
-> +				struct kobj_attribute *attr, char *buf)
-> +{
-> +	return sprintf(buf, "0x%lx\n", efi.runtime);
-> +}
-> +
-> +static ssize_t config_table_show(struct kobject *kobj,
-> +				struct kobj_attribute *attr, char *buf)
-> +{
-> +	return sprintf(buf, "0x%lx\n", efi.config_table);
-> +}
-
-Those are sooo similar, it's like the macro SHOW writes itself.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+=E2=F1=E5 =F0=E0=E2=ED=EE =F5=EE=F2=FC =EA=E0=EA=E0=FF =F5=EE=E7=FF=FE=F8=
+=EA=E0 =E1=F3=E4=E5=F2 =EE=F2 =C2=E0=F1 =E2 =FD=EA=F1=F2=E0=E7=E5 http:=
+//goo.gl/Q6apF8
