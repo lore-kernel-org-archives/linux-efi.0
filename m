@@ -1,61 +1,54 @@
-From: Josh Boyer <jwboyer@redhat.com>
-Subject: Re: [PATCH 07/12] acpi: Ignore acpi_rsdp kernel parameter when
- securelevel is set
-Date: Tue, 26 Nov 2013 07:54:23 -0500
-Message-ID: <CA+5PVA6_4o6T7gS7q5uvksUBawxV__J82KQBMC=hE_qdTK2RUA@mail.gmail.com>
-References: <1378741786-18430-1-git-send-email-matthew.garrett@nebula.com>
-	<1378741786-18430-8-git-send-email-matthew.garrett@nebula.com>
-Reply-To: jwboyer@redhat.com
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v4 04/12] efi: cleanup efi_enter_virtual_mode function
+Date: Tue, 26 Nov 2013 14:51:55 +0000
+Message-ID: <20131126145155.GL11521@console-pimps.org>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-5-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1378741786-18430-8-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: "Linux-Kernel@Vger. Kernel. Org" <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Greg KH <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, James Morris <jmorris@namei.org>, linux-security-module <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1385445477-9665-5-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 9, 2013 at 11:49 AM, Matthew Garrett
-<matthew.garrett@nebula.com> wrote:
-> From: Josh Boyer <jwboyer@redhat.com>
->
-> This option allows userspace to pass the RSDP address to the kernel, which
-> makes it possible for a user to execute arbitrary code in the kernel.
-> Disable this when securelevel is set.
->
-> Signed-off-by: Josh Boyer <jwboyer@redhat.com>
-
-Dredging up an old thread in the hopes that Matthew runs sed and resubmits...
-
-Also, FWIW, I didn't write this.  It was derived from previous
-versions of something I did write, but there's really no evidence of
-anything I wrote left, so it should probably be From: you.
-
+On Tue, 26 Nov, at 01:57:49PM, Dave Young wrote:
+> Add two small functions:
+> efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+> calls them instead of embedding two long for loop.
+> 
+> v1->v2:
+> refresh; coding style fixes.
+> 
+> v2->v3:
+> Toshi Kani:
+> remove unused variable
+> Matt: check return value of krealloc.
+> v3->v4:
+> Boris: Stretch comment to 80 cols
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 > ---
->  drivers/acpi/osl.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/acpi/osl.c b/drivers/acpi/osl.c
-> index e5f416c..f6d8977 100644
-> --- a/drivers/acpi/osl.c
-> +++ b/drivers/acpi/osl.c
-> @@ -45,6 +45,7 @@
->  #include <linux/list.h>
->  #include <linux/jiffies.h>
->  #include <linux/semaphore.h>
-> +#include <linux/security.h>
->
->  #include <asm/io.h>
->  #include <asm/uaccess.h>
-> @@ -249,7 +250,7 @@ early_param("acpi_rsdp", setup_acpi_rsdp);
->  acpi_physical_address __init acpi_os_get_root_pointer(void)
->  {
->  #ifdef CONFIG_KEXEC
-> -       if (acpi_rsdp)
-> +       if (acpi_rsdp && (get_securelevel <= 0))
+>  arch/x86/platform/efi/efi.c | 109 +++++++++++++++++++++++++++-----------------
+>  1 file changed, 66 insertions(+), 43 deletions(-)
 
-This is missing some ( ).  That means you're comparing the
-get_securelevel function pointer to 0.  Pretty sure bad things will
-happen.
+[...]
 
-josh
+> @@ -922,9 +948,6 @@ void __init efi_enter_virtual_mode(void)
+>  			 0, NULL);
+>  
+>  	return;
+> -
+> - err_out:
+> -	pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+>  }
+>  
+>  /*
+ 
+Teeny, tiny comment: You could now delete the above return statement.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
