@@ -1,44 +1,41 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v4 01/12] efi: remove unused variables in __map_region
-Date: Tue, 26 Nov 2013 13:57:46 +0800
-Message-ID: <1385445477-9665-2-git-send-email-dyoung@redhat.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: [PATCH v4 03/12] efi: reserve boot service fix
+Date: Tue, 26 Nov 2013 13:57:48 +0800
+Message-ID: <1385445477-9665-4-git-send-email-dyoung@redhat.com>
 References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1385445477-9665-1-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-variables size and end is useless in this function, thus remove them.
+Current code check boot service region with kernel text region by:
+start+size >= __pa_symbol(_text)
+The end of the above region should be start + size - 1 instead.
 
-Reported-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+I see this problem in ovmf + Fedora 19 grub boot:
+text start: 1000000 md start: 800000 md size: 800000
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+Acked-by: Borislav Petkov <bp@suse.de>
+Acked-by: Toshi Kani <toshi.kani@hp.com>
 ---
- arch/x86/platform/efi/efi_64.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+ arch/x86/platform/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index bf286c3..c5a6491 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -148,15 +148,11 @@ void efi_setup_page_tables(void)
- static void __init __map_region(efi_memory_desc_t *md, u64 va)
- {
- 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
--	unsigned long pf = 0, size;
--	u64 end;
-+	unsigned long pf = 0;
- 
- 	if (!(md->attribute & EFI_MEMORY_WB))
- 		pf |= _PAGE_PCD;
- 
--	size = md->num_pages << PAGE_SHIFT;
--	end  = va + size;
--
- 	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
- 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
- 			   md->phys_addr, va);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index f8ec4da..15e3b5e 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -438,7 +438,7 @@ void __init efi_reserve_boot_services(void)
+ 		 * - Not within any part of the kernel
+ 		 * - Not the bios reserved area
+ 		*/
+-		if ((start+size >= __pa_symbol(_text)
++		if ((start + size > __pa_symbol(_text)
+ 				&& start <= __pa_symbol(_end)) ||
+ 			!e820_all_mapped(start, start+size, E820_RAM) ||
+ 			memblock_is_region_reserved(start, size)) {
 -- 
 1.8.3.1
