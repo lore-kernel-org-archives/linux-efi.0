@@ -1,79 +1,118 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: [PATCH v4 02/12] efi: add a wrapper function efi_map_region_fixed
-Date: Tue, 26 Nov 2013 13:57:47 +0800
-Message-ID: <1385445477-9665-3-git-send-email-dyoung@redhat.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v4 00/12] kexec kernel efi runtime support
+Date: Tue, 26 Nov 2013 13:57:45 +0800
+Message-ID: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Kexec kernel will use saved runtime virtual mapping, so add a
-new function efi_map_region_fixed for directly mapping a md
-to md->virt.
-
-The md is passed in from 1st kernel, the virtual addr is
-saved in md->virt_addr.
-
-Matt: coding style
-      reuse __map_region
-Boris: Strenthen comment lines to 80 cols.
-
-Signed-off-by: Dave Young <dyoung@redhat.com>
-Acked-by: Borislav Petkov <bp@suse.de>
----
- arch/x86/include/asm/efi.h     |  1 +
- arch/x86/platform/efi/efi_32.c |  2 ++
- arch/x86/platform/efi/efi_64.c | 10 ++++++++++
- 3 files changed, 13 insertions(+)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 89a05b0..9fbaeb2 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -128,6 +128,7 @@ extern void efi_call_phys_epilog(void);
- extern void efi_unmap_memmap(void);
- extern void efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
-+extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
- extern void efi_setup_page_tables(void);
- extern void __init old_map_region(efi_memory_desc_t *md);
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index e94557c..7b3ec6e 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -47,6 +47,8 @@ void __init efi_map_region(efi_memory_desc_t *md)
- 	old_map_region(md);
- }
- 
-+void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
-+
- void efi_call_phys_prelog(void)
- {
- 	struct desc_ptr gdt_descr;
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c5a6491..ff08cb1 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -199,6 +199,16 @@ void __init efi_map_region(efi_memory_desc_t *md)
- 	md->virt_addr = efi_va;
- }
- 
-+/*
-+ * kexec kernel will use efi_map_region_fixed to map efi runtime memory ranges.
-+ * md->virt_addr is the original virtual address which had been mapped in kexec
-+ * 1st kernel.
-+ */
-+void __init efi_map_region_fixed(efi_memory_desc_t *md)
-+{
-+	__map_region(md, md->virt_addr);
-+}
-+
- void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
- 				 u32 type, u64 attribute)
- {
--- 
-1.8.3.1
+SGksCgpIZXJlIGlzIHRoZSBWNCByZXNlbmQgZm9yIHN1cHBvcnRpbmcga2V4ZWMga2VybmVsIGVm
+aSBydW50aW1lLgpQZXIgcGVydmlvdXMgZGlzY3Vzc2lvbiBJIHBhc3MgdGhlIDFzdCBrZXJuZWwg
+ZWZpIHJ1bnRpbWUgbWFwcGluZwp2aWEgc2V0dXBfZGF0YSB0byAybmQga2VybmVsLiBCZXNpZGVz
+IG9mIHRoZSBydW50aW1lIG1hcHBpbmcKaW5mbyBJIGFsc28gcGFzcyB0aGUgZndfdmVuZG9yLCBy
+dW50aW1lLCBjb25maWcgdGFibGUsIHNtYmlvcwpwaHlzaWNhbCBhZGRyZXNzIGluIHNldHVwX2Rh
+dGEuIEVGSSBzcGVjIG1lbnRpb25lZCBmd192ZW5kb3IsCnJ1bnRpbWUsIGNvbmZpZyB0YWJsZSBh
+ZGRyZXNzZXMgd2lsbCBiZSBjb252ZXJ0ZWQgdG8gdmlydCBhZGRyZXNzCmFmdGVyIGVudGVyaW5n
+IHZpcnR1YWwgbW9kZSwgYnV0IHdlIHdpbGwgdXNlIGl0IGFzIHBoeXNpY2FsIGFkZHJlc3MKaW4g
+ZWZpX2luaXQuIEZvciBzbWJpb3MgRUZJIHNwZWMgZGlkIG5vdCBtZW50aW9uIGFib3V0IHRoZSBh
+ZGRyZXNzCnVwZGF0aW5nLCBidXQgZHVyaW5nIG15IHRlc3Qgb24gYSBIUCB3b3Jrc3RhdGlvbiwg
+dGhlIGJpb3Mgd2lsbApjb252ZXJ0IGl0IHRvIFZpcnQgYWRkciwgdGh1cyBwYXNzIGl0IGluIHNl
+dHVwX2RhdGEgYXMgd2VsbC4KCkZvciBmd192ZW5kb3IsIHJ1bnRpbWUsIGNvbmZpZyB0YWJsZSwg
+SSBleHBvcnQgdGhlbSBpbiAvc3lzL2Zpcm13YXJlLwplZmkvLCBzbWJpb3MgaXMgYWxyZWFkeSBp
+biAvc3lzL2Zpcm13YXJlL2VmaS9zeXN0YWIuCgpGb3IgZWZpIHJ1bnRpbWUgbWFwcGluZyBJIGFk
+ZCBhIG5ldyBkaXJlY3RvcnkgL3N5cy9maXJtd2FyZS9lZmkvCnJ1bnRpbWUtbWFwLyBsaWtlIGJl
+bG93CltkYXZlQGRhcmtzdGFyIH5dJCB0cmVlIC9zeXMvZmlybXdhcmUvZWZpL3J1bnRpbWUtbWFw
+Lwovc3lzL2Zpcm13YXJlL2VmaS9ydW50aW1lLW1hcC8K4pSc4pSA4pSAIDAK4pSCICAg4pSc4pSA
+4pSAIGF0dHJpYnV0ZQrilIIgICDilJzilIDilIAgbnVtX3BhZ2VzCuKUgiAgIOKUnOKUgOKUgCBw
+aHlzX2FkZHIK4pSCICAg4pSc4pSA4pSAIHR5cGUK4pSCICAg4pSU4pSA4pSAIHZpcnRfYWRkcgri
+lJzilIDilIAgMQrilIIgICDilJzilIDilIAgYXR0cmlidXRlCuKUgiAgIOKUnOKUgOKUgCBudW1f
+cGFnZXMK4pSCICAg4pSc4pSA4pSAIHBoeXNfYWRkcgrilIIgICDilJzilIDilIAgdHlwZQrilIIg
+ICDilJTilIDilIAgdmlydF9hZGRyCltzbmlwXQogCmtleGVjLXRvb2xzIHdpbGwgYXNzZW1ibGUg
+dGhlbSBhcyBzZXR1cF9kYXRhIGFuZCBwYXNzIHRvIDJuZCBrZXJuZWwuCkkgd2lsbCBzZW5kIHVz
+ZXJzcGFjZSBwYXRjaGVzIGFzIHdlbGwuCgpMaW1pdGF0aW9uIGlzIEkgb25seSB3cml0ZSBzdXBw
+b3J0IGZvciB4ODZfNjQsIHRlc3Qgb24gYmVsb3cgbWFjaGluZXM6Ckxlbm92byB0aGlua3BhZCB0
+NDIwCkRlbGwgaW5zcGlyb24gMTQgLSAzNDIxCkhQIFo0MjAgd29ya3N0YXRpb24KUWVtdSArIE9W
+TUYKClBsZWFzZSBoZWxwIHRvIHJldmlldyB0aGUgcGF0Y2hlcy4KClRoZSBwYXRjaGVzIGFyZSBi
+YXNlZCBvbiBtYXR0J3MgZWZpIG1hc3RlciB0cmVlCgpDaGFuZ2VzIGZyb20gdjE6CmFkZCBvbmUg
+ZmxhZyBpbiB4bG9hZGZsYWdzLCBzbyBrZXhlYy10b29scyBjYW4gc2FmZWx5IGxvYWQgb2xkIGtl
+cm5lbAp3aXRob3V0IGVmaSBzdXBwb3J0Lgpjb2Rpbmcgc3R5bGUgZml4ZXMKZnVuY3Rpb24gbmFt
+ZSBmb3IgbWFwIHBoeXNfYWRkciB0byBmaXhlZCB2aXJ0X2FkZHIKQWRkIEFCSSBkb2N1bWVudGF0
+aW9uIGZvciBzeXNmcyBmaWxlcwoKQ2hhbmdlcyBmcm9tIHYyOgowMS8wOTogYSBuZXcgcGF0Y2gg
+dG8gcmVtb3ZlIHVudXNlZCB2YXJpYWJsZXMgaW4gX19tYXBfcmVnaW9uIGZ1bmN0aW9uCiAgICAg
+ICBjYXRjaGVkIGJ5IFRvc2hpIEthbmkKMDkvMDk6IGEgbmV3IHBhdGNoIHRvIGV4cG9ydCB4ODYg
+Ym9vdF9wYXJhbXMgdG8gc3lzZnMgaW5zdGVhZCBvZiB1c2UKICAgICAgIGRlYnVnZnMgZmlsZXMK
+TWF0dDogcmV1c2UgX19tYXBfcmVnaW9uIGluc3RlYWQgZG8gc2FtZSB0aGluZyBpbiBhbm90aGVy
+IGZ1bmN0aW9uLgogICAgICBhZGQgYSB3cmFwcGVyIGZ1bmN0aW9uIGVmaV9tYXBfcmVnaW9uX2Zp
+eGVkIFswMi8wOV0KICAgICAgY2hlY2sgcmV0dXJuIHZhbHVlIG9mIGtyZWFsbG9jCiAgICAgIHN5
+c2ZzIGRpciBuYW1lIHMvZWZpLXJ1bnRpbWUtbWFwL3J1bnRpbWUtbWFwIFswNi8wOV0KICAgICAg
+dXNlIGRlc2Nfc2l6ZSBpbiBlZmlfcnVudGltZV9tYXAKICAgICAgZm9yIHRoZSB4bG9hZGZsYWdz
+IGRlZmluYXRpb246ICsmJiBkZWZpbmVkKENPTkZJR19LRVhFQykKR3JlZzogc3lzZnMgOiBvbmUg
+ZmlsZSBvbmUgdmFsdWUgZm9yIGZ3X3ZlbmRvciwgcnVudGltZSwgdGFibGVzLiBbMDUvMDldCiAg
+ICAgIERvY3VtZW50IHRoZW0gaW4gQUJJIHRlc3RpbmcKSFBBOiAgRG9jdW1lbnQgdGhlIG5ldyB4
+bG9hZGZsYWcKQWxzbyB0aGVyZSdzIG90aGVyIGZ1bmN0aW9uIGNsZWFudXAgYW5kIGltcHJvdmVt
+ZW50IGZvciBlcnJvciBoYW5kbGluZy4KCkNoYW5nZXMgZnJvbSB2MzoKR3JlZzogc3lzZnMgY29k
+ZSBtb3ZlIHRvIHVzZSBfX0FUVFJfUk8gYW5kIGF0dHJfZ3JvdXAKQm9yaXM6IGNvbW1lbnRzIGFu
+ZCBjb2RlIGFsaWdubWVudAoKQWRkZWQgMyBuZXcgcGF0Y2hlcyBiZWxvdwoxMC1wcmludC1lZmkt
+cnVudGltZS1tZW1tYXAucGF0Y2gKICAtIDEwLzEyOiBwcmludCBvbmx5IHJ1bnRpbWUgcmFuZ2Vz
+IGluIGNhc2UgRUZJX0RFQlVHIHByaW50aW5nCjExLXJlc2VydmUtc2V0dXAtZGF0YS1sYXRlLnBh
+dGNoCiAgLSBmaXggYSBidWcgb2Yga2R1bXAga2VybmVsLCBtb3ZlIGZ1bmN0aW9uIGZvciByZXNl
+cnZpbmcgc2V0dXAgZGF0YQogICAgcmFuZ2VzIGxhdGUgYWZ0ZXIgcGFyc2luZyBtZW1tYXA9IGNt
+ZGxpbmUgcGFyYW1zIGJlY2F1c2Uga2R1bXAga2VybmVsCiAgICB3aWxsIHBhc3MgZXhhY3QgbWVt
+bWFwIGxhdGUuCjEyLXg4Ni1rZGVidWdmcy11c2UtaW9yZW1hcC5wYXRjaAogIC0gZml4IGEgYnVn
+IG9mIHg4Ni9rZXJuZWwva2RlYnVnZnMuYywgdXNlIGlvcmVtYXAgaW5zdGVhZCBvZiBfX3ZhIGZv
+cgogICAgbG93IG1lbSBiZWNhdXNlIF9fdmEgZG9lcyBub3Qgd29yayBmb3IgZXhhY3QgbWVtbWFw
+PQoKRGF2ZSBZb3VuZyAoMTIpOgogIGVmaTogcmVtb3ZlIHVudXNlZCB2YXJpYWJsZXMgaW4gX19t
+YXBfcmVnaW9uCiAgZWZpOiBhZGQgYSB3cmFwcGVyIGZ1bmN0aW9uIGVmaV9tYXBfcmVnaW9uX2Zp
+eGVkCiAgZWZpOiByZXNlcnZlIGJvb3Qgc2VydmljZSBmaXgKICBlZmk6IGNsZWFudXAgZWZpX2Vu
+dGVyX3ZpcnR1YWxfbW9kZSBmdW5jdGlvbgogIGVmaTogZXhwb3J0IG1vcmUgZWZpIHRhYmxlIHZh
+cmlhYmxlIHRvIHN5c2ZzCiAgZWZpOiBleHBvcnQgZWZpIHJ1bnRpbWUgbWVtb3J5IG1hcHBpbmcg
+dG8gc3lzZnMKICBlZmk6IHBhc3Npbmcga2V4ZWMgbmVjZXNzYXJ5IGVmaSBkYXRhIHZpYSBzZXR1
+cF9kYXRhCiAgZWZpOiBvbmx5IHByaW50IHNhdmVkIGVmaSBydW50aW1lIG1hcHMgaW5zdGVhZCBv
+ZiBhbGwgbWVtbWFwIHJhbmdlcwogICAgZm9yIGtleGVjCiAgeDg2OiBhZGQgeGxvYWRmbGFncyBi
+aXQgZm9yIGVmaSBydW50aW1lIHN1cHBvcnQgb24ga2V4ZWMKICB4ODY6IGV4cG9ydCB4ODYgYm9v
+dF9wYXJhbXMgdG8gc3lzZnMKICB4ODY6IHJlc2VydmUgc2V0dXBfZGF0YSByYW5nZXMgbGF0ZSBh
+ZnRlciBwYXJzaW5nIG1lbW1hcCBjbWRsaW5lCiAgeDg2OiBrZGVidWdmcyBkbyBub3QgdXNlIF9f
+dmEgZm9yIGdldHRpbmcgc2V0dXBfZGF0YSB2aXJ0IGFkZHIKCiBEb2N1bWVudGF0aW9uL0FCSS90
+ZXN0aW5nL3N5c2ZzLWZpcm13YXJlLWVmaSAgICAgICB8ICAyNiArKwogLi4uL0FCSS90ZXN0aW5n
+L3N5c2ZzLWZpcm13YXJlLWVmaS1ydW50aW1lLW1hcCAgICAgfCAgNDUgKysrCiBEb2N1bWVudGF0
+aW9uL0FCSS90ZXN0aW5nL3N5c2ZzLWtlcm5lbC1ib290X3BhcmFtcyB8ICA0MCArKysKIERvY3Vt
+ZW50YXRpb24veDg2L2Jvb3QudHh0ICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAzICsKIGFy
+Y2gveDg2L2Jvb3QvaGVhZGVyLlMgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA5ICst
+CiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9lZmkuaCAgICAgICAgICAgICAgICAgICAgICAgICB8ICAx
+MyArCiBhcmNoL3g4Ni9pbmNsdWRlL3VhcGkvYXNtL2Jvb3RwYXJhbS5oICAgICAgICAgICAgICB8
+ICAgMiArCiBhcmNoL3g4Ni9rZXJuZWwvTWFrZWZpbGUgICAgICAgICAgICAgICAgICAgICAgICAg
+ICB8ICAgMiArLQogYXJjaC94ODYva2VybmVsL2tkZWJ1Z2ZzLmMgICAgICAgICAgICAgICAgICAg
+ICAgICAgfCAgMzUgKy0tCiBhcmNoL3g4Ni9rZXJuZWwva3N5c2ZzLmMgICAgICAgICAgICAgICAg
+ICAgICAgICAgICB8IDMzOSArKysrKysrKysrKysrKysrKysrKysKIGFyY2gveDg2L2tlcm5lbC9z
+ZXR1cC5jICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA3ICstCiBhcmNoL3g4Ni9wbGF0
+Zm9ybS9lZmkvZWZpLmMgICAgICAgICAgICAgICAgICAgICAgICB8IDMxMyArKysrKysrKysrKysr
+KystLS0tCiBhcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZpXzMyLmMgICAgICAgICAgICAgICAgICAg
+ICB8ICAgMiArCiBhcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZpXzY0LmMgICAgICAgICAgICAgICAg
+ICAgICB8ICAxNiArLQogZHJpdmVycy9maXJtd2FyZS9lZmkvS2NvbmZpZyAgICAgICAgICAgICAg
+ICAgICAgICAgfCAgMTAgKwogZHJpdmVycy9maXJtd2FyZS9lZmkvTWFrZWZpbGUgICAgICAgICAg
+ICAgICAgICAgICAgfCAgIDEgKwogZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLmMgICAgICAgICAg
+ICAgICAgICAgICAgICAgfCAgNDcgKystCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9ydW50aW1lLW1h
+cC5jICAgICAgICAgICAgICAgICB8IDE5OSArKysrKysrKysrKysKIGluY2x1ZGUvbGludXgvZWZp
+LmggICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICA5ICsKIDE5IGZpbGVzIGNoYW5n
+ZWQsIDEwMjggaW5zZXJ0aW9ucygrKSwgOTAgZGVsZXRpb25zKC0pCiBjcmVhdGUgbW9kZSAxMDA2
+NDQgRG9jdW1lbnRhdGlvbi9BQkkvdGVzdGluZy9zeXNmcy1maXJtd2FyZS1lZmkKIGNyZWF0ZSBt
+b2RlIDEwMDY0NCBEb2N1bWVudGF0aW9uL0FCSS90ZXN0aW5nL3N5c2ZzLWZpcm13YXJlLWVmaS1y
+dW50aW1lLW1hcAogY3JlYXRlIG1vZGUgMTAwNjQ0IERvY3VtZW50YXRpb24vQUJJL3Rlc3Rpbmcv
+c3lzZnMta2VybmVsLWJvb3RfcGFyYW1zCiBjcmVhdGUgbW9kZSAxMDA2NDQgYXJjaC94ODYva2Vy
+bmVsL2tzeXNmcy5jCiBjcmVhdGUgbW9kZSAxMDA2NDQgZHJpdmVycy9maXJtd2FyZS9lZmkvcnVu
+dGltZS1tYXAuYwoKLS0gCjEuOC4zLjEKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fXwprZXhlYyBtYWlsaW5nIGxpc3QKa2V4ZWNAbGlzdHMuaW5mcmFkZWFk
+Lm9yZwpodHRwOi8vbGlzdHMuaW5mcmFkZWFkLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2tleGVjCg==
