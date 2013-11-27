@@ -1,61 +1,84 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Wed, 27 Nov 2013 10:17:47 +0000
-Message-ID: <20131127101747.GC18170@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v4 08/12] efi: only print saved efi runtime maps instead
+ of all memmap ranges for kexec
+Date: Wed, 27 Nov 2013 10:27:01 +0000
+Message-ID: <20131127102701.GD18170@console-pimps.org>
 References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-8-git-send-email-dyoung@redhat.com>
- <20131126220448.GB18170@console-pimps.org>
- <20131127045237.GC11852@dhcp-16-126.nay.redhat.com>
+ <1385445477-9665-9-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20131127045237.GC11852-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+In-Reply-To: <1385445477-9665-9-git-send-email-dyoung@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, bp@alien8.de, greg@kroah.com, toshi.kani@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 27 Nov, at 12:52:37PM, Dave Young wrote:
-> To make it more readable, I will change them like below:
+On Tue, 26 Nov, at 01:57:53PM, Dave Young wrote:
+> For kexec/kdump kernel efi runtime mappings are saved, printing original whole
+> memmap ranges does not make sense anymore. So introduce a new function to only
+> print runtime maps in case kexec/kdump kernel is used.
 > 
-> p = efi_runtime_map;
-> md = efi_setup->map;
-> for (i = 0; i < nr_efi_runtime_map; i++) {
-> 	[...]
-> 	md += 1;
-> }
- 
-Actually, md++ is the canonical way to write this.
+> Signed-off-by: Dave Young <dyoung@redhat.com>
+> ---
+>  arch/x86/platform/efi/efi.c | 23 ++++++++++++++++++++++-
+>  1 file changed, 22 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index fafeb40..c65b0b8 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -430,6 +430,24 @@ int __init efi_memblock_x86_reserve_range(void)
+>  	return 0;
+>  }
+>  
+> +/* for kexec kernel runtime maps are passed in setup_data */
+> +static void __init print_saved_runtime_map(void)
+> +{
+> +#ifdef EFI_DEBUG
+> +	int i;
+> +	efi_memory_desc_t *md;
+> +
+> +	for (i = 0; i < nr_efi_runtime_map; i++) {
+> +		md = esdata->map + i;
+> +		pr_info("mem%02u: type=%u, attr=0x%llx, "
+> +			"range=[0x%016llx-0x%016llx) (%lluMB)\n",
+> +			i, md->type, md->attribute, md->phys_addr,
+> +			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
+> +			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+> +	}
+> +#endif  /*  EFI_DEBUG  */
+> +}
+> +
+>  static void __init print_efi_memmap(void)
+>  {
+>  #ifdef EFI_DEBUG
+> @@ -782,7 +800,10 @@ void __init efi_init(void)
+>  		x86_platform.set_wallclock = efi_set_rtc_mmss;
+>  	}
+>  #endif
+> -	print_efi_memmap();
+> +	if (esdata)
+> +		print_saved_runtime_map();
+> +	else
+> +		print_efi_memmap();
+>  }
 
-> > 
-> > > +		efi_map_region_fixed(md);
-> > > +		size = md->num_pages << PAGE_SHIFT;
-> > > +		end = md->phys_addr + size;
-> > > +
-> > > +		systab = (u64) (unsigned long) efi_phys.systab;
-> > > +		if (md->phys_addr <= systab && systab < end) {
-> > > +			systab += md->virt_addr - md->phys_addr;
-> > > +			efi.systab =
-> > > +				(efi_system_table_t *) (unsigned long) systab;
-> > > +		}
-> > > +		if (efi_runtime_map) {
-> > > +			memcpy(p, md, memmap.desc_size);
-> > > +			p += memmap.desc_size;
-> > > +		}
-> > 
-> > Is this if () needed? Is it possible to enter the loop and have
-> > 'efi_runtime_map' be NULL?
-> 
-> Yes, it is needed. if efi_runtime_map kmalloc fails I only print error, do not
-> return so kernel can still boot, just kexec on efi will not work that has been
-> put in the error message.
- 
-OK. On second thought, is there any way to turn the above code into a
-call to efi_save_runtime_map()? Because you've basically duplicated that
-code and I can definitely envisage the two code paths fragmenting over
-time, e.g. when someone makes changes to one but not the other.
+Heh, you can probably already guess what I'm going to say here...
+
+How about using a single function to dump the memory ranges irrespective
+of whether the memory map comes from 'memmap' or 'esdata'? e.g.
+something along the lines of,
+
+	if (esdata)
+		print_efi_memmap(esdata->map, nr_efi_runtime_map,
+				 sizeof(esdata->map[0]));
+	else
+		print_efi_memmap(memmap.map, memmap.nr_map,
+				 memmap.desc_size);
+
+?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
