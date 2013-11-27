@@ -1,49 +1,58 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v4 09/12] x86: add xloadflags bit for efi runtime support
- on kexec
-Date: Wed, 27 Nov 2013 15:27:32 +0100
-Message-ID: <20131127142732.GF32267@pd.tnic>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-10-git-send-email-dyoung@redhat.com>
+From: Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>
+Subject: RE: [PATCH v2] efi-pstore: Make efi-pstore return a unique id
+Date: Wed, 27 Nov 2013 14:51:22 +0000
+Message-ID: <A5ED84D3BB3A384992CBB9C77DEDA4D47FA16730@USINDEM103.corp.hds.com>
+References: <87bo1bnxhi.fsf@redhat.com>
+ <20131127114440.GF18170@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1385445477-9665-10-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20131127114440.GF18170-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "'linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "richard-/L3Ra7n9ekc@public.gmane.org" <richard-/L3Ra7n9ekc@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 26, 2013 at 01:57:54PM +0800, Dave Young wrote:
-> Old kexec-tools can not load new kernel. The reason is previously kexec-tools
 
-The reason is, kexec-tools ... previously, thus efi failed to initialize ...
 
-> do not fill efi_info in x86 setup header thus efi init fail and switch
-> to noefi boot. In new kexec-tools it will by default fill efi_info and
-> pass other efi required infomation to 2nd kernel so kexec kernel efi
-> initialization will success finally.
-
-		      succeed
-
+> -----Original Message-----
+> From: Matt Fleming [mailto:matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org]
+> Sent: Wednesday, November 27, 2013 6:45 AM
+> To: Madper Xie
+> Cc: 'linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org'; linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org; matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org; Seiji Aguchi; richard-/L3Ra7n9ekc@public.gmane.org; Tony Luck
+> Subject: Re: [PATCH v2] efi-pstore: Make efi-pstore return a unique id
 > 
-> To prevent from breaking userspace, add a new xloadflags bit so kexec-tools
-> will check the flag and switch to old logic.
+> On Sat, 23 Nov, at 07:55:37PM, Madper Xie wrote:
+> >
+> > Pstore fs expects that backends provide a uniqued id which could avoid
+> > pstore making entries as duplication or denominating entries the same
+> > name. So I combine the timestamp, part and count into id.
+> >
+> > Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  drivers/firmware/efi/efi-pstore.c | 19 +++++++++++++------
+> >  1 file changed, 13 insertions(+), 6 deletions(-)
 > 
-> changelog:
-> Matt: +&& defined(CONFIG_KEXEC)
-> HPA: document the flag.
+> Thanks unless anyone complains, I'm going to apply this.
 > 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Other than that:
+I'm OK with this patch based on Madper's comment below.
 
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+<snip>
+So i'd like to using fixed length. My dell xps has 128kb nvram
+space. and it at most store 126 pstore entries. So I think 1000 will be
+a safe value for count. For part, 100 should be okay. I don't think
+there will be a large kmsg and we must split it into more than 100 parts.
+<snip>
 
--- 
-Regards/Gruss,
-    Boris.
+> Does this need to be tagged for stable?
+> 
 
-Sent from a fat crate under my desk. Formatting is fine.
---
+I think so.
+
+Seiji
+
+> --
+> Matt Fleming, Intel Open Source Technology Center
