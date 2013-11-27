@@ -1,77 +1,61 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 0/4 v3] kexec-tools: efi runtime support
-Date: Wed, 27 Nov 2013 17:29:46 +0800
-Message-ID: <20131127092946.GB19809@dhcp-16-126.nay.redhat.com>
-References: <20131121064043.969000753@dhcp-16-126.nay.redhat.com>
- <1385159448.1791.161.camel@misato.fc.hp.com>
- <20131124031228.GA1754@dhcp-16-126.nay.redhat.com>
- <1385393451.1791.168.camel@misato.fc.hp.com>
- <20131126061124.GB9727@dhcp-16-126.nay.redhat.com>
- <1385481553.1791.179.camel@misato.fc.hp.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Wed, 27 Nov 2013 10:17:47 +0000
+Message-ID: <20131127101747.GC18170@console-pimps.org>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-8-git-send-email-dyoung@redhat.com>
+ <20131126220448.GB18170@console-pimps.org>
+ <20131127045237.GC11852@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1385481553.1791.179.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20131127045237.GC11852-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/26/13 at 08:59am, Toshi Kani wrote:
-> On Tue, 2013-11-26 at 14:11 +0800, Dave Young wrote:
-> > On 11/25/13 at 08:30am, Toshi Kani wrote:
-> > > HI Dave,
-> > > 
-> > > I will test v4 again.  This time, I will test "memmap=exactmap" option
-> > > as well.  I have tested the following cases before.  Are there any other
-> > > cases you'd like me to test?
-> > > 
-> > >  - kdump
-> > >  - multiple fast reboots and then kdump
-> > >  - old kexec and new kernel w/ noefi & acpi_rsdp option
-> > >  - new kexec and old kernel w/ noefi & acpi_rsdp option
+On Wed, 27 Nov, at 12:52:37PM, Dave Young wrote:
+> To make it more readable, I will change them like below:
 > 
-> Retested the above cases with v4 patchset.
+> p = efi_runtime_map;
+> md = efi_setup->map;
+> for (i = 0; i < nr_efi_runtime_map; i++) {
+> 	[...]
+> 	md += 1;
+> }
+ 
+Actually, md++ is the canonical way to write this.
+
+> > 
+> > > +		efi_map_region_fixed(md);
+> > > +		size = md->num_pages << PAGE_SHIFT;
+> > > +		end = md->phys_addr + size;
+> > > +
+> > > +		systab = (u64) (unsigned long) efi_phys.systab;
+> > > +		if (md->phys_addr <= systab && systab < end) {
+> > > +			systab += md->virt_addr - md->phys_addr;
+> > > +			efi.systab =
+> > > +				(efi_system_table_t *) (unsigned long) systab;
+> > > +		}
+> > > +		if (efi_runtime_map) {
+> > > +			memcpy(p, md, memmap.desc_size);
+> > > +			p += memmap.desc_size;
+> > > +		}
+> > 
+> > Is this if () needed? Is it possible to enter the loop and have
+> > 'efi_runtime_map' be NULL?
 > 
-> > There's one more test case is w/ debugfs mounted in 1st kernel due to the
-> > new version exports setup_data to sysfs.
-> 
-> Tested w/ debugfs mounted.
-> 
-> > For the exactmap I think it's a corner case, I just tested it in virtual
-> > machine I think setup a right cmdline is hard. But feel free to test it if
-> > you can.
-> 
-> Tested with exactmap for multiple fast reboots.  I was not able to setup
-> kdump properly with this case, but it's not related with your changes
-> since I was not able to do it without your changes, either.
-> 
-> Feel free to add my tested-by.
+> Yes, it is needed. if efi_runtime_map kmalloc fails I only print error, do not
+> return so kernel can still boot, just kexec on efi will not work that has been
+> put in the error message.
+ 
+OK. On second thought, is there any way to turn the above code into a
+call to efi_save_runtime_map()? Because you've basically duplicated that
+code and I can definitely envisage the two code paths fragmenting over
+time, e.g. when someone makes changes to one but not the other.
 
-Toshi, thanks a lot for your effort.
-
-I would like to send a new version which addressing several issues
-for code structure improvement and changelog etc.
-
-If there's no further comments I will send them tommorrow. I have done the
-rebase in the personal git tree (kexec-efi branch):
-https://github.com/daveyoung/linux.git
-
-They are not functional changes, I hope the test result will be same.
-
-If you would like to do a quick test again I can add the tested-by when I resend
-them, or for saving your time just test them after people are ok with the
-patches themselves finally.
-
-Thanks
-Dave
+-- 
+Matt Fleming, Intel Open Source Technology Center
