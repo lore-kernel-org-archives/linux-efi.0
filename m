@@ -1,50 +1,32 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch 0/4 v3] kexec-tools: efi runtime support
-Date: Thu, 28 Nov 2013 10:13:22 +0800
-Message-ID: <20131128021322.GC4282@dhcp-16-126.nay.redhat.com>
-References: <20131121064043.969000753@dhcp-16-126.nay.redhat.com>
- <1385159448.1791.161.camel@misato.fc.hp.com>
- <20131124031228.GA1754@dhcp-16-126.nay.redhat.com>
- <1385393451.1791.168.camel@misato.fc.hp.com>
- <20131126061124.GB9727@dhcp-16-126.nay.redhat.com>
- <1385481553.1791.179.camel@misato.fc.hp.com>
- <20131127092946.GB19809@dhcp-16-126.nay.redhat.com>
- <20131127115609.GC32267@pd.tnic>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2] efi-pstore: Make efi-pstore return a unique id
+Date: Thu, 28 Nov 2013 10:15:18 +0800
+Message-ID: <87vbzdb7bd.fsf@redhat.com>
+References: <87bo1bnxhi.fsf@redhat.com> <20131127114440.GF18170@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131127115609.GC32267-fF5Pk5pvG8Y@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-reply-to: <20131127114440.GF18170-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming@intel.com" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "richard@nod.at" <richard-/L3Ra7n9ekc@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/27/13 at 12:56pm, Borislav Petkov wrote:
-> On Wed, Nov 27, 2013 at 05:29:46PM +0800, Dave Young wrote:
-> > I would like to send a new version which addressing several issues for
-> > code structure improvement and changelog etc.
-> >
-> > If there's no further comments I will send them tommorrow.
-> 
-> As a rule of thumb you should wait ~week and give chance to people to
-> review your stuff completely before spamming them again with the whole
-> patchset. :)
-> 
-> So please be patient until we've finished going through v4.
 
-Sure, thanks. 
+matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org writes:
 
-I will be away from computer today so I will reply other emails tomorrow
-and post fixes next week.
-
-Dave
+> On Sat, 23 Nov, at 07:55:37PM, Madper Xie wrote:
+>> 
+>> Pstore fs expects that backends provide a uniqued id which could avoid
+>> pstore making entries as duplication or denominating entries the same
+>> name. So I combine the timestamp, part and count into id.
+>> 
+>> Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> ---
+>>  drivers/firmware/efi/efi-pstore.c | 19 +++++++++++++------
+>>  1 file changed, 13 insertions(+), 6 deletions(-)
+>
+> Thanks unless anyone complains, I'm going to apply this.
+>
+> Does this need to be tagged for stable?
+Since it fix a real issue, my answer is "Yes".
