@@ -1,73 +1,70 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: [PATCH V5 1/6] efi-stub.txt updates for ARM
-Date: Wed, 27 Nov 2013 15:31:50 -0800
-Message-ID: <1385595115-21488-2-git-send-email-roy.franz@linaro.org>
-References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux@arm.linux.org.uk
-Cc: leif.lindholm@linaro.org, grant.likely@linaro.org, dave.martin@arm.com, msalter@redhat.com, patches@linaro.org, Roy Franz <roy.franz@linaro.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 00/12] kexec kernel efi runtime support
+Date: Thu, 28 Nov 2013 10:08:40 +0800
+Message-ID: <20131128020840.GB4282@dhcp-16-126.nay.redhat.com>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <20131127125003.GG18170@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131127125003.GG18170-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Update efi-stub.txt documentation to be more general
-and not x86 specific.  Add ARM only "dtb=" command
-line option description.
+On 11/27/13 at 12:50pm, Matt Fleming wrote:
+> On Tue, 26 Nov, at 01:57:45PM, Dave Young wrote:
+> > Hi,
+> > 
+> > Here is the V4 resend for supporting kexec kernel efi runtime.
+> > Per pervious discussion I pass the 1st kernel efi runtime mapping
+> > via setup_data to 2nd kernel. Besides of the runtime mapping
+> > info I also pass the fw_vendor, runtime, config table, smbios
+> > physical address in setup_data. EFI spec mentioned fw_vendor,
+> > runtime, config table addresses will be converted to virt address
+> > after entering virtual mode, but we will use it as physical address
+> > in efi_init. For smbios EFI spec did not mention about the address
+> > updating, but during my test on a HP workstation, the bios will
+> > convert it to Virt addr, thus pass it in setup_data as well.
+>  
+> Dave, your commits introduce a bunch of new sparse warnings,
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
----
- Documentation/efi-stub.txt |   27 ++++++++++++++++++++-------
- 1 file changed, 20 insertions(+), 7 deletions(-)
+Hi, Matt
 
-diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-index 44e6bb6..19e897c 100644
---- a/Documentation/efi-stub.txt
-+++ b/Documentation/efi-stub.txt
-@@ -1,13 +1,16 @@
- 			  The EFI Boot Stub
- 		     ---------------------------
- 
--On the x86 platform, a bzImage can masquerade as a PE/COFF image,
--thereby convincing EFI firmware loaders to load it as an EFI
--executable. The code that modifies the bzImage header, along with the
--EFI-specific entry point that the firmware loader jumps to are
--collectively known as the "EFI boot stub", and live in
-+On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
-+as a PE/COFF image, thereby convincing EFI firmware loaders to load
-+it as an EFI executable. The code that modifies the bzImage header,
-+along with the EFI-specific entry point that the firmware loader
-+jumps to are collectively known as the "EFI boot stub", and live in
- arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
--respectively.
-+respectively.  For ARM the EFI stub is implemented in
-+arch/arm/boot/compressed/efi-header.S and
-+arch/arm/boot/compressed/efi-stub.c.  EFI stub code that is shared
-+between architectures is in drivers/firmware/efi/efi-stub-helper.c.
- 
- By using the EFI boot stub it's possible to boot a Linux kernel
- without the use of a conventional EFI boot loader, such as grub or
-@@ -23,7 +26,9 @@ The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
- System Partiion (ESP) and renamed with the extension ".efi". Without
- the extension the EFI firmware loader will refuse to execute it. It's
- not possible to execute bzImage.efi from the usual Linux file systems
--because EFI firmware doesn't have support for them.
-+because EFI firmware doesn't have support for them.  For ARM the
-+arch/arm/boot/zImage should be copied to the system partition, and it
-+may not need to be renamed.
- 
- 
- **** Passing kernel parameters from the EFI shell
-@@ -63,3 +68,11 @@ Notice how bzImage.efi can be specified with a relative path. That's
- because the image we're executing is interpreted by the EFI shell,
- which understands relative paths, whereas the rest of the command line
- is passed to bzImage.efi.
-+
-+
-+**** The "dtb=" option
-+
-+For the ARM architecture, we also need to be able to provide a device
-+tree to the kernel.  This is done with the "dtb=" command line option,
-+and is process in the same manner as the "initrd=" option that is described
-+above.
--- 
-1.7.10.4
+Will fix them, thanks.
+
+> 
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:130:15: warning: incorrect type in assignment (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:130:15:    expected struct setup_data *sdata
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:130:15:    got void [noderef] <asn:2>*
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:140:23: warning: incorrect type in argument 1 (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:140:23:    expected void [noderef] <asn:2>*addr
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:140:23:    got struct setup_data *sdata
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:143:16: warning: incorrect type in assignment (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:143:16:    expected struct efi_setup_data *[addressable] [toplevel] esdata
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:143:16:    got void [noderef] <asn:2>*
+> 
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:701:20: warning: incorrect type in assignment (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:701:20:    expected void *tablep
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:701:20:    got void [noderef] <asn:2>*
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:722:23: warning: incorrect type in argument 1 (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:722:23:    expected void [noderef] <asn:2>*addr
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:722:23:    got void *tablep
+> 
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:1079:31: warning: incorrect type in argument 1 (different address spaces)
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:1079:31:    expected void [noderef] <asn:2>*addr
+> /home/build/git/efi/arch/x86/platform/efi/efi.c:1079:31:    got struct efi_setup_data *[addressable] [toplevel] esdata
+> 
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
