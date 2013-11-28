@@ -1,32 +1,61 @@
-From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2] efi-pstore: Make efi-pstore return a unique id
-Date: Thu, 28 Nov 2013 10:15:18 +0800
-Message-ID: <87vbzdb7bd.fsf@redhat.com>
-References: <87bo1bnxhi.fsf@redhat.com> <20131127114440.GF18170@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-reply-to: <20131127114440.GF18170-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "'linux-kernel@vger.kernel.org'" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming@intel.com" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Seiji Aguchi <seiji.aguchi-7rDLJAbr9SE@public.gmane.org>, "richard@nod.at" <richard-/L3Ra7n9ekc@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v3 0/3] (U)EFI runtime services for arm
+Date: Thu, 28 Nov 2013 16:41:20 +0000
+Message-ID: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux@arm.linux.org.uk
+Cc: matt.fleming@intel.com, grant.likely@linaro.org, roy.franz@linaro.org, msalter@redhat.com, patches@linaro.org, linaro-uefi@linaro.org, mark.rutland@arm.com, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
+In systems based on [U]EFI-conformant firmware, runtime services provide
+a standardised way for the kernel to update firmware environment
+variables. This is used for example by efibootmgr to update which image
+should be loaded on next boot.
 
-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org writes:
+This patchset implements basic support for UEFI runtime services on ARM
+platforms, as well as the basic underlying EFI support. It also defines
+a mechanism by which the required information is passed from the
+bootloader (the EFI stub submitted separately) to the kernel via FDT
+entries.
 
-> On Sat, 23 Nov, at 07:55:37PM, Madper Xie wrote:
->> 
->> Pstore fs expects that backends provide a uniqued id which could avoid
->> pstore making entries as duplication or denominating entries the same
->> name. So I combine the timestamp, part and count into id.
->> 
->> Signed-off-by: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> ---
->>  drivers/firmware/efi/efi-pstore.c | 19 +++++++++++++------
->>  1 file changed, 13 insertions(+), 6 deletions(-)
->
-> Thanks unless anyone complains, I'm going to apply this.
->
-> Does this need to be tagged for stable?
-Since it fix a real issue, my answer is "Yes".
+This patchset depends on the presence of early_ioremap(). It has been
+validated against Mark Salter's generic implementation.
+
+Changes from v2:
+- Updated FDT bindings.
+- The EFI stub is now the only loader that will support the kernel
+  enabling runtime services.
+- Documentation updates.
+
+Changes from v1:
+- Updated FDT bindings, based on feedback.
+- Use common config table scanning and address lookup code.
+- Add dependency on !CPU_BIG_ENDIAN (for now).
+- Add proper efi_enabled() facility.
+- Documentation updates.
+
+
+Leif Lindholm (3):
+  Documentation: arm: add UEFI support documentation
+  arm: Add [U]EFI runtime services support
+  init: efi: arm: enable (U)EFI runtime services on arm
+
+ Documentation/arm/00-INDEX  |    3 +
+ Documentation/arm/uefi.txt  |   61 ++++++
+ arch/arm/Kconfig            |   15 ++
+ arch/arm/include/asm/uefi.h |   22 ++
+ arch/arm/kernel/Makefile    |    2 +
+ arch/arm/kernel/setup.c     |    6 +
+ arch/arm/kernel/uefi.c      |  469 +++++++++++++++++++++++++++++++++++++++++++
+ arch/arm/kernel/uefi_phys.S |   59 ++++++
+ include/linux/efi.h         |    2 +-
+ init/main.c                 |    4 +
+ 10 files changed, 642 insertions(+), 1 deletion(-)
+ create mode 100644 Documentation/arm/uefi.txt
+ create mode 100644 arch/arm/include/asm/uefi.h
+ create mode 100644 arch/arm/kernel/uefi.c
+ create mode 100644 arch/arm/kernel/uefi_phys.S
+
+-- 
+1.7.10.4
