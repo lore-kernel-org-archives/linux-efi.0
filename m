@@ -1,32 +1,33 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v3 0/3] (U)EFI runtime services for arm
-Date: Fri, 29 Nov 2013 11:53:19 +0000
-Message-ID: <20131129115319.GC11775@console-pimps.org>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
+Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
+Date: Fri, 29 Nov 2013 11:59:53 +0000
+Message-ID: <20131129115953.GD11775@console-pimps.org>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-7-git-send-email-dyoung@redhat.com>
+ <20131127114402.GB32267@pd.tnic>
+ <20131129094034.GI4186@dhcp-16-126.nay.redhat.com>
+ <20131129115029.GB4266@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1385656883-4420-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20131129115029.GB4266-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linaro-uefi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 28 Nov, at 04:41:20PM, Leif Lindholm wrote:
-> In systems based on [U]EFI-conformant firmware, runtime services provide
-> a standardised way for the kernel to update firmware environment
-> variables. This is used for example by efibootmgr to update which image
-> should be loaded on next boot.
+On Fri, 29 Nov, at 12:50:29PM, Borislav Petkov wrote:
+> > I did not add KEXEC because I thought it can be used for debugging
+> > purpose.
 > 
-> This patchset implements basic support for UEFI runtime services on ARM
-> platforms, as well as the basic underlying EFI support. It also defines
-> a mechanism by which the required information is passed from the
-> bootloader (the EFI stub submitted separately) to the kernel via FDT
-> entries.
-
-This all looks pretty good to me. Is this series going through the ARM
-trees?
+> mfleming is thinking about it :)
+ 
+I finally finished my thought. The sysfs code should be automatically
+enabled only if CONFIG_KEXEC is enabled, and not on my default because
+it is a debug interface. While it's true that the code may be useful for
+debugging the memory mappings of EFI systems, it doesn't make sense to
+always turn it on just for CONFIG_X86 and CONFIG_EFI.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
