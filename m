@@ -1,45 +1,59 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] UEFI: Don't use UEFI time services on 32-bit
-Date: Sat, 30 Nov 2013 06:04:07 +0800
-Message-ID: <1385762647.3539.4.camel@linux-s257.site>
-References: <1385754283-2464-1-git-send-email-matthew.garrett@nebula.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1385754283-2464-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+From: Mark Salter <msalter@redhat.com>
+Subject: [PATCH 0/3] arm64: Add EFI stub and runtime services support
+Date: Fri, 29 Nov 2013 17:05:09 -0500
+Message-ID: <1385762712-17043-1-git-send-email-msalter@redhat.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: patches@linaro.org, Mark Salter <msalter@redhat.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, linux-efi@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, roy.franz@linaro.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-doc@vger.kernel.org, Rob Landley <rob@landley.net>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matthew,=20
+This patch series adds EFI support to the arm64 kernel. This support has
+two main parts: an EFI stub and runtime support. The EFI stub support
+has the kernel masquerade as a PE/COFF application which can be directly
+booted by EFI firmware (or by secondary loaders with EFI support). The
+runtime services support provides access to various EFI firmware services
+such as reboot, real-time clock, boot variables, and others.
 
-=E6=96=BC =E4=BA=94=EF=BC=8C2013-11-29 =E6=96=BC 14:44 -0500=EF=BC=8CMa=
-tthew Garrett =E6=8F=90=E5=88=B0=EF=BC=9A
->=20
-> UEFI time services are often broken once we're in virtual mode. We
-> were
-> already refusing to use them on 64-bit systems, but it turns out that
-> they're also broken on some 32-bit firmware, including the Dell Venue=
-=2E
-> Disable them for now, we can revisit once we have the 1:1 mappings
-> code
-> incorporated.
->=20
-> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-> Cc: stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org=20
+These patches have dependencies on other patches which are not yet in
+the kernel but have been posted and are currently under review. In
+particular:
 
-Does there have chance to test Borislav's EFI runtime mapping work on
-Dell Venue?
+  - Generic fixmap support being discussed here:
+      http://lkml.org/lkml/2013/11/25/474
 
-Borislav's patches here:
-git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi
+  - early_ioremap support being discussed here:
+      https://lkml.org/lkml/2013/11/27/621
 
-I am sure his patchset can walkaround physical address accessing issue
-on a broken 64-bit machine. But, I didn't test it on 32-bit issue
-machine.
+  - shared EFI update_fdt() function being discussed here:
+      https://lkml.org/lkml/2013/11/27/565
 
+A repo with this patch series and the prerequisite patches is at:
 
-Thanks a lot!
-Joey Lee
+  git://github.com/mosalter/linux.git (arm64-efi-patches branch)
+
+Mark Salter (3):
+  arm64: add EFI stub
+  doc: arm64: add description of EFI stub support
+  arm64: add EFI runtime services
+
+ Documentation/arm64/booting.txt |   4 +
+ Documentation/efi-stub.txt      |  10 +-
+ arch/arm64/Kconfig              |  25 ++
+ arch/arm64/include/asm/efi.h    |  18 ++
+ arch/arm64/kernel/Makefile      |   4 +
+ arch/arm64/kernel/efi-entry.S   |  81 +++++++
+ arch/arm64/kernel/efi-stub.c    | 280 ++++++++++++++++++++++
+ arch/arm64/kernel/efi.c         | 507 ++++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/head.S        | 112 +++++++++
+ arch/arm64/kernel/setup.c       |   6 +
+ include/linux/efi.h             |   2 +-
+ 11 files changed, 1046 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm64/include/asm/efi.h
+ create mode 100644 arch/arm64/kernel/efi-entry.S
+ create mode 100644 arch/arm64/kernel/efi-stub.c
+ create mode 100644 arch/arm64/kernel/efi.c
+
+-- 
+1.8.3.1
+
