@@ -1,17 +1,16 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Fri, 29 Nov 2013 17:14:16 +0800
-Message-ID: <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
+Date: Fri, 29 Nov 2013 17:40:35 +0800
+Message-ID: <20131129094034.GI4186@dhcp-16-126.nay.redhat.com>
 References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-8-git-send-email-dyoung@redhat.com>
- <20131127140732.GD32267@pd.tnic>
+ <1385445477-9665-7-git-send-email-dyoung@redhat.com>
+ <20131127114402.GB32267@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131127140732.GD32267-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20131127114402.GB32267-fF5Pk5pvG8Y@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -25,191 +24,612 @@ To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gMTEvMjcvMTMgYXQgMDM6MDdwbSwgQm9yaXNsYXYgUGV0a292IHdyb3RlOgo+IE9uIFR1ZSwg
-Tm92IDI2LCAyMDEzIGF0IDAxOjU3OjUyUE0gKzA4MDAsIERhdmUgWW91bmcgd3JvdGU6Cj4gPiBB
-ZGQgYSBuZXcgc2V0dXBfZGF0YSB0eXBlIFNFVFVQX0VGSSBmb3Iga2V4ZWMgdXNlLgo+ID4gUGFz
-c2luZyB0aGUgc2F2ZWQgZndfdmVuZG9yLCBydW50aW1lLCBjb25maWcgdGFibGVzIGFuZAo+ID4g
-ZWZpIHJ1bnRpbWUgbWFwcGluZ3MuCj4gPiAKPiA+IFdoZW4gZW50ZXJpbmcgdmlydHVhbCBtb2Rl
-LCBkaXJlY3RseSBtYXBwaW5nIHRoZSBlZmkKPiA+IHJ1bnRpbWUgcmFnaW9ucyB3aGljaCB3ZSBw
-YXNzZWQgaW4gcHJldmlvdXNseS4gQW5kIHNraXAKPiA+IHRoZSBzdGVwIHRvIGNhbGwgU2V0Vmly
-dHVhbEFkZHJlc3NNYXAuCj4gPiAKPiA+IFNwZWNpYWxseSBmb3IgSFAgejQyMCB3b3Jrc3RhdGlv
-biBpdCBuZWVkIGFub3RoZXIgdmFyaWFibGUKPiA+IHNhdmluZywKPiAKPiBXaHkgdGhlIHNwZWNp
-YWwgaGFuZGxpbmc/IERvZXMgdGhhdCBtZWFuLCB0aGlzIGlzIGdvaW5nIHRvIGJlIHRoZSBjYXNl
-Cj4gZm9yIG90aGVyIEhQIFVFRkkgaW1wbGVtZW50YXRpb25zIHRvbz8KCkkgaGF2ZSBvbmx5IG9u
-ZSBIUCBtYWNoaW5lIGZvciB0ZXN0aW5nLCBNYXliZSBUb3NoaSBjYW4gaGVscCB0byB2ZXJpZnkK
-b24gb3RoZXIgbWFjaGluZXMuIEp1c3QgY29tbWVudCBvdXQgdGhlIGZ1bmN0aW9uIGVmaV9yZXVz
-ZV9jb25maWcgdG8gc2VlCmlmIGtleGVjIGtlcm5lbCBwYW5pYy4KCj4gCj4gPiBpdCdzIHRoZSBz
-bWJpb3MgcGh5c2ljYWwgYWRkcmVzcywgdGhlIEhQIGJpb3MKPiA+IGFsc28gdXBkYXRlIHRoZSBT
-TUJJT1MgYWRkcmVzcyBhZnRlciBlbnRlcmluZyB2aXJ0dWFsIG1vZGUKPiA+IGJlc2lkZXMgb2Yg
-dGhlIHN0YW5kYXJkIGZ3X3ZlbmRvcixydW50aW1lIGFuZCBjb25maWcgdGFibGUuCj4gPiAKPiA+
-IFRlc3RlZCBvbiBvdm1mK3FlbXUsIGxlbm92byB0aGlua3BhZCwgYSBkZWxsIGxhcHRvcCBhbmQg
-YW4KPiA+IEhQIHo0MjAgd29ya3N0YXRpb24uCj4gPiAKPiA+IHYyOiByZWZyZXNoIGJhc2VkIG9u
-IHByZXZpb3VzIHBhdGNoIGNoYW5nZXMsIGNvZGUgY2xlYW51cC4KPiA+IHYzOiB1c2UgaW9yZW1h
-cCBpbnN0ZWFkIG9mIHBoeXNfdG9fdmlydCBmb3IgZXNkYXRhCj4gPiAKPiA+IFNpZ25lZC1vZmYt
-Ynk6IERhdmUgWW91bmcgPGR5b3VuZ0ByZWRoYXQuY29tPgo+ID4gLS0tCj4gPiAgYXJjaC94ODYv
-aW5jbHVkZS9hc20vZWZpLmggICAgICAgICAgICB8ICAxMiArKysKPiA+ICBhcmNoL3g4Ni9pbmNs
-dWRlL3VhcGkvYXNtL2Jvb3RwYXJhbS5oIHwgICAxICsKPiA+ICBhcmNoL3g4Ni9rZXJuZWwvc2V0
-dXAuYyAgICAgICAgICAgICAgIHwgICAzICsKPiA+ICBhcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZp
-LmMgICAgICAgICAgIHwgMTYxICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0KPiA+
-ICA0IGZpbGVzIGNoYW5nZWQsIDE2MCBpbnNlcnRpb25zKCspLCAxNyBkZWxldGlvbnMoLSkKPiA+
-IAo+ID4gZGlmZiAtLWdpdCBhL2FyY2gveDg2L2luY2x1ZGUvYXNtL2VmaS5oIGIvYXJjaC94ODYv
-aW5jbHVkZS9hc20vZWZpLmgKPiA+IGluZGV4IDlmYmFlYjIuLjczZDU2NDMgMTAwNjQ0Cj4gPiAt
-LS0gYS9hcmNoL3g4Ni9pbmNsdWRlL2FzbS9lZmkuaAo+ID4gKysrIGIvYXJjaC94ODYvaW5jbHVk
-ZS9hc20vZWZpLmgKPiA+IEBAIC0xMzMsNiArMTMzLDE4IEBAIGV4dGVybiB2b2lkIGVmaV9zeW5j
-X2xvd19rZXJuZWxfbWFwcGluZ3Modm9pZCk7Cj4gPiAgZXh0ZXJuIHZvaWQgZWZpX3NldHVwX3Bh
-Z2VfdGFibGVzKHZvaWQpOwo+ID4gIGV4dGVybiB2b2lkIF9faW5pdCBvbGRfbWFwX3JlZ2lvbihl
-ZmlfbWVtb3J5X2Rlc2NfdCAqbWQpOwo+ID4gIAo+ID4gK3N0cnVjdCBlZmlfc2V0dXBfZGF0YSB7
-Cj4gPiArCXU2NCBmd192ZW5kb3I7Cj4gPiArCXU2NCBydW50aW1lOwo+ID4gKwl1NjQgdGFibGVz
-Owo+ID4gKwl1NjQgc21iaW9zOwo+ID4gKwl1NjQgcmVzZXJ2ZWRbOF07Cj4gCj4gV2hhdCdzIHRo
-YXQgZm9yPwoKVGhhdCdzIHJlc2VydmVkIGZvciBmdXR1cmUgZXh0ZW5zaW9uIHVzZSwgd2hvIGtu
-b3dzIGlmIHdlIHdpbGwgbmVlZAp0byBwYXNzIG90aGVyIGZpZWxkcyBpbiB0aGUgZnV0dXJlLgoK
-PiAKPiA+ICsJZWZpX21lbW9yeV9kZXNjX3QgbWFwWzBdOwo+ID4gK307Cj4gPiArCj4gPiArZXh0
-ZXJuIHZvaWQgcGFyc2VfZWZpX3NldHVwKHU2NCBwaHlzX2FkZHIsIHUzMiBkYXRhX2xlbik7Cj4g
-PiArZXh0ZXJuIHN0cnVjdCBlZmlfc2V0dXBfZGF0YSAqZXNkYXRhOwo+ID4gKwo+ID4gICNpZmRl
-ZiBDT05GSUdfRUZJCj4gPiAgCj4gPiAgc3RhdGljIGlubGluZSBib29sIGVmaV9pc19uYXRpdmUo
-dm9pZCkKPiAKPiBbIOKApiBdCj4gCj4gPiBkaWZmIC0tZ2l0IGEvYXJjaC94ODYvcGxhdGZvcm0v
-ZWZpL2VmaS5jIGIvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaS5jCj4gPiBpbmRleCBjM2EyYWFh
-Li5mYWZlYjQwIDEwMDY0NAo+ID4gLS0tIGEvYXJjaC94ODYvcGxhdGZvcm0vZWZpL2VmaS5jCj4g
-PiArKysgYi9hcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZpLmMKPiA+IEBAIC01MDQsOCArNTMxLDEy
-IEBAIHN0YXRpYyBpbnQgX19pbml0IGVmaV9zeXN0YWJfaW5pdCh2b2lkICpwaHlzKQo+ID4gIAkJ
-fQo+ID4gIAo+ID4gIAkJZWZpX3N5c3RhYi5oZHIgPSBzeXN0YWI2NC0+aGRyOwo+ID4gLQkJZWZp
-X3N5c3RhYi5md192ZW5kb3IgPSBzeXN0YWI2NC0+ZndfdmVuZG9yOwo+ID4gLQkJdG1wIHw9IHN5
-c3RhYjY0LT5md192ZW5kb3I7Cj4gPiArCj4gPiArCQlpZiAoZXNkYXRhKQo+ID4gKwkJCWVmaV9z
-eXN0YWIuZndfdmVuZG9yID0gKHVuc2lnbmVkIGxvbmcpZXNkYXRhLT5md192ZW5kb3I7Cj4gPiAr
-CQllbHNlCj4gPiArCQkJZWZpX3N5c3RhYi5md192ZW5kb3IgPSBzeXN0YWI2NC0+ZndfdmVuZG9y
-Owo+IAo+IAkJZWZpX3N5c3RhYi5md192ZW5kb3IgPSBlc2RhdGEgPyAodW5zaWduZWQgbG9uZyll
-c2RhdGEtPmZ3X3ZlbmRvcgo+IAkJCQkJICAgICAgOiBzeXN0YWI2NC0+ZndfdmVuZG9yOwoKT2ss
-IHdpbGwgdXBkYXRlLgoKPiAKPiA+ICsJCXRtcCB8PSBlZmlfc3lzdGFiLmZ3X3ZlbmRvcjsKPiA+
-ICAJCWVmaV9zeXN0YWIuZndfcmV2aXNpb24gPSBzeXN0YWI2NC0+ZndfcmV2aXNpb247Cj4gPiAg
-CQllZmlfc3lzdGFiLmNvbl9pbl9oYW5kbGUgPSBzeXN0YWI2NC0+Y29uX2luX2hhbmRsZTsKPiA+
-ICAJCXRtcCB8PSBzeXN0YWI2NC0+Y29uX2luX2hhbmRsZTsKPiA+IEBAIC01MTksMTMgKzU1MCwy
-MSBAQCBzdGF0aWMgaW50IF9faW5pdCBlZmlfc3lzdGFiX2luaXQodm9pZCAqcGh5cykKPiA+ICAJ
-CXRtcCB8PSBzeXN0YWI2NC0+c3RkZXJyX2hhbmRsZTsKPiA+ICAJCWVmaV9zeXN0YWIuc3RkZXJy
-ID0gc3lzdGFiNjQtPnN0ZGVycjsKPiA+ICAJCXRtcCB8PSBzeXN0YWI2NC0+c3RkZXJyOwo+ID4g
-LQkJZWZpX3N5c3RhYi5ydW50aW1lID0gKHZvaWQgKikodW5zaWduZWQgbG9uZylzeXN0YWI2NC0+
-cnVudGltZTsKPiA+IC0JCXRtcCB8PSBzeXN0YWI2NC0+cnVudGltZTsKPiA+ICsJCWlmIChlc2Rh
-dGEpCj4gPiArCQkJZWZpX3N5c3RhYi5ydW50aW1lID0KPiA+ICsJCQkJKHZvaWQgKikodW5zaWdu
-ZWQgbG9uZyllc2RhdGEtPnJ1bnRpbWU7Cj4gPiArCQllbHNlCj4gPiArCQkJZWZpX3N5c3RhYi5y
-dW50aW1lID0KPiA+ICsJCQkJKHZvaWQgKikodW5zaWduZWQgbG9uZylzeXN0YWI2NC0+cnVudGlt
-ZTsKPiAKPiBEaXR0by4gV2hpY2ggd291bGQgdGFrZSBjYXJlIG9mIHRoZXNlIGxpbmVicmVha3Mg
-d2hpY2ggYXJlIHVnbHkuCgpXaWxsIGRvLgoKPiAKPiA+ICsJCXRtcCB8PSAodW5zaWduZWQgbG9u
-ZyllZmlfc3lzdGFiLnJ1bnRpbWU7Cj4gPiAgCQllZmlfc3lzdGFiLmJvb3R0aW1lID0gKHZvaWQg
-KikodW5zaWduZWQgbG9uZylzeXN0YWI2NC0+Ym9vdHRpbWU7Cj4gPiAgCQl0bXAgfD0gc3lzdGFi
-NjQtPmJvb3R0aW1lOwo+ID4gIAkJZWZpX3N5c3RhYi5ucl90YWJsZXMgPSBzeXN0YWI2NC0+bnJf
-dGFibGVzOwo+ID4gLQkJZWZpX3N5c3RhYi50YWJsZXMgPSBzeXN0YWI2NC0+dGFibGVzOwo+ID4g
-LQkJdG1wIHw9IHN5c3RhYjY0LT50YWJsZXM7Cj4gPiArCQlpZiAoZXNkYXRhKQo+ID4gKwkJCWVm
-aV9zeXN0YWIudGFibGVzID0gKHVuc2lnbmVkIGxvbmcpZXNkYXRhLT50YWJsZXM7Cj4gPiArCQll
-bHNlCj4gPiArCQkJZWZpX3N5c3RhYi50YWJsZXMgPSBzeXN0YWI2NC0+dGFibGVzOwo+IAo+IERp
-dHRvLgoKV2lsbCBkbwoKPiAKPiA+ICsJCXRtcCB8PSBlZmlfc3lzdGFiLnRhYmxlczsKPiA+ICAK
-PiA+ICAJCWVhcmx5X2lvdW5tYXAoc3lzdGFiNjQsIHNpemVvZigqc3lzdGFiNjQpKTsKPiA+ICAj
-aWZkZWYgQ09ORklHX1g4Nl8zMgo+ID4gQEAgLTYzMSw2ICs2NzAsNDEgQEAgc3RhdGljIGludCBf
-X2luaXQgZWZpX21lbW1hcF9pbml0KHZvaWQpCj4gPiAgCXJldHVybiAwOwo+ID4gIH0KPiA+ICAK
-PiA+ICtzdGF0aWMgaW50IF9faW5pdCBlZmlfcmV1c2VfY29uZmlnKHU2NCB0YWJsZXMsIGludCBu
-cl90YWJsZXMpCj4gCj4gU3RhdGljIGZ1bmN0aW9uIC0gbm8gbmVlZCBmb3IgImVmaV8iIHByZWZp
-eC4KCk9rLiBJJ20gbm90IHZlcnkgc2F0aXNmaWVkIHdpdGggdGhlIGZ1bmN0aW9uIG5hbWUsIGFu
-eSBiZXR0ZXIKc3VnZ2VzdGlvbj8KCnJldXNlX2NvbmZpZwp1c2Vfb2xkX2NvbmZpZ19waHlzX2Fk
-ZHIKdXBkYXRlX2NvbmZpZ19lbnRyeV93aXRoX3BoeXNfYWRkcgouLi4KCj4gCj4gPiArewo+ID4g
-Kwl2b2lkICpwLCAqdGFibGVwOwo+ID4gKwlpbnQgaSwgc3o7Cj4gPiArCj4gPiArCWlmICghZWZp
-X2VuYWJsZWQoRUZJXzY0QklUKSkKPiA+ICsJCXJldHVybiAwOwo+ID4gKwo+ID4gKwlzeiA9IHNp
-emVvZihlZmlfY29uZmlnX3RhYmxlXzY0X3QpOwo+ID4gKwo+ID4gKwlwID0gdGFibGVwID0gZWFy
-bHlfbWVtcmVtYXAodGFibGVzLCBucl90YWJsZXMgKiBzeik7Cj4gPiArCWlmICghcCkgewo+ID4g
-KwkJcHJfZXJyKCJDb3VsZCBub3QgbWFwIENvbmZpZ3VyYXRpb24gdGFibGUhXG4iKTsKPiA+ICsJ
-CXJldHVybiAtRU5PTUVNOwo+ID4gKwl9Cj4gPiArCj4gPiArCWZvciAoaSA9IDA7IGkgPCBlZmku
-c3lzdGFiLT5ucl90YWJsZXM7IGkrKykgewo+ID4gKwkJZWZpX2d1aWRfdCBndWlkOwo+ID4gKwo+
-ID4gKwkJZ3VpZCA9ICgoZWZpX2NvbmZpZ190YWJsZV82NF90ICopcCktPmd1aWQ7Cj4gPiArCj4g
-PiArCQkvKgo+ID4gKwkJSFAgejQyMCB3b3Jrc3RhdGlvbiBzbWJpb3Mgd2lsbCBiZSBjb252ZXJ0
-IHRvCj4gPiArCQl2aXJ0dWFsIGFkZHJlc3MgYWZ0ZXIgZW50ZXIgdmlydHVhbCBtb2RlLgo+ID4g
-KwkJVGh1cyBpbiBjYXNlIGtleGVjL2tkdW1wIHRoZSBwaHlzaWNhbCBhZGRyZXNzCj4gPiArCQl3
-aWxsIGJlIHBhc3NlZCBpbiBzZXR1cF9kYXRhLgo+IAo+IElzIHRoYXQgd2hhdCB0aGUgY29tbWl0
-IG1lc3NhZ2UgYWJvdmUgc2F5cz8gSSdtIGhhdmluZyBhIGhhcmQgdGltZQo+IHBhcnNpbmcgdGhp
-cyB0ZXh0LgoKU2luY2UgTWF0dCBzdWdnZXN0IHRvIGV4dGVuZCB0aGUgZnVuY3Rpb24gZm9yIG90
-aGVyIHBvc3NpYmxlIGZpZWxkCm90aGVyIHRoYW4gc21iaW9zLCBzbyBJIHdvdWxkIGxpa2UgdG8g
-bW92ZSBjb21tZW50IHRvIHRoZSBmcm9udApvZiB0aGUgZnVuY3Rpb24gbGlrZSBiZWxvdzoKLyoK
-ICogRm9yIGtleGVjIGtlcm5lbCB0aGVyZSdzIHNvbWUgc3BlY2lhbCBjb25maWcgdGFibGUgZW50
-cmllcyB3aGljaCB3aWxsIGJlCiAqIGNvbnZlcnRlZCB0byB2aXJ0dWFsIGFkZHJlc3NlcyBhZnRl
-ciBlbnRlcmluZyB2aXJ0dWFsIG1vZGUuIEluIGtleGVjIGtlcm5lbAogKiB3ZSBuZWVkIHRoZSBw
-aHlzaWNhbCBhZGRyZXNzZXMgaW5zdGVhZCwgdGh1cyBwYXNzaW5nIHRoZW0gdmlhIHNldHVwX2Rh
-dGEKICogYW5kIHVwZGF0ZSB0aGUgZW50cmllcyB0byBwaHlzaWNhbCBhZGRyZXNzZXMgaW4gdGhp
-cyBmdW5jdGlvbi4KICoKICogQ3VycmVudGx5IG9ubHkgaGFuZGxlcyBzbWJpb3Mgd2hpY2ggaXMg
-bmVjZXNzYXJ5IGZvciBIUCB6NDIwLgogKi8Kc3RhdGljIGludCBfX2luaXQgZWZpX3JldXNlX2Nv
-bmZpZyh1NjQgdGFibGVzLCBpbnQgbnJfdGFibGVzKQoKPiAKPiA+ICsJCSovCj4gPiArCQlpZiAo
-IWVmaV9ndWlkY21wKGd1aWQsIFNNQklPU19UQUJMRV9HVUlEKSkKPiA+ICsJCQkoKGVmaV9jb25m
-aWdfdGFibGVfNjRfdCAqKXApLT50YWJsZSA9IGVzZGF0YS0+c21iaW9zOwo+IAo+IC4uLmFuZCB5
-ZXQgd2UgZG8gdGhpcyBmb3IgKmV2ZXJ5KiBVRUZJIGJveC4gV2h5IG5vdCBIUCBvbmx5PwoKSXMg
-dGhlcmUgYW55IGlkZWEgaW4geW91ciBtaW5kIGhvdyB0byBhZGQgdGhlIGNvZGUgZm9yIEhQIG9u
-bHk/Cgo+IAo+ID4gKwkJcCArPSBzejsKPiA+ICsJfQo+ID4gKwllYXJseV9pb3VubWFwKHRhYmxl
-cCwgbnJfdGFibGVzICogc3opOwo+ID4gKwlyZXR1cm4gMDsKPiA+ICt9Cj4gPiArCj4gPiAgdm9p
-ZCBfX2luaXQgZWZpX2luaXQodm9pZCkKPiA+ICB7Cj4gPiAgCWVmaV9jaGFyMTZfdCAqYzE2Owo+
-ID4gQEAgLTY3Niw2ICs3NTAsOSBAQCB2b2lkIF9faW5pdCBlZmlfaW5pdCh2b2lkKQo+ID4gIAkJ
-ZWZpLnN5c3RhYi0+aGRyLnJldmlzaW9uID4+IDE2LAo+ID4gIAkJZWZpLnN5c3RhYi0+aGRyLnJl
-dmlzaW9uICYgMHhmZmZmLCB2ZW5kb3IpOwo+ID4gIAo+ID4gKwlpZiAoZXNkYXRhICYmIGVzZGF0
-YS0+c21iaW9zKQo+ID4gKwkJZWZpX3JldXNlX2NvbmZpZyhlZmkuc3lzdGFiLT50YWJsZXMsIGVm
-aS5zeXN0YWItPm5yX3RhYmxlcyk7Cj4gPiArCj4gPiAgCWlmIChlZmlfY29uZmlnX2luaXQoYXJj
-aF90YWJsZXMpKQo+ID4gIAkJcmV0dXJuOwo+ID4gIAo+ID4gQEAgLTg4Niw2ICs5NjMsNDMgQEAg
-cmV0Ogo+ID4gIH0KPiA+ICAKPiA+ICAvKgo+ID4gKyAqIG1hcCBlZmkgcmVnaW9ucyB3aGljaCB3
-YXMgcGFzc2VkIHZpYSBzZXR1cF9kYXRhCj4gPiArICogdGhlIHZpcnRfYWRkciBpcyBhIGZpeGVk
-IGFkZHIgd2hpY2ggd2FzIHVzZWQgaW4KPiA+ICsgKiAxc3Qga2VybmVsIG9mIGtleGVjIGJvb3Qu
-Cj4gPiArICovCj4gCj4gQ29tbWVudCB0byA4MCBjb2xzIHBscy4KCldpbGwgZG8KCj4gCj4gPiAr
-c3RhdGljIHZvaWQgX19pbml0IGVmaV9tYXBfcmVnaW9uc19maXhlZCh2b2lkKQo+IAo+IEFsc28g
-bm8gbmVlZCBmb3IgImVmaV8iIHByZWZpeCBoZXJlLgoKT2suCgo+IAo+ID4gK3sKPiA+ICsJaW50
-IGk7Cj4gPiArCXVuc2lnbmVkIGxvbmcgc2l6ZTsKPiA+ICsJZWZpX21lbW9yeV9kZXNjX3QgKm1k
-Owo+ID4gKwl1NjQgZW5kLCBzeXN0YWI7Cj4gPiArCXZvaWQgKnA7Cj4gPiArCj4gPiArCWVmaV9y
-dW50aW1lX21hcCA9IGt6YWxsb2MobnJfZWZpX3J1bnRpbWVfbWFwICogbWVtbWFwLmRlc2Nfc2l6
-ZSwKPiA+ICsJCQkJR0ZQX0tFUk5FTCk7Cj4gCj4gQXJnIGFsaWdubWVudC4KCldpbGwgZG8uCgo+
-IAo+ID4gKwlpZiAoIWVmaV9ydW50aW1lX21hcCkKPiA+ICsJCXByX2VycigiT3V0IG9mIG1lbW9y
-eSwgRUZJIHJ1bnRpbWUgb24gbmVzdGVkIGtleGVjIG5vbi1mdW5jdGlvbmFsIVxuIik7Cj4gPiAr
-Cj4gPiArCWZvciAoaSA9IDAsIHAgPSBlZmlfcnVudGltZV9tYXA7IGkgPCBucl9lZmlfcnVudGlt
-ZV9tYXA7IGkrKykgewo+ID4gKwkJbWQgPSBlc2RhdGEtPm1hcCArIGk7Cj4gPiArCQllZmlfbWFw
-X3JlZ2lvbl9maXhlZChtZCk7Cj4gCj4gR2FhaCwgdGhpcyBmdW5jdGlvbiBzaG91bGQgcHJvYmFi
-bHkgaGF2ZSBhIHJldHZhbCB3aGljaCBzaWduYWxpemVzCj4gc3VjY2Vzcy9mYWlsdXJlLiBGb3Ig
-dGhhdCBJIHNob3VsZCBwcm9iYWJseSB0ZWFjaCBfX21hcF9yZWdpb24gdG8gZG8KPiB0aGF0IHRv
-by4gT24gdGhlIFRPRE8gbGlzdC4KClllcywgX19tYXBfcmVnaW9uIHJldHVybiBhbiBlcnJvciBj
-b2RlIHdpbGwgYmUgYmV0dGVyLiBXaWxsIHlvdSBzZW5kIGEKcGF0Y2ggZm9yIF9fbWFwX3JlZ2lv
-bj8gb3IgSSBjYW4gYWRkIG9uZSBtb3JlIHBhdGNoIGFsb25nIHdpdGggbmV4dCB2ZXJzaW9uLgoK
-PiAKPiA+ICsJCXNpemUgPSBtZC0+bnVtX3BhZ2VzIDw8IFBBR0VfU0hJRlQ7Cj4gPiArCQllbmQg
-PSBtZC0+cGh5c19hZGRyICsgc2l6ZTsKPiA+ICsKPiA+ICsJCXN5c3RhYiA9ICh1NjQpICh1bnNp
-Z25lZCBsb25nKSBlZmlfcGh5cy5zeXN0YWI7Cj4gPiArCQlpZiAobWQtPnBoeXNfYWRkciA8PSBz
-eXN0YWIgJiYgc3lzdGFiIDwgZW5kKSB7Cj4gPiArCQkJc3lzdGFiICs9IG1kLT52aXJ0X2FkZHIg
-LSBtZC0+cGh5c19hZGRyOwo+ID4gKwkJCWVmaS5zeXN0YWIgPQo+ID4gKwkJCQkoZWZpX3N5c3Rl
-bV90YWJsZV90ICopICh1bnNpZ25lZCBsb25nKSBzeXN0YWI7Cj4gCj4gQ0hFQ0s6IE5vIHNwYWNl
-IGlzIG5lY2Vzc2FyeSBhZnRlciBhIGNhc3QKPiAjMjE5OiBGSUxFOiBhcmNoL3g4Ni9wbGF0Zm9y
-bS9lZmkvZWZpLmM6OTkzOgoKV2lsbCBmaXgKCj4gKyAgICAgICAgICAgICAgICAgICAgICAgZWZp
-LnN5c3RhYiA9Cj4gKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAoZWZpX3N5c3RlbV90
-YWJsZV90ICopICh1bnNpZ25lZCBsb25nKSBzeXN0YWI7Cj4gCj4gCj4gQW5kIGFsc28sIHRob3Nl
-IGJyb2tlbiBsaW5lcyBhcmUgdWdseS4gSnVzdCBsZXQgaXQgc3RpY2sgb3V0IG92ZXIgODAgY29s
-cy4KClN1cmUuCgo+IAo+ID4gKwkJfQo+ID4gKwkJaWYgKGVmaV9ydW50aW1lX21hcCkgewo+ID4g
-KwkJCW1lbWNweShwLCBtZCwgbWVtbWFwLmRlc2Nfc2l6ZSk7Cj4gPiArCQkJcCArPSBtZW1tYXAu
-ZGVzY19zaXplOwo+ID4gKwkJfQo+ID4gKwl9Cj4gPiArfQo+ID4gKwo+ID4gKy8qCj4gPiAgICog
-VGhpcyBmdW5jdGlvbiB3aWxsIHN3aXRjaCB0aGUgRUZJIHJ1bnRpbWUgc2VydmljZXMgdG8gdmly
-dHVhbCBtb2RlLgo+ID4gICAqIEVzc2VudGlhbGx5LCB3ZSBsb29rIHRocm91Z2ggdGhlIEVGSSBt
-ZW1tYXAgYW5kIG1hcCBldmVyeSByZWdpb24gdGhhdAo+ID4gICAqIGhhcyB0aGUgcnVudGltZSBh
-dHRyaWJ1dGUgYml0IHNldCBpbiBpdHMgbWVtb3J5IGRlc2NyaXB0b3IgaW50byB0aGUKPiA+IEBA
-IC05MDEsNiArMTAxNSwxMCBAQCByZXQ6Cj4gPiAgICogc28gdGhhdCB3ZSdyZSBpbiBhIGRpZmZl
-cmVudCBhZGRyZXNzIHNwYWNlIHdoZW4gY2FsbGluZyBhIHJ1bnRpbWUKPiA+ICAgKiBmdW5jdGlv
-bi4gRm9yIGZ1bmN0aW9uIGFyZ3VtZW50cyBwYXNzaW5nIHdlIGRvIGNvcHkgdGhlIFBHRHMgb2Yg
-dGhlCj4gPiAgICoga2VybmVsIHBhZ2UgdGFibGUgaW50byAtPnRyYW1wb2xpbmVfcGdkIHByaW9y
-IHRvIGVhY2ggY2FsbC4KPiA+ICsgKgo+ID4gKyAqIFNwZWNpYWxseSBmb3Iga2V4ZWMgYm9vdCBl
-ZmkgcnVudGltZSBtYXBzIGluIHByZXZpb3VzIGtlcm5lbCBzaG91bGQKPiAKPiAJCQkgIGJvb3Qs
-IC4uLgoKV2lsbCB1cGRhdGUuCgo+IAo+ID4gKyAqIGJlIHBhc3NlZCBpbiB2aWEgc2V0dXBfZGF0
-YS4gSW4gdGhhdCBjYXNlIHJ1bnRpbWUgcmFuZ2VzIHdpbGwgYmUgbWFwcGVkCj4gCj4gCQkJCQkg
-ICBjYXNlLCAuLi4KPiAKPiA+ICsgKiB0byBmaXhlZCB2aXJ0dWFsIGFkZHJlc3NlcyBleGFjdGx5
-IHNhbWUgYXMgdGhlIG9uZXMgaW4gcHJldmlvdXMga2VybmVsLgo+IAo+ICIuLi4gdG8gdGhlIHNh
-bWUgdmlydHVhbCBhZGRyZXNzZXMgYXMgdGhlIGZpcnN0IGtlcm5lbC4iCgpXaWxsIGRvLgoKPiAK
-PiA+ICAgKi8KPiA+ICB2b2lkIF9faW5pdCBlZmlfZW50ZXJfdmlydHVhbF9tb2RlKHZvaWQpCj4g
-PiAgewo+ID4gQEAgLTkxOSwxMiArMTAzNywxNSBAQCB2b2lkIF9faW5pdCBlZmlfZW50ZXJfdmly
-dHVhbF9tb2RlKHZvaWQpCj4gPiAgCQlyZXR1cm47Cj4gPiAgCX0KPiA+ICAKPiA+IC0JZWZpX21l
-cmdlX3JlZ2lvbnMoKTsKPiA+IC0KPiA+IC0JbmV3X21lbW1hcCA9IGVmaV9tYXBfcmVnaW9ucygm
-Y291bnQpOwo+ID4gLQlpZiAoIW5ld19tZW1tYXApIHsKPiA+IC0JCXByX2VycigiRXJyb3IgcmVh
-bGxvY2F0aW5nIG1lbW9yeSwgRUZJIHJ1bnRpbWUgbm9uLWZ1bmN0aW9uYWwhXG4iKTsKPiA+IC0J
-CXJldHVybjsKPiA+ICsJaWYgKGVzZGF0YSkKPiA+ICsJCWVmaV9tYXBfcmVnaW9uc19maXhlZCgp
-Owo+ID4gKwllbHNlIHsKPiA+ICsJCWVmaV9tZXJnZV9yZWdpb25zKCk7Cj4gPiArCQluZXdfbWVt
-bWFwID0gZWZpX21hcF9yZWdpb25zKCZjb3VudCk7Cj4gPiArCQlpZiAoIW5ld19tZW1tYXApIHsK
-PiA+ICsJCQlwcl9lcnIoIkVycm9yIHJlYWxsb2NhdGluZyBtZW1vcnksIEVGSSBydW50aW1lIG5v
-bi1mdW5jdGlvbmFsIVxuIik7Cj4gPiArCQkJcmV0dXJuOwo+ID4gKwkJfQo+IAo+IENIRUNLOiBi
-cmFjZXMge30gc2hvdWxkIGJlIHVzZWQgb24gYWxsIGFybXMgb2YgdGhpcyBzdGF0ZW1lbnQKPiAj
-MjUzOiBGSUxFOiBhcmNoL3g4Ni9wbGF0Zm9ybS9lZmkvZWZpLmM6MTA0MDoKCk9rLgoKPiArICAg
-ICAgIGlmIChlc2RhdGEpCj4gWy4uLl0KPiArICAgICAgIGVsc2Ugewo+IFsuLi5dCj4gCgpUaGFu
-a3MgZm9yIGNhcmVmdWxseSByZXZpZXcKRGF2ZQoKX19fX19fX19fX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX18Ka2V4ZWMgbWFpbGluZyBsaXN0CmtleGVjQGxpc3RzLmluZnJh
-ZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJhZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9rZXhl
-Ywo=
+On 11/27/13 at 12:44pm, Borislav Petkov wrote:
+> On Tue, Nov 26, 2013 at 01:57:51PM +0800, Dave Young wrote:
+> > kexec kernel will need exactly same mapping for
+> > efi runtime memory ranges. Thus here export the
+> > runtime ranges mapping to sysfs, kexec-tools
+> > will assemble them and pass to 2nd kernel via
+> > setup_data.
+> > 
+> > Introducing a new directly /sys/firmware/efi/runtime-map
+> > Just like /sys/firmware/memmap. Containing below attribute
+> > in each file of that directory:
+> > attribute  num_pages  phys_addr  type  virt_addr
+> > 
+> > It will not work for efi 32bit. Only x86_64 currently.
+> > 
+> > Matt: s/efi-runtime-map.c/runtime-map.c
+> >       change dir name to runtime-map
+> > update to use desc_size in efi_runtime_map
+> > cleaup the code, add function efi_save_runtime_map
+> > improve err handling
+> > 
+> > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  .../ABI/testing/sysfs-firmware-efi-runtime-map     |  45 +++++
+> >  arch/x86/platform/efi/efi.c                        |  26 +++
+> >  drivers/firmware/efi/Kconfig                       |  10 ++
+> >  drivers/firmware/efi/Makefile                      |   1 +
+> >  drivers/firmware/efi/efi.c                         |   3 +-
+> >  drivers/firmware/efi/runtime-map.c                 | 199 +++++++++++++++++++++
+> >  include/linux/efi.h                                |   6 +
+> >  7 files changed, 289 insertions(+), 1 deletion(-)
+> >  create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> >  create mode 100644 drivers/firmware/efi/runtime-map.c
+> > 
+> > diff --git a/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> > new file mode 100644
+> > index 0000000..dab8d41
+> > --- /dev/null
+> > +++ b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> > @@ -0,0 +1,45 @@
+> > +What:		/sys/firmware/efi/runtime-map/
+> > +Date:		Oct 2013
+> > +Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > +Description:
+> > +		Switching efi runtime services to virtual mode requires
+> > +		that all efi memory ranges which has the runtime attribute
+> 
+> s/has/have/
+
+Will fix
+
+> 
+> > +		bit set to be mapped to virtual addresses.
+> > +
+> > +		In kexec kernel kernel can not entering virtual mode again
+> > +		because there's a limitation that SetVirtualAddressMap can
+> > +		only be called once for entering virtual mode. But kexec
+> > +		kernel still need maintain same physical address to virtual
+> > +		address mapping as the 1st kernel.
+> 
+> Simply say
+> 
+> "SetVirtualAddressMap has the limitation that it can be called only once
+> per system lifetime so a second kernel, like kexec, needs to reuse the
+> exact same virtual addresses like the first kernel."
+> 
+
+Matt are suggesting to below one, is it ok to you? I'm fine with both.
+
+The efi runtime services can only be switched to virtual
+mode once without rebooting. The kexec kernel must maintain
+the same physical to virtual address mappings as the first
+kernel. The mappings are exported to sysfs so userspace tools
+can reassemble them and pass them into the kexec kernel.
+
+> 
+> > 		The mappings are exported
+> > +		to sysfs so userspace tools can reassemble them and pass them
+> > +		into kexec kernel.
+> > +
+> > +		/sys/firmware/efi/runtim-map/ is what kernel export for
+> > +		this purpose. The structure is as follows:
+> 
+> "/sys/firmware/efi/runtime-map/ is the directory the kernel exports that
+> information in."
+
+Ok.
+
+> 
+> > +
+> > +		subdirectories are named with the number of the memory range:
+> > +
+> > +			/sys/firmware/efi/runtime-map/0
+> > +			/sys/firmware/efi/runtime-map/1
+> > +			/sys/firmware/efi/runtime-map/2
+> > +			/sys/firmware/efi/runtime-map/3
+> > +			...
+> > +
+> > +		Each subdirectory contains five files:
+> > +
+> > +		attribute : The attribute of the memory range.
+> 
+> 				attributes
+
+Ok.
+
+> 
+> > +		num_pages : The size of the memory range in page number.
+> 
+> 							 in 4K pages.
+
+Is it always 4K, how about "in pages"?
+
+> 
+> > +		phys_addr : The start physical address of the memory range.
+> 
+> 			    The physical address of the memory range
+
+Ok.
+
+> 
+> > +		type      : The type of the memory range.
+> > +		virt_addr : The start virtual address of the memory range.
+> 
+> 			    The virtual address...
+
+Ok.
+
+> 
+> > +
+> > +		Above values are all hexadecimal number with the '0x' prefix.
+> 
+> 						 numbers
+
+Ok.
+
+> 
+> > +
+> > +		So, for example:
+> > +
+> > +			/sys/firmware/efi/runtime-map/0/attribute
+> > +			/sys/firmware/efi/runtime-map/0/num_pages
+> > +			/sys/firmware/efi/runtime-map/0/phys_addr
+> > +			/sys/firmware/efi/runtime-map/0/type
+> > +			/sys/firmware/efi/runtime-map/0/virt_addr
+> > +                        ...
+> 
+> What is this example supposed to show? The above is already detailed
+> enough.
+
+Ok, I can remove them.
+
+> 
+> > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> > index 2a292aa..c3a2aaa 100644
+> > --- a/arch/x86/platform/efi/efi.c
+> > +++ b/arch/x86/platform/efi/efi.c
+> > @@ -76,6 +76,9 @@ static __initdata efi_config_table_type_t arch_tables[] = {
+> >  	{NULL_GUID, NULL, NULL},
+> >  };
+> >  
+> > +void *efi_runtime_map;
+> > +int nr_efi_runtime_map;
+> > +
+> >  /*
+> >   * Returns 1 if 'facility' is enabled, 0 otherwise.
+> >   */
+> > @@ -811,6 +814,21 @@ static void __init efi_merge_regions(void)
+> >  	}
+> >  }
+> >  
+> > +static int __init efi_save_runtime_map(efi_memory_desc_t *md)
+> 
+> It is a static function so no need for the "efi_" prefix.
+> 
+> Also, it should be called save_runtime_mem_desc or so because this is
+> what it does.
+
+Ok.
+
+> 
+> > +{
+> > +	efi_runtime_map = krealloc(efi_runtime_map,
+> > +			(nr_efi_runtime_map + 1) *
+> > +			memmap.desc_size, GFP_KERNEL);
+> 
+> WARNING: Reusing the krealloc arg is almost always a bug
+> #21: FILE: arch/x86/platform/efi/efi.c:819:
+> +       efi_runtime_map = krealloc(efi_runtime_map,
+> 
+> Please run your diffs through checkpatch.pl --strict before submitting.
+> 
+> Btw, we use krealloc below again which should be changed too.
+
+Since we do not know the exact number of ranges, introducing a list
+or count the totoal range numbers before will add more code. Do you
+really think it's necessary?
+
+I tend to not fix every warnings from checkpatch if it's not a must-fix
+one.
+> 
+> > +	if (!efi_runtime_map)
+> > +		return -ENOMEM;
+> > +
+> > +	memcpy(efi_runtime_map + nr_efi_runtime_map * memmap.desc_size,
+> > +		md, memmap.desc_size);
+> > +	nr_efi_runtime_map++;
+> > +
+> > +	return 0;
+> > +}
+> > +
+> >  /*
+> >   * Map efi memory ranges for runtime serivce and update new_memmap with virtual
+> >   * addresses.
+> > @@ -821,6 +839,7 @@ static void * __init efi_map_regions(int *count)
+> >  	void *p, *new_memmap = NULL;
+> >  	unsigned long size;
+> >  	u64 end, systab;
+> > +	int error = 0;
+> >  
+> >  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+> >  		md = p;
+> > @@ -852,9 +871,16 @@ static void * __init efi_map_regions(int *count)
+> >  
+> >  		memcpy(new_memmap + (*count * memmap.desc_size), md,
+> >  		       memmap.desc_size);
+> > +		if (!error && md->type != EFI_BOOT_SERVICES_CODE &&
+> > +				md->type != EFI_BOOT_SERVICES_DATA)
+> > +			error = efi_save_runtime_map(md);
+> 
+> I'm not sure I like this entangled stuff with the error code - I can
+> barely understand what's going on there - not necessarily because of
+> your changes but because this code is not that trivial, especially after
+> time has passed.
+
+suppose kexec runtime map preparing fails we still can get 1st kernel boot ok.
+
+> 
+> And I don't see you kfreeing efi_runtime_map in the case where the first
+> krealloc() fails at some iteration.
+
+Good catch, the original krealloc error handling also need improve.
+Ok, so I will improve the code by adding a link list for new_memmap
+and removing the krealloc.
+
+> 
+> What would be much cleaner IMO would be if you let efi_map_regions()
+> finish, *and*, *only* if it was successful iterate again over the
+> regions and do efi_save_runtime_map() on the runtime ones. This will
+> make the code much more readable too.
+
+For simplifying the code, will do.
+
+> 
+> >  		(*count)++;
+> >  	}
+> >  
+> > +	if (error) {
+> > +		nr_efi_runtime_map = 0;
+> > +		kfree(efi_runtime_map);
+> > +	}
+> 
+> This error gets overwritten each time the loop runs and you possibly
+> lose !0 values. What I'm suggesting above would take care of that case
+> too.
+> 
+> >  ret:
+> >  	return new_memmap;
+> >  }
+> > diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> > index b0fc7c7..b4d01ad 100644
+> > --- a/drivers/firmware/efi/Kconfig
+> > +++ b/drivers/firmware/efi/Kconfig
+> > @@ -36,4 +36,14 @@ config EFI_VARS_PSTORE_DEFAULT_DISABLE
+> >  	  backend for pstore by default. This setting can be overridden
+> >  	  using the efivars module's pstore_disable parameter.
+> >  
+> > +config EFI_RUNTIME_MAP
+> > +	bool "Export efi runtime maps to sysfs" if EXPERT
+> > +	default X86 && EFI
+> 
+> This should depend on KEXEC.
+
+I did not add KEXEC because I thought it can be used for debugging purpose. 
+
+> 
+> > +	help
+> > +	  Export efi runtime memory maps to /sys/firmware/efi/runtime-map.
+> > +	  That memory map is used for example by kexec to set up efi virtual
+> > +	  mapping the 2nd kernel, but can also be used for debugging purposes.
+> > +
+> > +	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
+> > +
+> >  endmenu
+> > diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> > index 99245ab..ecadcc1 100644
+> > --- a/drivers/firmware/efi/Makefile
+> > +++ b/drivers/firmware/efi/Makefile
+> > @@ -4,3 +4,4 @@
+> >  obj-y					+= efi.o vars.o
+> >  obj-$(CONFIG_EFI_VARS)			+= efivars.o
+> >  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+> > +obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
+> 
+> This will conflict with upstream:
+
+Will check and update, what tree are you using?
+
+> 
+> checking file drivers/firmware/efi/Makefile
+> Hunk #1 FAILED at 4.
+> 1 out of 1 hunk FAILED
+> 
+> It should be:
+> 
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index 9ba156d3c775..7f05c368b868 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -5,3 +5,4 @@ obj-y                                   += efi.o vars.o
+>  obj-$(CONFIG_EFI_VARS)                 += efivars.o
+>  obj-$(CONFIG_EFI_VARS_PSTORE)          += efi-pstore.o
+>  obj-$(CONFIG_UEFI_CPER)                        += cper.o
+> +obj-$(CONFIG_EFI_RUNTIME_MAP)          += runtime-map.o
+> 
+> 
+> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> > index 5d85956..a480de8 100644
+> > --- a/drivers/firmware/efi/efi.c
+> > +++ b/drivers/firmware/efi/efi.c
+> > @@ -38,7 +38,8 @@ struct efi __read_mostly efi = {
+> >  };
+> >  EXPORT_SYMBOL(efi);
+> >  
+> > -static struct kobject *efi_kobj;
+> > +struct kobject *efi_kobj;
+> > +EXPORT_SYMBOL_GPL(efi_kobj);
+> 
+> Can we move this private to linux/drivers/efi/runtime-map.c? If yes,
+> then there's no need to export it.
+
+Hmm, it's created in efi.c so I think we can not move it..
+
+> 
+> >  static struct kobject *efivars_kobj;
+> >  
+> >  /*
+> > diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+> > new file mode 100644
+> > index 0000000..036d099
+> > --- /dev/null
+> > +++ b/drivers/firmware/efi/runtime-map.c
+> > @@ -0,0 +1,199 @@
+> > +/*
+> > + * linux/drivers/efi/runtime-map.c
+> > + * Copyright (C) 2013 Red Hat, Inc., Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > + *
+> > + * This program is free software; you can redistribute it and/or modify
+> > + * it under the terms of the GNU General Public License v2.0 as published by
+> > + * the Free Software Foundation
+> > + *
+> > + * This program is distributed in the hope that it will be useful,
+> > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > + * GNU General Public License for more details.
+> 
+> Please drop this boilerplate text and do a single sentence saying that
+> it is licensed under GPL v2 and refer to COPYING in the kernel repo.
+
+Ok.
+
+> 
+> > + *
+> > + */
+> > +
+> > +#include <linux/string.h>
+> > +#include <linux/kernel.h>
+> > +#include <linux/module.h>
+> > +#include <linux/types.h>
+> > +#include <linux/efi.h>
+> > +#include <linux/slab.h>
+> > +
+> > +#include <asm/setup.h>
+> > +
+> > +struct efi_runtime_map_entry {
+> > +	efi_memory_desc_t md;
+> > +	struct kobject kobj;   /* kobject for each entry */
+> > +};
+> > +
+> > +static struct efi_runtime_map_entry **map_entries;
+> > +
+> > +static ssize_t map_attr_show(struct kobject *kobj,
+> > +				struct attribute *attr, char *buf);
+> > +static ssize_t type_show(struct efi_runtime_map_entry *entry, char *buf);
+> > +static ssize_t phys_addr_show(struct efi_runtime_map_entry *entry, char *buf);
+> > +static ssize_t virt_addr_show(struct efi_runtime_map_entry *entry, char *buf);
+> > +static ssize_t num_pages_show(struct efi_runtime_map_entry *entry, char *buf);
+> > +static ssize_t attribute_show(struct efi_runtime_map_entry *entry, char *buf);
+> > +
+> > +struct map_attribute {
+> > +	struct attribute attr;
+> > +	ssize_t (*show)(struct efi_runtime_map_entry *entry, char *buf);
+> > +};
+> > +
+> > +static struct map_attribute map_type_attr = __ATTR_RO(type);
+> > +static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
+> > +static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
+> > +static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
+> > +static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
+> > +
+> > +/*
+> > + * These are default attributes that are added for every memmap entry.
+> > + */
+> > +static struct attribute *def_attrs[] = {
+> > +	&map_type_attr.attr,
+> > +	&map_phys_addr_attr.attr,
+> > +	&map_virt_addr_attr.attr,
+> > +	&map_num_pages_attr.attr,
+> > +	&map_attribute_attr.attr,
+> > +	NULL
+> > +};
+> > +
+> > +static const struct sysfs_ops map_attr_ops = {
+> > +	.show = map_attr_show,
+> > +};
+> > +
+> > +static inline struct efi_runtime_map_entry *to_map_entry(struct kobject *kobj)
+> > +{
+> > +	return container_of(kobj, struct efi_runtime_map_entry, kobj);
+> > +}
+> > +
+> > +static void map_release(struct kobject *kobj)
+> > +{
+> > +	struct efi_runtime_map_entry *entry;
+> > +
+> > +	entry = to_map_entry(kobj);
+> > +	kfree(entry);
+> > +}
+> > +
+> > +static struct kobj_type __refdata map_ktype = {
+> > +	.sysfs_ops	= &map_attr_ops,
+> > +	.default_attrs	= def_attrs,
+> > +	.release	= map_release,
+> > +};
+> > +
+> > +static ssize_t type_show(struct efi_runtime_map_entry *entry, char *buf)
+> > +{
+> > +	return snprintf(buf, PAGE_SIZE, "0x%x\n", entry->md.type);
+> > +}
+> > +
+> > +static ssize_t phys_addr_show(struct efi_runtime_map_entry *entry, char *buf)
+> > +{
+> > +	return snprintf(buf, PAGE_SIZE, "0x%llx\n", entry->md.phys_addr);
+> > +}
+> > +
+> > +static ssize_t virt_addr_show(struct efi_runtime_map_entry *entry, char *buf)
+> > +{
+> > +	return snprintf(buf, PAGE_SIZE, "0x%llx\n", entry->md.virt_addr);
+> > +}
+> > +
+> > +static ssize_t num_pages_show(struct efi_runtime_map_entry *entry, char *buf)
+> > +{
+> > +	return snprintf(buf, PAGE_SIZE, "0x%llx\n", entry->md.num_pages);
+> > +}
+> > +
+> > +static ssize_t attribute_show(struct efi_runtime_map_entry *entry, char *buf)
+> > +{
+> > +	return snprintf(buf, PAGE_SIZE, "0x%llx\n", entry->md.attribute);
+> > +}
+> 
+> I can see the macro here writing itself too :)
+
+Thanks for catching, actually I have changed it in my local tree since your
+last comment about other file.
+
+> 
+> > +
+> > +static inline struct map_attribute *to_map_attr(struct attribute *attr)
+> > +{
+> > +	return container_of(attr, struct map_attribute, attr);
+> > +}
+> > +
+> > +static ssize_t map_attr_show(struct kobject *kobj,
+> > +				struct attribute *attr, char *buf)
+> > +{
+> > +	struct efi_runtime_map_entry *entry = to_map_entry(kobj);
+> > +	struct map_attribute *map_attr = to_map_attr(attr);
+> > +
+> > +	return map_attr->show(entry, buf);
+> > +}
+> > +
+> > +static struct kset *map_kset;
+> > +
+> > +/*
+> > + * Add map entry on sysfs
+> > + */
+> 
+> The function name should be enough - no need for the comment.
+
+Ok.
+
+> 
+> > +static struct efi_runtime_map_entry *add_sysfs_runtime_map_entry(int nr)
+> > +{
+> > +	int ret;
+> > +	unsigned long desc_size;
+> > +	struct efi_runtime_map_entry *entry;
+> > +	struct efi_info *e = &boot_params.efi_info;
+> > +
+> > +	if (!map_kset) {
+> > +		map_kset = kset_create_and_add("runtime-map", NULL,
+> > +				efi_kobj);
+> > +		if (!map_kset)
+> > +			return ERR_PTR(-ENOMEM);
+> > +	}
+> > +
+> > +	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
+> > +	if (!entry) {
+> > +		kset_unregister(map_kset);
+> > +		return entry;
+> > +	}
+> > +
+> > +	desc_size = e->efi_memdesc_size;
+> > +	memcpy(&entry->md, efi_runtime_map + nr * desc_size,
+> > +		sizeof(efi_memory_desc_t));
+> 
+> If you're going to break this line anyway, you don't really need the
+> local desc_size variable:
+
+Ok
+
+> 
+> 	memcpy(&entry->md,
+> 	       efi_runtime_map + nr * e->efi_memdesc_size,
+> 	       sizeof(efi_memory_desc_t));
+> 
+> > +
+> > +	kobject_init(&entry->kobj, &map_ktype);
+> > +	entry->kobj.kset = map_kset;
+> > +	ret = kobject_add(&entry->kobj, NULL, "%d", nr);
+> > +	if (ret) {
+> > +		kobject_put(&entry->kobj);
+> > +		kset_unregister(map_kset);
+> > +		return ERR_PTR(ret);
+> > +	}
+> > +
+> > +	return entry;
+> > +}
+> > +
+> > +static int __init efi_runtime_map_init(void)
+> > +{
+> > +	int i, j, ret = 0;
+> > +	struct efi_runtime_map_entry *entry;
+> > +
+> > +	if (!efi_runtime_map) {
+> > +		pr_warn("no efi_runtime_map found\n");
+> > +		return -EINVAL;
+> > +	}
+> > +
+> > +	map_entries = kzalloc(nr_efi_runtime_map *
+> > +		sizeof(struct efi_runtime_map_entry *), GFP_KERNEL);
+> 
+> Shorten:
+> 
+> 	map_entries = kzalloc(nr_efi_runtime_map * sizeof(entry), GFP_KERNEL);
+
+Will do.
+
+> 
+> > +	if (!map_entries)
+> > +		return -ENOMEM;
+> > +
+> > +	for (i = 0; i < nr_efi_runtime_map; i++) {
+> > +		entry = add_sysfs_runtime_map_entry(i);
+> > +		if (IS_ERR(entry)) {
+> > +			for (j = i - 1; j > 0; j--) {
+> > +				entry = *(map_entries + j);
+> > +				kobject_put(&entry->kobj);
+> > +			}
+> > +			if (map_kset)
+> > +				kset_unregister(map_kset);
+> > +			ret = PTR_ERR(entry);
+> > +			goto out;
+> > +		}
+> 
+> You can move this error unwinding path away from the main loop:
+> 
+> 	if (IS_ERR(entry))
+> 		goto out;
+> 
+> and make it more readable.
+
+Ok.
+
+> 
+> > +		*(map_entries + i) = entry;
+> > +	}
+> > +
+> > +out:
+> > +	return ret;
+> > +}
+> > +late_initcall(efi_runtime_map_init);
+> 
+> Why an initcall? Can't we run this from efisubsys_init()?
+
+Yes, we can, will do.
+
+Thanks for review
+Dave
