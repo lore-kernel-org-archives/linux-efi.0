@@ -1,33 +1,56 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
-Date: Fri, 29 Nov 2013 11:59:53 +0000
-Message-ID: <20131129115953.GD11775@console-pimps.org>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-7-git-send-email-dyoung@redhat.com>
- <20131127114402.GB32267@pd.tnic>
- <20131129094034.GI4186@dhcp-16-126.nay.redhat.com>
- <20131129115029.GB4266@pd.tnic>
+Subject: [GIT PULL] EFI urgent fixes
+Date: Fri, 29 Nov 2013 12:09:51 +0000
+Message-ID: <20131129120951.GF11775@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131129115029.GB4266-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 29 Nov, at 12:50:29PM, Borislav Petkov wrote:
-> > I did not add KEXEC because I thought it can be used for debugging
-> > purpose.
-> 
-> mfleming is thinking about it :)
- 
-I finally finished my thought. The sysfs code should be automatically
-enabled only if CONFIG_KEXEC is enabled, and not on my default because
-it is a debug interface. While it's true that the code may be useful for
-debugging the memory mappings of EFI systems, it doesn't make sense to
-always turn it on just for CONFIG_X86 and CONFIG_EFI.
+Hi guys,
+
+The following changes since commit 6ce4eac1f600b34f2f7f58f9cd8f0503d79e42ae:
+
+  Linux 3.13-rc1 (2013-11-22 11:30:55 -0800)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to fdeadb43fdf1e7d5698c027b555c389174548e5a:
+
+  efi-pstore: Make efi-pstore return a unique id (2013-11-29 10:11:06 +0000)
+
+----------------------------------------------------------------
+ * Avoid triggering a lockdep warning caused by calling kmemdup() while
+   holding a spinlock - Seiji Aguchi
+
+ * EFI framebuffer earlyprintk fix for off-by-one error that caused
+   console output to be split over two lines on some machines.
+
+ * Avoid pstore filename collisions by using a timestamp to calculate
+   the entry ID, thereby making them unique - Madper Xie
+
+----------------------------------------------------------------
+Madper Xie (1):
+      efi-pstore: Make efi-pstore return a unique id
+
+Matt Fleming (1):
+      x86/efi: Fix earlyprintk off-by-one bug
+
+Seiji Aguchi (1):
+      efivars, efi-pstore: Hold off deletion of sysfs entry until the scan is completed
+
+ arch/x86/platform/efi/early_printk.c |   2 +-
+ drivers/firmware/efi/efi-pstore.c    | 163 +++++++++++++++++++++++++++++++----
+ drivers/firmware/efi/efivars.c       |  12 ++-
+ drivers/firmware/efi/vars.c          |  12 ++-
+ include/linux/efi.h                  |   4 +
+ 5 files changed, 170 insertions(+), 23 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
