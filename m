@@ -1,77 +1,46 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Fri, 29 Nov 2013 17:46:52 +0800
-Message-ID: <20131129094652.GK4186@dhcp-16-126.nay.redhat.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-8-git-send-email-dyoung@redhat.com>
- <20131126220448.GB18170@console-pimps.org>
- <20131127045237.GC11852@dhcp-16-126.nay.redhat.com>
- <20131127101747.GC18170@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH V5 1/6] efi-stub.txt updates for ARM
+Date: Fri, 29 Nov 2013 10:36:49 +0000
+Message-ID: <20131129103649.GA11775@console-pimps.org>
+References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
+ <1385595115-21488-2-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131127101747.GC18170-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <1385595115-21488-2-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 11/27/13 at 10:17am, Matt Fleming wrote:
-> On Wed, 27 Nov, at 12:52:37PM, Dave Young wrote:
-> > To make it more readable, I will change them like below:
-> > 
-> > p = efi_runtime_map;
-> > md = efi_setup->map;
-> > for (i = 0; i < nr_efi_runtime_map; i++) {
-> > 	[...]
-> > 	md += 1;
-> > }
->  
-> Actually, md++ is the canonical way to write this.
-
-Ok.
-
+On Wed, 27 Nov, at 03:31:50PM, Roy Franz wrote:
+> Update efi-stub.txt documentation to be more general
+> and not x86 specific.  Add ARM only "dtb=" command
+> line option description.
 > 
-> > > 
-> > > > +		efi_map_region_fixed(md);
-> > > > +		size = md->num_pages << PAGE_SHIFT;
-> > > > +		end = md->phys_addr + size;
-> > > > +
-> > > > +		systab = (u64) (unsigned long) efi_phys.systab;
-> > > > +		if (md->phys_addr <= systab && systab < end) {
-> > > > +			systab += md->virt_addr - md->phys_addr;
-> > > > +			efi.systab =
-> > > > +				(efi_system_table_t *) (unsigned long) systab;
-> > > > +		}
-> > > > +		if (efi_runtime_map) {
-> > > > +			memcpy(p, md, memmap.desc_size);
-> > > > +			p += memmap.desc_size;
-> > > > +		}
-> > > 
-> > > Is this if () needed? Is it possible to enter the loop and have
-> > > 'efi_runtime_map' be NULL?
-> > 
-> > Yes, it is needed. if efi_runtime_map kmalloc fails I only print error, do not
-> > return so kernel can still boot, just kexec on efi will not work that has been
-> > put in the error message.
->  
-> OK. On second thought, is there any way to turn the above code into a
-> call to efi_save_runtime_map()? Because you've basically duplicated that
-> code and I can definitely envisage the two code paths fragmenting over
-> time, e.g. when someone makes changes to one but not the other.
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  Documentation/efi-stub.txt |   27 ++++++++++++++++++++-------
+>  1 file changed, 20 insertions(+), 7 deletions(-)
+> 
 
-OK, will consider to reuse the function.
+[...]
 
-Thanks
-Dave
+> -respectively.
+> +respectively.  For ARM the EFI stub is implemented in
+> +arch/arm/boot/compressed/efi-header.S and
+> +arch/arm/boot/compressed/efi-stub.c.  EFI stub code that is shared
+> +between architectures is in drivers/firmware/efi/efi-stub-helper.c.
+  
+No double spaces between full-stop and the beginning of a sentence
+please. That convention isn't used anywhere else in this file.
+
+> +For the ARM architecture, we also need to be able to provide a device
+> +tree to the kernel.  This is done with the "dtb=" command line option,
+> +and is process in the same manner as the "initrd=" option that is described
+
+         ^^ processed ?
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
