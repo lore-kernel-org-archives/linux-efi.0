@@ -1,54 +1,54 @@
-From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Mon, 02 Dec 2013 15:33:20 -0700
-Message-ID: <1386023600.1791.201.camel@misato.fc.hp.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-8-git-send-email-dyoung@redhat.com>
- <20131127140732.GD32267@pd.tnic>
- <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH V5 2/6] Add shared update_fdt() function for ARM/ARM64
+Date: Mon, 2 Dec 2013 15:09:26 -0800
+Message-ID: <CAFECyb8nE8e_aqZe5VYJ6+2FzJVQEdCsuqR-fNyRSDapt3NVdg@mail.gmail.com>
+References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
+	<1385595115-21488-3-git-send-email-roy.franz@linaro.org>
+	<20131129113008.GB11775@console-pimps.org>
+	<1385996185.1861.28.camel@deneb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <20131129091415.GH4186-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1385996185.1861.28.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-11-29 at 17:14 +0800, Dave Young wrote:
-> On 11/27/13 at 03:07pm, Borislav Petkov wrote:
-> > On Tue, Nov 26, 2013 at 01:57:52PM +0800, Dave Young wrote:
-> > > Add a new setup_data type SETUP_EFI for kexec use.
-> > > Passing the saved fw_vendor, runtime, config tables and
-> > > efi runtime mappings.
-> > > 
-> > > When entering virtual mode, directly mapping the efi
-> > > runtime ragions which we passed in previously. And skip
-> > > the step to call SetVirtualAddressMap.
-> > > 
-> > > Specially for HP z420 workstation it need another variable
-> > > saving,
-> > 
-> > Why the special handling? Does that mean, this is going to be the case
-> > for other HP UEFI implementations too?
-> 
-> I have only one HP machine for testing, Maybe Toshi can help to verify
-> on other machines. Just comment out the function efi_reuse_config to see
-> if kexec kernel panic.
+On Mon, Dec 2, 2013 at 6:56 AM, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Fri, 2013-11-29 at 11:30 +0000, Matt Fleming wrote:
+>> >       /*
+>> >        * Add an additional efi_memory_desc_t because we're doing an
+>> >        * allocation which may be in a new descriptor region.
+>> > +      * We allocate as EFI_RUNTIME_SERVICES_DATA since this is what
+>> > +      * we want for when we pass the memory map to the kernel.  This
+>> > +      * function is also used to get the memory map for other uses,
+>> > +      * but is always freed by the stub so the allocation type
+>> > +      * doesn't matter.
+>> >        */
+>> >       *map_size += sizeof(*m);
+>> >       status = efi_call_phys3(sys_table_arg->boottime->allocate_pool,
+>> > -                             EFI_LOADER_DATA, *map_size, (void **)&m);
+>> > +                             EFI_RUNTIME_SERVICES_DATA, *map_size,
+>> > +                             (void **)&m);
+>> >       if (status != EFI_SUCCESS)
+>> >               goto fail;
+>>
+>>
+>> OK, this needs a stronger justification. Presumably the reason for this
+>> change is that you want the allocation to hang around once the kernel is
+>> running? We have this problem on x86 and it's solved by reserving the
+>> memory early in the kernel, e.g. memblock_reserve().
+>> EFI_RUNTIME_SERVICES_DATA is for firmware use, not for kernel data.
+>>
+>
+> Yeah, arm64 reserves it and is okay with it being EFI_LOADER_DATA.
+>
+> --Mark
 
-My system (HP prototype server) did not need the special handling in
-efi_reuse_config().  I will check with firmware team to get more
-information on this.
+I have discussed this with Leif and will change this back to
+EFI_LOADER_DATA, and Leif will update
+his runtime services patch to reserve this as done in your arm64 implementation.
 
 Thanks,
--Toshi
+Roy
