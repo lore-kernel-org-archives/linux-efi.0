@@ -1,70 +1,52 @@
-From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Tue, 03 Dec 2013 08:39:00 -0700
-Message-ID: <1386085140.1791.218.camel@misato.fc.hp.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
-	 <1385445477-9665-8-git-send-email-dyoung@redhat.com>
-	 <20131127140732.GD32267@pd.tnic>
-	 <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
-	 <1386023600.1791.201.camel@misato.fc.hp.com>
-	 <1386034289.1791.210.camel@misato.fc.hp.com>
-	 <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH 1/3] arm64: add EFI stub
+Date: Tue, 3 Dec 2013 18:38:44 +0000
+Message-ID: <20131203183844.GA22668@mudshark.cambridge.arm.com>
+References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
+ <1385762712-17043-2-git-send-email-msalter@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131203015613.GB3980-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1385762712-17043-2-git-send-email-msalter@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Salter <msalter@redhat.com>
+Cc: "matt.fleming@intel.com" <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "patches@linaro.org" <patches@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-12-03 at 09:56 +0800, Dave Young wrote:
-> On 12/02/13 at 06:31pm, Toshi Kani wrote:
-> > On Mon, 2013-12-02 at 15:33 -0700, Toshi Kani wrote:
-> > > On Fri, 2013-11-29 at 17:14 +0800, Dave Young wrote:
-> > > > On 11/27/13 at 03:07pm, Borislav Petkov wrote:
-> > > > > On Tue, Nov 26, 2013 at 01:57:52PM +0800, Dave Young wrote:
-> > > > > > Add a new setup_data type SETUP_EFI for kexec use.
-> > > > > > Passing the saved fw_vendor, runtime, config tables and
-> > > > > > efi runtime mappings.
-> > > > > > 
-> > > > > > When entering virtual mode, directly mapping the efi
-> > > > > > runtime ragions which we passed in previously. And skip
-> > > > > > the step to call SetVirtualAddressMap.
-> > > > > > 
-> > > > > > Specially for HP z420 workstation it need another variable
-> > > > > > saving,
-> > > > > 
-> > > > > Why the special handling? Does that mean, this is going to be the case
-> > > > > for other HP UEFI implementations too?
-> > > > 
-> > > > I have only one HP machine for testing, Maybe Toshi can help to verify
-> > > > on other machines. Just comment out the function efi_reuse_config to see
-> > > > if kexec kernel panic.
-> > > 
-> > > My system (HP prototype server) did not need the special handling in
-> > > efi_reuse_config().  I will check with firmware team to get more
-> > > information on this.
-> > 
-> > I have one question.  I think this special handling assumes that
-> > efi.smbios contains a virtual address on HP z420.  So, how does the 1st
-> > kernel set a virtual address to efi.smbios in the first place?
-> 
-> Hi, Toshi,
-> 
-> It's originally a physical address, I think kernel does not change it.
-> As the fw_vendor, runtime etc. are changed to virt addr by firmware, so I
-> assume smbios on Hp z420 is also changed by firmware after becoming virtual mode.
+Hi Mark, Roy,
 
-Hi Dave,
+On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
+> This patch adds PE/COFF header fields to the start of the Image
+> so that it appears as an EFI application to EFI firmware. An EFI
+> stub is included to allow direct booting of the kernel Image. Due
+> to EFI firmware limitations, only little endian kernels with 4K
+> page sizes are supported at this time. Support in the COFF header
+> for signed images was provided by Ard Biesheuvel.
 
-Oh, I think I now understand what the issue was.  The z420 firmware
-updates the SMBIOS table address in the EFI system table to a virtual
-address after calling EFI SetVirtualAddressMap.  So, you are passing the
-original physical address of the SMBIOS table from the 1st kernel to the
-2nd kernel to put it back to physical.  Is that right? 
+I haven't really jumped into this but, whilst I see the use of EFI_STUB on
+both arm and arm64, there seems to be some duplication/reinvention between
+the two series you've put together.
 
-Thanks,
--Toshi
+Maybe I'm just being ignorant, but the stuff in efi-stub.c really looks to
+be doing the same thing on both architectures. Would you guys be able to
+work to together to produce an independent series containing the common
+parts, then add arm/arm64 backends on top of that please? In particular,
+factoring out the device-tree parts ensures that we don't introduce subtle
+differences between the two architectures when there's no real need to do
+so...
+
+...or shout at me because I didn't understand what you were doing!
+
+Cheers,
+
+Will
