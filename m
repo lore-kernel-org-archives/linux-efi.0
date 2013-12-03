@@ -1,34 +1,39 @@
-From: Roy Franz <roy.franz@linaro.org>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH 1/3] arm64: add EFI stub
-Date: Tue, 3 Dec 2013 11:31:29 -0800
-Message-ID: <CAFECyb-jx=f4T=NARGhGVJjQXGX1t4n8YbWuzJ050O4AQY2p4Q@mail.gmail.com>
+Date: Tue, 03 Dec 2013 14:31:30 -0500
+Message-ID: <1386099090.1861.55.camel@deneb.redhat.com>
 References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	<1385762712-17043-2-git-send-email-msalter@redhat.com>
-	<20131203183844.GA22668@mudshark.cambridge.arm.com>
+	 <1385762712-17043-2-git-send-email-msalter@redhat.com>
+	 <20131203183844.GA22668@mudshark.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20131203183844.GA22668@mudshark.cambridge.arm.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: Mark Salter <msalter@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131203183844.GA22668-MRww78TxoiP5vMa5CHWGZ34zcgK1vI+I0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Dec 3, 2013 at 10:38 AM, Will Deacon <will.deacon@arm.com> wrote:
+On Tue, 2013-12-03 at 18:38 +0000, Will Deacon wrote:
 > Hi Mark, Roy,
->
+> 
 > On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
->> This patch adds PE/COFF header fields to the start of the Image
->> so that it appears as an EFI application to EFI firmware. An EFI
->> stub is included to allow direct booting of the kernel Image. Due
->> to EFI firmware limitations, only little endian kernels with 4K
->> page sizes are supported at this time. Support in the COFF header
->> for signed images was provided by Ard Biesheuvel.
->
+> > This patch adds PE/COFF header fields to the start of the Image
+> > so that it appears as an EFI application to EFI firmware. An EFI
+> > stub is included to allow direct booting of the kernel Image. Due
+> > to EFI firmware limitations, only little endian kernels with 4K
+> > page sizes are supported at this time. Support in the COFF header
+> > for signed images was provided by Ard Biesheuvel.
+> 
 > I haven't really jumped into this but, whilst I see the use of EFI_STUB on
 > both arm and arm64, there seems to be some duplication/reinvention between
 > the two series you've put together.
->
+
+Indeed. As the file banner says, the arm64 stub started out from the arm
+code.
+
+> 
 > Maybe I'm just being ignorant, but the stuff in efi-stub.c really looks to
 > be doing the same thing on both architectures. Would you guys be able to
 > work to together to produce an independent series containing the common
@@ -36,27 +41,18 @@ On Tue, Dec 3, 2013 at 10:38 AM, Will Deacon <will.deacon@arm.com> wrote:
 > factoring out the device-tree parts ensures that we don't introduce subtle
 > differences between the two architectures when there's no real need to do
 > so...
->
+> 
 > ...or shout at me because I didn't understand what you were doing!
->
-> Cheers,
->
-> Will
 
-Hi Will,
+Along the way, Roy has pulled out common bits into:
+   drivers/firmware/efi-stub-helper.c
+and
+   drivers/firmware/fdt.c
 
-   Some of the device tree code is already factored out in
-drivers/firmware/efi/fdt.c, but
-looking at this again I think that there is more that can be moved to
-common code.  The
-main difference between the arm/arm64 stubs is the restrictions on
-where the kernel binary
-can be loaded.  On arm64 it is the kernel image itself, and on arm it
-is the zImage that is the
-next stage.  This also affects the build environment - the arm64 stub
-is part of the kernel itself,
-and the arm stub is part of the decompressor.
-I'll work with Mark to see how much of the two stubs we can refactor
-into shared code.
+There are arguably more bits which could be made common but there's not
+really a lot left. There are differences between the two stubs which
+limit what we can do. The arm stub is not part of the kernel (it is part
+of the zImage wrapper) but the arm64 stub is. So arm64 has a little more
+flexibility for using kernel facilities (__init attribute, LIBFDT, etc).
 
-Roy
+--Mark
