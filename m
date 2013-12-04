@@ -1,58 +1,44 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm64: add EFI stub
-Date: Tue, 03 Dec 2013 14:31:30 -0500
-Message-ID: <1386099090.1861.55.camel@deneb.redhat.com>
-References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	 <1385762712-17043-2-git-send-email-msalter@redhat.com>
-	 <20131203183844.GA22668@mudshark.cambridge.arm.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Wed, 4 Dec 2013 10:46:10 +0800
+Message-ID: <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-8-git-send-email-dyoung@redhat.com>
+ <20131127140732.GD32267@pd.tnic>
+ <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+ <1386023600.1791.201.camel@misato.fc.hp.com>
+ <1386034289.1791.210.camel@misato.fc.hp.com>
+ <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
+ <1386085140.1791.218.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131203183844.GA22668-MRww78TxoiP5vMa5CHWGZ34zcgK1vI+I0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1386085140.1791.218.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2013-12-03 at 18:38 +0000, Will Deacon wrote:
-> Hi Mark, Roy,
-> 
-> On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
-> > This patch adds PE/COFF header fields to the start of the Image
-> > so that it appears as an EFI application to EFI firmware. An EFI
-> > stub is included to allow direct booting of the kernel Image. Due
-> > to EFI firmware limitations, only little endian kernels with 4K
-> > page sizes are supported at this time. Support in the COFF header
-> > for signed images was provided by Ard Biesheuvel.
-> 
-> I haven't really jumped into this but, whilst I see the use of EFI_STUB on
-> both arm and arm64, there seems to be some duplication/reinvention between
-> the two series you've put together.
+Hi, Toshi
 
-Indeed. As the file banner says, the arm64 stub started out from the arm
-code.
+> Oh, I think I now understand what the issue was.  The z420 firmware
+> updates the SMBIOS table address in the EFI system table to a virtual
+> address after calling EFI SetVirtualAddressMap.  So, you are passing the
+> original physical address of the SMBIOS table from the 1st kernel to the
+> 2nd kernel to put it back to physical.  Is that right? 
 
-> 
-> Maybe I'm just being ignorant, but the stuff in efi-stub.c really looks to
-> be doing the same thing on both architectures. Would you guys be able to
-> work to together to produce an independent series containing the common
-> parts, then add arm/arm64 backends on top of that please? In particular,
-> factoring out the device-tree parts ensures that we don't introduce subtle
-> differences between the two architectures when there's no real need to do
-> so...
-> 
-> ...or shout at me because I didn't understand what you were doing!
+Right.
 
-Along the way, Roy has pulled out common bits into:
-   drivers/firmware/efi-stub-helper.c
-and
-   drivers/firmware/fdt.c
-
-There are arguably more bits which could be made common but there's not
-really a lot left. There are differences between the two stubs which
-limit what we can do. The arm stub is not part of the kernel (it is part
-of the zImage wrapper) but the arm64 stub is. So arm64 has a little more
-flexibility for using kernel facilities (__init attribute, LIBFDT, etc).
-
---Mark
+Thanks
+Dave
