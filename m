@@ -1,46 +1,53 @@
-From: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V5 6/6] Add config EFI_STUB for ARM to Kconfig
-Date: Thu, 05 Dec 2013 20:04:28 +0000
-Message-ID: <20131205200428.8FEBAC40785@trevor.secretlab.ca>
-References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org> < 1385595115-21488-7-git-send-email-roy.franz@linaro.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Thu, 5 Dec 2013 21:52:50 +0100
+Message-ID: <20131205205250.GF14407@pd.tnic>
+References: <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+ <1386023600.1791.201.camel@misato.fc.hp.com>
+ <1386034289.1791.210.camel@misato.fc.hp.com>
+ <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
+ <1386085140.1791.218.camel@misato.fc.hp.com>
+ <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
+ <1386175428.1791.225.camel@misato.fc.hp.com>
+ <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
+ <20131205115124.GC14407@pd.tnic>
+ <1386258962.1791.268.camel@misato.fc.hp.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1385595115-21488-7-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1386258962.1791.268.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 27 Nov 2013 15:31:55 -0800, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-Dude. Must have commit text. You know better.  :-)
-
-> ---
->  arch/arm/Kconfig |   10 ++++++++++
->  1 file changed, 10 insertions(+)
+On Thu, Dec 05, 2013 at 08:56:02AM -0700, Toshi Kani wrote:
+> The smbios in efi_setup_data is necessary for kexec to pass the physical
+> address of the SMBIOS table from the 1st kernel to the 2nd kernel.
 > 
-> diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-> index a1b4758..6601985 100644
-> --- a/arch/arm/Kconfig
-> +++ b/arch/arm/Kconfig
-> @@ -1857,6 +1857,16 @@ config EFI
->  	  This option is only useful on systems that have UEFI firmware.
->  	  However, even with this option, the resultant kernel will
->  	  continue to boot on non-UEFI platforms.
-> +config EFI_STUB
+> The kernel boot sequence proceeds in the following order.  Step 2
+> requires efi.smbios to be the physical address.  However, Dave found
+> that EFI system table has a virtual address of SMBIOS in step 1.  Hence,
+> he sets it back to the physical address with the smbios in
+> efi_setup_data.  (When it is still the physical address, it simply sets
+> the same value.)
+> 
+> 1. efi_init() - Set efi.smbios from EFI system table
+> 2. dmi_scan_machine() - Temporary map efi.smbios to access SMBIOS table
+> 3. efi_enter_virtual_mode() - Map EFI ranges
 
-Need a blank line between the previous stanza and config EFI_STUB
+Thanks Toshi, it is all clear now.
 
-> +	bool "EFI stub support"
-> +	depends on EFI && !CPU_BIG_ENDIAN
-> +	---help---
-> +	  This kernel feature allows a zImage to be loaded directly
-> +	  by EFI firmware without the use of a bootloader.  A PE/COFF
-> +	  header is added to the zImage in a way that makes the binary
-> +	  both a Linux zImage and an PE/COFF executable that can be
-> +	  executed directly by EFI firmware.
-> +	  See Documentation/efi-stub.txt for more information.
+@Dave: you might want to put Toshi's explanation in the commit message
+of your patch so that we know *why* the change is needed.
 
-Nit: 80 column word wrap is customary.
+Thanks.
 
-g.
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
