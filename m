@@ -1,125 +1,41 @@
-From: Grant Likely <grant.likely@linaro.org>
-Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
-Date: Thu, 05 Dec 2013 11:16:41 +0000
-Message-ID: <20131205111641.9BA3DC40710@trevor.secretlab.ca>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> < 1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-doc-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux@arm.linux.org.uk
-Cc: matt.fleming@intel.com, roy.franz@linaro.org, msalter@redhat.com, patches@linaro.org, linaro-uefi@linaro.org, mark.rutland@arm.com, Leif Lindholm <leif.lindholm@linaro.org>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Thu, 5 Dec 2013 12:51:24 +0100
+Message-ID: <20131205115124.GC14407@pd.tnic>
+References: <1385445477-9665-8-git-send-email-dyoung@redhat.com>
+ <20131127140732.GD32267@pd.tnic>
+ <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+ <1386023600.1791.201.camel@misato.fc.hp.com>
+ <1386034289.1791.210.camel@misato.fc.hp.com>
+ <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
+ <1386085140.1791.218.camel@misato.fc.hp.com>
+ <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
+ <1386175428.1791.225.camel@misato.fc.hp.com>
+ <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20131205015615.GC3736-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 28 Nov 2013 16:41:21 +0000, Leif Lindholm <leif.lindholm@linaro.org> wrote:
-> This patch provides documentation of the [U]EFI runtime service and
-> configuration features for the arm architecture.
+On Thu, Dec 05, 2013 at 09:56:15AM +0800, Dave Young wrote:
+> > The z420 firmware is based on some UEFI core that may be used by other
+> > vendors as well.  Since this handling is totally harmless (just
+> > redundant), I'd suggest not to have a platform check on this handling.
 > 
-> Changes since v1/v2:
-> - Complete rewrite.
-> - New FDT bindings.
-> 
-> Cc: Rob Landley <rob@landley.net>
-> Cc: linux-doc@vger.kernel.org
-> 
-> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+> I have same worry as well, so I agree with you.
 
-Acked-by: Grant Likely <grant.likely@linaro.org>
+Btw, why does kexec need the ->smbios table at all? I see it being
+passed in efi_setup_data.
 
-With a few minor comments below.
+-- 
+Regards/Gruss,
+    Boris.
 
-g.
-
-> ---
->  Documentation/arm/00-INDEX |    3 +++
->  Documentation/arm/uefi.txt |   61 ++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 64 insertions(+)
->  create mode 100644 Documentation/arm/uefi.txt
-> 
-> diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
-> index 36420e1..b3af704 100644
-> --- a/Documentation/arm/00-INDEX
-> +++ b/Documentation/arm/00-INDEX
-> @@ -34,3 +34,6 @@ nwfpe/
->  	- NWFPE floating point emulator documentation
->  swp_emulation
->  	- SWP/SWPB emulation handler/logging description
-> +
-> +uefi.txt
-> +	- [U]EFI configuration and runtime services documentation
-> diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
-> new file mode 100644
-> index 0000000..9ba59509
-> --- /dev/null
-> +++ b/Documentation/arm/uefi.txt
-> @@ -0,0 +1,61 @@
-> +UEFI, the Unified Extensible Firmware Interface is, a specification
-
-Nit: Comma in the wrong place.
-
-> +governing the behaviours of compatible firmware interfaces. It is
-> +maintained by the UEFI Forum - http://www.uefi.org/.
-> +
-> +UEFI is an evolution of its predecessor 'EFI', so the terms EFI and
-> +UEFI are used somewhat interchangeably in this document and associated
-> +source code. As a rule, anything new uses 'UEFI', whereas 'EFI' refers
-> +to legacy code or specifications.
-> +
-> +UEFI support in Linux
-> +=====================
-> +Booting on a platform with firmware compliant with the UEFI specification
-> +makes it possible for the kernel to support additional features:
-> +- UEFI Runtime Services
-> +- Retrieving various configuration information through the standardised
-> +  interface of UEFI configuration tables. (ACPI, SMBIOS, ...)
-> +
-> +For actually enabling [U]EFI support, enable:
-> +- CONFIG_EFI=y
-> +- CONFIG_EFI_VARS=y or m
-> +
-> +The implementation depends on receiving information about the UEFI environment
-> +in a Flattened Device Tree (FDT) - so is only available with CONFIG_OF.
-> +
-> +UEFI stub
-> +=========
-> +The "stub" is a feature that turns the Image/zImage into a valid UEFI PE/COFF
-
-Nit: s/turns/extends/
-
-> +executable, including a loader application that makes it possible to load the
-> +kernel directly from the UEFI shell, boot menu, or one of the lightweight
-> +bootloaders like Gummiboot or rEFInd.
-> +
-> +The kernel image built with stub support remains a valid kernel image for
-> +booting in non-UEFI environments.
-> +
-> +UEFI kernel support on ARM
-> +==========================
-> +UEFI kernel support on the ARM architectures (arm and arm64) is only available
-> +when boot is performed through the stub.
-> +
-> +The stub populates the FDT /chosen node with (and the kernel scans for) the
-> +following parameters:
-> +________________________________________________________________________________
-> +Name                      | Size   | Description
-> +================================================================================
-> +linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
-> +--------------------------------------------------------------------------------
-> +linux,uefi-mmap-start     | 64-bit | Physical address of the UEFI memory map,
-> +                          |        | populated by the UEFI GetMemoryMap() call.
-> +--------------------------------------------------------------------------------
-> +linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
-> +                          |        | pointed to in previous entry.
-> +--------------------------------------------------------------------------------
-> +linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
-> +                          |        | memory map.
-> +--------------------------------------------------------------------------------
-> +linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
-> +--------------------------------------------------------------------------------
-> +linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
-> +--------------------------------------------------------------------------------
-> +
-> +For verbose debug messages, specify 'uefi_debug' on the kernel command line.
-> -- 
-> 1.7.10.4
-> 
-
+Sent from a fat crate under my desk. Formatting is fine.
+--
