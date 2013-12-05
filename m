@@ -1,54 +1,242 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
-Date: Thu, 5 Dec 2013 13:58:06 +0100
-Message-ID: <20131205125805.GX24997@rocoto.smurfnet.nu>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
- <1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
- <CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
- <20131202210719.GQ24997@rocoto.smurfnet.nu>
- <CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com>
+From: Catalin Marinas <catalin.marinas@arm.com>
+Subject: Re: [PATCH 1/3] arm64: add EFI stub
+Date: Thu, 5 Dec 2013 14:18:53 +0000
+Message-ID: <20131205141853.GA974@darko.cambridge.arm.com>
+References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
+ <1385762712-17043-2-git-send-email-msalter@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1385762712-17043-2-git-send-email-msalter@redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Salter <msalter@redhat.com>
+Cc: "matt.fleming@intel.com" <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "patches@linaro.org" <patches@linaro.org>, Will Deacon <Will.Deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
-> By the time we get half-way through arm/kernel/head.S the cache and
-> MMU has been turned off and on and off again by the decompressor, and
-> after a large amount of guesswork and arbitrary restriction-based
-> implementation, there's no guarantee that the kernel hasn't been
-> decompressed over some important UEFI feature or some memory hasn't
-> been trashed. You can't make that guarantee because by entering the
-> plain zImage, you forfeited that information. This is at worst case
-> going to be lots of blank screens and blinking serial console prompts
-> and little more than frustration..
+Hi Mark,
 
-So, Grant covered the reason _why_ we coexist with zImage, so I won't
-go into that. I will however point out that we are explicitly using the
-UEFI interfaces to allocate the regions the zImage will decompress into.
-This isn't guesswork, and has in fact already turned up issues with a
-couple of UEFI board ports that reserved memory near 0 (which were
-indeed previously being silently overwritten by the kernel
-decompression).
+On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
+> This patch adds PE/COFF header fields to the start of the Image
+> so that it appears as an EFI application to EFI firmware. An EFI
+> stub is included to allow direct booting of the kernel Image. Due
+> to EFI firmware limitations, only little endian kernels with 4K
+> page sizes are supported at this time.
 
-We _are_ planning to do more development for subsequent patches, making
-more use of the UEFI memory map. And by subsequent, I mean hopefully in
-time for 3.14. I sneekily included this in the version of uefi.txt sent
-out for separate review early November:
-http://permalink.gmane.org/gmane.linux.kernel.efi/2657, but not in
-the one included with this patch set (since the code isn't there yet).
-But we considered it more important to get the basic support ready
-first.
+I don't fully understand the EFI firmware limitations but for big endian
+we could have the EFI_STUB wrapper in little endian and get the kernel
+to switch to big endian once booted. The image header should always be
+little endian.
 
-At that point, you will see the stub reading the dram_base from the
-UEFI memory map rather than DT, and memblock_init getting its input
-from there too.
+And I have to dig further into the 4K limitation (or you could give a
+quick summary ;)).
 
-Regards,
+> diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+> new file mode 100644
+> index 0000000..5f6d179
+> --- /dev/null
+> +++ b/arch/arm64/kernel/efi-entry.S
+> @@ -0,0 +1,81 @@
+> +/*
+> + * EFI entry point.
+> + *
+> + * Copyright (C) 2013 Red Hat, Inc.
+> + * Author: Mark Salter <msalter@redhat.com>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + */
+> +#include <linux/linkage.h>
+> +#include <linux/init.h>
+> +
+> +#include <asm/assembler.h>
+> +
+> +#define EFI_LOAD_ERROR 0x8000000000000001
 
-Leif
+It's defined already but I see why you can't include efi.h here. Maybe a
+comment.
+
+> +
+> +       __INIT
+> +
+> +       /*
+> +        * We arrive here from the EFI boot manager with:
+> +        *
+> +        *    * MMU on with identity-mapped RAM.
+> +        *    * Icache and Dcache on
+> +        *
+> +        * We will most likely be running from some place other than where
+> +        * we want to be. The kernel image wants to be placed at TEXT_OFFSET
+> +        * from start of RAM.
+> +        */
+> +ENTRY(efi_stub_entry)
+> +       stp     x29, x30, [sp, #-32]!
+> +
+> +       /*
+> +        * Call efi_entry to do the real work.
+> +        * x0 and x1 are already set up by firmware. Current runtime
+> +        * address of image is calculated and passed via *image_addr.
+> +        *
+> +        * unsigned long efi_entry(void *handle,
+> +        *                         efi_system_table_t *sys_table,
+> +        *                         unsigned long *image_addr) ;
+> +        */
+> +       adrp    x8, _text
+> +        add    x8, x8, #:lo12:_text
+
+Minor: some wrong whitespace (but I don't trust our incoming mail server
+either, it corrupts patches usually).
+
+> +       add     x2, sp, 16
+> +       str     x8, [x2]
+> +       bl      efi_entry
+> +       cmn     x0, #1
+> +       b.eq    efi_load_fail
+> +
+> +       /*
+> +        * efi_entry() will have relocated the kernel image if necessary
+> +        * and we return here with device tree address in x0 and the kernel
+> +        * entry point stored at *image_addr. Save those values in registers
+> +        * which are preserved by __flush_dcache_all.
+> +        */
+> +       ldr     x1, [sp, #16]
+> +       mov     x20, x0
+> +       mov     x21, x1
+> +
+> +       bl      __flush_dcache_all
+
+Regarding __flush_dcache_all, I plan to remove it for all cases apart
+from power management with the MMU disabled. With MMU enabled, there is
+no guarantee that this function does the right thing. It's even worse in
+the guest context.
+
+> +       /* Turn off Dcache and MMU */
+> +       mrs     x0, sctlr_el1
+> +       bic     x0, x0, #1 << 0 // clear SCTLR.M
+> +       bic     x0, x0, #1 << 2 // clear SCTLR.C
+> +       msr     sctlr_el1, x0
+> +       isb
+
+I assume an EFI app is running with the MMU enabled (and UP only). Do we
+always run it in EL1? What about EL2 mode (needed by KVM and Xen)?
+
+> +
+> +       /* Jump to real entry point */
+> +       mov     x0, x20
+> +       mov     x1, xzr
+> +       mov     x2, xzr
+> +       mov     x3, xzr
+> +       br      x21
+> +
+> +efi_load_fail:
+> +       mov     x0, EFI_LOAD_ERROR
+
+Needs #EFI_LOAD_ERROR (strange that gas doesn't complain).
+
+> +       ldp     x29, x30, [sp], #32
+> +       ret
+> +
+> +ENDPROC(efi_stub_entry)
+> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+> new file mode 100644
+> index 0000000..f000b04
+> --- /dev/null
+> +++ b/arch/arm64/kernel/efi-stub.c
+> @@ -0,0 +1,280 @@
+> +/*
+> + * linux/arch/arm/boot/compressed/efi-stub.c
+> + *
+> + * Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
+> + *
+> + * This file implements the EFI boot stub for the arm64 kernel.
+> + * Adapted from ARM version by Mark Salter <msalter@redhat.com>
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + *
+> + */
+> +#include <linux/efi.h>
+> +#include <linux/libfdt.h>
+> +#include <asm/sections.h>
+> +#include <generated/compile.h>
+> +#include <linux/uts.h>
+> +#include <linux/utsname.h>
+> +#include <generated/utsrelease.h>
+> +#include <linux/version.h>
+> +
+> +/* error code which can't be mistaken for valid address */
+> +#define EFI_ERROR      (~0UL)
+> +
+> +/*
+> + * EFI function call wrappers. These are not required for arm64, but wrappers
+> + * are required for X86 to convert between ABIs. These wrappers are provided
+> + * to allow code sharing between X86 and other architectures. Since these
+> + * wrappers directly invoke the EFI function pointer, the function pointer
+> + * type must be properly defined, which is not the case for X86. One advantage
+> + * of this is it allows for type checking of arguments, which is not possible
+> + * with the X86 wrappers.
+> + */
+> +#define efi_call_phys0(f)                      f()
+> +#define efi_call_phys1(f, a1)                  f(a1)
+> +#define efi_call_phys2(f, a1, a2)              f(a1, a2)
+> +#define efi_call_phys3(f, a1, a2, a3)          f(a1, a2, a3)
+> +#define efi_call_phys4(f, a1, a2, a3, a4)      f(a1, a2, a3, a4)
+> +#define efi_call_phys5(f, a1, a2, a3, a4, a5)  f(a1, a2, a3, a4, a5)
+> +
+> +/*
+> + * AArch64 requires the DTB to be 8-byte aligned in the first 512MiB from
+> + * start of kernel and may not cross a 2MiB boundary. We set alignment to
+> + * equal max size so we know it won't cross a 2MiB boudary.
+> + */
+> +#define MAX_DTB_SIZE   0x40000
+
+2MB is 0x200000 (or I don't understand the comment).
+
+> +#define DTB_ALIGN      MAX_DTB_SIZE
+> +#define MAX_DTB_OFFSET 0x20000000
+> +
+> +#define pr_efi(msg)     efi_printk(sys_table, "EFI stub: "msg)
+> +#define pr_efi_err(msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
+> +
+> +struct fdt_region {
+> +       u64 base;
+> +       u64 size;
+> +};
+> +
+> +/* Include shared EFI stub code */
+> +#include "../../../drivers/firmware/efi/efi-stub-helper.c"
+> +#include "../../../drivers/firmware/efi/fdt.c"
+
+I don't particularly like .c files inclusion but it looks like x86 does
+the same.
+
+> +
+> +static unsigned long __init get_dram_base(efi_system_table_t *sys_table)
+> +{
+> +       efi_status_t status;
+> +       unsigned long map_size, desc_size;
+> +       unsigned long membase = EFI_ERROR;
+> +       efi_memory_desc_t *memory_map;
+> +       int i;
+> +
+> +       status = efi_get_memory_map(sys_table, &memory_map, &map_size,
+> +                                   &desc_size, NULL, NULL);
+> +       if (status == EFI_SUCCESS) {
+
+Can you exit earlier here if !EFI_SUCCESS? It reduces the indentation
+level.
+
+-- 
+Catalin
