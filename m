@@ -1,45 +1,56 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
-Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support
- documentation
-Date: Wed, 4 Dec 2013 22:44:47 +0000
-Message-ID: <20131204224447.GA19265@srcf.ucam.org>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
- <1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
- <CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
- <20131202210719.GQ24997@rocoto.smurfnet.nu>
- <CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Thu, 5 Dec 2013 09:56:15 +0800
+Message-ID: <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
+ <1385445477-9665-8-git-send-email-dyoung@redhat.com>
+ <20131127140732.GD32267@pd.tnic>
+ <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
+ <1386023600.1791.201.camel@misato.fc.hp.com>
+ <1386034289.1791.210.camel@misato.fc.hp.com>
+ <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
+ <1386085140.1791.218.camel@misato.fc.hp.com>
+ <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
+ <1386175428.1791.225.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Matt Sealey <neko@bakuhatsu.net>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, matt.fleming@intel.com, Grant Likely <grant.likely@linaro.org>, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, Patch Tracking <patches@linaro.org>, linaro-uefi@lists.linaro.org, Mark Rutland <mark.rutland@arm.com>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
+In-Reply-To: <1386175428.1791.225.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
+On 12/04/13 at 09:43am, Toshi Kani wrote:
+> On Wed, 2013-12-04 at 10:46 +0800, Dave Young wrote:
+> > Hi, Toshi
+> > 
+> > > Oh, I think I now understand what the issue was.  The z420 firmware
+> > > updates the SMBIOS table address in the EFI system table to a virtual
+> > > address after calling EFI SetVirtualAddressMap.  So, you are passing the
+> > > original physical address of the SMBIOS table from the 1st kernel to the
+> > > 2nd kernel to put it back to physical.  Is that right? 
+> > 
+> > Right.
+> 
+> Hi Dave,
+> 
+> The z420 firmware is based on some UEFI core that may be used by other
+> vendors as well.  Since this handling is totally harmless (just
+> redundant), I'd suggest not to have a platform check on this handling.
 
-> there's no guarantee that the kernel hasn't been decompressed over 
-> some important UEFI feature or some memory hasn't been trashed. You 
-> can't make that guarantee because by entering the plain zImage, you 
-> forfeited that information.
+I have same worry as well, so I agree with you.
 
-The stub is responsible for ensuring that the compressed kernel is 
-loaded at a suitable address. Take a look at efi_relocate_kernel().
-
-> Most of the guessing is ideally not required to be a guess at all, the
-> restrictions are purely to deal with the lack of trust for the
-> bootloader environment. Why can't we trust UEFI? Or at least hold it
-> to a higher standard. If someone ships a broken UEFI, they screw a
-> feature or have a horrible bug and ship it, laud the fact Linux
-> doesn't boot on it and the fact that it's their fault - over their
-> head. It actually works these days, Linux actually has "market share,"
-> companies really go out of their way to rescue their "image" and
-> resolve the situation when someone blogs about a serious UEFI bug on
-> their $1300 laptops, or even $300 tablets.
-
-Yeah, that hasn't actually worked out too well for us.
-
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
+Thanks
+Dave
