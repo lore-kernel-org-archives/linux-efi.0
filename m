@@ -1,56 +1,61 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Thu, 5 Dec 2013 09:56:15 +0800
-Message-ID: <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-8-git-send-email-dyoung@redhat.com>
- <20131127140732.GD32267@pd.tnic>
- <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
- <1386023600.1791.201.camel@misato.fc.hp.com>
- <1386034289.1791.210.camel@misato.fc.hp.com>
- <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
- <1386085140.1791.218.camel@misato.fc.hp.com>
- <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
- <1386175428.1791.225.camel@misato.fc.hp.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1386175428.1791.225.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+From: Grant Likely <grant.likely@linaro.org>
+Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
+Date: Thu, 05 Dec 2013 10:55:50 +0000
+Message-ID: <20131205105550.692FCC40710@trevor.secretlab.ca>
+References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> < 1385656883-4420-2-git-send-email-leif.lindholm@linaro.org> < CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Matt Sealey <neko@bakuhatsu.net>, Leif Lindholm <leif.lindholm@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, matt.fleming@intel.com, roy.franz@linaro.org, msalter@redhat.com, Patch Tracking <patches@linaro.org>, linaro-uefi@linaro.org, Mark Rutland <mark.rutland@arm.com>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/04/13 at 09:43am, Toshi Kani wrote:
-> On Wed, 2013-12-04 at 10:46 +0800, Dave Young wrote:
-> > Hi, Toshi
-> > 
-> > > Oh, I think I now understand what the issue was.  The z420 firmware
-> > > updates the SMBIOS table address in the EFI system table to a virtual
-> > > address after calling EFI SetVirtualAddressMap.  So, you are passing the
-> > > original physical address of the SMBIOS table from the 1st kernel to the
-> > > 2nd kernel to put it back to physical.  Is that right? 
-> > 
-> > Right.
+On Mon, 2 Dec 2013 13:51:22 -0600, Matt Sealey <neko@bakuhatsu.net> wrote:
+> > +UEFI kernel support on ARM
+> > +==========================
+> > +UEFI kernel support on the ARM architectures (arm and arm64) is only available
+> > +when boot is performed through the stub.
+> > +
+> > +The stub populates the FDT /chosen node with (and the kernel scans for) the
+> > +following parameters:
+> > +________________________________________________________________________________
+> > +Name                      | Size   | Description
+> > +================================================================================
+> > +linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
+> > +--------------------------------------------------------------------------------
+> > +linux,uefi-mmap-start     | 64-bit | Physical address of the UEFI memory map,
+> > +                          |        | populated by the UEFI GetMemoryMap() call.
+> > +--------------------------------------------------------------------------------
+> > +linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
+> > +                          |        | pointed to in previous entry.
+> > +--------------------------------------------------------------------------------
+> > +linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
+> > +                          |        | memory map.
+> > +--------------------------------------------------------------------------------
+> > +linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
+> > +--------------------------------------------------------------------------------
+> > +linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
+> > +--------------------------------------------------------------------------------
 > 
-> Hi Dave,
+> This flies in the face of actually using #address-cells and
+> #size-cells to define how big addresses and sizes are. You're limited
+> here by the root node definitions... that's the spec.
 > 
-> The z420 firmware is based on some UEFI core that may be used by other
-> vendors as well.  Since this handling is totally harmless (just
-> redundant), I'd suggest not to have a platform check on this handling.
+> Here's where I think this whole thing falls down as being the weirdest
+> possible implementation of this. It defies logic to put this
+> information in the device tree /chosen node while also attempting to
+> boot the kernel using an EFI stub; the stub is going to have this
+> information because it is going to have the pointer to the system
+> System Table (since it was called by StartImage()). Why not stash the
+> System Table pointer somewhere safe in the stub?
 
-I have same worry as well, so I agree with you.
+Everything here is about getting from the stub to the kernel. We have a
+boot interface for the kernel proper. It works, and this patch set works
+with it. Also, this is effectively a kernel-internal interface between
+the stub and the kernel so there aren't any ABI issues that we need to
+deail with.
 
-Thanks
-Dave
+Go ahead and propose patches for a better interface, but in the mean
+time I see no reason not to merge this series.
+
+g.
