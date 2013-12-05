@@ -1,61 +1,34 @@
-From: Grant Likely <grant.likely@linaro.org>
-Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
-Date: Thu, 05 Dec 2013 10:55:50 +0000
-Message-ID: <20131205105550.692FCC40710@trevor.secretlab.ca>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> < 1385656883-4420-2-git-send-email-leif.lindholm@linaro.org> < CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Matt Sealey <neko@bakuhatsu.net>, Leif Lindholm <leif.lindholm@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, matt.fleming@intel.com, roy.franz@linaro.org, msalter@redhat.com, Patch Tracking <patches@linaro.org>, linaro-uefi@linaro.org, Mark Rutland <mark.rutland@arm.com>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] UEFI: Don't use UEFI time services on 32-bit
+Date: Thu, 5 Dec 2013 10:56:23 +0000
+Message-ID: <20131205105623.GA3823@console-pimps.org>
+References: <1385754283-2464-1-git-send-email-matthew.garrett@nebula.com>
+ <1385762647.3539.4.camel@linux-s257.site>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1385762647.3539.4.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2 Dec 2013 13:51:22 -0600, Matt Sealey <neko@bakuhatsu.net> wrote:
-> > +UEFI kernel support on ARM
-> > +==========================
-> > +UEFI kernel support on the ARM architectures (arm and arm64) is only available
-> > +when boot is performed through the stub.
-> > +
-> > +The stub populates the FDT /chosen node with (and the kernel scans for) the
-> > +following parameters:
-> > +________________________________________________________________________________
-> > +Name                      | Size   | Description
-> > +================================================================================
-> > +linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
-> > +--------------------------------------------------------------------------------
-> > +linux,uefi-mmap-start     | 64-bit | Physical address of the UEFI memory map,
-> > +                          |        | populated by the UEFI GetMemoryMap() call.
-> > +--------------------------------------------------------------------------------
-> > +linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
-> > +                          |        | pointed to in previous entry.
-> > +--------------------------------------------------------------------------------
-> > +linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
-> > +                          |        | memory map.
-> > +--------------------------------------------------------------------------------
-> > +linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
-> > +--------------------------------------------------------------------------------
-> > +linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
-> > +--------------------------------------------------------------------------------
+On Sat, 30 Nov, at 06:04:07AM, joeyli wrote:
+> Does there have chance to test Borislav's EFI runtime mapping work on
+> Dell Venue?
 > 
-> This flies in the face of actually using #address-cells and
-> #size-cells to define how big addresses and sizes are. You're limited
-> here by the root node definitions... that's the spec.
+> Borislav's patches here:
+> git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi
 > 
-> Here's where I think this whole thing falls down as being the weirdest
-> possible implementation of this. It defies logic to put this
-> information in the device tree /chosen node while also attempting to
-> boot the kernel using an EFI stub; the stub is going to have this
-> information because it is going to have the pointer to the system
-> System Table (since it was called by StartImage()). Why not stash the
-> System Table pointer somewhere safe in the stub?
+> I am sure his patchset can walkaround physical address accessing issue
+> on a broken 64-bit machine. But, I didn't test it on 32-bit issue
+> machine.
 
-Everything here is about getting from the stub to the kernel. We have a
-boot interface for the kernel proper. It works, and this patch set works
-with it. Also, this is effectively a kernel-internal interface between
-the stub and the kernel so there aren't any ABI issues that we need to
-deail with.
+Unfortunately there's no guarantee that once you fix the physical
+accesses the runtime services will work. I've got a 64-bit box that
+returns vendor-specific error codes once physical address accesses are
+handled.
 
-Go ahead and propose patches for a better interface, but in the mean
-time I see no reason not to merge this series.
-
-g.
+-- 
+Matt Fleming, Intel Open Source Technology Center
