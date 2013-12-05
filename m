@@ -1,43 +1,78 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm64: add EFI stub
-Date: Thu, 05 Dec 2013 09:43:23 -0500
-Message-ID: <1386254603.1861.120.camel@deneb.redhat.com>
-References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	 <1385762712-17043-2-git-send-email-msalter@redhat.com>
-	 <20131205141853.GA974@darko.cambridge.arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH V5 1/6] efi-stub.txt updates for ARM
+Date: Thu, 05 Dec 2013 15:19:23 +0000
+Message-ID: <20131205151923.E5B9CC40785@trevor.secretlab.ca>
+References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org> < 1385595115-21488-2-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131205141853.GA974-rtzwXk+D4rEjOxct69p1ducL+3YJyIBv@public.gmane.org>
+In-Reply-To: <1385595115-21488-2-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, dave.martin-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-12-05 at 14:18 +0000, Catalin Marinas wrote:
-> On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
-> > This patch adds PE/COFF header fields to the start of the Image
-> > so that it appears as an EFI application to EFI firmware. An EFI
-> > stub is included to allow direct booting of the kernel Image. Due
-> > to EFI firmware limitations, only little endian kernels with 4K
-> > page sizes are supported at this time.
+On Wed, 27 Nov 2013 15:31:50 -0800, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Update efi-stub.txt documentation to be more general
+> and not x86 specific.  Add ARM only "dtb=" command
+> line option description.
 > 
-> I don't fully understand the EFI firmware limitations but for big endian
-> we could have the EFI_STUB wrapper in little endian and get the kernel
-> to switch to big endian once booted. The image header should always be
-> little endian.
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-That would be fun. :) You'd also have to switch back and forth to make
-EFI runtime services calls.
+Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
+> ---
+>  Documentation/efi-stub.txt |   27 ++++++++++++++++++++-------
+>  1 file changed, 20 insertions(+), 7 deletions(-)
 > 
-> And I have to dig further into the 4K limitation (or you could give a
-> quick summary ;)).
-
-Just that the current UEFI spec mandates 4K pages for UEFI. So if UEFI
-maps two 4k pages with different attributes and those two pages are
-within the same 64k kernel page, there'd be a problem. I'd be better if
-UEFI used 64k pages, then the kernel could easily use 4k or 64k.
-
---Mark
+> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+> index 44e6bb6..19e897c 100644
+> --- a/Documentation/efi-stub.txt
+> +++ b/Documentation/efi-stub.txt
+> @@ -1,13 +1,16 @@
+>  			  The EFI Boot Stub
+>  		     ---------------------------
+>  
+> -On the x86 platform, a bzImage can masquerade as a PE/COFF image,
+> -thereby convincing EFI firmware loaders to load it as an EFI
+> -executable. The code that modifies the bzImage header, along with the
+> -EFI-specific entry point that the firmware loader jumps to are
+> -collectively known as the "EFI boot stub", and live in
+> +On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
+> +as a PE/COFF image, thereby convincing EFI firmware loaders to load
+> +it as an EFI executable. The code that modifies the bzImage header,
+> +along with the EFI-specific entry point that the firmware loader
+> +jumps to are collectively known as the "EFI boot stub", and live in
+>  arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+> -respectively.
+> +respectively.  For ARM the EFI stub is implemented in
+> +arch/arm/boot/compressed/efi-header.S and
+> +arch/arm/boot/compressed/efi-stub.c.  EFI stub code that is shared
+> +between architectures is in drivers/firmware/efi/efi-stub-helper.c.
+>  
+>  By using the EFI boot stub it's possible to boot a Linux kernel
+>  without the use of a conventional EFI boot loader, such as grub or
+> @@ -23,7 +26,9 @@ The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
+>  System Partiion (ESP) and renamed with the extension ".efi". Without
+>  the extension the EFI firmware loader will refuse to execute it. It's
+>  not possible to execute bzImage.efi from the usual Linux file systems
+> -because EFI firmware doesn't have support for them.
+> +because EFI firmware doesn't have support for them.  For ARM the
+> +arch/arm/boot/zImage should be copied to the system partition, and it
+> +may not need to be renamed.
+>  
+>  
+>  **** Passing kernel parameters from the EFI shell
+> @@ -63,3 +68,11 @@ Notice how bzImage.efi can be specified with a relative path. That's
+>  because the image we're executing is interpreted by the EFI shell,
+>  which understands relative paths, whereas the rest of the command line
+>  is passed to bzImage.efi.
+> +
+> +
+> +**** The "dtb=" option
+> +
+> +For the ARM architecture, we also need to be able to provide a device
+> +tree to the kernel.  This is done with the "dtb=" command line option,
+> +and is process in the same manner as the "initrd=" option that is described
+> +above.
+> -- 
+> 1.7.10.4
+> 
