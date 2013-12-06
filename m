@@ -1,50 +1,107 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Fri, 6 Dec 2013 09:31:44 +0800
-Message-ID: <20131206013143.GA3792@dhcp-16-126.nay.redhat.com>
-References: <1386023600.1791.201.camel@misato.fc.hp.com>
- <1386034289.1791.210.camel@misato.fc.hp.com>
- <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
- <1386085140.1791.218.camel@misato.fc.hp.com>
- <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
- <1386175428.1791.225.camel@misato.fc.hp.com>
- <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
- <20131205115124.GC14407@pd.tnic>
- <1386258962.1791.268.camel@misato.fc.hp.com>
- <20131205205250.GF14407@pd.tnic>
+From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
+Subject: Re: [PATCH v3 2/3] arm: Add [U]EFI runtime services support
+Date: Fri, 6 Dec 2013 02:59:48 +0100
+Message-ID: <201312060259.48259.arnd@arndb.de>
+References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> <1385656883-4420-3-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131205205250.GF14407-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <1385656883-4420-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linaro-uefi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/05/13 at 09:52pm, Borislav Petkov wrote:
-> On Thu, Dec 05, 2013 at 08:56:02AM -0700, Toshi Kani wrote:
-> > The smbios in efi_setup_data is necessary for kexec to pass the physical
-> > address of the SMBIOS table from the 1st kernel to the 2nd kernel.
-> > 
-> > The kernel boot sequence proceeds in the following order.  Step 2
-> > requires efi.smbios to be the physical address.  However, Dave found
-> > that EFI system table has a virtual address of SMBIOS in step 1.  Hence,
-> > he sets it back to the physical address with the smbios in
-> > efi_setup_data.  (When it is still the physical address, it simply sets
-> > the same value.)
-> > 
-> > 1. efi_init() - Set efi.smbios from EFI system table
-> > 2. dmi_scan_machine() - Temporary map efi.smbios to access SMBIOS table
-> > 3. efi_enter_virtual_mode() - Map EFI ranges
-> 
-> Thanks Toshi, it is all clear now.
-> 
-> @Dave: you might want to put Toshi's explanation in the commit message
-> of your patch so that we know *why* the change is needed.
+On Thursday 28 November 2013, Leif Lindholm wrote:
+> @@ -898,6 +900,10 @@ void __init setup_arch(char **cmdline_p)
+>  	sanity_check_meminfo();
+>  	arm_memblock_init(&meminfo, mdesc);
+>  
+> +#ifdef CONFIG_EFI
+> +	uefi_memblock_arm_reserve_range();
+> +#endif
+> +
 
-Ok, will do.
+Better use 
 
-Thanks
-Dave
+	if (IS_ENABLED(CONFIG_EFI))
+
+here for readability and better build-time checking of the interface when
+CONFIG_EFI is disabled.
+
+> +/*
+> + * Returns 1 if 'facility' is enabled, 0 otherwise.
+> + */
+> +int efi_enabled(int facility)
+> +{
+> +	return test_bit(facility, &arm_uefi_facility) != 0;
+> +}
+> +EXPORT_SYMBOL(efi_enabled);
+
+I'd use EXPORT_SYMBOL_GPL() unless there is a documented reason why
+a symbol should be available to GPL-incompatible modules.
+
+> +static __init int is_discardable_region(efi_memory_desc_t *md)
+> +{
+> +#ifdef KEEP_ALL_REGIONS
+> +	return 0;
+> +#endif
+
+IS_ENABLED() again.
+
+> +	if (md->attribute & EFI_MEMORY_RUNTIME)
+> +		return 0;
+> +
+> +	switch (md->type) {
+> +#ifdef KEEP_BOOT_SERVICES_REGIONS
+> +	case EFI_BOOT_SERVICES_CODE:
+> +	case EFI_BOOT_SERVICES_DATA:
+> +#endif
+
+and I think it can be used here too:
+
+	switch (md->type) {
+	case EFI_BOOT_SERVICES_CODE:
+	case EFI_BOOT_SERVICES_DATA:
+		if (IS_ENABLED(KEEP_BOOT_SERVICES_REGIONS))
+			return 1;
+		/* fallthrough */
+	case EFI_ACPI_RECLAIM_MEMORY:
+
+> +	memmap.phys_map = early_memremap((phys_addr_t)(u32) uefi_boot_mmap,
+> +					 uefi_boot_mmap_size);
+> +	if (!memmap.phys_map)
+> +		return 1;
+> +
+> +	p = memmap.phys_map;
+> +	e = (void *)((u32)p + uefi_boot_mmap_size);
+
+You are doing a lot of type casts here, which is normally an indication
+that you have the types wrong in some way. I can't spot a mistake
+here, but maybe you can give it some more thought and see if it can be
+changed.
+
+> +static int __init remap_region(efi_memory_desc_t *md, efi_memory_desc_t *entry)
+> +{
+> +	u64 va;
+> +	u64 paddr;
+> +	u64 size;
+> +
+> +	*entry = *md;
+> +	paddr = entry->phys_addr;
+> +	size = entry->num_pages << EFI_PAGE_SHIFT;
+> +
+> +	/*
+> +	 * Map everything writeback-capable as coherent memory,
+> +	 * anything else as device.
+> +	 */
+> +	if (md->attribute & EFI_MEMORY_WB)
+> +		va = (u64)((u32)uefi_remap(paddr, size) & 0xffffffffUL);
+> +	else
+> +		va = (u64)((u32)uefi_ioremap(paddr, size) & 0xffffffffUL);
+
+Same here. Why is 'va' a u64?
+
+	Arnd
