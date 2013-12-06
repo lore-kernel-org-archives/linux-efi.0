@@ -1,234 +1,152 @@
 From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/3] arm64: add EFI runtime services
-Date: Fri, 06 Dec 2013 09:34:49 -0500
-Message-ID: <1386340489.1861.175.camel@deneb.redhat.com>
+Subject: Re: [PATCH 1/3] arm64: add EFI stub
+Date: Fri, 06 Dec 2013 09:55:54 -0500
+Message-ID: <1386341754.1861.188.camel@deneb.redhat.com>
 References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	 <1385762712-17043-4-git-send-email-msalter@redhat.com>
-	 <20131205152510.GB974@darko.cambridge.arm.com>
+	 <1385762712-17043-2-git-send-email-msalter@redhat.com>
+	 <20131205141853.GA974@darko.cambridge.arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131205152510.GB974-rtzwXk+D4rEjOxct69p1ducL+3YJyIBv@public.gmane.org>
+In-Reply-To: <20131205141853.GA974-rtzwXk+D4rEjOxct69p1ducL+3YJyIBv@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-12-05 at 15:25 +0000, Catalin Marinas wrote:
-> On Fri, Nov 29, 2013 at 10:05:12PM +0000, Mark Salter wrote:
-> > +
-> > +#define efi_remap(cookie, size) __ioremap((cookie), (size), PAGE_KERNEL_EXEC)
-> > +#define efi_ioremap(cookie, size) __ioremap((cookie), (size), \
-> > +                                           __pgprot(PROT_DEVICE_nGnRE))
-> > +#define efi_unmap(cookie) __iounmap((cookie))
-> > +#define efi_iounmap(cookie) __iounmap((cookie))
+On Thu, 2013-12-05 at 14:18 +0000, Catalin Marinas wrote:
+> Hi Mark,
 > 
-> I prefer to use the ioremap_*() functions rather than the lower-level
-> __ioremap(). The ioremap_cache() should give us executable memory.
+> On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
+> > +#include <linux/linkage.h>
+> > +#include <linux/init.h>
+> > +
+> > +#include <asm/assembler.h>
+> > +
+> > +#define EFI_LOAD_ERROR 0x8000000000000001
+> 
+> It's defined already but I see why you can't include efi.h here. Maybe a
+> comment.
 
 okay
 
 > 
-> Looking at the code, I think we have a bug with ioremap_cache() using
-> MT_NORMAL since it doesn't have the shareability bit (Device memory does
-> not require this on AArch64). PROT_DEFAULT should change to
-> pgprot_default | PTE_DIRTY.
-> 
-
-ah, yes.
-
-> > +       if (depth != 1 ||
-> > +           (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
-> > +               return 0;
 > > +
-> > +       pr_info("Getting EFI parameters from FDT.\n");
-> > +
-> > +       prop = of_get_flat_dt_prop(node, "linux,uefi-system-table", &len);
-> > +       if (!prop) {
-> > +               pr_err("No EFI system table in FDT\n");
-> > +               return 0;
-> > +       }
-> > +       efi_system_table = of_read_ulong(prop, len/4);
-> > +
-> > +       prop = of_get_flat_dt_prop(node, "linux,uefi-mmap-start", &len);
-> > +       if (!prop) {
-> > +               pr_err("No EFI memmap in FDT\n");
-> > +               return 0;
-> > +       }
-> > +       memmap.phys_map = (void *)of_read_ulong(prop, len/4);
-> > +
-> > +       prop = of_get_flat_dt_prop(node, "linux,uefi-mmap-size", &len);
-> > +       if (!prop) {
-> > +               pr_err("No EFI memmap size in FDT\n");
-> > +               return 0;
-> > +       }
-> > +       size = of_read_ulong(prop, len/4);
-> > +       memmap.map_end = memmap.phys_map + size;
-> > +
-> > +       /* reserve memmap */
-> > +       memblock_reserve((u64)memmap.phys_map, size);
-> > +
-> > +       prop = of_get_flat_dt_prop(node, "linux,uefi-mmap-desc-size", &len);
-> > +       if (!prop) {
-> > +               pr_err("No EFI memmap descriptor size in FDT\n");
-> > +               return 0;
-> > +       }
-> > +       memmap.desc_size = of_read_ulong(prop, len/4);
-> > +
-> > +       memmap.nr_map = size / memmap.desc_size;
-> > +
-> > +       prop = of_get_flat_dt_prop(node, "linux,uefi-mmap-desc-ver", &len);
-> > +       if (!prop) {
-> > +               pr_err("No EFI memmap descriptor version in FDT\n");
-> > +               return 0;
-> > +       }
-> > +       memmap.desc_version = of_read_ulong(prop, len/4);
-> > +
-> > +       if (uefi_debug) {
-> > +               pr_info("  EFI system table @ %p\n", (void *)efi_system_table);
-> > +               pr_info("  EFI mmap @ %p-%p\n", memmap.phys_map,
-> > +                       memmap.map_end);
-> > +               pr_info("  EFI mmap descriptor size = 0x%lx\n",
-> > +                       memmap.desc_size);
-> > +               pr_info("  EFI mmap descriptor version = 0x%lx\n",
-> > +                       memmap.desc_version);
-> > +       }
-> > +
-> > +       return 1;
-> > +}
-> 
-> Are these checks generic to other architectures? We may do with some
-> helpers to avoid duplication.
-
-That whole function could probably be shared.
-
-> 
-> > +
-> > +#define PGD_END  (&idmap_pg_dir[sizeof(idmap_pg_dir)/sizeof(pgd_t)])
-> 
-> Just &idmap_pg_dir[PTRS_PER_PGD] would do (or idmap_pg_dir +
-> ARRAY_SIZE(idmap_pg_dir)).
-
-Should have been ARRAY_SIZE. I didn't want to use PTRS_PER_PGD in case
-that changed.
-
-> 
-> > +#ifndef CONFIG_SMP
-> > +#define PMD_FLAGS  (PMD_ATTRINDX(MT_NORMAL) | PMD_TYPE_SECT | PMD_SECT_AF)
-> > +#else
-> > +#define PMD_FLAGS  (PMD_ATTRINDX(MT_NORMAL) | PMD_TYPE_SECT | PMD_SECT_AF | \
-> > +                   PMD_SECT_S)
-> > +#endif
-> > +
-> > +static void __init create_idmap(unsigned long addr, unsigned long len)
-> 
-> I would change this to use the existing create_mapping() function which
-> takes care of allocating pud/pmd/ptes. We shouldn't duplicate this
-> functionality in two places. create_mapping() may need a slight change
-> since it assumes swapper_pg_dir but it's not much. It also uses
-> memblock_alloc() for early allocations.
-
-I'll take a look at this.
-
-> 
-> > +static __init int memmap_walk(struct efi_memory_map *memmap,
-> > +                             int (*func)(efi_memory_desc_t *, void *),
-> > +                             void *private_data, int early)
-> 
-> Is this generic enough as a common helper between arm and arm64 (and
-> maybe x86)?
-
-Probably not as-is, but one could be made. 
-> 
-> > +static __init int reserve_region(efi_memory_desc_t *md, void *priv)
-> [...]
-> > +static __init void reserve_regions(void)
-> [...]
-> > +static int __init remap_region(efi_memory_desc_t *md, void *priv)
-> [...]
-> > +static int __init remap_regions(efi_memory_desc_t *map)
-> 
-> Same here (I haven't looked at the other implementations).
-
-Only in arm/arm64 patches and they are different.
-
-> 
-> > +/*
-> > + * Called from setup_arch with interrupts disabled.
-> > + */
-> > +void __init efi_enter_virtual_mode(void)
-> > +{
-> > +       void *newmap;
-> > +       efi_status_t status;
-> > +       u64 mapsize, total_freed = 0;
-> > +       int count;
-> > +
-> > +       if (!efi_enabled(EFI_BOOT)) {
-> > +               pr_info("EFI services will not be available.\n");
-> > +               return;
-> > +       }
-> > +
-> > +       pr_info("Remapping and enabling EFI services.\n");
-> > +
-> > +       mapsize = memmap.map_end - memmap.phys_map;
-> > +       memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
-> > +                                                  mapsize);
-> > +       memmap.map_end = memmap.map + mapsize;
-> > +
-> > +       /* Map the regions we reserved earlier */
-> > +       newmap = alloc_bootmem(mapsize);
-> 
-> memblock_alloc() (also check the other bootmem uses in this patch, arm64
-> is using memblock).
-
-Okay, the bootmem function do use the memblock interface with some leak
-detection added, but I can use memblock directly.
-
-> 
-> > +       if (newmap == NULL) {
-> > +               pr_err("Failed to allocate new EFI memmap\n");
-> > +               return;
-> > +       }
-> > +
-> > +       count = remap_regions(newmap);
-> > +       if (count <= 0) {
-> > +               pr_err("Failed to remap EFI regions.\n");
-> > +               return;
-> > +       }
-> > +
-> > +       efi.memmap = &memmap;
-> > +
-> > +       efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
-> > +       if (efi.systab)
-> > +               set_bit(EFI_SYSTEM_TABLES, &arm_efi_facility);
+> > +       __INIT
 > > +
 > > +       /*
-> > +        * efi.systab->runtime is a pointer to something guaranteed by
-> > +        * the UEFI specification to be 1:1 mapped.
+> > +        * We arrive here from the EFI boot manager with:
+> > +        *
+> > +        *    * MMU on with identity-mapped RAM.
+> > +        *    * Icache and Dcache on
+> > +        *
+> > +        * We will most likely be running from some place other than where
+> > +        * we want to be. The kernel image wants to be placed at TEXT_OFFSET
+> > +        * from start of RAM.
 > > +        */
-> > +       runtime = (__force void *)efi_lookup_mapped_addr((u64)efi.systab->runtime);
+> > +ENTRY(efi_stub_entry)
+> > +       stp     x29, x30, [sp, #-32]!
 > > +
-> > +       /* Call SetVirtualAddressMap with the physical address of the map */
-> > +       efi.set_virtual_address_map = runtime->set_virtual_address_map;
-> > +
-> > +       /* boot time idmap_pg_dir is incomplete, so fill in missing parts */
-> > +       efi_setup_idmap();
-> > +
-> > +       cpu_switch_mm(idmap_pg_dir, &init_mm);
-> > +       flush_tlb_all();
-> > +       flush_cache_all();
-> > +
-> > +       status = efi.set_virtual_address_map(count * memmap.desc_size,
-> > +                                            memmap.desc_size,
-> > +                                            memmap.desc_version,
-> > +                                            newmap);
-> > +       cpu_set_reserved_ttbr0();
-> > +       flush_tlb_all();
-> > +       flush_cache_all();
+> > +       /*
+> > +        * Call efi_entry to do the real work.
+> > +        * x0 and x1 are already set up by firmware. Current runtime
+> > +        * address of image is calculated and passed via *image_addr.
+> > +        *
+> > +        * unsigned long efi_entry(void *handle,
+> > +        *                         efi_system_table_t *sys_table,
+> > +        *                         unsigned long *image_addr) ;
+> > +        */
+> > +       adrp    x8, _text
+> > +        add    x8, x8, #:lo12:_text
 > 
-> What is the point of cache flusing here?
+> Minor: some wrong whitespace (but I don't trust our incoming mail server
+> either, it corrupts patches usually).
 
-Paranoia based on not knowing what the firmware will be caching.
-If it doesn't matter and there's nothing to worry about I can drop
-it. 
+I will fix it. (the whitespace, not your mail server)
+
+> 
+> > +       add     x2, sp, 16
+> > +       str     x8, [x2]
+> > +       bl      efi_entry
+> > +       cmn     x0, #1
+> > +       b.eq    efi_load_fail
+> > +
+> > +       /*
+> > +        * efi_entry() will have relocated the kernel image if necessary
+> > +        * and we return here with device tree address in x0 and the kernel
+> > +        * entry point stored at *image_addr. Save those values in registers
+> > +        * which are preserved by __flush_dcache_all.
+> > +        */
+> > +       ldr     x1, [sp, #16]
+> > +       mov     x20, x0
+> > +       mov     x21, x1
+> > +
+> > +       bl      __flush_dcache_all
+> 
+> Regarding __flush_dcache_all, I plan to remove it for all cases apart
+> from power management with the MMU disabled. With MMU enabled, there is
+> no guarantee that this function does the right thing. It's even worse in
+> the guest context.
+
+According to booting.txt, the dcache needs to be invalidated. Is there
+something existing I can use or do I need to write it?
+> 
+> > +       /* Turn off Dcache and MMU */
+> > +       mrs     x0, sctlr_el1
+> > +       bic     x0, x0, #1 << 0 // clear SCTLR.M
+> > +       bic     x0, x0, #1 << 2 // clear SCTLR.C
+> > +       msr     sctlr_el1, x0
+> > +       isb
+> 
+> I assume an EFI app is running with the MMU enabled (and UP only). Do we
+> always run it in EL1? What about EL2 mode (needed by KVM and Xen)?
+
+Good point. It could be non-secure EL2.
+
+> 
+> > +
+> > +       /* Jump to real entry point */
+> > +       mov     x0, x20
+> > +       mov     x1, xzr
+> > +       mov     x2, xzr
+> > +       mov     x3, xzr
+> > +       br      x21
+> > +
+> > +efi_load_fail:
+> > +       mov     x0, EFI_LOAD_ERROR
+> 
+> Needs #EFI_LOAD_ERROR (strange that gas doesn't complain).
+
+Hmm, no complaint but it DTRT.
+
+> > +/*
+> > + * AArch64 requires the DTB to be 8-byte aligned in the first 512MiB from
+> > + * start of kernel and may not cross a 2MiB boundary. We set alignment to
+> > + * equal max size so we know it won't cross a 2MiB boudary.
+> > + */
+> > +#define MAX_DTB_SIZE   0x40000
+> 
+> 2MB is 0x200000 (or I don't understand the comment).
+
+I had a little trouble with it myself. :) The size was left over from
+older code which used it directly in an allocation. I'll fix the
+comment, drop MAX_DTB_SIZE, and fix DTB_ALIGN to be 2MiB.
+
+> > +
+> > +static unsigned long __init get_dram_base(efi_system_table_t *sys_table)
+> > +{
+> > +       efi_status_t status;
+> > +       unsigned long map_size, desc_size;
+> > +       unsigned long membase = EFI_ERROR;
+> > +       efi_memory_desc_t *memory_map;
+> > +       int i;
+> > +
+> > +       status = efi_get_memory_map(sys_table, &memory_map, &map_size,
+> > +                                   &desc_size, NULL, NULL);
+> > +       if (status == EFI_SUCCESS) {
+> 
+> Can you exit earlier here if !EFI_SUCCESS? It reduces the indentation
+> level.
+> 
+Yes.
