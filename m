@@ -1,107 +1,289 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V5 2/6] Add shared update_fdt() function for ARM/ARM64
-Date: Thu, 5 Dec 2013 16:58:47 -0800
-Message-ID: <CAFECyb8xoue5R9tH+Vjvpk-uyxjvxXX5=n0Son_+3vu28y8C8A@mail.gmail.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH V5 4/6] Add EFI stub for ARM
+Date: Thu, 5 Dec 2013 17:25:59 -0800
+Message-ID: <CAFECyb-mYRx+5Lc-yWjcH2=4wYcgU7JLAWA7b32htBh7zGKLNQ@mail.gmail.com>
 References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
-	<1385595115-21488-3-git-send-email-roy.franz@linaro.org>
-	<20131205192456.1B602C40785@trevor.secretlab.ca>
+	<1385595115-21488-5-git-send-email-roy.franz@linaro.org>
+	<20131205200054.ED87FC40785@trevor.secretlab.ca>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131205192456.1B602C40785-WNowdnHR2B42iJbIjFUEsiwD8/FfD2ys@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20131205200054.ED87FC40785@trevor.secretlab.ca>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Grant Likely <grant.likely@linaro.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Dave Martin <dave.martin@arm.com>, Mark Salter <msalter@redhat.com>, Patch Tracking <patches@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 5, 2013 at 11:24 AM, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Wed, 27 Nov 2013 15:31:51 -0800, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> Both ARM and ARM64 stubs will update the device tree
->> that they pass to the kernel.  In both cases they
->> primarily need to add the same UEFI related information,
->> so the function can be shared.
->> Create a new FDT related file for this to avoid use
->> of architecture #ifdefs in efi-stub-helper.c
->> Change EFI allocation type for memory map to
->> EFI_RUNTIME_SERVICES_DATA, since we are passing
->> this buffer to the kernel, or immediately freeing it.
+On Thu, Dec 5, 2013 at 12:00 PM, Grant Likely <grant.likely@linaro.org> wrote:
+> On Wed, 27 Nov 2013 15:31:53 -0800, Roy Franz <roy.franz@linaro.org> wrote:
+>> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
+>> operates similarly to the x86 stub: it is a shim between the EFI firmware
+>> and the normal zImage entry point, and sets up the environment that the
+>> zImage is expecting.  This includes loading the initrd (optionaly) and
+>> device tree from the system partition based on the kernel command line.
+>> The stub updates the device tree as necessary, adding entries for EFI
+>> runtime services. The PE/COFF "MZ" header at offset 0 results in the
+>> first instruction being an add that corrupts r5, which is not used by
+>> the zImage interface.
 >>
->> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Signed-off-by: Roy Franz <roy.franz@linaro.org>
 >
-> Hi Roy,
+> I'm going to review this patch side-by-side with the ARM64 patch written
+> by Mark. There are things that can still be consolidated. Otherwise the
+> patch looks good.
 >
-> Comments below...
+>> ---
+>> diff --git a/arch/arm/boot/compressed/efi-stub.c b/arch/arm/boot/compressed/efi-stub.c
+>> new file mode 100644
+>> index 0000000..2bd559d
+>> --- /dev/null
+>> +++ b/arch/arm/boot/compressed/efi-stub.c
+>> @@ -0,0 +1,291 @@
+>> +/*
+>> + * linux/arch/arm/boot/compressed/efi-stub.c
+>> + *
+>> + * Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
+>> + *
+>> + * This file implements the EFI boot stub for the ARM kernel
+>> + *
+>> + * This program is free software; you can redistribute it and/or modify
+>> + * it under the terms of the GNU General Public License version 2 as
+>> + * published by the Free Software Foundation.
+>> + *
+>> + */
+>> +#include <linux/efi.h>
+>> +#include <libfdt.h>
+>> +#include "efi-stub.h"
+>> +
+>> +/* EFI function call wrappers.  These are not required for
+>> + * ARM, but wrappers are required for X86 to convert between
+>> + * ABIs.  These wrappers are provided to allow code sharing
+>> + * between X86 and ARM.  Since these wrappers directly invoke the
+>> + * EFI function pointer, the function pointer type must be properly
+>> + * defined, which is not the case for X86  One advantage of this is
+>> + * it allows for type checking of arguments, which is not
+>> + * possible with the X86 wrappers.
+>> + */
+>> +#define efi_call_phys0(f)                    f()
+>> +#define efi_call_phys1(f, a1)                        f(a1)
+>> +#define efi_call_phys2(f, a1, a2)            f(a1, a2)
+>> +#define efi_call_phys3(f, a1, a2, a3)                f(a1, a2, a3)
+>> +#define efi_call_phys4(f, a1, a2, a3, a4)    f(a1, a2, a3, a4)
+>> +#define efi_call_phys5(f, a1, a2, a3, a4, a5)        f(a1, a2, a3, a4, a5)
 >
->> +static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->> +                            void *fdt, int new_fdt_size, char *cmdline_ptr,
->> +                            u64 initrd_addr, u64 initrd_size,
->> +                            efi_memory_desc_t *memory_map,
->> +                            unsigned long map_size, unsigned long desc_size,
->> +                            u32 desc_ver)
+> Identical to ARM64. I would put this into a common header usable by
+> platforms that can call the functions directly.
+>
+>> +
+>> +/* The maximum uncompressed kernel size is 32 MBytes, so we will reserve
+>> + * that for the decompressed kernel.  We have no easy way to tell what
+>> + * the actuall size of code + data the uncompressed kernel will use.
+>> + */
+>> +#define MAX_UNCOMP_KERNEL_SIZE       0x02000000
+>> +
+>> +/* The kernel zImage should be located between 32 Mbytes
+>> + * and 128 MBytes from the base of DRAM.  The min
+>> + * address leaves space for a maximal size uncompressed image,
+>> + * and the max address is due to how the zImage decompressor
+>> + * picks a destination address.
+>> + */
+>> +#define ZIMAGE_OFFSET_LIMIT  0x08000000
+>> +#define MIN_ZIMAGE_OFFSET    MAX_UNCOMP_KERNEL_SIZE
+>> +
+>> +#define PRINTK_PREFIX                "EFIstub: "
+>> +
+>> +struct fdt_region {
+>> +     u64 base;
+>> +     u64 size;
+>> +};
+>
+> Identical to ARM64; move to header.
+>
+>> +
+>> +
+>> +/* Include shared EFI stub code, and required headers. */
+>> +#include "../../../../include/generated/compile.h"
+>> +#include "../../../../include/generated/utsrelease.h"
+>> +#include "../../../../drivers/firmware/efi/efi-stub-helper.c"
+>> +#include "../../../../drivers/firmware/efi/fdt.c"
+>> +
+>> +
+>> +int efi_entry(void *handle, efi_system_table_t *sys_table,
+>> +           unsigned long *zimage_addr)
 >> +{
->> +     int node;
+>> +     efi_loaded_image_t *image;
 >> +     int status;
->> +     u32 fdt_val32;
->> +     u64 fdt_val64;
->> +     /* Copy definition of linux_banner here.  Since this code is
->> +      * built as part of the decompressor for ARM v7, pulling
->> +      * in version.c where linux_banner is defined for the
->> +      * kernel brings other kernel dependencies with it.
+>> +     unsigned long nr_pages;
+>> +     const struct fdt_region *region;
+>> +
+>> +     void *fdt;
+>> +     int err;
+>> +     int node;
+>> +     unsigned long zimage_size = 0;
+>> +     unsigned long dram_base;
+>> +     /* addr/point and size pairs for memory management*/
+>> +     unsigned long initrd_addr;
+>> +     unsigned long initrd_size = 0;
+>> +     unsigned long fdt_addr;
+>> +     unsigned long fdt_size = 0;
+>> +     efi_physical_addr_t kernel_reserve_addr;
+>> +     unsigned long kernel_reserve_size = 0;
+>> +     char *cmdline_ptr;
+>> +     int cmdline_size = 0;
+>> +
+>> +     unsigned long map_size, desc_size;
+>> +     u32 desc_ver;
+>> +     unsigned long mmap_key;
+>> +     efi_memory_desc_t *memory_map;
+>> +
+>> +     unsigned long new_fdt_size;
+>> +     unsigned long new_fdt_addr;
+>> +
+>> +     efi_guid_t proto = LOADED_IMAGE_PROTOCOL_GUID;
+>> +
+>> +     /* Check if we were booted by the EFI firmware */
+>> +     if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+>> +             goto fail;
+>> +
+>> +     efi_printk(sys_table, PRINTK_PREFIX"Booting Linux using EFI stub.\n");
+>
+> Gratuitously different between ARM and ARM64. efi_printk() vs. pr_efi()
+> and the string is different.
+>
+>> +     /* get the command line from EFI, using the LOADED_IMAGE protocol */
+>> +     status = efi_call_phys3(sys_table->boottime->handle_protocol,
+>> +                             handle, &proto, (void *)&image);
+>> +     if (status != EFI_SUCCESS) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Failed to get handle for LOADED_IMAGE_PROTOCOL.\n");
+>> +             goto fail;
+>> +     }
+>> +
+>> +     /* We are going to copy the command line into the device tree,
+>> +      * so this memory just needs to not conflict with boot protocol
+>> +      * requirements.
 >> +      */
->> +     const char linux_banner[] =
->> +         "Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
->> +         LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
->
-> This is inherently fragile because the string is now defined in two
-> places. This issue shouldn't hold off merging the patch, but a follow up
-> patch should be crafted to make it possible to pull in version.c without
-> the other dependencies....
->
-> Then again, the version.c strings have a very big "DON'T TOUCH" warning
-> on them so I'm probably worrying about nothing.  :-)
-
-I wasn't really happy about copying the definition here, but as this
-will be verified by UEFI
-code in the kernel if this every is changed it should not be much of a
-problem in practice.
-I can take a look at what changes would be required for using
-version.c here.  I haven't worked
-out what would need to be done, but was hesitant to make changes there
-to support a one-off use
-of the kernel version string outside of the kernel (ie in the
-decompressor/stub), and was trying to keep
-this patchset limited to changing arm/EFI code.
-
->
->> +
->> +     status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
->> +     if (status != 0)
->> +             goto fdt_set_fail;
->> +
->> +     node = fdt_subnode_offset(fdt, 0, "chosen");
->> +     if (node < 0) {
->> +             node = fdt_add_subnode(fdt, 0, "chosen");
->> +             if (node < 0) {
->> +                     status = node; /* node is error code when negative */
->> +                     goto fdt_set_fail;
->> +             }
+>> +     cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
+>> +                                                &cmdline_size);
+>> +     if (!cmdline_ptr) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Unable to allocate memory for command line.\n");
+>> +             goto fail;
 >> +     }
 >> +
->> +     if ((cmdline_ptr != NULL) && (strlen(cmdline_ptr) > 0)) {
->> +             status = fdt_setprop(fdt, node, "bootargs", cmdline_ptr,
->> +                                  strlen(cmdline_ptr) + 1);
->> +             if (status)
->> +                     goto fdt_set_fail;
+>> +     /* We first load the device tree, as we need to get the base address of
+>> +      * DRAM from the device tree.  The zImage, device tree, and initrd
+>> +      * have address restrictions that are relative to the base of DRAM.
+>> +      */
+>> +     status = handle_cmdline_files(sys_table, image, cmdline_ptr, "dtb=",
+>> +                                   0xffffffff, &fdt_addr, &fdt_size);
+>> +     if (status != EFI_SUCCESS) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Unable to load device tree blob.\n");
+>> +             goto fail_free_cmdline;
 >> +     }
 >> +
->> +     /* Set intird address/end in device tree, if present */
+>> +     err = fdt_check_header((void *)fdt_addr);
+>> +     if (err != 0) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Device tree header not valid.\n");
+>> +             goto fail_free_fdt;
+>> +     }
+>> +     if (fdt_totalsize((void *)fdt_addr) > fdt_size) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Incomplete device tree.\n");
+>> +             goto fail_free_fdt;
+>> +
+>> +     }
 >
-> sp. initrd
+> All of the above is basically identical.
 >
-> None of the above comments are blockers though.
+>> +     /* Look up the base of DRAM from the device tree. */
+>> +     fdt = (void *)fdt_addr;
+>> +     node = fdt_subnode_offset(fdt, 0, "memory");
+>> +     region = fdt_getprop(fdt, node, "reg", NULL);
+>> +     if (region) {
+>> +             dram_base = fdt64_to_cpu(region->base);
+>> +     } else {
+>> +             /* There is no way to get amount or addresses of physical
+>> +              * memory installed using EFI calls.  If the device tree
+>> +              * we read from disk doesn't have this, there is no way
+>> +              * for us to construct this informaion.
+>> +              */
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: No 'memory' node in device tree.\n");
+>> +             goto fail_free_fdt;
+>> +     }
 >
-> Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ARM and ARM64 differ here. ARM64 uses get_dram_base(), this open codes
+> some stuff.
 >
+>> +
+>> +     /* Reserve memory for the uncompressed kernel image. This is
+>> +      * all that prevents any future allocations from conflicting
+>> +      * with the kernel.  Since we can't tell from the compressed
+>> +      * image how much DRAM the kernel actually uses (due to BSS
+>> +      * size uncertainty) we allocate the maximum possible size.
+>> +      */
+>> +     kernel_reserve_addr = dram_base;
+>> +     kernel_reserve_size = MAX_UNCOMP_KERNEL_SIZE;
+>> +     nr_pages = round_up(kernel_reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
+>> +     status = efi_call_phys4(sys_table->boottime->allocate_pages,
+>> +                             EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+>> +                             nr_pages, &kernel_reserve_addr);
+>> +     if (status != EFI_SUCCESS) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Unable to allocate memory for uncompressed kernel.\n");
+>> +             goto fail_free_fdt;
+>> +     }
+>
+> This is ARM only since arm64 doesn't have a compressed version. It would
+> be possible to stub out.
+>
+>> +
+>> +     /* Relocate the zImage, if required.  ARM doesn't have a
+>> +      * preferred address, so we set it to 0, as we want to allocate
+>> +      * as low in memory as possible.
+>> +      */
+>> +     zimage_size = image->image_size;
+>> +     status = efi_relocate_kernel(sys_table, zimage_addr, zimage_size,
+>> +                                  zimage_size, 0, 0);
+>> +     if (status != EFI_SUCCESS) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Failed to relocate kernel.\n");
+>> +             goto fail_free_kernel_reserve;
+>> +     }
+>
+> Slight differences here.
+>
+>> +
+>> +     /* Check to see if we were able to allocate memory low enough
+>> +      * in memory.
+>> +      */
+>> +     if (*zimage_addr + zimage_size > dram_base + ZIMAGE_OFFSET_LIMIT) {
+>> +             efi_printk(sys_table, PRINTK_PREFIX"ERROR: Failed to relocate kernel, no low memory available.\n");
+>> +             goto fail_free_zimage;
+>> +     }
+>
+> Back to same code below this point, and is the same through to the
+> bottom of the function. That is a lot of identical code. I think you can
+> generalize the whole function with arch specific callouts in a couple of
+> places.
+>
+> I really don't want to hold up the merging of this series. Aside from
+> the duplication I think it is ready to be merged. However, the
+> duplication is so obvious that I'm not comfortable with it. If I were
+> an ARM or ARM64 core maintainer then I would push back on it.
+>
+> Go ahead an add my Acked-by for this patch. I'll support merging it as
+> is provided that you promise me to merge the two versions with a
+> follow-up patch ASAP. However, if you can I would still recommend
+> respinning the series with the common bits split out right away since
+> there's a much greater chance of getting the arm and arm64 maintainers
+> to accept them.
+>
+> Acked-by: Grant Likely <grant.likely@linaro.org>
+>
+> g.
 
-Thanks,
+Hi Grant,
+
+   You're not the first to bring this up, and I've discussed with Mark
+making more of the code common.
+My next series will pull more code into the shared files, so this will
+be at least partly addressed then.  Further
+consolidation if required will be much easier after both are merged.
+
 Roy
