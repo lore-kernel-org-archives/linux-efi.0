@@ -1,152 +1,120 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm64: add EFI stub
-Date: Fri, 06 Dec 2013 09:55:54 -0500
-Message-ID: <1386341754.1861.188.camel@deneb.redhat.com>
-References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	 <1385762712-17043-2-git-send-email-msalter@redhat.com>
-	 <20131205141853.GA974@darko.cambridge.arm.com>
+From: Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>
+Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
+Date: Fri, 6 Dec 2013 11:20:45 -0600
+Message-ID: <CAHCPf3s_SXYXLRwvn7tzqTCQ-gB=emRMK_dXkEmw_HWigiD7Mw@mail.gmail.com>
+References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
+	<1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
+	<CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
+	<20131202210719.GQ24997@rocoto.smurfnet.nu>
+	<CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com>
+	<20131204224447.GA19265@srcf.ucam.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131205141853.GA974-rtzwXk+D4rEjOxct69p1ducL+3YJyIBv@public.gmane.org>
+In-Reply-To: <20131204224447.GA19265-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2013-12-05 at 14:18 +0000, Catalin Marinas wrote:
-> Hi Mark,
-> 
-> On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
-> > +#include <linux/linkage.h>
-> > +#include <linux/init.h>
-> > +
-> > +#include <asm/assembler.h>
-> > +
-> > +#define EFI_LOAD_ERROR 0x8000000000000001
-> 
-> It's defined already but I see why you can't include efi.h here. Maybe a
-> comment.
+On Wed, Dec 4, 2013 at 4:44 PM, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
+> On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
+>
+>> there's no guarantee that the kernel hasn't been decompressed over
+>> some important UEFI feature or some memory hasn't been trashed. You
+>> can't make that guarantee because by entering the plain zImage, you
+>> forfeited that information.
+>
+> The stub is responsible for ensuring that the compressed kernel is
+> loaded at a suitable address. Take a look at efi_relocate_kernel().
 
-okay
+My objection is the suitable address is based on a restriction that
+booting from UEFI doesn't have and information UEFI provides that
+makes kernel features from head.S (both of them) easier to get around.
+The kernel doesn't need to be within a particular range of the start
+of memory, nor does the device tree or ramdisk require being in a
+particular place. What the code before efi_relocate_kernel does is
+allocate a maximum-sized-buffer to safely decompress in, which is just
+a gross way to do it, then crosses it's fingers based on the way it
+has historically worked - while you might want to assume that the
+decompression process is quite well defined and reliable, I keep
+seeing patches come in that stop it from doing weird unsavory behavior
+- for example decompressing over it's own page table.
 
-> 
-> > +
-> > +       __INIT
-> > +
-> > +       /*
-> > +        * We arrive here from the EFI boot manager with:
-> > +        *
-> > +        *    * MMU on with identity-mapped RAM.
-> > +        *    * Icache and Dcache on
-> > +        *
-> > +        * We will most likely be running from some place other than where
-> > +        * we want to be. The kernel image wants to be placed at TEXT_OFFSET
-> > +        * from start of RAM.
-> > +        */
-> > +ENTRY(efi_stub_entry)
-> > +       stp     x29, x30, [sp, #-32]!
-> > +
-> > +       /*
-> > +        * Call efi_entry to do the real work.
-> > +        * x0 and x1 are already set up by firmware. Current runtime
-> > +        * address of image is calculated and passed via *image_addr.
-> > +        *
-> > +        * unsigned long efi_entry(void *handle,
-> > +        *                         efi_system_table_t *sys_table,
-> > +        *                         unsigned long *image_addr) ;
-> > +        */
-> > +       adrp    x8, _text
-> > +        add    x8, x8, #:lo12:_text
-> 
-> Minor: some wrong whitespace (but I don't trust our incoming mail server
-> either, it corrupts patches usually).
+The decompressor - and the kernel head it jumps to after decompression
+- *guess* all the information UEFI could have provided and completely
+regenerate the environment for the decompressor itself (stacks, hacky
+memory allocations, cache on, off, on, off, on... fudging locations of
+page tables, zreladdr fixup, low level debug message output, in
+context of UEFI - reimplementation of memcpy, memset). It forfeits a
+more controlled and lean boot process to capitulate to a historical
+legacy. Since you're taking over the decompressor head.S anyway, why
+not take control of the decompression process?
 
-I will fix it. (the whitespace, not your mail server)
+It sets up a page table location the hard way (as above.. also patched
+recently not to decompress over it's own page table). It doesn't need
+to relocate itself past the end of the decompressed image. It doesn't
+need to set up the C environment - UEFI did that for it. It makes
+assumptions about the stack and hacks memory allocations for the
+decompression.. it turns the cache on, decompresses, then turns it off
+again... you can just walk through the code under the EFI stub in
+compressed/head.S and see all this can just fall away.
 
-> 
-> > +       add     x2, sp, 16
-> > +       str     x8, [x2]
-> > +       bl      efi_entry
-> > +       cmn     x0, #1
-> > +       b.eq    efi_load_fail
-> > +
-> > +       /*
-> > +        * efi_entry() will have relocated the kernel image if necessary
-> > +        * and we return here with device tree address in x0 and the kernel
-> > +        * entry point stored at *image_addr. Save those values in registers
-> > +        * which are preserved by __flush_dcache_all.
-> > +        */
-> > +       ldr     x1, [sp, #16]
-> > +       mov     x20, x0
-> > +       mov     x21, x1
-> > +
-> > +       bl      __flush_dcache_all
-> 
-> Regarding __flush_dcache_all, I plan to remove it for all cases apart
-> from power management with the MMU disabled. With MMU enabled, there is
-> no guarantee that this function does the right thing. It's even worse in
-> the guest context.
+There's one immediate advantage too, if it's actually implemented and
+working, which is that for kernel images that are compressed using the
+standard UEFI compression method no actual decompression code needs to
+be added to the stub, and the functionality gets the exact length of
+the required decompression buffer.. that doesn't reduce flexibility in
+kernel compression as long as there is still the possibility of adding
+additional compression code to the stub.
 
-According to booting.txt, the dcache needs to be invalidated. Is there
-something existing I can use or do I need to write it?
-> 
-> > +       /* Turn off Dcache and MMU */
-> > +       mrs     x0, sctlr_el1
-> > +       bic     x0, x0, #1 << 0 // clear SCTLR.M
-> > +       bic     x0, x0, #1 << 2 // clear SCTLR.C
-> > +       msr     sctlr_el1, x0
-> > +       isb
-> 
-> I assume an EFI app is running with the MMU enabled (and UP only). Do we
-> always run it in EL1? What about EL2 mode (needed by KVM and Xen)?
+The second immediate advantage is that the EFI stub/decompressor can
+actually verify that the *decompressed* image meets Secure Boot
+requirements.
 
-Good point. It could be non-secure EL2.
+Once you get past the decompressor and into the kernel proper head.S,
+creating the page tables (again) and turning the MMU on, pv table
+patching.. if you still had the information around, that gets simpler
+too.
 
-> 
-> > +
-> > +       /* Jump to real entry point */
-> > +       mov     x0, x20
-> > +       mov     x1, xzr
-> > +       mov     x2, xzr
-> > +       mov     x3, xzr
-> > +       br      x21
-> > +
-> > +efi_load_fail:
-> > +       mov     x0, EFI_LOAD_ERROR
-> 
-> Needs #EFI_LOAD_ERROR (strange that gas doesn't complain).
+Grant suggested I should propose some patches; sure, if I'm not otherwise busy.
 
-Hmm, no complaint but it DTRT.
+Maybe the Linaro guys can recommend a platform (real or emulated) that
+would be best to test it on with the available UEFI?
 
-> > +/*
-> > + * AArch64 requires the DTB to be 8-byte aligned in the first 512MiB from
-> > + * start of kernel and may not cross a 2MiB boundary. We set alignment to
-> > + * equal max size so we know it won't cross a 2MiB boudary.
-> > + */
-> > +#define MAX_DTB_SIZE   0x40000
-> 
-> 2MB is 0x200000 (or I don't understand the comment).
+>> Most of the guessing is ideally not required to be a guess at all, the
+>> restrictions are purely to deal with the lack of trust for the
+>> bootloader environment. Why can't we trust UEFI? Or at least hold it
+>> to a higher standard. If someone ships a broken UEFI, they screw a
+>> feature or have a horrible bug and ship it, laud the fact Linux
+>> doesn't boot on it and the fact that it's their fault - over their
+>> head. It actually works these days, Linux actually has "market share,"
+>> companies really go out of their way to rescue their "image" and
+>> resolve the situation when someone blogs about a serious UEFI bug on
+>> their $1300 laptops, or even $300 tablets.
+>
+> Yeah, that hasn't actually worked out too well for us.
 
-I had a little trouble with it myself. :) The size was left over from
-older code which used it directly in an allocation. I'll fix the
-comment, drop MAX_DTB_SIZE, and fix DTB_ALIGN to be 2MiB.
+Aside from Teething problems caused by a rush to market ;)
 
-> > +
-> > +static unsigned long __init get_dram_base(efi_system_table_t *sys_table)
-> > +{
-> > +       efi_status_t status;
-> > +       unsigned long map_size, desc_size;
-> > +       unsigned long membase = EFI_ERROR;
-> > +       efi_memory_desc_t *memory_map;
-> > +       int i;
-> > +
-> > +       status = efi_get_memory_map(sys_table, &memory_map, &map_size,
-> > +                                   &desc_size, NULL, NULL);
-> > +       if (status == EFI_SUCCESS) {
-> 
-> Can you exit earlier here if !EFI_SUCCESS? It reduces the indentation
-> level.
-> 
-Yes.
+For the "ARM server market" rather than the "get the cheapest
+tablet/ultrabook out of the door that runs Windows 8/RT" I am sure
+this is going to get to be VERY important for vendors to take into
+account. Imagine if Dell shipped a *server* where Linux would brick it
+out of the box just for setting a variable.. however, if it works the
+day they ship the server, and Linux gains better support for UEFI
+booting which breaks the server in question, that's our fault for not
+doing it in the right way in the first place, and Dell can be just as
+angry at us as we would be at them. Vendors won't test code that
+doesn't exist for obvious reasons.
+
+This is what I was trying to get at about them not updating their
+firmware support for the more firmware-aware method if it works with
+the "ditch firmware early" method worked well for them (which means
+the functionality in the firmware never gets stressed and the
+self-fulfilling prophecy of untrustworthy firmware vendors persists).
+That firmware quality assurance - if not the code itself - will
+trickle down to consumer tablets and ARM thin laptop kind of devices.
+
+Ta,
+Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>
