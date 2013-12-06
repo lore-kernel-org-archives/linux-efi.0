@@ -1,53 +1,107 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v4 07/12] efi: passing kexec necessary efi data via
- setup_data
-Date: Thu, 5 Dec 2013 21:52:50 +0100
-Message-ID: <20131205205250.GF14407@pd.tnic>
-References: <20131129091415.GH4186@dhcp-16-126.nay.redhat.com>
- <1386023600.1791.201.camel@misato.fc.hp.com>
- <1386034289.1791.210.camel@misato.fc.hp.com>
- <20131203015613.GB3980@dhcp-16-126.nay.redhat.com>
- <1386085140.1791.218.camel@misato.fc.hp.com>
- <20131204024610.GA3764@dhcp-16-126.nay.redhat.com>
- <1386175428.1791.225.camel@misato.fc.hp.com>
- <20131205015615.GC3736@dhcp-16-126.nay.redhat.com>
- <20131205115124.GC14407@pd.tnic>
- <1386258962.1791.268.camel@misato.fc.hp.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH V5 2/6] Add shared update_fdt() function for ARM/ARM64
+Date: Thu, 5 Dec 2013 16:58:47 -0800
+Message-ID: <CAFECyb8xoue5R9tH+Vjvpk-uyxjvxXX5=n0Son_+3vu28y8C8A@mail.gmail.com>
+References: <1385595115-21488-1-git-send-email-roy.franz@linaro.org>
+	<1385595115-21488-3-git-send-email-roy.franz@linaro.org>
+	<20131205192456.1B602C40785@trevor.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1386258962.1791.268.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+In-Reply-To: <20131205192456.1B602C40785-WNowdnHR2B42iJbIjFUEsiwD8/FfD2ys@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org
+To: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 05, 2013 at 08:56:02AM -0700, Toshi Kani wrote:
-> The smbios in efi_setup_data is necessary for kexec to pass the physical
-> address of the SMBIOS table from the 1st kernel to the 2nd kernel.
-> 
-> The kernel boot sequence proceeds in the following order.  Step 2
-> requires efi.smbios to be the physical address.  However, Dave found
-> that EFI system table has a virtual address of SMBIOS in step 1.  Hence,
-> he sets it back to the physical address with the smbios in
-> efi_setup_data.  (When it is still the physical address, it simply sets
-> the same value.)
-> 
-> 1. efi_init() - Set efi.smbios from EFI system table
-> 2. dmi_scan_machine() - Temporary map efi.smbios to access SMBIOS table
-> 3. efi_enter_virtual_mode() - Map EFI ranges
+On Thu, Dec 5, 2013 at 11:24 AM, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Wed, 27 Nov 2013 15:31:51 -0800, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> Both ARM and ARM64 stubs will update the device tree
+>> that they pass to the kernel.  In both cases they
+>> primarily need to add the same UEFI related information,
+>> so the function can be shared.
+>> Create a new FDT related file for this to avoid use
+>> of architecture #ifdefs in efi-stub-helper.c
+>> Change EFI allocation type for memory map to
+>> EFI_RUNTIME_SERVICES_DATA, since we are passing
+>> this buffer to the kernel, or immediately freeing it.
+>>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> Hi Roy,
+>
+> Comments below...
+>
+>> +static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>> +                            void *fdt, int new_fdt_size, char *cmdline_ptr,
+>> +                            u64 initrd_addr, u64 initrd_size,
+>> +                            efi_memory_desc_t *memory_map,
+>> +                            unsigned long map_size, unsigned long desc_size,
+>> +                            u32 desc_ver)
+>> +{
+>> +     int node;
+>> +     int status;
+>> +     u32 fdt_val32;
+>> +     u64 fdt_val64;
+>> +     /* Copy definition of linux_banner here.  Since this code is
+>> +      * built as part of the decompressor for ARM v7, pulling
+>> +      * in version.c where linux_banner is defined for the
+>> +      * kernel brings other kernel dependencies with it.
+>> +      */
+>> +     const char linux_banner[] =
+>> +         "Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
+>> +         LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
+>
+> This is inherently fragile because the string is now defined in two
+> places. This issue shouldn't hold off merging the patch, but a follow up
+> patch should be crafted to make it possible to pull in version.c without
+> the other dependencies....
+>
+> Then again, the version.c strings have a very big "DON'T TOUCH" warning
+> on them so I'm probably worrying about nothing.  :-)
 
-Thanks Toshi, it is all clear now.
+I wasn't really happy about copying the definition here, but as this
+will be verified by UEFI
+code in the kernel if this every is changed it should not be much of a
+problem in practice.
+I can take a look at what changes would be required for using
+version.c here.  I haven't worked
+out what would need to be done, but was hesitant to make changes there
+to support a one-off use
+of the kernel version string outside of the kernel (ie in the
+decompressor/stub), and was trying to keep
+this patchset limited to changing arm/EFI code.
 
-@Dave: you might want to put Toshi's explanation in the commit message
-of your patch so that we know *why* the change is needed.
+>
+>> +
+>> +     status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
+>> +     if (status != 0)
+>> +             goto fdt_set_fail;
+>> +
+>> +     node = fdt_subnode_offset(fdt, 0, "chosen");
+>> +     if (node < 0) {
+>> +             node = fdt_add_subnode(fdt, 0, "chosen");
+>> +             if (node < 0) {
+>> +                     status = node; /* node is error code when negative */
+>> +                     goto fdt_set_fail;
+>> +             }
+>> +     }
+>> +
+>> +     if ((cmdline_ptr != NULL) && (strlen(cmdline_ptr) > 0)) {
+>> +             status = fdt_setprop(fdt, node, "bootargs", cmdline_ptr,
+>> +                                  strlen(cmdline_ptr) + 1);
+>> +             if (status)
+>> +                     goto fdt_set_fail;
+>> +     }
+>> +
+>> +     /* Set intird address/end in device tree, if present */
+>
+> sp. initrd
+>
+> None of the above comments are blockers though.
+>
+> Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
 
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Thanks,
+Roy
