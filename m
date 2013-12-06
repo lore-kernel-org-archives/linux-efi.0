@@ -1,46 +1,40 @@
-From: Mark Salter <msalter@redhat.com>
-Subject: Re: [PATCH 1/3] arm64: add EFI stub
-Date: Fri, 06 Dec 2013 08:51:32 -0500
-Message-ID: <1386337892.1861.158.camel@deneb.redhat.com>
-References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
- <1385762712-17043-2-git-send-email-msalter@redhat.com>
- <20131205141853.GA974@darko.cambridge.arm.com>
- <1386254603.1861.120.camel@deneb.redhat.com>
- <20131205152806.GC974@darko.cambridge.arm.com>
- <20131206122511.301D6C40757@trevor.secretlab.ca>
- <1386336870.1861.155.camel@deneb.redhat.com>
- <20131206133827.GB24997@rocoto.smurfnet.nu>
+From: Wei Yongjun <weiyj.lk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH -next] x86, efi: remove unused variable in __map_region()
+Date: Fri, 6 Dec 2013 20:59:49 +0800
+Message-ID: <CAPgLHd_Ain0ogMPtDNAk+sCbconT2QnA1mwFD6LR+jJKz=sN2w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20131206133827.GB24997@rocoto.smurfnet.nu>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: "roy.franz@linaro.org" <roy.franz@linaro.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, "patches@linaro.org" <patches@linaro.org>, Will Deacon <Will.Deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Cc: yongjun_wei-zrsr2BFq86L20UzCJQGyNP8+0UxHXcjY@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2013-12-06 at 14:38 +0100, Leif Lindholm wrote:
-> On Fri, Dec 06, 2013 at 08:34:30AM -0500, Mark Salter wrote:
-> > > Or just disable runtime services on the switch to big ending. Big endian
-> > > should not disable the stub (but getting it to work could be a follow-up
-> > > patch)
-> > > 
-> > The other problem with BE is that the PE/COFF masquerading is built into
-> > head.S so the same Image can be used for EFI and non-EFI. I don't see
-> > a BE opcode which we could us to provide the magic "MZ" at the start
-> > of a BE kernel Image.
-> 
-> That's actually not an issue.
-> Instructions are always LE - endinaness affects only data.
-> 
+From: Wei Yongjun <yongjun_wei-zrsr2BFq86L20UzCJQGyNP8+0UxHXcjY@public.gmane.org>
 
-Oh right, I knew that. Time for coffee.
+The variable end is initialized but never used
+otherwise, so remove the unused variable.
+
+Signed-off-by: Wei Yongjun <yongjun_wei-zrsr2BFq86L20UzCJQGyNP8+0UxHXcjY@public.gmane.org>
+---
+ arch/x86/platform/efi/efi_64.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index bf286c3..8ce7663 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -149,13 +149,11 @@ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+ 	unsigned long pf = 0, size;
+-	u64 end;
+ 
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+ 		pf |= _PAGE_PCD;
+ 
+ 	size = md->num_pages << PAGE_SHIFT;
+-	end  = va + size;
+ 
+ 	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
