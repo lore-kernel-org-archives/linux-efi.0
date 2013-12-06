@@ -1,120 +1,132 @@
-From: Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
-Date: Fri, 6 Dec 2013 11:20:45 -0600
-Message-ID: <CAHCPf3s_SXYXLRwvn7tzqTCQ-gB=emRMK_dXkEmw_HWigiD7Mw@mail.gmail.com>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: Re: [PATCH v3 2/3] arm: Add [U]EFI runtime services support
+Date: Fri, 6 Dec 2013 18:54:49 +0100
+Message-ID: <20131206175449.GD24997@rocoto.smurfnet.nu>
 References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
-	<1385656883-4420-2-git-send-email-leif.lindholm@linaro.org>
-	<CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com>
-	<20131202210719.GQ24997@rocoto.smurfnet.nu>
-	<CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com>
-	<20131204224447.GA19265@srcf.ucam.org>
+ <1385656883-4420-3-git-send-email-leif.lindholm@linaro.org>
+ <201312060259.48259.arnd@arndb.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131204224447.GA19265-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <201312060259.48259.arnd@arndb.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Arnd Bergmann <arnd@arndb.de>, matt.fleming@intel.com
+Cc: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux@arm.linux.org.uk, mark.rutland@arm.com, linaro-uefi@lists.linaro.org, patches@linaro.org, roy.franz@linaro.org, msalter@redhat.com, grant.likely@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 4, 2013 at 4:44 PM, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
-> On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
->
->> there's no guarantee that the kernel hasn't been decompressed over
->> some important UEFI feature or some memory hasn't been trashed. You
->> can't make that guarantee because by entering the plain zImage, you
->> forfeited that information.
->
-> The stub is responsible for ensuring that the compressed kernel is
-> loaded at a suitable address. Take a look at efi_relocate_kernel().
+Hi Arnd,
 
-My objection is the suitable address is based on a restriction that
-booting from UEFI doesn't have and information UEFI provides that
-makes kernel features from head.S (both of them) easier to get around.
-The kernel doesn't need to be within a particular range of the start
-of memory, nor does the device tree or ramdisk require being in a
-particular place. What the code before efi_relocate_kernel does is
-allocate a maximum-sized-buffer to safely decompress in, which is just
-a gross way to do it, then crosses it's fingers based on the way it
-has historically worked - while you might want to assume that the
-decompression process is quite well defined and reliable, I keep
-seeing patches come in that stop it from doing weird unsavory behavior
-- for example decompressing over it's own page table.
+Thank you for your comments.
 
-The decompressor - and the kernel head it jumps to after decompression
-- *guess* all the information UEFI could have provided and completely
-regenerate the environment for the decompressor itself (stacks, hacky
-memory allocations, cache on, off, on, off, on... fudging locations of
-page tables, zreladdr fixup, low level debug message output, in
-context of UEFI - reimplementation of memcpy, memset). It forfeits a
-more controlled and lean boot process to capitulate to a historical
-legacy. Since you're taking over the decompressor head.S anyway, why
-not take control of the decompression process?
+On Fri, Dec 06, 2013 at 02:59:48AM +0100, Arnd Bergmann wrote:
+> On Thursday 28 November 2013, Leif Lindholm wrote:
+> > @@ -898,6 +900,10 @@ void __init setup_arch(char **cmdline_p)
+> >  	sanity_check_meminfo();
+> >  	arm_memblock_init(&meminfo, mdesc);
+> >  
+> > +#ifdef CONFIG_EFI
+> > +	uefi_memblock_arm_reserve_range();
+> > +#endif
+> > +
+> 
+> Better use 
+> 
+> 	if (IS_ENABLED(CONFIG_EFI))
+> 
+> here for readability and better build-time checking of the interface when
+> CONFIG_EFI is disabled.
 
-It sets up a page table location the hard way (as above.. also patched
-recently not to decompress over it's own page table). It doesn't need
-to relocate itself past the end of the decompressed image. It doesn't
-need to set up the C environment - UEFI did that for it. It makes
-assumptions about the stack and hacks memory allocations for the
-decompression.. it turns the cache on, decompresses, then turns it off
-again... you can just walk through the code under the EFI stub in
-compressed/head.S and see all this can just fall away.
+I think I'll do what Grant suggested and stub it out in asm/uefi.h.
 
-There's one immediate advantage too, if it's actually implemented and
-working, which is that for kernel images that are compressed using the
-standard UEFI compression method no actual decompression code needs to
-be added to the stub, and the functionality gets the exact length of
-the required decompression buffer.. that doesn't reduce flexibility in
-kernel compression as long as there is still the possibility of adding
-additional compression code to the stub.
+> > +/*
+> > + * Returns 1 if 'facility' is enabled, 0 otherwise.
+> > + */
+> > +int efi_enabled(int facility)
+> > +{
+> > +	return test_bit(facility, &arm_uefi_facility) != 0;
+> > +}
+> > +EXPORT_SYMBOL(efi_enabled);
+> 
+> I'd use EXPORT_SYMBOL_GPL() unless there is a documented reason why
+> a symbol should be available to GPL-incompatible modules.
 
-The second immediate advantage is that the EFI stub/decompressor can
-actually verify that the *decompressed* image meets Secure Boot
-requirements.
+So ... this is duplicating x86 code which Matt Fleming has promised
+to make generic. I'd prefer to keep it identical to x86 until this
+copy goes away.
 
-Once you get past the decompressor and into the kernel proper head.S,
-creating the page tables (again) and turning the MMU on, pv table
-patching.. if you still had the information around, that gets simpler
-too.
+> > +static __init int is_discardable_region(efi_memory_desc_t *md)
+> > +{
+> > +#ifdef KEEP_ALL_REGIONS
+> > +	return 0;
+> > +#endif
+> 
+> IS_ENABLED() again.
+ 
+Ok.
 
-Grant suggested I should propose some patches; sure, if I'm not otherwise busy.
+> > +	if (md->attribute & EFI_MEMORY_RUNTIME)
+> > +		return 0;
+> > +
+> > +	switch (md->type) {
+> > +#ifdef KEEP_BOOT_SERVICES_REGIONS
+> > +	case EFI_BOOT_SERVICES_CODE:
+> > +	case EFI_BOOT_SERVICES_DATA:
+> > +#endif
+> 
+> and I think it can be used here too:
+> 
+> 	switch (md->type) {
+> 	case EFI_BOOT_SERVICES_CODE:
+> 	case EFI_BOOT_SERVICES_DATA:
+> 		if (IS_ENABLED(KEEP_BOOT_SERVICES_REGIONS))
+> 			return 1;
+> 		/* fallthrough */
+> 	case EFI_ACPI_RECLAIM_MEMORY:
 
-Maybe the Linaro guys can recommend a platform (real or emulated) that
-would be best to test it on with the available UEFI?
+Will redesign for next version.
 
->> Most of the guessing is ideally not required to be a guess at all, the
->> restrictions are purely to deal with the lack of trust for the
->> bootloader environment. Why can't we trust UEFI? Or at least hold it
->> to a higher standard. If someone ships a broken UEFI, they screw a
->> feature or have a horrible bug and ship it, laud the fact Linux
->> doesn't boot on it and the fact that it's their fault - over their
->> head. It actually works these days, Linux actually has "market share,"
->> companies really go out of their way to rescue their "image" and
->> resolve the situation when someone blogs about a serious UEFI bug on
->> their $1300 laptops, or even $300 tablets.
->
-> Yeah, that hasn't actually worked out too well for us.
+> > +	memmap.phys_map = early_memremap((phys_addr_t)(u32) uefi_boot_mmap,
+> > +					 uefi_boot_mmap_size);
+> > +	if (!memmap.phys_map)
+> > +		return 1;
+> > +
+> > +	p = memmap.phys_map;
+> > +	e = (void *)((u32)p + uefi_boot_mmap_size);
+> 
+> You are doing a lot of type casts here, which is normally an indication
+> that you have the types wrong in some way. I can't spot a mistake
+> here, but maybe you can give it some more thought and see if it can be
+> changed.
 
-Aside from Teething problems caused by a rush to market ;)
+Grant made much the same comments here. It is possible the change to
+the DT bindings to have all addresses 64-bit actually makes this go
+away. I will revisit for next version.
 
-For the "ARM server market" rather than the "get the cheapest
-tablet/ultrabook out of the door that runs Windows 8/RT" I am sure
-this is going to get to be VERY important for vendors to take into
-account. Imagine if Dell shipped a *server* where Linux would brick it
-out of the box just for setting a variable.. however, if it works the
-day they ship the server, and Linux gains better support for UEFI
-booting which breaks the server in question, that's our fault for not
-doing it in the right way in the first place, and Dell can be just as
-angry at us as we would be at them. Vendors won't test code that
-doesn't exist for obvious reasons.
+> > +static int __init remap_region(efi_memory_desc_t *md, efi_memory_desc_t *entry)
+> > +{
+> > +	u64 va;
+> > +	u64 paddr;
+> > +	u64 size;
+> > +
+> > +	*entry = *md;
+> > +	paddr = entry->phys_addr;
+> > +	size = entry->num_pages << EFI_PAGE_SHIFT;
+> > +
+> > +	/*
+> > +	 * Map everything writeback-capable as coherent memory,
+> > +	 * anything else as device.
+> > +	 */
+> > +	if (md->attribute & EFI_MEMORY_WB)
+> > +		va = (u64)((u32)uefi_remap(paddr, size) & 0xffffffffUL);
+> > +	else
+> > +		va = (u64)((u32)uefi_ioremap(paddr, size) & 0xffffffffUL);
+> 
+> Same here. Why is 'va' a u64?
 
-This is what I was trying to get at about them not updating their
-firmware support for the more firmware-aware method if it works with
-the "ditch firmware early" method worked well for them (which means
-the functionality in the firmware never gets stressed and the
-self-fulfilling prophecy of untrustworthy firmware vendors persists).
-That firmware quality assurance - if not the code itself - will
-trickle down to consumer tablets and ARM thin laptop kind of devices.
+Because the field in the structure (defined by UEFI) is 64-bit:
 
-Ta,
-Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>
+        entry->virt_addr = va;
+
+/
+    Leif
