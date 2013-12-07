@@ -1,87 +1,70 @@
-From: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Subject: Re: [PATCH v3 2/3] arm: Add [U]EFI runtime services support
-Date: Fri, 6 Dec 2013 18:59:40 +0100
-Message-ID: <201312061859.40224.arnd@arndb.de>
-References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> <201312060259.48259.arnd@arndb.de> <20131206175449.GD24997@rocoto.smurfnet.nu>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to
+ sysfs
+Date: Sat, 7 Dec 2013 04:01:02 -0500 (EST)
+Message-ID: <2141297830.13051543.1386406862068.JavaMail.root@redhat.com>
+References: <1385445477-9665-1-git-send-email-dyoung@redhat.com> <1385445477-9665-7-git-send-email-dyoung@redhat.com> <20131127114402.GB32267@pd.tnic> <20131129094034.GI4186@dhcp-16-126.nay.redhat.com> <20131129115029.GB4266@pd.tnic> <20131202025942.GF3999@dhcp-16-126.nay.redhat.com> <20131202094020.GA7380@pd.tnic>
 Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131206175449.GD24997-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
+In-Reply-To: <20131202094020.GA7380-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Friday 06 December 2013, Leif Lindholm wrote:
-> 
-> On Fri, Dec 06, 2013 at 02:59:48AM +0100, Arnd Bergmann wrote:
-> > On Thursday 28 November 2013, Leif Lindholm wrote:
-> > > @@ -898,6 +900,10 @@ void __init setup_arch(char **cmdline_p)
-> > >  	sanity_check_meminfo();
-> > >  	arm_memblock_init(&meminfo, mdesc);
-> > >  
-> > > +#ifdef CONFIG_EFI
-> > > +	uefi_memblock_arm_reserve_range();
-> > > +#endif
-> > > +
-> > 
-> > Better use 
-> > 
-> > 	if (IS_ENABLED(CONFIG_EFI))
-> > 
-> > here for readability and better build-time checking of the interface when
-> > CONFIG_EFI is disabled.
-> 
-> I think I'll do what Grant suggested and stub it out in asm/uefi.h.
+Hi, all
 
-That's ok, too. I usually prefer the IS_ENABLED() method if there is only
-one caller, since it's harder to get wrong, but the result is similar.
+Update my status:
 
-> > > +/*
-> > > + * Returns 1 if 'facility' is enabled, 0 otherwise.
-> > > + */
-> > > +int efi_enabled(int facility)
-> > > +{
-> > > +	return test_bit(facility, &arm_uefi_facility) != 0;
-> > > +}
-> > > +EXPORT_SYMBOL(efi_enabled);
-> > 
-> > I'd use EXPORT_SYMBOL_GPL() unless there is a documented reason why
-> > a symbol should be available to GPL-incompatible modules.
-> 
-> So ... this is duplicating x86 code which Matt Fleming has promised
-> to make generic. I'd prefer to keep it identical to x86 until this
-> copy goes away.
+I have finished most of thecode related changes including the krealloc
+fixes (both for original code and my new code). And I'm slowly
+moving the kexec related stuff to efi_kexec.c, this involves
+some other cleanups, such as:
+efi_systab_init:
+ -> move 64bit code to efi_64.c, move 32bit code to efi_32.c
 
-Ok, makes sense.
+efi_setup global variable is changing to physical address, ioremapping
+it when necessary instead of directly using the virt addr because
+previously the virt addr will be freed until entering virtual mode,
+it's possible a leak in case something is wrong in the middle also it
+occupies the ioremap slot a little bit long.
 
-> > > +static int __init remap_region(efi_memory_desc_t *md, efi_memory_desc_t *entry)
-> > > +{
-> > > +	u64 va;
-> > > +	u64 paddr;
-> > > +	u64 size;
-> > > +
-> > > +	*entry = *md;
-> > > +	paddr = entry->phys_addr;
-> > > +	size = entry->num_pages << EFI_PAGE_SHIFT;
-> > > +
-> > > +	/*
-> > > +	 * Map everything writeback-capable as coherent memory,
-> > > +	 * anything else as device.
-> > > +	 */
-> > > +	if (md->attribute & EFI_MEMORY_WB)
-> > > +		va = (u64)((u32)uefi_remap(paddr, size) & 0xffffffffUL);
-> > > +	else
-> > > +		va = (u64)((u32)uefi_ioremap(paddr, size) & 0xffffffffUL);
-> > 
-> > Same here. Why is 'va' a u64?
-> 
-> Because the field in the structure (defined by UEFI) is 64-bit:
-> 
->         entry->virt_addr = va;
+There's also other problems, so I still need a few days probably
+a week to carefully restructure the code.
 
-I see. Maybe put the typecast in that final assignment then?
+Thanks
+Dave
 
-	Arnd
+Sending from web interface so sorry for the email format.
+----- Original Message -----
+From: "Borislav Petkov" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: "Dave Young" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "toshi kani" <toshi.kani-VXdhtT5mjnY@public.gmane.org>, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "James Bottomley" <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Sent: Monday, December 2, 2013 5:40:20 PM
+Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
+
+On Mon, Dec 02, 2013 at 10:59:42AM +0800, Dave Young wrote:
+> They are only called if there's setup_data SETUP_EFI passed in. Yes, I
+> think only kexec need that part of code. But I hesitated to mess the
+> code with a lot of #if. Will think about it.
+
+Well, the accepted strategy with the efi code is to have function calls
+in efi.c and then have different versions of those functions defined for
+32 and 64-bit, i.e. efi_32.c and efi_64.c.
+
+I can imagine adding an efi_kexec.c could make the whole deal very
+clearly arranged without ifdeffery.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
+
+_______________________________________________
+kexec mailing list
+kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+http://lists.infradead.org/mailman/listinfo/kexec
