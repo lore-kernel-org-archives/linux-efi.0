@@ -1,65 +1,155 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 06/12] efi: export efi runtime memory mapping to sysfs
-Date: Mon, 9 Dec 2013 10:23:36 +0800
-Message-ID: <20131209022335.GA3761@dhcp-16-126.nay.redhat.com>
-References: <1385445477-9665-1-git-send-email-dyoung@redhat.com>
- <1385445477-9665-7-git-send-email-dyoung@redhat.com>
- <20131127114402.GB32267@pd.tnic>
- <20131129094034.GI4186@dhcp-16-126.nay.redhat.com>
- <20131129115029.GB4266@pd.tnic>
- <20131202025942.GF3999@dhcp-16-126.nay.redhat.com>
- <20131202094020.GA7380@pd.tnic>
- <2141297830.13051543.1386406862068.JavaMail.root@redhat.com>
- <20131207133048.GA4183@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH v5 00/14] kexec kernel efi runtime support
+Date: Mon,  9 Dec 2013 17:42:13 +0800
+Message-ID: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131207133048.GA4183-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/07/13 at 02:30pm, Borislav Petkov wrote:
-> On Sat, Dec 07, 2013 at 04:01:02AM -0500, Dave Young wrote:
-> > Hi, all
-> > 
-> > Update my status:
-> > 
-> > I have finished most of thecode related changes including the krealloc
-> > fixes (both for original code and my new code). And I'm slowly
-> > moving the kexec related stuff to efi_kexec.c, this involves
-> > some other cleanups, such as:
-> > efi_systab_init:
-> >  -> move 64bit code to efi_64.c, move 32bit code to efi_32.c
-> > 
-> > efi_setup global variable is changing to physical address, ioremapping
-> > it when necessary instead of directly using the virt addr because
-> > previously the virt addr will be freed until entering virtual mode,
-> > it's possible a leak in case something is wrong in the middle also it
-> > occupies the ioremap slot a little bit long.
-> > 
-> > There's also other problems, so I still need a few days probably
-> > a week to carefully restructure the code.
-> 
-> Those are all lofty goals but beware that trying to solve it all at
-> once can be very painful and can cause unnecessary work for both coders
-> and reviewers. Especially if the patchset grows out of proportion which
-> makes it much harder to review and deal with.
-> 
-> So, from my experience and if I were you, I'd try to address the most
-> important issue I'm trying to fix, have 10ish nice clean patches and put
-> the rest on the TODO list. This is much easier to deal with for everyone
-> involved than trying to solve it all at once.
-> 
-> Besides, if you solve it all at once, what are you going to work on
-> afterwards? :-)
-> 
+Hi,
 
-I like your suggestion for splitting kexec stuff to another file efi_kexec.c.
-but yes it needs more work and is bloating the patchset, I'm fine to leave
-it in TODO list.
+Here is the V5 patchset for supporting kexec kernel efi runtime.
+Per pervious discussion I pass the 1st kernel efi runtime mapping
+via setup_data to 2nd kernel. Besides of the runtime mapping
+info I also pass the fw_vendor, runtime, config table, smbios
+physical address in setup_data. EFI spec mentioned fw_vendor,
+runtime, config table addresses will be converted to virt address
+after entering virtual mode, but we will use it as physical address
+in efi_init. For smbios EFI spec did not mention about the address
+updating, but during my test on a HP workstation, the bios will
+convert it to Virt addr, thus pass it in setup_data as well.
 
-Thanks
-Dave
+For fw_vendor, runtime, config table, I export them in /sys/firmware/
+efi/, smbios is already in /sys/firmware/efi/systab.
+
+For efi runtime mapping I add a new directory /sys/firmware/efi/
+runtime-map/ like below
+[dave@darkstar ~]$ tree /sys/firmware/efi/runtime-map/
+/sys/firmware/efi/runtime-map/
+|__ 0
+|   |__ attribute
+|   |__ num_pages
+|   |__ phys_addr
+|   |__ type
+|   |__ virt_addr
+|__ 1
+[snip]
+ 
+kexec-tools will assemble them as setup_data and pass to 2nd kernel.
+I will send userspace patches as well.
+
+Limitation is I only write support for x86_64, test on below machines:
+Lenovo thinkpad t420
+Dell inspiron 14 - 3421
+HP Z420 workstation
+Qemu + OVMF
+
+The patches are based on linus tree + matt's efi master tree
+
+Changes from v1:
+add one flag in xloadflags, so kexec-tools can safely load old kernel
+without efi support.
+coding style fixes
+function name for map phys_addr to fixed virt_addr
+Add ABI documentation for sysfs files
+
+Changes from v2:
+01/09: a new patch to remove unused variables in __map_region function
+       catched by Toshi Kani
+09/09: a new patch to export x86 boot_params to sysfs instead of use
+       debugfs files
+Matt: reuse __map_region instead do same thing in another function.
+      add a wrapper function efi_map_region_fixed [02/09]
+      check return value of krealloc
+      sysfs dir name s/efi-runtime-map/runtime-map [06/09]
+      use desc_size in efi_runtime_map
+      for the xloadflags defination: +&& defined(CONFIG_KEXEC)
+Greg: sysfs : one file one value for fw_vendor, runtime, tables. [05/09]
+      Document them in ABI testing
+HPA:  Document the new xloadflag
+Also there's other function cleanup and improvement for error handling.
+
+Changes from v3:
+Greg: sysfs code move to use __ATTR_RO and attr_group
+Boris: comments and code alignment
+
+Added 3 new patches below
+10-print-efi-runtime-memmap.patch
+  - 10/12: print only runtime ranges in case EFI_DEBUG printing
+11-reserve-setup-data-late.patch
+  - fix a bug of kdump kernel, move function for reserving setup data
+    ranges late after parsing memmap= cmdline params because kdump kernel
+    will pass exact memmap late.
+12-x86-kdebugfs-use-ioremap.patch
+  - fix a bug of x86/kernel/kdebugfs.c, use ioremap instead of __va for
+    low mem because __va does not work for exact memmap=
+
+Changes from V4:
+ - variable efi_setup in 09/14 is changed to the physical address instead of the virtual address
+because it will be not iounmapped until entering virtual mode, it's too long and could cause
+leak.
+ - sparse warnings fixes (Matt):
+   Added 2 new patches to addressing sparse warnings:
+   01/14: x86-mm-sparse-warning-fix-for-early_memremap.patch
+   02/14: efi-use-early_memremap-and-early_memunmap.patch
+ - krealloc fixes (Boris)
+ - rebase on top of Linus tree + Matt's efi master tree (Boris)
+ - a lot of documention/spelling fixes (Boris)
+ - share function save_runtime_map in 1st/2nd kernel code (Matt)
+ - style and other fixes detail see the patch changelog themselves.
+
+Boris: I still use the function name efi_reuse_config because it could be not only a problem for
+HP workstation, also because we will later split them to another file so efi_ is acceptable for me.
+
+The patches stay in kexec-efi-testing branch of below repo for testing:
+https://github.com/daveyoung/linux.git
+
+Dave Young (14):
+  x86/mm: sparse warning fix for early_memremap
+  efi: use early_memremap and early_memunmap
+  efi: remove unused variables in __map_region
+  efi: add a wrapper function efi_map_region_fixed
+  efi: reserve boot service fix
+  efi: cleanup efi_enter_virtual_mode function
+  efi: export more efi table variable to sysfs
+  efi: export efi runtime memory mapping to sysfs
+  efi: passing kexec necessary efi data via setup_data
+  efi: only print saved efi runtime maps instead of all memmap ranges
+    for kexec
+  x86: add xloadflags bit for efi runtime support on kexec
+  x86: export x86 boot_params to sysfs
+  x86: reserve setup_data ranges late after parsing memmap cmdline
+  x86: kdebugfs do not use __va for getting setup_data virt addr
+
+ Documentation/ABI/testing/sysfs-firmware-efi       |  24 ++
+ .../ABI/testing/sysfs-firmware-efi-runtime-map     |  36 ++
+ Documentation/ABI/testing/sysfs-kernel-boot_params |  39 +++
+ Documentation/x86/boot.txt                         |   3 +
+ arch/x86/boot/header.S                             |   9 +-
+ arch/x86/include/asm/efi.h                         |  12 +
+ arch/x86/include/asm/io.h                          |   3 +-
+ arch/x86/include/uapi/asm/bootparam.h              |   2 +
+ arch/x86/kernel/Makefile                           |   1 +
+ arch/x86/kernel/kdebugfs.c                         |  35 +-
+ arch/x86/kernel/ksysfs.c                           | 339 ++++++++++++++++++
+ arch/x86/kernel/setup.c                            |   7 +-
+ arch/x86/mm/ioremap.c                              |  10 +-
+ arch/x86/platform/efi/efi.c                        | 378 ++++++++++++++++-----
+ arch/x86/platform/efi/efi_32.c                     |   2 +
+ arch/x86/platform/efi/efi_64.c                     |  16 +-
+ drivers/firmware/efi/Kconfig                       |  11 +
+ drivers/firmware/efi/Makefile                      |   1 +
+ drivers/firmware/efi/efi.c                         |  47 ++-
+ drivers/firmware/efi/runtime-map.c                 | 176 ++++++++++
+ include/linux/efi.h                                |   9 +
+ 21 files changed, 1038 insertions(+), 122 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+ create mode 100644 Documentation/ABI/testing/sysfs-kernel-boot_params
+ create mode 100644 arch/x86/kernel/ksysfs.c
+ create mode 100644 drivers/firmware/efi/runtime-map.c
+
+-- 
+1.8.3.1
