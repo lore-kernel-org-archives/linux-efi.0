@@ -1,7 +1,7 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v5 07/14] efi: export more efi table variable to sysfs
-Date: Mon,  9 Dec 2013 17:42:20 +0800
-Message-ID: <1386582147-9802-8-git-send-email-dyoung@redhat.com>
+Subject: [PATCH v5 06/14] efi: cleanup efi_enter_virtual_mode function
+Date: Mon,  9 Dec 2013 17:42:19 +0800
+Message-ID: <1386582147-9802-7-git-send-email-dyoung@redhat.com>
 References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,153 +21,190 @@ To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Export fw_vendor, runtime and config table physical addresses to
-/sys/firmware/efi/fw_vendor, /sys/firmware/efi/runtime and
-/sys/firmware/efi/config_table because kexec kernel will need them.
+Add two small functions:
+efi_merge_regions and efi_map_regions, efi_enter_virtual_mode
+calls them instead of embedding two long for loop.
 
->From EFI spec these 3 variables will be updated to
-virtual address after entering virtual mode. But
-kernel startup code will need the physical address.
+v1->v2:
+refresh; coding style fixes.
 
-changelog:
-Greg: add standalone sysfs files instead of add lines to systab
-Document them as testing ABI
-Greg: use group attrs and is_visible
-Boris: align comments lines
-Boris: add macros for _show functions
-Matt: Documentation fixes.
+v2->v3:
+Toshi Kani:
+remove unused variable
+Matt: check return value of krealloc.
+v3->v4:
+Boris: Stretch comment to 80 cols
+fix krealloc bug.
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- Documentation/ABI/testing/sysfs-firmware-efi | 24 +++++++++++++++++
- arch/x86/platform/efi/efi.c                  |  4 +++
- drivers/firmware/efi/efi.c                   | 39 ++++++++++++++++++++++++++++
- include/linux/efi.h                          |  3 +++
- 4 files changed, 70 insertions(+)
- create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi
+ arch/x86/platform/efi/efi.c | 123 ++++++++++++++++++++++++++------------------
+ 1 file changed, 72 insertions(+), 51 deletions(-)
 
-diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
-new file mode 100644
-index 0000000..8c6e460
---- /dev/null
-+++ b/Documentation/ABI/testing/sysfs-firmware-efi
-@@ -0,0 +1,24 @@
-+What:		/sys/firmware/efi/fw_vendor
-+Date:		December 2013
-+Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+Description:
-+		It shows the physical address of firmware vendor field in the
-+		EFI system table.
-+
-+Users:		Kexec
-+
-+What:		/sys/firmware/efi/runtime
-+Date:		December 2013
-+Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+Description:
-+		It shows the physical address of runtime service table entry in
-+		the EFI system table.
-+Users:		Kexec
-+
-+What:		/sys/firmware/efi/config_table
-+Date:		December 2013
-+Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-+Description:
-+		It shows the physical address of config table entry in the EFI
-+		system table.
-+Users:		Kexec
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 7778b5f..3e8b760 100644
+index 8a88c68..7778b5f 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -653,6 +653,10 @@ void __init efi_init(void)
+@@ -773,44 +773,12 @@ void __init old_map_region(efi_memory_desc_t *md)
+ 		       (unsigned long long)md->phys_addr);
+ }
  
- 	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
+-/*
+- * This function will switch the EFI runtime services to virtual mode.
+- * Essentially, we look through the EFI memmap and map every region that
+- * has the runtime attribute bit set in its memory descriptor into the
+- * ->trampoline_pgd page table using a top-down VA allocation scheme.
+- *
+- * The old method which used to update that memory descriptor with the
+- * virtual address obtained from ioremap() is still supported when the
+- * kernel is booted with efi=old_map on its command line. Same old
+- * method enabled the runtime services to be called without having to
+- * thunk back into physical mode for every invocation.
+- *
+- * The new method does a pagetable switch in a preemption-safe manner
+- * so that we're in a different address space when calling a runtime
+- * function. For function arguments passing we do copy the PGDs of the
+- * kernel page table into ->trampoline_pgd prior to each call.
+- */
+-void __init efi_enter_virtual_mode(void)
++/* Merge contiguous regions of the same type and attribute */
++static void __init efi_merge_regions(void)
+ {
++	void *p;
+ 	efi_memory_desc_t *md, *prev_md = NULL;
+-	void *p, *new_memmap = NULL;
+-	unsigned long size;
+-	efi_status_t status;
+-	u64 end, systab;
+-	int count = 0;
+-
+-	efi.systab = NULL;
+-
+-	/*
+-	 * We don't do virtual mode, since we don't do runtime services, on
+-	 * non-native EFI
+-	 */
+-	if (!efi_is_native()) {
+-		efi_unmap_memmap();
+-		return;
+-	}
  
-+	efi.config_table = (unsigned long)efi.systab->tables;
-+	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
-+	efi.runtime	 = (unsigned long)efi.systab->runtime;
-+
- 	/*
- 	 * Show what we know for posterity
- 	 */
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b716a66..0ecccab 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
- 	.hcdp       = EFI_INVALID_TABLE_ADDR,
- 	.uga        = EFI_INVALID_TABLE_ADDR,
- 	.uv_systab  = EFI_INVALID_TABLE_ADDR,
-+	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
-+	.runtime    = EFI_INVALID_TABLE_ADDR,
-+	.config_table  = EFI_INVALID_TABLE_ADDR,
- };
- EXPORT_SYMBOL(efi);
- 
-@@ -71,13 +74,49 @@ static ssize_t systab_show(struct kobject *kobj,
- static struct kobj_attribute efi_attr_systab =
- 			__ATTR(systab, 0400, systab_show, NULL);
- 
-+#define EFI_FIELD(var) efi.var
-+
-+#define EFI_ATTR_SHOW(name) \
-+static ssize_t name##_show(struct kobject *kobj, \
-+				struct kobj_attribute *attr, char *buf) \
-+{ \
-+	return sprintf(buf, "0x%lx\n", EFI_FIELD(name)); \
+-	/* Merge contiguous regions of the same type and attribute */
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		u64 prev_size;
+ 		md = p;
+@@ -835,8 +803,19 @@ void __init efi_enter_virtual_mode(void)
+ 			continue;
+ 		}
+ 		prev_md = md;
+-
+ 	}
 +}
 +
-+EFI_ATTR_SHOW(fw_vendor);
-+EFI_ATTR_SHOW(runtime);
-+EFI_ATTR_SHOW(config_table);
-+
-+static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
-+static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
-+static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
-+
- static struct attribute *efi_subsys_attrs[] = {
- 	&efi_attr_systab.attr,
-+	&efi_attr_fw_vendor.attr,
-+	&efi_attr_runtime.attr,
-+	&efi_attr_config_table.attr,
- 	NULL,	/* maybe more in the future? */
- };
- 
-+static umode_t efi_attr_is_visible(struct kobject *kobj,
-+				   struct attribute *attr, int n)
++/*
++ * Map efi memory ranges for runtime serivce and update new_memmap with virtual
++ * addresses.
++ */
++static void * __init efi_map_regions(int *count)
 +{
-+	umode_t mode = attr->mode;
++	efi_memory_desc_t *md;
++	void *p, *tmp, *new_memmap = NULL;
++	unsigned long size;
++	u64 end, systab;
+ 
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+@@ -852,23 +831,68 @@ void __init efi_enter_virtual_mode(void)
+ 
+ 		size = md->num_pages << EFI_PAGE_SHIFT;
+ 		end = md->phys_addr + size;
+-
+-		systab = (u64) (unsigned long) efi_phys.systab;
++		systab = (u64)(unsigned long)efi_phys.systab;
+ 		if (md->phys_addr <= systab && systab < end) {
+ 			systab += md->virt_addr - md->phys_addr;
+-
+-			efi.systab = (efi_system_table_t *) (unsigned long) systab;
++			efi.systab = (efi_system_table_t *)(unsigned long)systab;
+ 		}
+ 
+-		new_memmap = krealloc(new_memmap,
+-				      (count + 1) * memmap.desc_size,
+-				      GFP_KERNEL);
+-		if (!new_memmap)
+-			goto err_out;
+-
+-		memcpy(new_memmap + (count * memmap.desc_size), md,
++		tmp = krealloc(new_memmap, (*count + 1) * memmap.desc_size,
++			       GFP_KERNEL);
++		if (!tmp)
++			goto out_krealloc;
++		new_memmap = tmp;
++		memcpy(new_memmap + (*count * memmap.desc_size), md,
+ 		       memmap.desc_size);
+-		count++;
++		(*count)++;
++	}
 +
-+	if (attr == &efi_attr_fw_vendor.attr)
-+		return (efi.fw_vendor == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
-+	else if (attr == &efi_attr_runtime.attr)
-+		return (efi.runtime == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
-+	else if (attr == &efi_attr_config_table.attr)
-+		return (efi.config_table == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
-+
-+	return mode;
++	return new_memmap;
++out_krealloc:
++	kfree(new_memmap);
++	return NULL;
 +}
 +
- static struct attribute_group efi_subsys_attr_group = {
- 	.attrs = efi_subsys_attrs,
-+	.is_visible = efi_attr_is_visible,
- };
++/*
++ * This function will switch the EFI runtime services to virtual mode.
++ * Essentially, we look through the EFI memmap and map every region that
++ * has the runtime attribute bit set in its memory descriptor into the
++ * ->trampoline_pgd page table using a top-down VA allocation scheme.
++ *
++ * The old method which used to update that memory descriptor with the
++ * virtual address obtained from ioremap() is still supported when the
++ * kernel is booted with efi=old_map on its command line. Same old
++ * method enabled the runtime services to be called without having to
++ * thunk back into physical mode for every invocation.
++ *
++ * The new method does a pagetable switch in a preemption-safe manner
++ * so that we're in a different address space when calling a runtime
++ * function. For function arguments passing we do copy the PGDs of the
++ * kernel page table into ->trampoline_pgd prior to each call.
++ */
++void __init efi_enter_virtual_mode(void)
++{
++	efi_status_t status;
++	void *new_memmap = NULL;
++	int count = 0;
++
++	efi.systab = NULL;
++
++	/*
++	 * We don't do virtual mode, since we don't do runtime services, on
++	 * non-native EFI
++	 */
++	if (!efi_is_native()) {
++		efi_unmap_memmap();
++		return;
++	}
++
++	efi_merge_regions();
++
++	new_memmap = efi_map_regions(&count);
++	if (!new_memmap) {
++		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
++		return;
+ 	}
  
- static struct efivars generic_efivars;
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 6c0ca52..fb60b10 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -556,6 +556,9 @@ extern struct efi {
- 	unsigned long hcdp;		/* HCDP table */
- 	unsigned long uga;		/* UGA table */
- 	unsigned long uv_systab;	/* UV system table */
-+	unsigned long fw_vendor;	/* fw_vendor */
-+	unsigned long runtime;		/* runtime table */
-+	unsigned long config_table;	/* config tables */
- 	efi_get_time_t *get_time;
- 	efi_set_time_t *set_time;
- 	efi_get_wakeup_time_t *get_wakeup_time;
+ 	BUG_ON(!efi.systab);
+@@ -922,9 +946,6 @@ void __init efi_enter_virtual_mode(void)
+ 			 0, NULL);
+ 
+ 	return;
+-
+- err_out:
+-	pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+ }
+ 
+ /*
 -- 
 1.8.3.1
