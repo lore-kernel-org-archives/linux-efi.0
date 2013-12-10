@@ -1,24 +1,37 @@
-From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH v5 00/14] kexec kernel efi runtime support
-Date: Tue, 10 Dec 2013 15:25:49 -0800
-Message-ID: <20131210152549.7975e3ac25d854e2ada63221@linux-foundation.org>
+Date: Wed, 11 Dec 2013 00:32:07 +0100
+Message-ID: <20131210233207.GI31437@pd.tnic>
 References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
+ <20131210152549.7975e3ac25d854e2ada63221@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1386582147-9802-1-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20131210152549.7975e3ac25d854e2ada63221@linux-foundation.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Dave Young <dyoung@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon,  9 Dec 2013 17:42:13 +0800 Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+On Tue, Dec 10, 2013 at 03:25:49PM -0800, Andrew Morton wrote:
+> On Mon,  9 Dec 2013 17:42:13 +0800 Dave Young <dyoung@redhat.com> wrote:
+> 
+> > Here is the V5 patchset for supporting kexec kernel efi runtime.
+> 
+> It's unclear (to me) who's supposed to merge this lot.  It's a "kexec"
+> patch which actually hits on efi and x86.
+> 
+> I grabbed them for some -next testing but won't be offended if someone
+> else merges them ;)
 
-> Here is the V5 patchset for supporting kexec kernel efi runtime.
+I was under the impression that this should go through Matt's efi tree.
+Oh, and we need to finish reviewing them so picking them up now would be
+too premature, IMHO.
 
-It's unclear (to me) who's supposed to merge this lot.  It's a "kexec"
-patch which actually hits on efi and x86.
+-- 
+Regards/Gruss,
+    Boris.
 
-I grabbed them for some -next testing but won't be offended if someone
-else merges them ;)
+Sent from a fat crate under my desk. Formatting is fine.
+--
