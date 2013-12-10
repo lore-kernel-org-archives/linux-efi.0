@@ -1,38 +1,24 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] UEFI: Don't use UEFI time services on 32-bit
-Date: Tue, 10 Dec 2013 23:24:23 +0000
-Message-ID: <1386717862.26245.5.camel@x230>
-References: <1385754283-2464-1-git-send-email-matthew.garrett@nebula.com>
-	 <52994324.4000404@zytor.com> <52A79B9A.7080004@zytor.com>
-	 <1386716246.26245.2.camel@x230> <52A7A1B0.7050903@zytor.com>
+From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [PATCH v5 00/14] kexec kernel efi runtime support
+Date: Tue, 10 Dec 2013 15:25:49 -0800
+Message-ID: <20131210152549.7975e3ac25d854e2ada63221@linux-foundation.org>
+References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52A7A1B0.7050903-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Content-Language: en-US
-Content-ID: <33E0983B27C29F4AB05EEE9C93132E25-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <1386582147-9802-1-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gVHVlLCAyMDEzLTEyLTEwIGF0IDE1OjIwIC0wODAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
-Cj4gT24gMTIvMTAvMjAxMyAwMjo1OCBQTSwgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiA+IEVG
-SSBpcyBwcmVmZXJhYmxlIHRvIFBOUCBpbiB0aGF0IGl0IGdpdmVzIHVzIGEgdGltZXpvbmUsIGFu
-ZCBXaW5kb3dzDQo+ID4gY2VydGFpbmx5IGNhbGxzIHRoZSBFRkkgdGltZSBmdW5jdGlvbnMuICpI
-b3dldmVyKiwgaXQgZG9lc24ndCBhcHBlYXIgdG8NCj4gPiBkbyBzbyBvbmNlIHRoZSBzeXN0ZW0g
-aXMgYm9vdGVkLiBTbyB3ZSBwcm9iYWJseSB3YW50IHRvIGNhbGwgaXQgaW4gdGhlDQo+ID4gYm9v
-dCBzdHViIGFuZCBmaW5kIHNvbWUgd2F5IHRvIHBhc3MgdGhlIHRpbWV6b25lIGluZm9ybWF0aW9u
-IHVwIHRvIHRoZQ0KPiA+IGtlcm5lbCwgYW5kIHRoZW4gc3BlbmQgc29tZSBtb3JlIHRpbWUgaW5z
-dHJ1bWVudGluZyBXaW5kb3dzIHRvIGZpZ3VyZQ0KPiA+IG91dCBob3cgaXQgbWFrZXMgdGltZSBj
-YWxscy4NCj4gDQo+IFRBRCB3b3VsZCBhbHNvIGdpdmUgdXMgdGhlIHRpbWV6b25lLiAgSSdtIG5v
-dCBzdXJlIGhvdyB5b3UgY2FuDQo+IHJlYWxpc3RpY2FsbHkgb25seSB1c2UgdGhlIHRpbWUgZnVu
-Y3Rpb24gZHVyaW5nIGJvb3QsIGhvd2V2ZXIsIHVubGVzcw0KPiB5b3UgaW5oZXJlbnRseSBhc3N1
-bWUgaXQgaXMgY29oZXJlbnQgd2l0aCB0aGUgaGFyZHdhcmUgUlRDLCBzaW5jZSB5b3UNCj4gd291
-bGRuJ3QgYmUgYWJsZSB0byBzZXQgaXQuDQoNCklmIHdlIGNhbiB2ZXJpZnkgdGhhdCBXaW5kb3dz
-IGFjdHVhbGx5IHVzZXMgVEFEIHRoZW4gSSdkIGFncmVlIGl0J3MNCnByZWZlcmFibGUgdG8gRUZJ
-LCBidXQgaWYgd2UgY2FuJ3QgdGhlbiBJIHdvdWxkbid0IGJlIHNvIHN1cmUuIEknbGwgcmVkbw0K
-bXkgV2luZG93cyBpbnN0cnVtZW50YXRpb24gYW5kIGZpZ3VyZSBvdXQgdW5kZXIgd2hpY2ggY2ly
-Y3Vtc3RhbmNlcyBpdCdzDQpjYWxsaW5nIHRoZSB0aW1lIGZ1bmN0aW9ucy4NCg0KLS0gDQpNYXR0
-aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
+On Mon,  9 Dec 2013 17:42:13 +0800 Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+
+> Here is the V5 patchset for supporting kexec kernel efi runtime.
+
+It's unclear (to me) who's supposed to merge this lot.  It's a "kexec"
+patch which actually hits on efi and x86.
+
+I grabbed them for some -next testing but won't be offended if someone
+else merges them ;)
