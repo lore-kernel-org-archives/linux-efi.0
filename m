@@ -1,45 +1,38 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH] UEFI: Don't use UEFI time services on 32-bit
-Date: Tue, 10 Dec 2013 15:20:16 -0800
-Message-ID: <52A7A1B0.7050903@zytor.com>
-References: <1385754283-2464-1-git-send-email-matthew.garrett@nebula.com>	 <52994324.4000404@zytor.com> <52A79B9A.7080004@zytor.com> <1386716246.26245.2.camel@x230>
+Date: Tue, 10 Dec 2013 23:24:23 +0000
+Message-ID: <1386717862.26245.5.camel@x230>
+References: <1385754283-2464-1-git-send-email-matthew.garrett@nebula.com>
+	 <52994324.4000404@zytor.com> <52A79B9A.7080004@zytor.com>
+	 <1386716246.26245.2.camel@x230> <52A7A1B0.7050903@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1386716246.26245.2.camel@x230>
+In-Reply-To: <52A7A1B0.7050903-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
+Content-ID: <33E0983B27C29F4AB05EEE9C93132E25-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <stable-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/10/2013 02:58 PM, Matthew Garrett wrote:
-> On Tue, 2013-12-10 at 14:54 -0800, H. Peter Anvin wrote:
-> 
->> Ping on this?
-> 
-> No TAD, yes ACPI declaration for RTC.
-
-OK, that is unfortunate.
-
->> Unless we find evidence to the contrary, we should probably do:
->>
->> ACPI TAD > PNP0B0x > EFI > hard probing
-> 
-> EFI is preferable to PNP in that it gives us a timezone, and Windows
-> certainly calls the EFI time functions. *However*, it doesn't appear to
-> do so once the system is booted. So we probably want to call it in the
-> boot stub and find some way to pass the timezone information up to the
-> kernel, and then spend some more time instrumenting Windows to figure
-> out how it makes time calls.
-
-TAD would also give us the timezone.  I'm not sure how you can
-realistically only use the time function during boot, however, unless
-you inherently assume it is coherent with the hardware RTC, since you
-wouldn't be able to set it.
-
-I suspect that means that Windows doesn't set the timezone information,
-which is highly unfortunate since Windows is the main offender in not
-using UTC time.
-
-	-hpa
+T24gVHVlLCAyMDEzLTEyLTEwIGF0IDE1OjIwIC0wODAwLCBILiBQZXRlciBBbnZpbiB3cm90ZToN
+Cj4gT24gMTIvMTAvMjAxMyAwMjo1OCBQTSwgTWF0dGhldyBHYXJyZXR0IHdyb3RlOg0KPiA+IEVG
+SSBpcyBwcmVmZXJhYmxlIHRvIFBOUCBpbiB0aGF0IGl0IGdpdmVzIHVzIGEgdGltZXpvbmUsIGFu
+ZCBXaW5kb3dzDQo+ID4gY2VydGFpbmx5IGNhbGxzIHRoZSBFRkkgdGltZSBmdW5jdGlvbnMuICpI
+b3dldmVyKiwgaXQgZG9lc24ndCBhcHBlYXIgdG8NCj4gPiBkbyBzbyBvbmNlIHRoZSBzeXN0ZW0g
+aXMgYm9vdGVkLiBTbyB3ZSBwcm9iYWJseSB3YW50IHRvIGNhbGwgaXQgaW4gdGhlDQo+ID4gYm9v
+dCBzdHViIGFuZCBmaW5kIHNvbWUgd2F5IHRvIHBhc3MgdGhlIHRpbWV6b25lIGluZm9ybWF0aW9u
+IHVwIHRvIHRoZQ0KPiA+IGtlcm5lbCwgYW5kIHRoZW4gc3BlbmQgc29tZSBtb3JlIHRpbWUgaW5z
+dHJ1bWVudGluZyBXaW5kb3dzIHRvIGZpZ3VyZQ0KPiA+IG91dCBob3cgaXQgbWFrZXMgdGltZSBj
+YWxscy4NCj4gDQo+IFRBRCB3b3VsZCBhbHNvIGdpdmUgdXMgdGhlIHRpbWV6b25lLiAgSSdtIG5v
+dCBzdXJlIGhvdyB5b3UgY2FuDQo+IHJlYWxpc3RpY2FsbHkgb25seSB1c2UgdGhlIHRpbWUgZnVu
+Y3Rpb24gZHVyaW5nIGJvb3QsIGhvd2V2ZXIsIHVubGVzcw0KPiB5b3UgaW5oZXJlbnRseSBhc3N1
+bWUgaXQgaXMgY29oZXJlbnQgd2l0aCB0aGUgaGFyZHdhcmUgUlRDLCBzaW5jZSB5b3UNCj4gd291
+bGRuJ3QgYmUgYWJsZSB0byBzZXQgaXQuDQoNCklmIHdlIGNhbiB2ZXJpZnkgdGhhdCBXaW5kb3dz
+IGFjdHVhbGx5IHVzZXMgVEFEIHRoZW4gSSdkIGFncmVlIGl0J3MNCnByZWZlcmFibGUgdG8gRUZJ
+LCBidXQgaWYgd2UgY2FuJ3QgdGhlbiBJIHdvdWxkbid0IGJlIHNvIHN1cmUuIEknbGwgcmVkbw0K
+bXkgV2luZG93cyBpbnN0cnVtZW50YXRpb24gYW5kIGZpZ3VyZSBvdXQgdW5kZXIgd2hpY2ggY2ly
+Y3Vtc3RhbmNlcyBpdCdzDQpjYWxsaW5nIHRoZSB0aW1lIGZ1bmN0aW9ucy4NCg0KLS0gDQpNYXR0
+aGV3IEdhcnJldHQgPG1hdHRoZXcuZ2FycmV0dEBuZWJ1bGEuY29tPg0K
