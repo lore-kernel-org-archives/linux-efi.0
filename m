@@ -1,67 +1,48 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 3/3] arm64: add EFI runtime services
-Date: Tue, 10 Dec 2013 12:58:02 -0500
-Message-ID: <1386698282.1979.44.camel@deneb.redhat.com>
-References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
-	 <1385762712-17043-4-git-send-email-msalter@redhat.com>
-	 <20131209135158.GH24997@rocoto.smurfnet.nu>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
+Date: Tue, 10 Dec 2013 10:29:34 -0800
+Message-ID: <CAFECyb93r5QGWRYDQxzWJ-xtptWBAEiQtAx=woLC5x+3WhbNqQ@mail.gmail.com>
+References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org>
+	<CAHCPf3s_SXYXLRwvn7tzqTCQ-gB=emRMK_dXkEmw_HWigiD7Mw@mail.gmail.com>
+	<20131210123035.D1586C40A27@trevor.secretlab.ca>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20131209135158.GH24997-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
+In-Reply-To: <20131210123035.D1586C40A27-WNowdnHR2B42iJbIjFUEsiwD8/FfD2ys@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Russell King <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linaro-uefi <linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2013-12-09 at 14:52 +0100, Leif Lindholm wrote:
-> Apologies for late feedback.
-> 
-> On Fri, Nov 29, 2013 at 05:05:12PM -0500, Mark Salter wrote:
-> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> > new file mode 100644
-> > index 0000000..1bad8a7
-> > --- /dev/null
-> > +++ b/arch/arm64/kernel/efi.c
-> > @@ -0,0 +1,507 @@
-> > +/*
-> > + * Extensible Firmware Interface
-> > + *
-> > + * Based on Extensible Firmware Interface Specification version 2.3.1
-> 
-> Actually, for arm64, we're relying on UEFI 2.4 or later.
+On Tue, Dec 10, 2013 at 4:30 AM, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Fri, 6 Dec 2013 11:20:45 -0600, Matt Sealey <neko-HhXTZounMxbZATc7fWT8Dg@public.gmane.org> wrote:
+>> On Wed, Dec 4, 2013 at 4:44 PM, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
+>> > On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
+>> Grant suggested I should propose some patches; sure, if I'm not otherwise busy.
+>>
+>> Maybe the Linaro guys can recommend a platform (real or emulated) that
+>> would be best to test it on with the available UEFI?
+>
+> Roy Franz (cc'd) has got UEFI running under QEMU. A few modifications
+> were required to both stock UEFI and QEMU. I'm not sure what the status
+> of mainlining those patches is. I think there are still a few things
+> that Roy has to fix, but you should be able to get the current patches
+> from him to get going.
+>
+> g.
+>
 
-You're right.
+Hi Grant and Matt,
 
-> 
-> > + *
-> > + * Copyright (C) 2013 Linaro Ltd.
-> 
-> And I'd say you've easily done enough here to motivate adding Red Hat.
-> 
-> > + *
-> > + * Adapted for arm64 from arch/arm/kernel/efi.c code
-> > + */
-> > +
-> > +#include <linux/efi.h>
-> > +#include <linux/export.h>
-> > +#include <linux/memblock.h>
-> > +#include <linux/of.h>
-> > +#include <linux/of_fdt.h>
-> > +#include <linux/sched.h>
-> > +#include <linux/slab.h>
-> > +#include <linux/bootmem.h>
-> > +
-> > +#include <asm/cacheflush.h>
-> > +#include <asm/efi.h>
-> > +#include <asm/tlbflush.h>
-> > +#include <asm/mmu_context.h>
-> > +
-> > +#define efi_early_remap(a, b) \
-> > +	((__force void *)early_ioremap((a), (b)))
-> 
-> Do we not want early_memremap() here, rather than early_ioremap()?
-> 
+I have put together a quick wiki page describing the current status,
+with git trees for
+UEFI and QEMU, and instructions for running the model.  I just whipped
+this up now, so it
+is pretty basic, but should have all the required information.
 
-Yes.
+https://wiki.linaro.org/LEG/Engineering/Kernel/UEFI/VersatileExpress/QEMU
+
+Please let me know if you have any questions.
+
+Thanks,
+Roy
