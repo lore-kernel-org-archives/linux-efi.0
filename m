@@ -1,146 +1,28 @@
-From: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] mm,x86: use E820_X_MAX instead of ARRAY_SIZE(e820.map)
-Date: Tue, 10 Dec 2013 18:08:32 +0800
-Message-ID: <52A6E820.2030905@huawei.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+From: Grant Likely <grant.likely@linaro.org>
+Subject: Re: [PATCH v3 1/3] Documentation: arm: add UEFI support documentation
+Date: Tue, 10 Dec 2013 12:30:35 +0000
+Message-ID: <20131210123035.D1586C40A27@trevor.secretlab.ca>
+References: <1385656883-4420-1-git-send-email-leif.lindholm@linaro.org> < 1385656883-4420-2-git-send-email-leif.lindholm@linaro.org> < CAHCPf3t5dEzVWbYZ6DWcFCENNO2dbrx-YeZvKRk0MkEsJMTE3A@mail.gmail.com> < 20131202210719.GQ24997@rocoto.smurfnet.nu> < CAHCPf3tsWdV+dJGm6mX6N4Ou5EQoGukdLyRvsRX6VQFjtKgxtg@mail.gmail.com> < 20131204224447.GA19265@srcf.ucam.org> < CAHCPf3s_SXYXLRwvn7tzqTCQ-gB=emRMK_dXkEmw_HWigiD7Mw@mail.gmail.com>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <CAHCPf3s_SXYXLRwvn7tzqTCQ-gB=emRMK_dXkEmw_HWigiD7Mw@mail.gmail.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Matt Sealey <neko@bakuhatsu.net>, Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Russell King <linux@arm.linux.org.uk>, matt.fleming@intel.com, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, Patch Tracking <patches@linaro.org>, linaro-uefi@lists.linaro.org, Mark Rutland <mark.rutland@arm.com>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Use E820_X_MAX instead of ARRAY_SIZE(e820.map).
-Code simplification, no functional changes.
+On Fri, 6 Dec 2013 11:20:45 -0600, Matt Sealey <neko@bakuhatsu.net> wrote:
+> On Wed, Dec 4, 2013 at 4:44 PM, Matthew Garrett <mjg59@srcf.ucam.org> wrote:
+> > On Wed, Dec 04, 2013 at 03:06:47PM -0600, Matt Sealey wrote:
+> Grant suggested I should propose some patches; sure, if I'm not otherwise busy.
+> 
+> Maybe the Linaro guys can recommend a platform (real or emulated) that
+> would be best to test it on with the available UEFI?
 
-Signed-off-by: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
----
- arch/x86/kernel/e820.c         |   10 +++++-----
- arch/x86/kernel/early-quirks.c |    2 +-
- arch/x86/kernel/setup.c        |    6 +++---
- arch/x86/platform/efi/efi.c    |    2 +-
- arch/x86/xen/setup.c           |    2 +-
- 5 files changed, 11 insertions(+), 11 deletions(-)
+Roy Franz (cc'd) has got UEFI running under QEMU. A few modifications
+were required to both stock UEFI and QEMU. I'm not sure what the status
+of mainlining those patches is. I think there are still a few things
+that Roy has to fix, but you should be able to get the current patches
+from him to get going.
 
-diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
-index 174da5f..97800ba 100644
---- a/arch/x86/kernel/e820.c
-+++ b/arch/x86/kernel/e820.c
-@@ -112,7 +112,7 @@ static void __init __e820_add_region(struct e820map *e820x, u64 start, u64 size,
- {
- 	int x = e820x->nr_map;
- 
--	if (x >= ARRAY_SIZE(e820x->map)) {
-+	if (x >= E820_X_MAX) {
- 		printk(KERN_ERR "e820: too many entries; ignoring [mem %#010llx-%#010llx]\n",
- 		       (unsigned long long) start,
- 		       (unsigned long long) (start + size - 1));
-@@ -564,7 +564,7 @@ void __init update_e820(void)
- 	u32 nr_map;
- 
- 	nr_map = e820.nr_map;
--	if (sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &nr_map))
-+	if (sanitize_e820_map(e820.map, E820_X_MAX, &nr_map))
- 		return;
- 	e820.nr_map = nr_map;
- 	printk(KERN_INFO "e820: modified physical RAM map:\n");
-@@ -575,7 +575,7 @@ static void __init update_e820_saved(void)
- 	u32 nr_map;
- 
- 	nr_map = e820_saved.nr_map;
--	if (sanitize_e820_map(e820_saved.map, ARRAY_SIZE(e820_saved.map), &nr_map))
-+	if (sanitize_e820_map(e820_saved.map, E820_X_MAX, &nr_map))
- 		return;
- 	e820_saved.nr_map = nr_map;
- }
-@@ -668,7 +668,7 @@ void __init parse_e820_ext(u64 phys_addr, u32 data_len)
- 	entries = sdata->len / sizeof(struct e820entry);
- 	extmap = (struct e820entry *)(sdata->data);
- 	__append_e820_map(extmap, entries);
--	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- 	early_iounmap(sdata, data_len);
- 	printk(KERN_INFO "e820: extended physical RAM map:\n");
- 	e820_print_map("extended");
-@@ -901,7 +901,7 @@ void __init finish_e820_parsing(void)
- 	if (userdef) {
- 		u32 nr = e820.nr_map;
- 
--		if (sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &nr) < 0)
-+		if (sanitize_e820_map(e820.map, E820_X_MAX, &nr) < 0)
- 			early_panic("Invalid user supplied memory map");
- 		e820.nr_map = nr;
- 
-diff --git a/arch/x86/kernel/early-quirks.c b/arch/x86/kernel/early-quirks.c
-index bc4a088..281caa2 100644
---- a/arch/x86/kernel/early-quirks.c
-+++ b/arch/x86/kernel/early-quirks.c
-@@ -372,7 +372,7 @@ static void __init intel_graphics_stolen(int num, int slot, int func)
- 				/* Mark this space as reserved */
- 				e820_add_region(start, size, E820_RESERVED);
- 				sanitize_e820_map(e820.map,
--						  ARRAY_SIZE(e820.map),
-+						  E820_X_MAX,
- 						  &e820.nr_map);
- 			}
- 			return;
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index cb233bc..c734467 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -472,7 +472,7 @@ static void __init e820_reserve_setup_data(void)
- 	if (!found)
- 		return;
- 
--	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- 	memcpy(&e820_saved, &e820, sizeof(struct e820map));
- 	printk(KERN_INFO "extended physical RAM map:\n");
- 	e820_print_map("reserve setup_data");
-@@ -770,7 +770,7 @@ static void __init trim_bios_range(void)
- 	 */
- 	e820_remove_range(BIOS_BEGIN, BIOS_END - BIOS_BEGIN, E820_RAM, 1);
- 
--	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- }
- 
- /* called before trim_bios_range() to spare extra sanitize */
-@@ -1015,7 +1015,7 @@ void __init setup_arch(char **cmdline_p)
- 	if (ppro_with_ram_bug()) {
- 		e820_update_range(0x70000000ULL, 0x40000ULL, E820_RAM,
- 				  E820_RESERVED);
--		sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+		sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- 		printk(KERN_INFO "fixed physical RAM map:\n");
- 		e820_print_map("bad_ppro");
- 	}
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 92c0234..2e0fdcc 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -367,7 +367,7 @@ static void __init do_add_efi_memmap(void)
- 		}
- 		e820_add_region(start, size, e820_type);
- 	}
--	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- }
- 
- int __init efi_memblock_x86_reserve_range(void)
-diff --git a/arch/x86/xen/setup.c b/arch/x86/xen/setup.c
-index 68c054f..10550ff 100644
---- a/arch/x86/xen/setup.c
-+++ b/arch/x86/xen/setup.c
-@@ -485,7 +485,7 @@ char * __init xen_memory_setup(void)
- 	memblock_reserve(__pa(xen_start_info->mfn_list),
- 			 xen_start_info->pt_base - xen_start_info->mfn_list);
- 
--	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
-+	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
- 
- 	return "Xen";
- }
--- 
-1.7.1
+g.
+
