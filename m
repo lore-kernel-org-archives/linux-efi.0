@@ -1,46 +1,146 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v5 01/14] x86/mm: sparse warning fix for early_memremap
-Date: Tue, 10 Dec 2013 10:12:21 +0800
-Message-ID: <20131210021221.GA3800@dhcp-16-126.nay.redhat.com>
-References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-2-git-send-email-dyoung@redhat.com>
- <20131209150521.GE31650@pd.tnic>
+From: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] mm,x86: use E820_X_MAX instead of ARRAY_SIZE(e820.map)
+Date: Tue, 10 Dec 2013 18:08:32 +0800
+Message-ID: <52A6E820.2030905@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131209150521.GE31650-fF5Pk5pvG8Y@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/09/13 at 04:05pm, Borislav Petkov wrote:
-> On Mon, Dec 09, 2013 at 05:42:14PM +0800, Dave Young wrote:
-> > There's a lot of sparse warnings for code like below:
-> > void *a = early_memremap(phys_addr, size);
-> > 
-> > early_memremap intend to map kernel memory with ioremap facility, the return
-> > pointer should be a kernel ram pointer instead of iomem one.
-> > 
-> > For making the function clearer and supressing sparse warnings this patch
-> > do below two things:
-> > 1. cast to (__force void *) for the return value of early_memremap
-> 
-> I'd guess this is to shut up the __iomem thing? And we're getting that
-> because we're using ioremap, ... hohum...
+Use E820_X_MAX instead of ARRAY_SIZE(e820.map).
+Code simplification, no functional changes.
 
-Yes, IMHO early_memremap really should not return __iomem pointer since it's
-*memremap*... 
+Signed-off-by: Xishi Qiu <qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/kernel/e820.c         |   10 +++++-----
+ arch/x86/kernel/early-quirks.c |    2 +-
+ arch/x86/kernel/setup.c        |    6 +++---
+ arch/x86/platform/efi/efi.c    |    2 +-
+ arch/x86/xen/setup.c           |    2 +-
+ 5 files changed, 11 insertions(+), 11 deletions(-)
 
-Thanks
-Dave
+diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
+index 174da5f..97800ba 100644
+--- a/arch/x86/kernel/e820.c
++++ b/arch/x86/kernel/e820.c
+@@ -112,7 +112,7 @@ static void __init __e820_add_region(struct e820map *e820x, u64 start, u64 size,
+ {
+ 	int x = e820x->nr_map;
+ 
+-	if (x >= ARRAY_SIZE(e820x->map)) {
++	if (x >= E820_X_MAX) {
+ 		printk(KERN_ERR "e820: too many entries; ignoring [mem %#010llx-%#010llx]\n",
+ 		       (unsigned long long) start,
+ 		       (unsigned long long) (start + size - 1));
+@@ -564,7 +564,7 @@ void __init update_e820(void)
+ 	u32 nr_map;
+ 
+ 	nr_map = e820.nr_map;
+-	if (sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &nr_map))
++	if (sanitize_e820_map(e820.map, E820_X_MAX, &nr_map))
+ 		return;
+ 	e820.nr_map = nr_map;
+ 	printk(KERN_INFO "e820: modified physical RAM map:\n");
+@@ -575,7 +575,7 @@ static void __init update_e820_saved(void)
+ 	u32 nr_map;
+ 
+ 	nr_map = e820_saved.nr_map;
+-	if (sanitize_e820_map(e820_saved.map, ARRAY_SIZE(e820_saved.map), &nr_map))
++	if (sanitize_e820_map(e820_saved.map, E820_X_MAX, &nr_map))
+ 		return;
+ 	e820_saved.nr_map = nr_map;
+ }
+@@ -668,7 +668,7 @@ void __init parse_e820_ext(u64 phys_addr, u32 data_len)
+ 	entries = sdata->len / sizeof(struct e820entry);
+ 	extmap = (struct e820entry *)(sdata->data);
+ 	__append_e820_map(extmap, entries);
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ 	early_iounmap(sdata, data_len);
+ 	printk(KERN_INFO "e820: extended physical RAM map:\n");
+ 	e820_print_map("extended");
+@@ -901,7 +901,7 @@ void __init finish_e820_parsing(void)
+ 	if (userdef) {
+ 		u32 nr = e820.nr_map;
+ 
+-		if (sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &nr) < 0)
++		if (sanitize_e820_map(e820.map, E820_X_MAX, &nr) < 0)
+ 			early_panic("Invalid user supplied memory map");
+ 		e820.nr_map = nr;
+ 
+diff --git a/arch/x86/kernel/early-quirks.c b/arch/x86/kernel/early-quirks.c
+index bc4a088..281caa2 100644
+--- a/arch/x86/kernel/early-quirks.c
++++ b/arch/x86/kernel/early-quirks.c
+@@ -372,7 +372,7 @@ static void __init intel_graphics_stolen(int num, int slot, int func)
+ 				/* Mark this space as reserved */
+ 				e820_add_region(start, size, E820_RESERVED);
+ 				sanitize_e820_map(e820.map,
+-						  ARRAY_SIZE(e820.map),
++						  E820_X_MAX,
+ 						  &e820.nr_map);
+ 			}
+ 			return;
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index cb233bc..c734467 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -472,7 +472,7 @@ static void __init e820_reserve_setup_data(void)
+ 	if (!found)
+ 		return;
+ 
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ 	memcpy(&e820_saved, &e820, sizeof(struct e820map));
+ 	printk(KERN_INFO "extended physical RAM map:\n");
+ 	e820_print_map("reserve setup_data");
+@@ -770,7 +770,7 @@ static void __init trim_bios_range(void)
+ 	 */
+ 	e820_remove_range(BIOS_BEGIN, BIOS_END - BIOS_BEGIN, E820_RAM, 1);
+ 
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ }
+ 
+ /* called before trim_bios_range() to spare extra sanitize */
+@@ -1015,7 +1015,7 @@ void __init setup_arch(char **cmdline_p)
+ 	if (ppro_with_ram_bug()) {
+ 		e820_update_range(0x70000000ULL, 0x40000ULL, E820_RAM,
+ 				  E820_RESERVED);
+-		sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++		sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ 		printk(KERN_INFO "fixed physical RAM map:\n");
+ 		e820_print_map("bad_ppro");
+ 	}
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 92c0234..2e0fdcc 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -367,7 +367,7 @@ static void __init do_add_efi_memmap(void)
+ 		}
+ 		e820_add_region(start, size, e820_type);
+ 	}
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ }
+ 
+ int __init efi_memblock_x86_reserve_range(void)
+diff --git a/arch/x86/xen/setup.c b/arch/x86/xen/setup.c
+index 68c054f..10550ff 100644
+--- a/arch/x86/xen/setup.c
++++ b/arch/x86/xen/setup.c
+@@ -485,7 +485,7 @@ char * __init xen_memory_setup(void)
+ 	memblock_reserve(__pa(xen_start_info->mfn_list),
+ 			 xen_start_info->pt_base - xen_start_info->mfn_list);
+ 
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
++	sanitize_e820_map(e820.map, E820_X_MAX, &e820.nr_map);
+ 
+ 	return "Xen";
+ }
+-- 
+1.7.1
