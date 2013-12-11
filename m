@@ -1,36 +1,39 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 01/14] x86/mm: sparse warning fix for early_memremap
-Date: Wed, 11 Dec 2013 12:12:40 +0100
-Message-ID: <20131211111240.GE21683@pd.tnic>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v5 02/14] efi: use early_memremap and early_memunmap
+Date: Wed, 11 Dec 2013 11:32:07 +0000
+Message-ID: <20131211113207.GA29980@console-pimps.org>
 References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-2-git-send-email-dyoung@redhat.com>
- <20131209150521.GE31650@pd.tnic>
- <20131210021221.GA3800@dhcp-16-126.nay.redhat.com>
- <20131211102025.GB19196@console-pimps.org>
+ <1386582147-9802-3-git-send-email-dyoung@redhat.com>
+ <20131211103903.GC19196@console-pimps.org>
+ <20131211110227.GK22356@rocoto.smurfnet.nu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131211102025.GB19196@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Dave Young <dyoung@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, greg@kroah.com, toshi.kani@hp.com
+In-Reply-To: <20131211110227.GK22356-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Dec 11, 2013 at 10:20:25AM +0000, Matt Fleming wrote:
-> This needs reviewing by at least one of the x86 folks, but it
-> certainly makes sense to me.
+On Wed, 11 Dec, at 12:02:27PM, Leif Lindholm wrote:
+> On Wed, Dec 11, 2013 at 10:39:03AM +0000, Matt Fleming wrote:
+> > Leif, Mark, does this patch look OK for ARM? We'd need to introduce a
+> > new early_memunmap() function so that things still build, but that
+> > should be straight forward. You'd even be able to get rid of the
+> > asymmetry in uefi_init() where you map efi.systab with early_memremap()
+> > but unmap it with early_iounmap().
+> 
+> This patch looks splendid for ARM. As long as Mark can get the new
+> function into an update to the early_*remap() set, I can include this
+> in my next version - which is coming this week.
 
-Ingo told me yesterday, it makes sense too. I'd guess we can try it.
-FWIW, all callers of early_memremap use the memory they get remapped as
-normal memory so we should be safe.
+Great!
 
-Maybe this whole discussion should be noted down in the commit message
-so that people know.
+Oh and ia64 would also need early_memunmap(). Tony, the original patch
+is here,
+
+  http://article.gmane.org/gmane.linux.kernel.kexec/10383
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
