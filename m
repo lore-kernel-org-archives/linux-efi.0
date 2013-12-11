@@ -1,145 +1,266 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v5 07/14] efi: export more efi table variable to sysfs
-Date: Wed, 11 Dec 2013 19:32:03 +0100
-Message-ID: <20131211183203.GF23793@pd.tnic>
+Subject: Re: [PATCH v5 08/14] efi: export efi runtime memory mapping to sysfs
+Date: Wed, 11 Dec 2013 19:55:20 +0100
+Message-ID: <20131211185520.GG23793@pd.tnic>
 References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-8-git-send-email-dyoung@redhat.com>
+ <1386582147-9802-9-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1386582147-9802-8-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1386582147-9802-9-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 09, 2013 at 05:42:20PM +0800, Dave Young wrote:
-> Export fw_vendor, runtime and config table physical addresses to
-> /sys/firmware/efi/fw_vendor, /sys/firmware/efi/runtime and
-> /sys/firmware/efi/config_table because kexec kernel will need them.
-
-you might wanna shorten:
-
-... sys/firmware/efi/{fw_vendor,runtime,config_table} ...
-
+On Mon, Dec 09, 2013 at 05:42:21PM +0800, Dave Young wrote:
+> kexec kernel will need exactly same mapping for
+> efi runtime memory ranges. Thus here export the
+> runtime ranges mapping to sysfs, kexec-tools
+> will assemble them and pass to 2nd kernel via
+> setup_data.
 > 
-> From EFI spec these 3 variables will be updated to
-> virtual address after entering virtual mode. But
-> kernel startup code will need the physical address.
+> Introducing a new directory /sys/firmware/efi/runtime-map
+> Just like /sys/firmware/memmap. Containing below attribute
+> in each file of that directory:
+> attribute  num_pages  phys_addr  type  virt_addr
 > 
-> changelog:
-> Greg: add standalone sysfs files instead of add lines to systab
-> Document them as testing ABI
-> Greg: use group attrs and is_visible
-> Boris: align comments lines
-> Boris: add macros for _show functions
-> Matt: Documentation fixes.
+> Matt: s/efi-runtime-map.c/runtime-map.c
+>       change dir name to runtime-map
+> update to use desc_size in efi_runtime_map
+> cleaup the code, add function efi_save_runtime_map
+> improve err handling
+> 
+> Matt: changelog fix;
+>       Documentation fixes.
+>       only export runtime-map sysfs file in case CONFIG_KEXEC
+> Add macros for sysfs _show functions
+> move functions to front of .c, remove forward declarations.
+> 
+> Boris: Documentation grammer/spelling fix
+>        better error handling for krealloc
+>        other code improvements.
+> move efi_runtime_map_init to subsys_initcall.
+> set efi_kobj = NULL in case efisubsys_init fails. And then efi_runtime_map_init
+> will bail out.
+> Kconfig EFI_RUNTIME_MAP depends on X86 && KEXEC && EFI
 > 
 > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > ---
->  Documentation/ABI/testing/sysfs-firmware-efi | 24 +++++++++++++++++
->  arch/x86/platform/efi/efi.c                  |  4 +++
->  drivers/firmware/efi/efi.c                   | 39 ++++++++++++++++++++++++++++
->  include/linux/efi.h                          |  3 +++
->  4 files changed, 70 insertions(+)
->  create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi
+>  .../ABI/testing/sysfs-firmware-efi-runtime-map     |  36 +++++
+>  arch/x86/platform/efi/efi.c                        |  28 ++++
+>  drivers/firmware/efi/Kconfig                       |  11 ++
+>  drivers/firmware/efi/Makefile                      |   1 +
+>  drivers/firmware/efi/efi.c                         |   4 +-
+>  drivers/firmware/efi/runtime-map.c                 | 176 +++++++++++++++++++++
+>  include/linux/efi.h                                |   6 +
+>  7 files changed, 261 insertions(+), 1 deletion(-)
+>  create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+>  create mode 100644 drivers/firmware/efi/runtime-map.c
 > 
-> diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
+> diff --git a/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
 > new file mode 100644
-> index 0000000..8c6e460
+> index 0000000..2ab7dd2
 > --- /dev/null
-> +++ b/Documentation/ABI/testing/sysfs-firmware-efi
-> @@ -0,0 +1,24 @@
-> +What:		/sys/firmware/efi/fw_vendor
+> +++ b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+> @@ -0,0 +1,36 @@
+> +What:		/sys/firmware/efi/runtime-map/
 > +Date:		December 2013
 > +Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > +Description:
-> +		It shows the physical address of firmware vendor field in the
 
-Why doesn't this start at the same line as "Description:"?
+This could start at the same line as Description
 
-> +		EFI system table.
+> +		Switching efi runtime services to virtual mode requires
+> +		that all efi memory ranges which have the runtime attribute
+> +		bit set to be mapped to virtual addresses.
+> +
+> +		The efi runtime services can only be switched to virtual
+> +		mode once without rebooting. The kexec kernel must maintain
+> +		the same physical to virtual address mappings as the first
+> +		kernel. The mappings are exported to sysfs so userspace tools
+> +		can reassemble them and pass them into the kexec kernel.
+> +
+> +		/sys/firmware/efi/runtime-map/ is the directory the kernel
+> +		exports that information in.
+> +
+> +		subdirectories are named with the number of the memory range:
+> +
+> +			/sys/firmware/efi/runtime-map/0
+> +			/sys/firmware/efi/runtime-map/1
+> +			/sys/firmware/efi/runtime-map/2
+> +			/sys/firmware/efi/runtime-map/3
+> +			...
+> +
+> +		Each subdirectory contains five files:
+> +
+> +		attribute : The attributes of the memory range.
+> +		num_pages : The size of the memory range in pages.
+> +		phys_addr : The physical address of the memory range.
+> +		type      : The type of the memory range.
+> +		virt_addr : The virtual address of the memory range.
+> +
+> +		Above values are all hexadecimal numbers with the '0x' prefix.
 > +
 
 Superfluous newline.
 
 > +Users:		Kexec
-> +
-> +What:		/sys/firmware/efi/runtime
-> +Date:		December 2013
-> +Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> +Description:
-> +		It shows the physical address of runtime service table entry in
-> +		the EFI system table.
-> +Users:		Kexec
-> +
-> +What:		/sys/firmware/efi/config_table
-> +Date:		December 2013
-> +Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> +Description:
-> +		It shows the physical address of config table entry in the EFI
-> +		system table.
-> +Users:		Kexec
 > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 7778b5f..3e8b760 100644
+> index 3e8b760..8289e0c 100644
 > --- a/arch/x86/platform/efi/efi.c
 > +++ b/arch/x86/platform/efi/efi.c
-> @@ -653,6 +653,10 @@ void __init efi_init(void)
->  
->  	set_bit(EFI_SYSTEM_TABLES, &x86_efi_facility);
->  
-> +	efi.config_table = (unsigned long)efi.systab->tables;
-> +	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
-> +	efi.runtime	 = (unsigned long)efi.systab->runtime;
-> +
->  	/*
->  	 * Show what we know for posterity
->  	 */
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index b716a66..0ecccab 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -32,6 +32,9 @@ struct efi __read_mostly efi = {
->  	.hcdp       = EFI_INVALID_TABLE_ADDR,
->  	.uga        = EFI_INVALID_TABLE_ADDR,
->  	.uv_systab  = EFI_INVALID_TABLE_ADDR,
-> +	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
-> +	.runtime    = EFI_INVALID_TABLE_ADDR,
-> +	.config_table  = EFI_INVALID_TABLE_ADDR,
+> @@ -76,6 +76,9 @@ static __initdata efi_config_table_type_t arch_tables[] = {
+>  	{NULL_GUID, NULL, NULL},
 >  };
->  EXPORT_SYMBOL(efi);
 >  
-> @@ -71,13 +74,49 @@ static ssize_t systab_show(struct kobject *kobj,
->  static struct kobj_attribute efi_attr_systab =
->  			__ATTR(systab, 0400, systab_show, NULL);
->  
-> +#define EFI_FIELD(var) efi.var
+> +void *efi_runtime_map;
+> +int nr_efi_runtime_map;
 > +
-> +#define EFI_ATTR_SHOW(name) \
-> +static ssize_t name##_show(struct kobject *kobj, \
-> +				struct kobj_attribute *attr, char *buf) \
-> +{ \
-> +	return sprintf(buf, "0x%lx\n", EFI_FIELD(name)); \
+>  /*
+>   * Returns 1 if 'facility' is enabled, 0 otherwise.
+>   */
+> @@ -810,6 +813,19 @@ static void __init efi_merge_regions(void)
+>  	}
+>  }
+>  
+> +static int __init save_runtime_map(efi_memory_desc_t *md, int idx)
+> +{
+> +	void *p;
+> +	p = krealloc(efi_runtime_map, (idx + 1) * memmap.desc_size, GFP_KERNEL);
+> +	if (!p)
+> +		return -ENOMEM;
+> +
+> +	efi_runtime_map = p;
+> +	memcpy(efi_runtime_map + idx * memmap.desc_size, md, memmap.desc_size);
+> +
+> +	return 0;
 > +}
 > +
-> +EFI_ATTR_SHOW(fw_vendor);
-> +EFI_ATTR_SHOW(runtime);
-> +EFI_ATTR_SHOW(config_table);
-> +
-> +static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
-> +static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
-> +static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
-> +
->  static struct attribute *efi_subsys_attrs[] = {
->  	&efi_attr_systab.attr,
-> +	&efi_attr_fw_vendor.attr,
-> +	&efi_attr_runtime.attr,
-> +	&efi_attr_config_table.attr,
->  	NULL,	/* maybe more in the future? */
-		^^^^^
+>  /*
+>   * Map efi memory ranges for runtime serivce and update new_memmap with virtual
+>   * addresses.
+> @@ -820,6 +836,7 @@ static void * __init efi_map_regions(int *count)
+>  	void *p, *tmp, *new_memmap = NULL;
+>  	unsigned long size;
+>  	u64 end, systab;
+> +	int err = 0;
+>  
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		md = p;
+> @@ -848,10 +865,21 @@ static void * __init efi_map_regions(int *count)
+>  		new_memmap = tmp;
+>  		memcpy(new_memmap + (*count * memmap.desc_size), md,
+>  		       memmap.desc_size);
+> +		if (md->type != EFI_BOOT_SERVICES_CODE &&
+> +		    md->type != EFI_BOOT_SERVICES_DATA) {
+> +			err = save_runtime_map(md, nr_efi_runtime_map);
+> +			if (err)
+> +				goto out_save_runtime;
+> +			nr_efi_runtime_map++;
+> +		}
 
-Now that there's more, you can drop that wise guy comment :)
+So why don't you move that code to save_runtime_map?
+
+
+It would looks like this:
+
+...
+                new_memmap = tmp;
+                memcpy(new_memmap + (*count * memmap.desc_size), md,
+                       memmap.desc_size);
+
+                save_runtime_map(md);
+                (*count)++;
+
+ [nr_efi_runtime_map is global, no need to pass it to save_runtime_map() ]
+
+and the EFI_BOOT* tests can be done in save_runtime_map and also the
+error handling can happen there. This way efi_map_regions() won't
+need to know about anything. This way, you can later move the whole
+save_runtime_map() function to efi-kexec.c just by taking it without any
+need for untangling.
+
+> +out_save_runtime:
+> +       kfree(efi_runtime_map);
+> +       nr_efi_runtime_map = 0;
+> +       efi_runtime_map = NULL;
+
+This can go there too.
+
+>  out_krealloc:
+>  	kfree(new_memmap);
+>  	return NULL;
+> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+> index 3150aa4..3d8d6f6 100644
+> --- a/drivers/firmware/efi/Kconfig
+> +++ b/drivers/firmware/efi/Kconfig
+> @@ -39,4 +39,15 @@ config EFI_VARS_PSTORE_DEFAULT_DISABLE
+>  config UEFI_CPER
+>  	def_bool n
+>  
+> +config EFI_RUNTIME_MAP
+> +	bool "Export efi runtime maps to sysfs" if EXPERT
+
+What's with the EXPERT? It depends on KEXEC already.
+
+> +	depends on X86 && EFI && KEXEC
+> +	default y
+> +	help
+> +	  Export efi runtime memory maps to /sys/firmware/efi/runtime-map.
+> +	  That memory map is used for example by kexec to set up efi virtual
+> +	  mapping the 2nd kernel, but can also be used for debugging purposes.
+> +
+> +	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
+> +
+>  endmenu
+
+...
+
+> +static int __init efi_runtime_map_init(void)
+> +{
+> +	int i, j, ret = 0;
+> +	struct efi_runtime_map_entry *entry;
+> +
+> +	if (!efi_kobj)
+> +		return 0;
+> +
+> +	if (!efi_runtime_map)
+> +		return 0;
+> +
+> +	map_entries = kzalloc(nr_efi_runtime_map * sizeof(entry), GFP_KERNEL);
+> +	if (!map_entries) {
+> +		ret = -ENOMEM;
+> +		goto out;
+> +	}
+> +
+> +	for (i = 0; i < nr_efi_runtime_map; i++) {
+> +		entry = add_sysfs_runtime_map_entry(i);
+> +		if (IS_ERR(entry)) {
+> +			ret = PTR_ERR(entry);
+> +			goto out_add_entry;
+> +		}
+> +		*(map_entries + i) = entry;
+> +	}
+> +
+> +	return 0;
+> +out_add_entry:
+> +	for (j = i - 1; j > 0; j--) {
+> +		entry = *(map_entries + j);
+> +		kobject_put(&entry->kobj);
+> +	}
+> +	if (map_kset)
+> +		kset_unregister(map_kset);
+> +out:
+> +	return ret;
+> +}
+> +
+> +subsys_initcall(efi_runtime_map_init);
+
+Let me repeat myself:
+
+Why an initcall? Can't we run this from efisubsys_init()?
 
 -- 
 Regards/Gruss,
