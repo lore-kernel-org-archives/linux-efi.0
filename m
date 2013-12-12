@@ -1,36 +1,44 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 08/14] efi: export efi runtime memory mapping to sysfs
-Date: Thu, 12 Dec 2013 21:36:56 +0100
-Message-ID: <20131212203656.GC26927@pd.tnic>
-References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-9-git-send-email-dyoung@redhat.com>
- <20131211185520.GG23793@pd.tnic>
- <20131212023617.GF3751@dhcp-16-126.nay.redhat.com>
- <20131212071337.GI3751@dhcp-16-126.nay.redhat.com>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: EFI tree kernel panic in phys_efi_set_virtual_address_map()
+Date: Thu, 12 Dec 2013 13:44:14 -0700
+Message-ID: <1386881054.1791.316.camel@misato.fc.hp.com>
+References: <1386806463.1791.295.camel@misato.fc.hp.com>
+	 <20131212002946.GF8863@pd.tnic>
+	 <1386808323.1791.299.camel@misato.fc.hp.com>
+	 <1386810484.1791.306.camel@misato.fc.hp.com>
+	 <1386810620.1791.307.camel@misato.fc.hp.com>
+	 <20131212162351.GA26927@pd.tnic>
+	 <1386866583.1791.310.camel@misato.fc.hp.com>
+	 <1386869221.1791.311.camel@misato.fc.hp.com>
+	 <1386869777.1791.314.camel@misato.fc.hp.com>
+	 <20131212203533.GB26927@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20131212071337.GI3751@dhcp-16-126.nay.redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, mjg59@srcf.ucam.org, hpa@zytor.com, James.Bottomley@HansenPartnership.com, vgoyal@redhat.com, ebiederm@xmission.com, horms@verge.net.au, kexec@lists.infradead.org, greg@kroah.com, matt@console-pimps.org, toshi.kani@hp.com
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131212203533.GB26927-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 12, 2013 at 03:13:37PM +0800, Dave Young wrote:
-> BTW, I will restructure the whole code when I move them to
-> efi_kexec.c, so no worry about it? If you have strong opinion I can
-> move them though.
+On Thu, 2013-12-12 at 21:35 +0100, Borislav Petkov wrote:
+> On Thu, Dec 12, 2013 at 10:36:17AM -0700, Toshi Kani wrote:
+> > BTW, the test system is shared and will be used by other test for a
+> > couple of hours or so. So, please take your time. :-)
+> 
+> Yeah, ok :-)
+> 
+> I went and polished the debugging patch a bit more - it seems we're
+> going to need it more often now, should probably send it up too :)
+> 
+> Right, so the pagetable dump shows that the new_memmap is not mapped in
+> it, thus the #PF.
+> 
+> Ok, so next try: let's dump the pagetable after we've copied the pgd
+> containing new_memmap. Same exercise as before, please.
 
-Well, if it were me, I'd do it now so that it'll see more testing.
-Later, it will be only a mechanical move of those functions which belong
-to efi_kexec.c and won't need a second testing.
+Will do.
 
-:-)
-
--- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Thanks,
+-Toshi
