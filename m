@@ -1,48 +1,51 @@
-From: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
-Subject: [PATCH] MAINTAINERS: add myself as gpt maintainer
-Date: Fri, 13 Dec 2013 10:05:29 -0800
-Message-ID: <1386957929.2867.6.camel@buesod1.americas.hpqcorp.net>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v5 12/14] x86: export x86 boot_params to sysfs
+Date: Fri, 13 Dec 2013 21:04:12 +0100
+Message-ID: <20131213200412.GA12466@pd.tnic>
+References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
+ <1386582147-9802-13-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1386582147-9802-13-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Matt Domsch <Matt_Domsch-8PEkshWhKlo@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
+On Mon, Dec 09, 2013 at 05:42:25PM +0800, Dave Young wrote:
+> kexec-tools use boot_params for getting the 1st kernel hardware_subarch,
+> the kexec kernel efi runtime support also need read the old efi_info from
+> boot_params. Currently it exists in debugfs which is not a good place for
+> such infomation. Per HPA, we should avoid of "sploit debugfs".
+> 
+> In this patch /sys/kernel/boot_params are exported, also the setup_data is
+> exported as a subdirectory. kexec-tools is using debugfs for hardware_subarch
+> for a long time now so we're not removing it yet.
+> 
+> Structure is like below:
+> 
+> /sys/kernel/boot_params
+> |__ data                /* boot_params in binary*/
+> |__ setup_data
+> |   |__ 0               /* the first setup_data node */
+> |   |   |__ data        /* setup_data node 0 in binary*/
+> |   |   |__ type        /* setup_data type of setup_data node 0, hex string */
+> [snip]
+> |__ version             /* boot protocal version (in hex, "0x" prefixed)*/
+> 
+> Changelog:
+> Greg: use __ATTR_RO() and group attr.
+> Matt and Boris: Documentation improvement, code indentation.
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Add a new entry for the GPT standard. Any future changes will now be routed
-through linux-efi.
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
-Cc: Matt Domsch <Matt_Domsch-8PEkshWhKlo@public.gmane.org>
-Signed-off-by: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
----
-This was discussed offline and both Matts are fine with me maintaining this.
-
- MAINTAINERS | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/MAINTAINERS b/MAINTAINERS
-index 4afcfb4..cf41aa5 100644
---- a/MAINTAINERS
-+++ b/MAINTAINERS
-@@ -3834,6 +3834,12 @@ T:	git git://linuxtv.org/media_tree.git
- S:	Maintained
- F:	drivers/media/usb/gspca/
- 
-+GUID PARTITION TABLE (GPT)
-+M:	Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
-+L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-+S:	Maintained
-+F:	block/partitions/efi.*
-+
- STK1160 USB VIDEO CAPTURE DRIVER
- M:	Ezequiel Garcia <elezegarcia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
- L:	linux-media-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 -- 
-1.8.1.4
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
