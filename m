@@ -1,42 +1,54 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v5 13/14] x86: reserve setup_data ranges late after
- parsing memmap cmdline
-Date: Fri, 13 Dec 2013 21:04:55 +0100
-Message-ID: <20131213200455.GB12466@pd.tnic>
-References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-14-git-send-email-dyoung@redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] MAINTAINERS: add myself as gpt maintainer
+Date: Sat, 14 Dec 2013 15:00:17 +0000
+Message-ID: <20131214150017.GC18640@console-pimps.org>
+References: <1386957929.2867.6.camel@buesod1.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1386582147-9802-14-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1386957929.2867.6.camel-5JQ4ckphU/8SZAcGdq5asR6epYMZPwEe5NbjCUgZEJk@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org
+To: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
+Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>, Matt Domsch <Matt_Domsch-8PEkshWhKlo@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 09, 2013 at 05:42:26PM +0800, Dave Young wrote:
-> Currently e820_reserve_setup_data is called before parsing early params,
-> it works in normal case. But for memmap=exactmap, the final memory ranges
-> are created after parsing memmap= cmdline params, so the previous
-> e820_reserve_setup_data has no effect. For example, setup_data ranges
-> will still be marked as normal system ram, thus when later sysfs driver
-> ioremap them kernel will warn about mapping normal ram.
+On Fri, 13 Dec, at 10:05:29AM, Davidlohr Bueso wrote:
+> From: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
 > 
-> This patch fix it by moving the e820_reserve_setup_data callback after
-> parsing early params so they can be set as reserved ranges and later
-> ioremap will be fine with it.
+> Add a new entry for the GPT standard. Any future changes will now be routed
+> through linux-efi.
 > 
-> changes:
-> Boris: improve patch description
+> Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Jens Axboe <axboe-tSWWG44O7X1aa/9Udqfwiw@public.gmane.org>
+> Cc: Matt Domsch <Matt_Domsch-8PEkshWhKlo@public.gmane.org>
+> Signed-off-by: Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
+> ---
+> This was discussed offline and both Matts are fine with me maintaining this.
 > 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>  MAINTAINERS | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/MAINTAINERS b/MAINTAINERS
+> index 4afcfb4..cf41aa5 100644
+> --- a/MAINTAINERS
+> +++ b/MAINTAINERS
+> @@ -3834,6 +3834,12 @@ T:	git git://linuxtv.org/media_tree.git
+>  S:	Maintained
+>  F:	drivers/media/usb/gspca/
+>  
+> +GUID PARTITION TABLE (GPT)
+> +M:	Davidlohr Bueso <davidlohr-VXdhtT5mjnY@public.gmane.org>
+> +L:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> +S:	Maintained
+> +F:	block/partitions/efi.*
+> +
 
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+I'm happy to take this through the EFI tree unless Andrew or Jens wants
+to take it?
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
