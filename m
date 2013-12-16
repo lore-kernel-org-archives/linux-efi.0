@@ -1,20 +1,20 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v5 08/14] efi: export efi runtime memory mapping to sysfs
-Date: Mon, 16 Dec 2013 09:33:19 +0800
-Message-ID: <20131216013319.GA3754@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH v5 02/14] efi: use early_memremap and early_memunmap
+Date: Mon, 16 Dec 2013 09:50:50 +0800
+Message-ID: <20131216015049.GB3754@dhcp-16-126.nay.redhat.com>
 References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-9-git-send-email-dyoung@redhat.com>
- <20131211185520.GG23793@pd.tnic>
- <20131212023617.GF3751@dhcp-16-126.nay.redhat.com>
- <20131212205346.GA30162@pd.tnic>
- <20131213072600.GB11164@dhcp-16-126.nay.redhat.com>
- <20131213123028.GB18640@console-pimps.org>
+ <1386582147-9802-3-git-send-email-dyoung@redhat.com>
+ <20131211103903.GC19196@console-pimps.org>
+ <20131211110227.GK22356@rocoto.smurfnet.nu>
+ <20131211113207.GA29980@console-pimps.org>
+ <1386775078.1979.98.camel@deneb.redhat.com>
+ <20131213155133.GR22356@rocoto.smurfnet.nu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131213123028.GB18640-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20131213155133.GR22356-GZEopFhza0F985/tl1ce8aaDwS/vmuI7@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -24,173 +24,28 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, toshi.kani-VXdhtT5mjnY@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/13/13 at 12:30pm, Matt Fleming wrote:
-> On Fri, 13 Dec, at 03:26:00PM, Dave Young wrote:
-> > On 12/12/13 at 09:53pm, Borislav Petkov wrote:
-> > > On Thu, Dec 12, 2013 at 10:36:17AM +0800, Dave Young wrote:
-> > > > Sorry that I forgot to explain this in changelog, should ask you before.
-> > > > 
-> > > > I did try moving it to efisubsys_init but it need add extern declaration
-> > > 
-> > > So what? Add it.
-> > > 
-> > > > for efi_runtime_map_init. Since link order will ensure it being called after
-> > > > efisubsys_init I think it's fine with this static function.
-> > > 
-> > > This is actually exactly the reason why it shouldn't be another
-> > > subsys_initcall() if it can be helped. People would need to go have a
-> > > look at drivers/firmware/efi/Makefile to realize that the link order is
-> > > ok.
-> > > 
-> > > And, this is prone to future breakage if people go and move code around
-> > > and thereby change the link order.
-> > > 
-> > > Please call efi_runtime_map_init from efisubsys_init.
+On 12/13/13 at 04:51pm, Leif Lindholm wrote:
+> On Wed, Dec 11, 2013 at 10:17:58AM -0500, Mark Salter wrote:
+> > Anyway, I posted a patch to create a generic early_ioremap
+> > implementation using generic bits of the x86 code:
 > > 
-> > After moving to efisubsys_init, the code will looks like below, because
-
-Will call it in efi_subsys_init as what I replied previously.
-
-> > the funtion only is used in drivers/firmware/efi/efi.c thus I can not
-> > add a blank function in #else section in the efi.h header file. Creating
-> > another header file for this one function looks bad to me.
+> >   https://lkml.org/lkml/2013/11/27/621
+> > 
+> > So maybe Dave's patch 1/14 should be part of that series or
+> > get rebased on top of it.
 > 
-> I agree with Borislav that this should be invoked from efisubsys_init().
-> Also Dave, there's nothing inherently x86-specific about runtime-map.c -
-> we've been trying not to dump arch-specific code in
-> drivers/firmware/efi/.
-> 
-> How about something like this, just to give you an idea? This would
-> allow the ARM/ia64 folks to enable this code if they want at some later
-> date. But more than that, it makes the code more self-contained and uses
-> some real interfaces instead of relying on global variables,
-> 
-> (not compile tested)
+> Yes, having those two sets of changes to the same bits floating around
+> at the same time is painful.
+> If you could integrate those changes into your set, everyone wins.
 
-Thanks for the good idea, will tune and test the code.
+I have no idea how to handle these dependency problems between different
+patchset, but for this one I feel it's better to add it to Mark's series,
+what's the status of the series, has it been reviewed and ready for merge?
 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 94a1cbcf6e2e..f45ea41deae0 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -76,8 +76,8 @@ static __initdata efi_config_table_type_t arch_tables[] = {
->  	{NULL_GUID, NULL, NULL},
->  };
->  
-> -void *efi_runtime_map;
-> -int nr_efi_runtime_map;
-> +static void *efi_runtime_map;
-> +static int nr_efi_runtime_map;
->  static u64 efi_setup; /* efi setup_data physical address */
->  
->  /*
-> @@ -1084,6 +1084,9 @@ void __init efi_enter_virtual_mode(void)
->  		}
->  	}
->  
-> +	efi_runtime_map_setup(efi_runtime_map, nr_efi_runtime_map,
-> +			      boot_params.efi_info.efi_memdesc_size);
-> +
->  	BUG_ON(!efi.systab);
->  
->  	efi_setup_page_tables();
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 0a288e306252..9870eb55d0e5 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -38,8 +38,7 @@ struct efi __read_mostly efi = {
->  };
->  EXPORT_SYMBOL(efi);
->  
-> -struct kobject *efi_kobj;
-> -EXPORT_SYMBOL_GPL(efi_kobj);
-> +static struct kobject *efi_kobj;
->  static struct kobject *efivars_kobj;
->  
->  /*
-> @@ -176,6 +175,8 @@ static int __init efisubsys_init(void)
->  		goto err_remove_group;
->  	}
->  
-> +	efi_runtime_map_init(efi_kobj);
-> +
->  	return 0;
->  
->  err_remove_group:
-> diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
-> index e5e998494d8a..ef9631e9c03e 100644
-> --- a/drivers/firmware/efi/runtime-map.c
-> +++ b/drivers/firmware/efi/runtime-map.c
-> @@ -14,6 +14,10 @@
->  
->  #include <asm/setup.h>
->  
-> +static void *efi_runtime_map;
-> +static int nr_efi_runtime_map;
-> +static u32 efi_memdesc_size;
-> + 
->  struct efi_runtime_map_entry {
->  	efi_memory_desc_t md;
->  	struct kobject kobj;   /* kobject for each entry */
-> @@ -105,7 +109,6 @@ static struct efi_runtime_map_entry *add_sysfs_runtime_map_entry(int nr)
->  {
->  	int ret;
->  	struct efi_runtime_map_entry *entry;
-> -	struct efi_info *e = &boot_params.efi_info;
->  
->  	if (!map_kset) {
->  		map_kset = kset_create_and_add("runtime-map", NULL,
-> @@ -120,7 +123,7 @@ static struct efi_runtime_map_entry *add_sysfs_runtime_map_entry(int nr)
->  		return entry;
->  	}
->  
-> -	memcpy(&entry->md, efi_runtime_map + nr * e->efi_memdesc_size,
-> +	memcpy(&entry->md, efi_runtime_map + nr * efi_memdesc_size,
->  	       sizeof(efi_memory_desc_t));
->  
->  	kobject_init(&entry->kobj, &map_ktype);
-> @@ -135,7 +138,14 @@ static struct efi_runtime_map_entry *add_sysfs_runtime_map_entry(int nr)
->  	return entry;
->  }
->  
-> -static int __init efi_runtime_map_init(void)
-> +int efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size)
-> +{
-> +	efi_runtime_map = map;
-> +	nr_efi_runtime_map = nr_entries;
-> +	efi_memdesc_size = desc_size;
-> +}
-> +
-> +int __init efi_runtime_map_init(struct kobject *efi_kobj)
->  {
->  	int i, j, ret = 0;
->  	struct efi_runtime_map_entry *entry;
-> @@ -172,5 +182,3 @@ out_add_entry:
->  out:
->  	return ret;
->  }
-> -
-> -subsys_initcall(efi_runtime_map_init);
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 4f1651d303b8..47e067044054 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -873,9 +873,8 @@ int efivars_sysfs_init(void);
->  #endif /* CONFIG_EFI_VARS */
->  
->  #ifdef CONFIG_EFI_RUNTIME_MAP
-> -extern void *efi_runtime_map;
-> -extern int nr_efi_runtime_map;
-> -extern struct kobject *efi_kobj;
-> +int efi_runtime_map_init(struct kobject *);
-> +int efi_runtime_map_setup(void *, int, u32);
->  #endif
->  
->  #endif /* _LINUX_EFI_H */
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+--
+Thanks
+Dave
