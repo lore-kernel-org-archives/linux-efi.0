@@ -1,32 +1,87 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v6 14/14] x86: kdebugfs do not use __va for getting
- setup_data virt addr
-Date: Mon, 16 Dec 2013 16:35:01 +0000
-Message-ID: <20131216163501.GB3873@console-pimps.org>
-References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
- <1387186235-15972-15-git-send-email-dyoung@redhat.com>
+From: jerry.hoemann@hp.com
+Subject: Re: [RFC v2 0/2] Early use of boot service memory
+Date: Mon, 16 Dec 2013 11:43:33 -0700
+Message-ID: <20131216184333.GA25634@anatevka.fc.hp.com>
+References: <1385067686-73500-1-git-send-email-jerry.hoemann@hp.com>
+ <20131121230744.GA31592@srcf.ucam.org>
+ <20131121233104.GF1106@anatevka.fc.hp.com>
+ <20131121233831.GB32121@srcf.ucam.org>
+ <20131122010515.GG1106@anatevka.fc.hp.com>
+ <20131122011613.GA1039@srcf.ucam.org>
+Reply-To: jerry.hoemann@hp.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1387186235-15972-15-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <20131122011613.GA1039@srcf.ucam.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: rob@landley.net, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, matt.fleming@intel.com, yinghai@kernel.org, akpm@linux-foundation.org, bp@suse.de, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, penberg@kernel.org, mingo.kernel.org@gmail.com, vgoyal@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Dec, at 05:30:35PM, Dave Young wrote:
-> kdump kernel will use memmap=exactmap kernel cmdline, but __va does not
-> work in case memmap=exactmap, so let's always use ioremap_cache.
+On Fri, Nov 22, 2013 at 01:16:13AM +0000, Matthew Garrett wrote:
+> On Thu, Nov 21, 2013 at 06:05:15PM -0700, jerry.hoemann@hp.com wrote:
+> > On Thu, Nov 21, 2013 at 11:38:31PM +0000, Matthew Garrett wrote:
+> > > Hm. If the problem is fragmentation, then yeah, I can imagine this 
+> > > causing problems. In that case we could take a two-pass approach - find 
+> > > a gap that *will* be big enough, reserve everything that isn't currently 
+> > > reserved, and then reserve the rest after ExitBootServices()?
+> > 
+> > 
 > 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/kernel/kdebugfs.c | 35 +++++++++++------------------------
->  1 file changed, 11 insertions(+), 24 deletions(-)
+> > Interesting questions, but as I don't have access to a system that has
+> > the firmware defects encountered when efi_reserve_boot_services, it makes
+> > it difficult to test that i don't break them.  Hence, the appealing nature
+> > of quirks.  Don't have to worry about breaking other platforms as they
+> > continue to operate same as before.
+> 
+> Yeah. The problem is that some users may want kdump while still having 
+> broken firmware, so a solution that works for them is much more 
+> appealing than one which involves manually maintaining a list of 
+> verified systems...
 
-Dave, I've no idea why this change is necessary from the commit log. Is
-it required for kexec to function on EFI? Why does __va() not work in
-the memmap=exactmap case?
+Matthew, 
+
+Sorry for the delay in replying.
+
+We've worked with our firmware engineers who have made changes
+to move around where certain drivers are allocating from which
+has helped reduce some of the fragmentation issue we were having.
+Since we are taking firmware drops from outside sources, we are
+subject to regressions in this area, so i'm still interested in
+this topic.
+
+To your point, kdump may still works for the platforms that
+have the broken firmware.  Much depends upon the memory and IO
+configuration on the system in question.
+
+>From prior mailing, apparently Macs are subject to the problem
+that efi_reserve_boot_services was created to address.  Smaller
+systems w/ less IO don't require the larger crash kernel allocations
+and hence are more likely to be able to find a gap in low memory
+that works.
+
+Its the larger systems with lots of cpus, memory, and IO that
+need to allocate the large crash kernels.  These types of systems
+are more at risk.
+
+Again,  my main concern is finding something that can be back ported
+into legacy kernels/distros.  For distros based upon newer kernel and
+associated tools, we can avoid the problem by allocating memory high.
+But, we don't have that option with legacy kernels/distros.
+
+So, if you have other suggestions, I'm willing to explore them.
+
+
+Jerry
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+
+----------------------------------------------------------------------------
+Jerry Hoemann            Software Engineer              Hewlett-Packard
+
+3404 E Harmony Rd. MS 57                        phone:  (970) 898-1022
+Ft. Collins, CO 80528                           FAX:    (970) 898-XXXX
+                                                email:  jerry.hoemann@hp.com
+----------------------------------------------------------------------------
+
