@@ -1,106 +1,55 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v6 08/14] efi: export efi runtime memory mapping to sysfs
-Date: Mon, 16 Dec 2013 15:09:29 +0000
-Message-ID: <20131216150929.GA3873@console-pimps.org>
-References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
- <1387186235-15972-9-git-send-email-dyoung@redhat.com>
+From: Catalin Marinas <catalin.marinas@arm.com>
+Subject: Re: [PATCH 1/3] arm64: add EFI stub
+Date: Mon, 16 Dec 2013 15:46:01 +0000
+Message-ID: <20131216154601.GH17713@arm.com>
+References: <1385762712-17043-1-git-send-email-msalter@redhat.com>
+ <1385762712-17043-2-git-send-email-msalter@redhat.com>
+ <20131205141853.GA974@darko.cambridge.arm.com>
+ <1386341754.1861.188.camel@deneb.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1387186235-15972-9-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <1386341754.1861.188.camel@deneb.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Salter <msalter@redhat.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "patches@linaro.org" <patches@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <Will.Deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Dec, at 05:30:29PM, Dave Young wrote:
-> @@ -899,6 +928,11 @@ void __init efi_enter_virtual_mode(void)
->  		return;
->  	}
->  
-> +#ifdef CONFIG_EFI_RUNTIME_MAP
-> +	efi_runtime_map_setup(efi_runtime_map, nr_efi_runtime_map,
-> +			      boot_params.efi_info.efi_memdesc_size);
-> +#endif
+On Fri, Dec 06, 2013 at 02:55:54PM +0000, Mark Salter wrote:
+> On Thu, 2013-12-05 at 14:18 +0000, Catalin Marinas wrote:
+> > On Fri, Nov 29, 2013 at 10:05:10PM +0000, Mark Salter wrote:
+> > > +       add     x2, sp, 16
+> > > +       str     x8, [x2]
+> > > +       bl      efi_entry
+> > > +       cmn     x0, #1
+> > > +       b.eq    efi_load_fail
+> > > +
+> > > +       /*
+> > > +        * efi_entry() will have relocated the kernel image if necessary
+> > > +        * and we return here with device tree address in x0 and the kernel
+> > > +        * entry point stored at *image_addr. Save those values in registers
+> > > +        * which are preserved by __flush_dcache_all.
+> > > +        */
+> > > +       ldr     x1, [sp, #16]
+> > > +       mov     x20, x0
+> > > +       mov     x21, x1
+> > > +
+> > > +       bl      __flush_dcache_all
+> > 
+> > Regarding __flush_dcache_all, I plan to remove it for all cases apart
+> > from power management with the MMU disabled. With MMU enabled, there is
+> > no guarantee that this function does the right thing. It's even worse in
+> > the guest context.
+> 
+> According to booting.txt, the dcache needs to be invalidated. Is there
+> something existing I can use or do I need to write it?
 
-[...]
-
-> @@ -167,6 +167,12 @@ static int __init efisubsys_init(void)
->  		goto err_unregister;
->  	}
->  
-> +#ifdef CONFIG_EFI_RUNTIME_MAP
-> +	error = efi_runtime_map_init(efi_kobj);
-> +	if (error)
-> +		goto err_remove_group;
-> +#endif
-
-[...]
-
-> @@ -876,4 +876,9 @@ int efivars_sysfs_init(void);
->  
->  #endif /* CONFIG_EFI_VARS */
->  
-> +#ifdef CONFIG_EFI_RUNTIME_MAP
-> +int efi_runtime_map_init(struct kobject *);
-> +void efi_runtime_map_setup(void *, int, u32);
-> +#endif
-
-I was thinking more along the lines of...
-
----
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 120086820654..fd5a0aad1fff 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -928,10 +928,8 @@ void __init efi_enter_virtual_mode(void)
- 		return;
- 	}
- 
--#ifdef CONFIG_EFI_RUNTIME_MAP
- 	efi_runtime_map_setup(efi_runtime_map, nr_efi_runtime_map,
- 			      boot_params.efi_info.efi_memdesc_size);
--#endif
- 
- 	BUG_ON(!efi.systab);
- 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 4109dca787dc..4753bac65279 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -167,11 +167,9 @@ static int __init efisubsys_init(void)
- 		goto err_unregister;
- 	}
- 
--#ifdef CONFIG_EFI_RUNTIME_MAP
- 	error = efi_runtime_map_init(efi_kobj);
- 	if (error)
- 		goto err_remove_group;
--#endif
- 
- 	/* and the standard mountpoint for efivarfs */
- 	efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a98eb0621583..e64540746c63 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -875,6 +875,14 @@ int efivars_sysfs_init(void);
- #ifdef CONFIG_EFI_RUNTIME_MAP
- int efi_runtime_map_init(struct kobject *);
- void efi_runtime_map_setup(void *, int, u32);
-+#else
-+static inline int efi_runtime_map_init(struct kobject *kobj)
-+{
-+	return 0;
-+}
-+
-+static inline void
-+efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size) {}
- #endif
- 
- #endif /* _LINUX_EFI_H */
+The function will stay for a few cases where needed. But here the
+D-cache and MMU are still on at this point and there is a slight chance
+of speculative loads after the flush (though only clean lines). You
+could move this after he MMU disabling (but still keep the I-cache on
+for performance).
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Catalin
