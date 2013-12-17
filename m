@@ -1,19 +1,18 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v5 10/14] efi: only print saved efi runtime maps instead
- of all memmap ranges for kexec
-Date: Tue, 17 Dec 2013 14:34:36 +0800
-Message-ID: <20131217063436.GF6751@dhcp-16-126.nay.redhat.com>
-References: <1386582147-9802-1-git-send-email-dyoung@redhat.com>
- <1386582147-9802-11-git-send-email-dyoung@redhat.com>
- <20131213160150.GE32329@pd.tnic>
- <20131216020010.GC3754@dhcp-16-126.nay.redhat.com>
- <20131216113324.GB4922@pd.tnic>
+Subject: Re: [PATCH v6 14/14] x86: kdebugfs do not use __va for getting
+ setup_data virt addr
+Date: Tue, 17 Dec 2013 14:53:46 +0800
+Message-ID: <20131217065346.GG6751@dhcp-16-126.nay.redhat.com>
+References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
+ <1387186235-15972-15-git-send-email-dyoung@redhat.com>
+ <20131216163501.GB3873@console-pimps.org>
+ <20131217062417.GE6751@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131216113324.GB4922-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20131217062417.GE6751-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -23,68 +22,90 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/16/13 at 12:33pm, Borislav Petkov wrote:
-> On Mon, Dec 16, 2013 at 10:00:10AM +0800, Dave Young wrote:
-> > > > -	print_efi_memmap();
-> > > > +	if (efi_setup) {
-> > > > +		int s;
-> > > > +		struct efi_setup_data *data;
-> > > > +
-> > > > +		s = sizeof(*data) + nr_efi_runtime_map * sizeof(data->map[0]);
-> > > > +		data = early_memremap(efi_setup, s);
-> > > > +		if (!data)
-> > > > +			return;
-> > > > +		print_efi_memmap(data->map, nr_efi_runtime_map,
-> > > > +				 sizeof(data->map[0]));
-> > > > +		early_memunmap(data, s);
+On 12/17/13 at 02:24pm, Dave Young wrote:
+> On 12/16/13 at 04:35pm, Matt Fleming wrote:
+> > On Mon, 16 Dec, at 05:30:35PM, Dave Young wrote:
+> > > kdump kernel will use memmap=exactmap kernel cmdline, but __va does not
+> > > work in case memmap=exactmap, so let's always use ioremap_cache.
 > > > 
-> > > Well, if you call print_efi_memmap() in parse_efi_setup() you can save
-> > > yourself that map/unmaping no?
+> > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > > ---
+> > >  arch/x86/kernel/kdebugfs.c | 35 +++++++++++------------------------
+> > >  1 file changed, 11 insertions(+), 24 deletions(-)
 > > 
-> > In parse_efi_setup, I need map twice as well:
+> > Dave, I've no idea why this change is necessary from the commit log. Is
+> > it required for kexec to function on EFI? Why does __va() not work in
+> > the memmap=exactmap case?
+> > 
 > 
-> Well, your v6 has a something completely different:
+> During previous kdump tests I saw panics while reading the setup_data in debugfs.
+> I thought it is caused by some unmapped addresses. At that time I also reproduced
+> it by booting the non-kexec kernel with memmap=exact.
 > 
-> void __init parse_efi_setup(u64 phys_addr)
-> {
->         efi_setup = phys_addr;
-> }
+> Since you are asking about this I'm testing it again but I seems can not
+> reproduce this problem any more, it's weird.
 > 
-> There's no mapping at all anymore. So please redo your reply against v6.
+> I should dug more about it and save the panic messages.
+> 
+> So let's drop this patch for now, I will keep an eye on this and address it later
+> if I can find the problem again.
 
-They are moved to efi.c efi_setup_init(), I'm not sure if I expained clear
-enough, in current code parse_efi_setup only accept one argument phys_addr
-so I will mapping it with sizeof(struct setup_data) to get the payload size
-then get the nr_efi_runtime_map. This is a simplification from the old 
-implementation.
+Reproduced it again in normal boot with memmap=exactmap, but I agree it's a corner
+case, I remember I saw this in kdump kernel, but I still did not see it in today's
+testing so I think move this issue out of this patch series is fine to me.
 
-Based on current implementation, yes, I can add back another argument data_len
-to avoid the 1st mapping thus I can print efi memmap as you said.
+[    0.359467] BUG: unable to handle kernel paging request at ffff8800d5592020
+[    0.359472] IP: [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
+[    0.359474] PGD 316b067 PUD 37031063 PMD 0 
+[    0.359476] Oops: 0000 [#1] PREEMPT SMP 
+[    0.359477] Modules linked in:
+[    0.359480] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 3.13.0-rc3+ #65
+[    0.359481] Hardware name: Hewlett-Packard HP Z420 Workstation/1589, BIOS J61 v03.15 05/09/2013
+[    0.359482] task: ffff880037022000 ti: ffff880037188000 task.ti: ffff880037188000
+[    0.359484] RIP: 0010:[<ffffffff817dbdbc>]  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
+[    0.359485] RSP: 0000:ffff880037189e30  EFLAGS: 00010286
+[    0.359486] RAX: ffff8800372e30e0 RBX: ffff8800372e30e0 RCX: 0000000000000191
+[    0.359486] RDX: 0000000000000000 RSI: ffffffff8168a39e RDI: ffff880037189e50
+[    0.359487] RBP: ffff880037189e90 R08: ffff8800372e30e0 R09: 0000000000000000
+[    0.359488] R10: 0000000000000000 R11: 0000000000000000 R12: ffff88003640aea0
+[    0.359489] R13: 00000000d5592018 R14: ffff88003640b200 R15: ffff8800d5592018
+[    0.359490] FS:  0000000000000000(0000) GS:ffff880037480000(0000) knlGS:0000000000000000
+[    0.359491] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[    0.359491] CR2: ffff8800d5592020 CR3: 0000000002716000 CR4: 00000000000407e0
+[    0.359492] Stack:
+[    0.359494]  ffffffff817da6d5 ffff88003640b0e0 ffff88003640afc0 0000000000000004
+[    0.359496]  ffff880037180033 ffffffff8149d82d 00000000c9b42d58 ffffffff817dbca2
+[    0.359498]  0000000000000000 00000000000000f3 0000000000000000 0000000000000000
+[    0.359499] Call Trace:
+[    0.359502]  [<ffffffff817da6d5>] ? boot_params_ksysfs_init+0x1ff/0x244
+[    0.359507]  [<ffffffff8149d82d>] ? mutex_unlock+0x9/0xb
+[    0.359508]  [<ffffffff817dbca2>] ? topology_init+0x36/0x36
+[    0.359512]  [<ffffffff810002bf>] do_one_initcall+0xae/0x15b
+[    0.359515]  [<ffffffff81078500>] ? parameq+0xb/0x1f
+[    0.359516]  [<ffffffff81078770>] ? parse_args+0x25c/0x33a
+[    0.359519]  [<ffffffff817d5ec6>] kernel_init_freeable+0x115/0x19b
+[    0.359521]  [<ffffffff817d573d>] ? do_early_param+0x88/0x88
+[    0.359523]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
+[    0.359524]  [<ffffffff81489362>] kernel_init+0x9/0xfa
+[    0.359527]  [<ffffffff8149fd0c>] ret_from_fork+0x7c/0xb0
+[    0.359528]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
+[    0.359548] Code: ff 48 85 c0 48 89 c3 0f 84 b9 00 00 00 49 bf 00 00 00 00 00 88 ff ff 4c 89 28 8b 55 bc 48 8d 7d c0 4d 01 ef 48 c 
+[    0.359549] RIP  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
+[    0.359550]  RSP <ffff880037189e30>
+[    0.359550] CR2: ffff8800d5592020
+[    0.359559] ---[ end trace d52b3fbe64a26115 ]---
+[    0.621287] kworker/u8:0 (43) used greatest stack depth: 5232 bytes left
+[    0.628021] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009
+[    0.628021] 
 
-In this way I need export another extern for the data_len though.
+
+
 
 > 
-> > Another where what I print in this patch is same position what
-> > non-kexec kernel does, it looks better that print them only if earlier
-> > init is ok.
-> 
-> -ENOPARSE.
-
-What do you mean about NOPARSE, do you want another function name like
-save_efi_setup()?
-
-> 
-> All I'm saying is, if you're going to memremap/memunmap efi_setup,
-> then do it once in efi_setup_init() as you do already and call
-> print_efi_memmap from there - no need to do work twice for no reason.
-> 
-> -- 
-> Regards/Gruss,
->     Boris.
-> 
-> Sent from a fat crate under my desk. Formatting is fine.
 > --
+> Thanks
+> Dave
