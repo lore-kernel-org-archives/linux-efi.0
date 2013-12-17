@@ -1,18 +1,15 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v6 14/14] x86: kdebugfs do not use __va for getting
- setup_data virt addr
-Date: Tue, 17 Dec 2013 14:53:46 +0800
-Message-ID: <20131217065346.GG6751@dhcp-16-126.nay.redhat.com>
+Subject: [PATCH v7 08/14] efi: export efi runtime memory mapping to sysfs
+Date: Tue, 17 Dec 2013 16:00:33 +0800
+Message-ID: <20131217080033.GA12621@dhcp-16-126.nay.redhat.com>
 References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
- <1387186235-15972-15-git-send-email-dyoung@redhat.com>
- <20131216163501.GB3873@console-pimps.org>
- <20131217062417.GE6751@dhcp-16-126.nay.redhat.com>
+ <1387186235-15972-9-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131217062417.GE6751-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <1387186235-15972-9-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -22,90 +19,432 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/17/13 at 02:24pm, Dave Young wrote:
-> On 12/16/13 at 04:35pm, Matt Fleming wrote:
-> > On Mon, 16 Dec, at 05:30:35PM, Dave Young wrote:
-> > > kdump kernel will use memmap=exactmap kernel cmdline, but __va does not
-> > > work in case memmap=exactmap, so let's always use ioremap_cache.
-> > > 
-> > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > > ---
-> > >  arch/x86/kernel/kdebugfs.c | 35 +++++++++++------------------------
-> > >  1 file changed, 11 insertions(+), 24 deletions(-)
-> > 
-> > Dave, I've no idea why this change is necessary from the commit log. Is
-> > it required for kexec to function on EFI? Why does __va() not work in
-> > the memmap=exactmap case?
-> > 
-> 
-> During previous kdump tests I saw panics while reading the setup_data in debugfs.
-> I thought it is caused by some unmapped addresses. At that time I also reproduced
-> it by booting the non-kexec kernel with memmap=exact.
-> 
-> Since you are asking about this I'm testing it again but I seems can not
-> reproduce this problem any more, it's weird.
-> 
-> I should dug more about it and save the panic messages.
-> 
-> So let's drop this patch for now, I will keep an eye on this and address it later
-> if I can find the problem again.
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Date: Tue, 26 Nov 2013 10:10:23 +0800
+Subject: [PATCH 08/13] efi: export efi runtime memory mapping to sysfs
 
-Reproduced it again in normal boot with memmap=exactmap, but I agree it's a corner
-case, I remember I saw this in kdump kernel, but I still did not see it in today's
-testing so I think move this issue out of this patch series is fine to me.
+kexec kernel will need exactly same mapping for
+efi runtime memory ranges. Thus here export the
+runtime ranges mapping to sysfs, kexec-tools
+will assemble them and pass to 2nd kernel via
+setup_data.
 
-[    0.359467] BUG: unable to handle kernel paging request at ffff8800d5592020
-[    0.359472] IP: [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-[    0.359474] PGD 316b067 PUD 37031063 PMD 0 
-[    0.359476] Oops: 0000 [#1] PREEMPT SMP 
-[    0.359477] Modules linked in:
-[    0.359480] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 3.13.0-rc3+ #65
-[    0.359481] Hardware name: Hewlett-Packard HP Z420 Workstation/1589, BIOS J61 v03.15 05/09/2013
-[    0.359482] task: ffff880037022000 ti: ffff880037188000 task.ti: ffff880037188000
-[    0.359484] RIP: 0010:[<ffffffff817dbdbc>]  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-[    0.359485] RSP: 0000:ffff880037189e30  EFLAGS: 00010286
-[    0.359486] RAX: ffff8800372e30e0 RBX: ffff8800372e30e0 RCX: 0000000000000191
-[    0.359486] RDX: 0000000000000000 RSI: ffffffff8168a39e RDI: ffff880037189e50
-[    0.359487] RBP: ffff880037189e90 R08: ffff8800372e30e0 R09: 0000000000000000
-[    0.359488] R10: 0000000000000000 R11: 0000000000000000 R12: ffff88003640aea0
-[    0.359489] R13: 00000000d5592018 R14: ffff88003640b200 R15: ffff8800d5592018
-[    0.359490] FS:  0000000000000000(0000) GS:ffff880037480000(0000) knlGS:0000000000000000
-[    0.359491] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[    0.359491] CR2: ffff8800d5592020 CR3: 0000000002716000 CR4: 00000000000407e0
-[    0.359492] Stack:
-[    0.359494]  ffffffff817da6d5 ffff88003640b0e0 ffff88003640afc0 0000000000000004
-[    0.359496]  ffff880037180033 ffffffff8149d82d 00000000c9b42d58 ffffffff817dbca2
-[    0.359498]  0000000000000000 00000000000000f3 0000000000000000 0000000000000000
-[    0.359499] Call Trace:
-[    0.359502]  [<ffffffff817da6d5>] ? boot_params_ksysfs_init+0x1ff/0x244
-[    0.359507]  [<ffffffff8149d82d>] ? mutex_unlock+0x9/0xb
-[    0.359508]  [<ffffffff817dbca2>] ? topology_init+0x36/0x36
-[    0.359512]  [<ffffffff810002bf>] do_one_initcall+0xae/0x15b
-[    0.359515]  [<ffffffff81078500>] ? parameq+0xb/0x1f
-[    0.359516]  [<ffffffff81078770>] ? parse_args+0x25c/0x33a
-[    0.359519]  [<ffffffff817d5ec6>] kernel_init_freeable+0x115/0x19b
-[    0.359521]  [<ffffffff817d573d>] ? do_early_param+0x88/0x88
-[    0.359523]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
-[    0.359524]  [<ffffffff81489362>] kernel_init+0x9/0xfa
-[    0.359527]  [<ffffffff8149fd0c>] ret_from_fork+0x7c/0xb0
-[    0.359528]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
-[    0.359548] Code: ff 48 85 c0 48 89 c3 0f 84 b9 00 00 00 49 bf 00 00 00 00 00 88 ff ff 4c 89 28 8b 55 bc 48 8d 7d c0 4d 01 ef 48 c 
-[    0.359549] RIP  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-[    0.359550]  RSP <ffff880037189e30>
-[    0.359550] CR2: ffff8800d5592020
-[    0.359559] ---[ end trace d52b3fbe64a26115 ]---
-[    0.621287] kworker/u8:0 (43) used greatest stack depth: 5232 bytes left
-[    0.628021] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009
-[    0.628021] 
+Introducing a new directory /sys/firmware/efi/runtime-map
+Just like /sys/firmware/memmap. Containing below attribute
+in each file of that directory:
+attribute  num_pages  phys_addr  type  virt_addr
 
+Changelog:
+ - Cleaup code, add function efi_save_runtime_map
+ - Improve err handling
+ - Add macros for sysfs _show functions
+ - Remove forward declarations.
+ Matt:
+ - s/efi-runtime-map.c/runtime-map.c
+ - Change dir name to runtime-map
+ - Changelog and documentation fixes.
+ - Documentation fixes.
+ - Update to use desc_size in efi_runtime_map
+ - Kconfig EFI_RUNTIME_MAP depends on X86 && KEXEC && EFI
+ Boris:
+ - Documentation grammar/spelling fix
+ - krealloc fix.
+ - Move efi_runtime_map_init to efisubsys_initcall.
+ - Remove 'if EXPERT' for EFI_RUNTIME_MAP Kconfig option
+ - save_runtime_map: move error handling code into the function itself.
+ - other code improvement.
 
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ .../ABI/testing/sysfs-firmware-efi-runtime-map     |  34 ++++
+ arch/x86/platform/efi/efi.c                        |  36 +++-
+ drivers/firmware/efi/Kconfig                       |  11 ++
+ drivers/firmware/efi/Makefile                      |   1 +
+ drivers/firmware/efi/efi.c                         |   4 +
+ drivers/firmware/efi/runtime-map.c                 | 181 +++++++++++++++++++++
+ include/linux/efi.h                                |  13 ++
+ 7 files changed, 278 insertions(+), 2 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+ create mode 100644 drivers/firmware/efi/runtime-map.c
 
-
-> 
-> --
-> Thanks
-> Dave
+diff --git a/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+new file mode 100644
+index 0000000..c61b9b3
+--- /dev/null
++++ b/Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+@@ -0,0 +1,34 @@
++What:		/sys/firmware/efi/runtime-map/
++Date:		December 2013
++Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++Description:	Switching efi runtime services to virtual mode requires
++		that all efi memory ranges which have the runtime attribute
++		bit set to be mapped to virtual addresses.
++
++		The efi runtime services can only be switched to virtual
++		mode once without rebooting. The kexec kernel must maintain
++		the same physical to virtual address mappings as the first
++		kernel. The mappings are exported to sysfs so userspace tools
++		can reassemble them and pass them into the kexec kernel.
++
++		/sys/firmware/efi/runtime-map/ is the directory the kernel
++		exports that information in.
++
++		subdirectories are named with the number of the memory range:
++
++			/sys/firmware/efi/runtime-map/0
++			/sys/firmware/efi/runtime-map/1
++			/sys/firmware/efi/runtime-map/2
++			/sys/firmware/efi/runtime-map/3
++			...
++
++		Each subdirectory contains five files:
++
++		attribute : The attributes of the memory range.
++		num_pages : The size of the memory range in pages.
++		phys_addr : The physical address of the memory range.
++		type      : The type of the memory range.
++		virt_addr : The virtual address of the memory range.
++
++		Above values are all hexadecimal numbers with the '0x' prefix.
++Users:		Kexec
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 3e8b760..b1fff8e 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -76,6 +76,9 @@ static __initdata efi_config_table_type_t arch_tables[] = {
+ 	{NULL_GUID, NULL, NULL},
+ };
+ 
++static void *efi_runtime_map;
++static int nr_efi_runtime_map;
++
+ /*
+  * Returns 1 if 'facility' is enabled, 0 otherwise.
+  */
+@@ -810,6 +813,24 @@ static void __init efi_merge_regions(void)
+ 	}
+ }
+ 
++static int __init save_runtime_map(efi_memory_desc_t *md, int idx)
++{
++	void *p;
++	p = krealloc(efi_runtime_map, (idx + 1) * memmap.desc_size, GFP_KERNEL);
++	if (!p)
++		goto out;
++
++	efi_runtime_map = p;
++	memcpy(efi_runtime_map + idx * memmap.desc_size, md, memmap.desc_size);
++
++	return 0;
++out:
++	kfree(efi_runtime_map);
++	efi_runtime_map = NULL;
++	nr_efi_runtime_map = 0;
++	return -ENOMEM;
++}
++
+ /*
+  * Map efi memory ranges for runtime serivce and update new_memmap with virtual
+  * addresses.
+@@ -820,6 +841,7 @@ static void * __init efi_map_regions(int *count)
+ 	void *p, *tmp, *new_memmap = NULL;
+ 	unsigned long size;
+ 	u64 end, systab;
++	int err = 0;
+ 
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+@@ -844,15 +866,22 @@ static void * __init efi_map_regions(int *count)
+ 		tmp = krealloc(new_memmap, (*count + 1) * memmap.desc_size,
+ 			       GFP_KERNEL);
+ 		if (!tmp)
+-			goto out_krealloc;
++			goto out;
+ 		new_memmap = tmp;
+ 		memcpy(new_memmap + (*count * memmap.desc_size), md,
+ 		       memmap.desc_size);
++		if (md->type != EFI_BOOT_SERVICES_CODE &&
++		    md->type != EFI_BOOT_SERVICES_DATA) {
++			err = save_runtime_map(md, nr_efi_runtime_map);
++			if (err)
++				goto out;
++			nr_efi_runtime_map++;
++		}
+ 		(*count)++;
+ 	}
+ 
+ 	return new_memmap;
+-out_krealloc:
++out:
+ 	kfree(new_memmap);
+ 	return NULL;
+ }
+@@ -899,6 +928,9 @@ void __init efi_enter_virtual_mode(void)
+ 		return;
+ 	}
+ 
++	efi_runtime_map_setup(efi_runtime_map, nr_efi_runtime_map,
++			      boot_params.efi_info.efi_memdesc_size);
++
+ 	BUG_ON(!efi.systab);
+ 
+ 	efi_setup_page_tables();
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 3150aa4..730f5f2 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -39,4 +39,15 @@ config EFI_VARS_PSTORE_DEFAULT_DISABLE
+ config UEFI_CPER
+ 	def_bool n
+ 
++config EFI_RUNTIME_MAP
++	bool "Export efi runtime maps to sysfs"
++	depends on X86 && EFI && KEXEC
++	default y
++	help
++	  Export efi runtime memory maps to /sys/firmware/efi/runtime-map.
++	  That memory map is used for example by kexec to set up efi virtual
++	  mapping the 2nd kernel, but can also be used for debugging purposes.
++
++	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
++
+ endmenu
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 9ba156d..a58e0f1 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -5,3 +5,4 @@ obj-y					+= efi.o vars.o
+ obj-$(CONFIG_EFI_VARS)			+= efivars.o
+ obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+ obj-$(CONFIG_UEFI_CPER)			+= cper.o
++obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 6d0bc52..7910cd5 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -167,6 +167,10 @@ static int __init efisubsys_init(void)
+ 		goto err_unregister;
+ 	}
+ 
++	error = efi_runtime_map_init(efi_kobj);
++	if (error)
++		goto err_remove_group;
++
+ 	/* and the standard mountpoint for efivarfs */
+ 	efivars_kobj = kobject_create_and_add("efivars", efi_kobj);
+ 	if (!efivars_kobj) {
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+new file mode 100644
+index 0000000..97cdd16
+--- /dev/null
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -0,0 +1,181 @@
++/*
++ * linux/drivers/efi/runtime-map.c
++ * Copyright (C) 2013 Red Hat, Inc., Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
++ *
++ * This file is released under the GPLv2.
++ */
++
++#include <linux/string.h>
++#include <linux/kernel.h>
++#include <linux/module.h>
++#include <linux/types.h>
++#include <linux/efi.h>
++#include <linux/slab.h>
++
++#include <asm/setup.h>
++
++static void *efi_runtime_map;
++static int nr_efi_runtime_map;
++static u32 efi_memdesc_size;
++
++struct efi_runtime_map_entry {
++	efi_memory_desc_t md;
++	struct kobject kobj;   /* kobject for each entry */
++};
++
++static struct efi_runtime_map_entry **map_entries;
++
++struct map_attribute {
++	struct attribute attr;
++	ssize_t (*show)(struct efi_runtime_map_entry *entry, char *buf);
++};
++
++static inline struct map_attribute *to_map_attr(struct attribute *attr)
++{
++	return container_of(attr, struct map_attribute, attr);
++}
++
++static ssize_t type_show(struct efi_runtime_map_entry *entry, char *buf)
++{
++	return snprintf(buf, PAGE_SIZE, "0x%x\n", entry->md.type);
++}
++
++#define EFI_RUNTIME_FIELD(var) entry->md.var
++
++#define EFI_RUNTIME_U64_ATTR_SHOW(name) \
++static ssize_t name##_show(struct efi_runtime_map_entry *entry, char *buf) \
++{ \
++	return snprintf(buf, PAGE_SIZE, "0x%llx\n", EFI_RUNTIME_FIELD(name)); \
++}
++
++EFI_RUNTIME_U64_ATTR_SHOW(phys_addr);
++EFI_RUNTIME_U64_ATTR_SHOW(virt_addr);
++EFI_RUNTIME_U64_ATTR_SHOW(num_pages);
++EFI_RUNTIME_U64_ATTR_SHOW(attribute);
++
++static inline struct efi_runtime_map_entry *to_map_entry(struct kobject *kobj)
++{
++	return container_of(kobj, struct efi_runtime_map_entry, kobj);
++}
++
++static ssize_t map_attr_show(struct kobject *kobj, struct attribute *attr,
++			      char *buf)
++{
++	struct efi_runtime_map_entry *entry = to_map_entry(kobj);
++	struct map_attribute *map_attr = to_map_attr(attr);
++
++	return map_attr->show(entry, buf);
++}
++
++static struct map_attribute map_type_attr = __ATTR_RO(type);
++static struct map_attribute map_phys_addr_attr   = __ATTR_RO(phys_addr);
++static struct map_attribute map_virt_addr_attr  = __ATTR_RO(virt_addr);
++static struct map_attribute map_num_pages_attr  = __ATTR_RO(num_pages);
++static struct map_attribute map_attribute_attr  = __ATTR_RO(attribute);
++
++/*
++ * These are default attributes that are added for every memmap entry.
++ */
++static struct attribute *def_attrs[] = {
++	&map_type_attr.attr,
++	&map_phys_addr_attr.attr,
++	&map_virt_addr_attr.attr,
++	&map_num_pages_attr.attr,
++	&map_attribute_attr.attr,
++	NULL
++};
++
++static const struct sysfs_ops map_attr_ops = {
++	.show = map_attr_show,
++};
++
++static void map_release(struct kobject *kobj)
++{
++	struct efi_runtime_map_entry *entry;
++
++	entry = to_map_entry(kobj);
++	kfree(entry);
++}
++
++static struct kobj_type __refdata map_ktype = {
++	.sysfs_ops	= &map_attr_ops,
++	.default_attrs	= def_attrs,
++	.release	= map_release,
++};
++
++static struct kset *map_kset;
++
++static struct efi_runtime_map_entry *
++add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
++{
++	int ret;
++	struct efi_runtime_map_entry *entry;
++
++	if (!map_kset) {
++		map_kset = kset_create_and_add("runtime-map", NULL, kobj);
++		if (!map_kset)
++			return ERR_PTR(-ENOMEM);
++	}
++
++	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
++	if (!entry) {
++		kset_unregister(map_kset);
++		return entry;
++	}
++
++	memcpy(&entry->md, efi_runtime_map + nr * efi_memdesc_size,
++	       sizeof(efi_memory_desc_t));
++
++	kobject_init(&entry->kobj, &map_ktype);
++	entry->kobj.kset = map_kset;
++	ret = kobject_add(&entry->kobj, NULL, "%d", nr);
++	if (ret) {
++		kobject_put(&entry->kobj);
++		kset_unregister(map_kset);
++		return ERR_PTR(ret);
++	}
++
++	return entry;
++}
++
++void efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size)
++{
++	efi_runtime_map = map;
++	nr_efi_runtime_map = nr_entries;
++	efi_memdesc_size = desc_size;
++}
++
++int __init efi_runtime_map_init(struct kobject *efi_kobj)
++{
++	int i, j, ret = 0;
++	struct efi_runtime_map_entry *entry;
++
++	if (!efi_runtime_map)
++		return 0;
++
++	map_entries = kzalloc(nr_efi_runtime_map * sizeof(entry), GFP_KERNEL);
++	if (!map_entries) {
++		ret = -ENOMEM;
++		goto out;
++	}
++
++	for (i = 0; i < nr_efi_runtime_map; i++) {
++		entry = add_sysfs_runtime_map_entry(efi_kobj, i);
++		if (IS_ERR(entry)) {
++			ret = PTR_ERR(entry);
++			goto out_add_entry;
++		}
++		*(map_entries + i) = entry;
++	}
++
++	return 0;
++out_add_entry:
++	for (j = i - 1; j > 0; j--) {
++		entry = *(map_entries + j);
++		kobject_put(&entry->kobj);
++	}
++	if (map_kset)
++		kset_unregister(map_kset);
++out:
++	return ret;
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 988af61..0a819e7 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -876,4 +876,17 @@ int efivars_sysfs_init(void);
+ 
+ #endif /* CONFIG_EFI_VARS */
+ 
++#ifdef CONFIG_EFI_RUNTIME_MAP
++int efi_runtime_map_init(struct kobject *);
++void efi_runtime_map_setup(void *, int, u32);
++#else
++static inline int efi_runtime_map_init(struct kobject *kobj)
++{
++	return 0;
++}
++
++static inline void
++efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size) {}
++#endif
++
+ #endif /* _LINUX_EFI_H */
+-- 
+1.8.3.1
