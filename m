@@ -1,154 +1,48 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 3/3] efi: Make efi virtual runtime map passing more robust
-Date: Tue, 17 Dec 2013 00:36:37 +0100
-Message-ID: <1387236997-26975-4-git-send-email-bp@alien8.de>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [PATCH 0/3] EFI memmap fix
+Date: Mon, 16 Dec 2013 18:11:44 -0700
+Message-ID: <1387242704.21140.44.camel@misato.fc.hp.com>
 References: <1387236997-26975-1-git-send-email-bp@alien8.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1387236997-26975-1-git-send-email-bp@alien8.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linux EFI <linux-efi@vger.kernel.org>, X86 ML <x86@kernel.org>, LKML <linux-kernel@vger.kernel.org>
-Cc: Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, James Bottomley <James.Bottomley@HansenPartnership.com>, Vivek Goyal <vgoyal@redhat.com>, Toshi Kani <toshi.kani@hp.com>, Arjan van de Ven <arjan@linux.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1387236997-26975-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp@suse.de>
+On Tue, 2013-12-17 at 00:36 +0100, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> 
+> Hi guys,
+> 
+> this is the result of Toshi and me debugging a #GP on one of his big HP
+> boxes sporting UEFI. Each commit message should be self-explanatory so
+> please look there.
+> 
+> This has more or less an RFC nature thus I'm sending it now to collect
+> feedback. It is going to wait in the EFI queue anyway after the kexec
+> stuff gets sorted out first.
+> 
+> Comments and suggestions as always are very much appreciated.
+> 
+> Thanks.
+> 
+> Borislav Petkov (3):
+>   x86, ptdump: Add the functionality to dump an arbitrary pagetable
+>   efi: Dump the EFI page table
+>   efi: Make efi virtual runtime map passing more robust
+> 
+>  arch/x86/include/asm/pgtable.h |  3 +-
+>  arch/x86/mm/dump_pagetables.c  | 77 ++++++++++++++++++++++++++++--------------
+>  arch/x86/platform/efi/efi.c    | 68 ++++++++++++++++++++++++++++++++-----
+>  3 files changed, 112 insertions(+), 36 deletions(-)
+> 
 
-Currently, running SetVirtualAddressMap() and passing the physical
-address of the virtual map array was working only by a lucky coincidence
-because the memory was present in the EFI page table too. Until Toshi
-went and booted this on a big HP box - the krealloc() manner of resizing
-the memmap we're doing did allocate from such physical addresses which
-were not mapped anymore and boom:
+Thanks for the quick turnaround!  For the series:
 
-http://lkml.kernel.org/r/1386806463.1791.295.camel@misato.fc.hp.com
+Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 
-One way to take care of that issue is to reimplement the krealloc thing
-but with pages. We start with contiguous pages of order 1, i.e. 2 pages,
-and when we deplete that memory (shouldn't happen all that often but you
-know firmware) we realloc the next power-of-two pages.
-
-Having the pages, it is much more handy and easy to map them into the
-EFI page table with the already existing mapping code which we're using
-for building the virtual mappings.
-
-And, it doesn't matter all that much how much pages we've used as we're
-freeing them right after they've fulfilled their purpose at the end of
-the function anyway.
-
-Reported-by: Toshi Kani <toshi.kani@hp.com>
-Signed-off-by: Borislav Petkov <bp@suse.de>
----
- arch/x86/platform/efi/efi.c | 57 ++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 48 insertions(+), 9 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 51d6285701e9..39c52cc9b63a 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -112,7 +112,6 @@ static int __init setup_storage_paranoia(char *arg)
- }
- early_param("efi_no_storage_paranoia", setup_storage_paranoia);
- 
--
- static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
- {
- 	unsigned long flags;
-@@ -775,6 +774,27 @@ void __init old_map_region(efi_memory_desc_t *md)
- 		       (unsigned long long)md->phys_addr);
- }
- 
-+static void *realloc_pages(void *old_memmap, int old_shift)
-+{
-+	void *ret;
-+
-+	ret = (void *)__get_free_pages(GFP_KERNEL, old_shift + 1);
-+	if (!ret)
-+		goto out;
-+
-+	/*
-+	 * A first-time allocation doesn't have anything to copy.
-+	 */
-+	if (!old_memmap)
-+		return ret;
-+
-+	memcpy(ret, old_memmap, PAGE_SIZE << old_shift);
-+
-+out:
-+	__free_pages(old_memmap, old_shift);
-+	return ret;
-+}
-+
- /*
-  * This function will switch the EFI runtime services to virtual mode.
-  * Essentially, we look through the EFI memmap and map every region that
-@@ -794,12 +814,13 @@ void __init old_map_region(efi_memory_desc_t *md)
-  */
- void __init efi_enter_virtual_mode(void)
- {
-+	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
-+	unsigned long size, new_memmap_left = 0;
- 	efi_memory_desc_t *md, *prev_md = NULL;
-+	int count = 0, new_memmap_shift = 0;
- 	void *p, *new_memmap = NULL;
--	unsigned long size;
- 	efi_status_t status;
- 	u64 end, systab;
--	int count = 0;
- 
- 	efi.systab = NULL;
- 
-@@ -862,14 +883,19 @@ void __init efi_enter_virtual_mode(void)
- 			efi.systab = (efi_system_table_t *) (unsigned long) systab;
- 		}
- 
--		new_memmap = krealloc(new_memmap,
--				      (count + 1) * memmap.desc_size,
--				      GFP_KERNEL);
--		if (!new_memmap)
--			goto err_out;
-+		if (new_memmap_left < memmap.desc_size) {
-+			new_memmap = realloc_pages(new_memmap, new_memmap_shift);
-+			if (!new_memmap)
-+				goto err_out;
-+
-+			new_memmap_shift++;
-+			new_memmap_left += PAGE_SIZE << new_memmap_shift;
-+		}
- 
- 		memcpy(new_memmap + (count * memmap.desc_size), md,
- 		       memmap.desc_size);
-+
-+		new_memmap_left -= memmap.desc_size;
- 		count++;
- 	}
- 
-@@ -880,6 +906,19 @@ void __init efi_enter_virtual_mode(void)
- 
- 	efi_dump_pagetable();
- 
-+	/*
-+	 * It can happen that the physical address of new_memmap lands in memory
-+	 * which is not mapped in the EFI page table. Therefore we need to go
-+	 * and ident-map those pages containing the map before calling
-+	 * phys_efi_set_virtual_address_map().
-+	 */
-+	if (kernel_map_pages_in_pgd(pgd, __pa(new_memmap), __pa(new_memmap),
-+				    1 << new_memmap_shift, _PAGE_NX)) {
-+		pr_err("Error ident-mapping new memmap (0x%lx)!\n",
-+		       __pa(new_memmap));
-+		goto err_out;
-+	}
-+
- 	status = phys_efi_set_virtual_address_map(
- 		memmap.desc_size * count,
- 		memmap.desc_size,
-@@ -916,7 +955,7 @@ void __init efi_enter_virtual_mode(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
- 		runtime_code_page_mkexec();
- 
--	kfree(new_memmap);
-+	__free_pages(new_memmap, new_memmap_shift);
- 
- 	/* clean DUMMY object */
- 	efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
--- 
-1.8.4
+Toshi
