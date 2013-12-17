@@ -1,101 +1,87 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v6 14/14] x86: kdebugfs do not use __va for getting
- setup_data virt addr
-Date: Tue, 17 Dec 2013 11:24:52 +0000
-Message-ID: <20131217112452.GA3145@console-pimps.org>
-References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
- <1387186235-15972-15-git-send-email-dyoung@redhat.com>
- <20131216163501.GB3873@console-pimps.org>
- <20131217062417.GE6751@dhcp-16-126.nay.redhat.com>
- <20131217065346.GG6751@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH 3/3] efi: Make efi virtual runtime map passing more robust
+Date: Tue, 17 Dec 2013 12:10:24 +0000
+Message-ID: <20131217121024.GB3145@console-pimps.org>
+References: <1387236997-26975-1-git-send-email-bp@alien8.de>
+ <1387236997-26975-4-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131217065346.GG6751-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <1387236997-26975-4-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 17 Dec, at 02:53:46PM, Dave Young wrote:
-> On 12/17/13 at 02:24pm, Dave Young wrote:
-> > On 12/16/13 at 04:35pm, Matt Fleming wrote:
-> > > On Mon, 16 Dec, at 05:30:35PM, Dave Young wrote:
-> > > > kdump kernel will use memmap=exactmap kernel cmdline, but __va does not
-> > > > work in case memmap=exactmap, so let's always use ioremap_cache.
-> > > > 
-> > > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > > > ---
-> > > >  arch/x86/kernel/kdebugfs.c | 35 +++++++++++------------------------
-> > > >  1 file changed, 11 insertions(+), 24 deletions(-)
-> > > 
-> > > Dave, I've no idea why this change is necessary from the commit log. Is
-> > > it required for kexec to function on EFI? Why does __va() not work in
-> > > the memmap=exactmap case?
-> > > 
-> > 
-> > During previous kdump tests I saw panics while reading the setup_data in debugfs.
-> > I thought it is caused by some unmapped addresses. At that time I also reproduced
-> > it by booting the non-kexec kernel with memmap=exact.
-> > 
-> > Since you are asking about this I'm testing it again but I seems can not
-> > reproduce this problem any more, it's weird.
-> > 
-> > I should dug more about it and save the panic messages.
-> > 
-> > So let's drop this patch for now, I will keep an eye on this and address it later
-> > if I can find the problem again.
-> 
-> Reproduced it again in normal boot with memmap=exactmap, but I agree it's a corner
-> case, I remember I saw this in kdump kernel, but I still did not see it in today's
-> testing so I think move this issue out of this patch series is fine to me.
- 
-Please include the following oops when you submit this patch again.
+On Tue, 17 Dec, at 12:36:37AM, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+>=20
+> Currently, running SetVirtualAddressMap() and passing the physical
+> address of the virtual map array was working only by a lucky coincide=
+nce
+> because the memory was present in the EFI page table too. Until Toshi
+> went and booted this on a big HP box - the krealloc() manner of resiz=
+ing
+> the memmap we're doing did allocate from such physical addresses whic=
+h
+> were not mapped anymore and boom:
+>=20
+> http://lkml.kernel.org/r/1386806463.1791.295.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org
+>=20
+> One way to take care of that issue is to reimplement the krealloc thi=
+ng
+> but with pages. We start with contiguous pages of order 1, i.e. 2 pag=
+es,
+> and when we deplete that memory (shouldn't happen all that often but =
+you
+> know firmware) we realloc the next power-of-two pages.
+>=20
+> Having the pages, it is much more handy and easy to map them into the
+> EFI page table with the already existing mapping code which we're usi=
+ng
+> for building the virtual mappings.
+>=20
+> And, it doesn't matter all that much how much pages we've used as we'=
+re
+> freeing them right after they've fulfilled their purpose at the end o=
+f
+> the function anyway.
+>=20
+> Reported-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi.c | 57 +++++++++++++++++++++++++++++++++++=
++++-------
+>  1 file changed, 48 insertions(+), 9 deletions(-)
 
-> [    0.359467] BUG: unable to handle kernel paging request at ffff8800d5592020
-> [    0.359472] IP: [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-> [    0.359474] PGD 316b067 PUD 37031063 PMD 0 
-> [    0.359476] Oops: 0000 [#1] PREEMPT SMP 
-> [    0.359477] Modules linked in:
-> [    0.359480] CPU: 1 PID: 1 Comm: swapper/0 Not tainted 3.13.0-rc3+ #65
-> [    0.359481] Hardware name: Hewlett-Packard HP Z420 Workstation/1589, BIOS J61 v03.15 05/09/2013
-> [    0.359482] task: ffff880037022000 ti: ffff880037188000 task.ti: ffff880037188000
-> [    0.359484] RIP: 0010:[<ffffffff817dbdbc>]  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-> [    0.359485] RSP: 0000:ffff880037189e30  EFLAGS: 00010286
-> [    0.359486] RAX: ffff8800372e30e0 RBX: ffff8800372e30e0 RCX: 0000000000000191
-> [    0.359486] RDX: 0000000000000000 RSI: ffffffff8168a39e RDI: ffff880037189e50
-> [    0.359487] RBP: ffff880037189e90 R08: ffff8800372e30e0 R09: 0000000000000000
-> [    0.359488] R10: 0000000000000000 R11: 0000000000000000 R12: ffff88003640aea0
-> [    0.359489] R13: 00000000d5592018 R14: ffff88003640b200 R15: ffff8800d5592018
-> [    0.359490] FS:  0000000000000000(0000) GS:ffff880037480000(0000) knlGS:0000000000000000
-> [    0.359491] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [    0.359491] CR2: ffff8800d5592020 CR3: 0000000002716000 CR4: 00000000000407e0
-> [    0.359492] Stack:
-> [    0.359494]  ffffffff817da6d5 ffff88003640b0e0 ffff88003640afc0 0000000000000004
-> [    0.359496]  ffff880037180033 ffffffff8149d82d 00000000c9b42d58 ffffffff817dbca2
-> [    0.359498]  0000000000000000 00000000000000f3 0000000000000000 0000000000000000
-> [    0.359499] Call Trace:
-> [    0.359502]  [<ffffffff817da6d5>] ? boot_params_ksysfs_init+0x1ff/0x244
-> [    0.359507]  [<ffffffff8149d82d>] ? mutex_unlock+0x9/0xb
-> [    0.359508]  [<ffffffff817dbca2>] ? topology_init+0x36/0x36
-> [    0.359512]  [<ffffffff810002bf>] do_one_initcall+0xae/0x15b
-> [    0.359515]  [<ffffffff81078500>] ? parameq+0xb/0x1f
-> [    0.359516]  [<ffffffff81078770>] ? parse_args+0x25c/0x33a
-> [    0.359519]  [<ffffffff817d5ec6>] kernel_init_freeable+0x115/0x19b
-> [    0.359521]  [<ffffffff817d573d>] ? do_early_param+0x88/0x88
-> [    0.359523]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
-> [    0.359524]  [<ffffffff81489362>] kernel_init+0x9/0xfa
-> [    0.359527]  [<ffffffff8149fd0c>] ret_from_fork+0x7c/0xb0
-> [    0.359528]  [<ffffffff81489359>] ? rest_init+0xbd/0xbd
-> [    0.359548] Code: ff 48 85 c0 48 89 c3 0f 84 b9 00 00 00 49 bf 00 00 00 00 00 88 ff ff 4c 89 28 8b 55 bc 48 8d 7d c0 4d 01 ef 48 c 
-> [    0.359549] RIP  [<ffffffff817dbdbc>] arch_kdebugfs_init+0x11a/0x201
-> [    0.359550]  RSP <ffff880037189e30>
-> [    0.359550] CR2: ffff8800d5592020
-> [    0.359559] ---[ end trace d52b3fbe64a26115 ]---
-> [    0.621287] kworker/u8:0 (43) used greatest stack depth: 5232 bytes left
-> [    0.628021] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000009
-> [    0.628021] 
+[...]
 
--- 
+> @@ -794,12 +814,13 @@ void __init old_map_region(efi_memory_desc_t *m=
+d)
+>   */
+>  void __init efi_enter_virtual_mode(void)
+>  {
+> +	pgd_t *pgd =3D (pgd_t *)__va(real_mode_header->trampoline_pgd);
+> +	unsigned long size, new_memmap_left =3D 0;
+>  	efi_memory_desc_t *md, *prev_md =3D NULL;
+> +	int count =3D 0, new_memmap_shift =3D 0;
+>  	void *p, *new_memmap =3D NULL;
+> -	unsigned long size;
+>  	efi_status_t status;
+>  	u64 end, systab;
+> -	int count =3D 0;
+> =20
+>  	efi.systab =3D NULL;
+
+You sunk my i386 battleship,
+
+/home/build/git/efi/arch/x86/platform/efi/efi.c:824:24: error: =E2=80=98=
+struct real_mode_header=E2=80=99 has no member named =E2=80=98trampolin=
+e_pgd=E2=80=99
+make[4]: *** [arch/x86/platform/efi/efi.o] Error 1
+make[3]: *** [arch/x86/platform/efi] Error 2
+
+--=20
 Matt Fleming, Intel Open Source Technology Center
