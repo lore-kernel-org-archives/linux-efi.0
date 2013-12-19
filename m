@@ -1,35 +1,40 @@
-From: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
-Subject: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME
-Date: Thu, 19 Dec 2013 17:04:45 +0100
-Message-ID: <20131219170445.42b50a5b@linux.lan.towertech.it>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com>
-	<52B309EB.90300@zytor.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v6 10/14] efi: only print saved efi runtime maps instead
+ of all memmap ranges for kexec
+Date: Thu, 19 Dec 2013 16:41:44 +0000
+Message-ID: <20131219164144.GG3145@console-pimps.org>
+References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
+ <1387186235-15972-11-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B309EB.90300-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1387186235-15972-11-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 19 Dec 2013 06:59:55 -0800
-"H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> wrote:
-
-> EFI time is something we used to support and ripped out, because it
-> doesn't work well, *at all*.
+On Mon, 16 Dec, at 05:30:31PM, Dave Young wrote:
+> For kexec/kdump kernel efi runtime mappings are saved, printing original whole
+> memmap ranges does not make sense anymore. So introduce a new function to only
+> print runtime maps in case kexec/kdump kernel is used.
 > 
-> I am hyper-skeptical to reintroducing them, and *definitely* will veto
-> reintroducing them on a system which has PNP0B0x devices present.
+> changelog:
+> Matt: use efi_setup instead of esdata
+>       share function print_efi_memmap for both normal and kexec boot.
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi.c | 24 +++++++++++++++++-------
+>  1 file changed, 17 insertions(+), 7 deletions(-)
 
- Definitely agree.
+Thinking about this a bit more, I'm not at all sure why this patch
+exists.
+
+Why do we not want to print the entire memory map range like we did in
+the first kernel? The e820 map is printed exactly like it was in the
+first kernel, why should the EFI memmap be special?
 
 -- 
-
- Best regards,
-
- Alessandro Zummo,
-  Tower Technologies - Torino, Italy
-
-  http://www.towertech.it
+Matt Fleming, Intel Open Source Technology Center
