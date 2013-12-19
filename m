@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [RFC PATCH 11/14] rtc: switch to get/set rtc time to efi functions if CMOS RTC Not Present git set.
-Date: Thu, 19 Dec 2013 15:51:52 +0800
-Message-ID: <1387439515-8926-12-git-send-email-jlee@suse.com>
+Subject: [RFC PATCH 09/14] efi: move functions of access efi time to header file for sharing
+Date: Thu, 19 Dec 2013 15:51:50 +0800
+Message-ID: <1387439515-8926-10-git-send-email-jlee@suse.com>
 References: <1387439515-8926-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1387439515-8926-1-git-send-email-jlee@suse.com>
@@ -10,89 +10,451 @@ To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech
 Cc: Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-When CMOS RTC Not Present git set in FADT, system should not access CMOS
-interface for time. This patch move get/set rtc time function from CMOS
-to EFI runtime on x86_64 machine. And, it also set the BUG_ON check in
-rtc_cmos_read/write function to avoid access it.
+There have some functions, e.g. compute_yday, compute_wday, convert efi
+time... are duplicated in efirtc, rtc-efi and will also used in rtc.c.
+So this patch moved those functions of access efi time to efi.h header
+file for sharing.
 
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/kernel/rtc.c     |    8 ++++++++
- include/asm-generic/rtc.h |   22 ++++++++++++++++++++++
- 2 files changed, 30 insertions(+), 0 deletions(-)
+ drivers/char/efirtc.c |   98 ------------------------------------
+ drivers/rtc/rtc-efi.c |  133 ++----------------------------------------------
+ include/linux/efi.h   |  134 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 140 insertions(+), 225 deletions(-)
 
-diff --git a/arch/x86/kernel/rtc.c b/arch/x86/kernel/rtc.c
-index 9b6c568..a54cd09 100644
---- a/arch/x86/kernel/rtc.c
-+++ b/arch/x86/kernel/rtc.c
-@@ -117,6 +117,10 @@ unsigned char rtc_cmos_read(unsigned char addr)
- {
- 	unsigned char val;
+diff --git a/drivers/char/efirtc.c b/drivers/char/efirtc.c
+index e39e740..8a30a02 100644
+--- a/drivers/char/efirtc.c
++++ b/drivers/char/efirtc.c
+@@ -41,109 +41,11 @@
  
-+	BUG_ON(acpi_gbl_FADT.header.revision >= 5 &&
-+	       acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC &&
-+	       addr <= RTC_YEAR);
-+
- 	lock_cmos_prefix(addr);
- 	outb(addr, RTC_PORT(0));
- 	val = inb(RTC_PORT(1));
-@@ -128,6 +132,10 @@ EXPORT_SYMBOL(rtc_cmos_read);
+ #define EFI_RTC_VERSION		"0.4"
  
- void rtc_cmos_write(unsigned char val, unsigned char addr)
+-#define EFI_ISDST (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
+-/*
+- * EFI Epoch is 1/1/1998
+- */
+-#define EFI_RTC_EPOCH		1998
+-
+ static DEFINE_SPINLOCK(efi_rtc_lock);
+ 
+ static long efi_rtc_ioctl(struct file *file, unsigned int cmd,
+ 							unsigned long arg);
+ 
+-#define is_leap(year) \
+-          ((year) % 4 == 0 && ((year) % 100 != 0 || (year) % 400 == 0))
+-
+-static const unsigned short int __mon_yday[2][13] =
+-{
+-	/* Normal years.  */
+-	{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
+-	/* Leap years.  */  
+-	{ 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
+-};
+-
+-/*
+- * returns day of the year [0-365]
+- */
+-static inline int
+-compute_yday(efi_time_t *eft)
+-{
+-	/* efi_time_t.month is in the [1-12] so, we need -1 */
+-	return  __mon_yday[is_leap(eft->year)][eft->month-1]+ eft->day -1;
+-}
+-/*
+- * returns day of the week [0-6] 0=Sunday
+- *
+- * Don't try to provide a year that's before 1998, please !
+- */
+-static int
+-compute_wday(efi_time_t *eft)
+-{
+-	int y;
+-	int ndays = 0;
+-
+-	if ( eft->year < 1998 ) {
+-		printk(KERN_ERR "efirtc: EFI year < 1998, invalid date\n");
+-		return -1;
+-	}
+-
+-	for(y=EFI_RTC_EPOCH; y < eft->year; y++ ) {
+-		ndays += 365 + (is_leap(y) ? 1 : 0);
+-	}
+-	ndays += compute_yday(eft);
+-
+-	/*
+-	 * 4=1/1/1998 was a Thursday
+-	 */
+-	return (ndays + 4) % 7;
+-}
+-
+-static void
+-convert_to_efi_time(struct rtc_time *wtime, efi_time_t *eft)
+-{
+-
+-	eft->year	= wtime->tm_year + 1900;
+-	eft->month	= wtime->tm_mon + 1; 
+-	eft->day	= wtime->tm_mday;
+-	eft->hour	= wtime->tm_hour;
+-	eft->minute	= wtime->tm_min;
+-	eft->second 	= wtime->tm_sec;
+-	eft->nanosecond = 0; 
+-	eft->daylight	= wtime->tm_isdst ? EFI_ISDST: 0;
+-	eft->timezone	= EFI_UNSPECIFIED_TIMEZONE;
+-}
+-
+-static void
+-convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
+-{
+-	memset(wtime, 0, sizeof(*wtime));
+-	wtime->tm_sec  = eft->second;
+-	wtime->tm_min  = eft->minute;
+-	wtime->tm_hour = eft->hour;
+-	wtime->tm_mday = eft->day;
+-	wtime->tm_mon  = eft->month - 1;
+-	wtime->tm_year = eft->year - 1900;
+-
+-	/* day of the week [0-6], Sunday=0 */
+-	wtime->tm_wday = compute_wday(eft);
+-
+-	/* day in the year [1-365]*/
+-	wtime->tm_yday = compute_yday(eft);
+-
+-
+-	switch (eft->daylight & EFI_ISDST) {
+-		case EFI_ISDST:
+-			wtime->tm_isdst = 1;
+-			break;
+-		case EFI_TIME_ADJUST_DAYLIGHT:
+-			wtime->tm_isdst = 0;
+-			break;
+-		default:
+-			wtime->tm_isdst = -1;
+-	}
+-}
+-
+ static long efi_rtc_ioctl(struct file *file, unsigned int cmd,
+ 							unsigned long arg)
  {
-+	BUG_ON(acpi_gbl_FADT.header.revision >= 5 &&
-+	       acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC &&
-+	       addr <= RTC_YEAR);
-+
- 	lock_cmos_prefix(addr);
- 	outb(addr, RTC_PORT(0));
- 	outb(val, RTC_PORT(1));
-diff --git a/include/asm-generic/rtc.h b/include/asm-generic/rtc.h
-index fa86f24..4ba8aa6 100644
---- a/include/asm-generic/rtc.h
-+++ b/include/asm-generic/rtc.h
-@@ -16,6 +16,8 @@
+diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+index 693ea47..4687022 100644
+--- a/drivers/rtc/rtc-efi.c
++++ b/drivers/rtc/rtc-efi.c
+@@ -22,95 +22,6 @@
  #include <linux/rtc.h>
- #include <linux/bcd.h>
- #include <linux/delay.h>
-+#include <linux/efi.h>
-+#include <linux/acpi.h>
+ #include <linux/efi.h>
  
- #define RTC_PIE 0x40		/* periodic interrupt enable */
- #define RTC_AIE 0x20		/* alarm interrupt enable */
-@@ -51,6 +53,16 @@ static inline unsigned int __get_rtc_time(struct rtc_time *time)
- 	unsigned int real_year;
+-#define EFI_ISDST (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
+-/*
+- * EFI Epoch is 1/1/1998
+- */
+-#define EFI_RTC_EPOCH		1998
+-
+-/*
+- * returns day of the year [0-365]
+- */
+-static inline int
+-compute_yday(efi_time_t *eft)
+-{
+-	/* efi_time_t.month is in the [1-12] so, we need -1 */
+-	return rtc_year_days(eft->day, eft->month - 1, eft->year);
+-}
+-/*
+- * returns day of the week [0-6] 0=Sunday
+- *
+- * Don't try to provide a year that's before 1998, please !
+- */
+-static int
+-compute_wday(efi_time_t *eft)
+-{
+-	int y;
+-	int ndays = 0;
+-
+-	if (eft->year < 1998) {
+-		pr_err("EFI year < 1998, invalid date\n");
+-		return -1;
+-	}
+-
+-	for (y = EFI_RTC_EPOCH; y < eft->year; y++)
+-		ndays += 365 + (is_leap_year(y) ? 1 : 0);
+-
+-	ndays += compute_yday(eft);
+-
+-	/*
+-	 * 4=1/1/1998 was a Thursday
+-	 */
+-	return (ndays + 4) % 7;
+-}
+-
+-static void
+-convert_to_efi_time(struct rtc_time *wtime, efi_time_t *eft)
+-{
+-	eft->year	= wtime->tm_year + 1900;
+-	eft->month	= wtime->tm_mon + 1;
+-	eft->day	= wtime->tm_mday;
+-	eft->hour	= wtime->tm_hour;
+-	eft->minute	= wtime->tm_min;
+-	eft->second	= wtime->tm_sec;
+-	eft->nanosecond = 0;
+-	eft->daylight	= wtime->tm_isdst ? EFI_ISDST : 0;
+-#ifdef CONFIG_IA64
+-	/* avoid overwrite timezone on non-IA64 platform. e.g. x86_64 */
+-	eft->timezone	= EFI_UNSPECIFIED_TIMEZONE;
+-#endif
+-}
+-
+-static void
+-convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
+-{
+-	memset(wtime, 0, sizeof(*wtime));
+-	wtime->tm_sec  = eft->second;
+-	wtime->tm_min  = eft->minute;
+-	wtime->tm_hour = eft->hour;
+-	wtime->tm_mday = eft->day;
+-	wtime->tm_mon  = eft->month - 1;
+-	wtime->tm_year = eft->year - 1900;
+-
+-	/* day of the week [0-6], Sunday=0 */
+-	wtime->tm_wday = compute_wday(eft);
+-
+-	/* day in the year [1-365]*/
+-	wtime->tm_yday = compute_yday(eft);
+-
+-
+-	switch (eft->daylight & EFI_ISDST) {
+-	case EFI_ISDST:
+-		wtime->tm_isdst = 1;
+-		break;
+-	case EFI_TIME_ADJUST_DAYLIGHT:
+-		wtime->tm_isdst = 0;
+-		break;
+-	default:
+-		wtime->tm_isdst = -1;
+-	}
+-}
+-
+ static int efi_read_gmtoff(struct device *dev, long int *arg)
+ {
+ 	efi_status_t status;
+@@ -230,54 +141,22 @@ static int efi_set_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
+ 	return status == EFI_SUCCESS ? 0 : -EINVAL;
+ }
+ 
+-static int efi_read_time(struct device *dev, struct rtc_time *tm)
++static int efi_rtc_read_time(struct device *dev, struct rtc_time *tm)
+ {
+-	efi_status_t status;
+-	efi_time_t eft;
+-	efi_time_cap_t cap;
+-
+-	status = efi.get_time(&eft, &cap);
+-
+-	if (status != EFI_SUCCESS) {
+-		/* should never happen */
+-		dev_err(dev, "can't read time\n");
+-		return -EINVAL;
+-	}
+-
+-	convert_from_efi_time(&eft, tm);
+-
+-	return rtc_valid_tm(tm);
++	return efi_read_time(tm);
+ }
+ 
+-static int efi_set_time(struct device *dev, struct rtc_time *tm)
++static int efi_rtc_set_time(struct device *dev, struct rtc_time *tm)
+ {
+-	efi_status_t status;
+-	efi_time_t eft;
+-#ifdef CONFIG_X86
+-	efi_time_cap_t cap;
+-
+-	/* read time for grab timezone to avoid overwrite it */
+-	status = efi.get_time(&eft, &cap);
+-
+-	if (status != EFI_SUCCESS) {
+-		pr_err("efitime: can't read time\n");
+-		return -EINVAL;
+-	}
+-#endif
+-
+-	convert_to_efi_time(tm, &eft);
+-
+-	status = efi.set_time(&eft);
+-
+-	return status == EFI_SUCCESS ? 0 : -EINVAL;
++	return efi_set_time(tm);
+ }
+ 
+ static const struct rtc_class_ops efi_rtc_ops = {
+ #ifdef CONFIG_X86
+ 	.ioctl = efi_rtc_ioctl,
  #endif
+-	.read_time = efi_read_time,
+-	.set_time = efi_set_time,
++	.read_time = efi_rtc_read_time,
++	.set_time = efi_rtc_set_time,
+ 	.read_alarm = efi_read_alarm,
+ 	.set_alarm = efi_set_alarm,
+ };
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index fc8fa0e..3859f3e 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -132,6 +132,12 @@ typedef int (*efi_freemem_callback_t) (u64 start, u64 end, void *arg);
+ #define EFI_TIME_ADJUST_DAYLIGHT 0x1
+ #define EFI_TIME_IN_DAYLIGHT     0x2
+ #define EFI_UNSPECIFIED_TIMEZONE 0x07ff
++#define EFI_ISDST		 (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
++
++/*
++ * EFI Epoch is 1/1/1998
++ */
++#define EFI_RTC_EPOCH           1998
  
-+	if (acpi_gbl_FADT.header.revision >= 5 &&
-+	    acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC) {
-+#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
-+		printk_once(KERN_INFO "efi: get rtc time by EFI\n");
-+		return efi_read_time(time);
-+#else
-+		BUG();
-+#endif
+ typedef struct {
+ 	u16 year;
+@@ -154,6 +160,90 @@ typedef struct {
+ } efi_time_cap_t;
+ 
+ /*
++ * returns day of the year [0-365]
++ */
++static inline int
++compute_yday(efi_time_t *eft)
++{
++	/* efi_time_t.month is in the [1-12] so, we need -1 */
++	return rtc_year_days(eft->day, eft->month - 1, eft->year);
++}
++
++/*
++ * returns day of the week [0-6] 0=Sunday
++ *
++ * Don't try to provide a year that's before 1998, please !
++ */
++static inline int
++compute_wday(efi_time_t *eft)
++{
++	int y;
++	int ndays = 0;
++
++	if (eft->year < 1998) {
++		pr_err("EFI year < 1998, invalid date\n");
++		return -1;
 +	}
 +
- 	/*
- 	 * read RTC once any update in progress is done. The update
- 	 * can take just over 2ms. We wait 20ms. There is no need to
-@@ -123,6 +135,16 @@ static inline int __set_rtc_time(struct rtc_time *time)
- 	unsigned int real_yrs, leap_yr;
- #endif
- 
-+	if (acpi_gbl_FADT.header.revision >= 5 &&
-+	    acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC) {
-+#if defined(CONFIG_EFI) && defined(CONFIG_X86_64)
-+		printk_once(KERN_INFO "efi: set rtc time by EFI\n");
-+		return efi_set_time(time);
-+#else
-+		BUG();
++	for (y = EFI_RTC_EPOCH; y < eft->year; y++)
++		ndays += 365 + (is_leap_year(y) ? 1 : 0);
++
++	ndays += compute_yday(eft);
++
++	/*
++	 * 4=1/1/1998 was a Thursday
++	 */
++	return (ndays + 4) % 7;
++}
++
++static inline void
++convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
++{
++	memset(wtime, 0, sizeof(*wtime));
++	wtime->tm_sec  = eft->second;
++	wtime->tm_min  = eft->minute;
++	wtime->tm_hour = eft->hour;
++	wtime->tm_mday = eft->day;
++	wtime->tm_mon  = eft->month - 1;
++	wtime->tm_year = eft->year - 1900;
++
++	/* day of the week [0-6], Sunday=0 */
++	wtime->tm_wday = compute_wday(eft);
++
++	/* day in the year [1-365]*/
++	wtime->tm_yday = compute_yday(eft);
++
++	switch (eft->daylight & EFI_ISDST) {
++	case EFI_ISDST:
++		wtime->tm_isdst = 1;
++		break;
++	case EFI_TIME_ADJUST_DAYLIGHT:
++		wtime->tm_isdst = 0;
++		break;
++	default:
++		wtime->tm_isdst = -1;
++	}
++}
++
++static inline void
++convert_to_efi_time(struct rtc_time *wtime, efi_time_t *eft)
++{
++	eft->year       = wtime->tm_year + 1900;
++	eft->month      = wtime->tm_mon + 1;
++	eft->day        = wtime->tm_mday;
++	eft->hour       = wtime->tm_hour;
++	eft->minute     = wtime->tm_min;
++	eft->second     = wtime->tm_sec;
++	eft->nanosecond = 0;
++	eft->daylight   = wtime->tm_isdst ? EFI_ISDST : 0;
++#ifdef CONFIG_IA64
++	/* avoid overwrite timezone on non-IA64 platform. e.g. x86_64 */
++	eft->timezone   = EFI_UNSPECIFIED_TIMEZONE;
 +#endif
++}
++
++
++/*
+  * EFI Boot Services table
+  */
+ typedef struct {
+@@ -585,6 +675,50 @@ efi_guid_unparse(efi_guid_t *guid, char *out)
+         return out;
+ }
+ 
++static inline int
++efi_set_time(struct rtc_time *tm)
++{
++	efi_status_t status;
++	efi_time_t eft;
++#ifdef CONFIG_X86
++	efi_time_cap_t cap;
++
++	/* read time for grab timezone to avoid overwrite it */
++	status = efi.get_time(&eft, &cap);
++
++	if (status != EFI_SUCCESS) {
++		pr_err("efi: can't read time\n");
++		return -EINVAL;
++	}
++#endif
++
++	convert_to_efi_time(tm, &eft);
++
++	status = efi.set_time(&eft);
++
++	return status == EFI_SUCCESS ? 0 : -EINVAL;
++}
++
++static inline int
++efi_read_time(struct rtc_time *tm)
++{
++	efi_status_t status;
++	efi_time_t eft;
++	efi_time_cap_t cap;
++
++	status = efi.get_time(&eft, &cap);
++
++	if (status != EFI_SUCCESS) {
++		/* should never happen */
++		pr_err("efi: can't read time\n");
++		return -EINVAL;
 +	}
 +
- 	yrs = time->tm_year;
- 	mon = time->tm_mon + 1;   /* tm_mon starts at zero */
- 	day = time->tm_mday;
++	convert_from_efi_time(&eft, tm);
++
++	return rtc_valid_tm(tm);
++}
++
+ extern void efi_init (void);
+ extern void *efi_get_pal_addr (void);
+ extern void efi_map_pal_code (void);
 -- 
 1.6.4.2
