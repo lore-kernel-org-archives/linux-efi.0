@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [RFC PATCH 05/14] rtc: Add RTC driver of ACPI Time and Alarm Device
-Date: Thu, 19 Dec 2013 15:51:46 +0800
-Message-ID: <1387439515-8926-6-git-send-email-jlee@suse.com>
+Subject: [RFC PATCH 07/14] rtc-efi: add GMTOFF support to rtc_efi
+Date: Thu, 19 Dec 2013 15:51:48 +0800
+Message-ID: <1387439515-8926-8-git-send-email-jlee@suse.com>
 References: <1387439515-8926-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1387439515-8926-1-git-send-email-jlee@suse.com>
@@ -10,229 +10,115 @@ To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech
 Cc: Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch add the RTC driver of ACPI TAD to provide userspace access
-ACPI time through RTC interface.
+Per UEFI 2.3.1 spec, we can use SetTime() to store the timezone value to
+BIOS and get it back by GetTime(). It's good for installation system to
+gain the default timezone setting from BIOS that was set by
+manufacturer.
+
+This patch adds 2 new iotrl: RTC_RD_GMTOFF and RTC_SET_GMTOFF to rtc_efi
+support get/set gmt offset that mapping to the GUN's tm_gmtoff extension
+(Seconds east of UTC).
+Due the timezone definition of UEFI is "Localtime = UTC - TimeZone",
+rtc_efi driver will transfer the format between GNU and EFI.
+
+The logic of timezone only affect on x86 architecture and keep the
+original EFI_UNSPECIFIED_TIMEZONE value on IA64.
 
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- drivers/rtc/Kconfig       |   10 ++
- drivers/rtc/Makefile      |    1 +
- drivers/rtc/rtc-acpitad.c |  294 +++++++++++++++++++++++++++++++++++++++++++++
- drivers/rtc/rtc-dev.c     |    4 +
- drivers/rtc/rtc-sysfs.c   |    8 ++
- include/linux/rtc.h       |    5 +
- include/uapi/linux/rtc.h  |    5 +
- 7 files changed, 327 insertions(+), 0 deletions(-)
- create mode 100644 drivers/rtc/rtc-acpitad.c
+ drivers/rtc/rtc-efi.c |  100 ++++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 files changed, 99 insertions(+), 1 deletions(-)
 
-diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-index 0077302..349dbc4 100644
---- a/drivers/rtc/Kconfig
-+++ b/drivers/rtc/Kconfig
-@@ -878,6 +878,16 @@ config RTC_DRV_NUC900
- 	  If you say yes here you get support for the RTC subsystem of the
- 	  NUC910/NUC920 used in embedded systems.
+diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+index c4c3843..e0e3c7e 100644
+--- a/drivers/rtc/rtc-efi.c
++++ b/drivers/rtc/rtc-efi.c
+@@ -75,7 +75,10 @@ convert_to_efi_time(struct rtc_time *wtime, efi_time_t *eft)
+ 	eft->second	= wtime->tm_sec;
+ 	eft->nanosecond = 0;
+ 	eft->daylight	= wtime->tm_isdst ? EFI_ISDST : 0;
++#ifdef CONFIG_IA64
++	/* avoid overwrite timezone on non-IA64 platform. e.g. x86_64 */
+ 	eft->timezone	= EFI_UNSPECIFIED_TIMEZONE;
++#endif
+ }
  
-+config RTC_ACPI_TAD
-+	tristate "RTC ACPI Time and Alarm Device driver"
-+	help
-+	  This driver exposes ACPI 5.0 Time and Alarm Device as RTC device.
-+	  Say Y (or M) if you have a computer with ACPI 5.0 firmware that
-+	  implemented Time and Alarm Device.
-+
-+	  To compile this driver as a module, choose M here:
-+	  the module will be called rtc_acpitad.
-+
- comment "on-CPU RTC drivers"
+ static void
+@@ -108,6 +111,84 @@ convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
+ 	}
+ }
  
- config RTC_DRV_DAVINCI
-diff --git a/drivers/rtc/Makefile b/drivers/rtc/Makefile
-index 27b4bd8..bca5ab3 100644
---- a/drivers/rtc/Makefile
-+++ b/drivers/rtc/Makefile
-@@ -20,6 +20,7 @@ obj-$(CONFIG_RTC_DRV_88PM860X)  += rtc-88pm860x.o
- obj-$(CONFIG_RTC_DRV_88PM80X)	+= rtc-88pm80x.o
- obj-$(CONFIG_RTC_DRV_AB3100)	+= rtc-ab3100.o
- obj-$(CONFIG_RTC_DRV_AB8500)	+= rtc-ab8500.o
-+obj-$(CONFIG_RTC_ACPI_TAD)	+= rtc-acpitad.o
- obj-$(CONFIG_RTC_DRV_AS3722)	+= rtc-as3722.o
- obj-$(CONFIG_RTC_DRV_AT32AP700X)+= rtc-at32ap700x.o
- obj-$(CONFIG_RTC_DRV_AT91RM9200)+= rtc-at91rm9200.o
-diff --git a/drivers/rtc/rtc-acpitad.c b/drivers/rtc/rtc-acpitad.c
-new file mode 100644
-index 0000000..065a033
---- /dev/null
-+++ b/drivers/rtc/rtc-acpitad.c
-@@ -0,0 +1,294 @@
-+/* A RTC driver for ACPI 5.0 Time and Alarm Device
-+ *
-+ * Copyright (C) 2013 SUSE Linux Products GmbH. All rights reserved.
-+ * Written by Lee, Chun-Yi (jlee@suse.com)
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public Licence
-+ * as published by the Free Software Foundation; either version
-+ * 2 of the Licence, or (at your option) any later version.
-+ */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
-+#include <linux/module.h>
-+#include <linux/rtc.h>
-+#include <linux/platform_device.h>
-+#include <linux/acpi.h>
-+
-+/*
-+ * returns day of the year [0-365]
-+ */
-+static inline int
-+compute_yday(struct acpi_time *acpit)
++static int efi_read_gmtoff(struct device *dev, long int *arg)
 +{
-+	/* acpi_time.month is in the [1-12] so, we need -1 */
-+	return rtc_year_days(acpit->day, acpit->month - 1, acpit->year);
-+}
-+
-+/*
-+ * returns day of the week [0-6] 0=Sunday
-+ */
-+static int
-+compute_wday(struct acpi_time *acpit)
-+{
-+	int y;
-+	int ndays = 0;
-+
-+	if (acpit->year < 1900) {
-+		pr_err("ACPI year < 1900, invalid date\n");
-+		return -1;
-+	}
-+
-+	for (y = 1900; y < acpit->year; y++)
-+		ndays += 365 + (is_leap_year(y) ? 1 : 0);
-+
-+	ndays += compute_yday(acpit);
-+
-+	/*
-+	 * 1=1/1/1900 was a Monday
-+	 */
-+	return (ndays + 1) % 7;
-+}
-+
-+static void
-+convert_to_acpi_time(struct rtc_time *tm, struct acpi_time *acpit)
-+{
-+	acpit->year	    = tm->tm_year + 1900;
-+	acpit->month        = tm->tm_mon + 1;
-+	acpit->day          = tm->tm_mday;
-+	acpit->hour         = tm->tm_hour;
-+	acpit->minute       = tm->tm_min;
-+	acpit->second       = tm->tm_sec;
-+	acpit->milliseconds = 0;
-+	acpit->daylight	    = tm->tm_isdst ? ACPI_ISDST : 0;
-+}
-+
-+static void
-+convert_from_acpi_time(struct acpi_time *acpit, struct rtc_time *tm)
-+{
-+	memset(tm, 0, sizeof(*tm));
-+	tm->tm_sec	= acpit->second;
-+	tm->tm_min	= acpit->minute;
-+	tm->tm_hour	= acpit->hour;
-+	tm->tm_mday	= acpit->day;
-+	tm->tm_mon	= acpit->month - 1;
-+	tm->tm_year	= acpit->year - 1900;
-+
-+	/* day of the week [0-6], Sunday=0 */
-+	tm->tm_wday = compute_wday(acpit);
-+
-+	/* day in the year [1-365]*/
-+	tm->tm_yday = compute_yday(acpit);
-+
-+	switch (acpit->daylight & ACPI_ISDST) {
-+	case ACPI_ISDST:
-+		tm->tm_isdst = 1;
-+		break;
-+	case ACPI_TIME_AFFECTED_BY_DAYLIGHT:
-+		tm->tm_isdst = 0;
-+		break;
-+	default:
-+		tm->tm_isdst = -1;
-+	}
-+}
-+
-+static int acpitad_read_gmtoff(struct device *dev, long int *arg)
-+{
-+	struct acpi_time *acpit;
++	efi_status_t status;
++	efi_time_t eft;
++	efi_time_cap_t cap;
 +	s16 timezone;
-+	int ret;
 +
-+	acpit = kzalloc(sizeof(struct acpi_time), GFP_KERNEL);
-+	if (!acpit)
-+		return -ENOMEM;
++	status = efi.get_time(&eft, &cap);
 +
-+	ret = acpi_read_time(acpit);
-+	if (ret)
-+		goto error_read;
++	if (status != EFI_SUCCESS) {
++		/* should never happen */
++		pr_err("efitime: can't read time\n");
++		return -EINVAL;
++	}
 +
-+	/* transfer minutes to seconds east of UTC for userspace */
-+	timezone = (s16)le16_to_cpu(acpit->timezone);
-+	*arg = ACPI_UNSPECIFIED_TIMEZONE * 60;
-+	if (abs(timezone) != ACPI_UNSPECIFIED_TIMEZONE &&
++	timezone = (s16)le16_to_cpu(eft.timezone);
++	*arg = EFI_UNSPECIFIED_TIMEZONE * 60;
++	if (abs(timezone) != EFI_UNSPECIFIED_TIMEZONE &&
 +	    abs(timezone) <= 1440)
 +		*arg = timezone * 60 * -1;
 +
-+error_read:
-+	kfree(acpit);
-+
-+	return ret;
++	return 0;
 +}
 +
-+
-+static int acpitad_set_gmtoff(struct device *dev, long int arg)
++static int efi_set_gmtoff(struct device *dev, long int arg)
 +{
-+	struct acpi_time *acpit;
++	efi_status_t status;
++	efi_time_t eft;
++	efi_time_cap_t cap;
 +	s16 timezone;
-+	int ret;
 +
 +	/* transfer seconds east of UTC to minutes for ACPI */
 +	timezone = arg / 60 * -1;
 +	if (abs(timezone) > 1440 &&
-+	    abs(timezone) != ACPI_UNSPECIFIED_TIMEZONE)
++	    abs(timezone) != EFI_UNSPECIFIED_TIMEZONE)
 +		return -EINVAL;
 +
 +	/* can not use -2047 */
-+	if (timezone == ACPI_UNSPECIFIED_TIMEZONE * -1)
-+		timezone = ACPI_UNSPECIFIED_TIMEZONE;
++	if (timezone == EFI_UNSPECIFIED_TIMEZONE * -1)
++		timezone = EFI_UNSPECIFIED_TIMEZONE;
 +
-+	acpit = kzalloc(sizeof(struct acpi_time), GFP_KERNEL);
-+	if (!acpit)
-+		return -ENOMEM;
++	status = efi.get_time(&eft, &cap);
 +
-+	ret = acpi_read_time(acpit);
-+	if (ret)
-+		goto error_read;
++	if (status != EFI_SUCCESS) {
++		pr_err("efitime: can't read time\n");
++		return -EINVAL;
++	}
 +
-+	acpit->timezone = (s16)cpu_to_le16(timezone);
-+	ret = acpi_set_time(acpit);
++	eft.timezone = (s16)cpu_to_le16(timezone);
++	status = efi.set_time(&eft);
++	if (status != EFI_SUCCESS) {
++		pr_err("efitime: can't set timezone\n");
++		return -EINVAL;
++	}
 +
-+error_read:
-+	kfree(acpit);
-+
-+	return ret;
++	return 0;
 +}
 +
-+static int acpitad_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
++static int efi_rtc_ioctl(struct device *dev, unsigned int cmd, unsigned long arg)
 +{
 +	long int gmtoff;
 +	int err;
 +
 +	switch (cmd) {
 +	case RTC_RD_GMTOFF:
-+		err = acpitad_read_gmtoff(dev, &gmtoff);
++		err = efi_read_gmtoff(dev, &gmtoff);
 +		if (err)
 +			return err;
 +		return put_user(gmtoff, (unsigned long __user *)arg);
 +	case RTC_SET_GMTOFF:
-+		return acpitad_set_gmtoff(dev, arg);
++		return efi_set_gmtoff(dev, arg);
 +	default:
 +		return -ENOIOCTLCMD;
 +	}
@@ -240,196 +126,58 @@ index 0000000..065a033
 +	return 0;
 +}
 +
-+static int acpitad_read_time(struct device *dev, struct rtc_time *tm)
-+{
-+	struct acpi_time *acpit;
-+	int ret;
+ static int efi_read_alarm(struct device *dev, struct rtc_wkalrm *wkalrm)
+ {
+ 	efi_time_t eft;
+@@ -172,6 +253,17 @@ static int efi_set_time(struct device *dev, struct rtc_time *tm)
+ {
+ 	efi_status_t status;
+ 	efi_time_t eft;
++#ifdef CONFIG_X86
++	efi_time_cap_t cap;
 +
-+	acpit = kzalloc(sizeof(struct acpi_time), GFP_KERNEL);
-+	if (!acpit)
-+		return -ENOMEM;
++	/* read time for grab timezone to avoid overwrite it */
++	status = efi.get_time(&eft, &cap);
 +
-+	ret = acpi_read_time(acpit);
-+	if (ret)
-+		return ret;
-+
-+	convert_from_acpi_time(acpit, tm);
-+
-+	return rtc_valid_tm(tm);
-+}
-+
-+static int acpitad_set_time(struct device *dev, struct rtc_time *tm)
-+{
-+	struct acpi_time *acpit;
-+	int ret;
-+
-+	acpit = kzalloc(sizeof(struct acpi_time), GFP_KERNEL);
-+	if (!acpit)
-+		return -ENOMEM;
-+
-+	/* read current timzone to avoid overwrite it by set time */
-+	ret = acpi_read_time(acpit);
-+	if (ret)
-+		goto error_read;
-+
-+	convert_to_acpi_time(tm, acpit);
-+
-+	ret = acpi_set_time(acpit);
-+
-+error_read:
-+	kfree(acpit);
-+	return ret;
-+}
-+
-+static struct rtc_class_ops acpi_rtc_ops = {
-+	.ioctl          = acpitad_rtc_ioctl,
-+	.read_time      = acpitad_read_time,
-+	.set_time       = acpitad_set_time,
-+};
-+
-+static int acpitad_rtc_probe(struct platform_device *dev)
-+{
-+	unsigned long cap;
-+	struct rtc_device *rtc;
-+	int ret;
-+
-+	ret = acpi_tad_get_capability(&cap);
-+	if (ret)
-+		return ret;
-+
-+	if (!(cap & TAD_CAP_GETSETTIME)) {
-+		acpi_rtc_ops.read_time = NULL;
-+		acpi_rtc_ops.set_time = NULL;
-+		pr_warn("No get/set time support\n");
++	if (status != EFI_SUCCESS) {
++		pr_err("efitime: can't read time\n");
++		return -EINVAL;
 +	}
-+
-+	/* ACPI Alarm at least need AC wake capability */
-+	if (!(cap & TAD_CAP_ACWAKE)) {
-+		acpi_rtc_ops.read_alarm = NULL;
-+		acpi_rtc_ops.set_alarm = NULL;
-+		pr_warn("No AC wake support\n");
-+	}
-+
-+	/* register rtc device */
-+	rtc = rtc_device_register("rtc-acpitad", &dev->dev, &acpi_rtc_ops,
-+					THIS_MODULE);
-+	if (IS_ERR(rtc))
-+		return PTR_ERR(rtc);
-+
-+	rtc->uie_unsupported = 1;
-+	rtc->caps = (RTC_TZ_CAP | RTC_DST_CAP);
-+	platform_set_drvdata(dev, rtc);
-+
-+	return 0;
-+}
-+
-+static int acpitad_rtc_remove(struct platform_device *dev)
-+{
-+	struct rtc_device *rtc = platform_get_drvdata(dev);
-+
-+	rtc_device_unregister(rtc);
-+
-+	return 0;
-+}
-+
-+static struct platform_driver acpitad_rtc_driver = {
-+	.driver = {
-+		.name = "rtc-acpitad",
-+		.owner = THIS_MODULE,
-+	},
-+	.probe = acpitad_rtc_probe,
-+	.remove = acpitad_rtc_remove,
-+};
-+
-+static int __init acpitad_rtc_init(void)
-+{
-+	return platform_driver_register(&acpitad_rtc_driver);
-+}
-+
-+static void __exit acpitad_rtc_exit(void)
-+{
-+	platform_driver_unregister(&acpitad_rtc_driver);
-+}
-+
-+module_init(acpitad_rtc_init);
-+module_exit(acpitad_rtc_exit);
-+
-+MODULE_AUTHOR("Lee, Chun-Yi <jlee@suse.com>");
-+MODULE_DESCRIPTION("RTC ACPI Time and Alarm Device driver");
-+MODULE_LICENSE("GPL");
-+MODULE_ALIAS("platform:rtc-acpitad");
-diff --git a/drivers/rtc/rtc-dev.c b/drivers/rtc/rtc-dev.c
-index d049393..aab70e7 100644
---- a/drivers/rtc/rtc-dev.c
-+++ b/drivers/rtc/rtc-dev.c
-@@ -398,6 +398,10 @@ static long rtc_dev_ioctl(struct file *file,
- 			err = -EFAULT;
- 		return err;
++#endif
  
-+	case RTC_CAPS_READ:
-+		err = put_user(rtc->caps, (unsigned int __user *)uarg);
-+		break;
-+
- 	default:
- 		/* Finally try the driver's ioctl interface */
- 		if (ops->ioctl) {
-diff --git a/drivers/rtc/rtc-sysfs.c b/drivers/rtc/rtc-sysfs.c
-index babd43b..bdffb8f 100644
---- a/drivers/rtc/rtc-sysfs.c
-+++ b/drivers/rtc/rtc-sysfs.c
-@@ -122,6 +122,13 @@ hctosys_show(struct device *dev, struct device_attribute *attr, char *buf)
+ 	convert_to_efi_time(tm, &eft);
+ 
+@@ -181,13 +273,16 @@ static int efi_set_time(struct device *dev, struct rtc_time *tm)
  }
- static DEVICE_ATTR_RO(hctosys);
  
-+static ssize_t
-+caps_show(struct device *dev, struct device_attribute *attr, char *buf)
-+{
-+       return sprintf(buf, "%d\n", to_rtc_device(dev)->caps);
-+}
-+static DEVICE_ATTR_RO(caps);
-+
- static struct attribute *rtc_attrs[] = {
- 	&dev_attr_name.attr,
- 	&dev_attr_date.attr,
-@@ -129,6 +136,7 @@ static struct attribute *rtc_attrs[] = {
- 	&dev_attr_since_epoch.attr,
- 	&dev_attr_max_user_freq.attr,
- 	&dev_attr_hctosys.attr,
-+	&dev_attr_caps.attr,
- 	NULL,
+ static const struct rtc_class_ops efi_rtc_ops = {
++#ifdef CONFIG_X86
++	.ioctl = efi_rtc_ioctl,
++#endif
+ 	.read_time = efi_read_time,
+ 	.set_time = efi_set_time,
+ 	.read_alarm = efi_read_alarm,
+ 	.set_alarm = efi_set_alarm,
  };
- ATTRIBUTE_GROUPS(rtc);
-diff --git a/include/linux/rtc.h b/include/linux/rtc.h
-index c2c2897..e6380ec 100644
---- a/include/linux/rtc.h
-+++ b/include/linux/rtc.h
-@@ -116,6 +116,11 @@ struct rtc_device
- 	/* Some hardware can't support UIE mode */
- 	int uie_unsupported;
  
-+	/* Time Zone and Daylight capabilities */
-+#define        RTC_TZ_CAP      (1 << 0)
-+#define        RTC_DST_CAP     (1 << 1)
-+	int caps;
-+
- #ifdef CONFIG_RTC_INTF_DEV_UIE_EMUL
- 	struct work_struct uie_task;
- 	struct timer_list uie_timer;
-diff --git a/include/uapi/linux/rtc.h b/include/uapi/linux/rtc.h
-index f8c82e6..5533914 100644
---- a/include/uapi/linux/rtc.h
-+++ b/include/uapi/linux/rtc.h
-@@ -94,6 +94,11 @@ struct rtc_pll_info {
- #define RTC_VL_READ	_IOR('p', 0x13, int)	/* Voltage low detector */
- #define RTC_VL_CLR	_IO('p', 0x14)		/* Clear voltage low information */
+-static int __init efi_rtc_probe(struct platform_device *dev)
++static int efi_rtc_probe(struct platform_device *dev)
+ {
+ 	struct rtc_device *rtc;
  
-+#define RTC_RD_GMTOFF  _IOR('p', 0x15, long int)       /* Read time zone return seconds east of UTC */
-+#define RTC_SET_GMTOFF _IOW('p', 0x16, long int)       /* Set time zone input seconds east of UTC */
+@@ -196,6 +291,8 @@ static int __init efi_rtc_probe(struct platform_device *dev)
+ 	if (IS_ERR(rtc))
+ 		return PTR_ERR(rtc);
+ 
++	rtc->caps = (RTC_TZ_CAP | RTC_DST_CAP);
 +
-+#define RTC_CAPS_READ  _IOR('p', 0x17, unsigned int)   /* Get capabilities, e.g. TZ, DST */
-+
- /* interrupt flags */
- #define RTC_IRQF 0x80	/* Any of the following is active */
- #define RTC_PF 0x40	/* Periodic interrupt */
+ 	platform_set_drvdata(dev, rtc);
+ 
+ 	return 0;
+@@ -213,3 +310,4 @@ module_platform_driver_probe(efi_rtc_driver, efi_rtc_probe);
+ MODULE_AUTHOR("dann frazier <dannf@hp.com>");
+ MODULE_LICENSE("GPL");
+ MODULE_DESCRIPTION("EFI RTC driver");
++MODULE_ALIAS("platform:rtc-efi");
 -- 
 1.6.4.2
