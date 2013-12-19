@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [RFC PATCH 12/14] efi: adjust system time base on timezone from EFI time services
-Date: Thu, 19 Dec 2013 15:51:53 +0800
-Message-ID: <1387439515-8926-13-git-send-email-jlee@suse.com>
+Subject: [TEST PATCH 14/14] acpi: add early parameter to set CMOS RTC Not Present bit for testing
+Date: Thu, 19 Dec 2013 15:51:55 +0800
+Message-ID: <1387439515-8926-15-git-send-email-jlee@suse.com>
 References: <1387439515-8926-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1387439515-8926-1-git-send-email-jlee@suse.com>
@@ -10,129 +10,55 @@ To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech
 Cc: Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-EFI time services provide the interface to store timezone to BIOS. The
-timezone value from EFI indicates the offset of RTC time in minutes from
-UTC.
-The formula is: Localtime = UTC - TimeZone.
+This is a patch for testing that will not go to any git tree.
 
-This patch add a efI_warp_clock() function to initial process for adjust
-system time base on timezone value from EFI time services. It will also
-set persistent_clock_is_local global variable to avoid user space
-adjust timezone again.
-
-This efi warp clock mechanism will triggered on x86_64 EFI machine when
-timezone value is neither 0 nor 2047(UNSPECIFIED), kernel assume the
-value of RTC is local time. On the other hand, system just follow
-the old logic when timezone value from EFI is 0 or 2047, kernel assume
-the value of RTC is UTC time.
-
-About the 2047(EFI_UNSPECIFIED_TIMEZONE) value, it's the default value
-of UEFI BIOS if there didn't have software set it through EFI interface.
-We can _NOT_ follow EFI spec to interpret the RTC time as a local time
-if timezone value is EFI_UNSPECIFIED_TIMEZONE, that's because Linux stored
-UTC to BIOS on shipped UEFI machines.
+Add a early kernel parameter to set CMOS RTC Not Present bit in
+acpi_gbl_FADT variable for testing. Use acpi_no_cmos_rtc=1 to enable
+this bit to block rtc cmos interface.
 
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/platform/efi/efi.c |   37 +++++++++++++++++++++++++++++++++++++
- include/linux/efi.h         |    2 ++
- init/main.c                 |    5 +++++
- kernel/time.c               |    2 +-
- 4 files changed, 45 insertions(+), 1 deletions(-)
+ arch/x86/kernel/acpi/boot.c |   17 +++++++++++++++++
+ 1 files changed, 17 insertions(+), 0 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 42d6052..848160e 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -306,6 +306,43 @@ static void efi_get_time(struct timespec *now)
- 	now->tv_nsec = 0;
- }
+diff --git a/arch/x86/kernel/acpi/boot.c b/arch/x86/kernel/acpi/boot.c
+index 6c0b43b..64925dd 100644
+--- a/arch/x86/kernel/acpi/boot.c
++++ b/arch/x86/kernel/acpi/boot.c
+@@ -83,6 +83,8 @@ static u64 acpi_lapic_addr __initdata = APIC_DEFAULT_PHYS_BASE;
+ #warning ACPI uses CMPXCHG, i486 and later hardware
+ #endif
  
-+static int efi_read_timezone(s16 *timezone)
-+{
-+	efi_status_t status;
-+	efi_time_t eft;
-+	efi_time_cap_t cap;
++static bool acpi_no_cmos_rtc;
 +
-+	status = efi.get_time(&eft, &cap);
-+
-+	if (status != EFI_SUCCESS) {
-+		/* should never happen */
-+		pr_err("efitime: can't read timezone.\n");
-+		return -EINVAL;
+ /* --------------------------------------------------------------------------
+                               Boot-time Configuration
+    -------------------------------------------------------------------------- */
+@@ -1531,6 +1533,13 @@ int __init acpi_boot_init(void)
+ 	 */
+ 	acpi_table_parse(ACPI_SIG_FADT, acpi_parse_fadt);
+ 
++	/* Dummy NO_CMOS_RTC enable option to fake out RTC CMOS */
++	if (acpi_no_cmos_rtc) {
++		acpi_gbl_FADT.header.revision = 5;
++		acpi_gbl_FADT.boot_flags |= ACPI_FADT_NO_CMOS_RTC;
++		pr_info("acpi: Set NO_CMOS_RTC bit in FADT for testing\n");
 +	}
 +
-+	*timezone = (s16)le16_to_cpu(eft.timezone);
+ 	/*
+ 	 * Process the Multiple APIC Description Table (MADT), if present
+ 	 */
+@@ -1673,3 +1682,11 @@ void __init arch_reserve_mem_area(acpi_physical_address addr, size_t size)
+ 	e820_add_region(addr, size, E820_ACPI);
+ 	update_e820();
+ }
++
++/* Dummy NO_CMOS_RTC enable option to fake out RTC CMOS */
++static int __init setup_acpi_no_cmos_rtc(char *arg)
++{
++	acpi_no_cmos_rtc = true;
 +	return 0;
 +}
-+
-+void __init efi_warp_clock(void)
-+{
-+	s16 timezone;
-+
-+	if (!efi_read_timezone(&timezone)) {
-+		/* TimeZone value, 2047 or 0 means UTC */
-+		if (timezone != 0 && timezone != 2047) {
-+			struct timespec adjust;
-+
-+			persistent_clock_is_local = 1;
-+			adjust.tv_sec = timezone * 60;
-+			adjust.tv_nsec = 0;
-+			timekeeping_inject_offset(&adjust);
-+			pr_info("RTC timezone is %d mins behind of UTC.\n", timezone);
-+			pr_info("Adjusted system time to UTC.\n");
-+		}
-+	}
-+}
-+
- /*
-  * Tell the kernel about the EFI memory map.  This might include
-  * more than the max 128 entries that can fit in the e820 legacy
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 1c78ae7..a8d4f5c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -715,10 +715,12 @@ extern void efi_memmap_walk (efi_freemem_callback_t callback, void *arg);
- extern void efi_gettimeofday (struct timespec *ts);
- extern void efi_enter_virtual_mode (void);	/* switch EFI to virtual mode, if possible */
- #ifdef CONFIG_X86
-+extern void efi_warp_clock(void);
- extern void efi_late_init(void);
- extern void efi_free_boot_services(void);
- extern efi_status_t efi_query_variable_store(u32 attributes, unsigned long size);
- #else
-+static inline void efi_warp_clock(void) {}
- static inline void efi_late_init(void) {}
- static inline void efi_free_boot_services(void) {}
- 
-diff --git a/init/main.c b/init/main.c
-index 61164ce..9effb1c 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -570,6 +570,11 @@ asmlinkage void __init start_kernel(void)
- 	hrtimers_init();
- 	softirq_init();
- 	timekeeping_init();
-+#ifdef CONFIG_X86_64
-+	/* adjust system time by timezone */
-+	if (efi_enabled(EFI_RUNTIME_SERVICES))
-+		efi_warp_clock();
-+#endif
- 	time_init();
- 	sched_clock_postinit();
- 	perf_event_init();
-diff --git a/kernel/time.c b/kernel/time.c
-index 7c7964c..ce18bac 100644
---- a/kernel/time.c
-+++ b/kernel/time.c
-@@ -176,7 +176,7 @@ int do_sys_settimeofday(const struct timespec *tv, const struct timezone *tz)
- 		update_vsyscall_tz();
- 		if (firsttime) {
- 			firsttime = 0;
--			if (!tv)
-+			if (!tv && !persistent_clock_is_local)
- 				warp_clock();
- 		}
- 	}
++early_param("acpi_no_cmos_rtc", setup_acpi_no_cmos_rtc);
 -- 
 1.6.4.2
