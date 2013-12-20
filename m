@@ -1,35 +1,71 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME
-Date: Thu, 19 Dec 2013 20:22:08 -0800
-Message-ID: <52B3C5F0.1060303@zytor.com>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com>	 <52B309EB.90300@zytor.com> <1387512357.3539.4317.camel@linux-s257.site>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFC PATCH 06/14] rtc-efi: register rtc-efi device when EFI
+ enabled
+Date: Fri, 20 Dec 2013 12:24:51 +0800
+Message-ID: <1387513491.3539.4345.camel@linux-s257.site>
+References: <1387439515-8926-1-git-send-email-jlee@suse.com>
+	 <1387439515-8926-7-git-send-email-jlee@suse.com>
+	 <20131219140918.GF3145@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1387512357.3539.4317.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20131219140918.GF3145@console-pimps.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech.it>, "H. Peter Anvin" <hpa@zytor.com>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/19/2013 08:05 PM, joeyli wrote:
-> 
-> Then that means the priority of PNP0B0x is higher then "CMOS RTC Not
-> Present" flag. ACPI spec doesn't have clear definition on this.
-> 
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-12-19 =E6=96=BC 14:09 +0000=EF=BC=8CMa=
+tt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
+> On Thu, 19 Dec, at 03:51:47PM, Lee, Chun-Yi wrote:
+> > UEFI time services, GetTime(), SetTime(), GetWakeupTime(), SetWakeu=
+pTime() are also
+> > supported by other non-IA64 architecutre with UEFI BIOS, e.g. x86.
+> >=20
+> > This patch changed RTC_DRV_EFI configuration to depend on EFI but n=
+ot just IA64. It
+> > checks efi_enabled flag and efi-rtc driver should enabled.
+> >=20
+> > Cc: Matt Fleming <matt.fleming@intel.com>
+> > Cc: H. Peter Anvin <hpa@zytor.com>
+> > Cc: Matthew Garrett <matthew.garrett@nebula.com>
+> > Cc: Thomas Gleixner <tglx@linutronix.de>
+> > Cc: Ingo Molnar <mingo@redhat.com>
+> > Cc: Jan Beulich <JBeulich@suse.com>
+> > Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> > ---
+> >  arch/x86/platform/efi/efi.c |   17 +++++++++++++++++
+> >  drivers/rtc/Kconfig         |    2 +-
+> >  2 files changed, 18 insertions(+), 1 deletions(-)
+>=20
+> This patch needs to be justified. Enabling the EFI runtime *Time
+> functions just because they're available isn't good enough. We need t=
+o
+> know why this patch improves things, what use case does it solve?
+>=20
 
-According to the Microsoft requirements documents, such a platform is
-broken and shouldn't exist.
+The main purpose of enable efi-rtc driver is providing interface to
+userspace access timezone field in EFI time services.
 
-> I look forward to Borislav's "EFI runtime mapping" to fix the physical
-> address accessing issue of EFI time service on x86_64 machines. I tested
-> his patches on a issue machine and it works for walk around BIOS bug.
-> 
-> Can we use EFI time services on x86_64 after Borislav's patches accepted
-> to mainline?
-> 
+Currently have two BIOS interfaces provided the timezone field accessin=
+g
+ability, ACPI TAD and EFI. I hope can enable them on x86_64 machines.
 
-No.
+> The general attitude has been that we want to invoke the runtime
+> services less, not more, due to the huge variety of runtime
+> implementation bugs.
+>=20
 
-	-hpa
+I agreed, but userspace application should not be too often to access
+RTC. Maybe only when system boot and set timezone.
+
+
+Thanks a lot!
+Joey Lee
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
