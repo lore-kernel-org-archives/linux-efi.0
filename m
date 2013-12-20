@@ -1,8 +1,7 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v7 02/12] efi: Use early_memremap and early_memunmap to fix
- sparse warnings
-Date: Fri, 20 Dec 2013 18:02:12 +0800
-Message-ID: <1387533742-18018-3-git-send-email-dyoung@redhat.com>
+Subject: [PATCH v7 05/12] efi: reserve boot service fix
+Date: Fri, 20 Dec 2013 18:02:15 +0800
+Message-ID: <1387533742-18018-6-git-send-email-dyoung@redhat.com>
 References: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,144 +21,32 @@ To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-There are a lot of sparse warnings for early_memremap and early_ioummap
-in arch/x86/platform/efi/efi.c and drivers/firmware/efi/efi.c.
+Current code check boot service region with kernel text region by:
+start+size >= __pa_symbol(_text)
+The end of the above region should be start + size - 1 instead.
 
-early_memremap is for mapping kernel memory instead of io memory, but
-the early_memremap returns void __iomem pointer and early_iounmap accepts
-__iomem pointer as argument. Sparse checking is not happy with the mismatch.
-
-Also there's several early_ioremap callbacks which need to be changed to
-early_memremap because they are actually mapping kernel memory.
-
-Previous patch fixed the early_memremap function to return a normal pointer
-instead of __iomem pointer. Also introduced a new function early_memunmap
-which accept normal pointer as the argument.
-
-This patch is fixing the sparse warnings as below:
-1. use early_memremap instead of early_ioremap
-2. use early_memunmap instead of early_iounmap
+I see this problem in ovmf + Fedora 19 grub boot:
+text start: 1000000 md start: 800000 md size: 800000
 
 Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Acked-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 20 ++++++++++----------
- drivers/firmware/efi/efi.c  |  4 ++--
- 2 files changed, 12 insertions(+), 12 deletions(-)
+ arch/x86/platform/efi/efi.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 7d8cacc..b1e07a4 100644
+index b1e07a4..f022294 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -456,7 +456,7 @@ void __init efi_unmap_memmap(void)
- {
- 	clear_bit(EFI_MEMMAP, &x86_efi_facility);
- 	if (memmap.map) {
--		early_iounmap(memmap.map, memmap.nr_map * memmap.desc_size);
-+		early_memunmap(memmap.map, memmap.nr_map * memmap.desc_size);
- 		memmap.map = NULL;
- 	}
- }
-@@ -493,7 +493,7 @@ static int __init efi_systab_init(void *phys)
- 		efi_system_table_64_t *systab64;
- 		u64 tmp = 0;
- 
--		systab64 = early_ioremap((unsigned long)phys,
-+		systab64 = early_memremap((unsigned long)phys,
- 					 sizeof(*systab64));
- 		if (systab64 == NULL) {
- 			pr_err("Couldn't map the system table!\n");
-@@ -524,7 +524,7 @@ static int __init efi_systab_init(void *phys)
- 		efi_systab.tables = systab64->tables;
- 		tmp |= systab64->tables;
- 
--		early_iounmap(systab64, sizeof(*systab64));
-+		early_memunmap(systab64, sizeof(*systab64));
- #ifdef CONFIG_X86_32
- 		if (tmp >> 32) {
- 			pr_err("EFI data located above 4GB, disabling EFI.\n");
-@@ -534,7 +534,7 @@ static int __init efi_systab_init(void *phys)
- 	} else {
- 		efi_system_table_32_t *systab32;
- 
--		systab32 = early_ioremap((unsigned long)phys,
-+		systab32 = early_memremap((unsigned long)phys,
- 					 sizeof(*systab32));
- 		if (systab32 == NULL) {
- 			pr_err("Couldn't map the system table!\n");
-@@ -555,7 +555,7 @@ static int __init efi_systab_init(void *phys)
- 		efi_systab.nr_tables = systab32->nr_tables;
- 		efi_systab.tables = systab32->tables;
- 
--		early_iounmap(systab32, sizeof(*systab32));
-+		early_memunmap(systab32, sizeof(*systab32));
- 	}
- 
- 	efi.systab = &efi_systab;
-@@ -586,7 +586,7 @@ static int __init efi_runtime_init(void)
- 	 * address of several of the EFI runtime functions, needed to
- 	 * set the firmware into virtual mode.
- 	 */
--	runtime = early_ioremap((unsigned long)efi.systab->runtime,
-+	runtime = early_memremap((unsigned long)efi.systab->runtime,
- 				sizeof(efi_runtime_services_t));
- 	if (!runtime) {
- 		pr_err("Could not map the runtime service table!\n");
-@@ -606,7 +606,7 @@ static int __init efi_runtime_init(void)
- 	 * virtual mode.
- 	 */
- 	efi.get_time = phys_efi_get_time;
--	early_iounmap(runtime, sizeof(efi_runtime_services_t));
-+	early_memunmap(runtime, sizeof(efi_runtime_services_t));
- 
- 	return 0;
- }
-@@ -614,7 +614,7 @@ static int __init efi_runtime_init(void)
- static int __init efi_memmap_init(void)
- {
- 	/* Map the EFI memory map */
--	memmap.map = early_ioremap((unsigned long)memmap.phys_map,
-+	memmap.map = early_memremap((unsigned long)memmap.phys_map,
- 				   memmap.nr_map * memmap.desc_size);
- 	if (memmap.map == NULL) {
- 		pr_err("Could not map the memory map!\n");
-@@ -656,14 +656,14 @@ void __init efi_init(void)
- 	/*
- 	 * Show what we know for posterity
- 	 */
--	c16 = tmp = early_ioremap(efi.systab->fw_vendor, 2);
-+	c16 = tmp = early_memremap(efi.systab->fw_vendor, 2);
- 	if (c16) {
- 		for (i = 0; i < sizeof(vendor) - 1 && *c16; ++i)
- 			vendor[i] = *c16++;
- 		vendor[i] = '\0';
- 	} else
- 		pr_err("Could not map the firmware vendor!\n");
--	early_iounmap(tmp, 2);
-+	early_memunmap(tmp, 2);
- 
- 	pr_info("EFI v%u.%.02u by %s\n",
- 		efi.systab->hdr.revision >> 16,
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 2e2fbde..b716a66 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -253,7 +253,7 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 			if (table64 >> 32) {
- 				pr_cont("\n");
- 				pr_err("Table located above 4GB, disabling EFI.\n");
--				early_iounmap(config_tables,
-+				early_memunmap(config_tables,
- 					       efi.systab->nr_tables * sz);
- 				return -EINVAL;
- 			}
-@@ -269,6 +269,6 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 		tablep += sz;
- 	}
- 	pr_cont("\n");
--	early_iounmap(config_tables, efi.systab->nr_tables * sz);
-+	early_memunmap(config_tables, efi.systab->nr_tables * sz);
- 	return 0;
- }
+@@ -438,7 +438,7 @@ void __init efi_reserve_boot_services(void)
+ 		 * - Not within any part of the kernel
+ 		 * - Not the bios reserved area
+ 		*/
+-		if ((start+size >= __pa_symbol(_text)
++		if ((start + size > __pa_symbol(_text)
+ 				&& start <= __pa_symbol(_end)) ||
+ 			!e820_all_mapped(start, start+size, E820_RAM) ||
+ 			memblock_is_region_reserved(start, size)) {
 -- 
 1.8.3.1
