@@ -1,14 +1,11 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v7 12/12] x86: reserve setup_data ranges late after parsing
- memmap cmdline
-Date: Fri, 20 Dec 2013 18:02:22 +0800
-Message-ID: <1387533742-18018-13-git-send-email-dyoung@redhat.com>
-References: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
+Subject: [PATCH v4 0/4] kexec-tools: efi runtime support on kexec kernel
+Date: Fri, 20 Dec 2013 18:05:43 +0800
+Message-ID: <1387533947-18210-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1387533742-18018-1-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/kexec/>
@@ -18,51 +15,42 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
  <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
 Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Currently e820_reserve_setup_data is called before parsing early params,
-it works in normal case. But for memmap=exactmap, the final memory ranges
-are created after parsing memmap= cmdline params, so the previous
-e820_reserve_setup_data has no effect. For example, setup_data ranges
-will still be marked as normal system ram, thus when later sysfs driver
-ioremap them kernel will warn about mapping normal ram.
+This patchset is for adding efi runtime support on kexec kernel
+kernel patches see below thread:
+http://thread.gmane.org/gmane.linux.kernel.efi/2491
 
-This patch fix it by moving the e820_reserve_setup_data callback after
-parsing early params so they can be set as reserved ranges and later
-ioremap will be fine with it.
+in kexec-tools, this patchset will do below:
+1. retrieve efi_info from debugfs boot_params, and fill the
+x86 setup header
 
-changes:
-Boris: improve patch description
+2. collect data efi runtime needed:
+/sys/firmware/efi/systab: fw_vendor, runtime, config_tables and smbios
+/sys/firmware/efi/efi-runtime-map/*, the phys-virt mappings in 1st kernel
 
-Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
----
- arch/x86/kernel/setup.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+3. assemble setup_data based on data get in 2) then pass it to 2nd kernel
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 8032615..5a7b2a0 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -941,8 +941,6 @@ void __init setup_arch(char **cmdline_p)
- 	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;
- 	setup_memory_map();
- 	parse_setup_data();
--	/* update the e820_saved too */
--	e820_reserve_setup_data();
- 
- 	copy_edd();
- 
-@@ -1004,6 +1002,8 @@ void __init setup_arch(char **cmdline_p)
- 		early_dump_pci_devices();
- #endif
- 
-+	/* update the e820_saved too */
-+	e820_reserve_setup_data();
- 	finish_e820_parsing();
- 
- 	if (efi_enabled(EFI_BOOT))
+changelog v3->v4:
+update efi_info memmap to the saved runtime map instead of use 1st kernel
+untouched memmap.
+
+Tested on OVMF, dell laptop, lenovo laptop and HP workstation
+
+Dave Young (4):
+  build fix: include x86-linux.h in x86-linux-setup.h
+  Add function get_bootparam
+  Add efi_info in x86 setup header
+  Passing efi related data via setup_data
+
+ include/x86/x86-linux.h             |   3 +-
+ kexec/arch/i386/crashdump-x86.c     |   4 +-
+ kexec/arch/i386/x86-linux-setup.c   | 246 ++++++++++++++++++++++++++++++++++--
+ kexec/arch/i386/x86-linux-setup.h   |   2 +
+ kexec/arch/x86_64/kexec-bzImage64.c |   6 +
+ 5 files changed, 248 insertions(+), 13 deletions(-)
+
 -- 
 1.8.3.1
