@@ -1,44 +1,177 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [RFC PATCH 04/14] ACPI: Add ACPI 5.0 Time and Alarm Device
- driver
-Date: Fri, 20 Dec 2013 13:41:39 +0800
-Message-ID: <1387518099.3539.4453.camel@linux-s257.site>
-References: <1387439515-8926-1-git-send-email-jlee@suse.com>
-	 <1387439515-8926-5-git-send-email-jlee@suse.com>
-	 <52B30F43.1060306@zytor.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v7 00/12] kexec kernel efi runtime support
+Date: Fri, 20 Dec 2013 18:02:10 +0800
+Message-ID: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B30F43.1060306-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2013-12-19 =E6=96=BC 07:22 -0800=EF=BC=8CH.=
- Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
-> On 12/18/2013 11:51 PM, Lee, Chun-Yi wrote:
-> > This patch add the driver of Time and Alarm Device in ACPI 5.0.
-> > Currently it only implemented get/set time functions and grab
-> > the capabilities of device when driver initial.
-> >=20
-> > This driver also register rtc-acpitad platform device for RTC ACPIT=
-AD
-> > stub driver using.
-> >=20
-> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
->=20
-> What platform do you have that has TAD support?  I am wondering how t=
-his
-> was tested.
->=20
-> 	-hpa
->=20
+Here is the V7 patchset for supporting kexec kernel efi runtime.
+Per pervious discussion I pass the 1st kernel efi runtime mapping
+via setup_data to 2nd kernel. Besides of the runtime mapping
+info I also pass the fw_vendor, runtime, config table, smbios
+physical address in setup_data. EFI spec mentioned fw_vendor,
+runtime, config table addresses will be converted to virt address
+after entering virtual mode, but we will use it as physical address
+in efi_init. For smbios EFI spec did not mention about the address
+updating, but during my test on a HP workstation, the bios will
+convert it to Virt addr, thus pass it in setup_data as well.
 
-It's a testing platform that's only support get/set time functions of
-ACPI TAD.
+For fw_vendor, runtime, config table, I export them in /sys/firmware/
+efi/, smbios is already in /sys/firmware/efi/systab.
 
+For efi runtime mapping I add a new directory /sys/firmware/efi/
+runtime-map/ like below
+[dave@darkstar ~]$ tree /sys/firmware/efi/runtime-map/
+/sys/firmware/efi/runtime-map/
+|__ 0
+|   |__ attribute
+|   |__ num_pages
+|   |__ phys_addr
+|   |__ type
+|   |__ virt_addr
+|__ 1
+[snip]
 
-Thanks
-Joey Lee
+kexec-tools will assemble them as setup_data and pass to 2nd kernel.
+I will send userspace patches as well.
+
+Limitation is I only write support for x86_64, test on below machines:
+Lenovo thinkpad t420
+Dell inspiron 14 - 3421
+HP Z420 workstation
+Qemu + OVMF
+
+The patches are based on linus tree + tip master + matt's efi master tree
+
+Changes from v1:
+ - add one flag in xloadflags, so kexec-tools can safely load old kernel
+   without efi support.
+ - coding style fixes
+ - function name for map phys_addr to fixed virt_addr
+ - Add ABI documentation for sysfs files
+
+Changes from v2:
+ - 01/09: a new patch to remove unused variables in __map_region function
+       catched by Toshi Kani
+ - 09/09: a new patch to export x86 boot_params to sysfs instead of use
+       debugfs files
+ - Matt: reuse __map_region instead do same thing in another function.
+      add a wrapper function efi_map_region_fixed [02/09]
+      check return value of krealloc
+      sysfs dir name s/efi-runtime-map/runtime-map [06/09]
+      use desc_size in efi_runtime_map
+      for the xloadflags defination: +&& defined(CONFIG_KEXEC)
+ - Greg: sysfs : one file one value for fw_vendor, runtime, tables. [05/09]
+      Document them in ABI testing
+ - HPA:  Document the new xloadflag
+ - Also there's other function cleanup and improvement for error handling.
+
+Changes from v3:
+ - Greg: sysfs code move to use __ATTR_RO and attr_group
+ - Boris: comments and code alignment
+
+ - Added 3 new patches below
+ 10-print-efi-runtime-memmap.patch
+  - 10/12: print only runtime ranges in case EFI_DEBUG printing
+ 11-reserve-setup-data-late.patch
+  - fix a bug of kdump kernel, move function for reserving setup data
+    ranges late after parsing memmap= cmdline params because kdump kernel
+    will pass exact memmap late.
+ 12-x86-kdebugfs-use-ioremap.patch
+  - fix a bug of x86/kernel/kdebugfs.c, use ioremap instead of __va for
+    low mem because __va does not work for exact memmap=
+
+Changes from V4:
+ - variable efi_setup in 09/14 is changed to the physical address instead
+   of the virtual address because it will be not iounmapped until entering
+   virtual mode, it's too long and could cause leak.
+ - sparse warnings fixes (Matt):
+   Added 2 new patches to addressing sparse warnings:
+   01/14: x86-mm-sparse-warning-fix-for-early_memremap.patch
+   02/14: efi-use-early_memremap-and-early_memunmap.patch
+ - krealloc fixes (Boris)
+ - rebase on top of Linus tree + Matt's efi master tree (Boris)
+ - a lot of documention/spelling fixes (Boris)
+ - share function save_runtime_map in 1st/2nd kernel code (Matt)
+ - style and other fixes detail see the patch changelog themselves.
+
+Changes from V5:
+ - add efi_runtime_map_setup() and remove the extern variables thus other
+   arches can reuse the runtime_map exporting code. (Matt)
+ - check efi_reuse_config return value. (Matt)
+ - move parse_efi_setup to efi_$(BITS).c (Boris)
+ - call efi_runtime_map_init in efisubsys_init (Boris)
+ - save_runtime_map cleanup. (Boris)
+
+Changes from V6:
+ - update memmap in userspace to the saved runtime map, thus kernel code
+   become cleaner.
+   - patch 08: simplify save_runtime_map.
+   - patch 09: simplify efi_map_regions and efi_map_regions_fixed.
+ - remove the patch to handle print_efi_memmap for kexec kernel 
+ - remove the last patch for fixing __va usage in kdebugfs since I can not
+   reproduce it in kdump kernel, it should be addressed seperately.
+ - patch 06 (efi: cleanup efi_enter_virtual_mode function):
+   add a share function get_systab_virt_addr()
+ - rebase to latest mainline tree
+
+The patches stay in kexec-efi-testing branch of below repo for testing:
+https://github.com/daveyoung/linux.git
+
+Dave Young (12):
+  x86/mm: sparse warning fix for early_memremap
+  efi: Use early_memremap and early_memunmap to fix sparse warnings
+  efi: remove unused variables in __map_region
+  efi: add a wrapper function efi_map_region_fixed
+  efi: reserve boot service fix
+  efi: cleanup efi_enter_virtual_mode function
+  efi: export more efi table variable to sysfs
+  efi: export efi runtime memory mapping to sysfs
+  efi: passing kexec necessary efi data via setup_data
+  x86: add xloadflags bit for efi runtime support on kexec
+  x86: export x86 boot_params to sysfs
+  x86: reserve setup_data ranges late after parsing memmap cmdline
+
+ Documentation/ABI/testing/sysfs-firmware-efi       |  20 ++
+ .../ABI/testing/sysfs-firmware-efi-runtime-map     |  34 ++
+ Documentation/ABI/testing/sysfs-kernel-boot_params |  38 +++
+ Documentation/x86/boot.txt                         |   3 +
+ arch/x86/boot/header.S                             |   9 +-
+ arch/x86/include/asm/efi.h                         |  14 +
+ arch/x86/include/asm/io.h                          |   3 +-
+ arch/x86/include/uapi/asm/bootparam.h              |   2 +
+ arch/x86/kernel/Makefile                           |   1 +
+ arch/x86/kernel/ksysfs.c                           | 339 ++++++++++++++++++++
+ arch/x86/kernel/setup.c                            |   7 +-
+ arch/x86/mm/ioremap.c                              |  10 +-
+ arch/x86/platform/efi/efi.c                        | 345 ++++++++++++++++-----
+ arch/x86/platform/efi/efi_32.c                     |   3 +
+ arch/x86/platform/efi/efi_64.c                     |  22 +-
+ drivers/firmware/efi/Kconfig                       |  11 +
+ drivers/firmware/efi/Makefile                      |   1 +
+ drivers/firmware/efi/efi.c                         |  49 ++-
+ drivers/firmware/efi/runtime-map.c                 | 181 +++++++++++
+ include/linux/efi.h                                |  16 +
+ 20 files changed, 1010 insertions(+), 98 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-runtime-map
+ create mode 100644 Documentation/ABI/testing/sysfs-kernel-boot_params
+ create mode 100644 arch/x86/kernel/ksysfs.c
+ create mode 100644 drivers/firmware/efi/runtime-map.c
+
+-- 
+1.8.3.1
