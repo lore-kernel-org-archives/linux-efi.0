@@ -1,34 +1,32 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Subject: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME
-Date: Fri, 20 Dec 2013 13:43:38 -0800
-Message-ID: <52B4BA0A.1030902@zytor.com>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com> <1387517916.3539.4446.camel@linux-s257.site> <52B4B242.5010002@zytor.com> <2787644.ytU7M33B4r@vostro.rjw.lan>
+Date: Fri, 20 Dec 2013 21:50:56 +0000
+Message-ID: <20131220215056.GA29501@console-pimps.org>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+ <1387517916.3539.4446.camel@linux-s257.site>
+ <52B4B242.5010002@zytor.com>
+ <2787644.ytU7M33B4r@vostro.rjw.lan>
+ <52B4BA0A.1030902@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <2787644.ytU7M33B4r@vostro.rjw.lan>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: joeyli <jlee@suse.com>, Alessandro Zummo <a.zummo@towertech.it>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <52B4BA0A.1030902-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/20/2013 01:45 PM, Rafael J. Wysocki wrote:
+On Fri, 20 Dec, at 01:43:38PM, H. Peter Anvin wrote:
 > 
-> My understanding, however, is that to use the TAD, we don't actually need to
-> create a struct acpi_device for it.  We just need a handle to the ACPICA
-> object which can be found using acpi_get_devices() as soon as the namespace
-> has been extracted from the DSDT and friends.  That in turn happens in
-> acpi_early_init(), which is called from start_kernel() right before
-> efi_late_init().
-> 
-> Is that early enough?
-> 
+> Possibly... will have to investigate.  I would also ask if the same
+> applies to the PNP0B0x devices -- all we really need there is the
+> presence/absence indication and the I/O port base.
 
-Possibly... will have to investigate.  I would also ask if the same
-applies to the PNP0B0x devices -- all we really need there is the
-presence/absence indication and the I/O port base.
+It's worth noting that efi_late_init() exists solely because the ACPI
+infrastructure to find the BGRT table isn't available any earlier.
 
-	-hpa
+If we could setup ACPI earlier that would be awesome.
 
-
+-- 
+Matt Fleming, Intel Open Source Technology Center
