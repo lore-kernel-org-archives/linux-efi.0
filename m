@@ -1,31 +1,37 @@
 From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME
-Date: Fri, 20 Dec 2013 13:10:26 -0800
-Message-ID: <52B4B242.5010002@zytor.com>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com>	 <52B309EB.90300@zytor.com> <1387512357.3539.4317.camel@linux-s257.site>	 <52B3C5F0.1060303@zytor.com> <1387517916.3539.4446.camel@linux-s257.site>
+Date: Fri, 20 Dec 2013 13:12:52 -0800
+Message-ID: <52B4B2D4.2020305@zytor.com>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>	 <52B309EB.90300@zytor.com> <1387512357.3539.4317.camel@linux-s257.site>	 <52B3C5F0.1060303@zytor.com> <1387552565.17961.3.camel@x230>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1387517916.3539.4446.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
+In-Reply-To: <1387552565.17961.3.camel@x230>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: "samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org" <samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jlee-IBi9RG/b67k@public.gmane.org" <jlee-IBi9RG/b67k@public.gmane.org>, "bp-l3A5Bk7waGM@public.gmane.org" <bp-l3A5Bk7waGM@public.gmane.org>, "a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org" <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, "Elliott-VXdhtT5mjnY@public.gmane.org" <Elliott-VXdhtT5mjnY@public.gmane.org>, "werner-IBi9RG/b67k@public.gmane.org" <werner-IBi9RG/b67k@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, "oneukum-l3A5Bk7waGM@public.gmane.org" <oneukum-l3A5Bk7waGM@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "trenn-l3A5Bk7waGM@public.gmane.org" <trenn-l3A5Bk7waGM@public.gmane.org>, "JBeulich-IBi9RG/b67k@public.gmane.org" <JBeulich-IBi9RG/b67k@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/19/2013 09:38 PM, joeyli wrote:
+On 12/20/2013 07:16 AM, Matthew Garrett wrote:
+> On Thu, 2013-12-19 at 20:22 -0800, H. Peter Anvin wrote:
+>> On 12/19/2013 08:05 PM, joeyli wrote:
+>>> Can we use EFI time services on x86_64 after Borislav's patches accepted
+>>> to mainline?
+>>>
+>>
+>> No.
 > 
-> If don't use EFI time, then the first priority is using ACPI TAD if it
-> present. Due to ACPI TAD is a generic acpi device that's need OS parsing
-> DSDT table before set system time.
-> 
-> Either move DSDT parser from subsystem initial stage to start_kernel or
-> move timekeeping initial to after DSDT be parsed. Which one you think is
-> more possible and risk less? Then I will try that way.
+> We will want to use them to (at minimum) obtain the clock timezone.
+> Using them for general RTC access is less attractive.
 > 
 
-I discussed the DSDT/SSDT parsing issue with Rafael and he claims it
-would require a lot of restructuring.  Unfortunately ACPI is at this
-point done rather late, as I understand.  All of this is a big problem.
+One option is to use the EFI runtime call to get and save the clock
+timezone before we call ExitBootServices() in the EFI stub.  This
+doesn't obviate the need for proper handling of the TAD, though,
+especially since it is likely that future hardware will not have a RTC
+in the current form (it is a way more complex device than is needed,
+which wouldn't normally be a problem, but the fact that it has to
+operate in the Vbat well makes it a major one.)
 
 	-hpa
