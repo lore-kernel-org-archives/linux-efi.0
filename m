@@ -1,100 +1,95 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v6 10/14] efi: only print saved efi runtime maps instead
- of all memmap ranges for kexec
-Date: Fri, 20 Dec 2013 09:57:47 +0800
-Message-ID: <20131220015747.GA7128@dhcp-16-126.nay.redhat.com>
-References: <1387186235-15972-1-git-send-email-dyoung@redhat.com>
- <1387186235-15972-11-git-send-email-dyoung@redhat.com>
- <20131219164144.GG3145@console-pimps.org>
- <20131220013508.GA3795@dhcp-16-126.nay.redhat.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 03/14] rtc: block registration of rtc-cmos when CMOS
+ RTC Not Present
+Date: Fri, 20 Dec 2013 11:54:10 +0800
+Message-ID: <1387511650.3539.4294.camel@linux-s257.site>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+	 <1387439053-8711-4-git-send-email-jlee@suse.com>
+	 <6fc9a2f9-eae7-4588-a092-f338053ec96a@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20131220013508.GA3795-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6fc9a2f9-eae7-4588-a092-f338053ec96a-2ueSQiBKiTY7tOexoI0I+QC/G2K4zDHf@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 12/20/13 at 09:35am, Dave Young wrote:
-> On 12/19/13 at 04:41pm, Matt Fleming wrote:
-> > On Mon, 16 Dec, at 05:30:31PM, Dave Young wrote:
-> > > For kexec/kdump kernel efi runtime mappings are saved, printing original whole
-> > > memmap ranges does not make sense anymore. So introduce a new function to only
-> > > print runtime maps in case kexec/kdump kernel is used.
-> > > 
-> > > changelog:
-> > > Matt: use efi_setup instead of esdata
-> > >       share function print_efi_memmap for both normal and kexec boot.
-> > > 
-> > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > > ---
-> > >  arch/x86/platform/efi/efi.c | 24 +++++++++++++++++-------
-> > >  1 file changed, 17 insertions(+), 7 deletions(-)
-> > 
-> > Thinking about this a bit more, I'm not at all sure why this patch
-> > exists.
-> > 
-> > Why do we not want to print the entire memory map range like we did in
-> > the first kernel? The e820 map is printed exactly like it was in the
-> > first kernel, why should the EFI memmap be special?
-> 
-> Hi, Matt
-> 
-> Here is the memmap.map print result in kexec kernel (qemu + ovmf).
-> I think the memmap.map is not valid any more in kexec kernel, thus we
-> should print the saved runtime map.
+Hi hpa,=20
 
-I have another idea to cleanup the code, that is update efi_info in
-userspace kexec-tools, make memmap.map point to saved runtime map in
-setup_data, thus the kernel part will be more simple.
+=E6=96=BC =E5=9B=9B=EF=BC=8C2013-12-19 =E6=96=BC 06:38 -0800=EF=BC=8CH.=
+ Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
+> Where did you find a platform with "no CMOS" set and a PNP RTC? I fin=
+d the expect behavior in that case to be quite ambiguous and it is not =
+at all clear to me that what you have here is the right thing.
 
-Working on it..
+Actually there doesn't have the box both with "No CMOS" and PNP device.=
+=20
+I choice to totally block rtc-cmos driver when "No CMOS RTC" because th=
+e
+definition in ACPI spec:
 
-> 
-> [    0.000000] efi: EFI v2.31 by EDK II
-> [    0.000000] efi:  ACPI=0x1f9e0000  ACPI 2.0=0x1f9e0014 
-> [    0.000000] efi: mem00: type=33490747, attr=0x1ff073c, range=[0xffffffff8105542e-0xfffff80fd649d42e) (72057594029606228MB)
-> [    0.000000] efi: mem01: type=33490747, attr=0x10756, range=[0xffffffff8105548e-0xfffff80fd650d48e) (72057594029606228MB)
-> [    0.000000] efi: mem02: type=67410, attr=0x10758, range=[0xffffffff81055548-0xfffff80fd6630548) (72057594029606229MB)
-> [    0.000000] efi: mem03: type=67416, attr=0x1ff0749, range=[0xffffffff810556c2-0xfffff80fd67246c2) (72057594029606230MB)
-> [    0.000000] efi: mem04: type=67416, attr=0x10756, range=[0xffffffff810557d1-0xfffff80fd685d7d1) (72057594029606232MB)
-> [    0.000000] efi: mem05: type=67410, attr=0x10756, range=[0xffffffff8105584a-0xfffff80fd68b684a) (72057594029606232MB)
-> [    0.000000] efi: mem06: type=67415, attr=0x10758, range=[0xffffffff810558b7-0xfffff80fd69168b7) (72057594029606232MB)
-> [    0.000000] efi: mem07: type=67417, attr=0x10758, range=[0xffffffff810558fa-0xfffff80fd697c8fa) (72057594029606233MB)
-> [    0.000000] efi: mem08: type=67415, attr=0x10758, range=[0xffffffff810559c2-0xfffff80fd6a6b9c2) (72057594029606234MB)
-> [    0.000000] efi: mem09: type=67417, attr=0x10754, range=[0xffffffff81055a4f-0xfffff80fd6b2fa4f) (72057594029606234MB)
-> [    0.000000] efi: mem10: type=33490778, attr=0x10753, range=[0xffffffff81055b66-0xfffff80fd6c49b66) (72057594029606235MB)
-> [    0.000000] efi: mem11: type=67417, attr=0x10753, range=[0xffffffff81055c75-0xfffff80fd6d0dc75) (72057594029606236MB)
-> [    0.000000] efi: mem12: type=67411, attr=0x10759, range=[0xffffffff81055dc2-0xfffff80fd6e38dc2) (72057594029606237MB)
-> [    0.000000] efi: mem13: type=33490773, attr=0x1ff075a, range=[0xffffffff81055e3e-0xfffff80fd6ea1e3e) (72057594029606238MB)
-> [    0.000000] efi: mem14: type=67409, attr=0x10752, range=[0xffffffff81056053-0xfffff80fd7163053) (72057594029606241MB)
-> [    0.000000] efi: mem15: type=67409, attr=0x1ff0747, range=[0xffffffff8105612b-0xfffff80fd719012b) (72057594029606241MB)
-> [    0.000000] efi: mem16: type=67409, attr=0x10751, range=[0xffffffff8105628c-0xfffff80fd73a828c) (72057594029606243MB)
-> [    0.000000] efi: mem17: type=67410, attr=0x10751, range=[0xffffffff81056441-0xfffff80fd74ff441) (72057594029606244MB)
-> [    0.000000] efi: mem18: type=67410, attr=0x10752, range=[0xffffffff8105652a-0xfffff80fd761152a) (72057594029606245MB)
-> [    0.000000] efi: mem19: type=33490748, attr=0x1072c, range=[0xffffffff810565e6-0xfffff80fd79dc5e6) (72057594029606249MB)
-> [    0.000000] efi: mem20: type=67409, attr=0x10751, range=[0xffffffff81056a25-0xfffff80fd7ae0a25) (72057594029606250MB)
-> [    0.000000] efi: mem21: type=67372, attr=0x1ff073b, range=[0xffffffff8105745c-0xfffff80fd84bc45c) (72057594029606260MB)
-> [    0.000000] efi: mem22: type=33490720, attr=0x1ff0744, range=[0xffffffff81057a3a-0xfffff80fd95d8a3a) (72057594029606277MB)
-> [    0.000000] efi: mem23: type=33490757, attr=0x1ff073f, range=[0xffffffff81058659-0xfffff80fd9734659) (72057594029606278MB)
-> [    0.000000] efi: mem24: type=33490752, attr=0x1ff074b, range=[0xffffffff81058867-0xfffff80fd98e1867) (72057594029606280MB)
-> [    0.000000] efi: mem25: type=67410, attr=0x10751, range=[0xffffffff810589d9-0xfffff80fd9ac79d9) (72057594029606282MB)
-> [    0.000000] efi: mem26: type=67414, attr=0x10753, range=[0xffffffff81058b4c-0xfffff80fd9c42b4c) (72057594029606283MB)
-> [    0.000000] efi: mem27: type=67416, attr=0x1072c, range=[0xffffffff81058c85-0xfffff80fd9dffc85) (72057594029606285MB)
-> [    0.000000] efi: mem28: type=67374, attr=0x1072d, range=[0xffffffff81058e41-0xfffff80fd9eb0e41) (72057594029606286MB)
-> 
-> 
-> > 
-> > -- 
-> > Matt Fleming, Intel Open Source Technology Center
+CMOS RTC Not Present
+
+If set, indicates that the CMOS RTC is either not implemented, or
+does not exist at the legacy addresses. OSPM uses the Control
+Method Time and Alarm Namespace device instead.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+It suggest us using ACPI TAD interface when this flag present. But, I
+agreed your point for this is ambiguous due to ACPI spec didn't clear
+define the relationship between PNP0B0x.
+
+Maybe we can do more detail check in cmos_init when "No CMOS RTC" set:
+ + check if have ACPI TAD device, then block rtc-cmos
+ + check if no ACPI TAD device, but have PNP0B0x, then we use PNP0b0x.
+
+>=20
+> "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> >We should not acess CMOS address when CMOS RTC Not Present bit set i=
+n
+> >FADT. The ee5872be patch didn't avoid rtc-cmos driver loaded when
+> >system support
+> >ACPI PNP PNP0B0* devices.
+> >So this patch block the registion of rtc-cmos driver to avoid
+> >user space access RTC through CMOS interface.
+> >
+> >Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> >---
+> > arch/x86/kernel/rtc.c  |   20 ++++++++++++++++----
+> > drivers/rtc/rtc-cmos.c |    9 +++++++++
+> > 2 files changed, 25 insertions(+), 4 deletions(-)
+> >
+=2E..
+> >--- a/drivers/rtc/rtc-cmos.c
+> >+++ b/drivers/rtc/rtc-cmos.c
+> >@@ -28,6 +28,9 @@
+> >  * interrupts disabled, holding the global rtc_lock, to exclude tho=
+se
+> >  * other drivers and utilities on correctly configured systems.
+> >  */
+> >+
+> >+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
+> >+
+> > #include <linux/kernel.h>
+> > #include <linux/module.h>
+> > #include <linux/init.h>
+> >@@ -1144,6 +1147,12 @@ static int __init cmos_init(void)
+> > {
+> > 	int retval =3D 0;
+> >=20
+> >+	if (acpi_gbl_FADT.header.revision >=3D 5 &&
+> >+	    acpi_gbl_FADT.boot_flags & ACPI_FADT_NO_CMOS_RTC) {
+> >+		pr_info("ACPI CMOS RTC Not Present detected - not loading\n");
+> >+		return 0;
+> >+	}
+> >+
+> > #ifdef	CONFIG_PNP
+> > 	retval =3D pnp_register_driver(&cmos_pnp_driver);
+> > 	if (retval =3D=3D 0)
+>=20
+
+Thanks a lot!
+Joey Lee
