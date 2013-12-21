@@ -1,80 +1,66 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [RFC PATCH 06/14] rtc-efi: register rtc-efi device when EFI
- enabled
-Date: Sat, 21 Dec 2013 09:24:02 +0800
-Message-ID: <1387589042.3539.4901.camel@linux-s257.site>
-References: <1387439515-8926-1-git-send-email-jlee@suse.com>
-	 <1387439515-8926-7-git-send-email-jlee@suse.com>
-	 <20131219140918.GF3145@console-pimps.org>
-	 <1387513491.3539.4345.camel@linux-s257.site> <52B3C7F8.3040901@zytor.com>
-	 <20131220103755.GA14784@pd.tnic> <1387552463.17961.2.camel@x230>
-	 <52B4B0ED.7030600@zytor.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [RFC PATCH 06/14] rtc-efi: register rtc-efi device when EFI enabled
+Date: Fri, 20 Dec 2013 17:51:29 -0800
+Message-ID: <52B4F421.2000403@zytor.com>
+References: <1387439515-8926-1-git-send-email-jlee@suse.com>	 <1387439515-8926-7-git-send-email-jlee@suse.com>	 <20131219140918.GF3145@console-pimps.org>	 <1387513491.3539.4345.camel@linux-s257.site> <52B3C7F8.3040901@zytor.com>	 <20131220103755.GA14784@pd.tnic> <1387552463.17961.2.camel@x230>	 <52B4B0ED.7030600@zytor.com> <1387589042.3539.4901.camel@linux-s257.site>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52B4B0ED.7030600-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org" <samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org" <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, "Elliott-VXdhtT5mjnY@public.gmane.org" <Elliott-VXdhtT5mjnY@public.gmane.org>, "werner-IBi9RG/b67k@public.gmane.org" <werner-IBi9RG/b67k@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "oneukum-l3A5Bk7waGM@public.gmane.org" <oneukum-l3A5Bk7waGM@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "trenn-l3A5Bk7waGM@public.gmane.org" <trenn-l3A5Bk7waGM@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "JBeulich-IBi9RG/b67k@public.gmane.org" <JBeulich-IBi9RG/b67k@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org" <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1387589042.3539.4901.camel@linux-s257.site>
+Sender: linux-acpi-owner@vger.kernel.org
+To: joeyli <jlee@suse.com>
+Cc: Matthew Garrett <matthew.garrett@nebula.com>, "bp@alien8.de" <bp@alien8.de>, "samer.el-haj-mahmoud@hp.com" <samer.el-haj-mahmoud@hp.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "a.zummo@towertech.it" <a.zummo@towertech.it>, "Elliott@hp.com" <Elliott@hp.com>, "werner@suse.com" <werner@suse.com>, "rtc-linux@googlegroups.com" <rtc-linux@googlegroups.com>, "x86@kernel.org" <x86@kernel.org>, "rjw@rjwysocki.net" <rjw@rjwysocki.net>, "mingo@redhat.com" <mingo@redhat.com>, "oneukum@suse.de" <oneukum@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "trenn@suse.de" <trenn@suse.de>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "JBeulich@suse.com" <JBeulich@suse.com>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "matt@console-pimps.org" <matt@console-pimps.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=BA=94=EF=BC=8C2013-12-20 =E6=96=BC 13:04 -0800=EF=BC=8CH.=
- Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
-> On 12/20/2013 07:14 AM, Matthew Garrett wrote:
-> > On Fri, 2013-12-20 at 11:37 +0100, Borislav Petkov wrote:
-> >> On Thu, Dec 19, 2013 at 08:30:48PM -0800, H. Peter Anvin wrote:
-> >>> On 12/19/2013 08:24 PM, joeyli wrote:
-> >>>> I agreed, but userspace application should not be too often to a=
-ccess
-> >>>> RTC. Maybe only when system boot and set timezone.
-> >>>
-> >>> This is, quite frankly, an idiotic argument.
-> >>
-> >> TBH, I've been struggling with the question too - and it might eve=
-n be a
-> >> stupid question - but what is that absolute need to be able to get=
- the
-> >> TZ in userspace? Why should I care?
-> >>
-> >> Can we get some use cases for stupid people like me please?
-> >=20
-> > Dual-boot environments will tend to have the RTC in local time, not=
- UTC.
-> > That means that userspace has to reprogram the clock over daylight
-> > savings changes, and to do that it must know whether another OS has
-> > already done so.
-> >=20
+On 12/20/2013 05:24 PM, joeyli wrote:
+> =E6=96=BC =E4=BA=94=EF=BC=8C2013-12-20 =E6=96=BC 13:04 -0800=EF=BC=8C=
+H. Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
+>>
+>> Actually, it doesn't have to reprogram the clock ... it just needs t=
+o
+>> know if another OS has already done so.  All Linux needs to do is to=
+ be
+>> able to derive UTC from whatever the RTC is set to and to be able to
+>> keep it consistent.
+>>
 >=20
-> Actually, it doesn't have to reprogram the clock ... it just needs to
-> know if another OS has already done so.  All Linux needs to do is to =
-be
-> able to derive UTC from whatever the RTC is set to and to be able to
-> keep it consistent.
+> It's dependent on a right boot initial priority of distribution.
+
+-ENOPARSE
+
+> Here have a discussion of adjusting system clock by TZ (from ACPI or
+> UEFI):
+> Discussion on BIOS/CMOS/UEFI clock in local time
+> 	http://www.spinics.net/lists/util-linux-ng/msg07639.html
 >=20
-> 	-hpa
+> and,
+> from Ted Ts'o in the mail thread
+>      https://lkml.org/lkml/2008/1/8/195
 >=20
+> If kernel use the TZ field from ACPI TAD or EFI to adjust system
+> clock when booting, then it can avoid buggy distributions adjust
+> system clock AFTER e2fsck is run.
+>=20
+> Using ACPI TAD should after DSDT parsing in subsystem initial stage,
+> so I choice EFI time services before we can move DSDT parser to
+> start_kernel().
 >=20
 
-It's dependent on a right boot initial priority of distribution.
-Here have a discussion of adjusting system clock by TZ (from ACPI or
-UEFI):
-Discussion on BIOS/CMOS/UEFI clock in local time
-	http://www.spinics.net/lists/util-linux-ng/msg07639.html
+Yes, of course.  That is irrelevant to needing to reprogram the clock,
+though.
 
-and,
-from Ted Ts'o in the mail thread
-     https://lkml.org/lkml/2008/1/8/195
+My argument is very simple: if we have to rely on EFI, we can get the
+offset in the boot stub before ExitBootServices(), and then simply neve=
+r
+change it.  That way we still pick up if another operating system has
+changed it, and it will still reflect the proper UTC time.
 
-
-If kernel use the TZ field from ACPI TAD or EFI to adjust system
-clock when booting, then it can avoid buggy distributions adjust
-system clock AFTER e2fsck is run.
-
-Using ACPI TAD should after DSDT parsing in subsystem initial stage,
-so I choice EFI time services before we can move DSDT parser to
-start_kernel().
+	-hpa
 
 
-Thanks a lot!
-Joey Lee
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
