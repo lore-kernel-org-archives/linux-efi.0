@@ -1,33 +1,58 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH v7 09/12] efi: passing kexec necessary efi data via
  setup_data
-Date: Mon, 23 Dec 2013 10:06:48 +0800
-Message-ID: <20131223020648.GA3760@dhcp-16-126.nay.redhat.com>
+Date: Mon, 23 Dec 2013 10:09:58 +0800
+Message-ID: <20131223020958.GB3760@dhcp-16-126.nay.redhat.com>
 References: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
  <1387533742-18018-10-git-send-email-dyoung@redhat.com>
- <20131221145348.GC29501@console-pimps.org>
+ <20131221160416.GD29501@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131221145348.GC29501-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20131221160416.GD29501-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-> > +		if (data)
-> > +			early_memunmap(data, sizeof(*data));
-> >  #ifdef CONFIG_X86_32
-> >  		if (tmp >> 32) {
-> >  			pr_err("EFI data located above 4GB, disabling EFI.\n");
+On 12/21/13 at 04:06pm, Matt Fleming wrote:
+> On Fri, 20 Dec, at 06:02:19PM, Dave Young wrote:
+> > @@ -133,6 +133,19 @@ extern void efi_sync_low_kernel_mappings(void);
+> >  extern void efi_setup_page_tables(void);
+> >  extern void __init old_map_region(efi_memory_desc_t *md);
+> >  
+> > +struct efi_setup_data {
+> > +	u64 fw_vendor;
+> > +	u64 runtime;
+> > +	u64 tables;
+> > +	u64 smbios;
+> > +	u64 reserved[8];
+> > +	efi_memory_desc_t map[0];
+> > +};
 > 
-> This isn't correct, and means we now won't trigger this pr_err() if
-> booting a CONFIG_X86_32 kernel with EFI_64BIT and where the ->fw_vendor,
-> ->runtime or ->tables pointer is above 4GB - you've mixed up systab and
-> systab64. I've fixed this up like so when applying this patch,
+> [...]
+> 
+> > +static void get_nr_runtime_map(void)
+> > +{
+> > +	if (!efi_setup)
+> > +		return;
+> > +
+> > +	nr_efi_runtime_map = (efi_data_len - sizeof(struct efi_setup_data)) /
+> > +			     sizeof(efi_memory_desc_t);
+> > +}
+> 
+> Do we actually need the 'map' entry in efi_setup_data now that you're
+> passing it via efi_info (which is much better approach!)? Also, we don't
+> need the global nr_efi_runtime_map or efi_runtime_map variables now,
+> right?
 
-You are right, I missed this 32bit tmp value, thanks for taking care of this.
+The map is still necessary because we need store the map somewhere and pass
+the physicall address to kexec kernel. Passing them in setup_data is the
+only better way currently...
+
+In efi_info there's only an entry for the map physical address, the original
+map area is not valid any more.
 
 Thanks
 Dave
