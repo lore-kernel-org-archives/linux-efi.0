@@ -1,46 +1,39 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 02/14] x86-64/efi: Use EFI to deal with platform wall
- clock (again)
-Date: Mon, 23 Dec 2013 15:25:41 -0800
-Message-ID: <52B8C675.30204@zytor.com>
-References: <1387439515-8926-1-git-send-email-jlee@suse.com>	<1387448416-11672-1-git-send-email-jlee@suse.com>	<20131219104908.GE3145@console-pimps.org>	<1387459939.3539.4092.camel@linux-s257.site> <20131220112955.75e82a86@alan.etchedpixels.co.uk>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [PATCH v7 00/12] kexec kernel efi runtime support
+Date: Tue, 24 Dec 2013 13:31:13 -0700
+Message-ID: <1387917073.1848.7.camel@misato.fc.hp.com>
+References: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
+	 <20131221173515.GE29501@console-pimps.org>
+	 <1387747621.1848.2.camel@misato.fc.hp.com>
+	 <20131223073641.GA28919@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20131220112955.75e82a86@alan.etchedpixels.co.uk>
-Sender: linux-acpi-owner@vger.kernel.org
-To: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, joeyli <jlee@suse.com>
-Cc: Matt Fleming <matt@console-pimps.org>, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Matt Fleming <matt.fleming@intel.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131223073641.GA28919-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org" <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org" <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, "vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org" <ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org>, "horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org" <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>, "kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org" <greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12/20/2013 03:29 AM, One Thousand Gnomes wrote:
-> On Thu, 19 Dec 2013 21:32:19 +0800
-> joeyli <jlee@suse.com> wrote:
->=20
->> =E6=96=BC =E5=9B=9B=EF=BC=8C2013-12-19 =E6=96=BC 10:49 +0000=EF=BC=8C=
-Matt Fleming =E6=8F=90=E5=88=B0=EF=BC=9A
->>> On Thu, 19 Dec, at 06:20:16PM, Lee, Chun-Yi wrote:
->>>> From: Jan Beulich <JBeulich@suse.com>
->>>>
->>>> Other than ix86, x86-64 on EFI so far didn't set the
->>>> {g,s}et_wallclock accessors to the EFI routines, thus
->>>> incorrectly using raw RTC accesses instead.
->=20
-> Probably wise.
->=20
-> Before anyone reverts that please make sure it also works on EFI32,
-> because right now we crash and burn on multiple EFI32 tablets queryin=
-g
-> the time.
->=20
+On Mon, 2013-12-23 at 07:36 +0000, Matt Fleming wrote:
+> On Sun, 22 Dec, at 02:27:01PM, Toshi Kani wrote:
+> > 
+> > The kexec branch is missing the following change, which is required for
+> > fast reboot with multi-cpus.
+> > 
+> >    commit 279f1df915c3a6ed3075d98a849705bf53851f99
+> >    Author: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >    Date:   Tue Nov 26 10:25:28 2013 +0800
+> > 
+> >        kexec: migrate to reboot cpu
+> > 
+> > With this change added, I confirmed that the branch kernel works fine.
+>  
+> I can't find that commit in Linus' tree. Where is it from?
 
-Quite -- we in fact did just the opposite (checkin 04bf9ba720fc).
+Dave's git tree for the patchset has this change.  This change was
+accepted by Vivek, so I think it is in his tree.
 
-	-hpa
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+-Toshi
