@@ -1,38 +1,54 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: split efi systab in sysfs
-Date: Thu, 26 Dec 2013 10:17:06 +0800
-Message-ID: <20131226021705.GC3750@dhcp-16-126.nay.redhat.com>
-References: <20131226015308.GA3750@dhcp-16-126.nay.redhat.com>
- <52BB8C8F.1020606@zytor.com>
- <20131226021238.GB3750@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v7 09/12] efi: passing kexec necessary efi data via
+ setup_data
+Date: Sun, 29 Dec 2013 13:05:46 +0000
+Message-ID: <20131229130546.GA2618@console-pimps.org>
+References: <1387533742-18018-1-git-send-email-dyoung@redhat.com>
+ <1387533742-18018-10-git-send-email-dyoung@redhat.com>
+ <20131221160416.GD29501@console-pimps.org>
+ <20131223020958.GB3760@dhcp-16-126.nay.redhat.com>
+ <20131223080741.GB28919@console-pimps.org>
+ <20131225031259.GB6333@dhcp-16-126.nay.redhat.com>
+ <20131225033205.GC6333@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20131226021238.GB3750-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org
+In-Reply-To: <20131225033205.GC6333-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-CCing Simon and kexec list
-
-On 12/26/13 at 10:12am, Dave Young wrote:
-> On 12/25/13 at 05:55pm, H. Peter Anvin wrote:
-> > On 12/25/2013 05:53 PM, Dave Young wrote:
-> > > Hi, Matt and Peter
-> > > 
-> > > Currently /sys/firmware/efi/systab contains multi-lines for efi systab
-> > > entries. As previous discussion with Greg, this is not a good in sysfs.
-> > > I wonder if there's other users for this file except kexec-tools.
-> > > 
-> > > If kexec-tools is the only user, maybe I can split it as several files.
-> > > In kexec-tools just use /sys/firmware/efi/"$entry_name" and if $entry_name
-> > > does not exist then switch to old systab file. 
-> > > 
-> > 
-> > Yes, the sysfs standard is "one entry per datum".  I have no idea about
-> > who the user(s) might be, though.
+On Wed, 25 Dec, at 11:32:05AM, Dave Young wrote:
 > 
-> Even the only known user kexec-tools, for new kernel + old kexec-tools we
-> have no way to support, maybe this systab should be kept forever...
+> Matt, if you want to remove the map[0] please fold below one line
+> patch? I have no strong opinion.
+> 
+> Index: linux/arch/x86/include/asm/efi.h
+> ===================================================================
+> --- linux.orig/arch/x86/include/asm/efi.h
+> +++ linux/arch/x86/include/asm/efi.h
+> @@ -139,7 +139,6 @@ struct efi_setup_data {
+>  	u64 tables;
+>  	u64 smbios;
+>  	u64 reserved[8];
+> -	efi_memory_desc_t map[0];
+>  };
+>  
+>  extern u64 efi_setup;
+
+Thanks Dave, I will fold this in. I would suggest updating your
+kexec-tools patches so that the two structures are in sync.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
