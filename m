@@ -1,52 +1,45 @@
-From: Joe Perches <joe@perches.com>
-Subject: [PATCH 1/2] efi: Fix krealloc defect
-Date: Fri,  3 Jan 2014 16:08:47 -0800
-Message-ID: <9a8eb1c9478049318e834d5223053a5fb7484bff.1388793978.git.joe@perches.com>
-References: <cover.1388793978.git.joe@perches.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <cover.1388793978.git.joe@perches.com>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: Matthew Garrett <matthew.garrett@nebula.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [RFC PATCH 04/14] ACPI: Add ACPI 5.0 Time and Alarm Device
+ driver
+Date: Mon, 06 Jan 2014 16:58:27 +0800
+Message-ID: <1388998707.3539.6070.camel@linux-s257.site>
+References: <1387439515-8926-1-git-send-email-jlee@suse.com>
+	 <1387439515-8926-5-git-send-email-jlee@suse.com>
+	 <52B30F43.1060306@zytor.com> <1387518099.3539.4453.camel@linux-s257.site>
+	 <52C3647B.7000708@zytor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <52C3647B.7000708-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-krealloc should use a temporary pointer for allocations
-and check the temporary pointer returned against NULL too.
+=E6=96=BC =E4=BA=8C=EF=BC=8C2013-12-31 =E6=96=BC 16:42 -0800=EF=BC=8CH.=
+ Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
+> On 12/19/2013 09:41 PM, joeyli wrote:
+> >>
+> >> What platform do you have that has TAD support?  I am wondering ho=
+w this
+> >> was tested.
+> >>
+> >=20
+> > It's a testing platform that's only support get/set time functions =
+of
+> > ACPI TAD.
+> >=20
+>=20
+> It would be really, really good to get this into Qemu (either SeaBIOS=
+ or
+> OVMF, or ideally both) so we can have anyone test.
+>=20
+> 	-hpa
+>=20
 
-Signed-off-by: Joe Perches <joe@perches.com>
-cc: Matthew Garrett <matthew.garrett@nebula.com>
----
- arch/x86/platform/efi/efi.c | 12 +++++++++---
- 1 file changed, 9 insertions(+), 3 deletions(-)
+I will try to add to OVMF first.
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index cceb813..ef7b7b4 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -798,6 +798,8 @@ void __init efi_enter_virtual_mode(void)
- 	}
- 
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		void *new_memmap2;
-+
- 		md = p;
- 		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
- #ifdef CONFIG_X86_64
-@@ -834,9 +836,13 @@ void __init efi_enter_virtual_mode(void)
- 			systab += md->virt_addr - md->phys_addr;
- 			efi.systab = (efi_system_table_t *) (unsigned long) systab;
- 		}
--		new_memmap = krealloc(new_memmap,
--				      (count + 1) * memmap.desc_size,
--				      GFP_KERNEL);
-+		new_memmap2 = krealloc(new_memmap,
-+				       (count + 1) * memmap.desc_size,
-+				       GFP_KERNEL);
-+		if (!new_memmap2)
-+			continue;
-+
-+		new_memmap = new_memmap2;
- 		memcpy(new_memmap + (count * memmap.desc_size), md,
- 		       memmap.desc_size);
- 		count++;
--- 
-1.8.1.2.459.gbcd45b4.dirty
+
+Thanks
+Joey Lee
