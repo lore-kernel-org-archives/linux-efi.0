@@ -1,45 +1,54 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+From: joeyli <jlee@suse.com>
 Subject: Re: [RFC PATCH 04/14] ACPI: Add ACPI 5.0 Time and Alarm Device
  driver
-Date: Mon, 06 Jan 2014 16:58:27 +0800
-Message-ID: <1388998707.3539.6070.camel@linux-s257.site>
+Date: Mon, 06 Jan 2014 17:20:53 +0800
+Message-ID: <1389000053.3539.6078.camel@linux-s257.site>
 References: <1387439515-8926-1-git-send-email-jlee@suse.com>
 	 <1387439515-8926-5-git-send-email-jlee@suse.com>
-	 <52B30F43.1060306@zytor.com> <1387518099.3539.4453.camel@linux-s257.site>
-	 <52C3647B.7000708@zytor.com>
+	 <CAOLK0pynyv2CjA-Jb-0cUMkdnXY8KD2QForsk5ygM1mrRtXOyg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52C3647B.7000708-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <CAOLK0pynyv2CjA-Jb-0cUMkdnXY8KD2QForsk5ygM1mrRtXOyg@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Lan Tianyu <lantianyu1986@gmail.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech.it>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, "linux-kernel@vger kernel org" <linux-kernel@vger.kernel.org>, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E4=BA=8C=EF=BC=8C2013-12-31 =E6=96=BC 16:42 -0800=EF=BC=8CH.=
- Peter Anvin =E6=8F=90=E5=88=B0=EF=BC=9A
-> On 12/19/2013 09:41 PM, joeyli wrote:
-> >>
-> >> What platform do you have that has TAD support?  I am wondering ho=
-w this
-> >> was tested.
-> >>
-> >=20
-> > It's a testing platform that's only support get/set time functions =
-of
-> > ACPI TAD.
-> >=20
+=E6=96=BC =E5=9B=9B=EF=BC=8C2014-01-02 =E6=96=BC 16:09 +0800=EF=BC=8CLa=
+n Tianyu =E6=8F=90=E5=88=B0=EF=BC=9A
+> > diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+> > index bba9b72..3f7a075 100644
+> > --- a/drivers/acpi/bus.c
+> > +++ b/drivers/acpi/bus.c
+> > @@ -689,6 +689,9 @@ static int __init acpi_init(void)
+> >         pci_mmcfg_late_init();
+> >         acpi_scan_init();
+> >         acpi_ec_init();
+> > +#ifdef CONFIG_X86
+> > +       acpi_tad_init();
+> > +#endif
 >=20
-> It would be really, really good to get this into Qemu (either SeaBIOS=
- or
-> OVMF, or ideally both) so we can have anyone test.
->=20
-> 	-hpa
+> Why calling acpi_tad_init() directly here rather than using
+> module_initcall?
+> Is there dependency?
 >=20
 
-I will try to add to OVMF first.
+The rtc-acpitad RTC driver depend on acpi_read/set_time functions in
+acpi_tad.
+
+On the other hand, if we adapt to ACPI time device when "CMOS RTC Not
+Present" set, then acpi_read/set_time will used to replace CMOS
+functions that's called by other drivers. So, I direct call
+acpi_tad_init() here.
 
 
-Thanks
+Thanks a lot!
 Joey Lee
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
