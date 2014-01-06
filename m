@@ -1,54 +1,58 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [RFC PATCH 04/14] ACPI: Add ACPI 5.0 Time and Alarm Device
- driver
-Date: Mon, 06 Jan 2014 17:20:53 +0800
-Message-ID: <1389000053.3539.6078.camel@linux-s257.site>
-References: <1387439515-8926-1-git-send-email-jlee@suse.com>
-	 <1387439515-8926-5-git-send-email-jlee@suse.com>
-	 <CAOLK0pynyv2CjA-Jb-0cUMkdnXY8KD2QForsk5ygM1mrRtXOyg@mail.gmail.com>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [PATCH v4 4/4 update] Passing efi related data via setup_data
+Date: Mon, 06 Jan 2014 14:58:33 -0700
+Message-ID: <1389045513.1792.0.camel@misato.fc.hp.com>
+References: <1387533947-18210-1-git-send-email-dyoung@redhat.com>
+	 <1387533947-18210-5-git-send-email-dyoung@redhat.com>
+	 <20131230071656.GB3827@dhcp-16-126.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <CAOLK0pynyv2CjA-Jb-0cUMkdnXY8KD2QForsk5ygM1mrRtXOyg@mail.gmail.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Lan Tianyu <lantianyu1986@gmail.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech.it>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, "linux-kernel@vger kernel org" <linux-kernel@vger.kernel.org>, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20131230071656.GB3827-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-=E6=96=BC =E5=9B=9B=EF=BC=8C2014-01-02 =E6=96=BC 16:09 +0800=EF=BC=8CLa=
-n Tianyu =E6=8F=90=E5=88=B0=EF=BC=9A
-> > diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-> > index bba9b72..3f7a075 100644
-> > --- a/drivers/acpi/bus.c
-> > +++ b/drivers/acpi/bus.c
-> > @@ -689,6 +689,9 @@ static int __init acpi_init(void)
-> >         pci_mmcfg_late_init();
-> >         acpi_scan_init();
-> >         acpi_ec_init();
-> > +#ifdef CONFIG_X86
-> > +       acpi_tad_init();
-> > +#endif
->=20
-> Why calling acpi_tad_init() directly here rather than using
-> module_initcall?
-> Is there dependency?
->=20
+On Mon, 2013-12-30 at 15:16 +0800, Dave Young wrote:
+> For supporting efi runtime, several efi physical addresses
+> fw_vendor, runtime, config tables, smbios and the whole runtime
+> mapping info need to be used in kexec kernel. Thus introduce
+> setup_data struct for passing these data.
+> 
+> collect the varialbes from /sys/firmware/efi/systab and
+> /sys/firmware/efi/runtime-map
+> 
+> Tested on qemu+ovmf, dell laptop, lenovo laptop and HP workstation.
+> 
+> v1->v2:
+> HPA: use uint*_t instead of __uint*_t
+> Simon: indention fix; fix a memory leak
+> move offset change update to previous patch in setup header
+> only passing setup_data when the bzImage support efi boot
+> Vivek: export a value in bzImage probe so it can be used
+>       to check if we should pass acpi_rsdp.
+> coding style
+> 
+> v2->v3:
+> code cleanup
+> bail out if efi mm desc_version != 1
+> bhe: define macro for SETUP_EFI
+>      break loop if find matched string in systab.
+> 
+> v3->v4:
+> update memmap in efi_info to the saved runtime map
+> So kernel side can iterate them as normal boot.
+> 
+> v4->v5:
+> simplify function get_efi_value(), add error handling
+> realloc error handling
+> move map[0] out of efi_setup_data since memmap addr is set in efi_info
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-The rtc-acpitad RTC driver depend on acpi_read/set_time functions in
-acpi_tad.
+Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 
-On the other hand, if we adapt to ACPI time device when "CMOS RTC Not
-Present" set, then acpi_read/set_time will used to replace CMOS
-functions that's called by other drivers. So, I direct call
-acpi_tad_init() here.
-
-
-Thanks a lot!
-Joey Lee
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Toshi
