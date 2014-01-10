@@ -1,173 +1,77 @@
 From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 3/6] efi: add helper function to get UEFI params from FDT
-Date: Fri, 10 Jan 2014 17:29:07 -0500
-Message-ID: <1389392950-22457-4-git-send-email-msalter@redhat.com>
+Subject: [PATCH 5/6] doc: arm64: add description of EFI stub support
+Date: Fri, 10 Jan 2014 17:29:09 -0500
+Message-ID: <1389392950-22457-6-git-send-email-msalter@redhat.com>
 References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1389392950-22457-1-git-send-email-msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-ARM and ARM64 architectures use the device tree to pass UEFI parameters
-from stub to kernel. These parameters are things known to the stub but
-not discoverable by the kernel after the stub calls ExitBootSerives().
-There is a helper function in:
-
-   drivers/firmware/efi/fdt.c
-
-which the stub uses to add the UEFI parameters to the device tree.
-This patch adds a complimentary helper function which UEFI runtime
-support may use to retrieve the parameters from the device tree.
-If an architecture wants to use this helper, it should select
-CONFIG_UEFI_PARAMS_FROM_FDT.
+Add explanation of arm64 EFI stub and kernel image header changes
+needed to masquerade as a PE/COFF application.
 
 Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+CC: linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+CC: Rob Landley <rob-VoJi6FS/r0vR7s880joybQ@public.gmane.org>
 ---
- drivers/firmware/efi/Kconfig |  7 ++++
- drivers/firmware/efi/efi.c   | 79 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h          |  9 +++++
- 3 files changed, 95 insertions(+)
+ Documentation/arm64/booting.txt |  4 ++++
+ Documentation/efi-stub.txt      | 12 +++++++++---
+ 2 files changed, 13 insertions(+), 3 deletions(-)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 6aecbc8..d5101e6 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -36,6 +36,13 @@ config EFI_VARS_PSTORE_DEFAULT_DISABLE
- 	  backend for pstore by default. This setting can be overridden
- 	  using the efivars module's pstore_disable parameter.
+diff --git a/Documentation/arm64/booting.txt b/Documentation/arm64/booting.txt
+index a9691cc..aa95d38c 100644
+--- a/Documentation/arm64/booting.txt
++++ b/Documentation/arm64/booting.txt
+@@ -85,6 +85,10 @@ The decompressed kernel image contains a 64-byte header as follows:
+ Header notes:
  
-+config UEFI_PARAMS_FROM_FDT
-+	bool
-+	help
-+	  Select this config option from the architecture Kconfig if
-+	  the EFI runtime support gets system table address, memory
-+          map address, and other parameters from the device tree.
-+
- endmenu
+ - code0/code1 are responsible for branching to stext.
++- when booting through EFI, code0/code1 are initially skipped.
++  res5 is an offset to the PE header and the PE header has the EFI
++  entry point (efi_stub_entry). When the stub has done its work, it
++  jumps to code0 to resume the normal boot process.
  
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 2e2fbde..4f1372b 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -20,6 +20,8 @@
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/io.h>
+ The image must be placed at the specified offset (currently 0x80000)
+ from the start of the system RAM and called there. The start of the
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index a55a0cd..d8ad0c1 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -12,6 +12,11 @@ arch/arm/boot/compressed/efi-header.S and
+ arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
+ between architectures is in drivers/firmware/efi/efi-stub-helper.c.
  
- struct efi __read_mostly efi = {
-@@ -272,3 +274,80 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 	early_iounmap(config_tables, efi.systab->nr_tables * sz);
- 	return 0;
- }
++For arm64, there is no compressed kernel support, so the Image itself
++masquerades as a PE/COFF image and the EFI stub is linked into the
++kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
++and arch/arm64/kernel/efi-stub.c.
 +
-+#ifdef CONFIG_UEFI_PARAMS_FROM_FDT
-+
-+#define UEFI_PARAM(name, prop, field)			   \
-+	{						   \
-+		{ name },				   \
-+		{ prop },				   \
-+		offsetof(struct efi_fdt_params, field),    \
-+		FIELD_SIZEOF(struct efi_fdt_params, field) \
-+	}
-+
-+static __initdata struct {
-+	const char name[32];
-+	const char propname[32];
-+	int offset;
-+	int size;
-+} dt_params[] = {
-+	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-+};
-+
-+struct param_info {
-+	int verbose;
-+	void *params;
-+};
-+
-+static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-+				       int depth, void *data)
-+{
-+	struct param_info *info = data;
-+	void *prop, *dest;
-+	unsigned long len;
-+	u64 val;
-+	int i;
-+
-+	if (depth != 1 ||
-+	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
-+		return 0;
-+
-+	pr_info("Getting parameters from FDT:\n");
-+
-+	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-+		if (!prop) {
-+			pr_err("Can't find %s in device tree!\n",
-+			       dt_params[i].name);
-+			return 0;
-+		}
-+		dest = info->params + dt_params[i].offset;
-+
-+		val = of_read_number(prop, len / sizeof(u32));
-+
-+		if (dt_params[i].size == sizeof(u32))
-+			*(u32 *)dest = val;
-+		else
-+			*(u64 *)dest = val;
-+
-+		if (info->verbose)
-+			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-+				dt_params[i].size * 2, val);
-+	}
-+	return 1;
-+}
-+
-+int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-+{
-+	struct param_info info;
-+
-+	info.verbose = verbose;
-+	info.params = params;
-+
-+	return of_scan_flat_dt(fdt_find_uefi_params, &info);
-+}
-+#endif /* CONFIG_UEFI_PARAMS_FROM_FDT */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 9dc5b05..ff8524e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -483,6 +483,14 @@ struct efi_memory_map {
- 	unsigned long desc_size;
- };
+ By using the EFI boot stub it's possible to boot a Linux kernel
+ without the use of a conventional EFI boot loader, such as grub or
+ elilo. Since the EFI boot stub performs the jobs of a boot loader, in
+@@ -28,7 +33,8 @@ the extension the EFI firmware loader will refuse to execute it. It's
+ not possible to execute bzImage.efi from the usual Linux file systems
+ because EFI firmware doesn't have support for them. For ARM the
+ arch/arm/boot/zImage should be copied to the system partition, and it
+-may not need to be renamed.
++may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
++should be copied but not necessarily renamed.
  
-+struct efi_fdt_params {
-+	u64 system_table;
-+	u64 mmap;
-+	u32 mmap_size;
-+	u32 desc_size;
-+	u32 desc_ver;
-+};
-+
- typedef struct {
- 	u32 revision;
- 	void *parent_handle;
-@@ -616,6 +624,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- extern void efi_get_time(struct timespec *now);
- extern int efi_set_rtc_mmss(const struct timespec *now);
- extern void efi_reserve_boot_services(void);
-+extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
- extern struct efi_memory_map memmap;
  
- /* Iterate through an efi_memory_map */
+ **** Passing kernel parameters from the EFI shell
+@@ -72,7 +78,7 @@ is passed to bzImage.efi.
+ 
+ **** The "dtb=" option
+ 
+-For the ARM architecture, we also need to be able to provide a device
+-tree to the kernel. This is done with the "dtb=" command line option,
++For the ARM and arm64 architectures, we also need to be able to provide a
++device tree to the kernel. This is done with the "dtb=" command line option,
+ and is processed in the same manner as the "initrd=" option that is
+ described above.
 -- 
 1.8.3.1
