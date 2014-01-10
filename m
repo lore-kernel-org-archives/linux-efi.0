@@ -1,76 +1,173 @@
-From: Mark Salter <msalter@redhat.com>
-Subject: [PATCH 0/6] arm64: Add EFI stub and runtime services support
-Date: Fri, 10 Jan 2014 17:29:04 -0500
-Message-ID: <1389392950-22457-1-git-send-email-msalter@redhat.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, roy.franz@linaro.org, patches@linaro.org, Grant Likely <grant.likely@secretlab.ca>, Mark Salter <msalter@redhat.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 3/6] efi: add helper function to get UEFI params from FDT
+Date: Fri, 10 Jan 2014 17:29:07 -0500
+Message-ID: <1389392950-22457-4-git-send-email-msalter@redhat.com>
+References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1389392950-22457-1-git-send-email-msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This patch series adds EFI support to the arm64 kernel. This support has
-two main parts: an EFI stub and runtime support. The EFI stub support
-has the kernel masquerade as a PE/COFF application which can be directly
-booted by EFI firmware (or by secondary loaders with EFI support). The
-runtime services support provides access to various EFI firmware services
-such as reboot, real-time clock, boot variables, and others.
+ARM and ARM64 architectures use the device tree to pass UEFI parameters
+from stub to kernel. These parameters are things known to the stub but
+not discoverable by the kernel after the stub calls ExitBootSerives().
+There is a helper function in:
 
-Changes since v1:
+   drivers/firmware/efi/fdt.c
 
-  * Added Acks (well, one anyway)
+which the stub uses to add the UEFI parameters to the device tree.
+This patch adds a complimentary helper function which UEFI runtime
+support may use to retrieve the parameters from the device tree.
+If an architecture wants to use this helper, it should select
+CONFIG_UEFI_PARAMS_FROM_FDT.
 
-  * The first 3 patches are new for v2 and provide more generic
-    support for for following EFI patches.
+Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/Kconfig |  7 ++++
+ drivers/firmware/efi/efi.c   | 79 ++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h          |  9 +++++
+ 3 files changed, 95 insertions(+)
 
-  * Lots of changes based on feedback from Catalin mostly. I think
-    I addressed all of his comments.
-
-These patches have dependencies on other patches which are not yet in
-the kernel but have been posted and are currently under review. In
-particular:
-
-  - Generic fixmap support being discussed here:
-      http://lkml.org/lkml/2013/11/25/474
-    This is now in the akpm tree
-
-  - early_ioremap support being discussed here:
-      https://lkml.org/lkml/2014/1/9/708
-
-  - shared EFI update_fdt() function in this series:
-      http://news.gmane.org/gmane.linux.kernel.efi
-
-A repo with this patch series and the prerequisite patches is at:
-
-  git://github.com/mosalter/linux.git (arm64-efi-patches-v2 branch)
-
-Mark Salter (6):
-  efi: create memory map iteration helper
-  arm64: Add function to create identity mappings
-  efi: add helper function to get UEFI params from FDT
-  arm64: add EFI stub
-  doc: arm64: add description of EFI stub support
-  arm64: add EFI runtime services
-
- Documentation/arm64/booting.txt |   4 +
- Documentation/efi-stub.txt      |  12 +-
- arch/arm64/Kconfig              |  26 +++
- arch/arm64/include/asm/efi.h    |  12 ++
- arch/arm64/include/asm/mmu.h    |   1 +
- arch/arm64/kernel/Makefile      |   4 +
- arch/arm64/kernel/efi-entry.S   |  93 +++++++++++
- arch/arm64/kernel/efi-stub.c    | 181 ++++++++++++++++++++
- arch/arm64/kernel/efi.c         | 353 ++++++++++++++++++++++++++++++++++++++++
- arch/arm64/kernel/head.S        | 112 +++++++++++++
- arch/arm64/kernel/setup.c       |   6 +
- arch/arm64/mm/mmu.c             |  34 ++--
- drivers/firmware/efi/Kconfig    |   7 +
- drivers/firmware/efi/efi.c      |  79 +++++++++
- include/linux/efi.h             |  17 +-
- 15 files changed, 927 insertions(+), 14 deletions(-)
- create mode 100644 arch/arm64/include/asm/efi.h
- create mode 100644 arch/arm64/kernel/efi-entry.S
- create mode 100644 arch/arm64/kernel/efi-stub.c
- create mode 100644 arch/arm64/kernel/efi.c
-
+diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
+index 6aecbc8..d5101e6 100644
+--- a/drivers/firmware/efi/Kconfig
++++ b/drivers/firmware/efi/Kconfig
+@@ -36,6 +36,13 @@ config EFI_VARS_PSTORE_DEFAULT_DISABLE
+ 	  backend for pstore by default. This setting can be overridden
+ 	  using the efivars module's pstore_disable parameter.
+ 
++config UEFI_PARAMS_FROM_FDT
++	bool
++	help
++	  Select this config option from the architecture Kconfig if
++	  the EFI runtime support gets system table address, memory
++          map address, and other parameters from the device tree.
++
+ endmenu
+ 
+ config UEFI_CPER
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 2e2fbde..4f1372b 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -20,6 +20,8 @@
+ #include <linux/init.h>
+ #include <linux/device.h>
+ #include <linux/efi.h>
++#include <linux/of.h>
++#include <linux/of_fdt.h>
+ #include <linux/io.h>
+ 
+ struct efi __read_mostly efi = {
+@@ -272,3 +274,80 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 	early_iounmap(config_tables, efi.systab->nr_tables * sz);
+ 	return 0;
+ }
++
++#ifdef CONFIG_UEFI_PARAMS_FROM_FDT
++
++#define UEFI_PARAM(name, prop, field)			   \
++	{						   \
++		{ name },				   \
++		{ prop },				   \
++		offsetof(struct efi_fdt_params, field),    \
++		FIELD_SIZEOF(struct efi_fdt_params, field) \
++	}
++
++static __initdata struct {
++	const char name[32];
++	const char propname[32];
++	int offset;
++	int size;
++} dt_params[] = {
++	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
++	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
++	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
++	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
++	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
++};
++
++struct param_info {
++	int verbose;
++	void *params;
++};
++
++static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
++				       int depth, void *data)
++{
++	struct param_info *info = data;
++	void *prop, *dest;
++	unsigned long len;
++	u64 val;
++	int i;
++
++	if (depth != 1 ||
++	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
++		return 0;
++
++	pr_info("Getting parameters from FDT:\n");
++
++	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
++		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
++		if (!prop) {
++			pr_err("Can't find %s in device tree!\n",
++			       dt_params[i].name);
++			return 0;
++		}
++		dest = info->params + dt_params[i].offset;
++
++		val = of_read_number(prop, len / sizeof(u32));
++
++		if (dt_params[i].size == sizeof(u32))
++			*(u32 *)dest = val;
++		else
++			*(u64 *)dest = val;
++
++		if (info->verbose)
++			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
++				dt_params[i].size * 2, val);
++	}
++	return 1;
++}
++
++int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
++{
++	struct param_info info;
++
++	info.verbose = verbose;
++	info.params = params;
++
++	return of_scan_flat_dt(fdt_find_uefi_params, &info);
++}
++#endif /* CONFIG_UEFI_PARAMS_FROM_FDT */
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 9dc5b05..ff8524e 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -483,6 +483,14 @@ struct efi_memory_map {
+ 	unsigned long desc_size;
+ };
+ 
++struct efi_fdt_params {
++	u64 system_table;
++	u64 mmap;
++	u32 mmap_size;
++	u32 desc_size;
++	u32 desc_ver;
++};
++
+ typedef struct {
+ 	u32 revision;
+ 	void *parent_handle;
+@@ -616,6 +624,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
+ extern void efi_get_time(struct timespec *now);
+ extern int efi_set_rtc_mmss(const struct timespec *now);
+ extern void efi_reserve_boot_services(void);
++extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
+ extern struct efi_memory_map memmap;
+ 
+ /* Iterate through an efi_memory_map */
 -- 
 1.8.3.1
