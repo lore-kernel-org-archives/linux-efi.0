@@ -1,42 +1,76 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 1/6] efi: create memory map iteration helper
-Date: Fri, 10 Jan 2014 17:29:05 -0500
-Message-ID: <1389392950-22457-2-git-send-email-msalter@redhat.com>
-References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1389392950-22457-1-git-send-email-msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Mark Salter <msalter@redhat.com>
+Subject: [PATCH 0/6] arm64: Add EFI stub and runtime services support
+Date: Fri, 10 Jan 2014 17:29:04 -0500
+Message-ID: <1389392950-22457-1-git-send-email-msalter@redhat.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, matt.fleming@intel.com, Leif Lindholm <leif.lindholm@linaro.org>, roy.franz@linaro.org, patches@linaro.org, Grant Likely <grant.likely@secretlab.ca>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-There are a lot of places in the kernel which iterate through an
-EFI memory map. Most of these places use essentially the same
-for-loop code. This patch adds a for_each_efi_memory_desc()
-helper to clean up all of the existing duplicate code and avoid
-more in the future.
+This patch series adds EFI support to the arm64 kernel. This support has
+two main parts: an EFI stub and runtime support. The EFI stub support
+has the kernel masquerade as a PE/COFF application which can be directly
+booted by EFI firmware (or by secondary loaders with EFI support). The
+runtime services support provides access to various EFI firmware services
+such as reboot, real-time clock, boot variables, and others.
 
-Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- include/linux/efi.h | 6 ++++++
- 1 file changed, 6 insertions(+)
+Changes since v1:
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 11ce678..9dc5b05 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -618,6 +618,12 @@ extern int efi_set_rtc_mmss(const struct timespec *now);
- extern void efi_reserve_boot_services(void);
- extern struct efi_memory_map memmap;
- 
-+/* Iterate through an efi_memory_map */
-+#define for_each_efi_memory_desc(m, md)					   \
-+	for ((md) = (m)->map;						   \
-+	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
-+	     (md) = (void *)(md) + (m)->desc_size)
-+
- /**
-  * efi_range_is_wc - check the WC bit on an address range
-  * @start: starting kvirt address
+  * Added Acks (well, one anyway)
+
+  * The first 3 patches are new for v2 and provide more generic
+    support for for following EFI patches.
+
+  * Lots of changes based on feedback from Catalin mostly. I think
+    I addressed all of his comments.
+
+These patches have dependencies on other patches which are not yet in
+the kernel but have been posted and are currently under review. In
+particular:
+
+  - Generic fixmap support being discussed here:
+      http://lkml.org/lkml/2013/11/25/474
+    This is now in the akpm tree
+
+  - early_ioremap support being discussed here:
+      https://lkml.org/lkml/2014/1/9/708
+
+  - shared EFI update_fdt() function in this series:
+      http://news.gmane.org/gmane.linux.kernel.efi
+
+A repo with this patch series and the prerequisite patches is at:
+
+  git://github.com/mosalter/linux.git (arm64-efi-patches-v2 branch)
+
+Mark Salter (6):
+  efi: create memory map iteration helper
+  arm64: Add function to create identity mappings
+  efi: add helper function to get UEFI params from FDT
+  arm64: add EFI stub
+  doc: arm64: add description of EFI stub support
+  arm64: add EFI runtime services
+
+ Documentation/arm64/booting.txt |   4 +
+ Documentation/efi-stub.txt      |  12 +-
+ arch/arm64/Kconfig              |  26 +++
+ arch/arm64/include/asm/efi.h    |  12 ++
+ arch/arm64/include/asm/mmu.h    |   1 +
+ arch/arm64/kernel/Makefile      |   4 +
+ arch/arm64/kernel/efi-entry.S   |  93 +++++++++++
+ arch/arm64/kernel/efi-stub.c    | 181 ++++++++++++++++++++
+ arch/arm64/kernel/efi.c         | 353 ++++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/head.S        | 112 +++++++++++++
+ arch/arm64/kernel/setup.c       |   6 +
+ arch/arm64/mm/mmu.c             |  34 ++--
+ drivers/firmware/efi/Kconfig    |   7 +
+ drivers/firmware/efi/efi.c      |  79 +++++++++
+ include/linux/efi.h             |  17 +-
+ 15 files changed, 927 insertions(+), 14 deletions(-)
+ create mode 100644 arch/arm64/include/asm/efi.h
+ create mode 100644 arch/arm64/kernel/efi-entry.S
+ create mode 100644 arch/arm64/kernel/efi-stub.c
+ create mode 100644 arch/arm64/kernel/efi.c
+
 -- 
 1.8.3.1
