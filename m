@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: [PATCH 2/4] efi: Dump the EFI page table
-Date: Sat, 11 Jan 2014 21:49:28 +0100
-Message-ID: <1389473370-1940-3-git-send-email-bp@alien8.de>
+Subject: [PATCH 4/4] efi: Make efi virtual runtime map passing more robust
+Date: Sat, 11 Jan 2014 21:49:30 +0100
+Message-ID: <1389473370-1940-5-git-send-email-bp@alien8.de>
 References: <1389473370-1940-1-git-send-email-bp@alien8.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1389473370-1940-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
@@ -12,49 +12,231 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-This is very useful for debugging issues with the recently added
-pagetable switching code for EFI virtual mode.
+Currently, running SetVirtualAddressMap() and passing the physical
+address of the virtual map array was working only by a lucky coincidence
+because the memory was present in the EFI page table too. Until Toshi
+went and booted this on a big HP box - the krealloc() manner of resizing
+the memmap we're doing did allocate from such physical addresses which
+were not mapped anymore and boom:
 
+http://lkml.kernel.org/r/1386806463.1791.295.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org
+
+One way to take care of that issue is to reimplement the krealloc thing
+but with pages. We start with contiguous pages of order 1, i.e. 2 pages,
+and when we deplete that memory (shouldn't happen all that often but you
+know firmware) we realloc the next power-of-two pages.
+
+Having the pages, it is much more handy and easy to map them into the
+EFI page table with the already existing mapping code which we're using
+for building the virtual mappings.
+
+And, it doesn't matter all that much how much pages we've used as we're
+freeing them right after they've fulfilled their purpose at the end of
+the function anyway.
+
+Reported-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ arch/x86/include/asm/efi.h     |  3 +-
+ arch/x86/platform/efi/efi.c    | 62 ++++++++++++++++++++++++++++++------------
+ arch/x86/platform/efi/efi_32.c |  6 +++-
+ arch/x86/platform/efi/efi_64.c | 31 +++++++++++++++++++--
+ 4 files changed, 80 insertions(+), 22 deletions(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 3b978c472d08..0e7973f7492e 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -130,7 +130,8 @@ extern void efi_memory_uc(u64 addr, unsigned long size);
+ extern void __init efi_map_region(efi_memory_desc_t *md);
+ extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
+ extern void efi_sync_low_kernel_mappings(void);
+-extern void efi_setup_page_tables(void);
++extern int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
++extern void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+ extern void __init old_map_region(efi_memory_desc_t *md);
+ 
+ struct efi_setup_data {
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index d62ec87a2b26..c34be4ce94c9 100644
+index c34be4ce94c9..65a8c969db87 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -54,6 +54,7 @@
- #include <asm/rtc.h>
+@@ -948,14 +948,36 @@ static void __init efi_map_regions_fixed(void)
  
- #define EFI_DEBUG
-+#undef EFI_PGT_DBG
- 
- #define EFI_MIN_RESERVE 5120
- 
-@@ -818,6 +819,15 @@ void efi_memory_uc(u64 addr, unsigned long size)
- 	set_memory_uc(addr, npages);
  }
  
-+static void dump_pagetable(void)
++static void *realloc_pages(void *old_memmap, int old_shift)
 +{
-+#if defined(EFI_PGT_DBG) && defined(CONFIG_X86_PTDUMP)
-+	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
++	void *ret;
 +
-+	walk_pgd_level(NULL, pgd);
-+#endif
++	ret = (void *)__get_free_pages(GFP_KERNEL, old_shift + 1);
++	if (!ret)
++		goto out;
++
++	/*
++	 * A first-time allocation doesn't have anything to copy.
++	 */
++	if (!old_memmap)
++		return ret;
++
++	memcpy(ret, old_memmap, PAGE_SIZE << old_shift);
++
++out:
++	__free_pages(old_memmap, old_shift);
++	return ret;
 +}
 +
- void __init old_map_region(efi_memory_desc_t *md)
+ /*
+- * Map efi memory ranges for runtime serivce and update new_memmap with virtual
+- * addresses.
++ * Map the efi memory ranges of the runtime services and update new_mmap with
++ * virtual addresses.
+  */
+-static void * __init efi_map_regions(int *count)
++static void * __init efi_map_regions(int *count, int *pg_shift)
  {
- 	u64 start_pfn, end_pfn, end;
-@@ -1033,6 +1043,7 @@ void __init efi_enter_virtual_mode(void)
++	void *p, *new_memmap = NULL;
++	unsigned long left = 0;
+ 	efi_memory_desc_t *md;
+-	void *p, *tmp, *new_memmap = NULL;
  
- 	efi_setup_page_tables();
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+@@ -970,20 +992,23 @@ static void * __init efi_map_regions(int *count)
+ 		efi_map_region(md);
+ 		get_systab_virt_addr(md);
+ 
+-		tmp = krealloc(new_memmap, (*count + 1) * memmap.desc_size,
+-			       GFP_KERNEL);
+-		if (!tmp)
+-			goto out;
+-		new_memmap = tmp;
++		if (left < memmap.desc_size) {
++			new_memmap = realloc_pages(new_memmap, *pg_shift);
++			if (!new_memmap)
++				return NULL;
++
++			left += PAGE_SIZE << *pg_shift;
++			(*pg_shift)++;
++		}
++
+ 		memcpy(new_memmap + (*count * memmap.desc_size), md,
+ 		       memmap.desc_size);
++
++		left -= memmap.desc_size;
+ 		(*count)++;
+ 	}
+ 
+ 	return new_memmap;
+-out:
+-	kfree(new_memmap);
+-	return NULL;
+ }
+ 
+ /*
+@@ -1009,9 +1034,9 @@ out:
+  */
+ void __init efi_enter_virtual_mode(void)
+ {
+-	efi_status_t status;
++	int err, count = 0, pg_shift = 0;
+ 	void *new_memmap = NULL;
+-	int err, count = 0;
++	efi_status_t status;
+ 
+ 	efi.systab = NULL;
+ 
+@@ -1028,7 +1053,7 @@ void __init efi_enter_virtual_mode(void)
+ 		efi_map_regions_fixed();
+ 	} else {
+ 		efi_merge_regions();
+-		new_memmap = efi_map_regions(&count);
++		new_memmap = efi_map_regions(&count, &pg_shift);
+ 		if (!new_memmap) {
+ 			pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+ 			return;
+@@ -1041,7 +1066,9 @@ void __init efi_enter_virtual_mode(void)
+ 
+ 	BUG_ON(!efi.systab);
+ 
+-	efi_setup_page_tables();
++	if (efi_setup_page_tables(__pa(new_memmap), 1 << pg_shift))
++		return;
++
  	efi_sync_low_kernel_mappings();
-+	dump_pagetable();
+ 	dump_pagetable();
  
- 	if (!efi_setup) {
- 		status = phys_efi_set_virtual_address_map(
+@@ -1083,7 +1110,8 @@ void __init efi_enter_virtual_mode(void)
+ 	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
+ 		runtime_code_page_mkexec();
+ 
+-	kfree(new_memmap);
++	efi_cleanup_page_tables(__pa(new_memmap), 1 << pg_shift);
++	__free_pages(new_memmap, pg_shift);
+ 
+ 	/* clean DUMMY object */
+ 	efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 249b183cf417..d58a2015e22d 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -40,7 +40,11 @@
+ static unsigned long efi_rt_eflags;
+ 
+ void efi_sync_low_kernel_mappings(void) {}
+-void efi_setup_page_tables(void) {}
++int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
++{
++	return 0;
++}
++void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages) {}
+ 
+ void __init efi_map_region(efi_memory_desc_t *md)
+ {
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 6284f158a47d..3d66844ea156 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -137,12 +137,37 @@ void efi_sync_low_kernel_mappings(void)
+ 		sizeof(pgd_t) * num_pgds);
+ }
+ 
+-void efi_setup_page_tables(void)
++int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
++	pgd_t *pgd;
++
++	if (efi_enabled(EFI_OLD_MEMMAP))
++		return 0;
++
++	/*
++	 * It can happen that the physical address of new_memmap lands in memory
++	 * which is not mapped in the EFI page table. Therefore we need to go
++	 * and ident-map those pages containing the map before calling
++	 * phys_efi_set_virtual_address_map().
++	 */
++	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
++		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
++		return 1;
++	}
++
+ 	efi_scratch.efi_pgt = (pgd_t *)(unsigned long)real_mode_header->trampoline_pgd;
++	efi_scratch.use_pgd = true;
+ 
+-	if (!efi_enabled(EFI_OLD_MEMMAP))
+-		efi_scratch.use_pgd = true;
++	pgd = __va(efi_scratch.efi_pgt);
++
++	return 0;
++}
++
++void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
++{
++	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
++
++	kernel_unmap_pages_in_pgd(pgd, pa_memmap, num_pages);
+ }
+ 
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
 -- 
 1.8.5.2.192.g7794a68
