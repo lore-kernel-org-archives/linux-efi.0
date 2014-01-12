@@ -1,73 +1,78 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: [RFT][PATCH] ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME)
-Date: Sun, 12 Jan 2014 01:30:23 +0100
-Message-ID: <2530951.HFPX8MI38t@vostro.rjw.lan>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com> <3476450.BMEcId2Lgj@vostro.rjw.lan> <20131221122148.GB29501@console-pimps.org>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
+ ACPI TAD and EFI TIME)
+Date: Sun, 12 Jan 2014 10:06:27 +0100
+Message-ID: <20140112090627.GB3668@pd.tnic>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+ <3476450.BMEcId2Lgj@vostro.rjw.lan>
+ <20131221122148.GB29501@console-pimps.org>
+ <2530951.HFPX8MI38t@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20131221122148.GB29501@console-pimps.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, joeyli <jlee@suse.com>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <2530951.HFPX8MI38t-sKB8Sp2ER+y1GS7QM15AGw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Saturday, December 21, 2013 12:21:48 PM Matt Fleming wrote:
-> On Fri, 20 Dec, at 11:18:56PM, Rafael J. Wysocki wrote:
-> > 
-> > I'm not sure 100%, but I *think* we need to do that with interrupts enabled.
-> > At least after mm_init(), because it relies on things initialized there if I
-> > remember correctly.
-> > 
-> > From what I can tell at the moment, it might be possible to move it before
-> > efi_enter_virtual_mode() if that would help.
+On Sun, Jan 12, 2014 at 01:30:23AM +0100, Rafael J. Wysocki wrote:
+> I don't see any adverse effects of the patch below on a couple of my test
+> boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
+> good to give it a go on as many machines as reasonably possible.
 > 
-> Actually yeah, that would be super useful, and I think we'd be able to
-> get rid of the whole efi_late_init() stuff because we'd no longer need
-> to hang on to the EFI_BOOT_SERVICES* regions after
-> SetVirtualAddressMap().
+> Thanks,
+> Rafael
+> 
+> ---
+> From: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Subject: ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+> 
+> According to Matt Fleming, if acpi_early_init() was executed befpre
+> efi_enter_virtual_mode(), the EFI initialization could benefit from
+> it, so make that happen.
+> 
+> Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  init/main.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> Index: linux-pm/init/main.c
+> ===================================================================
+> --- linux-pm.orig/init/main.c
+> +++ linux-pm/init/main.c
+> @@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
+>  	calibrate_delay();
+>  	pidmap_init();
+>  	anon_vma_init();
+> +	acpi_early_init();
+>  #ifdef CONFIG_X86
+>  	if (efi_enabled(EFI_RUNTIME_SERVICES))
+>  		efi_enter_virtual_mode();
+> @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
+>  
+>  	check_bugs();
+>  
+> -	acpi_early_init(); /* before LAPIC and SMP init */
+>  	sfi_init_late();
+>  
+>  	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+>
 
-OK
+Looks good both on kvm+OVMF and on my Dell EFI box.
 
-I don't see any adverse effects of the patch below on a couple of my test
-boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
-good to give it a go on as many machines as reasonably possible.
+Tested-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Thanks,
-Rafael
+Toshi has a big EFI box though - if he could run it too, that would be
+great :-)
 
----
-From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-Subject: ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+Thanks.
 
-According to Matt Fleming, if acpi_early_init() was executed befpre
-efi_enter_virtual_mode(), the EFI initialization could benefit from
-it, so make that happen.
+-- 
+Regards/Gruss,
+    Boris.
 
-Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
----
- init/main.c |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-Index: linux-pm/init/main.c
-===================================================================
---- linux-pm.orig/init/main.c
-+++ linux-pm/init/main.c
-@@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
- 	calibrate_delay();
- 	pidmap_init();
- 	anon_vma_init();
-+	acpi_early_init();
- #ifdef CONFIG_X86
- 	if (efi_enabled(EFI_RUNTIME_SERVICES))
- 		efi_enter_virtual_mode();
-@@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
- 
- 	check_bugs();
- 
--	acpi_early_init(); /* before LAPIC and SMP init */
- 	sfi_init_late();
- 
- 	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
-
+Sent from a fat crate under my desk. Formatting is fine.
+--
