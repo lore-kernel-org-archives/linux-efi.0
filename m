@@ -1,41 +1,73 @@
-From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
- arbitrary pagetable
-Date: Sat, 11 Jan 2014 12:59:42 -0800
-Message-ID: <1389473982.2537.84.camel@joe-AO722>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de>
-	 <1389473370-1940-2-git-send-email-bp@alien8.de>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: [RFT][PATCH] ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of ACPI TAD and EFI TIME)
+Date: Sun, 12 Jan 2014 01:30:23 +0100
+Message-ID: <2530951.HFPX8MI38t@vostro.rjw.lan>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com> <3476450.BMEcId2Lgj@vostro.rjw.lan> <20131221122148.GB29501@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1389473370-1940-2-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20131221122148.GB29501@console-pimps.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, joeyli <jlee@suse.com>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 2014-01-11 at 21:49 +0100, Borislav Petkov wrote:
-> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+On Saturday, December 21, 2013 12:21:48 PM Matt Fleming wrote:
+> On Fri, 20 Dec, at 11:18:56PM, Rafael J. Wysocki wrote:
+> > 
+> > I'm not sure 100%, but I *think* we need to do that with interrupts enabled.
+> > At least after mm_init(), because it relies on things initialized there if I
+> > remember correctly.
+> > 
+> > From what I can tell at the moment, it might be possible to move it before
+> > efi_enter_virtual_mode() if that would help.
 > 
-> With reusing the ->trampoline_pgd page table for mapping EFI regions in
-> order to use them after having switched to EFI virtual mode, it is very
-> useful to be able to dump aforementioned page table in dmesg. This adds
-> that functionality through the walk_pgd_level() interface which can be
-> called from somewhere else.
-[]
-> diff --git a/arch/x86/mm/dump_pagetables.c b/arch/x86/mm/dump_pagetables.c
-[]
-> @@ -306,6 +326,11 @@ static void walk_pgd_level(struct seq_file *m)
->  	int i;
->  	struct pg_state st;
->  
-> +	if (pgd) {
-> +		start = pgd;
-> +		dump_to_dmesg = true;
-> +	}
+> Actually yeah, that would be super useful, and I think we'd be able to
+> get rid of the whole efi_late_init() stuff because we'd no longer need
+> to hang on to the EFI_BOOT_SERVICES* regions after
+> SetVirtualAddressMap().
 
-	else
-		dump_to_dmesg = false;
+OK
 
-?
+I don't see any adverse effects of the patch below on a couple of my test
+boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
+good to give it a go on as many machines as reasonably possible.
+
+Thanks,
+Rafael
+
+---
+From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Subject: ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+
+According to Matt Fleming, if acpi_early_init() was executed befpre
+efi_enter_virtual_mode(), the EFI initialization could benefit from
+it, so make that happen.
+
+Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+---
+ init/main.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+Index: linux-pm/init/main.c
+===================================================================
+--- linux-pm.orig/init/main.c
++++ linux-pm/init/main.c
+@@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
+ 	calibrate_delay();
+ 	pidmap_init();
+ 	anon_vma_init();
++	acpi_early_init();
+ #ifdef CONFIG_X86
+ 	if (efi_enabled(EFI_RUNTIME_SERVICES))
+ 		efi_enter_virtual_mode();
+@@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
+ 
+ 	check_bugs();
+ 
+-	acpi_early_init(); /* before LAPIC and SMP init */
+ 	sfi_init_late();
+ 
+ 	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+
