@@ -1,34 +1,32 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] x86: efi: create memory map iteration helper
-Date: Mon, 13 Jan 2014 14:40:30 +0000
-Message-ID: <20140113144030.GD3256@console-pimps.org>
-References: <1389210653-15271-1-git-send-email-msalter@redhat.com>
+From: Arjan van de Ven <arjan@linux.intel.com>
+Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an arbitrary
+ pagetable
+Date: Mon, 13 Jan 2014 06:48:10 -0800
+Message-ID: <52D3FCAA.7070004@linux.intel.com>
+References: <1389473370-1940-1-git-send-email-bp@alien8.de> <1389473370-1940-2-git-send-email-bp@alien8.de> <20140113053240.GA11237@dhcp-16-126.nay.redhat.com> <20140113101822.GA5388@pd.tnic> <20140113122320.GA1900@darkstar.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1389210653-15271-1-git-send-email-msalter@redhat.com>
+In-Reply-To: <20140113122320.GA1900@darkstar.nay.redhat.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Salter <msalter@redhat.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, x86@kernel.org, leif.lindholm@linaro.org, Roy Franz <roy.franz@linaro.org>
+To: Dave Young <dyoung@redhat.com>, Borislav Petkov <bp@alien8.de>
+Cc: Linux EFI <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 08 Jan, at 02:50:53PM, Mark Salter wrote:
-> There are about a dozen places in the x86 EFI code which loop through
-> the EFI memory map descriptors. All of these places use essentially
-> the same for-loop code. This patch adds a for_each_efi_memory_desc()
-> helper to clean up all of the duplicate code and make it available
-> for other architectures to use.
-> 
-> Signed-off-by: Mark Salter <msalter@redhat.com>
-> ---
->  arch/x86/platform/efi/efi.c    | 48 +++++++++++++-----------------------------
->  arch/x86/platform/efi/efi_64.c |  5 +----
->  drivers/firmware/efi/efi.c     |  5 ++---
->  include/linux/efi.h            |  6 ++++++
->  4 files changed, 24 insertions(+), 40 deletions(-)
+On 1/13/2014 4:23 AM, Dave Young wrote:
+>>
+>>> How about do not limit to only if (pgd) case, instead do something
+>>> like below: set dump_to_dmesg as a module parameter
+>>
+>> X86_PTDUMP is not a module.
+>
+> Hmm, I just see the module macros in the code, since it's a bool Kconfig
+> I think the dump_pagetables.c need a cleanup,
+> remove the #include <linux/module.h> and below lines:
+> MODULE_LICENSE("GPL");
+> MODULE_AUTHOR("Arjan van de Ven <arjan@linux.intel.com>");
+> MODULE_DESCRIPTION("Kernel debugging helper that dumps pagetables");
 
-Thanks Mark, I like this. Applied.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+personally I consider it good form to always have this kind of information in .c files,
+regardless of the KConfig side of thing...
