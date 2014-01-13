@@ -1,55 +1,47 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/6] efi: create memory map iteration helper
-Date: Mon, 13 Jan 2014 12:53:01 -0500
-Message-ID: <1389635581.26822.2.camel@deneb.redhat.com>
-References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
-	 <1389392950-22457-2-git-send-email-msalter@redhat.com>
-	 <20140113151759.GG3256@console-pimps.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH v4 5/5] init: efi: arm: enable (U)EFI runtime services on arm
+Date: Mon, 13 Jan 2014 19:29:06 +0100
+Message-ID: <201401131929.07236.arnd@arndb.de>
+References: <1389445524-30623-1-git-send-email-leif.lindholm@linaro.org> <1389445524-30623-6-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140113151759.GG3256-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1389445524-30623-6-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, linux-kernel@vger.kernel.org, grant.likely@secretlab.ca, linux-efi@vger.kernel.org, linux@arm.linux.org.uk, patches@linaro.org, roy.franz@linaro.org, matt.fleming@intel.com, msalter@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2014-01-13 at 15:17 +0000, Matt Fleming wrote:
-> On Fri, 10 Jan, at 05:29:05PM, Mark Salter wrote:
-> > There are a lot of places in the kernel which iterate through an
-> > EFI memory map. Most of these places use essentially the same
-> > for-loop code. This patch adds a for_each_efi_memory_desc()
-> > helper to clean up all of the existing duplicate code and avoid
-> > more in the future.
-> > 
-> > Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  include/linux/efi.h | 6 ++++++
-> >  1 file changed, 6 insertions(+)
-> > 
-> > diff --git a/include/linux/efi.h b/include/linux/efi.h
-> > index 11ce678..9dc5b05 100644
-> > --- a/include/linux/efi.h
-> > +++ b/include/linux/efi.h
-> > @@ -618,6 +618,12 @@ extern int efi_set_rtc_mmss(const struct timespec *now);
-> >  extern void efi_reserve_boot_services(void);
-> >  extern struct efi_memory_map memmap;
-> >  
-> > +/* Iterate through an efi_memory_map */
-> > +#define for_each_efi_memory_desc(m, md)					   \
-> > +	for ((md) = (m)->map;						   \
-> > +	     (md) <= (efi_memory_desc_t *)((m)->map_end - (m)->desc_size); \
-> > +	     (md) = (void *)(md) + (m)->desc_size)
-> > +
-> 
-> Err, what? I just picked up your previous patch ("x86/efi: Create memory
-> map iteration helper") which adds this chunk, and I didn't see a follow
-> up email telling me not to pick it up.
-> 
-> What's the plan?
-> 
-Sorry, I meant to drop this one from this series. The one you picked
-up is the one I wanted picked up.
+On Saturday 11 January 2014, Leif Lindholm wrote:
+> diff --git a/init/main.c b/init/main.c
+> index febc511..1331829 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -905,6 +905,10 @@ static noinline void __init kernel_init_freeable(void)
+>         smp_prepare_cpus(setup_max_cpus);
+>  
+>         do_pre_smp_initcalls();
+> +
+> +       if (IS_ENABLED(CONFIG_ARM) && efi_enabled(EFI_BOOT))
+> +               efi_enter_virtual_mode();
 
---Mark
+What is the dependency on CONFIG_ARM here? Wouldn't most other
+architectures need the same? I'd rather not see this turn into
+a long list of CONFIG_$(ARCH) checks if other architectures
+enable it in the same place.
+
+I also wonder why the three architectures implementing it all
+call this from wildly different places during init/main.c, namely
+(very early) setup_arch() on ia64, (relatively early) start_kernel
+on x86 and (relatively late) kernel_init_freeable on arm.
+
+In general, I'd be happy with adding this as late in the startup
+code as possible, but it may be better to use the same place as
+x86 in order to avoid surprises with unexpected dependencies.
+One such dependency that may cause problems is the fact that
+we (try to) call efi_late_init() before efi_enter_virtual_mode()
+now.
+
+	Arnd
