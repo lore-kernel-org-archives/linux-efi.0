@@ -1,66 +1,50 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v4 4/5] arm: Add [U]EFI runtime services support
-Date: Mon, 13 Jan 2014 15:40:40 +0000
-Message-ID: <20140113154040.GH3256@console-pimps.org>
-References: <1389445524-30623-1-git-send-email-leif.lindholm@linaro.org>
- <1389445524-30623-5-git-send-email-leif.lindholm@linaro.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
+ arbitrary pagetable
+Date: Mon, 13 Jan 2014 15:49:09 +0000
+Message-ID: <20140113154909.GI3256@console-pimps.org>
+References: <1389473370-1940-1-git-send-email-bp@alien8.de>
+ <1389473370-1940-2-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1389445524-30623-5-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <1389473370-1940-2-git-send-email-bp@alien8.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Linux EFI <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Arjan van de Ven <arjan@linux.intel.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, Toshi Kani <toshi.kani@hp.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 11 Jan, at 01:05:23PM, Leif Lindholm wrote:
-> This patch implements basic support for UEFI runtime services in the
-> ARM architecture - a requirement for using efibootmgr to read and update
-> the system boot configuration.
+On Sat, 11 Jan, at 09:49:27PM, Borislav Petkov wrote:
+> From: Borislav Petkov <bp@suse.de>
 > 
-> It uses the generic configuration table scanning to populate ACPI and
-> SMBIOS pointers.
+> With reusing the ->trampoline_pgd page table for mapping EFI regions in
+> order to use them after having switched to EFI virtual mode, it is very
+> useful to be able to dump aforementioned page table in dmesg. This adds
+> that functionality through the walk_pgd_level() interface which can be
+> called from somewhere else.
 > 
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Reviewed-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> The original functionality of dumping to debugfs remains untouched.
 > 
-> Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> Cc: Arjan van de Ven <arjan@linux.intel.com>
+> Signed-off-by: Borislav Petkov <bp@suse.de>
 > ---
->  arch/arm/Kconfig            |   16 ++
->  arch/arm/include/asm/uefi.h |   28 +++
->  arch/arm/kernel/Makefile    |    2 +
->  arch/arm/kernel/setup.c     |    4 +
->  arch/arm/kernel/uefi.c      |  418 +++++++++++++++++++++++++++++++++++++++++++
->  arch/arm/kernel/uefi_phys.S |   67 +++++++
->  include/linux/efi.h         |    2 +-
->  7 files changed, 536 insertions(+), 1 deletion(-)
->  create mode 100644 arch/arm/include/asm/uefi.h
->  create mode 100644 arch/arm/kernel/uefi.c
->  create mode 100644 arch/arm/kernel/uefi_phys.S
+>  arch/x86/include/asm/pgtable.h |  3 +-
+>  arch/x86/mm/dump_pagetables.c  | 77 ++++++++++++++++++++++++++++--------------
+>  2 files changed, 53 insertions(+), 27 deletions(-)
 
 [...]
 
-> @@ -664,7 +664,7 @@ extern int __init efi_setup_pcdp_console(char *);
->  #define EFI_64BIT		5	/* Is the firmware 64-bit? */
+> @@ -296,7 +316,7 @@ static void walk_pud_level(struct seq_file *m, struct pg_state *st, pgd_t addr,
+>  #define pgd_none(a)  pud_none(__pud(pgd_val(a)))
+>  #endif
 >  
->  #ifdef CONFIG_EFI
-> -# ifdef CONFIG_X86
-> +# if defined(CONFIG_X86) || defined(CONFIG_ARM)
->  extern int efi_enabled(int facility);
->  # else
->  static inline int efi_enabled(int facility)
+> -static void walk_pgd_level(struct seq_file *m)
+> +void walk_pgd_level(struct seq_file *m, pgd_t *pgd)
+>  {
 
-This looks like it's going to conflict with Mark's "[PATCH 6/6] arm64:
-add EFI runtime services".
-
-Guys, what's going on here? Srsly. The dependency chain is so nuts that
-I'm struggling to even review these patches. Good luck to the maintainer
-that wants to merge this stuff.
-
-Can't you guys work together a bit more closely so that all of your
-patches feel like one logical progression of work?
+If you're going to start exporting this function, might I suggest
+renaming it something like ptdump_walk_pgd_level()?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
