@@ -1,40 +1,37 @@
-From: Toshi Kani <toshi.kani@hp.com>
-Subject: Re: [PATCH 0/4] EFI memmap fix v2
-Date: Mon, 13 Jan 2014 09:54:30 -0700
-Message-ID: <1389632070.1792.184.camel@misato.fc.hp.com>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de>
-	 <1389630165.1792.180.camel@misato.fc.hp.com>
+From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: Fix krealloc defect
+Date: Mon, 13 Jan 2014 09:47:21 -0800
+Message-ID: <1389635241.24849.22.camel@joe-AO722>
+References: <cover.1388793978.git.joe@perches.com>
+	 <9a8eb1c9478049318e834d5223053a5fb7484bff.1388793978.git.joe@perches.com>
+	 <20140113140334.GB3256@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1389630165.1792.180.camel@misato.fc.hp.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Linux EFI <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140113140334.GB3256-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2014-01-13 at 09:22 -0700, Toshi Kani wrote:
-> On Sat, 2014-01-11 at 21:49 +0100, Borislav Petkov wrote:
-> > From: Borislav Petkov <bp@suse.de>
+On Mon, 2014-01-13 at 14:03 +0000, Matt Fleming wrote:
+> On Fri, 03 Jan, at 04:08:47PM, Joe Perches wrote:
+> > krealloc should use a temporary pointer for allocations
+> > and check the temporary pointer returned against NULL too.
 > > 
-> > Ok, here's v2 rebased and rediffed against tip (which has the relevant
-> > efi branches).
-> > 
-> > Toshi, I'm pushing it to:
-> > 
-> > git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi-fixes
-> > 
-> > so that you can give it another run and so that the build robot can poke
-> > at it.
+> > Signed-off-by: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+> > cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  arch/x86/platform/efi/efi.c | 12 +++++++++---
+> >  1 file changed, 9 insertions(+), 3 deletions(-)
 > 
-> I tested the 4 patches on top of Matt's efi tree under kexec branch.
-> Unfortunately, it hit the same panic again...  I will send you the full
-> dmesg with EFI_PGT_DBG enabled in a separate email.  I will also test
-> your git tree as well. 
+> Thanks Joe, but I've already got the following commit queued up from
+> Borislav that addresses this,
 
-The git tree kernel also hit the same panic.  Will send you the dmesg
-output in a separate email as well.
+Hi Matt.  That's great.
 
-Thanks,
--Toshi
+If it's queued up in some tree of yours, should that
+tree be included in Stephen Rothwell's -next?
+
+cheers, Joe
