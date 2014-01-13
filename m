@@ -1,31 +1,61 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 4/4] efi: Make efi virtual runtime map passing more robust
-Date: Mon, 13 Jan 2014 11:27:34 +0100
-Message-ID: <20140113102734.GB5388@pd.tnic>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de>
- <1389473370-1940-5-git-send-email-bp@alien8.de>
- <20140113054038.GB11237@dhcp-16-126.nay.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [BUG] Kernel OOPS when reboot if I set reboot=efi,{warm, cold}
+ (and some questions :-)
+Date: Mon, 13 Jan 2014 12:16:36 +0000
+Message-ID: <20140113121636.GA3256@console-pimps.org>
+References: <8738l5zcfp.fsf@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140113054038.GB11237-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+In-Reply-To: <8738l5zcfp.fsf-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+To: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 13, 2014 at 01:40:39PM +0800, Dave Young wrote:
-> Adding a safeguard check for desc_size is better though currently it's
-> impossible for the desc_size > PAGE_SIZE?
+On Fri, 03 Jan, at 04:39:38PM, Madper Xie wrote:
+> Howdy Folks,
+>   Happy new yeah, happy new bug!
+>   With a uefi system, I meet following panic when reboot after I adding
+>   `reboot=efi,warm`
+> [call trace]:
+> <0>[  698.736637] reboot: Restarting system
+> <5>[  698.737407] reboot: machine restart
+> <1>[  698.738399] BUG: unable to handle kernel paging request at 00000000ded53e60
+> <1>[  698.738924] IP: [<ffff8800dedb946d>] 0xffff8800dedb946d
+> <4>[  698.739408] PGD 0 
+> <4>[  698.739868] Oops: 0000 [#1] SMP 
 
-Huh, what?
+[...]
 
-sizeof(efi_memory_desc_t) is only 40 bytes AFAICT.
+> According to Call Trace, the panic happen when call ResetSystem() which
+> is a uefi run time service. It's seems a asm code in efi_stub_64.S
+> I disassembly it with crash got following outputs:
+> crash> dis efi_call4
+> 0xffffffff810518f0 <efi_call4>: mov    %rsp,%rax
+> [ ... ]
+> 0xffffffff81051918 <efi_call4+40>:      movaps %xmm3,0x30(%rsp)
+> 0xffffffff8105191d <efi_call4+45>:      movaps %xmm4,0x20(%rsp)
+> 0xffffffff81051922 <efi_call4+50>:      movaps %xmm5,0x10(%rsp)
+> 0xffffffff81051927 <efi_call4+55>:      sub    $0x20,%rsp
+> [ ... ]
+> 
+> So it seems the panic happen when SAVE_XMM? Does SAVE_XMM will trigger
+> paging? (`unable to handle kernel paging request at 00000000ded53e60`)
+ 
+No, the crash is happening within the ResetSystem() runtime service.
+Checkout the RIP, it's in the direct mapping region (0xffff8800.....).
+
+> in case it's a hardware special issue: My testbed is a DELL xps x8500
+> And I'll try to test it on another uefi system.
+
+It looks like your firmware is trying to access physical addresses. Can
+you build a kernel from the 'next' branch at,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+
+That branch includes Borislav's 1:1 mapping work and may fix your issue.
 
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
