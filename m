@@ -1,42 +1,72 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: Dump the EFI page table
-Date: Mon, 13 Jan 2014 16:00:18 +0000
-Message-ID: <20140113160018.GJ3256@console-pimps.org>
+From: Toshi Kani <toshi.kani@hp.com>
+Subject: Re: [PATCH 0/4] EFI memmap fix v2
+Date: Mon, 13 Jan 2014 09:22:45 -0700
+Message-ID: <1389630165.1792.180.camel@misato.fc.hp.com>
 References: <1389473370-1940-1-git-send-email-bp@alien8.de>
- <1389473370-1940-3-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1389473370-1940-3-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1389473370-1940-1-git-send-email-bp@alien8.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Linux EFI <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 11 Jan, at 09:49:28PM, Borislav Petkov wrote:
-> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+On Sat, 2014-01-11 at 21:49 +0100, Borislav Petkov wrote:
+> From: Borislav Petkov <bp@suse.de>
 > 
-> This is very useful for debugging issues with the recently added
-> pagetable switching code for EFI virtual mode.
+> Ok, here's v2 rebased and rediffed against tip (which has the relevant
+> efi branches).
 > 
-> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c | 11 +++++++++++
->  1 file changed, 11 insertions(+)
+> Toshi, I'm pushing it to:
 > 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index d62ec87a2b26..c34be4ce94c9 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -54,6 +54,7 @@
->  #include <asm/rtc.h>
->  
->  #define EFI_DEBUG
-> +#undef EFI_PGT_DBG
+> git://git.kernel.org/pub/scm/linux/kernel/git/bp/bp.git#efi-fixes
+> 
+> so that you can give it another run and so that the build robot can poke
+> at it.
 
-Should this be a Kconfig option? Hacking source files to enable debug
-isn't the best idea. Plus you could make it depend on X86_PTDUMP.
+I tested the 4 patches on top of Matt's efi tree under kexec branch.
+Unfortunately, it hit the same panic again...  I will send you the full
+dmesg with EFI_PGT_DBG enabled in a separate email.  I will also test
+your git tree as well. 
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks,
+-Toshi
+
+BUG: unable to handle kernel paging request at 00000207fec34020
+IP: [<0000000072dcda76>] 0x72dcda76
+PGD 0
+Oops: 0000 [#1] SMP
+Modules linked in:
+CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.13.0-rc1+ #82
+Hardware name: HP CB920s x1, BIOS Bundle: 005.028.018 SFW: 012.124.000
+10/28/2013
+task: ffffffff81a10480 ti: ffffffff81a00000 task.ti: ffffffff81a00000
+RIP: 0010:[<0000000072dcda76>]  [<0000000072dcda76>] 0x72dcda76
+RSP: 0000:ffffffff81a01df8  EFLAGS: 00010206
+RAX: 00000000725fee18 RBX: 00000000725feda0 RCX: 00000207fec34000
+RDX: 0000000072dfe070 RSI: 0000000060000202 RDI: 0000000072dcdac8
+RBP: 0000000072dd0560 R08: 0000000000000000 R09: 000000000000001d
+R10: 0000000000000030 R11: 8000000000000000 R12: ffff8a07fec34000
+R13: 0000000000000001 R14: 0000000000000570 R15: 000000000009c000
+FS:  0000000000000000(0000) GS:ffff88087fa00000(0000)
+knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 00000207fec34020 CR3: 000000000009c000 CR4: 00000000000406b0
+Stack:
+ 0000000072dfb88f 0000000000000001 0000000000002643 0000000000000000
+ ffffffff81ace2a8 0000000072dcdac8 0000000072dcdb93 0000000000000001
+ ffffffff81a01f80 0000000000000570 ffff8a07fffbc000 0000000000000000
+Call Trace:
+ [<ffffffff81046a4c>] ? efi_call4+0x6c/0xf0
+ [<ffffffff81b05a7a>] ? efi_enter_virtual_mode+0x35d/0x524
+ [<ffffffff81aede1d>] ? start_kernel+0x397/0x431
+ [<ffffffff81aed88f>] ? repair_env_string+0x5c/0x5c
+ [<ffffffff81aed5a3>] ? x86_64_start_reservations+0x2a/0x2c
+ [<ffffffff81aed696>] ? x86_64_start_kernel+0xf1/0xf4
+Code:  Bad RIP value.
+RIP  [<0000000072dcda76>] 0x72dcda76
+ RSP <ffffffff81a01df8>
+CR2: 00000207fec34020
+---[ end trace b50fb077cda23ee8 ]---
