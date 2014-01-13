@@ -1,46 +1,236 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
- efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
- ACPI TAD and EFI TIME)
-Date: Sun, 12 Jan 2014 11:05:46 +0000
-Message-ID: <20140112110546.GB25180@console-pimps.org>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com>
- <3476450.BMEcId2Lgj@vostro.rjw.lan>
- <20131221122148.GB29501@console-pimps.org>
- <2530951.HFPX8MI38t@vostro.rjw.lan>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
+ arbitrary pagetable
+Date: Mon, 13 Jan 2014 13:32:40 +0800
+Message-ID: <20140113053240.GA11237@dhcp-16-126.nay.redhat.com>
+References: <1389473370-1940-1-git-send-email-bp@alien8.de>
+ <1389473370-1940-2-git-send-email-bp@alien8.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <2530951.HFPX8MI38t-sKB8Sp2ER+y1GS7QM15AGw@public.gmane.org>
+In-Reply-To: <1389473370-1940-2-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 12 Jan, at 01:30:23AM, Rafael J. Wysocki wrote:
-> On Saturday, December 21, 2013 12:21:48 PM Matt Fleming wrote:
-> > On Fri, 20 Dec, at 11:18:56PM, Rafael J. Wysocki wrote:
-> > > 
-> > > I'm not sure 100%, but I *think* we need to do that with interrupts enabled.
-> > > At least after mm_init(), because it relies on things initialized there if I
-> > > remember correctly.
-> > > 
-> > > From what I can tell at the moment, it might be possible to move it before
-> > > efi_enter_virtual_mode() if that would help.
-> > 
-> > Actually yeah, that would be super useful, and I think we'd be able to
-> > get rid of the whole efi_late_init() stuff because we'd no longer need
-> > to hang on to the EFI_BOOT_SERVICES* regions after
-> > SetVirtualAddressMap().
+On 01/11/14 at 09:49pm, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 > 
-> OK
+> With reusing the ->trampoline_pgd page table for mapping EFI regions in
+> order to use them after having switched to EFI virtual mode, it is very
+> useful to be able to dump aforementioned page table in dmesg. This adds
+> that functionality through the walk_pgd_level() interface which can be
+> called from somewhere else.
 > 
-> I don't see any adverse effects of the patch below on a couple of my test
-> boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
-> good to give it a go on as many machines as reasonably possible.
+> The original functionality of dumping to debugfs remains untouched.
+> 
+> Cc: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> ---
+>  arch/x86/include/asm/pgtable.h |  3 +-
+>  arch/x86/mm/dump_pagetables.c  | 77 ++++++++++++++++++++++++++++--------------
+>  2 files changed, 53 insertions(+), 27 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/pgtable.h b/arch/x86/include/asm/pgtable.h
+> index bbc8b12fa443..0001851fa785 100644
+> --- a/arch/x86/include/asm/pgtable.h
+> +++ b/arch/x86/include/asm/pgtable.h
+> @@ -15,9 +15,10 @@
+>  	 : (prot))
+>  
+>  #ifndef __ASSEMBLY__
+> -
+>  #include <asm/x86_init.h>
+>  
+> +void walk_pgd_level(struct seq_file *m, pgd_t *pgd);
+> +
+>  /*
+>   * ZERO_PAGE is a global shared page that is always zero: used
+>   * for zero-mapped memory areas etc..
+> diff --git a/arch/x86/mm/dump_pagetables.c b/arch/x86/mm/dump_pagetables.c
+> index 0002a3a33081..f987ecff9226 100644
+> --- a/arch/x86/mm/dump_pagetables.c
+> +++ b/arch/x86/mm/dump_pagetables.c
+> @@ -19,6 +19,8 @@
+>  
+>  #include <asm/pgtable.h>
+>  
+> +static bool dump_to_dmesg;
+> +
+>  /*
+>   * The dumper groups pagetable entries of the same type into one, and for
+>   * that it needs to keep some state when walking, and flush this state
+> @@ -88,6 +90,24 @@ static struct addr_marker address_markers[] = {
+>  #define PUD_LEVEL_MULT (PTRS_PER_PMD * PMD_LEVEL_MULT)
+>  #define PGD_LEVEL_MULT (PTRS_PER_PUD * PUD_LEVEL_MULT)
+>  
+> +#define pt_dump_seq_printf(m, fmt, args...)			\
+> +({								\
+> +	if (dump_to_dmesg)					\
+> +		printk(KERN_INFO fmt, ##args);			\
 
-Thanks Rafael, I'll give this a spin on my test machines here.
+pr_info? This is for debug purpose, maybe pr_debug is better?
+Ditto to other printk callbacks.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+> +	else							\
+> +		if (m)						\
+> +			seq_printf(m, fmt, ##args);		\
+> +})
+> +
+> +#define pt_dump_cont_printf(m, fmt, args...)			\
+> +({								\
+> +	if (dump_to_dmesg)					\
+> +		printk(KERN_CONT fmt, ##args);			\
+> +	else							\
+> +		if (m)						\
+> +			seq_printf(m, fmt, ##args);		\
+> +})
+> +
+>  /*
+>   * Print a readable form of a pgprot_t to the seq_file
+>   */
+> @@ -99,47 +119,47 @@ static void printk_prot(struct seq_file *m, pgprot_t prot, int level)
+>  
+>  	if (!pgprot_val(prot)) {
+>  		/* Not present */
+> -		seq_printf(m, "                          ");
+> +		pt_dump_cont_printf(m, "                          ");
+>  	} else {
+>  		if (pr & _PAGE_USER)
+> -			seq_printf(m, "USR ");
+> +			pt_dump_cont_printf(m, "USR ");
+>  		else
+> -			seq_printf(m, "    ");
+> +			pt_dump_cont_printf(m, "    ");
+>  		if (pr & _PAGE_RW)
+> -			seq_printf(m, "RW ");
+> +			pt_dump_cont_printf(m, "RW ");
+>  		else
+> -			seq_printf(m, "ro ");
+> +			pt_dump_cont_printf(m, "ro ");
+>  		if (pr & _PAGE_PWT)
+> -			seq_printf(m, "PWT ");
+> +			pt_dump_cont_printf(m, "PWT ");
+>  		else
+> -			seq_printf(m, "    ");
+> +			pt_dump_cont_printf(m, "    ");
+>  		if (pr & _PAGE_PCD)
+> -			seq_printf(m, "PCD ");
+> +			pt_dump_cont_printf(m, "PCD ");
+>  		else
+> -			seq_printf(m, "    ");
+> +			pt_dump_cont_printf(m, "    ");
+>  
+>  		/* Bit 9 has a different meaning on level 3 vs 4 */
+>  		if (level <= 3) {
+>  			if (pr & _PAGE_PSE)
+> -				seq_printf(m, "PSE ");
+> +				pt_dump_cont_printf(m, "PSE ");
+>  			else
+> -				seq_printf(m, "    ");
+> +				pt_dump_cont_printf(m, "    ");
+>  		} else {
+>  			if (pr & _PAGE_PAT)
+> -				seq_printf(m, "pat ");
+> +				pt_dump_cont_printf(m, "pat ");
+>  			else
+> -				seq_printf(m, "    ");
+> +				pt_dump_cont_printf(m, "    ");
+>  		}
+>  		if (pr & _PAGE_GLOBAL)
+> -			seq_printf(m, "GLB ");
+> +			pt_dump_cont_printf(m, "GLB ");
+>  		else
+> -			seq_printf(m, "    ");
+> +			pt_dump_cont_printf(m, "    ");
+>  		if (pr & _PAGE_NX)
+> -			seq_printf(m, "NX ");
+> +			pt_dump_cont_printf(m, "NX ");
+>  		else
+> -			seq_printf(m, "x  ");
+> +			pt_dump_cont_printf(m, "x  ");
+>  	}
+> -	seq_printf(m, "%s\n", level_name[level]);
+> +	pt_dump_cont_printf(m, "%s\n", level_name[level]);
+>  }
+>  
+>  /*
+> @@ -178,7 +198,7 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+>  		st->current_prot = new_prot;
+>  		st->level = level;
+>  		st->marker = address_markers;
+> -		seq_printf(m, "---[ %s ]---\n", st->marker->name);
+> +		pt_dump_seq_printf(m, "---[ %s ]---\n", st->marker->name);
+>  	} else if (prot != cur || level != st->level ||
+>  		   st->current_address >= st->marker[1].start_address) {
+>  		const char *unit = units;
+> @@ -188,16 +208,16 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+>  		/*
+>  		 * Now print the actual finished series
+>  		 */
+> -		seq_printf(m, "0x%0*lx-0x%0*lx   ",
+> -			   width, st->start_address,
+> -			   width, st->current_address);
+> +		pt_dump_seq_printf(m, "0x%0*lx-0x%0*lx   ",
+> +				   width, st->start_address,
+> +				   width, st->current_address);
+>  
+>  		delta = (st->current_address - st->start_address) >> 10;
+>  		while (!(delta & 1023) && unit[1]) {
+>  			delta >>= 10;
+>  			unit++;
+>  		}
+> -		seq_printf(m, "%9lu%c ", delta, *unit);
+> +		pt_dump_cont_printf(m, "%9lu%c ", delta, *unit);
+>  		printk_prot(m, st->current_prot, st->level);
+>  
+>  		/*
+> @@ -207,7 +227,7 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+>  		 */
+>  		if (st->current_address >= st->marker[1].start_address) {
+>  			st->marker++;
+> -			seq_printf(m, "---[ %s ]---\n", st->marker->name);
+> +			pt_dump_seq_printf(m, "---[ %s ]---\n", st->marker->name);
+>  		}
+>  
+>  		st->start_address = st->current_address;
+> @@ -296,7 +316,7 @@ static void walk_pud_level(struct seq_file *m, struct pg_state *st, pgd_t addr,
+>  #define pgd_none(a)  pud_none(__pud(pgd_val(a)))
+>  #endif
+>  
+> -static void walk_pgd_level(struct seq_file *m)
+> +void walk_pgd_level(struct seq_file *m, pgd_t *pgd)
+
+How about do not limit to only if (pgd) case, instead do something like below:
+set dump_to_dmesg as a module parameter, so user can enable it via kernel cmdline
+or set it while insmod.
+
+>  {
+>  #ifdef CONFIG_X86_64
+>  	pgd_t *start = (pgd_t *) &init_level4_pgt;
+> @@ -306,6 +326,11 @@ static void walk_pgd_level(struct seq_file *m)
+>  	int i;
+>  	struct pg_state st;
+>  
+> +	if (pgd) {
+> +		start = pgd;
+> +		dump_to_dmesg = true;
+> +	}
+> +
+>  	memset(&st, 0, sizeof(st));
+>  
+>  	for (i = 0; i < PTRS_PER_PGD; i++) {
+> @@ -331,7 +356,7 @@ static void walk_pgd_level(struct seq_file *m)
+>  
+>  static int ptdump_show(struct seq_file *m, void *v)
+>  {
+> -	walk_pgd_level(m);
+> +	walk_pgd_level(m, NULL);
+>  	return 0;
+>  }
+>  
+> -- 
+> 1.8.5.2.192.g7794a68
+> 
