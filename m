@@ -1,50 +1,79 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 4/5] arm: Add [U]EFI runtime services support
-Date: Tue, 14 Jan 2014 15:25:23 +0000
-Message-ID: <CAF7UmSwGgQ9u505s3fhd5MmGLHHy1A=rJLZBshycKr+rTniH1A@mail.gmail.com>
-References: <1389445524-30623-1-git-send-email-leif.lindholm@linaro.org>
-	<201401140752.33257.arnd@arndb.de>
-	<20140114114419.GH30907@bivouac.eciton.net>
-	<201401141426.16497.arnd@arndb.de>
+From: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
+ ACPI TAD and EFI TIME)
+Date: Tue, 14 Jan 2014 09:25:58 -0700
+Message-ID: <1389716758.1792.282.camel@misato.fc.hp.com>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+	 <3476450.BMEcId2Lgj@vostro.rjw.lan>
+	 <20131221122148.GB29501@console-pimps.org>
+	 <2530951.HFPX8MI38t@vostro.rjw.lan> <20140112090627.GB3668@pd.tnic>
+	 <1389665096.1792.271.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <201401141426.16497.arnd-r2nGTMty4D4@public.gmane.org>
+In-Reply-To: <1389665096.1792.271.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 14 January 2014 13:26, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org> wrote:
->> > > Are you suggesting that I should #ifndef ARM in common code, or that I
->> > > should neglect to document what the common code will do with data it is
->> > > given by UEFI?
->> >
->> > It would probably be good to document the fact that it won't work,
->> > possibly even having a BUG_ON statement in the code for this case.
->>
->> Why?
->>
->> You'll only touch that pointer if you enable CONFIG_ACPI, and if you
->> do you probably want that address. Sounds a bit hostile to throw a BUG
->> in the face of someone who's (for example) just succeeded to get Linux
->> running on a Windows RT device.
->
-> But we know that it can't work unless a lot of other things get changed
-> in the kernel.
+On Mon, 2014-01-13 at 19:04 -0700, Toshi Kani wrote:
+> On Sun, 2014-01-12 at 10:06 +0100, Borislav Petkov wrote:
+> > On Sun, Jan 12, 2014 at 01:30:23AM +0100, Rafael J. Wysocki wrote:
+> > > I don't see any adverse effects of the patch below on a couple of my test
+> > > boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
+> > > good to give it a go on as many machines as reasonably possible.
+> > > 
+> > > Thanks,
+> > > Rafael
+> > > 
+> > > ---
+> > > From: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > > Subject: ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+> > > 
+> > > According to Matt Fleming, if acpi_early_init() was executed befpre
+> > > efi_enter_virtual_mode(), the EFI initialization could benefit from
+> > > it, so make that happen.
+> > > 
+> > > Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > > ---
+> > >  init/main.c |    2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > > 
+> > > Index: linux-pm/init/main.c
+> > > ===================================================================
+> > > --- linux-pm.orig/init/main.c
+> > > +++ linux-pm/init/main.c
+> > > @@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
+> > >  	calibrate_delay();
+> > >  	pidmap_init();
+> > >  	anon_vma_init();
+> > > +	acpi_early_init();
+> > >  #ifdef CONFIG_X86
+> > >  	if (efi_enabled(EFI_RUNTIME_SERVICES))
+> > >  		efi_enter_virtual_mode();
+> > > @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
+> > >  
+> > >  	check_bugs();
+> > >  
+> > > -	acpi_early_init(); /* before LAPIC and SMP init */
+> > >  	sfi_init_late();
+> > >  
+> > >  	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+> > >
+> > 
+> > Looks good both on kvm+OVMF and on my Dell EFI box.
+> > 
+> > Tested-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> > 
+> > Toshi has a big EFI box though - if he could run it too, that would be
+> > great :-)
+> 
+> Yes, I will test the change.
 
-We know using ACPI cannot work without updates to the kernel.
-That doesn't mean we need to throw a BUG just because the
-firmware tells us a table exists.
+Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 
->> Although no other architectures supported by UEFI support big-endian,
->> so to be honest, I don't want to have to be the first one to validate
->> that in order to get the basic support into the kernel.
->
-> I think there was a project to run UEFI on PowerPC on some stage, though
-> I can't find any code now.
-
-That does sound familiar, but there is nothing in the specification.
-
-/
-    Leif
+Thanks,
+-Toshi
