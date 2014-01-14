@@ -1,43 +1,100 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an arbitrary
- pagetable
-Date: Tue, 14 Jan 2014 10:18:29 -0800
-Message-ID: <52D57F75.7060308@zytor.com>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de> <1389473370-1940-2-git-send-email-bp@alien8.de> <20140113053240.GA11237@dhcp-16-126.nay.redhat.com> <20140113101822.GA5388@pd.tnic> <20140113122320.GA1900@darkstar.nay.redhat.com> <52D3FCAA.7070004@linux.intel.com> <20140114014003.GB4327@dhcp-16-126.nay.redhat.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH 4/6] arm64: add EFI stub
+Date: Tue, 14 Jan 2014 11:26:58 -0800
+Message-ID: <CAFECyb_S8-n_rAKgKOzc9c6uiSo3oiLe=TfNWBsH=uynJo4pkA@mail.gmail.com>
+References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
+	<1389392950-22457-5-git-send-email-msalter@redhat.com>
+	<201401131949.39358.arnd@arndb.de>
+	<1389710640.26822.10.camel@deneb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140114014003.GB4327-je1gSBvt1TcFLmT5oZ11vB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1389710640.26822.10.camel@deneb.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Salter <msalter@redhat.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, Matt Fleming <matt.fleming@intel.com>, Patch Tracking <patches@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/13/2014 05:40 PM, Dave Young wrote:
-> On 01/13/14 at 06:48am, Arjan van de Ven wrote:
->> On 1/13/2014 4:23 AM, Dave Young wrote:
->>>>
->>>>> How about do not limit to only if (pgd) case, instead do something
->>>>> like below: set dump_to_dmesg as a module parameter
->>>>
->>>> X86_PTDUMP is not a module.
->>>
->>> Hmm, I just see the module macros in the code, since it's a bool Kconfig
->>> I think the dump_pagetables.c need a cleanup,
->>> remove the #include <linux/module.h> and below lines:
->>> MODULE_LICENSE("GPL");
->>> MODULE_AUTHOR("Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>");
->>> MODULE_DESCRIPTION("Kernel debugging helper that dumps pagetables");
+On Tue, Jan 14, 2014 at 6:44 AM, Mark Salter <msalter@redhat.com> wrote:
+> On Mon, 2014-01-13 at 19:49 +0100, Arnd Bergmann wrote:
+>> On Friday 10 January 2014, Mark Salter wrote:
+>> > This patch adds PE/COFF header fields to the start of the Image
+>> > so that it appears as an EFI application to EFI firmware. An EFI
+>> > stub is included to allow direct booting of the kernel Image. Due
+>> > to EFI firmware limitations, only little endian kernels with 4K
+>> > page sizes are supported at this time. Support in the COFF header
+>> > for signed images was provided by Ard Biesheuvel.
+>> >
+>> > Signed-off-by: Mark Salter <msalter@redhat.com>
+>> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 >>
->> personally I consider it good form to always have this kind of information in .c files,
->> regardless of the KConfig side of thing...
-> 
-> I agree it's good to add these infomation, but they can be added in comment.
-> IMHO it will be better in that way.
-> 
+>> You got the ordering of the S-o-b lines wrong. Since you send the
+>> patch, your name should come last.
+>
+> Yes.
+>
+>>
+>> > +config EFI_STUB
+>> > +     bool "EFI stub support"
+>> > +     depends on !ARM64_64K_PAGES && OF
+>> > +     select LIBFDT
+>> > +     default y
+>> > +     help
+>> > +       This kernel feature allows an Image to be loaded directly
+>> > +       by EFI firmware without the use of a bootloader.
+>> > +       See Documentation/efi-stub.txt for more information.
+>> > +
+>> >  endmenu
+>>
+>> Why not ARM64_64K_PAGES? I thought that it was going to be the
+>> default for a lot of distros that would need to run on UEFI systems.
+>
+> The UEFI spec currently mandates 4k page size. We may be able to work
+> around that or get the spec changed, but for now it is just 4k pages.
+>
+>>
+>> >  menu "Userspace binary formats"
+>> > diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+>> > index 5ba2fd4..1c52b84 100644
+>> > --- a/arch/arm64/kernel/Makefile
+>> > +++ b/arch/arm64/kernel/Makefile
+>> > @@ -4,6 +4,8 @@
+>> >
+>> >  CPPFLAGS_vmlinux.lds := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>> >  AFLAGS_head.o                := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>> > +CFLAGS_efi-stub.o    := -DTEXT_OFFSET=$(TEXT_OFFSET) \
+>> > +                        -I$(src)/../../../scripts/dtc/libfdt
+>>
+>> Hmm, this is pretty ugly. I notice the same has been done on MIPS
+>> as well, but I'd hope we can find a proper way to do it.
+>
+> Yes, I just copied that from mips. I can look into some more.
+>
+>>
+>> > diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+>> > new file mode 100644
+>> > index 0000000..10d02bf
+>> > --- /dev/null
+>> > +++ b/arch/arm64/kernel/efi-stub.c
+>> > +
+>> > +/* Include shared EFI stub code */
+>> > +#include "../../../drivers/firmware/efi/efi-stub-helper.c"
+>> > +#include "../../../drivers/firmware/efi/fdt.c"
+>>
+>> It gets worse here.
+>
+> Well, I'm open to suggestions here. The shared code has to work with
+> stubs which are built into kernel (arm64) and which are part of the
+> compressed image wrapper.
+>
 
-Why the [Finnish] do you feel that information needs to be in a
-different form because it is (currently!) not available as a module?
+The decompression algorithms are shared among the compressed image
+wrappers using #include of C code, so this is
+following that convention.  The only other mechanism that I saw for
+sharing code with the compressed image wrappers was
+copying of files, as is done with the FDT files for the ARM compressed
+wrapper.  I agree that neither of these is elegant, but
+whatever we do needs to work for compiling into the decompression
+wrapper (arm) and the kernel proper (arm64).
 
-	-hpa
+Roy
