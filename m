@@ -1,47 +1,44 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: Dump the EFI page table
-Date: Tue, 14 Jan 2014 09:36:51 +0800
-Message-ID: <20140114013651.GA4327@dhcp-16-126.nay.redhat.com>
+Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
+ arbitrary pagetable
+Date: Tue, 14 Jan 2014 09:40:03 +0800
+Message-ID: <20140114014003.GB4327@dhcp-16-126.nay.redhat.com>
 References: <1389473370-1940-1-git-send-email-bp@alien8.de>
- <1389473370-1940-3-git-send-email-bp@alien8.de>
- <20140113160018.GJ3256@console-pimps.org>
+ <1389473370-1940-2-git-send-email-bp@alien8.de>
+ <20140113053240.GA11237@dhcp-16-126.nay.redhat.com>
+ <20140113101822.GA5388@pd.tnic>
+ <20140113122320.GA1900@darkstar.nay.redhat.com>
+ <52D3FCAA.7070004@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140113160018.GJ3256-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <52D3FCAA.7070004-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+To: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/13/14 at 04:00pm, Matt Fleming wrote:
-> On Sat, 11 Jan, at 09:49:28PM, Borislav Petkov wrote:
-> > From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> > 
-> > This is very useful for debugging issues with the recently added
-> > pagetable switching code for EFI virtual mode.
-> > 
-> > Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> > ---
-> >  arch/x86/platform/efi/efi.c | 11 +++++++++++
-> >  1 file changed, 11 insertions(+)
-> > 
-> > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> > index d62ec87a2b26..c34be4ce94c9 100644
-> > --- a/arch/x86/platform/efi/efi.c
-> > +++ b/arch/x86/platform/efi/efi.c
-> > @@ -54,6 +54,7 @@
-> >  #include <asm/rtc.h>
-> >  
-> >  #define EFI_DEBUG
-> > +#undef EFI_PGT_DBG
+On 01/13/14 at 06:48am, Arjan van de Ven wrote:
+> On 1/13/2014 4:23 AM, Dave Young wrote:
+> >>
+> >>>How about do not limit to only if (pgd) case, instead do something
+> >>>like below: set dump_to_dmesg as a module parameter
+> >>
+> >>X86_PTDUMP is not a module.
+> >
+> >Hmm, I just see the module macros in the code, since it's a bool Kconfig
+> >I think the dump_pagetables.c need a cleanup,
+> >remove the #include <linux/module.h> and below lines:
+> >MODULE_LICENSE("GPL");
+> >MODULE_AUTHOR("Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>");
+> >MODULE_DESCRIPTION("Kernel debugging helper that dumps pagetables");
 > 
-> Should this be a Kconfig option? Hacking source files to enable debug
-> isn't the best idea. Plus you could make it depend on X86_PTDUMP.
+> personally I consider it good form to always have this kind of information in .c files,
+> regardless of the KConfig side of thing...
 
-I have same feeling, either a new Kconfig option or just print it while
-ptdump_to_dmesg is true by default without extra Kconfig.
+I agree it's good to add these infomation, but they can be added in comment.
+IMHO it will be better in that way.
 
 Thanks
 Dave
