@@ -1,63 +1,66 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH V6 3/8] Add helper function to get and convert EFI command line
-Date: Tue, 14 Jan 2014 11:41:23 -0800
-Message-ID: <CAFECyb9s6Q2O4iaEWWRGdWz55m7KKJ_ndT1P8X-4kzg4g3dUOA@mail.gmail.com>
-References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
-	<1389371417-379-4-git-send-email-roy.franz@linaro.org>
-	<20140113150406.GE3256@console-pimps.org>
+From: Toshi Kani <toshi.kani@hp.com>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode()
+Date: Tue, 14 Jan 2014 13:32:27 -0700
+Message-ID: <1389731547.1792.296.camel@misato.fc.hp.com>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+		 <3476450.BMEcId2Lgj@vostro.rjw.lan>
+		 <20131221122148.GB29501@console-pimps.org>
+		 <2530951.HFPX8MI38t@vostro.rjw.lan>
+	 <1389672548.24105.252.camel@linux-s257.site> <52D57B54.7080509@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140113150406.GE3256@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Grant Likely <grant.likely@linaro.org>, Dave Martin <dave.martin@arm.com>, Mark Salter <msalter@redhat.com>, Patch Tracking <patches@linaro.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <52D57B54.7080509@zytor.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: joeyli <jlee@suse.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matt Fleming <matt@console-pimps.org>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 13, 2014 at 7:04 AM, Matt Fleming <matt@console-pimps.org> wrote:
-> On Fri, 10 Jan, at 08:30:12AM, Roy Franz wrote:
->> Add an EFI stub helper function to retrieve the EFI command line using
->> the LOADED_IMAGE_PROTOCOL, and convert it to ASCII.  This function will
->> be shared by the various EFI stub implementations.
->>
->> Signed-off-by: Roy Franz <roy.franz@linaro.org>
->> ---
->>  drivers/firmware/efi/efi-stub-helper.c |   30 ++++++++++++++++++++++++++++++
->>  1 file changed, 30 insertions(+)
->>
->> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
->> index eb5d2eb..f657456 100644
->> --- a/drivers/firmware/efi/efi-stub-helper.c
->> +++ b/drivers/firmware/efi/efi-stub-helper.c
->> @@ -637,3 +637,33 @@ static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
->>       *cmd_line_len = options_size;
->>       return (char *)cmdline_addr;
->>  }
->> +
->> +/*
->> + * get the command line from EFI, using the LOADED_IMAGE
->> + * protocol, and convert to ASCII.
->> + *
->> + */
->> +static void efi_get_cmdline(efi_system_table_t *sys_table,
->> +                           efi_loaded_image_t **image,
->> +                           void *handle, char **cmdline_ptr)
->> +{
->
-> Wouldn't this prototype make more sense?
->
-> static char *efi_get_cmdline(efi_system_table_t *sys_table,
->                              efi_loaded_image_t **image,
->                              void *handle);
->
-> Is this function really worth implementing at all? Certainly on x86, we
-> lookup the loaded image protocol for reasons other than parsing the
-> command line, and so would need to do it in the caller anyway.
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+On Tue, 2014-01-14 at 10:00 -0800, H. Peter Anvin wrote:
+> On 01/13/2014 08:09 PM, joeyli wrote:
+> > 
+> > This patch works to me on Acer Gateway Z5WT2 UEFI notebook and Intel
+> > UEFI development board.
+> > 
+> > Does it possible move acpi_early_init() to before timekeeping_init()?
+> > The position is also before efi_enter_virtual_mode() and that will be
+> > useful for parsing ACPI TAD to set system clock:
+> > 
+> > diff --git a/init/main.c b/init/main.c
+> > index febc511..b6d93c8 100644
+> > --- a/init/main.c
+> > +++ b/init/main.c
+> > @@ -565,6 +565,7 @@ asmlinkage void __init start_kernel(void)
+> >         init_timers();
+> >         hrtimers_init();
+> >         softirq_init();
+> > +       acpi_early_init();
+> >         timekeeping_init();
+> >         time_init();
+> >         sched_clock_postinit();
+> > @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
+> >  
+> >         check_bugs();
+> >  
+> > -       acpi_early_init(); /* before LAPIC and SMP init */
+> >         sfi_init_late();
+> >  
+> >         if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+> > 
+> 
+> Hi Toshi,
+> 
+> Could you try this variant, too?  If this works as well then we end up
+> solving two problems in one patch...
 
-Yeah, this should just go away.  This was the result of some
-over-zealous moving code from arm/arm64 to shared code.
+Hi Peter,
 
-Roy
+Yes, this version works fine as well.
+
+Tested-by: Toshi Kani <toshi.kani@hp.com>
+
+Thanks,
+-Toshi
+
