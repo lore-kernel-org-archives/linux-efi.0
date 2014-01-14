@@ -1,44 +1,76 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
- arbitrary pagetable
-Date: Tue, 14 Jan 2014 09:40:03 +0800
-Message-ID: <20140114014003.GB4327@dhcp-16-126.nay.redhat.com>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de>
- <1389473370-1940-2-git-send-email-bp@alien8.de>
- <20140113053240.GA11237@dhcp-16-126.nay.redhat.com>
- <20140113101822.GA5388@pd.tnic>
- <20140113122320.GA1900@darkstar.nay.redhat.com>
- <52D3FCAA.7070004@linux.intel.com>
+From: Toshi Kani <toshi.kani@hp.com>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
+ ACPI TAD and EFI TIME)
+Date: Mon, 13 Jan 2014 19:04:56 -0700
+Message-ID: <1389665096.1792.271.camel@misato.fc.hp.com>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+	 <3476450.BMEcId2Lgj@vostro.rjw.lan>
+	 <20131221122148.GB29501@console-pimps.org>
+	 <2530951.HFPX8MI38t@vostro.rjw.lan> <20140112090627.GB3668@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <52D3FCAA.7070004-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20140112090627.GB3668@pd.tnic>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Borislav Petkov <bp@suse.de>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matt Fleming <matt@console-pimps.org>, "H. Peter Anvin" <hpa@zytor.com>, joeyli <jlee@suse.com>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 01/13/14 at 06:48am, Arjan van de Ven wrote:
-> On 1/13/2014 4:23 AM, Dave Young wrote:
-> >>
-> >>>How about do not limit to only if (pgd) case, instead do something
-> >>>like below: set dump_to_dmesg as a module parameter
-> >>
-> >>X86_PTDUMP is not a module.
+On Sun, 2014-01-12 at 10:06 +0100, Borislav Petkov wrote:
+> On Sun, Jan 12, 2014 at 01:30:23AM +0100, Rafael J. Wysocki wrote:
+> > I don't see any adverse effects of the patch below on a couple of my test
+> > boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
+> > good to give it a go on as many machines as reasonably possible.
+> > 
+> > Thanks,
+> > Rafael
+> > 
+> > ---
+> > From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> > Subject: ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+> > 
+> > According to Matt Fleming, if acpi_early_init() was executed befpre
+> > efi_enter_virtual_mode(), the EFI initialization could benefit from
+> > it, so make that happen.
+> > 
+> > Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> > ---
+> >  init/main.c |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > Index: linux-pm/init/main.c
+> > ===================================================================
+> > --- linux-pm.orig/init/main.c
+> > +++ linux-pm/init/main.c
+> > @@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
+> >  	calibrate_delay();
+> >  	pidmap_init();
+> >  	anon_vma_init();
+> > +	acpi_early_init();
+> >  #ifdef CONFIG_X86
+> >  	if (efi_enabled(EFI_RUNTIME_SERVICES))
+> >  		efi_enter_virtual_mode();
+> > @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
+> >  
+> >  	check_bugs();
+> >  
+> > -	acpi_early_init(); /* before LAPIC and SMP init */
+> >  	sfi_init_late();
+> >  
+> >  	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
 > >
-> >Hmm, I just see the module macros in the code, since it's a bool Kconfig
-> >I think the dump_pagetables.c need a cleanup,
-> >remove the #include <linux/module.h> and below lines:
-> >MODULE_LICENSE("GPL");
-> >MODULE_AUTHOR("Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>");
-> >MODULE_DESCRIPTION("Kernel debugging helper that dumps pagetables");
 > 
-> personally I consider it good form to always have this kind of information in .c files,
-> regardless of the KConfig side of thing...
+> Looks good both on kvm+OVMF and on my Dell EFI box.
+> 
+> Tested-by: Borislav Petkov <bp@suse.de>
+> 
+> Toshi has a big EFI box though - if he could run it too, that would be
+> great :-)
 
-I agree it's good to add these infomation, but they can be added in comment.
-IMHO it will be better in that way.
+Yes, I will test the change.
 
-Thanks
-Dave
+Thanks,
+-Toshi
+
