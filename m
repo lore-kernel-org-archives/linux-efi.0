@@ -1,59 +1,52 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: x86: make "efi facility" use slightly more generic
-Date: Tue, 14 Jan 2014 17:41:25 +0000
-Message-ID: <1389721285-32390-1-git-send-email-leif.lindholm@linaro.org>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+Date: Tue, 14 Jan 2014 10:00:52 -0800
+Message-ID: <52D57B54.7080509@zytor.com>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>	 <3476450.BMEcId2Lgj@vostro.rjw.lan>	 <20131221122148.GB29501@console-pimps.org>	 <2530951.HFPX8MI38t@vostro.rjw.lan> <1389672548.24105.252.camel@linux-s257.site>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1389672548.24105.252.camel-ONCj+Eqt86TasUa73XJKwA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: joeyli <jlee-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently, efi_enabled() is defined to be a dummy macro always returning
-1 unless CONFIG_X86. Change this logic to use a
-CONFIG_ARCH_USES_EFI_FACILITY to enable use by other architectures.
+On 01/13/2014 08:09 PM, joeyli wrote:
+> 
+> This patch works to me on Acer Gateway Z5WT2 UEFI notebook and Intel
+> UEFI development board.
+> 
+> Does it possible move acpi_early_init() to before timekeeping_init()?
+> The position is also before efi_enter_virtual_mode() and that will be
+> useful for parsing ACPI TAD to set system clock:
+> 
+> diff --git a/init/main.c b/init/main.c
+> index febc511..b6d93c8 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -565,6 +565,7 @@ asmlinkage void __init start_kernel(void)
+>         init_timers();
+>         hrtimers_init();
+>         softirq_init();
+> +       acpi_early_init();
+>         timekeeping_init();
+>         time_init();
+>         sched_clock_postinit();
+> @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
+>  
+>         check_bugs();
+>  
+> -       acpi_early_init(); /* before LAPIC and SMP init */
+>         sfi_init_late();
+>  
+>         if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+> 
 
-Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/x86/Kconfig             |    1 +
- drivers/firmware/efi/Kconfig |    3 +++
- include/linux/efi.h          |    2 +-
- 3 files changed, 5 insertions(+), 1 deletion(-)
+Hi Toshi,
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 50e1eab..8c0520d 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1582,6 +1582,7 @@ config EFI
- 	bool "EFI runtime service support"
- 	depends on ACPI
- 	select UCS2_STRING
-+	select ARCH_USES_EFI_FACILITY
- 	---help---
- 	  This enables the kernel to use EFI runtime services that are
- 	  available (such as the EFI variable services).
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 6aecbc8..1053c8f 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -40,3 +40,6 @@ endmenu
- 
- config UEFI_CPER
- 	bool
-+
-+config ARCH_USES_EFI_FACILITY
-+	bool
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 11ce678..b74c8a5 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -655,7 +655,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_64BIT		5	/* Is the firmware 64-bit? */
- 
- #ifdef CONFIG_EFI
--# ifdef CONFIG_X86
-+# ifdef CONFIG_ARCH_USES_EFI_FACILITY
- extern int efi_enabled(int facility);
- # else
- static inline int efi_enabled(int facility)
--- 
-1.7.10.4
+Could you try this variant, too?  If this works as well then we end up
+solving two problems in one patch...
+
+	-hpa
