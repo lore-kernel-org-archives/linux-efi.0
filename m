@@ -1,100 +1,53 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH 4/6] arm64: add EFI stub
-Date: Tue, 14 Jan 2014 11:26:58 -0800
-Message-ID: <CAFECyb_S8-n_rAKgKOzc9c6uiSo3oiLe=TfNWBsH=uynJo4pkA@mail.gmail.com>
-References: <1389392950-22457-1-git-send-email-msalter@redhat.com>
-	<1389392950-22457-5-git-send-email-msalter@redhat.com>
-	<201401131949.39358.arnd@arndb.de>
-	<1389710640.26822.10.camel@deneb.redhat.com>
+From: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
+Date: Tue, 14 Jan 2014 13:29:17 -0600
+Message-ID: <CAL_JsqLDVBfYomiNpFRacku4pJ3TrFy4rKJKedGp+LPGQt4m0w@mail.gmail.com>
+References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
+	<1389371417-379-7-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1389710640.26822.10.camel@deneb.redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Salter <msalter@redhat.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Grant Likely <grant.likely@secretlab.ca>, Matt Fleming <matt.fleming@intel.com>, Patch Tracking <patches@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1389371417-379-7-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linaro Patches <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave P Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 14, 2014 at 6:44 AM, Mark Salter <msalter@redhat.com> wrote:
-> On Mon, 2014-01-13 at 19:49 +0100, Arnd Bergmann wrote:
->> On Friday 10 January 2014, Mark Salter wrote:
->> > This patch adds PE/COFF header fields to the start of the Image
->> > so that it appears as an EFI application to EFI firmware. An EFI
->> > stub is included to allow direct booting of the kernel Image. Due
->> > to EFI firmware limitations, only little endian kernels with 4K
->> > page sizes are supported at this time. Support in the COFF header
->> > for signed images was provided by Ard Biesheuvel.
->> >
->> > Signed-off-by: Mark Salter <msalter@redhat.com>
->> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
->>
->> You got the ordering of the S-o-b lines wrong. Since you send the
->> patch, your name should come last.
+On Fri, Jan 10, 2014 at 10:30 AM, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
+> operates similarly to the x86 stub: it is a shim between the EFI firmware
+> and the normal zImage entry point, and sets up the environment that the
+> zImage is expecting.  This includes loading the initrd (optionaly) and
+> device tree from the system partition based on the kernel command line.
+> The stub updates the device tree as necessary, adding entries for EFI
+> runtime services. The PE/COFF "MZ" header at offset 0 results in the
+> first instruction being an add that corrupts r5, which is not used by
+> the zImage interface.
 >
-> Yes.
->
->>
->> > +config EFI_STUB
->> > +     bool "EFI stub support"
->> > +     depends on !ARM64_64K_PAGES && OF
->> > +     select LIBFDT
->> > +     default y
->> > +     help
->> > +       This kernel feature allows an Image to be loaded directly
->> > +       by EFI firmware without the use of a bootloader.
->> > +       See Documentation/efi-stub.txt for more information.
->> > +
->> >  endmenu
->>
->> Why not ARM64_64K_PAGES? I thought that it was going to be the
->> default for a lot of distros that would need to run on UEFI systems.
->
-> The UEFI spec currently mandates 4k page size. We may be able to work
-> around that or get the spec changed, but for now it is just 4k pages.
->
->>
->> >  menu "Userspace binary formats"
->> > diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
->> > index 5ba2fd4..1c52b84 100644
->> > --- a/arch/arm64/kernel/Makefile
->> > +++ b/arch/arm64/kernel/Makefile
->> > @@ -4,6 +4,8 @@
->> >
->> >  CPPFLAGS_vmlinux.lds := -DTEXT_OFFSET=$(TEXT_OFFSET)
->> >  AFLAGS_head.o                := -DTEXT_OFFSET=$(TEXT_OFFSET)
->> > +CFLAGS_efi-stub.o    := -DTEXT_OFFSET=$(TEXT_OFFSET) \
->> > +                        -I$(src)/../../../scripts/dtc/libfdt
->>
->> Hmm, this is pretty ugly. I notice the same has been done on MIPS
->> as well, but I'd hope we can find a proper way to do it.
->
-> Yes, I just copied that from mips. I can look into some more.
->
->>
->> > diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
->> > new file mode 100644
->> > index 0000000..10d02bf
->> > --- /dev/null
->> > +++ b/arch/arm64/kernel/efi-stub.c
->> > +
->> > +/* Include shared EFI stub code */
->> > +#include "../../../drivers/firmware/efi/efi-stub-helper.c"
->> > +#include "../../../drivers/firmware/efi/fdt.c"
->>
->> It gets worse here.
->
-> Well, I'm open to suggestions here. The shared code has to work with
-> stubs which are built into kernel (arm64) and which are part of the
-> compressed image wrapper.
->
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
 
-The decompression algorithms are shared among the compressed image
-wrappers using #include of C code, so this is
-following that convention.  The only other mechanism that I saw for
-sharing code with the compressed image wrappers was
-copying of files, as is done with the FDT files for the ARM compressed
-wrapper.  I agree that neither of these is elegant, but
-whatever we do needs to work for compiling into the decompression
-wrapper (arm) and the kernel proper (arm64).
+[snip]
 
-Roy
+> +       /* Look up the base of DRAM from the device tree. */
+> +       fdt = (void *)fdt_addr;
+> +       node = fdt_subnode_offset(fdt, 0, "memory");
+> +       region = fdt_getprop(fdt, node, "reg", NULL);
+> +       if (region) {
+> +               dram_base = fdt64_to_cpu(region->base);
+
+This will not work if the address is 32-bit size.
+
+> +       } else {
+> +               /* There is no way to get amount or addresses of physical
+> +                * memory installed using EFI calls.  If the device tree
+> +                * we read from disk doesn't have this, there is no way
+> +                * for us to construct this informaion.
+> +                */
+> +               pr_efi_err(sys_table, "No 'memory' node in device tree.\n");
+> +               goto fail_free_fdt;
+
+The current pc can't be used to determine the DRAM base like AUTO_ZRELADDR?
+
+Rob
