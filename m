@@ -1,31 +1,110 @@
-From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: Fix krealloc defect
-Date: Mon, 13 Jan 2014 18:35:08 -0800
-Message-ID: <1389666908.24849.29.camel@joe-AO722>
-References: <cover.1388793978.git.joe@perches.com>
-	 <9a8eb1c9478049318e834d5223053a5fb7484bff.1388793978.git.joe@perches.com>
-	 <20140113140334.GB3256@console-pimps.org>
-	 <1389635241.24849.22.camel@joe-AO722>
-	 <20140113191725.GK3256@console-pimps.org>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
+ ACPI TAD and EFI TIME)
+Date: Tue, 14 Jan 2014 12:09:08 +0800
+Message-ID: <1389672548.24105.252.camel@linux-s257.site>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+	 <3476450.BMEcId2Lgj@vostro.rjw.lan>
+	 <20131221122148.GB29501@console-pimps.org>
+	 <2530951.HFPX8MI38t@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140113191725.GK3256-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <2530951.HFPX8MI38t@vostro.rjw.lan>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Matt Fleming <matt@console-pimps.org>, "H. Peter Anvin" <hpa@zytor.com>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2014-01-13 at 19:17 +0000, Matt Fleming wrote:
-> On Mon, 13 Jan, at 09:47:21AM, Joe Perches wrote:
-> > If it's queued up in some tree of yours, should that
-> > tree be included in Stephen Rothwell's -next?
-> My trees get pulled into tip and those are included in linux-next. So,
-> Borislav's patch is commit ee4114302770 ("x86/efi: Check krealloc return
-> value") in today's linux-next.
+=E6=96=BC =E6=97=A5=EF=BC=8C2014-01-12 =E6=96=BC 01:30 +0100=EF=BC=8CRa=
+fael J. Wysocki =E6=8F=90=E5=88=B0=EF=BC=9A
+> OK
+>=20
+> I don't see any adverse effects of the patch below on a couple of my
+> test
+> boxes, but (a) they are Intel-based and (b) they are non-EFI, so it
+> would be
+> good to give it a go on as many machines as reasonably possible.
+>=20
+> Thanks,
+> Rafael
+>=20
+> ---
+> From: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> Subject: ACPI / init: Run acpi_early_init() before
+> efi_enter_virtual_mode()
+>=20
+> According to Matt Fleming, if acpi_early_init() was executed befpre
+> efi_enter_virtual_mode(), the EFI initialization could benefit from
+> it, so make that happen.
+>=20
+> Signed-off-by: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> ---
+>  init/main.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>=20
+> Index: linux-pm/init/main.c
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> --- linux-pm.orig/init/main.c
+> +++ linux-pm/init/main.c
+> @@ -615,6 +615,7 @@ asmlinkage void __init start_kernel(void
+>         calibrate_delay();
+>         pidmap_init();
+>         anon_vma_init();
+> +       acpi_early_init();
+>  #ifdef CONFIG_X86
+>         if (efi_enabled(EFI_RUNTIME_SERVICES))
+>                 efi_enter_virtual_mode();
+> @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void
+> =20
+>         check_bugs();
+> =20
+> -       acpi_early_init(); /* before LAPIC and SMP init */
+>         sfi_init_late();
+> =20
+>         if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+>=20
+>=20
+>=20
 
-You're right, thanks.
-I thought I did this against -next but it appears not.
+This patch works to me on Acer Gateway Z5WT2 UEFI notebook and Intel
+UEFI development board.
 
-cheers, Joe
+Does it possible move acpi_early_init() to before timekeeping_init()?
+The position is also before efi_enter_virtual_mode() and that will be
+useful for parsing ACPI TAD to set system clock:
+
+diff --git a/init/main.c b/init/main.c
+index febc511..b6d93c8 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -565,6 +565,7 @@ asmlinkage void __init start_kernel(void)
+        init_timers();
+        hrtimers_init();
+        softirq_init();
++       acpi_early_init();
+        timekeeping_init();
+        time_init();
+        sched_clock_postinit();
+@@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
+=20
+        check_bugs();
+=20
+-       acpi_early_init(); /* before LAPIC and SMP init */
+        sfi_init_late();
+=20
+        if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+
+
+Thanks a lot!
+Joey Lee
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
