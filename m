@@ -1,65 +1,51 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
-Date: Tue, 14 Jan 2014 11:35:25 -0800
-Message-ID: <CAFECyb83kmpj20nX3fw5HXw_hFyzj45aFga6nhG04qdKc-6jJw@mail.gmail.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH V6 0/8] Add ARM EFI stub
+Date: Tue, 14 Jan 2014 11:39:40 -0800
+Message-ID: <CAFECyb_EoHQSLaRcr1W0ScpnGTAS9UT0jN8DNsSELqYrLqCcNA@mail.gmail.com>
 References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
-	<1389371417-379-7-git-send-email-roy.franz@linaro.org>
-	<CAL_JsqLDVBfYomiNpFRacku4pJ3TrFy4rKJKedGp+LPGQt4m0w@mail.gmail.com>
+	<20140113150735.GF3256@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAL_JsqLDVBfYomiNpFRacku4pJ3TrFy4rKJKedGp+LPGQt4m0w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Linaro Patches <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave P Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140113150735.GF3256@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>, Grant Likely <grant.likely@linaro.org>, Dave Martin <dave.martin@arm.com>, Mark Salter <msalter@redhat.com>, Patch Tracking <patches@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 14, 2014 at 11:29 AM, Rob Herring <robherring2-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> On Fri, Jan 10, 2014 at 10:30 AM, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
->> operates similarly to the x86 stub: it is a shim between the EFI firmware
->> and the normal zImage entry point, and sets up the environment that the
->> zImage is expecting.  This includes loading the initrd (optionaly) and
->> device tree from the system partition based on the kernel command line.
->> The stub updates the device tree as necessary, adding entries for EFI
->> runtime services. The PE/COFF "MZ" header at offset 0 results in the
->> first instruction being an add that corrupts r5, which is not used by
->> the zImage interface.
+On Mon, Jan 13, 2014 at 7:07 AM, Matt Fleming <matt@console-pimps.org> wrote:
+> On Fri, 10 Jan, at 08:30:09AM, Roy Franz wrote:
+>> This patch series adds EFI stub support for the ARM architecture.  The
+>> stub for ARM is implemented in a similar manner to x86 in that it is a
+>> shim layer between EFI and the normal zImage/bzImage boot process, and
+>> that an image with the stub configured is bootable as both a zImage and
+>> EFI application.  This patchset adds common code that is shared with
+>> the ARM64 EFI stub.
 >>
->> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
+>> This patch depends on Leif Lindholm's ARM v7 runtime services patchset, which
+>> in turn depends on Mark Salter's early_io_remap() patchset.  This EFI stub
+>> patchset can be tested without those by simply modifying the Kconfig for
+>> EFI_STUB to not depend on EFI.  The kernel will boot using the stub,
+>> however no EFI support will be available in the kernel.
+>>
+>> I have addressed all the feedback I have recieved to date, and I am hoping
+>> that this patchset is acceptable for merging into 3.14.  It has been
+>> functionally stable for some time, and provides useful functionality.
+>> Further consolidation of the ARM/ARM64 stubs planned as part of the
+>> ongoing development of the stubs and supporting tools for both
+>> architectures (getting the FDT from a UEFI configuration table, using UEFI
+>> memory map instead of FDT for memory description.)
 >
-> [snip]
+> Is this going to Linus via one of the ARM maintainer trees?
 >
->> +       /* Look up the base of DRAM from the device tree. */
->> +       fdt = (void *)fdt_addr;
->> +       node = fdt_subnode_offset(fdt, 0, "memory");
->> +       region = fdt_getprop(fdt, node, "reg", NULL);
->> +       if (region) {
->> +               dram_base = fdt64_to_cpu(region->base);
->
-> This will not work if the address is 32-bit size.
->
->> +       } else {
->> +               /* There is no way to get amount or addresses of physical
->> +                * memory installed using EFI calls.  If the device tree
->> +                * we read from disk doesn't have this, there is no way
->> +                * for us to construct this informaion.
->> +                */
->> +               pr_efi_err(sys_table, "No 'memory' node in device tree.\n");
->> +               goto fail_free_fdt;
->
-> The current pc can't be used to determine the DRAM base like AUTO_ZRELADDR?
->
-> Rob
+> --
+> Matt Fleming, Intel Open Source Technology Center
 
-Hi Rob,
+Hi Matt,
 
-   UEFI may load the stub based kernel anywhere, so we don't get any
-useful information from where we were loaded.
-I am currently working on getting the base address from the EFI memory
-map, so all of the above code will go away, the only FDT
-operations that the stub will perform is to add the EFI related fields.
+    Yes, this is planned to go through one of the ARM trees.  Given
+that this relies on the early_io_remap
+patchsets that have not been accepted yet, I don't see this being
+accepted for 3.14.
 
 Roy
