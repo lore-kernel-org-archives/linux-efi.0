@@ -1,57 +1,74 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/4] x86, ptdump: Add the functionality to dump an
- arbitrary pagetable
-Date: Wed, 15 Jan 2014 09:16:09 +0800
-Message-ID: <20140115011609.GD23767@dhcp-16-126.nay.redhat.com>
-References: <1389473370-1940-1-git-send-email-bp@alien8.de>
- <1389473370-1940-2-git-send-email-bp@alien8.de>
- <20140113053240.GA11237@dhcp-16-126.nay.redhat.com>
- <20140113101822.GA5388@pd.tnic>
- <20140113122320.GA1900@darkstar.nay.redhat.com>
- <52D3FCAA.7070004@linux.intel.com>
- <20140114014003.GB4327@dhcp-16-126.nay.redhat.com>
- <52D57F75.7060308@zytor.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
+Date: Tue, 14 Jan 2014 17:47:27 -0800
+Message-ID: <CAFECyb9jx4NA0v_qNgrto4qG3KV3fBOpGh839Mnvbjody4xwYA@mail.gmail.com>
+References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
+	<1389371417-379-7-git-send-email-roy.franz@linaro.org>
+	<CAKv+Gu9OfieNhvj07tQv+ucQomZhDVDxwdV3Z9Tm+HaHE8HG-Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <52D57F75.7060308-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu9OfieNhvj07tQv+ucQomZhDVDxwdV3Z9Tm+HaHE8HG-Q@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Patch Tracking <patches@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Grant Likely <grant.likely@linaro.org>, Dave Martin <dave.martin@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 01/14/14 at 10:18am, H. Peter Anvin wrote:
-> On 01/13/2014 05:40 PM, Dave Young wrote:
-> > On 01/13/14 at 06:48am, Arjan van de Ven wrote:
-> >> On 1/13/2014 4:23 AM, Dave Young wrote:
-> >>>>
-> >>>>> How about do not limit to only if (pgd) case, instead do something
-> >>>>> like below: set dump_to_dmesg as a module parameter
-> >>>>
-> >>>> X86_PTDUMP is not a module.
-> >>>
-> >>> Hmm, I just see the module macros in the code, since it's a bool Kconfig
-> >>> I think the dump_pagetables.c need a cleanup,
-> >>> remove the #include <linux/module.h> and below lines:
-> >>> MODULE_LICENSE("GPL");
-> >>> MODULE_AUTHOR("Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>");
-> >>> MODULE_DESCRIPTION("Kernel debugging helper that dumps pagetables");
-> >>
-> >> personally I consider it good form to always have this kind of information in .c files,
-> >> regardless of the KConfig side of thing...
-> > 
-> > I agree it's good to add these infomation, but they can be added in comment.
-> > IMHO it will be better in that way.
-> > 
-> 
-> Why the [Finnish] do you feel that information needs to be in a
-> different form because it is (currently!) not available as a module?
+On Tue, Jan 14, 2014 at 1:05 AM, Ard Biesheuvel
+<ard.biesheuvel@linaro.org> wrote:
+> On 10 January 2014 17:30, Roy Franz <roy.franz@linaro.org> wrote:
+>> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
+>> operates similarly to the x86 stub: it is a shim between the EFI firmware
+>> and the normal zImage entry point, and sets up the environment that the
+>> zImage is expecting.  This includes loading the initrd (optionaly) and
+>> device tree from the system partition based on the kernel command line.
+>> The stub updates the device tree as necessary, adding entries for EFI
+>> runtime services. The PE/COFF "MZ" header at offset 0 results in the
+>> first instruction being an add that corrupts r5, which is not used by
+>> the zImage interface.
+>>
+>> Signed-off-by: Roy Franz <roy.franz@linaro.org>
+>> Acked-by: Grant Likely <grant.likely@linaro.org>
+>> ---
+>
+> [...]
+>
+>> diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+>> new file mode 100644
+>> index 0000000..dbb7101
+>> --- /dev/null
+>> +++ b/arch/arm/boot/compressed/efi-header.S
+>> @@ -0,0 +1,117 @@
+>> +@ Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
+>> +@
+>> +@ This file contains the PE/COFF header that is part of the
+>> +@ EFI stub.
+>> +@
+>> +
+>> +       .org    0x3c
+>> +       @
+>> +       @ The PE header can be anywhere in the file, but for
+>> +       @ simplicity we keep it together with the MSDOS header
+>> +       @ The offset to the PE/COFF header needs to be at offset
+>> +       @ 0x3C in the MSDOS header.
+>> +       @ The only 2 fields of the MSDOS header that are used are this
+>> +       @ PE/COFF offset, and the "MZ" bytes at offset 0x0.
+>> +       @
+>> +       .long   pe_header                       @ Offset to the PE header.
+>> +
+>> +      .align 3
+>> +pe_header:
+>> +       .ascii  "PE"
+>> +       .short  0
+>> +
+>> +coff_header:
+>> +       .short  0x01c2                          @ ARM or Thumb
+>
+> Could you explain why you are using 0x1c2 (Thumb) here and not 0x1c0 (ARM) ?
+>
+> Cheers,
+> Ard.
 
-I think moving them to comment can avoid including extra linux/module.h
+Nope.  It should be 0x1c0.
 
-If a module specific parameter is needed maybe it's not bad to add dummy
-module_init/module_exit
-
-Thanks
-Dave
+Roy
