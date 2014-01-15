@@ -1,62 +1,70 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
-Date: Wed, 15 Jan 2014 11:47:00 +0000
-Message-ID: <20140115114700.GI30907@bivouac.eciton.net>
-References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
- <1389371417-379-7-git-send-email-roy.franz@linaro.org>
- <CAKv+Gu9OfieNhvj07tQv+ucQomZhDVDxwdV3Z9Tm+HaHE8HG-Q@mail.gmail.com>
- <CAFECyb9jx4NA0v_qNgrto4qG3KV3fBOpGh839Mnvbjody4xwYA@mail.gmail.com>
- <CAFECyb9jbVHjM7--tRgbjfS9_MaAAvOhR3qXEKPKS6eW23V9Kg@mail.gmail.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [PATCH] ACPI / init: Run acpi_early_init() before timekeeping_init()
+Date: Wed, 15 Jan 2014 04:16:59 -0800
+Message-ID: <52D67C3B.4050503@zytor.com>
+References: <1389770748-32698-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAFECyb9jbVHjM7--tRgbjfS9_MaAAvOhR3qXEKPKS6eW23V9Kg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1389770748-32698-1-git-send-email-jlee@suse.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Alessandro Zummo <a.zummo@towertech.it>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <matthew.garrett@nebula.com>
+Cc: Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 14, 2014 at 06:16:58PM -0800, Roy Franz wrote:
-> >>> +      .align 3
-> >>> +pe_header:
-> >>> +       .ascii  "PE"
-> >>> +       .short  0
-> >>> +
-> >>> +coff_header:
-> >>> +       .short  0x01c2                          @ ARM or Thumb
-> >>
-> >> Could you explain why you are using 0x1c2 (Thumb) here and not 0x1c0 (ARM) ?
-> >
-> > Nope.  It should be 0x1c0.
+Rafael, you want to take this one?
+
+On 01/14/2014 11:25 PM, Lee, Chun-Yi wrote:
+> This is a variant patch from Rafael J. Wysocki's
+> ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
 > 
-> OK, now I resolved the nagging feeling that I had already fixed
-> this...   Right now, the EDK2 UEFI implementation
-> requires the machine type for ARM to be "0x1c2".  I don't think that
-> this is correct, but correcting this in EDK2 slipped through
-> the cracks, but is now back on my todo list.
+> According to Matt Fleming, if acpi_early_init() was executed before
+> efi_enter_virtual_mode(), the EFI initialization could benefit from
+> it, so Rafael's patch makes that happen.
+> 
+> And, we want accessing ACPI TAD device to set system clock, so move
+> acpi_early_init() before timekeeping_init(). This final position is
+> also before efi_enter_virtual_mode().
+> 
+> v2:
+> Move acpi_early_init() before timekeeping_init() to prepare setting
+> system clock with ACPI TAD.
+> 
+> v1:
+> Rafael J. Wysocki
+> ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+> 
+> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+> Cc: Matt Fleming <matt@console-pimps.org>
+> Cc: H. Peter Anvin <hpa@zytor.com>
+> Cc: Borislav Petkov <bp@suse.de>
+> Cc: Matthew Garrett <matthew.garrett@nebula.com>
+> Tested-by: Toshi Kani <toshi.kani@hp.com>
+> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> ---
+>  init/main.c |    2 +-
+>  1 files changed, 1 insertions(+), 1 deletions(-)
+> 
+> diff --git a/init/main.c b/init/main.c
+> index febc511..b6d93c8 100644
+> --- a/init/main.c
+> +++ b/init/main.c
+> @@ -565,6 +565,7 @@ asmlinkage void __init start_kernel(void)
+>  	init_timers();
+>  	hrtimers_init();
+>  	softirq_init();
+> +	acpi_early_init();
+>  	timekeeping_init();
+>  	time_init();
+>  	sched_clock_postinit();
+> @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
+>  
+>  	check_bugs();
+>  
+> -	acpi_early_init(); /* before LAPIC and SMP init */
+>  	sfi_init_late();
+>  
+>  	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+> 
 
-Nope, it should be 0x1c2.
-
-0x1c0 is the COFF code for ARM only, which corresponds roughly with
-OABI - which is not supported (and never will be) by the UEFI
-specification.
-0x1c2 means ARM or Thumb (Interworking), which is what we have.
-
-The UEFI specification (correctly) neglects to even mention 0x1c0
-and 0x1c4.
-
-Do also note that the COFF information relates to the executable,
-the stub. The rest of the kernel image is just a blob as far as UEFI
-is concerned.
-
-> I think that for now we should leave this as 0x1c2 so that the
-> unpatched EDK2 builds will boot it, and some time after EDK2 is
-> updated
-> this can be changed.  I'll work on a patch for EDK2 and get the
-> discussion going on that list to resolve this in EDK2.
-
-No need.
-
-/
-    Leif
