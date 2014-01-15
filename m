@@ -1,62 +1,100 @@
-From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] ACPI / init: Run acpi_early_init() before timekeeping_init()
-Date: Wed, 15 Jan 2014 15:25:48 +0800
-Message-ID: <1389770748-32698-1-git-send-email-jlee@suse.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
+Date: Wed, 15 Jan 2014 10:46:18 +0100
+Message-ID: <CAKv+Gu8yW3z3fAeZcA92s_URDcxMFhOqeWuxSiWxbdVGdHH+yA@mail.gmail.com>
+References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
+	<1389371417-379-7-git-send-email-roy.franz@linaro.org>
+	<CAKv+Gu9OfieNhvj07tQv+ucQomZhDVDxwdV3Z9Tm+HaHE8HG-Q@mail.gmail.com>
+	<CAFECyb9jx4NA0v_qNgrto4qG3KV3fBOpGh839Mnvbjody4xwYA@mail.gmail.com>
+	<CAFECyb9jbVHjM7--tRgbjfS9_MaAAvOhR3qXEKPKS6eW23V9Kg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAFECyb9jbVHjM7--tRgbjfS9_MaAAvOhR3qXEKPKS6eW23V9Kg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
-Cc: Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Dave Martin <dave.martin-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is a variant patch from Rafael J. Wysocki's
-ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
+On 15 January 2014 03:16, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Tue, Jan 14, 2014 at 5:47 PM, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On Tue, Jan 14, 2014 at 1:05 AM, Ard Biesheuvel
+>> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>> On 10 January 2014 17:30, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>>>> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
+>>>> operates similarly to the x86 stub: it is a shim between the EFI firmware
+>>>> and the normal zImage entry point, and sets up the environment that the
+>>>> zImage is expecting.  This includes loading the initrd (optionaly) and
+>>>> device tree from the system partition based on the kernel command line.
+>>>> The stub updates the device tree as necessary, adding entries for EFI
+>>>> runtime services. The PE/COFF "MZ" header at offset 0 results in the
+>>>> first instruction being an add that corrupts r5, which is not used by
+>>>> the zImage interface.
+>>>>
+>>>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>> Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>> ---
+>>>
+>>> [...]
+>>>
+>>>> diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+>>>> new file mode 100644
+>>>> index 0000000..dbb7101
+>>>> --- /dev/null
+>>>> +++ b/arch/arm/boot/compressed/efi-header.S
+>>>> @@ -0,0 +1,117 @@
+>>>> +@ Copyright (C) 2013 Linaro Ltd;  <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>> +@
+>>>> +@ This file contains the PE/COFF header that is part of the
+>>>> +@ EFI stub.
+>>>> +@
+>>>> +
+>>>> +       .org    0x3c
+>>>> +       @
+>>>> +       @ The PE header can be anywhere in the file, but for
+>>>> +       @ simplicity we keep it together with the MSDOS header
+>>>> +       @ The offset to the PE/COFF header needs to be at offset
+>>>> +       @ 0x3C in the MSDOS header.
+>>>> +       @ The only 2 fields of the MSDOS header that are used are this
+>>>> +       @ PE/COFF offset, and the "MZ" bytes at offset 0x0.
+>>>> +       @
+>>>> +       .long   pe_header                       @ Offset to the PE header.
+>>>> +
+>>>> +      .align 3
 
-According to Matt Fleming, if acpi_early_init() was executed before
-efi_enter_virtual_mode(), the EFI initialization could benefit from
-it, so Rafael's patch makes that happen.
+Btw you also have a whitespace error here.
 
-And, we want accessing ACPI TAD device to set system clock, so move
-acpi_early_init() before timekeeping_init(). This final position is
-also before efi_enter_virtual_mode().
+>>>> +pe_header:
+>>>> +       .ascii  "PE"
+>>>> +       .short  0
+>>>> +
+>>>> +coff_header:
+>>>> +       .short  0x01c2                          @ ARM or Thumb
+>>>
+>>> Could you explain why you are using 0x1c2 (Thumb) here and not 0x1c0 (ARM) ?
+>>>
+>>> Cheers,
+>>> Ard.
+>>
+>> Nope.  It should be 0x1c0.
+>>
+>> Roy
+>
+> OK, now I resolved the nagging feeling that I had already fixed
+> this...   Right now, the EDK2 UEFI implementation
+> requires the machine type for ARM to be "0x1c2".  I don't think that
+> this is correct, but correcting this in EDK2 slipped through
+> the cracks, but is now back on my todo list.
+>
+> I think that for now we should leave this as 0x1c2 so that the
+> unpatched EDK2 builds will boot it, and some time after EDK2 is
+> updated
+> this can be changed.  I'll work on a patch for EDK2 and get the
+> discussion going on that list to resolve this in EDK2.
+>
 
-v2:
-Move acpi_early_init() before timekeeping_init() to prepare setting
-system clock with ACPI TAD.
+OK. I have updated sbsigntool (Linaro's version) so it supports
+either, but I agree that using the ARM constant is the correct way.
 
-v1:
-Rafael J. Wysocki
-ACPI / init: Run acpi_early_init() before efi_enter_virtual_mode()
-
-Cc: Rafael J. Wysocki <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
-Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
----
- init/main.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/init/main.c b/init/main.c
-index febc511..b6d93c8 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -565,6 +565,7 @@ asmlinkage void __init start_kernel(void)
- 	init_timers();
- 	hrtimers_init();
- 	softirq_init();
-+	acpi_early_init();
- 	timekeeping_init();
- 	time_init();
- 	sched_clock_postinit();
-@@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
- 
- 	check_bugs();
- 
--	acpi_early_init(); /* before LAPIC and SMP init */
- 	sfi_init_late();
- 
- 	if (efi_enabled(EFI_RUNTIME_SERVICES)) {
 -- 
-1.6.4.2
+Ard.
