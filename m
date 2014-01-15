@@ -1,91 +1,58 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: [PATCH V6 6/8] Add EFI stub for ARM
-Date: Tue, 14 Jan 2014 18:16:58 -0800
-Message-ID: <CAFECyb9jbVHjM7--tRgbjfS9_MaAAvOhR3qXEKPKS6eW23V9Kg@mail.gmail.com>
-References: <1389371417-379-1-git-send-email-roy.franz@linaro.org>
-	<1389371417-379-7-git-send-email-roy.franz@linaro.org>
-	<CAKv+Gu9OfieNhvj07tQv+ucQomZhDVDxwdV3Z9Tm+HaHE8HG-Q@mail.gmail.com>
-	<CAFECyb9jx4NA0v_qNgrto4qG3KV3fBOpGh839Mnvbjody4xwYA@mail.gmail.com>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
+ efi_enter_virtual_mode()
+Date: Wed, 15 Jan 2014 15:18:02 +0800
+Message-ID: <1389770282.24105.259.camel@linux-s257.site>
+References: <1387439053-8711-1-git-send-email-jlee@suse.com>
+	 <3476450.BMEcId2Lgj@vostro.rjw.lan>
+	 <20131221122148.GB29501@console-pimps.org>
+	 <2530951.HFPX8MI38t@vostro.rjw.lan>
+	 <1389672548.24105.252.camel@linux-s257.site> <52D57B54.7080509@zytor.com>
+	 <1389731547.1792.296.camel@misato.fc.hp.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFECyb9jx4NA0v_qNgrto4qG3KV3fBOpGh839Mnvbjody4xwYA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Patch Tracking <patches@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Grant Likely <grant.likely@linaro.org>, Dave Martin <dave.martin@arm.com>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1389731547.1792.296.camel-RbGIw1UOYPVo/CpIj0byZw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Elliott-VXdhtT5mjnY@public.gmane.org, samer.el-haj-mahmoud-VXdhtT5mjnY@public.gmane.org, Oliver Neukum <oneukum-l3A5Bk7waGM@public.gmane.org>, werner-IBi9RG/b67k@public.gmane.org, trenn-l3A5Bk7waGM@public.gmane.org, JBeulich-IBi9RG/b67k@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 14, 2014 at 5:47 PM, Roy Franz <roy.franz@linaro.org> wrote:
-> On Tue, Jan 14, 2014 at 1:05 AM, Ard Biesheuvel
-> <ard.biesheuvel@linaro.org> wrote:
->> On 10 January 2014 17:30, Roy Franz <roy.franz@linaro.org> wrote:
->>> This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
->>> operates similarly to the x86 stub: it is a shim between the EFI firmware
->>> and the normal zImage entry point, and sets up the environment that the
->>> zImage is expecting.  This includes loading the initrd (optionaly) and
->>> device tree from the system partition based on the kernel command line.
->>> The stub updates the device tree as necessary, adding entries for EFI
->>> runtime services. The PE/COFF "MZ" header at offset 0 results in the
->>> first instruction being an add that corrupts r5, which is not used by
->>> the zImage interface.
->>>
->>> Signed-off-by: Roy Franz <roy.franz@linaro.org>
->>> Acked-by: Grant Likely <grant.likely@linaro.org>
->>> ---
->>
->> [...]
->>
->>> diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
->>> new file mode 100644
->>> index 0000000..dbb7101
->>> --- /dev/null
->>> +++ b/arch/arm/boot/compressed/efi-header.S
->>> @@ -0,0 +1,117 @@
->>> +@ Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
->>> +@
->>> +@ This file contains the PE/COFF header that is part of the
->>> +@ EFI stub.
->>> +@
->>> +
->>> +       .org    0x3c
->>> +       @
->>> +       @ The PE header can be anywhere in the file, but for
->>> +       @ simplicity we keep it together with the MSDOS header
->>> +       @ The offset to the PE/COFF header needs to be at offset
->>> +       @ 0x3C in the MSDOS header.
->>> +       @ The only 2 fields of the MSDOS header that are used are this
->>> +       @ PE/COFF offset, and the "MZ" bytes at offset 0x0.
->>> +       @
->>> +       .long   pe_header                       @ Offset to the PE header.
->>> +
->>> +      .align 3
->>> +pe_header:
->>> +       .ascii  "PE"
->>> +       .short  0
->>> +
->>> +coff_header:
->>> +       .short  0x01c2                          @ ARM or Thumb
->>
->> Could you explain why you are using 0x1c2 (Thumb) here and not 0x1c0 (ARM) ?
->>
->> Cheers,
->> Ard.
->
-> Nope.  It should be 0x1c0.
->
-> Roy
+=E6=96=BC =E4=BA=8C=EF=BC=8C2014-01-14 =E6=96=BC 13:32 -0700=EF=BC=8CTo=
+shi Kani =E6=8F=90=E5=88=B0=EF=BC=9A
+> > > +       acpi_early_init();
+> > >         timekeeping_init();
+> > >         time_init();
+> > >         sched_clock_postinit();
+> > > @@ -641,7 +642,6 @@ asmlinkage void __init start_kernel(void)
+> > > =20
+> > >         check_bugs();
+> > > =20
+> > > -       acpi_early_init(); /* before LAPIC and SMP init */
+> > >         sfi_init_late();
+> > > =20
+> > >         if (efi_enabled(EFI_RUNTIME_SERVICES)) {
+> > >=20
+> >=20
+> > Hi Toshi,
+> >=20
+> > Could you try this variant, too?  If this works as well then we end
+> up
+> > solving two problems in one patch...
+>=20
+> Hi Peter,
+>=20
+> Yes, this version works fine as well.
+>=20
+> Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+>=20
+> Thanks,
+> -Toshi
 
-OK, now I resolved the nagging feeling that I had already fixed
-this...   Right now, the EDK2 UEFI implementation
-requires the machine type for ARM to be "0x1c2".  I don't think that
-this is correct, but correcting this in EDK2 slipped through
-the cracks, but is now back on my todo list.
+Thanks a lot for your testing.
 
-I think that for now we should leave this as 0x1c2 so that the
-unpatched EDK2 builds will boot it, and some time after EDK2 is
-updated
-this can be changed.  I'll work on a patch for EDK2 and get the
-discussion going on that list to resolve this in EDK2.
+I will re-send a formal patch with changelog to everybody.
 
-
-Roy
+Regards
+Joey Lee
