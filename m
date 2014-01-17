@@ -1,52 +1,65 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [RFT][PATCH] ACPI / init: Run acpi_early_init() before
- efi_enter_virtual_mode() (was: Re: [RFC PATCH 00/14] Support timezone of
- ACPI TAD and EFI TIME)
-Date: Fri, 17 Jan 2014 12:20:52 +0000
-Message-ID: <20140117122052.GG27632@console-pimps.org>
-References: <1387439053-8711-1-git-send-email-jlee@suse.com>
- <3476450.BMEcId2Lgj@vostro.rjw.lan>
- <20131221122148.GB29501@console-pimps.org>
- <2530951.HFPX8MI38t@vostro.rjw.lan>
- <20140112110546.GB25180@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140112110546.GB25180@console-pimps.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, joeyli <jlee@suse.com>, Alessandro Zummo <a.zummo@towertech.it>, Matthew Garrett <matthew.garrett@nebula.com>, Elliott@hp.com, samer.el-haj-mahmoud@hp.com, Oliver Neukum <oneukum@suse.de>, werner@suse.com, trenn@suse.de, JBeulich@suse.com, linux-kernel@vger.kernel.org, rtc-linux@googlegroups.com, x86@kernel.org, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, linux-acpi@vger.kernel.org, Borislav Petkov <bp@suse.de>
+From: blanca54128-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org
+Subject: RE: LOCAL MAP OPTIMIZATION FOR : mail-archive.com (Less Than
+ $99/Month)
+Date: Sat, 18 Jan 2014 00:22:40 +0530
+Message-ID: <52d97bf2.a3b2440a.1b72.5b3e@mx.google.com>
+Reply-To: JUDY18088-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 12 Jan, at 11:05:46AM, Matt Fleming wrote:
-> On Sun, 12 Jan, at 01:30:23AM, Rafael J. Wysocki wrote:
-> > On Saturday, December 21, 2013 12:21:48 PM Matt Fleming wrote:
-> > > On Fri, 20 Dec, at 11:18:56PM, Rafael J. Wysocki wrote:
-> > > > 
-> > > > I'm not sure 100%, but I *think* we need to do that with interrupts enabled.
-> > > > At least after mm_init(), because it relies on things initialized there if I
-> > > > remember correctly.
-> > > > 
-> > > > From what I can tell at the moment, it might be possible to move it before
-> > > > efi_enter_virtual_mode() if that would help.
-> > > 
-> > > Actually yeah, that would be super useful, and I think we'd be able to
-> > > get rid of the whole efi_late_init() stuff because we'd no longer need
-> > > to hang on to the EFI_BOOT_SERVICES* regions after
-> > > SetVirtualAddressMap().
-> > 
-> > OK
-> > 
-> > I don't see any adverse effects of the patch below on a couple of my test
-> > boxes, but (a) they are Intel-based and (b) they are non-EFI, so it would be
-> > good to give it a go on as many machines as reasonably possible.
-> 
-> Thanks Rafael, I'll give this a spin on my test machines here.
+Good Morning Sir / Mam
 
-(Sorry for replying so late)
+Is your business ranking in local maps shown on PAGE 1 of google ? With new
+google policies they have specifically asked local business owners to
+optimize their website for local maps rather than JUST organics. Do you know
+the reason why you are not ranked well on google MAPs or why there is drop
+in your website rankings? Prime reason for bad rankings for a busniess is
+lack of local presence and local citations ie getting your business listed
+on directories like YELP, MANTA & Many more. These websites not just give
+your business a push but also help you Maintain a good Online Reputation.
 
-As various other people have reported, this works fine.
+Why you need to optimize your website for local MAP Listings ?
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+- MAP listings get 10 times more clicks than organic listings
+- Increased conversions because of real reviews posted on your Google Plus
+Page
+- Every year there is 30% increase in searches for local keywords
+- Increases legitimacy of a Business
+
+We will help you get your website ranked well on google for the related
+keywords in your niche. We specialize in LOCAL SEARCH ENGINE OPTIMIZATION
+increasing visibility for small businesses by ranking them for
+geographically-related keywords. Say for eg-: you want to search a plumber
+in your city, You will be typing in keywords like Plumbers + City Or
+Plumbers + IN + City. We make sure your website comes in google MAP listings
+shown on page 1 for each such keyword.
+
+Now Google believes in - BE ORIGINAL, HAVE ORIGINAL AND GIVE ORIGINAL which
+means that google wants to end up that frustrating experience of users who
+are searching for Service Or Product and seeing the results that are not
+even close to what they are looking for. Google only wants to give their
+user original and relevant results. This makes it even more important that
+we showcase our business in the best possible way and make sure our website
+in valued high by google.
+
+We at TheLOCALIST will make google feel the importance of your business by
+following their guidelines thus ranking your website higher in serach
+results. We are presently offering LOCAL OPTIMIZATION to more than 400
+websites and they all rank page 1 for all possible keywords !!! Each month
+your website is submitted to more than 50 citations and social presence is
+controlled by posting videos and blogs all over the web.
+
+Email us back with your website & phone number so we can discuss this
+further with you. Our Packages start from as low as 99$/month.
+
+
+Thanks For Taking Time To Read Our Email
+
+Polly Martin
+Local SEO Manager ( THE Localist )
+Address : 24 ST Suite 32 Downtown Provo Utah
+
+-------------------
+NOT INTERESTED ? REPLY WITH NOT INTERESTED IN THE SUBJECT LINE 
