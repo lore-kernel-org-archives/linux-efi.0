@@ -1,65 +1,72 @@
-From: blanca54128-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org
-Subject: RE: LOCAL MAP OPTIMIZATION FOR : mail-archive.com (Less Than
- $99/Month)
-Date: Sat, 18 Jan 2014 00:22:40 +0530
-Message-ID: <52d97bf2.a3b2440a.1b72.5b3e@mx.google.com>
-Reply-To: JUDY18088-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH 0/5] EFI memmap and other fixes, v3
+Date: Sat, 18 Jan 2014 12:48:13 +0100
+Message-ID: <1390045698-16882-1-git-send-email-bp@alien8.de>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Good Morning Sir / Mam
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Is your business ranking in local maps shown on PAGE 1 of google ? With new
-google policies they have specifically asked local business owners to
-optimize their website for local maps rather than JUST organics. Do you know
-the reason why you are not ranked well on google MAPs or why there is drop
-in your website rankings? Prime reason for bad rankings for a busniess is
-lack of local presence and local citations ie getting your business listed
-on directories like YELP, MANTA & Many more. These websites not just give
-your business a push but also help you Maintain a good Online Reputation.
+Hi all,
 
-Why you need to optimize your website for local MAP Listings ?
+this is the latest incarnation which should hopefully work just fine. It
+tpasses esting at least on all our boxes so we have *some* coverage.
 
-- MAP listings get 10 times more clicks than organic listings
-- Increased conversions because of real reviews posted on your Google Plus
-Page
-- Every year there is 30% increase in searches for local keywords
-- Increases legitimacy of a Business
+It took us a long time to debug the unmapping path and realize how
+exactly we're doing the PGD sharing between the kernel and the EFI page
+table. I've commented on this verbosely in 4/5 for future reference
+because this stuff is not trivial.
 
-We will help you get your website ranked well on google for the related
-keywords in your niche. We specialize in LOCAL SEARCH ENGINE OPTIMIZATION
-increasing visibility for small businesses by ranking them for
-geographically-related keywords. Say for eg-: you want to search a plumber
-in your city, You will be typing in keywords like Plumbers + City Or
-Plumbers + IN + City. We make sure your website comes in google MAP listings
-shown on page 1 for each such keyword.
+We definitely should have this in mind when we do more changes on how we
+handle the EFI page table and what we do with it, maybe even decouple it
+completely from the kernel one. I dunno - it is all future stuff to pay
+attention to.
 
-Now Google believes in - BE ORIGINAL, HAVE ORIGINAL AND GIVE ORIGINAL which
-means that google wants to end up that frustrating experience of users who
-are searching for Service Or Product and seeing the results that are not
-even close to what they are looking for. Google only wants to give their
-user original and relevant results. This makes it even more important that
-we showcase our business in the best possible way and make sure our website
-in valued high by google.
+Anyway, if anyone with an EFI box wants to give it a run, feel free to
+do so.
 
-We at TheLOCALIST will make google feel the importance of your business by
-following their guidelines thus ranking your website higher in serach
-results. We are presently offering LOCAL OPTIMIZATION to more than 400
-websites and they all rank page 1 for all possible keywords !!! Each month
-your website is submitted to more than 50 citations and social presence is
-controlled by posting videos and blogs all over the web.
+As always, all comments and suggestions are appreciated.
 
-Email us back with your website & phone number so we can discuss this
-further with you. Our Packages start from as low as 99$/month.
+Thanks.
 
+Changelog:
 
-Thanks For Taking Time To Read Our Email
+* v2:
 
-Polly Martin
-Local SEO Manager ( THE Localist )
-Address : 24 ST Suite 32 Downtown Provo Utah
+here's v2 rebased and rediffed against tip (which has the relevant
+efi branches).
 
--------------------
-NOT INTERESTED ? REPLY WITH NOT INTERESTED IN THE SUBJECT LINE 
+* v1:
+
+this is the result of Toshi and me debugging a #GP on one of his big HP
+boxes sporting UEFI. Each commit message should be self-explanatory so
+please look there.
+
+This has more or less an RFC nature thus I'm sending it now to collect
+feedback. It is going to wait in the EFI queue anyway after the kexec
+stuff gets sorted out first.
+
+Borislav Petkov (5):
+  x86, ptdump: Add the functionality to dump an arbitrary pagetable
+  efi: Dump the EFI page table
+  x86, pageattr: Export page unmapping interface
+  efi: Make efi virtual runtime map passing more robust
+  efi: Split efi_enter_virtual_mode
+
+ arch/x86/Kconfig                     |   9 ++
+ arch/x86/include/asm/efi.h           |   4 +-
+ arch/x86/include/asm/pgtable.h       |   3 +-
+ arch/x86/include/asm/pgtable_types.h |   2 +
+ arch/x86/mm/dump_pagetables.c        |  84 +++++++++-----
+ arch/x86/mm/pageattr.c               |  44 +++++---
+ arch/x86/platform/efi/efi.c          | 210 ++++++++++++++++++++++++++---------
+ arch/x86/platform/efi/efi_32.c       |   7 +-
+ arch/x86/platform/efi/efi_64.c       |  41 ++++++-
+ include/linux/efi.h                  |   1 +
+ 10 files changed, 304 insertions(+), 101 deletions(-)
+
+-- 
+1.8.5.2.192.g7794a68
