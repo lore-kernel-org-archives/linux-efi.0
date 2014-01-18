@@ -1,281 +1,232 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 4/5] efi: Make efi virtual runtime map passing more robust
-Date: Sat, 18 Jan 2014 12:48:17 +0100
-Message-ID: <1390045698-16882-5-git-send-email-bp@alien8.de>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH 1/5] x86, ptdump: Add the functionality to dump an arbitrary pagetable
+Date: Sat, 18 Jan 2014 12:48:14 +0100
+Message-ID: <1390045698-16882-2-git-send-email-bp@alien8.de>
 References: <1390045698-16882-1-git-send-email-bp@alien8.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1390045698-16882-1-git-send-email-bp@alien8.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Linux EFI <linux-efi@vger.kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt@console-pimps.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1390045698-16882-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Borislav Petkov <bp@suse.de>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Currently, running SetVirtualAddressMap() and passing the physical
-address of the virtual map array was working only by a lucky coincidence
-because the memory was present in the EFI page table too. Until Toshi
-went and booted this on a big HP box - the krealloc() manner of resizing
-the memmap we're doing did allocate from such physical addresses which
-were not mapped anymore and boom:
+With reusing the ->trampoline_pgd page table for mapping EFI regions in
+order to use them after having switched to EFI virtual mode, it is very
+useful to be able to dump aforementioned page table in dmesg. This adds
+that functionality through the walk_pgd_level() interface which can be
+called from somewhere else.
 
-http://lkml.kernel.org/r/1386806463.1791.295.camel@misato.fc.hp.com
+The original functionality of dumping to debugfs remains untouched.
 
-One way to take care of that issue is to reimplement the krealloc thing
-but with pages. We start with contiguous pages of order 1, i.e. 2 pages,
-and when we deplete that memory (shouldn't happen all that often but you
-know firmware) we realloc the next power-of-two pages.
-
-Having the pages, it is much more handy and easy to map them into the
-EFI page table with the already existing mapping code which we're using
-for building the virtual mappings.
-
-Thanks to Toshi Kani and Matt for the great debugging help.
-
-Reported-by: Toshi Kani <toshi.kani@hp.com>
-Signed-off-by: Borislav Petkov <bp@suse.de>
-Tested-by: Toshi Kani <toshi.kani@hp.com>
+Cc: Arjan van de Ven <arjan-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Tested-by: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 ---
- arch/x86/include/asm/efi.h     |  3 +-
- arch/x86/platform/efi/efi.c    | 99 +++++++++++++++++++++++++++++++++---------
- arch/x86/platform/efi/efi_32.c |  6 ++-
- arch/x86/platform/efi/efi_64.c | 32 ++++++++++++--
- 4 files changed, 114 insertions(+), 26 deletions(-)
+ arch/x86/include/asm/pgtable.h |  3 +-
+ arch/x86/mm/dump_pagetables.c  | 84 +++++++++++++++++++++++++++---------------
+ 2 files changed, 56 insertions(+), 31 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index dfc319e7a7b8..b473f2541e67 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -130,7 +130,8 @@ extern void efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
- extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
--extern void efi_setup_page_tables(void);
-+extern int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
-+extern void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
- extern void __init efi_dump_pagetable(void);
+diff --git a/arch/x86/include/asm/pgtable.h b/arch/x86/include/asm/pgtable.h
+index bbc8b12fa443..b459ddf27d64 100644
+--- a/arch/x86/include/asm/pgtable.h
++++ b/arch/x86/include/asm/pgtable.h
+@@ -15,9 +15,10 @@
+ 	 : (prot))
  
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 35450ab3a123..b79a85c8a6aa 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -938,14 +938,36 @@ static void __init efi_map_regions_fixed(void)
+ #ifndef __ASSEMBLY__
+-
+ #include <asm/x86_init.h>
  
- }
- 
-+static void *realloc_pages(void *old_memmap, int old_shift)
-+{
-+	void *ret;
-+
-+	ret = (void *)__get_free_pages(GFP_KERNEL, old_shift + 1);
-+	if (!ret)
-+		goto out;
-+
-+	/*
-+	 * A first-time allocation doesn't have anything to copy.
-+	 */
-+	if (!old_memmap)
-+		return ret;
-+
-+	memcpy(ret, old_memmap, PAGE_SIZE << old_shift);
-+
-+out:
-+	free_pages((unsigned long)old_memmap, old_shift);
-+	return ret;
-+}
++void ptdump_walk_pgd_level(struct seq_file *m, pgd_t *pgd);
 +
  /*
-- * Map efi memory ranges for runtime serivce and update new_memmap with virtual
-- * addresses.
-+ * Map the efi memory ranges of the runtime services and update new_mmap with
-+ * virtual addresses.
-  */
--static void * __init efi_map_regions(int *count)
-+static void * __init efi_map_regions(int *count, int *pg_shift)
- {
-+	void *p, *new_memmap = NULL;
-+	unsigned long left = 0;
- 	efi_memory_desc_t *md;
--	void *p, *tmp, *new_memmap = NULL;
+  * ZERO_PAGE is a global shared page that is always zero: used
+  * for zero-mapped memory areas etc..
+diff --git a/arch/x86/mm/dump_pagetables.c b/arch/x86/mm/dump_pagetables.c
+index 0002a3a33081..20621d753d5f 100644
+--- a/arch/x86/mm/dump_pagetables.c
++++ b/arch/x86/mm/dump_pagetables.c
+@@ -30,6 +30,7 @@ struct pg_state {
+ 	unsigned long start_address;
+ 	unsigned long current_address;
+ 	const struct addr_marker *marker;
++	bool to_dmesg;
+ };
  
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		md = p;
-@@ -960,20 +982,23 @@ static void * __init efi_map_regions(int *count)
- 		efi_map_region(md);
- 		get_systab_virt_addr(md);
+ struct addr_marker {
+@@ -88,10 +89,28 @@ static struct addr_marker address_markers[] = {
+ #define PUD_LEVEL_MULT (PTRS_PER_PMD * PMD_LEVEL_MULT)
+ #define PGD_LEVEL_MULT (PTRS_PER_PUD * PUD_LEVEL_MULT)
  
--		tmp = krealloc(new_memmap, (*count + 1) * memmap.desc_size,
--			       GFP_KERNEL);
--		if (!tmp)
--			goto out;
--		new_memmap = tmp;
-+		if (left < memmap.desc_size) {
-+			new_memmap = realloc_pages(new_memmap, *pg_shift);
-+			if (!new_memmap)
-+				return NULL;
++#define pt_dump_seq_printf(m, to_dmesg, fmt, args...)		\
++({								\
++	if (to_dmesg)					\
++		printk(KERN_INFO fmt, ##args);			\
++	else							\
++		if (m)						\
++			seq_printf(m, fmt, ##args);		\
++})
 +
-+			left += PAGE_SIZE << *pg_shift;
-+			(*pg_shift)++;
-+		}
++#define pt_dump_cont_printf(m, to_dmesg, fmt, args...)		\
++({								\
++	if (to_dmesg)					\
++		printk(KERN_CONT fmt, ##args);			\
++	else							\
++		if (m)						\
++			seq_printf(m, fmt, ##args);		\
++})
 +
- 		memcpy(new_memmap + (*count * memmap.desc_size), md,
- 		       memmap.desc_size);
-+
-+		left -= memmap.desc_size;
- 		(*count)++;
- 	}
- 
- 	return new_memmap;
--out:
--	kfree(new_memmap);
--	return NULL;
- }
- 
  /*
-@@ -999,9 +1024,9 @@ out:
+  * Print a readable form of a pgprot_t to the seq_file
   */
- void __init efi_enter_virtual_mode(void)
+-static void printk_prot(struct seq_file *m, pgprot_t prot, int level)
++static void printk_prot(struct seq_file *m, pgprot_t prot, int level, bool dmsg)
  {
--	efi_status_t status;
-+	int err, count = 0, pg_shift = 0;
- 	void *new_memmap = NULL;
--	int err, count = 0;
-+	efi_status_t status;
+ 	pgprotval_t pr = pgprot_val(prot);
+ 	static const char * const level_name[] =
+@@ -99,47 +118,47 @@ static void printk_prot(struct seq_file *m, pgprot_t prot, int level)
  
- 	efi.systab = NULL;
- 
-@@ -1018,20 +1043,24 @@ void __init efi_enter_virtual_mode(void)
- 		efi_map_regions_fixed();
+ 	if (!pgprot_val(prot)) {
+ 		/* Not present */
+-		seq_printf(m, "                          ");
++		pt_dump_cont_printf(m, dmsg, "                          ");
  	} else {
- 		efi_merge_regions();
--		new_memmap = efi_map_regions(&count);
-+		new_memmap = efi_map_regions(&count, &pg_shift);
- 		if (!new_memmap) {
- 			pr_err("Error reallocating memory, EFI runtime non-functional!\n");
- 			return;
+ 		if (pr & _PAGE_USER)
+-			seq_printf(m, "USR ");
++			pt_dump_cont_printf(m, dmsg, "USR ");
+ 		else
+-			seq_printf(m, "    ");
++			pt_dump_cont_printf(m, dmsg, "    ");
+ 		if (pr & _PAGE_RW)
+-			seq_printf(m, "RW ");
++			pt_dump_cont_printf(m, dmsg, "RW ");
+ 		else
+-			seq_printf(m, "ro ");
++			pt_dump_cont_printf(m, dmsg, "ro ");
+ 		if (pr & _PAGE_PWT)
+-			seq_printf(m, "PWT ");
++			pt_dump_cont_printf(m, dmsg, "PWT ");
+ 		else
+-			seq_printf(m, "    ");
++			pt_dump_cont_printf(m, dmsg, "    ");
+ 		if (pr & _PAGE_PCD)
+-			seq_printf(m, "PCD ");
++			pt_dump_cont_printf(m, dmsg, "PCD ");
+ 		else
+-			seq_printf(m, "    ");
++			pt_dump_cont_printf(m, dmsg, "    ");
+ 
+ 		/* Bit 9 has a different meaning on level 3 vs 4 */
+ 		if (level <= 3) {
+ 			if (pr & _PAGE_PSE)
+-				seq_printf(m, "PSE ");
++				pt_dump_cont_printf(m, dmsg, "PSE ");
+ 			else
+-				seq_printf(m, "    ");
++				pt_dump_cont_printf(m, dmsg, "    ");
+ 		} else {
+ 			if (pr & _PAGE_PAT)
+-				seq_printf(m, "pat ");
++				pt_dump_cont_printf(m, dmsg, "pat ");
+ 			else
+-				seq_printf(m, "    ");
++				pt_dump_cont_printf(m, dmsg, "    ");
  		}
--	}
- 
--	err = save_runtime_map();
--	if (err)
--		pr_err("Error saving runtime map, efi runtime on kexec non-functional!!\n");
-+		err = save_runtime_map();
-+		if (err)
-+			pr_err("Error saving runtime map, efi runtime on kexec non-functional!!\n");
-+	}
- 
- 	BUG_ON(!efi.systab);
- 
--	efi_setup_page_tables();
-+	if (!efi_setup) {
-+		if (efi_setup_page_tables(__pa(new_memmap), 1 << pg_shift))
-+			return;
-+	}
-+
- 	efi_sync_low_kernel_mappings();
- 	efi_dump_pagetable();
- 
-@@ -1073,7 +1102,35 @@ void __init efi_enter_virtual_mode(void)
- 	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
- 		runtime_code_page_mkexec();
- 
--	kfree(new_memmap);
-+
-+	/*
-+	 * We mapped the descriptor array into the EFI pagetable above but we're
-+	 * not unmapping it here. Here's why:
-+	 *
-+	 * We're copying select PGDs from the kernel page table to the EFI page
-+	 * table and when we do so and make changes to those PGDs like unmapping
-+	 * stuff from them, those changes appear in the kernel page table and we
-+	 * go boom.
-+	 *
-+	 * From setup_real_mode():
-+	 *
-+	 * ...
-+	 * trampoline_pgd[0] = init_level4_pgt[pgd_index(__PAGE_OFFSET)].pgd;
-+	 *
-+	 * In this particular case, our allocation is in PGD 0 of the EFI page
-+	 * table but we've copied that PGD from PGD[272] of the EFI page table:
-+	 *
-+	 *	pgd_index(__PAGE_OFFSET = 0xffff880000000000) = 272
-+	 *
-+	 * where the direct memory mapping in kernel space is.
-+	 *
-+	 * new_memmap's VA comes from that direct mapping and thus clearing it,
-+	 * it would get cleared in the kernel page table too.
-+	 *
-+	 * efi_cleanup_page_tables(__pa(new_memmap), 1 << pg_shift);
-+	 */
-+	if (!efi_setup)
-+		free_pages((unsigned long)new_memmap, pg_shift);
- 
- 	/* clean DUMMY object */
- 	efi.set_variable(efi_dummy_name, &EFI_DUMMY_GUID,
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index b9b827cbfecc..7ad87ee09525 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -40,8 +40,12 @@
- static unsigned long efi_rt_eflags;
- 
- void efi_sync_low_kernel_mappings(void) {}
--void efi_setup_page_tables(void) {}
- void __init efi_dump_pagetable(void) {}
-+int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+{
-+	return 0;
-+}
-+void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages) {}
- 
- void __init efi_map_region(efi_memory_desc_t *md)
- {
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 76fce828c31d..0998f3a536ff 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -137,12 +137,38 @@ void efi_sync_low_kernel_mappings(void)
- 		sizeof(pgd_t) * num_pgds);
+ 		if (pr & _PAGE_GLOBAL)
+-			seq_printf(m, "GLB ");
++			pt_dump_cont_printf(m, dmsg, "GLB ");
+ 		else
+-			seq_printf(m, "    ");
++			pt_dump_cont_printf(m, dmsg, "    ");
+ 		if (pr & _PAGE_NX)
+-			seq_printf(m, "NX ");
++			pt_dump_cont_printf(m, dmsg, "NX ");
+ 		else
+-			seq_printf(m, "x  ");
++			pt_dump_cont_printf(m, dmsg, "x  ");
+ 	}
+-	seq_printf(m, "%s\n", level_name[level]);
++	pt_dump_cont_printf(m, dmsg, "%s\n", level_name[level]);
  }
  
--void efi_setup_page_tables(void)
-+int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
-+	pgd_t *pgd;
-+
-+	if (efi_enabled(EFI_OLD_MEMMAP))
-+		return 0;
-+
- 	efi_scratch.efi_pgt = (pgd_t *)(unsigned long)real_mode_header->trampoline_pgd;
-+	pgd = __va(efi_scratch.efi_pgt);
+ /*
+@@ -178,7 +197,8 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+ 		st->current_prot = new_prot;
+ 		st->level = level;
+ 		st->marker = address_markers;
+-		seq_printf(m, "---[ %s ]---\n", st->marker->name);
++		pt_dump_seq_printf(m, st->to_dmesg, "---[ %s ]---\n",
++				   st->marker->name);
+ 	} else if (prot != cur || level != st->level ||
+ 		   st->current_address >= st->marker[1].start_address) {
+ 		const char *unit = units;
+@@ -188,17 +208,17 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+ 		/*
+ 		 * Now print the actual finished series
+ 		 */
+-		seq_printf(m, "0x%0*lx-0x%0*lx   ",
+-			   width, st->start_address,
+-			   width, st->current_address);
++		pt_dump_seq_printf(m, st->to_dmesg,  "0x%0*lx-0x%0*lx   ",
++				   width, st->start_address,
++				   width, st->current_address);
  
--	if (!efi_enabled(EFI_OLD_MEMMAP))
--		efi_scratch.use_pgd = true;
-+	/*
-+	 * It can happen that the physical address of new_memmap lands in memory
-+	 * which is not mapped in the EFI page table. Therefore we need to go
-+	 * and ident-map those pages containing the map before calling
-+	 * phys_efi_set_virtual_address_map().
-+	 */
-+	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
-+		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
-+		return 1;
+ 		delta = (st->current_address - st->start_address) >> 10;
+ 		while (!(delta & 1023) && unit[1]) {
+ 			delta >>= 10;
+ 			unit++;
+ 		}
+-		seq_printf(m, "%9lu%c ", delta, *unit);
+-		printk_prot(m, st->current_prot, st->level);
++		pt_dump_cont_printf(m, st->to_dmesg, "%9lu%c ", delta, *unit);
++		printk_prot(m, st->current_prot, st->level, st->to_dmesg);
+ 
+ 		/*
+ 		 * We print markers for special areas of address space,
+@@ -207,7 +227,8 @@ static void note_page(struct seq_file *m, struct pg_state *st,
+ 		 */
+ 		if (st->current_address >= st->marker[1].start_address) {
+ 			st->marker++;
+-			seq_printf(m, "---[ %s ]---\n", st->marker->name);
++			pt_dump_seq_printf(m, st->to_dmesg, "---[ %s ]---\n",
++					   st->marker->name);
+ 		}
+ 
+ 		st->start_address = st->current_address;
+@@ -296,7 +317,7 @@ static void walk_pud_level(struct seq_file *m, struct pg_state *st, pgd_t addr,
+ #define pgd_none(a)  pud_none(__pud(pgd_val(a)))
+ #endif
+ 
+-static void walk_pgd_level(struct seq_file *m)
++void ptdump_walk_pgd_level(struct seq_file *m, pgd_t *pgd)
+ {
+ #ifdef CONFIG_X86_64
+ 	pgd_t *start = (pgd_t *) &init_level4_pgt;
+@@ -304,9 +325,12 @@ static void walk_pgd_level(struct seq_file *m)
+ 	pgd_t *start = swapper_pg_dir;
+ #endif
+ 	int i;
+-	struct pg_state st;
++	struct pg_state st = {};
+ 
+-	memset(&st, 0, sizeof(st));
++	if (pgd) {
++		start = pgd;
++		st.to_dmesg = true;
 +	}
-+
-+	efi_scratch.use_pgd = true;
-+
-+
-+	return 0;
-+}
-+
-+void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+{
-+	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
-+
-+	kernel_unmap_pages_in_pgd(pgd, pa_memmap, num_pages);
+ 
+ 	for (i = 0; i < PTRS_PER_PGD; i++) {
+ 		st.current_address = normalize_addr(i * PGD_LEVEL_MULT);
+@@ -331,7 +355,7 @@ static void walk_pgd_level(struct seq_file *m)
+ 
+ static int ptdump_show(struct seq_file *m, void *v)
+ {
+-	walk_pgd_level(m);
++	ptdump_walk_pgd_level(m, NULL);
+ 	return 0;
  }
  
- static void __init __map_region(efi_memory_desc_t *md, u64 va)
 -- 
 1.8.5.2.192.g7794a68
