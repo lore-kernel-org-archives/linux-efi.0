@@ -1,35 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 5/5] efi: Split efi_enter_virtual_mode
-Date: Mon, 20 Jan 2014 14:48:16 +0000
-Message-ID: <20140120144816.GC684@console-pimps.org>
-References: <1390045698-16882-1-git-send-email-bp@alien8.de>
- <1390045698-16882-6-git-send-email-bp@alien8.de>
- <20140120134407.GB684@console-pimps.org>
- <20140120134625.GD3003@pd.tnic>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v4 0/4] kexec-tools: efi runtime support on kexec kernel
+Date: Tue, 21 Jan 2014 10:55:36 +0800
+Message-ID: <20140121025536.GA5544@dhcp-16-126.nay.redhat.com>
+References: <1387533947-18210-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140120134625.GD3003-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
+In-Reply-To: <1387533947-18210-1-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, toshi.kani-VXdhtT5mjnY@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 20 Jan, at 02:46:25PM, Borislav Petkov wrote:
-> On Mon, Jan 20, 2014 at 01:44:07PM +0000, Matt Fleming wrote:
-> > > +void __init kexec_enter_virtual_mode(void)
-> > > +{
-> > 
-> > Could this be static for now?
-> 
-> Didn't you wanna do arch/x86/platform/efi/kexec.c anyway?
+Hi, Simon
 
-Yes, but the patches are easier to review if we make
-kexec_enter_virtual_mode() global when moving it into a new file.
+The kernel patches has been merged into Linus tree, could you take a look
+at these kexec-tools patches and merge them if there's no more comments?
 
-Plus it makes this patch that little bit smaller because the
-modification to efi.h is unnecessary.
+Patch 4/4 was resended in a reply to original 4/4, the subject is:
+[PATCH v4 4/4 update] Passing efi related data via setup_data
+These patches has been tested by Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+If you need I resend them please let me know.
+
+Thanks
+Dave
