@@ -1,21 +1,32 @@
 From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [RFC][PATCH 3/3] ia64/efi: Implement efi_enabled()
-Date: Fri, 24 Jan 2014 18:46:39 +0000
-Message-ID: <3908561D78D1C84285E8C5FCA982C28F31DB855E@ORSMSX106.amr.corp.intel.com>
-References: <1389796136-23479-1-git-send-email-matt@console-pimps.org>
- <1389796136-23479-4-git-send-email-matt@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Subject: [PATCH] efi: Add newline to cper DIMM location messages
+Date: Fri, 24 Jan 2014 14:30:38 -0800
+Message-ID: <52e2e98e64494f92@agluck-desk.sc.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1389796136-23479-4-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Tony-hKmkhVXvusEnkhFzW7PF62O9nC1t1/YaHZ5vskTnxNA@public.gmane.org" <Tony-hKmkhVXvusEnkhFzW7PF62O9nC1t1/YaHZ5vskTnxNA@public.gmane.org>, "\"Luck <tony.luck\"@intel.com" <"Luck <tony.luck"@intel.com>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chen, Gong" <gong.chen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> There's no good reason to keep efi_enabled() under CONFIG_X86 anymore,
-> since nothing about the implementation is specific to x86.
+We forgot the newline at the end of two messages. Add it.
 
-Reviewed-and-tested-by: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+---
+
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 1491dd4f08f9..9f59f6ba271a 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -240,9 +240,9 @@ static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem)
+ 		const char *bank = NULL, *device = NULL;
+ 		dmi_memdev_name(mem->mem_dev_handle, &bank, &device);
+ 		if (bank != NULL && device != NULL)
+-			printk("%s""DIMM location: %s %s", pfx, bank, device);
++			printk("%s""DIMM location: %s %s\n", pfx, bank, device);
+ 		else
+-			printk("%s""DIMM DMI handle: 0x%.4x",
++			printk("%s""DIMM DMI handle: 0x%.4x\n",
+ 			       pfx, mem->mem_dev_handle);
+ 	}
+ }
