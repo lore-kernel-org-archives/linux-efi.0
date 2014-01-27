@@ -1,30 +1,38 @@
-From: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Subject: Re: [PATCH] efi: Add newline to cper DIMM location messages
-Date: Mon, 27 Jan 2014 11:25:14 -0800
-Message-ID: <CA+55aFwRE6DNoigx0xN7ZTc8dbCqHZdTopfwYOVuK_0vhZe0rw@mail.gmail.com>
+From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH] efi: Add newline to cper DIMM location messages
+Date: Mon, 27 Jan 2014 19:48:56 +0000
+Message-ID: <3908561D78D1C84285E8C5FCA982C28F31DBA1E0@ORSMSX106.amr.corp.intel.com>
 References: <52e6a8d812916d47b@agluck-desk.sc.intel.com>
+ <CA+55aFwRE6DNoigx0xN7ZTc8dbCqHZdTopfwYOVuK_0vhZe0rw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <52e6a8d812916d47b-E6Nu+q68HHTI/KE9syI0vLvm/XP+8Wra@public.gmane.org>
+In-Reply-To: <CA+55aFwRE6DNoigx0xN7ZTc8dbCqHZdTopfwYOVuK_0vhZe0rw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Chen, Gong" <gong.chen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Chen, Gong" <gong.chen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 27, 2014 at 10:43 AM, Luck, Tony <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> We forgot the newline at the end of two messages. Add it.
-
-So I don't think the patch is necessarily wrong, but does it actually matter?
-
-The thing is, unless the next printk is a continuation (PR_CONT), the
-newline should be added at that point. And if it isn't, then that's a
-bug. So I'm wondering how this issue got noticed - does it actually
-cause user-visible issues, or was it just code reading?
-
-Because I'm wondering if we eventually should start thinking of that
-final '\n' as pointless noise... The fact is, printk has different
-semantics from printf, and maybe we should start taking advantage of
-that rather than just slavishly follow tradition?
-
-               Linus
+PiBUaGUgdGhpbmcgaXMsIHVubGVzcyB0aGUgbmV4dCBwcmludGsgaXMgYSBjb250aW51YXRpb24g
+KFBSX0NPTlQpLCB0aGUNCj4gbmV3bGluZSBzaG91bGQgYmUgYWRkZWQgYXQgdGhhdCBwb2ludC4g
+QW5kIGlmIGl0IGlzbid0LCB0aGVuIHRoYXQncyBhDQo+IGJ1Zy4gU28gSSdtIHdvbmRlcmluZyBo
+b3cgdGhpcyBpc3N1ZSBnb3Qgbm90aWNlZCAtIGRvZXMgaXQgYWN0dWFsbHkNCj4gY2F1c2UgdXNl
+ci12aXNpYmxlIGlzc3Vlcywgb3Igd2FzIGl0IGp1c3QgY29kZSByZWFkaW5nPw0KDQpUaGUgbmV4
+dCB0aGluZyB0aGF0IGhhcHBlbmVkIHdhcyBhIGRlYnVnIHByaW50aygpIHRoYXQgZGlkbid0IGhh
+dmUNCmFueSBsb2cgbGV2ZWwgc3BlY2lmaWVkLg0KDQoJcHJpbnRrKCJDTUNJIG9uIGNwdSVkXG4i
+LCBzbXBfcHJvY2Vzc29yX2lkKCkpOw0KDQphbmQgbm8gbmV3bGluZSB3YXMgYWRkZWQuDQoNCj4g
+QmVjYXVzZSBJJ20gd29uZGVyaW5nIGlmIHdlIGV2ZW50dWFsbHkgc2hvdWxkIHN0YXJ0IHRoaW5r
+aW5nIG9mIHRoYXQNCj4gZmluYWwgJ1xuJyBhcyBwb2ludGxlc3Mgbm9pc2UuLi4gVGhlIGZhY3Qg
+aXMsIHByaW50ayBoYXMgZGlmZmVyZW50DQo+IHNlbWFudGljcyBmcm9tIHByaW50ZiwgYW5kIG1h
+eWJlIHdlIHNob3VsZCBzdGFydCB0YWtpbmcgYWR2YW50YWdlIG9mDQo+IHRoYXQgcmF0aGVyIHRo
+YW4ganVzdCBzbGF2aXNobHkgZm9sbG93IHRyYWRpdGlvbj8NCg0KT25jZSB0aGUgamFuaXRvcnMg
+aGF2ZSBlbGltaW5hdGVkIGFsbCB0aGUgcGxhY2VzIHdpdGhvdXQgYSBLRVJOX3NvbWV0aGluZywN
+CmFuZCBJIHRyYWluIG15IGZpbmdlcnMgdG8gcHV0IHRoYXQgaW4gZXZlbiBmb3IgdGhyb3dhd2F5
+IGRlYnVnZ2luZyBsaW5lcywNCnRoZW4gcGVyaGFwcyB0aGF0IHdpbGwgd29yay4gIE91dHB1dCB3
+aWxsIGxvb2sgYSBiaXQgb2RkIGlmIHlvdSBhcmUgd2F0Y2hpbmcNCnRoZSBzZXJpYWwgY29uc29s
+ZSBhcyB0aGUgbmV3bGluZXMgd2lsbCBiZSBkZWxheWVkLiAgSWYgc29tZSB1c2VyIGFwcGxpY2F0
+aW9uDQpzcGl0cyBvdXQgc29tZXRoaW5nIC0gdGhlbiB5b3Ugd2lsbCBhbHNvIHNlZSBjb25jYXRl
+bmF0ZWQgdGhpbmdzIChidXQganVtYmxlZA0KdXNlci9rZXJuZWwgb3V0cHV0IGlzIGhhcmQgdG8g
+YXZvaWQpLg0KDQotVG9ueQ0K
