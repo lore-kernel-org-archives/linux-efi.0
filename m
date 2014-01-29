@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [RFC][PATCH 09/11] x86/efi: Firmware agnostic handover entry points
-Date: Wed, 29 Jan 2014 16:23:55 +0000
-Message-ID: <1391012637-4839-10-git-send-email-matt@console-pimps.org>
+Subject: [RFC][PATCH 10/11] x86/efi: Add mixed runtime services support
+Date: Wed, 29 Jan 2014 16:23:56 +0000
+Message-ID: <1391012637-4839-11-git-send-email-matt@console-pimps.org>
 References: <1391012637-4839-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1391012637-4839-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,261 +12,673 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-The EFI handover code only works if the "bitness" of the firmware and
-the kernel match, i.e. 64-bit firmware and 64-bit kernel - it is not
-possible to mix the two. This goes against the tradition that a 32-bit
-kernel can be loaded on a 64-bit BIOS platform without having to do
-anything special in the boot loader. Linux distributions, for one thing,
-regularly run only 32-bit kernels on their live media.
+Setup the runtime services based on whether booting in EFI native mode
+or not. For non-native mode we need to thunk from 64-bit into 32-bit
+mode before invoking the EFI runtime services.
 
-Despite having only one 'handover_offset' field in the kernel header,
-EFI boot loaders use two separate entry points to enter the kernel based
-on the architecture the boot loader was compiled for,
-
-    (1) 32-bit loader: handover_offset
-    (2) 64-bit loader: handover_offset + 512
-
-Since we already have two entry points, we can leverage them to infer
-the bitness of the firmware we're running on, without requiring any boot
-loader modifications, by making (1) and (2) valid entry points for both
-CONFIG_X86_32 and CONFIG_X86_64 kernels.
-
-To be clear, a 32-bit boot loader will always use (1) and a 64-bit boot
-loader will always use (2). It's just that, if a single kernel image
-supports (1) and (2) that image can be used with both 32-bit and 64-bit
-boot loaders, and hence both 32-bit and 64-bit EFI.
-
-(1) and (2) must be 512 bytes apart at all times, but that is already
-part of the boot ABI and we could never change that delta without
-breaking existing boot loaders anyhow.
+Using the runtime services after SetVirtualAddressMap() is slightly more
+complicated because we need to ensure that all the addresses we pass to
+the firmware are below the 4GB boundary so that they can be addressed
+with 32-bit pointers, see efi_setup_page_tables().
 
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/boot/Makefile             |  2 +-
- arch/x86/boot/compressed/eboot.c   |  5 ++-
- arch/x86/boot/compressed/head_64.S | 69 +++++++++++++++++++++++++++++++++-----
- arch/x86/boot/tools/build.c        | 17 +++++++---
- arch/x86/include/asm/efi.h         |  6 ++--
- 5 files changed, 82 insertions(+), 17 deletions(-)
+ arch/x86/include/asm/efi.h        |  21 +++
+ arch/x86/platform/efi/Makefile    |   1 +
+ arch/x86/platform/efi/efi.c       | 126 ++++++++++-----
+ arch/x86/platform/efi/efi_64.c    | 328 +++++++++++++++++++++++++++++++++++++-
+ arch/x86/platform/efi/efi_thunk.S |  65 ++++++++
+ 5 files changed, 501 insertions(+), 40 deletions(-)
+ create mode 100644 arch/x86/platform/efi/efi_thunk.S
 
-diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
-index de7066918005..f1a32d077725 100644
---- a/arch/x86/boot/Makefile
-+++ b/arch/x86/boot/Makefile
-@@ -93,7 +93,7 @@ targets += voffset.h
- $(obj)/voffset.h: vmlinux FORCE
- 	$(call if_changed,voffset)
- 
--sed-zoffset := -e 's/^\([0-9a-fA-F]*\) . \(startup_32\|startup_64\|efi_pe_entry\|efi_stub_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
-+sed-zoffset := -e 's/^\([0-9a-fA-F]*\) . \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|efi_stub_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
- 
- quiet_cmd_zoffset = ZOFFSET $@
-       cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 4e428380bd56..c7e378eb38cd 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1077,6 +1077,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
- 	unsigned long map_sz, key, desc_size;
- 	efi_memory_desc_t *mem_map;
- 	struct setup_data *e820ext;
-+	const char *signature;
- 	__u32 e820ext_size;
- 	__u32 nr_desc, prev_nr_desc;
- 	efi_status_t status;
-@@ -1110,7 +1111,9 @@ get_map:
- 		goto get_map; /* Allocated memory, get map again */
- 	}
- 
--	memcpy(&efi->efi_loader_signature, EFI_LOADER_SIGNATURE, sizeof(__u32));
-+	signature = is64 ? EFI64_LOADER_SIGNATURE : EFI32_LOADER_SIGNATURE;
-+	memcpy(&efi->efi_loader_signature, signature, sizeof(__u32));
-+
- 	efi->efi_systab = (unsigned long)sys_table;
- 	efi->efi_memdesc_size = desc_size;
- 	efi->efi_memdesc_version = desc_version;
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 5e8e56f4d3f1..c112527a8900 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -178,6 +178,13 @@ ENTRY(startup_32)
- 	 */
- 	pushl	$__KERNEL_CS
- 	leal	startup_64(%ebp), %eax
-+#ifdef CONFIG_EFI_STUB
-+	movl	efi32_config(%ebp), %ebx
-+	cmp	$0, %ebx
-+	jz	1f
-+	leal	handover_entry(%ebp), %eax
-+1:
-+#endif
- 	pushl	%eax
- 
- 	/* Enter paged protected Mode, activating Long Mode */
-@@ -188,6 +195,30 @@ ENTRY(startup_32)
- 	lret
- ENDPROC(startup_32)
- 
-+#ifdef CONFIG_EFI_STUB
-+	.org 0x190
-+ENTRY(efi32_stub_entry)
-+	add	$0x4, %esp		/* Discard return address */
-+	popl	%ecx
-+	popl	%edx
-+	popl	%esi
-+
-+	leal	(BP_scratch+4)(%esi), %esp
-+	call	1f
-+1:	pop	%ebp
-+	subl	$1b, %ebp
-+
-+	movl	%ecx, efi32_config(%ebp)
-+	movl	%edx, efi32_config+8(%ebp)
-+	sgdtl	efi32_boot_gdt(%ebp)
-+
-+	leal	efi32_config(%ebp), %eax
-+	movl	%eax, efi_config(%ebp)
-+
-+	jmp	startup_32
-+ENDPROC(efi32_stub_entry)
-+#endif
-+
- 	.code64
- 	.org 0x200
- ENTRY(startup_64)
-@@ -231,13 +262,7 @@ ENTRY(efi_pe_entry)
- 	mov	%rax, %rsi
- 	jmp	2f		/* Skip the relocation */
- 
--ENTRY(efi_stub_entry)
--	movq	%rdx, efi64_config(%rip)	/* Handle */
--	movq	%rcx, efi64_config+8(%rip) /* EFI System table pointer */
--
--	leaq	efi64_config(%rip), %rax
--	movq	%rax, efi_config(%rip)
--
-+handover_entry:
- 	call	1f
- 1:	popq	%rbp
- 	subq	$1b, %rbp
-@@ -247,7 +272,6 @@ ENTRY(efi_stub_entry)
- 	 */
- 	movq	efi_config(%rip), %rax
- 	addq	%rbp, 88(%rax)
--	movq	%rdx, %rsi
- 2:
- 	movq	efi_config(%rip), %rdi
- 	call	efi_main
-@@ -336,6 +360,19 @@ preferred_addr:
- 	leaq	relocated(%rbx), %rax
- 	jmp	*%rax
- 
-+#ifdef CONFIG_EFI_STUB
-+	.org 0x390
-+ENTRY(efi64_stub_entry)
-+	movq	%rdx, efi64_config(%rip)
-+	movq	%rcx, efi64_config+8(%rip)
-+
-+	leaq	efi64_config(%rip), %rax
-+	movq	%rax, efi_config(%rip)
-+
-+	jmp	handover_entry
-+ENDPROC(efi64_stub_entry)
-+#endif
-+
- 	.text
- relocated:
- 
-@@ -405,6 +442,22 @@ gdt_end:
- efi_config:
- 	.quad	0
- 
-+	.global efi32_config
-+efi32_config:
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	0
-+	.quad	efi64_thunk
-+	.byte	0
-+
- 	.global efi64_config
- efi64_config:
- 	.quad	0
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index bf262077ec92..0483a8ef5ff0 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -54,6 +54,8 @@ int is_big_kernel;
- #define PECOFF_RELOC_RESERVE 0x20
- 
- unsigned long efi_stub_entry;
-+unsigned long efi32_stub_entry;
-+unsigned long efi64_stub_entry;
- unsigned long efi_pe_entry;
- unsigned long startup_64;
- 
-@@ -241,10 +243,15 @@ static void efi_stub_defaults(void)
- 
- static void efi_stub_entry_update(void)
- {
--#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
--	efi_stub_entry -= 0x200;
--#endif
--	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
-+	/* Don't worry about older kernels for now */
-+
-+	/* Yes, this is really how we defined it :( */
-+	efi64_stub_entry -= 0x200;
-+
-+	if (efi32_stub_entry != efi64_stub_entry)
-+		die("32-bit and 64-bit EFI entry points do not match\n");
-+
-+	put_unaligned_le32(efi32_stub_entry, &buf[0x264]);
- }
- 
- #else
-@@ -290,6 +297,8 @@ static void parse_zoffset(char *fname)
- 
- 	while (p && *p) {
- 		PARSE_ZOFS(p, efi_stub_entry);
-+		PARSE_ZOFS(p, efi32_stub_entry);
-+		PARSE_ZOFS(p, efi64_stub_entry);
- 		PARSE_ZOFS(p, efi_pe_entry);
- 		PARSE_ZOFS(p, startup_64);
- 
 diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index d3c099f53ff2..6647efb6c6e8 100644
+index 6647efb6c6e8..6b19282c6a33 100644
 --- a/arch/x86/include/asm/efi.h
 +++ b/arch/x86/include/asm/efi.h
-@@ -19,9 +19,11 @@
-  */
- #define EFI_OLD_MEMMAP		EFI_ARCH_1
+@@ -153,6 +153,27 @@ static inline bool efi_is_native(void)
  
-+#define EFI32_LOADER_SIGNATURE	"EL32"
-+#define EFI64_LOADER_SIGNATURE	"EL64"
+ extern struct console early_efi_console;
+ extern void parse_efi_setup(u64 phys_addr, u32 data_len);
 +
- #ifdef CONFIG_X86_32
++#ifdef CONFIG_EFI_MIXED
++extern void efi_thunk_runtime_setup(void);
++extern efi_status_t efi_thunk_set_virtual_address_map(
++	void *phys_set_virtual_address_map,
++	unsigned long memory_map_size,
++	unsigned long descriptor_size,
++	u32 descriptor_version,
++	efi_memory_desc_t *virtual_map);
++#else
++static inline void efi_thunk_runtime_setup(void) {}
++static inline efi_status_t efi_thunk_set_virtual_address_map(
++	void *phys_set_virtual_address_map,
++	unsigned long memory_map_size,
++	unsigned long descriptor_size,
++	u32 descriptor_version,
++	efi_memory_desc_t *virtual_map)
++{
++	return EFI_SUCCESS;
++}
++#endif /* CONFIG_EFI_MIXED */
+ #else
+ /*
+  * IF EFI is not configured, have the EFI calls return -ENOSYS.
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index b7b0b35c1981..bfe2dafed4a6 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -1,3 +1,4 @@
+ obj-$(CONFIG_EFI) 		+= efi.o efi_$(BITS).o efi_stub_$(BITS).o
+ obj-$(CONFIG_ACPI_BGRT) += efi-bgrt.o
+ obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
++obj-$(CONFIG_EFI_MIXED)		+= efi_thunk.o
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 5f623f3bcbba..ab415fe275ba 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -577,35 +577,64 @@ static int __init efi_systab_init(void *phys)
  
--#define EFI_LOADER_SIGNATURE	"EL32"
- 
- extern unsigned long asmlinkage efi_call_phys(void *, ...);
- 
-@@ -57,8 +59,6 @@ extern unsigned long asmlinkage efi_call_phys(void *, ...);
- 
- #else /* !CONFIG_X86_32 */
- 
--#define EFI_LOADER_SIGNATURE	"EL64"
+ static int __init efi_runtime_init(void)
+ {
+-	efi_runtime_services_t *runtime;
 -
- extern u64 efi_call0(void *fp);
- extern u64 efi_call1(void *fp, u64 arg1);
- extern u64 efi_call2(void *fp, u64 arg1, u64 arg2);
+ 	/*
+ 	 * Check out the runtime services table. We need to map
+ 	 * the runtime services table so that we can grab the physical
+ 	 * address of several of the EFI runtime functions, needed to
+ 	 * set the firmware into virtual mode.
+ 	 */
+-	runtime = early_ioremap((unsigned long)efi.systab->runtime,
+-				sizeof(efi_runtime_services_t));
+-	if (!runtime) {
+-		pr_err("Could not map the runtime service table!\n");
+-		return -ENOMEM;
++	if (efi_enabled(EFI_64BIT)) {
++		efi_runtime_services_64_t *runtime;
++
++		runtime = early_ioremap((unsigned long)efi.systab->runtime,
++				sizeof(efi_runtime_services_64_t));
++		if (!runtime) {
++			pr_err("Could not map the runtime service table!\n");
++			return -ENOMEM;
++		}
++
++		/*
++		 * We will only need *early* access to the following two
++		 * EFI runtime services before set_virtual_address_map
++		 * is invoked.
++		 */
++		efi_phys.get_time = (efi_get_time_t *)runtime->get_time;
++		efi_phys.set_virtual_address_map =
++				(efi_set_virtual_address_map_t *)
++				runtime->set_virtual_address_map;
++		/*
++		 * Make efi_get_time can be called before entering
++		 * virtual mode.
++		 */
++		efi.get_time = phys_efi_get_time;
++		early_iounmap(runtime, sizeof(efi_runtime_services_64_t));
++	} else {
++		efi_runtime_services_32_t *runtime;
++
++		runtime = early_ioremap((unsigned long)efi.systab->runtime,
++				sizeof(efi_runtime_services_32_t));
++		if (!runtime) {
++			pr_err("Could not map the runtime service table!\n");
++			return -ENOMEM;
++		}
++
++		/*
++		 * We will only need *early* access to the following two
++		 * EFI runtime services before set_virtual_address_map
++		 * is invoked.
++		 */
++		efi_phys.get_time = (efi_get_time_t *)
++				(unsigned long)runtime->get_time;
++		efi_phys.set_virtual_address_map =
++				(efi_set_virtual_address_map_t *)
++				(unsigned long)runtime->set_virtual_address_map;
++		/*
++		 * Make efi_get_time can be called before entering
++		 * virtual mode.
++		 */
++		efi.get_time = phys_efi_get_time;
++		early_iounmap(runtime, sizeof(efi_runtime_services_32_t));
+ 	}
+-	/*
+-	 * We will only need *early* access to the following
+-	 * two EFI runtime services before set_virtual_address_map
+-	 * is invoked.
+-	 */
+-	efi_phys.get_time = (efi_get_time_t *)runtime->get_time;
+-	efi_phys.set_virtual_address_map =
+-		(efi_set_virtual_address_map_t *)
+-		runtime->set_virtual_address_map;
+-	/*
+-	 * Make efi_get_time can be called before entering
+-	 * virtual mode.
+-	 */
+-	efi.get_time = phys_efi_get_time;
+-	early_iounmap(runtime, sizeof(efi_runtime_services_t));
+ 
+ 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 
+@@ -825,6 +854,22 @@ void __init old_map_region(efi_memory_desc_t *md)
+ 		       (unsigned long long)md->phys_addr);
+ }
+ 
++static void native_runtime_setup(void)
++{
++	efi.get_time = virt_efi_get_time;
++	efi.set_time = virt_efi_set_time;
++	efi.get_wakeup_time = virt_efi_get_wakeup_time;
++	efi.set_wakeup_time = virt_efi_set_wakeup_time;
++	efi.get_variable = virt_efi_get_variable;
++	efi.get_next_variable = virt_efi_get_next_variable;
++	efi.set_variable = virt_efi_set_variable;
++	efi.get_next_high_mono_count = virt_efi_get_next_high_mono_count;
++	efi.reset_system = virt_efi_reset_system;
++	efi.query_variable_info = virt_efi_query_variable_info;
++	efi.update_capsule = virt_efi_update_capsule;
++	efi.query_capsule_caps = virt_efi_query_capsule_caps;
++}
++
+ /* Merge contiguous regions of the same type and attribute */
+ static void __init efi_merge_regions(void)
+ {
+@@ -1071,11 +1116,20 @@ static void __init __efi_enter_virtual_mode(void)
+ 	efi_sync_low_kernel_mappings();
+ 	efi_dump_pagetable();
+ 
+-	status = phys_efi_set_virtual_address_map(
+-			memmap.desc_size * count,
+-			memmap.desc_size,
+-			memmap.desc_version,
+-			(efi_memory_desc_t *)__pa(new_memmap));
++	if (efi_is_native()) {
++		status = phys_efi_set_virtual_address_map(
++				memmap.desc_size * count,
++				memmap.desc_size,
++				memmap.desc_version,
++				(efi_memory_desc_t *)__pa(new_memmap));
++	} else {
++		status = efi_thunk_set_virtual_address_map(
++				efi_phys.set_virtual_address_map,
++				memmap.desc_size * count,
++				memmap.desc_size,
++				memmap.desc_version,
++				(efi_memory_desc_t *)__pa(new_memmap));
++	}
+ 
+ 	if (status != EFI_SUCCESS) {
+ 		pr_alert("Unable to switch EFI into virtual mode (status=%lx)!\n",
+@@ -1090,19 +1144,13 @@ static void __init __efi_enter_virtual_mode(void)
+ 	 * Call EFI services through wrapper functions.
+ 	 */
+ 	efi.runtime_version = efi_systab.hdr.revision;
+-	efi.get_time = virt_efi_get_time;
+-	efi.set_time = virt_efi_set_time;
+-	efi.get_wakeup_time = virt_efi_get_wakeup_time;
+-	efi.set_wakeup_time = virt_efi_set_wakeup_time;
+-	efi.get_variable = virt_efi_get_variable;
+-	efi.get_next_variable = virt_efi_get_next_variable;
+-	efi.set_variable = virt_efi_set_variable;
+-	efi.get_next_high_mono_count = virt_efi_get_next_high_mono_count;
+-	efi.reset_system = virt_efi_reset_system;
++
++	if (efi_is_native())
++		native_runtime_setup();
++	else
++		efi_thunk_runtime_setup();
++
+ 	efi.set_virtual_address_map = NULL;
+-	efi.query_variable_info = virt_efi_query_variable_info;
+-	efi.update_capsule = virt_efi_update_capsule;
+-	efi.query_capsule_caps = virt_efi_query_capsule_caps;
+ 
+ 	if (efi_enabled(EFI_OLD_MEMMAP) && (__supported_pte_mask & _PAGE_NX))
+ 		runtime_code_page_mkexec();
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 0998f3a536ff..5a73ba1d49f3 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -39,6 +39,7 @@
+ #include <asm/cacheflush.h>
+ #include <asm/fixmap.h>
+ #include <asm/realmode.h>
++#include <asm/time.h>
+ 
+ static pgd_t *save_pgd __initdata;
+ static unsigned long efi_flags __initdata;
+@@ -58,7 +59,8 @@ struct efi_scratch {
+ 	u64 prev_cr3;
+ 	pgd_t *efi_pgt;
+ 	bool use_pgd;
+-};
++	u64 phys_sp;
++} __packed;
+ 
+ static void __init early_code_mapping_set_exec(int executable)
+ {
+@@ -139,6 +141,9 @@ void efi_sync_low_kernel_mappings(void)
+ 
+ int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
++	unsigned long text;
++	unsigned npages;
++	struct page *page;
+ 	pgd_t *pgd;
+ 
+ 	if (efi_enabled(EFI_OLD_MEMMAP))
+@@ -160,6 +165,30 @@ int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 
+ 	efi_scratch.use_pgd = true;
+ 
++	/*
++	 * When making calls to the firmware everything needs to be 1:1
++	 * mapped and addressable with 32-bit pointers. Map the kernel
++	 * text and allocate a new stack because we can't rely on the
++	 * stack pointer being < 4GB.
++	 */
++	if (!IS_ENABLED(CONFIG_EFI_MIXED))
++		return 0;
++
++	page = alloc_page(GFP_KERNEL|__GFP_DMA32);
++	if (!page)
++		panic("Unable to allocate EFI runtime stack < 4GB\n");
++
++	efi_scratch.phys_sp = virt_to_phys(page_address(page));
++	efi_scratch.phys_sp += PAGE_SIZE; /* stack grows down */
++
++	npages = (_end - _text) >> PAGE_SHIFT;
++	text = __pa(_text);
++
++	if (kernel_map_pages_in_pgd(__va(efi_scratch.efi_pgt),
++				    text >> PAGE_SHIFT, text, npages, 0)) {
++		pr_err("Failed to map kernel text 1:1\n");
++		return 1;
++	}
+ 
+ 	return 0;
+ }
+@@ -199,6 +228,16 @@ void __init efi_map_region(efi_memory_desc_t *md)
+ 	 */
+ 	__map_region(md, md->phys_addr);
+ 
++	/*
++	 * Enforce the 1:1 mapping as the default virtual address when
++	 * booting in EFI mixed mode, because even though we may be
++	 * running a 64-bit kernel, the firmware may only be 32-bit.
++	 */
++	if (!efi_is_native () && IS_ENABLED(CONFIG_EFI_MIXED)) {
++		md->virt_addr = md->phys_addr;
++		return;
++	}
++
+ 	efi_va -= size;
+ 
+ 	/* Is PA 2M-aligned? */
+@@ -268,3 +307,290 @@ void __init efi_dump_pagetable(void)
+ 	ptdump_walk_pgd_level(NULL, pgd);
+ #endif
+ }
++
++#ifdef CONFIG_EFI_MIXED
++extern efi_status_t efi64_thunk(u32, ...);
++
++#define runtime_service32(func)						 \
++({									 \
++	u32 table = (u32)(unsigned long)efi.systab;			 \
++	u32 *rt, *___f;							 \
++									 \
++	rt = (u32 *)(table + offsetof(efi_system_table_32_t, runtime));	 \
++	___f = (u32 *)(*rt + offsetof(efi_runtime_services_32_t, func)); \
++	*___f;								 \
++})
++
++/*
++ * Switch to the EFI page tables early so that we can access the 1:1
++ * runtime services mappings which are not mapped in any other page
++ * tables. This function must be called before runtime_service32().
++ *
++ * Also, disable interrupts because the IDT points to 64-bit handlers,
++ * which aren't going to function correctly when we switch to 32-bit.
++ */
++#define efi_thunk(f, ...)						\
++({									\
++	efi_status_t __s;						\
++	unsigned long flags;						\
++	u32 func;							\
++									\
++	efi_sync_low_kernel_mappings();					\
++	local_irq_save(flags);						\
++									\
++	efi_scratch.prev_cr3 = read_cr3();				\
++	write_cr3((unsigned long)efi_scratch.efi_pgt);			\
++	__flush_tlb_all();						\
++									\
++	func = runtime_service32(f);					\
++	__s = efi64_thunk(func, __VA_ARGS__);			\
++									\
++	write_cr3(efi_scratch.prev_cr3);				\
++	__flush_tlb_all();						\
++	local_irq_restore(flags);					\
++									\
++	__s;								\
++})
++
++efi_status_t efi_thunk_set_virtual_address_map(
++	void *phys_set_virtual_address_map,
++	unsigned long memory_map_size,
++	unsigned long descriptor_size,
++	u32 descriptor_version,
++	efi_memory_desc_t *virtual_map)
++{
++	efi_status_t status;
++	unsigned long flags;
++	u32 func;
++
++	efi_sync_low_kernel_mappings();
++	local_irq_save(flags);
++
++	efi_scratch.prev_cr3 = read_cr3();
++	write_cr3((unsigned long)efi_scratch.efi_pgt);
++	__flush_tlb_all();
++
++	func = (u32)(unsigned long)phys_set_virtual_address_map;
++	status = efi64_thunk(func, memory_map_size, descriptor_size,
++			     descriptor_version, virtual_map);
++
++	write_cr3(efi_scratch.prev_cr3);
++	__flush_tlb_all();
++	local_irq_restore(flags);
++
++	return status;
++}
++
++static efi_status_t efi_thunk_get_time(efi_time_t *tm, efi_time_cap_t *tc)
++{
++	efi_status_t status;
++	u32 phys_tm, phys_tc;
++
++	spin_lock(&rtc_lock);
++
++	phys_tm = virt_to_phys(tm);
++	phys_tc = virt_to_phys(tc);
++
++	status = efi_thunk(get_time, phys_tm, phys_tc);
++
++	spin_unlock(&rtc_lock);
++
++	return status;
++}
++
++static efi_status_t efi_thunk_set_time(efi_time_t *tm)
++{
++	efi_status_t status;
++	u32 phys_tm;
++
++	spin_lock(&rtc_lock);
++
++	phys_tm = virt_to_phys(tm);
++
++	status = efi_thunk(set_time, phys_tm);
++
++	spin_unlock(&rtc_lock);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_get_wakeup_time(efi_bool_t *enabled, efi_bool_t *pending,
++			  efi_time_t *tm)
++{
++	efi_status_t status;
++	u32 phys_enabled, phys_pending, phys_tm;
++
++	spin_lock(&rtc_lock);
++
++	phys_enabled = virt_to_phys(enabled);
++	phys_pending = virt_to_phys(pending);
++	phys_tm = virt_to_phys(tm);
++
++	status = efi_thunk(get_wakeup_time, phys_enabled,
++			     phys_pending, phys_tm);
++
++	spin_unlock(&rtc_lock);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
++{
++	efi_status_t status;
++	u32 phys_tm;
++
++	spin_lock(&rtc_lock);
++
++	phys_tm = virt_to_phys(tm);
++
++	status = efi_thunk(set_wakeup_time, enabled, phys_tm);
++
++	spin_unlock(&rtc_lock);
++
++	return status;
++}
++
++
++static efi_status_t
++efi_thunk_get_variable(efi_char16_t *name, efi_guid_t *vendor,
++		       u32 *attr, unsigned long *data_size, void *data)
++{
++	efi_status_t status;
++	u32 phys_name, phys_vendor, phys_attr;
++	u32 phys_data_size, phys_data;
++
++	phys_data_size = virt_to_phys(data_size);
++	phys_vendor = virt_to_phys(vendor);
++	phys_name = virt_to_phys(name);
++	phys_attr = virt_to_phys(attr);
++	phys_data = virt_to_phys(data);
++
++	status = efi_thunk(get_variable, phys_name, phys_vendor,
++			   phys_attr, phys_data_size, phys_data);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_set_variable(efi_char16_t *name, efi_guid_t *vendor,
++		       u32 attr, unsigned long data_size, void *data)
++{
++	u32 phys_name, phys_vendor, phys_data;
++	efi_status_t status;
++
++	phys_name = virt_to_phys(name);
++	phys_vendor = virt_to_phys(vendor);
++	phys_data = virt_to_phys(data);
++
++	/* If data_size is > sizeof(u32) we've got problems */
++	status = efi_thunk(set_variable, phys_name, phys_vendor,
++			   attr, data_size, phys_data);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_get_next_variable(unsigned long *name_size,
++			    efi_char16_t *name,
++			    efi_guid_t *vendor)
++{
++	efi_status_t status;
++	u32 phys_name_size, phys_name, phys_vendor;
++
++	phys_name_size = virt_to_phys(name_size);
++	phys_vendor = virt_to_phys(vendor);
++	phys_name = virt_to_phys(name);
++
++	status = efi_thunk(get_next_variable, phys_name_size,
++			   phys_name, phys_vendor);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_get_next_high_mono_count(u32 *count)
++{
++	efi_status_t status;
++	u32 phys_count;
++
++	phys_count = virt_to_phys(count);
++	status = efi_thunk(get_next_high_mono_count, phys_count);
++
++	return status;
++}
++
++static void
++efi_thunk_reset_system(int reset_type, efi_status_t status,
++		       unsigned long data_size, efi_char16_t *data)
++{
++	u32 phys_data;
++
++	phys_data = virt_to_phys(data);
++
++	efi_thunk(reset_system, reset_type, status, data_size, phys_data);
++}
++
++static efi_status_t
++efi_thunk_update_capsule(efi_capsule_header_t **capsules,
++			 unsigned long count, unsigned long sg_list)
++{
++	/*
++	 * To properly support this function we would need to repackage
++	 * 'capsules' because the firmware doesn't understand 64-bit
++	 * pointers.
++	 */
++	return EFI_UNSUPPORTED;
++}
++
++static efi_status_t
++efi_thunk_query_variable_info(u32 attr, u64 *storage_space,
++			      u64 *remaining_space,
++			      u64 *max_variable_size)
++{
++	efi_status_t status;
++	u32 phys_storage, phys_remaining, phys_max;
++
++	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
++		return EFI_UNSUPPORTED;
++
++	phys_storage = virt_to_phys(storage_space);
++	phys_remaining = virt_to_phys(remaining_space);
++	phys_max = virt_to_phys(max_variable_size);
++
++	status = efi_thunk(query_variable_info, phys_storage,
++			   phys_remaining, phys_max);
++
++	return status;
++}
++
++static efi_status_t
++efi_thunk_query_capsule_caps(efi_capsule_header_t **capsules,
++			     unsigned long count, u64 *max_size,
++			     int *reset_type)
++{
++	/*
++	 * To properly support this function we would need to repackage
++	 * 'capsules' because the firmware doesn't understand 64-bit
++	 * pointers.
++	 */
++	return EFI_UNSUPPORTED;
++}
++
++void efi_thunk_runtime_setup(void)
++{
++	efi.get_time = efi_thunk_get_time;
++	efi.set_time = efi_thunk_set_time;
++	efi.get_wakeup_time = efi_thunk_get_wakeup_time;
++	efi.set_wakeup_time = efi_thunk_set_wakeup_time;
++	efi.get_variable = efi_thunk_get_variable;
++	efi.get_next_variable = efi_thunk_get_next_variable;
++	efi.set_variable = efi_thunk_set_variable;
++	efi.get_next_high_mono_count = efi_thunk_get_next_high_mono_count;
++	efi.reset_system = efi_thunk_reset_system;
++	efi.query_variable_info = efi_thunk_query_variable_info;
++	efi.update_capsule = efi_thunk_update_capsule;
++	efi.query_capsule_caps = efi_thunk_query_capsule_caps;
++}
++#endif /* CONFIG_EFI_MIXED */
+diff --git a/arch/x86/platform/efi/efi_thunk.S b/arch/x86/platform/efi/efi_thunk.S
+new file mode 100644
+index 000000000000..8806fa73e6e6
+--- /dev/null
++++ b/arch/x86/platform/efi/efi_thunk.S
+@@ -0,0 +1,65 @@
++/*
++ * Copyright (C) 2014 Intel Corporation; author Matt Fleming
++ */
++
++#include <linux/linkage.h>
++#include <asm/page_types.h>
++
++	.text
++	.code64
++ENTRY(efi64_thunk)
++	push	%rbp
++	push	%rbx
++
++	/*
++	 * Switch to 1:1 mapped 32-bit stack pointer.
++	 */
++	movq	%rsp, efi_saved_sp(%rip)
++	movq	efi_scratch+25(%rip), %rsp
++
++	/*
++	 * Calculate the physical address of the kernel text.
++	 */
++	movq	$__START_KERNEL_map, %rax
++	subq	phys_base(%rip), %rax
++
++	/*
++	 * Push some physical addresses onto the stack. This is easier
++	 * to do now in a code64 section while the assembler can address
++	 * 64-bit values. Note that all the addresses on the stack are
++	 * 32-bit.
++	 */
++	subq	$16, %rsp
++	leaq	efi_exit32(%rip), %rbx
++	subq	%rax, %rbx
++	movl	%ebx, 8(%rsp)
++	leaq	efi_gdt64(%rip), %rbx
++	subq	%rax, %rbx
++	movl	%ebx, 2(%ebx)
++	movl	%ebx, 4(%rsp)
++	leaq	efi_gdt32(%rip), %rbx
++	subq	%rax, %rbx
++	movl	%ebx, 2(%ebx)
++	movl	%ebx, (%rsp)
++
++	leaq	__efi64_thunk(%rip), %rbx
++	subq	%rax, %rbx
++	call	*%rbx
++
++	movq	efi_saved_sp(%rip), %rsp
++	pop	%rbx
++	pop	%rbp
++	retq
++ENDPROC(efi64_thunk)
++
++	.data
++efi_gdt32:
++	.word 	efi_gdt32_end - efi_gdt32
++	.long	0			/* Filled out above */
++	.word	0
++	.quad	0x0000000000000000	/* NULL descriptor */
++	.quad	0x00cf9a000000ffff	/* __KERNEL_CS */
++	.quad	0x00cf93000000ffff	/* __KERNEL_DS */
++efi_gdt32_end:
++
++efi_saved_sp:		.quad 0
 -- 
 1.8.3.1
