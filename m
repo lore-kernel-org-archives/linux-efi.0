@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [RFC][PATCH 08/11] x86/efi: Split the boot stub into 32/64 code paths
-Date: Wed, 29 Jan 2014 16:23:54 +0000
-Message-ID: <1391012637-4839-9-git-send-email-matt@console-pimps.org>
+Subject: [RFC][PATCH 09/11] x86/efi: Firmware agnostic handover entry points
+Date: Wed, 29 Jan 2014 16:23:55 +0000
+Message-ID: <1391012637-4839-10-git-send-email-matt@console-pimps.org>
 References: <1391012637-4839-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1391012637-4839-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,507 +12,261 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Make the decision which code path to take at runtime based on
-efi_early->is64.
+The EFI handover code only works if the "bitness" of the firmware and
+the kernel match, i.e. 64-bit firmware and 64-bit kernel - it is not
+possible to mix the two. This goes against the tradition that a 32-bit
+kernel can be loaded on a 64-bit BIOS platform without having to do
+anything special in the boot loader. Linux distributions, for one thing,
+regularly run only 32-bit kernels on their live media.
+
+Despite having only one 'handover_offset' field in the kernel header,
+EFI boot loaders use two separate entry points to enter the kernel based
+on the architecture the boot loader was compiled for,
+
+    (1) 32-bit loader: handover_offset
+    (2) 64-bit loader: handover_offset + 512
+
+Since we already have two entry points, we can leverage them to infer
+the bitness of the firmware we're running on, without requiring any boot
+loader modifications, by making (1) and (2) valid entry points for both
+CONFIG_X86_32 and CONFIG_X86_64 kernels.
+
+To be clear, a 32-bit boot loader will always use (1) and a 64-bit boot
+loader will always use (2). It's just that, if a single kernel image
+supports (1) and (2) that image can be used with both 32-bit and 64-bit
+boot loaders, and hence both 32-bit and 64-bit EFI.
+
+(1) and (2) must be 512 bytes apart at all times, but that is already
+part of the boot ABI and we could never change that delta without
+breaking existing boot loaders anyhow.
 
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.c | 398 +++++++++++++++++++++++++++++++--------
- 1 file changed, 323 insertions(+), 75 deletions(-)
+ arch/x86/boot/Makefile             |  2 +-
+ arch/x86/boot/compressed/eboot.c   |  5 ++-
+ arch/x86/boot/compressed/head_64.S | 69 +++++++++++++++++++++++++++++++++-----
+ arch/x86/boot/tools/build.c        | 17 +++++++---
+ arch/x86/include/asm/efi.h         |  6 ++--
+ 5 files changed, 82 insertions(+), 17 deletions(-)
 
+diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
+index de7066918005..f1a32d077725 100644
+--- a/arch/x86/boot/Makefile
++++ b/arch/x86/boot/Makefile
+@@ -93,7 +93,7 @@ targets += voffset.h
+ $(obj)/voffset.h: vmlinux FORCE
+ 	$(call if_changed,voffset)
+ 
+-sed-zoffset := -e 's/^\([0-9a-fA-F]*\) . \(startup_32\|startup_64\|efi_pe_entry\|efi_stub_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
++sed-zoffset := -e 's/^\([0-9a-fA-F]*\) . \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|efi_stub_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
+ 
+ quiet_cmd_zoffset = ZOFFSET $@
+       cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
 diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 9eff6cd473b7..4e428380bd56 100644
+index 4e428380bd56..c7e378eb38cd 100644
 --- a/arch/x86/boot/compressed/eboot.c
 +++ b/arch/x86/boot/compressed/eboot.c
-@@ -75,10 +75,10 @@ static void efi_printk(efi_system_table_t *, char *);
- static void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
- 
- static efi_status_t
--efi_file_size(efi_system_table_t *sys_table, void *__fh,
--	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
-+__file_size32(void *__fh, efi_char16_t *filename_16,
-+	      void **handle, u64 *file_sz)
- {
--	efi_file_handle_t *h, *fh = __fh;
-+	efi_file_handle_32_t *h, *fh = __fh;
- 	efi_file_info_t *info;
+@@ -1077,6 +1077,7 @@ static efi_status_t exit_boot(struct boot_params *boot_params,
+ 	unsigned long map_sz, key, desc_size;
+ 	efi_memory_desc_t *mem_map;
+ 	struct setup_data *e820ext;
++	const char *signature;
+ 	__u32 e820ext_size;
+ 	__u32 nr_desc, prev_nr_desc;
  	efi_status_t status;
- 	efi_guid_t info_guid = EFI_FILE_INFO_ID;
-@@ -127,30 +127,134 @@ grow:
- 	return status;
- }
+@@ -1110,7 +1111,9 @@ get_map:
+ 		goto get_map; /* Allocated memory, get map again */
+ 	}
  
-+static efi_status_t
-+__file_size64(void *__fh, efi_char16_t *filename_16,
-+	      void **handle, u64 *file_sz)
-+{
-+	efi_file_handle_64_t *h, *fh = __fh;
-+	efi_file_info_t *info;
-+	efi_status_t status;
-+	efi_guid_t info_guid = EFI_FILE_INFO_ID;
-+	u32 info_sz;
+-	memcpy(&efi->efi_loader_signature, EFI_LOADER_SIGNATURE, sizeof(__u32));
++	signature = is64 ? EFI64_LOADER_SIGNATURE : EFI32_LOADER_SIGNATURE;
++	memcpy(&efi->efi_loader_signature, signature, sizeof(__u32));
 +
-+	status = efi_early->call((unsigned long)fh->open, fh, &h, filename_16,
-+				 EFI_FILE_MODE_READ, (u64)0);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table, "Failed to open file: ");
-+		efi_char16_printk(sys_table, filename_16);
-+		efi_printk(sys_table, "\n");
-+		return status;
-+	}
+ 	efi->efi_systab = (unsigned long)sys_table;
+ 	efi->efi_memdesc_size = desc_size;
+ 	efi->efi_memdesc_version = desc_version;
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 5e8e56f4d3f1..c112527a8900 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -178,6 +178,13 @@ ENTRY(startup_32)
+ 	 */
+ 	pushl	$__KERNEL_CS
+ 	leal	startup_64(%ebp), %eax
++#ifdef CONFIG_EFI_STUB
++	movl	efi32_config(%ebp), %ebx
++	cmp	$0, %ebx
++	jz	1f
++	leal	handover_entry(%ebp), %eax
++1:
++#endif
+ 	pushl	%eax
+ 
+ 	/* Enter paged protected Mode, activating Long Mode */
+@@ -188,6 +195,30 @@ ENTRY(startup_32)
+ 	lret
+ ENDPROC(startup_32)
+ 
++#ifdef CONFIG_EFI_STUB
++	.org 0x190
++ENTRY(efi32_stub_entry)
++	add	$0x4, %esp		/* Discard return address */
++	popl	%ecx
++	popl	%edx
++	popl	%esi
 +
-+	*handle = h;
++	leal	(BP_scratch+4)(%esi), %esp
++	call	1f
++1:	pop	%ebp
++	subl	$1b, %ebp
 +
-+	info_sz = 0;
-+	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
-+				 &info_sz, NULL);
-+	if (status != EFI_BUFFER_TOO_SMALL) {
-+		efi_printk(sys_table, "Failed to get file info size\n");
-+		return status;
-+	}
++	movl	%ecx, efi32_config(%ebp)
++	movl	%edx, efi32_config+8(%ebp)
++	sgdtl	efi32_boot_gdt(%ebp)
 +
-+grow:
-+	status = efi_early->call(efi_early->allocate_pool, EFI_LOADER_DATA,
-+				 info_sz, (void **)&info);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table, "Failed to alloc mem for file info\n");
-+		return status;
-+	}
++	leal	efi32_config(%ebp), %eax
++	movl	%eax, efi_config(%ebp)
 +
-+	status = efi_early->call((unsigned long)h->get_info, h, &info_guid,
-+				 &info_sz, info);
-+	if (status == EFI_BUFFER_TOO_SMALL) {
-+		efi_early->call(efi_early->free_pool, info);
-+		return status;
-+	}
++	jmp	startup_32
++ENDPROC(efi32_stub_entry)
++#endif
 +
-+	*file_sz = info->file_size;
-+	efi_early->call(efi_early->free_pool, info);
+ 	.code64
+ 	.org 0x200
+ ENTRY(startup_64)
+@@ -231,13 +262,7 @@ ENTRY(efi_pe_entry)
+ 	mov	%rax, %rsi
+ 	jmp	2f		/* Skip the relocation */
+ 
+-ENTRY(efi_stub_entry)
+-	movq	%rdx, efi64_config(%rip)	/* Handle */
+-	movq	%rcx, efi64_config+8(%rip) /* EFI System table pointer */
+-
+-	leaq	efi64_config(%rip), %rax
+-	movq	%rax, efi_config(%rip)
+-
++handover_entry:
+ 	call	1f
+ 1:	popq	%rbp
+ 	subq	$1b, %rbp
+@@ -247,7 +272,6 @@ ENTRY(efi_stub_entry)
+ 	 */
+ 	movq	efi_config(%rip), %rax
+ 	addq	%rbp, 88(%rax)
+-	movq	%rdx, %rsi
+ 2:
+ 	movq	efi_config(%rip), %rdi
+ 	call	efi_main
+@@ -336,6 +360,19 @@ preferred_addr:
+ 	leaq	relocated(%rbx), %rax
+ 	jmp	*%rax
+ 
++#ifdef CONFIG_EFI_STUB
++	.org 0x390
++ENTRY(efi64_stub_entry)
++	movq	%rdx, efi64_config(%rip)
++	movq	%rcx, efi64_config+8(%rip)
 +
-+	if (status != EFI_SUCCESS)
-+		efi_printk(sys_table, "Failed to get initrd info\n");
++	leaq	efi64_config(%rip), %rax
++	movq	%rax, efi_config(%rip)
 +
-+	return status;
-+}
-+static efi_status_t
-+efi_file_size(efi_system_table_t *sys_table, void *__fh,
-+	      efi_char16_t *filename_16, void **handle, u64 *file_sz)
-+{
-+	if (efi_early->is64)
-+		return __file_size64(__fh, filename_16, handle, file_sz);
++	jmp	handover_entry
++ENDPROC(efi64_stub_entry)
++#endif
 +
-+	return __file_size32(__fh, filename_16, handle, file_sz);
-+}
+ 	.text
+ relocated:
+ 
+@@ -405,6 +442,22 @@ gdt_end:
+ efi_config:
+ 	.quad	0
+ 
++	.global efi32_config
++efi32_config:
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	0
++	.quad	efi64_thunk
++	.byte	0
 +
- static inline efi_status_t
- efi_file_read(void *__fh, void *handle, unsigned long *size, void *addr)
+ 	.global efi64_config
+ efi64_config:
+ 	.quad	0
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index bf262077ec92..0483a8ef5ff0 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -54,6 +54,8 @@ int is_big_kernel;
+ #define PECOFF_RELOC_RESERVE 0x20
+ 
+ unsigned long efi_stub_entry;
++unsigned long efi32_stub_entry;
++unsigned long efi64_stub_entry;
+ unsigned long efi_pe_entry;
+ unsigned long startup_64;
+ 
+@@ -241,10 +243,15 @@ static void efi_stub_defaults(void)
+ 
+ static void efi_stub_entry_update(void)
  {
--	efi_file_handle_t *fh = __fh;
--	return efi_early->call((unsigned long)fh->read, fh, handle, size, addr);
-+	unsigned long func;
-+
-+	if (efi_early->is64) {
-+		efi_file_handle_64_t *fh = __fh;
-+
-+		func = (unsigned long)fh->read;
-+		return efi_early->call(func, fh, handle, size, addr);
-+	} else {
-+		efi_file_handle_32_t *fh = __fh;
-+
-+		func = (unsigned long)fh->read;
-+		return efi_early->call(func, fh, handle, size, addr);
-+	}
- }
- 
- static inline efi_status_t efi_file_close(void *__fh, void *handle)
- {
--	efi_file_handle_t *fh = __fh;
-+	if (efi_early->is64) {
-+		efi_file_handle_64_t *fh = __fh;
-+
-+		return efi_early->call((unsigned long)fh->close, handle);
-+	} else {
-+		efi_file_handle_32_t *fh = __fh;
- 
--	return efi_early->call((unsigned long)fh->close, handle);
-+		return efi_early->call((unsigned long)fh->close, handle);
-+	}
- }
- 
--static inline efi_status_t
--efi_open_volume(efi_system_table_t *sys_table, void *__image, void **__fh)
-+static inline efi_status_t __open_volume32(void *__image, void **__fh)
-+{
-+	efi_file_io_interface_t *io;
-+	efi_loaded_image_32_t *image = __image;
-+	efi_file_handle_32_t *fh;
-+	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
-+	efi_status_t status;
-+	void *handle = (void *)(unsigned long)image->device_handle;
-+	unsigned long func;
-+
-+	status = efi_early->call(efi_early->handle_protocol, handle,
-+				 &fs_proto, (void **)&io);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table, "Failed to handle fs_proto\n");
-+		return status;
-+	}
-+
-+	func = (unsigned long)io->open_volume;
-+	status = efi_early->call(func, io, &fh);
-+	if (status != EFI_SUCCESS)
-+		efi_printk(sys_table, "Failed to open volume\n");
-+
-+	*__fh = fh;
-+	return status;
-+}
-+
-+static inline efi_status_t __open_volume64(void *__image, void **__fh)
- {
- 	efi_file_io_interface_t *io;
--	efi_loaded_image_t *image = __image;
--	efi_file_handle_t *fh;
-+	efi_loaded_image_64_t *image = __image;
-+	efi_file_handle_64_t *fh;
- 	efi_guid_t fs_proto = EFI_FILE_SYSTEM_GUID;
- 	efi_status_t status;
- 	void *handle = (void *)(unsigned long)image->device_handle;
--	u32 func;
-+	unsigned long func;
- 
- 	status = efi_early->call(efi_early->handle_protocol, handle,
- 				 &fs_proto, (void **)&io);
-@@ -168,19 +272,39 @@ efi_open_volume(efi_system_table_t *sys_table, void *__image, void **__fh)
- 	return status;
- }
- 
--static inline void
--efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
-+static inline efi_status_t
-+efi_open_volume(efi_system_table_t *sys_table, void *__image, void **__fh)
-+{
-+	if (efi_early->is64)
-+		return __open_volume64(__image, __fh);
-+
-+	return __open_volume32(__image, __fh);
-+}
-+
-+static void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- {
--	struct efi_simple_text_output_protocol *out;
- 	unsigned long output_string;
- 	size_t offset;
--	unsigned long *func;
- 
--	offset = offsetof(typeof(*out), output_string);
--	output_string = efi_early->text_output + offset;
--	func = (unsigned long *)output_string;
-+	if (efi_early->is64) {
-+		struct efi_simple_text_output_protocol_64 *out;
-+		u64 *func;
-+
-+		offset = offsetof(typeof(*out), output_string);
-+		output_string = efi_early->text_output + offset;
-+		func = (u64 *)output_string;
- 
--	efi_early->call(*func, efi_early->text_output, str);
-+		efi_early->call(*func, efi_early->text_output, str);
-+	} else {
-+		struct efi_simple_text_output_protocol_32 *out;
-+		u32 *func;
-+
-+		offset = offsetof(typeof(*out), output_string);
-+		output_string = efi_early->text_output + offset;
-+		func = (u32 *)output_string;
-+
-+		efi_early->call(*func, efi_early->text_output, str);
-+	}
- }
- 
- #include "../../../../drivers/firmware/efi/efi-stub-helper.c"
-@@ -208,6 +332,127 @@ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
- 	*size = len;
- }
- 
-+static efi_status_t
-+__setup_efi_pci32(efi_pci_io_protocol *__pci, struct pci_setup_rom **__rom)
-+{
-+	efi_pci_io_protocol_32 *pci;
-+	struct pci_setup_rom *rom;
-+	efi_status_t status;
-+	unsigned long size;
-+	uint64_t attributes;
-+
-+	pci = (efi_pci_io_protocol_32 *)__pci;
-+
-+	status = efi_early->call(pci->attributes, pci,
-+				 EfiPciIoAttributeOperationGet, 0, 0,
-+				 &attributes);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	if (!pci->romimage || !pci->romsize)
-+		return EFI_INVALID_PARAMETER;
-+
-+	size = pci->romsize + sizeof(*rom);
-+
-+	status = efi_early->call(efi_early->allocate_pool,
-+				 EFI_LOADER_DATA, size, &rom);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	rom->data.type = SETUP_PCI;
-+	rom->data.len = size - sizeof(struct setup_data);
-+	rom->data.next = 0;
-+	rom->pcilen = pci->romsize;
-+	*__rom = rom;
-+
-+	status = efi_early->call(pci->pci.read, pci, EfiPciIoWidthUint16,
-+				 PCI_VENDOR_ID, 1, &(rom->vendor));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	status = efi_early->call(pci->pci.read, pci, EfiPciIoWidthUint16,
-+				 PCI_DEVICE_ID, 1, &(rom->devid));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	status = efi_early->call(pci->get_location, pci, &(rom->segment),
-+				 &(rom->bus), &(rom->device), &(rom->function));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	return status;
-+
-+free_struct:
-+	efi_early->call(efi_early->free_pool, rom);
-+	return status;
-+}
-+
-+static efi_status_t
-+__setup_efi_pci64(efi_pci_io_protocol *__pci, struct pci_setup_rom **__rom)
-+{
-+	efi_pci_io_protocol_64 *pci;
-+	struct pci_setup_rom *rom;
-+	efi_status_t status;
-+	unsigned long size;
-+	uint64_t attributes;
-+
-+	pci = (efi_pci_io_protocol_64 *)__pci;
-+
-+	status = efi_early->call(pci->attributes, pci,
-+				 EfiPciIoAttributeOperationGet, 0,
-+				 &attributes);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	if (!pci->romimage || !pci->romsize)
-+		return EFI_INVALID_PARAMETER;
-+
-+	size = pci->romsize + sizeof(*rom);
-+
-+	status = efi_early->call(efi_early->allocate_pool,
-+				 EFI_LOADER_DATA, size, &rom);
-+
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	rom->data.type = SETUP_PCI;
-+	rom->data.len = size - sizeof(struct setup_data);
-+	rom->data.next = 0;
-+	rom->pcilen = pci->romsize;
-+	*__rom = rom;
-+
-+	status = efi_early->call(pci->pci.read, pci, EfiPciIoWidthUint16,
-+				 PCI_VENDOR_ID, 1, &(rom->vendor));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	status = efi_early->call(pci->pci.read, pci, EfiPciIoWidthUint16,
-+				 PCI_DEVICE_ID, 1, &(rom->devid));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	status = efi_early->call(pci->get_location, pci, &(rom->segment),
-+				 &(rom->bus), &(rom->device), &(rom->function));
-+
-+	if (status != EFI_SUCCESS)
-+		goto free_struct;
-+
-+	memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	return status;
-+
-+free_struct:
-+	efi_early->call(efi_early->free_pool, rom);
-+	return status;
-+
-+}
-+
- static efi_status_t setup_efi_pci(struct boot_params *params)
- {
- 	efi_pci_io_protocol *pci;
-@@ -246,7 +491,6 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
- 	nr_pci = size / sizeof(void *);
- 	for (i = 0; i < nr_pci; i++) {
- 		void *h = pci_handle[i];
--		uint64_t attributes;
- 		struct pci_setup_rom *rom;
- 
- 		status = efi_early->call(efi_early->handle_protocol, h,
-@@ -258,71 +502,72 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
- 		if (!pci)
- 			continue;
- 
--#ifdef CONFIG_X86_64
--		status = efi_early->call((unsigned long)pci->attributes, pci,
--					 EfiPciIoAttributeOperationGet, 0,
--					 &attributes);
--#else
--		status = efi_early->call((unsigned long)pci->attributes, pci,
--					 EfiPciIoAttributeOperationGet, 0, 0,
--					 &attributes);
+-#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
+-	efi_stub_entry -= 0x200;
 -#endif
--		if (status != EFI_SUCCESS)
--			continue;
--
--		if (!pci->romimage || !pci->romsize)
--			continue;
--
--		size = pci->romsize + sizeof(*rom);
--
--		status = efi_early->call(efi_early->allocate_pool,
--					 EFI_LOADER_DATA, size, &rom);
-+		if (efi_early->is64)
-+			status = __setup_efi_pci64(pci, &rom);
-+		else
-+			status = __setup_efi_pci32(pci, &rom);
- 
- 		if (status != EFI_SUCCESS)
- 			continue;
- 
--		rom->data.type = SETUP_PCI;
--		rom->data.len = size - sizeof(struct setup_data);
--		rom->data.next = 0;
--		rom->pcilen = pci->romsize;
-+		if (data)
-+			data->next = (unsigned long)rom;
-+		else
-+			params->hdr.setup_data = (unsigned long)rom;
- 
--		status = efi_early->call((unsigned long)pci->pci.read, pci,
--					 EfiPciIoWidthUint16, PCI_VENDOR_ID,
--					 1, &(rom->vendor));
-+		data = (struct setup_data *)rom;
-+	}
- 
--		if (status != EFI_SUCCESS)
--			goto free_struct;
-+free_handle:
-+	efi_early->call(efi_early->free_pool, pci_handle);
-+	return status;
-+}
- 
--		status = efi_early->call((unsigned long)pci->pci.read, pci,
--					 EfiPciIoWidthUint16, PCI_DEVICE_ID,
--					 1, &(rom->devid));
-+static efi_status_t
-+__gop_query32(struct efi_graphics_output_protocol *__gop,
-+	      struct efi_graphics_output_mode_info **info,
-+	      unsigned long *size, u32 *fb_base, u32 *fb_size)
-+{
-+	struct efi_graphics_output_protocol_32 *gop;
-+	struct efi_graphics_output_protocol_mode_32 *mode;
-+	efi_status_t status;
-+	unsigned long m;
- 
--		if (status != EFI_SUCCESS)
--			goto free_struct;
-+	gop = (struct efi_graphics_output_protocol_32 *)__gop;
- 
--		status = efi_early->call((unsigned long)pci->get_location, pci,
--					 &(rom->segment), &(rom->bus),
--					 &(rom->device), &(rom->function));
-+	m = gop->mode;
-+	mode = (struct efi_graphics_output_protocol_mode_32 *)m;
- 
--		if (status != EFI_SUCCESS)
--			goto free_struct;
-+	status = efi_early->call(gop->query_mode, gop, mode->mode, size, info);
-+	if (status != EFI_SUCCESS)
-+		return status;
- 
--		memcpy(rom->romdata, pci->romimage, pci->romsize);
-+	*fb_base = mode->frame_buffer_base;
-+	*fb_size = mode->frame_buffer_size;
-+	return status;
-+}
- 
--		if (data)
--			data->next = (unsigned long)rom;
--		else
--			params->hdr.setup_data = (unsigned long)rom;
-+static efi_status_t
-+__gop_query64(struct efi_graphics_output_protocol *__gop,
-+	      struct efi_graphics_output_mode_info **info,
-+	      unsigned long *size, u32 *fb_base, u32 *fb_size)
-+{
-+	struct efi_graphics_output_protocol_64 *gop;
-+	struct efi_graphics_output_protocol_mode_64 *mode;
-+	efi_status_t status;
-+	unsigned long m;
- 
--		data = (struct setup_data *)rom;
-+	gop = (struct efi_graphics_output_protocol_64 *)__gop;
- 
--		continue;
--	free_struct:
--		efi_early->call(efi_early->free_pool, rom);
--	}
-+	m = gop->mode;
-+	mode = (struct efi_graphics_output_protocol_mode_64 *)m;
- 
--free_handle:
--	efi_early->call(efi_early->free_pool, pci_handle);
-+	status = efi_early->call(gop->query_mode, gop, mode->mode, size, info);
-+	if (status != EFI_SUCCESS)
-+		return status;
+-	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
++	/* Don't worry about older kernels for now */
 +
-+	*fb_base = mode->frame_buffer_base;
-+	*fb_size = mode->frame_buffer_size;
- 	return status;
++	/* Yes, this is really how we defined it :( */
++	efi64_stub_entry -= 0x200;
++
++	if (efi32_stub_entry != efi64_stub_entry)
++		die("32-bit and 64-bit EFI entry points do not match\n");
++
++	put_unaligned_le32(efi32_stub_entry, &buf[0x264]);
  }
  
-@@ -375,8 +620,13 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 		if (status == EFI_SUCCESS)
- 			conout_found = true;
+ #else
+@@ -290,6 +297,8 @@ static void parse_zoffset(char *fname)
  
--		status = efi_early->call((unsigned long)gop->query_mode, gop,
--					 gop->mode->mode, &size, &info);
-+		if (efi_early->is64)
-+			status = __gop_query64(gop, &info, &size,
-+					       &fb_base, &fb_size);
-+		else
-+			status = __gop_query32(gop, &info, &size,
-+					       &fb_base, &fb_size);
+ 	while (p && *p) {
+ 		PARSE_ZOFS(p, efi_stub_entry);
++		PARSE_ZOFS(p, efi32_stub_entry);
++		PARSE_ZOFS(p, efi64_stub_entry);
+ 		PARSE_ZOFS(p, efi_pe_entry);
+ 		PARSE_ZOFS(p, startup_64);
+ 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index d3c099f53ff2..6647efb6c6e8 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -19,9 +19,11 @@
+  */
+ #define EFI_OLD_MEMMAP		EFI_ARCH_1
+ 
++#define EFI32_LOADER_SIGNATURE	"EL32"
++#define EFI64_LOADER_SIGNATURE	"EL64"
 +
- 		if (status == EFI_SUCCESS && (!first_gop || conout_found)) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
-@@ -387,8 +637,6 @@ static efi_status_t setup_gop(struct screen_info *si, efi_guid_t *proto,
- 			 */
- 			width = info->horizontal_resolution;
- 			height = info->vertical_resolution;
--			fb_base = gop->mode->frame_buffer_base;
--			fb_size = gop->mode->frame_buffer_size;
- 			pixel_format = info->pixel_format;
- 			pixel_info = info->pixel_information;
- 			pixels_per_scan_line = info->pixels_per_scan_line;
+ #ifdef CONFIG_X86_32
+ 
+-#define EFI_LOADER_SIGNATURE	"EL32"
+ 
+ extern unsigned long asmlinkage efi_call_phys(void *, ...);
+ 
+@@ -57,8 +59,6 @@ extern unsigned long asmlinkage efi_call_phys(void *, ...);
+ 
+ #else /* !CONFIG_X86_32 */
+ 
+-#define EFI_LOADER_SIGNATURE	"EL64"
+-
+ extern u64 efi_call0(void *fp);
+ extern u64 efi_call1(void *fp, u64 arg1);
+ extern u64 efi_call2(void *fp, u64 arg1, u64 arg2);
 -- 
 1.8.3.1
