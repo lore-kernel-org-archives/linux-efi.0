@@ -1,8 +1,10 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [RFC][PATCH 00/11] EFI mixed mode
-Date: Wed, 29 Jan 2014 16:23:46 +0000
-Message-ID: <1391012637-4839-1-git-send-email-matt@console-pimps.org>
+Subject: [RFC][PATCH 02/11] x86, tools: Consolidate #ifdef code
+Date: Wed, 29 Jan 2014 16:23:48 +0000
+Message-ID: <1391012637-4839-3-git-send-email-matt@console-pimps.org>
+References: <1391012637-4839-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1391012637-4839-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
@@ -10,66 +12,120 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-This patch series enables booting a 64-bit kernel on 32-bit EFI
-firmware. It's marked as RFC because I'm just after some general
-feedback on the approach taken.
+Instead of littering main() with #ifdef CONFIG_EFI_STUB, move the logic
+into separate functions that do nothing if the config option isn't set.
+This makes main() much easier to read.
 
-Note that no boot loader changes should be necessary to take advantage
-of these patches.
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/boot/tools/build.c | 64 +++++++++++++++++++++++++++++----------------
+ 1 file changed, 42 insertions(+), 22 deletions(-)
 
-Tested Qemu + OVMF with Syslinux.
-
-Some things that I'm going to fix up meanwhile are,
-
- o failure for > 4GB arg ptrs to EFI services should be graceful
-
- o revisit whether it's OK to mark the identity-mapped kernel
-   text as executable.
-
- o I'm pretty sure these patches break 32-bit boot completely
-
- o The ARM EFI stub doesn't handle relocations so can't jump through
-   global function pointers
-
-The full series is available on the 'mixed-mode' branch here,
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
-
-Matt Fleming (11):
-  x86/boot: Cleanup header.S by removing some #ifdefs
-  x86, tools: Consolidate #ifdef code
-  x86/mm/pageattr: Make __lookup_address_in_pgd() global
-  x86/efi: Delete dead code when checking for non-native
-  efi: Add separate 32-bit/64-bit definitions
-  x86/efi: Build our own EFI services pointer table
-  x86/efi: Add early thunk code to go from 64-bit to 32-bit
-  x86/efi: Split the boot stub into 32/64 code paths
-  x86/efi: Firmware agnostic handover entry points
-  x86/efi: Add mixed runtime services support
-  x86/efi: Wire up CONFIG_EFI_MIXED
-
- arch/x86/Kconfig                       |  10 +
- arch/x86/boot/Makefile                 |   2 +-
- arch/x86/boot/compressed/eboot.c       | 669 +++++++++++++++++++++++++++------
- arch/x86/boot/compressed/eboot.h       |  60 +++
- arch/x86/boot/compressed/efi_stub_64.S |  29 ++
- arch/x86/boot/compressed/head_64.S     | 123 +++++-
- arch/x86/boot/header.S                 |  23 +-
- arch/x86/boot/tools/build.c            |  73 ++--
- arch/x86/include/asm/efi.h             |  38 +-
- arch/x86/include/asm/pgtable_types.h   |   2 +
- arch/x86/kernel/setup.c                |   2 +-
- arch/x86/mm/fault.c                    |   7 +-
- arch/x86/mm/pageattr.c                 |  12 +-
- arch/x86/platform/efi/Makefile         |   1 +
- arch/x86/platform/efi/efi.c            | 154 ++++----
- arch/x86/platform/efi/efi_64.c         | 328 +++++++++++++++-
- arch/x86/platform/efi/efi_stub_64.S    | 161 ++++++++
- arch/x86/platform/efi/efi_thunk.S      |  65 ++++
- drivers/firmware/efi/efi-stub-helper.c | 142 ++-----
- include/linux/efi.h                    | 252 +++++++++++++
- 20 files changed, 1807 insertions(+), 346 deletions(-)
- create mode 100644 arch/x86/platform/efi/efi_thunk.S
-
+diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
+index 8e15b22391fc..bf262077ec92 100644
+--- a/arch/x86/boot/tools/build.c
++++ b/arch/x86/boot/tools/build.c
+@@ -219,6 +219,45 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz)
+ 	update_pecoff_section_header(".text", text_start, text_sz);
+ }
+ 
++static int reserve_pecoff_reloc_section(int c)
++{
++	/* Reserve 0x20 bytes for .reloc section */
++	memset(buf+c, 0, PECOFF_RELOC_RESERVE);
++	return PECOFF_RELOC_RESERVE;
++}
++
++static void efi_stub_defaults(void)
++{
++	/* Defaults for old kernel */
++#ifdef CONFIG_X86_32
++	efi_pe_entry = 0x10;
++	efi_stub_entry = 0x30;
++#else
++	efi_pe_entry = 0x210;
++	efi_stub_entry = 0x230;
++	startup_64 = 0x200;
++#endif
++}
++
++static void efi_stub_entry_update(void)
++{
++#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
++	efi_stub_entry -= 0x200;
++#endif
++	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
++}
++
++#else
++
++static inline void update_pecoff_setup_and_reloc(unsigned int) {}
++static inline void update_pecoff_text(unsigned int, unsigned int) {}
++static inline void efi_stub_defaults(void) {}
++static inline void efi_stup_entry_update(void) {}
++
++static inline int reserve_pecoff_reloc_section(int c)
++{
++	return 0;
++}
+ #endif /* CONFIG_EFI_STUB */
+ 
+ 
+@@ -271,15 +310,7 @@ int main(int argc, char ** argv)
+ 	void *kernel;
+ 	u32 crc = 0xffffffffUL;
+ 
+-	/* Defaults for old kernel */
+-#ifdef CONFIG_X86_32
+-	efi_pe_entry = 0x10;
+-	efi_stub_entry = 0x30;
+-#else
+-	efi_pe_entry = 0x210;
+-	efi_stub_entry = 0x230;
+-	startup_64 = 0x200;
+-#endif
++	efi_stub_defaults();
+ 
+ 	if (argc != 5)
+ 		usage();
+@@ -302,11 +333,7 @@ int main(int argc, char ** argv)
+ 		die("Boot block hasn't got boot flag (0xAA55)");
+ 	fclose(file);
+ 
+-#ifdef CONFIG_EFI_STUB
+-	/* Reserve 0x20 bytes for .reloc section */
+-	memset(buf+c, 0, PECOFF_RELOC_RESERVE);
+-	c += PECOFF_RELOC_RESERVE;
+-#endif
++	c += reserve_pecoff_reloc_section(c);
+ 
+ 	/* Pad unused space with zeros */
+ 	setup_sectors = (c + 511) / 512;
+@@ -315,9 +342,7 @@ int main(int argc, char ** argv)
+ 	i = setup_sectors*512;
+ 	memset(buf+c, 0, i-c);
+ 
+-#ifdef CONFIG_EFI_STUB
+ 	update_pecoff_setup_and_reloc(i);
+-#endif
+ 
+ 	/* Set the default root device */
+ 	put_unaligned_le16(DEFAULT_ROOT_DEV, &buf[508]);
+@@ -342,14 +367,9 @@ int main(int argc, char ** argv)
+ 	buf[0x1f1] = setup_sectors-1;
+ 	put_unaligned_le32(sys_size, &buf[0x1f4]);
+ 
+-#ifdef CONFIG_EFI_STUB
+ 	update_pecoff_text(setup_sectors * 512, sz + i + ((sys_size * 16) - sz));
+ 
+-#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
+-	efi_stub_entry -= 0x200;
+-#endif
+-	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
+-#endif
++	efi_stub_entry_update();
+ 
+ 	crc = partial_crc32(buf, i, crc);
+ 	if (fwrite(buf, 1, i, dest) != i)
 -- 
 1.8.3.1
