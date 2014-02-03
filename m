@@ -1,7 +1,7 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Will Deacon <will.deacon@arm.com>
 Subject: Re: [PATCH v4 2/5] arm: add new asm macro update_sctlr
-Date: Mon, 3 Feb 2014 15:55:42 +0000
-Message-ID: <20140203155542.GI11329@bivouac.eciton.net>
+Date: Mon, 3 Feb 2014 16:00:51 +0000
+Message-ID: <20140203160051.GG14112@mudshark.cambridge.arm.com>
 References: <1389445524-30623-1-git-send-email-leif.lindholm@linaro.org>
  <1389445524-30623-3-git-send-email-leif.lindholm@linaro.org>
  <20140122112055.GF1621@mudshark.cambridge.arm.com>
@@ -9,56 +9,68 @@ References: <1389445524-30623-1-git-send-email-leif.lindholm@linaro.org>
  <1391029124.2488.50.camel@deneb.redhat.com>
  <20140130131247.GG11329@bivouac.eciton.net>
  <20140203103415.GA12187@mudshark.cambridge.arm.com>
+ <20140203155542.GI11329@bivouac.eciton.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <20140203103415.GA12187-MRww78TxoiP5vMa5CHWGZ34zcgK1vI+I0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org" <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <20140203155542.GI11329@bivouac.eciton.net>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: "roy.franz@linaro.org" <roy.franz@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux@arm.linux.org.uk" <linux@arm.linux.org.uk>, "patches@linaro.org" <patches@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "grant.likely@secretlab.ca" <grant.likely@secretlab.ca>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "msalter@redhat.com" <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 03, 2014 at 10:34:15AM +0000, Will Deacon wrote:
-> On Thu, Jan 30, 2014 at 01:12:47PM +0000, Leif Lindholm wrote:
-> > Oh, that's neat - thanks!
+On Mon, Feb 03, 2014 at 03:55:42PM +0000, Leif Lindholm wrote:
+> On Mon, Feb 03, 2014 at 10:34:15AM +0000, Will Deacon wrote:
+> > On Thu, Jan 30, 2014 at 01:12:47PM +0000, Leif Lindholm wrote:
+> > > Oh, that's neat - thanks!
+> > > 
+> > > Well, given that, I can think of two less horrible options:
+> > > 1)
+> > > 	.macro  update_sctlr, tmp:req, set=, clear=
+> > >         mrc	p15, 0, \tmp, c1, c0, 0
+> > > 	.ifnc	\set,
+> > >         orr	\tmp, \set
+> > > 	.endif
+> > > 	.ifnc	\clear,
+> > > 	mvn	\clear, \clear
+> > > 	and	\tmp, \tmp, \clear
 > > 
-> > Well, given that, I can think of two less horrible options:
-> > 1)
-> > 	.macro  update_sctlr, tmp:req, set=, clear=
-> >         mrc	p15, 0, \tmp, c1, c0, 0
-> > 	.ifnc	\set,
-> >         orr	\tmp, \set
-> > 	.endif
-> > 	.ifnc	\clear,
-> > 	mvn	\clear, \clear
-> > 	and	\tmp, \tmp, \clear
+> > Can't you use bic here?
 > 
-> Can't you use bic here?
-
-Yeah.
-
-> > 	.endif
-> >         mcr	p15, 0, \tmp, c1, c0, 0
-> > 	.endm
-> > 
-> > With the two call sites in uefi_phys.S as:
-> > 
-> > 	ldr	r5, =(CR_M)
-> > 	update_sctlr	r12, , r5
-> > and
-> > 	ldr	r4, =(CR_I | CR_C | CR_M)
-> > 	update_sctlr	r12, r4
+> Yeah.
 > 
-> These ldr= could be movs, right?
+> > > 	.endif
+> > >         mcr	p15, 0, \tmp, c1, c0, 0
+> > > 	.endm
+> > > 
+> > > With the two call sites in uefi_phys.S as:
+> > > 
+> > > 	ldr	r5, =(CR_M)
+> > > 	update_sctlr	r12, , r5
+> > > and
+> > > 	ldr	r4, =(CR_I | CR_C | CR_M)
+> > > 	update_sctlr	r12, r4
+> > 
+> > These ldr= could be movs, right?
+> 
+> The first one could.
+> The second one could be movw on armv7+.
+> 
+> > If so, I definitely prefer this to putting an ldr = into the macro itself
+> > (option 2).
+> 
+> And your preference between 1) and 2) is?
 
-The first one could.
-The second one could be movw on armv7+.
+(1), using bic and mov[tw] where possible.
 
-> If so, I definitely prefer this to putting an ldr = into the macro itself
-> (option 2).
-
-And your preference between 1) and 2) is?
-
-/
-    Leif
+Will
