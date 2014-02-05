@@ -1,88 +1,80 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 21/22] arm: efistub: ignore dtb= when UEFI SecureBoot is enabled
-Date: Wed, 5 Feb 2014 19:09:11 +0100
-Message-ID: <CAKv+Gu-yD+MjN70cVRCwdBB=LLmJX9X7RVv13gTEuZcko+2E8A@mail.gmail.com>
-References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-	<1391619853-10601-22-git-send-email-leif.lindholm@linaro.org>
+From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [BUG] Linux 3.14 fails to boot with new EFI changes
+Date: Wed, 5 Feb 2014 15:45:36 -0600
+Message-ID: <20140205214536.GT3034@sgi.com>
+References: <20140128110552.GA815@pd.tnic>
+ <20140128200754.GZ18196@sgi.com>
+ <20140128225905.GN815@pd.tnic>
+ <20140128234036.GB18196@sgi.com>
+ <20140129141822.GC24887@pd.tnic>
+ <20140130221950.GJ3105@sgi.com>
+ <52EAD0F2.7090101@zytor.com>
+ <20140131100722.GA21873@pd.tnic>
+ <20140131140220.GC22498@sgi.com>
+ <20140131142318.GC21873@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1391619853-10601-22-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140131142318.GC21873-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 5 February 2014 18:04, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->
-> Loading unauthenticated FDT blobs directly from storage is a security hazard,
-> so this should only be allowed when running with UEFI Secure Boot disabled.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/arm-stub.c        |    4 +++-
->  drivers/firmware/efi/efi-stub-helper.c |   24 ++++++++++++++++++++++++
->  2 files changed, 27 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/arm-stub.c b/drivers/firmware/efi/arm-stub.c
-> index b505fde..c651082 100644
-> --- a/drivers/firmware/efi/arm-stub.c
-> +++ b/drivers/firmware/efi/arm-stub.c
-> @@ -95,7 +95,9 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->
->         /* Load a device tree from the configuration table, if present. */
->         fdt_addr = (uintptr_t)get_fdt(sys_table);
-> -       if (!fdt_addr) {
-> +       if (efi_secureboot_enabled(sys_table))
-> +               pr_efi(sys_table, "UEFI Secure Boot is enabled, ignoring dtb= commandline option.\n");
+On Fri, Jan 31, 2014 at 03:23:18PM +0100, Borislav Petkov wrote:
+> And now my question:
+> 
+> How can I reliably find out which region contains that
+> uv_systab.function call?
+> 
+> I need it so that I can map it in the EFI page table and you can
+> continue to call that function and you can get back to your reliable way
+> to boot.
 
-I am pretty sure my original patch had braces on both branches of the if () :-)
+While working on an answer to this question, I ran across another issue
+on some newer hardware, that looks like it's definitely related to this
+problem, and might be the root cause.
 
-Also, I think the precedence is backward here: dtb= should trump
-config table, not the other way around.
+When booting on a UV2 we die in efi_enter_virtual_mode:
 
--- 
-Ard.
+BUG: unable to handle kernel paging request at 0000008f7e848020
+IP: [<000000007dadb6a9>] 0x7dadb6a8
+PGD 0
+Oops: 0000 [#1] SMP
+Modules linked in:
+CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.11.0-medusa-00038-gd2f7cbe #821
+Hardware name: SGI UV2000/ROMLEY, BIOS SGI UV 2000/3000 series BIOS 01/15/2013
+task: ffffffff817ae400 ti: ffffffff8179e000 task.ti: ffffffff8179e000
+RIP: 0010:[<000000007dadb6a9>]  [<000000007dadb6a9>] 0x7dadb6a8
+RSP: 0000:ffffffff8179fd90  EFLAGS: 00010202
+RAX: 000000007d9b8e01 RBX: 0000000000000000 RCX: 0000000000000000
+RDX: 000000007db074f8 RSI: 000000007d9b8e18 RDI: 0000008f7e848000
+RBP: 000000007db074f8 R08: 0000000000000001 R09: 0000008f7e848000
+R10: 0000000000000030 R11: ffff880ffffda000 R12: 8000000000000000
+R13: 000077ff80000000 R14: ffff888f7e848000 R15: 000000000009b000
+FS:  0000000000000000(0000) GS:ffff880fffc00000(0000) knlGS:0000000000000000
+CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+CR2: 0000008f7e848020 CR3: 000000000009b000 CR4: 00000000000406b0
+Stack:
+ fffffffef6000000 0000000000000000 0000000000000000 80000000000001e3
+ 0000000000000030 000000007dadd540 0000000000001f20 0000000060000202
+ 000000007d9b8da0 000000007daf8c6b ffffffff810fd2bc 00000000000000d0
+Call Trace:
+ [<ffffffff810fd2bc>] ? cache_grow+0x1e5/0x236
+ [<ffffffff8103adac>] ? efi_call4+0x6c/0xf0
+ [<ffffffff8186452f>] ? efi_enter_virtual_mode+0x1ac/0x328
+ [<ffffffff8184de98>] ? start_kernel+0x35b/0x3ed
+ [<ffffffff8184d950>] ? repair_env_string+0x60/0x60
+ [<ffffffff8184d479>] ? x86_64_start_reservations+0x2e/0x30
+ [<ffffffff8184d5a3>] ? x86_64_start_kernel+0x128/0x12f
+Code:  Bad RIP value.
+RIP  [<000000007dadb6a9>] 0x7dadb6a8
+ RSP <ffffffff8179fd90>
+CR2: 0000008f7e848020
 
+Let me know what other information you need and I'll get it to you ASAP.
 
-> +       else if (!fdt_addr) {
->                 status = handle_cmdline_files(sys_table, image, cmdline_ptr,
->                                               "dtb=",
->                                               ~0UL, (unsigned long *)&fdt_addr,
-> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-> index 2ee69ea..6221be7 100644
-> --- a/drivers/firmware/efi/efi-stub-helper.c
-> +++ b/drivers/firmware/efi/efi-stub-helper.c
-> @@ -721,3 +721,27 @@ static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
->         *cmd_line_len = options_bytes;
->         return (char *)cmdline_addr;
->  }
-> +
-> +static int __init efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
-> +{
-> +       static efi_guid_t const var_guid __initconst = EFI_GLOBAL_VARIABLE_GUID;
-> +       static efi_char16_t const var_name[] __initconst = {
-> +               'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
-> +
-> +       efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
-> +       unsigned long size = sizeof(u8);
-> +       efi_status_t status;
-> +       u8 val;
-> +
-> +       status = efi_call_phys5(f_getvar, (efi_char16_t *)var_name,
-> +                               (efi_guid_t *)&var_guid, NULL, &size, &val);
-> +
-> +       switch (status) {
-> +       case EFI_SUCCESS:
-> +               return val;
-> +       case EFI_NOT_FOUND:
-> +               return 0;
-> +       default:
-> +               return 1;
-> +       }
-> +}
-> --
-> 1.7.10.4
->
+Thanks!
+
+- Alex
