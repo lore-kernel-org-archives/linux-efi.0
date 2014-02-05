@@ -1,478 +1,607 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH 10/22] Add EFI stub for ARM
-Date: Wed,  5 Feb 2014 17:04:01 +0000
-Message-ID: <1391619853-10601-11-git-send-email-leif.lindholm@linaro.org>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 19/22] arm64: add EFI runtime services
+Date: Wed,  5 Feb 2014 17:04:10 +0000
+Message-ID: <1391619853-10601-20-git-send-email-leif.lindholm@linaro.org>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: patches@linaro.org, Roy Franz <roy.franz@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1391619853-10601-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Roy Franz <roy.franz@linaro.org>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-This patch adds EFI stub support for the ARM Linux kernel.  The EFI stub
-operates similarly to the x86 stub: it is a shim between the EFI firmware
-and the normal zImage entry point, and sets up the environment that the
-zImage is expecting.  This includes loading the initrd (optionaly) and
-device tree from the system partition based on the kernel command line.
-The stub updates the device tree as necessary, adding entries for EFI
-runtime services. The PE/COFF "MZ" header at offset 0 results in the
-first instruction being an add that corrupts r5, which is not used by
-the zImage interface.
+This patch adds EFI runtime support for arm64. The runtime support allows
+the kernel to access various EFI runtime services provided by EFI firmware.
+Things like reboot, real time clock, EFI boot variables, and others.
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Acked-by: Grant Likely <grant.likely@linaro.org>
+Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/Kconfig                      |   11 +++
- arch/arm/boot/compressed/Makefile     |   17 ++++-
- arch/arm/boot/compressed/efi-header.S |  117 ++++++++++++++++++++++++++++++++
- arch/arm/boot/compressed/efi-stub.c   |  118 +++++++++++++++++++++++++++++++++
- arch/arm/boot/compressed/efi-stub.h   |    5 ++
- arch/arm/boot/compressed/head.S       |   83 +++++++++++++++++++++--
- 6 files changed, 342 insertions(+), 9 deletions(-)
- create mode 100644 arch/arm/boot/compressed/efi-header.S
- create mode 100644 arch/arm/boot/compressed/efi-stub.c
- create mode 100644 arch/arm/boot/compressed/efi-stub.h
+ arch/arm64/Kconfig           |   16 ++
+ arch/arm64/include/asm/efi.h |   12 ++
+ arch/arm64/kernel/Makefile   |    1 +
+ arch/arm64/kernel/efi.c      |  462 ++++++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/setup.c    |    3 +
+ init/main.c                  |    3 +-
+ 6 files changed, 496 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm64/include/asm/efi.h
+ create mode 100644 arch/arm64/kernel/efi.c
 
-diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
-index ef2aa77..a693921 100644
---- a/arch/arm/Kconfig
-+++ b/arch/arm/Kconfig
-@@ -1885,6 +1885,17 @@ config EARLY_IOREMAP
- 	  the same virtual memory range as kmap so all early mappings must
- 	  be unapped before paging_init() is called.
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 355f87c..636df8b 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -258,6 +258,20 @@ config CMDLINE_FORCE
+ 	  This is useful if you cannot or don't want to change the
+ 	  command-line options your boot loader passes to the kernel.
  
-+config EFI_STUB
-+	bool "EFI stub support"
-+	depends on EFI && !CPU_BIG_ENDIAN
-+	---help---
-+	  This kernel feature allows a zImage to be loaded directly by EFI
-+	  firmware without the use of a bootloader.  A PE/COFF header is
-+	  added to the zImage in a way that makes the binary both a Linux
-+	  zImage and an PE/COFF executable that can be executed directly by
-+	  EFI firmware.
-+	  See Documentation/efi-stub.txt for more information.
++config EFI
++        bool "EFI runtime service support"
++	depends on OF
++	select UCS2_STRING
++	select LIBFDT
++	select UEFI_PARAMS_FROM_FDT
++	help
++	  This enables the kernel to use UEFI runtime services that are
++	  available (such as the UEFI variable services).
 +
- config SECCOMP
- 	bool
- 	prompt "Enable seccomp to safely compute untrusted bytecode"
-diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
-index 68c9183..1415411 100644
---- a/arch/arm/boot/compressed/Makefile
-+++ b/arch/arm/boot/compressed/Makefile
-@@ -91,7 +91,7 @@ suffix_$(CONFIG_KERNEL_LZ4)  = lz4
- 
- # Borrowed libfdt files for the ATAG compatibility mode
- 
--libfdt		:= fdt_rw.c fdt_ro.c fdt_wip.c fdt.c
-+libfdt		:= fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c
- libfdt_hdrs	:= fdt.h libfdt.h libfdt_internal.h
- 
- libfdt_objs	:= $(addsuffix .o, $(basename $(libfdt)))
-@@ -99,11 +99,22 @@ libfdt_objs	:= $(addsuffix .o, $(basename $(libfdt)))
- $(addprefix $(obj)/,$(libfdt) $(libfdt_hdrs)): $(obj)/%: $(srctree)/scripts/dtc/libfdt/%
- 	$(call cmd,shipped)
- 
--$(addprefix $(obj)/,$(libfdt_objs) atags_to_fdt.o): \
-+$(addprefix $(obj)/,$(libfdt_objs) atags_to_fdt.o efi-stub.o): \
- 	$(addprefix $(obj)/,$(libfdt_hdrs))
- 
- ifeq ($(CONFIG_ARM_ATAG_DTB_COMPAT),y)
--OBJS	+= $(libfdt_objs) atags_to_fdt.o
-+OBJS	+= atags_to_fdt.o
-+USE_LIBFDT = y
-+endif
++	  This option is only useful on systems that have UEFI firmware.
++	  However, even with this option, the resultant kernel should
++	  continue to boot on existing non-UEFI platforms.
 +
-+ifeq ($(CONFIG_EFI_STUB),y)
-+CFLAGS_efi-stub.o += -DTEXT_OFFSET=$(TEXT_OFFSET)
-+OBJS	+= efi-stub.o
-+USE_LIBFDT = y
-+endif
-+
-+ifeq ($(USE_LIBFDT),y)
-+OBJS	+= $(libfdt_objs)
- endif
+ config EFI_STUB
+ 	bool "EFI stub support"
+ 	depends on OF
+@@ -317,6 +331,8 @@ source "net/Kconfig"
  
- targets       := vmlinux vmlinux.lds \
-diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+ source "drivers/Kconfig"
+ 
++source "drivers/firmware/Kconfig"
++
+ source "fs/Kconfig"
+ 
+ source "arch/arm64/kvm/Kconfig"
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
 new file mode 100644
-index 0000000..dbb7101
+index 0000000..a835b2c
 --- /dev/null
-+++ b/arch/arm/boot/compressed/efi-header.S
-@@ -0,0 +1,117 @@
-+@ Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
-+@
-+@ This file contains the PE/COFF header that is part of the
-+@ EFI stub.
-+@
++++ b/arch/arm64/include/asm/efi.h
+@@ -0,0 +1,12 @@
++#ifndef _ASM_ARM64_EFI_H
++#define _ASM_ARM64_EFI_H
 +
-+	.org	0x3c
-+	@
-+	@ The PE header can be anywhere in the file, but for
-+	@ simplicity we keep it together with the MSDOS header
-+	@ The offset to the PE/COFF header needs to be at offset
-+	@ 0x3C in the MSDOS header.
-+	@ The only 2 fields of the MSDOS header that are used are this
-+	@ PE/COFF offset, and the "MZ" bytes at offset 0x0.
-+	@
-+	.long	pe_header			@ Offset to the PE header.
++#include <asm/io.h>
 +
-+      .align 3
-+pe_header:
-+	.ascii	"PE"
-+	.short 	0
++#ifdef CONFIG_EFI
++extern void efi_init(void);
++#else
++#define efi_init()
++#endif
 +
-+coff_header:
-+	.short	0x01c2				@ ARM or Thumb
-+	.short	2				@ nr_sections
-+	.long	0 				@ TimeDateStamp
-+	.long	0				@ PointerToSymbolTable
-+	.long	1				@ NumberOfSymbols
-+	.short	section_table - optional_header	@ SizeOfOptionalHeader
-+	.short	0x306				@ Characteristics.
-+						@ IMAGE_FILE_32BIT_MACHINE |
-+						@ IMAGE_FILE_DEBUG_STRIPPED |
-+						@ IMAGE_FILE_EXECUTABLE_IMAGE |
-+						@ IMAGE_FILE_LINE_NUMS_STRIPPED
-+
-+optional_header:
-+	.short	0x10b				@ PE32 format
-+	.byte	0x02				@ MajorLinkerVersion
-+	.byte	0x14				@ MinorLinkerVersion
-+
-+	.long	_edata - efi_stub_entry		@ SizeOfCode
-+
-+	.long	0				@ SizeOfInitializedData
-+	.long	0				@ SizeOfUninitializedData
-+
-+	.long	efi_stub_entry			@ AddressOfEntryPoint
-+	.long	efi_stub_entry			@ BaseOfCode
-+	.long	0				@ data
-+
-+extra_header_fields:
-+	.long	0				@ ImageBase
-+	.long	0x20				@ SectionAlignment
-+	.long	0x8				@ FileAlignment
-+	.short	0				@ MajorOperatingSystemVersion
-+	.short	0				@ MinorOperatingSystemVersion
-+	.short	0				@ MajorImageVersion
-+	.short	0				@ MinorImageVersion
-+	.short	0				@ MajorSubsystemVersion
-+	.short	0				@ MinorSubsystemVersion
-+	.long	0				@ Win32VersionValue
-+
-+	.long	_edata				@ SizeOfImage
-+
-+	@ Everything before the entry point is considered part of the header
-+	.long	efi_stub_entry			@ SizeOfHeaders
-+	.long	0				@ CheckSum
-+	.short	0xa				@ Subsystem (EFI application)
-+	.short	0				@ DllCharacteristics
-+	.long	0				@ SizeOfStackReserve
-+	.long	0				@ SizeOfStackCommit
-+	.long	0				@ SizeOfHeapReserve
-+	.long	0				@ SizeOfHeapCommit
-+	.long	0				@ LoaderFlags
-+	.long	0x6				@ NumberOfRvaAndSizes
-+
-+	.quad   0                               @ ExportTable
-+	.quad   0                               @ ImportTable
-+	.quad   0                               @ ResourceTable
-+	.quad   0                               @ ExceptionTable
-+	.quad   0                               @ CertificationTable
-+	.quad   0                               @ BaseRelocationTable
-+	# Section table
-+section_table:
-+
-+	#
-+	# The EFI application loader requires a relocation section
-+	# because EFI applications must be relocatable.  This is a
-+	# dummy section as far as we are concerned.
-+	#
-+	.ascii	".reloc"
-+	.byte	0
-+	.byte	0			@ end of 0 padding of section name
-+	.long	0
-+	.long	0
-+	.long	0			@ SizeOfRawData
-+	.long	0			@ PointerToRawData
-+	.long	0			@ PointerToRelocations
-+	.long	0			@ PointerToLineNumbers
-+	.short	0			@ NumberOfRelocations
-+	.short	0			@ NumberOfLineNumbers
-+	.long	0x42100040		@ Characteristics (section flags)
-+
-+
-+	.ascii	".text"
-+	.byte	0
-+	.byte	0
-+	.byte	0        		@ end of 0 padding of section name
-+	.long	_edata - efi_stub_entry		@ VirtualSize
-+	.long	efi_stub_entry			@ VirtualAddress
-+	.long	_edata - efi_stub_entry		@ SizeOfRawData
-+	.long	efi_stub_entry			@ PointerToRawData
-+
-+	.long	0		@ PointerToRelocations (0 for executables)
-+	.long	0		@ PointerToLineNumbers (0 for executables)
-+	.short	0		@ NumberOfRelocations  (0 for executables)
-+	.short	0		@ NumberOfLineNumbers  (0 for executables)
-+	.long	0xe0500020	@ Characteristics (section flags)
-diff --git a/arch/arm/boot/compressed/efi-stub.c b/arch/arm/boot/compressed/efi-stub.c
++#endif /* _ASM_ARM64_EFI_H */
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index 0f60b45..4c5a797 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -23,6 +23,7 @@ arm64-obj-$(CONFIG_EARLY_PRINTK)	+= early_printk.o
+ arm64-obj-$(CONFIG_ARM64_CPU_SUSPEND)	+= sleep.o suspend.o
+ arm64-obj-$(CONFIG_JUMP_LABEL)		+= jump_label.o
+ arm64-obj-$(CONFIG_EFI_STUB)		+= efi-stub.o efi-entry.o
++arm64-obj-$(CONFIG_EFI)			+= efi.o
+ 
+ obj-y					+= $(arm64-obj-y) vdso/
+ obj-m					+= $(arm64-obj-m)
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
 new file mode 100644
-index 0000000..dba8037
+index 0000000..90ca3d1
 --- /dev/null
-+++ b/arch/arm/boot/compressed/efi-stub.c
-@@ -0,0 +1,118 @@
++++ b/arch/arm64/kernel/efi.c
+@@ -0,0 +1,462 @@
 +/*
-+ * linux/arch/arm/boot/compressed/efi-stub.c
++ * Extensible Firmware Interface
 + *
-+ * Copyright (C) 2013 Linaro Ltd;  <roy.franz@linaro.org>
++ * Based on Extensible Firmware Interface Specification version 2.4
 + *
-+ * This file implements the EFI boot stub for the ARM kernel
++ * Copyright (C) 2013 Linaro Ltd.
 + *
 + * This program is free software; you can redistribute it and/or modify
 + * it under the terms of the GNU General Public License version 2 as
 + * published by the Free Software Foundation.
 + *
 + */
++
 +#include <linux/efi.h>
-+#include <libfdt.h>
-+#include <generated/compile.h>
-+#include <generated/utsrelease.h>
-+#include "efi-stub.h"
++#include <linux/export.h>
++#include <linux/memblock.h>
++#include <linux/bootmem.h>
++#include <linux/of.h>
++#include <linux/of_fdt.h>
++#include <linux/sched.h>
++#include <linux/slab.h>
 +
-+/*
-+ * The maximum uncompressed kernel size is 32 MBytes, so we will reserve
-+ * that for the decompressed kernel.  We have no easy way to tell what
-+ * the actuall size of code + data the uncompressed kernel will use.
-+ */
-+#define MAX_UNCOMP_KERNEL_SIZE	0x02000000
++#include <asm/cacheflush.h>
++#include <asm/efi.h>
++#include <asm/tlbflush.h>
++#include <asm/mmu_context.h>
 +
-+/*
-+ * The kernel zImage should be located between 32 Mbytes
-+ * and 128 MBytes from the base of DRAM.  The min
-+ * address leaves space for a maximal size uncompressed image,
-+ * and the max address is due to how the zImage decompressor
-+ * picks a destination address.
-+ */
-+#define ZIMAGE_OFFSET_LIMIT	0x08000000
-+#define MIN_ZIMAGE_OFFSET	MAX_UNCOMP_KERNEL_SIZE
-+#define MAX_FDT_OFFSET		ZIMAGE_OFFSET_LIMIT
++struct efi_memory_map memmap;
 +
-+/* Include shared EFI stub code, and required headers. */
-+#include "../../../../drivers/firmware/efi/efi-stub-helper.c"
-+#include "../../../../drivers/firmware/efi/fdt.c"
-+#include "../../../drivers/firmware/efi/arm-stub.c"
++static efi_runtime_services_t *runtime;
 +
-+static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
-+					unsigned long *image_addr,
-+					unsigned long *image_size,
-+					unsigned long *reserve_addr,
-+					unsigned long *reserve_size,
-+					unsigned long dram_base,
-+					efi_loaded_image_t *image)
++static u64 efi_system_table;
++
++static int uefi_debug __initdata;
++static int __init uefi_debug_setup(char *str)
 +{
-+	unsigned long nr_pages;
-+	efi_status_t status;
-+	/* Use alloc_addr to tranlsate between types */
-+	efi_physical_addr_t alloc_addr;
++	uefi_debug = 1;
 +
-+	/*
-+	 * Verify that the DRAM base address is compatible the the ARM
-+	 * boot protocol, which determines the base of DRAM by masking
-+	 * off the low 24 bits of the address at which the zImage is
-+	 * loaded at.  These assumptions are made by the decompressor,
-+	 * before any memory map is available.
-+	 */
-+	if (dram_base & (ZIMAGE_OFFSET_LIMIT - 1)) {
-+		pr_efi_err(sys_table, "Invalid DRAM base address alignment.\n");
-+		return EFI_ERROR;
-+	}
-+
-+	/*
-+	 * Reserve memory for the uncompressed kernel image. This is
-+	 * all that prevents any future allocations from conflicting
-+	 * with the kernel.  Since we can't tell from the compressed
-+	 * image how much DRAM the kernel actually uses (due to BSS
-+	 * size uncertainty) we allocate the maximum possible size.
-+	 * Do this very early, as prints can cause memory allocations
-+	 * that may conflict with this.
-+	 */
-+	alloc_addr = dram_base;
-+	*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
-+	nr_pages = round_up(*reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
-+	status = efi_call_phys4(sys_table->boottime->allocate_pages,
-+				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
-+				nr_pages, &alloc_addr);
-+	if (status != EFI_SUCCESS) {
-+		*reserve_size = 0;
-+		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
-+		return status;
-+	}
-+	*reserve_addr = alloc_addr;
-+
-+	/*
-+	 * Relocate the zImage, if required.  ARM doesn't have a
-+	 * preferred address, so we set it to 0, as we want to allocate
-+	 * as low in memory as possible.
-+	 */
-+	*image_size = image->image_size;
-+	status = efi_relocate_kernel(sys_table, image_addr, *image_size,
-+				     *image_size, 0, 0);
-+	if (status != EFI_SUCCESS) {
-+		pr_efi_err(sys_table, "Failed to relocate kernel.\n");
-+		efi_free(sys_table, *reserve_size, *reserve_addr);
-+		*reserve_size = 0;
-+		return status;
-+	}
-+
-+	/*
-+	 * Check to see if we were able to allocate memory low enough
-+	 * in memory.  The kernel determines the base of DRAM from the
-+	 * address at which the zImage is loaded.
-+	 */
-+	if (*image_addr + *image_size > dram_base + ZIMAGE_OFFSET_LIMIT) {
-+		pr_efi_err(sys_table, "Failed to relocate kernel, no low memory available.\n");
-+		efi_free(sys_table, *reserve_size, *reserve_addr);
-+		*reserve_size = 0;
-+		efi_free(sys_table, *image_size, *image_addr);
-+		*image_size = 0;
-+		return EFI_ERROR;
-+	}
-+	return EFI_SUCCESS;
++	return 0;
 +}
-diff --git a/arch/arm/boot/compressed/efi-stub.h b/arch/arm/boot/compressed/efi-stub.h
-new file mode 100644
-index 0000000..0fe9376
---- /dev/null
-+++ b/arch/arm/boot/compressed/efi-stub.h
-@@ -0,0 +1,5 @@
-+#ifndef _ARM_EFI_STUB_H
-+#define _ARM_EFI_STUB_H
-+/* Error code returned to ASM code instead of valid FDT address. */
-+#define EFI_STUB_ERROR		(~0)
-+#endif
-diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
-index 066b034..eeb394c 100644
---- a/arch/arm/boot/compressed/head.S
-+++ b/arch/arm/boot/compressed/head.S
-@@ -10,6 +10,7 @@
-  */
- #include <linux/linkage.h>
- #include <asm/assembler.h>
-+#include "efi-stub.h"
++early_param("uefi_debug", uefi_debug_setup);
++
++static int __init is_normal_ram(efi_memory_desc_t *md)
++{
++	if (md->attribute & EFI_MEMORY_WB)
++		return 1;
++	return 0;
++}
++
++static void __init efi_setup_idmap(void)
++{
++	struct memblock_region *r;
++	efi_memory_desc_t *md;
++	u64 paddr, npages, size;
++
++	for_each_memblock(memory, r)
++		create_id_mapping(r->base, r->size, 0);
++
++	/* map runtime io spaces */
++	for_each_efi_memory_desc(&memmap, md) {
++		if (!(md->attribute & EFI_MEMORY_RUNTIME) || is_normal_ram(md))
++			continue;
++		paddr = md->phys_addr;
++		npages = md->num_pages;
++		memrange_efi_to_native(&paddr, &npages);
++		size = npages << PAGE_SHIFT;
++		create_id_mapping(paddr, size, 1);
++	}
++}
++
++static int __init uefi_init(void)
++{
++	efi_char16_t *c16;
++	char vendor[100] = "unknown";
++	int i, retval;
++
++	efi.systab = early_memremap(efi_system_table,
++				    sizeof(efi_system_table_t));
++	if (efi.systab == NULL) {
++		pr_warn("Unable to map EFI system table.\n");
++		return -ENOMEM;
++	}
++
++	set_bit(EFI_BOOT, &efi.flags);
++	set_bit(EFI_64BIT, &efi.flags);
++
++	/*
++	 * Verify the EFI Table
++	 */
++	if (efi.systab->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE) {
++		pr_err("System table signature incorrect\n");
++		return -EINVAL;
++	}
++	if ((efi.systab->hdr.revision >> 16) < 2)
++		pr_warn("Warning: EFI system table version %d.%02d, expected 2.00 or greater\n",
++			efi.systab->hdr.revision >> 16,
++			efi.systab->hdr.revision & 0xffff);
++
++	/* Show what we know for posterity */
++	c16 = early_memremap(efi.systab->fw_vendor,
++			     sizeof(vendor));
++	if (c16) {
++		for (i = 0; i < (int) sizeof(vendor) - 1 && *c16; ++i)
++			vendor[i] = c16[i];
++		vendor[i] = '\0';
++	}
++
++	pr_info("EFI v%u.%.02u by %s\n",
++		efi.systab->hdr.revision >> 16,
++		efi.systab->hdr.revision & 0xffff, vendor);
++
++	retval = efi_config_init(NULL);
++	if (retval == 0)
++		set_bit(EFI_CONFIG_TABLES, &efi.flags);
++
++	early_memunmap(c16, sizeof(vendor));
++	early_memunmap(efi.systab,  sizeof(efi_system_table_t));
++
++	return retval;
++}
++
++static __initdata char memory_type_name[][32] = {
++	{"Reserved"},
++	{"Loader Code"},
++	{"Loader Data"},
++	{"Boot Code"},
++	{"Boot Data"},
++	{"Runtime Code"},
++	{"Runtime Data"},
++	{"Conventional Memory"},
++	{"Unusable Memory"},
++	{"ACPI Reclaim Memory"},
++	{"ACPI Memory NVS"},
++	{"Memory Mapped I/O"},
++	{"MMIO Port Space"},
++	{"PAL Code"},
++};
++
++/*
++ * Return true for RAM regions we want to permanently reserve.
++ */
++static __init int is_reserve_region(efi_memory_desc_t *md)
++{
++	if (!is_normal_ram(md))
++		return 0;
++
++	if (md->attribute & EFI_MEMORY_RUNTIME)
++		return 1;
++
++	if (md->type == EFI_ACPI_RECLAIM_MEMORY)
++		return 1;
++
++	return 0;
++}
++
++static __init void reserve_regions(void)
++{
++	efi_memory_desc_t *md;
++	u64 paddr, npages, size;
++
++	if (uefi_debug)
++		pr_info("Processing EFI memory map:\n");
++
++	for_each_efi_memory_desc(&memmap, md) {
++		paddr = md->phys_addr;
++		npages = md->num_pages;
++
++		if (uefi_debug)
++			pr_info("  0x%012llx-0x%012llx [%s]",
++				paddr, paddr + (npages << EFI_PAGE_SHIFT) - 1,
++				memory_type_name[md->type]);
++
++		memrange_efi_to_native(&paddr, &npages);
++		size = npages << PAGE_SHIFT;
++
++		if (is_normal_ram(md))
++			early_init_dt_add_memory_arch(paddr, size);
++
++		if (is_reserve_region(md) ||
++		    md->type == EFI_BOOT_SERVICES_CODE ||
++		    md->type == EFI_BOOT_SERVICES_DATA) {
++			memblock_reserve(paddr, size);
++			if (uefi_debug)
++				pr_cont("*");
++		}
++
++		if (uefi_debug)
++			pr_cont("\n");
++	}
++}
++
++
++static u64 __init free_one_region(u64 start, u64 end)
++{
++	u64 size = end - start;
++
++	if (uefi_debug)
++		pr_info("  EFI freeing: 0x%012llx-0x%012llx\n",	start, end - 1);
++
++	free_bootmem_late(start, size);
++	return size;
++}
++
++static u64 __init free_region(u64 start, u64 end)
++{
++	u64 map_start, map_end, total = 0;
++
++	if (end <= start)
++		return total;
++
++	map_start = (u64)memmap.phys_map;
++	map_end = PAGE_ALIGN(map_start + (memmap.map_end - memmap.map));
++	map_start &= PAGE_MASK;
++
++	if (start < map_end && end > map_start) {
++		/* region overlaps UEFI memmap */
++		if (start < map_start)
++			total += free_one_region(start, map_start);
++
++		if (map_end < end)
++			total += free_one_region(map_end, end);
++	} else
++		total += free_one_region(start, end);
++
++	return total;
++}
++
++static void __init free_boot_services(void)
++{
++	u64 total_freed = 0;
++	u64 keep_end, free_start, free_end;
++	efi_memory_desc_t *md;
++
++	/*
++	 * If kernel uses larger pages than UEFI, we have to be careful
++	 * not to inadvertantly free memory we want to keep if there is
++	 * overlap at the kernel page size alignment. We do not want to
++	 * free is_reserve_region() memory nor the UEFI memmap itself.
++	 *
++	 * The memory map is sorted, so we keep track of the end of
++	 * any previous region we want to keep, remember any region
++	 * we want to free and defer freeing it until we encounter
++	 * the next region we want to keep. This way, before freeing
++	 * it, we can clip it as needed to avoid freeing memory we
++	 * want to keep for UEFI.
++	 */
++
++	keep_end = 0;
++	free_start = 0;
++
++	for_each_efi_memory_desc(&memmap, md) {
++		u64 paddr, npages, size;
++
++		if (is_reserve_region(md)) {
++			/*
++			 * We don't want to free any memory from this region.
++			 */
++			if (free_start) {
++				/* adjust free_end then free region */
++				if (free_end > md->phys_addr)
++					free_end -= PAGE_SIZE;
++				total_freed += free_region(free_start, free_end);
++				free_start = 0;
++			}
++			keep_end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT);
++			continue;
++		}
++
++		if (md->type != EFI_BOOT_SERVICES_CODE &&
++		    md->type != EFI_BOOT_SERVICES_DATA) {
++			/* no need to free this region */
++			continue;
++		}
++
++		/*
++		 * We want to free memory from this region.
++		 */
++		paddr = md->phys_addr;
++		npages = md->num_pages;
++		memrange_efi_to_native(&paddr, &npages);
++		size = npages << PAGE_SHIFT;
++
++		if (free_start) {
++			if (paddr <= free_end)
++				free_end = paddr + size;
++			else {
++				total_freed += free_region(free_start, free_end);
++				free_start = paddr;
++				free_end = paddr + size;
++			}
++		} else {
++			free_start = paddr;
++			free_end = paddr + size;
++		}
++		if (free_start < keep_end) {
++			free_start += PAGE_SIZE;
++			if (free_start >= free_end)
++				free_start = 0;
++		}
++	}
++	if (free_start)
++		total_freed += free_region(free_start, free_end);
++
++	if (total_freed)
++		pr_info("Freed 0x%llx bytes of EFI boot services memory",
++			total_freed);
++}
++
++void __init efi_init(void)
++{
++	struct efi_fdt_params params;
++
++	/* Grab UEFI information placed in FDT by stub */
++	if (!efi_get_fdt_params(&params, uefi_debug))
++		return;
++
++	efi_system_table = params.system_table;
++
++	memblock_reserve(params.mmap & PAGE_MASK,
++			 PAGE_ALIGN(params.mmap_size + (params.mmap & ~PAGE_MASK)));
++	memmap.phys_map = (void *)params.mmap;
++	memmap.map = early_memremap(params.mmap, params.mmap_size);
++	memmap.map_end = memmap.map + params.mmap_size;
++	memmap.desc_size = params.desc_size;
++	memmap.desc_version = params.desc_ver;
++
++	if (uefi_init() < 0)
++		return;
++
++	reserve_regions();
++}
++
++static int __init remap_region(efi_memory_desc_t *md, void **new)
++{
++	u64 paddr, vaddr, npages, size;
++
++	paddr = md->phys_addr;
++	npages = md->num_pages;
++	memrange_efi_to_native(&paddr, &npages);
++	size = npages << PAGE_SHIFT;
++
++	if (is_normal_ram(md))
++		vaddr = (__force u64)ioremap_cache(paddr, size);
++	else
++		vaddr = (__force u64)ioremap(paddr, size);
++
++	if (!vaddr) {
++		pr_err("Unable to remap 0x%llx pages @ %p\n",
++		       npages, (void *)paddr);
++		return 0;
++	}
++
++	/* adjust for any rounding when EFI and system pagesize differs */
++	md->virt_addr = vaddr + (md->phys_addr - paddr);
++
++	if (uefi_debug)
++		pr_info("  EFI remap 0x%012llx => %p\n",
++			md->phys_addr, (void *)md->virt_addr);
++
++	memcpy(*new, md, memmap.desc_size);
++	*new += memmap.desc_size;
++
++	return 1;
++}
++
++/*
++ * Called from setup_arch with interrupts disabled.
++ */
++void __init efi_enter_virtual_mode(void)
++{
++	efi_memory_desc_t *md;
++	phys_addr_t virtmap_phys;
++	void *virtmap, *virt_md;
++	efi_status_t status;
++	u64 mapsize;
++	int count = 0;
++	unsigned long flags;
++
++	if (!efi_enabled(EFI_BOOT)) {
++		pr_info("EFI services will not be available.\n");
++		return;
++	}
++
++	pr_info("Remapping and enabling EFI services.\n");
++
++	/* replace early memmap mapping with permanent mapping */
++	mapsize = memmap.map_end - memmap.map;
++	early_memunmap(memmap.map, mapsize);
++	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
++						   mapsize);
++	memmap.map_end = memmap.map + mapsize;
++
++	efi.memmap = &memmap;
++
++	/* Map the runtime regions */
++	virtmap = kmalloc(mapsize, GFP_KERNEL);
++	if (!virtmap) {
++		pr_err("Failed to allocate EFI virtual memmap\n");
++		return;
++	}
++	virtmap_phys = virt_to_phys(virtmap);
++	virt_md = virtmap;
++
++	for_each_efi_memory_desc(&memmap, md) {
++		if (!(md->attribute & EFI_MEMORY_RUNTIME))
++			continue;
++		if (remap_region(md, &virt_md))
++			++count;
++	}
++
++	efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
++	if (efi.systab)
++		set_bit(EFI_SYSTEM_TABLES, &efi.flags);
++
++	/* boot time idmap_pg_dir is incomplete, so fill in missing parts */
++	efi_setup_idmap();
++
++	local_irq_save(flags);
++	cpu_switch_mm(idmap_pg_dir, &init_mm);
++	flush_tlb_all();
++	flush_cache_all();
++
++	/* Call SetVirtualAddressMap with the physical address of the map */
++	runtime = efi.systab->runtime;
++	efi.set_virtual_address_map = runtime->set_virtual_address_map;
++
++	status = efi.set_virtual_address_map(count * memmap.desc_size,
++					     memmap.desc_size,
++					     memmap.desc_version,
++					     (efi_memory_desc_t *)virtmap_phys);
++	cpu_set_reserved_ttbr0();
++	flush_tlb_all();
++	flush_cache_all();
++	local_irq_restore(flags);
++
++	kfree(virtmap);
++
++	free_boot_services();
++
++	if (status != EFI_SUCCESS) {
++		pr_err("Failed to set EFI virtual address map! [%lx]\n",
++			status);
++		return;
++	}
++
++	/* Set up runtime services function pointers */
++	runtime = efi.systab->runtime;
++	efi.get_time = runtime->get_time;
++	efi.set_time = runtime->set_time;
++	efi.get_wakeup_time = runtime->get_wakeup_time;
++	efi.set_wakeup_time = runtime->set_wakeup_time;
++	efi.get_variable = runtime->get_variable;
++	efi.get_next_variable = runtime->get_next_variable;
++	efi.set_variable = runtime->set_variable;
++	efi.query_variable_info = runtime->query_variable_info;
++	efi.update_capsule = runtime->update_capsule;
++	efi.query_capsule_caps = runtime->query_capsule_caps;
++	efi.get_next_high_mono_count = runtime->get_next_high_mono_count;
++	efi.reset_system = runtime->reset_system;
++
++	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
++}
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 4d2ac74..7314460 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -41,6 +41,7 @@
+ #include <linux/memblock.h>
+ #include <linux/of_fdt.h>
+ #include <linux/of_platform.h>
++#include <linux/efi.h>
  
- 	.arch	armv7-a
- /*
-@@ -120,22 +121,93 @@
-  */
- 		.align
- 		.arm				@ Always enter in ARM state
-+		.text
- start:
- 		.type	start,#function
--		.rept	7
-+#ifdef CONFIG_EFI_STUB
-+		@ Magic MSDOS signature for PE/COFF + ADD opcode
-+		@ the EFI stub only supports little endian, as the EFI functions
-+		@ it invokes are little endian.
-+		.word	0x62805a4d
-+#else
-+		mov	r0, r0
-+#endif
-+		.rept	5
- 		mov	r0, r0
- 		.endr
--   ARM(		mov	r0, r0		)
--   ARM(		b	1f		)
-- THUMB(		adr	r12, BSYM(1f)	)
-- THUMB(		bx	r12		)
-+
-+		adrl	r12, BSYM(zimage_continue)
-+ ARM(		mov     pc, r12 )
-+ THUMB(		bx	r12     )
-+		@ zimage_continue will be in ARM or thumb mode as configured
+ #include <asm/fixmap.h>
+ #include <asm/cputype.h>
+@@ -55,6 +56,7 @@
+ #include <asm/traps.h>
+ #include <asm/memblock.h>
+ #include <asm/psci.h>
++#include <asm/efi.h>
  
- 		.word	0x016f2818		@ Magic numbers to help the loader
- 		.word	start			@ absolute load/run zImage address
- 		.word	_edata			@ zImage end address
-+
-+#ifdef CONFIG_EFI_STUB
-+		@ Portions of the MSDOS file header must be at offset
-+		@ 0x3c from the start of the file.  All PE/COFF headers
-+		@ are kept contiguous for simplicity.
-+#include "efi-header.S"
-+
-+efi_stub_entry:
-+		@ The EFI stub entry point is not at a fixed address, however
-+		@ this address must be set in the PE/COFF header.
-+		@ EFI entry point is in A32 mode, switch to T32 if configured.
-+ THUMB(		adr	r12, BSYM(1f)	)
-+ THUMB(		bx	r12		)
-  THUMB(		.thumb			)
- 1:
-  ARM_BE8(	setend	be )			@ go BE8 if compiled for BE8
-+		@ Save lr on stack for possible return to EFI firmware.
-+		@ Don't care about fp, but need 64 bit alignment....
-+		stmfd	sp!, {fp, lr}
-+
-+		@ allocate space on stack for passing current zImage address
-+		@ and for the EFI stub to return of new entry point of
-+		@ zImage, as EFI stub may copy the kernel.  Pointer address
-+		@ is passed in r2.  r0 and r1 are passed through from the
-+		@ EFI firmware to efi_entry
-+		adr	r3, start
-+		str	r3, [sp, #-8]!
-+		mov	r2, sp			@ pass pointer in r2
-+		bl	efi_entry
-+		ldr	r3, [sp], #8	@ get new zImage address from stack
-+
-+		@ Check for error return from EFI stub.  r0 has FDT address
-+		@ or EFI_STUB_ERROR error code.
-+		cmp	r0, #EFI_STUB_ERROR
-+		beq	efi_load_fail
-+
-+		@ Save return values of efi_entry
-+		stmfd	sp!, {r0, r3}
-+		bl	cache_clean_flush
-+		bl	cache_off
-+		ldmfd   sp!, {r0, r3}
-+
-+		@ Set parameters for booting zImage according to boot protocol
-+		@ put FDT address in r2, it was returned by efi_entry()
-+		@ r1 is FDT machine type, and r0 needs to be 0
-+		mov	r2, r0
-+		mov	r1, #0xFFFFFFFF
-+		mov	r0, #0
-+
-+		@ Branch to (possibly) relocated zImage that is in r3
-+		@ Make sure we are in A32 mode, as zImage requires
-+ THUMB(		bx	r3		)
-+ ARM(		mov	pc, r3		)
-+
-+efi_load_fail:
-+		@ Return EFI_LOAD_ERROR to EFI firmware on error.
-+		@ Switch back to ARM mode for EFI is done based on
-+		@ return address on stack in case we are in THUMB mode
-+		ldr	r0, =0x80000001
-+		ldmfd	sp!, {fp, pc}		@ put lr from stack into pc
-+#endif
-+
-+ THUMB(		.thumb			)
-+zimage_continue:
- 		mrs	r9, cpsr
- #ifdef CONFIG_ARM_VIRT_EXT
- 		bl	__hyp_stub_install	@ get into SVC mode, reversibly
-@@ -168,7 +240,6 @@ not_angel:
- 		 * by the linker here, but it should preserve r7, r8, and r9.
- 		 */
+ unsigned int processor_id;
+ EXPORT_SYMBOL(processor_id);
+@@ -333,6 +335,7 @@ void __init setup_arch(char **cmdline_p)
  
--		.text
+ 	parse_early_param();
  
- #ifdef CONFIG_AUTO_ZRELADDR
- 		@ determine final kernel image address
++	efi_init();
+ 	arm64_memblock_init();
+ 
+ 	paging_init();
+diff --git a/init/main.c b/init/main.c
+index 0325962..387b5b2 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -903,7 +903,8 @@ static noinline void __init kernel_init_freeable(void)
+ 
+ 	do_pre_smp_initcalls();
+ 
+-	if (IS_ENABLED(CONFIG_ARM) && efi_enabled(EFI_BOOT))
++	if ((IS_ENABLED(CONFIG_ARM) || IS_ENABLED(CONFIG_ARM64)) &&
++	    efi_enabled(EFI_BOOT))
+ 		efi_enter_virtual_mode();
+ 
+ 	lockup_detector_init();
 -- 
 1.7.10.4
