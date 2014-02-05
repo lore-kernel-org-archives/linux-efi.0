@@ -1,42 +1,131 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 2/5] arm: add new asm macro update_sctlr
-Date: Mon, 3 Feb 2014 18:15:44 +0000
-Message-ID: <20140203181544.GK11329@bivouac.eciton.net>
-References: <1389445524-30623-3-git-send-email-leif.lindholm@linaro.org>
- <20140122112055.GF1621@mudshark.cambridge.arm.com>
- <20140129182805.GF11329@bivouac.eciton.net>
- <1391029124.2488.50.camel@deneb.redhat.com>
- <20140130131247.GG11329@bivouac.eciton.net>
- <20140203103415.GA12187@mudshark.cambridge.arm.com>
- <20140203155542.GI11329@bivouac.eciton.net>
- <20140203160051.GG14112@mudshark.cambridge.arm.com>
- <20140203164636.GJ11329@bivouac.eciton.net>
- <20140203165718.GO14112@mudshark.cambridge.arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 00/22] arm/arm64: UEFI stubs + runtime services
+Date: Wed,  5 Feb 2014 17:03:51 +0000
+Message-ID: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140203165718.GO14112-MRww78TxoiP5vMa5CHWGZ34zcgK1vI+I0E9HWUfgJXw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org" <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org" <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 03, 2014 at 04:57:18PM +0000, Will Deacon wrote:
-> > mov[tw]: why?
-> > Then we end up battling different available immediate fields in A32/T32
-> > instruction sets and v5/v6/v7 architecture versions.
-> 
-> I was making the assumption that UEFI was going to be v7 only... is this not
-> true?
+This is a combined set of patches for the arm and arm64 kernel
+support for UEFI firmware.
 
-There is no such requirement in the specification.
-It even mentions requirements for ARMv4 in one place :)
+The set depends on the following prerequisite sets:
+- Laura Abbott's 'Remove ARM meminfo'
+- Matt Fleming's 'Move facility flags to struct efi'
+- Mark Salter's  'Generic fixmap'
+- Mark Salter's  'Generic early_ioremap'
+- Mark Salter's  'EFI memory map iteration helper'
 
-But I also don't understand why ldr= should be avoided.
-This is not performance sensitive (called once on system boot), and
-it's already executing with the caches off, so even if it ends up
-being a literal load it does not pollute.
+All of these are held on top of 3.14-rc1, with the patches in this set,
+in git://git.linaro.org/people/leif.lindholm/linux.git, rebasing branch
+uefi-for-upstream.
 
-/
-    Leif
+New in this version:
+- Much more stub code shared arm/arm64.
+- Stub looks in configuration tables for DT.
+- Stub creates empty DT if none found/specified.
+- Stub ignores dtb= option when UEFI Secure Boot active.
+- Stub deletes any memory nodes in DT.
+- Kernel sets up available RAM for memblock from UEFI memory map.
+  (So no longer need different DTs or command line parameters for
+   otherwise identical platforms with different amounts of RAM.)
+- arm64 now compatible with 64K pages (with 4K UEFI page size).
+- Fix mapping of runtime mmio regions on arm64.
+- Reworked update_sctlr asm macro.
+- Various cleanup and style fixes.
+
+---
+
+Ard Biesheuvel (1):
+  arm: efistub: ignore dtb= when UEFI SecureBoot is enabled
+
+H. Peter Anvin (1):
+  Improve cmdline conversion
+
+Leif Lindholm (6):
+  arm: break part of __soft_restart out into separate function
+  arm: add new asm macro update_sctlr
+  Documentation: arm: add UEFI support documentation
+  arm: Add [U]EFI runtime services support
+  init: efi: arm: enable (U)EFI runtime services on arm
+  arm: update boot/compressed/.gitignore
+
+Mark Salter (6):
+  efi: add helper function to get UEFI params from FDT
+  lib: add fdt_empty_tree.c
+  arm64: Add function to create identity mappings
+  arm64: add EFI stub
+  doc: arm64: add description of EFI stub support
+  arm64: add EFI runtime services
+
+Roy Franz (8):
+  efi-stub.txt updates for ARM
+  Add shared printk wrapper for consistent prefixing
+  Add helper functions used by arm/arm64
+  Add shared FDT related functions for ARM/ARM64
+  Add strstr to compressed string.c for ARM.
+  Add shared arm/arm64 EFI stub
+  Add EFI stub for ARM
+  Disable stack protection for decompressor/stub
+
+ Documentation/arm/00-INDEX             |    3 +
+ Documentation/arm/uefi.txt             |   64 +++++
+ Documentation/arm64/booting.txt        |    4 +
+ Documentation/efi-stub.txt             |   33 ++-
+ arch/arm/Kconfig                       |   27 ++
+ arch/arm/boot/compressed/.gitignore    |    3 +
+ arch/arm/boot/compressed/Makefile      |   19 +-
+ arch/arm/boot/compressed/efi-header.S  |  117 ++++++++
+ arch/arm/boot/compressed/efi-stub.c    |  118 ++++++++
+ arch/arm/boot/compressed/efi-stub.h    |    5 +
+ arch/arm/boot/compressed/head.S        |   83 +++++-
+ arch/arm/boot/compressed/string.c      |   21 ++
+ arch/arm/include/asm/assembler.h       |   14 +
+ arch/arm/include/asm/idmap.h           |    1 +
+ arch/arm/include/asm/uefi.h            |   28 ++
+ arch/arm/kernel/Makefile               |    2 +
+ arch/arm/kernel/process.c              |   12 +-
+ arch/arm/kernel/setup.c                |    7 +-
+ arch/arm/kernel/uefi.c                 |  413 ++++++++++++++++++++++++++++
+ arch/arm/kernel/uefi_phys.S            |   69 +++++
+ arch/arm/mm/idmap.c                    |   15 ++
+ arch/arm64/Kconfig                     |   26 ++
+ arch/arm64/include/asm/efi.h           |   12 +
+ arch/arm64/include/asm/mmu.h           |    2 +
+ arch/arm64/kernel/Makefile             |    4 +
+ arch/arm64/kernel/efi-entry.S          |   93 +++++++
+ arch/arm64/kernel/efi-stub.c           |   67 +++++
+ arch/arm64/kernel/efi.c                |  462 ++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/head.S               |  112 ++++++++
+ arch/arm64/kernel/setup.c              |    3 +
+ arch/arm64/mm/mmu.c                    |   66 +++--
+ arch/x86/boot/compressed/eboot.c       |    3 +-
+ drivers/firmware/efi/Kconfig           |    7 +
+ drivers/firmware/efi/arm-stub.c        |  146 ++++++++++
+ drivers/firmware/efi/efi-stub-helper.c |  199 +++++++++++---
+ drivers/firmware/efi/efi.c             |   79 ++++++
+ drivers/firmware/efi/fdt.c             |  268 ++++++++++++++++++
+ include/linux/efi.h                    |   12 +
+ init/main.c                            |    5 +
+ lib/Makefile                           |    3 +-
+ lib/fdt_empty_tree.c                   |    2 +
+ 41 files changed, 2534 insertions(+), 95 deletions(-)
+ create mode 100644 Documentation/arm/uefi.txt
+ create mode 100644 arch/arm/boot/compressed/efi-header.S
+ create mode 100644 arch/arm/boot/compressed/efi-stub.c
+ create mode 100644 arch/arm/boot/compressed/efi-stub.h
+ create mode 100644 arch/arm/include/asm/uefi.h
+ create mode 100644 arch/arm/kernel/uefi.c
+ create mode 100644 arch/arm/kernel/uefi_phys.S
+ create mode 100644 arch/arm64/include/asm/efi.h
+ create mode 100644 arch/arm64/kernel/efi-entry.S
+ create mode 100644 arch/arm64/kernel/efi-stub.c
+ create mode 100644 arch/arm64/kernel/efi.c
+ create mode 100644 drivers/firmware/efi/arm-stub.c
+ create mode 100644 drivers/firmware/efi/fdt.c
+ create mode 100644 lib/fdt_empty_tree.c
+
+-- 
+1.7.10.4
