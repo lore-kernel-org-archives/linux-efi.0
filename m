@@ -1,37 +1,49 @@
-From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
-Subject: Re: [PATCH 05/22] Add shared printk wrapper for consistent prefixing
-Date: Wed, 05 Feb 2014 09:34:13 -0800
-Message-ID: <1391621653.30094.11.camel@joe-AO722>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 02/22] arm: add new asm macro update_sctlr
+Date: Wed, 5 Feb 2014 18:01:16 +0000
+Message-ID: <20140205180115.GE28140@mudshark.cambridge.arm.com>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-	 <1391619853-10601-6-git-send-email-leif.lindholm@linaro.org>
+ <1391619853-10601-3-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1391619853-10601-6-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1391619853-10601-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2014-02-05 at 17:03 +0000, Leif Lindholm wrote:
-> From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Wed, Feb 05, 2014 at 05:03:53PM +0000, Leif Lindholm wrote:
+> A new macro for setting/clearing bits in the SCTLR.
 > 
-> Add a wrapper for printk to standardize the prefix for informational and
-> error messages from the EFI stub.
+> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Suggested-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> ---
+>  arch/arm/include/asm/assembler.h |   14 ++++++++++++++
+>  1 file changed, 14 insertions(+)
 
-trivia:
+Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 
-> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-[]
-> @@ -45,6 +45,9 @@ static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
->  	}
->  }
+(although really minor comment below)
+
+> diff --git a/arch/arm/include/asm/assembler.h b/arch/arm/include/asm/assembler.h
+> index 5c22851..e8ca24b 100644
+> --- a/arch/arm/include/asm/assembler.h
+> +++ b/arch/arm/include/asm/assembler.h
+> @@ -383,4 +383,18 @@ THUMB(	orr	\reg , \reg , #PSR_T_BIT	)
+>  #endif
+>  	.endm
 >  
-> +#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
-> +#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
+> +#ifdef CONFIG_CPU_CP15
+> +/* Macro for setting/clearing bits in sctlr */
+> +	.macro	update_sctlr, tmp:req, set=, clear=
+> +	mrc	p15, 0, \tmp, c1, c0, 0
+> +	.ifnc	\set,
+> +	orr	\tmp, \set
 
-Perhaps it'd be better to use a space after the second "
+I'd prefer the 3-arg form here for consistency (with this macro and the
+rest of the file).
 
-Also, maybe pr_efi should be pr_efi_info.
-That would quiet any checkpatch noise around long msg uses.
+Will
