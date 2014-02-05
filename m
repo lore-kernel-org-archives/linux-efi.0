@@ -1,9 +1,8 @@
-From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [BUG] Linux 3.14 fails to boot with new EFI changes
-Date: Wed, 5 Feb 2014 15:45:36 -0600
-Message-ID: <20140205214536.GT3034@sgi.com>
-References: <20140128110552.GA815@pd.tnic>
- <20140128200754.GZ18196@sgi.com>
+Date: Thu, 6 Feb 2014 00:15:40 +0100
+Message-ID: <20140205231540.GB6364@pd.tnic>
+References: <20140128200754.GZ18196@sgi.com>
  <20140128225905.GN815@pd.tnic>
  <20140128234036.GB18196@sgi.com>
  <20140129141822.GC24887@pd.tnic>
@@ -12,69 +11,48 @@ References: <20140128110552.GA815@pd.tnic>
  <20140131100722.GA21873@pd.tnic>
  <20140131140220.GC22498@sgi.com>
  <20140131142318.GC21873@pd.tnic>
+ <20140205214536.GT3034@sgi.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140131142318.GC21873-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20140205214536.GT3034-sJ/iWh9BUns@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
 Cc: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 31, 2014 at 03:23:18PM +0100, Borislav Petkov wrote:
-> And now my question:
+On Wed, Feb 05, 2014 at 03:45:36PM -0600, Alex Thorlton wrote:
+> While working on an answer to this question, I ran across another issue
+> on some newer hardware, that looks like it's definitely related to this
+> problem, and might be the root cause.
 > 
-> How can I reliably find out which region contains that
-> uv_systab.function call?
+> When booting on a UV2 we die in efi_enter_virtual_mode:
 > 
-> I need it so that I can map it in the EFI page table and you can
-> continue to call that function and you can get back to your reliable way
-> to boot.
+> BUG: unable to handle kernel paging request at 0000008f7e848020
+> IP: [<000000007dadb6a9>] 0x7dadb6a8
+> PGD 0
 
-While working on an answer to this question, I ran across another issue
-on some newer hardware, that looks like it's definitely related to this
-problem, and might be the root cause.
+That looks very much like this other issue we're debugging right now:
 
-When booting on a UV2 we die in efi_enter_virtual_mode:
+http://marc.info/?l=linux-kernel&m=139115794830637
 
-BUG: unable to handle kernel paging request at 0000008f7e848020
-IP: [<000000007dadb6a9>] 0x7dadb6a8
-PGD 0
-Oops: 0000 [#1] SMP
-Modules linked in:
-CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.11.0-medusa-00038-gd2f7cbe #821
-Hardware name: SGI UV2000/ROMLEY, BIOS SGI UV 2000/3000 series BIOS 01/15/2013
-task: ffffffff817ae400 ti: ffffffff8179e000 task.ti: ffffffff8179e000
-RIP: 0010:[<000000007dadb6a9>]  [<000000007dadb6a9>] 0x7dadb6a8
-RSP: 0000:ffffffff8179fd90  EFLAGS: 00010202
-RAX: 000000007d9b8e01 RBX: 0000000000000000 RCX: 0000000000000000
-RDX: 000000007db074f8 RSI: 000000007d9b8e18 RDI: 0000008f7e848000
-RBP: 000000007db074f8 R08: 0000000000000001 R09: 0000008f7e848000
-R10: 0000000000000030 R11: ffff880ffffda000 R12: 8000000000000000
-R13: 000077ff80000000 R14: ffff888f7e848000 R15: 000000000009b000
-FS:  0000000000000000(0000) GS:ffff880fffc00000(0000) knlGS:0000000000000000
-CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-CR2: 0000008f7e848020 CR3: 000000000009b000 CR4: 00000000000406b0
-Stack:
- fffffffef6000000 0000000000000000 0000000000000000 80000000000001e3
- 0000000000000030 000000007dadd540 0000000000001f20 0000000060000202
- 000000007d9b8da0 000000007daf8c6b ffffffff810fd2bc 00000000000000d0
-Call Trace:
- [<ffffffff810fd2bc>] ? cache_grow+0x1e5/0x236
- [<ffffffff8103adac>] ? efi_call4+0x6c/0xf0
- [<ffffffff8186452f>] ? efi_enter_virtual_mode+0x1ac/0x328
- [<ffffffff8184de98>] ? start_kernel+0x35b/0x3ed
- [<ffffffff8184d950>] ? repair_env_string+0x60/0x60
- [<ffffffff8184d479>] ? x86_64_start_reservations+0x2e/0x30
- [<ffffffff8184d5a3>] ? x86_64_start_kernel+0x128/0x12f
-Code:  Bad RIP value.
-RIP  [<000000007dadb6a9>] 0x7dadb6a8
- RSP <ffffffff8179fd90>
-CR2: 0000008f7e848020
+> CPU: 0 PID: 0 Comm: swapper/0 Not tainted 3.11.0-medusa-00038-gd2f7cbe #821
 
-Let me know what other information you need and I'll get it to you ASAP.
+...
 
-Thanks!
+> Let me know what other information you need and I'll get it to you ASAP.
 
-- Alex
+You could try to boot latest linus + Matt's 'next' branch ontop and see
+whether it is exploding. I'd venture a guess and say yes but a whole
+dmesg with CONFIG_EFI_PGT_DUMP and pagetable dump might still give us
+some clues.
+
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
