@@ -1,84 +1,77 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH 01/22] arm: break part of __soft_restart out into separate function
-Date: Wed,  5 Feb 2014 17:03:52 +0000
-Message-ID: <1391619853-10601-2-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH 04/22] efi-stub.txt updates for ARM
+Date: Wed,  5 Feb 2014 17:03:55 +0000
+Message-ID: <1391619853-10601-5-git-send-email-leif.lindholm@linaro.org>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: patches@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
+Cc: patches@linaro.org, Roy Franz <roy.franz@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Certain operations can be considered mandatory for any piece of code
-preparing to switch off the MMU. Break this out into separate function
-idmap_prepare().
+From: Roy Franz <roy.franz@linaro.org>
 
+Update efi-stub.txt documentation to be more general
+and not x86 specific.  Add ARM only "dtb=" command
+line option description.
+
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Suggested-by: Will Deacon <will.deacon@arm.com>
-Acked-by: Will Deacon <will.deacon@arm.com>
+Acked-by: Grant Likely <grant.likely@linaro.org>
 ---
- arch/arm/include/asm/idmap.h |    1 +
- arch/arm/kernel/process.c    |   12 +-----------
- arch/arm/mm/idmap.c          |   15 +++++++++++++++
- 3 files changed, 17 insertions(+), 11 deletions(-)
+ Documentation/efi-stub.txt |   27 ++++++++++++++++++++-------
+ 1 file changed, 20 insertions(+), 7 deletions(-)
 
-diff --git a/arch/arm/include/asm/idmap.h b/arch/arm/include/asm/idmap.h
-index bf863ed..2e914a8 100644
---- a/arch/arm/include/asm/idmap.h
-+++ b/arch/arm/include/asm/idmap.h
-@@ -10,5 +10,6 @@
- extern pgd_t *idmap_pgd;
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index c628788..26be7b0 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -1,13 +1,16 @@
+ 			  The EFI Boot Stub
+ 		     ---------------------------
  
- void setup_mm_for_reboot(void);
-+void idmap_prepare(void);
+-On the x86 platform, a bzImage can masquerade as a PE/COFF image,
+-thereby convincing EFI firmware loaders to load it as an EFI
+-executable. The code that modifies the bzImage header, along with the
+-EFI-specific entry point that the firmware loader jumps to are
+-collectively known as the "EFI boot stub", and live in
++On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
++as a PE/COFF image, thereby convincing EFI firmware loaders to load
++it as an EFI executable. The code that modifies the bzImage header,
++along with the EFI-specific entry point that the firmware loader
++jumps to are collectively known as the "EFI boot stub", and live in
+ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+-respectively.
++respectively. For ARM the EFI stub is implemented in
++arch/arm/boot/compressed/efi-header.S and
++arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
++between architectures is in drivers/firmware/efi/efi-stub-helper.c.
  
- #endif	/* __ASM_IDMAP_H */
-diff --git a/arch/arm/kernel/process.c b/arch/arm/kernel/process.c
-index 92f7b15..91b4cec 100644
---- a/arch/arm/kernel/process.c
-+++ b/arch/arm/kernel/process.c
-@@ -75,17 +75,7 @@ static void __soft_restart(void *addr)
- {
- 	phys_reset_t phys_reset;
+ By using the EFI boot stub it's possible to boot a Linux kernel
+ without the use of a conventional EFI boot loader, such as grub or
+@@ -23,7 +26,9 @@ The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
+ System Partition (ESP) and renamed with the extension ".efi". Without
+ the extension the EFI firmware loader will refuse to execute it. It's
+ not possible to execute bzImage.efi from the usual Linux file systems
+-because EFI firmware doesn't have support for them.
++because EFI firmware doesn't have support for them. For ARM the
++arch/arm/boot/zImage should be copied to the system partition, and it
++may not need to be renamed.
  
--	/* Take out a flat memory mapping. */
--	setup_mm_for_reboot();
--
--	/* Clean and invalidate caches */
--	flush_cache_all();
--
--	/* Turn off caching */
--	cpu_proc_fin();
--
--	/* Push out any further dirty data, and ensure cache is empty */
--	flush_cache_all();
-+	idmap_prepare();
  
- 	/* Switch to the identity mapping. */
- 	phys_reset = (phys_reset_t)(unsigned long)virt_to_phys(cpu_reset);
-diff --git a/arch/arm/mm/idmap.c b/arch/arm/mm/idmap.c
-index 8e0e52e..5c85779 100644
---- a/arch/arm/mm/idmap.c
-+++ b/arch/arm/mm/idmap.c
-@@ -122,3 +122,18 @@ void setup_mm_for_reboot(void)
- 	local_flush_tlb_all();
- #endif
- }
+ **** Passing kernel parameters from the EFI shell
+@@ -63,3 +68,11 @@ Notice how bzImage.efi can be specified with a relative path. That's
+ because the image we're executing is interpreted by the EFI shell,
+ which understands relative paths, whereas the rest of the command line
+ is passed to bzImage.efi.
 +
-+void idmap_prepare(void)
-+{
-+	/* Take out a flat memory mapping. */
-+	setup_mm_for_reboot();
 +
-+	/* Clean and invalidate caches */
-+	flush_cache_all();
++**** The "dtb=" option
 +
-+	/* Turn off caching */
-+	cpu_proc_fin();
-+
-+	/* Push out any further dirty data, and ensure cache is empty */
-+	flush_cache_all();
-+}
++For the ARM architecture, we also need to be able to provide a device
++tree to the kernel. This is done with the "dtb=" command line option,
++and is processed in the same manner as the "initrd=" option that is
++described above.
 -- 
 1.7.10.4
