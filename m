@@ -1,7 +1,7 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH 06/22] Add helper functions used by arm/arm64
-Date: Wed,  5 Feb 2014 17:03:57 +0000
-Message-ID: <1391619853-10601-7-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH 05/22] Add shared printk wrapper for consistent prefixing
+Date: Wed,  5 Feb 2014 17:03:56 +0000
+Message-ID: <1391619853-10601-6-git-send-email-leif.lindholm@linaro.org>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,102 +23,123 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Roy Franz <roy.franz@linaro.org>
 
-Add the get_dram_base() function and efi_call_physN() macros
-that are shared by arm/arm64.
+Add a wrapper for printk to standardize the prefix for informational and
+error messages from the EFI stub.
 
 Signed-off-by: Roy Franz <roy.franz@linaro.org>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- drivers/firmware/efi/efi-stub-helper.c |   63 +++++++++++++++++++++++++-------
- 1 file changed, 50 insertions(+), 13 deletions(-)
+ drivers/firmware/efi/efi-stub-helper.c |   25 ++++++++++++++-----------
+ 1 file changed, 14 insertions(+), 11 deletions(-)
 
 diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index eb5d2eb..8477a72 100644
+index b6bffbf..eb5d2eb 100644
 --- a/drivers/firmware/efi/efi-stub-helper.c
 +++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -11,6 +11,27 @@
-  */
- #define EFI_READ_CHUNK_SIZE	(1024 * 1024)
- 
-+/* error code which can't be mistaken for valid address */
-+#define EFI_ERROR	(~0UL)
-+
-+# if !defined(CONFIG_X86)
-+/*
-+ * EFI function call wrappers. These are not required for arm/arm64, but
-+ * wrappers are required for X86 to convert between ABIs. These wrappers are
-+ * provided to allow code sharing between X86 and other architectures. Since
-+ * these wrappers directly invoke the EFI function pointer, the function
-+ * pointer type must be properly defined, which is not the case for X86. One
-+ * advantage of this is it allows for type checking of arguments, which is not
-+ * possible with the X86 wrappers.
-+ */
-+#define efi_call_phys0(f)			f()
-+#define efi_call_phys1(f, a1)			f(a1)
-+#define efi_call_phys2(f, a1, a2)		f(a1, a2)
-+#define efi_call_phys3(f, a1, a2, a3)		f(a1, a2, a3)
-+#define efi_call_phys4(f, a1, a2, a3, a4)	f(a1, a2, a3, a4)
-+#define efi_call_phys5(f, a1, a2, a3, a4, a5)	f(a1, a2, a3, a4, a5)
-+#endif
-+
- struct file_info {
- 	efi_file_handle_t *handle;
- 	u64 size;
-@@ -92,6 +113,32 @@ fail:
- 	return status;
+@@ -45,6 +45,9 @@ static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+ 	}
  }
  
++#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
++#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
 +
-+static unsigned long __init get_dram_base(efi_system_table_t *sys_table)
-+{
-+	efi_status_t status;
-+	unsigned long map_size;
-+	unsigned long membase  = EFI_ERROR;
-+	struct efi_memory_map map;
-+	efi_memory_desc_t *md;
-+
-+	status = efi_get_memory_map(sys_table, (efi_memory_desc_t **)&map.map,
-+				    &map_size, &map.desc_size, NULL, NULL);
-+	if (status != EFI_SUCCESS)
-+		return membase;
-+
-+	map.map_end = map.map + map_size;
-+
-+	for_each_efi_memory_desc(&map, md)
-+		if (md->attribute & EFI_MEMORY_WB)
-+			if (membase > md->phys_addr)
-+				membase = md->phys_addr;
-+
-+	efi_call_phys1(sys_table->boottime->free_pool, map.map);
-+
-+	return membase;
-+}
-+
- /*
-  * Allocate at the highest possible address that is not above 'max'.
-  */
-@@ -610,19 +657,9 @@ static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
- 		options = &zero;
+ 
+ static efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 				       efi_memory_desc_t **map,
+@@ -324,7 +327,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 				nr_files * sizeof(*files),
+ 				(void **)&files);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to alloc mem for file handle list\n");
++		pr_efi_err(sys_table_arg, "Failed to alloc mem for file handle list\n");
+ 		goto fail;
  	}
  
--	options_size++;  /* NUL termination */
--#ifdef CONFIG_ARM
--	/*
--	 * For ARM, allocate at a high address to avoid reserved
--	 * regions at low addresses that we don't know the specfics of
--	 * at the time we are processing the command line.
--	 */
--	status = efi_high_alloc(sys_table_arg, options_size, 0,
--			    &cmdline_addr, 0xfffff000);
--#else
--	status = efi_low_alloc(sys_table_arg, options_size, 0,
--			    &cmdline_addr);
--#endif
-+	options_size++;  /* NULL termination */
-+
-+	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
- 	if (status != EFI_SUCCESS)
- 		return NULL;
+@@ -376,13 +379,13 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 					image->device_handle, &fs_proto,
+ 						(void **)&io);
+ 			if (status != EFI_SUCCESS) {
+-				efi_printk(sys_table_arg, "Failed to handle fs_proto\n");
++				pr_efi_err(sys_table_arg, "Failed to handle fs_proto\n");
+ 				goto free_files;
+ 			}
+ 
+ 			status = efi_call_phys2(io->open_volume, io, &fh);
+ 			if (status != EFI_SUCCESS) {
+-				efi_printk(sys_table_arg, "Failed to open volume\n");
++				pr_efi_err(sys_table_arg, "Failed to open volume\n");
+ 				goto free_files;
+ 			}
+ 		}
+@@ -390,7 +393,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 		status = efi_call_phys5(fh->open, fh, &h, filename_16,
+ 					EFI_FILE_MODE_READ, (u64)0);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table_arg, "Failed to open file: ");
++			pr_efi_err(sys_table_arg, "Failed to open file: ");
+ 			efi_char16_printk(sys_table_arg, filename_16);
+ 			efi_printk(sys_table_arg, "\n");
+ 			goto close_handles;
+@@ -402,7 +405,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 		status = efi_call_phys4(h->get_info, h, &info_guid,
+ 					&info_sz, NULL);
+ 		if (status != EFI_BUFFER_TOO_SMALL) {
+-			efi_printk(sys_table_arg, "Failed to get file info size\n");
++			pr_efi_err(sys_table_arg, "Failed to get file info size\n");
+ 			goto close_handles;
+ 		}
+ 
+@@ -411,7 +414,7 @@ grow:
+ 					EFI_LOADER_DATA, info_sz,
+ 					(void **)&info);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table_arg, "Failed to alloc mem for file info\n");
++			pr_efi_err(sys_table_arg, "Failed to alloc mem for file info\n");
+ 			goto close_handles;
+ 		}
+ 
+@@ -427,7 +430,7 @@ grow:
+ 		efi_call_phys1(sys_table_arg->boottime->free_pool, info);
+ 
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table_arg, "Failed to get file info\n");
++			pr_efi_err(sys_table_arg, "Failed to get file info\n");
+ 			goto close_handles;
+ 		}
+ 
+@@ -446,13 +449,13 @@ grow:
+ 		status = efi_high_alloc(sys_table_arg, file_size_total, 0x1000,
+ 				    &file_addr, max_addr);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table_arg, "Failed to alloc highmem for files\n");
++			pr_efi_err(sys_table_arg, "Failed to alloc highmem for files\n");
+ 			goto close_handles;
+ 		}
+ 
+ 		/* We've run out of free low memory. */
+ 		if (file_addr > max_addr) {
+-			efi_printk(sys_table_arg, "We've run out of free low memory\n");
++			pr_efi_err(sys_table_arg, "We've run out of free low memory\n");
+ 			status = EFI_INVALID_PARAMETER;
+ 			goto free_file_total;
+ 		}
+@@ -473,7 +476,7 @@ grow:
+ 							&chunksize,
+ 							(void *)addr);
+ 				if (status != EFI_SUCCESS) {
+-					efi_printk(sys_table_arg, "Failed to read file\n");
++					pr_efi_err(sys_table_arg, "Failed to read file\n");
+ 					goto free_file_total;
+ 				}
+ 				addr += chunksize;
+@@ -558,7 +561,7 @@ static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 				       &new_addr);
+ 	}
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "ERROR: Failed to allocate usable memory for kernel.\n");
++		pr_efi_err(sys_table_arg, "ERROR: Failed to allocate usable memory for kernel.\n");
+ 		return status;
+ 	}
  
 -- 
 1.7.10.4
