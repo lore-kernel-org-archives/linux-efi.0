@@ -1,176 +1,37 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH 03/22] efi: add helper function to get UEFI params from FDT
-Date: Wed,  5 Feb 2014 17:03:54 +0000
-Message-ID: <1391619853-10601-4-git-send-email-leif.lindholm@linaro.org>
+From: Joe Perches <joe-6d6DIl74uiNBDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [PATCH 05/22] Add shared printk wrapper for consistent prefixing
+Date: Wed, 05 Feb 2014 09:34:13 -0800
+Message-ID: <1391621653.30094.11.camel@joe-AO722>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: patches@linaro.org, Mark Salter <msalter@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>
+	 <1391619853-10601-6-git-send-email-leif.lindholm@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1391619853-10601-6-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Salter <msalter@redhat.com>
+On Wed, 2014-02-05 at 17:03 +0000, Leif Lindholm wrote:
+> From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> 
+> Add a wrapper for printk to standardize the prefix for informational and
+> error messages from the EFI stub.
 
-ARM and ARM64 architectures use the device tree to pass UEFI parameters
-from stub to kernel. These parameters are things known to the stub but
-not discoverable by the kernel after the stub calls ExitBootSerives().
-There is a helper function in:
+trivia:
 
-   drivers/firmware/efi/fdt.c
+> diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+[]
+> @@ -45,6 +45,9 @@ static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+>  	}
+>  }
+>  
+> +#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
+> +#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
 
-which the stub uses to add the UEFI parameters to the device tree.
-This patch adds a complimentary helper function which UEFI runtime
-support may use to retrieve the parameters from the device tree.
-If an architecture wants to use this helper, it should select
-CONFIG_UEFI_PARAMS_FROM_FDT.
+Perhaps it'd be better to use a space after the second "
 
-Signed-off-by: Mark Salter <msalter@redhat.com>
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
----
- drivers/firmware/efi/Kconfig |    7 ++++
- drivers/firmware/efi/efi.c   |   79 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h          |    9 +++++
- 3 files changed, 95 insertions(+)
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 1e75f48..d3fe28d 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -47,6 +47,13 @@ config EFI_RUNTIME_MAP
- 
- 	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
- 
-+config UEFI_PARAMS_FROM_FDT
-+	bool
-+	help
-+	  Select this config option from the architecture Kconfig if
-+	  the EFI runtime support gets system table address, memory
-+          map address, and other parameters from the device tree.
-+
- endmenu
- 
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b25b36b..7f6e977 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -20,6 +20,8 @@
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/io.h>
- 
- struct efi __read_mostly efi = {
-@@ -318,3 +320,80 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 
- 	return 0;
- }
-+
-+#ifdef CONFIG_UEFI_PARAMS_FROM_FDT
-+
-+#define UEFI_PARAM(name, prop, field)			   \
-+	{						   \
-+		{ name },				   \
-+		{ prop },				   \
-+		offsetof(struct efi_fdt_params, field),    \
-+		FIELD_SIZEOF(struct efi_fdt_params, field) \
-+	}
-+
-+static __initdata struct {
-+	const char name[32];
-+	const char propname[32];
-+	int offset;
-+	int size;
-+} dt_params[] = {
-+	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-+};
-+
-+struct param_info {
-+	int verbose;
-+	void *params;
-+};
-+
-+static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-+				       int depth, void *data)
-+{
-+	struct param_info *info = data;
-+	void *prop, *dest;
-+	unsigned long len;
-+	u64 val;
-+	int i;
-+
-+	if (depth != 1 ||
-+	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
-+		return 0;
-+
-+	pr_info("Getting parameters from FDT:\n");
-+
-+	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-+		if (!prop) {
-+			pr_err("Can't find %s in device tree!\n",
-+			       dt_params[i].name);
-+			return 0;
-+		}
-+		dest = info->params + dt_params[i].offset;
-+
-+		val = of_read_number(prop, len / sizeof(u32));
-+
-+		if (dt_params[i].size == sizeof(u32))
-+			*(u32 *)dest = val;
-+		else
-+			*(u64 *)dest = val;
-+
-+		if (info->verbose)
-+			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-+				dt_params[i].size * 2, val);
-+	}
-+	return 1;
-+}
-+
-+int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-+{
-+	struct param_info info;
-+
-+	info.verbose = verbose;
-+	info.params = params;
-+
-+	return of_scan_flat_dt(fdt_find_uefi_params, &info);
-+}
-+#endif /* CONFIG_UEFI_PARAMS_FROM_FDT */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a3276da..d450673 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -483,6 +483,14 @@ struct efi_memory_map {
- 	unsigned long desc_size;
- };
- 
-+struct efi_fdt_params {
-+	u64 system_table;
-+	u64 mmap;
-+	u32 mmap_size;
-+	u32 desc_size;
-+	u32 desc_ver;
-+};
-+
- typedef struct {
- 	u32 revision;
- 	void *parent_handle;
-@@ -620,6 +628,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- extern void efi_get_time(struct timespec *now);
- extern int efi_set_rtc_mmss(const struct timespec *now);
- extern void efi_reserve_boot_services(void);
-+extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
- extern struct efi_memory_map memmap;
- 
- /* Iterate through an efi_memory_map */
--- 
-1.7.10.4
+Also, maybe pr_efi should be pr_efi_info.
+That would quiet any checkpatch noise around long msg uses.
