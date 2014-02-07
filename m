@@ -1,42 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] Urgent fix
-Date: Fri, 7 Feb 2014 15:42:53 +0000
-Message-ID: <20140207154253.GA2887@console-pimps.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [RFC][PATCH 04/11] x86/efi: Delete dead code when checking for
+ non-native
+Date: Fri, 7 Feb 2014 17:40:11 +0100
+Message-ID: <20140207164011.GL24395@pd.tnic>
+References: <1391012637-4839-1-git-send-email-matt@console-pimps.org>
+ <1391012637-4839-5-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <1391012637-4839-5-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Folks,
+On Wed, Jan 29, 2014 at 04:23:50PM +0000, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> Both efi_free_boot_services() and efi_enter_virtual_mode() are invoked
+> from init/main.c, but only if the EFI runtime services are available.
+> This is not the case for non-native boots, e.g. where a 64-bit kernel is
+> booted with 32-bit EFI firmware.
+> 
+> Delete the dead code.
+> 
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Please pull the following which fixes an issue people are hitting on
-Baytrail platforms.
-
-The following changes since commit 38dbfb59d1175ef458d006556061adeaa8751b72:
-
-  Linus 3.14-rc1 (2014-02-02 16:42:13 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to 081cd62a010f97b5bc1d2b0cd123c5abc692b68a:
-
-  x86/efi: Allow mapping BGRT on x86-32 (2014-02-05 23:39:34 +0000)
-
-----------------------------------------------------------------
- * Avoid WARN_ON() when mapping BGRT on Baytrail (EFI 32-bit).
-
-----------------------------------------------------------------
-Matt Fleming (1):
-      x86/efi: Allow mapping BGRT on x86-32
-
- arch/x86/platform/efi/efi-bgrt.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
