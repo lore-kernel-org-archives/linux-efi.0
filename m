@@ -1,62 +1,51 @@
-From: Daeseok Youn <daeseok.youn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] firmware/efi : use NULL instead of 0 for pointer
-Date: Thu, 13 Feb 2014 18:54:48 +0900
-Message-ID: <2817765.zrQqrE3135@daeseok-laptop.cloud.net>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [BUG] can't boot up: unable to handle kernel paging request at
+ ffffffffff340003
+Date: Thu, 13 Feb 2014 10:55:47 +0000
+Message-ID: <20140213105547.GC20717@console-pimps.org>
+References: <8738jr5t3e.fsf@redhat.com>
+ <20140210175246.GB2887@console-pimps.org>
+ <87mwhy8iaj.fsf@redhat.com>
+ <20140211131640.GD2887@console-pimps.org>
+ <87lhxh69u0.fsf@redhat.com>
+ <20140211141846.GA1725@console-pimps.org>
+ <1392221703.5612.164.camel@misato.fc.hp.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1392221703.5612.164.camel@misato.fc.hp.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Toshi Kani <toshi.kani@hp.com>
+Cc: Madper Xie <cxie@redhat.com>, Matt Fleming <matt.fleming@intel.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Josh Triplett <josh@joshtriplett.org>
 List-Id: linux-efi@vger.kernel.org
 
->From 1c70573009a3b50cef2acaae1e5a8cd350edfe6d Mon Sep 17 00:00:00 2001
-From: Daeseok Youn <daeseok.youn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Date: Thu, 13 Feb 2014 17:16:36 +0900
-Subject: [PATCH] firmware/efi : use NULL instead of 0 for pointer
+On Wed, 12 Feb, at 09:15:03AM, Toshi Kani wrote:
+> 
+> Hi Matt,
+> 
+> Yes, I agree that the table size should be 0x38.  However, ACPI spec
+> states that bit0 of status indicates if the boot image graphic is valid.
+> This bit is set to 0 (invalid) on the system.  Can you check this bit
+> and return when invalid? 
 
-following sparse warnings:
+Madper, could you try out this patch?
 
-drivers/firmware/efi/efivars.c:230:66: warning:
- Using plain integer as NULL pointer
-drivers/firmware/efi/efi.c:236:27: warning:
- Using plain integer as NULL pointer
-
-Signed-off-by: Daeseok Youn <daeseok.youn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 ---
- drivers/firmware/efi/efi.c     |    2 +-
- drivers/firmware/efi/efivars.c |    2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 4753bac..d85187f 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -233,7 +233,7 @@ static __initdata efi_config_table_type_t common_tables[] = 
-{
- 	{SAL_SYSTEM_TABLE_GUID, "SALsystab", &efi.sal_systab},
- 	{SMBIOS_TABLE_GUID, "SMBIOS", &efi.smbios},
- 	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
--	{NULL_GUID, NULL, 0},
-+	{NULL_GUID, NULL, NULL},
- };
+diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+index 4df9591eadad..f15103dff4b4 100644
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -42,7 +42,7 @@ void __init efi_bgrt_init(void)
  
- static __init int match_config_table(efi_guid_t *guid,
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 3dc2482..50ea412 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -227,7 +227,7 @@ efivar_store_raw(struct efivar_entry *entry, const char 
-*buf, size_t count)
- 	memcpy(&entry->var, new_var, count);
- 
- 	err = efivar_entry_set(entry, new_var->Attributes,
--			       new_var->DataSize, new_var->Data, false);
-+			       new_var->DataSize, new_var->Data, NULL);
- 	if (err) {
- 		printk(KERN_WARNING "efivars: set_variable() failed: status=%d\n", 
-err);
- 		return -EIO;
+ 	if (bgrt_tab->header.length < sizeof(*bgrt_tab))
+ 		return;
+-	if (bgrt_tab->version != 1)
++	if (bgrt_tab->version != 1 || bgrt_tab->status != 1)
+ 		return;
+ 	if (bgrt_tab->image_type != 0 || !bgrt_tab->image_address)
+ 		return;
+
 -- 
-1.7.9.5
+Matt Fleming, Intel Open Source Technology Center
