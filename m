@@ -1,34 +1,48 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 06/22] Add helper functions used by arm/arm64
-Date: Thu, 13 Feb 2014 11:26:06 +0000
-Message-ID: <20140213112606.GF20717@console-pimps.org>
-References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
- <1391619853-10601-7-git-send-email-leif.lindholm@linaro.org>
+From: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [BUG] can't boot up: unable to handle kernel paging request at ffffffffff340003
+Date: Thu, 13 Feb 2014 21:40:36 +0800
+Message-ID: <87k3czdtbf.fsf@redhat.com>
+References: <8738jr5t3e.fsf@redhat.com> <20140210175246.GB2887@console-pimps.org> <87mwhy8iaj.fsf@redhat.com> <20140211131640.GD2887@console-pimps.org> <87lhxh69u0.fsf@redhat.com> <20140211141846.GA1725@console-pimps.org> <1392221703.5612.164.camel@misato.fc.hp.com> <20140213105547.GC20717@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1391619853-10601-7-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-reply-to: <20140213105547.GC20717-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 05 Feb, at 05:03:57PM, Leif Lindholm wrote:
-> From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> Add the get_dram_base() function and efi_call_physN() macros
-> that are shared by arm/arm64.
-> 
-> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/efi-stub-helper.c |   63 +++++++++++++++++++++++++-------
->  1 file changed, 50 insertions(+), 13 deletions(-)
 
-These changes should be in drivers/firmware/efi/arm-stub.c -
-efi-stub-helper.c is not a dumping ground for random
-architecture-specific code.
+matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org writes:
+
+> On Wed, 12 Feb, at 09:15:03AM, Toshi Kani wrote:
+>> 
+>> Hi Matt,
+>> 
+>> Yes, I agree that the table size should be 0x38.  However, ACPI spec
+>> states that bit0 of status indicates if the boot image graphic is valid.
+>> This bit is set to 0 (invalid) on the system.  Can you check this bit
+>> and return when invalid? 
+>
+> Madper, could you try out this patch?
+>
+Thanks Matt. This patch fix the panic. And ioremap warning disappeared
+after apply your patch.
+> ---
+>
+> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+> index 4df9591eadad..f15103dff4b4 100644
+> --- a/arch/x86/platform/efi/efi-bgrt.c
+> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> @@ -42,7 +42,7 @@ void __init efi_bgrt_init(void)
+>  
+>  	if (bgrt_tab->header.length < sizeof(*bgrt_tab))
+>  		return;
+> -	if (bgrt_tab->version != 1)
+> +	if (bgrt_tab->version != 1 || bgrt_tab->status != 1)
+>  		return;
+>  	if (bgrt_tab->image_type != 0 || !bgrt_tab->image_address)
+>  		return;
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Madper
