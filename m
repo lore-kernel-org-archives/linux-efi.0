@@ -1,51 +1,47 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Fri, 14 Feb 2014 13:08:53 +0000
-Message-ID: <20140214130853.GI20717@console-pimps.org>
+From: "Dr.William Davies" <purchase-iWkfCuf1Dv8t08DiuWRmVZ/QNRX+jHPU@public.gmane.org>
+Subject: Re: Instructions to release your payment.
+Date: Fri, 14 Feb 2014 18:06:49 +0530
+Message-ID: <05850bfa675129882bc42edd957194c7__4182.75219058177$1392389489$gmane$org@127.0.0.1>
+Reply-To: williamdavies54-/E1597aS9LT10XsdtD+oqA@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-There have been reports of EFI crashes since -rc1. The following two
-commits fix known issues.
+Attention
 
-The following changes since commit b28a960c42fcd9cfc987441fa6d1c1a471f0f9ed:
+Sir,
 
-  Linux 3.14-rc2 (2014-02-09 18:15:47 -0800)
+Following an application brought, seeking the release of your due payment
+through British bank, I am directed to inform you that the application has
+been approved and Natwest bank of London has been mandated to make transfer
+of your payment to the bank account you will nominate. Please kindly reply
+for immediate release of your US$6.2 Million to you nominates account.
 
-are available in the git repository at:
+Sir, for the avoidance of doubts, reconfirm the following information to
+me to enable us forward same to Natwest bank to contact you for your
+payment.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+Name:
 
-for you to fetch changes up to 09503379dc99535b1bbfa51aa1aeef340f5d82ec:
+Address:
 
-  x86/efi: Check status field to validate BGRT header (2014-02-14 10:07:15 +0000)
+Tel/Fax No.:
 
-----------------------------------------------------------------
- * Fix boot failure on 32-bit EFI due to the recent EFI memmap changes
-   merged during the merge window - Borislav Petkov
+Nationality:
 
- * Avoid a crash during efi_bgrt_init() by detecting invalid BGRT
-   headers based on the 'status' field.
+Occupation:
 
-----------------------------------------------------------------
-Borislav Petkov (1):
-      x86/efi: Fix 32-bit fallout
+Date of birth: 
 
-Matt Fleming (1):
-      x86/efi: Check status field to validate BGRT header
+As soon as I received the above information, I will forward them to
+Natwest bank to contact you for your approved payment. Please see in the
+attachment, letter I wrote to Natwest bank informing them of the
+transaction
 
- arch/x86/include/asm/efi.h       | 2 ++
- arch/x86/platform/efi/efi-bgrt.c | 2 +-
- arch/x86/platform/efi/efi.c      | 5 ++---
- arch/x86/platform/efi/efi_32.c   | 6 ++++++
- arch/x86/platform/efi/efi_64.c   | 9 +++++++++
- 5 files changed, 20 insertions(+), 4 deletions(-)
+Yours faithfully
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Dr.William Davies
+Chairman,British Banking Regulatory Board.
