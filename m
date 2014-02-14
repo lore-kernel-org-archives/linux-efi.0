@@ -1,40 +1,50 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
-Subject: Re: [PATCH 16/22] arm64: Add function to create identity mappings
-Date: Fri, 14 Feb 2014 17:42:56 +0000
-Message-ID: <20140214174256.GC12304@arm.com>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 06/22] Add helper functions used by arm/arm64
+Date: Fri, 14 Feb 2014 11:02:49 -0800
+Message-ID: <CAFECyb_wUphr4XOyW9tC-Rw5Py3m39e6GQorCtFGtSXTUTBnFQ@mail.gmail.com>
 References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
- <1391619853-10601-17-git-send-email-leif.lindholm@linaro.org>
+	<1391619853-10601-7-git-send-email-leif.lindholm@linaro.org>
+	<20140213112606.GF20717@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1391619853-10601-17-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, patches@linaro.org, Mark Salter <msalter@redhat.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140213112606.GF20717-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 05, 2014 at 05:04:07PM +0000, Leif Lindholm wrote:
-> +void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-> +{
-> +	pgd_t *pgd = &idmap_pg_dir[pgd_index(addr)];
-> +
-> +	if (pgd >= &idmap_pg_dir[ARRAY_SIZE(idmap_pg_dir)]) {
-> +		pr_warn("BUG: not creating id mapping for 0x%016llx\n", addr);
-> +		return;
-> +	}
-> +	__create_mapping(pgd, addr, addr, size, map_io);
-> +}
+On Thu, Feb 13, 2014 at 3:26 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Wed, 05 Feb, at 05:03:57PM, Leif Lindholm wrote:
+>> From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>
+>> Add the get_dram_base() function and efi_call_physN() macros
+>> that are shared by arm/arm64.
+>>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/firmware/efi/efi-stub-helper.c |   63 +++++++++++++++++++++++++-------
+>>  1 file changed, 50 insertions(+), 13 deletions(-)
+>
+> These changes should be in drivers/firmware/efi/arm-stub.c -
+> efi-stub-helper.c is not a dumping ground for random
+> architecture-specific code.
 
-I'm a bit worried because I gave some feedback in the past but it didn't
-make to this patch.
+Hi Matt,
 
-What I said on 22nd of January:
+  I will move those functions/macros to the arm-stub.c file.  I agree
+that the macros should go there, as they are the arm specific versions
+and conflict with the x86 versions defined elsewhere.  These were
+there before the arm-stub.c file was added and didn't get moved when
+it was.  The get_dram_base() function is only used by arm/arm64, but
+there is nothing architecture specific about it, which is why I put it
+here to begin with.  I don't feel strongly about this either way.
 
-  The condition above is always false since pgd_index() already ands the
-  index with (PTRS_PER_PGD - 1). Better check addr against something like
-  (PTRS_PER_PGD * PGDIR_SIZE) (for clarity, you could do other shifts,
-  doesn't really matter).
+Thanks,
+Roy
 
--- 
-Catalin
+
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
