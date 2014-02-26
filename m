@@ -1,57 +1,54 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: [PATCH 12/12] Add option to automatically set trusted_kernel
  when in Secure Boot mode
-Date: Wed, 26 Feb 2014 14:47:06 -0800
-Message-ID: <530E6EEA.3080003@zytor.com>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>	<1393445473-15068-13-git-send-email-matthew.garrett@nebula.com> <20140226224141.1741a746@alan.etchedpixels.co.uk>
+Date: Wed, 26 Feb 2014 22:48:38 +0000
+Message-ID: <1393454916.14900.54.camel@x230>
+References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
+	 <1393445473-15068-13-git-send-email-matthew.garrett@nebula.com>
+	 <20140226224141.1741a746@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20140226224141.1741a746@alan.etchedpixels.co.uk>
-Sender: linux-security-module-owner@vger.kernel.org
-To: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, keescook@chromium.org, gregkh@linuxfoundation.org, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org
+Content-Language: en-US
+Content-ID: <57C333CE7C86484C92E9550F2ACA27D6@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "gnomes@lxorguk.ukuu.org.uk" <gnomes@lxorguk.ukuu.org.uk>
+Cc: "keescook@chromium.org" <keescook@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "hpa@zytor.com" <hpa@zytor.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/26/2014 02:41 PM, One Thousand Gnomes wrote:
-> On Wed, 26 Feb 2014 15:11:13 -0500
-> Matthew Garrett <matthew.garrett@nebula.com> wrote:
-> 
->> UEFI Secure Boot provides a mechanism for ensuring that the firmware will
->> only load signed bootloaders and kernels. Certain use cases may also
->> require that the kernel prevent userspace from inserting untrusted kernel
->> code at runtime. Add a configuration option that enforces this automatically
->> when enabled.
-> 
-> I think you have a load more cases to attempt to paper over before you
-> even pretend to achieve that goal. Firewire for example. Also it only
-> remotely begins to work if you also force CAP_SYS_RAWIO off globally as
-> you need to force off things like raw command issuing to various
-> controllers (especially as some of that code is written on the basis that
-> 'its RAWIO, screw making it secure and doing all the checks we could
-> bother with'.
-> 
-> RAWIO also disables things like CPU msr access - which is also quite
-> adequate for subverting a kernel.
-> 
-> Another issue that needs addressing is firmware. Quite a few of our
-> request_firmware cases load device firmware which is not signed into DMA
-> capable hardware. Probably also worth checking what the
-> architectural guarantees on bogus microcode updates is. Maybe we need
-> firmware signing for such cases to match the mod signing ?
-> 
-> I'm trying to think what else. Possibly disabling it on Pentium-M with
-> the rep movs erratum (Y19) as it's quite possible to set up suitable
-> adjacent page sets in user space via the graphics.
-> 
-
-I have been arguing for a long time that this should disable RAWIO.  The
-argument was that apparently some SCSI controllers started requiring
-RAWIO to do things like update firmware... which is arguably equally
-problematic, but either way is (a) clearly wrong and (b) started a long,
-never-ending discussion...
-
-	-hpa
-
-
+T24gV2VkLCAyMDE0LTAyLTI2IGF0IDIyOjQxICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
+b3RlOg0KDQo+IEkgdGhpbmsgeW91IGhhdmUgYSBsb2FkIG1vcmUgY2FzZXMgdG8gYXR0ZW1wdCB0
+byBwYXBlciBvdmVyIGJlZm9yZSB5b3UNCj4gZXZlbiBwcmV0ZW5kIHRvIGFjaGlldmUgdGhhdCBn
+b2FsLiBGaXJld2lyZSBmb3IgZXhhbXBsZS4gQWxzbyBpdCBvbmx5DQo+IHJlbW90ZWx5IGJlZ2lu
+cyB0byB3b3JrIGlmIHlvdSBhbHNvIGZvcmNlIENBUF9TWVNfUkFXSU8gb2ZmIGdsb2JhbGx5IGFz
+DQo+IHlvdSBuZWVkIHRvIGZvcmNlIG9mZiB0aGluZ3MgbGlrZSByYXcgY29tbWFuZCBpc3N1aW5n
+IHRvIHZhcmlvdXMNCj4gY29udHJvbGxlcnMgKGVzcGVjaWFsbHkgYXMgc29tZSBvZiB0aGF0IGNv
+ZGUgaXMgd3JpdHRlbiBvbiB0aGUgYmFzaXMgdGhhdA0KPiAnaXRzIFJBV0lPLCBzY3JldyBtYWtp
+bmcgaXQgc2VjdXJlIGFuZCBkb2luZyBhbGwgdGhlIGNoZWNrcyB3ZSBjb3VsZA0KPiBib3RoZXIg
+d2l0aCcuDQoNClBoeXNpY2FsIHByZXNlbmNlIGlzIHJlcXVpcmVkIHRvIGRvIGFueXRoaW5nIG1l
+YW5pbmdmdWwgd2l0aCBmaXJld2lyZSwNCmFuZCBVRUZJIHNlY3VyZSBib290IGlzbid0IGludGVu
+ZGVkIHRvIHByb3RlY3QgYWdhaW5zdCB0aGF0LiBXaGljaA0KY29udHJvbGxlcnMgd2lsbCB0cmln
+Z2VyIGFyYml0cmFyeSBETUEgaW4gcmVzcG9uc2UgdG8gcmF3IGNvbW1hbmRzPw0KDQo+IFJBV0lP
+IGFsc28gZGlzYWJsZXMgdGhpbmdzIGxpa2UgQ1BVIG1zciBhY2Nlc3MgLSB3aGljaCBpcyBhbHNv
+IHF1aXRlDQo+IGFkZXF1YXRlIGZvciBzdWJ2ZXJ0aW5nIGEga2VybmVsLg0KDQpQYXRjaCA3Lg0K
+DQo+IEFub3RoZXIgaXNzdWUgdGhhdCBuZWVkcyBhZGRyZXNzaW5nIGlzIGZpcm13YXJlLiBRdWl0
+ZSBhIGZldyBvZiBvdXINCj4gcmVxdWVzdF9maXJtd2FyZSBjYXNlcyBsb2FkIGRldmljZSBmaXJt
+d2FyZSB3aGljaCBpcyBub3Qgc2lnbmVkIGludG8gRE1BDQo+IGNhcGFibGUgaGFyZHdhcmUuIFBy
+b2JhYmx5IGFsc28gd29ydGggY2hlY2tpbmcgd2hhdCB0aGUNCj4gYXJjaGl0ZWN0dXJhbCBndWFy
+YW50ZWVzIG9uIGJvZ3VzIG1pY3JvY29kZSB1cGRhdGVzIGlzLiBNYXliZSB3ZSBuZWVkDQo+IGZp
+cm13YXJlIHNpZ25pbmcgZm9yIHN1Y2ggY2FzZXMgdG8gbWF0Y2ggdGhlIG1vZCBzaWduaW5nID8N
+Cg0KVmVuZG9ycyBrZWVwIHRlbGxpbmcgbWUgdGhhdCB0aGV5J3JlIHZhbGlkYXRpbmcgZmlybXdh
+cmUgZm9yIG5ldw0KaGFyZHdhcmUsIGFuZCBJIGtlZXAgdGVuZGluZyBub3QgdG8gYmVsaWV2ZSB0
+aGVtLiBNZWguIFRoZSBiaWcgcHJvYmxlbQ0Kd2l0aCBmaXJtd2FyZSBzaWduYXR1cmVzIGlzIHRo
+YXQgd2UgZG9uJ3QgbmVjZXNzYXJpbHkgaGF2ZSB0aGUgcmlnaHQgdG8NCmRpc3RyaWJ1dGUgbW9k
+aWZpZWQgdmVyc2lvbnMgb2YgdGhlIGZpcm13YXJlLCBzbyB3ZSdkIG5lZWQgZGV0YWNoZWQNCnNp
+Z25hdHVyZSBzdXBwb3J0LiBJJ20gY2VydGFpbmx5IG5vdCBhZ2FpbnN0IHRoaXMuDQoNCj4gSSdt
+IHRyeWluZyB0byB0aGluayB3aGF0IGVsc2UuIFBvc3NpYmx5IGRpc2FibGluZyBpdCBvbiBQZW50
+aXVtLU0gd2l0aA0KPiB0aGUgcmVwIG1vdnMgZXJyYXR1bSAoWTE5KSBhcyBpdCdzIHF1aXRlIHBv
+c3NpYmxlIHRvIHNldCB1cCBzdWl0YWJsZQ0KPiBhZGphY2VudCBwYWdlIHNldHMgaW4gdXNlciBz
+cGFjZSB2aWEgdGhlIGdyYXBoaWNzLg0KDQpRdWlya2luZyB0aGlzIG91dCB3aGVuIHRoZSBoYXJk
+d2FyZSBtYWtlcyBpdCBpbXBvc3NpYmxlIHRvIHByb3ZpZGUgYW55DQpndWFyYW50ZWVzIHNlZW1z
+IHJlYXNvbmFibGUuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVi
+dWxhLmNvbT4NCg==
