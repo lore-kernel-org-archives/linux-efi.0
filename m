@@ -1,39 +1,36 @@
-From: Kees Cook <keescook@chromium.org>
+From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Wed, 26 Feb 2014 13:11:25 -0800
-Message-ID: <CAGXu5j+b49grru-=DTRC0wx5LTOHN_jKL0Q++uW0Mzy+BxDf4w@mail.gmail.com>
+Date: Wed, 26 Feb 2014 22:21:51 +0000
+Message-ID: <20140226222151.78854cd8@alan.etchedpixels.co.uk>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
+	<CAGXu5j+b49grru-=DTRC0wx5LTOHN_jKL0Q++uW0Mzy+BxDf4w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, James Morris <jmorris@namei.org>, linux-security-module <linux-security-module@vger.kernel.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGXu5j+b49grru-=DTRC0wx5LTOHN_jKL0Q++uW0Mzy+BxDf4w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 26, 2014 at 12:11 PM, Matthew Garrett
-<matthew.garrett@nebula.com> wrote:
-> The conclusion we came to at Plumbers was that this patchset was basically
-> fine but that Linus hated the name "securelevel" more than I hate pickled
-> herring, so after thinking about this for a few months I've come up with
-> "Trusted Kernel". This flag indicates that the kernel is, via some
-> external mechanism, trusted and should behave that way. If firmware has
-> some way to verify the kernel, it can pass that information on. If userspace
-> has some way to verify the kernel, it can set the flag itself. However,
-> userspace should not attempt to use the flag as a means to verify that the
-> kernel was trusted - untrusted userspace could have set it on an untrusted
-> kernel, but by the same metric an untrusted kernel could just set it itself.
->
-> If people object to this name then I swear to god that I will open a poll
-> on Phoronix to decide the next attempt and you will like that even less.
+> > kernel was trusted - untrusted userspace could have set it on an untrusted
+> > kernel, but by the same metric an untrusted kernel could just set it itself.
+> >
+> > If people object to this name then I swear to god that I will open a poll
+> > on Phoronix to decide the next attempt and you will like that even less.
 
-For the Chrome OS use-case, it might be better described as "untrusted
-userspace", but that seems unfriendly. :) The "trusted kernel" name
-seems fine to me.
+Go on open the poll -  I dare you. But don't be shocked if it ends up
+being called "Eric" or "Icanhazsigs" 8)
 
--Kees
+> For the Chrome OS use-case, it might be better described as "untrusted
+> userspace", but that seems unfriendly. :) The "trusted kernel" name
+> seems fine to me.
 
--- 
-Kees Cook
-Chrome OS Security
+Trusted is rather misleading. It's not trusted, it's *measured*.
+
+It's the same bits you had when you made it, and when you booted it
+before. Whether you trust them is a different and quite unrelated
+question. You may have reasons to do either.
+
+Alan
