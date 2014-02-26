@@ -1,256 +1,165 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 01/12] Add support for indicating that the booted kernel is externally trusted
-Date: Wed, 26 Feb 2014 15:11:02 -0500
-Message-ID: <1393445473-15068-2-git-send-email-matthew.garrett@nebula.com>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 12/12] Add option to automatically set trusted_kernel when in Secure Boot mode
+Date: Wed, 26 Feb 2014 15:11:13 -0500
+Message-ID: <1393445473-15068-13-git-send-email-matthew.garrett@nebula.com>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1393445473-15068-1-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org, linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Provide a boolean runtime configuration option for restricting userspace's
-ability to modify the running kernel. This can be used when some external
-validation of the kernel's state has been performed.
+UEFI Secure Boot provides a mechanism for ensuring that the firmware will
+only load signed bootloaders and kernels. Certain use cases may also
+require that the kernel prevent userspace from inserting untrusted kernel
+code at runtime. Add a configuration option that enforces this automatically
+when enabled.
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
+Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/kernel-parameters.txt       |   6 ++
- Documentation/security/trusted_kernel.txt |  35 ++++++++++
- include/linux/security.h                  |   8 +++
- security/Kconfig                          |   9 +++
- security/Makefile                         |   1 +
- security/trusted_kernel.c                 | 111 ++++++++++++++++++++++++++++++
- 6 files changed, 170 insertions(+)
- create mode 100644 Documentation/security/trusted_kernel.txt
- create mode 100644 security/trusted_kernel.c
+ Documentation/x86/zero-page.txt       |  2 ++
+ arch/x86/Kconfig                      | 13 +++++++++++++
+ arch/x86/boot/compressed/eboot.c      | 36 +++++++++++++++++++++++++++++++++++
+ arch/x86/include/uapi/asm/bootparam.h |  3 ++-
+ arch/x86/kernel/setup.c               |  6 ++++++
+ 5 files changed, 59 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 7116fda..d82ba9e 100644
---- a/Documentation/kernel-parameters.txt
-+++ b/Documentation/kernel-parameters.txt
-@@ -3271,6 +3271,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
- 			with respect to transparent hugepages.
- 			See Documentation/vm/transhuge.txt for more details.
+diff --git a/Documentation/x86/zero-page.txt b/Documentation/x86/zero-page.txt
+index 199f453..ec38acf 100644
+--- a/Documentation/x86/zero-page.txt
++++ b/Documentation/x86/zero-page.txt
+@@ -30,6 +30,8 @@ Offset	Proto	Name		Meaning
+ 1E9/001	ALL	eddbuf_entries	Number of entries in eddbuf (below)
+ 1EA/001	ALL	edd_mbr_sig_buf_entries	Number of entries in edd_mbr_sig_buffer
+ 				(below)
++1EB/001	ALL     kbd_status      Numlock is enabled
++1EC/001	ALL     secure_boot	Secure boot is enabled in the firmware
+ 1EF/001	ALL	sentinel	Used to detect broken bootloaders
+ 290/040	ALL	edd_mbr_sig_buffer EDD MBR signatures
+ 2D0/A00	ALL	e820_map	E820 memory map table
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 0af5250..3856dfb 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1585,6 +1585,19 @@ config EFI_STUB
  
-+	trusted_kernel	Indicate that the booted kernel has been verified to
-+			be trustworthy and that userspace should be forbidden
-+			from modifying it at runtime.
-+			See Documentation/security/trusted_kernel.txt for more
-+			details.
-+
- 	tsc=		Disable clocksource stability checks for TSC.
- 			Format: <string>
- 			[x86] reliable: mark tsc clocksource as reliable, this
-diff --git a/Documentation/security/trusted_kernel.txt b/Documentation/security/trusted_kernel.txt
-new file mode 100644
-index 0000000..538d21d
---- /dev/null
-+++ b/Documentation/security/trusted_kernel.txt
-@@ -0,0 +1,35 @@
-+Linux trusted kernel support
-+----------------------------
-+
-+Various mechanisms exist to ensure that a booted kernel is trusted by the
-+user or some external party (UEFI Secure Boot, Intel TXT, embedded platform
-+bootloaders). If userspace is able to modify the running kernel then this
-+trust can be subverted.
-+
-+The trusted kernel support modifies certain kernel interfaces such that
-+userspace is restricted from performing acts that would allow it to inject
-+untrusted code into the kernel. Userspace will be unable to perform direct
-+access to PCI devices, port IO access, access system memory directly via
-+/dev/mem and /dev/kmem, perform kexec_load(), use the userspace software
-+suspend mechanism, insert new ACPI code at runtime via the custom_method
-+interface or modify CPU MSRs (on x86). Certain drivers may also limit
-+additional interfaces.
-+
-+The trusted kernel feature may be enabled in multiple ways:
-+
-+1) Platform-specific code may automatically enable it when it detects that
-+the system has been booted appropriately
-+
-+2) The user or bootloader may pass the "trusted_kernel" kernel parameter
-+
-+3) Userspace may write "1" to the /sys/kernel/security/trusted_kernel
-+node. This must be done sufficiently early in the boot process that
-+untrusted userspace has no opportunity to modify the kernel.
-+
-+Once enabled. trusted kernel support may not be disabled without rebooting
-+the system.
-+
-+Note that this is a mechanism for the kernel to determine whether or not
-+it is externally trusted. Untrusted userspace can enable this option even
-+if the kernel is not trusted, and therefore userspace should not use this
-+value as an indication of whether or not the kernel is trustworthy.
-diff --git a/include/linux/security.h b/include/linux/security.h
-index 5623a7f..3415968 100644
---- a/include/linux/security.h
-+++ b/include/linux/security.h
-@@ -3091,6 +3091,14 @@ static inline void security_audit_rule_free(void *lsmrule)
- #endif /* CONFIG_SECURITY */
- #endif /* CONFIG_AUDIT */
+ 	  See Documentation/efi-stub.txt for more information.
  
-+#ifdef CONFIG_SECURITY_TRUSTED_KERNEL
-+extern bool get_trusted_kernel(void);
-+extern int set_trusted_kernel(bool new_trusted_kernel);
-+#else
-+static inline bool get_trusted_kernel(void) { return 0; }
-+static inline int set_trusted_kernel(bool new_trusted_kernel) { return 0; }
-+#endif /* CONFIG_TRUSTED_KERNEL */
++config EFI_SECURE_BOOT_TRUSTED_KERNEL
++        def_bool n
++	depends on SECURITY_TRUSTED_KERNEL
++	depends on EFI
++	prompt "Automatically set trusted_kernel with UEFI Secure Boot"
++	---help---
++	  UEFI Secure Boot provides a mechanism for ensuring that the
++	  firmware will only load signed bootloaders and kernels. Certain
++	  use cases may also require that the kernel restrict any userspace
++	  mechanism that could insert untrusted code into the kernel.
++	  Say Y here to automatically enable trusted_kernel enforcement
++	  when a system boots with UEFI Secure Boot enabled.
 +
- #ifdef CONFIG_SECURITYFS
+ config SECCOMP
+ 	def_bool y
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index a7677ba..4836551 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -12,6 +12,7 @@
+ #include <asm/efi.h>
+ #include <asm/setup.h>
+ #include <asm/desc.h>
++#include <asm/bootparam_utils.h>
  
- extern struct dentry *securityfs_create_file(const char *name, umode_t mode,
-diff --git a/security/Kconfig b/security/Kconfig
-index beb86b5..c0462c9 100644
---- a/security/Kconfig
-+++ b/security/Kconfig
-@@ -70,6 +70,15 @@ config SECURITY_PATH
- 	  implement pathname based access controls.
- 	  If you are unsure how to answer this question, answer N.
+ #undef memcpy			/* Use memcpy from misc.c */
  
-+config SECURITY_TRUSTED_KERNEL
-+        bool "Support for indicating that the kernel is trusted"
-+	depends on SECURITY
-+	help
-+	  This enables support for adding a set of additional kernel security
-+	  restrictions at runtime.
-+	  See Documentation/security/trusted_kernel.txt for further
-+	   information.
-+
- config INTEL_TXT
- 	bool "Enable Intel(R) Trusted Execution Technology (Intel(R) TXT)"
- 	depends on HAVE_INTEL_TXT
-diff --git a/security/Makefile b/security/Makefile
-index a5918e0..72af305 100644
---- a/security/Makefile
-+++ b/security/Makefile
-@@ -16,6 +16,7 @@ obj-$(CONFIG_MMU)			+= min_addr.o
- # Object file lists
- obj-$(CONFIG_SECURITY)			+= security.o capability.o
- obj-$(CONFIG_SECURITYFS)		+= inode.o
-+obj-$(CONFIG_SECURITY_TRUSTED_KERNEL)	+= trusted_kernel.o
- obj-$(CONFIG_SECURITY_SELINUX)		+= selinux/built-in.o
- obj-$(CONFIG_SECURITY_SMACK)		+= smack/built-in.o
- obj-$(CONFIG_AUDIT)			+= lsm_audit.o
-diff --git a/security/trusted_kernel.c b/security/trusted_kernel.c
-new file mode 100644
-index 0000000..2808113
---- /dev/null
-+++ b/security/trusted_kernel.c
-@@ -0,0 +1,111 @@
-+/*
-+ *  trusted_kernel.c - support for generic kernel lockdown
-+ *
-+ *  Copyright Nebula, Inc <matthew.garrett@nebula.com>
-+ *
-+ *  This program is free software; you can redistribute it and/or modify
-+ *  it under the terms of the GNU General Public License version 2 as
-+ *  published by the Free Software Foundation.
-+ *
-+ */
-+
-+#include <linux/fs.h>
-+#include <linux/init.h>
-+#include <linux/security.h>
-+#include <linux/uaccess.h>
-+
-+static bool trusted_kernel;
-+
-+bool get_trusted_kernel(void)
+@@ -421,6 +422,37 @@ void setup_graphics(struct boot_params *boot_params)
+ }
+ 
+ 
++static int get_secure_boot(void)
 +{
-+	return trusted_kernel;
-+}
-+EXPORT_SYMBOL(get_trusted_kernel);
++	u8 sb, setup;
++	unsigned long datasize = sizeof(sb);
++	efi_guid_t var_guid = EFI_GLOBAL_VARIABLE_GUID;
++	efi_status_t status;
 +
-+int set_trusted_kernel(bool new_trusted_kernel)
-+{
-+	if (trusted_kernel == true && new_trusted_kernel == false)
-+		return -EINVAL;
++	status = efi_call_phys5(sys_table->runtime->get_variable,
++				L"SecureBoot", &var_guid, NULL, &datasize, &sb);
 +
-+	trusted_kernel = new_trusted_kernel;
++	if (status != EFI_SUCCESS)
++		return 0;
 +
-+	return 0;
-+}
-+EXPORT_SYMBOL(set_trusted_kernel);
++	if (sb == 0)
++		return 0;
 +
-+static ssize_t trusted_kernel_read(struct file *filp, char __user *buf,
-+				   size_t count, loff_t *ppos)
-+{
-+	char tmpbuf[2];
-+	ssize_t length;
 +
-+	length = scnprintf(tmpbuf, sizeof(tmpbuf), "%d", trusted_kernel);
-+	return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
-+}
++	status = efi_call_phys5(sys_table->runtime->get_variable,
++				L"SetupMode", &var_guid, NULL, &datasize,
++				&setup);
 +
-+static ssize_t trusted_kernel_write(struct file *file, const char __user *buf,
-+				    size_t count, loff_t *ppos)
-+{
-+	char *page = NULL;
-+	ssize_t length;
-+	int new_trusted_kernel;
++	if (status != EFI_SUCCESS)
++		return 0;
 +
-+	length = -ENOMEM;
-+	if (count >= PAGE_SIZE)
-+		goto out;
++	if (setup == 1)
++		return 0;
 +
-+	length = -EINVAL;
-+	if (*ppos != 0)
-+		goto out;
-+
-+	length = -ENOMEM;
-+	page = (char *)get_zeroed_page(GFP_KERNEL);
-+	if (!page)
-+		goto out;
-+
-+	length = -EFAULT;
-+	if (copy_from_user(page, buf, count))
-+		goto out;
-+
-+	length = -EINVAL;
-+	if (sscanf(page, "%d", &new_trusted_kernel) != 1)
-+		goto out;
-+
-+	length = set_trusted_kernel(!!new_trusted_kernel);
-+	if (length)
-+		goto out;
-+
-+	length = count;
-+out:
-+	free_page((unsigned long) page);
-+	return length;
-+}
-+
-+static const struct file_operations trusted_kernel_fops = {
-+	.read	= trusted_kernel_read,
-+	.write	= trusted_kernel_write,
-+	.llseek	= generic_file_llseek,
-+};
-+
-+static __init int setup_trusted_kernel(void)
-+{
-+	struct dentry *trusted_kernel_file;
-+
-+	trusted_kernel_file = securityfs_create_file("trusted_kernel",
-+						     S_IWUSR | S_IRUGO,
-+						     NULL, NULL,
-+						     &trusted_kernel_fops);
-+
-+	if (IS_ERR(trusted_kernel_file))
-+		return PTR_ERR(trusted_kernel_file);
-+
-+	return 0;
-+}
-+late_initcall(setup_trusted_kernel);
-+
-+static int __init enable_trusted_kernel(char *__str)
-+{
-+	trusted_kernel = true;
 +	return 1;
 +}
-+__setup("trusted_kernel", enable_trusted_kernel);
++
++
+ /*
+  * Because the x86 boot code expects to be passed a boot_params we
+  * need to create one ourselves (usually the bootloader would create
+@@ -760,6 +792,10 @@ struct boot_params *efi_main(void *handle, efi_system_table_t *_table,
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+ 		goto fail;
+ 
++	sanitize_boot_params(boot_params);
++
++	boot_params->secure_boot = get_secure_boot();
++
+ 	setup_graphics(boot_params);
+ 
+ 	setup_efi_pci(boot_params);
+diff --git a/arch/x86/include/uapi/asm/bootparam.h b/arch/x86/include/uapi/asm/bootparam.h
+index 225b098..90dbfb7 100644
+--- a/arch/x86/include/uapi/asm/bootparam.h
++++ b/arch/x86/include/uapi/asm/bootparam.h
+@@ -133,7 +133,8 @@ struct boot_params {
+ 	__u8  eddbuf_entries;				/* 0x1e9 */
+ 	__u8  edd_mbr_sig_buf_entries;			/* 0x1ea */
+ 	__u8  kbd_status;				/* 0x1eb */
+-	__u8  _pad5[3];					/* 0x1ec */
++	__u8  secure_boot;				/* 0x1ec */
++	__u8  _pad5[2];					/* 0x1ed */
+ 	/*
+ 	 * The sentinel is set to a nonzero value (0xff) in header.S.
+ 	 *
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 06853e6..875258e 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -50,6 +50,7 @@
+ #include <linux/init_ohci1394_dma.h>
+ #include <linux/kvm_para.h>
+ #include <linux/dma-contiguous.h>
++#include <linux/security.h>
+ 
+ #include <linux/errno.h>
+ #include <linux/kernel.h>
+@@ -1143,6 +1144,11 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	io_delay_init();
+ 
++#ifdef CONFIG_EFI_SECURE_BOOT_TRUSTED_KERNEL
++	if (boot_params.secure_boot)
++		set_trusted_kernel(true);
++#endif
++
+ 	/*
+ 	 * Parse the ACPI tables for possible boot-time SMP configuration.
+ 	 */
 -- 
 1.8.5.3
