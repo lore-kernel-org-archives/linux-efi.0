@@ -1,66 +1,39 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: [PATCH 11/12] asus-wmi: Restrict debugfs interface when trusted_kernel is true
-Date: Wed, 26 Feb 2014 15:11:12 -0500
-Message-ID: <1393445473-15068-12-git-send-email-matthew.garrett@nebula.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: Trusted kernel patchset for Secure Boot lockdown
+Date: Wed, 26 Feb 2014 13:11:25 -0800
+Message-ID: <CAGXu5j+b49grru-=DTRC0wx5LTOHN_jKL0Q++uW0Mzy+BxDf4w@mail.gmail.com>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Greg KH <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, James Morris <jmorris@namei.org>, linux-security-module <linux-security-module@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-We have no way of validating what all of the Asus WMI methods do on a
-given machine, and there's a risk that some will allow hardware state to
-be manipulated in such a way that arbitrary code can be executed in the
-kernel. Prevent that if trusted_kernel is true.
+On Wed, Feb 26, 2014 at 12:11 PM, Matthew Garrett
+<matthew.garrett@nebula.com> wrote:
+> The conclusion we came to at Plumbers was that this patchset was basically
+> fine but that Linus hated the name "securelevel" more than I hate pickled
+> herring, so after thinking about this for a few months I've come up with
+> "Trusted Kernel". This flag indicates that the kernel is, via some
+> external mechanism, trusted and should behave that way. If firmware has
+> some way to verify the kernel, it can pass that information on. If userspace
+> has some way to verify the kernel, it can set the flag itself. However,
+> userspace should not attempt to use the flag as a means to verify that the
+> kernel was trusted - untrusted userspace could have set it on an untrusted
+> kernel, but by the same metric an untrusted kernel could just set it itself.
+>
+> If people object to this name then I swear to god that I will open a poll
+> on Phoronix to decide the next attempt and you will like that even less.
 
-Signed-off-by: Matthew Garrett <matthew.garrett@nebula.com>
----
- drivers/platform/x86/asus-wmi.c | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+For the Chrome OS use-case, it might be better described as "untrusted
+userspace", but that seems unfriendly. :) The "trusted kernel" name
+seems fine to me.
 
-diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
-index c5e082f..4c1000b 100644
---- a/drivers/platform/x86/asus-wmi.c
-+++ b/drivers/platform/x86/asus-wmi.c
-@@ -46,6 +46,7 @@
- #include <linux/platform_device.h>
- #include <linux/thermal.h>
- #include <linux/acpi.h>
-+#include <linux/security.h>
- #include <acpi/video.h>
- 
- #include "asus-wmi.h"
-@@ -1595,6 +1596,9 @@ static int show_dsts(struct seq_file *m, void *data)
- 	int err;
- 	u32 retval = -1;
- 
-+	if (get_trusted_kernel())
-+		return -EPERM;
-+
- 	err = asus_wmi_get_devstate(asus, asus->debug.dev_id, &retval);
- 
- 	if (err < 0)
-@@ -1611,6 +1615,9 @@ static int show_devs(struct seq_file *m, void *data)
- 	int err;
- 	u32 retval = -1;
- 
-+	if (get_trusted_kernel())
-+		return -EPERM;
-+
- 	err = asus_wmi_set_devstate(asus->debug.dev_id, asus->debug.ctrl_param,
- 				    &retval);
- 
-@@ -1635,6 +1642,9 @@ static int show_call(struct seq_file *m, void *data)
- 	union acpi_object *obj;
- 	acpi_status status;
- 
-+	if (get_trusted_kernel())
-+		return -EPERM;
-+
- 	status = wmi_evaluate_method(ASUS_WMI_MGMT_GUID,
- 				     1, asus->debug.method_id,
- 				     &input, &output);
+-Kees
+
 -- 
-1.8.5.3
+Kees Cook
+Chrome OS Security
