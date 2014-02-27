@@ -1,43 +1,276 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH 12/12] Add option to automatically set trusted_kernel when
- in Secure Boot mode
-Date: Thu, 27 Feb 2014 10:48:48 -0800
-Message-ID: <CAGXu5j+dwpG=X+i9CY2U3eUsOq86sVhZDRCNoeSYjdDTDv0VbQ@mail.gmail.com>
+From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Subject: Re: [PATCH 01/12] Add support for indicating that the booted kernel
+ is externally trusted
+Date: Thu, 27 Feb 2014 11:02:07 -0800
+Message-ID: <CAGXu5jK1d9jDcFcw52WL1DJdz6sSgGf6ZAU9jJ3VzEr397O3zQ@mail.gmail.com>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<1393445473-15068-13-git-send-email-matthew.garrett@nebula.com>
-	<20140226224141.1741a746@alan.etchedpixels.co.uk>
-	<1393454916.14900.54.camel@x230>
+	<1393445473-15068-2-git-send-email-matthew.garrett@nebula.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393454916.14900.54.camel@x230>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: "gnomes@lxorguk.ukuu.org.uk" <gnomes@lxorguk.ukuu.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "hpa@zytor.com" <hpa@zytor.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1393445473-15068-2-git-send-email-matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 26, 2014 at 2:48 PM, Matthew Garrett
-<matthew.garrett@nebula.com> wrote:
-> On Wed, 2014-02-26 at 22:41 +0000, One Thousand Gnomes wrote:
->> Another issue that needs addressing is firmware. Quite a few of our
->> request_firmware cases load device firmware which is not signed into DMA
->> capable hardware. Probably also worth checking what the
->> architectural guarantees on bogus microcode updates is. Maybe we need
->> firmware signing for such cases to match the mod signing ?
+On Wed, Feb 26, 2014 at 12:11 PM, Matthew Garrett
+<matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
+> Provide a boolean runtime configuration option for restricting userspace's
+> ability to modify the running kernel. This can be used when some external
+> validation of the kernel's state has been performed.
 >
-> Vendors keep telling me that they're validating firmware for new
-> hardware, and I keep tending not to believe them. Meh. The big problem
-> with firmware signatures is that we don't necessarily have the right to
-> distribute modified versions of the firmware, so we'd need detached
-> signature support. I'm certainly not against this.
+> Signed-off-by: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> ---
+>  Documentation/kernel-parameters.txt       |   6 ++
+>  Documentation/security/trusted_kernel.txt |  35 ++++++++++
+>  include/linux/security.h                  |   8 +++
+>  security/Kconfig                          |   9 +++
+>  security/Makefile                         |   1 +
+>  security/trusted_kernel.c                 | 111 ++++++++++++++++++++++++++++++
+>  6 files changed, 170 insertions(+)
+>  create mode 100644 Documentation/security/trusted_kernel.txt
+>  create mode 100644 security/trusted_kernel.c
+>
+> diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
+> index 7116fda..d82ba9e 100644
+> --- a/Documentation/kernel-parameters.txt
+> +++ b/Documentation/kernel-parameters.txt
+> @@ -3271,6 +3271,12 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+>                         with respect to transparent hugepages.
+>                         See Documentation/vm/transhuge.txt for more details.
+>
+> +       trusted_kernel  Indicate that the booted kernel has been verified to
+> +                       be trustworthy and that userspace should be forbidden
+> +                       from modifying it at runtime.
+> +                       See Documentation/security/trusted_kernel.txt for more
+> +                       details.
+> +
+>         tsc=            Disable clocksource stability checks for TSC.
+>                         Format: <string>
+>                         [x86] reliable: mark tsc clocksource as reliable, this
+> diff --git a/Documentation/security/trusted_kernel.txt b/Documentation/security/trusted_kernel.txt
+> new file mode 100644
+> index 0000000..538d21d
+> --- /dev/null
+> +++ b/Documentation/security/trusted_kernel.txt
+> @@ -0,0 +1,35 @@
+> +Linux trusted kernel support
+> +----------------------------
+> +
+> +Various mechanisms exist to ensure that a booted kernel is trusted by the
+> +user or some external party (UEFI Secure Boot, Intel TXT, embedded platform
+> +bootloaders). If userspace is able to modify the running kernel then this
+> +trust can be subverted.
+> +
+> +The trusted kernel support modifies certain kernel interfaces such that
+> +userspace is restricted from performing acts that would allow it to inject
+> +untrusted code into the kernel. Userspace will be unable to perform direct
+> +access to PCI devices, port IO access, access system memory directly via
+> +/dev/mem and /dev/kmem, perform kexec_load(), use the userspace software
+> +suspend mechanism, insert new ACPI code at runtime via the custom_method
+> +interface or modify CPU MSRs (on x86). Certain drivers may also limit
+> +additional interfaces.
+> +
+> +The trusted kernel feature may be enabled in multiple ways:
+> +
+> +1) Platform-specific code may automatically enable it when it detects that
+> +the system has been booted appropriately
+> +
+> +2) The user or bootloader may pass the "trusted_kernel" kernel parameter
+> +
+> +3) Userspace may write "1" to the /sys/kernel/security/trusted_kernel
+> +node. This must be done sufficiently early in the boot process that
+> +untrusted userspace has no opportunity to modify the kernel.
+> +
+> +Once enabled. trusted kernel support may not be disabled without rebooting
+> +the system.
+> +
+> +Note that this is a mechanism for the kernel to determine whether or not
+> +it is externally trusted. Untrusted userspace can enable this option even
+> +if the kernel is not trusted, and therefore userspace should not use this
+> +value as an indication of whether or not the kernel is trustworthy.
+> diff --git a/include/linux/security.h b/include/linux/security.h
+> index 5623a7f..3415968 100644
+> --- a/include/linux/security.h
+> +++ b/include/linux/security.h
+> @@ -3091,6 +3091,14 @@ static inline void security_audit_rule_free(void *lsmrule)
+>  #endif /* CONFIG_SECURITY */
+>  #endif /* CONFIG_AUDIT */
+>
+> +#ifdef CONFIG_SECURITY_TRUSTED_KERNEL
+> +extern bool get_trusted_kernel(void);
+> +extern int set_trusted_kernel(bool new_trusted_kernel);
+> +#else
+> +static inline bool get_trusted_kernel(void) { return 0; }
+> +static inline int set_trusted_kernel(bool new_trusted_kernel) { return 0; }
 
-I have been working on a patch series for this. It will have LSM hooks
-for validating firmware origin (via fd) and contents (via blob),
-similar to the changes I made for validating module origins. It just
-need to finish testing, and I'll post the series. If you want to check
-it out in its current state, it's here:
+Should set_trusted_kernel return -ENOTSUPP when the config is off?
 
-http://git.kernel.org/cgit/linux/kernel/git/kees/linux.git/log/?h=fw-restrict
+> +#endif /* CONFIG_TRUSTED_KERNEL */
+> +
+>  #ifdef CONFIG_SECURITYFS
+>
+>  extern struct dentry *securityfs_create_file(const char *name, umode_t mode,
+> diff --git a/security/Kconfig b/security/Kconfig
+> index beb86b5..c0462c9 100644
+> --- a/security/Kconfig
+> +++ b/security/Kconfig
+> @@ -70,6 +70,15 @@ config SECURITY_PATH
+>           implement pathname based access controls.
+>           If you are unsure how to answer this question, answer N.
+>
+> +config SECURITY_TRUSTED_KERNEL
+> +        bool "Support for indicating that the kernel is trusted"
+> +       depends on SECURITY
+> +       help
+> +         This enables support for adding a set of additional kernel security
+> +         restrictions at runtime.
+> +         See Documentation/security/trusted_kernel.txt for further
+> +          information.
+> +
+>  config INTEL_TXT
+>         bool "Enable Intel(R) Trusted Execution Technology (Intel(R) TXT)"
+>         depends on HAVE_INTEL_TXT
+> diff --git a/security/Makefile b/security/Makefile
+> index a5918e0..72af305 100644
+> --- a/security/Makefile
+> +++ b/security/Makefile
+> @@ -16,6 +16,7 @@ obj-$(CONFIG_MMU)                     += min_addr.o
+>  # Object file lists
+>  obj-$(CONFIG_SECURITY)                 += security.o capability.o
+>  obj-$(CONFIG_SECURITYFS)               += inode.o
+> +obj-$(CONFIG_SECURITY_TRUSTED_KERNEL)  += trusted_kernel.o
+>  obj-$(CONFIG_SECURITY_SELINUX)         += selinux/built-in.o
+>  obj-$(CONFIG_SECURITY_SMACK)           += smack/built-in.o
+>  obj-$(CONFIG_AUDIT)                    += lsm_audit.o
+> diff --git a/security/trusted_kernel.c b/security/trusted_kernel.c
+> new file mode 100644
+> index 0000000..2808113
+> --- /dev/null
+> +++ b/security/trusted_kernel.c
+> @@ -0,0 +1,111 @@
+> +/*
+> + *  trusted_kernel.c - support for generic kernel lockdown
+> + *
+> + *  Copyright Nebula, Inc <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+> + *
+> + *  This program is free software; you can redistribute it and/or modify
+> + *  it under the terms of the GNU General Public License version 2 as
+> + *  published by the Free Software Foundation.
+> + *
+> + */
+> +
+> +#include <linux/fs.h>
+> +#include <linux/init.h>
+> +#include <linux/security.h>
+> +#include <linux/uaccess.h>
+> +
+> +static bool trusted_kernel;
+> +
+> +bool get_trusted_kernel(void)
+> +{
+> +       return trusted_kernel;
+> +}
+> +EXPORT_SYMBOL(get_trusted_kernel);
+> +
+> +int set_trusted_kernel(bool new_trusted_kernel)
+> +{
+> +       if (trusted_kernel == true && new_trusted_kernel == false)
+> +               return -EINVAL;
+> +
+> +       trusted_kernel = new_trusted_kernel;
+> +
+> +       return 0;
+> +}
+> +EXPORT_SYMBOL(set_trusted_kernel);
+> +
+> +static ssize_t trusted_kernel_read(struct file *filp, char __user *buf,
+> +                                  size_t count, loff_t *ppos)
+> +{
+> +       char tmpbuf[2];
+> +       ssize_t length;
+> +
+> +       length = scnprintf(tmpbuf, sizeof(tmpbuf), "%d", trusted_kernel);
+> +       return simple_read_from_buffer(buf, count, ppos, tmpbuf, length);
+> +}
+> +
+> +static ssize_t trusted_kernel_write(struct file *file, const char __user *buf,
+> +                                   size_t count, loff_t *ppos)
+> +{
+> +       char *page = NULL;
+> +       ssize_t length;
+> +       int new_trusted_kernel;
+> +
+> +       length = -ENOMEM;
+> +       if (count >= PAGE_SIZE)
+> +               goto out;
+> +
+> +       length = -EINVAL;
+> +       if (*ppos != 0)
+> +               goto out;
+> +
+> +       length = -ENOMEM;
+> +       page = (char *)get_zeroed_page(GFP_KERNEL);
+> +       if (!page)
+> +               goto out;
+> +
+> +       length = -EFAULT;
+> +       if (copy_from_user(page, buf, count))
+> +               goto out;
+> +
+> +       length = -EINVAL;
+> +       if (sscanf(page, "%d", &new_trusted_kernel) != 1)
+> +               goto out;
+> +
+> +       length = set_trusted_kernel(!!new_trusted_kernel);
+> +       if (length)
+> +               goto out;
+> +
+> +       length = count;
+> +out:
+> +       free_page((unsigned long) page);
+> +       return length;
+> +}
+> +
+> +static const struct file_operations trusted_kernel_fops = {
+> +       .read   = trusted_kernel_read,
+> +       .write  = trusted_kernel_write,
+> +       .llseek = generic_file_llseek,
+> +};
+> +
+> +static __init int setup_trusted_kernel(void)
+> +{
+> +       struct dentry *trusted_kernel_file;
+> +
+> +       trusted_kernel_file = securityfs_create_file("trusted_kernel",
+> +                                                    S_IWUSR | S_IRUGO,
+> +                                                    NULL, NULL,
+> +                                                    &trusted_kernel_fops);
+> +
+> +       if (IS_ERR(trusted_kernel_file))
+> +               return PTR_ERR(trusted_kernel_file);
+> +
+> +       return 0;
+> +}
+> +late_initcall(setup_trusted_kernel);
+> +
+> +static int __init enable_trusted_kernel(char *__str)
+> +{
+> +       trusted_kernel = true;
+> +       return 1;
+> +}
+> +__setup("trusted_kernel", enable_trusted_kernel);
+> --
+> 1.8.5.3
+>
+
+Thanks for reposting this. I'm looking forward to adding
+"trusted_kernel" to the Chrome OS kernel cmdline. :)
+
+Please consider the series:
+
+Acked-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 
 -Kees
 
