@@ -1,54 +1,35 @@
-From: Matthew Garrett <matthew.garrett@nebula.com>
-Subject: Re: [PATCH 12/12] Add option to automatically set trusted_kernel
- when in Secure Boot mode
-Date: Wed, 26 Feb 2014 22:48:38 +0000
-Message-ID: <1393454916.14900.54.camel@x230>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	 <1393445473-15068-13-git-send-email-matthew.garrett@nebula.com>
-	 <20140226224141.1741a746@alan.etchedpixels.co.uk>
+From: Alon Ziv <alon-lkml-iOy/dmW02wpAfugRpC6u6w@public.gmane.org>
+Subject: Re: Trusted kernel patchset for Secure Boot lockdown
+Date: Thu, 27 Feb 2014 09:54:34 +0000 (UTC)
+Message-ID: <loom.20140227T104216-669@post.gmane.org>
+References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com> <CAGXu5j+b49grru-=DTRC0wx5LTOHN_jKL0Q++uW0Mzy+BxDf4w@mail.gmail.com> <20140226222151.78854cd8@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140226224141.1741a746@alan.etchedpixels.co.uk>
-Content-Language: en-US
-Content-ID: <57C333CE7C86484C92E9550F2ACA27D6@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "gnomes@lxorguk.ukuu.org.uk" <gnomes@lxorguk.ukuu.org.uk>
-Cc: "keescook@chromium.org" <keescook@chromium.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "hpa@zytor.com" <hpa@zytor.com>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDE0LTAyLTI2IGF0IDIyOjQxICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
-b3RlOg0KDQo+IEkgdGhpbmsgeW91IGhhdmUgYSBsb2FkIG1vcmUgY2FzZXMgdG8gYXR0ZW1wdCB0
-byBwYXBlciBvdmVyIGJlZm9yZSB5b3UNCj4gZXZlbiBwcmV0ZW5kIHRvIGFjaGlldmUgdGhhdCBn
-b2FsLiBGaXJld2lyZSBmb3IgZXhhbXBsZS4gQWxzbyBpdCBvbmx5DQo+IHJlbW90ZWx5IGJlZ2lu
-cyB0byB3b3JrIGlmIHlvdSBhbHNvIGZvcmNlIENBUF9TWVNfUkFXSU8gb2ZmIGdsb2JhbGx5IGFz
-DQo+IHlvdSBuZWVkIHRvIGZvcmNlIG9mZiB0aGluZ3MgbGlrZSByYXcgY29tbWFuZCBpc3N1aW5n
-IHRvIHZhcmlvdXMNCj4gY29udHJvbGxlcnMgKGVzcGVjaWFsbHkgYXMgc29tZSBvZiB0aGF0IGNv
-ZGUgaXMgd3JpdHRlbiBvbiB0aGUgYmFzaXMgdGhhdA0KPiAnaXRzIFJBV0lPLCBzY3JldyBtYWtp
-bmcgaXQgc2VjdXJlIGFuZCBkb2luZyBhbGwgdGhlIGNoZWNrcyB3ZSBjb3VsZA0KPiBib3RoZXIg
-d2l0aCcuDQoNClBoeXNpY2FsIHByZXNlbmNlIGlzIHJlcXVpcmVkIHRvIGRvIGFueXRoaW5nIG1l
-YW5pbmdmdWwgd2l0aCBmaXJld2lyZSwNCmFuZCBVRUZJIHNlY3VyZSBib290IGlzbid0IGludGVu
-ZGVkIHRvIHByb3RlY3QgYWdhaW5zdCB0aGF0LiBXaGljaA0KY29udHJvbGxlcnMgd2lsbCB0cmln
-Z2VyIGFyYml0cmFyeSBETUEgaW4gcmVzcG9uc2UgdG8gcmF3IGNvbW1hbmRzPw0KDQo+IFJBV0lP
-IGFsc28gZGlzYWJsZXMgdGhpbmdzIGxpa2UgQ1BVIG1zciBhY2Nlc3MgLSB3aGljaCBpcyBhbHNv
-IHF1aXRlDQo+IGFkZXF1YXRlIGZvciBzdWJ2ZXJ0aW5nIGEga2VybmVsLg0KDQpQYXRjaCA3Lg0K
-DQo+IEFub3RoZXIgaXNzdWUgdGhhdCBuZWVkcyBhZGRyZXNzaW5nIGlzIGZpcm13YXJlLiBRdWl0
-ZSBhIGZldyBvZiBvdXINCj4gcmVxdWVzdF9maXJtd2FyZSBjYXNlcyBsb2FkIGRldmljZSBmaXJt
-d2FyZSB3aGljaCBpcyBub3Qgc2lnbmVkIGludG8gRE1BDQo+IGNhcGFibGUgaGFyZHdhcmUuIFBy
-b2JhYmx5IGFsc28gd29ydGggY2hlY2tpbmcgd2hhdCB0aGUNCj4gYXJjaGl0ZWN0dXJhbCBndWFy
-YW50ZWVzIG9uIGJvZ3VzIG1pY3JvY29kZSB1cGRhdGVzIGlzLiBNYXliZSB3ZSBuZWVkDQo+IGZp
-cm13YXJlIHNpZ25pbmcgZm9yIHN1Y2ggY2FzZXMgdG8gbWF0Y2ggdGhlIG1vZCBzaWduaW5nID8N
-Cg0KVmVuZG9ycyBrZWVwIHRlbGxpbmcgbWUgdGhhdCB0aGV5J3JlIHZhbGlkYXRpbmcgZmlybXdh
-cmUgZm9yIG5ldw0KaGFyZHdhcmUsIGFuZCBJIGtlZXAgdGVuZGluZyBub3QgdG8gYmVsaWV2ZSB0
-aGVtLiBNZWguIFRoZSBiaWcgcHJvYmxlbQ0Kd2l0aCBmaXJtd2FyZSBzaWduYXR1cmVzIGlzIHRo
-YXQgd2UgZG9uJ3QgbmVjZXNzYXJpbHkgaGF2ZSB0aGUgcmlnaHQgdG8NCmRpc3RyaWJ1dGUgbW9k
-aWZpZWQgdmVyc2lvbnMgb2YgdGhlIGZpcm13YXJlLCBzbyB3ZSdkIG5lZWQgZGV0YWNoZWQNCnNp
-Z25hdHVyZSBzdXBwb3J0LiBJJ20gY2VydGFpbmx5IG5vdCBhZ2FpbnN0IHRoaXMuDQoNCj4gSSdt
-IHRyeWluZyB0byB0aGluayB3aGF0IGVsc2UuIFBvc3NpYmx5IGRpc2FibGluZyBpdCBvbiBQZW50
-aXVtLU0gd2l0aA0KPiB0aGUgcmVwIG1vdnMgZXJyYXR1bSAoWTE5KSBhcyBpdCdzIHF1aXRlIHBv
-c3NpYmxlIHRvIHNldCB1cCBzdWl0YWJsZQ0KPiBhZGphY2VudCBwYWdlIHNldHMgaW4gdXNlciBz
-cGFjZSB2aWEgdGhlIGdyYXBoaWNzLg0KDQpRdWlya2luZyB0aGlzIG91dCB3aGVuIHRoZSBoYXJk
-d2FyZSBtYWtlcyBpdCBpbXBvc3NpYmxlIHRvIHByb3ZpZGUgYW55DQpndWFyYW50ZWVzIHNlZW1z
-IHJlYXNvbmFibGUuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVi
-dWxhLmNvbT4NCg==
+One Thousand Gnomes <gnomes@...> writes:
+> Trusted is rather misleading. It's not trusted, it's *measured*.
+> 
+> It's the same bits you had when you made it, and when you booted it
+> before. Whether you trust them is a different and quite unrelated
+> question. You may have reasons to do either.
+
+I believe mjg's point is that the patch implement's the kernel's view
+of its trust requirements, and is thus independent of whether it is
+measured or not.
+
+Frankly, from my experience, the term "trust" is one of the most
+confusing ones in the security field... In general, unlike the intuitive
+definition, "trust" is a _negative_ feature.
+To say it differently: a "Trusted Kernel" is "a kernel that believes
+someone trusts it". It does _not_ mean the kernel is actually
+_trustworthy_. A "measured" kernel is one way for it to be trustworthy -
+but you cannot trust the kernel to tell you if it is measured. (This is
+a classic case of the Epimenides paradox: if the kernel is untrustworhy,
+it will always claim to be trusted.)
+
+-Alon
