@@ -1,7 +1,7 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 02/13] x86, tools: Consolidate #ifdef code
-Date: Thu, 27 Feb 2014 19:50:49 +0000
-Message-ID: <1393530660-12692-3-git-send-email-matt@console-pimps.org>
+Subject: [PATCH 03/13] x86/mm/pageattr: Always dump the right page table in an oops
+Date: Thu, 27 Feb 2014 19:50:50 +0000
+Message-ID: <1393530660-12692-4-git-send-email-matt@console-pimps.org>
 References: <1393530660-12692-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1393530660-12692-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
@@ -12,121 +12,89 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Instead of littering main() with #ifdef CONFIG_EFI_STUB, move the logic
-into separate functions that do nothing if the config option isn't set.
-This makes main() much easier to read.
+Now that we have EFI-specific page tables we need to lookup the pgd when
+dumping those page tables, rather than assuming that swapper_pgdir is
+the current pgdir.
+
+Remove the double underscore prefix, which is usually reserved for
+static functions.
 
 Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/boot/tools/build.c | 64 +++++++++++++++++++++++++++++----------------
- 1 file changed, 42 insertions(+), 22 deletions(-)
+ arch/x86/include/asm/pgtable_types.h |  2 ++
+ arch/x86/mm/fault.c                  |  7 ++++++-
+ arch/x86/mm/pageattr.c               | 12 ++++++++----
+ 3 files changed, 16 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 8e15b22391fc..bf262077ec92 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -219,6 +219,45 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz)
- 	update_pecoff_section_header(".text", text_start, text_sz);
+diff --git a/arch/x86/include/asm/pgtable_types.h b/arch/x86/include/asm/pgtable_types.h
+index 765a4f52d6cd..4384c560499e 100644
+--- a/arch/x86/include/asm/pgtable_types.h
++++ b/arch/x86/include/asm/pgtable_types.h
+@@ -381,6 +381,8 @@ static inline void update_page_count(int level, unsigned long pages) { }
+  * as a pte too.
+  */
+ extern pte_t *lookup_address(unsigned long address, unsigned int *level);
++extern pte_t *lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
++				    unsigned int *level);
+ extern phys_addr_t slow_virt_to_phys(void *__address);
+ extern int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 				   unsigned numpages, unsigned long page_flags);
+diff --git a/arch/x86/mm/fault.c b/arch/x86/mm/fault.c
+index 9d591c895803..b8d278f66095 100644
+--- a/arch/x86/mm/fault.c
++++ b/arch/x86/mm/fault.c
+@@ -584,8 +584,13 @@ show_fault_oops(struct pt_regs *regs, unsigned long error_code,
+ 
+ 	if (error_code & PF_INSTR) {
+ 		unsigned int level;
++		pgd_t *pgd;
++		pte_t *pte;
+ 
+-		pte_t *pte = lookup_address(address, &level);
++		pgd = __va(read_cr3() & PHYSICAL_PAGE_MASK);
++		pgd += pgd_index(address);
++
++		pte = lookup_address_in_pgd(pgd, address, &level);
+ 
+ 		if (pte && pte_present(*pte) && !pte_exec(*pte))
+ 			printk(nx_warning, from_kuid(&init_user_ns, current_uid()));
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index a3488689e301..1585da3b9b85 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -323,8 +323,12 @@ static inline pgprot_t static_protections(pgprot_t prot, unsigned long address,
+ 	return prot;
  }
  
-+static int reserve_pecoff_reloc_section(int c)
-+{
-+	/* Reserve 0x20 bytes for .reloc section */
-+	memset(buf+c, 0, PECOFF_RELOC_RESERVE);
-+	return PECOFF_RELOC_RESERVE;
-+}
-+
-+static void efi_stub_defaults(void)
-+{
-+	/* Defaults for old kernel */
-+#ifdef CONFIG_X86_32
-+	efi_pe_entry = 0x10;
-+	efi_stub_entry = 0x30;
-+#else
-+	efi_pe_entry = 0x210;
-+	efi_stub_entry = 0x230;
-+	startup_64 = 0x200;
-+#endif
-+}
-+
-+static void efi_stub_entry_update(void)
-+{
-+#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
-+	efi_stub_entry -= 0x200;
-+#endif
-+	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
-+}
-+
-+#else
-+
-+static inline void update_pecoff_setup_and_reloc(unsigned int) {}
-+static inline void update_pecoff_text(unsigned int, unsigned int) {}
-+static inline void efi_stub_defaults(void) {}
-+static inline void efi_stup_entry_update(void) {}
-+
-+static inline int reserve_pecoff_reloc_section(int c)
-+{
-+	return 0;
-+}
- #endif /* CONFIG_EFI_STUB */
+-static pte_t *__lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
+-				      unsigned int *level)
++/*
++ * Lookup the page table entry for a virtual address in a specific pgd.
++ * Return a pointer to the entry and the level of the mapping.
++ */
++pte_t *lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
++			     unsigned int *level)
+ {
+ 	pud_t *pud;
+ 	pmd_t *pmd;
+@@ -365,7 +369,7 @@ static pte_t *__lookup_address_in_pgd(pgd_t *pgd, unsigned long address,
+  */
+ pte_t *lookup_address(unsigned long address, unsigned int *level)
+ {
+-        return __lookup_address_in_pgd(pgd_offset_k(address), address, level);
++        return lookup_address_in_pgd(pgd_offset_k(address), address, level);
+ }
+ EXPORT_SYMBOL_GPL(lookup_address);
  
+@@ -373,7 +377,7 @@ static pte_t *_lookup_address_cpa(struct cpa_data *cpa, unsigned long address,
+ 				  unsigned int *level)
+ {
+         if (cpa->pgd)
+-		return __lookup_address_in_pgd(cpa->pgd + pgd_index(address),
++		return lookup_address_in_pgd(cpa->pgd + pgd_index(address),
+ 					       address, level);
  
-@@ -271,15 +310,7 @@ int main(int argc, char ** argv)
- 	void *kernel;
- 	u32 crc = 0xffffffffUL;
- 
--	/* Defaults for old kernel */
--#ifdef CONFIG_X86_32
--	efi_pe_entry = 0x10;
--	efi_stub_entry = 0x30;
--#else
--	efi_pe_entry = 0x210;
--	efi_stub_entry = 0x230;
--	startup_64 = 0x200;
--#endif
-+	efi_stub_defaults();
- 
- 	if (argc != 5)
- 		usage();
-@@ -302,11 +333,7 @@ int main(int argc, char ** argv)
- 		die("Boot block hasn't got boot flag (0xAA55)");
- 	fclose(file);
- 
--#ifdef CONFIG_EFI_STUB
--	/* Reserve 0x20 bytes for .reloc section */
--	memset(buf+c, 0, PECOFF_RELOC_RESERVE);
--	c += PECOFF_RELOC_RESERVE;
--#endif
-+	c += reserve_pecoff_reloc_section(c);
- 
- 	/* Pad unused space with zeros */
- 	setup_sectors = (c + 511) / 512;
-@@ -315,9 +342,7 @@ int main(int argc, char ** argv)
- 	i = setup_sectors*512;
- 	memset(buf+c, 0, i-c);
- 
--#ifdef CONFIG_EFI_STUB
- 	update_pecoff_setup_and_reloc(i);
--#endif
- 
- 	/* Set the default root device */
- 	put_unaligned_le16(DEFAULT_ROOT_DEV, &buf[508]);
-@@ -342,14 +367,9 @@ int main(int argc, char ** argv)
- 	buf[0x1f1] = setup_sectors-1;
- 	put_unaligned_le32(sys_size, &buf[0x1f4]);
- 
--#ifdef CONFIG_EFI_STUB
- 	update_pecoff_text(setup_sectors * 512, sz + i + ((sys_size * 16) - sz));
- 
--#ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
--	efi_stub_entry -= 0x200;
--#endif
--	put_unaligned_le32(efi_stub_entry, &buf[0x264]);
--#endif
-+	efi_stub_entry_update();
- 
- 	crc = partial_crc32(buf, i, crc);
- 	if (fwrite(buf, 1, i, dest) != i)
+         return lookup_address(address, level);
 -- 
 1.8.5.3
