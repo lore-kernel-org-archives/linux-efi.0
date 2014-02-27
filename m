@@ -1,50 +1,68 @@
-From: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Thu, 27 Feb 2014 14:11:07 -0500
-Message-ID: <CA+5PVA4GNWFx5bDM912TYmDbMHmZpb2X=Tzo85mGEGATvbW70A@mail.gmail.com>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	<20140227190710.GA4755@kroah.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH 00/13] EFI mixed mode
+Date: Thu, 27 Feb 2014 19:46:31 +0000
+Message-ID: <1393530404-12479-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140227190710.GA4755-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "Linux-Kernel@Vger. Kernel. Org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, linux-security-module <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 27, 2014 at 2:07 PM, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> On Thu, Feb 27, 2014 at 01:04:34PM -0500, Josh Boyer wrote:
->> On Wed, Feb 26, 2014 at 3:11 PM, Matthew Garrett
->> <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
->> > The conclusion we came to at Plumbers was that this patchset was basically
->> > fine but that Linus hated the name "securelevel" more than I hate pickled
->> > herring, so after thinking about this for a few months I've come up with
->> > "Trusted Kernel". This flag indicates that the kernel is, via some
->> > external mechanism, trusted and should behave that way. If firmware has
->> > some way to verify the kernel, it can pass that information on. If userspace
->> > has some way to verify the kernel, it can set the flag itself. However,
->> > userspace should not attempt to use the flag as a means to verify that the
->> > kernel was trusted - untrusted userspace could have set it on an untrusted
->> > kernel, but by the same metric an untrusted kernel could just set it itself.
->>
->> FWIW, I've been running a kernel using this patchset in place of the
->> patchset Fedora typically carries for this purpose for a bit.  Things
->> appear to be working as expected and the protections remain the same.
->>
->> It would be really nice to get this set of patches in so some of the
->> other patches that depend on them can start being pushed as well.
->
-> What other patches depend on this series?  Why aren't they also in this
-> series?
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-The patches we have to import certificates from the UEFI db and dbx
-vars, and MokListRT and apply them to signed module verification.
-Looking at them closely, there are pieces that could be sent now as
-they are slightly orthogonal to what this patchset is doing, which is
-probably why they aren't in this patchset to begin with.  I'll have to
-figure out which of those actually depend on anything in Matthew's
-series.
+This patch series enables booting a 64-bit kernel on 32-bit EFI
+firmware.
 
-josh
+Note that no boot loader changes should be necessary to take advantage
+of these patches, and if your bootloader of choice uses the EFI handover
+protocol (Syslinux, efilinux, Grub) you should automatically be able to
+boot a CONFIG_X86_64 kernel on 32-bit EFI by enabling CONFIG_EFI_MIXED.
+
+This series does not implement mixed mode support for the EFI boot stub,
+so it won't work with gummiboot or directly from the EFI shell.
+
+The full series is available on the 'mixed-mode' branch here,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+
+Matt Fleming (13):
+  x86/boot: Cleanup header.S by removing some #ifdefs
+  x86, tools: Consolidate #ifdef code
+  x86/mm/pageattr: Always dump the right page table in an oops
+  x86/efi: Delete dead code when checking for non-native
+  efi: Add separate 32-bit/64-bit definitions
+  x86/efi: Build our own EFI services pointer table
+  x86/efi: Add early thunk code to go from 64-bit to 32-bit
+  x86/efi: Split the boot stub into 32/64 code paths
+  x86/efi: Firmware agnostic handover entry points
+  x86/efi: Add mixed runtime services support
+  x86/efi: Wire up CONFIG_EFI_MIXED
+  x86/boot: Don't overwrite cr4 when enabling PAE
+  x86/efi: Re-disable interrupts after calling firmware services
+
+ arch/x86/Kconfig                       |   14 +
+ arch/x86/boot/Makefile                 |    2 +-
+ arch/x86/boot/compressed/eboot.c       | 1044 ++++++++++++++++++++++++++------
+ arch/x86/boot/compressed/eboot.h       |   60 ++
+ arch/x86/boot/compressed/efi_stub_64.S |   29 +
+ arch/x86/boot/compressed/head_32.S     |   50 +-
+ arch/x86/boot/compressed/head_64.S     |  108 +++-
+ arch/x86/boot/header.S                 |   23 +-
+ arch/x86/boot/tools/build.c            |   76 ++-
+ arch/x86/include/asm/efi.h             |   38 +-
+ arch/x86/include/asm/pgtable_types.h   |    2 +
+ arch/x86/kernel/setup.c                |    2 +-
+ arch/x86/mm/fault.c                    |    7 +-
+ arch/x86/mm/pageattr.c                 |   12 +-
+ arch/x86/platform/efi/Makefile         |    1 +
+ arch/x86/platform/efi/efi.c            |  170 +++---
+ arch/x86/platform/efi/efi_64.c         |  328 +++++++++-
+ arch/x86/platform/efi/efi_stub_64.S    |  157 +++++
+ arch/x86/platform/efi/efi_thunk_64.S   |   65 ++
+ drivers/firmware/efi/efi-stub-helper.c |  148 ++---
+ include/linux/efi.h                    |  252 ++++++++
+ 21 files changed, 2140 insertions(+), 448 deletions(-)
+ create mode 100644 arch/x86/platform/efi/efi_thunk_64.S
+
+-- 
+1.8.5.3
