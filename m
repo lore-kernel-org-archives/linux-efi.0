@@ -1,91 +1,107 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [GIT PULL] EFI changes for v3.15
-Date: Tue, 4 Mar 2014 21:15:26 +0000
-Message-ID: <20140304211526.GA17362@console-pimps.org>
+From: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+Subject: Re: [PATCH] efi: Quirk out SGI UV
+Date: Tue, 4 Mar 2014 17:06:15 -0600
+Message-ID: <20140304230615.GF8556@sgi.com>
+References: <1393948937-21840-1-git-send-email-bp@alien8.de>
+Reply-To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+In-Reply-To: <1393948937-21840-1-git-send-email-bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Folks,
+On Tue, Mar 04, 2014 at 05:02:17PM +0100, Borislav Petkov wrote:
+> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> 
+> Getting this thing to work with the new mapping scheme would need more
+> work.
 
-Could you please queue up the following for the v3.15 merge window?
+Thanks Boris.  Allows SGI UV to boot (without the extra bootline).
 
-The following changes since commit 6d0abeca3242a88cab8232e4acd7e2bf088f3bc2:
+Acked-by: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org> 
 
-  Linux 3.14-rc3 (2014-02-16 13:30:25 -0800)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 69e608411473ac56358ef35277563982d0565381:
-
-  efi: Use NULL instead of 0 for pointer (2014-03-04 16:17:20 +0000)
-
-----------------------------------------------------------------
- * Refactor efivarfs_file_write() and use memdup_user - Geyslan G. Bem
-
- * Delete stale comments in efi_query_variable_store() - Madper Xie
-
- * EFI code style improvements - Joe Perches
-
- * Remove some sparse warnings in efivars - Daeseok Youn
-
- * Add debug code to the dump EFI pagetable - Borislav Petkov
-
- * Make 1:1 runtime mapping robust when booting on machines with lots of
-   memory - Borislav Petkov
-
- * Move the EFI facilities bits out of 'x86_efi_facility' and into
-   efi.flags which is the standard architecture independent place to
-   keep EFI state.
-
-----------------------------------------------------------------
-Borislav Petkov (5):
-      x86, ptdump: Add the functionality to dump an arbitrary pagetable
-      x86/efi: Dump the EFI page table
-      x86, pageattr: Export page unmapping interface
-      x86/efi: Make efi virtual runtime map passing more robust
-      x86/efi: Split efi_enter_virtual_mode
-
-Daeseok Youn (1):
-      efi: Use NULL instead of 0 for pointer
-
-Geyslan G. Bem (1):
-      efivarfs: 'efivarfs_file_write' function reorganization
-
-Joe Perches (1):
-      x86/efi: Style neatening
-
-Madper Xie (1):
-      x86/efi: Delete out-of-date comments of efi_query_variable_store
-
-Matt Fleming (3):
-      efi: Move facility flags to struct efi
-      efi: Set feature flags inside feature init functions
-      ia64/efi: Implement efi_enabled()
-
- arch/ia64/kernel/efi.c               |   7 +
- arch/x86/Kconfig.debug               |   9 ++
- arch/x86/include/asm/efi.h           |   5 +-
- arch/x86/include/asm/pgtable.h       |   3 +-
- arch/x86/include/asm/pgtable_types.h |   2 +
- arch/x86/kernel/setup.c              |   6 +-
- arch/x86/mm/dump_pagetables.c        |  84 +++++++----
- arch/x86/mm/pageattr.c               |  44 ++++--
- arch/x86/platform/efi/efi.c          | 276 +++++++++++++++++++++++------------
- arch/x86/platform/efi/efi_32.c       |   7 +-
- arch/x86/platform/efi/efi_64.c       |  41 +++++-
- drivers/firmware/efi/efi.c           |   5 +-
- drivers/firmware/efi/efivars.c       |   2 +-
- fs/efivarfs/file.c                   |  13 +-
- include/linux/efi.h                  |  16 +-
- 15 files changed, 356 insertions(+), 164 deletions(-)
+> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+> ---
+>  arch/x86/include/asm/efi.h  |  1 +
+>  arch/x86/kernel/setup.c     | 10 ++--------
+>  arch/x86/platform/efi/efi.c | 20 ++++++++++++++++++++
+>  3 files changed, 23 insertions(+), 8 deletions(-)
+> 
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index e985d6bf7d3a..86d1fd4bf24c 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -135,6 +135,7 @@ extern void __init old_map_region(efi_memory_desc_t *md);
+>  extern void __init runtime_code_page_mkexec(void);
+>  extern void __init efi_runtime_mkexec(void);
+>  extern void __init efi_dump_pagetable(void);
+> +extern void __init efi_apply_memmap_quirks(void);
+>  
+>  struct efi_setup_data {
+>  	u64 fw_vendor;
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index 830ae2d95450..09c76d265550 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -1238,14 +1238,8 @@ void __init setup_arch(char **cmdline_p)
+>  	register_refined_jiffies(CLOCK_TICK_RATE);
+>  
+>  #ifdef CONFIG_EFI
+> -	/* Once setup is done above, unmap the EFI memory map on
+> -	 * mismatched firmware/kernel archtectures since there is no
+> -	 * support for runtime services.
+> -	 */
+> -	if (efi_enabled(EFI_BOOT) && !efi_is_native()) {
+> -		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
+> -		efi_unmap_memmap();
+> -	}
+> +	if (efi_enabled(EFI_BOOT))
+> +		efi_apply_memmap_quirks();
+>  #endif
+>  }
+>  
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 482986c3afc5..518aa8540a6d 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -52,6 +52,7 @@
+>  #include <asm/tlbflush.h>
+>  #include <asm/x86_init.h>
+>  #include <asm/rtc.h>
+> +#include <asm/uv/uv.h>
+>  
+>  #define EFI_DEBUG
+>  
+> @@ -1298,3 +1299,22 @@ static int __init parse_efi_cmdline(char *str)
+>  	return 0;
+>  }
+>  early_param("efi", parse_efi_cmdline);
+> +
+> +void __init efi_apply_memmap_quirks(void)
+> +{
+> +	/*
+> +	 * Once setup is done earlier, unmap the EFI memory map on mismatched
+> +	 * firmware/kernel architectures since there is no support for runtime
+> +	 * services.
+> +	 */
+> +	if (!efi_is_native()) {
+> +		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
+> +		efi_unmap_memmap();
+> +	}
+> +
+> +	/*
+> +	 * UV doesn't support the new EFI pagetable mapping yet.
+> +	 */
+> +	if (is_uv_system())
+> +		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+> +}
+> -- 
+> 1.9.0
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Russ Anderson,  Kernel and Performance Software Team Manager
+SGI - Silicon Graphics Inc          rja-sJ/iWh9BUns@public.gmane.org
