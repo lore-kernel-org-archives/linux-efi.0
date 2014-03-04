@@ -1,44 +1,75 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 06/22] Add helper functions used by arm/arm64
-Date: Mon, 3 Mar 2014 23:48:39 -0800
-Message-ID: <CAFECyb9eXYCFTQ7G35EEsx0P2vRwm7qNtwT46ZteTGbycbcEBg@mail.gmail.com>
-References: <1391619853-10601-1-git-send-email-leif.lindholm@linaro.org>
-	<1391619853-10601-7-git-send-email-leif.lindholm@linaro.org>
-	<20140213112606.GF20717@console-pimps.org>
-	<CAFECyb_wUphr4XOyW9tC-Rw5Py3m39e6GQorCtFGtSXTUTBnFQ@mail.gmail.com>
-	<20140303140811.GA18828@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [PATCH v2 00/13] EFI mixed mode
+Date: Tue,  4 Mar 2014 13:14:08 +0000
+Message-ID: <1393938861-16797-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140303140811.GA18828-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Patch Tracking <patches-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 3, 2014 at 6:08 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Fri, 14 Feb, at 11:02:49AM, Roy Franz wrote:
->>
->> The get_dram_base() function is only used by arm/arm64, but
->> there is nothing architecture specific about it, which is why I put it
->> here to begin with.  I don't feel strongly about this either way.
->
-> Sorry Roy, I just realised that you probably wanted a response from me
-> about this last point.
->
-> OK, leaving get_dram_base() in efi-stub-helper.c is fine.
->
-> FYI, "NUL" isn't a typo,
->
->> -     options_size++;  /* NUL termination */
-> [...]
->> +     options_size++;  /* NULL termination */
->
-> http://en.wikipedia.org/wiki/Null_character
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Thanks - I'll take care of this in the next revision.
+This patch series enables booting a 64-bit kernel on 32-bit EFI
+firmware.
 
-Roy
+Note that no boot loader changes should be necessary to take advantage
+of these patches, and if your bootloader of choice uses the EFI handover
+protocol (Syslinux, efilinux, Grub) you should automatically be able to
+boot a CONFIG_X86_64 kernel on 32-bit EFI by enabling CONFIG_EFI_MIXED.
+
+This series does not implement mixed mode support for the EFI boot stub,
+so it won't work with gummiboot or directly from the EFI shell.
+
+The full series is available on the 'mixed-mode' branch here,
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+
+
+Changes since v1:
+
+ - Simplify EFI_BOOT_SERVICES() as suggested by hpa
+
+... and I remembered to actually post to LKML this time.
+
+Matt Fleming (13):
+  x86/boot: Cleanup header.S by removing some #ifdefs
+  x86, tools: Consolidate #ifdef code
+  x86/mm/pageattr: Always dump the right page table in an oops
+  x86/efi: Delete dead code when checking for non-native
+  efi: Add separate 32-bit/64-bit definitions
+  x86/efi: Build our own EFI services pointer table
+  x86/efi: Add early thunk code to go from 64-bit to 32-bit
+  x86/efi: Split the boot stub into 32/64 code paths
+  x86/efi: Firmware agnostic handover entry points
+  x86/efi: Add mixed runtime services support
+  x86/efi: Wire up CONFIG_EFI_MIXED
+  x86/boot: Don't overwrite cr4 when enabling PAE
+  x86/efi: Re-disable interrupts after calling firmware services
+
+ arch/x86/Kconfig                       |   14 +
+ arch/x86/boot/Makefile                 |    2 +-
+ arch/x86/boot/compressed/eboot.c       | 1018 +++++++++++++++++++++++++-------
+ arch/x86/boot/compressed/eboot.h       |   60 ++
+ arch/x86/boot/compressed/efi_stub_64.S |   29 +
+ arch/x86/boot/compressed/head_32.S     |   50 +-
+ arch/x86/boot/compressed/head_64.S     |  108 +++-
+ arch/x86/boot/header.S                 |   23 +-
+ arch/x86/boot/tools/build.c            |   76 ++-
+ arch/x86/include/asm/efi.h             |   38 +-
+ arch/x86/include/asm/pgtable_types.h   |    2 +
+ arch/x86/kernel/setup.c                |    2 +-
+ arch/x86/mm/fault.c                    |    7 +-
+ arch/x86/mm/pageattr.c                 |   12 +-
+ arch/x86/platform/efi/Makefile         |    1 +
+ arch/x86/platform/efi/efi.c            |  170 +++---
+ arch/x86/platform/efi/efi_64.c         |  328 +++++++++-
+ arch/x86/platform/efi/efi_stub_64.S    |  157 +++++
+ arch/x86/platform/efi/efi_thunk_64.S   |   65 ++
+ drivers/firmware/efi/efi-stub-helper.c |  148 ++---
+ include/linux/efi.h                    |  252 ++++++++
+ 21 files changed, 2114 insertions(+), 448 deletions(-)
+ create mode 100644 arch/x86/platform/efi/efi_thunk_64.S
+
+-- 
+1.8.5.3
