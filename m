@@ -1,75 +1,92 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH 04/13] x86/efi: Delete dead code when checking for non-native
-Date: Tue,  4 Mar 2014 13:14:12 +0000
-Message-ID: <1393938861-16797-5-git-send-email-matt@console-pimps.org>
-References: <1393938861-16797-1-git-send-email-matt@console-pimps.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1393938861-16797-1-git-send-email-matt@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-kernel@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH] efi: Quirk out SGI UV
+Date: Tue,  4 Mar 2014 17:02:17 +0100
+Message-ID: <1393948937-21840-1-git-send-email-bp@alien8.de>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 
-Both efi_free_boot_services() and efi_enter_virtual_mode() are invoked
-from init/main.c, but only if the EFI runtime services are available.
-This is not the case for non-native boots, e.g. where a 64-bit kernel is
-booted with 32-bit EFI firmware.
+Getting this thing to work with the new mapping scheme would need more
+work.
 
-Delete the dead code.
-
-Acked-by: Borislav Petkov <bp@suse.de>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 21 ---------------------
- 1 file changed, 21 deletions(-)
+ arch/x86/include/asm/efi.h  |  1 +
+ arch/x86/kernel/setup.c     | 10 ++--------
+ arch/x86/platform/efi/efi.c | 20 ++++++++++++++++++++
+ 3 files changed, 23 insertions(+), 8 deletions(-)
 
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index e985d6bf7d3a..86d1fd4bf24c 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -135,6 +135,7 @@ extern void __init old_map_region(efi_memory_desc_t *md);
+ extern void __init runtime_code_page_mkexec(void);
+ extern void __init efi_runtime_mkexec(void);
+ extern void __init efi_dump_pagetable(void);
++extern void __init efi_apply_memmap_quirks(void);
+ 
+ struct efi_setup_data {
+ 	u64 fw_vendor;
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 830ae2d95450..09c76d265550 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1238,14 +1238,8 @@ void __init setup_arch(char **cmdline_p)
+ 	register_refined_jiffies(CLOCK_TICK_RATE);
+ 
+ #ifdef CONFIG_EFI
+-	/* Once setup is done above, unmap the EFI memory map on
+-	 * mismatched firmware/kernel archtectures since there is no
+-	 * support for runtime services.
+-	 */
+-	if (efi_enabled(EFI_BOOT) && !efi_is_native()) {
+-		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
+-		efi_unmap_memmap();
+-	}
++	if (efi_enabled(EFI_BOOT))
++		efi_apply_memmap_quirks();
+ #endif
+ }
+ 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 0c8672b3f9a3..5f623f3bcbba 100644
+index 482986c3afc5..518aa8540a6d 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -452,9 +452,6 @@ void __init efi_free_boot_services(void)
- {
- 	void *p;
+@@ -52,6 +52,7 @@
+ #include <asm/tlbflush.h>
+ #include <asm/x86_init.h>
+ #include <asm/rtc.h>
++#include <asm/uv/uv.h>
  
--	if (!efi_is_native())
--		return;
--
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		efi_memory_desc_t *md = p;
- 		unsigned long long start = md->phys_addr;
-@@ -979,15 +976,6 @@ static void __init kexec_enter_virtual_mode(void)
- 	efi.systab = NULL;
+ #define EFI_DEBUG
  
- 	/*
--	 * We don't do virtual mode, since we don't do runtime services, on
--	 * non-native EFI
--	 */
--	if (!efi_is_native()) {
--		efi_unmap_memmap();
--		return;
--	}
--
--	/*
- 	* Map efi regions which were passed via setup_data. The virt_addr is a
- 	* fixed addr which was used in first kernel of a kexec boot.
- 	*/
-@@ -1066,15 +1054,6 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	efi.systab = NULL;
- 
--	/*
--	 * We don't do virtual mode, since we don't do runtime services, on
--	 * non-native EFI
--	 */
--	if (!efi_is_native()) {
--		efi_unmap_memmap();
--		return;
--	}
--
- 	efi_merge_regions();
- 	new_memmap = efi_map_regions(&count, &pg_shift);
- 	if (!new_memmap) {
+@@ -1298,3 +1299,22 @@ static int __init parse_efi_cmdline(char *str)
+ 	return 0;
+ }
+ early_param("efi", parse_efi_cmdline);
++
++void __init efi_apply_memmap_quirks(void)
++{
++	/*
++	 * Once setup is done earlier, unmap the EFI memory map on mismatched
++	 * firmware/kernel architectures since there is no support for runtime
++	 * services.
++	 */
++	if (!efi_is_native()) {
++		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
++		efi_unmap_memmap();
++	}
++
++	/*
++	 * UV doesn't support the new EFI pagetable mapping yet.
++	 */
++	if (is_uv_system())
++		set_bit(EFI_OLD_MEMMAP, &efi.flags);
++}
 -- 
-1.8.5.3
+1.9.0
