@@ -1,43 +1,37 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fix
-Date: Tue, 4 Mar 2014 23:47:47 +0000
-Message-ID: <20140304234747.GD17362@console-pimps.org>
+From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 1/1] efi: cper: Support different length of Error Section
+Date: Tue, 4 Mar 2014 16:38:49 -0800
+Message-ID: <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
+References: <6366A95FCFBB78419E783DDD020ED2ECB2E9EC@APMAILMBX03.lenovo.com>
+	<20140304234145.GB17362@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
+In-Reply-To: <20140304234145.GB17362-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Please pull the following fix from Borislav that fixes a boot regression
-for SGI UV.
+On Tue, Mar 4, 2014 at 3:41 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+>> Tested on v3.14-rc5 with Grantley platform and Intel RAStool.
 
-The following changes since commit 09503379dc99535b1bbfa51aa1aeef340f5d82ec:
+So - I've been playing with Grantley too - and didn't see these warnings about
+"error length section too small".  I suspect this is because I've been
+toggling the
+BIOS option under:
 
-  x86/efi: Check status field to validate BGRT header (2014-02-14 10:07:15 +0000)
+   EDKII > Advanced > System Event Log > WHEA Settings > UEFI Version
 
-are available in the git repository at:
+to request reports according to spec version 2.3.1 (to get the card handle and
+module handle fields)
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+Does that fit with your experience too?
 
-for you to fetch changes up to a5d90c923bcfb9632d998ed06e9569216ad695f3:
+-Tony
 
-  x86/efi: Quirk out SGI UV (2014-03-04 23:43:33 +0000)
-
-----------------------------------------------------------------
- * Disable the new EFI 1:1 virtual mapping for SGI UV because using it
-   causes a crash during boot - Borislav Petkov
-
-----------------------------------------------------------------
-Borislav Petkov (1):
-      x86/efi: Quirk out SGI UV
-
- arch/x86/include/asm/efi.h  |  1 +
- arch/x86/kernel/setup.c     | 10 ++--------
- arch/x86/platform/efi/efi.c | 20 ++++++++++++++++++++
- 3 files changed, 23 insertions(+), 8 deletions(-)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+[I note that there is a 2.4 version of UEFI ... are there more changes to the
+error record format there?  I know there are plans to tweak even more
+bits because
+some of the 2-byte fields in the memory error description are not big enough
+to describe locations on 64GB DIMMs]
