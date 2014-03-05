@@ -1,53 +1,40 @@
-From: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 1/1] efi: cper: Support different length of Error Section
-Date: Wed, 5 Mar 2014 03:58:59 +0000
-Message-ID: <6366A95FCFBB78419E783DDD020ED2ECB2EA8F@APMAILMBX03.lenovo.com>
-References: <6366A95FCFBB78419E783DDD020ED2ECB2E9EC@APMAILMBX03.lenovo.com>
- <20140304234145.GB17362@console-pimps.org>
- <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI mixed kbuild fixes
+Date: Wed, 5 Mar 2014 16:03:32 +0000
+Message-ID: <20140305160332.GE17362@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gVHVlLCAyMDE0LTAzLTA0IGF0IDE2OjM4IC0wODAwLCBUb255IEx1Y2sgd3JvdGU6Cj4gT24g
-VHVlLCBNYXIgNCwgMjAxNCBhdCAzOjQxIFBNLCBNYXR0IEZsZW1pbmcgPG1hdHRAY29uc29sZS1w
-aW1wcy5vcmc+IHdyb3RlOgo+ID4+IFRlc3RlZCBvbiB2My4xNC1yYzUgd2l0aCBHcmFudGxleSBw
-bGF0Zm9ybSBhbmQgSW50ZWwgUkFTdG9vbC4KPiAKPiBTbyAtIEkndmUgYmVlbiBwbGF5aW5nIHdp
-dGggR3JhbnRsZXkgdG9vIC0gYW5kIGRpZG4ndCBzZWUgdGhlc2Ugd2FybmluZ3MgYWJvdXQKPiAi
-ZXJyb3IgbGVuZ3RoIHNlY3Rpb24gdG9vIHNtYWxsIi4gIEkgc3VzcGVjdCB0aGlzIGlzIGJlY2F1
-c2UgSSd2ZSBiZWVuCj4gdG9nZ2xpbmcgdGhlCj4gQklPUyBvcHRpb24gdW5kZXI6Cj4gCj4gICAg
-RURLSUkgPiBBZHZhbmNlZCA+IFN5c3RlbSBFdmVudCBMb2cgPiBXSEVBIFNldHRpbmdzID4gVUVG
-SSBWZXJzaW9uCj4gCj4gdG8gcmVxdWVzdCByZXBvcnRzIGFjY29yZGluZyB0byBzcGVjIHZlcnNp
-b24gMi4zLjEgKHRvIGdldCB0aGUgY2FyZCBoYW5kbGUgYW5kCj4gbW9kdWxlIGhhbmRsZSBmaWVs
-ZHMpClllcy4gVGhpcyBpcyB0aGUgY29ycmVjdCBiZWhhdmlvciBiZWNhdXNlIHRoZSBzaXplIG9m
-IHN0cnVjdApjcGVyX3NlY19tZW1fZXJyIChkcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLmMpIGFu
-ZCB0aGUgZXJyb3JfZGF0YV9sZW5ndGgKZmllbGQgb2Ygc3RydWN0IGFjcGlfZ2VuZXJpY19kYXRh
-IGFyZSAoODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbikuCgpGb3IgdGhvc2UgQklPU2VzIG9u
-bHkgc3VwcG9ydCB0aGUgVUVGSSBzcGVjIHZlcnNpb25zIHdoaWNoIGFyZSBsZXNzIHRoYW4KMi4z
-LCB0aGUgZXJyb3JfZGF0YV9sZW5ndGggZmllbGQgb2Ygc3RydWN0IGFjcGlfZ2VuZXJpY19kYXRh
-IGlzIDczCig3My1ieXRlIG1lbW9yeSBlcnJvciBzZWN0aW9uKSBhY2NvcmRpbmcgdG8gc3BlYyB2
-ZXJzaW9uIDIuMiwgMi4xIGFuZCBzbwpvbi4gV2Ugd2lsbCBzZWUgdGhlIHdhcm5pbmcgbWVzc2Fn
-ZSBhZnRlciBpbmplY3RpbmcgYSBtZW1vcnkgY29ycmVjdGVkCmVycm9yLiAKCj4gRG9lcyB0aGF0
-IGZpdCB3aXRoIHlvdXIgZXhwZXJpZW5jZSB0b28/Clllcy4KCj4gCj4gLVRvbnkKPiAKPiBbSSBu
-b3RlIHRoYXQgdGhlcmUgaXMgYSAyLjQgdmVyc2lvbiBvZiBVRUZJIC4uLiBhcmUgdGhlcmUgbW9y
-ZSBjaGFuZ2VzIHRvIHRoZQo+IGVycm9yIHJlY29yZCBmb3JtYXQgdGhlcmU/ICBJIGtub3cgdGhl
-cmUgYXJlIHBsYW5zIHRvIHR3ZWFrIGV2ZW4gbW9yZQo+IGJpdHMgYmVjYXVzZQo+IHNvbWUgb2Yg
-dGhlIDItYnl0ZSBmaWVsZHMgaW4gdGhlIG1lbW9yeSBlcnJvciBkZXNjcmlwdGlvbiBhcmUgbm90
-IGJpZyBlbm91Z2gKPiB0byBkZXNjcmliZSBsb2NhdGlvbnMgb24gNjRHQiBESU1Nc10KSSBqdXN0
-IGNoZWNrZWQgdmVyc2lvbiAyLjQgYW5kIDIuNCBFcnJhdGEgQS4gVGhlIHNpemUgb2YgbWVtb3J5
-IGVycm9yCnNlY3Rpb24gaXMgc3RpbGwgODAgYnl0ZXMuIFRoZSBvbmx5IGRpZmZlcmVuY2UgaXMg
-dGhhdCB0aGUgZmllbGQKIkV4dGVuZGVkIiBpbiBzcGVjIDIuNCBFcnJhdGEgQSByZXBsYWNlcyB0
-aGUgZmllbGQgInJlc2VydmVkIiBpbiBzcGVjCjIuNC4gVGhpcyBzaG91bGQgYmUgY2hhbmdlZCBh
-Y2NvcmRpbmdseS4gCgpJZiB0aGVyZSBhcmUgbW9yZSBhZGRlZCBmaWxlZHMgdG8gZXJyb3IgcmVj
-b3JkIGZvcm1hdCBpbiB0aGUgbmV3ZXIgVUVGSQpzcGVjLCB3ZSBjYW4gc2ltcGx5IG1vZGlmeSBw
-cm9jX2dlbmVyaWNfc2VjdGlvbl9sZW4sIG1lbV9zZWN0aW9uX2xlbiBhbmQKcGNpZV9zZWN0aW9u
-X2xlbiB0byBzdXBwb3J0IGRpZmZlcmVudCBsZW5ndGggb2YgZXJyb3Igc2VjdGlvbi4gVGhlCmRl
-ZmluaXRpb24gb2YgbWVtX3NlY3Rpb25fbGVuIGlzIGFuIGV4YW1wbGUgdG8gc3VwcG9ydCBib3Ro
-IDczLWJ5dGUgYW5kCjgwLWJ5dGUgbWVtb3J5IGVycm9yIHNlY3Rpb24uCgo=
+Peter, please pull the following two changes that fix build errors
+reported by Fengguang's kbuild bot.
+
+The following changes since commit 18c46461d9e42d398536055f31f58cdcd2c6347e:
+
+  x86/efi: Re-disable interrupts after calling firmware services (2014-03-04 21:44:00 +0000)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git mixed-mode
+
+for you to fetch changes up to 3db4cafdfd05717dc939780134e53023a3c1f15f:
+
+  x86/boot: Fix non-EFI build (2014-03-05 10:19:07 +0000)
+
+----------------------------------------------------------------
+Matt Fleming (2):
+      x86, tools: Fix up compiler warnings
+      x86/boot: Fix non-EFI build
+
+ arch/x86/boot/compressed/head_32.S | 2 ++
+ arch/x86/boot/compressed/head_64.S | 3 +++
+ arch/x86/boot/tools/build.c        | 7 ++++---
+ 3 files changed, 9 insertions(+), 3 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
