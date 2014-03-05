@@ -1,37 +1,53 @@
-From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH 1/1] efi: cper: Support different length of Error Section
-Date: Tue, 4 Mar 2014 16:38:49 -0800
-Message-ID: <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
+Date: Wed, 5 Mar 2014 03:58:59 +0000
+Message-ID: <6366A95FCFBB78419E783DDD020ED2ECB2EA8F@APMAILMBX03.lenovo.com>
 References: <6366A95FCFBB78419E783DDD020ED2ECB2E9EC@APMAILMBX03.lenovo.com>
-	<20140304234145.GB17362@console-pimps.org>
+ <20140304234145.GB17362@console-pimps.org>
+ <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140304234145.GB17362-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 4, 2014 at 3:41 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> Tested on v3.14-rc5 with Grantley platform and Intel RAStool.
-
-So - I've been playing with Grantley too - and didn't see these warnings about
-"error length section too small".  I suspect this is because I've been
-toggling the
-BIOS option under:
-
-   EDKII > Advanced > System Event Log > WHEA Settings > UEFI Version
-
-to request reports according to spec version 2.3.1 (to get the card handle and
-module handle fields)
-
-Does that fit with your experience too?
-
--Tony
-
-[I note that there is a 2.4 version of UEFI ... are there more changes to the
-error record format there?  I know there are plans to tweak even more
-bits because
-some of the 2-byte fields in the memory error description are not big enough
-to describe locations on 64GB DIMMs]
+T24gVHVlLCAyMDE0LTAzLTA0IGF0IDE2OjM4IC0wODAwLCBUb255IEx1Y2sgd3JvdGU6Cj4gT24g
+VHVlLCBNYXIgNCwgMjAxNCBhdCAzOjQxIFBNLCBNYXR0IEZsZW1pbmcgPG1hdHRAY29uc29sZS1w
+aW1wcy5vcmc+IHdyb3RlOgo+ID4+IFRlc3RlZCBvbiB2My4xNC1yYzUgd2l0aCBHcmFudGxleSBw
+bGF0Zm9ybSBhbmQgSW50ZWwgUkFTdG9vbC4KPiAKPiBTbyAtIEkndmUgYmVlbiBwbGF5aW5nIHdp
+dGggR3JhbnRsZXkgdG9vIC0gYW5kIGRpZG4ndCBzZWUgdGhlc2Ugd2FybmluZ3MgYWJvdXQKPiAi
+ZXJyb3IgbGVuZ3RoIHNlY3Rpb24gdG9vIHNtYWxsIi4gIEkgc3VzcGVjdCB0aGlzIGlzIGJlY2F1
+c2UgSSd2ZSBiZWVuCj4gdG9nZ2xpbmcgdGhlCj4gQklPUyBvcHRpb24gdW5kZXI6Cj4gCj4gICAg
+RURLSUkgPiBBZHZhbmNlZCA+IFN5c3RlbSBFdmVudCBMb2cgPiBXSEVBIFNldHRpbmdzID4gVUVG
+SSBWZXJzaW9uCj4gCj4gdG8gcmVxdWVzdCByZXBvcnRzIGFjY29yZGluZyB0byBzcGVjIHZlcnNp
+b24gMi4zLjEgKHRvIGdldCB0aGUgY2FyZCBoYW5kbGUgYW5kCj4gbW9kdWxlIGhhbmRsZSBmaWVs
+ZHMpClllcy4gVGhpcyBpcyB0aGUgY29ycmVjdCBiZWhhdmlvciBiZWNhdXNlIHRoZSBzaXplIG9m
+IHN0cnVjdApjcGVyX3NlY19tZW1fZXJyIChkcml2ZXJzL2Zpcm13YXJlL2VmaS9jcGVyLmMpIGFu
+ZCB0aGUgZXJyb3JfZGF0YV9sZW5ndGgKZmllbGQgb2Ygc3RydWN0IGFjcGlfZ2VuZXJpY19kYXRh
+IGFyZSAoODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbikuCgpGb3IgdGhvc2UgQklPU2VzIG9u
+bHkgc3VwcG9ydCB0aGUgVUVGSSBzcGVjIHZlcnNpb25zIHdoaWNoIGFyZSBsZXNzIHRoYW4KMi4z
+LCB0aGUgZXJyb3JfZGF0YV9sZW5ndGggZmllbGQgb2Ygc3RydWN0IGFjcGlfZ2VuZXJpY19kYXRh
+IGlzIDczCig3My1ieXRlIG1lbW9yeSBlcnJvciBzZWN0aW9uKSBhY2NvcmRpbmcgdG8gc3BlYyB2
+ZXJzaW9uIDIuMiwgMi4xIGFuZCBzbwpvbi4gV2Ugd2lsbCBzZWUgdGhlIHdhcm5pbmcgbWVzc2Fn
+ZSBhZnRlciBpbmplY3RpbmcgYSBtZW1vcnkgY29ycmVjdGVkCmVycm9yLiAKCj4gRG9lcyB0aGF0
+IGZpdCB3aXRoIHlvdXIgZXhwZXJpZW5jZSB0b28/Clllcy4KCj4gCj4gLVRvbnkKPiAKPiBbSSBu
+b3RlIHRoYXQgdGhlcmUgaXMgYSAyLjQgdmVyc2lvbiBvZiBVRUZJIC4uLiBhcmUgdGhlcmUgbW9y
+ZSBjaGFuZ2VzIHRvIHRoZQo+IGVycm9yIHJlY29yZCBmb3JtYXQgdGhlcmU/ICBJIGtub3cgdGhl
+cmUgYXJlIHBsYW5zIHRvIHR3ZWFrIGV2ZW4gbW9yZQo+IGJpdHMgYmVjYXVzZQo+IHNvbWUgb2Yg
+dGhlIDItYnl0ZSBmaWVsZHMgaW4gdGhlIG1lbW9yeSBlcnJvciBkZXNjcmlwdGlvbiBhcmUgbm90
+IGJpZyBlbm91Z2gKPiB0byBkZXNjcmliZSBsb2NhdGlvbnMgb24gNjRHQiBESU1Nc10KSSBqdXN0
+IGNoZWNrZWQgdmVyc2lvbiAyLjQgYW5kIDIuNCBFcnJhdGEgQS4gVGhlIHNpemUgb2YgbWVtb3J5
+IGVycm9yCnNlY3Rpb24gaXMgc3RpbGwgODAgYnl0ZXMuIFRoZSBvbmx5IGRpZmZlcmVuY2UgaXMg
+dGhhdCB0aGUgZmllbGQKIkV4dGVuZGVkIiBpbiBzcGVjIDIuNCBFcnJhdGEgQSByZXBsYWNlcyB0
+aGUgZmllbGQgInJlc2VydmVkIiBpbiBzcGVjCjIuNC4gVGhpcyBzaG91bGQgYmUgY2hhbmdlZCBh
+Y2NvcmRpbmdseS4gCgpJZiB0aGVyZSBhcmUgbW9yZSBhZGRlZCBmaWxlZHMgdG8gZXJyb3IgcmVj
+b3JkIGZvcm1hdCBpbiB0aGUgbmV3ZXIgVUVGSQpzcGVjLCB3ZSBjYW4gc2ltcGx5IG1vZGlmeSBw
+cm9jX2dlbmVyaWNfc2VjdGlvbl9sZW4sIG1lbV9zZWN0aW9uX2xlbiBhbmQKcGNpZV9zZWN0aW9u
+X2xlbiB0byBzdXBwb3J0IGRpZmZlcmVudCBsZW5ndGggb2YgZXJyb3Igc2VjdGlvbi4gVGhlCmRl
+ZmluaXRpb24gb2YgbWVtX3NlY3Rpb25fbGVuIGlzIGFuIGV4YW1wbGUgdG8gc3VwcG9ydCBib3Ro
+IDczLWJ5dGUgYW5kCjgwLWJ5dGUgbWVtb3J5IGVycm9yIHNlY3Rpb24uCgo=
