@@ -1,42 +1,57 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
 Subject: Re: [patch] x86/efi: use GFP_ATOMIC under spin_lock
-Date: Mon, 10 Mar 2014 09:47:46 -0700
-Message-ID: <531DECB2.3020405@zytor.com>
+Date: Mon, 10 Mar 2014 20:07:43 +0300
+Message-ID: <20140310170743.GS4774@mwanda>
 References: <20140307112055.GE2351@elgon.mountain>
+ <20140307121022.GA32575@gmail.com>
+ <20140307122103.GM4774@mwanda>
+ <20140309161946.GA10262@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20140307112055.GE2351@elgon.mountain>
+Content-Disposition: inline
+In-Reply-To: <20140309161946.GA10262@console-pimps.org>
 Sender: kernel-janitors-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>, Matt Fleming <matt.fleming@intel.com>, Nathan Zimmer <nzimmer@sgi.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Nathan Zimmer <nzimmer@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, Jan Beulich <JBeulich@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/07/2014 03:20 AM, Dan Carpenter wrote:
-> In phys_efi_get_time() we call efi_call_phys_prelog() with a spin_lock
-> so this allocation should be atomic.
+On Sun, Mar 09, 2014 at 04:20:20PM +0000, Matt Fleming wrote:
+> On Fri, 07 Mar, at 03:25:37PM, Dan Carpenter wrote:
+> > 
+> > You're on your own for fixing the complicated stuff like layering
+> > violations. I just do static checker stuff and sed fixes.  ;)
 > 
-> Fixes: b8f2c21db390 ('efi, x86: Pass a proper identity mapping in efi_call_phys_prelog')
-> Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+> Thanks for the patch Dan. Nice catch.
 > 
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index 0c2a234fef1e..f5adcadb381b 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -90,7 +90,7 @@ void __init efi_call_phys_prelog(void)
->  	local_irq_save(efi_flags);
->  
->  	n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
-> -	save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_KERNEL);
-> +	save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_ATOMIC);
->  
->  	for (pgd = 0; pgd < n_pgds; pgd++) {
->  		save_pgd[pgd] = *pgd_offset_k(pgd * PGDIR_SIZE);
+> But I'm wondering if we can simply delete phys_efi_get_time() to avoid
+> the whole problem of doing GFP_KERNEL allocations under a spinlock.
 > 
+> In fact, the whole EFI time stuff is looking a bit crusty.
+> 
+> I only see two direct users of efi.get_time() outside of arch,
+> 
+>   drivers/char/efirtc.c
+>   drivers/rtc/rtc-efi.c
+> 
+> which are both "depends on IA64". For x86, all other callers are inside
+> arch/x86/platform/efi/efi.c,
+> 
+>   efi_set_rtc_mmss()
+>   efi_get_time()
+> 
+> neither of which have any callers - it all appears to be dead code. The
+> diff stat of deleting all this dead code isn't too bad either,
+> 
+>  arch/x86/platform/efi/efi.c    | 151 ++---------------------------------------
+>  arch/x86/platform/efi/efi_64.c |  90 ------------------------
+>  2 files changed, 5 insertions(+), 236 deletions(-)
+> 
+> Thoughts?
 
-And what happens if the allocation fails, as GFP_ATOMIC allocations are
-wont to do?  I see an inbound NULL pointer reference from miles away here...
+I don't have strong opinions on this, this was just a static checker
+thing, and I don't know the code.
 
-	-hpa
+regards,
+dan carpenter
 
