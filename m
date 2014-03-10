@@ -1,62 +1,41 @@
-From: "Jan Beulich" <JBeulich@suse.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
 Subject: Re: [patch] x86/efi: use GFP_ATOMIC under spin_lock
-Date: Mon, 10 Mar 2014 07:26:13 +0000
-Message-ID: <531D7725020000780012230A@nat28.tlf.novell.com>
+Date: Mon, 10 Mar 2014 07:27:50 +0000
+Message-ID: <531D7786020000780012230D@nat28.tlf.novell.com>
 References: <20140307112055.GE2351@elgon.mountain>
  <20140307121022.GA32575@gmail.com> <20140307122103.GM4774@mwanda>
  <20140309161946.GA10262@console-pimps.org>
+ <20140309163141.GA18824@srcf.ucam.org>
+ <20140309185028.GB10262@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8BIT
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-In-Reply-To: <20140309161946.GA10262@console-pimps.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140309185028.GB10262-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Content-Disposition: inline
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, Ingo Molnar <mingo@kernel.org>, x86@kernel.org, Thomas Gleixner <tglx@linutronix.de>, Dan Carpenter <dan.carpenter@oracle.com>, Ingo Molnar <mingo@redhat.com>, Nathan Zimmer <nzimmer@sgi.com>, Matthew Garrett <mjg59@srcf.ucam.org>, kernel-janitors@vger.kernel.org, linux-efi@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Nathan Zimmer <nzimmer-sJ/iWh9BUns@public.gmane.org>, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
->>> On 09.03.14 at 17:20, Matt Fleming <matt@console-pimps.org> wrote:
-> On Fri, 07 Mar, at 03:25:37PM, Dan Carpenter wrote:
+>>> On 09.03.14 at 19:50, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Sun, 09 Mar, at 04:31:41PM, Matthew Garrett wrote:
+>> On Sun, Mar 09, 2014 at 04:20:20PM +0000, Matt Fleming wrote:
 >> 
->> You're on your own for fixing the complicated stuff like layering
->> violations. I just do static checker stuff and sed fixes.  ;)
+>> > We have tried to use the time functions before, with little success
+>> > because of various bugs in the runtime implementations, e.g. see commit
+>> > bacef661acdb ("x86-64/efi: Use EFI to deal with platform wall clock")
+>> > and commit bd52276fa1d4 ("x86-64/efi: Use EFI to deal with platform wall
+>> > clock (again)").
+>> 
+>> I'd naively expected that these would be more reliable after the 1:1 
+>> mapping patches, so it might actually be time to give them another go.
 > 
-> Thanks for the patch Dan. Nice catch.
-> 
-> But I'm wondering if we can simply delete phys_efi_get_time() to avoid
-> the whole problem of doing GFP_KERNEL allocations under a spinlock.
-> 
-> In fact, the whole EFI time stuff is looking a bit crusty.
-> 
-> I only see two direct users of efi.get_time() outside of arch,
-> 
->   drivers/char/efirtc.c
->   drivers/rtc/rtc-efi.c
-> 
-> which are both "depends on IA64".
+> Is there any value in that? Do machines exist where we absolutely must
+> have access to the EFI time services? Either because there's no other
+> method or no other working one?
 
-And wrongly so. I continue to think that the fact that various
-firmware implementations are broken should not make us by
-default avoid using proper abstraction functionality whenever
-possible. There's a reason behind that abstraction after all...
-
-> For x86, all other callers are inside
-> arch/x86/platform/efi/efi.c,
-> 
->   efi_set_rtc_mmss()
->   efi_get_time()
-> 
-> neither of which have any callers - it all appears to be dead code. The
-> diff stat of deleting all this dead code isn't too bad either,
-> 
->  arch/x86/platform/efi/efi.c    | 151 ++---------------------------------------
->  arch/x86/platform/efi/efi_64.c |  90 ------------------------
->  2 files changed, 5 insertions(+), 236 deletions(-)
-> 
-> Thoughts?
-
-Please don't, except perhaps for the phys_efi_get_time() removal.
+Is it such a bad thing to be prepared for this sort of machine to
+arrive even if likely there are none so far?
 
 Jan
-
