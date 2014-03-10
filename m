@@ -1,45 +1,62 @@
-From: Matthew Garrett <mjg59@srcf.ucam.org>
+From: "Jan Beulich" <JBeulich@suse.com>
 Subject: Re: [patch] x86/efi: use GFP_ATOMIC under spin_lock
-Date: Sun, 9 Mar 2014 19:00:53 +0000
-Message-ID: <20140309190053.GA29555@srcf.ucam.org>
+Date: Mon, 10 Mar 2014 07:26:13 +0000
+Message-ID: <531D7725020000780012230A@nat28.tlf.novell.com>
 References: <20140307112055.GE2351@elgon.mountain>
- <20140307121022.GA32575@gmail.com>
- <20140307122103.GM4774@mwanda>
+ <20140307121022.GA32575@gmail.com> <20140307122103.GM4774@mwanda>
  <20140309161946.GA10262@console-pimps.org>
- <20140309163141.GA18824@srcf.ucam.org>
- <20140309185028.GB10262@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8BIT
 Return-path: <kernel-janitors-owner@vger.kernel.org>
+In-Reply-To: <20140309161946.GA10262@console-pimps.org>
 Content-Disposition: inline
-In-Reply-To: <20140309185028.GB10262@console-pimps.org>
 Sender: kernel-janitors-owner@vger.kernel.org
 To: Matt Fleming <matt@console-pimps.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Nathan Zimmer <nzimmer@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org, Jan Beulich <JBeulich@suse.com>
+Cc: Matt Fleming <matt.fleming@intel.com>, Ingo Molnar <mingo@kernel.org>, x86@kernel.org, Thomas Gleixner <tglx@linutronix.de>, Dan Carpenter <dan.carpenter@oracle.com>, Ingo Molnar <mingo@redhat.com>, Nathan Zimmer <nzimmer@sgi.com>, Matthew Garrett <mjg59@srcf.ucam.org>, kernel-janitors@vger.kernel.org, linux-efi@vger.kernel.org, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Mar 09, 2014 at 06:50:28PM +0000, Matt Fleming wrote:
+>>> On 09.03.14 at 17:20, Matt Fleming <matt@console-pimps.org> wrote:
+> On Fri, 07 Mar, at 03:25:37PM, Dan Carpenter wrote:
+>> 
+>> You're on your own for fixing the complicated stuff like layering
+>> violations. I just do static checker stuff and sed fixes.  ;)
+> 
+> Thanks for the patch Dan. Nice catch.
+> 
+> But I'm wondering if we can simply delete phys_efi_get_time() to avoid
+> the whole problem of doing GFP_KERNEL allocations under a spinlock.
+> 
+> In fact, the whole EFI time stuff is looking a bit crusty.
+> 
+> I only see two direct users of efi.get_time() outside of arch,
+> 
+>   drivers/char/efirtc.c
+>   drivers/rtc/rtc-efi.c
+> 
+> which are both "depends on IA64".
 
-> Is there any value in that? Do machines exist where we absolutely must
-> have access to the EFI time services? Either because there's no other
-> method or no other working one?
+And wrongly so. I continue to think that the fact that various
+firmware implementations are broken should not make us by
+default avoid using proper abstraction functionality whenever
+possible. There's a reason behind that abstraction after all...
 
-In theory we get timezones, which we otherwise only get if we have an 
-ACPI TAD device.
+> For x86, all other callers are inside
+> arch/x86/platform/efi/efi.c,
+> 
+>   efi_set_rtc_mmss()
+>   efi_get_time()
+> 
+> neither of which have any callers - it all appears to be dead code. The
+> diff stat of deleting all this dead code isn't too bad either,
+> 
+>  arch/x86/platform/efi/efi.c    | 151 ++---------------------------------------
+>  arch/x86/platform/efi/efi_64.c |  90 ------------------------
+>  2 files changed, 5 insertions(+), 236 deletions(-)
+> 
+> Thoughts?
 
-> I can check again, but I'm pretty sure this ASUS machine under my desk
-> always returns a vendor-specific error code when invoked, even with
-> Borislav's 1:1 patches. Enabling EFI services just because they exist
-> hasn't worked out well for us in the past.
+Please don't, except perhaps for the phys_efi_get_time() removal.
 
-Returning an error doesn't seem like a problem, as long as it's not 
-actually killing the machine in the process...
+Jan
 
-> And of course, the GPF_KERNEL alloc under spinlock bug that started this
-> thread needs to be fixed.
-
-Losing phys_efi_get_time() doesn't seem like it ought to be much of a 
-problem.
-
--- 
-Matthew Garrett | mjg59@srcf.ucam.org
