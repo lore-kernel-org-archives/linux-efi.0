@@ -1,57 +1,63 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [patch] x86/efi: use GFP_ATOMIC under spin_lock
-Date: Mon, 10 Mar 2014 20:07:43 +0300
-Message-ID: <20140310170743.GS4774@mwanda>
-References: <20140307112055.GE2351@elgon.mountain>
- <20140307121022.GA32575@gmail.com>
- <20140307122103.GM4774@mwanda>
- <20140309161946.GA10262@console-pimps.org>
+From: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
+Subject: RE: [PATCH 1/1] efi: cper: Support different length of Error Section
+Date: Wed, 12 Mar 2014 06:31:11 +0000
+Message-ID: <6366A95FCFBB78419E783DDD020ED2ECB2F42B@APMAILMBX03.lenovo.com>
+References: <6366A95FCFBB78419E783DDD020ED2ECB2E9EC@APMAILMBX03.lenovo.com>
+ <20140304234145.GB17362@console-pimps.org>
+ <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
+ <6366A95FCFBB78419E783DDD020ED2ECB2EA8F@APMAILMBX03.lenovo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-janitors-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140309161946.GA10262@console-pimps.org>
-Sender: kernel-janitors-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Nathan Zimmer <nzimmer@sgi.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, kernel-janitors@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, Jan Beulich <JBeulich@suse.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <6366A95FCFBB78419E783DDD020ED2ECB2EA8F-Jk/oIdswkFjYfDlE21CtCN+069o89Hfh@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Mar 09, 2014 at 04:20:20PM +0000, Matt Fleming wrote:
-> On Fri, 07 Mar, at 03:25:37PM, Dan Carpenter wrote:
-> > 
-> > You're on your own for fixing the complicated stuff like layering
-> > violations. I just do static checker stuff and sed fixes.  ;)
-> 
-> Thanks for the patch Dan. Nice catch.
-> 
-> But I'm wondering if we can simply delete phys_efi_get_time() to avoid
-> the whole problem of doing GFP_KERNEL allocations under a spinlock.
-> 
-> In fact, the whole EFI time stuff is looking a bit crusty.
-> 
-> I only see two direct users of efi.get_time() outside of arch,
-> 
->   drivers/char/efirtc.c
->   drivers/rtc/rtc-efi.c
-> 
-> which are both "depends on IA64". For x86, all other callers are inside
-> arch/x86/platform/efi/efi.c,
-> 
->   efi_set_rtc_mmss()
->   efi_get_time()
-> 
-> neither of which have any callers - it all appears to be dead code. The
-> diff stat of deleting all this dead code isn't too bad either,
-> 
->  arch/x86/platform/efi/efi.c    | 151 ++---------------------------------------
->  arch/x86/platform/efi/efi_64.c |  90 ------------------------
->  2 files changed, 5 insertions(+), 236 deletions(-)
-> 
-> Thoughts?
-
-I don't have strong opinions on this, this was just a static checker
-thing, and I don't know the code.
-
-regards,
-dan carpenter
-
+R2VudGxlIHBpbmcsIFRvbnkuIEFueSBjb21tZW50cyBhYm91dCB0aGlzIHBhdGNoPyANCg0KLS0g
+QWRyaWFuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQWRyaWFuIEh1
+YW5nMTINCj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAwNSwgMjAxNCAxMTo1OSBBTQ0KPiBUbzog
+VG9ueSBMdWNrDQo+IENjOiBBZHJpYW4gSHVhbmcxMjsgTWF0dCBGbGVtaW5nOyBtYXR0LmZsZW1p
+bmdAaW50ZWwuY29tOyBsaW51eC0NCj4gZWZpQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
+ZTogW1BBVENIIDEvMV0gZWZpOiBjcGVyOiBTdXBwb3J0IGRpZmZlcmVudCBsZW5ndGggb2YgRXJy
+b3INCj4gU2VjdGlvbg0KPiANCj4gT24gVHVlLCAyMDE0LTAzLTA0IGF0IDE2OjM4IC0wODAwLCBU
+b255IEx1Y2sgd3JvdGU6DQo+ID4gT24gVHVlLCBNYXIgNCwgMjAxNCBhdCAzOjQxIFBNLCBNYXR0
+IEZsZW1pbmcgPG1hdHRAY29uc29sZS1waW1wcy5vcmc+DQo+IHdyb3RlOg0KPiA+ID4+IFRlc3Rl
+ZCBvbiB2My4xNC1yYzUgd2l0aCBHcmFudGxleSBwbGF0Zm9ybSBhbmQgSW50ZWwgUkFTdG9vbC4N
+Cj4gPg0KPiA+IFNvIC0gSSd2ZSBiZWVuIHBsYXlpbmcgd2l0aCBHcmFudGxleSB0b28gLSBhbmQg
+ZGlkbid0IHNlZSB0aGVzZSB3YXJuaW5ncw0KPiBhYm91dA0KPiA+ICJlcnJvciBsZW5ndGggc2Vj
+dGlvbiB0b28gc21hbGwiLiAgSSBzdXNwZWN0IHRoaXMgaXMgYmVjYXVzZSBJJ3ZlIGJlZW4NCj4g
+PiB0b2dnbGluZyB0aGUNCj4gPiBCSU9TIG9wdGlvbiB1bmRlcjoNCj4gPg0KPiA+ICAgIEVES0lJ
+ID4gQWR2YW5jZWQgPiBTeXN0ZW0gRXZlbnQgTG9nID4gV0hFQSBTZXR0aW5ncyA+IFVFRkkgVmVy
+c2lvbg0KPiA+DQo+ID4gdG8gcmVxdWVzdCByZXBvcnRzIGFjY29yZGluZyB0byBzcGVjIHZlcnNp
+b24gMi4zLjEgKHRvIGdldCB0aGUgY2FyZCBoYW5kbGUNCj4gYW5kDQo+ID4gbW9kdWxlIGhhbmRs
+ZSBmaWVsZHMpDQo+IFllcy4gVGhpcyBpcyB0aGUgY29ycmVjdCBiZWhhdmlvciBiZWNhdXNlIHRo
+ZSBzaXplIG9mIHN0cnVjdA0KPiBjcGVyX3NlY19tZW1fZXJyIChkcml2ZXJzL2Zpcm13YXJlL2Vm
+aS9jcGVyLmMpIGFuZCB0aGUgZXJyb3JfZGF0YV9sZW5ndGgNCj4gZmllbGQgb2Ygc3RydWN0IGFj
+cGlfZ2VuZXJpY19kYXRhIGFyZSAoODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbikuDQo+IA0K
+PiBGb3IgdGhvc2UgQklPU2VzIG9ubHkgc3VwcG9ydCB0aGUgVUVGSSBzcGVjIHZlcnNpb25zIHdo
+aWNoIGFyZSBsZXNzIHRoYW4NCj4gMi4zLCB0aGUgZXJyb3JfZGF0YV9sZW5ndGggZmllbGQgb2Yg
+c3RydWN0IGFjcGlfZ2VuZXJpY19kYXRhIGlzIDczDQo+ICg3My1ieXRlIG1lbW9yeSBlcnJvciBz
+ZWN0aW9uKSBhY2NvcmRpbmcgdG8gc3BlYyB2ZXJzaW9uIDIuMiwgMi4xIGFuZCBzbw0KPiBvbi4g
+V2Ugd2lsbCBzZWUgdGhlIHdhcm5pbmcgbWVzc2FnZSBhZnRlciBpbmplY3RpbmcgYSBtZW1vcnkg
+Y29ycmVjdGVkDQo+IGVycm9yLg0KPiANCj4gPiBEb2VzIHRoYXQgZml0IHdpdGggeW91ciBleHBl
+cmllbmNlIHRvbz8NCj4gWWVzLg0KPiANCj4gPg0KPiA+IC1Ub255DQo+ID4NCj4gPiBbSSBub3Rl
+IHRoYXQgdGhlcmUgaXMgYSAyLjQgdmVyc2lvbiBvZiBVRUZJIC4uLiBhcmUgdGhlcmUgbW9yZSBj
+aGFuZ2VzIHRvDQo+IHRoZQ0KPiA+IGVycm9yIHJlY29yZCBmb3JtYXQgdGhlcmU/ICBJIGtub3cg
+dGhlcmUgYXJlIHBsYW5zIHRvIHR3ZWFrIGV2ZW4gbW9yZQ0KPiA+IGJpdHMgYmVjYXVzZQ0KPiA+
+IHNvbWUgb2YgdGhlIDItYnl0ZSBmaWVsZHMgaW4gdGhlIG1lbW9yeSBlcnJvciBkZXNjcmlwdGlv
+biBhcmUgbm90IGJpZw0KPiBlbm91Z2gNCj4gPiB0byBkZXNjcmliZSBsb2NhdGlvbnMgb24gNjRH
+QiBESU1Nc10NCj4gSSBqdXN0IGNoZWNrZWQgdmVyc2lvbiAyLjQgYW5kIDIuNCBFcnJhdGEgQS4g
+VGhlIHNpemUgb2YgbWVtb3J5IGVycm9yDQo+IHNlY3Rpb24gaXMgc3RpbGwgODAgYnl0ZXMuIFRo
+ZSBvbmx5IGRpZmZlcmVuY2UgaXMgdGhhdCB0aGUgZmllbGQNCj4gIkV4dGVuZGVkIiBpbiBzcGVj
+IDIuNCBFcnJhdGEgQSByZXBsYWNlcyB0aGUgZmllbGQgInJlc2VydmVkIiBpbiBzcGVjDQo+IDIu
+NC4gVGhpcyBzaG91bGQgYmUgY2hhbmdlZCBhY2NvcmRpbmdseS4NCj4gDQo+IElmIHRoZXJlIGFy
+ZSBtb3JlIGFkZGVkIGZpbGVkcyB0byBlcnJvciByZWNvcmQgZm9ybWF0IGluIHRoZSBuZXdlciBV
+RUZJDQo+IHNwZWMsIHdlIGNhbiBzaW1wbHkgbW9kaWZ5IHByb2NfZ2VuZXJpY19zZWN0aW9uX2xl
+biwgbWVtX3NlY3Rpb25fbGVuIGFuZA0KPiBwY2llX3NlY3Rpb25fbGVuIHRvIHN1cHBvcnQgZGlm
+ZmVyZW50IGxlbmd0aCBvZiBlcnJvciBzZWN0aW9uLiBUaGUNCj4gZGVmaW5pdGlvbiBvZiBtZW1f
+c2VjdGlvbl9sZW4gaXMgYW4gZXhhbXBsZSB0byBzdXBwb3J0IGJvdGggNzMtYnl0ZSBhbmQNCj4g
+ODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbi4NCg0K
