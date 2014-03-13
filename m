@@ -1,49 +1,59 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 04/15] lib: add fdt_empty_tree.c
-Date: Thu, 13 Mar 2014 22:46:57 +0000
-Message-ID: <1394750828-16351-5-git-send-email-leif.lindholm@linaro.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v2 01/15] efi: delete stray ARM ifdef
+Date: Thu, 13 Mar 2014 22:46:54 +0000
+Message-ID: <1394750828-16351-2-git-send-email-leif.lindholm@linaro.org>
 References: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1394750828-16351-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, matt.fleming@intel.com
+Cc: roy.franz@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>, msalter@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+An #ifdef CONFIG_ARM clause in efi-stub-helper.c got included with some
+of the generic stub rework by Roy Franz. Drop it here to make subsequent
+patches less confusing.
 
-CONFIG_LIBFDT support does not include fdt_empty_tree.c which is
-needed by arm64 EFI stub. Add it to libfdt_files.
-
-Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- lib/Makefile         |    3 ++-
- lib/fdt_empty_tree.c |    2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
- create mode 100644 lib/fdt_empty_tree.c
+ drivers/firmware/efi/efi-stub-helper.c |   14 ++------------
+ 1 file changed, 2 insertions(+), 12 deletions(-)
 
-diff --git a/lib/Makefile b/lib/Makefile
-index 48140e3..befe555 100644
---- a/lib/Makefile
-+++ b/lib/Makefile
-@@ -147,7 +147,8 @@ obj-$(CONFIG_GENERIC_NET_UTILS) += net_utils.o
+diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+index b6bffbf..6811af7 100644
+--- a/drivers/firmware/efi/efi-stub-helper.c
++++ b/drivers/firmware/efi/efi-stub-helper.c
+@@ -608,18 +608,8 @@ static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
+ 	}
  
- obj-$(CONFIG_STMP_DEVICE) += stmp_device.o
+ 	options_size++;  /* NUL termination */
+-#ifdef CONFIG_ARM
+-	/*
+-	 * For ARM, allocate at a high address to avoid reserved
+-	 * regions at low addresses that we don't know the specfics of
+-	 * at the time we are processing the command line.
+-	 */
+-	status = efi_high_alloc(sys_table_arg, options_size, 0,
+-			    &cmdline_addr, 0xfffff000);
+-#else
+-	status = efi_low_alloc(sys_table_arg, options_size, 0,
+-			    &cmdline_addr);
+-#endif
++
++	status = efi_low_alloc(sys_table_arg, options_size, 0, &cmdline_addr);
+ 	if (status != EFI_SUCCESS)
+ 		return NULL;
  
--libfdt_files = fdt.o fdt_ro.o fdt_wip.o fdt_rw.o fdt_sw.o fdt_strerror.o
-+libfdt_files = fdt.o fdt_ro.o fdt_wip.o fdt_rw.o fdt_sw.o fdt_strerror.o \
-+	       fdt_empty_tree.o
- $(foreach file, $(libfdt_files), \
- 	$(eval CFLAGS_$(file) = -I$(src)/../scripts/dtc/libfdt))
- lib-$(CONFIG_LIBFDT) += $(libfdt_files)
-diff --git a/lib/fdt_empty_tree.c b/lib/fdt_empty_tree.c
-new file mode 100644
-index 0000000..5d30c58
---- /dev/null
-+++ b/lib/fdt_empty_tree.c
-@@ -0,0 +1,2 @@
-+#include <linux/libfdt_env.h>
-+#include "../scripts/dtc/libfdt/fdt_empty_tree.c"
 -- 
 1.7.10.4
