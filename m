@@ -1,57 +1,24 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Thu, 13 Mar 2014 10:12:35 +0000
-Message-ID: <20140313101235.753c3ec0@alan.etchedpixels.co.uk>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	<1394686919.25122.2.camel@x230>
-	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+Date: Thu, 13 Mar 2014 08:54:06 -0700
+Message-ID: <5321D49E.30705@zytor.com>
+References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>	<1394686919.25122.2.camel@x230>	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org> <20140313101235.753c3ec0@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: James Morris <jmorris@namei.org>
-Cc: Kees Cook <keescook@chromium.org>, Andrew Morton <akpm@linux-foundation.org>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "hpa@zytor.com" <hpa@zytor.com>, Matthew Garrett <matthew.garrett@nebula.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140313101235.753c3ec0-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 13 Mar 2014 20:33:06 +1100 (EST)
-James Morris <jmorris@namei.org> wrote:
-
-> On Wed, 12 Mar 2014, Kees Cook wrote:
+On 03/13/2014 03:12 AM, One Thousand Gnomes wrote:
 > 
-> > On Wed, Mar 12, 2014 at 10:01 PM, Matthew Garrett
-> > <matthew.garrett@nebula.com> wrote:
-> > > On Fri, 2014-02-28 at 14:03 +1100, James Morris wrote:
-> > >
-> > >> Ok, which tree should take this?  I'm happy to, although most of it is
-> > >> outside security/ .
-> > >
-> > > Should I be looking for someone else to take them instead? :)
-> > 
-> > Andrew, is this series[1] something you'd be okay taking? It touches
-> > many different areas, so you might be best for it.
+> I would prefer it did the revocation of CAP_SYS_RAWIO or at least
+> documented the absolute requirement.
 > 
-> I'll take it, but there's unanswered review feedback (your response to the 
-> first question), and Alan raised some doubts about the patches which I'm 
-> not sure have been resolved.
 
-I have a series of doubts about their completeness which didn't get any
-answer at all, and one on the misleading use of the term "secure" as
-opposed to "measured" 8)
+Seconded.  This has been my opinion, raised over and over and over again.
 
-I don't think it's reasonable to have a policy of refusing them until
-they cover all cases. It's not like it can be dropped into staging and
-refined.
-
-So other than the usual moan about people naming things "security" being
-like putting "i-" and "e-" on the front of stuff to make it sound cool
-when it isn't what it says I'm fine 8)
-
-I would prefer it did the revocation of CAP_SYS_RAWIO or at least
-documented the absolute requirement.
-
-Alan
+	-hpa
