@@ -1,63 +1,24 @@
-From: Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
-Subject: RE: [PATCH 1/1] efi: cper: Support different length of Error Section
-Date: Wed, 12 Mar 2014 06:31:11 +0000
-Message-ID: <6366A95FCFBB78419E783DDD020ED2ECB2F42B@APMAILMBX03.lenovo.com>
-References: <6366A95FCFBB78419E783DDD020ED2ECB2E9EC@APMAILMBX03.lenovo.com>
- <20140304234145.GB17362@console-pimps.org>
- <CA+8MBbL2K0=5rY3hZqC23ap9tWet3GUz-RwB4Z0qPLQm8LipNQ@mail.gmail.com>
- <6366A95FCFBB78419E783DDD020ED2ECB2EA8F@APMAILMBX03.lenovo.com>
+From: Matthew Garrett <matthew.garrett@nebula.com>
+Subject: Re: Trusted kernel patchset for Secure Boot lockdown
+Date: Thu, 13 Mar 2014 05:01:59 +0000
+Message-ID: <1394686919.25122.2.camel@x230>
+References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
+	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <6366A95FCFBB78419E783DDD020ED2ECB2EA8F-Jk/oIdswkFjYfDlE21CtCN+069o89Hfh@public.gmane.org>
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
 Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Adrian Huang12 <ahuang12-6jq1YtArVR3QT0dZR+AlfA@public.gmane.org>
+Content-ID: <957CFE1866E453488D2DDBE597FA3546@namprd05.prod.outlook.com>
+Sender: linux-security-module-owner@vger.kernel.org
+To: "jmorris@namei.org" <jmorris@namei.org>
+Cc: "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "hpa@zytor.com" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-R2VudGxlIHBpbmcsIFRvbnkuIEFueSBjb21tZW50cyBhYm91dCB0aGlzIHBhdGNoPyANCg0KLS0g
-QWRyaWFuDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQWRyaWFuIEh1
-YW5nMTINCj4gU2VudDogV2VkbmVzZGF5LCBNYXJjaCAwNSwgMjAxNCAxMTo1OSBBTQ0KPiBUbzog
-VG9ueSBMdWNrDQo+IENjOiBBZHJpYW4gSHVhbmcxMjsgTWF0dCBGbGVtaW5nOyBtYXR0LmZsZW1p
-bmdAaW50ZWwuY29tOyBsaW51eC0NCj4gZWZpQHZnZXIua2VybmVsLm9yZw0KPiBTdWJqZWN0OiBS
-ZTogW1BBVENIIDEvMV0gZWZpOiBjcGVyOiBTdXBwb3J0IGRpZmZlcmVudCBsZW5ndGggb2YgRXJy
-b3INCj4gU2VjdGlvbg0KPiANCj4gT24gVHVlLCAyMDE0LTAzLTA0IGF0IDE2OjM4IC0wODAwLCBU
-b255IEx1Y2sgd3JvdGU6DQo+ID4gT24gVHVlLCBNYXIgNCwgMjAxNCBhdCAzOjQxIFBNLCBNYXR0
-IEZsZW1pbmcgPG1hdHRAY29uc29sZS1waW1wcy5vcmc+DQo+IHdyb3RlOg0KPiA+ID4+IFRlc3Rl
-ZCBvbiB2My4xNC1yYzUgd2l0aCBHcmFudGxleSBwbGF0Zm9ybSBhbmQgSW50ZWwgUkFTdG9vbC4N
-Cj4gPg0KPiA+IFNvIC0gSSd2ZSBiZWVuIHBsYXlpbmcgd2l0aCBHcmFudGxleSB0b28gLSBhbmQg
-ZGlkbid0IHNlZSB0aGVzZSB3YXJuaW5ncw0KPiBhYm91dA0KPiA+ICJlcnJvciBsZW5ndGggc2Vj
-dGlvbiB0b28gc21hbGwiLiAgSSBzdXNwZWN0IHRoaXMgaXMgYmVjYXVzZSBJJ3ZlIGJlZW4NCj4g
-PiB0b2dnbGluZyB0aGUNCj4gPiBCSU9TIG9wdGlvbiB1bmRlcjoNCj4gPg0KPiA+ICAgIEVES0lJ
-ID4gQWR2YW5jZWQgPiBTeXN0ZW0gRXZlbnQgTG9nID4gV0hFQSBTZXR0aW5ncyA+IFVFRkkgVmVy
-c2lvbg0KPiA+DQo+ID4gdG8gcmVxdWVzdCByZXBvcnRzIGFjY29yZGluZyB0byBzcGVjIHZlcnNp
-b24gMi4zLjEgKHRvIGdldCB0aGUgY2FyZCBoYW5kbGUNCj4gYW5kDQo+ID4gbW9kdWxlIGhhbmRs
-ZSBmaWVsZHMpDQo+IFllcy4gVGhpcyBpcyB0aGUgY29ycmVjdCBiZWhhdmlvciBiZWNhdXNlIHRo
-ZSBzaXplIG9mIHN0cnVjdA0KPiBjcGVyX3NlY19tZW1fZXJyIChkcml2ZXJzL2Zpcm13YXJlL2Vm
-aS9jcGVyLmMpIGFuZCB0aGUgZXJyb3JfZGF0YV9sZW5ndGgNCj4gZmllbGQgb2Ygc3RydWN0IGFj
-cGlfZ2VuZXJpY19kYXRhIGFyZSAoODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbikuDQo+IA0K
-PiBGb3IgdGhvc2UgQklPU2VzIG9ubHkgc3VwcG9ydCB0aGUgVUVGSSBzcGVjIHZlcnNpb25zIHdo
-aWNoIGFyZSBsZXNzIHRoYW4NCj4gMi4zLCB0aGUgZXJyb3JfZGF0YV9sZW5ndGggZmllbGQgb2Yg
-c3RydWN0IGFjcGlfZ2VuZXJpY19kYXRhIGlzIDczDQo+ICg3My1ieXRlIG1lbW9yeSBlcnJvciBz
-ZWN0aW9uKSBhY2NvcmRpbmcgdG8gc3BlYyB2ZXJzaW9uIDIuMiwgMi4xIGFuZCBzbw0KPiBvbi4g
-V2Ugd2lsbCBzZWUgdGhlIHdhcm5pbmcgbWVzc2FnZSBhZnRlciBpbmplY3RpbmcgYSBtZW1vcnkg
-Y29ycmVjdGVkDQo+IGVycm9yLg0KPiANCj4gPiBEb2VzIHRoYXQgZml0IHdpdGggeW91ciBleHBl
-cmllbmNlIHRvbz8NCj4gWWVzLg0KPiANCj4gPg0KPiA+IC1Ub255DQo+ID4NCj4gPiBbSSBub3Rl
-IHRoYXQgdGhlcmUgaXMgYSAyLjQgdmVyc2lvbiBvZiBVRUZJIC4uLiBhcmUgdGhlcmUgbW9yZSBj
-aGFuZ2VzIHRvDQo+IHRoZQ0KPiA+IGVycm9yIHJlY29yZCBmb3JtYXQgdGhlcmU/ICBJIGtub3cg
-dGhlcmUgYXJlIHBsYW5zIHRvIHR3ZWFrIGV2ZW4gbW9yZQ0KPiA+IGJpdHMgYmVjYXVzZQ0KPiA+
-IHNvbWUgb2YgdGhlIDItYnl0ZSBmaWVsZHMgaW4gdGhlIG1lbW9yeSBlcnJvciBkZXNjcmlwdGlv
-biBhcmUgbm90IGJpZw0KPiBlbm91Z2gNCj4gPiB0byBkZXNjcmliZSBsb2NhdGlvbnMgb24gNjRH
-QiBESU1Nc10NCj4gSSBqdXN0IGNoZWNrZWQgdmVyc2lvbiAyLjQgYW5kIDIuNCBFcnJhdGEgQS4g
-VGhlIHNpemUgb2YgbWVtb3J5IGVycm9yDQo+IHNlY3Rpb24gaXMgc3RpbGwgODAgYnl0ZXMuIFRo
-ZSBvbmx5IGRpZmZlcmVuY2UgaXMgdGhhdCB0aGUgZmllbGQNCj4gIkV4dGVuZGVkIiBpbiBzcGVj
-IDIuNCBFcnJhdGEgQSByZXBsYWNlcyB0aGUgZmllbGQgInJlc2VydmVkIiBpbiBzcGVjDQo+IDIu
-NC4gVGhpcyBzaG91bGQgYmUgY2hhbmdlZCBhY2NvcmRpbmdseS4NCj4gDQo+IElmIHRoZXJlIGFy
-ZSBtb3JlIGFkZGVkIGZpbGVkcyB0byBlcnJvciByZWNvcmQgZm9ybWF0IGluIHRoZSBuZXdlciBV
-RUZJDQo+IHNwZWMsIHdlIGNhbiBzaW1wbHkgbW9kaWZ5IHByb2NfZ2VuZXJpY19zZWN0aW9uX2xl
-biwgbWVtX3NlY3Rpb25fbGVuIGFuZA0KPiBwY2llX3NlY3Rpb25fbGVuIHRvIHN1cHBvcnQgZGlm
-ZmVyZW50IGxlbmd0aCBvZiBlcnJvciBzZWN0aW9uLiBUaGUNCj4gZGVmaW5pdGlvbiBvZiBtZW1f
-c2VjdGlvbl9sZW4gaXMgYW4gZXhhbXBsZSB0byBzdXBwb3J0IGJvdGggNzMtYnl0ZSBhbmQNCj4g
-ODAtYnl0ZSBtZW1vcnkgZXJyb3Igc2VjdGlvbi4NCg0K
+T24gRnJpLCAyMDE0LTAyLTI4IGF0IDE0OjAzICsxMTAwLCBKYW1lcyBNb3JyaXMgd3JvdGU6DQoN
+Cj4gT2ssIHdoaWNoIHRyZWUgc2hvdWxkIHRha2UgdGhpcz8gIEknbSBoYXBweSB0bywgYWx0aG91
+Z2ggbW9zdCBvZiBpdCBpcyANCj4gb3V0c2lkZSBzZWN1cml0eS8gLg0KDQpTaG91bGQgSSBiZSBs
+b29raW5nIGZvciBzb21lb25lIGVsc2UgdG8gdGFrZSB0aGVtIGluc3RlYWQ/IDopDQoNCi0tIA0K
+TWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
