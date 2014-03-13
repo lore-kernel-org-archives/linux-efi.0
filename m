@@ -1,179 +1,178 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 10/15] arm64: Add function to create identity mappings
-Date: Thu, 13 Mar 2014 22:47:03 +0000
-Message-ID: <1394750828-16351-11-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v2 02/15] efi: x86: Improve cmdline conversion
+Date: Thu, 13 Mar 2014 22:46:55 +0000
+Message-ID: <1394750828-16351-3-git-send-email-leif.lindholm@linaro.org>
 References: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, matt.fleming@intel.com
-Cc: msalter@redhat.com, roy.franz@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
+Cc: roy.franz@linaro.org, "H. Peter Anvin" <hpa@zytor.com>, Leif Lindholm <leif.lindholm@linaro.org>, msalter@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Salter <msalter@redhat.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
 
-At boot time, before switching to a virtual UEFI memory map, firmware
-expects UEFI memory and IO regions to be identity mapped whenever
-kernel makes runtime services calls. The existing early boot code
-creates an identity map of kernel text/data but this is not sufficient
-for UEFI. This patch adds a create_id_mapping() function which reuses
-the core code of the existing create_mapping().
+Improve the conversion of the UTF-16 EFI command line
+to UTF-8 for passing to the kernel.
 
-Signed-off-by: Mark Salter <msalter@redhat.com>
+Signed-off-by: Roy Franz <roy.franz@linaro.org>
+Signed-off-by: H. Peter Anvin <hpa@zytor.com>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- arch/arm64/include/asm/mmu.h |    2 ++
- arch/arm64/mm/mmu.c          |   65 ++++++++++++++++++++++++++++++------------
- 2 files changed, 49 insertions(+), 18 deletions(-)
+ arch/x86/boot/compressed/eboot.c       |    3 +-
+ drivers/firmware/efi/efi-stub-helper.c |   91 ++++++++++++++++++++++++--------
+ 2 files changed, 70 insertions(+), 24 deletions(-)
 
-diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-index f600d40..29ed1d8 100644
---- a/arch/arm64/include/asm/mmu.h
-+++ b/arch/arm64/include/asm/mmu.h
-@@ -28,5 +28,7 @@ extern void paging_init(void);
- extern void setup_mm_for_reboot(void);
- extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
- extern void init_mem_pgprot(void);
-+/* create an identity mapping for memory (or io if map_io is true) */
-+extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index a7677ba..feca05f 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -488,8 +488,7 @@ struct boot_params *make_boot_params(void *handle, efi_system_table_t *_table)
+ 	hdr->type_of_loader = 0x21;
  
- #endif
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6b7e895..357956a 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -168,7 +168,8 @@ static void __init *early_alloc(unsigned long sz)
+ 	/* Convert unicode cmdline to ascii */
+-	cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
+-						   &options_size);
++	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
+ 	if (!cmdline_ptr)
+ 		goto fail;
+ 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
+diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
+index 6811af7..661f425 100644
+--- a/drivers/firmware/efi/efi-stub-helper.c
++++ b/drivers/firmware/efi/efi-stub-helper.c
+@@ -575,52 +575,99 @@ static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
  }
  
- static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
--				  unsigned long end, unsigned long pfn)
-+				  unsigned long end, unsigned long pfn,
-+				  pgprot_t prot)
- {
- 	pte_t *pte;
- 
-@@ -180,16 +181,28 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
- 
- 	pte = pte_offset_kernel(pmd, addr);
- 	do {
--		set_pte(pte, pfn_pte(pfn, PAGE_KERNEL_EXEC));
-+		set_pte(pte, pfn_pte(pfn, prot));
- 		pfn++;
- 	} while (pte++, addr += PAGE_SIZE, addr != end);
- }
- 
- static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
--				  unsigned long end, phys_addr_t phys)
-+				  unsigned long end, phys_addr_t phys,
-+				  int map_io)
- {
- 	pmd_t *pmd;
- 	unsigned long next;
-+	pmdval_t prot_sect;
-+	pgprot_t prot_pte;
+ /*
+- * Convert the unicode UEFI command line to ASCII to pass to kernel.
++ * Get the number of UTF-8 bytes corresponding to an UTF-16 character.
++ * This overestimates for surrogates, but that is okay.
++ */
++static int efi_utf8_bytes(u16 c)
++{
++	return 1 + (c >= 0x80) + (c >= 0x800);
++}
 +
-+	if (map_io) {
-+		prot_sect = PMD_TYPE_SECT | PMD_SECT_AF |
-+			    PMD_ATTRINDX(MT_DEVICE_nGnRE);
-+		prot_pte = __pgprot(PROT_DEVICE_nGnRE);
-+	} else {
-+		prot_sect = prot_sect_kernel;
-+		prot_pte = PAGE_KERNEL_EXEC;
++/*
++ * Convert an UTF-16 string, not necessarily null terminated, to UTF-8.
++ */
++static u8 *efi_utf16_to_utf8(u8 *dst, const u16 *src, int n)
++{
++	unsigned int c;
++
++	while (n--) {
++		c = *src++;
++		if (n && c >= 0xd800 && c <= 0xdbff &&
++		    *src >= 0xdc00 && *src <= 0xdfff) {
++			c = 0x10000 + ((c & 0x3ff) << 10) + (*src & 0x3ff);
++			src++;
++			n--;
++		}
++		if (c >= 0xd800 && c <= 0xdfff)
++			c = 0xfffd; /* Unmatched surrogate */
++		if (c < 0x80) {
++			*dst++ = c;
++			continue;
++		}
++		if (c < 0x800) {
++			*dst++ = 0xc0 + (c >> 6);
++			goto t1;
++		}
++		if (c < 0x10000) {
++			*dst++ = 0xe0 + (c >> 12);
++			goto t2;
++		}
++		*dst++ = 0xf0 + (c >> 18);
++		*dst++ = 0x80 + ((c >> 12) & 0x3f);
++t2:
++		*dst++ = 0x80 + ((c >> 6) & 0x3f);
++t1:
++		*dst++ = 0x80 + (c & 0x3f);
 +	}
- 
- 	/*
- 	 * Check for initial section mappings in the pgd/pud and remove them.
-@@ -205,7 +218,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 		/* try section mapping first */
- 		if (((addr | next | phys) & ~SECTION_MASK) == 0) {
- 			pmd_t old_pmd =*pmd;
--			set_pmd(pmd, __pmd(phys | prot_sect_kernel));
-+			set_pmd(pmd, __pmd(phys | prot_sect));
- 			/*
- 			 * Check for previous table entries created during
- 			 * boot (__create_page_tables) and flush them.
-@@ -213,21 +226,23 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 			if (!pmd_none(old_pmd))
- 				flush_tlb_all();
- 		} else {
--			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys));
-+			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys),
-+				       prot_pte);
- 		}
- 		phys += next - addr;
- 	} while (pmd++, addr = next, addr != end);
- }
- 
- static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
--				  unsigned long end, unsigned long phys)
-+				  unsigned long end, unsigned long phys,
-+				  int map_io)
- {
- 	pud_t *pud = pud_offset(pgd, addr);
- 	unsigned long next;
- 
- 	do {
- 		next = pud_addr_end(addr, end);
--		alloc_init_pmd(pud, addr, next, phys);
-+		alloc_init_pmd(pud, addr, next, phys, map_io);
- 		phys += next - addr;
- 	} while (pud++, addr = next, addr != end);
- }
-@@ -236,30 +251,44 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
-  * Create the page directory entries and any necessary page tables for the
-  * mapping specified by 'md'.
++
++	return dst;
++}
++
++/*
++ * Do proper conversion from UTF-16 to UTF-8
+  * Size of memory allocated return in *cmd_line_len.
+  * Returns NULL on error.
   */
--static void __init create_mapping(phys_addr_t phys, unsigned long virt,
--				  phys_addr_t size)
-+static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
-+				    unsigned long virt, phys_addr_t size,
-+				    int map_io)
+-static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
+-				      efi_loaded_image_t *image,
+-				      int *cmd_line_len)
++static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
++				 efi_loaded_image_t *image,
++				 int *cmd_line_len)
  {
- 	unsigned long addr, length, end, next;
--	pgd_t *pgd;
+-	u16 *s2;
++	const u16 *s2;
+ 	u8 *s1 = NULL;
+ 	unsigned long cmdline_addr = 0;
+-	int load_options_size = image->load_options_size / 2; /* ASCII */
+-	void *options = image->load_options;
+-	int options_size = 0;
++	int load_options_chars = image->load_options_size / 2; /* UTF-16 */
++	const u16 *options = image->load_options;
++	int options_bytes = 0;	/* UTF-8 bytes */
++	int options_chars = 0;	/* UTF-16 chars */
+ 	efi_status_t status;
+-	int i;
+ 	u16 zero = 0;
+ 
+ 	if (options) {
+ 		s2 = options;
+-		while (*s2 && *s2 != '\n' && options_size < load_options_size) {
+-			s2++;
+-			options_size++;
++		while (options_chars < load_options_chars
++		       && *s2 && *s2 != '\n') {
++			options_bytes += efi_utf8_bytes(*s2++);
++			options_chars++;
+ 		}
+ 	}
+ 
+-	if (options_size == 0) {
+-		/* No command line options, so return empty string*/
+-		options_size = 1;
++	if (!options_chars) {
++		/* No command line options, so return empty string */
+ 		options = &zero;
+ 	}
+ 
+-	options_size++;  /* NUL termination */
++	options_bytes++;  /* NUL termination */
+ 
+-	status = efi_low_alloc(sys_table_arg, options_size, 0, &cmdline_addr);
++	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
+ 	if (status != EFI_SUCCESS)
+ 		return NULL;
+ 
+ 	s1 = (u8 *)cmdline_addr;
+-	s2 = (u16 *)options;
 -
--	if (virt < VMALLOC_START) {
--		pr_warning("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
--			   phys, virt);
--		return;
--	}
+-	for (i = 0; i < options_size - 1; i++)
+-		*s1++ = *s2++;
++	s2 = (const u16 *)options;
  
- 	addr = virt & PAGE_MASK;
- 	length = PAGE_ALIGN(size + (virt & ~PAGE_MASK));
++	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
+ 	*s1 = '\0';
  
--	pgd = pgd_offset_k(addr);
- 	end = addr + length;
- 	do {
- 		next = pgd_addr_end(addr, end);
--		alloc_init_pud(pgd, addr, next, phys);
-+		alloc_init_pud(pgd, addr, next, phys, map_io);
- 		phys += next - addr;
- 	} while (pgd++, addr = next, addr != end);
+-	*cmd_line_len = options_size;
++	*cmd_line_len = options_bytes;
+ 	return (char *)cmdline_addr;
  }
- 
-+static void __init create_mapping(phys_addr_t phys, unsigned long virt,
-+				  phys_addr_t size)
-+{
-+	if (virt < VMALLOC_START) {
-+		pr_warn("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
-+			phys, virt);
-+		return;
-+	}
-+	__create_mapping(pgd_offset_k(virt & PAGE_MASK), phys, virt, size, 0);
-+}
-+
-+void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-+{
-+	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
-+		pr_warn("BUG: not creating id mapping for 0x%016llx\n", addr);
-+		return;
-+	}
-+	__create_mapping(&idmap_pg_dir[pgd_index(addr)],
-+			 addr, addr, size, map_io);
-+}
-+
- static void __init map_mem(void)
- {
- 	struct memblock_region *reg;
 -- 
 1.7.10.4
