@@ -1,187 +1,179 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 05/15] efi: add helper function to get UEFI params from FDT
-Date: Thu, 13 Mar 2014 22:46:58 +0000
-Message-ID: <1394750828-16351-6-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v2 10/15] arm64: Add function to create identity mappings
+Date: Thu, 13 Mar 2014 22:47:03 +0000
+Message-ID: <1394750828-16351-11-git-send-email-leif.lindholm@linaro.org>
 References: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, matt.fleming@intel.com
-Cc: roy.franz@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>, msalter@redhat.com
+Cc: msalter@redhat.com, roy.franz@linaro.org, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
 From: Mark Salter <msalter@redhat.com>
 
-ARM and ARM64 architectures use the device tree to pass UEFI parameters
-from stub to kernel. These parameters are things known to the stub but
-not discoverable by the kernel after the stub calls ExitBootSerives().
-There is a helper function in:
-
-   drivers/firmware/efi/fdt.c
-
-which the stub uses to add the UEFI parameters to the device tree.
-This patch adds a complimentary helper function which UEFI runtime
-support may use to retrieve the parameters from the device tree.
-If an architecture wants to use this helper, it should select
-CONFIG_UEFI_PARAMS_FROM_FDT.
+At boot time, before switching to a virtual UEFI memory map, firmware
+expects UEFI memory and IO regions to be identity mapped whenever
+kernel makes runtime services calls. The existing early boot code
+creates an identity map of kernel text/data but this is not sufficient
+for UEFI. This patch adds a create_id_mapping() function which reuses
+the core code of the existing create_mapping().
 
 Signed-off-by: Mark Salter <msalter@redhat.com>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- drivers/firmware/efi/Kconfig |    7 ++++
- drivers/firmware/efi/efi.c   |   79 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h          |    9 +++++
- 3 files changed, 95 insertions(+)
+ arch/arm64/include/asm/mmu.h |    2 ++
+ arch/arm64/mm/mmu.c          |   65 ++++++++++++++++++++++++++++++------------
+ 2 files changed, 49 insertions(+), 18 deletions(-)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 1e75f48..d3fe28d 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -47,6 +47,13 @@ config EFI_RUNTIME_MAP
+diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
+index f600d40..29ed1d8 100644
+--- a/arch/arm64/include/asm/mmu.h
++++ b/arch/arm64/include/asm/mmu.h
+@@ -28,5 +28,7 @@ extern void paging_init(void);
+ extern void setup_mm_for_reboot(void);
+ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
+ extern void init_mem_pgprot(void);
++/* create an identity mapping for memory (or io if map_io is true) */
++extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
  
- 	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
- 
-+config UEFI_PARAMS_FROM_FDT
-+	bool
-+	help
-+	  Select this config option from the architecture Kconfig if
-+	  the EFI runtime support gets system table address, memory
-+          map address, and other parameters from the device tree.
-+
- endmenu
- 
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index b25b36b..7f6e977 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -20,6 +20,8 @@
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/io.h>
- 
- struct efi __read_mostly efi = {
-@@ -318,3 +320,80 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 
- 	return 0;
+ #endif
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 6b7e895..357956a 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -168,7 +168,8 @@ static void __init *early_alloc(unsigned long sz)
  }
+ 
+ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
+-				  unsigned long end, unsigned long pfn)
++				  unsigned long end, unsigned long pfn,
++				  pgprot_t prot)
+ {
+ 	pte_t *pte;
+ 
+@@ -180,16 +181,28 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
+ 
+ 	pte = pte_offset_kernel(pmd, addr);
+ 	do {
+-		set_pte(pte, pfn_pte(pfn, PAGE_KERNEL_EXEC));
++		set_pte(pte, pfn_pte(pfn, prot));
+ 		pfn++;
+ 	} while (pte++, addr += PAGE_SIZE, addr != end);
+ }
+ 
+ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+-				  unsigned long end, phys_addr_t phys)
++				  unsigned long end, phys_addr_t phys,
++				  int map_io)
+ {
+ 	pmd_t *pmd;
+ 	unsigned long next;
++	pmdval_t prot_sect;
++	pgprot_t prot_pte;
 +
-+#ifdef CONFIG_UEFI_PARAMS_FROM_FDT
-+
-+#define UEFI_PARAM(name, prop, field)			   \
-+	{						   \
-+		{ name },				   \
-+		{ prop },				   \
-+		offsetof(struct efi_fdt_params, field),    \
-+		FIELD_SIZEOF(struct efi_fdt_params, field) \
++	if (map_io) {
++		prot_sect = PMD_TYPE_SECT | PMD_SECT_AF |
++			    PMD_ATTRINDX(MT_DEVICE_nGnRE);
++		prot_pte = __pgprot(PROT_DEVICE_nGnRE);
++	} else {
++		prot_sect = prot_sect_kernel;
++		prot_pte = PAGE_KERNEL_EXEC;
 +	}
-+
-+static __initdata struct {
-+	const char name[32];
-+	const char propname[32];
-+	int offset;
-+	int size;
-+} dt_params[] = {
-+	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-+};
-+
-+struct param_info {
-+	int verbose;
-+	void *params;
-+};
-+
-+static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-+				       int depth, void *data)
+ 
+ 	/*
+ 	 * Check for initial section mappings in the pgd/pud and remove them.
+@@ -205,7 +218,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+ 		/* try section mapping first */
+ 		if (((addr | next | phys) & ~SECTION_MASK) == 0) {
+ 			pmd_t old_pmd =*pmd;
+-			set_pmd(pmd, __pmd(phys | prot_sect_kernel));
++			set_pmd(pmd, __pmd(phys | prot_sect));
+ 			/*
+ 			 * Check for previous table entries created during
+ 			 * boot (__create_page_tables) and flush them.
+@@ -213,21 +226,23 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+ 			if (!pmd_none(old_pmd))
+ 				flush_tlb_all();
+ 		} else {
+-			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys));
++			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys),
++				       prot_pte);
+ 		}
+ 		phys += next - addr;
+ 	} while (pmd++, addr = next, addr != end);
+ }
+ 
+ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
+-				  unsigned long end, unsigned long phys)
++				  unsigned long end, unsigned long phys,
++				  int map_io)
+ {
+ 	pud_t *pud = pud_offset(pgd, addr);
+ 	unsigned long next;
+ 
+ 	do {
+ 		next = pud_addr_end(addr, end);
+-		alloc_init_pmd(pud, addr, next, phys);
++		alloc_init_pmd(pud, addr, next, phys, map_io);
+ 		phys += next - addr;
+ 	} while (pud++, addr = next, addr != end);
+ }
+@@ -236,30 +251,44 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
+  * Create the page directory entries and any necessary page tables for the
+  * mapping specified by 'md'.
+  */
+-static void __init create_mapping(phys_addr_t phys, unsigned long virt,
+-				  phys_addr_t size)
++static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
++				    unsigned long virt, phys_addr_t size,
++				    int map_io)
+ {
+ 	unsigned long addr, length, end, next;
+-	pgd_t *pgd;
+-
+-	if (virt < VMALLOC_START) {
+-		pr_warning("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
+-			   phys, virt);
+-		return;
+-	}
+ 
+ 	addr = virt & PAGE_MASK;
+ 	length = PAGE_ALIGN(size + (virt & ~PAGE_MASK));
+ 
+-	pgd = pgd_offset_k(addr);
+ 	end = addr + length;
+ 	do {
+ 		next = pgd_addr_end(addr, end);
+-		alloc_init_pud(pgd, addr, next, phys);
++		alloc_init_pud(pgd, addr, next, phys, map_io);
+ 		phys += next - addr;
+ 	} while (pgd++, addr = next, addr != end);
+ }
+ 
++static void __init create_mapping(phys_addr_t phys, unsigned long virt,
++				  phys_addr_t size)
 +{
-+	struct param_info *info = data;
-+	void *prop, *dest;
-+	unsigned long len;
-+	u64 val;
-+	int i;
-+
-+	if (depth != 1 ||
-+	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
-+		return 0;
-+
-+	pr_info("Getting parameters from FDT:\n");
-+
-+	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-+		if (!prop) {
-+			pr_err("Can't find %s in device tree!\n",
-+			       dt_params[i].name);
-+			return 0;
-+		}
-+		dest = info->params + dt_params[i].offset;
-+
-+		val = of_read_number(prop, len / sizeof(u32));
-+
-+		if (dt_params[i].size == sizeof(u32))
-+			*(u32 *)dest = val;
-+		else
-+			*(u64 *)dest = val;
-+
-+		if (info->verbose)
-+			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-+				dt_params[i].size * 2, val);
++	if (virt < VMALLOC_START) {
++		pr_warn("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
++			phys, virt);
++		return;
 +	}
-+	return 1;
++	__create_mapping(pgd_offset_k(virt & PAGE_MASK), phys, virt, size, 0);
 +}
 +
-+int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
++void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
 +{
-+	struct param_info info;
-+
-+	info.verbose = verbose;
-+	info.params = params;
-+
-+	return of_scan_flat_dt(fdt_find_uefi_params, &info);
++	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
++		pr_warn("BUG: not creating id mapping for 0x%016llx\n", addr);
++		return;
++	}
++	__create_mapping(&idmap_pg_dir[pgd_index(addr)],
++			 addr, addr, size, map_io);
 +}
-+#endif /* CONFIG_UEFI_PARAMS_FROM_FDT */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index a3276da..d450673 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -483,6 +483,14 @@ struct efi_memory_map {
- 	unsigned long desc_size;
- };
- 
-+struct efi_fdt_params {
-+	u64 system_table;
-+	u64 mmap;
-+	u32 mmap_size;
-+	u32 desc_size;
-+	u32 desc_ver;
-+};
 +
- typedef struct {
- 	u32 revision;
- 	void *parent_handle;
-@@ -620,6 +628,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- extern void efi_get_time(struct timespec *now);
- extern int efi_set_rtc_mmss(const struct timespec *now);
- extern void efi_reserve_boot_services(void);
-+extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
- extern struct efi_memory_map memmap;
- 
- /* Iterate through an efi_memory_map */
+ static void __init map_mem(void)
+ {
+ 	struct memblock_region *reg;
 -- 
 1.7.10.4
