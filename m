@@ -1,24 +1,50 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Thu, 13 Mar 2014 08:54:06 -0700
-Message-ID: <5321D49E.30705@zytor.com>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>	<1394686919.25122.2.camel@x230>	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org> <20140313101235.753c3ec0@alan.etchedpixels.co.uk>
+Date: Thu, 13 Mar 2014 15:59:24 +0000
+Message-ID: <1394726363.25122.16.camel@x230>
+References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
+	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	 <1394686919.25122.2.camel@x230>
+	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140313101235.753c3ec0-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, James Morris <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+Content-Language: en-US
+Content-ID: <4E8F15796680394FA0096755D042D658@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "jmorris@namei.org" <jmorris@namei.org>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "keescook@chromium.org" <keescook@chromium.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/13/2014 03:12 AM, One Thousand Gnomes wrote:
-> 
-> I would prefer it did the revocation of CAP_SYS_RAWIO or at least
-> documented the absolute requirement.
-> 
-
-Seconded.  This has been my opinion, raised over and over and over again.
-
-	-hpa
+T24gVGh1LCAyMDE0LTAzLTEzIGF0IDIwOjMzICsxMTAwLCBKYW1lcyBNb3JyaXMgd3JvdGU6DQoN
+Cj4gSSdsbCB0YWtlIGl0LCBidXQgdGhlcmUncyB1bmFuc3dlcmVkIHJldmlldyBmZWVkYmFjayAo
+eW91ciByZXNwb25zZSB0byB0aGUgDQo+IGZpcnN0IHF1ZXN0aW9uKSwgYW5kIEFsYW4gcmFpc2Vk
+IHNvbWUgZG91YnRzIGFib3V0IHRoZSBwYXRjaGVzIHdoaWNoIEknbSANCj4gbm90IHN1cmUgaGF2
+ZSBiZWVuIHJlc29sdmVkLg0KDQpUaGUgcmVtYWluaW5nIG9wZW5zIHNlZW0gdG8gYmUgQ0FQX1NZ
+U19SQVdJTyBhbmQgZmlybXdhcmUgc2lnbmluZz8NCklyb25pY2FsbHksIGRpc2FibGluZyBDQVBf
+U1lTX1JBV0lPIGRpc2FibGVzIGZpcm13YXJlIGxvYWRpbmfigKYNCg0KVGhlIHByb2JsZW0gd2l0
+aCBDQVBfU1lTX1JBV0lPIGlzIHRoYXQgaXRzIHNlbWFudGljcyB3ZXJlIG5ldmVyDQpzdWZmaWNp
+ZW50bHkgd2VsbCBkb2N1bWVudGVkLCBhbmQgYXMgYSByZXN1bHQgaXQncyBhIG1peHR1cmUgb2Yg
+IlRoaXMgaXMNCmluY3JlZGlibHkgZGFuZ2Vyb3VzIiBhbmQgIldlIHJlcGxhY2VkIGEgY2hlY2sg
+Zm9yIHVpZCAwIHdpdGggd2hpY2hldmVyDQpjYXBhYmlsaXR5IHNlZW1lZCB0byBoYXZlIHRoZSBt
+b3N0IGFwcHJvcHJpYXRlIG5hbWUiLiBJJ3ZlIGdvbmUgdGhyb3VnaA0KYWxsIHRoZSB1c2VzIG9m
+IENBUF9TWVNfUkFXSU8gYW5kIGFkZGVkIGFkZGl0aW9uYWwgY2hlY2tzIHRvIHRoZSBnZW5lcmlj
+DQpvbmVzIHRoYXQgc2VlbSBhcHByb3ByaWF0ZS4gVGhlcmUncyBhIGNvdXBsZSBvZiBvbGQgZHJp
+dmVycyB0aGF0IHVzZSBpdA0KdG8gZ2F0ZSBhY2Nlc3MgdG8gZmVhdHVyZXMgdGhhdCBwb3RlbnRp
+YWxseSBhbGxvdyBhcmJpdHJhcnkgRE1BIGFuZCBpdA0KbWlnaHQgYmUgd29ydGggY2xlYW5pbmcg
+dGhvc2UgdXAsIGJ1dCB0aGUgb25seSBnZW5lcmFsIGNhc2UgSSBoYXZlbid0DQptb2RpZmllZCBp
+cyB0aGUgYWJpbGl0eSB0byBzZW5kIGFyYml0cmFyeSBTQ1NJIGNvbW1hbmRzIGZyb20gdXNlcnNw
+YWNlLg0KTXkgdW5kZXJzdGFuZGluZyBpcyB0aGF0IGVuZHBvaW50cyBhcmVuJ3QgZ29pbmcgdG8g
+YmUgYWJsZSB0byBETUEgdG8NCmFyYml0cmFyeSBhZGRyZXNzZXMsIHNvIHRoYXQgZG9lc24ndCBz
+ZWVtIGxpa2UgYSBwcm9ibGVtLg0KDQpPbiB0aGUgb3RoZXIgaGFuZCwgZGlzYWJsaW5nIENBUF9T
+WVNfUkFXSU8gKmRlZmluaXRlbHkqIGJyZWFrcyBleHBlY3RlZA0KZnVuY3Rpb25hbGl0eSAtIGZp
+cm13YXJlIGxvYWRpbmcgYW5kIHRoZSBmaWJtYXAgaW9jdGwgYXJlIHByb2JhYmx5IHRoZQ0KbW9z
+dCBvYnZpb3VzLiBBbmQgY2hhbmdpbmcgdGhlIHVzZSBvZiBDQVBfU1lTX1JBV0lPIHBvdGVudGlh
+bGx5IGJyZWFrcw0KdXNlcnNwYWNlIGV4cGVjdGF0aW9ucywgc28gd2UncmUga2luZCBvZiBzdHVj
+ayB0aGVyZS4NCg0KQXMgZm9yIHNpZ25lZCBmaXJtd2FyZSwgSSdtIGxvb2tpbmcgZm9yd2FyZCB0
+byBLZWVzJyB3b3JrIG9uIHRoYXQuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3Lmdh
+cnJldHRAbmVidWxhLmNvbT4NCg==
