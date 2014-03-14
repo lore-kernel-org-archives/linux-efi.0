@@ -1,46 +1,67 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 15:58:02 +0000
-Message-ID: <1394812682.26846.5.camel@x230.mview.int.nebula.com>
+Date: Fri, 14 Mar 2014 16:28:31 +0000
+Message-ID: <20140314162831.1caf342c@alan.etchedpixels.co.uk>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	 <1394686919.25122.2.camel@x230>
-	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	 <1394726363.25122.16.camel@x230>
-	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	 <1394746248.27846.3.camel@x230>
-	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
-	 <1394762250.6416.24.camel@x230.lan>
-	 <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
-	 <1394801518.6416.38.camel@x230.lan>
-	 <CAGXu5jLZcWh5WD0L8s3Q-GXdXCMnA57qtjfdFfQbv0fxYcuCTQ@mail.gmail.com>
-	 <1394811997.26846.2.camel@x230.mview.int.nebula.com>
-	 <CAGXu5j+3vVKhFPOsArYddA+QqhvVUunj8eYOF799rDv=3MGtyg@mail.gmail.com>
+	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	<1394686919.25122.2.camel@x230>
+	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	<1394726363.25122.16.camel@x230>
+	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	<1394746248.27846.3.camel@x230>
+	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	<1394762250.6416.24.camel@x230.lan>
+	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<1394801518.6416.38.camel@x230.lan>
+	<CAGXu5jLZcWh5WD0L8s3Q-GXdXCMnA57qtjfdFfQbv0fxYcuCTQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGXu5j+3vVKhFPOsArYddA+QqhvVUunj8eYOF799rDv=3MGtyg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Content-ID: <810F24FF5F986543B694F546A00A701C-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <CAGXu5jLZcWh5WD0L8s3Q-GXdXCMnA57qtjfdFfQbv0fxYcuCTQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org" <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCAyMDE0LTAzLTE0IGF0IDA4OjU0IC0wNzAwLCBLZWVzIENvb2sgd3JvdGU6DQoNCj4g
-QWxsIHRoZSBtb3JlIHJlYXNvbiB0byBpZ25vcmUgY29tbWFuZCBsaW5lIGF0IHRoaXMgcG9pbnQu
-IEZvciBDaHJvbWUNCj4gT1MsIGl0J3MgcGFydCBvZiBvdXIgYm9vdCBzdGF0ZSwgc28gd2UgZG9u
-J3QgY2FyZSBhYm91dCBpdC4gRm9yDQo+IGdlbmVyaWMgU2VjdXJlIEJvb3QsIHdlIGNhbiBhZGQg
-Y2hlY2tzIGZvciBkYW5nZXJvdXMgc3R1ZmYgYXMgd2UgZ28NCj4gZm9yd2FyZC4gVGhhdCdzIHdo
-eSBJIGxpa2UgdGhpcyBpbnRlcmZhY2UgLS0gd2UgY2FuIGFkZCB0byBpdCBhcyB3ZQ0KPiBpZGVu
-dGlmeSBiYWQgc3R1ZmYsIGFuZCBpdCBzdGF5IHNlcGFyYXRlIGZyb20gb3RoZXIgc2VtYW50aWNz
-Lg0KDQpTdXJlLCBpdCdzIGp1c3QgYW5vdGhlciByZWFzb24gbm90IHRvIHdhbnQgdG8gdXNlIGEg
-Y2FwYWJpbGl0eS1iYXNlZA0KaW50ZXJmYWNlIC0gbm90IGFsbCB0aGUgcG9saWN5IHdlIHdhbnQg
-dG8gaW1wb3NlIGlzIHJlbGF0ZWQgdG8NCnByb2Nlc3Nlcywgc28gY2FwYWJpbGl0aWVzIHJlYWxs
-eSBkb24ndCBtYWtlIHNlbnNlLiBUaGUgY3VycmVudCBwYXRjaHNldA0KYWRkcyBhIHJlc3RyaWN0
-aW9uIHRvIHRoZSBhY3BpX3JzZHAgYXJndW1lbnQsIGFuZCBJJ3ZlIG5vIG9iamVjdGlvbiB0bw0K
-YWRkaW5nIG9uZSB0byBsaW1pdCB0aGUgdXNlIG9mIG1lbT0uDQoNCi0tIA0KTWF0dGhldyBHYXJy
-ZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
+> The command line problem here is a total red herring. If you've got a
+> measured kernel, you have a measured command line. (If not, you don't
+
+That would be the sensible approach, but it has some quite drastic
+ramifications.
+
+> have a measured kernel.) Dealing with the command line has nothing to
+> do with enforcing the ring0/uid0 boundary which is what this patch
+> series does.
+
+It has a huge relevance. You are signing blocks of code and loading them
+into your kernel. In case it's escaped your notice those blocks of code
+have behaviour which is considerably customisable by passing module
+arguments to them. In many cases they don't actually check those
+arguments. If I can set module paramters I already 0wn your box so many
+different ways its not even funny.
+
+> Right. As mentioned, we've been over all of this before. We cannot
+> change the meaning of capabilities (nor expand their coverage to
+> existing interfaces) without breaking userspace. Since we cannot break
+> userspace, we must create a different policy system that covers this
+> new thing we want to do and keeps the new policy distinctly separate.
+
+So you have everything checked twice all over the kernel and you
+guarantee that people will get it wrong. I don't see the point of putting
+a broken implementation in the kernel. If you want to do security do it
+*right* and do it once. You think every single person who adds a driver
+is going to muddle through two interfaces (and in future no doubt more if
+we don't fix it properly) and get it right each time ?
+
+The 'breaking userspace' argument is bullshit already. The whole *point*
+of the measured kernel is to break userspace. You are deliberately
+breaking a pile of functionality, much of it undersirable in order to
+achieve your measured system.
+
+The only "don't break" case that matters is if the measured stuff isn't
+in use. In those cases we don't need to break anything.
+
+Alan
