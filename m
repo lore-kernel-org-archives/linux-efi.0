@@ -1,228 +1,105 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+From: Matthew Garrett <matthew.garrett@nebula.com>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 17:06:55 +0000
-Message-ID: <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+Date: Fri, 14 Mar 2014 18:11:06 +0000
+Message-ID: <1394820664.26846.18.camel@x230.mview.int.nebula.com>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	<1394686919.25122.2.camel@x230>
-	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	<1394726363.25122.16.camel@x230>
-	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	<1394746248.27846.3.camel@x230>
-	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
-	<1394762250.6416.24.camel@x230.lan>
-	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
-	<1394801518.6416.38.camel@x230.lan>
+	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	 <1394686919.25122.2.camel@x230>
+	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	 <1394726363.25122.16.camel@x230>
+	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	 <1394746248.27846.3.camel@x230>
+	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	 <1394762250.6416.24.camel@x230.lan>
+	 <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	 <1394801518.6416.38.camel@x230.lan>
+	 <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1394801518.6416.38.camel@x230.lan>
+In-Reply-To: <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+Content-Language: en-US
+Content-ID: <A919B6F982A5CB44A308225F22BBB281@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
+To: "gnomes@lxorguk.ukuu.org.uk" <gnomes@lxorguk.ukuu.org.uk>
 Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "keescook@chromium.org" <keescook@chromium.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-> But you keep talking about MSRs despite there being a patch that limits
-> access to MSRs. If you have specific examples of privilege escalations
-> that are possible even with these patches then please, mention them.
-
-I mentioned MSRs once, and then you kept going on about it. 
-
-Your patches are all over the tree, for what should be one piece of
-policy. They rely on not missing a single case, which is also bad
-security engineering. We know that, as an industry we've spent fifty
-years repeatedly sticking our fingers in our ears, refusing to listen and
-then learning it again and again the hard way.
-
-> How is capable() going to be any use when deciding whether or not to
-> interpret some kernel command line options?
-
-I have no idea, why are you asking such an odd question ?
-
-You need to whitelist module parameters and boot options that are safe in
-your measured kernel environment. Nothing to do with RAWIO or capable(),
-just that we have thousands of such options many of which are quite
-exploitable because they assume the loader is trustable (which btw is
-already *broken* and on many systems - eg Fedora - allows you to break
-from DAC override into RAWIO).
-
-That one actually wants cleaning up anyway but its hard to see the right
-way to do it.
-
-> We still need a mechanism to differentiate between cases where
-> CAP_SYS_RAWIO should be forbidden and cases where it should be
-> permitted, which means that we need to add additional policy. We can
-> modify capable(), but that means that capable() no longer does what you
-> expect it to - it's not a transparent interface, and that's likely to
-> result in people accidentally misusing it.
-
-capable() is not a good interface. If we are going to patch half
-the capable() calls in the kernel wouldn't it be a good time to actually
-do something about it properly ?
-
-At the very least we should turn capabilities/needs into two lists and
-make them a 2D grid so we break the tie between the userspace
-'capability' and 'what this allows you to do in this specific
-instance'.
-
-For example instead of spewing magic trusted kernel checks all over the
-place we could do a global seach/replace of most of the capable calls with
-
-	is_permitted(x)
-
-where x is a value indicating what we wish to do (action) not what right
-we need (policy). All the real mess comes from the fact that capable() is
-implementing security *policy* in drivers all over the kernel.
-
-You can then set up a map of capability to X values, and more importantly
-you can use that map to have more complete, and descriptive versions of
-'x' than capabilities.
-
-You can now ask the rather more useful question
-
-	am I allowed to do 'X'
-
-and the answer may well depend upon selinux, trust models and what have
-you as well as securelevels and other concepts anyone wishes to play with
-(things like remote attestation for example)
-
-A simple minded adjustment to cap_capable would then be to make
-cap_is_permitted what cap_capable is now but with
-
-	cap = security_required_capability[x];
-	if (cap == -1)
-		return 0;
-
-Prior to adding anything or considered measured kernels that would be a
-1:1 mapping. Nothing breaks, nothing exciting happens.
-
-But you can now add new permissions and map them about. So you can mark
-some of the RAW_IO ones with new names and in non trusted kernels they
-get given a map value of CAP_SYS_RAWIO, or in trusted cases -1.
-
-At that point we've got
-
-- an automated conversion for the non-measured case, so we don't screw up
-  a long change set.
-
-- no breakages of userspace in the non measured case (and we can test at
-  this point quite happily)
-
-- a single interface, because driver authors can't be expected to
-  understand two differently broken interacting sets of checks (plus
-  since we just got rid of capable they can't forget to update their code
-  or copy old now broken but happily compiling code).
-
-- a way to fix the existing capable() mess
-
-- a way to support measured kernels by adding new permissions without
-  them breaking non measured userspace cases, without breaking the
-  capability model seen from userspace.
-
-  So for example we can add
-
-	RIGHT_LOAD_SIGNED_FIRMWARE
-	RIGHT_LOAD_UNSIGNED_FIRMWARE
-
-  etc and we can tie them to things other than CAP_SYS_RAWIO in untrusted
-  mode. Indeed it wouldn't be hard to make the table two dimensional
-
-	cap = security_required_capability[measured_kernel()][x];
-
-  and just mark the 'generic' RIGHT_RAW_IO_ACCESS as -1 in trusted mode
-  but CAP_SYS_RAWIO if not, while RIGHT_LOAD_SIGNED_FIRMWARE is
-  CAP_SYS_RAWIO in both cases.
-
-- a whitelist type behaviour. If the default for RIGHT_RAW_IO_ACCESS is
-  -1 in trusted mode then only the cases someone goes back and explicitly
-  refines will get enabled. Anyone adding a driver or blindly copying the
-  old behaviours either breaks or if they blindly convert gets the safe
-  behaviour.
-
-- a way to allow security modules to make smarter decisions because they
-  all have the ability to implement policy for such events, and
-  because we can provide a meaningful way to split them further as
-  needed
-
-- a way to make the question of trust namespace specific (because caps
-  are and the cap_capable logic has NS visibility)
-
-Why do we care about that, because if you want you can boot a measured
-file system which contains some services you consider part of the
-measured environment, and put the unmeasured universe in another
-namespace.
-
-> > The question then becomes what do we need to pass beyond "CAP_SYS_RAWIO"
-> > so the policy can be in the right place - even for example imposed by
-> > SELinux rules.
-> 
-> It needs to be possible for this policy to be imposed without userspace
-> being involved, so using selinux would mean baking it into the kernel
-> (along with an additional implementation for apparmor, and presumably
-> one for tomoyo as well).
-
-That's clearly false. You can load signed modules so you can load signed
-policies. Assuming you don't have an initial measured file system you
-need a kernel policy initially that protects you. If you have a measured
-file system you don't even need that, nor do you need to revoke RAWIO in
-kernel, you can do it before you switch into "measured and running
-un-measured code" mode - ie about the point you pivot root out of the
-initrd that loaded the measured policy.
-
-> > In addition several of the cases that you point out could be fixed by
-> > replacing the CAP_SYS_RAWIO using stuff with a proper interface should
-> > probably just be *fixed* to provide that.
-> 
-> ...thus breaking userspace outside this use case. I mean, sure, I'm
-> absolutely fine with deleting /dev/mem entirely. I don't see Linus
-> agreeing.
-
-That's not what I meant. We have a lot of interfaces where we use
-CAP_SYS_RAWIO rather than having a structured interface as opposed to a
-'yeah whatever, poke the registers' interface.
-
-For a lot of environments btw you don't actually need /dev/mem. It's not
-really got a lot of uses any more and plenty of people really restrict or
-remove it from systems. I don't think very many people would be sad
-if /dev/mem became a legacy interface most people left turned off.
-
-> That's why I used trusted rather than measured. The Secure Boot trust
-> model assumes that the user is able to modify the command line (it's
-> basically impossible to deploy generically otherwise), so we need to
-> filter out command line options that allow a user to elevate themselves
-> into the kernel at boot time.
-
-This is the kind of head up arsehole thinking that has security people
-banging their heads against the wall wondering why programmers are
-incapable of learning from history.
-
-You do not want to "filter out" options. You'll never get them all, there
-are rather a lot of them, and many apparently harmless ones are not at
-all harmless. The number of drivers where you can pass the maximum number
-of interfaces which then do
-
-	blah = kzalloc(sizeof(stuff) * unchecked_number)
-
-is rather large for example. The number of devices that allow you force
-arbitary MMIO values is not exactly small either.
-
-You want to whitelist the ones you actually need, and have done careful
-inspections of. The number of kernel options actually used by 99.99% of
-the universe in normal operational state or when doing basic poking at
-stuff or verbose booting is minimal. It also btw means you can have a
-measured command line (all trusted), or a mixed command line (measured
-bits trusted implicitly, rest not).
-
-It's not too hard. Most are module_parm, so we just need
-module_parm_is_safe(x) and a single centralised check for the general
-case.
-
-If we are going to do a measured kernel then it needs to be done right,
-it needs to be properly abstracted so we don't add another one for
-Android, another one for Chrome, another one for ARM trustzone, another
-one for Intel SGX, and so on.
-
-Alan
+T24gRnJpLCAyMDE0LTAzLTE0IGF0IDE3OjA2ICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
+b3RlOg0KPiA+IEJ1dCB5b3Uga2VlcCB0YWxraW5nIGFib3V0IE1TUnMgZGVzcGl0ZSB0aGVyZSBi
+ZWluZyBhIHBhdGNoIHRoYXQgbGltaXRzDQo+ID4gYWNjZXNzIHRvIE1TUnMuIElmIHlvdSBoYXZl
+IHNwZWNpZmljIGV4YW1wbGVzIG9mIHByaXZpbGVnZSBlc2NhbGF0aW9ucw0KPiA+IHRoYXQgYXJl
+IHBvc3NpYmxlIGV2ZW4gd2l0aCB0aGVzZSBwYXRjaGVzIHRoZW4gcGxlYXNlLCBtZW50aW9uIHRo
+ZW0uDQo+IA0KPiBJIG1lbnRpb25lZCBNU1JzIG9uY2UsIGFuZCB0aGVuIHlvdSBrZXB0IGdvaW5n
+IG9uIGFib3V0IGl0LiANCg0KWW91J3ZlIHR3aWNlIG1lbnRpb25lZCBNU1JzIGFzIGEgY2FzZSB3
+aGVyZSBDQVBfU1lTX1JBV0lPIGFsbG93cyB5b3UgdG8NCmVsZXZhdGUgcHJpdmlsZWdlcywgZGVz
+cGl0ZSB0aGF0IGJlaW5nIGEgY2FzZSB0aGF0J3MgZXhwbGljaXRseSBjb3ZlcmVkDQpieSB0aGlz
+IHBhdGNoc2V0LiBOb3csIGRvIHlvdSBoYXZlIGFuIGFjdHVhbCBleGFtcGxlIG9mIENBUF9TWVNf
+UkFXSU8NCmFsbG93aW5nIHlvdSB0byBlbGV2YXRlIHByaXZpbGVnZXMgZXZlbiB3aXRoIHRoaXMg
+cGF0Y2hzZXQgYXBwbGllZCAoYW5kDQp3aXRob3V0IHJlcXVpcmluZyB0aGUgcHJlc2VuY2Ugb2Yg
+b2Jzb2xldGUgaGFyZHdhcmUsIHdoaWNoIGlzIGEgc2VwYXJhdGUNCmNvbnZlcnNhdGlvbik/DQoN
+Cj4gWW91ciBwYXRjaGVzIGFyZSBhbGwgb3ZlciB0aGUgdHJlZSwgZm9yIHdoYXQgc2hvdWxkIGJl
+IG9uZSBwaWVjZSBvZg0KPiBwb2xpY3kuIFRoZXkgcmVseSBvbiBub3QgbWlzc2luZyBhIHNpbmds
+ZSBjYXNlLCB3aGljaCBpcyBhbHNvIGJhZA0KPiBzZWN1cml0eSBlbmdpbmVlcmluZy4gV2Uga25v
+dyB0aGF0LCBhcyBhbiBpbmR1c3RyeSB3ZSd2ZSBzcGVudCBmaWZ0eQ0KPiB5ZWFycyByZXBlYXRl
+ZGx5IHN0aWNraW5nIG91ciBmaW5nZXJzIGluIG91ciBlYXJzLCByZWZ1c2luZyB0byBsaXN0ZW4g
+YW5kDQo+IHRoZW4gbGVhcm5pbmcgaXQgYWdhaW4gYW5kIGFnYWluIHRoZSBoYXJkIHdheS4NCg0K
+SSBoYXZlIGEgc2V0IG9mIHBhdGNoZXMgdGhhdCBhcHBlYXIgYWNjZXB0YWJsZSB0byB0aGUgc2Vj
+dXJpdHkNCm1haW50YWluZXIuIEkndmUgcmV3cml0dGVuIHRoZW0gbXVsdGlwbGUgdGltZXMgaW4g
+cmVzcG9uc2UgdG8gdmFyaW91cw0KbGV2ZWxzIG9mIGJpa2VzaGVkZGluZy4gVGhleSBzb2x2ZSBh
+IHJlYWwgcHJvYmxlbSBhbmQgYXJlIGJlaW5nIHNoaXBwZWQNCmJ5IG11bHRpcGxlIGRpc3RyaWJ1
+dGlvbnMuDQoNCldoYXQgdGhlIHJlc3Qgb2YgeW91ciBtYWlsIGlzIGFza2luZyBtZSB0byBkbyBp
+cyB0byByZXdyaXRlIGNhcGFiaWxpdGllcw0Kc3VwcG9ydCBlbnRpcmVseS4gTm93LCB5ZXMsIEkg
+YWdyZWUgdGhhdCBjYXBhYmlsaXRpZXMgYXJlIGFuIGF3ZnVsDQppbnRlcmZhY2UgdGhhdCdzIGFw
+cHJveGltYXRlbHkgaW1wb3NzaWJsZSB0byB1c2UgY29ycmVjdGx5IGFuZCB3aGljaA0KYWRkcyBs
+aXR0bGUgc2VjdXJpdHkgZXZlbiBpZiB5b3UgZG8uIEJ1dCBJIHJlamVjdCB0aGUgaWRlYSB0aGF0
+DQpyZXdyaXRpbmcgZnVuZGFtZW50YWwgc2VjdXJpdHkgaW5mcmFzdHJ1Y3R1cmUgc2hvdWxkIGJl
+IGEgcHJlcmVxdWlzaXRlDQpmb3IgYWRkaW5nIHRoaXMgZnVuY3Rpb25hbGl0eS4NCg0KPiA+IEl0
+IG5lZWRzIHRvIGJlIHBvc3NpYmxlIGZvciB0aGlzIHBvbGljeSB0byBiZSBpbXBvc2VkIHdpdGhv
+dXQgdXNlcnNwYWNlDQo+ID4gYmVpbmcgaW52b2x2ZWQsIHNvIHVzaW5nIHNlbGludXggd291bGQg
+bWVhbiBiYWtpbmcgaXQgaW50byB0aGUga2VybmVsDQo+ID4gKGFsb25nIHdpdGggYW4gYWRkaXRp
+b25hbCBpbXBsZW1lbnRhdGlvbiBmb3IgYXBwYXJtb3IsIGFuZCBwcmVzdW1hYmx5DQo+ID4gb25l
+IGZvciB0b21veW8gYXMgd2VsbCkuDQo+IA0KPiBUaGF0J3MgY2xlYXJseSBmYWxzZS4gWW91IGNh
+biBsb2FkIHNpZ25lZCBtb2R1bGVzIHNvIHlvdSBjYW4gbG9hZCBzaWduZWQNCj4gcG9saWNpZXMu
+IEFzc3VtaW5nIHlvdSBkb24ndCBoYXZlIGFuIGluaXRpYWwgbWVhc3VyZWQgZmlsZSBzeXN0ZW0g
+eW91DQo+IG5lZWQgYSBrZXJuZWwgcG9saWN5IGluaXRpYWxseSB0aGF0IHByb3RlY3RzIHlvdS4g
+SWYgeW91IGhhdmUgYSBtZWFzdXJlZA0KPiBmaWxlIHN5c3RlbSB5b3UgZG9uJ3QgZXZlbiBuZWVk
+IHRoYXQsIG5vciBkbyB5b3UgbmVlZCB0byByZXZva2UgUkFXSU8gaW4NCj4ga2VybmVsLCB5b3Ug
+Y2FuIGRvIGl0IGJlZm9yZSB5b3Ugc3dpdGNoIGludG8gIm1lYXN1cmVkIGFuZCBydW5uaW5nDQo+
+IHVuLW1lYXN1cmVkIGNvZGUiIG1vZGUgLSBpZSBhYm91dCB0aGUgcG9pbnQgeW91IHBpdm90IHJv
+b3Qgb3V0IG9mIHRoZQ0KPiBpbml0cmQgdGhhdCBsb2FkZWQgdGhlIG1lYXN1cmVkIHBvbGljeS4N
+Cg0KV2UgY2FuJ3QgcmVseSBvbiB1c2Vyc3BhY2UgY2hvb3NpbmcgdG8gbG9hZCB0aGF0IHBvbGlj
+eS4gV2UgZG9uJ3QgaGF2ZSBhDQptZWFzdXJlZCBmaWxlc3lzdGVtLiBUaGUgaW5pdHJkIGlzIG5v
+dCBzaWduZWQgKGFuZCBub3IgY2FuIGl0IGJlKS4gVGhlDQprZXJuZWwgaXRzZWxmICptdXN0KiBp
+bXBvc2UgcG9saWN5Lg0KDQo+ID4gLi4udGh1cyBicmVha2luZyB1c2Vyc3BhY2Ugb3V0c2lkZSB0
+aGlzIHVzZSBjYXNlLiBJIG1lYW4sIHN1cmUsIEknbQ0KPiA+IGFic29sdXRlbHkgZmluZSB3aXRo
+IGRlbGV0aW5nIC9kZXYvbWVtIGVudGlyZWx5LiBJIGRvbid0IHNlZSBMaW51cw0KPiA+IGFncmVl
+aW5nLg0KPiANCj4gVGhhdCdzIG5vdCB3aGF0IEkgbWVhbnQuIFdlIGhhdmUgYSBsb3Qgb2YgaW50
+ZXJmYWNlcyB3aGVyZSB3ZSB1c2UNCj4gQ0FQX1NZU19SQVdJTyByYXRoZXIgdGhhbiBoYXZpbmcg
+YSBzdHJ1Y3R1cmVkIGludGVyZmFjZSBhcyBvcHBvc2VkIHRvIGENCj4gJ3llYWggd2hhdGV2ZXIs
+IHBva2UgdGhlIHJlZ2lzdGVycycgaW50ZXJmYWNlLg0KPiANCj4gRm9yIGEgbG90IG9mIGVudmly
+b25tZW50cyBidHcgeW91IGRvbid0IGFjdHVhbGx5IG5lZWQgL2Rldi9tZW0uIEl0J3Mgbm90DQo+
+IHJlYWxseSBnb3QgYSBsb3Qgb2YgdXNlcyBhbnkgbW9yZSBhbmQgcGxlbnR5IG9mIHBlb3BsZSBy
+ZWFsbHkgcmVzdHJpY3Qgb3INCj4gcmVtb3ZlIGl0IGZyb20gc3lzdGVtcy4gSSBkb24ndCB0aGlu
+ayB2ZXJ5IG1hbnkgcGVvcGxlIHdvdWxkIGJlIHNhZA0KPiBpZiAvZGV2L21lbSBiZWNhbWUgYSBs
+ZWdhY3kgaW50ZXJmYWNlIG1vc3QgcGVvcGxlIGxlZnQgdHVybmVkIG9mZi4NCg0KU3VyZSEgRXhj
+ZXB0IHRoZW4gQSBMYXJnZSBWZW5kb3IncyBjdXN0b20gSVBNSSB1c2Vyc3BhY2Ugc3RvcHMgd29y
+a2luZywNCmV2ZW4gb24gc3lzdGVtcyB3aXRob3V0IFNlY3VyZSBCb290LCBhbmQgdGhlbiBzYWlk
+IExhcmdlIFZlbmRvciB3YW50cyB0bw0KaGF2ZSBjb25mZXJlbmNlIGNhbGxzIGF0IHRpbWVzIHRo
+YXQgYXJlIGNvbnZlbmllbnQgZm9yIEphcGFuIGFuZCB0aGVuDQp0aGlzIGlzIGFuIGlzc3VlIHRo
+YXQncyBnb2luZyB0byBjYXVzZSAkMSBiaWxsaW9uIGluIGxvc3Qgc2FsZXMgYW5kIGNvbWUNCm9u
+LCB5b3UndmUgYmVlbiB0aGVyZS4gWW91IGtub3cgdGhhdCB0aGlzIGlzbid0IGdvaW5nIHRvIHdv
+cmsuIA0KDQo+IElmIHdlIGFyZSBnb2luZyB0byBkbyBhIG1lYXN1cmVkIGtlcm5lbCB0aGVuIGl0
+IG5lZWRzIHRvIGJlIGRvbmUgcmlnaHQsDQo+IGl0IG5lZWRzIHRvIGJlIHByb3Blcmx5IGFic3Ry
+YWN0ZWQgc28gd2UgZG9uJ3QgYWRkIGFub3RoZXIgb25lIGZvcg0KPiBBbmRyb2lkLCBhbm90aGVy
+IG9uZSBmb3IgQ2hyb21lLCBhbm90aGVyIG9uZSBmb3IgQVJNIHRydXN0em9uZSwgYW5vdGhlcg0K
+PiBvbmUgZm9yIEludGVsIFNHWCwgYW5kIHNvIG9uLg0KDQpUaGUgZmFjdCB0aGF0IHlvdSBrZWVw
+IHNheWluZyBtZWFzdXJlZCByZWFsbHkgZG9lcyBtYWtlIG1lIHN1c3BlY3QgdGhhdA0KeW91IG1p
+c3VuZGVyc3RhbmQgdGhlIHByb2JsZW0uIFRoZXJlJ3Mgbm8gbWVhc3VyZW1lbnQgaW52b2x2ZWQs
+IHRoZXJlJ3MNCnNpbXBseSBhbiBhc3NlcnRpb24gdGhhdCB0aGUgZmlybXdhcmUgKHdoaWNoIHlv
+dSdyZSBmb3JjZWQgdG8gdHJ1c3QpDQpjaG9zZSwgdmlhIHNvbWUgcG9saWN5IHlvdSBtYXkgYmUg
+dW5hd2FyZSBvZiwgdG8gdHJ1c3QgdGhlIGJvb3RlZA0Ka2VybmVsLg0KDQotLSANCk1hdHRoZXcg
+R2FycmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+DQo=
