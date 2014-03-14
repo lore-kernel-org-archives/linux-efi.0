@@ -1,71 +1,83 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 22:15:45 +0000
-Message-ID: <1394835345.1286.22.camel@x230>
+Date: Fri, 14 Mar 2014 22:31:50 +0000
+Message-ID: <20140314223150.0b49723e@alan.etchedpixels.co.uk>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	 <1394686919.25122.2.camel@x230>
-	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	 <1394726363.25122.16.camel@x230>
-	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	 <1394746248.27846.3.camel@x230>
-	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
-	 <1394762250.6416.24.camel@x230.lan>
-	 <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
-	 <1394801518.6416.38.camel@x230.lan>
-	 <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
-	 <1394820664.26846.18.camel@x230.mview.int.nebula.com>
-	 <20140314214806.54a3d031@alan.etchedpixels.co.uk>
-	 <1394834193.1286.11.camel@x230>
-	 <20140314220840.29a12171@alan.etchedpixels.co.uk>
+	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	<1394686919.25122.2.camel@x230>
+	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	<1394726363.25122.16.camel@x230>
+	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	<1394746248.27846.3.camel@x230>
+	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	<1394762250.6416.24.camel@x230.lan>
+	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<1394801518.6416.38.camel@x230.lan>
+	<20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+	<1394820664.26846.18.camel@x230.mview.int.nebula.com>
+	<20140314214806.54a3d031@alan.etchedpixels.co.uk>
+	<1394834193.1286.11.camel@x230>
+	<20140314220840.29a12171@alan.etchedpixels.co.uk>
+	<1394835345.1286.22.camel@x230>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140314220840.29a12171-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
-Content-Language: en-US
-Content-ID: <4F2DB0170EF3AA4C810108E9EE2D1B2C-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+In-Reply-To: <1394835345.1286.22.camel@x230>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org" <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCAyMDE0LTAzLTE0IGF0IDIyOjA4ICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
-b3RlOg0KPiBPbiBGcmksIDE0IE1hciAyMDE0IDIxOjU2OjMzICswMDAwDQo+IE1hdHRoZXcgR2Fy
-cmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+IHdyb3RlOg0KPiA+IFNpZ25lZCB1c2Vy
-c3BhY2UgaXMgbm90IGEgcmVxdWlyZW1lbnQsIGFuZCB0aGVyZWZvcmUgYW55IHNvbHV0aW9uIHRo
-YXQNCj4gPiByZWxpZXMgb24gYSBzaWduZWQgaW5pdHJkIGlzIGluYWRlcXVhdGUuIFRoZXJlIGFy
-ZSB1c2UgY2FzZXMgdGhhdA0KPiA+IHJlcXVpcmUgdmVyaWZpY2F0aW9uIG9mIHRoZSBpbml0cmQg
-YW5kIG90aGVyIGxldmVscy4gVGhpcyBpc24ndCBvbmUgb2YNCj4gPiB0aGVtLg0KPiANCj4gVGhl
-IGpvYiBvZiB0aGUga2VybmVsIGlzIHRvIHNvbHZlIHRoZSBnZW5lcmFsIHByb2JsZW0uIFRoZXJl
-IGFyZSBsb3RzIG9mDQo+IHBlb3BsZSB3aG8gaGFwcGVuIHRvIGNhcmUgYWJvdXQgdmVyaWZpY2F0
-aW9uIGJleW9uZCB0aGUga2VybmVsIHNvIGl0DQo+IHNob3VsZG4ndCBiZSBpZ25vcmVkLiBBbmQg
-dGhleSBjYW4gZG8gZG8gdGhpbmdzIGxpa2UgbG9hZCB0cnVzdGVkIFNFTGludXgNCj4gcnVsZXNl
-dHMgZXZlbiBpZiB5b3UgY2FuJ3Qgc3VwcG9ydCBpdCBpbiB5b3VyIGVudmlyb25tZW50Lg0KDQpU
-aGUgZ2VuZXJhbCBwcm9ibGVtIGluY2x1ZGVzIGhhdmluZyB0byBzdXBwb3J0IHRoaXMgZXZlbiB3
-aXRob3V0IGFuDQpzZWxpbnV4IHBvbGljeS4NCg0KPiA+ID4gRXZlbiBpbiBFRkkgeW91IGNhbiBt
-YWtlIHlvdXIga2VybmVsIG9yIGxvYWRlciBjaGVjayB0aGUgaW5pdHJkIHNpZ25hdHVyZQ0KPiA+
-ID4gYW5kIHRoZSByb290ZnMgc2lnbmF0dXJlIGlmIHlvdSB3YW50Lg0KPiA+IA0KPiA+IEV4Y2Vw
-dCB0aGUgaW5pdHJhbWZzIGdldHMgYnVpbHQgYXQga2VybmVsIGluc3RhbGwgdGltZS4NCj4gDQo+
-IEltcGxlbWVudGF0aW9uIGRldGFpbCBmb3IgeW91ciB1c2UgY2FzZS4NCg0KQW5kIG9uZSB0aGF0
-J3Mgbm90IGdvaW5nIHRvIGNoYW5nZSwgc28gdGhlIGdlbmVyYWwgcHJvYmxlbSBpbmNsdWRlcyBu
-b3QNCnJlbHlpbmcgb24gYSBzaWduZWQgaW5pdHJhbWZzLg0KDQo+ID4gPiBDb3JyZWN0IG1lIGlm
-IEkgYW0gd3JvbmcgYnV0IHlvdXIgc3RhcnRpbmcgcG9pbnQgaXMgIkkgaGF2ZSBhIGNoYWluIG9m
-DQo+ID4gPiBtZWFzdXJlbWVudCBhcyBmYXIgYXMgdGhlIGtlcm5lbCBJIGxvYWQiLiBXaXRob3V0
-IHRoYXQgSSBjYW4ganVzdCBnbyBpbnRvDQo+ID4gPiBncnViIGFuZCAwd24geW91Lg0KPiA+IA0K
-PiA+IEluIG15IHVzZSBjYXNlLiBCdXQgbm90IGFsbCBpbXBsZW1lbnRhdGlvbnMgd2lsbCBiZSBt
-ZWFzdXJpbmcgdGhpbmdzIC0NCj4gPiB0aGV5IGNhbiBhc3NlcnQgdGhhdCB0aGUga2VybmVsIGlz
-IHRydXN0d29ydGh5IHRocm91Z2ggc29tZSBvdGhlcg0KPiA+IG1lY2hhbmlzbS4gVGhpcyBnZW51
-aW5lbHkgaXMgYWJvdXQgdHJ1c3QsIG5vdCBtZWFzdXJlbWVudC4NCj4gDQo+IFRoZSBhc3NlcnRp
-b24geW91IGF0dGVtcHQgdG8gYWNoaWV2ZSBpcyBJIGJlbGlldmUNCj4gDQo+ICJObyByaW5nIDAg
-Y29kZSBpcyBleGVjdXRlZCBkaXJlY3RseSBvciBpbmRpcmVjdGx5IHRoYXQgaXMgbm90IG1lYXN1
-cmVkIg0KDQpOby4gQXMgSSBrZWVwIHBvaW50aW5nIG91dCwgbm90IGFsbCBjb2RlIGlzIG1lYXN1
-cmVkLiBUaGUgZmlybXdhcmUgaXMNCm5vdCByZXF1aXJlZCB0byBtZWFzdXJlIGl0c2VsZi4gQSBw
-YXJ0aWN1bGFyIGltcGxlbWVudGF0aW9uIG1heSBza2lwDQptZWFzdXJpbmcgdGhlIGtlcm5lbCBi
-ZWNhdXNlIGl0IGNhbiBhdHRlc3QgdG8gaXRzIHRydXN0d29ydGh5bmVzcyBpbg0Kc29tZSBvdGhl
-ciB3YXkuIENocm9tZU9TIHdpbGwgbG9hZCB1bm1lYXN1cmVkIGtlcm5lbCBtb2R1bGVzIHByb3Zp
-ZGVkIGl0DQpjYW4gYXR0ZXN0IHRvIHRoZSB0cnVzdHdvcnRoeW5lc3Mgb2YgdGhlIGZpbGVzeXN0
-ZW0gY29udGFpbmluZyB0aGVtLg0KDQotLSANCk1hdHRoZXcgR2FycmV0dCA8bWF0dGhldy5nYXJy
-ZXR0QG5lYnVsYS5jb20+DQo=
+On Fri, 14 Mar 2014 22:15:45 +0000
+Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
+
+> On Fri, 2014-03-14 at 22:08 +0000, One Thousand Gnomes wrote:
+> > On Fri, 14 Mar 2014 21:56:33 +0000
+> > Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
+> > > Signed userspace is not a requirement, and therefore any solution that
+> > > relies on a signed initrd is inadequate. There are use cases that
+> > > require verification of the initrd and other levels. This isn't one of
+> > > them.
+> > 
+> > The job of the kernel is to solve the general problem. There are lots of
+> > people who happen to care about verification beyond the kernel so it
+> > shouldn't be ignored. And they can do do things like load trusted SELinux
+> > rulesets even if you can't support it in your environment.
+> 
+> The general problem includes having to support this even without an
+> selinux policy.
+
+Yes. No dispute about that. But equally the general solution should allow
+for it.
+
+> And one that's not going to change, so the general problem includes not
+> relying on a signed initramfs.
+
+Likewise
+
+> some other way. ChromeOS will load unmeasured kernel modules provided it
+> can attest to the trustworthyness of the filesystem containing them.
+
+See "How to Bypass Verified Boot Security in Chromium OS" 8)
+
+And it attests the trustworthiness of the filesystem by measuring it. If
+you have a measurement of object X that states it is unchanged then you
+have a valid measurement of any subset of object X for which the same
+assertion is proven. In this case since you know all the bits in the root
+fs are as before, so you know all the bits in the module are as before
+
+And how do you know all the bits in the root fs are as before, because you
+have a set of measurements (hashes) on partition 12. At the end of the
+day you end up with a chain of measurements from a trusted thing you deep
+immutable. If your chain has gaps you have holes (see above).
+
+So ChromeOS loads *measured* kernel modules. It just did the measuring
+differently to the signed module code.
+
+Alan
+
+
+ 
