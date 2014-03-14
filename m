@@ -1,104 +1,144 @@
-From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+From: Kees Cook <keescook@chromium.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 12:51:58 +0000
-Message-ID: <1394801518.6416.38.camel@x230.lan>
+Date: Fri, 14 Mar 2014 08:23:49 -0700
+Message-ID: <CAGXu5jLZcWh5WD0L8s3Q-GXdXCMnA57qtjfdFfQbv0fxYcuCTQ@mail.gmail.com>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	 <1394686919.25122.2.camel@x230>
-	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	 <1394726363.25122.16.camel@x230>
-	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	 <1394746248.27846.3.camel@x230>
-	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
-	 <1394762250.6416.24.camel@x230.lan>
-	 <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	<1394686919.25122.2.camel@x230>
+	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	<1394726363.25122.16.camel@x230>
+	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	<1394746248.27846.3.camel@x230>
+	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	<1394762250.6416.24.camel@x230.lan>
+	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<1394801518.6416.38.camel@x230.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140314122231.17b9ca8a-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
-Content-Language: en-US
-Content-ID: <0966C34F581DC0419EC29CD8CD81008B-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org" <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1394801518.6416.38.camel@x230.lan>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matthew Garrett <matthew.garrett@nebula.com>
+Cc: "gnomes@lxorguk.ukuu.org.uk" <gnomes@lxorguk.ukuu.org.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gRnJpLCAyMDE0LTAzLTE0IGF0IDEyOjIyICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
-b3RlOg0KPiA+IEhhdmUgeW91IGFjdHVhbGx5IGxvb2tlZCBhdCB0aGVzZSBwYXRjaGVzPyBJJ3Zl
-IGxvb2tlZCBhdCBldmVyeSBjYXNlIG9mDQo+ID4gUkFXSU8gaW4gdGhlIGtlcm5lbC4gRm9yIGNh
-c2VzIHRoYXQgYXJlIGhhcmR3YXJlIHNwZWNpZmljIGFuZCB0aWVkIHRvDQo+ID4gZmFpcmx5IG9s
-ZCBoYXJkd2FyZSwgSSd2ZSBpZ25vcmVkIHRoZW0uIEZvciBjYXNlcyB3aGljaCBwcm92aWRlIGFu
-DQo+IA0KPiBZZXMgSSBoYXZlIC0gYW5kIGl0J3Mgbm90IGV4YWN0bHkgbG9jYWxpc2VkOiBpdCBt
-b2RpZmllcyBzdHVmZiBhbGwgb3Zlcg0KPiB0aGUgdHJlZSB3aGVuIGl0IHNob3VsZG4ndCBuZWVk
-IHRvLiBJdCdzIGEgc2VjdXJpdHkgcG9saWN5LiBJZiBpdCBsZWFrcw0KPiBwb2xpY3kgYWxsIG92
-ZXIgdGhlIGtlcm5lbCB0aGVuIHRoZSBpbXBsZW1lbnRhdGlvbiBtb2RlbCBpcyAqd3JvbmcqLg0K
-DQpCdXQgeW91IGtlZXAgdGFsa2luZyBhYm91dCBNU1JzIGRlc3BpdGUgdGhlcmUgYmVpbmcgYSBw
-YXRjaCB0aGF0IGxpbWl0cw0KYWNjZXNzIHRvIE1TUnMuIElmIHlvdSBoYXZlIHNwZWNpZmljIGV4
-YW1wbGVzIG9mIHByaXZpbGVnZSBlc2NhbGF0aW9ucw0KdGhhdCBhcmUgcG9zc2libGUgZXZlbiB3
-aXRoIHRoZXNlIHBhdGNoZXMgdGhlbiBwbGVhc2UsIG1lbnRpb24gdGhlbS4NCg0KPiA+ID5kZWZh
-dWx0IGJlaGF2aW91ciBmb3IgY2FwYWJsZSh4KSBpbiBmYWN0IGJlDQo+ID4gPg0KPiA+ID4gICAg
-ICAgIGNhcGFibGUoeCAmIH5zZWN1cmVfZm9yYmlkZGVuKQ0KPiA+ID4NCj4gPiA+Zm9yIGEgbWVh
-c3VyZWQga2VybmVsIGFuZCBhZGQgYSANCj4gPiA+DQo+ID4gPiAgICAgICAgY2FwYWJsZV9hbHdh
-eXMoKQ0KPiA+ID4NCj4gPiA+Zm9yIHRoZSBjYXNlcyB5b3Ugd2FudCB0byBub3QgYnJlYWsuDQo+
-ID4gDQo+ID4gV2UgY291bGQgZG8gdGhhdCwgYnV0IG5vdyB0aGUgYmVoYXZpb3VyIG9mIHRoZSBw
-YXRjaHNldCBpcyBmYXIgbGVzcw0KPiA+IG9idmlvdXMuIGNhcGFibGUoQ0FQX1NZU19SQVdJTykg
-bm93IG1lYW5zIHNvbWV0aGluZyBkaWZmZXJlbnQgdG8gZXZlcnkNCj4gPiBvdGhlciB1c2Ugb2Yg
-Y2FwYWJsZSgpLCBhbmQgd2Ugc3RpbGwgbmVlZCBnZXRfdHJ1c3RlZF9rZXJuZWwoKSBjYWxscyBm
-b3INCj4gPiBjYXNlcyB3aGVyZSB0aGUgY2hlY2tzIGhhdmUgbm90aGluZyB0byBkbyB3aXRoIHBy
-b2Nlc3NlcyBhbmQgc28NCj4gPiBjYXBhYmlsaXRpZXMgY2FuJ3QgYmUgdXNlZC4gDQo+IA0KPiBZ
-b3UgZG9uJ3QgbmVlZCBnZXRfbWVhc3VyZWRfa2VybmVsKCkgY2FsbHMgYmVjYXVzZSB0aGF0cyBo
-aWRkZW4gd2l0aGluDQo+IGNhcGFibGUvY2FwYWJsZV9hbHdheXMuIEFuZCBpZiB0aGUgaW50ZXJh
-Y3Rpb24gaXMgYSBjb21wbGljYXRlZCBhcyB5b3UNCj4gaW1wbHkgdGhhdCBhZ2FpbiBzYXlzIHRv
-IG1lIHRoZSBtb2RlbCBpcyB3cm9uZy4gQ29tcGxpY2F0ZWQgbXVsdGktd2F5DQo+IHNlY3VyaXR5
-IGludGVyYWN0aW9ucyBsZWFkIHRvIGNvbXBsaWNhdGVkIGV4cGxvaXRzIGxldmVyYWdpbmcgdGhl
-DQo+IGRpc2Nvbm5lY3RzLg0KDQpIb3cgaXMgY2FwYWJsZSgpIGdvaW5nIHRvIGJlIGFueSB1c2Ug
-d2hlbiBkZWNpZGluZyB3aGV0aGVyIG9yIG5vdCB0bw0KaW50ZXJwcmV0IHNvbWUga2VybmVsIGNv
-bW1hbmQgbGluZSBvcHRpb25zPw0KDQo+ID4gV2UgY2FuIGRvIHRoaXMgd2l0aG91dCB1bm5lY2Vz
-c2FyaWx5IGJyZWFraW5nIGFueSB1c2Vyc3BhY2UuIFdlIGp1c3QNCj4gPiBjYW4ndCBkbyBpdCBi
-eSBmaWRkbGluZyB3aXRoIGNhcGFiaWxpdGllcy4NCj4gDQo+IEl0IHNob3VsZCBzdGlsbCBiZSBh
-IHNlY3VyaXR5IG1vZGVsIG50byBzcHJlYWRpbmcgbWVhc3VyZWRfa2VybmVsKCkNCj4gY2hlY2tz
-IGFib3V0LiBOb3cgaWYgdGhhdCBtZWFucw0KPiANCj4gCWNhcGFibGUoQ0FQX1NZU19SQVdJTykN
-Cj4gDQo+IHNob3VsZCBiZWNvbWUgc2VjdXJpdHktPiBpbnRlcmZhY2UgaG9va3MgdGhhdCBwYXNz
-IHNvbWV0aGluZyBtZWFuaW5nZnVsDQo+IHRvIHRoZSBzZWN1cml0eSBsYXllciB0aGVuIEknZCBy
-YXRoZXIgd2UgZGlkIHRoZSBqb2IgcHJvcGVybHkgaW4gdGhlIGZpcnN0DQo+IHBsYWNlIGFuZCBw
-dXQgdGhlIHBvbGljeSBpbiBvbmUgc3BvdCBub3QgYWxsIG92ZXIgdGhlIGtlcm5lbC4NCg0KV2Ug
-c3RpbGwgbmVlZCBhIG1lY2hhbmlzbSB0byBkaWZmZXJlbnRpYXRlIGJldHdlZW4gY2FzZXMgd2hl
-cmUNCkNBUF9TWVNfUkFXSU8gc2hvdWxkIGJlIGZvcmJpZGRlbiBhbmQgY2FzZXMgd2hlcmUgaXQg
-c2hvdWxkIGJlDQpwZXJtaXR0ZWQsIHdoaWNoIG1lYW5zIHRoYXQgd2UgbmVlZCB0byBhZGQgYWRk
-aXRpb25hbCBwb2xpY3kuIFdlIGNhbg0KbW9kaWZ5IGNhcGFibGUoKSwgYnV0IHRoYXQgbWVhbnMg
-dGhhdCBjYXBhYmxlKCkgbm8gbG9uZ2VyIGRvZXMgd2hhdCB5b3UNCmV4cGVjdCBpdCB0byAtIGl0
-J3Mgbm90IGEgdHJhbnNwYXJlbnQgaW50ZXJmYWNlLCBhbmQgdGhhdCdzIGxpa2VseSB0bw0KcmVz
-dWx0IGluIHBlb3BsZSBhY2NpZGVudGFsbHkgbWlzdXNpbmcgaXQuDQoNCj4gVGhlIHF1ZXN0aW9u
-IHRoZW4gYmVjb21lcyB3aGF0IGRvIHdlIG5lZWQgdG8gcGFzcyBiZXlvbmQgIkNBUF9TWVNfUkFX
-SU8iDQo+IHNvIHRoZSBwb2xpY3kgY2FuIGJlIGluIHRoZSByaWdodCBwbGFjZSAtIGV2ZW4gZm9y
-IGV4YW1wbGUgaW1wb3NlZCBieQ0KPiBTRUxpbnV4IHJ1bGVzLg0KDQpJdCBuZWVkcyB0byBiZSBw
-b3NzaWJsZSBmb3IgdGhpcyBwb2xpY3kgdG8gYmUgaW1wb3NlZCB3aXRob3V0IHVzZXJzcGFjZQ0K
-YmVpbmcgaW52b2x2ZWQsIHNvIHVzaW5nIHNlbGludXggd291bGQgbWVhbiBiYWtpbmcgaXQgaW50
-byB0aGUga2VybmVsDQooYWxvbmcgd2l0aCBhbiBhZGRpdGlvbmFsIGltcGxlbWVudGF0aW9uIGZv
-ciBhcHBhcm1vciwgYW5kIHByZXN1bWFibHkNCm9uZSBmb3IgdG9tb3lvIGFzIHdlbGwpLg0KDQo+
-IA0KPiA+ID4gSSBkb24ndCB0aGluayB3ZSBuZWVkIHRvIGJyZWFrIGFueSB1c2Vyc3BhY2UgZm9y
-ICJub3JtYWwiIG1vZGUgdG8gZG8NCj4gPiA+IHRoaXMuIFVzZXJzcGFjZSBpbiBtZWFzdXJlZCBt
-b2RlIGlzIGdvaW5nIHRvIGNoYW5nZSBhbnl3YXkuIEl0IGFscmVhZHkNCj4gPiA+IGhhcyBqdXN0
-IGZvciB0aGluZ3MgbGlrZSBtb2R1bGUgc2lnbmluZy4NCj4gPiANCj4gPiBUaGlzIGhhcyBiZWVu
-IGRpc2N1c3NlZCBhdCBsZW5ndGguIE5vYm9keSB3aG8ncyBhY3R1YWxseSBzcGVudCB0aW1lDQo+
-ID4gd29ya2luZyBvbiB0aGUgcHJvYmxlbSB3YW50cyB0byB1c2UgY2FwYWJpbGl0aWVzLiBDQVBf
-U1lTX1JBV0lPIGlzIG5vdA0KPiA+IHNlbWFudGljYWxseSBpZGVudGljYWwgdG8gdGhlIHRydXN0
-ZWQga2VybmVsIGJpdC4gVHJ5aW5nIHRvIG1ha2UgdGhlbQ0KPiA+IHNlbWFudGljYWxseSBpZGVu
-dGljYWwgd2lsbCBicmVhayBleGlzdGluZyB1c2Vyc3BhY2UuDQo+IA0KPiBJIG5ldmVyIHNhaWQg
-aXQgd2FzLiBJIHNhaWQgdGhhdCBnZXR0aW5nIHJpZCBvZiBDQVBfU1lTX1JBV0lPIGFuZCB0aGVu
-DQo+IGRlYWxpbmcgd2l0aCAqanVzdCogdGhlIGV4Y2VwdGlvbnMgdG8gdGhpcyBpcyBhIGxvdCBj
-bGVhbmVyLCBhbmQgbGlrZWx5DQo+IHRvIGJlIG1vcmUgc2VjdXJlLg0KDQpBbmQgd2lsbCBnaXZl
-IHVzIHRoZSBjaG9pY2UgYmV0d2VlbiBjb21wbGljYXRpbmcgYSBzaW1wbGUgaW50ZXJmYWNlIG9y
-DQpicmVha2luZyB1c2Vyc3BhY2UuIElmIHRoZSBtYWludGFpbmVyIGJlbGlldmVzIHRoYXQncyBh
-IGJldHRlciBhcHByb2FjaA0KdGhlbiBJIGNhbiByZXdyaXRlIGFsbCBvZiB0aGlzIGFnYWluLCBi
-dXQgc28gZmFyIHlvdSBzZWVtIHRvIGJlIGluIGENCm1pbm9yaXR5IG9uIHRoaXMgZnJvbnQuIA0K
-DQo+IEluIGFkZGl0aW9uIHNldmVyYWwgb2YgdGhlIGNhc2VzIHRoYXQgeW91IHBvaW50IG91dCBj
-b3VsZCBiZSBmaXhlZCBieQ0KPiByZXBsYWNpbmcgdGhlIENBUF9TWVNfUkFXSU8gdXNpbmcgc3R1
-ZmYgd2l0aCBhIHByb3BlciBpbnRlcmZhY2Ugc2hvdWxkDQo+IHByb2JhYmx5IGp1c3QgYmUgKmZp
-eGVkKiB0byBwcm92aWRlIHRoYXQuDQoNCi4uLnRodXMgYnJlYWtpbmcgdXNlcnNwYWNlIG91dHNp
-ZGUgdGhpcyB1c2UgY2FzZS4gSSBtZWFuLCBzdXJlLCBJJ20NCmFic29sdXRlbHkgZmluZSB3aXRo
-IGRlbGV0aW5nIC9kZXYvbWVtIGVudGlyZWx5LiBJIGRvbid0IHNlZSBMaW51cw0KYWdyZWVpbmcu
-DQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
+On Fri, Mar 14, 2014 at 5:51 AM, Matthew Garrett
+<matthew.garrett@nebula.com> wrote:
+> On Fri, 2014-03-14 at 12:22 +0000, One Thousand Gnomes wrote:
+>> > Have you actually looked at these patches? I've looked at every case of
+>> > RAWIO in the kernel. For cases that are hardware specific and tied to
+>> > fairly old hardware, I've ignored them. For cases which provide an
+>>
+>> Yes I have - and it's not exactly localised: it modifies stuff all over
+>> the tree when it shouldn't need to. It's a security policy. If it leaks
+>> policy all over the kernel then the implementation model is *wrong*.
+>
+> But you keep talking about MSRs despite there being a patch that limits
+> access to MSRs. If you have specific examples of privilege escalations
+> that are possible even with these patches then please, mention them.
+>
+>> > >default behaviour for capable(x) in fact be
+>> > >
+>> > >        capable(x & ~secure_forbidden)
+>> > >
+>> > >for a measured kernel and add a
+>> > >
+>> > >        capable_always()
+>> > >
+>> > >for the cases you want to not break.
+>> >
+>> > We could do that, but now the behaviour of the patchset is far less
+>> > obvious. capable(CAP_SYS_RAWIO) now means something different to every
+>> > other use of capable(), and we still need get_trusted_kernel() calls for
+>> > cases where the checks have nothing to do with processes and so
+>> > capabilities can't be used.
+
+And this ignores the fact that being able to query the measured state
+is potentially valuable to additional security policies (e.g. module
+loading, firmware loading). Hiding the measured logic in capabilities
+makes no sense -- they're orthogonal restrictions.
+
+>>
+>> You don't need get_measured_kernel() calls because thats hidden within
+>> capable/capable_always. And if the interaction is a complicated as you
+>> imply that again says to me the model is wrong. Complicated multi-way
+>> security interactions lead to complicated exploits leveraging the
+>> disconnects.
+>
+> How is capable() going to be any use when deciding whether or not to
+> interpret some kernel command line options?
+
+The command line problem here is a total red herring. If you've got a
+measured kernel, you have a measured command line. (If not, you don't
+have a measured kernel.) Dealing with the command line has nothing to
+do with enforcing the ring0/uid0 boundary which is what this patch
+series does.
+
+>> > We can do this without unnecessarily breaking any userspace. We just
+>> > can't do it by fiddling with capabilities.
+>>
+>> It should still be a security model nto spreading measured_kernel()
+>> checks about. Now if that means
+>>
+>>       capable(CAP_SYS_RAWIO)
+>>
+>> should become security-> interface hooks that pass something meaningful
+>> to the security layer then I'd rather we did the job properly in the first
+>> place and put the policy in one spot not all over the kernel.
+>
+> We still need a mechanism to differentiate between cases where
+> CAP_SYS_RAWIO should be forbidden and cases where it should be
+> permitted, which means that we need to add additional policy. We can
+> modify capable(), but that means that capable() no longer does what you
+> expect it to - it's not a transparent interface, and that's likely to
+> result in people accidentally misusing it.
+>
+>> The question then becomes what do we need to pass beyond "CAP_SYS_RAWIO"
+>> so the policy can be in the right place - even for example imposed by
+>> SELinux rules.
+>
+> It needs to be possible for this policy to be imposed without userspace
+> being involved, so using selinux would mean baking it into the kernel
+> (along with an additional implementation for apparmor, and presumably
+> one for tomoyo as well).
+>
+>>
+>> > > I don't think we need to break any userspace for "normal" mode to do
+>> > > this. Userspace in measured mode is going to change anyway. It already
+>> > > has just for things like module signing.
+>> >
+>> > This has been discussed at length. Nobody who's actually spent time
+>> > working on the problem wants to use capabilities. CAP_SYS_RAWIO is not
+>> > semantically identical to the trusted kernel bit. Trying to make them
+>> > semantically identical will break existing userspace.
+>>
+>> I never said it was. I said that getting rid of CAP_SYS_RAWIO and then
+>> dealing with *just* the exceptions to this is a lot cleaner, and likely
+>> to be more secure.
+>
+> And will give us the choice between complicating a simple interface or
+> breaking userspace. If the maintainer believes that's a better approach
+> then I can rewrite all of this again, but so far you seem to be in a
+> minority on this front.
+>
+>> In addition several of the cases that you point out could be fixed by
+>> replacing the CAP_SYS_RAWIO using stuff with a proper interface should
+>> probably just be *fixed* to provide that.
+>
+> ...thus breaking userspace outside this use case. I mean, sure, I'm
+> absolutely fine with deleting /dev/mem entirely. I don't see Linus
+> agreeing.
+
+Right. As mentioned, we've been over all of this before. We cannot
+change the meaning of capabilities (nor expand their coverage to
+existing interfaces) without breaking userspace. Since we cannot break
+userspace, we must create a different policy system that covers this
+new thing we want to do and keeps the new policy distinctly separate.
+
+-Kees
+
+-- 
+Kees Cook
+Chrome OS Security
