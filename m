@@ -1,78 +1,100 @@
-From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Thu, 13 Mar 2014 23:21:40 +0000
-Message-ID: <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+Date: Fri, 14 Mar 2014 01:57:30 +0000
+Message-ID: <1394762250.6416.24.camel@x230.lan>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	<1394686919.25122.2.camel@x230>
-	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	<1394726363.25122.16.camel@x230>
-	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	<1394746248.27846.3.camel@x230>
+	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	 <1394686919.25122.2.camel@x230>
+	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	 <1394726363.25122.16.camel@x230>
+	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	 <1394746248.27846.3.camel@x230>
+	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-security-module-owner@vger.kernel.org>
-In-Reply-To: <1394746248.27846.3.camel@x230>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "keescook@chromium.org" <keescook@chromium.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140313232140.03bdaac3-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
+Content-Language: en-US
+Content-ID: <BD6E501CC23CDB4CBF31057998C36F60-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org" <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 13 Mar 2014 21:30:48 +0000
-Matthew Garrett <matthew.garrett@nebula.com> wrote:
-
-> On Thu, 2014-03-13 at 21:24 +0000, One Thousand Gnomes wrote:
-> 
-> > If I have CAP_SYS_RAWIO I can make arbitary ring 0 calls from userspace,
-> > trivially and in a fashion well known and documented.
-> 
-> How?
-
-You want a list... there are load of places all over the kernel that have
-assumptions that RAWIO = safe from the boringly mundane like MSR access
-to the more obscure driver "this is RAWIO trust the user" cases of which
-there are plenty.
-
-If you are going to do something "secure" then do it *right* otherwise
-you are not actually implementing anything, just making fake security
-noises.
-
-SELinux required user space changes, fiddle with CAP_SYS_RAWIO will need
-userspace changes IFF you want to run 'secure' mode. That I think is
-acceptable.
-
-You can even avoid the userspace issues with a small amount of checking.
-If you don't want to touch capability sets then make the default
-behaviour for capable(x) in fact be
-
-	capable(x & ~secure_forbidden)
-
-for a measured kernel and add a 
-
-	capable_always()
-
-for the cases you want to not break.
-
-As for mem= and exactmap, it has nothing to do with /dev/mem and
-everything to do with giving the kernel a memory map where some of the
-space it thinks is RAM is in fact devices, rom, space etc. If the kernel
-is given a false memory map it will misbehave. Exploitably - well given
-the kind of things people have achieved in the past - quite possibly.
-
-If you are not prepared to do the job right, then I don't think it
-belongs upstream. Let's do it right, and if we have to tweak a few bits
-of userspace to make them work in measured mode (but without breaking
-anything in normal modes) then it's worth doing the job properly.
-
-I don't think we need to break any userspace for "normal" mode to do
-this. Userspace in measured mode is going to change anyway. It already
-has just for things like module signing.
-
-(As an aside you may also then want to think about whether you allow
-measured userspace elements that secure_forbidden is considered to be 0
-for so you can sign userspace apps that are allowed to do RAWIO)
-
-Alan
+T24gVGh1LCAyMDE0LTAzLTEzIGF0IDIzOjIxICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
+b3RlOg0KPiBPbiBUaHUsIDEzIE1hciAyMDE0IDIxOjMwOjQ4ICswMDAwDQo+IE1hdHRoZXcgR2Fy
+cmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+IHdyb3RlOg0KPiANCj4gPiBPbiBUaHUs
+IDIwMTQtMDMtMTMgYXQgMjE6MjQgKzAwMDAsIE9uZSBUaG91c2FuZCBHbm9tZXMgd3JvdGU6DQo+
+ID4gDQo+ID4gPiBJZiBJIGhhdmUgQ0FQX1NZU19SQVdJTyBJIGNhbiBtYWtlIGFyYml0YXJ5IHJp
+bmcgMCBjYWxscyBmcm9tIHVzZXJzcGFjZSwNCj4gPiA+IHRyaXZpYWxseSBhbmQgaW4gYSBmYXNo
+aW9uIHdlbGwga25vd24gYW5kIGRvY3VtZW50ZWQuDQo+ID4gDQo+ID4gSG93Pw0KPiANCj4gWW91
+IHdhbnQgYSBsaXN0Li4uIHRoZXJlIGFyZSBsb2FkIG9mIHBsYWNlcyBhbGwgb3ZlciB0aGUga2Vy
+bmVsIHRoYXQgaGF2ZQ0KPiBhc3N1bXB0aW9ucyB0aGF0IFJBV0lPID0gc2FmZSBmcm9tIHRoZSBi
+b3JpbmdseSBtdW5kYW5lIGxpa2UgTVNSIGFjY2Vzcw0KPiB0byB0aGUgbW9yZSBvYnNjdXJlIGRy
+aXZlciAidGhpcyBpcyBSQVdJTyB0cnVzdCB0aGUgdXNlciIgY2FzZXMgb2Ygd2hpY2gNCj4gdGhl
+cmUgYXJlIHBsZW50eS4NCg0KSGF2ZSB5b3UgYWN0dWFsbHkgbG9va2VkIGF0IHRoZXNlIHBhdGNo
+ZXM/IEkndmUgbG9va2VkIGF0IGV2ZXJ5IGNhc2Ugb2YNClJBV0lPIGluIHRoZSBrZXJuZWwuIEZv
+ciBjYXNlcyB0aGF0IGFyZSBoYXJkd2FyZSBzcGVjaWZpYyBhbmQgdGllZCB0bw0KZmFpcmx5IG9s
+ZCBoYXJkd2FyZSwgSSd2ZSBpZ25vcmVkIHRoZW0uIEZvciBjYXNlcyB3aGljaCBwcm92aWRlIGFu
+DQpvYnZpb3VzIG1lY2hhbmlzbSBmb3IgZXhwbG9pdGF0aW9uLCBJJ3ZlIGFkZGVkIGFuIGFkZGl0
+aW9uYWwgY2hlY2suIEZvcg0KY2FzZXMgd2hlcmUgSSBjYW4ndCBzZWUgYSByZWFzb25hYmxlIG1l
+Y2hhbmlzbSBmb3IgZXhlY3V0aW5nIGFyYml0cmFyeQ0KY29kZSBpbiB0aGUga2VybmVsLCBJJ3Zl
+IGRvbmUgbm90aGluZy4NCg0KSWYgeW91IGhhdmUgc3BlY2lmaWMgZXhhbXBsZXMgb2YgcHJvY2Vz
+c2VzIHdpdGggQ0FQX1NZU19SQVdJTyBiZWluZyBhYmxlDQp0byBleGVjdXRlIGFyYml0cmFyeSBj
+b2RlIGluIHRoZSBrZXJuZWwgZXZlbiB3aXRoIHRoaXMgcGF0Y2hzZXQgYXBwbGllZCwNCnBsZWFz
+ZSwgZ2l2ZSB0aGVtLg0KDQo+WW91IGNhbiBldmVuIGF2b2lkIHRoZSB1c2Vyc3BhY2UgaXNzdWVz
+IHdpdGggYSBzbWFsbCBhbW91bnQgb2YNCj5jaGVja2luZy4gSWYgeW91IGRvbid0IHdhbnQgdG8g
+dG91Y2ggY2FwYWJpbGl0eSBzZXRzIHRoZW4gbWFrZSB0aGUNCj5kZWZhdWx0IGJlaGF2aW91ciBm
+b3IgY2FwYWJsZSh4KSBpbiBmYWN0IGJlDQo+DQo+ICAgICAgICBjYXBhYmxlKHggJiB+c2VjdXJl
+X2ZvcmJpZGRlbikNCj4NCj5mb3IgYSBtZWFzdXJlZCBrZXJuZWwgYW5kIGFkZCBhIA0KPg0KPiAg
+ICAgICAgY2FwYWJsZV9hbHdheXMoKQ0KPg0KPmZvciB0aGUgY2FzZXMgeW91IHdhbnQgdG8gbm90
+IGJyZWFrLg0KDQpXZSBjb3VsZCBkbyB0aGF0LCBidXQgbm93IHRoZSBiZWhhdmlvdXIgb2YgdGhl
+IHBhdGNoc2V0IGlzIGZhciBsZXNzDQpvYnZpb3VzLiBjYXBhYmxlKENBUF9TWVNfUkFXSU8pIG5v
+dyBtZWFucyBzb21ldGhpbmcgZGlmZmVyZW50IHRvIGV2ZXJ5DQpvdGhlciB1c2Ugb2YgY2FwYWJs
+ZSgpLCBhbmQgd2Ugc3RpbGwgbmVlZCBnZXRfdHJ1c3RlZF9rZXJuZWwoKSBjYWxscyBmb3INCmNh
+c2VzIHdoZXJlIHRoZSBjaGVja3MgaGF2ZSBub3RoaW5nIHRvIGRvIHdpdGggcHJvY2Vzc2VzIGFu
+ZCBzbw0KY2FwYWJpbGl0aWVzIGNhbid0IGJlIHVzZWQuIEl0IHN0aWxsIGludm9sdmVzIGF1ZGl0
+aW5nIGV2ZXJ5IHVzZSBvZg0KQ0FQX1NZU19SQVdJTy4gSW4gZmFjdCwgaW4gc29tZSBjYXNlcyB3
+ZSBuZWVkIHRvICphZGQqIENBUF9TWVNfUkFXSU8NCmNoZWNrcyAtIHdoaWNoLCBhZ2FpbiwgYnJl
+YWtzIHVzZXJzcGFjZS4NCg0KPiBBcyBmb3IgbWVtPSBhbmQgZXhhY3RtYXAsIGl0IGhhcyBub3Ro
+aW5nIHRvIGRvIHdpdGggL2Rldi9tZW0gYW5kDQo+IGV2ZXJ5dGhpbmcgdG8gZG8gd2l0aCBnaXZp
+bmcgdGhlIGtlcm5lbCBhIG1lbW9yeSBtYXAgd2hlcmUgc29tZSBvZiB0aGUNCj4gc3BhY2UgaXQg
+dGhpbmtzIGlzIFJBTSBpcyBpbiBmYWN0IGRldmljZXMsIHJvbSwgc3BhY2UgZXRjLiBJZiB0aGUg
+a2VybmVsDQo+IGlzIGdpdmVuIGEgZmFsc2UgbWVtb3J5IG1hcCBpdCB3aWxsIG1pc2JlaGF2ZS4g
+RXhwbG9pdGFibHkgLSB3ZWxsIGdpdmVuDQo+IHRoZSBraW5kIG9mIHRoaW5ncyBwZW9wbGUgaGF2
+ZSBhY2hpZXZlZCBpbiB0aGUgcGFzdCAtIHF1aXRlIHBvc3NpYmx5Lg0KDQpTdXJlLiBUaGF0J3Mg
+YSB3b3J0aHdoaWxlIHRoaW5nIHRvIGZpeCwgYW5kIGl0J3Mgc29tZXRoaW5nIHRoYXQgZHJvcHBp
+bmcNCkNBUF9TWVNfUkFXSU8gd291bGQgZG8gbm90aGluZyB0byBoZWxwIHlvdSB3aXRoLg0KDQo+
+IElmIHlvdSBhcmUgbm90IHByZXBhcmVkIHRvIGRvIHRoZSBqb2IgcmlnaHQsIHRoZW4gSSBkb24n
+dCB0aGluayBpdA0KPiBiZWxvbmdzIHVwc3RyZWFtLiBMZXQncyBkbyBpdCByaWdodCwgYW5kIGlm
+IHdlIGhhdmUgdG8gdHdlYWsgYSBmZXcgYml0cw0KPiBvZiB1c2Vyc3BhY2UgdG8gbWFrZSB0aGVt
+IHdvcmsgaW4gbWVhc3VyZWQgbW9kZSAoYnV0IHdpdGhvdXQgYnJlYWtpbmcNCj4gYW55dGhpbmcg
+aW4gbm9ybWFsIG1vZGVzKSB0aGVuIGl0J3Mgd29ydGggZG9pbmcgdGhlIGpvYiBwcm9wZXJseS4N
+Cg0KV2UgY2FuIGRvIHRoaXMgd2l0aG91dCB1bm5lY2Vzc2FyaWx5IGJyZWFraW5nIGFueSB1c2Vy
+c3BhY2UuIFdlIGp1c3QNCmNhbid0IGRvIGl0IGJ5IGZpZGRsaW5nIHdpdGggY2FwYWJpbGl0aWVz
+Lg0KDQo+IEkgZG9uJ3QgdGhpbmsgd2UgbmVlZCB0byBicmVhayBhbnkgdXNlcnNwYWNlIGZvciAi
+bm9ybWFsIiBtb2RlIHRvIGRvDQo+IHRoaXMuIFVzZXJzcGFjZSBpbiBtZWFzdXJlZCBtb2RlIGlz
+IGdvaW5nIHRvIGNoYW5nZSBhbnl3YXkuIEl0IGFscmVhZHkNCj4gaGFzIGp1c3QgZm9yIHRoaW5n
+cyBsaWtlIG1vZHVsZSBzaWduaW5nLg0KDQpUaGlzIGhhcyBiZWVuIGRpc2N1c3NlZCBhdCBsZW5n
+dGguIE5vYm9keSB3aG8ncyBhY3R1YWxseSBzcGVudCB0aW1lDQp3b3JraW5nIG9uIHRoZSBwcm9i
+bGVtIHdhbnRzIHRvIHVzZSBjYXBhYmlsaXRpZXMuIENBUF9TWVNfUkFXSU8gaXMgbm90DQpzZW1h
+bnRpY2FsbHkgaWRlbnRpY2FsIHRvIHRoZSB0cnVzdGVkIGtlcm5lbCBiaXQuIFRyeWluZyB0byBt
+YWtlIHRoZW0NCnNlbWFudGljYWxseSBpZGVudGljYWwgd2lsbCBicmVhayBleGlzdGluZyB1c2Vy
+c3BhY2UuDQoNCj4gKEFzIGFuIGFzaWRlIHlvdSBtYXkgYWxzbyB0aGVuIHdhbnQgdG8gdGhpbmsg
+YWJvdXQgd2hldGhlciB5b3UgYWxsb3cNCj4gbWVhc3VyZWQgdXNlcnNwYWNlIGVsZW1lbnRzIHRo
+YXQgc2VjdXJlX2ZvcmJpZGRlbiBpcyBjb25zaWRlcmVkIHRvIGJlIDANCj4gZm9yIHNvIHlvdSBj
+YW4gc2lnbiB1c2Vyc3BhY2UgYXBwcyB0aGF0IGFyZSBhbGxvd2VkIHRvIGRvIFJBV0lPKQ0KDQpJ
+J2QgYmUgYW1hemVkIGlmIGFueSBvZiB0aGUgYXBwbGljYXRpb25zIHRoYXQgbmVlZCBSQVdJTyBo
+YXZlIGhhZCBhbnkNCmtpbmQgb2YgbWVhbmluZ2Z1bCBzZWN1cml0eSBhdWRpdCwgd2l0aCB0aGUg
+cG9zc2libGUgZXhjZXB0aW9uIG9mIFggKGFuZA0KdGhlbiB3ZSdkIG5lZWQgdG8gYWRkIHN1cHBv
+cnQgZm9yIHNpZ25lZCBYIG1vZHVsZXMgYW5kIHNpZ24gYWxsIHRoZQ0KRERYZXMgYW5kIHNlcmlv
+dXNseSBqdXN0IG5vKS4gSSd2ZSBubyBvYmplY3Rpb24gdG8gc29tZW9uZSBkb2luZyB0aGF0DQp3
+b3JrIChhbmQgVml2ZWsgZGlkIGEgcGlsZSBvZiBpdCB3aGVuIGxvb2tpbmcgYXQgaW1wbGVtZW50
+aW5nIGtleGVjIHZpYQ0Kc2lnbmVkIHVzZXJzcGFjZSksIGJ1dCBJIGRvbid0IHNlZSBhbnkgcmVh
+bCB1c2UgY2FzZXMgLSBwcmV0dHkgbXVjaA0KZXZlcnlvbmUgdXNpbmcgYml0cyBvZiBSQVdJTyB0
+aGF0IGFyZSBnYXRlZCBpbiB0aGUgdHJ1c3RlZCBrZXJuZWwgY2FzZQ0Kc2hvdWxkIGJlIHVzaW5n
+IGEgcmVhbCBrZXJuZWwgaW50ZXJmYWNlIGluc3RlYWQuDQoNCi0tIA0KTWF0dGhldyBHYXJyZXR0
+IDxtYXR0aGV3LmdhcnJldHRAbmVidWxhLmNvbT4NCg==
