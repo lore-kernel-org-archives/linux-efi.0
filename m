@@ -1,82 +1,71 @@
-From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+From: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 22:08:40 +0000
-Message-ID: <20140314220840.29a12171@alan.etchedpixels.co.uk>
+Date: Fri, 14 Mar 2014 22:15:45 +0000
+Message-ID: <1394835345.1286.22.camel@x230>
 References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
-	<CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
-	<alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
-	<1394686919.25122.2.camel@x230>
-	<CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
-	<alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
-	<1394726363.25122.16.camel@x230>
-	<20140313212450.67f1de8e@alan.etchedpixels.co.uk>
-	<1394746248.27846.3.camel@x230>
-	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
-	<1394762250.6416.24.camel@x230.lan>
-	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
-	<1394801518.6416.38.camel@x230.lan>
-	<20140314170655.0ce398a3@alan.etchedpixels.co.uk>
-	<1394820664.26846.18.camel@x230.mview.int.nebula.com>
-	<20140314214806.54a3d031@alan.etchedpixels.co.uk>
-	<1394834193.1286.11.camel@x230>
+	 <CA+5PVA4RSh3hzJxEjpzHPj8w3uPoEzfg7ySWjB=6RUhAKJTudQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1402281402090.26521@tundra.namei.org>
+	 <1394686919.25122.2.camel@x230>
+	 <CAGXu5jJ_8w7PscwTQG5iVRJ4k4nzvN8oqzAPgV+NExAr9v17EQ@mail.gmail.com>
+	 <alpine.LRH.2.02.1403132031460.11638@tundra.namei.org>
+	 <1394726363.25122.16.camel@x230>
+	 <20140313212450.67f1de8e@alan.etchedpixels.co.uk>
+	 <1394746248.27846.3.camel@x230>
+	 <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	 <1394762250.6416.24.camel@x230.lan>
+	 <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	 <1394801518.6416.38.camel@x230.lan>
+	 <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+	 <1394820664.26846.18.camel@x230.mview.int.nebula.com>
+	 <20140314214806.54a3d031@alan.etchedpixels.co.uk>
+	 <1394834193.1286.11.camel@x230>
+	 <20140314220840.29a12171@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1394834193.1286.11.camel@x230>
+In-Reply-To: <20140314220840.29a12171-mUKnrFFms3BCCTY1wZZT65JpZx93mCW/@public.gmane.org>
+Content-Language: en-US
+Content-ID: <4F2DB0170EF3AA4C810108E9EE2D1B2C-HX+pjaQZbrqcE4WynfumptQqCkab/8FMAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+To: "gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org" <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
 Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 14 Mar 2014 21:56:33 +0000
-Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org> wrote:
-
-> On Fri, 2014-03-14 at 21:48 +0000, One Thousand Gnomes wrote:
-> 
-> > In your particularly implementation maybe you've got a weak setup where
-> > you don't measure down to your initrd. That's a *flaw* in your
-> > implementation. Don't inflict your limitations on others or on the
-> > future. EFI is only one (and not a very strong one at that) implementation
-> > of a 'secure' boot chain. A lot of other systems can not only propogate
-> > measurement and security assertions into their initrd they can propogate
-> > them into their rootfs (yes upgrades are .. exciting, but these kinds of
-> > users will live with that pain).
-> 
-> Signed userspace is not a requirement, and therefore any solution that
-> relies on a signed initrd is inadequate. There are use cases that
-> require verification of the initrd and other levels. This isn't one of
-> them.
-
-The job of the kernel is to solve the general problem. There are lots of
-people who happen to care about verification beyond the kernel so it
-shouldn't be ignored. And they can do do things like load trusted SELinux
-rulesets even if you can't support it in your environment.
-
-> > Even in EFI you can make your kernel or loader check the initrd signature
-> > and the rootfs signature if you want.
-> 
-> Except the initramfs gets built at kernel install time.
-
-Implementation detail for your use case.
-
-> > Correct me if I am wrong but your starting point is "I have a chain of
-> > measurement as far as the kernel I load". Without that I can just go into
-> > grub and 0wn you.
-> 
-> In my use case. But not all implementations will be measuring things -
-> they can assert that the kernel is trustworthy through some other
-> mechanism. This genuinely is about trust, not measurement.
-
-The assertion you attempt to achieve is I believe
-
-"No ring 0 code is executed directly or indirectly that is not measured"
-
-Some of your measuring is EFI boot, some is module signing and then you
-must impose a security model as well.
-
-It's a "measurement" problem if you ask what the rule is - yes ? Getting
-there is not just a measurement problem but your intended result is a
-measurement based rule ?
-
-Alan
+T24gRnJpLCAyMDE0LTAzLTE0IGF0IDIyOjA4ICswMDAwLCBPbmUgVGhvdXNhbmQgR25vbWVzIHdy
+b3RlOg0KPiBPbiBGcmksIDE0IE1hciAyMDE0IDIxOjU2OjMzICswMDAwDQo+IE1hdHRoZXcgR2Fy
+cmV0dCA8bWF0dGhldy5nYXJyZXR0QG5lYnVsYS5jb20+IHdyb3RlOg0KPiA+IFNpZ25lZCB1c2Vy
+c3BhY2UgaXMgbm90IGEgcmVxdWlyZW1lbnQsIGFuZCB0aGVyZWZvcmUgYW55IHNvbHV0aW9uIHRo
+YXQNCj4gPiByZWxpZXMgb24gYSBzaWduZWQgaW5pdHJkIGlzIGluYWRlcXVhdGUuIFRoZXJlIGFy
+ZSB1c2UgY2FzZXMgdGhhdA0KPiA+IHJlcXVpcmUgdmVyaWZpY2F0aW9uIG9mIHRoZSBpbml0cmQg
+YW5kIG90aGVyIGxldmVscy4gVGhpcyBpc24ndCBvbmUgb2YNCj4gPiB0aGVtLg0KPiANCj4gVGhl
+IGpvYiBvZiB0aGUga2VybmVsIGlzIHRvIHNvbHZlIHRoZSBnZW5lcmFsIHByb2JsZW0uIFRoZXJl
+IGFyZSBsb3RzIG9mDQo+IHBlb3BsZSB3aG8gaGFwcGVuIHRvIGNhcmUgYWJvdXQgdmVyaWZpY2F0
+aW9uIGJleW9uZCB0aGUga2VybmVsIHNvIGl0DQo+IHNob3VsZG4ndCBiZSBpZ25vcmVkLiBBbmQg
+dGhleSBjYW4gZG8gZG8gdGhpbmdzIGxpa2UgbG9hZCB0cnVzdGVkIFNFTGludXgNCj4gcnVsZXNl
+dHMgZXZlbiBpZiB5b3UgY2FuJ3Qgc3VwcG9ydCBpdCBpbiB5b3VyIGVudmlyb25tZW50Lg0KDQpU
+aGUgZ2VuZXJhbCBwcm9ibGVtIGluY2x1ZGVzIGhhdmluZyB0byBzdXBwb3J0IHRoaXMgZXZlbiB3
+aXRob3V0IGFuDQpzZWxpbnV4IHBvbGljeS4NCg0KPiA+ID4gRXZlbiBpbiBFRkkgeW91IGNhbiBt
+YWtlIHlvdXIga2VybmVsIG9yIGxvYWRlciBjaGVjayB0aGUgaW5pdHJkIHNpZ25hdHVyZQ0KPiA+
+ID4gYW5kIHRoZSByb290ZnMgc2lnbmF0dXJlIGlmIHlvdSB3YW50Lg0KPiA+IA0KPiA+IEV4Y2Vw
+dCB0aGUgaW5pdHJhbWZzIGdldHMgYnVpbHQgYXQga2VybmVsIGluc3RhbGwgdGltZS4NCj4gDQo+
+IEltcGxlbWVudGF0aW9uIGRldGFpbCBmb3IgeW91ciB1c2UgY2FzZS4NCg0KQW5kIG9uZSB0aGF0
+J3Mgbm90IGdvaW5nIHRvIGNoYW5nZSwgc28gdGhlIGdlbmVyYWwgcHJvYmxlbSBpbmNsdWRlcyBu
+b3QNCnJlbHlpbmcgb24gYSBzaWduZWQgaW5pdHJhbWZzLg0KDQo+ID4gPiBDb3JyZWN0IG1lIGlm
+IEkgYW0gd3JvbmcgYnV0IHlvdXIgc3RhcnRpbmcgcG9pbnQgaXMgIkkgaGF2ZSBhIGNoYWluIG9m
+DQo+ID4gPiBtZWFzdXJlbWVudCBhcyBmYXIgYXMgdGhlIGtlcm5lbCBJIGxvYWQiLiBXaXRob3V0
+IHRoYXQgSSBjYW4ganVzdCBnbyBpbnRvDQo+ID4gPiBncnViIGFuZCAwd24geW91Lg0KPiA+IA0K
+PiA+IEluIG15IHVzZSBjYXNlLiBCdXQgbm90IGFsbCBpbXBsZW1lbnRhdGlvbnMgd2lsbCBiZSBt
+ZWFzdXJpbmcgdGhpbmdzIC0NCj4gPiB0aGV5IGNhbiBhc3NlcnQgdGhhdCB0aGUga2VybmVsIGlz
+IHRydXN0d29ydGh5IHRocm91Z2ggc29tZSBvdGhlcg0KPiA+IG1lY2hhbmlzbS4gVGhpcyBnZW51
+aW5lbHkgaXMgYWJvdXQgdHJ1c3QsIG5vdCBtZWFzdXJlbWVudC4NCj4gDQo+IFRoZSBhc3NlcnRp
+b24geW91IGF0dGVtcHQgdG8gYWNoaWV2ZSBpcyBJIGJlbGlldmUNCj4gDQo+ICJObyByaW5nIDAg
+Y29kZSBpcyBleGVjdXRlZCBkaXJlY3RseSBvciBpbmRpcmVjdGx5IHRoYXQgaXMgbm90IG1lYXN1
+cmVkIg0KDQpOby4gQXMgSSBrZWVwIHBvaW50aW5nIG91dCwgbm90IGFsbCBjb2RlIGlzIG1lYXN1
+cmVkLiBUaGUgZmlybXdhcmUgaXMNCm5vdCByZXF1aXJlZCB0byBtZWFzdXJlIGl0c2VsZi4gQSBw
+YXJ0aWN1bGFyIGltcGxlbWVudGF0aW9uIG1heSBza2lwDQptZWFzdXJpbmcgdGhlIGtlcm5lbCBi
+ZWNhdXNlIGl0IGNhbiBhdHRlc3QgdG8gaXRzIHRydXN0d29ydGh5bmVzcyBpbg0Kc29tZSBvdGhl
+ciB3YXkuIENocm9tZU9TIHdpbGwgbG9hZCB1bm1lYXN1cmVkIGtlcm5lbCBtb2R1bGVzIHByb3Zp
+ZGVkIGl0DQpjYW4gYXR0ZXN0IHRvIHRoZSB0cnVzdHdvcnRoeW5lc3Mgb2YgdGhlIGZpbGVzeXN0
+ZW0gY29udGFpbmluZyB0aGVtLg0KDQotLSANCk1hdHRoZXcgR2FycmV0dCA8bWF0dGhldy5nYXJy
+ZXR0QG5lYnVsYS5jb20+DQo=
