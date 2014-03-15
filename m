@@ -1,79 +1,69 @@
-From: Theodore Ts'o <tytso@mit.edu>
+From: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
 Subject: Re: Trusted kernel patchset for Secure Boot lockdown
-Date: Fri, 14 Mar 2014 19:18:32 -0400
-Message-ID: <20140314231832.GA653@thunk.org>
+Date: Sat, 15 Mar 2014 00:15:42 +0000
+Message-ID: <20140315001542.769cff6c@alan.etchedpixels.co.uk>
 References: <1394746248.27846.3.camel@x230>
- <20140313232140.03bdaac3@alan.etchedpixels.co.uk>
- <1394762250.6416.24.camel@x230.lan>
- <20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
- <1394801518.6416.38.camel@x230.lan>
- <20140314170655.0ce398a3@alan.etchedpixels.co.uk>
- <1394820664.26846.18.camel@x230.mview.int.nebula.com>
- <20140314214806.54a3d031@alan.etchedpixels.co.uk>
- <1394834193.1286.11.camel@x230>
- <20140314220840.29a12171@alan.etchedpixels.co.uk>
+	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	<1394762250.6416.24.camel@x230.lan>
+	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<1394801518.6416.38.camel@x230.lan>
+	<20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+	<1394820664.26846.18.camel@x230.mview.int.nebula.com>
+	<20140314214806.54a3d031@alan.etchedpixels.co.uk>
+	<1394834193.1286.11.camel@x230>
+	<20140314220840.29a12171@alan.etchedpixels.co.uk>
+	<20140314231832.GA653@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140314220840.29a12171@alan.etchedpixels.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-security-module-owner@vger.kernel.org>
+In-Reply-To: <20140314231832.GA653@thunk.org>
+Sender: linux-security-module-owner@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
 Cc: Matthew Garrett <matthew.garrett@nebula.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "jmorris@namei.org" <jmorris@namei.org>, "keescook@chromium.org" <keescook@chromium.org>, "linux-security-module@vger.kernel.org" <linux-security-module@vger.kernel.org>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "jwboyer@fedoraproject.org" <jwboyer@fedoraproject.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "gregkh@linuxfoundation.org" <gregkh@linuxfoundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 14, 2014 at 10:08:40PM +0000, One Thousand Gnomes wrote:
-> > Signed userspace is not a requirement, and therefore any solution that
-> > relies on a signed initrd is inadequate. There are use cases that
-> > require verification of the initrd and other levels. This isn't one of
-> > them.
-> 
-> The job of the kernel is to solve the general problem. There are lots of
-> people who happen to care about verification beyond the kernel so it
-> shouldn't be ignored. And they can do do things like load trusted SELinux
-> rulesets even if you can't support it in your environment.
+> So as far as the narrow question of whether we should accept these
+> patches, I think it's a good thing.  Personally, I'm always going to
+> be disabling UEFI secure boot (even if it doesn't brick my laptop),
+> because for me, the security guarantees it provides isn't worth it.
+> But there will be people who want to be able to install Linux on
+> Windows 8 certified PC's without tweaking BIOS settings, so merging
+> the UEFI secure boot is a good thing, so long as those of use who
+> don't want to have anything to do with UEFI secure boot can disable
+> it.
 
-This is really a question about goals and trust models.  Alan is
-arguing that we should support trust models and goals which go far
-beyond the goals and trust model of the UEFI Forum.
+I definitely think we want the feature and there are a lot of non UEFI
+reasons for this (eg running trusted_kernel() virtual namespaces). I have
+three specific issues
 
-Matthew is, I think, trying to make the argument that his patches
-fulfill the goals that are needed so we can boot Linux distribution
-kernels on UEFI secure boot machines without worrying about Microsoft
-deciding to revoke keys so that Red Hat or SuSE will no longer be able
-to be bootable on desktops that are certified for Windows 8.  And
-while we might want to improve the framework to support other trust
-models later on, supporting distro kernels on Windows 8 certified PC's
-is important enough that we should let these patches into mainline.
+1. The implementation is a mess in part because it propogates more policy
+all over the place that should be separated. Root cause capable() mixes
+policy and activity. Fix suggested in my previous emails (and offer to do
+the work)
 
-Is that a fair summary of the two viewpoints?
+2. It's likely to lead to more bugs and errors because of the way it has
+been done and it doesn't break old code that gets added without
+considering the issue. It fails insecure which is bad. Fixed by doing
+what I suggested (and offered to do)
 
-Personally, I think that we are fortunate that Windows 8 has been
-enough of a train wreck that huge numbers of users have been taking
-Windows 8 systems and upgrading them to Windows 7, and hence the need
-for Distro kernels that can boot on fully locked down Windows 8 PC's.
-But at some point, whether it is a few years or a decade later (if
-Windows 7 lives on as long as XP :-), Windows 7 will be EOL'ed, and
-even before that, UEFI secure boot will be enabled by default.
+3. For things like module options we should be white not blacklisting
+'bad' ones.
 
-Right now, even though Lenovo laptops are shipping with Windows
-8. UEFI secure boot is not made mandatory (although it is on enough to
-brick the laptop when it runs into bugs wwith the UEFI BIOS code,
-sigh).  But sooner or later, UEFI secure boot will be on by default,
-and then if Linux distros don't have kernels where the installer can
-be run without needing to twiddle BIOS settings, it might make it
-harder for the "Year of the Desktop" to come about.
+I've offered to go and fix up the capability stuff - I'm just waiting for
+Matthew to actually confirm the question I specifically asked him - does
+this solve that bit of his problem. If it does great, I'll go and sort
+the capability bits out so we can keep the policy in the right place and
+we don't have the kernel festooned with && !trusted_kernel() everywhere.
 
-So as far as the narrow question of whether we should accept these
-patches, I think it's a good thing.  Personally, I'm always going to
-be disabling UEFI secure boot (even if it doesn't brick my laptop),
-because for me, the security guarantees it provides isn't worth it.
-But there will be people who want to be able to install Linux on
-Windows 8 certified PC's without tweaking BIOS settings, so merging
-the UEFI secure boot is a good thing, so long as those of use who
-don't want to have anything to do with UEFI secure boot can disable
-it.
+There is a question of completeness but its very clear we get there with
+a combination of two things - whitelisting so we catch stuff we missed
+rather than leave holes, and just accepting the reality that it'll take a
+few kernels once its upstream until we get them all.
 
-Regards,
+I care about security, we should do the job properly. We have a
+further magnitude shift in security needs coming that's going to be at
+least equivalent to the scale of shift between the old 'university,
+everyone is nice' internet and today.
 
-					- Ted
+Alan
