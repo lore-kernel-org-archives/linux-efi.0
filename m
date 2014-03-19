@@ -1,92 +1,47 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 11/15] arm64: add EFI stub
-Date: Wed, 19 Mar 2014 12:46:52 -0400
-Message-ID: <1395247612.2967.53.camel@deneb.redhat.com>
-References: <1394750828-16351-1-git-send-email-leif.lindholm@linaro.org>
-	 <1394750828-16351-12-git-send-email-leif.lindholm@linaro.org>
-	 <20140318120919.GG13200@arm.com>
-	 <1395153629.2967.10.camel@deneb.redhat.com>
-	 <20140318182826.GC20497@arm.com>
-	 <1395178831.2967.29.camel@deneb.redhat.com> <20140319105706.GE2214@arm.com>
-	 <1395241998.2967.52.camel@deneb.redhat.com> <20140319160149.GF2214@arm.com>
+From: Florian Weimer <fw-d32yF4oPJVt0XxTmqZlbVQ@public.gmane.org>
+Subject: Re: Trusted kernel patchset for Secure Boot lockdown
+Date: Wed, 19 Mar 2014 18:49:49 +0100
+Message-ID: <87eh1y84ea.fsf@mid.deneb.enyo.de>
+References: <1394746248.27846.3.camel@x230>
+	<20140313232140.03bdaac3@alan.etchedpixels.co.uk>
+	<1394762250.6416.24.camel@x230.lan>
+	<20140314122231.17b9ca8a@alan.etchedpixels.co.uk>
+	<1394801518.6416.38.camel@x230.lan>
+	<20140314170655.0ce398a3@alan.etchedpixels.co.uk>
+	<1394820664.26846.18.camel@x230.mview.int.nebula.com>
+	<20140314214806.54a3d031@alan.etchedpixels.co.uk>
+	<1394834193.1286.11.camel@x230>
+	<20140314220840.29a12171@alan.etchedpixels.co.uk>
+	<20140314231832.GA653@thunk.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140319160149.GF2214-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <20140314231832.GA653-AKGzg7BKzIDYtjvyW6yDsg@public.gmane.org> (Theodore Ts'o's message of
+	"Fri, 14 Mar 2014 19:18:32 -0400")
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Cc: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, "linux-kernel@vger.kernel.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "jmorris@namei.org" <jmorris-gx6/JNMH7DfYtjvyW6yDsg@public.gmane.org>, "keescook@chromium.org" <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "linux-security-module@vger.kernel.org" <linux-security-module-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "akpm@linux-foundation.org" <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "hpa@zytor.com" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "jwboyer@fedoraproject.org" <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, "linux-efi@vger.kernel.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "gregkh@linuxfoundation.org" <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2014-03-19 at 16:01 +0000, Catalin Marinas wrote:
-> On Wed, Mar 19, 2014 at 03:13:18PM +0000, Mark Salter wrote:
-> > On Wed, 2014-03-19 at 10:57 +0000, Catalin Marinas wrote:
-> > > On Tue, Mar 18, 2014 at 09:40:31PM +0000, Mark Salter wrote:
-> > > > On Tue, 2014-03-18 at 18:28 +0000, Catalin Marinas wrote:
-> > > > > If UEFI doesn't handle the caches, the only thing left to EFI_STUB is to
-> > > > > flush by MVA. We don't need to flush the whole DRAM (and I would even
-> > > > > recommend it) but at least the relevant kernel code/data touched with
-> > > > > the MMU disabled.
-> > > > 
-> > > > So, it goes like this:
-> > > > 
-> > > >   1) UEFI calls stub with MMU/Caches on. Stub/kernel can be anywhere.
-> > > >   2) Stub runs and relocates kernel to the desired runtime location
-> > > >      but continues to execute from wherever UEFI loaded it until just
-> > > >      after ExitBootServices().
-> > > >   3) After ExitBootServices, efi_entry() returns relocated entry point
-> > > >      for kernel to efi_stub_entry() in efi-entry.S where the Dcache and
-> > > >      MMU are turned off, the __flush_dcache_all is called, then the
-> > > >      code jumps to the kernel proper entry point.
-> > > > 
-> > > > It isn't clear to me if UEFI does cache flushing at ExitBootServices
-> > > > time, but even so, at least stack use will get cached between then and
-> > > > the kernel entry point. The stub could conceivably get its hands on the
-> > > > EFI memmap and invalidate dcache using address ranges from UEFI memory
-> > > > descriptors so maybe that is the way we should do it.
-> > > 
-> > > I think the stub just needs to flush the relocated kernel image, ensure
-> > > it is sync with the memory. Additional flushing can be done by the
-> > > kernel for bits it writes (like page tables, code patching etc). We can
-> > > enter the kernel with the SCTLR.I bit set, so it can allocate in an
-> > > unified cache already and D-cache maintenance would be needed anyway.
-> > 
-> > How about this?
-> > 
-> > diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-> > index 83bfb72..ed480b2 100644
-> > --- a/arch/arm64/kernel/efi-entry.S
-> > +++ b/arch/arm64/kernel/efi-entry.S
-> > @@ -52,11 +52,19 @@ ENTRY(efi_stub_entry)
-> >  	 * efi_entry() will have relocated the kernel image if necessary
-> >  	 * and we return here with device tree address in x0 and the kernel
-> >  	 * entry point stored at *image_addr. Save those values in registers
-> > -	 * which are preserved by __flush_dcache_all.
-> > +	 * which are callee preserved.
-> >  	 */
-> > -	ldr	x1, [sp, #16]
-> >  	mov	x20, x0
-> > -	mov	x21, x1
-> > +	ldr	x0, [sp, #16]
-> > +	mov	x21, x0
-> 
-> BTW, some comments to make it easier to review the code later about
-> what's at [sp, #16].
+* Theodore Ts'o:
 
-Okay.
+> Right now, even though Lenovo laptops are shipping with Windows
+> 8. UEFI secure boot is not made mandatory (although it is on enough to
+> brick the laptop when it runs into bugs wwith the UEFI BIOS code,
+> sigh).  But sooner or later, UEFI secure boot will be on by default,
+> and then if Linux distros don't have kernels where the installer can
+> be run without needing to twiddle BIOS settings, it might make it
+> harder for the "Year of the Desktop" to come about.
 
-> 
-> > +
-> > +	adrp	x1, _text
-> > +	add	x1, x1, #:lo12:_text
-> > +	adrp	x2, _edata
-> > +	add	x2, x2, #:lo12:_edata
-> > +	sub	x1, x2, x1
-> > +
-> > +	bl	__flush_dcache_area
-> 
-> Looks fine. We also need a "ic ialluis", is any other part of EFI_STUB
-> invalidating the I-cache?
+Windows 8 logo devices already enable Secure Boot by default.
 
-No. I will add it.
+One aspect which makes all this really tricky is that Microsoft is
+watching what we're doing and will keep raising the bar, probably not
+with the intent to lock us out completely, but sufficiently high to
+make things quite annoying.  For example, any certificate-signing
+certificate in the boot process needs to be an EV CA certificate,
+which comes with fairly stringent requirements that are quite costly
+to implement.
+
+So any restrictions we implement as a good-will gesture will
+eventually come back to haunt us.
