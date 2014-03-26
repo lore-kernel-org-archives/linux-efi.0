@@ -1,32 +1,67 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v3 3/5] x86: Call efi_memblock_x86_reserve_range() on
- native EFI platform only
-Date: Wed, 26 Mar 2014 13:57:23 +0000
-Message-ID: <20140326135723.GG24856@console-pimps.org>
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: Re: [PATCH v3 1/5] efi: Add efi_init_ops variable
+Date: Wed, 26 Mar 2014 15:02:17 +0100
+Message-ID: <20140326140217.GO3454@olila.local.net-space.pl>
 References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com>
- <1395781076-12000-4-git-send-email-daniel.kiper@oracle.com>
- <20140326130009.GB24856@console-pimps.org>
- <5332E2B9020000780000255D@nat28.tlf.novell.com>
- <20140326133119.GD24856@console-pimps.org>
- <5332E6AE02000078000025F0@nat28.tlf.novell.com>
- <20140326134845.GN3454@olila.local.net-space.pl>
+ <1395781076-12000-2-git-send-email-daniel.kiper@oracle.com>
+ <20140326125623.GA24856@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140326134845.GN3454-fJNZiO034lp9pOct4yEdx/3oZC3j2Omk@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+In-Reply-To: <20140326125623.GA24856@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com, Tang Liang <liang.tang@oracle.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 26 Mar, at 02:48:45PM, Daniel Kiper wrote:
-> 
-> On my machine this function crashes on Xen so that is why I have changed
-> condition. However, if you say that this issue could be solved in
-> another way I will investigate it further.
+On Wed, Mar 26, 2014 at 12:56:23PM +0000, Matt Fleming wrote:
+> On Tue, 25 Mar, at 09:57:52PM, Daniel Kiper wrote:
+> > Add efi_init_ops variable which allows us to replace
+> > EFI init functions on Xen with its specific stuff.
+> >
+> > This patch is based on Jan Beulich and Tang Liang work.
+> >
+> > Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+> > Signed-off-by: Tang Liang <liang.tang@oracle.com>
+> > ---
+> >  arch/ia64/kernel/efi.c      |   30 +++++++++++++++++++++---------
+> >  arch/x86/platform/efi/efi.c |   18 +++++++++++++-----
+> >  drivers/firmware/efi/efi.c  |   26 ++++++++++++++++++++++++++
+> >  include/linux/efi.h         |    8 ++++++++
+> >  4 files changed, 68 insertions(+), 14 deletions(-)
+>
+> [...]
+>
+> > @@ -1118,6 +1118,14 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+> >  	return 0;
+> >  }
+> >
+> > +struct efi_init_ops efi_init_ops = {
+> > +	.efi_init = efi_init_generic,
+> > +	.efi_reserve_boot_services = efi_reserve_boot_services_generic,
+> > +	.efi_enter_virtual_mode = efi_enter_virtual_mode_generic,
+> > +	.efi_mem_type = efi_mem_type_generic,
+> > +	.efi_mem_attributes = efi_mem_attributes_generic
+> > +};
+>
+> Please don't create another struct of EFI function pointers.
+>
+> After this we'll have 3 global efi structures defintions and 4 global
+> efi objects on x86,
+>
+>   - struct efi_early [in the boot stub]
+>   - struct efi ['efi_phys' before/'efi' after SetVirtualAddressMap()]
+>   - struct efi_init_ops [for the benefit of xen]
 
-Daniel, could you paste the crash? Do you get a stack trace?
+What do you suggest? Should we fill all EFI related structures
+in xen_efi_probe() (called from xen_start_kernel()) and later
+they should be parsed by generic/x86 EFI initialization code?
+I suppose that many variables will have NULL (or something relevant)
+in Xen dom0 and it will require some changes in EFI initialization code.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+> I have a big problem with exposing .efi_reserve_boot_services as an API.
+
+Why? efi_reserve_boot_services() is public right now.
+
+Daniel
