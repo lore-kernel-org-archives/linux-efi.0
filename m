@@ -1,67 +1,57 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH v3 1/5] efi: Add efi_init_ops variable
-Date: Wed, 26 Mar 2014 15:02:17 +0100
-Message-ID: <20140326140217.GO3454@olila.local.net-space.pl>
+From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3 2/5] efi: Export arch_tables variable
+Date: Wed, 26 Mar 2014 15:08:00 +0100
+Message-ID: <20140326140800.GP3454@olila.local.net-space.pl>
 References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com>
- <1395781076-12000-2-git-send-email-daniel.kiper@oracle.com>
- <20140326125623.GA24856@console-pimps.org>
+ <1395781076-12000-3-git-send-email-daniel.kiper@oracle.com>
+ <5332E25F020000780000255A@nat28.tlf.novell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140326125623.GA24856@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com, Tang Liang <liang.tang@oracle.com>
+In-Reply-To: <5332E25F020000780000255A-ce6RLXgGx+vWGUEhTRrCg1aTQe2KTcn/@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 26, 2014 at 12:56:23PM +0000, Matt Fleming wrote:
-> On Tue, 25 Mar, at 09:57:52PM, Daniel Kiper wrote:
-> > Add efi_init_ops variable which allows us to replace
-> > EFI init functions on Xen with its specific stuff.
+On Wed, Mar 26, 2014 at 01:21:19PM +0000, Jan Beulich wrote:
+> >>> On 25.03.14 at 21:57, <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org> wrote:
+> > Export arch_tables variable. Xen init function calls efi_config_init()
+> > which takes it as an argument.
 > >
-> > This patch is based on Jan Beulich and Tang Liang work.
+> > Additionally, put __initdata in place suggested by include/linux/init.h.
+>
+> Which isn't necessarily the most appropriate place.
+
+Why? If comments in include/linux/init.h are not valid they should be changed.
+
+> > --- a/arch/x86/platform/efi/efi.c
+> > +++ b/arch/x86/platform/efi/efi.c
+> > @@ -70,7 +70,7 @@ static efi_system_table_t efi_systab __initdata;
 > >
-> > Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-> > Signed-off-by: Tang Liang <liang.tang@oracle.com>
-> > ---
-> >  arch/ia64/kernel/efi.c      |   30 +++++++++++++++++++++---------
-> >  arch/x86/platform/efi/efi.c |   18 +++++++++++++-----
-> >  drivers/firmware/efi/efi.c  |   26 ++++++++++++++++++++++++++
-> >  include/linux/efi.h         |    8 ++++++++
-> >  4 files changed, 68 insertions(+), 14 deletions(-)
->
-> [...]
->
-> > @@ -1118,6 +1118,14 @@ u64 efi_mem_attributes(unsigned long phys_addr)
-> >  	return 0;
-> >  }
+> >  unsigned long x86_efi_facility;
 > >
-> > +struct efi_init_ops efi_init_ops = {
-> > +	.efi_init = efi_init_generic,
-> > +	.efi_reserve_boot_services = efi_reserve_boot_services_generic,
-> > +	.efi_enter_virtual_mode = efi_enter_virtual_mode_generic,
-> > +	.efi_mem_type = efi_mem_type_generic,
-> > +	.efi_mem_attributes = efi_mem_attributes_generic
-> > +};
+> > -static __initdata efi_config_table_type_t arch_tables[] = {
+> > +efi_config_table_type_t arch_tables[] __initdata = {
 >
-> Please don't create another struct of EFI function pointers.
+> efi_config_table_type_t __initdata arch_tables[] = {
 >
-> After this we'll have 3 global efi structures defintions and 4 global
-> efi objects on x86,
+> would be what I'd recommend.
 >
->   - struct efi_early [in the boot stub]
->   - struct efi ['efi_phys' before/'efi' after SetVirtualAddressMap()]
->   - struct efi_init_ops [for the benefit of xen]
+> > --- a/include/linux/efi.h
+> > +++ b/include/linux/efi.h
+> > @@ -583,6 +583,8 @@ extern struct efi {
+> >  	struct efi_memory_map *memmap;
+> >  } efi;
+> >
+> > +extern efi_config_table_type_t arch_tables[] __initdata;
+>
+> And section placement annotations are bogus on declarations.
 
-What do you suggest? Should we fill all EFI related structures
-in xen_efi_probe() (called from xen_start_kernel()) and later
-they should be parsed by generic/x86 EFI initialization code?
-I suppose that many variables will have NULL (or something relevant)
-in Xen dom0 and it will require some changes in EFI initialization code.
-
-> I have a big problem with exposing .efi_reserve_boot_services as an API.
-
-Why? efi_reserve_boot_services() is public right now.
+Hmmm... I am not sure which approach is better. I saw that
+in many places declarations have annotations. Could you
+point me some docs which states (and explains) that this
+is wrong idea.
 
 Daniel
