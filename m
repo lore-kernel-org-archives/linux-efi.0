@@ -1,42 +1,66 @@
-From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v3 3/5] x86: Call efi_memblock_x86_reserve_range()
- on native EFI platform only
-Date: Wed, 26 Mar 2014 13:39:42 +0000
-Message-ID: <5332E6AE02000078000025F0@nat28.tlf.novell.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v3 5/5] xen: Put EFI machinery in place
+Date: Wed, 26 Mar 2014 13:46:17 +0000
+Message-ID: <20140326134617.GE24856@console-pimps.org>
 References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com>
- <1395781076-12000-4-git-send-email-daniel.kiper@oracle.com>
- <20140326130009.GB24856@console-pimps.org>
- <5332E2B9020000780000255D@nat28.tlf.novell.com>
- <20140326133119.GD24856@console-pimps.org>
+ <1395781076-12000-6-git-send-email-daniel.kiper@oracle.com>
+ <20140326131214.GC24856@console-pimps.org>
+ <5332E4A802000078000025B6@nat28.tlf.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140326133119.GD24856-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ia64-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+In-Reply-To: <5332E4A802000078000025B6@nat28.tlf.novell.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Jan Beulich <JBeulich@suse.com>
+Cc: david.vrabel@citrix.com, ian.campbell@citrix.com, stefano.stabellini@eu.citrix.com, jeremy@goop.org, fenghua.yu@intel.com, matt.fleming@intel.com, tony.luck@intel.com, x86@kernel.org, tglx@linutronix.de, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, Daniel Kiper <daniel.kiper@oracle.com>, konrad.wilk@oracle.com, Tang Liang <liang.tang@oracle.com>, eshelton@pobox.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, hpa@zytor.com
 List-Id: linux-efi@vger.kernel.org
 
->>> On 26.03.14 at 14:31, <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Wed, 26 Mar, at 01:22:49PM, Jan Beulich wrote:
->> >>> On 26.03.14 at 14:00, <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> > 
->> > This could do with a little bit more explanation. Why is it not
->> > necessary to mark the EFI memory map that was passed to the kernel as
->> > reserved in memblock?
->> 
->> Because that's in memory Dom0 doesn't even see: The EFI memory
->> map is visible to the hypervisor only.
+On Wed, 26 Mar, at 01:31:04PM, Jan Beulich wrote:
+> >>> On 26.03.14 at 14:12, <matt@console-pimps.org> wrote:
+> > 
+> > Is there a reason that you can't just populate an efi_system_table_t
+> > object, which could be used by efi_init(), so that we can save you the
+> > trouble of duplicating all of this code?
 > 
-> So where does boot_params.efi_info.efi_memmap point?
+> Would the generic function cope with all other fields being NULL (or
+> equivalent)?
+ 
+I've no idea, but it shouldn't be difficult to make that work. And by
+making it work in the generic code
+
+> >> +/*
+> >> + * Convenience functions to obtain memory types and attributes
+> >> + */
+> >> +static u32 efi_mem_type_xen(unsigned long phys_addr)
+> >> +{
+> >> +	struct xen_platform_op op;
+> >> +	union xenpf_efi_info *info = &op.u.firmware_info.u.efi_info;
+> >> +
+> >> +	op.cmd = XENPF_firmware_info;
+> >> +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> >> +	op.u.firmware_info.index = XEN_FW_EFI_MEM_INFO;
+> >> +	info->mem.addr = phys_addr;
+> >> +	info->mem.size = 0;
+> >> +	return HYPERVISOR_dom0_op(&op) ? 0 : info->mem.type;
+> >> +}
+> > 
+> > Same idea here. Unless you expect the EFI memory map to change at runtime
+> > (and it's not clear to me whether that wouldn't cause other things to
+> > explode) you'd be better off building a struct efi_memory_map and using
+> > the existing generic functions.
 > 
-> If nowhere (i.e. it's NULL) that's no problem because memblock_reserve()
-> handles zero size regions just fine.
+> As said in another reply to this series - the memory map isn't being
+> (and shouldn't be) exposed to Dom0.
+ 
+Right, so you might not necessarily expose the EFI memory map that was
+constructed by the firmware, but it's worth looking at exposing *some*
+boot memory map, e.g. the map of memory before the kernel took control
+in DomU.
 
-That's a question to Daniel - in our implementation (with a separate
-Xen kernel that can't run on bare hardware) boot_params as a whole
-simply doesn't exist.
+Whether the firmware or the kernel builds it doesn't really matter. My
+point is that since we've already got a means of looking in the boot
+memory map for EFI type and EFI attributes, let's use it.
 
-Jan
+-- 
+Matt Fleming, Intel Open Source Technology Center
