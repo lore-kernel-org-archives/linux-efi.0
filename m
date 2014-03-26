@@ -1,32 +1,53 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v3 4/5] xen: Define EFI related stuff
-Date: Wed, 26 Mar 2014 15:34:30 +0000
-Message-ID: <alpine.DEB.2.02.1403261534210.2747@kaball.uk.xensource.com>
-References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com> <1395781076-12000-5-git-send-email-daniel.kiper@oracle.com> <alpine.DEB.2.02.1403261452160.2747@kaball.uk.xensource.com> <5332FF6C02000078000027A5@nat28.tlf.novell.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: [PATCH] Add efi_early_call() macro
+Date: Wed, 26 Mar 2014 10:40:31 -0700
+Message-ID: <CAFECyb_YNCM2Yz3j4_pPcCLqk6u6NjKqEFzy48LfWk+b08barQ@mail.gmail.com>
+References: <20140322110515.GF2815@console-pimps.org>
+	<1395787231-14298-1-git-send-email-roy.franz@linaro.org>
+	<20140326085953.GA2958@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5332FF6C02000078000027A5-ce6RLXgGx+vWGUEhTRrCg1aTQe2KTcn/@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
-Cc: stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Tang Liang <liang.tang-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140326085953.GA2958@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Leif Lindholm <leif.lindholm@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Alan Cox <alan@lxorguk.ukuu.org.uk>, Matthew Garrett <mjg59@srcf.ucam.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 26 Mar 2014, Jan Beulich wrote:
-> >>> On 26.03.14 at 15:58, <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org> wrote:
-> >> +struct xenpf_efi_runtime_call {
-> >> +	uint32_t function;
-> >> +    /*
-> >> +     * This field is generally used for per sub-function flags (defined
-> >> +     * below), except for the XEN_EFI_get_next_high_monotonic_count case,
-> >> +     * where it holds the single returned value.
-> >> +     */
-> >> +	uint32_t misc;
-> >> +	unsigned long status;
-> > 
-> > I realize that this is just the same as xen/include/public/platform.h,
-> > but this field should be xen_ulong_t.
-> 
-> Care to supply a patch to the canonical header?
+On Wed, Mar 26, 2014 at 1:59 AM, Matt Fleming <matt@console-pimps.org> wrote:
+> On Tue, 25 Mar, at 03:40:30PM, Roy Franz wrote:
+>> Add the efi_early_call() macro to invoke functions in the efi_early
+>> structure. Using a macro for these invocations allows the arm32/arm64
+>> architectures to define the macro differently so that they can directly
+>> invoke the boot services functions that are exposed in the efi_early
+>> structure on x86. Prior to the introduction of the efi_early structure
+>> the efi_call_physN macros were used on all architectures and allowed
+>> for this differentiation.
+>>
+>> Signed-off-by: Roy Franz <roy.franz@linaro.org>
+>> ---
+>>  arch/x86/boot/compressed/eboot.c       |    5 +++++
+>>  drivers/firmware/efi/efi-stub-helper.c |   26 +++++++++++++-------------
+>>  2 files changed, 18 insertions(+), 13 deletions(-)
+>
+> Confused.
+>
+> Why have you rewritten the patch that I sent Satuday morning?
+>
+>   https://lkml.org/lkml/2014/3/22/61
+>
+> I don't think your version goes far enough because you've left all the
+> efi_early->call() stuff in eboot.c. So now there's two ways to invoke
+> EFI functions in the x86 boot stub.
+>
+> What's wrong with the patch that I sent?
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
 
-I will.
+Hi Matt,
+
+   Sorry for the confusion - your patch is fine.  I had somehow not noticed
+it on your reply.
+
+Roy
