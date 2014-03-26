@@ -1,47 +1,49 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH v3 3/5] x86: Call efi_memblock_x86_reserve_range() on
- native EFI platform only
-Date: Wed, 26 Mar 2014 14:48:45 +0100
-Message-ID: <20140326134845.GN3454@olila.local.net-space.pl>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v3 5/5] xen: Put EFI machinery in place
+Date: Wed, 26 Mar 2014 13:53:46 +0000
+Message-ID: <20140326135346.GF24856@console-pimps.org>
 References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com>
- <1395781076-12000-4-git-send-email-daniel.kiper@oracle.com>
- <20140326130009.GB24856@console-pimps.org>
- <5332E2B9020000780000255D@nat28.tlf.novell.com>
- <20140326133119.GD24856@console-pimps.org>
- <5332E6AE02000078000025F0@nat28.tlf.novell.com>
+ <1395781076-12000-6-git-send-email-daniel.kiper@oracle.com>
+ <20140326131214.GC24856@console-pimps.org>
+ <5332E4A802000078000025B6@nat28.tlf.novell.com>
+ <20140326134617.GE24856@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ia64-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <5332E6AE02000078000025F0@nat28.tlf.novell.com>
-Sender: linux-ia64-owner@vger.kernel.org
-To: Jan Beulich <JBeulich@suse.com>
-Cc: Matt Fleming <matt@console-pimps.org>, david.vrabel@citrix.com, ian.campbell@citrix.com, stefano.stabellini@eu.citrix.com, jeremy@goop.org, fenghua.yu@intel.com, matt.fleming@intel.com, tony.luck@intel.com, x86@kernel.org, tglx@linutronix.de, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, konrad.wilk@oracle.com, eshelton@pobox.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, hpa@zytor.com
+In-Reply-To: <20140326134617.GE24856-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Tang Liang <liang.tang-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 26, 2014 at 01:39:42PM +0000, Jan Beulich wrote:
-> >>> On 26.03.14 at 14:31, <matt@console-pimps.org> wrote:
-> > On Wed, 26 Mar, at 01:22:49PM, Jan Beulich wrote:
-> >> >>> On 26.03.14 at 14:00, <matt@console-pimps.org> wrote:
-> >> >
-> >> > This could do with a little bit more explanation. Why is it not
-> >> > necessary to mark the EFI memory map that was passed to the kernel as
-> >> > reserved in memblock?
-> >>
-> >> Because that's in memory Dom0 doesn't even see: The EFI memory
-> >> map is visible to the hypervisor only.
-> >
-> > So where does boot_params.efi_info.efi_memmap point?
-> >
-> > If nowhere (i.e. it's NULL) that's no problem because memblock_reserve()
-> > handles zero size regions just fine.
->
-> That's a question to Daniel - in our implementation (with a separate
-> Xen kernel that can't run on bare hardware) boot_params as a whole
-> simply doesn't exist.
+On Wed, 26 Mar, at 01:46:17PM, Matt Fleming wrote:
+> On Wed, 26 Mar, at 01:31:04PM, Jan Beulich wrote:
+> > >>> On 26.03.14 at 14:12, <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> > > 
+> > > Is there a reason that you can't just populate an efi_system_table_t
+> > > object, which could be used by efi_init(), so that we can save you the
+> > > trouble of duplicating all of this code?
+> > 
+> > Would the generic function cope with all other fields being NULL (or
+> > equivalent)?
+>  
+> I've no idea, but it shouldn't be difficult to make that work. And by
+> making it work in the generic code
 
-On my machine this function crashes on Xen so that is why I have changed
-condition. However, if you say that this issue could be solved in
-another way I will investigate it further.
+Guh, hit Send too soon... sorry.
 
-Daniel
+What I was trying to say was that there's a real benefit to keeping all
+these idiosyncrasies, such as "This field may be NULL on some platforms,
+or this field, or that", in one place, because it gives you an immediate
+view of what platforms Linux supports and what assumptions we can make.
+
+It also helps immensely when the time comes to do some refactoring -
+because it's all contained in one central place all the use cases are in
+front of you.
+
+Obviously this approach doesn't work for super-platform specific stuff,
+but it's not clear to me that these patches fall into that category.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
