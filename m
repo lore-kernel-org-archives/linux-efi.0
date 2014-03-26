@@ -1,56 +1,207 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v3 1/5] efi: Add efi_init_ops variable
-Date: Wed, 26 Mar 2014 14:29:04 +0000
-Message-ID: <20140326142904.GI24856@console-pimps.org>
-References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com>
- <1395781076-12000-2-git-send-email-daniel.kiper@oracle.com>
- <20140326125623.GA24856@console-pimps.org>
- <20140326140217.GO3454@olila.local.net-space.pl>
+From: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Subject: Re: [PATCH v3 4/5] xen: Define EFI related stuff
+Date: Wed, 26 Mar 2014 14:58:36 +0000
+Message-ID: <alpine.DEB.2.02.1403261452160.2747@kaball.uk.xensource.com>
+References: <1395781076-12000-1-git-send-email-daniel.kiper@oracle.com> <1395781076-12000-5-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-ia64-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140326140217.GO3454@olila.local.net-space.pl>
+In-Reply-To: <1395781076-12000-5-git-send-email-daniel.kiper@oracle.com>
 Sender: linux-ia64-owner@vger.kernel.org
 To: Daniel Kiper <daniel.kiper@oracle.com>
-Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com
+Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com, Tang Liang <liang.tang@oracle.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 26 Mar, at 03:02:17PM, Daniel Kiper wrote:
-> On Wed, Mar 26, 2014 at 12:56:23PM +0000, Matt Fleming wrote:
-> >
-> > Please don't create another struct of EFI function pointers.
-> >
-> > After this we'll have 3 global efi structures defintions and 4 global
-> > efi objects on x86,
-> >
-> >   - struct efi_early [in the boot stub]
-> >   - struct efi ['efi_phys' before/'efi' after SetVirtualAddressMap()]
-> >   - struct efi_init_ops [for the benefit of xen]
+On Tue, 25 Mar 2014, Daniel Kiper wrote:
+> Define EFI related stuff for Xen.
 > 
-> What do you suggest? Should we fill all EFI related structures
-> in xen_efi_probe() (called from xen_start_kernel()) and later
-> they should be parsed by generic/x86 EFI initialization code?
-> I suppose that many variables will have NULL (or something relevant)
-> in Xen dom0 and it will require some changes in EFI initialization code.
- 
-Yeah, that is what I was thinking. And if we have to make some changes
-to the generic code to accomodate NULL fields, etc, I don't think it's a
-big deal.
-
-> > I have a big problem with exposing .efi_reserve_boot_services as an API.
+> This patch is based on Jan Beulich and Tang Liang work.
 > 
-> Why? efi_reserve_boot_services() is public right now.
+> Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+> Signed-off-by: Tang Liang <liang.tang@oracle.com>
+> Signed-off-by: Jan Beulich <jbeulich@suse.com>
+> ---
+>  include/xen/interface/platform.h |  123 +++++++++++++++++++++++++++++++++++++-
+>  1 file changed, 122 insertions(+), 1 deletion(-)
+> 
+> diff --git a/include/xen/interface/platform.h b/include/xen/interface/platform.h
+> index f1331e3..bb3dfad 100644
+> --- a/include/xen/interface/platform.h
+> +++ b/include/xen/interface/platform.h
+> @@ -108,11 +108,113 @@ struct xenpf_platform_quirk {
+>  };
+>  DEFINE_GUEST_HANDLE_STRUCT(xenpf_platform_quirk_t);
+>  
+> +#define XENPF_efi_runtime_call    49
+> +#define XEN_EFI_get_time                      1
+> +#define XEN_EFI_set_time                      2
+> +#define XEN_EFI_get_wakeup_time               3
+> +#define XEN_EFI_set_wakeup_time               4
+> +#define XEN_EFI_get_next_high_monotonic_count 5
+> +#define XEN_EFI_get_variable                  6
+> +#define XEN_EFI_set_variable                  7
+> +#define XEN_EFI_get_next_variable_name        8
+> +#define XEN_EFI_query_variable_info           9
+> +#define XEN_EFI_query_capsule_capabilities   10
+> +#define XEN_EFI_update_capsule               11
+> +
+> +struct xenpf_efi_runtime_call {
+> +	uint32_t function;
+> +    /*
+> +     * This field is generally used for per sub-function flags (defined
+> +     * below), except for the XEN_EFI_get_next_high_monotonic_count case,
+> +     * where it holds the single returned value.
+> +     */
+> +	uint32_t misc;
+> +	unsigned long status;
 
-Sure it's public, but it isn't implemented on ia64 at all, not even as a
-stub function, and it's only called inside x86 code (the fact that the
-prototype is in include/linux/efi.h is a bit of a bug).
+I realize that this is just the same as xen/include/public/platform.h,
+but this field should be xen_ulong_t.
 
-My concern is that if in we bake into our APIs it's going to be
-difficult in the future to get rid of it or disable it, or at least
-allow people to write code for EFI without caring about it.
 
-Afterall, it's a workaround for buggy firmware.
+> +	union {
+> +#define XEN_EFI_GET_TIME_SET_CLEARS_NS 0x00000001
+> +	struct {
+> +		struct xenpf_efi_time {
+> +			uint16_t year;
+> +			uint8_t month;
+> +			uint8_t day;
+> +			uint8_t hour;
+> +			uint8_t min;
+> +			uint8_t sec;
+> +			uint32_t ns;
+> +			int16_t tz;
+> +			uint8_t daylight;
+> +		} time;
+> +		uint32_t resolution;
+> +		uint32_t accuracy;
+> +	} get_time;
+> +
+> +	struct xenpf_efi_time set_time;
+> +
+> +#define XEN_EFI_GET_WAKEUP_TIME_ENABLED 0x00000001
+> +#define XEN_EFI_GET_WAKEUP_TIME_PENDING 0x00000002
+> +	struct xenpf_efi_time get_wakeup_time;
+> +
+> +#define XEN_EFI_SET_WAKEUP_TIME_ENABLE      0x00000001
+> +#define XEN_EFI_SET_WAKEUP_TIME_ENABLE_ONLY 0x00000002
+> +	struct xenpf_efi_time set_wakeup_time;
+> +
+> +#define XEN_EFI_VARIABLE_NON_VOLATILE       0x00000001
+> +#define XEN_EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
+> +#define XEN_EFI_VARIABLE_RUNTIME_ACCESS     0x00000004
+> +	struct {
+> +		GUEST_HANDLE(void) name;  /* UCS-2/UTF-16 string */
+> +		unsigned long size;
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Same here
+
+
+> +		GUEST_HANDLE(void) data;
+> +		struct xenpf_efi_guid {
+> +			uint32_t data1;
+> +			uint16_t data2;
+> +			uint16_t data3;
+> +			uint8_t data4[8];
+> +			} vendor_guid;
+> +		} get_variable, set_variable;
+> +
+> +	struct {
+> +		unsigned long size;
+
+Same here
+
+
+> +		GUEST_HANDLE(void) name;  /* UCS-2/UTF-16 string */
+> +		struct xenpf_efi_guid vendor_guid;
+> +		} get_next_variable_name;
+> +
+> +	struct {
+> +		uint32_t attr;
+> +		uint64_t max_store_size;
+> +		uint64_t remain_store_size;
+> +		uint64_t max_size;
+> +		} query_variable_info;
+> +
+> +	struct {
+> +		GUEST_HANDLE(void) capsule_header_array;
+> +		unsigned long capsule_count;
+
+Same here
+
+
+> +		uint64_t max_capsule_size;
+> +		unsigned int reset_type;
+
+I would prefer this to be explicitly sized
+
+
+> +		} query_capsule_capabilities;
+> +
+> +	struct {
+> +		GUEST_HANDLE(void) capsule_header_array;
+> +		unsigned long capsule_count;
+
+Same here
+
+
+> +		uint64_t sg_list; /* machine address */
+> +		} update_capsule;
+> +	} u;
+> +};
+> +DEFINE_GUEST_HANDLE_STRUCT(xenpf_efi_runtime_call);
+> +
+> +#define  XEN_FW_EFI_VERSION        0
+> +#define  XEN_FW_EFI_CONFIG_TABLE   1
+> +#define  XEN_FW_EFI_VENDOR         2
+> +#define  XEN_FW_EFI_MEM_INFO       3
+> +#define  XEN_FW_EFI_RT_VERSION     4
+> +
+>  #define XENPF_firmware_info       50
+>  #define XEN_FW_DISK_INFO          1 /* from int 13 AH=08/41/48 */
+>  #define XEN_FW_DISK_MBR_SIGNATURE 2 /* from MBR offset 0x1b8 */
+>  #define XEN_FW_VBEDDC_INFO        3 /* from int 10 AX=4f15 */
+> +#define XEN_FW_EFI_INFO           4 /* from EFI */
+>  #define XEN_FW_KBD_SHIFT_FLAGS    5 /* Int16, Fn02: Get keyboard shift flags. */
+> +
+>  struct xenpf_firmware_info {
+>  	/* IN variables. */
+>  	uint32_t type;
+> @@ -143,7 +245,25 @@ struct xenpf_firmware_info {
+>  			/* must refer to 128-byte buffer */
+>  			GUEST_HANDLE(uchar) edid;
+>  		} vbeddc_info; /* XEN_FW_VBEDDC_INFO */
+> -
+> +		union xenpf_efi_info {
+> +			uint32_t version;
+> +			struct {
+> +				uint64_t addr;   /* EFI_CONFIGURATION_TABLE */
+> +				uint32_t nent;
+> +			} cfg;
+> +			struct {
+> +				uint32_t revision;
+> +				uint32_t bufsz;  /* input, in bytes */
+> +				GUEST_HANDLE(void) name;
+> +				/* UCS-2/UTF-16 string */
+> +				} vendor;
+> +			struct {
+> +				uint64_t addr;
+> +				uint64_t size;
+> +				uint64_t attr;
+> +				uint32_t type;
+> +				} mem;
+> +		} efi_info; /* XEN_FW_EFI_INFO */
+>  		uint8_t kbd_shift_flags; /* XEN_FW_KBD_SHIFT_FLAGS */
+>  	} u;
+>  };
+> @@ -362,6 +482,7 @@ struct xen_platform_op {
+>  		struct xenpf_read_memtype      read_memtype;
+>  		struct xenpf_microcode_update  microcode;
+>  		struct xenpf_platform_quirk    platform_quirk;
+> +		struct xenpf_efi_runtime_call  efi_runtime_call;
+>  		struct xenpf_firmware_info     firmware_info;
+>  		struct xenpf_enter_acpi_sleep  enter_acpi_sleep;
+>  		struct xenpf_change_freq       change_freq;
+> -- 
+> 1.7.10.4
+> 
