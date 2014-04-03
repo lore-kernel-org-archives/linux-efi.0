@@ -1,57 +1,55 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH 01/12] Add support for indicating that the booted kernel
- is externally trusted
-Date: Mon, 31 Mar 2014 16:49:27 +0200
-Message-ID: <20140331144927.GA21805@xo-6d-61-c0.localdomain>
-References: <1393445473-15068-1-git-send-email-matthew.garrett@nebula.com>
- <1393445473-15068-2-git-send-email-matthew.garrett@nebula.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: eboot.c regression allows boot, from v3.7 on- no boot with UEFI,
+ only legacy, bisect results
+Date: Thu, 3 Apr 2014 22:04:44 +0100
+Message-ID: <20140403210444.GB5222@console-pimps.org>
+References: <CAEigmK-pY+9XF4V-KRZrbiO8GY5Fs6scE+Ehm1zc5T8V2RiB9g@mail.gmail.com>
+ <20140403210342.GA5222@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-security-module-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1393445473-15068-2-git-send-email-matthew.garrett@nebula.com>
-Sender: linux-security-module-owner@vger.kernel.org
-To: Matthew Garrett <matthew.garrett@nebula.com>
-Cc: linux-kernel@vger.kernel.org, keescook@chromium.org, gregkh@linuxfoundation.org, hpa@zytor.com, linux-efi@vger.kernel.org, jmorris@namei.org, linux-security-module@vger.kernel.org
+In-Reply-To: <20140403210342.GA5222-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel McLellan <daniel.mclellan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed 2014-02-26 15:11:02, Matthew Garrett wrote:
-> Provide a boolean runtime configuration option for restricting userspace's
-> ability to modify the running kernel. This can be used when some external
-> validation of the kernel's state has been performed.
+(Adding addresses for real this time... )
 
-I still don't like the idea, but...
+On Thu, 03 Apr, at 10:03:42PM, Matt Fleming wrote:
+> (Adding linux-efi and correct Matthew's address)
+> 
+> On Fri, 28 Mar, at 04:08:36PM, Daniel McLellan wrote:
+> > System: Hewlett-Packard product: HP EliteBook 2570p
+> > CPU~Dual core Intel Core i7-3520M CPU (-HT-MCP-)
+> > Kernel: 3.12.4-2-hplove x86_64 (64 bit) Desktop: Enlightenment 0.18.99.18202
+> > Distro: Arch Linux
+> > 
+> > 
+> > I believe this issue is common to only a few iterations of ivy bridge
+> > 
+> > https://bbs.archlinux.org/viewtopic.php?id=156670
+> > https://bugs.archlinux.org/task/33745?project=1
+> > 
+> > I had been patching eboot.c to v3.7 with the attached
+> > efi_hp_boot.patch, but due to the recent changes in eboot.c (in v3.13)
+> > I decided to bisect, and identified the following:
+> > 
+> > # first bad commit: [dd5fc854de5fd37adfcef8a366cd21a55aa01d3d] EFI:
+> > Stash ROMs if they're not in the PCI BAR
+> > 
+> > My next step is diffing the eboot.c from v3.13.
+> > 
+> > or would a better path be to check for ivy bridge?
+> 
+> Daniel, could you try booting a recent kernel, without your patch
+> applied and with the earlyprintk=efi,keep kernel parameter.
+> 
+> Meanwhile I'm going to try and reproduce this error.
+> 
+> -- 
+> Matt Fleming, Intel Open Source Technology Center
 
-> +Once enabled. trusted kernel support may not be disabled without rebooting
-> +the system.
-
-"enabled,"
-
-> @@ -3091,6 +3091,14 @@ static inline void security_audit_rule_free(void *lsmrule)
->  #endif /* CONFIG_SECURITY */
->  #endif /* CONFIG_AUDIT */
->  
-> +#ifdef CONFIG_SECURITY_TRUSTED_KERNEL
-> +extern bool get_trusted_kernel(void);
-> +extern int set_trusted_kernel(bool new_trusted_kernel);
-> +#else
-> +static inline bool get_trusted_kernel(void) { return 0; }
-> +static inline int set_trusted_kernel(bool new_trusted_kernel) { return 0; }
-> +#endif /* CONFIG_TRUSTED_KERNEL */
-
-comment does not match ifdef. (And _SECURITY is really superfluous here, maybe shorter
-option would be better?)
-
-> +	length = -EINVAL;
-> +	if (sscanf(page, "%d", &new_trusted_kernel) != 1)
-> +		goto out;
-> +
-> +	length = set_trusted_kernel(!!new_trusted_kernel);
-
-If someone writes 2 to the sysfs, it would be better to return einval than trying
-to second guess him...
-
-								Pavel
 -- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Matt Fleming, Intel Open Source Technology Center
