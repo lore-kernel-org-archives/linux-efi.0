@@ -1,100 +1,111 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v3 10/10] efi/arm64: ignore dtb= when UEFI SecureBoot is enabled
-Date: Fri,  4 Apr 2014 19:45:13 +0100
-Message-ID: <1396637113-22790-11-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v3 09/10] doc: arm: add UEFI support documentation
+Date: Fri,  4 Apr 2014 19:45:12 +0100
+Message-ID: <1396637113-22790-10-git-send-email-leif.lindholm@linaro.org>
 References: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 In-Reply-To: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-doc-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Matt Fleming <matt.fleming@intel.com>
+Cc: linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Rob Landley <rob@landley.net>, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+This patch provides documentation of the [U]EFI runtime service and
+configuration features for the arm architecture.
 
-Loading unauthenticated FDT blobs directly from storage is a security hazard,
-so this should only be allowed when running with UEFI Secure Boot disabled.
+Cc: Rob Landley <rob@landley.net>
+Cc: linux-doc@vger.kernel.org
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Matt Fleming <matt.fleming@intel.com>
+Acked-by: Grant Likely <grant.likely@linaro.org>
 ---
- drivers/firmware/efi/arm-stub.c        |   15 +++++++++++----
- drivers/firmware/efi/efi-stub-helper.c |   24 ++++++++++++++++++++++++
- 2 files changed, 35 insertions(+), 4 deletions(-)
+ Documentation/arm/00-INDEX |    2 ++
+ Documentation/arm/uefi.txt |   64 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 66 insertions(+)
+ create mode 100644 Documentation/arm/uefi.txt
 
-diff --git a/drivers/firmware/efi/arm-stub.c b/drivers/firmware/efi/arm-stub.c
-index b9b7c00..c8988b2 100644
---- a/drivers/firmware/efi/arm-stub.c
-+++ b/drivers/firmware/efi/arm-stub.c
-@@ -145,7 +145,7 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
- 	/* addr/point and size pairs for memory management*/
- 	unsigned long initrd_addr;
- 	u64 initrd_size = 0;
--	unsigned long fdt_addr;  /* Original DTB */
-+	unsigned long fdt_addr = 0;  /* Original DTB */
- 	u64 fdt_size = 0;  /* We don't get size from configuration table */
- 	char *cmdline_ptr = NULL;
- 	int cmdline_size = 0;
-@@ -197,9 +197,13 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
- 		goto fail_free_image;
- 	}
- 
--	/* Load a device tree from the configuration table, if present. */
--	fdt_addr = (uintptr_t)get_fdt(sys_table);
--	if (!fdt_addr) {
-+	/*
-+	 * Unauthenticated device tree data is a security hazard, so
-+	 * ignore 'dtb=' unless UEFI Secure Boot is disabled.
-+	 */
-+	if (efi_secureboot_enabled(sys_table)) {
-+		pr_efi(sys_table, "UEFI Secure Boot is enabled.\n");
-+	} else {
- 		status = handle_cmdline_files(sys_table, image, cmdline_ptr,
- 					      "dtb=",
- 					      ~0UL, (unsigned long *)&fdt_addr,
-@@ -210,6 +214,9 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
- 			goto fail_free_cmdline;
- 		}
- 	}
-+	if (!fdt_addr)
-+		/* Look for a device tree configuration table entry. */
-+		fdt_addr = (uintptr_t)get_fdt(sys_table);
- 
- 	status = handle_cmdline_files(sys_table, image, cmdline_ptr,
- 				      "initrd=", dram_base + SZ_512M,
-diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 998b884..8f8b538 100644
---- a/drivers/firmware/efi/efi-stub-helper.c
-+++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -632,3 +632,27 @@ static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 	*cmd_line_len = options_bytes;
- 	return (char *)cmdline_addr;
- }
+diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
+index a94090c..3b08bc2 100644
+--- a/Documentation/arm/00-INDEX
++++ b/Documentation/arm/00-INDEX
+@@ -46,5 +46,7 @@ swp_emulation
+ 	- SWP/SWPB emulation handler/logging description
+ tcm.txt
+ 	- ARM Tightly Coupled Memory
++uefi.txt
++	- [U]EFI configuration and runtime services documentation
+ vlocks.txt
+ 	- Voting locks, low-level mechanism relying on memory system atomic writes.
+diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
+new file mode 100644
+index 0000000..d60030a
+--- /dev/null
++++ b/Documentation/arm/uefi.txt
+@@ -0,0 +1,64 @@
++UEFI, the Unified Extensible Firmware Interface, is a specification
++governing the behaviours of compatible firmware interfaces. It is
++maintained by the UEFI Forum - http://www.uefi.org/.
 +
-+static int __init efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
-+{
-+	static efi_guid_t const var_guid __initconst = EFI_GLOBAL_VARIABLE_GUID;
-+	static efi_char16_t const var_name[] __initconst = {
-+		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
++UEFI is an evolution of its predecessor 'EFI', so the terms EFI and
++UEFI are used somewhat interchangeably in this document and associated
++source code. As a rule, anything new uses 'UEFI', whereas 'EFI' refers
++to legacy code or specifications.
 +
-+	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
-+	unsigned long size = sizeof(u8);
-+	efi_status_t status;
-+	u8 val;
++UEFI support in Linux
++=====================
++Booting on a platform with firmware compliant with the UEFI specification
++makes it possible for the kernel to support additional features:
++- UEFI Runtime Services
++- Retrieving various configuration information through the standardised
++  interface of UEFI configuration tables. (ACPI, SMBIOS, ...)
 +
-+	status = efi_call_phys5(f_getvar, (efi_char16_t *)var_name,
-+				(efi_guid_t *)&var_guid, NULL, &size, &val);
++For actually enabling [U]EFI support, enable:
++- CONFIG_EFI=y
++- CONFIG_EFI_VARS=y or m
 +
-+	switch (status) {
-+	case EFI_SUCCESS:
-+		return val;
-+	case EFI_NOT_FOUND:
-+		return 0;
-+	default:
-+		return 1;
-+	}
-+}
++The implementation depends on receiving information about the UEFI environment
++in a Flattened Device Tree (FDT) - so is only available with CONFIG_OF.
++
++UEFI stub
++=========
++The "stub" is a feature that extends the Image/zImage into a valid UEFI
++PE/COFF executable, including a loader application that makes it possible to
++load the kernel directly from the UEFI shell, boot menu, or one of the
++lightweight bootloaders like Gummiboot or rEFInd.
++
++The kernel image built with stub support remains a valid kernel image for
++booting in non-UEFI environments.
++
++UEFI kernel support on ARM
++==========================
++UEFI kernel support on the ARM architectures (arm and arm64) is only available
++when boot is performed through the stub.
++
++When booting in UEFI mode, the stub deletes any memory nodes from a provided DT.
++Instead, the kernel reads the UEFI memory map.
++
++The stub populates the FDT /chosen node with (and the kernel scans for) the
++following parameters:
++________________________________________________________________________________
++Name                      | Size   | Description
++================================================================================
++linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-start     | 64-bit | Physical address of the UEFI memory map,
++                          |        | populated by the UEFI GetMemoryMap() call.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
++                          |        | pointed to in previous entry.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
++                          |        | memory map.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
++--------------------------------------------------------------------------------
++linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
++--------------------------------------------------------------------------------
++
++For verbose debug messages, specify 'uefi_debug' on the kernel command line.
 -- 
 1.7.10.4
+
