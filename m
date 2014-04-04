@@ -1,88 +1,180 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v3 02/10] doc: efi-stub.txt updates for ARM
-Date: Fri,  4 Apr 2014 19:45:05 +0100
-Message-ID: <1396637113-22790-3-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v3 04/10] arm64: Add function to create identity mappings
+Date: Fri,  4 Apr 2014 19:45:07 +0100
+Message-ID: <1396637113-22790-5-git-send-email-leif.lindholm@linaro.org>
 References: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: Roy Franz <roy.franz@linaro.org>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>
+Cc: linux-kernel@vger.kernel.org, Mark Salter <msalter@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Roy Franz <roy.franz@linaro.org>
+From: Mark Salter <msalter@redhat.com>
 
-Update efi-stub.txt documentation to be more general
-and not x86 specific.  Add ARM only "dtb=" command
-line option description.
+At boot time, before switching to a virtual UEFI memory map, firmware
+expects UEFI memory and IO regions to be identity mapped whenever
+kernel makes runtime services calls. The existing early boot code
+creates an identity map of kernel text/data but this is not sufficient
+for UEFI. This patch adds a create_id_mapping() function which reuses
+the core code of the existing create_mapping().
 
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
+Signed-off-by: Mark Salter <msalter@redhat.com>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Acked-by: Grant Likely <grant.likely@linaro.org>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
 ---
- Documentation/efi-stub.txt |   27 ++++++++++++++++++++-------
- 1 file changed, 20 insertions(+), 7 deletions(-)
+ arch/arm64/include/asm/mmu.h |    2 ++
+ arch/arm64/mm/mmu.c          |   65 ++++++++++++++++++++++++++++++------------
+ 2 files changed, 49 insertions(+), 18 deletions(-)
 
-diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-index c628788..26be7b0 100644
---- a/Documentation/efi-stub.txt
-+++ b/Documentation/efi-stub.txt
-@@ -1,13 +1,16 @@
- 			  The EFI Boot Stub
- 		     ---------------------------
+diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
+index f600d40..29ed1d8 100644
+--- a/arch/arm64/include/asm/mmu.h
++++ b/arch/arm64/include/asm/mmu.h
+@@ -28,5 +28,7 @@ extern void paging_init(void);
+ extern void setup_mm_for_reboot(void);
+ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
+ extern void init_mem_pgprot(void);
++/* create an identity mapping for memory (or io if map_io is true) */
++extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
  
--On the x86 platform, a bzImage can masquerade as a PE/COFF image,
--thereby convincing EFI firmware loaders to load it as an EFI
--executable. The code that modifies the bzImage header, along with the
--EFI-specific entry point that the firmware loader jumps to are
--collectively known as the "EFI boot stub", and live in
-+On the x86 and ARM platforms, a kernel zImage/bzImage can masquerade
-+as a PE/COFF image, thereby convincing EFI firmware loaders to load
-+it as an EFI executable. The code that modifies the bzImage header,
-+along with the EFI-specific entry point that the firmware loader
-+jumps to are collectively known as the "EFI boot stub", and live in
- arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
--respectively.
-+respectively. For ARM the EFI stub is implemented in
-+arch/arm/boot/compressed/efi-header.S and
-+arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
-+between architectures is in drivers/firmware/efi/efi-stub-helper.c.
+ #endif
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 6b7e895..357956a 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -168,7 +168,8 @@ static void __init *early_alloc(unsigned long sz)
+ }
  
- By using the EFI boot stub it's possible to boot a Linux kernel
- without the use of a conventional EFI boot loader, such as grub or
-@@ -23,7 +26,9 @@ The bzImage located in arch/x86/boot/bzImage must be copied to the EFI
- System Partition (ESP) and renamed with the extension ".efi". Without
- the extension the EFI firmware loader will refuse to execute it. It's
- not possible to execute bzImage.efi from the usual Linux file systems
--because EFI firmware doesn't have support for them.
-+because EFI firmware doesn't have support for them. For ARM the
-+arch/arm/boot/zImage should be copied to the system partition, and it
-+may not need to be renamed.
+ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
+-				  unsigned long end, unsigned long pfn)
++				  unsigned long end, unsigned long pfn,
++				  pgprot_t prot)
+ {
+ 	pte_t *pte;
  
+@@ -180,16 +181,28 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
  
- **** Passing kernel parameters from the EFI shell
-@@ -63,3 +68,11 @@ Notice how bzImage.efi can be specified with a relative path. That's
- because the image we're executing is interpreted by the EFI shell,
- which understands relative paths, whereas the rest of the command line
- is passed to bzImage.efi.
+ 	pte = pte_offset_kernel(pmd, addr);
+ 	do {
+-		set_pte(pte, pfn_pte(pfn, PAGE_KERNEL_EXEC));
++		set_pte(pte, pfn_pte(pfn, prot));
+ 		pfn++;
+ 	} while (pte++, addr += PAGE_SIZE, addr != end);
+ }
+ 
+ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+-				  unsigned long end, phys_addr_t phys)
++				  unsigned long end, phys_addr_t phys,
++				  int map_io)
+ {
+ 	pmd_t *pmd;
+ 	unsigned long next;
++	pmdval_t prot_sect;
++	pgprot_t prot_pte;
 +
++	if (map_io) {
++		prot_sect = PMD_TYPE_SECT | PMD_SECT_AF |
++			    PMD_ATTRINDX(MT_DEVICE_nGnRE);
++		prot_pte = __pgprot(PROT_DEVICE_nGnRE);
++	} else {
++		prot_sect = prot_sect_kernel;
++		prot_pte = PAGE_KERNEL_EXEC;
++	}
+ 
+ 	/*
+ 	 * Check for initial section mappings in the pgd/pud and remove them.
+@@ -205,7 +218,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+ 		/* try section mapping first */
+ 		if (((addr | next | phys) & ~SECTION_MASK) == 0) {
+ 			pmd_t old_pmd =*pmd;
+-			set_pmd(pmd, __pmd(phys | prot_sect_kernel));
++			set_pmd(pmd, __pmd(phys | prot_sect));
+ 			/*
+ 			 * Check for previous table entries created during
+ 			 * boot (__create_page_tables) and flush them.
+@@ -213,21 +226,23 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+ 			if (!pmd_none(old_pmd))
+ 				flush_tlb_all();
+ 		} else {
+-			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys));
++			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys),
++				       prot_pte);
+ 		}
+ 		phys += next - addr;
+ 	} while (pmd++, addr = next, addr != end);
+ }
+ 
+ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
+-				  unsigned long end, unsigned long phys)
++				  unsigned long end, unsigned long phys,
++				  int map_io)
+ {
+ 	pud_t *pud = pud_offset(pgd, addr);
+ 	unsigned long next;
+ 
+ 	do {
+ 		next = pud_addr_end(addr, end);
+-		alloc_init_pmd(pud, addr, next, phys);
++		alloc_init_pmd(pud, addr, next, phys, map_io);
+ 		phys += next - addr;
+ 	} while (pud++, addr = next, addr != end);
+ }
+@@ -236,30 +251,44 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
+  * Create the page directory entries and any necessary page tables for the
+  * mapping specified by 'md'.
+  */
+-static void __init create_mapping(phys_addr_t phys, unsigned long virt,
+-				  phys_addr_t size)
++static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
++				    unsigned long virt, phys_addr_t size,
++				    int map_io)
+ {
+ 	unsigned long addr, length, end, next;
+-	pgd_t *pgd;
+-
+-	if (virt < VMALLOC_START) {
+-		pr_warning("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
+-			   phys, virt);
+-		return;
+-	}
+ 
+ 	addr = virt & PAGE_MASK;
+ 	length = PAGE_ALIGN(size + (virt & ~PAGE_MASK));
+ 
+-	pgd = pgd_offset_k(addr);
+ 	end = addr + length;
+ 	do {
+ 		next = pgd_addr_end(addr, end);
+-		alloc_init_pud(pgd, addr, next, phys);
++		alloc_init_pud(pgd, addr, next, phys, map_io);
+ 		phys += next - addr;
+ 	} while (pgd++, addr = next, addr != end);
+ }
+ 
++static void __init create_mapping(phys_addr_t phys, unsigned long virt,
++				  phys_addr_t size)
++{
++	if (virt < VMALLOC_START) {
++		pr_warn("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
++			phys, virt);
++		return;
++	}
++	__create_mapping(pgd_offset_k(virt & PAGE_MASK), phys, virt, size, 0);
++}
 +
-+**** The "dtb=" option
++void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
++{
++	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
++		pr_warn("BUG: not creating id mapping for 0x%016llx\n", addr);
++		return;
++	}
++	__create_mapping(&idmap_pg_dir[pgd_index(addr)],
++			 addr, addr, size, map_io);
++}
 +
-+For the ARM architecture, we also need to be able to provide a device
-+tree to the kernel. This is done with the "dtb=" command line option,
-+and is processed in the same manner as the "initrd=" option that is
-+described above.
+ static void __init map_mem(void)
+ {
+ 	struct memblock_region *reg;
 -- 
 1.7.10.4
