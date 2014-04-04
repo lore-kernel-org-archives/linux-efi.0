@@ -1,167 +1,82 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 3/5] efi: x86: Improve cmdline conversion
-Date: Fri,  4 Apr 2014 13:25:48 +0100
-Message-ID: <1396614350-20889-4-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH 4/5] efi: Add shared printk wrapper for consistent prefixing
+Date: Fri,  4 Apr 2014 13:25:49 +0100
+Message-ID: <1396614350-20889-5-git-send-email-leif.lindholm@linaro.org>
 References: <1396614350-20889-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1396614350-20889-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Improve the conversion of the UTF-16 EFI command line
-to UTF-8 for passing to the kernel.
+Add a wrapper for printk to standardize the prefix for informational and
+error messages from the EFI stub.
 
 Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/boot/compressed/eboot.c       |    3 +-
- drivers/firmware/efi/efi-stub-helper.c |   91 ++++++++++++++++++++++++--------
- 2 files changed, 70 insertions(+), 24 deletions(-)
+ drivers/firmware/efi/efi-stub-helper.c |   13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 1e61461..255d2aa 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1086,8 +1086,7 @@ struct boot_params *make_boot_params(struct efi_config *c)
- 	hdr->type_of_loader = 0x21;
- 
- 	/* Convert unicode cmdline to ascii */
--	cmdline_ptr = efi_convert_cmdline_to_ascii(sys_table, image,
--						   &options_size);
-+	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
- 	if (!cmdline_ptr)
- 		goto fail;
- 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
 diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/efi-stub-helper.c
-index 61230cb..3cc5ebe 100644
+index 3cc5ebe..183289c 100644
 --- a/drivers/firmware/efi/efi-stub-helper.c
 +++ b/drivers/firmware/efi/efi-stub-helper.c
-@@ -503,52 +503,99 @@ static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+@@ -33,6 +33,9 @@ static void efi_printk(efi_system_table_t *sys_table_arg, char *str)
+ 	}
  }
  
- /*
-- * Convert the unicode UEFI command line to ASCII to pass to kernel.
-+ * Get the number of UTF-8 bytes corresponding to an UTF-16 character.
-+ * This overestimates for surrogates, but that is okay.
-+ */
-+static int efi_utf8_bytes(u16 c)
-+{
-+	return 1 + (c >= 0x80) + (c >= 0x800);
-+}
++#define pr_efi(sys_table, msg)     efi_printk(sys_table, "EFI stub: "msg)
++#define pr_efi_err(sys_table, msg) efi_printk(sys_table, "EFI stub: ERROR: "msg)
 +
-+/*
-+ * Convert an UTF-16 string, not necessarily null terminated, to UTF-8.
-+ */
-+static u8 *efi_utf16_to_utf8(u8 *dst, const u16 *src, int n)
-+{
-+	unsigned int c;
-+
-+	while (n--) {
-+		c = *src++;
-+		if (n && c >= 0xd800 && c <= 0xdbff &&
-+		    *src >= 0xdc00 && *src <= 0xdfff) {
-+			c = 0x10000 + ((c & 0x3ff) << 10) + (*src & 0x3ff);
-+			src++;
-+			n--;
-+		}
-+		if (c >= 0xd800 && c <= 0xdfff)
-+			c = 0xfffd; /* Unmatched surrogate */
-+		if (c < 0x80) {
-+			*dst++ = c;
-+			continue;
-+		}
-+		if (c < 0x800) {
-+			*dst++ = 0xc0 + (c >> 6);
-+			goto t1;
-+		}
-+		if (c < 0x10000) {
-+			*dst++ = 0xe0 + (c >> 12);
-+			goto t2;
-+		}
-+		*dst++ = 0xf0 + (c >> 18);
-+		*dst++ = 0x80 + ((c >> 12) & 0x3f);
-+t2:
-+		*dst++ = 0x80 + ((c >> 6) & 0x3f);
-+t1:
-+		*dst++ = 0x80 + (c & 0x3f);
-+	}
-+
-+	return dst;
-+}
-+
-+/*
-+ * Do proper conversion from UTF-16 to UTF-8
-  * Size of memory allocated return in *cmd_line_len.
-  * Returns NULL on error.
-  */
--static char *efi_convert_cmdline_to_ascii(efi_system_table_t *sys_table_arg,
--				      efi_loaded_image_t *image,
--				      int *cmd_line_len)
-+static char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
-+				 efi_loaded_image_t *image,
-+				 int *cmd_line_len)
- {
--	u16 *s2;
-+	const u16 *s2;
- 	u8 *s1 = NULL;
- 	unsigned long cmdline_addr = 0;
--	int load_options_size = image->load_options_size / 2; /* ASCII */
--	void *options = image->load_options;
--	int options_size = 0;
-+	int load_options_chars = image->load_options_size / 2; /* UTF-16 */
-+	const u16 *options = image->load_options;
-+	int options_bytes = 0;	/* UTF-8 bytes */
-+	int options_chars = 0;	/* UTF-16 chars */
- 	efi_status_t status;
--	int i;
- 	u16 zero = 0;
  
- 	if (options) {
- 		s2 = options;
--		while (*s2 && *s2 != '\n' && options_size < load_options_size) {
--			s2++;
--			options_size++;
-+		while (options_chars < load_options_chars
-+		       && *s2 && *s2 != '\n') {
-+			options_bytes += efi_utf8_bytes(*s2++);
-+			options_chars++;
+ static efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 				       efi_memory_desc_t **map,
+@@ -310,7 +313,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				nr_files * sizeof(*files), (void **)&files);
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "Failed to alloc mem for file handle list\n");
++		pr_efi_err(sys_table_arg, "Failed to alloc mem for file handle list\n");
+ 		goto fail;
+ 	}
+ 
+@@ -374,13 +377,13 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 		status = efi_high_alloc(sys_table_arg, file_size_total, 0x1000,
+ 				    &file_addr, max_addr);
+ 		if (status != EFI_SUCCESS) {
+-			efi_printk(sys_table_arg, "Failed to alloc highmem for files\n");
++			pr_efi_err(sys_table_arg, "Failed to alloc highmem for files\n");
+ 			goto close_handles;
  		}
+ 
+ 		/* We've run out of free low memory. */
+ 		if (file_addr > max_addr) {
+-			efi_printk(sys_table_arg, "We've run out of free low memory\n");
++			pr_efi_err(sys_table_arg, "We've run out of free low memory\n");
+ 			status = EFI_INVALID_PARAMETER;
+ 			goto free_file_total;
+ 		}
+@@ -401,7 +404,7 @@ static efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 						       &chunksize,
+ 						       (void *)addr);
+ 				if (status != EFI_SUCCESS) {
+-					efi_printk(sys_table_arg, "Failed to read file\n");
++					pr_efi_err(sys_table_arg, "Failed to read file\n");
+ 					goto free_file_total;
+ 				}
+ 				addr += chunksize;
+@@ -486,7 +489,7 @@ static efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 				       &new_addr);
+ 	}
+ 	if (status != EFI_SUCCESS) {
+-		efi_printk(sys_table_arg, "ERROR: Failed to allocate usable memory for kernel.\n");
++		pr_efi_err(sys_table_arg, "ERROR: Failed to allocate usable memory for kernel.\n");
+ 		return status;
  	}
  
--	if (options_size == 0) {
--		/* No command line options, so return empty string*/
--		options_size = 1;
-+	if (!options_chars) {
-+		/* No command line options, so return empty string */
- 		options = &zero;
- 	}
- 
--	options_size++;  /* NUL termination */
-+	options_bytes++;  /* NUL termination */
- 
--	status = efi_low_alloc(sys_table_arg, options_size, 0, &cmdline_addr);
-+	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
- 	if (status != EFI_SUCCESS)
- 		return NULL;
- 
- 	s1 = (u8 *)cmdline_addr;
--	s2 = (u16 *)options;
--
--	for (i = 0; i < options_size - 1; i++)
--		*s1++ = *s2++;
-+	s2 = (const u16 *)options;
- 
-+	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
- 	*s1 = '\0';
- 
--	*cmd_line_len = options_size;
-+	*cmd_line_len = options_bytes;
- 	return (char *)cmdline_addr;
- }
 -- 
 1.7.10.4
