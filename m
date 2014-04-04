@@ -1,79 +1,81 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 00/10] arm64: UEFI support
-Date: Fri,  4 Apr 2014 19:45:03 +0100
-Message-ID: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v3 07/10] doc: arm64: add description of EFI stub support
+Date: Fri,  4 Apr 2014 19:45:10 +0100
+Message-ID: <1396637113-22790-8-git-send-email-leif.lindholm@linaro.org>
+References: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Mark Salter <msalter@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, linux-doc@vger.kernel.org, Rob Landley <rob@landley.net>
 List-Id: linux-efi@vger.kernel.org
 
-This set adds support for UEFI to the arm64 port - a stub loader, as
-well as runtime services support for efivars.
+From: Mark Salter <msalter@redhat.com>
 
-It depends on some core EFI patches currently in linux-next.
+Add explanation of arm64 EFI stub and kernel image header changes
+needed to masquerade as a PE/COFF application.
 
-This includes bits shared between arm and arm64 support.
-Remaining bits required for arm support will be submitted separately.
+Signed-off-by: Mark Salter <msalter@redhat.com>
+Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+Acked-by: Grant Likely <grant.likely@linaro.org>
+CC: linux-doc@vger.kernel.org
+CC: Rob Landley <rob@landley.net>
+---
+ Documentation/arm64/booting.txt |    4 ++++
+ Documentation/efi-stub.txt      |   12 +++++++++---
+ 2 files changed, 13 insertions(+), 3 deletions(-)
 
-Changes from previous version:
-- Enter_virtual_mode() is now an early initcall.
-- UEFI Reserved regions now preserved.
-- Bugfix for dtb= support with SecureBoot.
-- Stub now flushes instruction cache by address for kernel image area.
-- CONFIG_EFI_STUB merged into CONFIG_EFI since they are interdependent.
-- EFI_DEVICE_TREE_GUID renamed DEVICE_TREE_GUID.
-- Minor cleanups.
-
-Ard Biesheuvel (1):
-  efi/arm64: ignore dtb= when UEFI SecureBoot is enabled
-
-Leif Lindholm (1):
-  doc: arm: add UEFI support documentation
-
-Mark Salter (6):
-  lib: add fdt_empty_tree.c
-  efi: add helper function to get UEFI params from FDT
-  arm64: Add function to create identity mappings
-  arm64: efi: add EFI stub
-  doc: arm64: add description of EFI stub support
-  arm64: add EFI runtime services
-
-Roy Franz (2):
-  doc: efi-stub.txt updates for ARM
-  efi: Add shared FDT related functions for ARM/ARM64
-
- Documentation/arm/00-INDEX             |    2 +
- Documentation/arm/uefi.txt             |   64 +++++
- Documentation/arm64/booting.txt        |    4 +
- Documentation/efi-stub.txt             |   33 ++-
- arch/arm64/Kconfig                     |   21 ++
- arch/arm64/include/asm/efi.h           |   14 +
- arch/arm64/include/asm/mmu.h           |    2 +
- arch/arm64/kernel/Makefile             |    3 +
- arch/arm64/kernel/efi-entry.S          |  100 +++++++
- arch/arm64/kernel/efi-stub.c           |   97 +++++++
- arch/arm64/kernel/efi.c                |  469 ++++++++++++++++++++++++++++++++
- arch/arm64/kernel/head.S               |  112 ++++++++
- arch/arm64/kernel/setup.c              |    5 +
- arch/arm64/mm/mmu.c                    |   65 +++--
- drivers/firmware/efi/Kconfig           |    7 +
- drivers/firmware/efi/arm-stub.c        |  255 +++++++++++++++++
- drivers/firmware/efi/efi-stub-helper.c |   24 ++
- drivers/firmware/efi/efi.c             |   79 ++++++
- drivers/firmware/efi/fdt.c             |  269 ++++++++++++++++++
- include/linux/efi.h                    |   12 +
- lib/Makefile                           |    3 +-
- lib/fdt_empty_tree.c                   |    2 +
- 22 files changed, 1616 insertions(+), 26 deletions(-)
- create mode 100644 Documentation/arm/uefi.txt
- create mode 100644 arch/arm64/include/asm/efi.h
- create mode 100644 arch/arm64/kernel/efi-entry.S
- create mode 100644 arch/arm64/kernel/efi-stub.c
- create mode 100644 arch/arm64/kernel/efi.c
- create mode 100644 drivers/firmware/efi/arm-stub.c
- create mode 100644 drivers/firmware/efi/fdt.c
- create mode 100644 lib/fdt_empty_tree.c
-
+diff --git a/Documentation/arm64/booting.txt b/Documentation/arm64/booting.txt
+index a9691cc..aa95d38c 100644
+--- a/Documentation/arm64/booting.txt
++++ b/Documentation/arm64/booting.txt
+@@ -85,6 +85,10 @@ The decompressed kernel image contains a 64-byte header as follows:
+ Header notes:
+ 
+ - code0/code1 are responsible for branching to stext.
++- when booting through EFI, code0/code1 are initially skipped.
++  res5 is an offset to the PE header and the PE header has the EFI
++  entry point (efi_stub_entry). When the stub has done its work, it
++  jumps to code0 to resume the normal boot process.
+ 
+ The image must be placed at the specified offset (currently 0x80000)
+ from the start of the system RAM and called there. The start of the
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index 26be7b0..7747024 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -12,6 +12,11 @@ arch/arm/boot/compressed/efi-header.S and
+ arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
+ between architectures is in drivers/firmware/efi/efi-stub-helper.c.
+ 
++For arm64, there is no compressed kernel support, so the Image itself
++masquerades as a PE/COFF image and the EFI stub is linked into the
++kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
++and arch/arm64/kernel/efi-stub.c.
++
+ By using the EFI boot stub it's possible to boot a Linux kernel
+ without the use of a conventional EFI boot loader, such as grub or
+ elilo. Since the EFI boot stub performs the jobs of a boot loader, in
+@@ -28,7 +33,8 @@ the extension the EFI firmware loader will refuse to execute it. It's
+ not possible to execute bzImage.efi from the usual Linux file systems
+ because EFI firmware doesn't have support for them. For ARM the
+ arch/arm/boot/zImage should be copied to the system partition, and it
+-may not need to be renamed.
++may not need to be renamed. Similarly for arm64, arch/arm64/boot/Image
++should be copied but not necessarily renamed.
+ 
+ 
+ **** Passing kernel parameters from the EFI shell
+@@ -72,7 +78,7 @@ is passed to bzImage.efi.
+ 
+ **** The "dtb=" option
+ 
+-For the ARM architecture, we also need to be able to provide a device
+-tree to the kernel. This is done with the "dtb=" command line option,
++For the ARM and arm64 architectures, we also need to be able to provide a
++device tree to the kernel. This is done with the "dtb=" command line option,
+ and is processed in the same manner as the "initrd=" option that is
+ described above.
 -- 
 1.7.10.4
+
