@@ -1,55 +1,36 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: eboot.c regression allows boot, from v3.7 on- no boot with UEFI,
- only legacy, bisect results
-Date: Thu, 3 Apr 2014 22:04:44 +0100
-Message-ID: <20140403210444.GB5222@console-pimps.org>
-References: <CAEigmK-pY+9XF4V-KRZrbiO8GY5Fs6scE+Ehm1zc5T8V2RiB9g@mail.gmail.com>
- <20140403210342.GA5222@console-pimps.org>
+Subject: Re: [PATCH 0/5] x86/efi: Implement FPU context save/restore
+Date: Fri, 4 Apr 2014 12:11:35 +0100
+Message-ID: <20140404111135.GE5222@console-pimps.org>
+References: <1395958243-14458-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140403210342.GA5222-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1395958243-14458-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel McLellan <daniel.mclellan-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-(Adding addresses for real this time... )
+On Thu, 27 Mar, at 03:10:38PM, Ricardo Neri wrote:
+> It may be possible that EFI firmware wants to use the FPU. Thus, in such a case,
+> the kernel EFI runtime services need to make sure that they save and restore the
+> FPU context.
+> 
+> Additionally, several FPU internal functions require alternatives to be in place
+> when running. Some of the FPU context save/restore instances that this series
+> implements may occur early during boot; before the alternatives have run.
+> Several FPU internal functions are updated to use the alternatives-safe variant
+> of static_cpu_has. The performance penalty is negligible as the impacted
+> functions are not performance-critical.
+> 
+> In order to prepare to implement the FPU context save/restore, this series also
+> reworks many of the efi_call macros. The code will also be more readable and
+> continue to be reusable between x86_64 and i386.
 
-On Thu, 03 Apr, at 10:03:42PM, Matt Fleming wrote:
-> (Adding linux-efi and correct Matthew's address)
-> 
-> On Fri, 28 Mar, at 04:08:36PM, Daniel McLellan wrote:
-> > System: Hewlett-Packard product: HP EliteBook 2570p
-> > CPU~Dual core Intel Core i7-3520M CPU (-HT-MCP-)
-> > Kernel: 3.12.4-2-hplove x86_64 (64 bit) Desktop: Enlightenment 0.18.99.18202
-> > Distro: Arch Linux
-> > 
-> > 
-> > I believe this issue is common to only a few iterations of ivy bridge
-> > 
-> > https://bbs.archlinux.org/viewtopic.php?id=156670
-> > https://bugs.archlinux.org/task/33745?project=1
-> > 
-> > I had been patching eboot.c to v3.7 with the attached
-> > efi_hp_boot.patch, but due to the recent changes in eboot.c (in v3.13)
-> > I decided to bisect, and identified the following:
-> > 
-> > # first bad commit: [dd5fc854de5fd37adfcef8a366cd21a55aa01d3d] EFI:
-> > Stash ROMs if they're not in the PCI BAR
-> > 
-> > My next step is diffing the eboot.c from v3.13.
-> > 
-> > or would a better path be to check for ivy bridge?
-> 
-> Daniel, could you try booting a recent kernel, without your patch
-> applied and with the earlyprintk=efi,keep kernel parameter.
-> 
-> Meanwhile I'm going to try and reproduce this error.
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+Thanks Ricardo, I've picked these up. I'll merge them into my 'next'
+branch once the merge window closes.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
