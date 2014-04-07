@@ -1,177 +1,60 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v3 03/10] efi: add helper function to get UEFI params from FDT
-Date: Fri,  4 Apr 2014 19:45:06 +0100
-Message-ID: <1396637113-22790-4-git-send-email-leif.lindholm@linaro.org>
-References: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1396637113-22790-1-git-send-email-leif.lindholm@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Mark Salter <msalter@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Matt Fleming <matt.fleming@intel.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 3/5] efi: x86: Improve cmdline conversion
+Date: Mon, 7 Apr 2014 14:19:12 +0100
+Message-ID: <20140407131912.GG5222@console-pimps.org>
+References: <1396614350-20889-1-git-send-email-leif.lindholm@linaro.org>
+ <1396614350-20889-4-git-send-email-leif.lindholm@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1396614350-20889-4-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Salter <msalter@redhat.com>
+On Fri, 04 Apr, at 01:25:48PM, Leif Lindholm wrote:
+> From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> 
+> Improve the conversion of the UTF-16 EFI command line
+> to UTF-8 for passing to the kernel.
+> 
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-ARM and ARM64 architectures use the device tree to pass UEFI parameters
-from stub to kernel. These parameters are things known to the stub but
-not discoverable by the kernel after the stub calls ExitBootSerives().
-There is a helper function in:
+This Signed-off-by chain looks a little wonky because it reads as though
+the patch was sent by Roy to Peter, who sent it to Leif. Not only that,
+I don't have a record of Peter using his zytor.com account to submit
+this patch, only his linux.intel.com address.
 
-   drivers/firmware/efi/fdt.c
+*rummage* *rummage*.... this is what I have in my inbox,
 
-which the stub uses to add the UEFI parameters to the device tree.
-This patch adds a complimentary helper function which UEFI runtime
-support may use to retrieve the parameters from the device tree.
-If an architecture wants to use this helper, it should select
-CONFIG_UEFI_PARAMS_FROM_FDT.
+    From 7d6cf630c1adbb9787a24c2994230373c2b20a8f Mon Sep 17 00:00:00 2001
+    From: "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+    Date: Fri, 20 Sep 2013 09:55:39 -0500
+    Subject: [PATCH] efi: Handle arbitrary Unicode characters
 
-Signed-off-by: Mark Salter <msalter@redhat.com>
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Matt Fleming <matt.fleming@intel.com>
----
- drivers/firmware/efi/Kconfig |    7 ++++
- drivers/firmware/efi/efi.c   |   79 ++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h          |    9 +++++
- 3 files changed, 95 insertions(+)
+    Instead of truncating UTF-16 assuming all characters is ASCII,
+    properly convert it to UTF-8.
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 1e75f48..d3fe28d 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -47,6 +47,13 @@ config EFI_RUNTIME_MAP
- 
- 	  See also Documentation/ABI/testing/sysfs-firmware-efi-runtime-map.
- 
-+config UEFI_PARAMS_FROM_FDT
-+	bool
-+	help
-+	  Select this config option from the architecture Kconfig if
-+	  the EFI runtime support gets system table address, memory
-+          map address, and other parameters from the device tree.
-+
- endmenu
- 
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index af20f17..ece6197 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -20,6 +20,8 @@
- #include <linux/init.h>
- #include <linux/device.h>
- #include <linux/efi.h>
-+#include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/io.h>
- 
- struct efi __read_mostly efi = {
-@@ -318,3 +320,80 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 
- 	return 0;
- }
-+
-+#ifdef CONFIG_UEFI_PARAMS_FROM_FDT
-+
-+#define UEFI_PARAM(name, prop, field)			   \
-+	{						   \
-+		{ name },				   \
-+		{ prop },				   \
-+		offsetof(struct efi_fdt_params, field),    \
-+		FIELD_SIZEOF(struct efi_fdt_params, field) \
-+	}
-+
-+static __initdata struct {
-+	const char name[32];
-+	const char propname[32];
-+	int offset;
-+	int size;
-+} dt_params[] = {
-+	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-+};
-+
-+struct param_info {
-+	int verbose;
-+	void *params;
-+};
-+
-+static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-+				       int depth, void *data)
-+{
-+	struct param_info *info = data;
-+	void *prop, *dest;
-+	unsigned long len;
-+	u64 val;
-+	int i;
-+
-+	if (depth != 1 ||
-+	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
-+		return 0;
-+
-+	pr_info("Getting parameters from FDT:\n");
-+
-+	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-+		if (!prop) {
-+			pr_err("Can't find %s in device tree!\n",
-+			       dt_params[i].name);
-+			return 0;
-+		}
-+		dest = info->params + dt_params[i].offset;
-+
-+		val = of_read_number(prop, len / sizeof(u32));
-+
-+		if (dt_params[i].size == sizeof(u32))
-+			*(u32 *)dest = val;
-+		else
-+			*(u64 *)dest = val;
-+
-+		if (info->verbose)
-+			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-+				dt_params[i].size * 2, val);
-+	}
-+	return 1;
-+}
-+
-+int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-+{
-+	struct param_info info;
-+
-+	info.verbose = verbose;
-+	info.params = params;
-+
-+	return of_scan_flat_dt(fdt_find_uefi_params, &info);
-+}
-+#endif /* CONFIG_UEFI_PARAMS_FROM_FDT */
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 82d0abb..4f52ac6 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -664,6 +664,14 @@ struct efi_memory_map {
- 	unsigned long desc_size;
- };
- 
-+struct efi_fdt_params {
-+	u64 system_table;
-+	u64 mmap;
-+	u32 mmap_size;
-+	u32 desc_size;
-+	u32 desc_ver;
-+};
-+
- typedef struct {
- 	u32 revision;
- 	u32 parent_handle;
-@@ -861,6 +869,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- extern void efi_get_time(struct timespec *now);
- extern int efi_set_rtc_mmss(const struct timespec *now);
- extern void efi_reserve_boot_services(void);
-+extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
- extern struct efi_memory_map memmap;
- 
- /* Iterate through an efi_memory_map */
+    Signed-off-by: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+    ---
+     arch/x86/boot/compressed/eboot.c       |  3 +-
+     drivers/firmware/efi/efi-stub-helper.c | 89 ++++++++++++++++++++++++++--------
+     2 files changed, 71 insertions(+), 21 deletions(-)
+
+It looks like some unnecessary patch munging has gone on here. Now if
+Roy has modified Peter's patch in some way, that's fine, but it needs to
+be called out in the SoB chain, e.g.
+
+    Signed-off-by: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+    [ Add func foobar() and refactored code for XXX ]
+    Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+    Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+Make sense?
+
 -- 
-1.7.10.4
+Matt Fleming, Intel Open Source Technology Center
