@@ -1,42 +1,59 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: df36ac1bc2a16 ("pstore: Don't allow high traffic options on
- fragile devices")
-Date: Thu, 10 Apr 2014 20:57:24 +0200
-Message-ID: <20140410185724.GC4704@pd.tnic>
-References: <20140410181503.GA4704@pd.tnic>
- <3908561D78D1C84285E8C5FCA982C28F31E2465C@ORSMSX106.amr.corp.intel.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fixes
+Date: Fri, 11 Apr 2014 08:16:22 +0100
+Message-ID: <20140411071622.GB17021@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F31E2465C@ORSMSX106.amr.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Luck, Tony" <tony.luck@intel.com>
-Cc: Matt Fleming <matt@console-pimps.org>, linux-efi <linux-efi@vger.kernel.org>, lkml <linux-kernel@vger.kernel.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Apr 10, 2014 at 06:34:34PM +0000, Luck, Tony wrote:
-> Speed is also a factor ... waiting for flash to update for each
-> printk() would mess up timing so much that you might not see the
-> problem you are chasing.
+Guys, please pull the following. One of the fixes is for a regression
+introduced during the merge window. The other two are bugs that have
+existed in the EFI boot stub for a while, but which have only just been
+reported.
 
-Gaah, there's that too. I guess nvram access speeds slower than in the
-msec range (I'm looking at my printk timestamps) are no good for us.
+I'm going to take care of submitting the later two to stable separately
+because they won't apply cleanly as-is.
 
-> A better EFI trick for this would be "capsules". They live in regular
-> RAM and BIOS firmware does stuff with them at warm reset time. Matt
-> has been looking at them - but BIOS support for them seems sketchy to
-> none right now.
+The following changes since commit 204b0a1a4b92612c957a042df1a3be0e9cc79391:
 
-Hmm, I'm wondering whether we could put a bunch of sanity checks into
-fwts to run on a box and check needed capsules functionality before
-logging to one.
+  x86, efi: Abstract x86 efi_early calls (2014-03-26 11:30:03 -0700)
 
-Matt, looks like we have ourselves a new project. :-)
+are available in the git repository at:
 
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 47514c996fac5e6f13ef3a4c5e23f1c5cffabb7b:
+
+  efi: Pass correct file handle to efi_file_{read,close} (2014-04-10 21:20:03 +0100)
+
+----------------------------------------------------------------
+ * Fix EFI boot regression introduced during the merge window where the
+   firmware was reading random values from the stack because we were
+   passing a pointer to the wrong object type.
+
+ * Kernel corruption has been reported when booting with the EFI boot
+   stub which was tracked down to setting a bogus value for
+   bp->hdr.code32_start, resulting in corruption during relocation.
+
+ * Olivier Martin reported that the wrong file handles were being passed
+   to efi_file_(read|close), which works for x86 by luck due to the way
+   that the FAT driver is implemented, but doesn't work on ARM.
+
+----------------------------------------------------------------
+Matt Fleming (3):
+      x86/efi: Fix boot failure with EFI stub
+      x86/efi: Correct EFI boot stub use of code32_start
+      efi: Pass correct file handle to efi_file_{read,close}
+
+ arch/x86/boot/compressed/eboot.c       | 19 ++++++++++---------
+ arch/x86/boot/compressed/head_32.S     |  8 ++------
+ arch/x86/boot/compressed/head_64.S     |  9 +++------
+ drivers/firmware/efi/efi-stub-helper.c |  6 +++---
+ 4 files changed, 18 insertions(+), 24 deletions(-)
 -- 
-Regards/Gruss,
-    Boris.
-
-Sent from a fat crate under my desk. Formatting is fine.
---
+Matt Fleming, Intel Open Source Technology Center
