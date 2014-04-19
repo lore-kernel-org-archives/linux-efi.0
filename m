@@ -1,66 +1,93 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fixes
-Date: Fri, 11 Apr 2014 10:27:16 +0200
-Message-ID: <20140411082716.GC15418@gmail.com>
-References: <20140411071622.GB17021@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v3.16
+Date: Sat, 19 Apr 2014 11:06:53 +0100
+Message-ID: <20140419100653.GA26088@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140411071622.GB17021-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+Hi folks,
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+Please pull the following changes for v3.16. I'd like to get these in
+early so that they've got plenty of time to bake in linux-next. In
+particular, the ARM folks have had a hard time getting the generic EFI
+cleanups/improvements picked up via other trees.
 
-> Guys, please pull the following. One of the fixes is for a regression
-> introduced during the merge window. The other two are bugs that have
-> existed in the EFI boot stub for a while, but which have only just been
-> reported.
-> 
-> I'm going to take care of submitting the later two to stable separately
-> because they won't apply cleanly as-is.
-> 
-> The following changes since commit 204b0a1a4b92612c957a042df1a3be0e9cc79391:
-> 
->   x86, efi: Abstract x86 efi_early calls (2014-03-26 11:30:03 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 47514c996fac5e6f13ef3a4c5e23f1c5cffabb7b:
-> 
->   efi: Pass correct file handle to efi_file_{read,close} (2014-04-10 21:20:03 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix EFI boot regression introduced during the merge window where the
->    firmware was reading random values from the stack because we were
->    passing a pointer to the wrong object type.
-> 
->  * Kernel corruption has been reported when booting with the EFI boot
->    stub which was tracked down to setting a bogus value for
->    bp->hdr.code32_start, resulting in corruption during relocation.
-> 
->  * Olivier Martin reported that the wrong file handles were being passed
->    to efi_file_(read|close), which works for x86 by luck due to the way
->    that the FAT driver is implemented, but doesn't work on ARM.
-> 
-> ----------------------------------------------------------------
-> Matt Fleming (3):
->       x86/efi: Fix boot failure with EFI stub
->       x86/efi: Correct EFI boot stub use of code32_start
->       efi: Pass correct file handle to efi_file_{read,close}
-> 
->  arch/x86/boot/compressed/eboot.c       | 19 ++++++++++---------
->  arch/x86/boot/compressed/head_32.S     |  8 ++------
->  arch/x86/boot/compressed/head_64.S     |  9 +++------
->  drivers/firmware/efi/efi-stub-helper.c |  6 +++---
->  4 files changed, 18 insertions(+), 24 deletions(-)
+Obviously by taking these through tip we're creating a dependency with
+whatever tree the ARM patches live in. Do we need to inform Stephen
+Rothwell explicitly of this dependency? How should we handle things when
+the v3.16 merge window opens?
 
-Pulled, thanks a lot Matt!
+The following changes since commit c9eaa447e77efe77b7fa4c953bd62de8297fd6c5:
 
-	Ingo
+  Linux 3.15-rc1 (2014-04-13 14:18:35 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to e33655a386ed3b26ad36fb97a47ebb1c2ca1e928:
+
+  efivars: Add compatibility code for compat tasks (2014-04-17 13:53:53 +0100)
+
+----------------------------------------------------------------
+ * Generic EFI cleanups to help with the pending ARM/ARM64 EFI boot stub
+   by reducing code duplication - Roy Franz, Leif Lindholm, Mark Salter
+
+ * Swap to a single efi_call* implementation to reduce code duplication
+
+ * Perform full FPU context saving/restoring where needed before making
+   calls into the firmware - Ricardo Neri
+
+ * efivars compat support to allow 32-bit userland to access the EFI
+   variables via the sysfs efivars interface when running with a 64-bit
+   kernel
+
+----------------------------------------------------------------
+H. Peter Anvin (1):
+      efi: x86: Handle arbitrary Unicode characters
+
+Leif Lindholm (1):
+      efi: efi-stub-helper cleanup
+
+Mark Salter (1):
+      efi: create memory map iteration helper
+
+Matt Fleming (7):
+      x86/efi: Delete most of the efi_call* macros
+      x86, fpu: Extend the use of static_cpu_has_safe
+      efivars: Use local variables instead of a pointer dereference
+      efivars: Check size of user object
+      efivars: Stop passing a struct argument to efivar_validate()
+      efivars: Refactor sanity checking code into separate function
+      efivars: Add compatibility code for compat tasks
+
+Ricardo Neri (3):
+      x86/efi: Implement a __efi_call_virt macro
+      x86/efi: Save and restore FPU context around efi_calls (x86_64)
+      x86/efi: Save and restore FPU context around efi_calls (i386)
+
+Roy Franz (2):
+      efi: Add shared printk wrapper for consistent prefixing
+      efi: Add get_dram_base() helper function
+
+ arch/x86/boot/compressed/eboot.c       |   3 +-
+ arch/x86/boot/compressed/head_64.S     |   2 +-
+ arch/x86/include/asm/efi.h             | 100 ++++++-----------
+ arch/x86/include/asm/fpu-internal.h    |  10 +-
+ arch/x86/platform/efi/efi.c            |  48 ++++-----
+ arch/x86/platform/efi/efi_stub_64.S    |  81 +-------------
+ arch/x86/platform/uv/bios_uv.c         |   2 +-
+ drivers/firmware/efi/efi-stub-helper.c | 144 ++++++++++++++++++-------
+ drivers/firmware/efi/efivars.c         | 192 +++++++++++++++++++++++++++------
+ drivers/firmware/efi/vars.c            |  30 +++---
+ include/linux/efi.h                    |  12 ++-
+ 11 files changed, 361 insertions(+), 263 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
