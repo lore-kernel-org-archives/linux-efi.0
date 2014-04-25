@@ -1,31 +1,87 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] ignore ,keep for efi earlyprintk
-Date: Fri, 25 Apr 2014 12:53:45 +0100
-Message-ID: <20140425115345.GC26088@console-pimps.org>
-References: <20140424093658.GA7158@dhcp-16-198.nay.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140424093658.GA7158-je1gSBvt1Tc/CGXRbJeUwh/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: [PATCH v2 00/10] arm64: UEFI support
+Date: Fri, 25 Apr 2014 17:09:04 +0100
+Message-ID: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Cc: matt.fleming@intel.com, catalin.marinas@arm.com, msalter@redhat.com, grant.likely@linaro.org, roy.franz@linaro.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 24 Apr, at 05:36:58PM, Dave Young wrote:
-> earlyprint=efi,keep results a kernel hang after "Freeing unused kernel memory"
- 
-Are you sure it hangs and it's not just that nothing is output to the
-console after that point?
+This set adds support for UEFI to the arm64 port - a stub loader, as
+well as runtime services support for efivars.
 
-> Actually efi earlyprintk is using __init functions such as early_ioremap etc.
-> Thus efi earlyconsole can not be kept.
- 
-Urgh, good point, that's a bug. However I'm sure I've had this working
-in the past and have in fact used it to debug stuff.
+It depends on some core EFI patches currently in linux-next.
 
-Could you try and fix this up so it works with 'keep'?
+This includes bits shared between arm and arm64 support.
+Remaining bits required for arm support will be submitted separately.
+
+Changes from previous version:
+- Reordered runtime and stub packages to avoid bisect breakage.
+- Added more comments to efi-entry.S.
+- Use actual instruction to generate "MZ" signature in head.S.
+- Redundant cache/tlb maintenance removed.
+- Properly use %pa instead of %llx in mm error messages..
+- Stub deletes DT nodes of type "memory" instead of nodes called
+  "memory".
+
+Changes from earlier versions:
+- Enter_virtual_mode() is now an early initcall.
+- UEFI Reserved regions now preserved.
+- Bugfix for dtb= support with SecureBoot.
+- Stub now flushes instruction cache by address for kernel image area.
+- CONFIG_EFI_STUB merged into CONFIG_EFI since they are interdependent.
+- EFI_DEVICE_TREE_GUID renamed DEVICE_TREE_GUID.
+- Minor cleanups.
+
+Ard Biesheuvel (1):
+  efi/arm64: ignore dtb= when UEFI SecureBoot is enabled
+
+Leif Lindholm (1):
+  doc: arm: add UEFI support documentation
+
+Mark Salter (6):
+  lib: add fdt_empty_tree.c
+  efi: add helper function to get UEFI params from FDT
+  arm64: Add function to create identity mappings
+  arm64: add EFI runtime services
+  arm64: efi: add EFI stub
+  doc: arm64: add description of EFI stub support
+
+Roy Franz (2):
+  doc: efi-stub.txt updates for ARM
+  efi: Add shared FDT related functions for ARM/ARM64
+
+ Documentation/arm/00-INDEX      |    2 +
+ Documentation/arm/uefi.txt      |   64 ++++++
+ Documentation/arm64/booting.txt |    4 +
+ Documentation/efi-stub.txt      |   33 ++-
+ arch/arm64/Kconfig              |   16 ++
+ arch/arm64/include/asm/efi.h    |   14 ++
+ arch/arm64/include/asm/mmu.h    |    2 +
+ arch/arm64/kernel/Makefile      |    3 +
+ arch/arm64/kernel/efi-entry.S   |  109 +++++++++
+ arch/arm64/kernel/efi-stub.c    |   81 +++++++
+ arch/arm64/kernel/efi.c         |  466 +++++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/head.S        |  112 ++++++++++
+ arch/arm64/kernel/setup.c       |    5 +
+ arch/arm64/mm/mmu.c             |   65 ++++--
+ drivers/firmware/efi/Kconfig    |    7 +
+ drivers/firmware/efi/arm-stub.c |  278 +++++++++++++++++++++++
+ drivers/firmware/efi/efi.c      |   79 +++++++
+ drivers/firmware/efi/fdt.c      |  285 ++++++++++++++++++++++++
+ include/linux/efi.h             |   12 +
+ lib/Makefile                    |    3 +-
+ lib/fdt_empty_tree.c            |    2 +
+ 21 files changed, 1616 insertions(+), 26 deletions(-)
+ create mode 100644 Documentation/arm/uefi.txt
+ create mode 100644 arch/arm64/include/asm/efi.h
+ create mode 100644 arch/arm64/kernel/efi-entry.S
+ create mode 100644 arch/arm64/kernel/efi-stub.c
+ create mode 100644 arch/arm64/kernel/efi.c
+ create mode 100644 drivers/firmware/efi/arm-stub.c
+ create mode 100644 drivers/firmware/efi/fdt.c
+ create mode 100644 lib/fdt_empty_tree.c
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.7.10.4
