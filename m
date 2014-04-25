@@ -1,7 +1,7 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 05/10] efi: Add shared FDT related functions for ARM/ARM64
-Date: Fri, 25 Apr 2014 17:09:09 +0100
-Message-ID: <1398442154-19974-6-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v2 07/10] doc: arm: add UEFI support documentation
+Date: Fri, 25 Apr 2014 17:09:11 +0100
+Message-ID: <1398442154-19974-8-git-send-email-leif.lindholm@linaro.org>
 References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,329 +21,98 @@ To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@li
 Cc: mark.rutland@arm.com, matt.fleming@intel.com, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, linux-doc@vger.kernel.org, roy.franz@linaro.org, msalter@redhat.com, grant.likely@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Roy Franz <roy.franz@linaro.org>
+This patch provides documentation of the [U]EFI runtime service and
+configuration features for the arm architecture.
 
-Both ARM and ARM64 stubs will update the device tree that they pass to
-the kernel.  In both cases they primarily need to add the same UEFI
-related information, so the function can be shared.  Create a new FDT
-related file for this to avoid use of architecture #ifdefs in
-efi-stub-helper.c.
-
-Signed-off-by: Roy Franz <roy.franz@linaro.org>
-[ Fixed memory node deletion code. ]
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 Acked-by: Grant Likely <grant.likely@linaro.org>
 ---
- drivers/firmware/efi/fdt.c |  285 ++++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h        |    3 +
- 2 files changed, 288 insertions(+)
- create mode 100644 drivers/firmware/efi/fdt.c
+ Documentation/arm/00-INDEX |    2 ++
+ Documentation/arm/uefi.txt |   64 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 66 insertions(+)
+ create mode 100644 Documentation/arm/uefi.txt
 
-diff --git a/drivers/firmware/efi/fdt.c b/drivers/firmware/efi/fdt.c
+diff --git a/Documentation/arm/00-INDEX b/Documentation/arm/00-INDEX
+index a94090c..3b08bc2 100644
+--- a/Documentation/arm/00-INDEX
++++ b/Documentation/arm/00-INDEX
+@@ -46,5 +46,7 @@ swp_emulation
+ 	- SWP/SWPB emulation handler/logging description
+ tcm.txt
+ 	- ARM Tightly Coupled Memory
++uefi.txt
++	- [U]EFI configuration and runtime services documentation
+ vlocks.txt
+ 	- Voting locks, low-level mechanism relying on memory system atomic writes.
+diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
 new file mode 100644
-index 0000000..5c6a8e8
+index 0000000..d60030a
 --- /dev/null
-+++ b/drivers/firmware/efi/fdt.c
-@@ -0,0 +1,285 @@
-+/*
-+ * FDT related Helper functions used by the EFI stub on multiple
-+ * architectures. This should be #included by the EFI stub
-+ * implementation files.
-+ *
-+ * Copyright 2013 Linaro Limited; author Roy Franz
-+ *
-+ * This file is part of the Linux kernel, and is made available
-+ * under the terms of the GNU General Public License version 2.
-+ *
-+ */
++++ b/Documentation/arm/uefi.txt
+@@ -0,0 +1,64 @@
++UEFI, the Unified Extensible Firmware Interface, is a specification
++governing the behaviours of compatible firmware interfaces. It is
++maintained by the UEFI Forum - http://www.uefi.org/.
 +
-+static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
-+			       unsigned long orig_fdt_size,
-+			       void *fdt, int new_fdt_size, char *cmdline_ptr,
-+			       u64 initrd_addr, u64 initrd_size,
-+			       efi_memory_desc_t *memory_map,
-+			       unsigned long map_size, unsigned long desc_size,
-+			       u32 desc_ver)
-+{
-+	int node, prev;
-+	int status;
-+	u32 fdt_val32;
-+	u64 fdt_val64;
++UEFI is an evolution of its predecessor 'EFI', so the terms EFI and
++UEFI are used somewhat interchangeably in this document and associated
++source code. As a rule, anything new uses 'UEFI', whereas 'EFI' refers
++to legacy code or specifications.
 +
-+	/*
-+	 * Copy definition of linux_banner here.  Since this code is
-+	 * built as part of the decompressor for ARM v7, pulling
-+	 * in version.c where linux_banner is defined for the
-+	 * kernel brings other kernel dependencies with it.
-+	 */
-+	const char linux_banner[] =
-+	    "Linux version " UTS_RELEASE " (" LINUX_COMPILE_BY "@"
-+	    LINUX_COMPILE_HOST ") (" LINUX_COMPILER ") " UTS_VERSION "\n";
++UEFI support in Linux
++=====================
++Booting on a platform with firmware compliant with the UEFI specification
++makes it possible for the kernel to support additional features:
++- UEFI Runtime Services
++- Retrieving various configuration information through the standardised
++  interface of UEFI configuration tables. (ACPI, SMBIOS, ...)
 +
-+	/* Do some checks on provided FDT, if it exists*/
-+	if (orig_fdt) {
-+		if (fdt_check_header(orig_fdt)) {
-+			pr_efi_err(sys_table, "Device Tree header not valid!\n");
-+			return EFI_LOAD_ERROR;
-+		}
-+		/*
-+		 * We don't get the size of the FDT if we get if from a
-+		 * configuration table.
-+		 */
-+		if (orig_fdt_size && fdt_totalsize(orig_fdt) > orig_fdt_size) {
-+			pr_efi_err(sys_table, "Truncated device tree! foo!\n");
-+			return EFI_LOAD_ERROR;
-+		}
-+	}
++For actually enabling [U]EFI support, enable:
++- CONFIG_EFI=y
++- CONFIG_EFI_VARS=y or m
 +
-+	if (orig_fdt)
-+		status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
-+	else
-+		status = fdt_create_empty_tree(fdt, new_fdt_size);
++The implementation depends on receiving information about the UEFI environment
++in a Flattened Device Tree (FDT) - so is only available with CONFIG_OF.
 +
-+	if (status != 0)
-+		goto fdt_set_fail;
++UEFI stub
++=========
++The "stub" is a feature that extends the Image/zImage into a valid UEFI
++PE/COFF executable, including a loader application that makes it possible to
++load the kernel directly from the UEFI shell, boot menu, or one of the
++lightweight bootloaders like Gummiboot or rEFInd.
 +
-+	/*
-+	 * Delete any memory nodes present. We must delete nodes which
-+	 * early_init_dt_scan_memory may try to use.
-+	 */
-+	prev = 0;
-+	for (;;) {
-+		const char *type, *name;
-+		int len;
++The kernel image built with stub support remains a valid kernel image for
++booting in non-UEFI environments.
 +
-+		node = fdt_next_node(fdt, prev, NULL);
-+		if (node < 0)
-+			break;
++UEFI kernel support on ARM
++==========================
++UEFI kernel support on the ARM architectures (arm and arm64) is only available
++when boot is performed through the stub.
 +
-+		type = fdt_getprop(fdt, node, "device_type", &len);
-+		if (type && strncmp(type, "memory", len) == 0) {
-+			fdt_del_node(fdt, node);
-+			continue;
-+		}
++When booting in UEFI mode, the stub deletes any memory nodes from a provided DT.
++Instead, the kernel reads the UEFI memory map.
 +
-+		prev = node;
-+	}
++The stub populates the FDT /chosen node with (and the kernel scans for) the
++following parameters:
++________________________________________________________________________________
++Name                      | Size   | Description
++================================================================================
++linux,uefi-system-table   | 64-bit | Physical address of the UEFI System Table.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-start     | 64-bit | Physical address of the UEFI memory map,
++                          |        | populated by the UEFI GetMemoryMap() call.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-size      | 32-bit | Size in bytes of the UEFI memory map
++                          |        | pointed to in previous entry.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-desc-size | 32-bit | Size in bytes of each entry in the UEFI
++                          |        | memory map.
++--------------------------------------------------------------------------------
++linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
++--------------------------------------------------------------------------------
++linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
++--------------------------------------------------------------------------------
 +
-+	node = fdt_subnode_offset(fdt, 0, "chosen");
-+	if (node < 0) {
-+		node = fdt_add_subnode(fdt, 0, "chosen");
-+		if (node < 0) {
-+			status = node; /* node is error code when negative */
-+			goto fdt_set_fail;
-+		}
-+	}
-+
-+	if ((cmdline_ptr != NULL) && (strlen(cmdline_ptr) > 0)) {
-+		status = fdt_setprop(fdt, node, "bootargs", cmdline_ptr,
-+				     strlen(cmdline_ptr) + 1);
-+		if (status)
-+			goto fdt_set_fail;
-+	}
-+
-+	/* Set initrd address/end in device tree, if present */
-+	if (initrd_size != 0) {
-+		u64 initrd_image_end;
-+		u64 initrd_image_start = cpu_to_fdt64(initrd_addr);
-+
-+		status = fdt_setprop(fdt, node, "linux,initrd-start",
-+				     &initrd_image_start, sizeof(u64));
-+		if (status)
-+			goto fdt_set_fail;
-+		initrd_image_end = cpu_to_fdt64(initrd_addr + initrd_size);
-+		status = fdt_setprop(fdt, node, "linux,initrd-end",
-+				     &initrd_image_end, sizeof(u64));
-+		if (status)
-+			goto fdt_set_fail;
-+	}
-+
-+	/* Add FDT entries for EFI runtime services in chosen node. */
-+	node = fdt_subnode_offset(fdt, 0, "chosen");
-+	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)sys_table);
-+	status = fdt_setprop(fdt, node, "linux,uefi-system-table",
-+			     &fdt_val64, sizeof(fdt_val64));
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	fdt_val64 = cpu_to_fdt64((u64)(unsigned long)memory_map);
-+	status = fdt_setprop(fdt, node, "linux,uefi-mmap-start",
-+			     &fdt_val64,  sizeof(fdt_val64));
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	fdt_val32 = cpu_to_fdt32(map_size);
-+	status = fdt_setprop(fdt, node, "linux,uefi-mmap-size",
-+			     &fdt_val32,  sizeof(fdt_val32));
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	fdt_val32 = cpu_to_fdt32(desc_size);
-+	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-size",
-+			     &fdt_val32, sizeof(fdt_val32));
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	fdt_val32 = cpu_to_fdt32(desc_ver);
-+	status = fdt_setprop(fdt, node, "linux,uefi-mmap-desc-ver",
-+			     &fdt_val32, sizeof(fdt_val32));
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	/*
-+	 * Add kernel version banner so stub/kernel match can be
-+	 * verified.
-+	 */
-+	status = fdt_setprop_string(fdt, node, "linux,uefi-stub-kern-ver",
-+			     linux_banner);
-+	if (status)
-+		goto fdt_set_fail;
-+
-+	return EFI_SUCCESS;
-+
-+fdt_set_fail:
-+	if (status == -FDT_ERR_NOSPACE)
-+		return EFI_BUFFER_TOO_SMALL;
-+
-+	return EFI_LOAD_ERROR;
-+}
-+
-+#ifndef EFI_FDT_ALIGN
-+#define EFI_FDT_ALIGN EFI_PAGE_SIZE
-+#endif
-+
-+/*
-+ * Allocate memory for a new FDT, then add EFI, commandline, and
-+ * initrd related fields to the FDT.  This routine increases the
-+ * FDT allocation size until the allocated memory is large
-+ * enough.  EFI allocations are in EFI_PAGE_SIZE granules,
-+ * which are fixed at 4K bytes, so in most cases the first
-+ * allocation should succeed.
-+ * EFI boot services are exited at the end of this function.
-+ * There must be no allocations between the get_memory_map()
-+ * call and the exit_boot_services() call, so the exiting of
-+ * boot services is very tightly tied to the creation of the FDT
-+ * with the final memory map in it.
-+ */
-+
-+efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
-+					    void *handle,
-+					    unsigned long *new_fdt_addr,
-+					    unsigned long max_addr,
-+					    u64 initrd_addr, u64 initrd_size,
-+					    char *cmdline_ptr,
-+					    unsigned long fdt_addr,
-+					    unsigned long fdt_size)
-+{
-+	unsigned long map_size, desc_size;
-+	u32 desc_ver;
-+	unsigned long mmap_key;
-+	efi_memory_desc_t *memory_map;
-+	unsigned long new_fdt_size;
-+	efi_status_t status;
-+
-+	/*
-+	 * Estimate size of new FDT, and allocate memory for it. We
-+	 * will allocate a bigger buffer if this ends up being too
-+	 * small, so a rough guess is OK here.
-+	 */
-+	new_fdt_size = fdt_size + EFI_PAGE_SIZE;
-+	while (1) {
-+		status = efi_high_alloc(sys_table, new_fdt_size, EFI_FDT_ALIGN,
-+					new_fdt_addr, max_addr);
-+		if (status != EFI_SUCCESS) {
-+			pr_efi_err(sys_table, "Unable to allocate memory for new device tree.\n");
-+			goto fail;
-+		}
-+
-+		/*
-+		 * Now that we have done our final memory allocation (and free)
-+		 * we can get the memory map key  needed for
-+		 * exit_boot_services().
-+		 */
-+		status = efi_get_memory_map(sys_table, &memory_map, &map_size,
-+					    &desc_size, &desc_ver, &mmap_key);
-+		if (status != EFI_SUCCESS)
-+			goto fail_free_new_fdt;
-+
-+		status = update_fdt(sys_table,
-+				    (void *)fdt_addr, fdt_size,
-+				    (void *)*new_fdt_addr, new_fdt_size,
-+				    cmdline_ptr, initrd_addr, initrd_size,
-+				    memory_map, map_size, desc_size, desc_ver);
-+
-+		/* Succeeding the first time is the expected case. */
-+		if (status == EFI_SUCCESS)
-+			break;
-+
-+		if (status == EFI_BUFFER_TOO_SMALL) {
-+			/*
-+			 * We need to allocate more space for the new
-+			 * device tree, so free existing buffer that is
-+			 * too small.  Also free memory map, as we will need
-+			 * to get new one that reflects the free/alloc we do
-+			 * on the device tree buffer.
-+			 */
-+			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
-+			sys_table->boottime->free_pool(memory_map);
-+			new_fdt_size += EFI_PAGE_SIZE;
-+		} else {
-+			pr_efi_err(sys_table, "Unable to constuct new device tree.\n");
-+			goto fail_free_mmap;
-+		}
-+	}
-+
-+	/* Now we are ready to exit_boot_services.*/
-+	status = sys_table->boottime->exit_boot_services(handle, mmap_key);
-+
-+
-+	if (status == EFI_SUCCESS)
-+		return status;
-+
-+	pr_efi_err(sys_table, "Exit boot services failed.\n");
-+
-+fail_free_mmap:
-+	sys_table->boottime->free_pool(memory_map);
-+
-+fail_free_new_fdt:
-+	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
-+
-+fail:
-+	return EFI_LOAD_ERROR;
-+}
-+
-+static void *get_fdt(efi_system_table_t *sys_table)
-+{
-+	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
-+	efi_config_table_t *tables;
-+	void *fdt;
-+	int i;
-+
-+	tables = (efi_config_table_t *) sys_table->tables;
-+	fdt = NULL;
-+
-+	for (i = 0; i < sys_table->nr_tables; i++)
-+		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
-+			fdt = (void *) tables[i].table;
-+			break;
-+	 }
-+
-+	return fdt;
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 4f52ac6..ae3e2b2 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -575,6 +575,9 @@ typedef efi_status_t efi_query_variable_store_t(u32 attributes, unsigned long si
- #define EFI_FILE_SYSTEM_GUID \
-     EFI_GUID(  0x964e5b22, 0x6459, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
- 
-+#define DEVICE_TREE_GUID \
-+    EFI_GUID(  0xb1b621d5, 0xf19c, 0x41a5, 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 )
-+
- typedef struct {
- 	efi_guid_t guid;
- 	u64 table;
++For verbose debug messages, specify 'uefi_debug' on the kernel command line.
 -- 
 1.7.10.4
