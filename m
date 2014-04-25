@@ -1,192 +1,96 @@
 From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: [PATCH v2 04/10] arm64: Add function to create identity mappings
-Date: Fri, 25 Apr 2014 17:09:08 +0100
-Message-ID: <1398442154-19974-5-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH v2 10/10] efi/arm64: ignore dtb= when UEFI SecureBoot is enabled
+Date: Fri, 25 Apr 2014 17:09:14 +0100
+Message-ID: <1398442154-19974-11-git-send-email-leif.lindholm@linaro.org>
 References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org
-Cc: mark.rutland@arm.com, matt.fleming@intel.com, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, linux-doc@vger.kernel.org, roy.franz@linaro.org, msalter@redhat.com, grant.likely@linaro.org
+Cc: matt.fleming@intel.com, catalin.marinas@arm.com, msalter@redhat.com, grant.likely@linaro.org, roy.franz@linaro.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, linux-doc@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Salter <msalter@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-At boot time, before switching to a virtual UEFI memory map, firmware
-expects UEFI memory and IO regions to be identity mapped whenever
-kernel makes runtime services calls. The existing early boot code
-creates an identity map of kernel text/data but this is not sufficient
-for UEFI. This patch adds a create_id_mapping() function which reuses
-the core code of the existing create_mapping().
+Loading unauthenticated FDT blobs directly from storage is a security hazard,
+so this should only be allowed when running with UEFI Secure Boot disabled.
 
-Signed-off-by: Mark Salter <msalter@redhat.com>
-[ Fixed error message formatting (%pa). ]
-Signed-off-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 ---
- arch/arm64/include/asm/mmu.h |    2 ++
- arch/arm64/mm/mmu.c          |   65 ++++++++++++++++++++++++++++++------------
- 2 files changed, 49 insertions(+), 18 deletions(-)
+ drivers/firmware/efi/arm-stub.c |   39 +++++++++++++++++++++++++++++++++++----
+ 1 file changed, 35 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-index f600d40..29ed1d8 100644
---- a/arch/arm64/include/asm/mmu.h
-+++ b/arch/arm64/include/asm/mmu.h
-@@ -28,5 +28,7 @@ extern void paging_init(void);
- extern void setup_mm_for_reboot(void);
- extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
- extern void init_mem_pgprot(void);
-+/* create an identity mapping for memory (or io if map_io is true) */
-+extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
- 
- #endif
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6b7e895..971eb45 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -168,7 +168,8 @@ static void __init *early_alloc(unsigned long sz)
- }
- 
- static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
--				  unsigned long end, unsigned long pfn)
-+				  unsigned long end, unsigned long pfn,
-+				  pgprot_t prot)
- {
- 	pte_t *pte;
- 
-@@ -180,16 +181,28 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
- 
- 	pte = pte_offset_kernel(pmd, addr);
- 	do {
--		set_pte(pte, pfn_pte(pfn, PAGE_KERNEL_EXEC));
-+		set_pte(pte, pfn_pte(pfn, prot));
- 		pfn++;
- 	} while (pte++, addr += PAGE_SIZE, addr != end);
- }
- 
- static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
--				  unsigned long end, phys_addr_t phys)
-+				  unsigned long end, phys_addr_t phys,
-+				  int map_io)
- {
- 	pmd_t *pmd;
- 	unsigned long next;
-+	pmdval_t prot_sect;
-+	pgprot_t prot_pte;
-+
-+	if (map_io) {
-+		prot_sect = PMD_TYPE_SECT | PMD_SECT_AF |
-+			    PMD_ATTRINDX(MT_DEVICE_nGnRE);
-+		prot_pte = __pgprot(PROT_DEVICE_nGnRE);
-+	} else {
-+		prot_sect = prot_sect_kernel;
-+		prot_pte = PAGE_KERNEL_EXEC;
-+	}
- 
- 	/*
- 	 * Check for initial section mappings in the pgd/pud and remove them.
-@@ -205,7 +218,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 		/* try section mapping first */
- 		if (((addr | next | phys) & ~SECTION_MASK) == 0) {
- 			pmd_t old_pmd =*pmd;
--			set_pmd(pmd, __pmd(phys | prot_sect_kernel));
-+			set_pmd(pmd, __pmd(phys | prot_sect));
- 			/*
- 			 * Check for previous table entries created during
- 			 * boot (__create_page_tables) and flush them.
-@@ -213,21 +226,23 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 			if (!pmd_none(old_pmd))
- 				flush_tlb_all();
- 		} else {
--			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys));
-+			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys),
-+				       prot_pte);
- 		}
- 		phys += next - addr;
- 	} while (pmd++, addr = next, addr != end);
- }
- 
- static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
--				  unsigned long end, unsigned long phys)
-+				  unsigned long end, unsigned long phys,
-+				  int map_io)
- {
- 	pud_t *pud = pud_offset(pgd, addr);
- 	unsigned long next;
- 
- 	do {
- 		next = pud_addr_end(addr, end);
--		alloc_init_pmd(pud, addr, next, phys);
-+		alloc_init_pmd(pud, addr, next, phys, map_io);
- 		phys += next - addr;
- 	} while (pud++, addr = next, addr != end);
- }
-@@ -236,30 +251,44 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
-  * Create the page directory entries and any necessary page tables for the
-  * mapping specified by 'md'.
+diff --git a/drivers/firmware/efi/arm-stub.c b/drivers/firmware/efi/arm-stub.c
+index 19239a9..41114ce 100644
+--- a/drivers/firmware/efi/arm-stub.c
++++ b/drivers/firmware/efi/arm-stub.c
+@@ -12,6 +12,30 @@
+  *
   */
--static void __init create_mapping(phys_addr_t phys, unsigned long virt,
--				  phys_addr_t size)
-+static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
-+				    unsigned long virt, phys_addr_t size,
-+				    int map_io)
- {
- 	unsigned long addr, length, end, next;
--	pgd_t *pgd;
--
--	if (virt < VMALLOC_START) {
--		pr_warning("BUG: not creating mapping for 0x%016llx at 0x%016lx - outside kernel range\n",
--			   phys, virt);
--		return;
--	}
  
- 	addr = virt & PAGE_MASK;
- 	length = PAGE_ALIGN(size + (virt & ~PAGE_MASK));
- 
--	pgd = pgd_offset_k(addr);
- 	end = addr + length;
- 	do {
- 		next = pgd_addr_end(addr, end);
--		alloc_init_pud(pgd, addr, next, phys);
-+		alloc_init_pud(pgd, addr, next, phys, map_io);
- 		phys += next - addr;
- 	} while (pgd++, addr = next, addr != end);
- }
- 
-+static void __init create_mapping(phys_addr_t phys, unsigned long virt,
-+				  phys_addr_t size)
++static int __init efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
 +{
-+	if (virt < VMALLOC_START) {
-+		pr_warn("BUG: not creating mapping for %pa at 0x%016lx - outside kernel range\n",
-+			&phys, virt);
-+		return;
++	static efi_guid_t const var_guid __initconst = EFI_GLOBAL_VARIABLE_GUID;
++	static efi_char16_t const var_name[] __initconst = {
++		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
++
++	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
++	unsigned long size = sizeof(u8);
++	efi_status_t status;
++	u8 val;
++
++	status = f_getvar((efi_char16_t *)var_name, (efi_guid_t *)&var_guid,
++			  NULL, &size, &val);
++
++	switch (status) {
++	case EFI_SUCCESS:
++		return val;
++	case EFI_NOT_FOUND:
++		return 0;
++	default:
++		return 1;
 +	}
-+	__create_mapping(pgd_offset_k(virt & PAGE_MASK), phys, virt, size, 0);
 +}
 +
-+void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-+{
-+	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
-+		pr_warn("BUG: not creating id mapping for %pa\n", &addr);
-+		return;
-+	}
-+	__create_mapping(&idmap_pg_dir[pgd_index(addr)],
-+			 addr, addr, size, map_io);
-+}
-+
- static void __init map_mem(void)
+ static efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg,
+ 				    void *__image, void **__fh)
  {
- 	struct memblock_region *reg;
+@@ -144,7 +168,7 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	/* addr/point and size pairs for memory management*/
+ 	unsigned long initrd_addr;
+ 	u64 initrd_size = 0;
+-	unsigned long fdt_addr;  /* Original DTB */
++	unsigned long fdt_addr = 0;  /* Original DTB */
+ 	u64 fdt_size = 0;  /* We don't get size from configuration table */
+ 	char *cmdline_ptr = NULL;
+ 	int cmdline_size = 0;
+@@ -196,9 +220,13 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		goto fail_free_image;
+ 	}
+ 
+-	/* Load a device tree from the configuration table, if present. */
+-	fdt_addr = (uintptr_t)get_fdt(sys_table);
+-	if (!fdt_addr) {
++	/*
++	 * Unauthenticated device tree data is a security hazard, so
++	 * ignore 'dtb=' unless UEFI Secure Boot is disabled.
++	 */
++	if (efi_secureboot_enabled(sys_table)) {
++		pr_efi(sys_table, "UEFI Secure Boot is enabled.\n");
++	} else {
+ 		status = handle_cmdline_files(sys_table, image, cmdline_ptr,
+ 					      "dtb=",
+ 					      ~0UL, (unsigned long *)&fdt_addr,
+@@ -209,6 +237,9 @@ unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
+ 			goto fail_free_cmdline;
+ 		}
+ 	}
++	if (!fdt_addr)
++		/* Look for a device tree configuration table entry. */
++		fdt_addr = (uintptr_t)get_fdt(sys_table);
+ 
+ 	status = handle_cmdline_files(sys_table, image, cmdline_ptr,
+ 				      "initrd=", dram_base + SZ_512M,
 -- 
 1.7.10.4
