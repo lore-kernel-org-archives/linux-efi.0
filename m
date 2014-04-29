@@ -1,33 +1,50 @@
 From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v2 10/10] efi/arm64: ignore dtb= when UEFI SecureBoot is
- enabled
-Date: Tue, 29 Apr 2014 12:28:49 +0100
-Message-ID: <20140429112849.GJ26088@console-pimps.org>
+Subject: Re: [PATCH v2 00/10] arm64: UEFI support
+Date: Tue, 29 Apr 2014 12:43:56 +0100
+Message-ID: <20140429114356.GK26088@console-pimps.org>
 References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
- <1398442154-19974-11-git-send-email-leif.lindholm@linaro.org>
+ <20140429102817.GE17007@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1398442154-19974-11-git-send-email-leif.lindholm@linaro.org>
+In-Reply-To: <20140429102817.GE17007@arm.com>
 Sender: linux-doc-owner@vger.kernel.org
-To: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt.fleming@intel.com, catalin.marinas@arm.com, msalter@redhat.com, grant.likely@linaro.org, roy.franz@linaro.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, linux-doc@vger.kernel.org
+To: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "msalter@redhat.com" <msalter@redhat.com>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, Mark Rutland <Mark.Rutland@arm.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Stephen Rothwell <sfr@canb.auug.org.au>, Linus Torvalds <torvalds@linux-foundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 25 Apr, at 05:09:14PM, Leif Lindholm wrote:
-> From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> 
-> Loading unauthenticated FDT blobs directly from storage is a security hazard,
-> so this should only be allowed when running with UEFI Secure Boot disabled.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-> ---
->  drivers/firmware/efi/arm-stub.c |   39 +++++++++++++++++++++++++++++++++++----
->  1 file changed, 35 insertions(+), 4 deletions(-)
+(Pulling in Peter and Stephen)
 
-Acked-by: Matt Fleming <matt.fleming@intel.com>
+On Tue, 29 Apr, at 11:28:17AM, Catalin Marinas wrote:
+> 
+> The patches look fine to me, they've been through several rounds of
+> review already. How do we propose these get merged as the series
+> contains both generic and arm64 patches? And there are dependencies
+> already in linux-next.
+> 
+> Are the EFI patches in -next pulled from some non-rebaseable branch?
+
+Peter suggsted a plan when he took the generic EFI stuff that's in tip
+(and hence currently in linux-next),
+
+  It doesn't hurt to inform Stephen, although I think it will simply fall
+  out automatically since he uses git to merge and git will recognize the
+  graph.
+
+  During the merge window, it means they should not push their patches
+  until Linus has accepted the precondition patches from the tip tree.
+  Since Ingo and I try to push most of the tip tree as early as possible
+  in the merge window, this is usually not a problem.
+
+So we currently have the prerequisites in tip/x86/efi, and assuming that
+this 10-patch series gets merged into a single branch somewhere, things
+should work automatically for linux-next.
+
+It may be prudent to negotiate a plan now for when the merge window
+opens because, as Peter mentions above, the stuff in tip/x86/efi needs
+to be merged by Linus first to avoid build breakage with the arm64
+stuff.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
