@@ -1,39 +1,30 @@
-From: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Subject: Re: [PATCH] ignore ,keep for efi earlyprintk
-Date: Tue, 29 Apr 2014 12:21:15 +0200 (CEST)
-Message-ID: <alpine.DEB.2.02.1404291217380.6261@ionos.tec.linutronix.de>
-References: <20140424093658.GA7158@dhcp-16-198.nay.redhat.com> <20140425115345.GC26088@console-pimps.org> <20140426072821.GA2286@darkstar.redhat.com> <20140429094539.GD26088@console-pimps.org>
+From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 00/10] arm64: UEFI support
+Date: Tue, 29 Apr 2014 11:28:17 +0100
+Message-ID: <20140429102817.GE17007@arm.com>
+References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140429094539.GD26088-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1398442154-19974-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 29 Apr 2014, Matt Fleming wrote:
-> I would just replace the existing calls to early_ioremap() with
-> efi_ioremap() and implement it like so (all in
-> arch/x86/platform/efi/early_printk.c),
+On Fri, Apr 25, 2014 at 05:09:04PM +0100, Leif Lindholm wrote:
+> This set adds support for UEFI to the arm64 port - a stub loader, as
+> well as runtime services support for efivars.
 > 
-> static void *efi_ioremap(resource_size_t phys_addr, unsigned long size)
-> {
-> 	if (system_state == SYSTEM_BOOTING)
-> 		return early_ioremap(phys_addr, size);
-> 
-> 	return ioremap(phys_addr, size);
-> }
-> 
-> At least I think SYSTEM_BOOTING is the correct way to figure out when to
-> use early_ioremap(), I'm open to other suggestions though.
+> It depends on some core EFI patches currently in linux-next.
 
-ioremap() is available after paging_init() has been called.
+The patches look fine to me, they've been through several rounds of
+review already. How do we propose these get merged as the series
+contains both generic and arm64 patches? And there are dependencies
+already in linux-next.
 
-Just x86 has this extra bits so you can use early_ioremap/unmap
-_AFTER_ paging_init(). No idea why, but probably to cope with some
-brilliant init calls which run pre and post paging_init().
+Are the EFI patches in -next pulled from some non-rebaseable branch?
 
-Thanks,
-
-	tglx
+-- 
+Catalin
