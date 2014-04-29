@@ -1,32 +1,29 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH v2 00/10] arm64: UEFI support
-Date: Tue, 29 Apr 2014 14:47:28 +0100
-Message-ID: <20140429134726.GH17007@arm.com>
-References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
- <20140429102817.GE17007@arm.com>
- <20140429114356.GK26088@console-pimps.org>
+Date: Tue, 29 Apr 2014 07:36:24 -0700
+Message-ID: <535FB8E8.1060905@zytor.com>
+References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org> <20140429102817.GE17007@arm.com> <20140429114356.GK26088@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140429114356.GK26088@console-pimps.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "msalter@redhat.com" <msalter@redhat.com>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, Mark Rutland <Mark.Rutland@arm.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Stephen Rothwell <sfr@canb.auug.org.au>, Linus Torvalds <torvalds@linux-foundation.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140429114356.GK26088-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 29, 2014 at 12:43:56PM +0100, Matt Fleming wrote:
+On 04/29/2014 04:43 AM, Matt Fleming wrote:
 > (Pulling in Peter and Stephen)
 > 
 > On Tue, 29 Apr, at 11:28:17AM, Catalin Marinas wrote:
-> > 
-> > The patches look fine to me, they've been through several rounds of
-> > review already. How do we propose these get merged as the series
-> > contains both generic and arm64 patches? And there are dependencies
-> > already in linux-next.
-> > 
-> > Are the EFI patches in -next pulled from some non-rebaseable branch?
+>>
+>> The patches look fine to me, they've been through several rounds of
+>> review already. How do we propose these get merged as the series
+>> contains both generic and arm64 patches? And there are dependencies
+>> already in linux-next.
+>>
+>> Are the EFI patches in -next pulled from some non-rebaseable branch?
 > 
 > Peter suggsted a plan when he took the generic EFI stuff that's in tip
 > (and hence currently in linux-next),
@@ -49,16 +46,9 @@ On Tue, Apr 29, 2014 at 12:43:56PM +0100, Matt Fleming wrote:
 > to be merged by Linus first to avoid build breakage with the arm64
 > stuff.
 
-Waiting for the tip/x86/efi to be merged first is not a problem. We
-also need a stable base for testing the arm64 UEFI series, so I assume
-this series can be based onto tip/x86/efi (would such branch be rebased
-before hitting mainline?).
+Whomever is going to push the arm64 stuff just needs to be aware of this
+constraint.  Again, since we tend to push -tip very early in the merge
+window, unless there are problems or late additions, this is unlikely to
+be a problem in any way.
 
-Given that Leif's series contains both generic efi and arm64 patches,
-what's your preference for merging them? I'm happy to add my ack and
-they go via your tree (or the other way around).
-
-Thanks.
-
--- 
-Catalin
+	-hpa
