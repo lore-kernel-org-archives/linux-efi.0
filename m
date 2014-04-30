@@ -1,34 +1,45 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: Re: [PATCH v2 00/10] arm64: UEFI support
-Date: Tue, 29 Apr 2014 17:41:39 +0100
-Message-ID: <20140429164139.GI4179@bivouac.eciton.net>
-References: <1398442154-19974-1-git-send-email-leif.lindholm@linaro.org>
- <20140429102817.GE17007@arm.com>
- <20140429114356.GK26088@console-pimps.org>
- <20140429134726.GH17007@arm.com>
- <20140429144713.GL26088@console-pimps.org>
- <535FBD94.9040101@zytor.com>
- <20140429152707.GM26088@console-pimps.org>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] ignore ,keep for efi earlyprintk
+Date: Wed, 30 Apr 2014 09:12:50 +0800
+Message-ID: <20140430011250.GB1959@darkstar.redhat.com>
+References: <20140424093658.GA7158@dhcp-16-198.nay.redhat.com>
+ <20140425115345.GC26088@console-pimps.org>
+ <20140426072821.GA2286@darkstar.redhat.com>
+ <20140429094539.GD26088@console-pimps.org>
+ <alpine.DEB.2.02.1404291217380.6261@ionos.tec.linutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140429152707.GM26088@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Catalin Marinas <catalin.marinas@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "msalter@redhat.com" <msalter@redhat.com>, "grant.likely@linaro.org" <grant.likely@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, Mark Rutland <Mark.Rutland@arm.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, Stephen Rothwell <sfr@canb.auug.org.au>, Linus Torvalds <torvalds@linux-foundation.org>
+In-Reply-To: <alpine.DEB.2.02.1404291217380.6261-3cz04HxQygjZikZi3RtOZ1XZhhPuCNm+@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 29, 2014 at 04:27:07PM +0100, Matt Fleming wrote:
-> > I'm wondering if it would be better to organize it into a separate topic
-> > branch.  We can still take it through tip, if you want, but it would be
-> > better than putting it all into one tree.
+On 04/29/14 at 12:21pm, Thomas Gleixner wrote:
+> On Tue, 29 Apr 2014, Matt Fleming wrote:
+> > I would just replace the existing calls to early_ioremap() with
+> > efi_ioremap() and implement it like so (all in
+> > arch/x86/platform/efi/early_printk.c),
+> > 
+> > static void *efi_ioremap(resource_size_t phys_addr, unsigned long size)
+> > {
+> > 	if (system_state == SYSTEM_BOOTING)
+> > 		return early_ioremap(phys_addr, size);
+> > 
+> > 	return ioremap(phys_addr, size);
+> > }
+> > 
+> > At least I think SYSTEM_BOOTING is the correct way to figure out when to
+> > use early_ioremap(), I'm open to other suggestions though.
 > 
-> Sure, that makes sense. I'll do that.
+> ioremap() is available after paging_init() has been called.
+> 
+> Just x86 has this extra bits so you can use early_ioremap/unmap
+> _AFTER_ paging_init(). No idea why, but probably to cope with some
+> brilliant init calls which run pre and post paging_init().
 
-I've set up a new topic branch, "uefi-for-3.16" on
-git://git.linaro.org/people/leif.lindholm/linux.git
-Based off tip/x86/efi.
-
-/
-    Leif
+Good idea, will use an initcall function for this purpose.
+Thanks a lot.
+Dave
