@@ -1,84 +1,82 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI changes for arm64
-Date: Wed, 30 Apr 2014 21:03:32 +0100
-Message-ID: <20140430200332.GO26088@console-pimps.org>
+Subject: Re: [PATCH] earlyprintk=efi,keep fix
+Date: Thu, 1 May 2014 11:12:20 +0100
+Message-ID: <20140501101220.GP26088@console-pimps.org>
+References: <20140430021303.GA12316@darkstar.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <20140430021303.GA12316-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi folks,
+On Wed, 30 Apr, at 10:13:03AM, Dave Young wrote:
+> 
+> earlyprintk=efi,keep will cause kernel hangs while freeing initmem like below:
+> [    2.826089] VFS: Mounted root (ext4 filesystem) readonly on device 254:2.
+> [    2.846592] devtmpfs: mounted
+> [    2.856974] Freeing unused kernel memory: 880K (ffffffff817d4000 - ffffffff818b0000)
+> 
+> It is caused by efi earlyprintk use __init function which will be freed later.
+> Such as early_efi_write is marked as __init, also it will use early_ioremap
+> which is init function as well.
+> 
+> To fix this issue, I added one early initcall efi_ioremap_fb which will map the whole
+> efi fb for later use. OTOH, adding a wrapper function efi_ioremap which will call
+> early_ioremap before ioremap is available.
+> 
+> With this patch applied efi boot ok with earlyprintk=efi,keep console=efi
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/early_printk.c |   54 +++++++++++++++++++++++++++--------
+>  1 file changed, 42 insertions(+), 12 deletions(-)
+ 
+Thanks Dave, good catch. I've got a few comments below.
 
-I pulled the arm64 EFI changes into the following topic branch. Catalin
-was happy for this to go through tip, which definitely makes things
-easier for the next merge window because of the dependency these patches
-have on tip/x86/efi.
+> +static __init int efi_ioremap_fb(void)
+> +{
+> +	unsigned long base, size;
+> +
+> +	base = boot_params.screen_info.lfb_base;
+> +	size = boot_params.screen_info.lfb_size;
+> +	efi_fb = ioremap(base, size);
+> +
+> +	return efi_fb ? 0 : -ENOMEM;
+> +}
+> +early_initcall(efi_ioremap_fb);
 
-The following changes since commit e33655a386ed3b26ad36fb97a47ebb1c2ca1e928:
+So, here you're actually ioremap'ing the framebuffer irrespective of
+whether anyone passed earlyprintk=efi,keep on the command line.
+Furthermore, you'll perform the ioremap() even if some error was
+encountered in early_efi_setup().
 
-  efivars: Add compatibility code for compat tasks (2014-04-17 13:53:53 +0100)
+You need a way to figure out whether the ioremap() is actually needed.
 
-are available in the git repository at:
+Please document this function to explain why we need to ioremap() the
+framebuffer from an early_initcall().
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git arm64-efi
+Oh and as a side note, please prefix functions in this file with
+early_efi_*. Yeah, I realise that I suggested efi_ioremap() as a name -
+my bad.
 
-for you to fetch changes up to 345c736edd07b657a8c48190baed2719b85d0938:
+> +static __init_refok void *efi_ioremap(unsigned long start, unsigned long len)
+> +{
+> +	unsigned long base;
+> +
+> +	base = boot_params.screen_info.lfb_base;
+> +	if (efi_fb)
+> +		return (efi_fb + start - base);
+> +	else
+> +		return early_ioremap(start, len);
+> +}
 
-  efi/arm64: ignore dtb= when UEFI SecureBoot is enabled (2014-04-30 19:57:06 +0100)
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      efi/arm64: ignore dtb= when UEFI SecureBoot is enabled
-
-Leif Lindholm (1):
-      doc: arm: add UEFI support documentation
-
-Mark Salter (6):
-      lib: add fdt_empty_tree.c
-      efi: add helper function to get UEFI params from FDT
-      arm64: Add function to create identity mappings
-      arm64: add EFI runtime services
-      arm64: efi: add EFI stub
-      doc: arm64: add description of EFI stub support
-
-Roy Franz (2):
-      doc: efi-stub.txt updates for ARM
-      efi: Add shared FDT related functions for ARM/ARM64
-
- Documentation/arm/00-INDEX      |   2 +
- Documentation/arm/uefi.txt      |  64 ++++++
- Documentation/arm64/booting.txt |   4 +
- Documentation/efi-stub.txt      |  33 ++-
- arch/arm64/Kconfig              |  16 ++
- arch/arm64/include/asm/efi.h    |  14 ++
- arch/arm64/include/asm/mmu.h    |   2 +
- arch/arm64/kernel/Makefile      |   3 +
- arch/arm64/kernel/efi-entry.S   | 109 ++++++++++
- arch/arm64/kernel/efi-stub.c    |  81 +++++++
- arch/arm64/kernel/efi.c         | 466 ++++++++++++++++++++++++++++++++++++++++
- arch/arm64/kernel/head.S        | 112 ++++++++++
- arch/arm64/kernel/setup.c       |   5 +
- arch/arm64/mm/mmu.c             |  65 ++++--
- drivers/firmware/efi/Kconfig    |   7 +
- drivers/firmware/efi/arm-stub.c | 278 ++++++++++++++++++++++++
- drivers/firmware/efi/efi.c      |  79 +++++++
- drivers/firmware/efi/fdt.c      | 285 ++++++++++++++++++++++++
- include/linux/efi.h             |  12 ++
- lib/Makefile                    |   3 +-
- lib/fdt_empty_tree.c            |   2 +
- 21 files changed, 1616 insertions(+), 26 deletions(-)
- create mode 100644 Documentation/arm/uefi.txt
- create mode 100644 arch/arm64/include/asm/efi.h
- create mode 100644 arch/arm64/kernel/efi-entry.S
- create mode 100644 arch/arm64/kernel/efi-stub.c
- create mode 100644 arch/arm64/kernel/efi.c
- create mode 100644 drivers/firmware/efi/arm-stub.c
- create mode 100644 drivers/firmware/efi/fdt.c
- create mode 100644 lib/fdt_empty_tree.c
+Adding .lfb_base in the caller and then subtracting here seems
+needlessly complicated. Instead I'd suggest making early_efi_map() take
+an offset and a length, and document when each framebuffer is used.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
