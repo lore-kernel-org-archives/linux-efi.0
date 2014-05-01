@@ -1,82 +1,188 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] earlyprintk=efi,keep fix
-Date: Thu, 1 May 2014 11:12:20 +0100
-Message-ID: <20140501101220.GP26088@console-pimps.org>
-References: <20140430021303.GA12316@darkstar.redhat.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH V2] earlyprintk=efi,keep fix
+Date: Thu, 1 May 2014 21:15:48 +0800
+Message-ID: <20140501131548.GA15258@darkstar.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140430021303.GA12316-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 30 Apr, at 10:13:03AM, Dave Young wrote:
-> 
-> earlyprintk=efi,keep will cause kernel hangs while freeing initmem like below:
-> [    2.826089] VFS: Mounted root (ext4 filesystem) readonly on device 254:2.
-> [    2.846592] devtmpfs: mounted
-> [    2.856974] Freeing unused kernel memory: 880K (ffffffff817d4000 - ffffffff818b0000)
-> 
-> It is caused by efi earlyprintk use __init function which will be freed later.
-> Such as early_efi_write is marked as __init, also it will use early_ioremap
-> which is init function as well.
-> 
-> To fix this issue, I added one early initcall efi_ioremap_fb which will map the whole
-> efi fb for later use. OTOH, adding a wrapper function efi_ioremap which will call
-> early_ioremap before ioremap is available.
-> 
-> With this patch applied efi boot ok with earlyprintk=efi,keep console=efi
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/platform/efi/early_printk.c |   54 +++++++++++++++++++++++++++--------
->  1 file changed, 42 insertions(+), 12 deletions(-)
+
+earlyprintk=efi,keep will cause kernel hangs while freeing initmem like below:
+[    2.826089] VFS: Mounted root (ext4 filesystem) readonly on device 254:2.
+[    2.846592] devtmpfs: mounted
+[    2.856974] Freeing unused kernel memory: 880K (ffffffff817d4000 - ffffffff818b0000)
+
+It is caused by efi earlyprintk use __init function which will be freed later.
+Such as early_efi_write is marked as __init, also it will use early_ioremap
+which is init function as well.
+
+To fix this issue, I added early initcall early_efi_map_fb which maps the whole
+efi fb for later use. OTOH, adding a wrapper function early_efi_map which calls
+early_ioremap before ioremap is available.
+
+With this patch applied efi boot ok with earlyprintk=efi,keep console=efi
+
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/x86/platform/efi/early_printk.c |   83 ++++++++++++++++++++++++++---------
+ 1 file changed, 64 insertions(+), 19 deletions(-)
+
+--- linux-2.6.orig/arch/x86/platform/efi/early_printk.c
++++ linux-2.6/arch/x86/platform/efi/early_printk.c
+@@ -14,48 +14,92 @@
  
-Thanks Dave, good catch. I've got a few comments below.
-
-> +static __init int efi_ioremap_fb(void)
-> +{
-> +	unsigned long base, size;
-> +
-> +	base = boot_params.screen_info.lfb_base;
-> +	size = boot_params.screen_info.lfb_size;
-> +	efi_fb = ioremap(base, size);
-> +
-> +	return efi_fb ? 0 : -ENOMEM;
-> +}
-> +early_initcall(efi_ioremap_fb);
-
-So, here you're actually ioremap'ing the framebuffer irrespective of
-whether anyone passed earlyprintk=efi,keep on the command line.
-Furthermore, you'll perform the ioremap() even if some error was
-encountered in early_efi_setup().
-
-You need a way to figure out whether the ioremap() is actually needed.
-
-Please document this function to explain why we need to ioremap() the
-framebuffer from an early_initcall().
-
-Oh and as a side note, please prefix functions in this file with
-early_efi_*. Yeah, I realise that I suggested efi_ioremap() as a name -
-my bad.
-
-> +static __init_refok void *efi_ioremap(unsigned long start, unsigned long len)
-> +{
-> +	unsigned long base;
-> +
-> +	base = boot_params.screen_info.lfb_base;
-> +	if (efi_fb)
-> +		return (efi_fb + start - base);
-> +	else
-> +		return early_ioremap(start, len);
-> +}
-
-Adding .lfb_base in the caller and then subtracting here seems
-needlessly complicated. Instead I'd suggest making early_efi_map() take
-an offset and a length, and document when each framebuffer is used.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+ static const struct font_desc *font;
+ static u32 efi_x, efi_y;
++static void *efi_fb;
++static bool early_efi_keep;
+ 
+-static __init void early_efi_clear_scanline(unsigned int y)
++/*
++ * efi earlyprintk need use early_ioremap to map the framebuffer.
++ * But early_ioremap is not usable for earlyprintk=efi,keep, ioremap should
++ * be used instead. ioremap will be available after paging_init() which is
++ * earlier than initcall callbacks. Thus adding this early initcall function
++ * early_efi_map_fb to map the whole efi framebuffer.
++ */
++static __init int early_efi_map_fb(void)
+ {
+-	unsigned long base, *dst;
+-	u16 len;
++	unsigned long base, size;
++
++	if (!early_efi_keep)
++		return 0;
+ 
+ 	base = boot_params.screen_info.lfb_base;
+-	len = boot_params.screen_info.lfb_linelength;
++	size = boot_params.screen_info.lfb_size;
++	efi_fb = ioremap(base, size);
++
++	return efi_fb ? 0 : -ENOMEM;
++}
++early_initcall(early_efi_map_fb);
++
++/*
++ * early_efi_map maps efi framebuffer region [start, start + len -1]
++ * In case earlyprintk=efi,keep we have the whole framebuffer mapped already
++ * so just return the offset efi_fb + start.
++ */
++static __init_refok void *early_efi_map(unsigned long start, unsigned long len)
++{
++	unsigned long base;
++
++	base = boot_params.screen_info.lfb_base;
++
++	if (efi_fb)
++		return (efi_fb + start);
++	else
++		return early_ioremap(base + start, len);
++}
++
++static __init_refok void early_efi_unmap(void *addr, unsigned long len)
++{
++	if (!efi_fb)
++		early_iounmap(addr, len);
++}
+ 
+-	dst = early_ioremap(base + y*len, len);
++static void early_efi_clear_scanline(unsigned int y)
++{
++	unsigned long *dst;
++	u16 len;
++
++	len = boot_params.screen_info.lfb_linelength;
++	dst = early_efi_map(y*len, len);
+ 	if (!dst)
+ 		return;
+ 
+ 	memset(dst, 0, len);
+-	early_iounmap(dst, len);
++	early_efi_unmap(dst, len);
+ }
+ 
+-static __init void early_efi_scroll_up(void)
++static void early_efi_scroll_up(void)
+ {
+-	unsigned long base, *dst, *src;
++	unsigned long *dst, *src;
+ 	u16 len;
+ 	u32 i, height;
+ 
+-	base = boot_params.screen_info.lfb_base;
+ 	len = boot_params.screen_info.lfb_linelength;
+ 	height = boot_params.screen_info.lfb_height;
+ 
+ 	for (i = 0; i < height - font->height; i++) {
+-		dst = early_ioremap(base + i*len, len);
++		dst = early_efi_map(i*len, len);
+ 		if (!dst)
+ 			return;
+ 
+-		src = early_ioremap(base + (i + font->height) * len, len);
++		src = early_efi_map((i + font->height) * len, len);
+ 		if (!src) {
+-			early_iounmap(dst, len);
++			early_efi_unmap(dst, len);
+ 			return;
+ 		}
+ 
+ 		memmove(dst, src, len);
+ 
+-		early_iounmap(src, len);
+-		early_iounmap(dst, len);
++		early_efi_unmap(src, len);
++		early_efi_unmap(dst, len);
+ 	}
+ }
+ 
+@@ -79,16 +123,14 @@ static void early_efi_write_char(u32 *ds
+ 	}
+ }
+ 
+-static __init void
++static void
+ early_efi_write(struct console *con, const char *str, unsigned int num)
+ {
+ 	struct screen_info *si;
+-	unsigned long base;
+ 	unsigned int len;
+ 	const char *s;
+ 	void *dst;
+ 
+-	base = boot_params.screen_info.lfb_base;
+ 	si = &boot_params.screen_info;
+ 	len = si->lfb_linelength;
+ 
+@@ -109,7 +151,7 @@ early_efi_write(struct console *con, con
+ 		for (h = 0; h < font->height; h++) {
+ 			unsigned int n, x;
+ 
+-			dst = early_ioremap(base + (efi_y + h) * len, len);
++			dst = early_efi_map((efi_y + h) * len, len);
+ 			if (!dst)
+ 				return;
+ 
+@@ -123,7 +165,7 @@ early_efi_write(struct console *con, con
+ 				s++;
+ 			}
+ 
+-			early_iounmap(dst, len);
++			early_efi_unmap(dst, len);
+ 		}
+ 
+ 		num -= count;
+@@ -179,6 +221,9 @@ static __init int early_efi_setup(struct
+ 	for (i = 0; i < (yres - efi_y) / font->height; i++)
+ 		early_efi_scroll_up();
+ 
++	/* early_console_register will unset CON_BOOT in case ,keep */
++	if (!(con->flags & CON_BOOT))
++		early_efi_keep = true;
+ 	return 0;
+ }
+ 
