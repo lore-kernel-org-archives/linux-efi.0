@@ -1,41 +1,43 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH V2] earlyprintk=efi,keep fix
-Date: Fri, 2 May 2014 14:00:31 +0100
-Message-ID: <20140502130031.GT26088@console-pimps.org>
-References: <20140501131548.GA15258@darkstar.redhat.com>
+Subject: [GIT PULL] EFI urgent fix
+Date: Sat, 3 May 2014 06:51:34 +0100
+Message-ID: <20140503055134.GV26088@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140501131548.GA15258-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 01 May, at 09:15:48PM, Dave Young wrote:
-> 
-> earlyprintk=efi,keep will cause kernel hangs while freeing initmem like below:
-> [    2.826089] VFS: Mounted root (ext4 filesystem) readonly on device 254:2.
-> [    2.846592] devtmpfs: mounted
-> [    2.856974] Freeing unused kernel memory: 880K (ffffffff817d4000 - ffffffff818b0000)
-> 
-> It is caused by efi earlyprintk use __init function which will be freed later.
-> Such as early_efi_write is marked as __init, also it will use early_ioremap
-> which is init function as well.
-> 
-> To fix this issue, I added early initcall early_efi_map_fb which maps the whole
-> efi fb for later use. OTOH, adding a wrapper function early_efi_map which calls
-> early_ioremap before ioremap is available.
-> 
-> With this patch applied efi boot ok with earlyprintk=efi,keep console=efi
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/platform/efi/early_printk.c |   83 ++++++++++++++++++++++++++---------
->  1 file changed, 64 insertions(+), 19 deletions(-)
+Folks, please pull the following patch from Dave that fixes some bugs in
+the EFI earlyprintk code when using ",keep".
 
-Thanks Dave, applied!
+The following changes since commit 47514c996fac5e6f13ef3a4c5e23f1c5cffabb7b:
+
+  efi: Pass correct file handle to efi_file_{read,close} (2014-04-10 21:20:03 +0100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 5f35eb0e29ca26da82febe49d7698dbeb8882ea0:
+
+  x86/efi: earlyprintk=efi,keep fix (2014-05-03 06:39:06 +0100)
+
+----------------------------------------------------------------
+ * Fix earlyprintk=efi,keep support by switching to an ioremap() mapping
+   of the framebuffer when early_ioremap() is no longer available and
+   dropping __init from functions that may be invoked after
+   free_initmem() - Dave Young
+
+----------------------------------------------------------------
+Dave Young (1):
+      x86/efi: earlyprintk=efi,keep fix
+
+ arch/x86/platform/efi/early_printk.c | 83 +++++++++++++++++++++++++++---------
+ 1 file changed, 64 insertions(+), 19 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
