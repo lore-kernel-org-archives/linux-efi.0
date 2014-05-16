@@ -1,42 +1,184 @@
-From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v4 0/5] xen: Add EFI support
-Date: Fri, 16 May 2014 22:41:39 +0200
-Message-ID: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
-Cc: boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: [PATCH v4 2/5] xen: Define EFI related stuff
+Date: Fri, 16 May 2014 22:41:41 +0200
+Message-ID: <1400272904-31121-3-git-send-email-daniel.kiper@oracle.com>
+References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
+Cc: boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
-Hey,
+Define EFI related stuff for Xen.
 
-This patch series adds EFI support for Xen dom0 guests.
-It is based on Jan Beulich and Tang Liang work. I was
-trying to take into account all previous comments,
-however, if I missed something sorry for that.
+This patch is based on Jan Beulich and Tang Liang work.
 
-I am still not sure what to do with /sys/firmware/efi/config_table,
-/sys/firmware/efi/{fw_vendor,runtime,systab} files. On bare metal
-they contain physical addresses of relevant structures. However,
-in Xen case they does not make sens. So maybe they should contain
-invalid values (e.g. 0) or should not appear at all on Xen (I prefer
-last one). What do you think about that?
+v4 - suggestions/fixes:
+   - change some types from generic to Xen specific ones
+     (suggested by Stefano Stabellini),
+   - do some formating changes
+     (suggested by Jan Beulich).
 
-Daniel
+Signed-off-by: Jan Beulich <jbeulich@suse.com>
+Signed-off-by: Tang Liang <liang.tang@oracle.com>
+Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+---
+ include/xen/interface/platform.h |  123 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 123 insertions(+)
 
- arch/x86/kernel/setup.c          |    6 +-
- arch/x86/platform/efi/efi.c      |   60 ++++++++++----
- arch/x86/xen/enlighten.c         |   26 ++++++
- drivers/xen/Kconfig              |    3 +
- drivers/xen/Makefile             |    1 +
- drivers/xen/efi.c                |  374 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- include/linux/efi.h              |   13 +--
- include/xen/interface/platform.h |  123 +++++++++++++++++++++++++++
- 8 files changed, 582 insertions(+), 24 deletions(-)
-
-Daniel Kiper (5):
-      efi: Introduce EFI_DIRECT flag
-      xen: Define EFI related stuff
-      xen: Put EFI machinery in place
-      arch/x86: Replace plain strings with constants
-      arch/x86: Remove redundant set_bit() call
+diff --git a/include/xen/interface/platform.h b/include/xen/interface/platform.h
+index f1331e3..55deeb7 100644
+--- a/include/xen/interface/platform.h
++++ b/include/xen/interface/platform.h
+@@ -108,11 +108,113 @@ struct xenpf_platform_quirk {
+ };
+ DEFINE_GUEST_HANDLE_STRUCT(xenpf_platform_quirk_t);
+ 
++#define XENPF_efi_runtime_call    49
++#define XEN_EFI_get_time                      1
++#define XEN_EFI_set_time                      2
++#define XEN_EFI_get_wakeup_time               3
++#define XEN_EFI_set_wakeup_time               4
++#define XEN_EFI_get_next_high_monotonic_count 5
++#define XEN_EFI_get_variable                  6
++#define XEN_EFI_set_variable                  7
++#define XEN_EFI_get_next_variable_name        8
++#define XEN_EFI_query_variable_info           9
++#define XEN_EFI_query_capsule_capabilities   10
++#define XEN_EFI_update_capsule               11
++
++struct xenpf_efi_runtime_call {
++	uint32_t function;
++	/*
++	 * This field is generally used for per sub-function flags (defined
++	 * below), except for the XEN_EFI_get_next_high_monotonic_count case,
++	 * where it holds the single returned value.
++	 */
++	uint32_t misc;
++	xen_ulong_t status;
++	union {
++#define XEN_EFI_GET_TIME_SET_CLEARS_NS 0x00000001
++	struct {
++		struct xenpf_efi_time {
++			uint16_t year;
++			uint8_t month;
++			uint8_t day;
++			uint8_t hour;
++			uint8_t min;
++			uint8_t sec;
++			uint32_t ns;
++			int16_t tz;
++			uint8_t daylight;
++		} time;
++		uint32_t resolution;
++		uint32_t accuracy;
++	} get_time;
++
++	struct xenpf_efi_time set_time;
++
++#define XEN_EFI_GET_WAKEUP_TIME_ENABLED 0x00000001
++#define XEN_EFI_GET_WAKEUP_TIME_PENDING 0x00000002
++	struct xenpf_efi_time get_wakeup_time;
++
++#define XEN_EFI_SET_WAKEUP_TIME_ENABLE      0x00000001
++#define XEN_EFI_SET_WAKEUP_TIME_ENABLE_ONLY 0x00000002
++	struct xenpf_efi_time set_wakeup_time;
++
++#define XEN_EFI_VARIABLE_NON_VOLATILE       0x00000001
++#define XEN_EFI_VARIABLE_BOOTSERVICE_ACCESS 0x00000002
++#define XEN_EFI_VARIABLE_RUNTIME_ACCESS     0x00000004
++	struct {
++		GUEST_HANDLE(void) name;  /* UCS-2/UTF-16 string */
++		xen_ulong_t size;
++		GUEST_HANDLE(void) data;
++		struct xenpf_efi_guid {
++			uint32_t data1;
++			uint16_t data2;
++			uint16_t data3;
++			uint8_t data4[8];
++			} vendor_guid;
++		} get_variable, set_variable;
++
++	struct {
++		xen_ulong_t size;
++		GUEST_HANDLE(void) name;  /* UCS-2/UTF-16 string */
++		struct xenpf_efi_guid vendor_guid;
++		} get_next_variable_name;
++
++	struct {
++		uint32_t attr;
++		uint64_t max_store_size;
++		uint64_t remain_store_size;
++		uint64_t max_size;
++		} query_variable_info;
++
++	struct {
++		GUEST_HANDLE(void) capsule_header_array;
++		xen_ulong_t capsule_count;
++		uint64_t max_capsule_size;
++		uint32_t reset_type;
++		} query_capsule_capabilities;
++
++	struct {
++		GUEST_HANDLE(void) capsule_header_array;
++		xen_ulong_t capsule_count;
++		uint64_t sg_list; /* machine address */
++		} update_capsule;
++	} u;
++};
++DEFINE_GUEST_HANDLE_STRUCT(xenpf_efi_runtime_call);
++
++#define  XEN_FW_EFI_VERSION        0
++#define  XEN_FW_EFI_CONFIG_TABLE   1
++#define  XEN_FW_EFI_VENDOR         2
++#define  XEN_FW_EFI_MEM_INFO       3
++#define  XEN_FW_EFI_RT_VERSION     4
++
+ #define XENPF_firmware_info       50
+ #define XEN_FW_DISK_INFO          1 /* from int 13 AH=08/41/48 */
+ #define XEN_FW_DISK_MBR_SIGNATURE 2 /* from MBR offset 0x1b8 */
+ #define XEN_FW_VBEDDC_INFO        3 /* from int 10 AX=4f15 */
++#define XEN_FW_EFI_INFO           4 /* from EFI */
+ #define XEN_FW_KBD_SHIFT_FLAGS    5 /* Int16, Fn02: Get keyboard shift flags. */
++
+ struct xenpf_firmware_info {
+ 	/* IN variables. */
+ 	uint32_t type;
+@@ -144,6 +246,26 @@ struct xenpf_firmware_info {
+ 			GUEST_HANDLE(uchar) edid;
+ 		} vbeddc_info; /* XEN_FW_VBEDDC_INFO */
+ 
++		union xenpf_efi_info {
++			uint32_t version;
++			struct {
++				uint64_t addr;   /* EFI_CONFIGURATION_TABLE */
++				uint32_t nent;
++			} cfg;
++			struct {
++				uint32_t revision;
++				uint32_t bufsz;  /* input, in bytes */
++				GUEST_HANDLE(void) name;
++				/* UCS-2/UTF-16 string */
++				} vendor;
++			struct {
++				uint64_t addr;
++				uint64_t size;
++				uint64_t attr;
++				uint32_t type;
++				} mem;
++		} efi_info; /* XEN_FW_EFI_INFO */
++
+ 		uint8_t kbd_shift_flags; /* XEN_FW_KBD_SHIFT_FLAGS */
+ 	} u;
+ };
+@@ -362,6 +484,7 @@ struct xen_platform_op {
+ 		struct xenpf_read_memtype      read_memtype;
+ 		struct xenpf_microcode_update  microcode;
+ 		struct xenpf_platform_quirk    platform_quirk;
++		struct xenpf_efi_runtime_call  efi_runtime_call;
+ 		struct xenpf_firmware_info     firmware_info;
+ 		struct xenpf_enter_acpi_sleep  enter_acpi_sleep;
+ 		struct xenpf_change_freq       change_freq;
+-- 
+1.7.10.4
