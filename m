@@ -1,7 +1,7 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v4 4/5] arch/x86: Replace plain strings with constants
-Date: Fri, 16 May 2014 22:41:43 +0200
-Message-ID: <1400272904-31121-5-git-send-email-daniel.kiper@oracle.com>
+Subject: [PATCH v4 5/5] arch/x86: Remove redundant set_bit() call
+Date: Fri, 16 May 2014 22:41:44 +0200
+Message-ID: <1400272904-31121-6-git-send-email-daniel.kiper@oracle.com>
 References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
@@ -10,28 +10,26 @@ To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen
 Cc: boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de
 List-Id: linux-efi@vger.kernel.org
 
+Remove redundant set_bit(EFI_SYSTEM_TABLES, &efi.flags) call.
+It is executed earlier in efi_systab_init().
+
 Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
 ---
- arch/x86/kernel/setup.c |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ arch/x86/platform/efi/efi.c |    2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index f41f648..7a67f5d 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -924,11 +924,11 @@ void __init setup_arch(char **cmdline_p)
- #endif
- #ifdef CONFIG_EFI
- 	if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
--		     "EL32", 4)) {
-+				EFI32_LOADER_SIGNATURE, 4)) {
- 		set_bit(EFI_BOOT, &efi.flags);
- 		set_bit(EFI_DIRECT, &efi.flags);
- 	} else if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
--		     "EL64", 4)) {
-+				EFI64_LOADER_SIGNATURE, 4)) {
- 		set_bit(EFI_BOOT, &efi.flags);
- 		set_bit(EFI_DIRECT, &efi.flags);
- 		set_bit(EFI_64BIT, &efi.flags);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 7fcef06..e7008f0 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -754,8 +754,6 @@ void __init efi_init(void)
+ 	if (efi_systab_init(efi_phys.systab))
+ 		return;
+ 
+-	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+-
+ 	efi.config_table = (unsigned long)efi.systab->tables;
+ 	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
+ 	efi.runtime	 = (unsigned long)efi.systab->runtime;
 -- 
 1.7.10.4
