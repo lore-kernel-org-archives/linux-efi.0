@@ -1,49 +1,42 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Sun, 4 May 2014 20:21:28 +0200
-Message-ID: <20140504182127.GA15846@gmail.com>
-References: <20140503055134.GV26088@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v4 0/5] xen: Add EFI support
+Date: Fri, 16 May 2014 22:41:39 +0200
+Message-ID: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140503055134.GV26088-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
+Cc: boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+Hey,
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+This patch series adds EFI support for Xen dom0 guests.
+It is based on Jan Beulich and Tang Liang work. I was
+trying to take into account all previous comments,
+however, if I missed something sorry for that.
 
-> Folks, please pull the following patch from Dave that fixes some bugs in
-> the EFI earlyprintk code when using ",keep".
-> 
-> The following changes since commit 47514c996fac5e6f13ef3a4c5e23f1c5cffabb7b:
-> 
->   efi: Pass correct file handle to efi_file_{read,close} (2014-04-10 21:20:03 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 5f35eb0e29ca26da82febe49d7698dbeb8882ea0:
-> 
->   x86/efi: earlyprintk=efi,keep fix (2014-05-03 06:39:06 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix earlyprintk=efi,keep support by switching to an ioremap() mapping
->    of the framebuffer when early_ioremap() is no longer available and
->    dropping __init from functions that may be invoked after
->    free_initmem() - Dave Young
-> 
-> ----------------------------------------------------------------
-> Dave Young (1):
->       x86/efi: earlyprintk=efi,keep fix
-> 
->  arch/x86/platform/efi/early_printk.c | 83 +++++++++++++++++++++++++++---------
->  1 file changed, 64 insertions(+), 19 deletions(-)
+I am still not sure what to do with /sys/firmware/efi/config_table,
+/sys/firmware/efi/{fw_vendor,runtime,systab} files. On bare metal
+they contain physical addresses of relevant structures. However,
+in Xen case they does not make sens. So maybe they should contain
+invalid values (e.g. 0) or should not appear at all on Xen (I prefer
+last one). What do you think about that?
 
-Pulled into tip:x86/urgent, thanks a lot Matt!
+Daniel
 
-	Ingo
+ arch/x86/kernel/setup.c          |    6 +-
+ arch/x86/platform/efi/efi.c      |   60 ++++++++++----
+ arch/x86/xen/enlighten.c         |   26 ++++++
+ drivers/xen/Kconfig              |    3 +
+ drivers/xen/Makefile             |    1 +
+ drivers/xen/efi.c                |  374 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h              |   13 +--
+ include/xen/interface/platform.h |  123 +++++++++++++++++++++++++++
+ 8 files changed, 582 insertions(+), 24 deletions(-)
+
+Daniel Kiper (5):
+      efi: Introduce EFI_DIRECT flag
+      xen: Define EFI related stuff
+      xen: Put EFI machinery in place
+      arch/x86: Replace plain strings with constants
+      arch/x86: Remove redundant set_bit() call
