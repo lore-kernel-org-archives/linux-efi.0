@@ -1,212 +1,110 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v4 1/5] efi: Introduce EFI_DIRECT flag
-Date: Fri, 16 May 2014 22:41:40 +0200
-Message-ID: <1400272904-31121-2-git-send-email-daniel.kiper@oracle.com>
-References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: kernel 3.14.2 oops: seems related to EFI
+Date: Sun, 18 May 2014 15:42:07 +0200
+Message-ID: <20140518134206.GA8040@pd.tnic>
+References: <53777F7B.8060407@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <53777F7B.8060407-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Francis Moreau <francis.moro-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Introduce EFI_DIRECT flag. If it is set this means that Linux
-Kernel has direct access to EFI infrastructure. If not then
-kernel runs on EFI platform but it has not direct control
-on EFI stuff. This functionality is used in Xen dom0.
+On Sat, May 17, 2014 at 05:25:47PM +0200, Francis Moreau wrote:
+> [  +0.018677] general protection fault: 0000 [#1] PREEMPT SMP
+> [  +0.000068] Modules linked in: usb_storage tun raid1 md_mod loop fuse
+> joydev coretemp hwmon arc4 intel_rapl x86_pkg_temp_thermal
+> intel_powerclamp kvm_intel nls_iso8859_1 nls_cp437 iTCO_wdt kvm vfat fat
+> iTCO_vendor_support iwldvm uvcvideo led_class crct10dif_pclmul
+> crc32_pclmul crc32c_intel ghash_clmulni_intel mac80211 videobuf2_vmalloc
+> videobuf2_memops videobuf2_core aesni_intel videodev aes_x86_64
+> snd_hda_codec_hdmi lrw gf128mul mousedev glue_helper btusb
+> snd_hda_codec_via ablk_helper media cryptd iwlwifi snd_hda_codec_generic
+> bluetooth psmouse microcode i2c_i801 serio_raw cfg80211 6lowpan_iphc
+> rtsx_pci_ms r8169 memstick rfkill lpc_ich mii snd_hda_intel
+> snd_hda_codec thermal snd_hwdep wmi snd_pcm tpm_infineon snd_timer
+> tpm_tis mei_me snd tpm mei shpchp evdev soundcore processor battery
+> mac_hid ac
+> [  +0.000803]  ext4 crc16 mbcache jbd2 hid_generic usbhid hid bcache
+> sd_mod sr_mod crc_t10dif cdrom crct10dif_common rtsx_pci_sdmmc mmc_core
+> atkbd libps2 ahci libahci ehci_pci libata xhci_hcd ehci_hcd scsi_mod
+> rtsx_pci usbcore usb_common i8042 serio i915 video button intel_gtt
+> i2c_algo_bit drm_kms_helper drm i2c_core
+> [  +0.000328] CPU: 0 PID: 30835 Comm: systemd-udevd Not tainted
+> 3.14.2-1-ARCH #1
+> [  +0.000064] Hardware name: CLEVO CO.                        W55xEU
+>                       /W55xEU                          , BIOS 4.6.5
+> 03/05/2013
+> [  +0.000102] task: ffff880405ee6bf0 ti: ffff880400f4a000 task.ti:
+> ffff880400f4a000
+> [  +0.000060] RIP: 0010:[<ffffffff810655af>]  [<ffffffff810655af>]
+> efi_call5+0x6f/0xf0
+> [  +0.000071] RSP: 0018:ffff880400f4bdb0  EFLAGS: 00010002
+> [  +0.000045] RAX: 0000000080050033 RBX: ffff8804040e3000 RCX:
+> ffff8804040e3000
+> [  +0.000055] RDX: ffff8804040e3400 RSI: ffff8804040e3000 RDI:
+> bff7fffff7afffff
 
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
----
- arch/x86/kernel/setup.c     |    2 ++
- arch/x86/platform/efi/efi.c |   58 ++++++++++++++++++++++++++++++++-----------
- include/linux/efi.h         |   13 +++++-----
- 3 files changed, 53 insertions(+), 20 deletions(-)
+So you get a #GP while executing call *rdi and %rdi is supposed to
+contain ->get_variable. But instead it contains some very funky shit:
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 09c76d2..f41f648 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -926,9 +926,11 @@ void __init setup_arch(char **cmdline_p)
- 	if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
- 		     "EL32", 4)) {
- 		set_bit(EFI_BOOT, &efi.flags);
-+		set_bit(EFI_DIRECT, &efi.flags);
- 	} else if (!strncmp((char *)&boot_params.efi_info.efi_loader_signature,
- 		     "EL64", 4)) {
- 		set_bit(EFI_BOOT, &efi.flags);
-+		set_bit(EFI_DIRECT, &efi.flags);
- 		set_bit(EFI_64BIT, &efi.flags);
- 	}
- 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 3781dd3..7fcef06 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -352,6 +352,9 @@ int __init efi_memblock_x86_reserve_range(void)
- 	struct efi_info *e = &boot_params.efi_info;
- 	unsigned long pmap;
- 
-+	if (!efi_enabled(EFI_DIRECT))
-+		return 0;
-+
- #ifdef CONFIG_X86_32
- 	/* Can't handle data above 4GB at this time */
- 	if (e->efi_memmap_hi) {
-@@ -457,6 +460,21 @@ void __init efi_free_boot_services(void)
- 	efi_unmap_memmap();
- }
- 
-+static void __init __iomem *efi_early_ioremap(resource_size_t phys_addr,
-+							unsigned long size)
-+{
-+	if (efi_enabled(EFI_DIRECT))
-+		return early_ioremap(phys_addr, size);
-+
-+	return (__force void __iomem *)phys_addr;
-+}
-+
-+static void __init efi_early_iounmap(void __iomem *addr, unsigned long size)
-+{
-+	if (efi_enabled(EFI_DIRECT))
-+		early_iounmap(addr, size);
-+}
-+
- static int __init efi_systab_init(void *phys)
- {
- 	if (efi_enabled(EFI_64BIT)) {
-@@ -469,8 +487,8 @@ static int __init efi_systab_init(void *phys)
- 			if (!data)
- 				return -ENOMEM;
- 		}
--		systab64 = early_ioremap((unsigned long)phys,
--					 sizeof(*systab64));
-+		systab64 = efi_early_ioremap((unsigned long)phys,
-+							sizeof(*systab64));
- 		if (systab64 == NULL) {
- 			pr_err("Couldn't map the system table!\n");
- 			if (data)
-@@ -506,7 +524,7 @@ static int __init efi_systab_init(void *phys)
- 					   systab64->tables;
- 		tmp |= data ? data->tables : systab64->tables;
- 
--		early_iounmap(systab64, sizeof(*systab64));
-+		efi_early_iounmap(systab64, sizeof(*systab64));
- 		if (data)
- 			early_iounmap(data, sizeof(*data));
- #ifdef CONFIG_X86_32
-@@ -518,8 +536,8 @@ static int __init efi_systab_init(void *phys)
- 	} else {
- 		efi_system_table_32_t *systab32;
- 
--		systab32 = early_ioremap((unsigned long)phys,
--					 sizeof(*systab32));
-+		systab32 = efi_early_ioremap((unsigned long)phys,
-+							sizeof(*systab32));
- 		if (systab32 == NULL) {
- 			pr_err("Couldn't map the system table!\n");
- 			return -ENOMEM;
-@@ -539,7 +557,7 @@ static int __init efi_systab_init(void *phys)
- 		efi_systab.nr_tables = systab32->nr_tables;
- 		efi_systab.tables = systab32->tables;
- 
--		early_iounmap(systab32, sizeof(*systab32));
-+		efi_early_iounmap(systab32, sizeof(*systab32));
- 	}
- 
- 	efi.systab = &efi_systab;
-@@ -619,13 +637,16 @@ static int __init efi_runtime_init(void)
- 	 * address of several of the EFI runtime functions, needed to
- 	 * set the firmware into virtual mode.
- 	 */
--	if (efi_enabled(EFI_64BIT))
--		rv = efi_runtime_init64();
--	else
--		rv = efi_runtime_init32();
- 
--	if (rv)
--		return rv;
-+	if (efi_enabled(EFI_DIRECT)) {
-+		if (efi_enabled(EFI_64BIT))
-+			rv = efi_runtime_init64();
-+		else
-+			rv = efi_runtime_init32();
-+
-+		if (rv)
-+			return rv;
-+	}
- 
- 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- 
-@@ -634,6 +655,9 @@ static int __init efi_runtime_init(void)
- 
- static int __init efi_memmap_init(void)
- {
-+	if (!efi_enabled(EFI_DIRECT))
-+		return 0;
-+
- 	/* Map the EFI memory map */
- 	memmap.map = early_ioremap((unsigned long)memmap.phys_map,
- 				   memmap.nr_map * memmap.desc_size);
-@@ -739,14 +763,14 @@ void __init efi_init(void)
- 	/*
- 	 * Show what we know for posterity
- 	 */
--	c16 = tmp = early_ioremap(efi.systab->fw_vendor, 2);
-+	c16 = tmp = efi_early_ioremap(efi.systab->fw_vendor, 2);
- 	if (c16) {
- 		for (i = 0; i < sizeof(vendor) - 1 && *c16; ++i)
- 			vendor[i] = *c16++;
- 		vendor[i] = '\0';
- 	} else
- 		pr_err("Could not map the firmware vendor!\n");
--	early_iounmap(tmp, 2);
-+	efi_early_iounmap(tmp, 2);
- 
- 	pr_info("EFI v%u.%.02u by %s\n",
- 		efi.systab->hdr.revision >> 16,
-@@ -1187,6 +1211,9 @@ static void __init __efi_enter_virtual_mode(void)
- 
- void __init efi_enter_virtual_mode(void)
- {
-+	if (!efi_enabled(EFI_DIRECT))
-+		return;
-+
- 	if (efi_setup)
- 		kexec_enter_virtual_mode();
- 	else
-@@ -1219,6 +1246,9 @@ u64 efi_mem_attributes(unsigned long phys_addr)
- 	efi_memory_desc_t *md;
- 	void *p;
- 
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		md = p;
- 		if ((md->phys_addr <= phys_addr) &&
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 6c100ff..4113c4e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -893,12 +893,13 @@ extern int __init efi_setup_pcdp_console(char *);
-  * possible, remove EFI-related code altogether.
-  */
- #define EFI_BOOT		0	/* Were we booted from EFI? */
--#define EFI_SYSTEM_TABLES	1	/* Can we use EFI system tables? */
--#define EFI_CONFIG_TABLES	2	/* Can we use EFI config tables? */
--#define EFI_RUNTIME_SERVICES	3	/* Can we use runtime services? */
--#define EFI_MEMMAP		4	/* Can we use EFI memory map? */
--#define EFI_64BIT		5	/* Is the firmware 64-bit? */
--#define EFI_ARCH_1		6	/* First arch-specific bit */
-+#define EFI_DIRECT		1	/* Can we access EFI directly? */
-+#define EFI_SYSTEM_TABLES	2	/* Can we use EFI system tables? */
-+#define EFI_CONFIG_TABLES	3	/* Can we use EFI config tables? */
-+#define EFI_RUNTIME_SERVICES	4	/* Can we use runtime services? */
-+#define EFI_MEMMAP		5	/* Can we use EFI memory map? */
-+#define EFI_64BIT		6	/* Is the firmware 64-bit? */
-+#define EFI_ARCH_1		7	/* First arch-specific bit */
- 
- #ifdef CONFIG_EFI
- /*
+0xbff7fffff7afffff
+
+Who made it contain that nuisance of a pointer which thinks it is
+->get_variable, huh? If only I could get my hands on that guy! :-P
+
+Ok, seriously, how reproducible is this? Can you reproduce with the
+latest upstream kernel too, i.e. 3.15-rc5+?
+
+Thanks.
+
+(leaving in the rest for reference).
+
+> [  +0.000056] RBP: ffff880400f4be80 R08: 0000000000000000 R09:
+> ffff880400f4bec0
+> [  +0.000055] R10: 0000000000000000 R11: 0000000000000246 R12:
+> ffff8804040e3400
+> [  +0.000056] R13: 0000000000000000 R14: ffff880400f4bec0 R15:
+> 000000000009b000
+> [  +0.002960] FS:  00007fb6167c97c0(0000) GS:ffff88041e200000(0000)
+> knlGS:0000000000000000
+> [  +0.002958] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [  +0.003177] CR2: 00007fb61581f4c0 CR3: 000000000009b000 CR4:
+> 00000000001427e0
+> [  +0.003258] Stack:
+> [  +0.003257]  0000000000000201 8000000000000065 ffff880400000000
+> ffff880100000000
+> [  +0.003328]  0000000000000000 0000000000000000 ffff880400f4be50
+> 0000000080050033
+> [  +0.003354]  0000000000ff0000 0000000000000000 00ffffffffffffff
+> 0000000000000000
+> [  +0.003368] Call Trace:
+> [  +0.003389]  [<ffffffff81064901>] ? virt_efi_get_variable+0x51/0x80
+> [  +0.003353]  [<ffffffff813dbb71>] efivar_entry_size+0x41/0x80
+> [  +0.003315]  [<ffffffff81245659>] efivarfs_file_read+0x49/0x100
+> [  +0.003326]  [<ffffffff811ba797>] vfs_read+0x97/0x160
+> [  +0.003305]  [<ffffffff811bb2e9>] SyS_read+0x59/0xd0
+> [  +0.003263]  [<ffffffff81517629>] system_call_fastpath+0x16/0x1b
+> [  +0.003239] Code: 89 c8 48 89 f1 80 3d e8 16 7d 00 00 74 1d 4c 89 3d
+> c7 16 7d 00 41 0f 20 df 4c 89 3d c4 16 7d 00 4c 8b 3d c5 16 7d 00 41 0f
+> 22 df <ff> d7 80 3d c0 16 7d 00 00 74 41 4c 8b 3d a7 16 7d 00 41 0f 22
+> [  +0.003648] RIP  [<ffffffff810655af>] efi_call5+0x6f/0xf0
+> [  +0.003511]  RSP <ffff880400f4bdb0>
+> [  +0.024630] ---[ end trace 3670998c9a49abb7 ]---
+> [  +0.000005] note: systemd-udevd[30835] exited with preempt_count 2
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
+> 
+
 -- 
-1.7.10.4
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
