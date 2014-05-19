@@ -1,63 +1,56 @@
-From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [GIT PULL] EFI changes for v3.16
-Date: Mon, 19 May 2014 15:47:31 -0700
-Message-ID: <537A8A03.8060604@zytor.com>
-References: <20140503130447.GW26088@console-pimps.org> <20140519105129.GF4798@console-pimps.org>
+Date: Tue, 20 May 2014 01:10:12 +0200
+Message-ID: <20140519231012.GF6311@pd.tnic>
+References: <20140503130447.GW26088@console-pimps.org>
+ <20140519105129.GF4798@console-pimps.org>
+ <537A8A03.8060604@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140519105129.GF4798-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <537A8A03.8060604-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 05/19/2014 03:51 AM, Matt Fleming wrote:
-> On Sat, 03 May, at 02:04:47PM, Matt Fleming wrote:
->> Folks, please queue the following change for v3.16 from Borislav that
->> uses the more strict kernel_fpu_{begin,end}() instead of the __*
->> verisons that won't catch buggy use in interrupt context.
->>
->> The following changes since commit e33655a386ed3b26ad36fb97a47ebb1c2ca1e928:
->>
->>   efivars: Add compatibility code for compat tasks (2014-04-17 13:53:53 +0100)
->>
->> are available in the git repository at:
->>
->>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
->>
->> for you to fetch changes up to baa916f39b50ad91661534652110df40396acda0:
->>
->>   x86/efi: Check for unsafe dealing with FPU state in irq ctxt (2014-05-03 06:39:25 +0100)
->>
->> ----------------------------------------------------------------
->>  * Use the more strict FPU handling functions before invoking EFI
->>    services to catch misuse in irq context - Borislav Petkov
+On Mon, May 19, 2014 at 03:47:31PM -0700, H. Peter Anvin wrote:
+> >     efi_call can happen in an irq context (pstore) and there we really need
+> >     to make sure we're not scribbling over FPU state while we've interrupted
+> >     a thread or kernel mode with a live FPU state. Therefore, use the
+> >     kernel_fpu_begin/end() variants which do that check.
 > 
-> Ping?
+> How on earth does this solve anything?  The only thing we add here is a
+> WARN_ON_ONCE()... but the above text already tells us we have a problem.
 > 
+> It seems, rather, that we need to figure out how to deal with a pstore
+> in this case.  There are a few possibilities:
+> 
+> 1. We could keep an XSAVE buffer area around for this particular use.
+>    I am *assuming* we don't let more than one CPU into EFI, because I
+>    cannot for my life imagine that this is safe in typical CPUs.
+> 
+> 2. Drop the pstore on the floor if !irq_fpu_usable().
+> 
+> 3. Allow the pstore, then die (on the assumption that we're dead
+>    anyway.)
+> 
+> Comments?
 
->     efi_call can happen in an irq context (pstore) and there we really need
->     to make sure we're not scribbling over FPU state while we've interrupted
->     a thread or kernel mode with a live FPU state. Therefore, use the
->     kernel_fpu_begin/end() variants which do that check.
+The question is, why can't that pstore mumbo jumbo go and do its dance
+in !irq context?
 
-How on earth does this solve anything?  The only thing we add here is a
-WARN_ON_ONCE()... but the above text already tells us we have a problem.
+And how useful is the whole deal really, btw? I wanted to use it for
+saving oopses into it, for example, but Tony said its write speed is
+horribly low for that.
 
-It seems, rather, that we need to figure out how to deal with a pstore
-in this case.  There are a few possibilities:
+So why do we even bother with this thing and do the dance in irq context
+for it? Is it worth it at all?
 
-1. We could keep an XSAVE buffer area around for this particular use.
-   I am *assuming* we don't let more than one CPU into EFI, because I
-   cannot for my life imagine that this is safe in typical CPUs.
+-- 
+Regards/Gruss,
+    Boris.
 
-2. Drop the pstore on the floor if !irq_fpu_usable().
-
-3. Allow the pstore, then die (on the assumption that we're dead
-   anyway.)
-
-Comments?
-
-	-hpa
+Sent from a fat crate under my desk. Formatting is fine.
+--
