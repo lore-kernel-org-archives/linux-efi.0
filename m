@@ -1,91 +1,81 @@
-From: "Jan Beulich" <JBeulich@suse.com>
-Subject: Re: [PATCH v4 3/5] xen: Put EFI machinery in place
-Date: Mon, 19 May 2014 14:43:55 +0100
-Message-ID: <537A26BB0200007800013AAE@mail.emea.novell.com>
+From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [Xen-devel] [PATCH v4 3/5] xen: Put EFI machinery in place
+Date: Mon, 19 May 2014 14:47:47 +0100
+Message-ID: <537A27A30200007800013AD9@mail.emea.novell.com>
 References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
  <1400272904-31121-4-git-send-email-daniel.kiper@oracle.com>
+ <537A0974.40302@citrix.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1400272904-31121-4-git-send-email-daniel.kiper@oracle.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <537A0974.40302-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Kiper <daniel.kiper@oracle.com>
-Cc: david.vrabel@citrix.com, ian.campbell@citrix.com, stefano.stabellini@eu.citrix.com, jeremy@goop.org, matt.fleming@intel.com, x86@kernel.org, tglx@linutronix.de, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, konrad.wilk@oracle.com, eshelton@pobox.com, mingo@redhat.com, mjg59@srcf.ucam.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, hpa@zytor.com
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Cooper <andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
->>> On 16.05.14 at 22:41, <daniel.kiper@oracle.com> wrote:
-> --- a/drivers/xen/Kconfig
-> +++ b/drivers/xen/Kconfig
-> @@ -240,4 +240,7 @@ config XEN_MCE_LOG
->  config XEN_HAVE_PVMMU
->         bool
->  
-> +config XEN_EFI
-> +	def_bool X86_64 && EFI
+>>> On 19.05.14 at 15:39, <andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org> wrote:
+> On 16/05/14 21:41, Daniel Kiper wrote:
+>> @@ -0,0 +1,374 @@
+>> +/*
+>> + * EFI support for Xen.
+>> + *
+>> + * Copyright (C) 1999 VA Linux Systems
+>> + * Copyright (C) 1999 Walt Drummond <drummond-jCdQPDEk3idBDgjK7y7TUQ@public.gmane.org>
+>> + * Copyright (C) 1999-2002 Hewlett-Packard Co.
+>> + *	David Mosberger-Tang <davidm-sDzT885Ts8HQT0dZR+AlfA@public.gmane.org>
+>> + *	Stephane Eranian <eranian-sDzT885Ts8HQT0dZR+AlfA@public.gmane.org>
+>> + * Copyright (C) 2005-2008 Intel Co.
+>> + *	Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> + *	Bibo Mao <bibo.mao-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> + *	Chandramouli Narayanan <mouli-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+>> + *	Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> + * Copyright (C) 2011 Novell Co.
+>> + *	Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+>> + * Copyright (C) 2011-2012 Oracle Co.
+>> + *	Liang Tang <liang.tang-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+>> + * Copyright (c) 2014 Daniel Kiper, Oracle Corporation
+>> + */
+>> +
+>> +#include <linux/bug.h>
+>> +#include <linux/efi.h>
+>> +#include <linux/init.h>
+>> +#include <linux/string.h>
+>> +
+>> +#include <xen/interface/xen.h>
+>> +#include <xen/interface/platform.h>
+>> +
+>> +#include <asm/xen/hypercall.h>
+>> +
+>> +#define call (op.u.efi_runtime_call)
+> 
+> I think not.
 
-Constructs like this are bogus - they needlessly add a line to .config
-when the expression evaluates to false.
+??? (Read: What's wrong with putting this shortcut in place?)
 
-config XEN_EFI
-	def_bool y
-	depends on X86_64 && EFI
+>> +#define DECLARE_CALL(what) \
+>> +	struct xen_platform_op op; \
+>> +	op.cmd = XENPF_efi_runtime_call; \
+>> +	call.function = XEN_EFI_##what; \
+>> +	call.misc = 0
+> 
+> Macros like this which explicitly create local variable with implicit
+> names are evil when reading code.
+> 
+> If you want to do initialisation like this, then at least do something like:
+> 
+> #define INIT_EFI_CALL(what) \
+> { .cmd = XENPF_efi_runtime_call, \
+>    .u.efi_runtime_call.function = XEN_EFI_##what, \
+>    .u.efi_runtime_call.misc = 0 }
+> 
+> And use it as:
+> 
+> struct xen_platform_op op = INIT_EFI_CALL(foo);
 
-is what avoids this.
-
-> +static efi_status_t xen_efi_get_variable(efi_char16_t *name,
-> +					 efi_guid_t *vendor,
-> +					 u32 *attr,
-> +					 unsigned long *data_size,
-> +					 void *data)
-> +{
-> +	int err;
-> +	DECLARE_CALL(get_variable);
-> +
-> +	set_xen_guest_handle(call.u.get_variable.name, name);
-> +	BUILD_BUG_ON(sizeof(*vendor) !=
-> +		     sizeof(call.u.get_variable.vendor_guid));
-> +	memcpy(&call.u.get_variable.vendor_guid, vendor, sizeof(*vendor));
-> +	call.u.get_variable.size = *data_size;
-> +	set_xen_guest_handle(call.u.get_variable.data, data);
-> +	err = HYPERVISOR_dom0_op(&op);
-> +	if (err)
-> +		return EFI_UNSUPPORTED;
-> +
-> +	*data_size = call.u.get_variable.size;
-> +	*attr = call.misc; /* misc in struction is U32 variable*/
-
-Iirc attr is an optional output, i.e. can be NULL, which hence needs
-to be checked for here. I remember that this was broken in the
-original EFI patch in our trees, so perhaps it would be good for you
-to re-check against recent sources of ours for eventual other bug
-fixes.
-
-> +static efi_status_t xen_efi_query_variable_info(u32 attr,
-> +						u64 *storage_space,
-> +						u64 *remaining_space,
-> +						u64 *max_variable_size)
-> +{
-> +	int err;
-> +	DECLARE_CALL(query_variable_info);
-> +
-> +	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
-> +		return EFI_UNSUPPORTED;
-> +
-
-Here's a similar case - there is
-
-	call.u.query_variable_info.attr = attr;
-
-missing.
-
-> +static efi_char16_t vendor[100] __initdata;
-> +static const efi_char16_t unknown[] __initconst =
-> +			{'U', 'N', 'K', 'N', 'O', 'W', 'N', '\0'};
-
-If you enforced -fshort-wchar for the file's compilation, this could be
-written in a more legible manner (and probably you wouldn't need a
-named variable at all).
+That's minimal redundancy as a goal versus (to you, but not to me)
+legibility.
 
 Jan
