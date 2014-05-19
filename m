@@ -1,72 +1,39 @@
-From: Francis Moreau <francis.moro-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: kernel 3.14.2 oops: seems related to EFI
-Date: Mon, 19 May 2014 09:09:58 +0200
-Message-ID: <5379AE46.3000407@gmail.com>
-References: <53777F7B.8060407@gmail.com> <20140518134206.GA8040@pd.tnic>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [GIT PULL] EFI changes for arm64
+Date: Mon, 19 May 2014 11:50:42 +0100
+Message-ID: <20140519105042.GE4798@console-pimps.org>
+References: <20140430200332.GO26088@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140518134206.GA8040-fF5Pk5pvG8Y@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140430200332.GO26088-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 05/18/2014 03:42 PM, Borislav Petkov wrote:
-> On Sat, May 17, 2014 at 05:25:47PM +0200, Francis Moreau wrote:
->> [  +0.018677] general protection fault: 0000 [#1] PREEMPT SMP
->> [  +0.000068] Modules linked in: usb_storage tun raid1 md_mod loop fuse
->> joydev coretemp hwmon arc4 intel_rapl x86_pkg_temp_thermal
->> intel_powerclamp kvm_intel nls_iso8859_1 nls_cp437 iTCO_wdt kvm vfat fat
->> iTCO_vendor_support iwldvm uvcvideo led_class crct10dif_pclmul
->> crc32_pclmul crc32c_intel ghash_clmulni_intel mac80211 videobuf2_vmalloc
->> videobuf2_memops videobuf2_core aesni_intel videodev aes_x86_64
->> snd_hda_codec_hdmi lrw gf128mul mousedev glue_helper btusb
->> snd_hda_codec_via ablk_helper media cryptd iwlwifi snd_hda_codec_generic
->> bluetooth psmouse microcode i2c_i801 serio_raw cfg80211 6lowpan_iphc
->> rtsx_pci_ms r8169 memstick rfkill lpc_ich mii snd_hda_intel
->> snd_hda_codec thermal snd_hwdep wmi snd_pcm tpm_infineon snd_timer
->> tpm_tis mei_me snd tpm mei shpchp evdev soundcore processor battery
->> mac_hid ac
->> [  +0.000803]  ext4 crc16 mbcache jbd2 hid_generic usbhid hid bcache
->> sd_mod sr_mod crc_t10dif cdrom crct10dif_common rtsx_pci_sdmmc mmc_core
->> atkbd libps2 ahci libahci ehci_pci libata xhci_hcd ehci_hcd scsi_mod
->> rtsx_pci usbcore usb_common i8042 serio i915 video button intel_gtt
->> i2c_algo_bit drm_kms_helper drm i2c_core
->> [  +0.000328] CPU: 0 PID: 30835 Comm: systemd-udevd Not tainted
->> 3.14.2-1-ARCH #1
->> [  +0.000064] Hardware name: CLEVO CO.                        W55xEU
->>                       /W55xEU                          , BIOS 4.6.5
->> 03/05/2013
->> [  +0.000102] task: ffff880405ee6bf0 ti: ffff880400f4a000 task.ti:
->> ffff880400f4a000
->> [  +0.000060] RIP: 0010:[<ffffffff810655af>]  [<ffffffff810655af>]
->> efi_call5+0x6f/0xf0
->> [  +0.000071] RSP: 0018:ffff880400f4bdb0  EFLAGS: 00010002
->> [  +0.000045] RAX: 0000000080050033 RBX: ffff8804040e3000 RCX:
->> ffff8804040e3000
->> [  +0.000055] RDX: ffff8804040e3400 RSI: ffff8804040e3000 RDI:
->> bff7fffff7afffff
+On Wed, 30 Apr, at 09:03:32PM, Matt Fleming wrote:
+> Hi folks,
 > 
-> So you get a #GP while executing call *rdi and %rdi is supposed to
-> contain ->get_variable. But instead it contains some very funky shit:
+> I pulled the arm64 EFI changes into the following topic branch. Catalin
+> was happy for this to go through tip, which definitely makes things
+> easier for the next merge window because of the dependency these patches
+> have on tip/x86/efi.
 > 
-> 0xbff7fffff7afffff
+> The following changes since commit e33655a386ed3b26ad36fb97a47ebb1c2ca1e928:
 > 
-> Who made it contain that nuisance of a pointer which thinks it is
-> ->get_variable, huh? If only I could get my hands on that guy! :-P
+>   efivars: Add compatibility code for compat tasks (2014-04-17 13:53:53 +0100)
 > 
-> Ok, seriously, how reproducible is this?
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git arm64-efi
+> 
+> for you to fetch changes up to 345c736edd07b657a8c48190baed2719b85d0938:
+> 
+>   efi/arm64: ignore dtb= when UEFI SecureBoot is enabled (2014-04-30 19:57:06 +0100)
 
-I don't really know how to reproduce this, I only can say that it
-usually happens while partitioning the loop device or perhaps when the
-kernel reads the partition table afterwards.
+Ping?
 
-> Can you reproduce with the
-> latest upstream kernel too, i.e. 3.15-rc5+?
-
-I don't know, I can't really afford to configure/compile/test this new
-kernel, sorry.
-
-Thanks
+-- 
+Matt Fleming, Intel Open Source Technology Center
