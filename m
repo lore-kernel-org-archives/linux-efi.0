@@ -1,50 +1,29 @@
-From: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v4 3/5] xen: Put EFI machinery in place
-Date: Tue, 20 May 2014 13:10:16 +0100
-Message-ID: <537B4628.7020008@citrix.com>
-References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com> <1400272904-31121-4-git-send-email-daniel.kiper@oracle.com> <537B2494.2080702@citrix.com> <20140520112933.GF3529@olila.local.net-space.pl>
+From: Francis Moreau <francis.moro@gmail.com>
+Subject: Re: kernel 3.14.2 oops: seems related to EFI
+Date: Tue, 20 May 2014 14:12:49 +0200
+Message-ID: <537B46C1.8020802@gmail.com>
+References: <53777F7B.8060407@gmail.com> <20140518134206.GA8040@pd.tnic> <5379AE46.3000407@gmail.com> <20140520115421.GH4798@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140520112933.GF3529-fJNZiO034lp9pOct4yEdx/3oZC3j2Omk@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140520115421.GH4798@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, linux-efi <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 20/05/14 12:29, Daniel Kiper wrote:
-> 
->>> +	if (!xen_initial_domain() || HYPERVISOR_dom0_op(&op))
->>> +		return NULL;
+On 05/20/2014 01:54 PM, Matt Fleming wrote:
+> On Mon, 19 May, at 09:09:58AM, Francis Moreau wrote:
 >>
->> 	if (!xen_initial_domain())
->> 		return NULL;
->>
->> 	if (HYPERVISOR_dom0_op(&op) < 0)
->> 		return NULL;
+>> I don't know, I can't really afford to configure/compile/test this new
+>> kernel, sorry.
 > 
-> What is wrong with my if?
-
-Style.  The function returns -ve on error not a boolean success/fail.
-
->>> +
->>> +	/* Here we know that Xen runs on EFI platform. */
->>> +
->>> +	efi = efi_xen;
->>> +
->>> +	op.cmd = XENPF_firmware_info;
->>> +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
->>> +	op.u.firmware_info.index = XEN_FW_EFI_VENDOR;
->>> +	info->vendor.bufsz = sizeof(vendor);
->>> +	set_xen_guest_handle(info->vendor.name, vendor);
->>> +
->>> +	if (!HYPERVISOR_dom0_op(&op)) {
->>
->> if (HYPERVISOR_dom0_op(&op) == 0)
+> It would be useful to know whether this issue still occurs when booting
+> with the efi=old_map kernel parameter.
 > 
-> Ditto?
 
-Again, style.
+ok I can try to boot with that parameter and see if the issue happens
+again. Unfortunately if it doesn't, we couldn't tell.
 
-David
+Thanks
