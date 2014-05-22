@@ -1,41 +1,48 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for v3.16
-Date: Tue, 20 May 2014 21:27:55 +0100
-Message-ID: <20140520202755.GI4798@console-pimps.org>
-References: <20140503130447.GW26088@console-pimps.org>
- <20140519105129.GF4798@console-pimps.org>
- <537A8A03.8060604@zytor.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v4 1/5] efi: Introduce EFI_DIRECT flag
+Date: Thu, 22 May 2014 08:26:01 +0100
+Message-ID: <20140522072601.GP4798@console-pimps.org>
+References: <1400272904-31121-1-git-send-email-daniel.kiper@oracle.com>
+	<1400272904-31121-2-git-send-email-daniel.kiper@oracle.com>
+	<537A2A28.4010903@citrix.com>
+	<20140519210255.GC3529@olila.local.net-space.pl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
 Content-Disposition: inline
-In-Reply-To: <537A8A03.8060604-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20140519210255.GC3529@olila.local.net-space.pl>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
+To: Daniel Kiper <daniel.kiper@oracle.com>
+Cc: mjg59@srcf.ucam.org, jeremy@goop.org, linux-efi@vger.kernel.org, ian.campbell@citrix.com, x86@kernel.org, linux-kernel@vger.kernel.org, matt.fleming@intel.com, tglx@linutronix.de, David Vrabel <david.vrabel@citrix.com>, jbeulich@suse.com, hpa@zytor.com, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, mingo@redhat.com, stefano.stabellini@eu.citrix.com, eshelton@pobox.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 19 May, at 03:47:31PM, H. Peter Anvin wrote:
+On Mon, 19 May, at 11:02:55PM, Daniel Kiper wrote:
 > 
-> How on earth does this solve anything?  The only thing we add here is a
-> WARN_ON_ONCE()... but the above text already tells us we have a problem.
-> 
-> It seems, rather, that we need to figure out how to deal with a pstore
-> in this case.  There are a few possibilities:
-> 
-> 1. We could keep an XSAVE buffer area around for this particular use.
->    I am *assuming* we don't let more than one CPU into EFI, because I
->    cannot for my life imagine that this is safe in typical CPUs.
+> It is correct. As I said earlier: in case of !efi_enabled(EFI_DIRECT) some
+> structures are created artificially and they live in virtual address space.
+> So that is why they should not be mapped.
  
-Correct. This is actually prohibited by the spec, so we have a lock to
-enforce it.
+So, exploring Jan's idea, is it not possible to store the physical
+address and have early_ioremap() just work? Even if they're mapping in
+virtual address space they must have a corresponding physical address.
 
-> 2. Drop the pstore on the floor if !irq_fpu_usable().
-> 
-> 3. Allow the pstore, then die (on the assumption that we're dead
->    anyway.)
+We really need to be keeping these kinds of special code paths to a
+minimum. Unless absolutely necessary there should be just one way to do
+things.
 
-Personally, I'd prefer 2, but I'm open to suggestions.
+> I was going to have EFI_DIRECT close to EFI_BOOT which is quite generic
+> and platform independent name like EFI_BOOT. However, I do not insist
+> on having it in that place.
+
+Right, please don't shuffle these bits.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
