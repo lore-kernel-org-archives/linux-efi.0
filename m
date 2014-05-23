@@ -1,43 +1,49 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: arm64: memory node handling cleanup
-Date: Fri, 23 May 2014 16:19:45 +0100
-Message-ID: <1400858385-32079-1-git-send-email-leif.lindholm@linaro.org>
+Subject: Re: EFI_STUB fails to boot non-EFI on arm64
+Date: Fri, 23 May 2014 16:45:51 +0100
+Message-ID: <20140523154551.GT4179@bivouac.eciton.net>
+References: <20140523094513.GC9252@arm.com>
+ <20140523131656.GR4179@bivouac.eciton.net>
+ <20140523134720.GA9256@arm.com>
+ <20140523150331.GS4179@bivouac.eciton.net>
+ <CAKv+Gu-4ExoNfGVJzUK4v06XD5V3nYfRetoefY0RuFsN1CUOzg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-4ExoNfGVJzUK4v06XD5V3nYfRetoefY0RuFsN1CUOzg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Remove unused variable, and convert strncmp() to strcmp(), since the
-former is not available in arm zImage.
+On Fri, May 23, 2014 at 05:17:39PM +0200, Ard Biesheuvel wrote:
+> >> Can we add another of detecting whether it's an EFI application and
+> >> avoid calling efi_init()? I can see x86 sets some efi_loader_signature
+> >> string in exit_boot() and checks against it later when calling
+> >> efi_init().
+> >
+> > Well, I agree that we shouldn't be spewing error messages for expected
+> > operation, but efi_init() is the function we call to determine
+> > whether we _are_ booting via UEFI - and it sets flags accordingly for
+> > the efi_enabled() macro.
+> >
+> 
+> Considering that
+> 
+> a) the raw Image loader and the stub enter the kernel through
+> different entry points (i.e., offset #0 and whatever entry point is
+> specified in the PE/COFF header, respectively), and
+> b) there is no decompressor etc involved so we jump straight into the
+> kernel startup code
+> c) head.S already deals with a similar problem, i.e., storing the CPU boot mode
+> 
+> I would assume it shouldn't be so difficult to set a bit somewhere
+> indicating which case we are dealing with?
 
-Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/fdt.c |    7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+That would certainly be possible, but what would be the benefit of
+having two separate mechanisms for determining whether we are booting
+via UEFI - which could potentially end up disagreeing?
 
-diff --git a/drivers/firmware/efi/fdt.c b/drivers/firmware/efi/fdt.c
-index 5c6a8e8..ab12870 100644
---- a/drivers/firmware/efi/fdt.c
-+++ b/drivers/firmware/efi/fdt.c
-@@ -63,15 +63,14 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 	 */
- 	prev = 0;
- 	for (;;) {
--		const char *type, *name;
--		int len;
-+		const char *type;
- 
- 		node = fdt_next_node(fdt, prev, NULL);
- 		if (node < 0)
- 			break;
- 
--		type = fdt_getprop(fdt, node, "device_type", &len);
--		if (type && strncmp(type, "memory", len) == 0) {
-+		type = fdt_getprop(fdt, node, "device_type", NULL);
-+		if (type && strcmp(type, "memory") == 0) {
- 			fdt_del_node(fdt, node);
- 			continue;
- 		}
--- 
-1.7.10.4
+/
+    Leif
