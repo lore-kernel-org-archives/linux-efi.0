@@ -1,38 +1,47 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI changes for arm64
-Date: Fri, 23 May 2014 23:23:52 +0100
-Message-ID: <20140523222352.GB23963@console-pimps.org>
+From: HUSAM AL SAYED <husamal60-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Your Urgent reply.
+Date: Sun, 25 May 2014 22:43:05 +0400
+Message-ID: <CAP1pScic_JcQyT6-1GkV56F1xwVKsaUhCs8FFGmfh6vCLEZBXA__10492.4142630354$1401043398$gmane$org@mail.gmail.com>
+Reply-To: Husamalsayed-NQqDYL4TTn4@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Catalin reports that the arm64 EFI changes in tip/arm64/efi are causing
-boot issues when trying to run on a non-EFI machine. The below fix from
-Leif skips the EFI code on such machines.
+Dear Friend,
 
-The following changes since commit 345c736edd07b657a8c48190baed2719b85d0938:
 
-  efi/arm64: ignore dtb= when UEFI SecureBoot is enabled (2014-04-30 19:57:06 +0100)
 
-are available in the git repository at:
+Compliments of the day.This mail May be a surprise to you Because you
+did not give me the permission to do so and Neither do you know me but
+before I tell you about myself I want you to please forgive me for
+sending this mail without your permission I have been in search of
+someone with this last name so when I saw you online, I was pushed to
+contact you and see how best we can assist each other. I am Mr. Husam
+Al Sayed, a Bank Officer here in U.A.E. I believe it is the wish of
+God for me to come across you now. I am having an important business
+discussion I wish to share with you which I  believe will interest
+you, because it is in connection with your last name and you are going
+to benefit from it.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git arm64-efi
+One Late peter who was among the death victims in the May 27 2006
+Earthquake disaster in Java, Indonesia that killed over 5,000 people.
+He was in Indonesia on a business trip and that was how he met his
+end. My bank management is yet to know about his death, I knew about
+it because he was my friend and I am his account officer.he did not
+mention any Next of Kin/ Heir when the account was opened, and he was
+not married and no children. Last week my Bank Management requested
+that he should give instructions on what to do about his funds,I know
+this will happen and that is why I have been looking for a means to
+handle the situation,
 
-for you to fetch changes up to 74bcc2499291d38b6253f9dbd6af33a195222208:
+If you are interested send me your private Email Address so that i can
+send you more details of the transaction,
+Thanks for your understanding
 
-  arm64: efi: only attempt efi map setup if booting via EFI (2014-05-23 15:29:43 +0100)
+I am waiting for your reply.
 
-----------------------------------------------------------------
-Leif Lindholm (1):
-      arm64: efi: only attempt efi map setup if booting via EFI
+Best regards,
 
- arch/arm64/kernel/efi.c | 3 +++
- 1 file changed, 3 insertions(+)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Mr. Husam Al Sayed
