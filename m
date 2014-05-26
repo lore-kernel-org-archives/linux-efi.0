@@ -1,47 +1,51 @@
-From: HUSAM AL SAYED <husamal60-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Your Urgent reply.
-Date: Sun, 25 May 2014 22:43:05 +0400
-Message-ID: <CAP1pScic_JcQyT6-1GkV56F1xwVKsaUhCs8FFGmfh6vCLEZBXA__10492.4142630354$1401043398$gmane$org@mail.gmail.com>
-Reply-To: Husamalsayed-NQqDYL4TTn4@public.gmane.org
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] export efi.flags to sysfs
+Date: Mon, 26 May 2014 16:39:35 +0800
+Message-ID: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Dear Friend,
 
+For efi=old_map and any old_map quirks like SGI UV in current
+tree kexec/kdump will fail because it depends on the new 1:1 mapping.
 
+Thus export the mapping method to sysfs so kexec tools can switch
+to original way to boot.
 
-Compliments of the day.This mail May be a surprise to you Because you
-did not give me the permission to do so and Neither do you know me but
-before I tell you about myself I want you to please forgive me for
-sending this mail without your permission I have been in search of
-someone with this last name so when I saw you online, I was pushed to
-contact you and see how best we can assist each other. I am Mr. Husam
-Al Sayed, a Bank Officer here in U.A.E. I believe it is the wish of
-God for me to come across you now. I am having an important business
-discussion I wish to share with you which I  believe will interest
-you, because it is in connection with your last name and you are going
-to benefit from it.
+Since we have efi.flags for all efi facilities so let's just export the
+efi.flags itself, it maybe useful for other arches and use cases.
 
-One Late peter who was among the death victims in the May 27 2006
-Earthquake disaster in Java, Indonesia that killed over 5,000 people.
-He was in Indonesia on a business trip and that was how he met his
-end. My bank management is yet to know about his death, I knew about
-it because he was my friend and I am his account officer.he did not
-mention any Next of Kin/ Heir when the account was opened, and he was
-not married and no children. Last week my Bank Management requested
-that he should give instructions on what to do about his funds,I know
-this will happen and that is why I have been looking for a means to
-handle the situation,
+Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c |    3 +++
+ 1 file changed, 3 insertions(+)
 
-If you are interested send me your private Email Address so that i can
-send you more details of the transaction,
-Thanks for your understanding
-
-I am waiting for your reply.
-
-Best regards,
-
-Mr. Husam Al Sayed
+Index: linux-2.6/drivers/firmware/efi/efi.c
+===================================================================
+--- linux-2.6.orig/drivers/firmware/efi/efi.c
++++ linux-2.6/drivers/firmware/efi/efi.c
+@@ -86,16 +86,19 @@ static ssize_t name##_show(struct kobjec
+ EFI_ATTR_SHOW(fw_vendor);
+ EFI_ATTR_SHOW(runtime);
+ EFI_ATTR_SHOW(config_table);
++EFI_ATTR_SHOW(flags);
+ 
+ static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
+ static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
+ static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
++static struct kobj_attribute efi_attr_flags = __ATTR_RO(flags);
+ 
+ static struct attribute *efi_subsys_attrs[] = {
+ 	&efi_attr_systab.attr,
+ 	&efi_attr_fw_vendor.attr,
+ 	&efi_attr_runtime.attr,
+ 	&efi_attr_config_table.attr,
++	&efi_attr_flags.attr,
+ 	NULL,
+ };
+ 
