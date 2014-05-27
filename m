@@ -1,51 +1,81 @@
-From: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] export efi.flags to sysfs
-Date: Tue, 27 May 2014 14:36:41 +0100
-Message-ID: <CAL01qpvqa-8u2MZ=8wE8gsiprFLbN4U3AbEX9+h7FuemXNR93Q@mail.gmail.com>
-References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
-	<20140527030058.GB2372@darkstar.nay.redhat.com>
+From: Francis Moreau <francis.moro-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: kernel 3.14.2 oops: seems related to EFI
+Date: Tue, 27 May 2014 16:02:29 +0200
+Message-ID: <53849AF5.8040904@gmail.com>
+References: <53777F7B.8060407@gmail.com> <20140518134206.GA8040@pd.tnic> <5379AE46.3000407@gmail.com> <20140520115421.GH4798@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140527030058.GB2372-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
+In-Reply-To: <20140520115421.GH4798-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 May 2014 04:00, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 05/26/14 at 04:39pm, Dave Young wrote:
+On 05/20/2014 01:54 PM, Matt Fleming wrote:
+> On Mon, 19 May, at 09:09:58AM, Francis Moreau wrote:
 >>
->> For efi=old_map and any old_map quirks like SGI UV in current
->> tree kexec/kdump will fail because it depends on the new 1:1 mapping.
->>
->> Thus export the mapping method to sysfs so kexec tools can switch
->> to original way to boot.
->>
->> Since we have efi.flags for all efi facilities so let's just export the
->> efi.flags itself, it maybe useful for other arches and use cases.
->
-> Rethink about this issue, export flags will expose the efi facility
-> macros to userspace, Matt, what's your opinion? It might be better to export
-> a file 'old_map' only which is '0|1'
+>> I don't know, I can't really afford to configure/compile/test this new
+>> kernel, sorry.
+> 
+> It would be useful to know whether this issue still occurs when booting
+> with the efi=old_map kernel parameter.
+> 
 
-Exporting efi.flags is a non-starter. Those flags are part of an
-internal interface and I'm not prepared to turn them into a userspace
-ABI that we can never, ever change without a massive amount of pain.
+the bug triggered:
 
-I've only vaguely been following along with the other thread, so please
-summarise everything again in your patch. Particularly, I need answers
-to the following questions,
+[  +0.002872] BUG: unable to handle kernel paging request at
+fffffffefd4a1e60
+[  +0.000066] IP: [<ffffffff810648f8>] virt_efi_get_variable+0x48/0x80
+[  +0.000054] PGD 280f067 PUD 0
+[  +0.000031] Oops: 0000 [#1] PREEMPT SMP
+[  +0.000039] Modules linked in: tun ses enclosure usb_storage loop fuse
+joydev coretemp hwmon arc4 nls_iso8859_1 nls_c
+[  +0.000691]  ac ext4 crc16 mbcache jbd2 hid_generic usbhid hid bcache
+sd_mod sr_mod crc_t10dif cdrom crct10dif_common
+[  +0.000289] CPU: 7 PID: 23293 Comm: systemd-udevd Tainted: G        W
+   3.14.4-1-ARCH #1
+[  +0.000057] Hardware name: CLEVO CO.                        W55xEU
+                      /W55xEU
+[  +0.000087] task: ffff88039557bae0 ti: ffff8802de764000 task.ti:
+ffff8802de764000
+[  +0.000050] RIP: 0010:[<ffffffff810648f8>]  [<ffffffff810648f8>]
+virt_efi_get_variable+0x48/0x80
+[  +0.000064] RSP: 0018:ffff8802de765e58  EFLAGS: 00010082
+[  +0.000037] RAX: fffffffefd4a1e18 RBX: ffff8800da88f000 RCX:
+0000000000000000
+[  +0.000048] RDX: ffff8800da88f400 RSI: ffff8800da88f000 RDI:
+00000000ffffffff
+[  +0.000048] RBP: ffff8802de765e80 R08: ffff8802de765ec0 R09:
+0000000000000000
+[  +0.000047] R10: 0000000000000000 R11: 0000000000000246 R12:
+ffff8800da88f400
+[  +0.000048] R13: 0000000000000000 R14: ffff8802de765ec0 R15:
+0000000000000000
+[  +0.000048] FS:  00007f10751057c0(0000) GS:ffff88041e3c0000(0000)
+knlGS:0000000000000000
+[  +0.000054] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[  +0.000040] CR2: fffffffefd4a1e60 CR3: 00000003c4afa000 CR4:
+00000000001407e0
+[  +0.000048] Stack:
+[  +0.000016]  ffff8800da88f000 ffff8802de765ec0 ffffffff81b27c20
+ffff8802de765f48
+[  +0.000060]  3bc93ec9a0004bba ffff8802de765ea8 ffffffff813dbc91
+ffff8800da88f000
+[  +0.000060]  00007fffdc30c104 0000000000000004 ffff8802de765ef8
+ffffffff81245779
+[  +0.000060] Call Trace:
+[  +0.000025]  [<ffffffff813dbc91>] efivar_entry_size+0x41/0x80
+[  +0.000044]  [<ffffffff81245779>] efivarfs_file_read+0x49/0x100
+[  +0.000044]  [<ffffffff811ba7d7>] vfs_read+0x97/0x160
+[  +0.000037]  [<ffffffff811bb329>] SyS_read+0x59/0xd0
+[  +0.000039]  [<ffffffff81517769>] system_call_fastpath+0x16/0x1b
+[  +0.000041] Code: ce 4d 89 c7 e8 9a 06 00 00 65 ff 04 25 a0 c7 00 00
+48 8b 05 1b d4 86 00 4d 89 f9 4d 89 f0 4c 89 e9
+[  +0.000335] RIP  [<ffffffff810648f8>] virt_efi_get_variable+0x48/0x80
+[  +0.000049]  RSP <ffff8802de765e58>
+[  +0.000026] CR2: fffffffefd4a1e60
+[  +0.016781] ---[ end trace 5a7017feeac75345 ]---
 
- - Are you trying to fix a kexec/kdump regression?
- - Does SGI UV work with kexec + UEFI at all?
-
-The 1:1 mapping was required to make kexec + EFI work in the first
-instance. If a machine implements the EFI 1:1 mapping, kexec should
-work. If it doesn't implement the 1:1 mapping, then it's probably not
-going to work, right?
-
-The crux of the question: are you trying to fix a regression?
-
-If not, then we just need to get SGI UV working with the EFI 1:1
-mapping. No?
+the sad thing is tht my system can't shutdown properly when it happens.
