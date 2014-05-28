@@ -1,45 +1,40 @@
 From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH] export efi.flags to sysfs
-Date: Wed, 28 May 2014 08:40:29 -0400
-Message-ID: <20140528124029.GF14863@redhat.com>
+Date: Wed, 28 May 2014 10:51:40 -0400
+Message-ID: <20140528145140.GN14863@redhat.com>
 References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
- <20140527133411.GG10994@redhat.com>
- <20140528021359.GC2820@darkstar.nay.redhat.com>
+ <20140527030058.GB2372@darkstar.nay.redhat.com>
+ <CAL01qpvqa-8u2MZ=8wE8gsiprFLbN4U3AbEX9+h7FuemXNR93Q@mail.gmail.com>
+ <20140528020935.GB2820@darkstar.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140528021359.GC2820-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
+In-Reply-To: <20140528020935.GB2820-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, May 28, 2014 at 10:13:59AM +0800, Dave Young wrote:
-> On 05/27/14 at 09:34am, Vivek Goyal wrote:
-> > On Mon, May 26, 2014 at 04:39:35PM +0800, Dave Young wrote:
-> > > 
-> > > For efi=old_map and any old_map quirks like SGI UV in current
-> > > tree kexec/kdump will fail because it depends on the new 1:1 mapping.
-> > > 
-> > > Thus export the mapping method to sysfs so kexec tools can switch
-> > > to original way to boot.
-> > > 
-> > > Since we have efi.flags for all efi facilities so let's just export the
-> > > efi.flags itself, it maybe useful for other arches and use cases.
-> > > 
-> > 
-> > Does it require any documentation in Documentation/ABI/..
-> 
-> Yes, it's necessary. Will do in next version.
-> 
-> I'm still discussing with Matt, exporting efi.flags seems not a good way
-> because they are more internal interfaces. 
-> 
-> Probably I should export only a file 'old_map' instead.
+On Wed, May 28, 2014 at 10:09:35AM +0800, Dave Young wrote:
 
-How does /sys/firmware/efi/runtime-map/* look like with old mapping? Can't
-we look at it and figure out if it is 1:1 or not.
+[..]
+> > I've only vaguely been following along with the other thread, so please
+> > summarise everything again in your patch. Particularly, I need answers
+> > to the following questions,
+> > 
+> >  - Are you trying to fix a kexec/kdump regression?
+> 
+> Somehow it is a regression.
+
+Well, it is a *regression*. Previously kdump would work with
+SGI UV machines as it used "noefi". Now kexec by default thinks that
+efi is enabled and 1:1 mappings are in place and that does not work
+with SGI UV machines.
+
+So just providing --noefi is not enough. Somebody needs to automatically
+figure out that this SGI machine does not contain 1:1 mapping and hence
+need to fall back to old mode. --noefi is good for override.
 
 Thanks
 Vivek
