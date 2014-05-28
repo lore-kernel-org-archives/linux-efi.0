@@ -1,44 +1,53 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: EFI_STUB fails to boot non-EFI on arm64
-Date: Wed, 28 May 2014 16:59:31 +0100
-Message-ID: <20140528155931.GA20523@arm.com>
-References: <20140523094513.GC9252@arm.com>
- <20140523131656.GR4179@bivouac.eciton.net>
- <20140523134720.GA9256@arm.com>
- <20140523150331.GS4179@bivouac.eciton.net>
+From: Alex Thorlton <athorlton@sgi.com>
+Subject: Re: [PATCH] export efi.flags to sysfs
+Date: Wed, 28 May 2014 10:51:04 -0500
+Message-ID: <20140528155104.GW10771@sgi.com>
+References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
+ <20140527030058.GB2372@darkstar.nay.redhat.com>
+ <CAL01qpvqa-8u2MZ=8wE8gsiprFLbN4U3AbEX9+h7FuemXNR93Q@mail.gmail.com>
+ <20140528020935.GB2820@darkstar.nay.redhat.com>
+ <20140528094712.GL2820@darkstar.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140523150331.GS4179-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20140528094712.GL2820@darkstar.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: "Fleming, Matt" <matt.fleming@intel.com>, "bp@alien8.de" <bp@alien8.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, vgoyal@redhat.com, Alex Thorlton <athorlton@sgi.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, May 23, 2014 at 04:03:31PM +0100, Leif Lindholm wrote:
-> On Fri, May 23, 2014 at 02:47:20PM +0100, Catalin Marinas wrote:
-> > Can we add another of detecting whether it's an EFI application and
-> > avoid calling efi_init()? I can see x86 sets some efi_loader_signature
-> > string in exit_boot() and checks against it later when calling
-> > efi_init().
+On Wed, May 28, 2014 at 05:47:12PM +0800, Dave Young wrote:
+> Add Alex to cc
 > 
-> Well, I agree that we shouldn't be spewing error messages for expected
-> operation, but efi_init() is the function we call to determine
-> whether we _are_ booting via UEFI - and it sets flags accordingly for
-> the efi_enabled() macro.
+> > > The 1:1 mapping was required to make kexec + EFI work in the first
+> > > instance. If a machine implements the EFI 1:1 mapping, kexec should
+> > > work. If it doesn't implement the 1:1 mapping, then it's probably not
+> > > going to work, right?
+> > > 
+> > > The crux of the question: are you trying to fix a regression?
+> > > 
+> > > If not, then we just need to get SGI UV working with the EFI 1:1
+> > > mapping. No?
 > 
-> My view is that this should be fixed in fdt_find_uefi_params(). A
-> single info message that we can't find evidence of UEFI should be
-> printed in the non-error case.
-> 
-> Like below?
+> Alex is working on a SGI UV fix for 1:1 mapping.
+> Question to Alex, if userspace can get the firmware version there might
+> be another option that kexec-tools checking the firmware version and
+> switch to old noefi way automaticlly. Is it doable?
 
-Why not move the efi_get_fdt_params call out of efi_init and into
-setup_arch via a wrapper? Then efi_get_fdt_params and efi_init can have
-useful return values, which allow us to distinguish between "My DT doesn't
-have the necessary UEFI properties" and "UEFI failed to initialise" without
-having to make some printks pr_info and others pr_err within efi_init
-itself..
+Userspace can get the firmware version easily, as long as our hwperf
+module is installed (as it should be on any supported SGI machine).  The
+firmware version can be found in /proc/sgi_uv/bios_version on any
+machine where hwperf is loaded.
 
-Will
+I don't know if that's really an ideal method for what you're doing, but
+that's the only way I know of to get the firmware version in userspace.
+
+A side note, though:  We're going to have to figure out some way to
+determine whether or not to apply the old_map quirk on during boot
+anyway, so if it's easiest for you to just determine how the original
+kernel was booted and key off of that, then I wouldn't worry about
+finding a different method to get the firmware version in userspace,
+unless there are other reasons for you to do it that way.
+
+- Alex
