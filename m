@@ -1,48 +1,91 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Dave Young <dyoung@redhat.com>
 Subject: Re: [PATCH] export efi.flags to sysfs
-Date: Thu, 29 May 2014 10:37:59 +0800
-Message-ID: <20140529023759.GF2068@darkstar.nay.redhat.com>
+Date: Thu, 29 May 2014 17:09:13 +0800
+Message-ID: <20140529090913.GK2068@darkstar.nay.redhat.com>
 References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
- <20140527030058.GB2372@darkstar.nay.redhat.com>
- <CAL01qpvqa-8u2MZ=8wE8gsiprFLbN4U3AbEX9+h7FuemXNR93Q@mail.gmail.com>
- <20140528020935.GB2820@darkstar.nay.redhat.com>
- <20140528094712.GL2820@darkstar.nay.redhat.com>
- <20140528155104.GW10771@sgi.com>
+ <20140527133411.GG10994@redhat.com>
+ <20140528021359.GC2820@darkstar.nay.redhat.com>
+ <20140528124029.GF14863@redhat.com>
+ <20140529020837.GB2068@darkstar.nay.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140528155104.GW10771-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20140529020837.GB2068@darkstar.nay.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: matt.fleming@intel.com, bp@alien8.de, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-> > Question to Alex, if userspace can get the firmware version there might
-> > be another option that kexec-tools checking the firmware version and
-> > switch to old noefi way automaticlly. Is it doable?
+On 05/29/14 at 10:08am, Dave Young wrote:
+> On 05/28/14 at 08:40am, Vivek Goyal wrote:
+> > On Wed, May 28, 2014 at 10:13:59AM +0800, Dave Young wrote:
+> > > On 05/27/14 at 09:34am, Vivek Goyal wrote:
+> > > > On Mon, May 26, 2014 at 04:39:35PM +0800, Dave Young wrote:
+> > > > > 
+> > > > > For efi=old_map and any old_map quirks like SGI UV in current
+> > > > > tree kexec/kdump will fail because it depends on the new 1:1 mapping.
+> > > > > 
+> > > > > Thus export the mapping method to sysfs so kexec tools can switch
+> > > > > to original way to boot.
+> > > > > 
+> > > > > Since we have efi.flags for all efi facilities so let's just export the
+> > > > > efi.flags itself, it maybe useful for other arches and use cases.
+> > > > > 
+> > > > 
+> > > > Does it require any documentation in Documentation/ABI/..
+> > > 
+> > > Yes, it's necessary. Will do in next version.
+> > > 
+> > > I'm still discussing with Matt, exporting efi.flags seems not a good way
+> > > because they are more internal interfaces. 
+> > > 
+> > > Probably I should export only a file 'old_map' instead.
+> > 
+> > How does /sys/firmware/efi/runtime-map/* look like with old mapping? Can't
+> > we look at it and figure out if it is 1:1 or not.
 > 
-> Userspace can get the firmware version easily, as long as our hwperf
-> module is installed (as it should be on any supported SGI machine).  The
-> firmware version can be found in /proc/sgi_uv/bios_version on any
-> machine where hwperf is loaded.
+> There's phys_addr and virt_addr, (virt_addr - phys_addr) will always be
+> -64G for 1:1 map, ioremapped addresses space is different.
 > 
-> I don't know if that's really an ideal method for what you're doing, but
-> that's the only way I know of to get the firmware version in userspace.
-> 
-> A side note, though:  We're going to have to figure out some way to
-> determine whether or not to apply the old_map quirk on during boot
-> anyway, so if it's easiest for you to just determine how the original
-> kernel was booted and key off of that, then I wouldn't worry about
-> finding a different method to get the firmware version in userspace,
-> unless there are other reasons for you to do it that way.
+> So this is a good idea, we can do this way to avoid more ABI.
 
-I'm dropping the idea to check firmware version in user space, your kernel
-fix to automaticlly select mapping method based on firmware version is still
-needed.
+Thinking more about it. There's another another way. ioremapped addresses can not
+be garanteed to be same in 2nd kernel, but for same kernel it's usually are same
+so in 2nd kernel just try ioremap the regions again hopefully it will work.
+At lease it works for me before Boris's patchset. So user can do some test if it
+works then just use it as is. If kexec/kdump test failed he can switch to use
+--noefi in userspace. Like below patch:
 
-I'm tending to use the idea from Vivek in kexec-tools to check the virt addr
-in /sys/firmware/efi/runtime-map/*/virt_addr
 
-Thanks
-Dave
+Subject: [PATCH 2/2] x86: kexec efi boot use ioremap in case efi=old_map
+
+In case efi=old_map or quirked system which use old ioremap kexec should
+hopefully work for same kernel but it is not garanteed to be true.
+
+It will help if one has to use old_map and he want kexec support as well.
+At the same time he has succesfully tested the kexec boot. If it does not
+work then user can switch to use kexec --noefi in userspace instead.
+
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ arch/x86/platform/efi/efi.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 3781dd3..d2eaa6f 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -1030,7 +1030,11 @@ static void __init kexec_enter_virtual_mode(void)
+ 	*/
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+-		efi_map_region_fixed(md); /* FIXME: add error handling */
++		/* For ioremapped ranges it will hopefully work with same kernel. */
++		if (efi_enabled(EFI_OLD_MEMMAP))
++			old_map_region(md);
++		else
++			efi_map_region_fixed(md); /* FIXME: add error handling */
+ 		get_systab_virt_addr(md);
+ 	}
+ 
