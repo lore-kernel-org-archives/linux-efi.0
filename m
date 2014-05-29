@@ -1,79 +1,52 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: EFI_STUB fails to boot non-EFI on arm64
-Date: Wed, 28 May 2014 21:42:39 +0100
-Message-ID: <20140528204239.GV4179@bivouac.eciton.net>
-References: <20140523094513.GC9252@arm.com>
- <20140523131656.GR4179@bivouac.eciton.net>
- <20140523134720.GA9256@arm.com>
- <20140523150331.GS4179@bivouac.eciton.net>
- <20140528155931.GA20523@arm.com>
- <20140528180525.GU4179@bivouac.eciton.net>
- <20140528184043.GB20523@arm.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] export efi.flags to sysfs
+Date: Thu, 29 May 2014 10:08:37 +0800
+Message-ID: <20140529020837.GB2068@darkstar.nay.redhat.com>
+References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
+ <20140527133411.GG10994@redhat.com>
+ <20140528021359.GC2820@darkstar.nay.redhat.com>
+ <20140528124029.GF14863@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140528184043.GB20523-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <20140528124029.GF14863-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, May 28, 2014 at 07:40:43PM +0100, Will Deacon wrote:
-> > Well, but (for the output part) my patch already did that?
-> > If the "Getting parameters from FDT:\n" was too verbose, we could
-> > just drop it, and have the same effect on output.
-> 
-> It's the pr_err which is annoying, not the "Getting parameters from FDT:\n"
-> message. Why should I have an error logged to my console when I was never
-> intending to boot using EFI anyway?
-
-The pr_err would now only be triggered if some UEFI properties were
-present and not others. I.e. if the UEFI stub loader failed miserably
-without detecting it, or something corrupted the DT later on. We would
-then be the proud owners of a system in an undefined state.
-
-> > Thing is - there is not really any error case available anywhere
-> > during the execution of efi_init() and its branches other than:
-> > - Information required for UEFI boot cannot be found.
-> > - Information exists, but is invalid.
-> > - Failed to early_memremap some UEFI regions into the kernel.
-> > which all amounts to "UEFI not available or something went wrong",
-> > rather than "UEFI failed to initialise".
-> 
-> Fine, but in this case the DT had the relevant properties which is a good
-> indication that the user was at least *trying* to boot using EFI, no?
-
-Having a partial/invalid DT is going to cause undefined behaviour
-regardless of your method of booting.
-
-And if the data provided proved inaccessible or broken, the symptom
-would be a complete lack of memblocks. So it may in fact not be
-possible for that pr_err to ever make it to the console :)
-
-> > If efi_init returns successfully, EFI_BOOT is set, and testable using
-> > the efi_enabled() macro.
+On 05/28/14 at 08:40am, Vivek Goyal wrote:
+> On Wed, May 28, 2014 at 10:13:59AM +0800, Dave Young wrote:
+> > On 05/27/14 at 09:34am, Vivek Goyal wrote:
+> > > On Mon, May 26, 2014 at 04:39:35PM +0800, Dave Young wrote:
+> > > > 
+> > > > For efi=old_map and any old_map quirks like SGI UV in current
+> > > > tree kexec/kdump will fail because it depends on the new 1:1 mapping.
+> > > > 
+> > > > Thus export the mapping method to sysfs so kexec tools can switch
+> > > > to original way to boot.
+> > > > 
+> > > > Since we have efi.flags for all efi facilities so let's just export the
+> > > > efi.flags itself, it maybe useful for other arches and use cases.
+> > > > 
+> > > 
+> > > Does it require any documentation in Documentation/ABI/..
 > > 
-> > The proper "UEFI failed to initialise" bit does not come until the
-> > early_initcall arm64_enter_virtual_mode(), and is indicated not by
-> > a return value, but by setting the flag indicating that
-> > EFI_RUNTIME_SERVICES are available, which is checked later in core
-> > code using the efi_enabled() macro.
+> > Yes, it's necessary. Will do in next version.
+> > 
+> > I'm still discussing with Matt, exporting efi.flags seems not a good way
+> > because they are more internal interfaces. 
+> > 
+> > Probably I should export only a file 'old_map' instead.
 > 
-> Sorry, I naively assumed that with a name like efi_init it might, you know,
-> initialise EFI? ;)
+> How does /sys/firmware/efi/runtime-map/* look like with old mapping? Can't
+> we look at it and figure out if it is 1:1 or not.
 
-Name cargo-culted from ia64/x86 by me, and from me by Mark :)
+There's phys_addr and virt_addr, (virt_addr - phys_addr) will always be
+-64G for 1:1 map, ioremapped addresses space is different.
 
-> > So moving the call to efi_get_fdt_params() would have little effect
-> > other than adding a third call site for UEFI bits in setup_arch().
-> 
-> I don't mind having the extra call site if it allows us to distinguish
-> errors from information.
+So this is a good idea, we can do this way to avoid more ABI.
 
-And I still don't see how an extra call site in setup_arch would make
-this more possible than it already is (with my suggested patch to the
-current version of the code).
-
-/
-    Leif
+Thanks
+Dave
