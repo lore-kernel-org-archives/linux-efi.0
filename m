@@ -1,52 +1,73 @@
 From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [PATCH] export efi.flags to sysfs
-Date: Fri, 30 May 2014 09:53:15 +0800
-Message-ID: <20140530015315.GA1985@darkstar.nay.redhat.com>
+Date: Fri, 30 May 2014 10:24:38 +0800
+Message-ID: <20140530022438.GC1985@darkstar.nay.redhat.com>
 References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
- <20140527030058.GB2372@darkstar.nay.redhat.com>
- <CAL01qpvqa-8u2MZ=8wE8gsiprFLbN4U3AbEX9+h7FuemXNR93Q@mail.gmail.com>
- <20140528020935.GB2820@darkstar.nay.redhat.com>
- <20140528145140.GN14863@redhat.com>
- <CAL01qpsb5_Gh31uqm7yB6HP2rKQkhFWWTu+U4JAR54XR5bfbZw@mail.gmail.com>
- <20140529125910.GE14570@redhat.com>
- <CAL01qpuNS0u89gaR9pCKUoCVRkADhPO4mZueEyK8nP84=OfDaA@mail.gmail.com>
+ <20140527133411.GG10994@redhat.com>
+ <20140528021359.GC2820@darkstar.nay.redhat.com>
+ <20140528124029.GF14863@redhat.com>
+ <20140529020837.GB2068@darkstar.nay.redhat.com>
+ <20140529124520.GC14570@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAL01qpuNS0u89gaR9pCKUoCVRkADhPO4mZueEyK8nP84=OfDaA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20140529124520.GC14570-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 05/29/14 at 02:10pm, Fleming, Matt wrote:
-> On 29 May 2014 13:59, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >
-> > Only second kernel boots with "noefi" and this parameter is appened by
-> > kexec-tools to second kernel command line. So first kernel will still
-> > boot *without noefi* and kexec-tools wil think that this system support
-> > booting second kernel with UEFI enabled.
-> >
-> > I don't know if we export /sys/firmware/efi/runtime-map/ in case of
-> > non 1:1 mapping or not. Dave and Boris will know better.
-> 
-> Looking at the code the answer is: yes. I think that's the bug right there.
-> 
-> By exporting entries in /sys/firmware/efi/runtime-map we're saying
-> "These mappings persist across kexec, you can trust that they won't
-> change", for SGI UV (which currently uses the quirk) or if you boot
-> with efi=old_map on the command line, that's simply not true.
-> 
-> So, it would seem to me that we're missing a "if
-> (efi_enabled(OLD_MAP))" in drivers/firmware/efi/runtime-map.c.
-> Borislav, Dave? What do you guys think?
+On 05/29/14 at 08:45am, Vivek Goyal wrote:
+> On Thu, May 29, 2014 at 10:08:37AM +0800, Dave Young wrote:
+> > On 05/28/14 at 08:40am, Vivek Goyal wrote:
+> > > On Wed, May 28, 2014 at 10:13:59AM +0800, Dave Young wrote:
+> > > > On 05/27/14 at 09:34am, Vivek Goyal wrote:
+> > > > > On Mon, May 26, 2014 at 04:39:35PM +0800, Dave Young wrote:
+> > > > > > 
+> > > > > > For efi=old_map and any old_map quirks like SGI UV in current
+> > > > > > tree kexec/kdump will fail because it depends on the new 1:1 mapping.
+> > > > > > 
+> > > > > > Thus export the mapping method to sysfs so kexec tools can switch
+> > > > > > to original way to boot.
+> > > > > > 
+> > > > > > Since we have efi.flags for all efi facilities so let's just export the
+> > > > > > efi.flags itself, it maybe useful for other arches and use cases.
+> > > > > > 
+> > > > > 
+> > > > > Does it require any documentation in Documentation/ABI/..
+> > > > 
+> > > > Yes, it's necessary. Will do in next version.
+> > > > 
+> > > > I'm still discussing with Matt, exporting efi.flags seems not a good way
+> > > > because they are more internal interfaces. 
+> > > > 
+> > > > Probably I should export only a file 'old_map' instead.
+> > > 
+> > > How does /sys/firmware/efi/runtime-map/* look like with old mapping? Can't
+> > > we look at it and figure out if it is 1:1 or not.
+> > 
+> > There's phys_addr and virt_addr, (virt_addr - phys_addr) will always be
+> > -64G for 1:1 map, ioremapped addresses space is different.
 
-Yes, I missed the old_map case when I did the patchset.
-Only exporting runtime map in case 1:1 map looks good. Thus kexec-tools can
-easily just check the existance of the sysfs files.
+Correct myself it's top to down (-4G - -64G) instead of down to top. 
 
-Will send out a patch soon.
+> 
+> I am curious that what's the meaning of 1:1 mapping here? So far I thought
+> that means virt and physical addresses are same but that does not seem
+> to be the case. So what does it mean?
+
+while doing the mapping, we will iterate the memory ranges (md[])
+
+Like below without considering alignment:
+Virt addr   (down) <------------------------------> (top)
+md0 (size0)                                 <-----> 
+                                             (size0)
+md1 (size1)                        <------->
+                                    (size1)
+...
+
+Boris can correct me if I'm wrong.
 
 Thanks
 Dave
