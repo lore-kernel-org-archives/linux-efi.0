@@ -1,37 +1,60 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH]x86 efi: do not export efi runtime map in case old map
-Date: Fri, 30 May 2014 14:17:40 +0800
-Message-ID: <20140530061740.GC2187@darkstar.nay.redhat.com>
-References: <20140530032010.GA29906@dhcp-16-198.nay.redhat.com>
- <20140530055447.GB2187@darkstar.nay.redhat.com>
- <20140530060810.GA31868@verge.net.au>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] export efi.flags to sysfs
+Date: Fri, 30 May 2014 09:33:23 +0200
+Message-ID: <20140530073323.GB28131@pd.tnic>
+References: <20140526083935.GA19682@dhcp-16-198.nay.redhat.com>
+ <20140527133411.GG10994@redhat.com>
+ <20140528021359.GC2820@darkstar.nay.redhat.com>
+ <20140528124029.GF14863@redhat.com>
+ <20140529020837.GB2068@darkstar.nay.redhat.com>
+ <20140529124520.GC14570@redhat.com>
+ <20140530022438.GC1985@darkstar.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140530060810.GA31868-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
+In-Reply-To: <20140530022438.GC1985-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Simon Horman <horms-/R6kz+dDXgpPR4JQBCEnsQ@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 05/30/14 at 03:08pm, Simon Horman wrote:
-> On Fri, May 30, 2014 at 01:54:47PM +0800, Dave Young wrote:
-> > Ccing Simon.
-> > 
-> > Simon, appologize for not ccing you about this kernel patch. I see you have
-> > applied the userspace patch for checking sysfs runtime existance.
-> > 
-> > The userspace patch depends on this patch but it is not harmful even without
-> > this kernel patch. So applying the userspace patch before this one is still
-> > safe.
+On Fri, May 30, 2014 at 10:24:38AM +0800, Dave Young wrote:
+> > > > How does /sys/firmware/efi/runtime-map/* look like with old mapping? Can't
+> > > > we look at it and figure out if it is 1:1 or not.
+> > > 
+> > > There's phys_addr and virt_addr, (virt_addr - phys_addr) will always be
+> > > -64G for 1:1 map, ioremapped addresses space is different.
 > 
-> Thanks, I understand.
+> Correct myself it's top to down (-4G - -64G) instead of down to top.
+
+This is the new mapping.
+
+AFAICR, the question is about the old mapping. Which was "normal"
+ioremap into the kernel page table. The new mapping is into another page
+table.
+
+> > I am curious that what's the meaning of 1:1 mapping here? So far I thought
+> > that means virt and physical addresses are same but that does not seem
+> > to be the case. So what does it mean?
 > 
-> If the kernel side ends up being rejected or modified please
-> send an update for kexec-tools accordingly.
+> while doing the mapping, we will iterate the memory ranges (md[])
+> 
+> Like below without considering alignment:
+> Virt addr   (down) <------------------------------> (top)
+> md0 (size0)                                 <-----> 
+>                                              (size0)
+> md1 (size1)                        <------->
+>                                     (size1)
+> ...
+> 
+> Boris can correct me if I'm wrong.
 
-Sure, will do
+Yes, this is the new mapping, top = -2G.
 
-Thanks
-Dave
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
