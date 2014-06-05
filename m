@@ -1,53 +1,65 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Wed, 4 Jun 2014 17:53:58 +0100
-Message-ID: <20140604164955.GA3059@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] x86/efi: Only pass mapped RAM regions to free_bootmem_late()
+Date: Thu,  5 Jun 2014 14:27:34 +0100
+Message-ID: <1401974854-7716-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Folks,
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Here are two commits I've queued up from Dave. The first fixes the efi
-earlyprintk code and the second fixes a bug where we were exporting the
-EFI runtime mappings for use by kexec-tools, despite the fact that those
-mappings were not persistent across kexec reboot.
+free_bootmem_late() expects to only be passed RAM regions that the
+kernel can access, and that have a corresponding 'struct page'. It's
+possible for regions in the EFI memory map to reside in address ranges
+for which pfn_to_page() doesn't work, for instance when running on an
+i386 system with CONFIG_HIGHMEM=n.
 
-The following changes since commit 47514c996fac5e6f13ef3a4c5e23f1c5cffabb7b:
+This is in fact the case for one of Alan's machines where some of the
+EFI boot services pages live in highmem, and running a kernel without
+CONFIG_HIGHMEM enabled results in the following oops,
 
-  efi: Pass correct file handle to efi_file_{read,close} (2014-04-10 21:20:03 +0100)
+ BUG: unable to handle kernel paging request at f7f1f080
+ IP: [<c17fba96>] __free_pages_bootmem+0x5a/0xb8
+ *pdpt = 0000000001887001 *pde = 0000000001984067 *pte = 000000000 0000000
+ Oops: 0002 [#1] SMP
 
-are available in the git repository at:
+[...]
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+ Call Trace:
+  [<c17feacc>] free_bootmem_late+0x2d/0x3d
+  [<c17f1013>] efi_free_boot_services+0x48/0x5b
+  [<c17ddc12>] start_kernel+0x3ad/0x3cf
+  [<c17dd654>] ? set_init_arg+0x49/0x49
+  [<c17dd380>] i386_start_kernel+0x12e/0x131
 
-for you to fetch changes up to a3530e8fe980f756b823d451fe9243f26db95fa5:
+Reported-by: Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
 
-  x86/efi: Do not export efi runtime map in case old map (2014-06-02 12:21:59 +0100)
+Alan, could you double check that this patch also fixes the oops on your
+CONFIG_HIGHMEM=n machine?
 
-----------------------------------------------------------------
- * Fix earlyprintk=efi,keep support by switching to an ioremap() mapping
-   of the framebuffer when early_ioremap() is no longer available and
-   dropping __init from functions that may be invoked after
-   free_initmem() - Dave Young
+ arch/x86/platform/efi/efi.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
- * We shouldn't be exporting the EFI runtime map in sysfs if not using
-   the new 1:1 EFI mapping code since in that case the mappings are not
-   static across a kexec reboot - Dave Young
-
-----------------------------------------------------------------
-Dave Young (2):
-      x86/efi: earlyprintk=efi,keep fix
-      x86/efi: Do not export efi runtime map in case old map
-
- arch/x86/platform/efi/early_printk.c | 83 +++++++++++++++++++++++++++---------
- arch/x86/platform/efi/efi.c          |  3 ++
- 2 files changed, 67 insertions(+), 19 deletions(-)
-
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 3781dd39e8bd..893d183ee98f 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -451,6 +451,9 @@ void __init efi_free_boot_services(void)
+ 		if (!size)
+ 			continue;
+ 
++		if (!e820_all_mapped(start, start + size, E820_RAM))
++			continue;
++
+ 		free_bootmem_late(start, size);
+ 	}
+ 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.9.0
