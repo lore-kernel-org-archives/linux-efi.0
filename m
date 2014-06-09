@@ -1,37 +1,43 @@
-From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86/boot: EFI_MIXED should not prohibit loading above 4G
-Date: Mon, 9 Jun 2014 10:32:53 -0400
-Message-ID: <20140609143253.GB22049@redhat.com>
-References: <1402140380-15377-1-git-send-email-matt@console-pimps.org>
- <20140609125427.GA16256@redhat.com>
- <CADknwL7Jeh82W3=rEqGqh=37zpqhmMuP1jy+DDq9vb2gQ+9hzg@mail.gmail.com>
- <20140609141512.GA22049@redhat.com>
- <20140609142559.GE27302@console-pimps.org>
+From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Subject: [RFC] Best place/method to determine BIOS version?
+Date: Mon, 9 Jun 2014 15:00:17 -0500
+Message-ID: <20140609200017.GD2700@sgi.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140609142559.GE27302-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 09, 2014 at 03:25:59PM +0100, Matt Fleming wrote:
-> On Mon, 09 Jun, at 10:15:12AM, Vivek Goyal wrote:
-> > 
-> > Ok, thanks. Or I can check whether EFI run time map is there or not. I am
-> > assuming that efi runtime services are not enabled, then run time map
-> > will not be there either.
-> 
-> Yes, if runtime services are unavailable then the runtime map will not
-> be exported.
-> 
-> Now, you can check for the presence of the runtime map from userland but
-> please don't use that as your check inside the kernel - this is exactly
-> what efi_enabled() is for.
+Hi guys,
 
-Ok, I will use efi_enabled() instead.
+We recently ran into/corrected a bug in our BIOS that was exposed by the
+recent updates to the way that the EFI code maps in memory during boot.
+Discussion here:
 
-Thanks
-Vivek
+http://comments.gmane.org/gmane.linux.kernel/1638074
+
+Anyways, we now need to find a way to determine the BIOS version before
+efi_apply_memmap_quirks is called, so that we know whether or not the
+BIOS we're running requires the quirk.  We have a function in one of our
+EFI runtime services that provides this information, but I'm having a
+lot of trouble calling this function early enough in boot.
+
+It seems that all the necessary function pointers are available well
+before efi_apply_memmap_quirks is called, but when trying to use
+efi_call_phys6 to call our function, I always hit a kernel paging error.
+
+I think the problem is that I really need to be doing this at a point
+where I can directly use physical addressing (the function pointer that
+we have stored in efi.uv_systab contains the physical address of our
+function) - at least that's the idea I get from our BIOS guys, but I
+really don't know what I'm talking about here :)
+
+Can anybody help me with how early in boot I need to make this call, and
+possibly with an appropriate location to stick the code in?
+
+Any advice is greatly appreciated.  Thanks!
+
+- Alex
