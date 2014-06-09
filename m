@@ -1,31 +1,81 @@
-From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
-Subject: Re: Why efi_set_rtc_mmss() is never used?
-Date: Mon, 9 Jun 2014 13:46:35 +0100
-Message-ID: <20140609134635.26abc019@alan.etchedpixels.co.uk>
-References: <20140609110800.GJ15989@olila.local.net-space.pl>
+From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] x86/boot: EFI_MIXED should not prohibit loading above 4G
+Date: Mon, 9 Jun 2014 08:54:27 -0400
+Message-ID: <20140609125427.GA16256@redhat.com>
+References: <1402140380-15377-1-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140609110800.GJ15989-fJNZiO034lp9pOct4yEdx/3oZC3j2Omk@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1402140380-15377-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 9 Jun 2014 13:08:00 +0200
-Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org> wrote:
-
-> Hi,
+On Sat, Jun 07, 2014 at 12:26:20PM +0100, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> As I can see efi_set_rtc_mmss() is never used to set RTC.
-> Even on EFI platform mach_set_rtc_mmss() is called and does
-> that thing. Why it is done in that way? It is a bug or it was
-> done intentionally. Am I missing something?
+> commit 7d453eee36ae ("x86/efi: Wire up CONFIG_EFI_MIXED") introduced a
+> regression for the functionality to load kernels above 4G. The relevant
+> (incorrect) reasoning behind this change can be seen in the commit
+> message,
+> 
+>   "The xloadflags field in the bzImage header is also updated to reflect
+>   that the kernel supports both entry points by setting both of
+>   XLF_EFI_HANDOVER_32 and XLF_EFI_HANDOVER_64 when CONFIG_EFI_MIXED=y.
+>   XLF_CAN_BE_LOADED_ABOVE_4G is disabled so that the kernel text is
+>   guaranteed to be addressable with 32-bits."
+> 
+> This is obviously bogus since 32-bit EFI loaders will never place the
+> kernel above the 4G mark. So this restriction is entirely unnecessary.
 
-EFI services generally don't work properly. The less they are used the
-better. We can realistically only make an EFI call with the same
-parameters windows does under the same kind of circumstances because the
-firmware on many motherboards is complete sh*te.
+Hi Matt,
 
-Alan
+So with new kexec syscall I have written 64bit bzImage loader. For now
+I would like to detect this situation and disable loading and once
+32bit loader gets implemented it can take care of loading bzImage below
+4G.
+
+So how do I find out if EFI is 32bit.
+
+Thanks
+Vivek
+
+> 
+> But things are worse than that - since we want to encourage people to
+> always compile with CONFIG_EFI_MIXED=y so that their kernels work out of
+> the box for both 32-bit and 64-bit firmware, commit 7d453eee36ae
+> effectively disables XLF_CAN_BE_LOADED_ABOVE_4G completely.
+> 
+> Remove the overzealous and superfluous restriction and restore the
+> XLF_CAN_BE_LOADED_ABOVE_4G functionality.
+> 
+> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+> 
+> Peter, I realise that we're right on the edge of the v3.15 release here,
+> so this probably needs marking for stable (it only affects v3.15).
+> 
+>  arch/x86/boot/header.S | 3 +--
+>  1 file changed, 1 insertion(+), 2 deletions(-)
+> 
+> diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+> index 0ca9a5c362bc..84c223479e3c 100644
+> --- a/arch/x86/boot/header.S
+> +++ b/arch/x86/boot/header.S
+> @@ -375,8 +375,7 @@ xloadflags:
+>  # define XLF0 0
+>  #endif
+>  
+> -#if defined(CONFIG_RELOCATABLE) && defined(CONFIG_X86_64) && \
+> -	!defined(CONFIG_EFI_MIXED)
+> +#if defined(CONFIG_RELOCATABLE) && defined(CONFIG_X86_64)
+>     /* kernel/boot_param/ramdisk could be loaded above 4g */
+>  # define XLF1 XLF_CAN_BE_LOADED_ABOVE_4G
+>  #else
+> -- 
+> 1.9.0
