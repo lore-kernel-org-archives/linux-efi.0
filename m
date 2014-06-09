@@ -1,81 +1,34 @@
-From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: [PATCH] x86/boot: EFI_MIXED should not prohibit loading above 4G
-Date: Mon, 9 Jun 2014 08:54:27 -0400
-Message-ID: <20140609125427.GA16256@redhat.com>
+Date: Mon, 9 Jun 2014 14:18:54 +0100
+Message-ID: <CADknwL7Jeh82W3=rEqGqh=37zpqhmMuP1jy+DDq9vb2gQ+9hzg@mail.gmail.com>
 References: <1402140380-15377-1-git-send-email-matt@console-pimps.org>
+	<20140609125427.GA16256@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1402140380-15377-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140609125427.GA16256@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Jun 07, 2014 at 12:26:20PM +0100, Matt Fleming wrote:
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> commit 7d453eee36ae ("x86/efi: Wire up CONFIG_EFI_MIXED") introduced a
-> regression for the functionality to load kernels above 4G. The relevant
-> (incorrect) reasoning behind this change can be seen in the commit
-> message,
-> 
->   "The xloadflags field in the bzImage header is also updated to reflect
->   that the kernel supports both entry points by setting both of
->   XLF_EFI_HANDOVER_32 and XLF_EFI_HANDOVER_64 when CONFIG_EFI_MIXED=y.
->   XLF_CAN_BE_LOADED_ABOVE_4G is disabled so that the kernel text is
->   guaranteed to be addressable with 32-bits."
-> 
-> This is obviously bogus since 32-bit EFI loaders will never place the
-> kernel above the 4G mark. So this restriction is entirely unnecessary.
+On 9 June 2014 13:54, Vivek Goyal <vgoyal@redhat.com> wrote:
+> Hi Matt,
+>
+> So with new kexec syscall I have written 64bit bzImage loader. For now
+> I would like to detect this situation and disable loading and once
+> 32bit loader gets implemented it can take care of loading bzImage below
+> 4G.
 
-Hi Matt,
+What situation do you want to detect? You want to detect when it's
+impossible to load a kernel above 4G in the kexec path because you're
+booting with 32-bit EFI firmware?
 
-So with new kexec syscall I have written 64bit bzImage loader. For now
-I would like to detect this situation and disable loading and once
-32bit loader gets implemented it can take care of loading bzImage below
-4G.
+> So how do I find out if EFI is 32bit.
 
-So how do I find out if EFI is 32bit.
-
-Thanks
-Vivek
-
-> 
-> But things are worse than that - since we want to encourage people to
-> always compile with CONFIG_EFI_MIXED=y so that their kernels work out of
-> the box for both 32-bit and 64-bit firmware, commit 7d453eee36ae
-> effectively disables XLF_CAN_BE_LOADED_ABOVE_4G completely.
-> 
-> Remove the overzealous and superfluous restriction and restore the
-> XLF_CAN_BE_LOADED_ABOVE_4G functionality.
-> 
-> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
-> 
-> Peter, I realise that we're right on the edge of the v3.15 release here,
-> so this probably needs marking for stable (it only affects v3.15).
-> 
->  arch/x86/boot/header.S | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
-> 
-> diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-> index 0ca9a5c362bc..84c223479e3c 100644
-> --- a/arch/x86/boot/header.S
-> +++ b/arch/x86/boot/header.S
-> @@ -375,8 +375,7 @@ xloadflags:
->  # define XLF0 0
->  #endif
->  
-> -#if defined(CONFIG_RELOCATABLE) && defined(CONFIG_X86_64) && \
-> -	!defined(CONFIG_EFI_MIXED)
-> +#if defined(CONFIG_RELOCATABLE) && defined(CONFIG_X86_64)
->     /* kernel/boot_param/ramdisk could be loaded above 4g */
->  # define XLF1 XLF_CAN_BE_LOADED_ABOVE_4G
->  #else
-> -- 
-> 1.9.0
+efi_enabled(EFI_64BIT) will tell you that, but you probably also want
+to check that EFI runtime services are actually usable with
+efi_enabled(EFI_RUNTIME_SERVICES) since if they're not, you'll never
+call into the firmware so it doesn't matter where you load the kernel
+(this may happen with "noefi" kernel parameter).
