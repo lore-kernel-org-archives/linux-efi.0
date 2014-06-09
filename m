@@ -1,46 +1,47 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Refactoring and cleanup patch on x86/efi
-Date: Mon, 9 Jun 2014 14:41:27 +0100
-Message-ID: <20140609134127.GD27302@console-pimps.org>
-References: <D65204BE7F571446A6F75A899654E932723D6CFC@FMSMSX103.amr.corp.intel.com>
- <20140606132606.GA27302@console-pimps.org>
+From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] x86/boot: EFI_MIXED should not prohibit loading above 4G
+Date: Mon, 9 Jun 2014 10:15:12 -0400
+Message-ID: <20140609141512.GA22049@redhat.com>
+References: <1402140380-15377-1-git-send-email-matt@console-pimps.org>
+ <20140609125427.GA16256@redhat.com>
+ <CADknwL7Jeh82W3=rEqGqh=37zpqhmMuP1jy+DDq9vb2gQ+9hzg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140606132606.GA27302-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <CADknwL7Jeh82W3=rEqGqh=37zpqhmMuP1jy+DDq9vb2gQ+9hzg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Tangri, Saurabh" <saurabh.tangri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 06 Jun, at 02:26:06PM, Matt Fleming wrote:
-> On Wed, 04 Jun, at 02:09:15PM, Tangri, Saurabh wrote:
-> > x86/efi: Move all workarounds to a separate file quirks.c
-> > 
-> > Currently, it's difficult to find all the workarounds that are
-> > applied when running on EFI, because they're littered throughout
-> > various code paths. This change moves all of them into a separate
-> > file with the hope that it will be come the single location for all
-> > our well documented quirks.
+On Mon, Jun 09, 2014 at 02:18:54PM +0100, Matt Fleming wrote:
+> On 9 June 2014 13:54, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > Hi Matt,
+> >
+> > So with new kexec syscall I have written 64bit bzImage loader. For now
+> > I would like to detect this situation and disable loading and once
+> > 32bit loader gets implemented it can take care of loading bzImage below
+> > 4G.
 > 
-> Thanks Saurabh, applied to the 'next' branch. I had to rebase it against
-> 'next' because there's been a few changes since the patches that are in
-> the 'stable' branch.
+> What situation do you want to detect? You want to detect when it's
+> impossible to load a kernel above 4G in the kexec path because you're
+> booting with 32-bit EFI firmware?
+
+Yes.
+
 > 
-> Please double check to make sure that I did the rebase correctly,
+> > So how do I find out if EFI is 32bit.
 > 
->   http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=fdf46c9f56a9fdcfc4e0b250e893cd7ffcecf0d5
+> efi_enabled(EFI_64BIT) will tell you that, but you probably also want
+> to check that EFI runtime services are actually usable with
+> efi_enabled(EFI_RUNTIME_SERVICES) since if they're not, you'll never
+> call into the firmware so it doesn't matter where you load the kernel
+> (this may happen with "noefi" kernel parameter).
 
-Turns out I didn't apply it as carefully as I should have done, and the
-kbuild bot noticed,
+Ok, thanks. Or I can check whether EFI run time map is there or not. I am
+assuming that efi runtime services are not enabled, then run time map
+will not be there either.
 
-  https://lists.01.org/pipermail/kbuild-all/2014-June/004895.html
-
-I've fixed this up and pushed it back out along with a commit that
-should also fix the long standing sparse issue described in,
-
- https://lists.01.org/pipermail/kbuild-all/2014-June/004896.html
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks
+Vivek
