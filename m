@@ -1,34 +1,21 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Refactoring and cleanup patch on x86/efi
-Date: Fri, 6 Jun 2014 14:26:06 +0100
-Message-ID: <20140606132606.GA27302@console-pimps.org>
-References: <D65204BE7F571446A6F75A899654E932723D6CFC@FMSMSX103.amr.corp.intel.com>
+From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: Why efi_set_rtc_mmss() is never used?
+Date: Mon, 9 Jun 2014 13:08:00 +0200
+Message-ID: <20140609110800.GJ15989@olila.local.net-space.pl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <D65204BE7F571446A6F75A899654E932723D6CFC-AtyAts71sc9Qxe9IK+vIArfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Tangri, Saurabh" <saurabh.tangri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
+Cc: boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 04 Jun, at 02:09:15PM, Tangri, Saurabh wrote:
-> x86/efi: Move all workarounds to a separate file quirks.c
-> 
-> Currently, it's difficult to find all the workarounds that are
-> applied when running on EFI, because they're littered throughout
-> various code paths. This change moves all of them into a separate
-> file with the hope that it will be come the single location for all
-> our well documented quirks.
+Hi,
 
-Thanks Saurabh, applied to the 'next' branch. I had to rebase it against
-'next' because there's been a few changes since the patches that are in
-the 'stable' branch.
+As I can see efi_set_rtc_mmss() is never used to set RTC.
+Even on EFI platform mach_set_rtc_mmss() is called and does
+that thing. Why it is done in that way? It is a bug or it was
+done intentionally. Am I missing something?
 
-Please double check to make sure that I did the rebase correctly,
-
-  http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=fdf46c9f56a9fdcfc4e0b250e893cd7ffcecf0d5
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Daniel
