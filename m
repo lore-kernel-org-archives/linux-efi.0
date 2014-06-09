@@ -1,55 +1,46 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH] x86/efi: Use early_memunmap() to squelch sparse errors
-Date: Mon,  9 Jun 2014 14:41:12 +0100
-Message-ID: <1402321272-18053-1-git-send-email-matt@console-pimps.org>
+Subject: Re: Refactoring and cleanup patch on x86/efi
+Date: Mon, 9 Jun 2014 14:41:27 +0100
+Message-ID: <20140609134127.GD27302@console-pimps.org>
+References: <D65204BE7F571446A6F75A899654E932723D6CFC@FMSMSX103.amr.corp.intel.com>
+ <20140606132606.GA27302@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140606132606.GA27302-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Saurabh Tangri <saurabh.tangri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: "Tangri, Saurabh" <saurabh.tangri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Fri, 06 Jun, at 02:26:06PM, Matt Fleming wrote:
+> On Wed, 04 Jun, at 02:09:15PM, Tangri, Saurabh wrote:
+> > x86/efi: Move all workarounds to a separate file quirks.c
+> > 
+> > Currently, it's difficult to find all the workarounds that are
+> > applied when running on EFI, because they're littered throughout
+> > various code paths. This change moves all of them into a separate
+> > file with the hope that it will be come the single location for all
+> > our well documented quirks.
+> 
+> Thanks Saurabh, applied to the 'next' branch. I had to rebase it against
+> 'next' because there's been a few changes since the patches that are in
+> the 'stable' branch.
+> 
+> Please double check to make sure that I did the rebase correctly,
+> 
+>   http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=fdf46c9f56a9fdcfc4e0b250e893cd7ffcecf0d5
 
-The kbuild reports the following sparse errors,
+Turns out I didn't apply it as carefully as I should have done, and the
+kbuild bot noticed,
 
->> arch/x86/platform/efi/quirks.c:242:23: sparse: incorrect type in >> argument 1 (different address spaces)
-   arch/x86/platform/efi/quirks.c:242:23:    expected void [noderef] <asn:2>*addr
-   arch/x86/platform/efi/quirks.c:242:23:    got void *[assigned] tablep
->> arch/x86/platform/efi/quirks.c:245:23: sparse: incorrect type in >> argument 1 (different address spaces)
-   arch/x86/platform/efi/quirks.c:245:23:    expected void [noderef] <asn:2>*addr
-   arch/x86/platform/efi/quirks.c:245:23:    got struct efi_setup_data *[assigned] data
+  https://lists.01.org/pipermail/kbuild-all/2014-June/004895.html
 
-Dave Young had made previous attempts to convert the early_iounmap()
-calls to early_memunmap() but ran into merge conflicts with commit
-9e5c33d7aeee ("mm: create generic early_ioremap() support").
+I've fixed this up and pushed it back out along with a commit that
+should also fix the long standing sparse issue described in,
 
-Now that we've got that commit in place we can switch to using
-early_memunmap() since we're already using early_memremap() in
-efi_reuse_config().
+ https://lists.01.org/pipermail/kbuild-all/2014-June/004896.html
 
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Saurabh Tangri <saurabh.tangri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/platform/efi/quirks.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 7e3099c610dd..b4cb9182f155 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -239,10 +239,10 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
- 			((efi_config_table_64_t *)p)->table = data->smbios;
- 		p += sz;
- 	}
--	early_iounmap(tablep, nr_tables * sz);
-+	early_memunmap(tablep, nr_tables * sz);
- 
- out_memremap:
--	early_iounmap(data, sizeof(*data));
-+	early_memunmap(data, sizeof(*data));
- out:
- 	return ret;
- }
 -- 
-1.9.0
+Matt Fleming, Intel Open Source Technology Center
