@@ -1,57 +1,44 @@
-From: David Rientjes <rientjes-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] pstore: Fix an overflow on 32-bit builds.
-Date: Mon, 9 Jun 2014 13:24:43 -0700 (PDT)
-Message-ID: <alpine.DEB.2.02.1406091322050.30620@chino.kir.corp.google.com>
-References: <1402325440-26335-1-git-send-email-andrew.zaborowski@intel.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [RFC] Best place/method to determine BIOS version?
+Date: Tue, 10 Jun 2014 10:03:00 +0200
+Message-ID: <20140610080300.GA28607@pd.tnic>
+References: <20140609200017.GD2700@sgi.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1402325440-26335-1-git-send-email-andrew.zaborowski-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140609200017.GD2700-sJ/iWh9BUns@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andrzej Zaborowski <andrew.zaborowski-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Madper Xie <cxie-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 9 Jun 2014, Andrzej Zaborowski wrote:
-
-> [resend]
-> In generic_id the long int timestamp is multiplied by 100000 and needs
-> an explicit cast to u64.
+On Mon, Jun 09, 2014 at 03:00:17PM -0500, Alex Thorlton wrote:
+> Hi guys,
 > 
-> Without that the id in the resulting pstore filename is wrong and
-> userspace may have problems parsing it, but more importantly files in
-> pstore can never be deleted and may fill the EFI flash (brick device?).
-> This happens because when generic pstore code wants to delete a file,
-> it passes the id to the EFI backend which reinterpretes it and a wrong
-> variable name is attempted to be deleted.  There's no error message but
-> after remounting pstore, deleted files would reappear.
+> We recently ran into/corrected a bug in our BIOS that was exposed by the
+> recent updates to the way that the EFI code maps in memory during boot.
+> Discussion here:
 > 
-> Signed-off-by: Andrew Zaborowski <andrew.zaborowski-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
-Acked-by: David Rientjes <rientjes-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-
-> ---
->  drivers/firmware/efi/efi-pstore.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
+> http://comments.gmane.org/gmane.linux.kernel/1638074
 > 
-> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-> index 4b9dc83..e992abc 100644
-> --- a/drivers/firmware/efi/efi-pstore.c
-> +++ b/drivers/firmware/efi/efi-pstore.c
-> @@ -40,7 +40,7 @@ struct pstore_read_data {
->  static inline u64 generic_id(unsigned long timestamp,
->  			     unsigned int part, int count)
->  {
-> -	return (timestamp * 100 + part) * 1000 + count;
-> +	return ((u64) timestamp * 100 + part) * 1000 + count;
->  }
->  
->  static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+> Anyways, we now need to find a way to determine the BIOS version before
+> efi_apply_memmap_quirks is called, so that we know whether or not the
+> BIOS we're running requires the quirk.  We have a function in one of our
+> EFI runtime services that provides this information, but I'm having a
+> lot of trouble calling this function early enough in boot.
+> 
+> It seems that all the necessary function pointers are available well
+> before efi_apply_memmap_quirks is called, but when trying to use
+> efi_call_phys6 to call our function,
 
-This fixes commit fdeadb43fdf1 ("efi-pstore: Make efi-pstore return a 
-unique id") that went into stable, so I'm not sure if this should go into 
-stable as well.
+Why not use DMI instead of EFI for getting the BIOS version? I see
+dmi_scan_machine() called earlier than efi_apply_memmap_quirks() in
+setup_arch()...?
 
-You probably had to resend this because you didn't email any of the 
-maintainers (fixed).  Use scripts/get_maintainer.pl to figure out who to 
-email about a patch.
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
