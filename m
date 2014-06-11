@@ -1,29 +1,33 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Alex Thorlton <athorlton@sgi.com>
 Subject: Re: [RFC] Best place/method to determine BIOS version?
-Date: Wed, 11 Jun 2014 09:55:48 +0100
-Message-ID: <20140611085548.GB26290@console-pimps.org>
+Date: Wed, 11 Jun 2014 12:30:22 -0500
+Message-ID: <20140611173022.GD3275@sgi.com>
 References: <20140609200017.GD2700@sgi.com>
+ <20140611085548.GB26290@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140609200017.GD2700-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: Linux EFI <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+In-Reply-To: <20140611085548.GB26290@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Alex Thorlton <athorlton@sgi.com>, Linux EFI <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Borislav Petkov <bp@suse.de>, Russ Anderson <rja@sgi.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 09 Jun, at 03:00:17PM, Alex Thorlton wrote:
-> 
-> I think the problem is that I really need to be doing this at a point
-> where I can directly use physical addressing (the function pointer that
-> we have stored in efi.uv_systab contains the physical address of our
-> function) - at least that's the idea I get from our BIOS guys, but I
-> really don't know what I'm talking about here :)
+On Wed, Jun 11, 2014 at 09:55:48AM +0100, Matt Fleming wrote:
+> Can't you use either early_ioremap() or ioremap() (depending on when you
+> want to access the physical address), perhaps coupled with
+> efi_call_phys()?
 
-Can't you use either early_ioremap() or ioremap() (depending on when you
-want to access the physical address), perhaps coupled with
-efi_call_phys()?
+I had actually tried that exact approach, but I think the problem is
+that I need to remap both the function code, and the data that it needs
+to access, and the pointers get clobbered in that process.  The pointers
+work fine in direct physical mode, and they work fine after being mapped
+into the EFI page table in virtual mode, but I think there's some magic
+in there that helps fix them up when set_virtual_address_map is called,
+which isn't getting done when I try to remap manually.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+I'll look into this approach a bit more to be absolutely sure that it
+won't work, but I hadn't had any luck so far.
+
+- Alex
