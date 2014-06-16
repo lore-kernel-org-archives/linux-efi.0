@@ -1,178 +1,126 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH 4/4] efi: efistub: convert into static library
-Date: Mon, 16 Jun 2014 17:24:30 +0200
-Message-ID: <CAKv+Gu_w9N8kRHs8cXXMTJKACwMDpndix+Yh_Pkr_wKXcb7-5w@mail.gmail.com>
-References: <1402931688-23597-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1402931688-23597-4-git-send-email-ard.biesheuvel@linaro.org>
+From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v5 4/7] xen: Put EFI machinery in place
+Date: Mon, 16 Jun 2014 20:45:27 +0200
+Message-ID: <20140616184527.GH3463@olila.local.net-space.pl>
+References: <1402678823-24589-1-git-send-email-daniel.kiper@oracle.com>
+ <1402678823-24589-5-git-send-email-daniel.kiper@oracle.com>
+ <alpine.DEB.2.02.1406161245490.13771@kaball.uk.xensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1402931688-23597-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.02.1406161245490.13771-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 16 June 2014 17:14, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This patch changes both x86 and arm64 efistub implementations from #including
-> shared .c files under drivers/firmware/efi to building the shared code as a
-> static library.
+On Mon, Jun 16, 2014 at 12:55:35PM +0100, Stefano Stabellini wrote:
+> On Fri, 13 Jun 2014, Daniel Kiper wrote:
+> > This patch enables EFI usage under Xen dom0. Standard EFI Linux
+> > Kernel infrastructure cannot be used because it requires direct
+> > access to EFI data and code. However, in dom0 case it is not possible
+> > because above mentioned EFI stuff is fully owned and controlled
+> > by Xen hypervisor. In this case all calls from dom0 to EFI must
+> > be requested via special hypercall which in turn executes relevant
+> > EFI code in behalf of dom0.
+> >
+> > When dom0 kernel boots it checks for EFI availability on a machine.
+> > If it is detected then artificial EFI system table is filled.
+> > Native EFI callas are replaced by functions which mimics them
+> > by calling relevant hypercall. Later pointer to EFI system table
+> > is passed to standard EFI machinery and it continues EFI subsystem
+> > initialization taking into account that there is no direct access
+> > to EFI boot services, runtime, tables, structures, etc. After that
+> > system runs as usual.
+> >
+> > This patch is based on Jan Beulich and Tang Liang work.
+> >
+> > v5 - suggestions/fixes:
+> >    - improve macro usage readability
+> >      (suggested by Andrew Cooper and David Vrabel),
+> >    - conditions cleanup
+> >      (suggested by David Vrabel),
+> >    - use -fshort-wchar option
+> >      (suggested by Jan Beulich),
+> >    - Kconfig rule cleanup
+> >      (suggested by Jan Beulich),
+> >    - forward port fixes from SUSE kernel
+> >      (suggested by Jan Beulich),
+> >    - improve commit message
+> >      (suggested by David Vrabel).
+> >
+> > v4 - suggestions/fixes:
+> >    - "just populate an efi_system_table_t object"
+> >      (suggested by Matt Fleming).
+> >
+> > Signed-off-by: Jan Beulich <jbeulich-IBi9RG/b67k@public.gmane.org>
+> > Signed-off-by: Tang Liang <liang.tang-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+> > Signed-off-by: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
 >
-> The x86 code uses a stub built into the boot executable which uncompresses the
-> kernel at boot time. In this case, the library is linked into the decompressor.
->
-> In the arm64 case, the stub is part of the kernel proper so the library is
-> linked into the kernel proper as well.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/Kconfig                             |   1 +
->  arch/arm64/Makefile                            |   1 +
->  arch/arm64/kernel/efi-stub.c                   |   5 -
->  arch/x86/boot/compressed/Makefile              |   3 +-
->  arch/x86/boot/compressed/eboot.c               |   2 -
->  drivers/firmware/efi/Kconfig                   |   3 +
->  drivers/firmware/efi/Makefile                  |   2 +-
->  drivers/firmware/efi/arm-stub.c                | 284 -----------
->  drivers/firmware/efi/efi-stub-helper.c         | 632 -------------------------
->  drivers/firmware/efi/efistub.h                 |  42 --
->  drivers/firmware/efi/fdt.c                     | 279 -----------
->  drivers/firmware/efi/libstub/Makefile          |   5 +
->  drivers/firmware/efi/libstub/arm-stub.c        | 284 +++++++++++
->  drivers/firmware/efi/libstub/efi-stub-helper.c | 632 +++++++++++++++++++++++++
->  drivers/firmware/efi/libstub/efistub.h         |  42 ++
->  drivers/firmware/efi/libstub/fdt.c             | 279 +++++++++++
->  16 files changed, 1250 insertions(+), 1246 deletions(-)
->  delete mode 100644 drivers/firmware/efi/arm-stub.c
->  delete mode 100644 drivers/firmware/efi/efi-stub-helper.c
->  delete mode 100644 drivers/firmware/efi/efistub.h
->  delete mode 100644 drivers/firmware/efi/fdt.c
->  create mode 100644 drivers/firmware/efi/libstub/Makefile
->  create mode 100644 drivers/firmware/efi/libstub/arm-stub.c
->  create mode 100644 drivers/firmware/efi/libstub/efi-stub-helper.c
->  create mode 100644 drivers/firmware/efi/libstub/efistub.h
->  create mode 100644 drivers/firmware/efi/libstub/fdt.c
->
+> Sorry for commenting on your patches so late in the review cycle.
 
-Oops, forgot to enable diff.renames ...
-
-diffstat is actually
-
- arch/arm64/Kconfig                                   | 1 +
- arch/arm64/Makefile                                  | 1 +
- arch/arm64/kernel/efi-stub.c                         | 5 -----
- arch/x86/boot/compressed/Makefile                    | 3 ++-
- arch/x86/boot/compressed/eboot.c                     | 2 --
- drivers/firmware/efi/Kconfig                         | 3 +++
- drivers/firmware/efi/Makefile                        | 2 +-
- drivers/firmware/efi/libstub/Makefile                | 5 +++++
- drivers/firmware/efi/{ => libstub}/arm-stub.c        | 0
- drivers/firmware/efi/{ => libstub}/efi-stub-helper.c | 0
- drivers/firmware/efi/{ => libstub}/efistub.h         | 0
- drivers/firmware/efi/{ => libstub}/fdt.c             | 0
- 12 files changed, 13 insertions(+), 9 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/Makefile
- rename drivers/firmware/efi/{ => libstub}/arm-stub.c (100%)
- rename drivers/firmware/efi/{ => libstub}/efi-stub-helper.c (100%)
- rename drivers/firmware/efi/{ => libstub}/efistub.h (100%)
- rename drivers/firmware/efi/{ => libstub}/fdt.c (100%)
-
-> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-> index 7295419165e1..1ba4b5eae886 100644
-> --- a/arch/arm64/Kconfig
-> +++ b/arch/arm64/Kconfig
-> @@ -298,6 +298,7 @@ config EFI
->         select LIBFDT
->         select UCS2_STRING
->         select EFI_PARAMS_FROM_FDT
-> +       select EFI_ARMSTUB
->         default y
->         help
->           This option provides support for runtime services provided
-> diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
-> index 8185a913c5ed..bb8f21a626c0 100644
-> --- a/arch/arm64/Makefile
-> +++ b/arch/arm64/Makefile
-> @@ -48,6 +48,7 @@ core-$(CONFIG_XEN) += arch/arm64/xen/
->  core-$(CONFIG_CRYPTO) += arch/arm64/crypto/
->  libs-y         := arch/arm64/lib/ $(libs-y)
->  libs-y         += $(LIBGCC)
-> +libs-$(CONFIG_EFI) += drivers/firmware/efi/libstub/
->
->  # Default target when executing plain make
->  KBUILD_IMAGE   := Image.gz
-> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-> index e4999021b07d..12456a7d3fa2 100644
-> --- a/arch/arm64/kernel/efi-stub.c
-> +++ b/arch/arm64/kernel/efi-stub.c
-> @@ -13,11 +13,6 @@
->  #include <asm/efi.h>
->  #include <asm/sections.h>
->
-> -/* Include shared EFI stub code */
-> -#include "../../../drivers/firmware/efi/efi-stub-helper.c"
-> -#include "../../../drivers/firmware/efi/fdt.c"
-> -#include "../../../drivers/firmware/efi/arm-stub.c"
-> -
->
->  efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
->                                  unsigned long *image_addr,
-> diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-> index 0fcd9133790c..7a801a310e37 100644
-> --- a/arch/x86/boot/compressed/Makefile
-> +++ b/arch/x86/boot/compressed/Makefile
-> @@ -33,7 +33,8 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
->  $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
->
->  ifeq ($(CONFIG_EFI_STUB), y)
-> -       VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
-> +       VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-> +                               $(objtree)/drivers/firmware/efi/libstub/lib.a
->  endif
->
->  $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index d338c134c659..d4d865438a0c 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -280,8 +280,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
->         }
->  }
->
-> -#include "../../../../drivers/firmware/efi/efi-stub-helper.c"
-> -
->  static void find_bits(unsigned long mask, u8 *pos, u8 *size)
->  {
->         u8 first, len;
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index d420ae2d3413..4443ccc16409 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -54,6 +54,9 @@ config EFI_PARAMS_FROM_FDT
->           the EFI runtime support gets system table address, memory
->            map address, and other parameters from the device tree.
->
-> +config EFI_ARMSTUB
-> +       bool
-> +
->  endmenu
->
->  config UEFI_CPER
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 9553496b0f43..c8be91c895e1 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -1,7 +1,7 @@
->  #
->  # Makefile for linux kernel
->  #
-> -obj-$(CONFIG_EFI)                      += efi.o vars.o
-> +obj-$(CONFIG_EFI)                      += efi.o vars.o libstub/
->  obj-$(CONFIG_EFI_VARS)                 += efivars.o
->  obj-$(CONFIG_EFI_VARS_PSTORE)          += efi-pstore.o
->  obj-$(CONFIG_UEFI_CPER)                        += cper.o
+No problem.
 
 [...]
 
-Regards,
-Ard.
+> > +efi_system_table_t __init *xen_efi_probe(void)
+> > +{
+> > +	struct xen_platform_op op = {
+> > +		.cmd = XENPF_firmware_info,
+> > +		.u.firmware_info = {
+> > +			.type = XEN_FW_EFI_INFO,
+> > +			.index = XEN_FW_EFI_CONFIG_TABLE
+> > +		}
+> > +	};
+> > +	union xenpf_efi_info *info = &op.u.firmware_info.u.efi_info;
+> > +
+> > +	if (!xen_initial_domain() || HYPERVISOR_dom0_op(&op) < 0)
+> > +		return NULL;
+> > +
+> > +	/* Here we know that Xen runs on EFI platform. */
+> > +
+> > +	efi = efi_xen;
+> > +
+> > +	op.cmd = XENPF_firmware_info;
+> > +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> > +	op.u.firmware_info.index = XEN_FW_EFI_VENDOR;
+> > +	info->vendor.bufsz = sizeof(vendor);
+> > +	set_xen_guest_handle(info->vendor.name, vendor);
+> > +
+> > +	if (HYPERVISOR_dom0_op(&op) == 0) {
+> > +		efi_systab_xen.fw_vendor = __pa_symbol(vendor);
+> > +		efi_systab_xen.fw_revision = info->vendor.revision;
+> > +	} else
+> > +		efi_systab_xen.fw_vendor = __pa_symbol(L"UNKNOWN");
+> > +
+> > +	op.cmd = XENPF_firmware_info;
+> > +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> > +	op.u.firmware_info.index = XEN_FW_EFI_VERSION;
+> > +
+> > +	if (HYPERVISOR_dom0_op(&op) == 0)
+> > +		efi_systab_xen.hdr.revision = info->version;
+> > +
+> > +	op.cmd = XENPF_firmware_info;
+> > +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> > +	op.u.firmware_info.index = XEN_FW_EFI_RT_VERSION;
+> > +
+> > +	if (HYPERVISOR_dom0_op(&op) == 0)
+> > +		efi.runtime_version = info->version;
+> > +
+> > +	op.cmd = XENPF_firmware_info;
+> > +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> > +	op.u.firmware_info.index = XEN_FW_EFI_CONFIG_TABLE;
+> > +
+> > +	if (HYPERVISOR_dom0_op(&op) < 0)
+> > +		BUG();
+>
+> Is it really worth of a BUG()? Can't we just print a warning and return
+> NULL? We could still boot without EFI support.
+
+Earlier the same hypercall function succeeded so if here it failed
+it means that something is really broken. However, I will try remove
+this call and get all data from earlier one. This way we avoid this
+BUG() call.
+
+Daniel
