@@ -1,26 +1,100 @@
-From: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v5 4/7] xen: Put EFI machinery in place
-Date: Mon, 16 Jun 2014 13:00:29 +0100
-Message-ID: <539EDC5D.4010207@citrix.com>
-References: <1402678823-24589-1-git-send-email-daniel.kiper@oracle.com> <1402678823-24589-5-git-send-email-daniel.kiper@oracle.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [RFC PATCH 1/4] efi/x86: efistub: move shared dependencies to <asm/efi.h>
+Date: Mon, 16 Jun 2014 17:14:45 +0200
+Message-ID: <1402931688-23597-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1402678823-24589-5-git-send-email-daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org
-Cc: andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 13/06/14 18:00, Daniel Kiper wrote:
-> 
-> v5 - suggestions/fixes:
+This moves definitions depended upon both by code under arch/x86/boot and
+under drivers/firmware/efi to <asm/efi.h>. This is in preparation of turning
+the stub code under drivers/firmware/efi into a static library.
 
-Put after a --- marker.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c |  5 +----
+ arch/x86/boot/compressed/eboot.h | 16 ----------------
+ arch/x86/include/asm/efi.h       | 25 +++++++++++++++++++++++++
+ 3 files changed, 26 insertions(+), 20 deletions(-)
 
-> +static efi_char16_t vendor[100] __initdata;
-
-Why 100?
-
-David
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 0331d765c2bb..2fd5e2643623 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -19,10 +19,7 @@
+ 
+ static efi_system_table_t *sys_table;
+ 
+-static struct efi_config *efi_early;
+-
+-#define efi_call_early(f, ...)						\
+-	efi_early->call(efi_early->f, __VA_ARGS__);
++struct efi_config *efi_early;
+ 
+ #define BOOT_SERVICES(bits)						\
+ static void setup_boot_services##bits(struct efi_config *c)		\
+diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+index c88c31ecad12..d487e727f1ec 100644
+--- a/arch/x86/boot/compressed/eboot.h
++++ b/arch/x86/boot/compressed/eboot.h
+@@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
+ 	void *blt;
+ };
+ 
+-struct efi_config {
+-	u64 image_handle;
+-	u64 table;
+-	u64 allocate_pool;
+-	u64 allocate_pages;
+-	u64 get_memory_map;
+-	u64 free_pool;
+-	u64 free_pages;
+-	u64 locate_handle;
+-	u64 handle_protocol;
+-	u64 exit_boot_services;
+-	u64 text_output;
+-	efi_status_t (*call)(unsigned long, ...);
+-	bool is64;
+-} __packed;
+-
+ #endif /* BOOT_COMPRESSED_EBOOT_H */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 1eb5f6433ad8..55059a50a01f 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -156,6 +156,31 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ 	return EFI_SUCCESS;
+ }
+ #endif /* CONFIG_EFI_MIXED */
++
++
++/* arch specific definitions used by the stub code */
++
++struct efi_config {
++	u64 image_handle;
++	u64 table;
++	u64 allocate_pool;
++	u64 allocate_pages;
++	u64 get_memory_map;
++	u64 free_pool;
++	u64 free_pages;
++	u64 locate_handle;
++	u64 handle_protocol;
++	u64 exit_boot_services;
++	u64 text_output;
++	efi_status_t (*call)(unsigned long, ...);
++	bool is64;
++} __packed;
++
++extern struct efi_config *efi_early;
++
++#define efi_call_early(f, ...)						\
++	efi_early->call(efi_early->f, __VA_ARGS__);
++
+ #else
+ /*
+  * IF EFI is not configured, have the EFI calls return -ENOSYS.
+-- 
+1.8.3.2
