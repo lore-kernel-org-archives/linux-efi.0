@@ -1,41 +1,44 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: efistub: remove local copy of linux_banner
-Date: Wed, 18 Jun 2014 09:50:59 +0100
-Message-ID: <20140618085059.GB24049@console-pimps.org>
-References: <1402657911-7779-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi: fix pointer type errors in fdt_uefi_find_params()
+Date: Wed, 18 Jun 2014 10:02:45 +0100
+Message-ID: <20140618090245.GC24049@console-pimps.org>
+References: <1402671299-22493-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1402657911-7779-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1402671299-22493-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 13 Jun, at 01:11:51PM, Ard Biesheuvel wrote:
-> The shared efistub code for ARM and arm64 contains a local copy of linux_banner,
-> allowing it to be referenced from separate executables such as the ARM
-> decompressor. However, this introduces a dependency on generated header files,
-> causing unnecessary rebuilds of the stub itself and, in case of arm64, vmlinux
-> which contains it.
+On Fri, 13 Jun, at 04:54:59PM, Ard Biesheuvel wrote:
+> Fix two instances of pointer type errors, a harmless one where a const void*
+> value is assigned to a non-const void* variable, and a not-so-harmless one where
+> we pass a pointer to unsigned long where a pointer to int is expected.
 > 
-> On arm64, the copy is not actually needed since we can reference the original
-> symbol directly, and as it turns out, there may be better ways to deal with this
-> for ARM as well, so let's remove it from the shared code. If it still needs to
-> be reintroduced for ARM later, it should live under arch/arm anyway and not in
-> shared code.
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index cd36deb619fa..fe737832a882 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -353,8 +353,8 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  				       int depth, void *data)
+>  {
+>  	struct param_info *info = data;
+> -	void *prop, *dest;
+> -	unsigned long len;
+> +	void const *prop, *dest;
+> +	int len;
+>  	u64 val;
+>  	int i;
 
-I remember making some similar arguments when this patch was first
-introduced. From looking at my notes, the patch rationale was based on
-some DT binding discussion where people wanted an explicit way to
-identify the kernel they were booting and everyone agreed upon this
-string - I don't know which discussion, I don't have that data.
-
-I'm more than happy to delete this from the shared code, I never wanted
-it to go in in the first place. But could someone please give me some
-details as to why this change is safe and isn't going to break
-ARM/ARM64? How does this affect DT bindings?
+const void *?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
