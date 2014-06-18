@@ -1,75 +1,53 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH 2/2] efilinux: set ext_ramdisk_* for huge initrd
-Date: Tue, 17 Jun 2014 23:41:09 -0700
-Message-ID: <1403073669-6602-2-git-send-email-yinghai@kernel.org>
-References: <1403073669-6602-1-git-send-email-yinghai@kernel.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] pstore: Fix an overflow on 32-bit builds.
+Date: Wed, 18 Jun 2014 09:35:55 +0100
+Message-ID: <20140618083555.GA24049@console-pimps.org>
+References: <1402325440-26335-1-git-send-email-andrew.zaborowski@intel.com>
+ <alpine.DEB.2.02.1406091322050.30620@chino.kir.corp.google.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1403073669-6602-1-git-send-email-yinghai@kernel.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.02.1406091322050.30620@chino.kir.corp.google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
+To: David Rientjes <rientjes@google.com>
+Cc: Andrzej Zaborowski <andrew.zaborowski@intel.com>, Matt Fleming <matt.fleming@intel.com>, Madper Xie <cxie@redhat.com>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-We could load it high if it is more than 2G when kernel support
-LOAD_ABOVE_4G.
+On Mon, 09 Jun, at 01:24:43PM, David Rientjes wrote:
+> On Mon, 9 Jun 2014, Andrzej Zaborowski wrote:
+> 
+> > [resend]
+> > In generic_id the long int timestamp is multiplied by 100000 and needs
+> > an explicit cast to u64.
+> > 
+> > Without that the id in the resulting pstore filename is wrong and
+> > userspace may have problems parsing it, but more importantly files in
+> > pstore can never be deleted and may fill the EFI flash (brick device?).
+> > This happens because when generic pstore code wants to delete a file,
+> > it passes the id to the EFI backend which reinterpretes it and a wrong
+> > variable name is attempted to be deleted.  There's no error message but
+> > after remounting pstore, deleted files would reappear.
 
-Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+It shouldn't be possible to brick devices because the efi-pstore code
+still goes through efivar_entry_set_safe() whic has the necessary
+checks. Please let me know if you've witnessed any fallout from this bug
+other than being unable to delete files.
 
----
- loaders/bzimage/bzimage.c |    9 ++++++++-
- loaders/bzimage/bzimage.h |    8 ++++++--
- 2 files changed, 14 insertions(+), 3 deletions(-)
+> This fixes commit fdeadb43fdf1 ("efi-pstore: Make efi-pstore return a 
+> unique id") that went into stable, so I'm not sure if this should go into 
+> stable as well.
+ 
+I think it should go to stable too. Tony?
 
-Index: efilinux/loaders/bzimage/bzimage.c
-===================================================================
---- efilinux.orig/loaders/bzimage/bzimage.c
-+++ efilinux/loaders/bzimage/bzimage.c
-@@ -130,7 +130,9 @@ static void parse_initrd(EFI_LOADED_IMAG
- 	if (err != EFI_SUCCESS)
- 		goto close_handles;
- 
--	if ((UINTN)addr > boot_params->hdr.ramdisk_max) {
-+	if ((boot_params->hdr.version < 0x20c ||
-+	     !(boot_params->hdr.xloadflags & (1<<1))) &&
-+	    (UINTN)addr > boot_params->hdr.ramdisk_max) {
- 		Print(L"ramdisk address is too high!\n");
- 		efree(addr, size);
- 		goto close_handles;
-@@ -138,6 +140,11 @@ static void parse_initrd(EFI_LOADED_IMAG
- 
- 	boot_params->hdr.ramdisk_start = (UINT32)(UINTN)addr;
- 	boot_params->hdr.ramdisk_len = (UINT32)size;
-+	if (boot_params->hdr.version >= 0x20c &&
-+	    (boot_params->hdr.xloadflags & (1<<1))) {
-+		boot_params->ext_ramdisk_image = (UINT64)(UINTN)addr >> 32;
-+		boot_params->ext_ramdisk_size = size >> 32;
-+	}
- 
- 	for (j = 0; j < nr_initrds; j++) {
- 		struct initrd *rd = &initrds[j];
-Index: efilinux/loaders/bzimage/bzimage.h
-===================================================================
---- efilinux.orig/loaders/bzimage/bzimage.h
-+++ efilinux/loaders/bzimage/bzimage.h
-@@ -69,7 +69,8 @@ struct setup_header {
- 	UINT32 ramdisk_max;    /* Highest legal initrd address */
- 	UINT32 kernel_alignment; /* Physical addr alignment required for kernel */
- 	UINT8 relocatable_kernel; /* Whether kernel is relocatable or not */
--	UINT8 _pad2[3];
-+	UINT8 min_alignment;
-+	UINT16 xloadflags;
- 	UINT32 cmdline_size;
- 	UINT32 hardware_subarch;
- 	UINT64 hardware_subarch_data;
-@@ -148,7 +149,10 @@ struct boot_params {
- 	UINT8 hd1_info[16];
- 	UINT8 sys_desc_table[0x10];
- 	UINT8 olpc_ofw_header[0x10];
--	UINT8 _pad4[128];
-+	UINT32 ext_ramdisk_image;
-+	UINT32 ext_ramdisk_size;
-+	UINT32 ext_cmd_line_ptr;
-+	UINT8 _pad4[116];
- 	UINT8 edid_info[0x80];
- 	struct efi_info efi_info;
- 	UINT32 alt_mem_k;
+> You probably had to resend this because you didn't email any of the 
+> maintainers (fixed).  Use scripts/get_maintainer.pl to figure out who to 
+> email about a patch.
+
+Thanks for triaging this David.
+
+Unless anyone speaks up I'm going to throw this into the EFI tree with
+David's Acked-by.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
