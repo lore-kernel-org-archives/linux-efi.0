@@ -1,53 +1,41 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] pstore: Fix an overflow on 32-bit builds.
-Date: Wed, 18 Jun 2014 09:35:55 +0100
-Message-ID: <20140618083555.GA24049@console-pimps.org>
-References: <1402325440-26335-1-git-send-email-andrew.zaborowski@intel.com>
- <alpine.DEB.2.02.1406091322050.30620@chino.kir.corp.google.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efi/arm64: efistub: remove local copy of linux_banner
+Date: Wed, 18 Jun 2014 09:50:59 +0100
+Message-ID: <20140618085059.GB24049@console-pimps.org>
+References: <1402657911-7779-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.02.1406091322050.30620@chino.kir.corp.google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: David Rientjes <rientjes@google.com>
-Cc: Andrzej Zaborowski <andrew.zaborowski@intel.com>, Matt Fleming <matt.fleming@intel.com>, Madper Xie <cxie@redhat.com>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+In-Reply-To: <1402657911-7779-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 09 Jun, at 01:24:43PM, David Rientjes wrote:
-> On Mon, 9 Jun 2014, Andrzej Zaborowski wrote:
+On Fri, 13 Jun, at 01:11:51PM, Ard Biesheuvel wrote:
+> The shared efistub code for ARM and arm64 contains a local copy of linux_banner,
+> allowing it to be referenced from separate executables such as the ARM
+> decompressor. However, this introduces a dependency on generated header files,
+> causing unnecessary rebuilds of the stub itself and, in case of arm64, vmlinux
+> which contains it.
 > 
-> > [resend]
-> > In generic_id the long int timestamp is multiplied by 100000 and needs
-> > an explicit cast to u64.
-> > 
-> > Without that the id in the resulting pstore filename is wrong and
-> > userspace may have problems parsing it, but more importantly files in
-> > pstore can never be deleted and may fill the EFI flash (brick device?).
-> > This happens because when generic pstore code wants to delete a file,
-> > it passes the id to the EFI backend which reinterpretes it and a wrong
-> > variable name is attempted to be deleted.  There's no error message but
-> > after remounting pstore, deleted files would reappear.
+> On arm64, the copy is not actually needed since we can reference the original
+> symbol directly, and as it turns out, there may be better ways to deal with this
+> for ARM as well, so let's remove it from the shared code. If it still needs to
+> be reintroduced for ARM later, it should live under arch/arm anyway and not in
+> shared code.
 
-It shouldn't be possible to brick devices because the efi-pstore code
-still goes through efivar_entry_set_safe() whic has the necessary
-checks. Please let me know if you've witnessed any fallout from this bug
-other than being unable to delete files.
+I remember making some similar arguments when this patch was first
+introduced. From looking at my notes, the patch rationale was based on
+some DT binding discussion where people wanted an explicit way to
+identify the kernel they were booting and everyone agreed upon this
+string - I don't know which discussion, I don't have that data.
 
-> This fixes commit fdeadb43fdf1 ("efi-pstore: Make efi-pstore return a 
-> unique id") that went into stable, so I'm not sure if this should go into 
-> stable as well.
- 
-I think it should go to stable too. Tony?
-
-> You probably had to resend this because you didn't email any of the 
-> maintainers (fixed).  Use scripts/get_maintainer.pl to figure out who to 
-> email about a patch.
-
-Thanks for triaging this David.
-
-Unless anyone speaks up I'm going to throw this into the EFI tree with
-David's Acked-by.
+I'm more than happy to delete this from the shared code, I never wanted
+it to go in in the first place. But could someone please give me some
+details as to why this change is safe and isn't going to break
+ARM/ARM64? How does this affect DT bindings?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
