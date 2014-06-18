@@ -1,43 +1,59 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v5 2/7] efi: Introduce EFI_NO_DIRECT flag
-Date: Wed, 18 Jun 2014 16:12:32 +0100
-Message-ID: <20140618151232.GQ24049@console-pimps.org>
-References: <1402678823-24589-1-git-send-email-daniel.kiper@oracle.com>
- <1402678823-24589-3-git-send-email-daniel.kiper@oracle.com>
- <20140618135229.GH24049@console-pimps.org>
- <53A1B726020000780001B6CF@mail.emea.novell.com>
- <alpine.DEB.2.02.1406181523340.13771@kaball.uk.xensource.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] arm64: support reboot and power off via EFI runtime
+Date: Wed, 18 Jun 2014 16:53:56 +0100
+Message-ID: <20140618155356.GR24049@console-pimps.org>
+References: <1403023514-1352-1-git-send-email-msalter@redhat.com>
+ <CAL_JsqJUMMRwUn+PUiFweDOywgLCbKiWfDTLDSfJqE9oTV5gYw@mail.gmail.com>
+ <1403102507.32688.42.camel@deneb.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.02.1406181523340.13771-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Cc: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+In-Reply-To: <1403102507.32688.42.camel@deneb.redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Salter <msalter@redhat.com>
+Cc: Rob Herring <robherring2@gmail.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 18 Jun, at 03:30:25PM, Stefano Stabellini wrote:
+On Wed, 18 Jun, at 10:41:47AM, Mark Salter wrote:
+> On Wed, 2014-06-18 at 09:09 -0500, Rob Herring wrote:
+> > On Tue, Jun 17, 2014 at 11:45 AM, Mark Salter <msalter@redhat.com> wrote:
+> > > Add handlers for arm_pm_resestart and pm_power_off which use EFI
+> > 
+> > typo.
+> > 
+> > > runtime services ResetSystem call to perform the functions. These
+> > > handlers are only installed if no handler currently exists. This
+> > > allows PSCI to take priority over EFI for these functions.
+> > >
+> > > Signed-off-by: Mark Salter <msalter@redhat.com>
+> > > ---
+> > >  arch/arm64/kernel/efi.c | 40 ++++++++++++++++++++++++++++++++++++++++
+> > 
+> > Where's the arm32 version? Surely this could be shared with all
+> > arches. pm_power_off is at least architecturally independent. We
+> > should do the same for restart/reboot. I'm not saying do that now, but
+> > at least put it in the right place for that to happen.
+> > 
+> > Rob
 > 
-> I was thinking the same thing.
+> Good point. So the right place would be drivers/firmware/efi I think.
+> Add a CONFIG_EFI_RESET with default off. I suppose we could also
+> go ahead and s/arm_pm_restart/pm_restart/ kernel-wide or have an
+> ifdef in the code (or depends on ARM64 || ARM in Kconfig) until we
+> do so.
 > 
-> However this patch series doesn't add much code outside
-> drivers/xen/efi.c and include/xen/interface/platform.h.
-> I think it wouldn't be fair to ask Daniel to refactor the efi code
-> currently under arch/x86 to an arch-independent location.
-> Whoever comes in later and adds EFI Xen support for ARM can do that.
+> [Matt Fleming CC'd]
+ 
+Heh, this is timely. I wrote some patches last week to use
+EfiResetSystem() for ACPI Hardware Reduced platforms,
 
-I agree that we shouldn't necessarily build tons of arch-independent
-infrastructure when there's only one user, but it is wise to be careful
-about the design decisions being made if you know there's another user
-coming around the corner.
+  http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/log/?h=efi/reboot
 
-What we don't want to happen, is for the designs that we have now to
-become set in stone such that they can never be changed, to the
-deteriment of code duplication and maintenance.
+so it would definitely be good if we could try and solve both of our
+problems simultaneously.
 
-I don't think that's happening in this patch series, but it's definitely
-smart discussing this stuff upfront.
+Let me post that patch series to kickoff the discussion.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
