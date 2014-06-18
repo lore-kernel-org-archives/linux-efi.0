@@ -1,84 +1,154 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH v5 1/7] efi: Use early_mem*() instead of early_io*()
-Date: Wed, 18 Jun 2014 14:59:57 +0200
-Message-ID: <20140618125957.GA28489@olila.local.net-space.pl>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v5 2/7] efi: Introduce EFI_NO_DIRECT flag
+Date: Wed, 18 Jun 2014 14:52:29 +0100
+Message-ID: <20140618135229.GH24049@console-pimps.org>
 References: <1402678823-24589-1-git-send-email-daniel.kiper@oracle.com>
- <1402678823-24589-2-git-send-email-daniel.kiper@oracle.com>
- <20140618121709.GF24049@console-pimps.org>
+ <1402678823-24589-3-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140618121709.GF24049@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, Mark Salter <msalter@redhat.com>
+In-Reply-To: <1402678823-24589-3-git-send-email-daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 18, 2014 at 01:17:09PM +0100, Matt Fleming wrote:
-> (Pulling in Mark Salter for early_ioremap() knowledge)
->
-> On Fri, 13 Jun, at 07:00:17PM, Daniel Kiper wrote:
-> > Use early_mem*() instead of early_io*() because all mapped EFI regions
-> > are true RAM not I/O regions. Additionally, I/O family calls do not work
-> > correctly under Xen in our case. AIUI, early_io*() maps/unmaps real machine
-> > addresses. However, all artificial EFI structures created under Xen live
-> > in dom0 memory and should be mapped/unmapped using early_mem*() family
-> > calls which map domain memory.
-> >
-> > Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
-> > ---
-> >  arch/x86/platform/efi/efi.c |   42 +++++++++++++++++++++---------------------
-> >  drivers/firmware/efi/efi.c  |    4 ++--
-> >  2 files changed, 23 insertions(+), 23 deletions(-)
-> >
-> > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> > index 87fc96b..dd1e351 100644
-> > --- a/arch/x86/platform/efi/efi.c
-> > +++ b/arch/x86/platform/efi/efi.c
-> > @@ -427,7 +427,7 @@ void __init efi_unmap_memmap(void)
-> >  {
-> >  	clear_bit(EFI_MEMMAP, &efi.flags);
-> >  	if (memmap.map) {
-> > -		early_iounmap(memmap.map, memmap.nr_map * memmap.desc_size);
-> > +		early_memunmap(memmap.map, memmap.nr_map * memmap.desc_size);
-> >  		memmap.map = NULL;
-> >  	}
-> >  }
-> > @@ -467,12 +467,12 @@ static int __init efi_systab_init(void *phys)
-> >  			if (!data)
-> >  				return -ENOMEM;
-> >  		}
-> > -		systab64 = early_ioremap((unsigned long)phys,
-> > -					 sizeof(*systab64));
-> > +		systab64 = early_memremap((unsigned long)phys,
-> > +						sizeof(*systab64));
->
-> Please don't misalign the arguments :-( This makes the diff harder to
-> read when all you're doing is changing the function call. You're
-> indentation isn't an improvement.
+On Fri, 13 Jun, at 07:00:18PM, Daniel Kiper wrote:
+> Introduce EFI_NO_DIRECT flag. If it is set then kernel runs
+> on EFI platform but it has not direct control on EFI stuff
+> like EFI runtime, tables, structures, etc. If not this means
+> that Linux Kernel has direct access to EFI infrastructure
+> and everything runs as usual.
+> 
+> This functionality is used in Xen dom0 because hypervisor
+> has full control on EFI stuff and all calls from dom0 to
+> EFI must be requested via special hypercall which in turn
+> executes relevant EFI code in behalf of dom0.
+> 
+> v5 - suggestions/fixes:
+>    - rename EFI_DIRECT to EFI_NO_DIRECT
+>      (suggested by David Vrabel),
+>    - limit EFI_NO_DIRECT usage
+>      (suggested by Jan Beulich and Matt Fleming),
+>    - improve commit message
+>      (suggested by David Vrabel).
+> 
+> Signed-off-by: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi.c |   27 +++++++++++++++++++++------
+>  drivers/firmware/efi/efi.c  |   22 +++++++++++++---------
+>  include/linux/efi.h         |    3 ++-
+>  3 files changed, 36 insertions(+), 16 deletions(-)
 
-I think that it improves readability a bit but if you wish I will not
-do that in the future.
+[...]
 
-> As Matthew pointed out we may also need to access EFI mapped flash
-> devices.
+> @@ -617,13 +620,16 @@ static int __init efi_runtime_init(void)
+>  	 * address of several of the EFI runtime functions, needed to
+>  	 * set the firmware into virtual mode.
+>  	 */
+> -	if (efi_enabled(EFI_64BIT))
+> -		rv = efi_runtime_init64();
+> -	else
+> -		rv = efi_runtime_init32();
+>  
+> -	if (rv)
+> -		return rv;
+> +	if (!efi_enabled(EFI_NO_DIRECT)) {
+> +		if (efi_enabled(EFI_64BIT))
+> +			rv = efi_runtime_init64();
+> +		else
+> +			rv = efi_runtime_init32();
+> +
+> +		if (rv)
+> +			return rv;
+> +	}
+>  
+>  	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+>  
 
-Right, but I think it does not change a lot in that case. Flash
-is simply slower type of memory used as permanent storage.
-Am I missing something?
+This could do with some comments to explain why you want to set
+EFI_RUNTIME_SERVICES even though you're skipping efi_runtime_init*(),
+e.g. that for Xen things are already mapped.
 
-> Now, the only difference between early_memremap() and early_ioremap(),
-> at least on x86, is PAGE_KERNEL vs. PAGE_KERNEL_IO, where PAGE_KERNEL_IO
-> has the additional _PAGE_BIT_IOMAP bit set in the pte. But that's a
-> software bit for x86.
->
-> So, even though this change should be harmless, it's not clear to me why
-> this change is needed. You say "I/O family calls do not work correctly
-> under Xen in our case", but could you provide some more explanation as
-> to why they don't work correctly?
+I'm not likely to remember the rationale for this in 6 months time, and
+anyone else hacking on this code that isn't part of this thread also may
+not realise at first glance. Comments would go a long way to fixing
+that.
 
-As I saw David provided better explanation. If you wish I could include
-it in commit message.
+> @@ -1220,6 +1232,9 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+>  	efi_memory_desc_t *md;
+>  	void *p;
+>  
+> +	if (!efi_enabled(EFI_MEMMAP))
+> +		return 0;
+> +
+>  	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+>  		md = p;
+>  		if ((md->phys_addr <= phys_addr) &&
 
-Daniel
+This should be a separate patch, please.
+
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 023937a..8bb1075 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -104,16 +104,20 @@ static struct attribute *efi_subsys_attrs[] = {
+>  static umode_t efi_attr_is_visible(struct kobject *kobj,
+>  				   struct attribute *attr, int n)
+>  {
+> -	umode_t mode = attr->mode;
+> -
+> -	if (attr == &efi_attr_fw_vendor.attr)
+> -		return (efi.fw_vendor == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
+> -	else if (attr == &efi_attr_runtime.attr)
+> -		return (efi.runtime == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
+> -	else if (attr == &efi_attr_config_table.attr)
+> -		return (efi.config_table == EFI_INVALID_TABLE_ADDR) ? 0 : mode;
+> +	if (attr == &efi_attr_fw_vendor.attr) {
+> +		if (efi_enabled(EFI_NO_DIRECT) ||
+> +				efi.fw_vendor == EFI_INVALID_TABLE_ADDR)
+> +			return 0;
+> +	} else if (attr == &efi_attr_runtime.attr) {
+> +		if (efi_enabled(EFI_NO_DIRECT) ||
+> +				efi.runtime == EFI_INVALID_TABLE_ADDR)
+> +			return 0;
+> +	} else if (attr == &efi_attr_config_table.attr) {
+> +		if (efi.config_table == EFI_INVALID_TABLE_ADDR)
+> +			return 0;
+> +	}
+>  
+> -	return mode;
+> +	return attr->mode;
+>  }
+  
+Why don't you want to export efi.fw_vendor, etc? Rationale please.
+
+>  static struct attribute_group efi_subsys_attr_group = {
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 41bbf8b..e917c4a 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -916,7 +916,8 @@ extern int __init efi_setup_pcdp_console(char *);
+>  #define EFI_RUNTIME_SERVICES	3	/* Can we use runtime services? */
+>  #define EFI_MEMMAP		4	/* Can we use EFI memory map? */
+>  #define EFI_64BIT		5	/* Is the firmware 64-bit? */
+> -#define EFI_ARCH_1		6	/* First arch-specific bit */
+> +#define EFI_NO_DIRECT		6	/* Can we access EFI directly? */
+> +#define EFI_ARCH_1		7	/* First arch-specific bit */
+
+I like David's suggestion of using EFI_PARAVIRT.
+
+Why the bit shuffling? Are you trying to keep the non-arch bits
+together? That does make sense, and I can't help but feel that
+EFI_ARCH_1 should probably be bit 31 so we can subtract 1 for each new
+arch bit so we don't have to do this constant shuffling in future.
+
+I'll need to think a bit harder about that.
+
+EFI_PARAVIRT will be usable by architectures other than x86, correct? If
+your intention is for it only ever to be used by x86, then it should
+probably be EFI_ARCH_2.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
