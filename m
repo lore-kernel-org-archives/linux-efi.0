@@ -1,142 +1,175 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH 1/3] efi/reboot: Add generic wrapper around EfiResetSystem()
-Date: Thu, 19 Jun 2014 14:40:23 +0100
-Message-ID: <1403185225-9031-2-git-send-email-matt@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [PATCH 3/3] x86/reboot: Add EFI reboot quirk for ACPI Hardware Reduced flag
+Date: Thu, 19 Jun 2014 14:40:25 +0100
+Message-ID: <1403185225-9031-4-git-send-email-matt@console-pimps.org>
 References: <1403185225-9031-1-git-send-email-matt@console-pimps.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1403185225-9031-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Alan Cox <alan-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Aubrey Li <aubrey.li-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1403185225-9031-1-git-send-email-matt@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-efi@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Alan Cox <alan@lxorguk.ukuu.org.uk>, "H. Peter Anvin" <hpa@zytor.com>, Mark Salter <msalter@redhat.com>, Aubrey Li <aubrey.li@linux.intel.com>, Matt Fleming <matt.fleming@intel.com>, Len Brown <len.brown@intel.com>, "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Matt Fleming <matt.fleming@intel.com>
 
-Implement efi_reboot(), which is really just a wrapper around the
-EfiResetSystem() EFI runtime service, but it does at least allow us to
-funnel all callers through a single location.
+It appears that the BayTrail-T class of hardware requires EFI in order
+to powerdown and reboot and no other reliable method exists.
 
-It also simplifies the callsites since users no longer need to check to
-see whether EFI_RUNTIME_SERVICES are enabled.
+This quirk is generally applicable to all hardware that has the ACPI
+Hardware Reduced bit set, since usually ACPI would be the preferred
+method.
 
-Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Len Brown <len.brown@intel.com>
+Cc: Mark Salter <msalter@redhat.com>
+Cc: "Rafael J. Wysocki" <rafael.j.wysocki@intel.com>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
 ---
+ arch/x86/include/asm/efi.h     |  6 ++++++
+ arch/x86/kernel/reboot.c       | 18 ++++++++++++++++--
+ arch/x86/platform/efi/quirks.c | 23 +++++++++++++++++++++++
+ drivers/firmware/efi/reboot.c  |  8 ++++++++
+ include/linux/efi.h            |  1 +
+ 5 files changed, 54 insertions(+), 2 deletions(-)
 
-Mark, I reworked my efi_reboot() to more closely match your versino.
-Since we essentially wrote the same code I'd be happy to include your
-chosen Copyright notice, I just didn't want to be presumptuous and do it
-on your behalf without asking.
-
- arch/ia64/kernel/process.c    |  2 +-
- arch/x86/kernel/reboot.c      |  6 +-----
- drivers/firmware/efi/Makefile |  2 +-
- drivers/firmware/efi/reboot.c | 25 +++++++++++++++++++++++++
- include/linux/efi.h           |  4 ++++
- 5 files changed, 32 insertions(+), 7 deletions(-)
- create mode 100644 drivers/firmware/efi/reboot.c
-
-diff --git a/arch/ia64/kernel/process.c b/arch/ia64/kernel/process.c
-index 55d4ba47a907..deed6fa96bb0 100644
---- a/arch/ia64/kernel/process.c
-+++ b/arch/ia64/kernel/process.c
-@@ -662,7 +662,7 @@ void
- machine_restart (char *restart_cmd)
- {
- 	(void) notify_die(DIE_MACHINE_RESTART, restart_cmd, NULL, 0, 0, 0);
--	(*efi.reset_system)(EFI_RESET_WARM, 0, 0, NULL);
-+	efi_reboot(REBOOT_WARM, NULL);
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 3dbf56eb540d..5d71d0eb50b3 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -158,6 +158,8 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ 	return EFI_SUCCESS;
  }
+ #endif /* CONFIG_EFI_MIXED */
++
++extern bool efi_reboot_required(void);
+ #else
+ /*
+  * IF EFI is not configured, have the EFI calls return -ENOSYS.
+@@ -170,6 +172,10 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ #define efi_call5(_f, _a1, _a2, _a3, _a4, _a5)		(-ENOSYS)
+ #define efi_call6(_f, _a1, _a2, _a3, _a4, _a5, _a6)	(-ENOSYS)
+ static inline void parse_efi_setup(u64 phys_addr, u32 data_len) {}
++static inline bool efi_reboot_required(void)
++{
++	return false;
++}
+ #endif /* CONFIG_EFI */
  
- void
+ #endif /* _ASM_X86_EFI_H */
 diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
-index 52b1157c53eb..09e709fd1830 100644
+index 09e709fd1830..17962e667a91 100644
 --- a/arch/x86/kernel/reboot.c
 +++ b/arch/x86/kernel/reboot.c
-@@ -528,11 +528,7 @@ static void native_machine_emergency_restart(void)
- 			break;
- 
- 		case BOOT_EFI:
--			if (efi_enabled(EFI_RUNTIME_SERVICES))
--				efi.reset_system(reboot_mode == REBOOT_WARM ?
--						 EFI_RESET_WARM :
--						 EFI_RESET_COLD,
--						 EFI_SUCCESS, 0, NULL);
-+			efi_reboot(reboot_mode, NULL);
- 			reboot_type = BOOT_BIOS;
- 			break;
- 
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 9553496b0f43..c135154ead89 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -1,7 +1,7 @@
- #
- # Makefile for linux kernel
- #
--obj-$(CONFIG_EFI)			+= efi.o vars.o
-+obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o
- obj-$(CONFIG_EFI_VARS)			+= efivars.o
- obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
- obj-$(CONFIG_UEFI_CPER)			+= cper.o
-diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
-new file mode 100644
-index 000000000000..d10acc0a0370
---- /dev/null
-+++ b/drivers/firmware/efi/reboot.c
-@@ -0,0 +1,25 @@
-+/*
-+ * Copyright (C) 2014 Intel Corporation; author Matt Fleming
-+ */
-+#include <linux/efi.h>
-+#include <linux/reboot.h>
-+
-+void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
-+{
-+	int efi_mode;
-+
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-+		return;
-+
-+	switch (reboot_mode) {
-+	case REBOOT_WARM:
-+	case REBOOT_SOFT:
-+		efi_mode = EFI_RESET_WARM;
-+		break;
-+	default:
-+		efi_mode = EFI_RESET_COLD;
-+		break;
-+	}
-+
-+	efi.reset_system(efi_mode, EFI_SUCCESS, 0, NULL);
-+}
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 41bbf8ba4ba8..0958d4bb399f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -20,6 +20,7 @@
- #include <linux/ioport.h>
- #include <linux/pfn.h>
- #include <linux/pstore.h>
-+#include <linux/reboot.h>
- 
- #include <asm/page.h>
- 
-@@ -926,11 +927,14 @@ static inline bool efi_enabled(int feature)
- {
- 	return test_bit(feature, &efi.flags) != 0;
- }
-+extern void efi_reboot(enum reboot_mode reboot_mode, const char *__unused);
- #else
- static inline bool efi_enabled(int feature)
- {
- 	return false;
- }
-+static inline void
-+efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
- #endif
+@@ -28,6 +28,7 @@
+ #include <linux/mc146818rtc.h>
+ #include <asm/realmode.h>
+ #include <asm/x86_init.h>
++#include <asm/efi.h>
  
  /*
+  * Power off function, if any
+@@ -401,12 +402,25 @@ static struct dmi_system_id __initdata reboot_dmi_table[] = {
+ 
+ static int __init reboot_init(void)
+ {
++	int rv;
++
+ 	/*
+ 	 * Only do the DMI check if reboot_type hasn't been overridden
+ 	 * on the command line
+ 	 */
+-	if (reboot_default)
+-		dmi_check_system(reboot_dmi_table);
++	if (!reboot_default)
++		return 0;
++
++	/*
++	 * The DMI quirks table takes precedence. If no quirks entry
++	 * matches and the ACPI Hardware Reduced bit is set, force EFI
++	 * reboot.
++	 */
++	rv = dmi_check_system(reboot_dmi_table);
++
++	if (!rv && efi_reboot_required())
++		reboot_type = BOOT_EFI;
++
+ 	return 0;
+ }
+ core_initcall(reboot_init);
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index b4cb9182f155..1c7380da65ff 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -7,6 +7,7 @@
+ #include <linux/slab.h>
+ #include <linux/memblock.h>
+ #include <linux/bootmem.h>
++#include <linux/acpi.h>
+ #include <asm/efi.h>
+ #include <asm/uv/uv.h>
+ 
+@@ -265,3 +266,25 @@ void __init efi_apply_memmap_quirks(void)
+ 	if (is_uv_system())
+ 		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+ }
++
++/*
++ * For most modern platforms the preferred method of powering off is via
++ * ACPI. However, there are some that are known to require the use of
++ * EFI runtime services and for which ACPI does not work at all.
++ *
++ * Using EFI is a last resort, to be used only if no other option
++ * exists.
++ */
++bool efi_reboot_required(void)
++{
++	if (!acpi_gbl_reduced_hardware)
++		return false;
++
++	efi_reboot_quirk_mode = EFI_RESET_WARM;
++	return true;
++}
++
++bool efi_poweroff_required(void)
++{
++	return !!acpi_gbl_reduced_hardware;
++}
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+index 794a276dbe92..f94fb95db3b7 100644
+--- a/drivers/firmware/efi/reboot.c
++++ b/drivers/firmware/efi/reboot.c
+@@ -4,6 +4,8 @@
+ #include <linux/efi.h>
+ #include <linux/reboot.h>
+ 
++int efi_reboot_quirk_mode = -1;
++
+ void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
+ {
+ 	int efi_mode;
+@@ -21,6 +23,12 @@ void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
+ 		break;
+ 	}
+ 
++	/*
++	 * If a quirk forced an EFI reset mode, always use that.
++	 */
++	if (efi_reboot_quirk_mode != -1)
++		efi_mode = efi_reboot_quirk_mode;
++
+ 	efi.reset_system(efi_mode, EFI_SUCCESS, 0, NULL);
+ }
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 2539aff31808..b3fac7c1656c 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -876,6 +876,7 @@ extern void efi_reserve_boot_services(void);
+ extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
+ extern struct efi_memory_map memmap;
+ 
++extern int efi_reboot_quirk_mode;
+ extern bool efi_poweroff_required(void);
+ 
+ /* Iterate through an efi_memory_map */
 -- 
 1.9.0
