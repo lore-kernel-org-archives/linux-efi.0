@@ -1,26 +1,54 @@
-From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 13/13] kexec: Support kexec/kdump on EFI systems
-Date: Wed, 18 Jun 2014 13:39:33 -0400
-Message-ID: <20140618173933.GF15327@redhat.com>
-References: <1401800822-27425-1-git-send-email-vgoyal@redhat.com>
- <1401800822-27425-14-git-send-email-vgoyal@redhat.com>
- <20140618160607.GI24024@pd.tnic>
+From: Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] efi: fix build warning about of_get_flat_dt_prop
+Date: Thu, 19 Jun 2014 20:22:32 +0800
+Message-ID: <1403180552-9272-1-git-send-email-wangkefeng.wang@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140618160607.GI24024-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, jkosina-AlSwsSmVLrQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, chaowang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jun 18, 2014 at 06:06:07PM +0200, Borislav Petkov wrote:
-> Addomg linux-efi to CC for the efi bits. Please CC it on your next
-> submission.
+commit 9d0c4dfed(of/fdt: update of_get_flat_dt_prop in prep for libfdt)
+change the of_get_flat_dt_prop, so update related variable to fix build
+warning. Btw, remove unused variable 'name'.
 
-Sure I will. Thanks for reviewing the patches. I will get these ready
-for next round of submission.
+Signed-off-by: Kefeng Wang <wangkefeng.wang-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c |    5 ++---
+ drivers/firmware/efi/fdt.c |    2 +-
+ 2 files changed, 3 insertions(+), 4 deletions(-)
 
-Thanks
-Vivek
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index cd36deb..e6da090 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -353,10 +353,9 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 				       int depth, void *data)
+ {
+ 	struct param_info *info = data;
+-	void *prop, *dest;
+-	unsigned long len;
++	const void *prop, *dest;
++	int len, i;
+ 	u64 val;
+-	int i;
+ 
+ 	if (depth != 1 ||
+ 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
+diff --git a/drivers/firmware/efi/fdt.c b/drivers/firmware/efi/fdt.c
+index 5c6a8e8..82d7741 100644
+--- a/drivers/firmware/efi/fdt.c
++++ b/drivers/firmware/efi/fdt.c
+@@ -63,7 +63,7 @@ static efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	 */
+ 	prev = 0;
+ 	for (;;) {
+-		const char *type, *name;
++		const char *type;
+ 		int len;
+ 
+ 		node = fdt_next_node(fdt, prev, NULL);
+-- 
+1.7.1
