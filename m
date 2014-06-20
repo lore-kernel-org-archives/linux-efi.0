@@ -1,41 +1,77 @@
-From: Leif Lindholm <leif.lindholm@linaro.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Fri, 20 Jun 2014 15:19:28 +0100
-Message-ID: <20140620141927.GL4179@bivouac.eciton.net>
-References: <20140620090008.GU24049@console-pimps.org>
- <20140620092848.GC23939@arm.com>
- <20140620133919.GK4179@bivouac.eciton.net>
- <20140620134938.GY24049@console-pimps.org>
+From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v5 2/7] efi: Introduce EFI_NO_DIRECT flag
+Date: Fri, 20 Jun 2014 16:36:51 +0200
+Message-ID: <20140620143651.GE28489@olila.local.net-space.pl>
+References: <1402678823-24589-1-git-send-email-daniel.kiper@oracle.com>
+ <1402678823-24589-3-git-send-email-daniel.kiper@oracle.com>
+ <20140618135229.GH24049@console-pimps.org>
+ <20140618164835.GD28489@olila.local.net-space.pl>
+ <20140619144112.GT24049@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140620134938.GY24049@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+In-Reply-To: <20140619144112.GT24049-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, jbeulich-IBi9RG/b67k@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jun 20, 2014 at 02:49:38PM +0100, Matt Fleming wrote:
-> On Fri, 20 Jun, at 02:39:19PM, Leif Lindholm wrote:
-> > 
-> > I did post an alternative patch for one half of this a week before
-> > anyone else, but that one seems to have been ignored, even by gmane:
-> > http://www.spinics.net/lists/linux-efi/msg03924.html
->  
-> Sorry Leif, I don't know why I didn't pick that one up. I do see it in
-> my mail archive. Chalk it up to human error.
+On Thu, Jun 19, 2014 at 03:41:12PM +0100, Matt Fleming wrote:
+> On Wed, 18 Jun, at 06:48:35PM, Daniel Kiper wrote:
+> > >
+> > > Why don't you want to export efi.fw_vendor, etc? Rationale please.
+> >
+> > I am exporting real addresses (machine addresses) of things which
+> > I am able to get. Stuff which was created artificially and lives
+> > in dom0 address space or does not exist are not exported.
+>
+> So, wouldn't it be easier to just leave those fields as
+> EFI_INVALID_TABLE_ADDR? If they're not usable why fill out an address?
 
-Well, it seemed to manage to trick at least one computer too...
+It looks that EFI_PARAVIRT check is needed for efi.fw_vendor only.
+Probably I prepared this chunk of code before filling
+efi_systab_xen.runtime with EFI_INVALID_TABLE_ADDR. efi.fw_vendor
+contains pointer to vendor name which lives in dom0 memory and it
+is a copy of name living in EFI memory data. So, this pointer is useless
+for potential user of /sys/firmware/efi/fw_vendor. efi.fw_vendor is
+used in init code only. Hence, I was thinking once about wiping this
+pointer with EFI_INVALID_TABLE_ADDR. However, it requires some changes
+in arch/x86/platform/efi/efi.c (wipe it if EFI_PARAVIRT is set) and
+it is a hack for me. I prefer to live with current solution.
 
-> > That form will still be required for the 32-bit arm support, since
-> > strncmp is not available in the zImage.
-> 
-> Are you planning on incorporating this fix into the 32-bit arm support
-> patch series
+> > Hmmm... I do not know what is wrong with this minimal shuffling. We are
+> > playing here with internal stuff which is not visible outside of any
+> > given kernel. Additionally, as I saw in a few places arch bits are
+> > defined in following way:
+> >
+> > #define ARCH_1 10
+> >
+> > #define A_ARCH_CONST ARCH_1
+> > #define B_ARCH_CONST (ARCH_1 + 1)
+> > #define C_ARCH_CONST (ARCH_1 + 2)
+> > ...
+> >
+> > So I think addition is more natural here than subtraction.
+>
+> No, because we hit the same problem if we need more non-arch bits after
+> bit 9, it moves the problem, it doesn't fix it. Though admittedly, using
 
-Yeah, I'll do that.
-Just as soon as I get back off holiday :)
+10 is just an example. It could be an arbitrary value. However, you
+are right. This just moves the problem.
 
-/
-    Leif
+> this level of indirection (going through ARCH_1) instead of using
+> constants does reduce the problem.
+>
+> Yes, these bits are internal, and yes the shuffling is minimal, but we
+> can do better.
+
+As always, it is a place for an improvement. However, I am not sure
+it is worth fighting with that so hard.
+
+> I'm not suggesting you need to modify your patch. I'm really just
+> thinking out loud. I'll take care of fixing this up later.
+
+OK. Thanks.
+
+Daniel
