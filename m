@@ -1,40 +1,46 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v6 2/9] arch/x86: Do not access EFI memory map if it is not available
-Date: Fri, 20 Jun 2014 23:29:21 +0200
-Message-ID: <1403299768-9955-3-git-send-email-daniel.kiper@oracle.com>
+Subject: [PATCH v6 4/9] arch/x86: Remove redundant
+	set_bit(EFI_SYSTEM_TABLES) call
+Date: Fri, 20 Jun 2014 23:29:23 +0200
+Message-ID: <1403299768-9955-5-git-send-email-daniel.kiper@oracle.com>
 References: <1403299768-9955-1-git-send-email-daniel.kiper@oracle.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1403299768-9955-1-git-send-email-daniel.kiper@oracle.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de
+Cc: mjg59@srcf.ucam.org, jeremy@goop.org, matt.fleming@intel.com, ian.campbell@citrix.com, andrew.cooper3@citrix.com, stefano.stabellini@eu.citrix.com, mingo@redhat.com, david.vrabel@citrix.com, jbeulich@suse.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de, eshelton@pobox.com
 List-Id: linux-efi@vger.kernel.org
 
-Do not access EFI memory map if it is not available. At least
-Xen dom0 EFI implementation does not have an access to it.
+Remove redundant set_bit(EFI_SYSTEM_TABLES, &efi.flags) call.
+It is executed earlier in efi_systab_init().
 
 Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
 ---
-v6 - suggestions/fixes:
-   - create this separate patch from main EFI_PARAVIRT patch
-     (suggested by Matt Fleming).
----
- arch/x86/platform/efi/efi.c |    3 +++
- 1 file changed, 3 insertions(+)
+ arch/x86/platform/efi/efi.c |    2 --
+ 1 file changed, 2 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 0ee1f46..d2d3c41 100644
+index b9c23d7..ae3d398 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -1220,6 +1220,9 @@ u64 efi_mem_attributes(unsigned long phys_addr)
- 	efi_memory_desc_t *md;
- 	void *p;
+@@ -744,8 +744,6 @@ void __init efi_init(void)
+ 	if (efi_systab_init(efi_phys.systab))
+ 		return;
  
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
- 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
- 		md = p;
- 		if ((md->phys_addr <= phys_addr) &&
+-	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+-
+ 	efi.config_table = (unsigned long)efi.systab->tables;
+ 	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
+ 	efi.runtime	 = (unsigned long)efi.systab->runtime;
 -- 
 1.7.10.4
