@@ -1,50 +1,37 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [GIT PULL] EFI urgent fix
-Date: Fri, 20 Jun 2014 10:00:08 +0100
-Message-ID: <20140620090008.GU24049@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] firmware: fix the compiller warning
+Date: Fri, 20 Jun 2014 10:03:44 +0100
+Message-ID: <20140620090344.GV24049@console-pimps.org>
+References: <53A3B665.3080308@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>
+In-Reply-To: <53A3B665.3080308-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ding Tianhong <dingtianhong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Guys,
+On Fri, 20 Jun, at 12:19:49PM, Ding Tianhong wrote:
+> When I compile the kernel, found this warning:
+> 
+> In file included from arch/arm64/kernel/efi-stub.c:44:0:
+> arch/arm64/kernel/../../../drivers/firmware/efi/fdt.c: In function update_fdt:
+> arch/arm64/kernel/../../../drivers/firmware/efi/fdt.c:66:22: warning: unused variable name [-Wunused-variable]
+>    const char *type, *name;
+> 
+> so remove the unused variable and clean this warning.
+> 
+> Signed-off-by: Ding Tianhong <dingtianhong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/fdt.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-Please pull the following compiler warning fix. Sorry, I've been pretty
-slow in getting this pull request sent. Multiple people have reported
-hitting it and I've now received 4 patches for the same warning,
+Thanks, for the report, but I've already queued up a fix from Catalin
+and sent a pull request to the tip folks,
 
-  http://article.gmane.org/gmane.linux.kernel.efi/4024
-  http://article.gmane.org/gmane.linux.kernel.efi/4017
-  http://article.gmane.org/gmane.linux.kernel.efi/3957
-  http://article.gmane.org/gmane.linux.kernel.efi/3930
-
-The following changes since commit 7171511eaec5bf23fb06078f59784a3a0626b38f:
-
-  Linux 3.16-rc1 (2014-06-15 17:45:28 -1000)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to 6fb8cc82c096fd5ccf277678639193cae07125a0:
-
-  efi: Fix compiler warnings (unused, const, type) (2014-06-19 15:03:05 +0100)
-
-----------------------------------------------------------------
- * Fix a few compiler warnings in the arm64 EFI code that lots of people
-   are running into and reporting - Catalin Marinas
-
-----------------------------------------------------------------
-Catalin Marinas (1):
-      efi: Fix compiler warnings (unused, const, type)
-
- drivers/firmware/efi/efi.c | 6 +++---
- drivers/firmware/efi/fdt.c | 2 +-
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ http://marc.info/?l=linux-kernel&m=140325482303647 
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
