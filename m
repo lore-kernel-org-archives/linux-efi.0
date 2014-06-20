@@ -1,8 +1,8 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v6 4/9] arch/x86: Remove redundant
-	set_bit(EFI_SYSTEM_TABLES) call
-Date: Fri, 20 Jun 2014 23:29:23 +0200
-Message-ID: <1403299768-9955-5-git-send-email-daniel.kiper@oracle.com>
+Subject: [PATCH v6 5/9] arch/x86: Remove redundant
+	set_bit(EFI_MEMMAP) call
+Date: Fri, 20 Jun 2014 23:29:24 +0200
+Message-ID: <1403299768-9955-6-git-send-email-daniel.kiper@oracle.com>
 References: <1403299768-9955-1-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -21,8 +21,8 @@ To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen
 Cc: mjg59@srcf.ucam.org, jeremy@goop.org, matt.fleming@intel.com, ian.campbell@citrix.com, andrew.cooper3@citrix.com, stefano.stabellini@eu.citrix.com, mingo@redhat.com, david.vrabel@citrix.com, jbeulich@suse.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de, eshelton@pobox.com
 List-Id: linux-efi@vger.kernel.org
 
-Remove redundant set_bit(EFI_SYSTEM_TABLES, &efi.flags) call.
-It is executed earlier in efi_systab_init().
+Remove redundant set_bit(EFI_MEMMAP, &efi.flags) call.
+It is executed earlier in efi_memmap_init().
 
 Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
 ---
@@ -30,17 +30,17 @@ Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
  1 file changed, 2 deletions(-)
 
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index b9c23d7..ae3d398 100644
+index ae3d398..da15df9 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -744,8 +744,6 @@ void __init efi_init(void)
- 	if (efi_systab_init(efi_phys.systab))
+@@ -784,8 +784,6 @@ void __init efi_init(void)
+ 	if (efi_memmap_init())
  		return;
  
--	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+-	set_bit(EFI_MEMMAP, &efi.flags);
 -
- 	efi.config_table = (unsigned long)efi.systab->tables;
- 	efi.fw_vendor	 = (unsigned long)efi.systab->fw_vendor;
- 	efi.runtime	 = (unsigned long)efi.systab->runtime;
+ 	print_efi_memmap();
+ }
+ 
 -- 
 1.7.10.4
