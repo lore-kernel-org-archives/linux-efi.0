@@ -1,31 +1,61 @@
-From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v6 2/9] arch/x86: Do not access EFI memory map if
- it is not available
-Date: Mon, 23 Jun 2014 12:00:01 +0100
-Message-ID: <53A824D1020000780001C630@mail.emea.novell.com>
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: Re: [PATCH v6 1/9] efi: Use early_mem*() instead of early_io*()
+Date: Mon, 23 Jun 2014 15:54:46 +0200
+Message-ID: <20140623135446.GG28489@olila.local.net-space.pl>
 References: <1403299768-9955-1-git-send-email-daniel.kiper@oracle.com>
- <1403299768-9955-3-git-send-email-daniel.kiper@oracle.com>
- <53A7F8FF.2050309@citrix.com>
+ <1403299768-9955-2-git-send-email-daniel.kiper@oracle.com>
+ <53A7F104020000780001C4BE@mail.emea.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <53A7F8FF.2050309-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ia64-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org, jeremy-TSDbQ3PG+2Y@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, boris.ostrovsky-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org, eshelton-e+AXbWqSrlAAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+In-Reply-To: <53A7F104020000780001C4BE@mail.emea.novell.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Jan Beulich <JBeulich@suse.com>
+Cc: andrew.cooper3@citrix.com, david.vrabel@citrix.com, ian.campbell@citrix.com, stefano.stabellini@eu.citrix.com, jeremy@goop.org, matt.fleming@intel.com, x86@kernel.org, tglx@linutronix.de, xen-devel@lists.xenproject.org, boris.ostrovsky@oracle.com, konrad.wilk@oracle.com, eshelton@pobox.com, mingo@redhat.com, mjg59@srcf.ucam.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, hpa@zytor.com, tony.luck@intel.com, fenghua.yu@intel.com, linux-ia64@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
->>> On 23.06.14 at 11:53, <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org> wrote:
-> On 20/06/14 22:29, Daniel Kiper wrote:
->> Do not access EFI memory map if it is not available. At least
->> Xen dom0 EFI implementation does not have an access to it.
-> 
-> Could it make one based on the XENMEM_memory_map or
-> XENMEM_machine_memory_map hypercall?
+I am CC'ing IA-64 guys.
 
-No, the correct operation to implement this and efi_mem_type()
-similar function is XEN_FW_EFI_INFO, index XEN_FW_EFI_MEM_INFO.
+On Mon, Jun 23, 2014 at 08:19:00AM +0100, Jan Beulich wrote:
+> >>> On 20.06.14 at 23:29, <daniel.kiper@oracle.com> wrote:
+> > --- a/drivers/firmware/efi/efi.c
+> > +++ b/drivers/firmware/efi/efi.c
+> > @@ -298,7 +298,7 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+> >  			if (table64 >> 32) {
+> >  				pr_cont("\n");
+> >  				pr_err("Table located above 4GB, disabling EFI.\n");
+> > -				early_iounmap(config_tables,
+> > +				early_memunmap(config_tables,
+> >  					       efi.systab->nr_tables * sz);
+> >  				return -EINVAL;
+> >  			}
+> > @@ -314,7 +314,7 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+> >  		tablep += sz;
+> >  	}
+> >  	pr_cont("\n");
+> > -	early_iounmap(config_tables, efi.systab->nr_tables * sz);
+> > +	early_memunmap(config_tables, efi.systab->nr_tables * sz);
+> >
+> >  	set_bit(EFI_CONFIG_TABLES, &efi.flags);
+> >
+>
+> If these two changes are really deemed necessary (there's the
+> implied assumption currently in place that early_iounmap() can
+> undo early_memremap() mappings), then ia64 will need a
+> definition added for early_memunmap() or its build will break.
 
-Jan
+I know that early_memunmap() == early_iounmap() in general. However,
+I think that it is less confusing if use relevant functions in pairs
+(i.e. early_memremap() with early_memunmap(), ...) than mix them up.
+
+We have following choices here:
+  - leave early_iounmap() as is in drivers/firmware/efi/efi.c
+    (arch/x86/platform/efi/efi.c:early_iounmap() -> early_memunmap()
+    changes should be left as is),
+  - include asm/early_ioremap.h in arch/ia64/include/asm/io.h
+    (as I can see the same think is done for x86 and arm64).
+
+I prefer second solution but I do not insist.
+
+Daniel
