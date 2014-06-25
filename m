@@ -1,47 +1,34 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Wed, 25 Jun 2014 21:42:27 +0100
-Message-ID: <20140625204227.GD15494@console-pimps.org>
-References: <20140620090008.GU24049@console-pimps.org>
+Subject: Re: [PATCH 1/2] efilinux: Allocate boot_params before parsing initrd
+Date: Wed, 25 Jun 2014 21:45:54 +0100
+Message-ID: <20140625204554.GE15494@console-pimps.org>
+References: <1403073669-6602-1-git-send-email-yinghai@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140620090008.GU24049-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1403073669-6602-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 20 Jun, at 10:00:08AM, Matt Fleming wrote:
-> Guys,
+On Tue, 17 Jun, at 11:41:08PM, Yinghai Lu wrote:
+> We need to allocate boot_params early and clear it before copy
+> setup_header to it.
 > 
-> Please pull the following compiler warning fix. Sorry, I've been pretty
-> slow in getting this pull request sent. Multiple people have reported
-> hitting it and I've now received 4 patches for the same warning,
+> So kernel will not call sanitize_boot_params() to overwrite new
+> added parameter like ext_ramdisk_image, ext_ramdisk_size...
 > 
->   http://article.gmane.org/gmane.linux.kernel.efi/4024
->   http://article.gmane.org/gmane.linux.kernel.efi/4017
->   http://article.gmane.org/gmane.linux.kernel.efi/3957
->   http://article.gmane.org/gmane.linux.kernel.efi/3930
+> We should modify boot_params later instead of touch temp buf too early.
 > 
-> The following changes since commit 7171511eaec5bf23fb06078f59784a3a0626b38f:
+> Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 > 
->   Linux 3.16-rc1 (2014-06-15 17:45:28 -1000)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 6fb8cc82c096fd5ccf277678639193cae07125a0:
-> 
->   efi: Fix compiler warnings (unused, const, type) (2014-06-19 15:03:05 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix a few compiler warnings in the arm64 EFI code that lots of people
->    are running into and reporting - Catalin Marinas
-
-Ping? This doesn't seem to have been picked up yet?
+> ---
+>  loaders/bzimage/bzimage.c |   65 ++++++++++++++++++++++++----------------------
+>  1 file changed, 34 insertions(+), 31 deletions(-)
+ 
+Applied, thanks!
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
