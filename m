@@ -1,64 +1,47 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC PATCH 4/4] efi: efistub: convert into static library
-Date: Wed, 25 Jun 2014 21:34:24 +0100
-Message-ID: <20140625203424.GC15494@console-pimps.org>
-References: <1402931688-23597-1-git-send-email-ard.biesheuvel@linaro.org>
- <1402931688-23597-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Wed, 25 Jun 2014 21:42:27 +0100
+Message-ID: <20140625204227.GD15494@console-pimps.org>
+References: <20140620090008.GU24049@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1402931688-23597-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20140620090008.GU24049-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Jun, at 05:14:48PM, Ard Biesheuvel wrote:
-> This patch changes both x86 and arm64 efistub implementations from #including
-> shared .c files under drivers/firmware/efi to building the shared code as a
-> static library.
+On Fri, 20 Jun, at 10:00:08AM, Matt Fleming wrote:
+> Guys,
 > 
-> The x86 code uses a stub built into the boot executable which uncompresses the
-> kernel at boot time. In this case, the library is linked into the decompressor.
+> Please pull the following compiler warning fix. Sorry, I've been pretty
+> slow in getting this pull request sent. Multiple people have reported
+> hitting it and I've now received 4 patches for the same warning,
 > 
-> In the arm64 case, the stub is part of the kernel proper so the library is
-> linked into the kernel proper as well.
+>   http://article.gmane.org/gmane.linux.kernel.efi/4024
+>   http://article.gmane.org/gmane.linux.kernel.efi/4017
+>   http://article.gmane.org/gmane.linux.kernel.efi/3957
+>   http://article.gmane.org/gmane.linux.kernel.efi/3930
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> The following changes since commit 7171511eaec5bf23fb06078f59784a3a0626b38f:
+> 
+>   Linux 3.16-rc1 (2014-06-15 17:45:28 -1000)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 6fb8cc82c096fd5ccf277678639193cae07125a0:
+> 
+>   efi: Fix compiler warnings (unused, const, type) (2014-06-19 15:03:05 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Fix a few compiler warnings in the arm64 EFI code that lots of people
+>    are running into and reporting - Catalin Marinas
 
-Sorry for the delay in reviewing this.
-
-Conceptually, this is a nice cleanup. Unfortunately, I'm seeing the
-following build error,
-
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_printk':
-efi-stub-helper.c:(.text+0x1): undefined reference to `__fentry__'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_get_memory_map':
-efi-stub-helper.c:(.text+0x7f): undefined reference to `__fentry__'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_high_alloc':
-efi-stub-helper.c:(.text+0x1ea): undefined reference to `__fentry__'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_low_alloc':
-efi-stub-helper.c:(.text+0x3dd): undefined reference to `__fentry__'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_free':
-efi-stub-helper.c:(.text+0x59f): undefined reference to `__fentry__'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o):efi-stub-helper.c:(.text+0x5ec): more undefined references to `__fentry__' follow
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o):(.data+0x260): undefined reference to `__gcov_merge_add'
-drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `_GLOBAL__sub_I_65535_0_efi_printk':
-efi-stub-helper.c:(.text.startup+0xc): undefined reference to `__gcov_init'
-make[3]: *** [arch/x86/boot/compressed/vmlinux] Error 1
-make[2]: *** [arch/x86/boot/compressed/vmlinux] Error 2
-make[1]: *** [bzImage] Error 2
-
-This is because we use different CFLAGS for the EFI boot stub on x86.
-Take a look at arch/x86/boot/compressed/Makefile to see what I mean.
-
-What I'd suggest is that you simply update the efi-stub-helper.c
-#include path in the x86 EFI boot stub in this series, and only roll out
-the awesome new libstub for arm64. I'll take care of doing the necessary
-CFLAG munging for x86 when I have some spare time. Could you do a v2?
-
-That is, unless you really want to make it work for x86 ;-)
+Ping? This doesn't seem to have been picked up yet?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
