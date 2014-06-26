@@ -1,102 +1,53 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 2/5] efi/x86: efistub: move shared dependencies to <asm/efi.h>
-Date: Thu, 26 Jun 2014 16:23:34 +0200
-Message-ID: <1403792617-25792-3-git-send-email-ard.biesheuvel@linaro.org>
-References: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 0/5] efistub: convert into static library
+Date: Thu, 26 Jun 2014 16:23:32 +0200
+Message-ID: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1403792617-25792-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This moves definitions depended upon both by code under arch/x86/boot and
-under drivers/firmware/efi to <asm/efi.h>. This is in preparation of turning
-the stub code under drivers/firmware/efi into a static library.
+This is v2 of the series to change the #include "../../../../xxx.c" pattern
+into a static library linked into either the kernel (arm64) or a separate boot
+decompressor (x86, ARM).
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c |  5 +----
- arch/x86/boot/compressed/eboot.h | 16 ----------------
- arch/x86/include/asm/efi.h       | 25 +++++++++++++++++++++++++
- 3 files changed, 26 insertions(+), 20 deletions(-)
+Changes since v1:
+- added patch #1 to change EFI_ERROR, it is not a result code defined by UEFI so
+  it should only be returned by get_dram_base() and efi_entry()
+- added a section to libstub Makefile to clean CFLAGS of stack protecter and 
+  other options that are inappropriate for the stub
+- rebased onto the UEFI Runtime Services NEON patches (re)posted earlier today
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 0331d765c2bb..2fd5e2643623 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -19,10 +19,7 @@
- 
- static efi_system_table_t *sys_table;
- 
--static struct efi_config *efi_early;
--
--#define efi_call_early(f, ...)						\
--	efi_early->call(efi_early->f, __VA_ARGS__);
-+struct efi_config *efi_early;
- 
- #define BOOT_SERVICES(bits)						\
- static void setup_boot_services##bits(struct efi_config *c)		\
-diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
-index c88c31ecad12..d487e727f1ec 100644
---- a/arch/x86/boot/compressed/eboot.h
-+++ b/arch/x86/boot/compressed/eboot.h
-@@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
- 	void *blt;
- };
- 
--struct efi_config {
--	u64 image_handle;
--	u64 table;
--	u64 allocate_pool;
--	u64 allocate_pages;
--	u64 get_memory_map;
--	u64 free_pool;
--	u64 free_pages;
--	u64 locate_handle;
--	u64 handle_protocol;
--	u64 exit_boot_services;
--	u64 text_output;
--	efi_status_t (*call)(unsigned long, ...);
--	bool is64;
--} __packed;
--
- #endif /* BOOT_COMPRESSED_EBOOT_H */
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 1eb5f6433ad8..55059a50a01f 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -156,6 +156,31 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
- 	return EFI_SUCCESS;
- }
- #endif /* CONFIG_EFI_MIXED */
-+
-+
-+/* arch specific definitions used by the stub code */
-+
-+struct efi_config {
-+	u64 image_handle;
-+	u64 table;
-+	u64 allocate_pool;
-+	u64 allocate_pages;
-+	u64 get_memory_map;
-+	u64 free_pool;
-+	u64 free_pages;
-+	u64 locate_handle;
-+	u64 handle_protocol;
-+	u64 exit_boot_services;
-+	u64 text_output;
-+	efi_status_t (*call)(unsigned long, ...);
-+	bool is64;
-+} __packed;
-+
-+extern struct efi_config *efi_early;
-+
-+#define efi_call_early(f, ...)						\
-+	efi_early->call(efi_early->f, __VA_ARGS__);
-+
- #else
- /*
-  * IF EFI is not configured, have the EFI calls return -ENOSYS.
+Ard Biesheuvel (5):
+  efi/arm64: avoid EFI_ERROR as a generic return code
+  efi/x86: efistub: move shared dependencies to <asm/efi.h>
+  efi/arm64: efistub: move shared dependencies to <asm/efi.h>
+  efi: efistub: refactor stub components
+  efi: efistub: convert into static library
+
+ arch/arm64/Kconfig                                 |  1 +
+ arch/arm64/Makefile                                |  1 +
+ arch/arm64/include/asm/efi.h                       | 12 ++++
+ arch/arm64/kernel/efi-stub.c                       | 47 +++-----------
+ arch/x86/boot/compressed/Makefile                  |  3 +-
+ arch/x86/boot/compressed/eboot.c                   | 20 ++----
+ arch/x86/boot/compressed/eboot.h                   | 16 -----
+ arch/x86/include/asm/efi.h                         | 25 ++++++++
+ drivers/firmware/efi/Kconfig                       |  3 +
+ drivers/firmware/efi/Makefile                      |  2 +-
+ drivers/firmware/efi/libstub/Makefile              | 26 ++++++++
+ drivers/firmware/efi/{ => libstub}/arm-stub.c      | 32 ++++++----
+ .../firmware/efi/{ => libstub}/efi-stub-helper.c   | 74 +++++++++++-----------
+ drivers/firmware/efi/libstub/efistub.h             | 42 ++++++++++++
+ drivers/firmware/efi/{ => libstub}/fdt.c           | 20 +++---
+ include/linux/efi.h                                | 42 ++++++++++++
+ 16 files changed, 238 insertions(+), 128 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/Makefile
+ rename drivers/firmware/efi/{ => libstub}/arm-stub.c (93%)
+ rename drivers/firmware/efi/{ => libstub}/efi-stub-helper.c (88%)
+ create mode 100644 drivers/firmware/efi/libstub/efistub.h
+ rename drivers/firmware/efi/{ => libstub}/fdt.c (94%)
+
 -- 
 1.8.3.2
