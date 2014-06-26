@@ -1,211 +1,352 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 5/5] efi: efistub: convert into static library
-Date: Thu, 26 Jun 2014 16:23:37 +0200
-Message-ID: <1403792617-25792-6-git-send-email-ard.biesheuvel@linaro.org>
-References: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1403792617-25792-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 15/15] kexec: Support kexec/kdump on EFI systems
+Date: Thu, 26 Jun 2014 16:33:44 -0400
+Message-ID: <1403814824-7587-16-git-send-email-vgoyal@redhat.com>
+References: <1403814824-7587-1-git-send-email-vgoyal@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+In-Reply-To: <1403814824-7587-1-git-send-email-vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, chaowang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This patch changes both x86 and arm64 efistub implementations from #including
-shared .c files under drivers/firmware/efi to building the shared code as a
-static library.
+This patch does two thigns. It passes EFI run time mappings to second
+kernel in bootparams efi_info. Second kernel parse this info and create
+new mappings in second kernel. That means mappings in first and second
+kernel will be same. This paves the way to enable EFI in kexec kernel.
 
-The x86 code uses a stub built into the boot executable which uncompresses the
-kernel at boot time. In this case, the library is linked into the decompressor.
+This patch also prepares and passes EFI setup data through bootparams.
+This contains bunch of information about various tables and their
+addresses.
 
-In the arm64 case, the stub is part of the kernel proper so the library is
-linked into the kernel proper as well.
+These information gathering and passing has been written along the lines
+of what current kexec-tools is doing to make kexec work with UEFI.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+CC: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 ---
- arch/arm64/Kconfig                                 |  1 +
- arch/arm64/Makefile                                |  1 +
- arch/arm64/kernel/efi-stub.c                       |  5 -----
- arch/x86/boot/compressed/Makefile                  |  3 ++-
- arch/x86/boot/compressed/eboot.c                   |  2 --
- drivers/firmware/efi/Kconfig                       |  3 +++
- drivers/firmware/efi/Makefile                      |  2 +-
- drivers/firmware/efi/libstub/Makefile              | 26 ++++++++++++++++++++++
- drivers/firmware/efi/{ => libstub}/arm-stub.c      | 14 ++++++------
- .../firmware/efi/{ => libstub}/efi-stub-helper.c   |  0
- drivers/firmware/efi/{ => libstub}/efistub.h       |  0
- drivers/firmware/efi/{ => libstub}/fdt.c           |  0
- 12 files changed, 41 insertions(+), 16 deletions(-)
- create mode 100644 drivers/firmware/efi/libstub/Makefile
- rename drivers/firmware/efi/{ => libstub}/arm-stub.c (96%)
- rename drivers/firmware/efi/{ => libstub}/efi-stub-helper.c (100%)
- rename drivers/firmware/efi/{ => libstub}/efistub.h (100%)
- rename drivers/firmware/efi/{ => libstub}/fdt.c (100%)
+ arch/x86/kernel/kexec-bzimage64.c  | 146 ++++++++++++++++++++++++++++++++++---
+ drivers/firmware/efi/runtime-map.c |  21 ++++++
+ include/linux/efi.h                |  19 +++++
+ 3 files changed, 174 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 93e11f4d9513..f766f346022d 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -300,6 +300,7 @@ config EFI
- 	select UCS2_STRING
- 	select EFI_PARAMS_FROM_FDT
- 	select EFI_RUNTIME_WRAPPERS
-+	select EFI_ARMSTUB
- 	default y
- 	help
- 	  This option provides support for runtime services provided
-diff --git a/arch/arm64/Makefile b/arch/arm64/Makefile
-index 8185a913c5ed..bb8f21a626c0 100644
---- a/arch/arm64/Makefile
-+++ b/arch/arm64/Makefile
-@@ -48,6 +48,7 @@ core-$(CONFIG_XEN) += arch/arm64/xen/
- core-$(CONFIG_CRYPTO) += arch/arm64/crypto/
- libs-y		:= arch/arm64/lib/ $(libs-y)
- libs-y		+= $(LIBGCC)
-+libs-$(CONFIG_EFI) += drivers/firmware/efi/libstub/
+diff --git a/arch/x86/kernel/kexec-bzimage64.c b/arch/x86/kernel/kexec-bzimage64.c
+index 61e4306..9487845 100644
+--- a/arch/x86/kernel/kexec-bzimage64.c
++++ b/arch/x86/kernel/kexec-bzimage64.c
+@@ -18,10 +18,12 @@
+ #include <linux/kexec.h>
+ #include <linux/kernel.h>
+ #include <linux/mm.h>
++#include <linux/efi.h>
  
- # Default target when executing plain make
- KBUILD_IMAGE	:= Image.gz
-diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-index e4999021b07d..12456a7d3fa2 100644
---- a/arch/arm64/kernel/efi-stub.c
-+++ b/arch/arm64/kernel/efi-stub.c
-@@ -13,11 +13,6 @@
- #include <asm/efi.h>
- #include <asm/sections.h>
+ #include <asm/bootparam.h>
+ #include <asm/setup.h>
+ #include <asm/crash.h>
++#include <asm/efi.h>
  
--/* Include shared EFI stub code */
--#include "../../../drivers/firmware/efi/efi-stub-helper.c"
--#include "../../../drivers/firmware/efi/fdt.c"
--#include "../../../drivers/firmware/efi/arm-stub.c"
--
+ #define MAX_ELFCOREHDR_STR_LEN	30	/* elfcorehdr=0x<64bit-value> */
  
- efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 				 unsigned long *image_addr,
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 0fcd9133790c..7a801a310e37 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -33,7 +33,8 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
- ifeq ($(CONFIG_EFI_STUB), y)
--	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
-+	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
-+				$(objtree)/drivers/firmware/efi/libstub/lib.a
- endif
- 
- $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index d338c134c659..d4d865438a0c 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -280,8 +280,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
- 	}
+@@ -90,7 +92,7 @@ static int setup_cmdline(struct kimage *image, struct boot_params *params,
+ 	return 0;
  }
  
--#include "../../../../drivers/firmware/efi/efi-stub-helper.c"
--
- static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+-static int setup_memory_map_entries(struct boot_params *params)
++static int setup_e820_entries(struct boot_params *params)
  {
- 	u8 first, len;
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index 04a7af46736a..395e76d9a1b5 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -61,6 +61,9 @@ config EFI_RUNTIME_WRAPPERS
- 	  in which case it needs to provide #definitions of efi_call_virt and
- 	  __efi_call_virt in <asm/efi.h>
+ 	unsigned int nr_e820_entries;
  
-+config EFI_ARMSTUB
-+	bool
-+
- endmenu
+@@ -107,8 +109,93 @@ static int setup_memory_map_entries(struct boot_params *params)
+ 	return 0;
+ }
  
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index e1096539eedb..d9abdbc962f1 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -1,7 +1,7 @@
- #
- # Makefile for linux kernel
- #
--obj-$(CONFIG_EFI)			+= efi.o vars.o
-+obj-$(CONFIG_EFI)			+= efi.o vars.o libstub/
- obj-$(CONFIG_EFI_VARS)			+= efivars.o
- obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
- obj-$(CONFIG_UEFI_CPER)			+= cper.o
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-new file mode 100644
-index 000000000000..b14bc2b9fb4d
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -0,0 +1,26 @@
-+#
-+# The stub may be linked into the kernel proper or into a separate boot binary,
-+# but in either case, it executes before the kernel does (with MMU disabled) so
-+# things like ftrace and stack-protector are likely to cause trouble if left
-+# enabled, even if doing so doesn't break the build.
-+#
-+cflags-$(CONFIG_X86_32)		:= -march=i386
-+cflags-$(CONFIG_X86_64)		:= -mcmodel=small
-+cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2 \
-+				   -fPIC -fno-strict-aliasing -mno-red-zone \
-+				   -mno-mmx -mno-sse -DDISABLE_BRANCH_PROFILING
+-static int setup_boot_parameters(struct kimage *image,
+-				 struct boot_params *params)
++#ifdef CONFIG_EFI
++static int setup_efi_info_memmap(struct boot_params *params,
++				  unsigned long params_load_addr,
++				  unsigned int efi_map_offset,
++				  unsigned int efi_map_sz)
++{
++	void *efi_map = (void *)params + efi_map_offset;
++	unsigned long efi_map_phys_addr = params_load_addr + efi_map_offset;
++	struct efi_info *ei = &params->efi_info;
 +
-+cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
-+cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
-+				   -fno-builtin -fpic -mno-single-pic-base
++	if (!efi_map_sz)
++		return 0;
 +
-+KBUILD_CFLAGS			:= $(cflags-y) \
-+				   $(call cc-option,-ffreestanding) \
-+				   $(call cc-option,-fno-stack-protector)
++	efi_runtime_map_copy(efi_map, efi_map_sz);
 +
-+GCOV_PROFILE			:= n
++	ei->efi_memmap = efi_map_phys_addr & 0xffffffff;
++	ei->efi_memmap_hi = efi_map_phys_addr >> 32;
++	ei->efi_memmap_size = efi_map_sz;
 +
-+lib-y				:= efi-stub-helper.o
-+lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
++	return 0;
++}
 +
-+CFLAGS_fdt.o			+= -I$(srctree)/scripts/dtc/libfdt/
-diff --git a/drivers/firmware/efi/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-similarity index 96%
-rename from drivers/firmware/efi/arm-stub.c
-rename to drivers/firmware/efi/libstub/arm-stub.c
-index 34614d6f9698..480339b6b110 100644
---- a/drivers/firmware/efi/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -151,13 +151,13 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
-  * must be reserved. On failure it is required to free all
-  * all allocations it has made.
-  */
--static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
--					unsigned long *image_addr,
--					unsigned long *image_size,
--					unsigned long *reserve_addr,
--					unsigned long *reserve_size,
--					unsigned long dram_base,
--					efi_loaded_image_t *image);
-+efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
-+				 unsigned long *image_addr,
-+				 unsigned long *image_size,
-+				 unsigned long *reserve_addr,
-+				 unsigned long *reserve_size,
-+				 unsigned long dram_base,
-+				 efi_loaded_image_t *image);
- /*
-  * EFI entry point for the arm/arm64 EFI stubs.  This is the entrypoint
-  * that is described in the PE/COFF header.  Most of the code is the same
-diff --git a/drivers/firmware/efi/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-similarity index 100%
-rename from drivers/firmware/efi/efi-stub-helper.c
-rename to drivers/firmware/efi/libstub/efi-stub-helper.c
-diff --git a/drivers/firmware/efi/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-similarity index 100%
-rename from drivers/firmware/efi/efistub.h
-rename to drivers/firmware/efi/libstub/efistub.h
-diff --git a/drivers/firmware/efi/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-similarity index 100%
-rename from drivers/firmware/efi/fdt.c
-rename to drivers/firmware/efi/libstub/fdt.c
++static int
++prepare_add_efi_setup_data(struct boot_params *params,
++		       unsigned long params_load_addr,
++		       unsigned int efi_setup_data_offset)
++{
++	unsigned long setup_data_phys;
++	struct setup_data *sd = (void *)params + efi_setup_data_offset;
++	struct efi_setup_data *esd = (void *)sd + sizeof(struct setup_data);
++
++	esd->fw_vendor = efi.fw_vendor;
++	esd->runtime = efi.runtime;
++	esd->tables = efi.config_table;
++	esd->smbios = efi.smbios;
++
++	sd->type = SETUP_EFI;
++	sd->len = sizeof(struct efi_setup_data);
++
++	/* Add setup data */
++	setup_data_phys = params_load_addr + efi_setup_data_offset;
++	sd->next = params->hdr.setup_data;
++	params->hdr.setup_data = setup_data_phys;
++
++	return 0;
++}
++
++static int
++setup_efi_state(struct boot_params *params, unsigned long params_load_addr,
++		unsigned int efi_map_offset, unsigned int efi_map_sz,
++		unsigned int efi_setup_data_offset)
++{
++	struct efi_info *current_ei = &boot_params.efi_info;
++	struct efi_info *ei = &params->efi_info;
++
++	if (!current_ei->efi_memmap_size)
++		return 0;
++
++	/*
++	 * If 1:1 mapping is not enabled, second kernel can not setup EFI
++	 * and use EFI run time services. User space will have to pass
++	 * acpi_rsdp=<addr> on kernel command line to make second kernel boot
++	 * without efi.
++	 */
++	if (efi_enabled(EFI_OLD_MEMMAP))
++		return 0;
++
++	ei->efi_loader_signature = current_ei->efi_loader_signature;
++	ei->efi_systab = current_ei->efi_systab;
++	ei->efi_systab_hi = current_ei->efi_systab_hi;
++
++	ei->efi_memdesc_version = current_ei->efi_memdesc_version;
++	ei->efi_memdesc_size = get_efi_runtime_map_desc_size();
++
++	setup_efi_info_memmap(params, params_load_addr, efi_map_offset,
++			      efi_map_sz);
++	prepare_add_efi_setup_data(params, params_load_addr,
++				   efi_setup_data_offset);
++	return 0;
++}
++#endif /* CONFIG_EFI */
++
++static int
++setup_boot_parameters(struct kimage *image, struct boot_params *params,
++		      unsigned long params_load_addr,
++		      unsigned int efi_map_offset, unsigned int efi_map_sz,
++		      unsigned int efi_setup_data_offset)
+ {
+ 	unsigned int nr_e820_entries;
+ 	unsigned long long mem_k, start, end;
+@@ -140,7 +227,7 @@ static int setup_boot_parameters(struct kimage *image,
+ 		if (ret)
+ 			return ret;
+ 	} else
+-		setup_memory_map_entries(params);
++		setup_e820_entries(params);
+ 
+ 	nr_e820_entries = params->e820_entries;
+ 
+@@ -161,6 +248,12 @@ static int setup_boot_parameters(struct kimage *image,
+ 		}
+ 	}
+ 
++#ifdef CONFIG_EFI
++	/* Setup EFI state */
++	setup_efi_state(params, params_load_addr, efi_map_offset, efi_map_sz,
++			efi_setup_data_offset);
++#endif
++
+ 	/* Setup EDD info */
+ 	memcpy(params->eddbuf, boot_params.eddbuf,
+ 				EDDMAXNR * sizeof(struct edd_info));
+@@ -214,6 +307,15 @@ int bzImage64_probe(const char *buf, unsigned long len)
+ 		return ret;
+ 	}
+ 
++	/*
++	 * Can't handle 32bit EFI as it does not allow loading kernel
++	 * above 4G. This should be handled by 32bit bzImage loader
++	 */
++	if (efi_enabled(EFI_RUNTIME_SERVICES) && !efi_enabled(EFI_64BIT)) {
++		pr_debug("EFI is 32 bit. Can't load kernel above 4G.\n");
++		return ret;
++	}
++
+ 	/* I've got a bzImage */
+ 	pr_debug("It's a relocatable bzImage64\n");
+ 	ret = 0;
+@@ -229,7 +331,7 @@ void *bzImage64_load(struct kimage *image, char *kernel,
+ 
+ 	struct setup_header *header;
+ 	int setup_sects, kern16_size, ret = 0;
+-	unsigned long setup_header_size, params_cmdline_sz;
++	unsigned long setup_header_size, params_cmdline_sz, params_misc_sz;
+ 	struct boot_params *params;
+ 	unsigned long bootparam_load_addr, kernel_load_addr, initrd_load_addr;
+ 	unsigned long purgatory_load_addr;
+@@ -239,6 +341,7 @@ void *bzImage64_load(struct kimage *image, char *kernel,
+ 	struct kexec_entry64_regs regs64;
+ 	void *stack;
+ 	unsigned int setup_hdr_offset = offsetof(struct boot_params, hdr);
++	unsigned int efi_map_offset, efi_map_sz, efi_setup_data_offset;
+ 
+ 	header = (struct setup_header *)(kernel + setup_hdr_offset);
+ 	setup_sects = header->setup_sects;
+@@ -285,12 +388,29 @@ void *bzImage64_load(struct kimage *image, char *kernel,
+ 
+ 	pr_debug("Loaded purgatory at 0x%lx\n", purgatory_load_addr);
+ 
+-	/* Load Bootparams and cmdline */
++
++	/*
++	 * Load Bootparams and cmdline and space for efi stuff.
++	 *
++	 * Allocate memory together for multiple data structures so
++	 * that they all can go in single area/segment and we don't
++	 * have to create separate segment for each. Keeps things
++	 * little bit simple
++	 */
++	efi_map_sz = get_efi_runtime_map_size();
++	efi_map_sz = ALIGN(efi_map_sz, 16);
+ 	params_cmdline_sz = sizeof(struct boot_params) + cmdline_len +
+ 				MAX_ELFCOREHDR_STR_LEN;
+-	params = kzalloc(params_cmdline_sz, GFP_KERNEL);
++	params_cmdline_sz = ALIGN(params_cmdline_sz, 16);
++	params_misc_sz = params_cmdline_sz + efi_map_sz +
++				sizeof(struct setup_data) +
++				sizeof(struct efi_setup_data);
++
++	params = kzalloc(params_misc_sz, GFP_KERNEL);
+ 	if (!params)
+ 		return ERR_PTR(-ENOMEM);
++	efi_map_offset = params_cmdline_sz;
++	efi_setup_data_offset = efi_map_offset + efi_map_sz;
+ 
+ 	/* Copy setup header onto bootparams. Documentation/x86/boot.txt */
+ 	setup_header_size = 0x0202 + kernel[0x0201] - setup_hdr_offset;
+@@ -298,13 +418,13 @@ void *bzImage64_load(struct kimage *image, char *kernel,
+ 	/* Is there a limit on setup header size? */
+ 	memcpy(&params->hdr, (kernel + setup_hdr_offset), setup_header_size);
+ 
+-	ret = kexec_add_buffer(image, (char *)params, params_cmdline_sz,
+-			       params_cmdline_sz, 16, MIN_BOOTPARAM_ADDR,
++	ret = kexec_add_buffer(image, (char *)params, params_misc_sz,
++			       params_misc_sz, 16, MIN_BOOTPARAM_ADDR,
+ 			       ULONG_MAX, 1, &bootparam_load_addr);
+ 	if (ret)
+ 		goto out_free_params;
+-	pr_debug("Loaded boot_param and command line at 0x%lx bufsz=0x%lx memsz=0x%lx\n",
+-		 bootparam_load_addr, params_cmdline_sz, params_cmdline_sz);
++	pr_debug("Loaded boot_param, command line and misc at 0x%lx bufsz=0x%lx memsz=0x%lx\n",
++		 bootparam_load_addr, params_misc_sz, params_misc_sz);
+ 
+ 	/* Load kernel */
+ 	kernel_buf = kernel + kern16_size;
+@@ -365,7 +485,9 @@ void *bzImage64_load(struct kimage *image, char *kernel,
+ 	if (ret)
+ 		goto out_free_params;
+ 
+-	ret = setup_boot_parameters(image, params);
++	ret = setup_boot_parameters(image, params, bootparam_load_addr,
++				    efi_map_offset, efi_map_sz,
++				    efi_setup_data_offset);
+ 	if (ret)
+ 		goto out_free_params;
+ 
+diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
+index 97cdd16..40f2213 100644
+--- a/drivers/firmware/efi/runtime-map.c
++++ b/drivers/firmware/efi/runtime-map.c
+@@ -138,6 +138,27 @@ add_sysfs_runtime_map_entry(struct kobject *kobj, int nr)
+ 	return entry;
+ }
+ 
++int get_efi_runtime_map_size(void)
++{
++	return nr_efi_runtime_map * efi_memdesc_size;
++}
++
++int get_efi_runtime_map_desc_size(void)
++{
++	return efi_memdesc_size;
++}
++
++int efi_runtime_map_copy(void *buf, size_t bufsz)
++{
++	size_t sz = get_efi_runtime_map_size();
++
++	if (sz > bufsz)
++		sz = bufsz;
++
++	memcpy(buf, efi_runtime_map, sz);
++	return 0;
++}
++
+ void efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size)
+ {
+ 	efi_runtime_map = map;
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 41bbf8b..dce9f31 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1151,6 +1151,9 @@ int efivars_sysfs_init(void);
+ #ifdef CONFIG_EFI_RUNTIME_MAP
+ int efi_runtime_map_init(struct kobject *);
+ void efi_runtime_map_setup(void *, int, u32);
++int get_efi_runtime_map_size(void);
++int get_efi_runtime_map_desc_size(void);
++int efi_runtime_map_copy(void *buf, size_t bufsz);
+ #else
+ static inline int efi_runtime_map_init(struct kobject *kobj)
+ {
+@@ -1159,6 +1162,22 @@ static inline int efi_runtime_map_init(struct kobject *kobj)
+ 
+ static inline void
+ efi_runtime_map_setup(void *map, int nr_entries, u32 desc_size) {}
++
++static inline int get_efi_runtime_map_size(void)
++{
++	return 0;
++}
++
++static inline int get_efi_runtime_map_desc_size(void)
++{
++	return 0;
++}
++
++static inline int efi_runtime_map_copy(void *buf, size_t bufsz)
++{
++	return 0;
++}
++
+ #endif
+ 
+ #endif /* _LINUX_EFI_H */
 -- 
-1.8.3.2
+1.9.0
