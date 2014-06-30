@@ -1,7 +1,8 @@
 From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v7 01/10] arch/ia64: Define early_memunmap()
-Date: Mon, 30 Jun 2014 19:52:55 +0200
-Message-ID: <1404150784-27921-2-git-send-email-daniel.kiper@oracle.com>
+Subject: [PATCH v7 06/10] arch/x86: Remove redundant
+	set_bit(EFI_MEMMAP) call
+Date: Mon, 30 Jun 2014 19:53:00 +0200
+Message-ID: <1404150784-27921-7-git-send-email-daniel.kiper@oracle.com>
 References: <1404150784-27921-1-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -20,32 +21,26 @@ To: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.ker
 Cc: fenghua.yu@intel.com, jeremy@goop.org, matt.fleming@intel.com, ian.campbell@citrix.com, andrew.cooper3@citrix.com, stefano.stabellini@eu.citrix.com, tony.luck@intel.com, mjg59@srcf.ucam.org, mingo@redhat.com, david.vrabel@citrix.com, jbeulich@suse.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de, eshelton@pobox.com
 List-Id: linux-efi@vger.kernel.org
 
-This is odd to use early_iounmap() function do tear down mapping
-created by early_memremap() function, even if it works right now,
-because they belong to different set of functions. The former is
-I/O related function and the later is memory related. So, create
-early_memunmap() macro which in real is early_iounmap(). This
-thing will help to not confuse code readers longer by mixing
-functions from different classes.
-
-EFI patches following this patch uses that functionality.
+Remove redundant set_bit(EFI_MEMMAP, &efi.flags) call.
+It is executed earlier in efi_memmap_init().
 
 Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
 ---
- arch/ia64/include/asm/io.h |    1 +
- 1 file changed, 1 insertion(+)
+ arch/x86/platform/efi/efi.c |    2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/arch/ia64/include/asm/io.h b/arch/ia64/include/asm/io.h
-index 0d2bcb3..bee0acd 100644
---- a/arch/ia64/include/asm/io.h
-+++ b/arch/ia64/include/asm/io.h
-@@ -426,6 +426,7 @@ extern void iounmap (volatile void __iomem *addr);
- extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
- #define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
- extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
-+#define early_memunmap(addr, size)             early_iounmap(addr, size)
- static inline void __iomem * ioremap_cache (unsigned long phys_addr, unsigned long size)
- {
- 	return ioremap(phys_addr, size);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ae3d398..da15df9 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -784,8 +784,6 @@ void __init efi_init(void)
+ 	if (efi_memmap_init())
+ 		return;
+ 
+-	set_bit(EFI_MEMMAP, &efi.flags);
+-
+ 	print_efi_memmap();
+ }
+ 
 -- 
 1.7.10.4
