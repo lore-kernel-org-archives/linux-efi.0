@@ -1,46 +1,26 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: [PATCH v7 06/10] arch/x86: Remove redundant
-	set_bit(EFI_MEMMAP) call
-Date: Mon, 30 Jun 2014 19:53:00 +0200
-Message-ID: <1404150784-27921-7-git-send-email-daniel.kiper@oracle.com>
+From: David Vrabel <david.vrabel@citrix.com>
+Subject: Re: [PATCH v7 00/10] xen: Add EFI support
+Date: Tue, 1 Jul 2014 14:13:10 +0100
+Message-ID: <53B2B3E6.1080203@citrix.com>
 References: <1404150784-27921-1-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
+Return-path: <linux-ia64-owner@vger.kernel.org>
 In-Reply-To: <1404150784-27921-1-git-send-email-daniel.kiper@oracle.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
-To: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
-Cc: fenghua.yu@intel.com, jeremy@goop.org, matt.fleming@intel.com, ian.campbell@citrix.com, andrew.cooper3@citrix.com, stefano.stabellini@eu.citrix.com, tony.luck@intel.com, mjg59@srcf.ucam.org, mingo@redhat.com, david.vrabel@citrix.com, jbeulich@suse.com, hpa@zytor.com, boris.ostrovsky@oracle.com, tglx@linutronix.de, eshelton@pobox.com
+Sender: linux-ia64-owner@vger.kernel.org
+To: Daniel Kiper <daniel.kiper@oracle.com>, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org
+Cc: andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-Remove redundant set_bit(EFI_MEMMAP, &efi.flags) call.
-It is executed earlier in efi_memmap_init().
+On 30/06/14 18:52, Daniel Kiper wrote:
+> Hey,
+> 
+> This patch series adds EFI support for Xen dom0 guests.
+> It is based on Jan Beulich and Tang Liang work. I was
+> trying to take into account all previous comments,
+> however, if I missed something sorry for that.
 
-Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
----
- arch/x86/platform/efi/efi.c |    2 --
- 1 file changed, 2 deletions(-)
+What's changed in this version?
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index ae3d398..da15df9 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -784,8 +784,6 @@ void __init efi_init(void)
- 	if (efi_memmap_init())
- 		return;
- 
--	set_bit(EFI_MEMMAP, &efi.flags);
--
- 	print_efi_memmap();
- }
- 
--- 
-1.7.10.4
+David
