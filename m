@@ -1,55 +1,31 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/2] efi: preserve NEON registers on UEFI services calls
-Date: Tue, 1 Jul 2014 15:46:03 +0200
-Message-ID: <CAKv+Gu8yb=H2734e-Wai3npK_qwsq7SWHumn+1gjkmJhF-2QQA@mail.gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] efi/x86: move UEFI Runtime Services wrappers to
+ generic code
+Date: Tue, 1 Jul 2014 14:48:31 +0100
+Message-ID: <20140701134831.GE7539@console-pimps.org>
 References: <1403777346-28629-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20140701132638.GC7539@console-pimps.org>
+ <1403777346-28629-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20140701133033.GD7539@console-pimps.org>
+ <CAKv+Gu_hyXaFEydpRQCB0vP260oJpFftytN_Ex++shMdpFpafg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140701132638.GC7539-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_hyXaFEydpRQCB0vP260oJpFftytN_Ex++shMdpFpafg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Olivier Martin <olivier.martin-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 1 July 2014 15:26, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Thu, 26 Jun, at 12:09:04PM, Ard Biesheuvel wrote:
->> The current UEFI implementation for arm64 fails to preserve/restore the contents
->> of the NEON register file, which may result in data corruption, especially now
->> that those contents are lazily restored for user processes.
->>
->> This series proposes to fix this by wrapping all runtime services calls, and
->> adding kernel_neon_begin()/kernel_neon_end() pairs to the wrappers.
->>
->> The first patch moves the existing x86 versions of those wrappers to generic
->> code, so that the second patch can easily enable them by supplying a definition
->> for efi_call_virt and adding a call to efi_native_runtime_setup().
->>
->> Changes since v1:
->> - rename runtime.c -> runtime-wrappers.c
->> - make build depend on new Kconfig symbol EFI_RUNTIME_WRAPPERS to fix ia64
->>   breakage
->> - remove default #defines for efi_call_virt()/__efi_call_virt(), they are not
->>   needed anymore now that it is built conditionally
->> - add references to applicable UEFI/AAPCS spec sections
->>
->> Ard Biesheuvel (2):
->>   efi/x86: move UEFI Runtime Services wrappers to generic code
->>   efi/arm64: preserve FP/SIMD registers on UEFI runtime services calls
->
-> Thanks Ard. These patches look OK to me, and I've now pulled them into
-> my 'next' branch.
->
-> It'd be nice if we could get some ACKs from other people since this is
-> an ABI issue.
+On Tue, 01 Jul, at 03:35:09PM, Ard Biesheuvel wrote:
+> 
+> I agree, but I kind of followed the example of the Kconfig symbols in
+> the vicinity.
+> So sure, rip it out. Or would you like me to do a v(n+1)?
 
-Yes, they have been awfully quiet, haven't they?
-
-At least Roy has volunteered to get involved in the USWG to get the
-spec clarified.
-
-@Leif, Catalin, Olivier: care to chime in?
+Thanks. Nah, no need for another version, I'ved fixed this up in 'next',
+but please do check the commits to make sure nothing untoward has
+occurred.
 
 -- 
-Ard.
+Matt Fleming, Intel Open Source Technology Center
