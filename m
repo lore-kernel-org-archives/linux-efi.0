@@ -1,47 +1,54 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi/arm64: fix potential NULL dereference of efi.systab
-Date: Wed, 2 Jul 2014 12:13:24 +0200
-Message-ID: <CAKv+Gu-SLQC82q7Rj5ZusbFxwysy7KpRhZ=vw1ipXu9kvq46aQ@mail.gmail.com>
-References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v2 5/5] efi: efistub: convert into static library
+Date: Wed, 2 Jul 2014 12:15:28 +0100
+Message-ID: <20140702111528.GL7539@console-pimps.org>
+References: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1403792617-25792-6-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1404295802-28030-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1403792617-25792-6-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-> On 2 July 2014 12:10, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> We assign efi.systab using efi_lookup_mapped_addr(), and test for !NULL, but
-> then go on an dereference it anyway.
->
+On Thu, 26 Jun, at 04:23:37PM, Ard Biesheuvel wrote:
+> This patch changes both x86 and arm64 efistub implementations from #including
+> shared .c files under drivers/firmware/efi to building the shared code as a
+> static library.
+> 
+> The x86 code uses a stub built into the boot executable which uncompresses the
+> kernel at boot time. In this case, the library is linked into the decompressor.
+> 
+> In the arm64 case, the stub is part of the kernel proper so the library is
+> linked into the kernel proper as well.
+> 
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/kernel/efi.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
->
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index 56c3327bbf79..e785f93f17cb 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -419,8 +419,11 @@ static int __init arm64_enter_virtual_mode(void)
->         }
->
->         efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
-> -       if (efi.systab)
-> -               set_bit(EFI_SYSTEM_TABLES, &efi.flags);
-> +       if (!efi.systab) {
-> +               pr_err("Failed to remap EFI System Table!\n");
 
-... this needs a kfree(virtmap) as well.
+OK, this breaks the ia64 build because of the following...
 
-> +               return -1;
-> +       }
-> +       set_bit(EFI_SYSTEM_TABLES, &efi.flags);
->
->         local_irq_save(flags);
->         cpu_switch_mm(idmap_pg_dir, &init_mm);
-> --
-> 1.8.3.2
->
+/drivers/firmware/efi/libstub/efi-stub-helper.c:14:21: fatal error: asm/efi.h: No such file or directory
+
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index e1096539eedb..d9abdbc962f1 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -1,7 +1,7 @@
+>  #
+>  # Makefile for linux kernel
+>  #
+> -obj-$(CONFIG_EFI)			+= efi.o vars.o
+> +obj-$(CONFIG_EFI)			+= efi.o vars.o libstub/
+>  obj-$(CONFIG_EFI_VARS)			+= efivars.o
+>  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+>  obj-$(CONFIG_UEFI_CPER)			+= cper.o
+
+I guess what we need is CONFIG_EFI_LIBSTUB selected by both
+CONFIG_EFI_STUB (for x86) and CONFIG_EFI_ARMSTUB (for arm64)? e.g.
+
+obj-$(CONFIG_EFI_LIBSTUB)		libstub/
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
