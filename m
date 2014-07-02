@@ -1,112 +1,555 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/5] efi/x86: efistub: move shared dependencies to <asm/efi.h>
-Date: Wed, 2 Jul 2014 15:02:23 +0200
-Message-ID: <CAKv+Gu8qR9n0iMRi0NV055qcfmSatVE-BNY0JrAPCY2vCQLoRw@mail.gmail.com>
-References: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1403792617-25792-3-git-send-email-ard.biesheuvel@linaro.org>
-	<1404305996.19665.7.camel@deneb.redhat.com>
+From: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Subject: Re: [PATCH v7 08/10] xen: Put EFI machinery in place
+Date: Wed, 2 Jul 2014 15:01:59 +0100
+Message-ID: <alpine.DEB.2.02.1407021501480.8923@kaball.uk.xensource.com>
+References: <1404150784-27921-1-git-send-email-daniel.kiper@oracle.com> <1404150784-27921-9-git-send-email-daniel.kiper@oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1404305996.19665.7.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="US-ASCII"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1404150784-27921-9-git-send-email-daniel.kiper@oracle.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Kiper <daniel.kiper@oracle.com>
+Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com
 List-Id: linux-efi@vger.kernel.org
 
-On 2 July 2014 14:59, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Thu, 2014-06-26 at 16:23 +0200, Ard Biesheuvel wrote:
->> This moves definitions depended upon both by code under arch/x86/boot and
->> under drivers/firmware/efi to <asm/efi.h>. This is in preparation of turning
->> the stub code under drivers/firmware/efi into a static library.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/x86/boot/compressed/eboot.c |  5 +----
->>  arch/x86/boot/compressed/eboot.h | 16 ----------------
->>  arch/x86/include/asm/efi.h       | 25 +++++++++++++++++++++++++
->>  3 files changed, 26 insertions(+), 20 deletions(-)
->>
->> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
->> index 0331d765c2bb..2fd5e2643623 100644
->> --- a/arch/x86/boot/compressed/eboot.c
->> +++ b/arch/x86/boot/compressed/eboot.c
->> @@ -19,10 +19,7 @@
->>
->>  static efi_system_table_t *sys_table;
->>
->> -static struct efi_config *efi_early;
->> -
->> -#define efi_call_early(f, ...)                                               \
->> -     efi_early->call(efi_early->f, __VA_ARGS__);
->> +struct efi_config *efi_early;
->>
->>  #define BOOT_SERVICES(bits)                                          \
->>  static void setup_boot_services##bits(struct efi_config *c)          \
->> diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
->> index c88c31ecad12..d487e727f1ec 100644
->> --- a/arch/x86/boot/compressed/eboot.h
->> +++ b/arch/x86/boot/compressed/eboot.h
->> @@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
->>       void *blt;
->>  };
->>
->> -struct efi_config {
->> -     u64 image_handle;
->> -     u64 table;
->> -     u64 allocate_pool;
->> -     u64 allocate_pages;
->> -     u64 get_memory_map;
->> -     u64 free_pool;
->> -     u64 free_pages;
->> -     u64 locate_handle;
->> -     u64 handle_protocol;
->> -     u64 exit_boot_services;
->> -     u64 text_output;
->> -     efi_status_t (*call)(unsigned long, ...);
->> -     bool is64;
->> -} __packed;
->> -
->>  #endif /* BOOT_COMPRESSED_EBOOT_H */
->> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
->> index 1eb5f6433ad8..55059a50a01f 100644
->> --- a/arch/x86/include/asm/efi.h
->> +++ b/arch/x86/include/asm/efi.h
->> @@ -156,6 +156,31 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
->>       return EFI_SUCCESS;
->>  }
->>  #endif /* CONFIG_EFI_MIXED */
->> +
->> +
->> +/* arch specific definitions used by the stub code */
->> +
->> +struct efi_config {
->> +     u64 image_handle;
->> +     u64 table;
->> +     u64 allocate_pool;
->> +     u64 allocate_pages;
->> +     u64 get_memory_map;
->> +     u64 free_pool;
->> +     u64 free_pages;
->> +     u64 locate_handle;
->> +     u64 handle_protocol;
->> +     u64 exit_boot_services;
->> +     u64 text_output;
->> +     efi_status_t (*call)(unsigned long, ...);
->> +     bool is64;
->> +} __packed;
->> +
->> +extern struct efi_config *efi_early;
->> +
->> +#define efi_call_early(f, ...)                                               \
->> +     efi_early->call(efi_early->f, __VA_ARGS__);
->
-> That shouldn't have the trailing ;
->
+On Mon, 30 Jun 2014, Daniel Kiper wrote:
+> This patch enables EFI usage under Xen dom0. Standard EFI Linux
+> Kernel infrastructure cannot be used because it requires direct
+> access to EFI data and code. However, in dom0 case it is not possible
+> because above mentioned EFI stuff is fully owned and controlled
+> by Xen hypervisor. In this case all calls from dom0 to EFI must
+> be requested via special hypercall which in turn executes relevant
+> EFI code in behalf of dom0.
+> 
+> When dom0 kernel boots it checks for EFI availability on a machine.
+> If it is detected then artificial EFI system table is filled.
+> Native EFI callas are replaced by functions which mimics them
+> by calling relevant hypercall. Later pointer to EFI system table
+> is passed to standard EFI machinery and it continues EFI subsystem
+> initialization taking into account that there is no direct access
+> to EFI boot services, runtime, tables, structures, etc. After that
+> system runs as usual.
+> 
+> This patch is based on Jan Beulich and Tang Liang work.
+> 
+> Signed-off-by: Jan Beulich <jbeulich@suse.com>
+> Signed-off-by: Tang Liang <liang.tang@oracle.com>
+> Signed-off-by: Daniel Kiper <daniel.kiper@oracle.com>
+> Reviewed-by: David Vrabel <david.vrabel@citrix.com>
 
-Hmm, perhaps not.
-This patch just moves stuff around, so fixing this should probably be
-done in a separate patch.
+Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 
--- 
-Ard.
+
+
+> v7 - suggestions/fixes:
+>    - move xen_efi_probe() declaration to include/xen/xen-ops.h
+>      (suggested by Stefano Stabellini).
+> 
+> v6 - suggestions/fixes:
+>    - remove unneeded BUG() call
+>      (suggested by Stefano Stabellini).
+> 
+> v5 - suggestions/fixes:
+>    - improve macro usage readability
+>      (suggested by Andrew Cooper and David Vrabel),
+>    - conditions cleanup
+>      (suggested by David Vrabel),
+>    - use -fshort-wchar option
+>      (suggested by Jan Beulich),
+>    - Kconfig rule cleanup
+>      (suggested by Jan Beulich),
+>    - forward port fixes from SUSE kernel
+>      (suggested by Jan Beulich),
+>    - improve commit message
+>      (suggested by David Vrabel).
+> 
+> v4 - suggestions/fixes:
+>    - "just populate an efi_system_table_t object"
+>      (suggested by Matt Fleming).
+> ---
+>  arch/x86/xen/enlighten.c |   15 ++
+>  drivers/xen/Kconfig      |    4 +
+>  drivers/xen/Makefile     |    3 +
+>  drivers/xen/efi.c        |  368 ++++++++++++++++++++++++++++++++++++++++++++++
+>  include/xen/xen-ops.h    |   11 ++
+>  5 files changed, 401 insertions(+)
+>  create mode 100644 drivers/xen/efi.c
+> 
+> diff --git a/arch/x86/xen/enlighten.c b/arch/x86/xen/enlighten.c
+> index ffb101e..e27d2fe 100644
+> --- a/arch/x86/xen/enlighten.c
+> +++ b/arch/x86/xen/enlighten.c
+> @@ -32,6 +32,7 @@
+>  #include <linux/gfp.h>
+>  #include <linux/memblock.h>
+>  #include <linux/edd.h>
+> +#include <linux/efi.h>
+>  
+>  #include <xen/xen.h>
+>  #include <xen/events.h>
+> @@ -1520,6 +1521,7 @@ asmlinkage __visible void __init xen_start_kernel(void)
+>  {
+>  	struct physdev_set_iopl set_iopl;
+>  	int rc;
+> +	efi_system_table_t *efi_systab_xen;
+>  
+>  	if (!xen_start_info)
+>  		return;
+> @@ -1718,6 +1720,19 @@ asmlinkage __visible void __init xen_start_kernel(void)
+>  
+>  	xen_setup_runstate_info(0);
+>  
+> +	efi_systab_xen = xen_efi_probe();
+> +
+> +	if (efi_systab_xen) {
+> +		strncpy((char *)&boot_params.efi_info.efi_loader_signature, "Xen",
+> +				sizeof(boot_params.efi_info.efi_loader_signature));
+> +		boot_params.efi_info.efi_systab = (__u32)__pa(efi_systab_xen);
+> +		boot_params.efi_info.efi_systab_hi = (__u32)(__pa(efi_systab_xen) >> 32);
+> +
+> +		set_bit(EFI_BOOT, &efi.flags);
+> +		set_bit(EFI_PARAVIRT, &efi.flags);
+> +		set_bit(EFI_64BIT, &efi.flags);
+> +	}
+> +
+>  	/* Start the world */
+>  #ifdef CONFIG_X86_32
+>  	i386_start_kernel();
+> diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
+> index 38fb36e..8bc0183 100644
+> --- a/drivers/xen/Kconfig
+> +++ b/drivers/xen/Kconfig
+> @@ -240,4 +240,8 @@ config XEN_MCE_LOG
+>  config XEN_HAVE_PVMMU
+>         bool
+>  
+> +config XEN_EFI
+> +	def_bool y
+> +	depends on X86_64 && EFI
+> +
+>  endmenu
+> diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
+> index 45e00af..84044b5 100644
+> --- a/drivers/xen/Makefile
+> +++ b/drivers/xen/Makefile
+> @@ -9,6 +9,8 @@ obj-y	+= xenbus/
+>  nostackp := $(call cc-option, -fno-stack-protector)
+>  CFLAGS_features.o			:= $(nostackp)
+>  
+> +CFLAGS_efi.o				+= -fshort-wchar
+> +
+>  dom0-$(CONFIG_PCI) += pci.o
+>  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
+>  dom0-$(CONFIG_ACPI) += acpi.o $(xen-pad-y)
+> @@ -33,6 +35,7 @@ obj-$(CONFIG_XEN_STUB)			+= xen-stub.o
+>  obj-$(CONFIG_XEN_ACPI_HOTPLUG_MEMORY)	+= xen-acpi-memhotplug.o
+>  obj-$(CONFIG_XEN_ACPI_HOTPLUG_CPU)	+= xen-acpi-cpuhotplug.o
+>  obj-$(CONFIG_XEN_ACPI_PROCESSOR)	+= xen-acpi-processor.o
+> +obj-$(CONFIG_XEN_EFI)			+= efi.o
+>  xen-evtchn-y				:= evtchn.o
+>  xen-gntdev-y				:= gntdev.o
+>  xen-gntalloc-y				:= gntalloc.o
+> diff --git a/drivers/xen/efi.c b/drivers/xen/efi.c
+> new file mode 100644
+> index 0000000..31f618a
+> --- /dev/null
+> +++ b/drivers/xen/efi.c
+> @@ -0,0 +1,368 @@
+> +/*
+> + * EFI support for Xen.
+> + *
+> + * Copyright (C) 1999 VA Linux Systems
+> + * Copyright (C) 1999 Walt Drummond <drummond@valinux.com>
+> + * Copyright (C) 1999-2002 Hewlett-Packard Co.
+> + *	David Mosberger-Tang <davidm@hpl.hp.com>
+> + *	Stephane Eranian <eranian@hpl.hp.com>
+> + * Copyright (C) 2005-2008 Intel Co.
+> + *	Fenghua Yu <fenghua.yu@intel.com>
+> + *	Bibo Mao <bibo.mao@intel.com>
+> + *	Chandramouli Narayanan <mouli@linux.intel.com>
+> + *	Huang Ying <ying.huang@intel.com>
+> + * Copyright (C) 2011 Novell Co.
+> + *	Jan Beulich <JBeulich@suse.com>
+> + * Copyright (C) 2011-2012 Oracle Co.
+> + *	Liang Tang <liang.tang@oracle.com>
+> + * Copyright (c) 2014 Oracle Co., Daniel Kiper
+> + */
+> +
+> +#include <linux/bug.h>
+> +#include <linux/efi.h>
+> +#include <linux/init.h>
+> +#include <linux/string.h>
+> +
+> +#include <xen/interface/xen.h>
+> +#include <xen/interface/platform.h>
+> +#include <xen/xen.h>
+> +
+> +#include <asm/xen/hypercall.h>
+> +
+> +#define INIT_EFI_OP(name) \
+> +	{.cmd = XENPF_efi_runtime_call, \
+> +	 .u.efi_runtime_call.function = XEN_EFI_##name, \
+> +	 .u.efi_runtime_call.misc = 0}
+> +
+> +#define efi_data(op)	(op.u.efi_runtime_call)
+> +
+> +static efi_status_t xen_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(get_time);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	if (tm) {
+> +		BUILD_BUG_ON(sizeof(*tm) != sizeof(efi_data(op).u.get_time.time));
+> +		memcpy(tm, &efi_data(op).u.get_time.time, sizeof(*tm));
+> +	}
+> +
+> +	if (tc) {
+> +		tc->resolution = efi_data(op).u.get_time.resolution;
+> +		tc->accuracy = efi_data(op).u.get_time.accuracy;
+> +		tc->sets_to_zero = !!(efi_data(op).misc &
+> +				      XEN_EFI_GET_TIME_SET_CLEARS_NS);
+> +	}
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_set_time(efi_time_t *tm)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(set_time);
+> +
+> +	BUILD_BUG_ON(sizeof(*tm) != sizeof(efi_data(op).u.set_time));
+> +	memcpy(&efi_data(op).u.set_time, tm, sizeof(*tm));
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_get_wakeup_time(efi_bool_t *enabled,
+> +					    efi_bool_t *pending,
+> +					    efi_time_t *tm)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(get_wakeup_time);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	if (tm) {
+> +		BUILD_BUG_ON(sizeof(*tm) != sizeof(efi_data(op).u.get_wakeup_time));
+> +		memcpy(tm, &efi_data(op).u.get_wakeup_time, sizeof(*tm));
+> +	}
+> +
+> +	if (enabled)
+> +		*enabled = !!(efi_data(op).misc & XEN_EFI_GET_WAKEUP_TIME_ENABLED);
+> +
+> +	if (pending)
+> +		*pending = !!(efi_data(op).misc & XEN_EFI_GET_WAKEUP_TIME_PENDING);
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(set_wakeup_time);
+> +
+> +	BUILD_BUG_ON(sizeof(*tm) != sizeof(efi_data(op).u.set_wakeup_time));
+> +	if (enabled)
+> +		efi_data(op).misc = XEN_EFI_SET_WAKEUP_TIME_ENABLE;
+> +	if (tm)
+> +		memcpy(&efi_data(op).u.set_wakeup_time, tm, sizeof(*tm));
+> +	else
+> +		efi_data(op).misc |= XEN_EFI_SET_WAKEUP_TIME_ENABLE_ONLY;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_get_variable(efi_char16_t *name,
+> +					 efi_guid_t *vendor,
+> +					 u32 *attr,
+> +					 unsigned long *data_size,
+> +					 void *data)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(get_variable);
+> +
+> +	set_xen_guest_handle(efi_data(op).u.get_variable.name, name);
+> +	BUILD_BUG_ON(sizeof(*vendor) !=
+> +		     sizeof(efi_data(op).u.get_variable.vendor_guid));
+> +	memcpy(&efi_data(op).u.get_variable.vendor_guid, vendor, sizeof(*vendor));
+> +	efi_data(op).u.get_variable.size = *data_size;
+> +	set_xen_guest_handle(efi_data(op).u.get_variable.data, data);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	*data_size = efi_data(op).u.get_variable.size;
+> +	if (attr)
+> +		*attr = efi_data(op).misc;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_get_next_variable(unsigned long *name_size,
+> +					      efi_char16_t *name,
+> +					      efi_guid_t *vendor)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(get_next_variable_name);
+> +
+> +	efi_data(op).u.get_next_variable_name.size = *name_size;
+> +	set_xen_guest_handle(efi_data(op).u.get_next_variable_name.name, name);
+> +	BUILD_BUG_ON(sizeof(*vendor) !=
+> +		     sizeof(efi_data(op).u.get_next_variable_name.vendor_guid));
+> +	memcpy(&efi_data(op).u.get_next_variable_name.vendor_guid, vendor,
+> +	       sizeof(*vendor));
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	*name_size = efi_data(op).u.get_next_variable_name.size;
+> +	memcpy(vendor, &efi_data(op).u.get_next_variable_name.vendor_guid,
+> +	       sizeof(*vendor));
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_set_variable(efi_char16_t *name,
+> +					 efi_guid_t *vendor,
+> +					 u32 attr,
+> +					 unsigned long data_size,
+> +					 void *data)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(set_variable);
+> +
+> +	set_xen_guest_handle(efi_data(op).u.set_variable.name, name);
+> +	efi_data(op).misc = attr;
+> +	BUILD_BUG_ON(sizeof(*vendor) !=
+> +		     sizeof(efi_data(op).u.set_variable.vendor_guid));
+> +	memcpy(&efi_data(op).u.set_variable.vendor_guid, vendor, sizeof(*vendor));
+> +	efi_data(op).u.set_variable.size = data_size;
+> +	set_xen_guest_handle(efi_data(op).u.set_variable.data, data);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_query_variable_info(u32 attr,
+> +						u64 *storage_space,
+> +						u64 *remaining_space,
+> +						u64 *max_variable_size)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(query_variable_info);
+> +
+> +	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	efi_data(op).u.query_variable_info.attr = attr;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	*storage_space = efi_data(op).u.query_variable_info.max_store_size;
+> +	*remaining_space = efi_data(op).u.query_variable_info.remain_store_size;
+> +	*max_variable_size = efi_data(op).u.query_variable_info.max_size;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_get_next_high_mono_count(u32 *count)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(get_next_high_monotonic_count);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	*count = efi_data(op).misc;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_update_capsule(efi_capsule_header_t **capsules,
+> +					   unsigned long count,
+> +					   unsigned long sg_list)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(update_capsule);
+> +
+> +	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	set_xen_guest_handle(efi_data(op).u.update_capsule.capsule_header_array,
+> +			     capsules);
+> +	efi_data(op).u.update_capsule.capsule_count = count;
+> +	efi_data(op).u.update_capsule.sg_list = sg_list;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_status_t xen_efi_query_capsule_caps(efi_capsule_header_t **capsules,
+> +					       unsigned long count,
+> +					       u64 *max_size,
+> +					       int *reset_type)
+> +{
+> +	struct xen_platform_op op = INIT_EFI_OP(query_capsule_capabilities);
+> +
+> +	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	set_xen_guest_handle(efi_data(op).u.query_capsule_capabilities.capsule_header_array,
+> +					capsules);
+> +	efi_data(op).u.query_capsule_capabilities.capsule_count = count;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) < 0)
+> +		return EFI_UNSUPPORTED;
+> +
+> +	*max_size = efi_data(op).u.query_capsule_capabilities.max_capsule_size;
+> +	*reset_type = efi_data(op).u.query_capsule_capabilities.reset_type;
+> +
+> +	return efi_data(op).status;
+> +}
+> +
+> +static efi_char16_t vendor[100] __initdata;
+> +
+> +static efi_system_table_t efi_systab_xen __initdata = {
+> +	.hdr = {
+> +		.signature	= EFI_SYSTEM_TABLE_SIGNATURE,
+> +		.revision	= 0, /* Initialized later. */
+> +		.headersize	= 0, /* Ignored by Linux Kernel. */
+> +		.crc32		= 0, /* Ignored by Linux Kernel. */
+> +		.reserved	= 0
+> +	},
+> +	.fw_vendor	= EFI_INVALID_TABLE_ADDR, /* Initialized later. */
+> +	.fw_revision	= 0,			  /* Initialized later. */
+> +	.con_in_handle	= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.con_in		= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.con_out_handle	= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.con_out	= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.stderr_handle	= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.stderr		= EFI_INVALID_TABLE_ADDR, /* Not used under Xen. */
+> +	.runtime	= (efi_runtime_services_t *)EFI_INVALID_TABLE_ADDR,
+> +						  /* Not used under Xen. */
+> +	.boottime	= (efi_boot_services_t *)EFI_INVALID_TABLE_ADDR,
+> +						  /* Not used under Xen. */
+> +	.nr_tables	= 0,			  /* Initialized later. */
+> +	.tables		= EFI_INVALID_TABLE_ADDR  /* Initialized later. */
+> +};
+> +
+> +static const struct efi efi_xen __initconst = {
+> +	.systab                   = NULL, /* Initialized later. */
+> +	.runtime_version	  = 0,    /* Initialized later. */
+> +	.mps                      = EFI_INVALID_TABLE_ADDR,
+> +	.acpi                     = EFI_INVALID_TABLE_ADDR,
+> +	.acpi20                   = EFI_INVALID_TABLE_ADDR,
+> +	.smbios                   = EFI_INVALID_TABLE_ADDR,
+> +	.sal_systab               = EFI_INVALID_TABLE_ADDR,
+> +	.boot_info                = EFI_INVALID_TABLE_ADDR,
+> +	.hcdp                     = EFI_INVALID_TABLE_ADDR,
+> +	.uga                      = EFI_INVALID_TABLE_ADDR,
+> +	.uv_systab                = EFI_INVALID_TABLE_ADDR,
+> +	.fw_vendor                = EFI_INVALID_TABLE_ADDR,
+> +	.runtime                  = EFI_INVALID_TABLE_ADDR,
+> +	.config_table             = EFI_INVALID_TABLE_ADDR,
+> +	.get_time                 = xen_efi_get_time,
+> +	.set_time                 = xen_efi_set_time,
+> +	.get_wakeup_time          = xen_efi_get_wakeup_time,
+> +	.set_wakeup_time          = xen_efi_set_wakeup_time,
+> +	.get_variable             = xen_efi_get_variable,
+> +	.get_next_variable        = xen_efi_get_next_variable,
+> +	.set_variable             = xen_efi_set_variable,
+> +	.query_variable_info      = xen_efi_query_variable_info,
+> +	.update_capsule           = xen_efi_update_capsule,
+> +	.query_capsule_caps       = xen_efi_query_capsule_caps,
+> +	.get_next_high_mono_count = xen_efi_get_next_high_mono_count,
+> +	.reset_system             = NULL, /* Functionality provided by Xen. */
+> +	.set_virtual_address_map  = NULL, /* Not used under Xen. */
+> +	.memmap                   = NULL, /* Not used under Xen. */
+> +	.flags			  = 0     /* Initialized later. */
+> +};
+> +
+> +efi_system_table_t __init *xen_efi_probe(void)
+> +{
+> +	struct xen_platform_op op = {
+> +		.cmd = XENPF_firmware_info,
+> +		.u.firmware_info = {
+> +			.type = XEN_FW_EFI_INFO,
+> +			.index = XEN_FW_EFI_CONFIG_TABLE
+> +		}
+> +	};
+> +	union xenpf_efi_info *info = &op.u.firmware_info.u.efi_info;
+> +
+> +	if (!xen_initial_domain() || HYPERVISOR_dom0_op(&op) < 0)
+> +		return NULL;
+> +
+> +	/* Here we know that Xen runs on EFI platform. */
+> +
+> +	efi = efi_xen;
+> +
+> +	efi_systab_xen.tables = info->cfg.addr;
+> +	efi_systab_xen.nr_tables = info->cfg.nent;
+> +
+> +	op.cmd = XENPF_firmware_info;
+> +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> +	op.u.firmware_info.index = XEN_FW_EFI_VENDOR;
+> +	info->vendor.bufsz = sizeof(vendor);
+> +	set_xen_guest_handle(info->vendor.name, vendor);
+> +
+> +	if (HYPERVISOR_dom0_op(&op) == 0) {
+> +		efi_systab_xen.fw_vendor = __pa_symbol(vendor);
+> +		efi_systab_xen.fw_revision = info->vendor.revision;
+> +	} else
+> +		efi_systab_xen.fw_vendor = __pa_symbol(L"UNKNOWN");
+> +
+> +	op.cmd = XENPF_firmware_info;
+> +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> +	op.u.firmware_info.index = XEN_FW_EFI_VERSION;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) == 0)
+> +		efi_systab_xen.hdr.revision = info->version;
+> +
+> +	op.cmd = XENPF_firmware_info;
+> +	op.u.firmware_info.type = XEN_FW_EFI_INFO;
+> +	op.u.firmware_info.index = XEN_FW_EFI_RT_VERSION;
+> +
+> +	if (HYPERVISOR_dom0_op(&op) == 0)
+> +		efi.runtime_version = info->version;
+> +
+> +	return &efi_systab_xen;
+> +}
+> diff --git a/include/xen/xen-ops.h b/include/xen/xen-ops.h
+> index 0b3149e..771bbba 100644
+> --- a/include/xen/xen-ops.h
+> +++ b/include/xen/xen-ops.h
+> @@ -3,6 +3,7 @@
+>  
+>  #include <linux/percpu.h>
+>  #include <linux/notifier.h>
+> +#include <linux/efi.h>
+>  #include <asm/xen/interface.h>
+>  
+>  DECLARE_PER_CPU(struct vcpu_info *, xen_vcpu);
+> @@ -35,4 +36,14 @@ int xen_unmap_domain_mfn_range(struct vm_area_struct *vma,
+>  			       int numpgs, struct page **pages);
+>  
+>  bool xen_running_on_version_or_later(unsigned int major, unsigned int minor);
+> +
+> +#ifdef CONFIG_XEN_EFI
+> +extern efi_system_table_t *xen_efi_probe(void);
+> +#else
+> +static efi_system_table_t __init *xen_efi_probe(void)
+> +{
+> +	return NULL;
+> +}
+> +#endif
+> +
+>  #endif /* INCLUDE_XEN_OPS_H */
+> -- 
+> 1.7.10.4
+> 
