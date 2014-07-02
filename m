@@ -1,71 +1,59 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 5/5] efi: efistub: convert into static library
-Date: Wed, 2 Jul 2014 13:49:53 +0200
-Message-ID: <CAKv+Gu9WMsW9Wvcfh7_CM8iWP2Q4zMOkGE1z9mVf3YcVaoDU3A@mail.gmail.com>
-References: <1403792617-25792-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1403792617-25792-6-git-send-email-ard.biesheuvel@linaro.org>
-	<20140702111528.GL7539@console-pimps.org>
-	<CAKv+Gu9N_p49603oy0rKaq+G6sX+GS5ueSfJ2B=Yh7DrF301Cg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v3 0/5] efistub: convert into static library
+Date: Wed,  2 Jul 2014 14:54:38 +0200
+Message-ID: <1404305683-26501-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9N_p49603oy0rKaq+G6sX+GS5ueSfJ2B=Yh7DrF301Cg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Would something like this
+This is v3 of the series to change the #include "../../../../xxx.c" pattern
+into a static library linked into either the kernel (arm64) or a separate boot
+decompressor (x86, ARM).
 
-ifneq ($(CONFIG_EFI_STUB)$(CONFIG_EFI_ARMSTUB),nn)
-obj-y += libstub/
-endif
+Changes since v2:
+- make sure that removals of 'static' modifiers occur in a way that doesn't
+  break bisect (i.e., definition + all declarations in the same patch)
+- avoid ia64 breakage (which does not use the stub) by building it conditionally
+  on CONFIG_EFI_STUB not CONFIG_EFI
 
-be too hideous?
+Changes since v1:
+- added patch #1 to change EFI_ERROR, it is not a result code defined by UEFI so
+  it should only be returned by get_dram_base() and efi_entry()
+- added a section to libstub Makefile to clean CFLAGS of stack protecter and
+  other options that are inappropriate for the stub
+- rebased onto the UEFI Runtime Services NEON patches (re)posted earlier today
 
+Ard Biesheuvel (5):
+  efi/arm64: Avoid EFI_ERROR as a generic return code
+  efi/x86: efistub: Move shared dependencies to <asm/efi.h>
+  efi/arm64: efistub: Move shared dependencies to <asm/efi.h>
+  efi: efistub: refactor stub components
+  efi: efistub: convert into static library
 
+ arch/arm64/Kconfig                                 |  5 ++
+ arch/arm64/Makefile                                |  1 +
+ arch/arm64/include/asm/efi.h                       | 12 ++++
+ arch/arm64/kernel/efi-stub.c                       | 48 +++-----------
+ arch/x86/boot/compressed/Makefile                  |  3 +-
+ arch/x86/boot/compressed/eboot.c                   | 20 ++----
+ arch/x86/boot/compressed/eboot.h                   | 16 -----
+ arch/x86/include/asm/efi.h                         | 25 ++++++++
+ drivers/firmware/efi/Kconfig                       |  3 +
+ drivers/firmware/efi/Makefile                      |  1 +
+ drivers/firmware/efi/libstub/Makefile              | 26 ++++++++
+ drivers/firmware/efi/{ => libstub}/arm-stub.c      | 32 ++++++----
+ .../firmware/efi/{ => libstub}/efi-stub-helper.c   | 74 +++++++++++-----------
+ drivers/firmware/efi/libstub/efistub.h             | 42 ++++++++++++
+ drivers/firmware/efi/{ => libstub}/fdt.c           | 20 +++---
+ include/linux/efi.h                                | 42 ++++++++++++
+ 16 files changed, 242 insertions(+), 128 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/Makefile
+ rename drivers/firmware/efi/{ => libstub}/arm-stub.c (93%)
+ rename drivers/firmware/efi/{ => libstub}/efi-stub-helper.c (88%)
+ create mode 100644 drivers/firmware/efi/libstub/efistub.h
+ rename drivers/firmware/efi/{ => libstub}/fdt.c (94%)
 
-On 2 July 2014 13:23, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 2 July 2014 13:15, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> On Thu, 26 Jun, at 04:23:37PM, Ard Biesheuvel wrote:
->>> This patch changes both x86 and arm64 efistub implementations from #including
->>> shared .c files under drivers/firmware/efi to building the shared code as a
->>> static library.
->>>
->>> The x86 code uses a stub built into the boot executable which uncompresses the
->>> kernel at boot time. In this case, the library is linked into the decompressor.
->>>
->>> In the arm64 case, the stub is part of the kernel proper so the library is
->>> linked into the kernel proper as well.
->>>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>
->> OK, this breaks the ia64 build because of the following...
->>
->> /drivers/firmware/efi/libstub/efi-stub-helper.c:14:21: fatal error: asm/efi.h: No such file or directory
->>
->>> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
->>> index e1096539eedb..d9abdbc962f1 100644
->>> --- a/drivers/firmware/efi/Makefile
->>> +++ b/drivers/firmware/efi/Makefile
->>> @@ -1,7 +1,7 @@
->>>  #
->>>  # Makefile for linux kernel
->>>  #
->>> -obj-$(CONFIG_EFI)                    += efi.o vars.o
->>> +obj-$(CONFIG_EFI)                    += efi.o vars.o libstub/
->>>  obj-$(CONFIG_EFI_VARS)                       += efivars.o
->>>  obj-$(CONFIG_EFI_VARS_PSTORE)                += efi-pstore.o
->>>  obj-$(CONFIG_UEFI_CPER)                      += cper.o
->>
->> I guess what we need is CONFIG_EFI_LIBSTUB selected by both
->> CONFIG_EFI_STUB (for x86) and CONFIG_EFI_ARMSTUB (for arm64)? e.g.
->>
->> obj-$(CONFIG_EFI_LIBSTUB)               libstub/
->>
->
-> Yes, that seems the appropriate way to deal with this.
-> Let me respin so I can fix the other thing I mentioned yesterday as well.
->
-> --
-> Ard.
+-- 
+1.8.3.2
