@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 1/5] efi/arm64: Avoid EFI_ERROR as a generic return code
-Date: Wed,  2 Jul 2014 14:54:39 +0200
-Message-ID: <1404305683-26501-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 2/5] efi/x86: efistub: Move shared dependencies to <asm/efi.h>
+Date: Wed,  2 Jul 2014 14:54:40 +0200
+Message-ID: <1404305683-26501-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1404305683-26501-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1404305683-26501-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,30 +10,94 @@ To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yRO
 Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-As EFI_ERROR is not a UEFI result code but a local invention only
-intended to allow get_dram_base() to signal failure, we should not use
-it elsewhere.
-
-Replace with EFI_LOAD_ERROR.
+This moves definitions depended upon both by code under arch/x86/boot
+and under drivers/firmware/efi to <asm/efi.h>. This is in preparation of
+turning the stub code under drivers/firmware/efi into a static library.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/arm64/kernel/efi-stub.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/x86/boot/compressed/eboot.c |  5 +----
+ arch/x86/boot/compressed/eboot.h | 16 ----------------
+ arch/x86/include/asm/efi.h       | 25 +++++++++++++++++++++++++
+ 3 files changed, 26 insertions(+), 20 deletions(-)
 
-diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-index e786e6cdc400..7aa7155a9740 100644
---- a/arch/arm64/kernel/efi-stub.c
-+++ b/arch/arm64/kernel/efi-stub.c
-@@ -69,7 +69,7 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 		if (*image_addr != (dram_base + TEXT_OFFSET)) {
- 			pr_efi_err(sys_table, "Failed to alloc kernel memory\n");
- 			efi_free(sys_table, kernel_memsize, *image_addr);
--			return EFI_ERROR;
-+			return EFI_LOAD_ERROR;
- 		}
- 		*image_size = kernel_memsize;
- 	}
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 385f42c200bc..c066bc4e3051 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -19,10 +19,7 @@
+ 
+ static efi_system_table_t *sys_table;
+ 
+-static struct efi_config *efi_early;
+-
+-#define efi_call_early(f, ...)						\
+-	efi_early->call(efi_early->f, __VA_ARGS__);
++struct efi_config *efi_early;
+ 
+ #define BOOT_SERVICES(bits)						\
+ static void setup_boot_services##bits(struct efi_config *c)		\
+diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+index c88c31ecad12..d487e727f1ec 100644
+--- a/arch/x86/boot/compressed/eboot.h
++++ b/arch/x86/boot/compressed/eboot.h
+@@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
+ 	void *blt;
+ };
+ 
+-struct efi_config {
+-	u64 image_handle;
+-	u64 table;
+-	u64 allocate_pool;
+-	u64 allocate_pages;
+-	u64 get_memory_map;
+-	u64 free_pool;
+-	u64 free_pages;
+-	u64 locate_handle;
+-	u64 handle_protocol;
+-	u64 exit_boot_services;
+-	u64 text_output;
+-	efi_status_t (*call)(unsigned long, ...);
+-	bool is64;
+-} __packed;
+-
+ #endif /* BOOT_COMPRESSED_EBOOT_H */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 3dbf56eb540d..9043f365ebf5 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -158,6 +158,31 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ 	return EFI_SUCCESS;
+ }
+ #endif /* CONFIG_EFI_MIXED */
++
++
++/* arch specific definitions used by the stub code */
++
++struct efi_config {
++	u64 image_handle;
++	u64 table;
++	u64 allocate_pool;
++	u64 allocate_pages;
++	u64 get_memory_map;
++	u64 free_pool;
++	u64 free_pages;
++	u64 locate_handle;
++	u64 handle_protocol;
++	u64 exit_boot_services;
++	u64 text_output;
++	efi_status_t (*call)(unsigned long, ...);
++	bool is64;
++} __packed;
++
++extern struct efi_config *efi_early;
++
++#define efi_call_early(f, ...)						\
++	efi_early->call(efi_early->f, __VA_ARGS__);
++
+ #else
+ /*
+  * IF EFI is not configured, have the EFI calls return -ENOSYS.
 -- 
 1.8.3.2
