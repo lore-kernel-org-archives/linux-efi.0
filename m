@@ -1,35 +1,38 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 15/15] kexec: Support kexec/kdump on EFI systems
-Date: Tue, 1 Jul 2014 22:23:51 +0100
-Message-ID: <20140701212351.GK7539@console-pimps.org>
-References: <1403814824-7587-1-git-send-email-vgoyal@redhat.com>
- <1403814824-7587-16-git-send-email-vgoyal@redhat.com>
- <20140701194605.GJ7539@console-pimps.org>
- <20140701131419.454a3fc32fcc84a43b668c50@linux-foundation.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 1/2] efi/arm64: fix potential NULL dereference of efi.systab
+Date: Wed,  2 Jul 2014 12:10:01 +0200
+Message-ID: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140701131419.454a3fc32fcc84a43b668c50-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ebiederm-aS9lmoZGLiVWk0Htik3J/w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, greg-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, chaowang-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 01 Jul, at 01:14:19PM, Andrew Morton wrote:
-> 
-> This?
-> 
-> From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-> Subject: kexec-support-kexec-kdump-on-efi-systems-fix
-> 
-> s/get_efi/efi_get/g, per Matt
-> 
-> Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-> Signed-off-by: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+We assign efi.systab using efi_lookup_mapped_addr(), and test for !NULL, but
+then go on an dereference it anyway.
 
-Yep, looks spot on. Thanks Andrew.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/efi.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 56c3327bbf79..e785f93f17cb 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -419,8 +419,11 @@ static int __init arm64_enter_virtual_mode(void)
+ 	}
+ 
+ 	efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
+-	if (efi.systab)
+-		set_bit(EFI_SYSTEM_TABLES, &efi.flags);
++	if (!efi.systab) {
++		pr_err("Failed to remap EFI System Table!\n");
++		return -1;
++	}
++	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+ 	local_irq_save(flags);
+ 	cpu_switch_mm(idmap_pg_dir, &init_mm);
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.3.2
