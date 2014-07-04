@@ -1,68 +1,74 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi/arm64: fix potential NULL dereference of efi.systab
-Date: Thu, 3 Jul 2014 18:04:02 +0200
-Message-ID: <CAKv+Gu_RAFFfsX75mdTZ06q7fUrOzD+auFj6uo1sx6Rj=x7Qbw@mail.gmail.com>
-References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
-	<CAKv+Gu-SLQC82q7Rj5ZusbFxwysy7KpRhZ=vw1ipXu9kvq46aQ@mail.gmail.com>
-	<1404311385.19665.15.camel@deneb.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2] efi/arm64: handle missing virtual mapping for UEFI System Table
+Date: Fri,  4 Jul 2014 12:16:37 +0200
+Message-ID: <1404468997-6925-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1404311385.19665.15.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2 July 2014 16:29, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Wed, 2014-07-02 at 12:13 +0200, Ard Biesheuvel wrote:
->> > On 2 July 2014 12:10, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > We assign efi.systab using efi_lookup_mapped_addr(), and test for !NULL, but
->> > then go on an dereference it anyway.
->> >
->> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> > ---
->> >  arch/arm64/kernel/efi.c | 7 +++++--
->> >  1 file changed, 5 insertions(+), 2 deletions(-)
->> >
->> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
->> > index 56c3327bbf79..e785f93f17cb 100644
->> > --- a/arch/arm64/kernel/efi.c
->> > +++ b/arch/arm64/kernel/efi.c
->> > @@ -419,8 +419,11 @@ static int __init arm64_enter_virtual_mode(void)
->> >         }
->> >
->> >         efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
->> > -       if (efi.systab)
->> > -               set_bit(EFI_SYSTEM_TABLES, &efi.flags);
->> > +       if (!efi.systab) {
->> > +               pr_err("Failed to remap EFI System Table!\n");
->>
->> ... this needs a kfree(virtmap) as well.
->>
->
-> And probably should unmap all the remapped regions in virtmap first.
+If we cannot resolve the virtual address of the UEFI System Table, its physical
+offset must be missing from the virtual memory map, and there is really no point
+in proceeding with installing the virtual memory map and the runtime services
+dispatch table. So back out gracefully.
 
-Yes.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
 
-> Presumably the systab will be in a runtime memory region which gets
-> virtual mapping from remap_region(). If that succeeds, then the
-> efi_lookup_mapped_addr should always succeed. But to be careful,
-> we should probably bail out earlier if remap_region() ever returns
-> zero. If all remaps work and efi_lookup_mapped_addr() fails, then
-> we should try ioremap_cache() directly. Or do what x86 does and make
-> a local copy of the table earlier when we early_memremap() it in
-> uefi_init().
->
+v2:
+- release mappings and free virtmap before bailing
 
-Bailing early (and cleaning up) if any remap_region() call fails seems
-like a wise thing to do.
-But if they all succeed, and efi_lookup_mapped_addr() then fails to
-resolve efi_system_table, it means it lives in a region which will
-become inaccessible to the runtime services themselves after
-set_virtual_address_map() has been called. So doing any kind of
-fallback masks a severe firmware bug, which makes me think we should
-just complain loudly and not enable UEFI bits any further
+ arch/arm64/kernel/efi.c | 28 ++++++++++++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
 
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 56c3327bbf79..23942158e0f8 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -416,11 +416,23 @@ static int __init arm64_enter_virtual_mode(void)
+ 			continue;
+ 		if (remap_region(md, &virt_md))
+ 			++count;
++		else
++			goto err_unmap;
+ 	}
+ 
+ 	efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
+-	if (efi.systab)
+-		set_bit(EFI_SYSTEM_TABLES, &efi.flags);
++	if (!efi.systab) {
++		/*
++		 * If we have no virtual mapping for the System Table at this
++		 * point, the memory map doesn't cover the physical offset where
++		 * it resides. This means the System Table will be inaccessible
++		 * to Runtime Services themselves once the virtual mapping is
++		 * installed.
++		 */
++		pr_err("Failed to remap EFI System Table -- buggy firmware?\n");
++		goto err_unmap;
++	}
++	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+ 	local_irq_save(flags);
+ 	cpu_switch_mm(idmap_pg_dir, &init_mm);
+@@ -453,5 +465,17 @@ static int __init arm64_enter_virtual_mode(void)
+ 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 
+ 	return 0;
++
++err_unmap:
++	/* unmap all mappings that succeeded: there are 'count' of those */
++	for_each_efi_memory_desc(&memmap, md) {
++		if (!(md->attribute & EFI_MEMORY_RUNTIME))
++			continue;
++		if (!count--)
++			break;
++		iounmap((__force void *)md->virt_addr);
++	}
++	kfree(virtmap);
++	return -1;
+ }
+ early_initcall(arm64_enter_virtual_mode);
 -- 
-Ard.
+1.8.3.2
