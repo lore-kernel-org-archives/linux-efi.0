@@ -1,114 +1,94 @@
-From: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: autoload efivars
-Date: Tue, 08 Jul 2014 13:19:42 +0100
-Message-ID: <1404821982.2489.8.camel@deadeye.wl.decadent.org.uk>
-References: <1404788458-32105-1-git-send-email-jlee@suse.com>
-	 <20140708101434.GF27474@console-pimps.org>
+From: "Olivier Martin" <olivier.martin@arm.com>
+Subject: RE: [PATCH v2 0/2] efi: preserve NEON registers on UEFI services calls
+Date: Tue, 8 Jul 2014 16:33:32 +0100
+Message-ID: <46634.7550428056$1404833831@news.gmane.org>
+References: <1403777346-28629-1-git-send-email-ard.biesheuvel@linaro.org>	<20140701132638.GC7539@console-pimps.org>
+ <CAKv+Gu8yb=H2734e-Wai3npK_qwsq7SWHumn+1gjkmJhF-2QQA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-e9FZ+CyaNDKNFMQA4vJF"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140708101434.GF27474-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <CAKv+Gu8yb=H2734e-Wai3npK_qwsq7SWHumn+1gjkmJhF-2QQA@mail.gmail.com>
+Content-Language: en-gb
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: 'Ard Biesheuvel' <ard.biesheuvel@linaro.org>, Matt Fleming <matt@console-pimps.org>
+Cc: linux-efi@vger.kernel.org, Catalin Marinas <Catalin.Marinas@arm.com>, x86@kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Roy Franz <roy.franz@linaro.org>, Matt Fleming <matt.fleming@intel.com>, msalter@redhat.com, hpa@zytor.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+It is correct the UEFI 2.4 spec says 'Floating point and SIMD instructions may be used'. And it is also correct these registers are not preserved in the current UEFI EDK2 implementation.
+I will keep track in ARM UEFI todo list.
 
---=-e9FZ+CyaNDKNFMQA4vJF
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Acked-by: Olivier Martin <olivier.martin@arm.com>
 
-On Tue, 2014-07-08 at 11:14 +0100, Matt Fleming wrote:
-> On Tue, 08 Jul, at 11:00:58AM, Lee, Chun-Yi wrote:
-[...]
-> > --- a/arch/x86/platform/efi/efi.c
-> > +++ b/arch/x86/platform/efi/efi.c
-> > @@ -44,6 +44,7 @@
-> >  #include <linux/io.h>
-> >  #include <linux/reboot.h>
-> >  #include <linux/bcd.h>
-> > +#include <linux/platform_device.h>
-> > =20
-> >  #include <asm/setup.h>
-> >  #include <asm/efi.h>
-> > @@ -780,6 +781,20 @@ void __init efi_late_init(void)
-> >  	efi_bgrt_init();
-> >  }
-> > =20
-> > +#ifdef CONFIG_EFI_VARS_MODULE
-> > +static int __init efi_load_efivars(void)
-> > +{
-> > +	struct platform_device *pdev;
-> > +
-> > +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-> > +		return 0;
-> > +
-> > +	pdev =3D platform_device_register_simple("efivars", 0, NULL, 0);
-> > +	return IS_ERR(pdev) ? PTR_ERR(pdev) : 0;
-> > +}
-> > +device_initcall(efi_load_efivars);
-> > +#endif
-> > +
->=20
-> Could this be moved to drivers/firmware/efi/efi.c? That way the arm64
-> folks could benefit from it too.
+Thanks Ard for your patch,
+Olivier
 
-It seems like that should work now that efi_enabled() is not specific to
-x86.
-
-Ben.
-
-> >  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
-> >  {
-> >  	u64 addr, npages;
-> > diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efiv=
-ars.c
-> > index 463c565..f256ecd 100644
-> > --- a/drivers/firmware/efi/efivars.c
-> > +++ b/drivers/firmware/efi/efivars.c
-> > @@ -78,6 +78,7 @@ MODULE_AUTHOR("Matt Domsch <Matt_Domsch-DYMqY+WieiM@public.gmane.org>");
-> >  MODULE_DESCRIPTION("sysfs interface to EFI Variables");
-> >  MODULE_LICENSE("GPL");
-> >  MODULE_VERSION(EFIVARS_VERSION);
-> > +MODULE_ALIAS("platform:efivars");
-> > =20
-> >  LIST_HEAD(efivar_sysfs_list);
-> >  EXPORT_SYMBOL_GPL(efivar_sysfs_list);
-> > --=20
-> > 1.8.4.5
-> >=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
---=20
-Ben Hutchings
-Any smoothly functioning technology is indistinguishable from a rigged demo=
-.
-
---=-e9FZ+CyaNDKNFMQA4vJF
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIVAwUAU7vh4+e/yOyVhhEJAQqRehAAvTbqo2oFK+Zl+xDiVc0BccET2E7ghK60
-+uKuKvTLbuo80bdKGK0Zd2Wtqo+TbyJwrMN6CSSfirerh51TRWcw1xKMGq0tGQ5s
-Vg6czR6wfJ10BYN3s08yYl2KgLEwa5h5ms5hqANwkJUsgEmQT2V+PefVL5RVTBIM
-yq6yJzRfFffsGvnGwfNtTO08SolXa8977mtoA+Tq2vo9cca1gM8Fb16kgSmT7yUD
-BN1dZ8XJX/xzw7nXI+jJrphs+VtcxGN379sDfJaV8s512afNXbwSMCzwREDTm6vb
-mof8zPPujyKCJS8LMmfCgh99i0k0AwXzXwyHazwkaa5lqaTKisZaPMG9SwYYsbiv
-PsJnbZyBnqABBhexV3AergDDq/qhm1t0jdmPKzI5K/ytr4gaBlnR6MS2oE5lu0mQ
-wvCJKrQx0OxzcCAVKutX1UxnwTndCR0xoDGQ48my3+1+aavq+OBNRAfTeGSiQTV4
-S8vkK4D/NFpRgaejyyBv8rgb95WJzPUjOvUe6efNLaPrlwQ75BIwOGpVuRYFOSBw
-oQpHsTfFGaeE6awiLlgGiccMpxwMNDs++2SULlQjBwmbKni8dPJJ2Bq+7Wz27ZTJ
-MkWWdygB47zej6KzSanhaVzjrzuFEVp9/AV1Xg/7uyWjUk9VidWkSbz1paQ8C4jO
-v66Yteczs/Y=
-=UYlp
------END PGP SIGNATURE-----
-
---=-e9FZ+CyaNDKNFMQA4vJF--
+> -----Original Message-----
+> From: Ard Biesheuvel [mailto:ard.biesheuvel@linaro.org]
+> Sent: 01 July 2014 14:46
+> To: Matt Fleming
+> Cc: Matt Fleming; x86@kernel.org; Catalin Marinas; linux-
+> efi@vger.kernel.org; linux-arm-kernel@lists.infradead.org;
+> hpa@zytor.com; Leif Lindholm; Roy Franz; msalter@redhat.com; Olivier
+> Martin
+> Subject: Re: [PATCH v2 0/2] efi: preserve NEON registers on UEFI
+> services calls
+> 
+> On 1 July 2014 15:26, Matt Fleming <matt@console-pimps.org> wrote:
+> > On Thu, 26 Jun, at 12:09:04PM, Ard Biesheuvel wrote:
+> >> The current UEFI implementation for arm64 fails to preserve/restore
+> the contents
+> >> of the NEON register file, which may result in data corruption,
+> especially now
+> >> that those contents are lazily restored for user processes.
+> >>
+> >> This series proposes to fix this by wrapping all runtime services
+> calls, and
+> >> adding kernel_neon_begin()/kernel_neon_end() pairs to the wrappers.
+> >>
+> >> The first patch moves the existing x86 versions of those wrappers to
+> generic
+> >> code, so that the second patch can easily enable them by supplying a
+> definition
+> >> for efi_call_virt and adding a call to efi_native_runtime_setup().
+> >>
+> >> Changes since v1:
+> >> - rename runtime.c -> runtime-wrappers.c
+> >> - make build depend on new Kconfig symbol EFI_RUNTIME_WRAPPERS to
+> fix ia64
+> >>   breakage
+> >> - remove default #defines for efi_call_virt()/__efi_call_virt(),
+> they are not
+> >>   needed anymore now that it is built conditionally
+> >> - add references to applicable UEFI/AAPCS spec sections
+> >>
+> >> Ard Biesheuvel (2):
+> >>   efi/x86: move UEFI Runtime Services wrappers to generic code
+> >>   efi/arm64: preserve FP/SIMD registers on UEFI runtime services
+> calls
+> >
+> > Thanks Ard. These patches look OK to me, and I've now pulled them
+> into
+> > my 'next' branch.
+> >
+> > It'd be nice if we could get some ACKs from other people since this
+> is
+> > an ABI issue.
+> 
+> Yes, they have been awfully quiet, haven't they?
+> 
+> At least Roy has volunteered to get involved in the USWG to get the
+> spec clarified.
+> 
+> @Leif, Catalin, Olivier: care to chime in?
+> 
+> --
+> Ard.
