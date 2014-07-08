@@ -1,49 +1,79 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/5] efi/arm64: Avoid EFI_ERROR as a generic return code
-Date: Mon, 7 Jul 2014 17:22:23 -0700
-Message-ID: <CAFECyb8nVyiNAc8zKodxzd9CJ+68RkfGmvDqFV-HQTbB_rdMbA@mail.gmail.com>
-References: <1404305683-26501-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1404305683-26501-2-git-send-email-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH] x86/efi: autoload efivars
+Date: Tue,  8 Jul 2014 11:00:58 +0800
+Message-ID: <1404788458-32105-1-git-send-email-jlee@suse.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1404305683-26501-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 2, 2014 at 5:54 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> As EFI_ERROR is not a UEFI result code but a local invention only
-> intended to allow get_dram_base() to signal failure, we should not use
-> it elsewhere.
->
-> Replace with EFI_LOAD_ERROR.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/arm64/kernel/efi-stub.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-> index e786e6cdc400..7aa7155a9740 100644
-> --- a/arch/arm64/kernel/efi-stub.c
-> +++ b/arch/arm64/kernel/efi-stub.c
-> @@ -69,7 +69,7 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
->                 if (*image_addr != (dram_base + TEXT_OFFSET)) {
->                         pr_efi_err(sys_table, "Failed to alloc kernel memory\n");
->                         efi_free(sys_table, kernel_memsize, *image_addr);
-> -                       return EFI_ERROR;
-> +                       return EFI_LOAD_ERROR;
->                 }
->                 *image_size = kernel_memsize;
->         }
-> --
-> 1.8.3.2
->
+The original patch is from Ben Hutchings's contribution to debian
+kernel. Got Ben's permission to remove the code of efi-pstore.c and
+then patch to linux-efi:
+https://github.com/BlankOn/linux-debian/blob/master/debian/patches/features/all/efi-autoload-efivars.patch
 
-Looks good.
+efivars is generally useful to have on EFI systems, and in some cases
+it may be impossible to load it after a kernel upgrade in order to
+complete a boot loader update. At the same time we don't want to waste
+memory on non-EFI systems by making them built-in.
 
-Acked-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Instead, give them module aliases as if they are platform drivers, and
+register a corresponding platform device whenever EFI runtime services
+are available.  This should trigger udev to load them.
+
+Cc: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c    | 15 +++++++++++++++
+ drivers/firmware/efi/efivars.c |  1 +
+ 2 files changed, 16 insertions(+)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 87fc96b..c295c08 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -44,6 +44,7 @@
+ #include <linux/io.h>
+ #include <linux/reboot.h>
+ #include <linux/bcd.h>
++#include <linux/platform_device.h>
+ 
+ #include <asm/setup.h>
+ #include <asm/efi.h>
+@@ -780,6 +781,20 @@ void __init efi_late_init(void)
+ 	efi_bgrt_init();
+ }
+ 
++#ifdef CONFIG_EFI_VARS_MODULE
++static int __init efi_load_efivars(void)
++{
++	struct platform_device *pdev;
++
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return 0;
++
++	pdev = platform_device_register_simple("efivars", 0, NULL, 0);
++	return IS_ERR(pdev) ? PTR_ERR(pdev) : 0;
++}
++device_initcall(efi_load_efivars);
++#endif
++
+ void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
+ {
+ 	u64 addr, npages;
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 463c565..f256ecd 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -78,6 +78,7 @@ MODULE_AUTHOR("Matt Domsch <Matt_Domsch-DYMqY+WieiM@public.gmane.org>");
+ MODULE_DESCRIPTION("sysfs interface to EFI Variables");
+ MODULE_LICENSE("GPL");
+ MODULE_VERSION(EFIVARS_VERSION);
++MODULE_ALIAS("platform:efivars");
+ 
+ LIST_HEAD(efivar_sysfs_list);
+ EXPORT_SYMBOL_GPL(efivar_sysfs_list);
+-- 
+1.8.4.5
