@@ -1,40 +1,49 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: implement mandatory locking for UEFI Runtime Services
-Date: Mon, 7 Jul 2014 22:43:31 +0200
-Message-ID: <CAKv+Gu91CQADTQ8KMjXQPwVDvW1XkUYO2E5=Mu=aAtrB8B3q_A@mail.gmail.com>
-References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1404295802-28030-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20140707202954.GC27474@console-pimps.org>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v3 1/5] efi/arm64: Avoid EFI_ERROR as a generic return code
+Date: Mon, 7 Jul 2014 17:22:23 -0700
+Message-ID: <CAFECyb8nVyiNAc8zKodxzd9CJ+68RkfGmvDqFV-HQTbB_rdMbA@mail.gmail.com>
+References: <1404305683-26501-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1404305683-26501-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140707202954.GC27474-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1404305683-26501-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 7 July 2014 22:29, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Wed, 02 Jul, at 12:10:02PM, Ard Biesheuvel wrote:
->> According to section 7.1 of the UEFI spec, Runtime Services are not fully
->> reentrant, and there are particular combinations of calls that need to be
->> serialized.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/firmware/efi/runtime-wrappers.c | 109 +++++++++++++++++++++++++++++---
->>  1 file changed, 99 insertions(+), 10 deletions(-)
+On Wed, Jul 2, 2014 at 5:54 AM, Ard Biesheuvel
+<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> As EFI_ERROR is not a UEFI result code but a local invention only
+> intended to allow get_dram_base() to signal failure, we should not use
+> it elsewhere.
 >
-> Ard, what's going on with this one? I didn't see it resubmitted along
-> with v3 of "efi/arm64: handle missing virtual mapping for UEFI System
-> Table".
+> Replace with EFI_LOAD_ERROR.
 >
-> Note that we already have a lock to serialize access to the UEFI
-> variable services in the form of __efivars->lock, see
-> drivers/firmware/efi/vars.c. It's a spinlock because of the context we
-> may need to create variables in from efi_pstore_write().
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi-stub.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+> index e786e6cdc400..7aa7155a9740 100644
+> --- a/arch/arm64/kernel/efi-stub.c
+> +++ b/arch/arm64/kernel/efi-stub.c
+> @@ -69,7 +69,7 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+>                 if (*image_addr != (dram_base + TEXT_OFFSET)) {
+>                         pr_efi_err(sys_table, "Failed to alloc kernel memory\n");
+>                         efi_free(sys_table, kernel_memsize, *image_addr);
+> -                       return EFI_ERROR;
+> +                       return EFI_LOAD_ERROR;
+>                 }
+>                 *image_size = kernel_memsize;
+>         }
+> --
+> 1.8.3.2
 >
 
-As the patch says, the UEFI spec is very clear on which combinations
-of calls are not reentrant.
-I don't think the rtc_lock and the efivars->lock quite cover that completely ...
+Looks good.
+
+Acked-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
