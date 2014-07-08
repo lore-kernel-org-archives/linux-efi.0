@@ -1,122 +1,79 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: EFI_STUB fails to boot non-EFI on arm64
-Date: Tue, 8 Jul 2014 10:21:00 +0100
-Message-ID: <20140708092100.GA21320@arm.com>
-References: <20140523094513.GC9252@arm.com>
- <20140523131656.GR4179@bivouac.eciton.net>
- <20140523134720.GA9256@arm.com>
- <20140523150331.GS4179@bivouac.eciton.net>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/2] efi: implement mandatory locking for UEFI Runtime
+ Services
+Date: Tue, 8 Jul 2014 10:29:58 +0100
+Message-ID: <20140708092958.GD27474@console-pimps.org>
+References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1404295802-28030-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20140707202954.GC27474@console-pimps.org>
+ <CAKv+Gu91CQADTQ8KMjXQPwVDvW1XkUYO2E5=Mu=aAtrB8B3q_A@mail.gmail.com>
+ <CAKv+Gu8LbfuuEYyhAeu3dUiKHqzN_UFMbOjY0agVihbmmVL9CA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140523150331.GS4179-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
+In-Reply-To: <CAKv+Gu8LbfuuEYyhAeu3dUiKHqzN_UFMbOjY0agVihbmmVL9CA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I forgot about this thread. I think we need it sorted in some way.
+On Tue, 08 Jul, at 10:54:13AM, Ard Biesheuvel wrote:
+> 
+> After doing a bit more research, I still think there is work needed if
+> we aim to adhere to the UEFI spec, or at least be safe from the
+> hazards it points out.
+ 
+Note that I never claimed there wasn't a need for an EFI runtime lock, I
+was just pointing out that you need to consider the efi-pstore scenario,
+and that a mutex isn't suitable in that case.
 
-On Fri, May 23, 2014 at 04:03:31PM +0100, Leif Lindholm wrote:
-> On Fri, May 23, 2014 at 02:47:20PM +0100, Catalin Marinas wrote:
-> > Can we add another of detecting whether it's an EFI application and
-> > avoid calling efi_init()? I can see x86 sets some efi_loader_signature
-> > string in exit_boot() and checks against it later when calling
-> > efi_init().
+I did in fact make a half-arsed attempt at introducing a runtime lock
+here,
 
-So, to be in line with 32-bit arm, the only way to tell the uncompressed
-kernel image that it was started as an EFI application is via FDT.
+  http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=capsule-blkdev&id=c0a88ac5b21f3c837121748be2e59e995126a6cb
 
-> My view is that this should be fixed in fdt_find_uefi_params(). A
-> single info message that we can't find evidence of UEFI should be
-> printed in the non-error case.
-[...]
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index cd36deb..4bb42e1e 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -366,11 +366,8 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
->  
->  	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
->  		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-> -		if (!prop) {
-> -			pr_err("Can't find %s in device tree!\n",
-> -			       dt_params[i].name);
-> -			return 0;
-> -		}
-> +		if (!prop)
-> +			goto fail;
->  		dest = info->params + dt_params[i].offset;
->  
->  		val = of_read_number(prop, len / sizeof(u32));
-> @@ -385,6 +382,14 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
->  				dt_params[i].size * 2, val);
->  	}
->  	return 1;
-> +
-> +	fail:
-> +	if (i == 0)
-> +		pr_info("  UEFI not found.\n");
-> +	else
-> +		pr_err("Can't find %s in device tree!\n", dt_params[i].name);
-> +
-> +	return 0;
+Provided we can get away with a single EFI runtime lock like that patch,
+your recent efi_call_virt() changes actually make the required patch
+much simpler, at least for arm64 and x86.
 
-I'm ok with the idea but I don't particularly like the implementation.
-Does this look any better (functionally the same as yours)?
+> So the current status is:
+> - get/set time calls are serialized with respect to one another using
+> rtc_lock at the wrapper level
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index eff1a2f22f09..dc79346689e6 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -346,6 +346,7 @@ static __initdata struct {
+The time functions are completely unused on x86, which is why no proper
+runtime locking exists. It's basically dead code.
+
+> - get/set variable calls are serialized using the efivars->lock in the
+> efivars module
+> - get_next_variable() calls use the BKL
+
+It uses __efivars->lock just like the other variable services. Is that
+what you meant by BKL?
  
- struct param_info {
- 	int verbose;
-+	int found;
- 	void *params;
- };
- 
-@@ -362,16 +363,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
- 		return 0;
- 
--	pr_info("Getting parameters from FDT:\n");
--
- 	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
- 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
--		if (!prop) {
--			pr_err("Can't find %s in device tree!\n",
--			       dt_params[i].name);
-+		if (!prop)
- 			return 0;
--		}
- 		dest = info->params + dt_params[i].offset;
-+		info->found++;
- 
- 		val = of_read_number(prop, len / sizeof(u32));
- 
-@@ -390,10 +387,21 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
- {
- 	struct param_info info;
-+	int ret;
-+
-+	pr_info("Getting EFI parameters from FDT:\n");
- 
- 	info.verbose = verbose;
-+	info.found = 0;
- 	info.params = params;
- 
--	return of_scan_flat_dt(fdt_find_uefi_params, &info);
-+	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
-+	if (!info.found)
-+		pr_info("UEFI not found.\n");
-+	else if (!ret)
-+		pr_err("Can't find '%s' in device tree!\n",
-+		       dt_params[info.found].name);
-+
-+	return ret;
- }
- #endif /* CONFIG_EFI_PARAMS_FROM_FDT */
+> The two things I am most concerned with are:
+> - reset system while other calls are in flight; is this handled
+> implicitly in some other way?
+
+No, it isn't handled, so yeah, it needs fixing. I think on x86 we
+actually wait for other cpus to shutdown before issuing the reset but
+it's obviously not possible to make that guarantee across architectures.
+
+> - things like settime()/setwakeuptime() and setvariable() poking into
+> the flash at the same time.
+> 
+> Perhaps it would be sufficient to have a single spinlock cover all
+> these cases? Or just let efivars grab the rtc_lock as well?
+
+I think we need to introduce a separate lock, logically below all other
+subsystem specific ones (rtc_lock, __efivars->lock, etc). It needs to be
+the final lock you grab before invoking the runtime services.
+
+I don't think the additional complexity of introducing multiple locks to
+parallelise access to, say, GetTime() and GetVariable(), is really worth
+the headache. Definitely not without someone making a really compelling
+case for why they need to squeeze every ounce of performance out of that
+scenario.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
