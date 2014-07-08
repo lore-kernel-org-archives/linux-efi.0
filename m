@@ -1,40 +1,97 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: implement mandatory locking for UEFI Runtime
- Services
-Date: Tue, 8 Jul 2014 10:52:47 +0100
-Message-ID: <20140708095247.GE27474@console-pimps.org>
-References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
- <1404295802-28030-2-git-send-email-ard.biesheuvel@linaro.org>
- <20140707202954.GC27474@console-pimps.org>
- <CAKv+Gu91CQADTQ8KMjXQPwVDvW1XkUYO2E5=Mu=aAtrB8B3q_A@mail.gmail.com>
- <CAKv+Gu8LbfuuEYyhAeu3dUiKHqzN_UFMbOjY0agVihbmmVL9CA@mail.gmail.com>
- <20140708092958.GD27474@console-pimps.org>
- <CAKv+Gu9HkJgsnzUAROVwPKaHGHRU9FwAp+eOT8N8kYDR3Dda+w@mail.gmail.com>
+Subject: Re: [PATCH] x86/efi: autoload efivars
+Date: Tue, 8 Jul 2014 11:14:34 +0100
+Message-ID: <20140708101434.GF27474@console-pimps.org>
+References: <1404788458-32105-1-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9HkJgsnzUAROVwPKaHGHRU9FwAp+eOT8N8kYDR3Dda+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1404788458-32105-1-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 08 Jul, at 11:45:03AM, Ard Biesheuvel wrote:
+On Tue, 08 Jul, at 11:00:58AM, Lee, Chun-Yi wrote:
+> The original patch is from Ben Hutchings's contribution to debian
+> kernel. Got Ben's permission to remove the code of efi-pstore.c and
+> then patch to linux-efi:
+> https://github.com/BlankOn/linux-debian/blob/master/debian/patches/features/all/efi-autoload-efivars.patch
 > 
-> Well, that is what is says in the comment:
->          * ops.get_next_variable() is only called from register_efivars()
->          * or efivar_update_sysfs_entries(),
->          * which is protected by the BKL, so that path is safe.
- 
-Oops, so it does. That's a stale comment. I'll update it.
+> efivars is generally useful to have on EFI systems, and in some cases
+> it may be impossible to load it after a kernel upgrade in order to
+> complete a boot loader update. At the same time we don't want to waste
+> memory on non-EFI systems by making them built-in.
+> 
+> Instead, give them module aliases as if they are platform drivers, and
+> register a corresponding platform device whenever EFI runtime services
+> are available.  This should trigger udev to load them.
+> 
+> Cc: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> ---
+>  arch/x86/platform/efi/efi.c    | 15 +++++++++++++++
+>  drivers/firmware/efi/efivars.c |  1 +
+>  2 files changed, 16 insertions(+)
+> 
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 87fc96b..c295c08 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -44,6 +44,7 @@
+>  #include <linux/io.h>
+>  #include <linux/reboot.h>
+>  #include <linux/bcd.h>
+> +#include <linux/platform_device.h>
+>  
+>  #include <asm/setup.h>
+>  #include <asm/efi.h>
+> @@ -780,6 +781,20 @@ void __init efi_late_init(void)
+>  	efi_bgrt_init();
+>  }
+>  
+> +#ifdef CONFIG_EFI_VARS_MODULE
+> +static int __init efi_load_efivars(void)
+> +{
+> +	struct platform_device *pdev;
+> +
+> +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+> +		return 0;
+> +
+> +	pdev = platform_device_register_simple("efivars", 0, NULL, 0);
+> +	return IS_ERR(pdev) ? PTR_ERR(pdev) : 0;
+> +}
+> +device_initcall(efi_load_efivars);
+> +#endif
+> +
 
-> I agree. So shall I update my patch to add a single spin_lock that is
-> used by all wrappers?
-> We will likely need the wrappers on ARM as well, only ia64 needs
-> another approach (if desired)
+Could this be moved to drivers/firmware/efi/efi.c? That way the arm64
+folks could benefit from it too.
 
-Please do, that would be great!
+>  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
+>  {
+>  	u64 addr, npages;
+> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+> index 463c565..f256ecd 100644
+> --- a/drivers/firmware/efi/efivars.c
+> +++ b/drivers/firmware/efi/efivars.c
+> @@ -78,6 +78,7 @@ MODULE_AUTHOR("Matt Domsch <Matt_Domsch-DYMqY+WieiM@public.gmane.org>");
+>  MODULE_DESCRIPTION("sysfs interface to EFI Variables");
+>  MODULE_LICENSE("GPL");
+>  MODULE_VERSION(EFIVARS_VERSION);
+> +MODULE_ALIAS("platform:efivars");
+>  
+>  LIST_HEAD(efivar_sysfs_list);
+>  EXPORT_SYMBOL_GPL(efivar_sysfs_list);
+> -- 
+> 1.8.4.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
