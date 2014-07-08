@@ -1,65 +1,122 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: implement mandatory locking for UEFI Runtime Services
-Date: Tue, 8 Jul 2014 10:54:13 +0200
-Message-ID: <CAKv+Gu8LbfuuEYyhAeu3dUiKHqzN_UFMbOjY0agVihbmmVL9CA@mail.gmail.com>
-References: <1404295802-28030-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1404295802-28030-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20140707202954.GC27474@console-pimps.org>
-	<CAKv+Gu91CQADTQ8KMjXQPwVDvW1XkUYO2E5=Mu=aAtrB8B3q_A@mail.gmail.com>
+From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: EFI_STUB fails to boot non-EFI on arm64
+Date: Tue, 8 Jul 2014 10:21:00 +0100
+Message-ID: <20140708092100.GA21320@arm.com>
+References: <20140523094513.GC9252@arm.com>
+ <20140523131656.GR4179@bivouac.eciton.net>
+ <20140523134720.GA9256@arm.com>
+ <20140523150331.GS4179@bivouac.eciton.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu91CQADTQ8KMjXQPwVDvW1XkUYO2E5=Mu=aAtrB8B3q_A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140523150331.GS4179-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 7 July 2014 22:43, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 7 July 2014 22:29, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> On Wed, 02 Jul, at 12:10:02PM, Ard Biesheuvel wrote:
->>> According to section 7.1 of the UEFI spec, Runtime Services are not fully
->>> reentrant, and there are particular combinations of calls that need to be
->>> serialized.
->>>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> ---
->>>  drivers/firmware/efi/runtime-wrappers.c | 109 +++++++++++++++++++++++++++++---
->>>  1 file changed, 99 insertions(+), 10 deletions(-)
->>
->> Ard, what's going on with this one? I didn't see it resubmitted along
->> with v3 of "efi/arm64: handle missing virtual mapping for UEFI System
->> Table".
->>
->> Note that we already have a lock to serialize access to the UEFI
->> variable services in the form of __efivars->lock, see
->> drivers/firmware/efi/vars.c. It's a spinlock because of the context we
->> may need to create variables in from efi_pstore_write().
->>
->
-> As the patch says, the UEFI spec is very clear on which combinations
-> of calls are not reentrant.
-> I don't think the rtc_lock and the efivars->lock quite cover that completely ...
+I forgot about this thread. I think we need it sorted in some way.
 
-After doing a bit more research, I still think there is work needed if
-we aim to adhere to the UEFI spec, or at least be safe from the
-hazards it points out.
+On Fri, May 23, 2014 at 04:03:31PM +0100, Leif Lindholm wrote:
+> On Fri, May 23, 2014 at 02:47:20PM +0100, Catalin Marinas wrote:
+> > Can we add another of detecting whether it's an EFI application and
+> > avoid calling efi_init()? I can see x86 sets some efi_loader_signature
+> > string in exit_boot() and checks against it later when calling
+> > efi_init().
 
-So the current status is:
-- get/set time calls are serialized with respect to one another using
-rtc_lock at the wrapper level
-- get/set variable calls are serialized using the efivars->lock in the
-efivars module
-- get_next_variable() calls use the BKL
+So, to be in line with 32-bit arm, the only way to tell the uncompressed
+kernel image that it was started as an EFI application is via FDT.
 
-The two things I am most concerned with are:
-- reset system while other calls are in flight; is this handled
-implicitly in some other way?
-- things like settime()/setwakeuptime() and setvariable() poking into
-the flash at the same time.
+> My view is that this should be fixed in fdt_find_uefi_params(). A
+> single info message that we can't find evidence of UEFI should be
+> printed in the non-error case.
+[...]
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index cd36deb..4bb42e1e 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -366,11 +366,8 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  
+>  	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+>  		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+> -		if (!prop) {
+> -			pr_err("Can't find %s in device tree!\n",
+> -			       dt_params[i].name);
+> -			return 0;
+> -		}
+> +		if (!prop)
+> +			goto fail;
+>  		dest = info->params + dt_params[i].offset;
+>  
+>  		val = of_read_number(prop, len / sizeof(u32));
+> @@ -385,6 +382,14 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  				dt_params[i].size * 2, val);
+>  	}
+>  	return 1;
+> +
+> +	fail:
+> +	if (i == 0)
+> +		pr_info("  UEFI not found.\n");
+> +	else
+> +		pr_err("Can't find %s in device tree!\n", dt_params[i].name);
+> +
+> +	return 0;
 
-Perhaps it would be sufficient to have a single spinlock cover all
-these cases? Or just let efivars grab the rtc_lock as well?
+I'm ok with the idea but I don't particularly like the implementation.
+Does this look any better (functionally the same as yours)?
 
--- 
-Ard.
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index eff1a2f22f09..dc79346689e6 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -346,6 +346,7 @@ static __initdata struct {
+ 
+ struct param_info {
+ 	int verbose;
++	int found;
+ 	void *params;
+ };
+ 
+@@ -362,16 +363,12 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 	    (strcmp(uname, "chosen") != 0 && strcmp(uname, "chosen@0") != 0))
+ 		return 0;
+ 
+-	pr_info("Getting parameters from FDT:\n");
+-
+ 	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+ 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+-		if (!prop) {
+-			pr_err("Can't find %s in device tree!\n",
+-			       dt_params[i].name);
++		if (!prop)
+ 			return 0;
+-		}
+ 		dest = info->params + dt_params[i].offset;
++		info->found++;
+ 
+ 		val = of_read_number(prop, len / sizeof(u32));
+ 
+@@ -390,10 +387,21 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
+ {
+ 	struct param_info info;
++	int ret;
++
++	pr_info("Getting EFI parameters from FDT:\n");
+ 
+ 	info.verbose = verbose;
++	info.found = 0;
+ 	info.params = params;
+ 
+-	return of_scan_flat_dt(fdt_find_uefi_params, &info);
++	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
++	if (!info.found)
++		pr_info("UEFI not found.\n");
++	else if (!ret)
++		pr_err("Can't find '%s' in device tree!\n",
++		       dt_params[info.found].name);
++
++	return ret;
+ }
+ #endif /* CONFIG_EFI_PARAMS_FROM_FDT */
