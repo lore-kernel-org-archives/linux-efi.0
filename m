@@ -1,62 +1,91 @@
-From: Daniel Kiper <daniel.kiper@oracle.com>
-Subject: Re: [PATCH v7 00/10] xen: Add EFI support
-Date: Tue, 8 Jul 2014 22:52:15 +0200
-Message-ID: <20140708205215.GC3474@olila.local.net-space.pl>
-References: <1404150784-27921-1-git-send-email-daniel.kiper@oracle.com>
- <20140707194914.GA27474@console-pimps.org>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: autoload efivars
+Date: Wed, 9 Jul 2014 14:40:50 +0800
+Message-ID: <20140709064050.GI18225@linux-rxt1.site>
+References: <1404788458-32105-1-git-send-email-jlee@suse.com>
+ <20140708101434.GF27474@console-pimps.org>
+ <1404821982.2489.8.camel@deadeye.wl.decadent.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140707194914.GA27474@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, xen-devel@lists.xenproject.org, andrew.cooper3@citrix.com, boris.ostrovsky@oracle.com, david.vrabel@citrix.com, eshelton@pobox.com, fenghua.yu@intel.com, hpa@zytor.com, ian.campbell@citrix.com, jbeulich@suse.com, jeremy@goop.org, konrad.wilk@oracle.com, matt.fleming@intel.com, mingo@redhat.com, mjg59@srcf.ucam.org, stefano.stabellini@eu.citrix.com, tglx@linutronix.de, tony.luck@intel.com
+In-Reply-To: <1404821982.2489.8.camel-nDn/Rdv9kqW9Jme8/bJn5UCKIB8iOfG2tUK59QYPAWc@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 07, 2014 at 08:49:14PM +0100, Matt Fleming wrote:
-> On Mon, 30 Jun, at 07:52:54PM, Daniel Kiper wrote:
-> > Hey,
-> >
-> > This patch series adds EFI support for Xen dom0 guests.
-> > It is based on Jan Beulich and Tang Liang work. I was
-> > trying to take into account all previous comments,
-> > however, if I missed something sorry for that.
-> >
-> > Daniel
-> >
-> >  arch/ia64/include/asm/io.h       |    1 +
-> >  arch/x86/kernel/setup.c          |    4 +-
-> >  arch/x86/platform/efi/efi.c      |  106 ++++++++++--------------
-> >  arch/x86/xen/enlighten.c         |   15 ++++
-> >  drivers/firmware/efi/efi.c       |   25 +++---
-> >  drivers/xen/Kconfig              |    4 +
-> >  drivers/xen/Makefile             |    3 +
-> >  drivers/xen/efi.c                |  368 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  include/linux/efi.h              |    4 +-
-> >  include/xen/interface/platform.h |  123 ++++++++++++++++++++++++++++
-> >  include/xen/xen-ops.h            |   11 +++
-> >  11 files changed, 587 insertions(+), 77 deletions(-)
-> >
-> > Daniel Kiper (10):
-> >       arch/ia64: Define early_memunmap()
-> >       efi: Use early_mem*() instead of early_io*()
-> >       arch/x86: Do not access EFI memory map if it is not available
-> >       efi: Introduce EFI_PARAVIRT flag
-> >       arch/x86: Remove redundant set_bit(EFI_SYSTEM_TABLES) call
-> >       arch/x86: Remove redundant set_bit(EFI_MEMMAP) call
-> >       xen: Define EFI related stuff
-> >       xen: Put EFI machinery in place
-> >       arch/x86: Replace plain strings with constants
-> >       arch/x86: Remove efi_set_rtc_mmss()
->
-> Thanks Daniel.
->
-> I've included Stefano's Acks where they were given and queued this up
-> for v3.17 in the EFI 'next' branch at,
->
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git
+On Tue, Jul 08, 2014 at 01:19:42PM +0100, Ben Hutchings wrote:
+> On Tue, 2014-07-08 at 11:14 +0100, Matt Fleming wrote:
+> > On Tue, 08 Jul, at 11:00:58AM, Lee, Chun-Yi wrote:
+> [...]
+> > > --- a/arch/x86/platform/efi/efi.c
+> > > +++ b/arch/x86/platform/efi/efi.c
+> > > @@ -44,6 +44,7 @@
+> > >  #include <linux/io.h>
+> > >  #include <linux/reboot.h>
+> > >  #include <linux/bcd.h>
+> > > +#include <linux/platform_device.h>
+> > >  
+> > >  #include <asm/setup.h>
+> > >  #include <asm/efi.h>
+> > > @@ -780,6 +781,20 @@ void __init efi_late_init(void)
+> > >  	efi_bgrt_init();
+> > >  }
+> > >  
+> > > +#ifdef CONFIG_EFI_VARS_MODULE
+> > > +static int __init efi_load_efivars(void)
+> > > +{
+> > > +	struct platform_device *pdev;
+> > > +
+> > > +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+> > > +		return 0;
+> > > +
+> > > +	pdev = platform_device_register_simple("efivars", 0, NULL, 0);
+> > > +	return IS_ERR(pdev) ? PTR_ERR(pdev) : 0;
+> > > +}
+> > > +device_initcall(efi_load_efivars);
+> > > +#endif
+> > > +
+> > 
+> > Could this be moved to drivers/firmware/efi/efi.c? That way the arm64
+> > folks could benefit from it too.
+> 
+> It seems like that should work now that efi_enabled() is not specific to
+> x86.
+> 
+> Ben.
+> 
 
-Great! Thanks a lot.
+Thanks for Matt and Ban's review, I will move platform device register code to
+drivers/firmware/efi/efi.c and send version 2 patch.
 
-Daniel
+Joey Lee
+
+> > >  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
+> > >  {
+> > >  	u64 addr, npages;
+> > > diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+> > > index 463c565..f256ecd 100644
+> > > --- a/drivers/firmware/efi/efivars.c
+> > > +++ b/drivers/firmware/efi/efivars.c
+> > > @@ -78,6 +78,7 @@ MODULE_AUTHOR("Matt Domsch <Matt_Domsch-DYMqY+WieiM@public.gmane.org>");
+> > >  MODULE_DESCRIPTION("sysfs interface to EFI Variables");
+> > >  MODULE_LICENSE("GPL");
+> > >  MODULE_VERSION(EFIVARS_VERSION);
+> > > +MODULE_ALIAS("platform:efivars");
+> > >  
+> > >  LIST_HEAD(efivar_sysfs_list);
+> > >  EXPORT_SYMBOL_GPL(efivar_sysfs_list);
+> > > -- 
+> > > 1.8.4.5
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> > > the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
+> -- 
+> Ben Hutchings
+> Any smoothly functioning technology is indistinguishable from a rigged demo.
