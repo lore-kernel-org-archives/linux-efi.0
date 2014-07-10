@@ -1,68 +1,33 @@
-From: ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org
-Subject: [PATCH 1/1] arch/x86: Add better error logging to efi main
-Date: Thu, 10 Jul 2014 02:12:41 +0200
-Message-ID: <1404951161-2677-1-git-send-email-ulf@winkelvos.de>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] efi: fdt: Do not report an error during boot if UEFI is
+ not available
+Date: Thu, 10 Jul 2014 11:04:26 +0100
+Message-ID: <20140710100426.GD15932@console-pimps.org>
+References: <1404834858-10706-1-git-send-email-catalin.marinas@arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1404834858-10706-1-git-send-email-catalin.marinas-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
+To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <Leif.Lindholm-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
+On Tue, 08 Jul, at 04:54:18PM, Catalin Marinas wrote:
+> Currently, fdt_find_uefi_params() reports an error if no EFI parameters
+> are found in the DT. This is however a valid case for non-UEFI kernel
+> booting. This patch checks changes the error reporting to a
+> pr_info("UEFI not found") when no EFI parameters are found in the DT.
+> 
+> Signed-off-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Tested-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c | 22 +++++++++++++++-------
+>  1 file changed, 15 insertions(+), 7 deletions(-)
 
-Hopefully this will enable us to better debug:
-https://bugzilla.kernel.org/show_bug.cgi?id=68761
+Thanks, applied to 'urgent' for v3.16.
 
-Signed-off-by: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c | 14 +++++++++++---
- 1 file changed, 11 insertions(+), 3 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 3b5c66c..f277184 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1376,7 +1376,10 @@ struct boot_params *efi_main(struct efi_config *c,
-
-	setup_graphics(boot_params);
-
--	setup_efi_pci(boot_params);
-+	status = setup_efi_pci(boot_params);
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table, "setup_efi_pci() failed!\n");
-+	}
-
-	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-				sizeof(*gdt), (void **)&gdt);
-@@ -1403,16 +1406,20 @@ struct boot_params *efi_main(struct efi_config *c,
-					     hdr->init_size, hdr->init_size,
-					     hdr->pref_address,
-					     hdr->kernel_alignment);
--		if (status != EFI_SUCCESS)
-+		if (status != EFI_SUCCESS) {
-+			efi_printk(sys_table, "efi_relocate_kernel() failed!\n");
-			goto fail;
-+		}
-
-		hdr->pref_address = hdr->code32_start;
-		hdr->code32_start = bzimage_addr;
-	}
-
-	status = exit_boot(boot_params, handle, is64);
--	if (status != EFI_SUCCESS)
-+	if (status != EFI_SUCCESS) {
-+		efi_printk(sys_table, "exit_boot() failed!\n");
-		goto fail;
-+	}
-
-	memset((char *)gdt->address, 0x0, gdt->size);
-	desc = (struct desc_struct *)gdt->address;
-@@ -1472,5 +1479,6 @@ struct boot_params *efi_main(struct efi_config *c,
-
-	return boot_params;
- fail:
-+	efi_printk(sys_table, "efi_main() failed!\n");
-	return NULL;
- }
---
-2.0.1
+-- 
+Matt Fleming, Intel Open Source Technology Center
