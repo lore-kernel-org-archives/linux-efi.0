@@ -1,28 +1,36 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH] efi: Include a .bss section within the PE/COFF headers
-Date: Thu, 10 Jul 2014 15:48:15 +0100
-Message-ID: <20140710144815.GG15932@console-pimps.org>
-References: <1404942094-29447-1-git-send-email-mbrown@fensystems.co.uk>
- <20140710103431.GE15932@console-pimps.org>
+Subject: Re: [PATCH 1/2] efi: Include a .bss section within the PE/COFF
+ headers
+Date: Thu, 10 Jul 2014 15:48:32 +0100
+Message-ID: <20140710144832.GH15932@console-pimps.org>
+References: <1404991581-31210-1-git-send-email-mbrown@fensystems.co.uk>
+ <1404991581-31210-2-git-send-email-mbrown@fensystems.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140710103431.GE15932-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1404991581-31210-2-git-send-email-mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas =?iso-8859-1?Q?B=E4chler?= <thomas-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 10 Jul, at 11:34:31AM, Matt Fleming wrote:
+On Thu, 10 Jul, at 12:26:20PM, Michael Brown wrote:
+> The PE/COFF headers currently describe only the initialised-data
+> portions of the image, and result in no space being allocated for the
+> uninitialised-data portions.  Consequently, the EFI boot stub will end
+> up overwriting unexpected areas of memory, with unpredictable results.
 > 
-> Thomas, the patch in question is here this one,
+> Fix by including a .bss section in the PE/COFF headers (functionally
+> equivalent to the init_size field in the bzImage header).
 > 
->   http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=urgent&id=db0f1ff0ee1750cc52ead0ba1ddf95c47b3bd133
+> Signed-off-by: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+> ---
+>  arch/x86/boot/header.S      | 26 ++++++++++++++++++++++----
+>  arch/x86/boot/tools/build.c | 38 ++++++++++++++++++++++++++++++--------
+>  2 files changed, 52 insertions(+), 12 deletions(-)
 
-Correction, it's now this one,
-
-  http://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=urgent&id=c7fb93ec51d462ec3540a729ba446663c26a0505
+Thanks Michael, applied.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
