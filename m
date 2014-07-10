@@ -1,49 +1,39 @@
-From: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Subject: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
-Date: Thu, 10 Jul 2014 16:59:23 +0100
-Message-ID: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] x86, eboot: Support initrd loaded above 4G
+Date: Thu, 10 Jul 2014 11:00:06 -0700
+Message-ID: <CAE9FiQVP6d5GhFBBmX5HDo0w0oKJSizdKvepq5t6vhGNj=W9sg@mail.gmail.com>
+References: <1402773821-15995-1-git-send-email-yinghai@kernel.org>
+	<20140618142819.GN24049@console-pimps.org>
+	<20140709182651.GB15932@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140709182651.GB15932-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The kernel will align itself to the nearest boundary specified by the
-kernel_alignment field in the bzImage header.  If the kernel is loaded
-to an address which is not sufficiently aligned, it will therefore use
-memory beyond that indicated solely by the init_size field.
+On Wed, Jul 9, 2014 at 11:26 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Wed, 18 Jun, at 03:28:19PM, Matt Fleming wrote:
+>> On Sat, 14 Jun, at 12:23:41PM, Yinghai Lu wrote:
+>> > For boot efi kernel directly without bootloader.
+>> > If the kernel support XLF_CAN_BE_LOADED_ABOVE_4G, we should
+>> > not limit initrd under hdr->initrd_add_max.
+>
+> Well, fooey. This patch breaks one of my ASUS machines. It appears some
+> firmware implementations exhibit issues reading directly into a buffer
+> above the 4GB mark.
+>
+> I haven't diagnosed exactly what goes wrong with the buffer (i.e. in
+> what way it becomes corrupt), but I should really do that before
+> thinking of how to fix this.
+>
+> I'll keep you posted, I just wanted to give you a heads up that things
+> are screwy in this area.
 
-The PE/COFF headers now include a .bss section to describe the
-requirements of the init_size field, but do not currently expose the
-alignment requirement.  Consequently, a kernel loaded via the PE entry
-point may still end up overwriting unexpected areas of memory.
+Oh, no.
 
-Fix by exposing the desired alignment via the SectionAlignment field
-in the PE/COFF headers.  Despite its name, this field provides an
-overall alignment requirement for the loaded file.  (Naturally, the
-FileAlignment field describes the alignment for individual sections.)
+so efi could allocate buffer above 4g but can not access it?
 
-There is no way in the PE/COFF headers to express the concept of
-min_alignment; we therefore do not expose the minimum (as opposed to
-preferred) alignment.
-
-Signed-off-by: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
----
- arch/x86/boot/header.S | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 7a6d43a..16ef025 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -154,7 +154,7 @@ extra_header_fields:
- #else
- 	.quad	0				# ImageBase
- #endif
--	.long	0x20				# SectionAlignment
-+	.long	CONFIG_PHYSICAL_ALIGN		# SectionAlignment
- 	.long	0x20				# FileAlignment
- 	.word	0				# MajorOperatingSystemVersion
- 	.word	0				# MinorOperatingSystemVersion
--- 
-1.8.4.5
+Yinghai
