@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/2] arm64: add C struct definition for Image header
-Date: Mon, 14 Jul 2014 18:17:50 +0200
-Message-ID: <1405354671-14031-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/2] arm64/efi: efistub: get text offset and image size from the Image header
+Date: Mon, 14 Jul 2014 18:17:51 +0200
+Message-ID: <1405354671-14031-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1405354671-14031-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1405354671-14031-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,96 +10,86 @@ To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, geoff-wEGCiKHe2LqWVfeA
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-In order to be able to interpret the Image header from C code, we need a
-struct definition that reflects the specification for Image headers as laid
-out in Documentation/arm64/booting.txt.
+The EFI stub for arm64 needs to behave like an ordinary bootloader in the sense
+that it needs to use the EFI environment and the Image header at runtime and
+not rely on the linker or preprocessor to produce values for text offset,
+image size and kernel size. This patch also fixes the corner case where Image
+happens to be loaded at exactly the right offset, but the allocation is
+actually too small to satisfy the requirement imposed by image_size as set in
+the header.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/include/asm/image_hdr.h | 75 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 75 insertions(+)
- create mode 100644 arch/arm64/include/asm/image_hdr.h
+ arch/arm64/kernel/Makefile   |  2 --
+ arch/arm64/kernel/efi-stub.c | 29 ++++++++++++++++-------------
+ 2 files changed, 16 insertions(+), 15 deletions(-)
 
-diff --git a/arch/arm64/include/asm/image_hdr.h b/arch/arm64/include/asm/image_hdr.h
-new file mode 100644
-index 000000000000..9dc74b672124
---- /dev/null
-+++ b/arch/arm64/include/asm/image_hdr.h
-@@ -0,0 +1,75 @@
-+/*
-+ * image_hdr.h - C struct definition of the arm64 Image header format
-+ *
-+ * Copyright (C) 2014 Linaro Ltd
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License version 2 as
-+ * published by the Free Software Foundation.
-+ */
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index cdaedad3afe5..99b676eeeb0f 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -4,8 +4,6 @@
+ 
+ CPPFLAGS_vmlinux.lds	:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ AFLAGS_head.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+-CFLAGS_efi-stub.o 	:= -DTEXT_OFFSET=$(TEXT_OFFSET) \
+-			   -I$(src)/../../../scripts/dtc/libfdt
+ 
+ CFLAGS_REMOVE_ftrace.o = -pg
+ CFLAGS_REMOVE_insn.o = -pg
+diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+index 9b61d66e2d20..4ba90b2ef677 100644
+--- a/arch/arm64/kernel/efi-stub.c
++++ b/arch/arm64/kernel/efi-stub.c
+@@ -11,8 +11,7 @@
+  */
+ #include <linux/efi.h>
+ #include <asm/efi.h>
+-#include <asm/sections.h>
+-
++#include <asm/image_hdr.h>
+ 
+ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 unsigned long *image_addr,
+@@ -23,24 +22,28 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 				 efi_loaded_image_t *image)
+ {
+ 	efi_status_t status;
+-	unsigned long kernel_size, kernel_memsize = 0;
++	struct arm64_image_hdr *hdr = (struct arm64_image_hdr *)*image_addr;
 +
-+#ifndef __ASM_IMAGE_HDR_H
-+#define __ASM_IMAGE_HDR_H
-+
-+#ifdef __KERNEL__
-+#include <linux/types.h>
-+#else
-+#include <stdint.h>
-+#endif
-+
-+/**
-+ * struct arm64_image_hdr - arm64 kernel Image binary header format
-+ * @code0:		entry point, first instruction to jump to when booting
-+ *			the Image
-+ * @code1:		second instruction of entry point
-+ * @text_offset:	mandatory offset (little endian) beyond a 2 megabyte
-+ * 			aligned boundary that needs to be taken into account
-+ * 			when deciding where to load the image
-+ * @image_size:		total size (little endian) of the memory area (counted
-+ *			from the offset where the image was loaded) that may be
-+ *			used by the booting kernel before memory reservations
-+ *			can be honoured
-+ * @flags:		little endian bit field
-+ *			Bit 0:		Kernel endianness.  1 if BE, 0 if LE.
-+ *			Bits 1-63:	Reserved.
-+ * @res2:		reserved, must be 0
-+ * @res3:		reserved, must be 0
-+ * @res4:		reserved, must be 0
-+ * @magic:		Magic number (little endian): "ARM\x64"
-+ * @res5:		reserved (used for PE COFF offset)
-+ *
-+ * This definition reflects the definition in Documentation/arm64/booting.txt in
-+ * the Linux source tree.
-+ */
-+struct arm64_image_hdr {
-+	uint32_t code0;
-+	uint32_t code1;
-+	uint64_t text_offset;
-+	uint64_t image_size;
-+	uint64_t flags;
-+	uint64_t res2;
-+	uint64_t res3;
-+	uint64_t res4;
-+	uint32_t magic;
-+	uint32_t res5;
-+};
-+
-+static const union {
-+	uint8_t		le_val[4];
-+	uint32_t	cpu_val;
-+} arm64_image_hdr_magic = {
-+	.le_val		= "ARM\x64"
-+};
-+
-+/**
-+ * int arm64_image_hdr_check() - check whether hdr points to an arm64 Image
-+ * @hdr:	pointer to an arm64 Image
-+ *
-+ * Return: 1 if check is successful, 0 otherwise
-+ */
-+static inline int arm64_image_hdr_check(struct arm64_image_hdr const *hdr)
-+{
-+	return hdr->magic == arm64_image_hdr_magic.cpu_val;
-+}
-+
-+#endif
++	/* make sure image_addr points to an arm64 kernel Image */
++	if (!arm64_image_hdr_check(hdr)) {
++		pr_efi_err(sys_table, "Kernel Image header check failed\n");
++		return EFI_LOAD_ERROR;
++	}
+ 
+ 	/* Relocate the image, if required. */
+-	kernel_size = _edata - _text;
+-	if (*image_addr != (dram_base + TEXT_OFFSET)) {
+-		kernel_memsize = kernel_size + (_end - _edata) + TEXT_OFFSET;
+-		status = efi_low_alloc(sys_table, kernel_memsize, SZ_2M,
++	if (*image_addr != (dram_base + hdr->text_offset) ||
++	    image->image_size < hdr->image_size) {
++		*reserve_size = hdr->text_offset + hdr->image_size;
++		status = efi_low_alloc(sys_table, *reserve_size, SZ_2M,
+ 				       reserve_addr);
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err(sys_table, "Failed to relocate kernel\n");
++			*reserve_size = 0;
+ 			return status;
+ 		}
+-		memcpy((void *)*reserve_addr + TEXT_OFFSET, (void *)*image_addr,
+-		       kernel_size);
+-		*image_addr = *reserve_addr + TEXT_OFFSET;
+-		*reserve_size = kernel_memsize;
++		memcpy((void *)*reserve_addr + hdr->text_offset,
++		       (void *)*image_addr, image->image_size);
++		*image_addr = *reserve_addr + hdr->text_offset;
+ 	}
+-
+-
+ 	return EFI_SUCCESS;
+ }
 -- 
 1.8.3.2
