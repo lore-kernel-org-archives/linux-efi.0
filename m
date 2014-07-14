@@ -1,15 +1,15 @@
 From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm64/efi: efistub: get text offset and image size
- from the Image header
-Date: Mon, 14 Jul 2014 17:54:46 +0100
-Message-ID: <20140714165446.GN26465@leverpostej>
+Subject: Re: [PATCH 1/2] arm64: add C struct definition for Image header
+Date: Mon, 14 Jul 2014 17:58:51 +0100
+Message-ID: <20140714165851.GO26465@leverpostej>
 References: <1405354671-14031-1-git-send-email-ard.biesheuvel@linaro.org>
- <1405354671-14031-3-git-send-email-ard.biesheuvel@linaro.org>
+ <1405354671-14031-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1405354671-14031-3-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1405354671-14031-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "geoff-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org" <geoff-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
@@ -17,126 +17,116 @@ List-Id: linux-efi@vger.kernel.org
 
 Hi Ard,
 
-On Mon, Jul 14, 2014 at 05:17:51PM +0100, Ard Biesheuvel wrote:
-> The EFI stub for arm64 needs to behave like an ordinary bootloader in the sense
-> that it needs to use the EFI environment and the Image header at runtime and
-> not rely on the linker or preprocessor to produce values for text offset,
-> image size and kernel size.
-
-Could you elaborate on _why_ we can't do that, given it's linked into
-the kernel Image?
-
-Are we splitting the stub from the kernel? What's going on?
-
-> This patch also fixes the corner case where Image happens to be loaded
-> at exactly the right offset, but the allocation is actually too small
-> to satisfy the requirement imposed by image_size as set in the header.
-
-It's not really imposed by image_size. While it's described by
-image_size it's imposed by the existence of the BSS section and the
-initial page tables.
-
+On Mon, Jul 14, 2014 at 05:17:50PM +0100, Ard Biesheuvel wrote:
+> In order to be able to interpret the Image header from C code, we need a
+> struct definition that reflects the specification for Image headers as laid
+> out in Documentation/arm64/booting.txt.
 > 
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  arch/arm64/kernel/Makefile   |  2 --
->  arch/arm64/kernel/efi-stub.c | 29 ++++++++++++++++-------------
->  2 files changed, 16 insertions(+), 15 deletions(-)
+>  arch/arm64/include/asm/image_hdr.h | 75 ++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 75 insertions(+)
+>  create mode 100644 arch/arm64/include/asm/image_hdr.h
 > 
-> diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
-> index cdaedad3afe5..99b676eeeb0f 100644
-> --- a/arch/arm64/kernel/Makefile
-> +++ b/arch/arm64/kernel/Makefile
-> @@ -4,8 +4,6 @@
->  
->  CPPFLAGS_vmlinux.lds	:= -DTEXT_OFFSET=$(TEXT_OFFSET)
->  AFLAGS_head.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
-> -CFLAGS_efi-stub.o 	:= -DTEXT_OFFSET=$(TEXT_OFFSET) \
-> -			   -I$(src)/../../../scripts/dtc/libfdt
->  
->  CFLAGS_REMOVE_ftrace.o = -pg
->  CFLAGS_REMOVE_insn.o = -pg
-> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-> index 9b61d66e2d20..4ba90b2ef677 100644
-> --- a/arch/arm64/kernel/efi-stub.c
-> +++ b/arch/arm64/kernel/efi-stub.c
-> @@ -11,8 +11,7 @@
->   */
->  #include <linux/efi.h>
->  #include <asm/efi.h>
-> -#include <asm/sections.h>
-> -
-> +#include <asm/image_hdr.h>
->  
->  efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
->  				 unsigned long *image_addr,
-> @@ -23,24 +22,28 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
->  				 efi_loaded_image_t *image)
->  {
->  	efi_status_t status;
-> -	unsigned long kernel_size, kernel_memsize = 0;
-> +	struct arm64_image_hdr *hdr = (struct arm64_image_hdr *)*image_addr;
+> diff --git a/arch/arm64/include/asm/image_hdr.h b/arch/arm64/include/asm/image_hdr.h
+> new file mode 100644
+> index 000000000000..9dc74b672124
+> --- /dev/null
+> +++ b/arch/arm64/include/asm/image_hdr.h
+> @@ -0,0 +1,75 @@
+> +/*
+> + * image_hdr.h - C struct definition of the arm64 Image header format
+> + *
+> + * Copyright (C) 2014 Linaro Ltd
+> + *
+> + * This program is free software; you can redistribute it and/or modify
+> + * it under the terms of the GNU General Public License version 2 as
+> + * published by the Free Software Foundation.
+> + */
 > +
-> +	/* make sure image_addr points to an arm64 kernel Image */
-> +	if (!arm64_image_hdr_check(hdr)) {
-> +		pr_efi_err(sys_table, "Kernel Image header check failed\n");
-> +		return EFI_LOAD_ERROR;
-> +	}
+> +#ifndef __ASM_IMAGE_HDR_H
+> +#define __ASM_IMAGE_HDR_H
+> +
+> +#ifdef __KERNEL__
+> +#include <linux/types.h>
+> +#else
+> +#include <stdint.h>
+> +#endif
+> +
+> +/**
+> + * struct arm64_image_hdr - arm64 kernel Image binary header format
+> + * @code0:		entry point, first instruction to jump to when booting
+> + *			the Image
+> + * @code1:		second instruction of entry point
+> + * @text_offset:	mandatory offset (little endian) beyond a 2 megabyte
+> + * 			aligned boundary that needs to be taken into account
+> + * 			when deciding where to load the image
+> + * @image_size:		total size (little endian) of the memory area (counted
+> + *			from the offset where the image was loaded) that may be
+> + *			used by the booting kernel before memory reservations
+> + *			can be honoured
+> + * @flags:		little endian bit field
+> + *			Bit 0:		Kernel endianness.  1 if BE, 0 if LE.
+> + *			Bits 1-63:	Reserved.
+> + * @res2:		reserved, must be 0
+> + * @res3:		reserved, must be 0
+> + * @res4:		reserved, must be 0
+> + * @magic:		Magic number (little endian): "ARM\x64"
+> + * @res5:		reserved (used for PE COFF offset)
+> + *
+> + * This definition reflects the definition in Documentation/arm64/booting.txt in
+> + * the Linux source tree.
+> + */
 
-Surely this should always be the case if the stub is linked into the
-kernel?
+Can we not just say "See Documentation/arm64/booting.txt" rather than
+duplicating the description?
 
-It would be nice to know the rationale for this.
+> +struct arm64_image_hdr {
+> +	uint32_t code0;
+> +	uint32_t code1;
+> +	uint64_t text_offset;
+> +	uint64_t image_size;
+> +	uint64_t flags;
+> +	uint64_t res2;
+> +	uint64_t res3;
+> +	uint64_t res4;
+> +	uint32_t magic;
+> +	uint32_t res5;
+> +};
+> +
+> +static const union {
+> +	uint8_t		le_val[4];
+> +	uint32_t	cpu_val;
+> +} arm64_image_hdr_magic = {
+> +	.le_val		= "ARM\x64"
+> +};
+> +
+> +/**
+> + * int arm64_image_hdr_check() - check whether hdr points to an arm64 Image
+> + * @hdr:	pointer to an arm64 Image
+> + *
+> + * Return: 1 if check is successful, 0 otherwise
+> + */
+> +static inline int arm64_image_hdr_check(struct arm64_image_hdr const *hdr)
+> +{
+> +	return hdr->magic == arm64_image_hdr_magic.cpu_val;
+> +}
 
->  
->  	/* Relocate the image, if required. */
-> -	kernel_size = _edata - _text;
-> -	if (*image_addr != (dram_base + TEXT_OFFSET)) {
-> -		kernel_memsize = kernel_size + (_end - _edata) + TEXT_OFFSET;
-> -		status = efi_low_alloc(sys_table, kernel_memsize, SZ_2M,
-> +	if (*image_addr != (dram_base + hdr->text_offset) ||
-> +	    image->image_size < hdr->image_size) {
+Rather than the arm64_image_hdr_magic union trick above, could we not
+just use the magic inline with a memcmp, e.g.
 
-As far as I can tell the size of the Image (image->image_size) is always
-going to be less than the effective run time image size
-(hdr->image_size).
+static inline int arm64_image_hdr_check(struct arm64_image_hdr const *hdr)
+{
+	return !memcmp(&hdr->magic, "ARM\x64", 4);
+}
 
-The SizeOfImage field in head.S which I assume image->image_size is
-derived from (not having a UEFI spec in front of me) seems to cover
-everything up to _edata but skips the BSS, and initial page tables, but
-this is covered by the header's image_size field.
+I'm a little hesitant to expose this to userspace in case the size of
+the structure grows and userspace starts relying on it having a
+particular length (though perhaps that's unfounded).
 
-Am I missing something? Surely we _always_ expect image->image_size to
-be smaller than hdr->image_size?
+It's also a little unfortunate that we lose the nice endianness
+annotations here, as it gives a wrong impression of the structure as a
+set of native-endian fields.
 
-Cheers,
+Thanks,
 Mark.
-
-> +		*reserve_size = hdr->text_offset + hdr->image_size;
-> +		status = efi_low_alloc(sys_table, *reserve_size, SZ_2M,
->  				       reserve_addr);
->  		if (status != EFI_SUCCESS) {
->  			pr_efi_err(sys_table, "Failed to relocate kernel\n");
-> +			*reserve_size = 0;
->  			return status;
->  		}
-> -		memcpy((void *)*reserve_addr + TEXT_OFFSET, (void *)*image_addr,
-> -		       kernel_size);
-> -		*image_addr = *reserve_addr + TEXT_OFFSET;
-> -		*reserve_size = kernel_memsize;
-> +		memcpy((void *)*reserve_addr + hdr->text_offset,
-> +		       (void *)*image_addr, image->image_size);
-> +		*image_addr = *reserve_addr + hdr->text_offset;
->  	}
-> -
-> -
->  	return EFI_SUCCESS;
->  }
-> -- 
-> 1.8.3.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
