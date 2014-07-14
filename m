@@ -1,190 +1,224 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm64/efi: efistub: get text offset and image size
- from the Image header
-Date: Mon, 14 Jul 2014 19:29:08 +0100
-Message-ID: <20140714182908.GQ26465@leverpostej>
-References: <1405354671-14031-1-git-send-email-ard.biesheuvel@linaro.org>
- <1405354671-14031-3-git-send-email-ard.biesheuvel@linaro.org>
- <20140714165446.GN26465@leverpostej>
- <CAKv+Gu_Pf8O92eAO5ENQJPJ6yWMP2U0M90Uc_CYW8MSU7cFWHw@mail.gmail.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
+ occupied
+Date: Mon, 14 Jul 2014 14:40:48 -0400
+Message-ID: <1405363248.25580.12.camel@deneb.redhat.com>
+References: <1405351521-12010-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_Pf8O92eAO5ENQJPJ6yWMP2U0M90Uc_CYW8MSU7cFWHw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <1405351521-12010-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "geoff-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org" <geoff-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 14, 2014 at 06:35:32PM +0100, Ard Biesheuvel wrote:
-> On 14 July 2014 18:54, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> > Hi Ard,
-> >
-> > On Mon, Jul 14, 2014 at 05:17:51PM +0100, Ard Biesheuvel wrote:
-> >> The EFI stub for arm64 needs to behave like an ordinary bootloader in the sense
-> >> that it needs to use the EFI environment and the Image header at runtime and
-> >> not rely on the linker or preprocessor to produce values for text offset,
-> >> image size and kernel size.
-> >
-> > Could you elaborate on _why_ we can't do that, given it's linked into
-> > the kernel Image?
-> >
-> > Are we splitting the stub from the kernel? What's going on?
-> >
+On Mon, 2014-07-14 at 17:25 +0200, Ard Biesheuvel wrote:
+> If we fail to relocate the kernel Image to its preferred offset of TEXT_OFFSET
+> bytes above the base of DRAM, accept the lowest alternative mapping available
+> instead of aborting. We may lose a bit of memory at the low end, but we can
+> still proceed normally otherwise.
+
+This breaks APM Mustang because the spin-table holding pen for secondary
+CPUs is marked as reserved memory in the TEXT_OFFSET area and the kernel
+placement using your patch makes it unreachable by kernel. Here is a
+patch I've been working with to solve the same problem:
+
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Date: Thu, 10 Jul 2014 09:25:30 -0400
+Subject: [PATCH] arm64/efi: try to handle firmware located below kernel
+
+The rule for arm64 kernel image placement is that it must be located
+TEXT_OFFSET bytes past a 2MiB boundary. The kernel itself will use the
+TEXT_OFFSET sized area for initial page tables but that area is not
+part of the kernel image itself.
+
+The current EFI stub code finds the base of DRAM from the EFI memmap
+and relocates the kernel to dram_base+TEXT_OFFSET. This assumes that
+the low memory is not being used and the kernel relocation simply
+fails if the base memory allocation fails.
+
+At least one vendor has firmware which occupies memory near dram_base
+so kernel relocations always fail. This patch attempts to work with
+such firmware by searching the EFI memmap for the lowest available
+memory which may be used for the kernel image. There are several
+pitfalls remaining which may lead to boot failure:
+
+  * The stub does not allocate the TEXT_OFFSET region, so it is
+    required that the firmware not be using that area for anything
+    which may interfere or overlap with the initial kernel page
+    tables. We can't simply include that area in our search for
+    available memory because firmware using the spin-table method
+    for booting secondary CPUs may place the CPU pen in an out of
+    the way part of that region and mark it as reserved memory.
+
+  * The current code requires FDT to be placed within first 512MiB
+    of DRAM (with the kernel below it). This requirement can be
+    removed in the future, but would involve changes to generic
+    stub code shared by other architectures.
+
+Signed-off-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ arch/arm64/kernel/efi-stub.c | 45 +++++++++++++++++++++++++++++++++++++-------
+ arch/arm64/kernel/efi.c      | 19 ++++++++++++++++---
+ 2 files changed, 54 insertions(+), 10 deletions(-)
+
+diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+index 60e98a63..f5da27f 100644
+--- a/arch/arm64/kernel/efi-stub.c
++++ b/arch/arm64/kernel/efi-stub.c
+@@ -54,21 +54,53 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 					efi_loaded_image_t *image)
+ {
+ 	efi_status_t status;
+-	unsigned long kernel_size, kernel_memsize = 0;
++	unsigned long kernel_size, kernel_memsize;
++	unsigned long desired_base = dram_base + TEXT_OFFSET;
++	unsigned long desired_end;
++	unsigned long map_size;
++	struct efi_memory_map map;
++	efi_memory_desc_t *md;
+ 
+ 	/* Relocate the image, if required. */
+ 	kernel_size = _edata - _text;
+-	if (*image_addr != (dram_base + TEXT_OFFSET)) {
+-		kernel_memsize = kernel_size + (_end - _edata);
++	kernel_memsize = kernel_size + (_end - _edata);
++
++	desired_end = desired_base + kernel_size;
++
++	/* find lowest available address for kernel to live */
++	status = efi_get_memory_map(sys_table, (efi_memory_desc_t **)&map.map,
++				    &map_size, &map.desc_size, NULL, NULL);
++	if (status == EFI_SUCCESS) {
++		map.map_end = map.map + map_size;
++		for_each_efi_memory_desc(&map, md) {
++			unsigned long start, end, offset;
++			if (!(md->attribute & EFI_MEMORY_WB))
++				continue;
++			if (md->type != EFI_CONVENTIONAL_MEMORY)
++				continue;
++			start = md->phys_addr;
++			end = start + (md->num_pages << EFI_PAGE_SHIFT);
++			offset = start & (SZ_2M - 1);
++			if (offset < TEXT_OFFSET)
++				start += (TEXT_OFFSET - offset);
++			else if (offset > TEXT_OFFSET)
++				start = ALIGN(start, SZ_2M) + TEXT_OFFSET;
++			if (start < end && (start + kernel_memsize) <= end) {
++				desired_base = start;
++				break;
++			}
++		}
++	}
++
++	if (*image_addr != desired_base) {
+ 		status = efi_relocate_kernel(sys_table, image_addr,
+ 					     kernel_size, kernel_memsize,
+-					     dram_base + TEXT_OFFSET,
+-					     PAGE_SIZE);
++					     desired_base, PAGE_SIZE);
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err(sys_table, "Failed to relocate kernel\n");
+ 			return status;
+ 		}
+-		if (*image_addr != (dram_base + TEXT_OFFSET)) {
++		if (*image_addr != desired_base) {
+ 			pr_efi_err(sys_table, "Failed to alloc kernel memory\n");
+ 			efi_free(sys_table, kernel_memsize, *image_addr);
+ 			return EFI_ERROR;
+@@ -76,6 +108,5 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+ 		*image_size = kernel_memsize;
+ 	}
+ 
+-
+ 	return EFI_SUCCESS;
+ }
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 453b7f8..2bc6469 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -180,9 +180,18 @@ static __init void reserve_regions(void)
+ 		if (is_reserve_region(md) ||
+ 		    md->type == EFI_BOOT_SERVICES_CODE ||
+ 		    md->type == EFI_BOOT_SERVICES_DATA) {
+-			memblock_reserve(paddr, size);
+-			if (uefi_debug)
+-				pr_cont("*");
++			if (paddr < PHYS_OFFSET) {
++				if ((paddr + size) > PHYS_OFFSET) {
++					size -= (PHYS_OFFSET - paddr);
++					memblock_reserve(PHYS_OFFSET, size);
++					if (uefi_debug)
++						pr_cont("**");
++				}
++			} else {
++				memblock_reserve(paddr, size);
++				if (uefi_debug)
++					pr_cont("*");
++			}
+ 		}
+ 
+ 		if (uefi_debug)
+@@ -273,6 +282,10 @@ static void __init free_boot_services(void)
+ 			continue;
+ 		}
+ 
++		/* Don't free anything below kernel */
++		if (md->phys_addr < PHYS_OFFSET)
++			continue;
++
+ 		/*
+ 		 * We want to free memory from this region.
+ 		 */
+-- 
+1.8.3.1
+
+
+
 > 
-> Perhaps Leif can chime in here? I was under the impression that you
-> were aligned in this regard.
-
-Perhaps we were, and I can see reasons for doing this (e.g. as a step
-towards making it possible to boot a BE kernel using UEFI), but the
-commit message doesn't mention any such reason. For the sake of my poor
-recollection and that of others, some words in the commit message would
-be helpful.
-
-> >> This patch also fixes the corner case where Image happens to be loaded
-> >> at exactly the right offset, but the allocation is actually too small
-> >> to satisfy the requirement imposed by image_size as set in the header.
-> >
-> > It's not really imposed by image_size. While it's described by
-> > image_size it's imposed by the existence of the BSS section and the
-> > initial page tables.
-> >
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> This is a proposed bug fix for arm64 platforms that fail to boot through EFI
+> due to the fact that some bits of EFI itself are occupying the low end of DRAM. 
 > 
-> Yes, that is true. But from stub POV, it doesn't matter /why/
-> image_size has a particular value.
-
-Sure, the stub is a piece of software with no particular knowledge of
-anything. However, those of us reading the commit message are not, and
-for our sake it would be nice to have a description in case we care as
-to /why/ image_size has a particular value and why that value happens to
-be useful here.
-
-As far as I can see, we needed to allocate memory for the BSS even
-before the image_size field was introduced, so this isn't a new
-requirement.
-
-All that's needed is a change to the wording of the commit message to
-explain that we're trying to allocate space for (runtime-initialised)
-data between _edata and _end rather than how we find out how much space
-we need for that (reading the image_size field).
-
-> >>
-> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> ---
-> >>  arch/arm64/kernel/Makefile   |  2 --
-> >>  arch/arm64/kernel/efi-stub.c | 29 ++++++++++++++++-------------
-> >>  2 files changed, 16 insertions(+), 15 deletions(-)
-> >>
-> >> diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
-> >> index cdaedad3afe5..99b676eeeb0f 100644
-> >> --- a/arch/arm64/kernel/Makefile
-> >> +++ b/arch/arm64/kernel/Makefile
-> >> @@ -4,8 +4,6 @@
-> >>
-> >>  CPPFLAGS_vmlinux.lds := -DTEXT_OFFSET=$(TEXT_OFFSET)
-> >>  AFLAGS_head.o                := -DTEXT_OFFSET=$(TEXT_OFFSET)
-> >> -CFLAGS_efi-stub.o    := -DTEXT_OFFSET=$(TEXT_OFFSET) \
-> >> -                        -I$(src)/../../../scripts/dtc/libfdt
-> >>
-> >>  CFLAGS_REMOVE_ftrace.o = -pg
-> >>  CFLAGS_REMOVE_insn.o = -pg
-> >> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-> >> index 9b61d66e2d20..4ba90b2ef677 100644
-> >> --- a/arch/arm64/kernel/efi-stub.c
-> >> +++ b/arch/arm64/kernel/efi-stub.c
-> >> @@ -11,8 +11,7 @@
-> >>   */
-> >>  #include <linux/efi.h>
-> >>  #include <asm/efi.h>
-> >> -#include <asm/sections.h>
-> >> -
-> >> +#include <asm/image_hdr.h>
-> >>
-> >>  efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
-> >>                                unsigned long *image_addr,
-> >> @@ -23,24 +22,28 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
-> >>                                efi_loaded_image_t *image)
-> >>  {
-> >>       efi_status_t status;
-> >> -     unsigned long kernel_size, kernel_memsize = 0;
-> >> +     struct arm64_image_hdr *hdr = (struct arm64_image_hdr *)*image_addr;
-> >> +
-> >> +     /* make sure image_addr points to an arm64 kernel Image */
-> >> +     if (!arm64_image_hdr_check(hdr)) {
-> >> +             pr_efi_err(sys_table, "Kernel Image header check failed\n");
-> >> +             return EFI_LOAD_ERROR;
-> >> +     }
-> >
-> > Surely this should always be the case if the stub is linked into the
-> > kernel?
-> >
-> > It would be nice to know the rationale for this.
-> >
+> Note that this code now triggers an 'unused function' warning for
+> efi_relocate_kernel(), as that is no longer used. This warning will disappear
+> automatically once the already queued up EFISTUB refactoring patches will
+> get merged for 3.17.
 > 
-> Well, there is an actual issue addressed by this: the PE/COFF .text
-> section covers everything from stext to _edata, so it does not cover
-> the header itself. In fact, PE/COFF does not allow the headers
-> themselves to be covered by a section (or at least, the Tianocore/EDK2
-> UEFI implementation does not). So the pointer points *outside* of the
-> .text section, and we are assuming that whatever is at that [negative]
-> offset in the file was also copied to the same offset in memory.(For
-> instance, there is no reason to assume that all implementations of EFI
-> will copy data that is not part of any section to RAM when booting an
-> image located in NOR flash)
-
-If we are making assumptions which aren't always valid, then why the
-hell are we making them in the first place, and then trying to validate
-them? How does reading an address that we have absolutely no guarantee
-as to the contents of solve that problem?
-
-This sounds amazingly fragile, and as far as I can tell the header check
-doesn't address the issue so much as paper over it with a failure that's
-not even guaranteed to be graceful (e.g. if no memory exists at the
-negative offset we're accessing we will simply explode).
-
-Is this the first step towards splitting the stub form the kernel
-proper such that we can rely on the image header being present?
-
-If that's the case then please put that in the commit message and cover,
-because it's not obvious and there's no point wasting time arguing over
-whether to put a piece of useful context into the commit message.
-
+>  arch/arm64/kernel/efi-stub.c | 18 ++++++------------
+>  1 file changed, 6 insertions(+), 12 deletions(-)
 > 
-> >>
-> >>       /* Relocate the image, if required. */
-> >> -     kernel_size = _edata - _text;
-> >> -     if (*image_addr != (dram_base + TEXT_OFFSET)) {
-> >> -             kernel_memsize = kernel_size + (_end - _edata) + TEXT_OFFSET;
-> >> -             status = efi_low_alloc(sys_table, kernel_memsize, SZ_2M,
-> >> +     if (*image_addr != (dram_base + hdr->text_offset) ||
-> >> +         image->image_size < hdr->image_size) {
-> >
-> > As far as I can tell the size of the Image (image->image_size) is always
-> > going to be less than the effective run time image size
-> > (hdr->image_size).
-> >
+> diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+> index 60e98a639ac5..5165b3accefe 100644
+> --- a/arch/arm64/kernel/efi-stub.c
+> +++ b/arch/arm64/kernel/efi-stub.c
+> @@ -60,20 +60,16 @@ static efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+>  	kernel_size = _edata - _text;
+>  	if (*image_addr != (dram_base + TEXT_OFFSET)) {
+>  		kernel_memsize = kernel_size + (_end - _edata);
+> -		status = efi_relocate_kernel(sys_table, image_addr,
+> -					     kernel_size, kernel_memsize,
+> -					     dram_base + TEXT_OFFSET,
+> -					     PAGE_SIZE);
+> +		status = efi_low_alloc(sys_table, kernel_memsize + TEXT_OFFSET,
+> +				       SZ_2M, reserve_addr);
+>  		if (status != EFI_SUCCESS) {
+>  			pr_efi_err(sys_table, "Failed to relocate kernel\n");
+>  			return status;
+>  		}
+> -		if (*image_addr != (dram_base + TEXT_OFFSET)) {
+> -			pr_efi_err(sys_table, "Failed to alloc kernel memory\n");
+> -			efi_free(sys_table, kernel_memsize, *image_addr);
+> -			return EFI_ERROR;
+> -		}
+> -		*image_size = kernel_memsize;
+> +		memcpy((void *)*reserve_addr + TEXT_OFFSET, (void *)*image_addr,
+> +		       kernel_size);
+> +		*image_addr = *reserve_addr + TEXT_OFFSET;
+> +		*reserve_size = kernel_memsize;
+>  	}
 > 
-> Currently, yes.
 > 
-> > The SizeOfImage field in head.S which I assume image->image_size is
-> > derived from (not having a UEFI spec in front of me) seems to cover
-> > everything up to _edata but skips the BSS, and initial page tables, but
-> > this is covered by the header's image_size field.
-> >
-> > Am I missing something? Surely we _always_ expect image->image_size to
-> > be smaller than hdr->image_size?
-> >
-> 
-> At some point, we may extend the virtual size of .text all the way to _end.
-> (Without growing the actual payload, the remainder will be zero
-> initialized by the loader)
-
-Surely either way we know which is going to be the case? Either it's
-smaller (as it is now) or we've padded it (which we have not done).
-
-Why not either assume it's smaller or change the virtual size of .text?
-
-Cheers,
-Mark.
