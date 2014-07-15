@@ -1,61 +1,143 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] arm64/efi: efistub: cover entire static mem footprint in PE/COFF .text
-Date: Tue, 15 Jul 2014 12:58:20 +0200
-Message-ID: <1405421900-11733-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
+ occupied
+Date: Tue, 15 Jul 2014 12:00:26 +0100
+Message-ID: <20140715110026.GW26465@leverpostej>
+References: <1405351521-12010-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1405363248.25580.12.camel@deneb.redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1405363248.25580.12.camel@deneb.redhat.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Salter <msalter@redhat.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-The static memory footprint of a kernel Image at boot is larger than the
-Image file itself. Things like .bss data and initial page tables are allocated
-statically but populated dynamically so their content is not contained in the
-Image file.
+On Mon, Jul 14, 2014 at 07:40:48PM +0100, Mark Salter wrote:
+> On Mon, 2014-07-14 at 17:25 +0200, Ard Biesheuvel wrote:
+> > If we fail to relocate the kernel Image to its preferred offset of TEXT_OFFSET
+> > bytes above the base of DRAM, accept the lowest alternative mapping available
+> > instead of aborting. We may lose a bit of memory at the low end, but we can
+> > still proceed normally otherwise.
+> 
+> This breaks APM Mustang because the spin-table holding pen for secondary
+> CPUs is marked as reserved memory in the TEXT_OFFSET area and the kernel
+> placement using your patch makes it unreachable by kernel. Here is a
+> patch I've been working with to solve the same problem:
 
-However, if EFI has loaded the Image at precisely the desired offset of
-base of DRAM + TEXT_OFFSET, the Image will be booted in place, and we have
-to make sure that the allocation done by the EFI loader is large enough.
+I'm not sure that this is strictly speaking an issue with UEFI or the
+relocation strategy (which sounds sane to me). I believe we could easily
+hit similar issues with spin-table elsewhere, and I think we can fix
+this more generally without complicating the EFI stub.
 
-Fix this by growing the PE/COFF .text section to cover the entire static
-memory footprint. The part of the section that is not covered by the payload
-will be zero initialised by the EFI loader.
+As I see it, we have two issues here:
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+1) The linear mapping starts at VA:PAGE_OFFSET+TEXT_OFFSET /
+   PA:PHYS_OFFSET+TEXT_OFFSET, and we cannot access memory below this
+   start address. This seems like a general issue we need to address, as
+   it forces bootloader code to go through a tricky/impossible dance to
+   get the kernel as close to the start of RAM as possible.
+
+2) We cannot access a given cpu-release-addr if it is not in the linear
+   mapping. This is the problem we're encountering now.
+
+We can solve (2) now by using a temporary mapping to write to the
+cpu-release-addr. Does the below patch (untested) fix your issue with
+spin-table?
+
+For (1) we need to rework the arm64 VA layout to decouple the kernel
+text mapping from the linear map, but that's a lot more work. 
+
+Cheers,
+Mark.
+
+---->8----
+>From 73812b654a07f497f71bd38dfb4a6753fb0ad23e Mon Sep 17 00:00:00 2001
+From: Mark Rutland <mark.rutland@arm.com>
+Date: Tue, 15 Jul 2014 11:32:53 +0100
+Subject: [PATCH] arm64: spin-table: handle unmapped cpu-release-addrs
+
+In certain cases the cpu-release-addr of a CPU may not fall in the
+linear mapping (e.g. when the kernel is loaded above this address due to
+the presence of other images in memory). This is problematic for the
+spin-table code as it assumes that it can trivially convert a
+cpu-release-addr to a valid VA in the linear map.
+
+This patch modifies the spin-table code to use a temporary cached
+mapping to write to a given cpu-release-addr, enabling us to support
+addresses regardless of whether they are covered by the linear mapping.
+
+Signed-off-by: Mark Rutland <mark.rutland@arm.com>
 ---
- arch/arm64/kernel/head.S | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/arm64/kernel/smp_spin_table.c | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 78ddae28b090..bbf2489939c2 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -158,7 +158,7 @@ optional_header:
- 	.short	0x20b				// PE32+ format
- 	.byte	0x02				// MajorLinkerVersion
- 	.byte	0x14				// MinorLinkerVersion
--	.long	_edata - stext			// SizeOfCode
-+	.long	_end - stext			// SizeOfCode
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
- 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
-@@ -176,7 +176,7 @@ extra_header_fields:
- 	.short	0				// MinorSubsystemVersion
- 	.long	0				// Win32VersionValue
+diff --git a/arch/arm64/kernel/smp_spin_table.c b/arch/arm64/kernel/smp_spin_table.c
+index 0347d38..70181c1 100644
+--- a/arch/arm64/kernel/smp_spin_table.c
++++ b/arch/arm64/kernel/smp_spin_table.c
+@@ -20,6 +20,7 @@
+ #include <linux/init.h>
+ #include <linux/of.h>
+ #include <linux/smp.h>
++#include <linux/types.h>
  
--	.long	_edata - efi_head		// SizeOfImage
-+	.long	_end - efi_head			// SizeOfImage
+ #include <asm/cacheflush.h>
+ #include <asm/cpu_ops.h>
+@@ -65,12 +66,21 @@ static int smp_spin_table_cpu_init(struct device_node *dn, unsigned int cpu)
  
- 	// Everything before the kernel image is considered part of the header
- 	.long	stext_offset			// SizeOfHeaders
-@@ -223,7 +223,7 @@ section_table:
- 	.byte	0
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
--	.long	_edata - stext		// VirtualSize
-+	.long	_end - stext		// VirtualSize
- 	.long	stext_offset		// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
- 	.long	stext_offset		// PointerToRawData
+ static int smp_spin_table_cpu_prepare(unsigned int cpu)
+ {
+-	void **release_addr;
++	__le64 __iomem *release_addr;
+ 
+ 	if (!cpu_release_addr[cpu])
+ 		return -ENODEV;
+ 
+-	release_addr = __va(cpu_release_addr[cpu]);
++	/*
++	 * The cpu-release-addr may or may not be inside the linear mapping.
++	 * As ioremap_cache will either give us a new mapping or reuse the
++	 * existing linear mapping, we can use it to cover both cases. In
++	 * either case the memory will be MT_NORMAL.
++	 */
++	release_addr = ioremap_cache(cpu_release_addr[cpu],
++				     sizeof(*release_addr));
++	if (!release_addr)
++		return -ENOMEM;
+ 
+ 	/*
+ 	 * We write the release address as LE regardless of the native
+@@ -79,15 +89,16 @@ static int smp_spin_table_cpu_prepare(unsigned int cpu)
+ 	 * boot-loader's endianess before jumping. This is mandated by
+ 	 * the boot protocol.
+ 	 */
+-	release_addr[0] = (void *) cpu_to_le64(__pa(secondary_holding_pen));
+-
+-	__flush_dcache_area(release_addr, sizeof(release_addr[0]));
++	writeq_relaxed(__pa(secondary_holding_pen), release_addr);
++	__flush_dcache_area(release_addr, sizeof(*release_addr));
+ 
+ 	/*
+ 	 * Send an event to wake up the secondary CPU.
+ 	 */
+ 	sev();
+ 
++	iounmap(release_addr);
++
+ 	return 0;
+ }
+ 
 -- 
-1.8.3.2
+1.9.1
