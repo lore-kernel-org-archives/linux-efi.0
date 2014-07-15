@@ -1,78 +1,33 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: efistub: jump to 'stext' directly, not
- through the header
-Date: Tue, 15 Jul 2014 13:44:32 +0100
-Message-ID: <20140715124432.GA26465@leverpostej>
-References: <1405415402-3427-1-git-send-email-ard.biesheuvel@linaro.org>
- <20140715095704.GV26465@leverpostej>
- <CAKv+Gu_PUJVXbDqp5Y3jdVouWhSqPVzaOi_6bpFM6BaLVrwvTQ@mail.gmail.com>
- <20140715113138.GZ26465@leverpostej>
- <CAKv+Gu_1vYA+akR4_fAeTd+p22kt-EfcJHu+9sVBBToUnSO8_Q@mail.gmail.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
+ occupied
+Date: Tue, 15 Jul 2014 09:11:00 -0400
+Message-ID: <1405429860.25580.25.camel@deneb.redhat.com>
+References: <1405351521-12010-1-git-send-email-ard.biesheuvel@linaro.org>
+	 <1405363248.25580.12.camel@deneb.redhat.com>
+	 <20140715100221.GU4179@bivouac.eciton.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_1vYA+akR4_fAeTd+p22kt-EfcJHu+9sVBBToUnSO8_Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <20140715100221.GU4179-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 15, 2014 at 12:49:07PM +0100, Ard Biesheuvel wrote:
-> On 15 July 2014 13:31, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> >> >> diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-> >> >> index 619b1dd7bcde..6ef541731d9e 100644
-> >> >> --- a/arch/arm64/kernel/efi-entry.S
-> >> >> +++ b/arch/arm64/kernel/efi-entry.S
-> >> >> @@ -61,7 +61,7 @@ ENTRY(efi_stub_entry)
-> >> >>        */
-> >> >>       mov     x20, x0         // DTB address
-> >> >>       ldr     x0, [sp, #16]   // relocated _text address
-> >> >> -     mov     x21, x0
-> >> >> +     add     x21, x0, #:lo12:stext_offset
-> >> >
-> >> > I think we can drop the :lo12: here, which will allow us to have a
-> >> > warning if stext_offset is unexpectedly large (I believe this will
-> >> > currently silently mask bits were that to happen?).
-> >> >
-> >>
-> >> There is no alternative lo12 relocation that errors out when the value
-> >> does not fit, so it would have to use a literal instead.
-> >
-> > Ah, that's a shame. What happens when the value doesn't fit if the
-> > linker / assembler don't error out?
-> >
+On Tue, 2014-07-15 at 11:02 +0100, Leif Lindholm wrote:
+> > @@ -273,6 +282,10 @@ static void __init free_boot_services(void)
+> >                       continue;
+> >               }
+> >  
+> > +             /* Don't free anything below kernel */
+> > +             if (md->phys_addr < PHYS_OFFSET)
+> > +                     continue;
+> > +
 > 
-> Obviously, it will jump into the wrong place if stext ever gets pushed
-> beyond a 4k boundary, which is not that likely (current value is
-> 0x160, we may want to up it to 0x200 at some point if we need to
-> increase the PE/COFF section alignment, which some versions of the
-> (poor) PE/COFF documentation say should be 0x200 at the minimum)
+> Is the spin table area really allocated as BOOT_SERVICES_*?
 > 
-> However, doing ldr x21, =stext_offset works fine as well
-> 
-> > That sounds like a toolchain bug if they're silently doing the wrong
-> > thing.
-> >
-> 
-> Meh, don't think so, really. You get what you pay for, and :lo12: just
-> isn't supposed to care. (It's mainly used with adrp to get a +/- 4gb
-> PC relative reach)
 
-We appear to have a misunderstanding.
-
-I was suggesting we use:
-
-	add	x21, x0, #stext_offset
-
-... and I thought you meant that wouldn't produce an error if the
-immediate was out of range. I understand that :lo12: cuts the top bits
-off, and for its intended use that makes sense.
-
->From testing I see see that gas isn't happy to accept an undefined
-symbol as an immediate without :lo12:, and I can see why that makes
-sense. My suggestion was bad, sorry.
-
-Thanks,
-Mark.
+No. It is EFI_RESERVED_TYPE. But if UEFI is allowed below the kernel,
+then there could be BS code/data memory which we'd want to ignore.
