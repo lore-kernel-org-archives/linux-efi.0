@@ -1,30 +1,81 @@
-From: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Subject: Re: [PATCH] x86, eboot: Support initrd loaded above 4G
-Date: Tue, 15 Jul 2014 16:24:21 +0100
-Message-ID: <53C547A5.3030500@fensystems.co.uk>
-References: <1402773821-15995-1-git-send-email-yinghai@kernel.org> <20140618142819.GN24049@console-pimps.org> <20140709182651.GB15932@console-pimps.org> <CAE9FiQVP6d5GhFBBmX5HDo0w0oKJSizdKvepq5t6vhGNj=W9sg@mail.gmail.com> <20140711074029.GD5952@console-pimps.org> <20140715151025.GB32039@console-pimps.org>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
+ occupied
+Date: Tue, 15 Jul 2014 16:28:36 +0100
+Message-ID: <20140715152836.GX4179@bivouac.eciton.net>
+References: <1405351521-12010-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1405363248.25580.12.camel@deneb.redhat.com>
+ <20140715100221.GU4179@bivouac.eciton.net>
+ <1405429860.25580.25.camel@deneb.redhat.com>
+ <20140715135418.GV4179@bivouac.eciton.net>
+ <1405434206.25580.31.camel@deneb.redhat.com>
+ <20140715144944.GW4179@bivouac.eciton.net>
+ <1405436677.25580.34.camel@deneb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140715151025.GB32039-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1405436677.25580.34.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 15/07/14 16:10, Matt Fleming wrote:
-> Going forward, I suspect any attempts to use the EFI File Protocol are
-> going to result in this kind of breakage, and that the only thing that
-> can be relied upon is the Disk I/O Protocol.
->
-> But doing Disk I/O would necessitate adding the in-kernel FAT driver to
-> the EFI boot stub, which is a scary idea (though not without merit).
+On Tue, Jul 15, 2014 at 11:04:37AM -0400, Mark Salter wrote:
+> On Tue, 2014-07-15 at 15:49 +0100, Leif Lindholm wrote:
+> > On Tue, Jul 15, 2014 at 10:23:26AM -0400, Mark Salter wrote:
+> > > On Tue, 2014-07-15 at 14:54 +0100, Leif Lindholm wrote:
+> > > > On Tue, Jul 15, 2014 at 09:11:00AM -0400, Mark Salter wrote:
+> > > > > On Tue, 2014-07-15 at 11:02 +0100, Leif Lindholm wrote:
+> > > > > > > @@ -273,6 +282,10 @@ static void __init free_boot_services(void)
+> > > > > > >                       continue;
+> > > > > > >               }
+> > > > > > >  
+> > > > > > > +             /* Don't free anything below kernel */
+> > > > > > > +             if (md->phys_addr < PHYS_OFFSET)
+> > > > > > > +                     continue;
+> > > > > > > +
+> > > > > > 
+> > > > > > Is the spin table area really allocated as BOOT_SERVICES_*?
+> > > > > 
+> > > > > No. It is EFI_RESERVED_TYPE. But if UEFI is allowed below the kernel,
+> > > > > then there could be BS code/data memory which we'd want to ignore.
+> > > > 
+> > > > Well, if it is boot service code/data - then there is no need for us
+> > > > to keep it around after ExitBootServices().
+> > > 
+> > > One would think, but EFI has proven to be less than strictly compliant
+> > > in that regard in the past. I'm inclined to keep the boot services
+> > > around until after SetVirtualAddressMap just in case.
+> > 
+> > But the function you add this clause to will still throw away all boot
+> > services code/data regions - just with this modification it skips
+> > those that happen to lie lower in the address space than the kernel.
 
-Booting via iPXE will give you an EFI_SIMPLE_FILE_SYSTEM_PROTOCOL 
-(providing access to the initrd previously downloaded by iPXE).  It will 
-also give you a dummy disk I/O protocol which always return EFI_NO_MEDIA.
+Returning to the actual code we are discussing here:
+The hunk above has no bearing on whether boot services regions are
+generally unmapped or not. It only filters explicitly those boot
+services regions that happen to be lower in memory than the kernel,
+and keep them around for the duration of the system.
 
-In those circumstances, only the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL will work.
+> > 
+> > (And I do agree with Mark R here - let's not work around bugs that
+> > don't exist yet.)
+> > 
+> 
+> I'm not sure if they still exist or not, but on Foundation, I saw a
+> crash in SetVirtualAddressMap unless I kept BS regions around.
 
-Michael
+For the topic of keeping boot services code around:
+I did also see issues with not keeping boot services regions on v7 -
+ages ago. I have not seen it this year, and I _really_ want to see if
+any such issues resurface. So post-3.16 I would quite like to see the
+call to free_boot_services() moved earlier to flush out any such
+issues before we see large-scale deployments.
+
+The foundation model is a development tool, not a production system,
+so any issue reproducable only there is a pure bonus - since that
+firmware can _always_ be updated.
+
+/
+    Leif
