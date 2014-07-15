@@ -1,58 +1,75 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
- occupied
-Date: Tue, 15 Jul 2014 11:04:37 -0400
-Message-ID: <1405436677.25580.34.camel@deneb.redhat.com>
-References: <1405351521-12010-1-git-send-email-ard.biesheuvel@linaro.org>
-	 <1405363248.25580.12.camel@deneb.redhat.com>
-	 <20140715100221.GU4179@bivouac.eciton.net>
-	 <1405429860.25580.25.camel@deneb.redhat.com>
-	 <20140715135418.GV4179@bivouac.eciton.net>
-	 <1405434206.25580.31.camel@deneb.redhat.com>
-	 <20140715144944.GW4179@bivouac.eciton.net>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] x86, eboot: Support initrd loaded above 4G
+Date: Tue, 15 Jul 2014 16:10:25 +0100
+Message-ID: <20140715151025.GB32039@console-pimps.org>
+References: <1402773821-15995-1-git-send-email-yinghai@kernel.org>
+ <20140618142819.GN24049@console-pimps.org>
+ <20140709182651.GB15932@console-pimps.org>
+ <CAE9FiQVP6d5GhFBBmX5HDo0w0oKJSizdKvepq5t6vhGNj=W9sg@mail.gmail.com>
+ <20140711074029.GD5952@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140715144944.GW4179-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140711074029.GD5952@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2014-07-15 at 15:49 +0100, Leif Lindholm wrote:
-> On Tue, Jul 15, 2014 at 10:23:26AM -0400, Mark Salter wrote:
-> > On Tue, 2014-07-15 at 14:54 +0100, Leif Lindholm wrote:
-> > > On Tue, Jul 15, 2014 at 09:11:00AM -0400, Mark Salter wrote:
-> > > > On Tue, 2014-07-15 at 11:02 +0100, Leif Lindholm wrote:
-> > > > > > @@ -273,6 +282,10 @@ static void __init free_boot_services(void)
-> > > > > >                       continue;
-> > > > > >               }
-> > > > > >  
-> > > > > > +             /* Don't free anything below kernel */
-> > > > > > +             if (md->phys_addr < PHYS_OFFSET)
-> > > > > > +                     continue;
-> > > > > > +
-> > > > > 
-> > > > > Is the spin table area really allocated as BOOT_SERVICES_*?
-> > > > 
-> > > > No. It is EFI_RESERVED_TYPE. But if UEFI is allowed below the kernel,
-> > > > then there could be BS code/data memory which we'd want to ignore.
-> > > 
-> > > Well, if it is boot service code/data - then there is no need for us
-> > > to keep it around after ExitBootServices().
-> > 
-> > One would think, but EFI has proven to be less than strictly compliant
-> > in that regard in the past. I'm inclined to keep the boot services
-> > around until after SetVirtualAddressMap just in case.
+On Fri, 11 Jul, at 08:40:29AM, Matt Fleming wrote:
 > 
-> But the function you add this clause to will still throw away all boot
-> services code/data regions - just with this modification it skips
-> those that happen to lie lower in the address space than the kernel.
+> I'm not exactly sure what's wrong with the buffer - whether it's a case
+> of not being able to access it properly or somehing buggy in the EFI
+> code for reading files. No fault occurs when reading into it, it just
+> doesn't contain the correct data.
 > 
-> (And I do agree with Mark R here - let's not work around bugs that
-> don't exist yet.)
-> 
+> Either way, I'm going to leave your patch as-is and just ensure I fix
+> this before the merge window. I think it's a good idea to have whatever
+> workaround we come up with documented via an entirely separate patch.
 
-I'm not sure if they still exist or not, but on Foundation, I saw a
-crash in SetVirtualAddressMap unless I kept BS regions around.
+I spent some time playing around with this bug and it appears to be
+triggered by the read-a-chunk-at-a-time logic in handle_cmdline_files(),
+(which is itself a bug workaround) introduced here,
+
+  commit 2d2da60fb40a
+  Author: Maarten Lankhorst <m.b.lankhorst@gmail.com>
+  Date:   Fri Dec 16 13:30:58 2011 +0100
+
+      x86, efi: Break up large initrd reads
+    
+      The efi boot stub tries to read the entire initrd in 1 go, however
+      some efi implementations hang if too much if asked to read too much
+      data at the same time. After some experimentation I found out that my
+      asrock p67 board will hang if asked to read chunks of 4MiB, so use a
+      safe value.
+    
+      elilo reads in chunks of 16KiB, but since that requires many read
+      calls I use a value of 1 MiB.  hpa suggested adding individual
+      blacklists for when systems are found where this value causes a crash.
+    
+      Signed-off-by: Maarten Lankhorst <m.b.lankhorst@gmail.com>
+      Link: http://lkml.kernel.org/r/4EEB3A02.3090201@gmail.com
+      Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+
+Setting EFI_READ_CHUNK_SIZE to -1 (disabling the chunk workaround)
+allows everything to work just fine. Any chunk value smaller than the
+initrd file size causes the bug to trigger on my machine.
+
+Going forward, I suspect any attempts to use the EFI File Protocol are
+going to result in this kind of breakage, and that the only thing that
+can be relied upon is the Disk I/O Protocol.
+
+But doing Disk I/O would necessitate adding the in-kernel FAT driver to
+the EFI boot stub, which is a scary idea (though not without merit).
+
+On the flip-side, we've no infrastructure in the EFI boot stub for doing
+blacklisting via DMI, so there's no way currently to automatically
+disable the chunk-read workaround for known buggy machines.
+
+The simplest solution is to require that the user pull some kind of
+kernel parameter on the command line to explicitly disable the
+workaround, but that's a pretty lame prospect.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
