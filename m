@@ -1,73 +1,84 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 0/7] arm: add UEFI support
-Date: Fri, 18 Jul 2014 15:00:46 +0100
-Message-ID: <1405692053-7514-1-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH 1/7] arm: break part of __soft_restart out into separate function
+Date: Fri, 18 Jul 2014 15:00:47 +0100
+Message-ID: <1405692053-7514-2-git-send-email-leif.lindholm@linaro.org>
+References: <1405692053-7514-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1405692053-7514-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
 Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This set adds support for UEFI platforms 32-bit ARM platforms,
-consisting of:
-- UEFI stub support
-  Turns the kernel into a UEFI executable, able to launch without a
-  dedicated bootloader.
-- UEFI runtime services
-  Lets the kernel interact with services provided by firmware.
-  (Used by 'efibootmgr' application.)
-- UEFI system descriptions
-  For now, adds the ability to extract information about available
-  RAM from UEFI rather than hard-wired in .dtb or on command line.
+Certain operations can be considered mandatory for any piece of code
+preparing to switch off the MMU. Break this out into separate function
+idmap_prepare().
 
-This set depends on:
-- Ard Biesheuvel "efi: efistub: Convert into static library"
-                 About to go into linux-next, aiming for 3.17.
-- Mark Salter    "arm: use generic fixmap.h"
-- Mark Salter    "arm: add early_ioremap support"
+Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Suggested-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+---
+ arch/arm/include/asm/idmap.h |    1 +
+ arch/arm/kernel/process.c    |   12 +-----------
+ arch/arm/mm/idmap.c          |   15 +++++++++++++++
+ 3 files changed, 17 insertions(+), 11 deletions(-)
 
-The bits shared with arm64 went into 3.16-rc1.
-
-Changes from previous version:
-- Stub and runtime services support now merged (like on arm64) - they
-  are no longer functionally separable.
-- Some fixes and cleanup.
-
-Leif Lindholm (4):
-  arm: break part of __soft_restart out into separate function
-  arm: add new asm macro update_sctlr
-  arm: efi: use strcmp instead of strncmp for fdt parsing
-  init: efi: arm: enable (U)EFI runtime services on arm
-
-Roy Franz (3):
-  arm: add strstr to compressed string.c
-  arm: Disable stack protection for decompressor/stub
-  arm: add [U]EFI support
-
- arch/arm/Kconfig                      |   21 ++
- arch/arm/boot/compressed/.gitignore   |    2 +
- arch/arm/boot/compressed/Makefile     |   23 +-
- arch/arm/boot/compressed/efi-header.S |  117 +++++++++
- arch/arm/boot/compressed/efi-stub.c   |   92 +++++++
- arch/arm/boot/compressed/head.S       |   78 +++++-
- arch/arm/boot/compressed/string.c     |   21 ++
- arch/arm/include/asm/assembler.h      |   14 ++
- arch/arm/include/asm/efi.h            |   47 ++++
- arch/arm/include/asm/idmap.h          |    1 +
- arch/arm/kernel/Makefile              |    2 +
- arch/arm/kernel/efi.c                 |  435 +++++++++++++++++++++++++++++++++
- arch/arm/kernel/efi_phys.S            |   66 +++++
- arch/arm/kernel/process.c             |   12 +-
- arch/arm/kernel/setup.c               |    7 +-
- arch/arm/mm/idmap.c                   |   15 ++
- drivers/firmware/efi/libstub/fdt.c    |    5 +-
- init/main.c                           |    4 +
- 18 files changed, 938 insertions(+), 24 deletions(-)
- create mode 100644 arch/arm/boot/compressed/efi-header.S
- create mode 100644 arch/arm/boot/compressed/efi-stub.c
- create mode 100644 arch/arm/include/asm/efi.h
- create mode 100644 arch/arm/kernel/efi.c
- create mode 100644 arch/arm/kernel/efi_phys.S
-
+diff --git a/arch/arm/include/asm/idmap.h b/arch/arm/include/asm/idmap.h
+index bf863ed..2e914a8 100644
+--- a/arch/arm/include/asm/idmap.h
++++ b/arch/arm/include/asm/idmap.h
+@@ -10,5 +10,6 @@
+ extern pgd_t *idmap_pgd;
+ 
+ void setup_mm_for_reboot(void);
++void idmap_prepare(void);
+ 
+ #endif	/* __ASM_IDMAP_H */
+diff --git a/arch/arm/kernel/process.c b/arch/arm/kernel/process.c
+index 81ef686..6849e13 100644
+--- a/arch/arm/kernel/process.c
++++ b/arch/arm/kernel/process.c
+@@ -75,17 +75,7 @@ static void __soft_restart(void *addr)
+ {
+ 	phys_reset_t phys_reset;
+ 
+-	/* Take out a flat memory mapping. */
+-	setup_mm_for_reboot();
+-
+-	/* Clean and invalidate caches */
+-	flush_cache_all();
+-
+-	/* Turn off caching */
+-	cpu_proc_fin();
+-
+-	/* Push out any further dirty data, and ensure cache is empty */
+-	flush_cache_all();
++	idmap_prepare();
+ 
+ 	/* Switch to the identity mapping. */
+ 	phys_reset = (phys_reset_t)(unsigned long)virt_to_phys(cpu_reset);
+diff --git a/arch/arm/mm/idmap.c b/arch/arm/mm/idmap.c
+index 8e0e52e..5c85779 100644
+--- a/arch/arm/mm/idmap.c
++++ b/arch/arm/mm/idmap.c
+@@ -122,3 +122,18 @@ void setup_mm_for_reboot(void)
+ 	local_flush_tlb_all();
+ #endif
+ }
++
++void idmap_prepare(void)
++{
++	/* Take out a flat memory mapping. */
++	setup_mm_for_reboot();
++
++	/* Clean and invalidate caches */
++	flush_cache_all();
++
++	/* Turn off caching */
++	cpu_proc_fin();
++
++	/* Push out any further dirty data, and ensure cache is empty */
++	flush_cache_all();
++}
 -- 
 1.7.10.4
