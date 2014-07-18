@@ -1,91 +1,73 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2] arm64/efi: efistub: jump to 'stext' directly, not
- through the header
-Date: Thu, 17 Jul 2014 10:09:01 -0400
-Message-ID: <1405606141.25580.108.camel@deneb.redhat.com>
-References: <1405421886-11692-1-git-send-email-ard.biesheuvel@linaro.org>
-	 <1405522297.25580.72.camel@deneb.redhat.com>
-	 <20140716155345.GB30313@leverpostej>
-	 <1405539927.25580.74.camel@deneb.redhat.com>
-	 <CAKv+Gu-bqXKoy-G00cWPJES=6A_ofu=cfBOsD0ZriHa4AGxG0A@mail.gmail.com>
-	 <1405544636.25580.83.camel@deneb.redhat.com>
-	 <CAKv+Gu8kvU8ndeG2vF5HqRhjK+_F=8D52eabHzy++nTHt_pAYQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/7] arm: add UEFI support
+Date: Fri, 18 Jul 2014 15:00:46 +0100
+Message-ID: <1405692053-7514-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu8kvU8ndeG2vF5HqRhjK+_F=8D52eabHzy++nTHt_pAYQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2014-07-16 at 23:13 +0200, Ard Biesheuvel wrote:
-> On 16 July 2014 23:03, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> > On Wed, 2014-07-16 at 22:38 +0200, Ard Biesheuvel wrote:
-> >> On 16 July 2014 21:45, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> >> > On Wed, 2014-07-16 at 16:53 +0100, Mark Rutland wrote:
-> >> >> On Wed, Jul 16, 2014 at 03:51:37PM +0100, Mark Salter wrote:
-> >> >> > On Tue, 2014-07-15 at 12:58 +0200, Ard Biesheuvel wrote:
-> >> >> > > After the EFI stub has done its business, it jumps into the kernel by branching
-> >> >> > > to offset #0 of the loaded Image, which is where it expects to find the header
-> >> >> > > containing a 'branch to stext' instruction.
-> >> >> > >
-> >> >> > > However, the header is not covered by any PE/COFF section, so the header may
-> >> >> > > not actually be loaded at the expected offset. So instead, jump to 'stext'
-> >> >> > > directly, which is at the base of the PE/COFF .text section, by supplying a
-> >> >> > > symbol 'stext_offset' to efi-entry.o which contains the relative offset of
-> >> >> > > stext into the Image. Also replace other open coded calculations of the same
-> >> >> > > value with a reference to 'stext_offset'
-> >> >> >
-> >> >> > Have you actually seen a situation where the header isn't there?
-> >> >> > Isn't the kernel header actually part of the pe/coff file and
-> >> >> > firmware loads the whole file into RAM?
-> >> >>
-> >> >> From my understanding of Ard's earlier comments, this part isn't
-> >> >> guaranteed per the UEFI spec.
-> >> >>
-> >> >> I would rather we weren't relying on implementation details.
-> >> >>
-> >> >
-> >> > Could be. I didn't see anything about it in the UEFI spec, but I
-> >> > probably wasn't exhaustive in my search. In any case, there's at
-> >> > least one other place broken if the kernel header isn't included
-> >> > in the loaded image.
-> >> >
-> >>
-> >> I have not been able to find anything in the PE/COFF documents that
-> >> tells you what to put in memory areas that are not covered by a
-> >> section. Expecting the header to be there is indeed relying on an
-> >> implementation detail, which seems risky.
-> >> And indeed, if there are any other (non EFI related) uses of header
-> >> fields in the kernel, it would be good to have a look at those well,
-> >
-> > I think we need to come up with a loader which does load an image
-> > without kernel header so that we can test. Otherwise, we'll probably
-> > end up with buggy code anyway. The stub code assumes the the loaded
-> > image pointed to by the system table is the whole image. Seems like
-> > we'd need to add code to determine if it is whole kernel image or
-> > image without initial header. Stub would have to handle both cases.
-> > For instance, one case would want image placed at 2MiB+TEXT_OFFSET,
-> > other case would want 2MiB+TEXT_OFFSET+sizeof(kernel header).
-> >
-> 
-> No, this has nothing to do with misaligned data.
-> 
-> The PE/COFF .text section does not start at virtual offset #0 but at
-> virtual offset 'stext - efi_head'.
-> In other words, there is a hole in the virtual image where the header
-> is supposed to be.
-> So if there is no PE/COFF section describing what data should be put
-> at offset #0 by the loader, we can't assume the header is there, even
-> if ImageBase does start at #0
+This set adds support for UEFI platforms 32-bit ARM platforms,
+consisting of:
+- UEFI stub support
+  Turns the kernel into a UEFI executable, able to launch without a
+  dedicated bootloader.
+- UEFI runtime services
+  Lets the kernel interact with services provided by firmware.
+  (Used by 'efibootmgr' application.)
+- UEFI system descriptions
+  For now, adds the ability to extract information about available
+  RAM from UEFI rather than hard-wired in .dtb or on command line.
 
-I get that. You're supposing UEFI will always allocate memory for the
-full image, but only sometimes copy the PE/COFF headers. I can see your
-point from a PE/COFF perspective, but not so much from the UEFI spec
-perspective where the language leads me to think it treats the PE/COFF
-images as one unit wrt loading. In any case, it really isn't worth
-arguing about. I don't have any objection to the patch since it won't
-break anything from my perspective and it'll protect against breakage
-which could possibly occur with some firmware implementations.
+This set depends on:
+- Ard Biesheuvel "efi: efistub: Convert into static library"
+                 About to go into linux-next, aiming for 3.17.
+- Mark Salter    "arm: use generic fixmap.h"
+- Mark Salter    "arm: add early_ioremap support"
+
+The bits shared with arm64 went into 3.16-rc1.
+
+Changes from previous version:
+- Stub and runtime services support now merged (like on arm64) - they
+  are no longer functionally separable.
+- Some fixes and cleanup.
+
+Leif Lindholm (4):
+  arm: break part of __soft_restart out into separate function
+  arm: add new asm macro update_sctlr
+  arm: efi: use strcmp instead of strncmp for fdt parsing
+  init: efi: arm: enable (U)EFI runtime services on arm
+
+Roy Franz (3):
+  arm: add strstr to compressed string.c
+  arm: Disable stack protection for decompressor/stub
+  arm: add [U]EFI support
+
+ arch/arm/Kconfig                      |   21 ++
+ arch/arm/boot/compressed/.gitignore   |    2 +
+ arch/arm/boot/compressed/Makefile     |   23 +-
+ arch/arm/boot/compressed/efi-header.S |  117 +++++++++
+ arch/arm/boot/compressed/efi-stub.c   |   92 +++++++
+ arch/arm/boot/compressed/head.S       |   78 +++++-
+ arch/arm/boot/compressed/string.c     |   21 ++
+ arch/arm/include/asm/assembler.h      |   14 ++
+ arch/arm/include/asm/efi.h            |   47 ++++
+ arch/arm/include/asm/idmap.h          |    1 +
+ arch/arm/kernel/Makefile              |    2 +
+ arch/arm/kernel/efi.c                 |  435 +++++++++++++++++++++++++++++++++
+ arch/arm/kernel/efi_phys.S            |   66 +++++
+ arch/arm/kernel/process.c             |   12 +-
+ arch/arm/kernel/setup.c               |    7 +-
+ arch/arm/mm/idmap.c                   |   15 ++
+ drivers/firmware/efi/libstub/fdt.c    |    5 +-
+ init/main.c                           |    4 +
+ 18 files changed, 938 insertions(+), 24 deletions(-)
+ create mode 100644 arch/arm/boot/compressed/efi-header.S
+ create mode 100644 arch/arm/boot/compressed/efi-stub.c
+ create mode 100644 arch/arm/include/asm/efi.h
+ create mode 100644 arch/arm/kernel/efi.c
+ create mode 100644 arch/arm/kernel/efi_phys.S
+
+-- 
+1.7.10.4
