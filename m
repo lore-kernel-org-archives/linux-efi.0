@@ -1,7 +1,7 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/7] arm: efi: use strcmp instead of strncmp for fdt parsing
-Date: Fri, 18 Jul 2014 15:00:51 +0100
-Message-ID: <1405692053-7514-6-git-send-email-leif.lindholm@linaro.org>
+Subject: [PATCH 7/7] init: efi: arm: enable (U)EFI runtime services on arm
+Date: Fri, 18 Jul 2014 15:00:53 +0100
+Message-ID: <1405692053-7514-8-git-send-email-leif.lindholm@linaro.org>
 References: <1405692053-7514-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1405692053-7514-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,35 +10,29 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-The existing shared EFI arm/arm64 stub code uses strncmp when parsing
-the device tree. Since this function is missing from arm zImage, use
-strcmp instead, rather than growing the zImage further.
+Since the efi_set_virtual_address_map call has strict init ordering
+requirements, add an explicit hook in the required place.
 
 Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/libstub/fdt.c |    5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ init/main.c |    4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index a56bb35..399374b 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -58,14 +58,13 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 	prev = 0;
- 	for (;;) {
- 		const char *type;
--		int len;
+diff --git a/init/main.c b/init/main.c
+index e8ae1fe..744d271 100644
+--- a/init/main.c
++++ b/init/main.c
+@@ -996,6 +996,10 @@ static noinline void __init kernel_init_freeable(void)
+ 	smp_prepare_cpus(setup_max_cpus);
  
- 		node = fdt_next_node(fdt, prev, NULL);
- 		if (node < 0)
- 			break;
+ 	do_pre_smp_initcalls();
++
++	if (IS_ENABLED(CONFIG_ARM) && efi_enabled(EFI_BOOT))
++		efi_enter_virtual_mode();
++
+ 	lockup_detector_init();
  
--		type = fdt_getprop(fdt, node, "device_type", &len);
--		if (type && strncmp(type, "memory", len) == 0) {
-+		type = fdt_getprop(fdt, node, "device_type", NULL);
-+		if (type && strcmp(type, "memory") == 0) {
- 			fdt_del_node(fdt, node);
- 			continue;
- 		}
+ 	smp_init();
 -- 
 1.7.10.4
