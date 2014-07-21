@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [RFC PATCH 02/10] arm64/efi: efistub: cover entire static mem footprint in PE/COFF .text
-Date: Mon, 21 Jul 2014 17:16:17 +0200
-Message-ID: <1405955785-13477-3-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [RFC PATCH 03/10] arm64: add macros to emit little endian ASM constants
+Date: Mon, 21 Jul 2014 17:16:18 +0200
+Message-ID: <1405955785-13477-4-git-send-email-ard.biesheuvel@linaro.org>
 References: <1405955785-13477-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1405955785-13477-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,54 +10,40 @@ To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY7
 Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, victor.kamensky-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The static memory footprint of a kernel Image at boot is larger than the
-Image file itself. Things like .bss data and initial page tables are allocated
-statically but populated dynamically so their content is not contained in the
-Image file.
-
-However, if EFI has loaded the Image at precisely the desired offset of
-base of DRAM + TEXT_OFFSET, the Image will be booted in place, and we have
-to make sure that the allocation done by the EFI loader is large enough.
-
-Fix this by growing the PE/COFF .text section to cover the entire static
-memory footprint. The part of the section that is not covered by the payload
-will be zero initialised by the EFI loader.
+The Image header contains many constants that should be emitted in little
+endian regardless of the endianness of the kernel. Add helper macros le16,
+le32 and le64 to <asm/assembler.h> to aid with this.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/head.S | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ arch/arm64/include/asm/assembler.h | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 5cd1f3491df5..c63f44f20ae3 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -150,7 +150,7 @@ optional_header:
- 	.short	0x20b				// PE32+ format
- 	.byte	0x02				// MajorLinkerVersion
- 	.byte	0x14				// MinorLinkerVersion
--	.long	_edata - stext			// SizeOfCode
-+	.long	_end - stext			// SizeOfCode
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
- 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
-@@ -168,7 +168,7 @@ extra_header_fields:
- 	.short	0				// MinorSubsystemVersion
- 	.long	0				// Win32VersionValue
- 
--	.long	_edata - efi_head		// SizeOfImage
-+	.long	_end - efi_head			// SizeOfImage
- 
- 	// Everything before the kernel image is considered part of the header
- 	.long	stext_offset			// SizeOfHeaders
-@@ -215,7 +215,7 @@ section_table:
- 	.byte	0
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
--	.long	_edata - stext		// VirtualSize
-+	.long	_end - stext		// VirtualSize
- 	.long	stext_offset		// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
- 	.long	stext_offset		// PointerToRawData
+diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
+index 5901480bfdca..7db7c946f73f 100644
+--- a/arch/arm64/include/asm/assembler.h
++++ b/arch/arm64/include/asm/assembler.h
+@@ -155,3 +155,21 @@ lr	.req	x30		// link register
+ #endif
+ 	orr	\rd, \lbits, \hbits, lsl #32
+ 	.endm
++
++	/*
++	 * Define LE constants
++	 */
++	.macro		le16, x
++	.byte		\x & 0xff
++	.byte		(\x >> 8) & 0xff
++	.endm
++
++	.macro		le32, x
++	le16		\x
++	le16		\x >> 16
++	.endm
++
++	.macro		le64, x
++	le32		\x
++	le32		\x >> 32
++	.endm
 -- 
 1.8.3.2
