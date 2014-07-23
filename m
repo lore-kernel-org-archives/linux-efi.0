@@ -1,132 +1,307 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: efistub: don't abort if base of DRAM is
- occupied
-Date: Tue, 22 Jul 2014 22:28:48 +0100
-Message-ID: <20140722212848.GF4179@bivouac.eciton.net>
-References: <20140715100221.GU4179@bivouac.eciton.net>
- <1405429860.25580.25.camel@deneb.redhat.com>
- <20140715135418.GV4179@bivouac.eciton.net>
- <1405434206.25580.31.camel@deneb.redhat.com>
- <20140715144944.GW4179@bivouac.eciton.net>
- <1405436677.25580.34.camel@deneb.redhat.com>
- <20140715152836.GX4179@bivouac.eciton.net>
- <1405516428.25580.58.camel@deneb.redhat.com>
- <20140722170818.GD4179@bivouac.eciton.net>
- <1406057330.12484.21.camel@deneb.redhat.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [RFC PATCH 09/10] arm64/efi: enable minimal UEFI Runtime
+ Services for big endian
+Date: Wed, 23 Jul 2014 10:34:09 +0100
+Message-ID: <20140723093409.GB2714@leverpostej>
+References: <1405955785-13477-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1405955785-13477-10-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1406057330.12484.21.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
+In-Reply-To: <1405955785-13477-10-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "victor.kamensky-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <victor.kamensky-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 22, 2014 at 03:28:50PM -0400, Mark Salter wrote:
-> > > It doesn't filter them to keep them around, it filters them to avoid
-> > > calling free_bootmem_late() with an invalid address. If there are UEFI
-> > > regions below the kernel, we don't want to call memblock_reserve() or
-> > > free_bootmem_late() for them.
-> > 
-> > Then why not just flip things around and do like the arm port and only
-> > add the blocks we actually want to keep around to begin with?
+Hi Ard,
+
+This is certainly a neat feature, and I definitely want to be able to
+boot BE kernels via UEFI.
+
+However, I'm wary of calling EFI in a physical (i.e. idmap with dcaches
+off) context. I'm not sure anyone else does that, and I'm not sure
+whether that's going to work (both because of the cache maintenance
+requirements and the expectations of a given UEFI implementation w.r.t.
+memory cacheability).
+
+I'd hoped we'd be able to use a LE EL0 context to call the runtime
+services in, but I'm not sure that's possible by the spec :(
+
+As I understand it, we shouldn't need these runtime services to simply
+boot a BE kernel.
+
+On Mon, Jul 21, 2014 at 04:16:24PM +0100, Ard Biesheuvel wrote:
+> This enables the UEFI Runtime Services needed to manipulate the
+> non-volatile variable store when running under a BE kernel.
 > 
-> I'd rather leave it as-is with everything which can be covered by the
-> normal kernel mem mapping.
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/include/asm/efi.h       |   2 +
+>  arch/arm64/kernel/efi-be-call.S    |  55 ++++++++++++++++++++
+>  arch/arm64/kernel/efi-be-runtime.c | 104 +++++++++++++++++++++++++++++++++++++
+>  arch/arm64/kernel/efi.c            |  15 ++++++
+>  4 files changed, 176 insertions(+)
+>  create mode 100644 arch/arm64/kernel/efi-be-call.S
+>  create mode 100644 arch/arm64/kernel/efi-be-runtime.c
 > 
-> > > > > > (And I do agree with Mark R here - let's not work around bugs that
-> > > > > > don't exist yet.)
-> > > > > > 
-> > > > > 
-> > > > > I'm not sure if they still exist or not, but on Foundation, I saw a
-> > > > > crash in SetVirtualAddressMap unless I kept BS regions around.
-> > > > 
-> > > > For the topic of keeping boot services code around:
-> > > > I did also see issues with not keeping boot services regions on v7 -
-> > > > ages ago. I have not seen it this year, and I _really_ want to see if
-> > > > any such issues resurface. 
-> > > 
-> > > My view is that a problem has been seen in the past with tianocore for
-> > > arm64. There is no harm in delaying the freeing of BS regions.
-> > 
-> > There is a huge harm.
-> 
-> huge? really?
+> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+> index a34fd3b12e2b..44e642b6ab61 100644
+> --- a/arch/arm64/include/asm/efi.h
+> +++ b/arch/arm64/include/asm/efi.h
+> @@ -44,4 +44,6 @@ extern void efi_idmap_init(void);
+>  
+>  #define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
+>  
+> +extern void efi_be_runtime_setup(void);
+> +
+>  #endif /* _ASM_EFI_H */
+> diff --git a/arch/arm64/kernel/efi-be-call.S b/arch/arm64/kernel/efi-be-call.S
+> new file mode 100644
+> index 000000000000..24c92a4c352b
+> --- /dev/null
+> +++ b/arch/arm64/kernel/efi-be-call.S
+> @@ -0,0 +1,55 @@
+> +
+> +#include <linux/linkage.h>
+> +
+> +	.text
+> +	.align		3
+> +ENTRY(efi_be_phys_call)
+> +	/*
+> +	 * Entered at physical address with 1:1 mapping enabled.
+> +	 */
+> +	stp	x29, x30, [sp, #-96]!
+> +	mov	x29, sp
+> +	str	x27, [sp, #16]
+> +
+> +	ldr	x8, =efi_be_phys_call	// virt address of this function
+> +	adr	x9, efi_be_phys_call	// phys address of this function
+> +	sub	x9, x8, x9		// calculate virt to phys offset in x9
+> +
+> +	/* preserve all inputs */
+> +	stp	x0, x1, [sp, #32]
+> +	stp	x2, x3, [sp, #48]
+> +	stp	x4, x5, [sp, #64]
+> +	stp	x6, x7, [sp, #80]
+> +
+> +	/* get phys address of stack */
+> +	sub	sp, sp, x9
+> +
+> +	/* switch to LE, disable MMU and D-cache but leave I-cache enabled */
+> +	mrs	x27, sctlr_el1
+> +	bic	x8, x27, #1 << 2	// clear SCTLR.C
+> +	msr	sctlr_el1, x8
+> +
+> +	bl	flush_cache_all
 
-Yes. It is setting a precedent that "we will try to second-guess how
-you might code incorrectly and just deal with it - in those few places
-where this is possible, and not in others".
+What is the cache flush for?
 
-> > > The
-> > > memory becomes usable for general kernel use at early_initcall time.
-> > > This issue has also been seen with x86 firmware and some of those same
-> > > vendors will be providing arm64 firmware.
-> > 
-> > This issue has been seen with x86 firmware because in the early days
-> > (last year) noone bothered validating anything other than CSM. They no
-> > longer have that luxury.
-> > 
-> > The Linux kernel, currently being the most avid tester of existing
-> > arm64 UEFI firmware, falling over itself to cater for hypothetical
-> > broken implementations pretty much guarantees the situation will end
-> > up just as bad as it ever was on x86 - without us even having CSM.
-> 
-> It is hardly falling over itself. And if the problem is hypothetical,
-> why is this in the arm32 EFI patches:
-> 
-> +/*
-> + * If you need to (temporarily) support buggy firmware, set to 0.
-> + */
-> +#define DISCARD_BOOT_SERVICES_REGIONS 1
+The only thing that flush_cache_all can do is empty the local
+architected caches, and it can only do that when said caches are
+disabled. Any other use is unsafe; we have no guarantee that the cache
+is empty (or even clean), and we have no guarantee that prior writes
+have made it to the PoC.
 
-Because in the early days we did indeed have such an issue.
-Had we not had this enabled, we never would have spotted it.
+Even when the caches are disabled, flush_cache_all can only guarantee
+that the local architected caches are empty. There is no guarantee that
+the dirty data made it to the PoC.
 
-Felt useful to have around _and_disabled_ in case we ever run into
-anything like it again. Haven't happened for over a year.
+> +
+> +	/* restore inputs but rotated by 1 register */
+> +	ldp	x7, x0, [sp, #32]
+> +	ldp	x1, x2, [sp, #48]
+> +	ldp	x3, x4, [sp, #64]
+> +	ldp	x5, x6, [sp, #80]
+> +
+> +	bic	x8, x27, #1 << 2	// clear SCTLR.C
+> +	bic	x8, x8, #1 << 0		// clear SCTLR.M
+> +	bic	x8, x8, #1 << 25	// clear SCTLR.EE
+> +	msr	sctlr_el1, x8
+> +	isb
+> +
+> +	blr	x7
 
-> > > The problem isn't reproducible
-> > > now, but I'm not sure if there was a bug fix for it or if it just went
-> > > underground for some reason. Kernel boot may succeed by chance if some
-> > > needed BS memory isn't reused by kernel. 
-> > 
-> > And it may succeed by chance anyway.
-> > I'm not saying we won't see broken firmware - I'm saying that this is
-> > the window we have to try to _help_ people (and ourselves) by letting
-> > broken firmware fail - before it happens in the data centre.
-> 
-> In this particular case, we are removing a workaround to a problem
-> which has been seen in the past. So we would open a door to allow
-> this particular problem to reach the data center.
+Is it safe to call EFI functions with the D-cache disabled?
 
-No, we are removing a workaround to a problem that has possibly been
-seen in the past, not sure of the circumstances, not sure if it was a
-model cache management bug.
+Do the functions not care about the memory attributes for their own sue
+(e.g. for exclusives)? 
 
-A UEFI implementation that does not keep track of local and global
-symbols is just as likely to not update a pointer between runtime
-services regions as it is to not stop using boot services regions
-after ExitBootServices(). Keeping boot services regions around does
-not solve the problem - it slightly reduces the likelihood of it
-manifesting.
+Do they not care about IO? If IO to/from storage for variables is
+cache-coherent EFI and the device won't have a coherent view of memory.
 
-> > > > So post-3.16 I would quite like to see the
-> > > > call to free_boot_services() moved earlier to flush out any such
-> > > > issues before we see large-scale deployments.
-> > > 
-> > > You can just get rid of it altogether:
-> > 
-> > Well, clearly, that would not be my preference :)
-> 
-> Why not? There's no point in keeping it if it isn't wanted/needed. Or at
-> least make it optional with a #define as in arm32. Anyway, my opinion is
-> known and I'm really not that attached to the code. So, if someone wants
-> to submit a patch to take it out, I'm not going to make a fuss over it.
+> +
+> +	/* switch back to BE and reenable MMU and D-cache */
+> +	msr	sctlr_el1, x27
+> +
 
-I'll try to get that together tomorrow.
-I certainly don't mind keeping a #define around (and it might enable
-more code sharing arm/arm64).
+Missing ISB?
 
-/
-    Leif
+> +	mov	sp, x29
+> +	ldr	x27, [sp, #16]
+> +	ldp	x29, x30, [sp], #96
+> +	ret
+> +ENDPROC(efi_be_phys_call)
+> diff --git a/arch/arm64/kernel/efi-be-runtime.c b/arch/arm64/kernel/efi-be-runtime.c
+> new file mode 100644
+> index 000000000000..62e6c441b77b
+> --- /dev/null
+> +++ b/arch/arm64/kernel/efi-be-runtime.c
+> @@ -0,0 +1,104 @@
+> +
+> +#include <linux/efi.h>
+> +#include <linux/spinlock.h>
+> +#include <asm/efi.h>
+> +#include <asm/neon.h>
+> +#include <asm/tlbflush.h>
+> +
+> +static efi_runtime_services_t *runtime;
+> +static efi_status_t (*efi_be_call)(phys_addr_t func, ...);
+> +
+> +static DEFINE_SPINLOCK(efi_be_rt_lock);
+> +
+> +static unsigned long efi_be_call_pre(void)
+> +{
+> +	unsigned long flags;
+> +
+> +	kernel_neon_begin();
+> +	spin_lock_irqsave(&efi_be_rt_lock, flags);
+
+At this point we might still have DA_F unmasked, and I don't think we
+expect to be able to handle any of those when the CPU is in the wrong
+endianness for the kernel.
+
+> +	cpu_switch_mm(idmap_pg_dir, &init_mm);
+> +	flush_tlb_all();
+> +	return flags;
+> +}
+> +
+> +static void efi_be_call_post(unsigned long flags)
+> +{
+> +	cpu_switch_mm(current, current->active_mm);
+> +	flush_tlb_all();
+> +	spin_unlock_irqrestore(&efi_be_rt_lock, flags);
+> +	kernel_neon_end();
+> +}
+> +
+> +static efi_status_t efi_be_get_variable(efi_char16_t *name,
+> +					efi_guid_t *vendor,
+> +					u32 *attr,
+> +					unsigned long *data_size,
+> +					void *data)
+> +{
+> +	unsigned long flags;
+> +	efi_status_t status;
+> +
+> +	*data_size = cpu_to_le64(*data_size);
+> +	flags = efi_be_call_pre();
+> +	status = efi_be_call(le64_to_cpu(runtime->get_variable),
+> +			     virt_to_phys(name), virt_to_phys(vendor),
+> +			     virt_to_phys(attr), virt_to_phys(data_size),
+> +			     virt_to_phys(data));
+> +	efi_be_call_post(flags);
+> +	*attr = le32_to_cpu(*attr);
+> +	*data_size = le64_to_cpu(*data_size);
+> +	return status;
+
+No cache maintenance? EFI Could have written to a physical mapping which
+could be shadowed by old cache entries. Similarly any buffers that we
+pass to UEFI aren't guaranteed to have been hit the PoC, so UEFI might
+read stale data.
+
+I think that's true for all of the efi_be_* calls below.
+
+> +}
+> +
+> +static efi_status_t efi_be_get_next_variable(unsigned long *name_size,
+> +					     efi_char16_t *name,
+> +					     efi_guid_t *vendor)
+> +{
+> +	unsigned long flags;
+> +	efi_status_t status;
+> +
+> +	*name_size = cpu_to_le64(*name_size);
+> +	flags = efi_be_call_pre();
+> +	status = efi_be_call(le64_to_cpu(runtime->get_next_variable),
+> +			     virt_to_phys(name_size), virt_to_phys(name),
+> +			     virt_to_phys(vendor));
+> +	efi_be_call_post(flags);
+> +	*name_size = le64_to_cpu(*name_size);
+> +	return status;
+> +}
+> +
+> +static efi_status_t efi_be_set_variable(efi_char16_t *name,
+> +					efi_guid_t *vendor,
+> +					u32 attr,
+> +					unsigned long data_size,
+> +					void *data)
+> +{
+> +	unsigned long flags;
+> +	efi_status_t status;
+> +
+> +	flags = efi_be_call_pre();
+> +	status = efi_be_call(le64_to_cpu(runtime->set_variable),
+> +			     virt_to_phys(name), virt_to_phys(vendor),
+> +			     cpu_to_le32(attr), cpu_to_le64(data_size),
+> +			     virt_to_phys(data));
+> +	efi_be_call_post(flags);
+> +	return status;
+> +}
+> +
+> +void efi_be_runtime_setup(void)
+> +{
+> +	extern u8 efi_be_phys_call[];
+> +
+> +	runtime = ioremap_cache(le64_to_cpu(efi.systab->runtime),
+> +				sizeof(efi_runtime_services_t));
+> +	if (!runtime) {
+> +		pr_err("Failed to set up BE wrappers for UEFI Runtime Services!\n");
+> +		return;
+> +	}
+
+Might it be worth propagating the error code?
+
+> +
+> +	efi_be_call = (void *)virt_to_phys(efi_be_phys_call);
+> +
+> +	efi.get_variable = efi_be_get_variable;
+> +	efi.get_next_variable = efi_be_get_next_variable;
+> +	efi.set_variable = efi_be_set_variable;
+> +}
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 96df58824189..21e98810c5dd 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -406,6 +406,21 @@ static int __init arm64_enter_virtual_mode(void)
+>  
+>  	efi.memmap = &memmap;
+>  
+> +	if (IS_ENABLED(CONFIG_CPU_BIG_ENDIAN)) {
+> +		efi.systab = ioremap_cache(efi_system_table,
+> +					   sizeof(efi_system_table_t));
+> +		if (!efi.systab) {
+> +			pr_err("Failed to remap EFI system table!\n");
+> +			return -1;
+> +		}
+> +		free_boot_services();
+> +		efi_be_runtime_setup();
+
+We can fail here, but we'll still set the bits below, which doesn't seem
+right.
+
+> +
+> +		set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+> +		set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+> +		return 0;
+> +	}
+> +
+>  	/* Map the runtime regions */
+>  	virtmap = kmalloc(mapsize, GFP_KERNEL);
+>  	if (!virtmap) {
+> -- 
+> 1.8.3.2
+
+Cheers,
+Mark.
