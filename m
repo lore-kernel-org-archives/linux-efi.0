@@ -1,174 +1,58 @@
-From: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Subject: [PATCH] efi: Include a .bss section within the PE/COFF headers
-Date: Mon, 28 Jul 2014 14:21:53 +0100
-Message-ID: <1406553713-7479-1-git-send-email-mbrown@fensystems.co.uk>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64: ignore DT memreserve entries when booting in UEFI mode
+Date: Mon, 28 Jul 2014 19:03:03 +0100
+Message-ID: <1406570583-22848-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-commit c7fb93ec51d462ec3540a729ba446663c26a0505 upstream
+UEFI provides its own method for marking regions to reserve, via the
+memory map which is also used to initialise memblock. So when using the
+UEFI memory map, ignore any memreserve entries present in the DT.
 
-The PE/COFF headers currently describe only the initialised-data
-portions of the image, and result in no space being allocated for the
-uninitialised-data portions.  Consequently, the EFI boot stub will end
-up overwriting unexpected areas of memory, with unpredictable results.
-
-Fix by including a .bss section in the PE/COFF headers (functionally
-equivalent to the init_size field in the bzImage header).
-
-Signed-off-by: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/boot/header.S      | 26 ++++++++++++++++++++++----
- arch/x86/boot/tools/build.c | 37 ++++++++++++++++++++++++++++++-------
- 2 files changed, 52 insertions(+), 11 deletions(-)
+ arch/arm64/kernel/efi.c |    2 ++
+ arch/arm64/mm/init.c    |    4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index ec3b8ba..04da6c2 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -91,10 +91,9 @@ bs_die:
- 
- 	.section ".bsdata", "a"
- bugger_off_msg:
--	.ascii	"Direct floppy boot is not supported. "
--	.ascii	"Use a boot loader program instead.\r\n"
-+	.ascii	"Use a boot loader.\r\n"
- 	.ascii	"\n"
--	.ascii	"Remove disk and press any key to reboot ...\r\n"
-+	.ascii	"Remove disk and press any key to reboot...\r\n"
- 	.byte	0
- 
- #ifdef CONFIG_EFI_STUB
-@@ -108,7 +107,7 @@ coff_header:
- #else
- 	.word	0x8664				# x86-64
- #endif
--	.word	3				# nr_sections
-+	.word	4				# nr_sections
- 	.long	0 				# TimeDateStamp
- 	.long	0				# PointerToSymbolTable
- 	.long	1				# NumberOfSymbols
-@@ -250,6 +249,25 @@ section_table:
- 	.word	0				# NumberOfLineNumbers
- 	.long	0x60500020			# Characteristics (section flags)
- 
-+	#
-+	# The offset & size fields are filled in by build.c.
-+	#
-+	.ascii	".bss"
-+	.byte	0
-+	.byte	0
-+	.byte	0
-+	.byte	0
-+	.long	0
-+	.long	0x0
-+	.long	0				# Size of initialized data
-+						# on disk
-+	.long	0x0
-+	.long	0				# PointerToRelocations
-+	.long	0				# PointerToLineNumbers
-+	.word	0				# NumberOfRelocations
-+	.word	0				# NumberOfLineNumbers
-+	.long	0xc8000080			# Characteristics (section flags)
-+
- #endif /* CONFIG_EFI_STUB */
- 
- 	# Kernel attributes; used by setup.  This is part 1 of the
-diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.c
-index 8e15b22..3dafaeb 100644
---- a/arch/x86/boot/tools/build.c
-+++ b/arch/x86/boot/tools/build.c
-@@ -142,7 +142,7 @@ static void usage(void)
- 
- #ifdef CONFIG_EFI_STUB
- 
--static void update_pecoff_section_header(char *section_name, u32 offset, u32 size)
-+static void update_pecoff_section_header_fields(char *section_name, u32 vma, u32 size, u32 datasz, u32 offset)
- {
- 	unsigned int pe_header;
- 	unsigned short num_sections;
-@@ -163,10 +163,10 @@ static void update_pecoff_section_header(char *section_name, u32 offset, u32 siz
- 			put_unaligned_le32(size, section + 0x8);
- 
- 			/* section header vma field */
--			put_unaligned_le32(offset, section + 0xc);
-+			put_unaligned_le32(vma, section + 0xc);
- 
- 			/* section header 'size of initialised data' field */
--			put_unaligned_le32(size, section + 0x10);
-+			put_unaligned_le32(datasz, section + 0x10);
- 
- 			/* section header 'file offset' field */
- 			put_unaligned_le32(offset, section + 0x14);
-@@ -178,6 +178,11 @@ static void update_pecoff_section_header(char *section_name, u32 offset, u32 siz
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 14db1f6..7ad17b2 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -188,6 +188,8 @@ static __init void reserve_regions(void)
+ 		if (uefi_debug)
+ 			pr_cont("\n");
  	}
++
++	set_bit(EFI_MEMMAP, &efi.flags);
  }
  
-+static void update_pecoff_section_header(char *section_name, u32 offset, u32 size)
-+{
-+	update_pecoff_section_header_fields(section_name, offset, size, size, offset);
-+}
-+
- static void update_pecoff_setup_and_reloc(unsigned int size)
- {
- 	u32 setup_offset = 0x200;
-@@ -202,9 +207,6 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz)
  
- 	pe_header = get_unaligned_le32(&buf[0x3c]);
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index e90c542..58dbf2e 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -32,6 +32,7 @@
+ #include <linux/of_fdt.h>
+ #include <linux/dma-mapping.h>
+ #include <linux/dma-contiguous.h>
++#include <linux/efi.h>
  
--	/* Size of image */
--	put_unaligned_le32(file_sz, &buf[pe_header + 0x50]);
--
- 	/*
- 	 * Size of code: Subtract the size of the first sector (512 bytes)
- 	 * which includes the header.
-@@ -219,6 +221,22 @@ static void update_pecoff_text(unsigned int text_start, unsigned int file_sz)
- 	update_pecoff_section_header(".text", text_start, text_sz);
- }
+ #include <asm/sections.h>
+ #include <asm/setup.h>
+@@ -151,7 +152,8 @@ void __init arm64_memblock_init(void)
+ 	memblock_reserve(__pa(swapper_pg_dir), SWAPPER_DIR_SIZE);
+ 	memblock_reserve(__pa(idmap_pg_dir), IDMAP_DIR_SIZE);
  
-+static void update_pecoff_bss(unsigned int file_sz, unsigned int init_sz)
-+{
-+	unsigned int pe_header;
-+	unsigned int bss_sz = init_sz - file_sz;
-+
-+	pe_header = get_unaligned_le32(&buf[0x3c]);
-+
-+	/* Size of uninitialized data */
-+	put_unaligned_le32(bss_sz, &buf[pe_header + 0x24]);
-+
-+	/* Size of image */
-+	put_unaligned_le32(init_sz, &buf[pe_header + 0x50]);
-+
-+	update_pecoff_section_header_fields(".bss", file_sz, bss_sz, 0, 0);
-+}
-+
- #endif /* CONFIG_EFI_STUB */
+-	early_init_fdt_scan_reserved_mem();
++	if (!efi_enabled(EFI_MEMMAP))
++		early_init_fdt_scan_reserved_mem();
  
- 
-@@ -270,6 +288,9 @@ int main(int argc, char ** argv)
- 	int fd;
- 	void *kernel;
- 	u32 crc = 0xffffffffUL;
-+#ifdef CONFIG_EFI_STUB
-+	unsigned int init_sz;
-+#endif
- 
- 	/* Defaults for old kernel */
- #ifdef CONFIG_X86_32
-@@ -343,7 +364,9 @@ int main(int argc, char ** argv)
- 	put_unaligned_le32(sys_size, &buf[0x1f4]);
- 
- #ifdef CONFIG_EFI_STUB
--	update_pecoff_text(setup_sectors * 512, sz + i + ((sys_size * 16) - sz));
-+	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16));
-+	init_sz = get_unaligned_le32(&buf[0x260]);
-+	update_pecoff_bss(i + (sys_size * 16), init_sz);
- 
- #ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
- 	efi_stub_entry -= 0x200;
+ 	/* 4GB maximum for 32-bit only capable devices */
+ 	if (IS_ENABLED(CONFIG_ZONE_DMA))
 -- 
-1.8.4.5
+1.7.10.4
