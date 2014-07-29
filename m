@@ -1,87 +1,63 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/3] arm64: spin-table: handle unmapped cpu-release-addrs
-Date: Tue, 29 Jul 2014 12:49:08 +0200
-Message-ID: <1406630950-32432-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 2/3] arm64/efi: efistub: cover entire static mem footprint in PE/COFF .text
+Date: Tue, 29 Jul 2014 12:49:09 +0200
+Message-ID: <1406630950-32432-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1406630950-32432-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1406630950-32432-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+The static memory footprint of a kernel Image at boot is larger than the
+Image file itself. Things like .bss data and initial page tables are allocated
+statically but populated dynamically so their content is not contained in the
+Image file.
 
-In certain cases the cpu-release-addr of a CPU may not fall in the
-linear mapping (e.g. when the kernel is loaded above this address due to
-the presence of other images in memory). This is problematic for the
-spin-table code as it assumes that it can trivially convert a
-cpu-release-addr to a valid VA in the linear map.
+However, if EFI (or GRUB) has loaded the Image at precisely the desired offset
+of base of DRAM + TEXT_OFFSET, the Image will be booted in place, and we have
+to make sure that the allocation done by the PE/COFF loader is large enough.
 
-This patch modifies the spin-table code to use a temporary cached
-mapping to write to a given cpu-release-addr, enabling us to support
-addresses regardless of whether they are covered by the linear mapping.
+Fix this by growing the PE/COFF .text section to cover the entire static
+memory footprint. The part of the section that is not covered by the payload
+will be zero initialised by the PE/COFF loader.
 
-Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/smp_spin_table.c | 21 ++++++++++++++++-----
- 1 file changed, 16 insertions(+), 5 deletions(-)
+ arch/arm64/kernel/head.S | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm64/kernel/smp_spin_table.c b/arch/arm64/kernel/smp_spin_table.c
-index 0347d38eea29..70181c1bf42d 100644
---- a/arch/arm64/kernel/smp_spin_table.c
-+++ b/arch/arm64/kernel/smp_spin_table.c
-@@ -20,6 +20,7 @@
- #include <linux/init.h>
- #include <linux/of.h>
- #include <linux/smp.h>
-+#include <linux/types.h>
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index 69dafe9621fd..dafc4f2c1ade 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -148,7 +148,7 @@ optional_header:
+ 	.short	0x20b				// PE32+ format
+ 	.byte	0x02				// MajorLinkerVersion
+ 	.byte	0x14				// MinorLinkerVersion
+-	.long	_edata - stext			// SizeOfCode
++	.long	_end - stext			// SizeOfCode
+ 	.long	0				// SizeOfInitializedData
+ 	.long	0				// SizeOfUninitializedData
+ 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
+@@ -166,7 +166,7 @@ extra_header_fields:
+ 	.short	0				// MinorSubsystemVersion
+ 	.long	0				// Win32VersionValue
  
- #include <asm/cacheflush.h>
- #include <asm/cpu_ops.h>
-@@ -65,12 +66,21 @@ static int smp_spin_table_cpu_init(struct device_node *dn, unsigned int cpu)
+-	.long	_edata - efi_head		// SizeOfImage
++	.long	_end - efi_head			// SizeOfImage
  
- static int smp_spin_table_cpu_prepare(unsigned int cpu)
- {
--	void **release_addr;
-+	__le64 __iomem *release_addr;
- 
- 	if (!cpu_release_addr[cpu])
- 		return -ENODEV;
- 
--	release_addr = __va(cpu_release_addr[cpu]);
-+	/*
-+	 * The cpu-release-addr may or may not be inside the linear mapping.
-+	 * As ioremap_cache will either give us a new mapping or reuse the
-+	 * existing linear mapping, we can use it to cover both cases. In
-+	 * either case the memory will be MT_NORMAL.
-+	 */
-+	release_addr = ioremap_cache(cpu_release_addr[cpu],
-+				     sizeof(*release_addr));
-+	if (!release_addr)
-+		return -ENOMEM;
- 
- 	/*
- 	 * We write the release address as LE regardless of the native
-@@ -79,15 +89,16 @@ static int smp_spin_table_cpu_prepare(unsigned int cpu)
- 	 * boot-loader's endianess before jumping. This is mandated by
- 	 * the boot protocol.
- 	 */
--	release_addr[0] = (void *) cpu_to_le64(__pa(secondary_holding_pen));
--
--	__flush_dcache_area(release_addr, sizeof(release_addr[0]));
-+	writeq_relaxed(__pa(secondary_holding_pen), release_addr);
-+	__flush_dcache_area(release_addr, sizeof(*release_addr));
- 
- 	/*
- 	 * Send an event to wake up the secondary CPU.
- 	 */
- 	sev();
- 
-+	iounmap(release_addr);
-+
- 	return 0;
- }
- 
+ 	// Everything before the kernel image is considered part of the header
+ 	.long	stext - efi_head		// SizeOfHeaders
+@@ -213,7 +213,7 @@ section_table:
+ 	.byte	0
+ 	.byte	0
+ 	.byte	0        		// end of 0 padding of section name
+-	.long	_edata - stext		// VirtualSize
++	.long	_end - stext		// VirtualSize
+ 	.long	stext - efi_head	// VirtualAddress
+ 	.long	_edata - stext		// SizeOfRawData
+ 	.long	stext - efi_head	// PointerToRawData
 -- 
 1.8.3.2
