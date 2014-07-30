@@ -1,99 +1,41 @@
-From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Subject: [PATCH] efi-bgrt: Add error handling; inform the user when ignoring
- the BGRT
-Date: Wed, 30 Jul 2014 12:23:32 -0700
-Message-ID: <20140730192331.GA23730@jtriplet-mobl1>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: print debug values in Kib not MB
+Date: Wed, 30 Jul 2014 21:58:21 +0200
+Message-ID: <20140730195821.GE10213@pd.tnic>
+References: <1406653761-3884-1-git-send-email-prarit@redhat.com>
+ <20140729222932.GA17481@pd.tnic>
+ <20140730144803.GB15082@console-pimps.org>
+ <53D909C3.9050205@canonical.com>
+ <53D9259F.5050307@redhat.com>
+ <53D92700.3040803@infradead.org>
+ <53D92996.1050906@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <53D92996.1050906-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Gracefully handle failures to allocate memory for the image, which might
-be arbitrarily large.
+On Wed, Jul 30, 2014 at 10:21:26AM -0700, H. Peter Anvin wrote:
+> Arguably the exactness is available in the range...
 
-efi_bgrt_init can fail in various ways as well, usually because the
-BIOS-provided BGRT structure does not match expectations.  Add
-appropriate error messages rather than failing silently.
+... and the size too. FWIW, other region dumps don't even print size:
 
-Reported-by: Srihari Vijayaraghavan
-Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=81321
-Signed-off-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
----
- arch/x86/platform/efi/efi-bgrt.c | 36 ++++++++++++++++++++++++++++++------
- 1 file changed, 30 insertions(+), 6 deletions(-)
+[    0.000000] e820: BIOS-provided physical RAM map:
+[    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009e7ff] usable
+[    0.000000] BIOS-e820: [mem 0x000000000009e800-0x000000000009ffff] reserved
+[    0.000000] BIOS-e820: [mem 0x00000000000e0000-0x00000000000fffff] reserved
+...
 
-diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index f15103d..d143d21 100644
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -40,20 +40,40 @@ void __init efi_bgrt_init(void)
- 	if (ACPI_FAILURE(status))
- 		return;
- 
--	if (bgrt_tab->header.length < sizeof(*bgrt_tab))
-+	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
-+		pr_err("Ignoring BGRT: invalid length %u (expected %zu)\n",
-+		       bgrt_tab->header.length, sizeof(*bgrt_tab));
- 		return;
--	if (bgrt_tab->version != 1 || bgrt_tab->status != 1)
-+	}
-+	if (bgrt_tab->version != 1) {
-+		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
-+		       bgrt_tab->version);
-+		return;
-+	}
-+	if (bgrt_tab->status != 1) {
-+		pr_err("Ignoring BGRT: invalid status %u (expected 1)\n",
-+		       bgrt_tab->status);
-+		return;
-+	}
-+	if (bgrt_tab->image_type != 0) {
-+		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
-+		       bgrt_tab->image_type);
- 		return;
--	if (bgrt_tab->image_type != 0 || !bgrt_tab->image_address)
-+	}
-+	if (!bgrt_tab->image_address) {
-+		pr_err("Ignoring BGRT: null image address\n");
- 		return;
-+	}
- 
- 	image = efi_lookup_mapped_addr(bgrt_tab->image_address);
- 	if (!image) {
- 		image = early_memremap(bgrt_tab->image_address,
- 				       sizeof(bmp_header));
- 		ioremapped = true;
--		if (!image)
-+		if (!image) {
-+			pr_err("Ignoring BGRT: failed to map image header memory\n");
- 			return;
-+		}
- 	}
- 
- 	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
-@@ -61,14 +81,18 @@ void __init efi_bgrt_init(void)
- 		early_iounmap(image, sizeof(bmp_header));
- 	bgrt_image_size = bmp_header.size;
- 
--	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL);
--	if (!bgrt_image)
-+	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
-+	if (!bgrt_image) {
-+		pr_err("Ignoring BGRT: failed to allocate memory for image (wanted %zu bytes)\n",
-+		       bgrt_image_size);
- 		return;
-+	}
- 
- 	if (ioremapped) {
- 		image = early_memremap(bgrt_tab->image_address,
- 				       bmp_header.size);
- 		if (!image) {
-+			pr_err("Ignoring BGRT: failed to map image memory\n");
- 			kfree(bgrt_image);
- 			bgrt_image = NULL;
- 			return;
+If we do that too for UEFI, we can certainly put an end to the
+bikeshedding... provided everyone is tired of it by now. :-P
+
 -- 
-2.0.1
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
