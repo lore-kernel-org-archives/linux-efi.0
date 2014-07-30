@@ -1,38 +1,37 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [RFC PATCH 04/10] arm64: add EFI little endian constants to
- linker script
-Date: Wed, 30 Jul 2014 15:22:10 +0100
-Message-ID: <20140730142209.GC8989@arm.com>
-References: <1405955785-13477-1-git-send-email-ard.biesheuvel@linaro.org>
- <1405955785-13477-5-git-send-email-ard.biesheuvel@linaro.org>
- <20140730141805.GA15082@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH] x86, efi: print debug values in Kib not MB
+Date: Wed, 30 Jul 2014 15:48:03 +0100
+Message-ID: <20140730144803.GB15082@console-pimps.org>
+References: <1406653761-3884-1-git-send-email-prarit@redhat.com>
+ <20140729222932.GA17481@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140730141805.GA15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20140729222932.GA17481-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "victor.kamensky-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <victor.kamensky-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Colin Ian King <colin.king-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 30, 2014 at 03:18:05PM +0100, Matt Fleming wrote:
-> On Mon, 21 Jul, at 05:16:19PM, Ard Biesheuvel wrote:
-> > Similar to how text offset and kernel size are mangled to produce little
-> > endian constants for the Image header regardless of the endianness of the
-> > kernel, this adds a number of constants used in the EFI PE/COFF header which
-> > can only be calculated (and byte swapped) by the linker.
+On Wed, 30 Jul, at 12:29:32AM, Borislav Petkov wrote:
+> On Tue, Jul 29, 2014 at 01:09:21PM -0400, Prarit Bhargava wrote:
+> > The current debug print in EFI does
 > > 
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > ---
-> >  arch/arm64/kernel/image.h | 16 +++++++++++++++-
-> >  1 file changed, 15 insertions(+), 1 deletion(-)
+> > [    0.000000] efi: mem84: type=3, attr=0xf, range=[0x00000000645b5000-0x00000000645fb000) (0MB)
+> > 
+> > and rounds off the size to 0MB and isn't very useful.  We should print this in
+> > Kib.  After applying this patch we get better info with
+> > 
+> > [    0.000000] efi: mem84: type=3, attr=0xf, range=[0x00000000645b5000-0x00000000645fb000) (280kiB)
 > 
-> Where is this file? I can't find it in Linus' tree.
+> Turning this into kiB unconditionally won't always work ok:
+> 
+> First of all, there might be something which parses that output so I'd
+> make sure I'm not breaking that. Maybe fwts... Matt will know.
 
-It's queued in the arm64 tree for 3.17 (should also appear in -next at the
-moment).
+I'm not aware of anything that parses the dmesg output, but I'm
+including Colin in case he has any insight.
 
-See commit a2c1d73b94ed ("arm64: Update the Image header").
-
-Will
+-- 
+Matt Fleming, Intel Open Source Technology Center
