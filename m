@@ -1,51 +1,99 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] arm64: spin-table: handle unmapped cpu-release-addrs
-Date: Wed, 30 Jul 2014 21:17:02 +0200
-Message-ID: <CAKv+Gu8ne8k2NV12SyWye5aYJKHG0wHKAO+=V=1L89_hvyGopw@mail.gmail.com>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1406717944-24725-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20140730113013.GL12239@arm.com>
+From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Subject: [PATCH] efi-bgrt: Add error handling; inform the user when ignoring
+ the BGRT
+Date: Wed, 30 Jul 2014 12:23:32 -0700
+Message-ID: <20140730192331.GA23730@jtriplet-mobl1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140730113013.GL12239-5wv7dgnIgG8@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-]On 30 July 2014 13:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Wed, Jul 30, 2014 at 11:59:02AM +0100, Ard Biesheuvel wrote:
->> From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->>
->> In certain cases the cpu-release-addr of a CPU may not fall in the
->> linear mapping (e.g. when the kernel is loaded above this address due to
->> the presence of other images in memory). This is problematic for the
->> spin-table code as it assumes that it can trivially convert a
->> cpu-release-addr to a valid VA in the linear map.
->>
->> This patch modifies the spin-table code to use a temporary cached
->> mapping to write to a given cpu-release-addr, enabling us to support
->> addresses regardless of whether they are covered by the linear mapping.
->>
->> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->> Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> [ardb: added (__force void *) cast]
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/arm64/kernel/smp_spin_table.c | 22 +++++++++++++++++-----
->>  1 file changed, 17 insertions(+), 5 deletions(-)
->
-> I'm nervous about this. What if the spin table sits in the same physical 64k
-> frame as a read-sensitive device and we're running with 64k pages?
->
+Gracefully handle failures to allocate memory for the image, which might
+be arbitrarily large.
 
-Actually, booting.txt requires cpu-release-addr to point to a
-/memreserve/d part of memory, which implies DRAM (or you wouldn't have
-to memreserve it)
-That means it should always be covered by the linear mapping, unless
-it is located before Image in DRAM, which is the case addressed by
-this patch.
+efi_bgrt_init can fail in various ways as well, usually because the
+BIOS-provided BGRT structure does not match expectations.  Add
+appropriate error messages rather than failing silently.
 
+Reported-by: Srihari Vijayaraghavan
+Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=81321
+Signed-off-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+---
+ arch/x86/platform/efi/efi-bgrt.c | 36 ++++++++++++++++++++++++++++++------
+ 1 file changed, 30 insertions(+), 6 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+index f15103d..d143d21 100644
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -40,20 +40,40 @@ void __init efi_bgrt_init(void)
+ 	if (ACPI_FAILURE(status))
+ 		return;
+ 
+-	if (bgrt_tab->header.length < sizeof(*bgrt_tab))
++	if (bgrt_tab->header.length < sizeof(*bgrt_tab)) {
++		pr_err("Ignoring BGRT: invalid length %u (expected %zu)\n",
++		       bgrt_tab->header.length, sizeof(*bgrt_tab));
+ 		return;
+-	if (bgrt_tab->version != 1 || bgrt_tab->status != 1)
++	}
++	if (bgrt_tab->version != 1) {
++		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
++		       bgrt_tab->version);
++		return;
++	}
++	if (bgrt_tab->status != 1) {
++		pr_err("Ignoring BGRT: invalid status %u (expected 1)\n",
++		       bgrt_tab->status);
++		return;
++	}
++	if (bgrt_tab->image_type != 0) {
++		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
++		       bgrt_tab->image_type);
+ 		return;
+-	if (bgrt_tab->image_type != 0 || !bgrt_tab->image_address)
++	}
++	if (!bgrt_tab->image_address) {
++		pr_err("Ignoring BGRT: null image address\n");
+ 		return;
++	}
+ 
+ 	image = efi_lookup_mapped_addr(bgrt_tab->image_address);
+ 	if (!image) {
+ 		image = early_memremap(bgrt_tab->image_address,
+ 				       sizeof(bmp_header));
+ 		ioremapped = true;
+-		if (!image)
++		if (!image) {
++			pr_err("Ignoring BGRT: failed to map image header memory\n");
+ 			return;
++		}
+ 	}
+ 
+ 	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
+@@ -61,14 +81,18 @@ void __init efi_bgrt_init(void)
+ 		early_iounmap(image, sizeof(bmp_header));
+ 	bgrt_image_size = bmp_header.size;
+ 
+-	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL);
+-	if (!bgrt_image)
++	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
++	if (!bgrt_image) {
++		pr_err("Ignoring BGRT: failed to allocate memory for image (wanted %zu bytes)\n",
++		       bgrt_image_size);
+ 		return;
++	}
+ 
+ 	if (ioremapped) {
+ 		image = early_memremap(bgrt_tab->image_address,
+ 				       bmp_header.size);
+ 		if (!image) {
++			pr_err("Ignoring BGRT: failed to map image memory\n");
+ 			kfree(bgrt_image);
+ 			bgrt_image = NULL;
+ 			return;
 -- 
-Ard.
+2.0.1
