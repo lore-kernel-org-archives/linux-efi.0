@@ -1,98 +1,207 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] arm64: spin-table: handle unmapped cpu-release-addrs
-Date: Wed, 30 Jul 2014 15:28:57 +0200
-Message-ID: <CAKv+Gu8b3Lfh9dL8_ttu5n5wus4d3K6CNcfKpuju-pe3zM2KHA@mail.gmail.com>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1406717944-24725-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20140730113013.GL12239@arm.com>
-	<CAKv+Gu-891BPCMCB2xnhsaUHxz_BCMkwbbwQ76kmK=JsUdifHQ@mail.gmail.com>
-	<20140730123029.GA20162@leverpostej>
-	<20140730124258.GP12239@arm.com>
-	<20140730124908.GB20162@leverpostej>
-	<CAKv+Gu-OunL2FdzvZ6y95cKaewOyFaoCgX+Rqsg4R92yLAg=tQ@mail.gmail.com>
+From: Luis Henriques <luis.henriques-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: Re: [PATCH] efi: Include a .bss section within the PE/COFF headers
+Date: Wed, 30 Jul 2014 14:57:51 +0100
+Message-ID: <20140730135751.GC7239@hercules>
+References: <1406553713-7479-1-git-send-email-mbrown@fensystems.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-OunL2FdzvZ6y95cKaewOyFaoCgX+Rqsg4R92yLAg=tQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1406553713-7479-1-git-send-email-mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 30 July 2014 15:10, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 30 July 2014 14:49, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->> On Wed, Jul 30, 2014 at 01:42:58PM +0100, Will Deacon wrote:
->>> On Wed, Jul 30, 2014 at 01:30:29PM +0100, Mark Rutland wrote:
->>> > On Wed, Jul 30, 2014 at 01:00:40PM +0100, Ard Biesheuvel wrote:
->>> > > On 30 July 2014 13:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
->>> > > > On Wed, Jul 30, 2014 at 11:59:02AM +0100, Ard Biesheuvel wrote:
->>> > > >> From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->>> > > >>
->>> > > >> In certain cases the cpu-release-addr of a CPU may not fall in the
->>> > > >> linear mapping (e.g. when the kernel is loaded above this address due to
->>> > > >> the presence of other images in memory). This is problematic for the
->>> > > >> spin-table code as it assumes that it can trivially convert a
->>> > > >> cpu-release-addr to a valid VA in the linear map.
->>> > > >>
->>> > > >> This patch modifies the spin-table code to use a temporary cached
->>> > > >> mapping to write to a given cpu-release-addr, enabling us to support
->>> > > >> addresses regardless of whether they are covered by the linear mapping.
->>> > > >>
->>> > > >> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->>> > > >> Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>> > > >> [ardb: added (__force void *) cast]
->>> > > >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> > > >> ---
->>> > > >>  arch/arm64/kernel/smp_spin_table.c | 22 +++++++++++++++++-----
->>> > > >>  1 file changed, 17 insertions(+), 5 deletions(-)
->>> > > >
->>> > > > I'm nervous about this. What if the spin table sits in the same physical 64k
->>> > > > frame as a read-sensitive device and we're running with 64k pages?
->>> > > >
->>> > >
->>> > > I see what you mean. This is potentially hairy, as EFI already
->>> > > ioremap_cache()s everything known to it as normal DRAM, so using plain
->>> > > ioremap() here if pfn_valid() returns false for cpu-release-addr's PFN
->>> > > may still result in mappings with different attributes for the same
->>> > > region. So how should we decide whether to call ioremap() or
->>> > > ioremap_cache() in this case?
->>> >
->>> > If we're careful about handling mismatched attributes we might be able
->>> > to get away with always using a device mapping.
->>>
->>> Even then, I think ioremap hits a WARN_ON if pfn_valid.
->>
->> Ok, that's that idea dead then.
->>
->>> > I'll need to have a think about that, I'm not sure on the architected
->>> > cache behaviour in such a case.
->>>
->>> Of we just skip the cache flush if !pfn_valid.
->>
->> I don't think that's always safe given Ard's comment that the EFI code
->> will possibly have a mapping covering the region created by
->> ioremap_cache.
->>
->> Ard, what exactly does the EFI code map with ioremap_cache, and why?
->>
->
-> Actually, after re-reading the spec and the code, perhaps this is not an issue.
-> The EFI __init code calls ioremap_cache() for all regions described by
-> the UEFI memory map as requiring a virtual mapping
-> (EFI_MEMORY_RUNTIME): this is primarily runtime services code and data
-> regions and perhaps some I/O mappings for flash or other peripherals
-> that UEFI owns and needs to access during Runtime Services calls.
->
-> Mark Salter mentioned that APM Mustang's spin table lives in an
-> EFI_RESERVED_TYPE region, which presumably would not have the
-> EFI_MEMORY_RUNTIME attribute set, as it has nothing to do with the
-> UEFI Runtime Services. This means that no cached mapping should
-> already exist for that region.
+On Mon, Jul 28, 2014 at 02:21:53PM +0100, Michael Brown wrote:
+> commit c7fb93ec51d462ec3540a729ba446663c26a0505 upstream
 >
 
-That said, there is another potential snag: the UEFI spec for AArch64
-does not allow regions residing in the same 64k phys frame to have
-different memory attributes, and in order to meet this requirement, an
-EFI_RESERVED_TYPE region could supposedly still be described with a
-EFI_MEMORY_WB (cacheable) attribute set (e.g. if it shares the 64k
-phys frame with Runtime Services Code or Data)
+Thanks, I'll use this backport for the 3.11 kernel as well.
+
+Cheers,
+--
+Lu=EDs
+
+> The PE/COFF headers currently describe only the initialised-data
+> portions of the image, and result in no space being allocated for the
+> uninitialised-data portions.  Consequently, the EFI boot stub will en=
+d
+> up overwriting unexpected areas of memory, with unpredictable results=
+=2E
+>=20
+> Fix by including a .bss section in the PE/COFF headers (functionally
+> equivalent to the init_size field in the bzImage header).
+>=20
+> Signed-off-by: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> ---
+>  arch/x86/boot/header.S      | 26 ++++++++++++++++++++++----
+>  arch/x86/boot/tools/build.c | 37 ++++++++++++++++++++++++++++++-----=
+--
+>  2 files changed, 52 insertions(+), 11 deletions(-)
+>=20
+> diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+> index ec3b8ba..04da6c2 100644
+> --- a/arch/x86/boot/header.S
+> +++ b/arch/x86/boot/header.S
+> @@ -91,10 +91,9 @@ bs_die:
+> =20
+>  	.section ".bsdata", "a"
+>  bugger_off_msg:
+> -	.ascii	"Direct floppy boot is not supported. "
+> -	.ascii	"Use a boot loader program instead.\r\n"
+> +	.ascii	"Use a boot loader.\r\n"
+>  	.ascii	"\n"
+> -	.ascii	"Remove disk and press any key to reboot ...\r\n"
+> +	.ascii	"Remove disk and press any key to reboot...\r\n"
+>  	.byte	0
+> =20
+>  #ifdef CONFIG_EFI_STUB
+> @@ -108,7 +107,7 @@ coff_header:
+>  #else
+>  	.word	0x8664				# x86-64
+>  #endif
+> -	.word	3				# nr_sections
+> +	.word	4				# nr_sections
+>  	.long	0 				# TimeDateStamp
+>  	.long	0				# PointerToSymbolTable
+>  	.long	1				# NumberOfSymbols
+> @@ -250,6 +249,25 @@ section_table:
+>  	.word	0				# NumberOfLineNumbers
+>  	.long	0x60500020			# Characteristics (section flags)
+> =20
+> +	#
+> +	# The offset & size fields are filled in by build.c.
+> +	#
+> +	.ascii	".bss"
+> +	.byte	0
+> +	.byte	0
+> +	.byte	0
+> +	.byte	0
+> +	.long	0
+> +	.long	0x0
+> +	.long	0				# Size of initialized data
+> +						# on disk
+> +	.long	0x0
+> +	.long	0				# PointerToRelocations
+> +	.long	0				# PointerToLineNumbers
+> +	.word	0				# NumberOfRelocations
+> +	.word	0				# NumberOfLineNumbers
+> +	.long	0xc8000080			# Characteristics (section flags)
+> +
+>  #endif /* CONFIG_EFI_STUB */
+> =20
+>  	# Kernel attributes; used by setup.  This is part 1 of the
+> diff --git a/arch/x86/boot/tools/build.c b/arch/x86/boot/tools/build.=
+c
+> index 8e15b22..3dafaeb 100644
+> --- a/arch/x86/boot/tools/build.c
+> +++ b/arch/x86/boot/tools/build.c
+> @@ -142,7 +142,7 @@ static void usage(void)
+> =20
+>  #ifdef CONFIG_EFI_STUB
+> =20
+> -static void update_pecoff_section_header(char *section_name, u32 off=
+set, u32 size)
+> +static void update_pecoff_section_header_fields(char *section_name, =
+u32 vma, u32 size, u32 datasz, u32 offset)
+>  {
+>  	unsigned int pe_header;
+>  	unsigned short num_sections;
+> @@ -163,10 +163,10 @@ static void update_pecoff_section_header(char *=
+section_name, u32 offset, u32 siz
+>  			put_unaligned_le32(size, section + 0x8);
+> =20
+>  			/* section header vma field */
+> -			put_unaligned_le32(offset, section + 0xc);
+> +			put_unaligned_le32(vma, section + 0xc);
+> =20
+>  			/* section header 'size of initialised data' field */
+> -			put_unaligned_le32(size, section + 0x10);
+> +			put_unaligned_le32(datasz, section + 0x10);
+> =20
+>  			/* section header 'file offset' field */
+>  			put_unaligned_le32(offset, section + 0x14);
+> @@ -178,6 +178,11 @@ static void update_pecoff_section_header(char *s=
+ection_name, u32 offset, u32 siz
+>  	}
+>  }
+> =20
+> +static void update_pecoff_section_header(char *section_name, u32 off=
+set, u32 size)
+> +{
+> +	update_pecoff_section_header_fields(section_name, offset, size, siz=
+e, offset);
+> +}
+> +
+>  static void update_pecoff_setup_and_reloc(unsigned int size)
+>  {
+>  	u32 setup_offset =3D 0x200;
+> @@ -202,9 +207,6 @@ static void update_pecoff_text(unsigned int text_=
+start, unsigned int file_sz)
+> =20
+>  	pe_header =3D get_unaligned_le32(&buf[0x3c]);
+> =20
+> -	/* Size of image */
+> -	put_unaligned_le32(file_sz, &buf[pe_header + 0x50]);
+> -
+>  	/*
+>  	 * Size of code: Subtract the size of the first sector (512 bytes)
+>  	 * which includes the header.
+> @@ -219,6 +221,22 @@ static void update_pecoff_text(unsigned int text=
+_start, unsigned int file_sz)
+>  	update_pecoff_section_header(".text", text_start, text_sz);
+>  }
+> =20
+> +static void update_pecoff_bss(unsigned int file_sz, unsigned int ini=
+t_sz)
+> +{
+> +	unsigned int pe_header;
+> +	unsigned int bss_sz =3D init_sz - file_sz;
+> +
+> +	pe_header =3D get_unaligned_le32(&buf[0x3c]);
+> +
+> +	/* Size of uninitialized data */
+> +	put_unaligned_le32(bss_sz, &buf[pe_header + 0x24]);
+> +
+> +	/* Size of image */
+> +	put_unaligned_le32(init_sz, &buf[pe_header + 0x50]);
+> +
+> +	update_pecoff_section_header_fields(".bss", file_sz, bss_sz, 0, 0);
+> +}
+> +
+>  #endif /* CONFIG_EFI_STUB */
+> =20
+> =20
+> @@ -270,6 +288,9 @@ int main(int argc, char ** argv)
+>  	int fd;
+>  	void *kernel;
+>  	u32 crc =3D 0xffffffffUL;
+> +#ifdef CONFIG_EFI_STUB
+> +	unsigned int init_sz;
+> +#endif
+> =20
+>  	/* Defaults for old kernel */
+>  #ifdef CONFIG_X86_32
+> @@ -343,7 +364,9 @@ int main(int argc, char ** argv)
+>  	put_unaligned_le32(sys_size, &buf[0x1f4]);
+> =20
+>  #ifdef CONFIG_EFI_STUB
+> -	update_pecoff_text(setup_sectors * 512, sz + i + ((sys_size * 16) -=
+ sz));
+> +	update_pecoff_text(setup_sectors * 512, i + (sys_size * 16));
+> +	init_sz =3D get_unaligned_le32(&buf[0x260]);
+> +	update_pecoff_bss(i + (sys_size * 16), init_sz);
+> =20
+>  #ifdef CONFIG_X86_64 /* Yes, this is really how we defined it :( */
+>  	efi_stub_entry -=3D 0x200;
+> --=20
+> 1.8.4.5
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe stable" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
