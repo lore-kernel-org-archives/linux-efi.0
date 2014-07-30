@@ -1,41 +1,49 @@
-From: Steven Noonan <steven-Cunn4gMjHvbm+q05EWxUEA@public.gmane.org>
-Subject: Re: [PATCH] x86, efi: print debug values in Kib not MB
-Date: Tue, 29 Jul 2014 20:25:41 -0700
-Message-ID: <CAKbGBLi-6koxxQUDsn+KyO47nfCbOwFSnPgbDZGZ1Bnt=c5qKA@mail.gmail.com>
-References: <1406653761-3884-1-git-send-email-prarit@redhat.com>
-	<20140729222932.GA17481@pd.tnic>
-	<53D82118.6090202@redhat.com>
-	<20140729223603.GC17241@pd.tnic>
-	<53D82623.4080903@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/3 v2] arm64/efi: improve TEXT_OFFSET handling
+Date: Wed, 30 Jul 2014 12:59:01 +0200
+Message-ID: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <53D82623.4080903-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linux Kernel mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, lszubowi-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Linux-X86 <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 29, 2014 at 3:54 PM, Prarit Bhargava <prarit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->
->
-> On 07/29/2014 06:36 PM, Borislav Petkov wrote:
->> On Tue, Jul 29, 2014 at 06:32:56PM -0400, Prarit Bhargava wrote:
->>> and it was best to keep the code simple with a KiB.
->>
->> You're missing the point - the output doesn't get simple with KiB. Read
->> the example I just gave you!
->>
->> (13893632kiB) is actively *not* helping when one looks at it!
->
-> I did get your point and I'm (politely) disagreeing with it.  Your case ONLY
-> works if the number is _exactly_ 13GB.  What if it is 13.5?  Then we're still
-> rounding off and reporting 14GB.  Which, if this code is meant for debug, makes
-> no sense to me.  Why round it off?
->
+Resending this series sent out yesterday with only minor changes and acks etc
+added.
 
-I think if it was being represented in procfs or sysfs, we'd need to
-be extremely specific to make it machine-readable, but for a
-human-readable printk, it makes sense to me to print it in the smaller
-unit size until the value is in tens of the next higher unit size
-(e.g. print in KiB until 10+MiB, print in MiB until 10+GiB).
+In summary: patch #3 relaxes the requirements imposed by the EFI stub on where
+Image may be loaded, but this breaks APM Mustang (if booting via UEFI) if patch
+#1 does not go in first. Patch #2 prevents potential boot issues when Image is
+loaded such that the stub does not have to relocate it.
+
+@Will: as discussed on the list yesterday, these patches should be kept in
+sequence when going upstream, so it is best to take them through a single tree.
+However, patch #3 will not apply cleanly to the arm64 tree until after 3.16-rc1
+is released as it depends on a trivial change going in through x86/tip [efi].
+[https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=6091c9c447370c4717ec9975813c874af490eb36]
+
+If you are ok with these patches, how would you like to proceed? Patches #1 and
+#2 could go in straight away (through arm64), and I can send Catalin and you a
+gentle reminder once -rc1 is released to take #3? Or instead, ack them and ask
+Matt to queue them for 3.17-late? It would be nice if this makes 3.17 as it
+fixes actual boot problems on hardware that is under development.
+
+Changes in v2:
+- add (__force void *) cast to patch #1, as suggested in LAKML discussion
+- add tested-by/acked-by lines
+- rebased patch #3 onto efi-next
+
+Mark Rutland (1):
+  arm64: spin-table: handle unmapped cpu-release-addrs
+
+Ard Biesheuvel (2):
+  arm64/efi: efistub: cover entire static mem footprint in PE/COFF .text
+  arm64/efi: efistub: don't abort if base of DRAM is occupied
+
+ arch/arm64/kernel/efi-stub.c       | 18 ++++++------------
+ arch/arm64/kernel/head.S           |  6 +++---
+ arch/arm64/kernel/smp_spin_table.c | 21 ++++++++++++++++-----
+ 3 files changed, 25 insertions(+), 20 deletions(-)
+
+-- 
+1.8.3.2
