@@ -1,34 +1,59 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH] x86, efi: print debug values in Kib not MB
-Date: Wed, 30 Jul 2014 13:43:14 -0700
-Message-ID: <53D958E2.6070704@infradead.org>
-References: <1406653761-3884-1-git-send-email-prarit@redhat.com> <20140729222932.GA17481@pd.tnic> <20140730144803.GB15082@console-pimps.org> <53D909C3.9050205@canonical.com> <53D9259F.5050307@redhat.com> <53D92700.3040803@infradead.org> <53D92996.1050906@zytor.com> <20140730195821.GE10213@pd.tnic>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] arm64: spin-table: handle unmapped
+ cpu-release-addrs
+Date: Thu, 31 Jul 2014 10:45:15 +0100
+Message-ID: <20140731094515.GE26853@arm.com>
+References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1406717944-24725-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20140730113013.GL12239@arm.com>
+ <CAKv+Gu8ne8k2NV12SyWye5aYJKHG0wHKAO+=V=1L89_hvyGopw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140730195821.GE10213@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Prarit Bhargava <prarit@redhat.com>, Matt Fleming <matt@console-pimps.org>, Colin Ian King <colin.king@canonical.com>, linux-kernel@vger.kernel.org, lszubowi@redhat.com, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8ne8k2NV12SyWye5aYJKHG0wHKAO+=V=1L89_hvyGopw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 07/30/14 12:58, Borislav Petkov wrote:
-> On Wed, Jul 30, 2014 at 10:21:26AM -0700, H. Peter Anvin wrote:
->> Arguably the exactness is available in the range...
+On Wed, Jul 30, 2014 at 08:17:02PM +0100, Ard Biesheuvel wrote:
+> ]On 30 July 2014 13:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
+> > On Wed, Jul 30, 2014 at 11:59:02AM +0100, Ard Biesheuvel wrote:
+> >> From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> >>
+> >> In certain cases the cpu-release-addr of a CPU may not fall in the
+> >> linear mapping (e.g. when the kernel is loaded above this address due to
+> >> the presence of other images in memory). This is problematic for the
+> >> spin-table code as it assumes that it can trivially convert a
+> >> cpu-release-addr to a valid VA in the linear map.
+> >>
+> >> This patch modifies the spin-table code to use a temporary cached
+> >> mapping to write to a given cpu-release-addr, enabling us to support
+> >> addresses regardless of whether they are covered by the linear mapping.
+> >>
+> >> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> >> Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> >> [ardb: added (__force void *) cast]
+> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> ---
+> >>  arch/arm64/kernel/smp_spin_table.c | 22 +++++++++++++++++-----
+> >>  1 file changed, 17 insertions(+), 5 deletions(-)
+> >
+> > I'm nervous about this. What if the spin table sits in the same physical 64k
+> > frame as a read-sensitive device and we're running with 64k pages?
+> >
 > 
-> ... and the size too. FWIW, other region dumps don't even print size:
-> 
-> [    0.000000] e820: BIOS-provided physical RAM map:
-> [    0.000000] BIOS-e820: [mem 0x0000000000000000-0x000000000009e7ff] usable
-> [    0.000000] BIOS-e820: [mem 0x000000000009e800-0x000000000009ffff] reserved
-> [    0.000000] BIOS-e820: [mem 0x00000000000e0000-0x00000000000fffff] reserved
-> ...
-> 
-> If we do that too for UEFI, we can certainly put an end to the
-> bikeshedding... provided everyone is tired of it by now. :-P
+> Actually, booting.txt requires cpu-release-addr to point to a
+> /memreserve/d part of memory, which implies DRAM (or you wouldn't have
+> to memreserve it)
+> That means it should always be covered by the linear mapping, unless
+> it is located before Image in DRAM, which is the case addressed by
+> this patch.
 
-Yes, please.  (I'm tired and I barely got started ;)
+But if it's located before before the Image in DRAM and isn't covered by
+the linear mapping, then surely the /memreserve/ is pointless too? In which
+case, this looks like we're simply trying to cater for platforms that aren't
+following booting.txt (which may need updating if we need to handle this).
 
--- 
-~Randy
+Will
