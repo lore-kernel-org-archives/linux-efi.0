@@ -1,112 +1,241 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] arm64: spin-table: handle unmapped
- cpu-release-addrs
-Date: Thu, 31 Jul 2014 11:39:01 +0100
-Message-ID: <20140731103900.GA22994@leverpostej>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
- <1406717944-24725-2-git-send-email-ard.biesheuvel@linaro.org>
- <20140730113013.GL12239@arm.com>
- <CAKv+Gu8ne8k2NV12SyWye5aYJKHG0wHKAO+=V=1L89_hvyGopw@mail.gmail.com>
- <20140731094515.GE26853@arm.com>
- <20140731095854.GC21850@leverpostej>
- <20140731100439.GI26853@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [RFC PATCH] arm64/efi: use id mapping for Runtime Services
+Date: Thu, 31 Jul 2014 16:11:49 +0200
+Message-ID: <1406815909-26825-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140731100439.GI26853-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jul 31, 2014 at 11:04:39AM +0100, Will Deacon wrote:
-> On Thu, Jul 31, 2014 at 10:58:54AM +0100, Mark Rutland wrote:
-> > On Thu, Jul 31, 2014 at 10:45:15AM +0100, Will Deacon wrote:
-> > > On Wed, Jul 30, 2014 at 08:17:02PM +0100, Ard Biesheuvel wrote:
-> > > > ]On 30 July 2014 13:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> > > > > On Wed, Jul 30, 2014 at 11:59:02AM +0100, Ard Biesheuvel wrote:
-> > > > >> From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > > > >>
-> > > > >> In certain cases the cpu-release-addr of a CPU may not fall in the
-> > > > >> linear mapping (e.g. when the kernel is loaded above this address due to
-> > > > >> the presence of other images in memory). This is problematic for the
-> > > > >> spin-table code as it assumes that it can trivially convert a
-> > > > >> cpu-release-addr to a valid VA in the linear map.
-> > > > >>
-> > > > >> This patch modifies the spin-table code to use a temporary cached
-> > > > >> mapping to write to a given cpu-release-addr, enabling us to support
-> > > > >> addresses regardless of whether they are covered by the linear mapping.
-> > > > >>
-> > > > >> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > > > >> Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > > > >> [ardb: added (__force void *) cast]
-> > > > >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > > >> ---
-> > > > >>  arch/arm64/kernel/smp_spin_table.c | 22 +++++++++++++++++-----
-> > > > >>  1 file changed, 17 insertions(+), 5 deletions(-)
-> > > > >
-> > > > > I'm nervous about this. What if the spin table sits in the same physical 64k
-> > > > > frame as a read-sensitive device and we're running with 64k pages?
-> > > > >
-> > > > 
-> > > > Actually, booting.txt requires cpu-release-addr to point to a
-> > > > /memreserve/d part of memory, which implies DRAM (or you wouldn't have
-> > > > to memreserve it)
-> > > > That means it should always be covered by the linear mapping, unless
-> > > > it is located before Image in DRAM, which is the case addressed by
-> > > > this patch.
-> > > 
-> > > But if it's located before before the Image in DRAM and isn't covered by
-> > > the linear mapping, then surely the /memreserve/ is pointless too? In which
-> > > case, this looks like we're simply trying to cater for platforms that aren't
-> > > following booting.txt (which may need updating if we need to handle this).
-> > 
-> > No. The DT is describing the memory which is present, and the subset
-> > thereof which should not be used under normal circumstances. That's a
-> > static property of the system.
-> > 
-> > Where the OS happens to get loaded and what it is able to address is a
-> > dynamic property of the OS (and possibly the bootloader). The DT cannot
-> > have knowledge of this.
-> > 
-> > It's always true that the OS should not blindly use memreserve'd memory.
-> > The fact that it cannot address it in the linear mapping is orthogonal.
-> 
-> In which case, I think asserting that /memreserve/ implies DRAM is pretty
-> fragile and not actually enforced anywhere. Sure, we can say `don't do
-> that', but I'd prefer to have the kernel detect this dynamically.
+There are 2 interesting pieces of information in the UEFI spec section 2.3.6
+regarding the mapping of runtime regions:
+(a) the firmware should not request a virtual mapping for configuration tables,
+    even though they are marked as EfiRuntimeServicesData;
+(b) calling SetVirtualAddressMap() is optional, and it is equally appropriate to
+    call Runtime Services using an identity mapping.
 
-I think the boot protocol needs an update to allow a cpu-release-addr
-not covered by linear mapping. There are reasons that the kernel might
-not be loaded at the start of RAM, and I think relying on the
-cpu-release-addr addresses lying in the linear mapping is a limitation
-we need to address. Given that I also think we should allow for
-cpu-release-addrs outside of the range desribed by memory nodes (and
-therefore not requiring any /mremreserve/).
+So we can eliminate some of the complexity around UEFI Runtime Services by not
+using a virtual mapping at all, and calling the services at their physical
+address. This is especially useful under kexec, as SetVirtualAddressMap() may
+only be called once, and there is no guarantee that mappings are stable between
+different kexec'd kernels.
 
-I do not think we should rely on being able to address the
-cpu-release-addr with a normal cacheable mapping. If the
-cpu-release-addr falls outside of the memory described by the memory
-node(s) then we have no idea where it lives. Currently this falls in
-normal memory, but mandating that feels odd.
+The fallout for other in-kernel users of UEFI data structures should be
+negligible, as they cannot legally access those data structures through
+pre-existing virtual mappings anyway (point (a) above)
 
-The sole purpose of /memreserve/ is to describe areas in physical memory
-that memory should not be used for general allocation. I don't think it
-makes any sense to derive any information from /memreserve/ other than
-the fact said addresses shouldn't be poked arbitarily. If we allow
-cpu-release-addrs outside of memory, then we won't have a /memreserve/
-anyhow.
+It should also be noted that, as the kernel side of the address space (TTBR1) is
+retained, the stack and pointer function arguments remain accessible to the
+runtime service while the id mapping is active.
 
-So the question becomes can or can't we always detect when we already
-have a mapping that covers a cpu-release-addr?
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/include/asm/efi.h |  24 ++++++++--
+ arch/arm64/kernel/efi.c      | 106 ++-----------------------------------------
+ 2 files changed, 23 insertions(+), 107 deletions(-)
 
-> Does dtc check that the /memreserve/ region is actually a subset of the
-> memory node?
-
-I don't beleive it does. It's probably a sensible warning, but as far as
-I am aware the only time the memory reservation table will be read in
-any OS is to poke holes in its memory allocation pool(s).
-
-Cheers,
-Mark.
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index a34fd3b12e2b..d42a21e79b39 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -1,8 +1,10 @@
+ #ifndef _ASM_EFI_H
+ #define _ASM_EFI_H
+ 
++#include <asm/cacheflush.h>
+ #include <asm/io.h>
+ #include <asm/neon.h>
++#include <asm/tlbflush.h>
+ 
+ #ifdef CONFIG_EFI
+ extern void efi_init(void);
+@@ -12,23 +14,37 @@ extern void efi_idmap_init(void);
+ #define efi_idmap_init()
+ #endif
+ 
++static inline void switch_pgd(pgd_t *pgd, struct mm_struct *mm)
++{
++	cpu_switch_mm(pgd, mm);
++	flush_tlb_all();
++	if (icache_is_aivivt())
++		__flush_icache_all();
++}
++
+ #define efi_call_virt(f, ...)						\
+ ({									\
+-	efi_##f##_t *__f = efi.systab->runtime->f;			\
++	efi_##f##_t *__f;						\
+ 	efi_status_t __s;						\
+ 									\
+-	kernel_neon_begin();						\
++	kernel_neon_begin(); /* disables preemption */			\
++	switch_pgd(idmap_pg_dir, &init_mm);				\
++	__f =  efi.systab->runtime->f;					\
+ 	__s = __f(__VA_ARGS__);						\
++	switch_pgd(current->active_mm->pgd, current->active_mm);	\
+ 	kernel_neon_end();						\
+ 	__s;								\
+ })
+ 
+ #define __efi_call_virt(f, ...)						\
+ ({									\
+-	efi_##f##_t *__f = efi.systab->runtime->f;			\
++	efi_##f##_t *__f;						\
+ 									\
+-	kernel_neon_begin();						\
++	kernel_neon_begin(); /* disables preemption */			\
++	switch_pgd(idmap_pg_dir, &init_mm);				\
++	__f =  efi.systab->runtime->f;					\
+ 	__f(__VA_ARGS__);						\
++	switch_pgd(current->active_mm->pgd, current->active_mm);	\
+ 	kernel_neon_end();						\
+ })
+ 
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index e72f3100958f..d620a031e7bf 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -27,8 +27,6 @@
+ 
+ struct efi_memory_map memmap;
+ 
+-static efi_runtime_services_t *runtime;
+-
+ static u64 efi_system_table;
+ 
+ static int uefi_debug __initdata;
+@@ -340,51 +338,9 @@ void __init efi_idmap_init(void)
+ 	efi_setup_idmap();
+ }
+ 
+-static int __init remap_region(efi_memory_desc_t *md, void **new)
+-{
+-	u64 paddr, vaddr, npages, size;
+-
+-	paddr = md->phys_addr;
+-	npages = md->num_pages;
+-	memrange_efi_to_native(&paddr, &npages);
+-	size = npages << PAGE_SHIFT;
+-
+-	if (is_normal_ram(md))
+-		vaddr = (__force u64)ioremap_cache(paddr, size);
+-	else
+-		vaddr = (__force u64)ioremap(paddr, size);
+-
+-	if (!vaddr) {
+-		pr_err("Unable to remap 0x%llx pages @ %p\n",
+-		       npages, (void *)paddr);
+-		return 0;
+-	}
+-
+-	/* adjust for any rounding when EFI and system pagesize differs */
+-	md->virt_addr = vaddr + (md->phys_addr - paddr);
+-
+-	if (uefi_debug)
+-		pr_info("  EFI remap 0x%012llx => %p\n",
+-			md->phys_addr, (void *)md->virt_addr);
+-
+-	memcpy(*new, md, memmap.desc_size);
+-	*new += memmap.desc_size;
+-
+-	return 1;
+-}
+-
+-/*
+- * Switch UEFI from an identity map to a kernel virtual map
+- */
+ static int __init arm64_enter_virtual_mode(void)
+ {
+-	efi_memory_desc_t *md;
+-	phys_addr_t virtmap_phys;
+-	void *virtmap, *virt_md;
+-	efi_status_t status;
+ 	u64 mapsize;
+-	int count = 0;
+-	unsigned long flags;
+ 
+ 	if (!efi_enabled(EFI_BOOT)) {
+ 		pr_info("EFI services will not be available.\n");
+@@ -402,76 +358,20 @@ static int __init arm64_enter_virtual_mode(void)
+ 
+ 	efi.memmap = &memmap;
+ 
+-	/* Map the runtime regions */
+-	virtmap = kmalloc(mapsize, GFP_KERNEL);
+-	if (!virtmap) {
+-		pr_err("Failed to allocate EFI virtual memmap\n");
+-		return -1;
+-	}
+-	virtmap_phys = virt_to_phys(virtmap);
+-	virt_md = virtmap;
+-
+-	for_each_efi_memory_desc(&memmap, md) {
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME))
+-			continue;
+-		if (!remap_region(md, &virt_md))
+-			goto err_unmap;
+-		++count;
+-	}
+-
+-	efi.systab = (__force void *)efi_lookup_mapped_addr(efi_system_table);
++	efi.systab = (__force void *)ioremap_cache(efi_system_table,
++						   sizeof(efi_system_table_t));
+ 	if (!efi.systab) {
+-		/*
+-		 * If we have no virtual mapping for the System Table at this
+-		 * point, the memory map doesn't cover the physical offset where
+-		 * it resides. This means the System Table will be inaccessible
+-		 * to Runtime Services themselves once the virtual mapping is
+-		 * installed.
+-		 */
+ 		pr_err("Failed to remap EFI System Table -- buggy firmware?\n");
+-		goto err_unmap;
++		return -1;
+ 	}
+ 	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+-	local_irq_save(flags);
+-	cpu_switch_mm(idmap_pg_dir, &init_mm);
+-
+-	/* Call SetVirtualAddressMap with the physical address of the map */
+-	runtime = efi.systab->runtime;
+-	efi.set_virtual_address_map = runtime->set_virtual_address_map;
+-
+-	status = efi.set_virtual_address_map(count * memmap.desc_size,
+-					     memmap.desc_size,
+-					     memmap.desc_version,
+-					     (efi_memory_desc_t *)virtmap_phys);
+-	cpu_set_reserved_ttbr0();
+-	flush_tlb_all();
+-	local_irq_restore(flags);
+-
+-	kfree(virtmap);
+-
+ 	free_boot_services();
+ 
+-	if (status != EFI_SUCCESS) {
+-		pr_err("Failed to set EFI virtual address map! [%lx]\n",
+-			status);
+-		return -1;
+-	}
+-
+ 	/* Set up runtime services function pointers */
+-	runtime = efi.systab->runtime;
+ 	efi_native_runtime_setup();
+ 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 
+ 	return 0;
+-
+-err_unmap:
+-	/* unmap all mappings that succeeded: there are 'count' of those */
+-	for (virt_md = virtmap; count--; virt_md += memmap.desc_size) {
+-		md = virt_md;
+-		iounmap((__force void __iomem *)md->virt_addr);
+-	}
+-	kfree(virtmap);
+-	return -1;
+ }
+ early_initcall(arm64_enter_virtual_mode);
+-- 
+1.8.3.2
