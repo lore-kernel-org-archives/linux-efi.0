@@ -1,137 +1,57 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] arm64: spin-table: handle unmapped cpu-release-addrs
-Date: Fri, 1 Aug 2014 13:35:57 +0200
-Message-ID: <CAKv+Gu_Ax++OGT1wBwUhKEndR97Q69zXeVZL8vkxAiY=VJuT4w@mail.gmail.com>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1406717944-24725-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20140730113013.GL12239@arm.com>
-	<CAKv+Gu8ne8k2NV12SyWye5aYJKHG0wHKAO+=V=1L89_hvyGopw@mail.gmail.com>
-	<20140731094515.GE26853@arm.com>
-	<20140731095854.GC21850@leverpostej>
-	<20140731100439.GI26853@arm.com>
-	<20140731103900.GA22994@leverpostej>
+From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Subject: Re: [PATCH] efi-bgrt: Add error handling; inform the user when
+ ignoring the BGRT
+Date: Fri, 1 Aug 2014 09:11:54 -0700
+Message-ID: <20140801161154.GA1258@thin>
+References: <20140730192331.GA23730@jtriplet-mobl1>
+ <20140731103110.GC15082@console-pimps.org>
+ <20140731161133.GA12663@cloud>
+ <20140801091949.GD15082@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140731103900.GA22994@leverpostej>
+Content-Disposition: inline
+In-Reply-To: <20140801091949.GD15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Srihari Vijayaraghavan <linux.bug.reporting-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 31 July 2014 12:39, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Thu, Jul 31, 2014 at 11:04:39AM +0100, Will Deacon wrote:
->> On Thu, Jul 31, 2014 at 10:58:54AM +0100, Mark Rutland wrote:
->> > On Thu, Jul 31, 2014 at 10:45:15AM +0100, Will Deacon wrote:
->> > > On Wed, Jul 30, 2014 at 08:17:02PM +0100, Ard Biesheuvel wrote:
->> > > > ]On 30 July 2014 13:30, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
->> > > > > On Wed, Jul 30, 2014 at 11:59:02AM +0100, Ard Biesheuvel wrote:
->> > > > >> From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->> > > > >>
->> > > > >> In certain cases the cpu-release-addr of a CPU may not fall in the
->> > > > >> linear mapping (e.g. when the kernel is loaded above this address due to
->> > > > >> the presence of other images in memory). This is problematic for the
->> > > > >> spin-table code as it assumes that it can trivially convert a
->> > > > >> cpu-release-addr to a valid VA in the linear map.
->> > > > >>
->> > > > >> This patch modifies the spin-table code to use a temporary cached
->> > > > >> mapping to write to a given cpu-release-addr, enabling us to support
->> > > > >> addresses regardless of whether they are covered by the linear mapping.
->> > > > >>
->> > > > >> Signed-off-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->> > > > >> Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->> > > > >> [ardb: added (__force void *) cast]
->> > > > >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> > > > >> ---
->> > > > >>  arch/arm64/kernel/smp_spin_table.c | 22 +++++++++++++++++-----
->> > > > >>  1 file changed, 17 insertions(+), 5 deletions(-)
->> > > > >
->> > > > > I'm nervous about this. What if the spin table sits in the same physical 64k
->> > > > > frame as a read-sensitive device and we're running with 64k pages?
->> > > > >
->> > > >
->> > > > Actually, booting.txt requires cpu-release-addr to point to a
->> > > > /memreserve/d part of memory, which implies DRAM (or you wouldn't have
->> > > > to memreserve it)
->> > > > That means it should always be covered by the linear mapping, unless
->> > > > it is located before Image in DRAM, which is the case addressed by
->> > > > this patch.
->> > >
->> > > But if it's located before before the Image in DRAM and isn't covered by
->> > > the linear mapping, then surely the /memreserve/ is pointless too? In which
->> > > case, this looks like we're simply trying to cater for platforms that aren't
->> > > following booting.txt (which may need updating if we need to handle this).
->> >
->> > No. The DT is describing the memory which is present, and the subset
->> > thereof which should not be used under normal circumstances. That's a
->> > static property of the system.
->> >
->> > Where the OS happens to get loaded and what it is able to address is a
->> > dynamic property of the OS (and possibly the bootloader). The DT cannot
->> > have knowledge of this.
->> >
->> > It's always true that the OS should not blindly use memreserve'd memory.
->> > The fact that it cannot address it in the linear mapping is orthogonal.
->>
->> In which case, I think asserting that /memreserve/ implies DRAM is pretty
->> fragile and not actually enforced anywhere. Sure, we can say `don't do
->> that', but I'd prefer to have the kernel detect this dynamically.
->
-> I think the boot protocol needs an update to allow a cpu-release-addr
-> not covered by linear mapping. There are reasons that the kernel might
-> not be loaded at the start of RAM, and I think relying on the
-> cpu-release-addr addresses lying in the linear mapping is a limitation
-> we need to address. Given that I also think we should allow for
-> cpu-release-addrs outside of the range desribed by memory nodes (and
-> therefore not requiring any /mremreserve/).
->
+On Fri, Aug 01, 2014 at 10:19:49AM +0100, Matt Fleming wrote:
+> (Including akpm, the __GFP_NOWARN police)
 
-While I agree that it would be a nice thing to get that requirement
-relaxed, do we necessarily need to address both issues at once?
+Andrew suggested __GFP_NOWARN here in the first place.
 
-In a sense, this patch is a bug fix: even if a platform fully adheres
-to booting.txt, by putting the cpu-release-addr in a memreserved part
-of DRAM and loading Image at a 2 meg offset + TEXT_OFFSET, SMP will be
-broken in some cases, and that needs to be fixed. This issue is not
-imaginary, as TEXT_OFFSET fuzzing may well result in boot failures on
-APM Mustang, and the fix for /that/ (loading at the next 2 meg
-boundary (+ TEXT_OFFSET) up, a thing which booting.txt specifically
-allows) triggers the issue that this patch addresses.
+> On Thu, 31 Jul, at 09:11:33AM, Josh Triplett wrote:
+> > 
+> > I started to add an explicit limit, but any reasonable limit (large
+> > enough for modern screens) would be large enough that there's still a
+> > non-trivial possibility of allocation failure.  And I think it makes
+> > sense for BGRT image allocation to be non-fatal and minimally noisy
+> > (just a single-line error, not a scary-looking allocation warning),
+> > considering the highly optional and cosmetic nature of BGRT.  So, I
+> > believe __GFP_NOWARN makes sense.
+> 
+> Yes, I agree that we don't want to trigger the page allocator warning,
+> but I don't agree that passing __GFP_NOWARN is OK, which is why I'm
+> advocating some size limit checks.
+> 
+> We need to distinguish between "Your BGRT image size is huge, and
+> assumed buggy" and "Your BGRT looks valid, but we ran out of memory".
+> 
+> We've already got enough problems with the EFI code because we silently
+> paper over bugs, and using the page allocator's failure path as a way to
+> check for buggy BGRT images just doesn't make any sense to me at all.
+> 
+> If we get the limit wrong, it's not the end of the world, we can change
+> it later, but it's a safe bet that if the firmware engineers start
+> seeing "BGRT is buggy" in the kernel log they're going to start a
+> dialogue with us.
 
-> I do not think we should rely on being able to address the
-> cpu-release-addr with a normal cacheable mapping. If the
-> cpu-release-addr falls outside of the memory described by the memory
-> node(s) then we have no idea where it lives. Currently this falls in
-> normal memory, but mandating that feels odd.
->
+The original bug report was about an allocation failure for a fairly
+reasonable BGRT size.  We can certainly prohibit absurdly huge ones (for
+instance, bigger than the maximum likely screen resolution times 4 bytes
+per pixel), but allocation failures may well occur for smaller sizes,
+and I don't think we want to spew a massive warning for that either.
 
-We have the luxury that all existing working implementations have
-cpu-release-addr inside the linear mapping (or SMP would already be
-broken). Why makes our lives complicated by allowing things that
-nobody has asked for yet? Including dedicated SRAM patches makes
-sense, since anything that can tolerate being mapped MT_NORMAL using
-64k granule can be supported with your current code, but beyond that,
-what is the use case?
-
-> The sole purpose of /memreserve/ is to describe areas in physical memory
-> that memory should not be used for general allocation. I don't think it
-> makes any sense to derive any information from /memreserve/ other than
-> the fact said addresses shouldn't be poked arbitarily. If we allow
-> cpu-release-addrs outside of memory, then we won't have a /memreserve/
-> anyhow.
->
-> So the question becomes can or can't we always detect when we already
-> have a mapping that covers a cpu-release-addr?
->
-
-Let's not get ourselves into this mess.
-
->> Does dtc check that the /memreserve/ region is actually a subset of the
->> memory node?
->
-> I don't beleive it does. It's probably a sensible warning, but as far as
-> I am aware the only time the memory reservation table will be read in
-> any OS is to poke holes in its memory allocation pool(s).
->
-> Cheers,
-> Mark.
+- Josh Triplett
