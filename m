@@ -1,88 +1,43 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: 3.12 to 3.13 boot regression bisected - still applies to 3.16
-Date: Mon, 4 Aug 2014 14:54:52 +0100
-Message-ID: <20140804135452.GJ15082@console-pimps.org>
-References: <20140804113435.34ed8c76@pluto>
- <20140804122728.GH15082@console-pimps.org>
- <20140804150627.4563b6a7@pluto>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v3] efi: implement mandatory locking for UEFI Runtime
+ Services
+Date: Mon, 4 Aug 2014 15:49:57 +0100
+Message-ID: <20140804144957.GK15082@console-pimps.org>
+References: <1405062556-14540-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20140804130011.GI15082@console-pimps.org>
+ <CAKv+Gu-LQ9ahV5js0V5XgyRwUkrc3BOT9YoZj=mvwCEMQVXfow@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140804150627.4563b6a7@pluto>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Bruno =?iso-8859-1?Q?Pr=E9mont?= <bonbons@linux-vserver.org>
-Cc: P J P <ppandit@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+In-Reply-To: <CAKv+Gu-LQ9ahV5js0V5XgyRwUkrc3BOT9YoZj=mvwCEMQVXfow-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 04 Aug, at 03:06:27PM, Bruno Pr=E9mont wrote:
->=20
-> Yes, I did as I have seen that patch flying by, but it did not help
-> (I tried at 3.16-rc7).
-=20
-:-( Thanks for testing.
+On Mon, 04 Aug, at 03:13:28PM, Ard Biesheuvel wrote:
+> 
+> Well, again, the spec allows it. But I am happy to remove it as it
+> does not affect ARM anyway
 
-> On 3.16-rc7 I even tried adding earlyprintk=3Defi,keep, console=3Defi=
-,
-> ignore_loglevel and added some efi_printk() in EFI stub (in the spiri=
-t
-> of https://bugzilla.kernel.org/show_bug.cgi?id=3D68761)
-> The last message I get is my efi_printk() right before exiting boot
-> services. Without my efi_printk() there is no output at all.
->=20
-> Then system reboots.
+Right, I understand why you added these now.
 
-OK, so the fact that the system reboots suggests that the boot
-stub/kernel caused a fault.
-=20
-> There is no output on serial console either (via BMC),
-> (earlycon=3Duart,io,0x3f8,115200 or earlyprintk=3Dserial,ttyS0,115200=
-)
->=20
->=20
-> I even tried without initrd (setting CONFIG_INITRAMFS_SOURCE=3D"")
-> and got the same end-result.
+My personal opinion is that we shouldn't do the NMI dancing unless
+absolutely necessary, e.g. because of corresponding kernel code paths.
+The fact that the spec allows it doesn't necessarily mean we should
+support it.
 
-Oh that's interesting.
+But I do like the idea of documenting that the spec allows for things
+that we don't support, because that at least informs developers, when
+they come snooping around this file, that they've got some additional
+work to do if they want to call these functions from NMI context.
 
-> I could share a slightly modified one, replacing the
-> contained /etc/passwd. It's about 16MiB in size due to RAID controlle=
-r
-> management blobs for recovery. Except for that it just tries to find
-> ROOT partition, setting up dmcrypt if needed.
-=20
-This shouldn't be necessary if you can reproduce the issue without an
-initrd as you stated above.
+So the table you included is cool, and I think some additional sentences
+along the lines of "... but we don't support calling all these functions
+from NMI context" would be a good addition.
 
-> Any hint on how to find out what fails would be nice!
-> initrd issues tend not to be easy to debug (it would help if initrd
-> issues could be reported at the time kernel tries to start init - e.g=
-=2E
-> when console outputs are up and running).
+What do you think?
 
-I don't think this is necessarily an initrd issue.
-
-The way that I would debug this is to insert while(1); into strategic
-places. Yes, it's lame and time consuming, but it's effective.
-
-My first suggestion would be setup_arch(). In particular, because your
-machine is resetting, I'd guess that the kernel's early trap handlers
-haven't yet been installed.
-
-So throw a,
-
-	while (1);
-
-in there and see if you can get your machine to hang instead of reset.
-If it doesn't hang, the reset occurs earlier in boot - work backwards.
-If it does hang then you know that execution gets at least that far -
-work forwards. Like I said, lame but effective.
-
-Meanwhile I'm going to go and stare at the EFI boot stub code and
-instrument OVMF to check for more memory corruption bugs like the one
-Michael found in commit c7fb93ec51d4 ("x86/efi: Include a .bss section
-within the PE/COFF headers").
-
---=20
+-- 
 Matt Fleming, Intel Open Source Technology Center
