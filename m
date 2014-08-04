@@ -1,193 +1,88 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] efi: implement mandatory locking for UEFI Runtime Services
-Date: Mon, 4 Aug 2014 15:13:28 +0200
-Message-ID: <CAKv+Gu-LQ9ahV5js0V5XgyRwUkrc3BOT9YoZj=mvwCEMQVXfow@mail.gmail.com>
-References: <1405062556-14540-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20140804130011.GI15082@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: 3.12 to 3.13 boot regression bisected - still applies to 3.16
+Date: Mon, 4 Aug 2014 14:54:52 +0100
+Message-ID: <20140804135452.GJ15082@console-pimps.org>
+References: <20140804113435.34ed8c76@pluto>
+ <20140804122728.GH15082@console-pimps.org>
+ <20140804150627.4563b6a7@pluto>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140804130011.GI15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140804150627.4563b6a7@pluto>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Bruno =?iso-8859-1?Q?Pr=E9mont?= <bonbons@linux-vserver.org>
+Cc: P J P <ppandit@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 4 August 2014 15:00, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Fri, 11 Jul, at 09:09:16AM, Ard Biesheuvel wrote:
->> According to section 7.1 of the UEFI spec, Runtime Services are not fully
->> reentrant, and there are particular combinations of calls that need to be
->> serialized. Use a spinlock to serialize all Runtime Services with respect
->> to all others, even if this is more than strictly needed.
->
-> It'd be good to include a point about why we're only using a spinlock,
-> namely that anything else introduces complication to code that is
-> unlikely to be performance critical.
->
+On Mon, 04 Aug, at 03:06:27PM, Bruno Pr=E9mont wrote:
+>=20
+> Yes, I did as I have seen that patch flying by, but it did not help
+> (I tried at 3.16-rc7).
+=20
+:-( Thanks for testing.
 
-OK
+> On 3.16-rc7 I even tried adding earlyprintk=3Defi,keep, console=3Defi=
+,
+> ignore_loglevel and added some efi_printk() in EFI stub (in the spiri=
+t
+> of https://bugzilla.kernel.org/show_bug.cgi?id=3D68761)
+> The last message I get is my efi_printk() right before exiting boot
+> services. Without my efi_printk() there is no output at all.
+>=20
+> Then system reboots.
 
-> [...]
->
->> + *
->> + * In order to prevent deadlocks under NMI, the wrappers for these functions
->> + * only grab the efi_runtime_lock or rtc_lock spinlocks if !efi_in_nmi().
->> + */
->> +#ifndef efi_in_nmi
->> +#define efi_in_nmi() (0)
->> +#endif
->
-> It shouldn't be necessary to do the NMI checking for *all* runtime
-> services, unless you use, for instance, the timer functions on ARM64.
->
+OK, so the fact that the system reboots suggests that the boot
+stub/kernel caused a fault.
+=20
+> There is no output on serial console either (via BMC),
+> (earlycon=3Duart,io,0x3f8,115200 or earlyprintk=3Dserial,ttyS0,115200=
+)
+>=20
+>=20
+> I even tried without initrd (setting CONFIG_INITRAMFS_SOURCE=3D"")
+> and got the same end-result.
 
-No, I only added the checks to functions that are listed in the UEFI
-spec as requiring the special treatment.
-Table 32 is copied right from the spec. (And if that is not obvious, I
-should definitely add a mention there)
+Oh that's interesting.
 
+> I could share a slightly modified one, replacing the
+> contained /etc/passwd. It's about 16MiB in size due to RAID controlle=
+r
+> management blobs for recovery. Except for that it just tries to find
+> ROOT partition, setting up dmcrypt if needed.
+=20
+This shouldn't be necessary if you can reproduce the issue without an
+initrd as you stated above.
 
->> +/*
->>   * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
->>   * the EFI specification requires that callers of the time related runtime
->>   * functions serialize with other CMOS accesses in the kernel, as the EFI time
->> @@ -30,10 +95,17 @@ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
->>  {
->>       unsigned long flags;
->>       efi_status_t status;
->> +     bool __in_nmi = efi_in_nmi();
->>
->> -     spin_lock_irqsave(&rtc_lock, flags);
->> +     if (!__in_nmi) {
->> +             spin_lock_irqsave(&rtc_lock, flags);
->> +             spin_lock(&efi_runtime_lock);
->> +     }
->>       status = efi_call_virt(get_time, tm, tc);
->> -     spin_unlock_irqrestore(&rtc_lock, flags);
->> +     if (!__in_nmi) {
->> +             spin_unlock(&efi_runtime_lock);
->> +             spin_unlock_irqrestore(&rtc_lock, flags);
->> +     }
->>       return status;
->>  }
->>
->> @@ -42,8 +114,11 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
->>       unsigned long flags;
->>       efi_status_t status;
->>
->> +     BUG_ON(efi_in_nmi());
->
-> I think we can safely drop these BUG_ON()s. I would expect things to
-> explode pretty spectacularly anyway, even without them if we're in NMI
-> context. BUG_ON()s are usually reserved for "this is a fatal condition
-> and we cannot make any forward progress at all, so stop".
->
-> But also see my earlier point about how most of these functions aren't
-> called from NMI context.
->
+> Any hint on how to find out what fails would be nice!
+> initrd issues tend not to be easy to debug (it would help if initrd
+> issues could be reported at the time kernel tries to start init - e.g=
+=2E
+> when console outputs are up and running).
 
-I added the BUG_ON() to functions not listed in the table, and added
-the treatment to functions that are listed in the table.
-Happy to drop the BUG_ON()'s, though.
+I don't think this is necessarily an initrd issue.
 
->>  static efi_status_t virt_efi_get_next_variable(unsigned long *name_size,
->>                                              efi_char16_t *name,
->>                                              efi_guid_t *vendor)
->>  {
->> -     return efi_call_virt(get_next_variable, name_size, name, vendor);
->> +     unsigned long flags;
->> +     efi_status_t status;
->> +     bool __in_nmi = efi_in_nmi();
->> +
->> +     if (!__in_nmi)
->> +             spin_lock_irqsave(&efi_runtime_lock, flags);
->> +     status = efi_call_virt(get_next_variable, name_size, name, vendor);
->> +     if (!__in_nmi)
->> +             spin_unlock_irqrestore(&efi_runtime_lock, flags);
->> +     return status;
->
-> We shouldn't ever be in NMI context when calling get_next_variable(),
-> right?
->
+The way that I would debug this is to insert while(1); into strategic
+places. Yes, it's lame and time consuming, but it's effective.
 
-Spec allows it ...
+My first suggestion would be setup_arch(). In particular, because your
+machine is resetting, I'd guess that the kernel's early trap handlers
+haven't yet been installed.
 
->> @@ -119,17 +245,33 @@ static void virt_efi_reset_system(int reset_type,
->>                                 unsigned long data_size,
->>                                 efi_char16_t *data)
->>  {
->> +     unsigned long flags;
->> +     bool __in_nmi = efi_in_nmi();
->> +
->> +     if (!__in_nmi)
->> +             spin_lock_irqsave(&efi_runtime_lock, flags);
->>       __efi_call_virt(reset_system, reset_type, status, data_size, data);
->> +     if (!__in_nmi)
->> +             spin_unlock_irqrestore(&efi_runtime_lock, flags);
->>  }
->
-> Is it even possible to perform a reset through the usual machinery in
-> NMI context? I don't think this is possible for x86. What about for
-> arm64?
->
+So throw a,
 
-We don't have NMI so all the in_nmi() macros evaluate to false anyway.
+	while (1);
 
->>  static efi_status_t virt_efi_update_capsule(efi_capsule_header_t **capsules,
->>                                           unsigned long count,
->>                                           unsigned long sg_list)
->>  {
->> +     unsigned long flags;
->> +     efi_status_t status;
->> +     bool __in_nmi = efi_in_nmi();
->> +
->>       if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
->>               return EFI_UNSUPPORTED;
->>
->> -     return efi_call_virt(update_capsule, capsules, count, sg_list);
->> +     if (!__in_nmi)
->> +             spin_lock_irqsave(&efi_runtime_lock, flags);
->> +     status = efi_call_virt(update_capsule, capsules, count, sg_list);
->> +     if (!__in_nmi)
->> +             spin_unlock_irqrestore(&efi_runtime_lock, flags);
->> +     return status;
->>  }
->
-> I don't think we need to check for being in NMI context here.
->
+in there and see if you can get your machine to hang instead of reset.
+If it doesn't hang, the reset occurs earlier in boot - work backwards.
+If it does hang then you know that execution gets at least that far -
+work forwards. Like I said, lame but effective.
 
-Likewise, the spec says different ...
+Meanwhile I'm going to go and stare at the EFI boot stub code and
+instrument OVMF to check for more memory corruption bugs like the one
+Michael found in commit c7fb93ec51d4 ("x86/efi: Include a .bss section
+within the PE/COFF headers").
 
->>  static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
->> @@ -137,11 +279,20 @@ static efi_status_t virt_efi_query_capsule_caps(efi_capsule_header_t **capsules,
->>                                               u64 *max_size,
->>                                               int *reset_type)
->>  {
->> +     unsigned long flags;
->> +     efi_status_t status;
->> +     bool __in_nmi = efi_in_nmi();
->> +
->>       if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
->>               return EFI_UNSUPPORTED;
->>
->> -     return efi_call_virt(query_capsule_caps, capsules, count, max_size,
->> -                          reset_type);
->> +     if (!__in_nmi)
->> +             spin_lock_irqsave(&efi_runtime_lock, flags);
->> +     status = efi_call_virt(query_capsule_caps, capsules, count, max_size,
->> +                            reset_type);
->> +     if (!__in_nmi)
->> +             spin_unlock_irqrestore(&efi_runtime_lock, flags);
->> +     return status;
->>  }
->
-> Definitely should not be perfoming QueryCapsuleCapabilities() in NMI
-> context.
->
-
-Well, again, the spec allows it. But I am happy to remove it as it
-does not affect ARM anyway
-
-
-Regards,
-Ard.
+--=20
+Matt Fleming, Intel Open Source Technology Center
