@@ -1,87 +1,46 @@
-From: Bruno =?UTF-8?B?UHLDqW1vbnQ=?= <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
-Subject: 3.12 to 3.13 boot regression bisected - still applies to 3.16
-Date: Mon, 4 Aug 2014 11:34:35 +0200
-Message-ID: <20140804113435.34ed8c76@pluto>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH] efi-bgrt: Add error handling; inform the user when
+ ignoring the BGRT
+Date: Mon, 4 Aug 2014 13:19:59 +0100
+Message-ID: <20140804121959.GG15082@console-pimps.org>
+References: <20140730192331.GA23730@jtriplet-mobl1>
+ <20140731103110.GC15082@console-pimps.org>
+ <20140731161133.GA12663@cloud>
+ <20140801091949.GD15082@console-pimps.org>
+ <20140801161154.GA1258@thin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: P J P <ppandit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140801161154.GA1258@thin>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Srihari Vijayaraghavan <linux.bug.reporting@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, Matthew Garrett <mjg59@srcf.ucam.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On Fri, 01 Aug, at 09:11:54AM, Josh Triplett wrote:
+> 
+> The original bug report was about an allocation failure for a fairly
+> reasonable BGRT size.  We can certainly prohibit absurdly huge ones (for
+> instance, bigger than the maximum likely screen resolution times 4 bytes
+> per pixel), but allocation failures may well occur for smaller sizes,
+> and I don't think we want to spew a massive warning for that either.
 
-Since 3.13 kernels with built-in initrd fail to boot on Fujitsu hardware
-in EFI mode (efi stub) though the exact same kernel binary does boot in
-BIOS mode (grub).
-Interestingly EFI kernels with different config do boot under VMWare.
+Oh, dammit, that's my bad. I misread the allocation size and thought it
+was huge, but now realise it was only 6MB or so. Sorry Josh.
 
-Your patch "initramfs: read CONFIG_RD_ variables for initramfs
-compression" is the trigger.
+I was worried that this was the first reported instance of a BGRT
+claiming to be valid but with a bogusly large image size. I've never
+been so happy to be wrong.
 
+However, the fact that the allocation failed is worth investigating -
+this machine appears to have GBs of ram. Perhaps we should switch to
+requesting pages directly instead of relying on kmalloc()? 
 
-Is something missing in EFI stub or why do things behave differently?
+I appreciate that the BGRT code isn't mission critical or anything like
+that, and that failing the alloc isn't the end of the world, but if we
+have code in the kernel it should really be as robust as possible. I
+don't think trying to kmalloc() ~6MB can claim to be robust.
 
-Looking at compiled kernel with and without this patch the resulting
-bzImage is similar in size but in build directory I get:
-
-Vanilla 3.13, CONFIG_INITRAMFS_COMPRESSION_NONE=y:
--rw-r--r-- 1 kbuild kbuild     399 Aug  4 10:26 usr/built-in.mod.c
--rw-r--r-- 1 kbuild kbuild 7062309 Aug  4 10:26 usr/built-in.o
--rwxr-xr-x 1 kbuild kbuild   22670 Aug  4 10:26 usr/gen_init_cpio
--rw-r--r-- 1 kbuild kbuild 7061260 Aug  4 10:26 usr/initramfs_data.cpio.gz
--rw-r--r-- 1 kbuild kbuild 7062240 Aug  4 10:26 usr/initramfs_data.o
--rw-r--r-- 1 kbuild kbuild       0 Aug  4 10:26 usr/modules.builtin 
--rw-r--r-- 1 kbuild kbuild       0 Aug  4 10:26 usr/modules.order
-
-Does not boot, reboots after exiting EFI stub
-
-
-Vanilla 3.13, CONFIG_INITRAMFS_COMPRESSION_GZIP=y:
--rw-r--r-- 1 kbuild kbuild     399 Aug  4 10:26 usr/built-in.mod.c
--rw-r--r-- 1 kbuild kbuild 7062309 Aug  4 10:26 usr/built-in.o
--rwxr-xr-x 1 kbuild kbuild   22670 Aug  4 10:26 usr/gen_init_cpio
--rw-r--r-- 1 kbuild kbuild 7061260 Aug  4 10:26 usr/initramfs_data.cpio.gz
--rw-r--r-- 1 kbuild kbuild 7062240 Aug  4 10:26 usr/initramfs_data.o
--rw-r--r-- 1 kbuild kbuild       0 Aug  4 10:37 usr/modules.builtin
--rw-r--r-- 1 kbuild kbuild       0 Aug  4 10:37 usr/modules.order
-
-Does not boot, reboots after exiting EFI stub
-
-
-3.13 with patch revered, CONFIG_INITRAMFS_COMPRESSION_NONE=y:
--rw-r--r-- 1 kbuild kbuild      399 Aug  4 10:16 usr/built-in.mod.c
--rw-r--r-- 1 kbuild kbuild 16931869 Aug  4 10:16 usr/built-in.o
--rwxr-xr-x 1 kbuild kbuild    22670 Aug  4 10:16 usr/gen_init_cpio
--rw-r--r-- 1 kbuild kbuild 16930816 Aug  4 10:16 usr/initramfs_data.cpio
--rw-r--r-- 1 kbuild kbuild 16931800 Aug  4 10:16 usr/initramfs_data.o
--rw-r--r-- 1 kbuild kbuild        0 Aug  4 10:16 usr/modules.builtin
--rw-r--r-- 1 kbuild kbuild        0 Aug  4 10:16 usr/modules.order
-
-Boots successfully.
-
-
-
-Related config options:
-CONFIG_RD_GZIP=y
-CONFIG_RD_BZIP2=y
-CONFIG_RD_LZMA=y
-CONFIG_RD_XZ=y
-CONFIG_RD_LZO=y
-CONFIG_RD_LZ4=y
-
-CONFIG_INITRAMFS_SOURCE="/usr/src/initrd64-20131127.cpio"
-CONFIG_INITRAMFS_ROOT_UID=0
-CONFIG_INITRAMFS_ROOT_GID=0
-CONFIG_INITRAMFS_COMPRESSION_NONE=y
-# CONFIG_INITRAMFS_COMPRESSION_GZIP is not set
-# CONFIG_INITRAMFS_COMPRESSION_BZIP2 is not set
-# CONFIG_INITRAMFS_COMPRESSION_LZMA is not set
-# CONFIG_INITRAMFS_COMPRESSION_XZ is not set
-# CONFIG_INITRAMFS_COMPRESSION_LZO is not set
-
-
-
-Bruno
+-- 
+Matt Fleming, Intel Open Source Technology Center
