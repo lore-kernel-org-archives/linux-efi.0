@@ -1,57 +1,40 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH] x86/efi: Fix 3DNow optimization build failure in EFI stub
-Date: Mon,  4 Aug 2014 23:52:15 +0100
-Message-ID: <1407192735-26368-1-git-send-email-matt@console-pimps.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@kernel.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, Thomas Gleixner <tglx@linutronix.de>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Fix 3DNow optimization build failure in EFI
+ stub
+Date: Mon, 04 Aug 2014 16:06:01 -0700
+Message-ID: <53E011D9.5040908@zytor.com>
+References: <1407192735-26368-1-git-send-email-matt@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1407192735-26368-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+On 08/04/2014 03:52 PM, Matt Fleming wrote:
+> 
+> diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+> index 801ed36c2e49..fcad2e15e92a 100644
+> --- a/arch/x86/Kconfig
+> +++ b/arch/x86/Kconfig
+> @@ -1520,7 +1520,7 @@ config X86_SMAP
+>  
+>  config EFI
+>  	bool "EFI runtime service support"
+> -	depends on ACPI
+> +	depends on ACPI && !X86_USE_3DNOW
+>  	select UCS2_STRING
+>  	select EFI_RUNTIME_WRAPPERS
+>  	---help---
+> 
 
-Building a 32-bit kernel with CONFIG_X86_USE_3DNOW and CONFIG_EFI_STUB
-leads to the following build error,
+As we discussed over IRC, should be EFI_STUB not EFI.  Once that is fixed:
 
-  drivers/firmware/efi/libstub/lib.a(efi-stub-helper.o): In function `efi_relocate_kernel':
-  efi-stub-helper.c:(.text+0xda5): undefined reference to `_mmx_memcpy'
+Acked-by: H. Peter Anvin <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 
-This is due to the fact that the EFI boot stub pulls in the 3DNow
-optimized versions of the memcpy() prototype from
-arch/x86/include/asm/string_32.h, even though the _mmx_memcpy()
-implementation isn't available in the EFI stub.
+... in case Ingo or Thomas grabs it before I do.
 
-For now, predicate CONFIG_EFI on !CONFIG_X86_USE_3DNOW. This is most
-definitely a temporary fix. A complete solution will involve selectively
-including kernel headers/symbols into the early-boot execution
-environment of the EFI boot stub, i.e. something analogous to the way
-that the _SETUP symbol is used.
-
-Previous attempts have been made to fix this kind of problem, though
-none seem to have ever been merged,
-
-  http://lkml.kernel.org/r/20120329104822.GA17233@x1.osrc.amd.com
-
-Clearly, this problem has been around for a long time.
-
-Reported-by: Ingo Molnar <mingo@kernel.org>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
-
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 801ed36c2e49..fcad2e15e92a 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1520,7 +1520,7 @@ config X86_SMAP
- 
- config EFI
- 	bool "EFI runtime service support"
--	depends on ACPI
-+	depends on ACPI && !X86_USE_3DNOW
- 	select UCS2_STRING
- 	select EFI_RUNTIME_WRAPPERS
- 	---help---
--- 
-1.9.0
+	-hpa
