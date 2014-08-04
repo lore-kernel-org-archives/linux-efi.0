@@ -1,46 +1,69 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH] efi-bgrt: Add error handling; inform the user when
- ignoring the BGRT
-Date: Mon, 4 Aug 2014 13:19:59 +0100
-Message-ID: <20140804121959.GG15082@console-pimps.org>
-References: <20140730192331.GA23730@jtriplet-mobl1>
- <20140731103110.GC15082@console-pimps.org>
- <20140731161133.GA12663@cloud>
- <20140801091949.GD15082@console-pimps.org>
- <20140801161154.GA1258@thin>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: 3.12 to 3.13 boot regression bisected - still applies to 3.16
+Date: Mon, 4 Aug 2014 13:27:28 +0100
+Message-ID: <20140804122728.GH15082@console-pimps.org>
+References: <20140804113435.34ed8c76@pluto>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140801161154.GA1258@thin>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Srihari Vijayaraghavan <linux.bug.reporting@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, Matthew Garrett <mjg59@srcf.ucam.org>
+In-Reply-To: <20140804113435.34ed8c76@pluto>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Bruno =?iso-8859-1?Q?Pr=E9mont?= <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
+Cc: P J P <ppandit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 01 Aug, at 09:11:54AM, Josh Triplett wrote:
-> 
-> The original bug report was about an allocation failure for a fairly
-> reasonable BGRT size.  We can certainly prohibit absurdly huge ones (for
-> instance, bigger than the maximum likely screen resolution times 4 bytes
-> per pixel), but allocation failures may well occur for smaller sizes,
-> and I don't think we want to spew a massive warning for that either.
+On Mon, 04 Aug, at 11:34:35AM, Bruno Pr=E9mont wrote:
+> Hi,
+>=20
+> Since 3.13 kernels with built-in initrd fail to boot on Fujitsu hardw=
+are
+> in EFI mode (efi stub) though the exact same kernel binary does boot =
+in
+> BIOS mode (grub).
+> Interestingly EFI kernels with different config do boot under VMWare.
+>=20
+> Your patch "initramfs: read CONFIG_RD_ variables for initramfs
+> compression" is the trigger.
+>=20
+>=20
+> Is something missing in EFI stub or why do things behave differently?
+=20
+Nuts. I suspect it's an EFI boot stub bug. Have you definitely tried ou=
+t
+3.16? In particular the following commit might make a difference,
 
-Oh, dammit, that's my bad. I misread the allocation size and thought it
-was huge, but now realise it was only 6MB or so. Sorry Josh.
+  commit c7fb93ec51d4
+  Author: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+  Date:   Thu Jul 10 12:26:20 2014 +0100
 
-I was worried that this was the first reported instance of a BGRT
-claiming to be valid but with a bogusly large image size. I've never
-been so happy to be wrong.
+      x86/efi: Include a .bss section within the PE/COFF headers
+   =20
+      The PE/COFF headers currently describe only the initialised-data
+      portions of the image, and result in no space being allocated for=
+ the
+      uninitialised-data portions.  Consequently, the EFI boot stub wil=
+l end
+      up overwriting unexpected areas of memory, with unpredictable res=
+ults.
+   =20
+      Fix by including a .bss section in the PE/COFF headers (functiona=
+lly
+      equivalent to the init_size field in the bzImage header).
+   =20
+      Signed-off-by: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+      Cc: Thomas B=E4chler <thomas-fd97jBR+K/6hPH1hqNUYSQ@public.gmane.org>
+      Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+      Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+      Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-However, the fact that the allocation failed is worth investigating -
-this machine appears to have GBs of ram. Perhaps we should switch to
-requesting pages directly instead of relying on kmalloc()? 
 
-I appreciate that the BGRT code isn't mission critical or anything like
-that, and that failing the alloc isn't the end of the world, but if we
-have code in the kernel it should really be as robust as possible. I
-don't think trying to kmalloc() ~6MB can claim to be robust.
+> Looking at compiled kernel with and without this patch the resulting
+> bzImage is similar in size but in build directory I get:
 
--- 
+Could you send me the initrd image? I'd like to try and reproduce this
+on my end, even though I regularly boot with a built-in initrd.
+
+--=20
 Matt Fleming, Intel Open Source Technology Center
