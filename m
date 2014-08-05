@@ -1,75 +1,89 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4] efi: implement mandatory locking for UEFI Runtime Services
-Date: Tue, 5 Aug 2014 14:14:38 +0200
-Message-ID: <CAKv+Gu8tdHE_iE-1nv6d0TuuUTmpL5-rB3+Exht7jAdE+1jW=A@mail.gmail.com>
-References: <1407168960-30128-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20140805120332.GO15082@console-pimps.org>
+From: Bruno =?UTF-8?B?UHLDqW1vbnQ=?= <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
+Subject: Re: 3.12 to 3.13 boot regression bisected - still applies to 3.16
+Date: Tue, 5 Aug 2014 14:11:42 +0200
+Message-ID: <20140805141142.437ecb17@pluto>
+References: <20140804113435.34ed8c76@pluto>
+	<20140804122728.GH15082@console-pimps.org>
+	<20140804150627.4563b6a7@pluto>
+	<20140804135452.GJ15082@console-pimps.org>
+	<20140805100242.425e1093@pluto>
+	<20140805084542.GM15082@console-pimps.org>
+	<20140805111330.3cf9319f@pluto>
+	<20140805091848.GN15082@console-pimps.org>
+	<20140805135130.2d180b69@pluto>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140805120332.GO15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20140805135130.2d180b69@pluto>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: P J P <ppandit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 5 August 2014 14:03, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Mon, 04 Aug, at 06:16:00PM, Ard Biesheuvel wrote:
->> According to section 7.1 of the UEFI spec, Runtime Services are not fully
->> reentrant, and there are particular combinations of calls that need to be
->> serialized. Use a spinlock to serialize all Runtime Services with respect
->> to all others, even if this is more than strictly needed.
->
-> I think we should include something that explains how we've managed to
-> get away without an explicit runtime lock for so long,
->
->   We've managed to get away without requiring a runtime services lock
->   until now because most of the interactions with EFI involve EFI
->   variables, and those operations are already serialised with
->   __efivars->lock.
->
+On Tue, 5 Aug 2014 13:51:30 +0200 Bruno Pr=C3=A9mont wrote:
 
-Yes, that can go straight into the commit log imo
+> On Tue, 5 Aug 2014 10:18:48 +0100 Matt Fleming wrote:
+> > On Tue, 05 Aug, at 11:13:30AM, Bruno Pr=C3=A9mont wrote:
+> > >=20
+> > > I get at least to just before
+> > >   status =3D efi_call_early(exit_boot_services, handle, key);
+> > > in eboot.c on line 1310. A efi_printk inserted there is displayed=
+=2E
+> >=20
+> > This is worth pointing out in case you're unaware, but do you know =
+that
+> > it's not valid to call efi_printk() after ExitBootServices()? Doing=
+ so
+> > will almost certainly cause your machine to fault.
+>=20
+> I am aware that efi_printk() uses boot services!
+>=20
+>=20
+> Now I tried out loops at many places and have gotten up to line 340 i=
+n
+>=20
+>   arch/x86/kernel/head_64.S
 
-> and then a little bit of blurb about why that's no longer good enough.
->
+oops, bad copy&paste, should have been
+  arch/x86/boot/compressed/head_64.S
 
-"""
-Some of the assumptions underlying the decision whether locks are
-needed or not (e.g., SetVariable() against ResetSystem()) may not
-apply universally to all [new] architectures that implement UEFI.
-Rather than try to reason our way out of this, let's just implement at
-least what the spec requires in terms of locking.
-"""
+> System reboots within the following assembler instructions (does not
+> reach line 359).
+>=20
+> So efi_main() returns successfully but the assembler code following i=
+t
+> gets something wrong.
+>=20
+> I'm going to try further to determine which line between 340 and 359 =
+is
+> the "bad" one.
 
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/x86/include/asm/efi.h              |   2 +
->>  drivers/firmware/efi/runtime-wrappers.c | 154 +++++++++++++++++++++++++++++---
->>  2 files changed, 146 insertions(+), 10 deletions(-)
->>
->> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
->> index 044a2fd3c5fe..b39ee5f2c02d 100644
->> --- a/arch/x86/include/asm/efi.h
->> +++ b/arch/x86/include/asm/efi.h
->> @@ -86,6 +86,8 @@ extern void __iomem *efi_ioremap(unsigned long addr, unsigned long size,
->>
->>  #endif /* CONFIG_X86_32 */
->>
->> +#define efi_in_nmi() in_nmi()
->> +
->
-> Remind me why this is needed for x86 but not for arm again?
->
+arch/x86/boot/compressed/head_64.S
+341 /*
+342  * Copy the compressed kernel to the end of our buffer
+343  * where decompression in place becomes safe.
+344  */
+345         pushq   %rsi
+346         leaq    (_bss-8)(%rip), %rsi
+347         leaq    (_bss-8)(%rbx), %rdi
+348         movq    $_bss /* - $startup_32 */, %rcx
+349         shrq    $3, %rcx
+350         std
 
-The spec specifically mentions "NMI on IA-32 and x64 systems, Machine Check and
-INIT on Itanium systems" as asynchronous events that require
-additional attention.
-No such events exist on ARM or arm64 currently, so there is no need to
-implement it there.
+code gets up to here
 
-> The rest looks good. I'm just running it through some tests now.
->
+351         rep     movsq
 
-Cheers,
-Ard.
+this location is never reached but instead system reboots
+
+352         cld
+353         popq    %rsi
+354=20
+355 /*     =20
+356  * Jump to the relocated address.
+357  */
+=20
+
+
+Bruno
