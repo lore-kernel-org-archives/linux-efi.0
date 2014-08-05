@@ -1,125 +1,32 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: 3.12 to 3.13 boot regression bisected - still applies to 3.16
-Date: Tue, 5 Aug 2014 13:55:48 +0100
-Message-ID: <20140805125548.GP15082@console-pimps.org>
-References: <20140804113435.34ed8c76@pluto>
- <20140804122728.GH15082@console-pimps.org>
- <20140804150627.4563b6a7@pluto>
- <20140804135452.GJ15082@console-pimps.org>
- <20140805100242.425e1093@pluto>
- <20140805084542.GM15082@console-pimps.org>
- <20140805111330.3cf9319f@pluto>
- <20140805091848.GN15082@console-pimps.org>
- <20140805135130.2d180b69@pluto>
- <20140805141142.437ecb17@pluto>
+Subject: Re: [PATCH v4] efi: implement mandatory locking for UEFI Runtime
+ Services
+Date: Tue, 5 Aug 2014 15:14:17 +0100
+Message-ID: <20140805141417.GQ15082@console-pimps.org>
+References: <1407168960-30128-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20140805120332.GO15082@console-pimps.org>
+ <CAKv+Gu8tdHE_iE-1nv6d0TuuUTmpL5-rB3+Exht7jAdE+1jW=A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140805141142.437ecb17@pluto>
+In-Reply-To: <CAKv+Gu8tdHE_iE-1nv6d0TuuUTmpL5-rB3+Exht7jAdE+1jW=A@mail.gmail.com>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bruno =?iso-8859-1?Q?Pr=E9mont?= <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
-Cc: P J P <ppandit-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 05 Aug, at 02:11:42PM, Bruno Pr=E9mont wrote:
->=20
-> arch/x86/boot/compressed/head_64.S
-> 341 /*
-> 342  * Copy the compressed kernel to the end of our buffer
-> 343  * where decompression in place becomes safe.
-> 344  */
-> 345         pushq   %rsi
-> 346         leaq    (_bss-8)(%rip), %rsi
-> 347         leaq    (_bss-8)(%rbx), %rdi
-> 348         movq    $_bss /* - $startup_32 */, %rcx
-> 349         shrq    $3, %rcx
-> 350         std
->=20
-> code gets up to here
->=20
-> 351         rep     movsq
->=20
-> this location is never reached but instead system reboots
->=20
-> 352         cld
-> 353         popq    %rsi
-> 354=20
-> 355 /*     =20
-> 356  * Jump to the relocated address.
-> 357  */
+On Tue, 05 Aug, at 02:14:38PM, Ard Biesheuvel wrote:
+> 
+> """
+> Some of the assumptions underlying the decision whether locks are
+> needed or not (e.g., SetVariable() against ResetSystem()) may not
+> apply universally to all [new] architectures that implement UEFI.
+> Rather than try to reason our way out of this, let's just implement at
+> least what the spec requires in terms of locking.
+> """
 
-Excellent. Thanks for doing this, it's all starting to make sense now.
+Thanks Ard, I've picked this commit up for the 'next' branch.
 
-I suspect if you enable CONFIG_RELOCATABLE things will work just fine.
-I've actually got a patch to force that option if CONFIG_EFI_STUB is
-enabled to mitigate this exact problem. Could you try it out (see
-below)?
-
-Without CONFIG_RELOCATABLE the early boot code will try and decompress
-the kernel image to LOAD_PHYSICAL_ADDR. That may have worked in the day=
-s
-of BIOS, when it was reasonable to assume that nothing important would
-be sitting in the 0x10000000 region, but that's just not so for UEFI.=20
-
-=46or UEFI we need to request memory from the firmware and not stray
-outside the bounds of those allocations. Otherwise there's the potentia=
-l
-that we'll trash bits of the firmware's code/data.
-
----
-
-=46rom b9ffb908e18b11be1d89e4c39bee5d4671d3fa6f Mon Sep 17 00:00:00 200=
-1
-=46rom: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Date: Fri, 11 Jul 2014 08:45:25 +0100
-Subject: [PATCH] x86/efi: Enforce CONFIG_RELOCATABLE for EFI boot stub
-MIME-Version: 1.0
-Content-Type: text/plain; charset=3DUTF-8
-Content-Transfer-Encoding: 8bit
-
-Without CONFIG_RELOCATABLE the early boot code will decompress the
-kernel to LOAD_PHYSICAL_ADDR. While this may have been fine in the BIOS
-days, that isn't going to fly with UEFI since parts of the firmware
-code/data may be located at LOAD_PHYSICAL_ADDR.
-
-Straying outside of the bounds of the regions we've explicitly requeste=
-d
-from the firmware will cause all sorts of trouble. Bruno reports that
-his machine resets while trying to decompress the kernel image.
-
-We already go to great pains to ensure the kernel is loaded into a
-suitably aligned buffer, it's just that the address isn't necessarily
-LOAD_PHYSICAL_ADDR, because we can't guarantee that address isn't in-us=
-e
-by the firmware.
-
-Explicitly enforce CONFIG_RELOCATABLE for the EFI boot stub, so that we
-can load the kernel at any address with the correct alignment.
-
-Reported-by: Bruno Pr=E9mont <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
-Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/Kconfig | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 801ed36c2e49..f31b8ae8c81c 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1537,6 +1537,7 @@ config EFI
- config EFI_STUB
-        bool "EFI stub support"
-        depends on EFI
-+       select RELOCATABLE
-        ---help---
-           This kernel feature allows a bzImage to be loaded directly
- 	  by EFI firmware without the use of a bootloader.
---=20
-1.9.0
-
---=20
+-- 
 Matt Fleming, Intel Open Source Technology Center
