@@ -1,46 +1,27 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 1/2] UEFI arm64: add noefi boot param
-Date: Thu, 7 Aug 2014 21:26:20 +0100
-Message-ID: <20140807202620.GI15082@console-pimps.org>
-References: <20140806083825.GA31711@dhcp-16-198.nay.redhat.com>
- <20140806130623.GI4179@bivouac.eciton.net>
- <20140806132021.GB15082@console-pimps.org>
- <20140806132941.GJ4179@bivouac.eciton.net>
- <20140806140155.GC15082@console-pimps.org>
- <CAKv+Gu8ey1iKu-_wS6yYaEXQaQMDXa+PF5Kiw+edA9a_OE1EAw@mail.gmail.com>
- <20140806141814.GD15082@console-pimps.org>
- <20140807061945.GE20295@darkstar.nay.redhat.com>
+From: =?UTF-8?B?TWFudGFzIE1pa3VsxJduYXM=?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Loading initrd above 4G causes freeze on boot
+Date: Sat, 09 Aug 2014 17:23:43 +0300
+Message-ID: <53E62EEF.9040801@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140807061945.GE20295-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 07 Aug, at 02:19:45PM, Dave Young wrote:
-> 
-> The current efi_runtime_init() enables the bit after getting the efi
-> callback phyaddr of SetVirtualAddressMap.
-> 
-> Thinking more about it, since SetVirtualAddressMap() could fail
-> somehow it seems better to set EFI_RUNTIME_SERIVCES bit only when
-> enter virtual mode return EFI_SUCCESS.
-> 
-> Does it make sense to you, Matt?
+As of commit 4bf7111f5016 ("x86/efi: Support initrd loaded above 4G"),
+the kernel freezes at the earliest possible moment when trying to boot
+via UEFI on my Asus laptop. (It still boots via BIOS.)
 
-If you're going ahead with the scheme I proposed yesterday you'd
-actually want to *clear* the EFI_RUNTIME_SERVICES bit if
-SetVirtualAddressMap() fails, since we would have set it by default for
-EFI_BOOT.
+If I revert that commit on current master (c309bfa9b481), it boots
+correctly again [although I see "setup_efi_pci() failed" being printed]=
+=2E
 
-However, I still think we want to panic() if SetVirtualAddressMap()
-fails because we really never expect that function to return an error
-under normal circumstances. Also, I'm not sure it's safe to make any
-assumptions about the state of the system if SetVirtualAddressMap()
-fails.
+(Seems like it freezes when handle_cmdline_files() attempts to read
+the last chunk of the initramfs -- the last call to efi_file_read()
+never returns. Figuring out why that happens is beyond me, though.)
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+--=20
+Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
