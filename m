@@ -1,45 +1,61 @@
-From: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Loading initrd above 4G causes freeze on boot
-Date: Sun, 10 Aug 2014 21:43:32 +0300
-Message-ID: <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
-References: <53E62EEF.9040801@gmail.com>
-	<CAE9FiQVXkojPnTr4EQE7h2YhWqa5VBYRSCadB0B1qDL+eGY8jg@mail.gmail.com>
-	<20140809192302.GJ15082@console-pimps.org>
-	<CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>
-	<CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: [PATCH] firmware: Do not use WARN_ON(!spin_is_locked())
+Date: Sun, 10 Aug 2014 20:54:13 -0700
+Message-ID: <1407729253-31341-1-git-send-email-linux@roeck-us.net>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Aug 10, 2014 at 8:55 AM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Sat, Aug 9, 2014 at 3:45 PM, Mantas Mikul=C4=97nas <grawity@gmail.=
-com> wrote:
->> On Sat, Aug 9, 2014 at 10:23 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434MQ@public.gmane.org=
-g> wrote:
->> [However... Whether it's five chunks, four (after making the initrd
->> smaller), or just one (with your efi=3Dnochunk), I noticed that it
->> *always* hangs during the *last* read, and the allocated memory alwa=
-ys
->> ends at roughly the same address (0x137fffXXX). I wonder if it's
->> selecting a memory location already in use, or something like that..=
-=2E]
->>
->> (The laptop is Asus K52JT, AMI firmware v206, no updates available.)
->
-> wonder if  efi_file_read return with wrong chunksize.
->
-> Can you try attached patch ?
+spin_is_locked() always returns false for uniprocessor configurations,
+so do not use WARN_ON with it. WARN_ON_SMP() exists for that very
+purpose and must be used instead.
 
-Thanks, but it didn't change anything.
+Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+---
+ drivers/firmware/efi/vars.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-(I tried adding some efi_printk's, and as far as I can see,
-efi_file_read *doesn't* return at all.)
-
---=20
-Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index f0a4364..6f3623c 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -481,7 +481,7 @@ EXPORT_SYMBOL_GPL(efivar_entry_remove);
+  */
+ static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
+ {
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
++	WARN_ON_SMP(!spin_is_locked(&__efivars->lock));
+ 
+ 	list_del(&entry->list);
+ 	spin_unlock_irq(&__efivars->lock);
+@@ -507,7 +507,7 @@ int __efivar_entry_delete(struct efivar_entry *entry)
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
++	WARN_ON_SMP(!spin_is_locked(&__efivars->lock));
+ 
+ 	status = ops->set_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+@@ -667,7 +667,7 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
+ 	int strsize1, strsize2;
+ 	bool found = false;
+ 
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
++	WARN_ON_SMP(!spin_is_locked(&__efivars->lock));
+ 
+ 	list_for_each_entry_safe(entry, n, head, list) {
+ 		strsize1 = ucs2_strsize(name, 1024);
+@@ -739,7 +739,7 @@ int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	WARN_ON(!spin_is_locked(&__efivars->lock));
++	WARN_ON_SMP(!spin_is_locked(&__efivars->lock));
+ 
+ 	status = ops->get_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+-- 
+1.9.1
