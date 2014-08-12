@@ -1,52 +1,59 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 3/5] efi arm64: do not enter virtual mode in case booting
- with efi=noruntime or noefi
-Date: Tue, 12 Aug 2014 11:46:27 +0100
-Message-ID: <20140812104627.GI29013@arm.com>
-References: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
- <1407823822-23829-3-git-send-email-dyoung@redhat.com>
+From: David Michael <fedora.dm0-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Default initrd path with the EFI stub
+Date: Tue, 12 Aug 2014 19:49:28 -0400
+Message-ID: <87oavpp8tz.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1407823822-23829-3-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Aug 12, 2014 at 07:10:20AM +0100, Dave Young wrote:
-> In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
-> should error out.
-> 
-> At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
-> the function or it will leak early mem.
-> 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/arm64/kernel/efi.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index e72f310..324cdd1 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -386,7 +386,10 @@ static int __init arm64_enter_virtual_mode(void)
->  	int count = 0;
->  	unsigned long flags;
->  
-> -	if (!efi_enabled(EFI_BOOT)) {
-> +	mapsize = memmap.map_end - memmap.map;
-> +	early_memunmap(memmap.map, mapsize);
-> +
-> +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
+---
+Hi,
 
-Hmm, is this right? We only set EFI_BOOT if we find EFI parameters in the
-DT (see efi_init -> uefi_init), so you run the risk of unmapping something
-we never mapped here.
+I'd like to specify a default initrd path for the EFI stub at compile
+time.  Is there a way to do this?
 
-Furthermore, there seems to be a leak in uefi_init anyway, as we return
--EINVAL if the signature of the EFI table doesn't match without unmapping it
-first.
+I got it to successfully load an initrd by setting the parameter in
+CONFIG_CMDLINE with this proof-of-concept patch on 3.16.  (This patch is
+against the efi tree's next branch.)  If the EFI stub doesn't currently
+support this functionality, I'd appreciate it if something like this
+could be applied.
 
-Will
+Thanks.
+
+David
+
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index a920fec..eac30dc 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -675,6 +675,10 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
+ 
+ 	options_bytes++;	/* NUL termination */
+ 
++#ifdef CONFIG_CMDLINE
++	options_bytes += sizeof(CONFIG_CMDLINE);
++#endif
++
+ 	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
+ 	if (status != EFI_SUCCESS)
+ 		return NULL;
+@@ -682,6 +686,11 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
+ 	s1 = (u8 *)cmdline_addr;
+ 	s2 = (const u16 *)options;
+ 
++#ifdef CONFIG_CMDLINE
++	memcpy((void *)s1, CONFIG_CMDLINE " ", sizeof(CONFIG_CMDLINE));
++	s1 += sizeof(CONFIG_CMDLINE);
++#endif
++
+ 	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
+ 	*s1 = '\0';
+ 
+-- 
+1.9.3
