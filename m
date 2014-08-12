@@ -1,61 +1,95 @@
 From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 1/2] UEFI arm64: add noefi boot param
-Date: Mon, 11 Aug 2014 17:00:14 +0800
-Message-ID: <20140811090013.GD1834@darkstar.nay.redhat.com>
-References: <20140806083825.GA31711@dhcp-16-198.nay.redhat.com>
- <20140806130623.GI4179@bivouac.eciton.net>
- <20140806132021.GB15082@console-pimps.org>
- <20140806132941.GJ4179@bivouac.eciton.net>
- <20140806140155.GC15082@console-pimps.org>
- <CAKv+Gu8ey1iKu-_wS6yYaEXQaQMDXa+PF5Kiw+edA9a_OE1EAw@mail.gmail.com>
- <20140806141814.GD15082@console-pimps.org>
- <20140807061945.GE20295@darkstar.nay.redhat.com>
- <20140807202620.GI15082@console-pimps.org>
+Subject: [PATCH 1/5] efi: move noefi early param code out of x86 arch code
+Date: Tue, 12 Aug 2014 14:10:18 +0800
+Message-ID: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140807202620.GI15082@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt.fleming@intel.com>, Mark Salter <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Matt Fleming <matt.fleming@intel.com>
+Cc: Alessandro Zummo <a.zummo@towertech.it>, Randy Dunlap <rdunlap@infradead.org>, rtc-linux@googlegroups.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, hpa@zytor.com, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/07/14 at 09:26pm, Matt Fleming wrote:
-> On Thu, 07 Aug, at 02:19:45PM, Dave Young wrote:
-> > 
-> > The current efi_runtime_init() enables the bit after getting the efi
-> > callback phyaddr of SetVirtualAddressMap.
-> > 
-> > Thinking more about it, since SetVirtualAddressMap() could fail
-> > somehow it seems better to set EFI_RUNTIME_SERIVCES bit only when
-> > enter virtual mode return EFI_SUCCESS.
-> > 
-> > Does it make sense to you, Matt?
-> 
-> If you're going ahead with the scheme I proposed yesterday you'd
-> actually want to *clear* the EFI_RUNTIME_SERVICES bit if
-> SetVirtualAddressMap() fails, since we would have set it by default for
-> EFI_BOOT.
+noefi param can be used for arches other than X86 later, thus move it out of
+x86 platform code.
 
-There's one concern about the noefi early param handling in your proposal.
-Your patch depends on the parse_early_param() being called after setting
-EFI_RUNTIME_SERVICES bit. It's true in X86 setup.c, but it's not in arm64
-setup.c so I'm afraid there's other piece of code need early params and it
-will not work.
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+ arch/x86/platform/efi/efi.c | 10 +---------
+ drivers/firmware/efi/efi.c  | 13 +++++++++++++
+ include/linux/efi.h         |  1 +
+ 3 files changed, 15 insertions(+), 9 deletions(-)
 
-How about using a variable like runtime_disabled, then add a global function
-efi_runtime_disabled() to get the status. 
-
-
-> 
-> However, I still think we want to panic() if SetVirtualAddressMap()
-> fails because we really never expect that function to return an error
-> under normal circumstances. Also, I'm not sure it's safe to make any
-> assumptions about the state of the system if SetVirtualAddressMap()
-> fails.
-
-Ok, so the panic is reasonable to me as well.
-
-Thanks
-Dave
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 850da94..dd7aaa1 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -70,14 +70,6 @@ static efi_config_table_type_t arch_tables[] __initdata = {
+ 
+ u64 efi_setup;		/* efi setup_data physical address */
+ 
+-static bool disable_runtime __initdata = false;
+-static int __init setup_noefi(char *arg)
+-{
+-	disable_runtime = true;
+-	return 0;
+-}
+-early_param("noefi", setup_noefi);
+-
+ int add_efi_memmap;
+ EXPORT_SYMBOL(add_efi_memmap);
+ 
+@@ -492,7 +484,7 @@ void __init efi_init(void)
+ 	if (!efi_runtime_supported())
+ 		pr_info("No EFI runtime due to 32/64-bit mismatch with kernel\n");
+ 	else {
+-		if (disable_runtime || efi_runtime_init())
++		if (efi_runtime_disabled() || efi_runtime_init())
+ 			return;
+ 	}
+ 	if (efi_memmap_init())
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 64ecbb5..c8f01a7 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -41,6 +41,19 @@ struct efi __read_mostly efi = {
+ };
+ EXPORT_SYMBOL(efi);
+ 
++static bool disable_runtime;
++static int __init setup_noefi(char *arg)
++{
++	disable_runtime = true;
++	return 0;
++}
++early_param("noefi", setup_noefi);
++
++bool efi_runtime_disabled(void)
++{
++	return disable_runtime;
++}
++
+ static struct kobject *efi_kobj;
+ static struct kobject *efivars_kobj;
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 45cb4ff..06d7c03 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1227,4 +1227,5 @@ efi_status_t handle_cmdline_files(efi_system_table_t *sys_table_arg,
+ 				  unsigned long *load_addr,
+ 				  unsigned long *load_size);
+ 
++bool efi_runtime_disabled(void);
+ #endif /* _LINUX_EFI_H */
+-- 
+1.8.3.1
