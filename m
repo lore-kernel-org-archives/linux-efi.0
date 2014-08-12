@@ -1,46 +1,52 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 1/5] efi: move noefi early param code out of x86 arch code
-Date: Tue, 12 Aug 2014 15:14:43 +0800
-Message-ID: <20140812071443.GB14031@darkstar.nay.redhat.com>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 3/5] efi arm64: do not enter virtual mode in case booting
+ with efi=noruntime or noefi
+Date: Tue, 12 Aug 2014 11:46:27 +0100
+Message-ID: <20140812104627.GI29013@arm.com>
 References: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
- <53E9B9B3.1050504@infradead.org>
+ <1407823822-23829-3-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <53E9B9B3.1050504@infradead.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Alessandro Zummo <a.zummo@towertech.it>, Matt Fleming <matt.fleming@intel.com>, rtc-linux@googlegroups.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, hpa@zytor.com, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <1407823822-23829-3-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org" <rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/11/14 at 11:52pm, Randy Dunlap wrote:
-> On 08/11/14 23:10, Dave Young wrote:
-> > noefi param can be used for arches other than X86 later, thus move it out of
-> > x86 platform code.
-> > 
-> > Signed-off-by: Dave Young <dyoung@redhat.com>
-> > ---
-> >  arch/x86/platform/efi/efi.c | 10 +---------
-> >  drivers/firmware/efi/efi.c  | 13 +++++++++++++
-> >  include/linux/efi.h         |  1 +
-> >  3 files changed, 15 insertions(+), 9 deletions(-)
+On Tue, Aug 12, 2014 at 07:10:20AM +0100, Dave Young wrote:
+> In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
+> should error out.
 > 
-> This line in Documentation/kernel-parameters.txt needs to be updated:
+> At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
+> the function or it will leak early mem.
 > 
-> 	noefi		[X86] Disable EFI runtime services support.
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c | 7 ++++---
+>  1 file changed, 4 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index e72f310..324cdd1 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -386,7 +386,10 @@ static int __init arm64_enter_virtual_mode(void)
+>  	int count = 0;
+>  	unsigned long flags;
+>  
+> -	if (!efi_enabled(EFI_BOOT)) {
+> +	mapsize = memmap.map_end - memmap.map;
+> +	early_memunmap(memmap.map, mapsize);
+> +
+> +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
 
-Randy, thanks
+Hmm, is this right? We only set EFI_BOOT if we find EFI parameters in the
+DT (see efi_init -> uefi_init), so you run the risk of unmapping something
+we never mapped here.
 
-Will update the documentation.
+Furthermore, there seems to be a leak in uefi_init anyway, as we return
+-EINVAL if the signature of the EFI table doesn't match without unmapping it
+first.
 
-Dave
+Will
