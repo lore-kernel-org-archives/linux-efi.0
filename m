@@ -1,8 +1,8 @@
 From: Dave Young <dyoung@redhat.com>
-Subject: [PATCH 3/5] efi arm64: do not enter virtual mode in case booting with
- efi=noruntime or noefi
-Date: Tue, 12 Aug 2014 14:10:20 +0800
-Message-ID: <1407823822-23829-3-git-send-email-dyoung@redhat.com>
+Subject: [PATCH 5/5] efi_rtc: probe function error out in case no efi runtime
+ enabled
+Date: Tue, 12 Aug 2014 14:10:22 +0800
+Message-ID: <1407823822-23829-5-git-send-email-dyoung@redhat.com>
 References: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,41 +22,29 @@ To: Matt Fleming <matt.fleming@intel.com>
 Cc: Alessandro Zummo <a.zummo@towertech.it>, Randy Dunlap <rdunlap@infradead.org>, rtc-linux@googlegroups.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, hpa@zytor.com, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
-should error out.
+efi rtc depends on efi runtime services, so if efi runtime services are not
+usable it should error out.
 
-At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
-the function or it will leak early mem.
+Without this patch rtc-efi will panic with 'noefi' boot
 
 Signed-off-by: Dave Young <dyoung@redhat.com>
 ---
- arch/arm64/kernel/efi.c | 7 ++++---
- 1 file changed, 4 insertions(+), 3 deletions(-)
+ drivers/rtc/rtc-efi.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index e72f310..324cdd1 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -386,7 +386,10 @@ static int __init arm64_enter_virtual_mode(void)
- 	int count = 0;
- 	unsigned long flags;
+diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+index 8225b89..8c02ed8 100644
+--- a/drivers/rtc/rtc-efi.c
++++ b/drivers/rtc/rtc-efi.c
+@@ -213,6 +213,9 @@ static int __init efi_rtc_probe(struct platform_device *dev)
+ {
+ 	struct rtc_device *rtc;
  
--	if (!efi_enabled(EFI_BOOT)) {
-+	mapsize = memmap.map_end - memmap.map;
-+	early_memunmap(memmap.map, mapsize);
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return -ENODEV;
 +
-+	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
- 		pr_info("EFI services will not be available.\n");
- 		return -1;
- 	}
-@@ -394,8 +397,6 @@ static int __init arm64_enter_virtual_mode(void)
- 	pr_info("Remapping and enabling EFI services.\n");
- 
- 	/* replace early memmap mapping with permanent mapping */
--	mapsize = memmap.map_end - memmap.map;
--	early_memunmap(memmap.map, mapsize);
- 	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
- 						   mapsize);
- 	memmap.map_end = memmap.map + mapsize;
+ 	rtc = devm_rtc_device_register(&dev->dev, "rtc-efi", &efi_rtc_ops,
+ 					THIS_MODULE);
+ 	if (IS_ERR(rtc))
 -- 
 1.8.3.1
