@@ -1,198 +1,89 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH 2/5] efi: add kernel param efi=noruntime
-Date: Wed, 13 Aug 2014 16:13:47 +0800
-Message-ID: <20140813081347.GA3977@darkstar.nay.redhat.com>
-References: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
- <1407823822-23829-2-git-send-email-dyoung@redhat.com>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] arm64: ignore DT memreserve entries when booting in UEFI
+ mode
+Date: Wed, 13 Aug 2014 13:22:39 +0100
+Message-ID: <20140813122239.GA15356@bivouac.eciton.net>
+References: <1406570583-22848-1-git-send-email-leif.lindholm@linaro.org>
+ <20140728181449.GF2576@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1407823822-23829-2-git-send-email-dyoung@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Matt Fleming <matt.fleming@intel.com>
-Cc: Alessandro Zummo <a.zummo@towertech.it>, Randy Dunlap <rdunlap@infradead.org>, rtc-linux@googlegroups.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, hpa@zytor.com, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
+In-Reply-To: <20140728181449.GF2576@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, rob.herring-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 08/12/14 at 02:10pm, Dave Young wrote:
-> noefi kernel param means actually disabling efi runtime, Per suggestion from
-> Leif Lindholm efi=noruntime should be better. But since noefi is already used
-> in X86 thus just adding another param efi=noruntime for same purpose.
+On Mon, Jul 28, 2014 at 07:14:49PM +0100, Mark Rutland wrote:
+> On Mon, Jul 28, 2014 at 07:03:03PM +0100, Leif Lindholm wrote:
+> > UEFI provides its own method for marking regions to reserve, via the
+> > memory map which is also used to initialise memblock. So when using the
+> > UEFI memory map, ignore any memreserve entries present in the DT.
 > 
-> Signed-off-by: Dave Young <dyoung@redhat.com>
-> ---
->  Documentation/kernel-parameters.txt |  4 +++-
->  arch/x86/platform/efi/efi.c         | 12 ------------
->  drivers/firmware/efi/efi.c          | 22 ++++++++++++++++++++++
->  3 files changed, 25 insertions(+), 13 deletions(-)
+> It's worth noting that no-one is relying on this at present, and were
+> they it would imply that their UEFI implementation is broken (providing
+> a dodgy memory map).
 > 
-> diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-> index a8eb6af..09d8c54 100644
-> --- a/Documentation/kernel-parameters.txt
-> +++ b/Documentation/kernel-parameters.txt
-> @@ -992,11 +992,13 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
->  			Format: {"off" | "on" | "skip[mbr]"}
->  
->  	efi=		[EFI]
-> -			Format: { "old_map" }
-> +			Format: { "old_map" | "noruntime" }
->  			old_map [X86-64]: switch to the old ioremap-based EFI
->  			runtime services mapping. 32-bit still uses this one by
->  			default.
->  
-> +			noruntime : disable EFI runtime services support
-> +
->  	efi_no_storage_paranoia [EFI; X86]
->  			Using this parameter you can use more than 50% of
->  			your efi variable storage. Use this parameter only if
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index dd7aaa1..eae91be 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -929,15 +929,3 @@ u64 efi_mem_attributes(unsigned long phys_addr)
->  	}
->  	return 0;
->  }
-> -
-> -static int __init parse_efi_cmdline(char *str)
-> -{
-> -	if (*str == '=')
-> -		str++;
-> -
-> -	if (!strncmp(str, "old_map", 7))
-> -		set_bit(EFI_OLD_MEMMAP, &efi.flags);
-> -
-> -	return 0;
-> -}
-> -early_param("efi", parse_efi_cmdline);
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index c8f01a7..f3ec3f2 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -24,6 +24,7 @@
->  #include <linux/of_fdt.h>
->  #include <linux/io.h>
->  #include <linux/platform_device.h>
-> +#include <asm/efi.h>
->  
->  struct efi __read_mostly efi = {
->  	.mps        = EFI_INVALID_TABLE_ADDR,
-> @@ -54,6 +55,27 @@ bool efi_runtime_disabled(void)
->  	return disable_runtime;
->  }
->  
-> +static int __init parse_efi_cmdline(char *str)
-> +{
-> +	if (*str == '=')
-> +		str++;
-> +
-> +#ifdef CONFIG_X86
-> +	if (!strncmp(str, "old_map", 7)) {
-> +		set_bit(EFI_OLD_MEMMAP, &efi.flags);
-> +		goto out;
-> +	}
-> +#endif
-> +	if (!strncmp(str, "noruntime", 9)) {
-> +		disable_runtime = true;
-> +		goto out;
-> +	}
-> +
+> So before people start doing dodgy things, let's, close that hole. If we
+> need a way of modifying the memory map we should come up with a more
+> general plan.
 
-For sharing functions I moved old_map here, but rethinking about it maybe
-it's better to keep it in arch code.
+Catalin - any comments?
+As it is a bugfix, can it go into 3.17?
 
-Matt, I see you have some code for libstub option parsing, I will rebase
-on your efi/next and I'm thinking to add a generic function for parsing
-params like below (for old_map, but libstub can not use it):
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index c90d3cd..c73a7df5 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -932,26 +932,8 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+/
+    Leif
  
- static int __init parse_efi_cmdline(char *str)
- {
--	if (*str == '=')
--		str++;
--
--	while (*str) {
--		if (!strncmp(str, "old_map", 7)) {
--			set_bit(EFI_OLD_MEMMAP, &efi.flags);
--			str += strlen("old_map");
--		}
--
--		/*
--		 * Skip any options we don't understand. Presumably
--		 * they apply to the EFI boot stub.
--		 */
--		while (*str && *str != ',')
--			str++;
--
--		/* If we hit a delimiter, skip it */
--		if (*str == ',')
--			str++;
--	}
-+	if (parse_option_str(str, "old_map"))
-+		set_bit(EFI_OLD_MEMMAP, &efi.flags);
- 
- 	return 0;
- }
-diff --git a/include/linux/kernel.h b/include/linux/kernel.h
-index 4c52907..d612718 100644
---- a/include/linux/kernel.h
-+++ b/include/linux/kernel.h
-@@ -407,6 +407,7 @@ int vsscanf(const char *, const char *, va_list);
- extern int get_option(char **str, int *pint);
- extern char *get_options(const char *str, int nints, int *ints);
- extern unsigned long long memparse(const char *ptr, char **retptr);
-+extern bool parse_option_str(const char *str, const char *option);
- 
- extern int core_kernel_text(unsigned long addr);
- extern int core_kernel_data(unsigned long addr);
-diff --git a/lib/cmdline.c b/lib/cmdline.c
-index d4932f7..f384125 100644
---- a/lib/cmdline.c
-+++ b/lib/cmdline.c
-@@ -155,3 +155,32 @@ unsigned long long memparse(const char *ptr, char **retptr)
- 	return ret;
- }
- EXPORT_SYMBOL(memparse);
-+
-+/**
-+ *	parse_option_str - Parse a string and check an option is set or not 
-+ *	@str: String to be parsed
-+ *	@option: the option name
-+ *
-+ *	This function parses a string containing a comma-separated
-+ *	list of strings like a=b,c.
-+ *
-+ *	Return true if there's such option in the string, or return false.
-+ */
-++bool parse_option_str(const char *str, const char *option)
-+{
-+	while (*str) {
-+		if (!strncmp(str, option, strlen(option))) {
-+			str += strlen(option);
-+			if (!*str || *str == ',')
-+				return true;
-+		}
-+
-+		while (*str && *str != ',')
-+			str++;
-+
-+		if (*str == ',')
-+			str++;
-+	}
-+
-+	return false;
-+}
+> > Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
+> >  arch/arm64/kernel/efi.c |    2 ++
+> >  arch/arm64/mm/init.c    |    4 +++-
+> >  2 files changed, 5 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> > index 14db1f6..7ad17b2 100644
+> > --- a/arch/arm64/kernel/efi.c
+> > +++ b/arch/arm64/kernel/efi.c
+> > @@ -188,6 +188,8 @@ static __init void reserve_regions(void)
+> >  		if (uefi_debug)
+> >  			pr_cont("\n");
+> >  	}
+> > +
+> > +	set_bit(EFI_MEMMAP, &efi.flags);
+> 
+> Nothing outside of arch/x86 seems to hang off this, so using it here
+> looks fine.
+> 
+> >  }
+> >  
+> >  
+> > diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+> > index e90c542..58dbf2e 100644
+> > --- a/arch/arm64/mm/init.c
+> > +++ b/arch/arm64/mm/init.c
+> > @@ -32,6 +32,7 @@
+> >  #include <linux/of_fdt.h>
+> >  #include <linux/dma-mapping.h>
+> >  #include <linux/dma-contiguous.h>
+> > +#include <linux/efi.h>
+> >  
+> >  #include <asm/sections.h>
+> >  #include <asm/setup.h>
+> > @@ -151,7 +152,8 @@ void __init arm64_memblock_init(void)
+> >  	memblock_reserve(__pa(swapper_pg_dir), SWAPPER_DIR_SIZE);
+> >  	memblock_reserve(__pa(idmap_pg_dir), IDMAP_DIR_SIZE);
+> >  
+> > -	early_init_fdt_scan_reserved_mem();
+> > +	if (!efi_enabled(EFI_MEMMAP))
+> > +		early_init_fdt_scan_reserved_mem();
+> 
+> And this is a false stub for !EFI, so that looks fine.
+> 
+> FWIW:
+> 
+> Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> 
+> I wonder if we have any other flat tree uses we need to be careful of
+> when booting via EFI.
