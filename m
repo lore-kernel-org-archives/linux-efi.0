@@ -1,59 +1,71 @@
-From: David Michael <fedora.dm0-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Default initrd path with the EFI stub
-Date: Tue, 12 Aug 2014 19:49:28 -0400
-Message-ID: <87oavpp8tz.fsf@gmail.com>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: [PATCH 3/5] efi arm64: do not enter virtual mode in case booting
+ with efi=noruntime or noefi
+Date: Wed, 13 Aug 2014 09:29:41 +0800
+Message-ID: <20140813012941.GA2669@darkstar.nay.redhat.com>
+References: <1407823822-23829-1-git-send-email-dyoung@redhat.com>
+ <1407823822-23829-3-git-send-email-dyoung@redhat.com>
+ <20140812104627.GI29013@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <20140812104627.GI29013@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Will Deacon <will.deacon@arm.com>
+Cc: Alessandro Zummo <a.zummo@towertech.it>, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Catalin Marinas <Catalin.Marinas@arm.com>, "msalter@redhat.com" <msalter@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, Randy Dunlap <rdunlap@infradead.org>, "hpa@zytor.com" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
----
-Hi,
+On 08/12/14 at 11:46am, Will Deacon wrote:
+> On Tue, Aug 12, 2014 at 07:10:20AM +0100, Dave Young wrote:
+> > In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
+> > should error out.
+> > 
+> > At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
+> > the function or it will leak early mem.
+> > 
+> > Signed-off-by: Dave Young <dyoung@redhat.com>
+> > ---
+> >  arch/arm64/kernel/efi.c | 7 ++++---
+> >  1 file changed, 4 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> > index e72f310..324cdd1 100644
+> > --- a/arch/arm64/kernel/efi.c
+> > +++ b/arch/arm64/kernel/efi.c
+> > @@ -386,7 +386,10 @@ static int __init arm64_enter_virtual_mode(void)
+> >  	int count = 0;
+> >  	unsigned long flags;
+> >  
+> > -	if (!efi_enabled(EFI_BOOT)) {
+> > +	mapsize = memmap.map_end - memmap.map;
+> > +	early_memunmap(memmap.map, mapsize);
+> > +
+> > +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
+> 
+> Hmm, is this right? We only set EFI_BOOT if we find EFI parameters in the
+> DT (see efi_init -> uefi_init), so you run the risk of unmapping something
+> we never mapped here.
 
-I'd like to specify a default initrd path for the EFI stub at compile
-time.  Is there a way to do this?
+Good catch, I missed the case. will fix it in next update
 
-I got it to successfully load an initrd by setting the parameter in
-CONFIG_CMDLINE with this proof-of-concept patch on 3.16.  (This patch is
-against the efi tree's next branch.)  If the EFI stub doesn't currently
-support this functionality, I'd appreciate it if something like this
-could be applied.
+> 
+> Furthermore, there seems to be a leak in uefi_init anyway, as we return
+> -EINVAL if the signature of the EFI table doesn't match without unmapping it
+> first.
 
-Thanks.
+Yes, will add a new patch to fix the error handling in uefi_init.
 
-David
+BTW, Matt, I forgot to cc Xen/SGI people, will send an update soon and cc them.
 
- drivers/firmware/efi/libstub/efi-stub-helper.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index a920fec..eac30dc 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -675,6 +675,10 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 
- 	options_bytes++;	/* NUL termination */
- 
-+#ifdef CONFIG_CMDLINE
-+	options_bytes += sizeof(CONFIG_CMDLINE);
-+#endif
-+
- 	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
- 	if (status != EFI_SUCCESS)
- 		return NULL;
-@@ -682,6 +686,11 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 	s1 = (u8 *)cmdline_addr;
- 	s2 = (const u16 *)options;
- 
-+#ifdef CONFIG_CMDLINE
-+	memcpy((void *)s1, CONFIG_CMDLINE " ", sizeof(CONFIG_CMDLINE));
-+	s1 += sizeof(CONFIG_CMDLINE);
-+#endif
-+
- 	s1 = efi_utf16_to_utf8(s1, s2, options_chars);
- 	*s1 = '\0';
- 
--- 
-1.9.3
+Thanks
+Dave
