@@ -1,51 +1,44 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: Loading initrd above 4G causes freeze on boot
-Date: Wed, 13 Aug 2014 19:44:49 +0100
-Message-ID: <20140813184449.GV15082@console-pimps.org>
-References: <53E62EEF.9040801@gmail.com>
- <CAE9FiQVXkojPnTr4EQE7h2YhWqa5VBYRSCadB0B1qDL+eGY8jg@mail.gmail.com>
- <20140809192302.GJ15082@console-pimps.org>
- <CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>
- <CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>
- <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
- <20140813140219.GP15082@console-pimps.org>
- <CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>
+From: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Subject: Re: [PATCH] firmware: Do not use WARN_ON(!spin_is_locked())
+Date: Wed, 13 Aug 2014 19:31:58 -0400
+Message-ID: <20140813233158.GB10808@thunk.org>
+References: <1407729253-31341-1-git-send-email-linux@roeck-us.net>
+ <20140813141836.GQ15082@console-pimps.org>
+ <53EB7831.4080306@roeck-us.net>
+ <20140813150201.GT15082@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity@gmail.com>
-Cc: Yinghai Lu <yinghai@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org
+In-Reply-To: <20140813150201.GT15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 13 Aug, at 07:38:14PM, Mantas Mikul=C4=97nas wrote:
->=20
-> Here you go.
->=20
-> [    0.000000] BIOS-e820: [mem 0x0000000100000000-0x0000000137ffffff]=
- usable
+On Wed, Aug 13, 2014 at 04:02:01PM +0100, Matt Fleming wrote:
+> On Wed, 13 Aug, at 07:37:37AM, Guenter Roeck wrote:
+> > 
+> > WARN_ON and WARN_ON_SMP are unconditional. lockdep_assert_held()
+> > is only active if lockdep debugging is enabled. Not knowing the code,
+> > nor the reason why the unconditional method was chosen, I prefer
+> > to refrain from functional changes and limit myself to bug fixes.
+>  
+> As the author of that code, I feel confident telling you that the
+> unconditional method was used because the author is a boob. The code
+> isn't so important that we need to unconditionally check the locks, and
+> indeed it's possible to run into all sorts of problems when you don't
+> use the standard lock-checking functions - the non-SMP crash being a
+> good example.
 
-[...]
+If you want to actually force a BUG_ON if the spinlock is not taken,
+even for non-debug kernels, you can use assert_spin_locked().  This
+translates to a BUG_ON(!raw_spin_is_locked(x)) on SMP kernels, and a
+no-op on UP kernels.
 
-> [    0.000000] reserve setup_data: [mem 0x0000000100000000-0x00000001=
-37ffffff] usable
+If you're confident in your testing that any problems would be
+discovered before you push your patches to linus (and you actually use
+lockdep in your testing :-), then lockdep_assert_held() doesn't add
+any overhead if !lockdep, and so it might be a better choice for you.
 
-[...]
-
-> [    0.000000] efi: mem201: type=3D7, attr=3D0xf, range=3D[0x00000001=
-00000000-0x0000000138000000) (896MB)
-
-Nothing crazy here, unless we're getting the calculation wrong and
-reading past the buffer, the code looks OK though. Or something like th=
-e
-last page or so of that memory isn't actually free even though the
-firmware tells us it is.
-
-At this point, I think modifying the max address is the best way to
-debug this further, and figure out what address causes the hang.
-
---=20
-Matt Fleming, Intel Open Source Technology Center
+							- Ted
