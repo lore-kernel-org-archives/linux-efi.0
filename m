@@ -1,89 +1,76 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64: ignore DT memreserve entries when booting in UEFI
- mode
-Date: Wed, 13 Aug 2014 13:22:39 +0100
-Message-ID: <20140813122239.GA15356@bivouac.eciton.net>
-References: <1406570583-22848-1-git-send-email-leif.lindholm@linaro.org>
- <20140728181449.GF2576@leverpostej>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: Loading initrd above 4G causes freeze on boot
+Date: Wed, 13 Aug 2014 15:02:19 +0100
+Message-ID: <20140813140219.GP15082@console-pimps.org>
+References: <53E62EEF.9040801@gmail.com>
+ <CAE9FiQVXkojPnTr4EQE7h2YhWqa5VBYRSCadB0B1qDL+eGY8jg@mail.gmail.com>
+ <20140809192302.GJ15082@console-pimps.org>
+ <CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>
+ <CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>
+ <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140728181449.GF2576@leverpostej>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, rob.herring-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity@gmail.com>
+Cc: Yinghai Lu <yinghai@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jul 28, 2014 at 07:14:49PM +0100, Mark Rutland wrote:
-> On Mon, Jul 28, 2014 at 07:03:03PM +0100, Leif Lindholm wrote:
-> > UEFI provides its own method for marking regions to reserve, via the
-> > memory map which is also used to initialise memblock. So when using the
-> > UEFI memory map, ignore any memreserve entries present in the DT.
-> 
-> It's worth noting that no-one is relying on this at present, and were
-> they it would imply that their UEFI implementation is broken (providing
-> a dodgy memory map).
-> 
-> So before people start doing dodgy things, let's, close that hole. If we
-> need a way of modifying the memory map we should come up with a more
-> general plan.
+On Sun, 10 Aug, at 09:43:32PM, Mantas Mikul=C4=97nas wrote:
+> On Sun, Aug 10, 2014 at 8:55 AM, Yinghai Lu <yinghai@kernel.org> wrot=
+e:
+> > On Sat, Aug 9, 2014 at 3:45 PM, Mantas Mikul=C4=97nas <grawity@gmai=
+l.com> wrote:
+> >> On Sat, Aug 9, 2014 at 10:23 PM, Matt Fleming <matt@console-pimps.=
+org> wrote:
+> >> [However... Whether it's five chunks, four (after making the initr=
+d
+> >> smaller), or just one (with your efi=3Dnochunk), I noticed that it
+> >> *always* hangs during the *last* read, and the allocated memory al=
+ways
+> >> ends at roughly the same address (0x137fffXXX). I wonder if it's
+> >> selecting a memory location already in use, or something like that=
+=2E..]
+> >>
+> >> (The laptop is Asus K52JT, AMI firmware v206, no updates available=
+=2E)
+> >
+> > wonder if  efi_file_read return with wrong chunksize.
+> >
+> > Can you try attached patch ?
+>=20
+> Thanks, but it didn't change anything.
+>=20
+> (I tried adding some efi_printk's, and as far as I can see,
+> efi_file_read *doesn't* return at all.)
 
-Catalin - any comments?
-As it is a bugfix, can it go into 3.17?
+Could you send you revert Yinghai's commit locally and send the dmesg
+from a successful boot? I'm wondering what other regions are around the
+0x137fffxxx area.
 
-/
-    Leif
- 
-> > Reported-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> > Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > ---
-> >  arch/arm64/kernel/efi.c |    2 ++
-> >  arch/arm64/mm/init.c    |    4 +++-
-> >  2 files changed, 5 insertions(+), 1 deletion(-)
-> > 
-> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> > index 14db1f6..7ad17b2 100644
-> > --- a/arch/arm64/kernel/efi.c
-> > +++ b/arch/arm64/kernel/efi.c
-> > @@ -188,6 +188,8 @@ static __init void reserve_regions(void)
-> >  		if (uefi_debug)
-> >  			pr_cont("\n");
-> >  	}
-> > +
-> > +	set_bit(EFI_MEMMAP, &efi.flags);
-> 
-> Nothing outside of arch/x86 seems to hang off this, so using it here
-> looks fine.
-> 
-> >  }
-> >  
-> >  
-> > diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-> > index e90c542..58dbf2e 100644
-> > --- a/arch/arm64/mm/init.c
-> > +++ b/arch/arm64/mm/init.c
-> > @@ -32,6 +32,7 @@
-> >  #include <linux/of_fdt.h>
-> >  #include <linux/dma-mapping.h>
-> >  #include <linux/dma-contiguous.h>
-> > +#include <linux/efi.h>
-> >  
-> >  #include <asm/sections.h>
-> >  #include <asm/setup.h>
-> > @@ -151,7 +152,8 @@ void __init arm64_memblock_init(void)
-> >  	memblock_reserve(__pa(swapper_pg_dir), SWAPPER_DIR_SIZE);
-> >  	memblock_reserve(__pa(idmap_pg_dir), IDMAP_DIR_SIZE);
-> >  
-> > -	early_init_fdt_scan_reserved_mem();
-> > +	if (!efi_enabled(EFI_MEMMAP))
-> > +		early_init_fdt_scan_reserved_mem();
-> 
-> And this is a false stub for !EFI, so that looks fine.
-> 
-> FWIW:
-> 
-> Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> 
-> I wonder if we have any other flat tree uses we need to be careful of
-> when booting via EFI.
+One other thing to attempt would be to progressively try higher and
+higher max memory addresses to read into to see if we can correlate you=
+r
+hang with a particular region, i.e. this code,
+
+
+	if (hdr->xloadflags & XLF_CAN_BE_LOADED_ABOVE_4G)
+		initrd_addr_max =3D -1UL;
+	else
+		initrd_addr_max =3D hdr->initrd_addr_max;
+
+	status =3D efi_parse_options(cmdline_ptr);
+	if (status !=3D EFI_SUCCESS)
+		goto fail2;
+
+	status =3D handle_cmdline_files(sys_table, image,
+				      (char *)(unsigned long)hdr->cmd_line_ptr,
+				      "initrd=3D", initrd_addr_max,
+				      &ramdisk_addr, &ramdisk_size);
+
+
+--=20
+Matt Fleming, Intel Open Source Technology Center
