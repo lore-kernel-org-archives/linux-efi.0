@@ -1,65 +1,51 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH v2] firmware: Do not use WARN_ON(!spin_is_locked())
-Date: Wed, 13 Aug 2014 11:21:34 -0700
-Message-ID: <1407954094-26126-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: Loading initrd above 4G causes freeze on boot
+Date: Wed, 13 Aug 2014 19:44:49 +0100
+Message-ID: <20140813184449.GV15082@console-pimps.org>
+References: <53E62EEF.9040801@gmail.com>
+ <CAE9FiQVXkojPnTr4EQE7h2YhWqa5VBYRSCadB0B1qDL+eGY8jg@mail.gmail.com>
+ <20140809192302.GJ15082@console-pimps.org>
+ <CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>
+ <CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>
+ <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
+ <20140813140219.GP15082@console-pimps.org>
+ <CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity@gmail.com>
+Cc: Yinghai Lu <yinghai@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-spin_is_locked() always returns false for uniprocessor configurations
-in several architectures, so do not use WARN_ON with it.
-Use lockdep_assert_held() instead to also reduce overhead in
-non-debug kernels.
+On Wed, 13 Aug, at 07:38:14PM, Mantas Mikul=C4=97nas wrote:
+>=20
+> Here you go.
+>=20
+> [    0.000000] BIOS-e820: [mem 0x0000000100000000-0x0000000137ffffff]=
+ usable
 
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
----
-v2: Use lockdep_assert_held instead of WARN_ON_SMP.
+[...]
 
- drivers/firmware/efi/vars.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+> [    0.000000] reserve setup_data: [mem 0x0000000100000000-0x00000001=
+37ffffff] usable
 
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index f0a4364..5abe943 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -481,7 +481,7 @@ EXPORT_SYMBOL_GPL(efivar_entry_remove);
-  */
- static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
- {
--	WARN_ON(!spin_is_locked(&__efivars->lock));
-+	lockdep_assert_held(&__efivars->lock);
- 
- 	list_del(&entry->list);
- 	spin_unlock_irq(&__efivars->lock);
-@@ -507,7 +507,7 @@ int __efivar_entry_delete(struct efivar_entry *entry)
- 	const struct efivar_operations *ops = __efivars->ops;
- 	efi_status_t status;
- 
--	WARN_ON(!spin_is_locked(&__efivars->lock));
-+	lockdep_assert_held(&__efivars->lock);
- 
- 	status = ops->set_variable(entry->var.VariableName,
- 				   &entry->var.VendorGuid,
-@@ -667,7 +667,7 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
- 	int strsize1, strsize2;
- 	bool found = false;
- 
--	WARN_ON(!spin_is_locked(&__efivars->lock));
-+	lockdep_assert_held(&__efivars->lock);
- 
- 	list_for_each_entry_safe(entry, n, head, list) {
- 		strsize1 = ucs2_strsize(name, 1024);
-@@ -739,7 +739,7 @@ int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
- 	const struct efivar_operations *ops = __efivars->ops;
- 	efi_status_t status;
- 
--	WARN_ON(!spin_is_locked(&__efivars->lock));
-+	lockdep_assert_held(&__efivars->lock);
- 
- 	status = ops->get_variable(entry->var.VariableName,
- 				   &entry->var.VendorGuid,
--- 
-1.9.1
+[...]
+
+> [    0.000000] efi: mem201: type=3D7, attr=3D0xf, range=3D[0x00000001=
+00000000-0x0000000138000000) (896MB)
+
+Nothing crazy here, unless we're getting the calculation wrong and
+reading past the buffer, the code looks OK though. Or something like th=
+e
+last page or so of that memory isn't actually free even though the
+firmware tells us it is.
+
+At this point, I think modifying the max address is the best way to
+debug this further, and figure out what address causes the hang.
+
+--=20
+Matt Fleming, Intel Open Source Technology Center
