@@ -1,63 +1,65 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/3 v2] arm64/efi: improve TEXT_OFFSET handling
-Date: Wed, 13 Aug 2014 18:29:58 +0100
-Message-ID: <20140813172958.GA22224@bivouac.eciton.net>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 1/1] arch/x86: Add better error logging to efi main
+Date: Wed, 13 Aug 2014 18:56:11 +0100
+Message-ID: <20140813175611.GU15082@console-pimps.org>
+References: <1404951161-2677-1-git-send-email-ulf@winkelvos.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1406717944-24725-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1404951161-2677-1-git-send-email-ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+To: ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Darren Hart <dvhart-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 30, 2014 at 12:59:01PM +0200, Ard Biesheuvel wrote:
-> Resending this series sent out yesterday with only minor changes and acks etc
-> added.
+On Thu, 10 Jul, at 02:12:41AM, ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org wrote:
+> @@ -1376,7 +1376,10 @@ struct boot_params *efi_main(struct efi_config *c,
 > 
-> In summary: patch #3 relaxes the requirements imposed by the EFI stub on where
-> Image may be loaded, but this breaks APM Mustang (if booting via UEFI) if patch
-> #1 does not go in first. Patch #2 prevents potential boot issues when Image is
-> loaded such that the stub does not have to relocate it.
+> 	setup_graphics(boot_params);
 > 
-> @Will: as discussed on the list yesterday, these patches should be kept in
-> sequence when going upstream, so it is best to take them through a single tree.
-> However, patch #3 will not apply cleanly to the arm64 tree until after 3.16-rc1
-> is released as it depends on a trivial change going in through x86/tip [efi].
-> [https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=6091c9c447370c4717ec9975813c874af490eb36]
-> 
-> If you are ok with these patches, how would you like to proceed? Patches #1 and
-> #2 could go in straight away (through arm64), and I can send Catalin and you a
-> gentle reminder once -rc1 is released to take #3? Or instead, ack them and ask
-> Matt to queue them for 3.17-late? It would be nice if this makes 3.17 as it
-> fixes actual boot problems on hardware that is under development.
-> 
-> Changes in v2:
-> - add (__force void *) cast to patch #1, as suggested in LAKML discussion
-> - add tested-by/acked-by lines
-> - rebased patch #3 onto efi-next
-> 
-> Mark Rutland (1):
->   arm64: spin-table: handle unmapped cpu-release-addrs
-> 
-> Ard Biesheuvel (2):
->   arm64/efi: efistub: cover entire static mem footprint in PE/COFF .text
->   arm64/efi: efistub: don't abort if base of DRAM is occupied
-> 
->  arch/arm64/kernel/efi-stub.c       | 18 ++++++------------
->  arch/arm64/kernel/head.S           |  6 +++---
->  arch/arm64/kernel/smp_spin_table.c | 21 ++++++++++++++++-----
->  3 files changed, 25 insertions(+), 20 deletions(-)
-> 
-> -- 
-> 1.8.3.2
+> -	setup_efi_pci(boot_params);
+> +	status = setup_efi_pci(boot_params);
+> +	if (status != EFI_SUCCESS) {
+> +		efi_printk(sys_table, "setup_efi_pci() failed!\n");
+> +	}
+ 
+Actually, it turns out that a lot of people are seeing this error
+message in what would be an otherwise quiet boot,
 
-Since this set fixes two separate bugs on actual hardware platforms,
-for the entire set - for what it's worth:
-Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Tested-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+  https://bugzilla.kernel.org/show_bug.cgi?id=81891
 
-/
-    Leif
+Maybe we should distinguish between EFI_PCI_IO_PROTOCOL_GUID not being
+found and all other errors, i.e. memory allocation failure. We obviously
+do want to know if we failed to allocate memory, but we're less bothered
+if we've no PCI devices.
+
+Something like below? Folks on Cc, could you apply this snippet and see
+whether you're still seeing the error message?
+
+---
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index f4bdab1dbf66..37743459d089 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -534,8 +534,15 @@ static efi_status_t setup_efi_pci(struct boot_params *params)
+ 					NULL, &size, pci_handle);
+ 	}
+ 
+-	if (status != EFI_SUCCESS)
++	if (status != EFI_SUCCESS) {
++		/*
++		 * We must have encountered a non-fatal error condition,
++		 * such as being unable to locate pci_proto. Return, but
++		 * don't report an error.
++		 */
++		status = EFI_SUCCESS;
+ 		goto free_handle;
++	}
+ 
+ 	if (efi_early->is64)
+ 		status = setup_efi_pci64(params, pci_handle, size);
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
