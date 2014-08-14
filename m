@@ -1,8 +1,8 @@
 From: Dave Young <dyoung@redhat.com>
-Subject: [PATCH 5/7] arm64/efi: do not enter virtual mode in case booting with
- efi=noruntime or noefi
-Date: Thu, 14 Aug 2014 17:15:30 +0800
-Message-ID: <1408007731-15081-5-git-send-email-dyoung@redhat.com>
+Subject: [PATCH 6/7] x86/efi: clear EFI_RUNTIME_SERVICES bit in case failures
+ while entering virtual mode
+Date: Thu, 14 Aug 2014 17:15:31 +0800
+Message-ID: <1408007731-15081-6-git-send-email-dyoung@redhat.com>
 References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -22,39 +22,51 @@ To: Matt Fleming <matt.fleming@intel.com>
 Cc: Russ Anderson <rja@sgi.com>, Alessandro Zummo <a.zummo@towertech.it>, Randy Dunlap <rdunlap@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, Daniel Kiper <daniel.kiper@oracle.com>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Ingo Molnar <mingo@redhat.com>, hpa@zytor.com, Thomas Gleixner <tglx@linutronix.de>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
-should error out.
+If enter virtual mode failed due to some reason other than the efi call
+the EFI_RUNTIME_SERVICES bit in efi.flags should be cleared thus users
+of efi runtime services can check the bit and handle the case instead of
+assume efi runtime is ok.
 
-At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
-the function or it will leak early mem.
+Per Matt, if efi call SetVirtualAddressMap fails we will be not sure it's safe
+to make any assumptions about the state of the system. so kernel panics instead
+of clears EFI_RUNTIME_SERVICES bit.
 
 Signed-off-by: Dave Young <dyoung@redhat.com>
 ---
- arch/arm64/kernel/efi.c | 9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+ arch/x86/platform/efi/efi.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 6ed0362..309fab1 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -392,11 +392,16 @@ static int __init arm64_enter_virtual_mode(void)
- 		return -1;
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 00f4cc5..d3096c0 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -724,6 +724,7 @@ static void __init kexec_enter_virtual_mode(void)
+ 	 */
+ 	if (!efi_is_native()) {
+ 		efi_unmap_memmap();
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
  	}
  
-+	mapsize = memmap.map_end - memmap.map;
-+	if (efi_runtime_disabled()) {
-+		early_memunmap(memmap.map, mapsize);
-+		pr_info("EFI runtime services will be disabled.\n");
-+		return -1;
-+	}
-+
- 	pr_info("Remapping and enabling EFI services.\n");
+@@ -797,6 +798,7 @@ static void __init __efi_enter_virtual_mode(void)
+ 	new_memmap = efi_map_regions(&count, &pg_shift);
+ 	if (!new_memmap) {
+ 		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
+ 	}
  
- 	/* replace early memmap mapping with permanent mapping */
--	mapsize = memmap.map_end - memmap.map;
--	early_memunmap(memmap.map, mapsize);
- 	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
- 						   mapsize);
- 	memmap.map_end = memmap.map + mapsize;
+@@ -804,8 +806,10 @@ static void __init __efi_enter_virtual_mode(void)
+ 
+ 	BUG_ON(!efi.systab);
+ 
+-	if (efi_setup_page_tables(__pa(new_memmap), 1 << pg_shift))
++	if (efi_setup_page_tables(__pa(new_memmap), 1 << pg_shift)) {
++		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 		return;
++	}
+ 
+ 	efi_sync_low_kernel_mappings();
+ 	efi_dump_pagetable();
 -- 
 1.8.3.1
