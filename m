@@ -1,69 +1,61 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 4/7] arm64/efi: uefi_init error handling fix
-Date: Fri, 15 Aug 2014 16:05:44 +0100
-Message-ID: <20140815150544.GX27466@arm.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH 5/7] arm64/efi: do not enter virtual mode in case booting
+ with efi=noruntime or noefi
+Date: Fri, 15 Aug 2014 16:09:52 +0100
+Message-ID: <20140815150952.GY27466@arm.com>
 References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
- <1408007731-15081-4-git-send-email-dyoung@redhat.com>
+ <1408007731-15081-5-git-send-email-dyoung@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1408007731-15081-4-git-send-email-dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+In-Reply-To: <1408007731-15081-5-git-send-email-dyoung@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: Matt Fleming <matt.fleming@intel.com>, Catalin Marinas <Catalin.Marinas@arm.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "hpa@zytor.com" <hpa@zytor.com>, Alessandro Zummo <a.zummo@towertech.it>, Leif Lindholm <leif.lindholm@linaro.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "msalter@redhat.com" <msalter@redhat.com>, Randy Dunlap <rdunlap@infradead.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Daniel Kiper <daniel.kiper@oracle.com>, Russ Anderson <rja@sgi.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Aug 14, 2014 at 10:15:29AM +0100, Dave Young wrote:
-> There's one early memmap leak in uefi_init error path, fix it and slightly tune
-> the error handling code.
+On Thu, Aug 14, 2014 at 10:15:30AM +0100, Dave Young wrote:
+> In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
+> should error out.
 > 
-> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
+> the function or it will leak early mem.
+> 
+> Signed-off-by: Dave Young <dyoung@redhat.com>
+> ---
+>  arch/arm64/kernel/efi.c | 9 +++++++--
+>  1 file changed, 7 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 6ed0362..309fab1 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -392,11 +392,16 @@ static int __init arm64_enter_virtual_mode(void)
+>  		return -1;
+>  	}
+>  
+> +	mapsize = memmap.map_end - memmap.map;
+> +	if (efi_runtime_disabled()) {
+> +		early_memunmap(memmap.map, mapsize);
 
-Reported-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-
-Thanks for fixing this.
+Should this early_memunmap really be conditional? With this change, we no
+longer unmap it before setting up the permanent mapping below.
 
 Will
 
-> ---
->  arch/arm64/kernel/efi.c | 7 ++++---
->  1 file changed, 4 insertions(+), 3 deletions(-)
-> 
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index e72f310..6ed0362 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -89,7 +89,8 @@ static int __init uefi_init(void)
->  	 */
->  	if (efi.systab->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE) {
->  		pr_err("System table signature incorrect\n");
-> -		return -EINVAL;
-> +		retval = -EINVAL;
-> +		goto out;
->  	}
->  	if ((efi.systab->hdr.revision >> 16) < 2)
->  		pr_warn("Warning: EFI system table version %d.%02d, expected 2.00 or greater\n",
-> @@ -103,6 +104,7 @@ static int __init uefi_init(void)
->  		for (i = 0; i < (int) sizeof(vendor) - 1 && *c16; ++i)
->  			vendor[i] = c16[i];
->  		vendor[i] = '\0';
-> +		early_memunmap(c16, sizeof(vendor));
->  	}
+> +		pr_info("EFI runtime services will be disabled.\n");
+> +		return -1;
+> +	}
+> +
+>  	pr_info("Remapping and enabling EFI services.\n");
 >  
->  	pr_info("EFI v%u.%.02u by %s\n",
-> @@ -113,9 +115,8 @@ static int __init uefi_init(void)
->  	if (retval == 0)
->  		set_bit(EFI_CONFIG_TABLES, &efi.flags);
->  
-> -	early_memunmap(c16, sizeof(vendor));
-> +out:
->  	early_memunmap(efi.systab,  sizeof(efi_system_table_t));
-> -
->  	return retval;
->  }
->  
+>  	/* replace early memmap mapping with permanent mapping */
+> -	mapsize = memmap.map_end - memmap.map;
+> -	early_memunmap(memmap.map, mapsize);
+>  	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+>  						   mapsize);
+>  	memmap.map_end = memmap.map + mapsize;
 > -- 
 > 1.8.3.1
 > 
