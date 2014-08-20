@@ -1,32 +1,34 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: Loading initrd above 4G causes freeze on boot
-Date: Wed, 20 Aug 2014 18:05:20 +0100
-Message-ID: <20140820170520.GF29733@console-pimps.org>
-References: <53E62EEF.9040801@gmail.com>
- <CAE9FiQVXkojPnTr4EQE7h2YhWqa5VBYRSCadB0B1qDL+eGY8jg@mail.gmail.com>
- <20140809192302.GJ15082@console-pimps.org>
- <CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>
- <CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>
- <CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>
- <20140813140219.GP15082@console-pimps.org>
- <CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>
- <20140813184449.GV15082@console-pimps.org>
+Subject: Re: [PATCH v2 3/3] arm64/efi: efistub: don't abort if base of DRAM
+ is occupied
+Date: Wed, 20 Aug 2014 18:10:57 +0100
+Message-ID: <20140820171057.GG29733@console-pimps.org>
+References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1406717944-24725-4-git-send-email-ard.biesheuvel@linaro.org>
+ <20140814113204.GE24018@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140813184449.GV15082-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20140814113204.GE24018@leverpostej>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 13 Aug, at 07:44:49PM, Matt Fleming wrote:
+On Thu, 14 Aug, at 12:32:05PM, Mark Rutland wrote:
+> On Wed, Jul 30, 2014 at 11:59:04AM +0100, Ard Biesheuvel wrote:
+> > If we cannot relocate the kernel Image to its preferred offset of base of DRAM
+> > plus TEXT_OFFSET, instead relocate it to the lowest available 2 MB boundary plus
+> > TEXT_OFFSET. We may lose a bit of memory at the low end, but we can still
+> > proceed normally otherwise.
+> > 
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > 
-> At this point, I think modifying the max address is the best way to
-> debug this further, and figure out what address causes the hang.
+> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 
-Mantas, did you manage to get to the bottom of this issue?
+Ard, who's picking this up?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
