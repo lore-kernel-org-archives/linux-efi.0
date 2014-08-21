@@ -1,32 +1,43 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] arm64/efi: efistub: don't abort if base of DRAM
- is occupied
-Date: Thu, 21 Aug 2014 10:22:12 +0100
-Message-ID: <20140821092212.GI29733@console-pimps.org>
-References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org>
- <1406717944-24725-4-git-send-email-ard.biesheuvel@linaro.org>
- <20140814113204.GE24018@leverpostej>
- <20140820171057.GG29733@console-pimps.org>
- <20140820173528.GH21734@leverpostej>
- <CAKv+Gu-3wWQJf6DTSbx68cg4BV9FX4-5t=GQ+06ikvC4M5jSkw@mail.gmail.com>
+From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [edk2] Loading initrd above 4G causes freeze on boot
+Date: Thu, 21 Aug 2014 22:23:02 +0200
+Message-ID: <53F65526.4040307@redhat.com>
+References: <20140809192302.GJ15082@console-pimps.org>	<CAPWNY8X+pRf4GuYAzKj-co0fkLMY0KNw+wB4KA8eaJ0QbE4MnA@mail.gmail.com>	<CAE9FiQVDURMvgVd55-onMDejCZT+OZ2vrr92wx8FJMKRNSX_GA@mail.gmail.com>	<CAPWNY8WvyAt5oT3cJ53A07tbfZctE9Y-m5f2Nucgc3hVvCgdjQ@mail.gmail.com>	<20140813140219.GP15082@console-pimps.org>	<CAPWNY8WdA+Q+WjXirGOsrYjMGp+69sCqYa8ST7_owQeVhQkT0w@mail.gmail.com>	<20140813184449.GV15082@console-pimps.org>	<20140820170520.GF29733@console-pimps.org>	<CAPWNY8V_gFutOcow5rBUSz2updGzf4hkQ98qBZ9WRGkb_sA2jA@mail.gmail.com>	<53F4FCC9.1030405@fensystems.co.uk> <20140820203011.GH29733@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-3wWQJf6DTSbx68cg4BV9FX4-5t=GQ+06ikvC4M5jSkw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20140820203011.GH29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: edk2-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?B?TWFudGFzIE1pa3VsxJduYXM=?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 21 Aug, at 10:00:40AM, Ard Biesheuvel wrote:
-> 
-> Hey Matt,
-> 
-> These patches mostly touch non-EFI specific files under arch/arm64, so
-> to prevent conflicts, it makes sense for the arm64 tree to take them.
+On 08/20/14 22:30, Matt Fleming wrote:
+> [ Pulling in EDK2 folks for help ]
+>=20
+> On Wed, 20 Aug, at 08:53:45PM, Michael Brown wrote:
+>> On 20/08/14 20:05, Mantas Mikul=C4=97nas wrote:
+>>>
+>>> I experimented with some things (like setting chunk size to a few k=
+B
+>>> to see if it hangs earlier or only at the very end; etc.), and fina=
+lly
+>>> found out that it stops freezing if I pad the initrd file to a
+>>> multiple of 512 bytes :/ That is, 5684268 bytes will freeze, 568473=
+6
+>>> bytes will not.
+>>>
+>>> ...In other words, seems like it cannot read chunks that aren't
+>>> multiples of 512 into a location above 4 GB. Or something like that=
+=2E..
 
-OK great. Thanks guys.
+This patch by yours truly appears remotely relevant:
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+https://github.com/tianocore/edk2/commit/4e39b75e
+
+It's dated Aug 26, 2013; no idea if the firmware on Mantas' Asus K52JT,
+AMI firmware v206, has it.
+
+Thanks,
+Laszlo
