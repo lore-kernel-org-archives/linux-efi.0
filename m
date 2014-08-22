@@ -1,52 +1,64 @@
-From: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: Loading initrd above 4G causes freeze on boot
-Date: Fri, 22 Aug 2014 17:43:35 +0300
-Message-ID: <CAPWNY8V4pfazk4Hw9qu07cAQZywC-GS7eyS+54fazXZaKMjMQw@mail.gmail.com>
-References: <53E62EEF.9040801@gmail.com>
-	<53F752A2.7080604@redhat.com>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 5/7 update] arm64/efi: do not enter virtual mode in case
+ booting with efi=noruntime or noefi
+Date: Fri, 22 Aug 2014 16:10:07 +0100
+Message-ID: <20140822151007.GA17255@arm.com>
+References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
+ <1408007731-15081-5-git-send-email-dyoung@redhat.com>
+ <20140815150952.GY27466@arm.com>
+ <20140818013007.GB3379@darkstar.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <53F752A2.7080604-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140818013007.GB3379-4/PLUo9XfK+sDdueE5tM26fLeoKvNuZc@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 22, 2014 at 5:24 PM, Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote=
-:
-> On 09.08.2014 16:23, Mantas Mikul=C4=97nas wrote:
->> As of commit 4bf7111f5016 ("x86/efi: Support initrd loaded above 4G"=
-),
->> the kernel freezes at the earliest possible moment when trying to bo=
-ot
->> via UEFI on my Asus laptop. (It still boots via BIOS.)
->>
->> If I revert that commit on current master (c309bfa9b481), it boots
->> correctly again [although I see "setup_efi_pci() failed" being print=
-ed].
->>
->> (Seems like it freezes when handle_cmdline_files() attempts to read
->> the last chunk of the initramfs -- the last call to efi_file_read()
->> never returns. Figuring out why that happens is beyond me, though.)
->>
->
-> I fixed my issue with: https://lkml.org/lkml/2014/8/22/232
+On Mon, Aug 18, 2014 at 02:30:07AM +0100, Dave Young wrote:
+> In case efi runtime disabled via noefi kernel cmdline arm64_enter_virtual_mode
+> should error out.
+> 
+> At the same time move early_memunmap(memmap.map, mapsize) to the beginning of
+> the function or it will leak early mem.
+> 
+> Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c | 11 ++++++++---
+>  1 file changed, 8 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 6ed0362..8f5db4a 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -392,11 +392,16 @@ static int __init arm64_enter_virtual_mode(void)
+>  		return -1;
+>  	}
+>  
+> -	pr_info("Remapping and enabling EFI services.\n");
+> -
+> -	/* replace early memmap mapping with permanent mapping */
+>  	mapsize = memmap.map_end - memmap.map;
+>  	early_memunmap(memmap.map, mapsize);
+> +
+> +	if (efi_runtime_disabled()) {
+> +		pr_info("EFI runtime services will be disabled.\n");
+> +		return -1;
+> +	}
+> +
+> +	pr_info("Remapping and enabling EFI services.\n");
+> +	/* replace early memmap mapping with permanent mapping */
+>  	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+>  						   mapsize);
+>  	memmap.map_end = memmap.map + mapsize;
 
-=2E..Well. If that's the _physical_ address, then I suppose it wouldn't
-have worked on my 4 GB laptop either way. (I thought UEFI already used
-some sort of virtual memory, so I never even thought to mention
-this... Oh well.)
+This looks better, thanks:
 
-Though if that's the case, then I'm wondering why it would be affected
-by the read size? Shouldn't it have crashed either as soon as the high
-address was used, or never at all? (I really don't know much about
-memory at this level. Sorry.)
+  Reviewed-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 
-> Care to test?
+Are you sending these via the efi tree as part of this series, or do you
+need me to pick anything up into the arm64 tree?
 
-Will try later today.
-
---=20
-Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Will
