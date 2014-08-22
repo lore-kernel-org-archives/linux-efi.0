@@ -1,91 +1,51 @@
-From: "Zheng, Lv" <lv.zheng@intel.com>
-Subject: RE: kernel boot fail with efi earlyprintk (bisected)
-Date: Fri, 22 Aug 2014 05:55:34 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E880265F008@SHSMSX101.ccr.corp.intel.com>
-References: <20140819081658.GA1795@darkstar.nay.redhat.com>
- <20140821205224.GJ29733@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fixes
+Date: Fri, 22 Aug 2014 08:52:21 +0100
+Message-ID: <20140822075221.GK29733@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>, Dave Young <dyoung@redhat.com>
-Cc: "Fleming, Matt" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devel@acpica.org" <devel@acpica.org>, "lenb@kernel.org" <lenb@kernel.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, "Moore, Robert" <robert.moore@intel.com>, "Lv Zheng (zetalog@gmail.com)" <zetalog@gmail.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+Hi guys, please pull the following fixes, which trade the locking
+WARN_ON()s in the efivars code for the more usual lockdep_*() functions
+and an arm64 EFI change that allows the gamut of runtime services to be
+invoked.
 
-I checked the arch/x86/platform/efi/early_printk.c.
-In early_efi_scroll_up(), 2 mapping entries will be used for the src/dst screen buffer.
-In drivers/acpi/acpica/tbutils.c, we've improved the early table loading code in acpi_tb_parse_root_table().
-We now need 2 mapping entries:
-1. One mapping entry is used for RSDT table mapping. Each RSDT entry contains an address for another ACPI table.
-2. For each entry in RSDP, we need another mapping entry to map the table to perform necessary check/override before installing it.
+The following changes since commit 7d1311b93e58ed55f3a31cc8f94c4b8fe988a2b9:
 
-When acpi_tb_parse_root_table() prints something through EFI earlyprintk console, we'll have 4 mapping entries used.
-The current 4 slots setting of early_ioremap() seems to be too small for such a use case.
+  Linux 3.17-rc1 (2014-08-16 10:40:26 -0600)
 
-I'm not 100% sure if this is the cause.
-If it's the cause and we think both of the mappings are reasonable, we can simply increase the FIX_BITMAPS_SLOTS defined in arch/x86/include/asm/fixmap.h.
+are available in the git repository at:
 
-What do you think of this?
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-Thanks and best regards
--Lv
+for you to fetch changes up to 6a7519e81321343165f89abb8b616df186d3e57a:
 
-> From: Zheng, Lv
-> Sent: Friday, August 22, 2014 9:43 AM
-> 
-> Hi,
-> 
-> There is only limited entries in the x86 early mapping which is implemented by the FIXMAP.
-> So this means for all __init call invoked for x86, if there was a early mapping in it, it should be unmapped before exiting the __init call.
-> 
-> Using this rule, all __init call implementers can make sure that before entering the __init call, the limited number of FIXMAP entries is
-> enough.
-> 
-> The following bisected commit just increase early mapping times from 1 to 2 in ACPICA early table handling code.
-> The number of 2 is less than the number of available FIXMAP entries.
-> And ACPICA code has ensured that all mappings are correctly unmapped after the table initialization.
-> So we didn't break the rule.
-> 
-> We can offer a workaround in ACPICA to reduce mapping count from 2 to 1 using a global option.
-> But since this report sounds like that the root cause is earlyprintk=efi has broken the above rule and the existing issue is triggered by
-> this cleanup.
-> So could someone check the earlyprintk=efi code first?
-> I think earlyprintk=efi should either unmap the increased mapping or increase the number of FIXMAP entries in case earlyprintk=efi
-> need additional early mappings.
-> Otherwise it will always be chances for earlyprintk=efi to break future code.
-> 
-> Thanks and best regards
-> -Lv
-> 
-> > From: Matt Fleming [mailto:matt@console-pimps.org]
-> > Sent: Friday, August 22, 2014 4:52 AM
-> >
-> > On Tue, 19 Aug, at 04:16:58PM, Dave Young wrote:
-> > > Hi,
-> > >
-> > > 3.16 kernel boot fail with earlyprintk=efi on my laptop.
-> > > It keeps scrolling at the bottom line of screen.
-> > >
-> > > Bisected, the first bad commit is below:
-> > > commit 86dfc6f339886559d80ee0d4bd20fe5ee90450f0
-> > > Author: Lv Zheng <lv.zheng@intel.com>
-> > > Date:   Fri Apr 4 12:38:57 2014 +0800
-> > >
-> > >     ACPICA: Tables: Fix table checksums verification before installation.
-> > >
-> > >
-> > > I did some debugging by enabling both serial and efi earlyprintk, below is
-> > > some debug dmesg, seems early_ioremap fails in scroll up function due to
-> > > no free slot, but I'm still not sure if the debug info is right or not.
-> >
-> > Thanks Dave, your callstack seems to make sense.
-> >
-> > Can you also enable early_ioremap_debug so that we can figure out where
-> > all the FIXMAP slots are going?
-> >
-> > --
-> > Matt Fleming, Intel Open Source Technology Center
+  efi/arm64: Store Runtime Services revision (2014-08-22 08:45:41 +0100)
+
+----------------------------------------------------------------
+ * WARN_ON(!spin_is_locked()) always triggers on non-SMP machines.
+   Swap it for the more canonical lockdep_assert_held() which always
+   does the right thing - Guenter Roeck
+
+ * Assign the correct value to efi.runtime_version on arm64 so that all
+   the runtime services can be invoked - Semen Protsenko
+
+----------------------------------------------------------------
+Guenter Roeck (1):
+      firmware: Do not use WARN_ON(!spin_is_locked())
+
+Semen Protsenko (1):
+      efi/arm64: Store Runtime Services revision
+
+ arch/arm64/kernel/efi.c     | 2 ++
+ drivers/firmware/efi/vars.c | 8 ++++----
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
