@@ -1,37 +1,34 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: kernel boot fail with efi earlyprintk (bisected)
-Date: Fri, 22 Aug 2014 18:04:56 +0800
-Message-ID: <20140822100456.GB1877@darkstar.nay.redhat.com>
-References: <20140819081658.GA1795@darkstar.nay.redhat.com>
- <20140821205224.GJ29733@console-pimps.org>
- <1AE640813FDE7649BE1B193DEA596E880265F008@SHSMSX101.ccr.corp.intel.com>
+From: Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: Loading initrd above 4G causes freeze on boot
+Date: Fri, 22 Aug 2014 16:24:34 +0200
+Message-ID: <53F752A2.7080604@redhat.com>
+References: <53E62EEF.9040801@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1AE640813FDE7649BE1B193DEA596E880265F008@SHSMSX101.ccr.corp.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Zheng, Lv" <lv.zheng@intel.com>
-Cc: Matt Fleming <matt@console-pimps.org>, "Fleming, Matt" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devel@acpica.org" <devel@acpica.org>, "lenb@kernel.org" <lenb@kernel.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, "Moore, Robert" <robert.moore@intel.com>, "Lv Zheng (zetalog@gmail.com)" <zetalog@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <53E62EEF.9040801-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: =?UTF-8?B?TWFudGFzIE1pa3VsxJduYXM=?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 08/22/14 at 05:55am, Zheng, Lv wrote:
-> Hi,
-> 
-> I checked the arch/x86/platform/efi/early_printk.c.
-> In early_efi_scroll_up(), 2 mapping entries will be used for the src/dst screen buffer.
-> In drivers/acpi/acpica/tbutils.c, we've improved the early table loading code in acpi_tb_parse_root_table().
-> We now need 2 mapping entries:
-> 1. One mapping entry is used for RSDT table mapping. Each RSDT entry contains an address for another ACPI table.
-> 2. For each entry in RSDP, we need another mapping entry to map the table to perform necessary check/override before installing it.
-> 
-> When acpi_tb_parse_root_table() prints something through EFI earlyprintk console, we'll have 4 mapping entries used.
-> The current 4 slots setting of early_ioremap() seems to be too small for such a use case.
-> 
-> I'm not 100% sure if this is the cause.
-> If it's the cause and we think both of the mappings are reasonable, we can simply increase the FIX_BITMAPS_SLOTS defined in arch/x86/include/asm/fixmap.h.
+On 09.08.2014 16:23, Mantas Mikul=C4=97nas wrote:
+> As of commit 4bf7111f5016 ("x86/efi: Support initrd loaded above 4G")=
+,
+> the kernel freezes at the earliest possible moment when trying to boo=
+t
+> via UEFI on my Asus laptop. (It still boots via BIOS.)
+>=20
+> If I revert that commit on current master (c309bfa9b481), it boots
+> correctly again [although I see "setup_efi_pci() failed" being printe=
+d].
+>=20
+> (Seems like it freezes when handle_cmdline_files() attempts to read
+> the last chunk of the initramfs -- the last call to efi_file_read()
+> never returns. Figuring out why that happens is beyond me, though.)
+>=20
 
-Hmm, will give see if I can do more debug, I can try what you suggested.
+I fixed my issue with: https://lkml.org/lkml/2014/8/22/232
 
-Thanks
-Dave
+Care to test?
