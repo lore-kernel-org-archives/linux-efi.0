@@ -1,57 +1,47 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fixes
-Date: Fri, 22 Aug 2014 10:15:47 +0200
-Message-ID: <20140822081547.GA7903@gmail.com>
-References: <20140822075221.GK29733@console-pimps.org>
+From: Dave Young <dyoung@redhat.com>
+Subject: Re: kernel boot fail with efi earlyprintk (bisected)
+Date: Fri, 22 Aug 2014 18:02:58 +0800
+Message-ID: <20140822100258.GA1877@darkstar.nay.redhat.com>
+References: <20140819081658.GA1795@darkstar.nay.redhat.com>
+ <20140821205224.GJ29733@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140822075221.GK29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+In-Reply-To: <20140821205224.GJ29733@console-pimps.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: lv.zheng@intel.com, matt.fleming@intel.com, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, devel@acpica.org, lenb@kernel.org, rafael.j.wysocki@intel.com, robert.moore@intel.com
 List-Id: linux-efi@vger.kernel.org
 
+On 08/21/14 at 09:52pm, Matt Fleming wrote:
+> On Tue, 19 Aug, at 04:16:58PM, Dave Young wrote:
+> > Hi,
+> > 
+> > 3.16 kernel boot fail with earlyprintk=efi on my laptop.
+> > It keeps scrolling at the bottom line of screen.
+> > 
+> > Bisected, the first bad commit is below:
+> > commit 86dfc6f339886559d80ee0d4bd20fe5ee90450f0
+> > Author: Lv Zheng <lv.zheng@intel.com>
+> > Date:   Fri Apr 4 12:38:57 2014 +0800
+> > 
+> >     ACPICA: Tables: Fix table checksums verification before installation.
+> > 
+> > 
+> > I did some debugging by enabling both serial and efi earlyprintk, below is
+> > some debug dmesg, seems early_ioremap fails in scroll up function due to
+> > no free slot, but I'm still not sure if the debug info is right or not.
+> 
+> Thanks Dave, your callstack seems to make sense.
+> 
+> Can you also enable early_ioremap_debug so that we can figure out where
+> all the FIXMAP slots are going?
 
-* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+With early_ioremap_debug enabled, there will be a lot of "dropped printk", so
+I can not get any useful information.
 
-> Hi guys, please pull the following fixes, which trade the locking
-> WARN_ON()s in the efivars code for the more usual lockdep_*() functions
-> and an arm64 EFI change that allows the gamut of runtime services to be
-> invoked.
-> 
-> The following changes since commit 7d1311b93e58ed55f3a31cc8f94c4b8fe988a2b9:
-> 
->   Linux 3.17-rc1 (2014-08-16 10:40:26 -0600)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 6a7519e81321343165f89abb8b616df186d3e57a:
-> 
->   efi/arm64: Store Runtime Services revision (2014-08-22 08:45:41 +0100)
-> 
-> ----------------------------------------------------------------
->  * WARN_ON(!spin_is_locked()) always triggers on non-SMP machines.
->    Swap it for the more canonical lockdep_assert_held() which always
->    does the right thing - Guenter Roeck
-> 
->  * Assign the correct value to efi.runtime_version on arm64 so that all
->    the runtime services can be invoked - Semen Protsenko
-> 
-> ----------------------------------------------------------------
-> Guenter Roeck (1):
->       firmware: Do not use WARN_ON(!spin_is_locked())
-> 
-> Semen Protsenko (1):
->       efi/arm64: Store Runtime Services revision
-> 
->  arch/arm64/kernel/efi.c     | 2 ++
->  drivers/firmware/efi/vars.c | 8 ++++----
->  2 files changed, 6 insertions(+), 4 deletions(-)
+Will try to do more debug.
 
-Pulled into tip:x86/urgent, thanks Matt!
-
-	Ingo
+Thanks
+Dave
