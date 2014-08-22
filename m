@@ -1,66 +1,91 @@
 From: "Zheng, Lv" <lv.zheng@intel.com>
 Subject: RE: kernel boot fail with efi earlyprintk (bisected)
-Date: Fri, 22 Aug 2014 01:43:15 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E880265EF49@SHSMSX101.ccr.corp.intel.com>
+Date: Fri, 22 Aug 2014 05:55:34 +0000
+Message-ID: <1AE640813FDE7649BE1B193DEA596E880265F008@SHSMSX101.ccr.corp.intel.com>
 References: <20140819081658.GA1795@darkstar.nay.redhat.com>
  <20140821205224.GJ29733@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20140821205224.GJ29733@console-pimps.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Matt Fleming <matt@console-pimps.org>, Dave Young <dyoung@redhat.com>
-Cc: "Fleming, Matt" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devel@acpica.org" <devel@acpica.org>, "lenb@kernel.org" <lenb@kernel.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, "Moore, Robert" <robert.moore@intel.com>
+Cc: "Fleming, Matt" <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "devel@acpica.org" <devel@acpica.org>, "lenb@kernel.org" <lenb@kernel.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, "Moore, Robert" <robert.moore@intel.com>, "Lv Zheng (zetalog@gmail.com)" <zetalog@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
 Hi,
 
-There is only limited entries in the x86 early mapping which is implemented by the FIXMAP.
-So this means for all __init call invoked for x86, if there was a early mapping in it, it should be unmapped before exiting the __init call.
+I checked the arch/x86/platform/efi/early_printk.c.
+In early_efi_scroll_up(), 2 mapping entries will be used for the src/dst screen buffer.
+In drivers/acpi/acpica/tbutils.c, we've improved the early table loading code in acpi_tb_parse_root_table().
+We now need 2 mapping entries:
+1. One mapping entry is used for RSDT table mapping. Each RSDT entry contains an address for another ACPI table.
+2. For each entry in RSDP, we need another mapping entry to map the table to perform necessary check/override before installing it.
 
-Using this rule, all __init call implementers can make sure that before entering the __init call, the limited number of FIXMAP entries is enough.
+When acpi_tb_parse_root_table() prints something through EFI earlyprintk console, we'll have 4 mapping entries used.
+The current 4 slots setting of early_ioremap() seems to be too small for such a use case.
 
-The following bisected commit just increase early mapping times from 1 to 2 in ACPICA early table handling code.
-The number of 2 is less than the number of available FIXMAP entries.
-And ACPICA code has ensured that all mappings are correctly unmapped after the table initialization.
-So we didn't break the rule.
+I'm not 100% sure if this is the cause.
+If it's the cause and we think both of the mappings are reasonable, we can simply increase the FIX_BITMAPS_SLOTS defined in arch/x86/include/asm/fixmap.h.
 
-We can offer a workaround in ACPICA to reduce mapping count from 2 to 1 using a global option.
-But since this report sounds like that the root cause is earlyprintk=efi has broken the above rule and the existing issue is triggered by this cleanup.
-So could someone check the earlyprintk=efi code first?
-I think earlyprintk=efi should either unmap the increased mapping or increase the number of FIXMAP entries in case earlyprintk=efi need additional early mappings.
-Otherwise it will always be chances for earlyprintk=efi to break future code.
+What do you think of this?
 
 Thanks and best regards
 -Lv
 
-> From: Matt Fleming [mailto:matt@console-pimps.org]
-> Sent: Friday, August 22, 2014 4:52 AM
+> From: Zheng, Lv
+> Sent: Friday, August 22, 2014 9:43 AM
 > 
-> On Tue, 19 Aug, at 04:16:58PM, Dave Young wrote:
-> > Hi,
-> >
-> > 3.16 kernel boot fail with earlyprintk=efi on my laptop.
-> > It keeps scrolling at the bottom line of screen.
-> >
-> > Bisected, the first bad commit is below:
-> > commit 86dfc6f339886559d80ee0d4bd20fe5ee90450f0
-> > Author: Lv Zheng <lv.zheng@intel.com>
-> > Date:   Fri Apr 4 12:38:57 2014 +0800
-> >
-> >     ACPICA: Tables: Fix table checksums verification before installation.
-> >
-> >
-> > I did some debugging by enabling both serial and efi earlyprintk, below is
-> > some debug dmesg, seems early_ioremap fails in scroll up function due to
-> > no free slot, but I'm still not sure if the debug info is right or not.
+> Hi,
 > 
-> Thanks Dave, your callstack seems to make sense.
+> There is only limited entries in the x86 early mapping which is implemented by the FIXMAP.
+> So this means for all __init call invoked for x86, if there was a early mapping in it, it should be unmapped before exiting the __init call.
 > 
-> Can you also enable early_ioremap_debug so that we can figure out where
-> all the FIXMAP slots are going?
+> Using this rule, all __init call implementers can make sure that before entering the __init call, the limited number of FIXMAP entries is
+> enough.
 > 
-> --
-> Matt Fleming, Intel Open Source Technology Center
+> The following bisected commit just increase early mapping times from 1 to 2 in ACPICA early table handling code.
+> The number of 2 is less than the number of available FIXMAP entries.
+> And ACPICA code has ensured that all mappings are correctly unmapped after the table initialization.
+> So we didn't break the rule.
+> 
+> We can offer a workaround in ACPICA to reduce mapping count from 2 to 1 using a global option.
+> But since this report sounds like that the root cause is earlyprintk=efi has broken the above rule and the existing issue is triggered by
+> this cleanup.
+> So could someone check the earlyprintk=efi code first?
+> I think earlyprintk=efi should either unmap the increased mapping or increase the number of FIXMAP entries in case earlyprintk=efi
+> need additional early mappings.
+> Otherwise it will always be chances for earlyprintk=efi to break future code.
+> 
+> Thanks and best regards
+> -Lv
+> 
+> > From: Matt Fleming [mailto:matt@console-pimps.org]
+> > Sent: Friday, August 22, 2014 4:52 AM
+> >
+> > On Tue, 19 Aug, at 04:16:58PM, Dave Young wrote:
+> > > Hi,
+> > >
+> > > 3.16 kernel boot fail with earlyprintk=efi on my laptop.
+> > > It keeps scrolling at the bottom line of screen.
+> > >
+> > > Bisected, the first bad commit is below:
+> > > commit 86dfc6f339886559d80ee0d4bd20fe5ee90450f0
+> > > Author: Lv Zheng <lv.zheng@intel.com>
+> > > Date:   Fri Apr 4 12:38:57 2014 +0800
+> > >
+> > >     ACPICA: Tables: Fix table checksums verification before installation.
+> > >
+> > >
+> > > I did some debugging by enabling both serial and efi earlyprintk, below is
+> > > some debug dmesg, seems early_ioremap fails in scroll up function due to
+> > > no free slot, but I'm still not sure if the debug info is right or not.
+> >
+> > Thanks Dave, your callstack seems to make sense.
+> >
+> > Can you also enable early_ioremap_debug so that we can figure out where
+> > all the FIXMAP slots are going?
+> >
+> > --
+> > Matt Fleming, Intel Open Source Technology Center
