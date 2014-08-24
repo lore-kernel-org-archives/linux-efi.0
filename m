@@ -1,38 +1,66 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 5/7 update] arm64/efi: do not enter virtual mode in case
- booting with efi=noruntime or noefi
-Date: Fri, 22 Aug 2014 17:25:34 +0100
-Message-ID: <20140822162534.GP17255@arm.com>
-References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
- <1408007731-15081-5-git-send-email-dyoung@redhat.com>
- <20140815150952.GY27466@arm.com>
- <20140818013007.GB3379@darkstar.nay.redhat.com>
- <20140822151007.GA17255@arm.com>
- <20140822154719.GN29733@console-pimps.org>
+From: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity@gmail.com>
+Subject: Re: Loading initrd above 4G causes freeze on boot
+Date: Sun, 24 Aug 2014 22:19:04 +0300
+Message-ID: <CAPWNY8V=T=Y5uPX9J_qjdkTJRnctDs-PoTQP7LEX_cKQEn0_Zg@mail.gmail.com>
+References: <53E62EEF.9040801@gmail.com>
+	<53F752A2.7080604@redhat.com>
+	<CAPWNY8V4pfazk4Hw9qu07cAQZywC-GS7eyS+54fazXZaKMjMQw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20140822154719.GN29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAPWNY8V4pfazk4Hw9qu07cAQZywC-GS7eyS+54fazXZaKMjMQw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Harald Hoyer <harald@redhat.com>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 22, 2014 at 04:47:19PM +0100, Matt Fleming wrote:
-> On Fri, 22 Aug, at 04:10:07PM, Will Deacon wrote:
-> > 
-> > Are you sending these via the efi tree as part of this series, or do you
-> > need me to pick anything up into the arm64 tree?
-> 
-> I was planning on taking the entire series through the EFI tree (once
-> I've had chance to review it).
-> 
-> Does that work?
+On Fri, Aug 22, 2014 at 5:43 PM, Mantas Mikul=C4=97nas <grawity@gmail.c=
+om> wrote:
+>
+> On Fri, Aug 22, 2014 at 5:24 PM, Harald Hoyer <harald@redhat.com> wro=
+te:
+> > On 09.08.2014 16:23, Mantas Mikul=C4=97nas wrote:
+> >> As of commit 4bf7111f5016 ("x86/efi: Support initrd loaded above 4=
+G"),
+> >> the kernel freezes at the earliest possible moment when trying to =
+boot
+> >> via UEFI on my Asus laptop. (It still boots via BIOS.)
+> >>
+> >> If I revert that commit on current master (c309bfa9b481), it boots
+> >> correctly again [although I see "setup_efi_pci() failed" being pri=
+nted].
+> >>
+> >> (Seems like it freezes when handle_cmdline_files() attempts to rea=
+d
+> >> the last chunk of the initramfs -- the last call to efi_file_read(=
+)
+> >> never returns. Figuring out why that happens is beyond me, though.=
+)
+> >>
+> >
+> > I fixed my issue with: https://lkml.org/lkml/2014/8/22/232
+>
+> ...Well. If that's the _physical_ address, then I suppose it wouldn't
+> have worked on my 4 GB laptop either way. (I thought UEFI already use=
+d
+> some sort of virtual memory, so I never even thought to mention
+> this... Oh well.)
+>
+> Though if that's the case, then I'm wondering why it would be affecte=
+d
+> by the read size? Shouldn't it have crashed either as soon as the hig=
+h
+> address was used, or never at all? (I really don't know much about
+> memory at this level. Sorry.)
+>
+> > Care to test?
+>
+> Will try later today.
 
-Fine by me; I think I've acked/reviewed all the arm64 bits. If you find an
-arm64 patch with a missing ack, just ping me and I'll take a look.
+=46inally got around to testing it, and yes, your patch fixes the initr=
+d
+boot for me.
 
-Cheers,
-
-Will
+--=20
+Mantas Mikul=C4=97nas <grawity@gmail.com>
