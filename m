@@ -1,72 +1,97 @@
-From: Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH V2] efi_high_alloc: use EFI_ALLOCATE_MAX_ADDRESS
-Date: Mon, 25 Aug 2014 16:33:54 +0200
-Message-ID: <53FB4952.1090104@redhat.com>
-References: <1408715303-2215-1-git-send-email-harald@redhat.com> <1408967732-2381-1-git-send-email-harald@redhat.com> <20140825130724.GT29733@console-pimps.org>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: Loading initrd above 4G causes freeze on boot
+Date: Mon, 25 Aug 2014 11:22:34 -0700
+Message-ID: <CAE9FiQWOp0pGSXhnaTe62zaFe7QodS6BSCKnC8qamjm3qTRRJA@mail.gmail.com>
+References: <53E62EEF.9040801@gmail.com>
+	<53F752A2.7080604@redhat.com>
+	<CAPWNY8V4pfazk4Hw9qu07cAQZywC-GS7eyS+54fazXZaKMjMQw@mail.gmail.com>
+	<CAPWNY8V=T=Y5uPX9J_qjdkTJRnctDs-PoTQP7LEX_cKQEn0_Zg@mail.gmail.com>
+	<20140825105559.GQ29733@console-pimps.org>
+	<CAPWNY8V8D74CNXGhDwp2gpPpeV2F=Qao32i-0Mhq=9zhvDXLLw@mail.gmail.com>
+	<20140825125306.GS29733@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=20cf3011e1256897320501784593
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140825130724.GT29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20140825125306.GS29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 25.08.2014 15:07, Matt Fleming wrote:
-> On Mon, 25 Aug, at 01:55:32PM, harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org wrote:
->> From: Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->>
->> On my Lenovo T420s with 4GB memory, efi_high_alloc() was checking the
->> following memory regions:
->>
->> 0x0000000000100000 - 0x0000000020000000
->> 0x0000000020200000 - 0x0000000040000000
->> 0x0000000040200000 - 0x00000000d2c02000
->> 0x00000000d6e9f000 - 0x000000011e600000
->>
->> and decided to allocate 2649 pages at address 0x11dba7000.
->> ...
->> [    0.000000] efi: mem53: type=2, attr=0xf, range=[0x000000011dba7000-0x000000011e600000) (10MB)
->> ...
->> [    0.000000] RAMDISK: [mem 0x11dba7000-0x11e5fffff]
->> ...
->> [    0.154933] Unpacking initramfs...
->> [    0.160990] Initramfs unpacking failed: junk in compressed archive
->> [    0.163436] Freeing initrd memory: 10596K (ffff88011dba7000 - ffff88011e600000)
->> ...
->>
->> Nevertheless, unpacking of the initramfs later on failed.
->> This is maybe caused by my buggy EFI BIOS and
->> commit 4bf7111f50167133a71c23530ca852a41355e739,
->> which enables loading the initramfs above 4G addresses.
->>
->> With this patch efi_high_alloc() now uses EFI_ALLOCATE_MAX_ADDRESS,
->> which should do the same as before, but use the EFI logic to select the high memory range.
->  
-> No, that's not correct. Your patch changes the semantics of
-> efi_high_alloc(). The original version allocates from the top of memory
-> down, so you always get the highest aligned address, that is no higher
-> than 'max_addr'.
-> 
-> Your version allocates some address that isn't above 'max_addr', but it
-> needn't necessarily be the highest possible address. The following is
-> taken from the AllocatePages() documentation in the UEFI spec,
-> 
->   "Allocation requests of Type AllocateMaxAddress allocate any available
->    range of pages whose uppermost address is less than or equal to the
->    address pointed to by Memory on input."
-> 
-> Note the part about allocating *any* available range.
-> 
-> Furthermore, there are more callers of efi_high_alloc() than the initrd
-> loading case, and you've changed their behaviour with this patch.
-> 
-> I get where you're coming from, but this isn't the best way to solve
-> this problem, sorry. NAK.
-> 
+--20cf3011e1256897320501784593
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-So is that ok, if other callers of efi_high_alloc() get an address > 4GB?
+On Mon, Aug 25, 2014 at 5:53 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrot=
+e:
+> On Mon, 25 Aug, at 02:08:59PM, Mantas Mikul=C4=97nas wrote:
 
-Will the buggy EFI implementation work with the usage of the other caller's
-allocated memory? Or will they run into the same issues as the initramfs loader?
+>> [    0.000000] RAMDISK: [mem 0xbe22e000-0xbe799fff]
+
+that is pushed down under 4G.
+
+>
+> OK, we're out of options here. Yinghai, we're going to have to revert
+> your patch, 4bf7111f5016 ("x86/efi: Support initrd loaded above 4G")
+>
+> We could conceivably add a boot parameter option to attempt loading
+> inirds above 4G, but we can't turn the feature on by default because of
+> all these buggy EFI implementations - things must work out of the box.
+>
+> But the boot parameter would be useful for those people that a) know
+> their firmware isn't buggy and b) need to leave < 4G memory available
+> for use by other things. Yinghai, can you provide some justification for
+> your original commit? Do you have concrete use cases where loading
+> initrds above 4G is critical? How important is it that we enable this
+> functionality as opposed to reverting it?
+
+The use case: install RHEL full will take more than 8G in the root disk.
+then make initramfs image to include every file in the disk, then boot
+kernel and initramfs as diskless boot.
+
+To use this huge initramfs image, first one is kexec, second way is using
+UEFI 64bit.
+
+So the point is the initramfs is bigger than 4G.
+
+Please check if you can apply attached one. That will keep under 2G at firs=
+t,
+then try any high address.
+
+Thanks
+
+Yinghai
+
+--20cf3011e1256897320501784593
+Content-Type: text/x-patch; charset=US-ASCII; name="efi_initrd_above_4g_second_try.patch"
+Content-Disposition: attachment;
+	filename="efi_initrd_above_4g_second_try.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hza4kfia0
+
+LS0tCiBhcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvZWJvb3QuYyB8ICAgMTYgKysrKysrKysrLS0t
+LS0tLQogMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKSwgNyBkZWxldGlvbnMoLSkKCklu
+ZGV4OiBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKPT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PQotLS0gbGludXgtMi42Lm9yaWcvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKKysr
+IGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvZWJvb3QuYwpAQCAtMTAzMiw3ICsx
+MDMyLDYgQEAgc3RydWN0IGJvb3RfcGFyYW1zICptYWtlX2Jvb3RfcGFyYW1zKHN0cgogCWludCBp
+OwogCXVuc2lnbmVkIGxvbmcgcmFtZGlza19hZGRyOwogCXVuc2lnbmVkIGxvbmcgcmFtZGlza19z
+aXplOwotCXVuc2lnbmVkIGxvbmcgaW5pdHJkX2FkZHJfbWF4OwogCiAJZWZpX2Vhcmx5ID0gYzsK
+IAlzeXNfdGFibGUgPSAoZWZpX3N5c3RlbV90YWJsZV90ICopKHVuc2lnbmVkIGxvbmcpZWZpX2Vh
+cmx5LT50YWJsZTsKQEAgLTEwOTUsMTUgKzEwOTQsMTggQEAgc3RydWN0IGJvb3RfcGFyYW1zICpt
+YWtlX2Jvb3RfcGFyYW1zKHN0cgogCiAJbWVtc2V0KHNkdCwgMCwgc2l6ZW9mKCpzZHQpKTsKIAot
+CWlmIChoZHItPnhsb2FkZmxhZ3MgJiBYTEZfQ0FOX0JFX0xPQURFRF9BQk9WRV80RykKLQkJaW5p
+dHJkX2FkZHJfbWF4ID0gLTFVTDsKLQllbHNlCi0JCWluaXRyZF9hZGRyX21heCA9IGhkci0+aW5p
+dHJkX2FkZHJfbWF4OwotCiAJc3RhdHVzID0gaGFuZGxlX2NtZGxpbmVfZmlsZXMoc3lzX3RhYmxl
+LCBpbWFnZSwKIAkJCQkgICAgICAoY2hhciAqKSh1bnNpZ25lZCBsb25nKWhkci0+Y21kX2xpbmVf
+cHRyLAotCQkJCSAgICAgICJpbml0cmQ9IiwgaW5pdHJkX2FkZHJfbWF4LAorCQkJCSAgICAgICJp
+bml0cmQ9IiwgaGRyLT5pbml0cmRfYWRkcl9tYXgsCisJCQkJICAgICAgJnJhbWRpc2tfYWRkciwg
+JnJhbWRpc2tfc2l6ZSk7CisKKwlpZiAoc3RhdHVzICE9IEVGSV9TVUNDRVNTICYmCisJICAgIGhk
+ci0+eGxvYWRmbGFncyAmIFhMRl9DQU5fQkVfTE9BREVEX0FCT1ZFXzRHKQorCQlzdGF0dXMgPSBo
+YW5kbGVfY21kbGluZV9maWxlcyhzeXNfdGFibGUsIGltYWdlLAorCQkJCSAgICAgIChjaGFyICop
+KHVuc2lnbmVkIGxvbmcpaGRyLT5jbWRfbGluZV9wdHIsCisJCQkJICAgICAgImluaXRyZD0iLCAt
+MVVMLAogCQkJCSAgICAgICZyYW1kaXNrX2FkZHIsICZyYW1kaXNrX3NpemUpOworCiAJaWYgKHN0
+YXR1cyAhPSBFRklfU1VDQ0VTUykKIAkJZ290byBmYWlsMjsKIAloZHItPnJhbWRpc2tfaW1hZ2Ug
+PSByYW1kaXNrX2FkZHIgJiAweGZmZmZmZmZmOwo=
+--20cf3011e1256897320501784593--
