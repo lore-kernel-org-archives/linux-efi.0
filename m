@@ -1,97 +1,167 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: Loading initrd above 4G causes freeze on boot
-Date: Mon, 25 Aug 2014 11:22:34 -0700
-Message-ID: <CAE9FiQWOp0pGSXhnaTe62zaFe7QodS6BSCKnC8qamjm3qTRRJA@mail.gmail.com>
-References: <53E62EEF.9040801@gmail.com>
-	<53F752A2.7080604@redhat.com>
-	<CAPWNY8V4pfazk4Hw9qu07cAQZywC-GS7eyS+54fazXZaKMjMQw@mail.gmail.com>
-	<CAPWNY8V=T=Y5uPX9J_qjdkTJRnctDs-PoTQP7LEX_cKQEn0_Zg@mail.gmail.com>
-	<20140825105559.GQ29733@console-pimps.org>
-	<CAPWNY8V8D74CNXGhDwp2gpPpeV2F=Qao32i-0Mhq=9zhvDXLLw@mail.gmail.com>
-	<20140825125306.GS29733@console-pimps.org>
+From: Dave Young <dyoung@redhat.com>
+Subject: [PATCH RFC] x86 early_ioremap: increase FIX_BTMAPS_SLOTS to 8
+Date: Tue, 26 Aug 2014 17:06:41 +0800
+Message-ID: <20140826090641.GA16550@darkstar.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=20cf3011e1256897320501784593
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140825125306.GS29733-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Andrew Morton <akpm@linux-foundation.org>, matt.fleming@intel.com, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, devel@acpica.org, lenb@kernel.org, rafael.j.wysocki@intel.com, robert.moore@intel.com
 List-Id: linux-efi@vger.kernel.org
 
---20cf3011e1256897320501784593
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+3.16 kernel boot fail with earlyprintk=efi, it keeps scrolling at the
+bottom line of screen.
 
-On Mon, Aug 25, 2014 at 5:53 AM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrot=
-e:
-> On Mon, 25 Aug, at 02:08:59PM, Mantas Mikul=C4=97nas wrote:
+Bisected, the first bad commit is below:
+commit 86dfc6f339886559d80ee0d4bd20fe5ee90450f0
+Author: Lv Zheng <lv.zheng@intel.com>
+Date:   Fri Apr 4 12:38:57 2014 +0800
 
->> [    0.000000] RAMDISK: [mem 0xbe22e000-0xbe799fff]
+    ACPICA: Tables: Fix table checksums verification before installation.
 
-that is pushed down under 4G.
 
->
-> OK, we're out of options here. Yinghai, we're going to have to revert
-> your patch, 4bf7111f5016 ("x86/efi: Support initrd loaded above 4G")
->
-> We could conceivably add a boot parameter option to attempt loading
-> inirds above 4G, but we can't turn the feature on by default because of
-> all these buggy EFI implementations - things must work out of the box.
->
-> But the boot parameter would be useful for those people that a) know
-> their firmware isn't buggy and b) need to leave < 4G memory available
-> for use by other things. Yinghai, can you provide some justification for
-> your original commit? Do you have concrete use cases where loading
-> initrds above 4G is critical? How important is it that we enable this
-> functionality as opposed to reverting it?
+I did some debugging by enabling both serial and efi earlyprintk, below is
+some debug dmesg, seems early_ioremap fails in scroll up function due to
+no free slot, see below dmesg output:
 
-The use case: install RHEL full will take more than 8G in the root disk.
-then make initramfs image to include every file in the disk, then boot
-kernel and initramfs as diskless boot.
+[snip]
+[    0.000000] RAMDISK: [mem 0x3e1b0000-0x3e982fff]
+[    0.000000] ACPI: Early table checksum verification disabled
+[    0.000000] ACPI: RSDP 0x00000000DB752000 000024 (v02 HPQOEM)
+[    0.000000] ACPI: XSDT 0x00000000DB752088 00008C (v01 HPQOEM SLIC-WKS 01072009 AMI  00010013)
+[    0.000000] ACPI: FACP 0x00000000DB759590 00010C (v05 HPQOEM SLIC-WKS 01072009 AMI  00010013)
+[    0.000000] ------------[ cut here ]------------
+[    0.000000] WARNING: CPU: 0 PID: 0 at mm/early_ioremap.c:116 __early_ioremap+0x90/0x1c4()
+[    0.000000] __early_ioremap(ed00c800, 00000c80) not found slot
+[    0.000000] Modules linked in:
+[    0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 3.17.0-rc1+ #204
+[    0.000000] Hardware name: Hewlett-Packard HP Z420 Workstation/1589, BIOS J61 v03.15 05/09/2013
+[    0.000000]  0000000000000000 ffffffff8173b970 ffffffff814bb919 ffffffff8173b9b8
+[    0.000000]  ffffffff8173b9a8 ffffffff810638c9 ffffffff8184ee81 ffffffffff538000
+[    0.000000]  0000000000000c80 0000000000000003 0000000000000c80 ffffffff8173ba08
+[    0.000000] Call Trace:
+[    0.000000]  [<ffffffff814bb919>] dump_stack+0x4e/0x7a
+[    0.000000]  [<ffffffff810638c9>] warn_slowpath_common+0x75/0x8e
+[    0.000000]  [<ffffffff8184ee81>] ? __early_ioremap+0x90/0x1c4
+[    0.000000]  [<ffffffff81063929>] warn_slowpath_fmt+0x47/0x49
+[    0.000000]  [<ffffffff8184ee81>] __early_ioremap+0x90/0x1c4
+[    0.000000]  [<ffffffff8124cf4d>] ? sprintf+0x46/0x48
+[    0.000000]  [<ffffffff8184f169>] early_ioremap+0x13/0x15
+[    0.000000]  [<ffffffff814ae4f0>] early_efi_map+0x24/0x26
+[    0.000000]  [<ffffffff81060985>] early_efi_scroll_up+0x6d/0xc0
+[    0.000000]  [<ffffffff81060b88>] early_efi_write+0x1b0/0x214
+[    0.000000]  [<ffffffff8109ec3a>] call_console_drivers.constprop.21+0x73/0x7e
+[    0.000000]  [<ffffffff8109fab4>] console_unlock+0x151/0x3b2
+[    0.000000]  [<ffffffff810a01b4>] ? vprintk_emit+0x49f/0x532
+[    0.000000]  [<ffffffff810a0236>] vprintk_emit+0x521/0x532
+[    0.000000]  [<ffffffff8109fce6>] ? console_unlock+0x383/0x3b2
+[    0.000000]  [<ffffffff814b6f01>] printk+0x4f/0x51
+[    0.000000]  [<ffffffff81292f9c>] acpi_os_vprintf+0x2b/0x2d
+[    0.000000]  [<ffffffff81292fe1>] acpi_os_printf+0x43/0x45
+[    0.000000]  [<ffffffff812bc44c>] acpi_info+0x5c/0x63
+[    0.000000]  [<ffffffff8183cdfa>] ? __acpi_map_table+0x13/0x18
+[    0.000000]  [<ffffffff814afc88>] ? acpi_os_map_iomem+0x21/0x147
+[    0.000000]  [<ffffffff812b7e59>] acpi_tb_print_table_header+0x177/0x186
+[    0.000000]  [<ffffffff812b79da>] acpi_tb_install_table_with_override+0x4b/0x62
+[    0.000000]  [<ffffffff812b7b80>] acpi_tb_install_standard_table+0xd9/0x215
+[    0.000000]  [<ffffffff8184f169>] ? early_ioremap+0x13/0x15
+[    0.000000]  [<ffffffff8183cdfa>] ? __acpi_map_table+0x13/0x18
+[    0.000000]  [<ffffffff81857545>] acpi_tb_parse_root_table+0x16e/0x1b4
+[    0.000000]  [<ffffffff818575e2>] acpi_initialize_tables+0x57/0x59
+[    0.000000]  [<ffffffff8185591d>] acpi_table_init+0x50/0xce
+[    0.000000]  [<ffffffff8183cea2>] acpi_boot_table_init+0x1e/0x85
+[    0.000000]  [<ffffffff81834638>] setup_arch+0x9b7/0xcc4
+[    0.000000]  [<ffffffff81830b3e>] start_kernel+0x94/0x42d
+[    0.000000]  [<ffffffff81830120>] ? early_idt_handlers+0x120/0x120
+[    0.000000]  [<ffffffff818304a2>] x86_64_start_reservations+0x2a/0x2c
+[    0.000000]  [<ffffffff81830597>] x86_64_start_kernel+0xf3/0x100
+[    0.000000] ---[ end trace 48732c7db414b8fe ]---
+[    0.000000] ------------[ cut here ]------------
+[    0.000000] WARNING: CPU: 0 PID: 0 at mm/early_ioremap.c:116 __early_ioremap+0x90/0x1c4()
+[    0.000000] __early_ioremap(ed00c800, 00000c80) not found slot
+[    0.000000] Modules linked in:
+[    0.000000] CPU: 0 PID: 0 Comm: swapper Tainted: G        W      3.17.0-rc1+ #204
+[    0.000000] Hardware name: Hewlett-Packard HP Z420 Workstation/1589, BIOS J61 v03.15 05/09/2013
+[    0.000000]  0000000000000000 ffffffff8173b970 ffffffff814bb919 ffffffff8173b9b8
+[    0.000000]  ffffffff8173b9a8 ffffffff810638c9 ffffffff8184ee81 ffffffffff538000
+[    0.000000]  0000000000000c80 0000000000000003 0000000000000c80 ffffffff8173ba08
+[    0.000000] Call Trace:
+[    0.000000]  [<ffffffff814bb919>] dump_stack+0x4e/0x7a
+[    0.000000]  [<ffffffff810638c9>] warn_slowpath_common+0x75/0x8e
+[    0.000000]  [<ffffffff8184ee81>] ? __early_ioremap+0x90/0x1c4
+[    0.000000]  [<ffffffff81063929>] warn_slowpath_fmt+0x47/0x49
+[    0.000000]  [<ffffffff8184ee81>] __early_ioremap+0x90/0x1c4
+[    0.000000]  [<ffffffff8184f169>] early_ioremap+0x13/0x15
+[    0.000000]  [<ffffffff814ae4f0>] early_efi_map+0x24/0x26
+[    0.000000]  [<ffffffff81060985>] early_efi_scroll_up+0x6d/0xc0
+[    0.000000]  [<ffffffff81060b88>] early_efi_write+0x1b0/0x214
+[    0.000000]  [<ffffffff8109ec3a>] call_console_drivers.constprop.21+0x73/0x7e
+[    0.000000]  [<ffffffff8109fb5d>] console_unlock+0x1fa/0x3b2
+[    0.000000]  [<ffffffff810a0236>] vprintk_emit+0x521/0x532
+[    0.000000]  [<ffffffff8109fce6>] ? console_unlock+0x383/0x3b2
+[    0.000000]  [<ffffffff814b6f01>] printk+0x4f/0x51
+[    0.000000]  [<ffffffff81292f9c>] acpi_os_vprintf+0x2b/0x2d
+[    0.000000]  [<ffffffff81292fe1>] acpi_os_printf+0x43/0x45
+[    0.000000]  [<ffffffff812bc44c>] acpi_info+0x5c/0x63
+[    0.000000]  [<ffffffff8183cdfa>] ? __acpi_map_table+0x13/0x18
+[    0.000000]  [<ffffffff814afc88>] ? acpi_os_map_iomem+0x21/0x147
+[    0.000000]  [<ffffffff812b7e59>] acpi_tb_print_table_header+0x177/0x186
+[    0.000000]  [<ffffffff812b79da>] acpi_tb_install_table_with_override+0x4b/0x62
+[    0.000000]  [<ffffffff812b7b80>] acpi_tb_install_standard_table+0xd9/0x215
+[    0.000000]  [<ffffffff8184f169>] ? early_ioremap+0x13/0x15
+[    0.000000]  [<ffffffff8183cdfa>] ? __acpi_map_table+0x13/0x18
+[    0.000000]  [<ffffffff81857545>] acpi_tb_parse_root_table+0x16e/0x1b4
+[    0.000000]  [<ffffffff818575e2>] acpi_initialize_tables+0x57/0x59
+[    0.000000]  [<ffffffff8185591d>] acpi_table_init+0x50/0xce
+[    0.000000]  [<ffffffff8183cea2>] acpi_boot_table_init+0x1e/0x85
+[    0.000000]  [<ffffffff81834638>] setup_arch+0x9b7/0xcc4
+[    0.000000]  [<ffffffff81830b3e>] start_kernel+0x94/0x42d
+[    0.000000]  [<ffffffff81830120>] ? early_idt_handlers+0x120/0x120
+[    0.000000]  [<ffffffff818304a2>] x86_64_start_reservations+0x2a/0x2c
 
-To use this huge initramfs image, first one is kexec, second way is using
-UEFI 64bit.
 
-So the point is the initramfs is bigger than 4G.
+Quote reply from Lv.zheng about the early ioremap slot usage in this case:
 
-Please check if you can apply attached one. That will keep under 2G at firs=
-t,
-then try any high address.
+"""
+In early_efi_scroll_up(), 2 mapping entries will be used for the src/dst screen buffer.
+In drivers/acpi/acpica/tbutils.c, we've improved the early table loading code in acpi_tb_parse_root_table().
+We now need 2 mapping entries:
+1. One mapping entry is used for RSDT table mapping. Each RSDT entry contains an address for another ACPI table.
+2. For each entry in RSDP, we need another mapping entry to map the table to perform necessary check/override before installing it.
 
-Thanks
+When acpi_tb_parse_root_table() prints something through EFI earlyprintk console, we'll have 4 mapping entries used.
+The current 4 slots setting of early_ioremap() seems to be too small for such a use case.
+"""
 
-Yinghai
+Thus increase the slot to 8 in this patch to fix this issue.
+boot-time mappings become 512 page with this patch.
 
---20cf3011e1256897320501784593
-Content-Type: text/x-patch; charset=US-ASCII; name="efi_initrd_above_4g_second_try.patch"
-Content-Disposition: attachment;
-	filename="efi_initrd_above_4g_second_try.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hza4kfia0
+Signed-off-by: Dave Young <dyoung@redhat.com>
+---
+I'm not sure if this is ok in 32bit, review and comments are appreciated.
+ arch/x86/include/asm/fixmap.h |    6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-LS0tCiBhcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvZWJvb3QuYyB8ICAgMTYgKysrKysrKysrLS0t
-LS0tLQogMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKSwgNyBkZWxldGlvbnMoLSkKCklu
-ZGV4OiBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKPT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PQotLS0gbGludXgtMi42Lm9yaWcvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2Vib290LmMKKysr
-IGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvZWJvb3QuYwpAQCAtMTAzMiw3ICsx
-MDMyLDYgQEAgc3RydWN0IGJvb3RfcGFyYW1zICptYWtlX2Jvb3RfcGFyYW1zKHN0cgogCWludCBp
-OwogCXVuc2lnbmVkIGxvbmcgcmFtZGlza19hZGRyOwogCXVuc2lnbmVkIGxvbmcgcmFtZGlza19z
-aXplOwotCXVuc2lnbmVkIGxvbmcgaW5pdHJkX2FkZHJfbWF4OwogCiAJZWZpX2Vhcmx5ID0gYzsK
-IAlzeXNfdGFibGUgPSAoZWZpX3N5c3RlbV90YWJsZV90ICopKHVuc2lnbmVkIGxvbmcpZWZpX2Vh
-cmx5LT50YWJsZTsKQEAgLTEwOTUsMTUgKzEwOTQsMTggQEAgc3RydWN0IGJvb3RfcGFyYW1zICpt
-YWtlX2Jvb3RfcGFyYW1zKHN0cgogCiAJbWVtc2V0KHNkdCwgMCwgc2l6ZW9mKCpzZHQpKTsKIAot
-CWlmIChoZHItPnhsb2FkZmxhZ3MgJiBYTEZfQ0FOX0JFX0xPQURFRF9BQk9WRV80RykKLQkJaW5p
-dHJkX2FkZHJfbWF4ID0gLTFVTDsKLQllbHNlCi0JCWluaXRyZF9hZGRyX21heCA9IGhkci0+aW5p
-dHJkX2FkZHJfbWF4OwotCiAJc3RhdHVzID0gaGFuZGxlX2NtZGxpbmVfZmlsZXMoc3lzX3RhYmxl
-LCBpbWFnZSwKIAkJCQkgICAgICAoY2hhciAqKSh1bnNpZ25lZCBsb25nKWhkci0+Y21kX2xpbmVf
-cHRyLAotCQkJCSAgICAgICJpbml0cmQ9IiwgaW5pdHJkX2FkZHJfbWF4LAorCQkJCSAgICAgICJp
-bml0cmQ9IiwgaGRyLT5pbml0cmRfYWRkcl9tYXgsCisJCQkJICAgICAgJnJhbWRpc2tfYWRkciwg
-JnJhbWRpc2tfc2l6ZSk7CisKKwlpZiAoc3RhdHVzICE9IEVGSV9TVUNDRVNTICYmCisJICAgIGhk
-ci0+eGxvYWRmbGFncyAmIFhMRl9DQU5fQkVfTE9BREVEX0FCT1ZFXzRHKQorCQlzdGF0dXMgPSBo
-YW5kbGVfY21kbGluZV9maWxlcyhzeXNfdGFibGUsIGltYWdlLAorCQkJCSAgICAgIChjaGFyICop
-KHVuc2lnbmVkIGxvbmcpaGRyLT5jbWRfbGluZV9wdHIsCisJCQkJICAgICAgImluaXRyZD0iLCAt
-MVVMLAogCQkJCSAgICAgICZyYW1kaXNrX2FkZHIsICZyYW1kaXNrX3NpemUpOworCiAJaWYgKHN0
-YXR1cyAhPSBFRklfU1VDQ0VTUykKIAkJZ290byBmYWlsMjsKIAloZHItPnJhbWRpc2tfaW1hZ2Ug
-PSByYW1kaXNrX2FkZHIgJiAweGZmZmZmZmZmOwo=
---20cf3011e1256897320501784593--
+Index: linux/arch/x86/include/asm/fixmap.h
+===================================================================
+--- linux.orig/arch/x86/include/asm/fixmap.h
++++ linux/arch/x86/include/asm/fixmap.h
+@@ -106,14 +106,14 @@ enum fixed_addresses {
+ 	__end_of_permanent_fixed_addresses,
+ 
+ 	/*
+-	 * 256 temporary boot-time mappings, used by early_ioremap(),
++	 * 512 temporary boot-time mappings, used by early_ioremap(),
+ 	 * before ioremap() is functional.
+ 	 *
+-	 * If necessary we round it up to the next 256 pages boundary so
++	 * If necessary we round it up to the next 512 pages boundary so
+ 	 * that we can have a single pgd entry and a single pte table:
+ 	 */
+ #define NR_FIX_BTMAPS		64
+-#define FIX_BTMAPS_SLOTS	4
++#define FIX_BTMAPS_SLOTS	8
+ #define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)
+ 	FIX_BTMAP_END =
+ 	 (__end_of_permanent_fixed_addresses ^
