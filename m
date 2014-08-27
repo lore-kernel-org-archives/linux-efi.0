@@ -1,32 +1,42 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86: only load initrd above 4g on second try
-Date: Tue, 26 Aug 2014 15:58:50 -0700
-Message-ID: <CAE9FiQVE-UyXQOGTwErxRHJSUP0X61eL+x1L6x90=JToG12btw@mail.gmail.com>
-References: <1409089544-24221-1-git-send-email-yinghai@kernel.org>
-	<53FD01D0.8020203@zytor.com>
-	<CAE9FiQUF4THLRfzbnhK61QHpM2zyox4E8LTmyzVF7PnPdpb7jQ@mail.gmail.com>
-	<CAPWNY8WG3E7oZdZDdYsrnGM5pG4kWAKkEq0Eh5Hc_uXJ_8zD5g@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH V2] efi_high_alloc: use EFI_ALLOCATE_MAX_ADDRESS
+Date: Wed, 27 Aug 2014 11:30:38 +0100
+Message-ID: <20140827103038.GB28116@console-pimps.org>
+References: <1408715303-2215-1-git-send-email-harald@redhat.com>
+ <1408967732-2381-1-git-send-email-harald@redhat.com>
+ <20140825130724.GT29733@console-pimps.org>
+ <53FB4952.1090104@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAPWNY8WG3E7oZdZDdYsrnGM5pG4kWAKkEq0Eh5Hc_uXJ_8zD5g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <53FB4952.1090104@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Harald Hoyer <harald@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Aug 26, 2014 at 3:16 PM, Mantas Mikul=C4=97nas <grawity@gmail.c=
-om> wrote:
->
-> In particular, I just realized yesterday that I don't know whether
-> it's referring to physical or virtual addresses in the initrd load
-> code -- and the laptop only has 4 GB of memory, so the kernel
-> shouldn't be using larger physical addresses in the first place.
-> (Virtual ones, on the other hand, /would/ mean a weird bug like
-> described above.)
+On Mon, 25 Aug, at 04:33:54PM, Harald Hoyer wrote:
+> 
+> So is that ok, if other callers of efi_high_alloc() get an address >
+> 4GB?
 
-When you have 4G ram installed, the mmio could take [3G,4G).
-ram range will be [0,3G), [4G, 5G).
+Yeah, the issue at hand is that some x86 EFI firmware cannot perform a
+file read into a buffer above 4G. The actual allocation works fine.
 
-Yinghai
+If other callers want a high address buffer, they're not going to hit
+that issue. We've no reason to believe that this bug affects arm64 at
+all, for instance.
+
+Working around this problem in efi_high_alloc() gives the impression
+that there's something wrong with AllocatePages(), which isn't the case.
+
+> Will the buggy EFI implementation work with the usage of the other
+> caller's allocated memory? Or will they run into the same issues as
+> the initramfs loader?
+
+Based on the information we've gathered so far, there's no reason to
+believe other callers will hit the same issue as the file reading code.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
