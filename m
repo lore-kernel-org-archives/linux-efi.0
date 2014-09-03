@@ -1,173 +1,203 @@
-From: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [REGRESSION] "efi: efistub: Convert into static library" and
- preparation patches
-Date: Wed, 03 Sep 2014 10:27:07 +0200
-Message-ID: <5406D0DB.90401@canonical.com>
-References: <5405E186.2080406@canonical.com>	<20140902192941.GB3001@console-pimps.org> <CAKv+Gu_eSe+FeNkGm+w3sSsRn2_hr70xLVBieZgyhawAv6PQvw@mail.gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 0/5] beautify EFI memmap logs
+Date: Wed, 3 Sep 2014 11:00:22 +0200
+Message-ID: <20140903090022.GA8959@gmail.com>
+References: <1409532820-5027-1-git-send-email-lersek@redhat.com>
+ <20140901072207.GA22193@gmail.com>
+ <54043E68.7010405@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_eSe+FeNkGm+w3sSsRn2_hr70xLVBieZgyhawAv6PQvw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ia64-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <54043E68.7010405@redhat.com>
+Sender: linux-ia64-owner@vger.kernel.org
+To: Laszlo Ersek <lersek@redhat.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, x86@kernel.org, linux-ia64@vger.kernel.org, matt.fleming@intel.com, msalter@redhat.com
 List-Id: linux-efi@vger.kernel.org
 
-Op 03-09-14 om 08:06 schreef Ard Biesheuvel:
-> On 2 September 2014 21:29, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> On Tue, 02 Sep, at 05:25:58PM, Maarten Lankhorst wrote:
->>> Hey,
->>>
->>> My macbook pro 8.2 fails to do a efi stub boot with these patches.
->>>
->>> Commit f23cf8bd5c1f49 "efi/x86: efistub: Move shared dependencies to <asm/efi.h>"
->>> causes the first break, but this can be averted by changing
->>>
->>> struct efi_config *efi_early;
->>>
->>> to
->>>
->>> struct efi_config *efi_early __attribute__((visibility("hidden")));
->> Weird. That sounds like a bug in the Apple EFI PE loader. Does any other
->> visibility result in a working kernel?
->>
->>> I also need to revert commit f4f75ad5741fe "efi: efistub: Convert into static library"
->>> to get boot working.
->> I'll take a look at the symbol changes between these commits and try and
->> guess what's going on.
->>
->>> I'm not an early boot expert, so I have no idea what's going on here.
->>> Only console output I see when the boot fails is "setup_efi_pci() failed!" after
->>> the commit that adds this message.
->> Yeah, that should be unrelated.
->>
->> Thanks for the report.
->>
-> If x86 is anything like ARM in this respect, this is likely caused by
-> the way PIC references to globals are emitted.
-> When using default visibility, a reference to a global is emitted by a
-> reference to the GOT, and an offset into the GOT, and the two are
-> added and dereferenced at runtime. For this to work, the GOT needs to
-> contain the correct absolute address for the global in question. This,
-> in turn, relies on absolute relocations to be resolved at load time,
-> which we don't do with the EFI stub. Could it be that the link address
-> and load address are usually the same on x86 EFI but not on the Mac?
->
-> With hidden visibility, the PIC reference is emitted using a relative
-> relocation, to which the value of the program counter is added at
-> runtime, and no GOT is involved, and all relocations can be resolved
-> at build time.
->
-> I think it makes sense to add a #pragma GCC visibility push(hidden) to
-> efistub.h (if pragmas are in fashion these days), making sure that no
-> global references (not even externs) will generate GOT entries.
->
-Something like that probably.
 
-Following patch FAILS:
+* Laszlo Ersek <lersek@redhat.com> wrote:
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f277184e2ac1..f9738d92c9ce 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -15,6 +15,8 @@
- 
- #undef memcpy			/* Use memcpy from misc.c */
- 
-+#pragma GCC visibility push(hidden)
-+
- #include "eboot.h"
- 
- static efi_system_table_t *sys_table;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index 32d5cca30f49..7ef10f36cc1b 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -13,6 +13,8 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
- 
-+#pragma GCC visibility push(hidden)
-+
- #include "efistub.h"
- 
- #define EFI_READ_CHUNK_SIZE	(1024 * 1024)
+> On 09/01/14 09:22, Ingo Molnar wrote:
+> >
+> > * Laszlo Ersek <lersek@redhat.com> wrote:
+> >
+> >> It's a pain to analyze EFI memmap logs while debugging, especially to
+> >> verify the memory types (an enum) and the memory attributes (a bitmap).
+> >> This series renders those columns human-readable, and unifies their
+> >> formatting between x86, ia64 and arm64.
+> >>
+> >> Example output with the patchset on arm64 (in a qemu-system-aarch64
+> >> guest, booted with Ard's v5 series from edk2-devel ("QEMU_EFI.fd")):
+> >>
+> >>> Processing EFI memory map:
+> >>>   0x000040000000-0x000040000fff [Loader Data        |   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x000040001000-0x00004007ffff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x000040080000-0x00004072afff [Loader Data        |   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00004072b000-0x00005fdfffff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00005fe00000-0x00005fe0ffff [Loader Data        |   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00005fe10000-0x0000964e8fff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x0000964e9000-0x0000964e9fff [Loader Data        |   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x0000964ea000-0x000096c52fff [Loader Code        |   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x000096c53000-0x00009709dfff [Boot Code          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009709e000-0x0000970b3fff [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x0000970b4000-0x0000970f4fff [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x0000970f5000-0x000097117fff [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x000097118000-0x000097199fff [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009719a000-0x0000971dffff [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x0000971e0000-0x0000997f8fff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x0000997f9000-0x0000998f1fff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x0000998f2000-0x0000999eafff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x0000999eb000-0x00009af09fff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009af0a000-0x00009af21fff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00009af22000-0x00009af46fff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009af47000-0x00009af5bfff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00009af5c000-0x00009afe1fff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009afe2000-0x00009afe2fff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00009afe3000-0x00009c01ffff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009c020000-0x00009efbffff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00009efc0000-0x00009f14efff [Boot Code          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f14f000-0x00009f162fff [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f163000-0x00009f194fff [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f195000-0x00009f197fff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f198000-0x00009f198fff [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f199000-0x00009f1acfff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+> >>>   0x00009f1ad000-0x00009f1affff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f1b0000-0x00009f1b0fff [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x00009f1b1000-0x00009fffffff [Boot Data          |   |  |  |  |   |WB|WT|WC|UC]*
+> >>>   0x000004000000-0x000007ffffff [Memory Mapped I/O  |RUN|  |  |  |   |  |  |  |UC]
+> >>>   0x000009010000-0x000009010fff [Memory Mapped I/O  |RUN|  |  |  |   |  |  |  |UC]
+> >>
+> >> Output on x86 (OVMF guest):
+> >>
+> >>> [    0.000000] efi: mem00: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000000000-0x000000000009f000) (0MB)
+> >>> [    0.000000] efi: mem01: [Loader Data        |   |  |  |  |   |WB|WT|WC|UC] range=[0x000000000009f000-0x00000000000a0000) (0MB)
+> >>> [    0.000000] efi: mem02: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000100000-0x0000000000400000) (3MB)
+> >>> [    0.000000] efi: mem03: [Loader Data        |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000400000-0x0000000000800000) (4MB)
+> >>> [    0.000000] efi: mem04: [ACPI Memory NVS    |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000800000-0x0000000000808000) (0MB)
+> >>> [    0.000000] efi: mem05: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000808000-0x0000000000810000) (0MB)
+> >>> [    0.000000] efi: mem06: [ACPI Memory NVS    |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000810000-0x0000000000900000) (0MB)
+> >>> [    0.000000] efi: mem07: [Boot Data          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000000900000-0x0000000001100000) (8MB)
+> >>> [    0.000000] efi: mem08: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000001100000-0x0000000001400000) (3MB)
+> >>> [    0.000000] efi: mem09: [Loader Data        |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000001400000-0x0000000002613000) (18MB)
+> >>> [    0.000000] efi: mem10: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000002613000-0x0000000004000000) (25MB)
+> >>> [    0.000000] efi: mem11: [Boot Data          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000004000000-0x0000000004020000) (0MB)
+> >>> [    0.000000] efi: mem12: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000004020000-0x00000000068ea000) (40MB)
+> >>> [    0.000000] efi: mem13: [Loader Data        |   |  |  |  |   |WB|WT|WC|UC] range=[0x00000000068ea000-0x00000000068f0000) (0MB)
+> >>> [    0.000000] efi: mem14: [Boot Code          |   |  |  |  |   |WB|WT|WC|UC] range=[0x00000000068f0000-0x0000000006c7b000) (3MB)
+> >>> [    0.000000] efi: mem15: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006c7b000-0x0000000006c7d000) (0MB)
+> >>> [    0.000000] efi: mem16: [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006c7d000-0x0000000006c85000) (0MB)
+> >>> [    0.000000] efi: mem17: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006c85000-0x0000000006c87000) (0MB)
+> >>> [    0.000000] efi: mem18: [Boot Code          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000006c87000-0x0000000006ca3000) (0MB)
+> >>> [    0.000000] efi: mem19: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006ca3000-0x0000000006ca6000) (0MB)
+> >>> [    0.000000] efi: mem20: [ACPI Memory NVS    |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000006ca6000-0x0000000006cc6000) (0MB)
+> >>> [    0.000000] efi: mem21: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006cc6000-0x0000000006d95000) (0MB)
+> >>> [    0.000000] efi: mem22: [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000006d95000-0x0000000006e22000) (0MB)
+> >>> [    0.000000] efi: mem23: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000006e22000-0x0000000007165000) (3MB)
+> >>> [    0.000000] efi: mem24: [Boot Data          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007165000-0x0000000007d22000) (11MB)
+> >>> [    0.000000] efi: mem25: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007d22000-0x0000000007d25000) (0MB)
+> >>> [    0.000000] efi: mem26: [Boot Code          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007d25000-0x0000000007ea2000) (1MB)
+> >>> [    0.000000] efi: mem27: [Runtime Code       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000007ea2000-0x0000000007ed2000) (0MB)
+> >>> [    0.000000] efi: mem28: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000007ed2000-0x0000000007ef6000) (0MB)
+> >>> [    0.000000] efi: mem29: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007ef6000-0x0000000007f00000) (0MB)
+> >>> [    0.000000] efi: mem30: [ACPI Reclaim Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007f00000-0x0000000007f02000) (0MB)
+> >>> [    0.000000] efi: mem31: [ACPI Memory NVS    |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007f02000-0x0000000007f06000) (0MB)
+> >>> [    0.000000] efi: mem32: [Boot Data          |   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007f06000-0x0000000007fd0000) (0MB)
+> >>> [    0.000000] efi: mem33: [Runtime Data       |RUN|  |  |  |   |WB|WT|WC|UC] range=[0x0000000007fd0000-0x0000000007ff0000) (0MB)
+> >>> [    0.000000] efi: mem34: [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC] range=[0x0000000007ff0000-0x0000000008000000) (0MB)
+> >
+> > Would be nice to see the 'before' dump as well, so that we can
+> > see exactly what changed.
+> 
+> Right.
+> 
+> Current format on arm64 (same qemu-system-aarch64 / QEMU_EFI.fd guest):
+> 
+> > Processing EFI memory map:
+> >   0x000040000000-0x000040000fff [Loader Data]
+> >   0x000040001000-0x00004007ffff [Conventional Memory]
+> >   0x000040080000-0x00004072afff [Loader Data]
+> >   0x00004072b000-0x00005fdfffff [Conventional Memory]
+> >   0x00005fe00000-0x00005fe0ffff [Loader Data]
+> >   0x00005fe10000-0x0000964e8fff [Conventional Memory]
+> >   0x0000964e9000-0x0000964e9fff [Loader Data]
+> >   0x0000964ea000-0x000096c52fff [Loader Code]
+> >   0x000096c53000-0x00009709dfff [Boot Code]*
+> >   0x00009709e000-0x0000970b3fff [Runtime Code]*
+> >   0x0000970b4000-0x0000970f4fff [Runtime Data]*
+> >   0x0000970f5000-0x000097117fff [Runtime Code]*
+> >   0x000097118000-0x000097199fff [Runtime Data]*
+> >   0x00009719a000-0x0000971dffff [Runtime Code]*
+> >   0x0000971e0000-0x0000997f8fff [Conventional Memory]
+> >   0x0000997f9000-0x0000998f1fff [Boot Data]*
+> >   0x0000998f2000-0x0000999eafff [Conventional Memory]
+> >   0x0000999eb000-0x00009af09fff [Boot Data]*
+> >   0x00009af0a000-0x00009af21fff [Conventional Memory]
+> >   0x00009af22000-0x00009af46fff [Boot Data]*
+> >   0x00009af47000-0x00009af5bfff [Conventional Memory]
+> >   0x00009af5c000-0x00009afe1fff [Boot Data]*
+> >   0x00009afe2000-0x00009afe2fff [Conventional Memory]
+> >   0x00009afe3000-0x00009c01ffff [Boot Data]*
+> >   0x00009c020000-0x00009efbffff [Conventional Memory]
+> >   0x00009efc0000-0x00009f14efff [Boot Code]*
+> >   0x00009f14f000-0x00009f162fff [Runtime Code]*
+> >   0x00009f163000-0x00009f194fff [Runtime Data]*
+> >   0x00009f195000-0x00009f197fff [Boot Data]*
+> >   0x00009f198000-0x00009f198fff [Runtime Data]*
+> >   0x00009f199000-0x00009f1acfff [Conventional Memory]
+> >   0x00009f1ad000-0x00009f1affff [Boot Data]*
+> >   0x00009f1b0000-0x00009f1b0fff [Runtime Data]*
+> >   0x00009f1b1000-0x00009fffffff [Boot Data]*
+> >   0x000004000000-0x000007ffffff [Memory Mapped I/O]
+> >   0x000009010000-0x000009010fff [Memory Mapped I/O]
+> 
+> The difference for arm64 is that the attribute bitmap is decoded.
+> 
+> On x86 (same OVMF guest):
+> 
+> > [    0.000000] efi: mem00: type=7, attr=0xf, range=[0x0000000000000000-0x000000000009f000) (0MB)
+> > [    0.000000] efi: mem01: type=2, attr=0xf, range=[0x000000000009f000-0x00000000000a0000) (0MB)
+> > [    0.000000] efi: mem02: type=7, attr=0xf, range=[0x0000000000100000-0x0000000000400000) (3MB)
+> > [    0.000000] efi: mem03: type=2, attr=0xf, range=[0x0000000000400000-0x0000000000800000) (4MB)
+> > [    0.000000] efi: mem04: type=10, attr=0xf, range=[0x0000000000800000-0x0000000000808000) (0MB)
+> > [    0.000000] efi: mem05: type=7, attr=0xf, range=[0x0000000000808000-0x0000000000810000) (0MB)
+> > [    0.000000] efi: mem06: type=10, attr=0xf, range=[0x0000000000810000-0x0000000000900000) (0MB)
+> > [    0.000000] efi: mem07: type=4, attr=0xf, range=[0x0000000000900000-0x0000000001100000) (8MB)
+> > [    0.000000] efi: mem08: type=7, attr=0xf, range=[0x0000000001100000-0x0000000001400000) (3MB)
+> > [    0.000000] efi: mem09: type=2, attr=0xf, range=[0x0000000001400000-0x0000000002613000) (18MB)
+> > [    0.000000] efi: mem10: type=7, attr=0xf, range=[0x0000000002613000-0x0000000004000000) (25MB)
+> > [    0.000000] efi: mem11: type=4, attr=0xf, range=[0x0000000004000000-0x0000000004020000) (0MB)
+> > [    0.000000] efi: mem12: type=7, attr=0xf, range=[0x0000000004020000-0x00000000068ea000) (40MB)
+> > [    0.000000] efi: mem13: type=2, attr=0xf, range=[0x00000000068ea000-0x00000000068f0000) (0MB)
+> > [    0.000000] efi: mem14: type=3, attr=0xf, range=[0x00000000068f0000-0x0000000006c7b000) (3MB)
+> > [    0.000000] efi: mem15: type=6, attr=0x800000000000000f, range=[0x0000000006c7b000-0x0000000006c7d000) (0MB)
+> > [    0.000000] efi: mem16: type=5, attr=0x800000000000000f, range=[0x0000000006c7d000-0x0000000006c85000) (0MB)
+> > [    0.000000] efi: mem17: type=6, attr=0x800000000000000f, range=[0x0000000006c85000-0x0000000006c87000) (0MB)
+> > [    0.000000] efi: mem18: type=3, attr=0xf, range=[0x0000000006c87000-0x0000000006ca3000) (0MB)
+> > [    0.000000] efi: mem19: type=6, attr=0x800000000000000f, range=[0x0000000006ca3000-0x0000000006ca6000) (0MB)
+> > [    0.000000] efi: mem20: type=10, attr=0xf, range=[0x0000000006ca6000-0x0000000006cc6000) (0MB)
+> > [    0.000000] efi: mem21: type=6, attr=0x800000000000000f, range=[0x0000000006cc6000-0x0000000006d95000) (0MB)
+> > [    0.000000] efi: mem22: type=5, attr=0x800000000000000f, range=[0x0000000006d95000-0x0000000006e22000) (0MB)
+> > [    0.000000] efi: mem23: type=7, attr=0xf, range=[0x0000000006e22000-0x0000000007165000) (3MB)
+> > [    0.000000] efi: mem24: type=4, attr=0xf, range=[0x0000000007165000-0x0000000007d22000) (11MB)
+> > [    0.000000] efi: mem25: type=7, attr=0xf, range=[0x0000000007d22000-0x0000000007d25000) (0MB)
+> > [    0.000000] efi: mem26: type=3, attr=0xf, range=[0x0000000007d25000-0x0000000007ea2000) (1MB)
+> > [    0.000000] efi: mem27: type=5, attr=0x800000000000000f, range=[0x0000000007ea2000-0x0000000007ed2000) (0MB)
+> > [    0.000000] efi: mem28: type=6, attr=0x800000000000000f, range=[0x0000000007ed2000-0x0000000007ef6000) (0MB)
+> > [    0.000000] efi: mem29: type=7, attr=0xf, range=[0x0000000007ef6000-0x0000000007f00000) (0MB)
+> > [    0.000000] efi: mem30: type=9, attr=0xf, range=[0x0000000007f00000-0x0000000007f02000) (0MB)
+> > [    0.000000] efi: mem31: type=10, attr=0xf, range=[0x0000000007f02000-0x0000000007f06000) (0MB)
+> > [    0.000000] efi: mem32: type=4, attr=0xf, range=[0x0000000007f06000-0x0000000007fd0000) (0MB)
+> > [    0.000000] efi: mem33: type=6, attr=0x800000000000000f, range=[0x0000000007fd0000-0x0000000007ff0000) (0MB)
+> > [    0.000000] efi: mem34: type=7, attr=0xf, range=[0x0000000007ff0000-0x0000000008000000) (0MB)
+> 
+> The difference for x86 (and ia64) is that both the type enum and the
+> attribute bitmap are decoded (with the additional benefit that the
+> memory ranges line up as well).
 
------
-But this works:
+Looks like an improvement. Might be nice to fold back this 
+explanation into the patch description.
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 7a801a310e37..eebd13ee301b 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -30,11 +30,10 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
- 	$(obj)/string.o $(obj)/cmdline.o $(obj)/early_serial_console.o \
- 	$(obj)/piggy.o $(obj)/cpuflags.o $(obj)/aslr.o
- 
--$(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
-+$(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone -fvisibility=hidden
- 
- ifeq ($(CONFIG_EFI_STUB), y)
--	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
--				$(objtree)/drivers/firmware/efi/libstub/lib.a
-+	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
- endif
- 
- $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index f277184e2ac1..e18a265460dd 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -17,6 +17,8 @@
- 
- #include "eboot.h"
- 
-+#include "../../../drivers/firmware/efi/libstub/efi-stub-helper.c"
-+
- static efi_system_table_t *sys_table;
- 
- struct efi_config *efi_early;
+Thanks,
 
-
-In case it was caused by lacking -fshort-wchar or order of building, I tried the following, also fails:
----
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 7a801a310e37..8f62c273badd 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -30,11 +30,10 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
- 	$(obj)/string.o $(obj)/cmdline.o $(obj)/early_serial_console.o \
- 	$(obj)/piggy.o $(obj)/cpuflags.o $(obj)/aslr.o
- 
--$(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
-+$(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone -fvisibility=hidden
- 
- ifeq ($(CONFIG_EFI_STUB), y)
--	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
--				$(objtree)/drivers/firmware/efi/libstub/lib.a
-+	VMLINUX_OBJS += $(objtree)/drivers/firmware/efi/libstub/efi-stub-helper.o $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
- endif
- 
- $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index b14bc2b9fb4d..66c5536cff4d 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -8,7 +8,8 @@ cflags-$(CONFIG_X86_32)		:= -march=i386
- cflags-$(CONFIG_X86_64)		:= -mcmodel=small
- cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2 \
- 				   -fPIC -fno-strict-aliasing -mno-red-zone \
--				   -mno-mmx -mno-sse -DDISABLE_BRANCH_PROFILING
-+				   -mno-mmx -mno-sse -DDISABLE_BRANCH_PROFILING \
-+				   -fvisibility=hidden -fshort-wchar
- 
- cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
- cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
-
-
-
----
-I have no idea why only directly referencing the file in eboot.c works.
-
-~Maarten
+	Ingo
