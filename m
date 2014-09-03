@@ -1,40 +1,69 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH 2/5] efi: introduce efi_md_typeattr_format()
-Date: Wed, 3 Sep 2014 13:46:13 +0100
-Message-ID: <20140903124613.GD3001@console-pimps.org>
-References: <1409532820-5027-1-git-send-email-lersek@redhat.com>
- <1409532820-5027-3-git-send-email-lersek@redhat.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 0/5] beautify EFI memmap logs
+Date: Wed, 3 Sep 2014 15:01:31 +0200
+Message-ID: <CAKv+Gu_Yk-q0gf+EHc3EYQ=obLT2nj6Kj6qPTk678ASFEW+ZFQ@mail.gmail.com>
+References: <1409743943-16934-1-git-send-email-lersek@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <1409532820-5027-3-git-send-email-lersek@redhat.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Laszlo Ersek <lersek@redhat.com>
-Cc: matt.fleming@intel.com, linux-ia64@vger.kernel.org, x86@kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, msalter@redhat.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1409743943-16934-1-git-send-email-lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 01 Sep, at 02:53:37AM, Laszlo Ersek wrote:
-> +char * __init efi_md_typeattr_format(char *buf, size_t size,
-> +				     const efi_memory_desc_t *md)
-> +{
-> +	char *pos;
-> +	int type_len;
-> +	register u64 attr;
+On 3 September 2014 13:32, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> changes in v2:
+> - explain with examples how the log's appearance changes, in patches 3-5
+>   [Ingo]
+>
+> v1 blurb:
+>
+>> It's a pain to analyze EFI memmap logs while debugging, especially to
+>> verify the memory types (an enum) and the memory attributes (a
+>> bitmap). This series renders those columns human-readable, and unifies
+>> their formatting between x86, ia64 and arm64.
+>
 
-You can delete the 'register' keyword, since the compiler is free to
-ignore it (and will do so).
+Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+(on arm64 only)
 
-Rest of the patch looks good.
++1 for aligning between architectures
++1 for cleaning up the output to make it more readable
+
+The only thing I am not entirely convinced about is printing all those
+memory attributes: is it really so interesting to know that region X
+/can/ be configured as writeback, write through, write combining etc
+etc, as most regions seem to support most attributes, yet it tells you
+nothing about what the kernel ends up doing with that information. In
+the arm64 case, for instance, all MEMORY_WB ranges are mapped
+writeback cached, and everything else is mapped uncached.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Ard.
+
+
+> Laszlo Ersek (5):
+>   efi: add macro for EFI_MEMORY_UCE memory attribute
+>   efi: introduce efi_md_typeattr_format()
+>   x86: efi: format EFI memory type & attrs with efi_md_typeattr_format()
+>   ia64: efi: format EFI memory type & attrs with
+>     efi_md_typeattr_format()
+>   arm64: efi: format EFI memory type & attrs with
+>     efi_md_typeattr_format()
+>
+>  include/linux/efi.h         |  8 +++++++
+>  arch/arm64/kernel/efi.c     | 26 +++++----------------
+>  arch/ia64/kernel/efi.c      |  6 +++--
+>  arch/x86/platform/efi/efi.c |  7 ++++--
+>  drivers/firmware/efi/efi.c  | 57 +++++++++++++++++++++++++++++++++++++++++++++
+>  5 files changed, 80 insertions(+), 24 deletions(-)
+>
+> --
+> 1.8.3.1
+>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
