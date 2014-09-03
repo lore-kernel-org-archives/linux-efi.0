@@ -1,19 +1,19 @@
-From: Husam Al Sayed <oscar55@post.sk>
+From: Husam Al Sayed <oscar55-azLpJcbXd5U@public.gmane.org>
 Subject: FROM: Husam Al Sayed.
 Date: Wed, 3 Sep 2014 20:32:05 +0200 (CEST)
-Message-ID: <13635788.347147.1409769125805.JavaMail.root__25099.428513977$1409769597$gmane$org@mbox05>
-Reply-To: "alsayedhusa@hotmail.com" <alsayedhusa@hotmail.com>
+Message-ID: <13635788.347147.1409769125805.JavaMail.root__16525.9269917899$1409769598$gmane$org@mbox05>
+Reply-To: "alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org" <alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Sender: linux-fsdevel-owner@vger.kernel.org
-Cc: linux-efi@vger.kernel.org, elezegarcia@gmail.com, frank@f-seidel.de, andi@firstfloor.org, chirag.kantharia@hp.com, scameron@beardog.cce.hp.com, mike.miller@hp.com, iss_storagedev@hp.com, linux-fsdevel@vger.kernel.org, fero@drama.obuda.kando.hu, linux-nvidia@lists.surfsouth.com, linux@highpoint-tech.com, jes@trained-monkey.org, linux-hippi@sunsite.dk, j@w1.fi, hostap@shmoo.com, venki@google.com, mikulas@artax.karlin.mff.cuni.cz, sre@debian.org, j.dumon@option.com, arvid.brodin@alten.se, pof@eslack.org, nyc@holomorphy.com, kys@microsoft.com, haiyangz@microsoft.com, devel@linuxdriverproject.org, seth.heasley@intel.com, wsa@the-dreams.de, till@harbaum.org, fenghua.yu@intel.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, elezegarcia-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, frank-aMRDT+nbkrEb1SvskN2V4Q@public.gmane.org, andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org, chirag.kantharia-VXdhtT5mjnY@public.gmane.org, scameron-3C9H9nn4BS4HL6m8NFMY+dBPR1lH4CV8@public.gmane.org, mike.miller-VXdhtT5mjnY@public.gmane.org, iss_storagedev-VXdhtT5mjnY@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fero-m1v8e5HEDRgiC9n5j0o8YLYDWsXZH0gO@public.gmane.org, linux-nvidia-g/J2nbn7YhliLJA6kbroO0EOCMrvLtNR@public.gmane.org, linux-Cmuy/HDFvlmHNPcNWJ+vptBPR1lH4CV8@public.gmane.org, jes-dtAfj9ClZIwnoBwkMbRkTB2eb7JE58TQ@public.gmane.org, linux-hippi-OfajU3CKLf1/SzgSGea1oA@public.gmane.org, j@w1.fi, hostap-I1pBevtZXGcAvxtiuMwx3w@public.gmane.org, venki-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org, mikulas-TTVWCEgN8Z9G4ohzP4jBZS1Fcj925eT/@public.gmane.org, sre-8fiUuRrzOP0dnm+yROfE0A@public.gmane.org, j.dumon-x9gZzRpC1QbQT0dZR+AlfA@public.gmane.org, arvid.brodin-SVm98a2vdck@public.gmane.org, pof-FPnfh0goHpsdnm+yROfE0A@public.gmane.org, nyc-tGiaVUSOoeej7qYf8Sx8sA@public.gmane.org, kys-0li6OtcxBFHby3iVrkZq2A@public.gmane.org, haiyangz-0li6OtcxBFHby3iVrkZq2A@public.gmane.org, devel-tBiZLqfeLfOHmIFyCCdPziST3g8Odh+X@public.gmane.org, seth.heasley-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org, till-RcHadlBFbzVAfugRpC6u6w@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 FROM: Husam Al Sayed.
 
-EMAIL:alsayedhusa@hotmail.com
+EMAIL:alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org
  
 Hello,
  
@@ -32,7 +32,7 @@ Have a nice day and God bless. Anticipating your communication.
  
 Regards,
 FROM: Husam Al Sayed.
-EMAIL: alsayedhusa@hotmail.com
+EMAIL: alsayedhusa-PkbjNfxxIARBDgjK7y7TUQ@public.gmane.org
 _____________________________________________________________________
 
 http://ad.sme.sk/ Reklama na Sme.sk vam prinasa viac.
