@@ -1,123 +1,53 @@
-From: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [REGRESSION] "efi: efistub: Convert into static library" and
- preparation patches
-Date: Thu, 04 Sep 2014 12:48:22 +0200
-Message-ID: <54084376.8090002@canonical.com>
-References: <5405E186.2080406@canonical.com>	<20140902192941.GB3001@console-pimps.org>	<CAKv+Gu_eSe+FeNkGm+w3sSsRn2_hr70xLVBieZgyhawAv6PQvw@mail.gmail.com>	<5406D0DB.90401@canonical.com>	<CAKv+Gu8OD3p+GSwB+SPRf3pKwZB2R1t6x1zK7czGCXj1QhB7_g@mail.gmail.com>	<54073409.6030004@canonical.com>	<CAKv+Gu9q1qTh6DZXsCG2tGVBn-uwuQKQa_6FEMmchDVFi5vJtw@mail.gmail.com>	<20140903175948.GH3001@console-pimps.org> <CAKv+Gu9tejixb3Kb3YM_7sLcpKNuRHN+Dn+twFyCAXx99wYRCw@mail.gmail.com>
+From: Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>
+Subject: Re: [PATCH -v4] x86: only load initrd above 4g on second try
+Date: Fri, 5 Sep 2014 07:47:49 +0200
+Message-ID: <20140905054749.GA4498@ad.chargestorm.se>
+References: <1409806207-3992-1-git-send-email-yinghai@kernel.org>
+ <20140904100137.GK3001@console-pimps.org>
+ <5408D299.5000300@zytor.com>
+ <20140904212925.GL3001@console-pimps.org>
+ <CAE9FiQUDLoARj-Z3ipPTf2sZgGn71SxrxM+FqLE1Cyb-OEoP+A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="us-ascii"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9tejixb3Kb3YM_7sLcpKNuRHN+Dn+twFyCAXx99wYRCw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAE9FiQUDLoARj-Z3ipPTf2sZgGn71SxrxM+FqLE1Cyb-OEoP+A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Op 03-09-14 om 21:57 schreef Ard Biesheuvel:
-> On 3 September 2014 19:59, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
->> On Wed, 03 Sep, at 05:37:26PM, Ard Biesheuvel wrote:
->>> Will do, thanks.
->>>
->>> @Matt: so there is two ways to fix this, the patch above addressing
->>> this single instance, and alternatively, adding a #pragma GCC
->>> visiblilty push(hidden) to all .c files under libstub/, *before* the
->>> #includes. The latter would catch future problems regarding newly
->>> introduced global variables, but it may be a bit overkill in this
->>> case, as libstub is not expected to be in flux in the foreseeable
->>> future.
->>>
->>> Any preferences?
->> Any reason we can't reuse the existing GOT fixup code in the early x86
->> boot code? We're not executing it before the EFI boot stub atm, which is
->> the reason Maarten is hitting these difficulties.
->>
-> I guess that is likely to work, I just wasn't aware it existed :-)
-> I think adding another visibility(hidden) attribute or 2 would
-> complete eliminate the need for GOT fixups, but I guess that is more
-> sensitive to compiler versions being recent enough etc.
-> The attached (build tested only) patch eliminates all GOT relocations
-> under boot/compressed for a 64-bit EFI stub build.
->
->> Maarten, does the following help?
->>
->> If not, Ard please go ahead with option #2 above. Overkill yes, but I've
->> done the single __attribute__() hacks in other projects and someone
->> (usually me) always eventually forgets to tag some instance.
->>
-> It appears we just got lucky on arm64, since we don't have any global
-> variables, but the issue does exist there as well.
->
-FWIW, visibility pushing doesn't seem to work for functions declared with extern.
-Following seems to get rid of all GOTPCREL:
----
-diff --git a/arch/x86/boot/boot.h b/arch/x86/boot/boot.h
-index bd49ec61255c..221da1e53d87 100644
---- a/arch/x86/boot/boot.h
-+++ b/arch/x86/boot/boot.h
-@@ -298,8 +298,8 @@ int check_cpu(int *cpu_level_ptr, int *req_level_ptr, u32 **err_flags_ptr);
- int validate_cpu(void);
- 
- /* early_serial_console.c */
--extern int early_serial_base;
--void console_init(void);
-+extern __attribute__((__visibility__("hidden"))) int early_serial_base;
-+__attribute__((__visibility__("hidden"))) void console_init(void);
- 
- /* edd.c */
- void query_edd(void);
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index 24e3e569a13c..23ac047fd23e 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -30,9 +30,10 @@
- #endif
- 
- /* misc.c */
--extern memptr free_mem_ptr;
--extern memptr free_mem_end_ptr;
--extern struct boot_params *real_mode;		/* Pointer to real-mode data */
-+extern __attribute__((__visibility__("hidden"))) memptr free_mem_ptr;
-+extern __attribute__((__visibility__("hidden"))) memptr free_mem_end_ptr;
-+extern __attribute__((__visibility__("hidden"))) struct boot_params *real_mode;		/* Pointer to real-mode data */
-+
- void __putstr(const char *s);
- #define error_putstr(__x)  __putstr(__x)
- 
-@@ -75,7 +76,7 @@ unsigned char *choose_kernel_location(unsigned char *input,
- 
- #ifdef CONFIG_EARLY_PRINTK
- /* early_serial_console.c */
--extern int early_serial_base;
-+__attribute__((__visibility__("hidden"))) int early_serial_base;
- void console_init(void);
- #else
- static const int early_serial_base;
-diff --git a/arch/x86/boot/cpuflags.h b/arch/x86/boot/cpuflags.h
-index ea97697e51e4..d01fcf94ece6 100644
---- a/arch/x86/boot/cpuflags.h
-+++ b/arch/x86/boot/cpuflags.h
-@@ -10,8 +10,8 @@ struct cpu_features {
- 	u32 flags[NCAPINTS];
- };
- 
--extern struct cpu_features cpu;
--extern u32 cpu_vendor[3];
-+__attribute__((visibility("hidden"))) extern struct cpu_features cpu;
-+__attribute__((visibility("hidden"))) extern u32 cpu_vendor[3];
- 
- int has_eflag(unsigned long mask);
- void get_cpuflags(void);
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 044a2fd3c5fe..8725d85f1903 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -178,7 +178,7 @@ struct efi_config {
- 	bool is64;
- } __packed;
- 
--extern struct efi_config *efi_early;
-+extern __attribute__((visibility("hidden"))) struct efi_config *efi_early;
- 
- #define efi_call_early(f, ...)						\
- 	efi_early->call(efi_early->f, __VA_ARGS__);
+* Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> [140905 03:19]:
+
+
+> On Thu, Sep 4, 2014 at 2:29 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> > On Thu, 04 Sep, at 01:59:05PM, H. Peter Anvin wrote:
+
+> >> I am fine with this patch, but at the same time I do want to note that
+> >> there is an alternative to double-buffer the patch and/or (if that
+> >> applies to the buggy BIOS) round up the size of the target buffer.
+
+> > I'm not sure that rounding up the size of the target buffer will
+> > workaround this issue correctly.
+
+> > As far as I know, the only thing that Mantas tried was rounding up the
+> > size of the source file, by padding it.
+
+> Can you try attached patch on top of linus tree?
+
+I took the liberty to test the patch on my Dell XPS13 9333, and
+unfortunately I got the old hang back. 
+
+This was tested on the current Linus' tree.
+
+Cheers,
+Anders Darander
+
+> -					chunksize = size;
+> +					chunksize = round_up(size, EFI_PAGE_SIZE);
+
+
+
+-- 
+It usually takes more than three weeks to prepare a good impromptu speech.
+		-- Mark Twain
