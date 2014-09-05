@@ -1,39 +1,60 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [REGRESSION] "efi: efistub: Convert into static library" and
- preparation patches
-Date: Thu, 4 Sep 2014 22:37:53 +0100
-Message-ID: <20140904213753.GM3001@console-pimps.org>
-References: <5406D0DB.90401@canonical.com>
- <CAKv+Gu8OD3p+GSwB+SPRf3pKwZB2R1t6x1zK7czGCXj1QhB7_g@mail.gmail.com>
- <54073409.6030004@canonical.com>
- <CAKv+Gu9q1qTh6DZXsCG2tGVBn-uwuQKQa_6FEMmchDVFi5vJtw@mail.gmail.com>
- <20140903175948.GH3001@console-pimps.org>
- <CAKv+Gu9tejixb3Kb3YM_7sLcpKNuRHN+Dn+twFyCAXx99wYRCw@mail.gmail.com>
- <54084376.8090002@canonical.com>
- <540860F1.6060801@fensystems.co.uk>
- <CAKv+Gu8wALTqtNQK_855A7M5f2a+EB1JyLxo=j6G0T1cf8ZFog@mail.gmail.com>
- <CAKv+Gu_sLmkBHF-9GyPUgfAbLYirQTD4vk63o6HzdZhm6s_e0g@mail.gmail.com>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH -v4] x86: only load initrd above 4g on second try
+Date: Thu, 4 Sep 2014 18:19:16 -0700
+Message-ID: <CAE9FiQUDLoARj-Z3ipPTf2sZgGn71SxrxM+FqLE1Cyb-OEoP+A@mail.gmail.com>
+References: <1409806207-3992-1-git-send-email-yinghai@kernel.org>
+	<20140904100137.GK3001@console-pimps.org>
+	<5408D299.5000300@zytor.com>
+	<20140904212925.GL3001@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed; boundary=001a11c3bf04f9218d0502474180
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_sLmkBHF-9GyPUgfAbLYirQTD4vk63o6HzdZhm6s_e0g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20140904212925.GL3001-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, =?UTF-8?Q?Mantas_Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 04 Sep, at 11:25:48PM, Ard Biesheuvel wrote:
-> 
-> As it turns out, this breaks 32-bit, and the linker script is shared.
-> 
-> So I suggest that we go with Matt's suggestion, i.e., move/clone the
-> GOT fixup code so that it runs exactly once in each code path, but
-> early enough so that the embedded EFI application gets the treatment
-> too.
-> And don't forget head_32.S ...
+--001a11c3bf04f9218d0502474180
+Content-Type: text/plain; charset=UTF-8
 
-Thanks Ard, I'll take a look in the morning.
+On Thu, Sep 4, 2014 at 2:29 PM, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Thu, 04 Sep, at 01:59:05PM, H. Peter Anvin wrote:
+>>
+>> I am fine with this patch, but at the same time I do want to note that
+>> there is an alternative to double-buffer the patch and/or (if that
+>> applies to the buggy BIOS) round up the size of the target buffer.
+>
+> I'm not sure that rounding up the size of the target buffer will
+> workaround this issue correctly.
+>
+> As far as I know, the only thing that Mantas tried was rounding up the
+> size of the source file, by padding it.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Hi Mantas,
+
+Can you try attached patch on top of linus tree?
+
+Thanks
+
+Yinghai
+
+--001a11c3bf04f9218d0502474180
+Content-Type: text/x-patch; charset=US-ASCII; name="round_up_chunksize.patch"
+Content-Disposition: attachment; filename="round_up_chunksize.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hzou2nyd0
+
+LS0tCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9saWJzdHViL2VmaS1zdHViLWhlbHBlci5jIHwgICAg
+MiArLQogMSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpJbmRl
+eDogbGludXgtMi42L2RyaXZlcnMvZmlybXdhcmUvZWZpL2xpYnN0dWIvZWZpLXN0dWItaGVscGVy
+LmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PQotLS0gbGludXgtMi42Lm9yaWcvZHJpdmVycy9maXJtd2FyZS9lZmkvbGli
+c3R1Yi9lZmktc3R1Yi1oZWxwZXIuYworKysgbGludXgtMi42L2RyaXZlcnMvZmlybXdhcmUvZWZp
+L2xpYnN0dWIvZWZpLXN0dWItaGVscGVyLmMKQEAgLTQyNiw3ICs0MjYsNyBAQCBlZmlfc3RhdHVz
+X3QgaGFuZGxlX2NtZGxpbmVfZmlsZXMoZWZpX3N5CiAJCQkJaWYgKHNpemUgPiBFRklfUkVBRF9D
+SFVOS19TSVpFKQogCQkJCQljaHVua3NpemUgPSBFRklfUkVBRF9DSFVOS19TSVpFOwogCQkJCWVs
+c2UKLQkJCQkJY2h1bmtzaXplID0gc2l6ZTsKKwkJCQkJY2h1bmtzaXplID0gcm91bmRfdXAoc2l6
+ZSwgRUZJX1BBR0VfU0laRSk7CiAKIAkJCQlzdGF0dXMgPSBlZmlfZmlsZV9yZWFkKGZpbGVzW2pd
+LmhhbmRsZSwKIAkJCQkJCSAgICAgICAmY2h1bmtzaXplLAo=
+--001a11c3bf04f9218d0502474180--
