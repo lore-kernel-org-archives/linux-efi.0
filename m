@@ -1,264 +1,157 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [REGRESSION] "efi: efistub: Convert into static library" and
- preparation patches
-Date: Fri, 5 Sep 2014 21:27:44 +0100
-Message-ID: <20140905202744.GO3001@console-pimps.org>
-References: <CAKv+Gu8OD3p+GSwB+SPRf3pKwZB2R1t6x1zK7czGCXj1QhB7_g@mail.gmail.com>
- <54073409.6030004@canonical.com>
- <CAKv+Gu9q1qTh6DZXsCG2tGVBn-uwuQKQa_6FEMmchDVFi5vJtw@mail.gmail.com>
- <20140903175948.GH3001@console-pimps.org>
- <CAKv+Gu9tejixb3Kb3YM_7sLcpKNuRHN+Dn+twFyCAXx99wYRCw@mail.gmail.com>
- <54084376.8090002@canonical.com>
- <540860F1.6060801@fensystems.co.uk>
- <CAKv+Gu8wALTqtNQK_855A7M5f2a+EB1JyLxo=j6G0T1cf8ZFog@mail.gmail.com>
- <CAKv+Gu_sLmkBHF-9GyPUgfAbLYirQTD4vk63o6HzdZhm6s_e0g@mail.gmail.com>
- <20140904213753.GM3001@console-pimps.org>
+Subject: Re: [PATCH -v4] x86: only load initrd above 4g on second try
+Date: Fri, 5 Sep 2014 23:16:16 +0100
+Message-ID: <20140905221616.GP3001@console-pimps.org>
+References: <1409806207-3992-1-git-send-email-yinghai@kernel.org>
+ <20140904100137.GK3001@console-pimps.org>
+ <5408D299.5000300@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140904213753.GM3001-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <5408D299.5000300-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 04 Sep, at 10:37:53PM, Matt Fleming wrote:
-> 
-> Thanks Ard, I'll take a look in the morning.
+On Thu, 04 Sep, at 01:59:05PM, H. Peter Anvin wrote:
+>=20
+> I am fine with this patch, but at the same time I do want to note tha=
+t
+> there is an alternative to double-buffer the patch and/or (if that
+> applies to the buggy BIOS) round up the size of the target buffer.
 
-Maarten, could you try out this patch?
+I took a whack at the double-buffer strategy, and I think the patch is
+conceptually pretty straight forward.
+
+Could someone try out the following patch? It works around the problem
+on my ASUS machine.
 
 ---
 
->From a058d81d9687671813560af72f34d63da3cc16bc Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Date: Fri, 5 Sep 2014 14:52:26 +0100
-Subject: [PATCH] x86/efi: Fixup GOT in all boot code paths
+=46rom 89e7fdaeb04f79d9834678e486215974986d4ac8 Mon Sep 17 00:00:00 200=
+1
+=46rom: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Date: Fri, 5 Sep 2014 23:15:11 +0100
+Subject: [PATCH] x86/efi: Workaround firmware bug with double-buffer re=
+ad
+MIME-Version: 1.0
+Content-Type: text/plain; charset=3DUTF-8
+Content-Transfer-Encoding: 8bit
 
-Maarten reported that his Macbook pro 8.2 stopped booting after commit
-f23cf8bd5c1f49 ("efi/x86: efistub: Move shared dependencies to
-<asm/efi.h>"), the main feature of which is changing the visibility of
-symbol 'efi_early' from local to global.
+Mantas found that after commit 4bf7111f5016 ("x86/efi: Support initrd
+loaded above 4G"), the kernel freezes at the earliest possible moment
+when trying to boot via UEFI on Asus laptop.
 
-By making 'efi_early' global we end up requiring an entry in the Global
-Offset Table. Unfortunately, while we do include code to fixup GOT
-entries in the early boot code, it's only called after we've executed
-the EFI boot stub.
+The cause of the freeze appears to be a firmware bug when reading file
+data into buffers above 4GB, though the exact reason is unknown.  Manta=
+s
+reports that the hang can be avoided if the file size is a multiple of
+512 bytes, but I've seen some ASUS firmware simply corrupting the file
+data rather than freezing.
 
-What this amounts to is that references to 'efi_early' in the EFI boot
-stub don't point to the correct place.
+Since the bug has only been reported when reading into a buffer above
+4GB, we can workaround the problem by doing a double-buffer read, where
+we read a partial file chunk into a buffer < 4GB then copy it to the
+buffer (potentially) above 4GB.
 
-Since we've got multiple boot entry points we need to be prepared to
-fixup the GOT in multiple places, while ensuring that we never do it
-more than once, otherwise the GOT entries will still point to the wrong
-place.
+Laszlo fixed an issue in the upstream EDK2 DiskIO code in Aug 2013 whic=
+h
+may possibly be related, commit 4e39b75e ("MdeModulePkg/DiskIoDxe: fix
+source/destination pointer of overrun transfer"). Whatever the cause,
+it's unlikely that a fix will be forthcoming from the vendor, hence the
+workaround.
 
-Reported-by: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reported-by: Mantas Mikul=C4=97nas <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Reported-by: Harald Hoyer <harald-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/boot/compressed/head_32.S | 54 ++++++++++++++++++++++++++----------
- arch/x86/boot/compressed/head_64.S | 56 ++++++++++++++++++++++++++++----------
- 2 files changed, 81 insertions(+), 29 deletions(-)
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 28 ++++++++++++++++++=
+++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index cbed1407a5cd..d6b8aa4c986c 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -30,6 +30,33 @@
- #include <asm/boot.h>
- #include <asm/asm-offsets.h>
- 
-+/*
-+ * Adjust our own GOT
-+ *
-+ * The relocation base must be in %ebx
-+ *
-+ * It is safe to call this macro more than once, because in some of the
-+ * code paths multiple invocations are inevitable, e.g. via the efi*
-+ * entry points.
-+ *
-+ * Relocation is only performed the first time.
-+ */
-+.macro FIXUP_GOT
-+	cmpb	$1, got_fixed(%ebx)
-+	je	2f
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/f=
+irmware/efi/libstub/efi-stub-helper.c
+index 32d5cca30f49..470793ce2617 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -297,6 +297,7 @@ efi_status_t handle_cmdline_files(efi_system_table_=
+t *sys_table_arg,
+ {
+ 	struct file_info *files;
+ 	unsigned long file_addr;
++	unsigned long chunkbuf;
+ 	u64 file_size_total;
+ 	efi_file_handle_t *fh =3D NULL;
+ 	efi_status_t status;
+@@ -416,6 +417,24 @@ efi_status_t handle_cmdline_files(efi_system_table=
+_t *sys_table_arg,
+ 			goto free_file_total;
+ 		}
+=20
++		/*
++		 * Allocate a bounce buffer below 4GB.
++		 *
++		 * Some firmware implementations cannot perform file
++		 * reads into buffers above 4G and at best corrupt the
++		 * buffer, at worst they hang completely.
++		 *
++		 * Pass chunkbuf to the firmware to perform reads in
++		 * chunksize bytes and copy them to the target buffer
++		 * 'file_addr'.
++		 */
++		status =3D efi_high_alloc(sys_table_arg, EFI_READ_CHUNK_SIZE,
++					0x1000, &chunkbuf, 0xffffffff);
++		if (status !=3D EFI_SUCCESS) {
++			pr_efi_err(sys_table_arg, "Failed to alloc file chunk buffer\n");
++			goto free_chunk;
++		}
 +
-+	leal	_got(%ebx), %edx
-+	leal	_egot(%ebx), %ecx
-+1:
-+	cmpl	%ecx, %edx
-+	jae	2f
-+	addl	%ebx, (%edx)
-+	addl	$4, %edx
-+	jmp	1b
-+2:
-+	movb	$1, got_fixed(%ebx)
-+.endm
+ 		addr =3D file_addr;
+ 		for (j =3D 0; j < nr_files; j++) {
+ 			unsigned long size;
+@@ -430,11 +449,13 @@ efi_status_t handle_cmdline_files(efi_system_tabl=
+e_t *sys_table_arg,
+=20
+ 				status =3D efi_file_read(files[j].handle,
+ 						       &chunksize,
+-						       (void *)addr);
++						       (void *)chunkbuf);
+ 				if (status !=3D EFI_SUCCESS) {
+ 					pr_efi_err(sys_table_arg, "Failed to read file\n");
+-					goto free_file_total;
++					goto free_chunk;
+ 				}
 +
- 	__HEAD
- ENTRY(startup_32)
- #ifdef CONFIG_EFI_STUB
-@@ -56,6 +83,9 @@ ENTRY(efi_pe_entry)
- 	add	%esi, 88(%eax)
- 	pushl	%eax
- 
-+	movl	%esi, %ebx
-+	FIXUP_GOT
-+
- 	call	make_boot_params
- 	cmpl	$0, %eax
- 	je	fail
-@@ -81,6 +111,10 @@ ENTRY(efi32_stub_entry)
- 	leal	efi32_config(%esi), %eax
- 	add	%esi, 88(%eax)
- 	pushl	%eax
-+
-+	movl	%esi, %ebx
-+	FIXUP_GOT
-+
- 2:
- 	call	efi_main
- 	cmpl	$0, %eax
-@@ -190,19 +224,7 @@ relocated:
- 	shrl	$2, %ecx
- 	rep	stosl
- 
--/*
-- * Adjust our own GOT
-- */
--	leal	_got(%ebx), %edx
--	leal	_egot(%ebx), %ecx
--1:
--	cmpl	%ecx, %edx
--	jae	2f
--	addl	%ebx, (%edx)
--	addl	$4, %edx
--	jmp	1b
--2:
--
-+	FIXUP_GOT
- /*
-  * Do the decompression, and jump to the new kernel..
-  */
-@@ -225,8 +247,12 @@ relocated:
- 	xorl	%ebx, %ebx
- 	jmp	*%eax
- 
--#ifdef CONFIG_EFI_STUB
- 	.data
-+/* Have we relocated the GOT? */
-+got_fixed:
-+	.byte 0
-+
-+#ifdef CONFIG_EFI_STUB
- efi32_config:
- 	.fill 11,8,0
- 	.long efi_call_phys
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 2884e0c3e8a5..50f69c7eaaf4 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -32,6 +32,33 @@
- #include <asm/processor-flags.h>
- #include <asm/asm-offsets.h>
- 
-+/*
-+ * Adjust our own GOT
-+ *
-+ * The relocation base must be in %rbx
-+ *
-+ * It is safe to call this macro more than once, because in some of the
-+ * code paths multiple invocations are inevitable, e.g. via the efi*
-+ * entry points.
-+ *
-+ * Relocation is only performed the first time.
-+ */
-+.macro FIXUP_GOT
-+	cmpb	$1, got_fixed(%rip)
-+	je	2f
-+
-+	leaq	_got(%rip), %rdx
-+	leaq	_egot(%rip), %rcx
-+1:
-+	cmpq	%rcx, %rdx
-+	jae	2f
-+	addq	%rbx, (%rdx)
-+	addq	$8, %rdx
-+	jmp	1b
-+2:
-+	movb	$1, got_fixed(%rip)
-+.endm
-+
- 	__HEAD
- 	.code32
- ENTRY(startup_32)
-@@ -252,10 +279,13 @@ ENTRY(efi_pe_entry)
- 	subq	$1b, %rbp
- 
- 	/*
--	 * Relocate efi_config->call().
-+	 * Relocate efi_config->call() and the GOT entries.
- 	 */
- 	addq	%rbp, efi64_config+88(%rip)
- 
-+	movq	%rbp, %rbx
-+	FIXUP_GOT
-+
- 	movq	%rax, %rdi
- 	call	make_boot_params
- 	cmpq	$0,%rax
-@@ -271,10 +301,13 @@ handover_entry:
- 	subq	$1b, %rbp
- 
- 	/*
--	 * Relocate efi_config->call().
-+	 * Relocate efi_config->call() and the GOT entries.
- 	 */
- 	movq	efi_config(%rip), %rax
- 	addq	%rbp, 88(%rax)
-+
-+	movq	%rbp, %rbx
-+	FIXUP_GOT
- 2:
- 	movq	efi_config(%rip), %rdi
- 	call	efi_main
-@@ -385,19 +418,8 @@ relocated:
- 	shrq	$3, %rcx
- 	rep	stosq
- 
--/*
-- * Adjust our own GOT
-- */
--	leaq	_got(%rip), %rdx
--	leaq	_egot(%rip), %rcx
--1:
--	cmpq	%rcx, %rdx
--	jae	2f
--	addq	%rbx, (%rdx)
--	addq	$8, %rdx
--	jmp	1b
--2:
--	
-+	FIXUP_GOT
-+
- /*
-  * Do the decompression, and jump to the new kernel..
-  */
-@@ -437,6 +459,10 @@ gdt:
- 	.quad   0x0000000000000000	/* TS continued */
- gdt_end:
- 
-+/* Have we relocated the GOT? */
-+got_fixed:
-+	.byte	0
-+
- #ifdef CONFIG_EFI_STUB
- efi_config:
- 	.quad	0
--- 
++				memcpy((void *)addr, (void *)chunkbuf, chunksize);
+ 				addr +=3D chunksize;
+ 				size -=3D chunksize;
+ 			}
+@@ -442,6 +463,7 @@ efi_status_t handle_cmdline_files(efi_system_table_=
+t *sys_table_arg,
+ 			efi_file_close(files[j].handle);
+ 		}
+=20
++		efi_free(sys_table_arg, EFI_READ_CHUNK_SIZE, chunkbuf);
+ 	}
+=20
+ 	efi_call_early(free_pool, files);
+@@ -451,6 +473,8 @@ efi_status_t handle_cmdline_files(efi_system_table_=
+t *sys_table_arg,
+=20
+ 	return status;
+=20
++free_chunk:
++	efi_free(sys_table_arg, EFI_READ_CHUNK_SIZE, chunkbuf);
+ free_file_total:
+ 	efi_free(sys_table_arg, file_size_total, file_addr);
+=20
+--=20
 1.9.3
 
--- 
+--=20
 Matt Fleming, Intel Open Source Technology Center
