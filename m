@@ -1,75 +1,94 @@
 From: Jeff Kirsher <jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] efi: Resolve some shadow warnings
-Date: Sat, 06 Sep 2014 02:15:48 -0700
-Message-ID: <1409994948.2460.48.camel@jtkirshe-mobl>
-References: <1409967292-31441-1-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <20140906090331.GQ3001@console-pimps.org>
+Subject: [PATCH v2] efi: Resolve some shadow warnings
+Date: Sat,  6 Sep 2014 06:02:53 -0700
+Message-ID: <1410008573-444-1-git-send-email-jeffrey.t.kirsher@intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-VOWvnzG+Qwg5ec+4dQY3"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140906090331.GQ3001-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeff Kirsher <jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+=46rom: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
---=-VOWvnzG+Qwg5ec+4dQY3
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+It is a really bad idea to declare variables or parameters that
+have the same name as common types. It is valid C, but it gets
+surprising if a macro expansion attempts to declare an inner
+local with that type. Change the local names to eliminate the
+hazard.
 
-On Sat, 2014-09-06 at 10:03 +0100, Matt Fleming wrote:
-> On Fri, 05 Sep, at 06:34:52PM, Jeff Kirsher wrote:
-> > From: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> >=20
-> > It is a really bad idea to declare variables or parameters that
-> > have the same name as common types. It is valid C, but it gets
-> > surprising if a macro expansion attempts to declare an inner
-> > local with that type. Change the local names to eliminate the
-> > hazard.
-> =20
-> Oops, good catch. Could you include a copy of the compiler shadow
-> warnings in the commit log? I'm guessing this bug is highlighted with
-> -Wshadow? How did you discover this problem?
+Change s16 =3D> str16, s8 =3D> str8.
 
-Mark was using W=3D2 to see the warning, so I will see if I can wade
-through the numerous warnings that get generated with W=3D2 for the
-specific warning.
+This resolves warnings seen when using W=3D2 during make, for instance:
 
->=20
-> > Change s16 =3D> ps16, s8 =3D> ps8.
-> =20
-> Hmm... Instead, could you change it to str16 and str8? s8/s16 were
-> clearly misguided names in the first place, and it's not immediatealy
-> obvious to me that a 'ps16' would represent "pointer to 16-bit string".
->=20
+drivers/firmware/efi/vars.c: In function =E2=80=98dup_variable_bug=E2=80=
+=99:
+drivers/firmware/efi/vars.c:324:44: warning: declaration of =E2=80=98s1=
+6=E2=80=99 shadows a global declaration [-Wshadow]
+ static void dup_variable_bug(efi_char16_t *s16, efi_guid_t *vendor_gui=
+d,
 
-Ok, I can re-spin the patch for Mark, that is if I can capture the
-original warning to add to his commit message.  Otherwise, I will wait
-till Monday to have Mark re-spin the patch.
+drivers/firmware/efi/vars.c:328:8: warning: declaration of =E2=80=98s8=E2=
+=80=99 shadows a global declaration [-Wshadow]
+  char *s8;
 
---=-VOWvnzG+Qwg5ec+4dQY3
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
+Signed-off-by: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+v2: Updated patch description to add warning information and modified t=
+he
+    variable names to str* instead of ps*, based on feed back from Matt
+    Fleming
 
-iQIcBAABCgAGBQJUCtDEAAoJEOVv75VaS+3OIQIP+wV5dXiuBGv7zkTJEy541X8n
-R9ikVWg0ANQ4VskDDAPJhIMgj0/XEa8gAvx6gYH/Q+kcLBqjUa33fI9rwgm1hz+r
-wf6ie3ZQ6sJvoBt8i838rz7BUGjkftsh9RH3I7mjehGgob3d4BREYs84JM25301G
-khmF28q0JjEGVoDL1HBkgZus543nF6r92yGdJzeG4gHEpJyMckZpCLi6cX/Brv7t
-YGglGeiuQ7gCPxvfkKfnm8or179SAjyZ2AQyoBfEw7fXU7WzgdOmG8t/3oDZWYC8
-VgcFMwsV5dinIk3zYM4GySDjFAbhSLHyYUYibJF9mu7xrVj3fIs3UHaNnxHC9kv9
-8ZimOZKKJkr15rLs5mY5aFzgUgLUtuQ6qt3J9W9Jca8g8PLs4MC66ds7RQjAaaYH
-jNxaVBeQjZE/HUk+vJ7YA8zyjsV0cJait0Jcw9uMdTogHxVYFR1B9yyxH8+uhuLq
-AmzCVkC20nzesh994UF9ZKlyNntBH8NYg0nwMAt1thEPmC7jp2evcWmm/2euGRBz
-RZc/oTayDD9kiY92fATrVY1wF+8KiD42TLQw1NvkC2KaiALr26DIsIhtb5CDskc2
-7avd+/wzY6d0s2Brf8WlTFzDe+Xdnm2FdyK763YzjdE6oNY18BYkLb4C/NxsTqYH
-SzqldEGAleKxBgqy/yMX
-=NGip
------END PGP SIGNATURE-----
+ drivers/firmware/efi/vars.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
---=-VOWvnzG+Qwg5ec+4dQY3--
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 5abe943..afa3596 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -321,11 +321,11 @@ static unsigned long var_name_strnsize(efi_char16=
+_t *variable_name,
+  * Print a warning when duplicate EFI variables are encountered and
+  * disable the sysfs workqueue since the firmware is buggy.
+  */
+-static void dup_variable_bug(efi_char16_t *s16, efi_guid_t *vendor_gui=
+d,
++static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_g=
+uid,
+ 			     unsigned long len16)
+ {
+ 	size_t i, len8 =3D len16 / sizeof(efi_char16_t);
+-	char *s8;
++	char *str8;
+=20
+ 	/*
+ 	 * Disable the workqueue since the algorithm it uses for
+@@ -334,16 +334,16 @@ static void dup_variable_bug(efi_char16_t *s16, e=
+fi_guid_t *vendor_guid,
+ 	 */
+ 	efivar_wq_enabled =3D false;
+=20
+-	s8 =3D kzalloc(len8, GFP_KERNEL);
+-	if (!s8)
++	str8 =3D kzalloc(len8, GFP_KERNEL);
++	if (!str8)
+ 		return;
+=20
+ 	for (i =3D 0; i < len8; i++)
+-		s8[i] =3D s16[i];
++		str8[i] =3D str16[i];
+=20
+ 	printk(KERN_WARNING "efivars: duplicate variable: %s-%pUl\n",
+-	       s8, vendor_guid);
+-	kfree(s8);
++	       str8, vendor_guid);
++	kfree(str8);
+ }
+=20
+ /**
+--=20
+1.9.3
