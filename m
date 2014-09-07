@@ -1,34 +1,45 @@
 From: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Subject: [PATCH 0/4] x86/efi: Minor cleanup patches
-Date: Sun,  7 Sep 2014 19:42:13 +0200
-Message-ID: <1410111737-5220-1-git-send-email-minipli@googlemail.com>
+Subject: [PATCH 1/4] x86/efi: Remove unused efi_call* macros
+Date: Sun,  7 Sep 2014 19:42:14 +0200
+Message-ID: <1410111737-5220-2-git-send-email-minipli@googlemail.com>
+References: <1410111737-5220-1-git-send-email-minipli@googlemail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1410111737-5220-1-git-send-email-minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,
+Complement commit 62fa6e69a436 ("x86/efi: Delete most of the efi_call*
+macros") and delete the stub macros for the !CONFIG_EFI case, too. In
+fact, there are no EFI calls in this case so we don't need a dummy for
+efi_call() even.
 
-this series is a collection of rather random cleanup patches. The init code
-patch, though, should result in a lower runtime memory usage as more memory
-can be released after initialization, now.
+Signed-off-by: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+---
+ arch/x86/include/asm/efi.h |   10 ----------
+ 1 file changed, 10 deletions(-)
 
-Please apply!
-
-
-Mathias Krause (4):
-  x86/efi: Remove unused efi_call* macros
-  x86/efi: Unexport add_efi_memmap variable
-  x86/efi: Update comment regarding required phys mapped EFI services
-  x86/efi: Mark initialization code as such
-
- arch/x86/include/asm/efi.h          |   31 +++++++++------------------
- arch/x86/platform/efi/efi.c         |   20 ++++++++---------
- arch/x86/platform/efi/efi_32.c      |   12 ++++++-----
- arch/x86/platform/efi/efi_64.c      |    6 +++---
- arch/x86/platform/efi/efi_stub_32.S |    4 ++--
- 5 files changed, 31 insertions(+), 42 deletions(-)
-
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 044a2fd3c5fe..8aee01536c6c 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -186,16 +186,6 @@ extern struct efi_config *efi_early;
+ extern bool efi_reboot_required(void);
+ 
+ #else
+-/*
+- * IF EFI is not configured, have the EFI calls return -ENOSYS.
+- */
+-#define efi_call0(_f)					(-ENOSYS)
+-#define efi_call1(_f, _a1)				(-ENOSYS)
+-#define efi_call2(_f, _a1, _a2)				(-ENOSYS)
+-#define efi_call3(_f, _a1, _a2, _a3)			(-ENOSYS)
+-#define efi_call4(_f, _a1, _a2, _a3, _a4)		(-ENOSYS)
+-#define efi_call5(_f, _a1, _a2, _a3, _a4, _a5)		(-ENOSYS)
+-#define efi_call6(_f, _a1, _a2, _a3, _a4, _a5, _a6)	(-ENOSYS)
+ static inline void parse_efi_setup(u64 phys_addr, u32 data_len) {}
+ static inline bool efi_reboot_required(void)
+ {
 -- 
 1.7.10.4
