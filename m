@@ -1,67 +1,78 @@
 From: Andre <andre.muller-S0/GAf8tV78@public.gmane.org>
 Subject: Re: [PATCH 1/1] arch/x86: Add better error logging to efi main
-Date: Sat, 6 Sep 2014 23:02:51 +0200
-Message-ID: <20140906230251.140a99c9@bert>
+Date: Sun, 7 Sep 2014 02:11:33 +0200
+Message-ID: <20140907021133.7184c28c@bert>
+References: <20140906230251.140a99c9@bert>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140906230251.140a99c9@bert>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Matt Fleming <matt@...> writes:
->=20
-> On Thu, 10 Jul, at 02:12:41AM, ulf@... wrote:
-> >  <at>  <at>  -1376,7 +1376,10  <at>  <at>  struct boot_params *efi_=
-main(struct efi_config *c,
-> >=20
-> >     setup_graphics(boot_params);
-> >=20
-> > -   setup_efi_pci(boot_params);
-> > +   status =3D setup_efi_pci(boot_params);
-> > +   if (status !=3D EFI_SUCCESS) {
-> > +           efi_printk(sys_table, "setup_efi_pci() failed!\n");
-> > +   }
->=20
-> Actually, it turns out that a lot of people are seeing this error
-> message in what would be an otherwise quiet boot,
->=20
->   https://bugzilla.kernel.org/show_bug.cgi?id=3D81891
->=20
-> Maybe we should distinguish between EFI_PCI_IO_PROTOCOL_GUID not bein=
-g
-> found and all other errors, i.e. memory allocation failure. We obviou=
-sly
-> do want to know if we failed to allocate memory, but we're less bothe=
-red
-> if we've no PCI devices.
->=20
-> Something like below? Folks on Cc, could you apply this snippet and s=
-ee
-> whether you're still seeing the error message?
->=20
+On Sat, 6 Sep 2014 23:02:51 +0200
+Andre <andre.muller-S0/GAf8tV78@public.gmane.org> wrote:
+> With a Thinkpad T420 (pre-2.0 EFI), I do run into the failure condition for another reason:
+> 
+> setup_efi_pci64 gets called,
+> the loop therein is executed nr_pci=11 (!?) times.
+> The second call run calls into __setup_efi_pci64 successfully, the memcpy takes place; the free_struct: path is not used. Back in setup_efi_pci64, the non-data path is walked.
+> 
+> For all the other 10 runs of the loop, __setup_efi_pci64 fails at
+> if (!pci->romimage || !pci->romsize)
+>         return EFI_INVALID_PARAMETER;
+> so that is the status here for any run but the second.
 
-With a Thinkpad T420 (pre-2.0 EFI), I do run into the failure condition=
- for another reason:
+Following up with code...
 
-setup_efi_pci64 gets called,
-the loop therein is executed nr_pci=3D11 (!?) times.
-The second call run calls into __setup_efi_pci64 successfully, the memc=
-py takes place; the free_struct: path is not used. Back in setup_efi_pc=
-i64, the non-data path is walked.
+If it is OK to just leave the loop in setup_efi_pci64,
+this can be done simply by
 
-=46or all the other 10 runs of the loop, __setup_efi_pci64 fails at
-if (!pci->romimage || !pci->romsize)
-        return EFI_INVALID_PARAMETER;
-so that is the status here for any run but the second.
+--- arch/x86/boot/compressed/eboot.c	2014-09-07 01:54:41.761008645 +0200
++++ arch/x86/boot/compressed/eboot_break.c	2014-09-07 01:52:06.321004951 +0200
+@@ -504,6 +504,7 @@
+ 			params->hdr.setup_data = (unsigned long)rom;
+ 
+ 		data = (struct setup_data *)rom;
++		break;
+ 
+ 	}
+ 
+But I've got severe doubts about this.
 
-So here, I can work around the message by accepting the EFI_INVALID_PAR=
-AMETER condition.=20
-Also, I can work around that by adding break; to the end of the loop in=
- setup_efi_pci64, as it only gets to the end in the successful case. Bu=
-t I guess other machines require to loop successfully through this more=
- than once?
+A solution limited to this particular failure mode
+could look like the below. It has all the charm of 
+introducing a helper var. Hmpf.
+
+--- arch/x86/boot/compressed/eboot.c	2014-09-07 01:54:41.761008645 +0200
++++ arch/x86/boot/compressed/eboot_preserve.c	2014-09-07 01:56:18.529010945 +0200
+@@ -474,6 +474,7 @@
+ 	unsigned long nr_pci;
+ 	struct setup_data *data;
+ 	int i;
++	int setup_pci_worked_once = 0;
+ 
+ 	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
+ 
+@@ -495,7 +496,13 @@
+ 			continue;
+ 
+ 		status = __setup_efi_pci64(pci, &rom);
+-		if (status != EFI_SUCCESS)
++		if (status == EFI_SUCCESS)
++			setup_pci_worked_once = 1;
++		else if (status == EFI_INVALID_PARAMETER && setup_pci_worked_once == 1 && i == nr_pci - 1) {
++			status = EFI_SUCCESS;
++			continue;
++		}
++		else if (status != EFI_SUCCESS)
+ 			continue;
+ 
+ 		if (data)
+
+
 
 Regards,
-Andre M=FCller
+Andre 
