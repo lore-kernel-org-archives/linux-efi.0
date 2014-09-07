@@ -1,78 +1,34 @@
-From: Andre <andre.muller-S0/GAf8tV78@public.gmane.org>
-Subject: Re: [PATCH 1/1] arch/x86: Add better error logging to efi main
-Date: Sun, 7 Sep 2014 02:11:33 +0200
-Message-ID: <20140907021133.7184c28c@bert>
-References: <20140906230251.140a99c9@bert>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+From: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+Subject: [PATCH 0/4] x86/efi: Minor cleanup patches
+Date: Sun,  7 Sep 2014 19:42:13 +0200
+Message-ID: <1410111737-5220-1-git-send-email-minipli@googlemail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140906230251.140a99c9@bert>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 6 Sep 2014 23:02:51 +0200
-Andre <andre.muller-S0/GAf8tV78@public.gmane.org> wrote:
-> With a Thinkpad T420 (pre-2.0 EFI), I do run into the failure condition for another reason:
-> 
-> setup_efi_pci64 gets called,
-> the loop therein is executed nr_pci=11 (!?) times.
-> The second call run calls into __setup_efi_pci64 successfully, the memcpy takes place; the free_struct: path is not used. Back in setup_efi_pci64, the non-data path is walked.
-> 
-> For all the other 10 runs of the loop, __setup_efi_pci64 fails at
-> if (!pci->romimage || !pci->romsize)
->         return EFI_INVALID_PARAMETER;
-> so that is the status here for any run but the second.
+Hi Matt,
 
-Following up with code...
+this series is a collection of rather random cleanup patches. The init code
+patch, though, should result in a lower runtime memory usage as more memory
+can be released after initialization, now.
 
-If it is OK to just leave the loop in setup_efi_pci64,
-this can be done simply by
-
---- arch/x86/boot/compressed/eboot.c	2014-09-07 01:54:41.761008645 +0200
-+++ arch/x86/boot/compressed/eboot_break.c	2014-09-07 01:52:06.321004951 +0200
-@@ -504,6 +504,7 @@
- 			params->hdr.setup_data = (unsigned long)rom;
- 
- 		data = (struct setup_data *)rom;
-+		break;
- 
- 	}
- 
-But I've got severe doubts about this.
-
-A solution limited to this particular failure mode
-could look like the below. It has all the charm of 
-introducing a helper var. Hmpf.
-
---- arch/x86/boot/compressed/eboot.c	2014-09-07 01:54:41.761008645 +0200
-+++ arch/x86/boot/compressed/eboot_preserve.c	2014-09-07 01:56:18.529010945 +0200
-@@ -474,6 +474,7 @@
- 	unsigned long nr_pci;
- 	struct setup_data *data;
- 	int i;
-+	int setup_pci_worked_once = 0;
- 
- 	data = (struct setup_data *)(unsigned long)params->hdr.setup_data;
- 
-@@ -495,7 +496,13 @@
- 			continue;
- 
- 		status = __setup_efi_pci64(pci, &rom);
--		if (status != EFI_SUCCESS)
-+		if (status == EFI_SUCCESS)
-+			setup_pci_worked_once = 1;
-+		else if (status == EFI_INVALID_PARAMETER && setup_pci_worked_once == 1 && i == nr_pci - 1) {
-+			status = EFI_SUCCESS;
-+			continue;
-+		}
-+		else if (status != EFI_SUCCESS)
- 			continue;
- 
- 		if (data)
+Please apply!
 
 
+Mathias Krause (4):
+  x86/efi: Remove unused efi_call* macros
+  x86/efi: Unexport add_efi_memmap variable
+  x86/efi: Update comment regarding required phys mapped EFI services
+  x86/efi: Mark initialization code as such
 
-Regards,
-Andre 
+ arch/x86/include/asm/efi.h          |   31 +++++++++------------------
+ arch/x86/platform/efi/efi.c         |   20 ++++++++---------
+ arch/x86/platform/efi/efi_32.c      |   12 ++++++-----
+ arch/x86/platform/efi/efi_64.c      |    6 +++---
+ arch/x86/platform/efi/efi_stub_32.S |    4 ++--
+ 5 files changed, 31 insertions(+), 42 deletions(-)
+
+-- 
+1.7.10.4
