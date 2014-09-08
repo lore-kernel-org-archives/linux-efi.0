@@ -1,203 +1,274 @@
-From: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Subject: [PATCH 4/4] x86/efi: Mark initialization code as such
-Date: Sun,  7 Sep 2014 19:42:17 +0200
-Message-ID: <1410111737-5220-5-git-send-email-minipli@googlemail.com>
-References: <1410111737-5220-1-git-send-email-minipli@googlemail.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [REGRESSION] "efi: efistub: Convert into static library" and
+ preparation patches
+Date: Mon, 8 Sep 2014 14:55:47 +0200
+Message-ID: <CAKv+Gu8GOHMa=zVWBG7OdSG2i2Ag_XyEBE5NzU6ffLNP8zA3Ug@mail.gmail.com>
+References: <CAKv+Gu8OD3p+GSwB+SPRf3pKwZB2R1t6x1zK7czGCXj1QhB7_g@mail.gmail.com>
+	<54073409.6030004@canonical.com>
+	<CAKv+Gu9q1qTh6DZXsCG2tGVBn-uwuQKQa_6FEMmchDVFi5vJtw@mail.gmail.com>
+	<20140903175948.GH3001@console-pimps.org>
+	<CAKv+Gu9tejixb3Kb3YM_7sLcpKNuRHN+Dn+twFyCAXx99wYRCw@mail.gmail.com>
+	<54084376.8090002@canonical.com>
+	<540860F1.6060801@fensystems.co.uk>
+	<CAKv+Gu8wALTqtNQK_855A7M5f2a+EB1JyLxo=j6G0T1cf8ZFog@mail.gmail.com>
+	<CAKv+Gu_sLmkBHF-9GyPUgfAbLYirQTD4vk63o6HzdZhm6s_e0g@mail.gmail.com>
+	<20140904213753.GM3001@console-pimps.org>
+	<20140905202744.GO3001@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1410111737-5220-1-git-send-email-minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20140905202744.GO3001-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Seth Forshee <seth.forshee-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The 32 bit and 64 bit implementations differ in their __init annotations
-for some functions referenced from the common EFI code. Namely, the 32
-bit variant is missing some of the __init annotations the 64 bit variant
-has.
+On 5 September 2014 22:27, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
+> On Thu, 04 Sep, at 10:37:53PM, Matt Fleming wrote:
+>>
+>> Thanks Ard, I'll take a look in the morning.
+>
+> Maarten, could you try out this patch?
+>
 
-To solve the colliding annotations, mark the corresponding functions in
-efi_32.c as initialization code, too -- as it is such.
+Any developments regarding this patch?
+I tried to test it myself, but my Macbook happily boots straight from
+EFI into the kernel without it.
 
-Actually, quite a few more functions are only used during initialization
-and therefore can be marked __init. They are therefore annotated, too.
-Also add the __init annotation to the prototypes in the efi.h header so
-users of those functions will see it's meant as initialization code
-only.
-
-This patch also fixes the "prelog" typo. ("prologue" / "epilogue" might
-be more appropriate but this is C code after all, not an opera! :D)
-
-Signed-off-by: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-
----
-The function efi_cleanup_page_tables() is not referenced at all so might
-also be removed. But I didn't do this, only marked the code as __init
-code. So, at least, at runtime it won't be occupying memory any more.
----
- arch/x86/include/asm/efi.h          |   20 ++++++++++----------
- arch/x86/platform/efi/efi.c         |    4 ++--
- arch/x86/platform/efi/efi_32.c      |   12 +++++++-----
- arch/x86/platform/efi/efi_64.c      |    6 +++---
- arch/x86/platform/efi/efi_stub_32.S |    4 ++--
- 5 files changed, 24 insertions(+), 22 deletions(-)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index b07ecf332bdf..408ad6d3222e 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -81,23 +81,23 @@ extern u64 asmlinkage efi_call(void *fp, ...);
-  */
- #define __efi_call_virt(f, args...) efi_call_virt(f, args)
- 
--extern void __iomem *efi_ioremap(unsigned long addr, unsigned long size,
--				 u32 type, u64 attribute);
-+extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
-+					u32 type, u64 attribute);
- 
- #endif /* CONFIG_X86_32 */
- 
- extern struct efi_scratch efi_scratch;
--extern void efi_set_executable(efi_memory_desc_t *md, bool executable);
--extern int efi_memblock_x86_reserve_range(void);
--extern void efi_call_phys_prelog(void);
--extern void efi_call_phys_epilog(void);
--extern void efi_unmap_memmap(void);
--extern void efi_memory_uc(u64 addr, unsigned long size);
-+extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
-+extern int __init efi_memblock_x86_reserve_range(void);
-+extern void __init efi_call_phys_prolog(void);
-+extern void __init efi_call_phys_epilog(void);
-+extern void __init efi_unmap_memmap(void);
-+extern void __init efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
- extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
--extern int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
--extern void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
-+extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
-+extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
- extern void __init runtime_code_page_mkexec(void);
- extern void __init efi_runtime_mkexec(void);
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 504174c36a73..0e439a34034d 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -94,7 +94,7 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- {
- 	efi_status_t status;
- 
--	efi_call_phys_prelog();
-+	efi_call_phys_prolog();
- 	status = efi_call_phys(efi_phys.set_virtual_address_map,
- 			       memory_map_size, descriptor_size,
- 			       descriptor_version, virtual_map);
-@@ -535,7 +535,7 @@ void __init runtime_code_page_mkexec(void)
- 	}
- }
- 
--void efi_memory_uc(u64 addr, unsigned long size)
-+void __init efi_memory_uc(u64 addr, unsigned long size)
- {
- 	unsigned long page_shift = 1UL << EFI_PAGE_SHIFT;
- 	u64 npages;
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index 9ee3491e31fb..40e7cda52936 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -33,7 +33,7 @@
- 
- /*
-  * To make EFI call EFI runtime service in physical addressing mode we need
-- * prelog/epilog before/after the invocation to disable interrupt, to
-+ * prolog/epilog before/after the invocation to disable interrupt, to
-  * claim EFI runtime service handler exclusively and to duplicate a memory in
-  * low memory space say 0 - 3G.
-  */
-@@ -41,11 +41,13 @@ static unsigned long efi_rt_eflags;
- 
- void efi_sync_low_kernel_mappings(void) {}
- void __init efi_dump_pagetable(void) {}
--int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	return 0;
- }
--void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages) {}
-+void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+{
-+}
- 
- void __init efi_map_region(efi_memory_desc_t *md)
- {
-@@ -55,7 +57,7 @@ void __init efi_map_region(efi_memory_desc_t *md)
- void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
- void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
- 
--void efi_call_phys_prelog(void)
-+void __init efi_call_phys_prolog(void)
- {
- 	struct desc_ptr gdt_descr;
- 
-@@ -69,7 +71,7 @@ void efi_call_phys_prelog(void)
- 	load_gdt(&gdt_descr);
- }
- 
--void efi_call_phys_epilog(void)
-+void __init efi_call_phys_epilog(void)
- {
- 	struct desc_ptr gdt_descr;
- 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 290d397e1dd9..35aecb6042fb 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -79,7 +79,7 @@ static void __init early_code_mapping_set_exec(int executable)
- 	}
- }
- 
--void __init efi_call_phys_prelog(void)
-+void __init efi_call_phys_prolog(void)
- {
- 	unsigned long vaddress;
- 	int pgd;
-@@ -139,7 +139,7 @@ void efi_sync_low_kernel_mappings(void)
- 		sizeof(pgd_t) * num_pgds);
- }
- 
--int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long text;
- 	struct page *page;
-@@ -192,7 +192,7 @@ int efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	return 0;
- }
- 
--void efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
-+void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
- 
-diff --git a/arch/x86/platform/efi/efi_stub_32.S b/arch/x86/platform/efi/efi_stub_32.S
-index fbe66e626c09..040192b50d02 100644
---- a/arch/x86/platform/efi/efi_stub_32.S
-+++ b/arch/x86/platform/efi/efi_stub_32.S
-@@ -27,13 +27,13 @@ ENTRY(efi_call_phys)
- 	 * set to 0x0010, DS and SS have been set to 0x0018. In EFI, I found
- 	 * the values of these registers are the same. And, the corresponding
- 	 * GDT entries are identical. So I will do nothing about segment reg
--	 * and GDT, but change GDT base register in prelog and epilog.
-+	 * and GDT, but change GDT base register in prolog and epilog.
- 	 */
- 
- 	/*
- 	 * 1. Now I am running with EIP = <physical address> + PAGE_OFFSET.
- 	 * But to make it smoothly switch from virtual mode to flat mode.
--	 * The mapping of lower virtual memory has been created in prelog and
-+	 * The mapping of lower virtual memory has been created in prolog and
- 	 * epilog.
- 	 */
- 	movl	$1f, %edx
 -- 
-1.7.10.4
+Ard.
+
+
+> ---
+>
+> From a058d81d9687671813560af72f34d63da3cc16bc Mon Sep 17 00:00:00 2001
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Date: Fri, 5 Sep 2014 14:52:26 +0100
+> Subject: [PATCH] x86/efi: Fixup GOT in all boot code paths
+>
+> Maarten reported that his Macbook pro 8.2 stopped booting after commit
+> f23cf8bd5c1f49 ("efi/x86: efistub: Move shared dependencies to
+> <asm/efi.h>"), the main feature of which is changing the visibility of
+> symbol 'efi_early' from local to global.
+>
+> By making 'efi_early' global we end up requiring an entry in the Global
+> Offset Table. Unfortunately, while we do include code to fixup GOT
+> entries in the early boot code, it's only called after we've executed
+> the EFI boot stub.
+>
+> What this amounts to is that references to 'efi_early' in the EFI boot
+> stub don't point to the correct place.
+>
+> Since we've got multiple boot entry points we need to be prepared to
+> fixup the GOT in multiple places, while ensuring that we never do it
+> more than once, otherwise the GOT entries will still point to the wrong
+> place.
+>
+> Reported-by: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/head_32.S | 54 ++++++++++++++++++++++++++----------
+>  arch/x86/boot/compressed/head_64.S | 56 ++++++++++++++++++++++++++++----------
+>  2 files changed, 81 insertions(+), 29 deletions(-)
+>
+> diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+> index cbed1407a5cd..d6b8aa4c986c 100644
+> --- a/arch/x86/boot/compressed/head_32.S
+> +++ b/arch/x86/boot/compressed/head_32.S
+> @@ -30,6 +30,33 @@
+>  #include <asm/boot.h>
+>  #include <asm/asm-offsets.h>
+>
+> +/*
+> + * Adjust our own GOT
+> + *
+> + * The relocation base must be in %ebx
+> + *
+> + * It is safe to call this macro more than once, because in some of the
+> + * code paths multiple invocations are inevitable, e.g. via the efi*
+> + * entry points.
+> + *
+> + * Relocation is only performed the first time.
+> + */
+> +.macro FIXUP_GOT
+> +       cmpb    $1, got_fixed(%ebx)
+> +       je      2f
+> +
+> +       leal    _got(%ebx), %edx
+> +       leal    _egot(%ebx), %ecx
+> +1:
+> +       cmpl    %ecx, %edx
+> +       jae     2f
+> +       addl    %ebx, (%edx)
+> +       addl    $4, %edx
+> +       jmp     1b
+> +2:
+> +       movb    $1, got_fixed(%ebx)
+> +.endm
+> +
+>         __HEAD
+>  ENTRY(startup_32)
+>  #ifdef CONFIG_EFI_STUB
+> @@ -56,6 +83,9 @@ ENTRY(efi_pe_entry)
+>         add     %esi, 88(%eax)
+>         pushl   %eax
+>
+> +       movl    %esi, %ebx
+> +       FIXUP_GOT
+> +
+>         call    make_boot_params
+>         cmpl    $0, %eax
+>         je      fail
+> @@ -81,6 +111,10 @@ ENTRY(efi32_stub_entry)
+>         leal    efi32_config(%esi), %eax
+>         add     %esi, 88(%eax)
+>         pushl   %eax
+> +
+> +       movl    %esi, %ebx
+> +       FIXUP_GOT
+> +
+>  2:
+>         call    efi_main
+>         cmpl    $0, %eax
+> @@ -190,19 +224,7 @@ relocated:
+>         shrl    $2, %ecx
+>         rep     stosl
+>
+> -/*
+> - * Adjust our own GOT
+> - */
+> -       leal    _got(%ebx), %edx
+> -       leal    _egot(%ebx), %ecx
+> -1:
+> -       cmpl    %ecx, %edx
+> -       jae     2f
+> -       addl    %ebx, (%edx)
+> -       addl    $4, %edx
+> -       jmp     1b
+> -2:
+> -
+> +       FIXUP_GOT
+>  /*
+>   * Do the decompression, and jump to the new kernel..
+>   */
+> @@ -225,8 +247,12 @@ relocated:
+>         xorl    %ebx, %ebx
+>         jmp     *%eax
+>
+> -#ifdef CONFIG_EFI_STUB
+>         .data
+> +/* Have we relocated the GOT? */
+> +got_fixed:
+> +       .byte 0
+> +
+> +#ifdef CONFIG_EFI_STUB
+>  efi32_config:
+>         .fill 11,8,0
+>         .long efi_call_phys
+> diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+> index 2884e0c3e8a5..50f69c7eaaf4 100644
+> --- a/arch/x86/boot/compressed/head_64.S
+> +++ b/arch/x86/boot/compressed/head_64.S
+> @@ -32,6 +32,33 @@
+>  #include <asm/processor-flags.h>
+>  #include <asm/asm-offsets.h>
+>
+> +/*
+> + * Adjust our own GOT
+> + *
+> + * The relocation base must be in %rbx
+> + *
+> + * It is safe to call this macro more than once, because in some of the
+> + * code paths multiple invocations are inevitable, e.g. via the efi*
+> + * entry points.
+> + *
+> + * Relocation is only performed the first time.
+> + */
+> +.macro FIXUP_GOT
+> +       cmpb    $1, got_fixed(%rip)
+> +       je      2f
+> +
+> +       leaq    _got(%rip), %rdx
+> +       leaq    _egot(%rip), %rcx
+> +1:
+> +       cmpq    %rcx, %rdx
+> +       jae     2f
+> +       addq    %rbx, (%rdx)
+> +       addq    $8, %rdx
+> +       jmp     1b
+> +2:
+> +       movb    $1, got_fixed(%rip)
+> +.endm
+> +
+>         __HEAD
+>         .code32
+>  ENTRY(startup_32)
+> @@ -252,10 +279,13 @@ ENTRY(efi_pe_entry)
+>         subq    $1b, %rbp
+>
+>         /*
+> -        * Relocate efi_config->call().
+> +        * Relocate efi_config->call() and the GOT entries.
+>          */
+>         addq    %rbp, efi64_config+88(%rip)
+>
+> +       movq    %rbp, %rbx
+> +       FIXUP_GOT
+> +
+>         movq    %rax, %rdi
+>         call    make_boot_params
+>         cmpq    $0,%rax
+> @@ -271,10 +301,13 @@ handover_entry:
+>         subq    $1b, %rbp
+>
+>         /*
+> -        * Relocate efi_config->call().
+> +        * Relocate efi_config->call() and the GOT entries.
+>          */
+>         movq    efi_config(%rip), %rax
+>         addq    %rbp, 88(%rax)
+> +
+> +       movq    %rbp, %rbx
+> +       FIXUP_GOT
+>  2:
+>         movq    efi_config(%rip), %rdi
+>         call    efi_main
+> @@ -385,19 +418,8 @@ relocated:
+>         shrq    $3, %rcx
+>         rep     stosq
+>
+> -/*
+> - * Adjust our own GOT
+> - */
+> -       leaq    _got(%rip), %rdx
+> -       leaq    _egot(%rip), %rcx
+> -1:
+> -       cmpq    %rcx, %rdx
+> -       jae     2f
+> -       addq    %rbx, (%rdx)
+> -       addq    $8, %rdx
+> -       jmp     1b
+> -2:
+> -
+> +       FIXUP_GOT
+> +
+>  /*
+>   * Do the decompression, and jump to the new kernel..
+>   */
+> @@ -437,6 +459,10 @@ gdt:
+>         .quad   0x0000000000000000      /* TS continued */
+>  gdt_end:
+>
+> +/* Have we relocated the GOT? */
+> +got_fixed:
+> +       .byte   0
+> +
+>  #ifdef CONFIG_EFI_STUB
+>  efi_config:
+>         .quad   0
+> --
+> 1.9.3
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
