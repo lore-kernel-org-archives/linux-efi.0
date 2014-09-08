@@ -1,36 +1,48 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH -v4] x86: only load initrd above 4g on second try
-Date: Mon, 8 Sep 2014 16:58:55 +0100
-Message-ID: <20140908155855.GS3001@console-pimps.org>
-References: <1409806207-3992-1-git-send-email-yinghai@kernel.org>
- <20140904100137.GK3001@console-pimps.org>
- <5408D299.5000300@zytor.com>
- <20140905221616.GP3001@console-pimps.org>
- <CAPWNY8V6Vw0JBZ=VE_ZLZ1hiKVhrDbYyWfkLXMQtKYHZjmewRA@mail.gmail.com>
+Subject: Re: [PATCH v2] efi: Resolve some shadow warnings
+Date: Mon, 8 Sep 2014 17:08:05 +0100
+Message-ID: <20140908160805.GT3001@console-pimps.org>
+References: <1410008573-444-1-git-send-email-jeffrey.t.kirsher@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAPWNY8V6Vw0JBZ=VE_ZLZ1hiKVhrDbYyWfkLXMQtKYHZjmewRA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1410008573-444-1-git-send-email-jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Jeff Kirsher <jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 06 Sep, at 11:09:04PM, Mantas Mikul=C4=97nas wrote:
+On Sat, 06 Sep, at 06:02:53AM, Jeff Kirsher wrote:
+> From: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 >=20
-> Finally got around to testing the patches here. Sorry for no replies =
-earlier.
+> It is a really bad idea to declare variables or parameters that
+> have the same name as common types. It is valid C, but it gets
+> surprising if a macro expansion attempts to declare an inner
+> local with that type. Change the local names to eliminate the
+> hazard.
 >=20
-> This seemed like it would work, but... it hangs at the memcpy?...
+> Change s16 =3D> str16, s8 =3D> str8.
 >=20
-> (If I add a printk before memcpy and a printk after memcpy, I never
-> see the second one. I guess that memory location is just cursed, or
-> something.)
-=20
-Thanks for testing. Let's go ahead with Yinghai's patch ("x86/efi: Only
-load initrd above 4g on second try").
+> This resolves warnings seen when using W=3D2 during make, for instanc=
+e:
+>=20
+> drivers/firmware/efi/vars.c: In function =E2=80=98dup_variable_bug=E2=
+=80=99:
+> drivers/firmware/efi/vars.c:324:44: warning: declaration of =E2=80=98=
+s16=E2=80=99 shadows a global declaration [-Wshadow]
+>  static void dup_variable_bug(efi_char16_t *s16, efi_guid_t *vendor_g=
+uid,
+>=20
+> drivers/firmware/efi/vars.c:328:8: warning: declaration of =E2=80=98s=
+8=E2=80=99 shadows a global declaration [-Wshadow]
+>   char *s8;
+>=20
+> Signed-off-by: Mark Rustad <mark.d.rustad-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+Thanks Jeff, Mark, applied.
 
 --=20
 Matt Fleming, Intel Open Source Technology Center
