@@ -1,75 +1,36 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: fix fdt-related memory reservation
-Date: Mon, 8 Sep 2014 15:28:31 +0100
-Message-ID: <20140908142831.GK12081@leverpostej>
-References: <1410183102-6969-1-git-send-email-msalter@redhat.com>
- <20140908140609.GI12081@leverpostej>
- <1410186065.27715.2.camel@deneb.redhat.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH -v4] x86: only load initrd above 4g on second try
+Date: Mon, 8 Sep 2014 16:58:55 +0100
+Message-ID: <20140908155855.GS3001@console-pimps.org>
+References: <1409806207-3992-1-git-send-email-yinghai@kernel.org>
+ <20140904100137.GK3001@console-pimps.org>
+ <5408D299.5000300@zytor.com>
+ <20140905221616.GP3001@console-pimps.org>
+ <CAPWNY8V6Vw0JBZ=VE_ZLZ1hiKVhrDbYyWfkLXMQtKYHZjmewRA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1410186065.27715.2.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
+In-Reply-To: <CAPWNY8V6Vw0JBZ=VE_ZLZ1hiKVhrDbYyWfkLXMQtKYHZjmewRA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Mantas =?utf-8?Q?Mikul=C4=97nas?= <grawity-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Anders Darander <anders-7UjN0b3lYz2SbKU13Z4Etw@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 08, 2014 at 03:21:05PM +0100, Mark Salter wrote:
-> On Mon, 2014-09-08 at 15:06 +0100, Mark Rutland wrote:
-> > Hi Mark,
-> > 
-> > On Mon, Sep 08, 2014 at 02:31:42PM +0100, Mark Salter wrote:
-> > > Commit 86c8b27a01cf:
-> > >  "arm64: ignore DT memreserve entries when booting in UEFI mode
-> > > 
-> > > prevents early_init_fdt_scan_reserved_mem() from being called for
-> > > arm64 kernels booting via UEFI. This was done because the kernel
-> > > will use the UEFI memory map to determine reserved memory regions.
-> > > That approach has problems in that early_init_fdt_scan_reserved_mem()
-> > > also reserves the FDT itself and any node-specific reserved memory.
-> > > By chance of some kernel configs, the FDT may be overwritten before
-> > > it can be unflattened and the kernel will fail to boot. More subtle
-> > > problems will result if the FDT has node specific reserved memory
-> > > which is not really reserved.
-> > 
-> > That doesn't sound like fun; apologies for allowing such brokenness
-> > through in the first place.
-> 
-> Heh. It was obvious that DT unflattening was broken, but bisecting
-> didn't help much because I kept finding patches which when reverted
-> made the problem go away even though they obviously weren't the
-> cause.
+On Sat, 06 Sep, at 11:09:04PM, Mantas Mikul=C4=97nas wrote:
+>=20
+> Finally got around to testing the patches here. Sorry for no replies =
+earlier.
+>=20
+> This seemed like it would work, but... it hangs at the memcpy?...
+>=20
+> (If I add a printk before memcpy and a printk after memcpy, I never
+> see the second one. I guess that memory location is just cursed, or
+> something.)
+=20
+Thanks for testing. Let's go ahead with Yinghai's patch ("x86/efi: Only
+load initrd above 4g on second try").
 
-Yeah, those types of bugs are never fun. I recall a similar situation
-with the __INIT annotation in the versatile pen code. 
-
-> > [...]
-> > 
-> > > +	/*
-> > > +	 * Delete all memory reserve map entries. When booting via UEFI,
-> > > +	 * kernel will use the UEFI memory map to find reserved regions.
-> > > +	 */
-> > > +	num_rsv = fdt_num_mem_rsv(fdt);
-> > > +	for (i = 0; i < num_rsv; i++)
-> > > +		fdt_del_mem_rsv(fdt, i);
-> > 
-> > I don't think that's right. Won't the memreserve entries shift down by
-> > one each time we call fdt_del_mem_rsv?
-> > 
-> > Shouldn't this be something like:
-> > 
-> > while (fdt_num_mem_rsv(fdt))
-> > 	fdt_del_mem_rsv(fdt, 0);
-> > 
-> > Or we could count downwards.
-> > 
-> 
-> Sigh. Yes, you are right. I only tested with one reserved region.
-> I think counting down would be the way to go. I'll send a fixed
-> patch shortly.
-
-Ok, that sounds fine by me; make sure you add my ack :)
-
-Thanks,
-Mark.
+--=20
+Matt Fleming, Intel Open Source Technology Center
