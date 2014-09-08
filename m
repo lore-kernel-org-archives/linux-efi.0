@@ -1,21 +1,25 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH] efi/arm64: fix fdt-related memory reservation
-Date: Mon, 8 Sep 2014 15:56:12 +0200
-Message-ID: <CAKv+Gu9mNuCXo1mBH_m1nXZqLjRvMoq87mrB8mVCNOqoY8AVsg@mail.gmail.com>
+Date: Mon, 8 Sep 2014 15:06:09 +0100
+Message-ID: <20140908140609.GI12081@leverpostej>
 References: <1410183102-6969-1-git-send-email-msalter@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1410183102-6969-1-git-send-email-msalter@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Salter <msalter@redhat.com>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, Matt Fleming <matt.fleming@intel.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1410183102-6969-1-git-send-email-msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 8 September 2014 15:31, Mark Salter <msalter@redhat.com> wrote:
+Hi Mark,
+
+On Mon, Sep 08, 2014 at 02:31:42PM +0100, Mark Salter wrote:
 > Commit 86c8b27a01cf:
 >  "arm64: ignore DT memreserve entries when booting in UEFI mode
->
+> 
 > prevents early_init_fdt_scan_reserved_mem() from being called for
 > arm64 kernels booting via UEFI. This was done because the kernel
 > will use the UEFI memory map to determine reserved memory regions.
@@ -25,73 +29,49 @@ On 8 September 2014 15:31, Mark Salter <msalter@redhat.com> wrote:
 > it can be unflattened and the kernel will fail to boot. More subtle
 > problems will result if the FDT has node specific reserved memory
 > which is not really reserved.
->
-> This patch has the UEFI stub remove the memory reserve map entries
-> from the FDT as it does with the memory nodes. This allows
-> early_init_fdt_scan_reserved_mem() to be called unconditionally
-> so that the other needed reservations are made.
->
-> Signed-off-by: Mark Salter <msalter@redhat.com>
 
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+That doesn't sound like fun; apologies for allowing such brokenness
+through in the first place.
 
-Interesting. I noticed the other day that my FDT got clobbered when
-accidentally booting with very little memory on QEMU , but I hadn't
-looked into it yet in more detail.
+[...]
 
-Matt: could you put this in your 'urgent' queue as well, please?
+> +	/*
+> +	 * Delete all memory reserve map entries. When booting via UEFI,
+> +	 * kernel will use the UEFI memory map to find reserved regions.
+> +	 */
+> +	num_rsv = fdt_num_mem_rsv(fdt);
+> +	for (i = 0; i < num_rsv; i++)
+> +		fdt_del_mem_rsv(fdt, i);
 
-Cheers,
-Ard.
+I don't think that's right. Won't the memreserve entries shift down by
+one each time we call fdt_del_mem_rsv?
 
+Shouldn't this be something like:
 
-> ---
->  arch/arm64/mm/init.c               |  3 +--
->  drivers/firmware/efi/libstub/fdt.c | 10 +++++++++-
->  2 files changed, 10 insertions(+), 3 deletions(-)
->
-> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-> index 5472c24..a83061f 100644
-> --- a/arch/arm64/mm/init.c
-> +++ b/arch/arm64/mm/init.c
-> @@ -149,8 +149,7 @@ void __init arm64_memblock_init(void)
->                 memblock_reserve(__virt_to_phys(initrd_start), initrd_end - initrd_start);
->  #endif
->
-> -       if (!efi_enabled(EFI_MEMMAP))
-> -               early_init_fdt_scan_reserved_mem();
-> +       early_init_fdt_scan_reserved_mem();
->
->         /* 4GB maximum for 32-bit only capable devices */
->         if (IS_ENABLED(CONFIG_ZONE_DMA))
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index a56bb35..723c7da 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -22,7 +22,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->                         unsigned long map_size, unsigned long desc_size,
->                         u32 desc_ver)
->  {
-> -       int node, prev;
-> +       int node, prev, i, num_rsv;
->         int status;
->         u32 fdt_val32;
->         u64 fdt_val64;
-> @@ -73,6 +73,14 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->                 prev = node;
->         }
->
-> +       /*
-> +        * Delete all memory reserve map entries. When booting via UEFI,
-> +        * kernel will use the UEFI memory map to find reserved regions.
-> +        */
-> +       num_rsv = fdt_num_mem_rsv(fdt);
-> +       for (i = 0; i < num_rsv; i++)
-> +               fdt_del_mem_rsv(fdt, i);
+while (fdt_num_mem_rsv(fdt))
+	fdt_del_mem_rsv(fdt, 0);
+
+Or we could count downwards.
+
+Otherwise, the general approach sounds sane to me, so with that bug
+fixed or disproven:
+
+Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+
+Given this is mostly in the EFI stub I expect that this will go via the
+EFI tree?
+
+Mark.
+
 > +
->         node = fdt_subnode_offset(fdt, 0, "chosen");
->         if (node < 0) {
->                 node = fdt_add_subnode(fdt, 0, "chosen");
-> --
+>  	node = fdt_subnode_offset(fdt, 0, "chosen");
+>  	if (node < 0) {
+>  		node = fdt_add_subnode(fdt, 0, "chosen");
+> -- 
 > 1.8.3.1
->
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
