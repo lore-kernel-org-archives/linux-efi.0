@@ -1,64 +1,41 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL v2] EFI urgent fixes
-Date: Tue, 9 Sep 2014 16:57:11 +0200
-Message-ID: <20140909145711.GD19536@gmail.com>
-References: <20140909080233.GG18582@console-pimps.org>
+From: Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 3/3] arm64/efi: efistub: don't abort if base of DRAM
+ is occupied
+Date: Tue, 09 Sep 2014 15:39:38 -0400
+Message-ID: <540F577A.4040709@redhat.com>
+References: <1406717944-24725-1-git-send-email-ard.biesheuvel@linaro.org> <1406717944-24725-4-git-send-email-ard.biesheuvel@linaro.org> <20140814113204.GE24018@leverpostej> <20140820171057.GG29733@console-pimps.org> <20140820173528.GH21734@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140909080233.GG18582@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20140820173528.GH21734@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On 08/20/2014 01:35 PM, Mark Rutland wrote:
+> On Wed, Aug 20, 2014 at 06:10:57PM +0100, Matt Fleming wrote:
+>> On Thu, 14 Aug, at 12:32:05PM, Mark Rutland wrote:
+>>> On Wed, Jul 30, 2014 at 11:59:04AM +0100, Ard Biesheuvel wrote:
+>>>> If we cannot relocate the kernel Image to its preferred offset of base of DRAM
+>>>> plus TEXT_OFFSET, instead relocate it to the lowest available 2 MB boundary plus
+>>>> TEXT_OFFSET. We may lose a bit of memory at the low end, but we can still
+>>>> proceed normally otherwise.
+>>>>
+>>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
+>>>> Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
+>>>
+>>> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
+>>
+>> Ard, who's picking this up?
+> 
+> Will's already taken this into arm64/devel [1,2] with the intention of
+> waiting for v3.18 [3]. Per Leif's comment [4] that might have to be
+> bumped.
 
-* Matt Fleming <matt@console-pimps.org> wrote:
+So what's the plan with this series? Waiting for 3.18? The problem is
+that this patch series needs to be pulled for any platform with an EFI
+firmware located at DRAM base (e.g. AMD Seattle) as was noted before.
 
-> Folks, this is a resend of the EFI urgent pull request from yesterday
-> with the non-regression-fixing patches dropped as Ingo requested. The
-> patches fix two regressions introduced during the merge window, and one
-> introduced in -rc2.
-> 
-> The following changes since commit 52addcf9d6669fa439387610bc65c92fa0980cef:
-> 
->   Linux 3.17-rc2 (2014-08-25 15:36:20 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 0ceac9e094b065fe3fec19669740f338d3480498:
-> 
->   efi/arm64: Fix fdt-related memory reservation (2014-09-09 07:51:09 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix early boot regression affecting x86 EFI boot stub when loading
->    initrds above 4GB - Yinghai Lu
-> 
->  * Relocate GOT entries in the x86 EFI boot stub now that we have
->    symbols with global visibility - Matt Fleming
-> 
->  * fdt memory reservation fix for arm64 - Mark Salter
-> 
-> ----------------------------------------------------------------
-> Mark Salter (1):
->       efi/arm64: Fix fdt-related memory reservation
-> 
-> Matt Fleming (1):
->       x86/efi: Fixup GOT in all boot code paths
-> 
-> Yinghai Lu (1):
->       x86/efi: Only load initrd above 4g on second try
-> 
->  arch/arm64/mm/init.c               |  3 +-
->  arch/x86/boot/compressed/eboot.c   | 18 +++++++-----
->  arch/x86/boot/compressed/head_32.S | 54 ++++++++++++++++++++++++++----------
->  arch/x86/boot/compressed/head_64.S | 56 ++++++++++++++++++++++++++++----------
->  drivers/firmware/efi/libstub/fdt.c | 10 ++++++-
->  5 files changed, 102 insertions(+), 39 deletions(-)
-
-Pulled into tip:x86/urgent, thanks a lot Matt!
-
-	Ingo
+Jon.
