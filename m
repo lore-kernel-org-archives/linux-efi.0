@@ -1,78 +1,62 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fixes
-Date: Mon, 8 Sep 2014 22:55:35 +0100
-Message-ID: <20140908215535.GD18582@console-pimps.org>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fixes
+Date: Tue, 9 Sep 2014 07:07:49 +0200
+Message-ID: <20140909050749.GB6770@gmail.com>
+References: <20140908215535.GD18582@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
+In-Reply-To: <20140908215535.GD18582-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Folks,
 
-Please queue up the following fixes, mainly for regressions introduced
-in the merge window or -rc2.
+* Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
 
-The following changes since commit 52addcf9d6669fa439387610bc65c92fa0980cef:
+> Folks,
+> 
+> Please queue up the following fixes, mainly for regressions introduced
+> in the merge window or -rc2.
 
-  Linux 3.17-rc2 (2014-08-25 15:36:20 -0700)
+So the rule for post-rc1 merges is to fix regressions 'only', not 
+'mainly'!
 
-are available in the git repository at:
+> ----------------------------------------------------------------
+> Mark Rustad (1):
+>       efi: Resolve some shadow warnings
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+That's not a critical regression.
 
-for you to fetch changes up to 5d6012d8d72b4107bbc68d9e761aa5e2ddd73b05:
+> 
+> Mark Salter (1):
+>       efi/arm64: Fix fdt-related memory reservation
 
-  efi/arm64: Fix fdt-related memory reservation (2014-09-08 20:52:48 +0100)
+That's a regression fix.
 
-----------------------------------------------------------------
- * Fix early boot regression affecting x86 EFI boot stub when loading
-   initrds above 4GB - Yinghai Lu
+> Mathias Krause (4):
+>       x86/efi: Remove unused efi_call* macros
+>       x86/efi: Unexport add_efi_memmap variable
+>       x86/efi: Update comment regarding required phys mapped EFI services
+>       x86/efi: Mark initialization code as such
 
- * Relocate GOT entries in the x86 EFI boot stub now that we have
-   symbols with global visibility - Matt Fleming
+Neither of these 4 changes is a critical regression!
 
- * Fixes for compiler warnings caused by parameter and variable names
-   shadowing types - Mark Rustad
+> Matt Fleming (1):
+>       x86/efi: Fixup GOT in all boot code paths
 
- * General EFI cleanups and simplifications - Mathias Krause
+That's a regression fix.
 
- * fdt memory reservation fix for arm64 - Mark Salter
+> Yinghai Lu (1):
+>       x86/efi: Only load initrd above 4g on second try
 
-----------------------------------------------------------------
-Mark Rustad (1):
-      efi: Resolve some shadow warnings
+This revert is a regression fix too.
 
-Mark Salter (1):
-      efi/arm64: Fix fdt-related memory reservation
+So please only put the 3 regression fixes into efi-urgent, the 
+rest can go into the v3.18 pile.
 
-Mathias Krause (4):
-      x86/efi: Remove unused efi_call* macros
-      x86/efi: Unexport add_efi_memmap variable
-      x86/efi: Update comment regarding required phys mapped EFI services
-      x86/efi: Mark initialization code as such
+Thanks,
 
-Matt Fleming (1):
-      x86/efi: Fixup GOT in all boot code paths
-
-Yinghai Lu (1):
-      x86/efi: Only load initrd above 4g on second try
-
- arch/arm64/mm/init.c                |  3 +-
- arch/x86/boot/compressed/eboot.c    | 18 +++++++-----
- arch/x86/boot/compressed/head_32.S  | 54 +++++++++++++++++++++++++----------
- arch/x86/boot/compressed/head_64.S  | 56 +++++++++++++++++++++++++++----------
- arch/x86/include/asm/efi.h          | 31 +++++++-------------
- arch/x86/platform/efi/efi.c         | 20 ++++++-------
- arch/x86/platform/efi/efi_32.c      | 12 ++++----
- arch/x86/platform/efi/efi_64.c      |  6 ++--
- arch/x86/platform/efi/efi_stub_32.S |  4 +--
- drivers/firmware/efi/libstub/fdt.c  | 10 ++++++-
- drivers/firmware/efi/vars.c         | 14 +++++-----
- 11 files changed, 140 insertions(+), 88 deletions(-)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+	Ingo
