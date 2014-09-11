@@ -1,159 +1,68 @@
-From: Grant Likely <grant.likely-s3s/WqlpOiPyB63q8FvJNQ@public.gmane.org>
-Subject: Re: [RFC PATCH] arm64/efi: use id mapping for Runtime Services
-Date: Wed, 10 Sep 2014 14:44:00 +0100
-Message-ID: <CACxGe6sKTQndHVTcH0V8mQL6-UuV8CRXLKSyaM7_CPiyCZvUXQ@mail.gmail.com>
-References: <1406815909-26825-1-git-send-email-ard.biesheuvel@linaro.org>
- <20140806143632.GV25953@arm.com> <CAKv+Gu9xtGRTbhzzyCbGt7CEL=ORkpEnuipweedzDbBJZGGxuw@mail.gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [RFC] [PATCH] x86/efi: Adding efi_printks on memory allocationa
+ and pci.reads
+Date: Thu, 11 Sep 2014 09:08:41 +0100
+Message-ID: <20140911080841.GH18582@console-pimps.org>
+References: <20140906230251.140a99c9@bert>
+ <20140907021133.7184c28c@bert>
+ <20140908211856.GC18582@console-pimps.org>
+ <20140910010022.21b2707b@bert>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu9xtGRTbhzzyCbGt7CEL=ORkpEnuipweedzDbBJZGGxuw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20140910010022.21b2707b@bert>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Andre <andre.muller-S0/GAf8tV78@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-I had missed this conversation, but Ard pointed me at it yesterday, so
-I'll chime in now.
+On Wed, 10 Sep, at 01:00:22AM, Andre wrote:
+> All other calls to allocate memory seem to make some noise already, w=
+ith the
+> exception of two calls (for gop, uga) in the setup_graphics path.
+>=20
+> The purpose is to be noisy on worrysome errors immediately.
+>=20
+> > commit fb86b2440de0ec10fe0272eb19d262ae7a01adb8
+> > Author: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
+> > Date:   Thu Jul 10 02:12:41 2014 +0200
+> >
+> >     x86/efi: Add better error logging to EFI boot stub
+>=20
+> introduces printing false alarms for lots of hardware. Rather than pl=
+aying
+> Whack a Mole with non-fatal exit conditions, try the other way round.
+=20
+The usual way to reference existing commits is to quote the commit sha1
+(abbreviated to 12-characters) with the patch subject in parenthesis an=
+d
+quotes, i.e. commit fb86b2440de0 ("x86/efi: Add better error logging to
+EFI boot stub") - I fixed this up.
 
-Ard, you are correct that SetVirtualAddressMap() is optional in the
-spec and we could simply not call it. By a strict reading of the spec
-that is completely valid. However, the problem is not with the spec,
-it is with actual implementations. Vendors are notorious for shipping
-hardware that works enough to boot the operating system(s) they care
-about even though the implementation is out of spec. If we don't call
-SetVirtualAddressMap() it pretty much guarantees that we'll never be
-able to reliably call SetVirtualAddressMap() on ARM platforms because
-there will be a non-trivial set of platforms that implement it
-completely wrong.
+> This is per Matt Fleming's suggestion:
+>=20
+> > Where I think we could improve things
+> > is by adding efi_printk() message in certain error paths. Clearly, =
+not
+> > all error paths need such messages, e.g. the EFI_INVALID_PARAMETER =
+path
+> > you highlighted above, but it makes sense for memory allocation and=
+ PCI
+> > read failures.
+>=20
+> http://article.gmane.org/gmane.linux.kernel.efi/4628
+>=20
+> After this, the status check on the setup_efi_pci() function
+> can go away again.
+>=20
+> Signed-off-by: Andre M=FCller <andre.muller-S0/GAf8tV78@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c | 29 ++++++++++++++++++++++-------
+>  1 file changed, 22 insertions(+), 7 deletions(-)
 
-In the ARM server space, Linux will be the dominant OS for the near
-future, not Windows, so we are in the happy position of hardware
-vendors making sure their platform boots Linux instead of trying to
-run Linux on a platform only tested with Windows. We want to call
-SetVirtualAddressMap() because it is a pretty fundamental part of
-runtime services, and we want to make sure it works. I'd even argue
-that it would be a good idea to randomize the map layout on each boot
-to flush out buggy assumptions about the map it will be given.
+Patch looks good to me. Applied, thanks!
 
-That said, putting runtime services into a separate mapping apart from
-the kernel mappings is exactly the right thing to do. If runtime
-services access any data outside of declared address map, we want to
-know about it and prevent it from happening. Otherwise we've got no
-idea if UEFI is corrupting kernel data structures.
-
-As for kexec, we can pass the assigned mapping on to the next kernel.
-We already are passing the address map via the boot dt. As long as the
-kernel can detect if a mapping has already been set, which should be
-easy, the new kernel can use it instead of assigning one of it's own.
-
-g.
-
-
-On Wed, Aug 6, 2014 at 4:15 PM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 6 August 2014 16:36, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
->> On Thu, Jul 31, 2014 at 03:11:49PM +0100, Ard Biesheuvel wrote:
->>> There are 2 interesting pieces of information in the UEFI spec section 2.3.6
->>> regarding the mapping of runtime regions:
->>> (a) the firmware should not request a virtual mapping for configuration tables,
->>>     even though they are marked as EfiRuntimeServicesData;
->>> (b) calling SetVirtualAddressMap() is optional, and it is equally appropriate to
->>>     call Runtime Services using an identity mapping.
->>>
->>> So we can eliminate some of the complexity around UEFI Runtime Services by not
->>> using a virtual mapping at all, and calling the services at their physical
->>> address. This is especially useful under kexec, as SetVirtualAddressMap() may
->>> only be called once, and there is no guarantee that mappings are stable between
->>> different kexec'd kernels.
->>>
->>> The fallout for other in-kernel users of UEFI data structures should be
->>> negligible, as they cannot legally access those data structures through
->>> pre-existing virtual mappings anyway (point (a) above)
->>>
->>> It should also be noted that, as the kernel side of the address space (TTBR1) is
->>> retained, the stack and pointer function arguments remain accessible to the
->>> runtime service while the id mapping is active.
->>>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> ---
->>>  arch/arm64/include/asm/efi.h |  24 ++++++++--
->>>  arch/arm64/kernel/efi.c      | 106 ++-----------------------------------------
->>>  2 files changed, 23 insertions(+), 107 deletions(-)
->>>
->>> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
->>> index a34fd3b12e2b..d42a21e79b39 100644
->>> --- a/arch/arm64/include/asm/efi.h
->>> +++ b/arch/arm64/include/asm/efi.h
->>> @@ -1,8 +1,10 @@
->>>  #ifndef _ASM_EFI_H
->>>  #define _ASM_EFI_H
->>>
->>> +#include <asm/cacheflush.h>
->>>  #include <asm/io.h>
->>>  #include <asm/neon.h>
->>> +#include <asm/tlbflush.h>
->>>
->>>  #ifdef CONFIG_EFI
->>>  extern void efi_init(void);
->>> @@ -12,23 +14,37 @@ extern void efi_idmap_init(void);
->>>  #define efi_idmap_init()
->>>  #endif
->>>
->>> +static inline void switch_pgd(pgd_t *pgd, struct mm_struct *mm)
->>> +{
->>> +     cpu_switch_mm(pgd, mm);
->>> +     flush_tlb_all();
->>> +     if (icache_is_aivivt())
->>> +             __flush_icache_all();
->>> +}
->>> +
->>>  #define efi_call_virt(f, ...)                                                \
->>>  ({                                                                   \
->>> -     efi_##f##_t *__f = efi.systab->runtime->f;                      \
->>> +     efi_##f##_t *__f;                                               \
->>>       efi_status_t __s;                                               \
->>>                                                                       \
->>> -     kernel_neon_begin();                                            \
->>> +     kernel_neon_begin(); /* disables preemption */                  \
->>> +     switch_pgd(idmap_pg_dir, &init_mm);                             \
->>> +     __f =  efi.systab->runtime->f;                                  \
->>>       __s = __f(__VA_ARGS__);                                         \
->>> +     switch_pgd(current->active_mm->pgd, current->active_mm);        \
->>>       kernel_neon_end();                                              \
->>>       __s;                                                            \
->>>  })
->>
->> This scares the bejesus out of me, but I can't put my finger on exactly why.
->> I think it does what you intend and I can't break it myself, so it would be
->> really good if the EFI folks could confirm that this looks good to them.
->>
->
-> There is something similar in the x86 code (arch/x86/platform/efi/efi.c)
-> """
->  * The new method does a pagetable switch in a preemption-safe manner
->  * so that we're in a different address space when calling a runtime
->  * function. For function arguments passing we do copy the PGDs of the
->  * kernel page table into ->trampoline_pgd prior to each call.
-> """
->
-> How exactly this will turn out for arm64 (and ARM) is still under
-> discussion, though. My position is that if you are going to switch
-> pgd's anyway, why not just use the id mapping? And even if you feel it
-> is mandatory to install a virtual address mapping into UEFI (which I
-> think is /not/ the case), you could install an id mapping as well,
-> which means all the related machinery still gets invoked.
-> The alternative to using a TTBR0 mapping would be to reserve a slice
-> of kernel virtual memory so that the Runtime Services are guaranteed
-> to live at the same virtual address after a kexec, ideally the same
-> region on 4k and 64k pages ...
->
-> We are planning to discuss this further at Linaro Connect next month.
->
-> --
-> Ard.
->
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
+--=20
+Matt Fleming, Intel Open Source Technology Center
