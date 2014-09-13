@@ -1,110 +1,78 @@
-From: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
-Subject: [PATCH 3/6] x86/efi: add code to fixup page faults in BOOT_SERVICES_* regions
-Date: Sat, 13 Sep 2014 11:36:13 -0700
-Message-ID: <1410633376-8822-4-git-send-email-ricardo.neri-calderon@linux.intel.com>
+From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH 6/6] x86/efi: introduce EFI_BOOT_SERVICES_WARN
+Date: Sat, 13 Sep 2014 11:36:16 -0700
+Message-ID: <1410633376-8822-7-git-send-email-ricardo.neri-calderon@linux.intel.com>
 References: <1410633376-8822-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1410633376-8822-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>
-Cc: "H. Peter Anvin" <hpa@linux.intel.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, "Glenn P. Williamson" <glenn.p.williamson@intel.com>, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1410633376-8822-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Glenn P. Williamson" <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-As per the UEFI specification, accesses to BOOT_SERVICES_* memory
-regions by the UEFI firmware are illegal after the OS has called
-ExitBootServices. However, buggy firmware implementations may still
-access these regions after such call.
+There may exist buggy implementations of UEFI firmaware that may still
+try to access the EFI_BOOT_SERVICES_* memory regions after the call to
+ExitBootServices() has been made. This is a violation of the UEFI
+specification.
 
-The current approach of the kernel is to reserve and map all the
-EFI_BOOT_SERVICES_* memory regions until efi_free_boot_services() is
-called so that the buggy firmware can freely access such regions.
+If selected, this debug option will print a warning message if the
+conditions mentioned above are met. Along with the warning, the EFI
+platform code will fix up the page fault so that the firmware can
+proceed further. We are sure that the page fault will be caused by the
+firmware trying to access an unmapped page as the kernel has reserved
+such pages.
 
-A good way to detect these illegal accesses is to not map (but only
-reserve) these regions so that the accesses generate a page fault that
-the kernel can detect. Upon detection, the fault is fixed-up (i.e., the
-region is mapped for the buggy firmware to use). As the pages are
-reserved, the fixup is safe.
+If not selected, EFI_BOOT_SERVICES_CODE/DATA memory regions will be
+reserved and mapped along with the runtime memory regions so that the
+buggy firmware does not cause any page faults when trying to accessing
+such memory regions. This is the approach from Matthew Garrett in commit
+916f676f8dc0 ("x86, efi: Retain boot service code until after switching
+to virtual mode").
 
-Thus, rather than just silently allowing the buggy firmware to proceed,
-we detect the access and complain about it. Of course, this function
-will be called by the page fault handler fixup code in a subsequent
-patch.
+Being more verbose about this kind of illegal access from the firmware
+increases the likelihood of this kind firmware bugs to be fixed.
 
-Ideally, the new memory map with the just mapped region should be passed
-to the firmware. However, as per the UEFI specification,
-SetVirtualAddressMap may be called only once. Subsequent calls will
-return EFI_UNSUPPORTED. Thus, it is pointless to pass the new map.
-Furthermore, all the EFI_RUNTIME_SERVICES_* should already be mapped at
-this point.
-
-Also, at this point, the virtual address of the system table should have
-been found. Thus, there is no need to look for it in the just-mapped
-region.
-
-Finally, this new mapping will not impact a reboot from kexec, as kexec
-is only concerned about runtime memory regions.
-
-Signed-off-by: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 29 +++++++++++++++++++++++++++++
- include/linux/efi.h         |  8 ++++++++
- 2 files changed, 37 insertions(+)
+ arch/x86/Kconfig            | 12 ++++++++++++
+ arch/x86/platform/efi/efi.c |  2 +-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
 
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 778178f..d1c958a 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1565,6 +1565,18 @@ config EFI_MIXED
+ 
+ 	   If unsure, say N.
+ 
++config EFI_BOOT_SERVICES_WARN
++	bool "Warn about illegal accesses to BOOT_SERVICES memory"
++	depends on EFI
++	---help---
++	   Enable this debug feature to make the kernel issue a warning if
++	   memory regions marked as EFI_BOOT_SERVICES_CODE/DATA are
++	   accessed after the kernel calls ExitBootServices() on the
++	   firmware. Please see the UEFI specification for details on
++	   the expectations of memory usage.
++
++	   If unsure, say N.
++
+ config SECCOMP
+ 	def_bool y
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
 diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index d45decf..2e78083 100644
+index fd52004..c67637b 100644
 --- a/arch/x86/platform/efi/efi.c
 +++ b/arch/x86/platform/efi/efi.c
-@@ -954,3 +954,32 @@ static int __init parse_efi_cmdline(char *str)
- 	return 0;
- }
- early_param("efi", parse_efi_cmdline);
-+
-+#ifdef CONFIG_EFI_BOOT_SERVICES_WARN
-+static const char boot_services_warning[] =
-+"Fixing illegal access to BOOT_SERVICES_*. Bug in EFI firmware?\n";
-+
-+int efi_boot_services_fixup(unsigned long phys_addr)
-+{
-+	efi_memory_desc_t *md;
-+
-+	md = efi_memory_descriptor(phys_addr);
-+
-+	if (!md)
-+		return 0;
-+
-+	if (md->type == EFI_BOOT_SERVICES_CODE ||
-+	    md->type == EFI_BOOT_SERVICES_DATA)	{
-+		/*
-+		 * If the page fault was caused by an acccess to BOOT_SERVICES_*
-+		 * memory regions, just map the region... and warn about it.
-+		 * By now we should have found the virtual address of the system
-+		 * table. Thus, no need to update.
-+		 */
-+		pr_warn_once("%s", (char *)&boot_services_warning);
-+		efi_map_region(md);
-+		return 1;
-+	}
-+	return 0;
-+}
-+#endif
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index b36b588..fbdc412 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -875,6 +875,14 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
- extern void efi_get_time(struct timespec *now);
- extern void efi_reserve_boot_services(void);
-+#ifdef CONFIG_EFI_BOOT_SERVICES_WARN
-+extern int efi_boot_services_fixup(unsigned long phys_addr);
-+#else
-+static inline int efi_boot_services_fixup(unsigned long phys_addr)
-+{
-+		return 0;
-+}
-+#endif
- extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
- extern struct efi_memory_map memmap;
- 
+@@ -689,7 +689,7 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
+ 	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+ 		md = p;
+ 		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+-#ifdef CONFIG_X86_64
++#if defined(CONFIG_X86_64) && !defined(CONFIG_EFI_BOOT_SERVICES_WARN)
+ 			if (md->type != EFI_BOOT_SERVICES_CODE &&
+ 			    md->type != EFI_BOOT_SERVICES_DATA)
+ #endif
 -- 
 1.9.1
