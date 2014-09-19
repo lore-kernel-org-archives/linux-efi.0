@@ -1,56 +1,56 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Fri, 19 Sep 2014 12:50:01 +0200
-Message-ID: <20140919105001.GA11883@gmail.com>
-References: <20140919103305.GE18635@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/6] x86/efi: use efi_memory_descriptor in convenience
+ functions
+Date: Fri, 19 Sep 2014 12:04:12 +0100
+Message-ID: <20140919110412.GF18635@console-pimps.org>
+References: <1410633376-8822-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
+ <1410633376-8822-3-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20140919103305.GE18635@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Young <dyoung@redhat.com>
+In-Reply-To: <1410633376-8822-3-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Glenn P. Williamson" <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Sat, 13 Sep, at 11:36:12AM, Ricardo Neri wrote:
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 64ecbb5..29c85fe 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -206,29 +206,23 @@ subsys_initcall(efisubsys_init);
+>   */
+>  void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
+>  {
+> -	struct efi_memory_map *map;
+> -	void *p;
+> -	map =3D efi.memmap;
+> -	if (!map)
+> +	efi_memory_desc_t *md;
+> +
+> +	md =3D efi_memory_descriptor(phys_addr);
 
-* Matt Fleming <matt@console-pimps.org> wrote:
+Whoops. This change is causing the following build errors on ia64,
 
-> Hi guys,
-> 
-> Please consider pulling the following urgent fix from Dave. It fixes an
-> earlyprintk=efi regression introduced in v3.16. Due to changes in the
-> early ACPI code we run out of early_ioremap slots when earlyprintk=efi
-> is specified on the command line, resulting in a hang during kernel
-> boot.
-> 
-> This patch is clearly a core x86 change, but since it is a fix for an
-> EFI code issue I picked it up in my urgent queue. Let me know if you'd
-> like to route this some other way.
-> 
-> The following changes since commit 0ceac9e094b065fe3fec19669740f338d3480498:
-> 
->   efi/arm64: Fix fdt-related memory reservation (2014-09-09 07:51:09 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to 3eddc69ffeba092d288c386646bfa5ec0fce25fd:
-> 
->   x86 early_ioremap: Increase FIX_BTMAPS_SLOTS to 8 (2014-09-14 15:24:31 +0100)
-> 
-> ----------------------------------------------------------------
->  * Increase the number of early_ioremap slots to fix a regression with
->    earlyprintk=efi after recent changes to the ACPI code - Dave Young
-> 
-> ----------------------------------------------------------------
-> Dave Young (1):
->       x86 early_ioremap: Increase FIX_BTMAPS_SLOTS to 8
-> 
->  arch/x86/include/asm/fixmap.h | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+/home/build/git/efi/arch/ia64/kernel/efi.c:722:1: error: static declara=
+tion of =E2=80=98efi_memory_descriptor=E2=80=99 follows non-static decl=
+aration
+ efi_memory_descriptor (unsigned long phys_addr)
+ ^
+In file included from /home/build/git/efi/arch/ia64/kernel/efi.c:32:0:
+/home/build/git/efi/include/linux/efi.h:870:27: note: previous declarat=
+ion of =E2=80=98efi_memory_descriptor=E2=80=99 was here
+ extern efi_memory_desc_t *efi_memory_descriptor(unsigned long phys_add=
+r);
+                           ^
 
-Pulled, thanks a lot Matt!
+and on arm64...
 
-	Ingo
+drivers/built-in.o: In function `efi_lookup_mapped_addr':
+:(.text+0xb0e0): undefined reference to `efi_memory_descriptor'
+
+--=20
+Matt Fleming, Intel Open Source Technology Center
