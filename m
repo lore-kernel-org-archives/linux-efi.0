@@ -1,59 +1,50 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [PATCH] x86/efi: Delete misleading efi_printk() error message
-Date: Mon, 15 Sep 2014 16:20:54 +0100
-Message-ID: <1410794454-17961-1-git-send-email-matt@console-pimps.org>
+Subject: [GIT PULL] EFI urgent fix
+Date: Fri, 19 Sep 2014 11:33:05 +0100
+Message-ID: <20140919103305.GE18635@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>, =?UTF-8?q?Andre=20M=C3=BCller?= <andre.muller-S0/GAf8tV78@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=46rom: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Hi guys,
 
-A number of people are reporting seeing the "setup_efi_pci() failed!"
-error message in what used to be a quiet boot,
+Please consider pulling the following urgent fix from Dave. It fixes an
+earlyprintk=efi regression introduced in v3.16. Due to changes in the
+early ACPI code we run out of early_ioremap slots when earlyprintk=efi
+is specified on the command line, resulting in a hang during kernel
+boot.
 
-  https://bugzilla.kernel.org/show_bug.cgi?id=3D81891
+This patch is clearly a core x86 change, but since it is a fix for an
+EFI code issue I picked it up in my urgent queue. Let me know if you'd
+like to route this some other way.
 
-The message isn't all that helpful because setup_efi_pci() can return a
-non-success error code for a variety of reasons, not all of them fatal.
+The following changes since commit 0ceac9e094b065fe3fec19669740f338d3480498:
 
-Drop the efi_printk() now that we have more fine-grained, and more
-specific, error messages throughout the *setup_efi_pci*() code paths.
+  efi/arm64: Fix fdt-related memory reservation (2014-09-09 07:51:09 +0100)
 
-Reported-by: Darren Hart <dvhart-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Reported-by: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
-Cc: Ulf Winkelvos <ulf-rS3t9PEbhQ0OIzVOb1FTxg@public.gmane.org>
-Cc: Andre M=C3=BCller <andre.muller-S0/GAf8tV78@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
+are available in the git repository at:
 
-This patch is based on top of Andre's ("x86/efi: Adding efi_printks on
-memory allocationa and pci.reads") sitting on the 'next' branch.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
- arch/x86/boot/compressed/eboot.c | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+for you to fetch changes up to 3eddc69ffeba092d288c386646bfa5ec0fce25fd:
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compresse=
-d/eboot.c
-index ed8e06c59a4c..87398f9434f3 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1394,10 +1394,7 @@ struct boot_params *efi_main(struct efi_config *=
-c,
-=20
- 	setup_graphics(boot_params);
-=20
--	status =3D setup_efi_pci(boot_params);
--	if (status !=3D EFI_SUCCESS) {
--		efi_printk(sys_table, "setup_efi_pci() failed!\n");
--	}
-+	setup_efi_pci(boot_params);
-=20
- 	status =3D efi_call_early(allocate_pool, EFI_LOADER_DATA,
- 				sizeof(*gdt), (void **)&gdt);
---=20
-1.9.3
+  x86 early_ioremap: Increase FIX_BTMAPS_SLOTS to 8 (2014-09-14 15:24:31 +0100)
+
+----------------------------------------------------------------
+ * Increase the number of early_ioremap slots to fix a regression with
+   earlyprintk=efi after recent changes to the ACPI code - Dave Young
+
+----------------------------------------------------------------
+Dave Young (1):
+      x86 early_ioremap: Increase FIX_BTMAPS_SLOTS to 8
+
+ arch/x86/include/asm/fixmap.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
