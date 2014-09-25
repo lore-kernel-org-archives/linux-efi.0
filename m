@@ -1,60 +1,64 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 7/7] efi_rtc: probe function error out in case no efi
- runtime enabled
-Date: Tue, 23 Sep 2014 15:24:26 +0800
-Message-ID: <20140923072426.GB3916@darkstar.nay.redhat.com>
-References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
- <1408007953-15151-1-git-send-email-dyoung@redhat.com>
- <1411403609.25340.55.camel@deneb.redhat.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [GIT PULL] EFI urgent fixes
+Date: Thu, 25 Sep 2014 08:31:33 +0100
+Message-ID: <20140925073133.GQ18635@console-pimps.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1411403609.25340.55.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi, Mark
+Folks,
 
-On 09/22/14 at 12:33pm, Mark Salter wrote:
-> On Thu, 2014-08-14 at 17:19 +0800, Dave Young wrote:
-> > efi rtc depends on efi runtime services, so if efi runtime services are not
-> > usable it should error out.
-> > 
-> > Without this patch rtc-efi will panic with 'noefi' boot
-> 
-> Is this still needed after commit da167ad7638759:
-> 
->   rtc: ia64: allow other architectures to use EFI RTC
-> 
-> That should keep efi_rtc_probe from being called if runtime services
-> are not available.
+Please consider pulling the following fixes.
 
-If that's the case then this patch should be unnecessary, I have no machine
-to test it currently though.
+The first two are releated to the bug report I got from Linus and Josh
+Boyer, whereby Fedora20 + grub2 systems were no longer booting. Linus
+reverted the offending commit that broke grub2 boot, but that left us in
+a state where Macbooks still didn't boot with EFI. This is fixed with
+the below revert and I'm dropping a noisey boot time efi_printk() based
+on Josh's request and Linus' OK.
 
-> 
-> > 
-> > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  drivers/rtc/rtc-efi.c | 3 +++
-> >  1 file changed, 3 insertions(+)
-> > 
-> > diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
-> > index c4c3843..ca2487b 100644
-> > --- a/drivers/rtc/rtc-efi.c
-> > +++ b/drivers/rtc/rtc-efi.c
-> > @@ -191,6 +191,9 @@ static int __init efi_rtc_probe(struct platform_device *dev)
-> >  {
-> >  	struct rtc_device *rtc;
-> >  
-> > +	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-> > +		return -ENODEV;
-> > +
-> >  	rtc = devm_rtc_device_register(&dev->dev, "rtc-efi", &efi_rtc_ops,
-> >  					THIS_MODULE);
-> >  	if (IS_ERR(rtc))
-> 
-> 
+The third patch fixes a 32-bit EFI boot stub bug where garbled text is
+displayed on the screen if any of the efi_printk() statements run.
+
+The following changes since commit 3eddc69ffeba092d288c386646bfa5ec0fce25fd:
+
+  x86 early_ioremap: Increase FIX_BTMAPS_SLOTS to 8 (2014-09-14 15:24:31 +0100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 115c6628a59044958c205f8468a1b3ba3d539e61:
+
+  x86/efi: Truncate 64-bit values when calling 32-bit OutputString() (2014-09-24 21:56:46 +0100)
+
+----------------------------------------------------------------
+ * Revert the static library changes from the merge window since they're
+   causing issues for Macbooks and Fedora + Grub2 - Matt Fleming
+
+ * Delete the misleading "setup_efi_pci() failed!" message which some
+   people are seeing when booting EFI - Matt Fleming
+
+ * Fix printing strings from the 32-bit EFI boot stub by only passing
+   32-bit addresses to the firmware - Matt Fleming
+
+----------------------------------------------------------------
+Matt Fleming (3):
+      Revert "efi/x86: efistub: Move shared dependencies to <asm/efi.h>"
+      x86/efi: Delete misleading efi_printk() error message
+      x86/efi: Truncate 64-bit values when calling 32-bit OutputString()
+
+ arch/x86/boot/compressed/Makefile |  3 +--
+ arch/x86/boot/compressed/eboot.c  | 44 +++++++++++++++++++++++----------------
+ arch/x86/boot/compressed/eboot.h  | 16 ++++++++++++++
+ arch/x86/include/asm/efi.h        | 24 ---------------------
+ drivers/firmware/efi/Makefile     |  2 +-
+ 5 files changed, 44 insertions(+), 45 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
