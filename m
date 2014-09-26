@@ -1,41 +1,64 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+From: Paul Bolle <pebolle@tiscali.nl>
 Subject: Re: [GIT PULL] EFI urgent fixes
-Date: Fri, 26 Sep 2014 13:34:29 +0100
-Message-ID: <20140926123429.GX18635@console-pimps.org>
+Date: Fri, 26 Sep 2014 14:55:28 +0200
+Message-ID: <1411736128.7866.46.camel@x220>
 References: <20140925073133.GQ18635@console-pimps.org>
- <20140925144127.GA3828@gmail.com>
- <1411730854.7866.10.camel@x220>
- <20140926114454.GV18635@console-pimps.org>
- <1411732755.7866.24.camel@x220>
+	 <20140925144127.GA3828@gmail.com> <1411730854.7866.10.camel@x220>
+	 <20140926114454.GV18635@console-pimps.org> <1411732755.7866.24.camel@x220>
+	 <20140926123429.GX18635@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1411732755.7866.24.camel@x220>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Paul Bolle <pebolle-IWqWACnzNjzz+pZb47iToQ@public.gmane.org>
-Cc: Valentin Rothberg <valentinrothberg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Fengguang Wu <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140926123429.GX18635@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: Valentin Rothberg <valentinrothberg@gmail.com>, Ingo Molnar <mingo@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Fengguang Wu <fengguang.wu@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 26 Sep, at 01:59:15PM, Paul Bolle wrote:
+On Fri, 2014-09-26 at 13:34 +0100, Matt Fleming wrote:
+> On Fri, 26 Sep, at 01:59:15PM, Paul Bolle wrote:
+> > 
+> > I have a 800 line perl monster that checks for stuff like this. It's not
+> > very sophisticated but smart enough to spot typos like this one. I try
+> > to have it check each linux-next (and mainline) release.
+>  
+> Very cool.
+
+Thanks.
+
+> > (I think Valentin Rothberg is trying to automate this properly. See
+> > http://www.linuxplumbersconf.org/2014/ocw/sessions/1863 .)
 > 
-> I have a 800 line perl monster that checks for stuff like this. It's not
-> very sophisticated but smart enough to spot typos like this one. I try
-> to have it check each linux-next (and mainline) release.
- 
-Very cool.
+> Have either of you guys thought about asking for this to be included
+> with the 0-day kbuild bot or submitted under scripts/?
+> 
+> It certainly seems like a useful bit of functionality.
 
-> (I think Valentin Rothberg is trying to automate this properly. See
-> http://www.linuxplumbersconf.org/2014/ocw/sessions/1863 .)
+I've been testing things locally for three months now. People must have
+noticed an uptick in messages I send on this topic. (And, related, a
+decrease in the numbers of cleanup patches I send myself.) I've not been
+shouted at very often, so the signal to noise ratio is probably cool. 
 
-Have either of you guys thought about asking for this to be included
-with the 0-day kbuild bot or submitted under scripts/?
+This is about the third time I've written a monster like that. (I first
+started checking for Kconfig related defects in, I think, 2011.)
 
-It certainly seems like a useful bit of functionality.
+About the only thing I'm happy with in this attempt is that it parses
+blobs separately. Ie, every release it checks for previously unseen
+blobs, parses those, and saves each blob level parse as a git note to
+that blob. Then it collects all relevant blob level notes, does the
+aggregate analysis and reports the issues it identifies. That report is
+saved away again as a note on the tag I'm checking. (I have not bothered
+to automate that last step.) The neat thing is, I think, that each
+release touches only a minority of files so parsing the tree is mostly a
+one time cost (encountered on the very first run).
 
-Fengguang, the interesting bits of this thread start here,
+But, anyhow, I'm pretty sure Valentin is onto something much more
+sophisticated.
 
-  https://lkml.kernel.org/r/1411730854.7866.10.camel@x220
+> Fengguang, the interesting bits of this thread start here,
+> 
+>   https://lkml.kernel.org/r/1411730854.7866.10.camel@x220
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+
+Paul Bolle
