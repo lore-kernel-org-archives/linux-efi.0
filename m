@@ -1,133 +1,82 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: [GIT PULL] EFI changes for v3.18
-Date: Sun, 28 Sep 2014 21:27:02 +0100
-Message-ID: <20140928202702.GB18635@console-pimps.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL] EFI changes for v3.18
+Date: Mon, 29 Sep 2014 14:43:21 +0200
+Message-ID: <20140929124321.GB18825@gmail.com>
+References: <20140928202702.GB18635@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <20140928202702.GB18635@console-pimps.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi guys,
 
-This pull request is coming later than I had intended, sorry about that=
-=2E
-It unfortunately got pushed out by a number of things, chasing bugs,
-releases for other projects, etc.
+* Matt Fleming <matt@console-pimps.org> wrote:
 
-Merging this tag into Linus' tree causes some conflicts, which I've
-fixed up and pushed out as the efi-next-merge branch, in case you or
-Linus want to take a look at it. The conflicts are fairly straight
-forward to resolve.
+>  * Implement new EFI runtime lock which is required by the UEFI
+>    specification - Ard Biesheuvel
 
-The following changes since commit 99a5603e2a1f146ac0c6414d8a3669aa749c=
-cff8:
+Firstly, under what circumstances can EFI call parallelism happen 
+currently? Most of the EFI code runs during early bootup, which 
+is serialized.
 
-  efi/arm64: Handle missing virtual mapping for UEFI System Table (2014=
--07-18 21:24:04 +0100)
+Secondly, this locking pattern looks pretty disgusting:
 
-are available in the git repository at:
+@@ -94,7 +187,17 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
+                                          unsigned long data_size,
+                                          void *data)
+ {
+-       return efi_call_virt(set_variable, name, vendor, attr, data_size, data);
++       unsigned long flags;
++       efi_status_t status;
++       bool __in_nmi = efi_in_nmi();
++
++       if (!__in_nmi)
++               spin_lock_irqsave(&efi_runtime_lock, flags);
++       status = efi_call_virt(set_variable, name, vendor, attr, data_size,
++                              data);
++       if (!__in_nmi)
++               spin_unlock_irqrestore(&efi_runtime_lock, flags);
++       return status;
+ }
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/e=
-fi-next
+and that's repeated in virt_efi_query_variable_info() as well.
 
-for you to fetch changes up to 1eb56e1adab89d36f071db4277a3c4610970215f=
-:
+and that's the explanation given:
 
-  x86/efi: Adding efi_printks on memory allocationa and pci.reads (2014=
--09-28 17:43:21 +0100)
++/*
++ * Some runtime services calls can be reentrant under NMI, even if the table
++ * above says they are not. (source: UEFI Specification v2.4A)
++ *
++ * Table 32. Functions that may be called after Machine Check, INIT and NMI
++ * 
++----------------------------+------------------------------------------+
++ * | Function                  | Called after Machine Check, INIT and NMI |
++ * 
++----------------------------+------------------------------------------+
++ * | GetTime()                 | Yes, even if previously busy.            |
++ * | GetVariable()             | Yes, even if previously busy             |
++ * | GetNextVariableName()     | Yes, even if previously busy             |
++ * | QueryVariableInfo()       | Yes, even if previously busy             |
++ * | SetVariable()             | Yes, even if previously busy             |
++ * | UpdateCapsule()           | Yes, even if previously busy             |
++ * | QueryCapsuleCapabilities()| Yes, even if previously busy             |
++ * | ResetSystem()             | Yes, even if previously busy             |
++ * 
++----------------------------+------------------------------------------+
++ *
++ * In order to prevent deadlocks under NMI, the wrappers for these functions
++ * may only grab the efi_runtime_lock or rtc_lock spinlocks if !efi_in_nmi().
++ * However, not all of the services listed are reachable through NMI code paths,
++ * so the the special handling as suggested by the UEFI spec is only implemented
++ * for QueryVariableInfo() and SetVariable(), as these can be reached in NMI
++ * context through efi_pstore_write().
 
-----------------------------------------------------------------
- * Implement new EFI runtime lock which is required by the UEFI
-   specification - Ard Biesheuvel
+Are pstore calls into the EFI runtime reentrant?
 
- * Add new efi=3D x86 EFI boot stub parameter which mimics the way that
-   the regular kernel parameter works - Matt Fleming
+Thanks,
 
- * Improve error handling in efi-bgrt driver - Josh Triplett
-
- * Extend the "noefi" kernel parameter to arm64, add an efi=3Dnoruntime
-   synonym - Dave Young
-
- * Beautify the EFI memory map logs - Laszlo Ersek
-
- * Fix compiler shadow warnings and improve variable names - Mark Rusta=
-d
-
- * Remove unused efi_call() macros, update comments, tag initialization
-   functions with __init - Mathias Krause
-
- * Add more informative efi_printk()s to the x86 EFI boot stub at the
-   firmware call-sites - Andre M=FCller
-
-----------------------------------------------------------------
-Andre M=FCller (1):
-      x86/efi: Adding efi_printks on memory allocationa and pci.reads
-
-Ard Biesheuvel (1):
-      efi: Implement mandatory locking for UEFI Runtime Services
-
-Dave Young (6):
-      efi: Move noefi early param code out of x86 arch code
-      lib: Add a generic cmdline parse function parse_option_str
-      efi: Add kernel param efi=3Dnoruntime
-      arm64/efi: uefi_init error handling fix
-      arm64/efi: Do not enter virtual mode if booting with efi=3Dnorunt=
-ime or noefi
-      x86/efi: Clear EFI_RUNTIME_SERVICES if failing to enter virtual m=
-ode
-
-Josh Triplett (1):
-      efi-bgrt: Add error handling; inform the user when ignoring the B=
-GRT
-
-Laszlo Ersek (5):
-      efi: Add macro for EFI_MEMORY_UCE memory attribute
-      efi: Introduce efi_md_typeattr_format()
-      x86: efi: Format EFI memory type & attrs with efi_md_typeattr_for=
-mat()
-      ia64: efi: Format EFI memory type & attrs with efi_md_typeattr_fo=
-rmat()
-      arm64: efi: Format EFI memory type & attrs with efi_md_typeattr_f=
-ormat()
-
-Mark Rustad (1):
-      efi: Resolve some shadow warnings
-
-Mathias Krause (4):
-      x86/efi: Remove unused efi_call* macros
-      x86/efi: Unexport add_efi_memmap variable
-      x86/efi: Update comment regarding required phys mapped EFI servic=
-es
-      x86/efi: Mark initialization code as such
-
-Matt Fleming (1):
-      efi: Add efi=3D parameter parsing to the EFI boot stub
-
- Documentation/kernel-parameters.txt            |   8 +-
- arch/arm64/kernel/efi.c                        |  44 +++----
- arch/ia64/kernel/efi.c                         |   6 +-
- arch/x86/boot/compressed/eboot.c               |  32 +++--
- arch/x86/include/asm/efi.h                     |  33 ++----
- arch/x86/platform/efi/efi-bgrt.c               |  36 +++++-
- arch/x86/platform/efi/efi.c                    |  52 ++++-----
- arch/x86/platform/efi/efi_32.c                 |  12 +-
- arch/x86/platform/efi/efi_64.c                 |   6 +-
- arch/x86/platform/efi/efi_stub_32.S            |   4 +-
- drivers/firmware/efi/efi.c                     |  79 +++++++++++++
- drivers/firmware/efi/libstub/arm-stub.c        |   4 +
- drivers/firmware/efi/libstub/efi-stub-helper.c |  62 +++++++++-
- drivers/firmware/efi/runtime-wrappers.c        | 154 +++++++++++++++++=
-++++++--
- drivers/firmware/efi/vars.c                    |  14 +--
- include/linux/efi.h                            |  11 ++
- include/linux/kernel.h                         |   1 +
- lib/cmdline.c                                  |  29 +++++
- 18 files changed, 465 insertions(+), 122 deletions(-)
-
---=20
-Matt Fleming, Intel Open Source Technology Center
+	Ingo
