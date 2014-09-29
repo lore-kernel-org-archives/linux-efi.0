@@ -1,7 +1,7 @@
-From: Peter Zijlstra <peterz@infradead.org>
+From: Matt Fleming <matt@console-pimps.org>
 Subject: Re: [GIT PULL] EFI changes for v3.18
-Date: Mon, 29 Sep 2014 16:05:16 +0200
-Message-ID: <20140929140516.GL5430@worktop>
+Date: Mon, 29 Sep 2014 15:07:23 +0100
+Message-ID: <20140929140723.GA4788@console-pimps.org>
 References: <20140928202702.GB18635@console-pimps.org>
  <20140929124321.GB18825@gmail.com>
 Mime-Version: 1.0
@@ -11,10 +11,10 @@ Content-Disposition: inline
 In-Reply-To: <20140929124321.GB18825@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>
-Cc: Matt Fleming <matt@console-pimps.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 29, 2014 at 02:43:21PM +0200, Ingo Molnar wrote:
+On Mon, 29 Sep, at 02:43:21PM, Ingo Molnar wrote:
 > 
 > * Matt Fleming <matt@console-pimps.org> wrote:
 > 
@@ -24,7 +24,13 @@ On Mon, Sep 29, 2014 at 02:43:21PM +0200, Ingo Molnar wrote:
 > Firstly, under what circumstances can EFI call parallelism happen 
 > currently? Most of the EFI code runs during early bootup, which 
 > is serialized.
-> 
+ 
+Access to EFI variables needs to be serialized against each other, which
+we currently do with the __efivars->lock spinlock and the accessor
+functions in drivers/firmware/efi/vars.c. Additionally on arm64, access
+to the EFI time functions needs to be serialized with access to the
+variable functions (we don't use the time stuff on x86).
+
 > Secondly, this locking pattern looks pretty disgusting:
 > 
 > @@ -94,7 +187,17 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
@@ -76,12 +82,12 @@ On Mon, Sep 29, 2014 at 02:43:21PM +0200, Ingo Molnar wrote:
 > + * so the the special handling as suggested by the UEFI spec is only implemented
 > + * for QueryVariableInfo() and SetVariable(), as these can be reached in NMI
 > + * context through efi_pstore_write().
+> 
+> Are pstore calls into the EFI runtime reentrant?
 
-OMFG what a trainwreck... if they are reentrant like that, a lock isn't
-going to help you in any way. The implementation of these calls must be
-lockfree otherwise they cannot possibly be correct.
+Yes, the pstore functions are reentrant in the case of being invoked
+from the kmsg_dumper callback via pstore_dump(), which for the EFI
+pstore backend means we call efi_pstore_write() -> efi_entry_set_safe().
 
-Conditional locking like above is just plain broken, disgusting doesn't
-even begin to cover it. Full NAK on this. If this is required by the EFI
-spec someone needs to pull their head from their arse and smell the real
-world.
+-- 
+Matt Fleming, Intel Open Source Technology Center
