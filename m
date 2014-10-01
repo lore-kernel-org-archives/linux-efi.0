@@ -1,111 +1,79 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: [PATCH 2/2] efi: Delete the in_nmi() conditional runtime locking
-Date: Wed,  1 Oct 2014 13:06:40 +0100
-Message-ID: <1412165200-32141-3-git-send-email-matt@console-pimps.org>
+From: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: Provide a non-blocking SetVariable() operation
+Date: Wed, 1 Oct 2014 17:26:24 +0200
+Message-ID: <20141001152624.GB2843@worktop.programming.kicks-ass.net>
 References: <1412165200-32141-1-git-send-email-matt@console-pimps.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1412165200-32141-1-git-send-email-matt@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Peter Zijlstra <peterz@infradead.org>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Matt Fleming <matt.fleming@intel.com>
+ <1412165200-32141-2-git-send-email-matt@console-pimps.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1412165200-32141-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+On Wed, Oct 01, 2014 at 01:06:39PM +0100, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> There are some circumstances that call for trying to write an EFI
+> variable in a non-blocking way. One such scenario is when writing pstore
+> data in efi_pstore_write() via the pstore_dump() kdump callback.
+> 
+> Now that we have an EFI runtime spinlock we need a way of aborting if
+> there is contention instead of spinning, since when writing pstore data
+> from the kdump callback, the runtime lock may already be held by the CPU
+> that's running the callback if we crashed in the middle of an EFI
+> variable operation.
+> 
+> The situation is sufficiently special that a new EFI variable operation
+> is warranted.
+> 
+> Introduce ->set_variable_nonblocking() for this use case. It is an
+> optional EFI backend operation, and need only be implemented by those
+> backends that usually acquire locks to serialize access to EFI
+> variables, as is the case for virt_efi_set_variable() where we now grab
+> the EFI runtime spinlock.
+> 
+> Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  drivers/firmware/efi/runtime-wrappers.c | 19 +++++++++++++
+>  drivers/firmware/efi/vars.c             | 47 +++++++++++++++++++++++++++++++++
+>  include/linux/efi.h                     |  6 +++++
+>  3 files changed, 72 insertions(+)
+> 
+> diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+> index 9694cba665c4..4349206198b2 100644
+> --- a/drivers/firmware/efi/runtime-wrappers.c
+> +++ b/drivers/firmware/efi/runtime-wrappers.c
+> @@ -200,6 +200,24 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
+>  	return status;
+>  }
+>  
+> +static efi_status_t
+> +virt_efi_set_variable_nonblocking(efi_char16_t *name, efi_guid_t *vendor,
+> +				  u32 attr, unsigned long data_size,
+> +				  void *data)
+> +{
+> +	unsigned long flags;
+> +	efi_status_t status;
+> +
+> +	if (!spin_trylock_irqsave(&efi_runtime_lock, flags))
+> +		return EFI_NOT_READY;
+> +
+> +	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
+> +			       data);
+> +	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+> +	return status;
+> +}
 
-commit 5dc3826d9f08 ("efi: Implement mandatory locking for UEFI Runtime
-Services") implemented some conditional locking when accessing variable
-runtime services that Ingo described as "pretty disgusting".
+If you want to have this usable from NMI context, you need to convert
+efi_runtime_lock to a raw_spinlock_t.
 
-The intention with the !efi_in_nmi() checks was to avoid live-locks when
-trying to write pstore crash data into an EFI variable. Such lockless
-accesses are allowed according to the UEFI specification when we're in a
-"non-recoverable" state, but whether or not things are implemented
-correctly in actual firmware implementations remains an unanswered
-question, and so it would seem sensible to avoid doing any kind of
-unsynchronized variable accesses.
-
-Furthermore, the efi_in_nmi() tests are inadequate because they don't
-account for the case where we call EFI variable services from panic or
-oops callbacks and aren't executing in NMI context. In other words,
-live-locking is still possible.
-
-Let's just remove the conditional locking altogether. Now we've got the
-->set_variable_nonblocking() EFI variable operation we can abort if the
-runtime lock is already held. Aborting is by far the safest option.
-
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
----
- arch/x86/include/asm/efi.h              |  2 --
- drivers/firmware/efi/runtime-wrappers.c | 17 ++++-------------
- 2 files changed, 4 insertions(+), 15 deletions(-)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index abba1fe1db5e..408ad6d3222e 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -86,8 +86,6 @@ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
- 
- #endif /* CONFIG_X86_32 */
- 
--#define efi_in_nmi()	in_nmi()
--
- extern struct efi_scratch efi_scratch;
- extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
- extern int __init efi_memblock_x86_reserve_range(void);
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 4349206198b2..228bbf910461 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -86,9 +86,6 @@ static DEFINE_SPINLOCK(efi_runtime_lock);
-  * for QueryVariableInfo() and SetVariable(), as these can be reached in NMI
-  * context through efi_pstore_write().
-  */
--#ifndef efi_in_nmi
--#define efi_in_nmi()	(0)
--#endif
- 
- /*
-  * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
-@@ -189,14 +186,11 @@ static efi_status_t virt_efi_set_variable(efi_char16_t *name,
- {
- 	unsigned long flags;
- 	efi_status_t status;
--	bool __in_nmi = efi_in_nmi();
- 
--	if (!__in_nmi)
--		spin_lock_irqsave(&efi_runtime_lock, flags);
-+	spin_lock_irqsave(&efi_runtime_lock, flags);
- 	status = efi_call_virt(set_variable, name, vendor, attr, data_size,
- 			       data);
--	if (!__in_nmi)
--		spin_unlock_irqrestore(&efi_runtime_lock, flags);
-+	spin_unlock_irqrestore(&efi_runtime_lock, flags);
- 	return status;
- }
- 
-@@ -225,17 +219,14 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
- {
- 	unsigned long flags;
- 	efi_status_t status;
--	bool __in_nmi = efi_in_nmi();
- 
- 	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
- 		return EFI_UNSUPPORTED;
- 
--	if (!__in_nmi)
--		spin_lock_irqsave(&efi_runtime_lock, flags);
-+	spin_lock_irqsave(&efi_runtime_lock, flags);
- 	status = efi_call_virt(query_variable_info, attr, storage_space,
- 			       remaining_space, max_variable_size);
--	if (!__in_nmi)
--		spin_unlock_irqrestore(&efi_runtime_lock, flags);
-+	spin_unlock_irqrestore(&efi_runtime_lock, flags);
- 	return status;
- }
- 
--- 
-1.9.3
+Also, it would probably be a good idea to have some selftest like thing
+that actually calls this from NMI context, right?
