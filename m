@@ -1,38 +1,50 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: Provide a non-blocking SetVariable() operation
-Date: Wed, 1 Oct 2014 17:11:51 +0100
-Message-ID: <20141001161151.GD14343@console-pimps.org>
-References: <1412165200-32141-1-git-send-email-matt@console-pimps.org>
- <1412165200-32141-2-git-send-email-matt@console-pimps.org>
- <20141001152624.GB2843@worktop.programming.kicks-ass.net>
+Subject: Re: [PATCH 7/7] efi_rtc: probe function error out in case no efi
+ runtime enabled
+Date: Fri, 3 Oct 2014 13:11:19 +0100
+Message-ID: <20141003121119.GH14343@console-pimps.org>
+References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
+ <1408007953-15151-1-git-send-email-dyoung@redhat.com>
+ <1411403609.25340.55.camel@deneb.redhat.com>
+ <20140925211855.GS18635@console-pimps.org>
+ <1411681130.25340.101.camel@deneb.redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20141001152624.GB2843-IIpfhp3q70z/8w/KjCw3T+5/BudmfyzbbVWyRVo5IupeoWH0uzbU5w@public.gmane.org>
+In-Reply-To: <1411681130.25340.101.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 01 Oct, at 05:26:24PM, Peter Zijlstra wrote:
+(Argh, this was sat in my outbox for over a week)
+
+On Thu, 25 Sep, at 05:38:50PM, Mark Salter wrote:
+> On Thu, 2014-09-25 at 22:18 +0100, Matt Fleming wrote:
+> > On Mon, 22 Sep, at 12:33:29PM, Mark Salter wrote:
+> > > 
+> > > Is this still needed after commit da167ad7638759:
+> > > 
+> > >   rtc: ia64: allow other architectures to use EFI RTC
+> > 
+> > Umm... we should really look at disabling this for x86, since the EFI
+> > time functions don't work on a bunch of machines I've got here.
+> > 
+> > And it looks like someone enabled this driver and triggered an oops on
+> > their 32-bit EFI tablet,
+> > 
+> >   https://bugzilla.kernel.org/show_bug.cgi?id=84241#c21
 > 
-> If you want to have this usable from NMI context, you need to convert
-> efi_runtime_lock to a raw_spinlock_t.
+> Previously, it depended on IA64. If it's not worth the trouble for
+> x86 then I'd say have it depend on !X86 also. Newer EFI-supporting
+> architectures are unlikely to have the same legacy issues as x86
+> so I don't think it'll end up being an ever growing list.
  
-Hmm.. I note that none of the spinlocks in the pstore code path that we
-execute to get here are raw_spinlock_t. And that's the only code path
-that calls this function.
+Yeah that's what I was thinking. For x86, it's the age old "Windows
+doesn't use it, so it was never validated" issue.
 
-They need to be raw_spinlock_t for -rt?
-
-> Also, it would probably be a good idea to have some selftest like thing
-> that actually calls this from NMI context, right?
-
-Yeah probably, although that'd need to be a core pstore test since
-there's nothing really interesting going on in
-virt_efi_set_variable_nonblocking(), and it would be good to test it out
-in the larger pstore context.
+I'll send an update.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
