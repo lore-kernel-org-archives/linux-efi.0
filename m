@@ -1,62 +1,155 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
-Date: Fri, 03 Oct 2014 11:01:57 -0400
-Message-ID: <1412348517.5410.13.camel@deneb.redhat.com>
-References: <1412339576-17972-1-git-send-email-matt@console-pimps.org>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: [GIT PULL v2] EFI changes for v3.18
+Date: Fri, 3 Oct 2014 22:17:27 +0100
+Message-ID: <20141003211727.GK14343@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412339576-17972-1-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: Peter Zijlstra <peterz@infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 2014-10-03 at 13:32 +0100, Matt Fleming wrote:
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> commit da167ad7638759 ("rtc: ia64: allow other architectures to use EFI
-> RTC") inadvertently introduced a regression for x86. We've been careful
-> not to enable the EFI rtc driver for x86 due to the generally buggy
-> implementations of the time-related EFI runtime services.
-> 
-> Previous attempts have been made to us the time EFI services, but all
-> have eventually been reverted due to crashes inside the firmware code.
-> 
-> In fact, since the above commit was merged we've seen reports of crashes
-> on 32-bit tablets,
-> 
->   https://bugzilla.kernel.org/show_bug.cgi?id=84241#c21
-> 
-> Disable it explicitly for x86 so that we don't give users false hope
-> that this driver will work - it won't, and your machine is likely to
-> crash.
-> 
-> Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
+=46olks,
 
-Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+This is a respin of the previous pull request for v3.18 EFI material
+without the in_nmi() conditional locking in the EFI runtime lock patch.
 
-> 
-> Unless anyone objects, I'm happy to take this through the EFI tree.
-> 
->  drivers/rtc/Kconfig | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
-> index a168e96142b9..54ef393b0def 100644
-> --- a/drivers/rtc/Kconfig
-> +++ b/drivers/rtc/Kconfig
-> @@ -806,7 +806,7 @@ config RTC_DRV_DA9063
->  
->  config RTC_DRV_EFI
->  	tristate "EFI RTC"
-> -	depends on EFI
-> +	depends on EFI && !X86
->  	help
->  	  If you say yes here you will get support for the EFI
->  	  Real Time Clock.
+In addition, I picked up a trivial patch to the rtc-efi driver from Ard
+because no one else has responded to it in ~3 weeks, and included a
+regression fix for the rtc-efi driver (tagged for stable) since we've
+basically run out of -rcs now and it definitely isn't urgent enough to
+postpone the merge window.
+
+As before, merging this tag into Linus' tree causes some conflicts,
+which I've fixed up and pushed out as the efi-next-merge branch, in cas=
+e
+you or Linus want to take a look at it. The conflicts are fairly
+straight forward to resolve.
+
+The following changes since commit 7d1311b93e58ed55f3a31cc8f94c4b8fe988=
+a2b9:
+
+  Linux 3.17-rc1 (2014-08-16 10:40:26 -0600)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/e=
+fi-next
+
+for you to fetch changes up to 7efe665903d0d963b0ebf4cab25cc3ae32c62600=
+:
+
+  rtc: Disable EFI rtc for x86 (2014-10-03 21:24:17 +0100)
+
+----------------------------------------------------------------
+ * Implement new EFI runtime lock which is required by the UEFI
+   specification - Ard Biesheuvel
+
+ * Add new efi=3D x86 EFI boot stub parameter which mimics the way that
+   the regular kernel parameter works - Matt Fleming
+
+ * Improve error handling in efi-bgrt driver - Josh Triplett
+
+ * Extend the "noefi" kernel parameter to arm64, add an efi=3Dnoruntime
+   synonym - Dave Young
+
+ * Beautify the EFI memory map logs - Laszlo Ersek
+
+ * Fix compiler shadow warnings and improve variable names - Mark Rusta=
+d
+
+ * Remove unused efi_call() macros, update comments, tag initialization
+   functions with __init - Mathias Krause
+
+ * Add more informative efi_printk()s to the x86 EFI boot stub at the
+   firmware call-sites - Andre M=FCller
+
+ * Drop the in_nmi() checks from the EFI runtime locking code and
+   instead provide a new EFI variable operation to be used when we're i=
+n
+   a context that must not block - Matt Fleming
+
+ * Export a module alias for the rtc-efi driver for automatic loading b=
+y
+   udev - Ard Biesheuvel
+
+ * Disable building the rtc-efi driver for x86 since the time-related
+   EFI runtime services are notoriously crappy, and usually result in
+   crashes - Matt Fleming
+
+----------------------------------------------------------------
+Andre M=FCller (1):
+      x86/efi: Adding efi_printks on memory allocationa and pci.reads
+
+Ard Biesheuvel (2):
+      efi: Implement mandatory locking for UEFI Runtime Services
+      efi: rtc-efi: Export platform:rtc-efi as module alias
+
+Dave Young (6):
+      efi: Move noefi early param code out of x86 arch code
+      lib: Add a generic cmdline parse function parse_option_str
+      efi: Add kernel param efi=3Dnoruntime
+      arm64/efi: uefi_init error handling fix
+      arm64/efi: Do not enter virtual mode if booting with efi=3Dnorunt=
+ime or noefi
+      x86/efi: Clear EFI_RUNTIME_SERVICES if failing to enter virtual m=
+ode
+
+Josh Triplett (1):
+      efi-bgrt: Add error handling; inform the user when ignoring the B=
+GRT
+
+Laszlo Ersek (5):
+      efi: Add macro for EFI_MEMORY_UCE memory attribute
+      efi: Introduce efi_md_typeattr_format()
+      x86: efi: Format EFI memory type & attrs with efi_md_typeattr_for=
+mat()
+      ia64: efi: Format EFI memory type & attrs with efi_md_typeattr_fo=
+rmat()
+      arm64: efi: Format EFI memory type & attrs with efi_md_typeattr_f=
+ormat()
+
+Mark Rustad (1):
+      efi: Resolve some shadow warnings
+
+Mathias Krause (4):
+      x86/efi: Remove unused efi_call* macros
+      x86/efi: Unexport add_efi_memmap variable
+      x86/efi: Update comment regarding required phys mapped EFI servic=
+es
+      x86/efi: Mark initialization code as such
+
+Matt Fleming (4):
+      efi: Add efi=3D parameter parsing to the EFI boot stub
+      efi: Provide a non-blocking SetVariable() operation
+      efi: Delete the in_nmi() conditional runtime locking
+      rtc: Disable EFI rtc for x86
+
+ Documentation/kernel-parameters.txt            |   8 +-
+ arch/arm64/kernel/efi.c                        |  44 +++----
+ arch/ia64/kernel/efi.c                         |   6 +-
+ arch/x86/boot/compressed/eboot.c               |  32 +++--
+ arch/x86/include/asm/efi.h                     |  31 ++---
+ arch/x86/platform/efi/efi-bgrt.c               |  36 +++++-
+ arch/x86/platform/efi/efi.c                    |  52 ++++----
+ arch/x86/platform/efi/efi_32.c                 |  12 +-
+ arch/x86/platform/efi/efi_64.c                 |   6 +-
+ arch/x86/platform/efi/efi_stub_32.S            |   4 +-
+ drivers/firmware/efi/efi.c                     |  79 ++++++++++++
+ drivers/firmware/efi/libstub/arm-stub.c        |   4 +
+ drivers/firmware/efi/libstub/efi-stub-helper.c |  62 +++++++++-
+ drivers/firmware/efi/runtime-wrappers.c        | 164 +++++++++++++++++=
+++++++--
+ drivers/firmware/efi/vars.c                    |  61 +++++++--
+ drivers/rtc/Kconfig                            |   2 +-
+ drivers/rtc/rtc-efi.c                          |   1 +
+ include/linux/efi.h                            |  17 +++
+ include/linux/kernel.h                         |   1 +
+ lib/cmdline.c                                  |  29 +++++
+ 20 files changed, 528 insertions(+), 123 deletions(-)
+
+--=20
+Matt Fleming, Intel Open Source Technology Center
