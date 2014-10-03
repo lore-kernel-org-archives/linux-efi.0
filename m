@@ -1,50 +1,55 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 7/7] efi_rtc: probe function error out in case no efi
- runtime enabled
-Date: Fri, 3 Oct 2014 13:11:19 +0100
-Message-ID: <20141003121119.GH14343@console-pimps.org>
-References: <1408007731-15081-1-git-send-email-dyoung@redhat.com>
- <1408007953-15151-1-git-send-email-dyoung@redhat.com>
- <1411403609.25340.55.camel@deneb.redhat.com>
- <20140925211855.GS18635@console-pimps.org>
- <1411681130.25340.101.camel@deneb.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] rtc: Disable EFI rtc for x86
+Date: Fri,  3 Oct 2014 13:32:56 +0100
+Message-ID: <1412339576-17972-1-git-send-email-matt@console-pimps.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1411681130.25340.101.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Randy Dunlap <rdunlap-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+To: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-(Argh, this was sat in my outbox for over a week)
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-On Thu, 25 Sep, at 05:38:50PM, Mark Salter wrote:
-> On Thu, 2014-09-25 at 22:18 +0100, Matt Fleming wrote:
-> > On Mon, 22 Sep, at 12:33:29PM, Mark Salter wrote:
-> > > 
-> > > Is this still needed after commit da167ad7638759:
-> > > 
-> > >   rtc: ia64: allow other architectures to use EFI RTC
-> > 
-> > Umm... we should really look at disabling this for x86, since the EFI
-> > time functions don't work on a bunch of machines I've got here.
-> > 
-> > And it looks like someone enabled this driver and triggered an oops on
-> > their 32-bit EFI tablet,
-> > 
-> >   https://bugzilla.kernel.org/show_bug.cgi?id=84241#c21
-> 
-> Previously, it depended on IA64. If it's not worth the trouble for
-> x86 then I'd say have it depend on !X86 also. Newer EFI-supporting
-> architectures are unlikely to have the same legacy issues as x86
-> so I don't think it'll end up being an ever growing list.
+commit da167ad7638759 ("rtc: ia64: allow other architectures to use EFI
+RTC") inadvertently introduced a regression for x86. We've been careful
+not to enable the EFI rtc driver for x86 due to the generally buggy
+implementations of the time-related EFI runtime services.
+
+Previous attempts have been made to us the time EFI services, but all
+have eventually been reverted due to crashes inside the firmware code.
+
+In fact, since the above commit was merged we've seen reports of crashes
+on 32-bit tablets,
+
+  https://bugzilla.kernel.org/show_bug.cgi?id=84241#c21
+
+Disable it explicitly for x86 so that we don't give users false hope
+that this driver will work - it won't, and your machine is likely to
+crash.
+
+Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+
+Unless anyone objects, I'm happy to take this through the EFI tree.
+
+ drivers/rtc/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
+index a168e96142b9..54ef393b0def 100644
+--- a/drivers/rtc/Kconfig
++++ b/drivers/rtc/Kconfig
+@@ -806,7 +806,7 @@ config RTC_DRV_DA9063
  
-Yeah that's what I was thinking. For x86, it's the age old "Windows
-doesn't use it, so it was never validated" issue.
-
-I'll send an update.
-
+ config RTC_DRV_EFI
+ 	tristate "EFI RTC"
+-	depends on EFI
++	depends on EFI && !X86
+ 	help
+ 	  If you say yes here you will get support for the EFI
+ 	  Real Time Clock.
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.9.3
