@@ -1,76 +1,159 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for v3.18
-Date: Mon, 6 Oct 2014 11:26:01 +0200
-Message-ID: <CAKv+Gu8V=g59c3ef_M_OZDR7G5TA=Vd79qi7Lvb4zpx1jUSbYg@mail.gmail.com>
-References: <20140928202702.GB18635@console-pimps.org>
-	<20140929124321.GB18825@gmail.com>
-	<20140929140516.GL5430@worktop>
-	<20140929150009.GA9102@console-pimps.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [RFT PATCH] efi/x86: move x86 back to libstub
+Date: Mon,  6 Oct 2014 13:06:43 +0200
+Message-ID: <1412593603-6945-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20140929150009.GA9102-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 September 2014 17:00, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Mon, 29 Sep, at 04:05:16PM, Peter Zijlstra wrote:
->>
->> OMFG what a trainwreck... if they are reentrant like that, a lock isn't
->> going to help you in any way. The implementation of these calls must be
->> lockfree otherwise they cannot possibly be correct.
->
-> The only way these services are going to be called is if we (the OS)
-> invoke them. These NMI shenanigans we're playing in the locking
-> functions are actually for our benefit, not the firmware's.
->
+This reverts commit 84be880560fb, which itself reverted my original
+attempt to move x86 from #include'ing .c files from across the tree
+to using the EFI stub built as a static library.
 
-The thing to understand here is that these Runtime Services are never
-supposed to be *reentrant*, even under NMI. The special case for NMI,
-machine check etc allows the OS to issue a concurrent Runtime Services
-call that /preempts/ the call that is already in progress. The spec
-explicitly mentions that the preempted function call is entirely
-expected to fail.
+The issue that affected the original approach was that splitting
+the implementation into several .o files resulted in the variable
+'efi_early' becoming a global with external linkage, which under
+-fPIC implies that references to it must go through the GOT. However,
+dealing with this additional GOT entry turned out to be troublesome
+on some EFI implementations. (GCC's visibility=hidden attribute is
+supposed to lift this requirement, but it turned out not to work on
+the 32-bit build.)
 
-This is exactly why the spec is so specific on which calls can be
-issued concurrently: it puts the burden of exclusive access on the OS,
-and the implementation can abort/fail a call in progress if another
-one comes in concurrently.
+Instead, use a pure getter function to get a reference to efi_early.
+This approach results in no additional GOT entries being generated,
+so there is no need for any changes in the early GOT handling.
 
-This does imply that even the NMI case should take the lock if it is
-free, which makes my implementation incorrect.
+Cc: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
 
-Note that I am by no means suggesting that relying on any of this
-having been implemented correctly in most firmwares is a good idea.
+Gents,
 
->> Conditional locking like above is just plain broken, disgusting doesn't
->> even begin to cover it. Full NAK on this. If this is required by the EFI
->> spec someone needs to pull their head from their arse and smell the real
->> world.
->
-> The conditional locking isn't intended to conform to the spec, it's
-> intended to write a pstore object to the EFI variable NVRAM with our
-> last dying breath, even if someone was in the middle of a SetVariable()
-> call. All the spec says is that, if we're in a non-recoverable state,
-> it's OK to do that. Whether that'll be implemented correctly across a
-> range of firmware implementations is another matter.
->
-> In fact, maybe we shouldn't support that lockless access at all. I've no
-> huge problem changing the code in efi_pstore_write() to bail if we can't
-> grab the lock, so that we can be serialized all of the time.
->
-> That would certainly make the runtime lock code much simpler.
->
+This is a request for testing: I would like to find out if this patch
+fixes Maarten's issue without breaking anything like it did for Josh
+and Linus the first time around.
 
-I think there is value in the ability to issue those calls under
-MCHECK to record fault metadata, and obviously, the authors of the
-spec did as well. However, the question is indeed how robust existing
-firmware implementations are under this kind of behavior, so I agree
-it is better to make the exclusive access unconditional. Note that
-these exception are specific to Intel architectures, for arm64 the
-locking was unconditional already.
 
+ arch/x86/boot/compressed/Makefile |  3 ++-
+ arch/x86/boot/compressed/eboot.c  |  8 ++++----
+ arch/x86/boot/compressed/eboot.h  | 16 ----------------
+ arch/x86/include/asm/efi.h        | 24 ++++++++++++++++++++++++
+ drivers/firmware/efi/Makefile     |  2 +-
+ 5 files changed, 31 insertions(+), 22 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 0fcd9133790c..7a801a310e37 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -33,7 +33,8 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
+ $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
+ 
+ ifeq ($(CONFIG_EFI_STUB), y)
+-	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
++	VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
++				$(objtree)/drivers/firmware/efi/libstub/lib.a
+ endif
+ 
+ $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index de8eebd6f67c..58ea406f5d60 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -21,8 +21,10 @@ static efi_system_table_t *sys_table;
+ 
+ static struct efi_config *efi_early;
+ 
+-#define efi_call_early(f, ...)						\
+-	efi_early->call(efi_early->f, __VA_ARGS__);
++__pure const struct efi_config *__efi_early(void)
++{
++	return efi_early;
++}
+ 
+ #define BOOT_SERVICES(bits)						\
+ static void setup_boot_services##bits(struct efi_config *c)		\
+@@ -285,8 +287,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+ 	}
+ }
+ 
+-#include "../../../../drivers/firmware/efi/libstub/efi-stub-helper.c"
+-
+ static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+ {
+ 	u8 first, len;
+diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+index c88c31ecad12..d487e727f1ec 100644
+--- a/arch/x86/boot/compressed/eboot.h
++++ b/arch/x86/boot/compressed/eboot.h
+@@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
+ 	void *blt;
+ };
+ 
+-struct efi_config {
+-	u64 image_handle;
+-	u64 table;
+-	u64 allocate_pool;
+-	u64 allocate_pages;
+-	u64 get_memory_map;
+-	u64 free_pool;
+-	u64 free_pages;
+-	u64 locate_handle;
+-	u64 handle_protocol;
+-	u64 exit_boot_services;
+-	u64 text_output;
+-	efi_status_t (*call)(unsigned long, ...);
+-	bool is64;
+-} __packed;
+-
+ #endif /* BOOT_COMPRESSED_EBOOT_H */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 0ec241ede5a2..b2c854a0f5ca 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -159,6 +159,30 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+ }
+ #endif /* CONFIG_EFI_MIXED */
+ 
++
++/* arch specific definitions used by the stub code */
++
++struct efi_config {
++	u64 image_handle;
++	u64 table;
++	u64 allocate_pool;
++	u64 allocate_pages;
++	u64 get_memory_map;
++	u64 free_pool;
++	u64 free_pages;
++	u64 locate_handle;
++	u64 handle_protocol;
++	u64 exit_boot_services;
++	u64 text_output;
++	efi_status_t (*call)(unsigned long, ...);
++	bool is64;
++} __packed;
++
++__pure const struct efi_config *__efi_early(void);
++
++#define efi_call_early(f, ...)						\
++	__efi_early()->call(__efi_early()->f, __VA_ARGS__);
++
+ extern bool efi_reboot_required(void);
+ 
+ #else
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index aef6a95adef5..d8be608a9f3b 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -7,4 +7,4 @@ obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+ obj-$(CONFIG_UEFI_CPER)			+= cper.o
+ obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
+ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
+-obj-$(CONFIG_EFI_ARM_STUB)		+= libstub/
++obj-$(CONFIG_EFI_STUB)			+= libstub/
 -- 
-Ard.
+1.9.1
