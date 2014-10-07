@@ -1,54 +1,117 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH 35/44] m68k: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:37 -0700
-Message-ID: <1412659726-29957-36-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: [PATCH 19/44] ipmi: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:21 -0700
+Message-ID: <1412659726-29957-20-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Geert
+Return-path: <linux-m68k-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+Sender: linux-m68k-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Corey
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
-directly.
+directly. Register with a high priority value of 192 to reflect that
+the original code overwrites pm_power_off unconditionally.
 
-Cc: Geert Uytterhoeven <geert-Td1EMuHUCqxL1ZNQvxDV9g@public.gmane.org>
-Cc: Joshua Thompson <funaho-E7XWuSn13XjYtjvyW6yDsg@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Register poweroff handler after the ipmi system is ready, and unregister
+it prior to cleanup. This avoids having to check for the ready variable
+in the poweroff callback.
+
+Cc: Corey Minyard <minyard@acm.org>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- arch/m68k/emu/natfeat.c | 2 +-
- arch/m68k/mac/config.c  | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/char/ipmi/ipmi_poweroff.c | 30 +++++++++++++++++++-----------
+ 1 file changed, 19 insertions(+), 11 deletions(-)
 
-diff --git a/arch/m68k/emu/natfeat.c b/arch/m68k/emu/natfeat.c
-index 91e2ae7..c4d5bd8 100644
---- a/arch/m68k/emu/natfeat.c
-+++ b/arch/m68k/emu/natfeat.c
-@@ -91,5 +91,5 @@ void __init nf_init(void)
- 	pr_info("NatFeats found (%s, %lu.%lu)\n", buf, version >> 16,
- 		version & 0xffff);
+diff --git a/drivers/char/ipmi/ipmi_poweroff.c b/drivers/char/ipmi/ipmi_poweroff.c
+index 9f2e3be..a942a41 100644
+--- a/drivers/char/ipmi/ipmi_poweroff.c
++++ b/drivers/char/ipmi/ipmi_poweroff.c
+@@ -36,6 +36,7 @@
+ #include <linux/proc_fs.h>
+ #include <linux/string.h>
+ #include <linux/completion.h>
++#include <linux/notifier.h>
+ #include <linux/pm.h>
+ #include <linux/kdev_t.h>
+ #include <linux/ipmi.h>
+@@ -63,9 +64,6 @@ static ipmi_user_t ipmi_user;
+ static int ipmi_ifnum;
+ static void (*specific_poweroff_func)(ipmi_user_t user);
  
--	pm_power_off = nf_poweroff;
-+	register_poweroff_handler_simple(nf_poweroff, 128);
+-/* Holds the old poweroff function so we can restore it on removal. */
+-static void (*old_poweroff_func)(void);
+-
+ static int set_param_ifnum(const char *val, struct kernel_param *kp)
+ {
+ 	int rv = param_set_int(val, kp);
+@@ -544,15 +542,20 @@ static struct poweroff_function poweroff_functions[] = {
+ 
+ 
+ /* Called on a powerdown request. */
+-static void ipmi_poweroff_function(void)
++static int ipmi_poweroff_function(struct notifier_block *this,
++				  unsigned long unused1, void *unused2)
+ {
+-	if (!ready)
+-		return;
+-
+ 	/* Use run-to-completion mode, since interrupts may be off. */
+ 	specific_poweroff_func(ipmi_user);
++
++	return NOTIFY_DONE;
  }
-diff --git a/arch/m68k/mac/config.c b/arch/m68k/mac/config.c
-index 677913ff..5d8e2e6 100644
---- a/arch/m68k/mac/config.c
-+++ b/arch/m68k/mac/config.c
-@@ -160,7 +160,7 @@ void __init config_mac(void)
- 	mach_set_clock_mmss = mac_set_clock_mmss;
- 	mach_reset = mac_reset;
- 	mach_halt = mac_poweroff;
--	pm_power_off = mac_poweroff;
-+	register_poweroff_handler_simple(mac_poweroff, 128);
- 	mach_max_dma_address = 0xffffffff;
- #if defined(CONFIG_INPUT_M68K_BEEP) || defined(CONFIG_INPUT_M68K_BEEP_MODULE)
- 	mach_beep = mac_mksound;
+ 
++static struct notifier_block ipmi_poweroff_nb = {
++	.notifier_call = ipmi_poweroff_function,
++	.priority = 192,
++};
++
+ /* Wait for an IPMI interface to be installed, the first one installed
+    will be grabbed by this code and used to perform the powerdown. */
+ static void ipmi_po_new_smi(int if_num, struct device *device)
+@@ -631,9 +634,12 @@ static void ipmi_po_new_smi(int if_num, struct device *device)
+ 	printk(KERN_INFO PFX "Found a %s style poweroff function\n",
+ 	       poweroff_functions[i].platform_type);
+ 	specific_poweroff_func = poweroff_functions[i].poweroff_func;
+-	old_poweroff_func = pm_power_off;
+-	pm_power_off = ipmi_poweroff_function;
++
+ 	ready = 1;
++
++	rv = register_poweroff_handler(&ipmi_poweroff_nb);
++	if (rv)
++		pr_err(PFX "failed to register poweroff handler\n");
+ }
+ 
+ static void ipmi_po_smi_gone(int if_num)
+@@ -644,9 +650,10 @@ static void ipmi_po_smi_gone(int if_num)
+ 	if (ipmi_ifnum != if_num)
+ 		return;
+ 
++	unregister_poweroff_handler(&ipmi_poweroff_nb);
++
+ 	ready = 0;
+ 	ipmi_destroy_user(ipmi_user);
+-	pm_power_off = old_poweroff_func;
+ }
+ 
+ static struct ipmi_smi_watcher smi_watcher = {
+@@ -732,12 +739,13 @@ static void __exit ipmi_poweroff_cleanup(void)
+ 
+ 	ipmi_smi_watcher_unregister(&smi_watcher);
+ 
++	unregister_poweroff_handler(&ipmi_poweroff_nb);
++
+ 	if (ready) {
+ 		rv = ipmi_destroy_user(ipmi_user);
+ 		if (rv)
+ 			printk(KERN_ERR PFX "could not cleanup the IPMI"
+ 			       " user: 0x%x\n", rv);
+-		pm_power_off = old_poweroff_func;
+ 	}
+ }
+ module_exit(ipmi_poweroff_cleanup);
 -- 
 1.9.1
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-metag" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
