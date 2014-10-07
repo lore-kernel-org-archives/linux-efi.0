@@ -1,117 +1,105 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 19/44] ipmi: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:21 -0700
-Message-ID: <1412659726-29957-20-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 37/44] sh: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:39 -0700
+Message-ID: <1412659726-29957-38-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
 Return-path: <linux-m68k-owner@vger.kernel.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
 Sender: linux-m68k-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Corey
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
-directly. Register with a high priority value of 192 to reflect that
-the original code overwrites pm_power_off unconditionally.
+directly.
 
-Register poweroff handler after the ipmi system is ready, and unregister
-it prior to cleanup. This avoids having to check for the ready variable
-in the poweroff callback.
-
-Cc: Corey Minyard <minyard@acm.org>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- drivers/char/ipmi/ipmi_poweroff.c | 30 +++++++++++++++++++-----------
- 1 file changed, 19 insertions(+), 11 deletions(-)
+ arch/sh/boards/board-sh7785lcr.c       | 2 +-
+ arch/sh/boards/board-urquell.c         | 2 +-
+ arch/sh/boards/mach-highlander/setup.c | 2 +-
+ arch/sh/boards/mach-landisk/setup.c    | 2 +-
+ arch/sh/boards/mach-r2d/setup.c        | 2 +-
+ arch/sh/boards/mach-sdk7786/setup.c    | 2 +-
+ 6 files changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/char/ipmi/ipmi_poweroff.c b/drivers/char/ipmi/ipmi_poweroff.c
-index 9f2e3be..a942a41 100644
---- a/drivers/char/ipmi/ipmi_poweroff.c
-+++ b/drivers/char/ipmi/ipmi_poweroff.c
-@@ -36,6 +36,7 @@
- #include <linux/proc_fs.h>
- #include <linux/string.h>
- #include <linux/completion.h>
-+#include <linux/notifier.h>
- #include <linux/pm.h>
- #include <linux/kdev_t.h>
- #include <linux/ipmi.h>
-@@ -63,9 +64,6 @@ static ipmi_user_t ipmi_user;
- static int ipmi_ifnum;
- static void (*specific_poweroff_func)(ipmi_user_t user);
+diff --git a/arch/sh/boards/board-sh7785lcr.c b/arch/sh/boards/board-sh7785lcr.c
+index 2c4771e..c092402 100644
+--- a/arch/sh/boards/board-sh7785lcr.c
++++ b/arch/sh/boards/board-sh7785lcr.c
+@@ -332,7 +332,7 @@ static void __init sh7785lcr_setup(char **cmdline_p)
  
--/* Holds the old poweroff function so we can restore it on removal. */
--static void (*old_poweroff_func)(void);
--
- static int set_param_ifnum(const char *val, struct kernel_param *kp)
+ 	printk(KERN_INFO "Renesas Technology Corp. R0P7785LC0011RL support.\n");
+ 
+-	pm_power_off = sh7785lcr_power_off;
++	register_poweroff_handler_simple(sh7785lcr_power_off, 128);
+ 
+ 	/* sm501 DRAM configuration */
+ 	sm501_reg = ioremap_nocache(SM107_REG_ADDR, SM501_DRAM_CONTROL);
+diff --git a/arch/sh/boards/board-urquell.c b/arch/sh/boards/board-urquell.c
+index b52abcc..b3fa56f 100644
+--- a/arch/sh/boards/board-urquell.c
++++ b/arch/sh/boards/board-urquell.c
+@@ -204,7 +204,7 @@ static void __init urquell_setup(char **cmdline_p)
  {
- 	int rv = param_set_int(val, kp);
-@@ -544,15 +542,20 @@ static struct poweroff_function poweroff_functions[] = {
+ 	printk(KERN_INFO "Renesas Technology Corp. Urquell support.\n");
  
+-	pm_power_off = urquell_power_off;
++	register_poweroff_handler_simple(urquell_power_off, 128);
  
- /* Called on a powerdown request. */
--static void ipmi_poweroff_function(void)
-+static int ipmi_poweroff_function(struct notifier_block *this,
-+				  unsigned long unused1, void *unused2)
- {
--	if (!ready)
--		return;
--
- 	/* Use run-to-completion mode, since interrupts may be off. */
- 	specific_poweroff_func(ipmi_user);
-+
-+	return NOTIFY_DONE;
+ 	register_smp_ops(&shx3_smp_ops);
+ }
+diff --git a/arch/sh/boards/mach-highlander/setup.c b/arch/sh/boards/mach-highlander/setup.c
+index 4a52590..998f1a5 100644
+--- a/arch/sh/boards/mach-highlander/setup.c
++++ b/arch/sh/boards/mach-highlander/setup.c
+@@ -385,7 +385,7 @@ static void __init highlander_setup(char **cmdline_p)
+ 
+ 	__raw_writew(__raw_readw(PA_IVDRCTL) | 0x01, PA_IVDRCTL);	/* Si13112 */
+ 
+-	pm_power_off = r7780rp_power_off;
++	register_poweroff_handler_simple(r7780rp_power_off, 128);
  }
  
-+static struct notifier_block ipmi_poweroff_nb = {
-+	.notifier_call = ipmi_poweroff_function,
-+	.priority = 192,
-+};
-+
- /* Wait for an IPMI interface to be installed, the first one installed
-    will be grabbed by this code and used to perform the powerdown. */
- static void ipmi_po_new_smi(int if_num, struct device *device)
-@@ -631,9 +634,12 @@ static void ipmi_po_new_smi(int if_num, struct device *device)
- 	printk(KERN_INFO PFX "Found a %s style poweroff function\n",
- 	       poweroff_functions[i].platform_type);
- 	specific_poweroff_func = poweroff_functions[i].poweroff_func;
--	old_poweroff_func = pm_power_off;
--	pm_power_off = ipmi_poweroff_function;
-+
- 	ready = 1;
-+
-+	rv = register_poweroff_handler(&ipmi_poweroff_nb);
-+	if (rv)
-+		pr_err(PFX "failed to register poweroff handler\n");
+ static unsigned char irl2irq[HL_NR_IRL];
+diff --git a/arch/sh/boards/mach-landisk/setup.c b/arch/sh/boards/mach-landisk/setup.c
+index f1147ca..c817d80 100644
+--- a/arch/sh/boards/mach-landisk/setup.c
++++ b/arch/sh/boards/mach-landisk/setup.c
+@@ -89,7 +89,7 @@ static void __init landisk_setup(char **cmdline_p)
+ 	__raw_writeb(__raw_readb(PA_LED) | 0x03, PA_LED);
+ 
+ 	printk(KERN_INFO "I-O DATA DEVICE, INC. \"LANDISK Series\" support.\n");
+-	pm_power_off = landisk_power_off;
++	register_poweroff_handler_simple(landisk_power_off, 128);
  }
  
- static void ipmi_po_smi_gone(int if_num)
-@@ -644,9 +650,10 @@ static void ipmi_po_smi_gone(int if_num)
- 	if (ipmi_ifnum != if_num)
- 		return;
+ /*
+diff --git a/arch/sh/boards/mach-r2d/setup.c b/arch/sh/boards/mach-r2d/setup.c
+index 4b98a52..a759d39 100644
+--- a/arch/sh/boards/mach-r2d/setup.c
++++ b/arch/sh/boards/mach-r2d/setup.c
+@@ -279,7 +279,7 @@ static void __init rts7751r2d_setup(char **cmdline_p)
+ 					(ver >> 4) & 0xf, ver & 0xf);
  
-+	unregister_poweroff_handler(&ipmi_poweroff_nb);
-+
- 	ready = 0;
- 	ipmi_destroy_user(ipmi_user);
--	pm_power_off = old_poweroff_func;
+ 	__raw_writew(0x0000, PA_OUTPORT);
+-	pm_power_off = rts7751r2d_power_off;
++	register_poweroff_handler_simple(rts7751r2d_power_off, 128);
+ 
+ 	/* sm501 dram configuration:
+ 	 * ColSizeX = 11 - External Memory Column Size: 256 words.
+diff --git a/arch/sh/boards/mach-sdk7786/setup.c b/arch/sh/boards/mach-sdk7786/setup.c
+index c29268b..cb26336 100644
+--- a/arch/sh/boards/mach-sdk7786/setup.c
++++ b/arch/sh/boards/mach-sdk7786/setup.c
+@@ -252,7 +252,7 @@ static void __init sdk7786_setup(char **cmdline_p)
+ 	pr_info("\tPCB revision:\t%d\n", fpga_read_reg(PCBRR) & 0xf);
+ 
+ 	machine_ops.restart = sdk7786_restart;
+-	pm_power_off = sdk7786_power_off;
++	register_poweroff_handler_simple(sdk7786_power_off, 128);
+ 
+ 	register_smp_ops(&shx3_smp_ops);
  }
- 
- static struct ipmi_smi_watcher smi_watcher = {
-@@ -732,12 +739,13 @@ static void __exit ipmi_poweroff_cleanup(void)
- 
- 	ipmi_smi_watcher_unregister(&smi_watcher);
- 
-+	unregister_poweroff_handler(&ipmi_poweroff_nb);
-+
- 	if (ready) {
- 		rv = ipmi_destroy_user(ipmi_user);
- 		if (rv)
- 			printk(KERN_ERR PFX "could not cleanup the IPMI"
- 			       " user: 0x%x\n", rv);
--		pm_power_off = old_poweroff_func;
- 	}
- }
- module_exit(ipmi_poweroff_cleanup);
 -- 
 1.9.1
