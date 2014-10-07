@@ -1,99 +1,74 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 23/44] power/reset: qnap-poweroff: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:25 -0700
-Message-ID: <1412659726-29957-24-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: [PATCH 42/44] efi: Register poweroff handler with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:44 -0700
+Message-ID: <1412659726-29957-43-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-m68k-owner@vger.kernel.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-m68k-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Sebastian
+Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Matt
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
-directly. Register with default priority value of 128 to reflect that
-the original code generates an error if another poweroff handler has
-already been registered when the driver is loaded.
+directly. Register with low priority value of 64 since the efi code
+states that this is a poweroff handler of last resort.
 
-Cc: Sebastian Reichel <sre@kernel.org>
-Cc: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>
-Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 ---
- drivers/power/reset/qnap-poweroff.c | 28 ++++++++++++++--------------
- 1 file changed, 14 insertions(+), 14 deletions(-)
+ drivers/firmware/efi/reboot.c | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
-diff --git a/drivers/power/reset/qnap-poweroff.c b/drivers/power/reset/qnap-poweroff.c
-index a75db7f..c474980 100644
---- a/drivers/power/reset/qnap-poweroff.c
-+++ b/drivers/power/reset/qnap-poweroff.c
-@@ -16,7 +16,9 @@
- 
- #include <linux/kernel.h>
- #include <linux/module.h>
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+index 9c59d1c..c082439 100644
+--- a/drivers/firmware/efi/reboot.c
++++ b/drivers/firmware/efi/reboot.c
+@@ -3,6 +3,8 @@
+  * Copyright (c) 2014 Red Hat, Inc., Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+  */
+ #include <linux/efi.h>
 +#include <linux/notifier.h>
- #include <linux/platform_device.h>
 +#include <linux/pm.h>
- #include <linux/serial_reg.h>
- #include <linux/kallsyms.h>
- #include <linux/of.h>
-@@ -55,7 +57,8 @@ static void __iomem *base;
- static unsigned long tclk;
- static const struct power_off_cfg *cfg;
+ #include <linux/reboot.h>
  
--static void qnap_power_off(void)
-+static int qnap_power_off(struct notifier_block *this, unsigned long unused1,
-+			  void *unused2)
+ int efi_reboot_quirk_mode = -1;
+@@ -38,19 +40,32 @@ bool __weak efi_poweroff_required(void)
+ 	return false;
+ }
+ 
+-static void efi_power_off(void)
++static int efi_power_off(struct notifier_block *this,
++			 unsigned long unused1, void *unused2)
  {
- 	const unsigned divisor = ((tclk + (8 * cfg->baud)) / (16 * cfg->baud));
- 
-@@ -72,14 +75,20 @@ static void qnap_power_off(void)
- 
- 	/* send the power-off command to PIC */
- 	writel(cfg->cmd, UART1_REG(TX));
+ 	efi.reset_system(EFI_RESET_SHUTDOWN, EFI_SUCCESS, 0, NULL);
 +
 +	return NOTIFY_DONE;
  }
  
-+static struct notifier_block qnap_poweroff_nb = {
-+	.notifier_call = qnap_power_off,
-+	.priority = 128,
++static struct notifier_block efi_poweroff_nb = {
++	.notifier_call = efi_power_off,
++	.priority = 64,
 +};
 +
- static int qnap_power_off_probe(struct platform_device *pdev)
+ static int __init efi_shutdown_init(void)
  {
- 	struct device_node *np = pdev->dev.of_node;
- 	struct resource *res;
- 	struct clk *clk;
--	char symname[KSYM_NAME_LEN];
- 
- 	const struct of_device_id *match =
- 		of_match_node(qnap_power_off_of_match_table, np);
-@@ -106,22 +115,13 @@ static int qnap_power_off_probe(struct platform_device *pdev)
- 
- 	tclk = clk_get_rate(clk);
- 
--	/* Check that nothing else has already setup a handler */
--	if (pm_power_off) {
--		lookup_symbol_name((ulong)pm_power_off, symname);
--		dev_err(&pdev->dev,
--			"pm_power_off already claimed %p %s",
--			pm_power_off, symname);
--		return -EBUSY;
--	}
--	pm_power_off = qnap_power_off;
--
--	return 0;
-+	return register_poweroff_handler(&qnap_poweroff_nb);
- }
- 
- static int qnap_power_off_remove(struct platform_device *pdev)
- {
--	pm_power_off = NULL;
-+	unregister_poweroff_handler(&qnap_poweroff_nb);
++	int ret = 0;
 +
- 	return 0;
- }
+ 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
+ 		return -ENODEV;
  
+-	if (efi_poweroff_required())
+-		pm_power_off = efi_power_off;
++	if (efi_poweroff_required()) {
++		ret = register_poweroff_handler(&efi_poweroff_nb);
++		if (ret)
++			pr_err("efi: Failed to register poweroff handler\n");
++	}
+ 
+-	return 0;
++	return ret;
+ }
+ late_initcall(efi_shutdown_init);
 -- 
 1.9.1
