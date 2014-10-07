@@ -1,505 +1,397 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH 36/44] mips: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:38 -0700
-Message-ID: <1412659726-29957-37-git-send-email-linux@roeck-us.net>
-References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ralf
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: [PATCH 00/44] kernel: Add support for poweroff handler call chain
+Date: Mon,  6 Oct 2014 22:28:02 -0700
+Message-ID: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+Return-path: <linux-mips-bounce@linux-mips.org>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: linux-kernel@vger.kernel.org
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@v
 List-Id: linux-efi@vger.kernel.org
 
-Register with kernel poweroff handler instead of setting pm_power_off
-directly.
+Various drivers implement architecture and/or device specific means to
+remove power from the system.  For the most part, those drivers set the
+global variable pm_power_off to point to a function within the driver.
 
-If there is an indication that there can be more than one poweroff handler,
-use register_poweroff_handler, otherwise use register_poweroff_handler_simple
-to register the poweroff handler.
+This mechanism has a number of drawbacks.  Typically only one means
+to remove power is supported (at least if pm_power_off is used).
+At least in theory there can be multiple means to remove power, some of
+which may be less desirable.  For example, one mechanism might power off the
+entire system through an I/O port or gpio pin, while another might power off
+a board by disabling its power controller. Other mechanisms may really just
+execute a restart sequence or drop into the ROM monitor, or put the CPU into
+sleep mode.  Using pm_power_off can also be racy if the function pointer is
+set from a driver built as module, as the driver may be in the process of
+being unloaded when pm_power_off is called.  If there are multiple poweroff
+handlers in the system, removing a module with such a handler may
+inadvertently reset the pointer to pm_power_off to NULL, leaving the system
+with no means to remove power.
 
-If the poweroff handler only resets or stops the system, select a priority of
-0 to indicate that the poweroff handler is one of last resort. If the poweroff
-handler powers off the system, select a priority of 128, unless the poweroff
-handler installation code suggests that there can be more than one poweroff
-handler and the new handler is only installed conditionally. In this case,
-select a priority of 64.
+Introduce a system poweroff handler call chain to solve the described
+problems.  This call chain is expected to be executed from the architecture
+specific machine_power_off() function.  Drivers providing system poweroff
+functionality are expected to register with this call chain.  By using the
+priority field in the notifier block, callers can control poweroff handler
+execution sequence and thus ensure that the poweroff handler with the
+optimal capabilities to remove power for a given system is called first.
 
-Cc: Ralf Baechle <ralf-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>
-Cc: Maciej W. Rozycki <macro-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
----
- arch/mips/alchemy/board-gpr.c          |  2 +-
- arch/mips/alchemy/board-mtx1.c         |  2 +-
- arch/mips/alchemy/board-xxs1500.c      |  2 +-
- arch/mips/alchemy/devboards/platform.c | 17 +++++++++++++++--
- arch/mips/ar7/setup.c                  |  2 +-
- arch/mips/ath79/setup.c                |  2 +-
- arch/mips/bcm47xx/setup.c              |  2 +-
- arch/mips/bcm63xx/setup.c              |  2 +-
- arch/mips/cobalt/setup.c               |  2 +-
- arch/mips/dec/setup.c                  |  2 +-
- arch/mips/emma/markeins/setup.c        |  2 +-
- arch/mips/jz4740/reset.c               |  2 +-
- arch/mips/lantiq/falcon/reset.c        |  2 +-
- arch/mips/lantiq/xway/reset.c          |  2 +-
- arch/mips/lasat/reset.c                |  2 +-
- arch/mips/loongson/common/reset.c      |  2 +-
- arch/mips/loongson1/common/reset.c     |  2 +-
- arch/mips/mti-malta/malta-reset.c      |  2 +-
- arch/mips/mti-sead3/sead3-reset.c      |  2 +-
- arch/mips/netlogic/xlp/setup.c         |  2 +-
- arch/mips/netlogic/xlr/setup.c         |  2 +-
- arch/mips/pmcs-msp71xx/msp_setup.c     |  2 +-
- arch/mips/pnx833x/common/setup.c       |  2 +-
- arch/mips/ralink/reset.c               |  2 +-
- arch/mips/rb532/setup.c                |  2 +-
- arch/mips/sgi-ip22/ip22-reset.c        |  2 +-
- arch/mips/sgi-ip27/ip27-reset.c        |  2 +-
- arch/mips/sgi-ip32/ip32-reset.c        |  2 +-
- arch/mips/sibyte/common/cfe.c          |  2 +-
- arch/mips/sni/setup.c                  |  2 +-
- arch/mips/txx9/generic/setup.c         |  2 +-
- arch/mips/vr41xx/common/pmu.c          |  2 +-
- 32 files changed, 46 insertions(+), 33 deletions(-)
+Patch 01/44 implements the poweroff handler API.
 
-diff --git a/arch/mips/alchemy/board-gpr.c b/arch/mips/alchemy/board-gpr.c
-index acf9a2a..56190a3 100644
---- a/arch/mips/alchemy/board-gpr.c
-+++ b/arch/mips/alchemy/board-gpr.c
-@@ -89,7 +89,7 @@ void __init board_setup(void)
- {
- 	printk(KERN_INFO "Trapeze ITS GPR board\n");
- 
--	pm_power_off = gpr_power_off;
-+	register_poweroff_handler_simple(gpr_power_off, 0);
- 	_machine_halt = gpr_power_off;
- 	_machine_restart = gpr_reset;
- 
-diff --git a/arch/mips/alchemy/board-mtx1.c b/arch/mips/alchemy/board-mtx1.c
-index 1e3b102..e2b06b5 100644
---- a/arch/mips/alchemy/board-mtx1.c
-+++ b/arch/mips/alchemy/board-mtx1.c
-@@ -98,7 +98,7 @@ void __init board_setup(void)
- 	alchemy_gpio_direction_output(211, 1);	/* green on */
- 	alchemy_gpio_direction_output(212, 0);	/* red off */
- 
--	pm_power_off = mtx1_power_off;
-+	register_poweroff_handler_simple(mtx1_power_off, 0);
- 	_machine_halt = mtx1_power_off;
- 	_machine_restart = mtx1_reset;
- 
-diff --git a/arch/mips/alchemy/board-xxs1500.c b/arch/mips/alchemy/board-xxs1500.c
-index 0fc53e0..aaa5f5f 100644
---- a/arch/mips/alchemy/board-xxs1500.c
-+++ b/arch/mips/alchemy/board-xxs1500.c
-@@ -79,7 +79,7 @@ void __init board_setup(void)
- {
- 	u32 pin_func;
- 
--	pm_power_off = xxs1500_power_off;
-+	register_poweroff_handler_simple(xxs1500_power_off, 0);
- 	_machine_halt = xxs1500_power_off;
- 	_machine_restart = xxs1500_reset;
- 
-diff --git a/arch/mips/alchemy/devboards/platform.c b/arch/mips/alchemy/devboards/platform.c
-index 8df86eb..1734f72 100644
---- a/arch/mips/alchemy/devboards/platform.c
-+++ b/arch/mips/alchemy/devboards/platform.c
-@@ -6,6 +6,7 @@
- #include <linux/mtd/mtd.h>
- #include <linux/mtd/map.h>
- #include <linux/mtd/physmap.h>
-+#include <linux/notifier.h>
- #include <linux/slab.h>
- #include <linux/platform_device.h>
- #include <linux/pm.h>
-@@ -61,10 +62,22 @@ static void db1x_reset(char *c)
- 	bcsr_write(BCSR_SYSTEM, 0);
- }
- 
-+static int db1x_power_off_notify(struct notifier *this,
-+				 unsigned long unused1, void *unused2)
-+{
-+	db1x_power_off();
-+	return NOTIFY_DONE;
-+}
-+
-+static struct notifier_block db1x_poweroff_nb = {
-+	.notifier_call = db1x_power_off_notify,
-+	.priority = 64,
-+}
-+
- static int __init db1x_late_setup(void)
- {
--	if (!pm_power_off)
--		pm_power_off = db1x_power_off;
-+	if (register_poweroff_handler(&db1x_poweroff_nb))
-+		pr_err("dbx1: Failed to register poweroff handler\n");
- 	if (!_machine_halt)
- 		_machine_halt = db1x_power_off;
- 	if (!_machine_restart)
-diff --git a/arch/mips/ar7/setup.c b/arch/mips/ar7/setup.c
-index 820b7a3..464067e 100644
---- a/arch/mips/ar7/setup.c
-+++ b/arch/mips/ar7/setup.c
-@@ -91,7 +91,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = ar7_machine_restart;
- 	_machine_halt = ar7_machine_halt;
--	pm_power_off = ar7_machine_power_off;
-+	register_poweroff_handler_simple(ar7_machine_power_off, 128);
- 
- 	io_base = (unsigned long)ioremap(AR7_REGS_BASE, 0x10000);
- 	if (!io_base)
-diff --git a/arch/mips/ath79/setup.c b/arch/mips/ath79/setup.c
-index 64807a4..ce9754e 100644
---- a/arch/mips/ath79/setup.c
-+++ b/arch/mips/ath79/setup.c
-@@ -203,7 +203,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = ath79_restart;
- 	_machine_halt = ath79_halt;
--	pm_power_off = ath79_halt;
-+	register_poweroff_handler_simple(ath79_halt, 0);
- }
- 
- void __init plat_time_init(void)
-diff --git a/arch/mips/bcm47xx/setup.c b/arch/mips/bcm47xx/setup.c
-index ad439c2..d0841f6 100644
---- a/arch/mips/bcm47xx/setup.c
-+++ b/arch/mips/bcm47xx/setup.c
-@@ -242,7 +242,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = bcm47xx_machine_restart;
- 	_machine_halt = bcm47xx_machine_halt;
--	pm_power_off = bcm47xx_machine_halt;
-+	register_poweroff_handler_simple(bcm47xx_machine_halt, 0);
- 	bcm47xx_board_detect();
- 	mips_set_machine_name(bcm47xx_board_get_name());
- }
-diff --git a/arch/mips/bcm63xx/setup.c b/arch/mips/bcm63xx/setup.c
-index 6660c7d..80a5893 100644
---- a/arch/mips/bcm63xx/setup.c
-+++ b/arch/mips/bcm63xx/setup.c
-@@ -149,7 +149,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_halt = bcm63xx_machine_halt;
- 	_machine_restart = __bcm63xx_machine_reboot;
--	pm_power_off = bcm63xx_machine_halt;
-+	register_poweroff_handler_simple(bcm63xx_machine_halt, 0);
- 
- 	set_io_port_base(0);
- 	ioport_resource.start = 0;
-diff --git a/arch/mips/cobalt/setup.c b/arch/mips/cobalt/setup.c
-index 9a8c2fe..146406f 100644
---- a/arch/mips/cobalt/setup.c
-+++ b/arch/mips/cobalt/setup.c
-@@ -78,7 +78,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = cobalt_machine_restart;
- 	_machine_halt = cobalt_machine_halt;
--	pm_power_off = cobalt_machine_halt;
-+	register_poweroff_handler_simple(cobalt_machine_halt, 0);
- 
- 	set_io_port_base(CKSEG1ADDR(GT_DEF_PCI0_IO_BASE));
- 
-diff --git a/arch/mips/dec/setup.c b/arch/mips/dec/setup.c
-index 41bbffd..8aea997 100644
---- a/arch/mips/dec/setup.c
-+++ b/arch/mips/dec/setup.c
-@@ -158,7 +158,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = dec_machine_restart;
- 	_machine_halt = dec_machine_halt;
--	pm_power_off = dec_machine_power_off;
-+	register_poweroff_handler_simple(dec_machine_power_off, 128);
- 
- 	ioport_resource.start = ~0UL;
- 	ioport_resource.end = 0UL;
-diff --git a/arch/mips/emma/markeins/setup.c b/arch/mips/emma/markeins/setup.c
-index 9100122..e2ec2e5 100644
---- a/arch/mips/emma/markeins/setup.c
-+++ b/arch/mips/emma/markeins/setup.c
-@@ -103,7 +103,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = markeins_machine_restart;
- 	_machine_halt = markeins_machine_halt;
--	pm_power_off = markeins_machine_power_off;
-+	register_poweroff_handler_simple(markeins_machine_power_off, 0);
- 
- 	/* setup resource limits */
- 	ioport_resource.start = EMMA2RH_PCI_IO_BASE;
-diff --git a/arch/mips/jz4740/reset.c b/arch/mips/jz4740/reset.c
-index b6c6343..3659e62 100644
---- a/arch/mips/jz4740/reset.c
-+++ b/arch/mips/jz4740/reset.c
-@@ -114,5 +114,5 @@ void jz4740_reset_init(void)
- {
- 	_machine_restart = jz4740_restart;
- 	_machine_halt = jz4740_halt;
--	pm_power_off = jz4740_power_off;
-+	register_poweroff_handler_simple(jz4740_power_off, 128);
- }
-diff --git a/arch/mips/lantiq/falcon/reset.c b/arch/mips/lantiq/falcon/reset.c
-index 5682482..efd4ee2 100644
---- a/arch/mips/lantiq/falcon/reset.c
-+++ b/arch/mips/lantiq/falcon/reset.c
-@@ -83,7 +83,7 @@ static int __init mips_reboot_setup(void)
- {
- 	_machine_restart = machine_restart;
- 	_machine_halt = machine_halt;
--	pm_power_off = machine_power_off;
-+	register_poweroff_handler_simple(machine_power_off, 0);
- 	return 0;
- }
- 
-diff --git a/arch/mips/lantiq/xway/reset.c b/arch/mips/lantiq/xway/reset.c
-index 1fa0f17..b698032 100644
---- a/arch/mips/lantiq/xway/reset.c
-+++ b/arch/mips/lantiq/xway/reset.c
-@@ -157,7 +157,7 @@ static int __init mips_reboot_setup(void)
- 
- 	_machine_restart = ltq_machine_restart;
- 	_machine_halt = ltq_machine_halt;
--	pm_power_off = ltq_machine_power_off;
-+	register_poweroff_handler_simple(ltq_machine_power_off, 0);
- 
- 	return 0;
- }
-diff --git a/arch/mips/lasat/reset.c b/arch/mips/lasat/reset.c
-index e21f0b9..9a07a88 100644
---- a/arch/mips/lasat/reset.c
-+++ b/arch/mips/lasat/reset.c
-@@ -56,5 +56,5 @@ void lasat_reboot_setup(void)
- {
- 	_machine_restart = lasat_machine_restart;
- 	_machine_halt = lasat_machine_halt;
--	pm_power_off = lasat_machine_halt;
-+	register_poweroff_handler_simple(lasat_machine_halt, 0);
- }
-diff --git a/arch/mips/loongson/common/reset.c b/arch/mips/loongson/common/reset.c
-index a60715e..e251519 100644
---- a/arch/mips/loongson/common/reset.c
-+++ b/arch/mips/loongson/common/reset.c
-@@ -84,7 +84,7 @@ static int __init mips_reboot_setup(void)
- {
- 	_machine_restart = loongson_restart;
- 	_machine_halt = loongson_halt;
--	pm_power_off = loongson_poweroff;
-+	register_poweroff_handler_simple(loongson_poweroff, 128);
- 
- 	return 0;
- }
-diff --git a/arch/mips/loongson1/common/reset.c b/arch/mips/loongson1/common/reset.c
-index 547f34b..fbb563a 100644
---- a/arch/mips/loongson1/common/reset.c
-+++ b/arch/mips/loongson1/common/reset.c
-@@ -38,7 +38,7 @@ static int __init ls1x_reboot_setup(void)
- {
- 	_machine_restart = ls1x_restart;
- 	_machine_halt = ls1x_halt;
--	pm_power_off = ls1x_power_off;
-+	register_poweroff_handler_simple(ls1x_power_off, 0);
- 
- 	return 0;
- }
-diff --git a/arch/mips/mti-malta/malta-reset.c b/arch/mips/mti-malta/malta-reset.c
-index 2fd2cc2..632ce7c 100644
---- a/arch/mips/mti-malta/malta-reset.c
-+++ b/arch/mips/mti-malta/malta-reset.c
-@@ -40,7 +40,7 @@ static int __init mips_reboot_setup(void)
- {
- 	_machine_restart = mips_machine_restart;
- 	_machine_halt = mips_machine_halt;
--	pm_power_off = mips_machine_power_off;
-+	register_poweroff_handler_simple(mips_machine_power_off, 128);
- 
- 	return 0;
- }
-diff --git a/arch/mips/mti-sead3/sead3-reset.c b/arch/mips/mti-sead3/sead3-reset.c
-index e6fb244..d1df04f 100644
---- a/arch/mips/mti-sead3/sead3-reset.c
-+++ b/arch/mips/mti-sead3/sead3-reset.c
-@@ -33,7 +33,7 @@ static int __init mips_reboot_setup(void)
- {
- 	_machine_restart = mips_machine_restart;
- 	_machine_halt = mips_machine_halt;
--	pm_power_off = mips_machine_halt;
-+	register_poweroff_handler_simple(mips_machine_halt, 0);
- 
- 	return 0;
- }
-diff --git a/arch/mips/netlogic/xlp/setup.c b/arch/mips/netlogic/xlp/setup.c
-index 4fdd9fd..4982302 100644
---- a/arch/mips/netlogic/xlp/setup.c
-+++ b/arch/mips/netlogic/xlp/setup.c
-@@ -106,7 +106,7 @@ void __init plat_mem_setup(void)
- #endif
- 	_machine_restart = (void (*)(char *))nlm_linux_exit;
- 	_machine_halt	= nlm_linux_exit;
--	pm_power_off	= nlm_linux_exit;
-+	register_poweroff_handler_simple(nlm_linux_exit, 0);
- 
- 	/* memory and bootargs from DT */
- 	xlp_early_init_devtree();
-diff --git a/arch/mips/netlogic/xlr/setup.c b/arch/mips/netlogic/xlr/setup.c
-index d118b9a..5149dd4 100644
---- a/arch/mips/netlogic/xlr/setup.c
-+++ b/arch/mips/netlogic/xlr/setup.c
-@@ -75,7 +75,7 @@ void __init plat_mem_setup(void)
- {
- 	_machine_restart = (void (*)(char *))nlm_linux_exit;
- 	_machine_halt	= nlm_linux_exit;
--	pm_power_off	= nlm_linux_exit;
-+	register_poweroff_handler_simple(nlm_linux_exit, 0);
- }
- 
- const char *get_system_type(void)
-diff --git a/arch/mips/pmcs-msp71xx/msp_setup.c b/arch/mips/pmcs-msp71xx/msp_setup.c
-index 4f925e0..67699e30 100644
---- a/arch/mips/pmcs-msp71xx/msp_setup.c
-+++ b/arch/mips/pmcs-msp71xx/msp_setup.c
-@@ -144,7 +144,7 @@ void __init plat_mem_setup(void)
- {
- 	_machine_restart = msp_restart;
- 	_machine_halt = msp_halt;
--	pm_power_off = msp_power_off;
-+	register_poweroff_handler_simple(msp_power_off, 0);
- }
- 
- void __init prom_init(void)
-diff --git a/arch/mips/pnx833x/common/setup.c b/arch/mips/pnx833x/common/setup.c
-index 99b4d94..7c12665 100644
---- a/arch/mips/pnx833x/common/setup.c
-+++ b/arch/mips/pnx833x/common/setup.c
-@@ -51,7 +51,7 @@ int __init plat_mem_setup(void)
- 
- 	_machine_restart = pnx833x_machine_restart;
- 	_machine_halt = pnx833x_machine_halt;
--	pm_power_off = pnx833x_machine_power_off;
-+	register_poweroff_handler_simple(pnx833x_machine_power_off, 128);
- 
- 	/* IO/MEM resources. */
- 	set_io_port_base(KSEG1);
-diff --git a/arch/mips/ralink/reset.c b/arch/mips/ralink/reset.c
-index 55c7ec5..e640e9e 100644
---- a/arch/mips/ralink/reset.c
-+++ b/arch/mips/ralink/reset.c
-@@ -98,7 +98,7 @@ static int __init mips_reboot_setup(void)
- {
- 	_machine_restart = ralink_restart;
- 	_machine_halt = ralink_halt;
--	pm_power_off = ralink_halt;
-+	register_poweroff_handler_simple(ralink_halt, 0);
- 
- 	return 0;
- }
-diff --git a/arch/mips/rb532/setup.c b/arch/mips/rb532/setup.c
-index d0c64e7..c71a623 100644
---- a/arch/mips/rb532/setup.c
-+++ b/arch/mips/rb532/setup.c
-@@ -44,7 +44,7 @@ void __init plat_mem_setup(void)
- 
- 	_machine_restart = rb_machine_restart;
- 	_machine_halt = rb_machine_halt;
--	pm_power_off = rb_machine_halt;
-+	register_poweroff_handler-simple(rb_machine_halt, 0);
- 
- 	set_io_port_base(KSEG1);
- 
-diff --git a/arch/mips/sgi-ip22/ip22-reset.c b/arch/mips/sgi-ip22/ip22-reset.c
-index 063c2dd..466e710 100644
---- a/arch/mips/sgi-ip22/ip22-reset.c
-+++ b/arch/mips/sgi-ip22/ip22-reset.c
-@@ -188,7 +188,7 @@ static int __init reboot_setup(void)
- 
- 	_machine_restart = sgi_machine_restart;
- 	_machine_halt = sgi_machine_halt;
--	pm_power_off = sgi_machine_power_off;
-+	register_poweroff_handler_simple(sgi_machine_power_off, 128);
- 
- 	res = request_irq(SGI_PANEL_IRQ, panel_int, 0, "Front Panel", NULL);
- 	if (res) {
-diff --git a/arch/mips/sgi-ip27/ip27-reset.c b/arch/mips/sgi-ip27/ip27-reset.c
-index ac37e54..c26f04a 100644
---- a/arch/mips/sgi-ip27/ip27-reset.c
-+++ b/arch/mips/sgi-ip27/ip27-reset.c
-@@ -76,5 +76,5 @@ void ip27_reboot_setup(void)
- {
- 	_machine_restart = ip27_machine_restart;
- 	_machine_halt = ip27_machine_halt;
--	pm_power_off = ip27_machine_power_off;
-+	register_poweroff_handler_simple(ip27_machine_power_off, 0);
- }
-diff --git a/arch/mips/sgi-ip32/ip32-reset.c b/arch/mips/sgi-ip32/ip32-reset.c
-index 1f823da..88d8692 100644
---- a/arch/mips/sgi-ip32/ip32-reset.c
-+++ b/arch/mips/sgi-ip32/ip32-reset.c
-@@ -189,7 +189,7 @@ static __init int ip32_reboot_setup(void)
- 
- 	_machine_restart = ip32_machine_restart;
- 	_machine_halt = ip32_machine_halt;
--	pm_power_off = ip32_machine_power_off;
-+	register_poweroff_handler_simple(ip32_machine_power_off, 0);
- 
- 	init_timer(&blink_timer);
- 	blink_timer.function = blink_timeout;
-diff --git a/arch/mips/sibyte/common/cfe.c b/arch/mips/sibyte/common/cfe.c
-index 588e180..069de27 100644
---- a/arch/mips/sibyte/common/cfe.c
-+++ b/arch/mips/sibyte/common/cfe.c
-@@ -245,7 +245,7 @@ void __init prom_init(void)
- 
- 	_machine_restart   = cfe_linux_restart;
- 	_machine_halt	   = cfe_linux_halt;
--	pm_power_off = cfe_linux_halt;
-+	register_poweroff_handler_simple(cfe_linux_halt, 0);
- 
- 	/*
- 	 * Check if a loader was used; if NOT, the 4 arguments are
-diff --git a/arch/mips/sni/setup.c b/arch/mips/sni/setup.c
-index efad85c..5242bd9 100644
---- a/arch/mips/sni/setup.c
-+++ b/arch/mips/sni/setup.c
-@@ -225,7 +225,7 @@ void __init plat_mem_setup(void)
- 	}
- 
- 	_machine_restart = sni_machine_restart;
--	pm_power_off = sni_machine_power_off;
-+	register_poweroff_handler_simple(sni_machine_power_off, 128);
- 
- 	sni_display_setup();
- 	sni_console_setup();
-diff --git a/arch/mips/txx9/generic/setup.c b/arch/mips/txx9/generic/setup.c
-index 9ff200a..c429a4f 100644
---- a/arch/mips/txx9/generic/setup.c
-+++ b/arch/mips/txx9/generic/setup.c
-@@ -555,7 +555,7 @@ void __init plat_mem_setup(void)
- 	/* fallback restart/halt routines */
- 	_machine_restart = (void (*)(char *))txx9_machine_halt;
- 	_machine_halt = txx9_machine_halt;
--	pm_power_off = txx9_machine_halt;
-+	register_poweroff_handler_simple(txx9_machine_halt, 0);
- 
- #ifdef CONFIG_PCI
- 	pcibios_plat_setup = txx9_pcibios_setup;
-diff --git a/arch/mips/vr41xx/common/pmu.c b/arch/mips/vr41xx/common/pmu.c
-index d7f7558..4d947ab 100644
---- a/arch/mips/vr41xx/common/pmu.c
-+++ b/arch/mips/vr41xx/common/pmu.c
-@@ -127,7 +127,7 @@ static int __init vr41xx_pmu_init(void)
- 	cpu_wait = vr41xx_cpu_wait;
- 	_machine_restart = vr41xx_restart;
- 	_machine_halt = vr41xx_halt;
--	pm_power_off = vr41xx_halt;
-+	register_poweroff_handler_simple(vr41xx_halt, 0);
- 
- 	return 0;
- }
--- 
-1.9.1
+Patches 02/44 to 04/44 are cleanup patches to prepare for the move of
+pm_power_off to a common location.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-metag" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Patches 05/44 to 07/44 remove references to pm_power_off from devicetree
+bindings descriptions.
+
+Patch 08/44 moves the pm_power_off variable from architecture code to
+kernel/reboot.c. 
+
+Patches 09/44 to 30/44 convert various drivers to register with the kernel
+poweroff handler instead of setting pm_power_off directly.
+
+Patches 31/44 to 42/44 do the same for architecture code.
+
+Patch 43/44 replaces a direct call to pm_power_off from a hwmon driver
+with a call to kernel_power_off. This patch is part of the series for
+completeness, but will find its way upstream through the hwmon subsystem.
+
+Patch 44/44 removes pm_power_off.
+
+For the most part, the individual patches include explanations why specific
+priorities were chosen, at least if the selected priority is not the default
+priority. Subsystem and architecture maintainers are encouraged to have a look
+at the selected priorities and suggest improvements.
+
+I ran the final code through my normal build and qemu tests. Results
+are available at http://server.roeck-us.net:8010/builders in the
+'poweroff-handler' column. In addition I build several additional
+configurations for various architectures.
+
+The series is available in branch poweroff-handler of my repository at
+git://git.kernel.org/pub/scm/linux/kernel/git/groeck/linux-staging.git.
+It is based on 3.17, with the pending restart handler patches applied.
+
+I got a number of Acks from architecture maintainers as response to the RFC.
+I did not add those since the architecture code changed, and I did not think
+it was appropriate to retain the Acks.
+
+A note on timing: My original plan was to submit this series after 3.18-rc1
+was released.  However, since the commit window will remain open for three
+weeks, and the series is, for all practical purposes, ready for review,
+I decided to submit it now.  I plan to rebase it to 3.18-rc1 once available
+and send another version, hopefully including valuable feedback.
+
+Important changes since RFC:
+- Move API to new file kernel/power/poweroff_handler.c.
+- Move pm_power_off pointer to kernel/power/poweroff_handler.c. Call
+  pm_power_off from do_kernel_poweroff, and only call do_kernel_poweroff
+  from architecture code instead of calling both pm_power_off and
+  do_kernel_poweroff.
+- Provide additional API function register_poweroff_handler_simple
+  to simplify conversion of architecture code.
+- Provide additional API function have_kernel_poweroff to check if
+  a poweroff handler was installed.
+- Convert all drivers and architecture code to use the new API.
+- Remove pm_power_off as last patch of the series.
+
+Cc: Alexander Graf <agraf@suse.de>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Aurelien Jacquiot <a-jacquiot@ti.com>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Chen Liqin <liqin.linux@gmail.com>
+Cc: Chris Metcalf <cmetcalf@tilera.com>
+Cc: Chris Zankel <chris@zankel.net>
+Cc: Corey Minyard <minyard@acm.org>
+Cc: David Howells <dhowells@redhat.com>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: David Vrabel <david.vrabel@citrix.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
+Cc: Fenghua Yu <fenghua.yu@intel.com>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Greg Ungerer <gerg@uclinux.org>
+Cc: Guan Xuetao <gxt@mprc.pku.edu.cn>
+Cc: Haavard Skinnemoen <hskinnemoen@gmail.com>
+Cc: Hans-Christian Egtvedt <egtvedt@samfundet.no>
+Cc: Heiko Carstens <heiko.carstens@de.ibm.com>
+Cc: Helge Deller <deller@gmx.de>
+Cc: Hirokazu Takata <takata@linux-m32r.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Ivan Kokshaysky <ink@jurassic.park.msu.ru>
+Cc: James E.J. Bottomley <jejb@parisc-linux.org>
+Cc: James Hogan <james.hogan@imgtec.com>
+Cc: Jean Delvare <jdelvare@suse.de>
+Cc: Jeff Dike <jdike@addtoit.com>
+Cc: Jesper Nilsson <jesper.nilsson@axis.com>
+Cc: Jiri Kosina <jkosina@suse.cz>
+Cc: Jonas Bonn <jonas@southpole.se>
+Cc: Joshua Thompson <funaho@jurai.org>
+Cc: Julian Andres Klode <jak@jak-linux.org>
+Cc: Koichi Yasutake <yasutake.koichi@jp.panasonic.com>
+Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+Cc: Lee Jones <lee.jones@linaro.org>
+Cc: Len Brown <lenb@kernel.org>
+Cc: Len Brown <len.brown@intel.com>
+Cc: Lennox Wu <lennox.wu@gmail.com>
+Cc: Linus Walleij <linus.walleij@linaro.org>
+Cc: Maciej W. Rozycki <macro@linux-mips.org>
+Cc: Marc Dietrich <marvin24@gmx.de>
+Cc: Mark Rutland <mark.rutland@arm.com>
+Cc: Mark Salter <msalter@redhat.com>
+Cc: Martin Schwidefsky <schwidefsky@de.ibm.com>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Matt Turner <mattst88@gmail.com>
+Cc: Max Filippov <jcmvbkbc@gmail.com>
+Cc: Michael Ellerman <mpe@ellerman.id.au>
+Cc: Michal Simek <monstr@monstr.eu>
+Cc: Mikael Starvik <starvik@axis.com>
+Cc: Paul Mackerras <paulus@samba.org>
+Cc: Pavel Machek <pavel@ucw.cz>
+Cc: Pawel Moll <pawel.moll@arm.com>
+Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+Cc: Ralf Baechle <ralf@linux-mips.org>
+Cc: Richard Henderson <rth@twiddle.net>
+Cc: Richard Kuo <rkuo@codeaurora.org>
+Cc: Richard Weinberger <richard@nod.at>
+Cc: Rob Herring <robh+dt@kernel.org>
+Cc: Romain Perier <romain.perier@gmail.com>
+Cc: Russell King <linux@arm.linux.org.uk>
+Cc: Rusty Russell <rusty@rustcorp.com.au>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: Santosh Shilimkar <santosh.shilimkar@ti.com>
+Cc: Sebastian Reichel <sre@kernel.org>
+Cc: Steven Miao <realmz6@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Vineet Gupta <vgupta@synopsys.com>
+Cc: Will Deacon <will.deacon@arm.com>
+
+----------------------------------------------------------------
+Guenter Roeck (44):
+      kernel: Add support for poweroff handler call chain
+      memory: emif: Use API function to determine poweroff capability
+      hibernate: Call have_kernel_poweroff instead of checking pm_power_off
+      m68k: Replace mach_power_off with pm_power_off
+      mfd: as3722: Drop reference to pm_power_off from devicetree bindings
+      gpio-poweroff: Drop reference to pm_power_off from devicetree bindings
+      qnap-poweroff: Drop reference to pm_power_off from devicetree bindings
+      kernel: Move pm_power_off to common code
+      mfd: palmas: Register with kernel poweroff handler
+      mfd: axp20x: Register with kernel poweroff handler
+      mfd: retu: Register with kernel poweroff handler
+      mfd: ab8500-sysctrl: Register with kernel poweroff handler
+      mfd: max8907: Register with kernel poweroff handler
+      mfd: tps80031: Register with kernel poweroff handler
+      mfd: dm355evm_msp: Register with kernel poweroff handler
+      mfd: tps6586x: Register with kernel poweroff handler
+      mfd: tps65910: Register with kernel poweroff handler
+      mfd: twl4030-power: Register with kernel poweroff handler
+      ipmi: Register with kernel poweroff handler
+      power/reset: restart-poweroff: Register with kernel poweroff handler
+      power/reset: gpio-poweroff: Register with kernel poweroff handler
+      power/reset: as3722-poweroff: Register with kernel poweroff handler
+      power/reset: qnap-poweroff: Register with kernel poweroff handler
+      power/reset: msm-powroff: Register with kernel poweroff handler
+      power/reset: vexpress-poweroff: Register with kernel poweroff handler
+      x86: iris: Register with kernel poweroff handler
+      x86: apm: Register with kernel poweroff handler
+      x86: olpc: Register xo1 poweroff handler with kernel poweroff handler
+      staging: nvec: Register with kernel poweroff handler
+      acpi: Register poweroff handler with kernel poweroff handler
+      arm: Register with kernel poweroff handler
+      arm64: psci: Register with kernel poweroff handler
+      avr32: atngw100: Register with kernel poweroff handler
+      ia64: Register with kernel poweroff handler
+      m68k: Register with kernel poweroff handler
+      mips: Register with kernel poweroff handler
+      sh: Register with kernel poweroff handler
+      x86: lguest: Register with kernel poweroff handler
+      x86: ce4100: Register with kernel poweroff handler
+      x86: intel-mid: Drop registration of dummy poweroff handlers
+      x86: pmc_atom: Register poweroff handler with kernel poweroff handler
+      efi: Register poweroff handler with kernel poweroff handler
+      hwmon: (ab8500) Call kernel_power_off instead of pm_power_off
+      kernel: Remove pm_power_off
+
+ .../devicetree/bindings/gpio/gpio-poweroff.txt     |  10 +-
+ Documentation/devicetree/bindings/mfd/as3722.txt   |   3 +-
+ .../bindings/power_supply/qnap-poweroff.txt        |   4 +-
+ arch/alpha/kernel/process.c                        |   9 +-
+ arch/arc/kernel/reset.c                            |   5 +-
+ arch/arm/kernel/process.c                          |   5 +-
+ arch/arm/kernel/psci.c                             |   2 +-
+ arch/arm/mach-at91/board-gsia18s.c                 |   2 +-
+ arch/arm/mach-at91/setup.c                         |   4 +-
+ arch/arm/mach-bcm/board_bcm2835.c                  |   2 +-
+ arch/arm/mach-cns3xxx/cns3420vb.c                  |   2 +-
+ arch/arm/mach-cns3xxx/core.c                       |   2 +-
+ arch/arm/mach-highbank/highbank.c                  |   2 +-
+ arch/arm/mach-imx/mach-mx31moboard.c               |   2 +-
+ arch/arm/mach-iop32x/em7210.c                      |   2 +-
+ arch/arm/mach-iop32x/glantank.c                    |   2 +-
+ arch/arm/mach-iop32x/iq31244.c                     |   2 +-
+ arch/arm/mach-iop32x/n2100.c                       |   2 +-
+ arch/arm/mach-ixp4xx/dsmg600-setup.c               |   2 +-
+ arch/arm/mach-ixp4xx/nas100d-setup.c               |   2 +-
+ arch/arm/mach-ixp4xx/nslu2-setup.c                 |   2 +-
+ arch/arm/mach-omap2/board-omap3touchbook.c         |   2 +-
+ arch/arm/mach-orion5x/board-mss2.c                 |   2 +-
+ arch/arm/mach-orion5x/dns323-setup.c               |   6 +-
+ arch/arm/mach-orion5x/kurobox_pro-setup.c          |   2 +-
+ arch/arm/mach-orion5x/ls-chl-setup.c               |   2 +-
+ arch/arm/mach-orion5x/ls_hgl-setup.c               |   2 +-
+ arch/arm/mach-orion5x/lsmini-setup.c               |   2 +-
+ arch/arm/mach-orion5x/mv2120-setup.c               |   2 +-
+ arch/arm/mach-orion5x/net2big-setup.c              |   2 +-
+ arch/arm/mach-orion5x/terastation_pro2-setup.c     |   2 +-
+ arch/arm/mach-orion5x/ts209-setup.c                |   2 +-
+ arch/arm/mach-orion5x/ts409-setup.c                |   2 +-
+ arch/arm/mach-pxa/corgi.c                          |   2 +-
+ arch/arm/mach-pxa/mioa701.c                        |   2 +-
+ arch/arm/mach-pxa/poodle.c                         |   2 +-
+ arch/arm/mach-pxa/spitz.c                          |   2 +-
+ arch/arm/mach-pxa/tosa.c                           |   2 +-
+ arch/arm/mach-pxa/viper.c                          |   2 +-
+ arch/arm/mach-pxa/z2.c                             |   6 +-
+ arch/arm/mach-pxa/zeus.c                           |   6 +-
+ arch/arm/mach-s3c24xx/mach-gta02.c                 |   2 +-
+ arch/arm/mach-s3c24xx/mach-jive.c                  |   2 +-
+ arch/arm/mach-s3c24xx/mach-vr1000.c                |   2 +-
+ arch/arm/mach-s3c64xx/mach-smartq.c                |   2 +-
+ arch/arm/mach-sa1100/generic.c                     |   2 +-
+ arch/arm/mach-sa1100/simpad.c                      |   2 +-
+ arch/arm/mach-u300/regulator.c                     |   2 +-
+ arch/arm/mach-vt8500/vt8500.c                      |   2 +-
+ arch/arm/xen/enlighten.c                           |   2 +-
+ arch/arm64/kernel/process.c                        |   5 +-
+ arch/arm64/kernel/psci.c                           |   2 +-
+ arch/avr32/boards/atngw100/mrmt.c                  |   2 +-
+ arch/avr32/kernel/process.c                        |   6 +-
+ arch/blackfin/kernel/process.c                     |   3 -
+ arch/blackfin/kernel/reboot.c                      |   2 +
+ arch/c6x/kernel/process.c                          |   9 +-
+ arch/cris/kernel/process.c                         |   4 +-
+ arch/frv/kernel/process.c                          |   5 +-
+ arch/hexagon/kernel/reset.c                        |   5 +-
+ arch/ia64/kernel/process.c                         |   5 +-
+ arch/ia64/sn/kernel/setup.c                        |   4 +-
+ arch/m32r/kernel/process.c                         |   8 +-
+ arch/m68k/emu/natfeat.c                            |   3 +-
+ arch/m68k/include/asm/machdep.h                    |   1 -
+ arch/m68k/kernel/process.c                         |   7 +-
+ arch/m68k/kernel/setup_mm.c                        |   1 -
+ arch/m68k/kernel/setup_no.c                        |   1 -
+ arch/m68k/mac/config.c                             |   3 +-
+ arch/metag/kernel/process.c                        |   6 +-
+ arch/microblaze/kernel/process.c                   |   3 -
+ arch/microblaze/kernel/reset.c                     |   1 +
+ arch/mips/alchemy/board-gpr.c                      |   2 +-
+ arch/mips/alchemy/board-mtx1.c                     |   2 +-
+ arch/mips/alchemy/board-xxs1500.c                  |   2 +-
+ arch/mips/alchemy/devboards/platform.c             |  17 +-
+ arch/mips/ar7/setup.c                              |   2 +-
+ arch/mips/ath79/setup.c                            |   2 +-
+ arch/mips/bcm47xx/setup.c                          |   2 +-
+ arch/mips/bcm63xx/setup.c                          |   2 +-
+ arch/mips/cobalt/setup.c                           |   2 +-
+ arch/mips/dec/setup.c                              |   2 +-
+ arch/mips/emma/markeins/setup.c                    |   2 +-
+ arch/mips/jz4740/reset.c                           |   2 +-
+ arch/mips/kernel/reset.c                           |   6 +-
+ arch/mips/lantiq/falcon/reset.c                    |   2 +-
+ arch/mips/lantiq/xway/reset.c                      |   2 +-
+ arch/mips/lasat/reset.c                            |   2 +-
+ arch/mips/loongson/common/reset.c                  |   2 +-
+ arch/mips/loongson1/common/reset.c                 |   2 +-
+ arch/mips/mti-malta/malta-reset.c                  |   2 +-
+ arch/mips/mti-sead3/sead3-reset.c                  |   2 +-
+ arch/mips/netlogic/xlp/setup.c                     |   2 +-
+ arch/mips/netlogic/xlr/setup.c                     |   2 +-
+ arch/mips/pmcs-msp71xx/msp_setup.c                 |   2 +-
+ arch/mips/pnx833x/common/setup.c                   |   2 +-
+ arch/mips/ralink/reset.c                           |   2 +-
+ arch/mips/rb532/setup.c                            |   2 +-
+ arch/mips/sgi-ip22/ip22-reset.c                    |   2 +-
+ arch/mips/sgi-ip27/ip27-reset.c                    |   2 +-
+ arch/mips/sgi-ip32/ip32-reset.c                    |   2 +-
+ arch/mips/sibyte/common/cfe.c                      |   2 +-
+ arch/mips/sni/setup.c                              |   2 +-
+ arch/mips/txx9/generic/setup.c                     |   2 +-
+ arch/mips/vr41xx/common/pmu.c                      |   2 +-
+ arch/mn10300/kernel/process.c                      |   8 +-
+ arch/openrisc/kernel/process.c                     |   8 +-
+ arch/parisc/kernel/process.c                       |   8 +-
+ arch/powerpc/kernel/setup-common.c                 |   6 +-
+ arch/s390/kernel/setup.c                           |   8 +-
+ arch/score/kernel/process.c                        |   8 +-
+ arch/sh/boards/board-sh7785lcr.c                   |   2 +-
+ arch/sh/boards/board-urquell.c                     |   2 +-
+ arch/sh/boards/mach-highlander/setup.c             |   2 +-
+ arch/sh/boards/mach-landisk/setup.c                |   2 +-
+ arch/sh/boards/mach-r2d/setup.c                    |   2 +-
+ arch/sh/boards/mach-sdk7786/setup.c                |   2 +-
+ arch/sh/kernel/reboot.c                            |   6 +-
+ arch/sparc/kernel/process_32.c                     |  10 +-
+ arch/sparc/kernel/reboot.c                         |   8 +-
+ arch/tile/kernel/reboot.c                          |   7 +-
+ arch/um/kernel/reboot.c                            |   2 -
+ arch/unicore32/kernel/process.c                    |   9 +-
+ arch/x86/kernel/apm_32.c                           |  20 ++-
+ arch/x86/kernel/pmc_atom.c                         |  20 ++-
+ arch/x86/kernel/reboot.c                           |  11 +-
+ arch/x86/lguest/boot.c                             |   2 +-
+ arch/x86/platform/ce4100/ce4100.c                  |   2 +-
+ arch/x86/platform/intel-mid/intel-mid.c            |   5 -
+ arch/x86/platform/intel-mid/mfld.c                 |   5 -
+ arch/x86/platform/iris/iris.c                      |  25 ++-
+ arch/x86/platform/olpc/olpc-xo1-pm.c               |  20 ++-
+ arch/x86/xen/enlighten.c                           |   3 +-
+ arch/xtensa/kernel/process.c                       |   4 -
+ drivers/acpi/sleep.c                               |  15 +-
+ drivers/char/ipmi/ipmi_poweroff.c                  |  30 ++--
+ drivers/firmware/efi/reboot.c                      |  23 ++-
+ drivers/hwmon/ab8500.c                             |   5 +-
+ drivers/memory/emif.c                              |   4 +-
+ drivers/mfd/ab8500-sysctrl.c                       |  26 ++--
+ drivers/mfd/axp20x.c                               |  30 ++--
+ drivers/mfd/dm355evm_msp.c                         |  18 ++-
+ drivers/mfd/max8907.c                              |  24 ++-
+ drivers/mfd/palmas.c                               |  30 ++--
+ drivers/mfd/retu-mfd.c                             |  33 ++--
+ drivers/mfd/tps6586x.c                             |  31 +++-
+ drivers/mfd/tps65910.c                             |  27 ++--
+ drivers/mfd/tps80031.c                             |  30 ++--
+ drivers/mfd/twl4030-power.c                        |  25 ++-
+ drivers/parisc/power.c                             |   3 +-
+ drivers/power/reset/as3722-poweroff.c              |  36 +++--
+ drivers/power/reset/gpio-poweroff.c                |  36 ++---
+ drivers/power/reset/msm-poweroff.c                 |  13 +-
+ drivers/power/reset/qnap-poweroff.c                |  28 ++--
+ drivers/power/reset/restart-poweroff.c             |  25 ++-
+ drivers/power/reset/vexpress-poweroff.c            |  19 ++-
+ drivers/staging/nvec/nvec.c                        |  24 +--
+ drivers/staging/nvec/nvec.h                        |   2 +
+ include/linux/i2c/twl.h                            |   1 -
+ include/linux/mfd/axp20x.h                         |   1 +
+ include/linux/mfd/max8907.h                        |   2 +
+ include/linux/mfd/palmas.h                         |   3 +
+ include/linux/mfd/tps65910.h                       |   3 +
+ include/linux/mfd/tps80031.h                       |   2 +
+ include/linux/pm.h                                 |  14 +-
+ kernel/power/Makefile                              |   1 +
+ kernel/power/hibernate.c                           |   2 +-
+ kernel/power/poweroff_handler.c                    | 173 +++++++++++++++++++++
+ kernel/reboot.c                                    |   4 +-
+ 169 files changed, 794 insertions(+), 475 deletions(-)
+ create mode 100644 kernel/power/poweroff_handler.c
