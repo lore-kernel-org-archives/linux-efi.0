@@ -1,101 +1,117 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH 10/44] mfd: axp20x: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:12 -0700
-Message-ID: <1412659726-29957-11-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: [PATCH 18/44] mfd: twl4030-power: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:20 -0700
+Message-ID: <1412659726-29957-19-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>Lee Jones <l>
+Return-path: <linux-alpha-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+Sender: linux-alpha-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Samuel
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly. Register with a low priority value of 64 to reflect that
 the original code only sets pm_power_off if it was not already set.
 
-Cc: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
----
- drivers/mfd/axp20x.c       | 30 +++++++++++++++++-------------
- include/linux/mfd/axp20x.h |  1 +
- 2 files changed, 18 insertions(+), 13 deletions(-)
+Make twl4030_power_off static as it is only called from the twl4030-power
+driver.
 
-diff --git a/drivers/mfd/axp20x.c b/drivers/mfd/axp20x.c
-index dee6539..238db4c 100644
---- a/drivers/mfd/axp20x.c
-+++ b/drivers/mfd/axp20x.c
-@@ -17,7 +17,8 @@
- #include <linux/interrupt.h>
- #include <linux/kernel.h>
- #include <linux/module.h>
--#include <linux/pm_runtime.h>
-+#include <linux/notifier.h>
-+#include <linux/pm.h>
- #include <linux/regmap.h>
- #include <linux/slab.h>
- #include <linux/regulator/consumer.h>
-@@ -161,11 +162,16 @@ static struct mfd_cell axp20x_cells[] = {
- 	},
- };
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: Lee Jones <lee.jones@linaro.org>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+---
+ drivers/mfd/twl4030-power.c | 25 +++++++++++++++++++++----
+ include/linux/i2c/twl.h     |  1 -
+ 2 files changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/mfd/twl4030-power.c b/drivers/mfd/twl4030-power.c
+index 4d3ff37..bd6b830 100644
+--- a/drivers/mfd/twl4030-power.c
++++ b/drivers/mfd/twl4030-power.c
+@@ -25,9 +25,10 @@
+  */
  
--static struct axp20x_dev *axp20x_pm_power_off;
--static void axp20x_power_off(void)
-+static int axp20x_power_off(struct notifier_block *this, unsigned long unused1,
-+			    void *unused2)
-+
+ #include <linux/module.h>
+-#include <linux/pm.h>
++#include <linux/notifier.h>
+ #include <linux/i2c/twl.h>
+ #include <linux/platform_device.h>
++#include <linux/pm.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ 
+@@ -611,7 +612,8 @@ twl4030_power_configure_resources(const struct twl4030_power_data *pdata)
+  * After a successful execution, TWL shuts down the power to the SoC
+  * and all peripherals connected to it.
+  */
+-void twl4030_power_off(void)
++static int twl4030_power_off(struct notifier_block *this, unsigned long unused1,
++			     void *unused2)
  {
--	regmap_write(axp20x_pm_power_off->regmap, AXP20X_OFF_CTRL,
--		     AXP20X_OFF);
-+	struct axp20x_dev *axp20x = container_of(this, struct axp20x_dev,
-+						 poweroff_nb);
-+
-+	regmap_write(axp20x->regmap, AXP20X_OFF_CTRL, AXP20X_OFF);
+ 	int err;
+ 
+@@ -619,8 +621,15 @@ void twl4030_power_off(void)
+ 			       TWL4030_PM_MASTER_P1_SW_EVENTS);
+ 	if (err)
+ 		pr_err("TWL4030 Unable to power off\n");
 +
 +	return NOTIFY_DONE;
  }
  
- static int axp20x_i2c_probe(struct i2c_client *i2c,
-@@ -215,10 +221,11 @@ static int axp20x_i2c_probe(struct i2c_client *i2c,
- 		return ret;
++static struct notifier_block twl4030_poweroff_nb = {
++	.notifier_call = twl4030_power_off,
++	.priority = 64,
++};
++
+ static bool twl4030_power_use_poweroff(const struct twl4030_power_data *pdata,
+ 					struct device_node *node)
+ {
+@@ -836,7 +845,7 @@ static int twl4030_power_probe(struct platform_device *pdev)
  	}
  
--	if (!pm_power_off) {
--		axp20x_pm_power_off = axp20x;
--		pm_power_off = axp20x_power_off;
--	}
-+	axp20x->poweroff_nb.notifier_call = axp20x_power_off;
-+	axp20x->poweroff_nb.priority = 64;
-+	ret = register_poweroff_handler(&axp20x->poweroff_nb);
-+	if (ret)
-+		dev_err(&i2c->dev, "failed to register poweroff handler\n");
+ 	/* Board has to be wired properly to use this feature */
+-	if (twl4030_power_use_poweroff(pdata, node) && !pm_power_off) {
++	if (twl4030_power_use_poweroff(pdata, node)) {
+ 		/* Default for SEQ_OFFSYNC is set, lets ensure this */
+ 		err = twl_i2c_read_u8(TWL_MODULE_PM_MASTER, &val,
+ 				      TWL4030_PM_MASTER_CFG_P123_TRANSITION);
+@@ -853,7 +862,13 @@ static int twl4030_power_probe(struct platform_device *pdev)
+ 			}
+ 		}
  
- 	dev_info(&i2c->dev, "AXP20X driver loaded\n");
+-		pm_power_off = twl4030_power_off;
++		err = register_poweroff_handler(&twl4030_poweroff_nb);
++		if (err) {
++			dev_err(&pdev->dev,
++				"Failed to register poweroff handler\n");
++			/* Not a fatal error */
++			err = 0;
++		}
+ 	}
  
-@@ -229,10 +236,7 @@ static int axp20x_i2c_remove(struct i2c_client *i2c)
+ relock:
+@@ -869,6 +884,8 @@ relock:
+ 
+ static int twl4030_power_remove(struct platform_device *pdev)
  {
- 	struct axp20x_dev *axp20x = i2c_get_clientdata(i2c);
++	unregister_poweroff_handler(&twl4030_poweroff_nb);
++
+ 	return 0;
+ }
  
--	if (axp20x == axp20x_pm_power_off) {
--		axp20x_pm_power_off = NULL;
--		pm_power_off = NULL;
--	}
-+	unregister_poweroff_handler(&axp20x->poweroff_nb);
- 
- 	mfd_remove_devices(axp20x->dev);
- 	regmap_del_irq_chip(axp20x->i2c_client->irq, axp20x->regmap_irqc);
-diff --git a/include/linux/mfd/axp20x.h b/include/linux/mfd/axp20x.h
-index d0e31a2..8f23b39 100644
---- a/include/linux/mfd/axp20x.h
-+++ b/include/linux/mfd/axp20x.h
-@@ -175,6 +175,7 @@ struct axp20x_dev {
- 	struct regmap			*regmap;
- 	struct regmap_irq_chip_data	*regmap_irqc;
- 	long				variant;
-+	struct notifier_block		poweroff_nb;
+diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+index 8cfb50f..f8544f1 100644
+--- a/include/linux/i2c/twl.h
++++ b/include/linux/i2c/twl.h
+@@ -680,7 +680,6 @@ struct twl4030_power_data {
  };
  
- #endif /* __LINUX_MFD_AXP20X_H */
+ extern int twl4030_remove_script(u8 flags);
+-extern void twl4030_power_off(void);
+ 
+ struct twl4030_codec_data {
+ 	unsigned int digimic_delay; /* in ms */
 -- 
 1.9.1
+
