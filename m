@@ -1,163 +1,154 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] arm64/efi: efistub: jump to 'stext' directly, not
- through the header
-Date: Tue, 7 Oct 2014 09:49:03 +0200
-Message-ID: <CAKv+Gu_3h60BWUpJETBj-tvv+v76AtD=JJBynu0qX3BiDL6tpg@mail.gmail.com>
-References: <1405421886-11692-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1405522297.25580.72.camel@deneb.redhat.com>
-	<20140716155345.GB30313@leverpostej>
-	<1405539927.25580.74.camel@deneb.redhat.com>
-	<CAKv+Gu-bqXKoy-G00cWPJES=6A_ofu=cfBOsD0ZriHa4AGxG0A@mail.gmail.com>
-	<1405544636.25580.83.camel@deneb.redhat.com>
-	<CAKv+Gu8kvU8ndeG2vF5HqRhjK+_F=8D52eabHzy++nTHt_pAYQ@mail.gmail.com>
-	<1405606141.25580.108.camel@deneb.redhat.com>
-	<CAKv+Gu9N4PB3BQ3_HOoaFopkugbWJujEAb419HAULcjujtX1Uw@mail.gmail.com>
-	<20141006193342.GC9811@fenchurch.internal.datastacks.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 18/44] mfd: twl4030-power: Register with kernel poweroff
+ handler
+Date: Tue, 7 Oct 2014 08:52:38 +0100
+Message-ID: <20141007075238.GA25331@lee--X1>
+References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+ <1412659726-29957-19-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141006193342.GC9811-FS9oOTXHwv9t4tGkRPVz9tcb/sdHg95EuydrBrBl+0sAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-alpha-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1412659726-29957-19-git-send-email-linux@roeck-us.net>
+Sender: linux-alpha-owner@vger.kernel.org
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: linux-kernel@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Samuel Ortiz <same>
 List-Id: linux-efi@vger.kernel.org
 
-On 6 October 2014 21:33, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Mon, Oct 06, 2014 at 08:13:01PM +0200, Ard Biesheuvel wrote:
->> On 17 July 2014 16:09, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > On Wed, 2014-07-16 at 23:13 +0200, Ard Biesheuvel wrote:
->> >> On 16 July 2014 23:03, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> >> > On Wed, 2014-07-16 at 22:38 +0200, Ard Biesheuvel wrote:
->> >> >> On 16 July 2014 21:45, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> >> >> > On Wed, 2014-07-16 at 16:53 +0100, Mark Rutland wrote:
->> >> >> >> On Wed, Jul 16, 2014 at 03:51:37PM +0100, Mark Salter wrote:
->> >> >> >> > On Tue, 2014-07-15 at 12:58 +0200, Ard Biesheuvel wrote:
->> >> >> >> > > After the EFI stub has done its business, it jumps into the kernel by branching
->> >> >> >> > > to offset #0 of the loaded Image, which is where it expects to find the header
->> >> >> >> > > containing a 'branch to stext' instruction.
->> >> >> >> > >
->> >> >> >> > > However, the header is not covered by any PE/COFF section, so the header may
->> >> >> >> > > not actually be loaded at the expected offset. So instead, jump to 'stext'
->> >> >> >> > > directly, which is at the base of the PE/COFF .text section, by supplying a
->> >> >> >> > > symbol 'stext_offset' to efi-entry.o which contains the relative offset of
->> >> >> >> > > stext into the Image. Also replace other open coded calculations of the same
->> >> >> >> > > value with a reference to 'stext_offset'
->> >> >> >> >
->> >> >> >> > Have you actually seen a situation where the header isn't there?
->> >> >> >> > Isn't the kernel header actually part of the pe/coff file and
->> >> >> >> > firmware loads the whole file into RAM?
->> >> >> >>
->> >> >> >> From my understanding of Ard's earlier comments, this part isn't
->> >> >> >> guaranteed per the UEFI spec.
->> >> >> >>
->> >> >> >> I would rather we weren't relying on implementation details.
->> >> >> >>
->> >> >> >
->> >> >> > Could be. I didn't see anything about it in the UEFI spec, but I
->> >> >> > probably wasn't exhaustive in my search. In any case, there's at
->> >> >> > least one other place broken if the kernel header isn't included
->> >> >> > in the loaded image.
->> >> >> >
->> >> >>
->> >> >> I have not been able to find anything in the PE/COFF documents that
->> >> >> tells you what to put in memory areas that are not covered by a
->> >> >> section. Expecting the header to be there is indeed relying on an
->> >> >> implementation detail, which seems risky.
->> >> >> And indeed, if there are any other (non EFI related) uses of header
->> >> >> fields in the kernel, it would be good to have a look at those well,
->> >> >
->> >> > I think we need to come up with a loader which does load an image
->> >> > without kernel header so that we can test. Otherwise, we'll probably
->> >> > end up with buggy code anyway. The stub code assumes the the loaded
->> >> > image pointed to by the system table is the whole image. Seems like
->> >> > we'd need to add code to determine if it is whole kernel image or
->> >> > image without initial header. Stub would have to handle both cases.
->> >> > For instance, one case would want image placed at 2MiB+TEXT_OFFSET,
->> >> > other case would want 2MiB+TEXT_OFFSET+sizeof(kernel header).
->> >> >
->> >>
->> >> No, this has nothing to do with misaligned data.
->> >>
->> >> The PE/COFF .text section does not start at virtual offset #0 but at
->> >> virtual offset 'stext - efi_head'.
->> >> In other words, there is a hole in the virtual image where the header
->> >> is supposed to be.
->> >> So if there is no PE/COFF section describing what data should be put
->> >> at offset #0 by the loader, we can't assume the header is there, even
->> >> if ImageBase does start at #0
->> >
->> > I get that. You're supposing UEFI will always allocate memory for the
->> > full image, but only sometimes copy the PE/COFF headers. I can see your
->> > point from a PE/COFF perspective, but not so much from the UEFI spec
->> > perspective where the language leads me to think it treats the PE/COFF
->> > images as one unit wrt loading. In any case, it really isn't worth
->> > arguing about. I don't have any objection to the patch since it won't
->> > break anything from my perspective and it'll protect against breakage
->> > which could possibly occur with some firmware implementations.
->> >
->>
->> I am reviving this old thread because it appears we may have seen an
->> issue involving shim and GRUB where data not covered by any loadable
->> PE/COFF section was not actually loaded to memory. In this case, it
->> was the ".reloc" section, not the header but the conclusion should be
->> the same.
->>
->> @Peter: this is a second-hand account so perhaps you could fill in
->> with some details? Original thread is here:
->> http://marc.info/?l=linux-arm-kernel&m=140542202520933&w=2
->
-> So what happened with the shim+grub .reloc problem was that grub's
-> binary has relocations (which I think don't strictly need to be
-> processed), but shim's relocation code was *completely* defective.
->
-> Then I fixed shim to try to process relocations, but got it wrong
-> because in my mind data directories were file addresses rather than
-> relative virtual addresses (often they are identical, but by spec
-> they're RVAs). In grub's binary, everything has matching file addresses
-> and RVAs.  So grub worked, but other things did not.  That change is
-> here:
->
-> https://github.com/mjg59/shim/commit/a846aedd0e9dfe26ca6afaf6a1db8a54c20363c1
->
-> Then I realized that they are always RVAs and we have to match the base
-> relocation data directory up with the .reloc section for processing.  So
-> in the current code we /do/ load .reloc into memory to process the
-> relocations if we find the section there, but we don't mirror it into
-> the final image we've relocated and are executing if it's marked
-> discardable, which it typically is.
->
-> That change is here:
->
-> https://github.com/mjg59/shim/commit/a846aedd0e9dfe26ca6afaf6a1db8a54c20363c1
->
-> And it seems to work with all the binaries we actually generate,
-> including grub, MokManager.efi, fallback.efi, etc.
->
-> Just in general, though, I don't see that there's any PE spec
-> requirement that we have to copy anything from the binary into the
-> address range we're going to jump in to unless all of the following are
-> true:
->
-> 1) it is covered by a section header
-> 2) the section is non-discardable
-> 3) the section's SizeOfRawData is nonzero
-> 4) basic constraints of sanity are met - i.e. the section data is
->    actually entirely within the binary, it's doesn't overlap with the
->    data directory or the PE headers, etc.
->
-> There is the obvious case where something should exist in your running
-> copy that is not not covered by the above - .bss and such.  But those
-> are not /copied/ from the binary.
->
-> So is there a question now?
->
+On Mon, 06 Oct 2014, Guenter Roeck wrote:
 
-You have answered my question: it confirms that it is a bad idea to
-rely on the header having been copied to memory at the same relative
-offset from .text as it appears in the file.
+> Register with kernel poweroff handler instead of setting pm_power_off
+> directly. Register with a low priority value of 64 to reflect that
+> the original code only sets pm_power_off if it was not already set.
+>=20
+> Make twl4030_power_off static as it is only called from the twl4030-p=
+ower
+> driver.
+>=20
+> Cc: Samuel Ortiz <sameo@linux.intel.com>
+> Cc: Lee Jones <lee.jones@linaro.org>
+> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+> ---
+>  drivers/mfd/twl4030-power.c | 25 +++++++++++++++++++++----
+>  include/linux/i2c/twl.h     |  1 -
+>  2 files changed, 21 insertions(+), 5 deletions(-)
+>=20
+> diff --git a/drivers/mfd/twl4030-power.c b/drivers/mfd/twl4030-power.=
+c
+> index 4d3ff37..bd6b830 100644
+> --- a/drivers/mfd/twl4030-power.c
+> +++ b/drivers/mfd/twl4030-power.c
+> @@ -25,9 +25,10 @@
+>   */
+> =20
+>  #include <linux/module.h>
+> -#include <linux/pm.h>
+> +#include <linux/notifier.h>
+>  #include <linux/i2c/twl.h>
+>  #include <linux/platform_device.h>
+> +#include <linux/pm.h>
+>  #include <linux/of.h>
+>  #include <linux/of_device.h>
+> =20
+> @@ -611,7 +612,8 @@ twl4030_power_configure_resources(const struct tw=
+l4030_power_data *pdata)
+>   * After a successful execution, TWL shuts down the power to the SoC
+>   * and all peripherals connected to it.
+>   */
+> -void twl4030_power_off(void)
+> +static int twl4030_power_off(struct notifier_block *this, unsigned l=
+ong unused1,
+> +			     void *unused2)
+>  {
+>  	int err;
+> =20
+> @@ -619,8 +621,15 @@ void twl4030_power_off(void)
+>  			       TWL4030_PM_MASTER_P1_SW_EVENTS);
+>  	if (err)
+>  		pr_err("TWL4030 Unable to power off\n");
+> +
+> +	return NOTIFY_DONE;
+>  }
+> =20
+> +static struct notifier_block twl4030_poweroff_nb =3D {
+> +	.notifier_call =3D twl4030_power_off,
+> +	.priority =3D 64,
 
-Thanks for the elaborate response. I will respin the patch against
-3.17, test and repost.
+64 out of what?  How is this calculated?  Wouldn't it be better to
+define these?
 
--- 
-Ard.
+> +};
+> +
+>  static bool twl4030_power_use_poweroff(const struct twl4030_power_da=
+ta *pdata,
+>  					struct device_node *node)
+>  {
+> @@ -836,7 +845,7 @@ static int twl4030_power_probe(struct platform_de=
+vice *pdev)
+>  	}
+> =20
+>  	/* Board has to be wired properly to use this feature */
+> -	if (twl4030_power_use_poweroff(pdata, node) && !pm_power_off) {
+> +	if (twl4030_power_use_poweroff(pdata, node)) {
+>  		/* Default for SEQ_OFFSYNC is set, lets ensure this */
+>  		err =3D twl_i2c_read_u8(TWL_MODULE_PM_MASTER, &val,
+>  				      TWL4030_PM_MASTER_CFG_P123_TRANSITION);
+> @@ -853,7 +862,13 @@ static int twl4030_power_probe(struct platform_d=
+evice *pdev)
+>  			}
+>  		}
+> =20
+> -		pm_power_off =3D twl4030_power_off;
+> +		err =3D register_poweroff_handler(&twl4030_poweroff_nb);
+> +		if (err) {
+> +			dev_err(&pdev->dev,
+> +				"Failed to register poweroff handler\n");
+
+If this is not fatal, you should issue a dev_warn() instead.
+
+> +			/* Not a fatal error */
+> +			err =3D 0;
+
+How about using your own variable for this?  Then you don't have to
+worry about resetting it.
+
+> +		}
+>  	}
+> =20
+>  relock:
+> @@ -869,6 +884,8 @@ relock:
+> =20
+>  static int twl4030_power_remove(struct platform_device *pdev)
+>  {
+> +	unregister_poweroff_handler(&twl4030_poweroff_nb);
+
+Perhaps a naive question, but is there any way you can do this using
+devres (devm_* managed resources)?
+
+>  	return 0;
+>  }
+> =20
+> diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
+> index 8cfb50f..f8544f1 100644
+> --- a/include/linux/i2c/twl.h
+> +++ b/include/linux/i2c/twl.h
+> @@ -680,7 +680,6 @@ struct twl4030_power_data {
+>  };
+> =20
+>  extern int twl4030_remove_script(u8 flags);
+> -extern void twl4030_power_off(void);
+> =20
+>  struct twl4030_codec_data {
+>  	unsigned int digimic_delay; /* in ms */
+
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
+--
+To unsubscribe from this list: send the line "unsubscribe linux-alpha" =
+in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
