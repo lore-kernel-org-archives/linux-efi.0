@@ -1,124 +1,115 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 09/44] mfd: palmas: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:11 -0700
-Message-ID: <1412659726-29957-10-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 11/44] mfd: retu: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:13 -0700
+Message-ID: <1412659726-29957-12-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-alpha-owner@vger.kernel.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-alpha-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Samuel
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>Lee Jones <l>
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly. Register with a low priority value of 64 to reflect that
 the original code only sets pm_power_off if it was not already set.
 
-Cc: Samuel Ortiz <sameo@linux.intel.com>
 Cc: Lee Jones <lee.jones@linaro.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- drivers/mfd/palmas.c       | 30 +++++++++++++++++-------------
- include/linux/mfd/palmas.h |  3 +++
- 2 files changed, 20 insertions(+), 13 deletions(-)
+ drivers/mfd/retu-mfd.c | 33 +++++++++++++++++++--------------
+ 1 file changed, 19 insertions(+), 14 deletions(-)
 
-diff --git a/drivers/mfd/palmas.c b/drivers/mfd/palmas.c
-index 28cb048..4d78847 100644
---- a/drivers/mfd/palmas.c
-+++ b/drivers/mfd/palmas.c
-@@ -19,6 +19,7 @@
- #include <linux/i2c.h>
- #include <linux/interrupt.h>
- #include <linux/irq.h>
+diff --git a/drivers/mfd/retu-mfd.c b/drivers/mfd/retu-mfd.c
+index 663f8a3..64b60fa 100644
+--- a/drivers/mfd/retu-mfd.c
++++ b/drivers/mfd/retu-mfd.c
+@@ -22,6 +22,8 @@
+ #include <linux/slab.h>
+ #include <linux/mutex.h>
+ #include <linux/module.h>
++#include <linux/notifier.h>
 +#include <linux/pm.h>
  #include <linux/regmap.h>
- #include <linux/err.h>
  #include <linux/mfd/core.h>
-@@ -425,20 +426,18 @@ static void palmas_dt_to_pdata(struct i2c_client *i2c,
- 			"ti,system-power-controller");
- }
+ #include <linux/mfd/retu.h>
+@@ -43,6 +45,7 @@ struct retu_dev {
+ 	struct device			*dev;
+ 	struct mutex			mutex;
+ 	struct regmap_irq_chip_data	*irq_data;
++	struct notifier_block		poweroff_nb;
+ };
  
--static struct palmas *palmas_dev;
--static void palmas_power_off(void)
-+static int palmas_power_off(struct notifier_block *this, unsigned long unused1,
-+			    void *unused2)
- {
-+	struct palmas *palmas = container_of(this, struct palmas, poweroff_nb);
- 	unsigned int addr;
- 	int ret, slave;
+ static struct resource retu_pwrbutton_res[] = {
+@@ -81,9 +84,6 @@ static struct regmap_irq_chip retu_irq_chip = {
+ 	.ack_base	= RETU_REG_IDR,
+ };
  
--	if (!palmas_dev)
--		return;
+-/* Retu device registered for the power off. */
+-static struct retu_dev *retu_pm_power_off;
 -
- 	slave = PALMAS_BASE_TO_SLAVE(PALMAS_PMU_CONTROL_BASE);
- 	addr = PALMAS_BASE_TO_REG(PALMAS_PMU_CONTROL_BASE, PALMAS_DEV_CTRL);
+ static struct resource tahvo_usb_res[] = {
+ 	{
+ 		.name	= "tahvo-usb",
+@@ -165,12 +165,14 @@ int retu_write(struct retu_dev *rdev, u8 reg, u16 data)
+ }
+ EXPORT_SYMBOL_GPL(retu_write);
  
- 	ret = regmap_update_bits(
--			palmas_dev->regmap[slave],
-+			palmas->regmap[slave],
- 			addr,
- 			PALMAS_DEV_CTRL_DEV_ON,
- 			0);
-@@ -446,6 +445,8 @@ static void palmas_power_off(void)
- 	if (ret)
- 		pr_err("%s: Unable to write to DEV_CTRL_DEV_ON: %d\n",
- 				__func__, ret);
+-static void retu_power_off(void)
++static int retu_power_off(struct notifier_block *this, unsigned long unused1,
++			  void *unused2)
+ {
+-	struct retu_dev *rdev = retu_pm_power_off;
++	struct retu_dev *rdev = container_of(this, struct retu_dev,
++					     poweroff_nb);
+ 	int reg;
+ 
+-	mutex_lock(&retu_pm_power_off->mutex);
++	mutex_lock(&rdev->mutex);
+ 
+ 	/* Ignore power button state */
+ 	regmap_read(rdev->regmap, RETU_REG_CC1, &reg);
+@@ -183,7 +185,9 @@ static void retu_power_off(void)
+ 	for (;;)
+ 		cpu_relax();
+ 
+-	mutex_unlock(&retu_pm_power_off->mutex);
++	mutex_unlock(&rdev->mutex);
 +
 +	return NOTIFY_DONE;
  }
  
- static unsigned int palmas_features = PALMAS_PMIC_FEATURE_SMPS10_BOOST;
-@@ -668,9 +669,15 @@ no_irq:
- 		ret = of_platform_populate(node, NULL, NULL, &i2c->dev);
- 		if (ret < 0) {
- 			goto err_irq;
--		} else if (pdata->pm_off && !pm_power_off) {
--			palmas_dev = palmas;
--			pm_power_off = palmas_power_off;
-+		} else if (pdata->pm_off) {
-+			palmas->poweroff_nb.notifier_call = palmas_power_off;
-+			palmas->poweroff_nb.priority = 64;
-+			ret = register_poweroff_handler(&palmas->poweroff_nb);
-+			if (ret) {
-+				dev_err(palmas->dev,
-+					"Failed to register poweroff handler");
-+				ret = 0;
-+			}
- 		}
+ static int retu_regmap_read(void *context, const void *reg, size_t reg_size,
+@@ -279,9 +283,13 @@ static int retu_probe(struct i2c_client *i2c, const struct i2c_device_id *id)
+ 		return ret;
  	}
  
-@@ -698,10 +705,7 @@ static int palmas_i2c_remove(struct i2c_client *i2c)
- 			i2c_unregister_device(palmas->i2c_clients[i]);
+-	if (i2c->addr == 1 && !pm_power_off) {
+-		retu_pm_power_off = rdev;
+-		pm_power_off	  = retu_power_off;
++	if (i2c->addr == 1) {
++		rdev->poweroff_nb.notifier_call = retu_power_off;
++		rdev->poweroff_nb.priority = 64;
++		ret = register_poweroff_handler(&rdev->poweroff_nb);
++		if (ret)
++			dev_err(rdev->dev,
++				"Failed to register poweroff handler\n");
  	}
- 
--	if (palmas == palmas_dev) {
--		pm_power_off = NULL;
--		palmas_dev = NULL;
--	}
-+	unregister_poweroff_handler(&palmas->poweroff_nb);
  
  	return 0;
- }
-diff --git a/include/linux/mfd/palmas.h b/include/linux/mfd/palmas.h
-index fb0390a..4715057 100644
---- a/include/linux/mfd/palmas.h
-+++ b/include/linux/mfd/palmas.h
-@@ -18,6 +18,7 @@
+@@ -291,10 +299,7 @@ static int retu_remove(struct i2c_client *i2c)
+ {
+ 	struct retu_dev *rdev = i2c_get_clientdata(i2c);
  
- #include <linux/usb/otg.h>
- #include <linux/leds.h>
-+#include <linux/notifier.h>
- #include <linux/regmap.h>
- #include <linux/regulator/driver.h>
- #include <linux/extcon.h>
-@@ -68,6 +69,8 @@ struct palmas {
- 	struct i2c_client *i2c_clients[PALMAS_NUM_CLIENTS];
- 	struct regmap *regmap[PALMAS_NUM_CLIENTS];
- 
-+	struct notifier_block poweroff_nb;
-+
- 	/* Stored chip id */
- 	int id;
+-	if (retu_pm_power_off == rdev) {
+-		pm_power_off	  = NULL;
+-		retu_pm_power_off = NULL;
+-	}
++	unregister_poweroff_handler(&rdev->poweroff_nb);
+ 	mfd_remove_devices(rdev->dev);
+ 	regmap_del_irq_chip(i2c->irq, rdev->irq_data);
  
 -- 
 1.9.1
+
