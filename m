@@ -1,66 +1,31 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 06/44] gpio-poweroff: Drop reference to pm_power_off from
- devicetree bindings
-Date: Tue, 7 Oct 2014 12:03:32 +0100
-Message-ID: <20141007110332.GF24725@leverpostej>
+From: Richard Weinberger <richard@nod.at>
+Subject: Re: [PATCH 08/44] kernel: Move pm_power_off to common code
+Date: Tue, 07 Oct 2014 15:58:47 +0200
+Message-ID: <5433F197.8040801@nod.at>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-7-git-send-email-linux@roeck-us.net>
+ <1412659726-29957-9-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1412659726-29957-7-git-send-email-linux@roeck-us.net>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "lguest@lists.ozlabs.org" <lguest@lists.ozlabs.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-alpha@vger.kernel.org" <linux-alpha@vger.kernel.org>, "linux-am33-list@redhat.com" <linux-am33-list@redhat.com>, "linux-cris-kernel@axis.com" <linux-cris-kernel@axis.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-hexagon@vger.kernel.org" <linux-hexagon@vger.kernel.org>, "linux-m32r-ja@ml.linux-m32r.org" <linux-m32r-ja@ml.linux-m32r.org>, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>lin
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <1412659726-29957-9-git-send-email-linux@roeck-us.net>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
+To: Guenter Roeck <linux@roeck-us.net>, linux-kernel@vger.kernel.org
+Cc: Jonas Bonn <jonas@southpole.se>, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Steven Miao <realmz6@gmail.com>, linux-xtensa@linux-xtensa.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, David Howells <dhowells@redhat.com>, Max Filippov <jcmvbkbc@gmail.com>, Paul Mackerras <paulus@samba.org>, Ralf Baechle <ralf@linux-mips.org>, Pavel Machek <pavel@ucw.cz>, "H. Peter Anvin" <hpa@zytor.com>, Guan Xuetao <gxt@mprc.pku.edu.cn>, Thomas Gleixner <tglx@linutronix.de>, Lennox Wu <lennox.wu@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, Jesper Nilsson <jesper.nilsson@axis.com>, lguest@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, linux-c6x-dev@linux-c6x.org, Len Brown <len.brown@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 07, 2014 at 06:28:08AM +0100, Guenter Roeck wrote:
-> pm_power_off is an implementation detail. Replace it with a more generic
-> description of the driver's functionality.
-> 
-> Cc: Rob Herring <robh+dt@kernel.org>
-> Cc: Pawel Moll <pawel.moll@arm.com>
-> Cc: Mark Rutland <mark.rutland@arm.com>
+Am 07.10.2014 07:28, schrieb Guenter Roeck:
+>  arch/um/kernel/reboot.c            |  2 --
 
-Acked-by: Mark Rutland <mark.rutland@arm.com>
+Acked-by: Richard Weinberger <richard@nod.at>
 
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  Documentation/devicetree/bindings/gpio/gpio-poweroff.txt | 10 +++++-----
->  1 file changed, 5 insertions(+), 5 deletions(-)
-> 
-> diff --git a/Documentation/devicetree/bindings/gpio/gpio-poweroff.txt b/Documentation/devicetree/bindings/gpio/gpio-poweroff.txt
-> index d4eab92..c95a1a6 100644
-> --- a/Documentation/devicetree/bindings/gpio/gpio-poweroff.txt
-> +++ b/Documentation/devicetree/bindings/gpio/gpio-poweroff.txt
-> @@ -2,12 +2,12 @@ Driver a GPIO line that can be used to turn the power off.
->  
->  The driver supports both level triggered and edge triggered power off.
->  At driver load time, the driver will request the given gpio line and
-> -install a pm_power_off handler. If the optional properties 'input' is
-> -not found, the GPIO line will be driven in the inactive
-> +install a handler to power off the system. If the optional properties
-> +'input' is not found, the GPIO line will be driven in the inactive
->  state. Otherwise its configured as an input.
->  
-> -When the pm_power_off is called, the gpio is configured as an output,
-> -and drive active, so triggering a level triggered power off
-> +When the the poweroff handler is called, the gpio is configured as an
-> +output, and drive active, so triggering a level triggered power off
->  condition. This will also cause an inactive->active edge condition, so
->  triggering positive edge triggered power off. After a delay of 100ms,
->  the GPIO is set to inactive, thus causing an active->inactive edge,
-> @@ -24,7 +24,7 @@ Required properties:
->  
->  Optional properties:
->  - input : Initially configure the GPIO line as an input. Only reconfigure
-> -  it to an output when the pm_power_off function is called. If this optional
-> +  it to an output when the poweroff handler is called. If this optional
->    property is not specified, the GPIO is initialized as an output in its
->    inactive state.
->  
-> -- 
-> 1.9.1
-> 
-> 
+Thanks,
+//richard
