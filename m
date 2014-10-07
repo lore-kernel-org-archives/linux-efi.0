@@ -1,90 +1,93 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 27/44] x86: apm: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:29 -0700
-Message-ID: <1412659726-29957-28-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 28/44] x86: olpc: Register xo1 poweroff handler with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:30 -0700
+Message-ID: <1412659726-29957-29-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-ia64-owner@vger.kernel.org>
+Return-path: <linux-m68k-owner@vger.kernel.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-ia64-owner@vger.kernel.org
+Sender: linux-m68k-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
 Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Thomas
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly. Register with high priority value of 192 to reflect that
-the original code overwrites existing poweroff handlers.
+the driver explicitly wants to override default poweroff handlers.
 
 Cc: Thomas Gleixner <tglx@linutronix.de>
 Cc: Ingo Molnar <mingo@redhat.com>
 Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Jiri Kosina <jkosina@suse.cz>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- arch/x86/kernel/apm_32.c | 20 +++++++++++++++-----
- 1 file changed, 15 insertions(+), 5 deletions(-)
+ arch/x86/platform/olpc/olpc-xo1-pm.c | 20 +++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/kernel/apm_32.c b/arch/x86/kernel/apm_32.c
-index 5848744..84566a6 100644
---- a/arch/x86/kernel/apm_32.c
-+++ b/arch/x86/kernel/apm_32.c
-@@ -219,6 +219,7 @@
- #include <linux/init.h>
- #include <linux/time.h>
- #include <linux/sched.h>
+diff --git a/arch/x86/platform/olpc/olpc-xo1-pm.c b/arch/x86/platform/olpc/olpc-xo1-pm.c
+index a9acde7..96fba36 100644
+--- a/arch/x86/platform/olpc/olpc-xo1-pm.c
++++ b/arch/x86/platform/olpc/olpc-xo1-pm.c
+@@ -15,6 +15,7 @@
+ #include <linux/cs5535.h>
+ #include <linux/platform_device.h>
+ #include <linux/export.h>
 +#include <linux/notifier.h>
  #include <linux/pm.h>
- #include <linux/capability.h>
- #include <linux/device.h>
-@@ -981,7 +982,8 @@ recalc:
-  *	on their first cpu.
-  */
+ #include <linux/mfd/core.h>
+ #include <linux/suspend.h>
+@@ -92,7 +93,8 @@ asmlinkage __visible int xo1_do_sleep(u8 sleep_state)
+ 	return 0;
+ }
  
--static void apm_power_off(void)
-+static int apm_power_off(struct notifier_block *this, unsigned long unused1,
+-static void xo1_power_off(void)
++static int xo1_power_off(struct notifier_block *this, unsigned long unused1,
 +			 void *unused2)
  {
- 	/* Some bioses don't like being called from CPU != 0 */
- 	if (apm_info.realmode_power_off) {
-@@ -990,8 +992,14 @@ static void apm_power_off(void)
- 	} else {
- 		(void)set_system_power_state(APM_STATE_OFF);
- 	}
+ 	printk(KERN_INFO "OLPC XO-1 power off sequence...\n");
+ 
+@@ -108,8 +110,15 @@ static void xo1_power_off(void)
+ 
+ 	/* Write SLP_EN bit to start the machinery */
+ 	outl(0x00002000, acpi_base + CS5536_PM1_CNT);
++
 +	return NOTIFY_DONE;
  }
  
-+static struct notifier_block apm_poweroff_nb = {
-+	.notifier_call = apm_power_off,
++static struct notifier_block xo1_poweroff_nb = {
++	.notifier_call = xo1_power_off,
 +	.priority = 192,
 +};
 +
- #ifdef CONFIG_APM_DO_ENABLE
+ static int xo1_power_state_valid(suspend_state_t pm_state)
+ {
+ 	/* suspend-to-RAM only */
+@@ -146,8 +155,12 @@ static int xo1_pm_probe(struct platform_device *pdev)
  
- /**
-@@ -1847,8 +1855,11 @@ static int apm(void *unused)
+ 	/* If we have both addresses, we can override the poweroff hook */
+ 	if (pms_base && acpi_base) {
++		err = register_poweroff_handler(&xo1_poweroff_nb);
++		if (err) {
++			dev_err(&pdev->dev, "Failed to register poweroff handler\n");
++			return err;
++		}
+ 		suspend_set_ops(&xo1_suspend_ops);
+-		pm_power_off = xo1_power_off;
+ 		printk(KERN_INFO "OLPC XO-1 support registered\n");
  	}
  
- 	/* Install our power off handler.. */
--	if (power_off)
--		pm_power_off = apm_power_off;
-+	if (power_off) {
-+		error = register_poweroff_handler(&apm_poweroff_nb);
-+		if (error)
-+			pr_err("apm: Failed to register poweroff handler\n");
-+	}
+@@ -158,12 +171,13 @@ static int xo1_pm_remove(struct platform_device *pdev)
+ {
+ 	mfd_cell_disable(pdev);
  
- 	if (num_online_cpus() == 1 || smp) {
- #if defined(CONFIG_APM_DISPLAY_BLANK) && defined(CONFIG_VT)
-@@ -2408,9 +2419,8 @@ static void __exit apm_exit(void)
- 			apm_error("disengage power management", error);
- 	}
- 	misc_deregister(&apm_device);
-+	unregister_poweroff_handler(&apm_poweroff_nb);
- 	remove_proc_entry("apm", NULL);
--	if (power_off)
--		pm_power_off = NULL;
- 	if (kapmd_task) {
- 		kthread_stop(kapmd_task);
- 		kapmd_task = NULL;
++	unregister_poweroff_handler(&xo1_poweroff_nb);
++
+ 	if (strcmp(pdev->name, "cs5535-pms") == 0)
+ 		pms_base = 0;
+ 	else if (strcmp(pdev->name, "olpc-xo1-pm-acpi") == 0)
+ 		acpi_base = 0;
+ 
+-	pm_power_off = NULL;
+ 	return 0;
+ }
+ 
 -- 
 1.9.1
-
