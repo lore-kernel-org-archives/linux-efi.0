@@ -1,39 +1,55 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 38/44] x86: lguest: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:40 -0700
-Message-ID: <1412659726-29957-39-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 43/44] hwmon: (ab8500) Call kernel_power_off instead of pm_power_off
+Date: Mon,  6 Oct 2014 22:28:45 -0700
+Message-ID: <1412659726-29957-44-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-alpha-owner@vger.kernel.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-alpha-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Rusty
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Jean
 List-Id: linux-efi@vger.kernel.org
 
-Register with kernel poweroff handler instead of setting pm_power_off
-directly.
+Drivers should not call pm_power_off directly; it is not guaranteed
+to be non-NULL. Call kernel_power_off instead.
 
-Cc: Rusty Russell <rusty@rustcorp.com.au>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Jean Delvare <jdelvare@suse.de>
+Reviewed-by: Jean Delvare <jdelvare@suse.de>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- arch/x86/lguest/boot.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ drivers/hwmon/ab8500.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/lguest/boot.c b/arch/x86/lguest/boot.c
-index aae9413..083a999 100644
---- a/arch/x86/lguest/boot.c
-+++ b/arch/x86/lguest/boot.c
-@@ -1441,7 +1441,7 @@ __init void lguest_init(void)
- 	 * the Guest routine to power off, and the reboot hook to our restart
- 	 * routine.
- 	 */
--	pm_power_off = lguest_power_off;
-+	register_poweroff_handler_simple(lguest_power_off, 128);
- 	machine_ops.restart = lguest_restart;
+diff --git a/drivers/hwmon/ab8500.c b/drivers/hwmon/ab8500.c
+index d844dc8..8b6a4f4 100644
+--- a/drivers/hwmon/ab8500.c
++++ b/drivers/hwmon/ab8500.c
+@@ -6,7 +6,7 @@
+  *
+  * When the AB8500 thermal warning temperature is reached (threshold cannot
+  * be changed by SW), an interrupt is set, and if no further action is taken
+- * within a certain time frame, pm_power off will be called.
++ * within a certain time frame, kernel_power_off will be called.
+  *
+  * When AB8500 thermal shutdown temperature is reached a hardware shutdown of
+  * the AB8500 will occur.
+@@ -21,6 +21,7 @@
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
+ #include <linux/power/ab8500.h>
++#include <linux/reboot.h>
+ #include <linux/slab.h>
+ #include <linux/sysfs.h>
+ #include "abx500.h"
+@@ -106,7 +107,7 @@ static void ab8500_thermal_power_off(struct work_struct *work)
  
- 	/*
+ 	dev_warn(&abx500_data->pdev->dev, "Power off due to critical temp\n");
+ 
+-	pm_power_off();
++	kernel_power_off();
+ }
+ 
+ static ssize_t ab8500_show_name(struct device *dev,
 -- 
 1.9.1
+
