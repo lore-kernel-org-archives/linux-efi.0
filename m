@@ -1,117 +1,108 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 18/44] mfd: twl4030-power: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:20 -0700
-Message-ID: <1412659726-29957-19-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: [PATCH 13/44] mfd: max8907: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:15 -0700
+Message-ID: <1412659726-29957-14-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-alpha-owner@vger.kernel.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-alpha-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Samuel
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>Lee Jones <l>
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly. Register with a low priority value of 64 to reflect that
 the original code only sets pm_power_off if it was not already set.
 
-Make twl4030_power_off static as it is only called from the twl4030-power
-driver.
+Note that this patch fixes a problem on driver unload as side effect:
+The old code did not restore or clean up pm_power_off on remove,
+meaning the pointer was left in an undefined state.
 
-Cc: Samuel Ortiz <sameo@linux.intel.com>
-Cc: Lee Jones <lee.jones@linaro.org>
-Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Cc: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Samuel Ortiz <sameo-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 ---
- drivers/mfd/twl4030-power.c | 25 +++++++++++++++++++++----
- include/linux/i2c/twl.h     |  1 -
- 2 files changed, 21 insertions(+), 5 deletions(-)
+ drivers/mfd/max8907.c       | 24 ++++++++++++++++++------
+ include/linux/mfd/max8907.h |  2 ++
+ 2 files changed, 20 insertions(+), 6 deletions(-)
 
-diff --git a/drivers/mfd/twl4030-power.c b/drivers/mfd/twl4030-power.c
-index 4d3ff37..bd6b830 100644
---- a/drivers/mfd/twl4030-power.c
-+++ b/drivers/mfd/twl4030-power.c
-@@ -25,9 +25,10 @@
-  */
- 
+diff --git a/drivers/mfd/max8907.c b/drivers/mfd/max8907.c
+index 232749c..b8cddc1 100644
+--- a/drivers/mfd/max8907.c
++++ b/drivers/mfd/max8907.c
+@@ -19,6 +19,7 @@
  #include <linux/module.h>
--#include <linux/pm.h>
-+#include <linux/notifier.h>
- #include <linux/i2c/twl.h>
- #include <linux/platform_device.h>
-+#include <linux/pm.h>
  #include <linux/of.h>
  #include <linux/of_device.h>
++#include <linux/pm.h>
+ #include <linux/regmap.h>
+ #include <linux/slab.h>
  
-@@ -611,7 +612,8 @@ twl4030_power_configure_resources(const struct twl4030_power_data *pdata)
-  * After a successful execution, TWL shuts down the power to the SoC
-  * and all peripherals connected to it.
-  */
--void twl4030_power_off(void)
-+static int twl4030_power_off(struct notifier_block *this, unsigned long unused1,
+@@ -177,11 +178,16 @@ static const struct regmap_irq_chip max8907_rtc_irq_chip = {
+ 	.num_irqs = ARRAY_SIZE(max8907_rtc_irqs),
+ };
+ 
+-static struct max8907 *max8907_pm_off;
+-static void max8907_power_off(void)
++static int max8907_power_off(struct notifier_block *this, unsigned long unused1,
 +			     void *unused2)
  {
- 	int err;
- 
-@@ -619,8 +621,15 @@ void twl4030_power_off(void)
- 			       TWL4030_PM_MASTER_P1_SW_EVENTS);
- 	if (err)
- 		pr_err("TWL4030 Unable to power off\n");
+-	regmap_update_bits(max8907_pm_off->regmap_gen, MAX8907_REG_RESET_CNFG,
++	struct max8907 *max8907 = container_of(this, struct max8907,
++					       poweroff_nb);
++
++	regmap_update_bits(max8907->regmap_gen, MAX8907_REG_RESET_CNFG,
+ 			MAX8907_MASK_POWER_OFF, MAX8907_MASK_POWER_OFF);
 +
 +	return NOTIFY_DONE;
  }
  
-+static struct notifier_block twl4030_poweroff_nb = {
-+	.notifier_call = twl4030_power_off,
-+	.priority = 64,
-+};
-+
- static bool twl4030_power_use_poweroff(const struct twl4030_power_data *pdata,
- 					struct device_node *node)
- {
-@@ -836,7 +845,7 @@ static int twl4030_power_probe(struct platform_device *pdev)
+ static int max8907_i2c_probe(struct i2c_client *i2c,
+@@ -267,9 +273,13 @@ static int max8907_i2c_probe(struct i2c_client *i2c,
+ 		goto err_add_devices;
  	}
  
- 	/* Board has to be wired properly to use this feature */
--	if (twl4030_power_use_poweroff(pdata, node) && !pm_power_off) {
-+	if (twl4030_power_use_poweroff(pdata, node)) {
- 		/* Default for SEQ_OFFSYNC is set, lets ensure this */
- 		err = twl_i2c_read_u8(TWL_MODULE_PM_MASTER, &val,
- 				      TWL4030_PM_MASTER_CFG_P123_TRANSITION);
-@@ -853,7 +862,13 @@ static int twl4030_power_probe(struct platform_device *pdev)
- 			}
- 		}
- 
--		pm_power_off = twl4030_power_off;
-+		err = register_poweroff_handler(&twl4030_poweroff_nb);
-+		if (err) {
-+			dev_err(&pdev->dev,
-+				"Failed to register poweroff handler\n");
-+			/* Not a fatal error */
-+			err = 0;
-+		}
+-	if (pm_off && !pm_power_off) {
+-		max8907_pm_off = max8907;
+-		pm_power_off = max8907_power_off;
++	if (pm_off) {
++		max8907->poweroff_nb.notifier_call = max8907_power_off;
++		max8907->poweroff_nb.priority = 64;
++		ret = register_poweroff_handler(&max8907->poweroff_nb);
++		if (ret)
++			dev_err(&i2c->dev,
++				"Failed to register poweroff handler");
  	}
  
- relock:
-@@ -869,6 +884,8 @@ relock:
- 
- static int twl4030_power_remove(struct platform_device *pdev)
- {
-+	unregister_poweroff_handler(&twl4030_poweroff_nb);
-+
  	return 0;
- }
+@@ -293,6 +303,8 @@ static int max8907_i2c_remove(struct i2c_client *i2c)
+ {
+ 	struct max8907 *max8907 = i2c_get_clientdata(i2c);
  
-diff --git a/include/linux/i2c/twl.h b/include/linux/i2c/twl.h
-index 8cfb50f..f8544f1 100644
---- a/include/linux/i2c/twl.h
-+++ b/include/linux/i2c/twl.h
-@@ -680,7 +680,6 @@ struct twl4030_power_data {
++	unregister_poweroff_handler(&max8907->poweroff_nb);
++
+ 	mfd_remove_devices(max8907->dev);
+ 
+ 	regmap_del_irq_chip(max8907->i2c_gen->irq, max8907->irqc_rtc);
+diff --git a/include/linux/mfd/max8907.h b/include/linux/mfd/max8907.h
+index b06f7a6..016428e 100644
+--- a/include/linux/mfd/max8907.h
++++ b/include/linux/mfd/max8907.h
+@@ -13,6 +13,7 @@
+ #define __LINUX_MFD_MAX8907_H
+ 
+ #include <linux/mutex.h>
++#include <linux/notifier.h>
+ #include <linux/pm.h>
+ 
+ #define MAX8907_GEN_I2C_ADDR		(0x78 >> 1)
+@@ -247,6 +248,7 @@ struct max8907 {
+ 	struct regmap_irq_chip_data	*irqc_chg;
+ 	struct regmap_irq_chip_data	*irqc_on_off;
+ 	struct regmap_irq_chip_data	*irqc_rtc;
++	struct notifier_block		poweroff_nb;
  };
  
- extern int twl4030_remove_script(u8 flags);
--extern void twl4030_power_off(void);
- 
- struct twl4030_codec_data {
- 	unsigned int digimic_delay; /* in ms */
+ #endif
 -- 
 1.9.1
-
