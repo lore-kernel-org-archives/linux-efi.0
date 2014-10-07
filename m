@@ -1,45 +1,124 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH 05/44] mfd: as3722: Drop reference to pm_power_off from devicetree bindings
-Date: Mon,  6 Oct 2014 22:28:07 -0700
-Message-ID: <1412659726-29957-6-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: [PATCH 09/44] mfd: palmas: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:11 -0700
+Message-ID: <1412659726-29957-10-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Rob
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Samuel
 List-Id: linux-efi@vger.kernel.org
 
-Devicetree bindings are supposed to be operating system independent
-and should thus not describe how a specific functionality is implemented
-in Linux.
+Register with kernel poweroff handler instead of setting pm_power_off
+directly. Register with a low priority value of 64 to reflect that
+the original code only sets pm_power_off if it was not already set.
 
-Cc: Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Cc: Samuel Ortiz <sameo@linux.intel.com>
+Cc: Lee Jones <lee.jones@linaro.org>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- Documentation/devicetree/bindings/mfd/as3722.txt | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ drivers/mfd/palmas.c       | 30 +++++++++++++++++-------------
+ include/linux/mfd/palmas.h |  3 +++
+ 2 files changed, 20 insertions(+), 13 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/mfd/as3722.txt b/Documentation/devicetree/bindings/mfd/as3722.txt
-index 4f64b2a..0b2a609 100644
---- a/Documentation/devicetree/bindings/mfd/as3722.txt
-+++ b/Documentation/devicetree/bindings/mfd/as3722.txt
-@@ -122,8 +122,7 @@ Following are properties of regulator subnode.
+diff --git a/drivers/mfd/palmas.c b/drivers/mfd/palmas.c
+index 28cb048..4d78847 100644
+--- a/drivers/mfd/palmas.c
++++ b/drivers/mfd/palmas.c
+@@ -19,6 +19,7 @@
+ #include <linux/i2c.h>
+ #include <linux/interrupt.h>
+ #include <linux/irq.h>
++#include <linux/pm.h>
+ #include <linux/regmap.h>
+ #include <linux/err.h>
+ #include <linux/mfd/core.h>
+@@ -425,20 +426,18 @@ static void palmas_dt_to_pdata(struct i2c_client *i2c,
+ 			"ti,system-power-controller");
+ }
  
- Power-off:
- =========
--AS3722 supports the system power off by turning off all its rail. This
--is provided through pm_power_off.
-+AS3722 supports the system power off by turning off all its rails.
- The device node should have the following properties to enable this
- functionality
- ams,system-power-controller: Boolean, to enable the power off functionality
+-static struct palmas *palmas_dev;
+-static void palmas_power_off(void)
++static int palmas_power_off(struct notifier_block *this, unsigned long unused1,
++			    void *unused2)
+ {
++	struct palmas *palmas = container_of(this, struct palmas, poweroff_nb);
+ 	unsigned int addr;
+ 	int ret, slave;
+ 
+-	if (!palmas_dev)
+-		return;
+-
+ 	slave = PALMAS_BASE_TO_SLAVE(PALMAS_PMU_CONTROL_BASE);
+ 	addr = PALMAS_BASE_TO_REG(PALMAS_PMU_CONTROL_BASE, PALMAS_DEV_CTRL);
+ 
+ 	ret = regmap_update_bits(
+-			palmas_dev->regmap[slave],
++			palmas->regmap[slave],
+ 			addr,
+ 			PALMAS_DEV_CTRL_DEV_ON,
+ 			0);
+@@ -446,6 +445,8 @@ static void palmas_power_off(void)
+ 	if (ret)
+ 		pr_err("%s: Unable to write to DEV_CTRL_DEV_ON: %d\n",
+ 				__func__, ret);
++
++	return NOTIFY_DONE;
+ }
+ 
+ static unsigned int palmas_features = PALMAS_PMIC_FEATURE_SMPS10_BOOST;
+@@ -668,9 +669,15 @@ no_irq:
+ 		ret = of_platform_populate(node, NULL, NULL, &i2c->dev);
+ 		if (ret < 0) {
+ 			goto err_irq;
+-		} else if (pdata->pm_off && !pm_power_off) {
+-			palmas_dev = palmas;
+-			pm_power_off = palmas_power_off;
++		} else if (pdata->pm_off) {
++			palmas->poweroff_nb.notifier_call = palmas_power_off;
++			palmas->poweroff_nb.priority = 64;
++			ret = register_poweroff_handler(&palmas->poweroff_nb);
++			if (ret) {
++				dev_err(palmas->dev,
++					"Failed to register poweroff handler");
++				ret = 0;
++			}
+ 		}
+ 	}
+ 
+@@ -698,10 +705,7 @@ static int palmas_i2c_remove(struct i2c_client *i2c)
+ 			i2c_unregister_device(palmas->i2c_clients[i]);
+ 	}
+ 
+-	if (palmas == palmas_dev) {
+-		pm_power_off = NULL;
+-		palmas_dev = NULL;
+-	}
++	unregister_poweroff_handler(&palmas->poweroff_nb);
+ 
+ 	return 0;
+ }
+diff --git a/include/linux/mfd/palmas.h b/include/linux/mfd/palmas.h
+index fb0390a..4715057 100644
+--- a/include/linux/mfd/palmas.h
++++ b/include/linux/mfd/palmas.h
+@@ -18,6 +18,7 @@
+ 
+ #include <linux/usb/otg.h>
+ #include <linux/leds.h>
++#include <linux/notifier.h>
+ #include <linux/regmap.h>
+ #include <linux/regulator/driver.h>
+ #include <linux/extcon.h>
+@@ -68,6 +69,8 @@ struct palmas {
+ 	struct i2c_client *i2c_clients[PALMAS_NUM_CLIENTS];
+ 	struct regmap *regmap[PALMAS_NUM_CLIENTS];
+ 
++	struct notifier_block poweroff_nb;
++
+ 	/* Stored chip id */
+ 	int id;
+ 
 -- 
 1.9.1
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
