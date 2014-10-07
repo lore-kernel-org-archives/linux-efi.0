@@ -1,80 +1,102 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: [PATCH 41/44] x86: pmc_atom: Register poweroff handler with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:43 -0700
-Message-ID: <1412659726-29957-42-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: [PATCH 22/44] power/reset: as3722-poweroff: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:24 -0700
+Message-ID: <1412659726-29957-23-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-tegra-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Thomas
+Return-path: <linux-parisc-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+Sender: linux-parisc-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Sebastian
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly. Register with a low priority value of 64 to reflect that
 the original code only sets pm_power_off if it was not already set.
 
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Cc: Sebastian Reichel <sre@kernel.org>
+Cc: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- arch/x86/kernel/pmc_atom.c | 20 +++++++++++++++++---
- 1 file changed, 17 insertions(+), 3 deletions(-)
+ drivers/power/reset/as3722-poweroff.c | 36 ++++++++++++++++++-----------------
+ 1 file changed, 19 insertions(+), 17 deletions(-)
 
-diff --git a/arch/x86/kernel/pmc_atom.c b/arch/x86/kernel/pmc_atom.c
-index 0c424a6..79331a2 100644
---- a/arch/x86/kernel/pmc_atom.c
-+++ b/arch/x86/kernel/pmc_atom.c
-@@ -20,6 +20,8 @@
- #include <linux/pci.h>
- #include <linux/device.h>
- #include <linux/debugfs.h>
+diff --git a/drivers/power/reset/as3722-poweroff.c b/drivers/power/reset/as3722-poweroff.c
+index 6849711..7ebaed9 100644
+--- a/drivers/power/reset/as3722-poweroff.c
++++ b/drivers/power/reset/as3722-poweroff.c
+@@ -17,32 +17,33 @@
+ 
+ #include <linux/mfd/as3722.h>
+ #include <linux/module.h>
 +#include <linux/notifier.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
 +#include <linux/pm.h>
- #include <linux/seq_file.h>
- #include <linux/io.h>
+ #include <linux/slab.h>
  
-@@ -92,7 +94,8 @@ static inline void pmc_reg_write(struct pmc_dev *pmc, int reg_offset, u32 val)
- 	writel(val, pmc->regmap + reg_offset);
- }
+ struct as3722_poweroff {
+ 	struct device *dev;
+ 	struct as3722 *as3722;
++	struct notifier_block poweroff_nb;
+ };
  
--static void pmc_power_off(void)
-+static int pmc_power_off(struct notifier_block *this, unsigned long unused1,
-+			 void *unused2)
+-static struct as3722_poweroff *as3722_pm_poweroff;
+-
+-static void as3722_pm_power_off(void)
++static int as3722_power_off(struct notifier_block *this, unsigned long unused1,
++			    void *unused2)
  {
- 	u16	pm1_cnt_port;
- 	u32	pm1_cnt_value;
-@@ -107,8 +110,15 @@ static void pmc_power_off(void)
- 	pm1_cnt_value |= SLEEP_ENABLE;
++	struct as3722_poweroff *as3722_poweroff =
++		container_of(this, struct as3722_poweroff, poweroff_nb);
+ 	int ret;
  
- 	outl(pm1_cnt_value, pm1_cnt_port);
+-	if (!as3722_pm_poweroff) {
+-		pr_err("AS3722 poweroff is not initialised\n");
+-		return;
+-	}
+-
+-	ret = as3722_update_bits(as3722_pm_poweroff->as3722,
++	ret = as3722_update_bits(as3722_poweroff->as3722,
+ 		AS3722_RESET_CONTROL_REG, AS3722_POWER_OFF, AS3722_POWER_OFF);
+ 	if (ret < 0)
+-		dev_err(as3722_pm_poweroff->dev,
++		dev_err(as3722_poweroff->dev,
+ 			"RESET_CONTROL_REG update failed, %d\n", ret);
 +
 +	return NOTIFY_DONE;
  }
  
-+static struct notifier_block pmc_poweroff_nb = {
-+	.notifier_call = pmc_power_off,
-+	.priority = 64,
-+};
+ static int as3722_poweroff_probe(struct platform_device *pdev)
+@@ -63,18 +64,19 @@ static int as3722_poweroff_probe(struct platform_device *pdev)
+ 
+ 	as3722_poweroff->as3722 = dev_get_drvdata(pdev->dev.parent);
+ 	as3722_poweroff->dev = &pdev->dev;
+-	as3722_pm_poweroff = as3722_poweroff;
+-	if (!pm_power_off)
+-		pm_power_off = as3722_pm_power_off;
++	as3722_poweroff->poweroff_nb.notifier_call = as3722_power_off;
++	as3722_poweroff->poweroff_nb.priority = 64;
+ 
+-	return 0;
++	platform_set_drvdata(pdev, as3722_poweroff);
 +
- static void pmc_hw_reg_setup(struct pmc_dev *pmc)
++	return register_poweroff_handler(&as3722_poweroff->poweroff_nb);
+ }
+ 
+ static int as3722_poweroff_remove(struct platform_device *pdev)
  {
- 	/*
-@@ -247,8 +257,12 @@ static int pmc_setup_dev(struct pci_dev *pdev)
- 	acpi_base_addr &= ACPI_BASE_ADDR_MASK;
+-	if (pm_power_off == as3722_pm_power_off)
+-		pm_power_off = NULL;
+-	as3722_pm_poweroff = NULL;
++	struct as3722_poweroff *as3722_poweroff = platform_get_drvdata(pdev);
++
++	unregister_poweroff_handler(&as3722_poweroff->poweroff_nb);
  
- 	/* Install power off function */
--	if (acpi_base_addr != 0 && pm_power_off == NULL)
--		pm_power_off = pmc_power_off;
-+	if (acpi_base_addr != 0) {
-+		ret = register_poweroff_handler(&pmc_poweroff_nb);
-+		if (ret)
-+			dev_err(&pdev->dev,
-+				"Failed to install poweroff handler\n");
-+	}
- 
- 	pci_read_config_dword(pdev, PMC_BASE_ADDR_OFFSET, &pmc->base_addr);
- 	pmc->base_addr &= PMC_BASE_ADDR_MASK;
+ 	return 0;
+ }
 -- 
 1.9.1
+
