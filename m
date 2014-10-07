@@ -1,105 +1,82 @@
-From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 37/44] sh: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:39 -0700
-Message-ID: <1412659726-29957-38-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: [PATCH 25/44] power/reset: vexpress-poweroff: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:27 -0700
+Message-ID: <1412659726-29957-26-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-m68k-owner@vger.kernel.org>
-In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-m68k-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>
+Return-path: <linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1412659726-29957-1-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Sender: linux-metag-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-cris-kernel-VrBV9hrLPhE@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org, linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org, linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-tegra-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org, openipmi-developer-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, user-mode-linux-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-m68k-cunTk1MwBs8S/qaLPR03pWD2FQJk+8+b@public.gmane.org, linux-metag-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org, linux-parisc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
 directly.
 
-Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 ---
- arch/sh/boards/board-sh7785lcr.c       | 2 +-
- arch/sh/boards/board-urquell.c         | 2 +-
- arch/sh/boards/mach-highlander/setup.c | 2 +-
- arch/sh/boards/mach-landisk/setup.c    | 2 +-
- arch/sh/boards/mach-r2d/setup.c        | 2 +-
- arch/sh/boards/mach-sdk7786/setup.c    | 2 +-
- 6 files changed, 6 insertions(+), 6 deletions(-)
+ drivers/power/reset/vexpress-poweroff.c | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
 
-diff --git a/arch/sh/boards/board-sh7785lcr.c b/arch/sh/boards/board-sh7785lcr.c
-index 2c4771e..c092402 100644
---- a/arch/sh/boards/board-sh7785lcr.c
-+++ b/arch/sh/boards/board-sh7785lcr.c
-@@ -332,7 +332,7 @@ static void __init sh7785lcr_setup(char **cmdline_p)
+diff --git a/drivers/power/reset/vexpress-poweroff.c b/drivers/power/reset/vexpress-poweroff.c
+index 4dc102e2..060c55d 100644
+--- a/drivers/power/reset/vexpress-poweroff.c
++++ b/drivers/power/reset/vexpress-poweroff.c
+@@ -12,6 +12,7 @@
+  */
  
- 	printk(KERN_INFO "Renesas Technology Corp. R0P7785LC0011RL support.\n");
+ #include <linux/delay.h>
++#include <linux/notifier.h>
+ #include <linux/of.h>
+ #include <linux/of_device.h>
+ #include <linux/platform_device.h>
+@@ -36,11 +37,19 @@ static void vexpress_reset_do(struct device *dev, const char *what)
  
--	pm_power_off = sh7785lcr_power_off;
-+	register_poweroff_handler_simple(sh7785lcr_power_off, 128);
+ static struct device *vexpress_power_off_device;
  
- 	/* sm501 DRAM configuration */
- 	sm501_reg = ioremap_nocache(SM107_REG_ADDR, SM501_DRAM_CONTROL);
-diff --git a/arch/sh/boards/board-urquell.c b/arch/sh/boards/board-urquell.c
-index b52abcc..b3fa56f 100644
---- a/arch/sh/boards/board-urquell.c
-+++ b/arch/sh/boards/board-urquell.c
-@@ -204,7 +204,7 @@ static void __init urquell_setup(char **cmdline_p)
+-static void vexpress_power_off(void)
++static int vexpress_power_off(struct notifier_block *this,
++			      unsigned long unused1, void *unused2)
  {
- 	printk(KERN_INFO "Renesas Technology Corp. Urquell support.\n");
- 
--	pm_power_off = urquell_power_off;
-+	register_poweroff_handler_simple(urquell_power_off, 128);
- 
- 	register_smp_ops(&shx3_smp_ops);
- }
-diff --git a/arch/sh/boards/mach-highlander/setup.c b/arch/sh/boards/mach-highlander/setup.c
-index 4a52590..998f1a5 100644
---- a/arch/sh/boards/mach-highlander/setup.c
-+++ b/arch/sh/boards/mach-highlander/setup.c
-@@ -385,7 +385,7 @@ static void __init highlander_setup(char **cmdline_p)
- 
- 	__raw_writew(__raw_readw(PA_IVDRCTL) | 0x01, PA_IVDRCTL);	/* Si13112 */
- 
--	pm_power_off = r7780rp_power_off;
-+	register_poweroff_handler_simple(r7780rp_power_off, 128);
+ 	vexpress_reset_do(vexpress_power_off_device, "power off");
++
++	return NOTIFY_DONE;
  }
  
- static unsigned char irl2irq[HL_NR_IRL];
-diff --git a/arch/sh/boards/mach-landisk/setup.c b/arch/sh/boards/mach-landisk/setup.c
-index f1147ca..c817d80 100644
---- a/arch/sh/boards/mach-landisk/setup.c
-+++ b/arch/sh/boards/mach-landisk/setup.c
-@@ -89,7 +89,7 @@ static void __init landisk_setup(char **cmdline_p)
- 	__raw_writeb(__raw_readb(PA_LED) | 0x03, PA_LED);
++static struct notifier_block vexpress_poweroff_nb = {
++	.notifier_call = vexpress_power_off,
++	.priority = 128,
++};
++
+ static struct device *vexpress_restart_device;
  
- 	printk(KERN_INFO "I-O DATA DEVICE, INC. \"LANDISK Series\" support.\n");
--	pm_power_off = landisk_power_off;
-+	register_poweroff_handler_simple(landisk_power_off, 128);
- }
+ static void vexpress_restart(enum reboot_mode reboot_mode, const char *cmd)
+@@ -92,6 +101,7 @@ static int vexpress_reset_probe(struct platform_device *pdev)
+ 	const struct of_device_id *match =
+ 			of_match_device(vexpress_reset_of_match, &pdev->dev);
+ 	struct regmap *regmap;
++	int ret;
  
- /*
-diff --git a/arch/sh/boards/mach-r2d/setup.c b/arch/sh/boards/mach-r2d/setup.c
-index 4b98a52..a759d39 100644
---- a/arch/sh/boards/mach-r2d/setup.c
-+++ b/arch/sh/boards/mach-r2d/setup.c
-@@ -279,7 +279,7 @@ static void __init rts7751r2d_setup(char **cmdline_p)
- 					(ver >> 4) & 0xf, ver & 0xf);
- 
- 	__raw_writew(0x0000, PA_OUTPORT);
--	pm_power_off = rts7751r2d_power_off;
-+	register_poweroff_handler_simple(rts7751r2d_power_off, 128);
- 
- 	/* sm501 dram configuration:
- 	 * ColSizeX = 11 - External Memory Column Size: 256 words.
-diff --git a/arch/sh/boards/mach-sdk7786/setup.c b/arch/sh/boards/mach-sdk7786/setup.c
-index c29268b..cb26336 100644
---- a/arch/sh/boards/mach-sdk7786/setup.c
-+++ b/arch/sh/boards/mach-sdk7786/setup.c
-@@ -252,7 +252,7 @@ static void __init sdk7786_setup(char **cmdline_p)
- 	pr_info("\tPCB revision:\t%d\n", fpga_read_reg(PCBRR) & 0xf);
- 
- 	machine_ops.restart = sdk7786_restart;
--	pm_power_off = sdk7786_power_off;
-+	register_poweroff_handler_simple(sdk7786_power_off, 128);
- 
- 	register_smp_ops(&shx3_smp_ops);
- }
+ 	if (match)
+ 		func = (enum vexpress_reset_func)match->data;
+@@ -106,7 +116,12 @@ static int vexpress_reset_probe(struct platform_device *pdev)
+ 	switch (func) {
+ 	case FUNC_SHUTDOWN:
+ 		vexpress_power_off_device = &pdev->dev;
+-		pm_power_off = vexpress_power_off;
++		ret = register_poweroff_handler(&vexpress_poweroff_nb);
++		if (ret) {
++			dev_err(&pdev->dev,
++				"Failed to register poweroff handler\n");
++			return ret;
++		}
+ 		break;
+ 	case FUNC_RESET:
+ 		if (!vexpress_restart_device)
 -- 
 1.9.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-metag" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
