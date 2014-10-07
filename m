@@ -1,32 +1,36 @@
-From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Subject: Re: [PATCH 29/44] staging: nvec: Register with kernel poweroff
- handler
-Date: Tue, 7 Oct 2014 09:23:06 -0700
-Message-ID: <20141007162306.GA2913@kroah.com>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH 05/44] mfd: as3722: Drop reference to pm_power_off from
+ devicetree bindings
+Date: Tue, 7 Oct 2014 09:31:31 -0700
+Message-ID: <20141007163131.GE28835@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-30-git-send-email-linux@roeck-us.net>
+ <1412659726-29957-6-git-send-email-linux@roeck-us.net>
+ <543412F7.8040909@landley.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-m68k-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1412659726-29957-30-git-send-email-linux@roeck-us.net>
-Sender: linux-m68k-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: linux-kernel@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Julian
+In-Reply-To: <543412F7.8040909@landley.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Landley <rob@landley.net>
+Cc: linux-kernel@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Rob Herring <robh+>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 06, 2014 at 10:28:31PM -0700, Guenter Roeck wrote:
-> Register with kernel poweroff handler instead of setting pm_power_off
-> directly. Register with default priority value of 128 since we don't know
-> any better.
+On Tue, Oct 07, 2014 at 11:21:11AM -0500, Rob Landley wrote:
+> On 10/07/14 00:28, Guenter Roeck wrote:
+> > Devicetree bindings are supposed to be operating system independent
+> > and should thus not describe how a specific functionality is implemented
+> > in Linux.
 > 
-> Cc: Julian Andres Klode <jak@jak-linux.org>
-> Cc: Marc Dietrich <marvin24@gmx.de>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  drivers/staging/nvec/nvec.c | 24 +++++++++++++++---------
->  drivers/staging/nvec/nvec.h |  2 ++
->  2 files changed, 17 insertions(+), 9 deletions(-)
+> So your argument is that linux/Documentation/devicetree/bindings should
+> not be specific to Linux. Merely hosted in the Linux kernel source
+> repository.
+> 
+> Well that's certainly a point of view.
+> 
+Not specifically my argument, really, and nothing new either. But, yes, I do
+think that devicetree bindings descriptions should not include implementation
+details, especially since those may change over time (as is the case here).
 
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Thanks,
+Guenter
