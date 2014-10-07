@@ -1,126 +1,88 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 21/44] power/reset: gpio-poweroff: Register with
-	kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:23 -0700
-Message-ID: <1412659726-29957-22-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 20/44] power/reset: restart-poweroff: Register with kernel
+ poweroff handler
+Date: Mon,  6 Oct 2014 22:28:22 -0700
+Message-ID: <1412659726-29957-21-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: linux-kernel@vger.kernel.org
-Cc: linux-m32r-ja@ml.linux-m32r.org, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-xtensa@linux-xtensa.org, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, lguest@lists.ozlabs.org, linux-c6x-dev@linux-c6x.org, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, linux-acpi@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, devicetree@vger.kernel.org, user-mode-linux-devel@lists.sourceforge.net, linux-pm@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, linux-m68k@lists.linux-m68k.org, linux-am33-list@redhat.com, linux-tegra@vger.kernel.org, openipmi-developer@lists.sourceforge.net, linux-metag@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-parisc@vger.kernel.org, linux-cris-kernel@axis.com, David Woodhouse <dwmw2@in>
+Cc: linux-m32r-ja@ml.linux-m32r.org, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, linux-xtensa@linux-xtensa.org, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, lguest@lists.ozlabs.org, linux-c6x-dev@linux-c6x.org, Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, linux-acpi@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, devicetree@vger.kernel.org, user-mode-linux-devel@lists.sourceforge.net, linux-pm@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, linux-m68k@lists.linux-m68k.org, linux-am33-list@redhat.com, linux-tegra@vger.kernel.org, openipmi-developer@lists.sourceforge.net, linux-metag@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-parisc@vger.kernel.org, linux-cris-kernel@axis.com, David Woodhouse <dwmw2@infr>
 List-Id: linux-efi@vger.kernel.org
 
-Register with kernel poweroff handler instead of setting pm_power_off
-directly. Register with a low priority value of 64 to reflect that
-the original code only sets pm_power_off if it was not already set.
-
-Other changes:
-
-Drop note that there can not be an additional instance of this driver.
-The original reason no longer applies, it should be obvious that there
-can only be one instance of the driver if static variables are used to
-reflect its state, and support for multiple instances can now be added
-easily if needed by avoiding static variables.
-
-Do not create an error message if another poweroff handler has already been
-registered. This is perfectly normal and acceptable.
-
-Do not display a warning traceback if the poweroff handler fails to
-power off the system. There may be other poweroff handlers.
+Register with kernel poweroff handler instead of seting pm_power_off
+directly.  Register as poweroff handler of last resort since the driver
+does not really power off the system but executes a restart.
 
 Cc: Sebastian Reichel <sre@kernel.org>
 Cc: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
 Cc: David Woodhouse <dwmw2@infradead.org>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- drivers/power/reset/gpio-poweroff.c | 36 ++++++++++++++++++------------------
- 1 file changed, 18 insertions(+), 18 deletions(-)
+ drivers/power/reset/restart-poweroff.c | 25 ++++++++++++-------------
+ 1 file changed, 12 insertions(+), 13 deletions(-)
 
-diff --git a/drivers/power/reset/gpio-poweroff.c b/drivers/power/reset/gpio-poweroff.c
-index ce849bc..e95a7a1 100644
---- a/drivers/power/reset/gpio-poweroff.c
-+++ b/drivers/power/reset/gpio-poweroff.c
-@@ -14,18 +14,18 @@
+diff --git a/drivers/power/reset/restart-poweroff.c b/drivers/power/reset/restart-poweroff.c
+index edd707e..5437697 100644
+--- a/drivers/power/reset/restart-poweroff.c
++++ b/drivers/power/reset/restart-poweroff.c
+@@ -12,35 +12,34 @@
+  */
  #include <linux/kernel.h>
  #include <linux/init.h>
- #include <linux/delay.h>
 +#include <linux/notifier.h>
-+#include <linux/pm.h>
  #include <linux/platform_device.h>
- #include <linux/gpio/consumer.h>
  #include <linux/of_platform.h>
  #include <linux/module.h>
++#include <linux/pm.h>
+ #include <linux/reboot.h>
+-#include <asm/system_misc.h>
  
--/*
-- * Hold configuration here, cannot be more than one instance of the driver
-- * since pm_power_off itself is global.
-- */
- static struct gpio_desc *reset_gpio;
- 
--static void gpio_poweroff_do_poweroff(void)
-+static int gpio_poweroff_do_poweroff(struct notifier_block *this,
-+				     unsigned long unused1, void *unused2)
-+
+-static void restart_poweroff_do_poweroff(void)
++static int restart_poweroff_do_poweroff(struct notifier_block *this,
++					unsigned long unused1, void *unused2)
  {
- 	BUG_ON(!reset_gpio);
- 
-@@ -42,20 +42,18 @@ static void gpio_poweroff_do_poweroff(void)
- 	/* give it some time */
- 	mdelay(3000);
- 
--	WARN_ON(1);
+ 	reboot_mode = REBOOT_HARD;
+ 	machine_restart(NULL);
++
 +	return NOTIFY_DONE;
  }
  
-+static struct notifier_block gpio_poweroff_nb = {
-+	.notifier_call = gpio_poweroff_do_poweroff,
-+	.priority = 64,
++static struct notifier_block restart_poweroff_handler = {
++	.notifier_call = restart_poweroff_do_poweroff,
 +};
 +
- static int gpio_poweroff_probe(struct platform_device *pdev)
+ static int restart_poweroff_probe(struct platform_device *pdev)
  {
- 	bool input = false;
--
 -	/* If a pm_power_off function has already been added, leave it alone */
 -	if (pm_power_off != NULL) {
 -		dev_err(&pdev->dev,
--			"%s: pm_power_off function already registered",
--		       __func__);
+-			"pm_power_off function already registered");
 -		return -EBUSY;
 -	}
-+	int err;
- 
- 	reset_gpio = devm_gpiod_get(&pdev->dev, NULL);
- 	if (IS_ERR(reset_gpio))
-@@ -77,14 +75,16 @@ static int gpio_poweroff_probe(struct platform_device *pdev)
- 		}
- 	}
- 
--	pm_power_off = &gpio_poweroff_do_poweroff;
+-
+-	pm_power_off = &restart_poweroff_do_poweroff;
 -	return 0;
-+	err = register_poweroff_handler(&gpio_poweroff_nb);
-+	if (err)
-+		dev_err(&pdev->dev, "Failed to register poweroff handler\n");
-+
-+	return err;
++	return register_poweroff_handler(&restart_poweroff_handler);
  }
  
- static int gpio_poweroff_remove(struct platform_device *pdev)
+ static int restart_poweroff_remove(struct platform_device *pdev)
  {
--	if (pm_power_off == &gpio_poweroff_do_poweroff)
+-	if (pm_power_off == &restart_poweroff_do_poweroff)
 -		pm_power_off = NULL;
-+	unregister_poweroff_handler(&gpio_poweroff_nb);
++	unregister_poweroff_handler(&restart_poweroff_handler);
  
  	return 0;
  }
