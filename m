@@ -1,102 +1,111 @@
 From: Guenter Roeck <linux@roeck-us.net>
-Subject: [PATCH 22/44] power/reset: as3722-poweroff: Register with kernel poweroff handler
-Date: Mon,  6 Oct 2014 22:28:24 -0700
-Message-ID: <1412659726-29957-23-git-send-email-linux@roeck-us.net>
+Subject: [PATCH 29/44] staging: nvec: Register with kernel poweroff handler
+Date: Mon,  6 Oct 2014 22:28:31 -0700
+Message-ID: <1412659726-29957-30-git-send-email-linux@roeck-us.net>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Return-path: <linux-parisc-owner@vger.kernel.org>
+Return-path: <linux-m68k-owner@vger.kernel.org>
 In-Reply-To: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-Sender: linux-parisc-owner@vger.kernel.org
+Sender: linux-m68k-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org
-Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Sebastian
+Cc: adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Guenter Roeck <linux@roeck-us.net>, Julian
 List-Id: linux-efi@vger.kernel.org
 
 Register with kernel poweroff handler instead of setting pm_power_off
-directly. Register with a low priority value of 64 to reflect that
-the original code only sets pm_power_off if it was not already set.
+directly. Register with default priority value of 128 since we don't know
+any better.
 
-Cc: Sebastian Reichel <sre@kernel.org>
-Cc: Dmitry Eremin-Solenikov <dbaryshkov@gmail.com>
-Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Julian Andres Klode <jak@jak-linux.org>
+Cc: Marc Dietrich <marvin24@gmx.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Signed-off-by: Guenter Roeck <linux@roeck-us.net>
 ---
- drivers/power/reset/as3722-poweroff.c | 36 ++++++++++++++++++-----------------
- 1 file changed, 19 insertions(+), 17 deletions(-)
+ drivers/staging/nvec/nvec.c | 24 +++++++++++++++---------
+ drivers/staging/nvec/nvec.h |  2 ++
+ 2 files changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/power/reset/as3722-poweroff.c b/drivers/power/reset/as3722-poweroff.c
-index 6849711..7ebaed9 100644
---- a/drivers/power/reset/as3722-poweroff.c
-+++ b/drivers/power/reset/as3722-poweroff.c
-@@ -17,32 +17,33 @@
- 
- #include <linux/mfd/as3722.h>
- #include <linux/module.h>
-+#include <linux/notifier.h>
- #include <linux/of.h>
- #include <linux/of_device.h>
- #include <linux/platform_device.h>
+diff --git a/drivers/staging/nvec/nvec.c b/drivers/staging/nvec/nvec.c
+index a93208a..33d406c 100644
+--- a/drivers/staging/nvec/nvec.c
++++ b/drivers/staging/nvec/nvec.c
+@@ -33,6 +33,7 @@
+ #include <linux/mfd/core.h>
+ #include <linux/mutex.h>
+ #include <linux/notifier.h>
 +#include <linux/pm.h>
  #include <linux/slab.h>
+ #include <linux/spinlock.h>
+ #include <linux/workqueue.h>
+@@ -80,8 +81,6 @@ enum nvec_sleep_subcmds {
+ #define LID_SWITCH BIT(1)
+ #define PWR_BUTTON BIT(15)
  
- struct as3722_poweroff {
- 	struct device *dev;
- 	struct as3722 *as3722;
-+	struct notifier_block poweroff_nb;
- };
- 
--static struct as3722_poweroff *as3722_pm_poweroff;
+-static struct nvec_chip *nvec_power_handle;
 -
--static void as3722_pm_power_off(void)
-+static int as3722_power_off(struct notifier_block *this, unsigned long unused1,
-+			    void *unused2)
+ static const struct mfd_cell nvec_devices[] = {
+ 	{
+ 		.name = "nvec-kbd",
+@@ -759,12 +758,17 @@ static void nvec_disable_i2c_slave(struct nvec_chip *nvec)
+ }
+ #endif
+ 
+-static void nvec_power_off(void)
++static int nvec_power_off(struct notifier_block *this, unsigned long unused1,
++			  void *unused2)
  {
-+	struct as3722_poweroff *as3722_poweroff =
-+		container_of(this, struct as3722_poweroff, poweroff_nb);
- 	int ret;
++	struct nvec_chip *nvec = container_of(this, struct nvec_chip,
++					      poweroff_nb);
+ 	char ap_pwr_down[] = { NVEC_SLEEP, AP_PWR_DOWN };
  
--	if (!as3722_pm_poweroff) {
--		pr_err("AS3722 poweroff is not initialised\n");
--		return;
--	}
--
--	ret = as3722_update_bits(as3722_pm_poweroff->as3722,
-+	ret = as3722_update_bits(as3722_poweroff->as3722,
- 		AS3722_RESET_CONTROL_REG, AS3722_POWER_OFF, AS3722_POWER_OFF);
- 	if (ret < 0)
--		dev_err(as3722_pm_poweroff->dev,
-+		dev_err(as3722_poweroff->dev,
- 			"RESET_CONTROL_REG update failed, %d\n", ret);
+-	nvec_toggle_global_events(nvec_power_handle, false);
+-	nvec_write_async(nvec_power_handle, ap_pwr_down, 2);
++	nvec_toggle_global_events(nvec, false);
++	nvec_write_async(nvec, ap_pwr_down, 2);
 +
 +	return NOTIFY_DONE;
  }
  
- static int as3722_poweroff_probe(struct platform_device *pdev)
-@@ -63,18 +64,19 @@ static int as3722_poweroff_probe(struct platform_device *pdev)
+ /*
+@@ -878,8 +882,11 @@ static int tegra_nvec_probe(struct platform_device *pdev)
+ 	nvec->nvec_status_notifier.notifier_call = nvec_status_notifier;
+ 	nvec_register_notifier(nvec, &nvec->nvec_status_notifier, 0);
  
- 	as3722_poweroff->as3722 = dev_get_drvdata(pdev->dev.parent);
- 	as3722_poweroff->dev = &pdev->dev;
--	as3722_pm_poweroff = as3722_poweroff;
--	if (!pm_power_off)
--		pm_power_off = as3722_pm_power_off;
-+	as3722_poweroff->poweroff_nb.notifier_call = as3722_power_off;
-+	as3722_poweroff->poweroff_nb.priority = 64;
+-	nvec_power_handle = nvec;
+-	pm_power_off = nvec_power_off;
++	nvec->poweroff_nb.notifier_call = nvec_power_off;
++	nvec->poweroff_nb.priority = 128;
++	ret = register_poweroff_handler(&nvec->poweroff_nb);
++	if (ret)
++		dev_err(nvec->dev, "Failed to register poweroff handler\n");
  
--	return 0;
-+	platform_set_drvdata(pdev, as3722_poweroff);
-+
-+	return register_poweroff_handler(&as3722_poweroff->poweroff_nb);
- }
- 
- static int as3722_poweroff_remove(struct platform_device *pdev)
+ 	/* Get Firmware Version */
+ 	msg = nvec_write_sync(nvec, get_firmware_version, 2);
+@@ -914,13 +921,12 @@ static int tegra_nvec_remove(struct platform_device *pdev)
  {
--	if (pm_power_off == as3722_pm_power_off)
--		pm_power_off = NULL;
--	as3722_pm_poweroff = NULL;
-+	struct as3722_poweroff *as3722_poweroff = platform_get_drvdata(pdev);
-+
-+	unregister_poweroff_handler(&as3722_poweroff->poweroff_nb);
+ 	struct nvec_chip *nvec = platform_get_drvdata(pdev);
+ 
++	unregister_poweroff_handler(&nvec->poweroff_nb);
+ 	nvec_toggle_global_events(nvec, false);
+ 	mfd_remove_devices(nvec->dev);
+ 	nvec_unregister_notifier(nvec, &nvec->nvec_status_notifier);
+ 	cancel_work_sync(&nvec->rx_work);
+ 	cancel_work_sync(&nvec->tx_work);
+-	/* FIXME: needs check wether nvec is responsible for power off */
+-	pm_power_off = NULL;
  
  	return 0;
  }
+diff --git a/drivers/staging/nvec/nvec.h b/drivers/staging/nvec/nvec.h
+index e271375..e5ee2af 100644
+--- a/drivers/staging/nvec/nvec.h
++++ b/drivers/staging/nvec/nvec.h
+@@ -163,6 +163,8 @@ struct nvec_chip {
+ 	struct nvec_msg *last_sync_msg;
+ 
+ 	int state;
++
++	struct notifier_block poweroff_nb;
+ };
+ 
+ extern int nvec_write_async(struct nvec_chip *nvec, const unsigned char *data,
 -- 
 1.9.1
-
