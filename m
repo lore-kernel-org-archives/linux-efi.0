@@ -1,104 +1,48 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3] arm64/efi: efistub: jump to 'stext' directly, not through the header
-Date: Wed,  8 Oct 2014 16:11:27 +0200
-Message-ID: <1412777487-13636-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Catalin.Marinas-5wv7dgnIgG8@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Catalin Marinas <catalin.marinas@arm.com>
+Subject: Re: [PATCH 08/44] kernel: Move pm_power_off to common code
+Date: Thu, 9 Oct 2014 11:28:55 +0100
+Message-ID: <20141009102855.GE17836@e104818-lin.cambridge.arm.com>
+References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
+ <1412659726-29957-9-git-send-email-linux@roeck-us.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-mips-bounce@linux-mips.org>
+Content-Disposition: inline
+In-Reply-To: <1412659726-29957-9-git-send-email-linux@roeck-us.net>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "lguest@lists.ozlabs.org" <lguest@lists.ozlabs.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-alpha@vger.kernel.org" <linux-alpha@vger.kernel.org>, "linux-am33-list@redhat.com" <linux-am33-list@redhat.com>, "linux-cris-kernel@axis.com" <linux-cris-kernel@axis.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-hexagon@vger.kernel.org" <linux-hexagon@vger.kernel.org>, "linux-m32r-ja@ml.linux-m32r.org" <linux-m32r-ja@ml.linux-m32r.org>, "linuxppc-dev@lists.ozlabs.org" <linuxp>
 List-Id: linux-efi@vger.kernel.org
 
-After the EFI stub has done its business, it jumps into the kernel by
-branching to offset #0 of the loaded Image, which is where it expects
-to find the header containing a 'branch to stext' instruction.
+On Tue, Oct 07, 2014 at 06:28:10AM +0100, Guenter Roeck wrote:
+> diff --git a/arch/arm64/kernel/process.c b/arch/arm64/kernel/process.c
+> index e0ef8ba..db396bb 100644
+> --- a/arch/arm64/kernel/process.c
+> +++ b/arch/arm64/kernel/process.c
+> @@ -94,8 +94,6 @@ void soft_restart(unsigned long addr)
+>  /*
+>   * Function pointers to optional machine specific functions
+>   */
+> -void (*pm_power_off)(void);
+> -EXPORT_SYMBOL_GPL(pm_power_off);
+> 
+>  void (*arm_pm_restart)(enum reboot_mode reboot_mode, const char *cmd);
+> 
+> @@ -155,8 +153,7 @@ void machine_power_off(void)
+>  {
+>         local_irq_disable();
+>         smp_send_stop();
+> -       if (pm_power_off)
+> -               pm_power_off();
+> +       do_kernel_poweroff();
+>  }
 
-However, the UEFI spec 2.1.1 states the following regarding PE/COFF
-image loading:
-"A UEFI image is loaded into memory through the LoadImage() Boot
-Service. This service loads an image with a PE32+ format into memory.
-This PE32+ loader is required to load all sections of the PE32+ image
-into memory."
-
-In other words, it is /not/ required to load parts of the image that are
-not covered by a PE/COFF section, so it may not have loaded the header
-at the expected offset, as it is not covered by any PE/COFF section.
-
-So instead, jump to 'stext' directly, which is at the base of the
-PE/COFF .text section, by supplying a symbol 'stext_offset' to
-efi-entry.o which contains the relative offset of stext into the Image.
-Also replace other open coded calculations of the same value with a
-reference to 'stext_offset'
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
-Changes since v2:
-- rebased onto 3.17+
-- added spec reference to commit message
-
-Changes since v1:
-- drop :lo12: relocation against stext_offset in favor of using a literal
-  '=stext_offset' which is safer
-
- arch/arm64/kernel/efi-entry.S |  3 ++-
- arch/arm64/kernel/head.S      | 10 ++++++----
- 2 files changed, 8 insertions(+), 5 deletions(-)
-
-diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-index 619b1dd7bcde..a0016d3a17da 100644
---- a/arch/arm64/kernel/efi-entry.S
-+++ b/arch/arm64/kernel/efi-entry.S
-@@ -61,7 +61,8 @@ ENTRY(efi_stub_entry)
- 	 */
- 	mov	x20, x0		// DTB address
- 	ldr	x0, [sp, #16]	// relocated _text address
--	mov	x21, x0
-+	ldr	x21, =stext_offset
-+	add	x21, x0, x21
- 
- 	/*
- 	 * Flush dcache covering current runtime addresses
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 0a6e4f924df8..8c06c9d269d2 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -132,6 +132,8 @@ efi_head:
- #endif
- 
- #ifdef CONFIG_EFI
-+	.globl	stext_offset
-+	.set	stext_offset, stext - efi_head
- 	.align 3
- pe_header:
- 	.ascii	"PE"
-@@ -155,7 +157,7 @@ optional_header:
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
- 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
--	.long	stext - efi_head		// BaseOfCode
-+	.long	stext_offset			// BaseOfCode
- 
- extra_header_fields:
- 	.quad	0				// ImageBase
-@@ -172,7 +174,7 @@ extra_header_fields:
- 	.long	_end - efi_head			// SizeOfImage
- 
- 	// Everything before the kernel image is considered part of the header
--	.long	stext - efi_head		// SizeOfHeaders
-+	.long	stext_offset			// SizeOfHeaders
- 	.long	0				// CheckSum
- 	.short	0xa				// Subsystem (EFI application)
- 	.short	0				// DllCharacteristics
-@@ -217,9 +219,9 @@ section_table:
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
- 	.long	_end - stext		// VirtualSize
--	.long	stext - efi_head	// VirtualAddress
-+	.long	stext_offset		// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
--	.long	stext - efi_head	// PointerToRawData
-+	.long	stext_offset		// PointerToRawData
- 
- 	.long	0		// PointerToRelocations (0 for executables)
- 	.long	0		// PointerToLineNumbers (0 for executables)
--- 
-1.8.3.2
+Acked-by: Catalin Marinas <catalin.marinas@arm.com>
