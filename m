@@ -1,62 +1,126 @@
-From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Subject: Re: [PATCH 12/44] mfd: ab8500-sysctrl: Register with kernel poweroff
- handler
-Date: Thu, 9 Oct 2014 08:54:04 -0700
-Message-ID: <20141009155404.GC31987@roeck-us.net>
-References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-13-git-send-email-linux@roeck-us.net>
- <20141007080048.GB25331@lee--X1>
- <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
- <20141009104927.GN20647@lee--X1>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v3] arm64/efi: efistub: jump to 'stext' directly, not
+ through the header
+Date: Thu, 9 Oct 2014 18:23:54 +0100
+Message-ID: <20141009172354.GA466@leverpostej>
+References: <1412777487-13636-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20141009104927.GN20647@lee--X1>
+In-Reply-To: <1412777487-13636-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Lee Jones <lee.jones-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org" <linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org>, "linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org" <linux-mips-6z/3iImG2C8G8FEW9MqTrA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org" <linux-xtensa-PjhNF2WwrV/0Sa2dR60CXw@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org" <devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org>, "linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org" <linux-c6x-dev-jPsnJVOj+W6hPH1hqNUYSQ@public.gmane.org>, "linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-sh-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org" <xen-devel-GuqFBffKawtpuQazS67q72D2FQJk+8+b@public.gmane.org>, devicetree
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 09, 2014 at 11:49:27AM +0100, Lee Jones wrote:
-> On Thu, 09 Oct 2014, Catalin Marinas wrote:
-> 
-> > On Tue, Oct 07, 2014 at 09:00:48AM +0100, Lee Jones wrote:
-> > > On Mon, 06 Oct 2014, Guenter Roeck wrote:
-> > > > --- a/drivers/mfd/ab8500-sysctrl.c
-> > > > +++ b/drivers/mfd/ab8500-sysctrl.c
-> > > > @@ -6,6 +6,7 @@
-> > > 
-> > > [...]
-> > > 
-> > > > +static int ab8500_power_off(struct notifier_block *this, unsigned long unused1,
-> > > > +			    void *unused2)
-> > > >  {
-> > > >  	sigset_t old;
-> > > >  	sigset_t all;
-> > > > @@ -34,11 +36,6 @@ static void ab8500_power_off(void)
-> > > >  	struct power_supply *psy;
-> > > >  	int ret;
-> > > >  
-> > > > -	if (sysctrl_dev == NULL) {
-> > > > -		pr_err("%s: sysctrl not initialized\n", __func__);
-> > > > -		return;
-> > > > -	}
-> > > 
-> > > Can you explain the purpose of this change please?
-> > 
-> > I guess it's because the sysctrl_dev is already initialised when
-> > registering the power_off handler, so there isn't a way to call the
-> > above function with a NULL sysctrl_dev. Probably even with the original
-> > code you didn't need this check (after some race fix in
-> > ab8500_sysctrl_remove but races is one of the things Guenter's patches
-> > try to address).
-> 
-> Sounds reasonable, although I think this change should be part of
-> another patch.
-> 
-Turns out the options are to either drop the check or to use the device
-managed function to register the poweroff handler. I decided to keep
-the check and use the device managed function.
+Hi Ard,
 
-Guenter
+On Wed, Oct 08, 2014 at 03:11:27PM +0100, Ard Biesheuvel wrote:
+> After the EFI stub has done its business, it jumps into the kernel by
+> branching to offset #0 of the loaded Image, which is where it expects
+> to find the header containing a 'branch to stext' instruction.
+> 
+> However, the UEFI spec 2.1.1 states the following regarding PE/COFF
+> image loading:
+> "A UEFI image is loaded into memory through the LoadImage() Boot
+> Service. This service loads an image with a PE32+ format into memory.
+> This PE32+ loader is required to load all sections of the PE32+ image
+> into memory."
+> 
+> In other words, it is /not/ required to load parts of the image that are
+> not covered by a PE/COFF section, so it may not have loaded the header
+> at the expected offset, as it is not covered by any PE/COFF section.
+
+What does this mean for handle_kernel_image? Given we might not have
+_text through to _stext mapped, do we not need to take that into
+account?
+
+Also, have we seen problems on any systems yet?
+
+Otherwise, this looks like a good fix for hte problem.
+
+Thanks,
+Mark.
+
+> So instead, jump to 'stext' directly, which is at the base of the
+> PE/COFF .text section, by supplying a symbol 'stext_offset' to
+> efi-entry.o which contains the relative offset of stext into the Image.
+> Also replace other open coded calculations of the same value with a
+> reference to 'stext_offset'
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> Changes since v2:
+> - rebased onto 3.17+
+> - added spec reference to commit message
+> 
+> Changes since v1:
+> - drop :lo12: relocation against stext_offset in favor of using a literal
+>   '=stext_offset' which is safer
+> 
+>  arch/arm64/kernel/efi-entry.S |  3 ++-
+>  arch/arm64/kernel/head.S      | 10 ++++++----
+>  2 files changed, 8 insertions(+), 5 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+> index 619b1dd7bcde..a0016d3a17da 100644
+> --- a/arch/arm64/kernel/efi-entry.S
+> +++ b/arch/arm64/kernel/efi-entry.S
+> @@ -61,7 +61,8 @@ ENTRY(efi_stub_entry)
+>  	 */
+>  	mov	x20, x0		// DTB address
+>  	ldr	x0, [sp, #16]	// relocated _text address
+> -	mov	x21, x0
+> +	ldr	x21, =stext_offset
+> +	add	x21, x0, x21
+>  
+>  	/*
+>  	 * Flush dcache covering current runtime addresses
+> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+> index 0a6e4f924df8..8c06c9d269d2 100644
+> --- a/arch/arm64/kernel/head.S
+> +++ b/arch/arm64/kernel/head.S
+> @@ -132,6 +132,8 @@ efi_head:
+>  #endif
+>  
+>  #ifdef CONFIG_EFI
+> +	.globl	stext_offset
+> +	.set	stext_offset, stext - efi_head
+>  	.align 3
+>  pe_header:
+>  	.ascii	"PE"
+> @@ -155,7 +157,7 @@ optional_header:
+>  	.long	0				// SizeOfInitializedData
+>  	.long	0				// SizeOfUninitializedData
+>  	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
+> -	.long	stext - efi_head		// BaseOfCode
+> +	.long	stext_offset			// BaseOfCode
+>  
+>  extra_header_fields:
+>  	.quad	0				// ImageBase
+> @@ -172,7 +174,7 @@ extra_header_fields:
+>  	.long	_end - efi_head			// SizeOfImage
+>  
+>  	// Everything before the kernel image is considered part of the header
+> -	.long	stext - efi_head		// SizeOfHeaders
+> +	.long	stext_offset			// SizeOfHeaders
+>  	.long	0				// CheckSum
+>  	.short	0xa				// Subsystem (EFI application)
+>  	.short	0				// DllCharacteristics
+> @@ -217,9 +219,9 @@ section_table:
+>  	.byte	0
+>  	.byte	0        		// end of 0 padding of section name
+>  	.long	_end - stext		// VirtualSize
+> -	.long	stext - efi_head	// VirtualAddress
+> +	.long	stext_offset		// VirtualAddress
+>  	.long	_edata - stext		// SizeOfRawData
+> -	.long	stext - efi_head	// PointerToRawData
+> +	.long	stext_offset		// PointerToRawData
+>  
+>  	.long	0		// PointerToRelocations (0 for executables)
+>  	.long	0		// PointerToLineNumbers (0 for executables)
+> -- 
+> 1.8.3.2
+> 
+> 
