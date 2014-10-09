@@ -1,42 +1,69 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 32/44] arm64: psci: Register with kernel poweroff handler
-Date: Thu, 9 Oct 2014 11:41:04 +0100
-Message-ID: <20141009104104.GG17836@e104818-lin.cambridge.arm.com>
+From: Lee Jones <lee.jones@linaro.org>
+Subject: Re: [PATCH 12/44] mfd: ab8500-sysctrl: Register with kernel poweroff
+ handler
+Date: Thu, 9 Oct 2014 11:49:27 +0100
+Message-ID: <20141009104927.GN20647@lee--X1>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-33-git-send-email-linux@roeck-us.net>
+ <1412659726-29957-13-git-send-email-linux@roeck-us.net>
+ <20141007080048.GB25331@lee--X1>
+ <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1412659726-29957-33-git-send-email-linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Cc: "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org" <adi-buildroot-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org>, "devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org" <devel-gWbeCf7V1WCQmaza687I9mD2FQJk+8+b@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <lguest-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-alpha-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <linux-am33-list-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-cris-kernel-VrBV9hrLPhE@public.gmane.org" <linux-cris-kernel-VrBV9hrLPhE@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-hexagon-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org" <linux-m32r-ja-rQhvJZKUsGBRYuoOT4C5/9i2O/JbrIOy@public.gmane.org>, "linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org" <linuxppc-dev-uLR06cmDAlY/bJ5BZ2RsiQ@public.gmane.org>, "linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-s390-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>lin
+In-Reply-To: <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Guenter Roeck <linux@roeck-us.net>, "linux-m32r-ja@ml.linux-m32r.org" <linux-m32r-ja@ml.linux-m32r.org>, "linux-mips@linux-mips.org" <linux-mips@linux-mips.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "linux-xtensa@linux-xtensa.org" <linux-xtensa@linux-xtensa.org>, Linus Walleij <linus.walleij@linaro.org>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, "lguest@lists.ozlabs.org" <lguest@lists.ozlabs.org>, "linux-c6x-dev@linux-c6x.org" <linux-c6x-dev@linux-c6x.org>, "linux-hexagon@vger.kernel.org" <linux-hexagon@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "xen-devel@lists.xenproject.org" <xen-devel@lists.xenproject.org>, devicetree@vger.k
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 07, 2014 at 06:28:34AM +0100, Guenter Roeck wrote:
-> Register with kernel poweroff handler instead of setting pm_power_off
-> directly.
-> 
-> Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-> Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-> ---
->  arch/arm64/kernel/psci.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/arm64/kernel/psci.c b/arch/arm64/kernel/psci.c
-> index 5539547..c1f3d09 100644
-> --- a/arch/arm64/kernel/psci.c
-> +++ b/arch/arm64/kernel/psci.c
-> @@ -286,7 +286,7 @@ static int __init psci_0_2_init(struct device_node *np)
->  
->  	arm_pm_restart = psci_sys_reset;
->  
-> -	pm_power_off = psci_sys_poweroff;
-> +	register_poweroff_handler_simple(psci_sys_poweroff, 128);
->  
->  out_put_node:
->  	of_node_put(np);
+On Thu, 09 Oct 2014, Catalin Marinas wrote:
 
-Acked-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> On Tue, Oct 07, 2014 at 09:00:48AM +0100, Lee Jones wrote:
+> > On Mon, 06 Oct 2014, Guenter Roeck wrote:
+> > > --- a/drivers/mfd/ab8500-sysctrl.c
+> > > +++ b/drivers/mfd/ab8500-sysctrl.c
+> > > @@ -6,6 +6,7 @@
+> >=20
+> > [...]
+> >=20
+> > > +static int ab8500_power_off(struct notifier_block *this, unsigne=
+d long unused1,
+> > > +			    void *unused2)
+> > >  {
+> > >  	sigset_t old;
+> > >  	sigset_t all;
+> > > @@ -34,11 +36,6 @@ static void ab8500_power_off(void)
+> > >  	struct power_supply *psy;
+> > >  	int ret;
+> > > =20
+> > > -	if (sysctrl_dev =3D=3D NULL) {
+> > > -		pr_err("%s: sysctrl not initialized\n", __func__);
+> > > -		return;
+> > > -	}
+> >=20
+> > Can you explain the purpose of this change please?
+>=20
+> I guess it's because the sysctrl_dev is already initialised when
+> registering the power_off handler, so there isn't a way to call the
+> above function with a NULL sysctrl_dev. Probably even with the origin=
+al
+> code you didn't need this check (after some race fix in
+> ab8500_sysctrl_remove but races is one of the things Guenter's patche=
+s
+> try to address).
+
+Sounds reasonable, although I think this change should be part of
+another patch.
+
+--=20
+Lee Jones
+Linaro STMicroelectronics Landing Team Lead
+Linaro.org =E2=94=82 Open source software for ARM SoCs
+=46ollow Linaro: Facebook | Twitter | Blog
+--
+To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
+n
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
