@@ -1,45 +1,69 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH 01/44] kernel: Add support for poweroff handler call chain
-Date: Thu, 9 Oct 2014 13:31:40 +0200
-Message-ID: <CAMuHMdVOBnZ=pyVeGSxbOT9MtRR2iNY4V-PUm0NU=UFQ2pxE_g@mail.gmail.com>
-References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
-	<1412659726-29957-2-git-send-email-linux@roeck-us.net>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH 03/44] hibernate: Call have_kernel_poweroff instead of
+ checking pm_power_off
+Date: Thu, 09 Oct 2014 06:24:13 -0700
+Message-ID: <54368C7D.5040402@roeck-us.net>
+References: <1412659726-29957-1-git-send-email-linux@roeck-us.net> <1412659726-29957-4-git-send-email-linux@roeck-us.net> <20141009103254.GB6787@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-m68k-owner@vger.kernel.org>
-In-Reply-To: <1412659726-29957-2-git-send-email-linux@roeck-us.net>
-Sender: linux-m68k-owner@vger.kernel.org
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, driverdevel <devel@driverdev.osuosl.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, lguest@lists.ozlabs.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, alpha <linux-alpha@vger.kernel.org>, "moderated list:PANASONIC MN10300..." <linux-am33-list@redhat.com>, Cris <linux-cris-kernel@axis.com>, linux-efi@vger.kernel.org, "open list:QUALCOMM HEXAGON..." <linux-hexagon@vger.kernel.org>, linux-m32r-ja@ml.linux-m32r.org, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-s390 <linux-s390@vger.kernel.org>, linux-tegra@vger.kernel.org, "linux-xtensa@linux-xtensa.org" <linux-xtensa@linux-xtensa.org>, openipmi-developer@lists.sourceforge.net, uml-devel <user-mode-linux-devel@lists.s>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sh-owner@vger.kernel.org>
+In-Reply-To: <20141009103254.GB6787@amd>
+Sender: linux-sh-owner@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: linux-kernel@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.org, linux-pm@vger.kernel.org, linux-sh@vger.kernel.org, xen-devel@lists.xenproject.org, Rafael J. Wysocki
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 7, 2014 at 7:28 AM, Guenter Roeck <linux@roeck-us.net> wrote:
-> +int register_poweroff_handler_simple(void (*handler)(void), int priority)
-> +{
-> +       char symname[KSYM_NAME_LEN];
-> +
-> +       if (poweroff_handler_data.handler) {
-> +               lookup_symbol_name((unsigned long)poweroff_handler_data.handler,
-> +                                  symname);
-> +               pr_warn("Poweroff function already registered (%s)", symname);
-> +               lookup_symbol_name((unsigned long)handler, symname);
-> +               pr_cont(", cannot register %s\n", symname);
+On 10/09/2014 03:32 AM, Pavel Machek wrote:
+> On Mon 2014-10-06 22:28:05, Guenter Roeck wrote:
+>> Poweroff handlers may now be installed with register_poweroff_handler.
+>> Use the new API function have_kernel_poweroff to determine if a poweroff
+>> handler has been installed.
+>>
+>> Cc: Rafael J. Wysocki <rjw@rjwysocki.net>
+>> Cc: Pavel Machek <pavel@ucw.cz>
+>> Cc: Len Brown <len.brown@intel.com>
+>> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+>> ---
+>>   kernel/power/hibernate.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
+>> index a9dfa79..20353c5 100644
+>> --- a/kernel/power/hibernate.c
+>> +++ b/kernel/power/hibernate.c
+>> @@ -602,7 +602,7 @@ static void power_down(void)
+>>   	case HIBERNATION_PLATFORM:
+>>   		hibernation_platform_enter();
+>>   	case HIBERNATION_SHUTDOWN:
+>> -		if (pm_power_off)
+>> +		if (have_kernel_poweroff())
+>>   			kernel_power_off();
+>>   		break;
+>
+> poweroff -> power_off.
+>
+As mentioned in my other reply, that was on purpose to distinguish
+existing functions from poweroff handler functions.
 
-Doesn't %ps work to look up symbols?
+> But if you are playing with this, anyway... does it make sense to
+> introduce kernel_power_off() that just works, no need to check
+> have_..?
+> 									Pavel
 
-pr_warn("Poweroff function already registered (%ps), cannot register
-%ps\n", poweroff_handler_data.handler, handler);
+I am trying not to change existing behavior.
 
-> +               return -EBUSY;
-> +       }
+kernel_power_off is an existing function which does some cleanup
+before calling machine_power_off which in turn calls do_kernel_poweroff
+(or currently pm_power_off and may do some other machine specific stuff.
 
-Gr{oetje,eeting}s,
+Sure, poweroff handling could be unified further. We could decide to
+enter an endless loop if machine_power_off() returns, or we could decide
+to dump a warning or panic in this case. But that is all separate from
+the issue I am trying to solve here, which is to provide a capability to
+register more than one poweroff handler. It would also not be that simple,
+since some architectures call machine_power_off() directly from various
+places.
 
-                        Geert
+Guenter
 
---
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
-
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
