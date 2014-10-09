@@ -1,47 +1,94 @@
-From: Pavel Machek <pavel@denx.de>
-Subject: Re: [PATCH 08/44] kernel: Move pm_power_off to common code
-Date: Thu, 9 Oct 2014 22:24:19 +0200
-Message-ID: <20141009202419.GA16885@amd>
-References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-9-git-send-email-linux@roeck-us.net>
- <20141009103847.GC6787@amd> <54368A30.9070101@roeck-us.net>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3] arm64/efi: efistub: jump to 'stext' directly, not
+ through the header
+Date: Thu, 09 Oct 2014 18:19:39 -0400
+Message-ID: <1412893179.29182.71.camel@deneb.redhat.com>
+References: <1412777487-13636-1-git-send-email-ard.biesheuvel@linaro.org>
+	 <20141009172354.GA466@leverpostej>
+	 <CAKv+Gu-D812Rn32rm5wQJfSM+NzPXZWbxDcDkZ8mBzbi5RQJXQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
-Content-Disposition: inline
-In-Reply-To: <54368A30.9070101@roeck-us.net>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Guenter Roeck <linux@roeck-us.net>
-Cc: linux-m32r-ja@ml.linux-m32r.org, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Steven Miao <realmz6@gmail.com>, linux-xtensa@linux-xtensa.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, David Howells <dhowells@redhat.com>, Max Filippov <jcmvbkbc@gmail.com>, Paul Mackerras <paulus@samba.org>, Ralf Baechle <ralf@linux-mips.org>, "H. Peter Anvin" <hpa@zytor.com>, Guan Xuetao <gxt@mprc.pku.edu.cn>, Thomas Gleixner <tglx@linutronix.de>, Lennox Wu <lennox.wu@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, Jesper Nilsson <jesper.nilsson@axis.com>, lguest@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, linux-c6x-dev@linux-c6x.org, Len Brown <len.brown@intel.com>, "David S. Miller" <davem@d>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu-D812Rn32rm5wQJfSM+NzPXZWbxDcDkZ8mBzbi5RQJXQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi!
-
-> >>@@ -184,6 +179,8 @@ machine_halt(void)
-> >>  void
-> >>  machine_power_off(void)
-> >>  {
-> >>+	do_kernel_poweroff();
-> >>+
+On Thu, 2014-10-09 at 21:03 +0200, Ard Biesheuvel wrote:
+> On 9 October 2014 19:23, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> > Hi Ard,
 > >
-> >poweroff -> power_off for consistency.
+> > On Wed, Oct 08, 2014 at 03:11:27PM +0100, Ard Biesheuvel wrote:
+> >> After the EFI stub has done its business, it jumps into the kernel=
+ by
+> >> branching to offset #0 of the loaded Image, which is where it expe=
+cts
+> >> to find the header containing a 'branch to stext' instruction.
+> >>
+> >> However, the UEFI spec 2.1.1 states the following regarding PE/COF=
+=46
+> >> image loading:
+> >> "A UEFI image is loaded into memory through the LoadImage() Boot
+> >> Service. This service loads an image with a PE32+ format into memo=
+ry.
+> >> This PE32+ loader is required to load all sections of the PE32+ im=
+age
+> >> into memory."
+> >>
+> >> In other words, it is /not/ required to load parts of the image th=
+at are
+> >> not covered by a PE/COFF section, so it may not have loaded the he=
+ader
+> >> at the expected offset, as it is not covered by any PE/COFF sectio=
+n.
 > >
-> Dunno; matter of personal preference. I started with that, but ultimately went
-> with poweroff to distinguish poweroff handler functions from existing code,
-> specifically kernel_power_off().
+> > What does this mean for handle_kernel_image? Given we might not hav=
+e
+> > _text through to _stext mapped, do we not need to take that into
+> > account?
+> >
+>=20
+> Actually, handle_kernel_image() does not interpret the header, it jus=
+t
+> copies it along with the rest of the image if it needs to be
+> relocated, so I don't see an issue there. However, I do remember Mark
+> Salter mentioning that there is at least one other location that need=
+s
+> to be fixed up if this concern is valid. Mark?
 
-That works for you, but once it is merged, it is ugly/confusing typo.
-									Pavel
+I think at one time we were using the the EFI_LOADED_IMAGE_PROTOCOL
+ImageBase field and assuming it pointed to the start of the copied
+file, but I don't think we do so currently. My thought at the time was
+that the ImageBase pointer didn't really make sense unless the whole
+image file was copied by LoadImage(). The description for LoadImage has=
+:
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+  The LoadImage() function loads an EFI image into memory and returns
+  a handle to the image. The image is loaded in one of two ways.
+
+  =E2=80=A2 If SourceBuffer is not NULL, the function is a memory-to-me=
+mory
+    load  in which SourceBuffer points to the image to be loaded and
+    SourceSize indicates the image=E2=80=99s size in bytes. In this cas=
+e, the
+    caller has copied the image into SourceBuffer and can free the
+    buffer once loading is complete.
+
+  =E2=80=A2 If SourceBuffer is NULL, the function is a file copy operat=
+ion that
+    uses the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL.
+
+Which makes me think the whole thing gets copied. But in any case, I
+have no objection to your patch.
+
+>=20
+> > Also, have we seen problems on any systems yet?
+> >
+>=20
+> No, I am not aware of any occurrences of this exact issue, this is
+> just one of the things I spotted while working on this code.
+> But I think we mostly agree that branching through the header relies
+> on behavior of the PE/COFF loader that is not covered by the spec.
+>=20
