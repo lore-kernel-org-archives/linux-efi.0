@@ -1,69 +1,45 @@
-From: Lee Jones <lee.jones@linaro.org>
-Subject: Re: [PATCH 12/44] mfd: ab8500-sysctrl: Register with kernel poweroff
- handler
-Date: Thu, 9 Oct 2014 11:49:27 +0100
-Message-ID: <20141009104927.GN20647@lee--X1>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 01/44] kernel: Add support for poweroff handler call chain
+Date: Thu, 9 Oct 2014 13:31:40 +0200
+Message-ID: <CAMuHMdVOBnZ=pyVeGSxbOT9MtRR2iNY4V-PUm0NU=UFQ2pxE_g@mail.gmail.com>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-13-git-send-email-linux@roeck-us.net>
- <20141007080048.GB25331@lee--X1>
- <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
+	<1412659726-29957-2-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Guenter Roeck <linux@roeck-us.net>, "linux-m32r-ja@ml.linux-m32r.org" <linux-m32r-ja@ml.linux-m32r.org>, "linux-mips@linux-mips.org" <linux-mips@linux-mips.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "linux-xtensa@linux-xtensa.org" <linux-xtensa@linux-xtensa.org>, Linus Walleij <linus.walleij@linaro.org>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, "lguest@lists.ozlabs.org" <lguest@lists.ozlabs.org>, "linux-c6x-dev@linux-c6x.org" <linux-c6x-dev@linux-c6x.org>, "linux-hexagon@vger.kernel.org" <linux-hexagon@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "xen-devel@lists.xenproject.org" <xen-devel@lists.xenproject.org>, devicetree@vger.k
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-m68k-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-2-git-send-email-linux@roeck-us.net>
+Sender: linux-m68k-owner@vger.kernel.org
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "adi-buildroot-devel@lists.sourceforge.net" <adi-buildroot-devel@lists.sourceforge.net>, driverdevel <devel@driverdev.osuosl.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, lguest@lists.ozlabs.org, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, alpha <linux-alpha@vger.kernel.org>, "moderated list:PANASONIC MN10300..." <linux-am33-list@redhat.com>, Cris <linux-cris-kernel@axis.com>, linux-efi@vger.kernel.org, "open list:QUALCOMM HEXAGON..." <linux-hexagon@vger.kernel.org>, linux-m32r-ja@ml.linux-m32r.org, "linuxppc-dev@lists.ozlabs.org" <linuxppc-dev@lists.ozlabs.org>, linux-s390 <linux-s390@vger.kernel.org>, linux-tegra@vger.kernel.org, "linux-xtensa@linux-xtensa.org" <linux-xtensa@linux-xtensa.org>, openipmi-developer@lists.sourceforge.net, uml-devel <user-mode-linux-devel@lists.s>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 09 Oct 2014, Catalin Marinas wrote:
+On Tue, Oct 7, 2014 at 7:28 AM, Guenter Roeck <linux@roeck-us.net> wrote:
+> +int register_poweroff_handler_simple(void (*handler)(void), int priority)
+> +{
+> +       char symname[KSYM_NAME_LEN];
+> +
+> +       if (poweroff_handler_data.handler) {
+> +               lookup_symbol_name((unsigned long)poweroff_handler_data.handler,
+> +                                  symname);
+> +               pr_warn("Poweroff function already registered (%s)", symname);
+> +               lookup_symbol_name((unsigned long)handler, symname);
+> +               pr_cont(", cannot register %s\n", symname);
 
-> On Tue, Oct 07, 2014 at 09:00:48AM +0100, Lee Jones wrote:
-> > On Mon, 06 Oct 2014, Guenter Roeck wrote:
-> > > --- a/drivers/mfd/ab8500-sysctrl.c
-> > > +++ b/drivers/mfd/ab8500-sysctrl.c
-> > > @@ -6,6 +6,7 @@
-> >=20
-> > [...]
-> >=20
-> > > +static int ab8500_power_off(struct notifier_block *this, unsigne=
-d long unused1,
-> > > +			    void *unused2)
-> > >  {
-> > >  	sigset_t old;
-> > >  	sigset_t all;
-> > > @@ -34,11 +36,6 @@ static void ab8500_power_off(void)
-> > >  	struct power_supply *psy;
-> > >  	int ret;
-> > > =20
-> > > -	if (sysctrl_dev =3D=3D NULL) {
-> > > -		pr_err("%s: sysctrl not initialized\n", __func__);
-> > > -		return;
-> > > -	}
-> >=20
-> > Can you explain the purpose of this change please?
->=20
-> I guess it's because the sysctrl_dev is already initialised when
-> registering the power_off handler, so there isn't a way to call the
-> above function with a NULL sysctrl_dev. Probably even with the origin=
-al
-> code you didn't need this check (after some race fix in
-> ab8500_sysctrl_remove but races is one of the things Guenter's patche=
-s
-> try to address).
+Doesn't %ps work to look up symbols?
 
-Sounds reasonable, although I think this change should be part of
-another patch.
+pr_warn("Poweroff function already registered (%ps), cannot register
+%ps\n", poweroff_handler_data.handler, handler);
 
---=20
-Lee Jones
-Linaro STMicroelectronics Landing Team Lead
-Linaro.org =E2=94=82 Open source software for ARM SoCs
-=46ollow Linaro: Facebook | Twitter | Blog
+> +               return -EBUSY;
+> +       }
+
+Gr{oetje,eeting}s,
+
+                        Geert
+
 --
-To unsubscribe from this list: send the line "unsubscribe linux-acpi" i=
-n
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
+
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
