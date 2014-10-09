@@ -1,17 +1,15 @@
-From: Catalin Marinas <catalin.marinas@arm.com>
-Subject: Re: [PATCH 12/44] mfd: ab8500-sysctrl: Register with kernel poweroff
- handler
-Date: Thu, 9 Oct 2014 11:36:56 +0100
-Message-ID: <20141009103656.GF17836@e104818-lin.cambridge.arm.com>
+From: Pavel Machek <pavel@denx.de>
+Subject: Re: [PATCH 08/44] kernel: Move pm_power_off to common code
+Date: Thu, 9 Oct 2014 12:38:47 +0200
+Message-ID: <20141009103847.GC6787@amd>
 References: <1412659726-29957-1-git-send-email-linux@roeck-us.net>
- <1412659726-29957-13-git-send-email-linux@roeck-us.net>
- <20141007080048.GB25331@lee--X1>
+ <1412659726-29957-9-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
 Content-Disposition: inline
-In-Reply-To: <20141007080048.GB25331@lee--X1>
+In-Reply-To: <1412659726-29957-9-git-send-email-linux@roeck-us.net>
 List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
 List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel/>
@@ -21,40 +19,70 @@ List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driver
  <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
 Errors-To: driverdev-devel-bounces@linuxdriverproject.org
 Sender: "devel" <driverdev-devel-bounces@linuxdriverproject.org>
-To: Lee Jones <lee.jones@linaro.org>
-Cc: "linux-m32r-ja@ml.linux-m32r.org" <linux-m32r-ja@ml.linux-m32r.org>, "linux-mips@linux-mips.org" <linux-mips@linux-mips.org>, "linux-m68k@vger.kernel.org" <linux-m68k@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "linux-sh@vger.kernel.org" <linux-sh@vger.kernel.org>, Linus Walleij <linus.walleij@linaro.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, "linux-s390@vger.kernel.org" <linux-s390@vger.kernel.org>, "lguest@lists.ozlabs.org" <lguest@lists.ozlabs.org>, "linux-c6x-dev@linux-c6x.org" <linux-c6x-dev@linux-c6x.org>, "linux-hexagon@vger.kernel.org" <linux-hexagon@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "xen-devel@lists.xenproject.org" <xen-devel@lists.xenproject.org>, G
+To: Guenter Roeck <linux@roeck-us.net>
+Cc: linux-m32r-ja@ml.linux-m32r.org, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Steven Miao <realmz6@gmail.com>, linux-xtensa@linux-xtensa.org, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, David Howells <dhowells@redhat.com>, Max Filippov <jcmvbkbc@gmail.com>, Paul Mackerras <paulus@samba.org>, Ralf Baechle <ralf@linux-mips.org>, "H. Peter Anvin" <hpa@zytor.com>, Guan Xuetao <gxt@mprc.pku.edu.cn>, Thomas Gleixner <tglx@linutronix.de>, Lennox Wu <lennox.wu@gmail.com>, Hans-Christian Egtvedt <egtvedt@samfundet.no>, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, Jesper Nilsson <jesper.nilsson@axis.com>, lguest@lists.ozlabs.org, Russell King <linux@arm.linux.org.uk>, linux-c6x-dev@linux-c6x.org, Len Brown <len.brown@intel.com>, "David S. Miller" <davem@d>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 07, 2014 at 09:00:48AM +0100, Lee Jones wrote:
-> On Mon, 06 Oct 2014, Guenter Roeck wrote:
-> > --- a/drivers/mfd/ab8500-sysctrl.c
-> > +++ b/drivers/mfd/ab8500-sysctrl.c
-> > @@ -6,6 +6,7 @@
-> 
-> [...]
-> 
-> > +static int ab8500_power_off(struct notifier_block *this, unsigned long unused1,
-> > +			    void *unused2)
-> >  {
-> >  	sigset_t old;
-> >  	sigset_t all;
-> > @@ -34,11 +36,6 @@ static void ab8500_power_off(void)
-> >  	struct power_supply *psy;
-> >  	int ret;
-> >  
-> > -	if (sysctrl_dev == NULL) {
-> > -		pr_err("%s: sysctrl not initialized\n", __func__);
-> > -		return;
-> > -	}
-> 
-> Can you explain the purpose of this change please?
+Hi!
 
-I guess it's because the sysctrl_dev is already initialised when
-registering the power_off handler, so there isn't a way to call the
-above function with a NULL sysctrl_dev. Probably even with the original
-code you didn't need this check (after some race fix in
-ab8500_sysctrl_remove but races is one of the things Guenter's patches
-try to address).
+> @@ -184,6 +179,8 @@ machine_halt(void)
+>  void
+>  machine_power_off(void)
+>  {
+> +	do_kernel_poweroff();
+> +
+
+poweroff -> power_off for consistency.
+
+
+> index c4f50a3..1da27d1 100644
+> --- a/arch/blackfin/kernel/reboot.c
+> +++ b/arch/blackfin/kernel/reboot.c
+> @@ -106,6 +107,7 @@ void machine_halt(void)
+>  __attribute__((weak))
+>  void native_machine_power_off(void)
+>  {
+> +	do_kernel_poweroff();
+>  	idle_with_irq_disabled();
+>  }
+>
+
+So here we handle do_kernel_poweroff() returning,
+
+> diff --git a/arch/cris/kernel/process.c b/arch/cris/kernel/process.c
+> index b78498e..eaafad0 100644
+> --- a/arch/cris/kernel/process.c
+> +++ b/arch/cris/kernel/process.c
+> @@ -60,6 +57,7 @@ void machine_halt(void)
+>  
+>  void machine_power_off(void)
+>  {
+> +	do_kernel_poweroff();
+>  }
+>
+
+
+Here we don't.
+
+> diff --git a/arch/frv/kernel/process.c b/arch/frv/kernel/process.c
+> index 5d40aeb77..a673725 100644
+> --- a/arch/frv/kernel/process.c
+> +++ b/arch/frv/kernel/process.c
+> @@ -107,6 +104,8 @@ void machine_power_off(void)
+>  	gdbstub_exit(0);
+>  #endif
+>  
+> +	do_kernel_poweroff();
+> +
+>  	for (;;);
+>  }
+>  
+
+And here we do.
+
+What is right?
+								Pavel
 
 -- 
-Catalin
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
