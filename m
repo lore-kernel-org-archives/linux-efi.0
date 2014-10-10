@@ -1,115 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: set PE/COFF section alignment to 4 KB
-Date: Fri, 10 Oct 2014 17:59:53 +0200
-Message-ID: <CAKv+Gu__UGmSWOhVTWqmJAAnC0Zq_p87An-y7JELyu+EKCE=Mg@mail.gmail.com>
-References: <1412933124-13018-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20141010103301.GC4076@leverpostej>
-	<CAKv+Gu9b56r3Ujv342xC5CA3_i4yE6ySd=UjUss2U5Yaho0jAQ@mail.gmail.com>
-	<CAFECyb8pkia6NKETNb-v-5iVZEs66D3Wy5t9DngR4TEa1_Nt6g@mail.gmail.com>
+From: Guenter Roeck <linux@roeck-us.net>
+Subject: Re: [PATCH 08/44] kernel: Move pm_power_off to common code
+Date: Fri, 10 Oct 2014 09:53:52 -0700
+Message-ID: <54380F20.3060800@roeck-us.net>
+References: <1412659726-29957-1-git-send-email-linux@roeck-us.net> <1412659726-29957-9-git-send-email-linux@roeck-us.net> <20141009103847.GC6787@amd> <54368A30.9070101@roeck-us.net> <20141009202419.GA16885@amd>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFECyb8pkia6NKETNb-v-5iVZEs66D3Wy5t9DngR4TEa1_Nt6g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mips-bounce@linux-mips.org>
+In-Reply-To: <20141009202419.GA16885@amd>
+Sender: linux-mips-bounce@linux-mips.org
+Errors-to: linux-mips-bounce@linux-mips.org
+List-help: <mailto:ecartis@linux-mips.org?Subject=help>
+List-unsubscribe: <mailto:ecartis@linux-mips.org?subject=unsubscribe%20linux-mips>
+List-software: Ecartis version 1.0.0
+List-subscribe: <mailto:ecartis@linux-mips.org?subject=subscribe%20linux-mips>
+List-owner: <mailto:ralf@linux-mips.org>
+List-post: <mailto:linux-mips@linux-mips.org>
+List-archive: <http://www.linux-mips.org/archives/linux-mips/>
+To: Pavel Machek <pavel@denx.de>
+Cc: linux-kernel@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, devel@driverdev.osuosl.org, devicetree@vger.kernel.org, lguest@lists.ozlabs.org, linux-acpi@vger.kernel.org, linux-alpha@vger.kernel.org, linux-am33-list@redhat.com, linux-cris-kernel@axis.com, linux-efi@vger.kernel.org, linux-hexagon@vger.kernel.org, linux-m32r-ja@ml.linux-m32r.org, linuxppc-dev@lists.ozlabs.org, linux-s390@vger.kernel.org, linux-tegra@vger.kernel.org, linux-xtensa@linux-xtensa.org, openipmi-developer@lists.sourceforge.net, user-mode-linux-devel@lists.sourceforge.net, linux-arm-kernel@lists.infradead.org, linux-c6x-dev@linux-c6x.org, linux-ia64@vger.kernel.org, linux-m68k@lists.linux-m68k.org, linux-metag@vger.kernel.org, linux-mips@linux-mips.org, linux-parisc@vger.kernel.orglinux-
 List-Id: linux-efi@vger.kernel.org
 
-On 10 October 2014 17:55, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Fri, Oct 10, 2014 at 3:37 AM, Ard Biesheuvel
-> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On 10 October 2014 12:33, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->>> Hi Ard,
+On 10/09/2014 01:24 PM, Pavel Machek wrote:
+> Hi!
+>
+>>>> @@ -184,6 +179,8 @@ machine_halt(void)
+>>>>   void
+>>>>   machine_power_off(void)
+>>>>   {
+>>>> +	do_kernel_poweroff();
+>>>> +
 >>>
->>> On Fri, Oct 10, 2014 at 10:25:24AM +0100, Ard Biesheuvel wrote:
->>>> Position independent AArch64 code needs to be linked and loaded at the same
->>>> relative offset from a 4 KB boundary, or adrp/add and adrp/ldr pairs will
->>>> not work correctly. (This is how PC relative symbol references with a 4 GB
->>>> reach are emitted)
->>>>
->>>> We need to declare this in the PE/COFF header, otherwise the PE/COFF loader
->>>> may load the Image and invoke the stub at an offset which violates this rule.
+>>> poweroff -> power_off for consistency.
 >>>
->>> Has this been observed happening, or was this just found by inspection?
->>>
->>
->> This is also something found by inspection, or rather, by the
->> discussion going on in the other thread. I am not aware of any PE/COFF
->> loaders that may choose an offset that is not 4 KB aligned, even if
->> the header we give it appears to allow it.
->>
+>> Dunno; matter of personal preference. I started with that, but ultimately went
+>> with poweroff to distinguish poweroff handler functions from existing code,
+>> specifically kernel_power_off().
 >
-> This also resolves the problematic FileAlignment that I noticed when reviewing
-> the branch to stext patch.
->
-> The PE/COFF spec description of FileAlignment
->
-> The alignment factor (in bytes) that is
-> used to align the raw data of sections
-> in the image file. The value should be
-> a power of 2 between 512 and 64 K,
-> inclusive. The default is 512. If the
-> SectionAlignment is less than the
-> architecture's page size, then
-> FileAlignment must match
-> SectionAlignment.
->
-> Previously the section alignment was less than the page size,
-> and FileAlignment/SectionAlignment didn't match.
->
-> Reviewed-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> That works for you, but once it is merged, it is ugly/confusing typo.
+> 									Pavel
 >
 
-Yes, but this also means (as I noticed just now), that our file
-alignment is out of spec, as it should be at least 0x200.
-Unfortunately, that means we have to pad the kernel .data section to
-0x200 alignment as well.
+Ok, no problem, I'll change it.
 
-Oh, and our architecture does not have a single page size, so I wonder
-if we shouldn't just set both to 0x1000 and be done with it.
-
-Thanks,
-Ard.
-
->>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>> ---
->>>>  arch/arm64/kernel/head.S | 4 ++--
->>>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
->>>> index 0a6e4f924df8..5e83e5b8a9de 100644
->>>> --- a/arch/arm64/kernel/head.S
->>>> +++ b/arch/arm64/kernel/head.S
->>>> @@ -159,7 +159,7 @@ optional_header:
->>>>
->>>>  extra_header_fields:
->>>>       .quad   0                               // ImageBase
->>>> -     .long   0x20                            // SectionAlignment
->>>> +     .long   0x1000                          // SectionAlignment
->>>>       .long   0x8                             // FileAlignment
->>>>       .short  0                               // MajorOperatingSystemVersion
->>>>       .short  0                               // MinorOperatingSystemVersion
->>>> @@ -226,7 +226,7 @@ section_table:
->>>>       .short  0               // NumberOfRelocations  (0 for executables)
->>>>       .short  0               // NumberOfLineNumbers  (0 for executables)
->>>>       .long   0xe0500020      // Characteristics (section flags)
->>>> -     .align 5
->>>> +     .align 12
->>>
->>> Can we get a comment explaining why stext needs the additional
->>> alignment? Something like:
->>>
->>>         /*
->>>          * EFI will load stext onwards at the 4k section alignment
->>>          * described in the PE/COFF header. To ensure that instruction
->>>          * sequences using an adrp and a :lo12: immediate will function
->>>          * correctly at this alignment, we must ensure that stext is
->>>          * placed at a 4k boundary in the Image to begin with.
->>>          */
->>>         .align 12
->>>
->>
->> OK
->>
->> --
->> Ard.
+Guenter
