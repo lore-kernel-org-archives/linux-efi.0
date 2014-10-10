@@ -1,163 +1,169 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3] arm64/efi: efistub: jump to 'stext' directly, not
- through the header
-Date: Fri, 10 Oct 2014 08:30:01 +0200
-Message-ID: <CAKv+Gu_6uww=W9M9hDfoSmY+zr2i75Y=JOxTLCya2rr=HiT6Bw@mail.gmail.com>
-References: <1412777487-13636-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20141009172354.GA466@leverpostej>
-	<CAKv+Gu-D812Rn32rm5wQJfSM+NzPXZWbxDcDkZ8mBzbi5RQJXQ@mail.gmail.com>
-	<1412893179.29182.71.camel@deneb.redhat.com>
-	<CAFECyb9Tz2Fo2ix0VYiM7WPeie7C=woiVwyQtR4aH_HPcLwkOg@mail.gmail.com>
+Subject: Re: [RFT PATCH] efi/x86: move x86 back to libstub
+Date: Fri, 10 Oct 2014 08:35:09 +0200
+Message-ID: <CAKv+Gu9rdPujXqfWhJt=76V8Lemf2FuVoa75KH-TWh+2_a=Ghg@mail.gmail.com>
+References: <1412593603-6945-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFECyb9Tz2Fo2ix0VYiM7WPeie7C=woiVwyQtR4aH_HPcLwkOg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1412593603-6945-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10 October 2014 01:20, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Thu, Oct 9, 2014 at 3:19 PM, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrot=
-e:
->> On Thu, 2014-10-09 at 21:03 +0200, Ard Biesheuvel wrote:
->>> On 9 October 2014 19:23, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->>> > Hi Ard,
->>> >
->>> > On Wed, Oct 08, 2014 at 03:11:27PM +0100, Ard Biesheuvel wrote:
->>> >> After the EFI stub has done its business, it jumps into the kern=
-el by
->>> >> branching to offset #0 of the loaded Image, which is where it ex=
-pects
->>> >> to find the header containing a 'branch to stext' instruction.
->>> >>
->>> >> However, the UEFI spec 2.1.1 states the following regarding PE/C=
-OFF
->>> >> image loading:
->>> >> "A UEFI image is loaded into memory through the LoadImage() Boot
->>> >> Service. This service loads an image with a PE32+ format into me=
-mory.
->>> >> This PE32+ loader is required to load all sections of the PE32+ =
-image
->>> >> into memory."
->>> >>
->>> >> In other words, it is /not/ required to load parts of the image =
-that are
->>> >> not covered by a PE/COFF section, so it may not have loaded the =
-header
->>> >> at the expected offset, as it is not covered by any PE/COFF sect=
-ion.
->>> >
->>> > What does this mean for handle_kernel_image? Given we might not h=
-ave
->>> > _text through to _stext mapped, do we not need to take that into
->>> > account?
->>> >
->>>
->>> Actually, handle_kernel_image() does not interpret the header, it j=
-ust
->>> copies it along with the rest of the image if it needs to be
->>> relocated, so I don't see an issue there. However, I do remember Ma=
-rk
->>> Salter mentioning that there is at least one other location that ne=
-eds
->>> to be fixed up if this concern is valid. Mark?
->>
->> I think at one time we were using the the EFI_LOADED_IMAGE_PROTOCOL
->> ImageBase field and assuming it pointed to the start of the copied
->> file, but I don't think we do so currently. My thought at the time w=
-as
->> that the ImageBase pointer didn't really make sense unless the whole
->> image file was copied by LoadImage(). The description for LoadImage =
-has:
->>
->>   The LoadImage() function loads an EFI image into memory and return=
-s
->>   a handle to the image. The image is loaded in one of two ways.
->>
->>   =E2=80=A2 If SourceBuffer is not NULL, the function is a memory-to=
--memory
->>     load  in which SourceBuffer points to the image to be loaded and
->>     SourceSize indicates the image=E2=80=99s size in bytes. In this =
-case, the
->>     caller has copied the image into SourceBuffer and can free the
->>     buffer once loading is complete.
->>
->>   =E2=80=A2 If SourceBuffer is NULL, the function is a file copy ope=
-ration that
->>     uses the EFI_SIMPLE_FILE_SYSTEM_PROTOCOL.
->>
->> Which makes me think the whole thing gets copied. But in any case, I
->> have no objection to your patch.
->>
-> In practice for the edk2, the whole thing does get loaded into memory=
-=2E
-> Whether this
-> is mandated by the UEFI specification seems less clear.
+On 6 October 2014 13:06, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> This reverts commit 84be880560fb, which itself reverted my original
+> attempt to move x86 from #include'ing .c files from across the tree
+> to using the EFI stub built as a static library.
 >
-> I just took a look at handle_kernel_image(), and I don't think it wil=
-l do
-> the right thing if the firmware doesn't load the header.  Looking dee=
-per,
-> I think some other stuff will be broken in that case as well.
-> handle_kernel_image() takes the image_addr, which the ASM wrapper
-> computes using PC relative
-> operations and _text:
+> The issue that affected the original approach was that splitting
+> the implementation into several .o files resulted in the variable
+> 'efi_early' becoming a global with external linkage, which under
+> -fPIC implies that references to it must go through the GOT. However,
+> dealing with this additional GOT entry turned out to be troublesome
+> on some EFI implementations. (GCC's visibility=hidden attribute is
+> supposed to lift this requirement, but it turned out not to work on
+> the 32-bit build.)
 >
-> adrp x8, _text
-> add x8, x8, #:lo12:_text
+> Instead, use a pure getter function to get a reference to efi_early.
+> This approach results in no additional GOT entries being generated,
+> so there is no need for any changes in the early GOT handling.
 >
-> So if the header is actually not loaded, this address will be wrong -
-> it will be outside
-> the area loaded. While we're not using the EFI_LOADED_IMAGE_PROTOCOL,
-> our calculation is only
-> correct if it does load the whole file.
+> Cc: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Cc: Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>
+> Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
 >
-> I think a similar error would be present in handle_kernel_image() wit=
-h regard
-> to determining how big the kernel is so it can be copied:
-> kernel_size =3D _edata - _text;
-> This is not correct amount to copy if the header isn't loaded.
+> Gents,
 >
-> I think we'll also run into some alignment issues if the loader reall=
-y just
-> loads the section ( we just have the one) rather than the whole file.
-> From reviewing the PE/COFF spec again we violate the relationship
-> between FileAlignment and SectionAlignment.
->
-> I think the patch is fine for what it does - avoids executing the
-> branch in the PE/COFF header,
-> and rather branching directly to the desired code that is in the
-> PE/COFF section.
-> There are variety of other issues that would need to be addressed if
-> the EFI loader
-> is just loading the bare section.
+> This is a request for testing: I would like to find out if this patch
+> fixes Maarten's issue without breaking anything like it did for Josh
+> and Linus the first time around.
 >
 
-The issue is *not* that the PE/COFF .text section may get loaded at
-ImageBase instead of at ImageBase+sizeof(header), so I don't think
-there is reason for any of your concerns.
-The issue I try to address here is where the loader allocates some
-memory starting at ImageBase, but only populates those regions that
-are covered by a section, i.e., only the .text section in our case.
-Copying the header from the file to memory at the same relative
-(negative) offset from .text as it happens to appear in the file is
-behavior that is not covered by the spec at all.
-
---=20
-Ard.
+Any takers?
 
 
->>>
->>> > Also, have we seen problems on any systems yet?
->>> >
->>>
->>> No, I am not aware of any occurrences of this exact issue, this is
->>> just one of the things I spotted while working on this code.
->>> But I think we mostly agree that branching through the header relie=
-s
->>> on behavior of the PE/COFF loader that is not covered by the spec.
->>>
->>
->>
+>
+>  arch/x86/boot/compressed/Makefile |  3 ++-
+>  arch/x86/boot/compressed/eboot.c  |  8 ++++----
+>  arch/x86/boot/compressed/eboot.h  | 16 ----------------
+>  arch/x86/include/asm/efi.h        | 24 ++++++++++++++++++++++++
+>  drivers/firmware/efi/Makefile     |  2 +-
+>  5 files changed, 31 insertions(+), 22 deletions(-)
+>
+> diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+> index 0fcd9133790c..7a801a310e37 100644
+> --- a/arch/x86/boot/compressed/Makefile
+> +++ b/arch/x86/boot/compressed/Makefile
+> @@ -33,7 +33,8 @@ VMLINUX_OBJS = $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
+>  $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
+>
+>  ifeq ($(CONFIG_EFI_STUB), y)
+> -       VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o
+> +       VMLINUX_OBJS += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
+> +                               $(objtree)/drivers/firmware/efi/libstub/lib.a
+>  endif
+>
+>  $(obj)/vmlinux: $(VMLINUX_OBJS) FORCE
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index de8eebd6f67c..58ea406f5d60 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -21,8 +21,10 @@ static efi_system_table_t *sys_table;
+>
+>  static struct efi_config *efi_early;
+>
+> -#define efi_call_early(f, ...)                                         \
+> -       efi_early->call(efi_early->f, __VA_ARGS__);
+> +__pure const struct efi_config *__efi_early(void)
+> +{
+> +       return efi_early;
+> +}
+>
+>  #define BOOT_SERVICES(bits)                                            \
+>  static void setup_boot_services##bits(struct efi_config *c)            \
+> @@ -285,8 +287,6 @@ void efi_char16_printk(efi_system_table_t *table, efi_char16_t *str)
+>         }
+>  }
+>
+> -#include "../../../../drivers/firmware/efi/libstub/efi-stub-helper.c"
+> -
+>  static void find_bits(unsigned long mask, u8 *pos, u8 *size)
+>  {
+>         u8 first, len;
+> diff --git a/arch/x86/boot/compressed/eboot.h b/arch/x86/boot/compressed/eboot.h
+> index c88c31ecad12..d487e727f1ec 100644
+> --- a/arch/x86/boot/compressed/eboot.h
+> +++ b/arch/x86/boot/compressed/eboot.h
+> @@ -103,20 +103,4 @@ struct efi_uga_draw_protocol {
+>         void *blt;
+>  };
+>
+> -struct efi_config {
+> -       u64 image_handle;
+> -       u64 table;
+> -       u64 allocate_pool;
+> -       u64 allocate_pages;
+> -       u64 get_memory_map;
+> -       u64 free_pool;
+> -       u64 free_pages;
+> -       u64 locate_handle;
+> -       u64 handle_protocol;
+> -       u64 exit_boot_services;
+> -       u64 text_output;
+> -       efi_status_t (*call)(unsigned long, ...);
+> -       bool is64;
+> -} __packed;
+> -
+>  #endif /* BOOT_COMPRESSED_EBOOT_H */
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 0ec241ede5a2..b2c854a0f5ca 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -159,6 +159,30 @@ static inline efi_status_t efi_thunk_set_virtual_address_map(
+>  }
+>  #endif /* CONFIG_EFI_MIXED */
+>
+> +
+> +/* arch specific definitions used by the stub code */
+> +
+> +struct efi_config {
+> +       u64 image_handle;
+> +       u64 table;
+> +       u64 allocate_pool;
+> +       u64 allocate_pages;
+> +       u64 get_memory_map;
+> +       u64 free_pool;
+> +       u64 free_pages;
+> +       u64 locate_handle;
+> +       u64 handle_protocol;
+> +       u64 exit_boot_services;
+> +       u64 text_output;
+> +       efi_status_t (*call)(unsigned long, ...);
+> +       bool is64;
+> +} __packed;
+> +
+> +__pure const struct efi_config *__efi_early(void);
+> +
+> +#define efi_call_early(f, ...)                                         \
+> +       __efi_early()->call(__efi_early()->f, __VA_ARGS__);
+> +
+>  extern bool efi_reboot_required(void);
+>
+>  #else
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index aef6a95adef5..d8be608a9f3b 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -7,4 +7,4 @@ obj-$(CONFIG_EFI_VARS_PSTORE)           += efi-pstore.o
+>  obj-$(CONFIG_UEFI_CPER)                        += cper.o
+>  obj-$(CONFIG_EFI_RUNTIME_MAP)          += runtime-map.o
+>  obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)     += runtime-wrappers.o
+> -obj-$(CONFIG_EFI_ARM_STUB)             += libstub/
+> +obj-$(CONFIG_EFI_STUB)                 += libstub/
+> --
+> 1.9.1
+>
