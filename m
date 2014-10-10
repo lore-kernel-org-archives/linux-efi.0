@@ -1,86 +1,285 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: set PE/COFF file alignment to 512 bytes
-Date: Fri, 10 Oct 2014 10:07:48 -0700
-Message-ID: <CAFECyb8zwUwXAThPVOHNxZGzD6e=WVq4JMZdofNwztnw4YgYwA@mail.gmail.com>
-References: <1412960335-22905-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH 2/2] efi: Capsule update support
+Date: Fri, 10 Oct 2014 20:28:47 +0200
+Message-ID: <20141010182846.GA10588@pd.tnic>
+References: <1412692951-25478-1-git-send-email-matt@console-pimps.org>
+ <1412692951-25478-2-git-send-email-matt@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1412960335-22905-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1412692951-25478-2-git-send-email-matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 10, 2014 at 9:58 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> Change our PE/COFF header to use the minimum file alignment of
-> 512 bytes (0x200), as mandated by the PE/COFF spec v8.3
->
-> Also update the linker script so that the Image file itself is also a
-> round multiple of FileAlignment.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Tue, Oct 07, 2014 at 03:42:31PM +0100, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> The EFI capsule mechanism allows data blobs to be passed to the EFI
+> firmware. This patch just introduces the main infrastruture for
+> interacting with the firmware.
+> 
+> Once a capsule has been passed to the firmware, the next reboot will
+> always be performed using the ResetSystem() EFI runtime service, which
+> may involve overriding the reboot type specified by reboot=. This
+> ensures the reset value returned by QueryCapsuleCapabilities() is used
+> to reset the system, which is required for the capsule to be processed.
+> 
+> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+Just a couple of quick thoughts which might or might not make sense...
+
 > ---
-
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
->
-> Another one from the PE/COFF rabbit hole. I will follow up next week and repost
-> as a coherent series, once I have collected all the feedback.
->
->  arch/arm64/kernel/head.S        |  2 +-
->  arch/arm64/kernel/vmlinux.lds.S | 17 +++++++++++++++++
->  2 files changed, 18 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-> index ba715ce3f7f1..e7e83b3128fd 100644
-> --- a/arch/arm64/kernel/head.S
-> +++ b/arch/arm64/kernel/head.S
-> @@ -162,7 +162,7 @@ optional_header:
->  extra_header_fields:
->         .quad   0                               // ImageBase
->         .long   0x1000                          // SectionAlignment
-> -       .long   0x8                             // FileAlignment
-> +       .long   PECOFF_FILE_ALIGNMENT           // FileAlignment
->         .short  0                               // MajorOperatingSystemVersion
->         .short  0                               // MinorOperatingSystemVersion
->         .short  0                               // MajorImageVersion
-> diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-> index edf8715ba39b..4596f46d0244 100644
-> --- a/arch/arm64/kernel/vmlinux.lds.S
-> +++ b/arch/arm64/kernel/vmlinux.lds.S
-> @@ -32,6 +32,22 @@ jiffies = jiffies_64;
->         *(.hyp.text)                                    \
->         VMLINUX_SYMBOL(__hyp_text_end) = .;
->
+>  arch/x86/kernel/reboot.c       |   7 ++
+>  drivers/firmware/efi/Makefile  |   2 +-
+>  drivers/firmware/efi/capsule.c | 239 +++++++++++++++++++++++++++++++++++++++++
+>  drivers/firmware/efi/reboot.c  |  12 ++-
+>  include/linux/efi.h            |  20 ++++
+>  5 files changed, 278 insertions(+), 2 deletions(-)
+>  create mode 100644 drivers/firmware/efi/capsule.c
+> 
+> diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+> index 17962e667a91..59fe1c03c71a 100644
+> --- a/arch/x86/kernel/reboot.c
+> +++ b/arch/x86/kernel/reboot.c
+> @@ -516,6 +516,13 @@ static void native_machine_emergency_restart(void)
+>  	mode = reboot_mode == REBOOT_WARM ? 0x1234 : 0;
+>  	*((unsigned short *)__va(0x472)) = mode;
+>  
+> +	/*
+> +	 * If an EFI capsule has been registered with the firmware then
+> +	 * override the reboot= parameter.
+> +	 */
+> +	if (efi_capsule_pending(NULL))
+> +		reboot_type = BOOT_EFI;
+> +
+>  	for (;;) {
+>  		/* Could also try the reset bit in the Hammer NB */
+>  		switch (reboot_type) {
+> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+> index d8be608a9f3b..698846e67b09 100644
+> --- a/drivers/firmware/efi/Makefile
+> +++ b/drivers/firmware/efi/Makefile
+> @@ -1,7 +1,7 @@
+>  #
+>  # Makefile for linux kernel
+>  #
+> -obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o
+> +obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o capsule.o
+>  obj-$(CONFIG_EFI_VARS)			+= efivars.o
+>  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
+>  obj-$(CONFIG_UEFI_CPER)			+= cper.o
+> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+> new file mode 100644
+> index 000000000000..475643d66258
+> --- /dev/null
+> +++ b/drivers/firmware/efi/capsule.c
+> @@ -0,0 +1,239 @@
 > +/*
-> + * The size of the PE/COFF section that covers the kernel image, which
-> + * runs from stext to _edata, must be a round multiple of the PE/COFF
-> + * FileAlignment, which we set to its minimum value of 0x200. 'stext'
-> + * itself is 4 KB aligned, so padding out _edata to a 0x200 aligned
-> + * boundary should be sufficient.
+> + * EFI capsule support.
+> + *
+> + * Copyright 2013 Intel Corporation <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> + *
+> + * This file is part of the Linux kernel, and is made available under
+> + * the terms of the GNU General Public License version 2.
 > + */
-> +PECOFF_FILE_ALIGNMENT = 0x200;
 > +
-> +#ifdef CONFIG_EFI
-> +#define PECOFF_EDATA_PADDING   \
-> +       .pecoff_edata_padding : { BYTE(0); . = ALIGN(PECOFF_FILE_ALIGNMENT); }
-> +#else
-> +#define PECOFF_EDATA_PADDING
-> +#endif
+> +#define pr_fmt(fmt) "efi-capsule: " fmt
 > +
->  SECTIONS
->  {
->         /*
-> @@ -103,6 +119,7 @@ SECTIONS
->         _data = .;
->         _sdata = .;
->         RW_DATA_SECTION(64, PAGE_SIZE, THREAD_SIZE)
-> +       PECOFF_EDATA_PADDING
->         _edata = .;
->
->         BSS_SECTION(0, 0, 0)
-> --
-> 1.8.3.2
->
+> +#include <linux/slab.h>
+> +#include <linux/mutex.h>
+> +#include <linux/highmem.h>
+> +#include <linux/efi.h>
+> +#include <linux/vmalloc.h>
+> +#include <asm/io.h>
+> +
+> +typedef struct {
+> +	u64 length;
+> +	u64 data;
+> +} efi_capsule_block_desc_t;
+> +
+> +static bool capsule_pending;
+> +static int efi_reset_type = -1;
+> +
+> +/*
+> + * capsule_mutex serialises access to both 'capsule_pending' and
+> + * 'efi_reset_type'.
+> + *
+> + * This mutex must be held across calls to efi_capsule_supported() and
+> + * efi_update_capsule() so that the operation is atomic. This ensures
+> + * that efi_update_capsule() isn't called with a capsule that requires a
+> + * different reset type to the registered 'efi_reset_type'.
+> + */
+> +static DEFINE_MUTEX(capsule_mutex);
+> +
+> +static int efi_update_capsule(efi_capsule_header_t *capsule,
+> +			      struct page **pages, size_t size, int reset);
+> +
+> +/**
+> + * efi_capsule_pending - has a capsule been passed to the firmware?
+> + * @reset_type: store the type of EFI reset if capsule is pending
+> + *
+> + * To ensure that the registered capsule is processed correctly by the
+> + * firmware we need to perform a specific type of reset. If a capsule is
+> + * pending return the reset type in @reset_type.
+> + */
+> +bool efi_capsule_pending(int *reset_type)
+> +{
+> +	bool rv = false;
+> +
+> +	mutex_lock(&capsule_mutex);
+> +	if (!capsule_pending)
+> +		goto out;
+> +
+> +	if (reset_type)
+> +		*reset_type = efi_reset_type;
+> +	rv = true;
+> +
+> +out:
+> +	mutex_unlock(&capsule_mutex);
+> +	return rv;
+> +}
+> +
+> +/**
+> + * efi_capsule_supported - does the firmware support the capsule?
+> + * @guid: vendor guid of capsule
+> + * @flags: capsule flags
+> + * @size: size of capsule data
+> + * @reset: the reset type required for this capsule
+> + *
+> + * Check whether a capsule with @flags is supported and that @size
+> + * doesn't exceed the maximum size for a capsule.
+> + */
+> +int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
+> +{
+> +	efi_capsule_header_t *capsule;
+> +	efi_status_t status;
+> +	u64 max_size;
+> +	int rv = 0;
+> +
+> +	lockdep_assert_held(&capsule_mutex);
+> +
+> +	capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
+> +	if (!capsule)
+> +		return -ENOMEM;
+> +
+> +	capsule->headersize = capsule->imagesize = sizeof(*capsule);
+> +	memcpy(&capsule->guid, &guid, sizeof(efi_guid_t));
+> +	capsule->flags = flags;
+> +
+> +	status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
+> +	if (status != EFI_SUCCESS) {
+> +		rv = efi_status_to_err(status);
+> +		goto out;
+> +	}
+> +
+> +	if (size > max_size)
+> +		rv = -ENOSPC;
+> +out:
+> +	kfree(capsule);
+> +	return rv;
+> +}
+> +
+> +/**
+> + * efi_capsule_update - send a capsule to the firmware
+> + * @capsule: capsule to send to firmware
+> + * @pages: an array of capsule data
+> + *
+> + * Check that @capsule is supported by the firmware and that it doesn't
+> + * conflict with any previously registered capsule.
+> + */
+> +int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
+
+You have efi_capsule_update() vs efi_update_capsule(). Maybe change the
+names a bit more for differentiation. Or prepend the workhorse doing all
+the work with "__" or so...
+
+> +{
+> +	efi_guid_t guid = capsule->guid;
+> +	size_t size = capsule->imagesize;
+> +	u32 flags = capsule->flags;
+> +	int rv, reset_type;
+> +
+> +	mutex_lock(&capsule_mutex);
+> +	rv = efi_capsule_supported(guid, flags, size, &reset_type);
+> +	if (rv)
+> +		goto out;
+> +
+> +	if (efi_reset_type >= 0 && efi_reset_type != reset_type) {
+> +		pr_err("Incompatible capsule reset type %d\n", reset_type);
+> +		rv = -EINVAL;
+> +		goto out;
+> +	}
+> +
+> +	rv = efi_update_capsule(capsule, pages, size, reset_type);
+> +out:
+> +	mutex_unlock(&capsule_mutex);
+> +	return rv;
+> +}
+> +EXPORT_SYMBOL_GPL(efi_capsule_update);
+> +
+> +#define BLOCKS_PER_PAGE	(PAGE_SIZE / sizeof(efi_capsule_block_desc_t))
+> +
+> +/*
+> + * How many pages of block descriptors do we need to map 'nr_pages'?
+> + *
+> + * Every list of block descriptors in a page must end with a
+> + * continuation pointer. The last continuation pointer of the lage page
+> + * must be zero to mark the end of the chain.
+> + */
+> +static inline unsigned int num_block_pages(unsigned int nr_pages)
+> +{
+> +	return DIV_ROUND_UP(nr_pages, BLOCKS_PER_PAGE - 1);
+> +}
+> +
+> +/**
+> + * efi_update_capsule - pass a single capsule to the firmware.
+> + * @capsule: capsule to send to the firmware.
+> + * @pages: an array of capsule data.
+> + * @size: total size of capsule data + headers in @capsule.
+> + * @reset: the reset type required for @capsule
+> + *
+> + * Map @capsule with EFI capsule block descriptors in PAGE_SIZE chunks.
+> + * @size needn't necessarily be a multiple of PAGE_SIZE - we can handle
+> + * a trailing chunk that is smaller than PAGE_SIZE.
+> + *
+> + * @capsule MUST be virtually contiguous.
+> + *
+> + * Return 0 on success.
+> + */
+> +static int efi_update_capsule(efi_capsule_header_t *capsule,
+> +			      struct page **pages, size_t size, int reset)
+> +{
+> +	efi_capsule_block_desc_t *block = NULL;
+> +	struct page **block_pgs;
+> +	efi_status_t status;
+> +	unsigned int nr_data_pgs, nr_block_pgs;
+> +	int i, j, err = -ENOMEM;
+> +
+> +	lockdep_assert_held(&capsule_mutex);
+> +
+> +	nr_data_pgs = DIV_ROUND_UP(size, PAGE_SIZE);
+> +	nr_block_pgs = num_block_pages(nr_data_pgs);
+> +
+> +	block_pgs = kzalloc(nr_block_pgs * sizeof(*block_pgs), GFP_KERNEL);
+> +	if (!block_pgs)
+> +		return -ENOMEM;
+> +
+> +	for (i = 0; i < nr_block_pgs; i++) {
+> +		block_pgs[i] = alloc_page(GFP_KERNEL);
+
+Maybe alloc_pages() once we verify that it actually gives phys. contig.
+memory and maybe also try to do it outside of the locked region. I don't
+know if it would matter to drop the locks though as capsule updating is
+not something you do pretty often. I'd hope!
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
