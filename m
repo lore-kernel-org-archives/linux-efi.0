@@ -1,26 +1,45 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFT PATCH] efi/x86: move x86 back to libstub
-Date: Tue, 14 Oct 2014 22:42:09 +0100
-Message-ID: <20141014214209.GC14343@console-pimps.org>
-References: <1412593603-6945-1-git-send-email-ard.biesheuvel@linaro.org>
- <CAKv+Gu9rdPujXqfWhJt=76V8Lemf2FuVoa75KH-TWh+2_a=Ghg@mail.gmail.com>
- <5437990C.7050402@canonical.com>
- <CAKv+Gu_5tHNB=YOS0Kz2i2ap2n8PvzmvGD6-J7MzxptoG_zHQw@mail.gmail.com>
- <543BD583.3050303@canonical.com>
+Subject: Re: [PATCH 2/2] efi: Capsule update support
+Date: Tue, 14 Oct 2014 22:46:33 +0100
+Message-ID: <20141014214633.GD14343@console-pimps.org>
+References: <1412692951-25478-1-git-send-email-matt@console-pimps.org>
+ <1412692951-25478-2-git-send-email-matt@console-pimps.org>
+ <20141010182846.GA10588@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <543BD583.3050303-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+In-Reply-To: <20141010182846.GA10588-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Boyer <jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 13 Oct, at 03:37:07PM, Maarten Lankhorst wrote:
-> I tested netboot now to be sure, seems to be working ok.
+On Fri, 10 Oct, at 08:28:47PM, Borislav Petkov wrote:
+> 
+> You have efi_capsule_update() vs efi_update_capsule(). Maybe change the
+> names a bit more for differentiation. Or prepend the workhorse doing all
+> the work with "__" or so...
+ 
+Yeah, I really didn't come up with a great naming scheme here. I'll fix
+that.
 
-Thanks guys, I'll take a look at this tomorrow.
+> > +
+> > +	for (i = 0; i < nr_block_pgs; i++) {
+> > +		block_pgs[i] = alloc_page(GFP_KERNEL);
+> 
+> Maybe alloc_pages() once we verify that it actually gives phys. contig.
+> memory and maybe also try to do it outside of the locked region. I don't
+> know if it would matter to drop the locks though as capsule updating is
+> not something you do pretty often. I'd hope!
+
+Actually, I'm not bothered about getting physically contiguous memory
+because we pass a scatter gather list to the firmware anyway. What I was
+looking for was to avoid doing high order allocations when we don't
+really need them (lots of low order allocs are fine).
+
+Right, allocating under the lock isn't a great idea. I'll take a look at
+reworking this to do the allocation up front.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
