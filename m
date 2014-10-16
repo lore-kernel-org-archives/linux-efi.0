@@ -1,45 +1,36 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Capsule update support
-Date: Tue, 14 Oct 2014 22:46:33 +0100
-Message-ID: <20141014214633.GD14343@console-pimps.org>
-References: <1412692951-25478-1-git-send-email-matt@console-pimps.org>
- <1412692951-25478-2-git-send-email-matt@console-pimps.org>
- <20141010182846.GA10588@pd.tnic>
+Subject: Re: [PATCH] arm64/efi: set PE/COFF file alignment to 512 bytes
+Date: Thu, 16 Oct 2014 14:52:39 +0100
+Message-ID: <20141016135239.GG14343@console-pimps.org>
+References: <1412960335-22905-1-git-send-email-ard.biesheuvel@linaro.org>
+ <CAFECyb8zwUwXAThPVOHNxZGzD6e=WVq4JMZdofNwztnw4YgYwA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20141010182846.GA10588-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <CAFECyb8zwUwXAThPVOHNxZGzD6e=WVq4JMZdofNwztnw4YgYwA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 10 Oct, at 08:28:47PM, Borislav Petkov wrote:
+On Fri, 10 Oct, at 10:07:48AM, Roy Franz wrote:
+> On Fri, Oct 10, 2014 at 9:58 AM, Ard Biesheuvel
+> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> > Change our PE/COFF header to use the minimum file alignment of
+> > 512 bytes (0x200), as mandated by the PE/COFF spec v8.3
+> >
+> > Also update the linker script so that the Image file itself is also a
+> > round multiple of FileAlignment.
+> >
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
 > 
-> You have efi_capsule_update() vs efi_update_capsule(). Maybe change the
-> names a bit more for differentiation. Or prepend the workhorse doing all
-> the work with "__" or so...
- 
-Yeah, I really didn't come up with a great naming scheme here. I'll fix
-that.
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-> > +
-> > +	for (i = 0; i < nr_block_pgs; i++) {
-> > +		block_pgs[i] = alloc_page(GFP_KERNEL);
-> 
-> Maybe alloc_pages() once we verify that it actually gives phys. contig.
-> memory and maybe also try to do it outside of the locked region. I don't
-> know if it would matter to drop the locks though as capsule updating is
-> not something you do pretty often. I'd hope!
+Whut? Is there some patch authorship madness going on here?
 
-Actually, I'm not bothered about getting physically contiguous memory
-because we pass a scatter gather list to the firmware anyway. What I was
-looking for was to avoid doing high order allocations when we don't
-really need them (lots of low order allocs are fine).
-
-Right, allocating under the lock isn't a great idea. I'll take a look at
-reworking this to do the allocation up front.
+Who wrote the patch?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
