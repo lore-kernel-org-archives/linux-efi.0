@@ -1,42 +1,88 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: set PE/COFF file alignment to 512 bytes
-Date: Thu, 16 Oct 2014 18:06:35 +0200
-Message-ID: <CAKv+Gu_Ky6jUe-Br2E_nThA9ZKYUM2VbuhkRiHwviHh_8hbO-A@mail.gmail.com>
-References: <1412960335-22905-1-git-send-email-ard.biesheuvel@linaro.org>
-	<CAFECyb8zwUwXAThPVOHNxZGzD6e=WVq4JMZdofNwztnw4YgYwA@mail.gmail.com>
-	<20141016135239.GG14343@console-pimps.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH 2/2] efi: Capsule update support
+Date: Thu, 16 Oct 2014 17:15:07 +0100
+Message-ID: <20141016161507.GJ14343@console-pimps.org>
+References: <CAGBcZGfHX57jwCfw7CnvLgOJ58kd0KVJULOvhAsfi=3YBp5WsQ@mail.gmail.com>
+ <20141013095310.GZ14343@console-pimps.org>
+ <CAGBcZGe=HszCxQyx8bBDUEQcF4g+gcMyLfGiM4dVz4=TfxvLpg@mail.gmail.com>
+ <CAGBcZGfSdYa2yXW68RbywzCiC7mTxjAdGjUnwnhjWAwXZ0uqiQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141016135239.GG14343-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAGBcZGfSdYa2yXW68RbywzCiC7mTxjAdGjUnwnhjWAwXZ0uqiQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 16 October 2014 15:52, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Fri, 10 Oct, at 10:07:48AM, Roy Franz wrote:
->> On Fri, Oct 10, 2014 at 9:58 AM, Ard Biesheuvel
->> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > Change our PE/COFF header to use the minimum file alignment of
->> > 512 bytes (0x200), as mandated by the PE/COFF spec v8.3
->> >
->> > Also update the linker script so that the Image file itself is also a
->> > round multiple of FileAlignment.
->> >
->> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> > ---
->>
->> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->
-> Whut? Is there some patch authorship madness going on here?
->
-> Who wrote the patch?
->
+On Tue, 14 Oct, at 06:30:22PM, Sam Protsenko wrote:
+> Matt,
+> 
+> I tried to play with your code and now I have some extra notes about this patch:
+> 
+> 1. As it was proposed earlier, I support thought that it would be nice to
+>    rename function names in next way:
+> 
+>      efi_update_capsule -> __efi_update_capsule
+>      efi_capsule_update -> efi_update_capsule
+> 
+>    because it's quite confusing to have both efi_update_capsule() and
+>    efi_capsule_update(). Besides, EFI function called UpdateCapsule, so it's
+>    good idea to stick to this name in kernel API (I mean exporting
+>    efi_update_capsule() instead of efi_capsule_update()).
+ 
+I'm not so convinced by that argument. Remember, we're building a kernel
+API here, so we've got functions like,
 
-I wrote the patch, and I suppose Roy meant to ack it.
+  efi_capsule_supported()
+  efi_capsule_pending()
 
-Roy?
+I've stuck with efi_capsule_update() and __efi_capsule_update() for now,
+to continue the efi_capsule* theme (avoiding both efi_capsule_update()
+and efi_update_capsule() was a good point though).
+
+> 2. UEFI's UpdateCapsule() runtime service supports passing more than one
+>    capsule to it (we can pass CapsuleCount argument to it for this purpose).
+>    But your particular kernel implementation allows us only to provide one
+>    capsule at a time. Is that was done for a reason? Can it be consider as
+>    shortcoming?
+ 
+Yeah, the reason is simply that it makes the capsule management more
+complicated if you have more than one capsule, and when testing the
+patches (and experimenting with the features in the capsule-* branches
+in my git tree) I didn't come across a scenario where sending multiple
+capsules at one time was required.
+
+Doesn't mean we couldn't extend the kernel API in the future, though.
+We'd just need an in-kernel user first.
+
+> 3. I noticed that you dropped efi_capsule_build() in this patch (w.r.t.
+>    https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/
+>    implementation). BTW, it should be declared in header there.
+>    Anyway, how do we suppose to build capsule to pass to efi_capsule_update()?
+>    I mean, it can take a quite large code to build a capsule (allocating pages
+>    etc). Wouldn't it be easier to user to use your API if it has something
+>    ready to use? Anyway, if it should be done like this, it would be nice
+>    to have a decent example code (use-case) how to use this API (maybe in
+>    Documentation/, idk), because it looks quite non-intuitive (for me at least).
+ 
+The two patches that I sent are only preparatory patches for EFI capsule
+support, and Kweh (Cc'd) is working on patches that implement a userland
+interface.
+
+Wilson, do you think you could post your patches by the beginning of
+next week? They just need to give an idea of how we can use this API. 
+
+> 4. Tedious stuff: I checked your patch with "checkpatch.pl" and it shows
+>     some warnings, please fix them if possible.
+
+Will do.
+
+> I will try to test and verify this patch further, will notify you if
+> notice any issues.
+
+Great, thanks.
 
 -- 
-Ard.
+Matt Fleming, Intel Open Source Technology Center
