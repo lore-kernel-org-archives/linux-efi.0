@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 04/10] arm64/efi: reserve regions of type ACPI_MEMORY_NVS
-Date: Wed, 22 Oct 2014 16:21:47 +0200
-Message-ID: <1413987713-30528-5-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 07/10] efi: dmi: add support for SMBIOS 3.0 UEFI configuration table
+Date: Wed, 22 Oct 2014 16:21:50 +0200
+Message-ID: <1413987713-30528-8-git-send-email-ard.biesheuvel@linaro.org>
 References: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1413987713-30528-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,25 +10,75 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Memory regions of type ACPI_MEMORY_NVS should be preserved
-by the OS, so make sure we reserve them at boot.
+This adds support to the UEFI side for detecting the presence of
+a SMBIOS 3.0 64-bit entry point. This allows the actual SMBIOS
+structure table to reside at a physical offset over 4 GB, which
+cannot be supported by the legacy SMBIOS 32-bit entry point.
 
+Since the firmware can legally provide both entry points, store
+the SMBIOS 3.0 entry point in a separate variable, and let the
+DMI decoding layer decide which one will be used.
+
+Tested-by: Suravee Suthikulpanit <suravee.suthikulpanit-5C7GfCeVMHo@public.gmane.org>
+Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c | 1 +
- 1 file changed, 1 insertion(+)
+ drivers/firmware/efi/efi.c | 4 ++++
+ include/linux/efi.h        | 6 +++++-
+ 2 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 95c49ebc660d..71ea4fc0aa8a 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -132,6 +132,7 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
- 		return 1;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 8590099ac148..9035c1b74d58 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -30,6 +30,7 @@ struct efi __read_mostly efi = {
+ 	.acpi       = EFI_INVALID_TABLE_ADDR,
+ 	.acpi20     = EFI_INVALID_TABLE_ADDR,
+ 	.smbios     = EFI_INVALID_TABLE_ADDR,
++	.smbios3    = EFI_INVALID_TABLE_ADDR,
+ 	.sal_systab = EFI_INVALID_TABLE_ADDR,
+ 	.boot_info  = EFI_INVALID_TABLE_ADDR,
+ 	.hcdp       = EFI_INVALID_TABLE_ADDR,
+@@ -86,6 +87,8 @@ static ssize_t systab_show(struct kobject *kobj,
+ 		str += sprintf(str, "ACPI=0x%lx\n", efi.acpi);
+ 	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
+ 		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
++	if (efi.smbios3 != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "SMBIOS3=0x%lx\n", efi.smbios3);
+ 	if (efi.hcdp != EFI_INVALID_TABLE_ADDR)
+ 		str += sprintf(str, "HCDP=0x%lx\n", efi.hcdp);
+ 	if (efi.boot_info != EFI_INVALID_TABLE_ADDR)
+@@ -260,6 +263,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
+ 	{MPS_TABLE_GUID, "MPS", &efi.mps},
+ 	{SAL_SYSTEM_TABLE_GUID, "SALsystab", &efi.sal_systab},
+ 	{SMBIOS_TABLE_GUID, "SMBIOS", &efi.smbios},
++	{SMBIOS3_TABLE_GUID, "SMBIOS 3.0", &efi.smbios3},
+ 	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
+ 	{NULL_GUID, NULL, NULL},
+ };
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 0949f9c7e872..27d69388ded0 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -547,6 +547,9 @@ void efi_native_runtime_setup(void);
+ #define SMBIOS_TABLE_GUID    \
+     EFI_GUID(  0xeb9d2d31, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
  
- 	if (md->type == EFI_ACPI_RECLAIM_MEMORY ||
-+	    md->type == EFI_ACPI_MEMORY_NVS ||
- 	    md->type == EFI_RESERVED_TYPE)
- 		return 1;
++#define SMBIOS3_TABLE_GUID    \
++    EFI_GUID(  0xf2fd1544, 0x9794, 0x4a2c, 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 )
++
+ #define SAL_SYSTEM_TABLE_GUID    \
+     EFI_GUID(  0xeb9d2d32, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
  
+@@ -810,7 +813,8 @@ extern struct efi {
+ 	unsigned long mps;		/* MPS table */
+ 	unsigned long acpi;		/* ACPI table  (IA64 ext 0.71) */
+ 	unsigned long acpi20;		/* ACPI table  (ACPI 2.0) */
+-	unsigned long smbios;		/* SM BIOS table */
++	unsigned long smbios;		/* SM BIOS table (32 bit entry point) */
++	unsigned long smbios3;		/* SM BIOS table (64 bit entry point) */
+ 	unsigned long sal_systab;	/* SAL system table */
+ 	unsigned long boot_info;	/* boot info table */
+ 	unsigned long hcdp;		/* HCDP table */
 -- 
 1.8.3.2
