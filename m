@@ -1,82 +1,46 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH 02/10] arm64/efi: set PE/COFF section alignment to 4 KB
-Date: Wed, 22 Oct 2014 15:49:08 +0100
-Message-ID: <20141022144908.GD4010@leverpostej>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 04/10] arm64/efi: reserve regions of type ACPI_MEMORY_NVS
+Date: Wed, 22 Oct 2014 17:15:52 +0100
+Message-ID: <20141022161552.GG4010@leverpostej>
 References: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
- <1413987713-30528-3-git-send-email-ard.biesheuvel@linaro.org>
+ <1413987713-30528-5-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1413987713-30528-3-git-send-email-ard.biesheuvel@linaro.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: "matt.fleming@intel.com" <matt.fleming@intel.com>, "yi.li@linaro.org" <yi.li@linaro.org>, Catalin Marinas <Catalin.Marinas@arm.com>, Will Deacon <Will.Deacon@arm.com>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "roy.franz@linaro.org" <roy.franz@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "msalter@redhat.com" <msalter@redhat.com>, "dyoung@redhat.com" <dyoung@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+In-Reply-To: <1413987713-30528-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 22, 2014 at 03:21:45PM +0100, Ard Biesheuvel wrote:
-> Position independent AArch64 code needs to be linked and loaded at the
-> same relative offset from a 4 KB boundary, or adrp/add and adrp/ldr
-> pairs will not work correctly. (This is how PC relative symbol
-> references with a 4 GB reach are emitted)
+On Wed, Oct 22, 2014 at 03:21:47PM +0100, Ard Biesheuvel wrote:
+> Memory regions of type ACPI_MEMORY_NVS should be preserved
+> by the OS, so make sure we reserve them at boot.
 > 
-> We need to declare this in the PE/COFF header, otherwise the PE/COFF
-> loader may load the Image and invoke the stub at an offset which
-> violates this rule.
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c | 1 +
+>  1 file changed, 1 insertion(+)
 > 
-> Reviewed-by: Roy Franz <roy.franz@linaro.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 95c49ebc660d..71ea4fc0aa8a 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -132,6 +132,7 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
+>  		return 1;
+>  
+>  	if (md->type == EFI_ACPI_RECLAIM_MEMORY ||
+> +	    md->type == EFI_ACPI_MEMORY_NVS ||
+>  	    md->type == EFI_RESERVED_TYPE)
+>  		return 1;
 
-Acked-by: Mark Rutland <mark.rutland@arm.com>
+Shouldn't we also filter out EFI_UNUSABLE_MEMORY? Or does that happen
+elsewhere?
+
+Perhaps instead we should invert this logic and assume memory should be
+reserved if not EfiLoaderCode, EfiLoaderData, EfiBootServicesCode,
+EfiBootServicesData, or EfiConventionalMemory. That looks to be what x86
+does.
 
 Mark.
-
-> ---
-> v2: added comment explaining '.align 12' in head.S
-> ---
->  arch/arm64/kernel/head.S | 12 ++++++++++--
->  1 file changed, 10 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-> index 8c06c9d269d2..8ae84d8c2a8c 100644
-> --- a/arch/arm64/kernel/head.S
-> +++ b/arch/arm64/kernel/head.S
-> @@ -161,7 +161,7 @@ optional_header:
->  
->  extra_header_fields:
->  	.quad	0				// ImageBase
-> -	.long	0x20				// SectionAlignment
-> +	.long	0x1000				// SectionAlignment
->  	.long	0x8				// FileAlignment
->  	.short	0				// MajorOperatingSystemVersion
->  	.short	0				// MinorOperatingSystemVersion
-> @@ -228,7 +228,15 @@ section_table:
->  	.short	0		// NumberOfRelocations  (0 for executables)
->  	.short	0		// NumberOfLineNumbers  (0 for executables)
->  	.long	0xe0500020	// Characteristics (section flags)
-> -	.align 5
-> +
-> +	/*
-> +	 * EFI will load stext onwards at the 4k section alignment
-> +	 * described in the PE/COFF header. To ensure that instruction
-> +	 * sequences using an adrp and a :lo12: immediate will function
-> +	 * correctly at this alignment, we must ensure that stext is
-> +	 * placed at a 4k boundary in the Image to begin with.
-> +	 */
-> +	.align 12
->  #endif
->  
->  ENTRY(stext)
-> -- 
-> 1.8.3.2
-> 
-> 
