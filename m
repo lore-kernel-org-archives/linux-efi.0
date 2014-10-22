@@ -1,106 +1,57 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 01/10] arm64/efi: efistub: jump to 'stext' directly, not through the header
-Date: Wed, 22 Oct 2014 16:21:44 +0200
-Message-ID: <1413987713-30528-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 00/10] arm64 EFI patches for 3.19
+Date: Wed, 22 Oct 2014 16:21:43 +0200
+Message-ID: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1413987713-30528-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-After the EFI stub has done its business, it jumps into the kernel by
-branching to offset #0 of the loaded Image, which is where it expects
-to find the header containing a 'branch to stext' instruction.
+This is a bit of a mixed bag of patches that we would like to see merged for
+3.19. Most of them have been posted and discussed on linux-efi and/or LAKML
+before, and one of them has even been merged and reverted twice.
 
-However, the UEFI spec 2.1.1 states the following regarding PE/COFF
-image loading:
-"A UEFI image is loaded into memory through the LoadImage() Boot
-Service. This service loads an image with a PE32+ format into memory.
-This PE32+ loader is required to load all sections of the PE32+ image
-into memory."
+Patches #1 - #4 are fixes for compliance with the UEFI and PE/COFF specs.
+No issues are known that require these patches, so there is no reason to
+pull them into a stable release.
 
-In other words, it is /not/ required to load parts of the image that are
-not covered by a PE/COFF section, so it may not have loaded the header
-at the expected offset, as it is not covered by any PE/COFF section.
+Patches #5 and #6 address minor issues in the arm64 EFI init code.
 
-So instead, jump to 'stext' directly, which is at the base of the
-PE/COFF .text section, by supplying a symbol 'stext_offset' to
-efi-entry.o which contains the relative offset of stext into the Image.
-Also replace other open coded calculations of the same value with a
-reference to 'stext_offset'
+Patches #7 - #10 implement DMI/SMBIOS for arm64, both the existing 32-bit
+version and the upcoming 3.0 version that allows the SMBIOS structure table
+to reside at a physical offset that cannot be encoded in 32-bits. It also
+install a 'Hardware: xxx' string that is printed along with oopses and
+kernel call stack dumps on systems that implement DMI/SMBIOS.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
-v3:
-- rebased onto 3.17+
-- added spec reference to commit message
+Please refer to the patches themselves for version history. Acks and/or
+comments appreciated.
 
-v2:
-- drop :lo12: relocation against stext_offset in favor of using a literal
-  '=stext_offset' which is safer
----
- arch/arm64/kernel/efi-entry.S |  3 ++-
- arch/arm64/kernel/head.S      | 10 ++++++----
- 2 files changed, 8 insertions(+), 5 deletions(-)
+Ard Biesheuvel (9):
+  arm64/efi: efistub: jump to 'stext' directly, not through the header
+  arm64/efi: set PE/COFF section alignment to 4 KB
+  arm64/efi: set PE/COFF file alignment to 512 bytes
+  arm64/efi: reserve regions of type ACPI_MEMORY_NVS
+  arm64/efi: drop redundant set_bit(EFI_CONFIG_TABLES)
+  arm64/efi: use UEFI memory map unconditionally if available
+  efi: dmi: add support for SMBIOS 3.0 UEFI configuration table
+  dmi: add support for SMBIOS 3.0 64-bit entry point
+  arm64: dmi: set DMI string as dump stack arch description
 
-diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-index 619b1dd7bcde..a0016d3a17da 100644
---- a/arch/arm64/kernel/efi-entry.S
-+++ b/arch/arm64/kernel/efi-entry.S
-@@ -61,7 +61,8 @@ ENTRY(efi_stub_entry)
- 	 */
- 	mov	x20, x0		// DTB address
- 	ldr	x0, [sp, #16]	// relocated _text address
--	mov	x21, x0
-+	ldr	x21, =stext_offset
-+	add	x21, x0, x21
- 
- 	/*
- 	 * Flush dcache covering current runtime addresses
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 0a6e4f924df8..8c06c9d269d2 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -132,6 +132,8 @@ efi_head:
- #endif
- 
- #ifdef CONFIG_EFI
-+	.globl	stext_offset
-+	.set	stext_offset, stext - efi_head
- 	.align 3
- pe_header:
- 	.ascii	"PE"
-@@ -155,7 +157,7 @@ optional_header:
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
- 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
--	.long	stext - efi_head		// BaseOfCode
-+	.long	stext_offset			// BaseOfCode
- 
- extra_header_fields:
- 	.quad	0				// ImageBase
-@@ -172,7 +174,7 @@ extra_header_fields:
- 	.long	_end - efi_head			// SizeOfImage
- 
- 	// Everything before the kernel image is considered part of the header
--	.long	stext - efi_head		// SizeOfHeaders
-+	.long	stext_offset			// SizeOfHeaders
- 	.long	0				// CheckSum
- 	.short	0xa				// Subsystem (EFI application)
- 	.short	0				// DllCharacteristics
-@@ -217,9 +219,9 @@ section_table:
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
- 	.long	_end - stext		// VirtualSize
--	.long	stext - efi_head	// VirtualAddress
-+	.long	stext_offset		// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
--	.long	stext - efi_head	// PointerToRawData
-+	.long	stext_offset		// PointerToRawData
- 
- 	.long	0		// PointerToRelocations (0 for executables)
- 	.long	0		// PointerToLineNumbers (0 for executables)
+Yi Li (1):
+  arm64: dmi: Add SMBIOS/DMI support
+
+ arch/arm64/Kconfig              | 11 +++++++
+ arch/arm64/include/asm/dmi.h    | 31 ++++++++++++++++++
+ arch/arm64/kernel/efi-entry.S   |  3 +-
+ arch/arm64/kernel/efi.c         | 29 +++++++++++------
+ arch/arm64/kernel/head.S        | 24 +++++++++-----
+ arch/arm64/kernel/vmlinux.lds.S | 17 ++++++++++
+ drivers/firmware/dmi_scan.c     | 70 +++++++++++++++++++++++++++++++++++++++--
+ drivers/firmware/efi/efi.c      |  4 +++
+ include/linux/efi.h             |  6 +++-
+ 9 files changed, 175 insertions(+), 20 deletions(-)
+ create mode 100644 arch/arm64/include/asm/dmi.h
+
 -- 
 1.8.3.2
