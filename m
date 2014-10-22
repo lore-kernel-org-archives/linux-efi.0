@@ -1,58 +1,112 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 04/10] arm64/efi: reserve regions of type ACPI_MEMORY_NVS
-Date: Wed, 22 Oct 2014 18:33:35 +0200
-Message-ID: <CAKv+Gu9pUY766Wf8cVfNtmjS8mXAB9PZswrRdgsKmz8+AOXrww@mail.gmail.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 06/10] arm64/efi: use UEFI memory map unconditionally if
+ available
+Date: Wed, 22 Oct 2014 13:06:56 -0400
+Message-ID: <1413997616.2985.74.camel@deneb.redhat.com>
 References: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1413987713-30528-5-git-send-email-ard.biesheuvel@linaro.org>
-	<20141022161552.GG4010@leverpostej>
+	 <1413987713-30528-7-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141022161552.GG4010@leverpostej>
+In-Reply-To: <1413987713-30528-7-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 22 October 2014 18:15, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Wed, Oct 22, 2014 at 03:21:47PM +0100, Ard Biesheuvel wrote:
->> Memory regions of type ACPI_MEMORY_NVS should be preserved
->> by the OS, so make sure we reserve them at boot.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/arm64/kernel/efi.c | 1 +
->>  1 file changed, 1 insertion(+)
->>
->> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
->> index 95c49ebc660d..71ea4fc0aa8a 100644
->> --- a/arch/arm64/kernel/efi.c
->> +++ b/arch/arm64/kernel/efi.c
->> @@ -132,6 +132,7 @@ static __init int is_reserve_region(efi_memory_desc_t *md)
->>               return 1;
->>
->>       if (md->type == EFI_ACPI_RECLAIM_MEMORY ||
->> +         md->type == EFI_ACPI_MEMORY_NVS ||
->>           md->type == EFI_RESERVED_TYPE)
->>               return 1;
->
-> Shouldn't we also filter out EFI_UNUSABLE_MEMORY? Or does that happen
-> elsewhere?
->
+On Wed, 2014-10-22 at 16:21 +0200, Ard Biesheuvel wrote:
+> On systems that boot via UEFI, all memory nodes are deleted from the
+> device tree, and instead, the size and location of system RAM is derived
+> from the UEFI memory map. This is handled by reserve_regions, which not only
+> reserves parts of memory that UEFI declares as reserved, but also installs
+> the memblocks that cover the remaining usable memory.
+> 
+> Currently, reserve_regions() is only called if uefi_init() succeeds.
+> However, it does not actually depend on anything that uefi_init() does,
+> and not calling reserve_regions() results in a broken boot, so it is
+> better to just call it unconditionally.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c | 11 ++++-------
+>  1 file changed, 4 insertions(+), 7 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 51522ab0c6da..4cec21b1ecdd 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -313,8 +313,7 @@ void __init efi_init(void)
+>  	memmap.desc_size = params.desc_size;
+>  	memmap.desc_version = params.desc_ver;
+>  
+> -	if (uefi_init() < 0)
+> -		return;
+> +	WARN_ON(uefi_init() < 0);
+>  
+>  	reserve_regions();
+>  }
 
-Yes, good point.
+It also looks like EFI_BOOT flag will be set even if uefi_init fails.
+If uefi_init fails, we only need reserve_regions() for the purpose
+of adding memblocks. Otherwise, we end up wasting a lot of memory.
+So, something like this would also be needed:
 
-> Perhaps instead we should invert this logic and assume memory should be
-> reserved if not EfiLoaderCode, EfiLoaderData, EfiBootServicesCode,
-> EfiBootServicesData, or EfiConventionalMemory. That looks to be what x86
-> does.
->
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 03aaa99..5a6e189 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -81,9 +81,6 @@ static int __init uefi_init(void)
+ 		return -ENOMEM;
+ 	}
+ 
+-	set_bit(EFI_BOOT, &efi.flags);
+-	set_bit(EFI_64BIT, &efi.flags);
+-
+ 	/*
+ 	 * Verify the EFI Table
+ 	 */
+@@ -109,6 +106,9 @@ static int __init uefi_init(void)
+ 		efi.systab->hdr.revision >> 16,
+ 		efi.systab->hdr.revision & 0xffff, vendor);
+ 
++	set_bit(EFI_BOOT, &efi.flags);
++	set_bit(EFI_64BIT, &efi.flags);
++
+ 	retval = efi_config_init(NULL);
+ 	if (retval == 0)
+ 		set_bit(EFI_CONFIG_TABLES, &efi.flags);
+@@ -177,9 +177,10 @@ static __init void reserve_regions(void)
+ 		if (is_normal_ram(md))
+ 			early_init_dt_add_memory_arch(paddr, size);
+ 
+-		if (is_reserve_region(md) ||
+-		    md->type == EFI_BOOT_SERVICES_CODE ||
+-		    md->type == EFI_BOOT_SERVICES_DATA) {
++		if (efi_enabled(EFI_BOOT) &&
++		    (is_reserve_region(md) ||
++		     md->type == EFI_BOOT_SERVICES_CODE ||
++		     md->type == EFI_BOOT_SERVICES_DATA)) {
+ 			memblock_reserve(paddr, size);
+ 			if (uefi_debug)
+ 				pr_cont("*");
 
-That would make it more robust against new types in future spec
-changes, I suppose, although that would seem unlikely.
-
-I am happy to change the patch to take that approach instead, if
-others agree that it is preferable?
-
--- 
-Ard.
+> @@ -374,15 +373,13 @@ static int __init arm64_enter_virtual_mode(void)
+>  	int count = 0;
+>  	unsigned long flags;
+>  
+> -	if (!efi_enabled(EFI_BOOT)) {
+> -		pr_info("EFI services will not be available.\n");
+> -		return -1;
+> -	}
+> +	if (!efi_enabled(EFI_MEMMAP))
+> +		return 0;
+>  
+>  	mapsize = memmap.map_end - memmap.map;
+>  	early_memunmap(memmap.map, mapsize);
+>  
+> -	if (efi_runtime_disabled()) {
+> +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
+>  		pr_info("EFI runtime services will be disabled.\n");
+>  		return -1;
+>  	}
