@@ -1,65 +1,44 @@
-From: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
-Subject: [PATCH] efivarfs: allow unloading when build as module
-Date: Thu, 23 Oct 2014 23:20:37 +0200
-Message-ID: <1414099237-19081-1-git-send-email-minipli@googlemail.com>
+From: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v1 0/3] Enable user helper interface for efi capsule update
+Date: Fri, 24 Oct 2014 14:18:19 +0800
+Message-ID: <1414131502-13886-1-git-send-email-hock.leong.kweh@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-There is no need to keep the module loaded when it serves no function in
-case the EFI runtime services are disabled. Return an error in this case
-so loading the module will fail.
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Also supply a module_exit function to allow unloading the module.
+Hi Guys,
 
-Last, but not least, set the owner of the file_system_type struct.
+This patchset is created on top of "efi: Capsule update support" patch:
+http://permalink.gmane.org/gmane.linux.kernel.efi/4837
 
-Cc: Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Mathias Krause <minipli-gM/Ye1E23mwN+BqQ9rBEUg@public.gmane.org>
----
- fs/efivarfs/super.c |   11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+It leverages the request_firmware_nowait() to expose the user helper
+interface for user to upload the capsule binary and calling the
+efi_capsule_update() API to pass the binary to EFI firmware.
 
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index 0a48886e069c..6dad1176ec52 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -236,6 +236,7 @@ static void efivarfs_kill_sb(struct super_block *sb)
- }
- 
- static struct file_system_type efivarfs_type = {
-+	.owner   = THIS_MODULE,
- 	.name    = "efivarfs",
- 	.mount   = efivarfs_mount,
- 	.kill_sb = efivarfs_kill_sb,
-@@ -244,17 +245,23 @@ static struct file_system_type efivarfs_type = {
- static __init int efivarfs_init(void)
- {
- 	if (!efi_enabled(EFI_RUNTIME_SERVICES))
--		return 0;
-+		return -ENODEV;
- 
- 	if (!efivars_kobject())
--		return 0;
-+		return -ENODEV;
- 
- 	return register_filesystem(&efivarfs_type);
- }
- 
-+static __exit void efivarfs_exit(void)
-+{
-+	unregister_filesystem(&efivarfs_type);
-+}
-+
- MODULE_AUTHOR("Matthew Garrett, Jeremy Kerr");
- MODULE_DESCRIPTION("EFI Variable Filesystem");
- MODULE_LICENSE("GPL");
- MODULE_ALIAS_FS("efivarfs");
- 
- module_init(efivarfs_init);
-+module_exit(efivarfs_exit);
+Besides build in kernel, the design also cater for build as kernel driver
+module. This patchset introduce a new API (request_firmware_abort()) at
+firmware_class so that the driver module could be unloaded by calling
+the API to properly stop user helper interface and release the device.
+
+Thanks.
+
+
+Kweh, Hock Leong (3):
+  firmware loader: Introduce new API - request_firmware_abort()
+  firmware loader: fix hung task warning dump
+  efi: Capsule update with user helper interface
+
+ drivers/base/firmware_class.c                  |   34 +++-
+ drivers/firmware/efi/Kconfig                   |   13 ++
+ drivers/firmware/efi/Makefile                  |    1 +
+ drivers/firmware/efi/efi-capsule-user-helper.c |  246 ++++++++++++++++++++++++
+ include/linux/firmware.h                       |    4 +
+ 5 files changed, 296 insertions(+), 2 deletions(-)
+ create mode 100644 drivers/firmware/efi/efi-capsule-user-helper.c
+
 -- 
-1.7.10.4
+1.7.9.5
