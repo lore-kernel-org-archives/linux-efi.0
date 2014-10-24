@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/6] arm64/mm: add explicit struct_mm argument to __create_mapping()
-Date: Fri, 24 Oct 2014 14:39:39 +0200
-Message-ID: <1414154384-15385-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 3/6] efi: split off remapping code from efi_config_init()
+Date: Fri, 24 Oct 2014 14:39:41 +0200
+Message-ID: <1414154384-15385-4-git-send-email-ard.biesheuvel@linaro.org>
 References: <1414154384-15385-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1414154384-15385-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,115 +10,117 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently, swapper_pg_dir and idmap_pg_dir share the init_mm mm_struct
-instance. To allow the introduction of other pg_dir instances, for instance,
-for UEFI's mapping of Runtime Services, make the struct_mm instance an
-explicit argument that gets passed down to the pmd and pte instantiation
-functions. Note that the consumers (pmd_populate/pgd_populate) of the
-mm_struct argument don't actually inspect it, but let's fix it for
-correctness' sake.
+Split of the remapping code from efi_config_init() so that the caller
+can perform its own remapping. This is necessary to correctly handle
+virtually remapped UEFI memory regions under kexec, as efi.systab will
+have been updated to a virtual address.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/mm/mmu.c | 31 ++++++++++++++++---------------
- 1 file changed, 16 insertions(+), 15 deletions(-)
+ drivers/firmware/efi/efi.c | 49 +++++++++++++++++++++++++++++-----------------
+ include/linux/efi.h        |  2 ++
+ 2 files changed, 33 insertions(+), 18 deletions(-)
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6894ef3e6234..7eaa6a8c8467 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -155,9 +155,9 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
- 	} while (pte++, addr += PAGE_SIZE, addr != end);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 9035c1b74d58..0de77db4fb88 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -293,9 +293,10 @@ static __init int match_config_table(efi_guid_t *guid,
+ 	return 0;
  }
  
--static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
--				  unsigned long end, phys_addr_t phys,
--				  int map_io)
-+static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
-+				  unsigned long addr, unsigned long end,
-+				  phys_addr_t phys, int map_io)
+-int __init efi_config_init(efi_config_table_type_t *arch_tables)
++int __init efi_config_parse_tables(void *config_tables, int count,
++				   efi_config_table_type_t *arch_tables)
  {
- 	pmd_t *pmd;
- 	unsigned long next;
-@@ -177,7 +177,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 	 */
- 	if (pud_none(*pud) || pud_bad(*pud)) {
- 		pmd = early_alloc(PTRS_PER_PMD * sizeof(pmd_t));
--		pud_populate(&init_mm, pud, pmd);
-+		pud_populate(mm, pud, pmd);
- 	}
+-	void *config_tables, *tablep;
++	void *tablep;
+ 	int i, sz;
  
- 	pmd = pmd_offset(pud, addr);
-@@ -201,16 +201,16 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 	} while (pmd++, addr = next, addr != end);
- }
+ 	if (efi_enabled(EFI_64BIT))
+@@ -303,19 +304,9 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 	else
+ 		sz = sizeof(efi_config_table_32_t);
  
--static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
--				  unsigned long end, unsigned long phys,
--				  int map_io)
-+static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
-+				  unsigned long addr, unsigned long end,
-+				  unsigned long phys, int map_io)
- {
- 	pud_t *pud;
- 	unsigned long next;
+-	/*
+-	 * Let's see what config tables the firmware passed to us.
+-	 */
+-	config_tables = early_memremap(efi.systab->tables,
+-				       efi.systab->nr_tables * sz);
+-	if (config_tables == NULL) {
+-		pr_err("Could not map Configuration table!\n");
+-		return -ENOMEM;
+-	}
+-
+ 	tablep = config_tables;
+ 	pr_info("");
+-	for (i = 0; i < efi.systab->nr_tables; i++) {
++	for (i = 0; i < count; i++) {
+ 		efi_guid_t guid;
+ 		unsigned long table;
  
- 	if (pgd_none(*pgd)) {
- 		pud = early_alloc(PTRS_PER_PUD * sizeof(pud_t));
--		pgd_populate(&init_mm, pgd, pud);
-+		pgd_populate(mm, pgd, pud);
- 	}
- 	BUG_ON(pgd_bad(*pgd));
- 
-@@ -239,7 +239,7 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
- 				flush_tlb_all();
+@@ -328,8 +319,6 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 			if (table64 >> 32) {
+ 				pr_cont("\n");
+ 				pr_err("Table located above 4GB, disabling EFI.\n");
+-				early_memunmap(config_tables,
+-					       efi.systab->nr_tables * sz);
+ 				return -EINVAL;
  			}
- 		} else {
--			alloc_init_pmd(pud, addr, next, phys, map_io);
-+			alloc_init_pmd(mm, pud, addr, next, phys, map_io);
- 		}
- 		phys += next - addr;
- 	} while (pud++, addr = next, addr != end);
-@@ -249,9 +249,9 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
-  * Create the page directory entries and any necessary page tables for the
-  * mapping specified by 'md'.
-  */
--static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
--				    unsigned long virt, phys_addr_t size,
--				    int map_io)
-+static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
-+				    phys_addr_t phys, unsigned long virt,
-+				    phys_addr_t size, int map_io)
+ #endif
+@@ -344,13 +333,37 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 		tablep += sz;
+ 	}
+ 	pr_cont("\n");
+-	early_memunmap(config_tables, efi.systab->nr_tables * sz);
+-
+ 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
+-
+ 	return 0;
+ }
+ 
++int __init efi_config_init(efi_config_table_type_t *arch_tables)
++{
++	void *config_tables;
++	int sz, ret;
++
++	if (efi_enabled(EFI_64BIT))
++		sz = sizeof(efi_config_table_64_t);
++	else
++		sz = sizeof(efi_config_table_32_t);
++
++	/*
++	 * Let's see what config tables the firmware passed to us.
++	 */
++	config_tables = early_memremap(efi.systab->tables,
++				       efi.systab->nr_tables * sz);
++	if (config_tables == NULL) {
++		pr_err("Could not map Configuration table!\n");
++		return -ENOMEM;
++	}
++
++	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables,
++				      arch_tables);
++
++	early_memunmap(config_tables, efi.systab->nr_tables * sz);
++	return ret;
++}
++
+ #ifdef CONFIG_EFI_VARS_MODULE
+ static int __init efi_load_efivars(void)
  {
- 	unsigned long addr, length, end, next;
- 
-@@ -261,7 +261,7 @@ static void __init __create_mapping(pgd_t *pgd, phys_addr_t phys,
- 	end = addr + length;
- 	do {
- 		next = pgd_addr_end(addr, end);
--		alloc_init_pud(pgd, addr, next, phys, map_io);
-+		alloc_init_pud(mm, pgd, addr, next, phys, map_io);
- 		phys += next - addr;
- 	} while (pgd++, addr = next, addr != end);
- }
-@@ -274,7 +274,8 @@ static void __init create_mapping(phys_addr_t phys, unsigned long virt,
- 			&phys, virt);
- 		return;
- 	}
--	__create_mapping(pgd_offset_k(virt & PAGE_MASK), phys, virt, size, 0);
-+	__create_mapping(&init_mm, pgd_offset_k(virt & PAGE_MASK), phys, virt,
-+			 size, 0);
- }
- 
- void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-@@ -283,7 +284,7 @@ void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
- 		pr_warn("BUG: not creating id mapping for %pa\n", &addr);
- 		return;
- 	}
--	__create_mapping(&idmap_pg_dir[pgd_index(addr)],
-+	__create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
- 			 addr, addr, size, map_io);
- }
- 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 27d69388ded0..abd3e91964a6 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -875,6 +875,8 @@ static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned lon
+ #endif
+ extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
+ extern int efi_config_init(efi_config_table_type_t *arch_tables);
++extern int efi_config_parse_tables(void *config_tables, int count,
++				   efi_config_table_type_t *arch_tables);
+ extern u64 efi_get_iobase (void);
+ extern u32 efi_mem_type (unsigned long phys_addr);
+ extern u64 efi_mem_attributes (unsigned long phys_addr);
 -- 
 1.8.3.2
