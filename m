@@ -1,186 +1,61 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/6] arm64/mm: add create_pgd_mapping() to create private
- page tables
-Date: Fri, 24 Oct 2014 17:42:15 +0200
-Message-ID: <CAKv+Gu_1V2KpxDxg=Na0_OCTGunoOHb5ZZhwAaOcZLn58rGh2Q@mail.gmail.com>
-References: <1414154384-15385-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1414154384-15385-3-git-send-email-ard.biesheuvel@linaro.org>
-	<20141024151743.GA22807@linaro.org>
+From: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Subject: Re: [PATCH v1 2/3] firmware loader: fix hung task warning dump
+Date: Sun, 26 Oct 2014 23:52:11 +0800
+Message-ID: <CACVXFVM6naH5cSeyvqyfg+Hwz09DuWTb=P0joBeKUPy9843gAA@mail.gmail.com>
+References: <1414131502-13886-1-git-send-email-hock.leong.kweh@intel.com>
+	<1414131502-13886-3-git-send-email-hock.leong.kweh@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141024151743.GA22807-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1414131502-13886-3-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 October 2014 17:17, Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Fri, Oct 24, 2014 at 02:39:40PM +0200, Ard Biesheuvel wrote:
->> For UEFI, we need to install the memory mappings used for Runtime Services
->> in a dedicated set of page tables. Add create_pgd_mapping(), which allows
->> us to allocate and install those page table entries early.
->> This also adds a 'map_xn' option, that creates regions with the PXN and
->> UXN bits set.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Fri, Oct 24, 2014 at 2:18 PM, Kweh Hock Leong
+<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 >
-> Hi Ard,
+> When using request_firmware_nowait() with FW_ACTION_NOHOTPLUG param to
+> expose user helper interface, if the user do not react immediately, after
+> 120 seconds there will be a hung task warning message dumped as below:
 >
-> Some comments below...
+> [ 3000.784235] INFO: task kworker/0:0:8259 blocked for more than 120 seconds.
+> [ 3000.791281]       Tainted: G            E 3.16.0-rc1-yocto-standard #41
+> [ 3000.798082] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [ 3000.806072] kworker/0:0     D cd0075c8     0  8259      2 0x00000000
+> [ 3000.812765] Workqueue: events request_firmware_work_func
+> [ 3000.818253]  cd375e18 00000046 0000000e cd0075c8 000000f0 cd40ea00 cd375fec 1b883e89
+> [ 3000.826374]  0000026b cd40ea00 80000000 00000001 cd0075c8 00000000 cd375de4 c119917f
+> [ 3000.834492]  cd563360 cd375df4 c119a0ab cd563360 00000000 cd375e24 c119a1d6 00000000
+> [ 3000.842616] Call Trace:
+> [ 3000.845252]  [<c119917f>] ? kernfs_next_descendant_post+0x3f/0x50
+> [ 3000.851543]  [<c119a0ab>] ? kernfs_activate+0x6b/0xc0
+> [ 3000.856790]  [<c119a1d6>] ? kernfs_add_one+0xd6/0x130
+> [ 3000.862047]  [<c15fdb02>] schedule+0x22/0x60
+> [ 3000.866548]  [<c15fd195>] schedule_timeout+0x175/0x1d0
+> [ 3000.871887]  [<c119b391>] ? __kernfs_create_file+0x71/0xa0
+> [ 3000.877574]  [<c119bb9a>] ? sysfs_add_file_mode_ns+0xaa/0x180
+> [ 3000.883533]  [<c15fe84f>] wait_for_completion+0x6f/0xb0
+> [ 3000.888961]  [<c1065200>] ? wake_up_process+0x40/0x40
+> [ 3000.894219]  [<c13cb600>] _request_firmware+0x750/0x9f0
+> [ 3000.899666]  [<c1382a7f>] ? n_tty_receive_buf2+0x1f/0x30
+> [ 3000.905200]  [<c13cba02>] request_firmware_work_func+0x22/0x50
+> [ 3000.911235]  [<c10550d2>] process_one_work+0x122/0x380
+> [ 3000.916571]  [<c1055859>] worker_thread+0xf9/0x470
+> [ 3000.921555]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+> [ 3000.927497]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+> [ 3000.933448]  [<c105a5ff>] kthread+0x9f/0xc0
+> [ 3000.937850]  [<c15ffd40>] ret_from_kernel_thread+0x20/0x30
+> [ 3000.943548]  [<c105a560>] ? kthread_worker_fn+0x100/0x100
 >
->> ---
->>  arch/arm64/include/asm/mmu.h |  3 +++
->>  arch/arm64/mm/mmu.c          | 28 ++++++++++++++++++++--------
->>  2 files changed, 23 insertions(+), 8 deletions(-)
->>
->> diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
->> index c2f006c48bdb..bcf166043a8b 100644
->> --- a/arch/arm64/include/asm/mmu.h
->> +++ b/arch/arm64/include/asm/mmu.h
->> @@ -33,5 +33,8 @@ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
->>  extern void init_mem_pgprot(void);
->>  /* create an identity mapping for memory (or io if map_io is true) */
->>  extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
->> +extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
->> +                            unsigned long virt, phys_addr_t size,
->> +                            int map_io, int map_xn);
+> This patch change the wait_for_completion() function call to
+> wait_for_completion_interruptible() function call for solving the issue.
 >
-> I really don't like these map_io and map_xn parameters.
-> Further down we have logic "if (map_io)...", which is out of place, and
-> doesn't match the normal style of mapping page table entries.
->
-> Could we not instead have something like:
-> extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
->                                unsigned long virt, phys_addr_t size,
->                                pgprot_t prot_sect, pgprot_t prot_pte);
->
-> Then we can remove all the conditional logic for map_io, map_xn?
->
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Yes, you are quite right. I was a bit lazy and made some incremental
-changes allowing me to use this code in the way i need to for creating
-non-executable mappings for EFI data and config tables etc. But I
-agree it would be much better to clean it up the way you suggest.
+Acked-by: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 
->>
->>  #endif
->> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
->> index 7eaa6a8c8467..f7d17a5a1f56 100644
->> --- a/arch/arm64/mm/mmu.c
->> +++ b/arch/arm64/mm/mmu.c
->> @@ -157,7 +157,7 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
->>
->>  static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->>                                 unsigned long addr, unsigned long end,
->> -                               phys_addr_t phys, int map_io)
->> +                               phys_addr_t phys, int map_io, int map_xn)
->>  {
->>       pmd_t *pmd;
->>       unsigned long next;
->> @@ -167,6 +167,9 @@ static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->>       if (map_io) {
->>               prot_sect = PROT_SECT_DEVICE_nGnRE;
->>               prot_pte = __pgprot(PROT_DEVICE_nGnRE);
->> +     } else if (map_xn) {
->> +             prot_sect = PROT_SECT_NORMAL;
->> +             prot_pte = PAGE_KERNEL;
->>       } else {
->>               prot_sect = PROT_SECT_NORMAL_EXEC;
->>               prot_pte = PAGE_KERNEL_EXEC;
->
-> Ideally, this if block should be completely removed.
->
->> @@ -203,7 +206,7 @@ static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->>
->>  static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->>                                 unsigned long addr, unsigned long end,
->> -                               unsigned long phys, int map_io)
->> +                               unsigned long phys, int map_io, int map_xn)
->>  {
->>       pud_t *pud;
->>       unsigned long next;
->> @@ -221,7 +224,7 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->>               /*
->>                * For 4K granule only, attempt to put down a 1GB block
->>                */
->> -             if (!map_io && (PAGE_SHIFT == 12) &&
->> +             if (!map_io && !map_xn && (PAGE_SHIFT == 12) &&
->
-> Presumably the !map_io and !map_xn tests are here because of the
-> PROT_SECT_NORMAL_EXEC below? Is there another reason why a pud mapping
-> would be unsuitable for these?
->
-
-No, it's just highly unlikely that we would encounter one of that size
-with map_io or map_xn set.
-
-Cheers,
-Ard.
-
-
-
->>                   ((addr | next | phys) & ~PUD_MASK) == 0) {
->>                       pud_t old_pud = *pud;
->>                       set_pud(pud, __pud(phys | PROT_SECT_NORMAL_EXEC));
->> @@ -239,7 +242,8 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->>                               flush_tlb_all();
->>                       }
->>               } else {
->> -                     alloc_init_pmd(mm, pud, addr, next, phys, map_io);
->> +                     alloc_init_pmd(mm, pud, addr, next, phys, map_io,
->> +                                    map_xn);
->>               }
->>               phys += next - addr;
->>       } while (pud++, addr = next, addr != end);
->> @@ -251,7 +255,7 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->>   */
->>  static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
->>                                   phys_addr_t phys, unsigned long virt,
->> -                                 phys_addr_t size, int map_io)
->> +                                 phys_addr_t size, int map_io, int map_xn)
->>  {
->>       unsigned long addr, length, end, next;
->>
->> @@ -261,7 +265,7 @@ static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
->>       end = addr + length;
->>       do {
->>               next = pgd_addr_end(addr, end);
->> -             alloc_init_pud(mm, pgd, addr, next, phys, map_io);
->> +             alloc_init_pud(mm, pgd, addr, next, phys, map_io, map_xn);
->>               phys += next - addr;
->>       } while (pgd++, addr = next, addr != end);
->>  }
->> @@ -275,7 +279,7 @@ static void __init create_mapping(phys_addr_t phys, unsigned long virt,
->>               return;
->>       }
->>       __create_mapping(&init_mm, pgd_offset_k(virt & PAGE_MASK), phys, virt,
->> -                      size, 0);
->> +                      size, 0, 0);
->>  }
->>
->>  void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
->> @@ -285,7 +289,15 @@ void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
->>               return;
->>       }
->>       __create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
->> -                      addr, addr, size, map_io);
->> +                      addr, addr, size, map_io, 0);
->> +}
->> +
->> +void __init create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
->> +                            unsigned long virt, phys_addr_t size,
->> +                            int map_io, int map_xn)
->> +{
->> +     __create_mapping(mm, pgd_offset(mm, virt), phys, virt, size, map_io,
->> +                      map_xn);
->>  }
->>
->>  static void __init map_mem(void)
->> --
->> 1.8.3.2
->>
->
-> Cheers,
-> --
-> Steve
+Thanks,
