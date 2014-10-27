@@ -1,113 +1,45 @@
-From: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: Re: [PATCH v1 1/3] firmware loader: Introduce new API - request_firmware_abort()
-Date: Sun, 26 Oct 2014 23:59:55 +0800
-Message-ID: <CACVXFVOu2MyeRyyQybdAUEmp02mGHP6-kmHZ8EBx4=uJiF51LQ@mail.gmail.com>
-References: <1414131502-13886-1-git-send-email-hock.leong.kweh@intel.com>
-	<1414131502-13886-2-git-send-email-hock.leong.kweh@intel.com>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 00/10] arm64 EFI patches for 3.19
+Date: Mon, 27 Oct 2014 11:50:55 +0000
+Message-ID: <20141027115055.GM8768@arm.com>
+References: <1413987713-30528-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1414131502-13886-2-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1413987713-30528-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 24, 2014 at 2:18 PM, Kweh Hock Leong
-<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->
-> Besides aborting through user helper interface, a new API
-> request_firmware_abort() allows kernel driver module to abort the
-> request_firmware() / request_firmware_nowait() when they are no
-> longer needed. It is useful for cancelling an outstanding firmware
-> load if initiated from inside a module where that module is in the
-> process of being unloaded, since the unload function may not have
-> a handle to the struct firmware_buf.
->
-> Note for people who use request_firmware_nowait():
-> You are required to do your own synchronization after you call
-> request_firmware_abort() in order to continue unloading the
-> module. The example synchronization code shows below:
->
-> while (THIS_MODULE && module_refcount(THIS_MODULE))
->         msleep(20);
->
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/base/firmware_class.c |   30 ++++++++++++++++++++++++++++++
->  include/linux/firmware.h      |    4 ++++
->  2 files changed, 34 insertions(+)
->
-> diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
-> index d276e33..b2fe40b 100644
-> --- a/drivers/base/firmware_class.c
-> +++ b/drivers/base/firmware_class.c
-> @@ -1291,6 +1291,36 @@ request_firmware_nowait(
->  }
->  EXPORT_SYMBOL(request_firmware_nowait);
->
-> +/**
-> + * request_firmware_abort - abort the waiting of firmware request
-> + * @fw_name: name of firmware file
-> + *
-> + *     @fw_name is the same name string while calling to request_firmware()
-> + *             or request_firmware_nowait().
-> + **/
-> +int request_firmware_abort(const char *fw_name)
-> +{
-> +       struct firmware_buf *buf;
-> +       struct firmware_buf *entry;
-> +
-> +       spin_lock(&fw_cache.lock);
-> +       buf = __fw_lookup_buf(fw_name);
-> +       spin_unlock(&fw_cache.lock);
+Hi Ard,
 
-You can call fw_lookup_buf() directly, otherwise feel free to add:
+On Wed, Oct 22, 2014 at 03:21:43PM +0100, Ard Biesheuvel wrote:
+> This is a bit of a mixed bag of patches that we would like to see merged for
+> 3.19. Most of them have been posted and discussed on linux-efi and/or LAKML
+> before, and one of them has even been merged and reverted twice.
+> 
+> Patches #1 - #4 are fixes for compliance with the UEFI and PE/COFF specs.
+> No issues are known that require these patches, so there is no reason to
+> pull them into a stable release.
+> 
+> Patches #5 and #6 address minor issues in the arm64 EFI init code.
+> 
+> Patches #7 - #10 implement DMI/SMBIOS for arm64, both the existing 32-bit
+> version and the upcoming 3.0 version that allows the SMBIOS structure table
+> to reside at a physical offset that cannot be encoded in 32-bits. It also
+> install a 'Hardware: xxx' string that is printed along with oopses and
+> kernel call stack dumps on systems that implement DMI/SMBIOS.
+> 
+> Please refer to the patches themselves for version history. Acks and/or
+> comments appreciated.
 
-Acked-by: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+It would be helpful for me if you could split this into two series -- one
+for the arm64 tree and the other for the efi tree. That would also make the
+dependencies clearer, so I know whether any of the arch bits need to go via
+Matt.
 
-> +       if (!buf)
-> +               return -ENOENT;
-> +
-> +       mutex_lock(&fw_lock);
-> +       list_for_each_entry(entry, &pending_fw_head, pending_list) {
-> +               if (entry == buf) {
-> +                       __fw_load_abort(buf);
-> +                       break;
-> +               }
-> +       }
-> +       mutex_unlock(&fw_lock);
-> +       return 0;
-> +}
-> +EXPORT_SYMBOL(request_firmware_abort);
-> +
->  #ifdef CONFIG_PM_SLEEP
->  static ASYNC_DOMAIN_EXCLUSIVE(fw_cache_domain);
->
-> diff --git a/include/linux/firmware.h b/include/linux/firmware.h
-> index 5952933..ed90c8b 100644
-> --- a/include/linux/firmware.h
-> +++ b/include/linux/firmware.h
-> @@ -47,6 +47,7 @@ int request_firmware_nowait(
->         void (*cont)(const struct firmware *fw, void *context));
->
->  void release_firmware(const struct firmware *fw);
-> +int request_firmware_abort(const char *fw_name);
->  #else
->  static inline int request_firmware(const struct firmware **fw,
->                                    const char *name,
-> @@ -66,6 +67,9 @@ static inline void release_firmware(const struct firmware *fw)
->  {
->  }
->
-> +static inline int request_firmware_abort(const char *fw_name)
-> +{
-> +}
->  #endif
->
->  #ifdef CONFIG_FW_LOADER_USER_HELPER
-> --
-> 1.7.9.5
->
+Cheers,
+
+Will
