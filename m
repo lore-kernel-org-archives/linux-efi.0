@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 01/10] arm64/efi: efistub: jump to 'stext' directly, not through the header
-Date: Tue, 28 Oct 2014 17:18:34 +0100
-Message-ID: <1414513123-20400-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 04/10] arm64/efi: invert UEFI memory region reservation logic
+Date: Tue, 28 Oct 2014 17:18:37 +0100
+Message-ID: <1414513123-20400-5-git-send-email-ard.biesheuvel@linaro.org>
 References: <1414513123-20400-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1414513123-20400-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,98 +10,59 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-After the EFI stub has done its business, it jumps into the kernel by
-branching to offset #0 of the loaded Image, which is where it expects
-to find the header containing a 'branch to stext' instruction.
+Instead of reserving the memory regions based on which types we know
+need to be reserved, consider only regions of the following types as
+free for general use by the OS:
 
-However, the UEFI spec 2.1.1 states the following regarding PE/COFF
-image loading:
-"A UEFI image is loaded into memory through the LoadImage() Boot
-Service. This service loads an image with a PE32+ format into memory.
-This PE32+ loader is required to load all sections of the PE32+ image
-into memory."
+EFI_LOADER_CODE
+EFI_LOADER_DATA
+EFI_BOOT_SERVICES_CODE
+EFI_BOOT_SERVICES_DATA
+EFI_CONVENTIONAL_MEMORY
 
-In other words, it is /not/ required to load parts of the image that are
-not covered by a PE/COFF section, so it may not have loaded the header
-at the expected offset, as it is not covered by any PE/COFF section.
+Note that this also fixes a problem with the original code, which would
+misidentify a EFI_RUNTIME_SERVICES_DATA region as not reserved if it
+does not have the EFI_MEMORY_RUNTIME attribute set. However, it is
+perfectly legal for the firmware not to request a virtual mapping for
+EFI_RUNTIME_SERVICES_DATA regions that contain configuration tables, in
+which case the EFI_MEMORY_RUNTIME attribute would not be set.
 
-So instead, jump to 'stext' directly, which is at the base of the
-PE/COFF .text section, by supplying a symbol 'stext_offset' to
-efi-entry.o which contains the relative offset of stext into the Image.
-Also replace other open coded calculations of the same value with a
-reference to 'stext_offset'
-
-Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
-v3:
-- rebased onto 3.17+
-- added spec reference to commit message
+ arch/arm64/kernel/efi.c | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
-v2:
-- drop :lo12: relocation against stext_offset in favor of using a literal
-  '=stext_offset' which is safer
----
- arch/arm64/kernel/efi-entry.S |  3 ++-
- arch/arm64/kernel/head.S      | 10 ++++++----
- 2 files changed, 8 insertions(+), 5 deletions(-)
-
-diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-index 619b1dd7bcde..a0016d3a17da 100644
---- a/arch/arm64/kernel/efi-entry.S
-+++ b/arch/arm64/kernel/efi-entry.S
-@@ -61,7 +61,8 @@ ENTRY(efi_stub_entry)
- 	 */
- 	mov	x20, x0		// DTB address
- 	ldr	x0, [sp, #16]	// relocated _text address
--	mov	x21, x0
-+	ldr	x21, =stext_offset
-+	add	x21, x0, x21
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 95c49ebc660d..2e829148fb36 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -125,17 +125,17 @@ out:
+  */
+ static __init int is_reserve_region(efi_memory_desc_t *md)
+ {
+-	if (!is_normal_ram(md))
++	switch (md->type) {
++	case EFI_LOADER_CODE:
++	case EFI_LOADER_DATA:
++	case EFI_BOOT_SERVICES_CODE:
++	case EFI_BOOT_SERVICES_DATA:
++	case EFI_CONVENTIONAL_MEMORY:
+ 		return 0;
+-
+-	if (md->attribute & EFI_MEMORY_RUNTIME)
+-		return 1;
+-
+-	if (md->type == EFI_ACPI_RECLAIM_MEMORY ||
+-	    md->type == EFI_RESERVED_TYPE)
+-		return 1;
+-
+-	return 0;
++	default:
++		break;
++	}
++	return is_normal_ram(md);
+ }
  
- 	/*
- 	 * Flush dcache covering current runtime addresses
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index 0a6e4f924df8..8c06c9d269d2 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -132,6 +132,8 @@ efi_head:
- #endif
- 
- #ifdef CONFIG_EFI
-+	.globl	stext_offset
-+	.set	stext_offset, stext - efi_head
- 	.align 3
- pe_header:
- 	.ascii	"PE"
-@@ -155,7 +157,7 @@ optional_header:
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
- 	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
--	.long	stext - efi_head		// BaseOfCode
-+	.long	stext_offset			// BaseOfCode
- 
- extra_header_fields:
- 	.quad	0				// ImageBase
-@@ -172,7 +174,7 @@ extra_header_fields:
- 	.long	_end - efi_head			// SizeOfImage
- 
- 	// Everything before the kernel image is considered part of the header
--	.long	stext - efi_head		// SizeOfHeaders
-+	.long	stext_offset			// SizeOfHeaders
- 	.long	0				// CheckSum
- 	.short	0xa				// Subsystem (EFI application)
- 	.short	0				// DllCharacteristics
-@@ -217,9 +219,9 @@ section_table:
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
- 	.long	_end - stext		// VirtualSize
--	.long	stext - efi_head	// VirtualAddress
-+	.long	stext_offset		// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
--	.long	stext - efi_head	// PointerToRawData
-+	.long	stext_offset		// PointerToRawData
- 
- 	.long	0		// PointerToRelocations (0 for executables)
- 	.long	0		// PointerToLineNumbers (0 for executables)
+ static __init void reserve_regions(void)
 -- 
 1.8.3.2
