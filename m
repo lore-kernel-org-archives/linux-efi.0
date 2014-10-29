@@ -1,189 +1,156 @@
 From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] dmi: add support for SMBIOS 3.0 64-bit entry point
-Date: Wed, 29 Oct 2014 16:19:35 +0000
-Message-ID: <20141029161935.GL22224@bivouac.eciton.net>
-References: <1414513123-20400-8-git-send-email-ard.biesheuvel@linaro.org>
- <1414595485-5723-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 08/10] arm64: dmi: Add SMBIOS/DMI support
+Date: Wed, 29 Oct 2014 16:23:24 +0000
+Message-ID: <20141029162324.GM22224@bivouac.eciton.net>
+References: <1414513123-20400-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1414513123-20400-9-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1414595485-5723-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1414513123-20400-9-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 29, 2014 at 04:11:25PM +0100, Ard Biesheuvel wrote:
-> The DMTF SMBIOS reference spec v3.0.0 defines a new 64-bit entry point,
-> which enables support for SMBIOS structure tables residing at a physical
-> offset over 4 GB. This is especially important for upcoming arm64
-> platforms whose system RAM resides entirely above the 4 GB boundary.
+On Tue, Oct 28, 2014 at 05:18:41PM +0100, Ard Biesheuvel wrote:
+> From: Yi Li <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> For the UEFI case, this code attempts to detect the new SMBIOS 3.0
-> header magic at the offset passed in the SMBIOS3_TABLE_GUID UEFI
-> configuration table. If this configuration table is not provided, or
-> if we fail to parse the header, we fall back to using the legacy
-> SMBIOS_TABLE_GUID configuration table. This is in line with the spec,
-> that allows both configuration tables to be provided, but mandates that
-> they must point to the same structure table, unless the version pointed
-> to by the 64-bit entry point is a superset of the 32-bit one.
+> SMBIOS is important for server hardware vendors. It implements a spec for
+> providing descriptive information about the platform. Things like serial
+> numbers, physical layout of the ports, build configuration data, and the like.
 > 
-> For the non-UEFI case, the detection logic is modified to look for the
-> SMBIOS 3.0 header magic before it looks for the legacy header magic.
-> 
-> Note that this patch is based on version 3.0.0d [draft] of the
-> specification, which is expected not to deviate from the final version
-> in ways that would affect the correctness of this implementation.
-> 
+> Signed-off-by: Yi Li <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > Tested-by: Suravee Suthikulpanit <suravee.suthikulpanit-5C7GfCeVMHo@public.gmane.org>
-> Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Also, for SMBIOS 2 on X64 Ovmf and FVP Base AEMv8-A (with UEFI),
+On FVP Base AEMv8-A (UEFI), and qemu (-kernel, so non-UEFI):
 Tested-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-> Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-> Cc: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
-> v2: since dmi_base is now a phys_addr_t, prevent surprises caused by GCC's type
->     promotion rules by replacing the open coded shifts/ORs with
->     get_unaligned_leXX()
-> ---
->  drivers/firmware/dmi_scan.c | 79 +++++++++++++++++++++++++++++++++++++++++----
->  1 file changed, 72 insertions(+), 7 deletions(-)
+> A short history of this patch:
 > 
-> diff --git a/drivers/firmware/dmi_scan.c b/drivers/firmware/dmi_scan.c
-> index 17afc51f3054..f617badc2698 100644
-> --- a/drivers/firmware/dmi_scan.c
-> +++ b/drivers/firmware/dmi_scan.c
-> @@ -93,6 +93,12 @@ static void dmi_table(u8 *buf, int len, int num,
->  		const struct dmi_header *dm = (const struct dmi_header *)data;
+> v4: Moved call to dmi_scan_machine() to separate core_initcall(), so that it is
+>     called unconditionally, i.e., even if UEFI fails to initialize. Otherwise,
+>     any drivers that attempt to consult DMI info for quirks handling start
+>     spewing errors, as Catalin unfortunately found out after merging (and
+>     subsequently reverting) this patch for the second time.
+> 
+> v3: Moved call to dmi_scan_machine() into arm64_enter_virtual_mode(). This is
+>     necessary, because dmi_scan_machine() needs to be called before
+>     dmi_id_init(), which itself is invoked using an arch_initcall(). DMI depends
+>     on UEFI on arm64, so it is legal to only invoke dmi_scan_machine() when
+>     building with UEFI support. However, calling it from
+>     arm64_enter_virtual_mode() was a mistake, as it could result in
+>     dmi_scan_machine() not being called at all.
+> 
+> v2: Use efi_lookup_mapped_addr() to obtain the virtual address of the SMBIOS
+>     structure table instead of calling ioremap_cache(). This seemed a good idea
+>     at the time, as the UEFI memory map covers those regions, so the virtual
+>     mapping should be known as well. However, this is only true if the firmware
+>     has requested a virtual remapping of the region by setting the
+>     EFI_MEMORY_RUNTIME bit, which Tianocore/EDK2 appears to do, but violates
+>     the UEFI spec. ("In general, UEFI Configuration Tables loaded at boot time
+>     (e.g., SMBIOS table) can be contained in memory of type
+>     EfiRuntimeServicesData (recommended and the system firmware must not request
+>     a virtual mapping), [...]", section 2.3.6, UEFI spec v2.4B). This version
+>     was merged into the arm64 for-next/core branch and reverted again per our
+>     request.
+> ---
+>  arch/arm64/Kconfig           | 11 +++++++++++
+>  arch/arm64/include/asm/dmi.h | 31 +++++++++++++++++++++++++++++++
+>  arch/arm64/kernel/efi.c      | 13 +++++++++++++
+>  3 files changed, 55 insertions(+)
+>  create mode 100644 arch/arm64/include/asm/dmi.h
+> 
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 9532f8d5857e..2c3c2ca6f8bc 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -401,6 +401,17 @@ config EFI
+>  	  allow the kernel to be booted as an EFI application. This
+>  	  is only useful on systems that have UEFI firmware.
 >  
->  		/*
-> +		 * 7.45 End-of-Table (Type 127) [SMBIOS reference spec v3.0.0]
-> +		 */
-> +		if (dm->type == 127)
-> +			break;
+> +config DMI
+> +	bool "Enable support for SMBIOS (DMI) tables"
+> +	depends on EFI
+> +	default y
+> +	help
+> +	  This enables SMBIOS/DMI feature for systems.
 > +
-> +		/*
->  		 *  We want to know the total length (formatted area and
->  		 *  strings) before decoding to make sure we won't run off the
->  		 *  table in dmi_decode or dmi_string
-> @@ -107,7 +113,7 @@ static void dmi_table(u8 *buf, int len, int num,
->  	}
->  }
+> +	  This option is only useful on systems that have UEFI firmware.
+> +	  However, even with this option, the resultant kernel should
+> +	  continue to boot on existing non-UEFI platforms.
+> +
+>  endmenu
 >  
-> -static u32 dmi_base;
-> +static phys_addr_t dmi_base;
->  static u16 dmi_len;
->  static u16 dmi_num;
->  
-> @@ -467,7 +473,7 @@ static int __init dmi_present(const u8 *buf)
->  
->  	if (memcmp(buf, "_SM_", 4) == 0 &&
->  	    buf[5] < 32 && dmi_checksum(buf, buf[5])) {
-> -		smbios_ver = (buf[6] << 8) + buf[7];
-> +		smbios_ver = get_unaligned_be16(buf + 6);
->  
->  		/* Some BIOS report weird SMBIOS version, fix that up */
->  		switch (smbios_ver) {
-> @@ -489,10 +495,9 @@ static int __init dmi_present(const u8 *buf)
->  	buf += 16;
->  
->  	if (memcmp(buf, "_DMI_", 5) == 0 && dmi_checksum(buf, 15)) {
-> -		dmi_num = (buf[13] << 8) | buf[12];
-> -		dmi_len = (buf[7] << 8) | buf[6];
-> -		dmi_base = (buf[11] << 24) | (buf[10] << 16) |
-> -			(buf[9] << 8) | buf[8];
-> +		dmi_num = get_unaligned_le16(buf + 12);
-> +		dmi_len = get_unaligned_le16(buf + 6);
-> +		dmi_base = get_unaligned_le32(buf + 8);
->  
->  		if (dmi_walk_early(dmi_decode) == 0) {
->  			if (smbios_ver) {
-> @@ -514,12 +519,72 @@ static int __init dmi_present(const u8 *buf)
->  	return 1;
->  }
->  
+>  menu "Userspace binary formats"
+> diff --git a/arch/arm64/include/asm/dmi.h b/arch/arm64/include/asm/dmi.h
+> new file mode 100644
+> index 000000000000..69d37d87b159
+> --- /dev/null
+> +++ b/arch/arm64/include/asm/dmi.h
+> @@ -0,0 +1,31 @@
 > +/*
-> + * Check for the SMBIOS 3.0 64-bit entry point signature. Unlike the legacy
-> + * 32-bit entry point, there is no embedded DMI header (_DMI_) in here.
+> + * arch/arm64/include/asm/dmi.h
+> + *
+> + * Copyright (C) 2013 Linaro Limited.
+> + * Written by: Yi Li (yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org)
+> + *
+> + * based on arch/ia64/include/asm/dmi.h
+> + *
+> + * This file is subject to the terms and conditions of the GNU General Public
+> + * License.  See the file "COPYING" in the main directory of this archive
+> + * for more details.
 > + */
-> +static int __init dmi_smbios3_present(const u8 *buf)
+> +
+> +#ifndef __ASM_DMI_H
+> +#define __ASM_DMI_H
+> +
+> +#include <linux/io.h>
+> +#include <linux/slab.h>
+> +
+> +/*
+> + * According to section 2.3.6 of the UEFI spec, the firmware should not
+> + * request a virtual mapping for configuration tables such as SMBIOS.
+> + * This means we have to map them before use.
+> + */
+> +#define dmi_early_remap(x, l)		ioremap_cache(x, l)
+> +#define dmi_early_unmap(x, l)		iounmap(x)
+> +#define dmi_remap(x, l)			ioremap_cache(x, l)
+> +#define dmi_unmap(x)			iounmap(x)
+> +#define dmi_alloc(l)			kzalloc(l, GFP_KERNEL)
+> +
+> +#endif
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 558572ef1ea3..9ae5e7918b8f 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -11,6 +11,7 @@
+>   *
+>   */
+>  
+> +#include <linux/dmi.h>
+>  #include <linux/efi.h>
+>  #include <linux/export.h>
+>  #include <linux/memblock.h>
+> @@ -469,3 +470,15 @@ err_unmap:
+>  	return -1;
+>  }
+>  early_initcall(arm64_enter_virtual_mode);
+> +
+> +static int __init arm64_dmi_init(void)
 > +{
-> +	if (memcmp(buf, "_SM3_", 5) == 0 &&
-> +	    buf[6] < 32 && dmi_checksum(buf, buf[6])) {
-> +		dmi_ver = get_unaligned_be16(buf + 7);
-> +		dmi_len = get_unaligned_le32(buf + 12);
-> +		dmi_base = get_unaligned_le64(buf + 16);
-> +
-> +		/*
-> +		 * The 64-bit SMBIOS 3.0 entry point no longer has a field
-> +		 * containing the number of structures present in the table.
-> +		 * Instead, it defines the table size as a maximum size, and
-> +		 * relies on the end-of-table structure type (#127) to be used
-> +		 * to signal the end of the table.
-> +		 * So let's define dmi_num as an upper bound as well: each
-> +		 * structure has a 4 byte header, so dmi_len / 4 is an upper
-> +		 * bound for the number of structures in the table.
-> +		 */
-> +		dmi_num = dmi_len / 4;
-> +
-> +		if (dmi_walk_early(dmi_decode) == 0) {
-> +			pr_info("SMBIOS %d.%d present.\n",
-> +				dmi_ver >> 8, dmi_ver & 0xFF);
-> +			dmi_format_ids(dmi_ids_string, sizeof(dmi_ids_string));
-> +			pr_debug("DMI: %s\n", dmi_ids_string);
-> +			return 0;
-> +		}
-> +	}
-> +	return 1;
+> +	/*
+> +	 * On arm64, DMI depends on UEFI, and dmi_scan_machine() needs to
+> +	 * be called early because dmi_id_init(), which is an arch_initcall
+> +	 * itself, depends on dmi_scan_machine() having been called already.
+> +	 */
+> +	dmi_scan_machine();
+> +	return 0;
 > +}
-> +
->  void __init dmi_scan_machine(void)
->  {
->  	char __iomem *p, *q;
->  	char buf[32];
->  
->  	if (efi_enabled(EFI_CONFIG_TABLES)) {
-> +		/*
-> +		 * According to the DMTF SMBIOS reference spec v3.0.0, it is
-> +		 * allowed to define both the 64-bit entry point (smbios3) and
-> +		 * the 32-bit entry point (smbios), in which case they should
-> +		 * either both point to the same SMBIOS structure table, or the
-> +		 * table pointed to by the 64-bit entry point should contain a
-> +		 * superset of the table contents pointed to by the 32-bit entry
-> +		 * point (section 5.2)
-> +		 * This implies that the 64-bit entry point should have
-> +		 * precedence if it is defined and supported by the OS. If we
-> +		 * have the 64-bit entry point, but fail to decode it, fall
-> +		 * back to the legacy one (if available)
-> +		 */
-> +		if (efi.smbios3 != EFI_INVALID_TABLE_ADDR) {
-> +			p = dmi_early_remap(efi.smbios3, 32);
-> +			if (p == NULL)
-> +				goto error;
-> +			memcpy_fromio(buf, p, 32);
-> +			dmi_early_unmap(p, 32);
-> +
-> +			if (!dmi_smbios3_present(buf)) {
-> +				dmi_available = 1;
-> +				goto out;
-> +			}
-> +		}
->  		if (efi.smbios == EFI_INVALID_TABLE_ADDR)
->  			goto error;
->  
-> @@ -552,7 +617,7 @@ void __init dmi_scan_machine(void)
->  		memset(buf, 0, 16);
->  		for (q = p; q < p + 0x10000; q += 16) {
->  			memcpy_fromio(buf + 16, q, 16);
-> -			if (!dmi_present(buf)) {
-> +			if (!dmi_smbios3_present(buf) || !dmi_present(buf)) {
->  				dmi_available = 1;
->  				dmi_early_unmap(p, 0x10000);
->  				goto out;
+> +core_initcall(arm64_dmi_init);
 > -- 
 > 1.8.3.2
 > 
