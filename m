@@ -1,107 +1,30 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2 04/10] arm64/efi: invert UEFI memory region
- reservation logic
-Date: Tue, 28 Oct 2014 17:28:21 +0000
-Message-ID: <20141028172821.GO9796@leverpostej>
-References: <1414513123-20400-1-git-send-email-ard.biesheuvel@linaro.org>
- <1414513123-20400-5-git-send-email-ard.biesheuvel@linaro.org>
- <20141028164718.GM9796@leverpostej>
- <CAKv+Gu_czjghaF9WzjRv5t4VstCT9x+RqRmhB61jQr3FM5BWvQ@mail.gmail.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v1 1/3] firmware loader: Introduce new API -
+ request_firmware_abort()
+Date: Wed, 29 Oct 2014 03:04:48 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B80DB80@PGSMSX102.gar.corp.intel.com>
+References: <1414131502-13886-1-git-send-email-hock.leong.kweh@intel.com>
+	<1414131502-13886-2-git-send-email-hock.leong.kweh@intel.com>
+ <CACVXFVOu2MyeRyyQybdAUEmp02mGHP6-kmHZ8EBx4=uJiF51LQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_czjghaF9WzjRv5t4VstCT9x+RqRmhB61jQr3FM5BWvQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <CACVXFVOu2MyeRyyQybdAUEmp02mGHP6-kmHZ8EBx4=uJiF51LQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <yi.li-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 28, 2014 at 05:08:29PM +0000, Ard Biesheuvel wrote:
-> On 28 October 2014 17:47, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On Tue, Oct 28, 2014 at 04:18:37PM +0000, Ard Biesheuvel wrote:
-> >> Instead of reserving the memory regions based on which types we know
-> >> need to be reserved, consider only regions of the following types as
-> >> free for general use by the OS:
-> >>
-> >> EFI_LOADER_CODE
-> >> EFI_LOADER_DATA
-> >> EFI_BOOT_SERVICES_CODE
-> >> EFI_BOOT_SERVICES_DATA
-> >> EFI_CONVENTIONAL_MEMORY
-> >>
-> >> Note that this also fixes a problem with the original code, which would
-> >> misidentify a EFI_RUNTIME_SERVICES_DATA region as not reserved if it
-> >> does not have the EFI_MEMORY_RUNTIME attribute set. However, it is
-> >> perfectly legal for the firmware not to request a virtual mapping for
-> >> EFI_RUNTIME_SERVICES_DATA regions that contain configuration tables, in
-> >> which case the EFI_MEMORY_RUNTIME attribute would not be set.
-> >>
-> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> ---
-> >>  arch/arm64/kernel/efi.c | 20 ++++++++++----------
-> >>  1 file changed, 10 insertions(+), 10 deletions(-)
-> >>
-> >> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> >> index 95c49ebc660d..2e829148fb36 100644
-> >> --- a/arch/arm64/kernel/efi.c
-> >> +++ b/arch/arm64/kernel/efi.c
-> >> @@ -125,17 +125,17 @@ out:
-> >>   */
-> >>  static __init int is_reserve_region(efi_memory_desc_t *md)
-> >>  {
-> >> -     if (!is_normal_ram(md))
-> >> +     switch (md->type) {
-> >> +     case EFI_LOADER_CODE:
-> >> +     case EFI_LOADER_DATA:
-> >> +     case EFI_BOOT_SERVICES_CODE:
-> >> +     case EFI_BOOT_SERVICES_DATA:
-> >> +     case EFI_CONVENTIONAL_MEMORY:
-> >>               return 0;
-> >> -
-> >> -     if (md->attribute & EFI_MEMORY_RUNTIME)
-> >> -             return 1;
-> >> -
-> >> -     if (md->type == EFI_ACPI_RECLAIM_MEMORY ||
-> >> -         md->type == EFI_RESERVED_TYPE)
-> >> -             return 1;
-> >> -
-> >> -     return 0;
-> >> +     default:
-> >> +             break;
-> >> +     }
-> >> +     return is_normal_ram(md);
-> >
-> > Just to check: did we figure out if UnusableMemory was allowed to have
-> > EFI_MEMORY_WB attributes? If it isn't, this looks fine to me.
-> >
-> > If it is, then we will need to remove that memory (rather than reserving
-> > it) to prevent speculative accesses.
-> >
-> 
-> The spec does not mention at all how EfiUnusableMemory should be used,
-> and I would assume any such regions to have the EFI_MEMORY_WB
-> attribute set, as it is carved out of the normal system RAM, and the
-> way Tianocore/EDK2 implements it at least, all those attributes
-> (including the write-protect/execute-protect ones) are copied straight
-> from the underlying regions and never set to reflect the nature of the
-> actual contents.
-
-Ok. That's precisely the case I was concerned about.
-
-> However, for 3.20 I intend to propose another change to this code, so
-> that only non-reserved, usable memory gets memblock_add()'ed in the
-> first place, and I suppose this should cover your concern as well. The
-> reason for doing that is to allow tools like dmidecode and lshw access
-> to the SMBIOS and other tables through /dev/mem, which is currently
-> disallowed when STRICT_DEVMEM is set.
-
-So long as said memory is not later passed to memblock_reserve, that
-should be ok for the EfiUnusableMemory case. I guess we haven't actually
-seen such memory yet anyhow?
-
-I not all that keen on the usage of /dev/mem for those given the
-availability of other interfaces.
-
-Mark.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBNaW5nIExlaSBbbWFpbHRvOm1p
+bmcubGVpQGNhbm9uaWNhbC5jb21dDQo+IFNlbnQ6IE1vbmRheSwgT2N0b2JlciAyNywgMjAxNCAx
+MjowMCBBTQ0KPiANCj4gWW91IGNhbiBjYWxsIGZ3X2xvb2t1cF9idWYoKSBkaXJlY3RseSwgb3Ro
+ZXJ3aXNlIGZlZWwgZnJlZSB0byBhZGQ6DQo+IA0KPiBBY2tlZC1ieTogTWluZyBMZWkgPG1pbmcu
+bGVpQGNhbm9uaWNhbC5jb20+DQo+IA0KDQpIaSBNaW5nIExlaSwNCg0KVGhlIGZ3X2xvb2t1cF9i
+dWYoKSBpcyBkZWZpbmVkIGluc2lkZSB0aGUgY29uZGl0aW9uYWwgcHJlcHJvY2Vzc29yIGRpcmVj
+dGl2ZSBmb3IgQ09ORklHX1BNX1NMRUVQLg0KU2luY2UgdGhlIHJlcXVlc3RfZmlybXdhcmVfYWJv
+cnQoKSBtYXkgbm90IG9ubHkgYmUgdXNlZCBpbiBQTV9TTEVFUCwgY291bGQgSSBtb3ZlIHRoZSBm
+d19sb29rdXBfYnVmKCkNCm91dCBmcm9tIHRoZSBDT05GSUdfUE1fU0xFRVAgYmxvY2sgaWYgd2Ug
+d2FudCB0byBjYWxsIGZ3X2xvb2t1cF9idWYoKSBpbnN0ZWFkIG9mIF9fZndfbG9va3VwX2J1Zigp
+Pw0KDQpUaGFua3MuDQoNCg0KUmVnYXJkcywNCldpbHNvbg0K
