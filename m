@@ -1,32 +1,76 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] firmware loader: Introduce new API -
- request_firmware_abort()
-Date: Mon, 3 Nov 2014 12:07:20 +0000
-Message-ID: <1415016440.7122.891.camel@mfleming-mobl1.ger.corp.intel.com>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH v2 0/3] Enable user helper interface for efi capsule update
+Date: Mon, 03 Nov 2014 11:33:23 -0800
+Message-ID: <5457D883.4050201@amacapital.net>
 References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
-	 <1414984030-13859-2-git-send-email-hock.leong.kweh@intel.com>
-	 <20141103101558.GA11739@khazad-dum.debian.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141103101558.GA11739-ZGHd14iZgfaRjzvQDGKj+xxZW9W5cXbT@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Henrique de Moraes Holschuh <hmh-N3TV7GIv+o9fyO9Q7EP/yw@public.gmane.org>
-Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kweh Hock Leong <hock.leong.kweh@intel.com>, Matt Fleming <matt.fleming@intel.com>, Ming Lei <ming.lei@canonical.com>, Sam Protsenko <semen.protsenko@linaro.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Ong Boon Leong <boon.leong.ong@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2014-11-03 at 08:15 -0200, Henrique de Moraes Holschuh wrote:
-> On Mon, 03 Nov 2014, Kweh Hock Leong wrote:
-> > Note for people who use request_firmware_nowait():
-> > You are required to do your own synchronization after you call
-> > request_firmware_abort() in order to continue unloading the
-> > module. The example synchronization code shows below:
-> > 
-> > while (THIS_MODULE && module_refcount(THIS_MODULE))
-> > 	msleep(20);
+On 11/02/2014 07:07 PM, Kweh Hock Leong wrote:
+> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> This is _so_ asking for people to get it wrong, it is not funny :-(
+> Hi Guys,
+> 
+> This patchset is created on top of "efi: Capsule update support" patch:
+> http://permalink.gmane.org/gmane.linux.kernel.efi/4837
+> 
+> It leverages the request_firmware_nowait() to expose the user helper interface for user to upload the capsule binary and calling the
+> efi_capsule_update() API to pass the binary to EFI firmware.
 
-Yeah. How about we make request_firmware_abort() synchronous so that
-drivers don't have to perform these reference counting games?
+I don't get it.  Why is the firmware interface at all reasonable for
+uploading capsules?
+
+The firmware interface makes sense for nonvolatile firmware where
+hotplugging something or otherwise loading a driver needs a blob.  But
+uploading an EFI capsule is an *action*, not something that should
+happen transparently.  If there's an EFI firmware update available and
+the user wants to install it, then the userspace tool should install it,
+and it shouldn't hang around in /lib/firmware.  In fact, you shouldn't
+even need /lib to be on writable media to use this.
+
+And you most certainly don't want the EFI capsule hanging around so that
+it might be accidentally installed again if the hard disk is moved.
+
+ISTM there should be some file in sysfs to which you can write a
+capsule, or perhaps a chardev and an ioctl.
+
+--Andy
+
+> 
+> Besides build in kernel, the design also cater for build as kernel driver module. This patchset introduce a new API (request_firmware_abort()) at firmware_class so that the driver module could be unloaded by calling the API to properly stop user helper interface and release the device.
+> 
+> Thanks.
+> 
+> ---
+> changelog v2:
+> [PATCH 1/3]
+> * use fw_lookup_buf() instead of __fw_lookup_buf() function call
+> * move the fw_lookup_buf() function out of the CONFIG_PM_SLEEP block
+> 
+> [PATCH 2/3]
+> * no change
+> 
+> [PATCH 3/3]
+> * no change
+> 
+> 
+> Kweh, Hock Leong (3):
+>   firmware loader: Introduce new API - request_firmware_abort()
+>   firmware loader: fix hung task warning dump
+>   efi: Capsule update with user helper interface
+> 
+>  drivers/base/firmware_class.c                  |   56 ++++--
+>  drivers/firmware/efi/Kconfig                   |   13 ++
+>  drivers/firmware/efi/Makefile                  |    1 +
+>  drivers/firmware/efi/efi-capsule-user-helper.c |  246 ++++++++++++++++++++++++
+>  include/linux/firmware.h                       |    4 +
+>  5 files changed, 306 insertions(+), 14 deletions(-)
+>  create mode 100644 drivers/firmware/efi/efi-capsule-user-helper.c
+> 
