@@ -1,76 +1,60 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: [PATCH v2 0/3] Enable user helper interface for efi capsule update
-Date: Mon, 03 Nov 2014 11:33:23 -0800
-Message-ID: <5457D883.4050201@amacapital.net>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] Enable user helper interface for efi capsule
+ update
+Date: Mon, 3 Nov 2014 13:27:06 -0800
+Message-ID: <20141103212706.GE7379@kroah.com>
 References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
+ <5457D883.4050201@amacapital.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kweh Hock Leong <hock.leong.kweh@intel.com>, Matt Fleming <matt.fleming@intel.com>, Ming Lei <ming.lei@canonical.com>, Sam Protsenko <semen.protsenko@linaro.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Ong Boon Leong <boon.leong.ong@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <5457D883.4050201-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/02/2014 07:07 PM, Kweh Hock Leong wrote:
-> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Mon, Nov 03, 2014 at 11:33:23AM -0800, Andy Lutomirski wrote:
+> On 11/02/2014 07:07 PM, Kweh Hock Leong wrote:
+> > From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
+> > 
+> > Hi Guys,
+> > 
+> > This patchset is created on top of "efi: Capsule update support" patch:
+> > http://permalink.gmane.org/gmane.linux.kernel.efi/4837
+> > 
+> > It leverages the request_firmware_nowait() to expose the user helper interface for user to upload the capsule binary and calling the
+> > efi_capsule_update() API to pass the binary to EFI firmware.
 > 
-> Hi Guys,
-> 
-> This patchset is created on top of "efi: Capsule update support" patch:
-> http://permalink.gmane.org/gmane.linux.kernel.efi/4837
-> 
-> It leverages the request_firmware_nowait() to expose the user helper interface for user to upload the capsule binary and calling the
-> efi_capsule_update() API to pass the binary to EFI firmware.
+> I don't get it.  Why is the firmware interface at all reasonable for
+> uploading capsules?
 
-I don't get it.  Why is the firmware interface at all reasonable for
-uploading capsules?
+Tradition dictates that BIOS updates go through the firmware interface,
+that way you don't have to write a new userspace tool, which is a good
+thing.
 
-The firmware interface makes sense for nonvolatile firmware where
-hotplugging something or otherwise loading a driver needs a blob.  But
-uploading an EFI capsule is an *action*, not something that should
-happen transparently.  If there's an EFI firmware update available and
-the user wants to install it, then the userspace tool should install it,
-and it shouldn't hang around in /lib/firmware.  In fact, you shouldn't
-even need /lib to be on writable media to use this.
+> The firmware interface makes sense for nonvolatile firmware where
+> hotplugging something or otherwise loading a driver needs a blob.
 
-And you most certainly don't want the EFI capsule hanging around so that
-it might be accidentally installed again if the hard disk is moved.
+Or BIOS data.  We've been doing it this way for a long time now.
 
-ISTM there should be some file in sysfs to which you can write a
-capsule, or perhaps a chardev and an ioctl.
+> But uploading an EFI capsule is an *action*, not something that should
+> happen transparently.  If there's an EFI firmware update available and
+> the user wants to install it, then the userspace tool should install it,
+> and it shouldn't hang around in /lib/firmware.  In fact, you shouldn't
+> even need /lib to be on writable media to use this.
 
---Andy
+What does /lib have to do with this?
 
+> And you most certainly don't want the EFI capsule hanging around so that
+> it might be accidentally installed again if the hard disk is moved.
 > 
-> Besides build in kernel, the design also cater for build as kernel driver module. This patchset introduce a new API (request_firmware_abort()) at firmware_class so that the driver module could be unloaded by calling the API to properly stop user helper interface and release the device.
-> 
-> Thanks.
-> 
-> ---
-> changelog v2:
-> [PATCH 1/3]
-> * use fw_lookup_buf() instead of __fw_lookup_buf() function call
-> * move the fw_lookup_buf() function out of the CONFIG_PM_SLEEP block
-> 
-> [PATCH 2/3]
-> * no change
-> 
-> [PATCH 3/3]
-> * no change
-> 
-> 
-> Kweh, Hock Leong (3):
->   firmware loader: Introduce new API - request_firmware_abort()
->   firmware loader: fix hung task warning dump
->   efi: Capsule update with user helper interface
-> 
->  drivers/base/firmware_class.c                  |   56 ++++--
->  drivers/firmware/efi/Kconfig                   |   13 ++
->  drivers/firmware/efi/Makefile                  |    1 +
->  drivers/firmware/efi/efi-capsule-user-helper.c |  246 ++++++++++++++++++++++++
->  include/linux/firmware.h                       |    4 +
->  5 files changed, 306 insertions(+), 14 deletions(-)
->  create mode 100644 drivers/firmware/efi/efi-capsule-user-helper.c
-> 
+> ISTM there should be some file in sysfs to which you can write a
+> capsule, or perhaps a chardev and an ioctl.
+
+No, just use the firmware interface please.
+
+thanks,
+
+greg k-h
