@@ -1,99 +1,56 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Mon, 3 Nov 2014 22:32:02 -0800
-Message-ID: <CALCETrU2wk_FdcD6E+oMcp-tF97zN7f+w7q5rfPWBaNKrrmxVg@mail.gmail.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Tue, 4 Nov 2014 08:03:30 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B80EB68@PGSMSX102.gar.corp.intel.com>
 References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
  <1414984030-13859-4-git-send-email-hock.leong.kweh@intel.com>
- <20141104043247.GA23418@kroah.com> <CALCETrXjJju+cMWJfB6W5kSD=Ox5y+Hj_AfmbbbOTOh8CV8eaQ@mail.gmail.com>
+ <20141104043247.GA23418@kroah.com>
+ <CALCETrXjJju+cMWJfB6W5kSD=Ox5y+Hj_AfmbbbOTOh8CV8eaQ@mail.gmail.com>
  <F54AEECA5E2B9541821D670476DAE19C2B80EAE4@PGSMSX102.gar.corp.intel.com>
+ <CALCETrU2wk_FdcD6E+oMcp-tF97zN7f+w7q5rfPWBaNKrrmxVg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B80EAE4-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+In-Reply-To: <CALCETrU2wk_FdcD6E+oMcp-tF97zN7f+w7q5rfPWBaNKrrmxVg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
 Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 3, 2014 at 10:04 PM, Kweh, Hock Leong
-<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> -----Original Message-----
->> From: Andy Lutomirski [mailto:luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org]
->> >
->> > Andy, here's the steps to load a capsule.  I don't have a problem with
->> > this, it's userspace driven, no "autoloading" of files in /lib/, and
->> > works with sysfs.
->> >
->> > Have any objection to it, I don't.
->
-> Thanks Greg for helping me on the explanation. I would like to apologize if
-> my cover letter/commit messages did misleading.
->
->>
->> After reading the code, I still have objections.
->>
->> The full workflow seems to be, from the user's POV:
->>
->> 1. load the module
->>
->> 2. hope that there isn't a file called /lib/firmware/efi-capsule-file
->>
->> 3. echo 1 >.../loading
->>
->> 4. cat firmware >.../data
->>
->> 5. echo 0 >.../loading
->>
->> 6. efi_update_capsule gets called.  The return value ends up in the kernel
->> logs somewhere but doesn't seem to make it to userspace.
->>
->> 7. reboot(), but only if the capsule you loaded requires a reboot, which may
->> or may not be detectable without the kernel's help (I'm not sure about this
->> point).
->>
->> If you want to load a second capsule (which seems like a reasonable thing to
->> do if the first capsule was the kind that is processed immediately), then
->> rmmod -f the module and start over?
->
-> You no need to do rmmod in order to upload the 2nd capsule binary. You just need to
-> do the 3 steps as you mentioned in your 3, 4 and 5 for your 2nd or 3rd capsule binaries.
-> Then the last, you do the reboot.
-
-OK.  I missed that you request firmware again after each request finishes.
-
->
->>
->> This seems like an unpleasant interface.  I think that ioctl or a dedicated
->> custom sysfs file would be considerably nicer.  It would allow you to upload a
->> capsule and get an indication of success or failure all at once, and it lets you
->> load more than one capsule.
->> Also, it gets rid of some of the really weird module refcounting stuff that's
->> going on -- the only unusual thing the module would do would be to pin itself
->> once a reboot-requiring capsule is loaded.
->>
->> --Andy
->>
->
-> Regarding the synchronization, it is only required for module unload. The code is designed
-> in such a way that allow to be built as a kernel module or built into the kernel. If you choose
-> the built in kernel method, you won't come into the module unload situation which require
-> the synchronization.
->
-
-It seems like a large fraction of the code in this module exists just
-to work around the fact that request_firmware doesn't do what you want
-it to do.  You have code to:
-
- - Prevent the /lib/firmware mechanism from working.
- - Avoid a deadlock by doing strange things in the unload code.
- - Allow more than one capsule per module load.  (Isn't this hard to
-use?  User code will have to wait for the next firmware request before
-sending a second capsule.)
-
-All of this is for dubious gain.  You have to do three separate opens
-in sysfs to upload a capsule, and there's no way to report back to
-userspace whether the EFI call worked and whether a reboot is needed.
-
-What's the benefit of using the firmware interface here?
-
---Andy
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
+aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBUdWVzZGF5LCBOb3ZlbWJlciAwNCwg
+MjAxNCAyOjMyIFBNDQo+IA0KPiBJdCBzZWVtcyBsaWtlIGEgbGFyZ2UgZnJhY3Rpb24gb2YgdGhl
+IGNvZGUgaW4gdGhpcyBtb2R1bGUgZXhpc3RzIGp1c3QgdG8gd29yaw0KPiBhcm91bmQgdGhlIGZh
+Y3QgdGhhdCByZXF1ZXN0X2Zpcm13YXJlIGRvZXNuJ3QgZG8gd2hhdCB5b3Ugd2FudCBpdCB0byBk
+by4NCj4gWW91IGhhdmUgY29kZSB0bzoNCj4gDQo+ICAtIFByZXZlbnQgdGhlIC9saWIvZmlybXdh
+cmUgbWVjaGFuaXNtIGZyb20gd29ya2luZy4NCj4gIC0gQXZvaWQgYSBkZWFkbG9jayBieSBkb2lu
+ZyBzdHJhbmdlIHRoaW5ncyBpbiB0aGUgdW5sb2FkIGNvZGUuDQo+ICAtIEFsbG93IG1vcmUgdGhh
+biBvbmUgY2Fwc3VsZSBwZXIgbW9kdWxlIGxvYWQuICAoSXNuJ3QgdGhpcyBoYXJkIHRvIHVzZT8N
+Cj4gVXNlciBjb2RlIHdpbGwgaGF2ZSB0byB3YWl0IGZvciB0aGUgbmV4dCBmaXJtd2FyZSByZXF1
+ZXN0IGJlZm9yZSBzZW5kaW5nIGENCj4gc2Vjb25kIGNhcHN1bGUuKQ0KDQpJIGRpZCB0cnkgdG8g
+dXBsb2FkIG1vcmUgdGhhbiBvbmUgY2Fwc3VsZSBiaW5hcmllcyBhbmQgSSBkb24ndCBvYnNlcnZl
+IGEgbG9uZyB3YWl0DQppcyByZXF1aXJlZC4gSW4gZmFjdCwgaXQgc2VlbSB0byBtZSB0aGUgaW50
+ZXJmYWNlIGlzIGluc3RhbnRseSByZS1jcmVhdGVkLg0KDQo+IA0KPiBBbGwgb2YgdGhpcyBpcyBm
+b3IgZHViaW91cyBnYWluLiAgWW91IGhhdmUgdG8gZG8gdGhyZWUgc2VwYXJhdGUgb3BlbnMgaW4g
+c3lzZnMgdG8NCj4gdXBsb2FkIGEgY2Fwc3VsZSwgYW5kIHRoZXJlJ3Mgbm8gd2F5IHRvIHJlcG9y
+dCBiYWNrIHRvIHVzZXJzcGFjZSB3aGV0aGVyDQo+IHRoZSBFRkkgY2FsbCB3b3JrZWQgYW5kIHdo
+ZXRoZXIgYSByZWJvb3QgaXMgbmVlZGVkLg0KDQpJIGhhdmUgbm90IGVuY291bnRlciBhbnkgY2Fw
+c3VsZSB1cGRhdGUgdGhhdCBkb2VzIG5vdCByZXF1aXJlIHJlYm9vdC4NCkJhc2Ugb24gbXkgdW5k
+ZXJzdGFuZGluZywgdGhlIEVGSSBmaXJtd2FyZSBvbmx5IGRvIHRoZSBiaW5hcnkgZGVjb2RpbmcN
+CmR1cmluZyB0aGUgbmV4dCByZWJvb3QuIElmIHRoZSBiaW5hcnkgaXMgYnJva2VuL2NvcnJ1cHRl
+ZCwgeW91IHdvdWxkIG9ubHkNCmtub3cgZHVyaW5nIHRoZSBuZXh0IHJlYm9vdC4gT24ga2VybmVs
+IGRyaXZlciBwb2ludCBvZiB2aWV3LCBpdCBqdXN0IHJlZ2lzdGVycw0KdGhlIGJpbmFyeSBieSBj
+YWxsaW5nIHRoZSBFRkkgQVBJIFVwZGF0ZUNhcHN1bGUoKS4gTWF5IGJlIE1hdHQgeW91IGNvdWxk
+DQpoZWxwIG91dCB3aXRoIHRoaXM/DQoNClJlZ2FyZGluZyB0aGUgRUZJIGNhbGwgZmFpbGVkIG1l
+c3NhZ2UsIGJlc2lkZXMgb2J0YWlucyBmcm9tIHRoZSBkbWVzZyBsb2csDQp5b3UgYWxzbyBjYW4g
+dmVyaWZ5IHRoYXQgdGhyb3VnaCB0aGlzIHN5c2ZzOg0KL3N5cy9kZXZpY2VzL3BsYXRmb3JtL2Vm
+aV9jYXBzdWxlX3VzZXJfaGVscGVyL2NhcHN1bGVfbG9hZGVkDQoNCkkgZGlkIG1lbnRpb24gdGhp
+cyBpbiB0aGUgY29tbWl0IG1lc3NhZ2UgYXMgc2hvd2VkIGJlbG93Og0KQmVzaWRlcyB0aGUgcmVx
+dWVzdF9maXJtd2FyZSB1c2VyIGhlbHBlciBpbnRlcmZhY2UsIHRoaXMgbW9kdWxlIGFsc28gZXhw
+b3Nlcw0KYSAnY2Fwc3VsZV9sb2FkZWQnIGZpbGUgbm90ZSBmb3IgdXNlciB0byB2ZXJpZnkgdGhl
+IG51bWJlciBvZiBzdWNjZXNzZnVsbHkgdXBsb2FkZWQNCmNhcHN1bGUgYmluYXJpZXMuIFRoaXMg
+ZmlsZSBub3RlIGhhcyB0aGUgcmVhZCBvbmx5IGF0dHJpYnV0ZS4NCg0KPiANCj4gV2hhdCdzIHRo
+ZSBiZW5lZml0IG9mIHVzaW5nIHRoZSBmaXJtd2FyZSBpbnRlcmZhY2UgaGVyZT8NCj4gDQo+IC0t
+QW5keQ0KDQo=
