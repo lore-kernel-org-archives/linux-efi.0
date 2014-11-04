@@ -1,143 +1,30 @@
-From: Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Capsule update support
-Date: Tue, 4 Nov 2014 15:56:22 +0200
-Message-ID: <CAGBcZGf5+OkF1QQOJocVHuSKFgC1+rjiNuSBK3Oo3nBfr5RXdw@mail.gmail.com>
-References: <CAGBcZGfHX57jwCfw7CnvLgOJ58kd0KVJULOvhAsfi=3YBp5WsQ@mail.gmail.com>
-	<20141013095310.GZ14343@console-pimps.org>
-	<CAGBcZGe=HszCxQyx8bBDUEQcF4g+gcMyLfGiM4dVz4=TfxvLpg@mail.gmail.com>
-	<CAGBcZGfSdYa2yXW68RbywzCiC7mTxjAdGjUnwnhjWAwXZ0uqiQ@mail.gmail.com>
-	<20141016161507.GJ14343@console-pimps.org>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 0/3] Enable user helper interface for efi capsule
+ update
+Date: Tue, 4 Nov 2014 14:07:51 +0000
+Message-ID: <1415110071.26277.28.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
+	 <5457D883.4050201@amacapital.net> <20141103212706.GE7379@kroah.com>
+	 <CALCETrUNCuFvwkzbU4dWB0GH4mJKKV1e6jCNrSLVJe+n_et3kQ@mail.gmail.com>
+	 <20141103230234.GA9427@kroah.com>
+	 <CALCETrUtxqLaziC_f6iTEgKNhmTgJR6bOLJ=e=O22X_RsBc9sw@mail.gmail.com>
+	 <20141104003849.GA15147@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141016161507.GJ14343-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <20141104003849.GA15147-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Matt,
+On Mon, 2014-11-03 at 16:38 -0800, Greg Kroah-Hartman wrote:
+> 
+> Good point, I don't know.
+> 
+> Who ever wrote this code should know this, can someone please provide a
+> use-case for how this is all supposed to work?
 
-I've tested your patch with zero image size (no image passed, only headers)
-and it crashes because there is no check for image size there.
-This case (zero image size) seems to be legit according to specification
-and also can be useful in real life. So I developed a little fix for your patch:
-
-<<<<<<<<<<<<<<<<<<<<<<< cut here >>>>>>>>>>>>>>>>>>>>>
-diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-index ca29bad..597b363 100644
---- a/drivers/firmware/efi/capsule.c
-+++ b/drivers/firmware/efi/capsule.c
-@@ -169,13 +169,17 @@ static int
-efi_update_capsule(efi_capsule_header_t *capsule,
-                   struct page **pages, size_t size, int reset)
- {
-     efi_capsule_block_desc_t *block = NULL;
--    struct page **block_pgs;
-+    struct page **block_pgs = NULL;
-     efi_status_t status;
--    unsigned int nr_data_pgs, nr_block_pgs;
-+    unsigned int nr_data_pgs = 0, nr_block_pgs = 0;
-+    unsigned long sg_list = 0;
-     int i, j, err = -ENOMEM;
-
-     lockdep_assert_held(&capsule_mutex);
-
-+    if (size == 0)
-+        goto update_caps;
-+
-     nr_data_pgs = DIV_ROUND_UP(size, PAGE_SIZE);
-     nr_block_pgs = num_block_pages(nr_data_pgs);
-
-@@ -215,7 +219,10 @@ static int
-efi_update_capsule(efi_capsule_header_t *capsule,
-         kunmap(block_pgs[i]);
-     }
-
--    status = efi.update_capsule(&capsule, 1, page_to_phys(block_pgs[0]));
-+    sg_list = page_to_phys(block_pgs[0]);
-+
-+update_caps:
-+    status = efi.update_capsule(&capsule, 1, sg_list);
-     if (status != EFI_SUCCESS) {
-         pr_err("update_capsule fail: 0x%lx\n", status);
-         err = efi_status_to_err(status);
--- 
-2.1.1
-<<<<<<<<<<<<<<<<<<<<<<< cut here >>>>>>>>>>>>>>>>>>>>>
-
-I'm planning to use your API for our UpdateCapsule test module so
-it would be really helpful if you can include this fix to your patch.
-
-
-On 16 October 2014 19:15, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> On Tue, 14 Oct, at 06:30:22PM, Sam Protsenko wrote:
->> Matt,
->>
->> I tried to play with your code and now I have some extra notes about this patch:
->>
->> 1. As it was proposed earlier, I support thought that it would be nice to
->>    rename function names in next way:
->>
->>      efi_update_capsule -> __efi_update_capsule
->>      efi_capsule_update -> efi_update_capsule
->>
->>    because it's quite confusing to have both efi_update_capsule() and
->>    efi_capsule_update(). Besides, EFI function called UpdateCapsule, so it's
->>    good idea to stick to this name in kernel API (I mean exporting
->>    efi_update_capsule() instead of efi_capsule_update()).
->
-> I'm not so convinced by that argument. Remember, we're building a kernel
-> API here, so we've got functions like,
->
->   efi_capsule_supported()
->   efi_capsule_pending()
->
-> I've stuck with efi_capsule_update() and __efi_capsule_update() for now,
-> to continue the efi_capsule* theme (avoiding both efi_capsule_update()
-> and efi_update_capsule() was a good point though).
->
->> 2. UEFI's UpdateCapsule() runtime service supports passing more than one
->>    capsule to it (we can pass CapsuleCount argument to it for this purpose).
->>    But your particular kernel implementation allows us only to provide one
->>    capsule at a time. Is that was done for a reason? Can it be consider as
->>    shortcoming?
->
-> Yeah, the reason is simply that it makes the capsule management more
-> complicated if you have more than one capsule, and when testing the
-> patches (and experimenting with the features in the capsule-* branches
-> in my git tree) I didn't come across a scenario where sending multiple
-> capsules at one time was required.
->
-> Doesn't mean we couldn't extend the kernel API in the future, though.
-> We'd just need an in-kernel user first.
->
->> 3. I noticed that you dropped efi_capsule_build() in this patch (w.r.t.
->>    https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/
->>    implementation). BTW, it should be declared in header there.
->>    Anyway, how do we suppose to build capsule to pass to efi_capsule_update()?
->>    I mean, it can take a quite large code to build a capsule (allocating pages
->>    etc). Wouldn't it be easier to user to use your API if it has something
->>    ready to use? Anyway, if it should be done like this, it would be nice
->>    to have a decent example code (use-case) how to use this API (maybe in
->>    Documentation/, idk), because it looks quite non-intuitive (for me at least).
->
-> The two patches that I sent are only preparatory patches for EFI capsule
-> support, and Kweh (Cc'd) is working on patches that implement a userland
-> interface.
->
-> Wilson, do you think you could post your patches by the beginning of
-> next week? They just need to give an idea of how we can use this API.
->
->> 4. Tedious stuff: I checked your patch with "checkpatch.pl" and it shows
->>     some warnings, please fix them if possible.
->
-> Will do.
->
->> I will try to test and verify this patch further, will notify you if
->> notice any issues.
->
-> Great, thanks.
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+That would be Wilson. He's wanting to use this to send updates to the
+firmware on the Intel Quark, I think.
