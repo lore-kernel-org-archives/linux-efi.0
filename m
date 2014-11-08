@@ -1,56 +1,45 @@
-From: Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 02/10] arm64/mm: add create_pgd_mapping() to create
- private page tables
-Date: Fri, 7 Nov 2014 15:21:05 +0000
-Message-ID: <20141107152104.GA10892@linaro.org>
-References: <1415283206-14713-1-git-send-email-ard.biesheuvel@linaro.org>
- <1415283206-14713-3-git-send-email-ard.biesheuvel@linaro.org>
- <20141107150830.GA10210@linaro.org>
- <CAKv+Gu8SuNy8ufq2trZB=0jW6QRZde4QQS3M+jSDuWCTZ257vg@mail.gmail.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Sat, 8 Nov 2014 13:05:56 +0000
+Message-ID: <20141108130556.GM3592@console-pimps.org>
+References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
+ <1414984030-13859-4-git-send-email-hock.leong.kweh@intel.com>
+ <20141104043247.GA23418@kroah.com>
+ <CALCETrXjJju+cMWJfB6W5kSD=Ox5y+Hj_AfmbbbOTOh8CV8eaQ@mail.gmail.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B80EAE4@PGSMSX102.gar.corp.intel.com>
+ <CALCETrU2wk_FdcD6E+oMcp-tF97zN7f+w7q5rfPWBaNKrrmxVg@mail.gmail.com>
+ <1415110688.26277.36.camel@mfleming-mobl1.ger.corp.intel.com>
+ <CALCETrW1UaOCcb-32SOUhi_Zh5vLzV+VwyffThVvso23z04SHA@mail.gmail.com>
+ <20141104154017.GA28113@kroah.com>
+ <CALCETrV6M5D4iPjxPwNkMWTfVYDf3wSuZ9P23miUSR-jMGRyvg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8SuNy8ufq2trZB=0jW6QRZde4QQS3M+jSDuWCTZ257vg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CALCETrV6M5D4iPjxPwNkMWTfVYDf3wSuZ9P23miUSR-jMGRyvg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: Greg KH <gregkh@linuxfoundation.org>, Matt Fleming <matt.fleming@intel.com>, Sam Protsenko <semen.protsenko@linaro.org>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, LKML <linux-kernel@vger.kernel.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 07, 2014 at 04:12:34PM +0100, Ard Biesheuvel wrote:
-> On 7 November 2014 16:08, Steve Capper <steve.capper-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > On Thu, Nov 06, 2014 at 03:13:18PM +0100, Ard Biesheuvel wrote:
-
-[...]
-
-> >>  void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-> >> @@ -285,7 +278,16 @@ void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-> >>               return;
-> >>       }
-> >>       __create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
-> >> -                      addr, addr, size, map_io);
-> >> +                      addr, addr, size,
-> >> +                      map_io ? __pgprot(PROT_DEVICE_nGnRE)
-> >> +                             : PAGE_KERNEL_EXEC);
-> >> +}
-> >
-> > Could you please also change efi_setup_idmap (it's the only caller I
-> > can see for create_id_mapping)?
-> >
-> > That way the prototype for create_id_mapping would look like:
-> > void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, pgprot_t prot)
-> >
+On Tue, 04 Nov, at 08:35:40AM, Andy Lutomirski wrote:
 > 
-> I didn't bother because a couple of patches later, this stuff is all
-> ripped out anyway
-> (7/10 arm64/efi: remove idmap manipulations from UEFI code), because
-> there is no longer a need for UEFI to switch to the ID map.
-> 
-> Do you feel I should still change it here, and then remove it later?
+> Am I missing something here?  The current proposal is missing the
+> success/failure part, unless you count the loaded count (in a
+> different sysfs directory) as a useful interface for that.
+ 
+As Wilson pointed out, you only get the ability to make meaningful
+success/failure declarations once you've performed the reboot.
 
-Ahh, I looked at this patch in isolation.
-Yeah, this looks fine to me as is then Ard.
+I know of no firmware that will hot-patch itself when you call
+UpdateCapsule(). A reboot is always required. Certainly that's the way
+Windows will work from what I've read, which means that for x86 it's
+pretty much set in stone.
 
-Cheers,
+Which means there's only so much info you can return to userspace once
+you've handed the blob to the firmware. I don't see a huge problem with
+printing things in kernel buffer, since that's how other
+firmware-related things work today.
+
 -- 
-Steve
+Matt Fleming, Intel Open Source Technology Center
