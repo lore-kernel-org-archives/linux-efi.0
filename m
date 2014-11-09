@@ -1,59 +1,111 @@
-From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [PATCH v2 2/3] firmware loader: fix hung task warning dump
-Date: Sat, 8 Nov 2014 11:07:16 -0800
-Message-ID: <20141108190716.GB2638@kroah.com>
-References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
- <1414984030-13859-3-git-send-email-hock.leong.kweh@intel.com>
+From: Pali =?utf-8?q?Roh=C3=A1r?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
+Date: Sun, 9 Nov 2014 18:37:46 +0100
+Message-ID: <201411091837.47354@pali>
+References: <1412339576-17972-1-git-send-email-matt@console-pimps.org> <1412348517.5410.13.camel@deneb.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed;
+  boundary="nextPart2161255.Ze1lOtOiMd";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1414984030-13859-3-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1412348517.5410.13.camel-PDpCo7skNiwAicBL8TP8PQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 03, 2014 at 11:07:09AM +0800, Kweh Hock Leong wrote:
-> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> When using request_firmware_nowait() with FW_ACTION_NOHOTPLUG param to
-> expose user helper interface, if the user do not react immediately, after
-> 120 seconds there will be a hung task warning message dumped as below:
-> 
-> [ 3000.784235] INFO: task kworker/0:0:8259 blocked for more than 120 seconds.
-> [ 3000.791281]       Tainted: G            E 3.16.0-rc1-yocto-standard #41
-> [ 3000.798082] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
-> [ 3000.806072] kworker/0:0     D cd0075c8     0  8259      2 0x00000000
-> [ 3000.812765] Workqueue: events request_firmware_work_func
-> [ 3000.818253]  cd375e18 00000046 0000000e cd0075c8 000000f0 cd40ea00 cd375fec 1b883e89
-> [ 3000.826374]  0000026b cd40ea00 80000000 00000001 cd0075c8 00000000 cd375de4 c119917f
-> [ 3000.834492]  cd563360 cd375df4 c119a0ab cd563360 00000000 cd375e24 c119a1d6 00000000
-> [ 3000.842616] Call Trace:
-> [ 3000.845252]  [<c119917f>] ? kernfs_next_descendant_post+0x3f/0x50
-> [ 3000.851543]  [<c119a0ab>] ? kernfs_activate+0x6b/0xc0
-> [ 3000.856790]  [<c119a1d6>] ? kernfs_add_one+0xd6/0x130
-> [ 3000.862047]  [<c15fdb02>] schedule+0x22/0x60
-> [ 3000.866548]  [<c15fd195>] schedule_timeout+0x175/0x1d0
-> [ 3000.871887]  [<c119b391>] ? __kernfs_create_file+0x71/0xa0
-> [ 3000.877574]  [<c119bb9a>] ? sysfs_add_file_mode_ns+0xaa/0x180
-> [ 3000.883533]  [<c15fe84f>] wait_for_completion+0x6f/0xb0
-> [ 3000.888961]  [<c1065200>] ? wake_up_process+0x40/0x40
-> [ 3000.894219]  [<c13cb600>] _request_firmware+0x750/0x9f0
-> [ 3000.899666]  [<c1382a7f>] ? n_tty_receive_buf2+0x1f/0x30
-> [ 3000.905200]  [<c13cba02>] request_firmware_work_func+0x22/0x50
-> [ 3000.911235]  [<c10550d2>] process_one_work+0x122/0x380
-> [ 3000.916571]  [<c1055859>] worker_thread+0xf9/0x470
-> [ 3000.921555]  [<c1055760>] ? create_and_start_worker+0x50/0x50
-> [ 3000.927497]  [<c1055760>] ? create_and_start_worker+0x50/0x50
-> [ 3000.933448]  [<c105a5ff>] kthread+0x9f/0xc0
-> [ 3000.937850]  [<c15ffd40>] ret_from_kernel_thread+0x20/0x30
-> [ 3000.943548]  [<c105a560>] ? kthread_worker_fn+0x100/0x100
-> 
-> This patch change the wait_for_completion() function call to
-> wait_for_completion_interruptible() function call for solving the issue.
-> 
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+--nextPart2161255.Ze1lOtOiMd
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 
-Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+On Friday 03 October 2014 17:01:57 Mark Salter wrote:
+> On Fri, 2014-10-03 at 13:32 +0100, Matt Fleming wrote:
+> > From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> >=20
+> > commit da167ad7638759 ("rtc: ia64: allow other architectures
+> > to use EFI RTC") inadvertently introduced a regression for
+> > x86. We've been careful not to enable the EFI rtc driver
+> > for x86 due to the generally buggy implementations of the
+> > time-related EFI runtime services.
+> >=20
+> > Previous attempts have been made to us the time EFI
+> > services, but all have eventually been reverted due to
+> > crashes inside the firmware code.
+> >=20
+> > In fact, since the above commit was merged we've seen
+> > reports of crashes on 32-bit tablets,
+> >=20
+> >   https://bugzilla.kernel.org/show_bug.cgi?id=3D84241#c21
+> >=20
+> > Disable it explicitly for x86 so that we don't give users
+> > false hope that this driver will work - it won't, and your
+> > machine is likely to crash.
+> >=20
+> > Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+> > Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > ---
+>=20
+> Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>=20
+> > Unless anyone objects, I'm happy to take this through the
+> > EFI tree.
+> >=20
+> >  drivers/rtc/Kconfig | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >=20
+> > diff --git a/drivers/rtc/Kconfig b/drivers/rtc/Kconfig
+> > index a168e96142b9..54ef393b0def 100644
+> > --- a/drivers/rtc/Kconfig
+> > +++ b/drivers/rtc/Kconfig
+> > @@ -806,7 +806,7 @@ config RTC_DRV_DA9063
+> >=20
+> >  config RTC_DRV_EFI
+> > =20
+> >  	tristate "EFI RTC"
+> >=20
+> > -	depends on EFI
+> > +	depends on EFI && !X86
+> >=20
+> >  	help
+> >  =09
+> >  	  If you say yes here you will get support for the EFI
+> >  	  Real Time Clock.
+>=20
+> --
+> To unsubscribe from this list: send the line "unsubscribe
+> linux-kernel" in the body of a message to
+> majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at=20
+> http://vger.kernel.org/majordomo-info.html Please read the
+> FAQ at  http://www.tux.org/lkml/
+
+Hello,
+
+this patch totally disabled efi rfc driver on x86 machines at=20
+compile time. But on some x86 machines it working without crash=20
+and reading from file /sys/class/rtc/rtc*/since_epoch returns=20
+correct information. So why to disable compiling driver on=20
+machines where driver working?
+
+=2D-=20
+Pali Roh=C3=A1r
+pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+
+--nextPart2161255.Ze1lOtOiMd
+Content-Type: application/pgp-signature; name=signature.asc 
+Content-Description: This is a digitally signed message part.
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEABECAAYFAlRfpmsACgkQi/DJPQPkQ1JBdACgwuYNkLPD6Qvr4/HvZtYY0MCy
+/aIAn0k9giHBUB71dqK54oTbnYiOLpvy
+=aUcR
+-----END PGP SIGNATURE-----
+
+--nextPart2161255.Ze1lOtOiMd--
