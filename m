@@ -1,74 +1,36 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Mon, 10 Nov 2014 08:31:56 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B851058@PGSMSX102.gar.corp.intel.com>
-References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
- <1414984030-13859-4-git-send-email-hock.leong.kweh@intel.com>
- <20141104043247.GA23418@kroah.com>
- <CALCETrXjJju+cMWJfB6W5kSD=Ox5y+Hj_AfmbbbOTOh8CV8eaQ@mail.gmail.com>
- <F54AEECA5E2B9541821D670476DAE19C2B80EAE4@PGSMSX102.gar.corp.intel.com>
- <CALCETrU2wk_FdcD6E+oMcp-tF97zN7f+w7q5rfPWBaNKrrmxVg@mail.gmail.com>
- <1415110688.26277.36.camel@mfleming-mobl1.ger.corp.intel.com>
- <CALCETrW1UaOCcb-32SOUhi_Zh5vLzV+VwyffThVvso23z04SHA@mail.gmail.com>
- <20141104154017.GA28113@kroah.com>
- <CALCETrV6M5D4iPjxPwNkMWTfVYDf3wSuZ9P23miUSR-jMGRyvg@mail.gmail.com>
- <F54AEECA5E2B9541821D670476DAE19C2B80F3A9@PGSMSX102.gar.corp.intel.com>
- <CALCETrUi0ssZbOpHyVmh6jx68Oj=0h4BwfM0uLio8Qbaeu9gJw@mail.gmail.com>
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
+Date: Mon, 10 Nov 2014 11:22:13 +0000
+Message-ID: <1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1412339576-17972-1-git-send-email-matt@console-pimps.org>
+	 <1412348517.5410.13.camel@deneb.redhat.com> <201411091837.47354@pali>
+	 <20141109182231.GA29337@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CALCETrUi0ssZbOpHyVmh6jx68Oj=0h4BwfM0uLio8Qbaeu9gJw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
+In-Reply-To: <20141109182231.GA29337-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Pali =?ISO-8859-1?Q?Roh=E1r?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
-aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiA+ICMhL2Jpbi9zaA0KPiA+DQo+ID4gb2xkPSQo
-Y2F0DQo+ID4gL3N5cy9kZXZpY2VzL3BsYXRmb3JtL2VmaV9jYXBzdWxlX3VzZXJfaGVscGVyL2Nh
-cHN1bGVfbG9hZGVkKQ0KPiA+DQo+ID4gZm9yIGFyZyBpbiAiJEAiDQo+ID4gZG8NCj4gPiAgICAg
-ICAgIGlmIFsgLWYgJGFyZyBdDQo+ID4gICAgICAgICB0aGVuDQo+ID4gICAgICAgICAgICAgICAg
-IGVjaG8gMSA+IC9zeXMvY2xhc3MvZmlybXdhcmUvZWZpLWNhcHN1bGUtZmlsZS9sb2FkaW5nDQo+
-ID4gICAgICAgICAgICAgICAgIGNhdCAkYXJnID4gL3N5cy9jbGFzcy9maXJtd2FyZS9lZmktY2Fw
-c3VsZS1maWxlL2RhdGENCj4gPiAgICAgICAgICAgICAgICAgZWNobyAwID4gL3N5cy9jbGFzcy9m
-aXJtd2FyZS9lZmktY2Fwc3VsZS1maWxlL2xvYWRpbmcNCj4gDQo+IEkgdGhpbmsgeW91IGhhdmUg
-YSByYWNlLiAgVHJ5IHB1dHRpbmcgbXNsZWVwKDEwMDApIGFmdGVyIHRoZQ0KPiByZXF1ZXN0X2Zp
-cm13YXJlX25vd2FpdCBjYWxsLCBhbmQgSSBiZXQgdGhpcyB3aWxsIGZhaWwgb24gdGhlIHNlY29u
-ZCB0cnkuDQoNClNvcnJ5IGZvciB0aGUgbGF0ZSByZXNwb25zZS4gSSBkb24ndCByZWFsbHkgY2F0
-Y2ggdGhlIHJhY2UgY29uZGl0aW9uIHRoYXQNCnlvdSBhcmUgcmVmZXJyaW5nPyBBcmUgeW91IHRy
-eWluZyB0byB0ZWxsIHRoYXQgdGhlIHVzZXIgc2NyaXB0IGNvdWxkIHJ1biBmYXN0ZXINCmJlZm9y
-ZSB0aGUgcHJldmlvdXMgY2FsbGJhY2sgZnVuY3Rpb24gYWN0dWFsbHkgZW5kPyBXaWxsIHN1Y2gg
-c2NlbmFyaW8gaGFwcGVuPw0KSW4gdGhlIGNhbGxiYWNrIGZ1bmN0aW9uLCBhZnRlciB0aGUgcmVx
-dWVzdF9maXJtd2FyZV9ub3dhaXQoKSwgSSBkb24ndCBoYXZlDQphbnkgY29kZXMgd2lsbCBkZWxh
-eSB0aGUgY2FsbGJhY2sgZnVuY3Rpb24gdG8gZW5kLiBCZXNpZGVzLCB0aGVyZSBpcyBhIG11dGV4
-X2xvY2sNCnByb3RlY3RpbmcgdGhlIHJlcXVlc3RfZmlybXdhcmVfbm93YWl0KCkgY2FsbGluZy4g
-V29uJ3QgdGhhdCB0YWtlIGNhcmUgb2YgdGhlDQppc3N1ZT8NCg0KPiANCj4gPg0KPiA+ICAgICAg
-ICAgICAgICAgICBvbGR0aW1lPSQoZGF0ZSArJVMpDQo+ID4gICAgICAgICAgICAgICAgIG9sZHRp
-bWU9JCgoKHRpbWUgKyAyKSAlIDYwKSkNCj4gPiAgICAgICAgICAgICAgICAgdW50aWwgWyAtZiAv
-c3lzL2NsYXNzL2Zpcm13YXJlL2VmaS1jYXBzdWxlLWZpbGUvbG9hZGluZyBdDQo+ID4gICAgICAg
-ICAgICAgICAgIGRvDQo+ID4gICAgICAgICAgICAgICAgICAgICAgICAgbmV3dGltZT0kKGRhdGUg
-KyVTKQ0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGlmIFsgJG5ld3RpbWUgLWVxICRvbGR0
-aW1lIF0NCj4gPiAgICAgICAgICAgICAgICAgICAgICAgICB0aGVuDQo+ID4gICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICBicmVhaw0KPiA+ICAgICAgICAgICAgICAgICAgICAgICAgIGZp
-DQo+ID4gICAgICAgICAgICAgICAgIGRvbmUNCj4gPg0KPiA+ICAgICAgICAgICAgICAgICBvbGQ9
-JCgob2xkICsgMSkpDQo+ID4gICAgICAgICAgICAgICAgIG5ldz0kKGNhdA0KPiA+IC9zeXMvZGV2
-aWNlcy9wbGF0Zm9ybS9lZmlfY2Fwc3VsZV91c2VyX2hlbHBlci9jYXBzdWxlX2xvYWRlZCkNCj4g
-DQo+IEkgdGhpbmsgdGhhdCBmaXJtd2FyZV9jbGFzcyBkb2Vzbid0IGNhbGwgdGhlIGNhbGxiYWNr
-IHVudGlsIGFmdGVyIGxvYWRpbmcgaXMgY2xvc2VkDQo+IGZvciB0aGUgc2Vjb25kIHRpbWUuICBJ
-ZiBzbywgdGhlbiB0aGlzIGlzIHJhY3kuICBUcnkgaW5zZXJ0aW5nIG1zbGVlcCgxMDAwKSBhdCB0
-aGUNCj4gYmVnaW5uaW5nIG9mIHlvdXIgY2FsbGJhY2sgYW5kIHVwbG9hZGluZyBhIGNhcHN1bGUg
-dGhhdCBzaG91bGQgbG9hZA0KPiBzdWNjZXNzZnVsbHkgLS0gdGhpcyB3aWxsIHJlcG9ydCBmYWls
-dXJlLCBidXQgYSBmdXR1cmUgdXBsb2FkIG1heSBnZXQgdmVyeQ0KPiBjb25mdXNlZC4gQWxzbywg
-d2hhdCBkb2VzIHRoZSBmaXJtd2FyZSBjbGFzcyBkbyB3aGVuIHNpbXVsdGFuZW91cw0KPiB1cGxv
-YWRzIG9mIHRoZSBzYW1lIGZpbGUgd2l0aCBkaWZmZXJlbnQgY29udGVudHMgYXJlIGluIGZsaWdo
-dD8gIElzIHRoYXQgcG9zc2libGU/DQoNClNvcnJ5IGFnYWluLCBJIGNhbid0IHJlYWxseSBjYXRj
-aCB5b3Ugb24gdGhpcyByYWNlIGNvbmRpdGlvbiBzdGF0ZW1lbnQuIEFyZSB5b3UNCnRyeWluZyB0
-byB0ZWxsIGlmIHVzZXIgaXMgZG9pbmcgdGhpczoNCg0KZWNobyAxID4gL3N5cy9jbGFzcy9maXJt
-d2FyZS9lZmktY2Fwc3VsZS1maWxlL2xvYWRpbmcNCmNhdCBjYXBzdWxlMSA+IC9zeXMvY2xhc3Mv
-ZmlybXdhcmUvZWZpLWNhcHN1bGUtZmlsZS9kYXRhDQpjYXQgY2Fwc3VsZTIgPiAvc3lzL2NsYXNz
-L2Zpcm13YXJlL2VmaS1jYXBzdWxlLWZpbGUvZGF0YQ0KZWNobyAwID4gL3N5cy9jbGFzcy9maXJt
-d2FyZS9lZmktY2Fwc3VsZS1maWxlL2xvYWRpbmcNCg0KSWYgc28sIGNhcHN1bGUyIHdpbGwgYmUg
-dGhlIG9uZSB3ZSB3aWxsIG9idGFpbiBpbiB0aGUgY2FsbGJhY2sgZnVuY3Rpb24uDQoNCg0KUmVn
-YXJkcywNCldpbHNvbg0KDQo=
+On Sun, 2014-11-09 at 19:22 +0100, Borislav Petkov wrote:
+> On Sun, Nov 09, 2014 at 06:37:46PM +0100, Pali Roh=C3=A1r wrote:
+> > this patch totally disabled efi rfc driver on x86 machines at=20
+> > compile time. But on some x86 machines it working without crash=20
+> > and reading from file /sys/class/rtc/rtc*/since_epoch returns=20
+> > correct information. So why to disable compiling driver on=20
+> > machines where driver working?
+>=20
+> Sounds like we need an efi=3Drtc_enable knob for people who what to u=
+se
+> it...
+
+I'm not so sure. By and large, the EFI runtime Time services just don't
+work very well on x86. Just because they work sometimes, doesn't
+actually mean it's a good idea to use them.
+
+The one scenario where the time services are useful is early on during
+boot when we want to get the timezone information. I have vague
+recollections of someone working on that.
