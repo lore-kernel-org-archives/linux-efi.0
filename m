@@ -1,36 +1,74 @@
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Pali =?utf-8?q?Roh=C3=A1r?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
-Date: Mon, 10 Nov 2014 11:22:13 +0000
-Message-ID: <1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>
-References: <1412339576-17972-1-git-send-email-matt@console-pimps.org>
-	 <1412348517.5410.13.camel@deneb.redhat.com> <201411091837.47354@pali>
-	 <20141109182231.GA29337@pd.tnic>
+Date: Mon, 10 Nov 2014 17:23:46 +0100
+Message-ID: <201411101723.49197@pali>
+References: <1412339576-17972-1-git-send-email-matt@console-pimps.org> <20141109182231.GA29337@pd.tnic> <1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed;
+  boundary="nextPart2674380.b8tmZvY1V1";
+  protocol="application/pgp-signature";
+  micalg=pgp-sha1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141109182231.GA29337-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <1415618533.14686.239.camel-ZqTwcBeJ+wsBof6jY8KHXm7IUlhRatedral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Pali =?ISO-8859-1?Q?Roh=E1r?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 2014-11-09 at 19:22 +0100, Borislav Petkov wrote:
-> On Sun, Nov 09, 2014 at 06:37:46PM +0100, Pali Roh=C3=A1r wrote:
-> > this patch totally disabled efi rfc driver on x86 machines at=20
-> > compile time. But on some x86 machines it working without crash=20
-> > and reading from file /sys/class/rtc/rtc*/since_epoch returns=20
-> > correct information. So why to disable compiling driver on=20
-> > machines where driver working?
+--nextPart2674380.b8tmZvY1V1
+Content-Type: Text/Plain;
+  charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+On Monday 10 November 2014 12:22:13 Matt Fleming wrote:
+> On Sun, 2014-11-09 at 19:22 +0100, Borislav Petkov wrote:
+> > On Sun, Nov 09, 2014 at 06:37:46PM +0100, Pali Roh=C3=A1r wrote:
+> > > this patch totally disabled efi rfc driver on x86 machines
+> > > at compile time. But on some x86 machines it working
+> > > without crash and reading from file
+> > > /sys/class/rtc/rtc*/since_epoch returns correct
+> > > information. So why to disable compiling driver on
+> > > machines where driver working?
+> >=20
+> > Sounds like we need an efi=3Drtc_enable knob for people who
+> > what to use it...
 >=20
-> Sounds like we need an efi=3Drtc_enable knob for people who what to u=
-se
-> it...
+> I'm not so sure. By and large, the EFI runtime Time services
+> just don't work very well on x86. Just because they work
+> sometimes, doesn't actually mean it's a good idea to use
+> them.
+>=20
+> The one scenario where the time services are useful is early
+> on during boot when we want to get the timezone information.
+> I have vague recollections of someone working on that.
 
-I'm not so sure. By and large, the EFI runtime Time services just don't
-work very well on x86. Just because they work sometimes, doesn't
-actually mean it's a good idea to use them.
+On laptop Dell Latitude E6440 with 64bit kernel 3.17-rc6 (where=20
+was rtc-efi.ko enabled at compile time for x86) it working fine=20
+without crash. So I think that other Dell machines could work=20
+too.
 
-The one scenario where the time services are useful is early on during
-boot when we want to get the timezone information. I have vague
-recollections of someone working on that.
+Maybe problems which were reported are only specific for 32bit=20
+UEFI? Or 32bit kernels?
+
+And I think that if I know that efi time service working on=20
+machine, I should be able to use it with mainline kernel (without=20
+hacking Kconfig to enable it and so...).
+
+=2D-=20
+Pali Roh=C3=A1r
+pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+
+--nextPart2674380.b8tmZvY1V1
+Content-Type: application/pgp-signature; name=signature.asc 
+Content-Description: This is a digitally signed message part.
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iEYEABECAAYFAlRg5pUACgkQi/DJPQPkQ1IBZQCfTNuspzDzY56+NDmyAus3vY2g
+bqUAn0vAGETIMSXsu9RZoEq0myvGdJOW
+=MI7R
+-----END PGP SIGNATURE-----
+
+--nextPart2674380.b8tmZvY1V1--
