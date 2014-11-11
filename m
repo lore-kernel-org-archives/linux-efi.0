@@ -1,33 +1,35 @@
-From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
-Date: Tue, 11 Nov 2014 11:38:31 +0000
-Message-ID: <20141111113831.1119720e@alan.etchedpixels.co.uk>
+Date: Tue, 11 Nov 2014 12:46:06 +0100
+Message-ID: <20141111114605.GE31490@pd.tnic>
 References: <1412339576-17972-1-git-send-email-matt@console-pimps.org>
-	<20141109182231.GA29337@pd.tnic>
-	<1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>
-	<201411101723.49197@pali>
-	<5460EB92.1090501@gmail.com>
-	<20141110170417.GA17286@srcf.ucam.org>
-	<5461220E.20605@gmail.com>
-	<546126FF.3070600@zytor.com>
+ <20141109182231.GA29337@pd.tnic>
+ <1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>
+ <201411101723.49197@pali>
+ <5460EB92.1090501@gmail.com>
+ <20141110170417.GA17286@srcf.ucam.org>
+ <5461220E.20605@gmail.com>
+ <546126FF.3070600@zytor.com>
+ <20141111113831.1119720e@alan.etchedpixels.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <546126FF.3070600-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Austin S Hemmelgarn <ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Pali =?UTF-8?B?Um9ow6Fy?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20141111113831.1119720e@alan.etchedpixels.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Austin S Hemmelgarn <ahferroin7@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Pali =?utf-8?B?Um9ow6Fy?= <pali.rohar@gmail.com>, Matt Fleming <matt.fleming@intel.com>, Mark Salter <msalter@redhat.com>, Alessandro Zummo <a.zummo@towertech.it>, rtc-linux@googlegroups.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Young <dyoung@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-> > look further into the options I have set in my kernel build, I may have
-> > changed something else without remembering between booting with and
-> > without the CSM enabled.
-> > 
-> 
-> It could also be that the non-CSM BIOS somehow remaps the CMOS registers.
+On Tue, Nov 11, 2014 at 11:38:31AM +0000, One Thousand Gnomes wrote:
+> I don't believe there is anything which prevents the CSM from faking a
+> CMOS clock using SMM from whatever is actually in the hardware.
 
-I don't believe there is anything which prevents the CSM from faking a
-CMOS clock using SMM from whatever is actually in the hardware.
+HPET in SMM? Oh, sure, definitely.
 
-Alan
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
