@@ -1,99 +1,56 @@
-From: Austin S Hemmelgarn <ahferroin7@gmail.com>
-Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
-Date: Tue, 11 Nov 2014 07:14:15 -0500
-Message-ID: <5461FD97.1080601@gmail.com>
-References: <1412339576-17972-1-git-send-email-matt@console-pimps.org>	<20141109182231.GA29337@pd.tnic>	<1415618533.14686.239.camel@mfleming-mobl1.ger.corp.intel.com>	<201411101723.49197@pali>	<5460EB92.1090501@gmail.com>	<20141110170417.GA17286@srcf.ucam.org>	<5461220E.20605@gmail.com>	<546126FF.3070600@zytor.com> <20141111113831.1119720e@alan.etchedpixels.co.uk>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 09/10] arm64/efi: ignore unusable regions instead of
+ reserving them
+Date: Tue, 11 Nov 2014 10:42:16 -0500
+Message-ID: <1415720536.32311.113.camel@deneb.redhat.com>
+References: <1415283206-14713-1-git-send-email-ard.biesheuvel@linaro.org>
+	 <1415283206-14713-10-git-send-email-ard.biesheuvel@linaro.org>
+	 <1415592695.32311.91.camel@deneb.redhat.com>
+	 <CAKv+Gu8ZpDpfJSvDksUfW0L4k9uU0-j9mConGwcdcsmh1XM_2w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg=sha1; boundary="------------ms010608010602040409010701"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20141111113831.1119720e@alan.etchedpixels.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: One Thousand Gnomes <gnomes@lxorguk.ukuu.org.uk>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>, =?ISO-8859-1?Q?Pali_Roh=E1r?= <pali.rohar@gmail.com>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@alien8.de>, Mark Salter <msalter@redhat.com>, Alessandro Zummo <a.zummo@towertech.it>, rtc-linux@googlegroups.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Dave Young <dyoung@redhat.com>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAKv+Gu8ZpDpfJSvDksUfW0L4k9uU0-j9mConGwcdcsmh1XM_2w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is a cryptographically signed message in MIME format.
+On Mon, 2014-11-10 at 08:31 +0100, Ard Biesheuvel wrote:
+> On 10 November 2014 05:11, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> > On Thu, 2014-11-06 at 15:13 +0100, Ard Biesheuvel wrote:
+> >> This changes the way memblocks are installed based on the contents
+> of
+> >> the UEFI memory map. Formerly, all regions would be
+> memblock_add()'ed,
+> >> after which unusable regions would be memblock_reserve()'d as well.
+> >> To simplify things, but also to allow access to the unusable
+> regions
+> >> through mmap(/dev/mem), even with CONFIG_STRICT_DEVMEM set, change
+> >> this so that only usable regions are memblock_add()'ed in the first
+> >> place.
+> >
+> > This patch is crashing 64K pagesize kernels during boot. I'm not
+> exactly
+> > sure why, though. Here is what I get on an APM Mustang box:
+> >
+> 
+> Ah, yes, I meant to mention this patch
+> 
+> https://git.kernel.org/cgit/linux/kernel/git/glikely/linux.git/commit/?id=8cccffc52694938fc88f3d90bc7fed8460e27191
+> 
+> in the cover letter, which addresses this issue at least for the DT
+> case.
+> 
 
---------------ms010608010602040409010701
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: quoted-printable
+That isn't the problem. In general, with 64K kernel pages, you can't be
+sure if you leave something you need out of the kernel linear mapping.
+If you have Loader Code/Data regions begin and/or end at something other
+than a 64K boundary and that region is adjacent to a region not being
+added, then you end up leaving out the unaligned bits from the linear
+mapping. This could be bits of the initramfs or devicetree.
 
-On 2014-11-11 06:38, One Thousand Gnomes wrote:
->>> look further into the options I have set in my kernel build, I may ha=
-ve
->>> changed something else without remembering between booting with and
->>> without the CSM enabled.
->>>
->>
->> It could also be that the non-CSM BIOS somehow remaps the CMOS registe=
-rs.
->
-> I don't believe there is anything which prevents the CSM from faking a
-> CMOS clock using SMM from whatever is actually in the hardware.
->
-> Alan
->
-It wouldn't surprise me if that were the case.  I've had some pretty=20
-weird firmware related issues with other Lenovo systems before (like the =
-
-brightness hot-keys causing the reported trip points for ACPI thermal=20
-zones to temporarily change).
-
-I've rebuilt the kernel I'm using with everything I can think of=20
-possibly depending on the CSM compiled out or as modules, so I'll=20
-hopefully have some more info soon.
-
-
---------------ms010608010602040409010701
-Content-Type: application/pkcs7-signature; name="smime.p7s"
-Content-Transfer-Encoding: base64
-Content-Disposition: attachment; filename="smime.p7s"
-Content-Description: S/MIME Cryptographic Signature
-
-MIAGCSqGSIb3DQEHAqCAMIACAQExCzAJBgUrDgMCGgUAMIAGCSqGSIb3DQEHAQAAoIIFuDCC
-BbQwggOcoAMCAQICAw9gVDANBgkqhkiG9w0BAQ0FADB5MRAwDgYDVQQKEwdSb290IENBMR4w
-HAYDVQQLExVodHRwOi8vd3d3LmNhY2VydC5vcmcxIjAgBgNVBAMTGUNBIENlcnQgU2lnbmlu
-ZyBBdXRob3JpdHkxITAfBgkqhkiG9w0BCQEWEnN1cHBvcnRAY2FjZXJ0Lm9yZzAeFw0xNDA4
-MDgxMTMwNDRaFw0xNTAyMDQxMTMwNDRaMGMxGDAWBgNVBAMTD0NBY2VydCBXb1QgVXNlcjEj
-MCEGCSqGSIb3DQEJARYUYWhmZXJyb2luN0BnbWFpbC5jb20xIjAgBgkqhkiG9w0BCQEWE2Fo
-ZW1tZWxnQG9oaW9ndC5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDdmm8R
-BM5D6fGiB6rpogPZbLYu6CkU6834rcJepfmxKnLarYUYM593/VGygfaaHAyuc8qLaRA3u1M0
-Qp29flqmhv1VDTBZ+zFu6JgHjTDniBii1KOZRo0qV3jC5NvaS8KUM67+eQBjm29LhBWVi3+e
-a8jLxmogFXV0NGej+GHIr5zA9qKz2WJOEoGh0EfqZ2MQTmozcGI43/oqIYhRj8fRMkWXLUAF
-WsLzPQMpK19hD8fqwlxQWhBV8gsGRG54K5pyaQsjne7m89SF5M8JkNJPH39tHEvfv2Vhf7EM
-Y4WGyhLAULSlym1AI1uUHR1FfJaj3AChaEJZli/AdajYsqc7AgMBAAGjggFZMIIBVTAMBgNV
-HRMBAf8EAjAAMFYGCWCGSAGG+EIBDQRJFkdUbyBnZXQgeW91ciBvd24gY2VydGlmaWNhdGUg
-Zm9yIEZSRUUgaGVhZCBvdmVyIHRvIGh0dHA6Ly93d3cuQ0FjZXJ0Lm9yZzAOBgNVHQ8BAf8E
-BAMCA6gwQAYDVR0lBDkwNwYIKwYBBQUHAwQGCCsGAQUFBwMCBgorBgEEAYI3CgMEBgorBgEE
-AYI3CgMDBglghkgBhvhCBAEwMgYIKwYBBQUHAQEEJjAkMCIGCCsGAQUFBzABhhZodHRwOi8v
-b2NzcC5jYWNlcnQub3JnMDEGA1UdHwQqMCgwJqAkoCKGIGh0dHA6Ly9jcmwuY2FjZXJ0Lm9y
-Zy9yZXZva2UuY3JsMDQGA1UdEQQtMCuBFGFoZmVycm9pbjdAZ21haWwuY29tgRNhaGVtbWVs
-Z0BvaGlvZ3QuY29tMA0GCSqGSIb3DQEBDQUAA4ICAQCr4klxcZU/PDRBpUtlb+d6JXl2dfto
-OUP/6g19dpx6Ekt2pV1eujpIj5whh5KlCSPUgtHZI7BcksLSczQbxNDvRu6LNKqGJGvcp99k
-cWL1Z6BsgtvxWKkOmy1vB+2aPfDiQQiMCCLAqXwHiNDZhSkwmGsJ7KHMWgF/dRVDnsl6aOQZ
-jAcBMpUZxzA/bv4nY2PylVdqJWp9N7x86TF9sda1zRZiyUwy83eFTDNzefYPtc4MLppcaD4g
-Wt8U6T2ffQfCWVzDirhg4WmDH3MybDItjkSB2/+pgGOS4lgtEBMHzAGQqQ+5PojTHRyqu9Jc
-O59oIGrTaOtKV9nDeDtzNaQZgygJItJi9GoAl68AmIHxpS1rZUNV6X8ydFrEweFdRTVWhUEL
-70Cnx84YBojXv01LYBSZaq18K8cERPLaIrUD2go+2ffjdE9ejvYDhNBllY+ufvRizIjQA1uC
-OdktVAN6auQob94kOOsWpoMSrzHHvOvVW/kbokmKzaLtcs9+nJoL+vPi2AyzbaoQASVZYOGW
-pE3daA0F5FJfcPZKCwd5wdnmT3dU1IRUxa5vMmgjP20lkfP8tCPtvZv2mmI2Nw5SaXNY4gVu
-WQrvkV2in+TnGqgEIwUrLVbx9G6PSYZZs07czhO+Q1iVuKdAwjL/AYK0Us9v50acIzbl5CWw
-ZGj3wjGCA6EwggOdAgEBMIGAMHkxEDAOBgNVBAoTB1Jvb3QgQ0ExHjAcBgNVBAsTFWh0dHA6
-Ly93d3cuY2FjZXJ0Lm9yZzEiMCAGA1UEAxMZQ0EgQ2VydCBTaWduaW5nIEF1dGhvcml0eTEh
-MB8GCSqGSIb3DQEJARYSc3VwcG9ydEBjYWNlcnQub3JnAgMPYFQwCQYFKw4DAhoFAKCCAfUw
-GAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAcBgkqhkiG9w0BCQUxDxcNMTQxMTExMTIxNDE1
-WjAjBgkqhkiG9w0BCQQxFgQU8GcXah9KBvgWLz/bgqwN3pBj7pMwbAYJKoZIhvcNAQkPMV8w
-XTALBglghkgBZQMEASowCwYJYIZIAWUDBAECMAoGCCqGSIb3DQMHMA4GCCqGSIb3DQMCAgIA
-gDANBggqhkiG9w0DAgIBQDAHBgUrDgMCBzANBggqhkiG9w0DAgIBKDCBkQYJKwYBBAGCNxAE
-MYGDMIGAMHkxEDAOBgNVBAoTB1Jvb3QgQ0ExHjAcBgNVBAsTFWh0dHA6Ly93d3cuY2FjZXJ0
-Lm9yZzEiMCAGA1UEAxMZQ0EgQ2VydCBTaWduaW5nIEF1dGhvcml0eTEhMB8GCSqGSIb3DQEJ
-ARYSc3VwcG9ydEBjYWNlcnQub3JnAgMPYFQwgZMGCyqGSIb3DQEJEAILMYGDoIGAMHkxEDAO
-BgNVBAoTB1Jvb3QgQ0ExHjAcBgNVBAsTFWh0dHA6Ly93d3cuY2FjZXJ0Lm9yZzEiMCAGA1UE
-AxMZQ0EgQ2VydCBTaWduaW5nIEF1dGhvcml0eTEhMB8GCSqGSIb3DQEJARYSc3VwcG9ydEBj
-YWNlcnQub3JnAgMPYFQwDQYJKoZIhvcNAQEBBQAEggEAAUXP0Ct5jLxEOJv9x0MrVRh7bzh/
-bYzi6c5eckwuvZY0fxz+l+l19iHmAmFpGM1qQi+sHx0uxQNAZFqsV6A/1dcLRxyRUkw6bYk1
-qrp3RJROVZtGOq92ynAp8OhUpdp01Wb2gypxG6bVNEB4KmlfvcwZrFFhSde5OR0jaIaLseWd
-gopuxXC52TAuQA4KT+uwXhJWXcqwIsmykqz1fkG9TuAMAIZzouyfDssVZcyee51LnASO88xO
-ois80X1dvYPx7jsOpBntwPTrkkqIQz1SsWwIfeSpBqLEcslNbtxOhMBVwSU42JtAysWoSZia
-dwMSc3ho2iggU1HdnrOz8ZpMhgAAAAAAAA==
---------------ms010608010602040409010701--
+What I don't get with this failure is that it is an alignment fault
+which should be masked at EL1 for the kernel. The same unaligned
+access happens without this patch and it doesn't generate a fault.
