@@ -1,49 +1,72 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH v2] efi/x86: move x86 back to libstub
-Date: Tue, 11 Nov 2014 22:26:09 +0000
-Message-ID: <20141111222609.GK1292@console-pimps.org>
-References: <1415203256-29866-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
+ incorrect type in return expression (different modifiers)
+Date: Wed, 12 Nov 2014 11:31:58 +0100
+Message-ID: <CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
+References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1415203256-29866-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <201411120724.PdeIjimc%fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jwboyer-rxtnV0ftBwyoClj4AeEUq9i2O/JbrIOy@public.gmane.org, maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 05 Nov, at 05:00:56PM, Ard Biesheuvel wrote:
-> This reverts commit 84be880560fb, which itself reverted my original
-> attempt to move x86 from #include'ing .c files from across the tree
-> to using the EFI stub built as a static library.
-> 
-> The issue that affected the original approach was that splitting
-> the implementation into several .o files resulted in the variable
-> 'efi_early' becoming a global with external linkage, which under
-> -fPIC implies that references to it must go through the GOT. However,
-> dealing with this additional GOT entry turned out to be troublesome
-> on some EFI implementations. (GCC's visibility=hidden attribute is
-> supposed to lift this requirement, but it turned out not to work on
-> the 32-bit build.)
-> 
-> Instead, use a pure getter function to get a reference to efi_early.
-> This approach results in no additional GOT entries being generated,
-> so there is no need for any changes in the early GOT handling.
-> 
-> Tested-by: Maarten Lankhorst <maarten.lankhorst-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
-> v2: rebased onto v3.18-rc3, added tested-by
-> 
->  arch/x86/boot/compressed/Makefile |  3 ++-
->  arch/x86/boot/compressed/eboot.c  |  8 ++++----
->  arch/x86/boot/compressed/eboot.h  | 16 ----------------
->  arch/x86/include/asm/efi.h        | 24 ++++++++++++++++++++++++
->  drivers/firmware/efi/Makefile     |  2 +-
->  5 files changed, 31 insertions(+), 22 deletions(-)
+On 12 November 2014 00:48, kbuild test robot <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> tree:   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git next
+> head:   8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e
+> commit: 243b6754cd17112bbf0724ed3c13446b48cf6a28 [2/3] efi/x86: Move x86 back to libstub
+> reproduce:
+>   # apt-get install sparse
+>   git checkout 243b6754cd17112bbf0724ed3c13446b48cf6a28
+>   make ARCH=x86_64 allmodconfig
+>   make C=1 CF=-D__CHECK_ENDIAN__
+>
+>
+> sparse warnings: (new ones prefixed by >>)
+>
+>>> arch/x86/boot/compressed/eboot.c:26:16: sparse: incorrect type in return expression (different modifiers)
+>    arch/x86/boot/compressed/eboot.c:26:16:    expected struct efi_config const [pure] *
+>    arch/x86/boot/compressed/eboot.c:26:16:    got struct efi_config *static [toplevel] efi_early
+>
 
-Thanks Ard, applied.
+This smells like a sparse bug: __pure applies to functions only, so
+there is no way we could ever return something with the __pure
+modifier attached.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Ard.
+
+
+> vim +26 arch/x86/boot/compressed/eboot.c
+>
+>     10  #include <linux/efi.h>
+>     11  #include <linux/pci.h>
+>     12  #include <asm/efi.h>
+>     13  #include <asm/setup.h>
+>     14  #include <asm/desc.h>
+>     15
+>     16  #undef memcpy                   /* Use memcpy from misc.c */
+>     17
+>     18  #include "eboot.h"
+>     19
+>     20  static efi_system_table_t *sys_table;
+>     21
+>     22  static struct efi_config *efi_early;
+>     23
+>     24  __pure const struct efi_config *__efi_early(void)
+>     25  {
+>   > 26          return efi_early;
+>     27  }
+>     28
+>     29  #define BOOT_SERVICES(bits)                                             \
+>     30  static void setup_boot_services##bits(struct efi_config *c)             \
+>     31  {                                                                       \
+>     32          efi_system_table_##bits##_t *table;                             \
+>     33          efi_boot_services_##bits##_t *bt;                               \
+>     34                                                                          \
+>
+> ---
+> 0-DAY kernel test infrastructure                Open Source Technology Center
+> http://lists.01.org/mailman/listinfo/kbuild                 Intel Corporation
