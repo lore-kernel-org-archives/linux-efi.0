@@ -1,84 +1,63 @@
-From: Pali =?utf-8?q?Roh=C3=A1r?= <pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] rtc: Disable EFI rtc for x86
-Date: Fri, 14 Nov 2014 12:21:02 +0100
-Message-ID: <201411141221.03260@pali>
-References: <1412339576-17972-1-git-send-email-matt@console-pimps.org> <201411101723.49197@pali> <5460EB92.1090501@gmail.com>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v3.19
+Date: Fri, 14 Nov 2014 21:42:23 +0000
+Message-ID: <20141114214223.GA6810@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-  boundary="nextPart3214755.DR6N2d8hxz";
-  protocol="application/pgp-signature";
-  micalg=pgp-sha1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5460EB92.1090501-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Austin S Hemmelgarn <ahferroin7-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
---nextPart3214755.DR6N2d8hxz
-Content-Type: Text/Plain;
-  charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
+Folks,
 
-On Monday 10 November 2014 17:45:06 Austin S Hemmelgarn wrote:
-> On 2014-11-10 11:23, Pali Roh=C3=A1r wrote:
-> > On Monday 10 November 2014 12:22:13 Matt Fleming wrote:
-> >> On Sun, 2014-11-09 at 19:22 +0100, Borislav Petkov wrote:
-> >>> On Sun, Nov 09, 2014 at 06:37:46PM +0100, Pali Roh=C3=A1r wrote:
-> >>>> this patch totally disabled efi rfc driver on x86
-> >>>> machines at compile time. But on some x86 machines it
-> >>>> working without crash and reading from file
-> >>>> /sys/class/rtc/rtc*/since_epoch returns correct
-> >>>> information. So why to disable compiling driver on
-> >>>> machines where driver working?
-> >>>=20
-> >>> Sounds like we need an efi=3Drtc_enable knob for people who
-> >>> what to use it...
-> >>=20
-> >> I'm not so sure. By and large, the EFI runtime Time
-> >> services just don't work very well on x86. Just because
-> >> they work sometimes, doesn't actually mean it's a good
-> >> idea to use them.
-> >>=20
-> >> The one scenario where the time services are useful is
-> >> early on during boot when we want to get the timezone
-> >> information. I have vague recollections of someone working
-> >> on that.
-> >=20
-> > On laptop Dell Latitude E6440 with 64bit kernel 3.17-rc6
-> > (where was rtc-efi.ko enabled at compile time for x86) it
-> > working fine without crash. So I think that other Dell
-> > machines could work too.
->=20
-> I can also confirm that it works correctly on a number of ASUS
-> and ASrock desktop motherboards with the most recent BIOS
-> updates, and on a Lenovo Thinkpad L540.  I can however
-> confirm that it DOES NOT work however on an Acer Aspire
-> V5-131 system, though I had never updated the BIOS on that
-> one, so it may work correctly with a newer BIOS version.
->=20
+Please queue up the following changes for v3.19. 
 
-So how to solve it? I think that something like efi=3Drtc_enable=20
-param is better then disabling it for x86 at compile time.
+Inclued are two straight forward changes from Mathias, and another
+attempt from Ard at moving the x86 EFI boot stub to the libstub library.
 
-Once we figure out which machines are affected or if in future=20
-vendors fix their firmwares it can be enabled for new machines...
+It would be great to get these baking in linux-next for a bit.
 
-=2D-=20
-Pali Roh=C3=A1r
-pali.rohar-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+The following changes since commit cac7f2429872d3733dc3f9915857b1691da2eb2f:
 
---nextPart3214755.DR6N2d8hxz
-Content-Type: application/pgp-signature; name=signature.asc 
-Content-Description: This is a digitally signed message part.
+  Linux 3.18-rc2 (2014-10-26 16:48:41 -0700)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
+are available in the git repository at:
 
-iEYEABECAAYFAlRl5Z8ACgkQi/DJPQPkQ1KGPgCfen5v4pG31fdM7u0dt1yAdW5B
-+q8AoJeSNHJqsY8oZ6h4wUu2d1UvZCTs
-=EqRm
------END PGP SIGNATURE-----
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
 
---nextPart3214755.DR6N2d8hxz--
+for you to fetch changes up to 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
+
+  x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
+
+----------------------------------------------------------------
+ * Support module unload for efivarfs - Mathias Krause
+
+ * Another attempt at moving x86 to libstub taking advantage of the
+   __pure attribute - Ard Biesheuvel
+
+ * Add EFI runtime services section to ptdump - Mathias Krause
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi/x86: Move x86 back to libstub
+
+Mathias Krause (2):
+      efivarfs: Allow unloading when build as module
+      x86, ptdump: Add section for EFI runtime services
+
+ arch/x86/boot/compressed/Makefile       |  3 ++-
+ arch/x86/boot/compressed/eboot.c        |  8 ++++----
+ arch/x86/boot/compressed/eboot.h        | 16 ----------------
+ arch/x86/include/asm/efi.h              | 24 ++++++++++++++++++++++++
+ arch/x86/include/asm/pgtable_64_types.h |  2 ++
+ arch/x86/mm/dump_pagetables.c           |  3 +++
+ arch/x86/platform/efi/efi_64.c          |  3 +--
+ drivers/firmware/efi/Makefile           |  2 +-
+ fs/efivarfs/super.c                     | 11 +++++++++--
+ 9 files changed, 46 insertions(+), 26 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
