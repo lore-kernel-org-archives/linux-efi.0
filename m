@@ -1,47 +1,44 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
- incorrect type in return expression (different modifiers)
-Date: Mon, 17 Nov 2014 08:59:03 +0800
-Message-ID: <CANeU7Qnd=AoE1ty=4gTrQQh6nKYWdA2WNKwm8s+GNnU9E6XQRQ@mail.gmail.com>
-References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
-	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
-	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
-	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
-	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
-	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
-	<20141116182205.GB5032@thin>
+From: vamps53752-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Subject: Fix Penguin Penalty 17th October2014 ( mail-archive.com )
+Date: Mon, 17 Nov 2014 13:55:38 +0530
+Message-ID: <5469b102.a284460a.4d27.0668@mx.google.com>
+Reply-To: seo.expert388-/E1597aS9LQAvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-In-Reply-To: <20141116182205.GB5032@thin>
-Sender: linux-sparse-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "fengguang.wu" <fengguang.wu@intel.com>
+Content-Type: TEXT/PLAIN; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 17, 2014 at 2:22 AM, Josh Triplett <josh@joshtriplett.org> wrote:
->
-> Wait, is the above being parsed as applying the pure attribute to the
-> return value rather than to the function?  Or is that not the issue
-> here?
+Dear Sir
 
-That seems to be the case here, e.g.  "__pure int pure1(long x);"
-Currently sparse parse it as:
-<node pure1>
-    <function>
-        <base type int>  [pure]
+Did your website get hit by Google Penguin update on October 17th 2014?=
+ What basically is Google Penguin Update? It is actually a code name fo=
+r Google algorithm which aims at decreasing your websites search engine=
+ rankings that violate Google=92s guidelines by using black hat SEO tec=
+hniques to rank your webpage by giving number of spammy links to the pa=
+ge.
+=20
+We are one of those few SEO companies that can help you avoid penalties=
+ from Google Updates like Penguin and Panda. Our clients have survived =
+all the previous and present updates with ease. They have never been hi=
+t because we use 100% white hat SEO techniques to rank Webpages.  Simpl=
+e thing that we do to keep websites away from any Penguin or Panda pena=
+lties is follow Google guidelines and we give Google users the best ans=
+wers to their queries.
 
-Ideally it should be:
-<node pure1>
-    <function> [pure]
-        <base type int>
+If you are looking to increase the quality of your websites and to get =
+more targeted traffic or save your websites from these Google penalties=
+ email us back with your interest.=20
 
-There is reason sparse does that. Sparse parse "__pure int" as a base
-type to hold the __pure. The parse don't know if that is a function or
-a function
-pointer yet.
+We will be glad to serve you and help you grow your business.
 
-I haven't look at move the [pure] to function node. That is likely
-a much bigger change.
+Regards
 
-Chris
+Vince G
+
+SEO Manager ( TOB )
+B7 Green Avenue, Amritsar 143001 Punjab
+____________________________
+NO CLICK in the subject to STOP EMAILS
