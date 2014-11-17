@@ -1,48 +1,40 @@
-From: Matt Fleming <matt@console-pimps.org>
-Subject: Re: [PATCH v2 1/3] firmware loader: Introduce new API -
- request_firmware_abort()
-Date: Mon, 17 Nov 2014 15:12:11 +0000
-Message-ID: <20141117151211.GB6810@console-pimps.org>
-References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
- <1414984030-13859-2-git-send-email-hock.leong.kweh@intel.com>
- <20141108190655.GA2638@kroah.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8529E3@PGSMSX102.gar.corp.intel.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
+ incorrect type in return expression (different modifiers)
+Date: Mon, 17 Nov 2014 23:35:46 +0800
+Message-ID: <CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
+References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
+	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
+	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
+	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
+	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
+	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
+	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
+	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8529E3@PGSMSX102.gar.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ming Lei <ming.lei@canonical.com>, "Fleming, Matt" <matt.fleming@intel.com>, Sam Protsenko <semen.protsenko@linaro.org>, Henrique de Moraes Holschuh <hmh@hmh.eng.br>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sparse-owner@vger.kernel.org>
+In-Reply-To: <CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "fengguang.wu" <fengguang.wu@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 13 Nov, at 02:51:28AM, Kweh, Hock Leong wrote:
-> 
-> Hi everyone,
-> 
-> First of all, I would like to apologize if my commit message gives you guys an impression
-> that to use request_firmware_abort(), you guys MUST do the synchronization on your own. 
-> But the fact is, it is not a MUST. Below will provide more detail.
-> 
-> Regarding this synchronization topic, I would like to open a discussion to get a
-> better approach to handle this problem. Before jumping onto the design, I would
-> like to give a background of why I am doing in this way.
-> 
-> - Only doing module unload is required to be aware of this synchronization
-> 	-> Ensuring the call back does not fall into unloaded code which may cause
-> 	     undefined behavior.
-> 	-> Ensuring the put_device() & module_put() code have finished in firmware_class.c
-> 	     function request_firmware_work_func() before the device is unregistered
-> 	     and module unloaded happen.
+On Mon, Nov 17, 2014 at 8:38 AM, Christopher Li <sparse@chrisli.org> wrote:
+> I see. Thanks for the review. So the above case should not raise
+> error. However, the following one should:
+>
+> static __pure void *(*f3_err) = non_pure_func;
+>
+> I got it the other way around. I will add that to the test case
+> and send out the second round review.
 
-Shouldn't the existing module_{put,get}() and {put,get}_device() calls
-provide all the necessary synchronisation?
+I send push out the v2 version of the test case at
+https://git.kernel.org/cgit/devel/sparse/chrisl/sparse.git/log/?h=review-pure-attr2
 
-Module unload should not be possible while other code is using the
-module (and the module refcnt has been incremented accordindly).
+I haven't include the fix part yet. Do you see any thing wrong with the test
+case?
 
-Right?
+Thanks
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Chris
