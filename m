@@ -1,35 +1,69 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 13/13] arm64/efi: set EFI_ALLOC_ALIGN to 64 KB
-Date: Tue, 18 Nov 2014 13:57:12 +0100
-Message-ID: <1416315432-8534-14-git-send-email-ard.biesheuvel@linaro.org>
-References: <1416315432-8534-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org>
+Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
+ incorrect type in return expression (different modifiers)
+Date: Wed, 19 Nov 2014 00:09:37 +0800
+Message-ID: <CANeU7Q=tQOotWvG+LcrWBqgDYMANaB71Gr_nv15jS9_0EiUetg@mail.gmail.com>
+References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
+	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
+	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
+	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
+	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
+	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
+	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
+	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
+	<CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
+	<CAKv+Gu-c4qk-Snkc6Vs=LKwCnxVTMeBmgGjWT4qxapi-nTYX+w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1416315432-8534-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <CAKv+Gu-c4qk-Snkc6Vs=LKwCnxVTMeBmgGjWT4qxapi-nTYX+w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Sparse <linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "fengguang.wu" <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Set EFI_ALLOC_ALIGN to 64 KB so that all allocations done by the stub
-are naturally compatible with a 64 KB granule kernel.
+On Tue, Nov 18, 2014 at 12:24 AM, Ard Biesheuvel
+<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>
+> No, the test case looks correct now. You may want to add a conflicting
+> definition, for completeness, as that is an important case for sparse
+> to verify.
+> So you could just add
+>
+> static void *pure1(void); // conflicting declaration
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/include/asm/efi.h | 2 ++
- 1 file changed, 2 insertions(+)
+Just to confirm. If function declare as non pure then second time
+declare as pure, that  is a conflict error. That is very different from other
+C attributes. C allow function declare attribute incrementally.
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 5420ad5a4c63..18d4a764d630 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -48,6 +48,8 @@ extern void efi_init(void);
- 
- #define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
- 
-+#define EFI_ALLOC_ALIGN		SZ_64K
-+
- void efi_set_pgd(struct mm_struct *mm);
- 
- #endif /* _ASM_EFI_H */
--- 
-1.8.3.2
+If what you said is true, then pure attribute is actually acting like a modifier
+which don't fix not other non pure attribute.
+
+> at the bottom, and ensure it is flagged by sparse as an error after
+> you make your changes.
+
+I am curios how does GCC behave on this incremental declare of pure
+attribute. I just test it. GCC does not warn on the conflicting declare.
+
+GCC seems warn on some thing shouldn't warn on the test case:
+
+function "f2_ok" and "f5" shouldn't been warned. Strange.
+
+validation/pure-function.c:14:1: warning: '__pure__' attribute ignored
+[-Wattributes]
+ static __attribute__((__pure__)) void*(*f2_ok)(void) = pure1;
+ ^
+validation/pure-function.c:15:1: warning: '__pure__' attribute ignored
+[-Wattributes]
+ static __attribute__((__pure__)) void*(*f3_error)(void) = non_pure1;
+ ^
+validation/pure-function.c:29:1: warning: '__pure__' attribute ignored
+[-Wattributes]
+ static __attribute__((__pure__)) int(*f5)(void) = pure2;
+ ^
+validation/pure-function.c:30:1: warning: '__pure__' attribute ignored
+[-Wattributes]
+ static __attribute__((__pure__)) int(*f6_error)(void) = non_pure2;
+
+
+Chris
