@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 03/13] arm64: improve CONFIG_STRICT_DEVMEM handling
-Date: Tue, 18 Nov 2014 13:57:02 +0100
-Message-ID: <1416315432-8534-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 04/13] efi: split off remapping code from efi_config_init()
+Date: Tue, 18 Nov 2014 13:57:03 +0100
+Message-ID: <1416315432-8534-5-git-send-email-ard.biesheuvel@linaro.org>
 References: <1416315432-8534-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1416315432-8534-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,73 +10,117 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Improve the handling of /dev/mem mappings under CONFIG_STRICT_DEVMEM by:
-- allowing read-only access to parts of System RAM that are not
-  considered memory by the kernel, this is mainly intended for exposing
-  UEFI Configuration tables to userland;
-- avoid using non-cached mappings for those parts of System RAM, as it
-  may result in mismatched attributes.
+Split of the remapping code from efi_config_init() so that the caller
+can perform its own remapping. This is necessary to correctly handle
+virtually remapped UEFI memory regions under kexec, as efi.systab will
+have been updated to a virtual address.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/mm/mmap.c |  5 +++--
- arch/arm64/mm/mmu.c  | 15 ++++++++++++++-
- 2 files changed, 17 insertions(+), 3 deletions(-)
+ drivers/firmware/efi/efi.c | 49 +++++++++++++++++++++++++++++-----------------
+ include/linux/efi.h        |  2 ++
+ 2 files changed, 33 insertions(+), 18 deletions(-)
 
-diff --git a/arch/arm64/mm/mmap.c b/arch/arm64/mm/mmap.c
-index 1d73662f00ff..802cdf0df921 100644
---- a/arch/arm64/mm/mmap.c
-+++ b/arch/arm64/mm/mmap.c
-@@ -127,14 +127,15 @@ int valid_mmap_phys_addr_range(unsigned long pfn, size_t size)
- /*
-  * devmem_is_allowed() checks to see if /dev/mem access to a certain address
-  * is valid. The argument is a physical page number.  We mimic x86 here by
-- * disallowing access to system RAM as well as device-exclusive MMIO regions.
-+ * disallowing access to system RAM that is in active use by the kernel, as
-+ * well as device-exclusive MMIO regions.
-  * This effectively disable read()/write() on /dev/mem.
-  */
- int devmem_is_allowed(unsigned long pfn)
- {
- 	if (iomem_is_exclusive(pfn << PAGE_SHIFT))
- 		return 0;
--	if (!page_is_ram(pfn))
-+	if (!pfn_valid(pfn))
- 		return 1;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 9035c1b74d58..0de77db4fb88 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -293,9 +293,10 @@ static __init int match_config_table(efi_guid_t *guid,
  	return 0;
  }
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 4d583aa9ff4e..93ba10838359 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -121,7 +121,7 @@ early_param("cachepolicy", early_cachepolicy);
- pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
- 			      unsigned long size, pgprot_t vma_prot)
- {
--	if (!pfn_valid(pfn))
-+	if (!page_is_ram(pfn))
- 		return pgprot_noncached(vma_prot);
- 	else if (file->f_flags & O_SYNC)
- 		return pgprot_writecombine(vma_prot);
-@@ -129,6 +129,19 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
- }
- EXPORT_SYMBOL(phys_mem_access_prot);
  
-+/*
-+ * This definition of phys_mem_access_prot_allowed() overrides
-+ * the __weak definition in drivers/char/mem.c
-+ */
-+int phys_mem_access_prot_allowed(struct file *file, unsigned long pfn,
-+				 unsigned long size, pgprot_t *prot)
+-int __init efi_config_init(efi_config_table_type_t *arch_tables)
++int __init efi_config_parse_tables(void *config_tables, int count,
++				   efi_config_table_type_t *arch_tables)
+ {
+-	void *config_tables, *tablep;
++	void *tablep;
+ 	int i, sz;
+ 
+ 	if (efi_enabled(EFI_64BIT))
+@@ -303,19 +304,9 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 	else
+ 		sz = sizeof(efi_config_table_32_t);
+ 
+-	/*
+-	 * Let's see what config tables the firmware passed to us.
+-	 */
+-	config_tables = early_memremap(efi.systab->tables,
+-				       efi.systab->nr_tables * sz);
+-	if (config_tables == NULL) {
+-		pr_err("Could not map Configuration table!\n");
+-		return -ENOMEM;
+-	}
+-
+ 	tablep = config_tables;
+ 	pr_info("");
+-	for (i = 0; i < efi.systab->nr_tables; i++) {
++	for (i = 0; i < count; i++) {
+ 		efi_guid_t guid;
+ 		unsigned long table;
+ 
+@@ -328,8 +319,6 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 			if (table64 >> 32) {
+ 				pr_cont("\n");
+ 				pr_err("Table located above 4GB, disabling EFI.\n");
+-				early_memunmap(config_tables,
+-					       efi.systab->nr_tables * sz);
+ 				return -EINVAL;
+ 			}
+ #endif
+@@ -344,13 +333,37 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
+ 		tablep += sz;
+ 	}
+ 	pr_cont("\n");
+-	early_memunmap(config_tables, efi.systab->nr_tables * sz);
+-
+ 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
+-
+ 	return 0;
+ }
+ 
++int __init efi_config_init(efi_config_table_type_t *arch_tables)
 +{
-+	/* Disallow read-write access to reserved system RAM */
-+	if ((pgprot_val(*prot) & PTE_WRITE) && page_is_ram(pfn))
-+		return 0;
-+	return 1;
++	void *config_tables;
++	int sz, ret;
++
++	if (efi_enabled(EFI_64BIT))
++		sz = sizeof(efi_config_table_64_t);
++	else
++		sz = sizeof(efi_config_table_32_t);
++
++	/*
++	 * Let's see what config tables the firmware passed to us.
++	 */
++	config_tables = early_memremap(efi.systab->tables,
++				       efi.systab->nr_tables * sz);
++	if (config_tables == NULL) {
++		pr_err("Could not map Configuration table!\n");
++		return -ENOMEM;
++	}
++
++	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables,
++				      arch_tables);
++
++	early_memunmap(config_tables, efi.systab->nr_tables * sz);
++	return ret;
 +}
 +
- static void __init *early_alloc(unsigned long sz)
+ #ifdef CONFIG_EFI_VARS_MODULE
+ static int __init efi_load_efivars(void)
  {
- 	void *ptr = __va(memblock_alloc(sz, sz));
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 0238d612750e..2dc8577032b3 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -875,6 +875,8 @@ static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned lon
+ #endif
+ extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
+ extern int efi_config_init(efi_config_table_type_t *arch_tables);
++extern int efi_config_parse_tables(void *config_tables, int count,
++				   efi_config_table_type_t *arch_tables);
+ extern u64 efi_get_iobase (void);
+ extern u32 efi_mem_type (unsigned long phys_addr);
+ extern u64 efi_mem_attributes (unsigned long phys_addr);
 -- 
 1.8.3.2
