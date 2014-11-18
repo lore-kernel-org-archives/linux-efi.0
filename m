@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 08/13] arm64/efi: remove free_boot_services() and friends
-Date: Tue, 18 Nov 2014 13:57:07 +0100
-Message-ID: <1416315432-8534-9-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 09/13] arm64/efi: remove idmap manipulations from UEFI code
+Date: Tue, 18 Nov 2014 13:57:08 +0100
+Message-ID: <1416315432-8534-10-git-send-email-ard.biesheuvel@linaro.org>
 References: <1416315432-8534-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1416315432-8534-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,162 +10,129 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now that we are calling SetVirtualAddressMap() from the stub, there is no
-need to reserve boot-only memory regions, which implies that there is also
-no reason to free them again later.
+Now that we have moved the call to SetVirtualAddressMap() to the stub,
+UEFI has no use for the ID map, so we can drop the code that installs
+ID mappings for UEFI memory regions.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c | 123 +-----------------------------------------------
- 1 file changed, 1 insertion(+), 122 deletions(-)
+ arch/arm64/include/asm/efi.h |  2 --
+ arch/arm64/include/asm/mmu.h |  2 --
+ arch/arm64/kernel/efi.c      | 30 ------------------------------
+ arch/arm64/kernel/setup.c    |  1 -
+ arch/arm64/mm/mmu.c          | 12 ------------
+ 5 files changed, 47 deletions(-)
 
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index e2cea16f3bd7..5420ad5a4c63 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -6,10 +6,8 @@
+ 
+ #ifdef CONFIG_EFI
+ extern void efi_init(void);
+-extern void efi_idmap_init(void);
+ #else
+ #define efi_init()
+-#define efi_idmap_init()
+ #endif
+ 
+ #define efi_call_virt(f, ...)						\
+diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
+index 5fd40c43be80..3d311761e3c2 100644
+--- a/arch/arm64/include/asm/mmu.h
++++ b/arch/arm64/include/asm/mmu.h
+@@ -31,8 +31,6 @@ extern void paging_init(void);
+ extern void setup_mm_for_reboot(void);
+ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
+ extern void init_mem_pgprot(void);
+-/* create an identity mapping for memory (or io if map_io is true) */
+-extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
+ extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
+ 			       unsigned long virt, phys_addr_t size,
+ 			       pgprot_t prot);
 diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index beb5a79d32c3..9f05b4fe9fd5 100644
+index 9f05b4fe9fd5..a48a2f9ab669 100644
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
-@@ -170,9 +170,7 @@ static __init void reserve_regions(void)
- 		if (is_normal_ram(md))
- 			early_init_dt_add_memory_arch(paddr, size);
- 
--		if (is_reserve_region(md) ||
--		    md->type == EFI_BOOT_SERVICES_CODE ||
--		    md->type == EFI_BOOT_SERVICES_DATA) {
-+		if (is_reserve_region(md)) {
- 			memblock_reserve(paddr, size);
- 			if (uefi_debug)
- 				pr_cont("*");
-@@ -185,123 +183,6 @@ static __init void reserve_regions(void)
- 	set_bit(EFI_MEMMAP, &efi.flags);
+@@ -47,27 +47,6 @@ static int __init is_normal_ram(efi_memory_desc_t *md)
+ 	return 0;
  }
  
--
--static u64 __init free_one_region(u64 start, u64 end)
+-static void __init efi_setup_idmap(void)
 -{
--	u64 size = end - start;
--
--	if (uefi_debug)
--		pr_info("  EFI freeing: 0x%012llx-0x%012llx\n",	start, end - 1);
--
--	free_bootmem_late(start, size);
--	return size;
--}
--
--static u64 __init free_region(u64 start, u64 end)
--{
--	u64 map_start, map_end, total = 0;
--
--	if (end <= start)
--		return total;
--
--	map_start = (u64)memmap.phys_map;
--	map_end = PAGE_ALIGN(map_start + (memmap.map_end - memmap.map));
--	map_start &= PAGE_MASK;
--
--	if (start < map_end && end > map_start) {
--		/* region overlaps UEFI memmap */
--		if (start < map_start)
--			total += free_one_region(start, map_start);
--
--		if (map_end < end)
--			total += free_one_region(map_end, end);
--	} else
--		total += free_one_region(start, end);
--
--	return total;
--}
--
--static void __init free_boot_services(void)
--{
--	u64 total_freed = 0;
--	u64 keep_end, free_start, free_end;
+-	struct memblock_region *r;
 -	efi_memory_desc_t *md;
+-	u64 paddr, npages, size;
 -
--	/*
--	 * If kernel uses larger pages than UEFI, we have to be careful
--	 * not to inadvertantly free memory we want to keep if there is
--	 * overlap at the kernel page size alignment. We do not want to
--	 * free is_reserve_region() memory nor the UEFI memmap itself.
--	 *
--	 * The memory map is sorted, so we keep track of the end of
--	 * any previous region we want to keep, remember any region
--	 * we want to free and defer freeing it until we encounter
--	 * the next region we want to keep. This way, before freeing
--	 * it, we can clip it as needed to avoid freeing memory we
--	 * want to keep for UEFI.
--	 */
+-	for_each_memblock(memory, r)
+-		create_id_mapping(r->base, r->size, 0);
 -
--	keep_end = 0;
--	free_start = 0;
--
+-	/* map runtime io spaces */
 -	for_each_efi_memory_desc(&memmap, md) {
--		u64 paddr, npages, size;
--
--		if (is_reserve_region(md)) {
--			/*
--			 * We don't want to free any memory from this region.
--			 */
--			if (free_start) {
--				/* adjust free_end then free region */
--				if (free_end > md->phys_addr)
--					free_end -= PAGE_SIZE;
--				total_freed += free_region(free_start, free_end);
--				free_start = 0;
--			}
--			keep_end = md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT);
+-		if (!(md->attribute & EFI_MEMORY_RUNTIME) || is_normal_ram(md))
 -			continue;
--		}
--
--		if (md->type != EFI_BOOT_SERVICES_CODE &&
--		    md->type != EFI_BOOT_SERVICES_DATA) {
--			/* no need to free this region */
--			continue;
--		}
--
--		/*
--		 * We want to free memory from this region.
--		 */
 -		paddr = md->phys_addr;
 -		npages = md->num_pages;
 -		memrange_efi_to_native(&paddr, &npages);
 -		size = npages << PAGE_SHIFT;
--
--		if (free_start) {
--			if (paddr <= free_end)
--				free_end = paddr + size;
--			else {
--				total_freed += free_region(free_start, free_end);
--				free_start = paddr;
--				free_end = paddr + size;
--			}
--		} else {
--			free_start = paddr;
--			free_end = paddr + size;
--		}
--		if (free_start < keep_end) {
--			free_start += PAGE_SIZE;
--			if (free_start >= free_end)
--				free_start = 0;
--		}
+-		create_id_mapping(paddr, size, 1);
 -	}
--	if (free_start)
--		total_freed += free_region(free_start, free_end);
--
--	if (total_freed)
--		pr_info("Freed 0x%llx bytes of EFI boot services memory",
--			total_freed);
 -}
 -
- void __init efi_init(void)
+ static int __init uefi_init(void)
  {
- 	struct efi_fdt_params params;
-@@ -368,8 +249,6 @@ static int __init arm64_enter_virtual_mode(void)
- 	}
- 	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 	efi_char16_t *c16;
+@@ -207,15 +186,6 @@ void __init efi_init(void)
+ 	reserve_regions();
+ }
  
--	free_boot_services();
+-void __init efi_idmap_init(void)
+-{
+-	if (!efi_enabled(EFI_BOOT))
+-		return;
 -
- 	if (!efi_enabled(EFI_VIRTMAP)) {
- 		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
- 		return -1;
+-	/* boot time idmap_pg_dir is incomplete, so fill in missing parts */
+-	efi_setup_idmap();
+-}
+-
+ static int __init arm64_enter_virtual_mode(void)
+ {
+ 	u64 mapsize;
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index ac19b2d6a3fc..a6028490a28f 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -392,7 +392,6 @@ void __init setup_arch(char **cmdline_p)
+ 	paging_init();
+ 	request_standard_resources();
+ 
+-	efi_idmap_init();
+ 	efi_virtmap_init();
+ 
+ 	unflatten_device_tree();
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 93ba10838359..d2a1625f1055 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -283,18 +283,6 @@ static void __init create_mapping(phys_addr_t phys, unsigned long virt,
+ 			 size, PAGE_KERNEL_EXEC);
+ }
+ 
+-void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
+-{
+-	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
+-		pr_warn("BUG: not creating id mapping for %pa\n", &addr);
+-		return;
+-	}
+-	__create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
+-			 addr, addr, size,
+-			 map_io ? __pgprot(PROT_DEVICE_nGnRE)
+-				: PAGE_KERNEL_EXEC);
+-}
+-
+ void __init create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
+ 			       unsigned long virt, phys_addr_t size,
+ 			       pgprot_t prot)
 -- 
 1.8.3.2
