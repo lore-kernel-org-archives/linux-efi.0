@@ -1,52 +1,86 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
- incorrect type in return expression (different modifiers)
-Date: Mon, 17 Nov 2014 17:24:44 +0100
-Message-ID: <CAKv+Gu-c4qk-Snkc6Vs=LKwCnxVTMeBmgGjWT4qxapi-nTYX+w@mail.gmail.com>
-References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
-	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
-	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
-	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
-	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
-	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
-	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
-	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
-	<CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH v3] firmware loader: fix hung task warning dump
+Date: Tue, 18 Nov 2014 10:56:59 +0800
+Message-ID: <1416279419-26590-1-git-send-email-hock.leong.kweh@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Sparse <linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "fengguang.wu" <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 November 2014 16:35, Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org> wrote:
-> On Mon, Nov 17, 2014 at 8:38 AM, Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org> wrote:
->> I see. Thanks for the review. So the above case should not raise
->> error. However, the following one should:
->>
->> static __pure void *(*f3_err) = non_pure_func;
->>
->> I got it the other way around. I will add that to the test case
->> and send out the second round review.
->
-> I send push out the v2 version of the test case at
-> https://git.kernel.org/cgit/devel/sparse/chrisl/sparse.git/log/?h=review-pure-attr2
->
-> I haven't include the fix part yet. Do you see any thing wrong with the test
-> case?
->
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-No, the test case looks correct now. You may want to add a conflicting
-definition, for completeness, as that is an important case for sparse
-to verify.
-So you could just add
+When using request_firmware_nowait() with FW_ACTION_NOHOTPLUG param to
+expose user helper interface, if the user do not react immediately, after
+120 seconds there will be a hung task warning message dumped as below:
 
-static void *pure1(void); // conflicting declaration
+[ 3000.784235] INFO: task kworker/0:0:8259 blocked for more than 120 seconds.
+[ 3000.791281]       Tainted: G            E 3.16.0-rc1-yocto-standard #41
+[ 3000.798082] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+[ 3000.806072] kworker/0:0     D cd0075c8     0  8259      2 0x00000000
+[ 3000.812765] Workqueue: events request_firmware_work_func
+[ 3000.818253]  cd375e18 00000046 0000000e cd0075c8 000000f0 cd40ea00 cd375fec 1b883e89
+[ 3000.826374]  0000026b cd40ea00 80000000 00000001 cd0075c8 00000000 cd375de4 c119917f
+[ 3000.834492]  cd563360 cd375df4 c119a0ab cd563360 00000000 cd375e24 c119a1d6 00000000
+[ 3000.842616] Call Trace:
+[ 3000.845252]  [<c119917f>] ? kernfs_next_descendant_post+0x3f/0x50
+[ 3000.851543]  [<c119a0ab>] ? kernfs_activate+0x6b/0xc0
+[ 3000.856790]  [<c119a1d6>] ? kernfs_add_one+0xd6/0x130
+[ 3000.862047]  [<c15fdb02>] schedule+0x22/0x60
+[ 3000.866548]  [<c15fd195>] schedule_timeout+0x175/0x1d0
+[ 3000.871887]  [<c119b391>] ? __kernfs_create_file+0x71/0xa0
+[ 3000.877574]  [<c119bb9a>] ? sysfs_add_file_mode_ns+0xaa/0x180
+[ 3000.883533]  [<c15fe84f>] wait_for_completion+0x6f/0xb0
+[ 3000.888961]  [<c1065200>] ? wake_up_process+0x40/0x40
+[ 3000.894219]  [<c13cb600>] _request_firmware+0x750/0x9f0
+[ 3000.899666]  [<c1382a7f>] ? n_tty_receive_buf2+0x1f/0x30
+[ 3000.905200]  [<c13cba02>] request_firmware_work_func+0x22/0x50
+[ 3000.911235]  [<c10550d2>] process_one_work+0x122/0x380
+[ 3000.916571]  [<c1055859>] worker_thread+0xf9/0x470
+[ 3000.921555]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+[ 3000.927497]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+[ 3000.933448]  [<c105a5ff>] kthread+0x9f/0xc0
+[ 3000.937850]  [<c15ffd40>] ret_from_kernel_thread+0x20/0x30
+[ 3000.943548]  [<c105a560>] ? kthread_worker_fn+0x100/0x100
 
-at the bottom, and ensure it is flagged by sparse as an error after
-you make your changes.
+This patch change the wait_for_completion() function call to
+wait_for_completion_interruptible() function call for solving the issue.
 
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Acked-by: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+---
+
+changelog v3:
+* Breaked this independent patch from efi_capsule_user_helper patchset
+  for upstream.
+* Added Acked-by.
+
+ drivers/base/firmware_class.c |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+index d276e33..fe61f19 100644
+--- a/drivers/base/firmware_class.c
++++ b/drivers/base/firmware_class.c
+@@ -908,7 +908,7 @@ static int _request_firmware_load(struct firmware_priv *fw_priv,
+ 		kobject_uevent(&fw_priv->dev.kobj, KOBJ_ADD);
+ 	}
+ 
+-	wait_for_completion(&buf->completion);
++	retval = wait_for_completion_interruptible(&buf->completion);
+ 
+ 	cancel_delayed_work_sync(&fw_priv->timeout_work);
+ 	if (!buf->data)
+@@ -985,7 +985,7 @@ static int sync_cached_firmware_buf(struct firmware_buf *buf)
+ 			break;
+ 		}
+ 		mutex_unlock(&fw_lock);
+-		wait_for_completion(&buf->completion);
++		ret = wait_for_completion_interruptible(&buf->completion);
+ 		mutex_lock(&fw_lock);
+ 	}
+ 	mutex_unlock(&fw_lock);
 -- 
-Ard.
+1.7.9.5
