@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 10/13] arm64/efi: use UEFI memory map unconditionally if available
-Date: Tue, 18 Nov 2014 13:57:09 +0100
-Message-ID: <1416315432-8534-11-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 12/13] efi: efistub: allow allocation alignment larger than EFI_PAGE_SIZE
+Date: Tue, 18 Nov 2014 13:57:11 +0100
+Message-ID: <1416315432-8534-13-git-send-email-ard.biesheuvel@linaro.org>
 References: <1416315432-8534-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1416315432-8534-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,54 +10,82 @@ To: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On systems that boot via UEFI, all memory nodes are deleted from the
-device tree, and instead, the size and location of system RAM is derived
-from the UEFI memory map. This is handled by reserve_regions, which not only
-reserves parts of memory that UEFI declares as reserved, but also installs
-the memblocks that cover the remaining usable memory.
-
-Currently, reserve_regions() is only called if uefi_init() succeeds.
-However, it does not actually depend on anything that uefi_init() does,
-and not calling reserve_regions() results in a broken boot, so it is
-better to just call it unconditionally.
+On systems with 64 KB pages, it is preferable for UEFI memory map
+entries to be 64 KB aligned multiples of 64 KB, because it relieves
+us of having to deal with the residues.
+So, if EFI_ALLOC_ALIGN is #define'd by the platform, use it to round
+up all memory allocations made.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c | 11 ++++-------
- 1 file changed, 4 insertions(+), 7 deletions(-)
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index a48a2f9ab669..3009c22e2620 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -180,8 +180,7 @@ void __init efi_init(void)
- 	memmap.desc_size = params.desc_size;
- 	memmap.desc_version = params.desc_ver;
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index a920fec8fe88..e766df60fbfb 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -32,6 +32,15 @@
  
--	if (uefi_init() < 0)
--		return;
-+	WARN_ON(uefi_init() < 0);
+ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
  
- 	reserve_regions();
++/*
++ * Allow the platform to override the allocation granularity: this allows
++ * systems that have the capability to run with a larger page size to deal
++ * with the allocations for initrd and fdt more efficiently.
++ */
++#ifndef EFI_ALLOC_ALIGN
++#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
++#endif
++
+ struct file_info {
+ 	efi_file_handle_t *handle;
+ 	u64 size;
+@@ -150,10 +159,10 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 	 * a specific address.  We are doing page-based allocations,
+ 	 * so we must be aligned to a page.
+ 	 */
+-	if (align < EFI_PAGE_SIZE)
+-		align = EFI_PAGE_SIZE;
++	if (align < EFI_ALLOC_ALIGN)
++		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ again:
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+@@ -235,10 +244,10 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 	 * a specific address.  We are doing page-based allocations,
+ 	 * so we must be aligned to a page.
+ 	 */
+-	if (align < EFI_PAGE_SIZE)
+-		align = EFI_PAGE_SIZE;
++	if (align < EFI_ALLOC_ALIGN)
++		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+ 		unsigned long m = (unsigned long)map;
+@@ -292,7 +301,7 @@ void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 	if (!size)
+ 		return;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	efi_call_early(free_pages, addr, nr_pages);
  }
-@@ -190,15 +189,13 @@ static int __init arm64_enter_virtual_mode(void)
- {
- 	u64 mapsize;
  
--	if (!efi_enabled(EFI_BOOT)) {
--		pr_info("EFI services will not be available.\n");
--		return -1;
--	}
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
- 
- 	mapsize = memmap.map_end - memmap.map;
- 	early_memunmap(memmap.map, mapsize);
- 
--	if (efi_runtime_disabled()) {
-+	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
- 		pr_info("EFI runtime services will be disabled.\n");
- 		return -1;
- 	}
+@@ -561,7 +570,7 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 	 * to the preferred address.  If that fails, allocate as low
+ 	 * as possible while respecting the required alignment.
+ 	 */
+-	nr_pages = round_up(alloc_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(alloc_size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	status = efi_call_early(allocate_pages,
+ 				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+ 				nr_pages, &efi_addr);
 -- 
 1.8.3.2
