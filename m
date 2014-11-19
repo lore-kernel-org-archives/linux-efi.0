@@ -1,59 +1,78 @@
-From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [PATCH v2 1/3] firmware loader: Introduce new API -
- request_firmware_abort()
-Date: Tue, 18 Nov 2014 18:05:02 -0800
-Message-ID: <20141119020502.GC6054@kroah.com>
-References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
- <1414984030-13859-2-git-send-email-hock.leong.kweh@intel.com>
- <20141108190655.GA2638@kroah.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8529E3@PGSMSX102.gar.corp.intel.com>
- <20141117151211.GB6810@console-pimps.org>
- <F54AEECA5E2B9541821D670476DAE19C2B85DA57@PGSMSX102.gar.corp.intel.com>
+From: Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org>
+Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
+ incorrect type in return expression (different modifiers)
+Date: Wed, 19 Nov 2014 10:53:36 +0800
+Message-ID: <CANeU7Q=uCR6P41F72J0X6c2=fgU5eefPj1NrzfnoYRtCuzYxYg@mail.gmail.com>
+References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
+	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
+	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
+	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
+	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
+	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
+	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
+	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
+	<CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
+	<CAKv+Gu-c4qk-Snkc6Vs=LKwCnxVTMeBmgGjWT4qxapi-nTYX+w@mail.gmail.com>
+	<CANeU7Q=tQOotWvG+LcrWBqgDYMANaB71Gr_nv15jS9_0EiUetg@mail.gmail.com>
+	<CAKv+Gu_2uwTdDT=7ghM6e2-=TpH652Q-JOOwF6oFsGFLxeKueg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B85DA57-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+In-Reply-To: <CAKv+Gu_2uwTdDT=7ghM6e2-=TpH652Q-JOOwF6oFsGFLxeKueg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Henrique de Moraes Holschuh <hmh-N3TV7GIv+o9fyO9Q7EP/yw@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux-Sparse <linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "fengguang.wu" <fengguang.wu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 18, 2014 at 06:31:38AM +0000, Kweh, Hock Leong wrote:
-> > -----Original Message-----
-> > From: Matt Fleming [mailto:matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org]
-> > Sent: Monday, November 17, 2014 11:12 PM
-> > >
-> > > - Only doing module unload is required to be aware of this synchronization
-> > > 	-> Ensuring the call back does not fall into unloaded code which may
-> > cause
-> > > 	     undefined behavior.
-> > > 	-> Ensuring the put_device() & module_put() code have finished in
-> > firmware_class.c
-> > > 	     function request_firmware_work_func() before the device is
-> > unregistered
-> > > 	     and module unloaded happen.
-> > 
-> > Shouldn't the existing module_{put,get}() and {put,get}_device() calls
-> > provide all the necessary synchronisation?
-> > 
-> > Module unload should not be possible while other code is using the
-> > module (and the module refcnt has been incremented accordindly).
-> > 
-> > Right?
-> > 
-> > --
-> > Matt Fleming, Intel Open Source Technology Center
-> 
-> Hi Matt,
-> 
-> Yes, you are right. If the module refcount is not zero, you will get error
-> message and returned while you do "rmmod". But I strongly believe if we
-> have the capability in our code to take care of it by doing synchronization,
-> we should take care of it in case people are doing "rmmod -f". Don't
-> you think so?
+On Wed, Nov 19, 2014 at 12:38 AM, Ard Biesheuvel
+<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> Well, that is how sparse currently treats it, and I think that is correct.
+> If an extern declaration in a .h file specifies  __pure, then GCC may
+> legally emit fewer calls to that function than appear in the source.
+> So if the actual implementation in the .c file is not __pure, then you
+> have an error.
 
-If you do 'rmmod -f' you get to keep all of the broken pieces of your
-kernel, no need to try to help out with crazy things like that.
+OK. I just want to figure out what is the right thing to do here.
+It is ambiguous when the second time function declare without pure attribute,
+weather it should follow the incremental declare rule or conflicting error.
 
-greg k-h
+If follow the C incremental declare rule, there is no error there.
+It just an incomplete declare, compiler will internally merge all the
+declare in the same scope and apply that to the final function.
+
+e.g.
+static __attribute__((noreturn)) void deadloop(void);
+
+static void deadloop(void)
+{
+}
+
+gcc will treat the second deadloop() function has noreturn attribute,
+even though it does not have one in the second time declare.
+That is why Gcc warns the function does return:
+ /tmp/noreturn.c: In function 'deadloop':
+/tmp/noreturn.c:6:1: warning: 'noreturn' function does return [enabled
+by default]
+ }
+
+I try it on gcc, gcc does not emit error for the pure attribute conflicting.
+That seems indicate gcc follow the incremental declare rule rather than
+conflicting error.
+
+Sparse has the symbol->same_symbol chain for that reason as well.
+It can be used for merging different declare of the same function.
+Some declare provide more detail specification, some did not.
+
+> """
+> static __attribute__((__pure__)) int pure2(void)
+> {
+> int i = 0;
+> return i;
+> }
+> static int pure2(void); // error here
+> """
+
+See above. I am not sure that is an error here if we follow
+the incremental declare rule.
+
+Chris
