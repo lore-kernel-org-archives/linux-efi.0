@@ -1,102 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
- incorrect type in return expression (different modifiers)
-Date: Tue, 18 Nov 2014 17:38:28 +0100
-Message-ID: <CAKv+Gu_2uwTdDT=7ghM6e2-=TpH652Q-JOOwF6oFsGFLxeKueg@mail.gmail.com>
-References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
-	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
-	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
-	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
-	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
-	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
-	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
-	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
-	<CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
-	<CAKv+Gu-c4qk-Snkc6Vs=LKwCnxVTMeBmgGjWT4qxapi-nTYX+w@mail.gmail.com>
-	<CANeU7Q=tQOotWvG+LcrWBqgDYMANaB71Gr_nv15jS9_0EiUetg@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH v2 1/3] firmware loader: Introduce new API -
+ request_firmware_abort()
+Date: Tue, 18 Nov 2014 18:05:02 -0800
+Message-ID: <20141119020502.GC6054@kroah.com>
+References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
+ <1414984030-13859-2-git-send-email-hock.leong.kweh@intel.com>
+ <20141108190655.GA2638@kroah.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8529E3@PGSMSX102.gar.corp.intel.com>
+ <20141117151211.GB6810@console-pimps.org>
+ <F54AEECA5E2B9541821D670476DAE19C2B85DA57@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sparse-owner@vger.kernel.org>
-In-Reply-To: <CANeU7Q=tQOotWvG+LcrWBqgDYMANaB71Gr_nv15jS9_0EiUetg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "fengguang.wu" <fengguang.wu@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B85DA57-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Henrique de Moraes Holschuh <hmh-N3TV7GIv+o9fyO9Q7EP/yw@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 18 November 2014 17:09, Christopher Li <sparse@chrisli.org> wrote:
-> On Tue, Nov 18, 2014 at 12:24 AM, Ard Biesheuvel
-> <ard.biesheuvel@linaro.org> wrote:
->>
->> No, the test case looks correct now. You may want to add a conflicting
->> definition, for completeness, as that is an important case for sparse
->> to verify.
->> So you could just add
->>
->> static void *pure1(void); // conflicting declaration
->
-> Just to confirm. If function declare as non pure then second time
-> declare as pure, that  is a conflict error. That is very different from other
-> C attributes. C allow function declare attribute incrementally.
->
-> If what you said is true, then pure attribute is actually acting like a modifier
-> which don't fix not other non pure attribute.
->
+On Tue, Nov 18, 2014 at 06:31:38AM +0000, Kweh, Hock Leong wrote:
+> > -----Original Message-----
+> > From: Matt Fleming [mailto:matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org]
+> > Sent: Monday, November 17, 2014 11:12 PM
+> > >
+> > > - Only doing module unload is required to be aware of this synchronization
+> > > 	-> Ensuring the call back does not fall into unloaded code which may
+> > cause
+> > > 	     undefined behavior.
+> > > 	-> Ensuring the put_device() & module_put() code have finished in
+> > firmware_class.c
+> > > 	     function request_firmware_work_func() before the device is
+> > unregistered
+> > > 	     and module unloaded happen.
+> > 
+> > Shouldn't the existing module_{put,get}() and {put,get}_device() calls
+> > provide all the necessary synchronisation?
+> > 
+> > Module unload should not be possible while other code is using the
+> > module (and the module refcnt has been incremented accordindly).
+> > 
+> > Right?
+> > 
+> > --
+> > Matt Fleming, Intel Open Source Technology Center
+> 
+> Hi Matt,
+> 
+> Yes, you are right. If the module refcount is not zero, you will get error
+> message and returned while you do "rmmod". But I strongly believe if we
+> have the capability in our code to take care of it by doing synchronization,
+> we should take care of it in case people are doing "rmmod -f". Don't
+> you think so?
 
-Well, that is how sparse currently treats it, and I think that is correct.
-If an extern declaration in a .h file specifies  __pure, then GCC may
-legally emit fewer calls to that function than appear in the source.
-So if the actual implementation in the .c file is not __pure, then you
-have an error.
+If you do 'rmmod -f' you get to keep all of the broken pieces of your
+kernel, no need to try to help out with crazy things like that.
 
->> at the bottom, and ensure it is flagged by sparse as an error after
->> you make your changes.
->
-> I am curios how does GCC behave on this incremental declare of pure
-> attribute. I just test it. GCC does not warn on the conflicting declare.
->
-> GCC seems warn on some thing shouldn't warn on the test case:
->
-> function "f2_ok" and "f5" shouldn't been warned. Strange.
->
-> validation/pure-function.c:14:1: warning: '__pure__' attribute ignored
-> [-Wattributes]
->  static __attribute__((__pure__)) void*(*f2_ok)(void) = pure1;
->  ^
-> validation/pure-function.c:15:1: warning: '__pure__' attribute ignored
-> [-Wattributes]
->  static __attribute__((__pure__)) void*(*f3_error)(void) = non_pure1;
->  ^
-> validation/pure-function.c:29:1: warning: '__pure__' attribute ignored
-> [-Wattributes]
->  static __attribute__((__pure__)) int(*f5)(void) = pure2;
->  ^
-> validation/pure-function.c:30:1: warning: '__pure__' attribute ignored
-> [-Wattributes]
->  static __attribute__((__pure__)) int(*f6_error)(void) = non_pure2;
->
-
-My apologies. It appears GCC ignores pure attributes on function
-pointers, so the assignments are all legal. Sorry to have wasted your
-time on this.
-
-So what remains imo is
-
-"""
-static __attribute__((__pure__)) void *pure1(void)
-{
-void *i = (void *)0;
-return i;
-}
-
-static __attribute__((__pure__)) int pure2(void)
-{
-int i = 0;
-return i;
-}
-static int pure2(void); // error here
-"""
-
-and all the other stuff can be dropped.
-
-Regards,
-Ard.
+greg k-h
