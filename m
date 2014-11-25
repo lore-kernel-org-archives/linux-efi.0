@@ -1,190 +1,65 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v3 02/13] arm64/mm: add create_pgd_mapping() to create
- private page tables
-Date: Tue, 25 Nov 2014 14:32:47 +0000
-Message-ID: <20141125143247.GE8541@arm.com>
-References: <1416315432-8534-1-git-send-email-ard.biesheuvel@linaro.org>
- <1416315432-8534-3-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [PATCH v3] firmware loader: fix hung task warning dump
+Date: Tue, 25 Nov 2014 16:10:58 +0000
+Message-ID: <20141125161058.GC3331@console-pimps.org>
+References: <1416279419-26590-1-git-send-email-hock.leong.kweh@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1416315432-8534-3-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1416279419-26590-1-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 18, 2014 at 12:57:01PM +0000, Ard Biesheuvel wrote:
-> For UEFI, we need to install the memory mappings used for Runtime Services
-> in a dedicated set of page tables. Add create_pgd_mapping(), which allows
-> us to allocate and install those page table entries early.
+On Tue, 18 Nov, at 10:56:59AM, Kweh Hock Leong wrote:
+> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/include/asm/mmu.h     |  3 +++
->  arch/arm64/include/asm/pgtable.h |  5 +++++
->  arch/arm64/mm/mmu.c              | 43 ++++++++++++++++++++--------------------
->  3 files changed, 30 insertions(+), 21 deletions(-)
-
-Looks fairly mechanical to me:
-
-  Reviewed-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-
-Will
-
-> diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-> index c2f006c48bdb..5fd40c43be80 100644
-> --- a/arch/arm64/include/asm/mmu.h
-> +++ b/arch/arm64/include/asm/mmu.h
-> @@ -33,5 +33,8 @@ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
->  extern void init_mem_pgprot(void);
->  /* create an identity mapping for memory (or io if map_io is true) */
->  extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
-> +extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
-> +			       unsigned long virt, phys_addr_t size,
-> +			       pgprot_t prot);
->  
->  #endif
-> diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
-> index 41a43bf26492..1abe4d08725b 100644
-> --- a/arch/arm64/include/asm/pgtable.h
-> +++ b/arch/arm64/include/asm/pgtable.h
-> @@ -264,6 +264,11 @@ static inline pmd_t pte_pmd(pte_t pte)
->  	return __pmd(pte_val(pte));
->  }
->  
-> +static inline pgprot_t mk_sect_prot(pgprot_t prot)
-> +{
-> +	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
-> +}
-> +
->  /*
->   * THP definitions.
->   */
-> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-> index 83e6713143a3..4d583aa9ff4e 100644
-> --- a/arch/arm64/mm/mmu.c
-> +++ b/arch/arm64/mm/mmu.c
-> @@ -157,20 +157,10 @@ static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
->  
->  static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->  				  unsigned long addr, unsigned long end,
-> -				  phys_addr_t phys, int map_io)
-> +				  phys_addr_t phys, pgprot_t prot)
->  {
->  	pmd_t *pmd;
->  	unsigned long next;
-> -	pmdval_t prot_sect;
-> -	pgprot_t prot_pte;
-> -
-> -	if (map_io) {
-> -		prot_sect = PROT_SECT_DEVICE_nGnRE;
-> -		prot_pte = __pgprot(PROT_DEVICE_nGnRE);
-> -	} else {
-> -		prot_sect = PROT_SECT_NORMAL_EXEC;
-> -		prot_pte = PAGE_KERNEL_EXEC;
-> -	}
->  
->  	/*
->  	 * Check for initial section mappings in the pgd/pud and remove them.
-> @@ -186,7 +176,8 @@ static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->  		/* try section mapping first */
->  		if (((addr | next | phys) & ~SECTION_MASK) == 0) {
->  			pmd_t old_pmd =*pmd;
-> -			set_pmd(pmd, __pmd(phys | prot_sect));
-> +			set_pmd(pmd, __pmd(phys |
-> +					   pgprot_val(mk_sect_prot(prot))));
->  			/*
->  			 * Check for previous table entries created during
->  			 * boot (__create_page_tables) and flush them.
-> @@ -195,7 +186,7 @@ static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->  				flush_tlb_all();
->  		} else {
->  			alloc_init_pte(pmd, addr, next, __phys_to_pfn(phys),
-> -				       prot_pte);
-> +				       prot);
->  		}
->  		phys += next - addr;
->  	} while (pmd++, addr = next, addr != end);
-> @@ -203,7 +194,7 @@ static void __init alloc_init_pmd(struct mm_struct *mm, pud_t *pud,
->  
->  static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->  				  unsigned long addr, unsigned long end,
-> -				  unsigned long phys, int map_io)
-> +				  unsigned long phys, pgprot_t prot)
->  {
->  	pud_t *pud;
->  	unsigned long next;
-> @@ -221,10 +212,11 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->  		/*
->  		 * For 4K granule only, attempt to put down a 1GB block
->  		 */
-> -		if (!map_io && (PAGE_SHIFT == 12) &&
-> +		if ((PAGE_SHIFT == 12) &&
->  		    ((addr | next | phys) & ~PUD_MASK) == 0) {
->  			pud_t old_pud = *pud;
-> -			set_pud(pud, __pud(phys | PROT_SECT_NORMAL_EXEC));
-> +			set_pud(pud, __pud(phys |
-> +					   pgprot_val(mk_sect_prot(prot))));
->  
->  			/*
->  			 * If we have an old value for a pud, it will
-> @@ -239,7 +231,7 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->  				flush_tlb_all();
->  			}
->  		} else {
-> -			alloc_init_pmd(mm, pud, addr, next, phys, map_io);
-> +			alloc_init_pmd(mm, pud, addr, next, phys, prot);
->  		}
->  		phys += next - addr;
->  	} while (pud++, addr = next, addr != end);
-> @@ -251,7 +243,7 @@ static void __init alloc_init_pud(struct mm_struct *mm, pgd_t *pgd,
->   */
->  static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
->  				    phys_addr_t phys, unsigned long virt,
-> -				    phys_addr_t size, int map_io)
-> +				    phys_addr_t size, pgprot_t prot)
->  {
->  	unsigned long addr, length, end, next;
->  
-> @@ -261,7 +253,7 @@ static void __init __create_mapping(struct mm_struct *mm, pgd_t *pgd,
->  	end = addr + length;
->  	do {
->  		next = pgd_addr_end(addr, end);
-> -		alloc_init_pud(mm, pgd, addr, next, phys, map_io);
-> +		alloc_init_pud(mm, pgd, addr, next, phys, prot);
->  		phys += next - addr;
->  	} while (pgd++, addr = next, addr != end);
->  }
-> @@ -275,7 +267,7 @@ static void __init create_mapping(phys_addr_t phys, unsigned long virt,
->  		return;
->  	}
->  	__create_mapping(&init_mm, pgd_offset_k(virt & PAGE_MASK), phys, virt,
-> -			 size, 0);
-> +			 size, PAGE_KERNEL_EXEC);
->  }
->  
->  void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
-> @@ -285,7 +277,16 @@ void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
->  		return;
->  	}
->  	__create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
-> -			 addr, addr, size, map_io);
-> +			 addr, addr, size,
-> +			 map_io ? __pgprot(PROT_DEVICE_nGnRE)
-> +				: PAGE_KERNEL_EXEC);
-> +}
-> +
-> +void __init create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
-> +			       unsigned long virt, phys_addr_t size,
-> +			       pgprot_t prot)
-> +{
-> +	__create_mapping(mm, pgd_offset(mm, virt), phys, virt, size, prot);
->  }
->  
->  static void __init map_mem(void)
-> -- 
-> 1.8.3.2
+> When using request_firmware_nowait() with FW_ACTION_NOHOTPLUG param to
+> expose user helper interface, if the user do not react immediately, after
+> 120 seconds there will be a hung task warning message dumped as below:
 > 
+> [ 3000.784235] INFO: task kworker/0:0:8259 blocked for more than 120 seconds.
+> [ 3000.791281]       Tainted: G            E 3.16.0-rc1-yocto-standard #41
+> [ 3000.798082] "echo 0 > /proc/sys/kernel/hung_task_timeout_secs" disables this message.
+> [ 3000.806072] kworker/0:0     D cd0075c8     0  8259      2 0x00000000
+> [ 3000.812765] Workqueue: events request_firmware_work_func
+> [ 3000.818253]  cd375e18 00000046 0000000e cd0075c8 000000f0 cd40ea00 cd375fec 1b883e89
+> [ 3000.826374]  0000026b cd40ea00 80000000 00000001 cd0075c8 00000000 cd375de4 c119917f
+> [ 3000.834492]  cd563360 cd375df4 c119a0ab cd563360 00000000 cd375e24 c119a1d6 00000000
+> [ 3000.842616] Call Trace:
+> [ 3000.845252]  [<c119917f>] ? kernfs_next_descendant_post+0x3f/0x50
+> [ 3000.851543]  [<c119a0ab>] ? kernfs_activate+0x6b/0xc0
+> [ 3000.856790]  [<c119a1d6>] ? kernfs_add_one+0xd6/0x130
+> [ 3000.862047]  [<c15fdb02>] schedule+0x22/0x60
+> [ 3000.866548]  [<c15fd195>] schedule_timeout+0x175/0x1d0
+> [ 3000.871887]  [<c119b391>] ? __kernfs_create_file+0x71/0xa0
+> [ 3000.877574]  [<c119bb9a>] ? sysfs_add_file_mode_ns+0xaa/0x180
+> [ 3000.883533]  [<c15fe84f>] wait_for_completion+0x6f/0xb0
+> [ 3000.888961]  [<c1065200>] ? wake_up_process+0x40/0x40
+> [ 3000.894219]  [<c13cb600>] _request_firmware+0x750/0x9f0
+> [ 3000.899666]  [<c1382a7f>] ? n_tty_receive_buf2+0x1f/0x30
+> [ 3000.905200]  [<c13cba02>] request_firmware_work_func+0x22/0x50
+> [ 3000.911235]  [<c10550d2>] process_one_work+0x122/0x380
+> [ 3000.916571]  [<c1055859>] worker_thread+0xf9/0x470
+> [ 3000.921555]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+> [ 3000.927497]  [<c1055760>] ? create_and_start_worker+0x50/0x50
+> [ 3000.933448]  [<c105a5ff>] kthread+0x9f/0xc0
+> [ 3000.937850]  [<c15ffd40>] ret_from_kernel_thread+0x20/0x30
+> [ 3000.943548]  [<c105a560>] ? kthread_worker_fn+0x100/0x100
 > 
+> This patch change the wait_for_completion() function call to
+> wait_for_completion_interruptible() function call for solving the issue.
+> 
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Acked-by: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+> Acked-by: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+
+Looks good to me. Who's going to pick this up? Ming, Greg, am I OK to
+take this through the EFI tree or would you prefer to take it through
+some other tree?
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
