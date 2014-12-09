@@ -1,10 +1,10 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: [RFC PATCH] Add esrt support.
-Date: Tue,  9 Dec 2014 17:18:34 -0500
-Message-ID: <1418163514-22977-1-git-send-email-pjones@redhat.com>
-References: <20141209213847.GB1159@fenchurch.internal.datastacks.com>
+Date: Tue,  9 Dec 2014 17:28:02 -0500
+Message-ID: <1418164082-23534-1-git-send-email-pjones@redhat.com>
+References: <1418163514-22977-1-git-send-email-pjones@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141209213847.GB1159-FS9oOTXHwv9t4tGkRPVz9tcb/sdHg95EuydrBrBl+0sAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1418163514-22977-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -15,14 +15,15 @@ Add sysfs files for EFI System Resource Table under
 entries/ as a subdir.
 
 v2 with suggestions from bpetkov.
+v3 with me remembering checkpatch.
 
 Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
  drivers/firmware/efi/Makefile |   2 +-
- drivers/firmware/efi/efi.c    |  45 ++++-
- drivers/firmware/efi/esrt.c   | 392 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi.c    |  46 ++++-
+ drivers/firmware/efi/esrt.c   | 393 ++++++++++++++++++++++++++++++++++++++++++
  include/linux/efi.h           |   6 +
- 4 files changed, 443 insertions(+), 2 deletions(-)
+ 4 files changed, 445 insertions(+), 2 deletions(-)
  create mode 100644 drivers/firmware/efi/esrt.c
 
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
@@ -39,7 +40,7 @@ index aef6a95..0d61089 100644
  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
  obj-$(CONFIG_UEFI_CPER)			+= cper.o
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 8590099..bc7eaca 100644
+index 8590099..68002d8 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
 @@ -38,6 +38,7 @@ struct efi __read_mostly efi = {
@@ -68,7 +69,7 @@ index 8590099..bc7eaca 100644
  
  	return str - buf;
  }
-@@ -220,6 +223,45 @@ err_put:
+@@ -220,6 +223,46 @@ err_put:
  
  subsys_initcall(efisubsys_init);
  
@@ -100,6 +101,7 @@ index 8590099..bc7eaca 100644
 +		efi_memory_desc_t *md = phys_to_virt((phys_addr_t)p);
 +		u64 size = md->num_pages << EFI_PAGE_SHIFT;
 +		u64 end = md->phys_addr + size;
++
 +		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
 +		    md->type != EFI_BOOT_SERVICES_CODE &&
 +		    md->type != EFI_BOOT_SERVICES_DATA)
@@ -114,7 +116,7 @@ index 8590099..bc7eaca 100644
  
  /*
   * We can't ioremap data in EFI boot services RAM, because we've already mapped
-@@ -261,6 +303,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
+@@ -261,6 +304,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
  	{SAL_SYSTEM_TABLE_GUID, "SALsystab", &efi.sal_systab},
  	{SMBIOS_TABLE_GUID, "SMBIOS", &efi.smbios},
  	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
@@ -124,17 +126,17 @@ index 8590099..bc7eaca 100644
  
 diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
 new file mode 100644
-index 0000000..ffa2144
+index 0000000..71eb77c
 --- /dev/null
 +++ b/drivers/firmware/efi/esrt.c
-@@ -0,0 +1,392 @@
+@@ -0,0 +1,393 @@
 +/*
 + * esrt.c
 + *
 + * This module exports EFI System Resource Table (ESRT) entries into userspace
 + * through the sysfs file system. The ESRT provides a read-only catalog of
 + * system components for which the system accepts firmware upgrades via UEFI's
-+ * "Capsule Update" feature. This module allows userland utilties to evaluate
++ * "Capsule Update" feature. This module allows userland utilities to evaluate
 + * what firmware updates can be applied to this system, and potentially arrange
 + * for those updates to occur.
 + *
@@ -153,7 +155,7 @@ index 0000000..ffa2144
 +#include <linux/slab.h>
 +#include <linux/types.h>
 +
-+typedef struct {
++struct {
 +	efi_guid_t	fw_class;
 +	u32		fw_type;
 +	u32		fw_version;
@@ -161,7 +163,7 @@ index 0000000..ffa2144
 +	u32		capsule_flags;
 +	u32		last_attempt_version;
 +	u32		last_attempt_status;
-+} efi_system_resource_entry_t;
++} efi_system_resource_entry;
 +
 +/*
 + * _count and _version are what they seem like.  _max is actually just
@@ -172,17 +174,17 @@ index 0000000..ffa2144
 + * Since there's no guidance about what that means in terms of memory layout,
 + * it means nothing to us.
 + */
-+typedef struct {
++struct {
 +	u32	fw_resource_count;
 +	u32	fw_resource_count_max;
 +	u64	fw_resource_version;
-+	efi_system_resource_entry_t entries[];
-+} efi_system_resource_table_t;
++	struct efi_system_resource_entry entries[];
++} efi_system_resource_table;
 +
-+static efi_system_resource_table_t *esrt;
++static struct efi_system_resource_table *esrt;
 +
 +struct esre_entry {
-+	efi_system_resource_entry_t *esre;
++	struct efi_system_resource_entry *esre;
 +
 +	struct kobject kobj;
 +	struct list_head list;
@@ -196,7 +198,7 @@ index 0000000..ffa2144
 +	struct attribute attr;
 +	ssize_t (*show)(struct esre_entry *entry, char *buf);
 +	ssize_t (*store)(struct esre_entry *entry,
-+	                 const char *buf, size_t count);
++			 const char *buf, size_t count);
 +};
 +
 +static struct esre_entry *to_entry(struct kobject *kobj)
@@ -230,6 +232,7 @@ index 0000000..ffa2144
 +static ssize_t esre_fw_class_show(struct esre_entry *entry, char *buf)
 +{
 +	char *str = buf;
++
 +	efi_guid_unparse(&entry->esre->fw_class, str);
 +	str += strlen(str);
 +	str += sprintf(str, "\n");
@@ -241,7 +244,8 @@ index 0000000..ffa2144
 +	esre_fw_class_show, NULL);
 +
 +#define esre_attr_decl(name, size, fmt) \
-+static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf) { \
++static ssize_t esre_##name##_show(struct esre_entry *entry, char *buf)\
++{ \
 +	return sprintf(buf, fmt "\n", le##size##_to_cpu(entry->esre->name)); \
 +} \
 +\
@@ -250,7 +254,7 @@ index 0000000..ffa2144
 +
 +esre_attr_decl(fw_type, 32, "%u");
 +esre_attr_decl(fw_version, 32, "%u");
-+esre_attr_decl(lowest_supported_fw_version, 32,"%u");
++esre_attr_decl(lowest_supported_fw_version, 32, "%u");
 +esre_attr_decl(capsule_flags, 32, "0x%x");
 +esre_attr_decl(last_attempt_version, 32, "%u");
 +esre_attr_decl(last_attempt_status, 32, "%u");
@@ -283,7 +287,7 @@ index 0000000..ffa2144
 +static struct kobject *esrt_kobj;
 +static struct kset *esrt_kset;
 +
-+static int esre_create_sysfs_entry(efi_system_resource_entry_t *esre)
++static int esre_create_sysfs_entry(struct efi_system_resource_entry *esre)
 +{
 +	int rc;
 +	struct esre_entry *entry;
@@ -311,7 +315,7 @@ index 0000000..ffa2144
 +/* support for displaying ESRT fields at the top level */
 +#define esrt_attr_decl(name, size, fmt) \
 +static ssize_t esrt_##name##_show(struct kobject *kobj, \
-+				  struct kobj_attribute *attr, char *buf) \
++				  struct kobj_attribute *attr, char *buf)\
 +{ \
 +	return sprintf(buf, fmt "\n", le##size##_to_cpu(esrt->name)); \
 +} \
@@ -357,8 +361,8 @@ index 0000000..ffa2144
 + */
 +static int esrt_duplicate_pages(void)
 +{
-+	efi_system_resource_table_t *tmpesrt;
-+	efi_system_resource_entry_t *entries;
++	struct efi_system_resource_table *tmpesrt;
++	struct efi_system_resource_entry *entries;
 +	size_t size, max;
 +	int err = -EINVAL;
 +
@@ -383,7 +387,7 @@ index 0000000..ffa2144
 +		return -ENOMEM;
 +	}
 +
-+	if (tmpesrt->fw_resource_count > 0 && max - size < sizeof (*entries)) {
++	if (tmpesrt->fw_resource_count > 0 && max - size < sizeof(*entries)) {
 +		pr_err("ESRT memory map entry can only hold the header.\n");
 +		goto err_iounmap;
 +	}
@@ -405,7 +409,7 @@ index 0000000..ffa2144
 +	 * We know it can't be larger than N * sizeof() here, and N is limited
 +	 * by the previous test to a small number, so there's no overflow.
 +	 */
-+	size += tmpesrt->fw_resource_count * sizeof (*entries);
++	size += tmpesrt->fw_resource_count * sizeof(*entries);
 +	if (max < size) {
 +		pr_err("ESRT does not fit on single memory map entry.\n");
 +		goto err_iounmap;
@@ -413,7 +417,6 @@ index 0000000..ffa2144
 +
 +	esrt = kmalloc(size, GFP_KERNEL);
 +	if (!esrt) {
-+		pr_err("kmalloc failed.\n");
 +		err = -ENOMEM;
 +		goto err_iounmap;
 +	}
@@ -427,7 +430,7 @@ index 0000000..ffa2144
 +
 +static int register_entries(void)
 +{
-+	efi_system_resource_entry_t *entries = esrt->entries;
++	struct efi_system_resource_entry *entries = esrt->entries;
 +	int i, rc;
 +
 +	if (!esrt_table_exists())
@@ -436,8 +439,8 @@ index 0000000..ffa2144
 +	for (i = 0; i < le32_to_cpu(esrt->fw_resource_count); i++) {
 +		rc = esre_create_sysfs_entry(&entries[i]);
 +		if (rc < 0) {
-+			pr_err("EFI System Resource Entry creation "
-+			       "failed with error %d.\n", rc);
++			pr_err("ESRT entry creation failed with error %d.\n",
++			       rc);
 +			return rc;
 +		}
 +	}
