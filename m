@@ -1,7 +1,7 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: Re: [RFC PATCH] Add esrt support.
-Date: Thu, 11 Dec 2014 09:08:03 -0500
-Message-ID: <20141211140802.GA17171@fenchurch.internal.datastacks.com>
+Date: Thu, 11 Dec 2014 15:17:26 -0500
+Message-ID: <20141211201725.GF17171@fenchurch.internal.datastacks.com>
 References: <1418163514-22977-1-git-send-email-pjones@redhat.com>
  <1418164082-23534-1-git-send-email-pjones@redhat.com>
  <1418257161.2856.4.camel@ranerica-desk01>
@@ -29,12 +29,15 @@ On Thu, Dec 11, 2014 at 12:19:23AM +0000, Neri, Ricardo wrote:
 > I also see compilations errors after applying this patch to v3.18. I am
 > using gcc ver gcc version 4.9.2 (Ubuntu 4.9.2-0ubuntu1~14.04) and doing
 > make x86_64_defconfig && make:
+> 
+> drivers/firmware/efi/esrt.c:49:35: error: array type has incomplete
+> element type
+>   struct efi_system_resource_entry entries[];
 
-Alright, then clearly something has gone wrong on my end.  I'll start
-with a clean tree and see if I can't reproduce these problems and fix
-them.
-
-Thanks.
+So this was a pretty straightforward error on my part, and I'm not sure
+why I didn't notice it building, but when I've tried it in a clean tree
+it shows up clear as day.  My follow-up email here will have a fixed
+version.
 
 -- 
         Peter
