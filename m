@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v4 3/8] efi: split off remapping code from efi_config_init()
-Date: Mon, 22 Dec 2014 10:58:59 +0000
-Message-ID: <1419245944-2424-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v4 5/8] arm64/efi: set EFI_ALLOC_ALIGN to 64 KB
+Date: Mon, 22 Dec 2014 10:59:01 +0000
+Message-ID: <1419245944-2424-6-git-send-email-ard.biesheuvel@linaro.org>
 References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1419245944-2424-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,117 +10,24 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Split of the remapping code from efi_config_init() so that the caller
-can perform its own remapping. This is necessary to correctly handle
-virtually remapped UEFI memory regions under kexec, as efi.systab will
-have been updated to a virtual address.
+Set EFI_ALLOC_ALIGN to 64 KB so that all allocations done by the stub
+are naturally compatible with a 64 KB granule kernel.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/efi.c | 49 +++++++++++++++++++++++++++++-----------------
- include/linux/efi.h        |  2 ++
- 2 files changed, 33 insertions(+), 18 deletions(-)
+ arch/arm64/include/asm/efi.h | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9035c1b74d58..0de77db4fb88 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -293,9 +293,10 @@ static __init int match_config_table(efi_guid_t *guid,
- 	return 0;
- }
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index a34fd3b12e2b..71291253114f 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -44,4 +44,6 @@ extern void efi_idmap_init(void);
  
--int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+int __init efi_config_parse_tables(void *config_tables, int count,
-+				   efi_config_table_type_t *arch_tables)
- {
--	void *config_tables, *tablep;
-+	void *tablep;
- 	int i, sz;
+ #define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
  
- 	if (efi_enabled(EFI_64BIT))
-@@ -303,19 +304,9 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 	else
- 		sz = sizeof(efi_config_table_32_t);
- 
--	/*
--	 * Let's see what config tables the firmware passed to us.
--	 */
--	config_tables = early_memremap(efi.systab->tables,
--				       efi.systab->nr_tables * sz);
--	if (config_tables == NULL) {
--		pr_err("Could not map Configuration table!\n");
--		return -ENOMEM;
--	}
--
- 	tablep = config_tables;
- 	pr_info("");
--	for (i = 0; i < efi.systab->nr_tables; i++) {
-+	for (i = 0; i < count; i++) {
- 		efi_guid_t guid;
- 		unsigned long table;
- 
-@@ -328,8 +319,6 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 			if (table64 >> 32) {
- 				pr_cont("\n");
- 				pr_err("Table located above 4GB, disabling EFI.\n");
--				early_memunmap(config_tables,
--					       efi.systab->nr_tables * sz);
- 				return -EINVAL;
- 			}
- #endif
-@@ -344,13 +333,37 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 		tablep += sz;
- 	}
- 	pr_cont("\n");
--	early_memunmap(config_tables, efi.systab->nr_tables * sz);
--
- 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
--
- 	return 0;
- }
- 
-+int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+{
-+	void *config_tables;
-+	int sz, ret;
++#define EFI_ALLOC_ALIGN		SZ_64K
 +
-+	if (efi_enabled(EFI_64BIT))
-+		sz = sizeof(efi_config_table_64_t);
-+	else
-+		sz = sizeof(efi_config_table_32_t);
-+
-+	/*
-+	 * Let's see what config tables the firmware passed to us.
-+	 */
-+	config_tables = early_memremap(efi.systab->tables,
-+				       efi.systab->nr_tables * sz);
-+	if (config_tables == NULL) {
-+		pr_err("Could not map Configuration table!\n");
-+		return -ENOMEM;
-+	}
-+
-+	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables,
-+				      arch_tables);
-+
-+	early_memunmap(config_tables, efi.systab->nr_tables * sz);
-+	return ret;
-+}
-+
- #ifdef CONFIG_EFI_VARS_MODULE
- static int __init efi_load_efivars(void)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 0238d612750e..2dc8577032b3 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -875,6 +875,8 @@ static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned lon
- #endif
- extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
- extern int efi_config_init(efi_config_table_type_t *arch_tables);
-+extern int efi_config_parse_tables(void *config_tables, int count,
-+				   efi_config_table_type_t *arch_tables);
- extern u64 efi_get_iobase (void);
- extern u32 efi_mem_type (unsigned long phys_addr);
- extern u64 efi_mem_attributes (unsigned long phys_addr);
+ #endif /* _ASM_EFI_H */
 -- 
 1.8.3.2
