@@ -1,139 +1,67 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v4 8/8] arm64/efi: remove idmap manipulations from UEFI code
-Date: Mon, 22 Dec 2014 10:59:04 +0000
-Message-ID: <1419245944-2424-9-git-send-email-ard.biesheuvel@linaro.org>
-References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 0/8] arm64: improved memory map handling for /dev/mem, ACPI etc
+Date: Mon, 22 Dec 2014 19:08:34 +0000
+Message-ID: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1419245944-2424-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now that we have moved the call to SetVirtualAddressMap() to the stub,
-UEFI has no use for the ID map, so we can drop the code that installs
-ID mappings for UEFI memory regions.
+This series was split off from the UEFI virtmap for kexec series that I posted
+earlier today. The main purpose is to deal with the need to classify memory
+ranges as RAM or non-RAM in a consistent and comprehensive manner. This series
+applies on top of the other series.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/include/asm/efi.h |  2 --
- arch/arm64/include/asm/mmu.h |  2 --
- arch/arm64/kernel/efi.c      | 30 ------------------------------
- arch/arm64/kernel/setup.c    |  1 -
- arch/arm64/mm/mmu.c          | 12 ------------
- 5 files changed, 47 deletions(-)
+Patch #1 avoids an early panic if the UEFI memory map is available but UEFI
+support itself fails to initialize. In this case, there is no need to panic
+early, and we have a better chance of being able to inform the user if we deal
+with this error condition at a later time.
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 6cc668a378c5..84c50853b5dc 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -6,11 +6,9 @@
- 
- #ifdef CONFIG_EFI
- extern void efi_init(void);
--extern void efi_idmap_init(void);
- extern void efi_virtmap_init(void);
- #else
- #define efi_init()
--#define efi_idmap_init()
- #define efi_virtmap_init
- #endif
- 
-diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-index 5fd40c43be80..3d311761e3c2 100644
---- a/arch/arm64/include/asm/mmu.h
-+++ b/arch/arm64/include/asm/mmu.h
-@@ -31,8 +31,6 @@ extern void paging_init(void);
- extern void setup_mm_for_reboot(void);
- extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
- extern void init_mem_pgprot(void);
--/* create an identity mapping for memory (or io if map_io is true) */
--extern void create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io);
- extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
- 			       unsigned long virt, phys_addr_t size,
- 			       pgprot_t prot);
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index e969c5076713..d7d2e818c856 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -53,27 +53,6 @@ static int __init is_normal_ram(efi_memory_desc_t *md)
- 	return 0;
- }
- 
--static void __init efi_setup_idmap(void)
--{
--	struct memblock_region *r;
--	efi_memory_desc_t *md;
--	u64 paddr, npages, size;
--
--	for_each_memblock(memory, r)
--		create_id_mapping(r->base, r->size, 0);
--
--	/* map runtime io spaces */
--	for_each_efi_memory_desc(&memmap, md) {
--		if (!(md->attribute & EFI_MEMORY_RUNTIME) || is_normal_ram(md))
--			continue;
--		paddr = md->phys_addr;
--		npages = md->num_pages;
--		memrange_efi_to_native(&paddr, &npages);
--		size = npages << PAGE_SHIFT;
--		create_id_mapping(paddr, size, 1);
--	}
--}
--
- /*
-  * Translate a EFI virtual address into a physical address: this is necessary,
-  * as some data members of the EFI system table are virtually remapped after
-@@ -235,15 +214,6 @@ void __init efi_init(void)
- 	reserve_regions();
- }
- 
--void __init efi_idmap_init(void)
--{
--	if (!efi_enabled(EFI_BOOT))
--		return;
--
--	/* boot time idmap_pg_dir is incomplete, so fill in missing parts */
--	efi_setup_idmap();
--}
--
- static int __init arm64_enter_virtual_mode(void)
- {
- 	u64 mapsize;
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index d8390f507da0..0771de962f37 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -401,7 +401,6 @@ void __init setup_arch(char **cmdline_p)
- 	paging_init();
- 	request_standard_resources();
- 
--	efi_idmap_init();
- 	efi_virtmap_init();
- 
- 	unflatten_device_tree();
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 3f3d5aa4a8b1..328638548871 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -271,18 +271,6 @@ static void __init create_mapping(phys_addr_t phys, unsigned long virt,
- 			 size, PAGE_KERNEL_EXEC);
- }
- 
--void __init create_id_mapping(phys_addr_t addr, phys_addr_t size, int map_io)
--{
--	if ((addr >> PGDIR_SHIFT) >= ARRAY_SIZE(idmap_pg_dir)) {
--		pr_warn("BUG: not creating id mapping for %pa\n", &addr);
--		return;
--	}
--	__create_mapping(&init_mm, &idmap_pg_dir[pgd_index(addr)],
--			 addr, addr, size,
--			 map_io ? __pgprot(PROT_DEVICE_nGnRE)
--				: PAGE_KERNEL_EXEC);
--}
--
- void __init create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
- 			       unsigned long virt, phys_addr_t size,
- 			       pgprot_t prot)
+Patch #2 adds iomem resource registration of UEFI memory regions. This is
+necessary because otherwise, drivers could potentially claim regions that
+are in active use by the firmware. This applies to both MMIO (NOR flash, RTC)
+and RAM ranges (runtime services code and data).
+
+Patch #3-6 adds support to UEFI and non-UEFI code paths to record all memory
+known to the system in the 'physmem' memblock table (if enabled). This fulfils
+a need in the /dev/mem and (upcoming) ACPI layers to be able to classify ranges
+as being backed by normal RAM even if they are not covered by the 'memory'
+memblock table, and are hence not covered by the linear direct mapping.
+The physmem code is pre-existing code that only needs minor tweaking to be made
+suitable for this purpose.
+
+Patch #7 enables the 'physmem' memblock table for arm64, and wires it into the
+handling of /dev/mem mappings, both to decide whether it should be mapped as
+MT_NORMAL, and whether read-write access can be allowed. (Non-RAM regions can
+be mapped read-write as long as they are not claimed by a driver in the iomem
+resource table. RAM regions can only be mapped read-only, and only if they are
+not covered by the 'memory' memblock table, and hence not covered by the linear
+mapping)
+
+Finally, patch #8 changes the way the virtual memory map is handled by the
+early UEFI code. Specifically, it memblock_remove()s rather than _reserves()
+UEFI reserved RAM regions, so that they are removed entirely from the linear
+mapping.
+
+Ard Biesheuvel (8):
+  arm64/efi: use UEFI memory map unconditionally if available
+  arm64/efi: register UEFI reserved regions as iomem resources
+  memblock: add physmem to memblock_dump_all() output
+  memblock: introduce memblock_add_phys() and memblock_is_physmem()
+  of: fdt: register physmem in early_init_dt_scan_memory()
+  arm64/efi: register physmem in reserve_regions()
+  arm64: use 'physmem' memblock to improve CONFIG_STRICT_DEVMEM handling
+  arm64/efi: memblock_remove rather than _reserve UEFI reserved RAM
+
+ arch/arm64/Kconfig       |  1 +
+ arch/arm64/kernel/efi.c  | 82 +++++++++++++++++++++++++++++++++++++++---------
+ arch/arm64/mm/mmap.c     |  2 +-
+ arch/arm64/mm/mmu.c      | 15 ++++++++-
+ drivers/of/fdt.c         |  1 +
+ include/linux/memblock.h | 10 ++++++
+ mm/memblock.c            | 18 +++++++++++
+ 7 files changed, 113 insertions(+), 16 deletions(-)
+
 -- 
 1.8.3.2
