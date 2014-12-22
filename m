@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 4/8] memblock: introduce memblock_add_phys() and memblock_is_physmem()
-Date: Mon, 22 Dec 2014 19:08:38 +0000
-Message-ID: <1419275322-29811-5-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 5/8] of: fdt: register physmem in early_init_dt_scan_memory()
+Date: Mon, 22 Dec 2014 19:08:39 +0000
+Message-ID: <1419275322-29811-6-git-send-email-ard.biesheuvel@linaro.org>
 References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1419275322-29811-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,71 +10,26 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This introduces the following functions:
-- memblock_add_phys(), that registers regions in the 'physmem' memblock map if
-  CONFIG_HAVE_MEMBLOCK_PHYS_MAP is set; otherwise, it is a nop
-- memblock_is_physmem(), returns whether a physical address is classified as
-  physical memory.
+This patch changes early_init_dt_scan_memory() so that all memory
+covered by DT memory nodes is registered in the 'physmem' memblock
+table if CONFIG_HAVE_MEMBLOCK_PHYS_MAP is enabled.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- include/linux/memblock.h | 10 ++++++++++
- mm/memblock.c            | 15 +++++++++++++++
- 2 files changed, 25 insertions(+)
+ drivers/of/fdt.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/include/linux/memblock.h b/include/linux/memblock.h
-index e8cc45307f8f..d32fe838c6ca 100644
---- a/include/linux/memblock.h
-+++ b/include/linux/memblock.h
-@@ -365,6 +365,16 @@ static inline unsigned long memblock_region_reserved_end_pfn(const struct memblo
- #define __initdata_memblock
- #endif
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 510074226d57..6e59c2168536 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -894,6 +894,7 @@ int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
+ 		    (unsigned long long)size);
  
-+#ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
-+int memblock_add_phys(phys_addr_t base, phys_addr_t size);
-+int memblock_is_physmem(phys_addr_t addr);
-+#else
-+static inline int memblock_add_phys(phys_addr_t base, phys_addr_t size)
-+{
-+	return 0;
-+}
-+#endif /* CONFIG_HAVE_MEMBLOCK_PHYS_MAP */
-+
- #else
- static inline phys_addr_t memblock_alloc(phys_addr_t size, phys_addr_t align)
- {
-diff --git a/mm/memblock.c b/mm/memblock.c
-index c27353beb260..107aa5ee2d7b 100644
---- a/mm/memblock.c
-+++ b/mm/memblock.c
-@@ -586,6 +586,14 @@ int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
- 				   MAX_NUMNODES, 0);
- }
+ 		early_init_dt_add_memory_arch(base, size);
++		memblock_add_phys(base, size);
+ 	}
  
-+#ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
-+int __init_memblock memblock_add_phys(phys_addr_t base, phys_addr_t size)
-+{
-+	return memblock_add_range(&memblock.physmem, base, size,
-+				  MAX_NUMNODES, 0);
-+}
-+#endif
-+
- /**
-  * memblock_isolate_range - isolate given range into disjoint memblocks
-  * @type: memblock type to isolate range for
-@@ -1398,6 +1406,13 @@ int __init_memblock memblock_is_memory(phys_addr_t addr)
- 	return memblock_search(&memblock.memory, addr) != -1;
- }
- 
-+#ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
-+int __init_memblock memblock_is_physmem(phys_addr_t addr)
-+{
-+	return memblock_search(&memblock.physmem, addr) != -1;
-+}
-+#endif
-+
- #ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP
- int __init_memblock memblock_search_pfn_nid(unsigned long pfn,
- 			 unsigned long *start_pfn, unsigned long *end_pfn)
+ 	return 0;
 -- 
 1.8.3.2
