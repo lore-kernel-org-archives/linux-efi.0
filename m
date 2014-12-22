@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 6/8] arm64/efi: register physmem in reserve_regions()
-Date: Mon, 22 Dec 2014 19:08:40 +0000
-Message-ID: <1419275322-29811-7-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 7/8] arm64: use 'physmem' memblock to improve CONFIG_STRICT_DEVMEM handling
+Date: Mon, 22 Dec 2014 19:08:41 +0000
+Message-ID: <1419275322-29811-8-git-send-email-ard.biesheuvel@linaro.org>
 References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1419275322-29811-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,41 +10,80 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-After traversing the UEFI memory map to discover the regions that are backed
-by normal RAM, register the resulting minimal memory map into the physmem
-memblock table.
+The 'physmem' memblock table allows us to classify memory as RAM even
+if it is not covered by the ordinary 'memory' memblock table.
+
+Under CONFIG_STRICT_DEVMEM, we can use this to:
+- allow read-only access to parts of RAM that are not considered memory
+  by the kernel, this is mainly intended for exposing UEFI configuration
+  tables such as SMBIOS to userland;
+- avoid using non-cached mappings for those parts of RAM, as it may
+  result in mismatched attributes.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
+ arch/arm64/Kconfig   |  1 +
+ arch/arm64/mm/mmap.c |  2 +-
+ arch/arm64/mm/mmu.c  | 15 ++++++++++++++-
+ 3 files changed, 16 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index ba5fe66c3634..b1b816ecf3b3 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -155,6 +155,7 @@ static __init void reserve_regions(void)
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index b1f9a20a3677..86902f8d8e36 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -60,6 +60,7 @@ config ARM64
+ 	select HAVE_GENERIC_DMA_COHERENT
+ 	select HAVE_HW_BREAKPOINT if PERF_EVENTS
+ 	select HAVE_MEMBLOCK
++	select HAVE_MEMBLOCK_PHYS_MAP
+ 	select HAVE_PATA_PLATFORM
+ 	select HAVE_PERF_EVENTS
+ 	select HAVE_PERF_REGS
+diff --git a/arch/arm64/mm/mmap.c b/arch/arm64/mm/mmap.c
+index 54922d1275b8..9f558ab41f39 100644
+--- a/arch/arm64/mm/mmap.c
++++ b/arch/arm64/mm/mmap.c
+@@ -126,7 +126,7 @@ int devmem_is_allowed(unsigned long pfn)
  {
- 	efi_memory_desc_t *md;
- 	u64 paddr, npages, size;
-+	struct memblock_region *r;
- 
- 	if (uefi_debug)
- 		pr_info("Processing EFI memory map:\n");
-@@ -187,6 +188,14 @@ static __init void reserve_regions(void)
- 			pr_cont("\n");
- 	}
- 
-+	/*
-+	 * After memblock has stitched all the regions together, copy the
-+	 * resulting map of physical memory from the memory memblock table into
-+	 * the physmem memblock table.
-+	 */
-+	for_each_memblock(memory, r)
-+		memblock_add_phys(r->base, r->size);
-+
- 	set_bit(EFI_MEMMAP, &efi.flags);
+ 	if (iomem_is_exclusive(pfn << PAGE_SHIFT))
+ 		return 0;
+-	if (!page_is_ram(pfn))
++	if (!pfn_valid(pfn))
+ 		return 1;
+ 	return 0;
  }
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 328638548871..083be3de1a87 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -122,7 +122,7 @@ early_param("cachepolicy", early_cachepolicy);
+ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+ 			      unsigned long size, pgprot_t vma_prot)
+ {
+-	if (!pfn_valid(pfn))
++	if (!memblock_is_physmem(PFN_PHYS(pfn)))
+ 		return pgprot_noncached(vma_prot);
+ 	else if (file->f_flags & O_SYNC)
+ 		return pgprot_writecombine(vma_prot);
+@@ -130,6 +130,19 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+ }
+ EXPORT_SYMBOL(phys_mem_access_prot);
  
++/*
++ * This definition of phys_mem_access_prot_allowed() overrides
++ * the __weak definition in drivers/char/mem.c
++ */
++int phys_mem_access_prot_allowed(struct file *file, unsigned long pfn,
++				 unsigned long size, pgprot_t *prot)
++{
++	/* Disallow read-write access to system RAM */
++	if (memblock_is_physmem(PFN_PHYS(pfn)) && pgprot_val(*prot) & PTE_WRITE)
++		return 0;
++	return 1;
++}
++
+ static void __init *early_alloc(unsigned long sz)
+ {
+ 	void *ptr = __va(memblock_alloc(sz, sz));
 -- 
 1.8.3.2
