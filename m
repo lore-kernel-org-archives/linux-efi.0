@@ -1,113 +1,59 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/8] arm64: improved memory map handling for /dev/mem,
- ACPI etc
-Date: Tue, 30 Dec 2014 13:21:36 +0000
-Message-ID: <CAKv+Gu_Ou6Fv7-AUcpbUJAijwEJ8=PCB1mQU3mCfctLFAMhu_w@mail.gmail.com>
-References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20141226093528.GA26133@darkstar.redhat.com>
-	<CAKv+Gu_1VCJK7y5U9H-mhjjN6AFW8+SGvbKUZfuzx6qGEpVg0A@mail.gmail.com>
-	<20141230092514.GF2457@darkstar.redhat.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: EFI mixed mode + perf = rampant triple faults
+Date: Wed, 31 Dec 2014 18:37:39 +0000
+Message-ID: <20141231183739.GA28946@console-pimps.org>
+References: <5491B4A8.905@amacapital.net>
+ <CALCETrUyw5_E+FN8o8ZsOxN5XG81-Q8MVzeUHPZ_XBM+ifi6_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141230092514.GF2457-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CALCETrUyw5_E+FN8o8ZsOxN5XG81-Q8MVzeUHPZ_XBM+ifi6_w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Peter Zijlstra <peterz@infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 30 December 2014 at 09:25, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 12/29/14 at 09:22am, Ard Biesheuvel wrote:
->> On 26 December 2014 at 09:35, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > On 12/22/14 at 07:08pm, Ard Biesheuvel wrote:
->> >> This series was split off from the UEFI virtmap for kexec series that I posted
->> >> earlier today. The main purpose is to deal with the need to classify memory
->> >> ranges as RAM or non-RAM in a consistent and comprehensive manner. This series
->> >> applies on top of the other series.
->> >>
->> >> Patch #1 avoids an early panic if the UEFI memory map is available but UEFI
->> >> support itself fails to initialize. In this case, there is no need to panic
->> >> early, and we have a better chance of being able to inform the user if we deal
->> >> with this error condition at a later time.
->> >>
->> >> Patch #2 adds iomem resource registration of UEFI memory regions. This is
->> >> necessary because otherwise, drivers could potentially claim regions that
->> >> are in active use by the firmware. This applies to both MMIO (NOR flash, RTC)
->> >> and RAM ranges (runtime services code and data).
->> >>
->> >> Patch #3-6 adds support to UEFI and non-UEFI code paths to record all memory
->> >> known to the system in the 'physmem' memblock table (if enabled). This fulfils
->> >> a need in the /dev/mem and (upcoming) ACPI layers to be able to classify ranges
->> >> as being backed by normal RAM even if they are not covered by the 'memory'
->> >> memblock table, and are hence not covered by the linear direct mapping.
->> >> The physmem code is pre-existing code that only needs minor tweaking to be made
->> >> suitable for this purpose.
->> >>
->> >> Patch #7 enables the 'physmem' memblock table for arm64, and wires it into the
->> >> handling of /dev/mem mappings, both to decide whether it should be mapped as
->> >> MT_NORMAL, and whether read-write access can be allowed. (Non-RAM regions can
->> >> be mapped read-write as long as they are not claimed by a driver in the iomem
->> >> resource table. RAM regions can only be mapped read-only, and only if they are
->> >> not covered by the 'memory' memblock table, and hence not covered by the linear
->> >> mapping)
->> >>
->> >> Finally, patch #8 changes the way the virtual memory map is handled by the
->> >> early UEFI code. Specifically, it memblock_remove()s rather than _reserves()
->> >> UEFI reserved RAM regions, so that they are removed entirely from the linear
->> >> mapping.
->> >>
->> >> Ard Biesheuvel (8):
->> >>   arm64/efi: use UEFI memory map unconditionally if available
->> >>   arm64/efi: register UEFI reserved regions as iomem resources
->> >>   memblock: add physmem to memblock_dump_all() output
->> >>   memblock: introduce memblock_add_phys() and memblock_is_physmem()
->> >>   of: fdt: register physmem in early_init_dt_scan_memory()
->> >>   arm64/efi: register physmem in reserve_regions()
->> >>   arm64: use 'physmem' memblock to improve CONFIG_STRICT_DEVMEM handling
->> >>   arm64/efi: memblock_remove rather than _reserve UEFI reserved RAM
->> >
->> > Ard, It is much cleaner for this splitting.
->> >
->>
->> Thanks for having a look.
->>
->> > I wonder if some of them can become general code such as register reserved
->> > regions as iomem resources?
->> >
->>
->> AFAICT, the x86 code adds reservations for such regions to the E820
->> memory map, which in turn is used to memblock_reserve() the actual
->> memory. Also, sharing of the RTC is handled with a dedicated mutex in
->> the runtime services wrapper code (and x86 does not even use the time
->> related runtime services as they are broken on many firmware
->> implementations) so blindly applying the same logic to x86 or ia64
->> would likely break stuff.
->
-> Ok, I think bootloader will pass the E820 ranges though it can not tell
-> which region is for what.
->
->>
->> Do you (or Mark) have any feedback on the utility of this series in
->> the ACPI context? I failed to mention in the cover letter that
->> memblock_is_physmem() now serves the purpose of page_is_ram(), i.e.,
->> whether a physical region is backed by a slice of RAM that was left
->> out of the kernel's linear mapping.
->
-> I will do some test later along with the stable mapping stuff.
->
+On Wed, 17 Dec, at 08:54:56AM, Andy Lutomirski wrote:
+> [trying again with .org spelled correctly.  also cc: bpetkov]
+> 
+> On Wed, Dec 17, 2014 at 8:51 AM, Andy Lutomirski <luto@amacapital.net> wrote:
+> > I figured I should send this email before I forget about this issue:
+> >
+> > If you run perf record across any EFI mixed mode call or otherwise
+> > receive an NMI or MCE, the machine triple-faults.  The cause is
+> > straightforward: there is no valid IDT when we have long mode disabled
+> > for the duration of the EFI call.
 
-Cheers.
+Right, the lack of IDT is intentional since we disable interrupts while
+making the EFI call and so far I have side-stepped (ignored) the NMI/MCE
+issue.
 
-> BTW, with previous stable mapping patches on modified 3.18 tree kexec kernel
-> panics because of damaged efi mempry map arrays. It contains some
-> random value instead of right addresses so that virt_to_phys return
-> same value for vendor field. Will do more debugging maybe I missed something.
-> Any clue for debugging above issue will be appreciated.
->
+Perf is an interesting use case. I've admittedly never used it with EFI
+mixed mode, but yes, we should definitely get that working (if NMI/MCE
+handling wasn't justification enough).
 
-No clues, unfortunately. The memory map is not used after early boot,
-so it may be getting clobbered at any point between the first boot and
-the second boot.
+> > As far as I know, the only way to have continuously functional interrupt
+> > handling across a long mode transition is to install an interrupt vector
+> > table and hope that CPUs actually do something intelligent when
+> > receiving an interrupt with LME=1, LMA=1, and PG=0.  Yuck.
+> >
+> > Could we get away with issuing 32-bit EFI calls in compat mode, i.e.
+> > with a 32-bit CPL0 CS but while still in long mode?  I think that
+> > delivery of an IST interrupt (which includes both NMI and MCE) will
+> > correctly switch to a fully valid 64-bit state and would correctly
+> > switch back when we execute IRET at the end.  (Am I missing some reason
+> > that switching bitness without a privilege level change doesn't work
+> > well?  I haven't thought of anything, other than the lack of SS/SP controls
+> > on intra-ring interrupts, but that shouldn't be an issue here.)
+> >
+> > As an added benefit, this would considerably simplify the code.
+
+I can't immediately think of a reason that this wouldn't work, but I've
+Cc'd more x86 folks for additional insight.
+
+I will schedule some time to look into this issue in the new year.
+Thanks Andy.
 
 -- 
-Ard.
+Matt Fleming, Intel Open Source Technology Center
