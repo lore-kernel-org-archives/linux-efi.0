@@ -1,31 +1,102 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 4/8] efi: efistub: allow allocation alignment larger
- than EFI_PAGE_SIZE
-Date: Mon, 5 Jan 2015 11:24:45 +0000
-Message-ID: <CAKv+Gu9dP7pXkquv3d-64SsX0HBTE0qt92=ktN0rXWp6kF=a1Q@mail.gmail.com>
-References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1419245944-2424-5-git-send-email-ard.biesheuvel@linaro.org>
-	<20141223164549.GB3810@pd.tnic>
-	<CAKv+Gu_+scCHYuXccgsvn9THsbP24OfyjvjN9XtEVe4nMdQtig@mail.gmail.com>
-	<20141229094732.GA16051@nazgul.tnic>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [RFC PATCH] Add esrt support.
+Date: Mon, 5 Jan 2015 13:51:13 +0000
+Message-ID: <20150105135113.GA3163@console-pimps.org>
+References: <20141211202119.GG17171@fenchurch.internal.datastacks.com>
+ <1418329324-8975-1-git-send-email-pjones@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20141229094732.GA16051-K5JNixvcfoxupOikMc4+xw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1418329324-8975-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Geoff Levand <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 29 December 2014 at 09:47, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org> wrote:
-> On Mon, Dec 29, 2014 at 09:25:15AM +0000, Ard Biesheuvel wrote:
->> Do you have any comments regarding patches #3 and #6 in this series?
->
-> Sorry, have had no time so far to take a look. Holidays and all...
-> You're on the TODO list though :-)
->
+On Thu, 11 Dec, at 03:22:04PM, Peter Jones wrote:
+> Add sysfs files for EFI System Resource Table under
+> /sys/firmware/efi/esrt and for each EFI System Resource Entry under
+> entries/ as a subdir.
+> 
+> v2 with suggestions from bpetkov.
+> v3 with me remembering checkpatch.
+> v4 without me typing struct decls completely wrong somehow.
+> 
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/Makefile |   2 +-
+>  drivers/firmware/efi/efi.c    |  46 ++++-
+>  drivers/firmware/efi/esrt.c   | 393 ++++++++++++++++++++++++++++++++++++++++++
+>  include/linux/efi.h           |   6 +
+>  4 files changed, 445 insertions(+), 2 deletions(-)
+>  create mode 100644 drivers/firmware/efi/esrt.c
+ 
+When this patch moves out of RFC I'd ideally like to see a much more
+expansive commit message.
 
-No worries, business has been slow for everyone, I'm sure.
+Why do we want this functionality, what's it going to be used for? What
+does the patch actaully do?  Where can we go looking for more
+information about ERST? You'll probably end up copying and pasting
+things from the top of erst.c, but that's fine.
 
-Regards,
-Ard.
+> @@ -220,6 +223,46 @@ err_put:
+>  
+>  subsys_initcall(efisubsys_init);
+>  
+> +/*
+> + * Given a physicall address, determine if it exists within an EFI Memory Map
+> + * entry, and if so, how much of that map exists at a higher address.  That
+> + * is, if this is the address of something in an EFI map, what's the highest
+> + * address at which it's likely to end.
+> + */
+> +u64 efi_mem_max_reasonable_size(u64 phys_addr)
+
+Confused. I think I know what you're saying here, but I'm also doing a
+fair bit of a guesswork.
+
+Instead, how about,
+
+extern struct efi_memory_desc_t *efi_mem_desc_lookup(u64 phys_addr);
+
+/*
+ * Return the end physical address of a EFI memory map region
+ */
+static inline u64 efi_mem_desc_end(struct efi_memory_desc_t *md)
+{
+	u64 size = md->num_pages << EFI_PAGE_SHIFT;
+
+	return md->phys_addr + size;
+}
+
+The caller can then do,
+
+	md = efi_mem_desc_lookup(phys_addr)
+	if (!md)
+		return -1;
+
+	bytes = efi_mem_desc_end(md) - phys_addr;
+	ioremap(phys_addr, bytes);
+
+I think leaving this "remaining bytes" logic in the ioremap() caller is
+the most robust solution because it's a quirky thing to want to do,
+whereas the other functions (efi_mem_desc_lookup() and
+efi_mem_desc_end()) are more general.
+
+Thoughts?
+
+[...]
+
+> +static inline int esrt_table_exists(void)
+> +{
+> +	if (!efi_enabled(EFI_CONFIG_TABLES))
+> +		return 0;
+> +	if (efi.esrt == EFI_INVALID_TABLE_ADDR)
+> +		return 0;
+> +	return 1;
+> +}
+
+Minor detail: this should be using 'bool'.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
