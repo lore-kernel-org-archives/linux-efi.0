@@ -1,40 +1,55 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/2] arm64: call early_ioremap_reset() in paging_init()
-Date: Mon,  5 Jan 2015 18:33:55 +0000
-Message-ID: <1420482835-6444-3-git-send-email-leif.lindholm@linaro.org>
-References: <1420482835-6444-1-git-send-email-leif.lindholm@linaro.org>
+From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [GIT PULL] EFI changes for next
+Date: Mon, 05 Jan 2015 11:28:09 -0800
+Message-ID: <1420486089.17206.35.camel@ranerica-desk01>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1420482835-6444-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
-Cc: ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-arm64 does not support early_memremap/memunmap/ioremap/iounmap after
-paging_init() has been called. The core early_*remap code handles this
-via the after_paging_init variable, which is set by a call to
-early_ioremap_reset().
+Hi Matt,
 
-However, arm64 currently does not call early_ioremap_reset(), which
-has made it possible to poke around in the fixmap region after kmap
-is enabled. Add the required call.
+Please pull the following changes for next. This includes a change in
+the help text of EFI firmware Kconfig to update the URL of efibootgr.
 
-Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/mm/mmu.c | 1 +
- 1 file changed, 1 insertion(+)
+It also renames the efi_guid_unparse to reflect better the behavior of
+the function.
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6032f3e..506544f 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -348,6 +348,7 @@ void __init paging_init(void)
- {
- 	void *zero_page;
- 
-+	early_ioremap_reset();
- 	map_mem();
- 
- 	/*
--- 
-2.1.3
+Thanks and BR,
+Ricardo
+
+The following changes since commit
+b7392d2247cfe6771f95d256374f1a8e6a6f48d6:
+
+  Linux 3.19-rc2 (2014-12-28 16:49:37 -0800)
+
+are available in the git repository at:
+
+  https://github.com/ricardon/efi.git tags/rneri-efi-next
+
+for you to fetch changes up to 2364a022398a7cda70494cf53b1b529bf88830b0:
+
+  efi: mv efi_guid_unparse -> efi_guid_to_str (2014-12-31 16:40:09
+-0800)
+
+----------------------------------------------------------------
+Updates on EFI firmware Kconfig help text and a function rename
+
+----------------------------------------------------------------
+Borislav Petkov (1):
+      efi: mv efi_guid_unparse -> efi_guid_to_str
+
+Peter Jones (1):
+      Update the URLs for efibootmgr.
+
+ block/partitions/efi.c         | 2 +-
+ drivers/firmware/efi/Kconfig   | 4 ++--
+ drivers/firmware/efi/efi.c     | 4 ++--
+ drivers/firmware/efi/efivars.c | 6 +++---
+ fs/efivarfs/super.c            | 2 +-
+ include/linux/efi.h            | 2 +-
+ 6 files changed, 10 insertions(+), 10 deletions(-)
