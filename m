@@ -1,52 +1,112 @@
-From: Laszlo Ersek <lersek@redhat.com>
-Subject: Re: Shorten efi regions output
-Date: Mon, 05 Jan 2015 16:00:51 +0100
-Message-ID: <54AAA723.1070605@redhat.com>
-References: <20141209095843.GA3990@pd.tnic> <20141210021741.GA3280@darkstar.nay.redhat.com> <20141210104627.GA17053@pd.tnic> <20150105140332.GB3163@console-pimps.org>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFC PATCH] Add esrt support.
+Date: Mon, 5 Jan 2015 10:10:38 -0500
+Message-ID: <20150105151038.GA28206@fenchurch.internal.datastacks.com>
+References: <20141211202119.GG17171@fenchurch.internal.datastacks.com>
+ <1418329324-8975-1-git-send-email-pjones@redhat.com>
+ <20150105135113.GA3163@console-pimps.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150105140332.GB3163@console-pimps.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>, Borislav Petkov <bp@alien8.de>
-Cc: Dave Young <dyoung@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt.fleming@intel.com>, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>, lkml <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150105135113.GA3163-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 01/05/15 15:03, Matt Fleming wrote:
-> On Wed, 10 Dec, at 11:46:28AM, Borislav Petkov wrote:
->> On Wed, Dec 10, 2014 at 10:17:41AM +0800, Dave Young wrote:
->>> I have same feeling with you, it is too long for most of people.
->>>
->>> Since the printk code are for EFI_DEBUG, they are around the #ifdef
->>> so I would like to see a kernel param like efi_debug=on, so only
->>> efi_debug is specified then these verbose messages are printed.
->>> Without the param kernel can print some basic infomation about the
->>> memory ranges.
->>>
->>> In arm64 code there's already a uefi_debug param it can be moved to
->>> general code so that there will be a goable switch.
->>
->> Hmm, makes sense to me. Maybe we should really hide those behind a
->> debug switch, the question is whether asking the user to boot with
->> "efi_debug=on" in order to see the regions is ok. And I think it is ok
->> because we do that when debugging other stuff so I don't see anything
->> different here.
->>
->> And then when they're disabled by default, we don't really need to
->> shorten them as they're pure debug output then.
->>
->> Matt?
+On Mon, Jan 05, 2015 at 01:51:13PM +0000, Matt Fleming wrote:
+> On Thu, 11 Dec, at 03:22:04PM, Peter Jones wrote:
+> > Add sysfs files for EFI System Resource Table under
+> > /sys/firmware/efi/esrt and for each EFI System Resource Entry under
+> > entries/ as a subdir.
+> > 
+> > v2 with suggestions from bpetkov.
+> > v3 with me remembering checkpatch.
+> > v4 without me typing struct decls completely wrong somehow.
+> > 
+> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > ---
+> >  drivers/firmware/efi/Makefile |   2 +-
+> >  drivers/firmware/efi/efi.c    |  46 ++++-
+> >  drivers/firmware/efi/esrt.c   | 393 ++++++++++++++++++++++++++++++++++++++++++
+> >  include/linux/efi.h           |   6 +
+> >  4 files changed, 445 insertions(+), 2 deletions(-)
+> >  create mode 100644 drivers/firmware/efi/esrt.c
+>  
+> When this patch moves out of RFC I'd ideally like to see a much more
+> expansive commit message.
 > 
-> I'm fine with disabling the EFI memory output regions by default.
-> 
-> Printing the regions is still useful for debugging, but like you
-> mention, we frequently ask users to enable other debug options when
-> tracking down issues.
-> 
-> Laszlo, would you be OK with that?
+> Why do we want this functionality, what's it going to be used for? What
+> does the patch actaully do?  Where can we go looking for more
+> information about ERST? You'll probably end up copying and pasting
+> things from the top of erst.c, but that's fine.
 
-Sure.
+Yeah, fair enough.
 
-Thanks
-Laszlo
+> 
+> > @@ -220,6 +223,46 @@ err_put:
+> >  
+> >  subsys_initcall(efisubsys_init);
+> >  
+> > +/*
+> > + * Given a physicall address, determine if it exists within an EFI Memory Map
+> > + * entry, and if so, how much of that map exists at a higher address.  That
+> > + * is, if this is the address of something in an EFI map, what's the highest
+> > + * address at which it's likely to end.
+> > + */
+> > +u64 efi_mem_max_reasonable_size(u64 phys_addr)
+> 
+> Confused. I think I know what you're saying here, but I'm also doing a
+> fair bit of a guesswork.
+> 
+> Instead, how about,
+> 
+> extern struct efi_memory_desc_t *efi_mem_desc_lookup(u64 phys_addr);
+> 
+> /*
+>  * Return the end physical address of a EFI memory map region
+>  */
+> static inline u64 efi_mem_desc_end(struct efi_memory_desc_t *md)
+> {
+> 	u64 size = md->num_pages << EFI_PAGE_SHIFT;
+> 
+> 	return md->phys_addr + size;
+> }
+> 
+> The caller can then do,
+> 
+> 	md = efi_mem_desc_lookup(phys_addr)
+> 	if (!md)
+> 		return -1;
+> 
+> 	bytes = efi_mem_desc_end(md) - phys_addr;
+> 	ioremap(phys_addr, bytes);
+> 
+> I think leaving this "remaining bytes" logic in the ioremap() caller is
+> the most robust solution because it's a quirky thing to want to do,
+> whereas the other functions (efi_mem_desc_lookup() and
+> efi_mem_desc_end()) are more general.
+> 
+> Thoughts?
+
+I can be okay with this.
+
+> 
+> [...]
+> 
+> > +static inline int esrt_table_exists(void)
+> > +{
+> > +	if (!efi_enabled(EFI_CONFIG_TABLES))
+> > +		return 0;
+> > +	if (efi.esrt == EFI_INVALID_TABLE_ADDR)
+> > +		return 0;
+> > +	return 1;
+> > +}
+> 
+> Minor detail: this should be using 'bool'.
+
+Thanks.  I'll send a new patch soon.
+
+-- 
+        Peter
