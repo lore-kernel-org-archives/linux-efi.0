@@ -1,39 +1,35 @@
 From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [RFC] fs: make efivarfs a pseudo filesystem, built by default
- with EFI
-Date: Mon, 5 Jan 2015 14:15:21 +0000
-Message-ID: <20150105141521.GC3163@console-pimps.org>
-References: <1418925049-3659-1-git-send-email-leif.lindholm@linaro.org>
+Subject: Re: [PATCH v4 3/8] efi: split off remapping code from
+ efi_config_init()
+Date: Mon, 5 Jan 2015 14:55:10 +0000
+Message-ID: <20150105145510.GD3163@console-pimps.org>
+References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1419245944-2424-4-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1418925049-3659-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1419245944-2424-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org, matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org, jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 18 Dec, at 05:50:49PM, Leif Lindholm wrote:
-> efivars is currently enabled under MISC_FILESYSTEMS, which is decribed
-> as "such as filesystems that came from other operating systems".
-> In reality, it is a pseudo filesystem, providing access to the kernel
-> UEFI variable interface.
+On Mon, 22 Dec, at 10:58:59AM, Ard Biesheuvel wrote:
+> Split of the remapping code from efi_config_init() so that the caller
+> can perform its own remapping. This is necessary to correctly handle
+> virtually remapped UEFI memory regions under kexec, as efi.systab will
+> have been updated to a virtual address.
 > 
-> Since this is the preferred interface for accessing UEFI variables, over
-> the legacy efivars interface, also build it by default as a module if
-> CONFIG_EFI.
-> 
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  fs/Kconfig          | 2 +-
->  fs/efivarfs/Kconfig | 1 +
->  2 files changed, 2 insertions(+), 1 deletion(-)
+>  drivers/firmware/efi/efi.c | 49 +++++++++++++++++++++++++++++-----------------
+>  include/linux/efi.h        |  2 ++
+>  2 files changed, 33 insertions(+), 18 deletions(-)
 
-Looks good to me Leif.
+Looks good Ard.
 
-Unless I hear otherwise, I'll apply this to the 'next' branch of the EFI
-tree this week.
+Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
