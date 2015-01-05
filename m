@@ -1,112 +1,188 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [RFC PATCH] Add esrt support.
-Date: Mon, 5 Jan 2015 10:10:38 -0500
-Message-ID: <20150105151038.GA28206@fenchurch.internal.datastacks.com>
-References: <20141211202119.GG17171@fenchurch.internal.datastacks.com>
- <1418329324-8975-1-git-send-email-pjones@redhat.com>
- <20150105135113.GA3163@console-pimps.org>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v4 6/8] arm64/efi: move SetVirtualAddressMap() to UEFI
+ stub
+Date: Mon, 5 Jan 2015 16:20:16 +0000
+Message-ID: <20150105162016.GD26699@leverpostej>
+References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1419245944-2424-7-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150105135113.GA3163-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+In-Reply-To: <1419245944-2424-7-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 05, 2015 at 01:51:13PM +0000, Matt Fleming wrote:
-> On Thu, 11 Dec, at 03:22:04PM, Peter Jones wrote:
-> > Add sysfs files for EFI System Resource Table under
-> > /sys/firmware/efi/esrt and for each EFI System Resource Entry under
-> > entries/ as a subdir.
-> > 
-> > v2 with suggestions from bpetkov.
-> > v3 with me remembering checkpatch.
-> > v4 without me typing struct decls completely wrong somehow.
-> > 
-> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  drivers/firmware/efi/Makefile |   2 +-
-> >  drivers/firmware/efi/efi.c    |  46 ++++-
-> >  drivers/firmware/efi/esrt.c   | 393 ++++++++++++++++++++++++++++++++++++++++++
-> >  include/linux/efi.h           |   6 +
-> >  4 files changed, 445 insertions(+), 2 deletions(-)
-> >  create mode 100644 drivers/firmware/efi/esrt.c
->  
-> When this patch moves out of RFC I'd ideally like to see a much more
-> expansive commit message.
-> 
-> Why do we want this functionality, what's it going to be used for? What
-> does the patch actaully do?  Where can we go looking for more
-> information about ERST? You'll probably end up copying and pasting
-> things from the top of erst.c, but that's fine.
+Hi Ard,
 
-Yeah, fair enough.
+I have a few (minor) comments below.
 
+On Mon, Dec 22, 2014 at 10:59:02AM +0000, Ard Biesheuvel wrote:
+> In order to support kexec, the kernel needs to be able to deal with the
+> state of the UEFI firmware after SetVirtualAddressMap() has been called.
+> To avoid having separate code paths for non-kexec and kexec, let's move
+> the call to SetVirtualAddressMap() to the stub: this will guarantee us
+> that it will only be called once (since the stub is not executed during
+> kexec), and ensures that the UEFI state is identical between kexec and
+> normal boot.
 > 
-> > @@ -220,6 +223,46 @@ err_put:
-> >  
-> >  subsys_initcall(efisubsys_init);
-> >  
-> > +/*
-> > + * Given a physicall address, determine if it exists within an EFI Memory Map
-> > + * entry, and if so, how much of that map exists at a higher address.  That
-> > + * is, if this is the address of something in an EFI map, what's the highest
-> > + * address at which it's likely to end.
-> > + */
-> > +u64 efi_mem_max_reasonable_size(u64 phys_addr)
+> This implies that the layout of the virtual mapping needs to be created
+> by the stub as well. All regions are rounded up to a naturally aligned
+> multiple of 64 KB (for compatibility with 64k pages kernels) and recorded
+> in the UEFI memory map. The kernel proper reads those values and installs
+> the mappings in a dedicated set of page tables that are swapped in during
+> UEFI Runtime Services calls.
 > 
-> Confused. I think I know what you're saying here, but I'm also doing a
-> fair bit of a guesswork.
-> 
-> Instead, how about,
-> 
-> extern struct efi_memory_desc_t *efi_mem_desc_lookup(u64 phys_addr);
-> 
-> /*
->  * Return the end physical address of a EFI memory map region
->  */
-> static inline u64 efi_mem_desc_end(struct efi_memory_desc_t *md)
-> {
-> 	u64 size = md->num_pages << EFI_PAGE_SHIFT;
-> 
-> 	return md->phys_addr + size;
-> }
-> 
-> The caller can then do,
-> 
-> 	md = efi_mem_desc_lookup(phys_addr)
-> 	if (!md)
-> 		return -1;
-> 
-> 	bytes = efi_mem_desc_end(md) - phys_addr;
-> 	ioremap(phys_addr, bytes);
-> 
-> I think leaving this "remaining bytes" logic in the ioremap() caller is
-> the most robust solution because it's a quirky thing to want to do,
-> whereas the other functions (efi_mem_desc_lookup() and
-> efi_mem_desc_end()) are more general.
-> 
-> Thoughts?
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/include/asm/efi.h       |  20 +++-
+>  arch/arm64/kernel/efi.c            | 223 ++++++++++++++++++++-----------------
+>  arch/arm64/kernel/setup.c          |   1 +
+>  drivers/firmware/efi/libstub/fdt.c | 137 ++++++++++++++++++++++-
+>  4 files changed, 270 insertions(+), 111 deletions(-)
 
-I can be okay with this.
+[...]
 
-> 
-> [...]
-> 
-> > +static inline int esrt_table_exists(void)
-> > +{
-> > +	if (!efi_enabled(EFI_CONFIG_TABLES))
-> > +		return 0;
-> > +	if (efi.esrt == EFI_INVALID_TABLE_ADDR)
-> > +		return 0;
-> > +	return 1;
-> > +}
-> 
-> Minor detail: this should be using 'bool'.
+> +static void efi_set_pgd(struct mm_struct *mm)
+> +{
+> +       cpu_switch_mm(mm->pgd, mm);
+> +       flush_tlb_all();
+> +       if (icache_is_aivivt())
+> +               __flush_icache_all();
+> +}
 
-Thanks.  I'll send a new patch soon.
+Do we have any idea how often we call runtime services?
 
--- 
-        Peter
+I assume not all that often (read the RTC at boot, set/get variables).
+
+If we're nuking the TLBs and I-cache a lot we'll probably need to
+reserve an asid for the EFI virtmap.
+
+[...]
+
+> +void __init efi_virtmap_init(void)
+> +{
+> +       efi_memory_desc_t *md;
+> +
+> +       if (!efi_enabled(EFI_BOOT))
+> +               return;
+> +
+> +       for_each_efi_memory_desc(&memmap, md) {
+> +               u64 paddr, npages, size;
+> +               pgprot_t prot;
+> +
+> +               if (!(md->attribute & EFI_MEMORY_RUNTIME))
+> +                       continue;
+> +               if (WARN(md->virt_addr == 0,
+> +                        "UEFI virtual mapping incomplete or missing -- no entry found for 0x%llx\n",
+> +                        md->phys_addr))
+> +                       return;
+
+I wonder if we might want to use a different address to signal a bad
+mapping (e.g. 0UL-1 as it's not even EFI_PAGE_SIZE aligned), just in
+case we have to handle a valid use of zero in future for some reason --
+perhaps coming from another OS.
+
+> +
+> +               paddr = md->phys_addr;
+> +               npages = md->num_pages;
+> +               memrange_efi_to_native(&paddr, &npages);
+> +               size = npages << PAGE_SHIFT;
+> +
+> +               pr_info("  EFI remap 0x%012llx => %p\n",
+
+Why not use %016llx? We might only have 48-bit PAs currently, but we may
+as well keep the VA and PA equally long when printing out -- that'll
+also help to identify issues with garbage in the upper 16 bits of the
+PA field.
+
+[...]
+
+> +/*
+> + * This is the base address at which to start allocating virtual memory ranges
+> + * for UEFI Runtime Services. This is a userland range so that we can use any
+> + * allocation we choose, and eliminate the risk of a conflict after kexec.
+> + */
+> +#define EFI_RT_VIRTUAL_BASE    0x40000000
+
+Nit: I'm not keen on the term "userland" here. You can map stuff to EL0
+in the high half of the address space if you wanted, so TTBR0/TTBR1
+aren't architecturally user/kernel.
+
+s/userland/low half/, perhaps?
+
+It might also be worth pointing out that the arbitrary base address
+isn't zero so as to be less likely to be an idmap.
+
+> +
+> +static void update_memory_map(efi_memory_desc_t *memory_map,
+> +                             unsigned long map_size, unsigned long desc_size,
+> +                             int *count)
+> +{
+> +       u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
+> +       efi_memory_desc_t *out = (void *)memory_map + map_size;
+> +       int l;
+> +
+> +       for (l = 0; l < map_size; l += desc_size) {
+> +               efi_memory_desc_t *in = (void *)memory_map + l;
+> +               u64 paddr, size;
+> +
+> +               if (!(in->attribute & EFI_MEMORY_RUNTIME))
+> +                       continue;
+> +
+> +               /*
+> +                * Make the mapping compatible with 64k pages: this allows
+> +                * a 4k page size kernel to kexec a 64k page size kernel and
+> +                * vice versa.
+> +                */
+> +               paddr = round_down(in->phys_addr, SZ_64K);
+> +               size = round_up(in->num_pages * EFI_PAGE_SIZE +
+> +                               in->phys_addr - paddr, SZ_64K);
+> +
+> +               /*
+> +                * Avoid wasting memory on PTEs by choosing a virtual base that
+> +                * is compatible with section mappings if this region has the
+> +                * appropriate size and physical alignment. (Sections are 2 MB
+> +                * on 4k granule kernels)
+> +                */
+> +               if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
+> +                       efi_virt_base = round_up(efi_virt_base, SZ_2M);
+> +
+> +               in->virt_addr = efi_virt_base + in->phys_addr - paddr;
+> +               efi_virt_base += size;
+> +
+> +               memcpy(out, in, desc_size);
+> +               out = (void *)out + desc_size;
+> +               ++*count;
+> +       }
+> +}
+
+This feels like this should live in arch/arm64, or under some other
+directory specific to arm/arm64. That said, I guess the fdt stuff is
+currently arm-specific anyway, so perhaps this is fine.
+
+[...]
+
+> @@ -248,12 +337,52 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+>                 }
+>         }
+> 
+> +       /*
+> +        * Update the memory map with virtual addresses. The function will also
+> +        * populate the spare second half of the memory_map allocation with
+> +        * copies of just the EFI_MEMORY_RUNTIME entries so that we can pass it
+> +        * straight into SetVirtualAddressMap()
+> +        */
+> +       update_memory_map(memory_map, map_size, desc_size,
+> +                         &runtime_entry_count);
+> +
+> +       pr_efi(sys_table,
+> +              "Exiting boot services and installing virtual address map...\n");
+
+I believe that the memory map is allowed to change as a result of this
+call, so I think this needs to be moved before update_memory_map.
+
+Thanks,
+Mark.
