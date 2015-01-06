@@ -1,50 +1,78 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm64: call early_ioremap_reset() in paging_init()
-Date: Tue, 6 Jan 2015 09:39:52 +0000
-Message-ID: <CAKv+Gu9G8R7CscCBw9Xg1SrJgUMjDtbOCaTSw+3BOAFXBmBVcg@mail.gmail.com>
-References: <1420482835-6444-1-git-send-email-leif.lindholm@linaro.org>
-	<1420482835-6444-3-git-send-email-leif.lindholm@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: [GIT PULL] EFI changes for next
+Date: Tue, 6 Jan 2015 13:04:36 +0000
+Message-ID: <20150106130436.GJ3163@console-pimps.org>
+References: <1420486089.17206.35.camel@ranerica-desk01>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1420482835-6444-3-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1420486089.17206.35.camel@ranerica-desk01>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5 January 2015 at 18:33, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> arm64 does not support early_memremap/memunmap/ioremap/iounmap after
-> paging_init() has been called. The core early_*remap code handles this
-> via the after_paging_init variable, which is set by a call to
-> early_ioremap_reset().
->
-> However, arm64 currently does not call early_ioremap_reset(), which
-> has made it possible to poke around in the fixmap region after kmap
-> is enabled. Add the required call.
->
-> Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Mon, 05 Jan, at 11:28:09AM, Ricardo Neri wrote:
+> Hi Matt,
+> 
+> Please pull the following changes for next. This includes a change in
+> the help text of EFI firmware Kconfig to update the URL of efibootgr.
+> 
+> It also renames the efi_guid_unparse to reflect better the behavior of
+> the function.
+> 
+> Thanks and BR,
+> Ricardo
+> 
+> The following changes since commit
+> b7392d2247cfe6771f95d256374f1a8e6a6f48d6:
+> 
+>   Linux 3.19-rc2 (2014-12-28 16:49:37 -0800)
+ 
+Is there a reason that you based the patches onto -rc2?
 
-Perhaps add 'Fixes' and 'Cc: stable' tags as well?
+What I tend to do is try and apply the patches onto the existing EFI
+'next' branch first. If they don't apply only then will I rebase 'next'
+onto a more recent release tag.
 
+This is a habit I picked up from the tip folks, and it keeps the history
+much cleaner.
 
-> ---
->  arch/arm64/mm/mmu.c | 1 +
->  1 file changed, 1 insertion(+)
->
-> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-> index 6032f3e..506544f 100644
-> --- a/arch/arm64/mm/mmu.c
-> +++ b/arch/arm64/mm/mmu.c
-> @@ -348,6 +348,7 @@ void __init paging_init(void)
->  {
->         void *zero_page;
->
-> +       early_ioremap_reset();
->         map_mem();
->
->         /*
-> --
-> 2.1.3
->
+Both of the below commits apply cleanly on 'next' (which is based on
+v3.18-rc2). Could you send me another pull request against 'next'?
+Thanks!
+
+> are available in the git repository at:
+> 
+>   https://github.com/ricardon/efi.git tags/rneri-efi-next
+> 
+> for you to fetch changes up to 2364a022398a7cda70494cf53b1b529bf88830b0:
+> 
+>   efi: mv efi_guid_unparse -> efi_guid_to_str (2014-12-31 16:40:09
+> -0800)
+> 
+> ----------------------------------------------------------------
+> Updates on EFI firmware Kconfig help text and a function rename
+> 
+> ----------------------------------------------------------------
+> Borislav Petkov (1):
+>       efi: mv efi_guid_unparse -> efi_guid_to_str
+ 
+Borislav, you're renaming the function, not moving it. The rest of the
+commit log is fine but how about rewording the title to,
+
+  "efi: Rename efi_guid_unparse to efi_guid_to_str"
+
+I don't think you need to resubmit it, I'd usually fix this up when I
+applied your patch, so Ricardo can do that before he resends his pull.
+
+> Peter Jones (1):
+>       Update the URLs for efibootmgr.
+ 
+This commit needs a subsystem prefix ("efi:"), and we should probably Cc
+Matt Domsch too. Ricardo could you take care of this, unless Peter
+objects?
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
