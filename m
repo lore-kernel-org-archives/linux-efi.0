@@ -1,42 +1,56 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 2/2] arm64: call early_ioremap_reset() in paging_init()
-Date: Tue,  6 Jan 2015 13:41:13 +0000
-Message-ID: <1420551673-31416-3-git-send-email-leif.lindholm@linaro.org>
-References: <1420551673-31416-1-git-send-email-leif.lindholm@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1420551673-31416-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: Re: [PATCH 1/2] arm64: don't make early_*map() calls post
+ paging_init()
+Date: Tue, 6 Jan 2015 13:39:17 +0000
+Message-ID: <20150106133917.GB3827@bivouac.eciton.net>
+References: <1420482835-6444-1-git-send-email-leif.lindholm@linaro.org>
+ <1420482835-6444-2-git-send-email-leif.lindholm@linaro.org>
+ <CAKv+Gu_EWCYYcmsLuojGGQ+6x+Lp5fWJQ+4fvR-4fqXqU2f53Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_EWCYYcmsLuojGGQ+6x+Lp5fWJQ+4fvR-4fqXqU2f53Q@mail.gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-arm64 does not support early_memremap/memunmap/ioremap/iounmap after
-paging_init() has been called. The core early_*remap code handles this
-via the after_paging_init variable, which is set by a call to
-early_ioremap_reset().
+On Tue, Jan 06, 2015 at 09:38:24AM +0000, Ard Biesheuvel wrote:
+> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> > index 6fac253..790adb5 100644
+> > --- a/arch/arm64/kernel/efi.c
+> > +++ b/arch/arm64/kernel/efi.c
 
-However, arm64 currently does not call early_ioremap_reset(), which
-has made it possible to poke around in the fixmap region after kmap
-is enabled. Add the required call.
+> > @@ -393,6 +385,8 @@ static int __init arm64_enter_virtual_mode(void)
+> >                                                    mapsize);
+> >         memmap.map_end = memmap.map + mapsize;
+> >
+> > +       efi_setup_idmap();
+> > +
+> 
+> I think this is incorrect: we may call early_alloc() here which is
+> only allowed before paging_init()
 
-Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Fixes: bf4b558eba92 ("arm64: add early_ioremap support")
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/mm/mmu.c | 1 +
- 1 file changed, 1 insertion(+)
+Hmm...
+Technically, the existing code is already breaking this restriction
+then - but my patch moved that _way_ later in the boot process (early
+initcall instead of setup_arch()).
 
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6032f3e..506544f 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -348,6 +348,7 @@ void __init paging_init(void)
- {
- 	void *zero_page;
- 
-+	early_ioremap_reset();
- 	map_mem();
- 
- 	/*
--- 
-2.1.3
+I'll resend with an alternative solution that leaves the
+efi_setup_idmap() ordering vs paging init() in its current state.
+Since efi_setup_idmap() goes away with your "stable UEFI virtual
+mappings for kexec" series, I don't want to make changes here and for
+potential backports too invasive.
+
+/
+    Leif
