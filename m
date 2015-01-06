@@ -1,47 +1,49 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 0/2] arm64: don't call early_*map() post paging_init()
-Date: Tue, 6 Jan 2015 16:23:58 +0000
-Message-ID: <CAKv+Gu8nsdCiKM3fOZ6KSMKJ2-1==TyNv8W2Fo6R4jeO3AsgDg@mail.gmail.com>
-References: <1420551673-31416-1-git-send-email-leif.lindholm@linaro.org>
-	<20150106135941.GA3484@arm.com>
-	<CAKv+Gu-nYC1VaJW6ULY0AantA681xZyxqqC+nQq91nj5t7w4OQ@mail.gmail.com>
-	<20150106155208.GC3827@bivouac.eciton.net>
-	<CAKv+Gu9uWRmLBrnoUNsEcymguiUwgXUc8UVkLO0N21UywuGT=A@mail.gmail.com>
-	<20150106160511.GD3484@arm.com>
+From: Leif Lindholm <leif.lindholm@linaro.org>
+Subject: Re: [PATCH v4 5/8] arm64/efi: set EFI_ALLOC_ALIGN to 64 KB
+Date: Tue, 6 Jan 2015 16:37:00 +0000
+Message-ID: <20150106163700.GD3827@bivouac.eciton.net>
+References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1419245944-2424-6-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150106160511.GD3484-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <1419245944-2424-6-git-send-email-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, geoff.levand@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, roy.franz@linaro.org, matt.fleming@intel.com, bp@alien8.de, msalter@redhat.com, dyoung@redhat.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On 6 January 2015 at 16:05, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Tue, Jan 06, 2015 at 03:54:29PM +0000, Ard Biesheuvel wrote:
->> On 6 January 2015 at 15:52, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > On Tue, Jan 06, 2015 at 02:04:50PM +0000, Ard Biesheuvel wrote:
->> >> >> Changes since v1:
->> >> >> - Rebased to v3.19-rc3
->> >> >> - Added 'Fixes:' tags
->> >> >> - Reworked 1/2 to restore call to efi_setup_idmap() to the original
->> >> >>   location in the boot process.
->> >> >
->> >> > Looks reasonable to me; do they need a CC stable,
->> >>
->> >> Yes, but with a note that both patches should be taken and the order
->> >> is retained, or we break bisect.
->> >
->> > Where would one add such a note?
->> >
->>
->> I guess the best way would be to not add a 'Cc: stable' tag, but send
->> an email to Greg once the patches have been merged by Linus.
->
-> I thought Greg didn't take anything until it had hit mainline anyway? I
-> think it should be fine with just the Cc...
->
+On Mon, Dec 22, 2014 at 10:59:01AM +0000, Ard Biesheuvel wrote:
+> Set EFI_ALLOC_ALIGN to 64 KB so that all allocations done by the stub
+> are naturally compatible with a 64 KB granule kernel.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  arch/arm64/include/asm/efi.h | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+> index a34fd3b12e2b..71291253114f 100644
+> --- a/arch/arm64/include/asm/efi.h
+> +++ b/arch/arm64/include/asm/efi.h
+> @@ -44,4 +44,6 @@ extern void efi_idmap_init(void);
+>  
+>  #define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
+>  
+> +#define EFI_ALLOC_ALIGN		SZ_64K
+> +
+>  #endif /* _ASM_EFI_H */
+> -- 
+> 1.8.3.2
 
-I know he doesn't, but do you know for a fact that he always takes
-patches in the same order they appear in mainline? It would seem like
-the reasonable thing to do, I guess, but we just have to make sure.
+Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
