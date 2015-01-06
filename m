@@ -1,78 +1,121 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for next
-Date: Tue, 6 Jan 2015 13:04:36 +0000
-Message-ID: <20150106130436.GJ3163@console-pimps.org>
-References: <1420486089.17206.35.camel@ranerica-desk01>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 1/2] arm64: don't make early_*map() calls post paging_init()
+Date: Tue,  6 Jan 2015 13:41:12 +0000
+Message-ID: <1420551673-31416-2-git-send-email-leif.lindholm@linaro.org>
+References: <1420551673-31416-1-git-send-email-leif.lindholm@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1420486089.17206.35.camel@ranerica-desk01>
+In-Reply-To: <1420551673-31416-1-git-send-email-leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 05 Jan, at 11:28:09AM, Ricardo Neri wrote:
-> Hi Matt,
-> 
-> Please pull the following changes for next. This includes a change in
-> the help text of EFI firmware Kconfig to update the URL of efibootgr.
-> 
-> It also renames the efi_guid_unparse to reflect better the behavior of
-> the function.
-> 
-> Thanks and BR,
-> Ricardo
-> 
-> The following changes since commit
-> b7392d2247cfe6771f95d256374f1a8e6a6f48d6:
-> 
->   Linux 3.19-rc2 (2014-12-28 16:49:37 -0800)
+arm64 early_ioremap/iounmap/memremap/memunmap are not supported beyond
+the call to paging_init(), but arm64_enter_virtual_mode() (an early
+initcall) makes one call to unmap the UEFI memory map.
+
+Rearrange the code to unmap this region before paging_init(), and then
+pull back the remapping of the EFI memory map to the second part of
+UEFI initialisation - efi_idmap_init() - renaming that function as
+efi_memmap_init(), which better describes what it now does.
+
+Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Fixes: f84d02755f5a ("arm64: add EFI runtime services")
+---
+ arch/arm64/include/asm/efi.h |  4 ++--
+ arch/arm64/kernel/efi.c      | 27 ++++++++++++++-------------
+ arch/arm64/kernel/setup.c    |  2 +-
+ 3 files changed, 17 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index a34fd3b..92f4d44 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -6,10 +6,10 @@
  
-Is there a reason that you based the patches onto -rc2?
-
-What I tend to do is try and apply the patches onto the existing EFI
-'next' branch first. If they don't apply only then will I rebase 'next'
-onto a more recent release tag.
-
-This is a habit I picked up from the tip folks, and it keeps the history
-much cleaner.
-
-Both of the below commits apply cleanly on 'next' (which is based on
-v3.18-rc2). Could you send me another pull request against 'next'?
-Thanks!
-
-> are available in the git repository at:
-> 
->   https://github.com/ricardon/efi.git tags/rneri-efi-next
-> 
-> for you to fetch changes up to 2364a022398a7cda70494cf53b1b529bf88830b0:
-> 
->   efi: mv efi_guid_unparse -> efi_guid_to_str (2014-12-31 16:40:09
-> -0800)
-> 
-> ----------------------------------------------------------------
-> Updates on EFI firmware Kconfig help text and a function rename
-> 
-> ----------------------------------------------------------------
-> Borislav Petkov (1):
->       efi: mv efi_guid_unparse -> efi_guid_to_str
+ #ifdef CONFIG_EFI
+ extern void efi_init(void);
+-extern void efi_idmap_init(void);
++extern void efi_memmap_init(void);
+ #else
+ #define efi_init()
+-#define efi_idmap_init()
++#define efi_memmap_init()
+ #endif
  
-Borislav, you're renaming the function, not moving it. The rest of the
-commit log is fine but how about rewording the title to,
-
-  "efi: Rename efi_guid_unparse to efi_guid_to_str"
-
-I don't think you need to resubmit it, I'd usually fix this up when I
-applied your patch, so Ricardo can do that before he resends his pull.
-
-> Peter Jones (1):
->       Update the URLs for efibootmgr.
+ #define efi_call_virt(f, ...)						\
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 6fac253..e311066 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -313,17 +313,26 @@ void __init efi_init(void)
+ 	memmap.desc_size = params.desc_size;
+ 	memmap.desc_version = params.desc_ver;
  
-This commit needs a subsystem prefix ("efi:"), and we should probably Cc
-Matt Domsch too. Ricardo could you take care of this, unless Peter
-objects?
-
+-	if (uefi_init() < 0)
+-		return;
++	if (uefi_init() >= 0)
++		reserve_regions();
+ 
+-	reserve_regions();
++	early_memunmap(memmap.map, params.mmap_size);
+ }
+ 
+-void __init efi_idmap_init(void)
++void __init efi_memmap_init(void)
+ {
++	u64 mapsize;
++
+ 	if (!efi_enabled(EFI_BOOT))
+ 		return;
+ 
++	/* replace early memmap mapping with permanent mapping */
++	mapsize = memmap.map_end - memmap.map;
++	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
++						   mapsize);
++	memmap.map_end = memmap.map + mapsize;
++	efi.memmap = &memmap;
++
+ 	/* boot time idmap_pg_dir is incomplete, so fill in missing parts */
+ 	efi_setup_idmap();
+ }
+@@ -379,23 +388,15 @@ static int __init arm64_enter_virtual_mode(void)
+ 		return -1;
+ 	}
+ 
+-	mapsize = memmap.map_end - memmap.map;
+-	early_memunmap(memmap.map, mapsize);
+-
+ 	if (efi_runtime_disabled()) {
+ 		pr_info("EFI runtime services will be disabled.\n");
+ 		return -1;
+ 	}
+ 
+ 	pr_info("Remapping and enabling EFI services.\n");
+-	/* replace early memmap mapping with permanent mapping */
+-	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+-						   mapsize);
+-	memmap.map_end = memmap.map + mapsize;
+-
+-	efi.memmap = &memmap;
+ 
+ 	/* Map the runtime regions */
++	mapsize = memmap.map_end - memmap.map;
+ 	virtmap = kmalloc(mapsize, GFP_KERNEL);
+ 	if (!virtmap) {
+ 		pr_err("Failed to allocate EFI virtual memmap\n");
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index b809911..ebf7820 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -401,7 +401,7 @@ void __init setup_arch(char **cmdline_p)
+ 	paging_init();
+ 	request_standard_resources();
+ 
+-	efi_idmap_init();
++	efi_memmap_init();
+ 
+ 	unflatten_device_tree();
+ 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+2.1.3
