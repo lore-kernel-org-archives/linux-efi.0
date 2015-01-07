@@ -1,122 +1,59 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] efivars: avoid potential null-dereference
-Date: Wed,  7 Jan 2015 04:08:20 +0200
-Message-ID: <1420596500-32158-1-git-send-email-andy.shevchenko@gmail.com>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] arm64: don't make early_*map() calls post
+ paging_init()
+Date: Wed, 7 Jan 2015 10:58:41 +0000
+Message-ID: <20150107105841.GE7485@arm.com>
+References: <1420551673-31416-1-git-send-email-leif.lindholm@linaro.org>
+ <1420551673-31416-2-git-send-email-leif.lindholm@linaro.org>
+ <1420576522.16211.30.camel@t520.localdomain>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1420576522.16211.30.camel-SI7Dh15yCUp82hYKe6nXyg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-We have to check the pointer before dereferencing it. The patch fixes
-such issues in the efivars module.
+On Tue, Jan 06, 2015 at 08:35:22PM +0000, Mark Salter wrote:
+> On Tue, 2015-01-06 at 13:41 +0000, Leif Lindholm wrote:
+> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> > index 6fac253..e311066 100644
+> > --- a/arch/arm64/kernel/efi.c
+> > +++ b/arch/arm64/kernel/efi.c
+> > @@ -313,17 +313,26 @@ void __init efi_init(void)
+> >  	memmap.desc_size = params.desc_size;
+> >  	memmap.desc_version = params.desc_ver;
+> >  
+> > -	if (uefi_init() < 0)
+> > -		return;
+> > +	if (uefi_init() >= 0)
+> > +		reserve_regions();
+> >  
+> > -	reserve_regions();
+> > +	early_memunmap(memmap.map, params.mmap_size);
+> >  }
+> >  
+> > -void __init efi_idmap_init(void)
+> > +void __init efi_memmap_init(void)
+> >  {
+> > +	u64 mapsize;
+> > +
+> >  	if (!efi_enabled(EFI_BOOT))
+> >  		return;
+> >  
+> > +	/* replace early memmap mapping with permanent mapping */
+> > +	mapsize = memmap.map_end - memmap.map;
+> > +	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+> > +						   mapsize);
+> 
+> ioremap_cache() could potententially fail here if the phys_map address
+> doesn't have a valid pfn (not in the kernel linear ram mapping) because
+> some of the underlying vm support hasn't been initialized yet.
 
-Signed-off-by: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efi/efivars.c | 24 +++++++++++++++++-------
- 1 file changed, 17 insertions(+), 7 deletions(-)
+Can you be more specific about the case you have in mind, please? pfn_valid
+uses the memblocks on arm64, and that should all have been sorted out in
+paging_init(). What's the issue that you're anticipating?
 
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index f256ecd..e62ef79 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -122,12 +122,14 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var);
- static ssize_t
- efivar_guid_read(struct efivar_entry *entry, char *buf)
- {
--	struct efi_variable *var = &entry->var;
-+	struct efi_variable *var;
- 	char *str = buf;
- 
- 	if (!entry || !buf)
- 		return 0;
- 
-+	var = &entry->var;
-+
- 	efi_guid_unparse(&var->VendorGuid, str);
- 	str += strlen(str);
- 	str += sprintf(str, "\n");
-@@ -138,12 +140,14 @@ efivar_guid_read(struct efivar_entry *entry, char *buf)
- static ssize_t
- efivar_attr_read(struct efivar_entry *entry, char *buf)
- {
--	struct efi_variable *var = &entry->var;
-+	struct efi_variable *var;
- 	char *str = buf;
- 
- 	if (!entry || !buf)
- 		return -EINVAL;
- 
-+	var = &entry->var;
-+
- 	var->DataSize = 1024;
- 	if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
- 		return -EIO;
-@@ -171,12 +175,14 @@ efivar_attr_read(struct efivar_entry *entry, char *buf)
- static ssize_t
- efivar_size_read(struct efivar_entry *entry, char *buf)
- {
--	struct efi_variable *var = &entry->var;
-+	struct efi_variable *var;
- 	char *str = buf;
- 
- 	if (!entry || !buf)
- 		return -EINVAL;
- 
-+	var = &entry->var;
-+
- 	var->DataSize = 1024;
- 	if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
- 		return -EIO;
-@@ -188,11 +194,13 @@ efivar_size_read(struct efivar_entry *entry, char *buf)
- static ssize_t
- efivar_data_read(struct efivar_entry *entry, char *buf)
- {
--	struct efi_variable *var = &entry->var;
-+	struct efi_variable *var;
- 
- 	if (!entry || !buf)
- 		return -EINVAL;
- 
-+	var = &entry->var;
-+
- 	var->DataSize = 1024;
- 	if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
- 		return -EIO;
-@@ -280,7 +288,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
- 		if (err)
- 			return err;
- 
--		copy_out_compat(&entry->var, compat);
-+		copy_out_compat(var, compat);
- 	} else {
- 		if (count != sizeof(struct efi_variable))
- 			return -EINVAL;
-@@ -297,7 +305,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
- 		if (err)
- 			return err;
- 
--		memcpy(&entry->var, new_var, count);
-+		memcpy(var, new_var, count);
- 	}
- 
- 	err = efivar_entry_set(entry, attributes, size, data, NULL);
-@@ -312,13 +320,15 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
- static ssize_t
- efivar_show_raw(struct efivar_entry *entry, char *buf)
- {
--	struct efi_variable *var = &entry->var;
-+	struct efi_variable *var;
- 	struct compat_efi_variable *compat;
- 	size_t size;
- 
- 	if (!entry || !buf)
- 		return 0;
- 
-+	var = &entry->var;
-+
- 	var->DataSize = 1024;
- 	if (efivar_entry_get(entry, &entry->var.Attributes,
- 			     &entry->var.DataSize, entry->var.Data))
--- 
-1.8.3.101.g727a46b
+Will
