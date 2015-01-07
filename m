@@ -1,50 +1,77 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 6/8] arm64/efi: move SetVirtualAddressMap() to UEFI
- stub
-Date: Wed, 7 Jan 2015 12:56:39 +0000
-Message-ID: <20150107125639.GL3827@bivouac.eciton.net>
-References: <1419245944-2424-1-git-send-email-ard.biesheuvel@linaro.org>
- <1419245944-2424-7-git-send-email-ard.biesheuvel@linaro.org>
- <20150107120608.GJ3827@bivouac.eciton.net>
- <CAKv+Gu_k0_anqvm24P8J4WaMrFLMxOhQETAfUb6xmzaJ+Z2vBQ@mail.gmail.com>
- <20150107122515.GK3827@bivouac.eciton.net>
- <CAKv+Gu-aRkoRj5zVXrsBc0APCehZ9W926J6fxH380K9EURXe_Q@mail.gmail.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 1/2] arm64: don't make early_*map() calls post
+ paging_init()
+Date: Wed, 7 Jan 2015 13:13:06 +0000
+Message-ID: <CAKv+Gu9NRRFZG0S6oFJqPG1+1O2-SZah4wqoi0YPofL33X3nJw@mail.gmail.com>
+References: <1420551673-31416-1-git-send-email-leif.lindholm@linaro.org>
+ <1420551673-31416-2-git-send-email-leif.lindholm@linaro.org>
+ <1420576522.16211.30.camel@t520.localdomain>
+ <20150107105841.GE7485@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-aRkoRj5zVXrsBc0APCehZ9W926J6fxH380K9EURXe_Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Geoff Levand <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20150107105841.GE7485@arm.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Will Deacon <will.deacon@arm.com>
+Cc: Catalin Marinas <Catalin.Marinas@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jan 07, 2015 at 12:30:27PM +0000, Ard Biesheuvel wrote:
-> >> >> +     kernel_neon_begin();    /* disables preemption */               \
-> >> >
-> >> > Same nitpick.
-> >> >
-> >>
-> >> Is there anything wrong with that?
-> >
-> > I said nitpick.
-> >
-> > My (very minor) objection is that a (very reasonable) comment is added
-> > to existing functionality by a patch that adds new functionality. It
-> > makes the git blame/praise output less clear.
-> >
-> >> Would you prefer the comment to be on a separate line?
-> >
-> > I would _prefer_ the comments to be a separate patch.
-> > But again, a nitpick.
-> >
-> 
-> Well, adding the comment is relevant to this patch, as we need to
-> disable preemption now before switching to the new address space. In
-> fact, it might be better even to drop the comment, and add an explicit
-> (if redundant) preempt_disable/preempt_enable pair.
+On 7 January 2015 at 10:58, Will Deacon <will.deacon@arm.com> wrote:
+> On Tue, Jan 06, 2015 at 08:35:22PM +0000, Mark Salter wrote:
+>> On Tue, 2015-01-06 at 13:41 +0000, Leif Lindholm wrote:
+>> > diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+>> > index 6fac253..e311066 100644
+>> > --- a/arch/arm64/kernel/efi.c
+>> > +++ b/arch/arm64/kernel/efi.c
+>> > @@ -313,17 +313,26 @@ void __init efi_init(void)
+>> >     memmap.desc_size = params.desc_size;
+>> >     memmap.desc_version = params.desc_ver;
+>> >
+>> > -   if (uefi_init() < 0)
+>> > -           return;
+>> > +   if (uefi_init() >= 0)
+>> > +           reserve_regions();
+>> >
+>> > -   reserve_regions();
+>> > +   early_memunmap(memmap.map, params.mmap_size);
+>> >  }
+>> >
+>> > -void __init efi_idmap_init(void)
+>> > +void __init efi_memmap_init(void)
+>> >  {
+>> > +   u64 mapsize;
+>> > +
+>> >     if (!efi_enabled(EFI_BOOT))
+>> >             return;
+>> >
+>> > +   /* replace early memmap mapping with permanent mapping */
+>> > +   mapsize = memmap.map_end - memmap.map;
+>> > +   memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+>> > +                                              mapsize);
+>>
+>> ioremap_cache() could potententially fail here if the phys_map address
+>> doesn't have a valid pfn (not in the kernel linear ram mapping) because
+>> some of the underlying vm support hasn't been initialized yet.
+>
+> Can you be more specific about the case you have in mind, please? pfn_valid
+> uses the memblocks on arm64, and that should all have been sorted out in
+> paging_init(). What's the issue that you're anticipating?
+>
 
-That would be more clear, yes.
+I think Mark's concern is that it is too early to call
+__get_free_page(), which is what happens if ioremap_cache() finds that
+the requested address is not covered by the existing linear mapping.
+Currently, UEFI reserved RAM regions are covered by the linear
+mapping, but that is something we intend to change in the future.
 
-/
-    Leif
+-- 
+Ard.
