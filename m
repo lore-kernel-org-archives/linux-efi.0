@@ -1,71 +1,138 @@
-From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [GIT PULL v2] EFI changes for next
-Date: Wed, 07 Jan 2015 19:27:39 -0800
-Message-ID: <54ADF92B.3010305@linux.intel.com>
+From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] efivars: avoid potential null-dereference
+Date: Thu, 8 Jan 2015 10:02:39 +0200
+Message-ID: <CAHp75VfWWwC4z-50eDhYNgPezY18fYk6YiHfmBJ1RxLdTsc3Sg@mail.gmail.com>
+References: <1420596500-32158-1-git-send-email-andy.shevchenko@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1420596500-32158-1-git-send-email-andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Domsch <Matt_Domsch-8PEkshWhKlo@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,
+On Wed, Jan 7, 2015 at 4:08 AM, Andy Shevchenko
+<andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+> We have to check the pointer before dereferencing it. The patch fixes
+> such issues in the efivars module.
 
-This is the v2 of a pull request I submitted on Jan 5, 2015 
-(http://article.gmane.org/gmane.linux.kernel.efi/5193).
+Discard this, sorry for noise.
 
-If everything looks correct, please pull the following changes for next. 
-I have also cc'ed the people involved in these changes so they can 
-comment as well.
+>
+> Signed-off-by: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efivars.c | 24 +++++++++++++++++-------
+>  1 file changed, 17 insertions(+), 7 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+> index f256ecd..e62ef79 100644
+> --- a/drivers/firmware/efi/efivars.c
+> +++ b/drivers/firmware/efi/efivars.c
+> @@ -122,12 +122,14 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var);
+>  static ssize_t
+>  efivar_guid_read(struct efivar_entry *entry, char *buf)
+>  {
+> -       struct efi_variable *var = &entry->var;
+> +       struct efi_variable *var;
+>         char *str = buf;
+>
+>         if (!entry || !buf)
+>                 return 0;
+>
+> +       var = &entry->var;
+> +
+>         efi_guid_unparse(&var->VendorGuid, str);
+>         str += strlen(str);
+>         str += sprintf(str, "\n");
+> @@ -138,12 +140,14 @@ efivar_guid_read(struct efivar_entry *entry, char *buf)
+>  static ssize_t
+>  efivar_attr_read(struct efivar_entry *entry, char *buf)
+>  {
+> -       struct efi_variable *var = &entry->var;
+> +       struct efi_variable *var;
+>         char *str = buf;
+>
+>         if (!entry || !buf)
+>                 return -EINVAL;
+>
+> +       var = &entry->var;
+> +
+>         var->DataSize = 1024;
+>         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
+>                 return -EIO;
+> @@ -171,12 +175,14 @@ efivar_attr_read(struct efivar_entry *entry, char *buf)
+>  static ssize_t
+>  efivar_size_read(struct efivar_entry *entry, char *buf)
+>  {
+> -       struct efi_variable *var = &entry->var;
+> +       struct efi_variable *var;
+>         char *str = buf;
+>
+>         if (!entry || !buf)
+>                 return -EINVAL;
+>
+> +       var = &entry->var;
+> +
+>         var->DataSize = 1024;
+>         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
+>                 return -EIO;
+> @@ -188,11 +194,13 @@ efivar_size_read(struct efivar_entry *entry, char *buf)
+>  static ssize_t
+>  efivar_data_read(struct efivar_entry *entry, char *buf)
+>  {
+> -       struct efi_variable *var = &entry->var;
+> +       struct efi_variable *var;
+>
+>         if (!entry || !buf)
+>                 return -EINVAL;
+>
+> +       var = &entry->var;
+> +
+>         var->DataSize = 1024;
+>         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
+>                 return -EIO;
+> @@ -280,7 +288,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
+>                 if (err)
+>                         return err;
+>
+> -               copy_out_compat(&entry->var, compat);
+> +               copy_out_compat(var, compat);
+>         } else {
+>                 if (count != sizeof(struct efi_variable))
+>                         return -EINVAL;
+> @@ -297,7 +305,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
+>                 if (err)
+>                         return err;
+>
+> -               memcpy(&entry->var, new_var, count);
+> +               memcpy(var, new_var, count);
+>         }
+>
+>         err = efivar_entry_set(entry, attributes, size, data, NULL);
+> @@ -312,13 +320,15 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
+>  static ssize_t
+>  efivar_show_raw(struct efivar_entry *entry, char *buf)
+>  {
+> -       struct efi_variable *var = &entry->var;
+> +       struct efi_variable *var;
+>         struct compat_efi_variable *compat;
+>         size_t size;
+>
+>         if (!entry || !buf)
+>                 return 0;
+>
+> +       var = &entry->var;
+> +
+>         var->DataSize = 1024;
+>         if (efivar_entry_get(entry, &entry->var.Attributes,
+>                              &entry->var.DataSize, entry->var.Data))
+> --
+> 1.8.3.101.g727a46b
+>
 
-The details for the changes are detailed in the tag message.
 
-Changes since v1:
 
-  *Based pull request on the next branch of Matt's efi repository.
-  *Prepended "efi:" to Peter's commit message and copied Matt Domsch.
-  *Reworded Borislav's commit title to reflect better the contents of 
-the patch.
-
-Thanks and BR,
-Ricardo
-
-The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
-
-   x86, ptdump: Add section for EFI runtime services (2014-11-11 
-22:28:57 +0000)
-
-are available in the git repository at:
-
-    https://github.com/ricardon/efi.git tags/rneri-efi-next
-
-for you to fetch changes up to 26e022727f5e88c6e5054e14d954425deacbe56a:
-
-   efi: Rename efi_guid_unparse to efi_guid_to_str (2015-01-07 19:07:44 
--0800)
-
-----------------------------------------------------------------
-Updates included:
-
-  *Rename the function efi_guid_unparse to reflect better its behavior. 
-- Borislav Petkov
-
-  *Update the EFI firmware Kconfig help with the URL of efibootmgr. - 
-Peter Jones
-
-----------------------------------------------------------------
-Borislav Petkov (1):
-       efi: Rename efi_guid_unparse to efi_guid_to_str
-
-Peter Jones (1):
-       efi: Update the URLs for efibootmgr
-
-  block/partitions/efi.c         | 2 +-
-  drivers/firmware/efi/Kconfig   | 4 ++--
-  drivers/firmware/efi/efi.c     | 4 ++--
-  drivers/firmware/efi/efivars.c | 6 +++---
-  fs/efivarfs/super.c            | 2 +-
-  include/linux/efi.h            | 2 +-
-  6 files changed, 10 insertions(+), 10 deletions(-)
+-- 
+With Best Regards,
+Andy Shevchenko
