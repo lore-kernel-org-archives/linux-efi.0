@@ -1,138 +1,75 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] efivars: avoid potential null-dereference
-Date: Thu, 8 Jan 2015 10:02:39 +0200
-Message-ID: <CAHp75VfWWwC4z-50eDhYNgPezY18fYk6YiHfmBJ1RxLdTsc3Sg@mail.gmail.com>
-References: <1420596500-32158-1-git-send-email-andy.shevchenko@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi: stub: call get_memory_map() to obtain map and desc sizes
+Date: Thu,  8 Jan 2015 17:51:47 +0000
+Message-ID: <1420739507-1708-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1420596500-32158-1-git-send-email-andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jan 7, 2015 at 4:08 AM, Andy Shevchenko
-<andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
-> We have to check the pointer before dereferencing it. The patch fixes
-> such issues in the efivars module.
+This fixes two minor issues in the implementation of get_memory_map():
+- Currently, it assumes that sizeof(efi_memory_desc_t) == desc_size,
+  which is usually true, but not mandated by the spec. (This was added
+  intentionally to allow future additions to the definition of
+  efi_memory_desc_t). The way the loop is implemented currently, the
+  added slack space may be insufficient if desc_size is larger, which in
+  some corner cases could result in the loop never terminating.
+- It allocates 32 efi_memory_desc_t entries first (again, using the size
+  of the struct instead of desc_size), and frees and reallocates if it
+  turns out to be insufficient. Few implementations of UEFI have such small
+  memory maps, which results in a unnecessary allocate/free pair on each
+  invocation.
 
-Discard this, sorry for noise.
+Fix this by calling the get_memory_map() boot service first with a '0'
+input value for map size to retrieve the map size and desc size from the
+firmware and only then perform the allocation, using desc_size rather
+than sizeof(efi_memory_desc_t).
 
->
-> Signed-off-by: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/firmware/efi/efivars.c | 24 +++++++++++++++++-------
->  1 file changed, 17 insertions(+), 7 deletions(-)
->
-> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-> index f256ecd..e62ef79 100644
-> --- a/drivers/firmware/efi/efivars.c
-> +++ b/drivers/firmware/efi/efivars.c
-> @@ -122,12 +122,14 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var);
->  static ssize_t
->  efivar_guid_read(struct efivar_entry *entry, char *buf)
->  {
-> -       struct efi_variable *var = &entry->var;
-> +       struct efi_variable *var;
->         char *str = buf;
->
->         if (!entry || !buf)
->                 return 0;
->
-> +       var = &entry->var;
-> +
->         efi_guid_unparse(&var->VendorGuid, str);
->         str += strlen(str);
->         str += sprintf(str, "\n");
-> @@ -138,12 +140,14 @@ efivar_guid_read(struct efivar_entry *entry, char *buf)
->  static ssize_t
->  efivar_attr_read(struct efivar_entry *entry, char *buf)
->  {
-> -       struct efi_variable *var = &entry->var;
-> +       struct efi_variable *var;
->         char *str = buf;
->
->         if (!entry || !buf)
->                 return -EINVAL;
->
-> +       var = &entry->var;
-> +
->         var->DataSize = 1024;
->         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
->                 return -EIO;
-> @@ -171,12 +175,14 @@ efivar_attr_read(struct efivar_entry *entry, char *buf)
->  static ssize_t
->  efivar_size_read(struct efivar_entry *entry, char *buf)
->  {
-> -       struct efi_variable *var = &entry->var;
-> +       struct efi_variable *var;
->         char *str = buf;
->
->         if (!entry || !buf)
->                 return -EINVAL;
->
-> +       var = &entry->var;
-> +
->         var->DataSize = 1024;
->         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
->                 return -EIO;
-> @@ -188,11 +194,13 @@ efivar_size_read(struct efivar_entry *entry, char *buf)
->  static ssize_t
->  efivar_data_read(struct efivar_entry *entry, char *buf)
->  {
-> -       struct efi_variable *var = &entry->var;
-> +       struct efi_variable *var;
->
->         if (!entry || !buf)
->                 return -EINVAL;
->
-> +       var = &entry->var;
-> +
->         var->DataSize = 1024;
->         if (efivar_entry_get(entry, &var->Attributes, &var->DataSize, var->Data))
->                 return -EIO;
-> @@ -280,7 +288,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
->                 if (err)
->                         return err;
->
-> -               copy_out_compat(&entry->var, compat);
-> +               copy_out_compat(var, compat);
->         } else {
->                 if (count != sizeof(struct efi_variable))
->                         return -EINVAL;
-> @@ -297,7 +305,7 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
->                 if (err)
->                         return err;
->
-> -               memcpy(&entry->var, new_var, count);
-> +               memcpy(var, new_var, count);
->         }
->
->         err = efivar_entry_set(entry, attributes, size, data, NULL);
-> @@ -312,13 +320,15 @@ efivar_store_raw(struct efivar_entry *entry, const char *buf, size_t count)
->  static ssize_t
->  efivar_show_raw(struct efivar_entry *entry, char *buf)
->  {
-> -       struct efi_variable *var = &entry->var;
-> +       struct efi_variable *var;
->         struct compat_efi_variable *compat;
->         size_t size;
->
->         if (!entry || !buf)
->                 return 0;
->
-> +       var = &entry->var;
-> +
->         var->DataSize = 1024;
->         if (efivar_entry_get(entry, &entry->var.Attributes,
->                              &entry->var.DataSize, entry->var.Data))
-> --
-> 1.8.3.101.g727a46b
->
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 16 ++++++++++------
+ 1 file changed, 10 insertions(+), 6 deletions(-)
 
-
-
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index e766df60fbfb..caf91eab0bfc 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -75,25 +75,29 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 	unsigned long key;
+ 	u32 desc_version;
+ 
+-	*map_size = sizeof(*m) * 32;
+-again:
++	*map_size = 0;
++	*desc_size = 0;
++	key = 0;
++	status = efi_call_early(get_memory_map, map_size, NULL,
++				&key, desc_size, &desc_version);
++	if (status != EFI_BUFFER_TOO_SMALL)
++		return EFI_LOAD_ERROR;
++
+ 	/*
+ 	 * Add an additional efi_memory_desc_t because we're doing an
+ 	 * allocation which may be in a new descriptor region.
+ 	 */
+-	*map_size += sizeof(*m);
++	*map_size += *desc_size;
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				*map_size, (void **)&m);
+ 	if (status != EFI_SUCCESS)
+ 		goto fail;
+ 
+-	*desc_size = 0;
+-	key = 0;
+ 	status = efi_call_early(get_memory_map, map_size, m,
+ 				&key, desc_size, &desc_version);
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+ 		efi_call_early(free_pool, m);
+-		goto again;
++		return EFI_LOAD_ERROR;
+ 	}
+ 
+ 	if (status != EFI_SUCCESS)
 -- 
-With Best Regards,
-Andy Shevchenko
+1.8.3.2
