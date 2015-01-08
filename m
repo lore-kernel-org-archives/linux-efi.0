@@ -1,128 +1,103 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v5 3/8] efi: split off remapping code from efi_config_init()
-Date: Thu,  8 Jan 2015 18:48:29 +0000
-Message-ID: <1420742914-2404-4-git-send-email-ard.biesheuvel@linaro.org>
-References: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: leif.lindholm@linaro.org, roy.franz@linaro.org, matt.fleming@intel.com, will.deacon@arm.com, catalin.marinas@arm.com, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, bp@alien8.de, msalter@redhat.com, geoff.levand@linaro.org, dyoung@redhat.com, mark.rutland@arm.com, linux-kernel@vger.kernel.org
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH] efi: stub: call get_memory_map() to obtain map and desc
+ sizes
+Date: Thu, 8 Jan 2015 19:04:26 +0000
+Message-ID: <20150108190426.GC31280@leverpostej>
+References: <1420739507-1708-1-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1420739507-1708-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Split of the remapping code from efi_config_init() so that the caller
-can perform its own remapping. This is necessary to correctly handle
-virtually remapped UEFI memory regions under kexec, as efi.systab will
-have been updated to a virtual address.
+Hi Ard,
 
-Acked-by: Matt Fleming <matt.fleming@intel.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
- drivers/firmware/efi/efi.c | 56 ++++++++++++++++++++++++++--------------------
- include/linux/efi.h        |  2 ++
- 2 files changed, 34 insertions(+), 24 deletions(-)
+On Thu, Jan 08, 2015 at 05:51:47PM +0000, Ard Biesheuvel wrote:
+> This fixes two minor issues in the implementation of get_memory_map():
+> - Currently, it assumes that sizeof(efi_memory_desc_t) == desc_size,
+>   which is usually true, but not mandated by the spec. (This was added
+>   intentionally to allow future additions to the definition of
+>   efi_memory_desc_t). The way the loop is implemented currently, the
+>   added slack space may be insufficient if desc_size is larger, which in
+>   some corner cases could result in the loop never terminating.
+> - It allocates 32 efi_memory_desc_t entries first (again, using the size
+>   of the struct instead of desc_size), and frees and reallocates if it
+>   turns out to be insufficient. Few implementations of UEFI have such small
+>   memory maps, which results in a unnecessary allocate/free pair on each
+>   invocation.
+> 
+> Fix this by calling the get_memory_map() boot service first with a '0'
+> input value for map size to retrieve the map size and desc size from the
+> firmware and only then perform the allocation, using desc_size rather
+> than sizeof(efi_memory_desc_t).
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9035c1b74d58..b7ba9d8ec4b0 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -293,29 +293,15 @@ static __init int match_config_table(efi_guid_t *guid,
- 	return 0;
- }
- 
--int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+int __init efi_config_parse_tables(void *config_tables, int count, int sz,
-+				   efi_config_table_type_t *arch_tables)
- {
--	void *config_tables, *tablep;
--	int i, sz;
--
--	if (efi_enabled(EFI_64BIT))
--		sz = sizeof(efi_config_table_64_t);
--	else
--		sz = sizeof(efi_config_table_32_t);
--
--	/*
--	 * Let's see what config tables the firmware passed to us.
--	 */
--	config_tables = early_memremap(efi.systab->tables,
--				       efi.systab->nr_tables * sz);
--	if (config_tables == NULL) {
--		pr_err("Could not map Configuration table!\n");
--		return -ENOMEM;
--	}
-+	void *tablep;
-+	int i;
- 
- 	tablep = config_tables;
- 	pr_info("");
--	for (i = 0; i < efi.systab->nr_tables; i++) {
-+	for (i = 0; i < count; i++) {
- 		efi_guid_t guid;
- 		unsigned long table;
- 
-@@ -328,8 +314,6 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 			if (table64 >> 32) {
- 				pr_cont("\n");
- 				pr_err("Table located above 4GB, disabling EFI.\n");
--				early_memunmap(config_tables,
--					       efi.systab->nr_tables * sz);
- 				return -EINVAL;
- 			}
- #endif
-@@ -344,13 +328,37 @@ int __init efi_config_init(efi_config_table_type_t *arch_tables)
- 		tablep += sz;
- 	}
- 	pr_cont("\n");
--	early_memunmap(config_tables, efi.systab->nr_tables * sz);
--
- 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
--
- 	return 0;
- }
- 
-+int __init efi_config_init(efi_config_table_type_t *arch_tables)
-+{
-+	void *config_tables;
-+	int sz, ret;
-+
-+	if (efi_enabled(EFI_64BIT))
-+		sz = sizeof(efi_config_table_64_t);
-+	else
-+		sz = sizeof(efi_config_table_32_t);
-+
-+	/*
-+	 * Let's see what config tables the firmware passed to us.
-+	 */
-+	config_tables = early_memremap(efi.systab->tables,
-+				       efi.systab->nr_tables * sz);
-+	if (config_tables == NULL) {
-+		pr_err("Could not map Configuration table!\n");
-+		return -ENOMEM;
-+	}
-+
-+	ret = efi_config_parse_tables(config_tables, efi.systab->nr_tables, sz,
-+				      arch_tables);
-+
-+	early_memunmap(config_tables, efi.systab->nr_tables * sz);
-+	return ret;
-+}
-+
- #ifdef CONFIG_EFI_VARS_MODULE
- static int __init efi_load_efivars(void)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 0238d612750e..5ffe5115951f 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -875,6 +875,8 @@ static inline efi_status_t efi_query_variable_store(u32 attributes, unsigned lon
- #endif
- extern void __iomem *efi_lookup_mapped_addr(u64 phys_addr);
- extern int efi_config_init(efi_config_table_type_t *arch_tables);
-+extern int efi_config_parse_tables(void *config_tables, int count, int sz,
-+				   efi_config_table_type_t *arch_tables);
- extern u64 efi_get_iobase (void);
- extern u32 efi_mem_type (unsigned long phys_addr);
- extern u64 efi_mem_attributes (unsigned long phys_addr);
--- 
-1.8.3.2
+Is the desc_size guaranteed to be set up correctly if the size is too
+small?
+
+As far as I can see, for that case the spec only mandates that
+MemoryMapSize is updated nd EFI_BUFFER_TOO_SMALL is returned.
+
+It's not clear to me whether DescriptorSize or DescriptorVersion are
+initialised in cases other than success.
+
+Thanks,
+Mark.
+
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/libstub/efi-stub-helper.c | 16 ++++++++++------
+>  1 file changed, 10 insertions(+), 6 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> index e766df60fbfb..caf91eab0bfc 100644
+> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
+> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+> @@ -75,25 +75,29 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+>  	unsigned long key;
+>  	u32 desc_version;
+>  
+> -	*map_size = sizeof(*m) * 32;
+> -again:
+> +	*map_size = 0;
+> +	*desc_size = 0;
+> +	key = 0;
+> +	status = efi_call_early(get_memory_map, map_size, NULL,
+> +				&key, desc_size, &desc_version);
+> +	if (status != EFI_BUFFER_TOO_SMALL)
+> +		return EFI_LOAD_ERROR;
+> +
+>  	/*
+>  	 * Add an additional efi_memory_desc_t because we're doing an
+>  	 * allocation which may be in a new descriptor region.
+>  	 */
+> -	*map_size += sizeof(*m);
+> +	*map_size += *desc_size;
+>  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+>  				*map_size, (void **)&m);
+>  	if (status != EFI_SUCCESS)
+>  		goto fail;
+>  
+> -	*desc_size = 0;
+> -	key = 0;
+>  	status = efi_call_early(get_memory_map, map_size, m,
+>  				&key, desc_size, &desc_version);
+>  	if (status == EFI_BUFFER_TOO_SMALL) {
+>  		efi_call_early(free_pool, m);
+> -		goto again;
+> +		return EFI_LOAD_ERROR;
+>  	}
+>  
+>  	if (status != EFI_SUCCESS)
+> -- 
+> 1.8.3.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
