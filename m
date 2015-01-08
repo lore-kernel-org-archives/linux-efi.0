@@ -1,117 +1,93 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v5 0/8] arm64: stable UEFI virtual mappings for kexec
-Date: Thu,  8 Jan 2015 18:48:26 +0000
-Message-ID: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v5 4/8] efi: efistub: allow allocation alignment larger than EFI_PAGE_SIZE
+Date: Thu,  8 Jan 2015 18:48:30 +0000
+Message-ID: <1420742914-2404-5-git-send-email-ard.biesheuvel@linaro.org>
+References: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: leif.lindholm@linaro.org, roy.franz@linaro.org, matt.fleming@intel.com, will.deacon@arm.com, catalin.marinas@arm.com, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, bp@alien8.de, msalter@redhat.com, geoff.levand@linaro.org, dyoung@redhat.com, mark.rutland@arm.com, linux-kernel@vger.kernel.org
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is v5 of the series to update the UEFI memory map handling for the arm64
-architecture so that virtual mappings of UEFI Runtime Services are stable across
-kexec.
+On systems with 64 KB pages, it is preferable for UEFI memory map
+entries to be 64 KB aligned multiples of 64 KB, because it relieves
+us of having to deal with the residues.
+So, if EFI_ALLOC_ALIGN is #define'd by the platform, use it to round
+up all memory allocations made.
 
-Changes between v5 and v4:
-- rebased onto v3.19-rc3 + the early_ioremap() fix we sent out today
-- patches #1 and #2: unchanged
-- patch #3: added Matt's ack, addressed Boris's review comments
-- patch #4: added Boris's ack
-- patch #5: added Leif's ack
-- patch #6: addressed review comments from Mark Rutland, Leif and Matt (see
-  below)
-- patch #7 and #8: added Leif's ack
+Acked-by: Matt Fleming <matt.fleming@intel.com>
+Acked-by: Borislav Petkov <bp@suse.de>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
 
-I have tried to address Matt's concern about drivers/firmware/efi/fdt.c becoming
-a dumping ground for ARM specific stuff by moving the virtmap creation to
-arm-stub.c. However, EFI is not the only place where sharing code between ARM
-and arm64 should be dealt with in a better way, so this remains a concern IMO.
-
-Regarding the duplicated version of efi_get_memory_map(): I dropped it and now
-call the original version twice, where the first call is actually only used to
-get an allocation whose size is an upper bound for all runtime region
-descriptors combined. I have posted a separate patch to improve the original
-as there are some concerns there as well.
-
-Regarding EFI_VIRTMAP/EFI_ARCH_1: I added an elaborate comment about it, and
-I think there is a case for retaining it next to EFI_RUNTIME_SERVICES.
-
-To de-risk the adoption of the subset of patches that are essential to get kexec
-working on UEFI systems, in v4 I dropped all the patches related to the iomem
-resource table, /dev/mem permissions and memory attributes etc. These topics
-have been addressed in a separate series.
-
-The primary changes between v4 and v3 in the patches that were kept are:
-- instead of reording the memory map so that part of it can double as input
-  argument to SetVirtualAddressMap(), increase the allocation size for the
-  memory map so that we can use some of it as scratch space and use that to
-  prepare the input to SVAM() instead. UPDATE: now a separate allocation (v5)
-- added some acks
-- rebased onto v3.19-rc1
-
-NOTE: these changes trigger an issue on AMD Seattle that we (Mark Rutland and I)
-consider a firmware bug. It appears that, during the call to SVAM() (which is
-called with a 1:1 mapping as per the UEFI spec) the virtual mapping being
-installed is dereferenced prematurely. This went unnoticed in the original
-situation, as the virtual mappings were just kernel mappings that are always
-accessible. However, in the new situation, those mappings are only active
-during Runtime Service invocations, and performing any kind of access through
-them at any other time triggers a fault.
-UPDATE: this issue has been fixed but obviously requires those affected to
-install a new version of the firmware
-
-============== v1 blurb ==================
-
-The main premise of these patches is that, in order to support kexec, we need
-to add code to the kernel that is able to deal with the state of the firmware
-after SetVirtualAddressMap() [SVAM] has been called. However, if we are going to
-deal with that anyway, why not make that the default state, and have only a
-single code path for both cases.
-
-This means SVAM() needs to move to the stub, and hence the code that invents
-the virtual layout needs to move with it. The result is that the kernel proper
-is entered with the virt_addr members of all EFI_MEMORY_RUNTIME regions
-assigned, and the mapping installed into the firmware. The kernel proper needs
-to set up the page tables, and switch to them while performing the runtime
-services calls. Note that there is also an efi_to_phys() to translate the values
-of the fw_vendor and tables fields of the EFI system table. Again, this is
-something we need to do anyway under kexec, or we end up handing over state
-between one kernel and the next, which implies different code paths between
-non-kexec and kexec.
-
-The layout is chosen such that it used the userland half of the virtual address
-space (TTBR0), which means no additional alignment or reservation is required
-to ensure that it will always be available.
-
-One thing that may stand out is the reordering of the memory map. The reason
-for doing this is that we can use the same memory map as input to SVAM(). The
-alternative is allocating memory for it using boot services, but that clutters
-up the existing logic a bit between getting the memory map, populating the fdt,
-and loop again if it didn't fit.
-
-Ard Biesheuvel (8):
-  arm64/mm: add explicit struct_mm argument to __create_mapping()
-  arm64/mm: add create_pgd_mapping() to create private page tables
-  efi: split off remapping code from efi_config_init()
-  efi: efistub: allow allocation alignment larger than EFI_PAGE_SIZE
-  arm64/efi: set EFI_ALLOC_ALIGN to 64 KB
-  arm64/efi: move SetVirtualAddressMap() to UEFI stub
-  arm64/efi: remove free_boot_services() and friends
-  arm64/efi: remove idmap manipulations from UEFI code
-
- arch/arm64/include/asm/efi.h                   |  38 ++-
- arch/arm64/include/asm/mmu.h                   |   5 +-
- arch/arm64/include/asm/pgtable.h               |   5 +
- arch/arm64/kernel/efi.c                        | 369 ++++++++-----------------
- arch/arm64/kernel/setup.c                      |   2 +-
- arch/arm64/mm/mmu.c                            |  60 ++--
- drivers/firmware/efi/efi.c                     |  56 ++--
- drivers/firmware/efi/libstub/arm-stub.c        |  59 ++++
- drivers/firmware/efi/libstub/efi-stub-helper.c |  25 +-
- drivers/firmware/efi/libstub/efistub.h         |   4 +
- drivers/firmware/efi/libstub/fdt.c             |  62 ++++-
- include/linux/efi.h                            |   2 +
- 12 files changed, 362 insertions(+), 325 deletions(-)
-
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index a920fec8fe88..e766df60fbfb 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -32,6 +32,15 @@
+ 
+ static unsigned long __chunk_size = EFI_READ_CHUNK_SIZE;
+ 
++/*
++ * Allow the platform to override the allocation granularity: this allows
++ * systems that have the capability to run with a larger page size to deal
++ * with the allocations for initrd and fdt more efficiently.
++ */
++#ifndef EFI_ALLOC_ALIGN
++#define EFI_ALLOC_ALIGN		EFI_PAGE_SIZE
++#endif
++
+ struct file_info {
+ 	efi_file_handle_t *handle;
+ 	u64 size;
+@@ -150,10 +159,10 @@ efi_status_t efi_high_alloc(efi_system_table_t *sys_table_arg,
+ 	 * a specific address.  We are doing page-based allocations,
+ 	 * so we must be aligned to a page.
+ 	 */
+-	if (align < EFI_PAGE_SIZE)
+-		align = EFI_PAGE_SIZE;
++	if (align < EFI_ALLOC_ALIGN)
++		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ again:
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+@@ -235,10 +244,10 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+ 	 * a specific address.  We are doing page-based allocations,
+ 	 * so we must be aligned to a page.
+ 	 */
+-	if (align < EFI_PAGE_SIZE)
+-		align = EFI_PAGE_SIZE;
++	if (align < EFI_ALLOC_ALIGN)
++		align = EFI_ALLOC_ALIGN;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	for (i = 0; i < map_size / desc_size; i++) {
+ 		efi_memory_desc_t *desc;
+ 		unsigned long m = (unsigned long)map;
+@@ -292,7 +301,7 @@ void efi_free(efi_system_table_t *sys_table_arg, unsigned long size,
+ 	if (!size)
+ 		return;
+ 
+-	nr_pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	efi_call_early(free_pages, addr, nr_pages);
+ }
+ 
+@@ -561,7 +570,7 @@ efi_status_t efi_relocate_kernel(efi_system_table_t *sys_table_arg,
+ 	 * to the preferred address.  If that fails, allocate as low
+ 	 * as possible while respecting the required alignment.
+ 	 */
+-	nr_pages = round_up(alloc_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	nr_pages = round_up(alloc_size, EFI_ALLOC_ALIGN) / EFI_PAGE_SIZE;
+ 	status = efi_call_early(allocate_pages,
+ 				EFI_ALLOCATE_ADDRESS, EFI_LOADER_DATA,
+ 				nr_pages, &efi_addr);
 -- 
 1.8.3.2
