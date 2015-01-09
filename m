@@ -1,60 +1,56 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v5 7/8] arm64/efi: remove free_boot_services() and friends
-Date: Fri, 9 Jan 2015 15:49:24 +0000
-Message-ID: <20150109154924.GH11258@arm.com>
-References: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
- <1420742914-2404-8-git-send-email-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH] Expose underlying UEFI firmware platform size to userland
+Date: Fri,  9 Jan 2015 15:29:53 +0000
+Message-ID: <1420817394-12922-1-git-send-email-steve@einval.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1420742914-2404-8-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org, Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 08, 2015 at 06:48:33PM +0000, Ard Biesheuvel wrote:
-> Now that we are calling SetVirtualAddressMap() from the stub, there is no
-> need to reserve boot-only memory regions, which implies that there is also
-> no reason to free them again later.
-> 
-> Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/kernel/efi.c | 123 +-----------------------------------------------
->  1 file changed, 1 insertion(+), 122 deletions(-)
+In some cases (e.g. Intel Bay Trail machines), the kernel will happily
+run in 64-bit even if the underlying UEFI firmware platform is
+32-bit. That's great, but it's difficult for userland utilities like
+grub-install to do the right thing in such a situation.
 
-[...]
+The kernel already knows about the size of the firmware via
+efi_enabled(EFI_64BIT). Add an extra sysfs interface
+/sys/firmware/efi/fw_platform_size to expose that information to
+userland for low-level utilities to use.
 
-> -static void __init free_boot_services(void)
-> -{
-> -	u64 total_freed = 0;
-> -	u64 keep_end, free_start, free_end;
-> -	efi_memory_desc_t *md;
-> -
-> -	/*
-> -	 * If kernel uses larger pages than UEFI, we have to be careful
-> -	 * not to inadvertantly free memory we want to keep if there is
-> -	 * overlap at the kernel page size alignment. We do not want to
-> -	 * free is_reserve_region() memory nor the UEFI memmap itself.
-> -	 *
-> -	 * The memory map is sorted, so we keep track of the end of
-> -	 * any previous region we want to keep, remember any region
-> -	 * we want to free and defer freeing it until we encounter
-> -	 * the next region we want to keep. This way, before freeing
-> -	 * it, we can clip it as needed to avoid freeing memory we
-> -	 * want to keep for UEFI.
-> -	 */
-> -
-> -	keep_end = 0;
-> -	free_start = 0;
-> -
-> -	for_each_efi_memory_desc(&memmap, md) {
-> -		u64 paddr, npages, size;
+Signed-off-by: Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-I'm glad to see the back of this function, thanks.
-
-Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-
-Will
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 9035c1b..4495e3e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -115,15 +115,24 @@ EFI_ATTR_SHOW(fw_vendor);
+ EFI_ATTR_SHOW(runtime);
+ EFI_ATTR_SHOW(config_table);
+ 
++static ssize_t fw_platform_size_show(struct kobject *kobj,
++				     struct kobj_attribute *attr, char *buf)
++{
++	return sprintf(buf, "%d\n", efi_enabled(EFI_64BIT) ? 64 : 32);
++}
++
+ static struct kobj_attribute efi_attr_fw_vendor = __ATTR_RO(fw_vendor);
+ static struct kobj_attribute efi_attr_runtime = __ATTR_RO(runtime);
+ static struct kobj_attribute efi_attr_config_table = __ATTR_RO(config_table);
++static struct kobj_attribute efi_attr_fw_platform_size =
++	__ATTR_RO(fw_platform_size);
+ 
+ static struct attribute *efi_subsys_attrs[] = {
+ 	&efi_attr_systab.attr,
+ 	&efi_attr_fw_vendor.attr,
+ 	&efi_attr_runtime.attr,
+ 	&efi_attr_config_table.attr,
++	&efi_attr_fw_platform_size.attr,
+ 	NULL,
+ };
+ 
+-- 
+1.7.10.4
