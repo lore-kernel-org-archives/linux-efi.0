@@ -1,82 +1,103 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] efi: stub: call get_memory_map() to obtain map and desc
- sizes
-Date: Fri, 9 Jan 2015 11:16:46 +0000
-Message-ID: <20150109111646.GA12740@leverpostej>
-References: <1420739507-1708-1-git-send-email-ard.biesheuvel@linaro.org>
- <20150108190426.GC31280@leverpostej>
- <CAKv+Gu9tVjfU5S=3oLTznUFnv0WAbGcKueNjKtDtYqGQ+cxtxw@mail.gmail.com>
- <20150109101950.GA27421@leverpostej>
- <20150109105529.GP3827@bivouac.eciton.net>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH 7/8] arm64: use 'physmem' memblock to improve
+ CONFIG_STRICT_DEVMEM handling
+Date: Fri, 9 Jan 2015 15:38:17 +0000
+Message-ID: <20150109153817.GE11258@arm.com>
+References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1419275322-29811-8-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150109105529.GP3827-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
+In-Reply-To: <1419275322-29811-8-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 09, 2015 at 10:55:29AM +0000, Leif Lindholm wrote:
-> On Fri, Jan 09, 2015 at 10:19:50AM +0000, Mark Rutland wrote:
-> > On Thu, Jan 08, 2015 at 07:09:22PM +0000, Ard Biesheuvel wrote:
-> > > On 8 January 2015 at 19:04, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> > > > Hi Ard,
-> > > >
-> > > > On Thu, Jan 08, 2015 at 05:51:47PM +0000, Ard Biesheuvel wrote:
-> > > >> This fixes two minor issues in the implementation of get_memory_map():
-> > > >> - Currently, it assumes that sizeof(efi_memory_desc_t) == desc_size,
-> > > >>   which is usually true, but not mandated by the spec. (This was added
-> > > >>   intentionally to allow future additions to the definition of
-> > > >>   efi_memory_desc_t). The way the loop is implemented currently, the
-> > > >>   added slack space may be insufficient if desc_size is larger, which in
-> > > >>   some corner cases could result in the loop never terminating.
-> > > >> - It allocates 32 efi_memory_desc_t entries first (again, using the size
-> > > >>   of the struct instead of desc_size), and frees and reallocates if it
-> > > >>   turns out to be insufficient. Few implementations of UEFI have such small
-> > > >>   memory maps, which results in a unnecessary allocate/free pair on each
-> > > >>   invocation.
-> > > >>
-> > > >> Fix this by calling the get_memory_map() boot service first with a '0'
-> > > >> input value for map size to retrieve the map size and desc size from the
-> > > >> firmware and only then perform the allocation, using desc_size rather
-> > > >> than sizeof(efi_memory_desc_t).
-> > > >
-> > > > Is the desc_size guaranteed to be set up correctly if the size is too
-> > > > small?
-> > > >
-> > > > As far as I can see, for that case the spec only mandates that
-> > > > MemoryMapSize is updated nd EFI_BUFFER_TOO_SMALL is returned.
-> > > >
-> > > > It's not clear to me whether DescriptorSize or DescriptorVersion are
-> > > > initialised in cases other than success.
-> > > >
-> > > 
-> > > The way I read it, descriptor size and descriptor version are always
-> > > returned, e.g., as opposed to MapKey, which is only returned on
-> > > success, and the spec mentions that specifically.
-> > 
-> > I agree that that would be the sensible reading of the spec. I just fear
-> > that there's room for an implementor to read it slightly differently,
-> > and cause pain for us.
+On Mon, Dec 22, 2014 at 07:08:41PM +0000, Ard Biesheuvel wrote:
+> The 'physmem' memblock table allows us to classify memory as RAM even
+> if it is not covered by the ordinary 'memory' memblock table.
 > 
-> I disagree.
-> The intent is clear, and you can not follow the current text and
-> provide a version that does not do the right thing. Only the MapKey
-> return is conditional on success.
+> Under CONFIG_STRICT_DEVMEM, we can use this to:
+> - allow read-only access to parts of RAM that are not considered memory
+>   by the kernel, this is mainly intended for exposing UEFI configuration
+>   tables such as SMBIOS to userland;
+> - avoid using non-cached mappings for those parts of RAM, as it may
+>   result in mismatched attributes.
+
+Looks fine to me assuming that the rest of the series is ok:
+
+  Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+
+Will
+
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/Kconfig   |  1 +
+>  arch/arm64/mm/mmap.c |  2 +-
+>  arch/arm64/mm/mmu.c  | 15 ++++++++++++++-
+>  3 files changed, 16 insertions(+), 2 deletions(-)
+> 
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index b1f9a20a3677..86902f8d8e36 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -60,6 +60,7 @@ config ARM64
+>  	select HAVE_GENERIC_DMA_COHERENT
+>  	select HAVE_HW_BREAKPOINT if PERF_EVENTS
+>  	select HAVE_MEMBLOCK
+> +	select HAVE_MEMBLOCK_PHYS_MAP
+>  	select HAVE_PATA_PLATFORM
+>  	select HAVE_PERF_EVENTS
+>  	select HAVE_PERF_REGS
+> diff --git a/arch/arm64/mm/mmap.c b/arch/arm64/mm/mmap.c
+> index 54922d1275b8..9f558ab41f39 100644
+> --- a/arch/arm64/mm/mmap.c
+> +++ b/arch/arm64/mm/mmap.c
+> @@ -126,7 +126,7 @@ int devmem_is_allowed(unsigned long pfn)
+>  {
+>  	if (iomem_is_exclusive(pfn << PAGE_SHIFT))
+>  		return 0;
+> -	if (!page_is_ram(pfn))
+> +	if (!pfn_valid(pfn))
+>  		return 1;
+>  	return 0;
+>  }
+> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+> index 328638548871..083be3de1a87 100644
+> --- a/arch/arm64/mm/mmu.c
+> +++ b/arch/arm64/mm/mmu.c
+> @@ -122,7 +122,7 @@ early_param("cachepolicy", early_cachepolicy);
+>  pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+>  			      unsigned long size, pgprot_t vma_prot)
+>  {
+> -	if (!pfn_valid(pfn))
+> +	if (!memblock_is_physmem(PFN_PHYS(pfn)))
+>  		return pgprot_noncached(vma_prot);
+>  	else if (file->f_flags & O_SYNC)
+>  		return pgprot_writecombine(vma_prot);
+> @@ -130,6 +130,19 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
+>  }
+>  EXPORT_SYMBOL(phys_mem_access_prot);
 >  
-> > > We could ask for clarification just to be sure.
-> > 
-> > I think we should.
-> > 
-> > Given it could take a while for any conclusion to be reached and
-> > published, I'm happy to go with the patch below in the meantime, so long
-> > as the issue gets raised.
+> +/*
+> + * This definition of phys_mem_access_prot_allowed() overrides
+> + * the __weak definition in drivers/char/mem.c
+> + */
+> +int phys_mem_access_prot_allowed(struct file *file, unsigned long pfn,
+> +				 unsigned long size, pgprot_t *prot)
+> +{
+> +	/* Disallow read-write access to system RAM */
+> +	if (memblock_is_physmem(PFN_PHYS(pfn)) && pgprot_val(*prot) & PTE_WRITE)
+> +		return 0;
+> +	return 1;
+> +}
+> +
+>  static void __init *early_alloc(unsigned long sz)
+>  {
+>  	void *ptr = __va(memblock_alloc(sz, sz));
+> -- 
+> 1.8.3.2
 > 
-> We could ask for clarification of the spec, but I see no need to ask
-> for guidance on the current text.
-
-I'm fine with that.
-
-Mark.
+> 
