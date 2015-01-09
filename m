@@ -1,102 +1,74 @@
 From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 7/8] arm64: use 'physmem' memblock to improve
- CONFIG_STRICT_DEVMEM handling
-Date: Fri, 9 Jan 2015 15:38:17 +0000
-Message-ID: <20150109153817.GE11258@arm.com>
+Subject: Re: [PATCH 1/8] arm64/efi: use UEFI memory map unconditionally if
+ available
+Date: Fri, 9 Jan 2015 15:41:40 +0000
+Message-ID: <20150109154140.GF11258@arm.com>
 References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
- <1419275322-29811-8-git-send-email-ard.biesheuvel@linaro.org>
+ <1419275322-29811-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1419275322-29811-8-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1419275322-29811-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 22, 2014 at 07:08:41PM +0000, Ard Biesheuvel wrote:
-> The 'physmem' memblock table allows us to classify memory as RAM even
-> if it is not covered by the ordinary 'memory' memblock table.
+On Mon, Dec 22, 2014 at 07:08:35PM +0000, Ard Biesheuvel wrote:
+> On systems that boot via UEFI, all memory nodes are deleted from the
+> device tree, and instead, the size and location of system RAM is derived
+> from the UEFI memory map. This is handled by reserve_regions, which not only
+> reserves parts of memory that UEFI declares as reserved, but also installs
+> the memblocks that cover the remaining usable memory.
 > 
-> Under CONFIG_STRICT_DEVMEM, we can use this to:
-> - allow read-only access to parts of RAM that are not considered memory
->   by the kernel, this is mainly intended for exposing UEFI configuration
->   tables such as SMBIOS to userland;
-> - avoid using non-cached mappings for those parts of RAM, as it may
->   result in mismatched attributes.
+> Currently, reserve_regions() is only called if uefi_init() succeeds.
+> However, it does not actually depend on anything that uefi_init() does,
+> and not calling reserve_regions() results in a broken boot, so it is
+> better to just call it unconditionally.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c | 11 ++++-------
+>  1 file changed, 4 insertions(+), 7 deletions(-)
 
-Looks fine to me assuming that the rest of the series is ok:
-
-  Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 
 Will
 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/Kconfig   |  1 +
->  arch/arm64/mm/mmap.c |  2 +-
->  arch/arm64/mm/mmu.c  | 15 ++++++++++++++-
->  3 files changed, 16 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-> index b1f9a20a3677..86902f8d8e36 100644
-> --- a/arch/arm64/Kconfig
-> +++ b/arch/arm64/Kconfig
-> @@ -60,6 +60,7 @@ config ARM64
->  	select HAVE_GENERIC_DMA_COHERENT
->  	select HAVE_HW_BREAKPOINT if PERF_EVENTS
->  	select HAVE_MEMBLOCK
-> +	select HAVE_MEMBLOCK_PHYS_MAP
->  	select HAVE_PATA_PLATFORM
->  	select HAVE_PERF_EVENTS
->  	select HAVE_PERF_REGS
-> diff --git a/arch/arm64/mm/mmap.c b/arch/arm64/mm/mmap.c
-> index 54922d1275b8..9f558ab41f39 100644
-> --- a/arch/arm64/mm/mmap.c
-> +++ b/arch/arm64/mm/mmap.c
-> @@ -126,7 +126,7 @@ int devmem_is_allowed(unsigned long pfn)
->  {
->  	if (iomem_is_exclusive(pfn << PAGE_SHIFT))
->  		return 0;
-> -	if (!page_is_ram(pfn))
-> +	if (!pfn_valid(pfn))
->  		return 1;
->  	return 0;
->  }
-> diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-> index 328638548871..083be3de1a87 100644
-> --- a/arch/arm64/mm/mmu.c
-> +++ b/arch/arm64/mm/mmu.c
-> @@ -122,7 +122,7 @@ early_param("cachepolicy", early_cachepolicy);
->  pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
->  			      unsigned long size, pgprot_t vma_prot)
->  {
-> -	if (!pfn_valid(pfn))
-> +	if (!memblock_is_physmem(PFN_PHYS(pfn)))
->  		return pgprot_noncached(vma_prot);
->  	else if (file->f_flags & O_SYNC)
->  		return pgprot_writecombine(vma_prot);
-> @@ -130,6 +130,19 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
->  }
->  EXPORT_SYMBOL(phys_mem_access_prot);
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index d7d2e818c856..d2f483a7cffe 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -208,8 +208,7 @@ void __init efi_init(void)
+>  	memmap.desc_size = params.desc_size;
+>  	memmap.desc_version = params.desc_ver;
 >  
-> +/*
-> + * This definition of phys_mem_access_prot_allowed() overrides
-> + * the __weak definition in drivers/char/mem.c
-> + */
-> +int phys_mem_access_prot_allowed(struct file *file, unsigned long pfn,
-> +				 unsigned long size, pgprot_t *prot)
-> +{
-> +	/* Disallow read-write access to system RAM */
-> +	if (memblock_is_physmem(PFN_PHYS(pfn)) && pgprot_val(*prot) & PTE_WRITE)
-> +		return 0;
-> +	return 1;
-> +}
-> +
->  static void __init *early_alloc(unsigned long sz)
+> -	if (uefi_init() < 0)
+> -		return;
+> +	WARN_ON(uefi_init() < 0);
+>  
+>  	reserve_regions();
+>  }
+> @@ -218,15 +217,13 @@ static int __init arm64_enter_virtual_mode(void)
 >  {
->  	void *ptr = __va(memblock_alloc(sz, sz));
+>  	u64 mapsize;
+>  
+> -	if (!efi_enabled(EFI_BOOT)) {
+> -		pr_info("EFI services will not be available.\n");
+> -		return -1;
+> -	}
+> +	if (!efi_enabled(EFI_MEMMAP))
+> +		return 0;
+>  
+>  	mapsize = memmap.map_end - memmap.map;
+>  	early_memunmap(memmap.map, mapsize);
+>  
+> -	if (efi_runtime_disabled()) {
+> +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
+>  		pr_info("EFI runtime services will be disabled.\n");
+>  		return -1;
+>  	}
 > -- 
 > 1.8.3.2
 > 
