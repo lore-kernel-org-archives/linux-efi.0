@@ -1,75 +1,60 @@
 From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 1/8] arm64/efi: use UEFI memory map unconditionally if
- available
-Date: Fri, 9 Jan 2015 15:41:40 +0000
-Message-ID: <20150109154140.GF11258@arm.com>
-References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
- <1419275322-29811-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v5 7/8] arm64/efi: remove free_boot_services() and friends
+Date: Fri, 9 Jan 2015 15:49:24 +0000
+Message-ID: <20150109154924.GH11258@arm.com>
+References: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1420742914-2404-8-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1419275322-29811-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1420742914-2404-8-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <geoff.levand-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Dec 22, 2014 at 07:08:35PM +0000, Ard Biesheuvel wrote:
-> On systems that boot via UEFI, all memory nodes are deleted from the
-> device tree, and instead, the size and location of system RAM is derived
-> from the UEFI memory map. This is handled by reserve_regions, which not only
-> reserves parts of memory that UEFI declares as reserved, but also installs
-> the memblocks that cover the remaining usable memory.
+On Thu, Jan 08, 2015 at 06:48:33PM +0000, Ard Biesheuvel wrote:
+> Now that we are calling SetVirtualAddressMap() from the stub, there is no
+> need to reserve boot-only memory regions, which implies that there is also
+> no reason to free them again later.
 > 
-> Currently, reserve_regions() is only called if uefi_init() succeeds.
-> However, it does not actually depend on anything that uefi_init() does,
-> and not calling reserve_regions() results in a broken boot, so it is
-> better to just call it unconditionally.
-> 
+> Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  arch/arm64/kernel/efi.c | 11 ++++-------
->  1 file changed, 4 insertions(+), 7 deletions(-)
+>  arch/arm64/kernel/efi.c | 123 +-----------------------------------------------
+>  1 file changed, 1 insertion(+), 122 deletions(-)
+
+[...]
+
+> -static void __init free_boot_services(void)
+> -{
+> -	u64 total_freed = 0;
+> -	u64 keep_end, free_start, free_end;
+> -	efi_memory_desc_t *md;
+> -
+> -	/*
+> -	 * If kernel uses larger pages than UEFI, we have to be careful
+> -	 * not to inadvertantly free memory we want to keep if there is
+> -	 * overlap at the kernel page size alignment. We do not want to
+> -	 * free is_reserve_region() memory nor the UEFI memmap itself.
+> -	 *
+> -	 * The memory map is sorted, so we keep track of the end of
+> -	 * any previous region we want to keep, remember any region
+> -	 * we want to free and defer freeing it until we encounter
+> -	 * the next region we want to keep. This way, before freeing
+> -	 * it, we can clip it as needed to avoid freeing memory we
+> -	 * want to keep for UEFI.
+> -	 */
+> -
+> -	keep_end = 0;
+> -	free_start = 0;
+> -
+> -	for_each_efi_memory_desc(&memmap, md) {
+> -		u64 paddr, npages, size;
+
+I'm glad to see the back of this function, thanks.
 
 Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 
 Will
-
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index d7d2e818c856..d2f483a7cffe 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -208,8 +208,7 @@ void __init efi_init(void)
->  	memmap.desc_size = params.desc_size;
->  	memmap.desc_version = params.desc_ver;
->  
-> -	if (uefi_init() < 0)
-> -		return;
-> +	WARN_ON(uefi_init() < 0);
->  
->  	reserve_regions();
->  }
-> @@ -218,15 +217,13 @@ static int __init arm64_enter_virtual_mode(void)
->  {
->  	u64 mapsize;
->  
-> -	if (!efi_enabled(EFI_BOOT)) {
-> -		pr_info("EFI services will not be available.\n");
-> -		return -1;
-> -	}
-> +	if (!efi_enabled(EFI_MEMMAP))
-> +		return 0;
->  
->  	mapsize = memmap.map_end - memmap.map;
->  	early_memunmap(memmap.map, mapsize);
->  
-> -	if (efi_runtime_disabled()) {
-> +	if (!efi_enabled(EFI_BOOT) || efi_runtime_disabled()) {
->  		pr_info("EFI runtime services will be disabled.\n");
->  		return -1;
->  	}
-> -- 
-> 1.8.3.2
-> 
-> 
