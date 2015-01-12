@@ -1,135 +1,118 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: Add esrt support.
-Date: Mon, 12 Jan 2015 13:03:32 +0000
-Message-ID: <20150112130332.GG26589@codeblueprint.co.uk>
-References: <1420831159-17285-1-git-send-email-pjones@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64/efi: efistub: apply __init annotation
+Date: Mon, 12 Jan 2015 13:29:51 +0000
+Message-ID: <1421069391-6902-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1420831159-17285-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 09 Jan, at 02:19:19PM, Peter Jones wrote:
-> Add sysfs files for the EFI System Resource Table (ESRT) under
-> /sys/firmware/efi/esrt and for each EFI System Resource Entry under
-> entries/ as a subdir.
-> 
-> The EFI System Resource Table (ESRT) provides a read-only catalog of
-> system components for which the system accepts firmware upgrades via
-> UEFI's "Capsule Update" feature.  This module allows userland utilities
-> to evaluate what firmware updates can be applied to this system, and
-> potentially arrange for those updates to occur.
-> 
-> The ESRT is described as part of the UEFI specification, in version 2.5
-> which should be available from http://uefi.org/specifications in early
-> 2015.  If you're a member of the UEFI Forum, information about its
-> addition to the standard is available as UEFI Mantis 1090.
-> 
-> For some hardware platforms, additional restrictions may be found at
-> http://msdn.microsoft.com/en-us/library/windows/hardware/jj128256.aspx ,
-> and additional documentation may be found at
-> http://download.microsoft.com/download/5/F/5/5F5D16CD-2530-4289-8019-94C6A20BED3C/windows-uefi-firmware-update-platform.docx
-> .
-> 
-> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  drivers/firmware/efi/Makefile |   2 +-
->  drivers/firmware/efi/efi.c    |  60 ++++++-
->  drivers/firmware/efi/esrt.c   | 402 ++++++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h           |   7 +
->  4 files changed, 469 insertions(+), 2 deletions(-)
->  create mode 100644 drivers/firmware/efi/esrt.c
+This ensures all stub component are freed when the kernel proper is
+done booting, by prefixing the names of all ELF sections that have
+the SHF_ALLOC attribute with ".init". This approach ensures that even
+implicitly emitted allocated data (like initializer values and string
+literals) are covered.
 
-[...]
+At the same time, remove some __init annotations in the stub that have
+now become redundant, and add the __init annotation to handle_kernel_image
+which will trigger a section mismatch without it.
 
-> @@ -223,6 +226,60 @@ err_put:
->  
->  subsys_initcall(efisubsys_init);
->  
-> +/*
-> + * Find the efi memory descriptor for a given physical address.  Given a
-> + * physicall address, determine if it exists within an EFI Memory Map entry,
-> + * and if so, populate the supplied memory descriptor with the appropriate
-> + * data.
-> + */
-> +int efi_mem_desc_lookup(u64 phys_addr, efi_memory_desc_t *out_md)
-> +{
-> +	struct efi_memory_map *map = efi.memmap;
-> +	void *p, *e;
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/efi-stub.c                   | 14 +++++++-------
+ drivers/firmware/efi/libstub/Makefile          | 15 +++++++++++++++
+ drivers/firmware/efi/libstub/arm-stub.c        |  8 ++++----
+ drivers/firmware/efi/libstub/efi-stub-helper.c |  2 +-
+ 4 files changed, 27 insertions(+), 12 deletions(-)
 
-This is missing,
-
-	if (!efi_enabled(EFI_MEMMAP))
-		return -EINVAL;
-
-> +
-> +	if (!map)
-> +		return -1;
-> +	if (!out_md)
-> +		return -1;
-> +	if (WARN_ON(!map->phys_map))
-> +		return -1;
-> +	if (WARN_ON(map->nr_map == 0) || WARN_ON(map->desc_size == 0))
-> +		return -1;
-
-Should we be returning -EINVAL here instead?
-
-> +
-> +	e = map->phys_map + map->nr_map * map->desc_size;
-> +	for (p = map->phys_map; p < e; p += map->desc_size) {
-> +		/*
-> +		 * If a driver calls this after efi_free_boot_services,
-> +		 * ->map will be NULL.
-> +		 * So just always get our own virtual map on the CPU.
-> +		 */
-> +		efi_memory_desc_t *md = phys_to_virt((phys_addr_t)p);
-> +		u64 size = md->num_pages << EFI_PAGE_SHIFT;
-> +		u64 end = md->phys_addr + size;
-> +
-> +		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
-> +		    md->type != EFI_BOOT_SERVICES_CODE &&
-> +		    md->type != EFI_BOOT_SERVICES_DATA)
-> +			continue;
-> +		if (!md->virt_addr)
-> +			continue;
-> +		if (phys_addr >= md->phys_addr && phys_addr < end) {
-> +			memcpy(out_md, md, sizeof(*out_md));
-> +			return 0;
-> +		}
-> +	}
-> +	return -1;
-
--ENOENT?
-
-[...]
-
-> +
-> +	tmpesrt = ioremap(efi.esrt, size);
-> +	if (!tmpesrt) {
-> +		pr_err("ioremap failed.\n");
-> +		return -ENOMEM;
-> +	}
-
-Sadly, this isn't going to work with kexec. I don't that should hold up
-this patch, but I just wanted to raise the issue and make people aware.
-
-Dave, Ard, original thread is here,
-
-  http://article.gmane.org/gmane.linux.kernel.efi/5233
-
-Ard has come up with a nice solution to this kind of problem for arm64:
-basically you perform all such mappings in the EFI boot stub so that the
-kexec and non-kexec code paths are always dealing with virtual
-addresses. It's a neat idea.
-
-I'm going to take a look at that this week to see whether we can do
-something similar for x86, because no doubt we're going to want to map
-more tables in the future (right now we have the ESRT and memmap
-tables).
-
+diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+index d27dd982ff26..f5374065ad53 100644
+--- a/arch/arm64/kernel/efi-stub.c
++++ b/arch/arm64/kernel/efi-stub.c
+@@ -13,13 +13,13 @@
+ #include <asm/efi.h>
+ #include <asm/sections.h>
+ 
+-efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+-				 unsigned long *image_addr,
+-				 unsigned long *image_size,
+-				 unsigned long *reserve_addr,
+-				 unsigned long *reserve_size,
+-				 unsigned long dram_base,
+-				 efi_loaded_image_t *image)
++efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table,
++					unsigned long *image_addr,
++					unsigned long *image_size,
++					unsigned long *reserve_addr,
++					unsigned long *reserve_size,
++					unsigned long dram_base,
++					efi_loaded_image_t *image)
+ {
+ 	efi_status_t status;
+ 	unsigned long kernel_size, kernel_memsize = 0;
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index b14bc2b9fb4d..4e7de244c663 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -24,3 +24,18 @@ lib-y				:= efi-stub-helper.o
+ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
+ 
+ CFLAGS_fdt.o			+= -I$(srctree)/scripts/dtc/libfdt/
++
++#
++# arm64 puts the stub in the kernel proper, which will unnecessarily retain all
++# code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
++# So let's apply the __init annotations at the section level, by prefixing
++# the section names directly. This will ensure that even all the inline string
++# literals are covered.
++#
++lib-$(CONFIG_ARM64)		:= $(addsuffix .init,$(lib-y))
++
++OBJCOPYFLAGS := --prefix-alloc-sections=.init
++$(obj)/%.o.init: $(obj)/%.o FORCE
++	$(call if_changed,objcopy)
++
++.PRECIOUS: $(obj)/%.o
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index e2432b39b6df..dcae482a9a17 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -17,10 +17,10 @@
+ 
+ #include "efistub.h"
+ 
+-static int __init efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
++static int efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
+ {
+-	static efi_guid_t const var_guid __initconst = EFI_GLOBAL_VARIABLE_GUID;
+-	static efi_char16_t const var_name[] __initconst = {
++	static efi_guid_t const var_guid = EFI_GLOBAL_VARIABLE_GUID;
++	static efi_char16_t const var_name[] = {
+ 		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
+ 
+ 	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
+@@ -164,7 +164,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+  * for both archictectures, with the arch-specific code provided in the
+  * handle_kernel_image() function.
+  */
+-unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
++unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 			       unsigned long *image_addr)
+ {
+ 	efi_loaded_image_t *image;
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index e766df60fbfb..2fe195002021 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -110,7 +110,7 @@ fail:
+ }
+ 
+ 
+-unsigned long __init get_dram_base(efi_system_table_t *sys_table_arg)
++unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
+ {
+ 	efi_status_t status;
+ 	unsigned long map_size;
 -- 
-Matt Fleming, Intel Open Source Technology Center
+1.8.3.2
