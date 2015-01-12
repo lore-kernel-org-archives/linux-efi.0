@@ -1,45 +1,35 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v5 6/8] arm64/efi: move SetVirtualAddressMap() to UEFI
- stub
-Date: Mon, 12 Jan 2015 11:46:00 +0000
-Message-ID: <20150112114600.GE26589@codeblueprint.co.uk>
-References: <1420742914-2404-1-git-send-email-ard.biesheuvel@linaro.org>
- <1420742914-2404-7-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] Expose underlying UEFI firmware platform size to userland
+Date: Mon, 12 Jan 2015 11:50:27 +0000
+Message-ID: <20150112115027.GF26589@codeblueprint.co.uk>
+References: <1420817394-12922-1-git-send-email-steve@einval.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1420742914-2404-7-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: leif.lindholm@linaro.org, roy.franz@linaro.org, matt.fleming@intel.com, will.deacon@arm.com, catalin.marinas@arm.com, linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, bp@alien8.de, msalter@redhat.com, geoff.levand@linaro.org, dyoung@redhat.com, mark.rutland@arm.com, linux-kernel@vger.kernel.org
+In-Reply-To: <1420817394-12922-1-git-send-email-steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 08 Jan, at 06:48:32PM, Ard Biesheuvel wrote:
-> @@ -46,4 +54,26 @@ extern void efi_idmap_init(void);
->  
->  #define EFI_ALLOC_ALIGN		SZ_64K
->  
-> +/*
-> + * On ARM systems, virtually remapped UEFI runtime services are set up in three
-> + * distinct stages:
-> + * - The stub retrieves the final version of the memory map from UEFI, populates
-> + *   the virt_addr fields and calls the SetVirtualAddressMap() [SVAM] runtime
-> + *   service to communicate the new mapping to the firmware (Note that the new
-> + *   mapping is not live at this time)
-> + * - During early boot, the page tables are allocated and populated based on the
-> + *   virt_addr fields in the memory map, but only if all descriptors with the
-> + *   EFI_MEMORY_RUNTIME attribute have a non-zero value for virt_addr. If this
-> + *   succeeds, the EFI_VIRTMAP flag is set to indicate that the virtual mappings
-> + *   have been installed successfully.
-> + * - During an early initcall(), the UEFI Runtime Services are enabled and the
-> + *   EFI_RUNTIME_SERVICES bit set if some conditions are met, i.e., we need a
-> + *   non-early mapping of the UEFI system table, and we need to have the virtmap
-> + *   installed.
-> + */
-> +#define EFI_VIRTMAP		EFI_ARCH_1
-
-Lucid. Thanks, Ard!
+On Fri, 09 Jan, at 03:29:53PM, Steve McIntyre wrote:
+> In some cases (e.g. Intel Bay Trail machines), the kernel will happily
+> run in 64-bit even if the underlying UEFI firmware platform is
+> 32-bit. That's great, but it's difficult for userland utilities like
+> grub-install to do the right thing in such a situation.
+> 
+> The kernel already knows about the size of the firmware via
+> efi_enabled(EFI_64BIT). Add an extra sysfs interface
+> /sys/firmware/efi/fw_platform_size to expose that information to
+> userland for low-level utilities to use.
+> 
+> Signed-off-by: Steve McIntyre <steve-nt0JYOx6u4DQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c |    9 +++++++++
+>  1 file changed, 9 insertions(+)
+ 
+Looks good to me, Steve! Applied to 'next' for v3.20.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
