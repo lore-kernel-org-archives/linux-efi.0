@@ -1,32 +1,35 @@
-From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
-Subject: Re: [PATCH 1/8] arm64/efi: use UEFI memory map unconditionally if
- available
-Date: Mon, 12 Jan 2015 10:46:25 +0000
-Message-ID: <20150112104625.GC26589@codeblueprint.co.uk>
-References: <1419275322-29811-1-git-send-email-ard.biesheuvel@linaro.org>
- <1419275322-29811-2-git-send-email-ard.biesheuvel@linaro.org>
- <20150106090407.GF3163@console-pimps.org>
- <CAKv+Gu_q5wFhjb8M7VptVtHfm5vfp6_YiqN_XoTs9qV5=8OOdg@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: stub: call get_memory_map() to obtain map and desc
+ sizes
+Date: Mon, 12 Jan 2015 11:09:57 +0000
+Message-ID: <20150112110957.GD26589@codeblueprint.co.uk>
+References: <1420739507-1708-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20150108190426.GC31280@leverpostej>
+ <CAKv+Gu9tVjfU5S=3oLTznUFnv0WAbGcKueNjKtDtYqGQ+cxtxw@mail.gmail.com>
+ <20150109101950.GA27421@leverpostej>
+ <20150109105529.GP3827@bivouac.eciton.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_q5wFhjb8M7VptVtHfm5vfp6_YiqN_XoTs9qV5=8OOdg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20150109105529.GP3827-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 07 Jan, at 11:48:51AM, Ard Biesheuvel wrote:
-> On 6 January 2015 at 09:04, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org> wrote:
-> > It looks like you should be setting EFI_BOOT (and EFI_64BIT) in
-> > efi_init() if efi_get_fdt_params() succeeds.
-> >
+On Fri, 09 Jan, at 10:55:29AM, Leif Lindholm wrote:
 > 
-> Yes, I agree. We should probably set EFI_SYSTEM_TABLES in uefi_init()
-> then, and possibly unset it again if we fail to remap it.
+> I disagree.
+> The intent is clear, and you can not follow the current text and
+> provide a version that does not do the right thing. Only the MapKey
+> return is conditional on success.
 
-Yeah, I think that would be more correct.
+Tianocore does in fact appear to set the descriptor version and size
+even with a zero sized memory map buffer, so that's encouraging.
+
+The real test will be to see how this patch performs in the wild, so
+let's get it in linux-next?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
