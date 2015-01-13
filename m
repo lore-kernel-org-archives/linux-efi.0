@@ -1,121 +1,38 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2] arm64/efi: efistub: apply __init annotation
-Date: Mon, 12 Jan 2015 20:28:20 +0000
-Message-ID: <1421094500-15659-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH] efi: rtc-efi: mark UIE as unsupported
+Date: Tue, 13 Jan 2015 12:28:53 +0000
+Message-ID: <1421152133-28506-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This ensures all stub component are freed when the kernel proper is
-done booting, by prefixing the names of all ELF sections that have
-the SHF_ALLOC attribute with ".init". This approach ensures that even
-implicitly emitted allocated data (like initializer values and string
-literals) are covered.
+Tools like hwclock attempt to enable the RTC update interrupt (UIE) to
+maximize the accuracy of the reported time value. The EFI rtc does not
+have interrupt capability so this is a pointless exercise to begin with,
+but the generic RTC framework ends up issuing a SetWakeupTime() Runtime
+Services call before drawing that conclusion on its own.
 
-At the same time, remove some __init annotations in the stub that have
-now become redundant, and add the __init annotation to handle_kernel_image
-which will now trigger a section mismatch warning without it.
+Instead, we can mark UIE as unsupported at driver probe time. The net
+result is the same, but without the spurious SetWakeupTime() call.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
-v2: fixed an issue with spurious rebuilding of object files, now setting
-    $(extra-y) correctly, which also allows the .PRECIOUS: to be dropped.
+ drivers/rtc/rtc-efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-
- arch/arm64/kernel/efi-stub.c                   | 14 +++++++-------
- drivers/firmware/efi/libstub/Makefile          | 14 ++++++++++++++
- drivers/firmware/efi/libstub/arm-stub.c        |  8 ++++----
- drivers/firmware/efi/libstub/efi-stub-helper.c |  2 +-
- 4 files changed, 26 insertions(+), 12 deletions(-)
-
-diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
-index d27dd982ff26..f5374065ad53 100644
---- a/arch/arm64/kernel/efi-stub.c
-+++ b/arch/arm64/kernel/efi-stub.c
-@@ -13,13 +13,13 @@
- #include <asm/efi.h>
- #include <asm/sections.h>
+diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+index b37b0c80bd5a..cb989cd00b14 100644
+--- a/drivers/rtc/rtc-efi.c
++++ b/drivers/rtc/rtc-efi.c
+@@ -218,6 +218,7 @@ static int __init efi_rtc_probe(struct platform_device *dev)
+ 	if (IS_ERR(rtc))
+ 		return PTR_ERR(rtc);
  
--efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
--				 unsigned long *image_addr,
--				 unsigned long *image_size,
--				 unsigned long *reserve_addr,
--				 unsigned long *reserve_size,
--				 unsigned long dram_base,
--				 efi_loaded_image_t *image)
-+efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table,
-+					unsigned long *image_addr,
-+					unsigned long *image_size,
-+					unsigned long *reserve_addr,
-+					unsigned long *reserve_size,
-+					unsigned long dram_base,
-+					efi_loaded_image_t *image)
- {
- 	efi_status_t status;
- 	unsigned long kernel_size, kernel_memsize = 0;
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index b14bc2b9fb4d..8902f52e0998 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -24,3 +24,17 @@ lib-y				:= efi-stub-helper.o
- lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
++	rtc->uie_unsupported = 1;
+ 	platform_set_drvdata(dev, rtc);
  
- CFLAGS_fdt.o			+= -I$(srctree)/scripts/dtc/libfdt/
-+
-+#
-+# arm64 puts the stub in the kernel proper, which will unnecessarily retain all
-+# code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
-+# So let's apply the __init annotations at the section level, by prefixing
-+# the section names directly. This will ensure that even all the inline string
-+# literals are covered.
-+#
-+extra-$(CONFIG_ARM64)		:= $(lib-y)
-+lib-$(CONFIG_ARM64)		:= $(patsubst %.o,%.init.o,$(lib-y))
-+
-+OBJCOPYFLAGS := --prefix-alloc-sections=.init
-+$(obj)/%.init.o: $(obj)/%.o FORCE
-+	$(call if_changed,objcopy)
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index e2432b39b6df..dcae482a9a17 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -17,10 +17,10 @@
- 
- #include "efistub.h"
- 
--static int __init efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
-+static int efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
- {
--	static efi_guid_t const var_guid __initconst = EFI_GLOBAL_VARIABLE_GUID;
--	static efi_char16_t const var_name[] __initconst = {
-+	static efi_guid_t const var_guid = EFI_GLOBAL_VARIABLE_GUID;
-+	static efi_char16_t const var_name[] = {
- 		'S', 'e', 'c', 'u', 'r', 'e', 'B', 'o', 'o', 't', 0 };
- 
- 	efi_get_variable_t *f_getvar = sys_table_arg->runtime->get_variable;
-@@ -164,7 +164,7 @@ efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
-  * for both archictectures, with the arch-specific code provided in the
-  * handle_kernel_image() function.
-  */
--unsigned long __init efi_entry(void *handle, efi_system_table_t *sys_table,
-+unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
- 			       unsigned long *image_addr)
- {
- 	efi_loaded_image_t *image;
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index e766df60fbfb..2fe195002021 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -110,7 +110,7 @@ fail:
- }
- 
- 
--unsigned long __init get_dram_base(efi_system_table_t *sys_table_arg)
-+unsigned long get_dram_base(efi_system_table_t *sys_table_arg)
- {
- 	efi_status_t status;
- 	unsigned long map_size;
+ 	return 0;
 -- 
 1.8.3.2
