@@ -1,65 +1,43 @@
-From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: handle potential failure to remap memory map
-Date: Thu, 15 Jan 2015 11:50:47 -0500
-Message-ID: <1421340647.22837.2.camel@deneb.redhat.com>
-References: <1421323266-30973-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: EFI mixed mode + perf = rampant triple faults
+Date: Thu, 15 Jan 2015 19:41:27 +0000
+Message-ID: <20150115194127.GB12079@codeblueprint.co.uk>
+References: <5491B4A8.905@amacapital.net>
+ <CALCETrUyw5_E+FN8o8ZsOxN5XG81-Q8MVzeUHPZ_XBM+ifi6_w@mail.gmail.com>
+ <20141231183739.GA28946@console-pimps.org>
+ <20150114165151.GA3479@codeblueprint.co.uk>
+ <CALCETrWOxPwoL0zo0UZMk=05uAEqgY-Xovk1=JHwbVtinx3u3w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1421323266-30973-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CALCETrWOxPwoL0zo0UZMk=05uAEqgY-Xovk1=JHwbVtinx3u3w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2015-01-15 at 12:01 +0000, Ard Biesheuvel wrote:
-> When remapping the UEFI memory map using ioremap_cache(), we
-> have to deal with potential failure. Note that, even if the
-> common case is for ioremap_cache() to return the existing linear
-> mapping of the memory map, we cannot rely on that to be always the
-> case, e.g., in the presence of a mem= kernel parameter.
+On Wed, 14 Jan, at 10:27:47AM, Andy Lutomirski wrote:
 > 
-> At the same time, remove a stale comment and move the memmap code
-> together.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/kernel/efi.c | 10 ++++++----
->  1 file changed, 6 insertions(+), 4 deletions(-)
-> 
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index a98415b5979c..c9cb0fbe7aa4 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -229,19 +229,21 @@ static int __init arm64_enable_runtime_services(void)
->  		return -1;
->  	}
->  
-> -	mapsize = memmap.map_end - memmap.map;
-> -
->  	if (efi_runtime_disabled()) {
->  		pr_info("EFI runtime services will be disabled.\n");
->  		return -1;
->  	}
->  
->  	pr_info("Remapping and enabling EFI services.\n");
-> -	/* replace early memmap mapping with permanent mapping */
-> +
-> +	mapsize = memmap.map_end - memmap.map;
->  	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
->  						   mapsize);
-> +	if (!memmap.map) {
-> +		pr_err("Failed to remap EFI memory map\n");
-> +		return -1;
-> +	}
->  	memmap.map_end = memmap.map + mapsize;
-> -
->  	efi.memmap = &memmap;
->  
->  	efi.systab = (__force void *)ioremap_cache(efi_system_table,
+> How are you manually triggering an MCE?  I've been playing with some
+> MCE stuff recently, but the only reasonably reliable way I know of to
+> trigger an MCE is using WHEA, and I don't have a box with WHEA, and I
+> assume your ASUS T100 doesn't either.
+ 
+As Borislav mentions, I used 'int $18', solely to trigger the 64-bit
+exception handler code paths in the middle of the EFI mixed mode code.
 
-Somewhat unrelated but we should unmap memmap.map if the efi.systab
-mapping fails.
+> > Where this won't work so well is at boot time before we jump to the
+> > kernel proper. There, we still need to restore the firmware's GDT so
+> > that interrupts are serviced correctly before ExitBootServices() (in
+> > particular, ia32 Tianocore assumes __KERNEL_CS is a 32-bit CS).
+> 
+> Tianocore makes assumptions about the kernel's GDT layout?  Yuck.
 
-Acked-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+No, but 32-bit Tianocore does rely on the second GDT entry being a
+32-bit CS.
+
+It has no knowledge of Linux's GDT layout.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
