@@ -1,62 +1,56 @@
-From: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [patch] efi: small leak on error
-Date: Thu, 15 Jan 2015 13:28:24 +0300
-Message-ID: <20150115102824.GB6201@mwanda>
-References: <20150115092121.GA17976@mwanda>
- <20150115095455.GA15197@darkstar.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64/efi: handle potential failure to remap memory map
+Date: Thu, 15 Jan 2015 12:01:06 +0000
+Message-ID: <1421323266-30973-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150115095455.GA15197-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 15, 2015 at 05:54:55PM +0800, Dave Young wrote:
-> >  out_add_entry:
-> > -	for (j = i - 1; j > 0; j--) {
-> > +	for (j = i - 1; j >= 0; j--) {
-> >  		entry = *(map_entries + j);
-> >  		kobject_put(&entry->kobj);
-> >  	}
-> 
-> see below code, as for an invalid entry with i = 0, it will be not
-> assigned to *(map_entries + i) 
+When remapping the UEFI memory map using ioremap_cache(), we
+have to deal with potential failure. Note that, even if the
+common case is for ioremap_cache() to return the existing linear
+mapping of the memory map, we cannot rely on that to be always the
+case, e.g., in the presence of a mem= kernel parameter.
 
-Yes.  Of course, if the first iteration fails then we want the free loop
-to be a noop and it is in my code as well.  j = -1.  -1 is not >= 0.
-The problem is in later iterations.
+At the same time, remove a stale comment and move the memmap code
+together.
 
-> 
-> ---
-> 	for (i = 0; i < nr_efi_runtime_map; i++) {
-> 		entry = add_sysfs_runtime_map_entry(efi_kobj, i);
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/efi.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
 
-Assume that this is the second iteration and "i == 1".
-
-> 		if (IS_ERR(entry)) {
-> 			ret = PTR_ERR(entry);
-> 			goto out_add_entry;
-
-Assume it fails so we hit this goto.  We want to free the first entry.
-
-> 		}
-> 		*(map_entries + i) = entry;
-> 	}
-> 
-> 	return 0;
-> out_add_entry:
-> 	for (j = i - 1; j > 0; j--) {
-> 		entry = *(map_entries + j);
-
-In your code, "j == 1 - 1" and that's not greater than zero so we don't
-enter this loop.  In my code, we go through the loop one time.
-
-By the way this code would be a lot more clear if you used arrays.
-"map_entries[j]" is more clear than "*(map_entries + j)".  Even in the
-other patch, passing "&foo[i]" is more clear than "foo + i".
-
-regards,
-dan carpenter
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index a98415b5979c..c9cb0fbe7aa4 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -229,19 +229,21 @@ static int __init arm64_enable_runtime_services(void)
+ 		return -1;
+ 	}
+ 
+-	mapsize = memmap.map_end - memmap.map;
+-
+ 	if (efi_runtime_disabled()) {
+ 		pr_info("EFI runtime services will be disabled.\n");
+ 		return -1;
+ 	}
+ 
+ 	pr_info("Remapping and enabling EFI services.\n");
+-	/* replace early memmap mapping with permanent mapping */
++
++	mapsize = memmap.map_end - memmap.map;
+ 	memmap.map = (__force void *)ioremap_cache((phys_addr_t)memmap.phys_map,
+ 						   mapsize);
++	if (!memmap.map) {
++		pr_err("Failed to remap EFI memory map\n");
++		return -1;
++	}
+ 	memmap.map_end = memmap.map + mapsize;
+-
+ 	efi.memmap = &memmap;
+ 
+ 	efi.systab = (__force void *)ioremap_cache(efi_system_table,
+-- 
+1.8.3.2
