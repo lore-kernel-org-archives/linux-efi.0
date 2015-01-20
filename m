@@ -1,77 +1,45 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [patch] efi: small leak on error
-Date: Tue, 20 Jan 2015 15:59:33 +0000
-Message-ID: <20150120155933.GA12079@codeblueprint.co.uk>
-References: <20150115092121.GA17976@mwanda>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [Linaro-uefi] [PATCH] firmware: efi: remove unneeded guid unparse
+Date: Tue, 20 Jan 2015 16:20:10 +0000
+Message-ID: <CAKv+Gu87L6xhEbTiWSdcY6RCk3yc3nhf2bN7rMOji3znx=7uuQ@mail.gmail.com>
+References: <1421770352-5059-1-git-send-email-ivan.khoronzhuk@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150115092121.GA17976@mwanda>
+In-Reply-To: <1421770352-5059-1-git-send-email-ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Linaro Kernel Mailman List <linaro-kernel-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>, Linaro UEFI Mailman List <linaro-uefi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 15 Jan, at 12:21:21PM, Dan Carpenter wrote:
-> The "> 0" here should ">= 0" so we free map_entries[0].
-> 
-> Fixes: 926172d46038 ('efi: Export EFI runtime memory mapping to sysfs')
-> Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-> 
-> diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
-> index 018c29a..87b8e3b 100644
-> --- a/drivers/firmware/efi/runtime-map.c
-> +++ b/drivers/firmware/efi/runtime-map.c
-> @@ -191,7 +191,7 @@ int __init efi_runtime_map_init(struct kobject *efi_kobj)
->  
->  	return 0;
->  out_add_entry:
-> -	for (j = i - 1; j > 0; j--) {
-> +	for (j = i - 1; j >= 0; j--) {
->  		entry = *(map_entries + j);
->  		kobject_put(&entry->kobj);
->  	}
+On 20 January 2015 at 16:12, Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> There is no reason to translate guid number to string here.
+> So remove it in order to not do unneeded work.
+>
+> Signed-off-by: Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c | 5 -----
+>  1 file changed, 5 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 9035c1b..f6be017 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -272,15 +272,10 @@ static __init int match_config_table(efi_guid_t *guid,
+>                                      unsigned long table,
+>                                      efi_config_table_type_t *table_types)
+>  {
+> -       u8 str[EFI_VARIABLE_GUID_LEN + 1];
+>         int i;
+>
+>         if (table_types) {
+> -               efi_guid_unparse(guid, str);
+> -
+>                 for (i = 0; efi_guidcmp(table_types[i].guid, NULL_GUID); i++) {
+> -                       efi_guid_unparse(&table_types[i].guid, str);
+> -
+>                         if (!efi_guidcmp(*guid, table_types[i].guid)) {
+>                                 *(table_types[i].ptr) = table;
+>                                 pr_cont(" %s=0x%lx ",
 
-Thanks Dan, I've applied this for v3.20 and added Dave's ACK.
-
-One thing: I updated the title to be a little more descriptive. Because
-the "efi" code has grown rather large over the past few years, it's
-really helpful to pinpoint exactly what area a patch is touching (in
-this case, it's the runtime map code).
-
----
-
->From 86d68a58d00db3770735b5919ef2c6b12d7f06f3 Mon Sep 17 00:00:00 2001
-From: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Date: Thu, 15 Jan 2015 12:21:21 +0300
-Subject: [PATCH] efi: Small leak on error in runtime map code
-
-The "> 0" here should ">= 0" so we free map_entries[0].
-
-Fixes: 926172d46038 ('efi: Export EFI runtime memory mapping to sysfs')
-Signed-off-by: Dan Carpenter <dan.carpenter-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Acked-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efi/runtime-map.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/runtime-map.c b/drivers/firmware/efi/runtime-map.c
-index 018c29a26615..87b8e3b900d2 100644
---- a/drivers/firmware/efi/runtime-map.c
-+++ b/drivers/firmware/efi/runtime-map.c
-@@ -191,7 +191,7 @@ int __init efi_runtime_map_init(struct kobject *efi_kobj)
- 
- 	return 0;
- out_add_entry:
--	for (j = i - 1; j > 0; j--) {
-+	for (j = i - 1; j >= 0; j--) {
- 		entry = *(map_entries + j);
- 		kobject_put(&entry->kobj);
- 	}
--- 
-1.9.3
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
