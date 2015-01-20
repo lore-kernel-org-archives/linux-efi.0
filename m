@@ -1,23 +1,47 @@
-From: =?iso-8859-1?Q?=22Antonio_Vi=F1al=22?= <ferderodcal-yLk5BpCQSzA@public.gmane.org>
-Subject: Please respond!!!
-Date: Fri, 16 Jan 2015 20:56:37 -0000
-Message-ID: <6398b02bb139bc13f72a6eafd19c88b5.squirrel__22280.2908196629$1421441982$gmane$org@38.89.136.45>
-Reply-To: barr.antoniovinal-/E1597aS9LTXPF5Rlphj1Q@public.gmane.org
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: rtc-efi: mark UIE as unsupported
+Date: Tue, 20 Jan 2015 15:46:27 +0000
+Message-ID: <20150120154627.GZ12079@codeblueprint.co.uk>
+References: <1421152133-28506-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1421152133-28506-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Please respond!!!
-Hello friend!
+On Tue, 13 Jan, at 12:28:53PM, Ard Biesheuvel wrote:
+> Tools like hwclock attempt to enable the RTC update interrupt (UIE) to
+> maximize the accuracy of the reported time value. The EFI rtc does not
+> have interrupt capability so this is a pointless exercise to begin with,
+> but the generic RTC framework ends up issuing a SetWakeupTime() Runtime
+> Services call before drawing that conclusion on its own.
+> 
+> Instead, we can mark UIE as unsupported at driver probe time. The net
+> result is the same, but without the spurious SetWakeupTime() call.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/rtc/rtc-efi.c | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+> index b37b0c80bd5a..cb989cd00b14 100644
+> --- a/drivers/rtc/rtc-efi.c
+> +++ b/drivers/rtc/rtc-efi.c
+> @@ -218,6 +218,7 @@ static int __init efi_rtc_probe(struct platform_device *dev)
+>  	if (IS_ERR(rtc))
+>  		return PTR_ERR(rtc);
+>  
+> +	rtc->uie_unsupported = 1;
+>  	platform_set_drvdata(dev, rtc);
+>  
+>  	return 0;
 
-I would like to contact you personally for an important proposal that
-could of interest to you.
-I send this email only to know if this email address is functional.
-I have something very important to discuss with you. Contact me for
-details by:  Email: fernrodyup12-yLk5BpCQSzA@public.gmane.org with your direct contacts.
+Looks fine to me. Picked up in the EFI tree for v3.20. Thanks Ard.
 
-Kind regards.
-Antonio Vi=F1al.
+-- 
+Matt Fleming, Intel Open Source Technology Center
