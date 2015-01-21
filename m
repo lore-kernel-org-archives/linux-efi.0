@@ -1,111 +1,283 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL] EFI changes for v3.20
-Date: Wed, 21 Jan 2015 14:02:50 +0000
-Message-ID: <20150121140250.GE12079@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+From: Andrey Ryabinin <a.ryabinin@samsung.com>
+Subject: [PATCH v9 11/17] x86_64: kasan: add interceptors for
+ memset/memmove/memcpy functions
+Date: Wed, 21 Jan 2015 19:51:39 +0300
+Message-ID: <1421859105-25253-12-git-send-email-a.ryabinin@samsung.com>
+References: <1404905415-9046-1-git-send-email-a.ryabinin@samsung.com>
+ <1421859105-25253-1-git-send-email-a.ryabinin@samsung.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-reply-to: <1421859105-25253-1-git-send-email-a.ryabinin@samsung.com>
+Sender: owner-linux-mm@kvack.org
+To: linux-kernel@vger.kernel.org
+Cc: Andrey Ryabinin <a.ryabinin@samsung.com>, Dmitry Vyukov <dvyukov@google.com>, Konstantin Serebryany <kcc@google.com>, Dmitry Chernenkov <dmitryc@google.com>, Andrey Konovalov <adech.fo@gmail.com>, Yuri Gribov <tetra2005@gmail.com>, Konstantin Khlebnikov <koct9i@gmail.com>, Sasha Levin <sasha.levin@oracle.com>, Christoph Lameter <cl@linux.com>, Joonsoo Kim <iamjoonsoo.kim@lge.com>, Andrew Morton <akpm@linux-foundation.org>, Dave Hansen <dave.hansen@intel.com>, Andi Kleen <andi@firstfloor.org>, x86@kernel.org, linux-mm@kvack.org, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "open list:EXTENSIBLE FIRMWA..." <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Folks, please consider pulling the following changes for v3.20. There's
-nothing super scary, mainly cleanups, and a merge from Ricardo who
-kindly picked up some patches from the linux-efi mailing list while I
-was out on annual leave in December.
+Recently instrumentation of builtin functions calls was removed from GCC 5.0.
+To check the memory accessed by such functions, userspace asan always uses
+interceptors for them.
 
-Perhaps the biggest risk is the get_memory_map() change from Ard, which
-changes the way that both the arm64 and x86 EFI boot stub build the
-early memory map. It would be good to have it bake in linux-next for a
-while.
+So now we should do this as well. This patch declares memset/memmove/memcpy
+as weak symbols. In mm/kasan/kasan.c we have our own implementation
+of those functions which checks memory before accessing it.
 
-One other thing to note is that I've picked up an rtc-efi patch from Ard
-because the rtc maintainer hasn't been responsive for a while now.
+Default memset/memmove/memcpy now now always have aliases with '__' prefix.
+For files that built without kasan instrumentation (e.g. mm/slub.c)
+original mem* replaced (via #define) with prefixed variants,
+cause we don't want to check memory accesses there.
 
-The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
+Signed-off-by: Andrey Ryabinin <a.ryabinin@samsung.com>
+---
+ arch/x86/boot/compressed/eboot.c       |  3 +--
+ arch/x86/boot/compressed/misc.h        |  1 +
+ arch/x86/include/asm/string_64.h       | 18 +++++++++++++++++-
+ arch/x86/kernel/x8664_ksyms_64.c       | 10 ++++++++--
+ arch/x86/lib/memcpy_64.S               |  6 ++++--
+ arch/x86/lib/memmove_64.S              |  4 ++++
+ arch/x86/lib/memset_64.S               | 10 ++++++----
+ drivers/firmware/efi/libstub/efistub.h |  4 ++++
+ mm/kasan/kasan.c                       | 31 ++++++++++++++++++++++++++++++-
+ 9 files changed, 75 insertions(+), 12 deletions(-)
 
-  x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
-
-  efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
-
-----------------------------------------------------------------
- * Move efivarfs from the misc filesystem section to pseudo filesystem,
-   since that's a more logical and accurate place - Leif Lindholm
-
- * Update efibootmgr URL in Kconfig help - Peter Jones
-
- * Improve accuracy of EFI guid function names - Borislav Petkov
-
- * Expose firmware platform size in sysfs for the benefit of EFI boot
-   loader installers and other utilities - Steve McIntyre
-
- * Cleanup __init annotations for arm64/efi code - Ard Biesheuvel
-
- * Mark the UIE as unsupported for rtc-efi - Ard Biesheuvel
-
- * Fix memory leak in error code path of runtime map code - Dan Carpenter
-
- * Improve robustness of get_memory_map() by removing assumptions on the
-   size of efi_memory_desc_t (which could change in future spec
-   versions) and querying the firmware instead of guessing about the
-   memmap size - Ard Biesheuvel
-
- * Remove superfluous guid unparse calls - Ivan Khoronzhuk
-
- * Delete unnecessary chosen@0 DT node FDT code since was duplicated
-   from code in drivers/of and is entirely unnecessary - Leif Lindholm
-
-----------------------------------------------------------------
-Ard Biesheuvel (3):
-      arm64/efi: efistub: Apply __init annotation
-      efi: rtc-efi: Mark UIE as unsupported
-      efi/libstub: Call get_memory_map() to obtain map and desc sizes
-
-Borislav Petkov (1):
-      efi: Rename efi_guid_unparse to efi_guid_to_str
-
-Dan Carpenter (1):
-      efi: Small leak on error in runtime map code
-
-Ivan Khoronzhuk (1):
-      firmware: efi: Remove unneeded guid unparse
-
-Leif Lindholm (2):
-      fs: Make efivarfs a pseudo filesystem, built by default with EFI
-      efi: Don't look for chosen@0 node on DT platforms
-
-Matt Fleming (1):
-      Merge tag 'rneri-efi-next' of https://github.com/ricardon/efi into next
-
-Peter Jones (1):
-      efi: Update the URLs for efibootmgr
-
-Steve McIntyre (1):
-      efi: Expose underlying UEFI firmware platform size to userland
-
- arch/arm64/kernel/efi-stub.c                   | 14 +++++++-------
- block/partitions/efi.c                         |  2 +-
- drivers/firmware/efi/Kconfig                   |  4 ++--
- drivers/firmware/efi/efi.c                     | 17 ++++++++++-------
- drivers/firmware/efi/efivars.c                 |  6 +++---
- drivers/firmware/efi/libstub/Makefile          | 14 ++++++++++++++
- drivers/firmware/efi/libstub/arm-stub.c        |  8 ++++----
- drivers/firmware/efi/libstub/efi-stub-helper.c | 18 +++++++++++-------
- drivers/firmware/efi/runtime-map.c             |  2 +-
- drivers/rtc/rtc-efi.c                          |  1 +
- fs/Kconfig                                     |  2 +-
- fs/efivarfs/Kconfig                            |  1 +
- fs/efivarfs/super.c                            |  2 +-
- include/linux/efi.h                            |  2 +-
- 14 files changed, 58 insertions(+), 35 deletions(-)
-
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 92b9a5f..ef17683 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -13,8 +13,7 @@
+ #include <asm/setup.h>
+ #include <asm/desc.h>
+ 
+-#undef memcpy			/* Use memcpy from misc.c */
+-
++#include "../string.h"
+ #include "eboot.h"
+ 
+ static efi_system_table_t *sys_table;
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 24e3e56..04477d6 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -7,6 +7,7 @@
+  * we just keep it from happening
+  */
+ #undef CONFIG_PARAVIRT
++#undef CONFIG_KASAN
+ #ifdef CONFIG_X86_32
+ #define _ASM_X86_DESC_H 1
+ #endif
+diff --git a/arch/x86/include/asm/string_64.h b/arch/x86/include/asm/string_64.h
+index 19e2c46..e466119 100644
+--- a/arch/x86/include/asm/string_64.h
++++ b/arch/x86/include/asm/string_64.h
+@@ -27,11 +27,12 @@ static __always_inline void *__inline_memcpy(void *to, const void *from, size_t
+    function. */
+ 
+ #define __HAVE_ARCH_MEMCPY 1
++extern void *__memcpy(void *to, const void *from, size_t len);
++
+ #ifndef CONFIG_KMEMCHECK
+ #if (__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __GNUC__ > 4
+ extern void *memcpy(void *to, const void *from, size_t len);
+ #else
+-extern void *__memcpy(void *to, const void *from, size_t len);
+ #define memcpy(dst, src, len)					\
+ ({								\
+ 	size_t __len = (len);					\
+@@ -53,9 +54,11 @@ extern void *__memcpy(void *to, const void *from, size_t len);
+ 
+ #define __HAVE_ARCH_MEMSET
+ void *memset(void *s, int c, size_t n);
++void *__memset(void *s, int c, size_t n);
+ 
+ #define __HAVE_ARCH_MEMMOVE
+ void *memmove(void *dest, const void *src, size_t count);
++void *__memmove(void *dest, const void *src, size_t count);
+ 
+ int memcmp(const void *cs, const void *ct, size_t count);
+ size_t strlen(const char *s);
+@@ -63,6 +66,19 @@ char *strcpy(char *dest, const char *src);
+ char *strcat(char *dest, const char *src);
+ int strcmp(const char *cs, const char *ct);
+ 
++#if defined(CONFIG_KASAN) && !defined(__SANITIZE_ADDRESS__)
++
++/*
++ * For files that not instrumented (e.g. mm/slub.c) we
++ * should use not instrumented version of mem* functions.
++ */
++
++#undef memcpy
++#define memcpy(dst, src, len) __memcpy(dst, src, len)
++#define memmove(dst, src, len) __memmove(dst, src, len)
++#define memset(s, c, n) __memset(s, c, n)
++#endif
++
+ #endif /* __KERNEL__ */
+ 
+ #endif /* _ASM_X86_STRING_64_H */
+diff --git a/arch/x86/kernel/x8664_ksyms_64.c b/arch/x86/kernel/x8664_ksyms_64.c
+index 0406819..37d8fa4 100644
+--- a/arch/x86/kernel/x8664_ksyms_64.c
++++ b/arch/x86/kernel/x8664_ksyms_64.c
+@@ -50,13 +50,19 @@ EXPORT_SYMBOL(csum_partial);
+ #undef memset
+ #undef memmove
+ 
++extern void *__memset(void *, int, __kernel_size_t);
++extern void *__memcpy(void *, const void *, __kernel_size_t);
++extern void *__memmove(void *, const void *, __kernel_size_t);
+ extern void *memset(void *, int, __kernel_size_t);
+ extern void *memcpy(void *, const void *, __kernel_size_t);
+-extern void *__memcpy(void *, const void *, __kernel_size_t);
++extern void *memmove(void *, const void *, __kernel_size_t);
++
++EXPORT_SYMBOL(__memset);
++EXPORT_SYMBOL(__memcpy);
++EXPORT_SYMBOL(__memmove);
+ 
+ EXPORT_SYMBOL(memset);
+ EXPORT_SYMBOL(memcpy);
+-EXPORT_SYMBOL(__memcpy);
+ EXPORT_SYMBOL(memmove);
+ 
+ #ifndef CONFIG_DEBUG_VIRTUAL
+diff --git a/arch/x86/lib/memcpy_64.S b/arch/x86/lib/memcpy_64.S
+index 56313a3..89b53c9 100644
+--- a/arch/x86/lib/memcpy_64.S
++++ b/arch/x86/lib/memcpy_64.S
+@@ -53,6 +53,8 @@
+ .Lmemcpy_e_e:
+ 	.previous
+ 
++.weak memcpy
++
+ ENTRY(__memcpy)
+ ENTRY(memcpy)
+ 	CFI_STARTPROC
+@@ -199,8 +201,8 @@ ENDPROC(__memcpy)
+ 	 * only outcome...
+ 	 */
+ 	.section .altinstructions, "a"
+-	altinstruction_entry memcpy,.Lmemcpy_c,X86_FEATURE_REP_GOOD,\
++	altinstruction_entry __memcpy,.Lmemcpy_c,X86_FEATURE_REP_GOOD,\
+ 			     .Lmemcpy_e-.Lmemcpy_c,.Lmemcpy_e-.Lmemcpy_c
+-	altinstruction_entry memcpy,.Lmemcpy_c_e,X86_FEATURE_ERMS, \
++	altinstruction_entry __memcpy,.Lmemcpy_c_e,X86_FEATURE_ERMS, \
+ 			     .Lmemcpy_e_e-.Lmemcpy_c_e,.Lmemcpy_e_e-.Lmemcpy_c_e
+ 	.previous
+diff --git a/arch/x86/lib/memmove_64.S b/arch/x86/lib/memmove_64.S
+index 65268a6..9c4b530 100644
+--- a/arch/x86/lib/memmove_64.S
++++ b/arch/x86/lib/memmove_64.S
+@@ -24,7 +24,10 @@
+  * Output:
+  * rax: dest
+  */
++.weak memmove
++
+ ENTRY(memmove)
++ENTRY(__memmove)
+ 	CFI_STARTPROC
+ 
+ 	/* Handle more 32 bytes in loop */
+@@ -220,4 +223,5 @@ ENTRY(memmove)
+ 		.Lmemmove_end_forward-.Lmemmove_begin_forward,	\
+ 		.Lmemmove_end_forward_efs-.Lmemmove_begin_forward_efs
+ 	.previous
++ENDPROC(__memmove)
+ ENDPROC(memmove)
+diff --git a/arch/x86/lib/memset_64.S b/arch/x86/lib/memset_64.S
+index 2dcb380..6f44935 100644
+--- a/arch/x86/lib/memset_64.S
++++ b/arch/x86/lib/memset_64.S
+@@ -56,6 +56,8 @@
+ .Lmemset_e_e:
+ 	.previous
+ 
++.weak memset
++
+ ENTRY(memset)
+ ENTRY(__memset)
+ 	CFI_STARTPROC
+@@ -147,8 +149,8 @@ ENDPROC(__memset)
+          * feature to implement the right patch order.
+ 	 */
+ 	.section .altinstructions,"a"
+-	altinstruction_entry memset,.Lmemset_c,X86_FEATURE_REP_GOOD,\
+-			     .Lfinal-memset,.Lmemset_e-.Lmemset_c
+-	altinstruction_entry memset,.Lmemset_c_e,X86_FEATURE_ERMS, \
+-			     .Lfinal-memset,.Lmemset_e_e-.Lmemset_c_e
++	altinstruction_entry __memset,.Lmemset_c,X86_FEATURE_REP_GOOD,\
++			     .Lfinal-__memset,.Lmemset_e-.Lmemset_c
++	altinstruction_entry __memset,.Lmemset_c_e,X86_FEATURE_ERMS, \
++			     .Lfinal-__memset,.Lmemset_e_e-.Lmemset_c_e
+ 	.previous
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 304ab29..fbe0548 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -39,4 +39,8 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 
+ void *get_fdt(efi_system_table_t *sys_table);
+ 
++#undef memcpy
++#undef memset
++#undef memmove
++
+ #endif
+diff --git a/mm/kasan/kasan.c b/mm/kasan/kasan.c
+index c52350e..a59c976 100644
+--- a/mm/kasan/kasan.c
++++ b/mm/kasan/kasan.c
+@@ -44,7 +44,7 @@ static void kasan_poison_shadow(const void *address, size_t size, u8 value)
+ 	shadow_start = kasan_mem_to_shadow(addr);
+ 	shadow_end = kasan_mem_to_shadow(addr + size);
+ 
+-	memset((void *)shadow_start, value, shadow_end - shadow_start);
++	__memset((void *)shadow_start, value, shadow_end - shadow_start);
+ }
+ 
+ void kasan_unpoison_shadow(const void *address, size_t size)
+@@ -248,6 +248,35 @@ static __always_inline void check_memory_region(unsigned long addr,
+ 	kasan_report(addr, size, write);
+ }
+ 
++void __asan_loadN(unsigned long addr, size_t size);
++void __asan_storeN(unsigned long addr, size_t size);
++
++#undef memset
++void *memset(void *addr, int c, size_t len)
++{
++	__asan_storeN((unsigned long)addr, len);
++
++	return __memset(addr, c, len);
++}
++
++#undef memmove
++void *memmove(void *dest, const void *src, size_t len)
++{
++	__asan_loadN((unsigned long)src, len);
++	__asan_storeN((unsigned long)dest, len);
++
++	return __memmove(dest, src, len);
++}
++
++#undef memcpy
++void *memcpy(void *dest, const void *src, size_t len)
++{
++	__asan_loadN((unsigned long)src, len);
++	__asan_storeN((unsigned long)dest, len);
++
++	return __memcpy(dest, src, len);
++}
++
+ void kasan_alloc_pages(struct page *page, unsigned int order)
+ {
+ 	if (likely(!PageHighMem(page)))
 -- 
-Matt Fleming, Intel Open Source Technology Center
+2.2.1
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
