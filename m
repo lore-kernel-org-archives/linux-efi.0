@@ -1,159 +1,111 @@
-From: Bruno =?UTF-8?B?UHLDqW1vbnQ=?= <bonbons-ud5FBsm0p/xEiooADzr8i9i2O/JbrIOy@public.gmane.org>
-Subject: Re: Boot with EFI stub fails on VMWare during decompression
-Date: Wed, 21 Jan 2015 14:54:20 +0100
-Message-ID: <20150121145420.76511d61@pluto.restena.lu>
-References: <20150116110344.715cc887@pluto.restena.lu>
-	<20150120190238.GB12079@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v3.20
+Date: Wed, 21 Jan 2015 14:02:50 +0000
+Message-ID: <20150121140250.GE12079@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150120190238.GB12079-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 20 Jan 2015 19:02:38 +0000 Matt Fleming wrote:
-> On Fri, 16 Jan, at 11:03:44AM, Bruno Pr=C3=A9mont wrote:
-> > Register dump:
-> > rax            0x1000   4096
-> > rbx            0x23f78cb        37714123
-> > rcx            0x0      0
-> > rdx            0x0      0
-> > rsi            0x0      0
-> > rdi            0x23f7863        37714019
-> > rbp            0x1a363b4        0x1a363b4
-> > rsp            0x2404b20        0x2404b20
-> > r8             0x2404ee0        37768928
-> > r9             0x4      4
-> > r10            0x3      3
-> > r11            0x9      9
-> > r12            0x13dcbbc        20827068
-> > r13            0x1e000000       503316480      (this seems to point=
- to decompressed kernel)
->=20
-> [...]
-> =20
-> > while on the failing one I get (just enough efi_printk to cause ker=
-nel to boot):
-> > [    0.000000] efi: EFI v2.30 by VMware, Inc.
-> > [    0.000000] efi:  SMBIOS=3D0x1ffaf000  ACPI 2.0=3D0x1ff9f000=20
-> > [    0.000000] efi: mem00: [ACPI Memory NVS    |   |  |  |  |   |WB=
-|WT|WC|UC] range=3D[0x0000000000000000-0x0000000000001000) (0MB)
->=20
-> [..]
->=20
-> > [    0.000000] efi: mem23: [Boot Data          |   |  |  |  |   |WB=
-|WT|WC|UC] range=3D[0x000000001dee8000-0x000000001e547000) (6MB)
->=20
-> Oops. It sure looks like the EFI boot stub is trashing an EFI boot da=
-ta
-> region. That would certainly explain the memory corruption you're see=
-ing
-> (since the firmware assumes no one else is touch its data areas).
->=20
-> By any chance have you modified CONFIG_PHYSICAL_START in your .config=
-?
+Folks, please consider pulling the following changes for v3.20. There's
+nothing super scary, mainly cleanups, and a merge from Ricardo who
+kindly picked up some patches from the linux-efi mailing list while I
+was out on annual leave in December.
 
-As mentioned in the other mail, it's left at default value:
-  CONFIG_PHYSICAL_START=3D0x1000000
+Perhaps the biggest risk is the get_memory_map() change from Ard, which
+changes the way that both the arm64 and x86 EFI boot stub build the
+early memory map. It would be good to have it bake in linux-next for a
+while.
 
-> The suspect code is probably this from
-> arch/x86/boot/compressed/head_64.S:
->=20
-> ---
->=20
-> 	/*
-> 	 * Compute the decompressed kernel start address.  It is where
-> 	 * we were loaded at aligned to a 2M boundary. %rbp contains the
-> 	 * decompressed kernel start address.
-> 	 *
-> 	 * If it is a relocatable kernel then decompress and run the kernel
-> 	 * from load address aligned to 2MB addr, otherwise decompress and
-> 	 * run the kernel from LOAD_PHYSICAL_ADDR
-> 	 *
-> 	 * We cannot rely on the calculation done in 32-bit mode, since we
-> 	 * may have been invoked via the 64-bit entry point.
-> 	 */
->=20
-> 	/* Start with the delta to where the kernel will run at. */
-> #ifdef CONFIG_RELOCATABLE
+One other thing to note is that I've picked up an rtc-efi patch from Ard
+because the rtc maintainer hasn't been responsive for a while now.
 
-I've put a breakpoint here (hlt-loop) and have following details:
+The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
 
-(gdb) info registers
-rax            0x0      0
-rbx            0x1e53ae18       508800536
-rcx            0xffffffff       4294967295
-rdx            0x1ded8f98       502108056
-rsi            0x1000   4096
-rdi            0xffffffff       4294967295
-rbp            0x1c003e00       0x1c003e00
-rsp            0x1ffd7b68       0x1ffd7b68
-r8             0x0      0
-r9             0x0      0
-r10            0x0      0
-r11            0x0      0
-r12            0x1ffd7dc8       536706504
-r13            0x1ffd7dc0       536706496
-r14            0x0      0
-r15            0x1ffd7dc0       536706496
-rip            0x10002ad        0x10002ad
-eflags         0x46     [ PF ZF ]
-cs             0x18     24
-ss             0x0      0
-ds             0x0      0
-es             0x0      0
-fs             0x0      0
-gs             0x0      0
-(gdb) disassemble /r 0x10002ac,+64
-Dump of assembler code from 0x10002ac to 0x10002ec:
-   0x00000000010002ac:  f4      hlt   =20
-=3D> 0x00000000010002ad:  eb fd   jmp    0x10002ac
-   0x00000000010002af:  48 8d 2d 4a fd ff ff    lea    -0x2b6(%rip),%rb=
-p        # 0x1000000
-   0x00000000010002b6:  8b 86 30 02 00 00       mov    0x230(%rsi),%eax
-   0x00000000010002bc:  ff c8   dec    %eax
-   0x00000000010002be:  48 01 c5        add    %rax,%rbp
-   0x00000000010002c1:  48 f7 d0        not    %rax
-   0x00000000010002c4:  48 21 c5        and    %rax,%rbp
-   0x00000000010002c7:  48 81 fd 00 00 00 01    cmp    $0x1000000,%rbp
-   0x00000000010002ce:  7d 07   jge    0x10002d7
-   0x00000000010002d0:  48 c7 c5 00 00 00 01    mov    $0x1000000,%rbp
-   0x00000000010002d7:  48 8d 9d 00 60 a3 00    lea    0xa36000(%rbp),%=
-rbx
-   0x00000000010002de:  48 8d a3 00 ec 9c 00    lea    0x9cec00(%rbx),%=
-rsp
-   0x00000000010002e5:  6a 00   pushq  $0x0
-   0x00000000010002e7:  9d      popfq =20
-   0x00000000010002e8:  56      push   %rsi
-   0x00000000010002e9:  48 8d 35 08 29 9c 00    lea    0x9c2908(%rip),%=
-rsi        # 0x19c2bf8
+  x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
 
+are available in the git repository at:
 
-> 	leaq	startup_32(%rip) /* - $startup_32 */, %rbp
-> 	movl	BP_kernel_alignment(%rsi), %eax
-> 	decl	%eax
-> 	addq	%rax, %rbp
-> 	notq	%rax
-> 	andq	%rax, %rbp
-> 	cmpq	$LOAD_PHYSICAL_ADDR, %rbp
-> 	jge	1f
-> #endif
-> 	movq	$LOAD_PHYSICAL_ADDR, %rbp
-> 1:
->=20
-> You may want to snoop around this code to make sure that we're not
-> making some crazy calculation mistakes wrt where we decompress the
-> kernel.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
 
-So the default LOAD_PHYSICAL_ADDR is being selected/used.
+for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
 
-This all happens after efi_main() as far as I can understand.
-Is there a way to let efi_printk() do string formatting? It should have
-both source and destination addresses as it is doing the relocation (or=
- at
-least one step of it).
+  efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
 
-Bruno
+----------------------------------------------------------------
+ * Move efivarfs from the misc filesystem section to pseudo filesystem,
+   since that's a more logical and accurate place - Leif Lindholm
+
+ * Update efibootmgr URL in Kconfig help - Peter Jones
+
+ * Improve accuracy of EFI guid function names - Borislav Petkov
+
+ * Expose firmware platform size in sysfs for the benefit of EFI boot
+   loader installers and other utilities - Steve McIntyre
+
+ * Cleanup __init annotations for arm64/efi code - Ard Biesheuvel
+
+ * Mark the UIE as unsupported for rtc-efi - Ard Biesheuvel
+
+ * Fix memory leak in error code path of runtime map code - Dan Carpenter
+
+ * Improve robustness of get_memory_map() by removing assumptions on the
+   size of efi_memory_desc_t (which could change in future spec
+   versions) and querying the firmware instead of guessing about the
+   memmap size - Ard Biesheuvel
+
+ * Remove superfluous guid unparse calls - Ivan Khoronzhuk
+
+ * Delete unnecessary chosen@0 DT node FDT code since was duplicated
+   from code in drivers/of and is entirely unnecessary - Leif Lindholm
+
+----------------------------------------------------------------
+Ard Biesheuvel (3):
+      arm64/efi: efistub: Apply __init annotation
+      efi: rtc-efi: Mark UIE as unsupported
+      efi/libstub: Call get_memory_map() to obtain map and desc sizes
+
+Borislav Petkov (1):
+      efi: Rename efi_guid_unparse to efi_guid_to_str
+
+Dan Carpenter (1):
+      efi: Small leak on error in runtime map code
+
+Ivan Khoronzhuk (1):
+      firmware: efi: Remove unneeded guid unparse
+
+Leif Lindholm (2):
+      fs: Make efivarfs a pseudo filesystem, built by default with EFI
+      efi: Don't look for chosen@0 node on DT platforms
+
+Matt Fleming (1):
+      Merge tag 'rneri-efi-next' of https://github.com/ricardon/efi into next
+
+Peter Jones (1):
+      efi: Update the URLs for efibootmgr
+
+Steve McIntyre (1):
+      efi: Expose underlying UEFI firmware platform size to userland
+
+ arch/arm64/kernel/efi-stub.c                   | 14 +++++++-------
+ block/partitions/efi.c                         |  2 +-
+ drivers/firmware/efi/Kconfig                   |  4 ++--
+ drivers/firmware/efi/efi.c                     | 17 ++++++++++-------
+ drivers/firmware/efi/efivars.c                 |  6 +++---
+ drivers/firmware/efi/libstub/Makefile          | 14 ++++++++++++++
+ drivers/firmware/efi/libstub/arm-stub.c        |  8 ++++----
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 18 +++++++++++-------
+ drivers/firmware/efi/runtime-map.c             |  2 +-
+ drivers/rtc/rtc-efi.c                          |  1 +
+ fs/Kconfig                                     |  2 +-
+ fs/efivarfs/Kconfig                            |  1 +
+ fs/efivarfs/super.c                            |  2 +-
+ include/linux/efi.h                            |  2 +-
+ 14 files changed, 58 insertions(+), 35 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
