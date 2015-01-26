@@ -1,63 +1,38 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [RFD] efi assisted kdump
-Date: Sat, 24 Jan 2015 21:26:37 +0800
-Message-ID: <20150124132637.GB2139@darkstar.redhat.com>
+From: Matt Fleming <matt@console-pimps.org>
+Subject: Re: Shorten efi regions output
+Date: Mon, 26 Jan 2015 10:49:36 +0000
+Message-ID: <20150126104936.GB3320@codeblueprint.co.uk>
+References: <20141209095843.GA3990@pd.tnic>
+ <20141210021741.GA3280@darkstar.nay.redhat.com>
+ <20141210104627.GA17053@pd.tnic>
+ <20150105140332.GB3163@console-pimps.org>
+ <54AAA723.1070605@redhat.com>
+ <54BF3DCA.4070708@jonmasters.org>
+ <20150121100633.GC12173@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+In-Reply-To: <20150121100633.GC12173@pd.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Jon Masters <jonathan@jonmasters.org>, Laszlo Ersek <lersek@redhat.com>, Dave Young <dyoung@redhat.com>, linux-efi <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt.fleming@intel.com>, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>, lkml <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On Wed, 21 Jan, at 11:06:33AM, Borislav Petkov wrote:
+> On Wed, Jan 21, 2015 at 12:48:58AM -0500, Jon Masters wrote:
+> > We have on a number of occasions found just this output useful in
+> > debugging boot issues on ARM servers
+> 
+> We can turn it on by default on ARM and off on x86...
 
-Kdump has several limitations currently such as kdump kernel reboot will bypass
-device shutdown path so device drivers should reset during initialization.
+Yeah, there's no reason we need to have the same default. That is to
+say, it can be on for ARM and off for x86, but when enabled the format
+should be the same for both.
 
-* One of such problem we encounter now is the iommu
-issue, 1st kernel's on fly DMA requests cause 2nd kernel hang. There's some effort
-on this area, Zhenhua Li posted patches to resolve the intel iommu issue which is
-under review. But that is just one case there's other possible problems in the future.
+In the future the memory maps are likely to contain even more entries
+and I suspect we're going to get more requests to disable the voluminous
+memmap output by default if we don't do so now.
 
-* There's no serial console on most machines in the market especially for desktop
-machines and laptops. kms enabled kernel need drm layer driver for framebuffer
-console, after kernel crashing we need a console to see the 2nd kernel output
-ideally a serial console because we can not switch back to VGA mode.
-
-ppc64 has a feature "firmware assisted kdump", see below documentation:
-Documentation/powerpc/firmware-assisted-dump.txt
-
-In case UEFI machines I wonder if we can do similar things, basic idea is doing
-minimum thing based on original kdump process.
-
-kernel reserve crashkernel memory during early boot
- -> user (kdump service) save necessary informations in some way so that second
-    kernel boot can access ie. efi runtime variables or in reserved memory
-    * crashkernel memory ranges infomation
-    * collect infomations and save elf notes for 2nd kernel vmcore initialization
-    -> crashing
-       * call efi warm reboot
-       -> 2nd kernel boot
-          -> efi stub checking if this is a warm reboot and if this is a crashed boot
-             -> if this is not a crashed boot then
-                    do nothing more than original logic
-                else
-                    boot kernel with limited memory which was reserved in previous kernel
-                    -> 2nd kernel boot
-                       vmcore intializing
-
-There's several things I need to ask for help from EFI gurus to see if it is doable:
-
-* Make sure in case EFI warm reboot the memory of previous kernel can be retained.
-
-* How to determine if kernel is boot with EFI warm reboot in stub
-
-* What is the right way to pass informations from 1st kernel to 2nd kernel.
-  Is it ok for saving something with efi variables? 
-
-* Other possible problems what I missed
-
-Thanks
-Dave
+-- 
+Matt Fleming, Intel Open Source Technology Center
