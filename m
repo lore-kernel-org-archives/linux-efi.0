@@ -1,45 +1,59 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for v3.20
-Date: Mon, 26 Jan 2015 22:32:20 +0000
-Message-ID: <20150126223220.GF3320@codeblueprint.co.uk>
-References: <20150121140250.GE12079@codeblueprint.co.uk>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [RFD] efi assisted kdump
+Date: Tue, 27 Jan 2015 14:24:34 +0800
+Message-ID: <20150127062433.GD2506@darkstar.redhat.com>
+References: <20150124132637.GB2139@darkstar.redhat.com>
+ <20150126140843.GA25559@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150121140250.GE12079-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20150126140843.GA25559-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+To: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 21 Jan, at 02:02:50PM, Matt Fleming wrote:
-> Folks, please consider pulling the following changes for v3.20. There's
-> nothing super scary, mainly cleanups, and a merge from Ricardo who
-> kindly picked up some patches from the linux-efi mailing list while I
-> was out on annual leave in December.
+On 01/26/15 at 09:08am, Vivek Goyal wrote:
+> On Sat, Jan 24, 2015 at 09:26:37PM +0800, Dave Young wrote:
+> > Hi,
+> > 
+> > Kdump has several limitations currently such as kdump kernel reboot will bypass
+> > device shutdown path so device drivers should reset during initialization.
+> > 
+> > * One of such problem we encounter now is the iommu
+> > issue, 1st kernel's on fly DMA requests cause 2nd kernel hang. There's some effort
+> > on this area, Zhenhua Li posted patches to resolve the intel iommu issue which is
+> > under review. But that is just one case there's other possible problems in the future.
+> > 
+> > * There's no serial console on most machines in the market especially for desktop
+> > machines and laptops. kms enabled kernel need drm layer driver for framebuffer
+> > console, after kernel crashing we need a console to see the 2nd kernel output
+> > ideally a serial console because we can not switch back to VGA mode.
+> > 
+> > ppc64 has a feature "firmware assisted kdump", see below documentation:
+> > Documentation/powerpc/firmware-assisted-dump.txt
+> > 
+> > In case UEFI machines I wonder if we can do similar things, basic idea is doing
+> > minimum thing based on original kdump process.
+> > 
+> > kernel reserve crashkernel memory during early boot
+> >  -> user (kdump service) save necessary informations in some way so that second
+> >     kernel boot can access ie. efi runtime variables or in reserved memory
+> >     * crashkernel memory ranges infomation
+> >     * collect infomations and save elf notes for 2nd kernel vmcore initialization
 > 
-> Perhaps the biggest risk is the get_memory_map() change from Ard, which
-> changes the way that both the arm64 and x86 EFI boot stub build the
-> early memory map. It would be good to have it bake in linux-next for a
-> while.
+> I think anything related to vmcore initilization can be in memory
+> somewhere and should not be a problem.
 > 
-> One other thing to note is that I've picked up an rtc-efi patch from Ard
-> because the rtc maintainer hasn't been responsive for a while now.
-> 
-> The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
-> 
->   x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
-> 
->   efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
+> But we do have to think about anything which is passed in bootparams or
+> command line to second kenrnel with current mechanism, how will it be
+> passed to second kernel.
 
-Ping?
+Hi, Vivek,
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Since we are rebooting via efi maybe we can just choose another boot entry
+in grub.cfg with the proper cmdline?
+
+Thanks
+Dave 
