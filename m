@@ -1,53 +1,111 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI changes for v3.20
-Date: Wed, 28 Jan 2015 15:51:35 +0100
-Message-ID: <20150128145135.GC6559@gmail.com>
-References: <20150121140250.GE12079@codeblueprint.co.uk>
- <20150126223220.GF3320@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL] EFI changes for v3.20 (resend)
+Date: Wed, 28 Jan 2015 22:05:45 +0000
+Message-ID: <20150128220545.GA3941@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150126223220.GF3320-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
 List-Id: linux-efi@vger.kernel.org
 
+Folks, please consider pulling the following changes for v3.20. There's
+nothing super scary, mainly cleanups, and a merge from Ricardo who
+kindly picked up some patches from the linux-efi mailing list while I
+was out on annual leave in December.
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+Perhaps the biggest risk is the get_memory_map() change from Ard, which
+changes the way that both the arm64 and x86 EFI boot stub build the
+early memory map. It would be good to have it bake in linux-next for a
+while.
 
-> On Wed, 21 Jan, at 02:02:50PM, Matt Fleming wrote:
-> > Folks, please consider pulling the following changes for v3.20. There's
-> > nothing super scary, mainly cleanups, and a merge from Ricardo who
-> > kindly picked up some patches from the linux-efi mailing list while I
-> > was out on annual leave in December.
-> > 
-> > Perhaps the biggest risk is the get_memory_map() change from Ard, which
-> > changes the way that both the arm64 and x86 EFI boot stub build the
-> > early memory map. It would be good to have it bake in linux-next for a
-> > while.
-> > 
-> > One other thing to note is that I've picked up an rtc-efi patch from Ard
-> > because the rtc maintainer hasn't been responsive for a while now.
-> > 
-> > The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
-> > 
-> >   x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
-> > 
-> > are available in the git repository at:
-> > 
-> >   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> > 
-> > for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
-> > 
-> >   efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
-> 
-> Ping?
+One other thing to note is that I've picked up an rtc-efi patch from Ard
+because the rtc maintainer hasn't been responsive for a while now.
 
-Hm, I don't seem to have the previous mail in my mbox :-/ Mind 
-resending it with full diffstat, etc?
+The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
 
-Thanks,
+  x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
 
-	Ingo
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
+
+  efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
+
+----------------------------------------------------------------
+ * Move efivarfs from the misc filesystem section to pseudo filesystem,
+   since that's a more logical and accurate place - Leif Lindholm
+
+ * Update efibootmgr URL in Kconfig help - Peter Jones
+
+ * Improve accuracy of EFI guid function names - Borislav Petkov
+
+ * Expose firmware platform size in sysfs for the benefit of EFI boot
+   loader installers and other utilities - Steve McIntyre
+
+ * Cleanup __init annotations for arm64/efi code - Ard Biesheuvel
+
+ * Mark the UIE as unsupported for rtc-efi - Ard Biesheuvel
+
+ * Fix memory leak in error code path of runtime map code - Dan Carpenter
+
+ * Improve robustness of get_memory_map() by removing assumptions on the
+   size of efi_memory_desc_t (which could change in future spec
+   versions) and querying the firmware instead of guessing about the
+   memmap size - Ard Biesheuvel
+
+ * Remove superfluous guid unparse calls - Ivan Khoronzhuk
+
+ * Delete unnecessary chosen@0 DT node FDT code since was duplicated
+   from code in drivers/of and is entirely unnecessary - Leif Lindholm
+
+----------------------------------------------------------------
+Ard Biesheuvel (3):
+      arm64/efi: efistub: Apply __init annotation
+      efi: rtc-efi: Mark UIE as unsupported
+      efi/libstub: Call get_memory_map() to obtain map and desc sizes
+
+Borislav Petkov (1):
+      efi: Rename efi_guid_unparse to efi_guid_to_str
+
+Dan Carpenter (1):
+      efi: Small leak on error in runtime map code
+
+Ivan Khoronzhuk (1):
+      firmware: efi: Remove unneeded guid unparse
+
+Leif Lindholm (2):
+      fs: Make efivarfs a pseudo filesystem, built by default with EFI
+      efi: Don't look for chosen@0 node on DT platforms
+
+Matt Fleming (1):
+      Merge tag 'rneri-efi-next' of https://github.com/ricardon/efi into next
+
+Peter Jones (1):
+      efi: Update the URLs for efibootmgr
+
+Steve McIntyre (1):
+      efi: Expose underlying UEFI firmware platform size to userland
+
+ arch/arm64/kernel/efi-stub.c                   | 14 +++++++-------
+ block/partitions/efi.c                         |  2 +-
+ drivers/firmware/efi/Kconfig                   |  4 ++--
+ drivers/firmware/efi/efi.c                     | 17 ++++++++++-------
+ drivers/firmware/efi/efivars.c                 |  6 +++---
+ drivers/firmware/efi/libstub/Makefile          | 14 ++++++++++++++
+ drivers/firmware/efi/libstub/arm-stub.c        |  8 ++++----
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 18 +++++++++++-------
+ drivers/firmware/efi/runtime-map.c             |  2 +-
+ drivers/rtc/rtc-efi.c                          |  1 +
+ fs/Kconfig                                     |  2 +-
+ fs/efivarfs/Kconfig                            |  1 +
+ fs/efivarfs/super.c                            |  2 +-
+ include/linux/efi.h                            |  2 +-
+ 14 files changed, 58 insertions(+), 35 deletions(-)
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
