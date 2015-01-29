@@ -1,40 +1,27 @@
-From: Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] firmware: efi: remove unneeded guid unparse
-Date: Thu, 29 Jan 2015 16:35:02 +0200
-Message-ID: <1422542102-19348-1-git-send-email-ivan.khoronzhuk@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [PATCH] firmware: efi: remove unneeded guid unparse
+Date: Thu, 29 Jan 2015 14:47:49 +0000
+Message-ID: <1422542869.21110.8.camel@mfleming-mobl1.ger.corp.intel.com>
+References: <1422542102-19348-1-git-send-email-ivan.khoronzhuk@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1422542102-19348-1-git-send-email-ivan.khoronzhuk@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ivan Khoronzhuk <ivan.khoronzhuk@linaro.org>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-There is no reason to translate guid number to string here.
-So remove it in order to not do unneeded work.
+On Thu, 2015-01-29 at 16:35 +0200, Ivan Khoronzhuk wrote:
+> There is no reason to translate guid number to string here.
+> So remove it in order to not do unneeded work.
+> 
+> Signed-off-by: Ivan Khoronzhuk <ivan.khoronzhuk@linaro.org>
+> ---
+>  drivers/firmware/efi/efi.c | 5 -----
+>  1 file changed, 5 deletions(-)
 
-Signed-off-by: Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/efi.c | 5 -----
- 1 file changed, 5 deletions(-)
+Why the resend? I already picked this commit up,
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 9035c1b..f6be017 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -272,15 +272,10 @@ static __init int match_config_table(efi_guid_t *guid,
- 				     unsigned long table,
- 				     efi_config_table_type_t *table_types)
- {
--	u8 str[EFI_VARIABLE_GUID_LEN + 1];
- 	int i;
- 
- 	if (table_types) {
--		efi_guid_unparse(guid, str);
--
- 		for (i = 0; efi_guidcmp(table_types[i].guid, NULL_GUID); i++) {
--			efi_guid_unparse(&table_types[i].guid, str);
--
- 			if (!efi_guidcmp(*guid, table_types[i].guid)) {
- 				*(table_types[i].ptr) = table;
- 				pr_cont(" %s=0x%lx ",
--- 
-1.9.1
+  https://lkml.kernel.org/r/20150120223238.GC12079@codeblueprint.co.uk
