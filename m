@@ -1,48 +1,79 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL] EFI changes for v3.20
-Date: Thu, 29 Jan 2015 19:21:32 +0100
-Message-ID: <20150129182132.GA24418@gmail.com>
-References: <20150121140250.GE12079@codeblueprint.co.uk>
- <20150126223220.GF3320@codeblueprint.co.uk>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: [PATCH] efi, x86: Add a "debug" option to the efi= cmdline
+Date: Fri, 30 Jan 2015 17:43:09 +0100
+Message-ID: <20150130164309.GG1451@pd.tnic>
+References: <20141209095843.GA3990@pd.tnic>
+ <20141210021741.GA3280@darkstar.nay.redhat.com>
+ <20141210104627.GA17053@pd.tnic>
+ <20150105140332.GB3163@console-pimps.org>
+ <54AAA723.1070605@redhat.com>
+ <54BF3DCA.4070708@jonmasters.org>
+ <20150121100633.GC12173@pd.tnic>
+ <20150126104936.GB3320@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150126223220.GF3320@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+In-Reply-To: <20150126104936.GB3320-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Cc: Jon Masters <jonathan-Zp4isUonpHBD60Wz+7aTrA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Date: Mon, 26 Jan 2015 19:49:59 +0100
+Subject: [PATCH] efi, x86: Add a "debug" option to the efi= cmdline
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+... and hide the memory regions dump behind it. Make it default-off.
 
-> On Wed, 21 Jan, at 02:02:50PM, Matt Fleming wrote:
-> > Folks, please consider pulling the following changes for v3.20. There's
-> > nothing super scary, mainly cleanups, and a merge from Ricardo who
-> > kindly picked up some patches from the linux-efi mailing list while I
-> > was out on annual leave in December.
-> > 
-> > Perhaps the biggest risk is the get_memory_map() change from Ard, which
-> > changes the way that both the arm64 and x86 EFI boot stub build the
-> > early memory map. It would be good to have it bake in linux-next for a
-> > while.
-> > 
-> > One other thing to note is that I've picked up an rtc-efi patch from Ard
-> > because the rtc maintainer hasn't been responsive for a while now.
-> > 
-> > The following changes since commit 8266e31ed0fedb7ee16ebc86e80468f7cc1bbb4e:
-> > 
-> >   x86, ptdump: Add section for EFI runtime services (2014-11-11 22:28:57 +0000)
-> > 
-> > are available in the git repository at:
-> > 
-> >   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> > 
-> > for you to fetch changes up to 11629305043c513454c4ccb4fc384a1bfe610647:
-> > 
-> >   efi: Don't look for chosen@0 node on DT platforms (2015-01-20 22:41:56 +0000)
+Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Link: http://lkml.kernel.org/r/20141209095843.GA3990-fF5Pk5pvG8Y@public.gmane.org
+---
+ arch/x86/platform/efi/efi.c | 5 ++++-
+ include/linux/efi.h         | 1 +
+ 2 files changed, 5 insertions(+), 1 deletion(-)
 
-Pulled into tip:x86/efi, thanks a lot Matt!
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index dbc8627a5cdf..e859d56ce9f8 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -491,7 +491,8 @@ void __init efi_init(void)
+ 	if (efi_memmap_init())
+ 		return;
+ 
+-	print_efi_memmap();
++	if (efi_enabled(EFI_DBG))
++		print_efi_memmap();
+ }
+ 
+ void __init efi_late_init(void)
+@@ -939,6 +940,8 @@ static int __init arch_parse_efi_cmdline(char *str)
+ {
+ 	if (parse_option_str(str, "old_map"))
+ 		set_bit(EFI_OLD_MEMMAP, &efi.flags);
++	if (parse_option_str(str, "debug"))
++		set_bit(EFI_DBG, &efi.flags);
+ 
+ 	return 0;
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 0238d612750e..14cec75d7e74 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -940,6 +940,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_64BIT		5	/* Is the firmware 64-bit? */
+ #define EFI_PARAVIRT		6	/* Access is via a paravirt interface */
+ #define EFI_ARCH_1		7	/* First arch-specific bit */
++#define EFI_DBG			8	/* Print additional debug info at runtime */
+ 
+ #ifdef CONFIG_EFI
+ /*
+-- 
+2.2.0.33.gc18b867
 
-	Ingo
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
