@@ -1,39 +1,54 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH] x86, boot: Allow 64bit EFI kernel to be loaded above 4G
-Date: Thu, 5 Feb 2015 14:09:35 +0800
-Message-ID: <20150205060935.GA23096@dhcp-16-198.nay.redhat.com>
-References: <1423015400-12629-1-git-send-email-yinghai@kernel.org>
- <20150205032504.GB1903@darkstar.redhat.com>
- <CAE9FiQWMt7Y=kwhUu5PxcPP1aDSKdK-LojJatn3WgWHmEj9tsQ@mail.gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH] efi, x86: Add a "debug" option to the efi= cmdline
+Date: Thu, 5 Feb 2015 09:11:43 +0100
+Message-ID: <20150205081143.GA23980@pd.tnic>
+References: <20141209095843.GA3990@pd.tnic>
+ <20141210021741.GA3280@darkstar.nay.redhat.com>
+ <20141210104627.GA17053@pd.tnic>
+ <20150105140332.GB3163@console-pimps.org>
+ <54AAA723.1070605@redhat.com>
+ <54BF3DCA.4070708@jonmasters.org>
+ <20150121100633.GC12173@pd.tnic>
+ <20150126104936.GB3320@codeblueprint.co.uk>
+ <20150130164309.GG1451@pd.tnic>
+ <20150205031846.GA1903@darkstar.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAE9FiQWMt7Y=kwhUu5PxcPP1aDSKdK-LojJatn3WgWHmEj9tsQ@mail.gmail.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt.fleming@intel.com>, Kees Cook <keescook@chromium.org>, Junjie Mao <eternal.n08@gmail.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+In-Reply-To: <20150205031846.GA1903-4/PLUo9XfK/1wF9wiOj0lkEOCMrvLtNR@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Jon Masters <jonathan-Zp4isUonpHBD60Wz+7aTrA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/04/15 at 09:25pm, Yinghai Lu wrote:
-> On Wed, Feb 4, 2015 at 7:25 PM, Dave Young <dyoung@redhat.com> wrote:
-> >> After this patch, could use patched grub2-x86_64.efi to place
-> >> kernel/boot_params/cmd_line/initrd all above 4G and execute the kernel
-> >> above 4G.
-> >
-> > Can you share the grub2 patch for testing?
+On Thu, Feb 05, 2015 at 11:18:46AM +0800, Dave Young wrote:
+> > diff --git a/include/linux/efi.h b/include/linux/efi.h
+> > index 0238d612750e..14cec75d7e74 100644
+> > --- a/include/linux/efi.h
+> > +++ b/include/linux/efi.h
+> > @@ -940,6 +940,7 @@ extern int __init efi_setup_pcdp_console(char *);
+> >  #define EFI_64BIT		5	/* Is the firmware 64-bit? */
+> >  #define EFI_PARAVIRT		6	/* Access is via a paravirt interface */
+> >  #define EFI_ARCH_1		7	/* First arch-specific bit */
+> > +#define EFI_DBG			8	/* Print additional debug info at runtime */
 > 
-> Please check attached 5 patches. last one is for debug purpose.
-> 
-> You need to apply them on top of
-> 
-> git://git.savannah.gnu.org/grub.git
-> 
-> plus  http://pkgs.fedoraproject.org/cgit/grub2.git/plain/0091-Add-support-for-linuxefi.patch
+> Boris, a nickpick about alignment of the second column..
 
-> Subject: [PATCH] update setup_header and boot_params to 2.12
-> 
-> the one that is used by kernel v3.8...
+This is due to how diffs show tabs. See EFI_PARAVIRT above, it appears
+misaligned too. If you switch to list mode in vim, for example, it'll
+show you how many tabs are being used:
 
-Thanks for quick feedback..
-Dave
+#define EFI_PARAVIRT^I^I6^I/* Access is via a paravirt interface */$
+#define EFI_ARCH_1^I^I7^I/* First arch-specific bit */$
+#define EFI_DBG^I^I^I8^I/* Print additional debug info at runtime */$
+
+and EFI_DBG has an additional tab. However, the vertical alignment is
+correct. You can apply the patch and see for yourself :-)
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
