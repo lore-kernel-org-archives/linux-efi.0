@@ -1,47 +1,79 @@
-From: "Lad, Prabhakar" <prabhakar.csengg-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] Trivial patch in efifb.c to solve common indent issue and
- indent error
-Date: Mon, 9 Feb 2015 14:24:50 +0000
-Message-ID: <CA+V-a8todzzHHTSaJ1UzT+1sXrdbNaaBah66gFr2kEigNBhQYw@mail.gmail.com>
-References: <20150209125548.GA27277@linuxteamdev.amer.dell.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] x86, boot: Allow 64bit EFI kernel to be loaded above 4G
+Date: Mon, 9 Feb 2015 18:27:42 +0000
+Message-ID: <20150209182742.GQ6461@codeblueprint.co.uk>
+References: <1423015400-12629-1-git-send-email-yinghai@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150209125548.GA27277-uSknhY0EtF8ok8EplQz5xE1Vg53cnbg30E9HWUfgJXw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Parmeshwr Prasad <parmeshwr_prasad-8PEkshWhKlo@public.gmane.org>
-Cc: pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Jean-Christophe Plagniol-Villard <plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, LFBDEV <linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-doc-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1423015400-12629-1-git-send-email-yinghai@kernel.org>
+Sender: linux-doc-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Matt Fleming <matt.fleming@intel.com>, Kees Cook <keescook@chromium.org>, Junjie Mao <eternal.n08@gmail.com>, linux-doc@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On Tue, 03 Feb, at 06:03:20PM, Yinghai Lu wrote:
+> Now could use kexec to place kernel/boot_params/cmd_line/initrd
+> above 4G, but that is with legacy interface with startup_64 directly.
+> 
+> This patch will allow 64bit EFI kernel to be loaded above 4G
+> and use EFI HANDOVER PROTOCOL to start the kernel.
+> 
+> Current code32_start is used for passing around loading address,
+> so it will overflow when kernel is loaded abover 4G.
+> 
+> The patch mainly add ext_code32_start to take address high 32bit.
+> 
+> After this patch, could use patched grub2-x86_64.efi to place
+> kernel/boot_params/cmd_line/initrd all above 4G and execute the kernel
+> above 4G.
+ 
+The first thing that comes to mind is the issues we experienced last
+year when adding support for loading initrds above 4GB to the EFI boot
+stub, c.f. commit 47226ad4f4cf ("x86/efi: Only load initrd above 4g on
+second try").
 
-Thanks for the patch.
+Are things going to work correctly this time?
 
-On Mon, Feb 9, 2015 at 12:55 PM, Parmeshwr Prasad
-<parmeshwr_prasad-8PEkshWhKlo@public.gmane.org> wrote:
-> Hi All,
->
-> Please review this patch.
-> this patch is aimed to solve some indentation issue. It has also solved
-> three trivial error in efifb.c file.
->
-> And I have also changed printk with pr_err, pr_info ... at respective places.
->
->
-> From c49139fac1d15fe2da80d06e2a79eb8be7c079a7 Mon Sep 17 00:00:00 2001
-> From: Parmeshwr Prasad <parmeshwr_prasad-8PEkshWhKlo@public.gmane.org>
-> Date: Mon, 9 Feb 2015 07:33:59 -0500
-> Subject: [PATCH] Trival patch: improved indentation, and removed some ERROR
->  from code
->
-> Signed-off-by: Parmeshwr Prasad <parmeshwr_prasad-8PEkshWhKlo@public.gmane.org>
-> ---
+> Index: linux-2.6/arch/x86/boot/compressed/eboot.c
+> ===================================================================
+> --- linux-2.6.orig/arch/x86/boot/compressed/eboot.c
+> +++ linux-2.6/arch/x86/boot/compressed/eboot.c
+> @@ -1389,6 +1389,7 @@ struct boot_params *efi_main(struct efi_
+>  	void *handle;
+>  	efi_system_table_t *_table;
+>  	bool is64;
+> +	unsigned long loaded_addr;
+>  
+>  	efi_early = c;
+>  
+> @@ -1430,9 +1431,12 @@ struct boot_params *efi_main(struct efi_
+>  	 * If the kernel isn't already loaded at the preferred load
+>  	 * address, relocate it.
+>  	 */
+> -	if (hdr->pref_address != hdr->code32_start) {
+> -		unsigned long bzimage_addr = hdr->code32_start;
+> -		status = efi_relocate_kernel(sys_table, &bzimage_addr,
+> +	loaded_addr = hdr->code32_start;
+> +	loaded_addr |= (unsigned long)hdr->ext_code32_start << 32;
 
-1: did you use git to send this patch ?
-2: did you checkpatch it (I see some issues)?
-3: break this patch into 2 one fixing the 3 issues and other fixing
-the indentation.
-4: have proper commit message.
+Please compile this for CONFIG_X86_32 and fix any compiler warnings.
 
-Cheers,
---Prabhakar Lad
+> @@ -738,6 +742,13 @@ Offset/size:	0x264/4
+>  
+>    See EFI HANDOVER PROTOCOL below for more details.
+>  
+> +Field name:	ext_code32_start
+> +Type:		modify (optional, reloc)
+> +Offset/size:	0x268/4
+> +Protocol:	2.14+
+> +
+> +  The address is used with code32_start to compare pref_address
+> +  to support EFI 64bit kernel get loaded above 4G.
+
+It would be good to mention that this new field contains the upper
+32-bits of the 64-bit address.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
