@@ -1,62 +1,59 @@
-From: Peter Jones <pjones@redhat.com>
-Subject: Re: [PATCH] x86, boot: Allow 64bit EFI kernel to be loaded above 4G
-Date: Wed, 11 Feb 2015 11:29:58 -0500
-Message-ID: <20150211162958.GA18062@fenchurch.internal.datastacks.com>
-References: <1423015400-12629-1-git-send-email-yinghai@kernel.org>
- <20150209182742.GQ6461@codeblueprint.co.uk>
- <CAE9FiQUFO4yfEVgGZ9U0Q-RaokFor1gMbKJ7As2vvqGVkqrDbw@mail.gmail.com>
- <20150211155524.GC4665@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-doc-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150211155524.GC4665@codeblueprint.co.uk>
-Sender: linux-doc-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Yinghai Lu <yinghai@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Kees Cook <keescook@chromium.org>, Junjie Mao <eternal.n08@gmail.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Matthew Garrett <mjg59@srcf.ucam.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi: get_memory_map: add sufficient slack for memory descriptors
+Date: Thu, 12 Feb 2015 13:24:19 +0800
+Message-ID: <1423718659-795-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 11, 2015 at 03:55:24PM +0000, Matt Fleming wrote:
-> On Mon, 09 Feb, at 12:23:15PM, Yinghai Lu wrote:
-> > On Mon, Feb 9, 2015 at 10:27 AM, Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> > > On Tue, 03 Feb, at 06:03:20PM, Yinghai Lu wrote:
-> > >
-> > > The first thing that comes to mind is the issues we experienced last
-> > > year when adding support for loading initrds above 4GB to the EFI boot
-> > > stub, c.f. commit 47226ad4f4cf ("x86/efi: Only load initrd above 4g on
-> > > second try").
-> > >
-> > > Are things going to work correctly this time?
-> > 
-> > That should be addressed the grub2.
->  
-> I vaguely remember thinking that the issue was only experienced when
-> using the EFI_FILE protocol, which grub2 doesn't use. So the grub
-> developers may be OK, but we should at least give them a heads up.
+As it turns out, when allocating room for the UEFI memory map using
+UEFI's AllocatePool (), it may result in two new memory map entries
+being created, for instance, when using Tianocore's preallocated region
+feature. For example, the following region
 
-Looks correct to me.
+0x00005ead5000-0x00005ebfffff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
 
-> > I was thinking that we may need to add mem_limit command together with
-> > linuxefi and initrdefi.
-> > or add linuxefi64/initrdefi64?
->  
-> No, we definitely do not want to add any more grub commands.
+may be split like this
 
-Definitely agree.
+0x00005ead5000-0x00005eae2fff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
+0x00005eae3000-0x00005eae4fff [Loader Data        |   |  |  |  |   |WB|WT|WC|UC]
+0x00005eae5000-0x00005ebfffff [Conventional Memory|   |  |  |  |   |WB|WT|WC|UC]
 
-> > BTW, I tested loading kernel above grub2 on
-> > virutalbox, qemu/kvm/OVMF, and real servers (ami ...) all work without problem.
-> > 
-> > wonder if we need have one black list for 64bit UEFI that does not
-> > support access
-> > memory above 4G.
->  
-> We have been successful, so far, in not introducing these kind of
-> blacklists. It would be a shame to start now.
+if the preallocated Loader Data region was chosen to be right in the
+middle of the original free space.
 
->From grub's point of view I'm not sure why we'd care - the pages kernel
-and initramfs land in are both from the Boot Services allocator, so if the
-machine doesn't support high addresses, they won't be there.
+After patch d1a8d66b9177 ("efi/libstub: Call get_memory_map() to
+obtain map and desc sizes"), this is not being dealt with correctly
+anymore, as the existing logic to allocate room for a single additional
+entry has become insufficient.
 
+So instead, add room for two additional entries instead.
+
+Fixes: d1a8d66b9177 ("efi/libstub: Call get_memory_map() to obtain map and desc sizes")
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index af5d63c7cc53..ca0b07ed3b14 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -84,10 +84,10 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 		return EFI_LOAD_ERROR;
+ 
+ 	/*
+-	 * Add an additional efi_memory_desc_t because we're doing an
+-	 * allocation which may be in a new descriptor region.
++	 * Add room for two additional efi_memory_desc_t entries because we're
++	 * doing an allocation which may be in a new descriptor region.
+ 	 */
+-	*map_size += *desc_size;
++	*map_size += *desc_size * 2;
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				*map_size, (void **)&m);
+ 	if (status != EFI_SUCCESS)
 -- 
-        Peter
+1.8.3.2
