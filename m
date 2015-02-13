@@ -1,73 +1,125 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: get_memory_map: add sufficient slack for memory descriptors
-Date: Thu, 12 Feb 2015 23:31:02 +0800
-Message-ID: <CAKv+Gu_Z0Upoy0J-hxf0i7Oen00tb-TENJ9CszdEtTHsb5pGSg@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: get_memory_map: add sufficient slack for memory
+ descriptors
+Date: Fri, 13 Feb 2015 16:04:48 +0000
+Message-ID: <20150213160448.GA30567@codeblueprint.co.uk>
 References: <1423718659-795-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150212102226.GB1245@leverpostej>
-	<CAKv+Gu88vzPpXoSEs1ZSQbO7wsqh7NRSZc=iSpC9D6vzus7f8g@mail.gmail.com>
-	<20150212144727.GD4665@codeblueprint.co.uk>
-	<CAKv+Gu-NAKASZc4phj5x83mB8Ak4Gy2zYq-a0CDADEOTBD4pXA@mail.gmail.com>
-	<20150212151607.GH1522@leverpostej>
+ <20150212102226.GB1245@leverpostej>
+ <CAKv+Gu88vzPpXoSEs1ZSQbO7wsqh7NRSZc=iSpC9D6vzus7f8g@mail.gmail.com>
+ <20150212144727.GD4665@codeblueprint.co.uk>
+ <CAKv+Gu-NAKASZc4phj5x83mB8Ak4Gy2zYq-a0CDADEOTBD4pXA@mail.gmail.com>
+ <20150212151607.GH1522@leverpostej>
+ <CAKv+Gu_Z0Upoy0J-hxf0i7Oen00tb-TENJ9CszdEtTHsb5pGSg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150212151607.GH1522@leverpostej>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu_Z0Upoy0J-hxf0i7Oen00tb-TENJ9CszdEtTHsb5pGSg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 12 February 2015 at 23:16, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Thu, Feb 12, 2015 at 02:56:51PM +0000, Ard Biesheuvel wrote:
->> On 12 February 2015 at 22:47, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> > On Thu, 12 Feb, at 06:39:46PM, Ard Biesheuvel wrote:
->> >>
->> >> I don't see how doing a single allocation could result in a single
->> >> free region to be split into more than 1 occupied region + 2 free
->> >> regions.
->> >> So no, I don't think it is ...
->> >
->> > I don't think that's a guarantee we can make, nor is it something we
->> > should rely upon.
->> >
->> > Please explain the user-visible failure that this patch fixes. Does your
->> > machine refuse to boot?
->>
->> I am running UEFI under QEMU and Xen primarily at the moment, and
->> experimenting with various build options in Tianocore, One of the
->> options is preallocating and freeing blocks of various memory types,
->> in a way that should result in the final number of distinct regions to
->> be much lower. It could result however in a free memory region to be
->> carved up in three instead of two, and that is a failure I have seen
->> occur.
->
-> The simple answer is that the machine will fail to boot, beause the
-> efi_get_memory_map helper will give up after one go, and propagate the
-> error. The arm-stub will give up when the error is encountered.
->
+On Thu, 12 Feb, at 11:31:02PM, Ard Biesheuvel wrote:
+> 
+> Actually, looking again at the original patch, it appears that my
+> analysis was incorrect regarding the possibility that the loop would
+> never terminate. The only thing that could happen if desc_size >
+> sizeof(efi_memory_desc_t) is that you need two iterations instead of
+> one to get a pool allocation that is of sufficient size.
+> So perhaps it is better to just revert the patch.
+> 
+> My apologies for the hassle.
 
-Indeed.
+This is what I've got queued up,
 
->> > Why is the 'goto again' loop insufficient in
->> > handling this scenario?
->> >
->>
->> Yes, that should solve it as well, so if you prefer I reinstate that,
->> I can respin the patch. There is a theoretical possibility that it
->> would take more than just one more iteration, but that is highly
->> unlikely and it should still always complete.
->
-> Please reinstate the loop. It will make this far less fragile.
->
+---
 
-Actually, looking again at the original patch, it appears that my
-analysis was incorrect regarding the possibility that the loop would
-never terminate. The only thing that could happen if desc_size >
-sizeof(efi_memory_desc_t) is that you need two iterations instead of
-one to get a pool allocation that is of sufficient size.
-So perhaps it is better to just revert the patch.
+>From 3f281b98ffc99e604a3988aa93304a3a591eeeb5 Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Date: Fri, 13 Feb 2015 15:46:56 +0000
+Subject: [PATCH] Revert "efi/libstub: Call get_memory_map() to obtain map and
+ desc sizes"
 
-My apologies for the hassle.
+This reverts commit d1a8d66b9177105e898e73716f97eb61842c457a.
+
+Ard reported a boot failure when running UEFI under Qemu and Xen and
+experimenting with various Tianocore build options,
+
+ "As it turns out, when allocating room for the UEFI memory map using
+  UEFI's AllocatePool (), it may result in two new memory map entries
+  being created, for instance, when using Tianocore's preallocated region
+  feature. For example, the following region
+
+  0x00005ead5000-0x00005ebfffff [Conventional Memory|   |  |  |  |  |WB|WT|WC|UC]
+
+  may be split like this
+
+  0x00005ead5000-0x00005eae2fff [Conventional Memory|   |  |  |  |  |WB|WT|WC|UC]
+  0x00005eae3000-0x00005eae4fff [Loader Data        |   |  |  |  |  |WB|WT|WC|UC]
+  0x00005eae5000-0x00005ebfffff [Conventional Memory|   |  |  |  |  |WB|WT|WC|UC]
+
+  if the preallocated Loader Data region was chosen to be right in the
+  middle of the original free space.
+
+  After patch d1a8d66b9177 ("efi/libstub: Call get_memory_map() to
+  obtain map and desc sizes"), this is not being dealt with correctly
+  anymore, as the existing logic to allocate room for a single additional
+  entry has become insufficient."
+
+Mark requested to reinstate the old loop we had before commit
+d1a8d66b9177, which grows the memory map buffer until it's big enough to
+hold the EFI memory map.
+
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 16 ++++++----------
+ 1 file changed, 6 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
+index d073e3946383..9bd9fbb5bea8 100644
+--- a/drivers/firmware/efi/libstub/efi-stub-helper.c
++++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
+@@ -66,29 +66,25 @@ efi_status_t efi_get_memory_map(efi_system_table_t *sys_table_arg,
+ 	unsigned long key;
+ 	u32 desc_version;
+ 
+-	*map_size = 0;
+-	*desc_size = 0;
+-	key = 0;
+-	status = efi_call_early(get_memory_map, map_size, NULL,
+-				&key, desc_size, &desc_version);
+-	if (status != EFI_BUFFER_TOO_SMALL)
+-		return EFI_LOAD_ERROR;
+-
++	*map_size = sizeof(*m) * 32;
++again:
+ 	/*
+ 	 * Add an additional efi_memory_desc_t because we're doing an
+ 	 * allocation which may be in a new descriptor region.
+ 	 */
+-	*map_size += *desc_size;
++	*map_size += sizeof(*m);
+ 	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+ 				*map_size, (void **)&m);
+ 	if (status != EFI_SUCCESS)
+ 		goto fail;
+ 
++	*desc_size = 0;
++	key = 0;
+ 	status = efi_call_early(get_memory_map, map_size, m,
+ 				&key, desc_size, &desc_version);
+ 	if (status == EFI_BUFFER_TOO_SMALL) {
+ 		efi_call_early(free_pool, m);
+-		return EFI_LOAD_ERROR;
++		goto again;
+ 	}
+ 
+ 	if (status != EFI_SUCCESS)
+-- 
+1.9.3
 
 -- 
-Ard.
+Matt Fleming, Intel Open Source Technology Center
