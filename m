@@ -1,43 +1,437 @@
-From: Juergen Gross <jgross@suse.com>
-Subject: [PATCH 4/4] x86, efi: use early_ioremap in arch/x86/platform/efi/efi-bgrt.c
-Date: Tue, 24 Feb 2015 10:13:31 +0100
-Message-ID: <1424769211-11378-5-git-send-email-jgross@suse.com>
-References: <1424769211-11378-1-git-send-email-jgross@suse.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1424769211-11378-1-git-send-email-jgross@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org, hpa@zytor.com, tglx@linutronix.de, mingo@redhat.com, linux-efi@vger.kernel.org, matt.fleming@intel.com
-Cc: Juergen Gross <jgross@suse.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
+ interface
+Date: Tue, 24 Feb 2015 12:49:09 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+	boundary="_003_F54AEECA5E2B9541821D670476DAE19C2B8AC9DDPGSMSX102garcor_"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Use early_ioremap() to map an I/O-area instead of early_memremap().
+--_003_F54AEECA5E2B9541821D670476DAE19C2B8AC9DDPGSMSX102garcor_
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Juergen Gross <jgross@suse.com>
----
- arch/x86/platform/efi/efi-bgrt.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+> -----Original Message-----
+> From: Kweh, Hock Leong
+> Sent: Tuesday, February 24, 2015 6:54 PM
+>=20
+> In callbackfn_efi_capsule, you call request_firmware_nowait.  When that
+> callback is invoked, I think that the /sys/class/firmware/efi-capsule-fil=
+e
+> directory doesn't exist at all.
+> If the callback takes longer than it takes your script to make it through=
+ a full
+> iteration, then it will try uploading the second capsule before the firmw=
+are
+> class directory is there, so it will fail.
+>=20
+> But I just realized that your script has a loop below to handle that.
+> It's this:
+>=20
+>                  oldtime=3D$(date +%S)
+>                  oldtime=3D$(((time + 2) % 60))
+>                  until [ -f /sys/class/firmware/efi-capsule-file/loading =
+]
+>                  do
+>                          newtime=3D$(date +%S)
+>                          if [ $newtime -eq $oldtime ]
+>                          then
+>                                  break
+>                          fi
+>                  done
+>=20
+> Aside from the fact that this loop itself is racy (it may loop forever if
+> something goes wrong in the kernel, since $newtime -eq $oldtime may
+> never happen), it should help, if you're lucky.  But there's another bug.
+>=20
+>=20
+> Here's the race:
+>=20
+> User:
+> echo 1 > /sys/class/firmware/efi-capsule-file/loading
+> cat capsule1 > /sys/class/firmware/efi-capsule-file/data
+> echo 0 > /sys/class/firmware/efi-capsule-file/loading
+> Kernel: Be a little slow here due to preemption or whatever.
+>=20
+> User:
+> -f /sys/class/firmware/efi-capsule-file/loading returns true capsules_loa=
+ded
+> =3D=3D 0 Assume failure, incorrectly
+>=20
+> Kernel: catch up and increment capsules_loaded.
+>=20
+> If these patches get applied, then I think that the protocol needs to be
+> documented in Documentation/ABI.  It should say something like:
+>=20
+> To upload an EFI capsule, do this:
+>=20
+> Write 1 to /sys/class/firmware/efi-capsule-file/loading
+> Write the capsule to /sys/class/firmware/efi-capsule-file/data
+> Write 0 to /sys/class/firmware/efi-capsule-file/loading
+>=20
+> Make sure that /sys/class/firmware/efi-capsule-file disappears and comes
+> back, perhaps by cd-ing there and waiting for all the files in the direct=
+ory to
+> go away.
+>=20
+> Then, and only then, read capsules_loaded to detect success.
+>=20
+>=20
+> Once you've written that doc, please seriously consider whether this
+> interface is justifiable.  I think it sucks.
+>=20
+> --Andy
 
-diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index d143d21..d7f997f 100644
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -67,7 +67,7 @@ void __init efi_bgrt_init(void)
- 
- 	image = efi_lookup_mapped_addr(bgrt_tab->image_address);
- 	if (!image) {
--		image = early_memremap(bgrt_tab->image_address,
-+		image = early_ioremap(bgrt_tab->image_address,
- 				       sizeof(bmp_header));
- 		ioremapped = true;
- 		if (!image) {
-@@ -89,7 +89,7 @@ void __init efi_bgrt_init(void)
- 	}
- 
- 	if (ioremapped) {
--		image = early_memremap(bgrt_tab->image_address,
-+		image = early_ioremap(bgrt_tab->image_address,
- 				       bmp_header.size);
- 		if (!image) {
- 			pr_err("Ignoring BGRT: failed to map image memory\n");
--- 
-2.1.4
+Hi All,
+
+After some internal discussion and re-design prototyping & testing on
+this efi capsule interface kernel module, I would like to start a discussio=
+n
+here on the new idea and wish to get input for the implementation and
+eventually upstream.
+
+This new idea will expose 2 read-only file notes from the efi capsule kerne=
+l
+module - "capsule_ticket" and "capsule_report". The "capsule_ticket" will
+let user to obtain a NON-ZERO number and then perform a mutex lock. The
+obtained number will be used later for "capsule_report" status checking.
+Unlock mutex is done after "echo 0 > loading" at the end of callback functi=
+on.
+
+So the process steps basically look like this:
+1.) cat capsule_ticket    =3D=3D=3D=3D=3D=3D=3D> acquire a number and lock =
+mutex then
+                                                                     expose=
+ firmware_class user helper
+                                                                     interf=
+ace as well as start timer for timeout
+                                                                     counti=
+ng
+2.) repeat step 1 if obtained a "0" number
+3.) echo 1 > loading
+4.) cat bin > data
+5.) echo 0 > loading        =3D=3D=3D=3D=3D=3D=3D> stop the timeout countin=
+g  then unlock
+                                                                      mutex=
+ at the end of callback routine=20
+6.) cat capsule_report   =3D=3D=3D=3D=3D=3D=3D> grep the number acquired fr=
+om beginning
+                                                                      for c=
+hecking succeeded/failed
+
+The ticket numbering is starting from 1 to 999 and then rolls over from
+1 to 999 again. The "capsule_report" will show the whole list of the acquir=
+ed
+entries and will be limited to 128 entries which is capped within one page =
+buffer.
+
+The format of this "capsule_report" output will look like:
+"Capsule $num uploads successful/failed/aborted"
+
+There is a 2mins time out (internal) for each of the number acquired.
+After that, the interface will be closed/disappeared.
+
+I have attached a SAMPLE script and kernel module code in case you are not
+able to understand my description above.
+
+I believe this would really take care of the multi-capsule update concurren=
+tly
+issue and also asynchronous status reporting issue. Besides, this will indi=
+rectly
+take care the module unload issue with "rmmod" and not "rmmod -f".
+What do you guys think?
+
+---------------------------------------------------------------------------=
+-------------------
+
+There is another idea during internal discussion. The 2nd idea would requir=
+e
+some changes to drivers/base/firmware_class.c user helper interface for the
+mutex locking as well as status return. Mutex lock will be performed while
+doing the 'echo 1 > loading' session and status return will be performed af=
+ter
+the 'echo 0 > loading'. The mutex unlock will be done at 'echo 0 > loading'=
+ too
+or may be at the status reading session for avoid asynchronous reporting.
+
+This will likely changed the original firmware class user helper interface =
+design
+behavior. But this approach could save the 2 file notes from the 1st approa=
+ch.
+
+
+Which of the approach do you guys prefer? Thanks.
+
+
+Regards,
+Wilson
+
+
+--_003_F54AEECA5E2B9541821D670476DAE19C2B8AC9DDPGSMSX102garcor_
+Content-Type: text/plain; name="newcapsule.txt"
+Content-Description: newcapsule.txt
+Content-Disposition: attachment; filename="newcapsule.txt"; size=947;
+	creation-date="Tue, 24 Feb 2015 12:14:58 GMT";
+	modification-date="Tue, 24 Feb 2015 12:14:58 GMT"
+Content-Transfer-Encoding: base64
+
+IyEvYmluL3NoCgpmb3IgYXJnIGluICIkQCIKZG8KCWlmIFsgLWYgJGFyZyBdCgl0aGVuCgkJcmV0
+cnk9MAoJCXVudGlsIFsgISAkbnVtID0gJzAnIF0KCQlkbwoJCQlzbGVlcCAxCgkJCW51bT0kKGNh
+dCAvc3lzL2RldmljZXMvcGxhdGZvcm0vZWZpX2NhcHN1bGVfdXNlcl9oZWxwZXIvY2Fwc3VsZV90
+aWNrZXQpCgkJCWlmIFsgJHJldHJ5IC1sZSAxMzAgXQoJCQl0aGVuCgkJCQlyZXRyeT0kKChyZXRy
+eSArIDEpKQoJCQllbHNlCgkJCQllY2hvICJGYWlsZWQgdG8gYWNxdWlyZSBjYXBzdWxlIHRpY2tl
+dCIKCQkJCWV4aXQgMQoJCQlmaQoJCWRvbmUKCgkJb2xkdGltZT0kKGRhdGUgKyVTKQoJCW9sZHRp
+bWU9JCgoKHRpbWUgKyAyKSAlIDYwKSkKCQl1bnRpbCBbIC1mIC9zeXMvY2xhc3MvZmlybXdhcmUv
+ZWZpLWNhcHN1bGUtZmlsZS9sb2FkaW5nIF0KCQlkbwoJCQluZXd0aW1lPSQoZGF0ZSArJVMpCgkJ
+CWlmIFsgJG5ld3RpbWUgLWVxICRvbGR0aW1lIF0KCQkJdGhlbgoJCQkJZWNobyAiRmFpbGVkIHRv
+IGV4cG9zZSB1c2VyIGhlbHBlciBpbnRlcmZhY2UiCgkJCQlleGl0IDEKCQkJZmkKCQlkb25lCgoJ
+CWVjaG8gMSA+IC9zeXMvY2xhc3MvZmlybXdhcmUvZWZpLWNhcHN1bGUtZmlsZS9sb2FkaW5nCgkJ
+Y2F0ICRhcmcgPiAvc3lzL2NsYXNzL2Zpcm13YXJlL2VmaS1jYXBzdWxlLWZpbGUvZGF0YQoJCWVj
+aG8gMCA+IC9zeXMvY2xhc3MvZmlybXdhcmUvZWZpLWNhcHN1bGUtZmlsZS9sb2FkaW5nCgoJCXVu
+dGlsIFsgLW4gIiRyZXN1bHQiIF0KCQlkbwoJCQlyZXN1bHQ9JChjYXQgL3N5cy9kZXZpY2VzL3Bs
+YXRmb3JtL2VmaV9jYXBzdWxlX3VzZXJfaGVscGVyL2NhcHN1bGVfcmVwb3J0IHwgZ3JlcCAkbnVt
+KQoJCWRvbmUKCQllY2hvICRyZXN1bHQgIiAoIiAkYXJnICIpIgoJZWxzZQoJCWVjaG8gIkZpbGUg
+JGFyZyBub3QgZm91bmQgISEiCglmaQpkb25lCmV4aXQgMAo=
+
+--_003_F54AEECA5E2B9541821D670476DAE19C2B8AC9DDPGSMSX102garcor_
+Content-Type: application/octet-stream;
+	name="0002-efi-Capsule-update-with-user-helper-interface.patch"
+Content-Description: 0002-efi-Capsule-update-with-user-helper-interface.patch
+Content-Disposition: attachment;
+	filename="0002-efi-Capsule-update-with-user-helper-interface.patch";
+	size=12646; creation-date="Tue, 24 Feb 2015 12:15:18 GMT";
+	modification-date="Tue, 24 Feb 2015 12:15:18 GMT"
+Content-Transfer-Encoding: base64
+
+RnJvbSA3Mzk1ODc3ZTY4OTUyMzEyNTViYWFiNjgzOGQ4YjkyZTQ0ZjAzNDJiIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpNZXNzYWdlLUlkOiA8NzM5NTg3N2U2ODk1MjMxMjU1YmFhYjY4MzhkOGI5
+MmU0NGYwMzQyYi4xNDI0MjQ0MDg2LmdpdC5ob2NrLmxlb25nLmt3ZWhAaW50ZWwuY29tPgpJbi1S
+ZXBseS1UbzogPDkwNzAxMTg0YTkxOWJiNThjOGM3MWNkNWQ5ZDJlMjhjYzcyMmU1ZDEuMTQyNDI0
+NDA4Ni5naXQuaG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4KUmVmZXJlbmNlczogPDkwNzAxMTg0
+YTkxOWJiNThjOGM3MWNkNWQ5ZDJlMjhjYzcyMmU1ZDEuMTQyNDI0NDA4Ni5naXQuaG9jay5sZW9u
+Zy5rd2VoQGludGVsLmNvbT4KRnJvbTogIkt3ZWgsIEhvY2sgTGVvbmciIDxob2NrLmxlb25nLmt3
+ZWhAaW50ZWwuY29tPgpEYXRlOiBUdWUsIDIgU2VwIDIwMTQgMjI6MTA6NDIgKzA4MDAKU3ViamVj
+dDogW1BBVENIIDIvMl0gZWZpOiBDYXBzdWxlIHVwZGF0ZSB3aXRoIHVzZXIgaGVscGVyIGludGVy
+ZmFjZQoKSW50cm9kdWNpbmcgYSBrZXJuZWwgbW9kdWxlIHRvIGV4cG9zZSB1c2VyIGhlbHBlciBp
+bnRlcmZhY2UgZm9yCnVzZXIgdG8gdXBsb2FkIGNhcHN1bGUgYmluYXJpZXMuIFRoaXMgbW9kdWxl
+IGxldmVyYWdlIHRoZQpyZXF1ZXN0X2Zpcm13YXJlX25vd2FpdCgpIHRvIGV4cG9zZSBhbiBpbnRl
+cmZhY2UgdG8gdXNlci4KCkV4YW1wbGUgc3RlcHMgdG8gbG9hZCB0aGUgY2Fwc3VsZSBiaW5hcnk6
+CjEuKSBudW09JChjYXQgL3N5cy9kZXZpY2VzL3BsYXRmb3JtL2VmaV9jYXBzdWxlX3VzZXJfaGVs
+cGVyL2NhcHN1bGVfdGlja2V0KQoyLikgY29udGludWUgdG8gYWNxdWlyZSB0aGUgbnVtYmVyIGlm
+IHRoZSBudW1iZXIgaXMgJzAnCjMuKSBlY2hvIDEgPiAvc3lzL2NsYXNzL2Zpcm13YXJlL2VmaS1j
+YXBzdWxlLWZpbGUvbG9hZGluZwo0LikgY2F0IGNhcHN1bGUuYmluID4gL3N5cy9jbGFzcy9maXJt
+d2FyZS9lZmktY2Fwc3VsZS1maWxlL2RhdGEKNS4pIGVjaG8gMCA+IC9zeXMvY2xhc3MvZmlybXdh
+cmUvZWZpLWNhcHN1bGUtZmlsZS9sb2FkaW5nCjYuKSBjYXQgL3N5cy9kZXZpY2VzL3BsYXRmb3Jt
+L2VmaV9jYXBzdWxlX3VzZXJfaGVscGVyL2NhcHN1bGVfcmVwb3J0IHwgZ3JlcCAkbnVtCgpXaGVy
+ZWFzLCB0aGlzIG1vZHVsZSBkb2VzIG5vdCBhbGxvdyB0aGUgY2Fwc3VsZSBiaW5hcmllcyB0byBi
+ZQpvYnRhaW5lZCBmcm9tIHRoZSByZXF1ZXN0X2Zpcm13YXJlIGxpYnJhcnkgc2VhcmNoIHBhdGgu
+IElmIGFueQpjYXBzdWxlIGJpbmFyeSBsb2FkZWQgZnJvbSBmaXJtd2FyZSBzZWFjaCBwYXRoLCB0
+aGUgbW9kdWxlIHdpbGwKYWJvcnQgdGhlIGNhcHN1bGUgc3RvcmluZyBmdW5jdGlvbi4KCkJlc2lk
+ZXMgdGhlIHJlcXVlc3RfZmlybXdhcmUgdXNlciBoZWxwZXIgaW50ZXJmYWNlLCB0aGlzIG1vZHVs
+ZQphbHNvIGV4cG9zZXMgdHdvIHJlYWQgb25seSBmaWxlIG5vdGVzIHRvIGludGVyYWN0IHdpdGgg
+dXNlci4KCi0gJ2NhcHN1bGVfdGlja2V0JyBhbGxvd3MgdXNlciB0byBhY3F1aXJlIGEgbnVtYmVy
+IGFuZCBlbmFibGluZwpmaXJtd2FyZV9jbGFzcyB1c2VyIGhlbHBlciBpbnRlcmZhY2UgZm9yIHVw
+bG9hZGluZyB0aGUgY2Fwc3VsZQpiaW5hcnkuIFRoZSB0aWNrZXQgbnVtYmVyIGlzIHN0YXJ0aW5n
+IGZyb20gMDAxIHRvIDk5OS4gSWYKb2J0YWluZWQgYSBudW1iZXIgb2YgJzAnIG1lYW5zIHNvbWVv
+bmUgaXMgcGVyZm9ybWluZyB0aGUgbG9hZGluZy4KUGxlYXNlIHdhaXQgdW50aWwgdGhlIGxvYWRp
+bmcgaXMgZG9uZSBhbmQgb2J0YWluZWQgdGhlIG51bWJlciBpbgp0aGUgY29ycmVjdCByYW5nZSB0
+aGVuIHBlcmZvcm0gdG8gdGhlIG5leHQgc3RlcHMuIEEgMiBtaW51dGVzCnRpbWUgb3V0IGlzIGlt
+cGxlbWVudGVkIGZvciBlYWNoIGxvYWRpbmcgYWN0aXZpdHkuCgotICdjYXBzdWxlX3JlcG9ydCcg
+YWxsb3dzIHVzZXIgdG8gdmVyaWZ5IHRoZSBzdGF0dXMgb2YgdGhlCmNhcHN1bGUgbG9hZGluZy4g
+VXNlciBjYW4gdmVyaWZ5IGJ5IHVzaW5nIHRoZSBudW1iZXIgYWNxdWlyZWQgYXQKdGhlIDFzdCBz
+dGVwIHdpdGggJ2NhcHN1bGVfdGlja2V0Jy4KClRoaXMgZGVzaWduIGNhdGVyIHRoZSBwcmV2ZW50
+aW5nIG9mIG11bHRpIGNhcHN1bGVzIGNvbmN1cnJlbnQKbG9hZGluZyBwcm9ibGVtIGFzIHdlbGwg
+YXMgdGhlIHN0YXR1cyByZXBvcnRpbmcgc3luY2hyb25pemF0aW9uLgoKQ2M6IE1hdHQgRmxlbWlu
+ZyA8bWF0dC5mbGVtaW5nQGludGVsLmNvbT4KU2lnbmVkLW9mZi1ieTogS3dlaCwgSG9jayBMZW9u
+ZyA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4KLS0tCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9L
+Y29uZmlnICAgICAgICAgICAgICAgICAgIHwgICAxMyArCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9N
+YWtlZmlsZSAgICAgICAgICAgICAgICAgIHwgICAgMSArCiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9l
+ZmktY2Fwc3VsZS11c2VyLWhlbHBlci5jIHwgIDMxNiArKysrKysrKysrKysrKysrKysrKysrKysK
+IDMgZmlsZXMgY2hhbmdlZCwgMzMwIGluc2VydGlvbnMoKykKIGNyZWF0ZSBtb2RlIDEwMDY0NCBk
+cml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktY2Fwc3VsZS11c2VyLWhlbHBlci5jCgpkaWZmIC0tZ2l0
+IGEvZHJpdmVycy9maXJtd2FyZS9lZmkvS2NvbmZpZyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL0tj
+b25maWcKaW5kZXggZjcxMmQ0Ny4uN2RjODE0ZSAxMDA2NDQKLS0tIGEvZHJpdmVycy9maXJtd2Fy
+ZS9lZmkvS2NvbmZpZworKysgYi9kcml2ZXJzL2Zpcm13YXJlL2VmaS9LY29uZmlnCkBAIC02MCw2
+ICs2MCwxOSBAQCBjb25maWcgRUZJX1JVTlRJTUVfV1JBUFBFUlMKIGNvbmZpZyBFRklfQVJNU1RV
+QgogCWJvb2wKIAorY29uZmlnIEVGSV9DQVBTVUxFX1VTRVJfSEVMUEVSCisJdHJpc3RhdGUgIkVG
+SSBjYXBzdWxlIHVzZXIgbW9kZSBoZWxwZXIiCisJZGVwZW5kcyBvbiBFRkkKKwlzZWxlY3QgRldf
+TE9BREVSCisJc2VsZWN0IEZXX0xPQURFUl9VU0VSX0hFTFBFUgorCWhlbHAKKwkgIFRoaXMgb3B0
+aW9uIGV4cG9zZXMgdGhlIHVzZXIgbW9kZSBoZWxwZXIgaW50ZXJmYWNlIGZvciB1c2VyIHRvIGxv
+YWQKKwkgIEVGSSBjYXBzdWxlIGJpbmFyeSBhbmQgdXBkYXRlIHRoZSBFRkkgZmlybXdhcmUgYWZ0
+ZXIgc3lzdGVtIHJlYm9vdC4KKwkgIFRoaXMgZmVhdHVyZSBkb2VzIG5vdCBzdXBwb3J0IGF1dG8g
+bG9jYXRpbmcgY2Fwc3VsZSBiaW5hcmllcyBhdCB0aGUKKwkgIGZpcm13YXJlIGxpYiBzZWFyY2gg
+cGF0aC4KKworCSAgSWYgdW5zdXJlLCBzYXkgTi4KKwogZW5kbWVudQogCiBjb25maWcgVUVGSV9D
+UEVSCmRpZmYgLS1naXQgYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9NYWtlZmlsZSBiL2RyaXZlcnMv
+ZmlybXdhcmUvZWZpL01ha2VmaWxlCmluZGV4IDY5ODg0NmUuLjYzZjY5MTAgMTAwNjQ0Ci0tLSBh
+L2RyaXZlcnMvZmlybXdhcmUvZWZpL01ha2VmaWxlCisrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZp
+L01ha2VmaWxlCkBAIC04LDMgKzgsNCBAQCBvYmotJChDT05GSUdfVUVGSV9DUEVSKQkJCSs9IGNw
+ZXIubwogb2JqLSQoQ09ORklHX0VGSV9SVU5USU1FX01BUCkJCSs9IHJ1bnRpbWUtbWFwLm8KIG9i
+ai0kKENPTkZJR19FRklfUlVOVElNRV9XUkFQUEVSUykJKz0gcnVudGltZS13cmFwcGVycy5vCiBv
+YmotJChDT05GSUdfRUZJX1NUVUIpCQkJKz0gbGlic3R1Yi8KK29iai0kKENPTkZJR19FRklfQ0FQ
+U1VMRV9VU0VSX0hFTFBFUikJKz0gZWZpLWNhcHN1bGUtdXNlci1oZWxwZXIubwpkaWZmIC0tZ2l0
+IGEvZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLWNhcHN1bGUtdXNlci1oZWxwZXIuYyBiL2RyaXZl
+cnMvZmlybXdhcmUvZWZpL2VmaS1jYXBzdWxlLXVzZXItaGVscGVyLmMKbmV3IGZpbGUgbW9kZSAx
+MDA2NDQKaW5kZXggMDAwMDAwMC4uMDU4MzhmNQotLS0gL2Rldi9udWxsCisrKyBiL2RyaXZlcnMv
+ZmlybXdhcmUvZWZpL2VmaS1jYXBzdWxlLXVzZXItaGVscGVyLmMKQEAgLTAsMCArMSwzMTYgQEAK
+Ky8qCisgKiBFRkkgY2Fwc3VsZSB1c2VyIG1vZGUgaGVscGVyIGludGVyZmFjZSBkcml2ZXIuCisg
+KgorICogQ29weXJpZ2h0IDIwMTUgSW50ZWwgQ29ycG9yYXRpb24KKyAqCisgKiBUaGlzIGZpbGUg
+aXMgcGFydCBvZiB0aGUgTGludXgga2VybmVsLCBhbmQgaXMgbWFkZSBhdmFpbGFibGUgdW5kZXIK
+KyAqIHRoZSB0ZXJtcyBvZiB0aGUgR05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UgdmVyc2lvbiAy
+LgorICovCisKKyNkZWZpbmUgcHJfZm10KGZtdCkgS0JVSUxEX01PRE5BTUUgIjogIiBmbXQKKwor
+I2luY2x1ZGUgPGxpbnV4L2tlcm5lbC5oPgorI2luY2x1ZGUgPGxpbnV4L21vZHVsZS5oPgorI2lu
+Y2x1ZGUgPGxpbnV4L3BsYXRmb3JtX2RldmljZS5oPgorI2luY2x1ZGUgPGxpbnV4L2RlbGF5Lmg+
+CisjaW5jbHVkZSA8bGludXgvaGlnaG1lbS5oPgorI2luY2x1ZGUgPGxpbnV4L3NsYWIuaD4KKyNp
+bmNsdWRlIDxsaW51eC9tdXRleC5oPgorI2luY2x1ZGUgPGxpbnV4L3JlYm9vdC5oPgorI2luY2x1
+ZGUgPGxpbnV4L2VmaS5oPgorI2luY2x1ZGUgPGxpbnV4L2Zpcm13YXJlLmg+CisjaW5jbHVkZSA8
+bGludXgvd29ya3F1ZXVlLmg+CisKKyNkZWZpbmUgQ0FQU1VMRV9OQU1FICJlZmktY2Fwc3VsZS1m
+aWxlIgorI2RlZmluZSBERVZfTkFNRSAiZWZpX2NhcHN1bGVfdXNlcl9oZWxwZXIiCisjZGVmaW5l
+IFNUUklOR19JTlRFR0VSX01BWF9MRU5HVEggMTMKKyNkZWZpbmUgTUFYX1NZU0ZTX0JVRl9MRU5H
+VEggNDA5NgorI2RlZmluZSBDQVBTVUxFX1VTRVJfSEVMUEVSX1RJTUVPVVQgMTIwCisjZGVmaW5l
+IENBUFNVTEVfUkVQT1JUX01BWF9TVFJfU0laRSAzMgorI2RlZmluZSBDQVBTVUxFX1JFU1VMVF9Q
+QVNTICJzdWNjZXNzZnVsIgorI2RlZmluZSBDQVBTVUxFX1JFU1VMVF9GQUlMICJmYWlsZWQgICAg
+IgorI2RlZmluZSBDQVBTVUxFX1JFU1VMVF9FWElUICJhYm9ydGVkICAgIgorCitzdGF0aWMgREVG
+SU5FX01VVEVYKHVzZXJfaGVscGVyX2xvY2spOworc3RhdGljIGludCBjYXBzdWxlX2NvdW50Owor
+c3RhdGljIHN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKmVmaV9jYXBzdWxlX3BkZXY7CitzdGF0aWMg
+c3RydWN0IGRlbGF5ZWRfd29yayB0aW1lb3V0X3dvcms7CitzdGF0aWMgdW5zaWduZWQgY2hhciAq
+cmVwb3J0X2J1ZjsKK3N0YXRpYyBpbnQgcmVwb3J0X2J1Zl9oZWFkX29mZiwgcmVwb3J0X2J1Zl93
+cml0ZV9vZmY7CisKKy8qCisgKiBUaGlzIGZ1bmN0aW9uIHdpbGwgc3RvcmUgdGhlIGNhcHN1bGUg
+YmluYXJ5IGFuZCBwYXNzIGl0IHRvCisgKiBlZmlfY2Fwc3VsZV91cGRhdGUoKSBBUEkgaW4gY2Fw
+c3VsZS5jCisgKi8KK3N0YXRpYyBpbnQgZWZpX2NhcHN1bGVfc3RvcmUoY29uc3Qgc3RydWN0IGZp
+cm13YXJlICpmdykKK3sKKwlpbnQgaTsKKwlpbnQgcmV0OworCWludCBjb3VudCA9IGZ3LT5zaXpl
+OworCWludCBjb3B5X3NpemUgPSAoZnctPnNpemUgPiBQQUdFX1NJWkUpID8gUEFHRV9TSVpFIDog
+ZnctPnNpemU7CisJaW50IHBhZ2VzX25lZWRlZCA9IEFMSUdOKGZ3LT5zaXplLCBQQUdFX1NJWkUp
+ID4+IFBBR0VfU0hJRlQ7CisJc3RydWN0IHBhZ2UgKipwYWdlczsKKwl2b2lkICpwYWdlX2RhdGE7
+CisJZWZpX2NhcHN1bGVfaGVhZGVyX3QgKmNhcHN1bGUgPSBOVUxMOworCisJcGFnZXMgPSBrbWFs
+bG9jX2FycmF5KHBhZ2VzX25lZWRlZCwgc2l6ZW9mKHZvaWQgKiksIEdGUF9LRVJORUwpOworCWlm
+ICghcGFnZXMpIHsKKwkJcHJfZXJyKCIlczoga21hbGxvY19hcnJheSgpIGZhaWxlZFxuIiwgX19m
+dW5jX18pOworCQlyZXR1cm4gLUVOT01FTTsKKwl9CisKKwlmb3IgKGkgPSAwOyBpIDwgcGFnZXNf
+bmVlZGVkOyBpKyspIHsKKwkJcGFnZXNbaV0gPSBhbGxvY19wYWdlKEdGUF9LRVJORUwpOworCQlp
+ZiAoIXBhZ2VzW2ldKSB7CisJCQlwcl9lcnIoIiVzOiBhbGxvY19wYWdlKCkgZmFpbGVkXG4iLCBf
+X2Z1bmNfXyk7CisJCQktLWk7CisJCQlyZXQgPSAtRU5PTUVNOworCQkJZ290byBmYWlsZWQ7CisJ
+CX0KKwl9CisKKwlmb3IgKGkgPSAwOyBpIDwgcGFnZXNfbmVlZGVkOyBpKyspIHsKKwkJcGFnZV9k
+YXRhID0ga21hcChwYWdlc1tpXSk7CisJCW1lbWNweShwYWdlX2RhdGEsIGZ3LT5kYXRhICsgKGkg
+KiBQQUdFX1NJWkUpLCBjb3B5X3NpemUpOworCisJCWlmIChpID09IDApCisJCQljYXBzdWxlID0g
+KGVmaV9jYXBzdWxlX2hlYWRlcl90ICopcGFnZV9kYXRhOworCQllbHNlCisJCQlrdW5tYXAocGFn
+ZXNbaV0pOworCisJCWNvdW50IC09IGNvcHlfc2l6ZTsKKwkJaWYgKGNvdW50IDwgUEFHRV9TSVpF
+KQorCQkJY29weV9zaXplID0gY291bnQ7CisJfQorCisJcmV0ID0gZWZpX2NhcHN1bGVfdXBkYXRl
+KGNhcHN1bGUsIHBhZ2VzKTsKKwlpZiAocmV0KSB7CisJCXByX2VycigiJXM6IGVmaV9jYXBzdWxl
+X3VwZGF0ZSgpIGZhaWxlZFxuIiwgX19mdW5jX18pOworCQktLWk7CisJCWdvdG8gZmFpbGVkOwor
+CX0KKwlrdW5tYXAocGFnZXNbMF0pOworCisJLyoKKwkgKiB3ZSBjYW5ub3QgZnJlZSB0aGUgcGFn
+ZXMgaGVyZSBkdWUgdG8gcmVib290IG5lZWQgdGhhdCBkYXRhCisJICogbWFpbnRhaW5lZC4KKwkg
+Ki8KKwlyZXR1cm4gMDsKKworZmFpbGVkOgorCXdoaWxlIChpID49IDApCisJCV9fZnJlZV9wYWdl
+KHBhZ2VzW2ktLV0pOworCWtmcmVlKHBhZ2VzKTsKKwlyZXR1cm4gcmV0OworfQorCisvKgorICog
+VGhpcyBjYWxsYmFjayBmdW5jdGlvbiB3aWxsIGJlIGNhbGxlZCBieSByZXF1ZXN0X2Zpcm13YXJl
+X25vd2FpdCgpIHdoZW4KKyAqIHVzZXIgaGFzIGxvYWRlZCB0aGUgY2Fwc3VsZSBiaW5hcnkgb3Ig
+YWJvcnRlZCB1c2VyIGhlbHBlciBpbnRlcmZhY2UKKyAqLworc3RhdGljIHZvaWQgY2FsbGJhY2tm
+bl9lZmlfY2Fwc3VsZShjb25zdCBzdHJ1Y3QgZmlybXdhcmUgKmZ3LCB2b2lkICpjb250ZXh0KQor
+eworCWludCByZXQ7CisKKwlpZiAoZncpIHsKKwkJLyoKKwkJICogQmluYXJ5IHdoaWNoIGlzIG5v
+dCBnZXR0aW5nIGZyb20gdXNlciBoZWxwZXIgaW50ZXJmYWNlLAorCQkgKiB0aGUgZnctPnBhZ2Vz
+IGlzIGVxdWFsIHRvIE5VTEwKKwkJICovCisJCWlmICghZnctPnBhZ2VzKSB7CisJCQlwcl9lcnIo
+IiVzOiBFUlJPUjogQ2Fwc3VsZSBiaW5hcnkgJyVzJyBhdCAlc1xuIiwKKwkJCSAgICAgICBfX2Z1
+bmNfXywgQ0FQU1VMRV9OQU1FLAorCQkJICAgICAgICJmaXJtd2FyZSBsaWIgc2VhcmNoIHBhdGgg
+YXJlIG5vdCBzdXBwb3J0ZWQiKTsKKwkJCXByX2VycigidXNlciBoZWxwZXIgaW50ZXJmYWNlIGRp
+c2FibGVkXG4iKTsKKwkJCXNucHJpbnRmKHJlcG9ydF9idWYgKyByZXBvcnRfYnVmX3dyaXRlX29m
+ZiwKKwkJCQkgQ0FQU1VMRV9SRVBPUlRfTUFYX1NUUl9TSVpFLAorCQkJCSAiQ2Fwc3VsZSAlMDNk
+IHVwbG9hZHMgJXNcbiIsCisJCQkJIGNhcHN1bGVfY291bnQsCisJCQkJIENBUFNVTEVfUkVTVUxU
+X0ZBSUwpOworCQl9IGVsc2UgeworCQkJcmV0ID0gZWZpX2NhcHN1bGVfc3RvcmUoZncpOworCQkJ
+aWYgKCFyZXQpIHsKKwkJCQlzbnByaW50ZihyZXBvcnRfYnVmICsgcmVwb3J0X2J1Zl93cml0ZV9v
+ZmYsCisJCQkJCSBDQVBTVUxFX1JFUE9SVF9NQVhfU1RSX1NJWkUsCisJCQkJCSAiQ2Fwc3VsZSAl
+MDNkIHVwbG9hZHMgJXNcbiIsCisJCQkJCSBjYXBzdWxlX2NvdW50LAorCQkJCQkgQ0FQU1VMRV9S
+RVNVTFRfUEFTUyk7CisJCQl9IGVsc2UgeworCQkJCXByX2VycigiJXM6ICVzICUwM2QsIHJldHVy
+biBlcnJvciBjb2RlID0gJWRcbiIsCisJCQkJICAgICAgIF9fZnVuY19fLAorCQkJCSAgICAgICAi
+RmFpbGVkIHRvIHN0b3JlIGNhcHN1bGUgYmluYXJ5IiwKKwkJCQkgICAgICAgY2Fwc3VsZV9jb3Vu
+dCwgcmV0KTsKKwkJCQlzbnByaW50ZihyZXBvcnRfYnVmICsgcmVwb3J0X2J1Zl93cml0ZV9vZmYs
+CisJCQkJCSBDQVBTVUxFX1JFUE9SVF9NQVhfU1RSX1NJWkUsCisJCQkJCSAiQ2Fwc3VsZSAlMDNk
+IHVwbG9hZHMgJXNcbiIsCisJCQkJCSBjYXBzdWxlX2NvdW50LAorCQkJCQkgQ0FQU1VMRV9SRVNV
+TFRfRkFJTCk7CisJCQl9CisJCX0KKwkJcmVsZWFzZV9maXJtd2FyZShmdyk7CisJfSBlbHNlIHsK
+KwkJc25wcmludGYocmVwb3J0X2J1ZiArIHJlcG9ydF9idWZfd3JpdGVfb2ZmLAorCQkJIENBUFNV
+TEVfUkVQT1JUX01BWF9TVFJfU0laRSwKKwkJCSAiQ2Fwc3VsZSAlMDNkIHVwbG9hZHMgJXNcbiIs
+CisJCQkgY2Fwc3VsZV9jb3VudCwKKwkJCSBDQVBTVUxFX1JFU1VMVF9FWElUKTsKKwl9CisKKwly
+ZXBvcnRfYnVmX3dyaXRlX29mZiArPSBDQVBTVUxFX1JFUE9SVF9NQVhfU1RSX1NJWkU7CisJcmVw
+b3J0X2J1Zl93cml0ZV9vZmYgJT0gUEFHRV9TSVpFOworCisJY2FuY2VsX2RlbGF5ZWRfd29ya19z
+eW5jKCZ0aW1lb3V0X3dvcmspOworCW11dGV4X3VubG9jaygmdXNlcl9oZWxwZXJfbG9jayk7Cit9
+CisKK3N0YXRpYyB2b2lkIGNhcHN1bGVfdXNlcl9oZWxwZXJfdGltZW91dF93b3JrKHN0cnVjdCB3
+b3JrX3N0cnVjdCAqd29yaykKK3sKKwlyZXF1ZXN0X2Zpcm13YXJlX2Fib3J0KENBUFNVTEVfTkFN
+RSk7Cit9CisKK3N0YXRpYyBzc2l6ZV90IGNhcHN1bGVfdGlja2V0X3Nob3coc3RydWN0IGRldmlj
+ZSAqZGV2LAorCQkJCSAgIHN0cnVjdCBkZXZpY2VfYXR0cmlidXRlICphdHRyLCBjaGFyICpidWYp
+Cit7CisJaW50IHJldDsKKworCWlmIChtdXRleF90cnlsb2NrKCZ1c2VyX2hlbHBlcl9sb2NrKSkg
+eworCQkvKgorCQkgKiBVc2UgcmVxdWVzdF9maXJtd2FyZV9ub3dhaXQoKSB0byBleHBvc2UgYW4g
+dXNlciBoZWxwZXIKKwkJICogaW50ZXJmYWNlIGZvciBvYnRhaW5pbmcgdGhlIGNhcHN1bGUgYmlu
+YXJ5IGZyb20gdXNlciBzcGFjZQorCQkgKi8KKwkJcmV0ID0gcmVxdWVzdF9maXJtd2FyZV9ub3dh
+aXQoVEhJU19NT0RVTEUsIEZXX0FDVElPTl9OT0hPVFBMVUcsCisJCQkJCSAgICAgIENBUFNVTEVf
+TkFNRSwKKwkJCQkJICAgICAgJmVmaV9jYXBzdWxlX3BkZXYtPmRldiwKKwkJCQkJICAgICAgR0ZQ
+X0tFUk5FTCwgTlVMTCwKKwkJCQkJICAgICAgY2FsbGJhY2tmbl9lZmlfY2Fwc3VsZSk7CisJCWlm
+IChyZXQpIHsKKwkJCXByX2VycigiJXM6IHJlcXVlc3RfZmlybXdhcmVfbm93YWl0KCkgZmFpbGVk
+XG4iLAorCQkJICAgICAgIF9fZnVuY19fKTsKKwkJCW11dGV4X3VubG9jaygmdXNlcl9oZWxwZXJf
+bG9jayk7CisJCQlyZXR1cm4gc25wcmludGYoYnVmLCBTVFJJTkdfSU5URUdFUl9NQVhfTEVOR1RI
+LCAiMFxuIik7CisJCX0KKworCQlxdWV1ZV9kZWxheWVkX3dvcmsoc3lzdGVtX3Bvd2VyX2VmZmlj
+aWVudF93cSwKKwkJCQkgICAmdGltZW91dF93b3JrLAorCQkJCSAgIENBUFNVTEVfVVNFUl9IRUxQ
+RVJfVElNRU9VVCAqIEhaKTsKKworCQkrK2NhcHN1bGVfY291bnQ7CisJCWNhcHN1bGVfY291bnQg
+JT0gMTAwMCA/IDogKytjYXBzdWxlX2NvdW50OworCisJCXJldHVybiBzbnByaW50ZihidWYsIFNU
+UklOR19JTlRFR0VSX01BWF9MRU5HVEgsICIlMDNkXG4iLAorCQkJCWNhcHN1bGVfY291bnQpOwor
+CX0gZWxzZSB7CisJCXJldHVybiBzbnByaW50ZihidWYsIFNUUklOR19JTlRFR0VSX01BWF9MRU5H
+VEgsICIwXG4iKTsKKwl9Cit9CisKK3N0YXRpYyBERVZJQ0VfQVRUUl9STyhjYXBzdWxlX3RpY2tl
+dCk7CisKK3N0YXRpYyBzc2l6ZV90IGNhcHN1bGVfcmVwb3J0X3Nob3coc3RydWN0IGRldmljZSAq
+ZGV2LAorCQkJCSAgIHN0cnVjdCBkZXZpY2VfYXR0cmlidXRlICphdHRyLCBjaGFyICpidWYpCit7
+CisJaW50IGxlbmd0aCA9IGNhcHN1bGVfY291bnQgKiBDQVBTVUxFX1JFUE9SVF9NQVhfU1RSX1NJ
+WkU7CisKKwlsZW5ndGggPSBsZW5ndGggPiBQQUdFX1NJWkUgPyBQQUdFX1NJWkUgOiBsZW5ndGg7
+CisJbWVtY3B5KGJ1ZiwgcmVwb3J0X2J1ZiArIHJlcG9ydF9idWZfaGVhZF9vZmYsIGxlbmd0aCk7
+CisJcmV0dXJuIGxlbmd0aDsKK30KKworc3RhdGljIERFVklDRV9BVFRSX1JPKGNhcHN1bGVfcmVw
+b3J0KTsKKworLyogcmVib290IG5vdGlmaWVyIGZvciBhdm9pZCBkZWFkbG9jayB3aXRoIHVzZXJt
+b2RlX2xvY2sgKi8KK3N0YXRpYyBpbnQgY2Fwc3VsZV9zaHV0ZG93bl9ub3RpZnkoc3RydWN0IG5v
+dGlmaWVyX2Jsb2NrICpuYiwKKwkJCQkgICB1bnNpZ25lZCBsb25nIHN5c19zdGF0ZSwKKwkJCQkg
+ICB2b2lkICpyZWJvb3RfY21kKQoreworCXJlcXVlc3RfZmlybXdhcmVfYWJvcnQoQ0FQU1VMRV9O
+QU1FKTsKKwlyZXR1cm4gTk9USUZZX0RPTkU7Cit9CisKK3N0YXRpYyBzdHJ1Y3Qgbm90aWZpZXJf
+YmxvY2sgY2Fwc3VsZV9zaHV0ZG93bl9uYiA9IHsKKwkubm90aWZpZXJfY2FsbCA9IGNhcHN1bGVf
+c2h1dGRvd25fbm90aWZ5LAorCS8qCisJICogSW4gb3JkZXIgdG8gcmVib290IHByb3Blcmx5LCBp
+dCBpcyByZXF1aXJlZCB0byBlbnN1cmUgdGhlIHByaW9yaXR5CisJICogaGVyZSBpcyBoaWdoZXIg
+dGhhbiBmaXJtd2FyZV9jbGFzcyBmd19zaHV0ZG93bl9uYiBwcmlvcml0eQorCSAqLworCS5wcmlv
+cml0eSA9IDEsCit9OworCitzdGF0aWMgaW50IF9faW5pdCBlZmlfY2Fwc3VsZV91c2VyX2hlbHBl
+cl9pbml0KHZvaWQpCit7CisJaW50IHJldDsKKworCWVmaV9jYXBzdWxlX3BkZXYgPSBwbGF0Zm9y
+bV9kZXZpY2VfcmVnaXN0ZXJfc2ltcGxlKERFVl9OQU1FLAorCQkJCQkJCSAgIFBMQVRGT1JNX0RF
+VklEX05PTkUsCisJCQkJCQkJICAgTlVMTCwgMCk7CisJaWYgKElTX0VSUihlZmlfY2Fwc3VsZV9w
+ZGV2KSkgeworCQlwcl9lcnIoIiVzOiBwbGF0Zm9ybV9kZXZpY2VfcmVnaXN0ZXJfc2ltcGxlKCkg
+ZmFpbGVkXG4iLAorCQkgICAgICAgX19mdW5jX18pOworCQlyZXR1cm4gUFRSX0VSUihlZmlfY2Fw
+c3VsZV9wZGV2KTsKKwl9CisKKwlyZXBvcnRfYnVmID0gZGV2bV9remFsbG9jKCZlZmlfY2Fwc3Vs
+ZV9wZGV2LT5kZXYsIFBBR0VfU0laRSwKKwkJCQkgIEdGUF9LRVJORUwpOworCWlmICghcmVwb3J0
+X2J1ZikgeworCQlyZXQgPSAtRU5PTUVNOworCQlwcl9lcnIoIiVzOiBkZXZtX2t6YWxsb2MoKSBm
+YWlsZWRcbiIsIF9fZnVuY19fKTsKKwkJZ290byBvdXQ7CisJfQorCisJLyoKKwkgKiBjcmVhdGUg
+dGhpcyBmaWxlIG5vZGUgZm9yIHVzZXIgdG8gYWNxdWlyZSBhIHRpY2tldCBudW1iZXIgYW5kIGdl
+dAorCSAqIHJlYWR5IHRvIHVwbG9hZCBjYXBzdWxlIGJpbmFyaWVzCisJICovCisJcmV0ID0gZGV2
+aWNlX2NyZWF0ZV9maWxlKCZlZmlfY2Fwc3VsZV9wZGV2LT5kZXYsCisJCQkJICZkZXZfYXR0cl9j
+YXBzdWxlX3RpY2tldCk7CisJaWYgKHJldCkgeworCQlwcl9lcnIoIiVzOiBkZXZpY2VfY3JlYXRl
+X2ZpbGUoKSBmYWlsZWRcbiIsIF9fZnVuY19fKTsKKwkJZ290byBvdXQ7CisJfQorCisJLyoKKwkg
+KiBjcmVhdGUgdGhpcyBmaWxlIG5vZGUgZm9yIHVzZXIgdG8gY2hlY2sgdGhlIGNhcHN1bGUgYmlu
+YXJpZXMgdXBsb2FkCisJICogc3RhdHVzCisJICovCisJcmV0ID0gZGV2aWNlX2NyZWF0ZV9maWxl
+KCZlZmlfY2Fwc3VsZV9wZGV2LT5kZXYsCisJCQkJICZkZXZfYXR0cl9jYXBzdWxlX3JlcG9ydCk7
+CisJaWYgKHJldCkgeworCQlwcl9lcnIoIiVzOiBkZXZpY2VfY3JlYXRlX2ZpbGUoKSBmYWlsZWRc
+biIsIF9fZnVuY19fKTsKKwkJZ290byBvdXQ7CisJfQorCisJSU5JVF9ERUxBWUVEX1dPUksoJnRp
+bWVvdXRfd29yaywgY2Fwc3VsZV91c2VyX2hlbHBlcl90aW1lb3V0X3dvcmspOworCXJlZ2lzdGVy
+X3JlYm9vdF9ub3RpZmllcigmY2Fwc3VsZV9zaHV0ZG93bl9uYik7CisJcmV0dXJuIDA7CisKK291
+dDoKKwlwbGF0Zm9ybV9kZXZpY2VfdW5yZWdpc3RlcihlZmlfY2Fwc3VsZV9wZGV2KTsKKwlyZXR1
+cm4gcmV0OworfQorbW9kdWxlX2luaXQoZWZpX2NhcHN1bGVfdXNlcl9oZWxwZXJfaW5pdCk7CisK
+Ky8qCisgKiBUbyByZW1vdmUgdGhpcyBrZXJuZWwgbW9kdWxlLCBqdXN0IHBlcmZvcm06CisgKiBy
+bW1vZCBlZmlfY2Fwc3VsZV91c2VyX2hlbHBlci5rbworICoKKyAqIHJtbW9kIC1mIGVmaV9jYXBz
+dWxlX3VzZXJfaGVscGVyLmtvIGlzIE5PVCByZWNvbW1lbmRlZCBhbmQgTk9UIHN1cHBvcnRlZAor
+ICogYnkgdGhpcyBtb2R1bGUgZGVzaWduLiBBbnkgZm9yY2UgdW5sb2FkIG1heSBjYXVzZSB0aGUg
+c3lzdGVtIGNyYXNoLgorICovCitzdGF0aWMgdm9pZCBfX2V4aXQgZWZpX2NhcHN1bGVfdXNlcl9o
+ZWxwZXJfZXhpdCh2b2lkKQoreworCXVucmVnaXN0ZXJfcmVib290X25vdGlmaWVyKCZjYXBzdWxl
+X3NodXRkb3duX25iKTsKKworCS8vIHJlcXVlc3RfZmlybXdhcmVfYWJvcnQoQ0FQU1VMRV9OQU1F
+KTsKKwkvLyAvKgorCSAvLyAqIHN5bmNocm9uaXphdGlvbiBpcyBuZWVkZWQgdG8gbWFrZSBzdXJl
+IHJlcXVlc3RfZmlybXdhcmUgaXMgZnVsbHkKKwkgLy8gKiBhYm9ydGVkCisJIC8vICovCisJLy8g
+d2hpbGUgKGVmaV9jYXBzdWxlX3BkZXYtPmRldi5rb2JqLmtyZWYucmVmY291bnQuY291bnRlciA+
+IDMpCisJCS8vIG1zbGVlcCgyMCk7IC8qIGF2b2lkIGJ1c3kgd2FpdGluZyBmb3IgY29vcGVyYXRp
+dmUga2VybmVsICovCisKKwlwbGF0Zm9ybV9kZXZpY2VfdW5yZWdpc3RlcihlZmlfY2Fwc3VsZV9w
+ZGV2KTsKK30KK21vZHVsZV9leGl0KGVmaV9jYXBzdWxlX3VzZXJfaGVscGVyX2V4aXQpOworCitN
+T0RVTEVfREVTQ1JJUFRJT04oIkVGSSBDYXBzdWxlIHVzZXIgaGVscGVyIGJpbmFyeSBsb2FkIHV0
+aWxpdHkiKTsKK01PRFVMRV9MSUNFTlNFKCJHUEwgdjIiKTsKLS0gCjEuNy45LjUKCg==
+
+--_003_F54AEECA5E2B9541821D670476DAE19C2B8AC9DDPGSMSX102garcor_--
