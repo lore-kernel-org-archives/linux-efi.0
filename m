@@ -1,68 +1,121 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi: Add esrt support.
-Date: Thu, 26 Feb 2015 16:00:33 +0800
-Message-ID: <20150226080033.GB6207@darkstar.redhat.com>
-References: <1424357660-13733-1-git-send-email-pjones@redhat.com>
+From: Parmeshwr Prasad <parmeshwr_prasad-8PEkshWhKlo@public.gmane.org>
+Subject: [PATCH 1/3] Printk() is replaced with respective pr_* functions
+Date: Thu, 26 Feb 2015 05:42:23 -0500
+Message-ID: <20150226104215.GA20577@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1424357660-13733-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: plagnioj-sclMFOaUSTBWk0Htik3J/w@public.gmane.org, tomi.valkeinen-l0cyMroinI0@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 02/19/15 at 09:54am, Peter Jones wrote:
-> Add sysfs files for the EFI System Resource Table (ESRT) under
-> /sys/firmware/efi/esrt and for each EFI System Resource Entry under
-> entries/ as a subdir.
-> 
-> The EFI System Resource Table (ESRT) provides a read-only catalog of
-> system components for which the system accepts firmware upgrades via
-> UEFI's "Capsule Update" feature.  This module allows userland utilities
-> to evaluate what firmware updates can be applied to this system, and
-> potentially arrange for those updates to occur.
-> 
-> The ESRT is described as part of the UEFI specification, in version 2.5
-> which should be available from http://uefi.org/specifications in early
-> 2015.  If you're a member of the UEFI Forum, information about its
-> addition to the standard is available as UEFI Mantis 1090.
-> 
-> For some hardware platforms, additional restrictions may be found at
-> http://msdn.microsoft.com/en-us/library/windows/hardware/jj128256.aspx ,
-> and additional documentation may be found at
-> http://download.microsoft.com/download/5/F/5/5F5D16CD-2530-4289-8019-94C6A20BED3C/windows-uefi-firmware-update-platform.docx
-> .
-> 
-> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c   |   2 +
->  drivers/firmware/efi/Makefile |   2 +-
->  drivers/firmware/efi/efi.c    |  68 ++++++-
->  drivers/firmware/efi/esrt.c   | 441 ++++++++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h           |   8 +
->  5 files changed, 519 insertions(+), 2 deletions(-)
->  create mode 100644 drivers/firmware/efi/esrt.c
+This is a trivial patch. I am replacing printk() with respective pr_* functions.
 
-Update documentation under Documentation/ABI/testing/?
+Signed-off-by: Parmeshwr Prasad <parmeshwr_prasad-8PEkshWhKlo@public.gmane.org>
+---
+ drivers/video/fbdev/efifb.c | 26 ++++++++++++++------------
+ 1 file changed, 14 insertions(+), 12 deletions(-)
 
-[snip]
+diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+index 4bfff34..7557991 100644
+--- a/drivers/video/fbdev/efifb.c
++++ b/drivers/video/fbdev/efifb.c
+@@ -6,6 +6,8 @@
+  *
+  */
 
->  /*
-> @@ -95,6 +96,8 @@ static ssize_t systab_show(struct kobject *kobj,
->  		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
->  	if (efi.uga != EFI_INVALID_TABLE_ADDR)
->  		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
-> +	if (efi.esrt != EFI_INVALID_TABLE_ADDR)
-> +		str += sprintf(str, "ESRT=0x%lx\n", efi.esrt);
->  
->  	return str - buf;
->  }
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
+ #include <linux/module.h>
+ #include <linux/kernel.h>
+ #include <linux/errno.h>
+@@ -142,10 +144,10 @@ static int efifb_probe(struct platform_device *dev)
+        if (!screen_info.pages)
+                screen_info.pages = 1;
+        if (!screen_info.lfb_base) {
+-               printk(KERN_DEBUG "efifb: invalid framebuffer address\n");
++               pr_debug("invalid framebuffer address\n");
+                return -ENODEV;
+        }
+-       printk(KERN_INFO "efifb: probing for efifb\n");
++       pr_info("probing for efifb\n");
 
-Add more output in /sys/firmware/efi/systab is wrong, one table address should
-have one file under /sys/firmware/efi/, we have created the systab in the wrong
-way but we should not continue to add things..
+        /* just assume they're all unset if any are */
+        if (!screen_info.blue_size) {
+@@ -193,14 +195,14 @@ static int efifb_probe(struct platform_device *dev)
+        } else {
+                /* We cannot make this fatal. Sometimes this comes from magic
+                   spaces our resource handlers simply don't know about */
+-               printk(KERN_WARNING
+-                      "efifb: cannot reserve video memory at 0x%lx\n",
++               pr_warn(
++                      "cannot reserve video memory at 0x%lx\n",
+                        efifb_fix.smem_start);
+        }
 
-Thanks
-Dave
+        info = framebuffer_alloc(sizeof(u32) * 16, &dev->dev);
+        if (!info) {
+-               printk(KERN_ERR "efifb: cannot allocate framebuffer\n");
++               pr_err("cannot allocate framebuffer\n");
+                err = -ENOMEM;
+                goto err_release_mem;
+        }
+@@ -218,18 +220,18 @@ static int efifb_probe(struct platform_device *dev)
+
+        info->screen_base = ioremap_wc(efifb_fix.smem_start,
+efifb_fix.smem_len);
+        if (!info->screen_base) {
+-               printk(KERN_ERR "efifb: abort, cannot ioremap video memory "
++               pr_err("abort, cannot ioremap video memory "
+                                "0x%x @ 0x%lx\n",
+                        efifb_fix.smem_len, efifb_fix.smem_start);
+                err = -EIO;
+                goto err_release_fb;
+        }
+
+-       printk(KERN_INFO "efifb: framebuffer at 0x%lx, mapped to 0x%p, "
++       pr_info("framebuffer at 0x%lx, mapped to 0x%p, "
+               "using %dk, total %dk\n",
+               efifb_fix.smem_start, info->screen_base,
+               size_remap/1024, size_total/1024);
+-       printk(KERN_INFO "efifb: mode is %dx%dx%d, linelength=%d, pages=%d\n",
++       pr_info("mode is %dx%dx%d, linelength=%d, pages=%d\n",
+               efifb_defined.xres, efifb_defined.yres,
+               efifb_defined.bits_per_pixel, efifb_fix.line_length,
+               screen_info.pages);
+@@ -237,7 +239,7 @@ static int efifb_probe(struct platform_device *dev)
+        efifb_defined.xres_virtual = efifb_defined.xres;
+        efifb_defined.yres_virtual = efifb_fix.smem_len /
+                                        efifb_fix.line_length;
+-       printk(KERN_INFO "efifb: scrolling: redraw\n");
++       pr_info("scrolling: redraw\n");
+        efifb_defined.yres_virtual = efifb_defined.yres;
+
+        /* some dummy values for timing to make fbset happy */
+@@ -255,7 +257,7 @@ static int efifb_probe(struct platform_device *dev)
+        efifb_defined.transp.offset = screen_info.rsvd_pos;
+        efifb_defined.transp.length = screen_info.rsvd_size;
+
+-       printk(KERN_INFO "efifb: %s: "
++       pr_info("%s: "
+               "size=%d:%d:%d:%d, shift=%d:%d:%d:%d\n",
+               "Truecolor",
+               screen_info.rsvd_size,
+@@ -276,11 +278,11 @@ static int efifb_probe(struct platform_device *dev)
+        info->flags = FBINFO_FLAG_DEFAULT | FBINFO_MISC_FIRMWARE;
+
+        if ((err = fb_alloc_cmap(&info->cmap, 256, 0)) < 0) {
+-               printk(KERN_ERR "efifb: cannot allocate colormap\n");
++               pr_err("cannot allocate colormap\n");
+                goto err_unmap;
+        }
+        if ((err = register_framebuffer(info)) < 0) {
+-               printk(KERN_ERR "efifb: cannot register framebuffer\n");
++               pr_err("cannot register framebuffer\n");
+                goto err_fb_dealoc;
+        }
+        fb_info(info, "%s frame buffer device\n", info->fix.id);
+--
+1.9.3
