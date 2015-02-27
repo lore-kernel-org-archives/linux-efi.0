@@ -1,378 +1,84 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Thu, 26 Feb 2015 21:06:46 -0800
-Message-ID: <CAFECyb-JhpFm4WcWL8NU8zbK=xphGtG=B7q0PLhffmYDV-a_PQ@mail.gmail.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Fri, 27 Feb 2015 11:35:47 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AD592@PGSMSX102.gar.corp.intel.com>
 References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
 	<1414984030-13859-4-git-send-email-hock.leong.kweh@intel.com>
+ <CAFECyb-JhpFm4WcWL8NU8zbK=xphGtG=B7q0PLhffmYDV-a_PQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1414984030-13859-4-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAFECyb-JhpFm4WcWL8NU8zbK=xphGtG=B7q0PLhffmYDV-a_PQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Nov 2, 2014 at 7:07 PM, Kweh Hock Leong
-<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->
-> Introducing a kernel module to expose user helper interface for
-> user to upload capsule binaries. This module leverage the
-> request_firmware_nowait() to expose an interface to user.
->
-> Example steps to load the capsule binary:
-> 1.) echo 1 > /sys/class/firmware/efi-capsule-file/loading
-> 2.) cat capsule.bin > /sys/class/firmware/efi-capsule-file/data
-> 3.) echo 0 > /sys/class/firmware/efi-capsule-file/loading
->
-> Whereas, this module does not allow the capsule binaries to be
-> obtained from the request_firmware library search path. If any
-> capsule binary loaded from firmware seach path, the module will
-> stop functioning.
->
-> Besides the request_firmware user helper interface, this module
-> also expose a 'capsule_loaded' file note for user to verify
-> the number of successfully uploaded capsule binaries. This
-> file note has the read only attribute.
->
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/firmware/efi/Kconfig                   |   13 ++
->  drivers/firmware/efi/Makefile                  |    1 +
->  drivers/firmware/efi/efi-capsule-user-helper.c |  246 ++++++++++++++++++++++++
->  3 files changed, 260 insertions(+)
->  create mode 100644 drivers/firmware/efi/efi-capsule-user-helper.c
->
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index f712d47..7dc814e 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -60,6 +60,19 @@ config EFI_RUNTIME_WRAPPERS
->  config EFI_ARMSTUB
->         bool
->
-> +config EFI_CAPSULE_USER_HELPER
-> +       tristate "EFI capsule user mode helper"
-> +       depends on EFI
-> +       select FW_LOADER
-> +       select FW_LOADER_USER_HELPER
-> +       help
-> +         This option exposes the user mode helper interface for user to load
-> +         EFI capsule binary and update the EFI firmware after system reboot.
-> +         This feature does not support auto locating capsule binaries at the
-> +         firmware lib search path.
-> +
-> +         If unsure, say N.
-> +
->  endmenu
->
->  config UEFI_CPER
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 698846e..63f6910 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -8,3 +8,4 @@ obj-$(CONFIG_UEFI_CPER)                 += cper.o
->  obj-$(CONFIG_EFI_RUNTIME_MAP)          += runtime-map.o
->  obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)     += runtime-wrappers.o
->  obj-$(CONFIG_EFI_STUB)                 += libstub/
-> +obj-$(CONFIG_EFI_CAPSULE_USER_HELPER)  += efi-capsule-user-helper.o
-> diff --git a/drivers/firmware/efi/efi-capsule-user-helper.c b/drivers/firmware/efi/efi-capsule-user-helper.c
-> new file mode 100644
-> index 0000000..84a1628
-> --- /dev/null
-> +++ b/drivers/firmware/efi/efi-capsule-user-helper.c
-> @@ -0,0 +1,246 @@
-> +/*
-> + * EFI capsule user mode helper interface driver.
-> + *
-> + * Copyright 2014 Intel Corporation
-> + *
-> + * This file is part of the Linux kernel, and is made available under
-> + * the terms of the GNU General Public License version 2.
-> + */
-> +
-> +#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/module.h>
-> +#include <linux/platform_device.h>
-> +#include <linux/delay.h>
-> +#include <linux/highmem.h>
-> +#include <linux/slab.h>
-> +#include <linux/mutex.h>
-> +#include <linux/reboot.h>
-> +#include <linux/efi.h>
-> +#include <linux/firmware.h>
-> +
-> +#define CAPSULE_NAME "efi-capsule-file"
-> +#define DEV_NAME "efi_capsule_user_helper"
-> +#define STRING_INTEGER_MAX_LENGTH 13
-> +
-> +static DEFINE_MUTEX(user_helper_lock);
-> +static int capsule_count;
-> +static int stop_request;
-> +static struct platform_device *efi_capsule_pdev;
-> +
-> +/*
-> + * This function will store the capsule binary and pass it to
-> + * efi_capsule_update() API in capsule.c
-> + */
-> +static int efi_capsule_store(const struct firmware *fw)
-> +{
-> +       int i;
-> +       int ret;
-> +       int count = fw->size;
-> +       int copy_size = (fw->size > PAGE_SIZE) ? PAGE_SIZE : fw->size;
-> +       int pages_needed = ALIGN(fw->size, PAGE_SIZE) >> PAGE_SHIFT;
-> +       struct page **pages;
-> +       void *page_data;
-> +       efi_capsule_header_t *capsule = NULL;
-> +
-> +       pages = kmalloc_array(pages_needed, sizeof(void *), GFP_KERNEL);
-> +       if (!pages) {
-> +               pr_err("%s: kmalloc_array() failed\n", __func__);
-> +               return -ENOMEM;
-> +       }
-> +
-> +       for (i = 0; i < pages_needed; i++) {
-> +               pages[i] = alloc_page(GFP_KERNEL);
-> +               if (!pages[i]) {
-> +                       pr_err("%s: alloc_page() failed\n", __func__);
-> +                       --i;
-> +                       ret = -ENOMEM;
-> +                       goto failed;
-> +               }
-> +       }
-> +
-> +       for (i = 0; i < pages_needed; i++) {
-> +               page_data = kmap(pages[i]);
-> +               memcpy(page_data, fw->data + (i * PAGE_SIZE), copy_size);
-> +
-> +               if (i == 0)
-> +                       capsule = (efi_capsule_header_t *)page_data;
-> +               else
-> +                       kunmap(pages[i]);
-> +
-> +               count -= copy_size;
-> +               if (count < PAGE_SIZE)
-> +                       copy_size = count;
-> +       }
-> +
-> +       ret = efi_capsule_update(capsule, pages);
-> +       if (ret) {
-> +               pr_err("%s: efi_capsule_update() failed\n", __func__);
-> +               --i;
-
-Hi Hock,
-
-What does the decrement of i do here?  I looked at
-efi_capsule_update() and didn't see anything
-that would account for this.  It looks like in this failure case one
-page won't get freed.
-
-As an aside, when I was looking at efi_update_capsule, I see that Matt
-is doing very similar operations
-(array of struct page pointers), but does it like this (snipped from his patch):
-
-+ struct page **block_pgs;
-...
-+       block_pgs = kzalloc(nr_block_pgs * sizeof(*block_pgs), GFP_KERNEL);
-+       if (!block_pgs)
-+               return -ENOMEM;
-+
-+       for (i = 0; i < nr_block_pgs; i++) {
-+               block_pgs[i] = alloc_page(GFP_KERNEL);
-+               if (!block_pgs[i])
-+                       goto fail;
-+       }
-
-and then can simply free the pages that are not NULL:
-+fail:
-+       for (i = 0; i < nr_block_pgs; i++) {
-+               if (block_pgs[i])
-+                       __free_page(block_pgs[i]);
-+       }
-
-I think this way is preferable since it doesn't rely on 'i' being
-unchanged at the end of the function.  I also
-think it would be nice if the capsule code stuck with one idiom for
-dealing with arrays of page pointers.
-
-Roy
-
-> +               goto failed;
-> +       }
-> +       ++capsule_count;
-> +       kunmap(pages[0]);
-> +
-> +       /*
-> +        * we cannot free the pages here due to reboot need that data
-> +        * maintained.
-> +        */
-> +       return 0;
-> +
-> +failed:
-> +       while (i >= 0)
-> +               __free_page(pages[i--]);
-> +       kfree(pages);
-> +       return ret;
-> +}
-> +
-> +/*
-> + * This callback function will be called by request_firmware_nowait() when
-> + * user has loaded the capsule binary or aborted user helper interface
-> + */
-> +static void callbackfn_efi_capsule(const struct firmware *fw, void *context)
-> +{
-> +       int ret = 0;
-> +
-> +       if (fw) {
-> +               /*
-> +                * Binary not getting from user helper interface, fw->pages
-> +                * is equal to NULL
-> +                */
-> +               if (!fw->pages) {
-> +                       pr_err("%s: ERROR: Capsule binary '%s' at %s\n",
-> +                              __func__, CAPSULE_NAME,
-> +                              "firmware lib search path are not supported");
-> +                       pr_err("user helper interface disabled\n");
-> +                       stop_request = 1;
-> +               } else {
-> +                       efi_capsule_store(fw);
-> +               }
-> +               release_firmware(fw);
-> +       }
-> +
-> +       mutex_lock(&user_helper_lock);
-> +       if (!stop_request) {
-> +               ret = request_firmware_nowait(THIS_MODULE,
-> +                                             FW_ACTION_NOHOTPLUG,
-> +                                             CAPSULE_NAME,
-> +                                             &efi_capsule_pdev->dev,
-> +                                             GFP_KERNEL, NULL,
-> +                                             callbackfn_efi_capsule);
-> +               if (ret) {
-> +                       pr_err("%s: request_firmware_nowait() failed\n",
-> +                              __func__);
-> +               }
-> +       }
-> +       mutex_unlock(&user_helper_lock);
-> +}
-> +
-> +static ssize_t capsule_loaded_show(struct device *dev,
-> +                                  struct device_attribute *attr, char *buf)
-> +{
-> +       return snprintf(buf, STRING_INTEGER_MAX_LENGTH, "%d\n", capsule_count);
-> +}
-> +
-> +static DEVICE_ATTR_RO(capsule_loaded);
-> +
-> +/* stop user helper interface for reboot or module unload */
-> +static void capsule_stop_user_helper(void)
-> +{
-> +       mutex_lock(&user_helper_lock);
-> +       stop_request = 1;
-> +       mutex_unlock(&user_helper_lock);
-> +       request_firmware_abort(CAPSULE_NAME);
-> +}
-> +
-> +/* reboot notifier for avoid deadlock with usermode_lock */
-> +static int capsule_shutdown_notify(struct notifier_block *nb,
-> +                                  unsigned long sys_state,
-> +                                  void *reboot_cmd)
-> +{
-> +       capsule_stop_user_helper();
-> +       return NOTIFY_DONE;
-> +}
-> +
-> +static struct notifier_block capsule_shutdown_nb = {
-> +       .notifier_call = capsule_shutdown_notify,
-> +       /*
-> +        * In order to reboot properly, it is required to ensure the priority
-> +        * here is higher than firmware_class fw_shutdown_nb priority
-> +        */
-> +       .priority = 1,
-> +};
-> +
-> +/*
-> + * Use request_firmware_nowait() exposing an user helper interface to obtain
-> + * capsule binary from user space
-> + */
-> +static int __init efi_capsule_user_helper_init(void)
-> +{
-> +       int ret;
-> +
-> +       register_reboot_notifier(&capsule_shutdown_nb);
-> +
-> +       efi_capsule_pdev = platform_device_register_simple(DEV_NAME,
-> +                                                          PLATFORM_DEVID_NONE,
-> +                                                          NULL, 0);
-> +       if (IS_ERR(efi_capsule_pdev)) {
-> +               pr_err("%s: platform_device_register_simple() failed\n",
-> +                      __func__);
-> +               return PTR_ERR(efi_capsule_pdev);
-> +       }
-> +
-> +       /*
-> +        * create this file node for user to check the number of binaries that
-> +        * are successfully loaded
-> +        */
-> +       ret = device_create_file(&efi_capsule_pdev->dev,
-> +                                &dev_attr_capsule_loaded);
-> +       if (ret) {
-> +               pr_err("%s: device_create_file() failed\n", __func__);
-> +               return ret;
-> +       }
-> +
-> +       ret = request_firmware_nowait(THIS_MODULE, FW_ACTION_NOHOTPLUG,
-> +                                     CAPSULE_NAME, &efi_capsule_pdev->dev,
-> +                                     GFP_KERNEL, NULL, callbackfn_efi_capsule);
-> +       if (ret) {
-> +               pr_err("%s: request_firmware_nowait() failed\n", __func__);
-> +               goto out;
-> +       }
-> +
-> +       return 0;
-> +
-> +out:
-> +       device_remove_file(&efi_capsule_pdev->dev, &dev_attr_capsule_loaded);
-> +       unregister_reboot_notifier(&capsule_shutdown_nb);
-> +       return ret;
-> +}
-> +module_init(efi_capsule_user_helper_init);
-> +
-> +/*
-> + * rmmod app itself will stop you to remove the module if the user
-> + * helper interface is still exposing. In order to remove this driver,
-> + * you are require to do the command as below:
-> + * rmmod -f efi_capsule_user_helper.ko
-> + */
-> +static void __exit efi_capsule_user_helper_exit(void)
-> +{
-> +       unregister_reboot_notifier(&capsule_shutdown_nb);
-> +
-> +       capsule_stop_user_helper();
-> +       /*
-> +        * synchronization is needed to make sure request_firmware is fully
-> +        * aborted
-> +        */
-> +       while (efi_capsule_pdev->dev.kobj.kref.refcount.counter > 3)
-> +               msleep(20); /* avoid busy waiting for cooperative kernel */
-> +
-> +       device_remove_file(&efi_capsule_pdev->dev, &dev_attr_capsule_loaded);
-> +       platform_device_unregister(efi_capsule_pdev);
-> +}
-> +module_exit(efi_capsule_user_helper_exit);
-> +
-> +MODULE_DESCRIPTION("EFI Capsule user helper binary load utility");
-> +MODULE_LICENSE("GPL v2");
-> --
-> 1.7.9.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBSb3kgRnJhbnogW21haWx0bzpy
+b3kuZnJhbnpAbGluYXJvLm9yZ10NCj4gU2VudDogRnJpZGF5LCBGZWJydWFyeSAyNywgMjAxNSAx
+OjA3IFBNDQo+IA0KPiBPbiBTdW4sIE5vdiAyLCAyMDE0IGF0IDc6MDcgUE0sIEt3ZWggSG9jayBM
+ZW9uZw0KPiA+ICsvKg0KPiA+ICsgKiBUaGlzIGZ1bmN0aW9uIHdpbGwgc3RvcmUgdGhlIGNhcHN1
+bGUgYmluYXJ5IGFuZCBwYXNzIGl0IHRvDQo+ID4gKyAqIGVmaV9jYXBzdWxlX3VwZGF0ZSgpIEFQ
+SSBpbiBjYXBzdWxlLmMgICovIHN0YXRpYyBpbnQNCj4gPiArZWZpX2NhcHN1bGVfc3RvcmUoY29u
+c3Qgc3RydWN0IGZpcm13YXJlICpmdykgew0KPiA+ICsgICAgICAgaW50IGk7DQo+ID4gKyAgICAg
+ICBpbnQgcmV0Ow0KPiA+ICsgICAgICAgaW50IGNvdW50ID0gZnctPnNpemU7DQo+ID4gKyAgICAg
+ICBpbnQgY29weV9zaXplID0gKGZ3LT5zaXplID4gUEFHRV9TSVpFKSA/IFBBR0VfU0laRSA6IGZ3
+LT5zaXplOw0KPiA+ICsgICAgICAgaW50IHBhZ2VzX25lZWRlZCA9IEFMSUdOKGZ3LT5zaXplLCBQ
+QUdFX1NJWkUpID4+IFBBR0VfU0hJRlQ7DQo+ID4gKyAgICAgICBzdHJ1Y3QgcGFnZSAqKnBhZ2Vz
+Ow0KPiA+ICsgICAgICAgdm9pZCAqcGFnZV9kYXRhOw0KPiA+ICsgICAgICAgZWZpX2NhcHN1bGVf
+aGVhZGVyX3QgKmNhcHN1bGUgPSBOVUxMOw0KPiA+ICsNCj4gPiArICAgICAgIHBhZ2VzID0ga21h
+bGxvY19hcnJheShwYWdlc19uZWVkZWQsIHNpemVvZih2b2lkICopLCBHRlBfS0VSTkVMKTsNCj4g
+PiArICAgICAgIGlmICghcGFnZXMpIHsNCj4gPiArICAgICAgICAgICAgICAgcHJfZXJyKCIlczog
+a21hbGxvY19hcnJheSgpIGZhaWxlZFxuIiwgX19mdW5jX18pOw0KPiA+ICsgICAgICAgICAgICAg
+ICByZXR1cm4gLUVOT01FTTsNCj4gPiArICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICBmb3Ig
+KGkgPSAwOyBpIDwgcGFnZXNfbmVlZGVkOyBpKyspIHsNCj4gPiArICAgICAgICAgICAgICAgcGFn
+ZXNbaV0gPSBhbGxvY19wYWdlKEdGUF9LRVJORUwpOw0KPiA+ICsgICAgICAgICAgICAgICBpZiAo
+IXBhZ2VzW2ldKSB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCIlczogYWxs
+b2NfcGFnZSgpIGZhaWxlZFxuIiwgX19mdW5jX18pOw0KPiA+ICsgICAgICAgICAgICAgICAgICAg
+ICAgIC0taTsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXQgPSAtRU5PTUVNOw0KPiA+
+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZmFpbGVkOw0KPiA+ICsgICAgICAgICAgICAg
+ICB9DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgZm9yIChpID0gMDsgaSA8IHBh
+Z2VzX25lZWRlZDsgaSsrKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHBhZ2VfZGF0YSA9IGttYXAo
+cGFnZXNbaV0pOw0KPiA+ICsgICAgICAgICAgICAgICBtZW1jcHkocGFnZV9kYXRhLCBmdy0+ZGF0
+YSArIChpICogUEFHRV9TSVpFKSwNCj4gPiArIGNvcHlfc2l6ZSk7DQo+ID4gKw0KPiA+ICsgICAg
+ICAgICAgICAgICBpZiAoaSA9PSAwKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGNhcHN1
+bGUgPSAoZWZpX2NhcHN1bGVfaGVhZGVyX3QgKilwYWdlX2RhdGE7DQo+ID4gKyAgICAgICAgICAg
+ICAgIGVsc2UNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBrdW5tYXAocGFnZXNbaV0pOw0K
+PiA+ICsNCj4gPiArICAgICAgICAgICAgICAgY291bnQgLT0gY29weV9zaXplOw0KPiA+ICsgICAg
+ICAgICAgICAgICBpZiAoY291bnQgPCBQQUdFX1NJWkUpDQo+ID4gKyAgICAgICAgICAgICAgICAg
+ICAgICAgY29weV9zaXplID0gY291bnQ7DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAg
+ICAgcmV0ID0gZWZpX2NhcHN1bGVfdXBkYXRlKGNhcHN1bGUsIHBhZ2VzKTsNCj4gPiArICAgICAg
+IGlmIChyZXQpIHsNCj4gPiArICAgICAgICAgICAgICAgcHJfZXJyKCIlczogZWZpX2NhcHN1bGVf
+dXBkYXRlKCkgZmFpbGVkXG4iLCBfX2Z1bmNfXyk7DQo+ID4gKyAgICAgICAgICAgICAgIC0taTsN
+Cj4gDQo+IEhpIEhvY2ssDQo+IA0KPiBXaGF0IGRvZXMgdGhlIGRlY3JlbWVudCBvZiBpIGRvIGhl
+cmU/ICBJIGxvb2tlZCBhdA0KPiBlZmlfY2Fwc3VsZV91cGRhdGUoKSBhbmQgZGlkbid0IHNlZSBh
+bnl0aGluZyB0aGF0IHdvdWxkIGFjY291bnQgZm9yIHRoaXMuICBJdA0KPiBsb29rcyBsaWtlIGlu
+IHRoaXMgZmFpbHVyZSBjYXNlIG9uZSBwYWdlIHdvbid0IGdldCBmcmVlZC4NCj4gDQo+IEFzIGFu
+IGFzaWRlLCB3aGVuIEkgd2FzIGxvb2tpbmcgYXQgZWZpX3VwZGF0ZV9jYXBzdWxlLCBJIHNlZSB0
+aGF0IE1hdHQgaXMNCj4gZG9pbmcgdmVyeSBzaW1pbGFyIG9wZXJhdGlvbnMgKGFycmF5IG9mIHN0
+cnVjdCBwYWdlIHBvaW50ZXJzKSwgYnV0IGRvZXMgaXQgbGlrZQ0KPiB0aGlzIChzbmlwcGVkIGZy
+b20gaGlzIHBhdGNoKToNCj4gDQo+ICsgc3RydWN0IHBhZ2UgKipibG9ja19wZ3M7DQo+IC4uLg0K
+PiArICAgICAgIGJsb2NrX3BncyA9IGt6YWxsb2MobnJfYmxvY2tfcGdzICogc2l6ZW9mKCpibG9j
+a19wZ3MpLCBHRlBfS0VSTkVMKTsNCj4gKyAgICAgICBpZiAoIWJsb2NrX3BncykNCj4gKyAgICAg
+ICAgICAgICAgIHJldHVybiAtRU5PTUVNOw0KPiArDQo+ICsgICAgICAgZm9yIChpID0gMDsgaSA8
+IG5yX2Jsb2NrX3BnczsgaSsrKSB7DQo+ICsgICAgICAgICAgICAgICBibG9ja19wZ3NbaV0gPSBh
+bGxvY19wYWdlKEdGUF9LRVJORUwpOw0KPiArICAgICAgICAgICAgICAgaWYgKCFibG9ja19wZ3Nb
+aV0pDQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZmFpbDsNCj4gKyAgICAgICB9DQo+
+IA0KPiBhbmQgdGhlbiBjYW4gc2ltcGx5IGZyZWUgdGhlIHBhZ2VzIHRoYXQgYXJlIG5vdCBOVUxM
+Og0KPiArZmFpbDoNCj4gKyAgICAgICBmb3IgKGkgPSAwOyBpIDwgbnJfYmxvY2tfcGdzOyBpKysp
+IHsNCj4gKyAgICAgICAgICAgICAgIGlmIChibG9ja19wZ3NbaV0pDQo+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIF9fZnJlZV9wYWdlKGJsb2NrX3Bnc1tpXSk7DQo+ICsgICAgICAgfQ0KPiANCj4g
+SSB0aGluayB0aGlzIHdheSBpcyBwcmVmZXJhYmxlIHNpbmNlIGl0IGRvZXNuJ3QgcmVseSBvbiAn
+aScgYmVpbmcgdW5jaGFuZ2VkIGF0IHRoZQ0KPiBlbmQgb2YgdGhlIGZ1bmN0aW9uLiAgSSBhbHNv
+IHRoaW5rIGl0IHdvdWxkIGJlIG5pY2UgaWYgdGhlIGNhcHN1bGUgY29kZSBzdHVjaw0KPiB3aXRo
+IG9uZSBpZGlvbSBmb3IgZGVhbGluZyB3aXRoIGFycmF5cyBvZiBwYWdlIHBvaW50ZXJzLg0KPiAN
+Cj4gUm95DQo+IA0KDQpIaSBSb3ksDQoNClRoZSByZWFzb24gImkiIHRoZXJlIGhhdmUgdG8gcGVy
+Zm9ybSBhIGRlY3JlbWVudCBpcyBiZWNhdXNlIGEgZnVsbCBmb3IgbG9vcA0Kd2lsbCBlbmQgd2l0
+aCBvbmUgZXh0cmEgaW5jcmVtZW50ZWQgdmFsdWUgaWYgaXQgZG9lcyBub3QgYnJlYWsgb3V0IGlu
+IHRoZSBtaWRkbGUuDQoNCkFuZCB0aGUgZWZpX2NhcHN1bGVfc3RvcmUoKSdzIGFsbG9jIHBhZ2Ug
+aXMgdG8gc3RvcmUgdGhlIGJpbmFyeSBjb250ZW50IGFuZCB0aGUNCmVmaV9jYXBzdWxlX3VwZGF0
+ZSgpIGZyb20gTWF0dCBpcyB0byBzdG9yZSB0aGUgZWZpIGNhcHN1bGUgYmxvY2sgZGVzY3JpcHRv
+cg0Kd2hpY2ggd2lsbCBwb2ludCB0byB0aGUgYmluYXJ5IGJsb2NrcyBjb250ZW50LiBTbywgdGhl
+eSBhcmUgZGlmZmVyZW50Lg0KDQoNClJlZ2FyZHMsDQpXaWxzb24NCg==
