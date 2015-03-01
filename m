@@ -1,141 +1,126 @@
 From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH 4/8] x86, of: let add_dtb reserve by itself
-Date: Sat, 28 Feb 2015 18:17:35 -0800
-Message-ID: <1425176259-30087-5-git-send-email-yinghai@kernel.org>
+Subject: [PATCH 7/8] x86, pci: convert SETUP_PCI data to list
+Date: Sat, 28 Feb 2015 18:17:38 -0800
+Message-ID: <1425176259-30087-8-git-send-email-yinghai@kernel.org>
 References: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
 In-Reply-To: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-pci-owner@vger.kernel.org
 To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Rob Herring <robh@kernel.org>, David Vrabel <david.vrabel@citrix.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-We will not reserve setup_data in general code. Every handler
-need to reserve and copy.
+So we could avoid ioremap every time later.
 
-Current dtd handling already have code copying, just add reserve code ...
-
-also simplify code a bit with storing real dtb size.
-
-Cc: Rob Herring <robh@kernel.org>
-Cc: David Vrabel <david.vrabel@citrix.com>
+Cc: Bjorn Helgaas <bhelgaas@google.com>
+Cc: linux-pci@vger.kernel.org
 Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/include/asm/prom.h  |  9 ++++++---
- arch/x86/kernel/devicetree.c | 39 +++++++++++++++++++++------------------
- 2 files changed, 27 insertions(+), 21 deletions(-)
+ arch/x86/pci/common.c | 77 +++++++++++++++++++++++++++++++++++++++++----------
+ 1 file changed, 63 insertions(+), 14 deletions(-)
 
-diff --git a/arch/x86/include/asm/prom.h b/arch/x86/include/asm/prom.h
-index 1d081ac..fb716eddc 100644
---- a/arch/x86/include/asm/prom.h
-+++ b/arch/x86/include/asm/prom.h
-@@ -24,17 +24,20 @@
- 
- #ifdef CONFIG_OF
- extern int of_ioapic;
--extern u64 initial_dtb;
--extern void add_dtb(u64 data);
- void x86_of_pci_init(void);
- void x86_dtb_init(void);
- #else
--static inline void add_dtb(u64 data) { }
- static inline void x86_of_pci_init(void) { }
- static inline void x86_dtb_init(void) { }
- #define of_ioapic 0
- #endif
- 
-+#ifdef CONFIG_OF_FLATTREE
-+extern void add_dtb(u64 data);
-+#else
-+static inline void add_dtb(u64 data) { }
-+#endif
-+
- extern char cmd_line[COMMAND_LINE_SIZE];
- 
- #endif /* __ASSEMBLY__ */
-diff --git a/arch/x86/kernel/devicetree.c b/arch/x86/kernel/devicetree.c
-index 3d35033..cc2fb61 100644
---- a/arch/x86/kernel/devicetree.c
-+++ b/arch/x86/kernel/devicetree.c
-@@ -2,6 +2,7 @@
-  * Architecture specific OF callbacks.
-  */
- #include <linux/bootmem.h>
-+#include <linux/memblock.h>
- #include <linux/export.h>
- #include <linux/io.h>
- #include <linux/irqdomain.h>
-@@ -23,7 +24,6 @@
- #include <asm/setup.h>
- #include <asm/i8259.h>
- 
--__initdata u64 initial_dtb;
- char __initdata cmd_line[COMMAND_LINE_SIZE];
- 
- int __initdata of_ioapic;
-@@ -43,11 +43,23 @@ void * __init early_init_dt_alloc_memory_arch(u64 size, u64 align)
- 	return __alloc_bootmem(size, align, __pa(MAX_DMA_ADDRESS));
+diff --git a/arch/x86/pci/common.c b/arch/x86/pci/common.c
+index 4846db7..7b6fb94 100644
+--- a/arch/x86/pci/common.c
++++ b/arch/x86/pci/common.c
+@@ -680,10 +680,41 @@ void __init add_pci(u64 pa_data)
+ 	early_memunmap(data, sizeof(*data));
  }
  
-+#ifdef CONFIG_OF_FLATTREE
-+static u64 initial_dtb __initdata;
-+static u32 initial_dtb_size __initdata;
- void __init add_dtb(u64 data)
- {
-+	u32 map_len;
+-int pcibios_add_device(struct pci_dev *dev)
++struct firmware_setup_pci_entry {
++	struct list_head list;
++	uint16_t vendor;
++	uint16_t devid;
++	uint64_t pcilen;
++	unsigned long segment;
++	unsigned long bus;
++	unsigned long device;
++	unsigned long function;
++	phys_addr_t rom;
++};
 +
- 	initial_dtb = data + offsetof(struct setup_data, data);
--}
- 
-+	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
-+	initial_boot_params = early_memremap(initial_dtb, map_len);
-+	initial_dtb_size = of_get_flat_dt_size();
-+	early_memunmap(initial_boot_params, map_len);
-+	initial_boot_params = NULL;
-+	memblock_reserve(initial_dtb, initial_dtb_size);
++static LIST_HEAD(setup_pci_entries);
++
++static void __init firmware_setup_pci_add_entry(struct pci_setup_rom *rom,
++					u64 pa_data,
++					struct firmware_setup_pci_entry *entry)
++{
++	entry->segment = rom->segment;
++	entry->bus = rom->bus;
++	entry->device = rom->device;
++	entry->function = rom->function;
++	entry->vendor = rom->vendor;
++	entry->devid = rom->devid;
++	entry->rom = pa_data + offsetof(struct pci_setup_rom, romdata);
++	entry->pcilen = rom->pcilen;
++
++	list_add(&entry->list, &setup_pci_entries);
 +}
-+#endif
- /*
-  * CE4100 ids. Will be moved to machine_device_initcall() once we have it.
-  */
-@@ -272,31 +284,22 @@ static void __init dtb_apic_setup(void)
- 	dtb_ioapic_setup();
++
++static __init int fill_setup_pci_entries(void)
+ {
+ 	struct setup_data *data;
+ 	struct pci_setup_rom *rom;
++	struct firmware_setup_pci_entry *entry;
+ 	u64 pa_data;
+ 
+ 	pa_data = pci_setup_data;
+@@ -692,24 +723,42 @@ int pcibios_add_device(struct pci_dev *dev)
+ 		if (!data)
+ 			return -ENOMEM;
+ 
+-		rom = (struct pci_setup_rom *)data;
+-
+-		if ((pci_domain_nr(dev->bus) == rom->segment) &&
+-		    (dev->bus->number == rom->bus) &&
+-		    (PCI_SLOT(dev->devfn) == rom->device) &&
+-		    (PCI_FUNC(dev->devfn) == rom->function) &&
+-		    (dev->vendor == rom->vendor) &&
+-		    (dev->device == rom->devid)) {
+-			dev->rom = pa_data +
+-			      offsetof(struct pci_setup_rom, romdata);
+-			dev->romlen = rom->pcilen;
++		entry = kzalloc(sizeof(struct firmware_setup_pci_entry),
++				GFP_ATOMIC);
++		if (!entry) {
++			iounmap(data);
++			return -ENOMEM;
++		}
++
++		firmware_setup_pci_add_entry((struct pci_setup_rom *)data,
++					     pa_data, entry);
++		pa_data = data->next;
++		iounmap(data);
++	}
++
++	return 0;
++}
++postcore_initcall(fill_setup_pci_entries);
++
++int pcibios_add_device(struct pci_dev *dev)
++{
++	struct firmware_setup_pci_entry *entry;
++
++	list_for_each_entry(entry, &setup_pci_entries, list) {
++		if ((pci_domain_nr(dev->bus) == entry->segment) &&
++		    (dev->bus->number == entry->bus) &&
++		    (PCI_SLOT(dev->devfn) == entry->device) &&
++		    (PCI_FUNC(dev->devfn) == entry->function) &&
++		    (dev->vendor == entry->vendor) &&
++		    (dev->device == entry->devid)) {
++			dev->rom = entry->rom;
++			dev->romlen = entry->pcilen;
+ 			dev_printk(KERN_DEBUG, &dev->dev, "set rom to [%#010lx, %#010lx] via SETUP_PCI\n",
+ 				   (unsigned long)dev->rom,
+ 				   (unsigned long)(dev->rom + dev->romlen - 1));
+ 		}
+-		pa_data = data->next;
+-		iounmap(data);
+ 	}
++
+ 	return 0;
  }
  
--#ifdef CONFIG_OF_FLATTREE
- static void __init x86_flattree_get_config(void)
- {
--	u32 size, map_len;
-+#ifdef CONFIG_OF_FLATTREE
- 	void *dt;
- 
- 	if (!initial_dtb)
- 		return;
- 
--	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
--
--	initial_boot_params = dt = early_memremap(initial_dtb, map_len);
--	size = of_get_flat_dt_size();
--	if (map_len < size) {
--		early_iounmap(dt, map_len);
--		initial_boot_params = dt = early_memremap(initial_dtb, size);
--		map_len = size;
--	}
--
-+	initial_boot_params = dt = early_memremap(initial_dtb,
-+						  initial_dtb_size);
- 	unflatten_and_copy_device_tree();
--	early_iounmap(dt, map_len);
--}
--#else
--static inline void x86_flattree_get_config(void) { }
-+	early_memunmap(dt, initial_dtb_size);
-+
-+	memblock_free(initial_dtb, initial_dtb_size);
- #endif
-+}
- 
- void __init x86_dtb_init(void)
- {
 -- 
 1.8.4.5
