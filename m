@@ -1,171 +1,192 @@
 From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH 3/8] x86, efi: copy SETUP_EFI data and access directly
-Date: Sat, 28 Feb 2015 18:17:34 -0800
-Message-ID: <1425176259-30087-4-git-send-email-yinghai@kernel.org>
+Subject: [PATCH 2/8] x86: Kill E820_RESERVED_KERN
+Date: Sat, 28 Feb 2015 18:17:33 -0800
+Message-ID: <1425176259-30087-3-git-send-email-yinghai@kernel.org>
 References: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-pci-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
-Sender: linux-pci-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, "Lee, Chun-Yi" <jlee@suse.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-the copy will be in __initdata, and it is small.
+Now we are using memblock to do early resource reserver/allocation
+instead of using e820 map directly, and setup_data is reserved in
+memblock early already.
+Also kexec will generate setup_data and pass pointer to second kernel,
+so second kernel will reserve setup_data by their own.
 
-We can use pointer to access the setup_data instead of keeping on
-early_memmap and early_memunmap everywhere.
+We can kill E820_RESERVED_KERN and not touch e820 map at all.
 
-Cc: Matt Fleming <matt.fleming@intel.com>
-Cc: linux-efi@vger.kernel.org
+That will fix bug in mark_nonsave_region that can not handle that
+case: E820_RAM and E820_RESERVED_KERN ranges are continuous and
+boundary is not page aligned.
+
+Bugzilla: https://bugzilla.opensuse.org/show_bug.cgi?id=913885
+Reported-by: "Lee, Chun-Yi" <jlee@suse.com>
+Tested-by: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
 Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+Cc: stable@vger.kernel.org
 ---
- arch/x86/include/asm/efi.h     |  2 +-
- arch/x86/platform/efi/efi.c    | 13 ++-----------
- arch/x86/platform/efi/efi_64.c | 13 ++++++++++++-
- arch/x86/platform/efi/quirks.c | 23 ++++++-----------------
- 4 files changed, 21 insertions(+), 30 deletions(-)
+ arch/x86/include/uapi/asm/e820.h |  9 ---------
+ arch/x86/kernel/e820.c           |  6 ++----
+ arch/x86/kernel/setup.c          | 26 --------------------------
+ arch/x86/kernel/tboot.c          |  3 +--
+ arch/x86/mm/init_64.c            | 11 ++++-------
+ 5 files changed, 7 insertions(+), 48 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 25bce45..edbecd6 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -114,7 +114,7 @@ struct efi_setup_data {
- 	u64 reserved[8];
- };
+diff --git a/arch/x86/include/uapi/asm/e820.h b/arch/x86/include/uapi/asm/e820.h
+index d993e33..edc8a71 100644
+--- a/arch/x86/include/uapi/asm/e820.h
++++ b/arch/x86/include/uapi/asm/e820.h
+@@ -33,15 +33,6 @@
+ #define E820_NVS	4
+ #define E820_UNUSABLE	5
  
--extern u64 efi_setup;
-+extern struct efi_setup_data *efi_setup;
- 
- #ifdef CONFIG_EFI
- 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index dbc8627..1cd38e8 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -68,7 +68,7 @@ static efi_config_table_type_t arch_tables[] __initdata = {
- 	{NULL_GUID, NULL, NULL},
- };
- 
--u64 efi_setup;		/* efi setup_data physical address */
-+struct efi_setup_data *efi_setup __initdata; /* cached efi setup_data pointer */
- 
- static int add_efi_memmap __initdata;
- static int __init setup_add_efi_memmap(char *arg)
-@@ -225,20 +225,13 @@ static int __init efi_systab_init(void *phys)
- {
- 	if (efi_enabled(EFI_64BIT)) {
- 		efi_system_table_64_t *systab64;
--		struct efi_setup_data *data = NULL;
-+		struct efi_setup_data *data = efi_setup;
- 		u64 tmp = 0;
- 
--		if (efi_setup) {
--			data = early_memremap(efi_setup, sizeof(*data));
--			if (!data)
--				return -ENOMEM;
--		}
- 		systab64 = early_memremap((unsigned long)phys,
- 					 sizeof(*systab64));
- 		if (systab64 == NULL) {
- 			pr_err("Couldn't map the system table!\n");
--			if (data)
--				early_memunmap(data, sizeof(*data));
- 			return -ENOMEM;
- 		}
- 
-@@ -271,8 +264,6 @@ static int __init efi_systab_init(void *phys)
- 		tmp |= data ? data->tables : systab64->tables;
- 
- 		early_memunmap(systab64, sizeof(*systab64));
--		if (data)
--			early_memunmap(data, sizeof(*data));
- #ifdef CONFIG_X86_32
- 		if (tmp >> 32) {
- 			pr_err("EFI data located above 4GB, disabling EFI.\n");
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 17e80d8..a541c6c 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -292,9 +292,20 @@ void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
- 	return (void __iomem *)__va(phys_addr);
- }
- 
-+static struct efi_setup_data efi_setup_data __initdata;
-+
- void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- {
--	efi_setup = phys_addr + sizeof(struct setup_data);
-+	struct efi_setup_data *data;
-+
-+	data = early_memremap(phys_addr + sizeof(struct setup_data),
-+			      sizeof(*data));
-+	if (!data)
-+		return;
-+
-+	efi_setup_data = *data;
-+	early_memunmap(data, sizeof(*data));
-+	efi_setup = &efi_setup_data;
- }
- 
- void __init efi_runtime_mkexec(void)
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 1c7380d..45fec7d 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -203,9 +203,8 @@ void __init efi_free_boot_services(void)
-  */
- int __init efi_reuse_config(u64 tables, int nr_tables)
- {
--	int i, sz, ret = 0;
-+	int i, sz;
- 	void *p, *tablep;
--	struct efi_setup_data *data;
- 
- 	if (!efi_setup)
- 		return 0;
-@@ -213,22 +212,15 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
- 	if (!efi_enabled(EFI_64BIT))
- 		return 0;
- 
--	data = early_memremap(efi_setup, sizeof(*data));
--	if (!data) {
--		ret = -ENOMEM;
--		goto out;
--	}
 -
--	if (!data->smbios)
--		goto out_memremap;
-+	if (!efi_setup->smbios)
-+		return 0;
+-/*
+- * reserved RAM used by kernel itself
+- * if CONFIG_INTEL_TXT is enabled, memory of this type will be
+- * included in the S3 integrity calculation and so should not include
+- * any memory that BIOS might alter over the S3 transition
+- */
+-#define E820_RESERVED_KERN        128
+-
+ #ifndef __ASSEMBLY__
+ #include <linux/types.h>
+ struct e820entry {
+diff --git a/arch/x86/kernel/e820.c b/arch/x86/kernel/e820.c
+index 46201de..2a6bed9 100644
+--- a/arch/x86/kernel/e820.c
++++ b/arch/x86/kernel/e820.c
+@@ -134,7 +134,6 @@ static void __init e820_print_type(u32 type)
+ {
+ 	switch (type) {
+ 	case E820_RAM:
+-	case E820_RESERVED_KERN:
+ 		printk(KERN_CONT "usable");
+ 		break;
+ 	case E820_RESERVED:
+@@ -688,7 +687,7 @@ void __init e820_mark_nosave_regions(unsigned long limit_pfn)
+ 			register_nosave_region(pfn, PFN_UP(ei->addr));
  
- 	sz = sizeof(efi_config_table_64_t);
+ 		pfn = PFN_DOWN(ei->addr + ei->size);
+-		if (ei->type != E820_RAM && ei->type != E820_RESERVED_KERN)
++		if (ei->type != E820_RAM)
+ 			register_nosave_region(PFN_UP(ei->addr), pfn);
  
- 	p = tablep = early_memremap(tables, nr_tables * sz);
- 	if (!p) {
- 		pr_err("Could not map Configuration table!\n");
--		ret = -ENOMEM;
--		goto out_memremap;
-+		return -ENOMEM;
+ 		if (pfn >= limit_pfn)
+@@ -902,7 +901,6 @@ void __init finish_e820_parsing(void)
+ static inline const char *e820_type_to_string(int e820_type)
+ {
+ 	switch (e820_type) {
+-	case E820_RESERVED_KERN:
+ 	case E820_RAM:	return "System RAM";
+ 	case E820_ACPI:	return "ACPI Tables";
+ 	case E820_NVS:	return "ACPI Non-volatile Storage";
+@@ -1077,7 +1075,7 @@ void __init memblock_x86_fill(void)
+ 		if (end != (resource_size_t)end)
+ 			continue;
+ 
+-		if (ei->type != E820_RAM && ei->type != E820_RESERVED_KERN)
++		if (ei->type != E820_RAM)
+ 			continue;
+ 
+ 		memblock_add(ei->addr, ei->size);
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 05d444f..c9b3e2f 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -473,30 +473,6 @@ static void __init parse_setup_data(void)
  	}
- 
- 	for (i = 0; i < efi.systab->nr_tables; i++) {
-@@ -237,15 +229,12 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
- 		guid = ((efi_config_table_64_t *)p)->guid;
- 
- 		if (!efi_guidcmp(guid, SMBIOS_TABLE_GUID))
--			((efi_config_table_64_t *)p)->table = data->smbios;
-+			((efi_config_table_64_t *)p)->table = efi_setup->smbios;
- 		p += sz;
- 	}
- 	early_memunmap(tablep, nr_tables * sz);
- 
--out_memremap:
--	early_memunmap(data, sizeof(*data));
--out:
--	return ret;
-+	return 0;
  }
  
- void __init efi_apply_memmap_quirks(void)
+-static void __init e820_reserve_setup_data(void)
+-{
+-	struct setup_data *data;
+-	u64 pa_data;
+-	int found = 0;
+-
+-	pa_data = boot_params.hdr.setup_data;
+-	while (pa_data) {
+-		data = early_memremap(pa_data, sizeof(*data));
+-		e820_update_range(pa_data, sizeof(*data)+data->len,
+-			 E820_RAM, E820_RESERVED_KERN);
+-		found = 1;
+-		pa_data = data->next;
+-		early_iounmap(data, sizeof(*data));
+-	}
+-	if (!found)
+-		return;
+-
+-	sanitize_e820_map(e820.map, ARRAY_SIZE(e820.map), &e820.nr_map);
+-	memcpy(&e820_saved, &e820, sizeof(struct e820map));
+-	printk(KERN_INFO "extended physical RAM map:\n");
+-	e820_print_map("reserve setup_data");
+-}
+-
+ static void __init memblock_x86_reserve_range_setup_data(void)
+ {
+ 	struct setup_data *data;
+@@ -1032,8 +1008,6 @@ void __init setup_arch(char **cmdline_p)
+ 		early_dump_pci_devices();
+ #endif
+ 
+-	/* update the e820_saved too */
+-	e820_reserve_setup_data();
+ 	finish_e820_parsing();
+ 
+ 	if (efi_enabled(EFI_BOOT))
+diff --git a/arch/x86/kernel/tboot.c b/arch/x86/kernel/tboot.c
+index 91a4496..3c2752a 100644
+--- a/arch/x86/kernel/tboot.c
++++ b/arch/x86/kernel/tboot.c
+@@ -195,8 +195,7 @@ static int tboot_setup_sleep(void)
+ 	tboot->num_mac_regions = 0;
+ 
+ 	for (i = 0; i < e820.nr_map; i++) {
+-		if ((e820.map[i].type != E820_RAM)
+-		 && (e820.map[i].type != E820_RESERVED_KERN))
++		if (e820.map[i].type != E820_RAM)
+ 			continue;
+ 
+ 		add_mac_region(e820.map[i].addr, e820.map[i].size);
+diff --git a/arch/x86/mm/init_64.c b/arch/x86/mm/init_64.c
+index 30eb05a..19430d5 100644
+--- a/arch/x86/mm/init_64.c
++++ b/arch/x86/mm/init_64.c
+@@ -426,8 +426,7 @@ phys_pte_init(pte_t *pte_page, unsigned long addr, unsigned long end,
+ 		next = (addr & PAGE_MASK) + PAGE_SIZE;
+ 		if (addr >= end) {
+ 			if (!after_bootmem &&
+-			    !e820_any_mapped(addr & PAGE_MASK, next, E820_RAM) &&
+-			    !e820_any_mapped(addr & PAGE_MASK, next, E820_RESERVED_KERN))
++			    !e820_any_mapped(addr & PAGE_MASK, next, E820_RAM))
+ 				set_pte(pte, __pte(0));
+ 			continue;
+ 		}
+@@ -473,9 +472,8 @@ phys_pmd_init(pmd_t *pmd_page, unsigned long address, unsigned long end,
+ 
+ 		next = (address & PMD_MASK) + PMD_SIZE;
+ 		if (address >= end) {
+-			if (!after_bootmem &&
+-			    !e820_any_mapped(address & PMD_MASK, next, E820_RAM) &&
+-			    !e820_any_mapped(address & PMD_MASK, next, E820_RESERVED_KERN))
++			if (!after_bootmem && !e820_any_mapped(
++					address & PMD_MASK, next, E820_RAM))
+ 				set_pmd(pmd, __pmd(0));
+ 			continue;
+ 		}
+@@ -548,8 +546,7 @@ phys_pud_init(pud_t *pud_page, unsigned long addr, unsigned long end,
+ 		next = (addr & PUD_MASK) + PUD_SIZE;
+ 		if (addr >= end) {
+ 			if (!after_bootmem &&
+-			    !e820_any_mapped(addr & PUD_MASK, next, E820_RAM) &&
+-			    !e820_any_mapped(addr & PUD_MASK, next, E820_RESERVED_KERN))
++			    !e820_any_mapped(addr & PUD_MASK, next, E820_RAM))
+ 				set_pud(pud, __pud(0));
+ 			continue;
+ 		}
 -- 
 1.8.4.5
