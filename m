@@ -1,218 +1,141 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 6/8] x86: kill not used setup_data handling code
-Date: Sat, 28 Feb 2015 18:17:37 -0800
-Message-ID: <1425176259-30087-7-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH 4/8] x86, of: let add_dtb reserve by itself
+Date: Sat, 28 Feb 2015 18:17:35 -0800
+Message-ID: <1425176259-30087-5-git-send-email-yinghai@kernel.org>
 References: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1425176259-30087-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Rob Herring <robh@kernel.org>, David Vrabel <david.vrabel@citrix.com>
 List-Id: linux-efi@vger.kernel.org
 
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
----
- arch/x86/kernel/kdebugfs.c | 142 ---------------------------------------------
- arch/x86/kernel/setup.c    |  17 ------
- 2 files changed, 159 deletions(-)
+We will not reserve setup_data in general code. Every handler
+need to reserve and copy.
 
-diff --git a/arch/x86/kernel/kdebugfs.c b/arch/x86/kernel/kdebugfs.c
-index dc1404b..c8ca86c 100644
---- a/arch/x86/kernel/kdebugfs.c
-+++ b/arch/x86/kernel/kdebugfs.c
-@@ -21,142 +21,6 @@ struct dentry *arch_debugfs_dir;
- EXPORT_SYMBOL(arch_debugfs_dir);
+Current dtd handling already have code copying, just add reserve code ...
+
+also simplify code a bit with storing real dtb size.
+
+Cc: Rob Herring <robh@kernel.org>
+Cc: David Vrabel <david.vrabel@citrix.com>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+---
+ arch/x86/include/asm/prom.h  |  9 ++++++---
+ arch/x86/kernel/devicetree.c | 39 +++++++++++++++++++++------------------
+ 2 files changed, 27 insertions(+), 21 deletions(-)
+
+diff --git a/arch/x86/include/asm/prom.h b/arch/x86/include/asm/prom.h
+index 1d081ac..fb716eddc 100644
+--- a/arch/x86/include/asm/prom.h
++++ b/arch/x86/include/asm/prom.h
+@@ -24,17 +24,20 @@
  
- #ifdef CONFIG_DEBUG_BOOT_PARAMS
--struct setup_data_node {
--	u64 paddr;
--	u32 type;
--	u32 len;
--};
--
--static ssize_t setup_data_read(struct file *file, char __user *user_buf,
--			       size_t count, loff_t *ppos)
--{
--	struct setup_data_node *node = file->private_data;
--	unsigned long remain;
--	loff_t pos = *ppos;
--	struct page *pg;
--	void *p;
--	u64 pa;
--
--	if (pos < 0)
--		return -EINVAL;
--
--	if (pos >= node->len)
--		return 0;
--
--	if (count > node->len - pos)
--		count = node->len - pos;
--
--	pa = node->paddr + sizeof(struct setup_data) + pos;
--	pg = pfn_to_page((pa + count - 1) >> PAGE_SHIFT);
--	if (PageHighMem(pg)) {
--		p = ioremap_cache(pa, count);
--		if (!p)
--			return -ENXIO;
--	} else
--		p = __va(pa);
--
--	remain = copy_to_user(user_buf, p, count);
--
--	if (PageHighMem(pg))
--		iounmap(p);
--
--	if (remain)
--		return -EFAULT;
--
--	*ppos = pos + count;
--
--	return count;
--}
--
--static const struct file_operations fops_setup_data = {
--	.read		= setup_data_read,
--	.open		= simple_open,
--	.llseek		= default_llseek,
--};
--
--static int __init
--create_setup_data_node(struct dentry *parent, int no,
--		       struct setup_data_node *node)
--{
--	struct dentry *d, *type, *data;
--	char buf[16];
--
--	sprintf(buf, "%d", no);
--	d = debugfs_create_dir(buf, parent);
--	if (!d)
--		return -ENOMEM;
--
--	type = debugfs_create_x32("type", S_IRUGO, d, &node->type);
--	if (!type)
--		goto err_dir;
--
--	data = debugfs_create_file("data", S_IRUGO, d, node, &fops_setup_data);
--	if (!data)
--		goto err_type;
--
--	return 0;
--
--err_type:
--	debugfs_remove(type);
--err_dir:
--	debugfs_remove(d);
--	return -ENOMEM;
--}
--
--static int __init create_setup_data_nodes(struct dentry *parent)
--{
--	struct setup_data_node *node;
--	struct setup_data *data;
--	int error;
--	struct dentry *d;
--	struct page *pg;
--	u64 pa_data;
--	int no = 0;
--
--	d = debugfs_create_dir("setup_data", parent);
--	if (!d)
--		return -ENOMEM;
--
--	pa_data = boot_params.hdr.setup_data;
--
--	while (pa_data) {
--		node = kmalloc(sizeof(*node), GFP_KERNEL);
--		if (!node) {
--			error = -ENOMEM;
--			goto err_dir;
--		}
--
--		pg = pfn_to_page((pa_data+sizeof(*data)-1) >> PAGE_SHIFT);
--		if (PageHighMem(pg)) {
--			data = ioremap_cache(pa_data, sizeof(*data));
--			if (!data) {
--				kfree(node);
--				error = -ENXIO;
--				goto err_dir;
--			}
--		} else
--			data = __va(pa_data);
--
--		node->paddr = pa_data;
--		node->type = data->type;
--		node->len = data->len;
--		error = create_setup_data_node(d, no, node);
--		pa_data = data->next;
--
--		if (PageHighMem(pg))
--			iounmap(data);
--		if (error)
--			goto err_dir;
--		no++;
--	}
--
--	return 0;
--
--err_dir:
--	debugfs_remove(d);
--	return error;
--}
--
- static struct debugfs_blob_wrapper boot_params_blob = {
- 	.data		= &boot_params,
- 	.size		= sizeof(boot_params),
-@@ -181,14 +45,8 @@ static int __init boot_params_kdebugfs_init(void)
- 	if (!data)
- 		goto err_version;
+ #ifdef CONFIG_OF
+ extern int of_ioapic;
+-extern u64 initial_dtb;
+-extern void add_dtb(u64 data);
+ void x86_of_pci_init(void);
+ void x86_dtb_init(void);
+ #else
+-static inline void add_dtb(u64 data) { }
+ static inline void x86_of_pci_init(void) { }
+ static inline void x86_dtb_init(void) { }
+ #define of_ioapic 0
+ #endif
  
--	error = create_setup_data_nodes(dbp);
--	if (error)
--		goto err_data;
--
- 	return 0;
++#ifdef CONFIG_OF_FLATTREE
++extern void add_dtb(u64 data);
++#else
++static inline void add_dtb(u64 data) { }
++#endif
++
+ extern char cmd_line[COMMAND_LINE_SIZE];
  
--err_data:
--	debugfs_remove(data);
- err_version:
- 	debugfs_remove(version);
- err_dir:
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 93c0adb..b9f1687 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -479,20 +479,6 @@ static void __init parse_setup_data(void)
- 	boot_params.hdr.setup_data = 0; /* all done */
+ #endif /* __ASSEMBLY__ */
+diff --git a/arch/x86/kernel/devicetree.c b/arch/x86/kernel/devicetree.c
+index 3d35033..cc2fb61 100644
+--- a/arch/x86/kernel/devicetree.c
++++ b/arch/x86/kernel/devicetree.c
+@@ -2,6 +2,7 @@
+  * Architecture specific OF callbacks.
+  */
+ #include <linux/bootmem.h>
++#include <linux/memblock.h>
+ #include <linux/export.h>
+ #include <linux/io.h>
+ #include <linux/irqdomain.h>
+@@ -23,7 +24,6 @@
+ #include <asm/setup.h>
+ #include <asm/i8259.h>
+ 
+-__initdata u64 initial_dtb;
+ char __initdata cmd_line[COMMAND_LINE_SIZE];
+ 
+ int __initdata of_ioapic;
+@@ -43,11 +43,23 @@ void * __init early_init_dt_alloc_memory_arch(u64 size, u64 align)
+ 	return __alloc_bootmem(size, align, __pa(MAX_DMA_ADDRESS));
  }
  
--static void __init memblock_x86_reserve_range_setup_data(void)
--{
--	struct setup_data *data;
--	u64 pa_data;
--
--	pa_data = boot_params.hdr.setup_data;
--	while (pa_data) {
--		data = early_memremap(pa_data, sizeof(*data));
--		memblock_reserve(pa_data, sizeof(*data) + data->len);
--		pa_data = data->next;
--		early_iounmap(data, sizeof(*data));
--	}
++#ifdef CONFIG_OF_FLATTREE
++static u64 initial_dtb __initdata;
++static u32 initial_dtb_size __initdata;
+ void __init add_dtb(u64 data)
+ {
++	u32 map_len;
++
+ 	initial_dtb = data + offsetof(struct setup_data, data);
 -}
--
+ 
++	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
++	initial_boot_params = early_memremap(initial_dtb, map_len);
++	initial_dtb_size = of_get_flat_dt_size();
++	early_memunmap(initial_boot_params, map_len);
++	initial_boot_params = NULL;
++	memblock_reserve(initial_dtb, initial_dtb_size);
++}
++#endif
  /*
-  * --------- Crashkernel reservation ------------------------------
+  * CE4100 ids. Will be moved to machine_device_initcall() once we have it.
   */
-@@ -999,9 +985,6 @@ void __init setup_arch(char **cmdline_p)
+@@ -272,31 +284,22 @@ static void __init dtb_apic_setup(void)
+ 	dtb_ioapic_setup();
+ }
  
- 	x86_report_nx();
+-#ifdef CONFIG_OF_FLATTREE
+ static void __init x86_flattree_get_config(void)
+ {
+-	u32 size, map_len;
++#ifdef CONFIG_OF_FLATTREE
+ 	void *dt;
  
--	/* after early param, so could get panic from serial */
--	memblock_x86_reserve_range_setup_data();
+ 	if (!initial_dtb)
+ 		return;
+ 
+-	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
 -
- 	if (acpi_mps_check()) {
- #ifdef CONFIG_X86_LOCAL_APIC
- 		disable_apic = 1;
+-	initial_boot_params = dt = early_memremap(initial_dtb, map_len);
+-	size = of_get_flat_dt_size();
+-	if (map_len < size) {
+-		early_iounmap(dt, map_len);
+-		initial_boot_params = dt = early_memremap(initial_dtb, size);
+-		map_len = size;
+-	}
+-
++	initial_boot_params = dt = early_memremap(initial_dtb,
++						  initial_dtb_size);
+ 	unflatten_and_copy_device_tree();
+-	early_iounmap(dt, map_len);
+-}
+-#else
+-static inline void x86_flattree_get_config(void) { }
++	early_memunmap(dt, initial_dtb_size);
++
++	memblock_free(initial_dtb, initial_dtb_size);
+ #endif
++}
+ 
+ void __init x86_dtb_init(void)
+ {
 -- 
 1.8.4.5
