@@ -1,84 +1,65 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Fri, 27 Feb 2015 11:35:47 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AD592@PGSMSX102.gar.corp.intel.com>
-References: <1414984030-13859-1-git-send-email-hock.leong.kweh@intel.com>
-	<1414984030-13859-4-git-send-email-hock.leong.kweh@intel.com>
- <CAFECyb-JhpFm4WcWL8NU8zbK=xphGtG=B7q0PLhffmYDV-a_PQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/8] x86, boot: clean up setup_data handling
+Date: Sat, 28 Feb 2015 18:17:31 -0800
+Message-ID: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFECyb-JhpFm4WcWL8NU8zbK=xphGtG=B7q0PLhffmYDV-a_PQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBSb3kgRnJhbnogW21haWx0bzpy
-b3kuZnJhbnpAbGluYXJvLm9yZ10NCj4gU2VudDogRnJpZGF5LCBGZWJydWFyeSAyNywgMjAxNSAx
-OjA3IFBNDQo+IA0KPiBPbiBTdW4sIE5vdiAyLCAyMDE0IGF0IDc6MDcgUE0sIEt3ZWggSG9jayBM
-ZW9uZw0KPiA+ICsvKg0KPiA+ICsgKiBUaGlzIGZ1bmN0aW9uIHdpbGwgc3RvcmUgdGhlIGNhcHN1
-bGUgYmluYXJ5IGFuZCBwYXNzIGl0IHRvDQo+ID4gKyAqIGVmaV9jYXBzdWxlX3VwZGF0ZSgpIEFQ
-SSBpbiBjYXBzdWxlLmMgICovIHN0YXRpYyBpbnQNCj4gPiArZWZpX2NhcHN1bGVfc3RvcmUoY29u
-c3Qgc3RydWN0IGZpcm13YXJlICpmdykgew0KPiA+ICsgICAgICAgaW50IGk7DQo+ID4gKyAgICAg
-ICBpbnQgcmV0Ow0KPiA+ICsgICAgICAgaW50IGNvdW50ID0gZnctPnNpemU7DQo+ID4gKyAgICAg
-ICBpbnQgY29weV9zaXplID0gKGZ3LT5zaXplID4gUEFHRV9TSVpFKSA/IFBBR0VfU0laRSA6IGZ3
-LT5zaXplOw0KPiA+ICsgICAgICAgaW50IHBhZ2VzX25lZWRlZCA9IEFMSUdOKGZ3LT5zaXplLCBQ
-QUdFX1NJWkUpID4+IFBBR0VfU0hJRlQ7DQo+ID4gKyAgICAgICBzdHJ1Y3QgcGFnZSAqKnBhZ2Vz
-Ow0KPiA+ICsgICAgICAgdm9pZCAqcGFnZV9kYXRhOw0KPiA+ICsgICAgICAgZWZpX2NhcHN1bGVf
-aGVhZGVyX3QgKmNhcHN1bGUgPSBOVUxMOw0KPiA+ICsNCj4gPiArICAgICAgIHBhZ2VzID0ga21h
-bGxvY19hcnJheShwYWdlc19uZWVkZWQsIHNpemVvZih2b2lkICopLCBHRlBfS0VSTkVMKTsNCj4g
-PiArICAgICAgIGlmICghcGFnZXMpIHsNCj4gPiArICAgICAgICAgICAgICAgcHJfZXJyKCIlczog
-a21hbGxvY19hcnJheSgpIGZhaWxlZFxuIiwgX19mdW5jX18pOw0KPiA+ICsgICAgICAgICAgICAg
-ICByZXR1cm4gLUVOT01FTTsNCj4gPiArICAgICAgIH0NCj4gPiArDQo+ID4gKyAgICAgICBmb3Ig
-KGkgPSAwOyBpIDwgcGFnZXNfbmVlZGVkOyBpKyspIHsNCj4gPiArICAgICAgICAgICAgICAgcGFn
-ZXNbaV0gPSBhbGxvY19wYWdlKEdGUF9LRVJORUwpOw0KPiA+ICsgICAgICAgICAgICAgICBpZiAo
-IXBhZ2VzW2ldKSB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcHJfZXJyKCIlczogYWxs
-b2NfcGFnZSgpIGZhaWxlZFxuIiwgX19mdW5jX18pOw0KPiA+ICsgICAgICAgICAgICAgICAgICAg
-ICAgIC0taTsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXQgPSAtRU5PTUVNOw0KPiA+
-ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZmFpbGVkOw0KPiA+ICsgICAgICAgICAgICAg
-ICB9DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAgICAgZm9yIChpID0gMDsgaSA8IHBh
-Z2VzX25lZWRlZDsgaSsrKSB7DQo+ID4gKyAgICAgICAgICAgICAgIHBhZ2VfZGF0YSA9IGttYXAo
-cGFnZXNbaV0pOw0KPiA+ICsgICAgICAgICAgICAgICBtZW1jcHkocGFnZV9kYXRhLCBmdy0+ZGF0
-YSArIChpICogUEFHRV9TSVpFKSwNCj4gPiArIGNvcHlfc2l6ZSk7DQo+ID4gKw0KPiA+ICsgICAg
-ICAgICAgICAgICBpZiAoaSA9PSAwKQ0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGNhcHN1
-bGUgPSAoZWZpX2NhcHN1bGVfaGVhZGVyX3QgKilwYWdlX2RhdGE7DQo+ID4gKyAgICAgICAgICAg
-ICAgIGVsc2UNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBrdW5tYXAocGFnZXNbaV0pOw0K
-PiA+ICsNCj4gPiArICAgICAgICAgICAgICAgY291bnQgLT0gY29weV9zaXplOw0KPiA+ICsgICAg
-ICAgICAgICAgICBpZiAoY291bnQgPCBQQUdFX1NJWkUpDQo+ID4gKyAgICAgICAgICAgICAgICAg
-ICAgICAgY29weV9zaXplID0gY291bnQ7DQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAg
-ICAgcmV0ID0gZWZpX2NhcHN1bGVfdXBkYXRlKGNhcHN1bGUsIHBhZ2VzKTsNCj4gPiArICAgICAg
-IGlmIChyZXQpIHsNCj4gPiArICAgICAgICAgICAgICAgcHJfZXJyKCIlczogZWZpX2NhcHN1bGVf
-dXBkYXRlKCkgZmFpbGVkXG4iLCBfX2Z1bmNfXyk7DQo+ID4gKyAgICAgICAgICAgICAgIC0taTsN
-Cj4gDQo+IEhpIEhvY2ssDQo+IA0KPiBXaGF0IGRvZXMgdGhlIGRlY3JlbWVudCBvZiBpIGRvIGhl
-cmU/ICBJIGxvb2tlZCBhdA0KPiBlZmlfY2Fwc3VsZV91cGRhdGUoKSBhbmQgZGlkbid0IHNlZSBh
-bnl0aGluZyB0aGF0IHdvdWxkIGFjY291bnQgZm9yIHRoaXMuICBJdA0KPiBsb29rcyBsaWtlIGlu
-IHRoaXMgZmFpbHVyZSBjYXNlIG9uZSBwYWdlIHdvbid0IGdldCBmcmVlZC4NCj4gDQo+IEFzIGFu
-IGFzaWRlLCB3aGVuIEkgd2FzIGxvb2tpbmcgYXQgZWZpX3VwZGF0ZV9jYXBzdWxlLCBJIHNlZSB0
-aGF0IE1hdHQgaXMNCj4gZG9pbmcgdmVyeSBzaW1pbGFyIG9wZXJhdGlvbnMgKGFycmF5IG9mIHN0
-cnVjdCBwYWdlIHBvaW50ZXJzKSwgYnV0IGRvZXMgaXQgbGlrZQ0KPiB0aGlzIChzbmlwcGVkIGZy
-b20gaGlzIHBhdGNoKToNCj4gDQo+ICsgc3RydWN0IHBhZ2UgKipibG9ja19wZ3M7DQo+IC4uLg0K
-PiArICAgICAgIGJsb2NrX3BncyA9IGt6YWxsb2MobnJfYmxvY2tfcGdzICogc2l6ZW9mKCpibG9j
-a19wZ3MpLCBHRlBfS0VSTkVMKTsNCj4gKyAgICAgICBpZiAoIWJsb2NrX3BncykNCj4gKyAgICAg
-ICAgICAgICAgIHJldHVybiAtRU5PTUVNOw0KPiArDQo+ICsgICAgICAgZm9yIChpID0gMDsgaSA8
-IG5yX2Jsb2NrX3BnczsgaSsrKSB7DQo+ICsgICAgICAgICAgICAgICBibG9ja19wZ3NbaV0gPSBh
-bGxvY19wYWdlKEdGUF9LRVJORUwpOw0KPiArICAgICAgICAgICAgICAgaWYgKCFibG9ja19wZ3Nb
-aV0pDQo+ICsgICAgICAgICAgICAgICAgICAgICAgIGdvdG8gZmFpbDsNCj4gKyAgICAgICB9DQo+
-IA0KPiBhbmQgdGhlbiBjYW4gc2ltcGx5IGZyZWUgdGhlIHBhZ2VzIHRoYXQgYXJlIG5vdCBOVUxM
-Og0KPiArZmFpbDoNCj4gKyAgICAgICBmb3IgKGkgPSAwOyBpIDwgbnJfYmxvY2tfcGdzOyBpKysp
-IHsNCj4gKyAgICAgICAgICAgICAgIGlmIChibG9ja19wZ3NbaV0pDQo+ICsgICAgICAgICAgICAg
-ICAgICAgICAgIF9fZnJlZV9wYWdlKGJsb2NrX3Bnc1tpXSk7DQo+ICsgICAgICAgfQ0KPiANCj4g
-SSB0aGluayB0aGlzIHdheSBpcyBwcmVmZXJhYmxlIHNpbmNlIGl0IGRvZXNuJ3QgcmVseSBvbiAn
-aScgYmVpbmcgdW5jaGFuZ2VkIGF0IHRoZQ0KPiBlbmQgb2YgdGhlIGZ1bmN0aW9uLiAgSSBhbHNv
-IHRoaW5rIGl0IHdvdWxkIGJlIG5pY2UgaWYgdGhlIGNhcHN1bGUgY29kZSBzdHVjaw0KPiB3aXRo
-IG9uZSBpZGlvbSBmb3IgZGVhbGluZyB3aXRoIGFycmF5cyBvZiBwYWdlIHBvaW50ZXJzLg0KPiAN
-Cj4gUm95DQo+IA0KDQpIaSBSb3ksDQoNClRoZSByZWFzb24gImkiIHRoZXJlIGhhdmUgdG8gcGVy
-Zm9ybSBhIGRlY3JlbWVudCBpcyBiZWNhdXNlIGEgZnVsbCBmb3IgbG9vcA0Kd2lsbCBlbmQgd2l0
-aCBvbmUgZXh0cmEgaW5jcmVtZW50ZWQgdmFsdWUgaWYgaXQgZG9lcyBub3QgYnJlYWsgb3V0IGlu
-IHRoZSBtaWRkbGUuDQoNCkFuZCB0aGUgZWZpX2NhcHN1bGVfc3RvcmUoKSdzIGFsbG9jIHBhZ2Ug
-aXMgdG8gc3RvcmUgdGhlIGJpbmFyeSBjb250ZW50IGFuZCB0aGUNCmVmaV9jYXBzdWxlX3VwZGF0
-ZSgpIGZyb20gTWF0dCBpcyB0byBzdG9yZSB0aGUgZWZpIGNhcHN1bGUgYmxvY2sgZGVzY3JpcHRv
-cg0Kd2hpY2ggd2lsbCBwb2ludCB0byB0aGUgYmluYXJ5IGJsb2NrcyBjb250ZW50LiBTbywgdGhl
-eSBhcmUgZGlmZmVyZW50Lg0KDQoNClJlZ2FyZHMsDQpXaWxzb24NCg==
+Now we setup_data is reserved via memblock and e820 and different
+handlers have different ways, and it is confusing.
+1. SETUP_E820_EXT: is consumed early and will not copy or access again.
+	have memory wasted.
+2. SETUP_EFI: is accessed via ioremap every time at early stage.
+	have memory wasted.
+3. SETUP_DTB: is copied locally.
+	have memory wasted.
+4. SETUP_PCI: is accessed via ioremap for every pci devices, even run-time.
+5. SETUP_KASLR: is accessed early, will not copy or access again.
+	have memory wasted.
+
+Also setup_data is exported to debugfs for debug purpose.
+
+Here will convert to let every handler to decide how to handle it.
+and will not reserve the setup_data generally, so will not
+waste memory and also make memblock/e820 keep page aligned.
+1. not touch E820 anymore.
+2. copy SETUP_EFI to __initdata variable and access it without ioremap.
+3. SETUP_DTB: reserver and copy to local and free.
+4. SETUP_PCI: reverve localy and convert to list, to avoid keeping ioremap.
+5. SETUP_KASLR: fix accessing kaslr_enabled accessing...
+6. export SETUP_PCI via sysfs.
+
+Those patches could be applied on top of tip/x86/urgent with SETUP_KASLR
+support.
+
+Yinghai Lu (8):
+  x86, kaslr: get kaslr_enabled back correctly
+  x86: Kill E820_RESERVED_KERN
+  x86, efi: copy SETUP_EFI data and access directly
+  x86, of: let add_dtb reserve by itself
+  x86, boot: Add add_pci handler for SETUP_PCI
+  x86: kill not used setup_data handling code
+  x86, pci: convert SETUP_PCI data to list
+  x86, pci: export SETUP_PCI data via sysfs
+
+ arch/x86/include/asm/efi.h       |   2 +-
+ arch/x86/include/asm/pci.h       |   2 +
+ arch/x86/include/asm/prom.h      |   9 +-
+ arch/x86/include/uapi/asm/e820.h |   9 --
+ arch/x86/kernel/devicetree.c     |  39 +++---
+ arch/x86/kernel/e820.c           |   6 +-
+ arch/x86/kernel/kdebugfs.c       | 142 --------------------
+ arch/x86/kernel/setup.c          |  57 ++------
+ arch/x86/kernel/tboot.c          |   3 +-
+ arch/x86/mm/init_64.c            |  11 +-
+ arch/x86/pci/common.c            | 281 ++++++++++++++++++++++++++++++++++++---
+ arch/x86/platform/efi/efi.c      |  13 +-
+ arch/x86/platform/efi/efi_64.c   |  13 +-
+ arch/x86/platform/efi/quirks.c   |  23 +---
+ 14 files changed, 336 insertions(+), 274 deletions(-)
+
+-- 
+1.8.4.5
