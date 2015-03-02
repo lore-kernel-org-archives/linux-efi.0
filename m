@@ -1,35 +1,58 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+From: Jiri Kosina <jkosina@suse.cz>
 Subject: Re: [PATCH 1/8] x86, kaslr: get kaslr_enabled back correctly
-Date: Mon, 2 Mar 2015 09:56:54 +0100
-Message-ID: <20150302085654.GA17532@pd.tnic>
-References: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
- <1425176259-30087-2-git-send-email-yinghai@kernel.org>
- <CAE9FiQXE5YnSQAkkAxob38Qe+aHZ=niAXL6uLF5650KQPfjPPw@mail.gmail.com>
- <20150301094557.GA7748@pd.tnic>
- <20150301152351.GA17391@gmail.com>
- <CAE9FiQV7DouV+76mzH0jFjFJOFBm-ZmgKpYVjTGAmKao0y3HbA@mail.gmail.com>
- <20150301194904.GC7748@pd.tnic>
- <CAE9FiQVpWQ1NU5Euy2G4btS=94qKCZZ7T0YFsCR1x6iv4C1hjA@mail.gmail.com>
- <20150301202938.GD7748@pd.tnic>
- <CAE9FiQWqfpCg5reKP5TOv=8qJCLxqBDHCKAexH94avZ4b3=irQ@mail.gmail.com>
+Date: Mon, 2 Mar 2015 10:39:33 +0100 (CET)
+Message-ID: <alpine.LNX.2.00.1503021038401.9089@pobox.suse.cz>
+References: <1425176259-30087-1-git-send-email-yinghai@kernel.org> <1425176259-30087-2-git-send-email-yinghai@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAE9FiQWqfpCg5reKP5TOv=8qJCLxqBDHCKAexH94avZ4b3=irQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <1425176259-30087-2-git-send-email-yinghai@kernel.org>
+Sender: linux-pci-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Mar 01, 2015 at 12:41:10PM -0800, Yinghai Lu wrote:
-> Does not look safe yet...
+On Sat, 28 Feb 2015, Yinghai Lu wrote:
 
-Why?
+> We should access variable with referrence instead of using physical
+> address as value.
+> 
+> Cc: Matt Fleming <matt.fleming@intel.com>
+> Cc: Borislav Petkov <bp@suse.de>
+> Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+
+	Acked-by: Jiri Kosina <jkosina@suse.cz>
+
+
+Thanks for fixing my brainfart. This is not fixing the problem with the 
+later variable overwrite, but definitely needs to go in as well.
+
+Thanks.
+
+> ---
+>  arch/x86/kernel/setup.c | 8 +++++++-
+>  1 file changed, 7 insertions(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index 98dc931..05d444f 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -429,7 +429,13 @@ static void __init reserve_initrd(void)
+>  
+>  static void __init parse_kaslr_setup(u64 pa_data, u32 data_len)
+>  {
+> -	kaslr_enabled = (bool)(pa_data + sizeof(struct setup_data));
+> +	/* kaslr_setup_data is defined in aslr.c */
+> +	unsigned char *data;
+> +	unsigned long offset = sizeof(struct setup_data);
+> +
+> +	data = early_memremap(pa_data, offset + 1);
+> +	kaslr_enabled = *(data + offset);
+> +	early_memunmap(data, offset + 1);
+>  }
+>  
+>  static void __init parse_setup_data(void)
 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+Jiri Kosina
+SUSE Labs
