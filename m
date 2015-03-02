@@ -1,58 +1,51 @@
-From: Jiri Kosina <jkosina@suse.cz>
-Subject: Re: [PATCH 1/8] x86, kaslr: get kaslr_enabled back correctly
-Date: Mon, 2 Mar 2015 10:39:33 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1503021038401.9089@pobox.suse.cz>
-References: <1425176259-30087-1-git-send-email-yinghai@kernel.org> <1425176259-30087-2-git-send-email-yinghai@kernel.org>
+From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
+ interface
+Date: Mon, 2 Mar 2015 10:59:00 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <1425176259-30087-2-git-send-email-yinghai@kernel.org>
-Sender: linux-pci-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Andy Lutomirski <luto@amacapital.net>, Sam Protsenko <semen.protsenko@linaro.org>, Matt Fleming <matt@console-pimps.org>, Ming Lei <ming.lei@canonical.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 28 Feb 2015, Yinghai Lu wrote:
-
-> We should access variable with referrence instead of using physical
-> address as value.
-> 
-> Cc: Matt Fleming <matt.fleming@intel.com>
-> Cc: Borislav Petkov <bp@suse.de>
-> Signed-off-by: Yinghai Lu <yinghai@kernel.org>
-
-	Acked-by: Jiri Kosina <jkosina@suse.cz>
-
-
-Thanks for fixing my brainfart. This is not fixing the problem with the 
-later variable overwrite, but definitely needs to go in as well.
-
-Thanks.
-
-> ---
->  arch/x86/kernel/setup.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-> index 98dc931..05d444f 100644
-> --- a/arch/x86/kernel/setup.c
-> +++ b/arch/x86/kernel/setup.c
-> @@ -429,7 +429,13 @@ static void __init reserve_initrd(void)
->  
->  static void __init parse_kaslr_setup(u64 pa_data, u32 data_len)
->  {
-> -	kaslr_enabled = (bool)(pa_data + sizeof(struct setup_data));
-> +	/* kaslr_setup_data is defined in aslr.c */
-> +	unsigned char *data;
-> +	unsigned long offset = sizeof(struct setup_data);
-> +
-> +	data = early_memremap(pa_data, offset + 1);
-> +	kaslr_enabled = *(data + offset);
-> +	early_memunmap(data, offset + 1);
->  }
->  
->  static void __init parse_setup_data(void)
-
--- 
-Jiri Kosina
-SUSE Labs
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFdlZG5lc2RheSwgRmVicnVhcnkgMjUsIDIwMTUg
+ODo0OSBQTQ0KPiANCj4gT24gV2VkLCBGZWIgMjUsIDIwMTUgYXQgMTI6Mzg6MjBQTSArMDAwMCwg
+S3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBUaGUgcmVhc29uIHdlIHVzZSB0aGlzIGludGVy
+ZmFjZSBmb3IgZWZpIGNhcHN1bGUgaXMgdGhhdCBlZmkgY2Fwc3VsZQ0KPiA+IHN1cHBvcnQgbXVs
+dGkgYmluYXJpZXMgdG8gYmUgdXBsb2FkZWQgYW5kIGVhY2ggYmluYXJ5IGZpbGUgbmFtZQ0KPiA+
+IGNhbiBiZSBkaWZmZXJlbnQuDQo+IA0KPiBTbyB5b3UgY2FuIHdyaXRlIHRoZSBmaWxlIHBhdGgg
+dG8gYSBzZWNvbmQgZmlsZSBhbmQgcmVsb2FkIHRoZW4sIG9uY2UNCj4gcGVyIGZpbGUuDQoNClRo
+YW5rcyBmb3IgdGhlIHN1Z2dlc3Rpb24uIERpZCBzb21lIGV4cGxvcmF0aW9uIG9uIHRoaXMgYXBw
+cm9hY2ggYW5kDQp3b3VsZCBsaWtlIHRvIGNvbnRpbnVlIHRoZSBkaXNjdXNzaW9uIHRvZ2V0aGVy
+IHdpdGggdGhpcyBzdWdnZXN0ZWQgZGVzaWduLg0KDQpJZGVhbCBjb25kaXRpb246DQotIG9uZSBm
+aWxlIG5vdGUgaXMgZW5vdWdoIGZvciBsb2FkIGJpbmFyeSBhbmQgc3RhdHVzIHJldHVybiAoY2Fw
+c3VsZV9sb2FkKQ0KLSBsb2FkIHN0ZXBzIHdvdWxkIGJlIGFzIHNpbXBsZSBhcyBqdXN0Og0KICAg
+ZWNobyBbYmluYXJ5IGZpbGUgbmFtZV0gPiBjYXBzdWxlX2xvYWQNCi0gc3RhdHVzIHJldHVybiBp
+biB0aGUgc2FtZSBjb21tYW5kIGFjdGlvbi4gSWYgZmFpbGVkLCB0aGUgZWNobyB3aWxsIGZhaWwN
+CiAgIHdpdGggdGhlIGZhaWxpbmcgc3RhdHVzIGNvZGUuDQoNClRyYWRlIG9mZjoNCi0gZG9lcyBu
+b3QgaGF2ZSB0aGUgcnVuIHRpbWUgZmxleGliaWxpdHkgdG8gbG9hZCBhbnkgZmlybXdhcmUgYmlu
+YXJpZXMgYXQNCiAgIGRpZmZlcmVudCBkaWZmZXJlbnQgcGF0aCBhcyBmaXJtd2FyZSBjbGFzcyAg
+b25seSBzdXBwb3J0IG9uZSBjdXN0b20NCiAgIHBhdGggaW5wdXR0ZWQgZHVyaW5nIGJvb3QgdGlt
+ZS9sb2FkIHRpbWUuIFVubGVzcyB0byBhZGQgbmV3IGV4cG9ydA0KICAgZnVuY3Rpb24gZm9yIGZp
+cm13YXJlIGNsYXNzLg0KLSBpZiBhbnkgdHlwbyBvbiB1c2VyIGxldmVsIG9yIGZpbGUgcGF0aCBu
+b3QgZm91bmQsIGZpcm13YXJlIGNsYXNzIGZhbGxzIGJhY2sNCiAgIHRvIHVzZXIgaGVscGVyIGlu
+dGVyZmFjZS4gVXNlciBpcyByZXF1aXJlZCB0byBvcGVuIGFub3RoZXIgdGVybWluYWwgdG8NCiAg
+IHBlcmZvcm1zOg0KICAgLT4gZWNobyAxID4gbG9hZGluZw0KICAgLT4gY2F0IGNhcHN1bGUuYmlu
+ID4gZGF0YQ0KICAgLT4gZWNobyAwID4gbG9hZGluZw0KICAgT3Igd2FpdCBmb3IgdGltZW91dC4N
+Ci0gVXNlciBoYXMgdGhlIGNhcGFiaWxpdHkgdG8gY29uZmlndXJlIHRoZSBmaXJtd2FyZV9jbGFz
+cyB0aW1lIG91dCB2YWx1ZS4NCiAgIElmIHRoZSBpbmZpbml0ZSB2YWx1ZSBpcyBzZXQsIHRoZSBv
+bmx5IG1ldGhvZCB0byBicmVhayB0aGUgaW5maW5pdGUgd2FpdGluZw0KICAgYnkgbWFudWFsbHkg
+cGVyZm9ybSAiZWNobyAtMSA+IGxvYWRpbmciIG9uIHRoZSBvdGhlciB0ZXJtaW5hbC4NCg0KQXJl
+IHlvdSBndXlzIG9rYXkgd2l0aCB0aGVzZSB0cmFkZSBvZmY/DQpPciB5b3UgZ3V5cyBzdGlsbCBv
+a2F5IHdpdGggdGhlIHByZXZpb3VzIDIgZGVzaWduIGlkZWE/DQoNCj4gDQo+IEFsdGVybmF0aXZl
+bHksIHlvdSBjYW4gY29tYmluZSBhbGwgdGhlIGZpbGVzIGludG8gYSBjcGlvIGFyY2hpdmUgbGlr
+ZQ0KPiB3ZSBkbyB3aXRoIHRoZSBtaWNyb2NvZGUgbG9hZGVyIHRvbywgYW5kIGxldCB0aGUga2Vy
+bmVsIHBhcnNlIHRoZSBjcGlvDQo+IGFyY2hpdmUuDQoNCkkgYmVsaWV2ZSB0aGlzIHdpbGwgbWFr
+ZSB0aGUgaW1wbGVtZW50YXRpb24gY29tcGxpY2F0ZWQgY29tcGFyZSB0byBhYm92ZS4NCg0KDQpS
+ZWdhcmRzLA0KV2lsc29uDQo=
