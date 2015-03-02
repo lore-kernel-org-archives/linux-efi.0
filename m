@@ -1,50 +1,73 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/8] x86, kaslr: get kaslr_enabled back correctly
-Date: Mon, 2 Mar 2015 13:13:58 +0000
-Message-ID: <20150302131358.GD24476@codeblueprint.co.uk>
-References: <1425176259-30087-1-git-send-email-yinghai@kernel.org>
- <1425176259-30087-2-git-send-email-yinghai@kernel.org>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fixes
+Date: Mon, 2 Mar 2015 14:24:10 +0100
+Message-ID: <20150302132410.GA4300@gmail.com>
+References: <20150302125104.GC24476@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1425176259-30087-2-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20150302125104.GC24476-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ivan Khoronzhuk <ivan.khoronzhuk-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 28 Feb, at 06:17:32PM, Yinghai Lu wrote:
-> We should access variable with referrence instead of using physical
-> address as value.
-> 
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> ---
->  arch/x86/kernel/setup.c | 8 +++++++-
->  1 file changed, 7 insertions(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-> index 98dc931..05d444f 100644
-> --- a/arch/x86/kernel/setup.c
-> +++ b/arch/x86/kernel/setup.c
-> @@ -429,7 +429,13 @@ static void __init reserve_initrd(void)
->  
->  static void __init parse_kaslr_setup(u64 pa_data, u32 data_len)
->  {
-> -	kaslr_enabled = (bool)(pa_data + sizeof(struct setup_data));
-> +	/* kaslr_setup_data is defined in aslr.c */
-> +	unsigned char *data;
-> +	unsigned long offset = sizeof(struct setup_data);
-> +
-> +	data = early_memremap(pa_data, offset + 1);
-> +	kaslr_enabled = *(data + offset);
-> +	early_memunmap(data, offset + 1);
->  }
 
-ACK in principle, but could we change 'offset' to 'size' or 'len' along
-with the commit log updates people have suggested?
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+> Folks, please pull the following urgent changes.
+> 
+> The following changes since commit 43a9f69692b232d1c64c913a27507eb14a1c47fd:
+> 
+>   Revert "efi/libstub: Call get_memory_map() to obtain map and desc sizes" (2015-02-18 11:38:13 +0000)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 6d9ff473317245e3e5cd9922b4520411c2296388:
+> 
+>   firmware: dmi_scan: Fix dmi_len type (2015-02-24 18:54:17 +0000)
+> 
+> ----------------------------------------------------------------
+>  * Fix regression in DMI sysfs code for handling "End of Table" entry
+>    and a type bug that could lead to integer overflow - Ivan Khoronzhuk
+> 
+>  * Fix boundary checking in efi_high_alloc() which can lead to memory
+>    corruption in the EFI boot stubs - Yinghai Lu
+> 
+> ----------------------------------------------------------------
+> Ivan Khoronzhuk (2):
+>       firmware: dmi_scan: Fix dmi scan to handle "End of Table" structure
+>       firmware: dmi_scan: Fix dmi_len type
+> 
+> Yinghai Lu (1):
+>       efi/libstub: Fix boundary checking in efi_high_alloc()
+> 
+>  drivers/firmware/dmi_scan.c                    | 17 +++++++++--------
+>  drivers/firmware/efi/libstub/efi-stub-helper.c |  8 ++++----
+>  2 files changed, 13 insertions(+), 12 deletions(-)
+
+Pulled, thanks Matt!
+
+For future reference, plase leave out unreadable commit messages like 
+this:
+
+  While adding support loading kernel and initrd above 4G to grub2 in 
+  legacy mode, I was referring to efi_high_alloc(). That will allocate 
+  buffer for kernel and then initrd, and initrd will use kernel buffer 
+  start as limit.
+
+  During testing found two buffers will be overlapped when initrd size 
+  is very big like 400M.
+
+I pulled it, because you do explain the commit in the second half of 
+the changelog, in parentheses - but instead of forcing readers through 
+the crappy part, please just drop the crappy explanation and fix it 
+up, or require your contributors to submit proper changelogs. (Yinghai 
+Lu is a repeat offender in that area.)
+
+Thanks,
+
+	Ingo
