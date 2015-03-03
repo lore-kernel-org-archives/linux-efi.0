@@ -1,209 +1,88 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: Clean up the efi_call_phys_[prolog|epilog]()
- save/restore interaction
-Date: Tue, 3 Mar 2015 07:48:50 +0100
-Message-ID: <20150303064850.GA30036@gmail.com>
-References: <20150303025804.GA24587@kt-Inspiron-3542>
- <20150303063433.GA30468@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi: stub: retrieve FDT size when loaded from UEFI config table
+Date: Tue,  3 Mar 2015 10:08:19 +0100
+Message-ID: <1425373699-16321-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150303063433.GA30468-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Tapasweni Pathak <tapaswenipathak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+When allocating memory for the copy of the FDT that the stub
+modifies and passes to the kernel, it uses the current size as
+an estimate of how much memory to allocate, and increases it page
+by page if it turns out to be too small. However, when loading
+the FDT from a UEFI configuration table, the estimated size is
+left at its default value of zero, and the allocation loop runs
+starting from zero all the way up to the allocation size that
+finally fits the updated FDT.
 
-Also clean up the save_pgd global variable while at it.
+Instead, retrieve the size of the FDT when loading it from the
+UEFI config table.
 
-untested as well.
-
-Thanks,
-
-	Ingo
-
-==============>
->From 166625ceaef68fcbeee63adc63c02d75abcaf0db Mon Sep 17 00:00:00 2001
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Date: Tue, 3 Mar 2015 07:42:48 +0100
-Subject: [PATCH] efi: Clean up the efi_call_phys_[prolog|epilog]() save/restore interaction
-
-Currently x86-64 efi_call_phys_prolog() saves into a global variable (save_pgd),
-and efi_call_phys_epilog() restores the kernel pagetables from that global
-variable.
-
-Change this to a cleaner save/restore pattern where the saving function returns
-the saved object and the restore function restores that.
-
-Apply the same concept to the 32-bit code as well.
-
-Plus this approach, as an added bonus, allows us to express the
-!efi_enabled(EFI_OLD_MEMMAP) situation in a clean fashion as well,
-via a 'NULL' return value.
-
-Cc: Tapasweni Pathak <tapaswenipathak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/include/asm/efi.h     |  6 ++++--
- arch/x86/platform/efi/efi.c    |  5 +++--
- arch/x86/platform/efi/efi_32.c | 11 ++++++++---
- arch/x86/platform/efi/efi_64.c | 26 ++++++++++++++++----------
- 4 files changed, 31 insertions(+), 17 deletions(-)
+ drivers/firmware/efi/libstub/arm-stub.c | 4 ++--
+ drivers/firmware/efi/libstub/efistub.h  | 2 +-
+ drivers/firmware/efi/libstub/fdt.c      | 4 +++-
+ 3 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 25bce45c6fc4..3738b138b843 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -2,6 +2,8 @@
- #define _ASM_X86_EFI_H
- 
- #include <asm/i387.h>
-+#include <asm/pgtable.h>
-+
- /*
-  * We map the EFI regions needed for runtime services non-contiguously,
-  * with preserved alignment on virtual addresses starting from -4G down
-@@ -89,8 +91,8 @@ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
- extern struct efi_scratch efi_scratch;
- extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
- extern int __init efi_memblock_x86_reserve_range(void);
--extern void __init efi_call_phys_prolog(void);
--extern void __init efi_call_phys_epilog(void);
-+extern pgd_t * __init efi_call_phys_prolog(void);
-+extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
- extern void __init efi_unmap_memmap(void);
- extern void __init efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 2490a15d18f1..aa5bd2b986c2 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -86,8 +86,9 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- {
- 	efi_status_t status;
- 	unsigned long flags;
-+	pgd_t *save_pgd;
- 
--	efi_call_phys_prolog();
-+	save_pgd = efi_call_phys_prolog();
- 
- 	/* Disable interrupts around EFI calls: */
- 	local_irq_save(flags);
-@@ -96,7 +97,7 @@ static efi_status_t __init phys_efi_set_virtual_address_map(
- 			       descriptor_version, virtual_map);
- 	local_irq_restore(flags);
- 
--	efi_call_phys_epilog();
-+	efi_call_phys_epilog(save_pgd);
- 
- 	return status;
- }
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index abecc6e1dc90..ed5b67338294 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -56,19 +56,24 @@ void __init efi_map_region(efi_memory_desc_t *md)
- void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
- void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
- 
--void __init efi_call_phys_prolog(void)
-+pgd_t * __init efi_call_phys_prolog(void)
- {
- 	struct desc_ptr gdt_descr;
-+	pgd_t *save_pgd;
- 
-+	/* Current pgd is swapper_pg_dir, we'll restore it later: */
-+	save_pgd = swapper_pg_dir;
- 	load_cr3(initial_page_table);
- 	__flush_tlb_all();
- 
- 	gdt_descr.address = __pa(get_cpu_gdt_table(0));
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
-+
-+	return save_pgd;
- }
- 
--void __init efi_call_phys_epilog(void)
-+void __init efi_call_phys_epilog(pgd_t *save_pgd)
- {
- 	struct desc_ptr gdt_descr;
- 
-@@ -76,7 +81,7 @@ void __init efi_call_phys_epilog(void)
- 	gdt_descr.size = GDT_SIZE - 1;
- 	load_gdt(&gdt_descr);
- 
--	load_cr3(swapper_pg_dir);
-+	load_cr3(save_pgd);
- 	__flush_tlb_all();
- }
- 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index 427eb3540e5f..a0ac0f9c307f 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -41,8 +41,6 @@
- #include <asm/realmode.h>
- #include <asm/time.h>
- 
--static pgd_t *save_pgd __initdata;
--
- /*
-  * We allocate runtime services regions bottom-up, starting from -4G, i.e.
-  * 0xffff_ffff_0000_0000 and limit EFI VA mapping space to 64G.
-@@ -77,14 +75,16 @@ static void __init early_code_mapping_set_exec(int executable)
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index b98f0fcb4c6a..84d0a0b4ac4f 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -175,7 +175,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	unsigned long initrd_addr;
+ 	u64 initrd_size = 0;
+ 	unsigned long fdt_addr = 0;  /* Original DTB */
+-	u64 fdt_size = 0;  /* We don't get size from configuration table */
++	unsigned long fdt_size = 0;
+ 	char *cmdline_ptr = NULL;
+ 	int cmdline_size = 0;
+ 	unsigned long new_fdt_addr;
+@@ -252,7 +252,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		pr_efi(sys_table, "Using DTB from command line\n");
+ 	} else {
+ 		/* Look for a device tree configuration table entry. */
+-		fdt_addr = (uintptr_t)get_fdt(sys_table);
++		fdt_addr = (uintptr_t)get_fdt(sys_table, &fdt_size);
+ 		if (fdt_addr)
+ 			pr_efi(sys_table, "Using DTB from configuration table\n");
  	}
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 47437b16b186..e334a01cf92f 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -41,7 +41,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 					    unsigned long fdt_addr,
+ 					    unsigned long fdt_size);
+ 
+-void *get_fdt(efi_system_table_t *sys_table);
++void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size);
+ 
+ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ 		     unsigned long desc_size, efi_memory_desc_t *runtime_map,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 378196944e66..21aca05448d4 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -320,7 +320,7 @@ fail:
+ 	return EFI_LOAD_ERROR;
  }
  
--void __init efi_call_phys_prolog(void)
-+pgd_t * __init efi_call_phys_prolog(void)
+-void *get_fdt(efi_system_table_t *sys_table)
++void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
  {
- 	unsigned long vaddress;
-+	pgd_t *save_pgd;
-+
- 	int pgd;
- 	int n_pgds;
+ 	efi_guid_t fdt_guid = DEVICE_TREE_GUID;
+ 	efi_config_table_t *tables;
+@@ -333,6 +333,8 @@ void *get_fdt(efi_system_table_t *sys_table)
+ 	for (i = 0; i < sys_table->nr_tables; i++)
+ 		if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
+ 			fdt = (void *) tables[i].table;
++			if (!fdt_check_header(fdt))
++				*fdt_size = fdt_totalsize(fdt);
+ 			break;
+ 	 }
  
- 	if (!efi_enabled(EFI_OLD_MEMMAP))
--		return;
-+		return NULL;
- 
- 	early_code_mapping_set_exec(1);
- 
-@@ -97,22 +97,28 @@ void __init efi_call_phys_prolog(void)
- 		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
- 	}
- 	__flush_tlb_all();
-+
-+	return save_pgd;
- }
- 
--void __init efi_call_phys_epilog(void)
-+void __init efi_call_phys_epilog(pgd_t *save_pgd)
- {
- 	/*
- 	 * After the lock is released, the original page table is restored.
- 	 */
--	int pgd;
--	int n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
-+	int pgd_idx;
-+	int nr_pgds;
- 
--	if (!efi_enabled(EFI_OLD_MEMMAP))
-+	if (!save_pgd)
- 		return;
- 
--	for (pgd = 0; pgd < n_pgds; pgd++)
--		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), save_pgd[pgd]);
-+	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
-+
-+	for (pgd_idx = 0; pgd_idx < nr_pgds; pgd_idx++)
-+		set_pgd(pgd_offset_k(pgd_idx * PGDIR_SIZE), save_pgd[pgd_idx]);
-+
- 	kfree(save_pgd);
-+
- 	__flush_tlb_all();
- 	early_code_mapping_set_exec(0);
- }
+-- 
+1.8.3.2
