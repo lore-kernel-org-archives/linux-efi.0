@@ -1,121 +1,101 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: stub: retrieve FDT size when loaded from UEFI config table
-Date: Tue, 3 Mar 2015 10:03:33 -0800
-Message-ID: <CAFECyb-9Uv4AFrPjrj-6zYqyFkEe_YaA3HUBiec_4SeLwwfAjQ@mail.gmail.com>
-References: <1425373699-16321-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Tue, 3 Mar 2015 12:37:54 -0800
+Message-ID: <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+ <20150302122955.GB24476@codeblueprint.co.uk> <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1425373699-16321-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Cc: Matt Fleming <matt@console-pimps.org>, Borislav Petkov <bp@alien8.de>, Sam Protsenko <semen.protsenko@linaro.org>, Ming Lei <ming.lei@canonical.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 3, 2015 at 1:08 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> When allocating memory for the copy of the FDT that the stub
-> modifies and passes to the kernel, it uses the current size as
-> an estimate of how much memory to allocate, and increases it page
-> by page if it turns out to be too small. However, when loading
-> the FDT from a UEFI configuration table, the estimated size is
-> left at its default value of zero, and the allocation loop runs
-> starting from zero all the way up to the allocation size that
-> finally fits the updated FDT.
+On Mon, Mar 2, 2015 at 9:56 PM, Kweh, Hock Leong
+<hock.leong.kweh@intel.com> wrote:
+>> -----Original Message-----
+>> From: Matt Fleming [mailto:matt@console-pimps.org]
+>> Sent: Monday, March 02, 2015 8:30 PM
+>>
+>> On Mon, 02 Mar, at 10:59:00AM, Kweh Hock Leong wrote:
+>> > > -----Original Message-----
+>> > > From: Borislav Petkov [mailto:bp@alien8.de]
+>> > > Sent: Wednesday, February 25, 2015 8:49 PM
+>> > >
+>> > > On Wed, Feb 25, 2015 at 12:38:20PM +0000, Kweh, Hock Leong wrote:
+>> > > > The reason we use this interface for efi capsule is that efi capsule
+>> > > > support multi binaries to be uploaded and each binary file name
+>> > > > can be different.
+>> > >
+>> > > So you can write the file path to a second file and reload then, once
+>> > > per file.
+>> >
+>> > Thanks for the suggestion. Did some exploration on this approach and
+>> > would like to continue the discussion together with this suggested design.
+>> >
+>> > Ideal condition:
+>> > - one file note is enough for load binary and status return (capsule_load)
+>> > - load steps would be as simple as just:
+>> >    echo [binary file name] > capsule_load
+>> > - status return in the same command action. If failed, the echo will fail
+>> >    with the failing status code.
+>> >
+>> > Trade off:
+>> > - does not have the run time flexibility to load any firmware binaries at
+>> >    different different path as firmware class  only support one custom
+>> >    path inputted during boot time/load time. Unless to add new export
+>> >    function for firmware class.
+>>
+>> Could you elaborate here? I don't understand this point.
 >
-> Instead, retrieve the size of the FDT when loading it from the
-> UEFI config table.
-minor nit - maybe say "retrieve the size of the FDT from the FDT
-header" to make clear
-the size is provided by the FDT, and not the EFI configuration table entry.
+> Just to call out that using firmware class auto locate binary feature is limited
+> to locations:
+> - "/lib/firmware/updates/" UTS_RELEASE,
+> - "/lib/firmware/updates",
+> - "/lib/firmware/" UTS_RELEASE,
+> - "/lib/firmware"
+> and one custom path which inputted during firmware_class module load
+> time or kernel boot up time.
+>
+> It is just not like the user helper interface which allow load the binary at
+> any path/location.
+>
+> This really is not a big deal. User should cope with it.
 
+No, it's a big deal, and the user should not cope.
 
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/libstub/arm-stub.c | 4 ++--
->  drivers/firmware/efi/libstub/efistub.h  | 2 +-
->  drivers/firmware/efi/libstub/fdt.c      | 4 +++-
->  3 files changed, 6 insertions(+), 4 deletions(-)
->
-> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> index b98f0fcb4c6a..84d0a0b4ac4f 100644
-> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> @@ -175,7 +175,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->         unsigned long initrd_addr;
->         u64 initrd_size = 0;
->         unsigned long fdt_addr = 0;  /* Original DTB */
-> -       u64 fdt_size = 0;  /* We don't get size from configuration table */
-> +       unsigned long fdt_size = 0;
->         char *cmdline_ptr = NULL;
->         int cmdline_size = 0;
->         unsigned long new_fdt_addr;
-> @@ -252,7 +252,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->                 pr_efi(sys_table, "Using DTB from command line\n");
->         } else {
->                 /* Look for a device tree configuration table entry. */
-> -               fdt_addr = (uintptr_t)get_fdt(sys_table);
-> +               fdt_addr = (uintptr_t)get_fdt(sys_table, &fdt_size);
->                 if (fdt_addr)
->                         pr_efi(sys_table, "Using DTB from configuration table\n");
->         }
-> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-> index 47437b16b186..e334a01cf92f 100644
-> --- a/drivers/firmware/efi/libstub/efistub.h
-> +++ b/drivers/firmware/efi/libstub/efistub.h
-> @@ -41,7 +41,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->                                             unsigned long fdt_addr,
->                                             unsigned long fdt_size);
->
-> -void *get_fdt(efi_system_table_t *sys_table);
-> +void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size);
->
->  void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
->                      unsigned long desc_size, efi_memory_desc_t *runtime_map,
+The user *should not* be required to have write access to anything in
+/lib to install a UEFI capsule that they download from their
+motherboard vendor's website.  /lib belongs to the distro, and UEFI
+capsules do not belong to the distro.  In this regard, UEFI capsules
+are completely unlike your wireless card firmware, your cpu microcode,
+etc.
 
-It looks like there are some old casts of fdt_size/fdt_addr to unsigned long
-around line 240:
-if (efi_secureboot_enabled(sys_table)) {
-        pr_efi(sys_table, "UEFI Secure Boot is enabled.\n");
-} else {
-        status = handle_cmdline_files(sys_table, image, cmdline_ptr,
-                                      "dtb=",
-                                      ~0UL, (unsigned long *)&fdt_addr,
-                                      (unsigned long *)&fdt_size);
-It looks like both casts to unsigned long can go, as both fdt_size and fdt_addr
-are unsigned long. (fdt_addr already has the right type, but still has a cast.)
-I don't see any reason for fdt_size to be u64, so the type change itself seems
-fine.
+Imagine systems using NFS root, Atomic-style systems (e.g. ostree),
+systems that boot off squashfs, etc.  They should still be able to
+load capsules.  The basic user interface that should work is:
 
+# uefi-load-capsule /path/to/capsule
 
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index 378196944e66..21aca05448d4 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -320,7 +320,7 @@ fail:
->         return EFI_LOAD_ERROR;
->  }
->
-> -void *get_fdt(efi_system_table_t *sys_table)
-> +void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
->  {
->         efi_guid_t fdt_guid = DEVICE_TREE_GUID;
->         efi_config_table_t *tables;
-> @@ -333,6 +333,8 @@ void *get_fdt(efi_system_table_t *sys_table)
->         for (i = 0; i < sys_table->nr_tables; i++)
->                 if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
->                         fdt = (void *) tables[i].table;
-> +                       if (!fdt_check_header(fdt))
-> +                               *fdt_size = fdt_totalsize(fdt);
->                         break;
+or:
 
-Should we return NULL (with an error message) here if the FDT header
-check fails? We'll eventually do that
-when we try to update the FDT, but it seems nicer to not propagate
-data that we know is bad.
->          }
->
-> --
-> 1.8.3.2
->
+# uefi-load-capsule - </path/to/capsule
+
+I don't really care how uefi-load-capsule is implemented, as long as
+it's straightforward, because people will screw it up if it isn't
+straightforward.
+
+Why is it so hard to have a file in sysfs that you write the capsule
+to using *cat* (not echo) and that will return an error code if cat
+fails?  Is it because you don't know where the end of the capsule is?
+if so, ioctl is designed for exactly this purpose.
+
+TBH, I find this thread kind of ridiculous.  The problem that you're
+trying to solve is extremely simple, the functionality that userspace
+needs is trivial, and all of these complex proposals for how it should
+work are an artifact of the fact that the kernel-internal interfaces
+you're using for it are not well suited to the problem at hand.
+
+--Andy
