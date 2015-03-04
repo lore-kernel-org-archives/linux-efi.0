@@ -1,52 +1,115 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Tue, 3 Mar 2015 13:56:30 -0800
-Message-ID: <CALCETrVVC2bqM9KAbb6A_2kN=fwbKer5VZ-nZdKW8J_MNrM-MA@mail.gmail.com>
-References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
- <20150302122955.GB24476@codeblueprint.co.uk> <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
- <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com> <20150303204956.GG25768@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150303204956.GG25768@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Matt Fleming <matt@console-pimps.org>, Ong Boon Leong <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sam Protsenko <semen.protsenko@linaro.org>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 05/15] x86, kaslr: consolidate the mem_avoid filling
+Date: Wed,  4 Mar 2015 00:00:38 -0800
+Message-ID: <1425456048-16236-6-git-send-email-yinghai@kernel.org>
+References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1425456048-16236-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mar 3, 2015 12:51 PM, "Borislav Petkov" <bp@alien8.de> wrote:
->
-> On Tue, Mar 03, 2015 at 12:37:54PM -0800, Andy Lutomirski wrote:
-> > The user *should not* be required to have write access to anything in
-> > /lib to install a UEFI capsule that they download from their
-> > motherboard vendor's website.  /lib belongs to the distro, and UEFI
-> > capsules do not belong to the distro.  In this regard, UEFI capsules
-> > are completely unlike your wireless card firmware, your cpu microcode,
-> > etc.
->
-> Oh oh but but, if an UEFI capsule can brick the system, a normal user
-> would be able to brick that system then. I think we should forbid that.
+Now ZO sit end of the buffer, we can find out where is ZO text
+and data/bss etc.
 
-Absolutely.  That's why I said
+[input, input+input_size) is copied compressed kernel, not the whole ZO.
+[output, output+init_size) is the buffer for VO.
 
-# uefi-load-capsule
+[input+input_size, output+init_size) is [_text, _end) for ZO.
+that will be first range in mem_avoid. we don't need to guess that anymore.
 
-and not
+That area aleady include heap and stack. So we don't need to put
+them into mem_avoid array.
 
-$ uefi-load-capsule
+Also we need to put boot_params into the mem_avoid too.
+as with 64bit boot loader will put them above 4G.
 
-:)
+Also change output_size to init_size, as we pass that instead already.
 
->
-> I agree with the rest of your note that a simple
->
-> cat <fw_blob> > /sys/...
->
-> should be enough.
->
-> --
-> Regards/Gruss,
->     Boris.
->
-> ECO tip #101: Trim your mails when you reply.
-> --
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+---
+ arch/x86/boot/compressed/aslr.c | 29 ++++++++++++++---------------
+ 1 file changed, 14 insertions(+), 15 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
+index 7083c16..e8486a5 100644
+--- a/arch/x86/boot/compressed/aslr.c
++++ b/arch/x86/boot/compressed/aslr.c
+@@ -116,7 +116,7 @@ struct mem_vector {
+ 	unsigned long size;
+ };
+ 
+-#define MEM_AVOID_MAX 5
++#define MEM_AVOID_MAX 4
+ static struct mem_vector mem_avoid[MEM_AVOID_MAX];
+ 
+ static bool mem_contains(struct mem_vector *region, struct mem_vector *item)
+@@ -142,7 +142,7 @@ static bool mem_overlaps(struct mem_vector *one, struct mem_vector *two)
+ }
+ 
+ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+-			   unsigned long output, unsigned long output_size)
++			   unsigned long output, unsigned long init_size)
+ {
+ 	u64 initrd_start, initrd_size;
+ 	u64 cmd_line, cmd_line_size;
+@@ -151,10 +151,13 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 
+ 	/*
+ 	 * Avoid the region that is unsafe to overlap during
+-	 * decompression (see calculations at top of misc.c).
++	 * decompression.
++	 * As we already move compressed to the end of buffer,
++	 * [input+input_size, output+init_size) has [_text, _end)
++	 * for arch/x86/boot/compressed/vmlinux.
+ 	 */
+-	unsafe_len = (output_size >> 12) + 32768 + 18;
+-	unsafe = (unsigned long)input + input_size - unsafe_len;
++	unsafe_len = output + init_size - (input + input_size);
++	unsafe = (unsigned long)input + input_size;
+ 	mem_avoid[0].start = unsafe;
+ 	mem_avoid[0].size = unsafe_len;
+ 
+@@ -176,13 +179,9 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 	mem_avoid[2].start = cmd_line;
+ 	mem_avoid[2].size = cmd_line_size;
+ 
+-	/* Avoid heap memory. */
+-	mem_avoid[3].start = (unsigned long)free_mem_ptr;
+-	mem_avoid[3].size = BOOT_HEAP_SIZE;
+-
+-	/* Avoid stack memory. */
+-	mem_avoid[4].start = (unsigned long)free_mem_end_ptr;
+-	mem_avoid[4].size = BOOT_STACK_SIZE;
++	/* Avoid params */
++	mem_avoid[3].start = (unsigned long)real_mode;
++	mem_avoid[3].size = sizeof(*real_mode);
+ }
+ 
+ /* Does this memory vector overlap a known avoided area? */
+@@ -327,7 +326,7 @@ unsigned char *choose_kernel_location(struct boot_params *params,
+ 				      unsigned char *input,
+ 				      unsigned long input_size,
+ 				      unsigned char *output,
+-				      unsigned long output_size)
++				      unsigned long init_size)
+ {
+ 	unsigned long choice = (unsigned long)output;
+ 	unsigned long random;
+@@ -349,10 +348,10 @@ unsigned char *choose_kernel_location(struct boot_params *params,
+ 
+ 	/* Record the various known unsafe memory ranges. */
+ 	mem_avoid_init((unsigned long)input, input_size,
+-		       (unsigned long)output, output_size);
++		       (unsigned long)output, init_size);
+ 
+ 	/* Walk e820 and find a random address. */
+-	random = find_random_addr(choice, output_size);
++	random = find_random_addr(choice, init_size);
+ 	if (!random) {
+ 		debug_putstr("KASLR could not find suitable E820 region...\n");
+ 		goto out;
+-- 
+1.8.4.5
