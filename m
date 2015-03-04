@@ -1,115 +1,118 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 05/15] x86, kaslr: consolidate the mem_avoid filling
-Date: Wed,  4 Mar 2015 00:00:38 -0800
-Message-ID: <1425456048-16236-6-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v2 02/15] x86, boot: move ZO to end of buffer
+Date: Wed,  4 Mar 2015 00:00:35 -0800
+Message-ID: <1425456048-16236-3-git-send-email-yinghai@kernel.org>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1425456048-16236-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
+Sender: linux-pci-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now ZO sit end of the buffer, we can find out where is ZO text
-and data/bss etc.
+bp found data from boot stage can not be used kernel stage.
 
-[input, input+input_size) is copied compressed kernel, not the whole ZO.
-[output, output+init_size) is the buffer for VO.
+Actually those data area is overlapped with VO kernel bss stage, and clear_bss()
+clear them before code in arch/x86/kernel/setup.c access them.
 
-[input+input_size, output+init_size) is [_text, _end) for ZO.
-that will be first range in mem_avoid. we don't need to guess that anymore.
+To make the data survive that later, we should avoid the overlapping.
 
-That area aleady include heap and stack. So we don't need to put
-them into mem_avoid array.
+At first move compressed kernel close the end of buffer instead of middle
+of the buffer.
 
-Also we need to put boot_params into the mem_avoid too.
-as with 64bit boot loader will put them above 4G.
-
-Also change output_size to init_size, as we pass that instead already.
-
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Kees Cook <keescook@chromium.org>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/boot/compressed/aslr.c | 29 ++++++++++++++---------------
- 1 file changed, 14 insertions(+), 15 deletions(-)
+ arch/x86/boot/compressed/head_32.S | 11 +++++++++--
+ arch/x86/boot/compressed/head_64.S |  8 ++++++--
+ arch/x86/boot/compressed/mkpiggy.c |  3 ---
+ arch/x86/kernel/asm-offsets.c      |  1 +
+ 4 files changed, 16 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index 7083c16..e8486a5 100644
---- a/arch/x86/boot/compressed/aslr.c
-+++ b/arch/x86/boot/compressed/aslr.c
-@@ -116,7 +116,7 @@ struct mem_vector {
- 	unsigned long size;
- };
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index cbed140..a9b56f1 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -147,7 +147,9 @@ preferred_addr:
+ 1:
  
--#define MEM_AVOID_MAX 5
-+#define MEM_AVOID_MAX 4
- static struct mem_vector mem_avoid[MEM_AVOID_MAX];
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	addl    %eax, %ebx
  
- static bool mem_contains(struct mem_vector *region, struct mem_vector *item)
-@@ -142,7 +142,7 @@ static bool mem_overlaps(struct mem_vector *one, struct mem_vector *two)
- }
+ 	/* Set up the stack */
+ 	leal	boot_stack_end(%ebx), %esp
+@@ -208,8 +210,13 @@ relocated:
+  */
+ 				/* push arguments for decompress_kernel: */
+ 	pushl	$z_output_len	/* decompressed length */
+-	leal	z_extract_offset_negative(%ebx), %ebp
++
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	movl    %ebx, %ebp
++	subl    %eax, %ebp
+ 	pushl	%ebp		/* output address */
++
+ 	pushl	$z_input_len	/* input_len */
+ 	leal	input_data(%ebx), %eax
+ 	pushl	%eax		/* input_data */
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2884e0c..69015b5 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -101,7 +101,9 @@ ENTRY(startup_32)
+ 1:
  
- static void mem_avoid_init(unsigned long input, unsigned long input_size,
--			   unsigned long output, unsigned long output_size)
-+			   unsigned long output, unsigned long init_size)
- {
- 	u64 initrd_start, initrd_size;
- 	u64 cmd_line, cmd_line_size;
-@@ -151,10 +151,13 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl	BP_init_size(%esi), %eax
++	subl	$_end, %eax
++	addl	%eax, %ebx
  
- 	/*
- 	 * Avoid the region that is unsafe to overlap during
--	 * decompression (see calculations at top of misc.c).
-+	 * decompression.
-+	 * As we already move compressed to the end of buffer,
-+	 * [input+input_size, output+init_size) has [_text, _end)
-+	 * for arch/x86/boot/compressed/vmlinux.
- 	 */
--	unsafe_len = (output_size >> 12) + 32768 + 18;
--	unsafe = (unsigned long)input + input_size - unsafe_len;
-+	unsafe_len = output + init_size - (input + input_size);
-+	unsafe = (unsigned long)input + input_size;
- 	mem_avoid[0].start = unsafe;
- 	mem_avoid[0].size = unsafe_len;
+ /*
+  * Prepare for entering 64 bit mode
+@@ -329,7 +331,9 @@ preferred_addr:
+ 1:
  
-@@ -176,13 +179,9 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	mem_avoid[2].start = cmd_line;
- 	mem_avoid[2].size = cmd_line_size;
+ 	/* Target address to relocate to for decompression */
+-	leaq	z_extract_offset(%rbp), %rbx
++	movl	BP_init_size(%rsi), %ebx
++	subl	$_end, %ebx
++	addq	%rbp, %rbx
  
--	/* Avoid heap memory. */
--	mem_avoid[3].start = (unsigned long)free_mem_ptr;
--	mem_avoid[3].size = BOOT_HEAP_SIZE;
--
--	/* Avoid stack memory. */
--	mem_avoid[4].start = (unsigned long)free_mem_end_ptr;
--	mem_avoid[4].size = BOOT_STACK_SIZE;
-+	/* Avoid params */
-+	mem_avoid[3].start = (unsigned long)real_mode;
-+	mem_avoid[3].size = sizeof(*real_mode);
- }
+ 	/* Set up the stack */
+ 	leaq	boot_stack_end(%rbx), %rsp
+diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
+index b669ab6..652879b 100644
+--- a/arch/x86/boot/compressed/mkpiggy.c
++++ b/arch/x86/boot/compressed/mkpiggy.c
+@@ -82,9 +82,6 @@ int main(int argc, char *argv[])
+ 	printf("z_output_len = %lu\n", (unsigned long)olen);
+ 	printf(".globl z_extract_offset\n");
+ 	printf("z_extract_offset = 0x%lx\n", offs);
+-	/* z_extract_offset_negative allows simplification of head_32.S */
+-	printf(".globl z_extract_offset_negative\n");
+-	printf("z_extract_offset_negative = -0x%lx\n", offs);
  
- /* Does this memory vector overlap a known avoided area? */
-@@ -327,7 +326,7 @@ unsigned char *choose_kernel_location(struct boot_params *params,
- 				      unsigned char *input,
- 				      unsigned long input_size,
- 				      unsigned char *output,
--				      unsigned long output_size)
-+				      unsigned long init_size)
- {
- 	unsigned long choice = (unsigned long)output;
- 	unsigned long random;
-@@ -349,10 +348,10 @@ unsigned char *choose_kernel_location(struct boot_params *params,
+ 	printf(".globl input_data, input_data_end\n");
+ 	printf("input_data:\n");
+diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
+index 9f6b934..0e8e4f7 100644
+--- a/arch/x86/kernel/asm-offsets.c
++++ b/arch/x86/kernel/asm-offsets.c
+@@ -66,6 +66,7 @@ void common(void) {
+ 	OFFSET(BP_hardware_subarch, boot_params, hdr.hardware_subarch);
+ 	OFFSET(BP_version, boot_params, hdr.version);
+ 	OFFSET(BP_kernel_alignment, boot_params, hdr.kernel_alignment);
++	OFFSET(BP_init_size, boot_params, hdr.init_size);
+ 	OFFSET(BP_pref_address, boot_params, hdr.pref_address);
+ 	OFFSET(BP_code32_start, boot_params, hdr.code32_start);
  
- 	/* Record the various known unsafe memory ranges. */
- 	mem_avoid_init((unsigned long)input, input_size,
--		       (unsigned long)output, output_size);
-+		       (unsigned long)output, init_size);
- 
- 	/* Walk e820 and find a random address. */
--	random = find_random_addr(choice, output_size);
-+	random = find_random_addr(choice, init_size);
- 	if (!random) {
- 		debug_putstr("KASLR could not find suitable E820 region...\n");
- 		goto out;
 -- 
 1.8.4.5
