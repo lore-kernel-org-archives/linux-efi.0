@@ -1,52 +1,97 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 04/15] x86, kaslr: get kaslr_enabled back correctly
-Date: Wed,  4 Mar 2015 00:00:37 -0800
-Message-ID: <1425456048-16236-5-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v2 03/15] x86, boot: keep data from ZO boot stage to VO kernel stage.
+Date: Wed,  4 Mar 2015 00:00:36 -0800
+Message-ID: <1425456048-16236-4-git-send-email-yinghai@kernel.org>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1425456048-16236-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
-commit f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
-is using address as value for kaslr_enabled.
+bp found data from boot stage can not be used kernel stage.
 
-That will random kaslr_enabled get that set or cleared.
-Will have problem for system really have kaslr enabled.
+Actually those data area is overlapped with kernel bss stage, and clear_bss()
+clear them before code in arch/x86/kernel/setup.c access them.
 
--v2: update changelog.
+To make the data survive that later, we should avoid the overlapping.
+
+We already move compressed kernel close the end of buffer instead of middle of
+buffer. But there will have overlapping beween VO BRK with ZO data/bss range.
+
+Extend init_size so no one from kernel bss and brk will touch the data
+region of boot/compressed/misc.c
+
+The increase is from _rodata to _end in arch/x86/boot/compressed/vmlinux.
+
+-v2: add init_size in arch/x86/boot/header.S instead of BRK.
+-v3: split code that move Zo to end of buffer to another patch.
 
 Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Acked-by: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Kees Cook <keescook@chromium.org>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/kernel/setup.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ arch/x86/boot/Makefile                 | 2 +-
+ arch/x86/boot/compressed/vmlinux.lds.S | 2 ++
+ arch/x86/boot/header.S                 | 7 +++++--
+ 3 files changed, 8 insertions(+), 3 deletions(-)
 
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 98dc931..05d444f 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -429,7 +429,13 @@ static void __init reserve_initrd(void)
+diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
+index 57bbf2f..863ef25 100644
+--- a/arch/x86/boot/Makefile
++++ b/arch/x86/boot/Makefile
+@@ -86,7 +86,7 @@ targets += voffset.h
+ $(obj)/voffset.h: vmlinux FORCE
+ 	$(call if_changed,voffset)
  
- static void __init parse_kaslr_setup(u64 pa_data, u32 data_len)
- {
--	kaslr_enabled = (bool)(pa_data + sizeof(struct setup_data));
-+	/* kaslr_setup_data is defined in aslr.c */
-+	unsigned char *data;
-+	unsigned long offset = sizeof(struct setup_data);
-+
-+	data = early_memremap(pa_data, offset + 1);
-+	kaslr_enabled = *(data + offset);
-+	early_memunmap(data, offset + 1);
+-sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
++sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|_rodata\|z_.*\)$$/\#define ZO_\2 0x\1/p'
+ 
+ quiet_cmd_zoffset = ZOFFSET $@
+       cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 34d047c..805d6ad 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -35,6 +35,7 @@ SECTIONS
+ 		*(.text.*)
+ 		_etext = . ;
+ 	}
++        . = ALIGN(PAGE_SIZE); /* keep ADDON_ZO_SIZE page aligned */
+ 	.rodata : {
+ 		_rodata = . ;
+ 		*(.rodata)	 /* read-only data */
+@@ -70,5 +71,6 @@ SECTIONS
+ 		_epgtable = . ;
+ 	}
+ #endif
++        . = ALIGN(PAGE_SIZE);  /* keep ADDON_ZO_SIZE page aligned */
+ 	_end = .;
  }
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 16ef025..44359bd 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -440,12 +440,15 @@ setup_data:		.quad 0			# 64-bit physical pointer to
  
- static void __init parse_setup_data(void)
+ pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
+ 
++# don't overlap data area of ZO with VO
++#define ADDON_ZO_SIZE (ZO__end - ZO__rodata)
++
+ #define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_extract_offset)
+ #define VO_INIT_SIZE	(VO__end - VO__text)
+ #if ZO_INIT_SIZE > VO_INIT_SIZE
+-#define INIT_SIZE ZO_INIT_SIZE
++#define INIT_SIZE (ZO_INIT_SIZE + ADDON_ZO_SIZE)
+ #else
+-#define INIT_SIZE VO_INIT_SIZE
++#define INIT_SIZE (VO_INIT_SIZE + ADDON_ZO_SIZE)
+ #endif
+ init_size:		.long INIT_SIZE		# kernel initialization size
+ handover_offset:	.long 0			# Filled in by build.c
 -- 
 1.8.4.5
