@@ -1,219 +1,218 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v2 15/15] x86, pci: export SETUP_PCI data via sysfs
-Date: Wed,  4 Mar 2015 00:00:48 -0800
-Message-ID: <1425456048-16236-16-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 12/15] x86: kill not used setup_data handling code
+Date: Wed,  4 Mar 2015 00:00:45 -0800
+Message-ID: <1425456048-16236-13-git-send-email-yinghai@kernel.org>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1425456048-16236-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-So we could let kexec-tools to rebuild SETUP_PCI and pass it to
-second kernel.
-
-Now kexec-tools already build SETUP_EFI and SETUP_E820EXT.
-
-Cc: Bjorn Helgaas <bhelgaas@google.com>
-Cc: linux-pci@vger.kernel.org
-Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/pci/common.c | 175 ++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 175 insertions(+)
+ arch/x86/kernel/kdebugfs.c | 142 ---------------------------------------------
+ arch/x86/kernel/setup.c    |  17 ------
+ 2 files changed, 159 deletions(-)
 
-diff --git a/arch/x86/pci/common.c b/arch/x86/pci/common.c
-index a5de331..fb4765b 100644
---- a/arch/x86/pci/common.c
-+++ b/arch/x86/pci/common.c
-@@ -682,6 +682,8 @@ void __init add_pci(u64 pa_data)
+diff --git a/arch/x86/kernel/kdebugfs.c b/arch/x86/kernel/kdebugfs.c
+index dc1404b..c8ca86c 100644
+--- a/arch/x86/kernel/kdebugfs.c
++++ b/arch/x86/kernel/kdebugfs.c
+@@ -21,142 +21,6 @@ struct dentry *arch_debugfs_dir;
+ EXPORT_SYMBOL(arch_debugfs_dir);
  
- struct firmware_setup_pci_entry {
- 	struct list_head list;
-+	struct kobject kobj;
-+	struct bin_attribute *rom_attr;
- 	uint16_t vendor;
- 	uint16_t devid;
- 	uint64_t pcilen;
-@@ -803,6 +805,179 @@ int pcibios_add_device(struct pci_dev *dev)
+ #ifdef CONFIG_DEBUG_BOOT_PARAMS
+-struct setup_data_node {
+-	u64 paddr;
+-	u32 type;
+-	u32 len;
+-};
+-
+-static ssize_t setup_data_read(struct file *file, char __user *user_buf,
+-			       size_t count, loff_t *ppos)
+-{
+-	struct setup_data_node *node = file->private_data;
+-	unsigned long remain;
+-	loff_t pos = *ppos;
+-	struct page *pg;
+-	void *p;
+-	u64 pa;
+-
+-	if (pos < 0)
+-		return -EINVAL;
+-
+-	if (pos >= node->len)
+-		return 0;
+-
+-	if (count > node->len - pos)
+-		count = node->len - pos;
+-
+-	pa = node->paddr + sizeof(struct setup_data) + pos;
+-	pg = pfn_to_page((pa + count - 1) >> PAGE_SHIFT);
+-	if (PageHighMem(pg)) {
+-		p = ioremap_cache(pa, count);
+-		if (!p)
+-			return -ENXIO;
+-	} else
+-		p = __va(pa);
+-
+-	remain = copy_to_user(user_buf, p, count);
+-
+-	if (PageHighMem(pg))
+-		iounmap(p);
+-
+-	if (remain)
+-		return -EFAULT;
+-
+-	*ppos = pos + count;
+-
+-	return count;
+-}
+-
+-static const struct file_operations fops_setup_data = {
+-	.read		= setup_data_read,
+-	.open		= simple_open,
+-	.llseek		= default_llseek,
+-};
+-
+-static int __init
+-create_setup_data_node(struct dentry *parent, int no,
+-		       struct setup_data_node *node)
+-{
+-	struct dentry *d, *type, *data;
+-	char buf[16];
+-
+-	sprintf(buf, "%d", no);
+-	d = debugfs_create_dir(buf, parent);
+-	if (!d)
+-		return -ENOMEM;
+-
+-	type = debugfs_create_x32("type", S_IRUGO, d, &node->type);
+-	if (!type)
+-		goto err_dir;
+-
+-	data = debugfs_create_file("data", S_IRUGO, d, node, &fops_setup_data);
+-	if (!data)
+-		goto err_type;
+-
+-	return 0;
+-
+-err_type:
+-	debugfs_remove(type);
+-err_dir:
+-	debugfs_remove(d);
+-	return -ENOMEM;
+-}
+-
+-static int __init create_setup_data_nodes(struct dentry *parent)
+-{
+-	struct setup_data_node *node;
+-	struct setup_data *data;
+-	int error;
+-	struct dentry *d;
+-	struct page *pg;
+-	u64 pa_data;
+-	int no = 0;
+-
+-	d = debugfs_create_dir("setup_data", parent);
+-	if (!d)
+-		return -ENOMEM;
+-
+-	pa_data = boot_params.hdr.setup_data;
+-
+-	while (pa_data) {
+-		node = kmalloc(sizeof(*node), GFP_KERNEL);
+-		if (!node) {
+-			error = -ENOMEM;
+-			goto err_dir;
+-		}
+-
+-		pg = pfn_to_page((pa_data+sizeof(*data)-1) >> PAGE_SHIFT);
+-		if (PageHighMem(pg)) {
+-			data = ioremap_cache(pa_data, sizeof(*data));
+-			if (!data) {
+-				kfree(node);
+-				error = -ENXIO;
+-				goto err_dir;
+-			}
+-		} else
+-			data = __va(pa_data);
+-
+-		node->paddr = pa_data;
+-		node->type = data->type;
+-		node->len = data->len;
+-		error = create_setup_data_node(d, no, node);
+-		pa_data = data->next;
+-
+-		if (PageHighMem(pg))
+-			iounmap(data);
+-		if (error)
+-			goto err_dir;
+-		no++;
+-	}
+-
+-	return 0;
+-
+-err_dir:
+-	debugfs_remove(d);
+-	return error;
+-}
+-
+ static struct debugfs_blob_wrapper boot_params_blob = {
+ 	.data		= &boot_params,
+ 	.size		= sizeof(boot_params),
+@@ -181,14 +45,8 @@ static int __init boot_params_kdebugfs_init(void)
+ 	if (!data)
+ 		goto err_version;
+ 
+-	error = create_setup_data_nodes(dbp);
+-	if (error)
+-		goto err_data;
+-
  	return 0;
+ 
+-err_data:
+-	debugfs_remove(data);
+ err_version:
+ 	debugfs_remove(version);
+ err_dir:
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index b1296d3..9a18078 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -481,20 +481,6 @@ static void __init parse_setup_data(void)
+ 	boot_params.hdr.setup_data = 0; /* all done */
  }
  
-+#ifdef CONFIG_SYSFS
-+static inline struct firmware_setup_pci_entry *
-+to_setup_pci_entry(struct kobject *kobj)
-+{
-+	return container_of(kobj, struct firmware_setup_pci_entry, kobj);
-+}
-+
-+static ssize_t vendor_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%04llx\n",
-+			(unsigned long long)entry->vendor);
-+}
-+
-+static ssize_t devid_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%04llx\n",
-+			(unsigned long long)entry->devid);
-+}
-+
-+static ssize_t pcilen_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%llx\n",
-+			(unsigned long long)entry->pcilen);
-+}
-+
-+static ssize_t segment_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%04llx\n",
-+			(unsigned long long)entry->segment);
-+}
-+
-+static ssize_t bus_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%02llx\n",
-+			(unsigned long long)entry->bus);
-+}
-+
-+static ssize_t device_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%02llx\n",
-+			(unsigned long long)entry->device);
-+}
-+
-+static ssize_t function_show(struct firmware_setup_pci_entry *entry, char *buf)
-+{
-+	return snprintf(buf, PAGE_SIZE, "0x%1llx\n",
-+			(unsigned long long)entry->function);
-+}
-+
-+struct setup_pci_attribute {
-+	struct attribute attr;
-+	ssize_t (*show)(struct firmware_setup_pci_entry *entry, char *buf);
-+};
-+
-+static inline struct setup_pci_attribute *to_setup_pci_attr(
-+							struct attribute *attr)
-+{
-+	return container_of(attr, struct setup_pci_attribute, attr);
-+}
-+
-+static ssize_t setup_pci_attr_show(struct kobject *kobj,
-+				   struct attribute *attr, char *buf)
-+{
-+	struct firmware_setup_pci_entry *entry = to_setup_pci_entry(kobj);
-+	struct setup_pci_attribute *setup_pci_attr = to_setup_pci_attr(attr);
-+
-+	return setup_pci_attr->show(entry, buf);
-+}
-+
-+static struct setup_pci_attribute setup_pci_vendor_attr = __ATTR_RO(vendor);
-+static struct setup_pci_attribute setup_pci_devid_attr = __ATTR_RO(devid);
-+static struct setup_pci_attribute setup_pci_pcilen_attr = __ATTR_RO(pcilen);
-+static struct setup_pci_attribute setup_pci_segment_attr = __ATTR_RO(segment);
-+static struct setup_pci_attribute setup_pci_bus_attr = __ATTR_RO(bus);
-+static struct setup_pci_attribute setup_pci_device_attr = __ATTR_RO(device);
-+static struct setup_pci_attribute setup_pci_function_attr = __ATTR_RO(function);
-+
-+/*
-+ * These are default attributes that are added for every memmap entry.
-+ */
-+static struct attribute *def_attrs[] = {
-+	&setup_pci_vendor_attr.attr,
-+	&setup_pci_devid_attr.attr,
-+	&setup_pci_pcilen_attr.attr,
-+	&setup_pci_segment_attr.attr,
-+	&setup_pci_bus_attr.attr,
-+	&setup_pci_device_attr.attr,
-+	&setup_pci_function_attr.attr,
-+	NULL
-+};
-+
-+static const struct sysfs_ops setup_pci_attr_ops = {
-+	.show = setup_pci_attr_show,
-+};
-+
-+static struct kobj_type __refdata setup_pci_ktype = {
-+	.sysfs_ops      = &setup_pci_attr_ops,
-+	.default_attrs  = def_attrs,
-+};
-+
-+static ssize_t setup_pci_rom_read(struct file *filp, struct kobject *kobj,
-+				  struct bin_attribute *bin_attr, char *buf,
-+				  loff_t off, size_t count)
-+{
-+	struct firmware_setup_pci_entry *entry = to_setup_pci_entry(kobj);
-+
-+	if (off >= entry->pcilen)
-+		count = 0;
-+	else {
-+		unsigned char *rom = phys_to_virt(entry->romdata);
-+
-+		if (off + count > entry->pcilen)
-+			count = entry->pcilen - off;
-+
-+		memcpy(buf, rom + off, count);
-+	}
-+
-+	return count;
-+}
-+
-+static int __init add_sysfs_fw_setup_pci_entry(
-+					struct firmware_setup_pci_entry *entry)
-+{
-+	int retval = 0;
-+	static int setup_pci_entries_nr;
-+	static struct kset *setup_pci_kset;
-+	struct bin_attribute *attr;
-+
-+	kobject_init(&entry->kobj, &setup_pci_ktype);
-+
-+	if (!setup_pci_kset) {
-+		setup_pci_kset = kset_create_and_add("setup_pci", NULL,
-+						     firmware_kobj);
-+		if (!setup_pci_kset)
-+			return -ENOMEM;
-+	}
-+
-+	entry->kobj.kset = setup_pci_kset;
-+	retval = kobject_add(&entry->kobj, NULL, "%d", setup_pci_entries_nr++);
-+	if (retval) {
-+		kobject_put(&entry->kobj);
-+		return retval;
-+	}
-+
-+	attr = kzalloc(sizeof(*attr), GFP_ATOMIC);
-+	if (!attr)
-+		return -ENOMEM;
-+
-+	sysfs_bin_attr_init(attr);
-+	attr->size = entry->pcilen;
-+	attr->attr.name = "rom";
-+	attr->attr.mode = S_IRUSR;
-+	attr->read = setup_pci_rom_read;
-+	retval = sysfs_create_bin_file(&entry->kobj, attr);
-+	if (retval)
-+		kfree(attr);
-+	entry->rom_attr = attr;
-+
-+	return retval;
-+}
-+
-+static int __init firmware_setup_pci_init(void)
-+{
-+	struct firmware_setup_pci_entry *entry;
-+
-+	list_for_each_entry(entry, &setup_pci_entries, list)
-+		add_sysfs_fw_setup_pci_entry(entry);
-+
-+	return 0;
-+}
-+late_initcall(firmware_setup_pci_init);
-+#endif
-+
- int pcibios_enable_device(struct pci_dev *dev, int mask)
- {
- 	int err;
+-static void __init memblock_x86_reserve_range_setup_data(void)
+-{
+-	struct setup_data *data;
+-	u64 pa_data;
+-
+-	pa_data = boot_params.hdr.setup_data;
+-	while (pa_data) {
+-		data = early_memremap(pa_data, sizeof(*data));
+-		memblock_reserve(pa_data, sizeof(*data) + data->len);
+-		pa_data = data->next;
+-		early_iounmap(data, sizeof(*data));
+-	}
+-}
+-
+ /*
+  * --------- Crashkernel reservation ------------------------------
+  */
+@@ -1001,9 +987,6 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	x86_report_nx();
+ 
+-	/* after early param, so could get panic from serial */
+-	memblock_x86_reserve_range_setup_data();
+-
+ 	if (acpi_mps_check()) {
+ #ifdef CONFIG_X86_LOCAL_APIC
+ 		disable_apic = 1;
 -- 
 1.8.4.5
