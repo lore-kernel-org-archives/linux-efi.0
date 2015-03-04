@@ -1,118 +1,141 @@
 From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v2 02/15] x86, boot: move ZO to end of buffer
-Date: Wed,  4 Mar 2015 00:00:35 -0800
-Message-ID: <1425456048-16236-3-git-send-email-yinghai@kernel.org>
+Subject: [PATCH v2 10/15] x86, of: let add_dtb reserve by itself
+Date: Wed,  4 Mar 2015 00:00:43 -0800
+Message-ID: <1425456048-16236-11-git-send-email-yinghai@kernel.org>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-pci-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-Sender: linux-pci-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Kees Cook <keescook@chromium.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Rob Herring <robh@kernel.org>, David Vrabel <david.vrabel@citrix.com>
 List-Id: linux-efi@vger.kernel.org
 
-bp found data from boot stage can not be used kernel stage.
+We will not reserve setup_data in general code. Every handler
+need to reserve and copy.
 
-Actually those data area is overlapped with VO kernel bss stage, and clear_bss()
-clear them before code in arch/x86/kernel/setup.c access them.
+Current dtd handling already have code copying, just add reserve code ...
 
-To make the data survive that later, we should avoid the overlapping.
+also simplify code a bit with storing real dtb size.
 
-At first move compressed kernel close the end of buffer instead of middle
-of the buffer.
-
-Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>
-Cc: Kees Cook <keescook@chromium.org>
+Cc: Rob Herring <robh@kernel.org>
+Cc: David Vrabel <david.vrabel@citrix.com>
 Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/boot/compressed/head_32.S | 11 +++++++++--
- arch/x86/boot/compressed/head_64.S |  8 ++++++--
- arch/x86/boot/compressed/mkpiggy.c |  3 ---
- arch/x86/kernel/asm-offsets.c      |  1 +
- 4 files changed, 16 insertions(+), 7 deletions(-)
+ arch/x86/include/asm/prom.h  |  9 ++++++---
+ arch/x86/kernel/devicetree.c | 39 +++++++++++++++++++++------------------
+ 2 files changed, 27 insertions(+), 21 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-index cbed140..a9b56f1 100644
---- a/arch/x86/boot/compressed/head_32.S
-+++ b/arch/x86/boot/compressed/head_32.S
-@@ -147,7 +147,9 @@ preferred_addr:
- 1:
+diff --git a/arch/x86/include/asm/prom.h b/arch/x86/include/asm/prom.h
+index 1d081ac..fb716eddc 100644
+--- a/arch/x86/include/asm/prom.h
++++ b/arch/x86/include/asm/prom.h
+@@ -24,17 +24,20 @@
  
- 	/* Target address to relocate to for decompression */
--	addl	$z_extract_offset, %ebx
-+	movl    BP_init_size(%esi), %eax
-+	subl    $_end, %eax
-+	addl    %eax, %ebx
+ #ifdef CONFIG_OF
+ extern int of_ioapic;
+-extern u64 initial_dtb;
+-extern void add_dtb(u64 data);
+ void x86_of_pci_init(void);
+ void x86_dtb_init(void);
+ #else
+-static inline void add_dtb(u64 data) { }
+ static inline void x86_of_pci_init(void) { }
+ static inline void x86_dtb_init(void) { }
+ #define of_ioapic 0
+ #endif
  
- 	/* Set up the stack */
- 	leal	boot_stack_end(%ebx), %esp
-@@ -208,8 +210,13 @@ relocated:
++#ifdef CONFIG_OF_FLATTREE
++extern void add_dtb(u64 data);
++#else
++static inline void add_dtb(u64 data) { }
++#endif
++
+ extern char cmd_line[COMMAND_LINE_SIZE];
+ 
+ #endif /* __ASSEMBLY__ */
+diff --git a/arch/x86/kernel/devicetree.c b/arch/x86/kernel/devicetree.c
+index 3d35033..cc2fb61 100644
+--- a/arch/x86/kernel/devicetree.c
++++ b/arch/x86/kernel/devicetree.c
+@@ -2,6 +2,7 @@
+  * Architecture specific OF callbacks.
   */
- 				/* push arguments for decompress_kernel: */
- 	pushl	$z_output_len	/* decompressed length */
--	leal	z_extract_offset_negative(%ebx), %ebp
-+
-+	movl    BP_init_size(%esi), %eax
-+	subl    $_end, %eax
-+	movl    %ebx, %ebp
-+	subl    %eax, %ebp
- 	pushl	%ebp		/* output address */
-+
- 	pushl	$z_input_len	/* input_len */
- 	leal	input_data(%ebx), %eax
- 	pushl	%eax		/* input_data */
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 2884e0c..69015b5 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -101,7 +101,9 @@ ENTRY(startup_32)
- 1:
+ #include <linux/bootmem.h>
++#include <linux/memblock.h>
+ #include <linux/export.h>
+ #include <linux/io.h>
+ #include <linux/irqdomain.h>
+@@ -23,7 +24,6 @@
+ #include <asm/setup.h>
+ #include <asm/i8259.h>
  
- 	/* Target address to relocate to for decompression */
--	addl	$z_extract_offset, %ebx
-+	movl	BP_init_size(%esi), %eax
-+	subl	$_end, %eax
-+	addl	%eax, %ebx
+-__initdata u64 initial_dtb;
+ char __initdata cmd_line[COMMAND_LINE_SIZE];
  
+ int __initdata of_ioapic;
+@@ -43,11 +43,23 @@ void * __init early_init_dt_alloc_memory_arch(u64 size, u64 align)
+ 	return __alloc_bootmem(size, align, __pa(MAX_DMA_ADDRESS));
+ }
+ 
++#ifdef CONFIG_OF_FLATTREE
++static u64 initial_dtb __initdata;
++static u32 initial_dtb_size __initdata;
+ void __init add_dtb(u64 data)
+ {
++	u32 map_len;
++
+ 	initial_dtb = data + offsetof(struct setup_data, data);
+-}
+ 
++	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
++	initial_boot_params = early_memremap(initial_dtb, map_len);
++	initial_dtb_size = of_get_flat_dt_size();
++	early_memunmap(initial_boot_params, map_len);
++	initial_boot_params = NULL;
++	memblock_reserve(initial_dtb, initial_dtb_size);
++}
++#endif
  /*
-  * Prepare for entering 64 bit mode
-@@ -329,7 +331,9 @@ preferred_addr:
- 1:
+  * CE4100 ids. Will be moved to machine_device_initcall() once we have it.
+  */
+@@ -272,31 +284,22 @@ static void __init dtb_apic_setup(void)
+ 	dtb_ioapic_setup();
+ }
  
- 	/* Target address to relocate to for decompression */
--	leaq	z_extract_offset(%rbp), %rbx
-+	movl	BP_init_size(%rsi), %ebx
-+	subl	$_end, %ebx
-+	addq	%rbp, %rbx
+-#ifdef CONFIG_OF_FLATTREE
+ static void __init x86_flattree_get_config(void)
+ {
+-	u32 size, map_len;
++#ifdef CONFIG_OF_FLATTREE
+ 	void *dt;
  
- 	/* Set up the stack */
- 	leaq	boot_stack_end(%rbx), %rsp
-diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
-index b669ab6..652879b 100644
---- a/arch/x86/boot/compressed/mkpiggy.c
-+++ b/arch/x86/boot/compressed/mkpiggy.c
-@@ -82,9 +82,6 @@ int main(int argc, char *argv[])
- 	printf("z_output_len = %lu\n", (unsigned long)olen);
- 	printf(".globl z_extract_offset\n");
- 	printf("z_extract_offset = 0x%lx\n", offs);
--	/* z_extract_offset_negative allows simplification of head_32.S */
--	printf(".globl z_extract_offset_negative\n");
--	printf("z_extract_offset_negative = -0x%lx\n", offs);
+ 	if (!initial_dtb)
+ 		return;
  
- 	printf(".globl input_data, input_data_end\n");
- 	printf("input_data:\n");
-diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
-index 9f6b934..0e8e4f7 100644
---- a/arch/x86/kernel/asm-offsets.c
-+++ b/arch/x86/kernel/asm-offsets.c
-@@ -66,6 +66,7 @@ void common(void) {
- 	OFFSET(BP_hardware_subarch, boot_params, hdr.hardware_subarch);
- 	OFFSET(BP_version, boot_params, hdr.version);
- 	OFFSET(BP_kernel_alignment, boot_params, hdr.kernel_alignment);
-+	OFFSET(BP_init_size, boot_params, hdr.init_size);
- 	OFFSET(BP_pref_address, boot_params, hdr.pref_address);
- 	OFFSET(BP_code32_start, boot_params, hdr.code32_start);
+-	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
+-
+-	initial_boot_params = dt = early_memremap(initial_dtb, map_len);
+-	size = of_get_flat_dt_size();
+-	if (map_len < size) {
+-		early_iounmap(dt, map_len);
+-		initial_boot_params = dt = early_memremap(initial_dtb, size);
+-		map_len = size;
+-	}
+-
++	initial_boot_params = dt = early_memremap(initial_dtb,
++						  initial_dtb_size);
+ 	unflatten_and_copy_device_tree();
+-	early_iounmap(dt, map_len);
+-}
+-#else
+-static inline void x86_flattree_get_config(void) { }
++	early_memunmap(dt, initial_dtb_size);
++
++	memblock_free(initial_dtb, initial_dtb_size);
+ #endif
++}
  
+ void __init x86_dtb_init(void)
+ {
 -- 
 1.8.4.5
