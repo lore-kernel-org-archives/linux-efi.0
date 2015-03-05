@@ -1,36 +1,68 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: Re: [PATCH v2 04/15] x86, kaslr: get kaslr_enabled back correctly
-Date: Wed, 4 Mar 2015 19:20:15 -0800
-Message-ID: <CAE9FiQWa13Z1Eixwsjku5X_CxLpfSk+QFCOooC59YeH7dAqHgA@mail.gmail.com>
-References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-	<1425456048-16236-5-git-send-email-yinghai@kernel.org>
-	<20150304101649.GA3663@pd.tnic>
-	<alpine.LNX.2.00.1503041652550.26925@pobox.suse.cz>
-	<CAE9FiQU=wCmGEKoq06EV=oi=xxYwh7FGMEt7XiiPwrOLVo1OrA@mail.gmail.com>
-	<20150305025809.GA28401@linux-rxt1.site>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
+ interface
+Date: Thu, 5 Mar 2015 09:18:15 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+ <20150302122955.GB24476@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+ <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-pci-owner@vger.kernel.org>
-In-Reply-To: <20150305025809.GA28401@linux-rxt1.site>
-Sender: linux-pci-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@alien8.de>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Kees Cook <keescook@chromium.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 4, 2015 at 6:58 PM, joeyli <jlee@suse.com> wrote:
->
-> After 84c91b7ae merged to v3.17 kernel, hibernate code checks the e280 regions
-> should not be changed when doing hibernate resume. Without your patch 8,
-> the hibernate resume checking will randomly fail on the machines that reserved
-> setup_data in e820 regions.
->
-> Could you please consider to put "[PATCH v2 08/15] x86: Kill E820_RESERVED_KERN"
-> to v4.0 kernel?
-
-That will trigger SETUP_PCI ioremap warning.
-
-That is the reason I want to put it with other setup_data fix.
-
-Thanks
-
-Yinghai
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
+aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDA0LCAy
+MDE1IDQ6MzggQU0NCj4gDQo+IE9uIE1vbiwgTWFyIDIsIDIwMTUgYXQgOTo1NiBQTSwgS3dlaCwg
+SG9jayBMZW9uZw0KPiA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4gd3JvdGU6DQo+ID4NCj4g
+PiBKdXN0IHRvIGNhbGwgb3V0IHRoYXQgdXNpbmcgZmlybXdhcmUgY2xhc3MgYXV0byBsb2NhdGUg
+YmluYXJ5IGZlYXR1cmUgaXMgbGltaXRlZA0KPiA+IHRvIGxvY2F0aW9uczoNCj4gPiAtICIvbGli
+L2Zpcm13YXJlL3VwZGF0ZXMvIiBVVFNfUkVMRUFTRSwNCj4gPiAtICIvbGliL2Zpcm13YXJlL3Vw
+ZGF0ZXMiLA0KPiA+IC0gIi9saWIvZmlybXdhcmUvIiBVVFNfUkVMRUFTRSwNCj4gPiAtICIvbGli
+L2Zpcm13YXJlIg0KPiA+IGFuZCBvbmUgY3VzdG9tIHBhdGggd2hpY2ggaW5wdXR0ZWQgZHVyaW5n
+IGZpcm13YXJlX2NsYXNzIG1vZHVsZSBsb2FkDQo+ID4gdGltZSBvciBrZXJuZWwgYm9vdCB1cCB0
+aW1lLg0KPiA+DQo+ID4gSXQgaXMganVzdCBub3QgbGlrZSB0aGUgdXNlciBoZWxwZXIgaW50ZXJm
+YWNlIHdoaWNoIGFsbG93IGxvYWQgdGhlIGJpbmFyeSBhdA0KPiA+IGFueSBwYXRoL2xvY2F0aW9u
+Lg0KPiA+DQo+ID4gVGhpcyByZWFsbHkgaXMgbm90IGEgYmlnIGRlYWwuIFVzZXIgc2hvdWxkIGNv
+cGUgd2l0aCBpdC4NCj4gDQo+IE5vLCBpdCdzIGEgYmlnIGRlYWwsIGFuZCB0aGUgdXNlciBzaG91
+bGQgbm90IGNvcGUuDQo+IA0KPiBUaGUgdXNlciAqc2hvdWxkIG5vdCogYmUgcmVxdWlyZWQgdG8g
+aGF2ZSB3cml0ZSBhY2Nlc3MgdG8gYW55dGhpbmcgaW4NCj4gL2xpYiB0byBpbnN0YWxsIGEgVUVG
+SSBjYXBzdWxlIHRoYXQgdGhleSBkb3dubG9hZCBmcm9tIHRoZWlyDQo+IG1vdGhlcmJvYXJkIHZl
+bmRvcidzIHdlYnNpdGUuICAvbGliIGJlbG9uZ3MgdG8gdGhlIGRpc3RybywgYW5kIFVFRkkNCj4g
+Y2Fwc3VsZXMgZG8gbm90IGJlbG9uZyB0byB0aGUgZGlzdHJvLiAgSW4gdGhpcyByZWdhcmQsIFVF
+RkkgY2Fwc3VsZXMNCj4gYXJlIGNvbXBsZXRlbHkgdW5saWtlIHlvdXIgd2lyZWxlc3MgY2FyZCBm
+aXJtd2FyZSwgeW91ciBjcHUgbWljcm9jb2RlLA0KPiBldGMuDQo+IA0KPiBJbWFnaW5lIHN5c3Rl
+bXMgdXNpbmcgTkZTIHJvb3QsIEF0b21pYy1zdHlsZSBzeXN0ZW1zIChlLmcuIG9zdHJlZSksDQo+
+IHN5c3RlbXMgdGhhdCBib290IG9mZiBzcXVhc2hmcywgZXRjLiAgVGhleSBzaG91bGQgc3RpbGwg
+YmUgYWJsZSB0bw0KPiBsb2FkIGNhcHN1bGVzLiAgVGhlIGJhc2ljIHVzZXIgaW50ZXJmYWNlIHRo
+YXQgc2hvdWxkIHdvcmsgaXM6DQo+IA0KPiAjIHVlZmktbG9hZC1jYXBzdWxlIC9wYXRoL3RvL2Nh
+cHN1bGUNCj4gDQo+IG9yOg0KPiANCj4gIyB1ZWZpLWxvYWQtY2Fwc3VsZSAtIDwvcGF0aC90by9j
+YXBzdWxlDQo+IA0KPiBJIGRvbid0IHJlYWxseSBjYXJlIGhvdyB1ZWZpLWxvYWQtY2Fwc3VsZSBp
+cyBpbXBsZW1lbnRlZCwgYXMgbG9uZyBhcw0KPiBpdCdzIHN0cmFpZ2h0Zm9yd2FyZCwgYmVjYXVz
+ZSBwZW9wbGUgd2lsbCBzY3JldyBpdCB1cCBpZiBpdCBpc24ndA0KPiBzdHJhaWdodGZvcndhcmQu
+DQo+IA0KPiBXaHkgaXMgaXQgc28gaGFyZCB0byBoYXZlIGEgZmlsZSBpbiBzeXNmcyB0aGF0IHlv
+dSB3cml0ZSB0aGUgY2Fwc3VsZQ0KPiB0byB1c2luZyAqY2F0KiAobm90IGVjaG8pIGFuZCB0aGF0
+IHdpbGwgcmV0dXJuIGFuIGVycm9yIGNvZGUgaWYgY2F0DQo+IGZhaWxzPyAgSXMgaXQgYmVjYXVz
+ZSB5b3UgZG9uJ3Qga25vdyB3aGVyZSB0aGUgZW5kIG9mIHRoZSBjYXBzdWxlIGlzPw0KPiBpZiBz
+bywgaW9jdGwgaXMgZGVzaWduZWQgZm9yIGV4YWN0bHkgdGhpcyBwdXJwb3NlLg0KPiANCj4gVEJI
+LCBJIGZpbmQgdGhpcyB0aHJlYWQga2luZCBvZiByaWRpY3Vsb3VzLiAgVGhlIHByb2JsZW0gdGhh
+dCB5b3UncmUNCj4gdHJ5aW5nIHRvIHNvbHZlIGlzIGV4dHJlbWVseSBzaW1wbGUsIHRoZSBmdW5j
+dGlvbmFsaXR5IHRoYXQgdXNlcnNwYWNlDQo+IG5lZWRzIGlzIHRyaXZpYWwsIGFuZCBhbGwgb2Yg
+dGhlc2UgY29tcGxleCBwcm9wb3NhbHMgZm9yIGhvdyBpdCBzaG91bGQNCj4gd29yayBhcmUgYW4g
+YXJ0aWZhY3Qgb2YgdGhlIGZhY3QgdGhhdCB0aGUga2VybmVsLWludGVybmFsIGludGVyZmFjZXMN
+Cj4geW91J3JlIHVzaW5nIGZvciBpdCBhcmUgbm90IHdlbGwgc3VpdGVkIHRvIHRoZSBwcm9ibGVt
+IGF0IGhhbmQuDQo+IA0KPiAtLUFuZHkNCg0KU29ycnksIEkgbWF5IG5vdCBjYXRjaCB5b3VyIHBv
+aW50IGNvcnJlY3RseS4gQXJlIHlvdSB0cnlpbmcgdG8gdGVsbCB0aGF0DQphICJub3JtYWwiIHVz
+ZXIgY2FuIHBlcmZvcm0gZWZpIGNhcHN1bGUgdXBkYXRlLiBCdXQgYSAibm9ybWFsIiB1c2VyDQpk
+b2VzIG5vdCBoYXZlIHRoZSByaWdodCB0byBpbnN0YWxsIG9yIGNvcHkgdGhlIGNhcHN1bGUgYmlu
+YXJ5IGludG8NCiIvbGliL2Zpcm13YXJlLyIuIFNvLCB0aGVyZSBpcyBhIG5lZWQgdG8gbWFrZSB0
+aGlzIGNhcHN1bGUgbW9kdWxlIHRvDQphbGxvdyB1cGxvYWRpbmcgdGhlIGNhcHN1bGUgYmluYXJ5
+IGF0IGFueSBwYXRoIG9yIGxvY2F0aW9uIG90aGVyIHRoYW4NCiIvbGliL2Zpcm13YXJlLyIuDQoN
+CklzIHRoaXMgd2hhdCB5b3UgbWVhbj8NCg0KDQpSZWdhcmRzLA0KV2lsc29uDQo=
