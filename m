@@ -1,80 +1,64 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 04/15] x86, kaslr: get kaslr_enabled back correctly
-Date: Fri, 6 Mar 2015 09:49:25 -0800
-Message-ID: <CAE9FiQVux0j=3MOj1V-hAfVtbPGUCtAyzBpkQyjr8iUchFBmOg@mail.gmail.com>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: Re: [PATCH v2 01/15] x86, kaslr: Use init_size instead of run_size
+Date: Fri, 6 Mar 2015 10:44:29 -0800
+Message-ID: <CAE9FiQXzv7TPMRA+RqSdV0ERiW3KYA-2KOyDKBrZDn3Zd5RcrQ@mail.gmail.com>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-	<1425456048-16236-5-git-send-email-yinghai@kernel.org>
-	<20150304101649.GA3663@pd.tnic>
-	<CAE9FiQWKNDgzJtDVV34e7vWTu7LtqdDKB4KiN1RZwcZrX70zSA@mail.gmail.com>
-	<20150304200000.GB6276@gmail.com>
-	<CAE9FiQXJ-ujbhpw8phk5iQM8QFw=9QxDrXK6AdyXqDxmch_bbw@mail.gmail.com>
-	<20150306133312.GC4259@pd.tnic>
+	<1425456048-16236-2-git-send-email-yinghai@kernel.org>
+	<20150306135534.GD4259@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150306133312.GC4259-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150306135534.GD4259@pd.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Kees Cook <keescook@chromium.org>, Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Junjie Mao <eternal.n08@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 6, 2015 at 5:33 AM, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org> wrote:
-> Please use checkpatch before submitting patches:
+On Fri, Mar 6, 2015 at 5:55 AM, Borislav Petkov <bp@alien8.de> wrote:
+> On Wed, Mar 04, 2015 at 12:00:34AM -0800, Yinghai Lu wrote:
+>> commit e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+>>
+>> introduced one run_size for kaslr.
+>>
+>> We do not need to have home grown run_size.
+>>
+>> We should use real runtime size (include copy/decompress) aka init_size
 >
-> WARNING: please, no spaces at the start of a line
-> #71: FILE: arch/x86/kernel/setup.c:433:
-> +    unsigned char *data;$
->
-> WARNING: please, no spaces at the start of a line
-> #72: FILE: arch/x86/kernel/setup.c:434:
-> +    unsigned long offset = sizeof(struct setup_data);$
->
-> WARNING: please, no spaces at the start of a line
-> #74: FILE: arch/x86/kernel/setup.c:436:
-> +    data = early_memremap(pa_data, offset + 1);$
->
-> WARNING: please, no spaces at the start of a line
-> #75: FILE: arch/x86/kernel/setup.c:437:
-> +    if (!data) {$
->
-> ERROR: code indent should use tabs where possible
-> #76: FILE: arch/x86/kernel/setup.c:438:
-> +        kaslr_enabled = true;$
->
-> WARNING: please, no spaces at the start of a line
-> #76: FILE: arch/x86/kernel/setup.c:438:
-> +        kaslr_enabled = true;$
->
-> ERROR: code indent should use tabs where possible
-> #77: FILE: arch/x86/kernel/setup.c:439:
-> +        return;$
->
-> WARNING: please, no spaces at the start of a line
-> #77: FILE: arch/x86/kernel/setup.c:439:
-> +        return;$
->
-> WARNING: please, no spaces at the start of a line
-> #78: FILE: arch/x86/kernel/setup.c:440:
-> +    }$
->
-> WARNING: please, no spaces at the start of a line
-> #80: FILE: arch/x86/kernel/setup.c:442:
-> +    kaslr_enabled = *(data + offset);$
->
-> WARNING: please, no spaces at the start of a line
-> #81: FILE: arch/x86/kernel/setup.c:443:
-> +    early_memunmap(data, offset + 1);$
->
-> total: 2 errors, 9 warnings, 19 lines checked
->
-> NOTE: whitespace errors detected, you may wish to use scripts/cleanpatch or
->       scripts/cleanfile
->
-> Your patch has style problems, please review.
->
-> If any of these errors are false positives, please report
-> them to the maintainer, see CHECKPATCH in MAINTAINERS.
->
+> Why?
 
-That is "copy and paste" instead of attachment for easy review.
-but gmail web client convert tab to spaces.
+New change log:
+
+Subject: [PATCH] x86, kaslr: Use init_size instead of run_size
+
+commit e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+introduced one run_size for kaslr.
+We should use real runtime size (include copy/decompress) aka init_size.
+
+run_size is size of VO (vmlinux).
+init_size is the size needed for decompress and it is bigger than run_size
+when decompress need more buff.
+
+According to arch/x86/boot/header.S:
+| #define ZO_INIT_SIZE    (ZO__end - ZO_startup_32 + ZO_z_extract_offset)
+| #define VO_INIT_SIZE    (VO__end - VO__text)
+| #if ZO_INIT_SIZE > VO_INIT_SIZE
+| #define INIT_SIZE ZO_INIT_SIZE
+| #else
+| #define INIT_SIZE VO_INIT_SIZE
+| #endif
+| init_size:              .long INIT_SIZE         # kernel initialization size
+
+Bootloader allocate buffer according to init_size in hdr, and load the
+ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+During running of ZO, ZO move itself to the middle of buffer at
+z_extract_offset to make sure that decompressor would not have output
+overwrite input data before input data get consumed.
+But z_extract_offset calculating is based on size of VO (vmlinux) and size
+of compressed VO only at first.
+So need to make [z_extra_offset, init_size) will fit ZO, that means
+init_size need to be adjusted according to ZO size.
+That make init_size is always >= run_size.
+
+During aslr buffer searching, we need to make sure the buffer is bigger
+enough for decompress at first. So use init_size instead, and kill not
+needed run_size related code.
