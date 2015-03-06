@@ -1,104 +1,78 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: use UEFI ResetSystem() Runtime Service for
- system reset
-Date: Fri, 6 Mar 2015 13:14:13 +0100
-Message-ID: <CAKv+Gu9WW2O3fG+cvmgDtZwbaVo0JyRaha3O10mbbWPHzv-C7w@mail.gmail.com>
-References: <1425559871-3433-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150305142244.GD14093@leverpostej>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
+ interface
+Date: Fri, 6 Mar 2015 12:20:11 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AF8A2@PGSMSX102.gar.corp.intel.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+ <20150302122955.GB24476@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+ <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
+ <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150305142244.GD14093@leverpostej>
+In-Reply-To: <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 5 March 2015 at 15:22, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> Hi Ard,
->
-> On Thu, Mar 05, 2015 at 12:51:11PM +0000, Ard Biesheuvel wrote:
->> If UEFI Runtime Services are available, the ResetSystem() service should
->> be preferred over direct PSCI calls or other methods to reset the system.
->> The reason is that the UpdateCapsule() UEFI Runtime Service, which is used
->> to perform firmware updates, relies on this.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->> I sent roughly the same patch ~6 months ago, but at the time, we were still
->> waiting for the restart notifier call chain patches to land. Since that code
->> got rejected, I am proposing this again. Note that efi_enabled(x) always
->> evaluates to 'false' on !CONFIG_EFI.
->
-> Also, efi_reboot is a static inline for !CONFIG_EFI, so I can't see any
-> possibility of a build failure.
->
->> This fixes reboot on my Seattle [although it doesn't make it any faster :-)]
->>
->>  arch/arm64/kernel/process.c | 9 +++++++++
->>  1 file changed, 9 insertions(+)
->>
->> diff --git a/arch/arm64/kernel/process.c b/arch/arm64/kernel/process.c
->> index fde9923af859..a52bc0c316a8 100644
->> --- a/arch/arm64/kernel/process.c
->> +++ b/arch/arm64/kernel/process.c
->> @@ -21,6 +21,7 @@
->>  #include <stdarg.h>
->>
->>  #include <linux/compat.h>
->> +#include <linux/efi.h>
->>  #include <linux/export.h>
->>  #include <linux/sched.h>
->>  #include <linux/kernel.h>
->> @@ -150,6 +151,14 @@ void machine_restart(char *cmd)
->>       local_irq_disable();
->>       smp_send_stop();
->>
->> +     /*
->> +      * Prefer reboot via EFI if available, so that capsule updates [which
->> +      * rely on UEFI's ResetSystem() being called with the return value of
->> +      * UpdateCapsule()] have a chance of working as expected.
->> +      */
->> +     if (efi_enabled(EFI_RUNTIME_SERVICES))
->> +             efi_reboot(reboot_mode, NULL);
->
-> I expect that the particulars of the UpdateCapsule() will be handled
-> within efi_reboot and won't require any additions here. So the comment
-> could just be trimmed to say that UpdateCapsule() depends on the system
-> being reset with ResetSystem().
->
-
-OK.
-
-> Also, we need to make sure we call efi_poweroff to make UpdateCapsule()
-> work when shutting the machine down (behind the scenes efi_poweroff
-> calls ResetSystem(EfiResetShutdown, ...)).
->
-> For that I think adding the following to arch/arm64/kernel/efi.c is
-> sufficient:
->
-> /*
->  * UpdateCapsule() depends on the system being shutdown via
->  * ResetSystem().
->  */
-> bool efi_poweroff_required(void)
-> {
->         return efi_enabled(EFI_RUNTIME_SERVICES);
-> }
->
-
-Yes. I used to have this as a separate patch as well ~6 months ago,
-but I did not realise at the time that UpdateCapsule() depends on
-ResetSystem() for poweroff as well.
-
-> I've given the patch a spin (with and without that addition) on Juno and
-> Seattle. So with that folded in:
->
-> Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-> Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
->
-
-Thanks. I will fold it in and resend.
-
--- 
-Ard.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
+aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBGcmlkYXksIE1hcmNoIDA2LCAyMDE1
+IDc6MDkgQU0NCj4gDQo+IE9uIE1hciA1LCAyMDE1IDE6MTkgQU0sICJLd2VoLCBIb2NrIExlb25n
+IiA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPiA+ID4gVGhp
+cyByZWFsbHkgaXMgbm90IGEgYmlnIGRlYWwuIFVzZXIgc2hvdWxkIGNvcGUgd2l0aCBpdC4NCj4g
+PiA+DQo+ID4gPiBObywgaXQncyBhIGJpZyBkZWFsLCBhbmQgdGhlIHVzZXIgc2hvdWxkIG5vdCBj
+b3BlLg0KPiA+ID4NCj4gPiA+IFRoZSB1c2VyICpzaG91bGQgbm90KiBiZSByZXF1aXJlZCB0byBo
+YXZlIHdyaXRlIGFjY2VzcyB0byBhbnl0aGluZyBpbg0KPiA+ID4gL2xpYiB0byBpbnN0YWxsIGEg
+VUVGSSBjYXBzdWxlIHRoYXQgdGhleSBkb3dubG9hZCBmcm9tIHRoZWlyDQo+ID4gPiBtb3RoZXJi
+b2FyZCB2ZW5kb3IncyB3ZWJzaXRlLiAgL2xpYiBiZWxvbmdzIHRvIHRoZSBkaXN0cm8sIGFuZCBV
+RUZJDQo+ID4gPiBjYXBzdWxlcyBkbyBub3QgYmVsb25nIHRvIHRoZSBkaXN0cm8uICBJbiB0aGlz
+IHJlZ2FyZCwgVUVGSSBjYXBzdWxlcw0KPiA+ID4gYXJlIGNvbXBsZXRlbHkgdW5saWtlIHlvdXIg
+d2lyZWxlc3MgY2FyZCBmaXJtd2FyZSwgeW91ciBjcHUgbWljcm9jb2RlLA0KPiA+ID4gZXRjLg0K
+PiA+ID4NCj4gPiA+IEltYWdpbmUgc3lzdGVtcyB1c2luZyBORlMgcm9vdCwgQXRvbWljLXN0eWxl
+IHN5c3RlbXMgKGUuZy4gb3N0cmVlKSwNCj4gPiA+IHN5c3RlbXMgdGhhdCBib290IG9mZiBzcXVh
+c2hmcywgZXRjLiAgVGhleSBzaG91bGQgc3RpbGwgYmUgYWJsZSB0bw0KPiA+ID4gbG9hZCBjYXBz
+dWxlcy4gIFRoZSBiYXNpYyB1c2VyIGludGVyZmFjZSB0aGF0IHNob3VsZCB3b3JrIGlzOg0KPiA+
+ID4NCj4gPiA+ICMgdWVmaS1sb2FkLWNhcHN1bGUgL3BhdGgvdG8vY2Fwc3VsZQ0KPiA+ID4NCj4g
+PiA+IG9yOg0KPiA+ID4NCj4gPiA+ICMgdWVmaS1sb2FkLWNhcHN1bGUgLSA8L3BhdGgvdG8vY2Fw
+c3VsZQ0KPiA+ID4NCj4gPiA+IEkgZG9uJ3QgcmVhbGx5IGNhcmUgaG93IHVlZmktbG9hZC1jYXBz
+dWxlIGlzIGltcGxlbWVudGVkLCBhcyBsb25nIGFzDQo+ID4gPiBpdCdzIHN0cmFpZ2h0Zm9yd2Fy
+ZCwgYmVjYXVzZSBwZW9wbGUgd2lsbCBzY3JldyBpdCB1cCBpZiBpdCBpc24ndA0KPiA+ID4gc3Ry
+YWlnaHRmb3J3YXJkLg0KPiA+ID4NCj4gPiA+IFdoeSBpcyBpdCBzbyBoYXJkIHRvIGhhdmUgYSBm
+aWxlIGluIHN5c2ZzIHRoYXQgeW91IHdyaXRlIHRoZSBjYXBzdWxlDQo+ID4gPiB0byB1c2luZyAq
+Y2F0KiAobm90IGVjaG8pIGFuZCB0aGF0IHdpbGwgcmV0dXJuIGFuIGVycm9yIGNvZGUgaWYgY2F0
+DQo+ID4gPiBmYWlscz8gIElzIGl0IGJlY2F1c2UgeW91IGRvbid0IGtub3cgd2hlcmUgdGhlIGVu
+ZCBvZiB0aGUgY2Fwc3VsZSBpcz8NCj4gPiA+IGlmIHNvLCBpb2N0bCBpcyBkZXNpZ25lZCBmb3Ig
+ZXhhY3RseSB0aGlzIHB1cnBvc2UuDQo+ID4gPg0KPiA+ID4gVEJILCBJIGZpbmQgdGhpcyB0aHJl
+YWQga2luZCBvZiByaWRpY3Vsb3VzLiAgVGhlIHByb2JsZW0gdGhhdCB5b3UncmUNCj4gPiA+IHRy
+eWluZyB0byBzb2x2ZSBpcyBleHRyZW1lbHkgc2ltcGxlLCB0aGUgZnVuY3Rpb25hbGl0eSB0aGF0
+IHVzZXJzcGFjZQ0KPiA+ID4gbmVlZHMgaXMgdHJpdmlhbCwgYW5kIGFsbCBvZiB0aGVzZSBjb21w
+bGV4IHByb3Bvc2FscyBmb3IgaG93IGl0IHNob3VsZA0KPiA+ID4gd29yayBhcmUgYW4gYXJ0aWZh
+Y3Qgb2YgdGhlIGZhY3QgdGhhdCB0aGUga2VybmVsLWludGVybmFsIGludGVyZmFjZXMNCj4gPiA+
+IHlvdSdyZSB1c2luZyBmb3IgaXQgYXJlIG5vdCB3ZWxsIHN1aXRlZCB0byB0aGUgcHJvYmxlbSBh
+dCBoYW5kLg0KPiA+ID4NCj4gPiA+IC0tQW5keQ0KPiA+DQo+ID4gU29ycnksIEkgbWF5IG5vdCBj
+YXRjaCB5b3VyIHBvaW50IGNvcnJlY3RseS4gQXJlIHlvdSB0cnlpbmcgdG8gdGVsbCB0aGF0DQo+
+ID4gYSAibm9ybWFsIiB1c2VyIGNhbiBwZXJmb3JtIGVmaSBjYXBzdWxlIHVwZGF0ZS4gQnV0IGEg
+Im5vcm1hbCIgdXNlcg0KPiA+IGRvZXMgbm90IGhhdmUgdGhlIHJpZ2h0IHRvIGluc3RhbGwgb3Ig
+Y29weSB0aGUgY2Fwc3VsZSBiaW5hcnkgaW50bw0KPiA+ICIvbGliL2Zpcm13YXJlLyIuIFNvLCB0
+aGVyZSBpcyBhIG5lZWQgdG8gbWFrZSB0aGlzIGNhcHN1bGUgbW9kdWxlIHRvDQo+ID4gYWxsb3cg
+dXBsb2FkaW5nIHRoZSBjYXBzdWxlIGJpbmFyeSBhdCBhbnkgcGF0aCBvciBsb2NhdGlvbiBvdGhl
+ciB0aGFuDQo+ID4gIi9saWIvZmlybXdhcmUvIi4NCj4gPg0KPiA+IElzIHRoaXMgd2hhdCB5b3Ug
+bWVhbj8NCj4gDQo+IE5vLiAgT25seSByb290IHNob3VsZCBiZSBhYmxlIHRvIGxvYWQgY2Fwc3Vs
+ZXMsIGJ1dCBldmVuIHJvb3QgbWF5IG5vdA0KPiBiZSBhYmxlIHRvIHdyaXRlIHRvIC9saWIuDQo+
+IA0KPiAtLUFuZHkNCj4gDQoNCk9rYXksIEkgYWNjZXB0IHRoYXQgb25seSByb290IHVzZXIgY2Fu
+IHBlcmZvcm0gdGhlIGxvYWQgY2Fwc3VsZS4gSXQgaXMgbmV3DQp0byBtZSB0aGF0IHJvb3QgdXNl
+ciBtYXkgbm90IGhhdmUgdGhlIGFjY2VzcyByaWdodCB0byAiL2xpYi9maXJtd2FyZSIuDQoNCkJ1
+dCBJIHJlbWVtYmVyIHlvdSBkbyBtZW50aW9uIHRoYXQgQ1BVIG1pY3JvIGNvZGUgYW5kIHdpZmkg
+ZmlybXdhcmUNCnRoZXkgYXJlIGRpZmZlcmVudCBhbmQgYWJsZSB0byB3cml0ZSBpbiAvbGliL2Zp
+cm13YXJlLiBJIGFtIGN1cmlvdXMgd2h5DQplZmkgY2Fwc3VsZSBiaW5hcnkgaGF2ZSBzdWNoIGEg
+cmVzdHJpY3Rpb24uICBXaGF0IGlzIHByZXZlbnRpbmcgaXQgYmVpbmcNCndyaXRlIHRvIHRoYXQg
+bG9jYXRpb24/DQoNCkkgZXZlbiB3ZW50IHRvIGNoZWNrIG91dCB0aGUgRkhTOg0KaHR0cDovL2Vu
+Lndpa2lwZWRpYS5vcmcvd2lraS9GaWxlc3lzdGVtX0hpZXJhcmNoeV9TdGFuZGFyZA0KSSBkbyBu
+b3QgZmluZCBhbnkgcmVzdHJpY3Rpb24gY2FsbGluZyBvdXQgZm9yIHRoYXQuDQoNCldvdWxkIHlv
+dSBtaW5kIHRvIGVkdWNhdGUgbWUgb24gdGhhdD8NClRoYW5rcy4NCg0KDQpSZWdhcmRzLA0KV2ls
+c29uDQoNCg==
