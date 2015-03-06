@@ -1,29 +1,34 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH v2 02/15] x86, boot: move ZO to end of buffer
-Date: Fri, 6 Mar 2015 14:58:25 +0100
-Message-ID: <20150306135825.GE4259@pd.tnic>
-References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
- <1425456048-16236-3-git-send-email-yinghai@kernel.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Fri, 6 Mar 2015 15:47:26 +0100
+Message-ID: <20150306144725.GF3514@pd.tnic>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+ <20150302122955.GB24476@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+ <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
+ <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
+ <20150306081334.GA3514@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1425456048-16236-3-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Baoquan He <bhe@redhat.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Kees Cook <keescook@chromium.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8AF844-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 04, 2015 at 12:00:35AM -0800, Yinghai Lu wrote:
-> bp found data from boot stage can not be used kernel stage.
-> 
-> Actually those data area is overlapped with VO kernel bss stage, and clear_bss()
+On Fri, Mar 06, 2015 at 11:41:57AM +0000, Kweh, Hock Leong wrote:
+> # cat /any/path/capsule.bin > /sys/devices/platform/efi_capsule/capsule_load
 
-"VO kernel bss stage"?
+This is straight-forward and clean.
 
-I'm sure you can think of a better explanation. Right now I'm thinking
-of "Video Only" or "Virtually Omnipresent" or ... I can go all day.
-Let's be more precise here please.
+> or doing:
+> # echo "/any/path/capsule.bin" > /sys/devices/platform/efi_capsule/capsule_load
+
+This is strange and clumsy. So do the first one please.
 
 -- 
 Regards/Gruss,
