@@ -1,42 +1,104 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
- interface
-Date: Fri, 6 Mar 2015 11:41:57 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
-References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
- <20150302122955.GB24476@codeblueprint.co.uk>
- <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
- <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
- <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
- <20150306081334.GA3514@pd.tnic>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] arm64/efi: use UEFI ResetSystem() Runtime Service for
+ system reset
+Date: Fri, 6 Mar 2015 13:14:13 +0100
+Message-ID: <CAKv+Gu9WW2O3fG+cvmgDtZwbaVo0JyRaha3O10mbbWPHzv-C7w@mail.gmail.com>
+References: <1425559871-3433-1-git-send-email-ard.biesheuvel@linaro.org>
+	<20150305142244.GD14093@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150306081334.GA3514@pd.tnic>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@amacapital.net>
-Cc: Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sam Protsenko <semen.protsenko@linaro.org>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150305142244.GD14093@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMDYsIDIwMTUgNDoxNCBQ
-TQ0KPiANCj4gT24gVGh1LCBNYXIgMDUsIDIwMTUgYXQgMDM6MDg6NDJQTSAtMDgwMCwgQW5keSBM
-dXRvbWlyc2tpIHdyb3RlOg0KPiA+IE5vLiAgT25seSByb290IHNob3VsZCBiZSBhYmxlIHRvIGxv
-YWQgY2Fwc3VsZXMsIGJ1dCBldmVuIHJvb3QgbWF5IG5vdA0KPiA+IGJlIGFibGUgdG8gd3JpdGUg
-dG8gL2xpYi4NCj4gDQo+IFNvIGJhc2ljYWxseSB3aGF0IHdlIHdhbnQgdG8gZG8gaXM6DQo+IA0K
-PiAjIGNhdCAvYW55L3BhdGgvdG8vZWZpL2NhcHN1bGUvYWNjZXNzaWJsZS90by9yb290L2VmaV9j
-YXBzdWxlLmltZyA+DQo+IC9zeXMvZmlybXdhcmUvZWZpL3VwZGF0ZQ0KPiANCj4gTm93IGl0IGNh
-bid0IGdldCBhbnkgc2ltcGxlciB0aGFuIHRoYXQgYW5kIHlvdSBnZXQgZXJyb3IgY29kZXMgdG9v
-IGJ5DQo+IGZhaWxpbmcgdGhlIGNhdCBpZiB0aGUgdXBkYXRlIGZhaWxzLg0KPiANCj4gTWluZCB5
-b3UsIEknbSB1c2luZyAnIycgYW5kIG5vdCAnJCcgYXMgYSBzaGVsbCBwcm9tcHQgOi0pDQo+IA0K
-PiAtLQ0KPiBSZWdhcmRzL0dydXNzLA0KPiAgICAgQm9yaXMuDQo+IA0KPiBFQ08gdGlwICMxMDE6
-IFRyaW0geW91ciBtYWlscyB3aGVuIHlvdSByZXBseS4NCj4gLS0NCg0KSSBiZWxpZXZlIHlvdSBn
-dXlzIGFyZSBtb3JlIHBheWluZyBhdHRlbnRpb24gdG8gdGhlIFBBVEggYW5kDQp3aGV0aGVyIGRv
-aW5nOg0KIyBjYXQgL2FueS9wYXRoL2NhcHN1bGUuYmluID4gL3N5cy9kZXZpY2VzL3BsYXRmb3Jt
-L2VmaV9jYXBzdWxlL2NhcHN1bGVfbG9hZA0KDQpvciBkb2luZzoNCiMgZWNobyAiL2FueS9wYXRo
-L2NhcHN1bGUuYmluIiA+IC9zeXMvZGV2aWNlcy9wbGF0Zm9ybS9lZmlfY2Fwc3VsZS9jYXBzdWxl
-X2xvYWQNCg0KaXMgbm90IGEgYmlnIGlzc3VlIHJpZ2h0Pw0KDQoNClJlZ2FyZHMsDQpXaWxzb24N
-Cg0K
+On 5 March 2015 at 15:22, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> Hi Ard,
+>
+> On Thu, Mar 05, 2015 at 12:51:11PM +0000, Ard Biesheuvel wrote:
+>> If UEFI Runtime Services are available, the ResetSystem() service should
+>> be preferred over direct PSCI calls or other methods to reset the system.
+>> The reason is that the UpdateCapsule() UEFI Runtime Service, which is used
+>> to perform firmware updates, relies on this.
+>>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>> I sent roughly the same patch ~6 months ago, but at the time, we were still
+>> waiting for the restart notifier call chain patches to land. Since that code
+>> got rejected, I am proposing this again. Note that efi_enabled(x) always
+>> evaluates to 'false' on !CONFIG_EFI.
+>
+> Also, efi_reboot is a static inline for !CONFIG_EFI, so I can't see any
+> possibility of a build failure.
+>
+>> This fixes reboot on my Seattle [although it doesn't make it any faster :-)]
+>>
+>>  arch/arm64/kernel/process.c | 9 +++++++++
+>>  1 file changed, 9 insertions(+)
+>>
+>> diff --git a/arch/arm64/kernel/process.c b/arch/arm64/kernel/process.c
+>> index fde9923af859..a52bc0c316a8 100644
+>> --- a/arch/arm64/kernel/process.c
+>> +++ b/arch/arm64/kernel/process.c
+>> @@ -21,6 +21,7 @@
+>>  #include <stdarg.h>
+>>
+>>  #include <linux/compat.h>
+>> +#include <linux/efi.h>
+>>  #include <linux/export.h>
+>>  #include <linux/sched.h>
+>>  #include <linux/kernel.h>
+>> @@ -150,6 +151,14 @@ void machine_restart(char *cmd)
+>>       local_irq_disable();
+>>       smp_send_stop();
+>>
+>> +     /*
+>> +      * Prefer reboot via EFI if available, so that capsule updates [which
+>> +      * rely on UEFI's ResetSystem() being called with the return value of
+>> +      * UpdateCapsule()] have a chance of working as expected.
+>> +      */
+>> +     if (efi_enabled(EFI_RUNTIME_SERVICES))
+>> +             efi_reboot(reboot_mode, NULL);
+>
+> I expect that the particulars of the UpdateCapsule() will be handled
+> within efi_reboot and won't require any additions here. So the comment
+> could just be trimmed to say that UpdateCapsule() depends on the system
+> being reset with ResetSystem().
+>
+
+OK.
+
+> Also, we need to make sure we call efi_poweroff to make UpdateCapsule()
+> work when shutting the machine down (behind the scenes efi_poweroff
+> calls ResetSystem(EfiResetShutdown, ...)).
+>
+> For that I think adding the following to arch/arm64/kernel/efi.c is
+> sufficient:
+>
+> /*
+>  * UpdateCapsule() depends on the system being shutdown via
+>  * ResetSystem().
+>  */
+> bool efi_poweroff_required(void)
+> {
+>         return efi_enabled(EFI_RUNTIME_SERVICES);
+> }
+>
+
+Yes. I used to have this as a separate patch as well ~6 months ago,
+but I did not realise at the time that UpdateCapsule() depends on
+ResetSystem() for poweroff as well.
+
+> I've given the patch a spin (with and without that addition) on Juno and
+> Seattle. So with that folded in:
+>
+> Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+>
+
+Thanks. I will fold it in and resend.
+
+-- 
+Ard.
