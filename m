@@ -1,118 +1,67 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Fri, 6 Mar 2015 11:05:00 -0800
-Message-ID: <CALCETrW9w2AtHR7qs2zNphhcSDq8=Q=Vw4J-e4yOw87gWHSUbQ@mail.gmail.com>
-References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
- <20150302122955.GB24476@codeblueprint.co.uk> <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
- <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
- <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com> <F54AEECA5E2B9541821D670476DAE19C2B8AF8A2@PGSMSX102.gar.corp.intel.com>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: Re: [PATCH v2 01/15] x86, kaslr: Use init_size instead of run_size
+Date: Fri, 6 Mar 2015 11:28:25 -0800
+Message-ID: <CAE9FiQU3jKn260cce7Zvo0Qy0ksDKB=-o2m_drBmO4fpBv8Wow@mail.gmail.com>
+References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
+	<1425456048-16236-2-git-send-email-yinghai@kernel.org>
+	<20150306135534.GD4259@pd.tnic>
+	<CAE9FiQXzv7TPMRA+RqSdV0ERiW3KYA-2KOyDKBrZDn3Zd5RcrQ@mail.gmail.com>
+	<CAGXu5jLf+=CMs0qj4nRG-kw1YiQ-eMFHFpAE8uVUitqmGOG7gA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8AF8A2@PGSMSX102.gar.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Kweh Hock Leong <hock.leong.kweh@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>
+Return-path: <linux-pci-owner@vger.kernel.org>
+In-Reply-To: <CAGXu5jLf+=CMs0qj4nRG-kw1YiQ-eMFHFpAE8uVUitqmGOG7gA@mail.gmail.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Kees Cook <keescook@chromium.org>
+Cc: Borislav Petkov <bp@alien8.de>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Junjie Mao <eternal.n08@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mar 6, 2015 4:20 AM, "Kweh, Hock Leong" <hock.leong.kweh@intel.com> wrote:
->
-> > -----Original Message-----
-> > From: Andy Lutomirski [mailto:luto@amacapital.net]
-> > Sent: Friday, March 06, 2015 7:09 AM
-> >
-> > On Mar 5, 2015 1:19 AM, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-> > wrote:
-> > >
-> > > > > This really is not a big deal. User should cope with it.
-> > > >
-> > > > No, it's a big deal, and the user should not cope.
-> > > >
-> > > > The user *should not* be required to have write access to anything in
-> > > > /lib to install a UEFI capsule that they download from their
-> > > > motherboard vendor's website.  /lib belongs to the distro, and UEFI
-> > > > capsules do not belong to the distro.  In this regard, UEFI capsules
-> > > > are completely unlike your wireless card firmware, your cpu microcode,
-> > > > etc.
-> > > >
-> > > > Imagine systems using NFS root, Atomic-style systems (e.g. ostree),
-> > > > systems that boot off squashfs, etc.  They should still be able to
-> > > > load capsules.  The basic user interface that should work is:
-> > > >
-> > > > # uefi-load-capsule /path/to/capsule
-> > > >
-> > > > or:
-> > > >
-> > > > # uefi-load-capsule - </path/to/capsule
-> > > >
-> > > > I don't really care how uefi-load-capsule is implemented, as long as
-> > > > it's straightforward, because people will screw it up if it isn't
-> > > > straightforward.
-> > > >
-> > > > Why is it so hard to have a file in sysfs that you write the capsule
-> > > > to using *cat* (not echo) and that will return an error code if cat
-> > > > fails?  Is it because you don't know where the end of the capsule is?
-> > > > if so, ioctl is designed for exactly this purpose.
-> > > >
-> > > > TBH, I find this thread kind of ridiculous.  The problem that you're
-> > > > trying to solve is extremely simple, the functionality that userspace
-> > > > needs is trivial, and all of these complex proposals for how it should
-> > > > work are an artifact of the fact that the kernel-internal interfaces
-> > > > you're using for it are not well suited to the problem at hand.
-> > > >
-> > > > --Andy
-> > >
-> > > Sorry, I may not catch your point correctly. Are you trying to tell that
-> > > a "normal" user can perform efi capsule update. But a "normal" user
-> > > does not have the right to install or copy the capsule binary into
-> > > "/lib/firmware/". So, there is a need to make this capsule module to
-> > > allow uploading the capsule binary at any path or location other than
-> > > "/lib/firmware/".
-> > >
-> > > Is this what you mean?
-> >
-> > No.  Only root should be able to load capsules, but even root may not
-> > be able to write to /lib.
-> >
-> > --Andy
-> >
->
-> Okay, I accept that only root user can perform the load capsule. It is new
-> to me that root user may not have the access right to "/lib/firmware".
->
-> But I remember you do mention that CPU micro code and wifi firmware
-> they are different and able to write in /lib/firmware. I am curious why
-> efi capsule binary have such a restriction.  What is preventing it being
-> write to that location?
->
+On Fri, Mar 6, 2015 at 10:55 AM, Kees Cook <keescook@chromium.org> wrote:
+> On Fri, Mar 6, 2015 at 10:44 AM, Yinghai Lu <yinghai@kernel.org> wrote:
 
-It has to do with where the firmware comes from.  When someone
-prepares Linux fs image, they put user code, a kernel (usually), all
-modules that might be needed, and all firmware that's likely to be
-needed into /.  This might come from the distro or a company-wide
-image.
-
-If a normal firmware firmware file needs an update, it's just like
-updating a driver or a library -- / will be updated by whatever
-mechanism is in use.
-
-Nonvolatile firmware is different.  The update isn't needed on
-subsequent boots, and it could be much less generic than a driver.
-For example, a capsule could contain a boot splash screen image that
-says "this is computer #27."  Updating the system image to do this
-makes little sense.  Instead it'll be a one-time thing done by root.
-
---Andy
-
-> I even went to check out the FHS:
-> http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
-> I do not find any restriction calling out for that.
 >
-> Would you mind to educate me on that?
-> Thanks.
->
->
-> Regards,
-> Wilson
->
+> I don't see how bss and brk are related to these sizes. Can you
+> explain how bss, brk, and initrd factor into these sizes? Those were
+> what run_size was created to represent. I don't want to accidentally
+> start stomping on bss and brk again. :)
+
+VO (vlinux) init size aka VO_INIT_SIZE already inlude that.
+
+Please check update version.
+
+
+commit e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+introduced one run_size for kaslr.
+We should use real runtime size (include copy/decompress) aka init_size.
+
+run_size is VO (vmlinux) init size include bss and brk.
+init_size is the size needed for decompress and it is bigger than run_size
+when decompress need more buff.
+
+According to arch/x86/boot/header.S:
+| #define ZO_INIT_SIZE    (ZO__end - ZO_startup_32 + ZO_z_extract_offset)
+| #define VO_INIT_SIZE    (VO__end - VO__text)
+| #if ZO_INIT_SIZE > VO_INIT_SIZE
+| #define INIT_SIZE ZO_INIT_SIZE
+| #else
+| #define INIT_SIZE VO_INIT_SIZE
+| #endif
+| init_size:              .long INIT_SIZE         # kernel initialization size
+
+Bootloader allocate buffer according to init_size in hdr, and load the
+ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+init_size first should come from VO (vmlinux) init size. That VO init size
+is from VO _end to VO _end and include VO bss and brk area.
+
+During running of ZO, ZO move itself to the middle of buffer at
+z_extract_offset to make sure that decompressor would not have output
+overwrite input data before input data get consumed.
+But z_extract_offset calculating is based on size of VO (vmlinux) and size
+of compressed VO only at first.
+So need to make sure [z_extra_offset, init_size) will fit ZO, that means
+init_size need to be adjusted according to ZO size.
+That make init_size is always >= run_size.
+
+During aslr buffer searching, we need to make sure the buffer is bigger
+enough for decompress at first. So use init_size instead, and kill not
+needed run_size related code.
