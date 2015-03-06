@@ -1,39 +1,42 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
-Date: Fri, 6 Mar 2015 09:13:35 +0100
-Message-ID: <20150306081334.GA3514@pd.tnic>
+From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
+ interface
+Date: Fri, 6 Mar 2015 11:41:57 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
 References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
  <20150302122955.GB24476@codeblueprint.co.uk>
  <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
  <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
  <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
  <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
+ <20150306081334.GA3514@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150306081334.GA3514@pd.tnic>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@amacapital.net>
+Cc: Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sam Protsenko <semen.protsenko@linaro.org>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 05, 2015 at 03:08:42PM -0800, Andy Lutomirski wrote:
-> No.  Only root should be able to load capsules, but even root may not
-> be able to write to /lib.
-
-So basically what we want to do is:
-
-# cat /any/path/to/efi/capsule/accessible/to/root/efi_capsule.img > /sys/firmware/efi/update
-
-Now it can't get any simpler than that and you get error codes too by
-failing the cat if the update fails.
-
-Mind you, I'm using '#' and not '$' as a shell prompt :-)
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IEZyaWRheSwgTWFyY2ggMDYsIDIwMTUgNDoxNCBQ
+TQ0KPiANCj4gT24gVGh1LCBNYXIgMDUsIDIwMTUgYXQgMDM6MDg6NDJQTSAtMDgwMCwgQW5keSBM
+dXRvbWlyc2tpIHdyb3RlOg0KPiA+IE5vLiAgT25seSByb290IHNob3VsZCBiZSBhYmxlIHRvIGxv
+YWQgY2Fwc3VsZXMsIGJ1dCBldmVuIHJvb3QgbWF5IG5vdA0KPiA+IGJlIGFibGUgdG8gd3JpdGUg
+dG8gL2xpYi4NCj4gDQo+IFNvIGJhc2ljYWxseSB3aGF0IHdlIHdhbnQgdG8gZG8gaXM6DQo+IA0K
+PiAjIGNhdCAvYW55L3BhdGgvdG8vZWZpL2NhcHN1bGUvYWNjZXNzaWJsZS90by9yb290L2VmaV9j
+YXBzdWxlLmltZyA+DQo+IC9zeXMvZmlybXdhcmUvZWZpL3VwZGF0ZQ0KPiANCj4gTm93IGl0IGNh
+bid0IGdldCBhbnkgc2ltcGxlciB0aGFuIHRoYXQgYW5kIHlvdSBnZXQgZXJyb3IgY29kZXMgdG9v
+IGJ5DQo+IGZhaWxpbmcgdGhlIGNhdCBpZiB0aGUgdXBkYXRlIGZhaWxzLg0KPiANCj4gTWluZCB5
+b3UsIEknbSB1c2luZyAnIycgYW5kIG5vdCAnJCcgYXMgYSBzaGVsbCBwcm9tcHQgOi0pDQo+IA0K
+PiAtLQ0KPiBSZWdhcmRzL0dydXNzLA0KPiAgICAgQm9yaXMuDQo+IA0KPiBFQ08gdGlwICMxMDE6
+IFRyaW0geW91ciBtYWlscyB3aGVuIHlvdSByZXBseS4NCj4gLS0NCg0KSSBiZWxpZXZlIHlvdSBn
+dXlzIGFyZSBtb3JlIHBheWluZyBhdHRlbnRpb24gdG8gdGhlIFBBVEggYW5kDQp3aGV0aGVyIGRv
+aW5nOg0KIyBjYXQgL2FueS9wYXRoL2NhcHN1bGUuYmluID4gL3N5cy9kZXZpY2VzL3BsYXRmb3Jt
+L2VmaV9jYXBzdWxlL2NhcHN1bGVfbG9hZA0KDQpvciBkb2luZzoNCiMgZWNobyAiL2FueS9wYXRo
+L2NhcHN1bGUuYmluIiA+IC9zeXMvZGV2aWNlcy9wbGF0Zm9ybS9lZmlfY2Fwc3VsZS9jYXBzdWxl
+X2xvYWQNCg0KaXMgbm90IGEgYmlnIGlzc3VlIHJpZ2h0Pw0KDQoNClJlZ2FyZHMsDQpXaWxzb24N
+Cg0K
