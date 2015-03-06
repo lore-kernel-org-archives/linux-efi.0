@@ -1,78 +1,164 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: Re: [PATCH v2 3/3] efi: Capsule update with user helper
- interface
-Date: Fri, 6 Mar 2015 12:20:11 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8AF8A2@PGSMSX102.gar.corp.intel.com>
-References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
- <20150302122955.GB24476@codeblueprint.co.uk>
- <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
- <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
- <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 04/15] x86, kaslr: get kaslr_enabled back correctly
+Date: Fri, 6 Mar 2015 14:33:12 +0100
+Message-ID: <20150306133312.GC4259@pd.tnic>
+References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
+ <1425456048-16236-5-git-send-email-yinghai@kernel.org>
+ <20150304101649.GA3663@pd.tnic>
+ <CAE9FiQWKNDgzJtDVV34e7vWTu7LtqdDKB4KiN1RZwcZrX70zSA@mail.gmail.com>
+ <20150304200000.GB6276@gmail.com>
+ <CAE9FiQXJ-ujbhpw8phk5iQM8QFw=9QxDrXK6AdyXqDxmch_bbw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-pci-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAE9FiQXJ-ujbhpw8phk5iQM8QFw=9QxDrXK6AdyXqDxmch_bbw@mail.gmail.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Baoquan He <bhe@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
-aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBGcmlkYXksIE1hcmNoIDA2LCAyMDE1
-IDc6MDkgQU0NCj4gDQo+IE9uIE1hciA1LCAyMDE1IDE6MTkgQU0sICJLd2VoLCBIb2NrIExlb25n
-IiA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4NCj4gd3JvdGU6DQo+ID4NCj4gPiA+ID4gVGhp
-cyByZWFsbHkgaXMgbm90IGEgYmlnIGRlYWwuIFVzZXIgc2hvdWxkIGNvcGUgd2l0aCBpdC4NCj4g
-PiA+DQo+ID4gPiBObywgaXQncyBhIGJpZyBkZWFsLCBhbmQgdGhlIHVzZXIgc2hvdWxkIG5vdCBj
-b3BlLg0KPiA+ID4NCj4gPiA+IFRoZSB1c2VyICpzaG91bGQgbm90KiBiZSByZXF1aXJlZCB0byBo
-YXZlIHdyaXRlIGFjY2VzcyB0byBhbnl0aGluZyBpbg0KPiA+ID4gL2xpYiB0byBpbnN0YWxsIGEg
-VUVGSSBjYXBzdWxlIHRoYXQgdGhleSBkb3dubG9hZCBmcm9tIHRoZWlyDQo+ID4gPiBtb3RoZXJi
-b2FyZCB2ZW5kb3IncyB3ZWJzaXRlLiAgL2xpYiBiZWxvbmdzIHRvIHRoZSBkaXN0cm8sIGFuZCBV
-RUZJDQo+ID4gPiBjYXBzdWxlcyBkbyBub3QgYmVsb25nIHRvIHRoZSBkaXN0cm8uICBJbiB0aGlz
-IHJlZ2FyZCwgVUVGSSBjYXBzdWxlcw0KPiA+ID4gYXJlIGNvbXBsZXRlbHkgdW5saWtlIHlvdXIg
-d2lyZWxlc3MgY2FyZCBmaXJtd2FyZSwgeW91ciBjcHUgbWljcm9jb2RlLA0KPiA+ID4gZXRjLg0K
-PiA+ID4NCj4gPiA+IEltYWdpbmUgc3lzdGVtcyB1c2luZyBORlMgcm9vdCwgQXRvbWljLXN0eWxl
-IHN5c3RlbXMgKGUuZy4gb3N0cmVlKSwNCj4gPiA+IHN5c3RlbXMgdGhhdCBib290IG9mZiBzcXVh
-c2hmcywgZXRjLiAgVGhleSBzaG91bGQgc3RpbGwgYmUgYWJsZSB0bw0KPiA+ID4gbG9hZCBjYXBz
-dWxlcy4gIFRoZSBiYXNpYyB1c2VyIGludGVyZmFjZSB0aGF0IHNob3VsZCB3b3JrIGlzOg0KPiA+
-ID4NCj4gPiA+ICMgdWVmaS1sb2FkLWNhcHN1bGUgL3BhdGgvdG8vY2Fwc3VsZQ0KPiA+ID4NCj4g
-PiA+IG9yOg0KPiA+ID4NCj4gPiA+ICMgdWVmaS1sb2FkLWNhcHN1bGUgLSA8L3BhdGgvdG8vY2Fw
-c3VsZQ0KPiA+ID4NCj4gPiA+IEkgZG9uJ3QgcmVhbGx5IGNhcmUgaG93IHVlZmktbG9hZC1jYXBz
-dWxlIGlzIGltcGxlbWVudGVkLCBhcyBsb25nIGFzDQo+ID4gPiBpdCdzIHN0cmFpZ2h0Zm9yd2Fy
-ZCwgYmVjYXVzZSBwZW9wbGUgd2lsbCBzY3JldyBpdCB1cCBpZiBpdCBpc24ndA0KPiA+ID4gc3Ry
-YWlnaHRmb3J3YXJkLg0KPiA+ID4NCj4gPiA+IFdoeSBpcyBpdCBzbyBoYXJkIHRvIGhhdmUgYSBm
-aWxlIGluIHN5c2ZzIHRoYXQgeW91IHdyaXRlIHRoZSBjYXBzdWxlDQo+ID4gPiB0byB1c2luZyAq
-Y2F0KiAobm90IGVjaG8pIGFuZCB0aGF0IHdpbGwgcmV0dXJuIGFuIGVycm9yIGNvZGUgaWYgY2F0
-DQo+ID4gPiBmYWlscz8gIElzIGl0IGJlY2F1c2UgeW91IGRvbid0IGtub3cgd2hlcmUgdGhlIGVu
-ZCBvZiB0aGUgY2Fwc3VsZSBpcz8NCj4gPiA+IGlmIHNvLCBpb2N0bCBpcyBkZXNpZ25lZCBmb3Ig
-ZXhhY3RseSB0aGlzIHB1cnBvc2UuDQo+ID4gPg0KPiA+ID4gVEJILCBJIGZpbmQgdGhpcyB0aHJl
-YWQga2luZCBvZiByaWRpY3Vsb3VzLiAgVGhlIHByb2JsZW0gdGhhdCB5b3UncmUNCj4gPiA+IHRy
-eWluZyB0byBzb2x2ZSBpcyBleHRyZW1lbHkgc2ltcGxlLCB0aGUgZnVuY3Rpb25hbGl0eSB0aGF0
-IHVzZXJzcGFjZQ0KPiA+ID4gbmVlZHMgaXMgdHJpdmlhbCwgYW5kIGFsbCBvZiB0aGVzZSBjb21w
-bGV4IHByb3Bvc2FscyBmb3IgaG93IGl0IHNob3VsZA0KPiA+ID4gd29yayBhcmUgYW4gYXJ0aWZh
-Y3Qgb2YgdGhlIGZhY3QgdGhhdCB0aGUga2VybmVsLWludGVybmFsIGludGVyZmFjZXMNCj4gPiA+
-IHlvdSdyZSB1c2luZyBmb3IgaXQgYXJlIG5vdCB3ZWxsIHN1aXRlZCB0byB0aGUgcHJvYmxlbSBh
-dCBoYW5kLg0KPiA+ID4NCj4gPiA+IC0tQW5keQ0KPiA+DQo+ID4gU29ycnksIEkgbWF5IG5vdCBj
-YXRjaCB5b3VyIHBvaW50IGNvcnJlY3RseS4gQXJlIHlvdSB0cnlpbmcgdG8gdGVsbCB0aGF0DQo+
-ID4gYSAibm9ybWFsIiB1c2VyIGNhbiBwZXJmb3JtIGVmaSBjYXBzdWxlIHVwZGF0ZS4gQnV0IGEg
-Im5vcm1hbCIgdXNlcg0KPiA+IGRvZXMgbm90IGhhdmUgdGhlIHJpZ2h0IHRvIGluc3RhbGwgb3Ig
-Y29weSB0aGUgY2Fwc3VsZSBiaW5hcnkgaW50bw0KPiA+ICIvbGliL2Zpcm13YXJlLyIuIFNvLCB0
-aGVyZSBpcyBhIG5lZWQgdG8gbWFrZSB0aGlzIGNhcHN1bGUgbW9kdWxlIHRvDQo+ID4gYWxsb3cg
-dXBsb2FkaW5nIHRoZSBjYXBzdWxlIGJpbmFyeSBhdCBhbnkgcGF0aCBvciBsb2NhdGlvbiBvdGhl
-ciB0aGFuDQo+ID4gIi9saWIvZmlybXdhcmUvIi4NCj4gPg0KPiA+IElzIHRoaXMgd2hhdCB5b3Ug
-bWVhbj8NCj4gDQo+IE5vLiAgT25seSByb290IHNob3VsZCBiZSBhYmxlIHRvIGxvYWQgY2Fwc3Vs
-ZXMsIGJ1dCBldmVuIHJvb3QgbWF5IG5vdA0KPiBiZSBhYmxlIHRvIHdyaXRlIHRvIC9saWIuDQo+
-IA0KPiAtLUFuZHkNCj4gDQoNCk9rYXksIEkgYWNjZXB0IHRoYXQgb25seSByb290IHVzZXIgY2Fu
-IHBlcmZvcm0gdGhlIGxvYWQgY2Fwc3VsZS4gSXQgaXMgbmV3DQp0byBtZSB0aGF0IHJvb3QgdXNl
-ciBtYXkgbm90IGhhdmUgdGhlIGFjY2VzcyByaWdodCB0byAiL2xpYi9maXJtd2FyZSIuDQoNCkJ1
-dCBJIHJlbWVtYmVyIHlvdSBkbyBtZW50aW9uIHRoYXQgQ1BVIG1pY3JvIGNvZGUgYW5kIHdpZmkg
-ZmlybXdhcmUNCnRoZXkgYXJlIGRpZmZlcmVudCBhbmQgYWJsZSB0byB3cml0ZSBpbiAvbGliL2Zp
-cm13YXJlLiBJIGFtIGN1cmlvdXMgd2h5DQplZmkgY2Fwc3VsZSBiaW5hcnkgaGF2ZSBzdWNoIGEg
-cmVzdHJpY3Rpb24uICBXaGF0IGlzIHByZXZlbnRpbmcgaXQgYmVpbmcNCndyaXRlIHRvIHRoYXQg
-bG9jYXRpb24/DQoNCkkgZXZlbiB3ZW50IHRvIGNoZWNrIG91dCB0aGUgRkhTOg0KaHR0cDovL2Vu
-Lndpa2lwZWRpYS5vcmcvd2lraS9GaWxlc3lzdGVtX0hpZXJhcmNoeV9TdGFuZGFyZA0KSSBkbyBu
-b3QgZmluZCBhbnkgcmVzdHJpY3Rpb24gY2FsbGluZyBvdXQgZm9yIHRoYXQuDQoNCldvdWxkIHlv
-dSBtaW5kIHRvIGVkdWNhdGUgbWUgb24gdGhhdD8NClRoYW5rcy4NCg0KDQpSZWdhcmRzLA0KV2ls
-c29uDQoNCg==
+On Wed, Mar 04, 2015 at 01:32:53PM -0800, Yinghai Lu wrote:
+> On Wed, Mar 4, 2015 at 12:00 PM, Ingo Molnar <mingo@kernel.org> wrote:
+> >
+> > It is totally unacceptable that you don't do proper analysis of the
+> > patches you submit, and that you don't bother writing proper, readable
+> > changelogs.
+> 
+> Sorry, please check it again:
+> 
+> Subject: [PATCH v4] x86, kaslr: Get kaslr_enabled back correctly
+
+Subject: x86/kaslr: Access the correct kaslr_enabled variable
+
+> commit f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
+> is using address as value for kaslr_enabled.
+
+"commit ... started passing KASLR status to kernel proper."
+
+> That will get wrong value back for kaslr_enabled in kernel stage.
+> 1. When kaslr is not enabled at boot/choose_kernel_location, if kaslr_enabled
+> get set wrongly in setup.c, late in module.c::get_module_load_offset
+> will return not wanted random module load offset.
+> That change behavior when HIBERNATION is defined or nokaslr is passed.
+> 
+> 2. When kaslr is enabled at boot/choose_kernel_location, if kaslr_enabled
+> get cleared wrongly in setup.c, late in module.c::get_module_load_offset
+> will not return wanted random module load offset.
+> 
+> This patch changes the code to use early_memmap and access the value,
+> and will keep boot and kernel consistent with kaslr.
+
+Replace all that with:
+
+"However, the setup_data linked list and thus the element which contains
+kaslr_enabled is chained together using physical addresses. At the
+time when we access it in the kernel proper, we're already running
+with paging enabled and therefore must access it through its virtual
+address."
+
+That's it, now how hard was to explain it that way?
+
+> -v3: add checking return from early_memmap according to bp.
+
+I guess with "bp" you mean me? You can call me Boris.
+
+> Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
+> Cc: Matt Fleming <matt.fleming@intel.com>
+> Cc: Borislav Petkov <bp@suse.de>
+> Cc: Kees Cook <keescook@chromium.org>
+> Cc: Jiri Kosina <jkosina@suse.cz>
+> Acked-by: Jiri Kosina <jkosina@suse.cz>
+> Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+> 
+> ---
+>  arch/x86/kernel/setup.c |   13 ++++++++++++-
+>  1 file changed, 12 insertions(+), 1 deletion(-)
+> 
+> Index: linux-2.6/arch/x86/kernel/setup.c
+> ===================================================================
+> --- linux-2.6.orig/arch/x86/kernel/setup.c
+> +++ linux-2.6/arch/x86/kernel/setup.c
+> @@ -429,7 +429,18 @@ static void __init reserve_initrd(void)
+> 
+>  static void __init parse_kaslr_setup(u64 pa_data, u32 data_len)
+>  {
+> -    kaslr_enabled = (bool)(pa_data + sizeof(struct setup_data));
+> +    /* kaslr_setup_data is defined in aslr.c */
+> +    unsigned char *data;
+> +    unsigned long offset = sizeof(struct setup_data);
+> +
+> +    data = early_memremap(pa_data, offset + 1);
+> +    if (!data) {
+> +        kaslr_enabled = true;
+> +        return;
+> +    }
+> +
+> +    kaslr_enabled = *(data + offset);
+> +    early_memunmap(data, offset + 1);
+>  }
+> 
+>  static void __init parse_setup_data(void)
+
+Please use checkpatch before submitting patches:
+
+WARNING: please, no spaces at the start of a line
+#71: FILE: arch/x86/kernel/setup.c:433:
++    unsigned char *data;$
+
+WARNING: please, no spaces at the start of a line
+#72: FILE: arch/x86/kernel/setup.c:434:
++    unsigned long offset = sizeof(struct setup_data);$
+
+WARNING: please, no spaces at the start of a line
+#74: FILE: arch/x86/kernel/setup.c:436:
++    data = early_memremap(pa_data, offset + 1);$
+
+WARNING: please, no spaces at the start of a line
+#75: FILE: arch/x86/kernel/setup.c:437:
++    if (!data) {$
+
+ERROR: code indent should use tabs where possible
+#76: FILE: arch/x86/kernel/setup.c:438:
++        kaslr_enabled = true;$
+
+WARNING: please, no spaces at the start of a line
+#76: FILE: arch/x86/kernel/setup.c:438:
++        kaslr_enabled = true;$
+
+ERROR: code indent should use tabs where possible
+#77: FILE: arch/x86/kernel/setup.c:439:
++        return;$
+
+WARNING: please, no spaces at the start of a line
+#77: FILE: arch/x86/kernel/setup.c:439:
++        return;$
+
+WARNING: please, no spaces at the start of a line
+#78: FILE: arch/x86/kernel/setup.c:440:
++    }$
+
+WARNING: please, no spaces at the start of a line
+#80: FILE: arch/x86/kernel/setup.c:442:
++    kaslr_enabled = *(data + offset);$
+
+WARNING: please, no spaces at the start of a line
+#81: FILE: arch/x86/kernel/setup.c:443:
++    early_memunmap(data, offset + 1);$
+
+total: 2 errors, 9 warnings, 19 lines checked
+
+NOTE: whitespace errors detected, you may wish to use scripts/cleanpatch or
+      scripts/cleanfile
+
+Your patch has style problems, please review.
+
+If any of these errors are false positives, please report
+them to the maintainer, see CHECKPATCH in MAINTAINERS.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
