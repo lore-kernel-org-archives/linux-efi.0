@@ -1,7 +1,7 @@
 From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v3 3/7] x86, boot: Don't overlap VO with ZO data
-Date: Sat,  7 Mar 2015 14:07:17 -0800
-Message-ID: <1425766041-6551-4-git-send-email-yinghai@kernel.org>
+Subject: [PATCH v3 6/7] x86, boot: Split kernel_ident_mapping_init to another file
+Date: Sat,  7 Mar 2015 14:07:20 -0800
+Message-ID: <1425766041-6551-7-git-send-email-yinghai@kernel.org>
 References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
@@ -10,88 +10,209 @@ To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ing
 Cc: Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-Boris found data from boot stage can not be used kernel stage.
+We need to include that in boot::decompress_kernel stage to set new
+ident mapping.
 
-Bootloader allocate buffer according to init_size in hdr, and load the
-ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
-During running of ZO, ZO move itself to the middle of buffer at
-z_extract_offset to make sure that decompressor would not have output
-overwrite input data before input data get consumed.
-After decompressor is called, VO (vmlinux) use whole buffer from start,
-and ZO code and data section is overlapped with VO bss section.
-And later VO/clear_bss() clear them before code in arch/x86/kernel/setup.c
-access them.
+Also add checking for __pa/__va macro definition, as we need to override them
+in boot::decompress_kernel stage.
 
-We need to avoid overlapping to keep ZO data.
-
-In previous patch, We already move ZO close the end of buffer instead of
-middle of buffer. But there is overlapping beween VO brk with ZO data area.
-
-Extend init_size so VO bss and brk will not overlap with data ZO data area
-(most from boot/compressed/misc.c).
-
-The increase is from _rodata to _end in ZO (arch/x86/boot/compressed/vmlinux).
-
--v2: add init_size in arch/x86/boot/header.S instead of BRK.
--v3: split code that move ZO to end of buffer to another patch.
-
-Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>
-Cc: Kees Cook <keescook@chromium.org>
 Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/boot/Makefile                 | 2 +-
- arch/x86/boot/compressed/vmlinux.lds.S | 1 +
- arch/x86/boot/header.S                 | 7 +++++--
- 3 files changed, 7 insertions(+), 3 deletions(-)
+ arch/x86/include/asm/page.h |  5 +++
+ arch/x86/mm/ident_map.c     | 74 +++++++++++++++++++++++++++++++++++++++++++++
+ arch/x86/mm/init_64.c       | 74 +--------------------------------------------
+ 3 files changed, 80 insertions(+), 73 deletions(-)
+ create mode 100644 arch/x86/mm/ident_map.c
 
-diff --git a/arch/x86/boot/Makefile b/arch/x86/boot/Makefile
-index 57bbf2f..863ef25 100644
---- a/arch/x86/boot/Makefile
-+++ b/arch/x86/boot/Makefile
-@@ -86,7 +86,7 @@ targets += voffset.h
- $(obj)/voffset.h: vmlinux FORCE
- 	$(call if_changed,voffset)
+diff --git a/arch/x86/include/asm/page.h b/arch/x86/include/asm/page.h
+index 802dde3..cf8f619 100644
+--- a/arch/x86/include/asm/page.h
++++ b/arch/x86/include/asm/page.h
+@@ -37,7 +37,10 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
+ 	alloc_page_vma(GFP_HIGHUSER | __GFP_ZERO | movableflags, vma, vaddr)
+ #define __HAVE_ARCH_ALLOC_ZEROED_USER_HIGHPAGE
  
--sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|z_.*\)$$/\#define ZO_\2 0x\1/p'
-+sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|_rodata\|z_.*\)$$/\#define ZO_\2 0x\1/p'
- 
- quiet_cmd_zoffset = ZOFFSET $@
-       cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
-diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
-index e24e0a0..6d6158e 100644
---- a/arch/x86/boot/compressed/vmlinux.lds.S
-+++ b/arch/x86/boot/compressed/vmlinux.lds.S
-@@ -35,6 +35,7 @@ SECTIONS
- 		*(.text.*)
- 		_etext = . ;
- 	}
-+        . = ALIGN(PAGE_SIZE); /* keep ADDON_ZO_SIZE page aligned */
- 	.rodata : {
- 		_rodata = . ;
- 		*(.rodata)	 /* read-only data */
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 9bfab22..bc5d78d 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -440,12 +440,15 @@ setup_data:		.quad 0			# 64-bit physical pointer to
- 
- pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
- 
-+# don't overlap data area of ZO with VO
-+#define ADDON_ZO_SIZE (ZO__end - ZO__rodata)
++#ifndef __pa
+ #define __pa(x)		__phys_addr((unsigned long)(x))
++#endif
 +
- #define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_min_extract_offset)
- #define VO_INIT_SIZE	(VO__end - VO__text)
- #if ZO_INIT_SIZE > VO_INIT_SIZE
--#define INIT_SIZE ZO_INIT_SIZE
-+#define INIT_SIZE (ZO_INIT_SIZE + ADDON_ZO_SIZE)
- #else
--#define INIT_SIZE VO_INIT_SIZE
-+#define INIT_SIZE (VO_INIT_SIZE + ADDON_ZO_SIZE)
- #endif
- init_size:		.long INIT_SIZE		# kernel initialization size
- handover_offset:	.long 0			# Filled in by build.c
+ #define __pa_nodebug(x)	__phys_addr_nodebug((unsigned long)(x))
+ /* __pa_symbol should be used for C visible symbols.
+    This seems to be the official gcc blessed way to do such arithmetic. */
+@@ -51,7 +54,9 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
+ #define __pa_symbol(x) \
+ 	__phys_addr_symbol(__phys_reloc_hide((unsigned long)(x)))
+ 
++#ifndef __va
+ #define __va(x)			((void *)((unsigned long)(x)+PAGE_OFFSET))
++#endif
+ 
+ #define __boot_va(x)		__va(x)
+ #define __boot_pa(x)		__pa(x)
+diff --git a/arch/x86/mm/ident_map.c b/arch/x86/mm/ident_map.c
+new file mode 100644
+index 0000000..751ca92
+--- /dev/null
++++ b/arch/x86/mm/ident_map.c
+@@ -0,0 +1,74 @@
++
++static void ident_pmd_init(unsigned long pmd_flag, pmd_t *pmd_page,
++			   unsigned long addr, unsigned long end)
++{
++	addr &= PMD_MASK;
++	for (; addr < end; addr += PMD_SIZE) {
++		pmd_t *pmd = pmd_page + pmd_index(addr);
++
++		if (!pmd_present(*pmd))
++			set_pmd(pmd, __pmd(addr | pmd_flag));
++	}
++}
++static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
++			  unsigned long addr, unsigned long end)
++{
++	unsigned long next;
++
++	for (; addr < end; addr = next) {
++		pud_t *pud = pud_page + pud_index(addr);
++		pmd_t *pmd;
++
++		next = (addr & PUD_MASK) + PUD_SIZE;
++		if (next > end)
++			next = end;
++
++		if (pud_present(*pud)) {
++			pmd = pmd_offset(pud, 0);
++			ident_pmd_init(info->pmd_flag, pmd, addr, next);
++			continue;
++		}
++		pmd = (pmd_t *)info->alloc_pgt_page(info->context);
++		if (!pmd)
++			return -ENOMEM;
++		ident_pmd_init(info->pmd_flag, pmd, addr, next);
++		set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
++	}
++
++	return 0;
++}
++
++int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
++			      unsigned long addr, unsigned long end)
++{
++	unsigned long next;
++	int result;
++	int off = info->kernel_mapping ? pgd_index(__PAGE_OFFSET) : 0;
++
++	for (; addr < end; addr = next) {
++		pgd_t *pgd = pgd_page + pgd_index(addr) + off;
++		pud_t *pud;
++
++		next = (addr & PGDIR_MASK) + PGDIR_SIZE;
++		if (next > end)
++			next = end;
++
++		if (pgd_present(*pgd)) {
++			pud = pud_offset(pgd, 0);
++			result = ident_pud_init(info, pud, addr, next);
++			if (result)
++				return result;
++			continue;
++		}
++
++		pud = (pud_t *)info->alloc_pgt_page(info->context);
++		if (!pud)
++			return -ENOMEM;
++		result = ident_pud_init(info, pud, addr, next);
++		if (result)
++			return result;
++		set_pgd(pgd, __pgd(__pa(pud) | _KERNPG_TABLE));
++	}
++
++	return 0;
++}
+diff --git a/arch/x86/mm/init_64.c b/arch/x86/mm/init_64.c
+index 30eb05a..c30efb6 100644
+--- a/arch/x86/mm/init_64.c
++++ b/arch/x86/mm/init_64.c
+@@ -56,79 +56,7 @@
+ 
+ #include "mm_internal.h"
+ 
+-static void ident_pmd_init(unsigned long pmd_flag, pmd_t *pmd_page,
+-			   unsigned long addr, unsigned long end)
+-{
+-	addr &= PMD_MASK;
+-	for (; addr < end; addr += PMD_SIZE) {
+-		pmd_t *pmd = pmd_page + pmd_index(addr);
+-
+-		if (!pmd_present(*pmd))
+-			set_pmd(pmd, __pmd(addr | pmd_flag));
+-	}
+-}
+-static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
+-			  unsigned long addr, unsigned long end)
+-{
+-	unsigned long next;
+-
+-	for (; addr < end; addr = next) {
+-		pud_t *pud = pud_page + pud_index(addr);
+-		pmd_t *pmd;
+-
+-		next = (addr & PUD_MASK) + PUD_SIZE;
+-		if (next > end)
+-			next = end;
+-
+-		if (pud_present(*pud)) {
+-			pmd = pmd_offset(pud, 0);
+-			ident_pmd_init(info->pmd_flag, pmd, addr, next);
+-			continue;
+-		}
+-		pmd = (pmd_t *)info->alloc_pgt_page(info->context);
+-		if (!pmd)
+-			return -ENOMEM;
+-		ident_pmd_init(info->pmd_flag, pmd, addr, next);
+-		set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
+-	}
+-
+-	return 0;
+-}
+-
+-int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
+-			      unsigned long addr, unsigned long end)
+-{
+-	unsigned long next;
+-	int result;
+-	int off = info->kernel_mapping ? pgd_index(__PAGE_OFFSET) : 0;
+-
+-	for (; addr < end; addr = next) {
+-		pgd_t *pgd = pgd_page + pgd_index(addr) + off;
+-		pud_t *pud;
+-
+-		next = (addr & PGDIR_MASK) + PGDIR_SIZE;
+-		if (next > end)
+-			next = end;
+-
+-		if (pgd_present(*pgd)) {
+-			pud = pud_offset(pgd, 0);
+-			result = ident_pud_init(info, pud, addr, next);
+-			if (result)
+-				return result;
+-			continue;
+-		}
+-
+-		pud = (pud_t *)info->alloc_pgt_page(info->context);
+-		if (!pud)
+-			return -ENOMEM;
+-		result = ident_pud_init(info, pud, addr, next);
+-		if (result)
+-			return result;
+-		set_pgd(pgd, __pgd(__pa(pud) | _KERNPG_TABLE));
+-	}
+-
+-	return 0;
+-}
++#include "ident_map.c"
+ 
+ static int __init parse_direct_gbpages_off(char *arg)
+ {
 -- 
 1.8.4.5
