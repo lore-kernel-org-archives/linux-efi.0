@@ -1,284 +1,253 @@
 From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v3 7/7] x86, kaslr, 64bit: Set new or extra ident_mapping
-Date: Sat,  7 Mar 2015 14:07:21 -0800
-Message-ID: <1425766041-6551-8-git-send-email-yinghai@kernel.org>
+Subject: [PATCH v3 1/7] x86, kaslr: Use init_size instead of run_size
+Date: Sat,  7 Mar 2015 14:07:15 -0800
+Message-ID: <1425766041-6551-2-git-send-email-yinghai@kernel.org>
 References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Junjie Mao <eternal.n08@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-First, aslr will support to put random VO above 4G, so we must set ident
-mapping for the range even we come from startup_32 path.
+commit e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+introduced one run_size for kaslr.
+We should use real runtime size (include copy/decompress) aka init_size.
 
-Second, when boot from 64bit bootloader, bootloader set ident mapping,
-and boot via ZO (arch/x86/boot/compressed/vmlinux) startup_64.
-Those pages for pagetable need to be avoided when we select new random
-VO (vmlinux) base. Otherwise decompressor would overwrite them during
-decompressing.
+run_size is VO (vmlinux) init size include bss and brk.
+init_size is the size needed for decompress and it is bigger than run_size
+when decompress need more buff.
 
-One solution: go through pagetable and find out every page is used by
-pagetable for every mem_aovid checking but we will need extra code.
+According to arch/x86/boot/header.S:
+| #define ZO_INIT_SIZE    (ZO__end - ZO_startup_32 + ZO_z_extract_offset)
+| #define VO_INIT_SIZE    (VO__end - VO__text)
+| #if ZO_INIT_SIZE > VO_INIT_SIZE
+| #define INIT_SIZE ZO_INIT_SIZE
+| #else
+| #define INIT_SIZE VO_INIT_SIZE
+| #endif
+| init_size:              .long INIT_SIZE         # kernel initialization size
 
-Other solution: create new ident mapping instead, and pages for pagetable
-will sit in _pagetable section of ZO, and they are in mem_avoid array already.
-In this way, we can reuse the code for setting ident mapping.
+Bootloader allocate buffer according to init_size in hdr, and load the
+ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+init_size first come from VO (vmlinux) init size. That VO init size
+is from VO _end to VO _end and include VO bss and brk area.
 
-The _pgtable will be shared 32bit and 64bit path to reduce init_size,
-as now ZO _rodata to _end will contribute init_size.
+During running of ZO, ZO move itself to the middle of buffer at
+z_extract_offset to make sure that decompressor would not have output
+overwrite input data before input data get consumed.
+But z_extract_offset calculating is based on size of VO (vmlinux) and size
+of compressed VO only at first.
+So need to make sure [z_extra_offset, init_size) will fit ZO, that means
+init_size need to be adjusted according to ZO size.
+That make init_size is always >= run_size.
 
-Need to increase pgt buffer size.
-When boot via startup_64, as we need to cover old VO, params, cmdline
-and new VO, in extreme case we could have them all cross 512G boundary,
-will need (2+2)*4 pages with 2M mapping. And need 2 for first 2M for vga ram.
-Plus one for level4. Total will be 19 pages.
-When boot via startup_32, aslr would move new VO above 4G, we need set extra
-ident mapping for new VO, pgt buffer come from _pgtable offset 6 pages.
-should only need (2+2) pages at most when it cross 512G boundary.
-So 19 pages could make both pathes happy.
+During aslr buffer searching, we need to make sure the new buffer is big
+enough for decompress at first. So use init_size instead, and kill not
+needed run_size related code.
 
-
--v3: add mapping for first 2M with video ram when X86_VERBOSE_BOOTUP is set.
-     Don't need to set mapping for setup_data, as it is already late
-     in boot/ZO stage, will not access it until VO stage, and VO stage
-     will use early_memmap or kernel address to access them.
-
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Jiri Kosina <jkosina@suse.cz>
-Cc: Borislav Petkov <bp@suse.de>
+Fixes: e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Josh Triplett <josh@joshtriplett.org>
 Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Junjie Mao <eternal.n08@gmail.com>
 Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/boot/compressed/aslr.c     | 21 ++++++++
- arch/x86/boot/compressed/head_64.S  |  4 +-
- arch/x86/boot/compressed/misc_pgt.c | 98 +++++++++++++++++++++++++++++++++++++
- arch/x86/include/asm/boot.h         | 19 +++++++
- 4 files changed, 140 insertions(+), 2 deletions(-)
- create mode 100644 arch/x86/boot/compressed/misc_pgt.c
+ arch/x86/boot/compressed/Makefile  |  4 +---
+ arch/x86/boot/compressed/head_32.S |  5 ++---
+ arch/x86/boot/compressed/head_64.S |  5 +----
+ arch/x86/boot/compressed/misc.c    | 15 +++++++-------
+ arch/x86/boot/compressed/mkpiggy.c |  9 ++------
+ arch/x86/tools/calc_run_size.sh    | 42 --------------------------------------
+ 6 files changed, 13 insertions(+), 67 deletions(-)
+ delete mode 100644 arch/x86/tools/calc_run_size.sh
 
-diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index a279514..34eb652 100644
---- a/arch/x86/boot/compressed/aslr.c
-+++ b/arch/x86/boot/compressed/aslr.c
-@@ -1,3 +1,8 @@
-+#ifdef CONFIG_X86_64
-+#define __pa(x)  ((unsigned long)(x))
-+#define __va(x)  ((void *)((unsigned long)(x)))
-+#endif
-+
- #include "misc.h"
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index 0a291cd..70cc92c 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -92,10 +92,8 @@ suffix-$(CONFIG_KERNEL_XZ)	:= xz
+ suffix-$(CONFIG_KERNEL_LZO) 	:= lzo
+ suffix-$(CONFIG_KERNEL_LZ4) 	:= lz4
  
- #include <asm/msr.h>
-@@ -21,6 +26,8 @@ struct kaslr_setup_data {
- 	__u8 data[1];
- } kaslr_setup_data;
+-RUN_SIZE = $(shell $(OBJDUMP) -h vmlinux | \
+-	     $(CONFIG_SHELL) $(srctree)/arch/x86/tools/calc_run_size.sh)
+ quiet_cmd_mkpiggy = MKPIGGY $@
+-      cmd_mkpiggy = $(obj)/mkpiggy $< $(RUN_SIZE) > $@ || ( rm -f $@ ; false )
++      cmd_mkpiggy = $(obj)/mkpiggy $< > $@ || ( rm -f $@ ; false )
  
-+#include "misc_pgt.c"
-+
- #define I8254_PORT_CONTROL	0x43
- #define I8254_PORT_COUNTER0	0x40
- #define I8254_CMD_READBACK	0xC0
-@@ -160,6 +167,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	unsafe = (unsigned long)input + input_size;
- 	mem_avoid[0].start = unsafe;
- 	mem_avoid[0].size = unsafe_len;
-+	fill_pagetable(output, init_size);
+ targets += piggy.S
+ $(obj)/piggy.S: $(obj)/vmlinux.bin.$(suffix-y) $(obj)/mkpiggy FORCE
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 1d7fbbc..cbed140 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -207,8 +207,7 @@ relocated:
+  * Do the decompression, and jump to the new kernel..
+  */
+ 				/* push arguments for decompress_kernel: */
+-	pushl	$z_run_size	/* size of kernel with .bss and .brk */
+-	pushl	$z_output_len	/* decompressed length, end of relocs */
++	pushl	$z_output_len	/* decompressed length */
+ 	leal	z_extract_offset_negative(%ebx), %ebp
+ 	pushl	%ebp		/* output address */
+ 	pushl	$z_input_len	/* input_len */
+@@ -218,7 +217,7 @@ relocated:
+ 	pushl	%eax		/* heap area */
+ 	pushl	%esi		/* real mode pointer */
+ 	call	decompress_kernel /* returns kernel location in %eax */
+-	addl	$28, %esp
++	addl	$24, %esp
  
- 	/* Avoid initrd. */
- 	initrd_start  = (u64)real_mode->ext_ramdisk_image << 32;
-@@ -168,6 +176,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	initrd_size |= real_mode->hdr.ramdisk_size;
- 	mem_avoid[1].start = initrd_start;
- 	mem_avoid[1].size = initrd_size;
-+	/* don't need to set mapping for initrd */
- 
- 	/* Avoid kernel command line. */
- 	cmd_line  = (u64)real_mode->ext_cmd_line_ptr << 32;
-@@ -178,10 +187,19 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 		;
- 	mem_avoid[2].start = cmd_line;
- 	mem_avoid[2].size = cmd_line_size;
-+	fill_pagetable(cmd_line, cmd_line_size);
- 
- 	/* Avoid params */
- 	mem_avoid[3].start = (unsigned long)real_mode;
- 	mem_avoid[3].size = sizeof(*real_mode);
-+	fill_pagetable((unsigned long)real_mode, sizeof(*real_mode));
-+
-+	/* don't need to set mapping for setup_data */
-+
-+#ifdef CONFIG_X86_VERBOSE_BOOTUP
-+	/* for video ram */
-+	fill_pagetable(0, PMD_SIZE);
-+#endif
- }
- 
- /* Does this memory vector overlap a known avoided area? */
-@@ -362,6 +380,9 @@ unsigned char *choose_kernel_location(struct boot_params *params,
- 		goto out;
- 
- 	choice = random;
-+
-+	fill_pagetable(choice, init_size);
-+	switch_pagetable();
- out:
- 	return (unsigned char *)choice;
- }
+ /*
+  * Jump to the decompressed kernel.
 diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 69015b5..1b6e34a 100644
+index 6b1766c..2884e0c 100644
 --- a/arch/x86/boot/compressed/head_64.S
 +++ b/arch/x86/boot/compressed/head_64.S
-@@ -125,7 +125,7 @@ ENTRY(startup_32)
- 	/* Initialize Page tables to 0 */
- 	leal	pgtable(%ebx), %edi
- 	xorl	%eax, %eax
--	movl	$((4096*6)/4), %ecx
-+	movl	$(BOOT_INIT_PGT_SIZE/4), %ecx
- 	rep	stosl
+@@ -402,16 +402,13 @@ relocated:
+  * Do the decompression, and jump to the new kernel..
+  */
+ 	pushq	%rsi			/* Save the real mode argument */
+-	movq	$z_run_size, %r9	/* size of kernel with .bss and .brk */
+-	pushq	%r9
+ 	movq	%rsi, %rdi		/* real mode address */
+ 	leaq	boot_heap(%rip), %rsi	/* malloc area for uncompression */
+ 	leaq	input_data(%rip), %rdx  /* input_data */
+ 	movl	$z_input_len, %ecx	/* input_len */
+ 	movq	%rbp, %r8		/* output target address */
+-	movq	$z_output_len, %r9	/* decompressed length, end of relocs */
++	movq	$z_output_len, %r9	/* decompressed length */
+ 	call	decompress_kernel	/* returns kernel location in %rax */
+-	popq	%r9
+ 	popq	%rsi
  
- 	/* Build Level 4 */
-@@ -477,4 +477,4 @@ boot_stack_end:
- 	.section ".pgtable","a",@nobits
- 	.balign 4096
- pgtable:
--	.fill 6*4096, 1, 0
-+	.fill BOOT_PGT_SIZE, 1, 0
-diff --git a/arch/x86/boot/compressed/misc_pgt.c b/arch/x86/boot/compressed/misc_pgt.c
-new file mode 100644
-index 0000000..b55982c
---- /dev/null
-+++ b/arch/x86/boot/compressed/misc_pgt.c
-@@ -0,0 +1,98 @@
-+
-+#ifdef CONFIG_X86_64
-+#include <asm/init.h>
-+#include <asm/pgtable.h>
-+
-+#include "../../mm/ident_map.c"
-+
-+struct alloc_pgt_data {
-+	unsigned char *pgt_buf;
-+	unsigned long pgt_buf_size;
-+	unsigned long pgt_buf_offset;
-+};
-+
-+static void *alloc_pgt_page(void *context)
-+{
-+	struct alloc_pgt_data *d = (struct alloc_pgt_data *)context;
-+	unsigned char *p = (unsigned char *)d->pgt_buf;
-+
-+	if (d->pgt_buf_offset >= d->pgt_buf_size) {
-+		debug_putstr("out of pgt_buf in misc.c\n");
-+		return NULL;
-+	}
-+
-+	p += d->pgt_buf_offset;
-+	d->pgt_buf_offset += PAGE_SIZE;
-+
-+	return p;
-+}
-+
-+/*
-+ * Use a normal definition of memset() from string.c. There are already
-+ * included header files which expect a definition of memset() and by
-+ * the time we define memset macro, it is too late.
-+ */
-+#undef memset
-+#define memzero(s, n)   memset((s), 0, (n))
-+
-+unsigned long __force_order;
-+static struct alloc_pgt_data pgt_data;
-+static struct x86_mapping_info mapping_info;
-+static pgd_t *level4p;
-+
-+extern unsigned char _pgtable[];
-+static void fill_pagetable(unsigned long start, unsigned long size)
-+{
-+	unsigned long end = start + size;
-+
-+	if (!level4p) {
-+		pgt_data.pgt_buf_offset = 0;
-+		mapping_info.alloc_pgt_page = alloc_pgt_page;
-+		mapping_info.context = &pgt_data;
-+		mapping_info.pmd_flag = __PAGE_KERNEL_LARGE_EXEC;
-+
-+		/*
-+		 * come from startup_32 ?
-+		 * then cr3 is _pgtable, we can reuse it.
-+		 */
-+		level4p = (pgd_t *)read_cr3();
-+		if ((unsigned long)level4p == (unsigned long)_pgtable) {
-+			pgt_data.pgt_buf = (unsigned char *)_pgtable +
-+						 BOOT_INIT_PGT_SIZE;
-+			pgt_data.pgt_buf_size = BOOT_PGT_SIZE -
-+						 BOOT_INIT_PGT_SIZE;
-+
-+			debug_putstr("boot via startup_32\n");
-+		} else {
-+			pgt_data.pgt_buf = (unsigned char *)_pgtable;
-+			pgt_data.pgt_buf_size = BOOT_PGT_SIZE;
-+
-+			debug_putstr("boot via startup_64\n");
-+			level4p = (pgd_t *)alloc_pgt_page(&pgt_data);
-+		}
-+		memset((unsigned char *)pgt_data.pgt_buf, 0,
-+			 pgt_data.pgt_buf_size);
-+	}
-+
-+	/* align boundary to 2M */
-+	start = round_down(start, PMD_SIZE);
-+	end = round_up(end, PMD_SIZE);
-+	if (start >= end)
-+		return;
-+
-+	kernel_ident_mapping_init(&mapping_info, level4p, start, end);
-+}
-+
-+static void switch_pagetable(void)
-+{
-+	write_cr3((unsigned long)level4p);
-+}
-+
-+#else
-+static void fill_pagetable(unsigned long start, unsigned long size)
-+{
-+}
-+static void switch_pagetable(void)
-+{
-+}
-+#endif
-diff --git a/arch/x86/include/asm/boot.h b/arch/x86/include/asm/boot.h
-index 4fa687a..7b23908 100644
---- a/arch/x86/include/asm/boot.h
-+++ b/arch/x86/include/asm/boot.h
-@@ -32,7 +32,26 @@
- #endif /* !CONFIG_KERNEL_BZIP2 */
+ /*
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index 5903089..51e9e54 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -370,10 +370,10 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
+ 				  unsigned char *input_data,
+ 				  unsigned long input_len,
+ 				  unsigned char *output,
+-				  unsigned long output_len,
+-				  unsigned long run_size)
++				  unsigned long output_len)
+ {
+ 	unsigned char *output_orig = output;
++	unsigned long init_size;
  
- #ifdef CONFIG_X86_64
+ 	real_mode = rmode;
+ 
+@@ -396,15 +396,14 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
+ 	free_mem_ptr     = heap;	/* Heap */
+ 	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
+ 
++	init_size = real_mode->hdr.init_size;
 +
- #define BOOT_STACK_SIZE	0x4000
-+
-+#define BOOT_INIT_PGT_SIZE (6*4096)
-+#ifdef CONFIG_RANDOMIZE_BASE
-+/*
-+ * 1 page for level4, 2 pages for first 2M.
-+ * (2+2)*4 pages for kernel, param, cmd_line, random kernel
-+ * if all cross 512G boundary.
-+ * So total will be 19 pages.
-+ */
-+#ifdef CONFIG_X86_VERBOSE_BOOTUP
-+#define BOOT_PGT_SIZE (19*4096)
-+#else
-+#define BOOT_PGT_SIZE (17*4096)
-+#endif
-+#else
-+#define BOOT_PGT_SIZE BOOT_INIT_PGT_SIZE
-+#endif
-+
- #else
- #define BOOT_STACK_SIZE	0x1000
- #endif
+ 	/*
+-	 * The memory hole needed for the kernel is the larger of either
+-	 * the entire decompressed kernel plus relocation table, or the
+-	 * entire decompressed kernel plus .bss and .brk sections.
++	 * The memory hole needed for the kernel is init_size for running
++	 * and init_size is bigger than output_len always.
+ 	 */
+ 	output = choose_kernel_location(real_mode, input_data, input_len,
+-					output,
+-					output_len > run_size ? output_len
+-							      : run_size);
++					output, init_size);
+ 
+ 	/* Validate memory location choices. */
+ 	if ((unsigned long)output & (MIN_KERNEL_ALIGN - 1))
+diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
+index d8222f2..b669ab6 100644
+--- a/arch/x86/boot/compressed/mkpiggy.c
++++ b/arch/x86/boot/compressed/mkpiggy.c
+@@ -36,13 +36,11 @@ int main(int argc, char *argv[])
+ 	uint32_t olen;
+ 	long ilen;
+ 	unsigned long offs;
+-	unsigned long run_size;
+ 	FILE *f = NULL;
+ 	int retval = 1;
+ 
+-	if (argc < 3) {
+-		fprintf(stderr, "Usage: %s compressed_file run_size\n",
+-				argv[0]);
++	if (argc < 2) {
++		fprintf(stderr, "Usage: %s compressed_file\n", argv[0]);
+ 		goto bail;
+ 	}
+ 
+@@ -76,7 +74,6 @@ int main(int argc, char *argv[])
+ 	offs += olen >> 12;	/* Add 8 bytes for each 32K block */
+ 	offs += 64*1024 + 128;	/* Add 64K + 128 bytes slack */
+ 	offs = (offs+4095) & ~4095; /* Round to a 4K boundary */
+-	run_size = atoi(argv[2]);
+ 
+ 	printf(".section \".rodata..compressed\",\"a\",@progbits\n");
+ 	printf(".globl z_input_len\n");
+@@ -88,8 +85,6 @@ int main(int argc, char *argv[])
+ 	/* z_extract_offset_negative allows simplification of head_32.S */
+ 	printf(".globl z_extract_offset_negative\n");
+ 	printf("z_extract_offset_negative = -0x%lx\n", offs);
+-	printf(".globl z_run_size\n");
+-	printf("z_run_size = %lu\n", run_size);
+ 
+ 	printf(".globl input_data, input_data_end\n");
+ 	printf("input_data:\n");
+diff --git a/arch/x86/tools/calc_run_size.sh b/arch/x86/tools/calc_run_size.sh
+deleted file mode 100644
+index 1a4c17b..0000000
+--- a/arch/x86/tools/calc_run_size.sh
++++ /dev/null
+@@ -1,42 +0,0 @@
+-#!/bin/sh
+-#
+-# Calculate the amount of space needed to run the kernel, including room for
+-# the .bss and .brk sections.
+-#
+-# Usage:
+-# objdump -h a.out | sh calc_run_size.sh
+-
+-NUM='\([0-9a-fA-F]*[ \t]*\)'
+-OUT=$(sed -n 's/^[ \t0-9]*.b[sr][sk][ \t]*'"$NUM$NUM$NUM$NUM"'.*/\1\4/p')
+-if [ -z "$OUT" ] ; then
+-	echo "Never found .bss or .brk file offset" >&2
+-	exit 1
+-fi
+-
+-OUT=$(echo ${OUT# })
+-sizeA=$(printf "%d" 0x${OUT%% *})
+-OUT=${OUT#* }
+-offsetA=$(printf "%d" 0x${OUT%% *})
+-OUT=${OUT#* }
+-sizeB=$(printf "%d" 0x${OUT%% *})
+-OUT=${OUT#* }
+-offsetB=$(printf "%d" 0x${OUT%% *})
+-
+-run_size=$(( $offsetA + $sizeA + $sizeB ))
+-
+-# BFD linker shows the same file offset in ELF.
+-if [ "$offsetA" -ne "$offsetB" ] ; then
+-	# Gold linker shows them as consecutive.
+-	endB=$(( $offsetB + $sizeB ))
+-	if [ "$endB" != "$run_size" ] ; then
+-		printf "sizeA: 0x%x\n" $sizeA >&2
+-		printf "offsetA: 0x%x\n" $offsetA >&2
+-		printf "sizeB: 0x%x\n" $sizeB >&2
+-		printf "offsetB: 0x%x\n" $offsetB >&2
+-		echo ".bss and .brk are non-contiguous" >&2
+-		exit 1
+-	fi
+-fi
+-
+-printf "%d\n" $run_size
+-exit 0
 -- 
 1.8.4.5
