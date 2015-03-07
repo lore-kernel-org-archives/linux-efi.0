@@ -1,70 +1,181 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 0/7] x86, boot: clean up kasl
-Date: Sat,  7 Mar 2015 14:07:14 -0800
-Message-ID: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v3 2/7] x86, boot: Move ZO to end of buffer
+Date: Sat,  7 Mar 2015 14:07:16 -0800
+Message-ID: <1425766041-6551-3-git-send-email-yinghai@kernel.org>
+References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-First 3 patches make ZO (arch/x86/boot/compressed/vmlinux) data region is not
-overwritten by VO (vmlinux) after decompress.  So could pass data from ZO to VO.
+Boris found data from boot stage can not be used kernel stage.
 
-The 4th one is fixing kaslr_enabled accessing. Old code is using address
-as value wrongly.
+Bootloader allocate buffer according to init_size in hdr, and load the
+ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+During running of ZO, ZO move itself to the middle of buffer at
+z_extract_offset to make sure that decompressor would not have output
+overwrite input data before input data get consumed.
+After decompressor is called, VO (vmlinux) use whole buffer from start,
+and ZO code and data section is overlapped with VO bss section.
+And later VO/clear_bss() clear them before code in arch/x86/kernel/setup.c
+access them.
 
-Last 3 patches are the base for kaslr supporting kernel above 4G.
-create new ident mapping for kasl 64bit, so we can cover
-   above 4G random kernel base, also don't need to track pagetable
-   for 64bit bootloader (patched grub2 or kexec).
-   that will make mem_avoid handling simple.
+To make the data survive that later, we should avoid the overlapping.
+At first move ZO close the end of buffer instead of middle of the buffer,
+that will move out ZO data out of VO bss area.
 
-Please put first 4 patches into tip/x86/urgent to v4.0
+Also after that we can find out where is data section of copied ZO
+instead of guessing. That will aslr mem_avoid array filling for
+new buffer seaching much simple.
 
-Last 3 patches should go to tip/x86/kasl and to v4.1, but you may need to
-pull x86/urgent to x86/kasl, as them depends on first 4 patches.
+And rename z_extract_offset to z_min_extract_offset, as it is
+actually the minimum offset for extracting now.
 
-He could rebase his patches about kasl on top those patches.
+To keep the final real extract_offset to be page aligned like
+min_extract_offset, we need make VO _end and ZO _end both
+page aligned to make sure init_size always page aligned.
 
-git://git.kernel.org/pub/scm/linux/kernel/git/yinghai/linux-yinghai.git for-x86-4.0-rc2-aslr
+Next patch will add ZO data size to init_size, so it will make sure
+ZO data is even out of VO brk area.
 
-Thanks
-
-Yinghai Lu
-
-Yinghai Lu (7):
-  x86, kaslr: Use init_size instead of run_size
-  x86, boot: Move ZO to end of buffer
-  x86, boot: Don't overlap VO with ZO data
-  x86, kaslr: Access the correct kaslr_enabled variable
-  x86, kaslr: Consolidate mem_avoid array filling
-  x86, boot: Split kernel_ident_mapping_init to another file
-  x86, kaslr, 64bit: Set new or extra ident_mapping
-
- arch/x86/boot/Makefile                 |  2 +-
- arch/x86/boot/compressed/Makefile      |  4 +-
- arch/x86/boot/compressed/aslr.c        | 48 ++++++++++++-----
- arch/x86/boot/compressed/head_32.S     | 16 ++++--
- arch/x86/boot/compressed/head_64.S     | 17 +++---
- arch/x86/boot/compressed/misc.c        | 15 +++---
- arch/x86/boot/compressed/misc.h        |  4 +-
- arch/x86/boot/compressed/misc_pgt.c    | 98 ++++++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/mkpiggy.c     | 16 ++----
- arch/x86/boot/compressed/vmlinux.lds.S |  2 +
- arch/x86/boot/header.S                 |  9 ++--
- arch/x86/include/asm/boot.h            | 19 +++++++
- arch/x86/include/asm/page.h            |  5 ++
+Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Cc: Kees Cook <keescook@chromium.org>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+---
+ arch/x86/boot/compressed/head_32.S     | 11 +++++++++--
+ arch/x86/boot/compressed/head_64.S     |  8 ++++++--
+ arch/x86/boot/compressed/mkpiggy.c     |  7 ++-----
+ arch/x86/boot/compressed/vmlinux.lds.S |  1 +
+ arch/x86/boot/header.S                 |  2 +-
  arch/x86/kernel/asm-offsets.c          |  1 +
- arch/x86/kernel/setup.c                | 13 ++++-
  arch/x86/kernel/vmlinux.lds.S          |  1 +
- arch/x86/mm/ident_map.c                | 74 +++++++++++++++++++++++++
- arch/x86/mm/init_64.c                  | 74 +------------------------
- arch/x86/tools/calc_run_size.sh        | 42 ---------------
- 19 files changed, 288 insertions(+), 172 deletions(-)
- create mode 100644 arch/x86/boot/compressed/misc_pgt.c
- create mode 100644 arch/x86/mm/ident_map.c
- delete mode 100644 arch/x86/tools/calc_run_size.sh
+ 7 files changed, 21 insertions(+), 10 deletions(-)
 
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index cbed140..a9b56f1 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -147,7 +147,9 @@ preferred_addr:
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	addl    %eax, %ebx
+ 
+ 	/* Set up the stack */
+ 	leal	boot_stack_end(%ebx), %esp
+@@ -208,8 +210,13 @@ relocated:
+  */
+ 				/* push arguments for decompress_kernel: */
+ 	pushl	$z_output_len	/* decompressed length */
+-	leal	z_extract_offset_negative(%ebx), %ebp
++
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	movl    %ebx, %ebp
++	subl    %eax, %ebp
+ 	pushl	%ebp		/* output address */
++
+ 	pushl	$z_input_len	/* input_len */
+ 	leal	input_data(%ebx), %eax
+ 	pushl	%eax		/* input_data */
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2884e0c..69015b5 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -101,7 +101,9 @@ ENTRY(startup_32)
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl	BP_init_size(%esi), %eax
++	subl	$_end, %eax
++	addl	%eax, %ebx
+ 
+ /*
+  * Prepare for entering 64 bit mode
+@@ -329,7 +331,9 @@ preferred_addr:
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	leaq	z_extract_offset(%rbp), %rbx
++	movl	BP_init_size(%rsi), %ebx
++	subl	$_end, %ebx
++	addq	%rbp, %rbx
+ 
+ 	/* Set up the stack */
+ 	leaq	boot_stack_end(%rbx), %rsp
+diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
+index b669ab6..c03b009 100644
+--- a/arch/x86/boot/compressed/mkpiggy.c
++++ b/arch/x86/boot/compressed/mkpiggy.c
+@@ -80,11 +80,8 @@ int main(int argc, char *argv[])
+ 	printf("z_input_len = %lu\n", ilen);
+ 	printf(".globl z_output_len\n");
+ 	printf("z_output_len = %lu\n", (unsigned long)olen);
+-	printf(".globl z_extract_offset\n");
+-	printf("z_extract_offset = 0x%lx\n", offs);
+-	/* z_extract_offset_negative allows simplification of head_32.S */
+-	printf(".globl z_extract_offset_negative\n");
+-	printf("z_extract_offset_negative = -0x%lx\n", offs);
++	printf(".globl z_min_extract_offset\n");
++	printf("z_min_extract_offset = 0x%lx\n", offs);
+ 
+ 	printf(".globl input_data, input_data_end\n");
+ 	printf("input_data:\n");
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 34d047c..e24e0a0 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -70,5 +70,6 @@ SECTIONS
+ 		_epgtable = . ;
+ 	}
+ #endif
++	. = ALIGN(PAGE_SIZE);	/* keep ZO size page aligned */
+ 	_end = .;
+ }
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 16ef025..9bfab22 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -440,7 +440,7 @@ setup_data:		.quad 0			# 64-bit physical pointer to
+ 
+ pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
+ 
+-#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_extract_offset)
++#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_min_extract_offset)
+ #define VO_INIT_SIZE	(VO__end - VO__text)
+ #if ZO_INIT_SIZE > VO_INIT_SIZE
+ #define INIT_SIZE ZO_INIT_SIZE
+diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
+index 9f6b934..0e8e4f7 100644
+--- a/arch/x86/kernel/asm-offsets.c
++++ b/arch/x86/kernel/asm-offsets.c
+@@ -66,6 +66,7 @@ void common(void) {
+ 	OFFSET(BP_hardware_subarch, boot_params, hdr.hardware_subarch);
+ 	OFFSET(BP_version, boot_params, hdr.version);
+ 	OFFSET(BP_kernel_alignment, boot_params, hdr.kernel_alignment);
++	OFFSET(BP_init_size, boot_params, hdr.init_size);
+ 	OFFSET(BP_pref_address, boot_params, hdr.pref_address);
+ 	OFFSET(BP_code32_start, boot_params, hdr.code32_start);
+ 
+diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
+index 00bf300..ac25c7f 100644
+--- a/arch/x86/kernel/vmlinux.lds.S
++++ b/arch/x86/kernel/vmlinux.lds.S
+@@ -325,6 +325,7 @@ SECTIONS
+ 		__brk_limit = .;
+ 	}
+ 
++	. = ALIGN(PAGE_SIZE);		/* keep VO init size page aligned */
+ 	_end = .;
+ 
+         STABS_DEBUG
 -- 
 1.8.4.5
