@@ -1,55 +1,36 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 01/15] x86, kaslr: Use init_size instead of run_size
-Date: Fri, 6 Mar 2015 16:52:29 -0800
-Message-ID: <CAE9FiQXRyO1aej7_JOfUfG7h-qrFHfukEP+9JxYm5+e9s4-Zpg@mail.gmail.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 04/15] x86, kaslr: get kaslr_enabled back correctly
+Date: Sat, 7 Mar 2015 21:50:42 +0100
+Message-ID: <20150307205042.GA3380@pd.tnic>
 References: <1425456048-16236-1-git-send-email-yinghai@kernel.org>
-	<1425456048-16236-2-git-send-email-yinghai@kernel.org>
-	<20150306135534.GD4259@pd.tnic>
-	<CAE9FiQXzv7TPMRA+RqSdV0ERiW3KYA-2KOyDKBrZDn3Zd5RcrQ@mail.gmail.com>
-	<CAGXu5jLf+=CMs0qj4nRG-kw1YiQ-eMFHFpAE8uVUitqmGOG7gA@mail.gmail.com>
-	<CAE9FiQU3jKn260cce7Zvo0Qy0ksDKB=-o2m_drBmO4fpBv8Wow@mail.gmail.com>
-	<CAGXu5jLk-qeHLqejR47TmT8wzrkjF9eQhfGPJYDoejD+AdkmOQ@mail.gmail.com>
+ <1425456048-16236-5-git-send-email-yinghai@kernel.org>
+ <20150304101649.GA3663@pd.tnic>
+ <CAE9FiQWKNDgzJtDVV34e7vWTu7LtqdDKB4KiN1RZwcZrX70zSA@mail.gmail.com>
+ <20150304200000.GB6276@gmail.com>
+ <CAE9FiQXJ-ujbhpw8phk5iQM8QFw=9QxDrXK6AdyXqDxmch_bbw@mail.gmail.com>
+ <20150306133312.GC4259@pd.tnic>
+ <CAE9FiQVux0j=3MOj1V-hAfVtbPGUCtAyzBpkQyjr8iUchFBmOg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAGXu5jLk-qeHLqejR47TmT8wzrkjF9eQhfGPJYDoejD+AdkmOQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Junjie Mao <eternal.n08-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-pci-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAE9FiQVux0j=3MOj1V-hAfVtbPGUCtAyzBpkQyjr8iUchFBmOg@mail.gmail.com>
+Sender: linux-pci-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Bjorn Helgaas <bhelgaas@google.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Baoquan He <bhe@redhat.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-pci@vger.kernel.org" <linux-pci@vger.kernel.org>, Kees Cook <keescook@chromium.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Mar 6, 2015 at 11:56 AM, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
-> On Fri, Mar 6, 2015 at 11:28 AM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> Okay, I've proven this to myself now. :) I think it would be valuable
-> to call out that brk and bss are included in the _end calculation. For
-> others:
-...
-> So, _end - _text does equal _text + bss offset + bss size + brk size
->
-> Thanks! It'll be nice to lose the run_size hack. Adding some
-> documentation to the code here would help others in the future trying
-> to find this value, I think. :)
+On Fri, Mar 06, 2015 at 09:49:25AM -0800, Yinghai Lu wrote:
+> That is "copy and paste" instead of attachment for easy review.
+> but gmail web client convert tab to spaces.
 
-in arch/x86/kernel/vmlinux.lds.S, we have
+Next time you send a patch *only* for review *and* *not* for
+application, do state that at the top like everyone else. Better yet,
+don't use gmail for sending patches at all.
 
-        /* BSS */
-        . = ALIGN(PAGE_SIZE);
-        .bss : AT(ADDR(.bss) - LOAD_OFFSET) {
-                __bss_start = .;
-                *(.bss..page_aligned)
-                *(.bss)
-                . = ALIGN(PAGE_SIZE);
-                __bss_stop = .;
-        }
+-- 
+Regards/Gruss,
+    Boris.
 
-        . = ALIGN(PAGE_SIZE);
-        .brk : AT(ADDR(.brk) - LOAD_OFFSET) {
-                __brk_base = .;
-                . += 64 * 1024;         /* 64k alignment slop space */
-                *(.brk_reservation)     /* areas brk users have reserved */
-                __brk_limit = .;
-        }
-
-        _end = .;
-
-so _end already cover bss and brk.
+ECO tip #101: Trim your mails when you reply.
+--
