@@ -1,145 +1,47 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v3 3/8] x86, of: Let add_dtb reserve setup_data locally
-Date: Sat,  7 Mar 2015 16:56:16 -0800
-Message-ID: <1425776181-10219-4-git-send-email-yinghai@kernel.org>
-References: <1425776181-10219-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1425776181-10219-1-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@suse.de>, Bjorn Helgaas <bhelgaas@google.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, Chun-Yi Lee <jlee@suse.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pci@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>, Rob Herring <robh@kernel.org>, David Vrabel <david.vrabel@citrix.com>
+From: David Rientjes <rientjes-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3 1/8] x86: Kill E820_RESERVED_KERN
+Date: Sat, 7 Mar 2015 17:59:14 -0800 (PST)
+Message-ID: <alpine.DEB.2.10.1503071748530.5739@chino.kir.corp.google.com>
+References: <1425776181-10219-1-git-send-email-yinghai@kernel.org> <1425776181-10219-2-git-send-email-yinghai@kernel.org>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1425776181-10219-2-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-We will not reserve setup_data in generic code. Every handler need to
-reserve and copy setup_data locally.
+On Sat, 7 Mar 2015, Yinghai Lu wrote:
 
-Current dtd handling already have code for copying, just add reserve code.
+> Now we are using memblock to do early resource reserver/allocation
+> instead of using e820 map directly, and setup_data is reserved in
+> memblock early already.
+> Also kexec generate setup_data and pass pointer to second kernel,
+> so second kernel reserve setup_data by their own.
+> (Now kexec-tools create SETUP_EFI and SETUP_E820_EXT).
+> 
+> We can kill E820_RESERVED_KERN and not touch e820 map at all.
+> 
+> That will fix bug in mark_nonsave_region that can not handle that
+> case: E820_RAM and E820_RESERVED_KERN ranges are continuous and
+> boundary is not page aligned.
+> 
+> Bugzilla: https://bugzilla.opensuse.org/show_bug.cgi?id=913885
 
-Also simplify code a bit by storing real dtb size.
+Is this the bug referenced in the commit message that is fixed?  If so, 
+it's only a bug for resume, correct?  I'm not sure if that's clear enough 
+just from the commit message, I was looking at this patch for an e820 
+problem I'm currently facing on 3.3.
 
-Cc: Rob Herring <robh@kernel.org>
-Cc: David Vrabel <david.vrabel@citrix.com>
-Signed-off-by: Yinghai Lu <yinghai@kernel.org>
----
- arch/x86/include/asm/prom.h  |  9 ++++++---
- arch/x86/kernel/devicetree.c | 43 +++++++++++++++++++++++++------------------
- 2 files changed, 31 insertions(+), 21 deletions(-)
+> Reported-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+> Tested-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+> Cc: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+> Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-diff --git a/arch/x86/include/asm/prom.h b/arch/x86/include/asm/prom.h
-index 1d081ac..fb716eddc 100644
---- a/arch/x86/include/asm/prom.h
-+++ b/arch/x86/include/asm/prom.h
-@@ -24,17 +24,20 @@
- 
- #ifdef CONFIG_OF
- extern int of_ioapic;
--extern u64 initial_dtb;
--extern void add_dtb(u64 data);
- void x86_of_pci_init(void);
- void x86_dtb_init(void);
- #else
--static inline void add_dtb(u64 data) { }
- static inline void x86_of_pci_init(void) { }
- static inline void x86_dtb_init(void) { }
- #define of_ioapic 0
- #endif
- 
-+#ifdef CONFIG_OF_FLATTREE
-+extern void add_dtb(u64 data);
-+#else
-+static inline void add_dtb(u64 data) { }
-+#endif
-+
- extern char cmd_line[COMMAND_LINE_SIZE];
- 
- #endif /* __ASSEMBLY__ */
-diff --git a/arch/x86/kernel/devicetree.c b/arch/x86/kernel/devicetree.c
-index 3d35033..55cf76a 100644
---- a/arch/x86/kernel/devicetree.c
-+++ b/arch/x86/kernel/devicetree.c
-@@ -2,6 +2,7 @@
-  * Architecture specific OF callbacks.
-  */
- #include <linux/bootmem.h>
-+#include <linux/memblock.h>
- #include <linux/export.h>
- #include <linux/io.h>
- #include <linux/irqdomain.h>
-@@ -23,7 +24,6 @@
- #include <asm/setup.h>
- #include <asm/i8259.h>
- 
--__initdata u64 initial_dtb;
- char __initdata cmd_line[COMMAND_LINE_SIZE];
- 
- int __initdata of_ioapic;
-@@ -43,11 +43,27 @@ void * __init early_init_dt_alloc_memory_arch(u64 size, u64 align)
- 	return __alloc_bootmem(size, align, __pa(MAX_DMA_ADDRESS));
- }
- 
-+#ifdef CONFIG_OF_FLATTREE
-+static u64 initial_dtb __initdata;
-+static u32 initial_dtb_size __initdata;
- void __init add_dtb(u64 data)
- {
-+	u32 map_len;
-+
- 	initial_dtb = data + offsetof(struct setup_data, data);
--}
- 
-+	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
-+	initial_boot_params = early_memremap(initial_dtb, map_len);
-+	if (!initial_boot_params) {
-+		initial_dtb = 0;
-+		return;
-+	}
-+	initial_dtb_size = of_get_flat_dt_size();
-+	early_memunmap(initial_boot_params, map_len);
-+	initial_boot_params = NULL;
-+	memblock_reserve(initial_dtb, initial_dtb_size);
-+}
-+#endif
- /*
-  * CE4100 ids. Will be moved to machine_device_initcall() once we have it.
-  */
-@@ -272,31 +288,22 @@ static void __init dtb_apic_setup(void)
- 	dtb_ioapic_setup();
- }
- 
--#ifdef CONFIG_OF_FLATTREE
- static void __init x86_flattree_get_config(void)
- {
--	u32 size, map_len;
-+#ifdef CONFIG_OF_FLATTREE
- 	void *dt;
- 
- 	if (!initial_dtb)
- 		return;
- 
--	map_len = max(PAGE_SIZE - (initial_dtb & ~PAGE_MASK), (u64)128);
--
--	initial_boot_params = dt = early_memremap(initial_dtb, map_len);
--	size = of_get_flat_dt_size();
--	if (map_len < size) {
--		early_iounmap(dt, map_len);
--		initial_boot_params = dt = early_memremap(initial_dtb, size);
--		map_len = size;
--	}
--
-+	initial_boot_params = dt = early_memremap(initial_dtb,
-+						  initial_dtb_size);
- 	unflatten_and_copy_device_tree();
--	early_iounmap(dt, map_len);
--}
--#else
--static inline void x86_flattree_get_config(void) { }
-+	early_memunmap(dt, initial_dtb_size);
-+
-+	memblock_free(initial_dtb, initial_dtb_size);
- #endif
-+}
- 
- void __init x86_dtb_init(void)
- {
--- 
-1.8.4.5
+Hmm, although the bug is reported for a 3.12 kernel, I assume this is for 
+stable 3.10+?  If so, it should apply fine with the exception of removing 
+e820_reserve_setup_data() from setup_arch() rather than 
+memblock_x86_reserve_range_setup_data().  Or is it for 3.2 as well and 
+needs to be completely rebased for that kernel?
