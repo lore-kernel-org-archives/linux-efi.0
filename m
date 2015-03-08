@@ -1,32 +1,20 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/8] x86: Kill E820_RESERVED_KERN
-Date: Sat, 7 Mar 2015 22:51:53 -0800
-Message-ID: <CAE9FiQWd71SxCf9=Nh_dBSKK2ecHC=s3-2R7dZJM9PGuR7ybzw@mail.gmail.com>
-References: <1425776181-10219-1-git-send-email-yinghai@kernel.org>
-	<1425776181-10219-2-git-send-email-yinghai@kernel.org>
-	<alpine.DEB.2.10.1503071748530.5739@chino.kir.corp.google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Marcel Holtmann <marcel-kz+m5ild9QBg9hUCZPvPmw@public.gmane.org>
+Subject: efivarfs and writev() support
+Date: Sun, 8 Mar 2015 15:24:09 -0700
+Message-ID: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org>
+Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2070.6\))
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.10.1503071748530.5739-X6Q0R45D7oAcqpCFd4KODRPsWskHk0ljAL8bYrjMMd8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Rientjes <rientjes-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Chun-Yi Lee <jlee-IBi9RG/b67k@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Mar 7, 2015 at 5:59 PM, David Rientjes <rientjes-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org> wrote:
->
-> Hmm, although the bug is reported for a 3.12 kernel, I assume this is for
-> stable 3.10+?  If so, it should apply fine with the exception of removing
-> e820_reserve_setup_data() from setup_arch() rather than
-> memblock_x86_reserve_range_setup_data().  Or is it for 3.2 as well and
-> needs to be completely rebased for that kernel?
+Hi,
 
-For 3.10+, we will need to following patches, otherwise will have warning for
-SETUP_PCI with ioremap.
+it seems that efivarfs only supports readv(), but when it comes to writev(), I am getting an error. Is there any reason to not support vectored write on this filesystem? Especially with the uint32 header for each file, I think it would make perfect sense to support it.
 
-for 3.2 that does not SETUP_PCI, should be ok, but will need rebase.
+Regards
 
-Thanks
-
-Yinghai
+Marcel
