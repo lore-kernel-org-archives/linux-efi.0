@@ -1,33 +1,34 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v3 1/7] x86, kaslr: Use init_size instead of run_size
-Date: Mon, 9 Mar 2015 21:18:46 +0100
-Message-ID: <20150309201846.GM12732@pd.tnic>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
- <1425766041-6551-2-git-send-email-yinghai@kernel.org>
- <20150309124935.GA12732@pd.tnic>
- <CAE9FiQWc+mnepaqr8RvRXkyhyaOY_C=KvE_A0Ojf_jda3KmFBA@mail.gmail.com>
- <20150309200035.GK12732@pd.tnic>
- <CAE9FiQVEaeWZ2oggks8_jbS+dObZJLq7aEo9cFEqJNtOhWTNRw@mail.gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: fwupdate
+Date: Mon, 9 Mar 2015 22:23:22 +0100
+Message-ID: <20150309212322.GG9234@pd.tnic>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+ <20150302122955.GB24476@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+ <CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
+ <CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
+ <20150306081334.GA3514@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
+ <20150306144725.GF3514@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAE9FiQVEaeWZ2oggks8_jbS+dObZJLq7aEo9cFEqJNtOhWTNRw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20150306144725.GF3514-fF5Pk5pvG8Y@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Junjie Mao <eternal.n08-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 09, 2015 at 01:06:00PM -0700, Yinghai Lu wrote:
-> Yes. Just to emphasize that  " We need to make sure [z_extra_offset,
-> init_size) will fit ZO"
++ pjones.
 
-So you want to say:
+So reportedly, there is already a capsule-loading thing which doesn't
+need the kernel at all:
 
-"We need to make sure the compressed kernel fits in the interval
-[z_extra_offset, z_extra_offset + init_size)"
+https://github.com/rhinstaller/fwupdate
 
-?
+So why are we even wasting energy with this discussion here?
 
 -- 
 Regards/Gruss,
