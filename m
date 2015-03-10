@@ -1,122 +1,32 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] efi: stub: retrieve FDT size when loaded from UEFI
- config table
-Date: Tue, 10 Mar 2015 13:54:38 +0100
-Message-ID: <CAKv+Gu_emjD+g6HToxF3ULtYRX57+Kb8y6A8D4EZoBvRMCf6NA@mail.gmail.com>
-References: <1425470549-7393-1-git-send-email-ard.biesheuvel@linaro.org>
-	<CAFECyb8dTq0U-jCgH2R0K=4415zTR998VozQF2aCZ9ednAACvA@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: Disable interrupts around EFI calls, not in the
+ epilog/prolog calls
+Date: Tue, 10 Mar 2015 13:36:18 +0000
+Message-ID: <20150310133618.GB17573@codeblueprint.co.uk>
+References: <20150303025804.GA24587@kt-Inspiron-3542>
+ <20150303063433.GA30468@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAFECyb8dTq0U-jCgH2R0K=4415zTR998VozQF2aCZ9ednAACvA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150303063433.GA30468-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Tapasweni Pathak <tapaswenipathak-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 4 March 2015 at 19:06, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Wed, Mar 4, 2015 at 4:02 AM, Ard Biesheuvel
-> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> When allocating memory for the copy of the FDT that the stub
->> modifies and passes to the kernel, it uses the current size as
->> an estimate of how much memory to allocate, and increases it page
->> by page if it turns out to be too small. However, when loading
->> the FDT from a UEFI configuration table, the estimated size is
->> left at its default value of zero, and the allocation loop runs
->> starting from zero all the way up to the allocation size that
->> finally fits the updated FDT.
->>
->> Instead, retrieve the size of the FDT from the FDT header when
->> loading it from the UEFI config table.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/firmware/efi/libstub/arm-stub.c | 7 +++----
->>  drivers/firmware/efi/libstub/efistub.h  | 2 +-
->>  drivers/firmware/efi/libstub/fdt.c      | 7 ++++++-
->>  3 files changed, 10 insertions(+), 6 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
->> index dcae482a9a17..e29560e6b40b 100644
->> --- a/drivers/firmware/efi/libstub/arm-stub.c
->> +++ b/drivers/firmware/efi/libstub/arm-stub.c
->> @@ -175,7 +175,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->>         unsigned long initrd_addr;
->>         u64 initrd_size = 0;
->>         unsigned long fdt_addr = 0;  /* Original DTB */
->> -       u64 fdt_size = 0;  /* We don't get size from configuration table */
->> +       unsigned long fdt_size = 0;
->>         char *cmdline_ptr = NULL;
->>         int cmdline_size = 0;
->>         unsigned long new_fdt_addr;
->> @@ -239,8 +239,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->>         } else {
->>                 status = handle_cmdline_files(sys_table, image, cmdline_ptr,
->>                                               "dtb=",
->> -                                             ~0UL, (unsigned long *)&fdt_addr,
->> -                                             (unsigned long *)&fdt_size);
->> +                                             ~0UL, &fdt_addr, &fdt_size);
->>
->>                 if (status != EFI_SUCCESS) {
->>                         pr_efi_err(sys_table, "Failed to load device tree!\n");
->> @@ -252,7 +251,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
->>                 pr_efi(sys_table, "Using DTB from command line\n");
->>         } else {
->>                 /* Look for a device tree configuration table entry. */
->> -               fdt_addr = (uintptr_t)get_fdt(sys_table);
->> +               fdt_addr = (uintptr_t)get_fdt(sys_table, &fdt_size);
->>                 if (fdt_addr)
->>                         pr_efi(sys_table, "Using DTB from configuration table\n");
->>         }
->> diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
->> index 47437b16b186..e334a01cf92f 100644
->> --- a/drivers/firmware/efi/libstub/efistub.h
->> +++ b/drivers/firmware/efi/libstub/efistub.h
->> @@ -41,7 +41,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->>                                             unsigned long fdt_addr,
->>                                             unsigned long fdt_size);
->>
->> -void *get_fdt(efi_system_table_t *sys_table);
->> +void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size);
->>
->>  void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
->>                      unsigned long desc_size, efi_memory_desc_t *runtime_map,
->> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
->> index 91da56c4fd54..ef5d764e2a27 100644
->> --- a/drivers/firmware/efi/libstub/fdt.c
->> +++ b/drivers/firmware/efi/libstub/fdt.c
->> @@ -323,7 +323,7 @@ fail:
->>         return EFI_LOAD_ERROR;
->>  }
->>
->> -void *get_fdt(efi_system_table_t *sys_table)
->> +void *get_fdt(efi_system_table_t *sys_table, unsigned long *fdt_size)
->>  {
->>         efi_guid_t fdt_guid = DEVICE_TREE_GUID;
->>         efi_config_table_t *tables;
->> @@ -336,6 +336,11 @@ void *get_fdt(efi_system_table_t *sys_table)
->>         for (i = 0; i < sys_table->nr_tables; i++)
->>                 if (efi_guidcmp(tables[i].guid, fdt_guid) == 0) {
->>                         fdt = (void *) tables[i].table;
->> +                       if (fdt_check_header(fdt) != 0) {
->> +                               pr_efi_err(sys_table, "Invalid header detected on UEFI supplied FDT, ignoring ...\n");
->> +                               return NULL;
->> +                       }
->> +                       *fdt_size = fdt_totalsize(fdt);
->>                         break;
->>          }
->>
->> --
->> 1.8.3.2
->>
->
-> Looks good.
->
-> Reviewed-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Tue, 03 Mar, at 07:34:33AM, Ingo Molnar wrote:
+> 
+> So why are interrupts disabled around page table operations to begin 
+> with? It's not like any of this can execute on two CPUs at once, nor 
+> can this be executed from interrupt context.
+> 
+> So, shouldn't we only protect the EFI calls themselves? If we did that 
+> we could save the efi_flags global variable ugliness as well.
+> 
+> I.e. something like the attached patch. (not tested and all that)
 
-Thanks Roy.
+Looks good to me Ingo. I'll run it through the test farm. Thanks!
 
-@Matt: would you mind taking this one?
-
-Thanks,
-Ard.
+-- 
+Matt Fleming, Intel Open Source Technology Center
