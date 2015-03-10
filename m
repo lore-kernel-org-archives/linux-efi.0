@@ -1,30 +1,46 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v3 2/7] x86, boot: Move ZO to end of buffer
-Date: Tue, 10 Mar 2015 10:35:55 +0100
-Message-ID: <20150310093555.GD3535@pd.tnic>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
- <1425766041-6551-3-git-send-email-yinghai@kernel.org>
- <20150310080024.GB3535@pd.tnic>
- <alpine.LNX.2.00.1503101032560.26925@pobox.suse.cz>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Tue, 10 Mar 2015 12:26:52 +0000
+Message-ID: <20150310122652.GA17573@codeblueprint.co.uk>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+ <20150306213912.GA8020@fenchurch.internal.datastacks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1503101032560.26925-ztGlSCb7Y1iN3ZZ/Hiejyg@public.gmane.org>
+In-Reply-To: <20150306213912.GA8020-FS9oOTXHwv9t4tGkRPVz9tcb/sdHg95EuydrBrBl+0sAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 10, 2015 at 10:34:31AM +0100, Jiri Kosina wrote:
-> Thanks a lot for fixing my oversight.
+On Fri, 06 Mar, at 04:39:12PM, Peter Jones wrote:
+> 
+> So again: do we really need or want to do this?
 
-Bah, it was my suggestion to use setup_data in the first place, sorry
-about that.
+One thing that we totally lose the ability to do is use the capsule
+interface for things *other* than firmware updates, e.g.
+
+ https://lkml.org/lkml/2013/10/16/327 
+
+Also, requiring embedded or custom OS to include fwupdate into their
+existing boot solutions is a bit heavy handed when literally all they
+want to do is cat a binary blob to a sysfs file.
+
+I don't see why we can't have both solutions.
+
+Another thing is that ESRT isn't going to be supported by every
+platform.
+
+So, for the sysfs interface, let's not allow loading from /lib. Let's
+not require a userland tool. Let's just do,
+
+  # echo /path/to/my/awesome/capsule.bin > /sys/../capsule
+
+and be done with it.
+
+Hmmm?
 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+Matt Fleming, Intel Open Source Technology Center
