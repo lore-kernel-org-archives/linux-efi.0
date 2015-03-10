@@ -1,237 +1,74 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 6/7] x86, boot: Split kernel_ident_mapping_init to
- another file
-Date: Mon, 9 Mar 2015 18:03:04 -0700
-Message-ID: <CAGXu5jLAeqA2+G947SSUGQPRq9Bi4T9qwhMX7_3jbnuOGpH1uA@mail.gmail.com>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: Re: [PATCH v3 2/7] x86, boot: Move ZO to end of buffer
+Date: Mon, 9 Mar 2015 18:04:08 -0700
+Message-ID: <CAE9FiQUcmKJQm5FTADa10y6Ur1v-NfQ7gTT0HZfAWVpnRY3AkQ@mail.gmail.com>
 References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
-	<1425766041-6551-7-git-send-email-yinghai@kernel.org>
+	<1425766041-6551-3-git-send-email-yinghai@kernel.org>
+	<CAGXu5jJFms+vYOtEpVAQ6iZXM45uYF70a=vgyb72T0uRkf8c0g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1425766041-6551-7-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGXu5jJFms+vYOtEpVAQ6iZXM45uYF70a=vgyb72T0uRkf8c0g@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kees Cook <keescook@chromium.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Mar 7, 2015 at 2:07 PM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> We need to include that in boot::decompress_kernel stage to set new
-> ident mapping.
+On Mon, Mar 9, 2015 at 5:54 PM, Kees Cook <keescook@chromium.org> wrote:
+> On Sat, Mar 7, 2015 at 2:07 PM, Yinghai Lu <yinghai@kernel.org> wrote:
+>> Boris found data from boot stage can not be used kernel stage.
 >
-> Also add checking for __pa/__va macro definition, as we need to override them
-> in boot::decompress_kernel stage.
+> "... be used during kernel stage."
 >
-> Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Also, can you give a specific example of this problem? (Which data, used how?)
+>
+>> Bootloader allocate buffer according to init_size in hdr, and load the
+>> ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+>> During running of ZO, ZO move itself to the middle of buffer at
+>> z_extract_offset to make sure that decompressor would not have output
+>> overwrite input data before input data get consumed.
+>> After decompressor is called, VO (vmlinux) use whole buffer from start,
+>> and ZO code and data section is overlapped with VO bss section.
+>> And later VO/clear_bss() clear them before code in arch/x86/kernel/setup.c
+>> access them.
+>>
+>> To make the data survive that later, we should avoid the overlapping.
+>> At first move ZO close the end of buffer instead of middle of the buffer,
+>> that will move out ZO data out of VO bss area.
+>>
+>> Also after that we can find out where is data section of copied ZO
+>> instead of guessing. That will aslr mem_avoid array filling for
+>
+> "That will make aslr mem_avoid array ..."
+>
+>> new buffer seaching much simple.
+>>
+>> And rename z_extract_offset to z_min_extract_offset, as it is
+>> actually the minimum offset for extracting now.
+>>
+>> To keep the final real extract_offset to be page aligned like
+>> min_extract_offset, we need make VO _end and ZO _end both
+>> page aligned to make sure init_size always page aligned.
+>>
+>> Next patch will add ZO data size to init_size, so it will make sure
+>> ZO data is even out of VO brk area.
+>
+> This seems like a reasonable idea, but I think the changes should be
+> noted/updated in misc.c since a lot of effort was made to make the
+> in-memory foot print as small as possible.
 
-This seems good. :)
+Yes, that explanation in misc.c is very good about extra bytes, and it should
+still stand. Also need to make mkpiggy.c to point to it.
+We need to add more info about in head_32/64.c actually we need move
+to end of the buffer.
 
-Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+> These changes do expand the
+> size of the loaded kernel, IIUC. If not in this patch, maybe in 5/7?
 
--Kees
+It extend about 256k for init_size.  should be 3/7.
+but that is only for decompress time. Final VO (vmlinux) run size
+is not changed.
 
-> ---
->  arch/x86/include/asm/page.h |  5 +++
->  arch/x86/mm/ident_map.c     | 74 +++++++++++++++++++++++++++++++++++++++++++++
->  arch/x86/mm/init_64.c       | 74 +--------------------------------------------
->  3 files changed, 80 insertions(+), 73 deletions(-)
->  create mode 100644 arch/x86/mm/ident_map.c
->
-> diff --git a/arch/x86/include/asm/page.h b/arch/x86/include/asm/page.h
-> index 802dde3..cf8f619 100644
-> --- a/arch/x86/include/asm/page.h
-> +++ b/arch/x86/include/asm/page.h
-> @@ -37,7 +37,10 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
->         alloc_page_vma(GFP_HIGHUSER | __GFP_ZERO | movableflags, vma, vaddr)
->  #define __HAVE_ARCH_ALLOC_ZEROED_USER_HIGHPAGE
->
-> +#ifndef __pa
->  #define __pa(x)                __phys_addr((unsigned long)(x))
-> +#endif
-> +
->  #define __pa_nodebug(x)        __phys_addr_nodebug((unsigned long)(x))
->  /* __pa_symbol should be used for C visible symbols.
->     This seems to be the official gcc blessed way to do such arithmetic. */
-> @@ -51,7 +54,9 @@ static inline void copy_user_page(void *to, void *from, unsigned long vaddr,
->  #define __pa_symbol(x) \
->         __phys_addr_symbol(__phys_reloc_hide((unsigned long)(x)))
->
-> +#ifndef __va
->  #define __va(x)                        ((void *)((unsigned long)(x)+PAGE_OFFSET))
-> +#endif
->
->  #define __boot_va(x)           __va(x)
->  #define __boot_pa(x)           __pa(x)
-> diff --git a/arch/x86/mm/ident_map.c b/arch/x86/mm/ident_map.c
-> new file mode 100644
-> index 0000000..751ca92
-> --- /dev/null
-> +++ b/arch/x86/mm/ident_map.c
-> @@ -0,0 +1,74 @@
-> +
-> +static void ident_pmd_init(unsigned long pmd_flag, pmd_t *pmd_page,
-> +                          unsigned long addr, unsigned long end)
-> +{
-> +       addr &= PMD_MASK;
-> +       for (; addr < end; addr += PMD_SIZE) {
-> +               pmd_t *pmd = pmd_page + pmd_index(addr);
-> +
-> +               if (!pmd_present(*pmd))
-> +                       set_pmd(pmd, __pmd(addr | pmd_flag));
-> +       }
-> +}
-> +static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
-> +                         unsigned long addr, unsigned long end)
-> +{
-> +       unsigned long next;
-> +
-> +       for (; addr < end; addr = next) {
-> +               pud_t *pud = pud_page + pud_index(addr);
-> +               pmd_t *pmd;
-> +
-> +               next = (addr & PUD_MASK) + PUD_SIZE;
-> +               if (next > end)
-> +                       next = end;
-> +
-> +               if (pud_present(*pud)) {
-> +                       pmd = pmd_offset(pud, 0);
-> +                       ident_pmd_init(info->pmd_flag, pmd, addr, next);
-> +                       continue;
-> +               }
-> +               pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-> +               if (!pmd)
-> +                       return -ENOMEM;
-> +               ident_pmd_init(info->pmd_flag, pmd, addr, next);
-> +               set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
-> +       }
-> +
-> +       return 0;
-> +}
-> +
-> +int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
-> +                             unsigned long addr, unsigned long end)
-> +{
-> +       unsigned long next;
-> +       int result;
-> +       int off = info->kernel_mapping ? pgd_index(__PAGE_OFFSET) : 0;
-> +
-> +       for (; addr < end; addr = next) {
-> +               pgd_t *pgd = pgd_page + pgd_index(addr) + off;
-> +               pud_t *pud;
-> +
-> +               next = (addr & PGDIR_MASK) + PGDIR_SIZE;
-> +               if (next > end)
-> +                       next = end;
-> +
-> +               if (pgd_present(*pgd)) {
-> +                       pud = pud_offset(pgd, 0);
-> +                       result = ident_pud_init(info, pud, addr, next);
-> +                       if (result)
-> +                               return result;
-> +                       continue;
-> +               }
-> +
-> +               pud = (pud_t *)info->alloc_pgt_page(info->context);
-> +               if (!pud)
-> +                       return -ENOMEM;
-> +               result = ident_pud_init(info, pud, addr, next);
-> +               if (result)
-> +                       return result;
-> +               set_pgd(pgd, __pgd(__pa(pud) | _KERNPG_TABLE));
-> +       }
-> +
-> +       return 0;
-> +}
-> diff --git a/arch/x86/mm/init_64.c b/arch/x86/mm/init_64.c
-> index 30eb05a..c30efb6 100644
-> --- a/arch/x86/mm/init_64.c
-> +++ b/arch/x86/mm/init_64.c
-> @@ -56,79 +56,7 @@
->
->  #include "mm_internal.h"
->
-> -static void ident_pmd_init(unsigned long pmd_flag, pmd_t *pmd_page,
-> -                          unsigned long addr, unsigned long end)
-> -{
-> -       addr &= PMD_MASK;
-> -       for (; addr < end; addr += PMD_SIZE) {
-> -               pmd_t *pmd = pmd_page + pmd_index(addr);
-> -
-> -               if (!pmd_present(*pmd))
-> -                       set_pmd(pmd, __pmd(addr | pmd_flag));
-> -       }
-> -}
-> -static int ident_pud_init(struct x86_mapping_info *info, pud_t *pud_page,
-> -                         unsigned long addr, unsigned long end)
-> -{
-> -       unsigned long next;
-> -
-> -       for (; addr < end; addr = next) {
-> -               pud_t *pud = pud_page + pud_index(addr);
-> -               pmd_t *pmd;
-> -
-> -               next = (addr & PUD_MASK) + PUD_SIZE;
-> -               if (next > end)
-> -                       next = end;
-> -
-> -               if (pud_present(*pud)) {
-> -                       pmd = pmd_offset(pud, 0);
-> -                       ident_pmd_init(info->pmd_flag, pmd, addr, next);
-> -                       continue;
-> -               }
-> -               pmd = (pmd_t *)info->alloc_pgt_page(info->context);
-> -               if (!pmd)
-> -                       return -ENOMEM;
-> -               ident_pmd_init(info->pmd_flag, pmd, addr, next);
-> -               set_pud(pud, __pud(__pa(pmd) | _KERNPG_TABLE));
-> -       }
-> -
-> -       return 0;
-> -}
-> -
-> -int kernel_ident_mapping_init(struct x86_mapping_info *info, pgd_t *pgd_page,
-> -                             unsigned long addr, unsigned long end)
-> -{
-> -       unsigned long next;
-> -       int result;
-> -       int off = info->kernel_mapping ? pgd_index(__PAGE_OFFSET) : 0;
-> -
-> -       for (; addr < end; addr = next) {
-> -               pgd_t *pgd = pgd_page + pgd_index(addr) + off;
-> -               pud_t *pud;
-> -
-> -               next = (addr & PGDIR_MASK) + PGDIR_SIZE;
-> -               if (next > end)
-> -                       next = end;
-> -
-> -               if (pgd_present(*pgd)) {
-> -                       pud = pud_offset(pgd, 0);
-> -                       result = ident_pud_init(info, pud, addr, next);
-> -                       if (result)
-> -                               return result;
-> -                       continue;
-> -               }
-> -
-> -               pud = (pud_t *)info->alloc_pgt_page(info->context);
-> -               if (!pud)
-> -                       return -ENOMEM;
-> -               result = ident_pud_init(info, pud, addr, next);
-> -               if (result)
-> -                       return result;
-> -               set_pgd(pgd, __pgd(__pa(pud) | _KERNPG_TABLE));
-> -       }
-> -
-> -       return 0;
-> -}
-> +#include "ident_map.c"
->
->  static int __init parse_direct_gbpages_off(char *arg)
->  {
-> --
-> 1.8.4.5
->
+Thanks
 
-
-
--- 
-Kees Cook
-Chrome OS Security
+Yinghai
