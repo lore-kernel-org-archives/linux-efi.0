@@ -1,58 +1,34 @@
-From: Roy Franz <roy.franz@linaro.org>
-Subject: Re: fwupdate
-Date: Mon, 9 Mar 2015 18:54:12 -0700
-Message-ID: <CAFECyb8xq+Ozn9Op4EHkiGGdn4q64h1fE_X+GHw=0X5d3r_9_w@mail.gmail.com>
-References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
-	<20150302122955.GB24476@codeblueprint.co.uk>
-	<F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
-	<CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
-	<F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
-	<CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
-	<20150306081334.GA3514@pd.tnic>
-	<F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
-	<20150306144725.GF3514@pd.tnic>
-	<20150309212322.GG9234@pd.tnic>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [PATCH v3 2/7] x86, boot: Move ZO to end of buffer
+Date: Tue, 10 Mar 2015 06:59:17 +0100
+Message-ID: <20150310055917.GA3535@pd.tnic>
+References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
+ <1425766041-6551-3-git-send-email-yinghai@kernel.org>
+ <CAGXu5jJFms+vYOtEpVAQ6iZXM45uYF70a=vgyb72T0uRkf8c0g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20150309212322.GG9234@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Andy Lutomirski <luto@amacapital.net>, Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sam Protsenko <semen.protsenko@linaro.org>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>, Peter Jones <pjones@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAGXu5jJFms+vYOtEpVAQ6iZXM45uYF70a=vgyb72T0uRkf8c0g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 9, 2015 at 2:23 PM, Borislav Petkov <bp@alien8.de> wrote:
-> + pjones.
->
-> So reportedly, there is already a capsule-loading thing which doesn't
-> need the kernel at all:
->
-> https://github.com/rhinstaller/fwupdate
->
-> So why are we even wasting energy with this discussion here?
->
-> --
-> Regards/Gruss,
->     Boris.
+On Mon, Mar 09, 2015 at 05:54:01PM -0700, Kees Cook wrote:
+> On Sat, Mar 7, 2015 at 2:07 PM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+> > Boris found data from boot stage can not be used kernel stage.
+> 
+> "... be used during kernel stage."
+> 
+> Also, can you give a specific example of this problem? (Which data, used how?)
 
-The network boot case can be taken care of as Peter described (ie
-taking network device paths, instead of just file paths), so
-this should work for those cases as well.  There would be some extra
-setup, as for this to work the EFI firmware update program
-would need to be run at boot (via the BootNext variable), but I don't
-think this is unreasonable.
-It looks like GnuEFI now supports Aarch64, so building the firmware
-update utility shouldn't be a problem.  Peter - have you you tried
-building
-this on Aarch64 yet?  If not I'll give it a try.
+Yeah, I'm filling stuff in, no worries. It just takes twice as long as
+I'm decyphering early boot code *and* Yinghai. :-)
 
-I think there is some value in using runtime update capsule calls, as
-that will help make sure the feature works in the firmware.  I think
-with arm64 servers
-in an early stage of development, we can influence the firmware
-support of various features by using them.  I don't know that this is
-a sufficient reason, but if
-runtime capsules are never used then there is a good chance that there
-will be many broken implementations.
+-- 
+Regards/Gruss,
+    Boris.
 
-Roy
+ECO tip #101: Trim your mails when you reply.
+--
