@@ -1,51 +1,58 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH v3 5/7] x86, kaslr: Consolidate mem_avoid array filling
-Date: Mon, 9 Mar 2015 18:26:10 -0700
-Message-ID: <CAGXu5jKbCE2r06iTH3P4HT_if_DPr_kPdz6_5C5Yr4-SEYbwSQ@mail.gmail.com>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
-	<1425766041-6551-6-git-send-email-yinghai@kernel.org>
-	<CAGXu5j+exWabf=LdpkBtipcRYDVW=sH4LZf01P3RoSaKK7iYYA@mail.gmail.com>
-	<CAE9FiQX2Ee0gWhtDrQxi=NfwC3Vu9ZS_YLPC9qvR92htZfBcJg@mail.gmail.com>
+From: Roy Franz <roy.franz@linaro.org>
+Subject: Re: fwupdate
+Date: Mon, 9 Mar 2015 18:54:12 -0700
+Message-ID: <CAFECyb8xq+Ozn9Op4EHkiGGdn4q64h1fE_X+GHw=0X5d3r_9_w@mail.gmail.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AD9CA@PGSMSX102.gar.corp.intel.com>
+	<20150302122955.GB24476@codeblueprint.co.uk>
+	<F54AEECA5E2B9541821D670476DAE19C2B8ADC41@PGSMSX102.gar.corp.intel.com>
+	<CALCETrXfjbKcYSSRQXZbam7TgHU34LXM0BhvMuba_vYyCCPTig@mail.gmail.com>
+	<F54AEECA5E2B9541821D670476DAE19C2B8AF4F2@PGSMSX102.gar.corp.intel.com>
+	<CALCETrWKwQVe46gASNbb0miwcuHe+wirVSO-pQt6uF-Jd6e-bw@mail.gmail.com>
+	<20150306081334.GA3514@pd.tnic>
+	<F54AEECA5E2B9541821D670476DAE19C2B8AF844@PGSMSX102.gar.corp.intel.com>
+	<20150306144725.GF3514@pd.tnic>
+	<20150309212322.GG9234@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAE9FiQX2Ee0gWhtDrQxi=NfwC3Vu9ZS_YLPC9qvR92htZfBcJg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150309212322.GG9234@pd.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Andy Lutomirski <luto@amacapital.net>, Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Sam Protsenko <semen.protsenko@linaro.org>, LKML <linux-kernel@vger.kernel.org>, Ming Lei <ming.lei@canonical.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Mar 9, 2015 at 6:10 PM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Mon, Mar 9, 2015 at 6:00 PM, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
->> On Sat, Mar 7, 2015 at 2:07 PM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>
->> This may be a stupid question, but are boot_params being used outside
->> of the compressed loader? If so, it might make sense to split that
->> change into a separate patch to go to stable, if it's causing
->> problems. (And document what problem is getting solved.)
+On Mon, Mar 9, 2015 at 2:23 PM, Borislav Petkov <bp@alien8.de> wrote:
+> + pjones.
 >
-> boot_params will keep the same and until it is passed
-> x86_64_start_kernel in vmlinux.
-> and there it will be copied, same as cmdline.
+> So reportedly, there is already a capsule-loading thing which doesn't
+> need the kernel at all:
 >
-> but current kaslr only support random the base high, and it does not
-> support kexec
-> and current boot loader (grub2) put it really low. (under 1M). the
-> real real_mode. :).
-
-Oh right! Of course, thanks for the details. Yes, it was implicitly
-ignored before, but now it needs to be explicitly ignored. Great,
-thanks!
-
--Kees
-
+> https://github.com/rhinstaller/fwupdate
 >
-> Thanks
+> So why are we even wasting energy with this discussion here?
 >
-> Yinghai
+> --
+> Regards/Gruss,
+>     Boris.
 
+The network boot case can be taken care of as Peter described (ie
+taking network device paths, instead of just file paths), so
+this should work for those cases as well.  There would be some extra
+setup, as for this to work the EFI firmware update program
+would need to be run at boot (via the BootNext variable), but I don't
+think this is unreasonable.
+It looks like GnuEFI now supports Aarch64, so building the firmware
+update utility shouldn't be a problem.  Peter - have you you tried
+building
+this on Aarch64 yet?  If not I'll give it a try.
 
+I think there is some value in using runtime update capsule calls, as
+that will help make sure the feature works in the firmware.  I think
+with arm64 servers
+in an early stage of development, we can influence the firmware
+support of various features by using them.  I don't know that this is
+a sufficient reason, but if
+runtime capsules are never used then there is a good chance that there
+will be many broken implementations.
 
--- 
-Kees Cook
-Chrome OS Security
+Roy
