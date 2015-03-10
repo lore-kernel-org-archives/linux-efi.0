@@ -1,217 +1,219 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 7/7] x86, kaslr, 64bit: Set new or extra ident_mapping
-Date: Mon, 9 Mar 2015 23:54:54 -0700
-Message-ID: <CAE9FiQWTKcOtSni6Mdv94NhAWUfkYSYeB0eFOft6q4QxV8A9mw@mail.gmail.com>
+From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Subject: Re: [PATCH v3 2/7] x86, boot: Move ZO to end of buffer
+Date: Tue, 10 Mar 2015 09:00:24 +0100
+Message-ID: <20150310080024.GB3535@pd.tnic>
 References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
-	<1425766041-6551-8-git-send-email-yinghai@kernel.org>
-	<CAGXu5j+REYpi=hnf3s+F1Dd9nkXkvQ5w7wO_j_emmAM226VrGw@mail.gmail.com>
-	<CAE9FiQX=b38-mseWWeGg=eTFfbe1sH61PvXJYJYrsAF6Uxn8ow@mail.gmail.com>
+ <1425766041-6551-3-git-send-email-yinghai@kernel.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=047d7bdc1b72d0253d0510e9a08f
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAE9FiQX=b38-mseWWeGg=eTFfbe1sH61PvXJYJYrsAF6Uxn8ow-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1425766041-6551-3-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
---047d7bdc1b72d0253d0510e9a08f
-Content-Type: text/plain; charset=UTF-8
+Final patch:
 
-On Mon, Mar 9, 2015 at 6:14 PM, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>>
->>> +#include "misc_pgt.c"
->>
->> Shouldn't this just be a normal built .o file that is linked together
->> in the Makefile, specifically tracking CONFIG_RANDOMIZE_BASE as aslr.o
->> already is?
->
-> Yes, we could go that way.
+---
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Date: Sat, 7 Mar 2015 14:07:16 -0800
+Subject: [PATCH] x86/setup: Move compressed kernel to the end of the buffer
 
-Please check attached version with link misc_pgt.o.
+Boris found that passing KASLR status through setup_data from the boot
+stage cannot be used later in the kernel stage, see commit
 
-BTW, here are difference between include misc_pgt.c and link misc_pgt.o:
+  f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
 
-include misc_pgt.c
-   text       data        bss        dec        hex    filename
-13934290        304      50064    13984658     d56392
-arch/x86/boot/compressed/vmlinux
+Here's some background:
 
-link misc_pgt.o
-   text       data        bss        dec        hex    filename
-13934336        304      50064    13984704     d563c0
-arch/x86/boot/compressed/vmlinux
+The boot loader allocates a buffer of size init_size in concordance with
+the value passed in the setup header and it loads the compressed, i.e.
+first kernel (arch/x86/boot/compressed/vmlinux) in it.
 
-Thanks
+First kernel then moves itself somewhere around the middle of the
+buffer at z_extract_offset to make sure that the decompressor does not
+overwrite input data.
 
-Yinghai
+After the decompressor is finished, kernel proper (vmlinux) uses the
+whole buffer from the beginning and the compressed kernel's code and
+data section is overlapped with the kernel proper's bss section.
 
---047d7bdc1b72d0253d0510e9a08f
-Content-Type: text/x-patch; charset=US-ASCII; name="misc_fill_pgt_v4_2.patch"
-Content-Disposition: attachment; filename="misc_fill_pgt_v4_2.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_i72xtr570
+Later on, clear_bss() in kernel proper clears .bss before code in
+arch/x86/kernel/setup.c can access setup_data passed in the first,
+compressed kernel.
 
-RnJvbTogWWluZ2hhaSBMdSA8eWluZ2hhaUBrZXJuZWwub3JnPgpTdWJqZWN0OiBbUEFUQ0ggdjRd
-IHg4Niwga2FzbHIsIDY0Yml0OiBTZXQgbmV3IG9yIGV4dHJhIGlkZW50X21hcHBpbmcKCkZpcnN0
-LCBhc2xyIHdpbGwgc3VwcG9ydCB0byBwdXQgcmFuZG9tIFZPIGFib3ZlIDRHLCBzbyB3ZSBtdXN0
-IHNldCBpZGVudAptYXBwaW5nIGZvciB0aGUgcmFuZ2UgZXZlbiB3ZSBjb21lIGZyb20gc3RhcnR1
-cF8zMiBwYXRoLgoKU2Vjb25kLCB3aGVuIGJvb3QgZnJvbSA2NGJpdCBib290bG9hZGVyLCBib290
-bG9hZGVyIHNldCBpZGVudCBtYXBwaW5nLAphbmQgYm9vdCB2aWEgWk8gKGFyY2gveDg2L2Jvb3Qv
-Y29tcHJlc3NlZC92bWxpbnV4KSBzdGFydHVwXzY0LgpUaG9zZSBwYWdlcyBmb3IgcGFnZXRhYmxl
-IG5lZWQgdG8gYmUgYXZvaWRlZCB3aGVuIHdlIHNlbGVjdCBuZXcgcmFuZG9tClZPICh2bWxpbnV4
-KSBiYXNlLiBPdGhlcndpc2UgZGVjb21wcmVzc29yIHdvdWxkIG92ZXJ3cml0ZSB0aGVtIGR1cmlu
-ZwpkZWNvbXByZXNzaW5nLgoKT25lIHNvbHV0aW9uOiBnbyB0aHJvdWdoIHBhZ2V0YWJsZSBhbmQg
-ZmluZCBvdXQgZXZlcnkgcGFnZSBpcyB1c2VkIGJ5CnBhZ2V0YWJsZSBmb3IgZXZlcnkgbWVtX2Fv
-dmlkIGNoZWNraW5nIGJ1dCB3ZSB3aWxsIG5lZWQgZXh0cmEgY29kZS4KCk90aGVyIHNvbHV0aW9u
-OiBjcmVhdGUgbmV3IGlkZW50IG1hcHBpbmcgaW5zdGVhZCwgYW5kIHBhZ2VzIGZvciBwYWdldGFi
-bGUKd2lsbCBzaXQgaW4gX3BhZ2V0YWJsZSBzZWN0aW9uIG9mIFpPLCBhbmQgdGhleSBhcmUgaW4g
-bWVtX2F2b2lkIGFycmF5IGFscmVhZHkuCkluIHRoaXMgd2F5LCB3ZSBjYW4gcmV1c2UgdGhlIGNv
-ZGUgZm9yIHNldHRpbmcgaWRlbnQgbWFwcGluZy4KClRoZSBfcGd0YWJsZSB3aWxsIGJlIHNoYXJl
-ZCAzMmJpdCBhbmQgNjRiaXQgcGF0aCB0byByZWR1Y2UgaW5pdF9zaXplLAphcyBub3cgWk8gX3Jv
-ZGF0YSB0byBfZW5kIHdpbGwgY29udHJpYnV0ZSBpbml0X3NpemUuCgpOZWVkIHRvIGluY3JlYXNl
-IHBndCBidWZmZXIgc2l6ZS4KV2hlbiBib290IHZpYSBzdGFydHVwXzY0LCBhcyB3ZSBuZWVkIHRv
-IGNvdmVyIG9sZCBWTywgcGFyYW1zLCBjbWRsaW5lCmFuZCBuZXcgVk8sIGluIGV4dHJlbWUgY2Fz
-ZSB3ZSBjb3VsZCBoYXZlIHRoZW0gYWxsIGNyb3NzIDUxMkcgYm91bmRhcnksCndpbGwgbmVlZCAo
-MisyKSo0IHBhZ2VzIHdpdGggMk0gbWFwcGluZy4gQW5kIG5lZWQgMiBmb3IgZmlyc3QgMk0gZm9y
-IHZnYSByYW0uClBsdXMgb25lIGZvciBsZXZlbDQuIFRvdGFsIHdpbGwgYmUgMTkgcGFnZXMuCldo
-ZW4gYm9vdCB2aWEgc3RhcnR1cF8zMiwgYXNsciB3b3VsZCBtb3ZlIG5ldyBWTyBhYm92ZSA0Rywg
-d2UgbmVlZCBzZXQgZXh0cmEKaWRlbnQgbWFwcGluZyBmb3IgbmV3IFZPLCBwZ3QgYnVmZmVyIGNv
-bWUgZnJvbSBfcGd0YWJsZSBvZmZzZXQgNiBwYWdlcy4Kc2hvdWxkIG9ubHkgbmVlZCAoMisyKSBw
-YWdlcyBhdCBtb3N0IHdoZW4gaXQgY3Jvc3MgNTEyRyBib3VuZGFyeS4KU28gMTkgcGFnZXMgY291
-bGQgbWFrZSBib3RoIHBhdGhzIGhhcHB5LgoKQ2M6IEtlZXMgQ29vayA8a2Vlc2Nvb2tAY2hyb21p
-dW0ub3JnPgpDYzogSmlyaSBLb3NpbmEgPGprb3NpbmFAc3VzZS5jej4KQ2M6IEJvcmlzbGF2IFBl
-dGtvdiA8YnBAc3VzZS5kZT4KQ2M6IE1hdHQgRmxlbWluZyA8bWF0dC5mbGVtaW5nQGludGVsLmNv
-bT4KU2lnbmVkLW9mZi1ieTogWWluZ2hhaSBMdSA8eWluZ2hhaUBrZXJuZWwub3JnPgoKLS0tCi12
-MzogYWRkIG1hcHBpbmcgZm9yIGZpcnN0IDJNIHdpdGggdmlkZW8gcmFtIHdoZW4gWDg2X1ZFUkJP
-U0VfQk9PVFVQIGlzIHNldC4KICAgICBEb24ndCBuZWVkIHRvIHNldCBtYXBwaW5nIGZvciBzZXR1
-cF9kYXRhLCBhcyBpdCBpcyBhbHJlYWR5IGxhdGUKICAgICBpbiBib290L1pPIHN0YWdlLCB3aWxs
-IG5vdCBhY2Nlc3MgaXQgdW50aWwgVk8gc3RhZ2UsIGFuZCBWTyBzdGFnZQogICAgIHdpbGwgdXNl
-IGVhcmx5X21lbW1hcCBvciBrZXJuZWwgYWRkcmVzcyB0byBhY2Nlc3MgdGhlbS4KLXY0OiBsaW5r
-IG1pc2NfcGd0Lm8gaW5zdGVhZCBvZiBpbmNsdWRpbmcgbWlzY19wZ3QuYyBpbiBhc2xyLmMgdXAg
-dG8gcmVxdWVzdAogICAgIGZyb20gS2Vlcy4KCi0tLQogYXJjaC94ODYvYm9vdC9jb21wcmVzc2Vk
-L01ha2VmaWxlICAgfCAgICAzICsKIGFyY2gveDg2L2Jvb3QvY29tcHJlc3NlZC9hc2xyLmMgICAg
-IHwgICAxNCArKysrKwogYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL2hlYWRfNjQuUyAgfCAgICA0
-IC0KIGFyY2gveDg2L2Jvb3QvY29tcHJlc3NlZC9taXNjLmggICAgIHwgICAxMSArKysrCiBhcmNo
-L3g4Ni9ib290L2NvbXByZXNzZWQvbWlzY19wZ3QuYyB8ICAgOTEgKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrCiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9ib290LmggICAgICAgICB8
-ICAgMTkgKysrKysrKwogNiBmaWxlcyBjaGFuZ2VkLCAxNDAgaW5zZXJ0aW9ucygrKSwgMiBkZWxl
-dGlvbnMoLSkKCkluZGV4OiBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL21pc2Nf
-cGd0LmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PQotLS0gL2Rldi9udWxsCisrKyBsaW51eC0yLjYvYXJjaC94ODYvYm9v
-dC9jb21wcmVzc2VkL21pc2NfcGd0LmMKQEAgLTAsMCArMSw5MSBAQAorI2RlZmluZSBfX3BhKHgp
-ICAoKHVuc2lnbmVkIGxvbmcpKHgpKQorI2RlZmluZSBfX3ZhKHgpICAoKHZvaWQgKikoKHVuc2ln
-bmVkIGxvbmcpKHgpKSkKKworI2luY2x1ZGUgIm1pc2MuaCIKKworI2luY2x1ZGUgPGFzbS9pbml0
-Lmg+CisjaW5jbHVkZSA8YXNtL3BndGFibGUuaD4KKworI2luY2x1ZGUgIi4uLy4uL21tL2lkZW50
-X21hcC5jIgorCitzdHJ1Y3QgYWxsb2NfcGd0X2RhdGEgeworCXVuc2lnbmVkIGNoYXIgKnBndF9i
-dWY7CisJdW5zaWduZWQgbG9uZyBwZ3RfYnVmX3NpemU7CisJdW5zaWduZWQgbG9uZyBwZ3RfYnVm
-X29mZnNldDsKK307CisKK3N0YXRpYyB2b2lkICphbGxvY19wZ3RfcGFnZSh2b2lkICpjb250ZXh0
-KQoreworCXN0cnVjdCBhbGxvY19wZ3RfZGF0YSAqZCA9IChzdHJ1Y3QgYWxsb2NfcGd0X2RhdGEg
-Kiljb250ZXh0OworCXVuc2lnbmVkIGNoYXIgKnAgPSAodW5zaWduZWQgY2hhciAqKWQtPnBndF9i
-dWY7CisKKwlpZiAoZC0+cGd0X2J1Zl9vZmZzZXQgPj0gZC0+cGd0X2J1Zl9zaXplKSB7CisJCWRl
-YnVnX3B1dHN0cigib3V0IG9mIHBndF9idWYgaW4gbWlzYy5jXG4iKTsKKwkJcmV0dXJuIE5VTEw7
-CisJfQorCisJcCArPSBkLT5wZ3RfYnVmX29mZnNldDsKKwlkLT5wZ3RfYnVmX29mZnNldCArPSBQ
-QUdFX1NJWkU7CisKKwlyZXR1cm4gcDsKK30KKworLyoKKyAqIFVzZSBhIG5vcm1hbCBkZWZpbml0
-aW9uIG9mIG1lbXNldCgpIGZyb20gc3RyaW5nLmMuIFRoZXJlIGFyZSBhbHJlYWR5CisgKiBpbmNs
-dWRlZCBoZWFkZXIgZmlsZXMgd2hpY2ggZXhwZWN0IGEgZGVmaW5pdGlvbiBvZiBtZW1zZXQoKSBh
-bmQgYnkKKyAqIHRoZSB0aW1lIHdlIGRlZmluZSBtZW1zZXQgbWFjcm8sIGl0IGlzIHRvbyBsYXRl
-LgorICovCisjdW5kZWYgbWVtc2V0CisjZGVmaW5lIG1lbXplcm8ocywgbikgICBtZW1zZXQoKHMp
-LCAwLCAobikpCisKK3Vuc2lnbmVkIGxvbmcgX19mb3JjZV9vcmRlcjsKK3N0YXRpYyBzdHJ1Y3Qg
-YWxsb2NfcGd0X2RhdGEgcGd0X2RhdGE7CitzdGF0aWMgc3RydWN0IHg4Nl9tYXBwaW5nX2luZm8g
-bWFwcGluZ19pbmZvOworc3RhdGljIHBnZF90ICpsZXZlbDRwOworCit2b2lkIGZpbGxfcGFnZXRh
-YmxlKHVuc2lnbmVkIGxvbmcgc3RhcnQsIHVuc2lnbmVkIGxvbmcgc2l6ZSkKK3sKKwl1bnNpZ25l
-ZCBsb25nIGVuZCA9IHN0YXJ0ICsgc2l6ZTsKKworCWlmICghbGV2ZWw0cCkgeworCQlwZ3RfZGF0
-YS5wZ3RfYnVmX29mZnNldCA9IDA7CisJCW1hcHBpbmdfaW5mby5hbGxvY19wZ3RfcGFnZSA9IGFs
-bG9jX3BndF9wYWdlOworCQltYXBwaW5nX2luZm8uY29udGV4dCA9ICZwZ3RfZGF0YTsKKwkJbWFw
-cGluZ19pbmZvLnBtZF9mbGFnID0gX19QQUdFX0tFUk5FTF9MQVJHRV9FWEVDOworCisJCS8qCisJ
-CSAqIGNvbWUgZnJvbSBzdGFydHVwXzMyID8KKwkJICogdGhlbiBjcjMgaXMgX3BndGFibGUsIHdl
-IGNhbiByZXVzZSBpdC4KKwkJICovCisJCWxldmVsNHAgPSAocGdkX3QgKilyZWFkX2NyMygpOwor
-CQlpZiAoKHVuc2lnbmVkIGxvbmcpbGV2ZWw0cCA9PSAodW5zaWduZWQgbG9uZylfcGd0YWJsZSkg
-eworCQkJcGd0X2RhdGEucGd0X2J1ZiA9ICh1bnNpZ25lZCBjaGFyICopX3BndGFibGUgKworCQkJ
-CQkJIEJPT1RfSU5JVF9QR1RfU0laRTsKKwkJCXBndF9kYXRhLnBndF9idWZfc2l6ZSA9IEJPT1Rf
-UEdUX1NJWkUgLQorCQkJCQkJIEJPT1RfSU5JVF9QR1RfU0laRTsKKworCQkJZGVidWdfcHV0c3Ry
-KCJib290IHZpYSBzdGFydHVwXzMyXG4iKTsKKwkJfSBlbHNlIHsKKwkJCXBndF9kYXRhLnBndF9i
-dWYgPSAodW5zaWduZWQgY2hhciAqKV9wZ3RhYmxlOworCQkJcGd0X2RhdGEucGd0X2J1Zl9zaXpl
-ID0gQk9PVF9QR1RfU0laRTsKKworCQkJZGVidWdfcHV0c3RyKCJib290IHZpYSBzdGFydHVwXzY0
-XG4iKTsKKwkJCWxldmVsNHAgPSAocGdkX3QgKilhbGxvY19wZ3RfcGFnZSgmcGd0X2RhdGEpOwor
-CQl9CisJCW1lbXNldCgodW5zaWduZWQgY2hhciAqKXBndF9kYXRhLnBndF9idWYsIDAsCisJCQkg
-cGd0X2RhdGEucGd0X2J1Zl9zaXplKTsKKwl9CisKKwkvKiBhbGlnbiBib3VuZGFyeSB0byAyTSAq
-LworCXN0YXJ0ID0gcm91bmRfZG93bihzdGFydCwgUE1EX1NJWkUpOworCWVuZCA9IHJvdW5kX3Vw
-KGVuZCwgUE1EX1NJWkUpOworCWlmIChzdGFydCA+PSBlbmQpCisJCXJldHVybjsKKworCWtlcm5l
-bF9pZGVudF9tYXBwaW5nX2luaXQoJm1hcHBpbmdfaW5mbywgbGV2ZWw0cCwgc3RhcnQsIGVuZCk7
-Cit9CisKK3ZvaWQgc3dpdGNoX3BhZ2V0YWJsZSh2b2lkKQoreworCXdyaXRlX2NyMygodW5zaWdu
-ZWQgbG9uZylsZXZlbDRwKTsKK30KSW5kZXg6IGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXBy
-ZXNzZWQvYXNsci5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIGxpbnV4LTIuNi5vcmlnL2FyY2gveDg2L2Jvb3Qv
-Y29tcHJlc3NlZC9hc2xyLmMKKysrIGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNzZWQv
-YXNsci5jCkBAIC0xNjAsNiArMTYwLDcgQEAgc3RhdGljIHZvaWQgbWVtX2F2b2lkX2luaXQodW5z
-aWduZWQgbG9uZwogCXVuc2FmZSA9ICh1bnNpZ25lZCBsb25nKWlucHV0ICsgaW5wdXRfc2l6ZTsK
-IAltZW1fYXZvaWRbMF0uc3RhcnQgPSB1bnNhZmU7CiAJbWVtX2F2b2lkWzBdLnNpemUgPSB1bnNh
-ZmVfbGVuOworCWZpbGxfcGFnZXRhYmxlKG91dHB1dCwgaW5pdF9zaXplKTsKIAogCS8qIEF2b2lk
-IGluaXRyZC4gKi8KIAlpbml0cmRfc3RhcnQgID0gKHU2NClyZWFsX21vZGUtPmV4dF9yYW1kaXNr
-X2ltYWdlIDw8IDMyOwpAQCAtMTY4LDYgKzE2OSw3IEBAIHN0YXRpYyB2b2lkIG1lbV9hdm9pZF9p
-bml0KHVuc2lnbmVkIGxvbmcKIAlpbml0cmRfc2l6ZSB8PSByZWFsX21vZGUtPmhkci5yYW1kaXNr
-X3NpemU7CiAJbWVtX2F2b2lkWzFdLnN0YXJ0ID0gaW5pdHJkX3N0YXJ0OwogCW1lbV9hdm9pZFsx
-XS5zaXplID0gaW5pdHJkX3NpemU7CisJLyogZG9uJ3QgbmVlZCB0byBzZXQgbWFwcGluZyBmb3Ig
-aW5pdHJkICovCiAKIAkvKiBBdm9pZCBrZXJuZWwgY29tbWFuZCBsaW5lLiAqLwogCWNtZF9saW5l
-ICA9ICh1NjQpcmVhbF9tb2RlLT5leHRfY21kX2xpbmVfcHRyIDw8IDMyOwpAQCAtMTc4LDEwICsx
-ODAsMTkgQEAgc3RhdGljIHZvaWQgbWVtX2F2b2lkX2luaXQodW5zaWduZWQgbG9uZwogCQk7CiAJ
-bWVtX2F2b2lkWzJdLnN0YXJ0ID0gY21kX2xpbmU7CiAJbWVtX2F2b2lkWzJdLnNpemUgPSBjbWRf
-bGluZV9zaXplOworCWZpbGxfcGFnZXRhYmxlKGNtZF9saW5lLCBjbWRfbGluZV9zaXplKTsKIAog
-CS8qIEF2b2lkIHBhcmFtcyAqLwogCW1lbV9hdm9pZFszXS5zdGFydCA9ICh1bnNpZ25lZCBsb25n
-KXJlYWxfbW9kZTsKIAltZW1fYXZvaWRbM10uc2l6ZSA9IHNpemVvZigqcmVhbF9tb2RlKTsKKwlm
-aWxsX3BhZ2V0YWJsZSgodW5zaWduZWQgbG9uZylyZWFsX21vZGUsIHNpemVvZigqcmVhbF9tb2Rl
-KSk7CisKKwkvKiBkb24ndCBuZWVkIHRvIHNldCBtYXBwaW5nIGZvciBzZXR1cF9kYXRhICovCisK
-KyNpZmRlZiBDT05GSUdfWDg2X1ZFUkJPU0VfQk9PVFVQCisJLyogZm9yIHZpZGVvIHJhbSAqLwor
-CWZpbGxfcGFnZXRhYmxlKDAsIFBNRF9TSVpFKTsKKyNlbmRpZgogfQogCiAvKiBEb2VzIHRoaXMg
-bWVtb3J5IHZlY3RvciBvdmVybGFwIGEga25vd24gYXZvaWRlZCBhcmVhPyAqLwpAQCAtMzYyLDYg
-KzM3Myw5IEBAIHVuc2lnbmVkIGNoYXIgKmNob29zZV9rZXJuZWxfbG9jYXRpb24oc3QKIAkJZ290
-byBvdXQ7CiAKIAljaG9pY2UgPSByYW5kb207CisKKwlmaWxsX3BhZ2V0YWJsZShjaG9pY2UsIGlu
-aXRfc2l6ZSk7CisJc3dpdGNoX3BhZ2V0YWJsZSgpOwogb3V0OgogCXJldHVybiAodW5zaWduZWQg
-Y2hhciAqKWNob2ljZTsKIH0KSW5kZXg6IGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
-ZWQvaGVhZF82NC5TCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIGxpbnV4LTIuNi5vcmlnL2FyY2gveDg2L2Jvb3Qv
-Y29tcHJlc3NlZC9oZWFkXzY0LlMKKysrIGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
-ZWQvaGVhZF82NC5TCkBAIC0xMjUsNyArMTI1LDcgQEAgRU5UUlkoc3RhcnR1cF8zMikKIAkvKiBJ
-bml0aWFsaXplIFBhZ2UgdGFibGVzIHRvIDAgKi8KIAlsZWFsCXBndGFibGUoJWVieCksICVlZGkK
-IAl4b3JsCSVlYXgsICVlYXgKLQltb3ZsCSQoKDQwOTYqNikvNCksICVlY3gKKwltb3ZsCSQoQk9P
-VF9JTklUX1BHVF9TSVpFLzQpLCAlZWN4CiAJcmVwCXN0b3NsCiAKIAkvKiBCdWlsZCBMZXZlbCA0
-ICovCkBAIC00NzcsNCArNDc3LDQgQEAgYm9vdF9zdGFja19lbmQ6CiAJLnNlY3Rpb24gIi5wZ3Rh
-YmxlIiwiYSIsQG5vYml0cwogCS5iYWxpZ24gNDA5NgogcGd0YWJsZToKLQkuZmlsbCA2KjQwOTYs
-IDEsIDAKKwkuZmlsbCBCT09UX1BHVF9TSVpFLCAxLCAwCkluZGV4OiBsaW51eC0yLjYvYXJjaC94
-ODYvaW5jbHVkZS9hc20vYm9vdC5oCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIGxpbnV4LTIuNi5vcmlnL2FyY2gv
-eDg2L2luY2x1ZGUvYXNtL2Jvb3QuaAorKysgbGludXgtMi42L2FyY2gveDg2L2luY2x1ZGUvYXNt
-L2Jvb3QuaApAQCAtMzIsNyArMzIsMjYgQEAKICNlbmRpZiAvKiAhQ09ORklHX0tFUk5FTF9CWklQ
-MiAqLwogCiAjaWZkZWYgQ09ORklHX1g4Nl82NAorCiAjZGVmaW5lIEJPT1RfU1RBQ0tfU0laRQkw
-eDQwMDAKKworI2RlZmluZSBCT09UX0lOSVRfUEdUX1NJWkUgKDYqNDA5NikKKyNpZmRlZiBDT05G
-SUdfUkFORE9NSVpFX0JBU0UKKy8qCisgKiAxIHBhZ2UgZm9yIGxldmVsNCwgMiBwYWdlcyBmb3Ig
-Zmlyc3QgMk0uCisgKiAoMisyKSo0IHBhZ2VzIGZvciBrZXJuZWwsIHBhcmFtLCBjbWRfbGluZSwg
-cmFuZG9tIGtlcm5lbAorICogaWYgYWxsIGNyb3NzIDUxMkcgYm91bmRhcnkuCisgKiBTbyB0b3Rh
-bCB3aWxsIGJlIDE5IHBhZ2VzLgorICovCisjaWZkZWYgQ09ORklHX1g4Nl9WRVJCT1NFX0JPT1RV
-UAorI2RlZmluZSBCT09UX1BHVF9TSVpFICgxOSo0MDk2KQorI2Vsc2UKKyNkZWZpbmUgQk9PVF9Q
-R1RfU0laRSAoMTcqNDA5NikKKyNlbmRpZgorI2Vsc2UKKyNkZWZpbmUgQk9PVF9QR1RfU0laRSBC
-T09UX0lOSVRfUEdUX1NJWkUKKyNlbmRpZgorCiAjZWxzZQogI2RlZmluZSBCT09UX1NUQUNLX1NJ
-WkUJMHgxMDAwCiAjZW5kaWYKSW5kZXg6IGxpbnV4LTIuNi9hcmNoL3g4Ni9ib290L2NvbXByZXNz
-ZWQvTWFrZWZpbGUKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PQotLS0gbGludXgtMi42Lm9yaWcvYXJjaC94ODYvYm9vdC9j
-b21wcmVzc2VkL01ha2VmaWxlCisrKyBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2Vk
-L01ha2VmaWxlCkBAIC00Niw2ICs0Niw5IEBAIHZtbGludXgtb2Jqcy15IDo9ICQob2JqKS92bWxp
-bnV4LmxkcyAkKG8KIAogdm1saW51eC1vYmpzLSQoQ09ORklHX0VBUkxZX1BSSU5USykgKz0gJChv
-YmopL2Vhcmx5X3NlcmlhbF9jb25zb2xlLm8KIHZtbGludXgtb2Jqcy0kKENPTkZJR19SQU5ET01J
-WkVfQkFTRSkgKz0gJChvYmopL2FzbHIubworaWZkZWYgQ09ORklHX1g4Nl82NAorCXZtbGludXgt
-b2Jqcy0kKENPTkZJR19SQU5ET01JWkVfQkFTRSkgKz0gJChvYmopL21pc2NfcGd0Lm8KK2VuZGlm
-CiAKICQob2JqKS9lYm9vdC5vOiBLQlVJTERfQ0ZMQUdTICs9IC1mc2hvcnQtd2NoYXIgLW1uby1y
-ZWQtem9uZQogCkluZGV4OiBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL21pc2Mu
-aAo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09Ci0tLSBsaW51eC0yLjYub3JpZy9hcmNoL3g4Ni9ib290L2NvbXByZXNzZWQv
-bWlzYy5oCisrKyBsaW51eC0yLjYvYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL21pc2MuaApAQCAt
-NzYsNiArNzYsMTcgQEAgdW5zaWduZWQgY2hhciAqY2hvb3NlX2tlcm5lbF9sb2NhdGlvbihzdAog
-fQogI2VuZGlmCiAKKyNpZmRlZiBDT05GSUdfWDg2XzY0Cit2b2lkIGZpbGxfcGFnZXRhYmxlKHVu
-c2lnbmVkIGxvbmcgc3RhcnQsIHVuc2lnbmVkIGxvbmcgc2l6ZSk7Cit2b2lkIHN3aXRjaF9wYWdl
-dGFibGUodm9pZCk7CitleHRlcm4gdW5zaWduZWQgY2hhciBfcGd0YWJsZVtdOworI2Vsc2UKK3N0
-YXRpYyBpbmxpbmUgdm9pZCBmaWxsX3BhZ2V0YWJsZSh1bnNpZ25lZCBsb25nIHN0YXJ0LCB1bnNp
-Z25lZCBsb25nIHNpemUpCit7IH0KK3N0YXRpYyBpbmxpbmUgdm9pZCBzd2l0Y2hfcGFnZXRhYmxl
-KHZvaWQpCit7IH0KKyNlbmRpZgorCiAjaWZkZWYgQ09ORklHX0VBUkxZX1BSSU5USwogLyogZWFy
-bHlfc2VyaWFsX2NvbnNvbGUuYyAqLwogZXh0ZXJuIGludCBlYXJseV9zZXJpYWxfYmFzZTsK
---047d7bdc1b72d0253d0510e9a08f--
+To make sure that data survives, we should avoid the overlapping.
+
+As a first step, move the first kernel closer to the end of the buffer
+instead of the middle. As a result, this will place first kernel's data
+area out of kernel proper's .bss area.
+
+This way we can find out where the data section of the copied first
+kernel is instead of guessing. In addition, it will make the KASLR
+mem_avoid array preparation for the search of a fitting buffer much
+simpler.
+
+While at it, rename z_extract_offset to z_min_extract_offset as it is
+actually the minimum extract offset now.
+
+In order to keep the final extract offset page-aligned we need to
+make both kernels' _end markers page-aligned too so that init_size is
+page-aligned as a result.
+
+Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Fixes: f47233c2d34f ("x86/mm/ASLR: Propagate base load address calculation")
+Link: http://lkml.kernel.org/r/1425766041-6551-3-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+[ Commit message massively rewritten ]
+Signed-off-by: 
+---
+ arch/x86/boot/compressed/head_32.S     | 11 +++++++++--
+ arch/x86/boot/compressed/head_64.S     |  8 ++++++--
+ arch/x86/boot/compressed/mkpiggy.c     |  7 ++-----
+ arch/x86/boot/compressed/vmlinux.lds.S |  1 +
+ arch/x86/boot/header.S                 |  2 +-
+ arch/x86/kernel/asm-offsets.c          |  1 +
+ arch/x86/kernel/vmlinux.lds.S          |  1 +
+ 7 files changed, 21 insertions(+), 10 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index cbed1407a5cd..a9b56f1d8e75 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -147,7 +147,9 @@ preferred_addr:
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	addl    %eax, %ebx
+ 
+ 	/* Set up the stack */
+ 	leal	boot_stack_end(%ebx), %esp
+@@ -208,8 +210,13 @@ relocated:
+  */
+ 				/* push arguments for decompress_kernel: */
+ 	pushl	$z_output_len	/* decompressed length */
+-	leal	z_extract_offset_negative(%ebx), %ebp
++
++	movl    BP_init_size(%esi), %eax
++	subl    $_end, %eax
++	movl    %ebx, %ebp
++	subl    %eax, %ebp
+ 	pushl	%ebp		/* output address */
++
+ 	pushl	$z_input_len	/* input_len */
+ 	leal	input_data(%ebx), %eax
+ 	pushl	%eax		/* input_data */
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2884e0c3e8a5..69015b576cf6 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -101,7 +101,9 @@ ENTRY(startup_32)
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	addl	$z_extract_offset, %ebx
++	movl	BP_init_size(%esi), %eax
++	subl	$_end, %eax
++	addl	%eax, %ebx
+ 
+ /*
+  * Prepare for entering 64 bit mode
+@@ -329,7 +331,9 @@ preferred_addr:
+ 1:
+ 
+ 	/* Target address to relocate to for decompression */
+-	leaq	z_extract_offset(%rbp), %rbx
++	movl	BP_init_size(%rsi), %ebx
++	subl	$_end, %ebx
++	addq	%rbp, %rbx
+ 
+ 	/* Set up the stack */
+ 	leaq	boot_stack_end(%rbx), %rsp
+diff --git a/arch/x86/boot/compressed/mkpiggy.c b/arch/x86/boot/compressed/mkpiggy.c
+index b669ab65bf6c..c03b0097ce58 100644
+--- a/arch/x86/boot/compressed/mkpiggy.c
++++ b/arch/x86/boot/compressed/mkpiggy.c
+@@ -80,11 +80,8 @@ int main(int argc, char *argv[])
+ 	printf("z_input_len = %lu\n", ilen);
+ 	printf(".globl z_output_len\n");
+ 	printf("z_output_len = %lu\n", (unsigned long)olen);
+-	printf(".globl z_extract_offset\n");
+-	printf("z_extract_offset = 0x%lx\n", offs);
+-	/* z_extract_offset_negative allows simplification of head_32.S */
+-	printf(".globl z_extract_offset_negative\n");
+-	printf("z_extract_offset_negative = -0x%lx\n", offs);
++	printf(".globl z_min_extract_offset\n");
++	printf("z_min_extract_offset = 0x%lx\n", offs);
+ 
+ 	printf(".globl input_data, input_data_end\n");
+ 	printf("input_data:\n");
+diff --git a/arch/x86/boot/compressed/vmlinux.lds.S b/arch/x86/boot/compressed/vmlinux.lds.S
+index 34d047c98284..a80acabb80ec 100644
+--- a/arch/x86/boot/compressed/vmlinux.lds.S
++++ b/arch/x86/boot/compressed/vmlinux.lds.S
+@@ -70,5 +70,6 @@ SECTIONS
+ 		_epgtable = . ;
+ 	}
+ #endif
++	. = ALIGN(PAGE_SIZE);	/* keep size page-aligned */
+ 	_end = .;
+ }
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 16ef02596db2..9bfab22efdf7 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -440,7 +440,7 @@ setup_data:		.quad 0			# 64-bit physical pointer to
+ 
+ pref_address:		.quad LOAD_PHYSICAL_ADDR	# preferred load addr
+ 
+-#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_extract_offset)
++#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_min_extract_offset)
+ #define VO_INIT_SIZE	(VO__end - VO__text)
+ #if ZO_INIT_SIZE > VO_INIT_SIZE
+ #define INIT_SIZE ZO_INIT_SIZE
+diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
+index 9f6b9341950f..0e8e4f7a31ce 100644
+--- a/arch/x86/kernel/asm-offsets.c
++++ b/arch/x86/kernel/asm-offsets.c
+@@ -66,6 +66,7 @@ void common(void) {
+ 	OFFSET(BP_hardware_subarch, boot_params, hdr.hardware_subarch);
+ 	OFFSET(BP_version, boot_params, hdr.version);
+ 	OFFSET(BP_kernel_alignment, boot_params, hdr.kernel_alignment);
++	OFFSET(BP_init_size, boot_params, hdr.init_size);
+ 	OFFSET(BP_pref_address, boot_params, hdr.pref_address);
+ 	OFFSET(BP_code32_start, boot_params, hdr.code32_start);
+ 
+diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
+index 00bf300fd846..a92d3dc2812a 100644
+--- a/arch/x86/kernel/vmlinux.lds.S
++++ b/arch/x86/kernel/vmlinux.lds.S
+@@ -325,6 +325,7 @@ SECTIONS
+ 		__brk_limit = .;
+ 	}
+ 
++	. = ALIGN(PAGE_SIZE);		/* keep init size page-aligned */
+ 	_end = .;
+ 
+         STABS_DEBUG
+-- 
+2.2.0.33.gc18b867
+
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
