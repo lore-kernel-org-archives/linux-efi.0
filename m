@@ -1,36 +1,61 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 3/7] x86, boot: Don't overlap VO with ZO data
-Date: Tue, 10 Mar 2015 08:17:01 -0700
-Message-ID: <CAE9FiQVy47PnXdd=c_st7OSatFQcvwfzk8XWej=9KUTnRyxKPw@mail.gmail.com>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
-	<1425766041-6551-4-git-send-email-yinghai@kernel.org>
-	<20150310093430.GC3535@pd.tnic>
-	<CAE9FiQWauOdsZ=CBcVHfqTik1ePvW51uH7yy29MSvafOABTWZA@mail.gmail.com>
-	<20150310151035.GG3535@pd.tnic>
+From: Peter Jones <pjones@redhat.com>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Tue, 10 Mar 2015 11:21:55 -0400
+Message-ID: <20150310152155.GB1208@fenchurch.internal.datastacks.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+ <20150306213912.GA8020@fenchurch.internal.datastacks.com>
+ <20150310122652.GA17573@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150310151035.GG3535-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150310122652.GA17573@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Andy Lutomirski <luto@amacapital.net>, Sam Protsenko <semen.protsenko@linaro.org>, Ming Lei <ming.lei@canonical.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 10, 2015 at 8:10 AM, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org> wrote:
-> On Tue, Mar 10, 2015 at 08:05:52AM -0700, Yinghai Lu wrote:
->> We need to keep VO and ZO here...
->
-> Why?
+On Tue, Mar 10, 2015 at 12:26:52PM +0000, Matt Fleming wrote:
+> On Fri, 06 Mar, at 04:39:12PM, Peter Jones wrote:
+> > 
+> > So again: do we really need or want to do this?
+> 
+> One thing that we totally lose the ability to do is use the capsule
+> interface for things *other* than firmware updates, e.g.
+> 
+>  https://lkml.org/lkml/2013/10/16/327 
+> 
+> Also, requiring embedded or custom OS to include fwupdate into their
+> existing boot solutions is a bit heavy handed when literally all they
+> want to do is cat a binary blob to a sysfs file.
+> 
+> I don't see why we can't have both solutions.
 
-Make it not confusing.
+Yeah - we clearly need a kernel interface for some embedded devices, and
+it'd be better for every vendor to not implement it themselves.
 
-ZO: arch/x86/boot/compressed/vmlinux
-VO: vmlinux
+> Another thing is that ESRT isn't going to be supported by every
+> platform.
 
-setup + ZO ==> bzImage.
+Yeah - though I think you're *mostly* talking about the same platforms
+as above.
 
-compressed kernel is just compressed VO.
+> So, for the sysfs interface, let's not allow loading from /lib. Let's
+> not require a userland tool. Let's just do,
+> 
+>   # echo /path/to/my/awesome/capsule.bin > /sys/../capsule
 
-Thanks
+> 
+> and be done with it.
+> 
+> Hmmm?
 
-Yinghai
+I assume you're implying a) the capsule header with the guid is embedded
+in the .bin there already, and b) one contiguous write(2) with error
+reporting coming through something like vars.c's efi_status_to_err()?
+
+If so, yes, I prefer this API.
+
+-- 
+        Peter
