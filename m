@@ -1,28 +1,38 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] efi: stub: retrieve FDT size when loaded from UEFI
- config table
-Date: Tue, 10 Mar 2015 14:21:39 +0000
-Message-ID: <20150310142139.GD17573@codeblueprint.co.uk>
-References: <1425470549-7393-1-git-send-email-ard.biesheuvel@linaro.org>
- <CAFECyb8dTq0U-jCgH2R0K=4415zTR998VozQF2aCZ9ednAACvA@mail.gmail.com>
- <CAKv+Gu_emjD+g6HToxF3ULtYRX57+Kb8y6A8D4EZoBvRMCf6NA@mail.gmail.com>
+Subject: Re: [PATCH v2] efi/arm64: use UEFI for system reset and poweroff
+Date: Tue, 10 Mar 2015 14:48:57 +0000
+Message-ID: <20150310144857.GE17573@codeblueprint.co.uk>
+References: <1425653364-12591-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_emjD+g6HToxF3ULtYRX57+Kb8y6A8D4EZoBvRMCf6NA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1425653364-12591-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 10 Mar, at 01:54:38PM, Ard Biesheuvel wrote:
+On Fri, 06 Mar, at 03:49:24PM, Ard Biesheuvel wrote:
+> If UEFI Runtime Services are available, they are preferred over direct
+> PSCI calls or other methods to reset the system.
 > 
-> Thanks Roy.
+> For the reset case, we need to hook into machine_restart(), as the
+> arm_pm_restart function pointer may be overwritten by modules.
 > 
-> @Matt: would you mind taking this one?
+> Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi.c     | 9 +++++++++
+>  arch/arm64/kernel/process.c | 8 ++++++++
+>  2 files changed, 17 insertions(+)
 
-Queued up in 'next' for v4.1. Thanks guys.
+Looks good to me.
+
+Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+Catalin, are you picking this up?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
