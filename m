@@ -1,35 +1,59 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v3 3/7] x86, boot: Don't overlap VO with ZO data
-Date: Tue, 10 Mar 2015 16:48:28 +0100
-Message-ID: <20150310154828.GJ3535@pd.tnic>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
- <1425766041-6551-4-git-send-email-yinghai@kernel.org>
- <20150310093430.GC3535@pd.tnic>
- <CAE9FiQWauOdsZ=CBcVHfqTik1ePvW51uH7yy29MSvafOABTWZA@mail.gmail.com>
- <20150310151035.GG3535@pd.tnic>
- <CAE9FiQVy47PnXdd=c_st7OSatFQcvwfzk8XWej=9KUTnRyxKPw@mail.gmail.com>
- <20150310152137.GI3535@pd.tnic>
- <CAE9FiQUQn0vdU_MNf79=oE=DSkUG4U54-taVfgPro1JqUA7BTQ@mail.gmail.com>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Tue, 10 Mar 2015 08:51:59 -0700
+Message-ID: <CALCETrUDuTt_BK1JSFU=_EEujpm1ekzmkte-c3vxuRW7hWPUPQ@mail.gmail.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+ <20150306213912.GA8020@fenchurch.internal.datastacks.com> <20150310122652.GA17573@codeblueprint.co.uk>
+ <20150310152155.GB1208@fenchurch.internal.datastacks.com> <CALCETrXMvDqMvRf2yzRvpjHQB5pip5zNiihAccCc9Sm5UWGysg@mail.gmail.com>
+ <20150310154000.GD1208@fenchurch.internal.datastacks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAE9FiQUQn0vdU_MNf79=oE=DSkUG4U54-taVfgPro1JqUA7BTQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150310154000.GD1208@fenchurch.internal.datastacks.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Jones <pjones@redhat.com>
+Cc: Matt Fleming <matt@console-pimps.org>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Sam Protsenko <semen.protsenko@linaro.org>, Ming Lei <ming.lei@canonical.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Mar 10, 2015 at 08:42:40AM -0700, Yinghai Lu wrote:
-> In arch/x86/boot/header.S, we already use VO and ZO.
-> So please keep on using them, and don't introduce "kernel proper" etc.
+On Tue, Mar 10, 2015 at 8:40 AM, Peter Jones <pjones@redhat.com> wrote:
+>
+>> >> So, for the sysfs interface, let's not allow loading from /lib. Let's
+>> >> not require a userland tool. Let's just do,
+>> >>
+>> >>   # echo /path/to/my/awesome/capsule.bin > /sys/../capsule
+>> >
+>> >>
+>> >> and be done with it.
+>> >>
+>> >> Hmmm?
+>> >
+>> > I assume you're implying a) the capsule header with the guid is embedded
+>> > in the .bin there already, and b) one contiguous write(2) with error
+>> > reporting coming through something like vars.c's efi_status_to_err()?
+>> >
+>> > If so, yes, I prefer this API.
+>> >
+>>
+>> Is using a char device really so bad?  I have a "simple_char" that
+>> makes this really easy that's pending review.
+>
+> As long as there's straightforward propagation of the EFI_STATUS return
+> from UpdateCapsule() back, sysfs file vs char device makes very little
+> difference to me.  Either way it's open(), write(), close().  Using the
+> runtime firmware upload interface designed for wifi and scsi devices is
+> the part I don't really like.
+>
 
-So you're suggesting commit messages should use variable names and
-prefixes from the code instead of being human-readable?
+I'm not 100% happy with write(2) (which is all we have in sysfs) for
+two reasons:
 
--- 
-Regards/Gruss,
-    Boris.
+1. If we write a file name, eww.  That's more complicated, requires
+temporary files, has annoying mount namespace issues, etc.
 
-ECO tip #101: Trim your mails when you reply.
---
+2. If we write the full contents, we need to do it in a single call to
+write.  That means that we can't use cat, which mostly defeats the
+purpose.  In fact, using cat could be actively harmful.
+
+
+--Andy
