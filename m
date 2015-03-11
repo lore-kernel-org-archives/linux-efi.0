@@ -1,38 +1,30 @@
-From: Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] efivarfs: Ensure VariableName is NULL-terminated
-Date: Wed, 11 Mar 2015 12:00:55 +0000
-Message-ID: <1426075255-18037-1-git-send-email-ross.lagerwall@citrix.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: efivarfs and writev() support
+Date: Wed, 11 Mar 2015 13:42:26 +0000
+Message-ID: <20150311134226.GB24174@codeblueprint.co.uk>
+References: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Marcel Holtmann <marcel@holtmann.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>, Jeremy Kerr <jk@ozlabs.org>, Matt Fleming <matt.fleming@intel.com>, Al Viro <viro@ZenIV.linux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
-Some buggy firmware implementations update VariableNameSize on success
-such that it does not include the final NULL character which results in
-garbage in the efivarfs name entries.  Use kzalloc on the efivar_entry
-(as is done in efivars.c) to ensure that the name is always
-NULL-terminated.
+On Sun, 08 Mar, at 03:24:09PM, Marcel Holtmann wrote:
+> Hi,
+> 
+> it seems that efivarfs only supports readv(), but when it comes to
+> writev(), I am getting an error. Is there any reason to not support
+> vectored write on this filesystem? Especially with the uint32 header
+> for each file, I think it would make perfect sense to support it.
 
-Signed-off-by: Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
----
- fs/efivarfs/super.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+What error are you seeing? I thought that the vfs fell back to a looped
+write if the file system doesn't support .write_iter()?
 
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index ddbce42..acf9a67 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -121,7 +121,7 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
- 	int len, i;
- 	int err = -ENOMEM;
- 
--	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-+	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
- 	if (!entry)
- 		return err;
- 
+But yes, we definitely should support writev().
+
 -- 
-2.1.0
+Matt Fleming, Intel Open Source Technology Center
