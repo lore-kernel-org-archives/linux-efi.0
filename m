@@ -1,51 +1,44 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: efivarfs and writev() support
-Date: Thu, 12 Mar 2015 17:03:44 +0000
-Message-ID: <20150312170344.GN29656@ZenIV.linux.org.uk>
-References: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org>
- <20150311134226.GB24174@codeblueprint.co.uk>
- <7F5112DD-6998-47D3-B6B9-5618E14E022A@holtmann.org>
- <20150312063437.GK29656@ZenIV.linux.org.uk>
- <BC49553F-B4CE-4ED5-A1CE-D180E200AA60@holtmann.org>
+From: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Thu, 12 Mar 2015 22:47:54 +0000
+Message-ID: <20150312224754.GD24174@codeblueprint.co.uk>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+ <20150306213912.GA8020@fenchurch.internal.datastacks.com>
+ <20150310122652.GA17573@codeblueprint.co.uk>
+ <20150310152155.GB1208@fenchurch.internal.datastacks.com>
+ <CALCETrXMvDqMvRf2yzRvpjHQB5pip5zNiihAccCc9Sm5UWGysg@mail.gmail.com>
+ <20150310154000.GD1208@fenchurch.internal.datastacks.com>
+ <CALCETrUDuTt_BK1JSFU=_EEujpm1ekzmkte-c3vxuRW7hWPUPQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <BC49553F-B4CE-4ED5-A1CE-D180E200AA60@holtmann.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Marcel Holtmann <marcel@holtmann.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Matthew Garrett <matthew.garrett@nebula.com>, Jeremy Kerr <jk@ozlabs.org>, Matt Fleming <matt.fleming@intel.com>
+In-Reply-To: <CALCETrUDuTt_BK1JSFU=_EEujpm1ekzmkte-c3vxuRW7hWPUPQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 12, 2015 at 07:58:35AM -0700, Marcel Holtmann wrote:
-
-> I do not know about the specific semantics of efivarfs and frankly I have not tried every single combination. However it sounds to me that currently it requires that the whole file content is provided with a single write(). I have no idea if this is true or not. I do not know enough about the internals here.
+On Tue, 10 Mar, at 08:51:59AM, Andy Lutomirski wrote:
 > 
-> Maybe efivarfs just needs to implemented .write_iter properly to actually support writev() and can not rely on a fallback of multiple write() calls.
+> I'm not 100% happy with write(2) (which is all we have in sysfs) for
+> two reasons:
+> 
+> 1. If we write a file name, eww.  That's more complicated, requires
+> temporary files, has annoying mount namespace issues, etc.
+> 
+> 2. If we write the full contents, we need to do it in a single call to
+> write.  That means that we can't use cat, which mostly defeats the
+> purpose.  In fact, using cat could be actively harmful.
 
-Sigh...  There are three variants of write/writev semantics:
-	1) stream.  Neither syscall nor vector member boundaries matter,
-the thing on the other end of IO channel might interpret the stream of
-data it's being fed and carve it into pieces, but that's a function of
-the contents.  TCP sockets are like that, so are pipes, etc.
-	2) syscall-level datagram.  Vector member boundaries do not matter,
-syscall ones do.  UDP is like that - iovec is pure scatter-gather thing
-there; the boundaries come from syscalls.
-	3) vector-level datagram.  Each vector member represents a single
-datagram, syscall boundaries do not matter.  I.e. iovec is an array of
-datagrams.  Most of character devices are like that.  And so's efivarfs.
+At this point I'd really like Greg to chime in.
 
-What you are proposing seems to be switching it to syscall-level datagram
-behaviour.  It's very unlikely to break anything (I would be very surprised
-if anything tried to use "send this array of datagrams", simply because it's
-usually[1] bloody pointless for those files), but it *is* a user-visible API
-change.
+In principal, I'm not stricly opposed to using a simple char device
+provided that it's not essentially a copy and paste of code from
+drivers/base/firmware_class.c.
 
-And if we go for it, sure, we should just switch to ->write_iter() and be
-done with that - kmalloc(iov_iter_count(to), GFP_KERNEL), copy_from_iter(),
-use the first 4 bytes for attributes and the rest for body, same as we do
-now.
+Greg?
 
-[1] not always - variable doesn't have to have "each time we set it, the
-old value is completely lost" semantics, even though most of them are
-that way.
+-- 
+Matt Fleming, Intel Open Source Technology Center
