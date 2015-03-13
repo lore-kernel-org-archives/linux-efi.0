@@ -1,152 +1,89 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] x86, boot: Move z_extract_offset calculation to header.S
-Date: Thu, 12 Mar 2015 19:12:57 -0700
-Message-ID: <1426212777-3622-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v3 1/7] x86, kaslr: Use init_size instead of run_size
+Date: Fri, 13 Mar 2015 13:27:56 +0100
+Message-ID: <20150313122756.GA28855@gmail.com>
+References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
+ <1425766041-6551-2-git-send-email-yinghai@kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1425766041-6551-2-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Yinghai Lu <yinghai@kernel.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Jiri Kosina <jkosina@suse.cz>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Junjie Mao <eternal.n08@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-At that point, we have exact decompressor size, so we don't need to guess
-that size in mkpiggy.c
 
-We use 8 pages less in final init_size with this patch.
+* Yinghai Lu <yinghai@kernel.org> wrote:
 
-  input: [0x13f2b33b4-0x13fe44346], output: [0x13e000000-0x13fe61fff], heap: [0x13fe4f080-0x13fe5707f]
+> commit e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+> introduced one run_size for kaslr.
+> We should use real runtime size (include copy/decompress) aka init_size.
 
-before patch
+Why, what happens if we don't change this?
 
-  input: [0x13f2bb3b4-0x13fe4c346], output: [0x13e000000-0x13fe69fff], heap: [0x13fe57080-0x13fe5f07f]
+What's the purpose of your change?
 
-Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> run_size is VO (vmlinux) init size include bss and brk.
+> init_size is the size needed for decompress and it is bigger than run_size
+> when decompress need more buff.
 
----
-Please apply after patcheset: [PATCH v3 0/7] x86, boot: clean up kaslr
+What happens if we don't have enough 'buff'?
 
----
- arch/x86/boot/Makefile             |    2 +-
- arch/x86/boot/compressed/misc.c    |    5 +----
- arch/x86/boot/compressed/mkpiggy.c |   17 +----------------
- arch/x86/boot/header.S             |   29 ++++++++++++++++++++++++++++-
- 4 files changed, 31 insertions(+), 22 deletions(-)
+What's the purpose of your change?
 
-Index: linux-2.6/arch/x86/boot/Makefile
-===================================================================
---- linux-2.6.orig/arch/x86/boot/Makefile
-+++ linux-2.6/arch/x86/boot/Makefile
-@@ -86,7 +86,7 @@ targets += voffset.h
- $(obj)/voffset.h: vmlinux FORCE
- 	$(call if_changed,voffset)
- 
--sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|_rodata\|z_.*\)$$/\#define ZO_\2 0x\1/p'
-+sed-zoffset := -e 's/^\([0-9a-fA-F]*\) [ABCDGRSTVW] \(startup_32\|startup_64\|efi32_stub_entry\|efi64_stub_entry\|efi_pe_entry\|input_data\|_end\|_rodata\|_ehead\|_text\|z_.*\)$$/\#define ZO_\2 0x\1/p'
- 
- quiet_cmd_zoffset = ZOFFSET $@
-       cmd_zoffset = $(NM) $< | sed -n $(sed-zoffset) > $@
-Index: linux-2.6/arch/x86/boot/header.S
-===================================================================
---- linux-2.6.orig/arch/x86/boot/header.S
-+++ linux-2.6/arch/x86/boot/header.S
-@@ -443,7 +443,34 @@ pref_address:		.quad LOAD_PHYSICAL_ADDR
- # don't overlap data area of ZO with VO
- #define ADDON_ZO_SIZE (ZO__end - ZO__rodata)
- 
--#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_min_extract_offset)
-+/* check arch/x86/boot/compressed/misc.c for the formula about extra_bytes.  */
-+#define ZO_z_extra_bytes ((ZO_z_output_len >> 12) + 32768 + 18)
-+#if ZO_z_output_len > ZO_z_input_len
-+#define ZO_z_extract_offset (ZO_z_output_len + ZO_z_extra_bytes - ZO_z_input_len)
-+#else
-+#define ZO_z_extract_offset ZO_z_extra_bytes
-+#endif
-+/*
-+ * extract_offset has to be bigger than ZO head section.
-+ * otherwise during head code running to move ZO to end of buffer,
-+ * will overwrite head code itself.
-+ */
-+#if (ZO__ehead - ZO_startup_32) > ZO_z_extract_offset
-+#define ZO_z_extract_offset_new	((ZO__ehead - ZO_startup_32 + 4095) & ~4095)
-+#else
-+#define ZO_z_extract_offset_new	((ZO_z_extract_offset + 4095) & ~4095)
-+#endif
-+#define ZO_INIT_SIZE	(ZO__end - ZO_startup_32 + ZO_z_extract_offset_new)
-+
-+/*
-+ * ZO__end - ZO_startup_32 is (ZO__ehead - ZO_startup_32) + ZO_z_input_len + (ZO__end - ZO__text)
-+ * ZO_z_extract_offset_new >= (ZO_z_output_len + ZO_z_extra_bytes - ZO_z_input_len)
-+ * then ZO_INIT_SIZE >= (ZO__ehead - ZO_startup_32) + ZO_z_input_len + (ZO__end - ZO__text) + (ZO_z_output_len + ZO_z_extra_bytes - ZO_z_input_len)
-+ * so (ZO_INIT_SIZE - ZO_z_output_len) > (ZO__end - ZO__text)
-+ * That means during decompressor running, output could not
-+ * overwrite the decompressor itself.
-+ */
-+
- #define VO_INIT_SIZE	(VO__end - VO__text)
- #if ZO_INIT_SIZE > VO_INIT_SIZE
- #define INIT_SIZE (ZO_INIT_SIZE + ADDON_ZO_SIZE)
-Index: linux-2.6/arch/x86/boot/compressed/mkpiggy.c
-===================================================================
---- linux-2.6.orig/arch/x86/boot/compressed/mkpiggy.c
-+++ linux-2.6/arch/x86/boot/compressed/mkpiggy.c
-@@ -21,8 +21,7 @@
-  * ----------------------------------------------------------------------- */
- 
- /*
-- * Compute the desired load offset from a compressed program; outputs
-- * a small assembly wrapper with the appropriate symbols defined.
-+ * outputs a small assembly wrapper with the appropriate symbols defined.
-  */
- 
- #include <stdlib.h>
-@@ -35,7 +34,6 @@ int main(int argc, char *argv[])
- {
- 	uint32_t olen;
- 	long ilen;
--	unsigned long offs;
- 	FILE *f = NULL;
- 	int retval = 1;
- 
-@@ -65,24 +63,11 @@ int main(int argc, char *argv[])
- 	ilen = ftell(f);
- 	olen = get_unaligned_le32(&olen);
- 
--	/*
--	 * Now we have the input (compressed) and output (uncompressed)
--	 * sizes, compute the necessary decompression offset...
--	 */
--
--	offs = (olen > ilen) ? olen - ilen : 0;
--	offs += olen >> 12;	/* Add 8 bytes for each 32K block */
--	offs += 64*1024 + 128;	/* Add 64K + 128 bytes slack */
--	offs = (offs+4095) & ~4095; /* Round to a 4K boundary */
--
- 	printf(".section \".rodata..compressed\",\"a\",@progbits\n");
- 	printf(".globl z_input_len\n");
- 	printf("z_input_len = %lu\n", ilen);
- 	printf(".globl z_output_len\n");
- 	printf("z_output_len = %lu\n", (unsigned long)olen);
--	printf(".globl z_min_extract_offset\n");
--	printf("z_min_extract_offset = 0x%lx\n", offs);
--
- 	printf(".globl input_data, input_data_end\n");
- 	printf("input_data:\n");
- 	printf(".incbin \"%s\"\n", argv[1]);
-Index: linux-2.6/arch/x86/boot/compressed/misc.c
-===================================================================
---- linux-2.6.orig/arch/x86/boot/compressed/misc.c
-+++ linux-2.6/arch/x86/boot/compressed/misc.c
-@@ -83,13 +83,10 @@
-  * To avoid problems with the compressed data's meta information an extra 18
-  * bytes are needed.  Leading to the formula:
-  *
-- * extra_bytes = (uncompressed_size >> 12) + 32768 + 18 + decompressor_size.
-+ * extra_bytes = (uncompressed_size >> 12) + 32768 + 18.
-  *
-  * Adding 8 bytes per 32K is a bit excessive but much easier to calculate.
-  * Adding 32768 instead of 32767 just makes for round numbers.
-- * Adding the decompressor_size is necessary as it musht live after all
-- * of the data as well.  Last I measured the decompressor is about 14K.
-- * 10K of actual data and 4K of bss.
-  *
-  */
- 
+> According to arch/x86/boot/header.S:
+> | #define ZO_INIT_SIZE    (ZO__end - ZO_startup_32 + ZO_z_extract_offset)
+> | #define VO_INIT_SIZE    (VO__end - VO__text)
+> | #if ZO_INIT_SIZE > VO_INIT_SIZE
+> | #define INIT_SIZE ZO_INIT_SIZE
+> | #else
+> | #define INIT_SIZE VO_INIT_SIZE
+> | #endif
+> | init_size:              .long INIT_SIZE         # kernel initialization size
+> 
+> Bootloader allocate buffer according to init_size in hdr, and load the
+> ZO (arch/x86/boot/compressed/vmlinux) from start of that buffer.
+> init_size first come from VO (vmlinux) init size. That VO init size
+> is from VO _end to VO _end and include VO bss and brk area.
+> 
+> During running of ZO, ZO move itself to the middle of buffer at
+> z_extract_offset to make sure that decompressor would not have output
+> overwrite input data before input data get consumed.
+> But z_extract_offset calculating is based on size of VO (vmlinux) and size
+> of compressed VO only at first.
+> So need to make sure [z_extra_offset, init_size) will fit ZO, that means
+> init_size need to be adjusted according to ZO size.
+> That make init_size is always >= run_size.
+> 
+> During aslr buffer searching, we need to make sure the new buffer is big
+> enough for decompress at first. So use init_size instead, and kill not
+> needed run_size related code.
+
+Why, what happens if it's not big enough?
+
+What's the purpose of your change?
+
+> Fixes: e6023367d779 ("x86, kaslr: Prevent .bss from overlaping initrd")
+
+What does your patch fix in that commit?
+
+What's the purpose of your change?
+
+After so many words you still haven't explained _the_ most basic thing 
+a Linux kernel changelog needs to include: why a change is necessary, 
+i.e. what bad effects did the bug have...
+
+Why are you ignoring the kernel technology of trying to explain things 
+to others so that they can easily understand so badly?
+
+'Code well explained to others' is just as important a technology to 
+the Linux kernel as 'correct code', 'clean code' or 'fast code'.
+
+Do you perhaps understand now why I have to ignore most of your 
+patches after just a sad glance at the changelog's quality?
+
+Thanks,
+
+	Ingo
