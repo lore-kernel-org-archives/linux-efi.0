@@ -1,45 +1,42 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v3 1/7] x86, kaslr: Use init_size instead of run_size
-Date: Sat, 14 Mar 2015 10:59:23 +0100
-Message-ID: <20150314095923.GA3114@pd.tnic>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
- <1425766041-6551-2-git-send-email-yinghai@kernel.org>
- <20150313122756.GA28855@gmail.com>
- <CAE9FiQXaRmJFdEUhyn2q0v=9ymdbqZWEo1pzo6iyaNupWEp5Xg@mail.gmail.com>
- <20150314075357.GA8319@gmail.com>
+From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2] efi/arm64: use UEFI for system reset and poweroff
+Date: Sat, 14 Mar 2015 11:00:43 +0000
+Message-ID: <20150314110043.GA9696@e104818-lin.cambridge.arm.com>
+References: <1425653364-12591-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20150310144857.GE17573@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150314075357.GA8319-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20150310144857.GE17573-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Junjie Mao <eternal.n08-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Mar 14, 2015 at 08:53:57AM +0100, Ingo Molnar wrote:
-> You are still talking only about the low level code and about low
-> level symptoms, while in contrast to that the primary question with...
+On Tue, Mar 10, 2015 at 02:48:57PM +0000, Matt Fleming wrote:
+> On Fri, 06 Mar, at 03:49:24PM, Ard Biesheuvel wrote:
+> > If UEFI Runtime Services are available, they are preferred over direct
+> > PSCI calls or other methods to reset the system.
+> > 
+> > For the reset case, we need to hook into machine_restart(), as the
+> > arm_pm_restart function pointer may be overwritten by modules.
+> > 
+> > Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Reviewed-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
+> >  arch/arm64/kernel/efi.c     | 9 +++++++++
+> >  arch/arm64/kernel/process.c | 8 ++++++++
+> >  2 files changed, 17 insertions(+)
+> 
+> Looks good to me.
+> 
+> Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> Catalin, are you picking this up?
 
-<snip text which will be ignored again, unfortunately>
-
-Thanks for doing that!
-
-I really doubt it'll bring anything this time either but I don't care -
-certainly I've wasted enough time trying to improve things as far as I
-can so hell yeah, this bullshit has to stop!
-
-In addition to what you've said, I have only one proposal: we revert
-the whole crap and do it again, this time nice and clean in tip. It'll
-stay there as long as it has to. No half-arsed commit messages, no
-misunderstood crap, no lala code f*ckery. Whatever it takes, as long as
-it takes.
-
-Thanks.
+Yes, I will. Thanks.
 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+Catalin
