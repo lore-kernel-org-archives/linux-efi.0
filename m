@@ -1,54 +1,63 @@
-From: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
-Subject: Re: [PATCH] Revert "x86/mm/ASLR: Propagate base load address
- calculation"
-Date: Mon, 16 Mar 2015 14:56:11 +0100 (CET)
-Message-ID: <alpine.LNX.2.00.1503161441280.25438@pobox.suse.cz>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org> <1425766041-6551-2-git-send-email-yinghai@kernel.org> <20150313122756.GA28855@gmail.com> <CAE9FiQXaRmJFdEUhyn2q0v=9ymdbqZWEo1pzo6iyaNupWEp5Xg@mail.gmail.com> <20150314075357.GA8319@gmail.com>
- <20150314095923.GA3114@pd.tnic> <20150316100628.GD22995@pd.tnic>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: Re: [PATCH v2 3/3] efi: Capsule update with user helper interface
+Date: Mon, 16 Mar 2015 08:35:29 -0700
+Message-ID: <CALCETrVovfe0ivru52KUdWOhwLnPAa=ANYrXBGJ3Z+4zLf=YLg@mail.gmail.com>
+References: <F54AEECA5E2B9541821D670476DAE19C2B8AC95C@PGSMSX102.gar.corp.intel.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8AC9DD@PGSMSX102.gar.corp.intel.com>
+ <20150306213912.GA8020@fenchurch.internal.datastacks.com> <20150310122652.GA17573@codeblueprint.co.uk>
+ <20150310152155.GB1208@fenchurch.internal.datastacks.com> <CALCETrXMvDqMvRf2yzRvpjHQB5pip5zNiihAccCc9Sm5UWGysg@mail.gmail.com>
+ <20150310154000.GD1208@fenchurch.internal.datastacks.com> <CALCETrUDuTt_BK1JSFU=_EEujpm1ekzmkte-c3vxuRW7hWPUPQ@mail.gmail.com>
+ <20150312224754.GD24174@codeblueprint.co.uk> <20150313144213.GA19009@kroah.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150316100628.GD22995-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Junjie Mao <eternal.n08-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150313144213.GA19009@kroah.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg KH <gregkh@linuxfoundation.org>
+Cc: Matt Fleming <matt@console-pimps.org>, Ong Boon Leong <boon.leong.ong@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, LKML <linux-kernel@vger.kernel.org>, Peter Jones <pjones@redhat.com>, Ming Lei <ming.lei@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Mar 2015, Borislav Petkov wrote:
+On Mar 13, 2015 7:42 AM, "Greg Kroah-Hartman"
+<gregkh@linuxfoundation.org> wrote:
+>
+> On Thu, Mar 12, 2015 at 10:47:54PM +0000, Matt Fleming wrote:
+> > On Tue, 10 Mar, at 08:51:59AM, Andy Lutomirski wrote:
+> > >
+> > > I'm not 100% happy with write(2) (which is all we have in sysfs) for
+> > > two reasons:
+> > >
+> > > 1. If we write a file name, eww.  That's more complicated, requires
+> > > temporary files, has annoying mount namespace issues, etc.
+> > >
+> > > 2. If we write the full contents, we need to do it in a single call to
+> > > write.  That means that we can't use cat, which mostly defeats the
+> > > purpose.  In fact, using cat could be actively harmful.
+> >
+> > At this point I'd really like Greg to chime in.
+> >
+> > In principal, I'm not stricly opposed to using a simple char device
+> > provided that it's not essentially a copy and paste of code from
+> > drivers/base/firmware_class.c.
+> >
+> > Greg?
+>
+> Yes, I don't want a character driver here for this if at all possible.
+> Just stick with the firmware download code, it's there and should work
+> "as-is" for your stuff.
 
-> On Sat, Mar 14, 2015 at 10:59:23AM +0100, Borislav Petkov wrote:
-> > In addition to what you've said, I have only one proposal: we revert
-> > the whole crap and do it again, this time nice and clean in tip. It'll
-> > stay there as long as it has to. No half-arsed commit messages, no
-> > misunderstood crap, no lala code f*ckery. Whatever it takes, as long as
-> > it takes.
-> 
-> And here it is:
-> 
-> ---
-> From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Date: Mon, 16 Mar 2015 10:57:56 +0100
-> Subject: [PATCH] Revert "x86/mm/ASLR: Propagate base load address calculation"
-> 
-> This reverts commit f47233c2d34f243ecdaac179c3408a39ff9216a7.
-> 
-> The main reason for the revert is that in order to make this work, we
-> need non-trivial changes to the x86 boot code which we didn't manage to
-> get done in time for merging.
-> 
-> And even if we did, they would've been too risky so instead of rushing
-> things and break booting 4.1 on boxes left and right, we will be very
-> strict and conservative and will take our time with this to fix and test
-> it properly.
-> 
-> Signed-off-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Cc: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+Given the rest of this interminable discussion, it seems pretty clear
+to me that the firmware download code doesn't work as is for this use
+case.  It will sort of work with lots of changes (to locking,
+synchronicity, error reporting, enumeration, etc), but I think that
+the total complexity of doing that will far exceed the complexity if
+either a new chardev or some straightforward sysfs interface.
 
-Agreed. Let's work on a better refresh for 4.1+. The fix attempts were 
-quite chaotic.
+We don't have ioctls in sysfs, though, and adding that sounds worse
+than a new character driver, so...
 
-Acked-by: Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>
+--Andy
 
--- 
-Jiri Kosina
-SUSE Labs
+>
+> thanks,
+>
+> greg k-h
