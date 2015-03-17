@@ -1,47 +1,47 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH] Revert "x86/mm/ASLR: Propagate base load address
- calculation"
-Date: Tue, 17 Mar 2015 09:14:15 +0100
-Message-ID: <20150317081415.GB28462@gmail.com>
-References: <1425766041-6551-1-git-send-email-yinghai@kernel.org>
- <1425766041-6551-2-git-send-email-yinghai@kernel.org>
- <20150313122756.GA28855@gmail.com>
- <CAE9FiQXaRmJFdEUhyn2q0v=9ymdbqZWEo1pzo6iyaNupWEp5Xg@mail.gmail.com>
- <20150314075357.GA8319@gmail.com>
- <20150314095923.GA3114@pd.tnic>
- <20150316100628.GD22995@pd.tnic>
- <alpine.LNX.2.00.1503161441280.25438@pobox.suse.cz>
- <CAE9FiQU4xD9Jafbu7X=NDyBzRWAXnLqM0F-aCuVMVYgkqFp6sw@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: efivarfs and writev() support
+Date: Tue, 17 Mar 2015 15:46:30 +0000
+Message-ID: <20150317154630.GA25605@codeblueprint.co.uk>
+References: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org>
+ <20150311134226.GB24174@codeblueprint.co.uk>
+ <7F5112DD-6998-47D3-B6B9-5618E14E022A@holtmann.org>
+ <20150312063437.GK29656@ZenIV.linux.org.uk>
+ <BC49553F-B4CE-4ED5-A1CE-D180E200AA60@holtmann.org>
+ <20150312170344.GN29656@ZenIV.linux.org.uk>
+ <C20D75CF-FA82-43E5-BF70-E4E30E1D987B@holtmann.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAE9FiQU4xD9Jafbu7X=NDyBzRWAXnLqM0F-aCuVMVYgkqFp6sw@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Yinghai Lu <yinghai@kernel.org>
-Cc: Jiri Kosina <jkosina@suse.cz>, Borislav Petkov <bp@suse.de>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Kees Cook <keescook@chromium.org>, Baoquan He <bhe@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Junjie Mao <eternal.n08@gmail.com>
+In-Reply-To: <C20D75CF-FA82-43E5-BF70-E4E30E1D987B-kz+m5ild9QBg9hUCZPvPmw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Marcel Holtmann <marcel-kz+m5ild9QBg9hUCZPvPmw@public.gmane.org>
+Cc: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Yinghai Lu <yinghai@kernel.org> wrote:
-
-> On Mon, Mar 16, 2015 at 6:56 AM, Jiri Kosina <jkosina@suse.cz> wrote:
-> > On Mon, 16 Mar 2015, Borislav Petkov wrote:
-> >> From: Borislav Petkov <bp@suse.de>
-> >> Date: Mon, 16 Mar 2015 10:57:56 +0100
-> >> Subject: [PATCH] Revert "x86/mm/ASLR: Propagate base load address calculation"
-> >>
-> >> This reverts commit f47233c2d34f243ecdaac179c3408a39ff9216a7.
-> ...
-> >
-> > Agreed. Let's work on a better refresh for 4.1+. The fix attempts were
-> > quite chaotic.
+On Sat, 14 Mar, at 09:33:00AM, Marcel Holtmann wrote:
 > 
-> Then what is the plan for 4.1+ ?
+> I say we should support writev() on efivarfs. Not supporting it seems
+> odd especially since that is not documented anywhere. So yes, I am for
+> adding .write_iter() support and be done with that.
 
-My plan is to apply correct, clean, properly granular and properly 
-changelogged patches.
+Well, as Al has explained it's not that writev() isn't supported, it's
+that having an iovec vector containing only the 4-byte variable
+attribute isn't currently supported.
 
-Thanks,
+Since writev() calls are intended to be atomic, and even though efivarfs
+gets fed the variable data in chunks we can process it in one go, I
+think allowing the scenario you describe is fine.
 
-	Ingo
+> Also please note that even write(,4) and write(,n) does not work
+> either. You can not write partial entries as it seems. Maybe you are
+> able to append, but it seems the initial creation of the variable has
+> to be done with a single write() call. Anything else ends up in a file
+> with 0 length.
+
+Yes, that's by design. I guess it's to prohibit people from creating
+bogus EFI variables or accidentally deleting variables (a SetVariable()
+call with length 0 is a delete).
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
