@@ -1,66 +1,99 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5 15/19] x86, kaslr: Introduce fetch_random_virt_offset to randomize the kernel text mapping address
-Date: Wed, 18 Mar 2015 00:28:22 -0700
-Message-ID: <1426663706-23979-16-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v5 14/19] x86, kaslr: Add two functions which will be used later
+Date: Wed, 18 Mar 2015 00:28:21 -0700
+Message-ID: <1426663706-23979-15-git-send-email-yinghai@kernel.org>
 References: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1426663706-23979-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Baoquan He <bhe@redhat.com>
 
-Kaslr extended kernel text mapping region size from 512M to 1G,
-namely CONFIG_RANDOMIZE_BASE_MAX_OFFSET. This means kernel text
-can be mapped to below region:
+Add two functions mem_min_overlap() and store_slot_info() which will be
+used later.
 
-[__START_KERNEL_map + LOAD_PHYSICAL_ADDR, __START_KERNEL_map + 1G]
+Given a memory region mem_min_overlap will iterate all avoid region to
+find the first one which overlap with it.
 
-Introduce a function find_random_virt_offset() to get random value
-between LOAD_PHYSICAL_ADDR and CONFIG_RANDOMIZE_BASE_MAX_OFFSET.
-This random value will be added to __START_KERNEL_map to get the
-starting address which kernel text is mapped from. Since slot can
-be anywhere of this region, means it is an independent slot_area,
-it is simple to get a slot according to random value.
+store_slot_info() calculates the slot info of passed in region and
+store it into slot_areas[].
 
-Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Baoquan He <bhe@redhat.com>
 ---
- arch/x86/boot/compressed/aslr.c | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+ arch/x86/boot/compressed/aslr.c | 51 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 51 insertions(+)
 
 diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index 37dce4f..5114142 100644
+index 33693c1..37dce4f 100644
 --- a/arch/x86/boot/compressed/aslr.c
 +++ b/arch/x86/boot/compressed/aslr.c
-@@ -369,6 +369,27 @@ static unsigned long find_random_addr(unsigned long minimum,
- 	return slots_fetch_random();
+@@ -217,6 +217,40 @@ static bool mem_avoid_overlap(struct mem_vector *img)
+ 	return false;
  }
  
-+static unsigned long find_random_virt_offset(unsigned long minimum,
-+				  unsigned long image_size)
++static unsigned long
++mem_min_overlap(struct mem_vector *img, struct mem_vector *out)
 +{
-+	unsigned long slot_num, random;
++	int i;
++	struct setup_data *ptr;
++	unsigned long min = img->start + img->size;
 +
-+	/* Make sure minimum is aligned. */
-+	minimum = ALIGN(minimum, CONFIG_PHYSICAL_ALIGN);
++	for (i = 0; i < MEM_AVOID_MAX; i++) {
++		if (mem_overlaps(img, &mem_avoid[i]) &&
++			(mem_avoid[i].start < min)) {
++			*out = mem_avoid[i];
++			min = mem_avoid[i].start;
++		}
++	}
 +
-+	if (image_size <= CONFIG_PHYSICAL_ALIGN)
-+		slot_num = (CONFIG_RANDOMIZE_BASE_MAX_OFFSET - minimum) /
-+				CONFIG_PHYSICAL_ALIGN;
-+	else
-+		slot_num = (CONFIG_RANDOMIZE_BASE_MAX_OFFSET -
-+				minimum - image_size) /
-+				CONFIG_PHYSICAL_ALIGN + 1;
++	/* Check all entries in the setup_data linked list. */
++	ptr = (struct setup_data *)(unsigned long)real_mode->hdr.setup_data;
++	while (ptr) {
++		struct mem_vector avoid;
 +
-+	random = get_random_long() % slot_num;
++		avoid.start = (unsigned long)ptr;
++		avoid.size = sizeof(*ptr) + ptr->len;
 +
-+	return random * CONFIG_PHYSICAL_ALIGN + minimum;
++		if (mem_overlaps(img, &avoid) && (avoid.start < min)) {
++			*out = avoid;
++			min = avoid.start;
++		}
++
++		ptr = (struct setup_data *)(unsigned long)ptr->next;
++	}
++
++	return min;
 +}
 +
- static void add_kaslr_setup_data(__u8 enabled)
+ static unsigned long slots[CONFIG_RANDOMIZE_BASE_MAX_OFFSET /
+ 			   CONFIG_PHYSICAL_ALIGN];
+ 
+@@ -233,6 +267,23 @@ static unsigned long slot_max;
+ 
+ static unsigned long slot_area_index;
+ 
++static void store_slot_info(struct mem_vector *region, unsigned long image_size)
++{
++	struct slot_area slot_area;
++
++	slot_area.addr = region->start;
++	if (image_size <= CONFIG_PHYSICAL_ALIGN)
++		slot_area.num = region->size / CONFIG_PHYSICAL_ALIGN;
++	else
++		slot_area.num = (region->size - image_size) /
++				CONFIG_PHYSICAL_ALIGN + 1;
++
++	if (slot_area.num > 0) {
++		slot_areas[slot_area_index++] = slot_area;
++		slot_max += slot_area.num;
++	}
++}
++
+ static void slots_append(unsigned long addr)
  {
- 	struct setup_data *data;
+ 	/* Overflowing the slots list should be impossible. */
 -- 
 1.8.4.5
