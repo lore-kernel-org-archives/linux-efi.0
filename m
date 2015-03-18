@@ -1,252 +1,298 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5 16/19] x86, kaslr: Randomize physical and virtual address of kernel separately
-Date: Wed, 18 Mar 2015 00:28:23 -0700
-Message-ID: <1426663706-23979-17-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v5 10/19] x86, 64bit: Set ident_mapping for kaslr
+Date: Wed, 18 Mar 2015 00:28:17 -0700
+Message-ID: <1426663706-23979-11-git-send-email-yinghai@kernel.org>
 References: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1426663706-23979-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Current aslr only support random in near range, and new range still use
+old mapping. Also it does not support new range above 4G.
 
-On x86_64, in old kaslr implementaion only physical address of kernel
-loading is randomized. Then calculate the delta of physical address
-where vmlinux was linked to load and where it is finally loaded. If
-delta is not equal to 0, namely there's a new physical address where
-kernel is actually decompressed, relocation handling need be done. Then
-delta is added to offset of kernel symbol relocation, this makes the
-address of kernel text mapping move delta long.
+We need to have ident set for the new range before we can do decompress
+to the new ouput, and later run them.
 
-Here the behavior is changed. Randomize both the physical address
-where kernel is decompressed and the virtual address where kernel text
-is mapped. And relocation handling only depends on virtual address
-randomization. Means if and only if virtual address is randomized to
-a different value, we add the delta to the offset of kernel relocs.
+In this patch, we add ident mapping for all needed range.
 
-Note that up to now both virtual offset and physical addr randomization
-cann't exceed CONFIG_RANDOMIZE_BASE_MAX_OFFSET, namely 1G.
+At first, to aslr support to put random VO above 4G, we must set ident
+mapping for the new range when it come via startup_32 path.
 
-Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Secondly, when boot from 64bit bootloader, bootloader set ident mapping,
+and boot via ZO (arch/x86/boot/compressed/vmlinux) startup_64.
+Those pages for pagetable need to be avoided when we select new random
+VO (vmlinux) base. Otherwise decompressor would overwrite them during
+decompressing.
+First way would be: go through pagetable and find out every page is used by
+pagetable for every mem_aovid checking but we will need extra code, and may
+need to increase mem_avoid array size to hold them.
+Other way would be: We can create new ident mapping instead, and pages for
+pagetable will come from _pagetable section of ZO, and they are in mem_avoid
+array already. In this way, we can reuse the code for setting ident mapping.
+
+The _pgtable will be shared 32bit and 64bit path to reduce init_size,
+as now ZO _rodata to _end will contribute init_size.
+
+We need to increase pgt buffer size.
+When boot via startup_64, as we need to cover old VO, params, cmdline
+and new VO, in extreme case we could have them all cross 512G boundary,
+will need (2+2)*4 pages with 2M mapping. And need 2 for first 2M for vga ram.
+Plus one for level4. Total will be 19 pages.
+When boot via startup_32, aslr would move new VO above 4G, we need set extra
+ident mapping for new VO, pgt buffer come from _pgtable offset 6 pages.
+should only need (2+2) pages at most when it cross 512G boundary.
+So 19 pages could make both paths happy.
+
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Jiri Kosina <jkosina@suse.cz>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Matt Fleming <matt.fleming@intel.com>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
 ---
- arch/x86/boot/compressed/aslr.c | 46 +++++++++++++++++++++--------------------
- arch/x86/boot/compressed/misc.c | 39 ++++++++++++++++++++--------------
- arch/x86/boot/compressed/misc.h | 19 +++++++++--------
- 3 files changed, 58 insertions(+), 46 deletions(-)
+ arch/x86/boot/compressed/Makefile   |  3 ++
+ arch/x86/boot/compressed/aslr.c     | 14 ++++++
+ arch/x86/boot/compressed/head_64.S  |  4 +-
+ arch/x86/boot/compressed/misc.h     | 11 +++++
+ arch/x86/boot/compressed/misc_pgt.c | 91 +++++++++++++++++++++++++++++++++++++
+ arch/x86/include/asm/boot.h         | 19 ++++++++
+ 6 files changed, 140 insertions(+), 2 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/misc_pgt.c
 
+diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
+index e12a93c..66461b4 100644
+--- a/arch/x86/boot/compressed/Makefile
++++ b/arch/x86/boot/compressed/Makefile
+@@ -58,6 +58,9 @@ vmlinux-objs-y := $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
+ 
+ vmlinux-objs-$(CONFIG_EARLY_PRINTK) += $(obj)/early_serial_console.o
+ vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/aslr.o
++ifdef CONFIG_X86_64
++	vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/misc_pgt.o
++endif
+ 
+ $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
+ 
 diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index 5114142..ae0aed9 100644
+index 9dab0d6..f8d095d 100644
 --- a/arch/x86/boot/compressed/aslr.c
 +++ b/arch/x86/boot/compressed/aslr.c
-@@ -352,7 +352,7 @@ static void process_e820_entry(struct e820entry *entry,
- 	}
- }
- 
--static unsigned long find_random_addr(unsigned long minimum,
-+static unsigned long find_random_phy_addr(unsigned long minimum,
- 				      unsigned long size)
- {
- 	int i;
-@@ -410,48 +410,50 @@ static void add_kaslr_setup_data(__u8 enabled)
- 		real_mode->hdr.setup_data = (unsigned long)&kaslr_setup_data;
- }
- 
--unsigned char *choose_kernel_location(unsigned char *input,
--				      unsigned long input_size,
--				      unsigned char *output,
--				      unsigned long output_run_size)
-+void choose_kernel_location(unsigned char *input,
-+				unsigned long input_size,
-+				unsigned char **output,
-+				unsigned long output_run_size,
-+				unsigned char **virt_offset)
- {
--	unsigned long choice = (unsigned long)output;
- 	unsigned long random;
-+	*virt_offset = (unsigned char *)LOAD_PHYSICAL_ADDR;
- 
- #ifdef CONFIG_HIBERNATION
- 	if (!cmdline_find_option_bool("kaslr")) {
- 		debug_putstr("KASLR disabled by default...\n");
- 		add_kaslr_setup_data(0);
--		goto out;
-+		return;
- 	}
- #else
- 	if (cmdline_find_option_bool("nokaslr")) {
- 		debug_putstr("KASLR disabled by cmdline...\n");
- 		add_kaslr_setup_data(0);
--		goto out;
-+		return;
- 	}
- #endif
- 	add_kaslr_setup_data(1);
- 
- 	/* Record the various known unsafe memory ranges. */
- 	mem_avoid_init((unsigned long)input, input_size,
--		       (unsigned long)output);
-+		       (unsigned long)*output);
- 
- 	/* Walk e820 and find a random address. */
--	random = find_random_addr(choice, output_run_size);
--	if (!random) {
-+	random = find_random_phy_addr((unsigned long)*output, output_run_size);
-+	if (!random)
- 		debug_putstr("KASLR could not find suitable E820 region...\n");
--		goto out;
-+	else {
-+		if ((unsigned long)*output != random) {
-+			fill_pagetable(random, output_run_size);
-+			switch_pagetable();
-+			*output = (unsigned char *)random;
-+		}
- 	}
- 
--	/* Always enforce the minimum. */
--	if (random < choice)
--		goto out;
--
--	choice = random;
--
--	fill_pagetable(choice, output_run_size);
--	switch_pagetable();
--out:
--	return (unsigned char *)choice;
-+	/*
-+	 * Get a random address between LOAD_PHYSICAL_ADDR and
-+	 * CONFIG_RANDOMIZE_BASE_MAX_OFFSET
-+	 */
-+	random = find_random_virt_offset(LOAD_PHYSICAL_ADDR, output_run_size);
-+	*virt_offset = (unsigned char *)random;
- }
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index d6b4d91..03fa414 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -226,7 +226,8 @@ void error(char *x)
- }
- 
- #if CONFIG_X86_NEED_RELOCS
--static void handle_relocations(void *output, unsigned long output_len)
-+static void handle_relocations(void *output, unsigned long output_len,
-+			       void *virt_offset)
- {
- 	int *reloc;
- 	unsigned long delta, map, ptr;
-@@ -238,11 +239,6 @@ static void handle_relocations(void *output, unsigned long output_len)
- 	 * and where it was actually loaded.
+@@ -154,6 +154,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
  	 */
- 	delta = min_addr - LOAD_PHYSICAL_ADDR;
--	if (!delta) {
--		debug_putstr("No relocation needed... ");
--		return;
--	}
--	debug_putstr("Performing relocations... ");
+ 	mem_avoid[0].start = input;
+ 	mem_avoid[0].size = (output + init_size) - input;
++	fill_pagetable(input, (output + init_size) - input);
  
- 	/*
- 	 * The kernel contains a table of relocation addresses. Those
-@@ -253,6 +249,22 @@ static void handle_relocations(void *output, unsigned long output_len)
- 	 */
- 	map = delta - __START_KERNEL_map;
+ 	/* Avoid initrd. */
+ 	initrd_start  = (u64)real_mode->ext_ramdisk_image << 32;
+@@ -162,6 +163,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 	initrd_size |= real_mode->hdr.ramdisk_size;
+ 	mem_avoid[1].start = initrd_start;
+ 	mem_avoid[1].size = initrd_size;
++	/* don't need to set mapping for initrd */
  
+ 	/* Avoid kernel command line. */
+ 	cmd_line  = (u64)real_mode->ext_cmd_line_ptr << 32;
+@@ -172,10 +174,19 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 		;
+ 	mem_avoid[2].start = cmd_line;
+ 	mem_avoid[2].size = cmd_line_size;
++	fill_pagetable(cmd_line, cmd_line_size);
+ 
+ 	/* Avoid params */
+ 	mem_avoid[3].start = (unsigned long)real_mode;
+ 	mem_avoid[3].size = sizeof(*real_mode);
++	fill_pagetable((unsigned long)real_mode, sizeof(*real_mode));
 +
++	/* don't need to set mapping for setup_data */
 +
-+	/*
-+	 * 32-bit always performs relocations. 64-bit relocations are only
-+	 * needed if kASLR has chosen a different starting address offset
-+	 * from __START_KERNEL_map.
-+	 */
-+	if (IS_ENABLED(CONFIG_X86_64))
-+		delta = (unsigned long)virt_offset - LOAD_PHYSICAL_ADDR;
-+
-+	if (!delta) {
-+		debug_putstr("No relocation needed... ");
-+		return;
-+	}
-+	debug_putstr("Performing relocations... ");
-+
- 	/*
- 	 * Process relocations: 32 bit relocations first then 64 bit after.
- 	 * Three sets of binary relocations are added to the end of the kernel
-@@ -306,7 +318,8 @@ static void handle_relocations(void *output, unsigned long output_len)
- #endif
++#ifdef CONFIG_X86_VERBOSE_BOOTUP
++	/* for video ram */
++	fill_pagetable(0, PMD_SIZE);
++#endif
  }
- #else
--static inline void handle_relocations(void *output, unsigned long output_len)
-+static inline void handle_relocations(void *output, unsigned long output_len,
-+				      void *virt_offset)
- { }
- #endif
  
-@@ -373,6 +386,7 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
- 	unsigned long run_size = VO__end - VO__text;
- 	unsigned char *output_orig = output;
- 	unsigned long output_run_size;
-+	unsigned char *virt_offset;
+ /* Does this memory vector overlap a known avoided area? */
+@@ -354,6 +365,9 @@ unsigned char *choose_kernel_location(unsigned char *input,
+ 		goto out;
  
- 	real_mode = rmode;
- 
-@@ -402,8 +416,8 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
- 	 * the entire decompressed kernel plus relocation table, or the
- 	 * entire decompressed kernel plus .bss and .brk sections.
- 	 */
--	output = choose_kernel_location(input_data, input_len, output,
--					output_run_size);
-+	choose_kernel_location(input_data, input_len, &output,
-+			       output_run_size, &virt_offset);
- 
- 	/* Validate memory location choices. */
- 	if ((unsigned long)output & (MIN_KERNEL_ALIGN - 1))
-@@ -423,12 +437,7 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
- 	debug_putstr("\nDecompressing Linux... ");
- 	decompress(input_data, input_len, NULL, NULL, output, NULL, error);
- 	parse_elf(output);
--	/*
--	 * 32-bit always performs relocations. 64-bit relocations are only
--	 * needed if kASLR has chosen a different load address.
--	 */
--	if (!IS_ENABLED(CONFIG_X86_64) || output != output_orig)
--		handle_relocations(output, output_len);
-+	handle_relocations(output, output_len, virt_offset);
- 	debug_putstr("done.\nBooting the kernel.\n");
- 	return output;
+ 	choice = random;
++
++	fill_pagetable(choice, output_run_size);
++	switch_pagetable();
+ out:
+ 	return (unsigned char *)choice;
  }
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index 2678f03..11b1fbe 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -125,7 +125,7 @@ ENTRY(startup_32)
+ 	/* Initialize Page tables to 0 */
+ 	leal	pgtable(%ebx), %edi
+ 	xorl	%eax, %eax
+-	movl	$((4096*6)/4), %ecx
++	movl	$(BOOT_INIT_PGT_SIZE/4), %ecx
+ 	rep	stosl
+ 
+ 	/* Build Level 4 */
+@@ -477,4 +477,4 @@ boot_stack_end:
+ 	.section ".pgtable","a",@nobits
+ 	.balign 4096
+ pgtable:
+-	.fill 6*4096, 1, 0
++	.fill BOOT_PGT_SIZE, 1, 0
 diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index a7f3826..461f20b 100644
+index dec1663..98914a0 100644
 --- a/arch/x86/boot/compressed/misc.h
 +++ b/arch/x86/boot/compressed/misc.h
-@@ -59,20 +59,21 @@ int cmdline_find_option_bool(const char *option);
- 
- #if CONFIG_RANDOMIZE_BASE
- /* aslr.c */
--unsigned char *choose_kernel_location(unsigned char *input,
--				      unsigned long input_size,
--				      unsigned char *output,
--				      unsigned long output_run_size);
-+void choose_kernel_location(unsigned char *input,
-+				unsigned long input_size,
-+				unsigned char **output,
-+				unsigned long output_run_size,
-+				unsigned char **virt_offset);
- /* cpuflags.c */
- bool has_cpuflag(int flag);
- #else
- static inline
--unsigned char *choose_kernel_location(unsigned char *input,
--				      unsigned long input_size,
--				      unsigned char *output,
--				      unsigned long output_run_size)
-+void choose_kernel_location(unsigned char *input,
-+				unsigned long input_size,
-+				unsigned char **output,
-+				unsigned long output_run_size,
-+				unsigned char **virt_offset)
- {
--	return output;
+@@ -74,6 +74,17 @@ unsigned char *choose_kernel_location(unsigned char *input,
  }
  #endif
  
++#ifdef CONFIG_X86_64
++void fill_pagetable(unsigned long start, unsigned long size);
++void switch_pagetable(void);
++extern unsigned char _pgtable[];
++#else
++static inline void fill_pagetable(unsigned long start, unsigned long size)
++{ }
++static inline void switch_pagetable(void)
++{ }
++#endif
++
+ #ifdef CONFIG_EARLY_PRINTK
+ /* early_serial_console.c */
+ extern int early_serial_base;
+diff --git a/arch/x86/boot/compressed/misc_pgt.c b/arch/x86/boot/compressed/misc_pgt.c
+new file mode 100644
+index 0000000..4b81fb7
+--- /dev/null
++++ b/arch/x86/boot/compressed/misc_pgt.c
+@@ -0,0 +1,91 @@
++#define __pa(x)  ((unsigned long)(x))
++#define __va(x)  ((void *)((unsigned long)(x)))
++
++#include "misc.h"
++
++#include <asm/init.h>
++#include <asm/pgtable.h>
++
++#include "../../mm/ident_map.c"
++
++struct alloc_pgt_data {
++	unsigned char *pgt_buf;
++	unsigned long pgt_buf_size;
++	unsigned long pgt_buf_offset;
++};
++
++static void *alloc_pgt_page(void *context)
++{
++	struct alloc_pgt_data *d = (struct alloc_pgt_data *)context;
++	unsigned char *p = (unsigned char *)d->pgt_buf;
++
++	if (d->pgt_buf_offset >= d->pgt_buf_size) {
++		debug_putstr("out of pgt_buf in misc.c\n");
++		return NULL;
++	}
++
++	p += d->pgt_buf_offset;
++	d->pgt_buf_offset += PAGE_SIZE;
++
++	return p;
++}
++
++/*
++ * Use a normal definition of memset() from string.c. There are already
++ * included header files which expect a definition of memset() and by
++ * the time we define memset macro, it is too late.
++ */
++#undef memset
++#define memzero(s, n)   memset((s), 0, (n))
++
++unsigned long __force_order;
++static struct alloc_pgt_data pgt_data;
++static struct x86_mapping_info mapping_info;
++static pgd_t *level4p;
++
++void fill_pagetable(unsigned long start, unsigned long size)
++{
++	unsigned long end = start + size;
++
++	if (!level4p) {
++		pgt_data.pgt_buf_offset = 0;
++		mapping_info.alloc_pgt_page = alloc_pgt_page;
++		mapping_info.context = &pgt_data;
++		mapping_info.pmd_flag = __PAGE_KERNEL_LARGE_EXEC;
++
++		/*
++		 * come from startup_32 ?
++		 * then cr3 is _pgtable, we can reuse it.
++		 */
++		level4p = (pgd_t *)read_cr3();
++		if ((unsigned long)level4p == (unsigned long)_pgtable) {
++			pgt_data.pgt_buf = (unsigned char *)_pgtable +
++						 BOOT_INIT_PGT_SIZE;
++			pgt_data.pgt_buf_size = BOOT_PGT_SIZE -
++						 BOOT_INIT_PGT_SIZE;
++
++			debug_putstr("boot via startup_32\n");
++		} else {
++			pgt_data.pgt_buf = (unsigned char *)_pgtable;
++			pgt_data.pgt_buf_size = BOOT_PGT_SIZE;
++
++			debug_putstr("boot via startup_64\n");
++			level4p = (pgd_t *)alloc_pgt_page(&pgt_data);
++		}
++		memset((unsigned char *)pgt_data.pgt_buf, 0,
++			 pgt_data.pgt_buf_size);
++	}
++
++	/* align boundary to 2M */
++	start = round_down(start, PMD_SIZE);
++	end = round_up(end, PMD_SIZE);
++	if (start >= end)
++		return;
++
++	kernel_ident_mapping_init(&mapping_info, level4p, start, end);
++}
++
++void switch_pagetable(void)
++{
++	write_cr3((unsigned long)level4p);
++}
+diff --git a/arch/x86/include/asm/boot.h b/arch/x86/include/asm/boot.h
+index 4fa687a..7b23908 100644
+--- a/arch/x86/include/asm/boot.h
++++ b/arch/x86/include/asm/boot.h
+@@ -32,7 +32,26 @@
+ #endif /* !CONFIG_KERNEL_BZIP2 */
+ 
+ #ifdef CONFIG_X86_64
++
+ #define BOOT_STACK_SIZE	0x4000
++
++#define BOOT_INIT_PGT_SIZE (6*4096)
++#ifdef CONFIG_RANDOMIZE_BASE
++/*
++ * 1 page for level4, 2 pages for first 2M.
++ * (2+2)*4 pages for kernel, param, cmd_line, random kernel
++ * if all cross 512G boundary.
++ * So total will be 19 pages.
++ */
++#ifdef CONFIG_X86_VERBOSE_BOOTUP
++#define BOOT_PGT_SIZE (19*4096)
++#else
++#define BOOT_PGT_SIZE (17*4096)
++#endif
++#else
++#define BOOT_PGT_SIZE BOOT_INIT_PGT_SIZE
++#endif
++
+ #else
+ #define BOOT_STACK_SIZE	0x1000
+ #endif
 -- 
 1.8.4.5
