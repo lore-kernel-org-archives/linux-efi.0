@@ -1,298 +1,135 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v5 10/19] x86, 64bit: Set ident_mapping for kaslr
-Date: Wed, 18 Mar 2015 00:28:17 -0700
-Message-ID: <1426663706-23979-11-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v5 11/19] x86, boot: Add checking for memcpy
+Date: Wed, 18 Mar 2015 00:28:18 -0700
+Message-ID: <1426663706-23979-12-git-send-email-yinghai@kernel.org>
 References: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1426663706-23979-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Current aslr only support random in near range, and new range still use
-old mapping. Also it does not support new range above 4G.
+parse_elf is using local memcpy to move section to running position.
 
-We need to have ident set for the new range before we can do decompress
-to the new ouput, and later run them.
+That memcpy actually only support no overlapping or dest < src.
 
-In this patch, we add ident mapping for all needed range.
+Add checking in memcpy to find out wrong with future use, at that time
+we will need to have backward memcpy for it.
 
-At first, to aslr support to put random VO above 4G, we must set ident
-mapping for the new range when it come via startup_32 path.
+Also put comments in parse_elf about the fact.
 
-Secondly, when boot from 64bit bootloader, bootloader set ident mapping,
-and boot via ZO (arch/x86/boot/compressed/vmlinux) startup_64.
-Those pages for pagetable need to be avoided when we select new random
-VO (vmlinux) base. Otherwise decompressor would overwrite them during
-decompressing.
-First way would be: go through pagetable and find out every page is used by
-pagetable for every mem_aovid checking but we will need extra code, and may
-need to increase mem_avoid array size to hold them.
-Other way would be: We can create new ident mapping instead, and pages for
-pagetable will come from _pagetable section of ZO, and they are in mem_avoid
-array already. In this way, we can reuse the code for setting ident mapping.
-
-The _pgtable will be shared 32bit and 64bit path to reduce init_size,
-as now ZO _rodata to _end will contribute init_size.
-
-We need to increase pgt buffer size.
-When boot via startup_64, as we need to cover old VO, params, cmdline
-and new VO, in extreme case we could have them all cross 512G boundary,
-will need (2+2)*4 pages with 2M mapping. And need 2 for first 2M for vga ram.
-Plus one for level4. Total will be 19 pages.
-When boot via startup_32, aslr would move new VO above 4G, we need set extra
-ident mapping for new VO, pgt buffer come from _pgtable offset 6 pages.
-should only need (2+2) pages at most when it cross 512G boundary.
-So 19 pages could make both paths happy.
-
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Jiri Kosina <jkosina@suse.cz>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Matt Fleming <matt.fleming@intel.com>
-Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/boot/compressed/Makefile   |  3 ++
- arch/x86/boot/compressed/aslr.c     | 14 ++++++
- arch/x86/boot/compressed/head_64.S  |  4 +-
- arch/x86/boot/compressed/misc.h     | 11 +++++
- arch/x86/boot/compressed/misc_pgt.c | 91 +++++++++++++++++++++++++++++++++++++
- arch/x86/include/asm/boot.h         | 19 ++++++++
- 6 files changed, 140 insertions(+), 2 deletions(-)
- create mode 100644 arch/x86/boot/compressed/misc_pgt.c
+ arch/x86/boot/compressed/misc.c   | 14 +++++++-------
+ arch/x86/boot/compressed/misc.h   |  2 ++
+ arch/x86/boot/compressed/string.c | 28 ++++++++++++++++++++++++++--
+ 3 files changed, 35 insertions(+), 9 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index e12a93c..66461b4 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -58,6 +58,9 @@ vmlinux-objs-y := $(obj)/vmlinux.lds $(obj)/head_$(BITS).o $(obj)/misc.o \
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index f99c9c9..94e283c 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -106,9 +106,6 @@
+ #undef memset
+ #define memzero(s, n)	memset((s), 0, (n))
  
- vmlinux-objs-$(CONFIG_EARLY_PRINTK) += $(obj)/early_serial_console.o
- vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/aslr.o
-+ifdef CONFIG_X86_64
-+	vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/misc_pgt.o
-+endif
- 
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
-diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index 9dab0d6..f8d095d 100644
---- a/arch/x86/boot/compressed/aslr.c
-+++ b/arch/x86/boot/compressed/aslr.c
-@@ -154,6 +154,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	 */
- 	mem_avoid[0].start = input;
- 	mem_avoid[0].size = (output + init_size) - input;
-+	fill_pagetable(input, (output + init_size) - input);
- 
- 	/* Avoid initrd. */
- 	initrd_start  = (u64)real_mode->ext_ramdisk_image << 32;
-@@ -162,6 +163,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 	initrd_size |= real_mode->hdr.ramdisk_size;
- 	mem_avoid[1].start = initrd_start;
- 	mem_avoid[1].size = initrd_size;
-+	/* don't need to set mapping for initrd */
- 
- 	/* Avoid kernel command line. */
- 	cmd_line  = (u64)real_mode->ext_cmd_line_ptr << 32;
-@@ -172,10 +174,19 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
- 		;
- 	mem_avoid[2].start = cmd_line;
- 	mem_avoid[2].size = cmd_line_size;
-+	fill_pagetable(cmd_line, cmd_line_size);
- 
- 	/* Avoid params */
- 	mem_avoid[3].start = (unsigned long)real_mode;
- 	mem_avoid[3].size = sizeof(*real_mode);
-+	fill_pagetable((unsigned long)real_mode, sizeof(*real_mode));
-+
-+	/* don't need to set mapping for setup_data */
-+
-+#ifdef CONFIG_X86_VERBOSE_BOOTUP
-+	/* for video ram */
-+	fill_pagetable(0, PMD_SIZE);
-+#endif
+-
+-static void error(char *m);
+-
+ /*
+  * This is set up by the setup-routine at boot-time
+  */
+@@ -218,7 +215,7 @@ void __putstr(const char *s)
+ 	outb(0xff & (pos >> 1), vidport+1);
  }
  
- /* Does this memory vector overlap a known avoided area? */
-@@ -354,6 +365,9 @@ unsigned char *choose_kernel_location(unsigned char *input,
- 		goto out;
- 
- 	choice = random;
-+
-+	fill_pagetable(choice, output_run_size);
-+	switch_pagetable();
- out:
- 	return (unsigned char *)choice;
- }
-diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
-index 2678f03..11b1fbe 100644
---- a/arch/x86/boot/compressed/head_64.S
-+++ b/arch/x86/boot/compressed/head_64.S
-@@ -125,7 +125,7 @@ ENTRY(startup_32)
- 	/* Initialize Page tables to 0 */
- 	leal	pgtable(%ebx), %edi
- 	xorl	%eax, %eax
--	movl	$((4096*6)/4), %ecx
-+	movl	$(BOOT_INIT_PGT_SIZE/4), %ecx
- 	rep	stosl
- 
- 	/* Build Level 4 */
-@@ -477,4 +477,4 @@ boot_stack_end:
- 	.section ".pgtable","a",@nobits
- 	.balign 4096
- pgtable:
--	.fill 6*4096, 1, 0
-+	.fill BOOT_PGT_SIZE, 1, 0
+-static void error(char *x)
++void error(char *x)
+ {
+ 	error_putstr("\n\n");
+ 	error_putstr(x);
+@@ -353,9 +350,12 @@ static void parse_elf(void *output)
+ #else
+ 			dest = (void *)(phdr->p_paddr);
+ #endif
+-			memcpy(dest,
+-			       output + phdr->p_offset,
+-			       phdr->p_filesz);
++			/*
++			 * simple version memcpy only can work when dest is
++			 *   smaller than src or no overlapping.
++			 * Here dest is smaller than src always.
++			 */
++			memcpy(dest, output + phdr->p_offset, phdr->p_filesz);
+ 			break;
+ 		default: /* Ignore other PT_* */ break;
+ 		}
 diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index dec1663..98914a0 100644
+index 98914a0..a7f3826 100644
 --- a/arch/x86/boot/compressed/misc.h
 +++ b/arch/x86/boot/compressed/misc.h
-@@ -74,6 +74,17 @@ unsigned char *choose_kernel_location(unsigned char *input,
+@@ -37,6 +37,8 @@ extern struct boot_params *real_mode;		/* Pointer to real-mode data */
+ void __putstr(const char *s);
+ #define error_putstr(__x)  __putstr(__x)
+ 
++void error(char *x);
++
+ #ifdef CONFIG_X86_VERBOSE_BOOTUP
+ 
+ #define debug_putstr(__x)  __putstr(__x)
+diff --git a/arch/x86/boot/compressed/string.c b/arch/x86/boot/compressed/string.c
+index 00e788b..03805a4 100644
+--- a/arch/x86/boot/compressed/string.c
++++ b/arch/x86/boot/compressed/string.c
+@@ -1,7 +1,7 @@
+ #include "../string.c"
+ 
+ #ifdef CONFIG_X86_32
+-void *memcpy(void *dest, const void *src, size_t n)
++void *__memcpy(void *dest, const void *src, size_t n)
+ {
+ 	int d0, d1, d2;
+ 	asm volatile(
+@@ -15,7 +15,7 @@ void *memcpy(void *dest, const void *src, size_t n)
+ 	return dest;
+ }
+ #else
+-void *memcpy(void *dest, const void *src, size_t n)
++void *__memcpy(void *dest, const void *src, size_t n)
+ {
+ 	long d0, d1, d2;
+ 	asm volatile(
+@@ -30,6 +30,30 @@ void *memcpy(void *dest, const void *src, size_t n)
  }
  #endif
  
-+#ifdef CONFIG_X86_64
-+void fill_pagetable(unsigned long start, unsigned long size);
-+void switch_pagetable(void);
-+extern unsigned char _pgtable[];
-+#else
-+static inline void fill_pagetable(unsigned long start, unsigned long size)
-+{ }
-+static inline void switch_pagetable(void)
-+{ }
-+#endif
-+
- #ifdef CONFIG_EARLY_PRINTK
- /* early_serial_console.c */
- extern int early_serial_base;
-diff --git a/arch/x86/boot/compressed/misc_pgt.c b/arch/x86/boot/compressed/misc_pgt.c
-new file mode 100644
-index 0000000..4b81fb7
---- /dev/null
-+++ b/arch/x86/boot/compressed/misc_pgt.c
-@@ -0,0 +1,91 @@
-+#define __pa(x)  ((unsigned long)(x))
-+#define __va(x)  ((void *)((unsigned long)(x)))
-+
-+#include "misc.h"
-+
-+#include <asm/init.h>
-+#include <asm/pgtable.h>
-+
-+#include "../../mm/ident_map.c"
-+
-+struct alloc_pgt_data {
-+	unsigned char *pgt_buf;
-+	unsigned long pgt_buf_size;
-+	unsigned long pgt_buf_offset;
-+};
-+
-+static void *alloc_pgt_page(void *context)
++void *memcpy(void *dest, const void *src, size_t n)
 +{
-+	struct alloc_pgt_data *d = (struct alloc_pgt_data *)context;
-+	unsigned char *p = (unsigned char *)d->pgt_buf;
++	unsigned long start_dest, end_dest;
++	unsigned long start_src, end_src;
++	unsigned long max_start, min_end;
 +
-+	if (d->pgt_buf_offset >= d->pgt_buf_size) {
-+		debug_putstr("out of pgt_buf in misc.c\n");
-+		return NULL;
-+	}
++	if (dest < src)
++		return __memcpy(dest, src, n);
 +
-+	p += d->pgt_buf_offset;
-+	d->pgt_buf_offset += PAGE_SIZE;
++	start_dest = (unsigned long)dest;
++	end_dest = (unsigned long)dest + n;
++	start_src = (unsigned long)src;
++	end_src = (unsigned long)src + n;
++	max_start = (start_dest > start_src) ?  start_dest : start_src;
++	min_end = (end_dest < end_src) ? end_dest : end_src;
 +
-+	return p;
++	if (max_start >= min_end)
++		return __memcpy(dest, src, n);
++
++	error("memcpy does not support overlapping with dest > src!\n");
++
++	return dest;
 +}
 +
-+/*
-+ * Use a normal definition of memset() from string.c. There are already
-+ * included header files which expect a definition of memset() and by
-+ * the time we define memset macro, it is too late.
-+ */
-+#undef memset
-+#define memzero(s, n)   memset((s), 0, (n))
-+
-+unsigned long __force_order;
-+static struct alloc_pgt_data pgt_data;
-+static struct x86_mapping_info mapping_info;
-+static pgd_t *level4p;
-+
-+void fill_pagetable(unsigned long start, unsigned long size)
-+{
-+	unsigned long end = start + size;
-+
-+	if (!level4p) {
-+		pgt_data.pgt_buf_offset = 0;
-+		mapping_info.alloc_pgt_page = alloc_pgt_page;
-+		mapping_info.context = &pgt_data;
-+		mapping_info.pmd_flag = __PAGE_KERNEL_LARGE_EXEC;
-+
-+		/*
-+		 * come from startup_32 ?
-+		 * then cr3 is _pgtable, we can reuse it.
-+		 */
-+		level4p = (pgd_t *)read_cr3();
-+		if ((unsigned long)level4p == (unsigned long)_pgtable) {
-+			pgt_data.pgt_buf = (unsigned char *)_pgtable +
-+						 BOOT_INIT_PGT_SIZE;
-+			pgt_data.pgt_buf_size = BOOT_PGT_SIZE -
-+						 BOOT_INIT_PGT_SIZE;
-+
-+			debug_putstr("boot via startup_32\n");
-+		} else {
-+			pgt_data.pgt_buf = (unsigned char *)_pgtable;
-+			pgt_data.pgt_buf_size = BOOT_PGT_SIZE;
-+
-+			debug_putstr("boot via startup_64\n");
-+			level4p = (pgd_t *)alloc_pgt_page(&pgt_data);
-+		}
-+		memset((unsigned char *)pgt_data.pgt_buf, 0,
-+			 pgt_data.pgt_buf_size);
-+	}
-+
-+	/* align boundary to 2M */
-+	start = round_down(start, PMD_SIZE);
-+	end = round_up(end, PMD_SIZE);
-+	if (start >= end)
-+		return;
-+
-+	kernel_ident_mapping_init(&mapping_info, level4p, start, end);
-+}
-+
-+void switch_pagetable(void)
-+{
-+	write_cr3((unsigned long)level4p);
-+}
-diff --git a/arch/x86/include/asm/boot.h b/arch/x86/include/asm/boot.h
-index 4fa687a..7b23908 100644
---- a/arch/x86/include/asm/boot.h
-+++ b/arch/x86/include/asm/boot.h
-@@ -32,7 +32,26 @@
- #endif /* !CONFIG_KERNEL_BZIP2 */
- 
- #ifdef CONFIG_X86_64
-+
- #define BOOT_STACK_SIZE	0x4000
-+
-+#define BOOT_INIT_PGT_SIZE (6*4096)
-+#ifdef CONFIG_RANDOMIZE_BASE
-+/*
-+ * 1 page for level4, 2 pages for first 2M.
-+ * (2+2)*4 pages for kernel, param, cmd_line, random kernel
-+ * if all cross 512G boundary.
-+ * So total will be 19 pages.
-+ */
-+#ifdef CONFIG_X86_VERBOSE_BOOTUP
-+#define BOOT_PGT_SIZE (19*4096)
-+#else
-+#define BOOT_PGT_SIZE (17*4096)
-+#endif
-+#else
-+#define BOOT_PGT_SIZE BOOT_INIT_PGT_SIZE
-+#endif
-+
- #else
- #define BOOT_STACK_SIZE	0x1000
- #endif
+ void *memset(void *s, int c, size_t n)
+ {
+ 	int i;
 -- 
 1.8.4.5
