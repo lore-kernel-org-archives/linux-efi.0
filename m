@@ -1,48 +1,91 @@
-From: Marcel Holtmann <marcel-kz+m5ild9QBg9hUCZPvPmw@public.gmane.org>
-Subject: Re: efivarfs and writev() support
-Date: Tue, 17 Mar 2015 09:03:38 -0700
-Message-ID: <48E5761B-8142-4CDE-9AAD-BCD70C34BC13@holtmann.org>
-References: <33E85F72-FCA0-4DF7-B9E1-46D36244FCA3@holtmann.org> <20150311134226.GB24174@codeblueprint.co.uk> <7F5112DD-6998-47D3-B6B9-5618E14E022A@holtmann.org> <20150312063437.GK29656@ZenIV.linux.org.uk> <BC49553F-B4CE-4ED5-A1CE-D180E200AA60@holtmann.org> <20150312170344.GN29656@ZenIV.linux.org.uk> <C20D75CF-FA82-43E5-BF70-E4E30E1D987B@holtmann.org> <20150317154630.GA25605@codeblueprint.co.uk>
-Mime-Version: 1.0 (Mac OS X Mail 8.2 \(2070.6\))
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v5 00/19] x86, boot: kaslr cleanup and 64bit kaslr support
+Date: Wed, 18 Mar 2015 00:28:07 -0700
+Message-ID: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150317154630.GA25605-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Al Viro <viro-3bDd1+5oDREiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,
+First make ZO (arch/x86/boot/compressed/vmlinux) data region is not
+overwritten by VO (vmlinux) after decompress.  So could pass data from ZO to VO.
 
->> I say we should support writev() on efivarfs. Not supporting it seems
->> odd especially since that is not documented anywhere. So yes, I am for
->> adding .write_iter() support and be done with that.
-> 
-> Well, as Al has explained it's not that writev() isn't supported, it's
-> that having an iovec vector containing only the 4-byte variable
-> attribute isn't currently supported.
-> 
-> Since writev() calls are intended to be atomic, and even though efivarfs
-> gets fed the variable data in chunks we can process it in one go, I
-> think allowing the scenario you describe is fine.
+Second one is second try for kaslr_setup_data support.
 
-meaning only writev() with a single vector is supported.
+Patch 3-11, are kaslr clean up and enable ident mapping for He's patches.
+  kill run_size calculation shell scripts.
+  create new ident mapping for kasl 64bit, so we can cover
+   above 4G random kernel base, also don't need to track pagetable
+   for 64bit bootloader (patched grub2 or kexec).
+   that will make mem_avoid handling simple.
 
->> Also please note that even write(,4) and write(,n) does not work
->> either. You can not write partial entries as it seems. Maybe you are
->> able to append, but it seems the initial creation of the variable has
->> to be done with a single write() call. Anything else ends up in a file
->> with 0 length.
-> 
-> Yes, that's by design. I guess it's to prohibit people from creating
-> bogus EFI variables or accidentally deleting variables (a SetVariable()
-> call with length 0 is a delete).
+Also put 7 patches from He that support random random, as I already used
+his patches to test the ident mapping code, and could save some rebase
+work for him.
 
-I have no problems with these semantics, but it means you need to add support for .write_iter since otherwise multiple vectors will not work. And really think that is better than forcing userspace to work around this limitation.
+also at:
+git://git.kernel.org/pub/scm/linux/kernel/git/yinghai/linux-yinghai.git for-x86-4.0-rc5-aslr
 
-As I mentioned earlier, for me it was really obvious to use a vectored write for EFI variables. That just made sense to me. So seeing it not working caused confusion.
+Thanks
 
-Regards
+Yinghai
 
-Marcel
+
+Baoquan He (7):
+  x86, kaslr: Fix a bug that relocation can not be handled when kernel is loaded above 2G
+  x86, kaslr: Introduce struct slot_area to manage randomization slot info
+  x86, kaslr: Add two functions which will be used later
+  x86, kaslr: Introduce fetch_random_virt_offset to randomize the kernel text mapping address
+  x86, kaslr: Randomize physical and virtual address of kernel separately
+  x86, kaslr: Add support of kernel physical address randomization above 4G
+  x86, kaslr: Remove useless codes
+
+Jiri Kosina (1):
+  x86, kaslr: Propagate base load address calculation v2
+
+Yinghai Lu (11):
+  x86, boot: Make data from decompress_kernel stage live longer
+  x86, boot: Simplify run_size calculation
+  x86, kaslr: Kill not used run_size related code.
+  x86, kaslr: Use output_run_size
+  x86, kaslr: Consolidate mem_avoid array filling
+  x86, boot: Move z_extract_offset calculation to header.S
+  x86, kaslr: Get correct max_addr for relocs pointer
+  x86, boot: Split kernel_ident_mapping_init to another file
+  x86, 64bit: Set ident_mapping for kaslr
+  x86, boot: Add checking for memcpy
+  x86, kaslr: Allow random address could be below loaded address
+
+ arch/x86/boot/Makefile                 |  13 +-
+ arch/x86/boot/compressed/Makefile      |  19 ++-
+ arch/x86/boot/compressed/aslr.c        | 281 ++++++++++++++++++++++++---------
+ arch/x86/boot/compressed/head_32.S     |  14 +-
+ arch/x86/boot/compressed/head_64.S     |  15 +-
+ arch/x86/boot/compressed/misc.c        |  71 +++++----
+ arch/x86/boot/compressed/misc.h        |  32 ++--
+ arch/x86/boot/compressed/misc_pgt.c    |  91 +++++++++++
+ arch/x86/boot/compressed/mkpiggy.c     |  28 +---
+ arch/x86/boot/compressed/string.c      |  28 +++-
+ arch/x86/boot/compressed/vmlinux.lds.S |   2 +
+ arch/x86/boot/header.S                 |  43 ++++-
+ arch/x86/include/asm/aslr.h            |  10 ++
+ arch/x86/include/asm/boot.h            |  19 +++
+ arch/x86/include/asm/page.h            |   5 +
+ arch/x86/include/asm/page_types.h      |   2 +
+ arch/x86/include/uapi/asm/bootparam.h  |   1 +
+ arch/x86/kernel/asm-offsets.c          |   1 +
+ arch/x86/kernel/module.c               |  10 +-
+ arch/x86/kernel/setup.c                |  27 +++-
+ arch/x86/kernel/vmlinux.lds.S          |   1 +
+ arch/x86/mm/ident_map.c                |  74 +++++++++
+ arch/x86/mm/init_64.c                  |  74 +--------
+ arch/x86/tools/calc_run_size.sh        |  42 -----
+ 24 files changed, 610 insertions(+), 293 deletions(-)
+ create mode 100644 arch/x86/boot/compressed/misc_pgt.c
+ create mode 100644 arch/x86/include/asm/aslr.h
+ create mode 100644 arch/x86/mm/ident_map.c
+ delete mode 100644 arch/x86/tools/calc_run_size.sh
+
+-- 
+1.8.4.5
