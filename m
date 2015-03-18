@@ -1,96 +1,56 @@
-From: Yinghai Lu <yinghai@kernel.org>
-Subject: [PATCH v5 14/19] x86, kaslr: Add two functions which will be used later
-Date: Wed, 18 Mar 2015 00:28:21 -0700
-Message-ID: <1426663706-23979-15-git-send-email-yinghai@kernel.org>
+From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v5 13/19] x86, kaslr: Introduce struct slot_area to manage randomization slot info
+Date: Wed, 18 Mar 2015 00:28:20 -0700
+Message-ID: <1426663706-23979-14-git-send-email-yinghai@kernel.org>
 References: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1426663706-23979-1-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Baoquan He <bhe@redhat.com>
+From: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Add two functions mem_min_overlap() and store_slot_info() which will be
-used later.
+Kernel is expected to be randomly reloaded anywhere in the whole
+physical memory area, it could be near 64T at most. In this case
+there could be about 4*1024*1024 randomization slots. Hence the
+old slot array will cost too much memory and also not efficient
+to store the slot information one by one into slot array.
 
-Given a memory region mem_min_overlap will iterate all avoid region to
-find the first one which overlap with it.
+Here introduce struct slot_area to manage randomization slot info
+in one contiguous memory area excluding the avoid area. slot_areas
+is used to store all slot area info. Since setup_data is a linked
+list, could contain many datas by pointer to point one by one,
+excluding them will split RAM memory into many smaller areas, here
+only take the first 100 slot areas if too many of them.
 
-store_slot_info() calculates the slot info of passed in region and
-store it into slot_areas[].
-
-Signed-off-by: Baoquan He <bhe@redhat.com>
+Signed-off-by: Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- arch/x86/boot/compressed/aslr.c | 51 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 51 insertions(+)
+ arch/x86/boot/compressed/aslr.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
-index 33693c1..37dce4f 100644
+index f8d095d..33693c1 100644
 --- a/arch/x86/boot/compressed/aslr.c
 +++ b/arch/x86/boot/compressed/aslr.c
-@@ -217,6 +217,40 @@ static bool mem_avoid_overlap(struct mem_vector *img)
- 	return false;
- }
+@@ -219,8 +219,20 @@ static bool mem_avoid_overlap(struct mem_vector *img)
  
-+static unsigned long
-+mem_min_overlap(struct mem_vector *img, struct mem_vector *out)
-+{
-+	int i;
-+	struct setup_data *ptr;
-+	unsigned long min = img->start + img->size;
-+
-+	for (i = 0; i < MEM_AVOID_MAX; i++) {
-+		if (mem_overlaps(img, &mem_avoid[i]) &&
-+			(mem_avoid[i].start < min)) {
-+			*out = mem_avoid[i];
-+			min = mem_avoid[i].start;
-+		}
-+	}
-+
-+	/* Check all entries in the setup_data linked list. */
-+	ptr = (struct setup_data *)(unsigned long)real_mode->hdr.setup_data;
-+	while (ptr) {
-+		struct mem_vector avoid;
-+
-+		avoid.start = (unsigned long)ptr;
-+		avoid.size = sizeof(*ptr) + ptr->len;
-+
-+		if (mem_overlaps(img, &avoid) && (avoid.start < min)) {
-+			*out = avoid;
-+			min = avoid.start;
-+		}
-+
-+		ptr = (struct setup_data *)(unsigned long)ptr->next;
-+	}
-+
-+	return min;
-+}
-+
  static unsigned long slots[CONFIG_RANDOMIZE_BASE_MAX_OFFSET /
  			   CONFIG_PHYSICAL_ALIGN];
- 
-@@ -233,6 +267,23 @@ static unsigned long slot_max;
- 
- static unsigned long slot_area_index;
- 
-+static void store_slot_info(struct mem_vector *region, unsigned long image_size)
-+{
-+	struct slot_area slot_area;
 +
-+	slot_area.addr = region->start;
-+	if (image_size <= CONFIG_PHYSICAL_ALIGN)
-+		slot_area.num = region->size / CONFIG_PHYSICAL_ALIGN;
-+	else
-+		slot_area.num = (region->size - image_size) /
-+				CONFIG_PHYSICAL_ALIGN + 1;
++struct slot_area {
++	unsigned long addr;
++	int num;
++};
 +
-+	if (slot_area.num > 0) {
-+		slot_areas[slot_area_index++] = slot_area;
-+		slot_max += slot_area.num;
-+	}
-+}
++#define MAX_SLOT_AREA 100
++
++static struct slot_area slot_areas[MAX_SLOT_AREA];
++
+ static unsigned long slot_max;
+ 
++static unsigned long slot_area_index;
 +
  static void slots_append(unsigned long addr)
  {
