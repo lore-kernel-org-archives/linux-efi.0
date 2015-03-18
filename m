@@ -1,91 +1,123 @@
-From: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5 00/19] x86, boot: kaslr cleanup and 64bit kaslr support
-Date: Wed, 18 Mar 2015 00:28:07 -0700
-Message-ID: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Yinghai Lu <yinghai@kernel.org>
+Subject: [PATCH v5 05/19] x86, kaslr: Use output_run_size
+Date: Wed, 18 Mar 2015 00:28:12 -0700
+Message-ID: <1426663706-23979-6-git-send-email-yinghai@kernel.org>
+References: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1426663706-23979-1-git-send-email-yinghai@kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jiri Kosina <jkosina@suse.cz>, Kees Cook <keescook@chromium.org>, Borislav Petkov <bp@suse.de>, Baoquan He <bhe@redhat.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Yinghai Lu <yinghai@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-First make ZO (arch/x86/boot/compressed/vmlinux) data region is not
-overwritten by VO (vmlinux) after decompress.  So could pass data from ZO to VO.
+Now we are using output_size as parameter, actually we are passing
+max(output_len, run_size).
 
-Second one is second try for kaslr_setup_data support.
+Change it to output_run_size to make it less confusing.
 
-Patch 3-11, are kaslr clean up and enable ident mapping for He's patches.
-  kill run_size calculation shell scripts.
-  create new ident mapping for kasl 64bit, so we can cover
-   above 4G random kernel base, also don't need to track pagetable
-   for 64bit bootloader (patched grub2 or kexec).
-   that will make mem_avoid handling simple.
+Cc: Kees Cook <keescook@chromium.org>
+Signed-off-by: Yinghai Lu <yinghai@kernel.org>
+---
+ arch/x86/boot/compressed/aslr.c | 10 +++++-----
+ arch/x86/boot/compressed/misc.c |  6 ++++--
+ arch/x86/boot/compressed/misc.h |  4 ++--
+ 3 files changed, 11 insertions(+), 9 deletions(-)
 
-Also put 7 patches from He that support random random, as I already used
-his patches to test the ident mapping code, and could save some rebase
-work for him.
-
-also at:
-git://git.kernel.org/pub/scm/linux/kernel/git/yinghai/linux-yinghai.git for-x86-4.0-rc5-aslr
-
-Thanks
-
-Yinghai
-
-
-Baoquan He (7):
-  x86, kaslr: Fix a bug that relocation can not be handled when kernel is loaded above 2G
-  x86, kaslr: Introduce struct slot_area to manage randomization slot info
-  x86, kaslr: Add two functions which will be used later
-  x86, kaslr: Introduce fetch_random_virt_offset to randomize the kernel text mapping address
-  x86, kaslr: Randomize physical and virtual address of kernel separately
-  x86, kaslr: Add support of kernel physical address randomization above 4G
-  x86, kaslr: Remove useless codes
-
-Jiri Kosina (1):
-  x86, kaslr: Propagate base load address calculation v2
-
-Yinghai Lu (11):
-  x86, boot: Make data from decompress_kernel stage live longer
-  x86, boot: Simplify run_size calculation
-  x86, kaslr: Kill not used run_size related code.
-  x86, kaslr: Use output_run_size
-  x86, kaslr: Consolidate mem_avoid array filling
-  x86, boot: Move z_extract_offset calculation to header.S
-  x86, kaslr: Get correct max_addr for relocs pointer
-  x86, boot: Split kernel_ident_mapping_init to another file
-  x86, 64bit: Set ident_mapping for kaslr
-  x86, boot: Add checking for memcpy
-  x86, kaslr: Allow random address could be below loaded address
-
- arch/x86/boot/Makefile                 |  13 +-
- arch/x86/boot/compressed/Makefile      |  19 ++-
- arch/x86/boot/compressed/aslr.c        | 281 ++++++++++++++++++++++++---------
- arch/x86/boot/compressed/head_32.S     |  14 +-
- arch/x86/boot/compressed/head_64.S     |  15 +-
- arch/x86/boot/compressed/misc.c        |  71 +++++----
- arch/x86/boot/compressed/misc.h        |  32 ++--
- arch/x86/boot/compressed/misc_pgt.c    |  91 +++++++++++
- arch/x86/boot/compressed/mkpiggy.c     |  28 +---
- arch/x86/boot/compressed/string.c      |  28 +++-
- arch/x86/boot/compressed/vmlinux.lds.S |   2 +
- arch/x86/boot/header.S                 |  43 ++++-
- arch/x86/include/asm/aslr.h            |  10 ++
- arch/x86/include/asm/boot.h            |  19 +++
- arch/x86/include/asm/page.h            |   5 +
- arch/x86/include/asm/page_types.h      |   2 +
- arch/x86/include/uapi/asm/bootparam.h  |   1 +
- arch/x86/kernel/asm-offsets.c          |   1 +
- arch/x86/kernel/module.c               |  10 +-
- arch/x86/kernel/setup.c                |  27 +++-
- arch/x86/kernel/vmlinux.lds.S          |   1 +
- arch/x86/mm/ident_map.c                |  74 +++++++++
- arch/x86/mm/init_64.c                  |  74 +--------
- arch/x86/tools/calc_run_size.sh        |  42 -----
- 24 files changed, 610 insertions(+), 293 deletions(-)
- create mode 100644 arch/x86/boot/compressed/misc_pgt.c
- create mode 100644 arch/x86/include/asm/aslr.h
- create mode 100644 arch/x86/mm/ident_map.c
- delete mode 100644 arch/x86/tools/calc_run_size.sh
-
+diff --git a/arch/x86/boot/compressed/aslr.c b/arch/x86/boot/compressed/aslr.c
+index da01c78..5dc1a65 100644
+--- a/arch/x86/boot/compressed/aslr.c
++++ b/arch/x86/boot/compressed/aslr.c
+@@ -138,7 +138,7 @@ static bool mem_overlaps(struct mem_vector *one, struct mem_vector *two)
+ }
+ 
+ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+-			   unsigned long output, unsigned long output_size)
++			   unsigned long output, unsigned long output_run_size)
+ {
+ 	u64 initrd_start, initrd_size;
+ 	u64 cmd_line, cmd_line_size;
+@@ -149,7 +149,7 @@ static void mem_avoid_init(unsigned long input, unsigned long input_size,
+ 	 * Avoid the region that is unsafe to overlap during
+ 	 * decompression (see calculations at top of misc.c).
+ 	 */
+-	unsafe_len = (output_size >> 12) + 32768 + 18;
++	unsafe_len = (output_run_size >> 12) + 32768 + 18;
+ 	unsafe = (unsigned long)input + input_size - unsafe_len;
+ 	mem_avoid[0].start = unsafe;
+ 	mem_avoid[0].size = unsafe_len;
+@@ -321,7 +321,7 @@ static void add_kaslr_setup_data(__u8 enabled)
+ unsigned char *choose_kernel_location(unsigned char *input,
+ 				      unsigned long input_size,
+ 				      unsigned char *output,
+-				      unsigned long output_size)
++				      unsigned long output_run_size)
+ {
+ 	unsigned long choice = (unsigned long)output;
+ 	unsigned long random;
+@@ -343,10 +343,10 @@ unsigned char *choose_kernel_location(unsigned char *input,
+ 
+ 	/* Record the various known unsafe memory ranges. */
+ 	mem_avoid_init((unsigned long)input, input_size,
+-		       (unsigned long)output, output_size);
++		       (unsigned long)output, output_run_size);
+ 
+ 	/* Walk e820 and find a random address. */
+-	random = find_random_addr(choice, output_size);
++	random = find_random_addr(choice, output_run_size);
+ 	if (!random) {
+ 		debug_putstr("KASLR could not find suitable E820 region...\n");
+ 		goto out;
+diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
+index 1f290cc..7ef0eed 100644
+--- a/arch/x86/boot/compressed/misc.c
++++ b/arch/x86/boot/compressed/misc.c
+@@ -375,6 +375,7 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
+ {
+ 	unsigned long run_size = VO__end - VO__text;
+ 	unsigned char *output_orig = output;
++	unsigned long output_run_size;
+ 
+ 	real_mode = rmode;
+ 
+@@ -397,14 +398,15 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
+ 	free_mem_ptr     = heap;	/* Heap */
+ 	free_mem_end_ptr = heap + BOOT_HEAP_SIZE;
+ 
++	output_run_size = output_len > run_size ? output_len : run_size;
++
+ 	/*
+ 	 * The memory hole needed for the kernel is the larger of either
+ 	 * the entire decompressed kernel plus relocation table, or the
+ 	 * entire decompressed kernel plus .bss and .brk sections.
+ 	 */
+ 	output = choose_kernel_location(input_data, input_len, output,
+-					output_len > run_size ? output_len
+-							      : run_size);
++					output_run_size);
+ 
+ 	/* Validate memory location choices. */
+ 	if ((unsigned long)output & (MIN_KERNEL_ALIGN - 1))
+diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
+index 04477d6..dec1663 100644
+--- a/arch/x86/boot/compressed/misc.h
++++ b/arch/x86/boot/compressed/misc.h
+@@ -60,7 +60,7 @@ int cmdline_find_option_bool(const char *option);
+ unsigned char *choose_kernel_location(unsigned char *input,
+ 				      unsigned long input_size,
+ 				      unsigned char *output,
+-				      unsigned long output_size);
++				      unsigned long output_run_size);
+ /* cpuflags.c */
+ bool has_cpuflag(int flag);
+ #else
+@@ -68,7 +68,7 @@ static inline
+ unsigned char *choose_kernel_location(unsigned char *input,
+ 				      unsigned long input_size,
+ 				      unsigned char *output,
+-				      unsigned long output_size)
++				      unsigned long output_run_size)
+ {
+ 	return output;
+ }
 -- 
 1.8.4.5
