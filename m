@@ -1,40 +1,37 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [GIT PULL] EFI urgent fix
-Date: Fri, 27 Mar 2015 19:18:54 +0000
-Message-ID: <20150327191854.GC5801@codeblueprint.co.uk>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI changes for v4.1
+Date: Tue, 31 Mar 2015 10:57:18 +0200
+Message-ID: <20150331085718.GB10962@gmail.com>
+References: <20150327191651.GB5801@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+In-Reply-To: <20150327191651.GB5801-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Folks,
 
-Please pull the following fix from Jean which addresses an integer
-overflow issue when calculating the number of entries in an SMBIOS 3.0
-DMI table.
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-The following changes since commit 6d9ff473317245e3e5cd9922b4520411c2296388:
+> Yinghai Lu (1):
+>       x86, boot: Allow 64bit EFI kernel to be loaded above 4G
 
-  firmware: dmi_scan: Fix dmi_len type (2015-02-24 18:54:17 +0000)
+Despite multiple warnings the changelog from Yinghai is still 
+unreadable and chock full of typos, and in any case it should have 
+been acked by Boris, hpa, tglx or me before applying it to a Git tree.
 
-are available in the git repository at:
+This was my last warning to Yinghai:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+  http://lkml.iu.edu/hypermail/linux/kernel/1503.1/05342.html
 
-for you to fetch changes up to bfbaafae8519d82d10da6abe75f5766dd5b20475:
+I'm not pulling such messy patches from Yinghai anymore, please remove 
+this patch from the EFI tree and submit a fixed version separately.
 
-  firmware: dmi_scan: Prevent dmi_num integer overflow (2015-03-27 10:53:46 +0000)
+The other changes are looking good to me.
 
-----------------------------------------------------------------
-Jean Delvare (1):
-      firmware: dmi_scan: Prevent dmi_num integer overflow
+Thanks,
 
- drivers/firmware/dmi_scan.c | 22 +++++++---------------
- 1 file changed, 7 insertions(+), 15 deletions(-)
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+	Ingo
