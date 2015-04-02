@@ -1,68 +1,48 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL v2] EFI changes for v4.1
-Date: Wed, 1 Apr 2015 15:11:53 +0200
-Message-ID: <20150401131153.GA13492@gmail.com>
-References: <20150401130210.GA7931@codeblueprint.co.uk>
+From: Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH RESEND] efivarfs: Ensure VariableName is NUL-terminated
+Date: Thu, 2 Apr 2015 08:39:00 +0100
+Message-ID: <1427960340-5339-1-git-send-email-ross.lagerwall@citrix.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150401130210.GA7931-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Some buggy firmware implementations update VariableNameSize on success
+such that it does not include the final NUL character which results in
+garbage in the efivarfs name entries.  Use kzalloc on the efivar_entry
+(as is done in efivars.c) to ensure that the name is always
+NUL-terminated.
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+The buggy firmware is:
+BIOS Information
+        Vendor: Intel Corp.
+        Version: S1200RP.86B.02.02.0005.102320140911
+        Release Date: 10/23/2014
+        BIOS Revision: 4.6
+System Information
+        Manufacturer: Intel Corporation
+        Product Name: S1200RP_SE
 
-> Folks,
-> 
-> This is the second version of the EFI v4.1 pull request without
-> Yinghai Lu's patch.
-> 
-> It's based on v4.0-rc3, if that's not OK let me know and I'll respin it
-> against something else.
-> 
-> The following changes since commit 9eccca0843205f87c00404b663188b88eb248051:
-> 
->   Linux 4.0-rc3 (2015-03-08 16:09:09 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to a643375f4b175569bc3c03c7a3e758f845c1ccd9:
-> 
->   efi/libstub: Retrieve FDT size when loaded from UEFI config table (2015-04-01 12:46:23 +0100)
-> 
-> ----------------------------------------------------------------
-> Ard Biesheuvel (1):
->       efi/libstub: Retrieve FDT size when loaded from UEFI config table
-> 
-> Borislav Petkov (1):
->       x86/efi: Add a "debug" option to the efi= cmdline
-> 
-> Ingo Molnar (2):
->       efi: Disable interrupts around EFI calls, not in the epilog/prolog calls
->       efi: Clean up the efi_call_phys_[prolog|epilog]() save/restore interaction
-> 
-> Ivan Khoronzhuk (2):
->       firmware: dmi_scan: Use full dmi version for SMBIOS3
->       firmware: dmi_scan: Use direct access to static vars
-> 
->  Documentation/kernel-parameters.txt     |  3 ++-
->  arch/x86/include/asm/efi.h              |  6 ++++--
->  arch/x86/platform/efi/efi.c             | 17 ++++++++++++---
->  arch/x86/platform/efi/efi_32.c          | 22 ++++++++++----------
->  arch/x86/platform/efi/efi_64.c          | 29 ++++++++++++++------------
->  drivers/firmware/dmi_scan.c             | 37 +++++++++++++++++++--------------
->  drivers/firmware/efi/libstub/arm-stub.c |  7 +++----
->  drivers/firmware/efi/libstub/efistub.h  |  2 +-
->  drivers/firmware/efi/libstub/fdt.c      |  7 ++++++-
->  include/linux/efi.h                     |  1 +
->  10 files changed, 79 insertions(+), 52 deletions(-)
+Signed-off-by: Ross Lagerwall <ross.lagerwall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+---
+ fs/efivarfs/super.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Pulled into tip:core/efi, thanks a lot Matt!
-
-	Ingo
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index ddbce42..acf9a67 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -121,7 +121,7 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
+ 	int len, i;
+ 	int err = -ENOMEM;
+ 
+-	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
++	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
+ 	if (!entry)
+ 		return err;
+ 
+-- 
+2.1.0
