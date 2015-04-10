@@ -1,44 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: stub: use a pool allocation for the cmdline
-Date: Fri, 10 Apr 2015 14:56:09 +0200
-Message-ID: <1428670569-23089-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v3 0/3] Enable a capsule loader interface for user to
+ update
+Date: Fri, 10 Apr 2015 15:58:08 +0200
+Message-ID: <20150410135807.GH28074@pd.tnic>
+References: <1428694844-7782-1-git-send-email-hock.leong.kweh@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1428694844-7782-1-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This changes the allocation for the ASCII-converted command
-line to use an ordinary memory pool rather than a separate
-page based allocation.
+On Sat, Apr 11, 2015 at 03:40:41AM +0800, Kweh, Hock Leong wrote:
+> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> Hi Guys,
+> 
+> This patchset is created on top of "efi: Capsule update support" patch:
+> http://permalink.gmane.org/gmane.linux.kernel.efi/4837
+> 
+> It expose a sysfs loader interface for user to upload the capsule binary
+> and calling efi_capsule_update() API to pass the binary to EFI firmware.
 
-Pool allocations are generally preferred over page based
-allocations due to the fact that they cause less fragmentation,
-but in the particular case of arm64, where page allocations are
-rounded up to 64 KB and where this allocation happens to be the
-only explicit low allocation, it results in the lowest 64 KB of
-memory to always be taken up by this particular allocation.
+What I'm missing from those 0/n mails is why we need this? What is
+the problem you're trying to solve and why is Peter's userspace-only
+solution not enough.
 
-So allocate from the EFI_LOADER_DATA pool instead.
+Now I have a fairly good idea why we might/could/would need the kernel
+interface but I don't believe the every reader has followed the whole
+discussion.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/efi-stub-helper.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+So please start with the Why. Try to sell it to me as best as you can.
+Details will be discussed later anyway.
 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f07d4a67fa76..c95a567ca132 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -684,7 +684,8 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 
- 	options_bytes++;	/* NUL termination */
- 
--	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
-+	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-+				options_bytes, (void **)&cmdline_addr);
- 	if (status != EFI_SUCCESS)
- 		return NULL;
- 
+Thanks.
+
 -- 
-1.8.3.2
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
