@@ -1,99 +1,45 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] efi: stub: use a pool allocation for the cmdline
-Date: Fri, 10 Apr 2015 17:44:41 -0700
-Message-ID: <CAFECyb8RTMjR_hHHznOEJCGwuVj2GmMUnhoLAsdqyoPU7-vrbg@mail.gmail.com>
-References: <1428670569-23089-1-git-send-email-ard.biesheuvel@linaro.org>
-	<CAFECyb9efREE=BU5RGSbzAGHqi5CkivUuTf=BRdq02GvFqJaOA@mail.gmail.com>
-	<CAKv+Gu-KHpSWLKOgA7UW8C6L1-K3dOieNmF2=qq_t5N73u3Spg@mail.gmail.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v3 0/3] Enable a capsule loader interface for user to
+ update
+Date: Sun, 12 Apr 2015 08:38:11 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8D1D3E@PGSMSX102.gar.corp.intel.com>
+References: <1428694844-7782-1-git-send-email-hock.leong.kweh@intel.com>
+ <20150410135807.GH28074@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-KHpSWLKOgA7UW8C6L1-K3dOieNmF2=qq_t5N73u3Spg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20150410135807.GH28074-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 10, 2015 at 10:14 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 10 April 2015 at 18:43, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> On Fri, Apr 10, 2015 at 5:56 AM, Ard Biesheuvel
->> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->>> This changes the allocation for the ASCII-converted command
->>> line to use an ordinary memory pool rather than a separate
->>> page based allocation.
->>>
->>> Pool allocations are generally preferred over page based
->>> allocations due to the fact that they cause less fragmentation,
->>> but in the particular case of arm64, where page allocations are
->>> rounded up to 64 KB and where this allocation happens to be the
->>> only explicit low allocation, it results in the lowest 64 KB of
->>> memory to always be taken up by this particular allocation.
->>>
->>> So allocate from the EFI_LOADER_DATA pool instead.
->>>
->>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>> ---
->>>  drivers/firmware/efi/libstub/efi-stub-helper.c | 3 ++-
->>>  1 file changed, 2 insertions(+), 1 deletion(-)
->>>
->>> diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
->>> index f07d4a67fa76..c95a567ca132 100644
->>> --- a/drivers/firmware/efi/libstub/efi-stub-helper.c
->>> +++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
->>> @@ -684,7 +684,8 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
->>>
->>>         options_bytes++;        /* NUL termination */
->>>
->>> -       status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
->>> +       status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
->>> +                               options_bytes, (void **)&cmdline_addr);
->>>         if (status != EFI_SUCCESS)
->>>                 return NULL;
->>>
->>> --
->>> 1.8.3.2
->>>
->>
->> Hi Ard,
->>
->> We can't do this without also changing the frees on the error paths in
->> arm-stub.c (line 289)
->> and eboot.c (line 1148) to be a pool free as well.
->> Also, for x86/x86_64 the address of the command line is put into a
->> boot_params structure,
->> which only has a __u32 field for the address of the command line, so
->> we could get an address
->> that won't fit if we use a pool allocation.
->> Looking at that bit of if it, I don't think we handle the case of no
->> 32 bit addressable memory
->> existing at the time of the efi_low_alloc() for x86_64 systems, so if
->> a >32 bit address is returned here,
->> this won't be detected as a failure, and the cmdline address will be
->> the 32 bit truncated address.
-I'm working on a patch for this, and it also looks like efi_low_alloc() is
-not correct for 32 bit builds, as internally it can allocate a >32 bit address,
-and then will truncate that to return an 'unsigned long'.
-
-I should have something out next week.
-
->>
->> I don't think that there is a way to control the address range
->> returned by pool allocations,
->> so I think we are stuck with the page based allocations if we have
->> address restrictions.
->>
->
-> Ah yes, I wondered about the reason for the low_alloc(). I guess I
-> could have looked a bit further myself :-)
->
-> It is not such a big deal: the memory is reclaimed anyway, I was just
-> trying to reduce the fragmentation a bit, and trying to avoid
-> efi_xxx_alloc() which are substantially heavier than calling
-> allocate_pool() or allocate_pages() directly.
->
-> I'll drop this patch then. It's not really worth the effort as its
-> primarily cosmetics anyway.
->
-> --
-> Ard.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IEZyaWRheSwgQXByaWwgMTAsIDIwMTUgOTo1OCBQ
+TQ0KPiANCj4gT24gU2F0LCBBcHIgMTEsIDIwMTUgYXQgMDM6NDA6NDFBTSArMDgwMCwgS3dlaCwg
+SG9jayBMZW9uZyB3cm90ZToNCj4gPiBGcm9tOiAiS3dlaCwgSG9jayBMZW9uZyIgPGhvY2subGVv
+bmcua3dlaEBpbnRlbC5jb20+DQo+ID4NCj4gPiBIaSBHdXlzLA0KPiA+DQo+ID4gVGhpcyBwYXRj
+aHNldCBpcyBjcmVhdGVkIG9uIHRvcCBvZiAiZWZpOiBDYXBzdWxlIHVwZGF0ZSBzdXBwb3J0IiBw
+YXRjaDoNCj4gPiBodHRwOi8vcGVybWFsaW5rLmdtYW5lLm9yZy9nbWFuZS5saW51eC5rZXJuZWwu
+ZWZpLzQ4MzcNCj4gPg0KPiA+IEl0IGV4cG9zZSBhIHN5c2ZzIGxvYWRlciBpbnRlcmZhY2UgZm9y
+IHVzZXIgdG8gdXBsb2FkIHRoZSBjYXBzdWxlIGJpbmFyeQ0KPiA+IGFuZCBjYWxsaW5nIGVmaV9j
+YXBzdWxlX3VwZGF0ZSgpIEFQSSB0byBwYXNzIHRoZSBiaW5hcnkgdG8gRUZJIGZpcm13YXJlLg0K
+PiANCj4gV2hhdCBJJ20gbWlzc2luZyBmcm9tIHRob3NlIDAvbiBtYWlscyBpcyB3aHkgd2UgbmVl
+ZCB0aGlzPyBXaGF0IGlzDQo+IHRoZSBwcm9ibGVtIHlvdSdyZSB0cnlpbmcgdG8gc29sdmUgYW5k
+IHdoeSBpcyBQZXRlcidzIHVzZXJzcGFjZS1vbmx5DQo+IHNvbHV0aW9uIG5vdCBlbm91Z2guDQo+
+IA0KPiBOb3cgSSBoYXZlIGEgZmFpcmx5IGdvb2QgaWRlYSB3aHkgd2UgbWlnaHQvY291bGQvd291
+bGQgbmVlZCB0aGUga2VybmVsDQo+IGludGVyZmFjZSBidXQgSSBkb24ndCBiZWxpZXZlIHRoZSBl
+dmVyeSByZWFkZXIgaGFzIGZvbGxvd2VkIHRoZSB3aG9sZQ0KPiBkaXNjdXNzaW9uLg0KPiANCj4g
+U28gcGxlYXNlIHN0YXJ0IHdpdGggdGhlIFdoeS4gVHJ5IHRvIHNlbGwgaXQgdG8gbWUgYXMgYmVz
+dCBhcyB5b3UgY2FuLg0KPiBEZXRhaWxzIHdpbGwgYmUgZGlzY3Vzc2VkIGxhdGVyIGFueXdheS4N
+Cj4gDQo+IFRoYW5rcy4NCj4gDQoNCkhpIEJvcmlzbGF2LA0KDQpJIHdpbGwgbWFrZSB0aGUgc3Vt
+bWFyeSwgZm9yIG1vcmUgZGV0YWlsLCB5b3UgY2FuIHJlZmVyIHRvIHRoZSB0aHJlYWRzIGhlcmU6
+DQotIGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE1LzMvMTAvNDE4DQotIGh0dHBzOi8vbGttbC5v
+cmcvbGttbC8yMDE1LzMvMTAvMjYyDQoNClN1bW1hcnk6DQotIEtlcm5lbCBpbnRlcmZhY2UgY291
+bGQgcHJvdmlkZSBtb3JlIGZsZXhpYmlsaXR5IHRoYW4ganVzdCBmaXJtd2FyZSB1cGRhdGVzLg0K
+LSBGb3IgZW1iZWRkZWQgc21hbGwgZm9vdCBwcmludCBkZXZpY2VzLCBub3QgYWxsIHZlbmRvcnMg
+YXJlIGFmZm9yZGFibGUgdG8gaW5jbHVkZSBhbGwgdXNlcmxhbmQgdG9vbHMgdG8gdGhlaXIgcHJv
+ZHVjdC4NCi0gTm90IGFsbCBwbGF0Zm9ybSBzdXBwb3J0IEVTUlQuDQoNCg0KUmVnYXJkcywNCldp
+bHNvbg0KDQo=
