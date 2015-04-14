@@ -1,45 +1,54 @@
 From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v3 0/3] Enable a capsule loader interface for user to
- update
-Date: Sun, 12 Apr 2015 08:38:11 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8D1D3E@PGSMSX102.gar.corp.intel.com>
-References: <1428694844-7782-1-git-send-email-hock.leong.kweh@intel.com>
- <20150410135807.GH28074@pd.tnic>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Subject: [PATCH v4 0/2] Enable capsule loader interface for efi firmware updating
+Date: Tue, 14 Apr 2015 17:44:54 +0800
+Message-ID: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150410135807.GH28074-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IEZyaWRheSwgQXByaWwgMTAsIDIwMTUgOTo1OCBQ
-TQ0KPiANCj4gT24gU2F0LCBBcHIgMTEsIDIwMTUgYXQgMDM6NDA6NDFBTSArMDgwMCwgS3dlaCwg
-SG9jayBMZW9uZyB3cm90ZToNCj4gPiBGcm9tOiAiS3dlaCwgSG9jayBMZW9uZyIgPGhvY2subGVv
-bmcua3dlaEBpbnRlbC5jb20+DQo+ID4NCj4gPiBIaSBHdXlzLA0KPiA+DQo+ID4gVGhpcyBwYXRj
-aHNldCBpcyBjcmVhdGVkIG9uIHRvcCBvZiAiZWZpOiBDYXBzdWxlIHVwZGF0ZSBzdXBwb3J0IiBw
-YXRjaDoNCj4gPiBodHRwOi8vcGVybWFsaW5rLmdtYW5lLm9yZy9nbWFuZS5saW51eC5rZXJuZWwu
-ZWZpLzQ4MzcNCj4gPg0KPiA+IEl0IGV4cG9zZSBhIHN5c2ZzIGxvYWRlciBpbnRlcmZhY2UgZm9y
-IHVzZXIgdG8gdXBsb2FkIHRoZSBjYXBzdWxlIGJpbmFyeQ0KPiA+IGFuZCBjYWxsaW5nIGVmaV9j
-YXBzdWxlX3VwZGF0ZSgpIEFQSSB0byBwYXNzIHRoZSBiaW5hcnkgdG8gRUZJIGZpcm13YXJlLg0K
-PiANCj4gV2hhdCBJJ20gbWlzc2luZyBmcm9tIHRob3NlIDAvbiBtYWlscyBpcyB3aHkgd2UgbmVl
-ZCB0aGlzPyBXaGF0IGlzDQo+IHRoZSBwcm9ibGVtIHlvdSdyZSB0cnlpbmcgdG8gc29sdmUgYW5k
-IHdoeSBpcyBQZXRlcidzIHVzZXJzcGFjZS1vbmx5DQo+IHNvbHV0aW9uIG5vdCBlbm91Z2guDQo+
-IA0KPiBOb3cgSSBoYXZlIGEgZmFpcmx5IGdvb2QgaWRlYSB3aHkgd2UgbWlnaHQvY291bGQvd291
-bGQgbmVlZCB0aGUga2VybmVsDQo+IGludGVyZmFjZSBidXQgSSBkb24ndCBiZWxpZXZlIHRoZSBl
-dmVyeSByZWFkZXIgaGFzIGZvbGxvd2VkIHRoZSB3aG9sZQ0KPiBkaXNjdXNzaW9uLg0KPiANCj4g
-U28gcGxlYXNlIHN0YXJ0IHdpdGggdGhlIFdoeS4gVHJ5IHRvIHNlbGwgaXQgdG8gbWUgYXMgYmVz
-dCBhcyB5b3UgY2FuLg0KPiBEZXRhaWxzIHdpbGwgYmUgZGlzY3Vzc2VkIGxhdGVyIGFueXdheS4N
-Cj4gDQo+IFRoYW5rcy4NCj4gDQoNCkhpIEJvcmlzbGF2LA0KDQpJIHdpbGwgbWFrZSB0aGUgc3Vt
-bWFyeSwgZm9yIG1vcmUgZGV0YWlsLCB5b3UgY2FuIHJlZmVyIHRvIHRoZSB0aHJlYWRzIGhlcmU6
-DQotIGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE1LzMvMTAvNDE4DQotIGh0dHBzOi8vbGttbC5v
-cmcvbGttbC8yMDE1LzMvMTAvMjYyDQoNClN1bW1hcnk6DQotIEtlcm5lbCBpbnRlcmZhY2UgY291
-bGQgcHJvdmlkZSBtb3JlIGZsZXhpYmlsaXR5IHRoYW4ganVzdCBmaXJtd2FyZSB1cGRhdGVzLg0K
-LSBGb3IgZW1iZWRkZWQgc21hbGwgZm9vdCBwcmludCBkZXZpY2VzLCBub3QgYWxsIHZlbmRvcnMg
-YXJlIGFmZm9yZGFibGUgdG8gaW5jbHVkZSBhbGwgdXNlcmxhbmQgdG9vbHMgdG8gdGhlaXIgcHJv
-ZHVjdC4NCi0gTm90IGFsbCBwbGF0Zm9ybSBzdXBwb3J0IEVTUlQuDQoNCg0KUmVnYXJkcywNCldp
-bHNvbg0KDQo=
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+
+Dear maintainers & communities,
+
+This patchset is created on top of "efi: Capsule update support" patch:
+http://permalink.gmane.org/gmane.linux.kernel.efi/4837
+
+It expose a sysfs loader interface for user to upload the capsule binary
+and calling efi_capsule_update() API to pass the binary to EFI firmware.
+
+Thanks.
+
+---
+changelog v4:
+* rebase the firmware_class to gregkh/driver-core.git#driver-core-next
+  branch and drop the v3 2nd patch as Zahari already fix that in that
+  branch
+
+
+changelog v3:
+* changes base on the design discussion in the mailing list:
+  https://lkml.org/lkml/2015/2/24/307
+* 1st patch introduce a new API request_firmware_direct_full_path() in
+  firmware_class for developer to pass in full path to the firmware file
+* 2nd patch fix a bug for commit "firmware_loader: handle timeout via
+  wait_for_completion_interruptible_timeout()"
+* 3rd patch introduce the capsule loader interface kernel module
+
+
+Kweh, Hock Leong (2):
+  firmware_loader: introduce new API -
+    request_firmware_direct_full_path()
+  efi: an sysfs interface for user to update efi firmware
+
+ drivers/base/firmware_class.c             |   46 +++++++-
+ drivers/firmware/efi/Kconfig              |   12 ++
+ drivers/firmware/efi/Makefile             |    1
+ drivers/firmware/efi/efi-capsule-loader.c |  169 +++++++++++++++++++++++++++++
+ include/linux/firmware.h                  |    9 ++
+ 5 files changed, 232 insertions(+), 5 deletions(-)
+ create mode 100644 drivers/firmware/efi/efi-capsule-loader.c
+
+-- 
+1.7.9.5
