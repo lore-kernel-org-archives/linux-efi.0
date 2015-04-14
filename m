@@ -1,7 +1,7 @@
 From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v4 2/2] efi: an sysfs interface for user to update efi firmware
-Date: Tue, 14 Apr 2015 17:44:56 +0800
-Message-ID: <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+Subject: [PATCH v4 1/2] firmware_loader: introduce new API - request_firmware_direct_full_path()
+Date: Tue, 14 Apr 2015 17:44:55 +0800
+Message-ID: <1429004697-28320-2-git-send-email-hock.leong.kweh@intel.com>
 References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1429004697-28320-1-git-send-email-hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
@@ -12,229 +12,131 @@ List-Id: linux-efi@vger.kernel.org
 
 From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Introducing a kernel module to expose capsule loader interface
-for user to upload capsule binaries. This module leverage the
-request_firmware_direct_full_path() to obtain the binary at a
-specific path input by user.
+Introduce this new API for loading firmware from a specific location
+instead of /lib/firmware/ by providing a full path to the firmware
+file.
 
-Example method to load the capsule binary:
-echo -n "/path/to/capsule/binary" > /sys/devices/platform/efi_capsule_loader/capsule_loader
-
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Kweh, Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/firmware/efi/Kconfig              |   12 ++
- drivers/firmware/efi/Makefile             |    1 +
- drivers/firmware/efi/efi-capsule-loader.c |  169 +++++++++++++++++++++++++++++
- 3 files changed, 182 insertions(+)
- create mode 100644 drivers/firmware/efi/efi-capsule-loader.c
+ drivers/base/firmware_class.c |   46 ++++++++++++++++++++++++++++++++++++-----
+ include/linux/firmware.h      |    9 ++++++++
+ 2 files changed, 50 insertions(+), 5 deletions(-)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index f712d47..3e84ec0 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -60,6 +60,18 @@ config EFI_RUNTIME_WRAPPERS
- config EFI_ARMSTUB
- 	bool
+diff --git a/drivers/base/firmware_class.c b/drivers/base/firmware_class.c
+index 171841a..3ab7bb9 100644
+--- a/drivers/base/firmware_class.c
++++ b/drivers/base/firmware_class.c
+@@ -111,6 +111,7 @@ static inline long firmware_loading_timeout(void)
+ #define FW_OPT_FALLBACK		0
+ #endif
+ #define FW_OPT_NO_WARN	(1U << 3)
++#define FW_OPT_FULL_PATH	(1U << 4)
  
-+config EFI_CAPSULE_LOADER
-+	tristate "EFI capsule loader"
-+	depends on EFI
-+	select FW_LOADER
-+	help
-+	  This option exposes a loader interface for user to load EFI
-+	  capsule binary and update the EFI firmware through system reboot.
-+	  This feature does not support auto locating capsule binaries at the
-+	  firmware lib search path.
-+
-+	  If unsure, say N.
-+
- endmenu
+ struct firmware_cache {
+ 	/* firmware_buf instance will be added into the below list */
+@@ -318,20 +319,29 @@ fail:
+ }
  
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 698846e..5ab031a 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -8,3 +8,4 @@ obj-$(CONFIG_UEFI_CPER)			+= cper.o
- obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
- obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
- obj-$(CONFIG_EFI_STUB)			+= libstub/
-+obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= efi-capsule-loader.o
-diff --git a/drivers/firmware/efi/efi-capsule-loader.c b/drivers/firmware/efi/efi-capsule-loader.c
-new file mode 100644
-index 0000000..84b979b
---- /dev/null
-+++ b/drivers/firmware/efi/efi-capsule-loader.c
-@@ -0,0 +1,169 @@
-+/*
-+ * EFI capsule loader driver.
+ static int fw_get_filesystem_firmware(struct device *device,
+-				       struct firmware_buf *buf)
++				      struct firmware_buf *buf,
++				      unsigned int opt_flags)
+ {
+ 	int i;
+ 	int rc = -ENOENT;
+ 	char *path = __getname();
++	int path_array_size = 1;
++	static const char * const root_path[] = {"/"};
++	char **temp_path = (char **)root_path;
+ 
+-	for (i = 0; i < ARRAY_SIZE(fw_path); i++) {
++	if (!(opt_flags & FW_OPT_FULL_PATH)) {
++		temp_path = (char **)fw_path;
++		path_array_size = ARRAY_SIZE(fw_path);
++	}
++
++	for (i = 0; i < path_array_size; i++) {
+ 		struct file *file;
+ 
+ 		/* skip the unset customized path */
+-		if (!fw_path[i][0])
++		if (!temp_path[i][0])
+ 			continue;
+ 
+-		snprintf(path, PATH_MAX, "%s/%s", fw_path[i], buf->fw_id);
++		snprintf(path, PATH_MAX, "%s/%s", temp_path[i], buf->fw_id);
+ 
+ 		file = filp_open(path, O_RDONLY, 0);
+ 		if (IS_ERR(file))
+@@ -1122,7 +1132,7 @@ _request_firmware(const struct firmware **firmware_p, const char *name,
+ 		}
+ 	}
+ 
+-	ret = fw_get_filesystem_firmware(device, fw->priv);
++	ret = fw_get_filesystem_firmware(device, fw->priv, opt_flags);
+ 	if (ret) {
+ 		if (!(opt_flags & FW_OPT_NO_WARN))
+ 			dev_warn(device,
+@@ -1210,6 +1220,32 @@ int request_firmware_direct(const struct firmware **firmware_p,
+ EXPORT_SYMBOL_GPL(request_firmware_direct);
+ 
+ /**
++ * request_firmware_direct_full_path: - load firmware directly from exact
++ *                                      full path
++ * @firmware_p: pointer to firmware image
++ * @name: full path to the firmware file with file name
++ * @device: device for which firmware is being loaded
 + *
-+ * Copyright 2015 Intel Corporation
-+ *
-+ * This file is part of the Linux kernel, and is made available under
-+ * the terms of the GNU General Public License version 2.
-+ */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+#include <linux/platform_device.h>
-+#include <linux/highmem.h>
-+#include <linux/slab.h>
-+#include <linux/mutex.h>
-+#include <linux/efi.h>
-+#include <linux/firmware.h>
-+
-+#define DEV_NAME "efi_capsule_loader"
-+
-+static DEFINE_MUTEX(capsule_loader_lock);
-+static struct platform_device *efi_capsule_pdev;
-+
-+/*
-+ * This function will store the capsule binary and pass it to
-+ * efi_capsule_update() API in capsule.c
-+ */
-+static int efi_capsule_store(const struct firmware *fw)
++ * This function works like request_firmware_direct(), but this doesn't
++ * search the /lib/firmware/ for the firmware file. It support exact full
++ * path to the firmware file for loading.
++ **/
++int request_firmware_direct_full_path(const struct firmware **firmware_p,
++				      const char *name, struct device *device)
 +{
-+	int i;
 +	int ret;
-+	int count = fw->size;
-+	int copy_size = (fw->size > PAGE_SIZE) ? PAGE_SIZE : fw->size;
-+	int pages_needed = ALIGN(fw->size, PAGE_SIZE) >> PAGE_SHIFT;
-+	struct page **pages;
-+	void *page_data;
-+	efi_capsule_header_t *capsule = NULL;
 +
-+	if (!count) {
-+		pr_err("%s: Received zero binary size\n", __func__);
-+		return -ENOENT;
-+	}
-+
-+	pages = kmalloc_array(pages_needed, sizeof(void *), GFP_KERNEL);
-+	if (!pages) {
-+		pr_err("%s: kmalloc_array() failed\n", __func__);
-+		return -ENOMEM;
-+	}
-+
-+	for (i = 0; i < pages_needed; i++) {
-+		pages[i] = alloc_page(GFP_KERNEL);
-+		if (!pages[i]) {
-+			pr_err("%s: alloc_page() failed\n", __func__);
-+			--i;
-+			ret = -ENOMEM;
-+			goto failed;
-+		}
-+	}
-+
-+	for (i = 0; i < pages_needed; i++) {
-+		page_data = kmap(pages[i]);
-+		memcpy(page_data, fw->data + (i * PAGE_SIZE), copy_size);
-+
-+		if (i == 0)
-+			capsule = (efi_capsule_header_t *)page_data;
-+		else
-+			kunmap(pages[i]);
-+
-+		count -= copy_size;
-+		if (count < PAGE_SIZE)
-+			copy_size = count;
-+	}
-+
-+	ret = efi_capsule_update(capsule, pages);
-+	if (ret) {
-+		pr_err("%s: efi_capsule_update() failed\n", __func__);
-+		--i;
-+		goto failed;
-+	}
-+	kunmap(pages[0]);
-+
-+	/*
-+	 * we cannot free the pages here due to reboot need that data
-+	 * maintained.
-+	 */
-+	return 0;
-+
-+failed:
-+	while (i >= 0)
-+		__free_page(pages[i--]);
-+	kfree(pages);
-+	return ret;
-+}
-+
-+static ssize_t capsule_loader_store(struct device *dev,
-+				    struct device_attribute *attr,
-+				    const char *buf, size_t count)
-+{
-+	int ret = -EBUSY;
-+	const struct firmware *fw;
-+
-+	pr_debug("%s: Received path = %s\n", __func__, buf);
-+	if (mutex_trylock(&capsule_loader_lock)) {
-+		ret = request_firmware_direct_full_path(&fw, buf,
-+							&efi_capsule_pdev->dev);
-+		if (ret) {
-+			pr_err("%s: request_firmware_direct_full_path() %s\n",
-+			       __func__,
-+			       "failed");
-+			mutex_unlock(&capsule_loader_lock);
-+			return ret;
-+		}
-+
-+		ret = efi_capsule_store(fw);
-+		if (ret)
-+			pr_err("%s: %s, return error code = %d\n",
-+			       __func__,
-+			       "Failed to store capsule binary",
-+			       ret);
-+		release_firmware(fw);
-+		mutex_unlock(&capsule_loader_lock);
-+	}
-+
-+	return ret ? ret : count;
-+}
-+static DEVICE_ATTR_WO(capsule_loader);
-+
-+static int __init efi_capsule_loader_init(void)
-+{
-+	int ret = 0;
-+
-+	efi_capsule_pdev = platform_device_register_simple(DEV_NAME,
-+							   PLATFORM_DEVID_NONE,
-+							   NULL, 0);
-+	if (IS_ERR(efi_capsule_pdev)) {
-+		pr_err("%s: platform_device_register_simple() failed\n",
-+		       __func__);
-+		return PTR_ERR(efi_capsule_pdev);
-+	}
-+
-+	/*
-+	 * create this file node for user to pass in the full path of the
-+	 * capsule binary
-+	 */
-+	ret = device_create_file(&efi_capsule_pdev->dev,
-+				 &dev_attr_capsule_loader);
-+	if (ret) {
-+		pr_err("%s: device_create_file() failed\n", __func__);
-+		platform_device_unregister(efi_capsule_pdev);
-+	}
++	__module_get(THIS_MODULE);
++	ret = _request_firmware(firmware_p, name, device,
++				FW_OPT_UEVENT | FW_OPT_NO_WARN |
++				FW_OPT_FULL_PATH);
++	module_put(THIS_MODULE);
 +
 +	return ret;
 +}
-+module_init(efi_capsule_loader_init);
++EXPORT_SYMBOL_GPL(request_firmware_direct_full_path);
 +
-+/*
-+ * To remove this kernel module, just perform:
-+ * rmmod efi_capsule_loader.ko
-+ */
-+static void __exit efi_capsule_loader_exit(void)
++/**
+  * release_firmware: - release the resource associated with a firmware image
+  * @fw: firmware resource to release
+  **/
+diff --git a/include/linux/firmware.h b/include/linux/firmware.h
+index 5c41c5e..b7c6435 100644
+--- a/include/linux/firmware.h
++++ b/include/linux/firmware.h
+@@ -47,6 +47,8 @@ int request_firmware_nowait(
+ 	void (*cont)(const struct firmware *fw, void *context));
+ int request_firmware_direct(const struct firmware **fw, const char *name,
+ 			    struct device *device);
++int request_firmware_direct_full_path(const struct firmware **fw,
++				      const char *name, struct device *device);
+ 
+ void release_firmware(const struct firmware *fw);
+ #else
+@@ -75,5 +77,12 @@ static inline int request_firmware_direct(const struct firmware **fw,
+ 	return -EINVAL;
+ }
+ 
++static inline int request_firmware_direct_full_path(const struct firmware **fw,
++						    const char *name,
++						    struct device *device)
 +{
-+	platform_device_unregister(efi_capsule_pdev);
++	return -EINVAL;
 +}
-+module_exit(efi_capsule_loader_exit);
 +
-+MODULE_DESCRIPTION("EFI capsule firmware binary loader");
-+MODULE_LICENSE("GPL v2");
+ #endif
+ #endif
 -- 
 1.7.9.5
