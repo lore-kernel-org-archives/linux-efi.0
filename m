@@ -1,65 +1,67 @@
-From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
-Subject: Re: [PATCH v4 1/2] firmware_loader: introduce new API -
- request_firmware_direct_full_path()
-Date: Wed, 15 Apr 2015 15:15:51 +0200
-Message-ID: <20150415131551.GB21491@kroah.com>
-References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
- <1429004697-28320-2-git-send-email-hock.leong.kweh@intel.com>
- <20150414140806.GD5989@kroah.com>
- <CALCETrW_aXJ1iiXCa6aTE3r3J3EF_Njn5bb9=At_3ajCzPFSPg@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86_64/efi: enforce 32 bit address for command line
+ buffer
+Date: Wed, 15 Apr 2015 14:18:26 +0100
+Message-ID: <20150415131826.GE4804@codeblueprint.co.uk>
+References: <1429058752-13478-1-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CALCETrW_aXJ1iiXCa6aTE3r3J3EF_Njn5bb9=At_3ajCzPFSPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1429058752-13478-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 14, 2015 at 11:56:26AM -0400, Andy Lutomirski wrote:
-> On Tue, Apr 14, 2015 at 10:08 AM, Greg Kroah-Hartman
-> <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
-> > On Tue, Apr 14, 2015 at 05:44:55PM +0800, Kweh, Hock Leong wrote:
-> >> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> >>
-> >> Introduce this new API for loading firmware from a specific location
-> >> instead of /lib/firmware/ by providing a full path to the firmware
-> >> file.
-> >
-> > Ick, why would we want this?
-> >
+On Tue, 14 Apr, at 05:45:52PM, Roy Franz wrote:
+> The boot_params structure has a 32 bit field for storing the address of
+> the kernel command line.  When the EFI stub allocates memory for the command
+> line, it allocates at as low and address as possible, but does not ensure
+> that the address of memory allocated is below 4G.
+> This patch enforces this limit, and the stub now returns an error if the
+> command line buffer is allocated at too high of an address.
+> For 32 bit systems, the EFI mandated 1-1 memory mapping ensures
+> that all memory is 32 bit addressable, so we don't have a problem.
+> Also, mixed-mode booting on EFI platforms does not use the stub
+> code, so we don't need to handle the case of booting a 32 bit
+> kernel on a 64 bit EFI platform.
 > 
-> Because this mechanism should still work even if /lib is unwriteable
-> (e.g it's on squashfs or a read-only NFS root).
-
-Why would a filesystem need to be writable to read a firmware blob from?
-
-> In this regard, UEFI capsules are very much unlike firmware_class
-> firmware.  firmware_class firmwise is kind of like device drivers; it
-> generally comes from the same vendor as your kernel image and
-> /lib/modules, and it can be updated by the same mechanism.  UEFI
-> capsules, on the other hand, are one-time things that should be loaded
-> at the explicit request of the admin.
-
-Just like BIOS updates, which use the firmware interface.
-
-> There is no reason whatsoever
-> that they should exist on persistent storage, and, in fact, there's a
-> very good reason that they should not.  On little embedded devices,
-> which will apparently be the initial users of this code, keeping the
-> capsules around is a waste of valuable space.
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/eboot.c | 13 +++++++++++++
+>  1 file changed, 13 insertions(+)
 > 
-> This is why I think that the right approach would be to avoid using
-> firmware_class entirely for this.  IMO a simple_char device would be
-> the way to go (hint hint...) but other simple approaches are certainly
-> possible.
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index ef17683..82dbe27 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -1108,6 +1108,19 @@ struct boot_params *make_boot_params(struct efi_config *c)
+>  	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
+>  	if (!cmdline_ptr)
+>  		goto fail;
+> +
+> +#ifdef CONFIG_X86_64
+> +	/*
+> +	 * hdr->cmd_line_ptr is a 32 bit field, so on 64 bit systems we need
+> +	 * to ensure that the allocated buffer for the commandline is 32 bit
+> +	 * addressable.
+> +	  */
+> +	if ((u64)(cmdline_ptr) + options_size > (u64)U32_MAX) {
+> +		efi_printk(sys_table, "Failed to alloc lowmem for command line\n");
+> +		efi_free(sys_table, options_size, (unsigned long)cmdline_ptr);
+> +		goto fail;
+> +	}
+> +#endif /* CONFIG_X86_64 */
+>  	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
+>  
+>  	hdr->ramdisk_image = 0;
 
-A char device would be present all the time, like a sysfs file to write
-the firmware to, so I don't see the difference here.  For a char device,
-you would just do the normal open/write/close, just like for the
-firmware interface, what is the difference?
+Good catch. But actually, we have boot_params->ext_cmd_line_ptr for
+exactly this problem.
 
-thanks,
+So yes, that's a valid bug, but I don't think this is how we should fix
+it.
 
-greg k-h
+-- 
+Matt Fleming, Intel Open Source Technology Center
