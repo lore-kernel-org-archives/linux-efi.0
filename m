@@ -1,44 +1,53 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v4 1/2] firmware_loader: introduce new API -
- request_firmware_direct_full_path()
-Date: Tue, 14 Apr 2015 18:18:33 +0200
-Message-ID: <20150414161833.GE14069@pd.tnic>
-References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
- <1429004697-28320-2-git-send-email-hock.leong.kweh@intel.com>
- <20150414140806.GD5989@kroah.com>
- <CALCETrW_aXJ1iiXCa6aTE3r3J3EF_Njn5bb9=At_3ajCzPFSPg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] x86_64/efi: enforce 32 bit address for command line buffer
+Date: Tue, 14 Apr 2015 17:45:52 -0700
+Message-ID: <1429058752-13478-1-git-send-email-roy.franz@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CALCETrW_aXJ1iiXCa6aTE3r3J3EF_Njn5bb9=At_3ajCzPFSPg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 14, 2015 at 11:56:26AM -0400, Andy Lutomirski wrote:
-> This is why I think that the right approach would be to avoid using
-> firmware_class entirely for this.  IMO a simple_char device would be
-> the way to go (hint hint...) but other simple approaches are certainly
-> possible.
+The boot_params structure has a 32 bit field for storing the address of
+the kernel command line.  When the EFI stub allocates memory for the command
+line, it allocates at as low and address as possible, but does not ensure
+that the address of memory allocated is below 4G.
+This patch enforces this limit, and the stub now returns an error if the
+command line buffer is allocated at too high of an address.
+For 32 bit systems, the EFI mandated 1-1 memory mapping ensures
+that all memory is 32 bit addressable, so we don't have a problem.
+Also, mixed-mode booting on EFI platforms does not use the stub
+code, so we don't need to handle the case of booting a 32 bit
+kernel on a 64 bit EFI platform.
 
-Btw, didn't mfleming want to try using capsules for other funky stuff
-like early logging and pstore-like logging in panic time so that we can
-read out crash data on the next boot?
+Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/x86/boot/compressed/eboot.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-Which would mean that capsules would need a completely different
-interface, something new for shuffling lotsa binary data in and out of
-the kernel and in and out of the UEFI...
-
-Which would make the firmware_class thing completely inappropriate for
-that.
-
-Hmmm?
-
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index ef17683..82dbe27 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -1108,6 +1108,19 @@ struct boot_params *make_boot_params(struct efi_config *c)
+ 	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
+ 	if (!cmdline_ptr)
+ 		goto fail;
++
++#ifdef CONFIG_X86_64
++	/*
++	 * hdr->cmd_line_ptr is a 32 bit field, so on 64 bit systems we need
++	 * to ensure that the allocated buffer for the commandline is 32 bit
++	 * addressable.
++	  */
++	if ((u64)(cmdline_ptr) + options_size > (u64)U32_MAX) {
++		efi_printk(sys_table, "Failed to alloc lowmem for command line\n");
++		efi_free(sys_table, options_size, (unsigned long)cmdline_ptr);
++		goto fail;
++	}
++#endif /* CONFIG_X86_64 */
+ 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
+ 
+ 	hdr->ramdisk_image = 0;
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+1.9.1
