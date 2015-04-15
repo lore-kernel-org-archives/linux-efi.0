@@ -1,80 +1,45 @@
 From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
 Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
  firmware
-Date: Wed, 15 Apr 2015 15:19:06 +0200
-Message-ID: <20150415131906.GC21491@kroah.com>
+Date: Wed, 15 Apr 2015 15:20:00 +0200
+Message-ID: <20150415132000.GD21491@kroah.com>
 References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
  <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
  <20150414140914.GE5989@kroah.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
+ <CALCETrWeW8Gp9QFGCVhPmNo_Z+xsCJN7LYMPD6XNc92_dKMz3g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+In-Reply-To: <CALCETrWeW8Gp9QFGCVhPmNo_Z+xsCJN7LYMPD6XNc92_dKMz3g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 15, 2015 at 11:32:29AM +0000, Kweh, Hock Leong wrote:
-> > -----Original Message-----
-> > From: Greg Kroah-Hartman [mailto:gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org]
-> > Sent: Tuesday, April 14, 2015 10:09 PM
-> > 
+On Tue, Apr 14, 2015 at 11:52:48AM -0400, Andy Lutomirski wrote:
+> On Tue, Apr 14, 2015 at 10:09 AM, Greg Kroah-Hartman
+> <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
 > > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
-> > > From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > >
-> > > Introducing a kernel module to expose capsule loader interface
-> > > for user to upload capsule binaries. This module leverage the
-> > > request_firmware_direct_full_path() to obtain the binary at a
-> > > specific path input by user.
-> > >
-> > > Example method to load the capsule binary:
-> > > echo -n "/path/to/capsule/binary" >
-> > /sys/devices/platform/efi_capsule_loader/capsule_loader
-> > 
+> >> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> >>
+> >> Introducing a kernel module to expose capsule loader interface
+> >> for user to upload capsule binaries. This module leverage the
+> >> request_firmware_direct_full_path() to obtain the binary at a
+> >> specific path input by user.
+> >>
+> >> Example method to load the capsule binary:
+> >> echo -n "/path/to/capsule/binary" > /sys/devices/platform/efi_capsule_loader/capsule_loader
+> >
 > > Ick, why not just have the firmware file location present, and copy it
 > > to the sysfs file directly from userspace, instead of this two-step
 > > process?
 > 
-> Err .... I may not catch your meaning correctly. Are you trying to say
-> that you would prefer the user to perform:
-> 
-> cat file.bin > /sys/.../capsule_loader
-> 
-> instead of
-> 
-> echo -n "/path/to/binary" > /sys/..../capsule_laoder
+> Because it's not at all obvious how error handling should work in that case.
 
-Yes.  What's the namespace of your /path/to/binary/ and how do you know
-the kernel has the same one when it does the firmware load call?  By
-just copying the data with 'cat', you don't have to worry about
-namespace issues at all.
-
-> The reason we stick with the firmware_class is because we don't
-> want to replicate a code which already mature and has open API
-> for developer to use.
-
-That's fine, but adding a new api to the firmware interface seems odd to
-me, just because you don't like using /lib/ or any of the other
-"standard" locations for firmware blobs.  And note, that path is
-configurable.
-
-> > > + */
-> > > +static void __exit efi_capsule_loader_exit(void)
-> > > +{
-> > > +	platform_device_unregister(efi_capsule_pdev);
-> > 
-> > This is not a platform device, don't abuse that interface please.
-> > 
-> > greg k-h
-> 
-> Okay, so you would recommend to use device_register() for this case?
-> Or you would think that this is more suitable to use class_register()?
-
-A class isn't needed, you just want a device right?  So just use a
-device, but not a platform device, as that isn't what you have here.
+I don't understand how the error handling is any different.  The kernel
+ends up copying the data in through the firmware interface both ways, we
+just aren't creating yet-another-firmware-path in the system.
 
 thanks,
 
