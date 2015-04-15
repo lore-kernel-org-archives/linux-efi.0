@@ -1,53 +1,29 @@
-From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] x86_64/efi: enforce 32 bit address for command line buffer
-Date: Tue, 14 Apr 2015 17:45:52 -0700
-Message-ID: <1429058752-13478-1-git-send-email-roy.franz@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: stub: use a pool allocation for the cmdline
+Date: Wed, 15 Apr 2015 10:55:06 +0100
+Message-ID: <20150415095506.GA4804@codeblueprint.co.uk>
+References: <1428670569-23089-1-git-send-email-ard.biesheuvel@linaro.org>
+ <CAFECyb9efREE=BU5RGSbzAGHqi5CkivUuTf=BRdq02GvFqJaOA@mail.gmail.com>
+ <CAKv+Gu-KHpSWLKOgA7UW8C6L1-K3dOieNmF2=qq_t5N73u3Spg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-KHpSWLKOgA7UW8C6L1-K3dOieNmF2=qq_t5N73u3Spg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The boot_params structure has a 32 bit field for storing the address of
-the kernel command line.  When the EFI stub allocates memory for the command
-line, it allocates at as low and address as possible, but does not ensure
-that the address of memory allocated is below 4G.
-This patch enforces this limit, and the stub now returns an error if the
-command line buffer is allocated at too high of an address.
-For 32 bit systems, the EFI mandated 1-1 memory mapping ensures
-that all memory is 32 bit addressable, so we don't have a problem.
-Also, mixed-mode booting on EFI platforms does not use the stub
-code, so we don't need to handle the case of booting a 32 bit
-kernel on a 64 bit EFI platform.
+On Fri, 10 Apr, at 07:14:34PM, Ard Biesheuvel wrote:
+> 
+> It is not such a big deal: the memory is reclaimed anyway, I was just
+> trying to reduce the fragmentation a bit, and trying to avoid
+> efi_xxx_alloc() which are substantially heavier than calling
+> allocate_pool() or allocate_pages() directly.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/x86/boot/compressed/eboot.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+Out of curiosity, do you have any runtime numbers to backup the claim
+that allocate_*() is substantially more lightweight?
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ef17683..82dbe27 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1108,6 +1108,19 @@ struct boot_params *make_boot_params(struct efi_config *c)
- 	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
- 	if (!cmdline_ptr)
- 		goto fail;
-+
-+#ifdef CONFIG_X86_64
-+	/*
-+	 * hdr->cmd_line_ptr is a 32 bit field, so on 64 bit systems we need
-+	 * to ensure that the allocated buffer for the commandline is 32 bit
-+	 * addressable.
-+	  */
-+	if ((u64)(cmdline_ptr) + options_size > (u64)U32_MAX) {
-+		efi_printk(sys_table, "Failed to alloc lowmem for command line\n");
-+		efi_free(sys_table, options_size, (unsigned long)cmdline_ptr);
-+		goto fail;
-+	}
-+#endif /* CONFIG_X86_64 */
- 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
- 
- 	hdr->ramdisk_image = 0;
 -- 
-1.9.1
+Matt Fleming, Intel Open Source Technology Center
