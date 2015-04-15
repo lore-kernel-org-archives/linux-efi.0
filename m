@@ -1,50 +1,79 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v4 1/2] firmware_loader: introduce new API -
- request_firmware_direct_full_path()
-Date: Wed, 15 Apr 2015 12:09:05 +0100
-Message-ID: <20150415110905.GC4804@codeblueprint.co.uk>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
+ firmware
+Date: Wed, 15 Apr 2015 11:32:29 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
 References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
- <1429004697-28320-2-git-send-email-hock.leong.kweh@intel.com>
- <20150414140806.GD5989@kroah.com>
- <CALCETrW_aXJ1iiXCa6aTE3r3J3EF_Njn5bb9=At_3ajCzPFSPg@mail.gmail.com>
- <20150414161833.GE14069@pd.tnic>
- <20150415101455.GB4804@codeblueprint.co.uk>
- <20150415101805.GC2282@pd.tnic>
+ <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+ <20150414140914.GE5989@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150415101805.GC2282-fF5Pk5pvG8Y@public.gmane.org>
+In-Reply-To: <20150414140914.GE5989-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 15 Apr, at 12:18:05PM, Borislav Petkov wrote:
-> On Wed, Apr 15, 2015 at 11:14:55AM +0100, Matt Fleming wrote:
-> > Well, I haven't come across a scenario where you need a brand new
-> > interface for getting it *out* of the kernel again.
+> -----Original Message-----
+> From: Greg Kroah-Hartman [mailto:gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org]
+> Sent: Tuesday, April 14, 2015 10:09 PM
 > 
-> Well, how are we going to read crash data on next boot then? EFI var or
-> what? Are we going to have a generic interface like
+> On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
+> > From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> >
+> > Introducing a kernel module to expose capsule loader interface
+> > for user to upload capsule binaries. This module leverage the
+> > request_firmware_direct_full_path() to obtain the binary at a
+> > specific path input by user.
+> >
+> > Example method to load the capsule binary:
+> > echo -n "/path/to/capsule/binary" >
+> /sys/devices/platform/efi_capsule_loader/capsule_loader
 > 
-> /sys/.../capsule/...
+> Ick, why not just have the firmware file location present, and copy it
+> to the sysfs file directly from userspace, instead of this two-step
+> process?
+
+Err .... I may not catch your meaning correctly. Are you trying to say
+that you would prefer the user to perform:
+
+cat file.bin > /sys/.../capsule_loader
+
+instead of
+
+echo -n "/path/to/binary" > /sys/..../capsule_laoder
+
+
+The reason we stick with the firmware_class is because we don't
+want to replicate a code which already mature and has open API
+for developer to use.
+
 > 
-> or how are we imagining this to look like?
- 
-You can read it out in userspace using the existing pstorefs code. The
-last thing we need to do is introduce more userspace APIs ;-)
+> > +/*
+> > + * To remove this kernel module, just perform:
+> > + * rmmod efi_capsule_loader.ko
+> 
+> This comment is not needed.
 
-It's possible (and desirable) to separate the input interface from
-output.
+Okay, I will remove this.
 
-I've written patches in the past where the EFI kernel subsystem
-discovers capsules with a specific GUID reserved for crash data, and
-then hands that data to the pstore subsystem. Things are then exposed
-via pstorefs. The capsule code would just be another backend to pstore,
-similar to how the EFI variable code works today.
+> 
+> 
+> > + */
+> > +static void __exit efi_capsule_loader_exit(void)
+> > +{
+> > +	platform_device_unregister(efi_capsule_pdev);
+> 
+> This is not a platform device, don't abuse that interface please.
+> 
+> greg k-h
 
-I am in no way advocating for yet another crash API.
+Okay, so you would recommend to use device_register() for this case?
+Or you would think that this is more suitable to use class_register()?
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+
+Thanks & Regards,
+Wilson
