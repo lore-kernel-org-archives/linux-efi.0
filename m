@@ -1,67 +1,81 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] x86_64/efi: enforce 32 bit address for command line
- buffer
-Date: Wed, 15 Apr 2015 14:18:26 +0100
-Message-ID: <20150415131826.GE4804@codeblueprint.co.uk>
-References: <1429058752-13478-1-git-send-email-roy.franz@linaro.org>
+From: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
+ firmware
+Date: Wed, 15 Apr 2015 15:19:06 +0200
+Message-ID: <20150415131906.GC21491@kroah.com>
+References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
+ <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+ <20150414140914.GE5989@kroah.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1429058752-13478-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 14 Apr, at 05:45:52PM, Roy Franz wrote:
-> The boot_params structure has a 32 bit field for storing the address of
-> the kernel command line.  When the EFI stub allocates memory for the command
-> line, it allocates at as low and address as possible, but does not ensure
-> that the address of memory allocated is below 4G.
-> This patch enforces this limit, and the stub now returns an error if the
-> command line buffer is allocated at too high of an address.
-> For 32 bit systems, the EFI mandated 1-1 memory mapping ensures
-> that all memory is 32 bit addressable, so we don't have a problem.
-> Also, mixed-mode booting on EFI platforms does not use the stub
-> code, so we don't need to handle the case of booting a 32 bit
-> kernel on a 64 bit EFI platform.
+On Wed, Apr 15, 2015 at 11:32:29AM +0000, Kweh, Hock Leong wrote:
+> > -----Original Message-----
+> > From: Greg Kroah-Hartman [mailto:gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org]
+> > Sent: Tuesday, April 14, 2015 10:09 PM
+> > 
+> > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
+> > > From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> > >
+> > > Introducing a kernel module to expose capsule loader interface
+> > > for user to upload capsule binaries. This module leverage the
+> > > request_firmware_direct_full_path() to obtain the binary at a
+> > > specific path input by user.
+> > >
+> > > Example method to load the capsule binary:
+> > > echo -n "/path/to/capsule/binary" >
+> > /sys/devices/platform/efi_capsule_loader/capsule_loader
+> > 
+> > Ick, why not just have the firmware file location present, and copy it
+> > to the sysfs file directly from userspace, instead of this two-step
+> > process?
 > 
-> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/x86/boot/compressed/eboot.c | 13 +++++++++++++
->  1 file changed, 13 insertions(+)
+> Err .... I may not catch your meaning correctly. Are you trying to say
+> that you would prefer the user to perform:
 > 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index ef17683..82dbe27 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -1108,6 +1108,19 @@ struct boot_params *make_boot_params(struct efi_config *c)
->  	cmdline_ptr = efi_convert_cmdline(sys_table, image, &options_size);
->  	if (!cmdline_ptr)
->  		goto fail;
-> +
-> +#ifdef CONFIG_X86_64
-> +	/*
-> +	 * hdr->cmd_line_ptr is a 32 bit field, so on 64 bit systems we need
-> +	 * to ensure that the allocated buffer for the commandline is 32 bit
-> +	 * addressable.
-> +	  */
-> +	if ((u64)(cmdline_ptr) + options_size > (u64)U32_MAX) {
-> +		efi_printk(sys_table, "Failed to alloc lowmem for command line\n");
-> +		efi_free(sys_table, options_size, (unsigned long)cmdline_ptr);
-> +		goto fail;
-> +	}
-> +#endif /* CONFIG_X86_64 */
->  	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
->  
->  	hdr->ramdisk_image = 0;
+> cat file.bin > /sys/.../capsule_loader
+> 
+> instead of
+> 
+> echo -n "/path/to/binary" > /sys/..../capsule_laoder
 
-Good catch. But actually, we have boot_params->ext_cmd_line_ptr for
-exactly this problem.
+Yes.  What's the namespace of your /path/to/binary/ and how do you know
+the kernel has the same one when it does the firmware load call?  By
+just copying the data with 'cat', you don't have to worry about
+namespace issues at all.
 
-So yes, that's a valid bug, but I don't think this is how we should fix
-it.
+> The reason we stick with the firmware_class is because we don't
+> want to replicate a code which already mature and has open API
+> for developer to use.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+That's fine, but adding a new api to the firmware interface seems odd to
+me, just because you don't like using /lib/ or any of the other
+"standard" locations for firmware blobs.  And note, that path is
+configurable.
+
+> > > + */
+> > > +static void __exit efi_capsule_loader_exit(void)
+> > > +{
+> > > +	platform_device_unregister(efi_capsule_pdev);
+> > 
+> > This is not a platform device, don't abuse that interface please.
+> > 
+> > greg k-h
+> 
+> Okay, so you would recommend to use device_register() for this case?
+> Or you would think that this is more suitable to use class_register()?
+
+A class isn't needed, you just want a device right?  So just use a
+device, but not a platform device, as that isn't what you have here.
+
+thanks,
+
+greg k-h
