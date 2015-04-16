@@ -1,43 +1,75 @@
 From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] x86/efi: Store upper bits of command line buffer address in ext_cmd_line_ptr
-Date: Wed, 15 Apr 2015 16:32:24 -0700
-Message-ID: <1429140744-25768-1-git-send-email-roy.franz@linaro.org>
+Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi firmware
+Date: Wed, 15 Apr 2015 17:19:09 -0700
+Message-ID: <CAFECyb-bthi74VwkF8fpZg8ZpoyORmE5X+8dbRGG1uTP8RUm_A@mail.gmail.com>
+References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
+	<1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+	<20150414140914.GE5989@kroah.com>
+	<CALCETrWeW8Gp9QFGCVhPmNo_Z+xsCJN7LYMPD6XNc92_dKMz3g@mail.gmail.com>
+	<20150415132000.GD21491@kroah.com>
+	<CALCETrWUTjTLmwPZAwXrj06SwYaSX_7+XSTsVun2+HYC4wsqZQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CALCETrWUTjTLmwPZAwXrj06SwYaSX_7+XSTsVun2+HYC4wsqZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Until now, the EFI stub was only setting the 32 bit cmd_line_ptr in
-the setup_header structure, so on 64 bit platforms this could be truncated.
-This patch adds setting the upper bits of the buffer address in
-ext_cmd_line_ptr.  This case was likely never hit, as the allocation
-for this buffer is done at the lowest available address.  Only
-x86_64 kernels have this problem, as the 1-1 mapping mandated
-by EFI ensures that all memory is 32 bit addressable on 32 bit
-platforms.  The EFI stub does not support mixed mode, so the
-32 bit kernel on 64 bit firmware case does not need to be handled.
+On Wed, Apr 15, 2015 at 8:45 AM, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org> wrote:
+> On Apr 15, 2015 6:20 AM, "Greg Kroah-Hartman"
+> <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
+>>
+>> On Tue, Apr 14, 2015 at 11:52:48AM -0400, Andy Lutomirski wrote:
+>> > On Tue, Apr 14, 2015 at 10:09 AM, Greg Kroah-Hartman
+>> > <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org> wrote:
+>> > > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
+>> > >> From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> > >>
+>> > >> Introducing a kernel module to expose capsule loader interface
+>> > >> for user to upload capsule binaries. This module leverage the
+>> > >> request_firmware_direct_full_path() to obtain the binary at a
+>> > >> specific path input by user.
+>> > >>
+>> > >> Example method to load the capsule binary:
+>> > >> echo -n "/path/to/capsule/binary" > /sys/devices/platform/efi_capsule_loader/capsule_loader
+>> > >
+>> > > Ick, why not just have the firmware file location present, and copy it
+>> > > to the sysfs file directly from userspace, instead of this two-step
+>> > > process?
+>> >
+>> > Because it's not at all obvious how error handling should work in that case.
+>>
+>> I don't understand how the error handling is any different.  The kernel
+>> ends up copying the data in through the firmware interface both ways, we
+>> just aren't creating yet-another-firmware-path in the system.
+>
+> If I run uefi-update-capsule foo.bin, I want it to complain if the
+> UEFI call fails.  In contrast, if I boot and my ath10k firmware is
+> bad, there's no explicit user interaction that should fail; instead I
+> have no network device and I get to read the logs and figure out why.
+> IOW bad volatile device firmware is just like a bad device driver,
+> whereas bad UEFI capsules are problems that should be reported to
+> whatever tried to send them to UEFI.
+>
+> --Andy
+>
+There are several types of errors that can be returned by
+UpdateCapsule(), allowing
+us to distinguish between capsules that are not supported by the
+platform, capsules
+that must be updated at boot time, and capsule updates that failed due
+to a device error.
+I think we really do want this type of information returned to capsule loader.
 
-Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
-This is a follow-up to "x86_64/efi: enforce 32 bit address for command line buffer",
-which had the wrong fix to the truncation of address.
+Roy
 
- arch/x86/boot/compressed/eboot.c | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index ef17683..48304b8 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -1109,6 +1109,8 @@ struct boot_params *make_boot_params(struct efi_config *c)
- 	if (!cmdline_ptr)
- 		goto fail;
- 	hdr->cmd_line_ptr = (unsigned long)cmdline_ptr;
-+	/* Fill in upper bits of command line address, NOP on 32 bit  */
-+	boot_params->ext_cmd_line_ptr = (u64)(unsigned long)cmdline_ptr >> 32;
- 
- 	hdr->ramdisk_image = 0;
- 	hdr->ramdisk_size = 0;
--- 
-1.9.1
+>>
+>> thanks,
+>>
+>> greg k-h
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
