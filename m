@@ -1,46 +1,39 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
- firmware
-Date: Fri, 17 Apr 2015 15:36:40 +0100
-Message-ID: <20150417143640.GB3671@codeblueprint.co.uk>
-References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
- <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
- <20150414140914.GE5989@kroah.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
- <20150415131906.GC21491@kroah.com>
- <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
- <20150417134924.GB19794@kroah.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Store upper bits of command line buffer address
+ in ext_cmd_line_ptr
+Date: Fri, 17 Apr 2015 15:40:47 +0100
+Message-ID: <20150417144047.GC3671@codeblueprint.co.uk>
+References: <1429140744-25768-1-git-send-email-roy.franz@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150417134924.GB19794@kroah.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Ming Lei <ming.lei@canonical.com>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>
+In-Reply-To: <1429140744-25768-1-git-send-email-roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 17 Apr, at 03:49:24PM, Greg KH wrote:
+On Wed, 15 Apr, at 04:32:24PM, Roy Franz wrote:
+> Until now, the EFI stub was only setting the 32 bit cmd_line_ptr in
+> the setup_header structure, so on 64 bit platforms this could be truncated.
+> This patch adds setting the upper bits of the buffer address in
+> ext_cmd_line_ptr.  This case was likely never hit, as the allocation
+> for this buffer is done at the lowest available address.  Only
+> x86_64 kernels have this problem, as the 1-1 mapping mandated
+> by EFI ensures that all memory is 32 bit addressable on 32 bit
+> platforms.  The EFI stub does not support mixed mode, so the
+> 32 bit kernel on 64 bit firmware case does not need to be handled.
 > 
-> Not really, the kernel namespace is what matters at that point in time.
+> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> This is a follow-up to "x86_64/efi: enforce 32 bit address for command line buffer",
+> which had the wrong fix to the truncation of address.
 > 
-> And maybe it does matter, I haven't thought through all of the issues.
-> But passing a path from userspace, to the kernel, to have the kernel
-> turn around again and use that path is full of nasty consequences at
-> times due to namespaces, let's avoid all of that please.
-
-Oh crap. The namespace issue is a good point and not something I'd
-thought of at all.
-
-At this point, I think we've really run out of objections to Andy's
-suggestion of implementing this as a misc device, right?
-
-The concern I had about userspace tooling can partly be addressed by
-including the source in tools/ in the kernel tree. So provided we do
-that, I'm happy enough to see this implemented as a misc device because
-the other options we've explored just haven't panned out.
-
-Objections?
+>  arch/x86/boot/compressed/eboot.c | 2 ++
+>  1 file changed, 2 insertions(+)
+ 
+Looks good to me Roy, thanks applied!
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
