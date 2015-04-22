@@ -1,53 +1,49 @@
-From: One Thousand Gnomes <gnomes-qBU/x9rampVanCEyBjwyrvXRex20P6io@public.gmane.org>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
  firmware
-Date: Wed, 22 Apr 2015 16:24:34 +0100
-Message-ID: <20150422162434.0c701702@lxorguk.ukuu.org.uk>
-References: <20150415131906.GC21491@kroah.com>
-	<F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
-	<20150417134924.GB19794@kroah.com>
-	<20150417143640.GB3671@codeblueprint.co.uk>
-	<F54AEECA5E2B9541821D670476DAE19C2C279176@PGSMSX101.gar.corp.intel.com>
-	<20150420144323.GA7261@kroah.com>
-	<F54AEECA5E2B9541821D670476DAE19C2CC11869@PGSMSX102.gar.corp.intel.com>
-	<20150421075620.GA11000@kroah.com>
-	<1429665679.2207.44.camel@HansenPartnership.com>
-	<CALCETrX9GZmWnfkm-CwKW-2mPvRbNcRaY6tUY=8e0THsPBKMcA@mail.gmail.com>
-	<20150422132734.GB12062@redhat.com>
-	<1429715913.2195.22.camel@HansenPartnership.com>
+Date: Wed, 22 Apr 2015 08:35:54 -0700
+Message-ID: <1429716954.2195.28.camel@HansenPartnership.com>
+References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
+	 <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+	 <20150414140914.GE5989@kroah.com>
+	 <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
+	 <20150415131906.GC21491@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1429715913.2195.22.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+In-Reply-To: <20150415131906.GC21491-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> Yes, I think we've all agreed we can do it ... it's now a question of
-> whether we can stomach the ick factor of actually initiating a
-> transaction in close ... I'm still feeling queasy.
+On Wed, 2015-04-15 at 15:19 +0200, Greg Kroah-Hartman wrote:
+> On Wed, Apr 15, 2015 at 11:32:29AM +0000, Kweh, Hock Leong wrote:
+> > > -----Original Message-----
+> > > From: Greg Kroah-Hartman [mailto:gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org]
+> > > Sent: Tuesday, April 14, 2015 10:09 PM
+> > > 
+> > > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
+> > > > + */
+> > > > +static void __exit efi_capsule_loader_exit(void)
+> > > > +{
+> > > > +	platform_device_unregister(efi_capsule_pdev);
+> > > 
+> > > This is not a platform device, don't abuse that interface please.
+> > > 
+> > > greg k-h
+> > 
+> > Okay, so you would recommend to use device_register() for this case?
+> > Or you would think that this is more suitable to use class_register()?
+> 
+> A class isn't needed, you just want a device right?  So just use a
+> device, but not a platform device, as that isn't what you have here.
 
-NFS does transactions - including figuring out if the data will fit - on
-file close. It does that for real data so I'd relax. With hard disks we
-don't even complete a set of actions on close they just float around for
-a bit and get committed (but if there is a media failure you lose if you
-didnt commit them first via fsync etc)
+Coming back to this, am I the only one confused here?  What is a
+'platform device' then?  Because if it doesn't fit a direct channel to
+the platform firmware, which seems to be one of the definitions covered
+in driver-model/platform.txt under devices with minimal infrastructure
+then perhaps the documentation needs updating.
 
-> The alternative might be a two file approach (either in sysfs or a mini
-> custom fs), one for load up data and the other for initiate transaction
-> with the data errors (like overflow) being returned on the load up file
-> and the transaction errors being returned on the write that initiates
-> the transaction.
-
-The two file problem then turns into the "which transaction of the two
-done in parallel" problem.
-
-> My architectural sense is that transaction on close, provided we can
-> make it a more universally accepted idea, has a lot of potential because
-> it's more intuitive than the two file approach.
-
-Agreed
-
-Alan
+James
