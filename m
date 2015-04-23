@@ -1,53 +1,102 @@
 From: James Bottomley <James.Bottomley@HansenPartnership.com>
 Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
  firmware
-Date: Thu, 23 Apr 2015 07:09:47 -0700
-Message-ID: <1429798187.2170.3.camel@HansenPartnership.com>
-References: <20150415131906.GC21491@kroah.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
-	 <20150417134924.GB19794@kroah.com>
-	 <20150417143640.GB3671@codeblueprint.co.uk>
-	 <F54AEECA5E2B9541821D670476DAE19C2C279176@PGSMSX101.gar.corp.intel.com>
-	 <20150420144323.GA7261@kroah.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2CC11869@PGSMSX102.gar.corp.intel.com>
-	 <20150421075620.GA11000@kroah.com>
-	 <1429665679.2207.44.camel@HansenPartnership.com>
-	 <CALCETrX9GZmWnfkm-CwKW-2mPvRbNcRaY6tUY=8e0THsPBKMcA@mail.gmail.com>
-	 <20150422132734.GB12062@redhat.com>
-	 <1429715913.2195.22.camel@HansenPartnership.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2CC1259B@PGSMSX102.gar.corp.intel.com>
+Date: Thu, 23 Apr 2015 09:14:18 -0700
+Message-ID: <1429805658.6624.2.camel@HansenPartnership.com>
+References: <1429004697-28320-1-git-send-email-hock.leong.kweh@intel.com>
+	 <1429004697-28320-3-git-send-email-hock.leong.kweh@intel.com>
+	 <20150414140914.GE5989@kroah.com>
+	 <F54AEECA5E2B9541821D670476DAE19C2B8D2AEA@PGSMSX102.gar.corp.intel.com>
+	 <20150415131906.GC21491@kroah.com>
+	 <1429716954.2195.28.camel@HansenPartnership.com>
+	 <20150422154620.GA32576@kroah.com>
+	 <1429719077.2195.37.camel@HansenPartnership.com>
+	 <20150423095022.GA21126@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2CC1259B@PGSMSX102.gar.corp.intel.com>
+In-Reply-To: <20150423095022.GA21126@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Cc: Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ming Lei <ming.lei@canonical.com>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Ming Lei <ming.lei@canonical.com>, Matt Fleming <matt@console-pimps.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2015-04-23 at 08:30 +0000, Kweh, Hock Leong wrote:
-> > -----Original Message-----
-> > From: James Bottomley [mailto:James.Bottomley@HansenPartnership.com]
-> > Sent: Wednesday, April 22, 2015 11:19 PM
+On Thu, 2015-04-23 at 11:50 +0200, Greg Kroah-Hartman wrote:
+> On Wed, Apr 22, 2015 at 09:11:17AM -0700, James Bottomley wrote:
+> > On Wed, 2015-04-22 at 17:46 +0200, Greg Kroah-Hartman wrote:
+> > > On Wed, Apr 22, 2015 at 08:35:54AM -0700, James Bottomley wrote:
+> > > > On Wed, 2015-04-15 at 15:19 +0200, Greg Kroah-Hartman wrote:
+> > > > > On Wed, Apr 15, 2015 at 11:32:29AM +0000, Kweh, Hock Leong wrote:
+> > > > > > > -----Original Message-----
+> > > > > > > From: Greg Kroah-Hartman [mailto:gregkh@linuxfoundation.org]
+> > > > > > > Sent: Tuesday, April 14, 2015 10:09 PM
+> > > > > > > 
+> > > > > > > On Tue, Apr 14, 2015 at 05:44:56PM +0800, Kweh, Hock Leong wrote:
+> > > > > > > > + */
+> > > > > > > > +static void __exit efi_capsule_loader_exit(void)
+> > > > > > > > +{
+> > > > > > > > +	platform_device_unregister(efi_capsule_pdev);
+> > > > > > > 
+> > > > > > > This is not a platform device, don't abuse that interface please.
+> > > > > > > 
+> > > > > > > greg k-h
+> > > > > > 
+> > > > > > Okay, so you would recommend to use device_register() for this case?
+> > > > > > Or you would think that this is more suitable to use class_register()?
+> > > > > 
+> > > > > A class isn't needed, you just want a device right?  So just use a
+> > > > > device, but not a platform device, as that isn't what you have here.
+> > > > 
+> > > > Coming back to this, am I the only one confused here?  What is a
+> > > > 'platform device' then?  Because if it doesn't fit a direct channel to
+> > > > the platform firmware, which seems to be one of the definitions covered
+> > > > in driver-model/platform.txt under devices with minimal infrastructure
+> > > > then perhaps the documentation needs updating.
+> > > 
+> > > I don't remember the original code here at all, sorry.  I'm guessing
+> > > that they were using a class, and a platform device together, which is
+> > > not a good idea.  Just make a "virtual" device, as you don't need/want
+> > > any of the platform device infrastructure here, you just wanted a device
+> > > node and/or a way to show up in sysfs somewhere.
 > > 
+> > It was a platform device called efi_platform_loader and a single
+> > attribute file in that device called  capsule_load.  I agree that if
+> > we're going to use this for other things, we should probably have a uefi
+> > directory somewhere (under firmware?) to collect everything together
+> > rather than spraying random devices around.
 > > 
-> > Yes, I think we've all agreed we can do it ... it's now a question of whether we
-> > can stomach the ick factor of actually initiating a transaction in close ... I'm still
-> > feeling queasy.
+> > > If you have some kind of "platform resource", then you can be a platform
+> > > device, otherwise please don't use that api just because it seems simple
+> > > to use.  Use the ones the driver core provides for you that really are
+> > > just as simple (i.e. device_create()).
+> > 
+> > OK, so this is what I'm trying to understand.  Why isn't a pipe to
+> > firmware for something a "platform resource"?  I think UEFI is in the
+> > same class as ACPI which uses platform devices all over.
 > 
-> The file "close" here can I understand that the file system will call the "release"
-> function at the file_operations struct?
-> http://lxr.free-electrons.com/source/include/linux/fs.h#L1538
+> And I hate the fact that ACPI did that, but that ship has sailed a long
+> time ago.  It "should" have been it's own bus and device type, but oh
+> well.
 > 
-> So, James you are meaning that we could initiating the update transaction
-> inside the f_ops->release() and return the error code if update failed in this
-> function?
+> For a "simple" bus-less device, that has no platform resources needed
+> (i.e from acpi or device tree), so you don't need the infrastructure
+> from the platform core, just use a simple device_create() call, that's
+> what it is there for.
 
-Well, that's what I was thinking.  However the return value of ->release
-doesn't get propagated in sys_close (or indeed anywhere ... no idea why
-it returns an int) thanks to the task work additions, so we'd actually
-have to use the operation whose value is propagated in sys_close() which
-turns out to be flush.
+That's not confusing: ACPI shouldn't be a platform device, but something
+that is should have a platform resource provided by ACPI (or device tree).
+
+So I think the problem is that the documentation is wrong?  Platform
+device isn't for "platform resources" like you said initially?
+
+Or do we have a more fundamental problem: You don't use the word
+"platform" the same way we do?  A "platform" to most people on this
+thread is something designed to be delivered with the box that's not
+amenable to user modification.  That's why we think of UEFI (and ACPI)
+as platform technologies: they come with the box (often they were
+specially crafted for it) and we use their services to discover stuff
+and correctly configure the OS.  In this definition, almost everything
+we do via UEFI manipulates "platform resources".
 
 James
