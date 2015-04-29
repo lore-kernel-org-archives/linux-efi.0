@@ -1,164 +1,194 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
- firmware
-Date: Wed, 29 Apr 2015 11:23:38 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2CC13F37@PGSMSX102.gar.corp.intel.com>
-References: <20150415131906.GC21491@kroah.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
-	 <20150417134924.GB19794@kroah.com>
-	 <20150417143640.GB3671@codeblueprint.co.uk>
-	 <F54AEECA5E2B9541821D670476DAE19C2C279176@PGSMSX101.gar.corp.intel.com>
-	 <20150420144323.GA7261@kroah.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2CC11869@PGSMSX102.gar.corp.intel.com>
-	 <20150421075620.GA11000@kroah.com>
-	 <1429665679.2207.44.camel@HansenPartnership.com>
-	 <CALCETrX9GZmWnfkm-CwKW-2mPvRbNcRaY6tUY=8e0THsPBKMcA@mail.gmail.com>
-	 <20150422132734.GB12062@redhat.com>
-	 <1429715913.2195.22.camel@HansenPartnership.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2CC1259B@PGSMSX102.gar.corp.intel.com>
-	 <1429798187.2170.3.camel@HansenPartnership.com>
-	 <F54AEECA5E2B9541821D670476DAE19C2CC12798@PGSMSX102.gar.corp.intel.com>
-	 <1429888575.2182.20.camel@HansenPartnership.com>
-	 <CALCETrU2G10uGvdB6kVyfMPA=biuZwK7BAeqmKuY=jvN38K2wA@mail.gmail.com>
-	 <1430174136.2314.49.camel@HansenPartnership.com>
-	 <CALCETrXeh+y1XZrdDyhEmy+GK6z7-swZNPYGZybnqzppWAE+Wg@mail.gmail.com>
- <1430175112.2314.56.camel@HansenPartnership.com>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi firmware
+Date: Wed, 29 Apr 2015 11:40:54 -0700
+Message-ID: <CALCETrXBFBqwZ=A+zoC5Lj0Zr2_2hEkSBX0hrLZJRjyDWqjucA@mail.gmail.com>
+References: <20150415131906.GC21491@kroah.com> <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
+ <20150417134924.GB19794@kroah.com> <20150417143640.GB3671@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2C279176@PGSMSX101.gar.corp.intel.com>
+ <20150420144323.GA7261@kroah.com> <F54AEECA5E2B9541821D670476DAE19C2CC11869@PGSMSX102.gar.corp.intel.com>
+ <20150421075620.GA11000@kroah.com> <1429665679.2207.44.camel@HansenPartnership.com>
+ <CALCETrX9GZmWnfkm-CwKW-2mPvRbNcRaY6tUY=8e0THsPBKMcA@mail.gmail.com>
+ <20150422132734.GB12062@redhat.com> <1429715913.2195.22.camel@HansenPartnership.com>
+ <F54AEECA5E2B9541821D670476DAE19C2CC1259B@PGSMSX102.gar.corp.intel.com>
+ <1429798187.2170.3.camel@HansenPartnership.com> <F54AEECA5E2B9541821D670476DAE19C2CC12798@PGSMSX102.gar.corp.intel.com>
+ <1429888575.2182.20.camel@HansenPartnership.com> <CALCETrU2G10uGvdB6kVyfMPA=biuZwK7BAeqmKuY=jvN38K2wA@mail.gmail.com>
+ <1430174136.2314.49.camel@HansenPartnership.com> <CALCETrXeh+y1XZrdDyhEmy+GK6z7-swZNPYGZybnqzppWAE+Wg@mail.gmail.com>
+ <1430175112.2314.56.camel@HansenPartnership.com> <F54AEECA5E2B9541821D670476DAE19C2CC13F37@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430175112.2314.56.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C2CC13F37@PGSMSX102.gar.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Cc: James Bottomley <James.Bottomley@hansenpartnership.com>, Peter Jones <pjones@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ming Lei <ming.lei@canonical.com>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>, Al Viro <viro@zeniv.linux.org.uk>, Linux FS Devel <linux-fsdevel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYW1lcyBCb3R0b21sZXkgW21h
-aWx0bzpKYW1lcy5Cb3R0b21sZXlASGFuc2VuUGFydG5lcnNoaXAuY29tXQ0KPiBTZW50OiBUdWVz
-ZGF5LCBBcHJpbCAyOCwgMjAxNSA2OjUyIEFNDQo+IA0KPiBPbiBNb24sIDIwMTUtMDQtMjcgYXQg
-MTU6NDAgLTA3MDAsIEFuZHkgTHV0b21pcnNraSB3cm90ZToNCj4gPiBPbiBNb24sIEFwciAyNywg
-MjAxNSBhdCAzOjM1IFBNLCBKYW1lcyBCb3R0b21sZXkNCj4gPiA8SmFtZXMuQm90dG9tbGV5QGhh
-bnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4gPiBPbiBNb24sIDIwMTUtMDQtMjcgYXQg
-MTQ6NTkgLTA3MDAsIEFuZHkgTHV0b21pcnNraSB3cm90ZToNCj4gPiA+PiBPbiBGcmksIEFwciAy
-NCwgMjAxNSBhdCA4OjE2IEFNLCBKYW1lcyBCb3R0b21sZXkNCj4gPiA+PiA8SmFtZXMuQm90dG9t
-bGV5QGhhbnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4gPj4gPiBPbiBGcmksIDIwMTUt
-MDQtMjQgYXQgMDI6MTQgKzAwMDAsIEt3ZWgsIEhvY2sgTGVvbmcgd3JvdGU6DQo+ID4gPj4gPj4g
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4+ID4+ID4gRnJvbTogSmFtZXMgQm90
-dG9tbGV5DQo+ID4gPj4gPj4gPiBbbWFpbHRvOkphbWVzLkJvdHRvbWxleUBIYW5zZW5QYXJ0bmVy
-c2hpcC5jb21dDQo+ID4gPj4gPj4gPiBTZW50OiBUaHVyc2RheSwgQXByaWwgMjMsIDIwMTUgMTA6
-MTAgUE0NCj4gPiA+PiA+PiA+DQo+ID4gPj4gPj4gPiBPbiBUaHUsIDIwMTUtMDQtMjMgYXQgMDg6
-MzAgKzAwMDAsIEt3ZWgsIEhvY2sgTGVvbmcgd3JvdGU6DQo+ID4gPj4gPj4gPiA+ID4gLS0tLS1P
-cmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+PiA+PiA+ID4gPiBGcm9tOiBKYW1lcyBCb3R0b21s
-ZXkNCj4gPiA+PiA+PiA+IFttYWlsdG86SmFtZXMuQm90dG9tbGV5QEhhbnNlblBhcnRuZXJzaGlw
-LmNvbV0NCj4gPiA+PiA+PiA+ID4gPiBTZW50OiBXZWRuZXNkYXksIEFwcmlsIDIyLCAyMDE1IDEx
-OjE5IFBNDQo+ID4gPj4gPj4gPiA+ID4NCj4gPiA+PiA+PiA+ID4gPg0KPiA+ID4+ID4+ID4gPiA+
-IFllcywgSSB0aGluayB3ZSd2ZSBhbGwgYWdyZWVkIHdlIGNhbiBkbyBpdCAuLi4gaXQncyBub3cg
-YQ0KPiA+ID4+ID4+ID4gPiA+IHF1ZXN0aW9uIG9mIHdoZXRoZXINCj4gPiA+PiA+PiA+IHdlDQo+
-ID4gPj4gPj4gPiA+ID4gY2FuIHN0b21hY2ggdGhlIGljayBmYWN0b3Igb2YgYWN0dWFsbHkgaW5p
-dGlhdGluZyBhDQo+ID4gPj4gPj4gPiA+ID4gdHJhbnNhY3Rpb24gaW4gY2xvc2UgLi4uIEknbQ0K
-PiA+ID4+ID4+ID4gc3RpbGwNCj4gPiA+PiA+PiA+ID4gPiBmZWVsaW5nIHF1ZWFzeS4NCj4gPiA+
-PiA+PiA+ID4NCj4gPiA+PiA+PiA+ID4gVGhlIGZpbGUgImNsb3NlIiBoZXJlIGNhbiBJIHVuZGVy
-c3RhbmQgdGhhdCB0aGUgZmlsZSBzeXN0ZW0NCj4gPiA+PiA+PiA+ID4gd2lsbCBjYWxsIHRoZQ0K
-PiA+ID4+ID4+ID4gInJlbGVhc2UiDQo+ID4gPj4gPj4gPiA+IGZ1bmN0aW9uIGF0IHRoZSBmaWxl
-X29wZXJhdGlvbnMgc3RydWN0Pw0KPiA+ID4+ID4+ID4gPiBodHRwOi8vbHhyLmZyZWUtZWxlY3Ry
-b25zLmNvbS9zb3VyY2UvaW5jbHVkZS9saW51eC9mcy5oI0wxNTMNCj4gPiA+PiA+PiA+ID4gOA0K
-PiA+ID4+ID4+ID4gPg0KPiA+ID4+ID4+ID4gPiBTbywgSmFtZXMgeW91IGFyZSBtZWFuaW5nIHRo
-YXQgd2UgY291bGQgaW5pdGlhdGluZyB0aGUNCj4gPiA+PiA+PiA+ID4gdXBkYXRlIHRyYW5zYWN0
-aW9uIGluc2lkZSB0aGUgZl9vcHMtPnJlbGVhc2UoKSBhbmQgcmV0dXJuDQo+ID4gPj4gPj4gPiA+
-IHRoZSBlcnJvciBjb2RlIGlmIHVwZGF0ZSBmYWlsZWQgaW4gdGhpcyBmdW5jdGlvbj8NCj4gPiA+
-PiA+PiA+DQo+ID4gPj4gPj4gPiBXZWxsLCB0aGF0J3Mgd2hhdCBJIHdhcyB0aGlua2luZy4gIEhv
-d2V2ZXIgdGhlIHJldHVybiB2YWx1ZSBvZg0KPiA+ID4+ID4+ID4gLT5yZWxlYXNlIGRvZXNuJ3Qg
-Z2V0IHByb3BhZ2F0ZWQgaW4gc3lzX2Nsb3NlIChvciBpbmRlZWQNCj4gPiA+PiA+PiA+IGFueXdo
-ZXJlIC4uLiBubyBpZGVhIHdoeSBpdCByZXR1cm5zIGFuIGludCkgdGhhbmtzIHRvIHRoZSB0YXNr
-DQo+ID4gPj4gPj4gPiB3b3JrIGFkZGl0aW9ucywgc28gd2UnZCBhY3R1YWxseSBoYXZlIHRvIHVz
-ZSB0aGUgb3BlcmF0aW9uDQo+ID4gPj4gPj4gPiB3aG9zZSB2YWx1ZSBpcyBwcm9wYWdhdGVkIGlu
-IHN5c19jbG9zZSgpIHdoaWNoIHR1cm5zIG91dCB0byBiZQ0KPiBmbHVzaC4NCj4gPiA+PiA+PiA+
-DQo+ID4gPj4gPj4gPiBKYW1lcw0KPiA+ID4+ID4+ID4NCj4gPiA+PiA+Pg0KPiA+ID4+ID4+IE9r
-YXksIEkgdGhpbmsgSSBnb3QgeW91LiBKdXN0IHRvIGRvdWJsZSBjaGVjayBmb3IgaW4gY2FzZTog
-eW91DQo+ID4gPj4gPj4gYXJlIG1lYW5pbmcgdG8gaW1wbGVtZW50IGl0IGF0IGZfb3BzLT5mbHVz
-aCgpIGluc3RlYWQgb2YgZl9vcHMtDQo+ID5yZWxlYXNlKCkuDQo+ID4gPj4gPg0KPiA+ID4+ID4g
-V2VsbCwgd2hhdCBJJ20gc2F5aW5nIGlzIHRoYXQgdGhlIG9ubHkgd2F5IHRvIHByb3BhZ2F0ZSBh
-biBlcnJvcg0KPiA+ID4+ID4gdG8gY2xvc2UgaXMgYnkgcmV0dXJuaW5nIG9uZSBmcm9tIHRoZSBm
-bHVzaCBmaWxlX29wZXJhdGlvbi4NCj4gPiA+PiA+DQo+ID4gPj4gPiBMZXQncyBjYyBmc2RldmVs
-IHRvIHNlZSBpZiB0aGV5IGhhdmUgYW55IGJyaWdodGVyIGlkZWFzLg0KPiA+ID4+ID4NCj4gPiA+
-PiA+IFRoZSBwcm9ibGVtIGlzIHdlIG5lZWQgdG8gdXBkYXRlIGZpcm13YXJlIChzZXZlcmFsIG1l
-Z2FieXRlcyBvZg0KPiA+ID4+ID4gaXQpIHZpYSBzdGFuZGFyZCBzeXN0ZW0gdG9vbHMuICBXZSdy
-ZSB0aGlua2luZyBjYXQgdG8gYSBkZXZpY2UuDQo+ID4gPj4gPiBUaGUgcHJvYmxlbSBpcyB0aGF0
-IHdlIG5lZWQgYW4gZXJyb3IgY29kZSBiYWNrIG9uY2UgdGhlIHVwZGF0ZQ0KPiA+ID4+ID4gZ29l
-cyB0aHJvdWdoICh3aGljaCBpdCBjYW4ndCB1bnRpbCB3ZSd2ZSBmZWQgYWxsIHRoZSBmaXJtd2Fy
-ZQ0KPiA+ID4+ID4gZGF0YSBpbnRvIHRoZSBzeXN0ZW0pLiAgVG8gdXNlIHN0YW5kYXJkIHVuaXgg
-dG9vbHMsIHdlIGhhdmUgdG8NCj4gPiA+PiA+IHRyaWdnZXIgb2ZmIHRoZSBzdGFuZGFyZCBzeXN0
-ZW0gY2FsbHMgY2F0IHVzZXMgYW5kIHNpbmNlIHdyaXRlKCkNCj4gPiA+PiA+IHdpbGwgaGFwcGVu
-IGluIGNodW5rcywgdGhlIG9ubHkgd2F5IHRvIGNvbW1pdCB0aGUgdHJhbnNhY3Rpb24gaXMgaW4N
-Cj4gY2xvc2UoKS4NCj4gPiA+PiA+DQo+ID4gPj4gPiBXZSBpbml0aWFsbHkgdGhyb3VnaCBvZiBp
-bml0aWF0aW5nIHRoZSB0cmFuc2FjdGlvbiBpbg0KPiA+ID4+ID4gZl9vcHMtPnJlbGVhc2UgYW5k
-IHJldHVybmluZyB0aGUgZXJyb3IgY29kZSB0aGVyZSwgYnV0IHRoYXQNCj4gPiA+PiA+IGRvZXNu
-J3Qgd29yayBiZWNhdXNlIGl0cyB2YWx1ZSBpc24ndCBhY3R1YWxseSBwcm9wYWdhdGVkLCBzbw0K
-PiA+ID4+ID4gd2UncmUgbm93IHRoaW5raW5nIG9mIGluaXRpYXRpbmcgdGhlIHRyYW5zYWN0aW9u
-IGluIGZfb3BzLT5mbHVzaA0KPiA+ID4+ID4gaW5zdGVhZCAodGhpcyBpcyBhIGRldmljZSwgbm90
-IGEgZmlsZSwgc28gaXQgd29uJ3QgZ2V0IGFueSBvdGhlcg0KPiA+ID4+ID4gZmx1c2hlcnMpLiAg
-QXJlIHRoZXJlIGFueSBvdGhlciB3YXlzIGZvciB1cyB0byBwcm9wYWdhdGUgZXJyb3Igb24gY2xv
-c2U/DQo+ID4gPj4gPg0KPiA+ID4+DQo+ID4gPj4gSSB0aGluayB3ZSBtYXkgZW5kIHVwIHdhbnRp
-bmcgdG8gc3VwcG9ydCBib3RoIFVwZGF0ZUNhcHN1bGUgYW5kDQo+ID4gPj4gUXVlcnlDYXBzdWxl
-Q2FwYWJpbGl0aWVzLCBpbiB3aGljaCBjYXNlIHRoaXMgZ2V0cyBhd2t3YXJkLiAgTWF5YmUNCj4g
-PiA+PiB3ZSByZWFsbHkgc2hvdWxkIGRvIGEgbWlzYyBkZXZpY2UgKyBpb2N0bC4NCj4gPiA+DQo+
-ID4gPiBUbyBiZSBob25lc3QsIEkgaGF0ZSBpb2N0bHMgLi4uIGVzcGVjaWFsbHkgdGhlICJoYXZl
-IHRvIHVzZSBzcGVjaWFsDQo+ID4gPiB0b29scyIgcGFydC4NCj4gPiA+DQo+ID4gPiBXb3VsZCB3
-ZSBldmVyIHdhbnQgdG8gc3VwcG9ydCBRdWVyeUNhcHN1bGVVcGRhdGUoKT8gIFRoZSByZXR1cm4N
-Cj4gPiA+IGNvZGVzIG9uIGVycm9yIGFyZSB0aGUgc2FtZSBhcyBVcGRhdGVDYXBzdWxlKCkgYnV0
-IHRoZSBxdWVyeSBjYWxsDQo+ID4gPiBkb2VzIG5vdGhpbmcgb24gc3VjY2VzcyAoYW5kIHRoZSB1
-cGRhdGUgY2FsbCB1cGRhdGVzLCBvYnZpb3VzbHkpLCBzbw0KPiA+ID4gaXQgc2VlbXMgYSBiaXQg
-cG9pbnRsZXNzIGlmIHNvbWVvbmUncyBnb25lIHRvIHRoZSB0cm91YmxlIG9mIGdldHRpbmcNCj4g
-PiA+IGEgY2Fwc3VsZSAuLi4gdGhleSBvYnZpb3VzbHkgd2FudCB0byBhcHBseSBpdCByYXRoZXIg
-dGhhbiBrbm93IGlmIGl0IGNvdWxkIGJlDQo+IGFwcGxpZWQuDQo+ID4NCj4gPiBJIGNhbiBpbWFn
-aW5lIGEgVUkgdGhhdCB3b3VsZCB0cnkgdG8gdmFsaWRhdGUgYSB0cmFuc2FjdGlvbiBjb25zaXN0
-aW5nDQo+ID4gb2Ygc2V2ZXJhbCBvZiB0aGVzZSB0aGluZ3MsIHRlbGwgdGhlIHVzZXIgd2hldGhl
-ciBpdCdsbCB3b3JrIGFuZA0KPiA+IHdoZXRoZXIgYSByZWJvb3QgaXMgbmVlZGVkLCBhbmQgdGhl
-biBkbyBpdC4NCj4gDQo+IFlvdSBtZWFuIGZvciBkZXBlbmRlbnQgY2Fwc3VsZXM/ICBUaGF0J3Mg
-YSBiaXQgd2F5IG92ZXJ0aGlua2luZyB0aGUgVUVGSQ0KPiBjdXJyZW50IHVzZSBjYXNlICh3aGlj
-aCBpcyBmb3IgZmlybXdhcmUgdXBkYXRlKS4gIEluIHRoZW9yeSwgdGhlIHBlcnNpc3QgYWNyb3Nz
-DQo+IHJlYm9vdCBmbGFnIGNhbiBiZSB1c2VkIGZvciBPUyBwZXJzaXN0ZW50IGluZm9ybWF0aW9u
-IChzdWJqZWN0IHRvIHNvbWVvbmUNCj4gYWN0dWFsbHkgY29taW5nIHVwIHdpdGggYW4gaW1wbGVt
-ZW50YXRpb24pLiAgSSdkIGNvZGUgZm9yIHRoZSBzaW1wbGUgY2FzZToNCj4gZmlybXdhcmUgdXBk
-YXRlIGFuZCBsZXQgdGhlIHJlc3QgdGFrZSBjYXJlIG9mIGl0c2VsZiBpZiBhbmQgd2hlbiB3ZSBo
-YXZlIGFuDQo+IGltcGxlbWVudGF0aW9uLg0KPiANCj4gVGhlIGxhc3QgdGhpbmcgSSB3YW50IHRv
-IHNlZSBsYW5kaW5nIG9uIHRoZSBVRUZJLVNTVCBpcyBzb21lIGhvcGVsZXNzbHkNCj4gY29tcGxl
-eCBhbmQgbmFzdHkgY2Fwc3VsZSBzcGVjIGp1c3QgImJlY2F1c2UgTGludXggaW1wbGVtZW50cyBp
-dCB0aGlzIHdheSIuDQo+IA0KPiA+ID4gQXNzdW1pbmcgd2UgZG8sIHdlIGNvdWxkIGp1c3QgdXNl
-IHRoZSBzYW1lIGVycm9yIG9uIGNsb3NlIG1lY2hhbmlzbSwNCj4gPiA+IGJ1dCB1c2Ugc3lzZnMg
-YmluYXJ5IGF0dHJpYnV0ZXMgLi4uIG9yIHByb2JhYmx5IHNvbWV0aGluZyBuZXcgbGlrZSBhDQo+
-ID4gPiBiaW5hcnkgdHJhbnNhY3Rpb24gYXR0cmlidXRlIHRoYXQgZG9lcyBhbGwgdGhlIHRyYW5z
-YWN0aW9uIG9uIGNsb3NlDQo+ID4gPiBtYWdpYyBmb3IgdXMuDQo+ID4NCj4gPiBZZWFoLCBidXQg
-bm93IHdlIGhhdmUgYm90aCBpbnB1dCBhbmQgb3V0cHV0LCBzbyBhcyB1Z2x5IGFzIGlvY3RsIGlz
-LA0KPiA+IGl0J3MgYSBwcmV0dHkgZ29vZCBtYXRjaC4NCj4gDQo+IE5vLCB3ZSdsbCBoYXZlIHJl
-YWQgYW5kIHdyaXRlLCBzbyB3ZSBjYW4gZG8gdGhhdC4gIEFzIGxvbmcgYXMgdGhlcmUncyBubw0K
-PiB0cmFuc2FjdGlvbiB0aGF0IGNhbid0IGNvbXBsZXRlIGluIGNsb3NlIG9yIGFueSBzZW5zZSBv
-ZiBtdWx0aXBsZSB0cmFuc2FjdGlvbnMNCj4gdGhhdCBhcmVuJ3QgaXNzdWVkIGJ5IG9wZW4gcmVh
-ZC93cml0ZSBjbG9zZSwgd2UncmUgY292ZXJlZC4NCj4gDQo+ID4gU2lnaC4gIFRoaXMgaXMgYWxs
-IG1vcmUgY29tcGxpY2F0ZWQgdGhhbiBpdCBkZXNlcnZlcyB0byBtZS4NCj4gDQo+IEJlIGZhaXI6
-IGl0IGlzIGEgbmV3IGludGVyZmFjZSBhbmQgaXQgd29ya3MgaW4gYSB3YXkgdGhhdCdzIGp1c3Qg
-ZGlmZmVyZW50IGVub3VnaA0KPiBmcm9tIHJlZ3VsYXIgZmlybXdhcmUgdG8gY2F1c2UgYWxsIHRo
-aXMgYm90aGVyLg0KPiANCj4gSmFtZXMNCj4gDQoNCkRlYXIgY29tbXVuaXRpZXMsDQoNCkkgYWdy
-ZWUgd2l0aCBKYW1lcy4gRHVlIHRvIGRpZmZlcmVudCBwZW9wbGUgbWF5IGhhdmUgZGlmZmVyZW50
-IG5lZWRzLiBCdXQNCmZyb20gb3VyIHNpZGUsIHdlIHdvdWxkIGp1c3QgbGlrZSB0byBoYXZlIGEg
-c2ltcGxlIGludGVyZmFjZSBmb3IgdXMgdG8gdXBsb2FkDQp0aGUgZWZpIGNhcHN1bGUgYW5kIHBl
-cmZvcm0gdXBkYXRlLiBXZSBkbyBub3QgaGF2ZSBhbnkgdXNlIGNhc2Ugb3IgbmVlZA0KdG8gZ2V0
-IGluZm8gZnJvbSBRdWVyeUNhcHN1bGVVcGRhdGUoKS4gTGV0IG1lIGdpdmUgYSBzdWdnZXN0aW9u
-IGhlcmU6DQpwbGVhc2UgYWxsb3cgbWUgdG8gZm9jdXMgb24gZGVsaXZlciB0aGlzIHNpbXBsZSBs
-b2FkaW5nIGludGVyZmFjZSBhbmQNCnVwc3RyZWFtIGl0LiBUaGVuIGxhdGVyIHdob2V2ZXIgaGFz
-IHRoZSBhY3R1YWwgdXNlIGNhc2Ugb3IgbmVlZHMgb24gdGhlIGlvY3RsDQppbXBsZW1lbnRhdGlv
-biwgaGUgb3Igc2hlIGNvdWxkIGVuaGFuY2UgYmFzZSBvbiB0aGlzIHNpbXBsZSBsb2FkaW5nIGlu
-dGVyZmFjZS4NCldoYXQgZG8geW91IGd1eXMgdGhpbms/DQoNCkxldCBtZSBzdW1tYXJpemUgdGhl
-IGxhdGVzdCBkZXNpZ24gaWRlYToNCi0gTm8gbG9uZ2VyIGxldmVyYWdlIG9uIGZpcm13YXJlIGNs
-YXNzIGJ1dCB1c2UgbWlzYyBkZXZpY2UNCi0gRG8gbm90IHVzZSBwbGF0Zm9ybSBkZXZpY2UgYnV0
-IHVzZSBkZXZpY2VfY3JlYXRlKCkNCi0gVXNlciBqdXN0IG5lZWQgdG8gcGVyZm9ybSAiY2F0IGZp
-bGUuYmluID4gL3N5cy8uLi4vY2Fwc3VsZV9sb2FkZXIiIGluIHRoZSBzaGVsbA0KLSBGaWxlIG9w
-ZXJhdGlvbiBmdW5jdGlvbnMgaW5jbHVkZTogb3BlbigpLCByZWFkKCksIHdyaXRlKCkgYW5kIGZs
-dXNoKCkNCi0gUGVyZm9ybSBtdXRleCBsb2NrIGluIG9wZW4oKSB0aGVuIHJlbGVhc2UgdGhlIG11
-dGV4IGluIGZsdXNoKCkgZm9yIGF2b2lkaW5nDQogICByYWNlIGNvbmRpdGlvbiAvIGNvbmN1cnJl
-bnQgbG9hZGluZw0KLSBQZXJmb3JtIHRoZSBjYXBzdWxlIHVwZGF0ZSBhbmQgZXJyb3IgcmV0dXJu
-IGF0IGZsdXNoKCkgZnVuY3Rpb24NCg0KSXMgdGhlcmUgYW55dGhpbmcgSSBtaXNzZWQ/IEFueSBv
-bmUgc3RpbGwgaGF2ZSBjb25jZXJuIHdpdGggdGhpcyBpZGVhPw0KVGhhbmtzIGZvciBwcm92aWRp
-bmcgdGhlIGlkZWFzIGFzIHdlbGwgYXMgdGhlIHJldmlldy4NCg0KDQpSZWdhcmRzLA0KV2lsc29u
-DQoNCg==
+On Wed, Apr 29, 2015 at 4:23 AM, Kweh, Hock Leong
+<hock.leong.kweh@intel.com> wrote:
+>> -----Original Message-----
+>> From: James Bottomley [mailto:James.Bottomley@HansenPartnership.com]
+>> Sent: Tuesday, April 28, 2015 6:52 AM
+>>
+>> On Mon, 2015-04-27 at 15:40 -0700, Andy Lutomirski wrote:
+>> > On Mon, Apr 27, 2015 at 3:35 PM, James Bottomley
+>> > <James.Bottomley@hansenpartnership.com> wrote:
+>> > > On Mon, 2015-04-27 at 14:59 -0700, Andy Lutomirski wrote:
+>> > >> On Fri, Apr 24, 2015 at 8:16 AM, James Bottomley
+>> > >> <James.Bottomley@hansenpartnership.com> wrote:
+>> > >> > On Fri, 2015-04-24 at 02:14 +0000, Kweh, Hock Leong wrote:
+>> > >> >> > -----Original Message-----
+>> > >> >> > From: James Bottomley
+>> > >> >> > [mailto:James.Bottomley@HansenPartnership.com]
+>> > >> >> > Sent: Thursday, April 23, 2015 10:10 PM
+>> > >> >> >
+>> > >> >> > On Thu, 2015-04-23 at 08:30 +0000, Kweh, Hock Leong wrote:
+>> > >> >> > > > -----Original Message-----
+>> > >> >> > > > From: James Bottomley
+>> > >> >> > [mailto:James.Bottomley@HansenPartnership.com]
+>> > >> >> > > > Sent: Wednesday, April 22, 2015 11:19 PM
+>> > >> >> > > >
+>> > >> >> > > >
+>> > >> >> > > > Yes, I think we've all agreed we can do it ... it's now a
+>> > >> >> > > > question of whether
+>> > >> >> > we
+>> > >> >> > > > can stomach the ick factor of actually initiating a
+>> > >> >> > > > transaction in close ... I'm
+>> > >> >> > still
+>> > >> >> > > > feeling queasy.
+>> > >> >> > >
+>> > >> >> > > The file "close" here can I understand that the file system
+>> > >> >> > > will call the
+>> > >> >> > "release"
+>> > >> >> > > function at the file_operations struct?
+>> > >> >> > > http://lxr.free-electrons.com/source/include/linux/fs.h#L153
+>> > >> >> > > 8
+>> > >> >> > >
+>> > >> >> > > So, James you are meaning that we could initiating the
+>> > >> >> > > update transaction inside the f_ops->release() and return
+>> > >> >> > > the error code if update failed in this function?
+>> > >> >> >
+>> > >> >> > Well, that's what I was thinking.  However the return value of
+>> > >> >> > ->release doesn't get propagated in sys_close (or indeed
+>> > >> >> > anywhere ... no idea why it returns an int) thanks to the task
+>> > >> >> > work additions, so we'd actually have to use the operation
+>> > >> >> > whose value is propagated in sys_close() which turns out to be
+>> flush.
+>> > >> >> >
+>> > >> >> > James
+>> > >> >> >
+>> > >> >>
+>> > >> >> Okay, I think I got you. Just to double check for in case: you
+>> > >> >> are meaning to implement it at f_ops->flush() instead of f_ops-
+>> >release().
+>> > >> >
+>> > >> > Well, what I'm saying is that the only way to propagate an error
+>> > >> > to close is by returning one from the flush file_operation.
+>> > >> >
+>> > >> > Let's cc fsdevel to see if they have any brighter ideas.
+>> > >> >
+>> > >> > The problem is we need to update firmware (several megabytes of
+>> > >> > it) via standard system tools.  We're thinking cat to a device.
+>> > >> > The problem is that we need an error code back once the update
+>> > >> > goes through (which it can't until we've fed all the firmware
+>> > >> > data into the system).  To use standard unix tools, we have to
+>> > >> > trigger off the standard system calls cat uses and since write()
+>> > >> > will happen in chunks, the only way to commit the transaction is in
+>> close().
+>> > >> >
+>> > >> > We initially through of initiating the transaction in
+>> > >> > f_ops->release and returning the error code there, but that
+>> > >> > doesn't work because its value isn't actually propagated, so
+>> > >> > we're now thinking of initiating the transaction in f_ops->flush
+>> > >> > instead (this is a device, not a file, so it won't get any other
+>> > >> > flushers).  Are there any other ways for us to propagate error on close?
+>> > >> >
+>> > >>
+>> > >> I think we may end up wanting to support both UpdateCapsule and
+>> > >> QueryCapsuleCapabilities, in which case this gets awkward.  Maybe
+>> > >> we really should do a misc device + ioctl.
+>> > >
+>> > > To be honest, I hate ioctls ... especially the "have to use special
+>> > > tools" part.
+>> > >
+>> > > Would we ever want to support QueryCapsuleUpdate()?  The return
+>> > > codes on error are the same as UpdateCapsule() but the query call
+>> > > does nothing on success (and the update call updates, obviously), so
+>> > > it seems a bit pointless if someone's gone to the trouble of getting
+>> > > a capsule ... they obviously want to apply it rather than know if it could be
+>> applied.
+>> >
+>> > I can imagine a UI that would try to validate a transaction consisting
+>> > of several of these things, tell the user whether it'll work and
+>> > whether a reboot is needed, and then do it.
+>>
+>> You mean for dependent capsules?  That's a bit way overthinking the UEFI
+>> current use case (which is for firmware update).  In theory, the persist across
+>> reboot flag can be used for OS persistent information (subject to someone
+>> actually coming up with an implementation).  I'd code for the simple case:
+>> firmware update and let the rest take care of itself if and when we have an
+>> implementation.
+>>
+>> The last thing I want to see landing on the UEFI-SST is some hopelessly
+>> complex and nasty capsule spec just "because Linux implements it this way".
+>>
+>> > > Assuming we do, we could just use the same error on close mechanism,
+>> > > but use sysfs binary attributes ... or probably something new like a
+>> > > binary transaction attribute that does all the transaction on close
+>> > > magic for us.
+>> >
+>> > Yeah, but now we have both input and output, so as ugly as ioctl is,
+>> > it's a pretty good match.
+>>
+>> No, we'll have read and write, so we can do that.  As long as there's no
+>> transaction that can't complete in close or any sense of multiple transactions
+>> that aren't issued by open read/write close, we're covered.
+>>
+>> > Sigh.  This is all more complicated than it deserves to me.
+>>
+>> Be fair: it is a new interface and it works in a way that's just different enough
+>> from regular firmware to cause all this bother.
+>>
+>> James
+>>
+>
+> Dear communities,
+>
+> I agree with James. Due to different people may have different needs. But
+> from our side, we would just like to have a simple interface for us to upload
+> the efi capsule and perform update. We do not have any use case or need
+> to get info from QueryCapsuleUpdate(). Let me give a suggestion here:
+> please allow me to focus on deliver this simple loading interface and
+> upstream it. Then later whoever has the actual use case or needs on the ioctl
+> implementation, he or she could enhance base on this simple loading interface.
+> What do you guys think?
+>
+> Let me summarize the latest design idea:
+> - No longer leverage on firmware class but use misc device
+> - Do not use platform device but use device_create()
+> - User just need to perform "cat file.bin > /sys/.../capsule_loader" in the shell
+
+If you do this, there's no need for the misc device.
+
+> - File operation functions include: open(), read(), write() and flush()
+> - Perform mutex lock in open() then release the mutex in flush() for avoiding
+>    race condition / concurrent loading
+
+Make sure the mutex operation is killable, then, and maybe even interruptable.
+
+> - Perform the capsule update and error return at flush() function
+>
+> Is there anything I missed? Any one still have concern with this idea?
+> Thanks for providing the ideas as well as the review.
+>
+
+If it works (and cat really does fail reliably), then it seems okay to me.
+
+However, since I like pulling increasing numbers of my hats, someone
+should verify that the common embedded cat implementations are also
+okay with this.  For example, I haven't yet found any code in
+busybox's cat implementation that closes stdout.
+
+Given that the main targets of this (for now, at least) are embedded,
+this might be a problem.
+
+--Andy
