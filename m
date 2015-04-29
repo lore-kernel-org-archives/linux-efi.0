@@ -1,8 +1,8 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
 Subject: Re: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
  firmware
-Date: Wed, 29 Apr 2015 14:37:56 -0700
-Message-ID: <1430343476.2189.28.camel@HansenPartnership.com>
+Date: Wed, 29 Apr 2015 14:39:14 -0700
+Message-ID: <1430343554.2189.30.camel@HansenPartnership.com>
 References: <20150415131906.GC21491@kroah.com>
 	 <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
 	 <20150417134924.GB19794@kroah.com>
@@ -24,31 +24,65 @@ References: <20150415131906.GC21491@kroah.com>
 	 <CALCETrXeh+y1XZrdDyhEmy+GK6z7-swZNPYGZybnqzppWAE+Wg@mail.gmail.com>
 	 <1430175112.2314.56.camel@HansenPartnership.com>
 	 <F54AEECA5E2B9541821D670476DAE19C2CC13F37@PGSMSX102.gar.corp.intel.com>
-	 <CALCETrXBFBqwZ=A+zoC5Lj0Zr2_2hEkSBX0hrLZJRjyDWqjucA@mail.gmail.com>
+	 <1430343304.2189.25.camel@HansenPartnership.com>
+	 <CALCETrVYYxGb64D3fFYRazJLAdHtMquQSvcAH0e5goNMVehaEw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CALCETrXBFBqwZ=A+zoC5Lj0Zr2_2hEkSBX0hrLZJRjyDWqjucA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Cc: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CALCETrVYYxGb64D3fFYRazJLAdHtMquQSvcAH0e5goNMVehaEw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Peter Jones <pjones@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Matt Fleming <matt@codeblueprint.co.uk>, Ming Lei <ming.lei@canonical.com>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>, Al Viro <viro@zeniv.linux.org.uk>, Linux FS Devel <linux-fsdevel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 2015-04-29 at 11:40 -0700, Andy Lutomirski wrote:
-> If it works (and cat really does fail reliably), then it seems okay to me.
+On Wed, 2015-04-29 at 14:36 -0700, Andy Lutomirski wrote:
+> On Wed, Apr 29, 2015 at 2:35 PM, James Bottomley
+> <James.Bottomley@hansenpartnership.com> wrote:
+> > On Wed, 2015-04-29 at 11:23 +0000, Kweh, Hock Leong wrote:
+> >> I agree with James. Due to different people may have different needs. But
+> >> from our side, we would just like to have a simple interface for us to upload
+> >> the efi capsule and perform update. We do not have any use case or need
+> >> to get info from QueryCapsuleUpdate(). Let me give a suggestion here:
+> >> please allow me to focus on deliver this simple loading interface and
+> >> upstream it. Then later whoever has the actual use case or needs on the ioctl
+> >> implementation, he or she could enhance base on this simple loading interface.
+> >> What do you guys think?
+> >>
+> >> Let me summarize the latest design idea:
+> >> - No longer leverage on firmware class but use misc device
+> >> - Do not use platform device but use device_create()
+> >> - User just need to perform "cat file.bin > /sys/.../capsule_loader" in the shell
+> >> - File operation functions include: open(), read(), write() and flush()
+> >> - Perform mutex lock in open() then release the mutex in flush() for avoiding
+> >>    race condition / concurrent loading
+> >> - Perform the capsule update and error return at flush() function
+> >>
+> >> Is there anything I missed? Any one still have concern with this idea?
+> >> Thanks for providing the ideas as well as the review.
+> >
+> > I think that's pretty much it.
+> >
+> > Why don't you let me construct a straw man patch.  It's going to be a
+> > bit controversial because it involves adding flush operations to sysfs
+> > and kernfs, slicing apart firmware_class.c to extract the transaction
+> > handling stuff and creating an new efi update capsule file which makes
+> > use of it.
+> >
+> > Once we have code, we at least have something more concrete to argue
+> > over.
 > 
-> However, since I like pulling increasing numbers of my hats, someone
-> should verify that the common embedded cat implementations are also
-> okay with this.  For example, I haven't yet found any code in
-> busybox's cat implementation that closes stdout.
+> Would it be worth checking whether busybox is also okay with it first?
+> (Sorry to be a naysayer.)
 > 
-> Given that the main targets of this (for now, at least) are embedded,
-> this might be a problem.
+> It would be a shame if we do all this to keep the userspace footprint
+> light and then it doesn't work for non-coreutils userspace.
 
-I think that rabbit is a bit mixie: we already demonstrated we *can*
-collect the error in close.  It's up to the fw vendors who want to use
-this method to make sure they have proper tools (and if busybox cat
-needs fixing, to fix it before they ship).
+I don't think so, because we can fix busybox if it's a problem.  The
+embedded people wanting this control the tool space, so they can decide
+to use the fixed version.
+
+So yes, someone should check and fix busybox cat if broken, but no, it's
+not a blocker.
 
 James
