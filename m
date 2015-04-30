@@ -1,55 +1,70 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: RE: [RFC 0/3] Add capsule update using error on close semantics
-Date: Thu, 30 Apr 2015 09:30:53 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C2CC14303@PGSMSX102.gar.corp.intel.com>
-References: <1430348859.2189.37.camel@HansenPartnership.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] efi: dmi: List SMBIOS3 table before SMBIOS table
+Date: Thu, 30 Apr 2015 11:30:06 +0100
+Message-ID: <20150430103006.GA3014@codeblueprint.co.uk>
+References: <20150428093012.4c859240@endymion.delvare>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1430348859.2189.37.camel@HansenPartnership.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: James Bottomley <James.Bottomley@HansenPartnership.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@amacapital.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Peter Jones <pjones@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, "Ong, Boon Leong" <boon.leong.ong@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150428093012.4c859240-R0o5gVi9kd7kN2dkZ6Wm7A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ivan.khoronzhuk" <ivan.khoronzhuk-hExfYMNmJl/Cnp4W7fqMDg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYW1lcyBCb3R0b21sZXkgW21h
-aWx0bzpKYW1lcy5Cb3R0b21sZXlASGFuc2VuUGFydG5lcnNoaXAuY29tXQ0KPiBTZW50OiBUaHVy
-c2RheSwgQXByaWwgMzAsIDIwMTUgNzowOCBBTQ0KPiBUbzogbGludXgtZWZpQHZnZXIua2VybmVs
-Lm9yZw0KPiBDYzogS3dlaCwgSG9jayBMZW9uZzsgTEtNTDsgQW5keSBMdXRvbWlyc2tpOyBHcmVn
-IEtyb2FoLUhhcnRtYW47IFBldGVyDQo+IEpvbmVzDQo+IFN1YmplY3Q6IFtSRkMgMC8zXSBBZGQg
-Y2Fwc3VsZSB1cGRhdGUgdXNpbmcgZXJyb3Igb24gY2xvc2Ugc2VtYW50aWNzDQo+IA0KPiBUaGlz
-IGlzIGEgc3RyYXcgbWFuIGltcGxlbWVudGF0aW9uLiAgVGhlIHRocmVlIHBhdGNoZXMgZmlyc3Rs
-eSB0aHJlYWQgdGhlDQo+IG5lZWRlZCAtPmZsdXNoKCkgZmlsZSBvcCB0aHJvdWdoIHN5c2ZzIGFu
-ZCBrZXJuZnMuICBUaGUgbmV4dCBvbmUgZXh0cmFjdHMNCj4gdHJhbnNhY3Rpb24gYnVmZmVyIGhh
-bmRsaW5nIGZyb20gZmlybXdhcmVfY2xhc3MuYyBhbmQgbWFrZXMgaXQgZ2VuZXJpYyBpbiBhDQo+
-IGxpYiBoZWxwZXIgYW5kIHRoZSB0aGlyZCBwYXRjaCBhZGRzIGEgYmFyZSBib25lcyBjYXBzdWxl
-IHVwZGF0ZSAoSSBzdXNwZWN0DQo+IHRoZSBsYXR0ZXIgbmVlZHMgbW9yZSB3b3JrLCBzaW5jZSBp
-dCBkb2Vzbid0IGltcGxlbWVudCB0aGUgc2NhdHRlcmxpc3QpLg0KPiANCj4gSmFtZXMgQm90dG9t
-bGV5ICgzKToNCj4gICBzeXNmcyxrZXJuZnM6IGFkZCBmbHVzaCBvcGVyYXRpb24NCj4gICBmaXJt
-d2FyZV9jbGFzczogc3BsaXQgb3V0IHRyYW5zYWN0aW9uIGhlbHBlcnMNCj4gICBlZmk6IGFkZCBj
-YXBzdWxlIHVwZGF0ZSBjYXBhYmlsaXR5IHZpYSBzeXNmcw0KPiANCj4gIGRyaXZlcnMvYmFzZS9m
-aXJtd2FyZV9jbGFzcy5jICAgICAgfCAxMTcgKysrKy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LQ0KPiAgZHJpdmVycy9maXJtd2FyZS9lZmkvTWFrZWZpbGUgICAgICB8ICAgMiArLQ0KPiAgZHJp
-dmVycy9maXJtd2FyZS9lZmkvY2Fwc3VsZS5jICAgICB8ICA3OCArKysrKysrKysrKysrKysrKysr
-KysNCj4gIGRyaXZlcnMvZmlybXdhcmUvZWZpL2NhcHN1bGUuaCAgICAgfCAgIDIgKw0KPiAgZHJp
-dmVycy9maXJtd2FyZS9lZmkvZWZpLmMgICAgICAgICB8ICAgOCArKysNCj4gIGZzL2tlcm5mcy9m
-aWxlLmMgICAgICAgICAgICAgICAgICAgfCAgMTYgKysrKysNCj4gIGZzL3N5c2ZzL2ZpbGUuYyAg
-ICAgICAgICAgICAgICAgICAgfCAgMTYgKysrKysNCj4gIGluY2x1ZGUvbGludXgva2VybmZzLmgg
-ICAgICAgICAgICAgfCAgIDIgKw0KPiAgaW5jbHVkZS9saW51eC9zeXNmcy5oICAgICAgICAgICAg
-ICB8ICAgMiArDQo+ICBpbmNsdWRlL2xpbnV4L3RyYW5zYWN0aW9uX2hlbHBlci5oIHwgIDI2ICsr
-KysrKysNCj4gIGxpYi9NYWtlZmlsZSAgICAgICAgICAgICAgICAgICAgICAgfCAgIDIgKy0NCj4g
-IGxpYi90cmFuc2FjdGlvbl9oZWxwZXIuYyAgICAgICAgICAgfCAxMzcNCj4gKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKw0KPiAgMTIgZmlsZXMgY2hhbmdlZCwgMzA0IGluc2Vy
-dGlvbnMoKyksIDEwNCBkZWxldGlvbnMoLSkgIGNyZWF0ZSBtb2RlIDEwMDY0NA0KPiBkcml2ZXJz
-L2Zpcm13YXJlL2VmaS9jYXBzdWxlLmMgIGNyZWF0ZSBtb2RlIDEwMDY0NA0KPiBkcml2ZXJzL2Zp
-cm13YXJlL2VmaS9jYXBzdWxlLmggIGNyZWF0ZSBtb2RlIDEwMDY0NA0KPiBpbmNsdWRlL2xpbnV4
-L3RyYW5zYWN0aW9uX2hlbHBlci5oDQo+ICBjcmVhdGUgbW9kZSAxMDA2NDQgbGliL3RyYW5zYWN0
-aW9uX2hlbHBlci5jDQo+IA0KPiBKYW1lcw0KDQpIaSBKYW1lcywNCg0KSSBsaWtlIHRoZSBzeXNm
-cyBlbmhhbmNlbWVudCBidXQgcmVxdWlyZSBHcmVnIHRvIGJ1eSBpbiB0aGUgaWRlYS4NCkZvciB0
-aGUgZWZpIGNhcHN1bGUgcGFydCwgTWF0dCBoYXMgaW1wbGVtZW50ZWQgc29tZSBBUElzIHdoZXJl
-DQp5b3UgY291bGQgZ2V0IHRoZSBwYXRjaCBhdCBodHRwOi8vcGVybWFsaW5rLmdtYW5lLm9yZy9n
-bWFuZS5saW51eC5rZXJuZWwuZWZpLzQ4MzcuDQpTbywgSSB3b3VsZCB0aGluayB0aGF0IGxldmVy
-YWdpbmcgdGhlIEFQSXMgdGhhdCBNYXR0IGhhcyBjcmVhdGVkDQppcyBhIGJldHRlciBjaG9pY2Uu
-DQoNCg0KVGhhbmtzICYgUmVnYXJkcywNCldpbHNvbg0KDQo=
+On Tue, 28 Apr, at 09:30:12AM, Jean Delvare wrote:
+> The SMBIOS3 table should appear before the SMBIOS table in
+> /sys/firmware/efi/systab. This allows user-space utilities which
+> support both to pick the SMBIOS3 table with a single pass on systems
+> where both are implemented. The SMBIOS3 entry point is more capable
+> than the SMBIOS entry point so it should be preferred.
+> 
+> This follows the same logic as the ACPI20 table being listed before
+> the ACPI table.
+ 
+Now we need to ask the reverse question: Do any userspace utils use the
+last SMBIOS table entry as the preferred one? I suspect not because
+SMBIOS3 is so new but we need to highlight the risk of breaking
+functionality since this file forms an ABI.
+
+Anyone aware of such a tool?
+
+Also Jean, this patch could do with a new comment describing the
+importance of the table entry order so we don't break it in the future.
+
+> Signed-off-by: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi.c |    4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> --- linux-4.1-rc1.orig/drivers/firmware/efi/efi.c	2015-04-27 02:59:10.000000000 +0200
+> +++ linux-4.1-rc1/drivers/firmware/efi/efi.c	2015-04-28 09:19:20.910416344 +0200
+> @@ -85,10 +85,10 @@ static ssize_t systab_show(struct kobjec
+>  		str += sprintf(str, "ACPI20=0x%lx\n", efi.acpi20);
+>  	if (efi.acpi != EFI_INVALID_TABLE_ADDR)
+>  		str += sprintf(str, "ACPI=0x%lx\n", efi.acpi);
+> -	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
+> -		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
+>  	if (efi.smbios3 != EFI_INVALID_TABLE_ADDR)
+>  		str += sprintf(str, "SMBIOS3=0x%lx\n", efi.smbios3);
+> +	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
+> +		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
+>  	if (efi.hcdp != EFI_INVALID_TABLE_ADDR)
+>  		str += sprintf(str, "HCDP=0x%lx\n", efi.hcdp);
+>  	if (efi.boot_info != EFI_INVALID_TABLE_ADDR)
+> 
+> 
+> -- 
+> Jean Delvare
+> SUSE L3 Support
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
