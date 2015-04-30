@@ -1,48 +1,89 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [RFC 3/3] efi: add capsule update capability via sysfs
-Date: Wed, 29 Apr 2015 16:39:54 -0700
-Message-ID: <CALCETrWhe7YWYME0CLo4py1QYOaYptqWDZtrUdnFocdC6SqbLg@mail.gmail.com>
-References: <1430348859.2189.37.camel@HansenPartnership.com>
- <1430349130.2189.43.camel@HansenPartnership.com> <CALCETrV8bRj_CmCwZfHSV8bMF-vv0sab_7v5t0rpdhx2ib=wPw@mail.gmail.com>
- <1430350592.2189.50.camel@HansenPartnership.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v4 2/2] efi: an sysfs interface for user to update efi
+ firmware
+Date: Thu, 30 Apr 2015 09:17:54 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C2CC142E1@PGSMSX102.gar.corp.intel.com>
+References: <20150415131906.GC21491@kroah.com>
+ <F54AEECA5E2B9541821D670476DAE19C2B8D2E74@PGSMSX102.gar.corp.intel.com>
+ <20150417134924.GB19794@kroah.com>
+ <20150417143640.GB3671@codeblueprint.co.uk>
+ <F54AEECA5E2B9541821D670476DAE19C2C279176@PGSMSX101.gar.corp.intel.com>
+ <20150420144323.GA7261@kroah.com>
+ <F54AEECA5E2B9541821D670476DAE19C2CC11869@PGSMSX102.gar.corp.intel.com>
+ <20150421075620.GA11000@kroah.com>
+ <1429665679.2207.44.camel@HansenPartnership.com>
+ <CALCETrX9GZmWnfkm-CwKW-2mPvRbNcRaY6tUY=8e0THsPBKMcA@mail.gmail.com>
+ <20150422132734.GB12062@redhat.com>
+ <1429715913.2195.22.camel@HansenPartnership.com>
+ <F54AEECA5E2B9541821D670476DAE19C2CC1259B@PGSMSX102.gar.corp.intel.com>
+ <1429798187.2170.3.camel@HansenPartnership.com>
+ <F54AEECA5E2B9541821D670476DAE19C2CC12798@PGSMSX102.gar.corp.intel.com>
+ <1429888575.2182.20.camel@HansenPartnership.com>
+ <CALCETrU2G10uGvdB6kVyfMPA=biuZwK7BAeqmKuY=jvN38K2wA@mail.gmail.com>
+ <1430174136.2314.49.camel@HansenPartnership.com>
+ <CALCETrXeh+y1XZrdDyhEmy+GK6z7-swZNPYGZybnqzppWAE+Wg@mail.gmail.com>
+ <1430175112.2314.56.camel@HansenPartnership.com>
+ <F54AEECA5E2B9541821D670476DAE19C2CC13F37@PGSMSX102.gar.corp.intel.com>
+ <CALCETrXBFBqwZ=A+zoC5Lj0Zr2_2hEkSBX0hrLZJRjyDWqjucA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1430350592.2189.50.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+In-Reply-To: <CALCETrXBFBqwZ=A+zoC5Lj0Zr2_2hEkSBX0hrLZJRjyDWqjucA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ming Lei <ming.lei-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Al Viro <viro-RmSDqhL/yNMiFSDQTTA3OLVCufUGDwFn@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 29, 2015 at 4:36 PM, James Bottomley
-<James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
-> On Wed, 2015-04-29 at 16:25 -0700, Andy Lutomirski wrote:
->> On Wed, Apr 29, 2015 at 4:12 PM, James Bottomley
->> <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
->> > From: James Bottomley <JBottomley-O3H1v1f1dlM@public.gmane.org>
->> >
->> > The firmware update should be applied simply by doing
->> >
->> > cat fw_file > /sys/firmware/capsule/update
->> >
->> > With a properly formatted fw_file.  Any error will be returned on close of
->> > stdout.  util-linux returns errors correctly from closing stdout, but firmware
->> > shippers should check whatever utilities package they use correctly captures
->> > the error return on close.
->>
->> s/util-linux/coreutils/
->>
->> This still makes my API sense itch.  It's kind of an abuse of
->> open/write/close.
->
-> It works ... and according to Alan, NFS is already doing it.  I suppose
-> we can have a do over of the whole debate again ...
-
-I think that NFS is at least writing to actual files as opposed to
-trying to implement some kind of transactions.
-
-Blech, whatever.  This approach certainly works, as long as no one
-trips over the busybox thing.  Maybe there should also be
-/sys/something_that_errors_on_close that people can use as a test.
-
---Andy
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
+aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBUaHVyc2RheSwgQXByaWwgMzAsIDIw
+MTUgMjo0MSBBTQ0KPiANCj4gT24gV2VkLCBBcHIgMjksIDIwMTUgYXQgNDoyMyBBTSwgS3dlaCwg
+SG9jayBMZW9uZw0KPiA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4gd3JvdGU6DQo+ID4NCj4g
+PiBEZWFyIGNvbW11bml0aWVzLA0KPiA+DQo+ID4gSSBhZ3JlZSB3aXRoIEphbWVzLiBEdWUgdG8g
+ZGlmZmVyZW50IHBlb3BsZSBtYXkgaGF2ZSBkaWZmZXJlbnQgbmVlZHMuDQo+ID4gQnV0IGZyb20g
+b3VyIHNpZGUsIHdlIHdvdWxkIGp1c3QgbGlrZSB0byBoYXZlIGEgc2ltcGxlIGludGVyZmFjZSBm
+b3INCj4gPiB1cyB0byB1cGxvYWQgdGhlIGVmaSBjYXBzdWxlIGFuZCBwZXJmb3JtIHVwZGF0ZS4g
+V2UgZG8gbm90IGhhdmUgYW55DQo+ID4gdXNlIGNhc2Ugb3IgbmVlZCB0byBnZXQgaW5mbyBmcm9t
+IFF1ZXJ5Q2Fwc3VsZVVwZGF0ZSgpLiBMZXQgbWUgZ2l2ZSBhDQo+IHN1Z2dlc3Rpb24gaGVyZToN
+Cj4gPiBwbGVhc2UgYWxsb3cgbWUgdG8gZm9jdXMgb24gZGVsaXZlciB0aGlzIHNpbXBsZSBsb2Fk
+aW5nIGludGVyZmFjZSBhbmQNCj4gPiB1cHN0cmVhbSBpdC4gVGhlbiBsYXRlciB3aG9ldmVyIGhh
+cyB0aGUgYWN0dWFsIHVzZSBjYXNlIG9yIG5lZWRzIG9uDQo+ID4gdGhlIGlvY3RsIGltcGxlbWVu
+dGF0aW9uLCBoZSBvciBzaGUgY291bGQgZW5oYW5jZSBiYXNlIG9uIHRoaXMgc2ltcGxlDQo+IGxv
+YWRpbmcgaW50ZXJmYWNlLg0KPiA+IFdoYXQgZG8geW91IGd1eXMgdGhpbms/DQo+ID4NCj4gPiBM
+ZXQgbWUgc3VtbWFyaXplIHRoZSBsYXRlc3QgZGVzaWduIGlkZWE6DQo+ID4gLSBObyBsb25nZXIg
+bGV2ZXJhZ2Ugb24gZmlybXdhcmUgY2xhc3MgYnV0IHVzZSBtaXNjIGRldmljZQ0KPiA+IC0gRG8g
+bm90IHVzZSBwbGF0Zm9ybSBkZXZpY2UgYnV0IHVzZSBkZXZpY2VfY3JlYXRlKCkNCj4gPiAtIFVz
+ZXIganVzdCBuZWVkIHRvIHBlcmZvcm0gImNhdCBmaWxlLmJpbiA+IC9zeXMvLi4uL2NhcHN1bGVf
+bG9hZGVyIg0KPiA+IGluIHRoZSBzaGVsbA0KPiANCj4gSWYgeW91IGRvIHRoaXMsIHRoZXJlJ3Mg
+bm8gbmVlZCBmb3IgdGhlIG1pc2MgZGV2aWNlLg0KDQpJIGRvIHRoaXMgc28gdGhhdCBpbiB0aGUg
+ZnV0dXJlIHdoZW4gc29tZW9uZSB3YW50IHRvIGltcGxlbWVudCB0aGUNCklvY3RsKCksIGhlIG9y
+IHNoZSBjYW4gYmFzZSBvbiB0aGlzIGFuZCBleHBhbmQgaXQuDQoNCj4gDQo+ID4gLSBGaWxlIG9w
+ZXJhdGlvbiBmdW5jdGlvbnMgaW5jbHVkZTogb3BlbigpLCByZWFkKCksIHdyaXRlKCkgYW5kDQo+
+ID4gZmx1c2goKQ0KPiA+IC0gUGVyZm9ybSBtdXRleCBsb2NrIGluIG9wZW4oKSB0aGVuIHJlbGVh
+c2UgdGhlIG11dGV4IGluIGZsdXNoKCkgZm9yDQo+IGF2b2lkaW5nDQo+ID4gICAgcmFjZSBjb25k
+aXRpb24gLyBjb25jdXJyZW50IGxvYWRpbmcNCj4gDQo+IE1ha2Ugc3VyZSB0aGUgbXV0ZXggb3Bl
+cmF0aW9uIGlzIGtpbGxhYmxlLCB0aGVuLCBhbmQgbWF5YmUgZXZlbg0KPiBpbnRlcnJ1cHRhYmxl
+Lg0KDQpPa2F5Lg0KDQo+IA0KPiA+IC0gUGVyZm9ybSB0aGUgY2Fwc3VsZSB1cGRhdGUgYW5kIGVy
+cm9yIHJldHVybiBhdCBmbHVzaCgpIGZ1bmN0aW9uDQo+ID4NCj4gPiBJcyB0aGVyZSBhbnl0aGlu
+ZyBJIG1pc3NlZD8gQW55IG9uZSBzdGlsbCBoYXZlIGNvbmNlcm4gd2l0aCB0aGlzIGlkZWE/DQo+
+ID4gVGhhbmtzIGZvciBwcm92aWRpbmcgdGhlIGlkZWFzIGFzIHdlbGwgYXMgdGhlIHJldmlldy4N
+Cj4gPg0KPiANCj4gSWYgaXQgd29ya3MgKGFuZCBjYXQgcmVhbGx5IGRvZXMgZmFpbCByZWxpYWJs
+eSksIHRoZW4gaXQgc2VlbXMgb2theSB0byBtZS4NCj4gDQo+IEhvd2V2ZXIsIHNpbmNlIEkgbGlr
+ZSBwdWxsaW5nIGluY3JlYXNpbmcgbnVtYmVycyBvZiBteSBoYXRzLCBzb21lb25lIHNob3VsZA0K
+PiB2ZXJpZnkgdGhhdCB0aGUgY29tbW9uIGVtYmVkZGVkIGNhdCBpbXBsZW1lbnRhdGlvbnMgYXJl
+IGFsc28gb2theSB3aXRoDQo+IHRoaXMuICBGb3IgZXhhbXBsZSwgSSBoYXZlbid0IHlldCBmb3Vu
+ZCBhbnkgY29kZSBpbiBidXN5Ym94J3MgY2F0DQo+IGltcGxlbWVudGF0aW9uIHRoYXQgY2xvc2Vz
+IHN0ZG91dC4NCj4gDQo+IEdpdmVuIHRoYXQgdGhlIG1haW4gdGFyZ2V0cyBvZiB0aGlzIChmb3Ig
+bm93LCBhdCBsZWFzdCkgYXJlIGVtYmVkZGVkLCB0aGlzDQo+IG1pZ2h0IGJlIGEgcHJvYmxlbS4N
+Cj4gDQoNCkkgdGhpbmsgd2Ugc2hvdWxkbid0IGZvY3VzIG9uIHRoZSBjYXQgaW1wbGVtZW50YXRp
+b24gZm9yIHRoZSBjbG9zZSBpc3N1ZS4NCg0KTXkgdW5kZXJzdGFuZGluZyBhYm91dCB0aGlzIGFj
+dGlvbjoNCmNhdCBmaWxlLmJpbiA+IC9zeXMvLi4uLi9jYXBzdWxlX2xvYWRlcg0KSXQgaXMgYWN0
+dWFsbHkgdGhlICI+IiAoSU8gcmVkaXJlY3Rpb24pIHdobyBwZXJmb3JtIHRoZSBvcGVuIHdyaXRl
+ICYgY2xvc2UNCnRvIHRoaXMgIi9zeXMvLi4uLi9jYXBzdWxlX2xvYWRlciIgZmlsZSBub3RlIGFu
+ZCBub3QgdGhlICJjYXQiIGRvIGl0Lg0KU28sIEkgdGhpbmsgeW91ciBhbnN3ZXIgY2FuIGJlIGZv
+dW5kIGF0IFNoZWxsIHNvdXJjZSBjb2RlLg0KDQpNb3JlIGluZm8gYWJvdXQgdGhlIElPIHJlZGly
+ZWN0aW9uIGNhbiBiZSBmb3VuZCBhdDoNCmh0dHA6Ly93d3cudGxkcC5vcmcvTERQL2Ficy9odG1s
+L2lvLXJlZGlyZWN0aW9uLmh0bWwNCg0KQnVzeWJveCBTaGVsbCBTb3VjZSBjb2RlIGNhbiBiZSBm
+b3VuZCBhdDoNCmh0dHBzOi8vbHhyLm1pc3NpbmdsaW5rZWxlY3Ryb25pY3MuY29tL2J1c3lib3gv
+c2hlbGwvYXNoLmMNCg0KDQpSZWdhcmRzLA0KV2lsc29uDQo=
