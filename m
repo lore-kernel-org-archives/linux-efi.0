@@ -1,59 +1,53 @@
-From: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
-Subject: [PATCH v2] efi: dmi: List SMBIOS3 table before SMBIOS table
-Date: Thu, 30 Apr 2015 15:23:05 +0200
-Message-ID: <20150430152305.26b89bd3@endymion.delvare>
+From: James Bottomley <James.Bottomley@HansenPartnership.com>
+Subject: Re: [RFC 2/3] firmware_class: split out transaction helpers
+Date: Thu, 30 Apr 2015 07:39:58 -0700
+Message-ID: <1430404798.2167.5.camel@HansenPartnership.com>
+References: <1430348859.2189.37.camel@HansenPartnership.com>
+	 <1430349052.2189.41.camel@HansenPartnership.com>
+	 <20150430131120.GB17936@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ivan.khoronzhuk" <ivan.khoronzhuk-hExfYMNmJl/Cnp4W7fqMDg@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20150430131120.GB17936@kroah.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-efi@vger.kernel.org, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, LKML <linux-kernel@vger.kernel.org>, Andy Lutomirski <luto@amacapital.net>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-The SMBIOS3 table should appear before the SMBIOS table in
-/sys/firmware/efi/systab. This allows user-space utilities which
-support both to pick the SMBIOS3 table with a single pass on systems
-where both are implemented. The SMBIOS3 entry point is more capable
-than the SMBIOS entry point so it should be preferred.
+On Thu, 2015-04-30 at 15:11 +0200, Greg Kroah-Hartman wrote:
+> On Wed, Apr 29, 2015 at 04:10:52PM -0700, James Bottomley wrote:
+> > From: James Bottomley <JBottomley@Odin.com>
+> > 
+> > The firmware class contains code to manage an arbitrary sized buffer for
+> > discrete read and write operations.  We need precisely this ability to update
+> > firmware capsule files (and likely for other transactions as well), so split
+> > out the capability into a library helper
+> > 
+> > Signed-off-by: James Bottomley <JBottomley@Odin.com>
+> > ---
+> >  drivers/base/firmware_class.c      | 117 ++++---------------------------
+> >  include/linux/transaction_helper.h |  26 +++++++
+> >  lib/Makefile                       |   2 +-
+> >  lib/transaction_helper.c           | 137 +++++++++++++++++++++++++++++++++++++
+> >  4 files changed, 179 insertions(+), 103 deletions(-)
+> >  create mode 100644 include/linux/transaction_helper.h
+> >  create mode 100644 lib/transaction_helper.c
+> 
+> Interesting, do you think there are other places that can use this
+> "transaction_helper" library?
 
-This follows the same logic as the ACPI20 table being listed before
-the ACPI table.
+Certainly, everywhere binary attributes are used for more than a page of
+data, I think.  Certainly things like the PPC nvram dump read stuff and
+probably a few other architecture specific bin files for nvram.  I
+imagine there'll be a long series of janatorial patches if people are
+interested.
 
-Signed-off-by: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
-Changes since v1:
- * Added a comment explaining why SMBIOS3 must be listed before SMBIOS,
-   so that it doesn't get accidentally broken in the future.
+>   And a bit more documentation would be
+> nice, but on the whole, no objection from me.
 
- drivers/firmware/efi/efi.c |    9 +++++++--
- 1 file changed, 7 insertions(+), 2 deletions(-)
+Yes, that's why it's an RFC.I wanted to show the plan in code, get all
+the modification suggestions and then do the proper implementation.
+Docs come after the API is agreed.
 
---- linux-4.1-rc1.orig/drivers/firmware/efi/efi.c	2015-04-28 16:31:46.614397242 +0200
-+++ linux-4.1-rc1/drivers/firmware/efi/efi.c	2015-04-30 15:15:46.414862079 +0200
-@@ -85,10 +85,15 @@ static ssize_t systab_show(struct kobjec
- 		str += sprintf(str, "ACPI20=0x%lx\n", efi.acpi20);
- 	if (efi.acpi != EFI_INVALID_TABLE_ADDR)
- 		str += sprintf(str, "ACPI=0x%lx\n", efi.acpi);
--	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
--		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
-+	/*
-+	 * If both SMBIOS and SMBIOS3 entry points are implemented, the
-+	 * SMBIOS3 entry point shall be preferred, so we list it first to
-+	 * let applications stop parsing after the first match.
-+	 */
- 	if (efi.smbios3 != EFI_INVALID_TABLE_ADDR)
- 		str += sprintf(str, "SMBIOS3=0x%lx\n", efi.smbios3);
-+	if (efi.smbios != EFI_INVALID_TABLE_ADDR)
-+		str += sprintf(str, "SMBIOS=0x%lx\n", efi.smbios);
- 	if (efi.hcdp != EFI_INVALID_TABLE_ADDR)
- 		str += sprintf(str, "HCDP=0x%lx\n", efi.hcdp);
- 	if (efi.boot_info != EFI_INVALID_TABLE_ADDR)
-
-
--- 
-Jean Delvare
-SUSE L3 Support
+James
