@@ -1,73 +1,111 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 3/8] arm64: override early_init_dt_add_memory_arch()
-Date: Mon, 11 May 2015 08:41:55 +0200
-Message-ID: <1431326520-17331-4-git-send-email-ard.biesheuvel@linaro.org>
+From: Ganapatrao Kulkarni <gpkulkarni-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 6/8] arm64/efi: ignore DT memory nodes instead of removing them
+Date: Mon, 11 May 2015 21:58:27 +0530
+Message-ID: <CAFpQJXV0Hq7pCGDsY4qLSJGiwWTYu1VtTPAPZ0dNADaNkELr6Q@mail.gmail.com>
 References: <1431326520-17331-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1431326520-17331-7-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1431326520-17331-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1431326520-17331-7-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, "Kulkarni, Ganapatrao" <Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Override the __weak early_init_dt_add_memory_arch() with our own
-version. This allows us to relax the imposed restrictions at memory
-discovery time, which is needed if we want to defer the assignment
-of PHYS_OFFSET and make it independent of where the kernel Image
-is placed in physical memory.
+On Mon, May 11, 2015 at 12:11 PM, Ard Biesheuvel
+<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> There are two problems with the UEFI stub DT memory node removal
+> routine:
+> - it deletes nodes as it traverses the tree, which happens to work
+>   but is not supported, as deletion invalidates the node iterator;
+> - deleting memory nodes entirely may discard annotations in the form
+>   of additional properties on the nodes.
+>
+> Now that the UEFI initialization has moved to an earlier stage, we can
+> actually just ignore any memblocks that are installed after we have
+> processed the UEFI memory map. This way, it is no longer necessary to
+> remove the nodes, so we can remove that logic from the stub as well.
+>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/mm/init.c               |  7 +++++++
+>  drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+>  2 files changed, 8 insertions(+), 23 deletions(-)
+>
+> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+> index 64480b65ef17..95c239f43384 100644
+> --- a/arch/arm64/mm/init.c
+> +++ b/arch/arm64/mm/init.c
+> @@ -386,6 +386,13 @@ __setup("keepinitrd", keepinitrd_setup);
+>
+>  void __init early_init_dt_add_memory_arch(u64 base, u64 size)
+>  {
+> +       /*
+> +        * EFI_MEMMAP will be set /after/ UEFI has installed all memory based
+> +        * on the content of the UEFI memory map.
+> +        */
+> +       if (efi_enabled(EFI_MEMMAP))
+> +               return;
+> +
+>         if (!PAGE_ALIGNED(base)) {
+>                 if (size < PAGE_SIZE - (base & ~PAGE_MASK)) {
+>                         pr_warn("Ignoring memory block 0x%llx - 0x%llx\n",
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index ef5d764e2a27..343e7992bd8f 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>                         unsigned long map_size, unsigned long desc_size,
+>                         u32 desc_ver)
+>  {
+> -       int node, prev, num_rsv;
+> +       int node, num_rsv;
+>         int status;
+>         u32 fdt_val32;
+>         u64 fdt_val64;
+> @@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>                 goto fdt_set_fail;
+>
+>         /*
+> -        * Delete any memory nodes present. We must delete nodes which
+> -        * early_init_dt_scan_memory may try to use.
+> -        */
+> -       prev = 0;
+> -       for (;;) {
+> -               const char *type;
+> -               int len;
+> -
+> -               node = fdt_next_node(fdt, prev, NULL);
+> -               if (node < 0)
+> -                       break;
+> -
+> -               type = fdt_getprop(fdt, node, "device_type", &len);
+> -               if (type && strncmp(type, "memory", len) == 0) {
+> -                       fdt_del_node(fdt, node);
+> -                       continue;
+> -               }
+> -
+> -               prev = node;
+> -       }
+> -
+> -       /*
+>          * Delete all memory reserve map entries. When booting via UEFI,
+>          * kernel will use the UEFI memory map to find reserved regions.
+>          */
+> --
+> 1.9.1
+>
+>
+> _______________________________________________
+> linux-arm-kernel mailing list
+> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
 
-So copy the generic original, but only retain the check against
-regions whose sizes become zero when clipped to page alignment.
+Thanks Ard.
+Tested this patch on my numa setup.
 
-For now, we will remove the range below PHYS_OFFSET explicitly
-until we rework that logic in a subsequent patch. Any memory that
-we will not be able to map due to insufficient size of the linear
-region is also removed.
+Tested-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/mm/init.c | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
-
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index 597831bdddf3..64480b65ef17 100644
---- a/arch/arm64/mm/init.c
-+++ b/arch/arm64/mm/init.c
-@@ -158,6 +158,15 @@ early_param("mem", early_mem);
- 
- void __init arm64_memblock_init(void)
- {
-+	/*
-+	 * Remove the memory that we will not be able to cover
-+	 * with the linear mapping.
-+	 */
-+	const s64 linear_region_size = -(s64)PAGE_OFFSET;
-+
-+	memblock_remove(0, memstart_addr);
-+	memblock_remove(memstart_addr + linear_region_size, ULLONG_MAX);
-+
- 	memblock_enforce_memory_limit(memory_limit);
- 
- 	/*
-@@ -374,3 +383,19 @@ static int __init keepinitrd_setup(char *__unused)
- 
- __setup("keepinitrd", keepinitrd_setup);
- #endif
-+
-+void __init early_init_dt_add_memory_arch(u64 base, u64 size)
-+{
-+	if (!PAGE_ALIGNED(base)) {
-+		if (size < PAGE_SIZE - (base & ~PAGE_MASK)) {
-+			pr_warn("Ignoring memory block 0x%llx - 0x%llx\n",
-+				base, base + size);
-+			return;
-+		}
-+		size -= PAGE_SIZE - (base & ~PAGE_MASK);
-+		base = PAGE_ALIGN(base);
-+	}
-+	size &= PAGE_MASK;
-+
-+	memblock_add(base, size);
-+}
--- 
-1.9.1
+thanks
+Ganapat
