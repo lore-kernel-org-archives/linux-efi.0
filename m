@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 5/8] arm64/efi: move EFI init before early FDT processing
-Date: Mon, 11 May 2015 08:41:57 +0200
-Message-ID: <1431326520-17331-6-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 8/8] arm64/efi: adapt to relaxed FDT placement requirements
+Date: Mon, 11 May 2015 08:42:00 +0200
+Message-ID: <1431326520-17331-9-git-send-email-ard.biesheuvel@linaro.org>
 References: <1431326520-17331-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1431326520-17331-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,237 +10,131 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The early FDT processing is responsible for enumerating the
-DT memory nodes and installing them as memblocks. This should
-only be done if we are not booting via EFI, but at this point,
-we don't know yet if that is the case or not.
-
-So move the EFI init to before the early FDT processing. This involves
-making some changes to the way EFI discovers the locations of the
-EFI system table and the memory map, since those values are retrieved
-from the FDT as well. Instead the of_scan infrastructure, it now uses
-libfdt directly to access the /chosen node.
+With the relaxed FDT placement requirements in place, we can change
+the allocation strategy used by the stub to put the FDT image higher
+up in memory. At the same time, reduce the minimal alignment to 8 bytes,
+and impose a 2 MB size limit, as per the new requirements.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/include/asm/efi.h   |  4 +--
- arch/arm64/kernel/efi.c        | 14 +++-----
- arch/arm64/kernel/setup.c      |  4 ++-
- drivers/firmware/efi/Makefile  |  1 +
- drivers/firmware/efi/efi-fdt.c | 74 +++++++++++++++++-------------------------
- include/linux/efi.h            |  3 +-
- 6 files changed, 41 insertions(+), 59 deletions(-)
+ arch/arm64/include/asm/efi.h            | 10 +++-------
+ drivers/firmware/efi/libstub/arm-stub.c |  5 ++---
+ drivers/firmware/efi/libstub/efistub.h  |  1 -
+ drivers/firmware/efi/libstub/fdt.c      | 18 +++++++++---------
+ 4 files changed, 14 insertions(+), 20 deletions(-)
 
 diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index ef572206f1c3..635101f36720 100644
+index 635101f36720..43ea4ecbd361 100644
 --- a/arch/arm64/include/asm/efi.h
 +++ b/arch/arm64/include/asm/efi.h
-@@ -5,9 +5,9 @@
+@@ -1,6 +1,7 @@
+ #ifndef _ASM_EFI_H
+ #define _ASM_EFI_H
+ 
++#include <asm/boot.h>
+ #include <asm/io.h>
  #include <asm/neon.h>
  
- #ifdef CONFIG_EFI
--extern void efi_init(void);
-+extern void efi_init_fdt(void *fdt);
- #else
--#define efi_init()
-+#define efi_init_fdt(x)
- #endif
+@@ -38,13 +39,8 @@ extern void efi_init_fdt(void *fdt);
  
- #define efi_call_virt(f, ...)						\
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index ab21e0d58278..5369b4f96dd1 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -51,14 +51,7 @@ static struct mm_struct efi_mm = {
- 	INIT_MM_CONTEXT(efi_mm)
- };
+ /* arch specific definitions used by the stub code */
  
--static int uefi_debug __initdata;
--static int __init uefi_debug_setup(char *str)
--{
--	uefi_debug = 1;
--
--	return 0;
--}
--early_param("uefi_debug", uefi_debug_setup);
-+static bool uefi_debug __initdata;
+-/*
+- * AArch64 requires the DTB to be 8-byte aligned in the first 512MiB from
+- * start of kernel and may not cross a 2MiB boundary. We set alignment to
+- * 2MiB so we know it won't cross a 2MiB boundary.
+- */
+-#define EFI_FDT_ALIGN	SZ_2M   /* used by allocate_new_fdt_and_exit_boot() */
+-#define MAX_FDT_OFFSET	SZ_512M
++#define EFI_FDT_ALIGN		MIN_FDT_ALIGN
++#define EFI_FDT_MAX_SIZE	MAX_FDT_SIZE
  
- static int __init is_normal_ram(efi_memory_desc_t *md)
- {
-@@ -204,14 +197,15 @@ static __init void reserve_regions(void)
- 	set_bit(EFI_MEMMAP, &efi.flags);
+ #define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
+ 
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index e29560e6b40b..4e5ac133d1dc 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -268,9 +268,8 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 
+ 	new_fdt_addr = fdt_addr;
+ 	status = allocate_new_fdt_and_exit_boot(sys_table, handle,
+-				&new_fdt_addr, dram_base + MAX_FDT_OFFSET,
+-				initrd_addr, initrd_size, cmdline_ptr,
+-				fdt_addr, fdt_size);
++				&new_fdt_addr, initrd_addr, initrd_size,
++				cmdline_ptr, fdt_addr, fdt_size);
+ 
+ 	/*
+ 	 * If all went well, we need to return the FDT address to the
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index e334a01cf92f..cf14dafc348a 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -35,7 +35,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 					    void *handle,
+ 					    unsigned long *new_fdt_addr,
+-					    unsigned long max_addr,
+ 					    u64 initrd_addr, u64 initrd_size,
+ 					    char *cmdline_ptr,
+ 					    unsigned long fdt_addr,
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index a7e87cd582f2..ab6ecb22bd6e 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -134,10 +134,6 @@ fdt_set_fail:
+ 	return EFI_LOAD_ERROR;
  }
  
--void __init efi_init(void)
-+void __init efi_init_fdt(void *fdt)
- {
- 	struct efi_fdt_params params;
- 
- 	/* Grab UEFI information placed in FDT by stub */
--	if (!efi_get_fdt_params(&params, uefi_debug))
-+	if (!efi_get_fdt_params(fdt, &params))
- 		return;
- 
-+	uefi_debug = params.verbose;
- 	efi_system_table = params.system_table;
- 
- 	memblock_reserve(params.mmap & PAGE_MASK,
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 770ae9dc5a75..36ffd0a21a78 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -316,6 +316,9 @@ static void __init setup_machine_fdt(phys_addr_t dt_phys)
- {
- 	void *dt_virt = fixmap_remap_fdt(dt_phys);
- 
-+	if (dt_virt)
-+		efi_init_fdt(dt_virt);
-+
- 	if (!dt_virt || !early_init_dt_scan(dt_virt)) {
- 		pr_crit("\n"
- 			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
-@@ -384,7 +387,6 @@ void __init setup_arch(char **cmdline_p)
+-#ifndef EFI_FDT_ALIGN
+-#define EFI_FDT_ALIGN EFI_PAGE_SIZE
+-#endif
+-
+ /*
+  * Allocate memory for a new FDT, then add EFI, commandline, and
+  * initrd related fields to the FDT.  This routine increases the
+@@ -155,7 +151,6 @@ fdt_set_fail:
+ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 					    void *handle,
+ 					    unsigned long *new_fdt_addr,
+-					    unsigned long max_addr,
+ 					    u64 initrd_addr, u64 initrd_size,
+ 					    char *cmdline_ptr,
+ 					    unsigned long fdt_addr,
+@@ -192,8 +187,13 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
  	 */
- 	local_async_enable();
+ 	new_fdt_size = fdt_size + EFI_PAGE_SIZE;
+ 	while (1) {
+-		status = efi_high_alloc(sys_table, new_fdt_size, EFI_FDT_ALIGN,
+-					new_fdt_addr, max_addr);
++		if (new_fdt_size > EFI_FDT_MAX_SIZE) {
++			pr_efi_err(sys_table, "FDT size exceeds EFI_FDT_MAX_SIZE.\n");
++			goto fail;
++		}
++		status = sys_table->boottime->allocate_pool(EFI_LOADER_DATA,
++							    new_fdt_size,
++							    (void **)new_fdt_addr);
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err(sys_table, "Unable to allocate memory for new device tree.\n");
+ 			goto fail;
+@@ -227,7 +227,7 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 			 * to get new one that reflects the free/alloc we do
+ 			 * on the device tree buffer.
+ 			 */
+-			efi_free(sys_table, new_fdt_size, *new_fdt_addr);
++			sys_table->boottime->free_pool((void *)*new_fdt_addr);
+ 			sys_table->boottime->free_pool(memory_map);
+ 			new_fdt_size += EFI_PAGE_SIZE;
+ 		} else {
+@@ -285,7 +285,7 @@ fail_free_mmap:
+ 	sys_table->boottime->free_pool(memory_map);
  
--	efi_init();
- 	arm64_memblock_init();
+ fail_free_new_fdt:
+-	efi_free(sys_table, new_fdt_size, *new_fdt_addr);
++	sys_table->boottime->free_pool((void *)*new_fdt_addr);
  
- 	/* Parse the ACPI tables for possible boot-time configuration */
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 9967dde52174..7b408a4cfc8a 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -9,3 +9,4 @@ obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
- obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
- obj-$(CONFIG_EFI_STUB)			+= libstub/
- obj-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= efi-fdt.o
-+CFLAGS_efi-fdt.o			:= -I$(srctree)/scripts/dtc/libfdt/
-diff --git a/drivers/firmware/efi/efi-fdt.c b/drivers/firmware/efi/efi-fdt.c
-index f0e7ef2ae0e9..2e0e1a5a3fbb 100644
---- a/drivers/firmware/efi/efi-fdt.c
-+++ b/drivers/firmware/efi/efi-fdt.c
-@@ -8,8 +8,7 @@
- 
- #include <linux/init.h>
- #include <linux/efi.h>
--#include <linux/of.h>
--#include <linux/of_fdt.h>
-+#include <linux/libfdt.h>
- 
- #define UEFI_PARAM(name, prop, field)			   \
- 	{						   \
-@@ -32,62 +31,47 @@ static __initdata struct {
- 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
- };
- 
--struct param_info {
--	int verbose;
--	int found;
--	void *params;
--};
--
--static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
--				       int depth, void *data)
-+bool __init efi_get_fdt_params(void *fdt, struct efi_fdt_params *params)
- {
--	struct param_info *info = data;
- 	const void *prop;
--	void *dest;
--	u64 val;
--	int i, len;
-+	int node, i;
-+
-+	pr_info("Getting EFI parameters from FDT:\n");
- 
--	if (depth != 1 || strcmp(uname, "chosen") != 0)
--		return 0;
-+	node = fdt_path_offset(fdt, "/chosen");
-+	if (node < 0) {
-+		pr_err("/chosen node not found!\n");
-+		return false;
-+	}
-+
-+	prop = fdt_getprop(fdt, node, "bootargs", NULL);
-+	params->verbose = prop && strstr(prop, "uefi_debug");
- 
- 	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
--		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
--		if (!prop)
--			return 0;
--		dest = info->params + dt_params[i].offset;
--		info->found++;
-+		void *dest;
-+		int len;
-+		u64 val;
- 
--		val = of_read_number(prop, len / sizeof(u32));
-+		prop = fdt_getprop(fdt, node, dt_params[i].propname, &len);
-+		if (!prop)
-+			goto not_found;
-+		dest = (void *)params + dt_params[i].offset;
- 
- 		if (dt_params[i].size == sizeof(u32))
--			*(u32 *)dest = val;
-+			val = *(u32 *)dest = be32_to_cpup(prop);
- 		else
--			*(u64 *)dest = val;
-+			val = *(u64 *)dest = be64_to_cpup(prop);
- 
--		if (info->verbose)
-+		if (params->verbose)
- 			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
- 				dt_params[i].size * 2, val);
- 	}
--	return 1;
--}
--
--int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
--{
--	struct param_info info;
--	int ret;
-+	return true;
- 
--	pr_info("Getting EFI parameters from FDT:\n");
--
--	info.verbose = verbose;
--	info.found = 0;
--	info.params = params;
--
--	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
--	if (!info.found)
-+not_found:
-+	if (i == 0)
- 		pr_info("UEFI not found.\n");
--	else if (!ret)
--		pr_err("Can't find '%s' in device tree!\n",
--		       dt_params[info.found].name);
--
--	return ret;
-+	else
-+		pr_err("Can't find '%s' in device tree!\n", dt_params[i].name);
-+	return false;
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index af5be0368dec..c2be93d6156c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -684,6 +684,7 @@ struct efi_fdt_params {
- 	u32 mmap_size;
- 	u32 desc_size;
- 	u32 desc_ver;
-+	bool verbose;
- };
- 
- typedef struct {
-@@ -886,7 +887,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
- extern void efi_get_time(struct timespec *now);
- extern void efi_reserve_boot_services(void);
--extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
-+extern bool efi_get_fdt_params(void *fdt, struct efi_fdt_params *params);
- extern struct efi_memory_map memmap;
- 
- extern int efi_reboot_quirk_mode;
+ fail:
+ 	sys_table->boottime->free_pool(runtime_map);
 -- 
 1.9.1
