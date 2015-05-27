@@ -1,76 +1,42 @@
-From: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
-Subject: Re: [PATCH v2] efi: dmi: List SMBIOS3 table before SMBIOS table
-Date: Wed, 27 May 2015 16:33:04 +0200
-Message-ID: <20150527163304.32f0c866@endymion.delvare>
-References: <20150430152305.26b89bd3@endymion.delvare>
-	<20150430160401.GF3014@codeblueprint.co.uk>
-	<CAKv+Gu-7cakYGoz8oq5CoqgDvLWxyGwAK++yS8A6tvWo5d1taA@mail.gmail.com>
-	<20150526181152.GA3030@codeblueprint.co.uk>
-	<CAKv+Gu-SeWYkqiwj+Hin5AiVW188dtLr+GHG80SxJV-uzrkA9A@mail.gmail.com>
-	<20150527131857.GD3030@codeblueprint.co.uk>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Subject: Re: Capsule patches
+Date: Wed, 27 May 2015 10:58:30 -0700
+Message-ID: <1432749510.2194.35.camel@HansenPartnership.com>
+References: <EAEC0BCD44614F499E7CCE37C3B71F113806869D60@BLRX7MCDC202.AMER.DELL.COM>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150527131857.GD3030-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <EAEC0BCD44614F499E7CCE37C3B71F113806869D60-6n1rj5y50trWnfa2oNyE5AVY21JRvFwKV6yJEvX+wlw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ivan.khoronzhuk" <ivan.khoronzhuk-hExfYMNmJl/Cnp4W7fqMDg@public.gmane.org>
+To: Parmeshwr_Prasad-DYMqY+WieiM@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 27 May 2015 14:18:57 +0100, Matt Fleming wrote:
-> On Wed, 27 May, at 12:30:37PM, Ard Biesheuvel wrote:
-> > 
-> > OK. Then I guess we should at least document in
-> > Documentation/ABI/stable/sysfs-firmware-efi-systab that the order in
-> > which the entries are enumerated is part of the ABI.
+[adding linux-efi because that's where the experts hang out]
+On Mon, 2015-05-25 at 16:14 +0530, Parmeshwr_Prasad-DYMqY+WieiM@public.gmane.org wrote:
+> Hi James,
 > 
-> Makes perfect sense to me. How about this?
+> I am from dell.
+> I was working on Capsule feature. I got some patches from you which
+> supports user space interface for capsule.
+> I have applied those patches on 4.0 kernel and booted my server. I am
+> getting /sys/.../update entry to give capsule as interface.
 > 
-> ---
+> I am attaching your patches.
+> Along with this I have applied patched shared by Mutt.
 > 
-> From ccb5f08bb71ae4199c75668c6beacd6b47fa186c Mon Sep 17 00:00:00 2001
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Date: Wed, 27 May 2015 14:14:22 +0100
-> Subject: [PATCH] efi: Add 'systab' information to Documentation/ABI
+> I have done cat fw_file > /sys/firmware/capsule/update to give capsule
+> file.
 > 
-> It's not clear right now that the order in which entries are displayed
-> in /sys/firmware/efi/systab actually forms an ABI that userspace tools
-> rely upon.
-> 
-> Document the ABI along with the userspace tool that cares.
-> 
-> Suggested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
-> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Ivan Khoronzhuk <ivan.khoronzhuk-hExfYMNmJl/Cnp4W7fqMDg@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  Documentation/ABI/testing/sysfs-firmware-efi | 10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/Documentation/ABI/testing/sysfs-firmware-efi b/Documentation/ABI/testing/sysfs-firmware-efi
-> index 05874da7ce80..e794eac32a90 100644
-> --- a/Documentation/ABI/testing/sysfs-firmware-efi
-> +++ b/Documentation/ABI/testing/sysfs-firmware-efi
-> @@ -18,3 +18,13 @@ Contact:	Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
->  Description:	It shows the physical address of config table entry in the EFI
->  		system table.
->  Users:		Kexec
-> +
-> +What:		/sys/firmware/efi/systab
-> +Date:		April 2005
-> +Contact:	linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> +Description:	Displays the physical addresses of all EFI Configuration
-> +		Tables found via the EFI System Table. The order in
-> +		which the tables are printed forms an ABI and newer
-> +		versions are always printed first, i.e. ACPI20 comes
-> +		before ACPI.
-> +Users:		dmidecode
+> After doing this my kernel is hang. Any help how to debug this ?
 
-Reviewed-by: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>
+The patch was just a RFC demonstrating how the user interface would
+work ... and to secure agreement around that, since it had been one of
+the contentious issues.
 
-Thank you,
--- 
-Jean Delvare
-SUSE L3 Support
+However, I'm fairly certain the back end (the call into ACPI) also
+doesn't work properly.  Matt Fleming has some ideas about fixing that
+up.  You'll need both pieces to get this fully functional.
+
+James
