@@ -1,35 +1,42 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 4/8] efi: move FDT handling to separate object file
-Date: Tue, 26 May 2015 19:15:58 +0100
-Message-ID: <20150526181558.GB3030@codeblueprint.co.uk>
-References: <1431326520-17331-1-git-send-email-ard.biesheuvel@linaro.org>
- <1431326520-17331-5-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] efi: dmi: List SMBIOS3 table before SMBIOS table
+Date: Wed, 27 May 2015 12:30:37 +0200
+Message-ID: <CAKv+Gu-SeWYkqiwj+Hin5AiVW188dtLr+GHG80SxJV-uzrkA9A@mail.gmail.com>
+References: <20150430152305.26b89bd3@endymion.delvare>
+	<20150430160401.GF3014@codeblueprint.co.uk>
+	<CAKv+Gu-7cakYGoz8oq5CoqgDvLWxyGwAK++yS8A6tvWo5d1taA@mail.gmail.com>
+	<20150526181152.GA3030@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1431326520-17331-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20150526181152.GA3030-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Jean Delvare <jdelvare-l3A5Bk7waGM@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Ivan.khoronzhuk" <ivan.khoronzhuk-hExfYMNmJl/Cnp4W7fqMDg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 11 May, at 08:41:56AM, Ard Biesheuvel wrote:
-> The EFI specific FDT handling is compiled conditionally, and is
-> logically independent of the rest of efi.o. So move it to a separate
-> file before making changes to it in subsequent patches.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/Makefile  |  1 +
->  drivers/firmware/efi/efi-fdt.c | 93 ++++++++++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/efi.c     | 86 --------------------------------------
->  3 files changed, 94 insertions(+), 86 deletions(-)
->  create mode 100644 drivers/firmware/efi/efi-fdt.c
+On 26 May 2015 at 20:11, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Thu, 30 Apr, at 06:10:48PM, Ard Biesheuvel wrote:
+>>
+>> I don't have any objections to this patch per se, but I am not crazy
+>> about the fact that the way the output is ordered is kernel<->userland
+>> ABI now
+>> But since there appears to be a precedent with ACPI20 before ACPI,
+>> that was already the case, apparently.
+>> So,
+>>
+>> Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> Thanks Ard.
+>
+> I've thought about this for a long while and we always kinda treat the
+> results of sysfs files as ABI anyway. If SMBIOS 3 wasn't so new I
+> wouldn't entertain doing this, but I think it's OK in this situation.
+>
 
-Sorry for the delay,
+OK. Then I guess we should at least document in
+Documentation/ABI/stable/sysfs-firmware-efi-systab that the order in
+which the entries are enumerated is part of the ABI.
 
-Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Regards,
+Ard.
