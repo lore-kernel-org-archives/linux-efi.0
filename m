@@ -1,81 +1,79 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: arch, x86: arch, ia64: rearrange EFI memmap
- related functions
-Date: Wed, 27 May 2015 12:35:49 -0700
-Message-ID: <55661C95.5010200@codeaurora.org>
-References: <1430773335-22897-1-git-send-email-zjzhang@codeaurora.org> <1430773335-22897-2-git-send-email-zjzhang@codeaurora.org> <20150527123103.GC3030@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v4.2
+Date: Sun, 31 May 2015 17:25:59 +0100
+Message-ID: <20150531162559.GA6826@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150527123103.GC3030-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Thank you Matt very much for the code review! Pls. see comments inline.
+Hi folks,
 
-On 5/27/2015 5:31 AM, Matt Fleming wrote:
-> On Mon, 04 May, at 02:02:14PM, Jonathan (Zhixiong) Zhang wrote:
->> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->>
->> Both x86 and ia64 implemented efi_mem_attributs function, which is architecture
->> agnositc. This function is moved to efi subsystem.
->>
->> efi_remap() function is added. If EFI memmap feature is enabled, and if a
->> memory region has attribute of EFI_MEMORY_UC, map it as uncached.
->>
->> ---
->> This patch was tested on an arm64 platform. It was built on x86 platform.
->>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->> ---
->>   arch/ia64/kernel/efi.c      | 11 -----------
->>   arch/x86/platform/efi/efi.c | 18 ------------------
->>   drivers/firmware/efi/efi.c  | 27 +++++++++++++++++++++++++++
->>   include/linux/efi.h         |  1 +
->>   4 files changed, 28 insertions(+), 29 deletions(-)
->>
- >> <snipped>
->
-> This should be split into two patches, one to remove the duplicate
-> efi_mem_attributes() and the other to create the new efi_ioremap()
-> function.
-Makes sense, will do.
+Please pull the following new material for v4.2. The most interesting
+change is support for the EFI System Resource Table contributed by Peter
+Jones. ESRT is new in the UEFI 2.5 specification (released April 2015)
+and is used by Fedora's fwupdate tool when performing firmware updates.
 
->
->> +void __iomem *efi_remap(phys_addr_t phys_addr, size_t size)
->> +{
->> +	if (efi_enabled(EFI_MEMMAP) &&
->> +	    (efi_mem_attributes(phys_addr) & EFI_MEMORY_UC))
->> +		return ioremap(phys_addr, size);
->> +	else
->> +		return ioremap_cache(phys_addr, size);
->> +}
->
-> Note that on x86 we don't leave the EFI memmap mapped throughout
-> runtime, it gets unmapped in efi_free_boot_services().
->
-> Which means that the second patch in this series isn't going to work
-> correctly if an error is reported after the kernel has finished booting.
->
-> It looks like arm64 leaves the EFI memmap mapped at runtime, right?
->
-Correct, only x86 unmaps EFI memmap since efi_free_boot_services() is 
-not implemented for other architectures, as shown in include/linux/efi.h .
+The following changes since commit b787f68c36d49bb1d9236f403813641efa74a031:
 
-With x86 arch, efi_unmap_memmap() is called in efi_free_boot_services() 
-to unmap EFI memmap, this function is defined in 
-arch/x86/platform/efi/efi.c. It clears EFI_MEMMAP bit in efi flag. 
-Therefore in this case, efi_enabled(EFI_MEMMAP) returns false for x86 
-platforms with EFI memory map support, after kernel finished booting; 
-efi_remap() function in turn maps the memory region as cached.
+  Linux 4.1-rc1 (2015-04-26 17:59:10 -0700)
 
-Therefore, I believe the second patch in this series will work correctly 
-for above situation as well. How do you think?
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to c208358c2cc832eeb5b341a465eee30be19cd5a0:
+
+  efi: Add 'systab' information to Documentation/ABI (2015-05-27 15:40:20 +0100)
+
+----------------------------------------------------------------
+ * Use idiomatic negative error values in efivar_create_sysfs_entry()
+   instead of returning '1' to indicate error - Dan Carpenter
+
+ * New support to expose the EFI System Resource Tables in sysfs, which
+   provides information for performing firmware updates - Peter Jones
+
+ * Documentation cleanup in the EFI handover protocol section which
+   falsely claimed that 'cmdline_size' needed to be filled out by the
+   boot loader - Alex Smith
+
+ * Align the order of SMBIOS tables in /sys/firmware/efi/systab to match
+   the way that we do things for ACPI and add documentation to
+   Documentation/ABI - Jean Delvare
+
+----------------------------------------------------------------
+Alex Smith (1):
+      x86, doc: Remove cmdline_size from list of fields to be filled in for EFI handover
+
+Dan Carpenter (1):
+      efi: efivar_create_sysfs_entry() should return negative error codes
+
+Jean Delvare (1):
+      efi: dmi: List SMBIOS3 table before SMBIOS table
+
+Matt Fleming (1):
+      efi: Add 'systab' information to Documentation/ABI
+
+Peter Jones (2):
+      efi: Add esrt support
+      efi/esrt: Fix some compiler warnings
+
+ Documentation/ABI/testing/sysfs-firmware-efi      |  10 +
+ Documentation/ABI/testing/sysfs-firmware-efi-esrt |  81 ++++
+ Documentation/x86/boot.txt                        |   1 -
+ arch/x86/platform/efi/efi.c                       |   2 +
+ drivers/firmware/efi/Makefile                     |   2 +-
+ drivers/firmware/efi/efi.c                        |  91 ++++-
+ drivers/firmware/efi/efivars.c                    |  11 +-
+ drivers/firmware/efi/esrt.c                       | 471 ++++++++++++++++++++++
+ include/linux/efi.h                               |   8 +
+ 9 files changed, 667 insertions(+), 10 deletions(-)
+ create mode 100644 Documentation/ABI/testing/sysfs-firmware-efi-esrt
+ create mode 100644 drivers/firmware/efi/esrt.c
 
 -- 
-Jonathan (Zhixiong) Zhang
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Matt Fleming, Intel Open Source Technology Center
