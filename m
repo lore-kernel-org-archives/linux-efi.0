@@ -1,48 +1,59 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V2 0/3] map GHES memory region with EFI memory map
-Date: Mon,  1 Jun 2015 12:12:17 -0700
-Message-ID: <1433185940-24770-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, leif.lindholm@linaro.org, al.stone@linaro.org, fu.wei@linaro.org, rjw@rjwysocki.net, lenb@kernel.org, ying.huang@intel.com
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org
+From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V2 2/3] efi: add efi_remap()
+Date: Mon,  1 Jun 2015 12:12:19 -0700
+Message-ID: <1433185940-24770-3-git-send-email-zjzhang@codeaurora.org>
+References: <1433185940-24770-1-git-send-email-zjzhang@codeaurora.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1433185940-24770-1-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, vgandhi-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
-updates a memory region with hardware error record using nocache
-attribute. When OS reads the region, since it maps the region with
-cacahed attribute even though EFI memory map defines this region as
-uncached, OS gets stale data and errorneously reports there is no new
-HW error.
+If it is a EFI system, if EFI memmap is enabled and if
+a memory region has attribute of EFI_MEMORY_UC, map it as uncached.
 
-When ghes driver maps the memory region, it uses the cache attribute
-according to EFI memory map, if EFI memory map feature is enabled
-at runtime.
+On x86, EFI memmap is unmapped in efi_free_boot_services(),
+before kernel finishes booting. So when efi_remap() is called
+during runtime on x86, it maps the region as cached.
 
-Since both arch/x86 and arc/ia64 implemented architecture agnostic EFI
-memory map attribue lookup function efi_memattributes(), the code is
-moved from arch/x86 and arch/ia64 into EFI subsystem. On top of that,
-efi_remap() is added.
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c | 9 +++++++++
+ include/linux/efi.h        | 1 +
+ 2 files changed, 10 insertions(+)
 
-V2:
-1. Rebased to v4.1-rc5.
-2. Split removal of efi_mem_attributes() and creation of efi_ioremap()
-into two patches.
-
-Jonathan (Zhixiong) Zhang (3):
-  efi: arch, x86: arch, ia64: move efi_mem_attributes()
-  efi: add efi_remap()
-  acpi, apei: use EFI memmap to map GHES memory
-
- arch/ia64/kernel/efi.c      | 11 -----------
- arch/x86/platform/efi/efi.c | 18 ------------------
- drivers/acpi/apei/ghes.c    | 13 +++++++++++++
- drivers/firmware/efi/efi.c  | 27 +++++++++++++++++++++++++++
- include/linux/efi.h         |  1 +
- 5 files changed, 41 insertions(+), 29 deletions(-)
-
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 86da85368778..5b42bb6d1fde 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -535,3 +535,12 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+ 	}
+ 	return 0;
+ }
++
++void __iomem *efi_remap(phys_addr_t phys_addr, size_t size)
++{
++	if (efi_enabled(EFI_MEMMAP) &&
++	    (efi_mem_attributes(phys_addr) & EFI_MEMORY_UC))
++		return ioremap(phys_addr, size);
++	else
++		return ioremap_cache(phys_addr, size);
++}
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index af5be0368dec..0a0aa25d44d7 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -888,6 +888,7 @@ extern void efi_get_time(struct timespec *now);
+ extern void efi_reserve_boot_services(void);
+ extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
+ extern struct efi_memory_map memmap;
++extern void __iomem *efi_remap(phys_addr_t phys_addr, size_t size);
+ 
+ extern int efi_reboot_quirk_mode;
+ extern bool efi_poweroff_required(void);
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
