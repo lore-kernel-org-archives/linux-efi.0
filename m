@@ -1,110 +1,72 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH V2 1/3] efi: arch, x86: arch, ia64: move
- efi_mem_attributes()
-Date: Tue, 2 Jun 2015 14:36:47 +0100
-Message-ID: <20150602133647.GC6826@codeblueprint.co.uk>
-References: <1433185940-24770-1-git-send-email-zjzhang@codeaurora.org>
- <1433185940-24770-2-git-send-email-zjzhang@codeaurora.org>
+From: Peter Jones <pjones@redhat.com>
+Subject: Re: [GIT PULL] EFI changes for v4.2
+Date: Tue, 2 Jun 2015 09:59:44 -0400
+Message-ID: <20150602135944.GB29523@redhat.com>
+References: <20150531162559.GA6826@codeblueprint.co.uk>
+ <20150602064557.GB31128@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1433185940-24770-2-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-msm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, vgandhi-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20150602064557.GB31128@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "H. Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-(Cc'ing Tony for ia64 input)
-
-On Mon, 01 Jun, at 12:12:18PM, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> 
-> Both x86 and ia64 implemented efi_mem_attributs(), which is architecture
-> agnositc. This function is moved from arch/x86 and arch/ia64 to
-> drivers/firmware/efi.
-> 
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  arch/ia64/kernel/efi.c      | 11 -----------
->  arch/x86/platform/efi/efi.c | 18 ------------------
->  drivers/firmware/efi/efi.c  | 18 ++++++++++++++++++
->  3 files changed, 18 insertions(+), 29 deletions(-)
-> 
-> diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-> index c52d7540dc05..ef20ec784b04 100644
-> --- a/arch/ia64/kernel/efi.c
-> +++ b/arch/ia64/kernel/efi.c
-> @@ -771,17 +771,6 @@ efi_mem_type (unsigned long phys_addr)
->  }
+On Tue, Jun 02, 2015 at 08:45:57AM +0200, Ingo Molnar wrote:
+> @@ -167,7 +167,6 @@ static struct kset *esrt_kset;
 >  
->  u64
-> -efi_mem_attributes (unsigned long phys_addr)
-> -{
-> -	efi_memory_desc_t *md = efi_memory_descriptor(phys_addr);
-> -
-> -	if (md)
-> -		return md->attribute;
-> -	return 0;
-> -}
-> -EXPORT_SYMBOL(efi_mem_attributes);
-> -
-> -u64
->  efi_mem_attribute (unsigned long phys_addr, unsigned long size)
+>  static int esre_create_sysfs_entry(void *esre, int entry_num)
 >  {
->  	unsigned long end = phys_addr + size;
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 02744df576d5..10bd5289c593 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -926,24 +926,6 @@ u32 efi_mem_type(unsigned long phys_addr)
->  	return 0;
->  }
+> -       int rc = 0;
+>         struct esre_entry *entry;
+>         char name[20];
 >  
-> -u64 efi_mem_attributes(unsigned long phys_addr)
-> -{
-> -	efi_memory_desc_t *md;
-> -	void *p;
-> -
-> -	if (!efi_enabled(EFI_MEMMAP))
-> -		return 0;
-> -
-> -	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-> -		md = p;
-> -		if ((md->phys_addr <= phys_addr) &&
-> -		    (phys_addr < (md->phys_addr +
-> -				  (md->num_pages << EFI_PAGE_SHIFT))))
-> -			return md->attribute;
-> -	}
-> -	return 0;
-> -}
-> -
->  static int __init arch_parse_efi_cmdline(char *str)
->  {
->  	if (parse_option_str(str, "old_map"))
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 3061bb8629dc..86da85368778 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
->  			 attr & EFI_MEMORY_UC      ? "UC"  : "");
->  	return buf;
->  }
+> @@ -180,13 +179,15 @@ static int esre_create_sysfs_entry(void *esre, int entry_num)
+>         entry->kobj.kset = esrt_kset;
+>  
+>         if (esrt->fw_resource_version == 1) {
+> +               int rc = 0;
 > +
-> +u64 efi_mem_attributes(unsigned long phys_addr)
-> +{
-> +	efi_memory_desc_t *md;
-> +	void *p;
-> +
-> +	if (!efi_enabled(EFI_MEMMAP))
-> +		return 0;
-> +
+>                 entry->esre.esre1 = esre;
+>                 rc = kobject_init_and_add(&entry->kobj, &esre1_ktype, NULL,
+>                                           "%s", name);
+> -       }
+> -       if (rc) {
+> -               kfree(entry);
+> -               return rc;
+> +               if (rc) {
+> +                       kfree(entry);
+> +                       return rc;
+> +               }
+>         }
+>  
+>         list_add_tail(&entry->list, &entry_list);
+> 
+> How can a compiler ever have warned about 'rc' being uninitialized? It's defined 
+> straight at function entry, with initialization to 0. It can never be 
+> uninitialized.
+>
+> I pulled it, because I agree with the change itself, as it's always better to 
+> define and use variables in the narrowest scope possible, but I think it's a 
+> cleanup, not a compiler warning fix.
 
-Umm... ia64 doesn't appear to set EFI_MEMMAP. So doesn't this change
-actively break ia64?
+Well, apparently I failed to explain it well - the warning was about
+"esre" rather than "rc".  Basically before we were testing the version in
+register_entries() (i.e. this function's caller) and never calling the
+this function if it's not version 1.  The compiler didn't figure out
+that when we set "entry->esre.esre1 = esre;", esre can not be null
+because the function wouldn't be called.  Adding the explicit check
+on the version here silenced the warning about entry plausibly being
+NULL.
 
-While I like the idea of de-duplication, the two implementations of
-efi_mem_attributes() are not equivalent.
+I'm guessing that this is because it's checking that the same
+conditional test is involved - that the initialization is in the same
+"...version == 1" test that the usage is.  But that's just a guess.
+
+Would you like another patch to add this email to the commit message, or
+do you want to add it in your tree, or what?
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+        Peter
