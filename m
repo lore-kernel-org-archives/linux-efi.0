@@ -1,108 +1,128 @@
-From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [PATCH] efi: rtc-efi: use correct EFI 'epoch'
-Date: Mon, 08 Jun 2015 13:27:30 -0700
-Message-ID: <1433795250.2291.106.camel@HansenPartnership.com>
+Date: Mon, 8 Jun 2015 23:27:06 +0200
+Message-ID: <CAKv+Gu9OhjX2sPPPWFo2b_9C0TmyVOgFqn8Thub19+VBfLOCkg@mail.gmail.com>
 References: <1433762834-17961-1-git-send-email-ard.biesheuvel@linaro.org>
-	 <1433791592.2291.83.camel@HansenPartnership.com>
-	 <CAKv+Gu-e03H7nP5UOoSR++CkAt96qsVz1YaR4K8wRPhg7LpEqQ@mail.gmail.com>
+	<1433791592.2291.83.camel@HansenPartnership.com>
+	<CAKv+Gu-e03H7nP5UOoSR++CkAt96qsVz1YaR4K8wRPhg7LpEqQ@mail.gmail.com>
+	<1433795250.2291.106.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-e03H7nP5UOoSR++CkAt96qsVz1YaR4K8wRPhg7LpEqQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1433795250.2291.106.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
 Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2015-06-08 at 22:15 +0200, Ard Biesheuvel wrote:
-> On 8 June 2015 at 21:26, James Bottomley
-> <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
-> > On Mon, 2015-06-08 at 13:27 +0200, Ard Biesheuvel wrote:
-> >> The rtc-efi driver declares that the EFI 'epoch' is 1/1/1998, but
-> >> the UEFI spec does not define it at all. It does define a minimum
-> >> of 1900 for the 'Year' member of the EFI_TIME struct, so let's use
-> >> 1900 as the minimum year and not 1998.
-> >>
-> >> This prevents rtc_read_time() failures when the RTC that backs the
-> >> EFI time services is set to a date before 1998.
-> >>
-> >> Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
-> >> Cc: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-> >> Cc: rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> ---
-> >>  drivers/rtc/rtc-efi.c | 13 +++++++------
-> >>  1 file changed, 7 insertions(+), 6 deletions(-)
-> >>
-> >> diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
-> >> index cb989cd00b14..4a93b0bbf22c 100644
-> >> --- a/drivers/rtc/rtc-efi.c
-> >> +++ b/drivers/rtc/rtc-efi.c
-> >> @@ -25,9 +25,12 @@
-> >>
-> >>  #define EFI_ISDST (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
-> >>  /*
-> >> - * EFI Epoch is 1/1/1998
-> >> + * The UEFI spec does not literally define an epoch, but it does
-> >> + * define EFI_TIME::Year as having a value between 1900 and 9999.
-> >> + * (UEFI spec v2.5 paragraph 7.3)
-> >> + * So let's use 1900 as the EFI epoch year.
-> >>   */
-> >> -#define EFI_RTC_EPOCH                1998
-> >> +#define EFI_RTC_EPOCH                1900
-> >>
-> >>  /*
-> >>   * returns day of the year [0-365]
-> >> @@ -40,8 +43,6 @@ compute_yday(efi_time_t *eft)
-> >>  }
-> >>  /*
-> >>   * returns day of the week [0-6] 0=Sunday
-> >> - *
-> >> - * Don't try to provide a year that's before 1998, please !
-> >>   */
-> >>  static int
-> >>  compute_wday(efi_time_t *eft)
-> >> @@ -60,9 +61,9 @@ compute_wday(efi_time_t *eft)
-> >>       ndays += compute_yday(eft);
-> >>
-> >>       /*
-> >> -      * 4=1/1/1998 was a Thursday
-> >> +      * 1=1/1/1900 was a Monday
-> >>        */
-> >> -     return (ndays + 4) % 7;
-> >> +     return (ndays + 1) % 7;
-> >>  }
-> >
-> > This is a bit nuts: increasing the for loop by a huge amount every time
-> > we call the date just so we can cope with the odd early date.  Why not
-> > just count backwards for the exception case?  That way the epoch becomes
-> > an optimisation point, every year actually works, but years far before
-> > the epoch get penalised in the loop, while our current "efficiency"
-> > remains ... perhaps plus points if we want to move the epoch to 2015?
-> >
-> 
-> The 'epoch' is defined by the UEFI spec as starting at 1900, and
-> changing it to 2015 to optimize this for loop is equally silly imo.
+On 8 June 2015 at 22:27, James Bottomley
+<James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
+> On Mon, 2015-06-08 at 22:15 +0200, Ard Biesheuvel wrote:
+>> On 8 June 2015 at 21:26, James Bottomley
+>> <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
+>> > On Mon, 2015-06-08 at 13:27 +0200, Ard Biesheuvel wrote:
+>> >> The rtc-efi driver declares that the EFI 'epoch' is 1/1/1998, but
+>> >> the UEFI spec does not define it at all. It does define a minimum
+>> >> of 1900 for the 'Year' member of the EFI_TIME struct, so let's use
+>> >> 1900 as the minimum year and not 1998.
+>> >>
+>> >> This prevents rtc_read_time() failures when the RTC that backs the
+>> >> EFI time services is set to a date before 1998.
+>> >>
+>> >> Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+>> >> Cc: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+>> >> Cc: rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+>> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> >> ---
+>> >>  drivers/rtc/rtc-efi.c | 13 +++++++------
+>> >>  1 file changed, 7 insertions(+), 6 deletions(-)
+>> >>
+>> >> diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+>> >> index cb989cd00b14..4a93b0bbf22c 100644
+>> >> --- a/drivers/rtc/rtc-efi.c
+>> >> +++ b/drivers/rtc/rtc-efi.c
+>> >> @@ -25,9 +25,12 @@
+>> >>
+>> >>  #define EFI_ISDST (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
+>> >>  /*
+>> >> - * EFI Epoch is 1/1/1998
+>> >> + * The UEFI spec does not literally define an epoch, but it does
+>> >> + * define EFI_TIME::Year as having a value between 1900 and 9999.
+>> >> + * (UEFI spec v2.5 paragraph 7.3)
+>> >> + * So let's use 1900 as the EFI epoch year.
+>> >>   */
+>> >> -#define EFI_RTC_EPOCH                1998
+>> >> +#define EFI_RTC_EPOCH                1900
+>> >>
+>> >>  /*
+>> >>   * returns day of the year [0-365]
+>> >> @@ -40,8 +43,6 @@ compute_yday(efi_time_t *eft)
+>> >>  }
+>> >>  /*
+>> >>   * returns day of the week [0-6] 0=Sunday
+>> >> - *
+>> >> - * Don't try to provide a year that's before 1998, please !
+>> >>   */
+>> >>  static int
+>> >>  compute_wday(efi_time_t *eft)
+>> >> @@ -60,9 +61,9 @@ compute_wday(efi_time_t *eft)
+>> >>       ndays += compute_yday(eft);
+>> >>
+>> >>       /*
+>> >> -      * 4=1/1/1998 was a Thursday
+>> >> +      * 1=1/1/1900 was a Monday
+>> >>        */
+>> >> -     return (ndays + 4) % 7;
+>> >> +     return (ndays + 1) % 7;
+>> >>  }
+>> >
+>> > This is a bit nuts: increasing the for loop by a huge amount every time
+>> > we call the date just so we can cope with the odd early date.  Why not
+>> > just count backwards for the exception case?  That way the epoch becomes
+>> > an optimisation point, every year actually works, but years far before
+>> > the epoch get penalised in the loop, while our current "efficiency"
+>> > remains ... perhaps plus points if we want to move the epoch to 2015?
+>> >
+>>
+>> The 'epoch' is defined by the UEFI spec as starting at 1900, and
+>> changing it to 2015 to optimize this for loop is equally silly imo.
+>
+> The spec doesn't define an epoch in the sense we usually mean it, it
+> just says the year in EFI_TIME should be between 1900 and 9999.  So I
+> don't think EFI_RTC_EPOCH in the driver is really related.
+>
 
-The spec doesn't define an epoch in the sense we usually mean it, it
-just says the year in EFI_TIME should be between 1900 and 9999.  So I
-don't think EFI_RTC_EPOCH in the driver is really related.
+OK.
 
-> Note that the core purpose of the patch is to change the cutoff point
-> below which years are rejected, but that context does not appear in
-> the diff.
+>> Note that the core purpose of the patch is to change the cutoff point
+>> below which years are rejected, but that context does not appear in
+>> the diff.
+>
+> Both patches achieve that ... I just think doing a for loop from 1900 is
+> very inefficient.
+>
 
-Both patches achieve that ... I just think doing a for loop from 1900 is
-very inefficient.
+Yours allows years < 1900. I know this is all of little importance,
+just pointing it out since retaining the test but changing the limit
+was the point of the whole patch. Allowing any year instead is also
+fine by me, but I do think it makes sense to test against the UEFI
+specified range. Or, since this is Linux, we could settle on 1970 as
+well. Mind you, I am just trying to get rid of the errors when booting
+on a machine whose RTC is uninitialized, e.g., when it has lost power,
+so anything that achieves that is acceptable to me.
 
-> rtc_time64_to_tm() already has a better way of counting the leap days
-> between two years. I'd be happy to propose a followup patch that gets
-> rid of the for loop entirely.
-> But those are two separate issues imo.
+>> rtc_time64_to_tm() already has a better way of counting the leap days
+>> between two years. I'd be happy to propose a followup patch that gets
+>> rid of the for loop entirely.
+>> But those are two separate issues imo.
+>
+> Getting rid of the loop is better ... but creating a problem and then
+> fixing it is still not really good operating procedure.  Just propose
+> the final fix and we can apply that.
+>
 
-Getting rid of the loop is better ... but creating a problem and then
-fixing it is still not really good operating procedure.  Just propose
-the final fix and we can apply that.
+Yep, makes sense. I will spin a v2 that gets rid of the 'epoch'
+mention and the for loop.
 
-James
+-- 
+Ard.
