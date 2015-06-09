@@ -1,78 +1,122 @@
-From: ethan zhao <ethan.zhao-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86/simplefb: simplefb was broken on Oracle and HP system,
- skip VIDEO_TYPE_EFI
-Date: Tue, 09 Jun 2015 16:04:22 +0800
-Message-ID: <55769E06.4020001@oracle.com>
-References: <1432712748-11344-1-git-send-email-ethan.zhao@oracle.com> <20150605091713.GD6826@codeblueprint.co.uk> <CANq1E4Sqj6y1ys3z_XtgJj61r+4QQK_FCJFMPZ4v-2Ao-ddmXg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2] efi: rtc-efi: use correct EFI 'epoch'
+Date: Tue,  9 Jun 2015 11:15:35 +0200
+Message-ID: <1433841335-10453-1-git-send-email-ard.biesheuvel@linaro.org>
+References: <1433762834-17961-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CANq1E4Sqj6y1ys3z_XtgJj61r+4QQK_FCJFMPZ4v-2Ao-ddmXg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1433762834-17961-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Fabian Frederick <fabf-AgBVmzD5pcezQB+pC5nmwQ@public.gmane.org>, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ethan.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org
+Cc: roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+The rtc-efi driver declares that the EFI 'epoch' is 1/1/1998, but
+the UEFI spec does not define it at all. It does define a range of
+[1900, 9999] for the 'Year' member of the EFI_TIME struct, so let's
+use 1900 as the minimum year and not 1998.
+Also, move the validation of the year to the convert_from_efi_time()
+routine where all other EFI_TIME fields are validated as well.
 
-On 2015/6/5 17:31, David Herrmann wrote:
-> Hi
->
-> On Fri, Jun 5, 2015 at 11:17 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> (Cc'ing David)
->>
->> On Wed, 27 May, at 04:45:48PM, Ethan Zhao wrote:
->>> As descriped in https://bugzilla.kernel.org/show_bug.cgi?id=98721
->>> When kernel 4.0.4 was tested on Oracle and HP system with UEFI mode, no output and
->>> login on console.
->>>
->>> Simplefb was broken on these systems when orig_video_isVGA is VIDEO_TYPE_EFI, so
->>> skip it.
->>>
->>> This patch was tested on Oracle Sun server X5-2 series and HP ProLiant DL380 Gen9
->>> with kernel 4.0.4
->>>
->>> Signed-off-by: Ethan Zhao <ethan.zhao-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
->>> Tested-by: Kunlun Lao <kunlun.lao-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
->>> ---
->>>   arch/x86/kernel/sysfb_simplefb.c | 2 +-
->>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>
->>> diff --git a/arch/x86/kernel/sysfb_simplefb.c b/arch/x86/kernel/sysfb_simplefb.c
->>> index 764a29f..f833502 100644
->>> --- a/arch/x86/kernel/sysfb_simplefb.c
->>> +++ b/arch/x86/kernel/sysfb_simplefb.c
->>> @@ -36,7 +36,7 @@ __init bool parse_mode(const struct screen_info *si,
->>>        unsigned int i;
->>>
->>>        type = si->orig_video_isVGA;
->>> -     if (type != VIDEO_TYPE_VLFB && type != VIDEO_TYPE_EFI)
->>> +     if (type != VIDEO_TYPE_VLFB)
->>>                return false;
->>>
->>>        for (i = 0; i < ARRAY_SIZE(formats); ++i) {
->> This patch makes sense to me, but I'd really like David to fill us in on
->> the rationale for including VIDEO_TYPE_EFI in the simplefb list in first
->> place, and whether he's aware of any platforms that require simplefb for
->> UEFI.
-> simplefb works perfectly fine on EFI systems. There is no need to use
-> vesafb nor efifb anymore. If simplefb does not work on a platform, we
-> should fix it. Hence, I object to this patch. Can you elaborate what
-> exactly the problem is? Are you sure you have CONFIG_FB_SIMPLE=y?
-  Yes, no CONFIG_FB_SIMPLE set.
->
-> If you really want to use efifb instead, please set
-> CONFIG_X86_SYSFB=n.
+This prevents rtc_read_time() failures when the RTC that backs the
+EFI time services is set to a date before 1998, e.g., when it has
+lost power.
 
-CONFIG_X86_SYSFB=n.
-Works.
+This also optimizes the compute_wday() routine, by replacing the for
+loop with a simple arithmetic expression, and by reusing the yearday
+value that we need to compute anyway when populating the
+rtc_time::tm_yday field.
 
->   This config option controls whether you want
-> firmware framebuffers to be converted to the generic
-> simple-framebuffer interface, or whether you want to use the old
-> vesa/efi-framebuffer interfaces.
->
-> Thanks
-> David
-  Thanks,
-  Ethan
+Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+Cc: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Cc: rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+v2:
+- optimize compute_wday() to prevent adding latency to the common case to
+  accommodate the exceptional case (i.e., RTC date << present date)
+- move year validation to convert_from_efi_time() and check the upper bound
+  as well (<= 9999)
+
+ drivers/rtc/rtc-efi.c | 39 ++++++++++++++-------------------------
+ 1 file changed, 14 insertions(+), 25 deletions(-)
+
+diff --git a/drivers/rtc/rtc-efi.c b/drivers/rtc/rtc-efi.c
+index cb989cd00b14..6e917e2f5e86 100644
+--- a/drivers/rtc/rtc-efi.c
++++ b/drivers/rtc/rtc-efi.c
+@@ -24,10 +24,6 @@
+ #include <linux/efi.h>
+ 
+ #define EFI_ISDST (EFI_TIME_ADJUST_DAYLIGHT|EFI_TIME_IN_DAYLIGHT)
+-/*
+- * EFI Epoch is 1/1/1998
+- */
+-#define EFI_RTC_EPOCH		1998
+ 
+ /*
+  * returns day of the year [0-365]
+@@ -38,31 +34,24 @@ compute_yday(efi_time_t *eft)
+ 	/* efi_time_t.month is in the [1-12] so, we need -1 */
+ 	return rtc_year_days(eft->day, eft->month - 1, eft->year);
+ }
++
+ /*
+  * returns day of the week [0-6] 0=Sunday
+- *
+- * Don't try to provide a year that's before 1998, please !
+  */
+ static int
+-compute_wday(efi_time_t *eft)
++compute_wday(efi_time_t *eft, int yday)
+ {
+-	int y;
+-	int ndays = 0;
+-
+-	if (eft->year < EFI_RTC_EPOCH) {
+-		pr_err("EFI year < " __stringify(EFI_RTC_EPOCH) ", invalid date\n");
+-		return -1;
+-	}
+-
+-	for (y = EFI_RTC_EPOCH; y < eft->year; y++)
+-		ndays += 365 + (is_leap_year(y) ? 1 : 0);
+-
+-	ndays += compute_yday(eft);
++	int ndays = eft->year * (365 % 7)
++		    + (eft->year - 1) / 4
++		    - (eft->year - 1) / 100
++		    + (eft->year - 1) / 400
++		    + yday;
+ 
+ 	/*
+-	 * 4=1/1/1998 was a Thursday
++	 * 1/1/0000 may or may not have been a Sunday (if it ever existed at
++	 * all) but assuming it was makes this calculation work correctly.
+ 	 */
+-	return (ndays + 4) % 7;
++	return ndays % 7;
+ }
+ 
+ static void
+@@ -103,16 +92,16 @@ convert_from_efi_time(efi_time_t *eft, struct rtc_time *wtime)
+ 	if (!eft->month || eft->month > 12)
+ 		return false;
+ 	wtime->tm_mon  = eft->month - 1;
+-	wtime->tm_year = eft->year - 1900;
+ 
+-	/* day of the week [0-6], Sunday=0 */
+-	wtime->tm_wday = compute_wday(eft);
+-	if (wtime->tm_wday < 0)
++	if (eft->year < 1900 || eft->year > 9999)
+ 		return false;
++	wtime->tm_year = eft->year - 1900;
+ 
+ 	/* day in the year [1-365]*/
+ 	wtime->tm_yday = compute_yday(eft);
+ 
++	/* day of the week [0-6], Sunday=0 */
++	wtime->tm_wday = compute_wday(eft, wtime->tm_yday);
+ 
+ 	switch (eft->daylight & EFI_ISDST) {
+ 	case EFI_ISDST:
+-- 
+1.9.1
