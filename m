@@ -1,58 +1,90 @@
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V3 0/4] map GHES memory region with EFI memory map
-Date: Thu, 11 Jun 2015 11:25:56 -0700
-Message-ID: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, leif.lindholm@linaro.org, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, tony.luck@gmail.com, rjw@rjwysocki.net, lenb@kernel.org, ying.huang@intel.com
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org
+Subject: [PATCH V3 3/4] efi: x86: rearrange efi_mem_attributes()
+Date: Thu, 11 Jun 2015 11:25:59 -0700
+Message-ID: <1434047160-23358-4-git-send-email-zjzhang@codeaurora.org>
+References: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
-updates a memory region with hardware error record using nocache
-attribute. When OS reads the region, since it maps the region with
-cacahed attribute even though EFI memory map defines this region as
-uncached, OS gets stale data and errorneously reports there is no new
-HW error.
+x86 and ia64 implement efi_mem_attributes() differently. This
+function needs to be available for other arch (such as arm64)
+as well, such as for the purpose of ACPI/APEI.
 
-When ghes driver maps the memory region, it uses the cache attribute
-according to EFI memory map, if EFI memory map feature is enabled
-at runtime.
+ia64 efi does not setup memmap variable and does not set
+EFI_MEMMAP flag, so it needs to have its unique implementation
+of efi_mem_attributes().
 
-Since both arch/x86 and arch/ia64 implemented architecture agnostic EFI
-memory map attribue lookup function efi_memattributes(), the code is
-moved from arch/x86 into EFI subsystem and is declared as __weak; archs
-other than ia64 should not override the default implementation. 
+Move efi_mem_attributes() implementation from x86 to efi, and
+declare it with __weak. It is recommended that other archs
+should not override the default implementation.
 
-V3:
-1. Rebased to v4.1-rc7.
-2. Moved efi_mem_attributes() from arch/x86 to drivers/firmware/efi
-   and declared it as __weak.
-3. Introduced ARCH_APEI_PAGE_KERNEL_UC to allow arch specific page
-   protection type for UC.
-4. Removed efi_ioremap(). It can not be used for GHES memory region
-   mapping purpose since ioremap can not be used in atomic context.
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+---
+ arch/x86/platform/efi/efi.c | 18 ------------------
+ drivers/firmware/efi/efi.c  | 18 ++++++++++++++++++
+ 2 files changed, 18 insertions(+), 18 deletions(-)
 
-V2:
-1. Rebased to v4.1-rc5.
-2. Split removal of efi_mem_attributes() and creation of efi_ioremap()
-into two patches.
-
-Jonathan (Zhixiong) Zhang (4):
-  x86: acpi: define uncached page flag
-  arm64: acpi: define uncached page flag
-  efi: x86: rearrange efi_mem_attributes()
-  acpi, apei: use EFI memmap to map GHES memory
-
- arch/arm64/include/asm/acpi.h |  4 ++++
- arch/x86/include/asm/acpi.h   |  4 ++++
- arch/x86/platform/efi/efi.c   | 18 ------------------
- drivers/acpi/apei/ghes.c      |  9 ++++++++-
- drivers/firmware/efi/efi.c    | 18 ++++++++++++++++++
- 5 files changed, 34 insertions(+), 19 deletions(-)
-
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 02744df576d5..10bd5289c593 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -926,24 +926,6 @@ u32 efi_mem_type(unsigned long phys_addr)
+ 	return 0;
+ }
+ 
+-u64 efi_mem_attributes(unsigned long phys_addr)
+-{
+-	efi_memory_desc_t *md;
+-	void *p;
+-
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
+-
+-	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+-		md = p;
+-		if ((md->phys_addr <= phys_addr) &&
+-		    (phys_addr < (md->phys_addr +
+-				  (md->num_pages << EFI_PAGE_SHIFT))))
+-			return md->attribute;
+-	}
+-	return 0;
+-}
+-
+ static int __init arch_parse_efi_cmdline(char *str)
+ {
+ 	if (parse_option_str(str, "old_map"))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3061bb8629dc..88531b0dee80 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
+ 	return buf;
+ }
++
++u64 __weak efi_mem_attributes(unsigned long phys_addr)
++{
++	efi_memory_desc_t *md;
++	void *p;
++
++	if (!efi_enabled(EFI_MEMMAP))
++		return 0;
++
++	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
++		md = p;
++		if ((md->phys_addr <= phys_addr) &&
++		    (phys_addr < (md->phys_addr +
++		    (md->num_pages << EFI_PAGE_SHIFT))))
++			return md->attribute;
++	}
++	return 0;
++}
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
