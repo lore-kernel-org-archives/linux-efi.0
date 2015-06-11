@@ -1,52 +1,58 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Thu, 11 Jun 2015 16:43:58 +0200
-Message-ID: <20150611144358.GA12476@gmail.com>
-References: <20150611124758.GA19243@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150611124758.GA19243-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Subject: [PATCH V3 0/4] map GHES memory region with EFI memory map
+Date: Thu, 11 Jun 2015 11:25:56 -0700
+Message-ID: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
+Return-path: <linux-arm-msm-owner@vger.kernel.org>
+Sender: linux-arm-msm-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, leif.lindholm@linaro.org, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, tony.luck@gmail.com, rjw@rjwysocki.net, lenb@kernel.org, ying.huang@intel.com
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
+updates a memory region with hardware error record using nocache
+attribute. When OS reads the region, since it maps the region with
+cacahed attribute even though EFI memory map defines this region as
+uncached, OS gets stale data and errorneously reports there is no new
+HW error.
 
-> Folks, please pull the following build fix from Peter Jones. Guenter
-> reported that the ESRT driver doesn't build properly on ia64. The
-> problem was discovered in linux-next.
-> 
-> The following changes since commit c208358c2cc832eeb5b341a465eee30be19cd5a0:
-> 
->   efi: Add 'systab' information to Documentation/ABI (2015-05-27 15:40:20 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 3846c15820a1841225d0245afda4875af23dfbbe:
-> 
->   efi: Work around ia64 build problem with ESRT driver (2015-06-08 10:51:31 +0100)
-> 
-> ----------------------------------------------------------------
->  * Fix ESRT build breakage on ia64 reported by Guenter Roeck - Peter Jones
-> 
-> ----------------------------------------------------------------
-> Peter Jones (1):
->       efi: Work around ia64 build problem with ESRT driver
-> 
->  drivers/firmware/efi/Kconfig  | 5 +++++
->  drivers/firmware/efi/Makefile | 3 ++-
->  include/linux/efi.h           | 4 ++++
->  3 files changed, 11 insertions(+), 1 deletion(-)
+When ghes driver maps the memory region, it uses the cache attribute
+according to EFI memory map, if EFI memory map feature is enabled
+at runtime.
 
-So I pulled this into tip:x86/efi, not into tip:x86/urgent, because the commit 
-that broke the ia64 build is not upstream yet.
+Since both arch/x86 and arch/ia64 implemented architecture agnostic EFI
+memory map attribue lookup function efi_memattributes(), the code is
+moved from arch/x86 into EFI subsystem and is declared as __weak; archs
+other than ia64 should not override the default implementation. 
 
-Thanks,
+V3:
+1. Rebased to v4.1-rc7.
+2. Moved efi_mem_attributes() from arch/x86 to drivers/firmware/efi
+   and declared it as __weak.
+3. Introduced ARCH_APEI_PAGE_KERNEL_UC to allow arch specific page
+   protection type for UC.
+4. Removed efi_ioremap(). It can not be used for GHES memory region
+   mapping purpose since ioremap can not be used in atomic context.
 
-	Ingo
+V2:
+1. Rebased to v4.1-rc5.
+2. Split removal of efi_mem_attributes() and creation of efi_ioremap()
+into two patches.
+
+Jonathan (Zhixiong) Zhang (4):
+  x86: acpi: define uncached page flag
+  arm64: acpi: define uncached page flag
+  efi: x86: rearrange efi_mem_attributes()
+  acpi, apei: use EFI memmap to map GHES memory
+
+ arch/arm64/include/asm/acpi.h |  4 ++++
+ arch/x86/include/asm/acpi.h   |  4 ++++
+ arch/x86/platform/efi/efi.c   | 18 ------------------
+ drivers/acpi/apei/ghes.c      |  9 ++++++++-
+ drivers/firmware/efi/efi.c    | 18 ++++++++++++++++++
+ 5 files changed, 34 insertions(+), 19 deletions(-)
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
