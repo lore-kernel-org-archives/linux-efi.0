@@ -1,44 +1,52 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v5 06/10] x86/asm/efi: Fix asmvalidate warnings for
- efi_stub_64.S
-Date: Thu, 11 Jun 2015 14:14:39 +0100
-Message-ID: <20150611131438.GB19243@codeblueprint.co.uk>
-References: <cover.1433937132.git.jpoimboe@redhat.com>
- <3e1d9ce523b3174a49b4317cd8b1b85dfd0c319a.1433937132.git.jpoimboe@redhat.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Thu, 11 Jun 2015 16:43:58 +0200
+Message-ID: <20150611144358.GA12476@gmail.com>
+References: <20150611124758.GA19243@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <3e1d9ce523b3174a49b4317cd8b1b85dfd0c319a.1433937132.git.jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20150611124758.GA19243-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Michal Marek <mmarek-AlSwsSmVLrQ@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andi Kleen <andi-Vw/NltI1exuRpAAqCnN02g@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, live-patching-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 10 Jun, at 07:06:14AM, Josh Poimboeuf wrote:
-> Fix the following asmvalidate warnings:
+
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+
+> Folks, please pull the following build fix from Peter Jones. Guenter
+> reported that the ESRT driver doesn't build properly on ia64. The
+> problem was discovered in linux-next.
 > 
->    asmvalidate: arch/x86/platform/efi/efi_stub_64.o: efi_call(): missing FP_SAVE/RESTORE macros
->    asmvalidate: arch/x86/boot/compressed/efi_stub_64.o: efi_call(): missing FP_SAVE/RESTORE macros
+> The following changes since commit c208358c2cc832eeb5b341a465eee30be19cd5a0:
 > 
-> efi_call() is a non-leaf callable function, so save/restore the frame
-> pointer with FP_SAVE/RESTORE.
+>   efi: Add 'systab' information to Documentation/ABI (2015-05-27 15:40:20 +0100)
 > 
-> Signed-off-by: Josh Poimboeuf <jpoimboe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> ---
->  arch/x86/platform/efi/efi_stub_64.S | 3 +++
->  1 file changed, 3 insertions(+)
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+> 
+> for you to fetch changes up to 3846c15820a1841225d0245afda4875af23dfbbe:
+> 
+>   efi: Work around ia64 build problem with ESRT driver (2015-06-08 10:51:31 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Fix ESRT build breakage on ia64 reported by Guenter Roeck - Peter Jones
+> 
+> ----------------------------------------------------------------
+> Peter Jones (1):
+>       efi: Work around ia64 build problem with ESRT driver
+> 
+>  drivers/firmware/efi/Kconfig  | 5 +++++
+>  drivers/firmware/efi/Makefile | 3 ++-
+>  include/linux/efi.h           | 4 ++++
+>  3 files changed, 11 insertions(+), 1 deletion(-)
 
-Yeah, fair enough. Though it's worth noting that because we're calling
-firmware functions, which use the Microsoft ABI, %rbp will be saved by
-the callee function if used. Anyway,
+So I pulled this into tip:x86/efi, not into tip:x86/urgent, because the commit 
+that broke the ia64 build is not upstream yet.
 
-Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Thanks,
 
-And since I know Boris in particular has poked around in this area, an
-ACK from him would be worth alot.
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+	Ingo
