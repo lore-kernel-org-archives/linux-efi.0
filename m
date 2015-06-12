@@ -1,90 +1,25 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V3 3/4] efi: x86: rearrange efi_mem_attributes()
-Date: Thu, 11 Jun 2015 11:25:59 -0700
-Message-ID: <1434047160-23358-4-git-send-email-zjzhang@codeaurora.org>
-References: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1434047160-23358-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Fri, 12 Jun 2015 16:00:59 +0100
+Message-ID: <20150612150059.GA17685@codeblueprint.co.uk>
+References: <20150611124758.GA19243@codeblueprint.co.uk>
+ <20150611144358.GA12476@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150611144358.GA12476-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+On Thu, 11 Jun, at 04:43:58PM, Ingo Molnar wrote:
+> 
+> So I pulled this into tip:x86/efi, not into tip:x86/urgent, because the commit 
+> that broke the ia64 build is not upstream yet.
 
-x86 and ia64 implement efi_mem_attributes() differently. This
-function needs to be available for other arch (such as arm64)
-as well, such as for the purpose of ACPI/APEI.
+Thanks Ingo, that sounds good to me.
 
-ia64 efi does not setup memmap variable and does not set
-EFI_MEMMAP flag, so it needs to have its unique implementation
-of efi_mem_attributes().
-
-Move efi_mem_attributes() implementation from x86 to efi, and
-declare it with __weak. It is recommended that other archs
-should not override the default implementation.
-
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
----
- arch/x86/platform/efi/efi.c | 18 ------------------
- drivers/firmware/efi/efi.c  | 18 ++++++++++++++++++
- 2 files changed, 18 insertions(+), 18 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 02744df576d5..10bd5289c593 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -926,24 +926,6 @@ u32 efi_mem_type(unsigned long phys_addr)
- 	return 0;
- }
- 
--u64 efi_mem_attributes(unsigned long phys_addr)
--{
--	efi_memory_desc_t *md;
--	void *p;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return 0;
--
--	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
--		md = p;
--		if ((md->phys_addr <= phys_addr) &&
--		    (phys_addr < (md->phys_addr +
--				  (md->num_pages << EFI_PAGE_SHIFT))))
--			return md->attribute;
--	}
--	return 0;
--}
--
- static int __init arch_parse_efi_cmdline(char *str)
- {
- 	if (parse_option_str(str, "old_map"))
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3061bb8629dc..88531b0dee80 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
- 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
- 	return buf;
- }
-+
-+u64 __weak efi_mem_attributes(unsigned long phys_addr)
-+{
-+	efi_memory_desc_t *md;
-+	void *p;
-+
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
-+	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		md = p;
-+		if ((md->phys_addr <= phys_addr) &&
-+		    (phys_addr < (md->phys_addr +
-+		    (md->num_pages << EFI_PAGE_SHIFT))))
-+			return md->attribute;
-+	}
-+	return 0;
-+}
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Matt Fleming, Intel Open Source Technology Center
