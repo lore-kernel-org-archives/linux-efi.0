@@ -1,25 +1,38 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Fri, 12 Jun 2015 16:00:59 +0100
-Message-ID: <20150612150059.GA17685@codeblueprint.co.uk>
-References: <20150611124758.GA19243@codeblueprint.co.uk>
- <20150611144358.GA12476@gmail.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v5 06/10] x86/asm/efi: Fix asmvalidate warnings for
+ efi_stub_64.S
+Date: Fri, 12 Jun 2015 21:24:41 +0200
+Message-ID: <20150612192441.GL9084@pd.tnic>
+References: <cover.1433937132.git.jpoimboe@redhat.com>
+ <3e1d9ce523b3174a49b4317cd8b1b85dfd0c319a.1433937132.git.jpoimboe@redhat.com>
+ <20150611131438.GB19243@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150611144358.GA12476-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20150611131438.GB19243@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Michal Marek <mmarek@suse.cz>, Peter Zijlstra <peterz@infradead.org>, Andy Lutomirski <luto@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Andi Kleen <andi@firstfloor.org>, x86@kernel.org, live-patching@vger.kernel.org, linux-kernel@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 11 Jun, at 04:43:58PM, Ingo Molnar wrote:
-> 
-> So I pulled this into tip:x86/efi, not into tip:x86/urgent, because the commit 
-> that broke the ia64 build is not upstream yet.
+On Thu, Jun 11, 2015 at 02:14:39PM +0100, Matt Fleming wrote:
+> Yeah, fair enough. Though it's worth noting that because we're calling
+> firmware functions, which use the Microsoft ABI, %rbp will be saved by
+> the callee function if used.
 
-Thanks Ingo, that sounds good to me.
+Yeah, just looked at the spec.
+
+But you know how we don't trust specs. So we get additional paranoid
+security that callee won't futz with RBP because we save it before
+calling. But we pay the additional penalty in the CONFIG_FRAME_POINTER
+case.
+
+Oh what the hell, the 3 additional insns shouldn't be noticeable.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
