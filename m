@@ -1,7 +1,7 @@
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V4 2/4] x86: acpi: add arch_apei_get_mem_attributes()
-Date: Fri, 12 Jun 2015 18:01:45 -0700
-Message-ID: <1434157307-32318-3-git-send-email-zjzhang@codeaurora.org>
+Subject: [PATCH V4 1/4] efi: x86: rearrange efi_mem_attributes()
+Date: Fri, 12 Jun 2015 18:01:44 -0700
+Message-ID: <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
 References: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
@@ -12,57 +12,79 @@ List-Id: linux-efi@vger.kernel.org
 
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-... to allow arch specific implementation of getting page
-protection type associated with a physical address.
+x86 and ia64 implement efi_mem_attributes() differently. This
+function needs to be available for other arch (such as arm64)
+as well, such as for the purpose of ACPI/APEI.
 
-If the physical address has memory attributes defined by EFI
-memmap as EFI_MEMORY_UC, the page protection type is
-PAGE_KENERL_NOCACHE. Otherwise, the page protection type is
-PAGE_KERNEL.
+ia64 efi does not setup memmap variable and does not set
+EFI_MEMMAP flag, so it needs to have its unique implementation
+of efi_mem_attributes().
+
+Move efi_mem_attributes() implementation from x86 to efi, and
+declare it with __weak. It is recommended that other archs
+should not override the default implementation.
 
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 ---
- arch/x86/kernel/acpi/apei.c | 10 ++++++++++
- include/acpi/apei.h         |  1 +
- 2 files changed, 11 insertions(+)
+ arch/x86/platform/efi/efi.c | 18 ------------------
+ drivers/firmware/efi/efi.c  | 18 ++++++++++++++++++
+ 2 files changed, 18 insertions(+), 18 deletions(-)
 
-diff --git a/arch/x86/kernel/acpi/apei.c b/arch/x86/kernel/acpi/apei.c
-index c280df6b2aa2..cfcde9142b94 100644
---- a/arch/x86/kernel/acpi/apei.c
-+++ b/arch/x86/kernel/acpi/apei.c
-@@ -14,6 +14,8 @@
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 02744df576d5..10bd5289c593 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -926,24 +926,6 @@ u32 efi_mem_type(unsigned long phys_addr)
+ 	return 0;
+ }
  
- #include <acpi/apei.h>
- 
-+#include <linux/efi.h>
-+
- #include <asm/mce.h>
- #include <asm/tlbflush.h>
- 
-@@ -60,3 +62,11 @@ void arch_apei_flush_tlb_one(unsigned long addr)
+-u64 efi_mem_attributes(unsigned long phys_addr)
+-{
+-	efi_memory_desc_t *md;
+-	void *p;
+-
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
+-
+-	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+-		md = p;
+-		if ((md->phys_addr <= phys_addr) &&
+-		    (phys_addr < (md->phys_addr +
+-				  (md->num_pages << EFI_PAGE_SHIFT))))
+-			return md->attribute;
+-	}
+-	return 0;
+-}
+-
+ static int __init arch_parse_efi_cmdline(char *str)
  {
- 	__flush_tlb_one(addr);
+ 	if (parse_option_str(str, "old_map"))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3061bb8629dc..88531b0dee80 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
+ 	return buf;
  }
 +
-+pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
++u64 __weak efi_mem_attributes(unsigned long phys_addr)
 +{
-+	if (efi_mem_attributes(addr) & EFI_MEMORY_UC)
-+		return PAGE_KERNEL_NOCACHE;
-+	else
-+		return PAGE_KERNEL;
++	efi_memory_desc_t *md;
++	void *p;
++
++	if (!efi_enabled(EFI_MEMMAP))
++		return 0;
++
++	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
++		md = p;
++		if ((md->phys_addr <= phys_addr) &&
++		    (phys_addr < (md->phys_addr +
++		    (md->num_pages << EFI_PAGE_SHIFT))))
++			return md->attribute;
++	}
++	return 0;
 +}
-diff --git a/include/acpi/apei.h b/include/acpi/apei.h
-index 76284bb560a6..4dd8c490e24f 100644
---- a/include/acpi/apei.h
-+++ b/include/acpi/apei.h
-@@ -45,6 +45,7 @@ int erst_clear(u64 record_id);
- int arch_apei_enable_cmcff(struct acpi_hest_header *hest_hdr, void *data);
- void arch_apei_report_mem_error(int sev, struct cper_sec_mem_err *mem_err);
- void arch_apei_flush_tlb_one(unsigned long addr);
-+pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr);
- 
- #endif
- #endif
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
