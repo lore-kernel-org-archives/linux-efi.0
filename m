@@ -1,90 +1,45 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V4 1/4] efi: x86: rearrange efi_mem_attributes()
-Date: Fri, 12 Jun 2015 18:01:44 -0700
-Message-ID: <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
-References: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+Subject: Re: [PATCH v2] efi: rtc-efi: use correct EFI 'epoch'
+Date: Sat, 13 Jun 2015 14:57:53 +0200
+Message-ID: <20150613125753.GJ3890@piout.net>
+References: <1433762834-17961-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1433841335-10453-1-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1433841335-10453-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+On 09/06/2015 at 11:15:35 +0200, Ard Biesheuvel wrote :
+> The rtc-efi driver declares that the EFI 'epoch' is 1/1/1998, but
+> the UEFI spec does not define it at all. It does define a range of
+> [1900, 9999] for the 'Year' member of the EFI_TIME struct, so let's
+> use 1900 as the minimum year and not 1998.
+> Also, move the validation of the year to the convert_from_efi_time()
+> routine where all other EFI_TIME fields are validated as well.
+> 
+> This prevents rtc_read_time() failures when the RTC that backs the
+> EFI time services is set to a date before 1998, e.g., when it has
+> lost power.
+> 
+> This also optimizes the compute_wday() routine, by replacing the for
+> loop with a simple arithmetic expression, and by reusing the yearday
+> value that we need to compute anyway when populating the
+> rtc_time::tm_yday field.
+> 
+> Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
+> Cc: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
+> Cc: rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-x86 and ia64 implement efi_mem_attributes() differently. This
-function needs to be available for other arch (such as arm64)
-as well, such as for the purpose of ACPI/APEI.
+Applied, thanks.
 
-ia64 efi does not setup memmap variable and does not set
-EFI_MEMMAP flag, so it needs to have its unique implementation
-of efi_mem_attributes().
 
-Move efi_mem_attributes() implementation from x86 to efi, and
-declare it with __weak. It is recommended that other archs
-should not override the default implementation.
-
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
----
- arch/x86/platform/efi/efi.c | 18 ------------------
- drivers/firmware/efi/efi.c  | 18 ++++++++++++++++++
- 2 files changed, 18 insertions(+), 18 deletions(-)
-
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 02744df576d5..10bd5289c593 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -926,24 +926,6 @@ u32 efi_mem_type(unsigned long phys_addr)
- 	return 0;
- }
- 
--u64 efi_mem_attributes(unsigned long phys_addr)
--{
--	efi_memory_desc_t *md;
--	void *p;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return 0;
--
--	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
--		md = p;
--		if ((md->phys_addr <= phys_addr) &&
--		    (phys_addr < (md->phys_addr +
--				  (md->num_pages << EFI_PAGE_SHIFT))))
--			return md->attribute;
--	}
--	return 0;
--}
--
- static int __init arch_parse_efi_cmdline(char *str)
- {
- 	if (parse_option_str(str, "old_map"))
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3061bb8629dc..88531b0dee80 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
- 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
- 	return buf;
- }
-+
-+u64 __weak efi_mem_attributes(unsigned long phys_addr)
-+{
-+	efi_memory_desc_t *md;
-+	void *p;
-+
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
-+	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		md = p;
-+		if ((md->phys_addr <= phys_addr) &&
-+		    (phys_addr < (md->phys_addr +
-+		    (md->num_pages << EFI_PAGE_SHIFT))))
-+			return md->attribute;
-+	}
-+	return 0;
-+}
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Alexandre Belloni, Free Electrons
+Embedded Linux, Kernel and Android engineering
+http://free-electrons.com
