@@ -1,81 +1,64 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH V4 1/4] efi: x86: rearrange efi_mem_attributes()
-Date: Mon, 15 Jun 2015 18:09:57 +0100
-Message-ID: <20150615170957.GC17685@codeblueprint.co.uk>
-References: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
- <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
+From: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Subject: Re: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
+Date: Mon, 15 Jun 2015 21:43:54 +0000 (UTC)
+Message-ID: <loom.20150615T232724-11@post.gmane.org>
+References: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 12 Jun, at 06:01:44PM, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Michael Brown <mbrown@...> writes:
+
 > 
-> x86 and ia64 implement efi_mem_attributes() differently. This
-> function needs to be available for other arch (such as arm64)
-> as well, such as for the purpose of ACPI/APEI.
+> The kernel will align itself to the nearest boundary specified by the
+> kernel_alignment field in the bzImage header.  If the kernel is loaded
+> to an address which is not sufficiently aligned, it will therefore use
+> memory beyond that indicated solely by the init_size field.
 > 
-> ia64 efi does not setup memmap variable and does not set
-> EFI_MEMMAP flag, so it needs to have its unique implementation
-> of efi_mem_attributes().
+> The PE/COFF headers now include a .bss section to describe the
+> requirements of the init_size field, but do not currently expose the
+> alignment requirement.  Consequently, a kernel loaded via the PE entry
+> point may still end up overwriting unexpected areas of memory.
+> 
+> Fix by exposing the desired alignment via the SectionAlignment field
+> in the PE/COFF headers.  Despite its name, this field provides an
+> overall alignment requirement for the loaded file.  (Naturally, the
+> FileAlignment field describes the alignment for individual sections.)
+> 
+> There is no way in the PE/COFF headers to express the concept of
+> min_alignment; we therefore do not expose the minimum (as opposed to
+> preferred) alignment.
+> 
+> Signed-off-by: Michael Brown <mbrown@...>
+> ---
+>  arch/x86/boot/header.S | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+> index 7a6d43a..16ef025 100644
+> --- a/arch/x86/boot/header.S
+> +++ b/arch/x86/boot/header.S
+>  <at>  <at>  -154,7 +154,7  <at>  <at>  extra_header_fields:
+>  #else
+>  	.quad	0				# ImageBase
+>  #endif
+> -	.long	0x20				# SectionAlignment
+> +	.long	CONFIG_PHYSICAL_ALIGN		# SectionAlignment
+>  	.long	0x20				# FileAlignment
+>  	.word	0				# 
+MajorOperatingSystemVersion
+>  	.word	0				# 
+MinorOperatingSystemVersion
 
-Something like the above paragraph...
- 
-> @@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
->  			 attr & EFI_MEMORY_UC      ? "UC"  : "");
->  	return buf;
->  }
+There may be a problem with this change. The specification says that the 
+SizeOfImage field must be a multiple of SectionAlignment. That was the case 
+when SectionAlignment was 0x20, but now that it is so large it would 
+require quite an increase in the last section to comply. A kernel I am 
+looking at now has:
 
-needs to go here, i.e. as documentation for efi_mem_atributes(). You
-need to explain why this function is marked as __weak at the function
-definition site.
-
-> +u64 __weak efi_mem_attributes(unsigned long phys_addr)
-> +{
-> +	efi_memory_desc_t *md;
-> +	void *p;
-> +
-> +	if (!efi_enabled(EFI_MEMMAP))
-> +		return 0;
-> +
-> +	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-> +		md = p;
-> +		if ((md->phys_addr <= phys_addr) &&
-> +		    (phys_addr < (md->phys_addr +
-> +		    (md->num_pages << EFI_PAGE_SHIFT))))
-> +			return md->attribute;
-> +	}
-> +	return 0;
-> +}
-
-because otherwise people are going to read this in the future and think,
-
- "efi_mem_attribute() doesn't quite work how I want it to for my arch,
- but it's __weak, so I'll override it"
-
-which is absolutely not the practice we should be promoting.
-
-How about something like this,
-
-	/*
-	 * efi_mem_attributes - lookup memmap attributes for physical address
-	 * @phys_addr: the physical address to lookup
-	 *
-	 * Search in the EFI memory map for the region covering
-	 * @phys_addr. Returns the EFI memory attributes if the region
-	 * was found in the memory map, 0 otherwise.
-	 *
-	 * Despite being marked __weak most architectures should *not*
-	 * override this function. It is __weak solely for the benefit
-	 * of ia64 which has a funky EFI memory map that doesn't work
-	 * the same way as other architectures.
-	 */
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Alignment of sections:	0x1000000
+Size of image:	0x105a000
