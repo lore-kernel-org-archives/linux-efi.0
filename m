@@ -1,45 +1,81 @@
-From: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v2] efi: rtc-efi: use correct EFI 'epoch'
-Date: Sat, 13 Jun 2015 14:57:53 +0200
-Message-ID: <20150613125753.GJ3890@piout.net>
-References: <1433762834-17961-1-git-send-email-ard.biesheuvel@linaro.org>
- <1433841335-10453-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH V4 1/4] efi: x86: rearrange efi_mem_attributes()
+Date: Mon, 15 Jun 2015 18:09:57 +0100
+Message-ID: <20150615170957.GC17685@codeblueprint.co.uk>
+References: <1434157307-32318-1-git-send-email-zjzhang@codeaurora.org>
+ <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1433841335-10453-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>, rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
+In-Reply-To: <1434157307-32318-2-git-send-email-zjzhang@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On 09/06/2015 at 11:15:35 +0200, Ard Biesheuvel wrote :
-> The rtc-efi driver declares that the EFI 'epoch' is 1/1/1998, but
-> the UEFI spec does not define it at all. It does define a range of
-> [1900, 9999] for the 'Year' member of the EFI_TIME struct, so let's
-> use 1900 as the minimum year and not 1998.
-> Also, move the validation of the year to the convert_from_efi_time()
-> routine where all other EFI_TIME fields are validated as well.
+On Fri, 12 Jun, at 06:01:44PM, Jonathan (Zhixiong) Zhang wrote:
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 > 
-> This prevents rtc_read_time() failures when the RTC that backs the
-> EFI time services is set to a date before 1998, e.g., when it has
-> lost power.
+> x86 and ia64 implement efi_mem_attributes() differently. This
+> function needs to be available for other arch (such as arm64)
+> as well, such as for the purpose of ACPI/APEI.
 > 
-> This also optimizes the compute_wday() routine, by replacing the for
-> loop with a simple arithmetic expression, and by reusing the yearday
-> value that we need to compute anyway when populating the
-> rtc_time::tm_yday field.
-> 
-> Cc: Alessandro Zummo <a.zummo-BfzFCNDTiLLj+vYz1yj4TQ@public.gmane.org>
-> Cc: Alexandre Belloni <alexandre.belloni-wi1+55ScJUtKEb57/3fJTNBPR1lH4CV8@public.gmane.org>
-> Cc: rtc-linux-/JYPxA39Uh5TLH3MbocFFw@public.gmane.org
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ia64 efi does not setup memmap variable and does not set
+> EFI_MEMMAP flag, so it needs to have its unique implementation
+> of efi_mem_attributes().
 
-Applied, thanks.
+Something like the above paragraph...
+ 
+> @@ -517,3 +517,21 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+>  			 attr & EFI_MEMORY_UC      ? "UC"  : "");
+>  	return buf;
+>  }
 
+needs to go here, i.e. as documentation for efi_mem_atributes(). You
+need to explain why this function is marked as __weak at the function
+definition site.
+
+> +u64 __weak efi_mem_attributes(unsigned long phys_addr)
+> +{
+> +	efi_memory_desc_t *md;
+> +	void *p;
+> +
+> +	if (!efi_enabled(EFI_MEMMAP))
+> +		return 0;
+> +
+> +	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+> +		md = p;
+> +		if ((md->phys_addr <= phys_addr) &&
+> +		    (phys_addr < (md->phys_addr +
+> +		    (md->num_pages << EFI_PAGE_SHIFT))))
+> +			return md->attribute;
+> +	}
+> +	return 0;
+> +}
+
+because otherwise people are going to read this in the future and think,
+
+ "efi_mem_attribute() doesn't quite work how I want it to for my arch,
+ but it's __weak, so I'll override it"
+
+which is absolutely not the practice we should be promoting.
+
+How about something like this,
+
+	/*
+	 * efi_mem_attributes - lookup memmap attributes for physical address
+	 * @phys_addr: the physical address to lookup
+	 *
+	 * Search in the EFI memory map for the region covering
+	 * @phys_addr. Returns the EFI memory attributes if the region
+	 * was found in the memory map, 0 otherwise.
+	 *
+	 * Despite being marked __weak most architectures should *not*
+	 * override this function. It is __weak solely for the benefit
+	 * of ia64 which has a funky EFI memory map that doesn't work
+	 * the same way as other architectures.
+	 */
 
 -- 
-Alexandre Belloni, Free Electrons
-Embedded Linux, Kernel and Android engineering
-http://free-electrons.com
+Matt Fleming, Intel Open Source Technology Center
