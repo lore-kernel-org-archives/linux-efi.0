@@ -1,55 +1,60 @@
-From: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
-Date: Tue, 16 Jun 2015 11:37:25 -0600
-Message-ID: <20150616173725.GE13153@oranje.fc.hp.com>
-References: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
- <loom.20150615T232724-11@post.gmane.org>
- <55804C91.4030000@fensystems.co.uk>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH 01/44] kernel: Add support for poweroff handler call chain
+Date: Wed, 17 Jun 2015 18:04:54 -0700
+Message-ID: <55821936.4040704@codeaurora.org>
+References: <1412659726-29957-1-git-send-email-linux@roeck-us.net> <1412659726-29957-2-git-send-email-linux@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <55804C91.4030000-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-hexagon-owner@vger.kernel.org>
+In-Reply-To: <1412659726-29957-2-git-send-email-linux@roeck-us.net>
+Sender: linux-hexagon-owner@vger.kernel.org
+To: Guenter Roeck <linux@roeck-us.net>, linux-kernel@vger.kernel.org
+Cc: linux-m32r-ja@ml.linux-m32r.org, linux-mips@linux-mips.org, linux-efi@vger.kernel.org, linux-ia64@vger.kernel.org, Heiko Stuebner <heiko@sntech.de>, Len Brown <len.brown@intel.com>, linux-xtensa@linux-xtensa.org, Pavel Machek <pavel@ucw.cz>, devel@driverdev.osuosl.org, linux-s390@vger.kernel.org, lguest@lists.ozlabs.org, linux-c6x-dev@linux-c6x.org, linux-hexagon@vger.kernel.org, linux-sh@vger.kernel.org, Alexander Graf <agraf@suse.de>, linux-acpi@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, xen-devel@lists.xenproject.org, devicetree@vger.kernel.org, user-mode-linux-devel@lists.sourceforge.net, linux-pm@vger.kernel.org, adi-buildroot-devel@lists.sourceforge.net, linux-m68k@lists.linux-m68k.org, linux-am33-list@redhat.com, linux-tegra@vger.kernel.org, openipmi-developer@lists.sourceforge.net, linux-metag@vger.kernel.org, linux-arm-kernel@lists.infradead
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jun 16, 2015 at 05:19:29PM +0100, Michael Brown wrote:
-> On 15/06/15 22:43, Linn Crosetto wrote:
-> >Michael Brown <mbrown@...> writes:
-> >>The kernel will align itself to the nearest boundary specified by the
-> >>kernel_alignment field in the bzImage header.  If the kernel is loaded
-> >>to an address which is not sufficiently aligned, it will therefore use
-> >>memory beyond that indicated solely by the init_size field.
-> >>
-> >>The PE/COFF headers now include a .bss section to describe the
-> >>requirements of the init_size field, but do not currently expose the
-> >>alignment requirement.  Consequently, a kernel loaded via the PE entry
-> >>point may still end up overwriting unexpected areas of memory.
-> >>
-> >>Fix by exposing the desired alignment via the SectionAlignment field
-> >>in the PE/COFF headers.  Despite its name, this field provides an
-> >>overall alignment requirement for the loaded file.  (Naturally, the
-> >>FileAlignment field describes the alignment for individual sections.)
-> >>
-> >>There is no way in the PE/COFF headers to express the concept of
-> >>min_alignment; we therefore do not expose the minimum (as opposed to
-> >>preferred) alignment.
-> >
-> ><snip>
-> >
-> >There may be a problem with this change. The specification says that the
-> >SizeOfImage field must be a multiple of SectionAlignment. That was the case
-> >when SectionAlignment was 0x20, but now that it is so large it would
-> >require quite an increase in the last section to comply. A kernel I am
-> >looking at now has:
-> >
-> >Alignment of sections:	0x1000000
-> >Size of image:	0x105a000
-> 
-> Any suggested solution?
+On 10/06/2014 10:28 PM, Guenter Roeck wrote:
+> Various drivers implement architecture and/or device specific means to
+> remove power from the system.  For the most part, those drivers set the
+> global variable pm_power_off to point to a function within the driver.
+>
+> This mechanism has a number of drawbacks.  Typically only one scheme
+> to remove power is supported (at least if pm_power_off is used).
+> At least in theory there can be multiple means remove power, some of
+> which may be less desirable. For example, some mechanisms may only
+> power off the CPU or the CPU card, while another may power off the
+> entire system.  Others may really just execute a restart sequence
+> or drop into the ROM monitor. Using pm_power_off can also be racy
+> if the function pointer is set from a driver built as module, as the
+> driver may be in the process of being unloaded when pm_power_off is
+> called. If there are multiple poweroff handlers in the system, removing
+> a module with such a handler may inadvertently reset the pointer to
+> pm_power_off to NULL, leaving the system with no means to remove power.
+>
+> Introduce a system poweroff handler call chain to solve the described
+> problems.  This call chain is expected to be executed from the
+> architecture specific machine_power_off() function.  Drivers providing
+> system poweroff functionality are expected to register with this call chain.
+> By using the priority field in the notifier block, callers can control
+> poweroff handler execution sequence and thus ensure that the poweroff
+> handler with the optimal capabilities to remove power for a given system
+> is called first.
 
-I have been reverting this patch as a workaround. The fields need to be changed,
-but I am not that familiar with the code. Maybe there is a way to use a
-heuristic to calculate the best values based on init_sz?
+What happened to this series? I want to add shutdown support to my
+platform and I need to write a register on the PMIC in one driver to
+configure it for shutdown instead of restart and then write an MMIO
+register to tell the PMIC to actually do the shutdown in another driver.
+It seems that the notifier solves this case for me, albeit with the
+slight complication that I need to order the two with some priority.
+
+I'm also considering putting the PMIC configuration part into the reboot
+notifier chain, because it only does things to change the configuration
+and not actually any shutdown/restart itself. That removes any
+requirement to get the priority of notifiers right. This series will
+still be useful for the MMIO register that needs to be toggled though.
+Right now I have to assign pm_power_off or hook the reboot notifier with
+a different priority to make this work.
+
+-- 
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
