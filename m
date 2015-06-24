@@ -1,74 +1,84 @@
-From: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi: add support for EFI_MEMORY_RO attribute introduced
- by UEFIv2.5
-Date: Wed, 24 Jun 2015 13:47:21 +0200
-Message-ID: <558A98C9.5000306@redhat.com>
-References: <1435142544-10014-1-git-send-email-ard.biesheuvel@linaro.org>
+From: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: compatability with older versions of UEFI
+Date: Wed, 24 Jun 2015 11:04:05 -0700
+Message-ID: <558AF115.8020909@codeaurora.org>
+References: <20150623170534.GA21341@agluck-desk.sc.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1435142544-10014-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20150623170534.GA21341-E6Nu+q68HHTI/KE9syI0vLvm/XP+8Wra@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+To: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linaro-acpi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 06/24/15 12:42, Ard Biesheuvel wrote:
-> The UEFI spec v2.5 introduces a new memory attribute EFI_MEMORY_RO,
-> which is now the preferred attribute to convey that the nature of
-> the contents of such a region allows it to be mapped read-only
-> (i.e., it contains .text and .rodata only). The specification of
-> the existing EFI_MEMORY_WP attribute has been updated to align
-> more closely with its common use as a cacheability attribute rather
-> than a permission attribute.
-> 
-> Add the #define and add the attribute to the memory map dumping
-> routine.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/efi.c | 8 +++++---
->  include/linux/efi.h        | 1 +
->  2 files changed, 6 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 03a6b313568c..7c4c2202b663 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -502,16 +502,18 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
->  
->  	attr = md->attribute;
->  	if (attr & ~(EFI_MEMORY_UC | EFI_MEMORY_WC | EFI_MEMORY_WT |
-> -		     EFI_MEMORY_WB | EFI_MEMORY_UCE | EFI_MEMORY_WP |
-> -		     EFI_MEMORY_RP | EFI_MEMORY_XP | EFI_MEMORY_RUNTIME))
-> +		     EFI_MEMORY_WB | EFI_MEMORY_UCE | EFI_MEMORY_RO |
-> +		     EFI_MEMORY_WP | EFI_MEMORY_RP | EFI_MEMORY_XP |
-> +		     EFI_MEMORY_RUNTIME))
->  		snprintf(pos, size, "|attr=0x%016llx]",
->  			 (unsigned long long)attr);
->  	else
-> -		snprintf(pos, size, "|%3s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
-> +		snprintf(pos, size, "|%3s|%2s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
->  			 attr & EFI_MEMORY_RUNTIME ? "RUN" : "",
->  			 attr & EFI_MEMORY_XP      ? "XP"  : "",
->  			 attr & EFI_MEMORY_RP      ? "RP"  : "",
->  			 attr & EFI_MEMORY_WP      ? "WP"  : "",
-> +			 attr & EFI_MEMORY_RO      ? "RO"  : "",
->  			 attr & EFI_MEMORY_UCE     ? "UCE" : "",
->  			 attr & EFI_MEMORY_WB      ? "WB"  : "",
->  			 attr & EFI_MEMORY_WT      ? "WT"  : "",
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index af5be0368dec..407e1e6ef29e 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -96,6 +96,7 @@ typedef	struct {
->  #define EFI_MEMORY_WP		((u64)0x0000000000001000ULL)	/* write-protect */
->  #define EFI_MEMORY_RP		((u64)0x0000000000002000ULL)	/* read-protect */
->  #define EFI_MEMORY_XP		((u64)0x0000000000004000ULL)	/* execute-protect */
-> +#define EFI_MEMORY_RO		((u64)0x0000000000020000ULL)	/* read-only */
->  #define EFI_MEMORY_RUNTIME	((u64)0x8000000000000000ULL)	/* range requires runtime mapping */
->  #define EFI_MEMORY_DESCRIPTOR_VERSION	1
->  
-> 
+Another option would be to have 2 structs, the first one
+"struct cper_sec_mem_err" holds the structure as defined by UEFI
+2.1, the 2nd one "struct cper_sec_mem_err_24_ext" holds the 4
+elements added in UEFI 2.3.1.
 
-Reviewed-by: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In the past how is such situation (newer version of spec adds elements
+to existing table) handled? To me, the "extension structure" option
+proposed above makes sense because it allows rigid check of data
+passed from firmware to OS.
+
+Jonathan
+
+On 6/23/2015 10:05 AM, Luck, Tony wrote:
+> When we print UEFI appendix N error logs provided by plaform
+> firmware we get to this function:
+>
+> static void cper_estatus_print_section(
+> 	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
+> {
+>
+> Which includes this code (similar for the other section types):
+>
+>
+> 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
+> 		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
+> 		printk("%s""section_type: memory error\n", newpfx);
+> 		if (gdata->error_data_length >= sizeof(*mem_err))
+> 			cper_print_mem(newpfx, mem_err);
+> 		else
+> 			goto err_section_too_small;
+>
+> I'm having a problem with that size check.  The kernel defines
+> "struct cper_sec_mem_err" according to the 2.3.1 and later versions
+> of the spec where the last element is the module handle at offset 78
+> so the "sizeof(*mem_err)" is 80.  But my BIOS defaults to providing
+> version 2.2 format information, where the last field is the memory
+> error type, and the struture size is only 73 bytes. So this code
+> takes the goto err_section_too_small, prints an error message, and
+> stops decoding.
+>
+> This is a pity because it looks like the UEFI folk took great care
+> to make these structures back/forward compatible. Each has a bitfield
+> at the start saying which elements are valid ... so my 2.2 using BIOS
+> will never set the valid bits for the fields it doesn't know about.
+>
+> Perhaps we can have some defines for the size of these structures
+> in the oldest version of the spec where they exist (2.1 AFAICT):
+>
+> #define	UEFI_MEMSECTION_MIN_SIZE	73
+>
+> etc. Then use these as the sanity check?
+>
+> Or we can be totally distrustful of the BIOS and pass the
+> "gdata->error_data_length" to the print function and have
+> it check that size against the offset of any fields that
+> the validation_bits say we should print.  This feels like
+> overkill.
+>
+> -Tony
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+
+-- 
+Jonathan (Zhixiong) Zhang
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
