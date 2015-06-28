@@ -1,38 +1,31 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: add support for EFI_MEMORY_RO attribute introduced
- by UEFIv2.5
-Date: Sun, 28 Jun 2015 15:35:41 +0100
-Message-ID: <20150628143541.GC28334@codeblueprint.co.uk>
-References: <1435142544-10014-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: lower log level of efi-bgrt / handle status 0
+Date: Mon, 29 Jun 2015 01:10:52 +0800
+Message-ID: <CAGnHSEnBNr-HVaUMjRqPK104mV1r16uDsktob+9WADr84fBh0w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1435142544-10014-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 24 Jun, at 12:42:24PM, Ard Biesheuvel wrote:
-> The UEFI spec v2.5 introduces a new memory attribute EFI_MEMORY_RO,
-> which is now the preferred attribute to convey that the nature of
-> the contents of such a region allows it to be mapped read-only
-> (i.e., it contains .text and .rodata only). The specification of
-> the existing EFI_MEMORY_WP attribute has been updated to align
-> more closely with its common use as a cacheability attribute rather
-> than a permission attribute.
-> 
-> Add the #define and add the attribute to the memory map dumping
-> routine.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/efi.c | 8 +++++---
->  include/linux/efi.h        | 1 +
->  2 files changed, 6 insertions(+), 3 deletions(-)
+My motherboard is ASUS H87-PRO which has UEFI BIOS. The kernel gives
+the following error on every boot:
 
-Thanks Ard, applied.
+Ignoring BGRT: invalid status 0 (expected 1)
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+This happens when the "Boot Logo" BIOS option is set to "Auto" (AND
+using a PCI-E display card, IIRC). According to the mobo's manual,
+"Auto" means:
+
+"Automatically adjust the boot logo size according to Windows requirements."
+
+while the error will be gone if I set it to "Full Screen" (which makes
+the boot logo look huge and ugly) or "Disabled" instead.
+
+The thing is nothing really goes wrong when I choose "Auto" except
+from keep seeing that error. So could you make it accept/handle status
+0, or at least lower the log level of messages in efi-bgrt? I can see
+that all of them make use of pr_err() and I wonder how important is
+this BGRT thing.
