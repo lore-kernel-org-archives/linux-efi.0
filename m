@@ -1,71 +1,39 @@
-From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH] x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid
  BGRT
-Date: Mon, 29 Jun 2015 07:02:56 -0700
-Message-ID: <20150629140256.GB22374@x>
+Date: Mon, 29 Jun 2015 16:17:24 +0200
+Message-ID: <20150629141724.GG12383@pd.tnic>
 References: <1435579602-6612-1-git-send-email-matt@codeblueprint.co.uk>
+ <20150629131305.GB13113@pd.tnic>
+ <20150629140022.GA22374@x>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1435579602-6612-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20150629140022.GA22374@x>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jun 29, 2015 at 01:06:42PM +0100, Matt Fleming wrote:
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> It's totally legitimate, per the ACPI spec, for the firmware to set the
-> BGRT 'status' field to zero to indicate that the BGRT image isn't being
-> displayed, and we shouldn't be printing an error message in that case
-> because it's just noise for users. So swap pr_err() for pr_debug().
-> 
-> However, Josh points that out it still makes sense to test the validity
-> of the upper 7 bits of the 'status' field, since they're marked as
-> "reserved" in the spec and must be zero. If firmware violates this it
-> really *is* an error.
-> 
-> Reported-by: Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Mon, Jun 29, 2015 at 07:00:22AM -0700, Josh Triplett wrote:
+> Definitely not FW_BUG.  The field is reserved *now*; it would be
+> legitimate for a new version of the BGRT spec to define one of those
+> bits for something else.
 
-Looks reasonable to me.
+Which would mean that booting old kernels on new FW which defines those
+reserved bits would cause that warning to fire erroneously.
 
-Reviewed-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+So then we probably don't need it at all or we need to check implemented
+BGRT version of the FW running to know which bits are defined by the
+spec and which are reserved...
 
-> 
-> Tom, if you could test out this patch that would be really helpful. I'll
-> take this one through the EFI git repo.
-> 
->  arch/x86/platform/efi/efi-bgrt.c | 9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
-> 
-> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-> index d7f997f7c26d..ea48449b2e63 100644
-> --- a/arch/x86/platform/efi/efi-bgrt.c
-> +++ b/arch/x86/platform/efi/efi-bgrt.c
-> @@ -50,11 +50,16 @@ void __init efi_bgrt_init(void)
->  		       bgrt_tab->version);
->  		return;
->  	}
-> -	if (bgrt_tab->status != 1) {
-> -		pr_err("Ignoring BGRT: invalid status %u (expected 1)\n",
-> +	if (bgrt_tab->status & 0xfe) {
-> +		pr_err("Ignoring BGRT: reserved status bits are non-zero %u\n",
->  		       bgrt_tab->status);
->  		return;
->  	}
-> +	if (bgrt_tab->status != 1) {
-> +		pr_debug("Ignoring BGRT: invalid status %u (expected 1)\n",
-> +			 bgrt_tab->status);
-> +		return;
-> +	}
->  	if (bgrt_tab->image_type != 0) {
->  		pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
->  		       bgrt_tab->image_type);
-> -- 
-> 2.1.0
-> 
+Also, does the spec really say that reserved bits must be zero? Or it
+doesn't specify their value?
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
+--
