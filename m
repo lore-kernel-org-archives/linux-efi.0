@@ -1,118 +1,53 @@
-From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCHv2] efi: Handle memory error structures produced based on
- old versions of standard
-Date: Tue, 30 Jun 2015 15:57:51 -0700
-Message-ID: <20150630225751.GA18060@agluck-desk.sc.intel.com>
-References: <20150623170534.GA21341@agluck-desk.sc.intel.com>
- <558AF115.8020909@codeaurora.org>
- <20150628142909.GA28334@codeblueprint.co.uk>
- <20150629182106.GA25924@agluck-desk.sc.intel.com>
- <20150630122244.GJ28334@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH] efi: Check for null efi kernel parameters
+Date: Tue, 30 Jun 2015 16:13:33 -0700
+Message-ID: <1435706013-20375-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150630122244.GJ28334-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linaro-acpi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Glenn P. Williamson" <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The memory error record structure includes as its first field a
-bitmask of which subsequent fields are valid. The allows new fields
-to be added to the structure while keeping compatibility with older
-software that parses these records. This mechanism was used between
-versions 2.2 and 2.3 to add four new fields, growing the size of the
-structure from 73 bytes to 80. But Linux just added all the new
-fields so this test:
-	if (gdata->error_data_length >= sizeof(*mem_err))
-		cper_print_mem(newpfx, mem_err);
-	else
-		goto err_section_too_small;
-now make Linux complain about old format records being too short.
+Even though it is documented how to specify efi parameters,
+it is possible to cause a kernel panic due to a NULL pointer
+derreference if no efi parameter is passed. Thus, check whether
+there is any parameters at all before parsing and warn the user.
 
-Add a definition for the old format of the structure and use that
-for the minimum size check. Pass the actual size to cper_print_mem()
-so it can sanity check the validation_bits field to ensure that if
-a BIOS using the old format sets bits as if it were new, we won't
-access fields beyond the end of the structure.
-
-Signed-off-by: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 ---
-v1-v2: print FW_WARN if we see bogus validation bits from an old sized structure
+ arch/x86/platform/efi/efi.c | 4 ++++
+ drivers/firmware/efi/efi.c  | 4 ++++
+ 2 files changed, 8 insertions(+)
 
- drivers/firmware/efi/cper.c | 15 ++++++++++++---
- include/linux/cper.h        | 22 +++++++++++++++++++++-
- 2 files changed, 33 insertions(+), 4 deletions(-)
-
-diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-index 4fd9961d552e..d42537425438 100644
---- a/drivers/firmware/efi/cper.c
-+++ b/drivers/firmware/efi/cper.c
-@@ -305,10 +305,17 @@ const char *cper_mem_err_unpack(struct trace_seq *p,
- 	return ret;
- }
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 51a689d..f60af0c 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -948,6 +948,10 @@ u64 efi_mem_attributes(unsigned long phys_addr)
  
--static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem)
-+static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem,
-+	int len)
+ static int __init arch_parse_efi_cmdline(char *str)
  {
- 	struct cper_mem_err_compact cmem;
- 
-+	/* Don't trust UEFI 2.1/2.2 structure with bad validation bits */
-+	if (len == sizeof(struct cper_sec_mem_err_old) &&
-+	    (mem->validation_bits & ~(CPER_MEM_VALID_RANK_NUMBER - 1))) {
-+		pr_err(FW_WARN "valid bits set for fields beyond structure\n");
-+		return;
++	if (!str) {
++		pr_warn("need at least one option\n");
++		return -EINVAL;
 +	}
- 	if (mem->validation_bits & CPER_MEM_VALID_ERROR_STATUS)
- 		printk("%s""error_status: 0x%016llx\n", pfx, mem->error_status);
- 	if (mem->validation_bits & CPER_MEM_VALID_PA)
-@@ -405,8 +412,10 @@ static void cper_estatus_print_section(
- 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
- 		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
- 		printk("%s""section_type: memory error\n", newpfx);
--		if (gdata->error_data_length >= sizeof(*mem_err))
--			cper_print_mem(newpfx, mem_err);
-+		if (gdata->error_data_length >=
-+		    sizeof(struct cper_sec_mem_err_old))
-+			cper_print_mem(newpfx, mem_err,
-+				       gdata->error_data_length);
- 		else
- 			goto err_section_too_small;
- 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
-diff --git a/include/linux/cper.h b/include/linux/cper.h
-index 76abba4b238e..dcacb1a72e26 100644
---- a/include/linux/cper.h
-+++ b/include/linux/cper.h
-@@ -340,7 +340,27 @@ struct cper_ia_proc_ctx {
- 	__u64	mm_reg_addr;
- };
+ 	if (parse_option_str(str, "old_map"))
+ 		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+ 	if (parse_option_str(str, "debug"))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3c457db..c1b3fdb 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -58,6 +58,10 @@ bool efi_runtime_disabled(void)
  
--/* Memory Error Section */
-+/* Old Memory Error Section UEFI 2.1, 2.2 */
-+struct cper_sec_mem_err_old {
-+	__u64	validation_bits;
-+	__u64	error_status;
-+	__u64	physical_addr;
-+	__u64	physical_addr_mask;
-+	__u16	node;
-+	__u16	card;
-+	__u16	module;
-+	__u16	bank;
-+	__u16	device;
-+	__u16	row;
-+	__u16	column;
-+	__u16	bit_pos;
-+	__u64	requestor_id;
-+	__u64	responder_id;
-+	__u64	target_id;
-+	__u8	error_type;
-+};
-+
-+/* Memory Error Section UEFI >= 2.3 */
- struct cper_sec_mem_err {
- 	__u64	validation_bits;
- 	__u64	error_status;
+ static int __init parse_efi_cmdline(char *str)
+ {
++	if (!str) {
++		pr_warn("need at least one option\n");
++		return -EINVAL;
++	}
+ 	if (parse_option_str(str, "noruntime"))
+ 		disable_runtime = true;
+ 
 -- 
-2.1.4
+1.9.1
