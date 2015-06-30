@@ -1,71 +1,105 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] efi: Handle memory error structures produced based on
- old versions of standard
-Date: Tue, 30 Jun 2015 13:22:44 +0100
-Message-ID: <20150630122244.GJ28334@codeblueprint.co.uk>
-References: <20150623170534.GA21341@agluck-desk.sc.intel.com>
- <558AF115.8020909@codeaurora.org>
- <20150628142909.GA28334@codeblueprint.co.uk>
- <20150629182106.GA25924@agluck-desk.sc.intel.com>
+From: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 1/2] arm64/efi: base UEFI mapping permissions on region
+ attributes
+Date: Tue, 30 Jun 2015 10:50:48 -0400
+Message-ID: <1435675848.21009.10.camel@redhat.com>
+References: <1435659443-17625-1-git-send-email-ard.biesheuvel@linaro.org>
+	 <1435659443-17625-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150629182106.GA25924-E6Nu+q68HHTI/KE9syI0vLvm/XP+8Wra@public.gmane.org>
+In-Reply-To: <1435659443-17625-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linaro-acpi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 29 Jun, at 11:21:07AM, Luck, Tony wrote:
-> The memory error record structure includes as its first field a
-> bitmask of which subsequent fields are valid. The allows new fields
-> to be added to the structure while keeping compatibility with older
-> software that parses these records. This mechanism was used between
-> versions 2.2 and 2.3 to add four new fields, growing the size of the
-> structure from 73 bytes to 80. But Linux just added all the new
-> fields so this test:
-> 	if (gdata->error_data_length >= sizeof(*mem_err))
-> 		cper_print_mem(newpfx, mem_err);
-> 	else
-> 		goto err_section_too_small;
-> now make Linux complain about old format records being too short.
-> 
-> Add a definition for the old format of the structure and use that
-> for the minimum size check. Pass the actual size to cper_print_mem()
-> so it can sanity check the validation_bits field to ensure that if
-> a BIOS using the old format sets bits as if it were new, we won't
-> access fields beyond the end of the structure.
-> 
-> Signed-off-by: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+On Tue, 2015-06-30 at 12:17 +0200, Ard Biesheuvel wrote:
+
+> Currently, we infer the UEFI memory region mapping permissions
+> from the memory region type (i.e., runtime services code are
+> mapped RWX and runtime services data mapped RW-). This appears to
+> work fine but is not entirely UEFI spec compliant. So instead, use
+> the designated permission attributes to decide how these regions
+> should be mapped.
+>=20
+> Since UEFIv2.5 introduces a new EFI_MEMORY_RO permission attribute,
+> and redefines EFI_MEMORY_WP as a cacheability attribute, use only
+> the former as a read-only attribute. For setting the PXN bit, the
+> corresponding EFI_MEMORY_XP attribute is used.
+>=20
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  drivers/firmware/efi/cper.c | 13 ++++++++++---
->  include/linux/cper.h        | 22 +++++++++++++++++++++-
->  2 files changed, 31 insertions(+), 4 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 4fd9961d552e..b2012004a8ab 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -305,10 +305,15 @@ const char *cper_mem_err_unpack(struct trace_seq *p,
->  	return ret;
->  }
->  
-> -static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem)
-> +static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem,
-> +	int len)
->  {
->  	struct cper_mem_err_compact cmem;
->  
-> +	/* Don't trust UEFI 2.1/2.2 structure with bad validation bits */
-> +	if (len == sizeof(struct cper_sec_mem_err_old) &&
-> +	    (mem->validation_bits & ~(CPER_MEM_VALID_RANK_NUMBER - 1)))
-> +		return;
+>  arch/arm64/kernel/efi.c | 32 +++++++++++++-------
+>  1 file changed, 21 insertions(+), 11 deletions(-)
+>=20
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index ab21e0d58278..5dcab58d5d30 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -247,20 +247,30 @@ static bool __init efi_virtmap_init(void)
+>  		memrange_efi_to_native(&paddr, &npages);
+>  		size =3D npages << PAGE_SHIFT;
+> =20
+> -		pr_info("  EFI remap 0x%016llx =3D> %p\n",
+> -			md->phys_addr, (void *)md->virt_addr);
+> -
+> -		/*
+> -		 * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
+> -		 * executable, everything else can be mapped with the XN bits
+> -		 * set.
+> -		 */
+>  		if (!is_normal_ram(md))
+>  			prot =3D __pgprot(PROT_DEVICE_nGnRE);
+> -		else if (md->type =3D=3D EFI_RUNTIME_SERVICES_CODE)
+> -			prot =3D PAGE_KERNEL_EXEC;
+>  		else
+> -			prot =3D PAGE_KERNEL;
+> +			prot =3D PAGE_KERNEL_EXEC;
+> +
+> +		/*
+> +		 * On 64 KB granule kernels, only use strict permissions when
+> +		 * the region does not share a 64 KB page frame with another
+> +		 * region at either end.
+> +		 */
+> +		if (!IS_ENABLED(CONFIG_ARM64_64K_PAGES) ||
+> +		    !(md->virt_addr % PAGE_SIZE ||
+> +		      (md->phys_addr + md->num_pages * EFI_PAGE_SIZE) % PAGE_SIZE)=
+) {
 
-I would have thought that we'd want to print an error message here
-instead of silently returning?
+I think this would read easier with:
 
-Otherwise looks good.
+		    (PAGE_ALIGNED(md->virt_addr) &&
+		      PAGE_ALIGNED(md->phys_addr + md->num_pages * EFI_PAGE_SIZE))) {
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+> +
+> +			if (md->attribute & EFI_MEMORY_RO)
+> +				prot |=3D __pgprot(PTE_RDONLY);
+> +			if (md->attribute & EFI_MEMORY_XP)
+> +				prot |=3D __pgprot(PTE_PXN);
+> +		}
+> +
+> +		pr_info("  EFI remap 0x%016llx =3D> %p (R%c%c)\n",
+> +			md->phys_addr, (void *)md->virt_addr,
+> +			prot & __pgprot(PTE_RDONLY) ? '-' : 'W',
+> +			prot & __pgprot(PTE_PXN) ? '-' : 'X');
+
+You can't maninulate pgprot_t directly like that. It will
+break STRICT_MM_TYPECHECKS. You need to use __pgprot_modify()
+and/or pgprot_val().
+
+arch/arm64/kernel/efi.c: In function =E2=80=98efi_virtmap_init=E2=80=99=
+:
+arch/arm64/kernel/efi.c:266:10: error: invalid operands to binary | (ha=
+ve =E2=80=98pgprot_t=E2=80=99 and =E2=80=98pgprot_t=E2=80=99)
+     prot |=3D __pgprot(PTE_RDONLY);
+          ^
+   ...
+  =20
+(In trying that, I see there are a number of other places which
+need some STRICT_MM_TYPECHECKS fixing)
+
+> =20
+>  		create_pgd_mapping(&efi_mm, paddr, md->virt_addr, size, prot);
+>  	}
