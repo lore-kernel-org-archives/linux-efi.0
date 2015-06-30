@@ -1,77 +1,51 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 1/2] arm64/efi: base UEFI mapping permissions on region attributes
-Date: Tue, 30 Jun 2015 12:17:22 +0200
-Message-ID: <1435659443-17625-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1435659443-17625-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 0/2] arm64/efi: adapt to UEFI 2.5 properties table changes
+Date: Tue, 30 Jun 2015 12:17:21 +0200
+Message-ID: <1435659443-17625-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1435659443-17625-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Currently, we infer the UEFI memory region mapping permissions
-from the memory region type (i.e., runtime services code are
-mapped RWX and runtime services data mapped RW-). This appears to
-work fine but is not entirely UEFI spec compliant. So instead, use
-the designated permission attributes to decide how these regions
-should be mapped.
+First of all, I am aware that it is not customary to send non-trivial series
+during the merge window. However, since a parallel discussion is currently
+taking place on the edk2-devel mailing list, I think it makes sense to make
+an exception for this series.
 
-Since UEFIv2.5 introduces a new EFI_MEMORY_RO permission attribute,
-and redefines EFI_MEMORY_WP as a cacheability attribute, use only
-the former as a read-only attribute. For setting the PXN bit, the
-corresponding EFI_MEMORY_XP attribute is used.
+Version 2.5 of the UEFI spec introduces a new Properties Table feature
+that splits the memory regions covered by PE/COFF executable images
+into regions with the appropriate permissions for the underlying segment
+(i.e., RuntimeServicesCode/R-X for .text and RuntimeServiceData/rw- for
+.data)
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/kernel/efi.c | 32 +++++++++++++-------
- 1 file changed, 21 insertions(+), 11 deletions(-)
+Unfortunately, this feature is built on the backwards incompatible assumption
+that the OS always maps all RuntimeServicesCode and RuntimeServiceData regions
+in a way that keeps adjacent code and data regions adjacent. Since this is
+not what we are currently doing for arm64, some changes are required.
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index ab21e0d58278..5dcab58d5d30 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -247,20 +247,30 @@ static bool __init efi_virtmap_init(void)
- 		memrange_efi_to_native(&paddr, &npages);
- 		size = npages << PAGE_SHIFT;
- 
--		pr_info("  EFI remap 0x%016llx => %p\n",
--			md->phys_addr, (void *)md->virt_addr);
--
--		/*
--		 * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
--		 * executable, everything else can be mapped with the XN bits
--		 * set.
--		 */
- 		if (!is_normal_ram(md))
- 			prot = __pgprot(PROT_DEVICE_nGnRE);
--		else if (md->type == EFI_RUNTIME_SERVICES_CODE)
--			prot = PAGE_KERNEL_EXEC;
- 		else
--			prot = PAGE_KERNEL;
-+			prot = PAGE_KERNEL_EXEC;
-+
-+		/*
-+		 * On 64 KB granule kernels, only use strict permissions when
-+		 * the region does not share a 64 KB page frame with another
-+		 * region at either end.
-+		 */
-+		if (!IS_ENABLED(CONFIG_ARM64_64K_PAGES) ||
-+		    !(md->virt_addr % PAGE_SIZE ||
-+		      (md->phys_addr + md->num_pages * EFI_PAGE_SIZE) % PAGE_SIZE)) {
-+
-+			if (md->attribute & EFI_MEMORY_RO)
-+				prot |= __pgprot(PTE_RDONLY);
-+			if (md->attribute & EFI_MEMORY_XP)
-+				prot |= __pgprot(PTE_PXN);
-+		}
-+
-+		pr_info("  EFI remap 0x%016llx => %p (R%c%c)\n",
-+			md->phys_addr, (void *)md->virt_addr,
-+			prot & __pgprot(PTE_RDONLY) ? '-' : 'W',
-+			prot & __pgprot(PTE_PXN) ? '-' : 'X');
- 
- 		create_pgd_mapping(&efi_mm, paddr, md->virt_addr, size, prot);
- 	}
+The first patch makes the mapping permission logic compliant with the spec,
+by mapping all RuntimeServicesCode *and* RuntimeServicesData regions RWX,
+(formerly, we were using RW- for data regions), unless any of the
+EFI_MEMORY_RO and EFI_MEMORY_XP attributes are set, and the region is fully
+aligned to the page size (which may not always be the case on 64k pages)
+
+Then, in patch #2, we change the virtual remapping logic to keep adjacent
+EFI_MEMORY_RUNTIME regions together. This requires us to sort the incoming
+memory map, since the UEFI spec does not guarantee that it is sorted (although
+it usually is).
+
+This series applies on top of the patch that introduces the EFI_MEMORY_RO
+region attribute, which can be found here:
+http://article.gmane.org/gmane.linux.kernel.efi/5819
+
+Ard Biesheuvel (2):
+  arm64/efi: base UEFI mapping permissions on region attributes
+  arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
+
+ arch/arm64/kernel/efi.c                 | 32 +++++++----
+ drivers/firmware/efi/libstub/arm-stub.c | 58 +++++++++++++++-----
+ 2 files changed, 64 insertions(+), 26 deletions(-)
+
 -- 
 1.9.1
