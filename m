@@ -1,127 +1,118 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] arm64/efi: base UEFI mapping permissions on region attributes
-Date: Tue, 30 Jun 2015 16:53:50 +0200
-Message-ID: <CAKv+Gu_YPti+5h0jN7TEF_O10HvuzLB8aCLh2Bgo0ddYCGS0jA@mail.gmail.com>
-References: <1435659443-17625-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1435659443-17625-2-git-send-email-ard.biesheuvel@linaro.org>
-	<1435675848.21009.10.camel@redhat.com>
+From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCHv2] efi: Handle memory error structures produced based on
+ old versions of standard
+Date: Tue, 30 Jun 2015 15:57:51 -0700
+Message-ID: <20150630225751.GA18060@agluck-desk.sc.intel.com>
+References: <20150623170534.GA21341@agluck-desk.sc.intel.com>
+ <558AF115.8020909@codeaurora.org>
+ <20150628142909.GA28334@codeblueprint.co.uk>
+ <20150629182106.GA25924@agluck-desk.sc.intel.com>
+ <20150630122244.GJ28334@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1435675848.21009.10.camel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150630122244.GJ28334-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linaro-acpi-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 30 June 2015 at 16:50, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On Tue, 2015-06-30 at 12:17 +0200, Ard Biesheuvel wrote:
->
->> Currently, we infer the UEFI memory region mapping permissions
->> from the memory region type (i.e., runtime services code are
->> mapped RWX and runtime services data mapped RW-). This appears to
->> work fine but is not entirely UEFI spec compliant. So instead, use
->> the designated permission attributes to decide how these regions
->> should be mapped.
->>
->> Since UEFIv2.5 introduces a new EFI_MEMORY_RO permission attribute,
->> and redefines EFI_MEMORY_WP as a cacheability attribute, use only
->> the former as a read-only attribute. For setting the PXN bit, the
->> corresponding EFI_MEMORY_XP attribute is used.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/arm64/kernel/efi.c | 32 +++++++++++++-------
->>  1 file changed, 21 insertions(+), 11 deletions(-)
->>
->> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
->> index ab21e0d58278..5dcab58d5d30 100644
->> --- a/arch/arm64/kernel/efi.c
->> +++ b/arch/arm64/kernel/efi.c
->> @@ -247,20 +247,30 @@ static bool __init efi_virtmap_init(void)
->>               memrange_efi_to_native(&paddr, &npages);
->>               size =3D npages << PAGE_SHIFT;
->>
->> -             pr_info("  EFI remap 0x%016llx =3D> %p\n",
->> -                     md->phys_addr, (void *)md->virt_addr);
->> -
->> -             /*
->> -              * Only regions of type EFI_RUNTIME_SERVICES_CODE need=
- to be
->> -              * executable, everything else can be mapped with the =
-XN bits
->> -              * set.
->> -              */
->>               if (!is_normal_ram(md))
->>                       prot =3D __pgprot(PROT_DEVICE_nGnRE);
->> -             else if (md->type =3D=3D EFI_RUNTIME_SERVICES_CODE)
->> -                     prot =3D PAGE_KERNEL_EXEC;
->>               else
->> -                     prot =3D PAGE_KERNEL;
->> +                     prot =3D PAGE_KERNEL_EXEC;
->> +
->> +             /*
->> +              * On 64 KB granule kernels, only use strict permissio=
-ns when
->> +              * the region does not share a 64 KB page frame with a=
-nother
->> +              * region at either end.
->> +              */
->> +             if (!IS_ENABLED(CONFIG_ARM64_64K_PAGES) ||
->> +                 !(md->virt_addr % PAGE_SIZE ||
->> +                   (md->phys_addr + md->num_pages * EFI_PAGE_SIZE) =
-% PAGE_SIZE)) {
->
-> I think this would read easier with:
->
->                     (PAGE_ALIGNED(md->virt_addr) &&
->                       PAGE_ALIGNED(md->phys_addr + md->num_pages * EF=
-I_PAGE_SIZE))) {
->
+The memory error record structure includes as its first field a
+bitmask of which subsequent fields are valid. The allows new fields
+to be added to the structure while keeping compatibility with older
+software that parses these records. This mechanism was used between
+versions 2.2 and 2.3 to add four new fields, growing the size of the
+structure from 73 bytes to 80. But Linux just added all the new
+fields so this test:
+	if (gdata->error_data_length >= sizeof(*mem_err))
+		cper_print_mem(newpfx, mem_err);
+	else
+		goto err_section_too_small;
+now make Linux complain about old format records being too short.
 
-Yes, good point, I will change that.
+Add a definition for the old format of the structure and use that
+for the minimum size check. Pass the actual size to cper_print_mem()
+so it can sanity check the validation_bits field to ensure that if
+a BIOS using the old format sets bits as if it were new, we won't
+access fields beyond the end of the structure.
 
->> +
->> +                     if (md->attribute & EFI_MEMORY_RO)
->> +                             prot |=3D __pgprot(PTE_RDONLY);
->> +                     if (md->attribute & EFI_MEMORY_XP)
->> +                             prot |=3D __pgprot(PTE_PXN);
->> +             }
->> +
->> +             pr_info("  EFI remap 0x%016llx =3D> %p (R%c%c)\n",
->> +                     md->phys_addr, (void *)md->virt_addr,
->> +                     prot & __pgprot(PTE_RDONLY) ? '-' : 'W',
->> +                     prot & __pgprot(PTE_PXN) ? '-' : 'X');
->
-> You can't maninulate pgprot_t directly like that. It will
-> break STRICT_MM_TYPECHECKS. You need to use __pgprot_modify()
-> and/or pgprot_val().
->
-> arch/arm64/kernel/efi.c: In function =E2=80=98efi_virtmap_init=E2=80=99=
-:
-> arch/arm64/kernel/efi.c:266:10: error: invalid operands to binary | (=
-have =E2=80=98pgprot_t=E2=80=99 and =E2=80=98pgprot_t=E2=80=99)
->      prot |=3D __pgprot(PTE_RDONLY);
->           ^
->    ...
->
-> (In trying that, I see there are a number of other places which
-> need some STRICT_MM_TYPECHECKS fixing)
->
+Signed-off-by: Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+v1-v2: print FW_WARN if we see bogus validation bits from an old sized structure
 
-Actually, I had 'prot |=3D PTE_RDONLY' but then changed it to the above
-thinking that it would pass the strict type checks, but apparently not
-:-)
+ drivers/firmware/efi/cper.c | 15 ++++++++++++---
+ include/linux/cper.h        | 22 +++++++++++++++++++++-
+ 2 files changed, 33 insertions(+), 4 deletions(-)
 
-I will fix that up as well.
-
-Thanks,
-Ard.
-
-
->>
->>               create_pgd_mapping(&efi_mm, paddr, md->virt_addr, size=
-, prot);
->>       }
->
+diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+index 4fd9961d552e..d42537425438 100644
+--- a/drivers/firmware/efi/cper.c
++++ b/drivers/firmware/efi/cper.c
+@@ -305,10 +305,17 @@ const char *cper_mem_err_unpack(struct trace_seq *p,
+ 	return ret;
+ }
+ 
+-static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem)
++static void cper_print_mem(const char *pfx, const struct cper_sec_mem_err *mem,
++	int len)
+ {
+ 	struct cper_mem_err_compact cmem;
+ 
++	/* Don't trust UEFI 2.1/2.2 structure with bad validation bits */
++	if (len == sizeof(struct cper_sec_mem_err_old) &&
++	    (mem->validation_bits & ~(CPER_MEM_VALID_RANK_NUMBER - 1))) {
++		pr_err(FW_WARN "valid bits set for fields beyond structure\n");
++		return;
++	}
+ 	if (mem->validation_bits & CPER_MEM_VALID_ERROR_STATUS)
+ 		printk("%s""error_status: 0x%016llx\n", pfx, mem->error_status);
+ 	if (mem->validation_bits & CPER_MEM_VALID_PA)
+@@ -405,8 +412,10 @@ static void cper_estatus_print_section(
+ 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PLATFORM_MEM)) {
+ 		struct cper_sec_mem_err *mem_err = (void *)(gdata + 1);
+ 		printk("%s""section_type: memory error\n", newpfx);
+-		if (gdata->error_data_length >= sizeof(*mem_err))
+-			cper_print_mem(newpfx, mem_err);
++		if (gdata->error_data_length >=
++		    sizeof(struct cper_sec_mem_err_old))
++			cper_print_mem(newpfx, mem_err,
++				       gdata->error_data_length);
+ 		else
+ 			goto err_section_too_small;
+ 	} else if (!uuid_le_cmp(*sec_type, CPER_SEC_PCIE)) {
+diff --git a/include/linux/cper.h b/include/linux/cper.h
+index 76abba4b238e..dcacb1a72e26 100644
+--- a/include/linux/cper.h
++++ b/include/linux/cper.h
+@@ -340,7 +340,27 @@ struct cper_ia_proc_ctx {
+ 	__u64	mm_reg_addr;
+ };
+ 
+-/* Memory Error Section */
++/* Old Memory Error Section UEFI 2.1, 2.2 */
++struct cper_sec_mem_err_old {
++	__u64	validation_bits;
++	__u64	error_status;
++	__u64	physical_addr;
++	__u64	physical_addr_mask;
++	__u16	node;
++	__u16	card;
++	__u16	module;
++	__u16	bank;
++	__u16	device;
++	__u16	row;
++	__u16	column;
++	__u16	bit_pos;
++	__u64	requestor_id;
++	__u64	responder_id;
++	__u64	target_id;
++	__u8	error_type;
++};
++
++/* Memory Error Section UEFI >= 2.3 */
+ struct cper_sec_mem_err {
+ 	__u64	validation_bits;
+ 	__u64	error_status;
+-- 
+2.1.4
