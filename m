@@ -1,73 +1,60 @@
-From: Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH] x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid BGRT
-Date: Tue, 30 Jun 2015 05:52:43 +0800
-Message-ID: <CAGnHSEnO9BiCTgSOCJnJiwycpSMKtQzeYb1+S-2Cq7U_Xy+H1w@mail.gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid
+ BGRT
+Date: Tue, 30 Jun 2015 10:31:59 +0100
+Message-ID: <20150630093159.GH28334@codeblueprint.co.uk>
 References: <1435579602-6612-1-git-send-email-matt@codeblueprint.co.uk>
+ <20150629131305.GB13113@pd.tnic>
+ <20150629140022.GA22374@x>
+ <20150629141724.GG12383@pd.tnic>
+ <20150629144940.GF28334@codeblueprint.co.uk>
+ <20150629154458.GH12383@pd.tnic>
+ <20150629163553.GB1348@cloud>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1435579602-6612-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150629163553.GB1348@cloud>
+Sender: linux-acpi-owner@vger.kernel.org
+To: josh@joshtriplett.org
+Cc: Borislav Petkov <bp@alien8.de>, Tom Yan <tom.ty89@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt!
+On Mon, 29 Jun, at 09:35:53AM, Josh Triplett wrote:
+> On Mon, Jun 29, 2015 at 05:44:58PM +0200, Borislav Petkov wrote:
+> > On Mon, Jun 29, 2015 at 03:49:40PM +0100, Matt Fleming wrote:
+> > > It still makes sense to have the error message because the kernel
+> > > literally does not know what the firmware is trying to achieve by
+> > > setting those bits.
+> > > 
+> > > But I agree with Josh that for the specific case of "reserved bits",
+> > > FW_BUG is wrong, because if in some future version of the spec those
+> > > bits get used, seeing,
+> > > 
+> > >   "[Firmware Bug]: Ignoring BGRT: reserved bits are non-zero 0x3"
+> > 
+> > I still don't see what that message brings if some kernel complains that
+> > some bits are !0 then. Are they valid bits which the kernel doesn't know
+> > about or are they erroneously set and reserved. This, IMHO, is confusing
+> > because the error message is not correct in all cases.
+> > 
+> > Thus my suggestion to either check the spec version before looking at
+> > the bits or find out in some other way which bits are defined and which
+> > are reserved and warn only about the reserved ones which are 1b.
+> 
+> The version is already checked *before* the status bits: if the version
+> is not 1, the kernel stops there and ignores the BGRT, before printing a
+> message about status.
 
-The patch works for me against linux 4.0.6. I no longer see the
-message in dmesg with the BIOS option set to "Auto". I assume this is
-expected? It will only be displayed if I build it with a debug flag,
-right?
-https://www.kernel.org/doc/local/pr_debug.txt
+If we're performing version[1] checks then I think it's fair game to use
+FW_BUG, since these bits are reserved for that version.
 
-On 29 June 2015 at 20:06, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->
-> It's totally legitimate, per the ACPI spec, for the firmware to set the
-> BGRT 'status' field to zero to indicate that the BGRT image isn't being
-> displayed, and we shouldn't be printing an error message in that case
-> because it's just noise for users. So swap pr_err() for pr_debug().
->
-> However, Josh points that out it still makes sense to test the validity
-> of the upper 7 bits of the 'status' field, since they're marked as
-> "reserved" in the spec and must be zero. If firmware violates this it
-> really *is* an error.
->
-> Reported-by: Tom Yan <tom.ty89-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->
-> Tom, if you could test out this patch that would be really helpful. I'll
-> take this one through the EFI git repo.
->
->  arch/x86/platform/efi/efi-bgrt.c | 9 +++++++--
->  1 file changed, 7 insertions(+), 2 deletions(-)
->
-> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-> index d7f997f7c26d..ea48449b2e63 100644
-> --- a/arch/x86/platform/efi/efi-bgrt.c
-> +++ b/arch/x86/platform/efi/efi-bgrt.c
-> @@ -50,11 +50,16 @@ void __init efi_bgrt_init(void)
->                        bgrt_tab->version);
->                 return;
->         }
-> -       if (bgrt_tab->status != 1) {
-> -               pr_err("Ignoring BGRT: invalid status %u (expected 1)\n",
-> +       if (bgrt_tab->status & 0xfe) {
-> +               pr_err("Ignoring BGRT: reserved status bits are non-zero %u\n",
->                        bgrt_tab->status);
->                 return;
->         }
-> +       if (bgrt_tab->status != 1) {
-> +               pr_debug("Ignoring BGRT: invalid status %u (expected 1)\n",
-> +                        bgrt_tab->status);
-> +               return;
-> +       }
->         if (bgrt_tab->image_type != 0) {
->                 pr_err("Ignoring BGRT: invalid image type %u (expected 0)\n",
->                        bgrt_tab->image_type);
-> --
-> 2.1.0
->
+[1] Note the version of the BGRT table is checked, not the ACPI spec
+version, and it's not clear which would get a bump if new bits were
+defined for the 'status' field. Historically, new bits have been added
+to the EFI memory map without bumping the expected "memory descriptor"
+version - a spec version update was considered to be sufficient (see
+EFI_MEMORY_RO).
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
