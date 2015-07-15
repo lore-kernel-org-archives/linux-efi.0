@@ -1,80 +1,46 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
-Date: Wed, 15 Jul 2015 15:11:19 +0100
-Message-ID: <20150715141119.GA6955@codeblueprint.co.uk>
-References: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
- <loom.20150615T232724-11@post.gmane.org>
- <55804C91.4030000@fensystems.co.uk>
- <20150616173725.GE13153@oranje.fc.hp.com>
- <20150618220241.GA2776@codeblueprint.co.uk>
- <558345EB.8010408@fensystems.co.uk>
- <20150619122147.GC2776@codeblueprint.co.uk>
- <55840A3B.3000400@fensystems.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL] EFI urgent fix
+Date: Wed, 15 Jul 2015 15:31:11 +0100
+Message-ID: <20150715143111.GB6955@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <55840A3B.3000400-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Cc: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 19 Jun, at 01:25:31PM, Michael Brown wrote:
-> 
-> You are right; this change can safely be reverted.  Sorry for the noise.
+Folks,
 
-Guys, this is what I'm going to queue up for v4.3. My plan is to let it
-bake in linux-next for a while, to try and shake out any problems.
+Please pull the following fix from Tony that addresses a bug in the EFI
+CPER driver preventing it from working with memory error records as
+described in the UEFI 2.2 spec.
 
-Interestingly, I'm not sure that the size of the bzImage is actually
-guaranteed to be a multiple of 32, since it appears that
-arch/x86/boot/tools/build.c only deals with 16-byte "paragraphs".
+The following changes since commit d67e199611b986b345ea3087ee2e4a15da1c98b3:
 
----
+  efi: Fix error handling in add_sysfs_runtime_map_entry() (2015-05-05 16:20:13 +0100)
 
->From 809ca3d4eac5836e5f48c19f28babff1e5b71c77 Mon Sep 17 00:00:00 2001
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Date: Wed, 15 Jul 2015 14:05:53 +0100
-Subject: [PATCH] Revert "x86/efi: Request desired alignment via the PE/COFF
- headers"
+are available in the git repository at:
 
-This reverts commit aeffc4928ea21aab3c7be72f00e257799b661c29.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-Linn reports that Signtool complains that kernels built with
-CONFIG_EFI_STUB are violating the PE/COFF specification because the
-SizeOfImage field is not a multiple of SectionAlignment.
+for you to fetch changes up to 4c62360d7562a20c996836d163259c87d9378120:
 
-This violation was introduced as an optimisation to skip having the
-kernel relocate itself during boot and instead have the firmware place
-it at a correctly aligned address.
+  efi: Handle memory error structures produced based on old versions of standard (2015-07-15 13:30:38 +0100)
 
-No one else has complained and I'm not aware of any firmware
-implementations that refuse to boot with commit aeffc4928ea2, but it's a
-legitimate bug, so revert the offending commit.
+----------------------------------------------------------------
+ * Fix a bug in the Common Platform Error Record (CPER) driver that
+   caused old UEFI spec (< 2.3) versions of the memory error record
+   structure to be declared invalid - Tony Luck
 
-Reported-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/boot/header.S | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+----------------------------------------------------------------
+Tony Luck (1):
+      efi: Handle memory error structures produced based on old versions of standard
 
-diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-index 16ef02596db2..7a6d43a554d7 100644
---- a/arch/x86/boot/header.S
-+++ b/arch/x86/boot/header.S
-@@ -154,7 +154,7 @@ extra_header_fields:
- #else
- 	.quad	0				# ImageBase
- #endif
--	.long	CONFIG_PHYSICAL_ALIGN		# SectionAlignment
-+	.long	0x20				# SectionAlignment
- 	.long	0x20				# FileAlignment
- 	.word	0				# MajorOperatingSystemVersion
- 	.word	0				# MinorOperatingSystemVersion
--- 
-2.1.0
+ drivers/firmware/efi/cper.c | 15 ++++++++++++---
+ include/linux/cper.h        | 22 +++++++++++++++++++++-
+ 2 files changed, 33 insertions(+), 4 deletions(-)
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
