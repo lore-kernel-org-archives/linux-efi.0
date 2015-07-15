@@ -1,103 +1,80 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V5 1/4] efi: x86: rearrange efi_mem_attributes()
-Date: Tue, 14 Jul 2015 17:31:53 -0700
-Message-ID: <1436920316-18127-2-git-send-email-zjzhang@codeaurora.org>
-References: <1436920316-18127-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1436920316-18127-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, catalin.marinas@arm.com, will.deacon@arm.com
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
+Date: Wed, 15 Jul 2015 15:11:19 +0100
+Message-ID: <20150715141119.GA6955@codeblueprint.co.uk>
+References: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
+ <loom.20150615T232724-11@post.gmane.org>
+ <55804C91.4030000@fensystems.co.uk>
+ <20150616173725.GE13153@oranje.fc.hp.com>
+ <20150618220241.GA2776@codeblueprint.co.uk>
+ <558345EB.8010408@fensystems.co.uk>
+ <20150619122147.GC2776@codeblueprint.co.uk>
+ <55840A3B.3000400@fensystems.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <55840A3B.3000400-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+Cc: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+On Fri, 19 Jun, at 01:25:31PM, Michael Brown wrote:
+> 
+> You are right; this change can safely be reverted.  Sorry for the noise.
 
-x86 and ia64 implement efi_mem_attributes() differently. This
-function needs to be available for other arch (such as arm64)
-as well, such as for the purpose of ACPI/APEI.
+Guys, this is what I'm going to queue up for v4.3. My plan is to let it
+bake in linux-next for a while, to try and shake out any problems.
 
-ia64 efi does not setup memmap variable and does not set
-EFI_MEMMAP flag, so it needs to have its unique implementation
-of efi_mem_attributes().
+Interestingly, I'm not sure that the size of the bzImage is actually
+guaranteed to be a multiple of 32, since it appears that
+arch/x86/boot/tools/build.c only deals with 16-byte "paragraphs".
 
-Move efi_mem_attributes() implementation from x86 to efi, and
-declare it with __weak. It is recommended that other archs
-should not override the default implementation.
-
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 ---
- arch/x86/platform/efi/efi.c | 18 ------------------
- drivers/firmware/efi/efi.c  | 31 +++++++++++++++++++++++++++++++
- 2 files changed, 31 insertions(+), 18 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index dbc8627a5cdf..88b3ebaeb72f 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -917,24 +917,6 @@ u32 efi_mem_type(unsigned long phys_addr)
- 	return 0;
- }
- 
--u64 efi_mem_attributes(unsigned long phys_addr)
--{
--	efi_memory_desc_t *md;
--	void *p;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return 0;
--
--	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
--		md = p;
--		if ((md->phys_addr <= phys_addr) &&
--		    (phys_addr < (md->phys_addr +
--				  (md->num_pages << EFI_PAGE_SHIFT))))
--			return md->attribute;
--	}
--	return 0;
--}
--
- static int __init arch_parse_efi_cmdline(char *str)
- {
- 	if (parse_option_str(str, "old_map"))
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3061bb8629dc..bf4190a4f3f5 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -517,3 +517,34 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
- 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
- 	return buf;
- }
-+
-+/*
-+ * efi_mem_attributes - lookup memmap attributes for physical address
-+ * @phys_addr: the physical address to lookup
-+ *
-+ * Search in the EFI memory map for the region covering
-+ * @phys_addr. Returns the EFI memory attributes if the region
-+ * was found in the memory map, 0 otherwise.
-+ *
-+ * Despite being marked __weak, most architectures should *not*
-+ * override this function. It is __weak solely for the benefit
-+ * of ia64 which has a funky EFI memory map that doesn't work
-+ * the same way as other architectures.
-+ */
-+u64 __weak efi_mem_attributes(unsigned long phys_addr)
-+{
-+	efi_memory_desc_t *md;
-+	void *p;
-+
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
-+	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		md = p;
-+		if ((md->phys_addr <= phys_addr) &&
-+		    (phys_addr < (md->phys_addr +
-+		    (md->num_pages << EFI_PAGE_SHIFT))))
-+			return md->attribute;
-+	}
-+	return 0;
-+}
+>From 809ca3d4eac5836e5f48c19f28babff1e5b71c77 Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Date: Wed, 15 Jul 2015 14:05:53 +0100
+Subject: [PATCH] Revert "x86/efi: Request desired alignment via the PE/COFF
+ headers"
+
+This reverts commit aeffc4928ea21aab3c7be72f00e257799b661c29.
+
+Linn reports that Signtool complains that kernels built with
+CONFIG_EFI_STUB are violating the PE/COFF specification because the
+SizeOfImage field is not a multiple of SectionAlignment.
+
+This violation was introduced as an optimisation to skip having the
+kernel relocate itself during boot and instead have the firmware place
+it at a correctly aligned address.
+
+No one else has complained and I'm not aware of any firmware
+implementations that refuse to boot with commit aeffc4928ea2, but it's a
+legitimate bug, so revert the offending commit.
+
+Reported-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/boot/header.S | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
+index 16ef02596db2..7a6d43a554d7 100644
+--- a/arch/x86/boot/header.S
++++ b/arch/x86/boot/header.S
+@@ -154,7 +154,7 @@ extra_header_fields:
+ #else
+ 	.quad	0				# ImageBase
+ #endif
+-	.long	CONFIG_PHYSICAL_ALIGN		# SectionAlignment
++	.long	0x20				# SectionAlignment
+ 	.long	0x20				# FileAlignment
+ 	.word	0				# MajorOperatingSystemVersion
+ 	.word	0				# MinorOperatingSystemVersion
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.1.0
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
