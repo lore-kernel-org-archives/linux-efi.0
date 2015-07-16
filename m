@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [RFC PATCH 04/16] x86/efi: Generating random number in EFI stub
-Date: Thu, 16 Jul 2015 22:25:18 +0800
-Message-ID: <1437056730-15247-5-git-send-email-jlee@suse.com>
+Subject: [RFC PATCH 02/16] x86/efi: Add get and set variable to EFI services pointer table
+Date: Thu, 16 Jul 2015 22:25:16 +0800
+Message-ID: <1437056730-15247-3-git-send-email-jlee@suse.com>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1437056730-15247-1-git-send-email-jlee@suse.com>
@@ -10,160 +10,128 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-This patch adds the codes for generating random number array as the
-HMAC key that will used by later EFI stub codes.
-
-The original codes in efi_random copied from aslr and add the codes
-to accept input entropy and EFI debugging. In later patch will add
-the codes to get random number by EFI protocol. The separate codes
-can avoid impacting aslr function.
+Add get variable and set variable function to EFI services pointer
+table for supporting later functions of hibernate signature
+verification to keep the HMAC key in efi boot service veriable.
 
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/boot/compressed/Makefile     |  1 +
- arch/x86/boot/compressed/efi_random.c | 88 +++++++++++++++++++++++++++++++++++
- arch/x86/boot/compressed/misc.c       |  4 +-
- arch/x86/boot/compressed/misc.h       |  2 +-
- 4 files changed, 92 insertions(+), 3 deletions(-)
- create mode 100644 arch/x86/boot/compressed/efi_random.c
+ arch/x86/boot/compressed/eboot.c   | 4 ++++
+ arch/x86/boot/compressed/head_32.S | 6 +++---
+ arch/x86/boot/compressed/head_64.S | 8 ++++----
+ arch/x86/include/asm/efi.h         | 2 ++
+ 4 files changed, 13 insertions(+), 7 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/Makefile b/arch/x86/boot/compressed/Makefile
-index 0a291cd..377245b 100644
---- a/arch/x86/boot/compressed/Makefile
-+++ b/arch/x86/boot/compressed/Makefile
-@@ -49,6 +49,7 @@ vmlinux-objs-$(CONFIG_RANDOMIZE_BASE) += $(obj)/aslr.o
- 
- $(obj)/eboot.o: KBUILD_CFLAGS += -fshort-wchar -mno-red-zone
- 
-+vmlinux-objs-$(CONFIG_HIBERNATE_VERIFICATION) += $(obj)/efi_random.o
- vmlinux-objs-$(CONFIG_EFI_STUB) += $(obj)/eboot.o $(obj)/efi_stub_$(BITS).o \
- 	$(objtree)/drivers/firmware/efi/libstub/lib.a
- vmlinux-objs-$(CONFIG_EFI_MIXED) += $(obj)/efi_thunk_$(BITS).o
-diff --git a/arch/x86/boot/compressed/efi_random.c b/arch/x86/boot/compressed/efi_random.c
-new file mode 100644
-index 0000000..bdb2d46
---- /dev/null
-+++ b/arch/x86/boot/compressed/efi_random.c
-@@ -0,0 +1,88 @@
-+#include "misc.h"
-+
-+#include <linux/efi.h>
-+#include <asm/archrandom.h>
-+
-+#define X86_FEATURE_EDX_TSC	(1 << 4)
-+#define X86_FEATURE_ECX_RDRAND	(1 << 30)
-+
-+static bool rdrand_feature(void)
-+{
-+	return (cpuid_ecx(0x1) & X86_FEATURE_ECX_RDRAND);
-+}
-+
-+static bool rdtsc_feature(void)
-+{
-+	return (cpuid_edx(0x1) & X86_FEATURE_EDX_TSC);
-+}
-+
-+static unsigned long get_random_long(unsigned long entropy,
-+				     struct boot_params *boot_params,
-+				     efi_system_table_t *sys_table)
-+{
-+#ifdef CONFIG_X86_64
-+	const unsigned long mix_const = 0x5d6008cbf3848dd3UL;
-+#else
-+	const unsigned long mix_const = 0x3f39e593UL;
-+#endif
-+	unsigned long raw, random;
-+	bool use_i8254 = true;
-+
-+	efi_printk(sys_table, " EFI random");
-+
-+	if (entropy)
-+		random = entropy;
-+	else
-+		random = get_random_boot(boot_params);
-+
-+	if (rdrand_feature()) {
-+		efi_printk(sys_table, " RDRAND");
-+		if (rdrand_long(&raw)) {
-+			random ^= raw;
-+			use_i8254 = false;
-+		}
-+	}
-+
-+	if (rdtsc_feature()) {
-+		efi_printk(sys_table, " RDTSC");
-+		rdtscll(raw);
-+
-+		random ^= raw;
-+		use_i8254 = false;
-+	}
-+
-+	if (use_i8254) {
-+		efi_printk(sys_table, " i8254");
-+		random ^= i8254();
-+	}
-+
-+	/* Circular multiply for better bit diffusion */
-+	asm("mul %3"
-+	    : "=a" (random), "=d" (raw)
-+	    : "a" (random), "rm" (mix_const));
-+	random += raw;
-+
-+	efi_printk(sys_table, "...\n");
-+
-+	return random;
-+}
-+
-+void efi_get_random_key(efi_system_table_t *sys_table,
-+			struct boot_params *params, u8 key[], int size)
-+{
-+	unsigned long entropy = 0;
-+	int i, bfill = size;
-+
-+	if (key == NULL || !size)
-+		return;
-+
-+	memset(key, 0, size);
-+	while (bfill > 0) {
-+		entropy = get_random_long(entropy, params, sys_table);
-+		if (bfill >= sizeof(entropy))
-+			memcpy((void *)(key + size - bfill), &entropy, sizeof(entropy));
-+		else
-+			memcpy((void *)(key + size - bfill), &entropy, bfill);
-+		bfill -= sizeof(entropy);
-+	}
-+}
-diff --git a/arch/x86/boot/compressed/misc.c b/arch/x86/boot/compressed/misc.c
-index d929506..2c3c997 100644
---- a/arch/x86/boot/compressed/misc.c
-+++ b/arch/x86/boot/compressed/misc.c
-@@ -439,7 +439,7 @@ asmlinkage __visible void *decompress_kernel(void *rmode, memptr heap,
- 	return output;
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+index 2c82bd1..0ffb6db 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -30,12 +30,14 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ {									\
+ 	efi_system_table_##bits##_t *table;				\
+ 	efi_boot_services_##bits##_t *bt;				\
++	efi_runtime_services_##bits##_t *rt;				\
+ 									\
+ 	table = (typeof(table))sys_table;				\
+ 									\
+ 	c->text_output = table->con_out;				\
+ 									\
+ 	bt = (typeof(bt))(unsigned long)(table->boottime);		\
++	rt = (typeof(rt))(unsigned long)(table->runtime);		\
+ 									\
+ 	c->allocate_pool = bt->allocate_pool;				\
+ 	c->allocate_pages = bt->allocate_pages;				\
+@@ -45,6 +47,8 @@ static void setup_boot_services##bits(struct efi_config *c)		\
+ 	c->locate_handle = bt->locate_handle;				\
+ 	c->handle_protocol = bt->handle_protocol;			\
+ 	c->exit_boot_services = bt->exit_boot_services;			\
++	c->get_variable = rt->get_variable;				\
++	c->set_variable = rt->set_variable;				\
  }
+ BOOT_SERVICES(32);
+ BOOT_SERVICES(64);
+diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+index 8ef964d..a7db5e3 100644
+--- a/arch/x86/boot/compressed/head_32.S
++++ b/arch/x86/boot/compressed/head_32.S
+@@ -54,7 +54,7 @@ ENTRY(efi_pe_entry)
  
--#if CONFIG_RANDOMIZE_BASE
-+#if CONFIG_HIBERNATE_VERIFICATION || CONFIG_RANDOMIZE_BASE
- #define I8254_PORT_CONTROL	0x43
- #define I8254_PORT_COUNTER0	0x40
- #define I8254_CMD_READBACK	0xC0
-@@ -489,4 +489,4 @@ unsigned long get_random_boot(struct boot_params *boot_params)
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 88(%eax)
++	add	%esi, 104(%eax)
+ 	pushl	%eax
  
- 	return hash;
- }
--#endif /* CONFIG_RANDOMIZE_BASE */
-+#endif /* CONFIG_HIBERNATE_VERIFICATION || CONFIG_RANDOMIZE_BASE */
-diff --git a/arch/x86/boot/compressed/misc.h b/arch/x86/boot/compressed/misc.h
-index e10908c..4be2780 100644
---- a/arch/x86/boot/compressed/misc.h
-+++ b/arch/x86/boot/compressed/misc.h
-@@ -53,7 +53,7 @@ int cmdline_find_option(const char *option, char *buffer, int bufsize);
- int cmdline_find_option_bool(const char *option);
+ 	call	make_boot_params
+@@ -80,7 +80,7 @@ ENTRY(efi32_stub_entry)
+ 
+ 	/* Relocate efi_config->call() */
+ 	leal	efi32_config(%esi), %eax
+-	add	%esi, 88(%eax)
++	add	%esi, 104(%eax)
+ 	pushl	%eax
+ 2:
+ 	call	efi_main
+@@ -230,7 +230,7 @@ relocated:
+ #ifdef CONFIG_EFI_STUB
+ 	.data
+ efi32_config:
+-	.fill 11,8,0
++	.fill 13,8,0
+ 	.long efi_call_phys
+ 	.long 0
+ 	.byte 0
+diff --git a/arch/x86/boot/compressed/head_64.S b/arch/x86/boot/compressed/head_64.S
+index b0c0d16..471b1c1 100644
+--- a/arch/x86/boot/compressed/head_64.S
++++ b/arch/x86/boot/compressed/head_64.S
+@@ -255,7 +255,7 @@ ENTRY(efi_pe_entry)
+ 	/*
+ 	 * Relocate efi_config->call().
+ 	 */
+-	addq	%rbp, efi64_config+88(%rip)
++	addq	%rbp, efi64_config+104(%rip)
+ 
+ 	movq	%rax, %rdi
+ 	call	make_boot_params
+@@ -275,7 +275,7 @@ handover_entry:
+ 	 * Relocate efi_config->call().
+ 	 */
+ 	movq	efi_config(%rip), %rax
+-	addq	%rbp, 88(%rax)
++	addq	%rbp, 104(%rax)
+ 2:
+ 	movq	efi_config(%rip), %rdi
+ 	call	efi_main
+@@ -448,14 +448,14 @@ efi_config:
+ #ifdef CONFIG_EFI_MIXED
+ 	.global efi32_config
+ efi32_config:
+-	.fill	11,8,0
++	.fill	13,8,0
+ 	.quad	efi64_thunk
+ 	.byte	0
  #endif
  
--#if CONFIG_RANDOMIZE_BASE
-+#if CONFIG_HIBERNATE_VERIFICATION || CONFIG_RANDOMIZE_BASE
- extern u16 i8254(void);
- extern unsigned long get_random_boot(struct boot_params *boot_params);
- #endif
+ 	.global efi64_config
+ efi64_config:
+-	.fill	11,8,0
++	.fill	13,8,0
+ 	.quad	efi_call
+ 	.byte	1
+ #endif /* CONFIG_EFI_STUB */
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 155162e..a274aa8 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -175,6 +175,8 @@ struct efi_config {
+ 	u64 handle_protocol;
+ 	u64 exit_boot_services;
+ 	u64 text_output;
++	u64 get_variable;
++	u64 set_variable;
+ 	efi_status_t (*call)(unsigned long, ...);
+ 	bool is64;
+ } __packed;
 -- 
 1.8.4.5
