@@ -1,89 +1,87 @@
-From: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-Subject: Re: [PATCH v3] efi: Request desired alignment via the PE/COFF headers
-Date: Wed, 15 Jul 2015 10:56:49 -0600
-Message-ID: <20150715165649.GF21759@oranje.fc.hp.com>
-References: <1405007963-520-1-git-send-email-mbrown@fensystems.co.uk>
- <loom.20150615T232724-11@post.gmane.org>
- <55804C91.4030000@fensystems.co.uk>
- <20150616173725.GE13153@oranje.fc.hp.com>
- <20150618220241.GA2776@codeblueprint.co.uk>
- <558345EB.8010408@fensystems.co.uk>
- <20150619122147.GC2776@codeblueprint.co.uk>
- <55840A3B.3000400@fensystems.co.uk>
- <20150715141119.GA6955@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH v2] efi: Check for null efi kernel parameters
+Date: Wed, 15 Jul 2015 19:36:03 -0700
+Message-ID: <1437014163-4652-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150715141119.GA6955-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Glenn P. Williamson" <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 15, 2015 at 03:11:19PM +0100, Matt Fleming wrote:
-> On Fri, 19 Jun, at 01:25:31PM, Michael Brown wrote:
-> > 
-> > You are right; this change can safely be reverted.  Sorry for the noise.
-> 
-> Guys, this is what I'm going to queue up for v4.3. My plan is to let it
-> bake in linux-next for a while, to try and shake out any problems.
-> 
-> Interestingly, I'm not sure that the size of the bzImage is actually
-> guaranteed to be a multiple of 32, since it appears that
-> arch/x86/boot/tools/build.c only deals with 16-byte "paragraphs".
-> 
-> ---
-> 
-> From 809ca3d4eac5836e5f48c19f28babff1e5b71c77 Mon Sep 17 00:00:00 2001
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Date: Wed, 15 Jul 2015 14:05:53 +0100
-> Subject: [PATCH] Revert "x86/efi: Request desired alignment via the PE/COFF
->  headers"
-> 
-> This reverts commit aeffc4928ea21aab3c7be72f00e257799b661c29.
-> 
-> Linn reports that Signtool complains that kernels built with
-> CONFIG_EFI_STUB are violating the PE/COFF specification because the
-> SizeOfImage field is not a multiple of SectionAlignment.
+Even though it is documented how to specifiy efi parameters, it is
+possible to cause a kernel panic due to a derreference of a NULL pointer when
+parsing such parameters if "efi" alone is given:
 
-Thanks Matt. The actual problem causing the failure in Signtool is that
-FileAlignment is less than 512 and not equal to SectionAlignment. Reverting
-the commit fixes this problem as well. The spec says that FileAlignment
-should be a power of 2 between 512 and 64K, but Signtool accepts other
-values when it is equal to SectionAlignment.
+PANIC: early exception 0e rip 10:ffffffff812fb361 error 0 cr2 0
+[ 0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.2.0-rc1+ #450
+[ 0.000000]  ffffffff81fe20a9 ffffffff81e03d50 ffffffff8184bb0f 00000000000003f8
+[ 0.000000]  0000000000000000 ffffffff81e03e08 ffffffff81f371a1 64656c62616e6520
+[ 0.000000]  0000000000000069 000000000000005f 0000000000000000 0000000000000000
+[ 0.000000] Call Trace:
+[ 0.000000]  [<ffffffff8184bb0f>] dump_stack+0x45/0x57
+[ 0.000000]  [<ffffffff81f371a1>] early_idt_handler_common+0x81/0xae
+[ 0.000000]  [<ffffffff812fb361>] ? parse_option_str+0x11/0x90
+[ 0.000000]  [<ffffffff81f4dd69>] arch_parse_efi_cmdline+0x15/0x42
+[ 0.000000]  [<ffffffff81f376e1>] do_early_param+0x50/0x8a
+[ 0.000000]  [<ffffffff8106b1b3>] parse_args+0x1e3/0x400
+[ 0.000000]  [<ffffffff81f37a43>] parse_early_options+0x24/0x28
+[ 0.000000]  [<ffffffff81f37691>] ? loglevel+0x31/0x31
+[ 0.000000]  [<ffffffff81f37a78>] parse_early_param+0x31/0x3d
+[ 0.000000]  [<ffffffff81f3ae98>] setup_arch+0x2de/0xc08
+[ 0.000000]  [<ffffffff8109629a>] ? vprintk_default+0x1a/0x20
+[ 0.000000]  [<ffffffff81f37b20>] start_kernel+0x90/0x423
+[ 0.000000]  [<ffffffff81f37495>] x86_64_start_reservations+0x2a/0x2c
+[ 0.000000]  [<ffffffff81f37582>] x86_64_start_kernel+0xeb/0xef
+[ 0.000000] RIP 0xffffffff81ba2efc
 
-> This violation was introduced as an optimisation to skip having the
-> kernel relocate itself during boot and instead have the firmware place
-> it at a correctly aligned address.
-> 
-> No one else has complained and I'm not aware of any firmware
-> implementations that refuse to boot with commit aeffc4928ea2, but it's a
-> legitimate bug, so revert the offending commit.
-> 
-> Reported-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
-> Cc: Michael Brown <mbrown-OViyBiuKJBuK421+ScFKDQ@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/boot/header.S | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/boot/header.S b/arch/x86/boot/header.S
-> index 16ef02596db2..7a6d43a554d7 100644
-> --- a/arch/x86/boot/header.S
-> +++ b/arch/x86/boot/header.S
-> @@ -154,7 +154,7 @@ extra_header_fields:
->  #else
->  	.quad	0				# ImageBase
->  #endif
-> -	.long	CONFIG_PHYSICAL_ALIGN		# SectionAlignment
-> +	.long	0x20				# SectionAlignment
->  	.long	0x20				# FileAlignment
->  	.word	0				# MajorOperatingSystemVersion
->  	.word	0				# MinorOperatingSystemVersion
+This panic is not reproducible with "efi=" as this will result in a non-NULL
+zero-lenght string.
 
-Reviewed-by: Linn Crosetto <linn-VXdhtT5mjnY@public.gmane.org>
+Thus, verify that the pointer to the parameter string is not NULL. This is
+consistent with other parameter-parsing functions which check for NULL pointers.
 
+Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+---
+
+Changes since v1:
+
+ - Include a stackdump showing the code path to the panic
+ - Describe further in which scenarios the panic can be reproduced
+ - Describe more accurately the fix.
+
+ arch/x86/platform/efi/efi.c | 4 ++++
+ drivers/firmware/efi/efi.c  | 4 ++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index cfba30f..d323e3a 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -972,6 +972,10 @@ u64 efi_mem_attributes(unsigned long phys_addr)
+ 
+ static int __init arch_parse_efi_cmdline(char *str)
+ {
++	if (!str) {
++		pr_warn("need at least one option\n");
++		return -EINVAL;
++	}
+ 	if (parse_option_str(str, "old_map"))
+ 		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+ 	if (parse_option_str(str, "debug"))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 46eb8a6..9816e3d 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -58,6 +58,10 @@ bool efi_runtime_disabled(void)
+ 
+ static int __init parse_efi_cmdline(char *str)
+ {
++	if (!str) {
++		pr_warn("need at least one option\n");
++		return -EINVAL;
++	}
+ 	if (parse_option_str(str, "noruntime"))
+ 		disable_runtime = true;
+ 
 -- 
-Linn Crosetto
-Linux for HP Helion OpenStack
+1.9.1
