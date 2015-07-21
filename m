@@ -1,78 +1,103 @@
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V6 0/4] map GHES memory region according to EFI memory map
-Date: Mon, 20 Jul 2015 17:32:35 -0700
-Message-ID: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, tony.luck@gmail.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, lenb@kernel.org, ying.huang@intel.com, catalin.marinas@arm.com, will.deacon@arm.com
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org
+Subject: [PATCH V6 1/4] efi: x86: rearrange efi_mem_attributes()
+Date: Mon, 20 Jul 2015 17:32:36 -0700
+Message-ID: <1437438759-3686-2-git-send-email-zjzhang@codeaurora.org>
+References: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, catalin.marinas@arm.com, will.deacon@arm.com
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org
 List-Id: linux-efi@vger.kernel.org
 
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
-updates a memory region with hardware error record using nocache
-attribute. When OS reads the region, since it maps the region with
-cacahed attribute even though EFI memory map defines this region as
-uncached, OS gets stale data and errorneously reports there is no new
-HW error.
+x86 and ia64 implement efi_mem_attributes() differently. This
+function needs to be available for other arch (such as arm64)
+as well, such as for the purpose of ACPI/APEI.
 
-When ghes driver maps the memory region, it uses the cache attribute
-according to EFI memory map, if EFI memory map feature is enabled
-at runtime.
+ia64 efi does not setup memmap variable and does not set
+EFI_MEMMAP flag, so it needs to have its unique implementation
+of efi_mem_attributes().
 
-Since both arch/x86 and arch/ia64 implemented architecture agnostic EFI
-memory map attribue lookup function efi_memattributes(), the code is
-moved from arch/x86 into EFI subsystem and is declared as __weak; archs
-other than ia64 should not override the default implementation.
+Move efi_mem_attributes() implementation from x86 to efi, and
+declare it with __weak. It is recommended that other archs
+should not override the default implementation.
 
-V6:
-1. Implemented arch_apei_get_mem_attributes() for arm64 as inline
-   function.
-2. Rebased to efi-next-14364 of efi/next, pm+acpi-4.2-rc3 of
-   linux-pm/master, arm64-upstream-13521 of arm64/master,
-   next-20150720 of linux-next/master.
-V5:
-1. Rebased to next-20150713 of linux-next/master, efi-next-14359 of
-   efi/next, pm+acpi-4.2-rc2 of linux-pm/master,
-   arm64-fixes-1215 of arm64/master.
-2. Added comment for efi_mem_attributes(), explained why it is marked
-   as __weak at the function definition site.
-V4:
-1. Introduced arch_apei_get_mem_attributes() to allow arch specific
-   implementation of getting pgprot_t appropriate for a physical
-   address.
-2. Implemented arch_apei_get_mem_attributes() for x86 and for arm64.
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+---
+ arch/x86/platform/efi/efi.c | 18 ------------------
+ drivers/firmware/efi/efi.c  | 31 +++++++++++++++++++++++++++++++
+ 2 files changed, 31 insertions(+), 18 deletions(-)
 
-V3:
-1. Rebased to v4.1-rc7.
-2. Moved efi_mem_attributes() from arch/x86 to drivers/firmware/efi
-   and declared it as __weak.
-3. Introduced ARCH_APEI_PAGE_KERNEL_UC to allow arch specific page
-   protection type for UC.
-4. Removed efi_ioremap(). It can not be used for GHES memory region
-   mapping purpose since ioremap can not be used in atomic context.
-
-V2:
-1. Rebased to v4.1-rc5.
-2. Split removal of efi_mem_attributes() and creation of efi_ioremap()
-into two patches.
-
-Jonathan (Zhixiong) Zhang (4):
-  efi: x86: rearrange efi_mem_attributes()
-  x86: acpi: implement arch_apei_get_mem_attributes()
-  arm64: apei: implement arch_apei_get_mem_attributes()
-  acpi, apei: use appropriate pgprot_t to map GHES memory
-
- arch/arm64/include/asm/acpi.h | 15 +++++++++++++++
- arch/x86/kernel/acpi/apei.c   | 10 ++++++++++
- arch/x86/platform/efi/efi.c   | 18 ------------------
- drivers/acpi/apei/ghes.c      |  6 ++++--
- drivers/firmware/efi/efi.c    | 31 +++++++++++++++++++++++++++++++
- include/acpi/apei.h           |  1 +
- 6 files changed, 61 insertions(+), 20 deletions(-)
-
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index dbc8627a5cdf..88b3ebaeb72f 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -917,24 +917,6 @@ u32 efi_mem_type(unsigned long phys_addr)
+ 	return 0;
+ }
+ 
+-u64 efi_mem_attributes(unsigned long phys_addr)
+-{
+-	efi_memory_desc_t *md;
+-	void *p;
+-
+-	if (!efi_enabled(EFI_MEMMAP))
+-		return 0;
+-
+-	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+-		md = p;
+-		if ((md->phys_addr <= phys_addr) &&
+-		    (phys_addr < (md->phys_addr +
+-				  (md->num_pages << EFI_PAGE_SHIFT))))
+-			return md->attribute;
+-	}
+-	return 0;
+-}
+-
+ static int __init arch_parse_efi_cmdline(char *str)
+ {
+ 	if (parse_option_str(str, "old_map"))
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3061bb8629dc..bf4190a4f3f5 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -517,3 +517,34 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
+ 	return buf;
+ }
++
++/*
++ * efi_mem_attributes - lookup memmap attributes for physical address
++ * @phys_addr: the physical address to lookup
++ *
++ * Search in the EFI memory map for the region covering
++ * @phys_addr. Returns the EFI memory attributes if the region
++ * was found in the memory map, 0 otherwise.
++ *
++ * Despite being marked __weak, most architectures should *not*
++ * override this function. It is __weak solely for the benefit
++ * of ia64 which has a funky EFI memory map that doesn't work
++ * the same way as other architectures.
++ */
++u64 __weak efi_mem_attributes(unsigned long phys_addr)
++{
++	efi_memory_desc_t *md;
++	void *p;
++
++	if (!efi_enabled(EFI_MEMMAP))
++		return 0;
++
++	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
++		md = p;
++		if ((md->phys_addr <= phys_addr) &&
++		    (phys_addr < (md->phys_addr +
++		    (md->num_pages << EFI_PAGE_SHIFT))))
++			return md->attribute;
++	}
++	return 0;
++}
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
-
