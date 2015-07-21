@@ -1,101 +1,83 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2] efi: Check for null efi kernel parameters
-Date: Tue, 21 Jul 2015 17:22:17 +0800
-Message-ID: <20150721092217.GA7361@dhcp-129-220.nay.redhat.com>
-References: <1437014163-4652-1-git-send-email-ricardo.neri-calderon@linux.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1437014163-4652-1-git-send-email-ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Glenn P. Williamson" <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Subject: [PATCH V7 0/5] map GHES memory region according to EFI memory map
+Date: Tue, 21 Jul 2015 14:59:15 -0700
+Message-ID: <1437515960-16812-1-git-send-email-zjzhang@codeaurora.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, tony.luck@gmail.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, lenb@kernel.org, ying.huang@intel.com, catalin.marinas@arm.com, will.deacon@arm.com
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-arm-msm@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org
 List-Id: linux-efi@vger.kernel.org
 
-On 07/15/15 at 07:36pm, Ricardo Neri wrote:
-> Even though it is documented how to specifiy efi parameters, it is
-> possible to cause a kernel panic due to a derreference of a NULL pointer when
-> parsing such parameters if "efi" alone is given:
-> 
-> PANIC: early exception 0e rip 10:ffffffff812fb361 error 0 cr2 0
-> [ 0.000000] CPU: 0 PID: 0 Comm: swapper Not tainted 4.2.0-rc1+ #450
-> [ 0.000000]  ffffffff81fe20a9 ffffffff81e03d50 ffffffff8184bb0f 00000000000003f8
-> [ 0.000000]  0000000000000000 ffffffff81e03e08 ffffffff81f371a1 64656c62616e6520
-> [ 0.000000]  0000000000000069 000000000000005f 0000000000000000 0000000000000000
-> [ 0.000000] Call Trace:
-> [ 0.000000]  [<ffffffff8184bb0f>] dump_stack+0x45/0x57
-> [ 0.000000]  [<ffffffff81f371a1>] early_idt_handler_common+0x81/0xae
-> [ 0.000000]  [<ffffffff812fb361>] ? parse_option_str+0x11/0x90
-> [ 0.000000]  [<ffffffff81f4dd69>] arch_parse_efi_cmdline+0x15/0x42
-> [ 0.000000]  [<ffffffff81f376e1>] do_early_param+0x50/0x8a
-> [ 0.000000]  [<ffffffff8106b1b3>] parse_args+0x1e3/0x400
-> [ 0.000000]  [<ffffffff81f37a43>] parse_early_options+0x24/0x28
-> [ 0.000000]  [<ffffffff81f37691>] ? loglevel+0x31/0x31
-> [ 0.000000]  [<ffffffff81f37a78>] parse_early_param+0x31/0x3d
-> [ 0.000000]  [<ffffffff81f3ae98>] setup_arch+0x2de/0xc08
-> [ 0.000000]  [<ffffffff8109629a>] ? vprintk_default+0x1a/0x20
-> [ 0.000000]  [<ffffffff81f37b20>] start_kernel+0x90/0x423
-> [ 0.000000]  [<ffffffff81f37495>] x86_64_start_reservations+0x2a/0x2c
-> [ 0.000000]  [<ffffffff81f37582>] x86_64_start_kernel+0xeb/0xef
-> [ 0.000000] RIP 0xffffffff81ba2efc
-> 
-> This panic is not reproducible with "efi=" as this will result in a non-NULL
-> zero-lenght string.
-> 
-> Thus, verify that the pointer to the parameter string is not NULL. This is
-> consistent with other parameter-parsing functions which check for NULL pointers.
-> 
-> Signed-off-by: Ricardo Neri <ricardo.neri-calderon-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-> ---
-> 
-> Changes since v1:
-> 
->  - Include a stackdump showing the code path to the panic
->  - Describe further in which scenarios the panic can be reproduced
->  - Describe more accurately the fix.
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-Ricardo, any reason not change in parse_option_str general function? 
-I prefer to fix it in parse_option_str, because it is for checking
-if str contains an option string, if str is NULL then it should 
-return false.
+On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
+updates a memory region with hardware error record using nocache
+attribute. When OS reads the region, since it maps the region with
+cacahed attribute even though EFI memory map defines this region as
+uncached, OS gets stale data and errorneously reports there is no new
+HW error.
 
-But since it is only used in efi code for now so I have no strong opinion.
+When ghes driver maps the memory region, it uses the cache attribute
+according to EFI memory map, if EFI memory map feature is enabled
+at runtime.
 
-> 
->  arch/x86/platform/efi/efi.c | 4 ++++
->  drivers/firmware/efi/efi.c  | 4 ++++
->  2 files changed, 8 insertions(+)
-> 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index cfba30f..d323e3a 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -972,6 +972,10 @@ u64 efi_mem_attributes(unsigned long phys_addr)
->  
->  static int __init arch_parse_efi_cmdline(char *str)
->  {
-> +	if (!str) {
-> +		pr_warn("need at least one option\n");
-> +		return -EINVAL;
-> +	}
->  	if (parse_option_str(str, "old_map"))
->  		set_bit(EFI_OLD_MEMMAP, &efi.flags);
->  	if (parse_option_str(str, "debug"))
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 46eb8a6..9816e3d 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -58,6 +58,10 @@ bool efi_runtime_disabled(void)
->  
->  static int __init parse_efi_cmdline(char *str)
->  {
-> +	if (!str) {
-> +		pr_warn("need at least one option\n");
-> +		return -EINVAL;
-> +	}
->  	if (parse_option_str(str, "noruntime"))
->  		disable_runtime = true;
->  
-Thanks
-Dave
+Since both arch/x86 and arch/ia64 implemented architecture agnostic EFI
+memory map attribue lookup function efi_memattributes(), the code is
+moved from arch/x86 into EFI subsystem and is declared as __weak; archs
+other than ia64 should not override the default implementation. 
+
+V7:
+1. Added PROT_DEVICE_nGnRnE and PROT_NORMAL_WT to support all
+   possible UEFI memory types for arm64.
+V6:
+1. Implemented arch_apei_get_mem_attributes() for arm64 as inline
+   function.
+2. Rebased to efi-next-14364 of efi/next, pm+acpi-4.2-rc3 of
+   linux-pm/master, arm64-upstream-13521 of arm64/master,
+   next-20150720 of linux-next/master.
+V5:
+1. Rebased to next-20150713 of linux-next/master, efi-next-14359 of
+   efi/next, pm+acpi-4.2-rc2 of linux-pm/master,
+   arm64-fixes-1215 of arm64/master.
+2. Added comment for efi_mem_attributes(), explained why it is marked
+   as __weak at the function definition site.
+V4:
+1. Introduced arch_apei_get_mem_attributes() to allow arch specific
+   implementation of getting pgprot_t appropriate for a physical
+   address.
+2. Implemented arch_apei_get_mem_attributes() for x86 and for arm64.
+V3:
+1. Rebased to v4.1-rc7.
+2. Moved efi_mem_attributes() from arch/x86 to drivers/firmware/efi
+   and declared it as __weak.
+3. Introduced ARCH_APEI_PAGE_KERNEL_UC to allow arch specific page
+   protection type for UC.
+4. Removed efi_ioremap(). It can not be used for GHES memory region
+   mapping purpose since ioremap can not be used in atomic context.
+V2:
+1. Rebased to v4.1-rc5.
+2. Split removal of efi_mem_attributes() and creation of efi_ioremap()
+into two patches.
+
+Jonathan (Zhixiong) Zhang (5):
+  efi: x86: rearrange efi_mem_attributes()
+  x86: acpi: implement arch_apei_get_mem_attributes()
+  arm64: mm: add PROT_DEVICE_nGnRnE and PROT_NORMAL_WT
+  arm64: apei: implement arch_apei_get_mem_attributes()
+  acpi, apei: use appropriate pgprot_t to map GHES memory
+
+ arch/arm64/include/asm/acpi.h    | 26 ++++++++++++++++++++++++++
+ arch/arm64/include/asm/memory.h  |  1 +
+ arch/arm64/include/asm/pgtable.h |  2 ++
+ arch/arm64/mm/proc.S             |  6 ++++--
+ arch/x86/kernel/acpi/apei.c      | 10 ++++++++++
+ arch/x86/platform/efi/efi.c      | 18 ------------------
+ drivers/acpi/apei/ghes.c         |  6 ++++--
+ drivers/firmware/efi/efi.c       | 31 +++++++++++++++++++++++++++++++
+ include/acpi/apei.h              |  1 +
+ 9 files changed, 79 insertions(+), 22 deletions(-)
+
+-- 
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
+
