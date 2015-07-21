@@ -1,68 +1,52 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH V6 2/4] x86: acpi: implement arch_apei_get_mem_attributes()
-Date: Mon, 20 Jul 2015 17:32:37 -0700
-Message-ID: <1437438759-3686-3-git-send-email-zjzhang@codeaurora.org>
-References: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, lenb@kernel.org, catalin.marinas@arm.com, will.deacon@arm.com
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linaro-acpi@lists.linaro.org
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Tue, 21 Jul 2015 09:53:40 +0200
+Message-ID: <20150721075340.GA26339@gmail.com>
+References: <20150715143111.GB6955@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150715143111.GB6955-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-... to allow arch specific implementation of getting page
-protection type associated with a physical address.
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-If the physical address has memory attributes defined by EFI
-memmap as EFI_MEMORY_UC, the page protection type is
-PAGE_KENERL_NOCACHE. Otherwise, the page protection type is
-PAGE_KERNEL.
+> Folks,
+> 
+> Please pull the following fix from Tony that addresses a bug in the EFI
+> CPER driver preventing it from working with memory error records as
+> described in the UEFI 2.2 spec.
+> 
+> The following changes since commit d67e199611b986b345ea3087ee2e4a15da1c98b3:
+> 
+>   efi: Fix error handling in add_sysfs_runtime_map_entry() (2015-05-05 16:20:13 +0100)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 4c62360d7562a20c996836d163259c87d9378120:
+> 
+>   efi: Handle memory error structures produced based on old versions of standard (2015-07-15 13:30:38 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Fix a bug in the Common Platform Error Record (CPER) driver that
+>    caused old UEFI spec (< 2.3) versions of the memory error record
+>    structure to be declared invalid - Tony Luck
+> 
+> ----------------------------------------------------------------
+> Tony Luck (1):
+>       efi: Handle memory error structures produced based on old versions of standard
+> 
+>  drivers/firmware/efi/cper.c | 15 ++++++++++++---
+>  include/linux/cper.h        | 22 +++++++++++++++++++++-
+>  2 files changed, 33 insertions(+), 4 deletions(-)
 
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
----
- arch/x86/kernel/acpi/apei.c | 10 ++++++++++
- include/acpi/apei.h         |  1 +
- 2 files changed, 11 insertions(+)
+Pulled, thanks Matt!
 
-diff --git a/arch/x86/kernel/acpi/apei.c b/arch/x86/kernel/acpi/apei.c
-index c280df6b2aa2..9c6b3c8d81e4 100644
---- a/arch/x86/kernel/acpi/apei.c
-+++ b/arch/x86/kernel/acpi/apei.c
-@@ -14,6 +14,8 @@
- 
- #include <acpi/apei.h>
- 
-+#include <linux/efi.h>
-+
- #include <asm/mce.h>
- #include <asm/tlbflush.h>
- 
-@@ -60,3 +62,11 @@ void arch_apei_flush_tlb_one(unsigned long addr)
- {
- 	__flush_tlb_one(addr);
- }
-+
-+pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
-+{
-+	if (efi_mem_attributes(addr) & EFI_MEMORY_UC)
-+		return PAGE_KERNEL_NOCACHE;
-+
-+	return PAGE_KERNEL;
-+}
-diff --git a/include/acpi/apei.h b/include/acpi/apei.h
-index 284801ac7042..64a12ce9880b 100644
---- a/include/acpi/apei.h
-+++ b/include/acpi/apei.h
-@@ -46,6 +46,7 @@ int erst_clear(u64 record_id);
- int arch_apei_enable_cmcff(struct acpi_hest_header *hest_hdr, void *data);
- void arch_apei_report_mem_error(int sev, struct cper_sec_mem_err *mem_err);
- void arch_apei_flush_tlb_one(unsigned long addr);
-+pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr);
- 
- #endif
- #endif
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+	Ingo
