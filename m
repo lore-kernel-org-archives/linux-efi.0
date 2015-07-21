@@ -1,103 +1,68 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH V7 1/5] efi: x86: rearrange efi_mem_attributes()
-Date: Tue, 21 Jul 2015 14:59:16 -0700
-Message-ID: <1437515960-16812-2-git-send-email-zjzhang@codeaurora.org>
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Subject: [PATCH V7 2/5] x86: acpi: implement arch_apei_get_mem_attributes()
+Date: Tue, 21 Jul 2015 14:59:17 -0700
+Message-ID: <1437515960-16812-3-git-send-email-zjzhang@codeaurora.org>
 References: <1437515960-16812-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1437515960-16812-1-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1437515960-16812-1-git-send-email-zjzhang@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, ying.huang@intel.com, fu.wei@linaro.org, al.stone@linaro.org, bp@alien8.de, rjw@rjwysocki.net, lenb@kernel.org, catalin.marinas@arm.com, will.deacon@arm.com
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linaro-acpi@lists.linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-x86 and ia64 implement efi_mem_attributes() differently. This
-function needs to be available for other arch (such as arm64)
-as well, such as for the purpose of ACPI/APEI.
+... to allow arch specific implementation of getting page
+protection type associated with a physical address.
 
-ia64 efi does not setup memmap variable and does not set
-EFI_MEMMAP flag, so it needs to have its unique implementation
-of efi_mem_attributes().
+If the physical address has memory attributes defined by EFI
+memmap as EFI_MEMORY_UC, the page protection type is
+PAGE_KENERL_NOCACHE. Otherwise, the page protection type is
+PAGE_KERNEL.
 
-Move efi_mem_attributes() implementation from x86 to efi, and
-declare it with __weak. It is recommended that other archs
-should not override the default implementation.
-
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 ---
- arch/x86/platform/efi/efi.c | 18 ------------------
- drivers/firmware/efi/efi.c  | 31 +++++++++++++++++++++++++++++++
- 2 files changed, 31 insertions(+), 18 deletions(-)
+ arch/x86/kernel/acpi/apei.c | 10 ++++++++++
+ include/acpi/apei.h         |  1 +
+ 2 files changed, 11 insertions(+)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index dbc8627a5cdf..88b3ebaeb72f 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -917,24 +917,6 @@ u32 efi_mem_type(unsigned long phys_addr)
- 	return 0;
- }
+diff --git a/arch/x86/kernel/acpi/apei.c b/arch/x86/kernel/acpi/apei.c
+index c280df6b2aa2..9c6b3c8d81e4 100644
+--- a/arch/x86/kernel/acpi/apei.c
++++ b/arch/x86/kernel/acpi/apei.c
+@@ -14,6 +14,8 @@
  
--u64 efi_mem_attributes(unsigned long phys_addr)
--{
--	efi_memory_desc_t *md;
--	void *p;
--
--	if (!efi_enabled(EFI_MEMMAP))
--		return 0;
--
--	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
--		md = p;
--		if ((md->phys_addr <= phys_addr) &&
--		    (phys_addr < (md->phys_addr +
--				  (md->num_pages << EFI_PAGE_SHIFT))))
--			return md->attribute;
--	}
--	return 0;
--}
--
- static int __init arch_parse_efi_cmdline(char *str)
+ #include <acpi/apei.h>
+ 
++#include <linux/efi.h>
++
+ #include <asm/mce.h>
+ #include <asm/tlbflush.h>
+ 
+@@ -60,3 +62,11 @@ void arch_apei_flush_tlb_one(unsigned long addr)
  {
- 	if (parse_option_str(str, "old_map"))
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3061bb8629dc..bf4190a4f3f5 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -517,3 +517,34 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
- 			 attr & EFI_MEMORY_UC      ? "UC"  : "");
- 	return buf;
+ 	__flush_tlb_one(addr);
  }
 +
-+/*
-+ * efi_mem_attributes - lookup memmap attributes for physical address
-+ * @phys_addr: the physical address to lookup
-+ *
-+ * Search in the EFI memory map for the region covering
-+ * @phys_addr. Returns the EFI memory attributes if the region
-+ * was found in the memory map, 0 otherwise.
-+ *
-+ * Despite being marked __weak, most architectures should *not*
-+ * override this function. It is __weak solely for the benefit
-+ * of ia64 which has a funky EFI memory map that doesn't work
-+ * the same way as other architectures.
-+ */
-+u64 __weak efi_mem_attributes(unsigned long phys_addr)
++pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
 +{
-+	efi_memory_desc_t *md;
-+	void *p;
++	if (efi_mem_attributes(addr) & EFI_MEMORY_UC)
++		return PAGE_KERNEL_NOCACHE;
 +
-+	if (!efi_enabled(EFI_MEMMAP))
-+		return 0;
-+
-+	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		md = p;
-+		if ((md->phys_addr <= phys_addr) &&
-+		    (phys_addr < (md->phys_addr +
-+		    (md->num_pages << EFI_PAGE_SHIFT))))
-+			return md->attribute;
-+	}
-+	return 0;
++	return PAGE_KERNEL;
 +}
+diff --git a/include/acpi/apei.h b/include/acpi/apei.h
+index 284801ac7042..64a12ce9880b 100644
+--- a/include/acpi/apei.h
++++ b/include/acpi/apei.h
+@@ -46,6 +46,7 @@ int erst_clear(u64 record_id);
+ int arch_apei_enable_cmcff(struct acpi_hest_header *hest_hdr, void *data);
+ void arch_apei_report_mem_error(int sev, struct cper_sec_mem_err *mem_err);
+ void arch_apei_flush_tlb_one(unsigned long addr);
++pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr);
+ 
+ #endif
+ #endif
 -- 
 The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
 a Linux Foundation Collaborative Project
