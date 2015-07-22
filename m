@@ -1,175 +1,55 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang@codeaurora.org>
-Subject: Re: [PATCH 1/2] efi: parse vendor proprietary CPER section
-Date: Wed, 22 Jul 2015 11:11:10 -0700
-Message-ID: <55AFDCBE.7070002@codeaurora.org>
-References: <1437521807-27571-1-git-send-email-zjzhang@codeaurora.org>
- <1437521807-27571-2-git-send-email-zjzhang@codeaurora.org>
- <20150722073021.GB7979@nazgul.tnic>
+From: josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org
+Subject: Re: [PATCH] Don't print an error on unsupported BGRT version.
+Date: Wed, 22 Jul 2015 11:23:08 -0700
+Message-ID: <20150722182308.GA26620@cloud>
+References: <1437583253-29600-1-git-send-email-pjones@redhat.com>
+ <20150722165357.GC1203@jtriplet-mobl1>
+ <20150722170906.GA17419@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <20150722073021.GB7979@nazgul.tnic>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Matt Fleming <matt.fleming@intel.com>, tony.luck@intel.com, fu.wei@linaro.org, al.stone@linaro.org, rjw@rjwysocki.net, mchehab@redhat.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org, linux-acpi@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150722170906.GA17419-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Thank you Borislav for your help.
+On Wed, Jul 22, 2015 at 01:09:06PM -0400, Peter Jones wrote:
+> On Wed, Jul 22, 2015 at 09:53:57AM -0700, Josh Triplett wrote:
+> > On Wed, Jul 22, 2015 at 12:40:53PM -0400, Peter Jones wrote:
+> > > BGRT can legitimately be a different version from what we support, and
+> > > that's a problem with the driver not supporting something, not an error
+> > > that needs to be surfaced to the user.
+> > > 
+> > > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > 
+> > Are you actually seeing this error on a real system?  Or is this just a
+> > theoretical concern with some future version?
+> 
+> Yeah, I have several systems where I see it every boot - and with
+> "quiet", it's the only message I see.  In all cases the version is 0,
+> i.e. the code was written before it was included in the standard, and
+> it's a version the driver legitimately does not handle.  Admittedly
+> these are mostly machines for developing UEFI on (including the Intel
+> S1200RP board with the UDK2014 B2 firmware.)  But the fact is there are
+> systems you can *buy* which will show this as an error, and it really
+> isn't an error.  It's just an earlier version than we support.
 
-On 7/22/2015 12:30 AM, Borislav Petkov wrote:
-> On Tue, Jul 21, 2015 at 04:36:46PM -0700, Jonathan (Zhixiong) Zhang wrote:
->> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
->>
->> UEFI spec allows for non-standard section in Common Platform Error
->> Record. This is defined in section N.2.3 of UEFI version 2.5.
->>
->> If Section Type field of Generic Error Data Entry indicates a
->> non-standard section (eg. matchs a vendor proprietary GUID as defined
->> in include/linux/cper.h), print out the raw data in hex in dmesg
->> buffer. Data length is taken from Error Data length field of
->> Generic Error Data Entry.
->>
->> Following is a sample output from dmesg:
->> {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
->> {1}[Hardware Error]: It has been corrected by h/w and requires no further action
->> {1}[Hardware Error]: event severity: corrected
->> {1}[Hardware Error]:  Error 0, type: corrected
->> {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
->> {1}[Hardware Error]:  fru_text:
->> {1}[Hardware Error]:   section_type: Qualcomm Technologies Inc. proprietary error
->> {1}[Hardware Error]:   section length: 88
->> {1}[Hardware Error]:   00000000: 01002011 20150416 01000001 00000002
->> {1}[Hardware Error]:   00000010: 5f434345 525f4543 0000574d 00000000
->> {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
->> {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
->> {1}[Hardware Error]:   00000040: 00000000 00000000 fe800000 00000000
->> {1}[Hardware Error]:   00000050: 00000004 5f434345
->>
->> ---
->> checkpatch.pl gives following warnings on this patch:
->>      WARNING: printk() should include KERN_ facility level
->> This is a false warning as pfx parameter includes KERN_ facility
->> level. Also such practice is consistent with the rest of the file.
->> ---
->>
->> Change-Id: I9a5bb6039beef1c0a36097765268b382e6a28498
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
->> ---
->>   drivers/firmware/efi/cper.c | 61 +++++++++++++++++++++++++++++++++++++++++++--
->>   include/linux/cper.h        |  4 +++
->>   2 files changed, 63 insertions(+), 2 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
->> index 4fd9961d552e..29af8846ffd1 100644
->> --- a/drivers/firmware/efi/cper.c
->> +++ b/drivers/firmware/efi/cper.c
->> @@ -32,12 +32,50 @@
->>   #include <linux/acpi.h>
->>   #include <linux/pci.h>
->>   #include <linux/aer.h>
->> +#include <linux/printk.h>
->>
->>   #define INDENT_SP	" "
->>
->> +#define ROW_SIZE 16
->> +#define GROUP_SIZE 4
->> +
->> +struct sec_vendor {
->> +	uuid_le         guid;
->> +	const char      *name;
->> +};
->> +
->> +static struct sec_vendor sec_vendors[] = {
->> +	{CPER_SEC_QTI_ERR, "Qualcomm Technologies Inc. proprietary error"},
->> +	{NULL_UUID_LE, NULL},
->> +};
->
-> No, no vendor-specific stuff like that. This becomes a nightmare to
-> maintain...
-Got it. I will take the feedback and print data of "unknown" sections
-as is.
->
->> +
->>   static char rcd_decode_str[CPER_REC_LEN];
->>
->>   /*
->> + * In case of CPER error record, there should be only two message
->> + * levels: KERN_ERR and KERN_WARNING
->> + */
->> +static const char *cper_kern_level(const char *pfx)
->> +{
->> +	switch (printk_get_level(pfx)) {
->> +	case '3': return KERN_ERR;
->> +	case '4': return KERN_WARNING;
->> +	default:  return KERN_DEFAULT;
->> +	}
->
->
-> We already pass down const char *pfx - no need for retranslation.
-The reason I did re-translation is because print_hex_dump() asks for two
-parameters, one for level, another for prefix string. In our case, pfx
-already includes both of them. Since print_hex_dump() simply
-concatenates level and prefix string together, I will not do the
-re-translation, but pass pfx as the level parameter, and pass empty
-string as the prefix string parameter to print_hex_dump().
->
->> +
->> +/*
->> + * cper_print_hex - print hex from a binary buffer
->> + * @pfx: prefix for each line, including log level and prefix string
->> + * @buf: buffer pointer
->> + * @len: size of buffer
->> + */
->> +#define cper_print_hex(pfx, buf, len)					\
->> +	print_hex_dump(cper_kern_level(pfx), printk_skip_level(pfx),	\
->> +		DUMP_PREFIX_OFFSET, ROW_SIZE, GROUP_SIZE,		\
->> +		buf, len, 0)
->> +
->> +/*
->>    * CPER record ID need to be unique even after reboot, because record
->>    * ID is used as index for ERST storage, while CPER records from
->>    * multiple boot may co-exist in ERST.
->> @@ -379,6 +417,12 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
->>   	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->>   }
->>
->> +static void cper_print_vendor(const char *pfx, __u8 *vendor_err, __u32 len)
->> +{
->> +	printk("%ssection length: %d\n", pfx, len);
->> +	cper_print_hex(pfx, vendor_err, len);
->> +}
->> +
->>   static void cper_estatus_print_section(
->>   	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
->>   {
->> @@ -416,9 +460,22 @@ static void cper_estatus_print_section(
->>   			cper_print_pcie(newpfx, pcie, gdata);
->>   		else
->>   			goto err_section_too_small;
->> -	} else
->> +	} else {
->> +		int i;
->> +		__u8 *vendor_err = (void *)(gdata + 1);
->> +
->> +		for (i = 0; uuid_le_cmp(sec_vendors[i].guid,
->> +		     NULL_UUID_LE); i++) {
->> +			if (!uuid_le_cmp(*sec_type, sec_vendors[i].guid)) {
->> +				printk("%ssection_type: %s", newpfx,
->> +					sec_vendors[i].name);
->> +				cper_print_vendor(newpfx, vendor_err,
->> +					gdata->error_data_length);
->> +				return;
->> +			}
->> +		}
->>   		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
->
-> ... you simply dump the section in binary if none of the standard
-> UUIDs match. And you can then turn the "unknown" message into a
-> vendor-specific one.
-Sure.
+We should support version 0.  Is the structure layout and semantic the
+same?  Could you submit a patch to handle version 0?
 
--- 
-Jonathan (Zhixiong) Zhang
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+> > While I agree that this doesn't need to be pr_err, I don't think
+> > pr_debug is appropriate either.  It may mean the driver needs updating,
+> > or it may mean that a system in the wild is actually broken and has an
+> > invalid version number.  I'd prefer at least pr_warn so that people see
+> > it and report it, but I could live with pr_notice; that should hide it
+> > from systems booting in quiet mode, while still having it in the log
+> > even on non-debug kernels.
+> 
+> I'd be okay with pr_notice.  I'll send a follow-up.
+
+If we can handle 0, I'd prefer to do that and then have a pr_warn for
+versions other than 0 and 1.
+
+- Josh Triplett
