@@ -1,46 +1,173 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH V6 1/4] efi: x86: rearrange efi_mem_attributes()
-Date: Wed, 22 Jul 2015 10:21:27 -0700
-Message-ID: <55AFD117.90801@codeaurora.org>
-References: <1437438759-3686-1-git-send-email-zjzhang@codeaurora.org>
- <1437438759-3686-2-git-send-email-zjzhang@codeaurora.org>
- <20150722111106.GC2734@codeblueprint.co.uk>
+From: "Zhang, Jonathan Zhixiong" <zjzhang@codeaurora.org>
+Subject: Re: [PATCH 1/2] efi: parse vendor proprietary CPER section
+Date: Wed, 22 Jul 2015 11:11:10 -0700
+Message-ID: <55AFDCBE.7070002@codeaurora.org>
+References: <1437521807-27571-1-git-send-email-zjzhang@codeaurora.org>
+ <1437521807-27571-2-git-send-email-zjzhang@codeaurora.org>
+ <20150722073021.GB7979@nazgul.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150722111106.GC2734-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20150722073021.GB7979@nazgul.tnic>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt.fleming@intel.com>, tony.luck@intel.com, fu.wei@linaro.org, al.stone@linaro.org, rjw@rjwysocki.net, mchehab@redhat.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Appreciate Matt for your ack.
+Thank you Borislav for your help.
 
-On 7/22/2015 4:11 AM, Matt Fleming wrote:
-> On Mon, 20 Jul, at 05:32:36PM, Jonathan (Zhixiong) Zhang wrote:
->> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+On 7/22/2015 12:30 AM, Borislav Petkov wrote:
+> On Tue, Jul 21, 2015 at 04:36:46PM -0700, Jonathan (Zhixiong) Zhang wrote:
+>> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 >>
->> x86 and ia64 implement efi_mem_attributes() differently. This
->> function needs to be available for other arch (such as arm64)
->> as well, such as for the purpose of ACPI/APEI.
+>> UEFI spec allows for non-standard section in Common Platform Error
+>> Record. This is defined in section N.2.3 of UEFI version 2.5.
 >>
->> ia64 efi does not setup memmap variable and does not set
->> EFI_MEMMAP flag, so it needs to have its unique implementation
->> of efi_mem_attributes().
+>> If Section Type field of Generic Error Data Entry indicates a
+>> non-standard section (eg. matchs a vendor proprietary GUID as defined
+>> in include/linux/cper.h), print out the raw data in hex in dmesg
+>> buffer. Data length is taken from Error Data length field of
+>> Generic Error Data Entry.
 >>
->> Move efi_mem_attributes() implementation from x86 to efi, and
->> declare it with __weak. It is recommended that other archs
->> should not override the default implementation.
+>> Following is a sample output from dmesg:
+>> {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
+>> {1}[Hardware Error]: It has been corrected by h/w and requires no further action
+>> {1}[Hardware Error]: event severity: corrected
+>> {1}[Hardware Error]:  Error 0, type: corrected
+>> {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
+>> {1}[Hardware Error]:  fru_text:
+>> {1}[Hardware Error]:   section_type: Qualcomm Technologies Inc. proprietary error
+>> {1}[Hardware Error]:   section length: 88
+>> {1}[Hardware Error]:   00000000: 01002011 20150416 01000001 00000002
+>> {1}[Hardware Error]:   00000010: 5f434345 525f4543 0000574d 00000000
+>> {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
+>> {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
+>> {1}[Hardware Error]:   00000040: 00000000 00000000 fe800000 00000000
+>> {1}[Hardware Error]:   00000050: 00000004 5f434345
 >>
->> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 >> ---
->>   arch/x86/platform/efi/efi.c | 18 ------------------
->>   drivers/firmware/efi/efi.c  | 31 +++++++++++++++++++++++++++++++
->>   2 files changed, 31 insertions(+), 18 deletions(-)
+>> checkpatch.pl gives following warnings on this patch:
+>>      WARNING: printk() should include KERN_ facility level
+>> This is a false warning as pfx parameter includes KERN_ facility
+>> level. Also such practice is consistent with the rest of the file.
+>> ---
+>>
+>> Change-Id: I9a5bb6039beef1c0a36097765268b382e6a28498
+>> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+>> ---
+>>   drivers/firmware/efi/cper.c | 61 +++++++++++++++++++++++++++++++++++++++++++--
+>>   include/linux/cper.h        |  4 +++
+>>   2 files changed, 63 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
+>> index 4fd9961d552e..29af8846ffd1 100644
+>> --- a/drivers/firmware/efi/cper.c
+>> +++ b/drivers/firmware/efi/cper.c
+>> @@ -32,12 +32,50 @@
+>>   #include <linux/acpi.h>
+>>   #include <linux/pci.h>
+>>   #include <linux/aer.h>
+>> +#include <linux/printk.h>
+>>
+>>   #define INDENT_SP	" "
+>>
+>> +#define ROW_SIZE 16
+>> +#define GROUP_SIZE 4
+>> +
+>> +struct sec_vendor {
+>> +	uuid_le         guid;
+>> +	const char      *name;
+>> +};
+>> +
+>> +static struct sec_vendor sec_vendors[] = {
+>> +	{CPER_SEC_QTI_ERR, "Qualcomm Technologies Inc. proprietary error"},
+>> +	{NULL_UUID_LE, NULL},
+>> +};
 >
-> Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> No, no vendor-specific stuff like that. This becomes a nightmare to
+> maintain...
+Got it. I will take the feedback and print data of "unknown" sections
+as is.
 >
+>> +
+>>   static char rcd_decode_str[CPER_REC_LEN];
+>>
+>>   /*
+>> + * In case of CPER error record, there should be only two message
+>> + * levels: KERN_ERR and KERN_WARNING
+>> + */
+>> +static const char *cper_kern_level(const char *pfx)
+>> +{
+>> +	switch (printk_get_level(pfx)) {
+>> +	case '3': return KERN_ERR;
+>> +	case '4': return KERN_WARNING;
+>> +	default:  return KERN_DEFAULT;
+>> +	}
+>
+>
+> We already pass down const char *pfx - no need for retranslation.
+The reason I did re-translation is because print_hex_dump() asks for two
+parameters, one for level, another for prefix string. In our case, pfx
+already includes both of them. Since print_hex_dump() simply
+concatenates level and prefix string together, I will not do the
+re-translation, but pass pfx as the level parameter, and pass empty
+string as the prefix string parameter to print_hex_dump().
+>
+>> +
+>> +/*
+>> + * cper_print_hex - print hex from a binary buffer
+>> + * @pfx: prefix for each line, including log level and prefix string
+>> + * @buf: buffer pointer
+>> + * @len: size of buffer
+>> + */
+>> +#define cper_print_hex(pfx, buf, len)					\
+>> +	print_hex_dump(cper_kern_level(pfx), printk_skip_level(pfx),	\
+>> +		DUMP_PREFIX_OFFSET, ROW_SIZE, GROUP_SIZE,		\
+>> +		buf, len, 0)
+>> +
+>> +/*
+>>    * CPER record ID need to be unique even after reboot, because record
+>>    * ID is used as index for ERST storage, while CPER records from
+>>    * multiple boot may co-exist in ERST.
+>> @@ -379,6 +417,12 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
+>>   	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
+>>   }
+>>
+>> +static void cper_print_vendor(const char *pfx, __u8 *vendor_err, __u32 len)
+>> +{
+>> +	printk("%ssection length: %d\n", pfx, len);
+>> +	cper_print_hex(pfx, vendor_err, len);
+>> +}
+>> +
+>>   static void cper_estatus_print_section(
+>>   	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
+>>   {
+>> @@ -416,9 +460,22 @@ static void cper_estatus_print_section(
+>>   			cper_print_pcie(newpfx, pcie, gdata);
+>>   		else
+>>   			goto err_section_too_small;
+>> -	} else
+>> +	} else {
+>> +		int i;
+>> +		__u8 *vendor_err = (void *)(gdata + 1);
+>> +
+>> +		for (i = 0; uuid_le_cmp(sec_vendors[i].guid,
+>> +		     NULL_UUID_LE); i++) {
+>> +			if (!uuid_le_cmp(*sec_type, sec_vendors[i].guid)) {
+>> +				printk("%ssection_type: %s", newpfx,
+>> +					sec_vendors[i].name);
+>> +				cper_print_vendor(newpfx, vendor_err,
+>> +					gdata->error_data_length);
+>> +				return;
+>> +			}
+>> +		}
+>>   		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
+>
+> ... you simply dump the section in binary if none of the standard
+> UUIDs match. And you can then turn the "unknown" message into a
+> vendor-specific one.
+Sure.
 
 -- 
 Jonathan (Zhixiong) Zhang
