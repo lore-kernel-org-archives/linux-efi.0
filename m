@@ -1,7 +1,7 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Subject: [PATCH] Don't print an error on unsupported BGRT version.
-Date: Wed, 22 Jul 2015 13:09:10 -0400
-Message-ID: <1437584950-30866-1-git-send-email-pjones@redhat.com>
+Date: Wed, 22 Jul 2015 13:13:27 -0400
+Message-ID: <1437585207-32516-1-git-send-email-pjones@redhat.com>
 References: <20150722165357.GC1203@jtriplet-mobl1>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20150722165357.GC1203@jtriplet-mobl1>
@@ -20,7 +20,7 @@ Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index d7f997f..e568701 100644
+index d7f997f..e369162 100644
 --- a/arch/x86/platform/efi/efi-bgrt.c
 +++ b/arch/x86/platform/efi/efi-bgrt.c
 @@ -46,7 +46,7 @@ void __init efi_bgrt_init(void)
@@ -28,7 +28,7 @@ index d7f997f..e568701 100644
  	}
  	if (bgrt_tab->version != 1) {
 -		pr_err("Ignoring BGRT: invalid version %u (expected 1)\n",
-+		pr_debug("Ignoring BGRT: invalid version %u (expected 1)\n",
++		pr_notice("Ignoring BGRT: invalid version %u (expected 1)\n",
  		       bgrt_tab->version);
  		return;
  	}
