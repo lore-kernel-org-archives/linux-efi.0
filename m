@@ -1,52 +1,64 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] x86_64/efi: Use all 64 bit of efi_memmap in setup_e820()
-Date: Wed, 22 Jul 2015 17:22:35 +0200
-Message-ID: <20150722152235.GC28766@nazgul.tnic>
-References: <1437577570-13038-1-git-send-email-sdmitry@parallels.com>
+From: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Subject: [PATCH] x86/mm, efi: Check for valid image type
+Date: Wed, 22 Jul 2015 17:32:44 +0200
+Message-ID: <1437579164-20176-1-git-send-email-bigeasy@linutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1437577570-13038-1-git-send-email-sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Denis V. Lunev" <den-GEFAQzZX7r8dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Jul 22, 2015 at 07:06:10PM +0400, Dmitry Skorodumov wrote:
-> The efi_info structure stores low 32 bits of memory map
-> in efi_memmap and high 32 bits in efi_memmap_hi.
-> 
-> While constructing pointer in the setup_e820(), need
-> to take into account all 64 bit of the pointer.
-> 
-> It is because on 64bit machine the function
-> efi_get_memory_map() may return full 64bit pointer and before
-> the patch that pointer was truncated.
-> 
-> Signed-off-by: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-> CC: Denis V. Lunev <den-GEFAQzZX7r8dnm+yROfE0A@public.gmane.org>
-> 
-> tested in Parallles virtual machine, kernel 3.10.0
-> ---
->  arch/x86/boot/compressed/eboot.c |   10 +++++++++-
->  1 files changed, 9 insertions(+), 1 deletions(-)
-> 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 2c82bd1..908a81f 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -1184,6 +1184,12 @@ static efi_status_t setup_e820(struct boot_params *params,
->  	u32 nr_entries;
->  	u32 nr_desc;
->  	int i;
-> +	unsigned long m
+I usually see
+|Ignoring BGRT: failed to allocate memory for image (wanted 264301314 b=
+ytes)
+|Ignoring BGRT: failed to allocate memory for image (wanted 3925872891 =
+bytes)
 
-Did you even build-test it before sending?
+sometimes I get
 
--- 
-Regards/Gruss,
-    Boris.
+|------------[ cut here ]------------
+|WARNING: CPU: 0 PID: 0 at mm/early_ioremap.c:136 __early_ioremap.const=
+prop.0+0x113/0x1d3()
+=E2=80=A6
+| [<ffffffff81b3de8c>] __early_ioremap.constprop.0+0x113/0x1d3
+| [<ffffffff81b3e106>] early_ioremap+0x13/0x15
+| [<ffffffff81b2c4a9>] efi_bgrt_init+0x1e2/0x27d
+=E2=80=A6
 
-ECO tip #101: Trim your mails when you reply.
---
+now and then. The data behind that pointer changes on each boot because
+nobody preserves the content across kexec.
+
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+---
+
+I don't know much about the requirement of having the .bmp in memory al=
+l the
+time. Would it be a bad thing to compress the bmp and uncompress on cat=
+ from
+userland? In my case the bmp has 272 KiB and LZO gets it down to 12KiB,
+XZ 7.4KiB.
+
+ arch/x86/platform/efi/efi-bgrt.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/e=
+fi-bgrt.c
+index d7f997f7c26d..59710f0875bb 100644
+--- a/arch/x86/platform/efi/efi-bgrt.c
++++ b/arch/x86/platform/efi/efi-bgrt.c
+@@ -79,6 +79,10 @@ void __init efi_bgrt_init(void)
+ 	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
+ 	if (ioremapped)
+ 		early_iounmap(image, sizeof(bmp_header));
++	if (bmp_header.id !=3D 0x4d42) {
++		pr_err("BGRT: Not a valid BMP file.\n");
++		return;
++	}
+ 	bgrt_image_size =3D bmp_header.size;
+=20
+ 	bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
+--=20
+2.1.4
