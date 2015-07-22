@@ -1,161 +1,188 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 2/2] ras: acpi/apei: trace event for vendor proprietary
- CPER section
-Date: Wed, 22 Jul 2015 09:36:26 +0200
-Message-ID: <20150722073626.GC7979@nazgul.tnic>
-References: <1437521807-27571-1-git-send-email-zjzhang@codeaurora.org>
- <1437521807-27571-3-git-send-email-zjzhang@codeaurora.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 31/42] x86, efi: Copy SETUP_EFI data and access directly
+Date: Wed, 22 Jul 2015 11:58:49 +0100
+Message-ID: <20150722105849.GB2734@codeblueprint.co.uk>
+References: <1436300428-21163-1-git-send-email-yinghai@kernel.org>
+ <1436300428-21163-32-git-send-email-yinghai@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1437521807-27571-3-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, tony.luck@intel.com, fu.wei@linaro.org, al.stone@linaro.org, rjw@rjwysocki.net, mchehab@redhat.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org, linux-acpi@vger.kernel.org
+In-Reply-To: <1436300428-21163-32-git-send-email-yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Baoquan He <bhe-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 21, 2015 at 04:36:47PM -0700, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+(Pulling in Dave since he wrote the code)
+
+On Tue, 07 Jul, at 01:20:17PM, Yinghai Lu wrote:
+> The copy will be in __initdata, and it is small.
 > 
-> Trace event is generated when hardware detected a hardware error
-> event, which is of non-standard section as defined in UEFI
-> spec appendix "Common Platform Error Record" (section N.2.3 of
-> UEFI version 2.5).
-> 
-> The trace buffer contains length of error data and raw error data
-> in hex.
-> 
-> Following is a sample output of "perf script":
-> _________swapper_____0_[000]___133.521441:_ras:vendor_event:_len=88_raw=11_20_0
-> 0_01_16_04_15_20_01_00_00_01_02_00_00_00_45_43_43_5f_43_45_5f_52_4d_57_00_00_00
-> _00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00
-> 00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_80_fe_00_00_00_00_04_0
-> 0_00_00_45_43_43_5f
-> 
-> Change-Id: Ic8661310133b0ae51f6b299cdde3cd0fa5517464
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> We can use pointer to access the setup_data instead of using early_memmap
+> everywhere.
+ 
+Is that the only advantage to copying the data, that we save ourselves
+the overhead of calling early_memremap()? That seems fair enough, I just
+want to be clear.
+
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> Signed-off-by: Yinghai Lu <yinghai-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 > ---
->  drivers/acpi/apei/ghes.c | 29 +++++++++++++++++++++++++++--
->  drivers/ras/ras.c        |  1 +
->  include/ras/ras_event.h  | 30 ++++++++++++++++++++++++++++++
->  3 files changed, 58 insertions(+), 2 deletions(-)
+>  arch/x86/include/asm/efi.h     |  2 +-
+>  arch/x86/platform/efi/efi.c    | 13 ++-----------
+>  arch/x86/platform/efi/efi_64.c | 10 +++++++++-
+>  arch/x86/platform/efi/quirks.c | 23 ++++++-----------------
+>  4 files changed, 18 insertions(+), 30 deletions(-)
 > 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 67fc948da17a..03114d27d218 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -53,9 +53,15 @@
->  #include <acpi/ghes.h>
->  #include <acpi/apei.h>
->  #include <asm/tlbflush.h>
-> +#include <ras/ras_event.h>
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 155162e..a3e3aee 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -116,7 +116,7 @@ struct efi_setup_data {
+>  	u64 reserved[8];
+>  };
 >  
->  #include "apei-internal.h"
+> -extern u64 efi_setup;
+> +extern struct efi_setup_data *efi_setup;
 >  
-> +static uuid_le sec_vendor_uuids[] = {
-> +	CPER_SEC_QTI_ERR,
-> +	NULL_UUID_LE,
-> +};
-> +
->  #define GHES_PFX	"GHES: "
+>  #ifdef CONFIG_EFI
 >  
->  #define GHES_ESTATUS_MAX_SIZE		65536
-> @@ -440,11 +446,14 @@ static void ghes_do_proc(struct ghes *ghes,
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index cfba30f..33036ce 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -68,7 +68,7 @@ static efi_config_table_type_t arch_tables[] __initdata = {
+>  	{NULL_GUID, NULL, NULL},
+>  };
+>  
+> -u64 efi_setup;		/* efi setup_data physical address */
+> +struct efi_setup_data *efi_setup __initdata; /* cached efi setup_data pointer */
+>  
+>  static int add_efi_memmap __initdata;
+>  static int __init setup_add_efi_memmap(char *arg)
+> @@ -257,20 +257,13 @@ static int __init efi_systab_init(void *phys)
 >  {
->  	int sev, sec_sev;
->  	struct acpi_hest_generic_data *gdata;
-> +	uuid_le sec_type;
+>  	if (efi_enabled(EFI_64BIT)) {
+>  		efi_system_table_64_t *systab64;
+> -		struct efi_setup_data *data = NULL;
+> +		struct efi_setup_data *data = efi_setup;
+>  		u64 tmp = 0;
 >  
->  	sev = ghes_severity(estatus->error_severity);
->  	apei_estatus_for_each_section(estatus, gdata) {
->  		sec_sev = ghes_severity(gdata->error_severity);
-> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
-> +		sec_type = *(uuid_le *)gdata->section_type;
-> +
-> +		if (!uuid_le_cmp(sec_type,
->  				 CPER_SEC_PLATFORM_MEM)) {
-
-No need to break lines like that - 80 cols rule is superceded by common
-sense.
-
->  			struct cper_sec_mem_err *mem_err;
->  			mem_err = (struct cper_sec_mem_err *)(gdata+1);
-> @@ -454,7 +463,7 @@ static void ghes_do_proc(struct ghes *ghes,
->  			ghes_handle_memory_failure(gdata, sev);
+> -		if (efi_setup) {
+> -			data = early_memremap(efi_setup, sizeof(*data));
+> -			if (!data)
+> -				return -ENOMEM;
+> -		}
+>  		systab64 = early_memremap((unsigned long)phys,
+>  					 sizeof(*systab64));
+>  		if (systab64 == NULL) {
+>  			pr_err("Couldn't map the system table!\n");
+> -			if (data)
+> -				early_memunmap(data, sizeof(*data));
+>  			return -ENOMEM;
 >  		}
->  #ifdef CONFIG_ACPI_APEI_PCIEAER
-> -		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
-> +		else if (!uuid_le_cmp(sec_type,
->  				      CPER_SEC_PCIE)) {
->  			struct cper_sec_pcie *pcie_err;
->  			pcie_err = (struct cper_sec_pcie *)(gdata+1);
-> @@ -486,6 +495,22 @@ static void ghes_do_proc(struct ghes *ghes,
 >  
->  		}
->  #endif
-> +		else {
-
-If you return in the cases above, you can save yourself this last else
-and an intentation level...
-
-> +			int i;
-> +
-> +			for (i = 0; uuid_le_cmp(sec_vendor_uuids[i],
-> +			     NULL_UUID_LE); i++) {
-
-... and not break statements like that...
-
-> +				if (!uuid_le_cmp(sec_type,
-> +				    sec_vendor_uuids[i])) {
-
-... and like that.
-
-> +					const void *vendor_err;
-> +
-> +					vendor_err = gdata + 1;
-> +					trace_vendor_event(vendor_err,
-> +						gdata->error_data_length);
-> +					break;
-> +				}
-> +			}
-> +		}
->  	}
+> @@ -303,8 +296,6 @@ static int __init efi_systab_init(void *phys)
+>  		tmp |= data ? data->tables : systab64->tables;
+>  
+>  		early_memunmap(systab64, sizeof(*systab64));
+> -		if (data)
+> -			early_memunmap(data, sizeof(*data));
+>  #ifdef CONFIG_X86_32
+>  		if (tmp >> 32) {
+>  			pr_err("EFI data located above 4GB, disabling EFI.\n");
+> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> index a0ac0f9..a255491 100644
+> --- a/arch/x86/platform/efi/efi_64.c
+> +++ b/arch/x86/platform/efi/efi_64.c
+> @@ -295,9 +295,17 @@ void __iomem *__init efi_ioremap(unsigned long phys_addr, unsigned long size,
+>  	return (void __iomem *)__va(phys_addr);
 >  }
 >  
-> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
-> index b67dd362b7b6..a656ff131249 100644
-> --- a/drivers/ras/ras.c
-> +++ b/drivers/ras/ras.c
-> @@ -27,3 +27,4 @@ subsys_initcall(ras_init);
->  EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
->  #endif
->  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
-> +EXPORT_TRACEPOINT_SYMBOL_GPL(vendor_event);
-> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
-> index 79abb9c71772..a3038653f72d 100644
-> --- a/include/ras/ras_event.h
-> +++ b/include/ras/ras_event.h
-> @@ -161,6 +161,36 @@ TRACE_EVENT(mc_event,
->  );
+> +static struct efi_setup_data efi_setup_data __initdata;
+> +
+>  void __init parse_efi_setup(u64 phys_addr, u32 data_len)
+>  {
+> -	efi_setup = phys_addr + sizeof(struct setup_data);
+> +	struct efi_setup_data *data;
+> +
+> +	data = early_memremap(phys_addr + sizeof(struct setup_data),
+> +			      sizeof(*data));
+> +	efi_setup_data = *data;
+> +	early_memunmap(data, sizeof(*data));
+> +	efi_setup = &efi_setup_data;
+>  }
 >  
->  /*
-> + * Vendor Proprietary Events Report
-> + *
-> + * Those event is generated when hardware detected a hardware
-> + * error event, which is of non-standard section as defined
-> + * in UEFI spec appendix "Common Platform Error Record".
-> + *
-> + */
-> +TRACE_EVENT(vendor_event,
-
-This should be something more generic like "data_event" or
-"raw_data_event" which can be used as a catch-all for all non-standard
-formats the UEFI insanity spec will come up with in the future.
+>  void __init efi_runtime_mkexec(void)
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index 1c7380d..45fec7d 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -203,9 +203,8 @@ void __init efi_free_boot_services(void)
+>   */
+>  int __init efi_reuse_config(u64 tables, int nr_tables)
+>  {
+> -	int i, sz, ret = 0;
+> +	int i, sz;
+>  	void *p, *tablep;
+> -	struct efi_setup_data *data;
+>  
+>  	if (!efi_setup)
+>  		return 0;
+> @@ -213,22 +212,15 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
+>  	if (!efi_enabled(EFI_64BIT))
+>  		return 0;
+>  
+> -	data = early_memremap(efi_setup, sizeof(*data));
+> -	if (!data) {
+> -		ret = -ENOMEM;
+> -		goto out;
+> -	}
+> -
+> -	if (!data->smbios)
+> -		goto out_memremap;
+> +	if (!efi_setup->smbios)
+> +		return 0;
+>  
+>  	sz = sizeof(efi_config_table_64_t);
+>  
+>  	p = tablep = early_memremap(tables, nr_tables * sz);
+>  	if (!p) {
+>  		pr_err("Could not map Configuration table!\n");
+> -		ret = -ENOMEM;
+> -		goto out_memremap;
+> +		return -ENOMEM;
+>  	}
+>  
+>  	for (i = 0; i < efi.systab->nr_tables; i++) {
+> @@ -237,15 +229,12 @@ int __init efi_reuse_config(u64 tables, int nr_tables)
+>  		guid = ((efi_config_table_64_t *)p)->guid;
+>  
+>  		if (!efi_guidcmp(guid, SMBIOS_TABLE_GUID))
+> -			((efi_config_table_64_t *)p)->table = data->smbios;
+> +			((efi_config_table_64_t *)p)->table = efi_setup->smbios;
+>  		p += sz;
+>  	}
+>  	early_memunmap(tablep, nr_tables * sz);
+>  
+> -out_memremap:
+> -	early_memunmap(data, sizeof(*data));
+> -out:
+> -	return ret;
+> +	return 0;
+>  }
+>  
+>  void __init efi_apply_memmap_quirks(void)
+> -- 
+> 1.8.4.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Please read the FAQ at  http://www.tux.org/lkml/
 
 -- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
---
+Matt Fleming, Intel Open Source Technology Center
