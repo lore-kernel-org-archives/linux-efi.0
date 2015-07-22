@@ -1,160 +1,157 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: parse vendor proprietary CPER section
-Date: Wed, 22 Jul 2015 09:30:21 +0200
-Message-ID: <20150722073021.GB7979@nazgul.tnic>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 2/2] ras: acpi/apei: trace event for vendor proprietary
+ CPER section
+Date: Wed, 22 Jul 2015 09:36:26 +0200
+Message-ID: <20150722073626.GC7979@nazgul.tnic>
 References: <1437521807-27571-1-git-send-email-zjzhang@codeaurora.org>
- <1437521807-27571-2-git-send-email-zjzhang@codeaurora.org>
+ <1437521807-27571-3-git-send-email-zjzhang@codeaurora.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1437521807-27571-2-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, mchehab-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linaro-acpi-cunTk1MwBs8s++Sfvej+rw@public.gmane.org, vgandhi-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1437521807-27571-3-git-send-email-zjzhang@codeaurora.org>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, tony.luck@intel.com, fu.wei@linaro.org, al.stone@linaro.org, rjw@rjwysocki.net, mchehab@redhat.com, mingo@redhat.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org, linux-acpi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 21, 2015 at 04:36:46PM -0700, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+On Tue, Jul 21, 2015 at 04:36:47PM -0700, Jonathan (Zhixiong) Zhang wrote:
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 > 
-> UEFI spec allows for non-standard section in Common Platform Error
-> Record. This is defined in section N.2.3 of UEFI version 2.5.
+> Trace event is generated when hardware detected a hardware error
+> event, which is of non-standard section as defined in UEFI
+> spec appendix "Common Platform Error Record" (section N.2.3 of
+> UEFI version 2.5).
 > 
-> If Section Type field of Generic Error Data Entry indicates a
-> non-standard section (eg. matchs a vendor proprietary GUID as defined
-> in include/linux/cper.h), print out the raw data in hex in dmesg
-> buffer. Data length is taken from Error Data length field of
-> Generic Error Data Entry.
+> The trace buffer contains length of error data and raw error data
+> in hex.
 > 
-> Following is a sample output from dmesg:
-> {1}[Hardware Error]: Hardware error from APEI Generic Hardware Error Source: 2
-> {1}[Hardware Error]: It has been corrected by h/w and requires no further action
-> {1}[Hardware Error]: event severity: corrected
-> {1}[Hardware Error]:  Error 0, type: corrected
-> {1}[Hardware Error]:  fru_id: 00000000-0000-0000-0000-000000000000
-> {1}[Hardware Error]:  fru_text:
-> {1}[Hardware Error]:   section_type: Qualcomm Technologies Inc. proprietary error
-> {1}[Hardware Error]:   section length: 88
-> {1}[Hardware Error]:   00000000: 01002011 20150416 01000001 00000002
-> {1}[Hardware Error]:   00000010: 5f434345 525f4543 0000574d 00000000
-> {1}[Hardware Error]:   00000020: 00000000 00000000 00000000 00000000
-> {1}[Hardware Error]:   00000030: 00000000 00000000 00000000 00000000
-> {1}[Hardware Error]:   00000040: 00000000 00000000 fe800000 00000000
-> {1}[Hardware Error]:   00000050: 00000004 5f434345
+> Following is a sample output of "perf script":
+> _________swapper_____0_[000]___133.521441:_ras:vendor_event:_len=88_raw=11_20_0
+> 0_01_16_04_15_20_01_00_00_01_02_00_00_00_45_43_43_5f_43_45_5f_52_4d_57_00_00_00
+> _00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00
+> 00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_00_80_fe_00_00_00_00_04_0
+> 0_00_00_45_43_43_5f
 > 
+> Change-Id: Ic8661310133b0ae51f6b299cdde3cd0fa5517464
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 > ---
-> checkpatch.pl gives following warnings on this patch:
->     WARNING: printk() should include KERN_ facility level
-> This is a false warning as pfx parameter includes KERN_ facility
-> level. Also such practice is consistent with the rest of the file.
-> ---
+>  drivers/acpi/apei/ghes.c | 29 +++++++++++++++++++++++++++--
+>  drivers/ras/ras.c        |  1 +
+>  include/ras/ras_event.h  | 30 ++++++++++++++++++++++++++++++
+>  3 files changed, 58 insertions(+), 2 deletions(-)
 > 
-> Change-Id: I9a5bb6039beef1c0a36097765268b382e6a28498
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  drivers/firmware/efi/cper.c | 61 +++++++++++++++++++++++++++++++++++++++++++--
->  include/linux/cper.h        |  4 +++
->  2 files changed, 63 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/cper.c b/drivers/firmware/efi/cper.c
-> index 4fd9961d552e..29af8846ffd1 100644
-> --- a/drivers/firmware/efi/cper.c
-> +++ b/drivers/firmware/efi/cper.c
-> @@ -32,12 +32,50 @@
->  #include <linux/acpi.h>
->  #include <linux/pci.h>
->  #include <linux/aer.h>
-> +#include <linux/printk.h>
+> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+> index 67fc948da17a..03114d27d218 100644
+> --- a/drivers/acpi/apei/ghes.c
+> +++ b/drivers/acpi/apei/ghes.c
+> @@ -53,9 +53,15 @@
+>  #include <acpi/ghes.h>
+>  #include <acpi/apei.h>
+>  #include <asm/tlbflush.h>
+> +#include <ras/ras_event.h>
 >  
->  #define INDENT_SP	" "
+>  #include "apei-internal.h"
 >  
-> +#define ROW_SIZE 16
-> +#define GROUP_SIZE 4
-> +
-> +struct sec_vendor {
-> +	uuid_le         guid;
-> +	const char      *name;
+> +static uuid_le sec_vendor_uuids[] = {
+> +	CPER_SEC_QTI_ERR,
+> +	NULL_UUID_LE,
 > +};
 > +
-> +static struct sec_vendor sec_vendors[] = {
-> +	{CPER_SEC_QTI_ERR, "Qualcomm Technologies Inc. proprietary error"},
-> +	{NULL_UUID_LE, NULL},
-> +};
-
-No, no vendor-specific stuff like that. This becomes a nightmare to
-maintain...
-
-> +
->  static char rcd_decode_str[CPER_REC_LEN];
+>  #define GHES_PFX	"GHES: "
 >  
->  /*
-> + * In case of CPER error record, there should be only two message
-> + * levels: KERN_ERR and KERN_WARNING
-> + */
-> +static const char *cper_kern_level(const char *pfx)
-> +{
-> +	switch (printk_get_level(pfx)) {
-> +	case '3': return KERN_ERR;
-> +	case '4': return KERN_WARNING;
-> +	default:  return KERN_DEFAULT;
-> +	}
-
-
-We already pass down const char *pfx - no need for retranslation.
-
-> +
-> +/*
-> + * cper_print_hex - print hex from a binary buffer
-> + * @pfx: prefix for each line, including log level and prefix string
-> + * @buf: buffer pointer
-> + * @len: size of buffer
-> + */
-> +#define cper_print_hex(pfx, buf, len)					\
-> +	print_hex_dump(cper_kern_level(pfx), printk_skip_level(pfx),	\
-> +		DUMP_PREFIX_OFFSET, ROW_SIZE, GROUP_SIZE,		\
-> +		buf, len, 0)
-> +
-> +/*
->   * CPER record ID need to be unique even after reboot, because record
->   * ID is used as index for ERST storage, while CPER records from
->   * multiple boot may co-exist in ERST.
-> @@ -379,6 +417,12 @@ static void cper_print_pcie(const char *pfx, const struct cper_sec_pcie *pcie,
->  	pfx, pcie->bridge.secondary_status, pcie->bridge.control);
->  }
->  
-> +static void cper_print_vendor(const char *pfx, __u8 *vendor_err, __u32 len)
-> +{
-> +	printk("%ssection length: %d\n", pfx, len);
-> +	cper_print_hex(pfx, vendor_err, len);
-> +}
-> +
->  static void cper_estatus_print_section(
->  	const char *pfx, const struct acpi_hest_generic_data *gdata, int sec_no)
+>  #define GHES_ESTATUS_MAX_SIZE		65536
+> @@ -440,11 +446,14 @@ static void ghes_do_proc(struct ghes *ghes,
 >  {
-> @@ -416,9 +460,22 @@ static void cper_estatus_print_section(
->  			cper_print_pcie(newpfx, pcie, gdata);
->  		else
->  			goto err_section_too_small;
-> -	} else
-> +	} else {
-> +		int i;
-> +		__u8 *vendor_err = (void *)(gdata + 1);
+>  	int sev, sec_sev;
+>  	struct acpi_hest_generic_data *gdata;
+> +	uuid_le sec_type;
+>  
+>  	sev = ghes_severity(estatus->error_severity);
+>  	apei_estatus_for_each_section(estatus, gdata) {
+>  		sec_sev = ghes_severity(gdata->error_severity);
+> -		if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> +		sec_type = *(uuid_le *)gdata->section_type;
 > +
-> +		for (i = 0; uuid_le_cmp(sec_vendors[i].guid,
-> +		     NULL_UUID_LE); i++) {
-> +			if (!uuid_le_cmp(*sec_type, sec_vendors[i].guid)) {
-> +				printk("%ssection_type: %s", newpfx,
-> +					sec_vendors[i].name);
-> +				cper_print_vendor(newpfx, vendor_err,
-> +					gdata->error_data_length);
-> +				return;
+> +		if (!uuid_le_cmp(sec_type,
+>  				 CPER_SEC_PLATFORM_MEM)) {
+
+No need to break lines like that - 80 cols rule is superceded by common
+sense.
+
+>  			struct cper_sec_mem_err *mem_err;
+>  			mem_err = (struct cper_sec_mem_err *)(gdata+1);
+> @@ -454,7 +463,7 @@ static void ghes_do_proc(struct ghes *ghes,
+>  			ghes_handle_memory_failure(gdata, sev);
+>  		}
+>  #ifdef CONFIG_ACPI_APEI_PCIEAER
+> -		else if (!uuid_le_cmp(*(uuid_le *)gdata->section_type,
+> +		else if (!uuid_le_cmp(sec_type,
+>  				      CPER_SEC_PCIE)) {
+>  			struct cper_sec_pcie *pcie_err;
+>  			pcie_err = (struct cper_sec_pcie *)(gdata+1);
+> @@ -486,6 +495,22 @@ static void ghes_do_proc(struct ghes *ghes,
+>  
+>  		}
+>  #endif
+> +		else {
+
+If you return in the cases above, you can save yourself this last else
+and an intentation level...
+
+> +			int i;
+> +
+> +			for (i = 0; uuid_le_cmp(sec_vendor_uuids[i],
+> +			     NULL_UUID_LE); i++) {
+
+... and not break statements like that...
+
+> +				if (!uuid_le_cmp(sec_type,
+> +				    sec_vendor_uuids[i])) {
+
+... and like that.
+
+> +					const void *vendor_err;
+> +
+> +					vendor_err = gdata + 1;
+> +					trace_vendor_event(vendor_err,
+> +						gdata->error_data_length);
+> +					break;
+> +				}
 > +			}
 > +		}
->  		printk("%s""section type: unknown, %pUl\n", newpfx, sec_type);
+>  	}
+>  }
+>  
+> diff --git a/drivers/ras/ras.c b/drivers/ras/ras.c
+> index b67dd362b7b6..a656ff131249 100644
+> --- a/drivers/ras/ras.c
+> +++ b/drivers/ras/ras.c
+> @@ -27,3 +27,4 @@ subsys_initcall(ras_init);
+>  EXPORT_TRACEPOINT_SYMBOL_GPL(extlog_mem_event);
+>  #endif
+>  EXPORT_TRACEPOINT_SYMBOL_GPL(mc_event);
+> +EXPORT_TRACEPOINT_SYMBOL_GPL(vendor_event);
+> diff --git a/include/ras/ras_event.h b/include/ras/ras_event.h
+> index 79abb9c71772..a3038653f72d 100644
+> --- a/include/ras/ras_event.h
+> +++ b/include/ras/ras_event.h
+> @@ -161,6 +161,36 @@ TRACE_EVENT(mc_event,
+>  );
+>  
+>  /*
+> + * Vendor Proprietary Events Report
+> + *
+> + * Those event is generated when hardware detected a hardware
+> + * error event, which is of non-standard section as defined
+> + * in UEFI spec appendix "Common Platform Error Record".
+> + *
+> + */
+> +TRACE_EVENT(vendor_event,
 
-... you simply dump the section in binary if none of the standard
-UUIDs match. And you can then turn the "unknown" message into a
-vendor-specific one.
+This should be something more generic like "data_event" or
+"raw_data_event" which can be used as a catch-all for all non-standard
+formats the UEFI insanity spec will come up with in the future.
 
 -- 
 Regards/Gruss,
