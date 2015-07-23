@@ -1,173 +1,116 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [arch] WARNING: CPU: 0 PID: 0 at kernel/memremap.c:31 memremap()
-Date: Wed, 22 Jul 2015 16:56:41 -0700
-Message-ID: <CAPcyv4hL79y7Viyb7DySFLaO4odiHDhU_Qt1uOFXZkE6r-h8Vg@mail.gmail.com>
-References: <55b02823.YCZlvehUZTMuyZIC%fengguang.wu@intel.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [edk2] [PATCH] arm64/efi: prefer AllocatePages() over
+	efi_low_alloc() for vmlinux
+Date: Thu, 23 Jul 2015 15:11:41 +0200
+Message-ID: <1437657101-7134-1-git-send-email-ard.biesheuvel@linaro.org>
+References: <55B0D4E4.9030403@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <55b02823.YCZlvehUZTMuyZIC%fengguang.wu@intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: kernel test robot <fengguang.wu@intel.com>
-Cc: LKP <lkp@01.org>, iommu@lists.linux-foundation.org, tlinux-users@tce.toshiba-dme.co.jp, Linux ACPI <linux-acpi@vger.kernel.org>, linux-xtensa@linux-xtensa.org, linux-efi@vger.kernel.org, linux-sh@vger.kernel.org, linux-ia64@vger.kernel.org, xen-devel@lists.xenproject.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <edk2-devel-bounces@lists.01.org>
+In-Reply-To: <55B0D4E4.9030403@redhat.com>
+List-Unsubscribe: <https://lists.01.org/mailman/options/edk2-devel>,
+ <mailto:edk2-devel-request@lists.01.org?subject=unsubscribe>
+List-Post: <mailto:edk2-devel@lists.01.org>
+List-Help: <mailto:edk2-devel-request@lists.01.org?subject=help>
+List-Subscribe: <https://lists.01.org/mailman/listinfo/edk2-devel>,
+ <mailto:edk2-devel-request@lists.01.org?subject=subscribe>
+Errors-To: edk2-devel-bounces@lists.01.org
+Sender: "edk2-devel" <edk2-devel-bounces@lists.01.org>
+To: lersek@redhat.com, matt.fleming@intel.com, leif.lindholm@linaro.org, haojian.zhuang@linaro.org, edk2-devel@lists.01.org
+Cc: linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-[ note: this patch is in a dev branch for test coverage, safe to
-disregard for now ]
+Hello Haojian,
 
-On Wed, Jul 22, 2015 at 4:32 PM, kernel test robot
-<fengguang.wu@intel.com> wrote:
-> Greetings,
->
-> 0day kernel testing robot got the below dmesg and the first bad commit is
->
-> git://git.kernel.org/pub/scm/linux/kernel/git/djbw/nvdimm.git pmem-api
->
-> commit 163f9409a57082aed03fbeeb321fbf18bdaf5f42
-> Author:     Dan Williams <dan.j.williams@intel.com>
-> AuthorDate: Wed Jul 22 18:09:01 2015 -0400
-> Commit:     Dan Williams <dan.j.williams@intel.com>
-> CommitDate: Wed Jul 22 18:09:01 2015 -0400
->
->     arch: introduce memremap(), replace ioremap_cache()
->
->     Existing users of ioremap_cache() are mapping memory that is known in
->     advance to not have i/o side effects.  These users are forced to cast
->     away the __iomem annotation, or otherwise neglect to fix the sparse
->     errors thrown when dereferencing pointers to this memory.  Provide
->     memremap() as a non __iomem annotated ioremap_*() in the case when
->     ioremap is otherwise a pointer to memory.
->
->     The ARCH_HAS_MEMREMAP kconfig symbol is introduced for archs to assert
->     that it is safe to recast / reuse the return value from ioremap as a
->     normal pointer to memory.  In other words, archs that mandate specific
->     accessors for __iomem are not memremap() capable and drivers that care,
->     like pmem, can add a dependency to disable themselves on these archs.
->
->     Note, that memremap is a break from the ioremap implementation pattern
->     of adding a new memremap_<type>() for each mapping type.  Instead,
->     the implementation defines flags that are passed to the central
->     memremap() implementation.
->
->     Outside of ioremap() and ioremap_nocache(), the expectation is that most
->     calls to ioremap_<type>() are seeking memory-like semantics (e.g.
->     speculative reads, and prefetching permitted).  These callsites can be
->     moved to memremap() over time.
->
->     Cc: Arnd Bergmann <arnd@arndb.de>
->     Acked-by: Andy Shevchenko <andy.shevchenko@gmail.com>
->     Signed-off-by: Dan Williams <dan.j.williams@intel.com>
->
-> +------------------------------------------------+------------+------------+------------+
-> |                                                | dc5d38e432 | 163f9409a5 | 5dfe2d5864 |
-> +------------------------------------------------+------------+------------+------------+
-> | boot_successes                                 | 63         | 0          | 0          |
-> | boot_failures                                  | 0          | 26         | 19         |
-> | WARNING:at_kernel/memremap.c:#memremap()       | 0          | 26         | 19         |
-> | backtrace:acpi_load_tables                     | 0          | 26         | 19         |
-> | backtrace:acpi_early_init                      | 0          | 26         | 19         |
-> | IP-Config:Auto-configuration_of_network_failed | 0          | 0          | 2          |
-> +------------------------------------------------+------------+------------+------------+
->
-> [    0.227312] ACPI: Core revision 20150619
-> [    0.227690] memremap: acpi_os_map_iomem
-> [    0.228021] ------------[ cut here ]------------
-> [    0.228406] WARNING: CPU: 0 PID: 0 at kernel/memremap.c:31 memremap+0x73/0x159()
-> [    0.229202] memremap attempted on unknown/mixed range 0x000000000ffe0000 size: 4096
-> [    0.229829] Modules linked in:
-> [    0.230106] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.2.0-rc3-00007-g163f940 #1
-> [    0.230718]  00000000 00000000 c175bf04 c1489068 c175bf30 c175bf20 c103a1ae 0000001f
-> [    0.231456]  c10f6407 00001000 00000001 00000001 c175bf38 c103a1f0 00000009 c175bf30
-> [    0.232242]  c16b3ecb c175bf4c c175bf68 c10f6407 c16b3f04 0000001f c16b3ecb c175bf54
-> [    0.232985] Call Trace:
-> [    0.233196]  [<c1489068>] dump_stack+0x48/0x60
-> [    0.233570]  [<c103a1ae>] warn_slowpath_common+0x89/0xa0
-> [    0.234016]  [<c10f6407>] ? memremap+0x73/0x159
-> [    0.234396]  [<c103a1f0>] warn_slowpath_fmt+0x2b/0x2f
-> [    0.234816]  [<c10f6407>] memremap+0x73/0x159
-> [    0.235190]  [<c1486181>] acpi_os_map_iomem+0x10b/0x15f
-> [    0.235660]  [<c14861e2>] acpi_os_map_memory+0xd/0xf
-> [    0.236089]  [<c1293d5c>] acpi_tb_acquire_table+0x35/0x5a
-> [    0.236538]  [<c1293e41>] acpi_tb_validate_table+0x22/0x37
-> [    0.237001]  [<c1841255>] acpi_load_tables+0x38/0x146
-> [    0.237424]  [<c184080e>] acpi_early_init+0x64/0xd4
-> [    0.237830]  [<c1817b14>] start_kernel+0x3e1/0x447
-> [    0.238232]  [<c18172bb>] i386_start_kernel+0x85/0x89
-> [    0.238734] ---[ end trace cb88537fdc8fa200 ]---
-> [    0.239133] ACPI Exception: AE_NO_ACPI_TABLES, While loading namespace from ACPI tables (20150619/tbxfload-80)
->
-> git bisect start 5dfe2d5864e91244e7befaa2317519ea15dc9c89 52721d9d3334c1cb1f76219a161084094ec634dc --
-> git bisect good cfc652fabeee43adf800889a5a4a935a9af090a7  # 07:04     20+      0  arch, drivers: don't include <asm/io.h> directly, use <linux/io.h> instead
-> git bisect good dc5d38e432ff171125f746d80a037692feb16fc9  # 07:11     22+      0  intel_iommu: fix leaked ioremap mapping
-> git bisect  bad 163f9409a57082aed03fbeeb321fbf18bdaf5f42  # 07:17      0-     22  arch: introduce memremap(), replace ioremap_cache()
-> # first bad commit: [163f9409a57082aed03fbeeb321fbf18bdaf5f42] arch: introduce memremap(), replace ioremap_cache()
-> git bisect good dc5d38e432ff171125f746d80a037692feb16fc9  # 07:19     63+      0  intel_iommu: fix leaked ioremap mapping
-> # extra tests with DEBUG_INFO
-> git bisect  bad 163f9409a57082aed03fbeeb321fbf18bdaf5f42  # 07:24      0-     29  arch: introduce memremap(), replace ioremap_cache()
-> # extra tests on HEAD of nvdimm/pmem-api
-> git bisect  bad 5dfe2d5864e91244e7befaa2317519ea15dc9c89  # 07:24      0-     19  pmem: convert to generic memremap
-> # extra tests on tree/branch nvdimm/pmem-api
-> git bisect  bad 5dfe2d5864e91244e7befaa2317519ea15dc9c89  # 07:24      0-     19  pmem: convert to generic memremap
-> # extra tests on tree/branch linus/master
-> git bisect good 5a5ca73ac0a73c876b62858f0753a25ee430e370  # 07:26     66+      2  Merge tag 'arm64-fixes' of git://git.kernel.org/pub/scm/linux/kernel/git/arm64/linux
-> # extra tests on tree/branch linux-next/master
-> git bisect good 72a68fd733c8b6cd2e0ebc0586a9103067cd4ed7  # 07:29     65+      0  Add linux-next specific files for 20150722
->
->
-> This script may reproduce the error.
->
-> ----------------------------------------------------------------------------
-> #!/bin/bash
->
-> kernel=$1
-> initrd=yocto-minimal-i386.cgz
->
-> wget --no-clobber https://github.com/fengguang/reproduce-kernel-bug/raw/master/initrd/$initrd
->
-> kvm=(
->         qemu-system-x86_64
->         -enable-kvm
->         -cpu Haswell,+smep,+smap
->         -kernel $kernel
->         -initrd $initrd
->         -m 256
->         -smp 1
->         -device e1000,netdev=net0
->         -netdev user,id=net0
->         -boot order=nc
->         -no-reboot
->         -watchdog i6300esb
->         -rtc base=localtime
->         -serial stdio
->         -display none
->         -monitor null
-> )
->
-> append=(
->         hung_task_panic=1
->         earlyprintk=ttyS0,115200
->         systemd.log_level=err
->         debug
->         apic=debug
->         sysrq_always_enabled
->         rcupdate.rcu_cpu_stall_timeout=100
->         panic=-1
->         softlockup_panic=1
->         nmi_watchdog=panic
->         oops=panic
->         load_ramdisk=2
->         prompt_ramdisk=0
->         console=ttyS0,115200
->         console=tty0
->         vga=normal
->         root=/dev/ram0
->         rw
->         drbd.minor_count=8
-> )
->
-> "${kvm[@]}" --append "${append[*]}"
-> ----------------------------------------------------------------------------
->
-> ---
-> 0-DAY kernel test infrastructure                Open Source Technology Center
-> https://lists.01.org/pipermail/lkp                          Intel Corporation
+Could you please try this patch?
+
+-- 
+Ard.
+
+
+-------8<--------
+When allocating memory for the kernel image, try the AllocatePages()
+boot service to obtain memory at the preferred offset of
+'dram_base + TEXT_OFFSET', and only revert to efi_low_alloc() if that
+fails. This is the only way to allocate at the base of DRAM if DRAM
+starts at 0x0, since efi_low_alloc() refuses to allocate at 0x0.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/kernel/efi-stub.c | 45 ++++++++++++++++----
+ 1 file changed, 37 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/kernel/efi-stub.c b/arch/arm64/kernel/efi-stub.c
+index f5374065ad53..894cad555955 100644
+--- a/arch/arm64/kernel/efi-stub.c
++++ b/arch/arm64/kernel/efi-stub.c
+@@ -13,7 +13,7 @@
+ #include <asm/efi.h>
+ #include <asm/sections.h>
+ 
+-efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table,
++efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 					unsigned long *image_addr,
+ 					unsigned long *image_size,
+ 					unsigned long *reserve_addr,
+@@ -23,21 +23,50 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table,
+ {
+ 	efi_status_t status;
+ 	unsigned long kernel_size, kernel_memsize = 0;
++	unsigned long pgnum;
+ 
+ 	/* Relocate the image, if required. */
+ 	kernel_size = _edata - _text;
+ 	if (*image_addr != (dram_base + TEXT_OFFSET)) {
+ 		kernel_memsize = kernel_size + (_end - _edata);
+-		status = efi_low_alloc(sys_table, kernel_memsize + TEXT_OFFSET,
+-				       SZ_2M, reserve_addr);
++
++		//
++		// First, try a straight allocation at the preferred offset.
++		// This will work around the issue where, if dram_base == 0x0,
++		// efi_low_alloc() refuses to allocate at 0x0 (to prevent the
++		// address of the allocation to be mistaken for a FAIL return
++		// value or a NULL pointer). It will also ensure that, on
++		// platforms where the [dram_base, dram_base + TEXT_OFFSET)
++		// interval is partially occupied by the firmware (like on APM
++		// Mustang), we can still place the kernel at the address
++		// 'dram_base + TEXT_OFFSET'.
++		//
++		pgnum = round_up(kernel_memsize, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++		status = efi_call_early(allocate_pages, EFI_ALLOCATE_ADDRESS,
++					EFI_LOADER_DATA, pgnum,
++					(efi_physical_addr_t *)reserve_addr);
++		if (status == EFI_SUCCESS) {
++			memcpy((void *)*reserve_addr, (void *)*image_addr,
++			       kernel_size);
++			*image_addr = *reserve_addr;
++			*reserve_size = kernel_memsize;
++		} else {
++			status = efi_low_alloc(sys_table_arg,
++					       kernel_memsize + TEXT_OFFSET,
++					       SZ_2M, reserve_addr);
++
++			if (status == EFI_SUCCESS) {
++				memcpy((void *)*reserve_addr + TEXT_OFFSET,
++				       (void *)*image_addr,
++				       kernel_size);
++				*image_addr = *reserve_addr + TEXT_OFFSET;
++				*reserve_size = kernel_memsize + TEXT_OFFSET;
++			}
++		}
+ 		if (status != EFI_SUCCESS) {
+-			pr_efi_err(sys_table, "Failed to relocate kernel\n");
++			pr_efi_err(sys_table_arg, "Failed to relocate kernel\n");
+ 			return status;
+ 		}
+-		memcpy((void *)*reserve_addr + TEXT_OFFSET, (void *)*image_addr,
+-		       kernel_size);
+-		*image_addr = *reserve_addr + TEXT_OFFSET;
+-		*reserve_size = kernel_memsize + TEXT_OFFSET;
+ 	}
+ 
+ 
+-- 
+1.9.1
