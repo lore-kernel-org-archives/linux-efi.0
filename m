@@ -1,41 +1,53 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [RFC PATCH 00/16] Signature verification of hibernate snapshot
-Date: Sat, 25 Jul 2015 22:32:03 +0800
-Message-ID: <20150725143203.GA19009@linux-rxt1.site>
-References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <alpine.LNX.2.00.1507241527410.1141@pobox.suse.cz>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64/efi: map the entire UEFI vendor string before reading it
+Date: Sun, 26 Jul 2015 14:59:00 +0200
+Message-ID: <1437915540-7553-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.LNX.2.00.1507241527410.1141-ztGlSCb7Y1iN3ZZ/Hiejyg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Jiri,
+At boot, the UTF-16 UEFI vendor string is copied from the system
+table into a char array with a size of 100 bytes. However, this
+size of 100 bytes is also used for memremapping() the source,
+which may not be sufficient if the vendor string exceeds 50
+UTF-16 characters, and the placement of the vendor string inside
+a 4 KB page happens to leave the end unmapped.
 
-On Fri, Jul 24, 2015 at 07:08:18PM +0200, Jiri Kosina wrote:
-> On Thu, 16 Jul 2015, Lee, Chun-Yi wrote:
-> 
-> > This patchset is the implementation of signature verification of hibernate
-> > snapshot image. The origin idea is from Jiri Kosina: Let EFI bootloader
-> > generate key-pair in UEFI secure boot environment, then forward it to kernel
-> > for sign/verify hibernate image.
-> 
-> I've finally managed to fully go through the series and test it on my 
-> secure boot testing setup.
-> 
-> 	Reviewed-by: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
-> 	Tested-by: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
-> 
-> for the whole series. Thanks,
-> 
-> -- 
-> Jiri Kosina
-> SUSE Labs
+So use the correct '100 * sizeof(efi_char16_t)' for the size of
+the mapping.
 
-Thanks for your review and test.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+Hello Catalin,
 
-Joey Lee
+I think this should go into v4.2 with a cc: stable.
+
+Thanks,
+Ard.
+
+ arch/arm64/kernel/efi.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 9d4aa18f2a82..e8ca6eaedd02 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -122,12 +122,12 @@ static int __init uefi_init(void)
+ 
+ 	/* Show what we know for posterity */
+ 	c16 = early_memremap(efi_to_phys(efi.systab->fw_vendor),
+-			     sizeof(vendor));
++			     sizeof(vendor) * sizeof(efi_char16_t));
+ 	if (c16) {
+ 		for (i = 0; i < (int) sizeof(vendor) - 1 && *c16; ++i)
+ 			vendor[i] = c16[i];
+ 		vendor[i] = '\0';
+-		early_memunmap(c16, sizeof(vendor));
++		early_memunmap(c16, sizeof(vendor) * sizeof(efi_char16_t));
+ 	}
+ 
+ 	pr_info("EFI v%u.%.02u by %s\n",
+-- 
+1.9.1
