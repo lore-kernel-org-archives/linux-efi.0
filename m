@@ -1,65 +1,48 @@
-From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
-Subject: Re: [RFC PATCH 04/16] x86/efi: Generating random number in EFI stub
-Date: Tue, 28 Jul 2015 14:01:12 +0200
-Message-ID: <20150728120112.GA9518@amd>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [RFC PATCH 01/16] PM / hibernate: define HMAC algorithm and
+ digest size of swsusp
+Date: Tue, 28 Jul 2015 14:01:56 +0200
+Message-ID: <20150728120156.GB9518@amd>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <1437056730-15247-5-git-send-email-jlee@suse.com>
+ <1437056730-15247-2-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1437056730-15247-5-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+In-Reply-To: <1437056730-15247-2-git-send-email-jlee@suse.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi!
-
-> This patch adds the codes for generating random number array as the
-> HMAC key that will used by later EFI stub codes.
+On Thu 2015-07-16 22:25:15, Lee, Chun-Yi wrote:
+> Using HMAC-SHA1 to be the HMAC algorithm of signing hibernate
+> snapshot image. The digest size of HMAC-SHA1 is 160 bits (20 bytes),
+> this size will be also applied to the length of HMAC key.
 > 
-> The original codes in efi_random copied from aslr and add the codes
-> to accept input entropy and EFI debugging. In later patch will add
-> the codes to get random number by EFI protocol. The separate codes
-> can avoid impacting aslr function.
+> In addition, add HIBERNATE_VERIFICATION kernel config.
 > 
-> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-
-> +#define X86_FEATURE_EDX_TSC	(1 << 4)
-> +#define X86_FEATURE_ECX_RDRAND	(1 << 30)
-
-Can you pull it from existing includes somewhere?
-
-> +static bool rdrand_feature(void)
-> +{
-> +	return (cpuid_ecx(0x1) & X86_FEATURE_ECX_RDRAND);
-> +}
+> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> ---
+>  include/linux/suspend.h |  5 +++++
+>  kernel/power/Kconfig    | 13 +++++++++++++
+>  kernel/power/power.h    |  1 +
+>  3 files changed, 19 insertions(+)
+> 
+> diff --git a/include/linux/suspend.h b/include/linux/suspend.h
+> index 5efe743..6cd2a48 100644
+> --- a/include/linux/suspend.h
+> +++ b/include/linux/suspend.h
+> @@ -327,6 +327,11 @@ struct platform_hibernation_ops {
+>  };
+>  
+>  #ifdef CONFIG_HIBERNATION
 > +
-> +static bool rdtsc_feature(void)
-> +{
-> +	return (cpuid_edx(0x1) & X86_FEATURE_EDX_TSC);
-> +}
+> +/* HMAC Algorithm of Hibernate Signature */
+> +#define SWSUSP_HMAC		"hmac(sha1)"
+> +#define SWSUSP_DIGEST_SIZE	20
 
-Are these helpers neccessary?
-
-> +	if (rdrand_feature()) {
-> +		efi_printk(sys_table, " RDRAND");
-> +		if (rdrand_long(&raw)) {
-> +			random ^= raw;
-> +			use_i8254 = false;
-> +		}
-> +	}
-> +
-> +	if (rdtsc_feature()) {
-> +		efi_printk(sys_table, " RDTSC");
-> +		rdtscll(raw);
-> +
-> +		random ^= raw;
-> +		use_i8254 = false;
-> +	}
-
-You'll do two (expensive) cpuids calls here.
+I'd replace SWSUSP with HIBERNATION here, and pretty much everywhere.
 
 -- 
 (english) http://www.livejournal.com/~pavelmachek
