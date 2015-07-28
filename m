@@ -1,49 +1,40 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC PATCH 01/16] PM / hibernate: define HMAC algorithm and
- digest size of swsusp
-Date: Tue, 28 Jul 2015 14:01:56 +0200
-Message-ID: <20150728120156.GB9518@amd>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [RFC PATCH 00/16] Signature verification of hibernate snapshot
+Date: Tue, 28 Jul 2015 13:09:23 +0100
+Message-ID: <1438085363.2923.8.camel@intel.com>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <1437056730-15247-2-git-send-email-jlee@suse.com>
+	 <alpine.LNX.2.00.1507241527410.1141@pobox.suse.cz>
+	 <7508149.lVtoIPoiay@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-pm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1437056730-15247-2-git-send-email-jlee@suse.com>
+In-Reply-To: <7508149.lVtoIPoiay@vostro.rjw.lan>
 Sender: linux-pm-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: Jiri Kosina <jkosina@suse.com>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu 2015-07-16 22:25:15, Lee, Chun-Yi wrote:
-> Using HMAC-SHA1 to be the HMAC algorithm of signing hibernate
-> snapshot image. The digest size of HMAC-SHA1 is 160 bits (20 bytes),
-> this size will be also applied to the length of HMAC key.
+On Fri, 2015-07-24 at 22:08 +0200, Rafael J. Wysocki wrote:
+> On Friday, July 24, 2015 07:08:18 PM Jiri Kosina wrote:
+> > On Thu, 16 Jul 2015, Lee, Chun-Yi wrote:
+> > 
+> > > This patchset is the implementation of signature verification of hibernate
+> > > snapshot image. The origin idea is from Jiri Kosina: Let EFI bootloader
+> > > generate key-pair in UEFI secure boot environment, then forward it to kernel
+> > > for sign/verify hibernate image.
+> > 
+> > I've finally managed to fully go through the series and test it on my 
+> > secure boot testing setup.
+> > 
+> > 	Reviewed-by: Jiri Kosina <jkosina@suse.com>
+> > 	Tested-by: Jiri Kosina <jkosina@suse.com>
+> > 
+> > for the whole series. Thanks,
 > 
-> In addition, add HIBERNATE_VERIFICATION kernel config.
+> Thanks Jiri, much appreciated!
 > 
-> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> ---
->  include/linux/suspend.h |  5 +++++
->  kernel/power/Kconfig    | 13 +++++++++++++
->  kernel/power/power.h    |  1 +
->  3 files changed, 19 insertions(+)
-> 
-> diff --git a/include/linux/suspend.h b/include/linux/suspend.h
-> index 5efe743..6cd2a48 100644
-> --- a/include/linux/suspend.h
-> +++ b/include/linux/suspend.h
-> @@ -327,6 +327,11 @@ struct platform_hibernation_ops {
->  };
->  
->  #ifdef CONFIG_HIBERNATION
-> +
-> +/* HMAC Algorithm of Hibernate Signature */
-> +#define SWSUSP_HMAC		"hmac(sha1)"
-> +#define SWSUSP_DIGEST_SIZE	20
+> I'd like to hear from Matt, though, and it looks like Ingo han't been CCed ...
 
-I'd replace SWSUSP with HIBERNATION here, and pretty much everywhere.
+I'm hoping to get time to review this series this week.
 
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
