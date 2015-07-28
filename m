@@ -1,41 +1,67 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: map the entire UEFI vendor string before
- reading it
-Date: Mon, 27 Jul 2015 14:16:20 +0200
-Message-ID: <CAKv+Gu9KpSNQD9-tDtat13++M=DB+k+dkEken170XFE3y1i_CA@mail.gmail.com>
-References: <1437915540-7553-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150727121455.GF29945@e104818-lin.cambridge.arm.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] [v2] x86_64/efi: Use all 64 bit of efi_memmap in
+ setup_e820()
+Date: Tue, 28 Jul 2015 12:24:13 +0100
+Message-ID: <20150728112413.GA645@codeblueprint.co.uk>
+References: <1437579068-14982-1-git-send-email-sdmitry@parallels.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150727121455.GF29945-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1437579068-14982-1-git-send-email-sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 July 2015 at 14:14, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Sun, Jul 26, 2015 at 02:59:00PM +0200, Ard Biesheuvel wrote:
->> At boot, the UTF-16 UEFI vendor string is copied from the system
->> table into a char array with a size of 100 bytes. However, this
->> size of 100 bytes is also used for memremapping() the source,
->> which may not be sufficient if the vendor string exceeds 50
->> UTF-16 characters, and the placement of the vendor string inside
->> a 4 KB page happens to leave the end unmapped.
->>
->> So use the correct '100 * sizeof(efi_char16_t)' for the size of
->> the mapping.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->> Hello Catalin,
->>
->> I think this should go into v4.2 with a cc: stable.
->
-> If it's cc stable, do you have a Fixes: tag? (it saves me some
-> searching).
->
+On Wed, 22 Jul, at 07:31:08PM, Dmitry Skorodumov wrote:
+> The efi_info structure stores low 32 bits of memory map
+> in efi_memmap and high 32 bits in efi_memmap_hi.
+> 
+> While constructing pointer in the setup_e820(), need
+> to take into account all 64 bits of the pointer.
+> 
+> It is because on 64bit machine the function
+> efi_get_memory_map() may return full 64bit pointer and before
+> the patch that pointer was truncated.
+> 
+> Signed-off-by: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
+> 
+> tested in Parallels virtual machine with more then 3GB of memory
 
-Ah sure, I forgot.
+When you say "tested", you mean that it doesn't boot correctly without
+your patch but does boot correctly with it applied? What I'm really
+asking is: are we sure that your setup triggered this new code?
 
-Fixes: f84d02755f5a ("arm64: add EFI runtime services")
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index 2c82bd1..9108fe5 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -1184,6 +1184,12 @@ static efi_status_t setup_e820(struct boot_params *params,
+>  	u32 nr_entries;
+>  	u32 nr_desc;
+>  	int i;
+> +	unsigned long m;
+> +
+> +	m = efi->efi_memmap;
+> +#ifdef CONFIG_X86_64
+> +	m |= (u64)efi->efi_memmap_hi << 32;
+> +#endif
+>  
+>  	nr_entries = 0;
+>  	nr_desc = efi->efi_memmap_size / efi->efi_memdesc_size;
+> @@ -1191,7 +1197,6 @@ static efi_status_t setup_e820(struct boot_params *params,
+>  	for (i = 0; i < nr_desc; i++) {
+>  		efi_memory_desc_t *d;
+>  		unsigned int e820_type = 0;
+> -		unsigned long m = efi->efi_memmap;
+>  
+>  		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
+>  		switch (d->type) {
+
+Is there a reason that adding efi->efi_memmap_hi can't be done inside
+this for loop? Gcc should be smart enough to hoist this calculation out
+of the loop.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
