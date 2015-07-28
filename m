@@ -1,67 +1,66 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] [v2] x86_64/efi: Use all 64 bit of efi_memmap in
- setup_e820()
-Date: Tue, 28 Jul 2015 12:24:13 +0100
-Message-ID: <20150728112413.GA645@codeblueprint.co.uk>
-References: <1437579068-14982-1-git-send-email-sdmitry@parallels.com>
+From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
+Subject: Re: [RFC PATCH 04/16] x86/efi: Generating random number in EFI stub
+Date: Tue, 28 Jul 2015 14:01:12 +0200
+Message-ID: <20150728120112.GA9518@amd>
+References: <1437056730-15247-1-git-send-email-jlee@suse.com>
+ <1437056730-15247-5-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1437579068-14982-1-git-send-email-sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
+In-Reply-To: <1437056730-15247-5-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 22 Jul, at 07:31:08PM, Dmitry Skorodumov wrote:
-> The efi_info structure stores low 32 bits of memory map
-> in efi_memmap and high 32 bits in efi_memmap_hi.
-> 
-> While constructing pointer in the setup_e820(), need
-> to take into account all 64 bits of the pointer.
-> 
-> It is because on 64bit machine the function
-> efi_get_memory_map() may return full 64bit pointer and before
-> the patch that pointer was truncated.
-> 
-> Signed-off-by: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-> 
-> tested in Parallels virtual machine with more then 3GB of memory
+Hi!
 
-When you say "tested", you mean that it doesn't boot correctly without
-your patch but does boot correctly with it applied? What I'm really
-asking is: are we sure that your setup triggered this new code?
+> This patch adds the codes for generating random number array as the
+> HMAC key that will used by later EFI stub codes.
+> 
+> The original codes in efi_random copied from aslr and add the codes
+> to accept input entropy and EFI debugging. In later patch will add
+> the codes to get random number by EFI protocol. The separate codes
+> can avoid impacting aslr function.
+> 
+> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 2c82bd1..9108fe5 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -1184,6 +1184,12 @@ static efi_status_t setup_e820(struct boot_params *params,
->  	u32 nr_entries;
->  	u32 nr_desc;
->  	int i;
-> +	unsigned long m;
+> +#define X86_FEATURE_EDX_TSC	(1 << 4)
+> +#define X86_FEATURE_ECX_RDRAND	(1 << 30)
+
+Can you pull it from existing includes somewhere?
+
+> +static bool rdrand_feature(void)
+> +{
+> +	return (cpuid_ecx(0x1) & X86_FEATURE_ECX_RDRAND);
+> +}
 > +
-> +	m = efi->efi_memmap;
-> +#ifdef CONFIG_X86_64
-> +	m |= (u64)efi->efi_memmap_hi << 32;
-> +#endif
->  
->  	nr_entries = 0;
->  	nr_desc = efi->efi_memmap_size / efi->efi_memdesc_size;
-> @@ -1191,7 +1197,6 @@ static efi_status_t setup_e820(struct boot_params *params,
->  	for (i = 0; i < nr_desc; i++) {
->  		efi_memory_desc_t *d;
->  		unsigned int e820_type = 0;
-> -		unsigned long m = efi->efi_memmap;
->  
->  		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
->  		switch (d->type) {
+> +static bool rdtsc_feature(void)
+> +{
+> +	return (cpuid_edx(0x1) & X86_FEATURE_EDX_TSC);
+> +}
 
-Is there a reason that adding efi->efi_memmap_hi can't be done inside
-this for loop? Gcc should be smart enough to hoist this calculation out
-of the loop.
+Are these helpers neccessary?
+
+> +	if (rdrand_feature()) {
+> +		efi_printk(sys_table, " RDRAND");
+> +		if (rdrand_long(&raw)) {
+> +			random ^= raw;
+> +			use_i8254 = false;
+> +		}
+> +	}
+> +
+> +	if (rdtsc_feature()) {
+> +		efi_printk(sys_table, " RDTSC");
+> +		rdtscll(raw);
+> +
+> +		random ^= raw;
+> +		use_i8254 = false;
+> +	}
+
+You'll do two (expensive) cpuids calls here.
 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
