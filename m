@@ -1,70 +1,79 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] [v2] x86_64/efi: Use all 64 bit of efi_memmap in
- setup_e820()
-Date: Tue, 28 Jul 2015 21:42:31 +0100
-Message-ID: <20150728204231.GC2773@codeblueprint.co.uk>
-References: <1437579068-14982-1-git-send-email-sdmitry@parallels.com>
- <20150728112413.GA645@codeblueprint.co.uk>
- <BY1PR0301MB1255463A9A89D6247A81D242A18D0@BY1PR0301MB1255.namprd03.prod.outlook.com>
+Subject: Re: [PATCH] x86/mm, efi: Check for valid image type
+Date: Tue, 28 Jul 2015 21:51:57 +0100
+Message-ID: <20150728205157.GD2773@codeblueprint.co.uk>
+References: <1437579164-20176-1-git-send-email-bigeasy@linutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <BY1PR0301MB1255463A9A89D6247A81D242A18D0-M1kb196zaopYAF46dOS0O5wN6zqB+hSMnBOFsp37pqbUKgpGm//BTAC/G2K4zDHf@public.gmane.org>
+In-Reply-To: <1437579164-20176-1-git-send-email-bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dmitry Skorodumov <sdmitry-bzQdu9zFT3WakBO8gow8eQ@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Denis Lunev <den-wo1vFcy6AUs@public.gmane.org>
+To: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 28 Jul, at 01:18:37PM, Dmitry Skorodumov wrote:
-> Matt Fleming <matt@...> writes:
-> 
-> > On Wed, 22 Jul, at 07:31:08PM, Dmitry Skorodumov wrote:
-> > > The efi_info structure stores low 32 bits of memory map
-> > > in efi_memmap and high 32 bits in efi_memmap_hi.
-> > > 
-> > > While constructing pointer in the setup_e820(), need
-> > > to take into account all 64 bits of the pointer.
-> 
-> > > tested in Parallels virtual machine with more then 3GB of memory
-> 
-> > When you say "tested", you mean that it doesn't boot correctly without
-> > your patch but does boot correctly with it applied? What I'm really
-> > asking is: are we sure that your setup triggered this new code?
-> 
-> Yes, while debugging I added a lot of logging to trace the problem.
-> Parallels VM doesn't boot correctly without the patch.
- 
-OK cool, I would definitely include this in the patch commit message.
+(Pulling in Josh)
 
-> I believe that any  EDK2-based efi-bios will not work also,
-> though I heard that OVMF uses own linux boot loader..
-> It is because the memory for memmap was allocated from EFI_LOADER_DATA pool -
-> efi_call_early(allocate_pool, EFI_LOADER_DATA, map_size... );
-> 
-> It is possible to kludge the problem by patching EFI-bios of the machine
-> to allocate  EFI_LOADER_DATA-memory below the 4GB space,
-> but I think that fixing setup_e820() is the right thing.
- 
-Yes your fix looks correct to me, I just wanted to know whether you hit
-the bug with a real workload or via code inspection.
+On Wed, 22 Jul, at 05:32:44PM, Sebastian Andrzej Siewior wrote:
+> I usually see
+> |Ignoring BGRT: failed to allocate memory for image (wanted 264301314=
+ bytes)
+> |Ignoring BGRT: failed to allocate memory for image (wanted 392587289=
+1 bytes)
+>=20
+> sometimes I get
+>=20
+> |------------[ cut here ]------------
+> |WARNING: CPU: 0 PID: 0 at mm/early_ioremap.c:136 __early_ioremap.con=
+stprop.0+0x113/0x1d3()
+> =E2=80=A6
+> | [<ffffffff81b3de8c>] __early_ioremap.constprop.0+0x113/0x1d3
+> | [<ffffffff81b3e106>] early_ioremap+0x13/0x15
+> | [<ffffffff81b2c4a9>] efi_bgrt_init+0x1e2/0x27d
+> =E2=80=A6
+>=20
+> now and then. The data behind that pointer changes on each boot becau=
+se
+> nobody preserves the content across kexec.
+>=20
+> Signed-off-by: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> ---
+>=20
+> I don't know much about the requirement of having the .bmp in memory =
+all the
+> time. Would it be a bad thing to compress the bmp and uncompress on c=
+at from
+> userland? In my case the bmp has 272 KiB and LZO gets it down to 12Ki=
+B,
+> XZ 7.4KiB.
 
-> > > +	m = efi->efi_memmap;
-> > > +#ifdef CONFIG_X86_64
-> > > +	m |= (u64)efi->efi_memmap_hi << 32;
-> > > +#endif
-> ..
-> > >  	for (i = 0; i < nr_desc; i++) {
-> > > -		unsigned long m = efi->efi_memmap;
-> > >  		d = (efi_memory_desc_t *)(m + (i * efi->efi_memdesc_size));
-> 
-> > Is there a reason that adding efi->efi_memmap_hi can't be done inside
-> > this for loop? Gcc should be smart enough to hoist this calculation out
-> > of the loop.
-> 
-> Smart from its side.. I'll correct this and resend the patch.
+The usual use for BGRT is to display it during kernel boot, so
+interacting with userland doesn't help you there.
 
-Great, thanks.
+>  arch/x86/platform/efi/efi-bgrt.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+>=20
+> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi=
+/efi-bgrt.c
+> index d7f997f7c26d..59710f0875bb 100644
+> --- a/arch/x86/platform/efi/efi-bgrt.c
+> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> @@ -79,6 +79,10 @@ void __init efi_bgrt_init(void)
+>  	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
+>  	if (ioremapped)
+>  		early_iounmap(image, sizeof(bmp_header));
+> +	if (bmp_header.id !=3D 0x4d42) {
+> +		pr_err("BGRT: Not a valid BMP file.\n");
+> +		return;
+> +	}
+>  	bgrt_image_size =3D bmp_header.size;
+> =20
+>  	bgrt_image =3D kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
 
--- 
+I'm confused, is the BMP image valid on your machine or not? You add a
+validity check but talk about compressing it above.
+
+--=20
 Matt Fleming, Intel Open Source Technology Center
