@@ -1,61 +1,116 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2] arm64/efi: prefer AllocatePages() over
- efi_low_alloc() for vmlinux
-Date: Wed, 29 Jul 2015 11:27:17 +0100
-Message-ID: <20150729102717.GA4797@arm.com>
-References: <1437737907-10477-1-git-send-email-ard.biesheuvel@linaro.org>
- <20150728211752.GE2773@codeblueprint.co.uk>
- <CAKv+Gu_EtOV8wannMLG87ai_x3ARu4rUSo9D6w2DQ+Kb5Kjn-A@mail.gmail.com>
+From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Subject: Re: [PATCH] x86/mm, efi: Check for valid image type
+Date: Wed, 29 Jul 2015 09:41:18 -0700
+Message-ID: <20150729164118.GC10114@x>
+References: <1437579164-20176-1-git-send-email-bigeasy@linutronix.de>
+ <20150728205157.GD2773@codeblueprint.co.uk>
+ <20150729001034.GD8671@cloud>
+ <55B88F3B.2000902@linutronix.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_EtOV8wannMLG87ai_x3ARu4rUSo9D6w2DQ+Kb5Kjn-A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <55B88F3B.2000902-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jul 28, 2015 at 10:24:23PM +0100, Ard Biesheuvel wrote:
-> On 28 July 2015 at 23:17, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> > On Fri, 24 Jul, at 01:38:27PM, Ard Biesheuvel wrote:
-> >> When allocating memory for the kernel image, try the AllocatePages()
-> >> boot service to obtain memory at the preferred offset of
-> >> 'dram_base + TEXT_OFFSET', and only revert to efi_low_alloc() if that
-> >> fails. This is the only way to allocate at the base of DRAM if DRAM
-> >> starts at 0x0, since efi_low_alloc() refuses to allocate at 0x0.
+On Wed, Jul 29, 2015 at 10:30:51AM +0200, Sebastian Andrzej Siewior wrote:
+> On 07/29/2015 02:10 AM, josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org wrote:
+> >> On Wed, 22 Jul, at 05:32:44PM, Sebastian Andrzej Siewior wrote:
+> >>> now and then. The data behind that pointer changes on each boot because
+> >>> nobody preserves the content across kexec.
+> > 
+> > Right.  The kernel copies this image precisely because it may go away at
+> > ExitBootServices or similar, or when ACPI reclaim space is freed.  This
+> > ties into the various work about trying to make kexec handle EFI and
+> > ACPI.  Is there some way we can indicate to the kexec kernel that this
+> > won't work?  (Or fix it so it will?)
+> 
+> From what I know kexec entry is transparent. Could you remove the table
+> from ACPI? There is no point on having this bitmap information now,
+> right? The last way out would be to patch kexec and let it read the
+> table from /sys and put it at the spot mentioned in the ACPI table.
+
+Assuming that memory isn't already in use.  Seems non-trivial.  Another
+alternative would be to patch the address in the ACPI table.  But for a
+first pass, I think it'd suffice to just stop attempting to parse the
+BGRT at all from the kexec'd kernel.
+
+> >>> Signed-off-by: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+> >>> ---
+> >>>
+> >>> I don't know much about the requirement of having the .bmp in memory all the
+> >>> time. Would it be a bad thing to compress the bmp and uncompress on cat from
+> >>> userland? In my case the bmp has 272 KiB and LZO gets it down to 12KiB,
+> >>> XZ 7.4KiB.
 > >>
-> >> Tested-by: Haojian Zhuang <haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> ---
-> >> v2:
-> >> - reshuffle code flow to make it more logical, and have only a single
-> >>   memcpy() invocation at the end of the function
-> >> ---
-> >>  arch/arm64/kernel/efi-stub.c | 41 ++++++++++++++++++++++++++++++++---------
-> >>  1 file changed, 32 insertions(+), 9 deletions(-)
-> >
-> > Would it be easier if we allow efi_low_alloc() to return 0x0 for some
-> > uses? If you don't need the preference for low allocations, probably
-> > not, but I don't want to see us working around limitations in
-> > efi_low_alloc() instead of just fixing it.
-> >
+> >> The usual use for BGRT is to display it during kernel boot, so
+> >> interacting with userland doesn't help you there.
+> > 
+> > If we're going to be storing a large image, applying simple in-kernel
+> > compression doesn't seem unreasonable, if we then decompress it when
+> > read from the BGRT sysfs file.  That's entirely separate from this issue
+> > though.
 > 
-> This workaround fixes another issue as well: the arm64 kernel needs to
-> be loaded 512 KB above a 2MB aligned boundary, and using
-> efi_low_alloc() as we do loses (2 MB - 512 KB) at the bottom if part
-> of that 512 KB is occupied, since efi_low_alloc() is not aware of the
-> fact that the first 512 KB will remain unused.
-> 
-> What would be most helpful is if efi_low_alloc() could take an offset
-> param in addition to the alignment, i.e., alignment == 2MB and offset
-> == 512 KB. The offset would default to 0, reverting to the original
-> behavior.
-> 
-> If you'd be ok with such a change, I can propose it instead, and wire
-> it up into this function.
+> This is correct. However I miss the point of saving the image in the
+> first place. From what I see is that I have now 272 KiB in memory which
+> are never used again. Is there a usecase why we have it? From the code
+> it looks like we save it during boot and make it available later via
+> sysfs.
 
-I already merged the original patch, so if you propose anything extra,
-please do it on top of that!
+That's the point, yes.  A splash screen or an about box can then read it
+from there later and display it to the user.
 
-Will
+> >>>  arch/x86/platform/efi/efi-bgrt.c | 4 ++++
+> >>>  1 file changed, 4 insertions(+)
+> >>>
+> >>> diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
+> >>> index d7f997f7c26d..59710f0875bb 100644
+> >>> --- a/arch/x86/platform/efi/efi-bgrt.c
+> >>> +++ b/arch/x86/platform/efi/efi-bgrt.c
+> >>> @@ -79,6 +79,10 @@ void __init efi_bgrt_init(void)
+> >>>  	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
+> >>>  	if (ioremapped)
+> >>>  		early_iounmap(image, sizeof(bmp_header));
+> >>> +	if (bmp_header.id != 0x4d42) {
+> >>> +		pr_err("BGRT: Not a valid BMP file.\n");
+> >>> +		return;
+> >>> +	}
+> > 
+> > That's a good idea as an additional cross-check, but not a complete fix
+> > for the problem.
+> 
+> But it is one additional check to make sure we look at proper data. The
+> (ACPI-table) header has an image type which is to BMP (the only
+> currently support image type) so this is the double check.
+
+I agree completely with adding the check; I'm just saying it isn't a
+complete fix.
+
+> And the
+> kernel should be able to read from any address as long as it is within
+> its DRAM.
+
+Then what caused the oops on early_ioremap?
+
+> >  As you pointed out above, a wild pointer could cause a
+> > WARN from early_ioremap.  We need to never follow the pointer in the
+> > first place after a kexec, unless we have some way to know that it's
+> > actually valid.
+> 
+> So you assume that the information from ACPI is always correct then?
+> The pointer is correct, the information it points to is no longer.
+> 
+> If we run always under EFI then it looks like the variable efi_setup
+> which is checked in efi_enter_virtual_mode() is 0 during normal boot
+> and != 0 on kexec entry. This hint is set via setup_data / SETUP_EFI
+> since commit 1fec053369 ("x86/efi: Pass necessary EFI data for kexec
+> via setup_data"). So maybe we could use this to check if we run under
+> kexec or not.
+
+That sounds like a sensible fix; don't try to parse the BGRT if
+efi_setup.
+
+- Josh Triplett
