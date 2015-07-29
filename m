@@ -1,43 +1,34 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] x86/mm, efi: Check for valid image type
-Date: Wed, 29 Jul 2015 17:37:52 +0800
-Message-ID: <20150729093752.GF31695@dhcp-128-89.nay.redhat.com>
-References: <1437579164-20176-1-git-send-email-bigeasy@linutronix.de>
- <20150728205157.GD2773@codeblueprint.co.uk>
- <20150729001034.GD8671@cloud>
- <55B88F3B.2000902@linutronix.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 0/2] arm64/efi: fix kernel allocation at base of DRAM
+Date: Wed, 29 Jul 2015 12:04:17 +0200
+Message-ID: <1438164259-14470-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <55B88F3B.2000902-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sebastian Andrzej Siewior <bigeasy-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+This series provides an alternative to 'arm64/efi: prefer AllocatePages() over
+efi_low_alloc() for vmlinux', of which a v2 was sent out on July 24th.
 
-> 
-> >  As you pointed out above, a wild pointer could cause a
-> > WARN from early_ioremap.  We need to never follow the pointer in the
-> > first place after a kexec, unless we have some way to know that it's
-> > actually valid.
-> 
-> So you assume that the information from ACPI is always correct then?
-> The pointer is correct, the information it points to is no longer.
-> 
-> If we run always under EFI then it looks like the variable efi_setup
-> which is checked in efi_enter_virtual_mode() is 0 during normal boot
-> and != 0 on kexec entry. This hint is set via setup_data / SETUP_EFI
-> since commit 1fec053369 ("x86/efi: Pass necessary EFI data for kexec
-> via setup_data"). So maybe we could use this to check if we run under
-> kexec or not.
+This series updates efi_low_alloc() to support doing allocations that start
+at a fixed offset from an aligned boundary, as is required for allocating the
+arm64 kernel 512 KB above a 2 MB boundary.
 
-Not sure if BGRT is useful in kexec kernel, it seems not worth to copy
-it between kernels.
+With these changes, the arm64 placement code can be simplified, and will deal
+better with the HiKey platform, whose DRAM starts at 0x0, and APM Mustang, whose
+firmware occupies some memory at the base of DRAM, which is currently preventing
+the arm64 kernel from using the bottom 2 MB.
 
-IMO just return in case if (efi_setup) is true make sense.
+Ard Biesheuvel (2):
+  efi: add 'offset' param to efi_low_alloc()
+  arm64/efi: use efi_low_alloc() with offset to allocate kernel
 
-Thanks
-Dave
+ arch/arm64/kernel/efi-stub.c                   | 11 ++++++-----
+ arch/x86/boot/compressed/eboot.c               |  4 ++--
+ drivers/firmware/efi/libstub/efi-stub-helper.c | 20 +++++++++++++++-----
+ include/linux/efi.h                            |  2 +-
+ 4 files changed, 24 insertions(+), 13 deletions(-)
+
+-- 
+1.9.1
