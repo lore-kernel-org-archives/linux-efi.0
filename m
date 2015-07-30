@@ -1,73 +1,73 @@
-From: Matt Fleming <matt.fleming@intel.com>
-Subject: Re: [RFC PATCH 08/16] x86/efi: Carrying swsusp key by setup data
-Date: Thu, 30 Jul 2015 17:30:09 +0100
-Message-ID: <1438273809.11322.21.camel@intel.com>
-References: <1437056730-15247-1-git-send-email-jlee@suse.com>
-	 <1437056730-15247-9-git-send-email-jlee@suse.com>
+From: Greg KH <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH 3.10 ~ 3.14] efi: fix the efi 32bit boot failed problem
+Date: Thu, 30 Jul 2015 09:31:02 -0700
+Message-ID: <20150730163102.GA19943@kroah.com>
+References: <1438078879-24705-1-git-send-email-fupan.li@windriver.com>
+ <20150730150428.GJ2725@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1437056730-15247-9-git-send-email-jlee@suse.com>
+Content-Disposition: inline
+In-Reply-To: <20150730150428.GJ2725@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: fupan.li@windriver.com, linux-kernel@vger.kernel.org, fupanli@gmail.com, linux-efi@vger.kernel.org, Luis Henriques <luis.henriques@canonical.com>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2015-07-16 at 22:25 +0800, Lee, Chun-Yi wrote:
-> For forwarding swsusp key from EFI stub to boot kernel, this patch
-> allocates setup data for carrying swsusp key, size and the status
-> of efi operating.
+On Thu, Jul 30, 2015 at 04:04:28PM +0100, Matt Fleming wrote:
+> (Add linux-efi, Luis and Greg)
 > 
-> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> ---
->  arch/x86/boot/compressed/eboot.c      | 29 +++++++++++++++++++++++++----
->  arch/x86/include/uapi/asm/bootparam.h |  1 +
->  2 files changed, 26 insertions(+), 4 deletions(-)
+> On Tue, 28 Jul, at 06:21:19PM, fupan.li@windriver.com wrote:
+> > From: fli <fupan.li@windriver.com>
+> > 
+> > The commit 35d5134b7d5a55e269c953096224248b9f6f72c2
+> > Author: Matt Fleming <matt@console-pimps.org>
+> > Date:   Tue Apr 8 13:14:00 2014 +0100
+> > 
+> >     x86/efi: Correct EFI boot stub use of code32_start
+> > 
+> > imported a bug, which should use the label's address instead
+> > of the value stored in the label's address to caculate the
+> > code32_start address.
+> > 
+> > Signed-off-by: fli <fupan.li@windriver.com>
+> > ---
+> >  arch/x86/boot/compressed/head_32.S | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+> > index abb988a..3b28eff 100644
+> > --- a/arch/x86/boot/compressed/head_32.S
+> > +++ b/arch/x86/boot/compressed/head_32.S
+> > @@ -54,7 +54,7 @@ ENTRY(efi_pe_entry)
+> >  	call	reloc
+> >  reloc:
+> >  	popl	%ecx
+> > -	subl	reloc, %ecx
+> > +	subl	$reloc, %ecx
+> >  	movl	%ecx, BP_code32_start(%eax)
+> >  
+> >  	sub	$0x4, %esp
 > 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 97b356f..5e1476e 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -1392,19 +1392,23 @@ free_mem_map:
->  
->  static void setup_swsusp_keys(struct boot_params *params)
->  {
-> -	unsigned long key_size, attributes;
-> +	struct setup_data *setup_data, *swsusp_setup_data;
->  	struct swsusp_keys *swsusp_keys;
-> +	int size = 0;
-> +	unsigned long key_size, attributes;
->  	efi_status_t status;
+> Woa, nice catch!
+> 
+> The commit message could do with a little work however. In particular
+> the usual way to refer to a commit is like this: commit 35d5134b7d5a
+> ("x86/efi: Correct EFI boot stub use of code32_start"). And the
+> Signed-off-by line should contain your full name.
+> 
+> Luis, Greg, what is the procedure for submitting a patch that is only
+> required for stable?
 
-Why the local variable shuffling? It'd be better to leave key_size and
-attributes alone.
+You don't. :)
 
-Also, 'size' doesn't look like it should be int. If you're passing it to
-allocate_pool it really wants to be 'unsigned long'.
+Why isn't this an issue in newer kernel releases?  Did this already get
+fixed by some other patch?  If so, why can't we just take that patch?
+If not, why not?
 
->  	/* Allocate setup_data to carry keys */
-> +	size = sizeof(struct setup_data) + sizeof(struct swsusp_keys);
->  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-> -				sizeof(struct swsusp_keys), &swsusp_keys);
-> +				size, &swsusp_setup_data);
->  	if (status != EFI_SUCCESS) {
->  		efi_printk(sys_table, "Failed to alloc mem for swsusp_keys\n");
->  		return;
->  	}
->  
-> -	memset(swsusp_keys, 0, sizeof(struct swsusp_keys));
-> +	memset(swsusp_setup_data, 0, size);
-> +	swsusp_keys = (struct swsusp_keys *)swsusp_setup_data->data;
->  
->  	status = efi_call_early(get_variable, SWSUSP_KEY, &EFI_SWSUSP_GUID,
->  				&attributes, &key_size, swsusp_keys->swsusp_key);
-> @@ -1413,7 +1417,9 @@ static void setup_swsusp_keys(struct boot_params *params)
->  		memset(swsusp_keys->swsusp_key, 0, SWSUSP_DIGEST_SIZE);
->  		status = efi_call_early(set_variable, SWSUSP_KEY,
->  					&EFI_SWSUSP_GUID, attributes, 0, NULL);
-> -		if (status == EFI_SUCCESS) {
-> +		if (status)
-> +			goto clean_fail;
+I _REALLY_ don't like taking patches that are not already in Linus's
+tree, as it almost always turns out to be the wrong solution.
 
-Please use the EFI status codes explicitly.
+thanks,
+
+greg k-h
