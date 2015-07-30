@@ -1,56 +1,61 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] x86_64/efi: Mapping Boot and Runtime EFI memory regions
- to different starting virtual address
-Date: Thu, 30 Jul 2015 22:16:01 +0800
-Message-ID: <20150730141601.GO15651@linux-rxt1.site>
-References: <55B9D806.7030705@zytor.com>
- <20150730080323.GD8984@nazgul.tnic>
- <20150730101131.GB2725@codeblueprint.co.uk>
- <20150730110959.GJ15651@linux-rxt1.site>
- <20150730111819.GK15651@linux-rxt1.site>
- <20150730120916.GD2725@codeblueprint.co.uk>
- <20150730123116.GL15651@linux-rxt1.site>
- <20150730131723.GG2725@codeblueprint.co.uk>
- <20150730133947.GN15651@linux-rxt1.site>
- <20150730140542.GI2725@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 3.10 ~ 3.14] efi: fix the efi 32bit boot failed problem
+Date: Thu, 30 Jul 2015 16:04:28 +0100
+Message-ID: <20150730150428.GJ2725@codeblueprint.co.uk>
+References: <1438078879-24705-1-git-send-email-fupan.li@windriver.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150730140542.GI2725-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1438078879-24705-1-git-send-email-fupan.li@windriver.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: fupan.li@windriver.com
+Cc: linux-kernel@vger.kernel.org, fupanli@gmail.com, linux-efi@vger.kernel.org, Luis Henriques <luis.henriques@canonical.com>, Greg KH <gregkh@linuxfoundation.org>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jul 30, 2015 at 03:05:42PM +0100, Matt Fleming wrote:
-> On Thu, 30 Jul, at 09:39:47PM, joeyli wrote:
-> > 
-> > OK, understood! Thanks for your suggestion!
-> > 
-> > But, I have a question about mapping Boot Code/Data to -4G area. I understand
-> > we need Runtime regions, and 1:1 mapping is the workaround of some buggy BIOS.
-> > But why should kernel mapping Boot regions to -4G area?
+(Add linux-efi, Luis and Greg)
+
+On Tue, 28 Jul, at 06:21:19PM, fupan.li@windriver.com wrote:
+> From: fli <fupan.li@windriver.com>
 > 
-> We map the Boot Service regions in the -4G area for simplicity, i.e.
-> it's easier to iterate through the EFI memory map in order, and map
-> things starting at -4G and working down to lower addresses, than it
-> would be to make different mapping decisions based on the region type.
+> The commit 35d5134b7d5a55e269c953096224248b9f6f72c2
+> Author: Matt Fleming <matt@console-pimps.org>
+> Date:   Tue Apr 8 13:14:00 2014 +0100
 > 
-> As for why we map the Boot Service regions *at all*, that's also a bug
-> workaround, see commit 916f676f8dc0 ("x86, efi: Retain boot service code
-> until after switching to virtual mode"). We setup the mappings before we
-> call efi_free_boot_services().
+>     x86/efi: Correct EFI boot stub use of code32_start
 > 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+> imported a bug, which should use the label's address instead
+> of the value stored in the label's address to caculate the
+> code32_start address.
+> 
+> Signed-off-by: fli <fupan.li@windriver.com>
+> ---
+>  arch/x86/boot/compressed/head_32.S | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
+> index abb988a..3b28eff 100644
+> --- a/arch/x86/boot/compressed/head_32.S
+> +++ b/arch/x86/boot/compressed/head_32.S
+> @@ -54,7 +54,7 @@ ENTRY(efi_pe_entry)
+>  	call	reloc
+>  reloc:
+>  	popl	%ecx
+> -	subl	reloc, %ecx
+> +	subl	$reloc, %ecx
+>  	movl	%ecx, BP_code32_start(%eax)
+>  
+>  	sub	$0x4, %esp
 
-Thanks for your explanation.
+Woa, nice catch!
 
-For my issue, I will check if rewriting the VA of runtime services can fix issue.
-If not, then I think need find a way to sync the mapping in EFI page table between
-boot kernel and image kernel.
+The commit message could do with a little work however. In particular
+the usual way to refer to a commit is like this: commit 35d5134b7d5a
+("x86/efi: Correct EFI boot stub use of code32_start"). And the
+Signed-off-by line should contain your full name.
 
+Luis, Greg, what is the procedure for submitting a patch that is only
+required for stable?
 
-Thanks a lot!
-Joey Lee
+-- 
+Matt Fleming, Intel Open Source Technology Center
