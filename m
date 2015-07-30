@@ -1,55 +1,67 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH] x86_64/efi: Mapping Boot and Runtime EFI memory regions
- to different starting virtual address
-Date: Thu, 30 Jul 2015 21:39:47 +0800
-Message-ID: <20150730133947.GN15651@linux-rxt1.site>
-References: <1438230757-30840-1-git-send-email-jlee@suse.com>
- <55B9D806.7030705@zytor.com>
- <20150730080323.GD8984@nazgul.tnic>
- <20150730101131.GB2725@codeblueprint.co.uk>
- <20150730110959.GJ15651@linux-rxt1.site>
- <20150730111819.GK15651@linux-rxt1.site>
- <20150730120916.GD2725@codeblueprint.co.uk>
- <20150730123116.GL15651@linux-rxt1.site>
- <20150730131723.GG2725@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 1/2] efi: add 'offset' param to efi_low_alloc()
+Date: Thu, 30 Jul 2015 15:01:44 +0100
+Message-ID: <20150730140144.GH2725@codeblueprint.co.uk>
+References: <1438164259-14470-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1438164259-14470-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150730131723.GG2725-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1438164259-14470-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jul 30, 2015 at 02:17:23PM +0100, Matt Fleming wrote:
-> On Thu, 30 Jul, at 08:31:16PM, joeyli wrote:
-> > 
-> > I think hibernate overwrite it.
+On Wed, 29 Jul, at 12:04:18PM, Ard Biesheuvel wrote:
+> In some cases, e.g., when allocating memory for the arm64 kernel,
+> we need memory at a certain offset from an aligned boundary. So add
+> an offset parameter to efi_low_alloc(), and update the existing
+> callers to pass zero by default.
 > 
-> We absolutely must get a more detailed answer before going any further.
-> 
-> Simply put, if we're remapping the EFI regions into the virtual address
-> space and calling SetVirtualAddressMap() on hibernate resume there is no
-> reason that anyone should be using the old mappings.
-> 
-> And since you've demonstrated that we *are* using the old mappings,
-> we've likely got a bug somewhere that we need to get a handle on before
-> we paper over the issue.
-> 
-> Where exactly is the old mapping address being used? Is it that
-> efi.systab->runtime->get_variable is incorrect? If you could paste the
-> disassembled output where the page fault occurs, that would be helpful.
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/kernel/efi-stub.c                   |  2 +-
+>  arch/x86/boot/compressed/eboot.c               |  4 ++--
+>  drivers/firmware/efi/libstub/efi-stub-helper.c | 20 +++++++++++++++-----
+>  include/linux/efi.h                            |  2 +-
+>  4 files changed, 19 insertions(+), 9 deletions(-)
+ 
+[...]
 
-OK, understood! Thanks for your suggestion!
+> @@ -269,10 +269,19 @@ efi_status_t efi_low_alloc(efi_system_table_t *sys_table_arg,
+>  		 * checks pointers against NULL. Skip the first 8
+>  		 * bytes so we start at a nice even number.
+>  		 */
+> -		if (start == 0x0)
+> +		if (start + offset == 0x0)
+>  			start += 8;
+>  
+> -		start = round_up(start, align);
+> +		/*
+> +		 * Check if the offset exceeds the misalignment of this region.
+> +		 * In that case, we can round down instead of up, and the
+> +		 * resulting start value will be correctly aligned and still
+> +		 * point past the start of the region.
+> +		 */
+> +		if (offset >= (start & (align - 1)))
+> +			start = round_down(start, align) + offset;
+> +		else
+> +			start = round_up(start, align) + offset;
+>  		if ((start + size) > end)
+>  			continue;
 
-But, I have a question about mapping Boot Code/Data to -4G area. I understand
-we need Runtime regions, and 1:1 mapping is the workaround of some buggy BIOS.
-But why should kernel mapping Boot regions to -4G area?
+Aha, now I see what you mean. Thanks for doing this Ard, these are much
+more polished than what I was expecting.
 
+I'm gonna have to NAK this because it's just too much of a special case
+to support directly in efi_low_alloc(), which I think was the exact
+point that you made originally, and which I was too tired/dumb to
+understand. Sorry.
 
-Thanks a lot!
-Joey Lee
+In particular, the fact that you can use the offset argument to violate
+the requested alignment seems like it would trip up most users. 
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
