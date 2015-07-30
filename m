@@ -1,61 +1,31 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 3.10 ~ 3.14] efi: fix the efi 32bit boot failed problem
-Date: Thu, 30 Jul 2015 16:04:28 +0100
-Message-ID: <20150730150428.GJ2725@codeblueprint.co.uk>
-References: <1438078879-24705-1-git-send-email-fupan.li@windriver.com>
+From: Matt Fleming <matt.fleming@intel.com>
+Subject: Re: [RFC PATCH 02/16] x86/efi: Add get and set variable to EFI
+ services pointer table
+Date: Thu, 30 Jul 2015 16:19:58 +0100
+Message-ID: <1438269598.11322.2.camel@intel.com>
+References: <1437056730-15247-1-git-send-email-jlee@suse.com>
+	 <1437056730-15247-3-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1438078879-24705-1-git-send-email-fupan.li@windriver.com>
+In-Reply-To: <1437056730-15247-3-git-send-email-jlee@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: fupan.li@windriver.com
-Cc: linux-kernel@vger.kernel.org, fupanli@gmail.com, linux-efi@vger.kernel.org, Luis Henriques <luis.henriques@canonical.com>, Greg KH <gregkh@linuxfoundation.org>, stable@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-(Add linux-efi, Luis and Greg)
-
-On Tue, 28 Jul, at 06:21:19PM, fupan.li@windriver.com wrote:
-> From: fli <fupan.li@windriver.com>
+On Thu, 2015-07-16 at 22:25 +0800, Lee, Chun-Yi wrote:
+> Add get variable and set variable function to EFI services pointer
+> table for supporting later functions of hibernate signature
+> verification to keep the HMAC key in efi boot service veriable.
 > 
-> The commit 35d5134b7d5a55e269c953096224248b9f6f72c2
-> Author: Matt Fleming <matt@console-pimps.org>
-> Date:   Tue Apr 8 13:14:00 2014 +0100
-> 
->     x86/efi: Correct EFI boot stub use of code32_start
-> 
-> imported a bug, which should use the label's address instead
-> of the value stored in the label's address to caculate the
-> code32_start address.
-> 
-> Signed-off-by: fli <fupan.li@windriver.com>
-> ---
->  arch/x86/boot/compressed/head_32.S | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/boot/compressed/head_32.S b/arch/x86/boot/compressed/head_32.S
-> index abb988a..3b28eff 100644
-> --- a/arch/x86/boot/compressed/head_32.S
-> +++ b/arch/x86/boot/compressed/head_32.S
-> @@ -54,7 +54,7 @@ ENTRY(efi_pe_entry)
->  	call	reloc
->  reloc:
->  	popl	%ecx
-> -	subl	reloc, %ecx
-> +	subl	$reloc, %ecx
->  	movl	%ecx, BP_code32_start(%eax)
->  
->  	sub	$0x4, %esp
+> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 
-Woa, nice catch!
+Maybe mention that we want to be able to read/write variables from
+within the EFI boot stub? That's really why you want to add
+{get,set}_variable pointers.
 
-The commit message could do with a little work however. In particular
-the usual way to refer to a commit is like this: commit 35d5134b7d5a
-("x86/efi: Correct EFI boot stub use of code32_start"). And the
-Signed-off-by line should contain your full name.
+s/veriable/variable/
 
-Luis, Greg, what is the procedure for submitting a patch that is only
-required for stable?
-
--- 
-Matt Fleming, Intel Open Source Technology Center
+Rest of the patch looks good.
