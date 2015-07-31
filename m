@@ -1,45 +1,45 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [RFC PATCH 02/16] x86/efi: Add get and set variable to EFI
- services pointer table
-Date: Fri, 31 Jul 2015 18:14:52 +0800
-Message-ID: <20150731101452.GE13113@linux-rxt1.site>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFC PATCH 03/16] x86/boot: Public getting random boot function
+Date: Fri, 31 Jul 2015 18:52:09 +0800
+Message-ID: <20150731105209.GF13113@linux-rxt1.site>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <1437056730-15247-3-git-send-email-jlee@suse.com>
- <1438269598.11322.2.camel@intel.com>
+ <1437056730-15247-4-git-send-email-jlee@suse.com>
+ <20150728122133.GA12681@amd>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1438269598.11322.2.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20150728122133.GA12681@amd>
+Sender: linux-pm-owner@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jul 30, 2015 at 04:19:58PM +0100, Matt Fleming wrote:
-> On Thu, 2015-07-16 at 22:25 +0800, Lee, Chun-Yi wrote:
-> > Add get variable and set variable function to EFI services pointer
-> > table for supporting later functions of hibernate signature
-> > verification to keep the HMAC key in efi boot service veriable.
-> > 
-> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+On Tue, Jul 28, 2015 at 02:21:33PM +0200, Pavel Machek wrote:
+> Hi!
 > 
-> Maybe mention that we want to be able to read/write variables from
-> within the EFI boot stub? That's really why you want to add
-> {get,set}_variable pointers.
->
-
-I will add more detail for accessing efi boot service
-variable is because that will not touched by unauthenticated
-codes.
- 
-> s/veriable/variable/
+> >  int cmdline_find_option_bool(const char *option);
+> >  #endif
+> >  
+> > +#if CONFIG_RANDOMIZE_BASE
 > 
-
-I will fix the typo.
-
-> Rest of the patch looks good.
+> Not ifdef?
 > 
+> > +extern u16 i8254(void);
+> 
+> That's rather poor name for global function...
+
+This i8254 function only used by aslr and efi_random.
+I will keep this name for do not change codes in aslr for naming.
+
+> 
+> >  #if CONFIG_RANDOMIZE_BASE
+> 
+> Ok, maybe not, but I'm confused.
+> 									Pavel
+> -- 
+> (english) http://www.livejournal.com/~pavelmachek
+> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
 
 Thanks a lot!
 Joey Lee
