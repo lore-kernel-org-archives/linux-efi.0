@@ -1,49 +1,60 @@
-From: fupan <fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
-Subject: Re: [PATCH 3.10 ~ 3.14] efi: fix the efi 32bit boot failed problem
-Date: Fri, 31 Jul 2015 09:22:33 +0800
-Message-ID: <55BACDD9.6020505@windriver.com>
-References: <1438078879-24705-1-git-send-email-fupan.li@windriver.com> <20150730150428.GJ2725@codeblueprint.co.uk> <20150730163102.GA19943@kroah.com> <20150730164544.GL2725@codeblueprint.co.uk> <20150730165943.GD5515@kroah.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fixes
+Date: Fri, 31 Jul 2015 09:56:27 +0200
+Message-ID: <20150731075627.GA32179@gmail.com>
+References: <20150730210643.GM2725@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150730165943.GD5515-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20150730210643.GM2725-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fupanli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Luis Henriques <luis.henriques-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 07/31/2015 12:59 AM, Greg KH wrote:
-> On Thu, Jul 30, 2015 at 05:45:44PM +0100, Matt Fleming wrote:
->> On Thu, 30 Jul, at 09:31:02AM, Greg KH wrote:
->>> Why isn't this an issue in newer kernel releases?  Did this already get
->>> fixed by some other patch?  If so, why can't we just take that patch?
->>> If not, why not?
->>   
->> The commit 35d5134b7d5a ("x86/efi: Correct EFI boot stub use of
->> code32_start") only exists in the stable trees in that form because
->> there was quite a lot of churn in that area in Linus tree that didn't
->> get backported.
->>
->> So the code in Linus' tree never looked like the code in the stable does
->> right now.
->>
->>> I _REALLY_ don't like taking patches that are not already in Linus's
->>> tree, as it almost always turns out to be the wrong solution.
->> Yeah, I think this issue verifies that.
-> Ugh, what a mess.  Ok, if you get something that works and is in a
-> format that I can apply it, please resend it properly so that we can do
-> so.
-Hi, Matt
 
-Will you take care of this patch or I send a V2?
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-Thanks!
+> Folks, please pull the following urgent EFI fixes which prevent an oops
+> if users pass an invalid "efi" kernel parameter and a boot issue seen on
+> Parallels virtual machines.
+> 
+> The tag is based on v4.2-rc4, let me know if you want me to rebase it on
+> top of something else.
+> 
+> The following changes since commit cbfe8fa6cd672011c755c3cd85c9ffd4e2d10a6f:
+> 
+>   Linux 4.2-rc4 (2015-07-26 12:26:21 -0700)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 9115c7589b11349a1c3099758b4bded579ff69e0:
+> 
+>   efi: Check for NULL efi kernel parameters (2015-07-30 18:07:11 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Fix an EFI boot issue preventing a Parallels virtual machine from
+>    booting because the upper 32-bits of the EFI memmap pointer were
+>    being discarded in setup_e820() - Dmitry Skorodumov
+> 
+>  * Validate that the "efi" kernel parameter gets used with an argument,
+>    otherwise we will oops - Ricardo Neri
+> 
+> ----------------------------------------------------------------
+> Dmitry Skorodumov (1):
+>       x86/efi: Use all 64 bit of efi_memmap in setup_e820()
+> 
+> Ricardo Neri (1):
+>       efi: Check for NULL efi kernel parameters
+> 
+>  arch/x86/boot/compressed/eboot.c | 4 ++++
+>  arch/x86/platform/efi/efi.c      | 5 +++++
+>  drivers/firmware/efi/efi.c       | 5 +++++
+>  3 files changed, 14 insertions(+)
 
-Fupan
->
-> thanks,
->
-> greg k-h
->
->
+Pulled, thanks Matt!
+
+	Ingo
