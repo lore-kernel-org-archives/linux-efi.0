@@ -1,42 +1,150 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC PATCH 03/16] x86/boot: Public getting random boot function
-Date: Fri, 31 Jul 2015 14:50:06 +0200
-Message-ID: <20150731125006.GB5728@amd>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [RFC PATCH 05/16] x86/efi: Get entropy through EFI random number
+ generator protocol
+Date: Fri, 31 Jul 2015 22:59:12 +0800
+Message-ID: <20150731145256.GA2067@linux-rxt1.site>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <1437056730-15247-4-git-send-email-jlee@suse.com>
- <20150728122133.GA12681@amd>
- <20150731105209.GF13113@linux-rxt1.site>
+ <1437056730-15247-6-git-send-email-jlee@suse.com>
+ <1438272704.11322.13.camel@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150731105209.GF13113@linux-rxt1.site>
-Sender: linux-kernel-owner@vger.kernel.org
-To: joeyli <jlee@suse.com>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>
+In-Reply-To: <1438272704.11322.13.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri 2015-07-31 18:52:09, joeyli wrote:
-> On Tue, Jul 28, 2015 at 02:21:33PM +0200, Pavel Machek wrote:
-> > Hi!
+On Thu, Jul 30, 2015 at 05:11:44PM +0100, Matt Fleming wrote:
+> On Thu, 2015-07-16 at 22:25 +0800, Lee, Chun-Yi wrote:
+> > To grab random numbers through EFI protocol as one of the entropies
+> > source of swsusp key, this patch adds the logic for accessing EFI RNG
+> > (random number generator) protocol that's introduced since UEFI 2.4.
 > > 
-> > >  int cmdline_find_option_bool(const char *option);
-> > >  #endif
-> > >  
-> > > +#if CONFIG_RANDOMIZE_BASE
-> > 
-> > Not ifdef?
-> > 
-> > > +extern u16 i8254(void);
-> > 
-> > That's rather poor name for global function...
+> > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> > ---
+> >  arch/x86/boot/compressed/efi_random.c | 193 ++++++++++++++++++++++++++++++++++
+> >  include/linux/efi.h                   |  46 ++++++++
+> >  2 files changed, 239 insertions(+)
 > 
-> This i8254 function only used by aslr and efi_random.
-> I will keep this name for do not change codes in aslr for naming.
+> [...]
+> 
+> > @@ -2,6 +2,191 @@
+> >  
+> >  #include <linux/efi.h>
+> >  #include <asm/archrandom.h>
+> > +#include <asm/efi.h>
+> > +
+> > +static efi_status_t efi_locate_rng(efi_system_table_t *sys_table,
+> > +				   void ***rng_handle)
+> > +{
+> > +	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+> > +	unsigned long size = 0;
+> > +	efi_status_t status;
+> > +
+> > +	status = efi_call_early(locate_handle,
+> > +				EFI_LOCATE_BY_PROTOCOL,
+> > +				&rng_proto, NULL, &size, *rng_handle);
+> > +
+> > +	if (status == EFI_BUFFER_TOO_SMALL) {
+> > +		status = efi_call_early(allocate_pool,
+> > +					EFI_LOADER_DATA,
+> > +					size, (void **)rng_handle);
+> > +
+> > +		if (status != EFI_SUCCESS) {
+> > +			efi_printk(sys_table, " Failed to alloc mem for rng_handle");
+> > +			return status;
+> > +		}
+> > +
+> > +		status = efi_call_early(locate_handle,
+> > +					EFI_LOCATE_BY_PROTOCOL, &rng_proto,
+> > +					NULL, &size, *rng_handle);
+> > +	}
+> > +
+> > +	if (status != EFI_SUCCESS) {
+> > +		efi_printk(sys_table, " Failed to locate EFI_RNG_PROTOCOL");
+> > +		goto free_handle;
+> > +	}
+> > +
+> > +	return EFI_SUCCESS;
+> > +
+> > +free_handle:
+> > +	efi_call_early(free_pool, *rng_handle);
+> > +
+> > +	return status;
+> > +}
+> 
+> I would suggest setting *rng_handle = NULL at the beginning of this
+> function just because if we ever forget to set it that way in the caller
+> this free_pool call might do screwy things.
+>
 
-No. That's not suitable function name for global function. And you are
-making it global.
-									Pavel
--- 
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+Thanks for your suggestion, I will set NULL to *rng_handle.
+ 
+> 
+> > +static bool efi_rng_supported(efi_system_table_t *sys_table)
+> > +{
+> > +	const struct efi_config *efi_early = __efi_early();
+> > +	u32 random = 0;
+> > +	efi_status_t status;
+> > +	void **rng_handle = NULL;
+> > +
+> > +	status = efi_locate_rng(sys_table, &rng_handle);
+> > +	if (status != EFI_SUCCESS)
+> > +		return false;
+> > +
+> > +	if (efi_early->is64)
+> > +		random = efi_rng_supported64(sys_table, rng_handle);
+> > +	else
+> > +		random = efi_rng_supported32(sys_table, rng_handle);
+> > +
+> > +	efi_call_early(free_pool, rng_handle);
+> > +
+> > +	return random;
+> 
+> Oops, 'random' isn't a bool but it should be.
+> 
+
+I will change type of random to boot.
+
+> > @@ -51,6 +236,14 @@ static unsigned long get_random_long(unsigned long entropy,
+> >  		use_i8254 = false;
+> >  	}
+> >  
+> > +	if (efi_rng_supported(sys_table)) {
+> > +		efi_printk(sys_table, " EFI_RNG");
+> > +		raw = efi_get_rng(sys_table);
+> > +		if (raw)
+> > +			random ^= raw;
+> > +		use_i8254 = false;
+> > +	}
+> > +
+> >  	if (use_i8254) {
+> >  		efi_printk(sys_table, " i8254");
+> >  		random ^= i8254();
+> 
+> Have you looked at the tradeoff in terms of boot time for building a key
+> array in 'unsigned long' chunks as opposed to passing the array and size
+> directly for the RNG protocol?
+>
+
+I didn't really measure the speed, but directly passing array and size to
+RNG protocol should a bit faster than calling the protocol a could of times.
+
+But, the key generation process only in first time building or trigger by
+user raises the rebuild flag. So, it doesn't affect to every booting time.
+
+Due to I want let the whole key array more random, so each unsigned long
+chunk was mixed(xor) by following entropy:
+ + random long from RDRAND
+ + RDTSC
+ + random long from EFI RNG protocol
+ + last unsigned long chunk
+
+Another reason is voiding the result of EFI RNG protocol to get weight
+higher than other source, in case too trust EFI RNG.
+
+
+Thanks a lot!
+Joey Lee
