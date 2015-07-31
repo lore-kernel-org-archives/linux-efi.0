@@ -1,65 +1,84 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [RFC PATCH 01/16] PM / hibernate: define HMAC algorithm and
- digest size of swsusp
-Date: Fri, 31 Jul 2015 23:46:11 +0800
-Message-ID: <20150731154611.GG2067@linux-rxt1.site>
+From: joeyli <jlee@suse.com>
+Subject: Re: [RFC PATCH 05/16] x86/efi: Get entropy through EFI random number
+ generator protocol
+Date: Sat, 1 Aug 2015 00:05:36 +0800
+Message-ID: <20150731160536.GH2067@linux-rxt1.site>
 References: <1437056730-15247-1-git-send-email-jlee@suse.com>
- <1437056730-15247-2-git-send-email-jlee@suse.com>
- <20150728120156.GB9518@amd>
- <20150731100812.GD13113@linux-rxt1.site>
- <20150731124936.GA5728@amd>
+ <1437056730-15247-6-git-send-email-jlee@suse.com>
+ <20150728122853.GB12681@amd>
+ <20150731095854.GC13113@linux-rxt1.site>
+ <1438344078.11322.46.camel@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150731124936.GA5728@amd>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-KKrjLPT3xs0@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1438344078.11322.46.camel@intel.com>
+Sender: linux-pm-owner@vger.kernel.org
+To: Matt Fleming <matt.fleming@intel.com>
+Cc: Pavel Machek <pavel@ucw.cz>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jul 31, 2015 at 02:49:36PM +0200, Pavel Machek wrote:
-> On Fri 2015-07-31 18:08:12, joeyli wrote:
-> > On Tue, Jul 28, 2015 at 02:01:56PM +0200, Pavel Machek wrote:
-> > > On Thu 2015-07-16 22:25:15, Lee, Chun-Yi wrote:
-> > > > Using HMAC-SHA1 to be the HMAC algorithm of signing hibernate
-> > > > snapshot image. The digest size of HMAC-SHA1 is 160 bits (20 bytes),
-> > > > this size will be also applied to the length of HMAC key.
-> > > > 
-> > > > In addition, add HIBERNATE_VERIFICATION kernel config.
-> > > > 
-> > > > Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-> > > > ---
-> > > >  include/linux/suspend.h |  5 +++++
-> > > >  kernel/power/Kconfig    | 13 +++++++++++++
-> > > >  kernel/power/power.h    |  1 +
-> > > >  3 files changed, 19 insertions(+)
-> > > > 
-> > > > diff --git a/include/linux/suspend.h b/include/linux/suspend.h
-> > > > index 5efe743..6cd2a48 100644
-> > > > --- a/include/linux/suspend.h
-> > > > +++ b/include/linux/suspend.h
-> > > > @@ -327,6 +327,11 @@ struct platform_hibernation_ops {
-> > > >  };
-> > > >  
-> > > >  #ifdef CONFIG_HIBERNATION
-> > > > +
-> > > > +/* HMAC Algorithm of Hibernate Signature */
-> > > > +#define SWSUSP_HMAC		"hmac(sha1)"
-> > > > +#define SWSUSP_DIGEST_SIZE	20
+On Fri, Jul 31, 2015 at 01:01:18PM +0100, Matt Fleming wrote:
+> On Fri, 2015-07-31 at 17:58 +0800, joeyli wrote:
 > > > 
-> > > I'd replace SWSUSP with HIBERNATION here, and pretty much everywhere.
+> > > Can you do something to avoid each function having two very similar
+> > > versions of these functions?
 > > >
 > > 
-> > SWSUSP is shorter than HIBERNATION, and there have some codes in hibernate
-> > are also using swsusp. I still want to use it.
+> > They are similar but I want follow the style in eboot.c.
+> > On the other hand, it's earlier to locate problem on 32-bit or 64-bit EFI.
+> > 
+> > So, I will keep the above codes.
 > 
-> Yes, its shorter, but its old name we are trying to move away
-> from. Please do the same.
-> 									Pavel
-
-OK~ I will rename.
-
+> FWIW, I think that's fine. I would happily accept a patch to cleanup the
+> duplication, but I don't think that needs to be a prerequisite for this
+> support.
+> 
+> I've no problem with the duplication right now.
+>
 
 Thanks
+ 
+> > > 
+> > > > --- a/include/linux/efi.h
+> > > > +++ b/include/linux/efi.h
+> > > > @@ -427,6 +427,16 @@ typedef struct {
+> > > >  #define EFI_PCI_IO_ATTRIBUTE_VGA_PALETTE_IO_16 0x20000
+> > > >  #define EFI_PCI_IO_ATTRIBUTE_VGA_IO_16 0x40000
+> > > >  
+> > > > +typedef struct {
+> > > > +	u32 get_info;
+> > > > +	u32 get_rng;
+> > > > +} efi_rng_protocol_32;
+> > > > +
+> > > > +typedef struct {
+> > > > +	u64 get_info;
+> > > > +	u64 get_rng;
+> > > > +} efi_rng_protocol_64;
+> > > 
+> > > We don't typedef structs usually...
+> > > 
+> > > Make it union so you can have just one
+> > >
+> > 
+> > I want to follow the style as efi_pci_io_protocolxxx in efi.h.
+> > So I will keep it.
+> 
+> Yeah, consistency is better here than sticking with the general Linux
+> coding style rules.
+> 
+> > > > +	switch (status) {
+> > > > +	case EFI_SUCCESS:
+> > > > +		str = "EFI_SUCCESS";
+> > > > +		break;
+> > > 
+> > > Can you use macros to reduce code duplication here?
+> > > 									Pavel
+> > I will try to reduce duplicate code.
+> 
+> Take a look at __stringify().
+>
+
+Thanks for suggestion, I will look at it.
+
 Joey Lee
