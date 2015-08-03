@@ -1,32 +1,48 @@
-From: Valdis.Kletnieks@vt.edu
-Subject: Re: [RFC PATCH 07/16] efi: Public the function of transferring EFI status to kernel error
-Date: Sat, 01 Aug 2015 20:23:18 -0400
-Message-ID: <37520.1438474998@turing-police.cc.vt.edu>
-References: <1437056730-15247-1-git-send-email-jlee@suse.com> <1437056730-15247-8-git-send-email-jlee@suse.com>
-            <1438273402.11322.17.camel@intel.com>
+From: fupan <fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+Subject: Re: [PATCH 3.10 ~ 3.14] efi: fix the efi 32bit boot failed problem
+Date: Mon, 3 Aug 2015 09:38:23 +0800
+Message-ID: <55BEC60F.1040404@windriver.com>
+References: <1438078879-24705-1-git-send-email-fupan.li@windriver.com> <20150730150428.GJ2725@codeblueprint.co.uk> <20150730163102.GA19943@kroah.com> <20150730164544.GL2725@codeblueprint.co.uk> <20150730165943.GD5515@kroah.com> <55BACDD9.6020505@windriver.com> <20150731120519.GN2725@codeblueprint.co.uk> <20150731122150.GB2626@ares>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-reply-to: Your message of "Thu, 30 Jul 2015 17:23:22 +0100."
-             <1438273402.11322.17.camel@intel.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: Matt Fleming <matt.fleming@intel.com>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@sisk.pl>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <jlee@suse.com>
+Content-Type: text/plain; charset=windows-1252;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150731122150.GB2626@ares>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Luis Henriques <luis.henriques-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Jiri Slaby <jslaby-AlSwsSmVLrQ@public.gmane.org>, Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fupanli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 30 Jul 2015 17:23:22 +0100, Matt Fleming said:
-> On Thu, 2015-07-16 at 22:25 +0800, Lee, Chun-Yi wrote:
-> > Moved the function of transferring EFI status to kernel error for
-> > later used by EFI stub.
-> > 
-> > Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> > ---
-> >  drivers/firmware/efi/vars.c | 33 ---------------------------------
-> >  include/linux/efi.h         | 33 +++++++++++++++++++++++++++++++++
-> >  2 files changed, 33 insertions(+), 33 deletions(-)
+On 07/31/2015 08:21 PM, Luis Henriques wrote:
+> On Fri, Jul 31, 2015 at 01:05:19PM +0100, Matt Fleming wrote:
+>> On Fri, 31 Jul, at 09:22:33AM, fupan wrote:
+>>> Hi, Matt
+>>>
+>>> Will you take care of this patch or I send a V2?
+>>  =20
+>> Could you please send a V2 with the changes to the commit message th=
+at I
+>> suggested previously? Thanks!
+>>
+> I'm replying to this thread simply to include Jiri on the CC list as =
+I
+> believe 3.12 will also require this fix.  Please make sure he's in th=
+e
+> list for the v2.
+Hi, Lu=EDs
+
+No problem.
+
+BTW, actually all of the branch from 3.10 to 3.14 will need this fix.
+
+=46upan
 >
-> The patch contents are fine but the title could do with some work,
-> "public" isn't a verb.
-
-In English, any noun can be verbed. :)
-
+> [ It looks like the 3.16 kernel I'm maintaining isn't affected, BTW. =
+]
+>
+> Cheers,
+> --
+> Lu=EDs
+>
+>
