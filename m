@@ -1,45 +1,34 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH V9 0/5] map GHES memory region according to EFI memory map
-Date: Mon, 3 Aug 2015 12:26:58 +0100
-Message-ID: <20150803112658.GE10501@arm.com>
-References: <1438292109-4170-1-git-send-email-zjzhang@codeaurora.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH V2] efi: fix 32bit kernel boot failed problem using efi
+Date: Mon, 3 Aug 2015 12:39:53 +0100
+Message-ID: <20150803113953.GO2725@codeblueprint.co.uk>
+References: <1438567369-23332-1-git-send-email-fupan.li@windriver.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1438292109-4170-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@gmail.com" <tony.luck@gmail.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "fu.wei@linaro.org" <fu.wei@linaro.org>, "al.stone@linaro.org" <al.stone@linaro.org>, "bp@alien8.de" <bp@alien8.de>, "rjw@rjwysocki.net" <rjw@rjwysocki.net>, "lenb@kernel.org" <lenb@kernel.org>, "ying.huang@intel.com" <ying.huang@intel.com>, Catalin Marinas <Catalin.Marinas@arm.com>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "hanjun.guo@linaro.org" <hanjun.guo@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-arm-msm@vger.kernel.or
+In-Reply-To: <1438567369-23332-1-git-send-email-fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org
+Cc: jslaby-AlSwsSmVLrQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fupanli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Jonathan,
+On Mon, 03 Aug, at 10:02:49AM, fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org wrote:
+> From: fli <fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+> 
+> Commit 35d5134b7d5a
+> ("x86/efi: Correct EFI boot stub use of code32_start")
+> imported a bug, which will cause 32bit kernel boot failed
+> using efi method. It should use the label's address instead
+> of the value stored in the label to caculate the address of
+> code32_start.
+> 
+> Signed-off-by: Fupan Li <fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+> ---
+>  arch/x86/boot/compressed/head_32.S | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 
-On Thu, Jul 30, 2015 at 10:35:04PM +0100, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-> 
-> On a platform with APEI (ACPI Platform Error Interface) enabled, firmware
-> updates a memory region with hardware error record using nocache
-> attribute. When OS reads the region, since it maps the region with
-> cacahed attribute even though EFI memory map defines this region as
-> uncached, OS gets stale data and errorneously reports there is no new
-> HW error.
-> 
-> When ghes driver maps the memory region, it uses the cache attribute
-> according to EFI memory map, if EFI memory map feature is enabled
-> at runtime.
-> 
-> Since both arch/x86 and arch/ia64 implemented architecture agnostic EFI
-> memory map attribue lookup function efi_memattributes(), the code is
-> moved from arch/x86 into EFI subsystem and is declared as __weak; archs
-> other than ia64 should not override the default implementation.
-> 
-> V9:
-> 1. Rebased to arm64-upstream-14543 of arm64/master.
-> 2. Match strict MM type in arch_apei_get_mem_attribute().
+Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-I guess this is all going via Matt's tree? I'm happy to take the new
-memory type in arch/arm64/ if there's nothing currently queued, but I
-suspect it makes more sense for it to stay together.
-
-Will
+-- 
+Matt Fleming, Intel Open Source Technology Center
