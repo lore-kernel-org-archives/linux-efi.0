@@ -1,32 +1,74 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH V9 0/5] map GHES memory region according to EFI memory map
-Date: Mon, 3 Aug 2015 17:23:54 +0100
-Message-ID: <20150803162354.GQ2725@codeblueprint.co.uk>
-References: <1438292109-4170-1-git-send-email-zjzhang@codeaurora.org>
- <20150803112658.GE10501@arm.com>
+From: Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>
+Subject: Re: [PATCH V2] efi: fix 32bit kernel boot failed problem using efi
+Date: Mon, 03 Aug 2015 23:15:33 +0100
+Message-ID: <1438640133.3225.112.camel@decadent.org.uk>
+References: <1438567369-23332-1-git-send-email-fupan.li@windriver.com>
+	 <20150803161509.GA18377@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-fOfev0svnuteN8vhAFNc"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150803112658.GE10501-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <20150803161509.GA18377-U8xfFu+wG4EAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org" <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <al.stone-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, "lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>"linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linu>
+To: Greg KH <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org
+Cc: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, jslaby-AlSwsSmVLrQ@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, fupanli-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 03 Aug, at 12:26:58PM, Will Deacon wrote:
-> 
-> I guess this is all going via Matt's tree? I'm happy to take the new
-> memory type in arch/arm64/ if there's nothing currently queued, but I
-> suspect it makes more sense for it to stay together.
 
-Right, it probably does make sense to take this through a single tree.
+--=-fOfev0svnuteN8vhAFNc
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-I'm still waiting for the ACPI folks to chime in on whether this series
-makes sense, and in particular I'd like to hear from people that have
-touched ghes.c in the past.
+On Mon, 2015-08-03 at 09:15 -0700, Greg KH wrote:
+> On Mon, Aug 03, 2015 at 10:02:49AM +0800, fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org wrot
+> e:
+> > From: fli <fupan.li-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+>=20
+> This needs to match the signed-off-by line, otherwise I can't take it=20
+> :(
+>=20
+> Please fix up and resend.
+>=20
+> And what -stable tree is this for?
 
-Rafael, Boris?
+The bug was introduced in 35d5134b7d5a on the 3.10 branch, but the same
+bug in the backport seems to have been introduced on the 3.14 branch
+and two others you don't maintain:
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+v3.10.39: 35d5134b7d5a x86/efi: Correct EFI boot stub use of code32_start
+v3.12.20: 065487a10a22 x86/efi: Correct EFI boot stub use of code32_start
+v3.14.3: 45ada9fae6d8 x86/efi: Correct EFI boot stub use of code32_start
+v3.11.10.11: f32e88d764e3 x86/efi: Correct EFI boot stub use of code32_star=
+t
+
+Ben.
+
+--=20
+Ben Hutchings
+Unix is many things to many people,
+but it's never been everything to anybody.
+
+
+--=-fOfev0svnuteN8vhAFNc
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
+
+iQIVAwUAVb/oBee/yOyVhhEJAQoQmw/5ASgGcKnT0Sf5Mrw1G3L3GfeUgWv1iOLt
+AdEcrQ+eXZltlla9GHy2rzzIJkdXAKiMEu5AUUZpt1m5nk2qgOJ4inzCz53iIgGt
+GTenMWg67MumGMWhlYqDhYXT87hmczmTcRsA0k0HRy2U39I1o5IXJpCqr8Loc8ZI
+UjeXJnz7Z4bUahQx+wLR2Pjma9GASC/wBaGqRZPGosjPs+Ojiet1TaahDc30KQfp
+1NvlB+49o/7DExVkO8vAdZe4F8M6FkqGasP8Vu8gtXDfRiLWWI0Q5+7e357iGRv9
+5Eyseg+jTLrqQJSt2xGe6pc49DnTFA0TVMStdS7jFOFXLOFgmBwDOT2k8WzacbEE
+r/4WmkKJG1pga5g8wcMHtnWvVJb6Dqgvyi60P2etuNyne+nWnfmvBoS+85p4pfWk
+xT7FbhtHFamsZKyZx9ZPVDAhMsLM6I4ETUiH68LBpL4GOT4s8pdxCHll0JCYF9NG
+P/wGwMtF2UkY9HF4+rBdGypvbhPzlh/9ADHSstmP5405/zCMHYF0at0v/PsnUHue
+Diz1+jBug+JyAahwbGJ3vs8buKU5+0uhUQSvIQtoGbB9SUp4SJ2WLcGe2xmSEYgd
+9P9TDP0e+prsvlsxOFryBndGbj1OIShvfMrgLQ7tmrJ4F27gYtyKsOXDZ2AKmGQl
+VMD/msdvAHE=
+=Zlb6
+-----END PGP SIGNATURE-----
+
+--=-fOfev0svnuteN8vhAFNc--
