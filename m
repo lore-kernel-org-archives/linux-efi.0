@@ -1,49 +1,83 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang@codeaurora.org>
-Subject: Re: [PATCH V9 0/5] map GHES memory region according to EFI memory map
-Date: Thu, 6 Aug 2015 06:47:23 -0700
-Message-ID: <55C3656B.5090808@codeaurora.org>
-References: <1438292109-4170-1-git-send-email-zjzhang@codeaurora.org>
- <20150803112658.GE10501@arm.com> <20150803162354.GQ2725@codeblueprint.co.uk>
- <20150804042552.GG31787@nazgul.tnic> <55C0DD30.9070800@codeaurora.org>
- <20150805092125.GB4332@codeblueprint.co.uk> <55C232BC.1010107@codeaurora.org>
- <20150805161000.GE4332@codeblueprint.co.uk>
- <20150805161325.GF4332@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL] EFI changes for v4.3
+Date: Thu, 6 Aug 2015 21:32:32 +0100
+Message-ID: <20150806203232.GH4332@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-msm-owner@vger.kernel.org>
-In-Reply-To: <20150805161325.GF4332@codeblueprint.co.uk>
-Sender: linux-arm-msm-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@alien8.de>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "tony.luck@gmail.com" <tony.luck@gmail.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "fu.wei@linaro.org" <fu.wei@linaro.org>, "al.stone@linaro.org" <al.stone@linaro.org>, "rjw@rjwysocki.net" <rjw@rjwysocki.net>, "lenb@kernel.org" <lenb@kernel.org>, "ying.huang@intel.com" <ying.huang@intel.com>, Catalin Marinas <Catalin.Marinas@arm.com>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "hanjun.guo@linaro.org" <hanjun.guo@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+Folks, please pull the following changes for v4.3. The biggest changes
+are the memory map querying updates in the ACPI GHES driver and the
+revert of commit aeffc4928ea2 ("x86/efi: Request desired alignment via
+the PE/COFF headers") which was reportedly causing errors when users
+attempt to sign their kernels with Signtool.
 
+The GHES driver changes touch a mixture of ACPI, x86 and arm64 code but
+all the patches have been ACKed and/or reviewed by relevant people.
 
-On 8/5/2015 9:13 AM, Matt Fleming wrote:
-> On Wed, 05 Aug, at 05:10:00PM, Matt Fleming wrote:
->> On Wed, 05 Aug, at 08:58:52AM, Zhang, Jonathan Zhixiong wrote:
->>>
->>> Yes, absolutely. It has been in my mind, sorry I was tied up in the last
->>> few days. I wonder what I may missed, I certainly do x86 build test with
->>> versions of the patch set.
->>>
->>> I will try today and report back.
->>
->> No problem.
->>
->> I'd suggest moving the implementation into include/acpi/apei.h and
->> leaving it as static inline instead of implementing it out of line in
->> arch/x86/kernel/acpi/apei.c.
->
-> Yeah, I didn't mean include/acpi/apei.h but the architecture-specific
-> equivalent.
->
-Thank you Matt. It builds well on x86 with default configuration, but
-not if APEI feature is turned on. This is my fault.
-I just sent a new version of the patch set out.
+The following changes since commit bc0195aad0daa2ad5b0d76cce22b167bc3435590:
+
+  Linux 4.2-rc2 (2015-07-12 15:10:30 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 8229722e29da369a4e9512a5c18adb4028a7626b:
+
+  acpi, apei: use appropriate pgprot_t to map GHES memory (2015-08-06 15:44:41 +0100)
+
+----------------------------------------------------------------
+ * Add support for the new EFI memory map attribute EFI_MEMORY_RO that
+   was introduced in the UEFI 2.5 spec - Ard Biesheuvel
+
+ * Lower the severity of the invalid BGRT message from pr_err()
+   to pr_debug() since it's legitimate (per the spec) for the firmware
+   to pass the kernel a BGRT with the invalid status bit set. The kernel
+   just simply needs to ignore it.
+
+ * Revert the optimisation of using CONFIG_PHYSICAL_ALIGN in the
+   PE/COFF header SectionAlignment field of the EFI stub, since it
+   violates the PE/COFF spec which says SizeOfImage must be a multiple
+   of SectionAlignment, and because it was causing Signtool to fail.
+
+ * Update the ACPI Platform Error Interface (APEI) GHES driver to query
+   the EFI memory map for the correct cache attributes to use when
+   mapping pages accessed by both the kernel and firmware. This prevents
+   stale data being read by the kernel - Jonathan (Zhixiong) Zhang
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      efi: Add support for EFI_MEMORY_RO attribute introduced by UEFIv2.5
+
+Jonathan (Zhixiong) Zhang (5):
+      efi: x86: rearrange efi_mem_attributes()
+      x86: acpi: implement arch_apei_get_mem_attributes()
+      arm64: mm: add PROT_DEVICE_nGnRnE and PROT_NORMAL_WT
+      arm64: apei: implement arch_apei_get_mem_attributes()
+      acpi, apei: use appropriate pgprot_t to map GHES memory
+
+Matt Fleming (2):
+      x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid BGRT
+      Revert "x86/efi: Request desired alignment via the PE/COFF headers"
+
+ arch/arm64/include/asm/acpi.h    | 27 +++++++++++++++++++++++++++
+ arch/arm64/include/asm/memory.h  |  1 +
+ arch/arm64/include/asm/pgtable.h |  2 ++
+ arch/arm64/mm/proc.S             |  4 +++-
+ arch/x86/boot/header.S           |  2 +-
+ arch/x86/include/asm/acpi.h      | 24 ++++++++++++++++++++++++
+ arch/x86/platform/efi/efi-bgrt.c |  9 +++++++--
+ arch/x86/platform/efi/efi.c      | 18 ------------------
+ drivers/acpi/apei/ghes.c         |  6 ++++--
+ drivers/firmware/efi/efi.c       | 39 ++++++++++++++++++++++++++++++++++++---
+ include/linux/efi.h              |  1 +
+ 11 files changed, 106 insertions(+), 27 deletions(-)
 
 -- 
-Jonathan (Zhixiong) Zhang
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Matt Fleming, Intel Open Source Technology Center
