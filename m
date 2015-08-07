@@ -1,25 +1,29 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
 Subject: Re: [PATCH 4/8] efi: x86: rearrange efi_mem_attributes()
-Date: Fri, 7 Aug 2015 10:43:46 -0700
-Message-ID: <55C4EE52.2010402@codeaurora.org>
+Date: Fri, 7 Aug 2015 19:46:28 +0100
+Message-ID: <20150807184628.GD2625@codeblueprint.co.uk>
 References: <20150806203232.GH4332@codeblueprint.co.uk>
  <1438936621-5215-4-git-send-email-matt@codeblueprint.co.uk>
+ <55C4EE52.2010402@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1438936621-5215-4-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "\"H. Peter Anvin" <"hpa\""@zytor.co>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <55C4EE52.2010402@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Zhang, Jonathan Zhixiong" <zjzhang@codeaurora.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>
 List-Id: linux-efi@vger.kernel.org
 
-Thank you Matt for your help. I tried to find the cover letter
-and patch 1, 2, 3 of the patch set. But I did not find them.
-Probably the subject has typo? I appreciate that you re-post the
-patch set to get more feed backs, I just wanted to be sure.
+On Fri, 07 Aug, at 10:43:46AM, Zhang, Jonathan Zhixiong wrote:
+> Thank you Matt for your help. I tried to find the cover letter
+> and patch 1, 2, 3 of the patch set. But I did not find them.
+> Probably the subject has typo? I appreciate that you re-post the
+> patch set to get more feed backs, I just wanted to be sure.
+
+I sent the patches as follow-up to my GIT PULL request here,
+
+  https://lkml.kernel.org/r/20150806203232.GH4332@codeblueprint.co.uk
 
 -- 
-Jonathan (Zhixiong) Zhang
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Matt Fleming, Intel Open Source Technology Center
