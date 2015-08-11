@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [PATCH v2 12/16] PM / hibernate: Forward signature verifying result and key to image kernel
-Date: Tue, 11 Aug 2015 14:16:32 +0800
-Message-ID: <1439273796-25359-13-git-send-email-jlee@suse.com>
+Subject: [PATCH v2 10/16] PM / hibernate: Generate and verify signature of hibernate snapshot
+Date: Tue, 11 Aug 2015 14:16:30 +0800
+Message-ID: <1439273796-25359-11-git-send-email-jlee@suse.com>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1439273796-25359-1-git-send-email-jlee@suse.com>
@@ -10,252 +10,435 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-Due to the memory space of boot kernel will be overwritten after restoring
-snapshot image and switching to image kernel. There have some informations
-should be forwarded from boot kernel to image kernel: the result of
-signature verifying, flag of enforce verifying signature and hibernation key.
-That because those informations did not include in hibernate image or
-produced when restoring.
+This is the heart of generating and verifying the signature of
+snapshot image of hibernate.
 
-The significant reason is image kernel needs hibernation key to sign image for
-next hibernate cycle, otherwise the signature generating will be failed in
-next cycle. In additional, it's also useful to expose the verification
-result in dmesg after recovery.
+When creating hibernation image, HMAC-SHA1 calculates hash result
+of all data pages that are copied to image. The signature is stored
+in the header of snapshot, and verified by resuming code when it's
+writing snapshot image to memory space.
 
-The codes in hibernate key handler allocates an empty page as the buffer
-of forward information that will be included in snapshot iamge, then keeps
-page frame number in image header. When restoring snapshot image to memory
-space of boot kernel, snapshot codes will asking key handler to fill forward
-informations to buffer page. Then restoring hibernation key data to key page,
-and cleaning this page buffer for next cycle.
+When the signature verification failed, the hibernate code will stop
+to recover system to image kernel and system will boots as normal.
 
 Reviewed-by: Jiri Kosina <jkosina@suse.com>
 Tested-by: Jiri Kosina <jkosina@suse.com>
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/power/hibernate_keys.c | 63 +++++++++++++++++++++++++++++++++++++++++
- kernel/power/hibernate.c        |  1 +
- kernel/power/power.h            |  6 ++++
- kernel/power/snapshot.c         | 27 +++++++++++++++++-
- kernel/power/user.c             |  1 +
- 5 files changed, 97 insertions(+), 1 deletion(-)
+ kernel/power/power.h    |   5 +
+ kernel/power/snapshot.c | 254 +++++++++++++++++++++++++++++++++++++++++++++---
+ kernel/power/swap.c     |   4 +
+ kernel/power/user.c     |   4 +
+ 4 files changed, 252 insertions(+), 15 deletions(-)
 
-diff --git a/arch/x86/power/hibernate_keys.c b/arch/x86/power/hibernate_keys.c
-index f44823e..5e92101 100644
---- a/arch/x86/power/hibernate_keys.c
-+++ b/arch/x86/power/hibernate_keys.c
-@@ -19,6 +19,15 @@ static u64 keys_phys_addr;
- /* A page used to keep hibernation keys */
- static struct hibernation_keys *hibernation_keys;
- 
-+/* Forward information and keys from boot kernel to image kernel */
-+struct forward_info {
-+	bool            sig_enforce;
-+	int             sig_verify_ret;
-+	struct hibernation_keys hibernation_keys;
-+};
-+
-+static struct forward_info *forward_buff;
-+
- void __init parse_hibernation_keys(u64 phys_addr, u32 data_len)
- {
- 	struct setup_data *hibernation_setup_data;
-@@ -62,6 +71,55 @@ bool swsusp_page_is_keys(struct page *page)
- 	return ret;
- }
- 
-+unsigned long get_forward_buff_pfn(void)
-+{
-+	if (!forward_buff)
-+		return 0;
-+
-+	return page_to_pfn(virt_to_page(forward_buff));
-+}
-+
-+void fill_forward_info(void *forward_buff_page, int verify_ret)
-+{
-+	struct forward_info *info;
-+
-+	if (!forward_buff_page)
-+		return;
-+
-+	memset(forward_buff_page, 0, PAGE_SIZE);
-+	info = (struct forward_info *)forward_buff_page;
-+	info->sig_verify_ret = verify_ret;
-+
-+	if (hibernation_keys && !hibernation_keys->hkey_status) {
-+		info->hibernation_keys = *hibernation_keys;
-+		memset(hibernation_keys, 0, PAGE_SIZE);
-+	} else
-+		pr_info("PM: Fill hibernation keys failed\n");
-+
-+	pr_info("PM: Filled sign information to forward buffer\n");
-+}
-+
-+void restore_sig_forward_info(void)
-+{
-+	if (!forward_buff) {
-+		pr_warn("PM: Did not allocate forward buffer\n");
-+		return;
-+	}
-+
-+	if (forward_buff->sig_verify_ret)
-+		pr_warn("PM: Signature verifying failed: %d\n",
-+			forward_buff->sig_verify_ret);
-+
-+	if (hibernation_keys) {
-+		memset(hibernation_keys, 0, PAGE_SIZE);
-+		*hibernation_keys = forward_buff->hibernation_keys;
-+		pr_info("PM: Restored hibernation keys\n");
-+	}
-+
-+	/* clean forward information buffer for next round */
-+	memset(forward_buff, 0, PAGE_SIZE);
-+}
-+
- static int __init init_hibernation_keys(void)
- {
- 	struct hibernation_keys *keys;
-@@ -76,6 +134,11 @@ static int __init init_hibernation_keys(void)
- 	hibernation_keys = (struct hibernation_keys *)get_zeroed_page(GFP_KERNEL);
- 	if (hibernation_keys) {
- 		*hibernation_keys = *keys;
-+		forward_buff = (struct forward_info *)get_zeroed_page(GFP_KERNEL);
-+		if (!forward_buff) {
-+			pr_err("PM: Allocate forward buffer failed\n");
-+			ret = -ENOMEM;
-+		}
- 	} else {
- 		pr_err("PM: Allocate hibernation keys page failed\n");
- 		ret = -ENOMEM;
-diff --git a/kernel/power/hibernate.c b/kernel/power/hibernate.c
-index 690f78f..640ca8a 100644
---- a/kernel/power/hibernate.c
-+++ b/kernel/power/hibernate.c
-@@ -702,6 +702,7 @@ int hibernate(void)
- 		pm_restore_gfp_mask();
- 	} else {
- 		pr_debug("PM: Image restored successfully.\n");
-+		restore_sig_forward_info();
- 	}
- 
-  Free_bitmaps:
 diff --git a/kernel/power/power.h b/kernel/power/power.h
-index 6d1d406..1ea3513 100644
+index 7d8f310..ccc1e72 100644
 --- a/kernel/power/power.h
 +++ b/kernel/power/power.h
-@@ -13,6 +13,7 @@ struct swsusp_info {
- 	unsigned long		image_pages;
- 	unsigned long		pages;
- 	unsigned long		size;
-+	unsigned long		forward_buff_pfn;
- 	u8                      signature[HIBERNATION_DIGEST_SIZE];
- } __aligned(PAGE_SIZE);
+@@ -143,6 +143,11 @@ extern int snapshot_read_next(struct snapshot_handle *handle);
+ extern int snapshot_write_next(struct snapshot_handle *handle);
+ extern void snapshot_write_finalize(struct snapshot_handle *handle);
+ extern int snapshot_image_loaded(struct snapshot_handle *handle);
++#ifdef CONFIG_HIBERNATE_VERIFICATION
++extern int snapshot_image_verify(void);
++#else
++static inline int snapshot_image_verify(void) { return 0; }
++#endif
  
-@@ -20,8 +21,13 @@ struct swsusp_info {
- /* arch/x86/power/hibernate_keys.c */
- extern int get_hibernation_key(u8 **hkey);
- extern bool swsusp_page_is_keys(struct page *page);
-+extern unsigned long get_forward_buff_pfn(void);
-+extern void fill_forward_info(void *forward_buff_page, int verify_ret);
-+extern void restore_sig_forward_info(void);
- #else
- static inline bool swsusp_page_is_keys(struct page *page) { return false; }
-+static inline unsigned long get_forward_buff_pfn(void) { return 0; }
-+static inline void restore_sig_forward_info(void) {}
- #endif
- 
- /* kernel/power/snapshot.c */
+ /* If unset, the snapshot device cannot be open. */
+ extern atomic_t snapshot_device_available;
 diff --git a/kernel/power/snapshot.c b/kernel/power/snapshot.c
-index 5522028..3629249 100644
+index 5235dd4..b8c7e2e 100644
 --- a/kernel/power/snapshot.c
 +++ b/kernel/power/snapshot.c
-@@ -1281,6 +1281,14 @@ static unsigned int nr_copy_pages;
-  */
- static u8 signature[HIBERNATION_DIGEST_SIZE];
+@@ -36,6 +36,8 @@
+ #include <asm/tlbflush.h>
+ #include <asm/io.h>
  
-+/*
-+ * Keep the pfn of forwarding information buffer from resume target.
-+ * Writing hibernation keys to this buffer in snapshot image before restoring.
-+ */
-+unsigned long forward_buff_pfn;
++#include <crypto/hash.h>
 +
-+void *forward_buff;
-+
- /* Buffer point array for collecting address of page buffers */
- void **h_buf;
+ #include "power.h"
  
-@@ -1383,13 +1391,24 @@ error_key:
- 	return ret;
+ static int swsusp_page_is_free(struct page *);
+@@ -1265,7 +1267,214 @@ static inline void copy_data_page(unsigned long dst_pfn, unsigned long src_pfn)
  }
+ #endif /* CONFIG_HIGHMEM */
  
-+static void snapshot_fill_sig_forward_info(int verify_ret)
+-static void
++/* Total number of image pages */
++static unsigned int nr_copy_pages;
++
++/*
++ * Signature of snapshot
++ */
++static u8 signature[HIBERNATION_DIGEST_SIZE];
++
++/* Buffer point array for collecting address of page buffers */
++void **h_buf;
++
++#ifdef CONFIG_HIBERNATE_VERIFICATION
++static int
++__copy_data_pages(struct memory_bitmap *copy_bm, struct memory_bitmap *orig_bm)
 +{
-+	if (!forward_buff_pfn || !forward_buff) {
-+		pr_err("PM: Did not find forward buffer\n");
-+		return;
++	unsigned long pfn, dst_pfn;
++	struct page *d_page;
++	void *hash_buffer = NULL;
++	struct crypto_shash *tfm = NULL;
++	struct shash_desc *desc = NULL;
++	u8 *key = NULL, *digest = NULL;
++	size_t digest_size, desc_size;
++	int key_err = 0, ret = 0;
++
++	key_err = get_hibernation_key(&key);
++	if (key_err)
++		goto copy_pages;
++
++	tfm = crypto_alloc_shash(HIBERNATION_HMAC, 0, 0);
++	if (IS_ERR(tfm)) {
++		pr_err("PM: Allocate HMAC failed: %ld\n", PTR_ERR(tfm));
++		return PTR_ERR(tfm);
 +	}
 +
-+	/* Fill hibernation keys to snapshot in memory for next round */
-+	fill_forward_info(forward_buff, verify_ret);
++	ret = crypto_shash_setkey(tfm, key, HIBERNATION_DIGEST_SIZE);
++	if (ret) {
++		pr_err("PM: Set HMAC key failed\n");
++		goto error_setkey;
++	}
++
++	desc_size = crypto_shash_descsize(tfm) + sizeof(*desc);
++	digest_size = crypto_shash_digestsize(tfm);
++	digest = kzalloc(digest_size + desc_size, GFP_KERNEL);
++	if (!digest) {
++		pr_err("PM: Allocate digest failed\n");
++		ret = -ENOMEM;
++		goto error_digest;
++	}
++
++	desc = (void *) digest + digest_size;
++	desc->tfm = tfm;
++	desc->flags = CRYPTO_TFM_REQ_MAY_SLEEP;
++	ret = crypto_shash_init(desc);
++	if (ret < 0)
++		goto error_shash;
++
++copy_pages:
++	memory_bm_position_reset(orig_bm);
++	memory_bm_position_reset(copy_bm);
++	for (;;) {
++		pfn = memory_bm_next_pfn(orig_bm);
++		if (unlikely(pfn == BM_END_OF_MAP))
++			break;
++		dst_pfn = memory_bm_next_pfn(copy_bm);
++		copy_data_page(dst_pfn, pfn);
++
++		/* Generate digest */
++		d_page = pfn_to_page(dst_pfn);
++		if (PageHighMem(d_page)) {
++			void *kaddr = kmap_atomic(d_page);
++
++			copy_page(buffer, kaddr);
++			kunmap_atomic(kaddr);
++			hash_buffer = buffer;
++		} else {
++			hash_buffer = page_address(d_page);
++		}
++
++		if (key_err)
++			continue;
++
++		ret = crypto_shash_update(desc, hash_buffer, PAGE_SIZE);
++		if (ret)
++			goto error_shash;
++	}
++
++	if (key_err)
++		goto error_key;
++
++	ret = crypto_shash_final(desc, digest);
++	if (ret)
++		goto error_shash;
++
++	memset(signature, 0, HIBERNATION_DIGEST_SIZE);
++	memcpy(signature, digest, HIBERNATION_DIGEST_SIZE);
++
++	kfree(digest);
++	crypto_free_shash(tfm);
++
++	return 0;
++
++error_shash:
++	kfree(digest);
++error_setkey:
++error_digest:
++	crypto_free_shash(tfm);
++error_key:
++	return ret;
 +}
 +
- int snapshot_image_verify(void)
++int snapshot_image_verify(void)
++{
++	struct crypto_shash *tfm;
++	struct shash_desc *desc;
++	u8 *key, *digest;
++	size_t digest_size, desc_size;
++	int ret, i;
++
++	if (!h_buf)
++		return 0;
++
++	ret = get_hibernation_key(&key);
++	if (ret)
++		goto forward_ret;
++
++	tfm = crypto_alloc_shash(HIBERNATION_HMAC, 0, 0);
++	if (IS_ERR(tfm)) {
++		pr_err("PM: Allocate HMAC failed: %ld\n", PTR_ERR(tfm));
++		return PTR_ERR(tfm);
++	}
++
++	ret = crypto_shash_setkey(tfm, key, HIBERNATION_DIGEST_SIZE);
++	if (ret) {
++		pr_err("PM: Set HMAC key failed\n");
++		goto error_setkey;
++	}
++
++	desc_size = crypto_shash_descsize(tfm) + sizeof(*desc);
++	digest_size = crypto_shash_digestsize(tfm);
++	digest = kzalloc(digest_size + desc_size, GFP_KERNEL);
++	if (!digest) {
++		pr_err("PM: Allocate digest failed\n");
++		ret = -ENOMEM;
++		goto error_digest;
++	}
++	desc = (void *) digest + digest_size;
++	desc->tfm = tfm;
++	desc->flags = CRYPTO_TFM_REQ_MAY_SLEEP;
++
++	ret = crypto_shash_init(desc);
++	if (ret < 0)
++		goto error_shash;
++
++	for (i = 0; i < nr_copy_pages; i++) {
++		ret = crypto_shash_update(desc, *(h_buf + i), PAGE_SIZE);
++		if (ret)
++			goto error_shash;
++	}
++
++	ret = crypto_shash_final(desc, digest);
++	if (ret)
++		goto error_shash;
++
++	pr_debug("PM: Signature %*phN\n", HIBERNATION_DIGEST_SIZE, signature);
++	pr_debug("PM: Digest %*phN\n", (int) digest_size, digest);
++	if (memcmp(signature, digest, HIBERNATION_DIGEST_SIZE))
++		ret = -EKEYREJECTED;
++
++error_shash:
++	kfree(h_buf);
++	kfree(digest);
++error_setkey:
++error_digest:
++	crypto_free_shash(tfm);
++forward_ret:
++	if (ret)
++		pr_warn("PM: Signature verifying failed: %d\n", ret);
++	return ret;
++}
++
++static void alloc_h_buf(void)
++{
++	h_buf = kmalloc(sizeof(void *) * nr_copy_pages, GFP_KERNEL);
++	if (!h_buf)
++		pr_err("PM: Allocate buffer point array failed\n");
++}
++#else
++static int
++__copy_data_pages(struct memory_bitmap *copy_bm, struct memory_bitmap *orig_bm)
++{
++	unsigned long pfn;
++
++	memory_bm_position_reset(orig_bm);
++	memory_bm_position_reset(copy_bm);
++	for (;;) {
++		pfn = memory_bm_next_pfn(orig_bm);
++		if (unlikely(pfn == BM_END_OF_MAP))
++			break;
++		copy_data_page(memory_bm_next_pfn(copy_bm), pfn);
++	}
++
++	return 0;
++}
++
++static inline void alloc_h_buf(void) {}
++#endif /* CONFIG_HIBERNATE_VERIFICATION */
++
++static int
+ copy_data_pages(struct memory_bitmap *copy_bm, struct memory_bitmap *orig_bm)
  {
- 	struct crypto_shash *tfm;
- 	struct shash_desc *desc;
- 	u8 *key, *digest;
- 	size_t digest_size, desc_size;
--	int ret, i;
-+	int i, ret = 0;
- 
- 	if (!h_buf)
- 		return 0;
-@@ -1450,6 +1469,7 @@ error_digest:
- forward_ret:
- 	if (ret)
- 		pr_warn("PM: Signature verifying failed: %d\n", ret);
-+	snapshot_fill_sig_forward_info(ret);
- 	return ret;
+ 	struct zone *zone;
+@@ -1280,18 +1489,10 @@ copy_data_pages(struct memory_bitmap *copy_bm, struct memory_bitmap *orig_bm)
+ 			if (page_is_saveable(zone, pfn))
+ 				memory_bm_set_bit(orig_bm, pfn);
+ 	}
+-	memory_bm_position_reset(orig_bm);
+-	memory_bm_position_reset(copy_bm);
+-	for(;;) {
+-		pfn = memory_bm_next_pfn(orig_bm);
+-		if (unlikely(pfn == BM_END_OF_MAP))
+-			break;
+-		copy_data_page(memory_bm_next_pfn(copy_bm), pfn);
+-	}
++
++	return __copy_data_pages(copy_bm, orig_bm);
  }
  
-@@ -2126,6 +2146,7 @@ static int init_header(struct swsusp_info *info)
+-/* Total number of image pages */
+-static unsigned int nr_copy_pages;
+ /* Number of pages needed for saving the original pfns of the image pages */
+ static unsigned int nr_meta_pages;
+ /*
+@@ -1837,6 +2038,7 @@ swsusp_alloc(struct memory_bitmap *orig_bm, struct memory_bitmap *copy_bm,
+ asmlinkage __visible int swsusp_save(void)
+ {
+ 	unsigned int nr_pages, nr_highmem;
++	int ret;
+ 
+ 	printk(KERN_INFO "PM: Creating hibernation image:\n");
+ 
+@@ -1859,7 +2061,11 @@ asmlinkage __visible int swsusp_save(void)
+ 	 * Kill them.
+ 	 */
+ 	drain_local_pages(NULL);
+-	copy_data_pages(&copy_bm, &orig_bm);
++	ret = copy_data_pages(&copy_bm, &orig_bm);
++	if (ret) {
++		pr_err("PM: Copy data pages failed\n");
++		return ret;
++	}
+ 
+ 	/*
+ 	 * End of critical section. From now on, we can write to memory,
+@@ -1914,6 +2120,7 @@ static int init_header(struct swsusp_info *info)
  	info->pages = snapshot_get_image_size();
  	info->size = info->pages;
  	info->size <<= PAGE_SHIFT;
-+	info->forward_buff_pfn = get_forward_buff_pfn();
- 	memcpy(info->signature, signature, HIBERNATION_DIGEST_SIZE);
++	memcpy(info->signature, signature, HIBERNATION_DIGEST_SIZE);
  	return init_header_complete(info);
  }
-@@ -2289,6 +2310,7 @@ load_header(struct swsusp_info *info)
+ 
+@@ -2076,6 +2283,8 @@ load_header(struct swsusp_info *info)
  	if (!error) {
  		nr_copy_pages = info->image_pages;
  		nr_meta_pages = info->pages - info->image_pages - 1;
-+		forward_buff_pfn = info->forward_buff_pfn;
- 		memset(signature, 0, HIBERNATION_DIGEST_SIZE);
- 		memcpy(signature, info->signature, HIBERNATION_DIGEST_SIZE);
++		memset(signature, 0, HIBERNATION_DIGEST_SIZE);
++		memcpy(signature, info->signature, HIBERNATION_DIGEST_SIZE);
  	}
-@@ -2757,6 +2779,9 @@ int snapshot_write_next(struct snapshot_handle *handle)
+ 	return error;
+ }
+@@ -2414,7 +2623,8 @@ prepare_image(struct memory_bitmap *new_bm, struct memory_bitmap *bm)
+  *	set for its caller to write to.
+  */
+ 
+-static void *get_buffer(struct memory_bitmap *bm, struct chain_allocator *ca)
++static void *get_buffer(struct memory_bitmap *bm, struct chain_allocator *ca,
++		unsigned long *_pfn)
+ {
+ 	struct pbe *pbe;
+ 	struct page *page;
+@@ -2423,6 +2633,9 @@ static void *get_buffer(struct memory_bitmap *bm, struct chain_allocator *ca)
+ 	if (pfn == BM_END_OF_MAP)
+ 		return ERR_PTR(-EFAULT);
+ 
++	if (_pfn)
++		*_pfn = pfn;
++
+ 	page = pfn_to_page(pfn);
+ 	if (PageHighMem(page))
+ 		return get_highmem_page_buffer(page, ca);
+@@ -2469,6 +2682,7 @@ static void *get_buffer(struct memory_bitmap *bm, struct chain_allocator *ca)
+ int snapshot_write_next(struct snapshot_handle *handle)
+ {
+ 	static struct chain_allocator ca;
++	unsigned long pfn;
+ 	int error = 0;
+ 
+ 	/* Check if we have already loaded the entire image */
+@@ -2491,6 +2705,12 @@ int snapshot_write_next(struct snapshot_handle *handle)
+ 		if (error)
+ 			return error;
+ 
++		/* Allocate buffer point array for generating
++		 * digest to compare with signature.
++		 * h_buf will freed in snapshot_image_verify().
++		 */
++		alloc_h_buf();
++
+ 		error = memory_bm_create(&copy_bm, GFP_ATOMIC, PG_ANY);
+ 		if (error)
+ 			return error;
+@@ -2513,20 +2733,24 @@ int snapshot_write_next(struct snapshot_handle *handle)
+ 			chain_init(&ca, GFP_ATOMIC, PG_SAFE);
+ 			memory_bm_position_reset(&orig_bm);
+ 			restore_pblist = NULL;
+-			handle->buffer = get_buffer(&orig_bm, &ca);
++			handle->buffer = get_buffer(&orig_bm, &ca, &pfn);
  			handle->sync_read = 0;
- 		if (h_buf)
- 			*(h_buf + (handle->cur - nr_meta_pages - 1)) = handle->buffer;
-+		/* Keep the buffer of hibernation keys in snapshot */
-+		if (forward_buff_pfn && pfn == forward_buff_pfn)
-+			forward_buff = handle->buffer;
+ 			if (IS_ERR(handle->buffer))
+ 				return PTR_ERR(handle->buffer);
++			if (h_buf)
++				*h_buf = handle->buffer;
+ 		}
+ 	} else {
+ 		copy_last_highmem_page();
+ 		/* Restore page key for data page (s390 only). */
+ 		page_key_write(handle->buffer);
+-		handle->buffer = get_buffer(&orig_bm, &ca);
++		handle->buffer = get_buffer(&orig_bm, &ca, &pfn);
+ 		if (IS_ERR(handle->buffer))
+ 			return PTR_ERR(handle->buffer);
+ 		if (handle->buffer != buffer)
+ 			handle->sync_read = 0;
++		if (h_buf)
++			*(h_buf + (handle->cur - nr_meta_pages - 1)) = handle->buffer;
  	}
  	handle->cur++;
  	return PAGE_SIZE;
+diff --git a/kernel/power/swap.c b/kernel/power/swap.c
+index 2f30ca9..ff2b36f 100644
+--- a/kernel/power/swap.c
++++ b/kernel/power/swap.c
+@@ -1085,6 +1085,8 @@ static int load_image(struct swap_map_handle *handle,
+ 		snapshot_write_finalize(snapshot);
+ 		if (!snapshot_image_loaded(snapshot))
+ 			ret = -ENODATA;
++		if (!ret)
++			ret = snapshot_image_verify();
+ 	}
+ 	swsusp_show_speed(start, stop, nr_to_read, "Read");
+ 	return ret;
+@@ -1440,6 +1442,8 @@ out_finish:
+ 				}
+ 			}
+ 		}
++		if (!ret)
++			ret = snapshot_image_verify();
+ 	}
+ 	swsusp_show_speed(start, stop, nr_to_read, "Read");
+ out_clean:
 diff --git a/kernel/power/user.c b/kernel/power/user.c
-index 9b891d5..ffd327a 100644
+index 526e891..9b891d5 100644
 --- a/kernel/power/user.c
 +++ b/kernel/power/user.c
-@@ -241,6 +241,7 @@ static long snapshot_ioctl(struct file *filp, unsigned int cmd,
- 		if (!data->frozen || data->ready)
+@@ -268,6 +268,10 @@ static long snapshot_ioctl(struct file *filp, unsigned int cmd,
+ 			error = -EPERM;
  			break;
- 		pm_restore_gfp_mask();
-+		restore_sig_forward_info();
- 		free_basic_memory_bitmaps();
- 		data->free_bitmaps = false;
- 		thaw_processes();
+ 		}
++		if (snapshot_image_verify()) {
++			error = -EPERM;
++			break;
++		}
+ 		error = hibernation_restore(data->platform_support);
+ 		break;
+ 
 -- 
 2.1.4
