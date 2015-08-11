@@ -1,7 +1,7 @@
 From: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Subject: [PATCH v2 09/16] PM / hibernate: Reserve hibernation key and erase footprints
-Date: Tue, 11 Aug 2015 14:16:29 +0800
-Message-ID: <1439273796-25359-10-git-send-email-jlee@suse.com>
+Subject: [PATCH v2 11/16] PM / hibernate: Avoid including hibernation key to hibernate image
+Date: Tue, 11 Aug 2015 14:16:31 +0800
+Message-ID: <1439273796-25359-12-git-send-email-jlee@suse.com>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1439273796-25359-1-git-send-email-jlee@suse.com>
@@ -10,203 +10,83 @@ To: linux-kernel@vger.kernel.org
 Cc: linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-Add handler to parse the setup data that carrying hibernation key, it
-reserves hibernation key by memblock then copies key to a allocated page
-in later initcall stage.
-
-And for erasing footprints, the codes in this patch remove setup
-data that carried hibernation key, and clean the memory space that
-reserved by memblock.
+The HMAC key should only resides in kernel memory space but not leak
+to outside. To avoid including hibernation key in hibernate snapshot
+image, this patch adds the checking block in the code for asking saveable
+pages to make sure the key page should not marked as saveable.
 
 Reviewed-by: Jiri Kosina <jkosina@suse.com>
 Tested-by: Jiri Kosina <jkosina@suse.com>
 Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
 ---
- arch/x86/include/asm/suspend.h  |  4 +++
- arch/x86/kernel/setup.c         | 21 ++++++++++-
- arch/x86/power/Makefile         |  1 +
- arch/x86/power/hibernate_keys.c | 78 +++++++++++++++++++++++++++++++++++++++++
- kernel/power/power.h            |  5 +++
- 5 files changed, 108 insertions(+), 1 deletion(-)
- create mode 100644 arch/x86/power/hibernate_keys.c
+ arch/x86/power/hibernate_keys.c | 15 +++++++++++++++
+ kernel/power/power.h            |  3 +++
+ kernel/power/snapshot.c         |  6 ++++++
+ 3 files changed, 24 insertions(+)
 
-diff --git a/arch/x86/include/asm/suspend.h b/arch/x86/include/asm/suspend.h
-index ab463c4..bb3652a 100644
---- a/arch/x86/include/asm/suspend.h
-+++ b/arch/x86/include/asm/suspend.h
-@@ -7,8 +7,12 @@
- #ifdef CONFIG_HIBERNATE_VERIFICATION
- #include <linux/suspend.h>
- 
-+extern void parse_hibernation_keys(u64 phys_addr, u32 data_len);
-+
- struct hibernation_keys {
- 	unsigned long hkey_status;
- 	u8 hibernation_key[HIBERNATION_DIGEST_SIZE];
- };
-+#else
-+static inline void parse_hibernation_keys(u64 phys_addr, u32 data_len) {}
- #endif
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 80f874b..b345359 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -112,6 +112,8 @@
- #include <asm/alternative.h>
- #include <asm/prom.h>
- 
-+#include <asm/suspend.h>
-+
- /*
-  * max_low_pfn_mapped: highest direct mapped pfn under 4GB
-  * max_pfn_mapped:     highest direct mapped pfn over 4GB
-@@ -425,10 +427,22 @@ static void __init reserve_initrd(void)
- }
- #endif /* CONFIG_BLK_DEV_INITRD */
- 
-+static void __init remove_setup_data(u64 pa_prev, u64 pa_next)
-+{
-+	struct setup_data *data;
-+
-+	if (pa_prev) {
-+		data = early_memremap(pa_prev, sizeof(*data));
-+		data->next = pa_next;
-+		early_iounmap(data, sizeof(*data));
-+	} else
-+		boot_params.hdr.setup_data = pa_next;
-+}
-+
- static void __init parse_setup_data(void)
- {
- 	struct setup_data *data;
--	u64 pa_data, pa_next;
-+	u64 pa_data, pa_next, pa_prev = 0;
- 
- 	pa_data = boot_params.hdr.setup_data;
- 	while (pa_data) {
-@@ -450,9 +464,14 @@ static void __init parse_setup_data(void)
- 		case SETUP_EFI:
- 			parse_efi_setup(pa_data, data_len);
- 			break;
-+		case SETUP_HIBERNATION_KEYS:
-+			parse_hibernation_keys(pa_data, data_len);
-+			remove_setup_data(pa_prev, pa_next);
-+			break;
- 		default:
- 			break;
- 		}
-+		pa_prev = pa_data;
- 		pa_data = pa_next;
- 	}
- }
-diff --git a/arch/x86/power/Makefile b/arch/x86/power/Makefile
-index a6a198c..ef8d550 100644
---- a/arch/x86/power/Makefile
-+++ b/arch/x86/power/Makefile
-@@ -5,3 +5,4 @@ CFLAGS_cpu.o	:= $(nostackp)
- 
- obj-$(CONFIG_PM_SLEEP)		+= cpu.o
- obj-$(CONFIG_HIBERNATION)	+= hibernate_$(BITS).o hibernate_asm_$(BITS).o
-+obj-$(CONFIG_HIBERNATE_VERIFICATION)	+= hibernate_keys.o
 diff --git a/arch/x86/power/hibernate_keys.c b/arch/x86/power/hibernate_keys.c
-new file mode 100644
-index 0000000..357dc0e
---- /dev/null
+index 357dc0e..f44823e 100644
+--- a/arch/x86/power/hibernate_keys.c
 +++ b/arch/x86/power/hibernate_keys.c
-@@ -0,0 +1,78 @@
-+/* Hibernation keys handler
-+ *
-+ * Copyright (C) 2015 Lee, Chun-Yi <jlee@suse.com>
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public Licence
-+ * as published by the Free Software Foundation; either version
-+ * 2 of the Licence, or (at your option) any later version.
-+ */
+@@ -47,6 +47,21 @@ int get_hibernation_key(u8 **hkey)
+ 	return hibernation_keys->hkey_status;
+ }
+ 
 +
-+#include <linux/bootmem.h>
-+#include <linux/memblock.h>
-+#include <linux/suspend.h>
-+#include <asm/suspend.h>
-+
-+/* physical address of hibernation keys from boot params */
-+static u64 keys_phys_addr;
-+
-+/* A page used to keep hibernation keys */
-+static struct hibernation_keys *hibernation_keys;
-+
-+void __init parse_hibernation_keys(u64 phys_addr, u32 data_len)
++bool swsusp_page_is_keys(struct page *page)
 +{
-+	struct setup_data *hibernation_setup_data;
++	bool ret = false;
 +
-+	/* Reserve keys memory, will copy and erase in init_hibernation_keys() */
-+	keys_phys_addr = phys_addr + sizeof(struct setup_data);
-+	memblock_reserve(keys_phys_addr, sizeof(struct hibernation_keys));
++	if (!hibernation_keys || hibernation_keys->hkey_status)
++		return ret;
 +
-+	/* clear hibernation_data */
-+	hibernation_setup_data = early_memremap(phys_addr, data_len);
-+	if (!hibernation_setup_data)
-+		return;
-+
-+	memset(hibernation_setup_data, 0, sizeof(struct setup_data));
-+	early_memunmap(hibernation_setup_data, data_len);
-+}
-+
-+int get_hibernation_key(u8 **hkey)
-+{
-+	if (!hibernation_keys)
-+		return -ENODEV;
-+
-+	if (!hibernation_keys->hkey_status)
-+		*hkey = hibernation_keys->hibernation_key;
-+
-+	return hibernation_keys->hkey_status;
-+}
-+
-+static int __init init_hibernation_keys(void)
-+{
-+	struct hibernation_keys *keys;
-+	int ret = 0;
-+
-+	if (!keys_phys_addr)
-+		return -ENODEV;
-+
-+	keys = early_memremap(keys_phys_addr, sizeof(struct hibernation_keys));
-+
-+	/* Copy hibernation keys to a allocated page */
-+	hibernation_keys = (struct hibernation_keys *)get_zeroed_page(GFP_KERNEL);
-+	if (hibernation_keys) {
-+		*hibernation_keys = *keys;
-+	} else {
-+		pr_err("PM: Allocate hibernation keys page failed\n");
-+		ret = -ENOMEM;
-+	}
-+
-+	/* Erase keys data no matter copy success or failed */
-+	memset(keys, 0, sizeof(struct hibernation_keys));
-+	early_memunmap(keys, sizeof(struct hibernation_keys));
-+	memblock_free(keys_phys_addr, sizeof(struct hibernation_keys));
-+	keys_phys_addr = 0;
++	ret = (page_to_pfn(page) == page_to_pfn(virt_to_page(hibernation_keys)));
++	if (ret)
++		pr_info("PM: Avoid snapshot the page of hibernation key.\n");
 +
 +	return ret;
 +}
 +
-+late_initcall(init_hibernation_keys);
+ static int __init init_hibernation_keys(void)
+ {
+ 	struct hibernation_keys *keys;
 diff --git a/kernel/power/power.h b/kernel/power/power.h
-index 6ea5c78..7d8f310 100644
+index ccc1e72..6d1d406 100644
 --- a/kernel/power/power.h
 +++ b/kernel/power/power.h
-@@ -16,6 +16,11 @@ struct swsusp_info {
- 	u8                      signature[HIBERNATION_DIGEST_SIZE];
- } __aligned(PAGE_SIZE);
+@@ -19,6 +19,9 @@ struct swsusp_info {
+ #ifdef CONFIG_HIBERNATE_VERIFICATION
+ /* arch/x86/power/hibernate_keys.c */
+ extern int get_hibernation_key(u8 **hkey);
++extern bool swsusp_page_is_keys(struct page *page);
++#else
++static inline bool swsusp_page_is_keys(struct page *page) { return false; }
+ #endif
  
-+#ifdef CONFIG_HIBERNATE_VERIFICATION
-+/* arch/x86/power/hibernate_keys.c */
-+extern int get_hibernation_key(u8 **hkey);
-+#endif
-+
  /* kernel/power/snapshot.c */
- extern void __init hibernate_reserved_size_init(void);
- extern void __init hibernate_image_size_init(void);
+diff --git a/kernel/power/snapshot.c b/kernel/power/snapshot.c
+index b8c7e2e..5522028 100644
+--- a/kernel/power/snapshot.c
++++ b/kernel/power/snapshot.c
+@@ -1093,6 +1093,9 @@ static struct page *saveable_highmem_page(struct zone *zone, unsigned long pfn)
+ 
+ 	BUG_ON(!PageHighMem(page));
+ 
++	if (swsusp_page_is_keys(page))
++		return NULL;
++
+ 	if (swsusp_page_is_forbidden(page) ||  swsusp_page_is_free(page) ||
+ 	    PageReserved(page))
+ 		return NULL;
+@@ -1155,6 +1158,9 @@ static struct page *saveable_page(struct zone *zone, unsigned long pfn)
+ 
+ 	BUG_ON(PageHighMem(page));
+ 
++	if (swsusp_page_is_keys(page))
++		return NULL;
++
+ 	if (swsusp_page_is_forbidden(page) || swsusp_page_is_free(page))
+ 		return NULL;
+ 
 -- 
 2.1.4
