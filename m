@@ -1,78 +1,49 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/2] arm64: apei: implement arch_apei_get_mem_attributes()
-Date: Wed, 12 Aug 2015 17:17:13 +0100
-Message-ID: <1439396234-22863-2-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES memory
+Date: Wed, 12 Aug 2015 17:17:14 +0100
+Message-ID: <1439396234-22863-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1439396234-22863-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1439396234-22863-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
 From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 
-Table 8 of UEFI 2.5 section 2.3.6.1 defines mappings from EFI
-memory types to MAIR attribute encodings for arm64.
+With ACPI APEI firmware first handling, generic hardware error
+record is updated by firmware in GHES memory region. On an arm64
+platform, firmware updates GHES memory region with uncached
+access attribute, and then Linux reads stale data from cache.
 
-If the physical address has memory attributes defined by EFI
-memmap as EFI_MEMORY_[UC|WC|WT], return approprate page protection
-type according to the UEFI spec. Otherwise, return PAGE_KERNEL.
+GHES memory region should be mapped with page protection type
+according to what is returned from arch_apei_get_mem_attribute(),
+instead of always with PAGE_KERNEL (eg. cached attribute).
 
-Reviewed-by: Catalin Marinas <catalin.marinas@arm.com>
-Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
-Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Borislav Petkov <bp@suse.de>
 Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
 Signed-off-by: Matt Fleming <matt.fleming@intel.com>
 ---
- arch/arm64/include/asm/acpi.h | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+ drivers/acpi/apei/ghes.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
-index 406485ed110a..1cbad43e561d 100644
---- a/arch/arm64/include/asm/acpi.h
-+++ b/arch/arm64/include/asm/acpi.h
-@@ -19,6 +19,11 @@
- #include <asm/psci.h>
- #include <asm/smp_plat.h>
+diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
+index 2bfd53cbfe80..0aa37c57acec 100644
+--- a/drivers/acpi/apei/ghes.c
++++ b/drivers/acpi/apei/ghes.c
+@@ -164,8 +164,10 @@ static void __iomem *ghes_ioremap_pfn_irq(u64 pfn)
+ 	unsigned long vaddr;
  
-+#ifdef CONFIG_ACPI_APEI
-+#include <linux/efi.h>
-+#include <asm/pgtable.h>
-+#endif
-+
- /* Macros for consistency checks of the GICC subtable of MADT */
- #define ACPI_MADT_GICC_LENGTH	\
- 	(acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
-@@ -92,4 +97,29 @@ static inline const char *acpi_get_enable_method(int cpu)
- {
- 	return acpi_psci_present() ? "psci" : NULL;
+ 	vaddr = (unsigned long)GHES_IOREMAP_IRQ_PAGE(ghes_ioremap_area->addr);
+-	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
+-			   pfn << PAGE_SHIFT, PAGE_KERNEL);
++	ioremap_page_range(vaddr,
++			   vaddr + PAGE_SIZE,
++			   pfn << PAGE_SHIFT,
++			   arch_apei_get_mem_attribute(pfn << PAGE_SHIFT));
+ 
+ 	return (void __iomem *)vaddr;
  }
-+
-+#ifdef	CONFIG_ACPI_APEI
-+static inline pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
-+{
-+	/*
-+	 * According to "Table 8 Map: EFI memory types to AArch64 memory types"
-+	 * of UEFI 2.5 section 2.3.6.1, each EFI memory type is mapped to
-+	 * corresponding MAIR attribute encoding.
-+	 * The EFI memory attribute advises all possible capabilities of a
-+	 * memory region. We use the most efficient capability.
-+	 */
-+
-+	u64 attr;
-+
-+	attr = efi_mem_attributes(addr);
-+	if (attr & EFI_MEMORY_WB)
-+		return PAGE_KERNEL;
-+	if (attr & EFI_MEMORY_WT)
-+		return __pgprot(PROT_NORMAL_WT);
-+	if (attr & EFI_MEMORY_WC)
-+		return __pgprot(PROT_NORMAL_NC);
-+	return __pgprot(PROT_DEVICE_nGnRnE);
-+}
-+#endif
-+
- #endif /*_ASM_ACPI_H*/
 -- 
 2.1.0
