@@ -1,94 +1,67 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH 1/2] arm64: apei: implement arch_apei_get_mem_attributes()
-Date: Thu, 13 Aug 2015 10:22:07 +0200
-Message-ID: <20150813082207.GB14610@gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
+ memory
+Date: Thu, 13 Aug 2015 10:24:32 +0100
+Message-ID: <20150813092432.GA2797@codeblueprint.co.uk>
 References: <1439396234-22863-1-git-send-email-matt@codeblueprint.co.uk>
- <1439396234-22863-2-git-send-email-matt@codeblueprint.co.uk>
+ <1439396234-22863-3-git-send-email-matt@codeblueprint.co.uk>
+ <20150813081917.GA14610@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1439396234-22863-2-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>
+In-Reply-To: <20150813081917.GA14610-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
-
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+On Thu, 13 Aug, at 10:19:17AM, Ingo Molnar wrote:
 > 
-> Table 8 of UEFI 2.5 section 2.3.6.1 defines mappings from EFI
-> memory types to MAIR attribute encodings for arm64.
+> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 > 
-> If the physical address has memory attributes defined by EFI
-> memmap as EFI_MEMORY_[UC|WC|WT], return approprate page protection
-> type according to the UEFI spec. Otherwise, return PAGE_KERNEL.
+> > From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> > 
+> > With ACPI APEI firmware first handling, generic hardware error
+> > record is updated by firmware in GHES memory region. On an arm64
+> > platform, firmware updates GHES memory region with uncached
+> > access attribute, and then Linux reads stale data from cache.
 > 
-> Reviewed-by: Catalin Marinas <catalin.marinas@arm.com>
-> Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
-> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
-> Signed-off-by: Matt Fleming <matt.fleming@intel.com>
-> ---
->  arch/arm64/include/asm/acpi.h | 30 ++++++++++++++++++++++++++++++
->  1 file changed, 30 insertions(+)
+> So this paragraph does not parse for me ...
 > 
-> diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
-> index 406485ed110a..1cbad43e561d 100644
-> --- a/arch/arm64/include/asm/acpi.h
-> +++ b/arch/arm64/include/asm/acpi.h
-> @@ -19,6 +19,11 @@
->  #include <asm/psci.h>
->  #include <asm/smp_plat.h>
->  
-> +#ifdef CONFIG_ACPI_APEI
-> +#include <linux/efi.h>
-> +#include <asm/pgtable.h>
-> +#endif
-> +
->  /* Macros for consistency checks of the GICC subtable of MADT */
->  #define ACPI_MADT_GICC_LENGTH	\
->  	(acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
-> @@ -92,4 +97,29 @@ static inline const char *acpi_get_enable_method(int cpu)
->  {
->  	return acpi_psci_present() ? "psci" : NULL;
->  }
-> +
-> +#ifdef	CONFIG_ACPI_APEI
-> +static inline pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
-> +{
-> +	/*
-> +	 * According to "Table 8 Map: EFI memory types to AArch64 memory types"
-> +	 * of UEFI 2.5 section 2.3.6.1, each EFI memory type is mapped to
-> +	 * corresponding MAIR attribute encoding.
+> If it tries to explain a bug it falls very short of doing a proper job of that.
 
-s/mapped to corresponding/
-  mapped to a corresponding
+I'll let Jonathan provide more details but I understood the problem to
+be a cache (in)coherency issue.
 
-> +	 * The EFI memory attribute advises all possible capabilities of a
-> +	 * memory region. We use the most efficient capability.
-> +	 */
-> +
-> +	u64 attr;
-> +
-> +	attr = efi_mem_attributes(addr);
-> +	if (attr & EFI_MEMORY_WB)
-> +		return PAGE_KERNEL;
-> +	if (attr & EFI_MEMORY_WT)
-> +		return __pgprot(PROT_NORMAL_WT);
-> +	if (attr & EFI_MEMORY_WC)
-> +		return __pgprot(PROT_NORMAL_NC);
-> +	return __pgprot(PROT_DEVICE_nGnRnE);
-> +}
-> +#endif
+The kernel currently maps the the GHES memory region as cacheable
+(PAGE_KERNEL) for all architectures. This memory region is used as a
+communication buffer for reporting hardware errors from the firmware to
+kernel. Essentially the firmware writes hardware error records there,
+trigger an NMI/interrupt, and the GHES driver goes off and grabs the
+error record from the GHES region.
 
-Also, this doesn't look like a small function - why is it inlined?
+Since the firmware gets first crack at inspecting the error this
+mechanism is referred to as "firmware first" in the ACPI spec.
 
-Moving it to .c would also slightly improve compilation times for every .c file 
-that includes asm/acpi.h.
+Now, there's a mismatch on arm64 platforms between how the kernel maps
+the GHES region (PAGE_KERNEL) and how the firmware maps it
+(EFI_MEMORY_UC, i.e. uncacheable), leading to the possibility of the
+kernel GHES driver reading stale data from the cache when it receives
+the NMI/interrupt.
 
-Thanks,
+As for exactly why the arm64 firmware uses an uncached mapping, I
+presume it's to avoid relying on the kernel to get the necessary cache
+flushing correct.
 
-	Ingo
+The proposed solution is to query the EFI memory map to ensure the
+kernel uses a compatible mapping.
+
+None of this should affect x86, it still uses PAGE_KERNEL because we're
+yet to see any hardware that has an EFI memory map entry for the GHES
+region that's incompatible with PAGE_KERNEL.
+
+Jonathan, would you like to provide more details?
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
