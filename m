@@ -1,33 +1,93 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
- memory
-Date: Thu, 13 Aug 2015 10:19:17 +0200
-Message-ID: <20150813081917.GA14610@gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 1/2] arm64: apei: implement arch_apei_get_mem_attributes()
+Date: Thu, 13 Aug 2015 10:22:07 +0200
+Message-ID: <20150813082207.GB14610@gmail.com>
 References: <1439396234-22863-1-git-send-email-matt@codeblueprint.co.uk>
- <1439396234-22863-3-git-send-email-matt@codeblueprint.co.uk>
+ <1439396234-22863-2-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1439396234-22863-3-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+In-Reply-To: <1439396234-22863-2-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Hanjun Guo <hanjun.guo@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+* Matt Fleming <matt@codeblueprint.co.uk> wrote:
 
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
 > 
-> With ACPI APEI firmware first handling, generic hardware error
-> record is updated by firmware in GHES memory region. On an arm64
-> platform, firmware updates GHES memory region with uncached
-> access attribute, and then Linux reads stale data from cache.
+> Table 8 of UEFI 2.5 section 2.3.6.1 defines mappings from EFI
+> memory types to MAIR attribute encodings for arm64.
+> 
+> If the physical address has memory attributes defined by EFI
+> memmap as EFI_MEMORY_[UC|WC|WT], return approprate page protection
+> type according to the UEFI spec. Otherwise, return PAGE_KERNEL.
+> 
+> Reviewed-by: Catalin Marinas <catalin.marinas@arm.com>
+> Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
+> Reviewed-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
+> Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+> ---
+>  arch/arm64/include/asm/acpi.h | 30 ++++++++++++++++++++++++++++++
+>  1 file changed, 30 insertions(+)
+> 
+> diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
+> index 406485ed110a..1cbad43e561d 100644
+> --- a/arch/arm64/include/asm/acpi.h
+> +++ b/arch/arm64/include/asm/acpi.h
+> @@ -19,6 +19,11 @@
+>  #include <asm/psci.h>
+>  #include <asm/smp_plat.h>
+>  
+> +#ifdef CONFIG_ACPI_APEI
+> +#include <linux/efi.h>
+> +#include <asm/pgtable.h>
+> +#endif
+> +
+>  /* Macros for consistency checks of the GICC subtable of MADT */
+>  #define ACPI_MADT_GICC_LENGTH	\
+>  	(acpi_gbl_FADT.header.revision < 6 ? 76 : 80)
+> @@ -92,4 +97,29 @@ static inline const char *acpi_get_enable_method(int cpu)
+>  {
+>  	return acpi_psci_present() ? "psci" : NULL;
+>  }
+> +
+> +#ifdef	CONFIG_ACPI_APEI
+> +static inline pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
+> +{
+> +	/*
+> +	 * According to "Table 8 Map: EFI memory types to AArch64 memory types"
+> +	 * of UEFI 2.5 section 2.3.6.1, each EFI memory type is mapped to
+> +	 * corresponding MAIR attribute encoding.
 
-So this paragraph does not parse for me ...
+s/mapped to corresponding/
+  mapped to a corresponding
 
-If it tries to explain a bug it falls very short of doing a proper job of that.
+> +	 * The EFI memory attribute advises all possible capabilities of a
+> +	 * memory region. We use the most efficient capability.
+> +	 */
+> +
+> +	u64 attr;
+> +
+> +	attr = efi_mem_attributes(addr);
+> +	if (attr & EFI_MEMORY_WB)
+> +		return PAGE_KERNEL;
+> +	if (attr & EFI_MEMORY_WT)
+> +		return __pgprot(PROT_NORMAL_WT);
+> +	if (attr & EFI_MEMORY_WC)
+> +		return __pgprot(PROT_NORMAL_NC);
+> +	return __pgprot(PROT_DEVICE_nGnRnE);
+> +}
+> +#endif
+
+Also, this doesn't look like a small function - why is it inlined?
+
+Moving it to .c would also slightly improve compilation times for every .c file 
+that includes asm/acpi.h.
 
 Thanks,
 
