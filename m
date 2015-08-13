@@ -1,75 +1,70 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
- memory
-Date: Thu, 13 Aug 2015 12:14:22 +0100
-Message-ID: <20150813111422.GE10280@arm.com>
-References: <1439396234-22863-1-git-send-email-matt@codeblueprint.co.uk>
- <1439396234-22863-3-git-send-email-matt@codeblueprint.co.uk>
- <20150813081917.GA14610@gmail.com>
- <20150813092432.GA2797@codeblueprint.co.uk>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH v2 09/16] PM / hibernate: Reserve hibernation key and
+ erase footprints
+Date: Thu, 13 Aug 2015 22:33:37 +0800
+Message-ID: <20150813143337.GA31748@linux-rxt1.site>
+References: <1439273796-25359-1-git-send-email-jlee@suse.com>
+ <1439273796-25359-10-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150813092432.GA2797-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <1439273796-25359-10-git-send-email-jlee@suse.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Aug 13, 2015 at 10:24:32AM +0100, Matt Fleming wrote:
-> On Thu, 13 Aug, at 10:19:17AM, Ingo Molnar wrote:
-> > * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> > 
-> > > From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> > > 
-> > > With ACPI APEI firmware first handling, generic hardware error
-> > > record is updated by firmware in GHES memory region. On an arm64
-> > > platform, firmware updates GHES memory region with uncached
-> > > access attribute, and then Linux reads stale data from cache.
-> > 
-> > So this paragraph does not parse for me ...
-> > 
-> > If it tries to explain a bug it falls very short of doing a proper job of that.
-> 
-> I'll let Jonathan provide more details but I understood the problem to
-> be a cache (in)coherency issue.
-> 
-> The kernel currently maps the the GHES memory region as cacheable
-> (PAGE_KERNEL) for all architectures. This memory region is used as a
-> communication buffer for reporting hardware errors from the firmware to
-> kernel. Essentially the firmware writes hardware error records there,
-> trigger an NMI/interrupt, and the GHES driver goes off and grabs the
-> error record from the GHES region.
-> 
-> Since the firmware gets first crack at inspecting the error this
-> mechanism is referred to as "firmware first" in the ACPI spec.
-> 
-> Now, there's a mismatch on arm64 platforms between how the kernel maps
-> the GHES region (PAGE_KERNEL) and how the firmware maps it
-> (EFI_MEMORY_UC, i.e. uncacheable), leading to the possibility of the
-> kernel GHES driver reading stale data from the cache when it receives
-> the NMI/interrupt.
-> 
-> As for exactly why the arm64 firmware uses an uncached mapping, I
-> presume it's to avoid relying on the kernel to get the necessary cache
-> flushing correct.
-> 
-> The proposed solution is to query the EFI memory map to ensure the
-> kernel uses a compatible mapping.
-> 
-> None of this should affect x86, it still uses PAGE_KERNEL because we're
-> yet to see any hardware that has an EFI memory map entry for the GHES
-> region that's incompatible with PAGE_KERNEL.
-> 
-> Jonathan, would you like to provide more details?
+On Tue, Aug 11, 2015 at 02:16:29PM +0800, Lee, Chun-Yi wrote:
+> Add handler to parse the setup data that carrying hibernation key, it
+> reserves hibernation key by memblock then copies key to a allocated page
+> in later initcall stage.
+>
+[...snip] 
+> diff --git a/arch/x86/power/hibernate_keys.c b/arch/x86/power/hibernate_keys.c
+> new file mode 100644
+> index 0000000..357dc0e
+> --- /dev/null
+> +++ b/arch/x86/power/hibernate_keys.c
+> @@ -0,0 +1,78 @@
+> +/* Hibernation keys handler
+> + *
+[...snip]
+> +static int __init init_hibernation_keys(void)
+> +{
+> +	struct hibernation_keys *keys;
+> +	int ret = 0;
+> +
+> +	if (!keys_phys_addr)
+> +		return -ENODEV;
+> +
+> +	keys = early_memremap(keys_phys_addr, sizeof(struct hibernation_keys));
+> +
+> +	/* Copy hibernation keys to a allocated page */
+> +	hibernation_keys = (struct hibernation_keys *)get_zeroed_page(GFP_KERNEL);
+> +	if (hibernation_keys) {
+> +		*hibernation_keys = *keys;
+> +	} else {
+> +		pr_err("PM: Allocate hibernation keys page failed\n");
+> +		ret = -ENOMEM;
+> +	}
+> +
+> +	/* Erase keys data no matter copy success or failed */
+> +	memset(keys, 0, sizeof(struct hibernation_keys));
+> +	early_memunmap(keys, sizeof(struct hibernation_keys));
+> +	memblock_free(keys_phys_addr, sizeof(struct hibernation_keys));
+> +	keys_phys_addr = 0;
+> +
+> +	return ret;
+> +}
+> +
+> +late_initcall(init_hibernation_keys);
 
-FWIW, that matches my understanding of the problem too. The ARM architecture
-refers to this situation as "mismatched memory attributes" and typically
-requires some explicit cache maintenance to achieve portable behaviour in
-this scenario.
+Yu's reviewing triggered me rethinking...
 
-It's much better to avoid the mismatch in the first place, if you can,
-which is what this is all about.
+I afraid that's too late in late_initcall stage for copying key data that
+reserved by memblock. I will try to move this copy action to setup_arch().
 
-Will
+
+Regards
+Joey Lee
