@@ -1,53 +1,71 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Subject: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES memory
-Date: Fri, 14 Aug 2015 15:37:30 -0700
-Message-ID: <1439591850-29002-2-git-send-email-zjzhang@codeaurora.org>
-References: <1439591850-29002-1-git-send-email-zjzhang@codeaurora.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1439591850-29002-1-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, "linux-kernel @ vger . kernel . org" <linux-kernel@vger.kernel.org>, "linux-efi @ vger . kernel . org" <linux-efi@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Catalin Marinas <Catalin.Marinas@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+From: Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>
+Subject: Re: [PATCH v2 08/16] x86/efi: Carrying hibernation key by setup
+ data
+Date: Sat, 15 Aug 2015 19:07:38 +0200
+Message-ID: <20150815170737.GA25353@Nokia-N900>
+References: <1439273796-25359-1-git-send-email-jlee@suse.com>
+ <1439273796-25359-9-git-send-email-jlee@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1439273796-25359-9-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
+On Tue 2015-08-11 14:16:28, Lee, Chun-Yi wrote:
+> For forwarding hibernation key from EFI stub to boot kernel, this patch
+> allocates setup data for carrying hibernation key, size and the status
+> of efi operating.
+> 
+> Reviewed-by: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
 
-With ACPI APEI firmware first handling, generic hardware error
-record is updated by firmware in GHES memory region. On an arm64
-platform, firmware updates GHES memory region with uncached
-access attribute, and then Linux reads stale data from cache.
+Jiri, are you sure you reviewed these? This is not really
+english, afaict, and efi/EFI should be spelled consistently.
 
-With current code, GHES memory region is mapped with PAGE_KERNEL
-based on the assumption that cache coherency of GHES memory region
-is maintained by firmware on all platforms. This assumption is
-not true for above mentioned arm64 platform.
+Could you try reviewing it again? Pointing out 10s of small
+bugs is quite boring...
 
-Instead GHES memory region should be mapped with page protection type
-according to what is returned from arch_apei_get_mem_attribute().
+>  	unsigned long key_size;
+>  	unsigned long attributes;
+> +	struct setup_data *setup_data, *hibernation_setup_data;
+>  	struct hibernation_keys *keys;
+> +	unsigned long size = 0;
+>  	efi_status_t status;
+>  
+>  	/* Allocate setup_data to carry keys */
+> +	size = sizeof(struct setup_data) + sizeof(struct hibernation_keys);
+>  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+> -				sizeof(struct hibernation_keys), &keys);
+> +				size, &hibernation_setup_data);
+>  	if (status != EFI_SUCCESS) {
+>  		efi_printk(sys_table, "Failed to alloc mem for hibernation keys\n");
+>  		return;
+>  	}
+>  
+> -	memset(keys, 0, sizeof(struct hibernation_keys));
+> +	memset(hibernation_setup_data, 0, size);
+> +	keys = (struct hibernation_keys *) hibernation_setup_data->data;
+>  
 
-Acked-by: Borislav Petkov <bp@suse.de>
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang@codeaurora.org>
----
- drivers/acpi/apei/ghes.c | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+any chance to type stuff correctly so that casts are not
+neccessary?
 
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 23981ac1c6c2..f742335bd8bb 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -160,8 +160,10 @@ static void __iomem *ghes_ioremap_pfn_irq(u64 pfn)
- 	unsigned long vaddr;
- 
- 	vaddr = (unsigned long)GHES_IOREMAP_IRQ_PAGE(ghes_ioremap_area->addr);
--	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
--			   pfn << PAGE_SHIFT, PAGE_KERNEL);
-+	ioremap_page_range(vaddr,
-+			   vaddr + PAGE_SIZE,
-+			   pfn << PAGE_SHIFT,
-+			   arch_apei_get_mem_attribute(pfn << PAGE_SHIFT));
- 
- 	return (void __iomem *)vaddr;
- }
+> +clean_fail:
+> +	hibernation_setup_data->type = SETUP_HIBERNATION_KEYS;
+> +	hibernation_setup_data->len = sizeof(struct hibernation_keys);
+> +	hibernation_setup_data->next = 0;
+> +	keys->hkey_status = efi_status_to_err(status);
+> +
+> +	setup_data = (struct setup_data *)params->hdr.setup_data;
+> +	while (setup_data && setup_data->next)
+> +		setup_data = (struct setup_data *)setup_data->next;
+
+way too many casts here.
+
+							Pavel
 -- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
