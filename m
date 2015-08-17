@@ -1,75 +1,97 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
- memory
-Date: Mon, 17 Aug 2015 14:13:57 +0100
-Message-ID: <20150817131357.GB3233@codeblueprint.co.uk>
-References: <1439591850-29002-1-git-send-email-zjzhang@codeaurora.org>
- <1439591850-29002-2-git-send-email-zjzhang@codeaurora.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: [PATCH V3 1/2] arm64: apei: implement arch_apei_get_mem_attributes()
+Date: Mon, 17 Aug 2015 14:08:40 -0700
+Message-ID: <1439845721-30196-1-git-send-email-zjzhang@codeaurora.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1439591850-29002-2-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi @ vger . kernel . org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 14 Aug, at 03:37:30PM, Jonathan (Zhixiong) Zhang wrote:
-> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> 
-> With ACPI APEI firmware first handling, generic hardware error
-> record is updated by firmware in GHES memory region. On an arm64
-> platform, firmware updates GHES memory region with uncached
-> access attribute, and then Linux reads stale data from cache.
-> 
-> With current code, GHES memory region is mapped with PAGE_KERNEL
-> based on the assumption that cache coherency of GHES memory region
-> is maintained by firmware on all platforms. This assumption is
-> not true for above mentioned arm64 platform.
-> 
-> Instead GHES memory region should be mapped with page protection type
-> according to what is returned from arch_apei_get_mem_attribute().
-> 
-> Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> ---
->  drivers/acpi/apei/ghes.c | 6 ++++--
->  1 file changed, 4 insertions(+), 2 deletions(-)
-> 
-> diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-> index 23981ac1c6c2..f742335bd8bb 100644
-> --- a/drivers/acpi/apei/ghes.c
-> +++ b/drivers/acpi/apei/ghes.c
-> @@ -160,8 +160,10 @@ static void __iomem *ghes_ioremap_pfn_irq(u64 pfn)
->  	unsigned long vaddr;
->  
->  	vaddr = (unsigned long)GHES_IOREMAP_IRQ_PAGE(ghes_ioremap_area->addr);
-> -	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
-> -			   pfn << PAGE_SHIFT, PAGE_KERNEL);
-> +	ioremap_page_range(vaddr,
-> +			   vaddr + PAGE_SIZE,
-> +			   pfn << PAGE_SHIFT,
-> +			   arch_apei_get_mem_attribute(pfn << PAGE_SHIFT));
->  
->  	return (void __iomem *)vaddr;
->  }
+From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 
-Y'know, this would be more readable if written as,
+Table 8 of UEFI 2.5 section 2.3.6.1 defines mappings from EFI
+memory types to MAIR attribute encodings for arm64.
 
-	unsigned long vaddr, paddr;
-	pgprot_t prot;
-
-  	vaddr = (unsigned long)GHES_IOREMAP_IRQ_PAGE(ghes_ioremap_area->addr);
-
-	paddr = pfn << PAGE_SHIFT;
-	prot = arch_apei_get_mem_attribute(paddr);
-
-	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
-
-But either way,
+If the physical address has memory attributes defined by EFI
+memmap as EFI_MEMORY_[UC|WC|WT], return approprate page protection
+type according to the UEFI spec. Otherwise, return PAGE_KERNEL.
 
 Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Reviewed-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+---
+V3: Updated Reviewed-by.
+V2: Changed arm64's implementation of arch_apei_get_mem_attributes()
+    from inline function to out of line function, based on Ingo's
+    feedback.
 
+ arch/arm64/include/asm/acpi.h |  5 +++++
+ arch/arm64/kernel/acpi.c      | 29 +++++++++++++++++++++++++++++
+ 2 files changed, 34 insertions(+)
+
+diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
+index 406485ed110a..8084f3640006 100644
+--- a/arch/arm64/include/asm/acpi.h
++++ b/arch/arm64/include/asm/acpi.h
+@@ -92,4 +92,9 @@ static inline const char *acpi_get_enable_method(int cpu)
+ {
+ 	return acpi_psci_present() ? "psci" : NULL;
+ }
++
++#ifdef	CONFIG_ACPI_APEI
++pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr);
++#endif
++
+ #endif /*_ASM_ACPI_H*/
+diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+index 19de7537e7d3..9f083606e5bf 100644
+--- a/arch/arm64/kernel/acpi.c
++++ b/arch/arm64/kernel/acpi.c
+@@ -29,6 +29,11 @@
+ #include <asm/cpu_ops.h>
+ #include <asm/smp_plat.h>
+ 
++#ifdef CONFIG_ACPI_APEI
++#include <linux/efi.h>
++#include <asm/pgtable.h>
++#endif
++
+ int acpi_noirq = 1;		/* skip ACPI IRQ initialization */
+ int acpi_disabled = 1;
+ EXPORT_SYMBOL(acpi_disabled);
+@@ -230,3 +235,27 @@ void __init acpi_gic_init(void)
+ 
+ 	early_acpi_os_unmap_memory((char *)table, tbl_size);
+ }
++
++#ifdef  CONFIG_ACPI_APEI
++pgprot_t arch_apei_get_mem_attribute(phys_addr_t addr)
++{
++	/*
++	 * According to "Table 8 Map: EFI memory types to AArch64 memory
++	 * types" of UEFI 2.5 section 2.3.6.1, each EFI memory type is
++	 * mapped to a corresponding MAIR attribute encoding.
++	 * The EFI memory attribute advises all possible capabilities
++	 * of a memory region. We use the most efficient capability.
++	 */
++
++	u64 attr;
++
++	attr = efi_mem_attributes(addr);
++	if (attr & EFI_MEMORY_WB)
++		return PAGE_KERNEL;
++	if (attr & EFI_MEMORY_WT)
++		return __pgprot(PROT_NORMAL_WT);
++	if (attr & EFI_MEMORY_WC)
++		return __pgprot(PROT_NORMAL_NC);
++	return __pgprot(PROT_DEVICE_nGnRnE);
++}
++#endif
 -- 
-Matt Fleming, Intel Open Source Technology Center
+The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
+a Linux Foundation Collaborative Project
