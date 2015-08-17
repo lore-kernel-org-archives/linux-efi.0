@@ -1,41 +1,54 @@
-From: Nigel Cunningham <nigel@nigelcunningham.com.au>
-Subject: Re: [PATCH v2 08/16] x86/efi: Carrying hibernation key by setup data
-Date: Mon, 17 Aug 2015 16:54:01 +1000
-Message-ID: <55D18509.9080709@nigelcunningham.com.au>
-References: <1439273796-25359-1-git-send-email-jlee@suse.com> <1439273796-25359-9-git-send-email-jlee@suse.com> <20150815170737.GA25353@Nokia-N900> <alpine.LNX.2.00.1508162321100.27871@pobox.suse.cz>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH V2 1/2] arm64: apei: implement
+ arch_apei_get_mem_attributes()
+Date: Mon, 17 Aug 2015 14:05:53 +0100
+Message-ID: <20150817130553.GA3233@codeblueprint.co.uk>
+References: <1439591850-29002-1-git-send-email-zjzhang@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-pm-owner@vger.kernel.org>
-In-Reply-To: <alpine.LNX.2.00.1508162321100.27871@pobox.suse.cz>
-Sender: linux-pm-owner@vger.kernel.org
-To: Jiri Kosina <jikos@kernel.org>, Pavel Machek <pavel@ucw.cz>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1439591850-29002-1-git-send-email-zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi all.
+On Fri, 14 Aug, at 03:37:29PM, Jonathan (Zhixiong) Zhang wrote:
+> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> 
+> Table 8 of UEFI 2.5 section 2.3.6.1 defines mappings from EFI
+> memory types to MAIR attribute encodings for arm64.
+> 
+> If the physical address has memory attributes defined by EFI
+> memmap as EFI_MEMORY_[UC|WC|WT], return approprate page protection
+> type according to the UEFI spec. Otherwise, return PAGE_KERNEL.
+> 
+> Reviewed-by: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+> Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Cc: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+> ---
+> V2: Changed arm64's implementation of arch_apei_get_mem_attributes()
+>     from inline function to out of line function, based on Ingo's
+>     feedback.
+> 
+>  arch/arm64/include/asm/acpi.h |  5 +++++
+>  arch/arm64/kernel/acpi.c      | 29 +++++++++++++++++++++++++++++
+>  2 files changed, 34 insertions(+)
+> 
 
-I've rejoined LKML, so I'll try to help with reviewing PM patches. I'd forgotten how much it is a case of sipping at a fire hydrant!
+Looks fine to me, though it appears to be missing Ard's Reviewed-by
+tag (the only change from the previous version is that it's no longer
+inline).
 
-Regards,
+Reviewed-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Nigel
+Ingo, are you going to pick up this patch series and apply it directly
+to tip if you're OK with this version?
 
-On 17/08/15 07:23, Jiri Kosina wrote:
-> On Sat, 15 Aug 2015, Pavel Machek wrote:
->
->>> For forwarding hibernation key from EFI stub to boot kernel, this patch
->>> allocates setup data for carrying hibernation key, size and the status
->>> of efi operating.
->>>
->>> Reviewed-by: Jiri Kosina <jkosina@suse.com>
->> Jiri, are you sure you reviewed these? This is not really
->> english, afaict, and efi/EFI should be spelled consistently.
-> Yes, I did review the code and the fact that it is still in compliance 
-> with my original idea. I think you can blame me on not reviewing 
-> changelogs super-rigorously though, so all suggestions for improvements 
-> are absolutely welcome.
->
-> Thanks,
->
-
+-- 
+Matt Fleming, Intel Open Source Technology Center
