@@ -1,42 +1,50 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2 07/16] efi: Make efi_status_to_err() public
-Date: Thu, 20 Aug 2015 16:07:06 +0100
-Message-ID: <20150820150706.GE2567@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 05/16] x86/efi: Get entropy through EFI random number
+ generator protocol
+Date: Thu, 20 Aug 2015 21:26:20 +0100
+Message-ID: <20150820202620.GF2567@codeblueprint.co.uk>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
- <1439273796-25359-8-git-send-email-jlee@suse.com>
+ <1439273796-25359-6-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1439273796-25359-8-git-send-email-jlee@suse.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
+In-Reply-To: <1439273796-25359-6-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 11 Aug, at 02:16:27PM, Lee, Chun-Yi wrote:
-> Moved the function of transferring EFI status to kernel error for
-> later used by EFI stub.
- 
-Might I suggest:
+On Tue, 11 Aug, at 02:16:25PM, Lee, Chun-Yi wrote:
+> +
+> +static unsigned long efi_get_rng64(efi_system_table_t *sys_table,
+> +				   void **rng_handle)
+> +{
+> +	const struct efi_config *efi_early = __efi_early();
+> +	efi_rng_protocol_64 *rng = NULL;
+> +	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
+> +	u64 *handles = (u64 *)(unsigned long)rng_handle;
+> +	efi_status_t status;
+> +	unsigned long rng_number;
+> +
+> +	status = efi_call_early(handle_protocol, handles[0],
+> +				&rng_proto, (void **)&rng);
+> +	if (status != EFI_SUCCESS)
+> +		efi_printk(sys_table, "Failed to get EFI_RNG_PROTOCOL handles\n");
+> +
+> +	if (status == EFI_SUCCESS && rng) {
+> +		status = efi_early->call((unsigned long)rng->get_rng, rng, NULL,
+> +					sizeof(rng_number), &rng_number);
 
- "Move the function for converting EFI status to kernel error values
-  from drivers/firmware/efi/ to include/linux/efi.h for use by the x86
-  EFI stub in an upcoming patch."
+Actually, one thing just occurred to me - you're not passing an
+RNGAlgorithm value and are relying upon the firmware's default
+implementation.
 
-?
+I don't think that's a safe bet, the default could be anything and
+might vary across implementations.
 
-> Reviewed-by: Jiri Kosina <jkosina@suse.com>
-> Tested-by: Jiri Kosina <jkosina@suse.com>
-> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> ---
->  drivers/firmware/efi/vars.c | 33 ---------------------------------
->  include/linux/efi.h         | 33 +++++++++++++++++++++++++++++++++
->  2 files changed, 33 insertions(+), 33 deletions(-)
-
-The patch content is fine,
-
-Reviewed-by: Matt Fleming <matt.fleming@intel.com>
+Can we do a little better here and pick a "preferred" algorithm
+instead of the default?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
