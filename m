@@ -1,44 +1,44 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH] x86_64/efi: Mapping Boot and Runtime EFI memory regions
- to different starting virtual address
-Date: Thu, 20 Aug 2015 09:05:55 +0800
-Message-ID: <20150820010555.GA12143@linux-rxt1.site>
-References: <20150730101131.GB2725@codeblueprint.co.uk>
- <20150730110959.GJ15651@linux-rxt1.site>
- <20150730111819.GK15651@linux-rxt1.site>
- <20150730120916.GD2725@codeblueprint.co.uk>
- <20150730123116.GL15651@linux-rxt1.site>
- <20150730131723.GG2725@codeblueprint.co.uk>
- <20150730133947.GN15651@linux-rxt1.site>
- <20150730140542.GI2725@codeblueprint.co.uk>
- <20150730141601.GO15651@linux-rxt1.site>
- <20150819163145.GI3233@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150819163145.GI3233@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
+From: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH 1/2] efi: Add EFI_MEMORY_MORE_RELIABLE support to efi_md_typeattr_format()
+Date: Fri, 21 Aug 2015 02:15:52 +0900
+Message-ID: <1440090952-15211-1-git-send-email-izumi.taku@jp.fujitsu.com>
+References: <1440090902-15157-1-git-send-email-izumi.taku@jp.fujitsu.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1440090902-15157-1-git-send-email-izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Cc: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 19, 2015 at 05:31:45PM +0100, Matt Fleming wrote:
-> On Thu, 30 Jul, at 10:16:01PM, joeyli wrote:
-> > 
-> > Thanks for your explanation.
-> > 
-> > For my issue, I will check if rewriting the VA of runtime services can fix issue.
-> > If not, then I think need find a way to sync the mapping in EFI page table between
-> > boot kernel and image kernel.
-> 
-> Hey Joey, did you make any progress with this issue?
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+UEFI spec 2.5 introduces new Memory Attribute Definition named
+EFI_MEMORY_MORE_RELIABLE. This patch adds this new attribute
+support to efi_md_typeattr_format().
 
-I am sticky on other issue and hope back to trace this problem in this week.
-Sorry for my delay!
+Signed-off-by: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
 
-
-Joey Lee
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index d6144e3..aadc1c4 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -589,12 +589,14 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
+ 	attr = md->attribute;
+ 	if (attr & ~(EFI_MEMORY_UC | EFI_MEMORY_WC | EFI_MEMORY_WT |
+ 		     EFI_MEMORY_WB | EFI_MEMORY_UCE | EFI_MEMORY_WP |
+-		     EFI_MEMORY_RP | EFI_MEMORY_XP | EFI_MEMORY_RUNTIME))
++		     EFI_MEMORY_RP | EFI_MEMORY_XP | EFI_MEMORY_RUNTIME |
++		     EFI_MEMORY_MORE_RELIABLE))
+ 		snprintf(pos, size, "|attr=0x%016llx]",
+ 			 (unsigned long long)attr);
+ 	else
+-		snprintf(pos, size, "|%3s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
++		snprintf(pos, size, "|%3s|%4s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
+ 			 attr & EFI_MEMORY_RUNTIME ? "RUN" : "",
++			 attr & EFI_MEMORY_MORE_RELIABLE ? "RELY" : "",
+ 			 attr & EFI_MEMORY_XP      ? "XP"  : "",
+ 			 attr & EFI_MEMORY_RP      ? "RP"  : "",
+ 			 attr & EFI_MEMORY_WP      ? "WP"  : "",
+-- 
+1.8.3.1
