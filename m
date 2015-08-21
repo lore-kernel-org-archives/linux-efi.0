@@ -1,121 +1,154 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2 08/16] x86/efi: Carrying hibernation key by setup data
-Date: Fri, 21 Aug 2015 13:40:26 +0100
-Message-ID: <20150821124026.GB3310@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 09/16] PM / hibernate: Reserve hibernation key and
+ erase footprints
+Date: Fri, 21 Aug 2015 14:27:53 +0100
+Message-ID: <20150821132753.GC3310@codeblueprint.co.uk>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
- <1439273796-25359-9-git-send-email-jlee@suse.com>
+ <1439273796-25359-10-git-send-email-jlee@suse.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1439273796-25359-9-git-send-email-jlee@suse.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
+In-Reply-To: <1439273796-25359-10-git-send-email-jlee-IBi9RG/b67k@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 11 Aug, at 02:16:28PM, Lee, Chun-Yi wrote:
-> For forwarding hibernation key from EFI stub to boot kernel, this patch
-> allocates setup data for carrying hibernation key, size and the status
-> of efi operating.
- 
-This could do with some more information, and include that the key is
-used to validate hibernate images.
-
-But now that I think about it, is there a reason this patch hasn't
-been merged with patch 6? The memory leak I mentioned in patch 6
-becomes a non-issue in this one, so it would be good if these two
-could be squashed together.
-  
-> Reviewed-by: Jiri Kosina <jkosina@suse.com>
-> Tested-by: Jiri Kosina <jkosina@suse.com>
-> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> ---
->  arch/x86/boot/compressed/eboot.c      | 26 +++++++++++++++++++++++---
->  arch/x86/include/uapi/asm/bootparam.h |  1 +
->  2 files changed, 24 insertions(+), 3 deletions(-)
+On Tue, 11 Aug, at 02:16:29PM, Lee, Chun-Yi wrote:
+> Add handler to parse the setup data that carrying hibernation key, it
+> reserves hibernation key by memblock then copies key to a allocated page
+> in later initcall stage.
 > 
-> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> index 463aa9b..c838d09 100644
-> --- a/arch/x86/boot/compressed/eboot.c
-> +++ b/arch/x86/boot/compressed/eboot.c
-> @@ -1394,18 +1394,22 @@ static void setup_hibernation_keys(struct boot_params *params)
->  {
->  	unsigned long key_size;
->  	unsigned long attributes;
-> +	struct setup_data *setup_data, *hibernation_setup_data;
->  	struct hibernation_keys *keys;
-> +	unsigned long size = 0;
->  	efi_status_t status;
+> And for erasing footprints, the codes in this patch remove setup
+> data that carried hibernation key, and clean the memory space that
+> reserved by memblock.
+> 
+> Reviewed-by: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
+> Tested-by: Jiri Kosina <jkosina-IBi9RG/b67k@public.gmane.org>
+> Signed-off-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> ---
+>  arch/x86/include/asm/suspend.h  |  4 +++
+>  arch/x86/kernel/setup.c         | 21 ++++++++++-
+>  arch/x86/power/Makefile         |  1 +
+>  arch/x86/power/hibernate_keys.c | 78 +++++++++++++++++++++++++++++++++++++++++
+>  kernel/power/power.h            |  5 +++
+>  5 files changed, 108 insertions(+), 1 deletion(-)
+>  create mode 100644 arch/x86/power/hibernate_keys.c
 
-One thing to be aware of is that eboot.c has mainly used the
-"reverse-christmas-tree" style of variable declarations, with longer
-lines first, and shorter ones following. I haven't mentioned it before
-because none of your changes seemed to be too different (and it's not
-a tree-wide convention), but the above setup_data line goes a bit too
-far.
+[...]
 
-Could you try and keep them ordered, longest line first?
-
+> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+> index 80f874b..b345359 100644
+> --- a/arch/x86/kernel/setup.c
+> +++ b/arch/x86/kernel/setup.c
+> @@ -112,6 +112,8 @@
+>  #include <asm/alternative.h>
+>  #include <asm/prom.h>
 >  
->  	/* Allocate setup_data to carry keys */
-> +	size = sizeof(struct setup_data) + sizeof(struct hibernation_keys);
->  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-> -				sizeof(struct hibernation_keys), &keys);
-> +				size, &hibernation_setup_data);
->  	if (status != EFI_SUCCESS) {
->  		efi_printk(sys_table, "Failed to alloc mem for hibernation keys\n");
->  		return;
->  	}
->  
-> -	memset(keys, 0, sizeof(struct hibernation_keys));
-> +	memset(hibernation_setup_data, 0, size);
-> +	keys = (struct hibernation_keys *) hibernation_setup_data->data;
->  
->  	status = efi_call_early(get_variable, HIBERNATION_KEY,
->  				&EFI_HIBERNATION_GUID, &attributes,
-> @@ -1419,7 +1423,8 @@ static void setup_hibernation_keys(struct boot_params *params)
->  		if (status == EFI_SUCCESS) {
->  			efi_printk(sys_table, "Cleaned existing hibernation key\n");
->  			status = EFI_NOT_FOUND;
-> -		}
-> +		} else
-> +			goto clean_fail;
-
-Please add braces for the 'else' clause. Also, please include a
-comment stating that the reason you jump to the label instead of
-returning is so that the EFI status error code can be recorded in
-hibernation_setup_data.
-
->  	}
->  
->  	if (status != EFI_SUCCESS) {
-> @@ -1436,6 +1441,21 @@ static void setup_hibernation_keys(struct boot_params *params)
->  		if (status != EFI_SUCCESS)
->  			efi_printk(sys_table, "Failed to set hibernation key\n");
->  	}
+> +#include <asm/suspend.h>
 > +
-> +clean_fail:
-> +	hibernation_setup_data->type = SETUP_HIBERNATION_KEYS;
-> +	hibernation_setup_data->len = sizeof(struct hibernation_keys);
-> +	hibernation_setup_data->next = 0;
-> +	keys->hkey_status = efi_status_to_err(status);
+>  /*
+>   * max_low_pfn_mapped: highest direct mapped pfn under 4GB
+>   * max_pfn_mapped:     highest direct mapped pfn over 4GB
+> @@ -425,10 +427,22 @@ static void __init reserve_initrd(void)
+>  }
+>  #endif /* CONFIG_BLK_DEV_INITRD */
+>  
+> +static void __init remove_setup_data(u64 pa_prev, u64 pa_next)
+> +{
+> +	struct setup_data *data;
 > +
-> +	setup_data = (struct setup_data *)params->hdr.setup_data;
-> +	while (setup_data && setup_data->next)
-> +		setup_data = (struct setup_data *)setup_data->next;
+> +	if (pa_prev) {
+> +		data = early_memremap(pa_prev, sizeof(*data));
+> +		data->next = pa_next;
+> +		early_iounmap(data, sizeof(*data));
+
+This should be early_memunmap for consistency().
+
+> diff --git a/arch/x86/power/hibernate_keys.c b/arch/x86/power/hibernate_keys.c
+> new file mode 100644
+> index 0000000..357dc0e
+> --- /dev/null
+> +++ b/arch/x86/power/hibernate_keys.c
+> @@ -0,0 +1,78 @@
+> +/* Hibernation keys handler
+> + *
+> + * Copyright (C) 2015 Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public Licence
+> + * as published by the Free Software Foundation; either version
+> + * 2 of the Licence, or (at your option) any later version.
+> + */
 > +
-> +	if (setup_data)
-> +		setup_data->next = (unsigned long)hibernation_setup_data;
-> +	else
-> +		params->hdr.setup_data = (unsigned long)hibernation_setup_data;
+> +#include <linux/bootmem.h>
+> +#include <linux/memblock.h>
+> +#include <linux/suspend.h>
+> +#include <asm/suspend.h>
+> +
+> +/* physical address of hibernation keys from boot params */
+> +static u64 keys_phys_addr;
+> +
+> +/* A page used to keep hibernation keys */
+> +static struct hibernation_keys *hibernation_keys;
+> +
+> +void __init parse_hibernation_keys(u64 phys_addr, u32 data_len)
+> +{
+> +	struct setup_data *hibernation_setup_data;
+> +
+> +	/* Reserve keys memory, will copy and erase in init_hibernation_keys() */
+> +	keys_phys_addr = phys_addr + sizeof(struct setup_data);
+> +	memblock_reserve(keys_phys_addr, sizeof(struct hibernation_keys));
+> +
+> +	/* clear hibernation_data */
+> +	hibernation_setup_data = early_memremap(phys_addr, data_len);
+> +	if (!hibernation_setup_data)
+> +		return;
+> +
+> +	memset(hibernation_setup_data, 0, sizeof(struct setup_data));
 
-This label name is a little confusing because you reach it both when
-the EFI boot variable was successfully created and when a bogus EFI
-variable failed to be deleted, i.e. it's not always reached because of
-a failure.
+Why is this necessary? You're only clearing the struct setup_data
+fields and you unlinked this setup_data entry in remove_setup_data()
+anyway.
 
-How about 'setup' or simply 'out' ?
+> +	early_memunmap(hibernation_setup_data, data_len);
+> +}
+> +
+> +int get_hibernation_key(u8 **hkey)
+> +{
+> +	if (!hibernation_keys)
+> +		return -ENODEV;
+> +
+> +	if (!hibernation_keys->hkey_status)
+> +		*hkey = hibernation_keys->hibernation_key;
+> +
+> +	return hibernation_keys->hkey_status;
+> +}
+
+For global functions like this it's usually much preferred to prefix
+the name with the subsystem, i.e. hibernation_get_key().
+
+> +static int __init init_hibernation_keys(void)
+> +{
+> +	struct hibernation_keys *keys;
+> +	int ret = 0;
+> +
+> +	if (!keys_phys_addr)
+> +		return -ENODEV;
+> +
+> +	keys = early_memremap(keys_phys_addr, sizeof(struct hibernation_keys));
+> +
+> +	/* Copy hibernation keys to a allocated page */
+> +	hibernation_keys = (struct hibernation_keys *)get_zeroed_page(GFP_KERNEL);
+> +	if (hibernation_keys) {
+> +		*hibernation_keys = *keys;
+> +	} else {
+> +		pr_err("PM: Allocate hibernation keys page failed\n");
+> +		ret = -ENOMEM;
+> +	}
+
+It seems overkill to allocate an entire page for 28 bytes of data.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
