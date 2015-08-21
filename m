@@ -1,285 +1,121 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: [PATCH v5 2/2] efi: a misc char interface for user to update efi firmware
-Date: Fri, 21 Aug 2015 19:34:48 +0800
-Message-ID: <1440156888-25796-3-git-send-email-hock.leong.kweh@intel.com>
-References: <1440156888-25796-1-git-send-email-hock.leong.kweh@intel.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH v2 08/16] x86/efi: Carrying hibernation key by setup data
+Date: Fri, 21 Aug 2015 13:40:26 +0100
+Message-ID: <20150821124026.GB3310@codeblueprint.co.uk>
+References: <1439273796-25359-1-git-send-email-jlee@suse.com>
+ <1439273796-25359-9-git-send-email-jlee@suse.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1440156888-25796-1-git-send-email-hock.leong.kweh@intel.com>
+Content-Disposition: inline
+In-Reply-To: <1439273796-25359-9-git-send-email-jlee@suse.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Ong Boon Leong <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Fleming Matt <matt.fleming@intel.com>
+To: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-
-Introducing a kernel module to expose capsule loader interface
-(misc char device file note) for user to upload capsule binaries.
-
-Example method to load the capsule binary:
-cat firmware.bin > /dev/efi_capsule_loader
-
-Cc: Matt Fleming <matt.fleming@intel.com>
-Signed-off-by: Kweh, Hock Leong <hock.leong.kweh@intel.com>
----
- drivers/firmware/efi/Kconfig              |   10 ++
- drivers/firmware/efi/Makefile             |    1 +
- drivers/firmware/efi/efi-capsule-loader.c |  218 +++++++++++++++++++++++++++++
- 3 files changed, 229 insertions(+)
- create mode 100644 drivers/firmware/efi/efi-capsule-loader.c
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index f712d47..0be8ee3 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -60,6 +60,16 @@ config EFI_RUNTIME_WRAPPERS
- config EFI_ARMSTUB
- 	bool
+On Tue, 11 Aug, at 02:16:28PM, Lee, Chun-Yi wrote:
+> For forwarding hibernation key from EFI stub to boot kernel, this patch
+> allocates setup data for carrying hibernation key, size and the status
+> of efi operating.
  
-+config EFI_CAPSULE_LOADER
-+	tristate "EFI capsule loader"
-+	depends on EFI
-+	help
-+	  This option exposes a loader interface "/dev/efi_capsule_loader" for
-+	  user to load EFI capsule binary and update the EFI firmware through
-+	  system reboot.
-+
-+	  If unsure, say N.
-+
- endmenu
- 
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 698846e..5ab031a 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -8,3 +8,4 @@ obj-$(CONFIG_UEFI_CPER)			+= cper.o
- obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
- obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
- obj-$(CONFIG_EFI_STUB)			+= libstub/
-+obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= efi-capsule-loader.o
-diff --git a/drivers/firmware/efi/efi-capsule-loader.c b/drivers/firmware/efi/efi-capsule-loader.c
-new file mode 100644
-index 0000000..1da8608
---- /dev/null
-+++ b/drivers/firmware/efi/efi-capsule-loader.c
-@@ -0,0 +1,218 @@
-+/*
-+ * EFI capsule loader driver.
-+ *
-+ * Copyright 2015 Intel Corporation
-+ *
-+ * This file is part of the Linux kernel, and is made available under
-+ * the terms of the GNU General Public License version 2.
-+ */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+#include <linux/miscdevice.h>
-+#include <linux/highmem.h>
-+#include <linux/slab.h>
-+#include <linux/mutex.h>
-+#include <linux/efi.h>
-+
-+#define DEV_NAME "efi_capsule_loader"
-+
-+struct capsule_info {
-+	int		curr_index;
-+	int		curr_size;
-+	int		total_size;
-+	struct page	**pages;
-+};
-+
-+static DEFINE_MUTEX(capsule_loader_lock);
-+
-+/*
-+ * This function will store the capsule binary and pass it to
-+ * efi_capsule_update() API in capsule.c
-+ */
-+static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
-+				 size_t count, loff_t *offp)
-+{
-+	int ret = 0;
-+	struct capsule_info *cap_info = file->private_data;
-+	struct page *kbuff_page;
-+	void *kbuff;
-+
-+	pr_debug("%s: Entering Write()\n", __func__);
-+	if (count == 0)
-+		return 0;
-+
-+	if (cap_info->curr_index == -1)
-+		return count;
-+
-+	kbuff_page = alloc_page(GFP_KERNEL);
-+	if (!kbuff_page) {
-+		pr_err("%s: alloc_page() failed\n", __func__);
-+		if (!cap_info->curr_index)
-+			return -ENOMEM;
-+		ret = -ENOMEM;
-+		goto failed;
-+	}
-+
-+	kbuff = kmap(kbuff_page);
-+	if (!kbuff) {
-+		pr_err("%s: kmap() failed\n", __func__);
-+		if (cap_info->curr_index)
-+			cap_info->pages[cap_info->curr_index++] = kbuff_page;
-+		ret = -EFAULT;
-+		goto failed;
-+	}
-+
-+	/* copy capsule binary data from user space to kernel space buffer */
-+	if (copy_from_user(kbuff, buff, min_t(size_t, count, PAGE_SIZE))) {
-+		pr_err("%s: copy_from_user() failed\n", __func__);
-+		if (cap_info->curr_index)
-+			cap_info->pages[cap_info->curr_index++] = kbuff_page;
-+		kunmap(kbuff_page);
-+		ret = -EFAULT;
-+		goto failed;
-+	}
-+
-+	/* setup capsule binary info structure */
-+	if (cap_info->curr_index == 0) {
-+		efi_capsule_header_t *cap_hdr = kbuff;
-+		int reset_type;
-+		int pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >>
-+					PAGE_SHIFT;
-+
-+		if (pages_needed <= 0) {
-+			pr_err("%s: pages count invalid\n", __func__);
-+			ret = -EINVAL;
-+			kunmap(kbuff_page);
-+			goto failed;
-+		}
-+
-+		/* check if the capsule binary supported */
-+		ret = efi_capsule_supported(cap_hdr->guid, cap_hdr->flags,
-+					    cap_hdr->imagesize, &reset_type);
-+		if (ret) {
-+			pr_err("%s: efi_capsule_supported() failed\n",
-+			       __func__);
-+			kunmap(kbuff_page);
-+			goto failed;
-+		}
-+
-+		cap_info->total_size = cap_hdr->imagesize;
-+		cap_info->pages = kmalloc_array(pages_needed, sizeof(void *),
-+						GFP_KERNEL);
-+		if (!cap_info->pages) {
-+			pr_err("%s: kmalloc_array() failed\n", __func__);
-+			ret = -ENOMEM;
-+			kunmap(kbuff_page);
-+			goto failed;
-+		}
-+	}
-+
-+	cap_info->pages[cap_info->curr_index++] = kbuff_page;
-+	cap_info->curr_size += count;
-+	kunmap(kbuff_page);
-+
-+	/* submit the full binary to efi_capsule_update() API */
-+	if (cap_info->curr_size >= cap_info->total_size) {
-+		ret = efi_capsule_update(kmap(cap_info->pages[0]),
-+					 cap_info->pages);
-+		kunmap(cap_info->pages[0]);
-+		if (ret) {
-+			pr_err("%s: efi_capsule_update() failed\n", __func__);
-+			goto failed;
-+		}
-+		/* indicate capsule binary uploading is done */
-+		cap_info->curr_index = -1;
-+	}
-+
-+	/*
-+	 * we cannot free the pages here due to reboot need that data
-+	 * maintained.
-+	 */
-+	return count;
-+
-+failed:
-+	if (!cap_info->curr_index) {
-+		__free_page(kbuff_page);
-+	} else {
-+		while (cap_info->curr_index > 0)
-+			__free_page(cap_info->pages[--cap_info->curr_index]);
-+		kfree(cap_info->pages);
-+	}
-+
-+	return ret;
-+}
-+
-+static int efi_capsule_release(struct inode *inode, struct file *file)
-+{
-+	int ret = 0;
-+	struct capsule_info *cap_info = file->private_data;
-+
-+	pr_debug("%s: Exit in Release()\n", __func__);
-+	/* release those uncompleted uploaded block */
-+	if (cap_info->curr_index > 0) {
-+		pr_err("%s: capsule upload not complete\n", __func__);
-+		while (cap_info->curr_index > 0)
-+			__free_page(cap_info->pages[--cap_info->curr_index]);
-+		kfree(cap_info->pages);
-+		ret = -ECANCELED;
-+	}
-+	kfree(file->private_data);
-+	file->private_data = NULL;
-+	mutex_unlock(&capsule_loader_lock);
-+	return ret;
-+}
-+
-+static int efi_capsule_open(struct inode *inode, struct file *file)
-+{
-+	int ret = -EBUSY;
-+	struct capsule_info *cap_info;
-+
-+	pr_debug("%s: Entering Open()\n", __func__);
-+	if (mutex_trylock(&capsule_loader_lock)) {
-+		cap_info = kzalloc(sizeof(*cap_info), GFP_KERNEL);
-+		file->private_data = cap_info;
-+		ret = 0;
-+	}
-+	return ret;
-+}
-+
-+static const struct file_operations efi_capsule_fops = {
-+	.owner = THIS_MODULE,
-+	.open = efi_capsule_open,
-+	.write = efi_capsule_write,
-+	.release = efi_capsule_release,
-+	.llseek = no_llseek,
-+};
-+
-+static struct miscdevice efi_capsule_misc = {
-+	.minor = MISC_DYNAMIC_MINOR,
-+	.name = DEV_NAME,
-+	.fops = &efi_capsule_fops,
-+};
-+
-+static int __init efi_capsule_loader_init(void)
-+{
-+	int ret;
-+
-+	mutex_init(&capsule_loader_lock);
-+
-+	ret = misc_register(&efi_capsule_misc);
-+	if (ret)
-+		pr_err("%s: misc_register() failed\n", __func__);
-+
-+	return ret;
-+}
-+module_init(efi_capsule_loader_init);
-+
-+static void __exit efi_capsule_loader_exit(void)
-+{
-+	mutex_destroy(&capsule_loader_lock);
-+	misc_deregister(&efi_capsule_misc);
-+}
-+module_exit(efi_capsule_loader_exit);
-+
-+MODULE_DESCRIPTION("EFI capsule firmware binary loader");
-+MODULE_LICENSE("GPL v2");
+This could do with some more information, and include that the key is
+used to validate hibernate images.
+
+But now that I think about it, is there a reason this patch hasn't
+been merged with patch 6? The memory leak I mentioned in patch 6
+becomes a non-issue in this one, so it would be good if these two
+could be squashed together.
+  
+> Reviewed-by: Jiri Kosina <jkosina@suse.com>
+> Tested-by: Jiri Kosina <jkosina@suse.com>
+> Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> ---
+>  arch/x86/boot/compressed/eboot.c      | 26 +++++++++++++++++++++++---
+>  arch/x86/include/uapi/asm/bootparam.h |  1 +
+>  2 files changed, 24 insertions(+), 3 deletions(-)
+> 
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> index 463aa9b..c838d09 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -1394,18 +1394,22 @@ static void setup_hibernation_keys(struct boot_params *params)
+>  {
+>  	unsigned long key_size;
+>  	unsigned long attributes;
+> +	struct setup_data *setup_data, *hibernation_setup_data;
+>  	struct hibernation_keys *keys;
+> +	unsigned long size = 0;
+>  	efi_status_t status;
+
+One thing to be aware of is that eboot.c has mainly used the
+"reverse-christmas-tree" style of variable declarations, with longer
+lines first, and shorter ones following. I haven't mentioned it before
+because none of your changes seemed to be too different (and it's not
+a tree-wide convention), but the above setup_data line goes a bit too
+far.
+
+Could you try and keep them ordered, longest line first?
+
+>  
+>  	/* Allocate setup_data to carry keys */
+> +	size = sizeof(struct setup_data) + sizeof(struct hibernation_keys);
+>  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+> -				sizeof(struct hibernation_keys), &keys);
+> +				size, &hibernation_setup_data);
+>  	if (status != EFI_SUCCESS) {
+>  		efi_printk(sys_table, "Failed to alloc mem for hibernation keys\n");
+>  		return;
+>  	}
+>  
+> -	memset(keys, 0, sizeof(struct hibernation_keys));
+> +	memset(hibernation_setup_data, 0, size);
+> +	keys = (struct hibernation_keys *) hibernation_setup_data->data;
+>  
+>  	status = efi_call_early(get_variable, HIBERNATION_KEY,
+>  				&EFI_HIBERNATION_GUID, &attributes,
+> @@ -1419,7 +1423,8 @@ static void setup_hibernation_keys(struct boot_params *params)
+>  		if (status == EFI_SUCCESS) {
+>  			efi_printk(sys_table, "Cleaned existing hibernation key\n");
+>  			status = EFI_NOT_FOUND;
+> -		}
+> +		} else
+> +			goto clean_fail;
+
+Please add braces for the 'else' clause. Also, please include a
+comment stating that the reason you jump to the label instead of
+returning is so that the EFI status error code can be recorded in
+hibernation_setup_data.
+
+>  	}
+>  
+>  	if (status != EFI_SUCCESS) {
+> @@ -1436,6 +1441,21 @@ static void setup_hibernation_keys(struct boot_params *params)
+>  		if (status != EFI_SUCCESS)
+>  			efi_printk(sys_table, "Failed to set hibernation key\n");
+>  	}
+> +
+> +clean_fail:
+> +	hibernation_setup_data->type = SETUP_HIBERNATION_KEYS;
+> +	hibernation_setup_data->len = sizeof(struct hibernation_keys);
+> +	hibernation_setup_data->next = 0;
+> +	keys->hkey_status = efi_status_to_err(status);
+> +
+> +	setup_data = (struct setup_data *)params->hdr.setup_data;
+> +	while (setup_data && setup_data->next)
+> +		setup_data = (struct setup_data *)setup_data->next;
+> +
+> +	if (setup_data)
+> +		setup_data->next = (unsigned long)hibernation_setup_data;
+> +	else
+> +		params->hdr.setup_data = (unsigned long)hibernation_setup_data;
+
+This label name is a little confusing because you reach it both when
+the EFI boot variable was successfully created and when a bogus EFI
+variable failed to be deleted, i.e. it's not always reached because of
+a failure.
+
+How about 'setup' or simply 'out' ?
+
 -- 
-1.7.9.5
+Matt Fleming, Intel Open Source Technology Center
