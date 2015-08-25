@@ -1,64 +1,118 @@
-From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES memory
-Date: Mon, 24 Aug 2015 11:25:57 -0700
-Message-ID: <1440440757-4526-1-git-send-email-zjzhang@codeaurora.org>
+From: "Zhang, Tianfei" <tianfei.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: memleak on efi_enter_virtual_mode()
+Date: Tue, 25 Aug 2015 01:57:26 +0000
+Message-ID: <BA6F50564D52C24884F9840E07E32DEC2A8F2306@CDSMSX102.ccr.corp.intel.com>
+References: <BA6F50564D52C24884F9840E07E32DEC2A8F10F0@CDSMSX102.ccr.corp.intel.com>
+	 <20150824055558.GA15397@dhcp-129-120.nay.redhat.com>
+	 <BA6F50564D52C24884F9840E07E32DEC2A8F1D68@CDSMSX102.ccr.corp.intel.com>
+ <1440414057.5713.19.camel@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1440414057.5713.19.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi @ vger . kernel . org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+To: "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: "dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "bp-l3A5Bk7waGM@public.gmane.org" <bp-l3A5Bk7waGM@public.gmane.org>, "mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-
-GHES memory region is used as a communication buffer for reporting
-hardware errors from the firmware to kernel. Essentially the
-firmware writes hardware error records there, triggers an NMI/interrupt,
-then the GHES driver goes off and grabs the error record from the
-GHES region.
-
-The kernel currently maps the GHES memory region as cacheable
-(PAGE_KERNEL) for all architectures. However, on some arm64 platforms,
-there is a mismatch between how the kernel maps the GHES region
-(PAGE_KERNEL) and how the firmware maps it (EFI_MEMORY_UC, ie.
-uncacheable), leading to the possibility of the kernel GHES driver
-reading stale data from the cache when it receives the interrupt. With
-stale data being read, kernel reports there is no new hardware error
-when there actually is; this may lead to further damage in various
-scenarios, such as error propagation caused data corruption.
-
-Instead GHES memory region should be mapped with page protection type
-according to what is returned from arch_apei_get_mem_attribute().
-
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
----
- drivers/acpi/apei/ghes.c | 10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/acpi/apei/ghes.c b/drivers/acpi/apei/ghes.c
-index 23981ac1c6c2..3dd9c462d22a 100644
---- a/drivers/acpi/apei/ghes.c
-+++ b/drivers/acpi/apei/ghes.c
-@@ -157,11 +157,15 @@ static void __iomem *ghes_ioremap_pfn_nmi(u64 pfn)
- 
- static void __iomem *ghes_ioremap_pfn_irq(u64 pfn)
- {
--	unsigned long vaddr;
-+	unsigned long vaddr, paddr;
-+	pgprot_t prot;
- 
- 	vaddr = (unsigned long)GHES_IOREMAP_IRQ_PAGE(ghes_ioremap_area->addr);
--	ioremap_page_range(vaddr, vaddr + PAGE_SIZE,
--			   pfn << PAGE_SHIFT, PAGE_KERNEL);
-+
-+	paddr = pfn << PAGE_SHIFT;
-+	prot = arch_apei_get_mem_attribute(paddr);
-+
-+	ioremap_page_range(vaddr, vaddr + PAGE_SIZE, paddr, prot);
- 
- 	return (void __iomem *)vaddr;
- }
--- 
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+SGkgZHk6DQpXaGVuIGZyZWUgdGhlIG1lbW9yeSAoIGVmaV9ydW50aW1lX21hcCkga3JlYWxsb2Mg
+aW4gc2F2ZV9ydW50aW1lX21hcCgpIGZ1bmN0aW9uPw0KDQpIaSBhbGw6DQoNCldlIGFyZSB1c2lu
+ZyBMaW51eC0zLjE0IGZvciBBbmRyb2lkIGRldmljZSwgd2UgZm91bmQgdGhhdCBpdCBpcyBhIG1l
+bWxlYWsgb24gZWZpX2VudGVyX3ZpcnR1YWxfbW9kZSgpIGJ5IGttZW1sZWFrIGNoZWNraW5nLg0K
+QW55b25lIHdvdWxkIGxpa2UgdG8gZ2l2ZSBzb21lIHN1Z2dlc3Rpb24/DQoNCkJlc3QsDQp0aWFu
+ZmVpDQoNCg0Kcm9vdEBsYXR0ZTovICMgY2F0IC9zeXMva2VybmVsL2RlYnVnL2ttZW1sZWFrICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIA0KdW5yZWZlcmVuY2VkIG9iamVjdCAweGZm
+ZmY4ODAwN2EwNWI0MDAgKHNpemUgMTAyNCk6DQogIGNvbW0gInN3YXBwZXIvMCIsIHBpZCAwLCBq
+aWZmaWVzIDQyOTQ2Njc2NDcgKGFnZSA3My45MzZzKQ0KICBoZXggZHVtcCAoZmlyc3QgMzIgYnl0
+ZXMpOg0KICAgIDA2IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAxIDdiIDAwIDAwIDAwIDAw
+ICAuLi4uLi4uLi4uLnsuLi4uDQogICAgMDAgMDAgNjEgZmUgZmUgZmYgZmYgZmYgNGMgMDAgMDAg
+MDAgMDAgMDAgMDAgMDAgIC4uYS4uLi4uTC4uLi4uLi4NCiAgYmFja3RyYWNlOg0KICAgIFs8ZmZm
+ZmZmZmY4MTk5MGY5ZT5dIGttZW1sZWFrX2FsbG9jKzB4NGUvMHhiMA0KICAgIFs8ZmZmZmZmZmY4
+MTE5YjExOT5dIF9fa21hbGxvY190cmFja19jYWxsZXIrMHhiOS8weDRjMA0KICAgIFs8ZmZmZmZm
+ZmY4MTE2ZDYwZj5dIGtyZWFsbG9jKzB4NGYvMHhhMA0KICAgIFs8ZmZmZmZmZmY4MjI0Mzk2Yj5d
+IGVmaV9lbnRlcl92aXJ0dWFsX21vZGUrMHgyMjkvMHg0OWENCiAgICBbPGZmZmZmZmZmODIyMmVl
+NmE+XSBzdGFydF9rZXJuZWwrMHgzZDUvMHg0NjYNCiAgICBbPGZmZmZmZmZmODIyMmU1YWQ+XSB4
+ODZfNjRfc3RhcnRfcmVzZXJ2YXRpb25zKzB4MmEvMHgyYw0KICAgIFs8ZmZmZmZmZmY4MjIyZTZh
+NT5dIHg4Nl82NF9zdGFydF9rZXJuZWwrMHhmNi8weGY5DQpbPGZmZmZmZmZmZmZmZmZmZmY+XSAw
+eGZmZmZmZmZmZmZmZmZmZmYNCg0KDQooZ2RiKSBmaWxlIG91dC90YXJnZXQvcHJvZHVjdC9jaHQv
+bGludXgva2VybmVsL2NodC92bWxpbnV4DQpMb2FkIG5ldyBzeW1ib2wgdGFibGUgZnJvbSAiL2hv
+bWUvZmlnby93b3JrL2FuZHJvaWQvY2hlcnJ5dHJhaWwvY2h0L291dC90YXJnZXQvcHJvZHVjdC9s
+YXQvbGludXgva2VybmVsL2NodC92bWxpbnV4Ij8gKHkgb3IgbikgeQ0KUmVhZGluZyBzeW1ib2xz
+IGZyb20gL2hvbWUvZmlnby93b3JrL2FuZHJvaWQvY2hlcnJ5dHJhaWwvY2h0L291dC90YXJnZXQv
+cHJvZHVjdC9sYXQvbGludXgva2VybmVsL2NodC92bWxpbnV4Li4uZG9uZS4NCihnZGIpIGwgKmVm
+aV9lbnRlcl92aXJ0dWFsX21vZGUrMHgyMjkNCjB4ZmZmZmZmZmY4MjI0Mzk2YiBpcyBhdCAvaG9t
+ZS9maWdvL3dvcmsvYW5kcm9pZC9jaGVycnl0cmFpbC9jaHQva2VybmVsL2NodC9hcmNoL3g4Ni9w
+bGF0Zm9ybS9lZmkvZWZpLmM6OTA5Lg0KOTA0ICAgICAgICAgICAgICAgICAgICAgaWYgKCEobWQt
+PmF0dHJpYnV0ZSAmIEVGSV9NRU1PUllfUlVOVElNRSkgfHwNCjkwNSAgICAgICAgICAgICAgICAg
+ICAgICAgICAobWQtPnR5cGUgPT0gRUZJX0JPT1RfU0VSVklDRVNfQ09ERSkgfHwNCjkwNiAgICAg
+ICAgICAgICAgICAgICAgICAgICAobWQtPnR5cGUgPT0gRUZJX0JPT1RfU0VSVklDRVNfREFUQSkp
+DQo5MDcgICAgICAgICAgICAgICAgICAgICAgICAgICAgY29udGludWU7DQo5MDggICAgICAgICAg
+ICAgICAgICAgIHRtcCA9IGtyZWFsbG9jKHEsIChjb3VudCArIDEpICogbWVtbWFwLmRlc2Nfc2l6
+ZSwgR0ZQX0tFUk5FTCk7DQo5MDkgICAgICAgICAgICAgICAgICAgICBpZiAoIXRtcCkNCjkxMCAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCjkxMSAgICAgICAgICAgICAgICAg
+ICAgIHEgPSB0bXA7DQo5MTIgICAgICAgDQo5MTMgICAgICAgICAgICAgICAgICAgICBtZW1jcHko
+cSArIGNvdW50ICogbWVtbWFwLmRlc2Nfc2l6ZSwgbWQsIG1lbW1hcC5kZXNjX3NpemUpOw0KKGdk
+YikNCg0KDQo+IC0tLS0tT3JpZ2luYWwgTWVzc2FnZS0tLS0tDQo+IEZyb206IEZsZW1pbmcsIE1h
+dHQNCj4gU2VudDogTW9uZGF5LCBBdWd1c3QgMjQsIDIwMTUgNzowMSBQTQ0KPiBUbzogWmhhbmcs
+IFRpYW5mZWkNCj4gQ2M6IGR5b3VuZ0ByZWRoYXQuY29tOyBicEBzdXNlLmRlOyBtaW5nb0BrZXJu
+ZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBtZW1sZWFrIG9uIGVmaV9lbnRlcl92aXJ0dWFsX21vZGUo
+KQ0KPiANCj4gRm9sa3MsIHBsZWFzZSB0YWtlIHRoaXMgdG8gdGhlIG1haWxpbmcgbGlzdCAobGlu
+dXgtZWZpQHZnZXIua2VybmVsLm9yZykgc28gdGhhdA0KPiBvdGhlciBwZW9wbGUgY2FuIGpvaW4g
+aW4gYW5kIGJlbmVmaXQgZnJvbSB0aGUgZGlzY3Vzc2lvbi4NCj4gDQo+IE9uIE1vbiwgMjAxNS0w
+OC0yNCBhdCAxMTo0MCArMDEwMCwgWmhhbmcsIFRpYW5mZWkgd3JvdGU6DQo+ID4gV2hlbiBmcmVl
+IHRoZSBtZW1vcnkgKCBlZmlfcnVudGltZV9tYXApIGtyZWFsbG9jIGluIHNhdmVfcnVudGltZV9t
+YXAoKQ0KPiBmdW5jdGlvbj8NCj4gPg0KPiA+DQo+ID4NCj4gPg0KPiA+DQo+ID4gPiAtLS0tLU9y
+aWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiA+ID4gRnJvbTogZHlvdW5nQHJlZGhhdC5jb20gW21haWx0
+bzpkeW91bmdAcmVkaGF0LmNvbV0NCj4gPiA+IFNlbnQ6IE1vbmRheSwgQXVndXN0IDI0LCAyMDE1
+IDE6NTYgUE0NCj4gPiA+IFRvOiBaaGFuZywgVGlhbmZlaQ0KPiA+ID4gQ2M6IEZsZW1pbmcsIE1h
+dHQ7IGJwQHN1c2UuZGU7IG1pbmdvQGtlcm5lbC5vcmcNCj4gPiA+IFN1YmplY3Q6IFJlOiBtZW1s
+ZWFrIG9uIGVmaV9lbnRlcl92aXJ0dWFsX21vZGUoKQ0KPiA+ID4NCj4gPiA+IE9uIDA4LzIyLzE1
+IGF0IDAxOjA2YW0sIFpoYW5nLCBUaWFuZmVpIHdyb3RlOg0KPiA+ID4gPiBIaSBhbGw6DQo+ID4g
+PiA+DQo+ID4gPiA+IFdlIGFyZSB1c2luZyBMaW51eC0zLjE0IGZvciBBbmRyb2lkIGRldmljZSwg
+d2UgZm91bmQgdGhhdCBpdCBpcyBhDQo+ID4gPiA+IG1lbWxlYWsNCj4gPiA+IG9uIGVmaV9lbnRl
+cl92aXJ0dWFsX21vZGUoKSBieSBrbWVtbGVhayBjaGVja2luZy4NCj4gPiA+ID4gV291bGQgeW91
+IGxpa2UgdG8gaGVscCB0byBnaXZlIHNvbWUgc3VnZ2VzdGlvbiBhYm91dCBpdD8NCj4gPiA+ID4N
+Cj4gPiA+ID4gQmVzdCwNCj4gPiA+ID4gdGlhbmZlaQ0KPiA+ID4gPg0KPiA+ID4gPg0KPiA+ID4g
+PiByb290QGxhdHRlOi8gIyBjYXQgL3N5cy9rZXJuZWwvZGVidWcva21lbWxlYWsgdW5yZWZlcmVu
+Y2VkIG9iamVjdA0KPiA+ID4gPiAweGZmZmY4ODAwN2EwNWI0MDAgKHNpemUgMTAyNCk6DQo+ID4g
+PiA+ICAgY29tbSAic3dhcHBlci8wIiwgcGlkIDAsIGppZmZpZXMgNDI5NDY2NzY0NyAoYWdlIDcz
+LjkzNnMpDQo+ID4gPiA+ICAgaGV4IGR1bXAgKGZpcnN0IDMyIGJ5dGVzKToNCj4gPiA+ID4gICAg
+IDA2IDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAwIDAxIDdiIDAwIDAwIDAwIDAwICAuLi4uLi4u
+Li4uLnsuLi4uDQo+ID4gPiA+ICAgICAwMCAwMCA2MSBmZSBmZSBmZiBmZiBmZiA0YyAwMCAwMCAw
+MCAwMCAwMCAwMCAwMCAgLi5hLi4uLi5MLi4uLi4uLg0KPiA+ID4gPiAgIGJhY2t0cmFjZToNCj4g
+PiA+ID4gICAgIFs8ZmZmZmZmZmY4MTk5MGY5ZT5dIGttZW1sZWFrX2FsbG9jKzB4NGUvMHhiMA0K
+PiA+ID4gPiAgICAgWzxmZmZmZmZmZjgxMTliMTE5Pl0gX19rbWFsbG9jX3RyYWNrX2NhbGxlcisw
+eGI5LzB4NGMwDQo+ID4gPiA+ICAgICBbPGZmZmZmZmZmODExNmQ2MGY+XSBrcmVhbGxvYysweDRm
+LzB4YTANCj4gPiA+ID4gICAgIFs8ZmZmZmZmZmY4MjI0Mzk2Yj5dIGVmaV9lbnRlcl92aXJ0dWFs
+X21vZGUrMHgyMjkvMHg0OWENCj4gPiA+ID4gICAgIFs8ZmZmZmZmZmY4MjIyZWU2YT5dIHN0YXJ0
+X2tlcm5lbCsweDNkNS8weDQ2Ng0KPiA+ID4gPiAgICAgWzxmZmZmZmZmZjgyMjJlNWFkPl0geDg2
+XzY0X3N0YXJ0X3Jlc2VydmF0aW9ucysweDJhLzB4MmMNCj4gPiA+ID4gICAgIFs8ZmZmZmZmZmY4
+MjIyZTZhNT5dIHg4Nl82NF9zdGFydF9rZXJuZWwrMHhmNi8weGY5DQo+ID4gPiA+IFs8ZmZmZmZm
+ZmZmZmZmZmZmZj5dIDB4ZmZmZmZmZmZmZmZmZmZmZg0KPiA+ID4gPg0KPiA+ID4gPg0KPiA+ID4g
+PiAoZ2RiKSBmaWxlIG91dC90YXJnZXQvcHJvZHVjdC9sYXR0ZS9saW51eC9rZXJuZWwvY2h0L3Zt
+bGludXgNCj4gPiA+ID4gTG9hZCBuZXcgc3ltYm9sIHRhYmxlIGZyb20NCj4gPiA+ID4NCj4gPiA+
+ICIvaG9tZS9maWdvL3dvcmsvYW5kcm9pZC9jaGVycnl0cmFpbC94aWFvbWkvb3V0L3RhcmdldC9w
+cm9kdWN0L2xhdHRlDQo+ID4gPiAvbGludSB4L2tlcm5lbC9jaHQvdm1saW51eCI/ICh5IG9yIG4p
+IHkgUmVhZGluZyBzeW1ib2xzIGZyb20NCj4gPiA+IC9ob21lL2ZpZ28vd29yay9hbmRyb2lkL2No
+ZXJyeXRyYWlsL3hpYW9taS9vdXQvdGFyZ2V0L3Byb2R1Y3QvbGF0dGUvDQo+ID4gPiBsaW51eA0K
+PiA+ID4gL2tlcm5lbC9jaHQvdm1saW51eC4uLmRvbmUuDQo+ID4gPiA+IChnZGIpIGwgKmVmaV9l
+bnRlcl92aXJ0dWFsX21vZGUrMHgyMjkgMHhmZmZmZmZmZjgyMjQzOTZiIGlzIGF0DQo+ID4gPiAv
+aG9tZS9maWdvL3dvcmsvYW5kcm9pZC9jaGVycnl0cmFpbC94aWFvbWkva2VybmVsL2NodC9hcmNo
+L3g4Ni9wbGF0Zg0KPiA+ID4gb3JtLw0KPiA+ID4gZWZpL2VmaS5jOjkwOS4NCj4gPiA+ID4gOTA0
+ICAgICAgICAgICAgICAgICAgICAgaWYgKCEobWQtPmF0dHJpYnV0ZSAmDQo+IEVGSV9NRU1PUllf
+UlVOVElNRSkNCj4gPiA+IHx8DQo+ID4gPiA+IDkwNSAgICAgICAgICAgICAgICAgICAgICAgICAo
+bWQtPnR5cGUgPT0NCj4gRUZJX0JPT1RfU0VSVklDRVNfQ09ERSkNCj4gPiA+IHx8DQo+ID4gPiA+
+IDkwNiAgICAgICAgICAgICAgICAgICAgICAgICAobWQtPnR5cGUgPT0NCj4gRUZJX0JPT1RfU0VS
+VklDRVNfREFUQSkpDQo+ID4gPiA+IDkwNyAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb250
+aW51ZTsNCj4gPiA+ID4gOTA4ICAgICAgICAgICAgICAgICAgICB0bXAgPSBrcmVhbGxvYyhxLCAo
+Y291bnQgKyAxKSAqDQo+ID4gPiBtZW1tYXAuZGVzY19zaXplLCBHRlBfS0VSTkVMKTsNCj4gPiA+
+ID4gOTA5ICAgICAgICAgICAgICAgICAgICAgaWYgKCF0bXApDQo+ID4gPiA+IDkxMCAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICBnb3RvIG91dDsNCj4gPiA+ID4gOTExICAgICAgICAgICAgICAg
+ICAgICAgcSA9IHRtcDsNCj4gPiA+ID4gOTEyDQo+ID4gPiA+IDkxMyAgICAgICAgICAgICAgICAg
+ICAgIG1lbWNweShxICsgY291bnQgKiBtZW1tYXAuZGVzY19zaXplLA0KPiBtZCwNCj4gPiA+IG1l
+bW1hcC5kZXNjX3NpemUpOw0KPiA+ID4gPiAoZ2RiKQ0KPiA+ID4NCj4gPiA+IEkgZG8gbm90IHNl
+ZSBwcm9ibGVtIGluIHRoZSBjb2RlIGl0IHNob3VsZCBiZSBhIGZhbHNlIHBvc2l0aXZlDQo+ID4g
+PiByZXBvcnQsIFRoZSBydW50aW1lIG1hcHMgYXJlIGNvcGllZCB0byBrcmVhbGxvY2VkIGJ1ZmZl
+ciBmb3Iga2V4ZWMgdXNlLg0KPiA+ID4NCj4gPiA+IFRoYW5rcw0KPiA+ID4gRGF2ZQ0KPiANCg0K
