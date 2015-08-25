@@ -1,92 +1,73 @@
-From: "Zhang, Jonathan Zhixiong" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
- memory
-Date: Tue, 25 Aug 2015 10:30:04 -0700
-Message-ID: <55DCA61C.8010109@codeaurora.org>
-References: <1439591850-29002-1-git-send-email-zjzhang@codeaurora.org>
- <1439591850-29002-2-git-send-email-zjzhang@codeaurora.org>
- <20150822092429.GB18233@gmail.com> <55DB60FA.8050406@codeaurora.org>
- <20150825085923.GA22414@gmail.com>
+From: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+Subject: [PATCH] drivers/firmware: make efi/esrt.c driver explicitly non-modular
+Date: Tue, 25 Aug 2015 19:00:48 -0400
+Message-ID: <1440543648-27328-1-git-send-email-paul.gortmaker@windriver.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150825085923.GA22414-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi @ vger . kernel . org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+The Kconfig for this driver is currently hidden with:
 
+config EFI_ESRT
+        bool
 
-On 8/25/2015 1:59 AM, Ingo Molnar wrote:
->
-> * Zhang, Jonathan Zhixiong <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
->
->>
->>
->> On 8/22/2015 2:24 AM, Ingo Molnar wrote:
->>>
->>> * Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org> wrote:
->>>
->>>> From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
->>>>
->>>> With ACPI APEI firmware first handling, generic hardware error
->>>> record is updated by firmware in GHES memory region. On an arm64
->>>> platform, firmware updates GHES memory region with uncached
->>>> access attribute, and then Linux reads stale data from cache.
->>>
->>> This paragraph *still* doesn't parse for me. It's not any English
->>> I can recognize: what is a 'With ACPI APEI firmware first handling'?
->> APEI is ACPI Platform Error Interface; it is part of ACPI spec,
->> defining the aspect of hardware error handling. "firmware first
->> handling" is a terminology used in APEI. It describes such mechanism
->> that when hardware error happens, firmware intersects/handles such
->> hardware error, formulates hardware error record and writes the record
->> to GHES memory region, notifies the kernel through NMI/interrupt, then
->> the kernel GHES driver grabs the error record from the GHES memory
->> region.
->
-> Argh. So how about translating that to English and putting that misnomer into
-> scare quotes, and saying something like:
->
->    If the ACPI APEI firmware handles the error first (called "firmware first
->    handling"), the generic hardware error record is updated by the firmware in the
->    GHES memory region.
->
-> ( Also note all the missing articles I added for readability. The rest of the
->    changelog is missing articles as well. )
-Thank you very much, Ingo. Input are taken.
->
->>> ... plus what this changelog still doesn't mention is the most important part
->>> of any bug fix description: how does the user notice this in practice and why
->>> does he care?
->>
->> The changelog mentioned that Linux would read stale data from cache. When stale
->> data is read, kernel reports there is no new hardware error when there actually
->> is.
->
-> Note that this is the most valuable sentence so far, in this whole changelog and
-> discussion. And we needed how many emails to get to this point?
->
-> obviously saying 'stale data' in itself does not mean much - it could mean a
-> harmless inconsistency nobody really cares about, or in fact it could mean
-> something more serious:
-Sure, makes sense.
->
->> [...] This may lead to further damage in various scenarios, such as error
->> propagation caused data corruption.
->
-> Please outline this better. How users are affected in practice is far more
-> important than any other detail.
-Yes, will do. I just sent out an update for your review.
->
-> Thanks,
->
-> 	Ingo
->
+...meaning that it currently is not being built as a module by anyone.
+Lets remove the modular code that is essentially orphaned, so that
+when reading the driver there is no doubt it is builtin-only.
 
+Since module_init translates to device_initcall in the non-modular
+case, the init ordering remains unchanged with this commit.
+
+We leave some tags like MODULE_AUTHOR for documentation purposes.
+
+We don't replace module.h with init.h since the file already has that.
+
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index a5b95d61ae71..22c5285f7705 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -20,7 +20,6 @@
+ #include <linux/kobject.h>
+ #include <linux/list.h>
+ #include <linux/memblock.h>
+-#include <linux/module.h>
+ #include <linux/slab.h>
+ #include <linux/types.h>
+ 
+@@ -450,22 +449,10 @@ err:
+ 	esrt = NULL;
+ 	return error;
+ }
++device_initcall(esrt_sysfs_init);
+ 
+-static void __exit esrt_sysfs_exit(void)
+-{
+-	pr_debug("esrt-sysfs: unloading.\n");
+-	cleanup_entry_list();
+-	kset_unregister(esrt_kset);
+-	sysfs_remove_group(esrt_kobj, &esrt_attr_group);
+-	kfree(esrt);
+-	esrt = NULL;
+-	kobject_del(esrt_kobj);
+-	kobject_put(esrt_kobj);
+-}
+-
+-module_init(esrt_sysfs_init);
+-module_exit(esrt_sysfs_exit);
+-
++/*
+ MODULE_AUTHOR("Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>");
+ MODULE_DESCRIPTION("EFI System Resource Table support");
+ MODULE_LICENSE("GPL");
++*/
 -- 
-Jonathan (Zhixiong) Zhang
-The Qualcomm Innovation Center, Inc. is a member of the Code Aurora Forum,
-a Linux Foundation Collaborative Project
+2.2.1
