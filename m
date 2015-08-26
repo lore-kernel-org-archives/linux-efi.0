@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 3/5] arm64/efi: move EFI init before early FDT processing
-Date: Wed, 26 Aug 2015 10:06:29 +0200
-Message-ID: <1440576391-25725-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 5/5] arm64/efi: ignore DT memreserve entries instead of removing them
+Date: Wed, 26 Aug 2015 10:06:31 +0200
+Message-ID: <1440576391-25725-6-git-send-email-ard.biesheuvel@linaro.org>
 References: <1440576391-25725-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1440576391-25725-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,227 +10,61 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The early FDT processing is responsible for enumerating the
-DT memory nodes and installing them as memblocks. This should
-only be done if we are not booting via EFI, but at this point,
-we don't know yet if that is the case or not.
-
-So move the EFI init to before the early FDT processing. This involves
-making some changes to the way EFI discovers the locations of the
-EFI system table and the memory map, since those values are retrieved
-from the FDT as well. Instead the of_scan infrastructure, it now uses
-libfdt directly to access the /chosen node.
+Now that the reservation of the FDT image itself is split off, we
+can make the DT scanning of memreserves conditional on whether we
+booted via UEFI and have its memory map available. This allows us
+to drop deletion of these memreserves in the stub. It also fixes
+the issue where the /reserved-memory/ node (which offers another
+way of reserving memory ranges) was not being ignored under UEFI.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/include/asm/efi.h   |  4 +-
- arch/arm64/kernel/efi.c        | 14 ++--
- arch/arm64/kernel/setup.c      |  4 +-
- drivers/firmware/efi/efi-fdt.c | 74 ++++++++------------
- include/linux/efi.h            |  3 +-
- 5 files changed, 40 insertions(+), 59 deletions(-)
+ arch/arm64/mm/init.c               |  3 ++-
+ drivers/firmware/efi/libstub/fdt.c | 11 +----------
+ 2 files changed, 3 insertions(+), 11 deletions(-)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index ef572206f1c3..635101f36720 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -5,9 +5,9 @@
- #include <asm/neon.h>
- 
- #ifdef CONFIG_EFI
--extern void efi_init(void);
-+extern void efi_init_fdt(void *fdt);
- #else
--#define efi_init()
-+#define efi_init_fdt(x)
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index ecbc051bc66b..0c33670ed1b6 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -170,7 +170,8 @@ void __init arm64_memblock_init(void)
+ 		memblock_reserve(__virt_to_phys(initrd_start), initrd_end - initrd_start);
  #endif
  
- #define efi_call_virt(f, ...)						\
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 9d4aa18f2a82..0e3dbe2cb752 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -51,14 +51,7 @@ static struct mm_struct efi_mm = {
- 	INIT_MM_CONTEXT(efi_mm)
- };
+-	early_init_fdt_scan_reserved_mem();
++	if (!efi_enabled(EFI_MEMMAP))
++		early_init_fdt_scan_reserved_mem();
  
--static int uefi_debug __initdata;
--static int __init uefi_debug_setup(char *str)
--{
--	uefi_debug = 1;
--
--	return 0;
--}
--early_param("uefi_debug", uefi_debug_setup);
-+static bool uefi_debug __initdata;
- 
- static int __init is_normal_ram(efi_memory_desc_t *md)
+ 	/* 4GB maximum for 32-bit only capable devices */
+ 	if (IS_ENABLED(CONFIG_ZONE_DMA))
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index 343e7992bd8f..a7e87cd582f2 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -24,8 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long map_size, unsigned long desc_size,
+ 			u32 desc_ver)
  {
-@@ -205,14 +198,15 @@ static __init void reserve_regions(void)
- 	set_bit(EFI_MEMMAP, &efi.flags);
- }
+-	int node, num_rsv;
+-	int status;
++	int node, status;
+ 	u32 fdt_val32;
+ 	u64 fdt_val64;
  
--void __init efi_init(void)
-+void __init efi_init_fdt(void *fdt)
- {
- 	struct efi_fdt_params params;
+@@ -53,14 +52,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	if (status != 0)
+ 		goto fdt_set_fail;
  
- 	/* Grab UEFI information placed in FDT by stub */
--	if (!efi_get_fdt_params(&params, uefi_debug))
-+	if (!efi_get_fdt_params(fdt, &params))
- 		return;
- 
-+	uefi_debug = params.verbose;
- 	efi_system_table = params.system_table;
- 
- 	memblock_reserve(params.mmap & PAGE_MASK,
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index fddae2c15ad2..8fdde97c975c 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -298,6 +298,9 @@ static void __init setup_machine_fdt(phys_addr_t dt_phys)
- {
- 	void *dt_virt = fixmap_remap_fdt(dt_phys);
- 
-+	if (dt_virt)
-+		efi_init_fdt(dt_virt);
-+
- 	if (!dt_virt || !early_init_dt_scan(dt_virt)) {
- 		pr_crit("\n"
- 			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
-@@ -366,7 +369,6 @@ void __init setup_arch(char **cmdline_p)
- 	 */
- 	local_async_enable();
- 
--	efi_init();
- 	arm64_memblock_init();
- 
- 	/* Parse the ACPI tables for possible boot-time configuration */
-diff --git a/drivers/firmware/efi/efi-fdt.c b/drivers/firmware/efi/efi-fdt.c
-index f0e7ef2ae0e9..2e0e1a5a3fbb 100644
---- a/drivers/firmware/efi/efi-fdt.c
-+++ b/drivers/firmware/efi/efi-fdt.c
-@@ -8,8 +8,7 @@
- 
- #include <linux/init.h>
- #include <linux/efi.h>
--#include <linux/of.h>
--#include <linux/of_fdt.h>
-+#include <linux/libfdt.h>
- 
- #define UEFI_PARAM(name, prop, field)			   \
- 	{						   \
-@@ -32,62 +31,47 @@ static __initdata struct {
- 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
- };
- 
--struct param_info {
--	int verbose;
--	int found;
--	void *params;
--};
+-	/*
+-	 * Delete all memory reserve map entries. When booting via UEFI,
+-	 * kernel will use the UEFI memory map to find reserved regions.
+-	 */
+-	num_rsv = fdt_num_mem_rsv(fdt);
+-	while (num_rsv-- > 0)
+-		fdt_del_mem_rsv(fdt, num_rsv);
 -
--static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
--				       int depth, void *data)
-+bool __init efi_get_fdt_params(void *fdt, struct efi_fdt_params *params)
- {
--	struct param_info *info = data;
- 	const void *prop;
--	void *dest;
--	u64 val;
--	int i, len;
-+	int node, i;
-+
-+	pr_info("Getting EFI parameters from FDT:\n");
- 
--	if (depth != 1 || strcmp(uname, "chosen") != 0)
--		return 0;
-+	node = fdt_path_offset(fdt, "/chosen");
-+	if (node < 0) {
-+		pr_err("/chosen node not found!\n");
-+		return false;
-+	}
-+
-+	prop = fdt_getprop(fdt, node, "bootargs", NULL);
-+	params->verbose = prop && strstr(prop, "uefi_debug");
- 
- 	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
--		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
--		if (!prop)
--			return 0;
--		dest = info->params + dt_params[i].offset;
--		info->found++;
-+		void *dest;
-+		int len;
-+		u64 val;
- 
--		val = of_read_number(prop, len / sizeof(u32));
-+		prop = fdt_getprop(fdt, node, dt_params[i].propname, &len);
-+		if (!prop)
-+			goto not_found;
-+		dest = (void *)params + dt_params[i].offset;
- 
- 		if (dt_params[i].size == sizeof(u32))
--			*(u32 *)dest = val;
-+			val = *(u32 *)dest = be32_to_cpup(prop);
- 		else
--			*(u64 *)dest = val;
-+			val = *(u64 *)dest = be64_to_cpup(prop);
- 
--		if (info->verbose)
-+		if (params->verbose)
- 			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
- 				dt_params[i].size * 2, val);
- 	}
--	return 1;
--}
--
--int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
--{
--	struct param_info info;
--	int ret;
-+	return true;
- 
--	pr_info("Getting EFI parameters from FDT:\n");
--
--	info.verbose = verbose;
--	info.found = 0;
--	info.params = params;
--
--	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
--	if (!info.found)
-+not_found:
-+	if (i == 0)
- 		pr_info("UEFI not found.\n");
--	else if (!ret)
--		pr_err("Can't find '%s' in device tree!\n",
--		       dt_params[info.found].name);
--
--	return ret;
-+	else
-+		pr_err("Can't find '%s' in device tree!\n", dt_params[i].name);
-+	return false;
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 85ef051ac6fb..faafa1ad6ea7 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -690,6 +690,7 @@ struct efi_fdt_params {
- 	u32 mmap_size;
- 	u32 desc_size;
- 	u32 desc_ver;
-+	bool verbose;
- };
- 
- typedef struct {
-@@ -901,7 +902,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
- extern void efi_get_time(struct timespec *now);
- extern void efi_reserve_boot_services(void);
--extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
-+extern bool efi_get_fdt_params(void *fdt, struct efi_fdt_params *params);
- extern struct efi_memory_map memmap;
- extern struct kobject *efi_kobj;
- 
+ 	node = fdt_subnode_offset(fdt, 0, "chosen");
+ 	if (node < 0) {
+ 		node = fdt_add_subnode(fdt, 0, "chosen");
 -- 
 1.9.1
