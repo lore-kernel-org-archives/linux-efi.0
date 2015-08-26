@@ -1,68 +1,53 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 0/5] arm64 UEFI early FDT handling
-Date: Wed, 26 Aug 2015 10:06:26 +0200
-Message-ID: <1440576391-25725-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Taku Izumi <izumi.taku@jp.fujitsu.com>
+Subject: [PATCH v2 0/3] Introduce "efi_fake_mem_mirror" boot option
+Date: Thu, 27 Aug 2015 02:10:31 +0900
+Message-ID: <1440609031-14695-1-git-send-email-izumi.taku@jp.fujitsu.com>
+Return-path: <owner-linux-mm@kvack.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, matt.fleming@intel.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com
+Cc: tony.luck@intel.com, qiuxishi@huawei.com, kamezawa.hiroyu@jp.fujitsu.com, ard.biesheuvel@linaro.org, linux-mm@kvack.org, Taku Izumi <izumi.taku@jp.fujitsu.com>
 List-Id: linux-efi@vger.kernel.org
 
-This is a followup to the "arm64: update/clarify/relax Image and FDT placement
-rules" series I sent a while ago:
-(http://article.gmane.org/gmane.linux.ports.arm.kernel/407148)
+UEFI spec 2.5 introduces new Memory Attribute Definition named
+EFI_MEMORY_MORE_RELIABLE which indicates which memory ranges are
+mirrored. Now linux kernel can recognize which memory ranges are mirrored
+by handling EFI_MEMORY_MORE_RELIABLE attributes.
+However testing this feature necesitates boxes with UEFI spec 2.5 complied
+firmware.
 
-This has now been split in two series: this first series deals with the
-early FDT handling, primarily in the context of UEFI, but not exclusively.
+This patchset introduces new boot option named "efi_fake_mem_mirror".
+By specifying this parameter, you can mark specific memory as
+mirrored memory. This is useful for debugging of Memory Address Range
+Mirroring feature.
 
-A number of minor issues exist in the early UEFI/FDT handling path, such as:
-- when booting via UEFI, memreserve entries are removed from the device tree but
-  the /reserved-memory node is not
-- memory nodes are removed from the device tree in a way that is not officially
-  supported by the libfdt API (i.e., you cannot delete nodes while traversing
-  the tree)
-- removal of memory nodes may discard annotations (such as NUMA topology) that
-  should ideally be retained, or may corrupt the tree by discarding nodes
-  referenced by phandles.
+v1 -> v2:
+ - change abbreviation of EFI_MEMORY_MORE_RELIABLE from "RELY" to "MR"
+ - add patch (2/3) for changing abbreviation of EFI_MEMORY_RUNTIME
+ - migrate some code from arch/x86/platform/efi/quirks to
+   drivers/firmware/efi/fake_mem.c and create config EFI_FAKE_MEMMAP
 
-Patch #1 introduces an arm64 specific version of early_init_dt_add_memory_arch()
-so that we can modify it later to ignore DT memory nodes if booting via UEFI.
+Taku Izumi (3):
+  efi: Add EFI_MEMORY_MORE_RELIABLE support to efi_md_typeattr_format()
+  efi: Change abbreviation of EFI_MEMORY_RUNTIME from "RUN" to "RT"
+  x86, efi: Add "efi_fake_mem_mirror" boot option
 
-Patch #2 moves some UEFI+FDT init code around before making changes to it.
-
-Patch #3 moves the UEFI initialization to before the early FDT scanning so we
-know at that point whether we are booting via UEFI or not.
-
-Patch #4 changes the UEFI init code so that memory nodes are simply ignored, so
-that they don't have to be removed by the stub anymore.
-
-Patch #5 does the same as #6, but for memreserves and the /reserved-memory
-node.
-
-Changes since v1:
-- dropped first two patches, they have been merged into v4.2-rc1
-- dropped last patch regarding FDT placement by the stub, this is not entirely
-  relevant to the primary issue targeted by this series
-- rebased onto for-next/core (arm64) as of today
-
-Ard Biesheuvel (5):
-  arm64: clone early_init_dt_add_memory_arch() to override default
-  efi: move FDT handling to separate object file
-  arm64/efi: move EFI init before early FDT processing
-  arm64/efi: ignore DT memory nodes instead of removing them
-  arm64/efi: ignore DT memreserve entries instead of removing them
-
- arch/arm64/include/asm/efi.h       |  4 +-
- arch/arm64/kernel/efi.c            | 14 +---
- arch/arm64/kernel/setup.c          |  4 +-
- arch/arm64/mm/init.c               | 54 +++++++++++-
- drivers/firmware/efi/Makefile      |  1 +
- drivers/firmware/efi/efi-fdt.c     | 77 ++++++++++++++++++
- drivers/firmware/efi/efi.c         | 86 --------------------
- drivers/firmware/efi/libstub/fdt.c | 33 +-------
- include/linux/efi.h                |  3 +-
- 9 files changed, 143 insertions(+), 133 deletions(-)
- create mode 100644 drivers/firmware/efi/efi-fdt.c
+ Documentation/kernel-parameters.txt |   8 ++
+ arch/x86/include/asm/efi.h          |   1 +
+ arch/x86/kernel/setup.c             |   4 +-
+ arch/x86/platform/efi/efi.c         |   2 +-
+ drivers/firmware/efi/Kconfig        |  12 +++
+ drivers/firmware/efi/Makefile       |   1 +
+ drivers/firmware/efi/efi.c          |   8 +-
+ drivers/firmware/efi/fake_mem.c     | 204 ++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h                 |   6 ++
+ 9 files changed, 241 insertions(+), 5 deletions(-)
+ create mode 100644 drivers/firmware/efi/fake_mem.c
 
 -- 
-1.9.1
+1.8.3.1
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
