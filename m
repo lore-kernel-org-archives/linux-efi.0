@@ -1,83 +1,44 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 5/5] arm64/efi: ignore DT memreserve entries instead
- of removing them
-Date: Wed, 26 Aug 2015 16:35:18 +0100
-Message-ID: <20150826153518.GE10728@bivouac.eciton.net>
-References: <1440576391-25725-1-git-send-email-ard.biesheuvel@linaro.org>
- <1440576391-25725-6-git-send-email-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH 0/4] KASAN/ARM64 EFI fixes
+Date: Wed, 26 Aug 2015 19:15:03 +0300
+Message-ID: <1440605707-8325-1-git-send-email-ryabinin.a.a@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1440576391-25725-6-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 26, 2015 at 10:06:31AM +0200, Ard Biesheuvel wrote:
-> Now that the reservation of the FDT image itself is split off, we
-> can make the DT scanning of memreserves conditional on whether we
-> booted via UEFI and have its memory map available. This allows us
-> to drop deletion of these memreserves in the stub. It also fixes
-> the issue where the /reserved-memory/ node (which offers another
-> way of reserving memory ranges) was not being ignored under UEFI.
+On 08/13/2015 08:23 PM, Will Deacon wrote:
+> I tried this out under EFI and it dies horribly in the stub code because
+> we're missing at least one KASAN_SANITIZE_ Makefile entry.
 > 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/mm/init.c               |  3 ++-
->  drivers/firmware/efi/libstub/fdt.c | 11 +----------
->  2 files changed, 3 insertions(+), 11 deletions(-)
-
-Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-And possibly a reference to 0ceac9e094b0?
-
-As it is a bugfix, it would be nice to see this one go into 4.3, but...
-
-> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-> index ecbc051bc66b..0c33670ed1b6 100644
-> --- a/arch/arm64/mm/init.c
-> +++ b/arch/arm64/mm/init.c
-> @@ -170,7 +170,8 @@ void __init arm64_memblock_init(void)
->  		memblock_reserve(__virt_to_phys(initrd_start), initrd_end - initrd_start);
->  #endif
->  
-> -	early_init_fdt_scan_reserved_mem();
-> +	if (!efi_enabled(EFI_MEMMAP))
-> +		early_init_fdt_scan_reserved_mem();
->  
->  	/* 4GB maximum for 32-bit only capable devices */
->  	if (IS_ENABLED(CONFIG_ZONE_DMA))
-> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-> index 343e7992bd8f..a7e87cd582f2 100644
-> --- a/drivers/firmware/efi/libstub/fdt.c
-> +++ b/drivers/firmware/efi/libstub/fdt.c
-> @@ -24,8 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->  			unsigned long map_size, unsigned long desc_size,
->  			u32 desc_ver)
->  {
-> -	int node, num_rsv;
-> -	int status;
-> +	int node, status;
->  	u32 fdt_val32;
->  	u64 fdt_val64;
->  
-> @@ -53,14 +52,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->  	if (status != 0)
->  		goto fdt_set_fail;
->  
-> -	/*
-> -	 * Delete all memory reserve map entries. When booting via UEFI,
-> -	 * kernel will use the UEFI memory map to find reserved regions.
-> -	 */
-> -	num_rsv = fdt_num_mem_rsv(fdt);
-> -	while (num_rsv-- > 0)
-> -		fdt_del_mem_rsv(fdt, num_rsv);
-> -
->  	node = fdt_subnode_offset(fdt, 0, "chosen");
->  	if (node < 0) {
->  		node = fdt_add_subnode(fdt, 0, "chosen");
-> -- 
-> 1.9.1
+> So I think this needs longer to stew before hitting mainline. By all means
+> get the x86 dependencies in for 4.3, but the arm64 port can probably use
+> another cycle to iron out the bugs.
 > 
+> Cheers,
+> 
+> Will
+> 
+
+These series fixes boot crash with KASAN under EFI.
+I'm sending it separetly for easier review.
+We have one more small x86 dependcy in the first patch.
+Patches 2-4 I'm going to squash into v6 'arm64: add KASAN support' patch.
+
+
+Andrey Ryabinin (4):
+  x86, efi, kasan: #undef memset/memcpy/memmove per arch.
+  efi/runtime-wrappers, kasan: don't sanitize runtime wrappers.
+  arm64/efi-stub, kasan: don't instrument efi-stub.
+  libfdt, kasan: don't instrument libfdt.
+
+ arch/arm64/kernel/Makefile             | 2 ++
+ arch/x86/include/asm/efi.h             | 8 ++++++++
+ drivers/firmware/efi/Makefile          | 8 ++++++++
+ drivers/firmware/efi/libstub/efistub.h | 4 ----
+ lib/Makefile                           | 3 ++-
+ 5 files changed, 20 insertions(+), 5 deletions(-)
+
+--
+2.4.6
