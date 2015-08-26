@@ -1,148 +1,263 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 1/5] arm64: clone early_init_dt_add_memory_arch() to
- override default
-Date: Wed, 26 Aug 2015 17:00:28 +0200
-Message-ID: <CAKv+Gu9roNfr8KPUJj_hhP6jw-Rz_CdcoT08vyxYDgW2AXpt4A@mail.gmail.com>
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 3/5] arm64/efi: move EFI init before early FDT
+ processing
+Date: Wed, 26 Aug 2015 16:16:27 +0100
+Message-ID: <20150826151627.GC10728@bivouac.eciton.net>
 References: <1440576391-25725-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1440576391-25725-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20150826144325.GA10728@bivouac.eciton.net>
+ <1440576391-25725-4-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150826144325.GA10728-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1440576391-25725-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Kulkarni, Ganapatrao" <Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Haojian Zhuang <haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leo Yan <leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 26 August 2015 at 16:43, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On Wed, Aug 26, 2015 at 10:06:27AM +0200, Ard Biesheuvel wrote:
->> Override the __weak early_init_dt_add_memory_arch() with our own
->> version. We need this in a subsequent patch to make the handling of
->> the memory nodes conditional on whether we are booting via UEFI or
->> not.
->
-> Worth clarifying that this is a direct copy?
-> ("Our own version" can be read as there being modifications here.)
->
+On Wed, Aug 26, 2015 at 10:06:29AM +0200, Ard Biesheuvel wrote:
+> The early FDT processing is responsible for enumerating the
+> DT memory nodes and installing them as memblocks. This should
+> only be done if we are not booting via EFI, but at this point,
+> we don't know yet if that is the case or not.
+> 
+> So move the EFI init to before the early FDT processing. This involves
+> making some changes to the way EFI discovers the locations of the
+> EFI system table and the memory map, since those values are retrieved
+> from the FDT as well. Instead the of_scan infrastructure, it now uses
+> libfdt directly to access the /chosen node.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/arm64/include/asm/efi.h   |  4 +-
+>  arch/arm64/kernel/efi.c        | 14 ++--
+>  arch/arm64/kernel/setup.c      |  4 +-
+>  drivers/firmware/efi/efi-fdt.c | 74 ++++++++------------
+>  include/linux/efi.h            |  3 +-
+>  5 files changed, 40 insertions(+), 59 deletions(-)
+> 
+> diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+> index ef572206f1c3..635101f36720 100644
+> --- a/arch/arm64/include/asm/efi.h
+> +++ b/arch/arm64/include/asm/efi.h
+> @@ -5,9 +5,9 @@
+>  #include <asm/neon.h>
+>  
+>  #ifdef CONFIG_EFI
+> -extern void efi_init(void);
+> +extern void efi_init_fdt(void *fdt);
+>  #else
+> -#define efi_init()
+> +#define efi_init_fdt(x)
+>  #endif
+>  
+>  #define efi_call_virt(f, ...)						\
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 9d4aa18f2a82..0e3dbe2cb752 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -51,14 +51,7 @@ static struct mm_struct efi_mm = {
+>  	INIT_MM_CONTEXT(efi_mm)
+>  };
+>  
+> -static int uefi_debug __initdata;
+> -static int __init uefi_debug_setup(char *str)
+> -{
+> -	uefi_debug = 1;
+> -
+> -	return 0;
+> -}
+> -early_param("uefi_debug", uefi_debug_setup);
+> +static bool uefi_debug __initdata;
 
-Yes. In fact, it wasn't before, so hence the choice of words here.
+So, this obviously clashes with the patches I sent out recently, but
+then they were triggered by the awkwardness of the interface passing
+the verbosity flag around...
+  
+>  static int __init is_normal_ram(efi_memory_desc_t *md)
+>  {
+> @@ -205,14 +198,15 @@ static __init void reserve_regions(void)
+>  	set_bit(EFI_MEMMAP, &efi.flags);
+>  }
+>  
+> -void __init efi_init(void)
+> +void __init efi_init_fdt(void *fdt)
 
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  arch/arm64/mm/init.c | 41 ++++++++++++++++++++
->>  1 file changed, 41 insertions(+)
->>
->> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
->> index f5c0680d17d9..ab25fde7397c 100644
->> --- a/arch/arm64/mm/init.c
->> +++ b/arch/arm64/mm/init.c
->> @@ -374,3 +374,44 @@ static int __init keepinitrd_setup(char *__unused)
->>
->>  __setup("keepinitrd", keepinitrd_setup);
->>  #endif
->> +
->> +void __init early_init_dt_add_memory_arch(u64 base, u64 size)
->> +{
->> +     const u64 phys_offset = __pa(PAGE_OFFSET);
->> +
->> +     if (!PAGE_ALIGNED(base)) {
->> +             if (size < PAGE_SIZE - (base & ~PAGE_MASK)) {
->> +                     pr_warn("Ignoring memory block 0x%llx - 0x%llx\n",
->> +                             base, base + size);
->> +                     return;
->> +             }
->> +             size -= PAGE_SIZE - (base & ~PAGE_MASK);
->> +             base = PAGE_ALIGN(base);
->> +     }
->> +     size &= PAGE_MASK;
->> +
->> +     if (base > MAX_MEMBLOCK_ADDR) {
->> +             pr_warning("Ignoring memory block 0x%llx - 0x%llx\n",
->> +                             base, base + size);
->> +             return;
->> +     }
->> +
->> +     if (base + size - 1 > MAX_MEMBLOCK_ADDR) {
->> +             pr_warning("Ignoring memory range 0x%llx - 0x%llx\n",
->> +                             ((u64)MAX_MEMBLOCK_ADDR) + 1, base + size);
->> +             size = MAX_MEMBLOCK_ADDR - base + 1;
->> +     }
->> +
->> +     if (base + size < phys_offset) {
->> +             pr_warning("Ignoring memory block 0x%llx - 0x%llx\n",
->> +                        base, base + size);
->> +             return;
->> +     }
->> +     if (base < phys_offset) {
->> +             pr_warning("Ignoring memory range 0x%llx - 0x%llx\n",
->> +                        base, phys_offset);
->> +             size -= phys_offset - base;
->> +             base = phys_offset;
->> +     }
->> +     memblock_add(base, size);
->> +}
->> --
->> 1.9.1
->
-> Would it be too crazy to do this via an added call to a weak
-> memblock_use_dt() function in the original instead, to avoid
-> duplicating this entire function?
->
+(Nitpick: efi_init_fdt here, efi_virtmap_init below - naming consistency)
 
-This keeps coming up: I have a series in the freezer that decouples
-the kernel mapping from the linear mapping, which makes another round
-of changes to this function. So that is why I cloned the function in
-the first place, only to reuse this patch for this series as well.
+>  {
+>  	struct efi_fdt_params params;
+>  
+>  	/* Grab UEFI information placed in FDT by stub */
+> -	if (!efi_get_fdt_params(&params, uefi_debug))
+> +	if (!efi_get_fdt_params(fdt, &params))
+>  		return;
+>  
+> +	uefi_debug = params.verbose;
+>  	efi_system_table = params.system_table;
 
-The following does the trick as well, but I am not sure if the alias
-attribute is allowed in the kernel
+Here is where it gets problematic.
+Because this is now called before parse_early_params(), we lose the
+ability to do debug output. Now, the details in the DT parsing is
+maybe not that critical, but what follow is:
+  
+>  	memblock_reserve(params.mmap & PAGE_MASK,
 
-"""
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index ad87ce826cce..af2f30cbf357 100644
---- a/arch/arm64/mm/init.c
-+++ b/arch/arm64/mm/init.c
-@@ -374,3 +374,8
+... and we _really_ need to be able to dump the memory regions, with
+attributes, for debugging purposes.
 
- __setup("keepinitrd", keepinitrd_setup);
- #endif
-+
-+void __init early_init_dt_add_memory_arch(u64 base, u64 size)
-+{
-+       __early_init_dt_add_memory_arch(base, size);
-+}
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 07496560e5b9..2da75619ed78 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -1047,6 +1047,9
- }
- #endif
+> diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+> index fddae2c15ad2..8fdde97c975c 100644
+> --- a/arch/arm64/kernel/setup.c
+> +++ b/arch/arm64/kernel/setup.c
+> @@ -298,6 +298,9 @@ static void __init setup_machine_fdt(phys_addr_t dt_phys)
+>  {
+>  	void *dt_virt = fixmap_remap_fdt(dt_phys);
+>  
+> +	if (dt_virt)
+> +		efi_init_fdt(dt_virt);
+> +
+>  	if (!dt_virt || !early_init_dt_scan(dt_virt)) {
+>  		pr_crit("\n"
+>  			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
+> @@ -366,7 +369,6 @@ void __init setup_arch(char **cmdline_p)
+>  	 */
+>  	local_async_enable();
+>  
+> -	efi_init();
 
-+void __early_init_dt_add_memory_arch(u64 base, u64 size)
-+                       __attribute__((alias("early_init_dt_add_memory_arch")));
-+
- bool __init early_init_dt_verify(void *params)
- {
-        if (!params)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index df9ef3801812..64fcb143f5f4 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -66,6 +66,7
- extern void early_init_fdt_scan_reserved_mem(void);
- extern void early_init_fdt_reserve_self(void);
- extern void early_init_dt_add_memory_arch(u64 base, u64 size);
-+extern void __early_init_dt_add_memory_arch(u64 base, u64 size);
- extern int early_init_dt_reserve_memory_arch(phys_addr_t base,
-phys_addr_t size,
-                                             bool no_map);
- extern void * early_init_dt_alloc_memory_arch(u64 size, u64 align);
-"""
+So can we just keep this call and terminate efi_init_fdt before
+memblock_reserve?
 
-> We need the functionality for 4/5 (nice cleanup) and 5/5 (bugfix), so
-> happy with whatever works.
->
-
-Indeed.
+>  	arm64_memblock_init();
+>  
+>  	/* Parse the ACPI tables for possible boot-time configuration */
+> diff --git a/drivers/firmware/efi/efi-fdt.c b/drivers/firmware/efi/efi-fdt.c
+> index f0e7ef2ae0e9..2e0e1a5a3fbb 100644
+> --- a/drivers/firmware/efi/efi-fdt.c
+> +++ b/drivers/firmware/efi/efi-fdt.c
+> @@ -8,8 +8,7 @@
+>  
+>  #include <linux/init.h>
+>  #include <linux/efi.h>
+> -#include <linux/of.h>
+> -#include <linux/of_fdt.h>
+> +#include <linux/libfdt.h>
+>  
+>  #define UEFI_PARAM(name, prop, field)			   \
+>  	{						   \
+> @@ -32,62 +31,47 @@ static __initdata struct {
+>  	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+>  };
+>  
+> -struct param_info {
+> -	int verbose;
+> -	int found;
+> -	void *params;
+> -};
+> -
+> -static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+> -				       int depth, void *data)
+> +bool __init efi_get_fdt_params(void *fdt, struct efi_fdt_params *params)
+>  {
+> -	struct param_info *info = data;
+>  	const void *prop;
+> -	void *dest;
+> -	u64 val;
+> -	int i, len;
+> +	int node, i;
+> +
+> +	pr_info("Getting EFI parameters from FDT:\n");
+>  
+> -	if (depth != 1 || strcmp(uname, "chosen") != 0)
+> -		return 0;
+> +	node = fdt_path_offset(fdt, "/chosen");
+> +	if (node < 0) {
+> +		pr_err("/chosen node not found!\n");
+> +		return false;
+> +	}
+> +
+> +	prop = fdt_getprop(fdt, node, "bootargs", NULL);
+> +	params->verbose = prop && strstr(prop, "uefi_debug");
+>  
+>  	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+> -		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+> -		if (!prop)
+> -			return 0;
+> -		dest = info->params + dt_params[i].offset;
+> -		info->found++;
+> +		void *dest;
+> +		int len;
+> +		u64 val;
+>  
+> -		val = of_read_number(prop, len / sizeof(u32));
+> +		prop = fdt_getprop(fdt, node, dt_params[i].propname, &len);
+> +		if (!prop)
+> +			goto not_found;
+> +		dest = (void *)params + dt_params[i].offset;
+>  
+>  		if (dt_params[i].size == sizeof(u32))
+> -			*(u32 *)dest = val;
+> +			val = *(u32 *)dest = be32_to_cpup(prop);
+>  		else
+> -			*(u64 *)dest = val;
+> +			val = *(u64 *)dest = be64_to_cpup(prop);
+>  
+> -		if (info->verbose)
+> +		if (params->verbose)
+>  			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
+>  				dt_params[i].size * 2, val);
+>  	}
+> -	return 1;
+> -}
+> -
+> -int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
+> -{
+> -	struct param_info info;
+> -	int ret;
+> +	return true;
+>  
+> -	pr_info("Getting EFI parameters from FDT:\n");
+> -
+> -	info.verbose = verbose;
+> -	info.found = 0;
+> -	info.params = params;
+> -
+> -	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+> -	if (!info.found)
+> +not_found:
+> +	if (i == 0)
+>  		pr_info("UEFI not found.\n");
+> -	else if (!ret)
+> -		pr_err("Can't find '%s' in device tree!\n",
+> -		       dt_params[info.found].name);
+> -
+> -	return ret;
+> +	else
+> +		pr_err("Can't find '%s' in device tree!\n", dt_params[i].name);
+> +	return false;
+>  }
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 85ef051ac6fb..faafa1ad6ea7 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -690,6 +690,7 @@ struct efi_fdt_params {
+>  	u32 mmap_size;
+>  	u32 desc_size;
+>  	u32 desc_ver;
+> +	bool verbose;
+>  };
+>  
+>  typedef struct {
+> @@ -901,7 +902,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
+>  		struct resource *data_resource, struct resource *bss_resource);
+>  extern void efi_get_time(struct timespec *now);
+>  extern void efi_reserve_boot_services(void);
+> -extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
+> +extern bool efi_get_fdt_params(void *fdt, struct efi_fdt_params *params);
+>  extern struct efi_memory_map memmap;
+>  extern struct kobject *efi_kobj;
+>  
+> -- 
+> 1.9.1
+> 
