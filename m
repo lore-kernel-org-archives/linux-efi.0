@@ -1,245 +1,148 @@
-From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 2/5] efi: move FDT handling to separate object file
-Date: Wed, 26 Aug 2015 15:47:39 +0100
-Message-ID: <20150826144739.GB10728@bivouac.eciton.net>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/5] arm64: clone early_init_dt_add_memory_arch() to
+ override default
+Date: Wed, 26 Aug 2015 17:00:28 +0200
+Message-ID: <CAKv+Gu9roNfr8KPUJj_hhP6jw-Rz_CdcoT08vyxYDgW2AXpt4A@mail.gmail.com>
 References: <1440576391-25725-1-git-send-email-ard.biesheuvel@linaro.org>
- <1440576391-25725-3-git-send-email-ard.biesheuvel@linaro.org>
+	<1440576391-25725-2-git-send-email-ard.biesheuvel@linaro.org>
+	<20150826144325.GA10728@bivouac.eciton.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1440576391-25725-3-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20150826144325.GA10728-t77nlHhSwNqAroYi2ySoxKxOck334EZe@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org, haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Kulkarni, Ganapatrao" <Ganapatrao.Kulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Haojian Zhuang <haojian.zhuang-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leo Yan <leo.yan-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 26, 2015 at 10:06:28AM +0200, Ard Biesheuvel wrote:
-> The EFI specific FDT handling is compiled conditionally, and is
-> logically independent of the rest of efi.o. So move it to a separate
-> file before making changes to it in subsequent patches.
-> 
-> Acked-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/Makefile  |  1 +
->  drivers/firmware/efi/efi-fdt.c | 93 ++++++++++++++++++++
->  drivers/firmware/efi/efi.c     | 86 ------------------
->  3 files changed, 94 insertions(+), 86 deletions(-)
+On 26 August 2015 at 16:43, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+> On Wed, Aug 26, 2015 at 10:06:27AM +0200, Ard Biesheuvel wrote:
+>> Override the __weak early_init_dt_add_memory_arch() with our own
+>> version. We need this in a subsequent patch to make the handling of
+>> the memory nodes conditional on whether we are booting via UEFI or
+>> not.
+>
+> Worth clarifying that this is a direct copy?
+> ("Our own version" can be read as there being modifications here.)
+>
 
-Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Yes. In fact, it wasn't before, so hence the choice of words here.
 
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 6fd3da938717..d9140208fc1c 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -9,3 +9,4 @@ obj-$(CONFIG_UEFI_CPER)			+= cper.o
->  obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
->  obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
->  obj-$(CONFIG_EFI_STUB)			+= libstub/
-> +obj-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= efi-fdt.o
-> diff --git a/drivers/firmware/efi/efi-fdt.c b/drivers/firmware/efi/efi-fdt.c
-> new file mode 100644
-> index 000000000000..f0e7ef2ae0e9
-> --- /dev/null
-> +++ b/drivers/firmware/efi/efi-fdt.c
-> @@ -0,0 +1,93 @@
-> +/*
-> + * Copyright (C) 2013 - 2015 Linaro Ltd.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +
-> +#include <linux/init.h>
-> +#include <linux/efi.h>
-> +#include <linux/of.h>
-> +#include <linux/of_fdt.h>
-> +
-> +#define UEFI_PARAM(name, prop, field)			   \
-> +	{						   \
-> +		{ name },				   \
-> +		{ prop },				   \
-> +		offsetof(struct efi_fdt_params, field),    \
-> +		FIELD_SIZEOF(struct efi_fdt_params, field) \
-> +	}
-> +
-> +static __initdata struct {
-> +	const char name[32];
-> +	const char propname[32];
-> +	int offset;
-> +	int size;
-> +} dt_params[] = {
-> +	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-> +	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-> +	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-> +	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-> +	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-> +};
-> +
-> +struct param_info {
-> +	int verbose;
-> +	int found;
-> +	void *params;
-> +};
-> +
-> +static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-> +				       int depth, void *data)
-> +{
-> +	struct param_info *info = data;
-> +	const void *prop;
-> +	void *dest;
-> +	u64 val;
-> +	int i, len;
-> +
-> +	if (depth != 1 || strcmp(uname, "chosen") != 0)
-> +		return 0;
-> +
-> +	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-> +		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-> +		if (!prop)
-> +			return 0;
-> +		dest = info->params + dt_params[i].offset;
-> +		info->found++;
-> +
-> +		val = of_read_number(prop, len / sizeof(u32));
-> +
-> +		if (dt_params[i].size == sizeof(u32))
-> +			*(u32 *)dest = val;
-> +		else
-> +			*(u64 *)dest = val;
-> +
-> +		if (info->verbose)
-> +			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-> +				dt_params[i].size * 2, val);
-> +	}
-> +	return 1;
-> +}
-> +
-> +int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-> +{
-> +	struct param_info info;
-> +	int ret;
-> +
-> +	pr_info("Getting EFI parameters from FDT:\n");
-> +
-> +	info.verbose = verbose;
-> +	info.found = 0;
-> +	info.params = params;
-> +
-> +	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
-> +	if (!info.found)
-> +		pr_info("UEFI not found.\n");
-> +	else if (!ret)
-> +		pr_err("Can't find '%s' in device tree!\n",
-> +		       dt_params[info.found].name);
-> +
-> +	return ret;
-> +}
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 9fa8084a7c8d..f975a1a45b80 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -20,8 +20,6 @@
->  #include <linux/init.h>
->  #include <linux/device.h>
->  #include <linux/efi.h>
-> -#include <linux/of.h>
-> -#include <linux/of_fdt.h>
->  #include <linux/io.h>
->  #include <linux/platform_device.h>
->  
-> @@ -460,90 +458,6 @@ static int __init efi_load_efivars(void)
->  device_initcall(efi_load_efivars);
->  #endif
->  
-> -#ifdef CONFIG_EFI_PARAMS_FROM_FDT
-> -
-> -#define UEFI_PARAM(name, prop, field)			   \
-> -	{						   \
-> -		{ name },				   \
-> -		{ prop },				   \
-> -		offsetof(struct efi_fdt_params, field),    \
-> -		FIELD_SIZEOF(struct efi_fdt_params, field) \
-> -	}
-> -
-> -static __initdata struct {
-> -	const char name[32];
-> -	const char propname[32];
-> -	int offset;
-> -	int size;
-> -} dt_params[] = {
-> -	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
-> -	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
-> -	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-> -	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
-> -	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
-> -};
-> -
-> -struct param_info {
-> -	int verbose;
-> -	int found;
-> -	void *params;
-> -};
-> -
-> -static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
-> -				       int depth, void *data)
-> -{
-> -	struct param_info *info = data;
-> -	const void *prop;
-> -	void *dest;
-> -	u64 val;
-> -	int i, len;
-> -
-> -	if (depth != 1 || strcmp(uname, "chosen") != 0)
-> -		return 0;
-> -
-> -	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-> -		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
-> -		if (!prop)
-> -			return 0;
-> -		dest = info->params + dt_params[i].offset;
-> -		info->found++;
-> -
-> -		val = of_read_number(prop, len / sizeof(u32));
-> -
-> -		if (dt_params[i].size == sizeof(u32))
-> -			*(u32 *)dest = val;
-> -		else
-> -			*(u64 *)dest = val;
-> -
-> -		if (info->verbose)
-> -			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
-> -				dt_params[i].size * 2, val);
-> -	}
-> -	return 1;
-> -}
-> -
-> -int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-> -{
-> -	struct param_info info;
-> -	int ret;
-> -
-> -	pr_info("Getting EFI parameters from FDT:\n");
-> -
-> -	info.verbose = verbose;
-> -	info.found = 0;
-> -	info.params = params;
-> -
-> -	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
-> -	if (!info.found)
-> -		pr_info("UEFI not found.\n");
-> -	else if (!ret)
-> -		pr_err("Can't find '%s' in device tree!\n",
-> -		       dt_params[info.found].name);
-> -
-> -	return ret;
-> -}
-> -#endif /* CONFIG_EFI_PARAMS_FROM_FDT */
-> -
->  static __initdata char memory_type_name[][20] = {
->  	"Reserved",
->  	"Loader Code",
-> -- 
-> 1.9.1
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  arch/arm64/mm/init.c | 41 ++++++++++++++++++++
+>>  1 file changed, 41 insertions(+)
+>>
+>> diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+>> index f5c0680d17d9..ab25fde7397c 100644
+>> --- a/arch/arm64/mm/init.c
+>> +++ b/arch/arm64/mm/init.c
+>> @@ -374,3 +374,44 @@ static int __init keepinitrd_setup(char *__unused)
+>>
+>>  __setup("keepinitrd", keepinitrd_setup);
+>>  #endif
+>> +
+>> +void __init early_init_dt_add_memory_arch(u64 base, u64 size)
+>> +{
+>> +     const u64 phys_offset = __pa(PAGE_OFFSET);
+>> +
+>> +     if (!PAGE_ALIGNED(base)) {
+>> +             if (size < PAGE_SIZE - (base & ~PAGE_MASK)) {
+>> +                     pr_warn("Ignoring memory block 0x%llx - 0x%llx\n",
+>> +                             base, base + size);
+>> +                     return;
+>> +             }
+>> +             size -= PAGE_SIZE - (base & ~PAGE_MASK);
+>> +             base = PAGE_ALIGN(base);
+>> +     }
+>> +     size &= PAGE_MASK;
+>> +
+>> +     if (base > MAX_MEMBLOCK_ADDR) {
+>> +             pr_warning("Ignoring memory block 0x%llx - 0x%llx\n",
+>> +                             base, base + size);
+>> +             return;
+>> +     }
+>> +
+>> +     if (base + size - 1 > MAX_MEMBLOCK_ADDR) {
+>> +             pr_warning("Ignoring memory range 0x%llx - 0x%llx\n",
+>> +                             ((u64)MAX_MEMBLOCK_ADDR) + 1, base + size);
+>> +             size = MAX_MEMBLOCK_ADDR - base + 1;
+>> +     }
+>> +
+>> +     if (base + size < phys_offset) {
+>> +             pr_warning("Ignoring memory block 0x%llx - 0x%llx\n",
+>> +                        base, base + size);
+>> +             return;
+>> +     }
+>> +     if (base < phys_offset) {
+>> +             pr_warning("Ignoring memory range 0x%llx - 0x%llx\n",
+>> +                        base, phys_offset);
+>> +             size -= phys_offset - base;
+>> +             base = phys_offset;
+>> +     }
+>> +     memblock_add(base, size);
+>> +}
+>> --
+>> 1.9.1
+>
+> Would it be too crazy to do this via an added call to a weak
+> memblock_use_dt() function in the original instead, to avoid
+> duplicating this entire function?
+>
+
+This keeps coming up: I have a series in the freezer that decouples
+the kernel mapping from the linear mapping, which makes another round
+of changes to this function. So that is why I cloned the function in
+the first place, only to reuse this patch for this series as well.
+
+The following does the trick as well, but I am not sure if the alias
+attribute is allowed in the kernel
+
+"""
+diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
+index ad87ce826cce..af2f30cbf357 100644
+--- a/arch/arm64/mm/init.c
++++ b/arch/arm64/mm/init.c
+@@ -374,3 +374,8
+
+ __setup("keepinitrd", keepinitrd_setup);
+ #endif
++
++void __init early_init_dt_add_memory_arch(u64 base, u64 size)
++{
++       __early_init_dt_add_memory_arch(base, size);
++}
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 07496560e5b9..2da75619ed78 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -1047,6 +1047,9
+ }
+ #endif
+
++void __early_init_dt_add_memory_arch(u64 base, u64 size)
++                       __attribute__((alias("early_init_dt_add_memory_arch")));
++
+ bool __init early_init_dt_verify(void *params)
+ {
+        if (!params)
+diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+index df9ef3801812..64fcb143f5f4 100644
+--- a/include/linux/of_fdt.h
++++ b/include/linux/of_fdt.h
+@@ -66,6 +66,7
+ extern void early_init_fdt_scan_reserved_mem(void);
+ extern void early_init_fdt_reserve_self(void);
+ extern void early_init_dt_add_memory_arch(u64 base, u64 size);
++extern void __early_init_dt_add_memory_arch(u64 base, u64 size);
+ extern int early_init_dt_reserve_memory_arch(phys_addr_t base,
+phys_addr_t size,
+                                             bool no_map);
+ extern void * early_init_dt_alloc_memory_arch(u64 size, u64 align);
+"""
+
+> We need the functionality for 4/5 (nice cleanup) and 5/5 (bugfix), so
+> happy with whatever works.
+>
+
+Indeed.
