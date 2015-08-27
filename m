@@ -1,77 +1,191 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH v2 05/16] x86/efi: Get entropy through EFI random number
- generator protocol
-Date: Thu, 27 Aug 2015 14:17:50 +0800
-Message-ID: <20150827061750.GE24088@linux-rxt1.site>
+From: joeyli <jlee@suse.com>
+Subject: Re: [PATCH v2 06/16] x86/efi: Generating random HMAC key for siging
+ hibernate image
+Date: Thu, 27 Aug 2015 17:04:52 +0800
+Message-ID: <20150827090452.GB27415@linux-rxt1.site>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
- <1439273796-25359-6-git-send-email-jlee@suse.com>
- <20150820202620.GF2567@codeblueprint.co.uk>
+ <1439273796-25359-7-git-send-email-jlee@suse.com>
+ <20150820204044.GG2567@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-pm-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150820202620.GF2567-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20150820204044.GG2567@codeblueprint.co.uk>
+Sender: linux-pm-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Aug 20, 2015 at 09:26:20PM +0100, Matt Fleming wrote:
-> On Tue, 11 Aug, at 02:16:25PM, Lee, Chun-Yi wrote:
+On Thu, Aug 20, 2015 at 09:40:44PM +0100, Matt Fleming wrote:
+> On Tue, 11 Aug, at 02:16:26PM, Lee, Chun-Yi wrote:
+> > This patch adds codes in EFI stub for generating and storing the
+> > HMAC key in EFI boot service variable for signing hibernate image.
+> > 
+> > Per rcf2104, the length of HMAC-SHA1 hash result is 20 bytes, and
+> > it recommended the length of key the same with hash rsult, means
+> > also 20 bytes. Using longer key would not significantly increase
+> > the function strength. Due to the nvram space is limited in some
+> > UEFI machines, so using the minimal recommended length 20 bytes
+> > key that will stored in boot service variable.
+> 
+> I'm having a hard time understanding the middle part of this
+> paragraph, specifically the part of the key and the hash result.
+> There's a typo in the subject too s/siging/signing/and "Generating"
+> should be "Generate".
+>
+
+In description, I want to explain why the length of key is 20 bytes.
+I will try to explain more clear, if it still confuses reviewer then
+I will remove the description.
+ 
+> > The HMAC key stored in EFI boot service variable, GUID is
+> > HIBERNATIONKey-fe141863-c070-478e-b8a3-878a5dc9ef21.
+>  
+> I'd really like to see some of the explanation from your cover letter
+> included in the commit message for this patch, and in particular why
+> signing hibernate images is a good thing.
+> 
+> Recording that for posterity in the commit message is going to be
+> helpful when someone looks at this patch in 2 years time and wonders
+> why RNG support was added to the EFI stub and why they might want to
+> sign hibernate images.
+> 
+
+Thanks for suggestion, I will move some description from cover letter
+to here and add comment for history and RNG support.
+
+> > Reviewed-by: Jiri Kosina <jkosina@suse.com>
+> > Tested-by: Jiri Kosina <jkosina@suse.com>
+> > Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
+> > ---
+> >  arch/x86/boot/compressed/eboot.c | 60 ++++++++++++++++++++++++++++++++++++++++
+> >  arch/x86/include/asm/suspend.h   |  9 ++++++
+> >  include/linux/suspend.h          |  3 ++
+> >  3 files changed, 72 insertions(+)
+> > 
+> > diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
+> > index 0ffb6db..463aa9b 100644
+> > --- a/arch/x86/boot/compressed/eboot.c
+> > +++ b/arch/x86/boot/compressed/eboot.c
+> > @@ -12,6 +12,7 @@
+> >  #include <asm/efi.h>
+> >  #include <asm/setup.h>
+> >  #include <asm/desc.h>
+> > +#include <asm/suspend.h>
+> >  
+> >  #include "../string.h"
+> >  #include "eboot.h"
+> > @@ -1383,6 +1384,63 @@ free_mem_map:
+> >  	return status;
+> >  }
+> >  
+> > +#ifdef CONFIG_HIBERNATE_VERIFICATION
+> > +#define HIBERNATION_KEY \
+> > +	((efi_char16_t [15]) { 'H', 'I', 'B', 'E', 'R', 'N', 'A', 'T', 'I', 'O', 'N', 'K', 'e', 'y', 0 })
+> > +#define HIBERNATION_KEY_ATTRIBUTE	(EFI_VARIABLE_NON_VOLATILE | \
+> > +					EFI_VARIABLE_BOOTSERVICE_ACCESS)
 > > +
-> > +static unsigned long efi_get_rng64(efi_system_table_t *sys_table,
-> > +				   void **rng_handle)
+> > +static void setup_hibernation_keys(struct boot_params *params)
 > > +{
-> > +	const struct efi_config *efi_early = __efi_early();
-> > +	efi_rng_protocol_64 *rng = NULL;
-> > +	efi_guid_t rng_proto = EFI_RNG_PROTOCOL_GUID;
-> > +	u64 *handles = (u64 *)(unsigned long)rng_handle;
+> > +	unsigned long key_size;
+> > +	unsigned long attributes;
+> > +	struct hibernation_keys *keys;
 > > +	efi_status_t status;
-> > +	unsigned long rng_number;
 > > +
-> > +	status = efi_call_early(handle_protocol, handles[0],
-> > +				&rng_proto, (void **)&rng);
-> > +	if (status != EFI_SUCCESS)
-> > +		efi_printk(sys_table, "Failed to get EFI_RNG_PROTOCOL handles\n");
+> > +	/* Allocate setup_data to carry keys */
+> > +	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
+> > +				sizeof(struct hibernation_keys), &keys);
+> > +	if (status != EFI_SUCCESS) {
+> > +		efi_printk(sys_table, "Failed to alloc mem for hibernation keys\n");
+> > +		return;
+> > +	}
 > > +
-> > +	if (status == EFI_SUCCESS && rng) {
-> > +		status = efi_early->call((unsigned long)rng->get_rng, rng, NULL,
-> > +					sizeof(rng_number), &rng_number);
+> > +	memset(keys, 0, sizeof(struct hibernation_keys));
+> > +
+> > +	status = efi_call_early(get_variable, HIBERNATION_KEY,
+> > +				&EFI_HIBERNATION_GUID, &attributes,
+> > +				&key_size, keys->hibernation_key);
 > 
-> Actually, one thing just occurred to me - you're not passing an
-> RNGAlgorithm value and are relying upon the firmware's default
-> implementation.
+> Tiny nit, but could you put a new line here please? This is a large
+> chunk of code.
+>
+
+OK, I will add new line here.
+ 
+> > +	if (status == EFI_SUCCESS && attributes != HIBERNATION_KEY_ATTRIBUTE) {
+> > +		efi_printk(sys_table, "A hibernation key is not boot service variable\n");
+> > +		memset(keys->hibernation_key, 0, HIBERNATION_DIGEST_SIZE);
+> > +		status = efi_call_early(set_variable, HIBERNATION_KEY,
+> > +					&EFI_HIBERNATION_GUID, attributes, 0,
+> > +					NULL);
+> > +		if (status == EFI_SUCCESS) {
+> > +			efi_printk(sys_table, "Cleaned existing hibernation key\n");
+> > +			status = EFI_NOT_FOUND;
+> > +		}
+> > +	}
 > 
-> I don't think that's a safe bet, the default could be anything and
-> might vary across implementations.
+> Hmm.. it's not clear to me that we should be deleting this EFI
+> variable if the attributes are bogus. It would be safer to just bail.
 > 
 
-I didn't set specific RNGAlgorithm because different BIOS may
-set different algorithm as default, it's also a kind of random situation
-to provide uncertainty.
+The purpose of checking attribute of hibernation key variable is 
+in case someone created a key variable on runtime environment _before_
+this kernel create boot service variable. That causes EFI stub may load
+a key that from non-secure environment.
 
-On the other hand, if the specific RNGAlgorithm doesn't support by BIOS
-then EFI stub still need use BIOS's _default_ algorithm to get random
-value.
+That's why delete non-boot service variable and create new one here.
 
-> Can we do a little better here and pick a "preferred" algorithm
-> instead of the default?
+> > +
+> > +	if (status != EFI_SUCCESS) {
+> > +		efi_printk(sys_table, "Failed to get existing hibernation key\n");
+> > +
+> > +		efi_get_random_key(sys_table, params, keys->hibernation_key,
+> > +				   HIBERNATION_DIGEST_SIZE);
+> > +
+> > +		status = efi_call_early(set_variable, HIBERNATION_KEY,
+> > +					&EFI_HIBERNATION_GUID,
+> > +					HIBERNATION_KEY_ATTRIBUTE,
+> > +					HIBERNATION_DIGEST_SIZE,
+> > +					keys->hibernation_key);
+> > +		if (status != EFI_SUCCESS)
+> > +			efi_printk(sys_table, "Failed to set hibernation key\n");
 > 
+> You're leaking 'keys' here.
+>
+
+Oh, you are right, I will free keys here.
+ 
+> > diff --git a/arch/x86/include/asm/suspend.h b/arch/x86/include/asm/suspend.h
+> > index 2fab6c2..ab463c4 100644
+> > --- a/arch/x86/include/asm/suspend.h
+> > +++ b/arch/x86/include/asm/suspend.h
+> > @@ -3,3 +3,12 @@
+> >  #else
+> >  # include <asm/suspend_64.h>
+> >  #endif
+> > +
+> > +#ifdef CONFIG_HIBERNATE_VERIFICATION
+> > +#include <linux/suspend.h>
+> > +
+> > +struct hibernation_keys {
+> > +	unsigned long hkey_status;
+> > +	u8 hibernation_key[HIBERNATION_DIGEST_SIZE];
+> > +};
+> > +#endif
+> 
+> Have you given any thought to how things are going to work if we
+> change the hash function in the future, or provide a choice? That
+> information doesn't appear anywhere in the above struct.
+> 
+
+Do you mean the hash function of signing hibernation image changed, so the
+hibernation key also need to re-generate for new length?
+
+I will add a field in struct to forward the length of hibernation key variable.
+In the future kernel can check the length to handle the change.
+
 > -- 
 > Matt Fleming, Intel Open Source Technology Center
-
-Per EDK2 implementation, EFI_RNG_ALGORITHM_SP800_90_CTR_256 is the default
-algorithm that provided by driver, and EFI_RNG_ALGORITHM_RAW is the second
-algorithm supported by EDK2. BIOS vendor need to write driver to support
-others.
-
-Maybe using EFI_RNG_ALGORITHM_SP800_90_CTR_256 as the default RNGAlgorithm
-in efi_random can cover the most widely UEFI implementation, but when BIOS
-do not support EFI_RNG_ALGORITHM_SP800_90_CTR_256 then kernel still need
-use BIOS's _default_ setting.
-
-I hope your suggestion.
-
 
 Thanks a lot!
 Joey Lee
