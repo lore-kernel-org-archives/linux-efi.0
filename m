@@ -1,143 +1,88 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH v2 08/16] x86/efi: Carrying hibernation key by setup data
-Date: Thu, 27 Aug 2015 17:28:26 +0800
-Message-ID: <20150827092826.GD27415@linux-rxt1.site>
-References: <1439273796-25359-1-git-send-email-jlee@suse.com>
- <1439273796-25359-9-git-send-email-jlee@suse.com>
- <20150821124026.GB3310@codeblueprint.co.uk>
+From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v2] arm64/efi: base UEFI mapping permissions on region
+ attributes
+Date: Thu, 27 Aug 2015 10:32:28 +0100
+Message-ID: <20150827093228.GA23520@arm.com>
+References: <1440595802-20359-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150821124026.GB3310@codeblueprint.co.uk>
-Sender: linux-pm-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>
+In-Reply-To: <1440595802-20359-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Aug 21, 2015 at 01:40:26PM +0100, Matt Fleming wrote:
-> On Tue, 11 Aug, at 02:16:28PM, Lee, Chun-Yi wrote:
-> > For forwarding hibernation key from EFI stub to boot kernel, this patch
-> > allocates setup data for carrying hibernation key, size and the status
-> > of efi operating.
+Hi Ard,
+
+On Wed, Aug 26, 2015 at 02:30:02PM +0100, Ard Biesheuvel wrote:
+> Currently, we infer the UEFI memory region mapping permissions
+> from the memory region type (i.e., runtime services code are
+> mapped RWX and runtime services data mapped RW-). This appears to
+> work fine but is not entirely UEFI spec compliant. So instead, use
+> the designated permission attributes to decide how these regions
+> should be mapped.
+> 
+> Since UEFIv2.5 introduces a new EFI_MEMORY_RO permission attribute,
+> and redefines EFI_MEMORY_WP as a cacheability attribute, use only
+> the former as a read-only attribute. For setting the PXN bit, the
+> corresponding EFI_MEMORY_XP attribute is used.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> Changes since v1:
+> - rewrote page size and alignment check to be more legible
+> - use code that is STRICT_MM_TYPECHECKS compliant
+> 
+> Example output of a recent Tianocore build on FVP Foundation model
+> is attached below.
+> 
+>  arch/arm64/kernel/efi.c | 37 +++++++++++++-------
+>  1 file changed, 24 insertions(+), 13 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index ab21e0d58278..c8d587f46f3e 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -235,7 +235,7 @@ static bool __init efi_virtmap_init(void)
 >  
-> This could do with some more information, and include that the key is
-> used to validate hibernate images.
-> 
-> But now that I think about it, is there a reason this patch hasn't
-> been merged with patch 6? The memory leak I mentioned in patch 6
-> becomes a non-issue in this one, so it would be good if these two
-> could be squashed together.
->
+>  	for_each_efi_memory_desc(&memmap, md) {
+>  		u64 paddr, npages, size;
+> -		pgprot_t prot;
+> +		pteval_t prot_val;
+>  
+>  		if (!(md->attribute & EFI_MEMORY_RUNTIME))
+>  			continue;
+> @@ -247,22 +247,33 @@ static bool __init efi_virtmap_init(void)
+>  		memrange_efi_to_native(&paddr, &npages);
+>  		size = npages << PAGE_SHIFT;
+>  
+> -		pr_info("  EFI remap 0x%016llx => %p\n",
+> -			md->phys_addr, (void *)md->virt_addr);
+> +		if (!is_normal_ram(md))
+> +			prot_val = PROT_DEVICE_nGnRE;
+> +		else
+> +			prot_val = pgprot_val(PAGE_KERNEL_EXEC);
+>  
+>  		/*
+> -		 * Only regions of type EFI_RUNTIME_SERVICES_CODE need to be
+> -		 * executable, everything else can be mapped with the XN bits
+> -		 * set.
+> +		 * On 64 KB granule kernels, only use strict permissions when
+> +		 * the region does not share a 64 KB page frame with another
+> +		 * region at either end.
+>  		 */
+> -		if (!is_normal_ram(md))
+> -			prot = __pgprot(PROT_DEVICE_nGnRE);
+> -		else if (md->type == EFI_RUNTIME_SERVICES_CODE)
+> -			prot = PAGE_KERNEL_EXEC;
+> -		else
+> -			prot = PAGE_KERNEL;
+> +		if (PAGE_SIZE == EFI_PAGE_SIZE ||
+> +		    (PAGE_ALIGNED(md->virt_addr) &&
+> +		     PAGE_ALIGNED(md->phys_addr + md->num_pages * EFI_PAGE_SIZE))) {
 
-OK, I will merge this patch with patch 6.
+Why do you use virt_addr instead of phys_addr for the base check?
 
-Actually the sequence of patches are from the order of my developing.
-And, the purpose of code in this patch a bit different with patch 6,
-so I didn't merge them together.
-   
-> > Reviewed-by: Jiri Kosina <jkosina@suse.com>
-> > Tested-by: Jiri Kosina <jkosina@suse.com>
-> > Signed-off-by: Lee, Chun-Yi <jlee@suse.com>
-> > ---
-> >  arch/x86/boot/compressed/eboot.c      | 26 +++++++++++++++++++++++---
-> >  arch/x86/include/uapi/asm/bootparam.h |  1 +
-> >  2 files changed, 24 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-> > index 463aa9b..c838d09 100644
-> > --- a/arch/x86/boot/compressed/eboot.c
-> > +++ b/arch/x86/boot/compressed/eboot.c
-> > @@ -1394,18 +1394,22 @@ static void setup_hibernation_keys(struct boot_params *params)
-> >  {
-> >  	unsigned long key_size;
-> >  	unsigned long attributes;
-> > +	struct setup_data *setup_data, *hibernation_setup_data;
-> >  	struct hibernation_keys *keys;
-> > +	unsigned long size = 0;
-> >  	efi_status_t status;
-> 
-> One thing to be aware of is that eboot.c has mainly used the
-> "reverse-christmas-tree" style of variable declarations, with longer
-> lines first, and shorter ones following. I haven't mentioned it before
-> because none of your changes seemed to be too different (and it's not
-> a tree-wide convention), but the above setup_data line goes a bit too
-> far.
-> 
-> Could you try and keep them ordered, longest line first?
-> 
-
-Sure, sorry for I didn't aware that before.
-
-> >  
-> >  	/* Allocate setup_data to carry keys */
-> > +	size = sizeof(struct setup_data) + sizeof(struct hibernation_keys);
-> >  	status = efi_call_early(allocate_pool, EFI_LOADER_DATA,
-> > -				sizeof(struct hibernation_keys), &keys);
-> > +				size, &hibernation_setup_data);
-> >  	if (status != EFI_SUCCESS) {
-> >  		efi_printk(sys_table, "Failed to alloc mem for hibernation keys\n");
-> >  		return;
-> >  	}
-> >  
-> > -	memset(keys, 0, sizeof(struct hibernation_keys));
-> > +	memset(hibernation_setup_data, 0, size);
-> > +	keys = (struct hibernation_keys *) hibernation_setup_data->data;
-> >  
-> >  	status = efi_call_early(get_variable, HIBERNATION_KEY,
-> >  				&EFI_HIBERNATION_GUID, &attributes,
-> > @@ -1419,7 +1423,8 @@ static void setup_hibernation_keys(struct boot_params *params)
-> >  		if (status == EFI_SUCCESS) {
-> >  			efi_printk(sys_table, "Cleaned existing hibernation key\n");
-> >  			status = EFI_NOT_FOUND;
-> > -		}
-> > +		} else
-> > +			goto clean_fail;
-> 
-> Please add braces for the 'else' clause. Also, please include a
-> comment stating that the reason you jump to the label instead of
-> returning is so that the EFI status error code can be recorded in
-> hibernation_setup_data.
->
-
-Thanks for suggestions, I will modify it.
- 
-> >  	}
-> >  
-> >  	if (status != EFI_SUCCESS) {
-> > @@ -1436,6 +1441,21 @@ static void setup_hibernation_keys(struct boot_params *params)
-> >  		if (status != EFI_SUCCESS)
-> >  			efi_printk(sys_table, "Failed to set hibernation key\n");
-> >  	}
-> > +
-> > +clean_fail:
-> > +	hibernation_setup_data->type = SETUP_HIBERNATION_KEYS;
-> > +	hibernation_setup_data->len = sizeof(struct hibernation_keys);
-> > +	hibernation_setup_data->next = 0;
-> > +	keys->hkey_status = efi_status_to_err(status);
-> > +
-> > +	setup_data = (struct setup_data *)params->hdr.setup_data;
-> > +	while (setup_data && setup_data->next)
-> > +		setup_data = (struct setup_data *)setup_data->next;
-> > +
-> > +	if (setup_data)
-> > +		setup_data->next = (unsigned long)hibernation_setup_data;
-> > +	else
-> > +		params->hdr.setup_data = (unsigned long)hibernation_setup_data;
-> 
-> This label name is a little confusing because you reach it both when
-> the EFI boot variable was successfully created and when a bogus EFI
-> variable failed to be deleted, i.e. it's not always reached because of
-> a failure.
-> 
-> How about 'setup' or simply 'out' ?
->
-
-I will change the label to 'setup' that match with setting setup_data.
- 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
-
-
-Thanks a lot!
-Joey Lee
+Will
