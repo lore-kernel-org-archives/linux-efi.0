@@ -1,48 +1,51 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] drivers/firmware: make efi/esrt.c driver explicitly
- non-modular
-Date: Mon, 31 Aug 2015 09:52:02 -0400
-Message-ID: <20150831135201.GA17921@redhat.com>
-References: <1440543648-27328-1-git-send-email-paul.gortmaker@windriver.com>
- <20150826171128.GA2837@codeblueprint.co.uk>
+Subject: Re: [PATCH] efifb: Add support for 64-bit frame buffer addresses
+Date: Mon, 31 Aug 2015 11:23:31 -0400
+Message-ID: <20150831152330.GC17921@redhat.com>
+References: <1440763939-17027-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150826171128.GA2837-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1440763939-17027-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fbdev-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pete Hawkins <pete.hawkins-ZTdz3wlHnvg@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Chad Page <chad.page-ZTdz3wlHnvg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Aug 26, 2015 at 06:11:28PM +0100, Matt Fleming wrote:
-> On Tue, 25 Aug, at 07:00:48PM, Paul Gortmaker wrote:
-> > The Kconfig for this driver is currently hidden with:
-> > 
-> > config EFI_ESRT
-> >         bool
-> > 
-> > ...meaning that it currently is not being built as a module by anyone.
-> > Lets remove the modular code that is essentially orphaned, so that
-> > when reading the driver there is no doubt it is builtin-only.
-> > 
-> > Since module_init translates to device_initcall in the non-modular
-> > case, the init ordering remains unchanged with this commit.
-> > 
-> > We leave some tags like MODULE_AUTHOR for documentation purposes.
-> > 
-> > We don't replace module.h with init.h since the file already has that.
-> > 
-> > Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> > Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> > Signed-off-by: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+On Fri, Aug 28, 2015 at 01:12:19PM +0100, Matt Fleming wrote:
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> Looks good to me. I know Peter is on vacation right now, so I'm still
-> expecting a response from him. In the meantime, I'll queue this up in
-> the EFI 'next' branch. Thanks!
+> The EFI Graphics Output Protocol uses 64-bit frame buffer addresses
+> but these get truncated to 32-bit by the EFI boot stub when storing
+> the address in the 'lfb_base' field of 'struct screen_info'.
+> 
+> Add a 'ext_lfb_base' field for the upper 32-bits of the frame buffer
+> address and set VIDEO_TYPE_CAPABILITY_64BIT_BASE when the field is
+> useable.
+> 
+> It turns out that the reason no one has required this support so far
+> is that there's actually code in tianocore to "downgrade" PCI
+> resources that have option ROMs and 64-bit BARS from 64-bit to 32-bit
+> to cope with legacy option ROMs that can't handle 64-bit addresses.
+> The upshot is that basically all GOP devices in the wild use a 32-bit
+> frame buffer address.
+> 
+> Still, it is possible to build firmware that uses a full 64-bit GOP
+> frame buffer address. Chad did, which led to him reporting this issue.
+> 
+> Add support in anticipation of GOP devices using 64-bit addresses more
+> widely, and so that efifb works out of the box when that happens.
+> 
+> Reported-by: Chad Page <chad.page-ZTdz3wlHnvg@public.gmane.org>
+> Cc: Pete Hawkins <pete.hawkins-ZTdz3wlHnvg@public.gmane.org>
+> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Looks fine to me as well.
+Looks good to me.
+
+Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
 -- 
         Peter
