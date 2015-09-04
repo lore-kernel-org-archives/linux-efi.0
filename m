@@ -1,61 +1,150 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] acpi, apei: use appropriate pgprot_t to map GHES
- memory
-Date: Fri, 4 Sep 2015 13:36:00 +0200
-Message-ID: <20150904113559.GA21396@gmail.com>
-References: <1440523642-31373-1-git-send-email-zjzhang@codeaurora.org>
- <20150904112820.GB2737@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
+Date: Fri,  4 Sep 2015 15:06:26 +0200
+Message-ID: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150904112820.GB2737-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+The new Properties Table feature introduced in UEFIv2.5 may split
+memory regions that cover PE/COFF memory images into separate code
+and data regions.
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+Since the relative offset of PE/COFF .text and .data segments cannot
+be changed on the fly, this means that we can no longer pad out those
+regions to be mappable using 64 KB pages.
+Unfortunately, there is no annotation in the UEFI memory map that
+identifies data regions that were split off from a code region, so we
+must apply this logic to all adjacent runtime regions whose attributes
+only differ in the permission bits.
 
-> On Tue, 25 Aug, at 10:27:22AM, Jonathan (Zhixiong) Zhang wrote:
-> > From: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> > 
-> > If the ACPI APEI firmware handles hardware error first (called "firmware
-> > first handling"), the firmware updates the GHES memory region with hardware
-> > error record (called "generic hardware error record"). Essentially the
-> > firmware writes hardware error records in the GHES memory region, triggers
-> > an NMI/interrupt, then the GHES driver goes off and grabs the error record
-> > from the GHES region.
-> > 
-> > The kernel currently maps the GHES memory region as cacheable
-> > (PAGE_KERNEL) for all architectures. However, on some arm64 platforms,
-> > there is a mismatch between how the kernel maps the GHES region
-> > (PAGE_KERNEL) and how the firmware maps it (EFI_MEMORY_UC, ie.
-> > uncacheable), leading to the possibility of the kernel GHES driver
-> > reading stale data from the cache when it receives the interrupt.
-> > 
-> > With stale data being read, the kernel is unaware there is new hardware
-> > error to be handled when there actually is; this may lead to further damage
-> > in various scenarios, such as error propagation caused data corruption.
-> > If uncorrected error (such as double bit ECC error) happened in memory
-> > operation and if the kernel is unaware of such event happening, errorneous
-> > data may be propagated to the disk.
-> > 
-> > Instead GHES memory region should be mapped with page protection type
-> > according to what is returned from arch_apei_get_mem_attribute().
-> > 
-> > Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> > Acked-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-> > Signed-off-by: Jonathan (Zhixiong) Zhang <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
-> > ---
-> >  drivers/acpi/apei/ghes.c | 10 +++++++---
-> >  1 file changed, 7 insertions(+), 3 deletions(-)
-> 
-> This patch message looks fine to me. Ingo?
+So instead of rounding each memory region to 64 KB alignment at both
+ends, only round down regions that are not directly preceded by another
+runtime region with the same type attributes. Since the UEFI spec does
+not mandate that the memory map be sorted, this means we also need to
+sort it first.
 
-Looks good to me too!
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
 
-Thanks,
+As discussed off list, this is the arm64 side of what we should backport
+to stable to prevent firmware that adheres to the current version of the
+UEFI v2.5 spec with the memprotect feature enabled from blowing up the system
+upon the first OS call into the runtime services.
 
-	Ingo
+For arm64, we already map things in order, but since the spec does not mandate
+a sorted memory map, we need to sort it to be sure. This also allows us to
+easily find adjacent regions with < 64 KB granularity, which the current version
+of the spec allows if they only differ in permission bits (which the spec says
+are 'unused' on AArch64, which could be interpreted as 'allowed but ignored').
+
+@Matt: I don't know what your timeline is for fixing this on the x86 side, but
+perhaps it makes sense to keep those patches together? Your call.
+
+ drivers/firmware/efi/libstub/arm-stub.c | 62 +++++++++++++++-----
+ 1 file changed, 47 insertions(+), 15 deletions(-)
+
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index e29560e6b40b..cb4e9c4de952 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -13,6 +13,7 @@
+  */
+ 
+ #include <linux/efi.h>
++#include <linux/sort.h>
+ #include <asm/efi.h>
+ 
+ #include "efistub.h"
+@@ -305,6 +306,13 @@ fail:
+  */
+ #define EFI_RT_VIRTUAL_BASE	0x40000000
+ 
++static int cmp_mem_desc(const void *a, const void *b)
++{
++	const efi_memory_desc_t *left = a, *right = b;
++
++	return (left->phys_addr > right->phys_addr) ? 1 : -1;
++}
++
+ /*
+  * efi_get_virtmap() - create a virtual mapping for the EFI memory map
+  *
+@@ -316,34 +324,58 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ 		     unsigned long desc_size, efi_memory_desc_t *runtime_map,
+ 		     int *count)
+ {
++	static const u64 mem_type_mask = EFI_MEMORY_WB | EFI_MEMORY_WT |
++					 EFI_MEMORY_WC | EFI_MEMORY_UC |
++					 EFI_MEMORY_RUNTIME;
++
+ 	u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
+-	efi_memory_desc_t *out = runtime_map;
++	efi_memory_desc_t *in, *prev = NULL, *out = runtime_map;
+ 	int l;
+ 
+-	for (l = 0; l < map_size; l += desc_size) {
+-		efi_memory_desc_t *in = (void *)memory_map + l;
++	/*
++	 * To work around potential issues with the Properties Table feature
++	 * introduced in UEFI 2.5, which may split PE/COFF executable images
++	 * in memory into several RuntimeServicesCode and RuntimeServicesData
++	 * regions, we need to preserve the relative offsets between adjacent
++	 * EFI_MEMORY_RUNTIME regions with the same memory type attributes.
++	 * The easiest way to find adjacent regions is to sort the memory map
++	 * before traversing it.
++	 */
++	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
++
++	for (l = 0; l < map_size; l += desc_size, prev = in) {
+ 		u64 paddr, size;
+ 
++		in = (void *)memory_map + l;
+ 		if (!(in->attribute & EFI_MEMORY_RUNTIME))
+ 			continue;
+ 
++		paddr = in->phys_addr;
++		size = in->num_pages * EFI_PAGE_SIZE;
++
+ 		/*
+ 		 * Make the mapping compatible with 64k pages: this allows
+ 		 * a 4k page size kernel to kexec a 64k page size kernel and
+ 		 * vice versa.
+ 		 */
+-		paddr = round_down(in->phys_addr, SZ_64K);
+-		size = round_up(in->num_pages * EFI_PAGE_SIZE +
+-				in->phys_addr - paddr, SZ_64K);
+-
+-		/*
+-		 * Avoid wasting memory on PTEs by choosing a virtual base that
+-		 * is compatible with section mappings if this region has the
+-		 * appropriate size and physical alignment. (Sections are 2 MB
+-		 * on 4k granule kernels)
+-		 */
+-		if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
+-			efi_virt_base = round_up(efi_virt_base, SZ_2M);
++		if (!prev ||
++		    ((prev->attribute ^ in->attribute) & mem_type_mask) != 0 ||
++		    paddr != (prev->phys_addr + prev->num_pages * EFI_PAGE_SIZE)) {
++
++			paddr = round_down(in->phys_addr, SZ_64K);
++			size += in->phys_addr - paddr;
++
++			/*
++			 * Avoid wasting memory on PTEs by choosing a virtual
++			 * base that is compatible with section mappings if this
++			 * region has the appropriate size and physical
++			 * alignment. (Sections are 2 MB on 4k granule kernels)
++			 */
++			if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
++				efi_virt_base = round_up(efi_virt_base, SZ_2M);
++			else
++				efi_virt_base = round_up(efi_virt_base, SZ_64K);
++		}
+ 
+ 		in->virt_addr = efi_virt_base + in->phys_addr - paddr;
+ 		efi_virt_base += size;
+-- 
+1.9.1
