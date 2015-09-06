@@ -1,56 +1,29 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Sun, 6 Sep 2015 16:06:16 +0200
-Message-ID: <CAKv+Gu8a585HGe4K-1pr0jrWC0JVGD4arQoOgsBQPD+Z2p9ipw@mail.gmail.com>
-References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
-	<CAKv+Gu9bGcSVWuMkPVJGDkCPmWvFpjhh4odLWPBZ-wX3=LgGaw@mail.gmail.com>
-	<20150904182307.GE2737@codeblueprint.co.uk>
-	<CAKv+Gu-AQdgJNOtrgtEtqxsaSC_L=EANpC3pT8b6X2jmZ5qO_Q@mail.gmail.com>
+From: iSayor <iSayor-yJUSPDxTjKrQT0dZR+AlfA@public.gmane.org>
+Subject: usually 3000 customers/Where 100,000+ customers worldwide?
+Date: Sun, 06 Sep 2015 15:08:56 -0700
+Message-ID: <01d0e8f0$Blat.v3.2.4$9fc5dcc8$12530635a@localhost>
+Reply-To: iSayor <iSayor-9Onoh4P/yGk@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-AQdgJNOtrgtEtqxsaSC_L=EANpC3pT8b6X2jmZ5qO_Q@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, Peter Jones <pjones@redhat.com>, James Bottomley <JBottomley@odin.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 4 September 2015 at 20:53, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> On 4 September 2015 at 20:23, Matt Fleming <matt@codeblueprint.co.uk> wrote:
->> On Fri, 04 Sep, at 03:24:21PM, Ard Biesheuvel wrote:
->>>
->>> Since the UEFI spec does not mandate an enumeration order for
->>> GetMemoryMap(), it seems to me that you still need to sort its output
->>> before laying out the VA space. Since you need to sort it anyway, why
->>> not simply sort it in reverse order and keep all the original code?
->>> Considering that this is meant for stable, that would keep the delta
->>> *much* smaller.
->>
->> Hmm... that'd be a neat trick and while it would save on the diff
->> size, I don't think it would be smaller in terms of change complexity.
->>
->> EDK2 sorts the memory map when EFI_PROPERTIES_TABLE is enabled, so we
->> can be reasonably sure the entry order returned by GetMemoryMap() is
->> compatible with the split regions, even if it's not mandated by the
->> spec.
->>
->
-> EDK2 does sort it, but the spec does not mandate it so another
-> implementation may do something different entirely.
->
->> For the non-EFI_PROPERTIES_TABLE case, things have been working fine
->> without the sorting, so I'm reluctant to introduce it now (it's also
->> much less of an issue there).
->>
->
-> I see. I do wonder, since the VA mapping preserves the modulo 2 MB
-> alignment of each region, aren't you using much more VA space when
-> mapping in reverse order as you are doing now?
->
-
-BTW if you are going to rely on the sortedness of the memory map if
-the feature is enabled, you could still simply traverse the memory map
-in reverse order and keep most of the old code.
-
--- 
-Ard.
+Hi
+=C2=A0=C2=A0Are you still develop foreign customers with alibaba, exhib=
+ition?
+=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0You out of!!!
+=C2=A0 Are you looking other channel beside exhibition/B2B when you fee=
+l difficult to find foreign customers?
+=C2=A0 Industry hundreds of thousands of customers worldwide, usually w=
+e can only contact three thousand, do you want to rest also developed?
+=C2=A0 Guangdong General Chamber of Commerce recommended the initiative=
+ customer develop first brand, nearly ten thousand companies are benefi=
+ting.
+  the first benefit with first use, nearly twenty thousand companies le=
+ad you!
+  You can not use, but not without understanding.
+=C2=A0 Add QQ2652697913/Skype:iSayor let's show you the initiative cust=
+omer develop means.
