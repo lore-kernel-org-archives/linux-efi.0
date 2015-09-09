@@ -1,126 +1,63 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Wed, 9 Sep 2015 09:37:21 +0200
-Message-ID: <CAKv+Gu8oYgkbxd_L-t2JhtvfUvpmMDEgE3A67cQTtFBpXspAiw@mail.gmail.com>
-References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
-	<CAKv+Gu9bGcSVWuMkPVJGDkCPmWvFpjhh4odLWPBZ-wX3=LgGaw@mail.gmail.com>
-	<20150904182307.GE2737@codeblueprint.co.uk>
-	<CAKv+Gu-AQdgJNOtrgtEtqxsaSC_L=EANpC3pT8b6X2jmZ5qO_Q@mail.gmail.com>
-	<20150908131622.GA2854@codeblueprint.co.uk>
-	<CAKv+Gu_us3Nu_gMd4GxPe7z0eqtMfM4DM_UEmGW2MTqVDxg5vA@mail.gmail.com>
-	<20150908203630.GB2854@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH 2/2] efi: introduce EFI_NX_PE_DATA bit and set it from properties table
+Date: Wed,  9 Sep 2015 10:08:16 +0200
+Message-ID: <1441786096-8514-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1441786096-8514-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150908203630.GB2854-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1441786096-8514-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <JBottomley-wo1vFcy6AUs@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 8 September 2015 at 22:37, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Tue, 08 Sep, at 03:21:17PM, Ard Biesheuvel wrote:
->>
->> I noticed that the 64-bit version of efi_map_region() preserves the
->> relative alignment with respect to a 2 MB boundary for /each/ region.
->> Since the regions are mapped in reverse order, it is highly unlikely
->> that each region starts at the same 2 MB relative alignment that the
->> previous region ended at, so you are likely wasting quite a bit of VA
->> space.
->>
->> I don't think it is a bug, though, but it does not seem intentional.
->
-> Yeah, that's a very good catch. The existing code, that is, top-down
-> allocation scheme where we map ealier EFI memmap entries at higher
-> virtual addresses, does incur quite a bit of wasted address space.
->
-> That's not true of this patch, though, and it's also not true if we
-> map the entries in reverse order of the EFI memmap, that is, mapping
-> the last memmap entry at the highest virtual address.
->
-> So it's a bug in the original code, or rather an unintended feature.
->
+UEFI v2.5 introduces a runtime memory protection feature that splits
+PE/COFF runtime images into separate code and data regions. Since this
+may require special handling by the OS, allocate a EFI_xxx bit to
+keep track of whether this feature is currently active or not.
 
-Indeed. It does deserve a mention, since the point of this patch is to
-prevent reordering and/or rounding up of regions.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c | 15 +++++++++++++++
+ include/linux/efi.h        |  1 +
+ 2 files changed, 16 insertions(+)
 
-> Ard, based on your suggestion I cooked this patch up to show what
-> iterating the EFI memmap in reverse looks like in terms of code. The
-> below diff and the original patch from this thread give me identical
-> virtual address space layouts.
->
-
-Good, as expected.
-
-> Admittedly the below is missing a whole bunch of comments so makes the
-> diff look smaller, but something like this could work,
->
-> ---
->
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 691b333e0038..a2af35f6093a 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -704,6 +704,44 @@ out:
->         return ret;
->  }
->
-> +static inline void *efi_map_next_entry_reverse(void *entry)
-> +{
-> +       if (!entry)
-> +               return memmap.map_end - memmap.desc_size;
-> +
-> +       entry -= memmap.desc_size;
-> +       if (entry < memmap.map)
-> +               return NULL;
-> +
-> +       return entry;
-> +}
-> +
-> +static void *efi_map_next_entry(void *entry)
-> +{
-> +       bool reverse = false;
-> +
-> +       if (!efi_enabled(EFI_OLD_MEMMAP) && efi_enabled(EFI_64BIT)) {
-
-Here, you could also test whether the
-EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA bit
-(sigh) is set
-
-> +               /*
-> +                * Iterate the EFI memory map in reverse order because
-> +                * the regions will be mapped top-down. The end result
-> +                * is the same as if we had mapped things forward, but
-> +                * doesn't require us to change the implementation of
-> +                * efi_map_region().
-> +                */
-> +               return efi_map_next_entry_reverse(entry);
-> +       }
-> +
-> +       /* Initial call */
-> +       if (!entry)
-> +               return memmap.map;
-> +
-> +       entry += memmap.desc_size;
-> +       if (entry >= memmap.map_end)
-> +               return NULL;
-> +
-> +       return entry;
-> +}
-> +
->  /*
->   * Map the efi memory ranges of the runtime services and update new_mmap with
->   * virtual addresses.
-> @@ -718,7 +756,8 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
->         start = -1UL;
->         end = 0;
->
-> -       for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-> +       p = NULL;
-> +       while ((p = efi_map_next_entry(p))) {
->                 md = p;
->                 if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
->  #ifdef CONFIG_X86_64
->
-> --
-> Matt Fleming, Intel Open Source Technology Center
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 5cbb8d31da33..8befd0b53472 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -425,6 +425,21 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
+ 	}
+ 	pr_cont("\n");
+ 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
++
++	/* parse the EFI Properties table if it exists */
++	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
++		efi_properties_table_t *tbl;
++
++		tbl = early_memremap(efi.properties_table, sizeof (*tbl));
++		if (tbl == NULL) {
++			pr_err("Could not map Properties table!\n");
++			return -ENOMEM;
++		}
++		if (tbl->memory_protection_attribute &
++		    EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA)
++			set_bit(EFI_NX_PE_DATA, &efi.flags);
++		early_memunmap(tbl, sizeof(*tbl));
++	}
+ 	return 0;
+ }
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 5b4f3ac08053..4f2ab71e1b8a 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -972,6 +972,7 @@ extern int __init efi_setup_pcdp_console(char *);
+ #define EFI_PARAVIRT		6	/* Access is via a paravirt interface */
+ #define EFI_ARCH_1		7	/* First arch-specific bit */
+ #define EFI_DBG			8	/* Print additional debug info at runtime */
++#define EFI_NX_PE_DATA		9	/* whether PE/COFF images are split */
+ 
+ #ifdef CONFIG_EFI
+ /*
+-- 
+1.9.1
