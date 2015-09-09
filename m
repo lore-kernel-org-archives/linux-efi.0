@@ -1,63 +1,118 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/2] efi: introduce EFI_NX_PE_DATA bit and set it from properties table
-Date: Wed,  9 Sep 2015 10:08:16 +0200
-Message-ID: <1441786096-8514-2-git-send-email-ard.biesheuvel@linaro.org>
-References: <1441786096-8514-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/2] efi: add support for UEFIv2.5 Properties table
+Date: Wed,  9 Sep 2015 10:08:15 +0200
+Message-ID: <1441786096-8514-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1441786096-8514-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-UEFI v2.5 introduces a runtime memory protection feature that splits
-PE/COFF runtime images into separate code and data regions. Since this
-may require special handling by the OS, allocate a EFI_xxx bit to
-keep track of whether this feature is currently active or not.
+Version 2.5 of the UEFI spec introduces a new configuration table
+called the 'EFI Properties table'. Currently, it is only used to
+convey whether the Memory Protection feature is enabled, which splits
+PE/COFF images into separate code and data memory regions.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/efi.c | 15 +++++++++++++++
- include/linux/efi.h        |  1 +
- 2 files changed, 16 insertions(+)
+ drivers/firmware/efi/efi.c | 32 ++++++++++++++++++--------------
+ include/linux/efi.h        | 13 +++++++++++++
+ 2 files changed, 31 insertions(+), 14 deletions(-)
 
 diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 5cbb8d31da33..8befd0b53472 100644
+index d6144e3b97c5..5cbb8d31da33 100644
 --- a/drivers/firmware/efi/efi.c
 +++ b/drivers/firmware/efi/efi.c
-@@ -425,6 +425,21 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 	}
- 	pr_cont("\n");
- 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
-+
-+	/* parse the EFI Properties table if it exists */
-+	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
-+		efi_properties_table_t *tbl;
-+
-+		tbl = early_memremap(efi.properties_table, sizeof (*tbl));
-+		if (tbl == NULL) {
-+			pr_err("Could not map Properties table!\n");
-+			return -ENOMEM;
-+		}
-+		if (tbl->memory_protection_attribute &
-+		    EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA)
-+			set_bit(EFI_NX_PE_DATA, &efi.flags);
-+		early_memunmap(tbl, sizeof(*tbl));
-+	}
- 	return 0;
+@@ -26,20 +26,21 @@
+ #include <linux/platform_device.h>
+ 
+ struct efi __read_mostly efi = {
+-	.mps        = EFI_INVALID_TABLE_ADDR,
+-	.acpi       = EFI_INVALID_TABLE_ADDR,
+-	.acpi20     = EFI_INVALID_TABLE_ADDR,
+-	.smbios     = EFI_INVALID_TABLE_ADDR,
+-	.smbios3    = EFI_INVALID_TABLE_ADDR,
+-	.sal_systab = EFI_INVALID_TABLE_ADDR,
+-	.boot_info  = EFI_INVALID_TABLE_ADDR,
+-	.hcdp       = EFI_INVALID_TABLE_ADDR,
+-	.uga        = EFI_INVALID_TABLE_ADDR,
+-	.uv_systab  = EFI_INVALID_TABLE_ADDR,
+-	.fw_vendor  = EFI_INVALID_TABLE_ADDR,
+-	.runtime    = EFI_INVALID_TABLE_ADDR,
+-	.config_table  = EFI_INVALID_TABLE_ADDR,
+-	.esrt       = EFI_INVALID_TABLE_ADDR,
++	.mps			= EFI_INVALID_TABLE_ADDR,
++	.acpi			= EFI_INVALID_TABLE_ADDR,
++	.acpi20			= EFI_INVALID_TABLE_ADDR,
++	.smbios			= EFI_INVALID_TABLE_ADDR,
++	.smbios3		= EFI_INVALID_TABLE_ADDR,
++	.sal_systab		= EFI_INVALID_TABLE_ADDR,
++	.boot_info		= EFI_INVALID_TABLE_ADDR,
++	.hcdp			= EFI_INVALID_TABLE_ADDR,
++	.uga			= EFI_INVALID_TABLE_ADDR,
++	.uv_systab		= EFI_INVALID_TABLE_ADDR,
++	.fw_vendor		= EFI_INVALID_TABLE_ADDR,
++	.runtime		= EFI_INVALID_TABLE_ADDR,
++	.config_table		= EFI_INVALID_TABLE_ADDR,
++	.esrt			= EFI_INVALID_TABLE_ADDR,
++	.properties_table	= EFI_INVALID_TABLE_ADDR,
+ };
+ EXPORT_SYMBOL(efi);
+ 
+@@ -105,6 +106,8 @@ static ssize_t systab_show(struct kobject *kobj,
+ 		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
+ 	if (efi.uga != EFI_INVALID_TABLE_ADDR)
+ 		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
++	if (efi.properties_table != EFI_INVALID_TABLE_ADDR)
++		str += sprintf(str, "PROP=0x%lx\n", efi.properties_table);
+ 
+ 	return str - buf;
  }
+@@ -362,6 +365,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
+ 	{SMBIOS3_TABLE_GUID, "SMBIOS 3.0", &efi.smbios3},
+ 	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
+ 	{EFI_SYSTEM_RESOURCE_TABLE_GUID, "ESRT", &efi.esrt},
++	{EFI_PROPERTIES_TABLE_GUID, "PROP", &efi.properties_table},
+ 	{NULL_GUID, NULL, NULL},
+ };
  
 diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5b4f3ac08053..4f2ab71e1b8a 100644
+index 85ef051ac6fb..5b4f3ac08053 100644
 --- a/include/linux/efi.h
 +++ b/include/linux/efi.h
-@@ -972,6 +972,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_PARAVIRT		6	/* Access is via a paravirt interface */
- #define EFI_ARCH_1		7	/* First arch-specific bit */
- #define EFI_DBG			8	/* Print additional debug info at runtime */
-+#define EFI_NX_PE_DATA		9	/* whether PE/COFF images are split */
+@@ -595,6 +595,9 @@ void efi_native_runtime_setup(void);
+ #define DEVICE_TREE_GUID \
+     EFI_GUID(  0xb1b621d5, 0xf19c, 0x41a5, 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 )
  
- #ifdef CONFIG_EFI
++#define EFI_PROPERTIES_TABLE_GUID \
++    EFI_GUID(  0x880aaca3, 0x4adc, 0x4a04, 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5 )
++
+ typedef struct {
+ 	efi_guid_t guid;
+ 	u64 table;
+@@ -808,6 +811,15 @@ typedef struct _efi_file_io_interface {
+ #define EFI_FILE_MODE_WRITE	0x0000000000000002
+ #define EFI_FILE_MODE_CREATE	0x8000000000000000
+ 
++typedef struct {
++	u32 version;
++	u32 length;
++	u64 memory_protection_attribute;
++} efi_properties_table_t;
++
++#define EFI_PROPERTIES_TABLE_VERSION	0x00010000
++#define EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA	0x1
++
+ #define EFI_INVALID_TABLE_ADDR		(~0UL)
+ 
  /*
+@@ -830,6 +842,7 @@ extern struct efi {
+ 	unsigned long runtime;		/* runtime table */
+ 	unsigned long config_table;	/* config tables */
+ 	unsigned long esrt;		/* ESRT table */
++	unsigned long properties_table;	/* properties table */
+ 	efi_get_time_t *get_time;
+ 	efi_set_time_t *set_time;
+ 	efi_get_wakeup_time_t *get_wakeup_time;
 -- 
 1.9.1
