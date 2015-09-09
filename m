@@ -1,83 +1,171 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Wed, 9 Sep 2015 08:33:07 +0800
-Message-ID: <20150909003307.GJ2266@linux-rxt1.site>
-References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
- <20150907040752.GW13182@linux-rxt1.site>
- <20150908204147.GC2854@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150908204147.GC2854@codeblueprint.co.uk>
-Sender: stable-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, LeifLindholm@linux-rxt1.site, leif.lindholm@linaro.org, Peter Jones <pjones@redhat.com>, James Bottomley <JBottomley@Odin.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
+Date: Wed,  9 Sep 2015 09:06:54 +0200
+Message-ID: <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
+References: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1441371986-4554-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Matt,
+The new Properties Table feature introduced in UEFIv2.5 may split
+memory regions that cover PE/COFF memory images into separate code
+and data regions. Since these regions only differ in the type (runtime
+code vs runtime data) and the permission bits, but not in the memory
+type attributes (UC/WC/WT/WB), the spec does not require them to be
+aligned to 64 KB.
 
-On Tue, Sep 08, 2015 at 09:41:47PM +0100, Matt Fleming wrote:
-> On Mon, 07 Sep, at 12:07:52PM, joeyli wrote:
-> > 
-> > This patch works to me on Intel S1200V3RPS to fix issue:
-> > DMI: Intel Corporation (uefidk.com) Intel Server Board S1200V3RPS UEFI Development Kit/ROMLEY, BIOS 2.0
-> > 
-> > Tested-by: Lee, Chun-Yi <jlee@suse.com>
-> 
-> When you say "fix issue", do you mean that your machine has the
-> EFI_PROPERTIES_TABLE feature enabled, and that it doesn't boot without
-> this patch?
-> 
-> -- 
-> Matt Fleming, Intel Open Source Technology Center
+As the relative offset of PE/COFF .text and .data segments cannot be
+changed on the fly, this means that we can no longer pad out those
+regions to be mappable using 64 KB pages.
+Unfortunately, there is no annotation in the UEFI memory map that
+identifies data regions that were split off from a code region, so we
+must apply this logic to all adjacent runtime regions whose attributes
+only differ in the permission bits.
 
-Yes, the machine on my hand has EFI_PROPERTIES_TABLE enabled, and it doesn't
-boot without your patch.
+So instead of rounding each memory region to 64 KB alignment at both
+ends, only round down regions that are not directly preceded by another
+runtime region with the same type attributes. Since the UEFI spec does
+not mandate that the memory map be sorted, this means we also need to
+sort it first.
 
-I captured similar kernel oops through serial port:
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
 
-[    0.037745] ACPI: All ACPI Tables successfully acquired
-[    0.044666] BUG: unable to handle kernel paging request at fffffffef0e5d450
-[    0.052451] IP: [<fffffffef0e5d450>] 0xfffffffef0e5d450
-[    0.058291] PGD 1c0d067 PUD 17fcfd063 PMD 17fd6f063 PTE 0
-[    0.064355] Oops: 0010 [#1] SMP 
-[    0.067972] Modules linked in:
-[    0.071388] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.2.0-rc8-2.gc02428d-default #1
-[    0.080121] Hardware name: Intel Corporation (uefidk.com) Intel Server Board S1200V3RPS UEFI Development Kit/ROMLEY, BIOS 2.0 
-[    0.092827] task: ffffffff81c114c0 ti: ffffffff81c00000 task.ti: ffffffff81c00000
-[    0.101172] RIP: 0010:[<fffffffef0e5d450>]  [<fffffffef0e5d450>] 0xfffffffef0e5d450
-[    0.109724] RSP: 0000:ffffffff81c03d38  EFLAGS: 00010082
-[    0.115647] RAX: fffffffef0c5d100 RBX: fffffffef1d66040 RCX: fffffffef0c5d100
-[    0.123604] RDX: 00000000be366018 RSI: 0000000000000000 RDI: ffffffff81c38b00
-[    0.131560] RBP: 000000000000000c R08: ffffffff81c03d70 R09: ffffffff81c38b0b
-[    0.139517] R10: 0000000000000078 R11: 0000000000000002 R12: 0000000000000296
-[    0.147475] R13: ffffffff81c03eb8 R14: 0000000000000030 R15: 0000000000000007
-[    0.155432] FS:  0000000000000000(0000) GS:ffff88042e600000(0000) knlGS:0000000000000000
-[    0.164457] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[    0.170864] CR2: fffffffef0e5d450 CR3: 000000000009b000 CR4: 00000000000406b0
-[    0.178819] Stack:
-[    0.181059]  fffffffef10574c9 0000000000000002 0000000000000000 0000000000000000
-[    0.189351]  ffffffff81c38b00 0000000000000000 fffffffef1057a4b 0000000000000058
-[    0.197645]  000000078000203c 000000000009b000 ffff8801ffd70000 000000000009b000
-[    0.205939] Call Trace:
-[    0.208669]  [<ffffffff8105dd9e>] ? efi_call+0x7e/0x100
-[    0.214497]  [<ffffffff81523006>] ? virt_efi_set_variable+0x66/0x90
-[    0.221487]  [<ffffffff8105cd67>] ? efi_delete_dummy_variable+0x77/0x90
-[    0.228866]  [<ffffffff81d41ff5>] ? efi_enter_virtual_mode+0x3ac/0x3bb
-[    0.236147]  [<ffffffff81d26f24>] ? start_kernel+0x3f4/0x484
-[    0.242459]  [<ffffffff81d26120>] ? early_idt_handler_array+0x120/0x120
-[    0.249835]  [<ffffffff81d26315>] ? x86_64_start_reservations+0x2a/0x2c
-[    0.257212]  [<ffffffff81d26452>] ? x86_64_start_kernel+0x13b/0x14a
-[    0.264200] Code:  Bad RIP value.
-[    0.267916] RIP  [<fffffffef0e5d450>] 0xfffffffef0e5d450
-[    0.273851]  RSP <ffffffff81c03d38>
-[    0.277739] CR2: fffffffef0e5d450
-[    0.281436] ---[ end trace 19be7a419bfa9401 ]---
-[    0.286575] Kernel panic - not syncing: Attempted to kill the idle task!
-[    0.294049] Rebooting in 90 seconds..
-[    0.299184] ACPI MEMORY or I/O RESET_REG.
+As discussed off list, this is the arm64 side of what we should backport
+to stable to prevent firmware that adheres to the current version of the
+UEFI v2.5 spec with the memprotect feature enabled from blowing up the system
+upon the first OS call into the runtime services.
 
+For arm64, we already map things in order, but since the spec does not mandate
+a sorted memory map, we need to sort it to be sure. This also allows us to
+easily find adjacent regions with < 64 KB granularity, which the current version
+of the spec allows if they only differ in permission bits (which the spec says
+are 'unused' on AArch64, which could be interpreted as 'allowed but ignored').
 
-Thanks a lot!
-Joey Lee
+Changes since v1:
+- Ensure that we don't inadvertently set the XN bit on the preceding region at
+  mapping time if we the OS is running with >4 KB pages.
+  
+ arch/arm64/kernel/efi.c                 |  3 +-
+ drivers/firmware/efi/libstub/arm-stub.c | 62 +++++++++++++++-----
+ 2 files changed, 49 insertions(+), 16 deletions(-)
+
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index e8ca6eaedd02..13671a9cf016 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -258,7 +258,8 @@ static bool __init efi_virtmap_init(void)
+ 		 */
+ 		if (!is_normal_ram(md))
+ 			prot = __pgprot(PROT_DEVICE_nGnRE);
+-		else if (md->type == EFI_RUNTIME_SERVICES_CODE)
++		else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
++			 !PAGE_ALIGNED(md->phys_addr))
+ 			prot = PAGE_KERNEL_EXEC;
+ 		else
+ 			prot = PAGE_KERNEL;
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index e29560e6b40b..cb4e9c4de952 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -13,6 +13,7 @@
+  */
+ 
+ #include <linux/efi.h>
++#include <linux/sort.h>
+ #include <asm/efi.h>
+ 
+ #include "efistub.h"
+@@ -305,6 +306,13 @@ fail:
+  */
+ #define EFI_RT_VIRTUAL_BASE	0x40000000
+ 
++static int cmp_mem_desc(const void *a, const void *b)
++{
++	const efi_memory_desc_t *left = a, *right = b;
++
++	return (left->phys_addr > right->phys_addr) ? 1 : -1;
++}
++
+ /*
+  * efi_get_virtmap() - create a virtual mapping for the EFI memory map
+  *
+@@ -316,34 +324,58 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ 		     unsigned long desc_size, efi_memory_desc_t *runtime_map,
+ 		     int *count)
+ {
++	static const u64 mem_type_mask = EFI_MEMORY_WB | EFI_MEMORY_WT |
++					 EFI_MEMORY_WC | EFI_MEMORY_UC |
++					 EFI_MEMORY_RUNTIME;
++
+ 	u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
+-	efi_memory_desc_t *out = runtime_map;
++	efi_memory_desc_t *in, *prev = NULL, *out = runtime_map;
+ 	int l;
+ 
+-	for (l = 0; l < map_size; l += desc_size) {
+-		efi_memory_desc_t *in = (void *)memory_map + l;
++	/*
++	 * To work around potential issues with the Properties Table feature
++	 * introduced in UEFI 2.5, which may split PE/COFF executable images
++	 * in memory into several RuntimeServicesCode and RuntimeServicesData
++	 * regions, we need to preserve the relative offsets between adjacent
++	 * EFI_MEMORY_RUNTIME regions with the same memory type attributes.
++	 * The easiest way to find adjacent regions is to sort the memory map
++	 * before traversing it.
++	 */
++	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
++
++	for (l = 0; l < map_size; l += desc_size, prev = in) {
+ 		u64 paddr, size;
+ 
++		in = (void *)memory_map + l;
+ 		if (!(in->attribute & EFI_MEMORY_RUNTIME))
+ 			continue;
+ 
++		paddr = in->phys_addr;
++		size = in->num_pages * EFI_PAGE_SIZE;
++
+ 		/*
+ 		 * Make the mapping compatible with 64k pages: this allows
+ 		 * a 4k page size kernel to kexec a 64k page size kernel and
+ 		 * vice versa.
+ 		 */
+-		paddr = round_down(in->phys_addr, SZ_64K);
+-		size = round_up(in->num_pages * EFI_PAGE_SIZE +
+-				in->phys_addr - paddr, SZ_64K);
+-
+-		/*
+-		 * Avoid wasting memory on PTEs by choosing a virtual base that
+-		 * is compatible with section mappings if this region has the
+-		 * appropriate size and physical alignment. (Sections are 2 MB
+-		 * on 4k granule kernels)
+-		 */
+-		if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
+-			efi_virt_base = round_up(efi_virt_base, SZ_2M);
++		if (!prev ||
++		    ((prev->attribute ^ in->attribute) & mem_type_mask) != 0 ||
++		    paddr != (prev->phys_addr + prev->num_pages * EFI_PAGE_SIZE)) {
++
++			paddr = round_down(in->phys_addr, SZ_64K);
++			size += in->phys_addr - paddr;
++
++			/*
++			 * Avoid wasting memory on PTEs by choosing a virtual
++			 * base that is compatible with section mappings if this
++			 * region has the appropriate size and physical
++			 * alignment. (Sections are 2 MB on 4k granule kernels)
++			 */
++			if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
++				efi_virt_base = round_up(efi_virt_base, SZ_2M);
++			else
++				efi_virt_base = round_up(efi_virt_base, SZ_64K);
++		}
+ 
+ 		in->virt_addr = efi_virt_base + in->phys_addr - paddr;
+ 		efi_virt_base += size;
+-- 
+1.9.1
