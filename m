@@ -1,171 +1,126 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
-Date: Wed,  9 Sep 2015 09:06:54 +0200
-Message-ID: <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
-References: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
+Date: Wed, 9 Sep 2015 09:37:21 +0200
+Message-ID: <CAKv+Gu8oYgkbxd_L-t2JhtvfUvpmMDEgE3A67cQTtFBpXspAiw@mail.gmail.com>
+References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
+	<CAKv+Gu9bGcSVWuMkPVJGDkCPmWvFpjhh4odLWPBZ-wX3=LgGaw@mail.gmail.com>
+	<20150904182307.GE2737@codeblueprint.co.uk>
+	<CAKv+Gu-AQdgJNOtrgtEtqxsaSC_L=EANpC3pT8b6X2jmZ5qO_Q@mail.gmail.com>
+	<20150908131622.GA2854@codeblueprint.co.uk>
+	<CAKv+Gu_us3Nu_gMd4GxPe7z0eqtMfM4DM_UEmGW2MTqVDxg5vA@mail.gmail.com>
+	<20150908203630.GB2854@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1441371986-4554-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <20150908203630.GB2854-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <JBottomley-wo1vFcy6AUs@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The new Properties Table feature introduced in UEFIv2.5 may split
-memory regions that cover PE/COFF memory images into separate code
-and data regions. Since these regions only differ in the type (runtime
-code vs runtime data) and the permission bits, but not in the memory
-type attributes (UC/WC/WT/WB), the spec does not require them to be
-aligned to 64 KB.
+On 8 September 2015 at 22:37, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Tue, 08 Sep, at 03:21:17PM, Ard Biesheuvel wrote:
+>>
+>> I noticed that the 64-bit version of efi_map_region() preserves the
+>> relative alignment with respect to a 2 MB boundary for /each/ region.
+>> Since the regions are mapped in reverse order, it is highly unlikely
+>> that each region starts at the same 2 MB relative alignment that the
+>> previous region ended at, so you are likely wasting quite a bit of VA
+>> space.
+>>
+>> I don't think it is a bug, though, but it does not seem intentional.
+>
+> Yeah, that's a very good catch. The existing code, that is, top-down
+> allocation scheme where we map ealier EFI memmap entries at higher
+> virtual addresses, does incur quite a bit of wasted address space.
+>
+> That's not true of this patch, though, and it's also not true if we
+> map the entries in reverse order of the EFI memmap, that is, mapping
+> the last memmap entry at the highest virtual address.
+>
+> So it's a bug in the original code, or rather an unintended feature.
+>
 
-As the relative offset of PE/COFF .text and .data segments cannot be
-changed on the fly, this means that we can no longer pad out those
-regions to be mappable using 64 KB pages.
-Unfortunately, there is no annotation in the UEFI memory map that
-identifies data regions that were split off from a code region, so we
-must apply this logic to all adjacent runtime regions whose attributes
-only differ in the permission bits.
+Indeed. It does deserve a mention, since the point of this patch is to
+prevent reordering and/or rounding up of regions.
 
-So instead of rounding each memory region to 64 KB alignment at both
-ends, only round down regions that are not directly preceded by another
-runtime region with the same type attributes. Since the UEFI spec does
-not mandate that the memory map be sorted, this means we also need to
-sort it first.
+> Ard, based on your suggestion I cooked this patch up to show what
+> iterating the EFI memmap in reverse looks like in terms of code. The
+> below diff and the original patch from this thread give me identical
+> virtual address space layouts.
+>
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+Good, as expected.
 
-As discussed off list, this is the arm64 side of what we should backport
-to stable to prevent firmware that adheres to the current version of the
-UEFI v2.5 spec with the memprotect feature enabled from blowing up the system
-upon the first OS call into the runtime services.
+> Admittedly the below is missing a whole bunch of comments so makes the
+> diff look smaller, but something like this could work,
+>
+> ---
+>
+> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> index 691b333e0038..a2af35f6093a 100644
+> --- a/arch/x86/platform/efi/efi.c
+> +++ b/arch/x86/platform/efi/efi.c
+> @@ -704,6 +704,44 @@ out:
+>         return ret;
+>  }
+>
+> +static inline void *efi_map_next_entry_reverse(void *entry)
+> +{
+> +       if (!entry)
+> +               return memmap.map_end - memmap.desc_size;
+> +
+> +       entry -= memmap.desc_size;
+> +       if (entry < memmap.map)
+> +               return NULL;
+> +
+> +       return entry;
+> +}
+> +
+> +static void *efi_map_next_entry(void *entry)
+> +{
+> +       bool reverse = false;
+> +
+> +       if (!efi_enabled(EFI_OLD_MEMMAP) && efi_enabled(EFI_64BIT)) {
 
-For arm64, we already map things in order, but since the spec does not mandate
-a sorted memory map, we need to sort it to be sure. This also allows us to
-easily find adjacent regions with < 64 KB granularity, which the current version
-of the spec allows if they only differ in permission bits (which the spec says
-are 'unused' on AArch64, which could be interpreted as 'allowed but ignored').
+Here, you could also test whether the
+EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA bit
+(sigh) is set
 
-Changes since v1:
-- Ensure that we don't inadvertently set the XN bit on the preceding region at
-  mapping time if we the OS is running with >4 KB pages.
-  
- arch/arm64/kernel/efi.c                 |  3 +-
- drivers/firmware/efi/libstub/arm-stub.c | 62 +++++++++++++++-----
- 2 files changed, 49 insertions(+), 16 deletions(-)
-
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index e8ca6eaedd02..13671a9cf016 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -258,7 +258,8 @@ static bool __init efi_virtmap_init(void)
- 		 */
- 		if (!is_normal_ram(md))
- 			prot = __pgprot(PROT_DEVICE_nGnRE);
--		else if (md->type == EFI_RUNTIME_SERVICES_CODE)
-+		else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
-+			 !PAGE_ALIGNED(md->phys_addr))
- 			prot = PAGE_KERNEL_EXEC;
- 		else
- 			prot = PAGE_KERNEL;
-diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-index e29560e6b40b..cb4e9c4de952 100644
---- a/drivers/firmware/efi/libstub/arm-stub.c
-+++ b/drivers/firmware/efi/libstub/arm-stub.c
-@@ -13,6 +13,7 @@
-  */
- 
- #include <linux/efi.h>
-+#include <linux/sort.h>
- #include <asm/efi.h>
- 
- #include "efistub.h"
-@@ -305,6 +306,13 @@ fail:
-  */
- #define EFI_RT_VIRTUAL_BASE	0x40000000
- 
-+static int cmp_mem_desc(const void *a, const void *b)
-+{
-+	const efi_memory_desc_t *left = a, *right = b;
-+
-+	return (left->phys_addr > right->phys_addr) ? 1 : -1;
-+}
-+
- /*
-  * efi_get_virtmap() - create a virtual mapping for the EFI memory map
-  *
-@@ -316,34 +324,58 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
- 		     unsigned long desc_size, efi_memory_desc_t *runtime_map,
- 		     int *count)
- {
-+	static const u64 mem_type_mask = EFI_MEMORY_WB | EFI_MEMORY_WT |
-+					 EFI_MEMORY_WC | EFI_MEMORY_UC |
-+					 EFI_MEMORY_RUNTIME;
-+
- 	u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
--	efi_memory_desc_t *out = runtime_map;
-+	efi_memory_desc_t *in, *prev = NULL, *out = runtime_map;
- 	int l;
- 
--	for (l = 0; l < map_size; l += desc_size) {
--		efi_memory_desc_t *in = (void *)memory_map + l;
-+	/*
-+	 * To work around potential issues with the Properties Table feature
-+	 * introduced in UEFI 2.5, which may split PE/COFF executable images
-+	 * in memory into several RuntimeServicesCode and RuntimeServicesData
-+	 * regions, we need to preserve the relative offsets between adjacent
-+	 * EFI_MEMORY_RUNTIME regions with the same memory type attributes.
-+	 * The easiest way to find adjacent regions is to sort the memory map
-+	 * before traversing it.
-+	 */
-+	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
-+
-+	for (l = 0; l < map_size; l += desc_size, prev = in) {
- 		u64 paddr, size;
- 
-+		in = (void *)memory_map + l;
- 		if (!(in->attribute & EFI_MEMORY_RUNTIME))
- 			continue;
- 
-+		paddr = in->phys_addr;
-+		size = in->num_pages * EFI_PAGE_SIZE;
-+
- 		/*
- 		 * Make the mapping compatible with 64k pages: this allows
- 		 * a 4k page size kernel to kexec a 64k page size kernel and
- 		 * vice versa.
- 		 */
--		paddr = round_down(in->phys_addr, SZ_64K);
--		size = round_up(in->num_pages * EFI_PAGE_SIZE +
--				in->phys_addr - paddr, SZ_64K);
--
--		/*
--		 * Avoid wasting memory on PTEs by choosing a virtual base that
--		 * is compatible with section mappings if this region has the
--		 * appropriate size and physical alignment. (Sections are 2 MB
--		 * on 4k granule kernels)
--		 */
--		if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
--			efi_virt_base = round_up(efi_virt_base, SZ_2M);
-+		if (!prev ||
-+		    ((prev->attribute ^ in->attribute) & mem_type_mask) != 0 ||
-+		    paddr != (prev->phys_addr + prev->num_pages * EFI_PAGE_SIZE)) {
-+
-+			paddr = round_down(in->phys_addr, SZ_64K);
-+			size += in->phys_addr - paddr;
-+
-+			/*
-+			 * Avoid wasting memory on PTEs by choosing a virtual
-+			 * base that is compatible with section mappings if this
-+			 * region has the appropriate size and physical
-+			 * alignment. (Sections are 2 MB on 4k granule kernels)
-+			 */
-+			if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
-+				efi_virt_base = round_up(efi_virt_base, SZ_2M);
-+			else
-+				efi_virt_base = round_up(efi_virt_base, SZ_64K);
-+		}
- 
- 		in->virt_addr = efi_virt_base + in->phys_addr - paddr;
- 		efi_virt_base += size;
--- 
-1.9.1
+> +               /*
+> +                * Iterate the EFI memory map in reverse order because
+> +                * the regions will be mapped top-down. The end result
+> +                * is the same as if we had mapped things forward, but
+> +                * doesn't require us to change the implementation of
+> +                * efi_map_region().
+> +                */
+> +               return efi_map_next_entry_reverse(entry);
+> +       }
+> +
+> +       /* Initial call */
+> +       if (!entry)
+> +               return memmap.map;
+> +
+> +       entry += memmap.desc_size;
+> +       if (entry >= memmap.map_end)
+> +               return NULL;
+> +
+> +       return entry;
+> +}
+> +
+>  /*
+>   * Map the efi memory ranges of the runtime services and update new_mmap with
+>   * virtual addresses.
+> @@ -718,7 +756,8 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
+>         start = -1UL;
+>         end = 0;
+>
+> -       for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
+> +       p = NULL;
+> +       while ((p = efi_map_next_entry(p))) {
+>                 md = p;
+>                 if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+>  #ifdef CONFIG_X86_64
+>
+> --
+> Matt Fleming, Intel Open Source Technology Center
