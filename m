@@ -1,237 +1,101 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
-Date: Thu, 10 Sep 2015 15:40:38 +0200
-Message-ID: <CAKv+Gu91fT=bQ1C3AETDCeKzgJ0fpwm1+gdKF02F7t8VzqVYFA@mail.gmail.com>
-References: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150910132211.GF29293@leverpostej>
+From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
+ parameters
+Date: Thu, 10 Sep 2015 14:52:25 +0100
+Message-ID: <alpine.DEB.2.02.1509101429480.2672@kaball.uk.xensource.com>
+References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
+ <20150910095208.GA29293@leverpostej>
+ <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
+ <20150910112418.GC29293@leverpostej>
+ <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
+ <20150910121514.GE29293@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150910132211.GF29293@leverpostej>
+In-Reply-To: <20150910121514.GE29293@leverpostej>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org" <freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jbeulich-IBi9RG/b67k@public.gmane.org" <jbeulich@su>
 List-Id: linux-efi@vger.kernel.org
 
-On 10 September 2015 at 15:22, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> Hi,
->
-> FWIW I gave this a spin on Seattle and Juno and saw no regressions (both
-> are pre-2.5 EFI though).
->
+On Thu, 10 Sep 2015, Mark Rutland wrote:
+> On Thu, Sep 10, 2015 at 12:37:57PM +0100, Stefano Stabellini wrote:
+> > On Thu, 10 Sep 2015, Mark Rutland wrote:
+> > > > > Does Xen not talk to EFI itself and/or give the kernel a virtual EFI
+> > > > > interface?
+> > > > 
+> > > > Xen talks to EFI itself but the interface provided to dom0 is somewhat
+> > > > different: there are no BootServices (Xen calls ExitBootServices before
+> > > > running the kernel), and the RuntimeServices go via hypercalls (see
+> > > > drivers/xen/efi.c).
+> > > 
+> > > That's somewhat hideous; a non Xen-aware OS wouild presumably die if
+> > > trying to use any runtime services the normal way? I'm not keen on
+> > > describing things that the OS cannot use.
+> >  
+> > I agree that is somewhat hideous, but a non-Xen aware OS traditionally
+> > has never been able to even boot as Dom0. On ARM it can, but it still
+> > wouldn't be very useful (one couldn't use it to start other guests).
+> 
+> Sure, but it feels odd to provide the usual information in this manner
+> if it cannot be used. If you require Xen-specific code to make things
+> work, I would imagine this information could be dciscovered in a
+> Xen-specific manner.
 
-Thanks!
+We need ACPI (or Device Tree) to find that Xen is available on the
+platform, so we cannot use Xen-specific code to get the ACPI tables.
 
-> I have some concerns below.
->
-> On Wed, Sep 09, 2015 at 08:06:54AM +0100, Ard Biesheuvel wrote:
->> The new Properties Table feature introduced in UEFIv2.5 may split
->> memory regions that cover PE/COFF memory images into separate code
->> and data regions. Since these regions only differ in the type (runtime
->> code vs runtime data) and the permission bits, but not in the memory
->> type attributes (UC/WC/WT/WB), the spec does not require them to be
->> aligned to 64 KB.
->
-> We should require those to be 64k-aligned for permissions too. I can
-> imagine vendors getting permissions wrong but things happening to work
-> for a 64k kernel (where I assume we have to use the superset of all
-> permissions within a 64k page).
->
 
-Indeed. But note that this patch is /only/ about interoperability with
-the current version of the spec. This is not the venue for discussing
-improvements in upcoming versions.
+> > > Why can't Xen give a virtual EFI interface to Dom0 / guests? e.g.
+> > > create pages of RuntimeServicesCode that are trivial assembly shims
+> > > doing hypercalls, and plumb these into the virtual EFI memory map and
+> > > tables?
+> > > 
+> > > That would keep things sane for any guest, allow for easy addition of
+> > > EFI features, and you could even enter the usual EFI entry point,
+> > > simulate ExitBootServices(), SetVirtualAddressMap(), and allow the guest
+> > > to make things sane for itself...
+> > 
+> > That's the way it was done on x86 and now we have common code both in
+> > Linux (drivers/xen/efi.c) and Xen (xen/common/efi) which implement this
+> > scheme.
+> 
+> This code is not currently used on arm. It might live in a location
+> where it may be shared, but that doesn't mean that it's common code yet.
 
->> As the relative offset of PE/COFF .text and .data segments cannot be
->> changed on the fly, this means that we can no longer pad out those
->> regions to be mappable using 64 KB pages.
->> Unfortunately, there is no annotation in the UEFI memory map that
->> identifies data regions that were split off from a code region, so we
->> must apply this logic to all adjacent runtime regions whose attributes
->> only differ in the permission bits.
->>
->> So instead of rounding each memory region to 64 KB alignment at both
->> ends, only round down regions that are not directly preceded by another
->> runtime region with the same type attributes. Since the UEFI spec does
->> not mandate that the memory map be sorted, this means we also need to
->> sort it first.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>
->> As discussed off list, this is the arm64 side of what we should backport
->> to stable to prevent firmware that adheres to the current version of the
->> UEFI v2.5 spec with the memprotect feature enabled from blowing up the system
->> upon the first OS call into the runtime services.
->>
->> For arm64, we already map things in order, but since the spec does not mandate
->> a sorted memory map, we need to sort it to be sure. This also allows us to
->> easily find adjacent regions with < 64 KB granularity, which the current version
->> of the spec allows if they only differ in permission bits (which the spec says
->> are 'unused' on AArch64, which could be interpreted as 'allowed but ignored').
->>
->> Changes since v1:
->> - Ensure that we don't inadvertently set the XN bit on the preceding region at
->>   mapping time if we the OS is running with >4 KB pages.
->>
->>  arch/arm64/kernel/efi.c                 |  3 +-
->>  drivers/firmware/efi/libstub/arm-stub.c | 62 +++++++++++++++-----
->>  2 files changed, 49 insertions(+), 16 deletions(-)
->>
->> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
->> index e8ca6eaedd02..13671a9cf016 100644
->> --- a/arch/arm64/kernel/efi.c
->> +++ b/arch/arm64/kernel/efi.c
->> @@ -258,7 +258,8 @@ static bool __init efi_virtmap_init(void)
->>                */
->>               if (!is_normal_ram(md))
->>                       prot = __pgprot(PROT_DEVICE_nGnRE);
->> -             else if (md->type == EFI_RUNTIME_SERVICES_CODE)
->> +             else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
->> +                      !PAGE_ALIGNED(md->phys_addr))
->>                       prot = PAGE_KERNEL_EXEC;
->
-> This looks coarser than necessary. For memory organised like:
->
-> 0x00000000 - 0x0000F000 (60KiB) : EFI_RUNTIME_SERVICES_CODE
-> 0x0000F000 - 0x00020000 (68KiB) : EFI_RUNTIME_SERVICES_DATA
->
-> We should be able to make the last 64K non-executable, but with this all
-> 128K is executable, unless I've missed something?
->
+Yeah, but that was clearly the intention.
 
-In theory, yes. But considering that
 
-a) this only affects 64 KB pages kernels, and
-b) this patch is intended for -stable
+> > Switching to a different solution for ARM, would mean diverging
+> > with x86, which is not nice, or reimplementing the x86 solution too,
+> > which is expensive.
+> > 
+> > BTW I think that the idea you proposed was actually considered at the
+> > time and deemed hard to implement, if I recall correctly.
+> 
+> I appreciate that divergence is painful. We already diverge in other
+> respects (e.g. lack of PV page tables) because things that used to be
+> the case on x86 never applied to ARM.
+> 
+> It would be interesting to see why that was the case for x86, and
+> whether that applies to ARM.
 
-I chose to keep it simple and ignore this, and just relax the
-permissions for any region that is not aligned to 64 KB.
+I have been a big advocate of doing things differently, and more
+cleanly, on ARM, but in this case the code is already non-arch specific.
+We are not talking about pagetables, which of course cannot be reused
+as-is even if we wanted to.
 
-Since these regions are only mapped during Runtime Services calls, the
-window for abuse is not that large.
+For once, I think we should follow the x86 way, for convenience and for
+the reasons brought up by Jan.
 
-> Maybe we could do a two-step pass, first mapping the data as
-> not-executable, then mapping any code pages executable (overriding any
-> overlapping portions, but only for the overlapping parts).
->
 
-Let me have a go at that.
+> > In any case this should be separate from the shim ABI discussion.
+> 
+> I disagree; I think this is very much relevant to the ABI discussion.
+> That's not to say that I insist on a particular approach, but I think
+> that they need to be considered together.
 
->>               else
->>                       prot = PAGE_KERNEL;
->> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
->> index e29560e6b40b..cb4e9c4de952 100644
->> --- a/drivers/firmware/efi/libstub/arm-stub.c
->> +++ b/drivers/firmware/efi/libstub/arm-stub.c
->> @@ -13,6 +13,7 @@
->>   */
->>
->>  #include <linux/efi.h>
->> +#include <linux/sort.h>
->
-> Sort isn't an inline in this header. I thought it wasn't safe to call
-> arbitary kernel functions from the stub?
->
-
-We call string functions, cache maintenance functions, libfdt
-functions etc etc so it seems not everyone got the memo :-)
-
-I agree that treating vmlinux both as a static library and as a
-payload from the stub's pov is a bit sloppy, and I do remember
-discussing this, but for the life of me, I can't remember the exact
-issue, other than the use of adrp/add and adrp/ldr pairs, which we
-fixed by setting the PE/COFF section alignment to 4 KB.
-
->>  #include <asm/efi.h>
->>
->>  #include "efistub.h"
->> @@ -305,6 +306,13 @@ fail:
->>   */
->>  #define EFI_RT_VIRTUAL_BASE  0x40000000
->>
->> +static int cmp_mem_desc(const void *a, const void *b)
->> +{
->> +     const efi_memory_desc_t *left = a, *right = b;
->> +
->> +     return (left->phys_addr > right->phys_addr) ? 1 : -1;
->> +}
->
-> Nit: please chose names to make the relationship between these clearer.
-> e.g. s/left/mem_a/, s/right/mem_b/.
->
-
-OK, I can do that.
-
->> +
->>  /*
->>   * efi_get_virtmap() - create a virtual mapping for the EFI memory map
->>   *
->> @@ -316,34 +324,58 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
->>                    unsigned long desc_size, efi_memory_desc_t *runtime_map,
->>                    int *count)
->>  {
->> +     static const u64 mem_type_mask = EFI_MEMORY_WB | EFI_MEMORY_WT |
->> +                                      EFI_MEMORY_WC | EFI_MEMORY_UC |
->> +                                      EFI_MEMORY_RUNTIME;
->> +
->>       u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
->> -     efi_memory_desc_t *out = runtime_map;
->> +     efi_memory_desc_t *in, *prev = NULL, *out = runtime_map;
->>       int l;
->>
->> -     for (l = 0; l < map_size; l += desc_size) {
->> -             efi_memory_desc_t *in = (void *)memory_map + l;
->> +     /*
->> +      * To work around potential issues with the Properties Table feature
->> +      * introduced in UEFI 2.5, which may split PE/COFF executable images
->> +      * in memory into several RuntimeServicesCode and RuntimeServicesData
->> +      * regions, we need to preserve the relative offsets between adjacent
->> +      * EFI_MEMORY_RUNTIME regions with the same memory type attributes.
->> +      * The easiest way to find adjacent regions is to sort the memory map
->> +      * before traversing it.
->> +      */
->> +     sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
->> +
->> +     for (l = 0; l < map_size; l += desc_size, prev = in) {
->>               u64 paddr, size;
->>
->> +             in = (void *)memory_map + l;
->>               if (!(in->attribute & EFI_MEMORY_RUNTIME))
->>                       continue;
->>
->> +             paddr = in->phys_addr;
->> +             size = in->num_pages * EFI_PAGE_SIZE;
->> +
->>               /*
->>                * Make the mapping compatible with 64k pages: this allows
->>                * a 4k page size kernel to kexec a 64k page size kernel and
->>                * vice versa.
->>                */
->> -             paddr = round_down(in->phys_addr, SZ_64K);
->> -             size = round_up(in->num_pages * EFI_PAGE_SIZE +
->> -                             in->phys_addr - paddr, SZ_64K);
->> -
->> -             /*
->> -              * Avoid wasting memory on PTEs by choosing a virtual base that
->> -              * is compatible with section mappings if this region has the
->> -              * appropriate size and physical alignment. (Sections are 2 MB
->> -              * on 4k granule kernels)
->> -              */
->> -             if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
->> -                     efi_virt_base = round_up(efi_virt_base, SZ_2M);
->> +             if (!prev ||
->> +                 ((prev->attribute ^ in->attribute) & mem_type_mask) != 0 ||
->> +                 paddr != (prev->phys_addr + prev->num_pages * EFI_PAGE_SIZE)) {
->> +
->
-> This looks correct, though slightly painful to read. It might be nicer
-> with helpers helpers like descs_have_same_attrs and
-> descs_are_contiguous.
->
-
-I can do that too. I agree it reads a bit more difficult than necessary.
-
-Thanks,
-Ard.
+Let's suppose Xen didn't expose any RuntimeServices at all, would that
+make it easier to discuss about the EFI stub parameters?  In the grant
+scheme of things, they are not that important, as Ian wrote what is
+important is how to pass the RSDP.
