@@ -1,74 +1,186 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of
- EFI stub parameters
-Date: Thu, 10 Sep 2015 15:53:31 +0100
-Message-ID: <20150910145331.GJ29293@leverpostej>
-References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
-	<20150910095208.GA29293@leverpostej>
-	<alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
-	<20150910112418.GC29293@leverpostej>
-	<alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
-	<55F199DD02000078000A1B1E@prv-mh.provo.novell.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
+Date: Thu, 10 Sep 2015 16:51:05 +0200
+Message-ID: <CAKv+Gu-U0zcQpqXeb4BoRL+BcJvJ0dxRx6gZb77eJc520Spd2w@mail.gmail.com>
+References: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20150910132211.GF29293@leverpostej>
+ <CAKv+Gu91fT=bQ1C3AETDCeKzgJ0fpwm1+gdKF02F7t8VzqVYFA@mail.gmail.com>
+ <20150910140419.GH29293@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
-Content-Disposition: inline
-In-Reply-To: <55F199DD02000078000A1B1E@prv-mh.provo.novell.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
-To: Jan Beulich <JBeulich@suse.com>
-Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "Ian.Campbell@citrix.com" <Ian.Campbell@citrix.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "christoffer.dall@linaro.org" <christoffer.dall@linaro.org>, "daniel.kiper@oracle.com" <daniel.kiper@oracle.com>, Stefano Stabellini <stefano.stabellini@eu.citrix.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "peter.huangpeng@huawei.com" <peter.huangpeng@huawei.com>, "julien.grall@citrix.com" <julien.grall@citrix.com>, "freebsd-arm@freebsd.org" <freebsd-arm@freebsd.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "shannon.zhao@linaro.org" <shannon.zhao@linaro.org>, Shannon Zhao <zhaoshenglong@huawei.com>
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <20150910140419.GH29293@leverpostej>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Catalin Marinas <Catalin.Marinas@arm.com>, Will Deacon <Will.Deacon@arm.com>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "msalter@redhat.com" <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Sep 10, 2015 at 01:55:25PM +0100, Jan Beulich wrote:
-> >>> On 10.09.15 at 13:37, <stefano.stabellini@eu.citrix.com> wrote:
-> > On Thu, 10 Sep 2015, Mark Rutland wrote:
-> >> Why can't Xen give a virtual EFI interface to Dom0 / guests? e.g.
-> >> create pages of RuntimeServicesCode that are trivial assembly shims
-> >> doing hypercalls, and plumb these into the virtual EFI memory map and
-> >> tables?
-> >> 
-> >> That would keep things sane for any guest, allow for easy addition of
-> >> EFI features, and you could even enter the usual EFI entry point,
-> >> simulate ExitBootServices(), SetVirtualAddressMap(), and allow the guest
-> >> to make things sane for itself...
-> > 
-> > That's the way it was done on x86 and now we have common code both in
-> > Linux (drivers/xen/efi.c) and Xen (xen/common/efi) which implement this
-> > scheme.  Switching to a different solution for ARM, would mean diverging
-> > with x86, which is not nice, or reimplementing the x86 solution too,
-> > which is expensive.
-> > 
-> > BTW I think that the idea you proposed was actually considered at the
-> > time and deemed hard to implement, if I recall correctly.
-> 
-> Considering that the EFI support is just for Dom0, and Dom0 (at
-> the time) had to be PV anyway, it was the more natural solution to
-> expose the interface via hypercalls, the more that this allows better
-> control over what is and primarily what is not being exposed to
-> Dom0. With the wrapper approach we'd be back to the same
-> problem (discussed elsewhere) of which EFI version to surface: The
-> host one would impose potentially missing extensions, while the
-> most recent hypervisor known one might imply hiding valuable
-> information from Dom0. Plus there are incompatible changes like
-> the altered meaning of EFI_MEMORY_WP in 2.5.
+On 10 September 2015 at 16:04, Mark Rutland <mark.rutland@arm.com> wrote:
+>> >> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+>> >> index e8ca6eaedd02..13671a9cf016 100644
+>> >> --- a/arch/arm64/kernel/efi.c
+>> >> +++ b/arch/arm64/kernel/efi.c
+>> >> @@ -258,7 +258,8 @@ static bool __init efi_virtmap_init(void)
+>> >>                */
+>> >>               if (!is_normal_ram(md))
+>> >>                       prot = __pgprot(PROT_DEVICE_nGnRE);
+>> >> -             else if (md->type == EFI_RUNTIME_SERVICES_CODE)
+>> >> +             else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
+>> >> +                      !PAGE_ALIGNED(md->phys_addr))
+>> >>                       prot = PAGE_KERNEL_EXEC;
+>> >
+>> > This looks coarser than necessary. For memory organised like:
+>> >
+>> > 0x00000000 - 0x0000F000 (60KiB) : EFI_RUNTIME_SERVICES_CODE
+>> > 0x0000F000 - 0x00020000 (68KiB) : EFI_RUNTIME_SERVICES_DATA
+>> >
+>> > We should be able to make the last 64K non-executable, but with this all
+>> > 128K is executable, unless I've missed something?
+>> >
+>>
+>> In theory, yes. But considering that
+>>
+>> a) this only affects 64 KB pages kernels, and
+>> b) this patch is intended for -stable
+>>
+>> I chose to keep it simple and ignore this, and just relax the
+>> permissions for any region that is not aligned to 64 KB.
+>>
+>> Since these regions are only mapped during Runtime Services calls, the
+>> window for abuse is not that large.
+>
+> Ok, that does sound reasonable.
+>
+>> > Maybe we could do a two-step pass, first mapping the data as
+>> > not-executable, then mapping any code pages executable (overriding any
+>> > overlapping portions, but only for the overlapping parts).
+>> >
+>>
+>> Let me have a go at that.
+>
+> Cheers!
+>
 
-I'm not sure I follow how hypercalls solve any impedance mismatch here;
-you're still expecting Dom0 to call up to Xen in order to perform calls,
-and all I suggested was a different location for those hypercalls.
+OK so what we could do is the following:
 
-If Xen is happy to make such calls blindly, why does it matter if the
-hypercall was in the kernel binary or an external shim?
+------------8<--------------
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index e8ca6eaedd02..39fa2a70a7f1 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -233,6 +233,7 @@ void __init efi_init(void)
+ static bool __init efi_virtmap_init(void)
+ {
+        efi_memory_desc_t *md;
++       u64 prev_end = 0;
 
-Incompatible changes are a spec problem regardless of how this is
-handled.
+        for_each_efi_memory_desc(&memmap, md) {
+                u64 paddr, npages, size;
+@@ -256,13 +257,26 @@ static bool __init efi_virtmap_init(void)
+                 * executable, everything else can be mapped with the XN bits
+                 * set.
+                 */
+-               if (!is_normal_ram(md))
++               if (!is_normal_ram(md)) {
+                        prot = __pgprot(PROT_DEVICE_nGnRE);
+-               else if (md->type == EFI_RUNTIME_SERVICES_CODE)
++               } else if (md->type == EFI_RUNTIME_SERVICES_CODE) {
+                        prot = PAGE_KERNEL_EXEC;
+-               else
++               } else {
++                       /*
++                        * If we are running with >4 KB pages and the current
++                        * region shares a page frame with the preceding one,
++                        * we should not map the leading page again since doing
++                        * so may take its executable permissions away.
++                        */
++                       if (PAGE_SIZE > EFI_PAGE_SIZE && paddr < prev_end) {
++                               paddr += PAGE_SIZE;
++                               size -= PAGE_SIZE;
++                               if (!size)
++                                       continue;
++                       }
+                        prot = PAGE_KERNEL;
+-
++               }
++               prev_end = paddr + size;
+                create_pgd_mapping(&efi_mm, paddr, md->virt_addr, size, prot);
+        }
+        return true;
+------------8<--------------
 
-Thanks,
-Mark.
+This will ensure that only the pages that are shared between 2 or more
+regions may have their permissions upgraded, but only if any of these
+regions requires it.
+
+I prefer the much simpler previous version, though, and I think it is
+more suitable for -stable. I can always follow up with an improvement
+like this for v4.3-late.
+
+>> >>               else
+>> >>                       prot = PAGE_KERNEL;
+>> >> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+>> >> index e29560e6b40b..cb4e9c4de952 100644
+>> >> --- a/drivers/firmware/efi/libstub/arm-stub.c
+>> >> +++ b/drivers/firmware/efi/libstub/arm-stub.c
+>> >> @@ -13,6 +13,7 @@
+>> >>   */
+>> >>
+>> >>  #include <linux/efi.h>
+>> >> +#include <linux/sort.h>
+>> >
+>> > Sort isn't an inline in this header. I thought it wasn't safe to call
+>> > arbitary kernel functions from the stub?
+>> >
+>>
+>> We call string functions, cache maintenance functions, libfdt
+>> functions etc etc so it seems not everyone got the memo :-)
+>>
+>> I agree that treating vmlinux both as a static library and as a
+>> payload from the stub's pov is a bit sloppy, and I do remember
+>> discussing this, but for the life of me, I can't remember the exact
+>> issue, other than the use of adrp/add and adrp/ldr pairs, which we
+>> fixed by setting the PE/COFF section alignment to 4 KB.
+>
+> I only had a vague recollection that there was a problem, which I
+> thought was more to do with potential use of absolute kernel virtual
+> addresses, which would be incorrect in the context of an EFI
+> application.
+>
+
+That was it, of course. Unlike the x86 stub, which is built with -fPIC
+(as is the ARM decompressor, btw), the arm64 kernel is position
+dependent. Fortunately, the small code model is mostly position
+independent by default, but it would be good if we could spot any
+problems at build time.
+
+> Digging a bit, the stub code itself is safe due to commit
+> f4f75ad5741fe033 ("efi: efistub: Convert into static library"), but that
+
+libstub is linked into vmlinux so that does not make a different at all
+
+> isn't necessarily true of anything it calls (libfdt uses callbacks in
+> several places). I think the cache functions we call are all raw asm
+> which is position-oblivious.
+>
+
+I remember looking into this when doing the BE port.
+
+> We do seem to be ok so far, however. Maybe we just need to keep an eye
+> out.
+>
+
+I'd much rather restrict the code that goes into the stub somehow than
+deal with any absolute references. Perhaps we could reuse some of the
+section mismatch code in some way to tag certain code as stub-safe and
+do a verification pass on the binary.
