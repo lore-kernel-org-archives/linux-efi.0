@@ -1,150 +1,199 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v2] arm64/efi: don't pad between EFI_MEMORY_RUNTIME
- regions
-Date: Thu, 10 Sep 2015 16:03:00 +0100
-Message-ID: <20150910150300.GK29293@leverpostej>
-References: <1441371986-4554-1-git-send-email-ard.biesheuvel@linaro.org>
- <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
- <20150910132211.GF29293@leverpostej>
- <CAKv+Gu91fT=bQ1C3AETDCeKzgJ0fpwm1+gdKF02F7t8VzqVYFA@mail.gmail.com>
- <20150910140419.GH29293@leverpostej>
- <CAKv+Gu-U0zcQpqXeb4BoRL+BcJvJ0dxRx6gZb77eJc520Spd2w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3] arm64/efi: don't pad between EFI_MEMORY_RUNTIME regions
+Date: Thu, 10 Sep 2015 17:41:39 +0200
+Message-ID: <1441899699-14893-1-git-send-email-ard.biesheuvel@linaro.org>
+References: <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-U0zcQpqXeb4BoRL+BcJvJ0dxRx6gZb77eJc520Spd2w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1441782414-16284-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> OK so what we could do is the following:
-> 
-> ------------8<--------------
-> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-> index e8ca6eaedd02..39fa2a70a7f1 100644
-> --- a/arch/arm64/kernel/efi.c
-> +++ b/arch/arm64/kernel/efi.c
-> @@ -233,6 +233,7 @@ void __init efi_init(void)
->  static bool __init efi_virtmap_init(void)
->  {
->         efi_memory_desc_t *md;
-> +       u64 prev_end = 0;
-> 
->         for_each_efi_memory_desc(&memmap, md) {
->                 u64 paddr, npages, size;
-> @@ -256,13 +257,26 @@ static bool __init efi_virtmap_init(void)
->                  * executable, everything else can be mapped with the XN bits
->                  * set.
->                  */
-> -               if (!is_normal_ram(md))
-> +               if (!is_normal_ram(md)) {
->                         prot = __pgprot(PROT_DEVICE_nGnRE);
-> -               else if (md->type == EFI_RUNTIME_SERVICES_CODE)
-> +               } else if (md->type == EFI_RUNTIME_SERVICES_CODE) {
->                         prot = PAGE_KERNEL_EXEC;
-> -               else
-> +               } else {
-> +                       /*
-> +                        * If we are running with >4 KB pages and the current
-> +                        * region shares a page frame with the preceding one,
-> +                        * we should not map the leading page again since doing
-> +                        * so may take its executable permissions away.
-> +                        */
-> +                       if (PAGE_SIZE > EFI_PAGE_SIZE && paddr < prev_end) {
-> +                               paddr += PAGE_SIZE;
-> +                               size -= PAGE_SIZE;
-> +                               if (!size)
-> +                                       continue;
-> +                       }
->                         prot = PAGE_KERNEL;
-> -
-> +               }
-> +               prev_end = paddr + size;
->                 create_pgd_mapping(&efi_mm, paddr, md->virt_addr, size, prot);
->         }
->         return true;
-> ------------8<--------------
-> 
-> This will ensure that only the pages that are shared between 2 or more
-> regions may have their permissions upgraded, but only if any of these
-> regions requires it.
-> 
-> I prefer the much simpler previous version, though, and I think it is
-> more suitable for -stable. I can always follow up with an improvement
-> like this for v4.3-late.
+The new Properties Table feature introduced in UEFIv2.5 may split
+memory regions that cover PE/COFF memory images into separate code
+and data regions. Since these regions only differ in the type (runtime
+code vs runtime data) and the permission bits, but not in the memory
+type attributes (UC/WC/WT/WB), the spec does not require them to be
+aligned to 64 KB.
 
-Ok. Let's go with your previous version for now.
+Since the relative offset of PE/COFF .text and .data segments cannot
+be changed on the fly, this means that we can no longer pad out those
+regions to be mappable using 64 KB pages.
+Unfortunately, there is no annotation in the UEFI memory map that
+identifies data regions that were split off from a code region, so we
+must apply this logic to all adjacent runtime regions whose attributes
+only differ in the permission bits.
 
-Could you put something in the commit message about this limitation, so
-that we don't forget?
+So instead of rounding each memory region to 64 KB alignment at both
+ends, only round down regions that are not directly preceded by another
+runtime region with the same type attributes. Since the UEFI spec does
+not mandate that the memory map be sorted, this means we also need to
+sort it first.
 
-> >> >>               else
-> >> >>                       prot = PAGE_KERNEL;
-> >> >> diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
-> >> >> index e29560e6b40b..cb4e9c4de952 100644
-> >> >> --- a/drivers/firmware/efi/libstub/arm-stub.c
-> >> >> +++ b/drivers/firmware/efi/libstub/arm-stub.c
-> >> >> @@ -13,6 +13,7 @@
-> >> >>   */
-> >> >>
-> >> >>  #include <linux/efi.h>
-> >> >> +#include <linux/sort.h>
-> >> >
-> >> > Sort isn't an inline in this header. I thought it wasn't safe to call
-> >> > arbitary kernel functions from the stub?
-> >> >
-> >>
-> >> We call string functions, cache maintenance functions, libfdt
-> >> functions etc etc so it seems not everyone got the memo :-)
-> >>
-> >> I agree that treating vmlinux both as a static library and as a
-> >> payload from the stub's pov is a bit sloppy, and I do remember
-> >> discussing this, but for the life of me, I can't remember the exact
-> >> issue, other than the use of adrp/add and adrp/ldr pairs, which we
-> >> fixed by setting the PE/COFF section alignment to 4 KB.
-> >
-> > I only had a vague recollection that there was a problem, which I
-> > thought was more to do with potential use of absolute kernel virtual
-> > addresses, which would be incorrect in the context of an EFI
-> > application.
-> >
-> 
-> That was it, of course. Unlike the x86 stub, which is built with -fPIC
-> (as is the ARM decompressor, btw), the arm64 kernel is position
-> dependent. Fortunately, the small code model is mostly position
-> independent by default, but it would be good if we could spot any
-> problems at build time.
-> 
-> > Digging a bit, the stub code itself is safe due to commit
-> > f4f75ad5741fe033 ("efi: efistub: Convert into static library"), but that
-> 
-> libstub is linked into vmlinux so that does not make a different at all
+Note that this change will result in all EFI_MEMORY_RUNTIME regions whose
+start addresses are not aligned to the OS page size to be mapped with
+executable permissions (i.e., on kernels compiled with 64 KB pages).
+However, since these mappings are only active during the time that UEFI
+Runtime Services are being invoked, the window for abuse is rather small.
 
-Ok. I assumed that inter-stub references would still be relative, but I
-have no idea what the linker would do.
+Tested-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Reviewed-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+Changes since v2:
+- break down complex if() condition into helper functions to test for adjacency
+  and compatible memory types
+- update commit log to emphasize that this patch may result in data regions to
+  be mapped with exec permissions on 64k pages kernels.
+- no functional changes
 
-> > We do seem to be ok so far, however. Maybe we just need to keep an eye
-> > out.
-> >
-> 
-> I'd much rather restrict the code that goes into the stub somehow than
-> deal with any absolute references. Perhaps we could reuse some of the
-> section mismatch code in some way to tag certain code as stub-safe and
-> do a verification pass on the binary.
+Changes since v1:
+- Ensure that we don't inadvertently set the XN bit on the preceding region at
+  mapping time if we the OS is running with >4 KB pages.
 
-It would be great if we could, though I'm not really sure how that would
-work.
+ arch/arm64/kernel/efi.c                 |  3 +-
+ drivers/firmware/efi/libstub/arm-stub.c | 88 ++++++++++++++++----
+ 2 files changed, 75 insertions(+), 16 deletions(-)
 
-Imagine stub_foo calls fdt_blah, which calls kern_baz by absolute
-address. Normally the latter call is fine, but not when the original
-call comes from the stub. I don't think the section mismatch code has
-any way to contextualize calls like that, and I don't know what criteria
-we could use for annotating code.
-
-Let's not have that delay this patch, however. That's a bigger can of
-worms.
-
-Thanks,
-Mark.
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index e8ca6eaedd02..13671a9cf016 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -258,7 +258,8 @@ static bool __init efi_virtmap_init(void)
+ 		 */
+ 		if (!is_normal_ram(md))
+ 			prot = __pgprot(PROT_DEVICE_nGnRE);
+-		else if (md->type == EFI_RUNTIME_SERVICES_CODE)
++		else if (md->type == EFI_RUNTIME_SERVICES_CODE ||
++			 !PAGE_ALIGNED(md->phys_addr))
+ 			prot = PAGE_KERNEL_EXEC;
+ 		else
+ 			prot = PAGE_KERNEL;
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index e29560e6b40b..950c87f5d279 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -13,6 +13,7 @@
+  */
+ 
+ #include <linux/efi.h>
++#include <linux/sort.h>
+ #include <asm/efi.h>
+ 
+ #include "efistub.h"
+@@ -305,6 +306,44 @@ fail:
+  */
+ #define EFI_RT_VIRTUAL_BASE	0x40000000
+ 
++static int cmp_mem_desc(const void *l, const void *r)
++{
++	const efi_memory_desc_t *left = l, *right = r;
++
++	return (left->phys_addr > right->phys_addr) ? 1 : -1;
++}
++
++/*
++ * Returns whether region @left ends exactly where region @right starts,
++ * or false if either argument is NULL.
++ */
++static bool regions_are_adjacent(efi_memory_desc_t *left,
++				 efi_memory_desc_t *right)
++{
++	u64 left_end;
++
++	if (left == NULL || right == NULL)
++		return false;
++
++	left_end = left->phys_addr + left->num_pages * EFI_PAGE_SIZE;
++
++	return left_end == right->phys_addr;
++}
++
++/*
++ * Returns whether region @left and region @right have compatible memory type
++ * mapping attributes, and are both EFI_MEMORY_RUNTIME regions.
++ */
++static bool regions_have_compatible_memory_type_attrs(efi_memory_desc_t *left,
++						      efi_memory_desc_t *right)
++{
++	static const u64 mem_type_mask = EFI_MEMORY_WB | EFI_MEMORY_WT |
++					 EFI_MEMORY_WC | EFI_MEMORY_UC |
++					 EFI_MEMORY_RUNTIME;
++
++	return ((left->attribute ^ right->attribute) & mem_type_mask) == 0;
++}
++
+ /*
+  * efi_get_virtmap() - create a virtual mapping for the EFI memory map
+  *
+@@ -317,33 +356,52 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ 		     int *count)
+ {
+ 	u64 efi_virt_base = EFI_RT_VIRTUAL_BASE;
+-	efi_memory_desc_t *out = runtime_map;
++	efi_memory_desc_t *in, *prev = NULL, *out = runtime_map;
+ 	int l;
+ 
+-	for (l = 0; l < map_size; l += desc_size) {
+-		efi_memory_desc_t *in = (void *)memory_map + l;
++	/*
++	 * To work around potential issues with the Properties Table feature
++	 * introduced in UEFI 2.5, which may split PE/COFF executable images
++	 * in memory into several RuntimeServicesCode and RuntimeServicesData
++	 * regions, we need to preserve the relative offsets between adjacent
++	 * EFI_MEMORY_RUNTIME regions with the same memory type attributes.
++	 * The easiest way to find adjacent regions is to sort the memory map
++	 * before traversing it.
++	 */
++	sort(memory_map, map_size / desc_size, desc_size, cmp_mem_desc, NULL);
++
++	for (l = 0; l < map_size; l += desc_size, prev = in) {
+ 		u64 paddr, size;
+ 
++		in = (void *)memory_map + l;
+ 		if (!(in->attribute & EFI_MEMORY_RUNTIME))
+ 			continue;
+ 
++		paddr = in->phys_addr;
++		size = in->num_pages * EFI_PAGE_SIZE;
++
+ 		/*
+ 		 * Make the mapping compatible with 64k pages: this allows
+ 		 * a 4k page size kernel to kexec a 64k page size kernel and
+ 		 * vice versa.
+ 		 */
+-		paddr = round_down(in->phys_addr, SZ_64K);
+-		size = round_up(in->num_pages * EFI_PAGE_SIZE +
+-				in->phys_addr - paddr, SZ_64K);
+-
+-		/*
+-		 * Avoid wasting memory on PTEs by choosing a virtual base that
+-		 * is compatible with section mappings if this region has the
+-		 * appropriate size and physical alignment. (Sections are 2 MB
+-		 * on 4k granule kernels)
+-		 */
+-		if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
+-			efi_virt_base = round_up(efi_virt_base, SZ_2M);
++		if (!regions_are_adjacent(prev, in) ||
++		    !regions_have_compatible_memory_type_attrs(prev, in)) {
++
++			paddr = round_down(in->phys_addr, SZ_64K);
++			size += in->phys_addr - paddr;
++
++			/*
++			 * Avoid wasting memory on PTEs by choosing a virtual
++			 * base that is compatible with section mappings if this
++			 * region has the appropriate size and physical
++			 * alignment. (Sections are 2 MB on 4k granule kernels)
++			 */
++			if (IS_ALIGNED(in->phys_addr, SZ_2M) && size >= SZ_2M)
++				efi_virt_base = round_up(efi_virt_base, SZ_2M);
++			else
++				efi_virt_base = round_up(efi_virt_base, SZ_64K);
++		}
+ 
+ 		in->virt_addr = efi_virt_base + in->phys_addr - paddr;
+ 		efi_virt_base += size;
+-- 
+1.9.1
