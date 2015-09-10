@@ -1,54 +1,42 @@
-From: "Jan Beulich" <JBeulich@suse.com>
-Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
- parameters
-Date: Thu, 10 Sep 2015 06:55:25 -0600
-Message-ID: <55F199DD02000078000A1B1E@prv-mh.provo.novell.com>
+From: Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [Xen-devel] [PATCH] efi/libstub/fdt: Standardize the names of
+ EFI stub parameters
+Date: Thu, 10 Sep 2015 13:58:25 +0100
+Message-ID: <1441889905.24450.382.camel@citrix.com>
 References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
- <20150910095208.GA29293@leverpostej>
- <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
- <20150910112418.GC29293@leverpostej>
- <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
+	 <20150910095208.GA29293@leverpostej>
+	 <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
+	 <20150910112418.GC29293@leverpostej>
+	 <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
+	 <20150910121514.GE29293@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
-Content-Disposition: inline
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>, Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-Cc: "Ian.Campbell@citrix.com" <Ian.Campbell@citrix.com>, "julien.grall@citrix.com" <julien.grall@citrix.com>, "freebsd-arm@freebsd.org" <freebsd-arm@freebsd.org>, "peter.huangpeng@huawei.com" <peter.huangpeng@huawei.com>, Shannon Zhao <zhaoshenglong@huawei.com>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "christoffer.dall@linaro.org" <christoffer.dall@linaro.org>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "shannon.zhao@linaro.org" <shannon.zhao@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, daniel.kiper@oracle.com, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, linux-efi@vger
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150910121514.GE29293@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Cc: "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org" <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org" <freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jbeulich-IBi9RG/b67k@public.gmane.org" <jbeulich-IBi9RG/b67k@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWMP3drIcvDWNA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
->>> On 10.09.15 at 13:37, <stefano.stabellini@eu.citrix.com> wrote:
-> On Thu, 10 Sep 2015, Mark Rutland wrote:
->> Why can't Xen give a virtual EFI interface to Dom0 / guests? e.g.
->> create pages of RuntimeServicesCode that are trivial assembly shims
->> doing hypercalls, and plumb these into the virtual EFI memory map and
->> tables?
->> 
->> That would keep things sane for any guest, allow for easy addition of
->> EFI features, and you could even enter the usual EFI entry point,
->> simulate ExitBootServices(), SetVirtualAddressMap(), and allow the guest
->> to make things sane for itself...
-> 
-> That's the way it was done on x86 and now we have common code both in
-> Linux (drivers/xen/efi.c) and Xen (xen/common/efi) which implement this
-> scheme.  Switching to a different solution for ARM, would mean diverging
-> with x86, which is not nice, or reimplementing the x86 solution too,
-> which is expensive.
-> 
-> BTW I think that the idea you proposed was actually considered at the
-> time and deemed hard to implement, if I recall correctly.
+On Thu, 2015-09-10 at 13:15 +0100, Mark Rutland wrote:
 
-Considering that the EFI support is just for Dom0, and Dom0 (at
-the time) had to be PV anyway, it was the more natural solution to
-expose the interface via hypercalls, the more that this allows better
-control over what is and primarily what is not being exposed to
-Dom0. With the wrapper approach we'd be back to the same
-problem (discussed elsewhere) of which EFI version to surface: The
-host one would impose potentially missing extensions, while the
-most recent hypervisor known one might imply hiding valuable
-information from Dom0. Plus there are incompatible changes like
-the altered meaning of EFI_MEMORY_WP in 2.5.
+> > In any case this should be separate from the shim ABI discussion.
+> 
+> I disagree; I think this is very much relevant to the ABI discussion.
+> That's not to say that I insist on a particular approach, but I think
+> that they need to be considered together.
 
-Jan
+Taking a step back, the reason for using the EFI stub parameters is only
+(AFAIK) in order to be able to locate the ACPI RDSP (the root table
+pointer), which as it happens is normally passed via one of the EFI
+firmware tables.
+
+If there was a way to achieve that goal (i.e. another way to find the RSDP)
+without opening the can of UEFI worms then we could consider that opiton
+too.
+
+a way != the legacy x86 thing of scanning low memory of the signature, of
+course.
+
+Ian.
