@@ -1,56 +1,40 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH V2 2/2] ras: acpi / apei: generate trace event for
- unrecognized CPER section
-Date: Thu, 10 Sep 2015 20:41:36 +0200
-Message-ID: <20150910184136.GC10457@pd.tnic>
-References: <1441747761-12012-1-git-send-email-zjzhang@codeaurora.org>
- <1441747761-12012-3-git-send-email-zjzhang@codeaurora.org>
+From: Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
+ parameters
+Date: Fri, 11 Sep 2015 12:00:00 +0100
+Message-ID: <1441969200.3549.23.camel@citrix.com>
+References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
+	 <20150910095208.GA29293@leverpostej>
+	 <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
+	 <20150910112418.GC29293@leverpostej>
+	 <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
+	 <20150910121514.GE29293@leverpostej>
+	 <alpine.DEB.2.02.1509101429480.2672@kaball.uk.xensource.com>
+	 <20150910144938.GI29293@leverpostej>
+	 <alpine.DEB.2.02.1509101655020.2672@kaball.uk.xensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1441747761-12012-3-git-send-email-zjzhang@codeaurora.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Jonathan (Zhixiong) Zhang" <zjzhang@codeaurora.org>
-Cc: Matt Fleming <matt.fleming@intel.com>, tony.luck@intel.com, fu.wei@linaro.org, al.stone@linaro.org, rjw@rjwysocki.net, mchehab@osg.samsung.com, mingo@redhat.com, gong.chen@linux.intel.com, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, linaro-acpi@lists.linaro.org, vgandhi@codeaurora.org, linux-acpi@vger.kernel.org, timur@codeaurora.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.02.1509101655020.2672-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-doc-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org" <freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jbeulich-IBi9RG/b67k@public.gmane.org" <jbeulich-IBi9RG/b67k@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao@>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 08, 2015 at 02:29:21PM -0700, Jonathan (Zhixiong) Zhang wrote:
->  /*
-> + * Raw Events Report
-> + *
-> + * This event is generated when hardware detected a hardware
-> + * error event, which may be of non-standard section as defined
-> + * in UEFI spec appendix "Common Platform Error Record", or may
-> + * be of sections for which TRACE_EVENT is not defined.
-> + *
-> + */
-> +TRACE_EVENT(raw_event,
-> +
-> +	TP_PROTO(const uuid_le *sec_type,
-> +		 const uuid_le *fru_id,
-> +		 const char *fru_text,
-> +		 u8 sev,
-> +		 const u8 *err,
-> +		 const u32 len),
+On Thu, 2015-09-10 at 17:10 +0100, Stefano Stabellini wrote:
 
-This is not a raw event - this is an event which has a section type, FRU
-ID, text, etc, etc.
+> > C) When you could go:
+> > 
+> >    DT -> Discover Xen -> Xen-specific stuff -> Xen-specific EFI/ACPI
+> > discovery
+> 
+> I take you mean discovering Xen with the usual Xen hypervisor node on
+> device tree.
 
-A raw event is one which takes exactly two arguments: bytes and count.
-What it does is, it dumps the bytes of length count in a block or other
-amicably formatted output, most likely hex, similar to hexdump or other
-tools; *without* any attempt to interpret it whatsoever.
+There may be other options, such as ARM defining an architectural mechanism
+to do early detection of hypervisors e.g. by defining some bit in some
+hypervisor controllable register (MPIDR?) to say "a hypervisor is present"
+and defining an hvc or smc call which can be used to ask which one it is.
 
-Its *consumers* do the interpretation. So that that raw_event tracepoint
-can be used as a fallback in all cases where the error information is of
-unknown structure to the kernel.
-
-Btw, @count should be sanity-checked before calling the tracepoint with
-insane values.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+Ian.
