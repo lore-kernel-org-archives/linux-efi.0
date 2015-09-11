@@ -1,85 +1,60 @@
-From: Mark Rutland <mark.rutland@arm.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
  parameters
-Date: Fri, 11 Sep 2015 17:33:32 +0100
-Message-ID: <20150911163332.GB8726@leverpostej>
-References: <20150910112418.GC29293@leverpostej>
+Date: Fri, 11 Sep 2015 17:36:05 +0100
+Message-ID: <20150911163605.GC8726@leverpostej>
+References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
+ <20150910095208.GA29293@leverpostej>
+ <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
+ <20150910112418.GC29293@leverpostej>
  <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
- <20150910121514.GE29293@leverpostej>
- <alpine.DEB.2.02.1509101429480.2672@kaball.uk.xensource.com>
- <20150910144938.GI29293@leverpostej>
- <alpine.DEB.2.02.1509101655020.2672@kaball.uk.xensource.com>
- <20150910162302.GN29293@leverpostej>
- <20150911124643.GB4530@olila.local.net-space.pl>
- <alpine.DEB.2.02.1509111410180.2672@kaball.uk.xensource.com>
- <CAKv+Gu9rN7_mxk0huX+34HSCC_aTWVTkUZKQMB1+9U56fRnwsA@mail.gmail.com>
+ <55F199DD02000078000A1B1E@prv-mh.provo.novell.com>
+ <20150910145331.GJ29293@leverpostej>
+ <55F1B89802000078000A1C9B@prv-mh.provo.novell.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9rN7_mxk0huX+34HSCC_aTWVTkUZKQMB1+9U56fRnwsA@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Stefano Stabellini <stefano.stabellini@eu.citrix.com>, Daniel Kiper <daniel.kiper@oracle.com>, Shannon Zhao <zhaoshenglong@huawei.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "Ian.Campbell@citrix.com" <Ian.Campbell@citrix.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, "julien.grall@citrix.com" <julien.grall@citrix.com>, "freebsd-arm@freebsd.org" <freebsd-arm@freebsd.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "christoffer.dall@linaro.org" <christoffer.dall@linaro.org>, "jbeulich@suse.com" <jbeulich@suse.com>, peter.
+In-Reply-To: <55F1B89802000078000A1C9B-rw/UEucdPrvD8XXLLHKrIiOjQekVJEpY@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
+Cc: "Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org" <freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org" <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TaqPxH82wqD4g@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> It feels like this discussion is going in circles.
+> >> Considering that the EFI support is just for Dom0, and Dom0 (at
+> >> the time) had to be PV anyway, it was the more natural solution to
+> >> expose the interface via hypercalls, the more that this allows better
+> >> control over what is and primarily what is not being exposed to
+> >> Dom0. With the wrapper approach we'd be back to the same
+> >> problem (discussed elsewhere) of which EFI version to surface: The
+> >> host one would impose potentially missing extensions, while the
+> >> most recent hypervisor known one might imply hiding valuable
+> >> information from Dom0. Plus there are incompatible changes like
+> >> the altered meaning of EFI_MEMORY_WP in 2.5.
+> > 
+> > I'm not sure I follow how hypercalls solve any impedance mismatch here;
+> > you're still expecting Dom0 to call up to Xen in order to perform calls,
+> > and all I suggested was a different location for those hypercalls.
+> > 
+> > If Xen is happy to make such calls blindly, why does it matter if the
+> > hypercall was in the kernel binary or an external shim?
 > 
-> When we discussed this six months ago, we already concluded that,
-> since UEFI is the only specified way that the presence of ACPI is
-> advertised on an ARM system, we need to emulate UEFI to some extent.
+> Because there could be new entries in SystemTable->RuntimeServices
+> (expected and blindly but validly called by the kernel). Even worse
+> (because likely harder to deal with) would be new fields in other
+> structures.
 
-My understanding from the last time I was present at such a discussion
-was that the emulation was complete from the kernel's PoV (i.e. no
-special case handling was required). 
+Any of these could cause Xen to blow up, while Xen could always provide
+a known-safe (but potentially sub-optimal) view to the kernel by
+default.
 
-Evidently I misunderstood.
-
-One of the main points of rationale for requiring EFI was that we'd have
-a well-defined system state as per the EFI (and ACPI) standards. We'd
-know we had the EFI memory map, services, etc (with the memory map and
-configuration tables being the most important elements). We didn't want
-to have to try to reconcile a DT memory map and ACPI, for instance.
-
-That is somewhat (though admitedly not entirely) broken if we require a
-set of rules to be applied beyond what the standards mandate.  That is
-broken if we require a non-standard set of rules to be applied, and
-limits what we can do in the !Xen case.
-
-> So we need the EFI system table to expose the UEFI configuration table
-> that carries the ACPI root pointer.
+> > Incompatible changes are a spec problem regardless of how this is
+> > handled.
 > 
-> Since ACPI support also relies on the UEFI memory map (I think?), we
-> need that as well.
-> 
-> These two items are exactly what we pass via the UEFI DT properties,
-> so we should indeed promote the current de-facto binding to a proper
-> binding, and renaming the properties makes sense in that context.
+> Not necessarily - we don't expose the memory map (we'd have to
+> if we were to mimic EFI for Dom0), and hence the mentioned issue
+> doesn't exist in our model.
 
-I agree that we need to sort these out.
+We have to expose _some_ memory map, so I don't follow this point.
 
-> I agree that this should also include a description of the expected
-> state of the firmware, i.e., that ExitBootServices() has been called,
-> and that the memory map has been populated with virtual address, which
-> have been installed using SetVirtualAddressMap() if they differ from
-> the physical addresses. (The current implementation on the kernel side
-> is perfectly capable of dealing with a 1:1 mapping).
-> 
-> Beyond that, there is no point in pretending to be a full UEFI
-> implementation, imo. Boot services are not required, nor are runtime
-> services (only the current EFI init code on arm needs to be modified
-> to deal with a NULL runtime services pointer)
-
-I'm not keen on this because it involves applying Xen-specific caveats
-atop of what the UEFI spec says (e.g. as runtime services might be NULL
-under Xen). As the spec and Xen evolve, those caveats shift, and that's
-going to be fragile for all users regardleses of Xen.
-
-If Xen needs special-casing, then I'd rather that Xen were detected
-first and provided us with what it knows is safe for us to use, rather
-than we tip-toe around until we're sure Xen isn't present and/or doesn't
-need additional constraints met.
-
-Thanks,
 Mark.
