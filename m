@@ -1,60 +1,74 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
- parameters
-Date: Fri, 11 Sep 2015 17:36:05 +0100
-Message-ID: <20150911163605.GC8726@leverpostej>
-References: <1441874516-11364-1-git-send-email-zhaoshenglong@huawei.com>
- <20150910095208.GA29293@leverpostej>
- <alpine.DEB.2.02.1509101116580.2672@kaball.uk.xensource.com>
- <20150910112418.GC29293@leverpostej>
- <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
- <55F199DD02000078000A1B1E@prv-mh.provo.novell.com>
- <20150910145331.GJ29293@leverpostej>
- <55F1B89802000078000A1C9B@prv-mh.provo.novell.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 3/3] x86, efi: Add "efi_fake_mem_mirror" boot option
+Date: Sat, 12 Sep 2015 11:41:57 +0100
+Message-ID: <20150912104157.GB2796@codeblueprint.co.uk>
+References: <1440609031-14695-1-git-send-email-izumi.taku@jp.fujitsu.com>
+ <1440609097-14836-1-git-send-email-izumi.taku@jp.fujitsu.com>
+ <CAKv+Gu88nxLQk5R2SGo0pnDA0VyTBvZT6oxLV-Uwc3=3wqjSaA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <55F1B89802000078000A1C9B-rw/UEucdPrvD8XXLLHKrIiOjQekVJEpY@public.gmane.org>
+In-Reply-To: <CAKv+Gu88nxLQk5R2SGo0pnDA0VyTBvZT6oxLV-Uwc3=3wqjSaA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jan Beulich <JBeulich-IBi9RG/b67k@public.gmane.org>
-Cc: "Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org" <freebsd-arm-h+KGxgPPiopAfugRpC6u6w@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org" <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TaqPxH82wqD4g@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, qiuxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> >> Considering that the EFI support is just for Dom0, and Dom0 (at
-> >> the time) had to be PV anyway, it was the more natural solution to
-> >> expose the interface via hypercalls, the more that this allows better
-> >> control over what is and primarily what is not being exposed to
-> >> Dom0. With the wrapper approach we'd be back to the same
-> >> problem (discussed elsewhere) of which EFI version to surface: The
-> >> host one would impose potentially missing extensions, while the
-> >> most recent hypervisor known one might imply hiding valuable
-> >> information from Dom0. Plus there are incompatible changes like
-> >> the altered meaning of EFI_MEMORY_WP in 2.5.
-> > 
-> > I'm not sure I follow how hypercalls solve any impedance mismatch here;
-> > you're still expecting Dom0 to call up to Xen in order to perform calls,
-> > and all I suggested was a different location for those hypercalls.
-> > 
-> > If Xen is happy to make such calls blindly, why does it matter if the
-> > hypercall was in the kernel binary or an external shim?
+On Wed, 09 Sep, at 04:16:09PM, Ard Biesheuvel wrote:
 > 
-> Because there could be new entries in SystemTable->RuntimeServices
-> (expected and blindly but validly called by the kernel). Even worse
-> (because likely harder to deal with) would be new fields in other
-> structures.
-
-Any of these could cause Xen to blow up, while Xen could always provide
-a known-safe (but potentially sub-optimal) view to the kernel by
-default.
-
-> > Incompatible changes are a spec problem regardless of how this is
-> > handled.
+> Hello Taku,
 > 
-> Not necessarily - we don't expose the memory map (we'd have to
-> if we were to mimic EFI for Dom0), and hence the mentioned issue
-> doesn't exist in our model.
+> To be honest, I think that the naming of this feature is poorly
+> chosen. The UEFI spec gets it right by using 'MORE_RELIABLE'. Since
+> one way to implement more reliable memory ranges is mirroring, the
+> implementation detail of that has leaked into the generic naming,
+> which is confusing. Not your fault though, just something I wanted to
+> highlight.
+ 
+Care to suggest an alternative option? efi_fake_mem_more_reliable ?
 
-We have to expose _some_ memory map, so I don't follow this point.
+Maybe we should go further than this current design and generalise
+things to allow an EFI_MEMORY_ATTRIBUTE value to be specified for
+these memory ranges that supplements the ones actually provided by the
+firmware?
 
-Mark.
+Something like,
+
+  efi_fake_mem=2G@4G:0x10000,2G@0x10a0000000:0x10000
+
+Where 0x10000 is the EFI_MEMORY_MORE_RELIABLE attribute bit.
+
+That would seem incredibly useful for testing the kernel side of the
+EFI_PROPERTIES_TABLE changes, i.e. you wouldn't need support in the
+firmware and could just "mock-up" an EFI memory map with EFI_MEMORY_XP
+for the data regions (code regions and EFI_MEMORY_RO are a little
+trickier as I understand it, because they may also contain data).
+
+> So first of all, could you please update the example so that it only
+> shows a single more reliable region (or two but of different sizes)?
+> It took me a while to figure out that those 2 GB regions are not
+> mirrors of each other in any way, they are simply two separate regions
+> that are marked as more reliable than the remaining memory.
+> 
+> I do wonder if this functionality belongs in the kernel, though. I see
+> how it could be useful, and you can keep it as a local hack, but
+> generally, the firmware (OVMF?) is a better way to play around with
+> code like this, I think?
+ 
+I (partially) disagree. Using real life memory maps has its
+advantages, since different layouts exercise the code in different
+ways, and I'd really like to see this used on beefy machines with
+multiple GB/TB or RAM. It also allows performance measurements to be
+taken with bare metal accuracy. Plus there's precedent in the kernel
+for creating fake memory/topology objects, e.g. see numa=fake.
+
+Not everyone who touches the EFI memory mirror code is going to want
+(or be able) to run firmware with EFI_MEMORY_MORE_RELIABLE support.
+
+Having said that, I'd love to also see EFI_MEMORY_MORE_RELIABLE
+support in OVMF! I think both options make sense for different
+reasons.
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
