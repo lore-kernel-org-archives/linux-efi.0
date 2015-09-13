@@ -1,98 +1,68 @@
-From: joeyli <jlee@suse.com>
-Subject: Re: [PATCH v2 06/16] x86/efi: Generating random HMAC key for siging
- hibernate image
-Date: Sun, 13 Sep 2015 10:47:15 +0800
-Message-ID: <20150913024715.GA6752@linux-rxt1.site>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH v2 09/16] PM / hibernate: Reserve hibernation key and
+ erase footprints
+Date: Sun, 13 Sep 2015 10:58:09 +0800
+Message-ID: <20150913025809.GB6752@linux-rxt1.site>
 References: <1439273796-25359-1-git-send-email-jlee@suse.com>
- <1439273796-25359-7-git-send-email-jlee@suse.com>
- <20150820204044.GG2567@codeblueprint.co.uk>
- <20150827090452.GB27415@linux-rxt1.site>
- <20150909121545.GD4973@codeblueprint.co.uk>
+ <1439273796-25359-10-git-send-email-jlee@suse.com>
+ <20150821132753.GC3310@codeblueprint.co.uk>
+ <20150827102144.GE27415@linux-rxt1.site>
+ <20150909122408.GE4973@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20150909121545.GD4973@codeblueprint.co.uk>
-Sender: linux-pm-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: "Lee, Chun-Yi" <joeyli.kernel@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-pm@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Matthew Garrett <matthew.garrett@nebula.com>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Josh Boyer <jwboyer@redhat.com>, Vojtech Pavlik <vojtech@suse.cz>, Matt Fleming <matt.fleming@intel.com>, Jiri Kosina <jkosina@suse.cz>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>
+In-Reply-To: <20150909122408.GE4973-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "Lee, Chun-Yi" <joeyli.kernel-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Pavel Machek <pavel-+ZI9xUNit7I@public.gmane.org>, Josh Boyer <jwboyer-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Vojtech Pavlik <vojtech-AlSwsSmVLrQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Jiri Kosina <jkosina-AlSwsSmVLrQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 09, 2015 at 01:15:45PM +0100, Matt Fleming wrote:
-> On Thu, 27 Aug, at 05:04:52PM, joeyli wrote:
-> > 
-> > The purpose of checking attribute of hibernation key variable is 
-> > in case someone created a key variable on runtime environment _before_
-> > this kernel create boot service variable. That causes EFI stub may load
-> > a key that from non-secure environment.
-> > 
-> > That's why delete non-boot service variable and create new one here.
->  
-> I think bailing is more appropriate in that case, not deleting the
-> variable. The environment is not what we expected it to be, so we
-> shouldn't tamper with it.
-> 
-> But I don't feel super strongly about this point. I just wanted to
-> raise the question of whether it actually makes sense to delete the
-> variable that we obviously didn't create or whether it makes more
-> sense to refuse to verify hibernation images.
->
-
-Thanks for you point out. But, I want keep this logic to avoid someone
-create a runtime variable with the same name-SSID to confuse the key
-generator in EFI stub.
- 
-> > > > diff --git a/arch/x86/include/asm/suspend.h b/arch/x86/include/asm/suspend.h
-> > > > index 2fab6c2..ab463c4 100644
-> > > > --- a/arch/x86/include/asm/suspend.h
-> > > > +++ b/arch/x86/include/asm/suspend.h
-> > > > @@ -3,3 +3,12 @@
-> > > >  #else
-> > > >  # include <asm/suspend_64.h>
-> > > >  #endif
+On Wed, Sep 09, 2015 at 01:24:08PM +0100, Matt Fleming wrote:
+> On Thu, 27 Aug, at 06:21:44PM, joeyli wrote:
+> > On Fri, Aug 21, 2015 at 02:27:53PM +0100, Matt Fleming wrote:
+> > > On Tue, 11 Aug, at 02:16:29PM, Lee, Chun-Yi wrote:
+> > > > +static int __init init_hibernation_keys(void)
+> > > > +{
+> > > > +	struct hibernation_keys *keys;
+> > > > +	int ret = 0;
 > > > > +
-> > > > +#ifdef CONFIG_HIBERNATE_VERIFICATION
-> > > > +#include <linux/suspend.h>
+> > > > +	if (!keys_phys_addr)
+> > > > +		return -ENODEV;
 > > > > +
-> > > > +struct hibernation_keys {
-> > > > +	unsigned long hkey_status;
-> > > > +	u8 hibernation_key[HIBERNATION_DIGEST_SIZE];
-> > > > +};
-> > > > +#endif
+> > > > +	keys = early_memremap(keys_phys_addr, sizeof(struct hibernation_keys));
+> > > > +
+> > > > +	/* Copy hibernation keys to a allocated page */
+> > > > +	hibernation_keys = (struct hibernation_keys *)get_zeroed_page(GFP_KERNEL);
+> > > > +	if (hibernation_keys) {
+> > > > +		*hibernation_keys = *keys;
+> > > > +	} else {
+> > > > +		pr_err("PM: Allocate hibernation keys page failed\n");
+> > > > +		ret = -ENOMEM;
+> > > > +	}
 > > > 
-> > > Have you given any thought to how things are going to work if we
-> > > change the hash function in the future, or provide a choice? That
-> > > information doesn't appear anywhere in the above struct.
+> > > It seems overkill to allocate an entire page for 28 bytes of data.
 > > > 
 > > 
-> > Do you mean the hash function of signing hibernation image changed, so the
-> > hibernation key also need to re-generate for new length?
->  
-> Yeah, that kind of thing.
+> > Here to allocate an entire page because the basic unit is 'page' when
+> > hibernation code checking saveable page that should included/excluded in
+> > snapshot image.
+> > Allocating an page to hibernation key can clearer to check the page should
+> > excluded in snapshot image.
 > 
-> > I will add a field in struct to forward the length of hibernation key variable.
-> > In the future kernel can check the length to handle the change.
-> 
-> Would it also make sense to explicitly record the hash function used
-> as well as the length?
+> Do other pieces of code do something similar, i.e. allocate an entire
+> page because the hibernation code deals with pages? If so, it might be
+> possible to lump all these pieces of data together into a single
+> 'auxiliary' page.
 > 
 > -- 
 > Matt Fleming, Intel Open Source Technology Center
 
-The job of key generator in EFI stub is to generate appropriate length of key
-for usage by later activities. It doesn't need to know how does kernel use
-which kind of hash algorithm, so I think do not need record the hash function.
-
-But, kernel should knows the exactly length of old key to decide if it needs to
-use flag to trigger key regeneration process in EFI stub to create new key for
-new length.
-
-Only the other hand, the hash algorithm of hibernation was setted in kernel
-compiler time even user can change  it, so I think to forward the key length
-from querying efi variable is enough, don't need write the hash algorithm to
-EFI boot variable.
+Thanks for your suggestions, I will lump all these data to into a single page
+with the key. I want keep all the contents in the page only for hibernation's
+usage but not to share with other subsystem in kernel, that's more safe to avoid
+the key be accessed by with other code.
 
 
 Thanks a lot!
 Joey Lee
-
