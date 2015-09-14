@@ -1,42 +1,85 @@
-From: "Jan Beulich" <JBeulich-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH] efi/libstub/fdt: Standardize the names
- of EFI stub parameters
-Date: Mon, 14 Sep 2015 05:34:35 -0600
-Message-ID: <55F6CCEB02000078000A28CC@prv-mh.provo.novell.com>
-References: <20150910112418.GC29293@leverpostej>
- <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
+From: Daniel Kiper <daniel.kiper@oracle.com>
+Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
+ parameters
+Date: Mon, 14 Sep 2015 14:19:36 +0200
+Message-ID: <20150914121936.GH4530@olila.local.net-space.pl>
+References: <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
  <20150910121514.GE29293@leverpostej>
  <alpine.DEB.2.02.1509101429480.2672@kaball.uk.xensource.com>
  <20150910144938.GI29293@leverpostej>
  <alpine.DEB.2.02.1509101655020.2672@kaball.uk.xensource.com>
  <20150910162302.GN29293@leverpostej>
  <20150911124643.GB4530@olila.local.net-space.pl>
- <alpine.DEB.2.02.1509111410180.2672@kaball.uk.xensource.com>
- <CAKv+Gu9rN7_mxk0huX+34HSCC_aTWVTkUZKQMB1+9U56fRnwsA@mail.gmail.com>
- <20150911154534.GD4530@olila.local.net-space.pl>
- <55F6886D.1090900@huawei.com>
- <CAKv+Gu-xAAd=xTOh+qZvPDthgbRPLy=YwT4xfi4dS53EgJRh1Q@mail.gmail.com>
- <55F693F5.8030203@huawei.com>
- <CAKv+Gu-2kyd3Gf3ceSa1jdgCjqJ8zBCesa4xehLiZ+VzergS3Q@mail.gmail.com>
- <55F6C01502000078000A2823@prv-mh.provo.novell.com>
- <CAKv+Gu_k4-BqW7CQwB82-GfeXXNKk0bCjr=ZNFy1iDBNzKNWSg@mail.gmail.com>
+ <20150911162559.GA8726@leverpostej>
+ <20150912113655.GG4530@olila.local.net-space.pl>
+ <20150914092518.GA10307@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_k4-BqW7CQwB82-GfeXXNKk0bCjr=ZNFy1iDBNzKNWSg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20150914092518.GA10307@leverpostej>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "Ian.Campbell@citrix.com" <Ian.Campbell@citrix.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, Stefano Stabellini <stefano.stabellini@eu.citrix.com>, "linux-doc@vger.kernel.org" <linux-doc@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "freebsd-arm@freebsd.org" <freebsd-arm@freebsd.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "christoffer.dall@linaro.org" <christoffer.dall@linaro.org>, "jbeulich@suse.com" <jbeulich@suse.com>, Shannon Zhao <zhaoshenglong@huawei.com>, "julien.grall@citrix.com" <julien.grall@citrix.com>, peter.huangpeng@huawei
 List-Id: linux-efi@vger.kernel.org
 
->>> On 14.09.15 at 13:16, <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> (I still think not using SetVirtualAddressMap() at all
-> would be the best approach for arm64, but unfortunately, most of my
-> colleagues disagree with me)
+On Mon, Sep 14, 2015 at 10:25:19AM +0100, Mark Rutland wrote:
+> On Sat, Sep 12, 2015 at 12:36:55PM +0100, Daniel Kiper wrote:
+> > On Fri, Sep 11, 2015 at 05:25:59PM +0100, Mark Rutland wrote:
+> > > On Fri, Sep 11, 2015 at 01:46:43PM +0100, Daniel Kiper wrote:
+> > > > On Thu, Sep 10, 2015 at 05:23:02PM +0100, Mark Rutland wrote:
+> >
+> > [...]
+> >
+> > > > > What's troublesome with the boot services?
+> > > > >
+> > > > > What can't be simulated?
+> > > >
+> > > > How do you want to access bare metal EFI boot services from dom0 if they
+> > > > were shutdown long time ago before loading dom0 image?
+> > >
+> > > I don't want to.
+> > >
+> > > I asked "What can't be simulated?" because I assumed everything
+> > > necessary/mandatory could be simulated without needinng access to any
+> > > real EFI boot services.
+> > >
+> > > As far as I can see all that's necessary is to provide a compatible
+> > > interface.
+> >
+> > Could you be more precise what do you need? Please enumerate. UEFI spec has
+> > more than 2500 pages and I do not think that we need all stuff in dom0.
+> >
+> > > > What do you need from EFI boot services in dom0?
+> > >
+> > > The ability to call ExitBootServices() and SetVirtualAddressMap() on a
+> > > _virtual_ address map for _virtual_ services provided by the hypervisor.
+> >
+> > I am confused. Why do you need that? Please remember, EFI is owned and
+> > operated by Xen hypervisor. dom0 does not have direct access to EFI.
+>
+> Let's take a step back.
+>
+> My objection here is to passing the Dom0 kernel properties as if it were
+> booted with direct access to a full UEFI, then later fixing that up
+> (when Xen is detected and we apply its hypercall EFI implementation).
+>
+> If the kernel cannot use EFI natively, why pretend to the kernel that it
+> can? The hypercall implementation is _not_ EFI (though it provides
+> access to some services).
+>
+> The two ways I can see providing Dom0 with EFI services are:
+>
+> * Have Xen create shims for any services, in which any hypercalls live,
+>   and pass these to the kernel with a virtual system table. This keeps
+>   the interface to the kernel the same regardless of Xen.
+>
+> * Have the kernel detect Xen EFI capability via Xen, without passing the
+>   usual native EFI parameters. This can then be installed into the
+>   kernel in a Xen-specific manner, and we know from the outset that
+>   Xen-specific caveats apply.
 
-Any reasons they have? I'm curious because we run x86 Xen without
-using this function ...
+It works on x86 in that way and I suppose that it can work in that way on ARM too.
+So, just go and reuse existing code. That is all.
 
-Jan
+Daniel
