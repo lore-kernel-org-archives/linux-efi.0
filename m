@@ -1,59 +1,61 @@
-From: Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
- parameters
-Date: Mon, 14 Sep 2015 11:25:25 +0100
-Message-ID: <1442226325.3549.134.camel@citrix.com>
-References: <20150910112418.GC29293@leverpostej>
-	 <alpine.DEB.2.02.1509101223580.2672@kaball.uk.xensource.com>
-	 <20150910121514.GE29293@leverpostej>
-	 <alpine.DEB.2.02.1509101429480.2672@kaball.uk.xensource.com>
-	 <20150910144938.GI29293@leverpostej>
-	 <alpine.DEB.2.02.1509101655020.2672@kaball.uk.xensource.com>
-	 <20150910162302.GN29293@leverpostej>
-	 <20150911124643.GB4530@olila.local.net-space.pl>
-	 <20150911162559.GA8726@leverpostej>
-	 <20150912113655.GG4530@olila.local.net-space.pl>
-	 <20150914092518.GA10307@leverpostej>
-	 <CAKv+Gu9ER1cKvPHobq-wo7ggPesJj4OQ7=aTr24GVpubHvVqjQ@mail.gmail.com>
-	 <1442224673.3549.131.camel@citrix.com>
-	 <CAKv+Gu_Gh649EwdtodLY9Q28JhqYg8o6RShXXH1ZbxsfYRfi2Q@mail.gmail.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL 0/2] EFI changes for v4.3 (part two)
+Date: Mon, 14 Sep 2015 12:25:34 +0200
+Message-ID: <20150914102533.GA20088@gmail.com>
+References: <1441372302-23242-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu_Gh649EwdtodLY9Q28JhqYg8o6RShXXH1ZbxsfYRfi2Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1441372302-23242-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jbeulich-IBi9RG/b67k@public.gmane.org" <jbeulich-IBi9RG/b67k@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 2015-09-14 at 12:02 +0200, Ard Biesheuvel wrote:
-> On 14 September 2015 at 11:57, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org> wrote:
-> > >  or SetVirtualAddressMap/ConvertPointer, and
-> > 
-> > These two are RTS, so in principal it could.
-> > 
-> > (I'm not sure about ConvertPointer, is it useful for OS kernels, or
-> > just
-> > for "UEFI components" mentioned at 
-> > http://wiki.phoenix.com/wiki/index.php/E
-> > FI_RUNTIME_SERVICES#ConvertPointer.28.29 ?)
-> > 
+
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> No, there is no point. The stub calls SetVirtualAddressMap, so the
-> kernel proper can never call it, since it can only be called once.
+> Folks, please pull the remaining parts of the EFI changes for v4.3.
+> 
+> Nothing much has changed in terms of code since the last version of
+> this part two pull request was sent on August 12th,
+> 
+>   https://lkml.kernel.org/r/1439396234-22863-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+> 
+> The main difference is the improved commit message in PATCH 2, which
+> now contains much more information as well as the user visible
+> side-effects of the issue that the patch fixes.
+> 
+> There were also some improvements to the comments inside PATCH 1 as
+> well as moving the function out of line at Ingo's suggestion.
+> 
+> The branch is based on tip/core/efi.
+> 
+> The following changes since commit 8d446c8647c9ab8fcb45a8fc7dbbafe1f83aa2f3:
+> 
+>   arm64/mm: Add PROT_DEVICE_nGnRnE and PROT_NORMAL_WT (2015-08-08 10:37:40 +0200)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git acpi/ghes
+> 
+> for you to fetch changes up to 404f03dbebede4d0ebeabd06e4b9120b481ae536:
+> 
+>   acpi, apei: Use appropriate pgprot_t to map GHES memory (2015-09-04 13:39:31 +0100)
+> 
+> ----------------------------------------------------------------
+> Jonathan (Zhixiong) Zhang (2):
+>       arm64: apei: Implement arch_apei_get_mem_attributes()
+>       acpi, apei: Use appropriate pgprot_t to map GHES memory
+> 
+>  arch/arm64/include/asm/acpi.h |  5 +++++
+>  arch/arm64/kernel/acpi.c      | 29 +++++++++++++++++++++++++++++
+>  drivers/acpi/apei/ghes.c      | 10 +++++++---
+>  3 files changed, 41 insertions(+), 3 deletions(-)
 
-I see. And changing this such that it was delayed until the kernel proper
-would be a _major_ shift in the policy of separation between the UEFI stub
-and the kernel proper. 
+Applied to tip:core/efi, thanks Matt!
 
-> ConvertPointer has little utility outside of the UEFI runtime
-> components that are invoked during SetVirtualAddressMap,
-
-That's the impression I was getting too. Thanks for confirming.
-
->  so I don't see a reason to supply that either.
-
-Ack.
-
-Ian.
+	Ingo
