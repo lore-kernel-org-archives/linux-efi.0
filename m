@@ -1,145 +1,247 @@
-From: Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi/libstub/fdt: Standardize the names of EFI stub
- parameters
-Date: Mon, 14 Sep 2015 15:57:05 +0200
-Message-ID: <20150914135705.GJ4530@olila.local.net-space.pl>
-References: <20150910144938.GI29293@leverpostej>
- <alpine.DEB.2.02.1509101655020.2672@kaball.uk.xensource.com>
- <20150910162302.GN29293@leverpostej>
- <20150911124643.GB4530@olila.local.net-space.pl>
- <20150911162559.GA8726@leverpostej>
- <20150912113655.GG4530@olila.local.net-space.pl>
- <20150914092518.GA10307@leverpostej>
- <CAKv+Gu9ER1cKvPHobq-wo7ggPesJj4OQ7=aTr24GVpubHvVqjQ@mail.gmail.com>
- <20150914122858.GI4530@olila.local.net-space.pl>
- <CAKv+Gu_z2X=9-qgoKTS7dKLqtSUvysyu9LzZryJqcSR4X8Ss6A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [RFC PATCH] arm64/efi: isolate EFI stub from the kernel proper
+Date: Tue, 15 Sep 2015 12:11:43 +0200
+Message-ID: <1442311903-19213-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_z2X=9-qgoKTS7dKLqtSUvysyu9LzZryJqcSR4X8Ss6A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "jbeulich-IBi9RG/b67k@public.gmane.org" <jbeulich-IBi9RG/b67k@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org" <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Sep 14, 2015 at 03:09:34PM +0200, Ard Biesheuvel wrote:
-> On 14 September 2015 at 14:28, Daniel Kiper <daniel.kiper-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org> wrote:
-> > On Mon, Sep 14, 2015 at 11:43:27AM +0200, Ard Biesheuvel wrote:
-> >> On 14 September 2015 at 11:25, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> >> > On Sat, Sep 12, 2015 at 12:36:55PM +0100, Daniel Kiper wrote:
-> >> >> On Fri, Sep 11, 2015 at 05:25:59PM +0100, Mark Rutland wrote:
-> >> >> > On Fri, Sep 11, 2015 at 01:46:43PM +0100, Daniel Kiper wrote:
-> >> >> > > On Thu, Sep 10, 2015 at 05:23:02PM +0100, Mark Rutland wrote:
-> >> >>
-> >> >> [...]
-> >> >>
-> >> >> > > > What's troublesome with the boot services?
-> >> >> > > >
-> >> >> > > > What can't be simulated?
-> >> >> > >
-> >> >> > > How do you want to access bare metal EFI boot services from dom0 if they
-> >> >> > > were shutdown long time ago before loading dom0 image?
-> >> >> >
-> >> >> > I don't want to.
-> >> >> >
-> >> >> > I asked "What can't be simulated?" because I assumed everything
-> >> >> > necessary/mandatory could be simulated without needinng access to any
-> >> >> > real EFI boot services.
-> >> >> >
-> >> >> > As far as I can see all that's necessary is to provide a compatible
-> >> >> > interface.
-> >> >>
-> >> >> Could you be more precise what do you need? Please enumerate. UEFI spec has
-> >> >> more than 2500 pages and I do not think that we need all stuff in dom0.
-> >> >>
-> >> >> > > What do you need from EFI boot services in dom0?
-> >> >> >
-> >> >> > The ability to call ExitBootServices() and SetVirtualAddressMap() on a
-> >> >> > _virtual_ address map for _virtual_ services provided by the hypervisor.
-> >> >>
-> >> >> I am confused. Why do you need that? Please remember, EFI is owned and
-> >> >> operated by Xen hypervisor. dom0 does not have direct access to EFI.
-> >> >
-> >> > Let's take a step back.
-> >> >
-> >> > My objection here is to passing the Dom0 kernel properties as if it were
-> >> > booted with direct access to a full UEFI, then later fixing that up
-> >> > (when Xen is detected and we apply its hypercall EFI implementation).
-> >> >
-> >>
-> >> To be honest, I don't think that has ever been suggested here. What
-> >> was suggested is to provide a minimal EFI like environment that allows
-> >> the post-stub EFI code to proceed and find the ACPI root pointer.
-> >>
-> >> > If the kernel cannot use EFI natively, why pretend to the kernel that it
-> >> > can? The hypercall implementation is _not_ EFI (though it provides
-> >> > access to some services).
-> >> >
-> >>
-> >> To get access to the ACPI root pointer, for which there is only one
-> >> specified way of obtaining it on ARM, which is via the UEFI
-> >> configuration table database
-> >>
-> >> > The two ways I can see providing Dom0 with EFI services are:
-> >> >
-> >> > * Have Xen create shims for any services, in which any hypercalls live,
-> >> >   and pass these to the kernel with a virtual system table. This keeps
-> >> >   the interface to the kernel the same regardless of Xen.
-> >> >
-> >> > * Have the kernel detect Xen EFI capability via Xen, without passing the
-> >> >   usual native EFI parameters. This can then be installed into the
-> >> >   kernel in a Xen-specific manner, and we know from the outset that
-> >> >   Xen-specific caveats apply.
-> >> >
-> >> > As per my original email, I'm not against the renaming of the stub
-> >> > parameters if we standardise the rest of the details, but I believe
-> >> > that's orthogonal to the Xen Dom0 case.
-> >> >
-> >>
-> >> Xen will not boot the kernel via the stub, but directly. It needs to
-> >> supply a EFI like environment so that the kernel can boot via ACPI.
-> >> There is no reason whatsoever to mock up boot services or other pieces
-> >> of UEFI functionality that are not needed. The core kernel does not
-> >> call any boot services or SetVirtualAddressMap/ConvertPointer, and
-> >> there is already paravirtualized plumbing in place for the remaining
-> >> runtime services.
-> >>
-> >> Hence my claim earlier that we should cope with the runtime services
-> >> pointer being NULL, since that is really the only thing standing in
-> >
-> > I suppose that you thought about EFI_INVALID_TABLE_ADDR...
-> >
->
-> Simply whatever we decide, so perhaps EFI_INVALID_TABLE_ADDR is better
-> if x86 uses that already. But that value is still outside of the UEFI
-> spec, so in that sense, it is not more appropriate than NULL.
+Since arm64 does not use a builtin decompressor, the EFI stub is built
+into the kernel proper. So far, this has been working fine, but actually,
+since the stub is in fact a PE/COFF relocatable binary that is executed
+at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
+should not be seamlessly sharing code with the kernel proper, which is a
+position dependent executable linked at a high virtual offset.
 
-Yep, you are right. However, I hope (I am not sure) that it was good reason
-behind choosing that value in Linux kernel and I think that in EFI related
-code it should be used as it is used right now.
+So instead, separate the contents of libstub and its dependencies, by
+putting them into their own namespace by prefixing all of its symbols
+with __efistub. This way, we have tight control over what parts of the
+kernel proper are referenced by the stub.
 
-> >> the way from the kernel side. If you feel that violates the spec in
-> >
-> > If yes then you should know that dom0 on x86 EFI platform works
-> > with efi.runtime == EFI_INVALID_TABLE_ADDR without any issue.
-> > So, I think that all problems are solved.
-> >
->
-> So there is precedent, which is good. But please note that x86 has a
-> lot of baggage and *lots* of quirks for buggy firmware that was only
-> ever tested with Windows. So before blindly copying x86 when it comes
-> to UEFI interworking, we still need to have the discussion whether
-> what x86 is appropriate for ARM as well (since it does not have the
-> above problems)
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/Makefile            | 12 +++++++--
+ arch/arm64/kernel/efi-entry.S         | 10 ++++----
+ arch/arm64/kernel/head.S              | 14 +++++------
+ arch/arm64/kernel/image.h             | 26 ++++++++++++++++++++
+ drivers/firmware/efi/libstub/Makefile | 16 +++++++++---
+ drivers/firmware/efi/libstub/fdt.c    |  8 ++++++
+ 6 files changed, 69 insertions(+), 17 deletions(-)
 
-EFI was designed as much as possible platform independent stuff and most
-of Linux kernel EFI code is platform independent (including Xen EFI related
-stuff). Additionally, as I can see currently existing implementation can run
-at least on IA64 and ARM64 (OK, Xen stuff does not work there) and for sure
-they do not care about x86 quirks. So, I think this is good starting point
-for dom0 implementation on ARM EFI. However, I am not trying to say that it
-will work for sure. Probably something should be changed but I think it should
-not be a big deal (well, I hope, taking into account this thread and what I know).
-
-Daniel
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index 22dc9bc781be..7b17f6245f1e 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -20,6 +20,14 @@ arm64-obj-y		:= debug-monitors.o entry.o irq.o fpsimd.o		\
+ 			   cpufeature.o alternative.o cacheinfo.o		\
+ 			   smp.o smp_spin_table.o topology.o
+ 
++stub-obj				:= efi-stub.o efi-entry.o
++extra-y					:= $(stub-obj)
++stub-obj				:= $(patsubst %.o,%.stub.o,$(stub-obj))
++
++OBJCOPYFLAGS := --prefix-symbols=__efistub_
++$(obj)/%.stub.o: $(obj)/%.o FORCE
++	$(call if_changed,objcopy)
++
+ arm64-obj-$(CONFIG_COMPAT)		+= sys32.o kuser32.o signal32.o 	\
+ 					   sys_compat.o entry32.o		\
+ 					   ../../arm/kernel/opcodes.o
+@@ -32,7 +40,7 @@ arm64-obj-$(CONFIG_CPU_PM)		+= sleep.o suspend.o
+ arm64-obj-$(CONFIG_CPU_IDLE)		+= cpuidle.o
+ arm64-obj-$(CONFIG_JUMP_LABEL)		+= jump_label.o
+ arm64-obj-$(CONFIG_KGDB)		+= kgdb.o
+-arm64-obj-$(CONFIG_EFI)			+= efi.o efi-stub.o efi-entry.o
++arm64-obj-$(CONFIG_EFI)			+= efi.o $(stub-obj)
+ arm64-obj-$(CONFIG_PCI)			+= pci.o
+ arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
+ arm64-obj-$(CONFIG_ACPI)		+= acpi.o
+@@ -40,7 +48,7 @@ arm64-obj-$(CONFIG_ACPI)		+= acpi.o
+ obj-y					+= $(arm64-obj-y) vdso/
+ obj-m					+= $(arm64-obj-m)
+ head-y					:= head.o
+-extra-y					:= $(head-y) vmlinux.lds
++extra-y					+= $(head-y) vmlinux.lds
+ 
+ # vDSO - this must be built first to generate the symbol offsets
+ $(call objectify,$(arm64-obj-y)): $(obj)/vdso/vdso-offsets.h
+diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
+index 8ce9b0577442..a773db92908b 100644
+--- a/arch/arm64/kernel/efi-entry.S
++++ b/arch/arm64/kernel/efi-entry.S
+@@ -29,7 +29,7 @@
+ 	 * we want to be. The kernel image wants to be placed at TEXT_OFFSET
+ 	 * from start of RAM.
+ 	 */
+-ENTRY(efi_stub_entry)
++ENTRY(entry)
+ 	/*
+ 	 * Create a stack frame to save FP/LR with extra space
+ 	 * for image_addr variable passed to efi_entry().
+@@ -86,8 +86,8 @@ ENTRY(efi_stub_entry)
+ 	 * entries for the VA range of the current image, so no maintenance is
+ 	 * necessary.
+ 	 */
+-	adr	x0, efi_stub_entry
+-	adr	x1, efi_stub_entry_end
++	adr	x0, entry
++	adr	x1, entry_end
+ 	sub	x1, x1, x0
+ 	bl	__flush_dcache_area
+ 
+@@ -120,5 +120,5 @@ efi_load_fail:
+ 	ldp	x29, x30, [sp], #32
+ 	ret
+ 
+-efi_stub_entry_end:
+-ENDPROC(efi_stub_entry)
++entry_end:
++ENDPROC(entry)
+diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
+index a055be6125cf..e8f52943ac65 100644
+--- a/arch/arm64/kernel/head.S
++++ b/arch/arm64/kernel/head.S
+@@ -120,8 +120,8 @@ efi_head:
+ #endif
+ 
+ #ifdef CONFIG_EFI
+-	.globl	stext_offset
+-	.set	stext_offset, stext - efi_head
++	.globl	__efistub_stext_offset
++	.set	__efistub_stext_offset, stext - efi_head
+ 	.align 3
+ pe_header:
+ 	.ascii	"PE"
+@@ -144,8 +144,8 @@ optional_header:
+ 	.long	_end - stext			// SizeOfCode
+ 	.long	0				// SizeOfInitializedData
+ 	.long	0				// SizeOfUninitializedData
+-	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
+-	.long	stext_offset			// BaseOfCode
++	.long	__efistub_entry - efi_head	// AddressOfEntryPoint
++	.long	__efistub_stext_offset		// BaseOfCode
+ 
+ extra_header_fields:
+ 	.quad	0				// ImageBase
+@@ -162,7 +162,7 @@ extra_header_fields:
+ 	.long	_end - efi_head			// SizeOfImage
+ 
+ 	// Everything before the kernel image is considered part of the header
+-	.long	stext_offset			// SizeOfHeaders
++	.long	__efistub_stext_offset		// SizeOfHeaders
+ 	.long	0				// CheckSum
+ 	.short	0xa				// Subsystem (EFI application)
+ 	.short	0				// DllCharacteristics
+@@ -207,9 +207,9 @@ section_table:
+ 	.byte	0
+ 	.byte	0        		// end of 0 padding of section name
+ 	.long	_end - stext		// VirtualSize
+-	.long	stext_offset		// VirtualAddress
++	.long	__efistub_stext_offset	// VirtualAddress
+ 	.long	_edata - stext		// SizeOfRawData
+-	.long	stext_offset		// PointerToRawData
++	.long	__efistub_stext_offset	// PointerToRawData
+ 
+ 	.long	0		// PointerToRelocations (0 for executables)
+ 	.long	0		// PointerToLineNumbers (0 for executables)
+diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
+index 8fae0756e175..0475aef621ff 100644
+--- a/arch/arm64/kernel/image.h
++++ b/arch/arm64/kernel/image.h
+@@ -59,4 +59,30 @@
+ 	_kernel_offset_le	= DATA_LE64(TEXT_OFFSET);	\
+ 	_kernel_flags_le	= DATA_LE64(__HEAD_FLAGS);
+ 
++#ifdef CONFIG_EFI
++
++/*
++ * The EFI stub has its own symbol namespace prefixed by __efistub_, to
++ * isolate it from the kernel proper. The following symbols are legally
++ * accessed by the stub, so provide some aliases to make them accessible.
++ * Only include data symbols here, or text symbols of functions that are
++ * known to be safe when executed at another offset than they were linked at.
++ */
++__efistub_memcmp		= memcmp;
++__efistub_memchr		= memchr;
++__efistub_memcpy		= memcpy;
++__efistub_memmove		= memmove;
++__efistub_memset		= memset;
++__efistub_strlen		= strlen;
++__efistub_strncmp		= strncmp;
++__efistub_strstr		= strstr;
++__efistub___flush_dcache_area	= __flush_dcache_area;
++
++__efistub_linux_banner		= linux_banner;
++__efistub__text			= _text;
++__efistub__end			= _end;
++__efistub__edata		= _edata;
++
++#endif
++
+ #endif /* __ASM_IMAGE_H */
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 816dbe9f4b82..5de9ca0d3ead 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -10,10 +10,12 @@ cflags-$(CONFIG_X86)		+= -m$(BITS) -D__KERNEL__ $(LINUX_INCLUDE) -O2 \
+ 				   -fPIC -fno-strict-aliasing -mno-red-zone \
+ 				   -mno-mmx -mno-sse -DDISABLE_BRANCH_PROFILING
+ 
+-cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
++cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS)) -fpic
+ cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
+ 				   -fno-builtin -fpic -mno-single-pic-base
+ 
++cflags-$(CONFIG_EFI_PARAMS_FROM_FDT) += -I$(srctree)/scripts/dtc/libfdt
++
+ KBUILD_CFLAGS			:= $(cflags-y) \
+ 				   $(call cc-option,-ffreestanding) \
+ 				   $(call cc-option,-fno-stack-protector)
+@@ -22,7 +24,15 @@ GCOV_PROFILE			:= n
+ KASAN_SANITIZE			:= n
+ 
+ lib-y				:= efi-stub-helper.o
+-lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
++
++# include the stub's generic dependencies from lib/ when building for ARM/arm64
++arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
++
++$(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
++	$(call if_changed_rule,cc_o_c)
++
++lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o \
++				   $(patsubst %.c,lib-%.o,$(arm-deps))
+ 
+ #
+ # arm64 puts the stub in the kernel proper, which will unnecessarily retain all
+@@ -34,6 +44,6 @@ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
+ extra-$(CONFIG_ARM64)		:= $(lib-y)
+ lib-$(CONFIG_ARM64)		:= $(patsubst %.o,%.init.o,$(lib-y))
+ 
+-OBJCOPYFLAGS := --prefix-alloc-sections=.init
++OBJCOPYFLAGS := --prefix-alloc-sections=.init --prefix-symbols=__efistub_
+ $(obj)/%.init.o: $(obj)/%.o FORCE
+ 	$(call if_changed,objcopy)
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index ef5d764e2a27..b04cb468d79f 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -16,6 +16,14 @@
+ 
+ #include "efistub.h"
+ 
++/*
++ * We want the stub to access linux_banner via a relative reference and not via
++ * the GOT. Since the default visibility set on the GCC command line does not
++ * apply to external declarations, we need to add it explicitly here (or via
++ * a pragma).
++ */
++extern __attribute__((visibility("hidden"))) const char linux_banner[];
++
+ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long orig_fdt_size,
+ 			void *fdt, int new_fdt_size, char *cmdline_ptr,
+-- 
+1.9.1
