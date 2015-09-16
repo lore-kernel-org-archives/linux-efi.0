@@ -1,49 +1,69 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH] arm64/efi: isolate EFI stub from the kernel proper
-Date: Tue, 15 Sep 2015 17:24:09 +0200
-Message-ID: <CAKv+Gu8j1APZkGnFhZArNAtoyYOokP2bgemYH5n7Pn8jQ1b1XA@mail.gmail.com>
-References: <1442311903-19213-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150915144629.GG31157@arm.com>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
+Date: Wed, 16 Sep 2015 12:08:20 +0200
+Message-ID: <20150916100820.GA7077@nazgul.tnic>
+References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
+ <20150907040752.GW13182@linux-rxt1.site>
+ <20150908204147.GC2854@codeblueprint.co.uk>
+ <20150909003307.GJ2266@linux-rxt1.site>
+ <20150909112123.GB4973@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150915144629.GG31157-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20150909112123.GB4973@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: joeyli <jlee@suse.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, x86@kernel.org, Matt Fleming <matt.fleming@intel.com>, LeifLindholm@linux-rxt1.site, leif.lindholm@linaro.org, Peter Jones <pjones@redhat.com>, James Bottomley <JBottomley@Odin.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 15 September 2015 at 16:46, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Tue, Sep 15, 2015 at 11:11:43AM +0100, Ard Biesheuvel wrote:
->> Since arm64 does not use a builtin decompressor, the EFI stub is built
->> into the kernel proper. So far, this has been working fine, but actually,
->> since the stub is in fact a PE/COFF relocatable binary that is executed
->> at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
->> should not be seamlessly sharing code with the kernel proper, which is a
->> position dependent executable linked at a high virtual offset.
->>
->> So instead, separate the contents of libstub and its dependencies, by
->> putting them into their own namespace by prefixing all of its symbols
->> with __efistub. This way, we have tight control over what parts of the
->> kernel proper are referenced by the stub.
->
-> Could we add an __efistub annotation to spit out warnings if the stub
-> calls into unexpected kernel code, like we do for __init/__ref?
->
+On Wed, Sep 09, 2015 at 12:21:23PM +0100, Matt Fleming wrote:
+> On Wed, 09 Sep, at 08:33:07AM, joeyli wrote:
+> >=20
+> > Yes, the machine on my hand has EFI_PROPERTIES_TABLE enabled, and i=
+t doesn't
+> > boot without your patch.
+>=20
+> Awesome. Could you test the following patch instead?
+>=20
+> ---
+>=20
+> From 24d324b781a3b688dcc265995949a9cf4e8af687 Mon Sep 17 00:00:00 200=
+1
+> From: Matt Fleming <matt.fleming@intel.com>
+> Date: Thu, 3 Sep 2015 15:56:25 +0100
+> Subject: [PATCH v2] x86/efi: Map EFI memmap entries in-order at runti=
+me
+>=20
+> Beginning with UEFI v2.5 EFI_PROPERTIES_TABLE was introduced that
+> signals that the firmware PE/COFF loader supports splitting code and
+> data sections of PE/COFF images into separate EFI memory map entries.
+> This allows the kernel to map those regions with strict memory
+> protections, e.g. EFI_MEMORY_RO for code, EFI_MEMORY_XP for data, etc=
+=2E
+>=20
+> Unfortunately, an unwritten requirement of this new feature is that
+> the regions need to be mapped with the same offsets relative to each
+> other as observed in the EFI memory map. If this is not done crashes
 
-Currently, it will break the build rather than warn if you use a
-disallowed symbol, which I think is not unreasonable.
+Let me get this straight: this looks like the next EFI screwup which
+practically requires specific mapping placement in VA space just
+because it uses relative addresses? And since you say "unwritten" this
+practically a requirement is not even in the spec?
 
-But I suppose that the objcopy step in this patch could rename the
-sections to .efistub.xxx sections, which would allow us to reuse some
-of the section mismatch code.
-However, this would involve marking things like the generic string and
-memcpy routines __efistub as well, which I think may be too much.
-Also, note that the logic is inverted here: with __init, we disallow
-normal code to call __init functions, but with __efistub, it will be
-the other way around, which may be more difficult to accomplish
-(Rutland and I did discuss this option when we talked about this over
-IRC)
+Can we state explicitly in the spec NOT to rely on mapping VA placement=
+?
+I mean, this "unwritten" requirement is seriously screwed on soo many
+levels...
 
--- 
-Ard.
+What else are we to expect? Spelled out virtual addresses which are
+going to be the EFI-allowed ones only??!
+
+--=20
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on, HRB 21284 (AG N=C3=BCrnberg)
+--
