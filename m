@@ -1,53 +1,87 @@
-From: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+From: James Bottomley <jbottomley@odin.com>
 Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Wed, 16 Sep 2015 15:28:22 +0200
-Message-ID: <20150916132822.GB9198@nazgul.tnic>
+Date: Wed, 16 Sep 2015 13:37:18 +0000
+Message-ID: <1442410638.2234.8.camel@Odin.com>
 References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
- <20150907040752.GW13182@linux-rxt1.site>
- <20150908204147.GC2854@codeblueprint.co.uk>
- <20150909003307.GJ2266@linux-rxt1.site>
- <20150909112123.GB4973@codeblueprint.co.uk>
- <20150916100820.GA7077@nazgul.tnic>
- <CAKv+Gu-Q_g4YtbZ7X1S1g3RaMZC6HQCVza+oqv26mXbrDjTc5w@mail.gmail.com>
+	 <20150907040752.GW13182@linux-rxt1.site>
+	 <20150908204147.GC2854@codeblueprint.co.uk>
+	 <20150909003307.GJ2266@linux-rxt1.site>
+	 <20150909112123.GB4973@codeblueprint.co.uk>
+	 <20150916100820.GA7077@nazgul.tnic>
+	 <CAKv+Gu-Q_g4YtbZ7X1S1g3RaMZC6HQCVza+oqv26mXbrDjTc5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-Q_g4YtbZ7X1S1g3RaMZC6HQCVza+oqv26mXbrDjTc5w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <JBottomley-wo1vFcy6AUs@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <CAKv+Gu-Q_g4YtbZ7X1S1g3RaMZC6HQCVza+oqv26mXbrDjTc5w@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <B8E4AAE33CCCC94BB984B80CC7B21968@sw.swsoft.com>
+Sender: stable-owner@vger.kernel.org
+To: "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>
+Cc: "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "pjones@redhat.com" <pjones@redhat.com>, "jlee@suse.com" <jlee@suse.com>, "bp@suse.de" <bp@suse.de>, "dyoung@redhat.com" <dyoung@redhat.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "hpa@zytor.com" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "leif.lindholm@linaro.org" <leif.lindholm@linaro.org>, "matt.fleming@intel.com" <matt.fleming@intel.com>, "LeifLindholm@linux-rxt1.site" <LeifLindholm@linux-rxt1.site>, "mjg59@srcf.ucam.org" <mjg59@srcf.ucam.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 16, 2015 at 01:25:06PM +0200, Ard Biesheuvel wrote:
-> ... so even if we wanted to, it would be intractible to find each
-> cross-section relative reference and do the fixup.
-
-Hmm, maybe we should go and patch EFI code segments and fixup all
-relative references after mapping. I mean, if you want something done
-right, you better do it yourself. :-\
-
-> No, it seems nobody thought of this when designing the feature.
-
-Not surprised at all, to be honest.
-
-> Several solutions and/or work arounds are currently under discussion.
-
-And requiring for code segments not to refer to each other with relativ=
-e
-offsets and holding that down in the spec post-factum is not possible
-anymore...?
-
- [ I can already imagine what the answer to that question would be thou=
-gh... ]
-
-Thanks.
-
---=20
-Regards/Gruss,
-    Boris.
-
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
-on, HRB 21284 (AG N=C3=BCrnberg)
---
+T24gV2VkLCAyMDE1LTA5LTE2IGF0IDEzOjI1ICswMjAwLCBBcmQgQmllc2hldXZlbCB3cm90ZToN
+Cj4gT24gMTYgU2VwdGVtYmVyIDIwMTUgYXQgMTI6MDgsIEJvcmlzbGF2IFBldGtvdiA8YnBAc3Vz
+ZS5kZT4gd3JvdGU6DQo+ID4gT24gV2VkLCBTZXAgMDksIDIwMTUgYXQgMTI6MjE6MjNQTSArMDEw
+MCwgTWF0dCBGbGVtaW5nIHdyb3RlOg0KPiA+PiBPbiBXZWQsIDA5IFNlcCwgYXQgMDg6MzM6MDdB
+TSwgam9leWxpIHdyb3RlOg0KPiA+PiA+DQo+ID4+ID4gWWVzLCB0aGUgbWFjaGluZSBvbiBteSBo
+YW5kIGhhcyBFRklfUFJPUEVSVElFU19UQUJMRSBlbmFibGVkLCBhbmQgaXQgZG9lc24ndA0KPiA+
+PiA+IGJvb3Qgd2l0aG91dCB5b3VyIHBhdGNoLg0KPiA+Pg0KPiA+PiBBd2Vzb21lLiBDb3VsZCB5
+b3UgdGVzdCB0aGUgZm9sbG93aW5nIHBhdGNoIGluc3RlYWQ/DQo+ID4+DQo+ID4+IC0tLQ0KPiA+
+Pg0KPiA+PiBGcm9tIDI0ZDMyNGI3ODFhM2I2ODhkY2MyNjU5OTU5NDlhOWNmNGU4YWY2ODcgTW9u
+IFNlcCAxNyAwMDowMDowMCAyMDAxDQo+ID4+IEZyb206IE1hdHQgRmxlbWluZyA8bWF0dC5mbGVt
+aW5nQGludGVsLmNvbT4NCj4gPj4gRGF0ZTogVGh1LCAzIFNlcCAyMDE1IDE1OjU2OjI1ICswMTAw
+DQo+ID4+IFN1YmplY3Q6IFtQQVRDSCB2Ml0geDg2L2VmaTogTWFwIEVGSSBtZW1tYXAgZW50cmll
+cyBpbi1vcmRlciBhdCBydW50aW1lDQo+ID4+DQo+ID4+IEJlZ2lubmluZyB3aXRoIFVFRkkgdjIu
+NSBFRklfUFJPUEVSVElFU19UQUJMRSB3YXMgaW50cm9kdWNlZCB0aGF0DQo+ID4+IHNpZ25hbHMg
+dGhhdCB0aGUgZmlybXdhcmUgUEUvQ09GRiBsb2FkZXIgc3VwcG9ydHMgc3BsaXR0aW5nIGNvZGUg
+YW5kDQo+ID4+IGRhdGEgc2VjdGlvbnMgb2YgUEUvQ09GRiBpbWFnZXMgaW50byBzZXBhcmF0ZSBF
+RkkgbWVtb3J5IG1hcCBlbnRyaWVzLg0KPiA+PiBUaGlzIGFsbG93cyB0aGUga2VybmVsIHRvIG1h
+cCB0aG9zZSByZWdpb25zIHdpdGggc3RyaWN0IG1lbW9yeQ0KPiA+PiBwcm90ZWN0aW9ucywgZS5n
+LiBFRklfTUVNT1JZX1JPIGZvciBjb2RlLCBFRklfTUVNT1JZX1hQIGZvciBkYXRhLCBldGMuDQo+
+ID4+DQo+ID4+IFVuZm9ydHVuYXRlbHksIGFuIHVud3JpdHRlbiByZXF1aXJlbWVudCBvZiB0aGlz
+IG5ldyBmZWF0dXJlIGlzIHRoYXQNCj4gPj4gdGhlIHJlZ2lvbnMgbmVlZCB0byBiZSBtYXBwZWQg
+d2l0aCB0aGUgc2FtZSBvZmZzZXRzIHJlbGF0aXZlIHRvIGVhY2gNCj4gPj4gb3RoZXIgYXMgb2Jz
+ZXJ2ZWQgaW4gdGhlIEVGSSBtZW1vcnkgbWFwLiBJZiB0aGlzIGlzIG5vdCBkb25lIGNyYXNoZXMN
+Cj4gPg0KPiA+IExldCBtZSBnZXQgdGhpcyBzdHJhaWdodDogdGhpcyBsb29rcyBsaWtlIHRoZSBu
+ZXh0IEVGSSBzY3Jld3VwIHdoaWNoDQo+ID4gcHJhY3RpY2FsbHkgcmVxdWlyZXMgc3BlY2lmaWMg
+bWFwcGluZyBwbGFjZW1lbnQgaW4gVkEgc3BhY2UganVzdA0KPiA+IGJlY2F1c2UgaXQgdXNlcyBy
+ZWxhdGl2ZSBhZGRyZXNzZXM/DQo+IA0KPiBCb3RoIHJlbGF0aXZlIGFuZCBhYnNvbHV0ZSByZWZl
+cmVuY2VzLCBjdXJyZW50bHkuIFRoZSBsYXR0ZXIgYXJlIGFsc28NCj4gYWZmZWN0ZWQgc2luY2Ug
+dGhlIHJlbG9jYXRpb24gb2Zmc2V0IHRoYXQgaXMgYXBwbGllZCB0byBhbGwgUEUvQ09GRg0KPiBy
+ZWxvY2F0aW9uIGVudHJpZXMgaXMgYmFzZWQgb24gdGhlIGRpc3BsYWNlbWVudCBvZiBJbWFnZUJh
+c2UsIGFuZA0KPiBhYnNvbHV0ZSByZWZlcmVuY2VzIHRvIHN5bWJvbHMgaW4gLmRhdGEgbmVlZCB0
+byBiZSB0cmVhdGVkIHNwZWNpYWxseQ0KPiAoc2luY2UgaXQgbWF5IGJlIHNoaWZ0ZWQgcmVsYXRp
+dmUgdG8gdGhlIC50ZXh0IHNlY3Rpb24gY29udGFpbmluZw0KPiBJbWFnZUJhc2UpLiBUaGlzIGNv
+dWxkIGJlIHdvcmtlZCBhcm91bmQgYnkgY29udmVydGluZyBlYWNoIGFic29sdXRlDQo+IHJlZmVy
+ZW5jZSBpbmRpdmlkdWFsbHkgdXNpbmcgQ29udmVydFBvaW50ZXIgKCkgW2FuZCBJIGhhdmUgYSBw
+cm9vZiBvZg0KPiBjb25jZXB0IHRoYXQgYWN0dWFsbHkgbWFrZXMgdGhlIHByb2JsZW0gZ28gYXdh
+eSBvbiB4ODZdIGJ1dCBpdCB3b3VsZA0KPiBzdGlsbCBiZSBvbmx5IGEgcGFydGlhbCBzb2x1dGlv
+biwgc2luY2UgcmVsYXRpdmUgcmVmZXJlbmNlcyBhcmUgbm90DQo+IHRyYWNrZWQgaW4gdGhlIFBF
+L0NPRkYgbWV0YWRhdGEsIHNvIGV2ZW4gaWYgd2Ugd2FudGVkIHRvLCBpdCB3b3VsZCBiZQ0KPiBp
+bnRyYWN0aWJsZSB0byBmaW5kIGVhY2ggY3Jvc3Mtc2VjdGlvbiByZWxhdGl2ZSByZWZlcmVuY2Ug
+YW5kIGRvIHRoZQ0KPiBmaXh1cC4NCj4gDQo+ID4gQW5kIHNpbmNlIHlvdSBzYXkgInVud3JpdHRl
+biIgdGhpcw0KPiA+IHByYWN0aWNhbGx5IGEgcmVxdWlyZW1lbnQgaXMgbm90IGV2ZW4gaW4gdGhl
+IHNwZWM/DQo+ID4NCj4gDQo+IE5vLCBpdCBzZWVtcyBub2JvZHkgdGhvdWdodCBvZiB0aGlzIHdo
+ZW4gZGVzaWduaW5nIHRoZSBmZWF0dXJlLg0KDQpUbyBhZGQgY29sb3VyOiBvdXIgcHJvYmxlbSBp
+cyBzZWN0aW9uIHJlbGF0aXZlIHJlZmVyZW5jZXMgKGVpdGhlciBsb2Fkcw0Kb3IganVtcHMpLiAg
+VGhlIFBFL0NPRkYgbGlua2VyIGlzIGFsbG93ZWQgbm90IHRvIGVtaXQgcmVsb2NhdGlvbnMgZm9y
+DQpzZWN0aW9uIHJlbGF0aXZlIHJlZmVyZW5jZXMgYmVjYXVzZSBpdCBleHBlY3RzIHRoYXQgdGhl
+IHNlY3Rpb25zIHdpbGwNCmFsd2F5cyBiZSBsb2FkZWQgYXQgdGhlIHNhbWUgcmVsYXRpdmUgb2Zm
+c2V0LiAgSXQgbG9va3MgbGlrZSBpdCBpcw0KcG9zc2libGUgdG8gZm9yY2UgdGhlbSB0byBoYXZl
+IHJlbG9jYXRpb24gZW50cmllcywgc28gaXQgd291bGQgYmUNCnBvc3NpYmxlIHRvIGFkZCB0byB0
+aGUgc3RhbmRhcmQgbGFuZ3VhZ2UgcmVxdWlyaW5nIHRoaXMgZm9yIFVFRkkNCmNvbXBhdGlibGUg
+YmluYXJpZXMsIGJ1dCB0aGF0IHdvbid0IGhlbHAgd2l0aCBhbnkgb2YgdGhlIGV4aXN0aW5nDQpQ
+RS9DT0ZGIHN0dWZmIGluIHRoZSBmaWVsZC4NCg0KVGhlIHByb2JsZW0gaXMgdGhhdCB0byBhcHBs
+eSB0aGUgdmFyaW91cyBwcm90ZWN0aW9ucyBVRUZJIGlzDQppbnRyb2R1Y2luZywgd2UncmUgdHJ5
+aW5nIHRvIHJlbG9jYXRlIHRoZSBzZWN0aW9ucyBhbmQgdGhhdCdzIHdoYXQncw0KY2F1c2luZyB0
+aGUgaXNzdWUuICBCZWZvcmUgdGhpcywgbm8tb25lIHJlYWxseSB0aG91Z2h0IG9mIG1hcHBpbmcg
+dGhlDQpzZWN0aW9ucyBhdCBkaWZmZXJlbnQgcmVsYXRpdmUgYWRkcmVzc2VzLiAgSXQncyByZWFs
+bHkgYW4gdW5leHBlY3RlZA0Kd2Vha25lc3MgaW4gdGhlIFBFL0NPRkYgc3BlYyB0aGF0IHdlIGNh
+bid0IGZpeCwgc28gd2UgaGF2ZSB0byB3b3JrDQphcm91bmQgaXQuDQoNCkphbWVzDQoNCj4gPiBD
+YW4gd2Ugc3RhdGUgZXhwbGljaXRseSBpbiB0aGUgc3BlYyBOT1QgdG8gcmVseSBvbiBtYXBwaW5n
+IFZBIHBsYWNlbWVudD8NCj4gPiBJIG1lYW4sIHRoaXMgInVud3JpdHRlbiIgcmVxdWlyZW1lbnQg
+aXMgc2VyaW91c2x5IHNjcmV3ZWQgb24gc29vIG1hbnkNCj4gPiBsZXZlbHMuLi4NCj4gPg0KPiAN
+Cj4gU2V2ZXJhbCBzb2x1dGlvbnMgYW5kL29yIHdvcmsgYXJvdW5kcyBhcmUgY3VycmVudGx5IHVu
+ZGVyIGRpc2N1c3Npb24NCj4gDQoNCg0K
