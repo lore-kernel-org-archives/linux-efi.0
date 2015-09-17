@@ -1,48 +1,83 @@
-From: Borislav Petkov <bp@suse.de>
-Subject: Re: [PATCH] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Thu, 17 Sep 2015 10:05:12 +0200
-Message-ID: <20150917080511.GG12379@nazgul.tnic>
-References: <1441372447-23439-1-git-send-email-matt@codeblueprint.co.uk>
- <20150907040752.GW13182@linux-rxt1.site>
- <20150908204147.GC2854@codeblueprint.co.uk>
- <20150909003307.GJ2266@linux-rxt1.site>
- <20150909112123.GB4973@codeblueprint.co.uk>
- <20150916100820.GA7077@nazgul.tnic>
- <CAKv+Gu-Q_g4YtbZ7X1S1g3RaMZC6HQCVza+oqv26mXbrDjTc5w@mail.gmail.com>
- <20150916132822.GB9198@nazgul.tnic>
- <CAKv+Gu84SJiJH-orFBk-mW6CA7XA0yOiU7DhLzWVTAg=u-yMOg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu84SJiJH-orFBk-mW6CA7XA0yOiU7DhLzWVTAg=u-yMOg@mail.gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, joeyli <jlee@suse.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Matt Fleming <matt.fleming@intel.com>, Leif Lindholm <leif.lindholm@linaro.org>, Peter Jones <pjones@redhat.com>, James Bottomley <JBottomley@odin.com>, Matthew Garrett <mjg59@srcf.ucam.org>, "H. Peter Anvin" <hpa@zytor.com>, Dave Young <dyoung@redhat.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>
+From: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Subject: [PATCH v6 3/6] x86, efi, kasan: #undef memset/memcpy/memmove per arch.
+Date: Thu, 17 Sep 2015 12:38:09 +0300
+Message-ID: <1442482692-6416-4-git-send-email-ryabinin.a.a@gmail.com>
+References: <1442482692-6416-1-git-send-email-ryabinin.a.a@gmail.com>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1442482692-6416-1-git-send-email-ryabinin.a.a@gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-arm-kernel@lists.infradead.org
+Cc: Andrey Ryabinin <ryabinin.a.a@gmail.com>, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-efi@vger.kernel.org, fengguang.wu@intel.com, Linus Walleij <linus.walleij@linaro.org>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, David Keitel <dkeitel@codeaurora.org>, linux-mm@kvack.org, Alexey Klimov <klimov.linux@gmail.com>, Yury <yury.norov@gmail.com>, Andrey Konovalov <andreyknvl@google.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 16, 2015 at 03:38:45PM +0200, Ard Biesheuvel wrote:
-> That is a can of worms I'd rather keep closed, if you don't mind ...
+In not-instrumented code KASAN replaces instrumented
+memset/memcpy/memmove with not-instrumented analogues
+__memset/__memcpy/__memove.
+However, on x86 the EFI stub is not linked with the kernel.
+It uses not-instrumented mem*() functions from
+arch/x86/boot/compressed/string.c
+So we don't replace them with __mem*() variants in EFI stub.
 
-Same here.
+On ARM64 the EFI stub is linked with the kernel, so we should
+replace mem*() functions with __mem*(), because the EFI stub
+runs before KASAN sets up early shadow.
 
-> But in general, since we are already violating the PE/COFF spec by
-> relocating each runtime image once, then invoke its entry point, then
-> fire an event which it should catch to manually update its pointers,
-> and then relocate it again into the OS VA space.
+So let's move these #undef mem* into arch's asm/efi.h which is
+also included by the EFI stub.
 
-Yeah, I vaguely remember at the time hpa proposing an EFI-specific
-page fault handler or so. I guess we should consider such or similar
-technique as it should be most flexible to deal with such screwups. And
-with whatever funky fw stuff comes our way in the future...
+Also, this will fix the warning in 32-bit build reported by
+kbuild test robot <fengguang.wu@intel.com>:
+	efi-stub-helper.c:599:2: warning: implicit declaration of function 'memcpy'
 
-Thanks.
+Signed-off-by: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+---
+ arch/x86/include/asm/efi.h             | 12 ++++++++++++
+ drivers/firmware/efi/libstub/efistub.h |  4 ----
+ 2 files changed, 12 insertions(+), 4 deletions(-)
 
---=20
-Regards/Gruss,
-    Boris.
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 155162e..6db2742 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -86,6 +86,18 @@ extern u64 asmlinkage efi_call(void *fp, ...);
+ extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned long size,
+ 					u32 type, u64 attribute);
+ 
++/*
++ * CONFIG_KASAN may redefine memset to __memset.
++ * __memset function is present only in kernel binary.
++ * Since the EFI stub linked into a separate binary it
++ * doesn't have __memset(). So we should use standard
++ * memset from arch/x86/boot/compressed/string.c
++ * The same applies to memcpy and memmove.
++ */
++#undef memcpy
++#undef memset
++#undef memmove
++
+ #endif /* CONFIG_X86_32 */
+ 
+ extern struct efi_scratch efi_scratch;
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index e334a01..6b6548f 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -5,10 +5,6 @@
+ /* error code which can't be mistaken for valid address */
+ #define EFI_ERROR	(~0UL)
+ 
+-#undef memcpy
+-#undef memset
+-#undef memmove
+-
+ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
+ 
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
+-- 
+2.4.6
 
-SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
-on, HRB 21284 (AG N=C3=BCrnberg)
 --
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
