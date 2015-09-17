@@ -1,81 +1,41 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [RFC PATCH] arm64/efi: isolate EFI stub from the kernel proper
-Date: Thu, 17 Sep 2015 17:09:26 +0100
-Message-ID: <20150917160925.GP25634@arm.com>
-References: <1442311903-19213-1-git-send-email-ard.biesheuvel@linaro.org>
- <20150915144629.GG31157@arm.com>
- <CAKv+Gu8j1APZkGnFhZArNAtoyYOokP2bgemYH5n7Pn8jQ1b1XA@mail.gmail.com>
- <CAKv+Gu_KuOxA+EMSV0YcQR9rmO+R=-y9tivweNym3o+E4DrnHQ@mail.gmail.com>
+From: iSayor <iSayor-yJUSPDxTjKrQT0dZR+AlfA@public.gmane.org>
+Subject: =?UTF-8?B?5bmz5pe25pyA5aSa5Lmf5bCx6IGU57O75LqG5LiJ5Y2D5a6277yM5YWo?=
+ =?UTF-8?B?55CD6L+Y5pyJ5Y2B5Yeg5LiH5a6i5oi35Zyo5ZOq6YeM77yf?=
+Date: Thu, 17 Sep 2015 13:28:21 -0700
+Message-ID: <01d0f187$Blat.v3.2.4$64fd8e14$3d7411f1@localhost>
+Reply-To: iSayor <iSayor-9Onoh4P/yGk@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_KuOxA+EMSV0YcQR9rmO+R=-y9tivweNym3o+E4DrnHQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
-
-On Thu, Sep 17, 2015 at 11:51:07AM +0100, Ard Biesheuvel wrote:
-> On 15 September 2015 at 17:24, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > On 15 September 2015 at 16:46, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
-> >> On Tue, Sep 15, 2015 at 11:11:43AM +0100, Ard Biesheuvel wrote:
-> >>> Since arm64 does not use a builtin decompressor, the EFI stub is built
-> >>> into the kernel proper. So far, this has been working fine, but actually,
-> >>> since the stub is in fact a PE/COFF relocatable binary that is executed
-> >>> at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
-> >>> should not be seamlessly sharing code with the kernel proper, which is a
-> >>> position dependent executable linked at a high virtual offset.
-> >>>
-> >>> So instead, separate the contents of libstub and its dependencies, by
-> >>> putting them into their own namespace by prefixing all of its symbols
-> >>> with __efistub. This way, we have tight control over what parts of the
-> >>> kernel proper are referenced by the stub.
-> >>
-> >> Could we add an __efistub annotation to spit out warnings if the stub
-> >> calls into unexpected kernel code, like we do for __init/__ref?
-> >>
-> >
-> > Currently, it will break the build rather than warn if you use a
-> > disallowed symbol, which I think is not unreasonable.
-> >
-> > But I suppose that the objcopy step in this patch could rename the
-> > sections to .efistub.xxx sections, which would allow us to reuse some
-> > of the section mismatch code.
-> > However, this would involve marking things like the generic string and
-> > memcpy routines __efistub as well, which I think may be too much.
-> > Also, note that the logic is inverted here: with __init, we disallow
-> > normal code to call __init functions, but with __efistub, it will be
-> > the other way around, which may be more difficult to accomplish
-> > (Rutland and I did discuss this option when we talked about this over
-> > IRC)
-> >
-> 
-> OK, I have given this a go, and as it turns out, it implies that we go
-> and mark generic pieces of lib/ as __section(.text.efistubok) in order
-> for modpost.c to accept it. Tweaking modpost.c itself seems quite
-> doable, since the logic is fairly flexible and can easily be augmented
-> to complain about unauthorized references from the stub to the kernel
-> proper.
-> 
-> So what we could do is fold libfdt and lib/sort.c (which are the
-> primary generic dependencies) into the stub, but we would still need
-> to retain the symbol prefixing bit to prevent the stub's symbols from
-> clashing with the ones from the kernel proper. And with the symbol
-> prefixing in place, we have something that is even stronger than
-> section mismatch, which is to error out on undefined references rather
-> than warn about section mismatches.
-> 
-> I think the current approach is better, but only if we agree that we
-> should do something in the first place. (Currently, there are no known
-> issues, just the awareness that things are not quite as tidy as they
-> should be)
-
-I agree, but thanks for looking into it. The only downside I still see
-with symbol namespacing is that the error produced won't be as obvious
-as something akin to a section mismatch, but then again, it's mainly you
-hacking on the stub so it's not really an issue :)
-
-Will
+=E6=82=A8=E5=A5=BD:
+    =E6=82=A8=E8=BF=98=E5=9C=A8=E7=94=A8ali=E5=B9=B3=E5=8F=B0=E5=BC=80=E5=
+=8F=91=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7?
+       =E8=BF=98=E5=9C=A8=E4=BD=BF=E7=94=A8=E5=B1=95=E4=BC=9A=E5=AE=A3=E4=
+=BC=A0=E4=BC=81=E4=B8=9A=E5=92=8C=E4=BA=A7=E5=93=81?
+             =E4=BD=A0out=E4=BA=86!!!
+ =E5=BD=93=E5=89=8D=E5=A4=96=E8=B4=B8=E5=AE=A2=E6=88=B7=E5=BC=80=E5=8F=91=
+=E9=9A=BE=EF=BC=8C=E6=82=A8=E6=98=AF=E5=90=A6=E4=B9=9F=E5=9C=A8=E5=AF=BB=
+=E6=89=BE=E5=B1=95=E4=BC=9A=EF=BC=8CB2B=E4=B9=8B=E5=A4=96=E5=A5=BD=E7=9A=
+=84=E6=B8=A0=E9=81=93=EF=BC=9F=20
+ =E8=A1=8C=E4=B8=9A=E5=85=A8=E7=90=83=E5=8D=81=E5=87=A0=E4=B8=87=E5=AE=A2=
+=E6=88=B7=EF=BC=8C=E5=B9=B3=E6=97=B6=E6=9C=80=E5=A4=9A=E4=B9=9F=E5=B0=B1=
+=E8=81=94=E7=B3=BB=E4=BA=86=E4=B8=89=E5=8D=83=E5=AE=B6=EF=BC=8C=E6=82=A8=
+=E6=98=AF=E5=90=A6=E6=83=B3=E6=8A=8A=E5=89=A9=E4=B8=8B=E7=9A=84=E4=B9=9F=
+=E5=BC=80=E5=8F=91=E5=88=B0=EF=BC=9F
+ =E5=8A=A0QQ2652697913=E7=BB=99=E6=82=A8=E6=BC=94=E7=A4=BA=E4=B8=8B=E4=B8=
+=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=E6=88=B7=E7=9A=84=E6=96=B9=E6=B3=
+=95=EF=BC=8C=E5=85=88=E7=94=A8=E5=85=88=E5=8F=97=E7=9B=8A=EF=BC=8C=E5=B7=
+=B2=E7=BB=8F=E6=9C=89=E8=BF=91=E4=B8=87=E5=AE=B6=E4=BC=81=E4=B8=9A=E9=A2=
+=86=E5=85=88=E6=82=A8=E4=BD=BF=E7=94=A8=EF=BC=81=EF=BC=81=E3=80=82
+ =E5=B9=BF=E4=B8=9C=E7=9C=81=E5=95=86=E4=B8=9A=E8=81=94=E5=90=88=E4=BC=9A=
+=E6=8E=A8=E8=8D=90=EF=BC=8C=E4=B8=BB=E5=8A=A8=E5=BC=80=E5=8F=91=E5=AE=A2=
+=E6=88=B7=E7=AC=AC=E4=B8=80=E5=93=81=E7=89=8C=EF=BC=8C=E8=BF=91=E4=B8=87=
+=E5=AE=B6=E4=BC=81=E4=B8=9A=E6=AD=A3=E5=9C=A8=E8=8E=B7=E7=9B=8A=E3=80=82=
+=E6=82=A8=E5=8F=AF=E4=BB=A5=E6=B2=A1=E6=9C=89=E4=BD=BF=E7=94=A8=EF=BC=8C=
+=E4=BD=86=E6=98=AF=E4=B8=8D=E8=83=BD=E6=B2=A1=E6=9C=89=E4=BA=86=E8=A7=A3=
+=E3=80=82
