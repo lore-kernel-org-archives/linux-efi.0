@@ -1,97 +1,71 @@
-From: "=?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?="
-	<dirty.ice.hu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] x86/efi: fix multiple GOP device support
-Date: Sat, 19 Sep 2015 15:40:23 +0200
-Message-ID: <fce1886dc0b07f374eb49a13746df5e47518d338.1442666763.git.DirtY.iCE.hu@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 1/6] of/fdt: make generic early_init_dt_add_memory_arch() a weak alias
+Date: Mon, 21 Sep 2015 17:21:23 -0700
+Message-ID: <1442881288-13962-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1442881288-13962-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1442881288-13962-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-When multiple GOP devices exists, but none of them implements ConOut,
-the code should just choose the first GOP (according to the comments).
-But currently fb_base will refer to the last GOP, while other parameter=
-s
-to the first GOP, which will likely result in a garbled display.
+The function early_init_dt_add_memory_arch() is defined as __weak
+so that archs can override it. However, in this override implementation,
+it may still be useful to invoke the generic implementation, so instead,
+rename the generic version to early_init_dt_add_memory() and turn the
+original definition into a weak alias. This way, the generic version can
+still be called even in the presence of an arch specific override.
 
-Signed-off-by: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <DirtY.iCE.hu@gmail.c=
-om>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
+ drivers/of/fdt.c       | 7 +++++--
+ include/linux/of_fdt.h | 1 +
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-I can reliably reproducible this bug using my ASRock Z87M Extreme4
-motherboard with CSM and integrated GPU disabled, and two PCIe video
-cards (NVidia GT640 and GTX980), booting from efi-stub (booting from
-grub works fine).  On the primary display the asrock logo remains and o=
-n
-the secondary screen is garbled up completely.
-
- arch/x86/boot/compressed/eboot.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compresse=
-d/eboot.c
-index ee1b6d3..db51c1f 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -667,6 +667,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 		bool conout_found =3D false;
- 		void *dummy =3D NULL;
- 		u32 h =3D handles[i];
-+		u32 current_fb_base;
-=20
- 		status =3D efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop32);
-@@ -678,7 +679,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 		if (status =3D=3D EFI_SUCCESS)
- 			conout_found =3D true;
-=20
--		status =3D __gop_query32(gop32, &info, &size, &fb_base);
-+		status =3D __gop_query32(gop32, &info, &size, &current_fb_base);
- 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
-@@ -692,6 +693,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 			pixel_format =3D info->pixel_format;
- 			pixel_info =3D info->pixel_information;
- 			pixels_per_scan_line =3D info->pixels_per_scan_line;
-+			fb_base =3D current_fb_base;
-=20
- 			/*
- 			 * Once we've found a GOP supporting ConOut,
-@@ -770,6 +772,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 		bool conout_found =3D false;
- 		void *dummy =3D NULL;
- 		u64 h =3D handles[i];
-+		u32 current_fb_base;
-=20
- 		status =3D efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop64);
-@@ -781,7 +784,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 		if (status =3D=3D EFI_SUCCESS)
- 			conout_found =3D true;
-=20
--		status =3D __gop_query64(gop64, &info, &size, &fb_base);
-+		status =3D __gop_query64(gop64, &info, &size, &current_fb_base);
- 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
-@@ -795,6 +798,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 			pixel_format =3D info->pixel_format;
- 			pixel_info =3D info->pixel_information;
- 			pixels_per_scan_line =3D info->pixels_per_scan_line;
-+			fb_base =3D current_fb_base;
-=20
- 			/*
- 			 * Once we've found a GOP supporting ConOut,
---=20
-2.5.2
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 07496560e5b9..8b758e10c9f8 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -969,7 +969,7 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
+ #ifdef CONFIG_HAVE_MEMBLOCK
+ #define MAX_PHYS_ADDR	((phys_addr_t)~0)
+ 
+-void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
++void __init early_init_dt_add_memory(u64 base, u64 size)
+ {
+ 	const u64 phys_offset = __pa(PAGE_OFFSET);
+ 
+@@ -1027,7 +1027,7 @@ void * __init __weak early_init_dt_alloc_memory_arch(u64 size, u64 align)
+ 	return __va(memblock_alloc(size, align));
+ }
+ #else
+-void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
++void __init early_init_dt_add_memory(u64 base, u64 size)
+ {
+ 	WARN_ON(1);
+ }
+@@ -1047,6 +1047,9 @@ void * __init __weak early_init_dt_alloc_memory_arch(u64 size, u64 align)
+ }
+ #endif
+ 
++__weak __alias(early_init_dt_add_memory)
++void early_init_dt_add_memory_arch(u64 base, u64 size);
++
+ bool __init early_init_dt_verify(void *params)
+ {
+ 	if (!params)
+diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+index df9ef3801812..463a06ba87ac 100644
+--- a/include/linux/of_fdt.h
++++ b/include/linux/of_fdt.h
+@@ -65,6 +65,7 @@ extern int early_init_dt_scan_memory(unsigned long node, const char *uname,
+ 				     int depth, void *data);
+ extern void early_init_fdt_scan_reserved_mem(void);
+ extern void early_init_fdt_reserve_self(void);
++extern void early_init_dt_add_memory(u64 base, u64 size);
+ extern void early_init_dt_add_memory_arch(u64 base, u64 size);
+ extern int early_init_dt_reserve_memory_arch(phys_addr_t base, phys_addr_t size,
+ 					     bool no_map);
+-- 
+1.9.1
