@@ -1,74 +1,113 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 2/2] efi: introduce EFI_NX_PE_DATA bit and set it from properties table
-Date: Wed, 23 Sep 2015 07:29:34 -0700
-Message-ID: <1443018574-21702-1-git-send-email-ard.biesheuvel@linaro.org>
-References: <20150923141817.GF2867@codeblueprint.co.uk>
+Subject: Re: [RFC PATCH] arm64/efi: isolate EFI stub from the kernel proper
+Date: Wed, 23 Sep 2015 09:44:45 -0700
+Message-ID: <CAKv+Gu_DF5n1Fe3QE8W2AzZXf4OGq3V73oTWgwPvYmKgMzGBKA@mail.gmail.com>
+References: <1442311903-19213-1-git-send-email-ard.biesheuvel@linaro.org>
+	<20150915144629.GG31157@arm.com>
+	<CAKv+Gu8j1APZkGnFhZArNAtoyYOokP2bgemYH5n7Pn8jQ1b1XA@mail.gmail.com>
+	<CAKv+Gu_KuOxA+EMSV0YcQR9rmO+R=-y9tivweNym3o+E4DrnHQ@mail.gmail.com>
+	<20150917160925.GP25634@arm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150923141817.GF2867-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20150917160925.GP25634-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, "leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-UEFI v2.5 introduces a runtime memory protection feature that splits
-PE/COFF runtime images into separate code and data regions. Since this
-may require special handling by the OS, allocate a EFI_xxx bit to
-keep track of whether this feature is currently active or not.
+On 17 September 2015 at 09:09, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
+> Hi Ard,
+>
+> On Thu, Sep 17, 2015 at 11:51:07AM +0100, Ard Biesheuvel wrote:
+>> On 15 September 2015 at 17:24, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> > On 15 September 2015 at 16:46, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
+>> >> On Tue, Sep 15, 2015 at 11:11:43AM +0100, Ard Biesheuvel wrote:
+>> >>> Since arm64 does not use a builtin decompressor, the EFI stub is built
+>> >>> into the kernel proper. So far, this has been working fine, but actually,
+>> >>> since the stub is in fact a PE/COFF relocatable binary that is executed
+>> >>> at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
+>> >>> should not be seamlessly sharing code with the kernel proper, which is a
+>> >>> position dependent executable linked at a high virtual offset.
+>> >>>
+>> >>> So instead, separate the contents of libstub and its dependencies, by
+>> >>> putting them into their own namespace by prefixing all of its symbols
+>> >>> with __efistub. This way, we have tight control over what parts of the
+>> >>> kernel proper are referenced by the stub.
+>> >>
+>> >> Could we add an __efistub annotation to spit out warnings if the stub
+>> >> calls into unexpected kernel code, like we do for __init/__ref?
+>> >>
+>> >
+>> > Currently, it will break the build rather than warn if you use a
+>> > disallowed symbol, which I think is not unreasonable.
+>> >
+>> > But I suppose that the objcopy step in this patch could rename the
+>> > sections to .efistub.xxx sections, which would allow us to reuse some
+>> > of the section mismatch code.
+>> > However, this would involve marking things like the generic string and
+>> > memcpy routines __efistub as well, which I think may be too much.
+>> > Also, note that the logic is inverted here: with __init, we disallow
+>> > normal code to call __init functions, but with __efistub, it will be
+>> > the other way around, which may be more difficult to accomplish
+>> > (Rutland and I did discuss this option when we talked about this over
+>> > IRC)
+>> >
+>>
+>> OK, I have given this a go, and as it turns out, it implies that we go
+>> and mark generic pieces of lib/ as __section(.text.efistubok) in order
+>> for modpost.c to accept it. Tweaking modpost.c itself seems quite
+>> doable, since the logic is fairly flexible and can easily be augmented
+>> to complain about unauthorized references from the stub to the kernel
+>> proper.
+>>
+>> So what we could do is fold libfdt and lib/sort.c (which are the
+>> primary generic dependencies) into the stub, but we would still need
+>> to retain the symbol prefixing bit to prevent the stub's symbols from
+>> clashing with the ones from the kernel proper. And with the symbol
+>> prefixing in place, we have something that is even stronger than
+>> section mismatch, which is to error out on undefined references rather
+>> than warn about section mismatches.
+>>
+>> I think the current approach is better, but only if we agree that we
+>> should do something in the first place. (Currently, there are no known
+>> issues, just the awareness that things are not quite as tidy as they
+>> should be)
+>
+> I agree, but thanks for looking into it. The only downside I still see
+> with symbol namespacing is that the error produced won't be as obvious
+> as something akin to a section mismatch, but then again, it's mainly you
+> hacking on the stub so it's not really an issue :)
+>
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
+OK, so it seems we are mostly aligned with regard to the solution this
+patch proposes. Perhaps we need to discuss whether we feel the problem
+needs solving in the first place.
 
-@Matt:
-here's v2 of 2/2 only, with your comments addressed.
+To elaborate a bit, the concern is that the EFI stub, which executes
+in the context of the UEFI boot services environment, should be
+allowed to access random other code bits of the kernel that are built
+to be executed from a virtual offset that is not set up yet when UEFI
+runs. At the moment, this works fine, since the AArch64 small code
+model uses relative references primarily, and we happen not to be
+relying on any static data structures containing pointers.
 
-Thanks,
-Ard.
+In fact, using the -fpic model (as I do in this patch for the stub
+components), which naively seems more appropriate for code that needs
+to execute at an a priori unknown offset, is very likely to make
+things worse rather than better, since the default visibility and ELF
+symbol preemption rules implemented by GCC mandate that all references
+to externally visible (i.e., non-static global) variables are
+preemptible, which means all external symbol references must go via
+[absolute] GOT entries.
 
+Since -fpic is not helping to prevent absolute references from being
+emitted, I should probably remove it from this patch. That means that
+the sole remaining purpose is to control which core kernel code is
+referenced by the stub, not to build the stub code itself in a
+different way.
 
- drivers/firmware/efi/efi.c | 18 ++++++++++++++++++
- include/linux/efi.h        |  1 +
- 2 files changed, 19 insertions(+)
+Thoughts, please?
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 5cbb8d31da33..8c81cd58f95f 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -425,6 +425,24 @@ int __init efi_config_parse_tables(void *config_tables, int count, int sz,
- 	}
- 	pr_cont("\n");
- 	set_bit(EFI_CONFIG_TABLES, &efi.flags);
-+
-+	/* Parse the EFI Properties table if it exists */
-+	if (efi.properties_table != EFI_INVALID_TABLE_ADDR) {
-+		efi_properties_table_t *tbl;
-+
-+		tbl = early_memremap(efi.properties_table, sizeof(*tbl));
-+		if (tbl == NULL) {
-+			pr_err("Could not map Properties table!\n");
-+			return -ENOMEM;
-+		}
-+
-+		if (tbl->memory_protection_attribute &
-+		    EFI_PROPERTIES_RUNTIME_MEMORY_PROTECTION_NON_EXECUTABLE_PE_DATA)
-+			set_bit(EFI_NX_PE_DATA, &efi.flags);
-+
-+		early_memunmap(tbl, sizeof(*tbl));
-+	}
-+
- 	return 0;
- }
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 5b4f3ac08053..61b5a5e1e9be 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -972,6 +972,7 @@ extern int __init efi_setup_pcdp_console(char *);
- #define EFI_PARAVIRT		6	/* Access is via a paravirt interface */
- #define EFI_ARCH_1		7	/* First arch-specific bit */
- #define EFI_DBG			8	/* Print additional debug info at runtime */
-+#define EFI_NX_PE_DATA		9	/* Can runtime data regions be mapped non-executable? */
- 
- #ifdef CONFIG_EFI
- /*
 -- 
-1.9.1
+Ard.
