@@ -1,75 +1,33 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 6/6] arm64/efi: ignore DT memreserve entries instead of removing them
-Date: Mon, 21 Sep 2015 17:21:28 -0700
-Message-ID: <1442881288-13962-7-git-send-email-ard.biesheuvel@linaro.org>
-References: <1442881288-13962-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3] arm64/efi: don't pad between EFI_MEMORY_RUNTIME
+ regions
+Date: Wed, 23 Sep 2015 14:50:05 +0100
+Message-ID: <20150923135005.GD2867@codeblueprint.co.uk>
+References: <1441782414-16284-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1441899699-14893-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20150910160809.GM29293@leverpostej>
+ <CAKv+Gu914YCoEvs9QkS619+gPW3qv1UTXqjmBhLPuH6ZCdmEqA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1442881288-13962-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu914YCoEvs9QkS619+gPW3qv1UTXqjmBhLPuH6ZCdmEqA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Catalin Marinas <Catalin.Marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <Will.Deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Now that the reservation of the FDT image itself is split off from
-the processing of memory reservations described by the device tree,
-we can make the DT scanning of memreserves conditional on whether
-we booted via UEFI and have its memory map available. This allows
-us to drop deletion of these memreserves in the stub. It also fixes
-the issue where the /reserved-memory node (which offers another
-way of reserving memory ranges) was not being ignored under UEFI.
+On Thu, 10 Sep, at 06:10:57PM, Ard Biesheuvel wrote:
+> 
+> Thanks Mark.
+> 
+> @Matt: could you please drop the version you have queued, and take
+> this one instead?
+> Also, this patch will not apply to anything before v4.0 so could you
+> please include that in the cc:stable tag?
 
-Note that this reverts 0ceac9e094b0 ("efi/arm64: Fix fdt-related
-memory reservation").
+Sorry for the delay. I've queued up this version with all tags and
+I'll send an urgent pull request this week. Thanks everyone.
 
-Acked-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/mm/init.c               |  3 ++-
- drivers/firmware/efi/libstub/fdt.c | 11 +----------
- 2 files changed, 3 insertions(+), 11 deletions(-)
-
-diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index d8ce7f51dba1..c74ff920540a 100644
---- a/arch/arm64/mm/init.c
-+++ b/arch/arm64/mm/init.c
-@@ -170,7 +170,8 @@ void __init arm64_memblock_init(void)
- 		memblock_reserve(__virt_to_phys(initrd_start), initrd_end - initrd_start);
- #endif
- 
--	early_init_fdt_scan_reserved_mem();
-+	if (!efi_enabled(EFI_MEMMAP))
-+		early_init_fdt_scan_reserved_mem();
- 
- 	/* 4GB maximum for 32-bit only capable devices */
- 	if (IS_ENABLED(CONFIG_ZONE_DMA))
-diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 343e7992bd8f..a7e87cd582f2 100644
---- a/drivers/firmware/efi/libstub/fdt.c
-+++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -24,8 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 			unsigned long map_size, unsigned long desc_size,
- 			u32 desc_ver)
- {
--	int node, num_rsv;
--	int status;
-+	int node, status;
- 	u32 fdt_val32;
- 	u64 fdt_val64;
- 
-@@ -53,14 +52,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 	if (status != 0)
- 		goto fdt_set_fail;
- 
--	/*
--	 * Delete all memory reserve map entries. When booting via UEFI,
--	 * kernel will use the UEFI memory map to find reserved regions.
--	 */
--	num_rsv = fdt_num_mem_rsv(fdt);
--	while (num_rsv-- > 0)
--		fdt_del_mem_rsv(fdt, num_rsv);
--
- 	node = fdt_subnode_offset(fdt, 0, "chosen");
- 	if (node < 0) {
- 		node = fdt_add_subnode(fdt, 0, "chosen");
 -- 
-1.9.1
+Matt Fleming, Intel Open Source Technology Center
