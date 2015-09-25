@@ -1,63 +1,169 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL 0/2] EFI urgent fixes
-Date: Fri, 25 Sep 2015 23:02:17 +0100
-Message-ID: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <JBottomley-O3H1v1f1dlM@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 1/2] x86/efi: Map EFI memmap entries in-order at runtime
+Date: Fri, 25 Sep 2015 23:02:18 +0100
+Message-ID: <1443218539-7610-2-git-send-email-matt@codeblueprint.co.uk>
+References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Borislav Petkov <bp@suse.de>, Leif Lindholm <leif.lindholm@linaro.org>, Peter Jones <pjones@redhat.com>, James Bottomley <JBottomley@Odin.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Dave Young <dyoung@redhat.com>, stable@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Matt Fleming <matt.fleming@intel.com>
 
-Folks,
+Beginning with UEFI v2.5 EFI_PROPERTIES_TABLE was introduced that
+signals that the firmware PE/COFF loader supports splitting code and
+data sections of PE/COFF images into separate EFI memory map entries.
+This allows the kernel to map those regions with strict memory
+protections, e.g. EFI_MEMORY_RO for code, EFI_MEMORY_XP for data, etc.
 
-The patches in this pull request fix kernel crashes when booting Linux
-on UEFI v2.5 machines with the Properties Table feature enabled.
+Unfortunately, an unwritten requirement of this new feature is that
+the regions need to be mapped with the same offsets relative to each
+other as observed in the EFI memory map. If this is not done crashes
+like this may occur,
 
-Essentially, when this feature is enabled the firmware allocates
-separate entries in the EFI memory map for the code and data sections
-of PE/COFF images, whereas previously only one memory map entry would
-have existed.
+ [    0.006391] BUG: unable to handle kernel paging request at fffffffefe6086dd
+ [    0.006923] IP: [<fffffffefe6086dd>] 0xfffffffefe6086dd
+ [    0.007000] Call Trace:
+ [    0.007000]  [<ffffffff8104c90e>] efi_call+0x7e/0x100
+ [    0.007000]  [<ffffffff81602091>] ? virt_efi_set_variable+0x61/0x90
+ [    0.007000]  [<ffffffff8104c583>] efi_delete_dummy_variable+0x63/0x70
+ [    0.007000]  [<ffffffff81f4e4aa>] efi_enter_virtual_mode+0x383/0x392
+ [    0.007000]  [<ffffffff81f37e1b>] start_kernel+0x38a/0x417
+ [    0.007000]  [<ffffffff81f37495>] x86_64_start_reservations+0x2a/0x2c
+ [    0.007000]  [<ffffffff81f37582>] x86_64_start_kernel+0xeb/0xef
 
-Because we've now got two entries that reference each other we *must*
-map them into the kernel virtual address space with the same offsets
-and in the same order as they appear in the EFI memory map. Failure to
-do so causes the firmware to access unmapped/invalid addresses. 
+Here 0xfffffffefe6086dd refers to an address the firmware expects to
+be mapped but which the OS never claimed was mapped. The issue is that
+included in these regions are relative addresses to other regions
+which were emitted by the firmware toolchain before the "splitting" of
+sections occurred at runtime.
 
-These patches were intentionally kept as small as possible so that
-they can be backported by distributions, aggressively.
+Needless to say, we don't satisfy this unwritten requirement on x86_64
+and instead map the EFI memory map entries in reverse order. The above
+crash is almost certainly triggerable with any kernel newer than v3.13
+because that's when we rewrote the EFI runtime region mapping code, in
+commit d2f7cbe7b26a ("x86/efi: Runtime services virtual mapping"). For
+kernel versions before v3.13 things may work by pure luck depending on
+the fragmentation of the kernel virtual address space at the time we
+map the EFI regions.
 
-The following changes since commit 1f93e4a96c9109378204c147b3eec0d0e8100fde:
+Instead of mapping the EFI memory map entries in reverse order, where
+entry N has a higher virtual address than entry N+1, map them in the
+same order as they appear in the EFI memory map to preserve this
+relative offset between regions.
 
-  Linux 4.3-rc2 (2015-09-20 14:32:34 -0700)
+This patch has been kept as small as possible with the intention that
+it should be applied aggressively to stable and distribution kernels.
+It is very much a bugfix rather than support for a new feature, since
+when EFI_PROPERTIES_TABLE is enabled we must map things as outlined
+above to even boot - we have no way of asking the firmware not to
+split the code/data regions.
 
-are available in the git repository at:
+In fact, this patch doesn't even make use of the more strict memory
+protections available in UEFI v2.5. That will come later.
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+Reported-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Suggested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: "Lee, Chun-Yi" <jlee@suse.com>
+Cc: Borislav Petkov <bp@suse.de>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: James Bottomley <JBottomley@Odin.com>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Dave Young <dyoung@redhat.com>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+---
+ arch/x86/platform/efi/efi.c | 67 ++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 66 insertions(+), 1 deletion(-)
 
-for you to fetch changes up to 1fa25e09ca2ce07f03bca93ad71800c312fd4951:
-
-  arm64/efi: Don't pad between EFI_MEMORY_RUNTIME regions (2015-09-25 22:35:15 +0100)
-
-----------------------------------------------------------------
- * arm64 bug fix for UEFI 2.5 firmware that has the Properties Table
-   feature enabled. The fix avoids a kernel crash by removing the padding
-   between runtime regions that we currently do in the kernel so we don't
-   break the EFI's cross-region references - Ard Biesheuvel
-
- * Map EFI memory regions in-order on x86 so that we maintain the
-   relative offset between regions and fix a crash when booting on
-   UEFI 2.5 machines with the Properties Table feature enabled.
-
-----------------------------------------------------------------
-Ard Biesheuvel (1):
-      arm64/efi: Don't pad between EFI_MEMORY_RUNTIME regions
-
-Matt Fleming (1):
-      x86/efi: Map EFI memmap entries in-order at runtime
-
- arch/arm64/kernel/efi.c                 |  3 +-
- arch/x86/platform/efi/efi.c             | 67 ++++++++++++++++++++++++-
- drivers/firmware/efi/libstub/arm-stub.c | 88 +++++++++++++++++++++++++++------
- 3 files changed, 141 insertions(+), 17 deletions(-)
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 1db84c0758b7..6a28ded74211 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -705,6 +705,70 @@ out:
+ }
+ 
+ /*
++ * Iterate the EFI memory map in reverse order because the regions
++ * will be mapped top-down. The end result is the same as if we had
++ * mapped things forward, but doesn't require us to change the
++ * existing implementation of efi_map_region().
++ */
++static inline void *efi_map_next_entry_reverse(void *entry)
++{
++	/* Initial call */
++	if (!entry)
++		return memmap.map_end - memmap.desc_size;
++
++	entry -= memmap.desc_size;
++	if (entry < memmap.map)
++		return NULL;
++
++	return entry;
++}
++
++/*
++ * efi_map_next_entry - Return the next EFI memory map descriptor
++ * @entry: Previous EFI memory map descriptor
++ *
++ * This is a helper function to iterate over the EFI memory map, which
++ * we do in different orders depending on the current configuration.
++ *
++ * To begin traversing the memory map @entry must be %NULL.
++ *
++ * Returns %NULL when we reach the end of the memory map.
++ */
++static void *efi_map_next_entry(void *entry)
++{
++	if (!efi_enabled(EFI_OLD_MEMMAP) && efi_enabled(EFI_64BIT)) {
++		/*
++		 * Starting in UEFI v2.5 the EFI_PROPERTIES_TABLE
++		 * config table feature requires us to map all entries
++		 * in the same order as they appear in the EFI memory
++		 * map. That is to say, entry N must have a lower
++		 * virtual address than entry N+1. This is because the
++		 * firmware toolchain leaves relative references in
++		 * the code/data sections, which are split and become
++		 * separate EFI memory regions. Mapping things
++		 * out-of-order leads to the firmware accessing
++		 * unmapped addresses.
++		 *
++		 * Since we need to map things this way whether or not
++		 * the kernel actually makes use of
++		 * EFI_PROPERTIES_TABLE, let's just switch to this
++		 * scheme by default for 64-bit.
++		 */
++		return efi_map_next_entry_reverse(entry);
++	}
++
++	/* Initial call */
++	if (!entry)
++		return memmap.map;
++
++	entry += memmap.desc_size;
++	if (entry >= memmap.map_end)
++		return NULL;
++
++	return entry;
++}
++
++/*
+  * Map the efi memory ranges of the runtime services and update new_mmap with
+  * virtual addresses.
+  */
+@@ -714,7 +778,8 @@ static void * __init efi_map_regions(int *count, int *pg_shift)
+ 	unsigned long left = 0;
+ 	efi_memory_desc_t *md;
+ 
+-	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
++	p = NULL;
++	while ((p = efi_map_next_entry(p))) {
+ 		md = p;
+ 		if (!(md->attribute & EFI_MEMORY_RUNTIME)) {
+ #ifdef CONFIG_X86_64
+-- 
+2.1.0
