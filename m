@@ -1,117 +1,63 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: add support for UEFIv2.5 Properties table
-Date: Thu, 24 Sep 2015 23:45:35 -0700
-Message-ID: <CAKv+Gu8FCGCbpp+u6Foo2Ek=qttD_0eVCcA0LSqtf7cHbJW4EA@mail.gmail.com>
-References: <1441786096-8514-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20150924060624.GA26341@dhcp-129-149.nay.redhat.com>
-	<CAKv+Gu9hoMybK19EGRxsQTt1A4xsfwj40d=6F5kVHQD+39CvGg@mail.gmail.com>
-	<20150925014336.GA6640@dhcp-129-149.nay.redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL 0/2] EFI urgent fixes
+Date: Fri, 25 Sep 2015 23:02:17 +0100
+Message-ID: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20150925014336.GA6640-sa4SJRhfYT7nqxX4cJjai/XAX3CI6PSWQQ4Iyu8u01E@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, James Bottomley <JBottomley-O3H1v1f1dlM@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 24 September 2015 at 18:43, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
-> On 09/24/15 at 02:06pm, Ard Biesheuvel wrote:
->> On 23 September 2015 at 23:06, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> > On 09/09/15 at 10:08am, Ard Biesheuvel wrote:
->> >> Version 2.5 of the UEFI spec introduces a new configuration table
->> >> called the 'EFI Properties table'. Currently, it is only used to
->> >> convey whether the Memory Protection feature is enabled, which splits
->> >> PE/COFF images into separate code and data memory regions.
->> >>
->> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >> ---
->> >>  drivers/firmware/efi/efi.c | 32 ++++++++++++++++++--------------
->> >>  include/linux/efi.h        | 13 +++++++++++++
->> >>  2 files changed, 31 insertions(+), 14 deletions(-)
->> >>
->> >> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->> >> index d6144e3b97c5..5cbb8d31da33 100644
->> >> --- a/drivers/firmware/efi/efi.c
->> >> +++ b/drivers/firmware/efi/efi.c
->> >> @@ -26,20 +26,21 @@
->> >>  #include <linux/platform_device.h>
->> >>
->> >>  struct efi __read_mostly efi = {
->> >> -     .mps        = EFI_INVALID_TABLE_ADDR,
->> >> -     .acpi       = EFI_INVALID_TABLE_ADDR,
->> >> -     .acpi20     = EFI_INVALID_TABLE_ADDR,
->> >> -     .smbios     = EFI_INVALID_TABLE_ADDR,
->> >> -     .smbios3    = EFI_INVALID_TABLE_ADDR,
->> >> -     .sal_systab = EFI_INVALID_TABLE_ADDR,
->> >> -     .boot_info  = EFI_INVALID_TABLE_ADDR,
->> >> -     .hcdp       = EFI_INVALID_TABLE_ADDR,
->> >> -     .uga        = EFI_INVALID_TABLE_ADDR,
->> >> -     .uv_systab  = EFI_INVALID_TABLE_ADDR,
->> >> -     .fw_vendor  = EFI_INVALID_TABLE_ADDR,
->> >> -     .runtime    = EFI_INVALID_TABLE_ADDR,
->> >> -     .config_table  = EFI_INVALID_TABLE_ADDR,
->> >> -     .esrt       = EFI_INVALID_TABLE_ADDR,
->> >> +     .mps                    = EFI_INVALID_TABLE_ADDR,
->> >> +     .acpi                   = EFI_INVALID_TABLE_ADDR,
->> >> +     .acpi20                 = EFI_INVALID_TABLE_ADDR,
->> >> +     .smbios                 = EFI_INVALID_TABLE_ADDR,
->> >> +     .smbios3                = EFI_INVALID_TABLE_ADDR,
->> >> +     .sal_systab             = EFI_INVALID_TABLE_ADDR,
->> >> +     .boot_info              = EFI_INVALID_TABLE_ADDR,
->> >> +     .hcdp                   = EFI_INVALID_TABLE_ADDR,
->> >> +     .uga                    = EFI_INVALID_TABLE_ADDR,
->> >> +     .uv_systab              = EFI_INVALID_TABLE_ADDR,
->> >> +     .fw_vendor              = EFI_INVALID_TABLE_ADDR,
->> >> +     .runtime                = EFI_INVALID_TABLE_ADDR,
->> >> +     .config_table           = EFI_INVALID_TABLE_ADDR,
->> >> +     .esrt                   = EFI_INVALID_TABLE_ADDR,
->> >> +     .properties_table       = EFI_INVALID_TABLE_ADDR,
->> >>  };
->> >>  EXPORT_SYMBOL(efi);
->> >>
->> >> @@ -105,6 +106,8 @@ static ssize_t systab_show(struct kobject *kobj,
->> >>               str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
->> >>       if (efi.uga != EFI_INVALID_TABLE_ADDR)
->> >>               str += sprintf(str, "UGA=0x%lx\n", efi.uga);
->> >> +     if (efi.properties_table != EFI_INVALID_TABLE_ADDR)
->> >> +             str += sprintf(str, "PROP=0x%lx\n", efi.properties_table);
->> >
->> > Hello, Ard and Matt
->> >
->>
->> Hi Dave,
->>
->> > I ramdomly read some of mails in linux-efi@, sorry for joining the discussion late.
->> >
->> > The sysfs file systab abuses sysfs policy about one value one file. For what we
->> > have done we will have to maintain it, but I think we should not add more entries
->> > to the file any more. Previously I thought to send a patch to add some code comment
->> > to avoid later patches doing such modifications, but I hesitated if I should send
->> > it, later I'm busy on something else..
->> >
->>
->> While I agree that we should not be abusing this policy in the first
->> place, changing the semantics of 'systab' to mean 'all configuration
->> tables we knew about at some random point in the past' rather than
->> 'all configuration tables passed by the firmware' is even worse imo.
->
-> Hmm, I have already put several of them out of systab like 'runtime',
+From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-OK, I was not aware of that.
+Folks,
 
-> if you do not
-> like it, how about re-adding all table entries under /sys/firmware/efi as standalone
-> files, at the same time keep original systab there only for compatibility purpose.
->
+The patches in this pull request fix kernel crashes when booting Linux
+on UEFI v2.5 machines with the Properties Table feature enabled.
 
-The reason I added it is because other config tables are also listed
-there, and I didn't realize we are already actively withholding some
-of the information there (even though efi.runtime does not point to a
-configuration table) But I don't think there is necessarily a point to
-exposing all this information, so I'd prefer to remove it rather than
-add it to a new (mostly redundant) interface.
+Essentially, when this feature is enabled the firmware allocates
+separate entries in the EFI memory map for the code and data sections
+of PE/COFF images, whereas previously only one memory map entry would
+have existed.
 
-All I need is for the table to be enumerated, which will also print
-its address at boot. The hunk that adds it to /sys/firmware/efi/systab
-could be removed for all I care.
+Because we've now got two entries that reference each other we *must*
+map them into the kernel virtual address space with the same offsets
+and in the same order as they appear in the EFI memory map. Failure to
+do so causes the firmware to access unmapped/invalid addresses. 
+
+These patches were intentionally kept as small as possible so that
+they can be backported by distributions, aggressively.
+
+The following changes since commit 1f93e4a96c9109378204c147b3eec0d0e8100fde:
+
+  Linux 4.3-rc2 (2015-09-20 14:32:34 -0700)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 1fa25e09ca2ce07f03bca93ad71800c312fd4951:
+
+  arm64/efi: Don't pad between EFI_MEMORY_RUNTIME regions (2015-09-25 22:35:15 +0100)
+
+----------------------------------------------------------------
+ * arm64 bug fix for UEFI 2.5 firmware that has the Properties Table
+   feature enabled. The fix avoids a kernel crash by removing the padding
+   between runtime regions that we currently do in the kernel so we don't
+   break the EFI's cross-region references - Ard Biesheuvel
+
+ * Map EFI memory regions in-order on x86 so that we maintain the
+   relative offset between regions and fix a crash when booting on
+   UEFI 2.5 machines with the Properties Table feature enabled.
+
+----------------------------------------------------------------
+Ard Biesheuvel (1):
+      arm64/efi: Don't pad between EFI_MEMORY_RUNTIME regions
+
+Matt Fleming (1):
+      x86/efi: Map EFI memmap entries in-order at runtime
+
+ arch/arm64/kernel/efi.c                 |  3 +-
+ arch/x86/platform/efi/efi.c             | 67 ++++++++++++++++++++++++-
+ drivers/firmware/efi/libstub/arm-stub.c | 88 +++++++++++++++++++++++++++------
+ 3 files changed, 141 insertions(+), 17 deletions(-)
