@@ -1,49 +1,31 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
- regions
-Date: Sun, 27 Sep 2015 12:40:14 +0200
-Message-ID: <20150927104014.GA7631@pd.tnic>
+From: Andy Lutomirski <luto@amacapital.net>
+Subject: Re: [PATCH 1/2] x86/efi: Map EFI memmap entries in-order at runtime
+Date: Sun, 27 Sep 2015 09:30:48 -0700
+Message-ID: <CALCETrUA6k-oHzuWA54VzEA1v63b5--JPCCuBoOxLisOtjUn+g@mail.gmail.com>
 References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
- <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
- <20150926060159.GB25877@gmail.com>
- <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
- <20150927070644.GC26125@gmail.com>
+ <1443218539-7610-2-git-send-email-matt@codeblueprint.co.uk>
+ <20150926055643.GA25877@gmail.com> <CALCETrUeGAedCKcSCvedyooamr6-tyfb3-b3uYDZG+k3Q_v9rw@mail.gmail.com>
+ <E40EBF14-FD9E-49C0-A7FB-951958F72F79@zytor.com> <CAKv+Gu8i4KuXYQZA5noTomj6-chZcuuDEQubOJznyP1DR=+VTw@mail.gmail.com>
+ <0568D1D7-B6AA-437C-ADCE-A86D7A2E4722@zytor.com> <20150926195755.GC3144@codeblueprint.co.uk>
+ <BFDFFBC6-C6CA-4035-8E29-C7220533A787@linaro.org> <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20150927070644.GC26125@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
+Sender: stable-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, stable <stable@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Matthew Garrett <mjg59@srcf.ucam.org>, Ingo Molnar <mingo@kernel.org>, Brian Gerst <brgerst@gmail.com>, Dave Young <dyoung@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Jones <pjones@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, "Lee, Chun-Yi" <jlee@suse.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, James Bottomley <JBottomley@odin.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Sep 27, 2015 at 09:06:44AM +0200, Ingo Molnar wrote:
-> Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
-> in a post that also explains the background so that more people can chime in, not 
-> just people versed in EFI internals? It's very much possible that a bad decision 
-> was made.
+On Sep 26, 2015 1:19 PM, "H. Peter Anvin" <hpa@zytor.com> wrote:
+>
+> Sadly a lot of firmware is known to fail in that configuration :(  That was very much our guest choice.
+>
 
-The main reason why we did the additional, top-down mapping was kexec
-kernel wanting to use UEFI runtime facilities too and the braindead
-design of SetVirtualAddressMap() being callable only once per system
-boot. So we had to have stable mappings which are valid in the kexec-ed
-kernel too.
+Why can't we map everything completely 1:1 (VA = PA) and call the
+setVA thing but pass it literally the identity.
 
-But this was long time ago and I most certainly have forgotten all the
-details.
+Firmwares that need it to be called will work, and firmwares that fail
+to update all offsets will be fine because there's nothing to update.
 
-And now I'm wondering why didn't we do the 1:1 thing and rebuild the
-exact same EFI pagetable in the kexec-ed kernel? Because when we do
-an EFI call, we switch to the special pagetable so why didn't we make
-the kexec-ed kernel rebuild the 1:1 pagetable which it can use for EFI
-calls...
-
-Hmm, again, I've forgotten a lot of details so I'm sure Matt will come
-in and say "No, you can't do that because..."
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+--Andy
