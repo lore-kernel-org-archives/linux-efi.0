@@ -1,41 +1,49 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
  regions
-Date: Sun, 27 Sep 2015 09:06:44 +0200
-Message-ID: <20150927070644.GC26125@gmail.com>
+Date: Sun, 27 Sep 2015 12:40:14 +0200
+Message-ID: <20150927104014.GA7631@pd.tnic>
 References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
  <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
  <20150926060159.GB25877@gmail.com>
  <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
+ <20150927070644.GC26125@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20150927070644.GC26125@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
+On Sun, Sep 27, 2015 at 09:06:44AM +0200, Ingo Molnar wrote:
+> Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
+> in a post that also explains the background so that more people can chime in, not 
+> just people versed in EFI internals? It's very much possible that a bad decision 
+> was made.
 
-* Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+The main reason why we did the additional, top-down mapping was kexec
+kernel wanting to use UEFI runtime facilities too and the braindead
+design of SetVirtualAddressMap() being callable only once per system
+boot. So we had to have stable mappings which are valid in the kexec-ed
+kernel too.
 
-> > If we allocate the EFI runtime as a single virtual memory block then issues 
-> > like rounding between sections does not even come up as a problem: we map the 
-> > original offsets and sizes byte by byte.
-> 
-> Well, by that reasoning, we should not call SetVirtualAddressMap() in the first 
-> place, and just use the 1:1 mapping UEFI uses natively. This is more than 
-> feasible on arm64, and I actually fought hard against using 
-> SetVirtualAddressMap() at all, but I was overruled by others. I think this is 
-> also trivially possible on X64, since the 1:1 mapping is already active 
-> alongside the VA mapping.
+But this was long time ago and I most certainly have forgotten all the
+details.
 
-Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
-in a post that also explains the background so that more people can chime in, not 
-just people versed in EFI internals? It's very much possible that a bad decision 
-was made.
+And now I'm wondering why didn't we do the 1:1 thing and rebuild the
+exact same EFI pagetable in the kexec-ed kernel? Because when we do
+an EFI call, we switch to the special pagetable so why didn't we make
+the kexec-ed kernel rebuild the 1:1 pagetable which it can use for EFI
+calls...
 
-Thanks,
+Hmm, again, I've forgotten a lot of details so I'm sure Matt will come
+in and say "No, you can't do that because..."
 
-	Ingo
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
