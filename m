@@ -1,47 +1,52 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/2] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Mon, 28 Sep 2015 08:16:46 +0200
-Message-ID: <20150928061646.GA21690@gmail.com>
-References: <20150926055643.GA25877@gmail.com>
- <CALCETrUeGAedCKcSCvedyooamr6-tyfb3-b3uYDZG+k3Q_v9rw@mail.gmail.com>
- <E40EBF14-FD9E-49C0-A7FB-951958F72F79@zytor.com>
- <CAKv+Gu8i4KuXYQZA5noTomj6-chZcuuDEQubOJznyP1DR=+VTw@mail.gmail.com>
- <0568D1D7-B6AA-437C-ADCE-A86D7A2E4722@zytor.com>
- <20150926195755.GC3144@codeblueprint.co.uk>
- <BFDFFBC6-C6CA-4035-8E29-C7220533A787@linaro.org>
- <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
- <CALCETrUA6k-oHzuWA54VzEA1v63b5--JPCCuBoOxLisOtjUn+g@mail.gmail.com>
- <20150927180633.GA29466@srcf.ucam.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
+ regions
+Date: Mon, 28 Sep 2015 08:20:15 +0200
+Message-ID: <20150928062015.GB21690@gmail.com>
+References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
+ <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
+ <20150926060159.GB25877@gmail.com>
+ <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
+ <20150927070644.GC26125@gmail.com>
+ <20150927104014.GA7631@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20150927180633.GA29466-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, stable <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Bottomley <JBottomley-wo1vFcy6AUs@public.gmane.org>
+In-Reply-To: <20150927104014.GA7631@pd.tnic>
+Sender: stable-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
 
-* Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org> wrote:
+* Borislav Petkov <bp@alien8.de> wrote:
 
-> On Sun, Sep 27, 2015 at 09:30:48AM -0700, Andy Lutomirski wrote:
-> > On Sep 26, 2015 1:19 PM, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> wrote:
-> > >
-> > > Sadly a lot of firmware is known to fail in that configuration :(  That was very much our guest choice.
-> > >
-> > 
-> > Why can't we map everything completely 1:1 (VA = PA) and call the
-> > setVA thing but pass it literally the identity.
+> On Sun, Sep 27, 2015 at 09:06:44AM +0200, Ingo Molnar wrote:
+>
+> > Could we please re-list all the arguments pro and contra of 1:1 physical 
+> > mappings, in a post that also explains the background so that more people can 
+> > chime in, not just people versed in EFI internals? It's very much possible 
+> > that a bad decision was made.
 > 
-> Last time I tried this I found that some firmware makes assumptions 
-> about having high addresses.
+> The main reason why we did the additional, top-down mapping was kexec kernel 
+> wanting to use UEFI runtime facilities too and the braindead design of 
+> SetVirtualAddressMap() being callable only once per system boot. So we had to 
+> have stable mappings which are valid in the kexec-ed kernel too.
+> 
+> But this was long time ago and I most certainly have forgotten all the details.
+> 
+> And now I'm wondering why didn't we do the 1:1 thing and rebuild the exact same 
+> EFI pagetable in the kexec-ed kernel? Because when we do an EFI call, we switch 
+> to the special pagetable so why didn't we make the kexec-ed kernel rebuild the 
+> 1:1 pagetable which it can use for EFI calls...
 
-So the question is, what does Windows do?
+Yeah.
 
-PC firmware is a hostile environment for Linux, to be compatible the best we can 
-do is to mimic the environment that the firmware is tested under - i.e. try to use 
-the firmware in the way Windows uses it.
+> Hmm, again, I've forgotten a lot of details so I'm sure Matt will come in and 
+> say "No, you can't do that because..."
+
+Would be nice to re-examine all this.
 
 Thanks,
 
