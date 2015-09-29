@@ -1,59 +1,127 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
- regions
-Date: Tue, 29 Sep 2015 15:36:12 +0100
-Message-ID: <20150929143612.GC4401@codeblueprint.co.uk>
-References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
- <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
- <20150926060159.GB25877@gmail.com>
- <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
- <20150927070644.GC26125@gmail.com>
- <20150927104014.GA7631@pd.tnic>
+From: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Subject: Re: [PATCH v6 3/6] x86, efi, kasan: #undef memset/memcpy/memmove per arch.
+Date: Tue, 29 Sep 2015 18:34:51 +0300
+Message-ID: <CAPAsAGwKh2sWMwEqhrtfV_YGWcFRWDqj6_vfgBMFW-Eqh+Dtjw@mail.gmail.com>
+References: <1442482692-6416-1-git-send-email-ryabinin.a.a@gmail.com>
+	<1442482692-6416-4-git-send-email-ryabinin.a.a@gmail.com>
+	<20150929083814.GA32127@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20150927104014.GA7631-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20150929083814.GA32127@gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-arm-kernel@lists.infradead.org, Matt Fleming <matt.fleming@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, linux-efi@vger.kernel.org, kbuild test robot <fengguang.wu@intel.com>, Linus Walleij <linus.walleij@linaro.org>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Arnd Bergmann <arnd@arndb.de>, LKML <linux-kernel@vger.kernel.org>, David Keitel <dkeitel@codeaurora.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Alexey Klimov <klimov.linux@gmail.com>, Yury <yury.norov@gmail.com>, Andrey Konovalov <andreyknvl@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, 27 Sep, at 12:40:14PM, Borislav Petkov wrote:
-> On Sun, Sep 27, 2015 at 09:06:44AM +0200, Ingo Molnar wrote:
-> > Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
-> > in a post that also explains the background so that more people can chime in, not 
-> > just people versed in EFI internals? It's very much possible that a bad decision 
-> > was made.
-> 
-> The main reason why we did the additional, top-down mapping was kexec
-> kernel wanting to use UEFI runtime facilities too and the braindead
-> design of SetVirtualAddressMap() being callable only once per system
-> boot. So we had to have stable mappings which are valid in the kexec-ed
-> kernel too.
-> 
-> But this was long time ago and I most certainly have forgotten all the
-> details.
- 
-That's a pretty good summary for x86. I think specifically the reason
-we map the EFI memmap entries "backwards" (entry N has higher VA than
-entry N+1) is because the code was easier to write that way, but
-you'll know better than me ;-)
+2015-09-29 11:38 GMT+03:00 Ingo Molnar <mingo@kernel.org>:
+>
+> * Andrey Ryabinin <ryabinin.a.a@gmail.com> wrote:
+>
+>> In not-instrumented code KASAN replaces instrumented
+>> memset/memcpy/memmove with not-instrumented analogues
+>> __memset/__memcpy/__memove.
+>> However, on x86 the EFI stub is not linked with the kernel.
+>> It uses not-instrumented mem*() functions from
+>> arch/x86/boot/compressed/string.c
+>> So we don't replace them with __mem*() variants in EFI stub.
+>>
+>> On ARM64 the EFI stub is linked with the kernel, so we should
+>> replace mem*() functions with __mem*(), because the EFI stub
+>> runs before KASAN sets up early shadow.
+>>
+>> So let's move these #undef mem* into arch's asm/efi.h which is
+>> also included by the EFI stub.
+>>
+>> Also, this will fix the warning in 32-bit build reported by
+>> kbuild test robot <fengguang.wu@intel.com>:
+>>       efi-stub-helper.c:599:2: warning: implicit declaration of function=
+ 'memcpy'
+>>
+>> Signed-off-by: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+>> ---
+>>  arch/x86/include/asm/efi.h             | 12 ++++++++++++
+>>  drivers/firmware/efi/libstub/efistub.h |  4 ----
+>>  2 files changed, 12 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+>> index 155162e..6db2742 100644
+>> --- a/arch/x86/include/asm/efi.h
+>> +++ b/arch/x86/include/asm/efi.h
+>> @@ -86,6 +86,18 @@ extern u64 asmlinkage efi_call(void *fp, ...);
+>>  extern void __iomem *__init efi_ioremap(unsigned long addr, unsigned lo=
+ng size,
+>>                                       u32 type, u64 attribute);
+>>
+>> +/*
+>> + * CONFIG_KASAN may redefine memset to __memset.
+>> + * __memset function is present only in kernel binary.
+>> + * Since the EFI stub linked into a separate binary it
+>> + * doesn't have __memset(). So we should use standard
+>> + * memset from arch/x86/boot/compressed/string.c
+>> + * The same applies to memcpy and memmove.
+>> + */
+>> +#undef memcpy
+>> +#undef memset
+>> +#undef memmove
+>
+> Hm, so this hack got upstream via -mm, and it breaks the 64-bit x86 build=
+ with
+> some configs:
+>
+>  arch/x86/platform/efi/efi.c:673:3: error: implicit declaration of functi=
+on =E2=80=98memcpy=E2=80=99 [-Werror=3Dimplicit-function-declaration]
+>  arch/x86/platform/efi/efi_64.c:139:2: error: implicit declaration of fun=
+ction =E2=80=98memcpy=E2=80=99 [-Werror=3Dimplicit-function-declaration]
+>  ./arch/x86/include/asm/desc.h:121:2: error: implicit declaration of func=
+tion =E2=80=98memcpy=E2=80=99 [-Werror=3Dimplicit-function-declaration]
+>
+> I guess it's about EFI=3Dy but KASAN=3Dn. Config attached.
 
-> And now I'm wondering why didn't we do the 1:1 thing and rebuild the
-> exact same EFI pagetable in the kexec-ed kernel? Because when we do
-> an EFI call, we switch to the special pagetable so why didn't we make
-> the kexec-ed kernel rebuild the 1:1 pagetable which it can use for EFI
-> calls...
-> 
-> Hmm, again, I've forgotten a lot of details so I'm sure Matt will come
-> in and say "No, you can't do that because..."
+It's actually, it's about KMEMCHECK=3Dy and KASAN=3Dn, because declaration
+of memcpy() is hidden under ifndef.
 
-I *think* the only reason was the Apple firmware problem where it
-explodes if you pass the 1:1 mappings to SetVirtualAddressMap(). And
-obviously people do want to use kexec with Apple machines.
+arch/x86/include/asm/string_64.h:
+    #ifndef CONFIG_KMEMCHECK
+    #if (__GNUC__ =3D=3D 4 && __GNUC_MINOR__ >=3D 3) || __GNUC__ > 4
+    extern void *memcpy(void *to, const void *from, size_t len);
+    #else
+    #define memcpy(dst, src, len)                                   \
+    .......
+    #endif
+    #else
+    /*
+     * kmemcheck becomes very happy if we use the REP instructions
+unconditionally,
+     * because it means that we know both memory operands in advance.
+     */
+    #define memcpy(dst, src, len) __inline_memcpy((dst), (src), (len))
+    #endif
 
-It's probably worth revisiting this whole thing from the x86 side.
+So it also broke build with GCCs 4.0 - 4.3.
+And it also breaks clang build, because AFAIK clang defines GNUC,
+GNUC_MINOR as 4.2.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+>
+> beyond fixing the build bug ... could we also engineer this in a better f=
+ashion
+> than spreading random #undefs across various KASAN unrelated headers?
+
+I think we can add something like -DNOT_KERNEL (anyone has a better name ?)
+to the CFLAGS for everything that is not linked with the kernel binary
+(efistub, arch/x86/boot)
+
+So, if NOT_KERNEL is defined we will not #define memcpy(), so we won't
+need these undefs.
+
+
+> Thanks,
+>
+>         Ingo
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
