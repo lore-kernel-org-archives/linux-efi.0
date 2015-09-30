@@ -1,45 +1,49 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
- regions
-Date: Tue, 29 Sep 2015 18:03:43 -0700
-Message-ID: <560B34EF.8040408@zytor.com>
-References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
- <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
- <20150926060159.GB25877@gmail.com>
- <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
- <20150927070644.GC26125@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20150927070644.GC26125@gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
+From: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH 0/2] Introduce "efi_fake_mem" boot option
+Date: Wed, 30 Sep 2015 19:18:12 +0900
+Message-ID: <1443608292-37686-1-git-send-email-izumi.taku@jp.fujitsu.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Cc: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, qinxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/27/2015 12:06 AM, Ingo Molnar wrote:
-> 
-> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> 
->>> If we allocate the EFI runtime as a single virtual memory block then issues 
->>> like rounding between sections does not even come up as a problem: we map the 
->>> original offsets and sizes byte by byte.
->>
->> Well, by that reasoning, we should not call SetVirtualAddressMap() in the first 
->> place, and just use the 1:1 mapping UEFI uses natively. This is more than 
->> feasible on arm64, and I actually fought hard against using 
->> SetVirtualAddressMap() at all, but I was overruled by others. I think this is 
->> also trivially possible on X64, since the 1:1 mapping is already active 
->> alongside the VA mapping.
-> 
-> Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
-> in a post that also explains the background so that more people can chime in, not 
-> just people versed in EFI internals? It's very much possible that a bad decision 
-> was made.
-> 
+UEFI spec 2.5 introduces new Memory Attribute Definition named
+EFI_MEMORY_MORE_RELIABLE which indicates which memory ranges are
+mirrored. Now linux kernel can recognize which memory ranges are mirrored
+by handling EFI_MEMORY_MORE_RELIABLE attributes.
+However testing this feature necesitates boxes with UEFI spec 2.5 complied
+firmware.
 
-Pro: by far the sanest way to map the UEFI tables.
-Con: doesn't actually work (breaks on several known platforms.)
+This patchset introduces new boot option named "efi_fake_mem".
+By specifying this parameter, you can add arbitrary attribute to
+specific memory range. This is useful for debugging of Memory 
+Address Range Mirroring feature.
 
-	-hpa
+This is updated version one of the former patch posted at
+ http://www.mail-archive.com/linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org/msg05936.html
+
+changelog:
+ - change boot option name and spec
+   efi_fake_mem_mirror=nn@ss -> efi_fake_mem=nn@ss:aa
+ - rename print_efi_memmap() to efi_print_memmap()
+ - introduce new config named CONFIG_EFI_MAX_FAKE_MEM
+ - and some fix pointed by Matt Flemming
+
+Taku Izumi (2):
+  x86, efi: rename print_efi_memmap() to efi_print_memmap()
+  x86, efi: Add "efi_fake_mem" boot option
+
+ Documentation/kernel-parameters.txt |  15 +++
+ arch/x86/include/asm/efi.h          |   1 +
+ arch/x86/kernel/setup.c             |   4 +-
+ arch/x86/platform/efi/efi.c         |   4 +-
+ drivers/firmware/efi/Kconfig        |  22 ++++
+ drivers/firmware/efi/Makefile       |   1 +
+ drivers/firmware/efi/fake_mem.c     | 238 ++++++++++++++++++++++++++++++++++++
+ include/linux/efi.h                 |   6 +
+ 8 files changed, 288 insertions(+), 3 deletions(-)
+ create mode 100644 drivers/firmware/efi/fake_mem.c
+
+-- 
+1.8.3.1
