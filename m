@@ -1,101 +1,116 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+From: James Bottomley <jbottomley@odin.com>
 Subject: Re: [PATCH 1/2] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Wed, 30 Sep 2015 09:43:05 -0700
-Message-ID: <CALCETrWCwuj1hmbGqXGs1vHG2Dk3aoOWD9Ve4gmXJ9S7jPUt-g@mail.gmail.com>
+Date: Wed, 30 Sep 2015 17:24:35 +0000
+Message-ID: <1443633874.2185.42.camel@Odin.com>
 References: <CALCETrUeGAedCKcSCvedyooamr6-tyfb3-b3uYDZG+k3Q_v9rw@mail.gmail.com>
- <E40EBF14-FD9E-49C0-A7FB-951958F72F79@zytor.com> <CAKv+Gu8i4KuXYQZA5noTomj6-chZcuuDEQubOJznyP1DR=+VTw@mail.gmail.com>
- <0568D1D7-B6AA-437C-ADCE-A86D7A2E4722@zytor.com> <20150926195755.GC3144@codeblueprint.co.uk>
- <BFDFFBC6-C6CA-4035-8E29-C7220533A787@linaro.org> <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
- <CALCETrUA6k-oHzuWA54VzEA1v63b5--JPCCuBoOxLisOtjUn+g@mail.gmail.com>
- <20150927180633.GA29466@srcf.ucam.org> <20150928061646.GA21690@gmail.com>
- <20150928064143.GA7380@srcf.ucam.org> <560B096D.6000303@redhat.com> <CAKv+Gu-enULj-OMRufB3OPSUVueM1843bD1CdFybaAS7xMUKgw@mail.gmail.com>
+	 <E40EBF14-FD9E-49C0-A7FB-951958F72F79@zytor.com>
+	 <CAKv+Gu8i4KuXYQZA5noTomj6-chZcuuDEQubOJznyP1DR=+VTw@mail.gmail.com>
+	 <0568D1D7-B6AA-437C-ADCE-A86D7A2E4722@zytor.com>
+	 <20150926195755.GC3144@codeblueprint.co.uk>
+	 <BFDFFBC6-C6CA-4035-8E29-C7220533A787@linaro.org>
+	 <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
+	 <CALCETrUA6k-oHzuWA54VzEA1v63b5--JPCCuBoOxLisOtjUn+g@mail.gmail.com>
+	 <20150927180633.GA29466@srcf.ucam.org> <20150928061646.GA21690@gmail.com>
+	 <20150928064143.GA7380@srcf.ucam.org> <560B096D.6000303@redhat.com>
+	 <CAKv+Gu-enULj-OMRufB3OPSUVueM1843bD1CdFybaAS7xMUKgw@mail.gmail.com>
+	 <CALCETrWCwuj1hmbGqXGs1vHG2Dk3aoOWD9Ve4gmXJ9S7jPUt-g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAKv+Gu-enULj-OMRufB3OPSUVueM1843bD1CdFybaAS7xMUKgw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, stable <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, James Bottomley <JBottomley-wo1vFcy6AUs@public.gmane.org>, "Jordan Justen (Intel address)" <jordan.l.justen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CALCETrWCwuj1hmbGqXGs1vHG2Dk3aoOWD9Ve4gmXJ9S7jPUt-g@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <0CA7358C2DCCF94498D36A4C5E8F8E00@sw.swsoft.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "luto@amacapital.net" <luto@amacapital.net>
+Cc: "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "mingo@kernel.org" <mingo@kernel.org>, "pjones@redhat.com" <pjones@redhat.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "jlee@suse.com" <jlee@suse.com>, "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "lersek@redhat.com" <lersek@redhat.com>, "dyoung@redhat.com" <dyoung@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "jordan.l.justen@intel.com" <jordan.l.justen@intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "brgerst@gmail.com" <brgerst@gmail.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "bp@suse.de" <bp@suse.de>, "bp@alien8.de" <bp@alien8.de>, "dvlasenk@redhat.com" <dvlasenk@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Sep 30, 2015 at 2:30 AM, Ard Biesheuvel
-<ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> On 29 September 2015 at 23:58, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
->> On 09/28/15 08:41, Matthew Garrett wrote:
->>> On Mon, Sep 28, 2015 at 08:16:46AM +0200, Ingo Molnar wrote:
->>>
->>>> So the question is, what does Windows do?
->>>
->>> It's pretty trivial to hack OVMF to dump the SetVirtualAddressMap()
->>> arguments to the qemu debug port. Unfortunately I'm about to drop
->>> mostly  offline for a week, otherwise I'd give it a go...
-> [...]
->> Then I booted my Windows Server 2012 R2, Windows 8.1, and Windows 10
->> guests, with the properties table feature enabled vs. disabled in the
->> firmware. (All three Windows guests were updated first though.)
->>
->> All three Windows OSes adapt their SetVirtualAddressMap() calls, when
->> the feature is enabled in the firmware. However, Windows 8.1 crashes
->> nonetheless (BSOD, I forget the fault details, sorry). Windows Server
->> 2012 R2 and Windows 10 boot fine.
->>
->
-> Looking at the log, it seems the VA mapping strategy is actually the
-> same (i.e., bottom-up for Win10), and the difference can be explained
-> by the differences in the memory map provided by the firmware to the
-> OS. And indeed, the Win8.1 log shows the following:
->
->  # MemType Phys 0x  Virt 0x  Size 0x Attributes
-> -- ------- -------- -------- ------- -------------------------------
->  0 RtData  7EC21000 FFBFA000 0006000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  1 RtCode  7EC27000 FFBF3000 0007000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
->  2 RtData  7EC2E000 FFBEC000 0007000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  3 RtData  7EC35000 FFBEB000 0001000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  4 RtCode  7EC36000 FFBE6000 0005000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
->  5 RtData  7EC3B000 FFBE4000 0002000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  6 RtData  7EC60000 FFBDE000 0006000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  7 RtCode  7EC66000 FFBD5000 0009000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
->  8 RtData  7EC6F000 FFBD3000 0002000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
->  9 RtData  7EC9E000 FFAFA000 00D9000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 10 RtCode  7ED77000 FFA63000 0097000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
-> 11 RtData  7EE0E000 FFA58000 000B000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 12 RtData  7FE99000 FFA52000 0006000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 13 RtCode  7FE9F000 FFA4C000 0006000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
-> 14 RtData  7FEA5000 FFA49000 0003000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 15 RtCode  7FEA8000 FFA42000 0007000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
-> 16 RtData  7FEAF000 FFA3F000 0003000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 17 RtCode  7FEB2000 FFA36000 0009000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
-> 18 RtData  7FEBB000 FFA33000 0003000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 19 RtCode  7FEBE000 FFA2A000 0009000 [UC|WC|WT|WB|  |  |RO|  |  |RT]
-> 20 RtData  7FEC7000 FFA04000 0026000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 21 RtData  7FFD0000 FF9E4000 0020000 [UC|WC|WT|WB|  |XP|  |  |  |RT]
-> 22 RtData  FFE00000 FF7E4000 0200000 [UC|  |  |  |  |XP|  |  |  |RT]
->
-> I.e., the physical addresses increase while the virtual addresses
-> decrease, and since each consecutive RuntimeCode/RuntimeData pair
-> constitutes a PE/COFF image (.text and .data, respectively), the
-> PE/COFF images appear corrupted in the virtual space.
-
-All of this garbage makes me want to ask a rhetorical question:
-
-Why on Earth did anyone think it's a good idea to invoke EFI functions
-at CPL0 once the OS is booted?
-
-And a more practical question:
-
-Do we actually have to invoke EFI functions at CPL0?
-
-I really mean it.  Sure, for things like reboot where we give up
-control and don't get it back, we need to do that.  But for things
-like variable access, the EFI code should really only need access to
-EFI memor (with a known PA -> VA map) and the ability to trigger an
-SMI.  Doing it at CPL3 could require more fixups than would really
-make sense, but could we virtualize it instead?
-
-Actually, CPL3 + IOPL3 just might work.
-
-Heck, on mixed-mode, we're already invoke EFI functions in compat
-mode, and that seems okay, so those functions can't be poking at any
-CPU state that varies between long and 32-bit modes.
-
---Andy
+T24gV2VkLCAyMDE1LTA5LTMwIGF0IDA5OjQzIC0wNzAwLCBBbmR5IEx1dG9taXJza2kgd3JvdGU6
+DQo+IE9uIFdlZCwgU2VwIDMwLCAyMDE1IGF0IDI6MzAgQU0sIEFyZCBCaWVzaGV1dmVsDQo+IDxh
+cmQuYmllc2hldXZlbEBsaW5hcm8ub3JnPiB3cm90ZToNCj4gPiBPbiAyOSBTZXB0ZW1iZXIgMjAx
+NSBhdCAyMzo1OCwgTGFzemxvIEVyc2VrIDxsZXJzZWtAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ID4+
+IE9uIDA5LzI4LzE1IDA4OjQxLCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQo+ID4+PiBPbiBNb24s
+IFNlcCAyOCwgMjAxNSBhdCAwODoxNjo0NkFNICswMjAwLCBJbmdvIE1vbG5hciB3cm90ZToNCj4g
+Pj4+DQo+ID4+Pj4gU28gdGhlIHF1ZXN0aW9uIGlzLCB3aGF0IGRvZXMgV2luZG93cyBkbz8NCj4g
+Pj4+DQo+ID4+PiBJdCdzIHByZXR0eSB0cml2aWFsIHRvIGhhY2sgT1ZNRiB0byBkdW1wIHRoZSBT
+ZXRWaXJ0dWFsQWRkcmVzc01hcCgpDQo+ID4+PiBhcmd1bWVudHMgdG8gdGhlIHFlbXUgZGVidWcg
+cG9ydC4gVW5mb3J0dW5hdGVseSBJJ20gYWJvdXQgdG8gZHJvcA0KPiA+Pj4gbW9zdGx5ICBvZmZs
+aW5lIGZvciBhIHdlZWssIG90aGVyd2lzZSBJJ2QgZ2l2ZSBpdCBhIGdvLi4uDQo+ID4gWy4uLl0N
+Cj4gPj4gVGhlbiBJIGJvb3RlZCBteSBXaW5kb3dzIFNlcnZlciAyMDEyIFIyLCBXaW5kb3dzIDgu
+MSwgYW5kIFdpbmRvd3MgMTANCj4gPj4gZ3Vlc3RzLCB3aXRoIHRoZSBwcm9wZXJ0aWVzIHRhYmxl
+IGZlYXR1cmUgZW5hYmxlZCB2cy4gZGlzYWJsZWQgaW4gdGhlDQo+ID4+IGZpcm13YXJlLiAoQWxs
+IHRocmVlIFdpbmRvd3MgZ3Vlc3RzIHdlcmUgdXBkYXRlZCBmaXJzdCB0aG91Z2guKQ0KPiA+Pg0K
+PiA+PiBBbGwgdGhyZWUgV2luZG93cyBPU2VzIGFkYXB0IHRoZWlyIFNldFZpcnR1YWxBZGRyZXNz
+TWFwKCkgY2FsbHMsIHdoZW4NCj4gPj4gdGhlIGZlYXR1cmUgaXMgZW5hYmxlZCBpbiB0aGUgZmly
+bXdhcmUuIEhvd2V2ZXIsIFdpbmRvd3MgOC4xIGNyYXNoZXMNCj4gPj4gbm9uZXRoZWxlc3MgKEJT
+T0QsIEkgZm9yZ2V0IHRoZSBmYXVsdCBkZXRhaWxzLCBzb3JyeSkuIFdpbmRvd3MgU2VydmVyDQo+
+ID4+IDIwMTIgUjIgYW5kIFdpbmRvd3MgMTAgYm9vdCBmaW5lLg0KPiA+Pg0KPiA+DQo+ID4gTG9v
+a2luZyBhdCB0aGUgbG9nLCBpdCBzZWVtcyB0aGUgVkEgbWFwcGluZyBzdHJhdGVneSBpcyBhY3R1
+YWxseSB0aGUNCj4gPiBzYW1lIChpLmUuLCBib3R0b20tdXAgZm9yIFdpbjEwKSwgYW5kIHRoZSBk
+aWZmZXJlbmNlIGNhbiBiZSBleHBsYWluZWQNCj4gPiBieSB0aGUgZGlmZmVyZW5jZXMgaW4gdGhl
+IG1lbW9yeSBtYXAgcHJvdmlkZWQgYnkgdGhlIGZpcm13YXJlIHRvIHRoZQ0KPiA+IE9TLiBBbmQg
+aW5kZWVkLCB0aGUgV2luOC4xIGxvZyBzaG93cyB0aGUgZm9sbG93aW5nOg0KPiA+DQo+ID4gICMg
+TWVtVHlwZSBQaHlzIDB4ICBWaXJ0IDB4ICBTaXplIDB4IEF0dHJpYnV0ZXMNCj4gPiAtLSAtLS0t
+LS0tIC0tLS0tLS0tIC0tLS0tLS0tIC0tLS0tLS0gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLQ0KPiA+ICAwIFJ0RGF0YSAgN0VDMjEwMDAgRkZCRkEwMDAgMDAwNjAwMCBbVUN8V0N8V1R8
+V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gIDEgUnRDb2RlICA3RUMyNzAwMCBGRkJGMzAwMCAw
+MDA3MDAwIFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgMiBSdERhdGEgIDdF
+QzJFMDAwIEZGQkVDMDAwIDAwMDcwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0K
+PiA+ICAzIFJ0RGF0YSAgN0VDMzUwMDAgRkZCRUIwMDAgMDAwMTAwMCBbVUN8V0N8V1R8V0J8ICB8
+WFB8ICB8ICB8ICB8UlRdDQo+ID4gIDQgUnRDb2RlICA3RUMzNjAwMCBGRkJFNjAwMCAwMDA1MDAw
+IFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgNSBSdERhdGEgIDdFQzNCMDAw
+IEZGQkU0MDAwIDAwMDIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+ICA2
+IFJ0RGF0YSAgN0VDNjAwMDAgRkZCREUwMDAgMDAwNjAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8
+ICB8ICB8UlRdDQo+ID4gIDcgUnRDb2RlICA3RUM2NjAwMCBGRkJENTAwMCAwMDA5MDAwIFtVQ3xX
+Q3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgOCBSdERhdGEgIDdFQzZGMDAwIEZGQkQz
+MDAwIDAwMDIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+ICA5IFJ0RGF0
+YSAgN0VDOUUwMDAgRkZBRkEwMDAgMDBEOTAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8
+UlRdDQo+ID4gMTAgUnRDb2RlICA3RUQ3NzAwMCBGRkE2MzAwMCAwMDk3MDAwIFtVQ3xXQ3xXVHxX
+QnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAxMSBSdERhdGEgIDdFRTBFMDAwIEZGQTU4MDAwIDAw
+MEIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDEyIFJ0RGF0YSAgN0ZF
+OTkwMDAgRkZBNTIwMDAgMDAwNjAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+
+ID4gMTMgUnRDb2RlICA3RkU5RjAwMCBGRkE0QzAwMCAwMDA2MDAwIFtVQ3xXQ3xXVHxXQnwgIHwg
+IHxST3wgIHwgIHxSVF0NCj4gPiAxNCBSdERhdGEgIDdGRUE1MDAwIEZGQTQ5MDAwIDAwMDMwMDAg
+W1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDE1IFJ0Q29kZSAgN0ZFQTgwMDAg
+RkZBNDIwMDAgMDAwNzAwMCBbVUN8V0N8V1R8V0J8ICB8ICB8Uk98ICB8ICB8UlRdDQo+ID4gMTYg
+UnREYXRhICA3RkVBRjAwMCBGRkEzRjAwMCAwMDAzMDAwIFtVQ3xXQ3xXVHxXQnwgIHxYUHwgIHwg
+IHwgIHxSVF0NCj4gPiAxNyBSdENvZGUgIDdGRUIyMDAwIEZGQTM2MDAwIDAwMDkwMDAgW1VDfFdD
+fFdUfFdCfCAgfCAgfFJPfCAgfCAgfFJUXQ0KPiA+IDE4IFJ0RGF0YSAgN0ZFQkIwMDAgRkZBMzMw
+MDAgMDAwMzAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gMTkgUnRDb2Rl
+ICA3RkVCRTAwMCBGRkEyQTAwMCAwMDA5MDAwIFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxS
+VF0NCj4gPiAyMCBSdERhdGEgIDdGRUM3MDAwIEZGQTA0MDAwIDAwMjYwMDAgW1VDfFdDfFdUfFdC
+fCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDIxIFJ0RGF0YSAgN0ZGRDAwMDAgRkY5RTQwMDAgMDAy
+MDAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gMjIgUnREYXRhICBGRkUw
+MDAwMCBGRjdFNDAwMCAwMjAwMDAwIFtVQ3wgIHwgIHwgIHwgIHxYUHwgIHwgIHwgIHxSVF0NCj4g
+Pg0KPiA+IEkuZS4sIHRoZSBwaHlzaWNhbCBhZGRyZXNzZXMgaW5jcmVhc2Ugd2hpbGUgdGhlIHZp
+cnR1YWwgYWRkcmVzc2VzDQo+ID4gZGVjcmVhc2UsIGFuZCBzaW5jZSBlYWNoIGNvbnNlY3V0aXZl
+IFJ1bnRpbWVDb2RlL1J1bnRpbWVEYXRhIHBhaXINCj4gPiBjb25zdGl0dXRlcyBhIFBFL0NPRkYg
+aW1hZ2UgKC50ZXh0IGFuZCAuZGF0YSwgcmVzcGVjdGl2ZWx5KSwgdGhlDQo+ID4gUEUvQ09GRiBp
+bWFnZXMgYXBwZWFyIGNvcnJ1cHRlZCBpbiB0aGUgdmlydHVhbCBzcGFjZS4NCj4gDQo+IEFsbCBv
+ZiB0aGlzIGdhcmJhZ2UgbWFrZXMgbWUgd2FudCB0byBhc2sgYSByaGV0b3JpY2FsIHF1ZXN0aW9u
+Og0KPiANCj4gV2h5IG9uIEVhcnRoIGRpZCBhbnlvbmUgdGhpbmsgaXQncyBhIGdvb2QgaWRlYSB0
+byBpbnZva2UgRUZJIGZ1bmN0aW9ucw0KPiBhdCBDUEwwIG9uY2UgdGhlIE9TIGlzIGJvb3RlZD8N
+Cg0KSSdtIGFmcmFpZCB0aGUgb3JpZ2luYXRvcnMgb2YgRUZJIChJbnRlbCkgbG9vayBvbiBpdCBh
+cyBhIERPUw0KcmVwbGFjZW1lbnQgLi4uIHdpdGggdGhlIHNhbWUgT1Mgc3VwcG9ydC4NCg0KPiBB
+bmQgYSBtb3JlIHByYWN0aWNhbCBxdWVzdGlvbjoNCj4gDQo+IERvIHdlIGFjdHVhbGx5IGhhdmUg
+dG8gaW52b2tlIEVGSSBmdW5jdGlvbnMgYXQgQ1BMMD8NCj4gDQo+IEkgcmVhbGx5IG1lYW4gaXQu
+ICBTdXJlLCBmb3IgdGhpbmdzIGxpa2UgcmVib290IHdoZXJlIHdlIGdpdmUgdXANCj4gY29udHJv
+bCBhbmQgZG9uJ3QgZ2V0IGl0IGJhY2ssIHdlIG5lZWQgdG8gZG8gdGhhdC4gIEJ1dCBmb3IgdGhp
+bmdzDQo+IGxpa2UgdmFyaWFibGUgYWNjZXNzLCB0aGUgRUZJIGNvZGUgc2hvdWxkIHJlYWxseSBv
+bmx5IG5lZWQgYWNjZXNzIHRvDQo+IEVGSSBtZW1vciAod2l0aCBhIGtub3duIFBBIC0+IFZBIG1h
+cCkgYW5kIHRoZSBhYmlsaXR5IHRvIHRyaWdnZXIgYW4NCj4gU01JLiAgRG9pbmcgaXQgYXQgQ1BM
+MyBjb3VsZCByZXF1aXJlIG1vcmUgZml4dXBzIHRoYW4gd291bGQgcmVhbGx5DQo+IG1ha2Ugc2Vu
+c2UsIGJ1dCBjb3VsZCB3ZSB2aXJ0dWFsaXplIGl0IGluc3RlYWQ/DQo+IA0KPiBBY3R1YWxseSwg
+Q1BMMyArIElPUEwzIGp1c3QgbWlnaHQgd29yay4NCj4gDQo+IEhlY2ssIG9uIG1peGVkLW1vZGUs
+IHdlJ3JlIGFscmVhZHkgaW52b2tlIEVGSSBmdW5jdGlvbnMgaW4gY29tcGF0DQo+IG1vZGUsIGFu
+ZCB0aGF0IHNlZW1zIG9rYXksIHNvIHRob3NlIGZ1bmN0aW9ucyBjYW4ndCBiZSBwb2tpbmcgYXQg
+YW55DQo+IENQVSBzdGF0ZSB0aGF0IHZhcmllcyBiZXR3ZWVuIGxvbmcgYW5kIDMyLWJpdCBtb2Rl
+cy4NCg0KSXQncyBoYXJkLiAgVGhlIEVGSSBmdW5jdGlvbnMgZXhwZWN0IHRvIGludGVyYWN0IGRp
+cmVjdGx5IHdpdGgga2VybmVsDQptZW1vcnksIHdoaWNoIHRoZXkgY2FuJ3QgYXQgQ1BMMy4gIFdl
+IGNvdWxkIHZlY3RvciBhbGwgdGhhdCB0aHJvdWdoIGENCkNQTDMgcmVhZGFibGUgYnVmZmVyIGJ1
+dCBhbnl0aGluZyB3aXRoaW4gRUZJIHRoYXQgdXNlcyBwcml2aWxlZ2VkDQppbnN0cnVjdGlvbnMg
+d2lsbCBmYXVsdCBhbmQgd2UnbGwgaGF2ZSB0byBoYW5kbGUgaXQgLi4uIHRoaXMgcmVhbGx5DQpz
+b3VuZHMgbGlrZSBhIGNhbiBvZiB3b3Jtcy4gIEVzcGVjaWFsbHkgYXMgd2luZG93cyB3aWxsIGJl
+IG5vIGhlbHANCnRlc3RpbmcgYWxsIG9mIHRoaXMgYmVjYXVzZSBpdCB3aWxsIGNhbGwgaW4gYXQg
+Q1BMMC4NCg0KSmFtZXMNCg0K
