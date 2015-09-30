@@ -1,47 +1,58 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME regions
-Date: Tue, 29 Sep 2015 18:16:19 -0700
-Message-ID: <CALCETrVvwxZN95swaUDG2fkz9brWV3BQkfMDtLJXZkTRpe8nRg@mail.gmail.com>
-References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
- <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
- <20150926060159.GB25877@gmail.com> <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
- <20150927070644.GC26125@gmail.com> <560B34EF.8040408@zytor.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <560B34EF.8040408@zytor.com>
-Sender: stable-owner@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
+From: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Subject: [PATCH 1/2] x86, efi: rename print_efi_memmap() to efi_print_memmap()
+Date: Wed, 30 Sep 2015 19:20:00 +0900
+Message-ID: <1443608400-37744-1-git-send-email-izumi.taku@jp.fujitsu.com>
+References: <1443608292-37686-1-git-send-email-izumi.taku@jp.fujitsu.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1443608292-37686-1-git-send-email-izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
+Cc: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, qinxishi-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Sep 29, 2015 at 6:03 PM, H. Peter Anvin <hpa@zytor.com> wrote:
-> On 09/27/2015 12:06 AM, Ingo Molnar wrote:
->>
->> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->>
->>>> If we allocate the EFI runtime as a single virtual memory block then issues
->>>> like rounding between sections does not even come up as a problem: we map the
->>>> original offsets and sizes byte by byte.
->>>
->>> Well, by that reasoning, we should not call SetVirtualAddressMap() in the first
->>> place, and just use the 1:1 mapping UEFI uses natively. This is more than
->>> feasible on arm64, and I actually fought hard against using
->>> SetVirtualAddressMap() at all, but I was overruled by others. I think this is
->>> also trivially possible on X64, since the 1:1 mapping is already active
->>> alongside the VA mapping.
->>
->> Could we please re-list all the arguments pro and contra of 1:1 physical mappings,
->> in a post that also explains the background so that more people can chime in, not
->> just people versed in EFI internals? It's very much possible that a bad decision
->> was made.
->>
->
-> Pro: by far the sanest way to map the UEFI tables.
-> Con: doesn't actually work (breaks on several known platforms.)
+This patch renames print_efi_memmap() to efi_print_memmap() and
+make it global function so that we can invoke it outside of
+arch/x86/platform/efi/efi.c
 
-Can we at least do 1:1 without an offset on arm64?  Given that Linux
-seems to be more of a reference on arm64 than Windows is, maybe that
-would give everyone something vaguely sane to work with.
+Signed-off-by: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
+---
+ arch/x86/include/asm/efi.h  | 1 +
+ arch/x86/platform/efi/efi.c | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
---Andy
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index ab5f1d4..f8b93d6 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -103,6 +103,7 @@ extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
+ extern int __init efi_memblock_x86_reserve_range(void);
+ extern pgd_t * __init efi_call_phys_prolog(void);
+ extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
++extern void __init efi_print_memmap(void);
+ extern void __init efi_unmap_memmap(void);
+ extern void __init efi_memory_uc(u64 addr, unsigned long size);
+ extern void __init efi_map_region(efi_memory_desc_t *md);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 1db84c0..1f95caf 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -222,7 +222,7 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	return 0;
+ }
+ 
+-static void __init print_efi_memmap(void)
++void __init efi_print_memmap(void)
+ {
+ #ifdef EFI_DEBUG
+ 	efi_memory_desc_t *md;
+@@ -524,7 +524,7 @@ void __init efi_init(void)
+ 		return;
+ 
+ 	if (efi_enabled(EFI_DBG))
+-		print_efi_memmap();
++		efi_print_memmap();
+ 
+ 	efi_esrt_init();
+ }
+-- 
+1.8.3.1
