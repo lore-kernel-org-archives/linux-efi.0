@@ -1,51 +1,68 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH] efi: remove UEFIv2.5 properties table from
- /sys/firmware/efi/systab
-Date: Thu, 1 Oct 2015 11:15:05 +0800
-Message-ID: <20151001031505.GA8264@localhost.localdomain>
-References: <1443624196-31630-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 2/2] arm64/efi: Don't pad between EFI_MEMORY_RUNTIME
+ regions
+Date: Thu, 1 Oct 2015 12:44:55 +0200
+Message-ID: <20151001104455.GA14061@gmail.com>
+References: <1443218539-7610-1-git-send-email-matt@codeblueprint.co.uk>
+ <1443218539-7610-3-git-send-email-matt@codeblueprint.co.uk>
+ <20150926060159.GB25877@gmail.com>
+ <CAKv+Gu_JRCmx5qKq7SDDq73BegVs3LKZwe+OdvTKb4YD_CURyw@mail.gmail.com>
+ <20150927070644.GC26125@gmail.com>
+ <560B34EF.8040408@zytor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1443624196-31630-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+In-Reply-To: <560B34EF.8040408@zytor.com>
+Sender: stable-owner@vger.kernel.org
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Leif Lindholm <leif.lindholm@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "stable@vger.kernel.org" <stable@vger.kernel.org>, Matt Fleming <matt.fleming@intel.com>, Mark Rutland <mark.rutland@arm.com>, Mark Salter <msalter@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 09/30/15 at 04:43pm, Ard Biesheuvel wrote:
-> As pointed out by Dave Young, /sys/firmware/efi/systab violates the
-> sysfs one-value-per-file policy already, so adding more data items
-> to it should be avoided. So let's remove the PROP= line that lists
-> the address of the recently introduced Properties Table before it
-> appears in a release.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
-> 
-> Matt pointed out that there still needs to be a way for kexec/x86 to
-> access this data, since it needs to pass it on to the kexec kernel.
-> That is way out of my area of expertise, so I will leave it to you
-> to come up with something suitable there.
-> 
->  drivers/firmware/efi/efi.c | 2 --
->  1 file changed, 2 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-> index 2eb31e28a35c..3804ecd4a77a 100644
-> --- a/drivers/firmware/efi/efi.c
-> +++ b/drivers/firmware/efi/efi.c
-> @@ -109,8 +109,6 @@ static ssize_t systab_show(struct kobject *kobj,
->  		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
->  	if (efi.uga != EFI_INVALID_TABLE_ADDR)
->  		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
-> -	if (efi.properties_table != EFI_INVALID_TABLE_ADDR)
-> -		str += sprintf(str, "PROP=0x%lx\n", efi.properties_table);
->  
->  	return str - buf;
->  }
 
-Ard, thanks, it looks good to me.
+* H. Peter Anvin <hpa@zytor.com> wrote:
 
-Acked-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> On 09/27/2015 12:06 AM, Ingo Molnar wrote:
+> > 
+> > * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> > 
+> >>> If we allocate the EFI runtime as a single virtual memory block then issues 
+> >>> like rounding between sections does not even come up as a problem: we map the 
+> >>> original offsets and sizes byte by byte.
+> >>
+> >> Well, by that reasoning, we should not call SetVirtualAddressMap() in the first 
+> >> place, and just use the 1:1 mapping UEFI uses natively. This is more than 
+> >> feasible on arm64, and I actually fought hard against using 
+> >> SetVirtualAddressMap() at all, but I was overruled by others. I think this is 
+> >> also trivially possible on X64, since the 1:1 mapping is already active 
+> >> alongside the VA mapping.
+> > 
+> > Could we please re-list all the arguments pro and contra of 1:1 physical mappings, 
+> > in a post that also explains the background so that more people can chime in, not 
+> > just people versed in EFI internals? It's very much possible that a bad decision 
+> > was made.
+> > 
+> 
+> Pro: by far the sanest way to map the UEFI tables.
+> Con: doesn't actually work (breaks on several known platforms.)
+
+You knew this next question was coming: in what way does it break on known 
+platforms?
+
+I.e. do those platforms require a SetVirtualAddressMap() call and break if one 
+does not come?
+
+Note that there's 3 models possible:
+
+ - pure 1:1
+ - 1:1 plus offset, with SetVirtualAddressMap(offset)
+ - bottom up allocator
+
+I don't think we want 'pure' 1:1 physical/virtual (for security reasons, etc.).
+
+So the question is, in what way does our current proposed bottom-up allocator 
+differ from 1:1 plus offset? My impression is that they are mostly identical.
+
+Thanks,
+
+	Ingo
