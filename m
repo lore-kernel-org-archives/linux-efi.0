@@ -1,116 +1,51 @@
-From: James Bottomley <jbottomley@odin.com>
-Subject: Re: [PATCH 1/2] x86/efi: Map EFI memmap entries in-order at runtime
-Date: Wed, 30 Sep 2015 17:24:35 +0000
-Message-ID: <1443633874.2185.42.camel@Odin.com>
-References: <CALCETrUeGAedCKcSCvedyooamr6-tyfb3-b3uYDZG+k3Q_v9rw@mail.gmail.com>
-	 <E40EBF14-FD9E-49C0-A7FB-951958F72F79@zytor.com>
-	 <CAKv+Gu8i4KuXYQZA5noTomj6-chZcuuDEQubOJznyP1DR=+VTw@mail.gmail.com>
-	 <0568D1D7-B6AA-437C-ADCE-A86D7A2E4722@zytor.com>
-	 <20150926195755.GC3144@codeblueprint.co.uk>
-	 <BFDFFBC6-C6CA-4035-8E29-C7220533A787@linaro.org>
-	 <F1F37F57-7D03-4FC2-955E-7E8C82540A24@zytor.com>
-	 <CALCETrUA6k-oHzuWA54VzEA1v63b5--JPCCuBoOxLisOtjUn+g@mail.gmail.com>
-	 <20150927180633.GA29466@srcf.ucam.org> <20150928061646.GA21690@gmail.com>
-	 <20150928064143.GA7380@srcf.ucam.org> <560B096D.6000303@redhat.com>
-	 <CAKv+Gu-enULj-OMRufB3OPSUVueM1843bD1CdFybaAS7xMUKgw@mail.gmail.com>
-	 <CALCETrWCwuj1hmbGqXGs1vHG2Dk3aoOWD9Ve4gmXJ9S7jPUt-g@mail.gmail.com>
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH] efi: remove UEFIv2.5 properties table from
+ /sys/firmware/efi/systab
+Date: Thu, 1 Oct 2015 11:15:05 +0800
+Message-ID: <20151001031505.GA8264@localhost.localdomain>
+References: <1443624196-31630-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CALCETrWCwuj1hmbGqXGs1vHG2Dk3aoOWD9Ve4gmXJ9S7jPUt-g@mail.gmail.com>
-Content-Language: en-US
-Content-ID: <0CA7358C2DCCF94498D36A4C5E8F8E00@sw.swsoft.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "luto@amacapital.net" <luto@amacapital.net>
-Cc: "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "mingo@kernel.org" <mingo@kernel.org>, "pjones@redhat.com" <pjones@redhat.com>, "ard.biesheuvel@linaro.org" <ard.biesheuvel@linaro.org>, "jlee@suse.com" <jlee@suse.com>, "torvalds@linux-foundation.org" <torvalds@linux-foundation.org>, "tglx@linutronix.de" <tglx@linutronix.de>, "lersek@redhat.com" <lersek@redhat.com>, "dyoung@redhat.com" <dyoung@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "jordan.l.justen@intel.com" <jordan.l.justen@intel.com>, "akpm@linux-foundation.org" <akpm@linux-foundation.org>, "hpa@zytor.com" <hpa@zytor.com>, "brgerst@gmail.com" <brgerst@gmail.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "bp@suse.de" <bp@suse.de>, "bp@alien8.de" <bp@alien8.de>, "dvlasenk@redhat.com" <dvlasenk@redhat.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1443624196-31630-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCAyMDE1LTA5LTMwIGF0IDA5OjQzIC0wNzAwLCBBbmR5IEx1dG9taXJza2kgd3JvdGU6
-DQo+IE9uIFdlZCwgU2VwIDMwLCAyMDE1IGF0IDI6MzAgQU0sIEFyZCBCaWVzaGV1dmVsDQo+IDxh
-cmQuYmllc2hldXZlbEBsaW5hcm8ub3JnPiB3cm90ZToNCj4gPiBPbiAyOSBTZXB0ZW1iZXIgMjAx
-NSBhdCAyMzo1OCwgTGFzemxvIEVyc2VrIDxsZXJzZWtAcmVkaGF0LmNvbT4gd3JvdGU6DQo+ID4+
-IE9uIDA5LzI4LzE1IDA4OjQxLCBNYXR0aGV3IEdhcnJldHQgd3JvdGU6DQo+ID4+PiBPbiBNb24s
-IFNlcCAyOCwgMjAxNSBhdCAwODoxNjo0NkFNICswMjAwLCBJbmdvIE1vbG5hciB3cm90ZToNCj4g
-Pj4+DQo+ID4+Pj4gU28gdGhlIHF1ZXN0aW9uIGlzLCB3aGF0IGRvZXMgV2luZG93cyBkbz8NCj4g
-Pj4+DQo+ID4+PiBJdCdzIHByZXR0eSB0cml2aWFsIHRvIGhhY2sgT1ZNRiB0byBkdW1wIHRoZSBT
-ZXRWaXJ0dWFsQWRkcmVzc01hcCgpDQo+ID4+PiBhcmd1bWVudHMgdG8gdGhlIHFlbXUgZGVidWcg
-cG9ydC4gVW5mb3J0dW5hdGVseSBJJ20gYWJvdXQgdG8gZHJvcA0KPiA+Pj4gbW9zdGx5ICBvZmZs
-aW5lIGZvciBhIHdlZWssIG90aGVyd2lzZSBJJ2QgZ2l2ZSBpdCBhIGdvLi4uDQo+ID4gWy4uLl0N
-Cj4gPj4gVGhlbiBJIGJvb3RlZCBteSBXaW5kb3dzIFNlcnZlciAyMDEyIFIyLCBXaW5kb3dzIDgu
-MSwgYW5kIFdpbmRvd3MgMTANCj4gPj4gZ3Vlc3RzLCB3aXRoIHRoZSBwcm9wZXJ0aWVzIHRhYmxl
-IGZlYXR1cmUgZW5hYmxlZCB2cy4gZGlzYWJsZWQgaW4gdGhlDQo+ID4+IGZpcm13YXJlLiAoQWxs
-IHRocmVlIFdpbmRvd3MgZ3Vlc3RzIHdlcmUgdXBkYXRlZCBmaXJzdCB0aG91Z2guKQ0KPiA+Pg0K
-PiA+PiBBbGwgdGhyZWUgV2luZG93cyBPU2VzIGFkYXB0IHRoZWlyIFNldFZpcnR1YWxBZGRyZXNz
-TWFwKCkgY2FsbHMsIHdoZW4NCj4gPj4gdGhlIGZlYXR1cmUgaXMgZW5hYmxlZCBpbiB0aGUgZmly
-bXdhcmUuIEhvd2V2ZXIsIFdpbmRvd3MgOC4xIGNyYXNoZXMNCj4gPj4gbm9uZXRoZWxlc3MgKEJT
-T0QsIEkgZm9yZ2V0IHRoZSBmYXVsdCBkZXRhaWxzLCBzb3JyeSkuIFdpbmRvd3MgU2VydmVyDQo+
-ID4+IDIwMTIgUjIgYW5kIFdpbmRvd3MgMTAgYm9vdCBmaW5lLg0KPiA+Pg0KPiA+DQo+ID4gTG9v
-a2luZyBhdCB0aGUgbG9nLCBpdCBzZWVtcyB0aGUgVkEgbWFwcGluZyBzdHJhdGVneSBpcyBhY3R1
-YWxseSB0aGUNCj4gPiBzYW1lIChpLmUuLCBib3R0b20tdXAgZm9yIFdpbjEwKSwgYW5kIHRoZSBk
-aWZmZXJlbmNlIGNhbiBiZSBleHBsYWluZWQNCj4gPiBieSB0aGUgZGlmZmVyZW5jZXMgaW4gdGhl
-IG1lbW9yeSBtYXAgcHJvdmlkZWQgYnkgdGhlIGZpcm13YXJlIHRvIHRoZQ0KPiA+IE9TLiBBbmQg
-aW5kZWVkLCB0aGUgV2luOC4xIGxvZyBzaG93cyB0aGUgZm9sbG93aW5nOg0KPiA+DQo+ID4gICMg
-TWVtVHlwZSBQaHlzIDB4ICBWaXJ0IDB4ICBTaXplIDB4IEF0dHJpYnV0ZXMNCj4gPiAtLSAtLS0t
-LS0tIC0tLS0tLS0tIC0tLS0tLS0tIC0tLS0tLS0gLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLQ0KPiA+ICAwIFJ0RGF0YSAgN0VDMjEwMDAgRkZCRkEwMDAgMDAwNjAwMCBbVUN8V0N8V1R8
-V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gIDEgUnRDb2RlICA3RUMyNzAwMCBGRkJGMzAwMCAw
-MDA3MDAwIFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgMiBSdERhdGEgIDdF
-QzJFMDAwIEZGQkVDMDAwIDAwMDcwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0K
-PiA+ICAzIFJ0RGF0YSAgN0VDMzUwMDAgRkZCRUIwMDAgMDAwMTAwMCBbVUN8V0N8V1R8V0J8ICB8
-WFB8ICB8ICB8ICB8UlRdDQo+ID4gIDQgUnRDb2RlICA3RUMzNjAwMCBGRkJFNjAwMCAwMDA1MDAw
-IFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgNSBSdERhdGEgIDdFQzNCMDAw
-IEZGQkU0MDAwIDAwMDIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+ICA2
-IFJ0RGF0YSAgN0VDNjAwMDAgRkZCREUwMDAgMDAwNjAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8
-ICB8ICB8UlRdDQo+ID4gIDcgUnRDb2RlICA3RUM2NjAwMCBGRkJENTAwMCAwMDA5MDAwIFtVQ3xX
-Q3xXVHxXQnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAgOCBSdERhdGEgIDdFQzZGMDAwIEZGQkQz
-MDAwIDAwMDIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+ICA5IFJ0RGF0
-YSAgN0VDOUUwMDAgRkZBRkEwMDAgMDBEOTAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8
-UlRdDQo+ID4gMTAgUnRDb2RlICA3RUQ3NzAwMCBGRkE2MzAwMCAwMDk3MDAwIFtVQ3xXQ3xXVHxX
-QnwgIHwgIHxST3wgIHwgIHxSVF0NCj4gPiAxMSBSdERhdGEgIDdFRTBFMDAwIEZGQTU4MDAwIDAw
-MEIwMDAgW1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDEyIFJ0RGF0YSAgN0ZF
-OTkwMDAgRkZBNTIwMDAgMDAwNjAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+
-ID4gMTMgUnRDb2RlICA3RkU5RjAwMCBGRkE0QzAwMCAwMDA2MDAwIFtVQ3xXQ3xXVHxXQnwgIHwg
-IHxST3wgIHwgIHxSVF0NCj4gPiAxNCBSdERhdGEgIDdGRUE1MDAwIEZGQTQ5MDAwIDAwMDMwMDAg
-W1VDfFdDfFdUfFdCfCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDE1IFJ0Q29kZSAgN0ZFQTgwMDAg
-RkZBNDIwMDAgMDAwNzAwMCBbVUN8V0N8V1R8V0J8ICB8ICB8Uk98ICB8ICB8UlRdDQo+ID4gMTYg
-UnREYXRhICA3RkVBRjAwMCBGRkEzRjAwMCAwMDAzMDAwIFtVQ3xXQ3xXVHxXQnwgIHxYUHwgIHwg
-IHwgIHxSVF0NCj4gPiAxNyBSdENvZGUgIDdGRUIyMDAwIEZGQTM2MDAwIDAwMDkwMDAgW1VDfFdD
-fFdUfFdCfCAgfCAgfFJPfCAgfCAgfFJUXQ0KPiA+IDE4IFJ0RGF0YSAgN0ZFQkIwMDAgRkZBMzMw
-MDAgMDAwMzAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gMTkgUnRDb2Rl
-ICA3RkVCRTAwMCBGRkEyQTAwMCAwMDA5MDAwIFtVQ3xXQ3xXVHxXQnwgIHwgIHxST3wgIHwgIHxS
-VF0NCj4gPiAyMCBSdERhdGEgIDdGRUM3MDAwIEZGQTA0MDAwIDAwMjYwMDAgW1VDfFdDfFdUfFdC
-fCAgfFhQfCAgfCAgfCAgfFJUXQ0KPiA+IDIxIFJ0RGF0YSAgN0ZGRDAwMDAgRkY5RTQwMDAgMDAy
-MDAwMCBbVUN8V0N8V1R8V0J8ICB8WFB8ICB8ICB8ICB8UlRdDQo+ID4gMjIgUnREYXRhICBGRkUw
-MDAwMCBGRjdFNDAwMCAwMjAwMDAwIFtVQ3wgIHwgIHwgIHwgIHxYUHwgIHwgIHwgIHxSVF0NCj4g
-Pg0KPiA+IEkuZS4sIHRoZSBwaHlzaWNhbCBhZGRyZXNzZXMgaW5jcmVhc2Ugd2hpbGUgdGhlIHZp
-cnR1YWwgYWRkcmVzc2VzDQo+ID4gZGVjcmVhc2UsIGFuZCBzaW5jZSBlYWNoIGNvbnNlY3V0aXZl
-IFJ1bnRpbWVDb2RlL1J1bnRpbWVEYXRhIHBhaXINCj4gPiBjb25zdGl0dXRlcyBhIFBFL0NPRkYg
-aW1hZ2UgKC50ZXh0IGFuZCAuZGF0YSwgcmVzcGVjdGl2ZWx5KSwgdGhlDQo+ID4gUEUvQ09GRiBp
-bWFnZXMgYXBwZWFyIGNvcnJ1cHRlZCBpbiB0aGUgdmlydHVhbCBzcGFjZS4NCj4gDQo+IEFsbCBv
-ZiB0aGlzIGdhcmJhZ2UgbWFrZXMgbWUgd2FudCB0byBhc2sgYSByaGV0b3JpY2FsIHF1ZXN0aW9u
-Og0KPiANCj4gV2h5IG9uIEVhcnRoIGRpZCBhbnlvbmUgdGhpbmsgaXQncyBhIGdvb2QgaWRlYSB0
-byBpbnZva2UgRUZJIGZ1bmN0aW9ucw0KPiBhdCBDUEwwIG9uY2UgdGhlIE9TIGlzIGJvb3RlZD8N
-Cg0KSSdtIGFmcmFpZCB0aGUgb3JpZ2luYXRvcnMgb2YgRUZJIChJbnRlbCkgbG9vayBvbiBpdCBh
-cyBhIERPUw0KcmVwbGFjZW1lbnQgLi4uIHdpdGggdGhlIHNhbWUgT1Mgc3VwcG9ydC4NCg0KPiBB
-bmQgYSBtb3JlIHByYWN0aWNhbCBxdWVzdGlvbjoNCj4gDQo+IERvIHdlIGFjdHVhbGx5IGhhdmUg
-dG8gaW52b2tlIEVGSSBmdW5jdGlvbnMgYXQgQ1BMMD8NCj4gDQo+IEkgcmVhbGx5IG1lYW4gaXQu
-ICBTdXJlLCBmb3IgdGhpbmdzIGxpa2UgcmVib290IHdoZXJlIHdlIGdpdmUgdXANCj4gY29udHJv
-bCBhbmQgZG9uJ3QgZ2V0IGl0IGJhY2ssIHdlIG5lZWQgdG8gZG8gdGhhdC4gIEJ1dCBmb3IgdGhp
-bmdzDQo+IGxpa2UgdmFyaWFibGUgYWNjZXNzLCB0aGUgRUZJIGNvZGUgc2hvdWxkIHJlYWxseSBv
-bmx5IG5lZWQgYWNjZXNzIHRvDQo+IEVGSSBtZW1vciAod2l0aCBhIGtub3duIFBBIC0+IFZBIG1h
-cCkgYW5kIHRoZSBhYmlsaXR5IHRvIHRyaWdnZXIgYW4NCj4gU01JLiAgRG9pbmcgaXQgYXQgQ1BM
-MyBjb3VsZCByZXF1aXJlIG1vcmUgZml4dXBzIHRoYW4gd291bGQgcmVhbGx5DQo+IG1ha2Ugc2Vu
-c2UsIGJ1dCBjb3VsZCB3ZSB2aXJ0dWFsaXplIGl0IGluc3RlYWQ/DQo+IA0KPiBBY3R1YWxseSwg
-Q1BMMyArIElPUEwzIGp1c3QgbWlnaHQgd29yay4NCj4gDQo+IEhlY2ssIG9uIG1peGVkLW1vZGUs
-IHdlJ3JlIGFscmVhZHkgaW52b2tlIEVGSSBmdW5jdGlvbnMgaW4gY29tcGF0DQo+IG1vZGUsIGFu
-ZCB0aGF0IHNlZW1zIG9rYXksIHNvIHRob3NlIGZ1bmN0aW9ucyBjYW4ndCBiZSBwb2tpbmcgYXQg
-YW55DQo+IENQVSBzdGF0ZSB0aGF0IHZhcmllcyBiZXR3ZWVuIGxvbmcgYW5kIDMyLWJpdCBtb2Rl
-cy4NCg0KSXQncyBoYXJkLiAgVGhlIEVGSSBmdW5jdGlvbnMgZXhwZWN0IHRvIGludGVyYWN0IGRp
-cmVjdGx5IHdpdGgga2VybmVsDQptZW1vcnksIHdoaWNoIHRoZXkgY2FuJ3QgYXQgQ1BMMy4gIFdl
-IGNvdWxkIHZlY3RvciBhbGwgdGhhdCB0aHJvdWdoIGENCkNQTDMgcmVhZGFibGUgYnVmZmVyIGJ1
-dCBhbnl0aGluZyB3aXRoaW4gRUZJIHRoYXQgdXNlcyBwcml2aWxlZ2VkDQppbnN0cnVjdGlvbnMg
-d2lsbCBmYXVsdCBhbmQgd2UnbGwgaGF2ZSB0byBoYW5kbGUgaXQgLi4uIHRoaXMgcmVhbGx5DQpz
-b3VuZHMgbGlrZSBhIGNhbiBvZiB3b3Jtcy4gIEVzcGVjaWFsbHkgYXMgd2luZG93cyB3aWxsIGJl
-IG5vIGhlbHANCnRlc3RpbmcgYWxsIG9mIHRoaXMgYmVjYXVzZSBpdCB3aWxsIGNhbGwgaW4gYXQg
-Q1BMMC4NCg0KSmFtZXMNCg0K
+On 09/30/15 at 04:43pm, Ard Biesheuvel wrote:
+> As pointed out by Dave Young, /sys/firmware/efi/systab violates the
+> sysfs one-value-per-file policy already, so adding more data items
+> to it should be avoided. So let's remove the PROP= line that lists
+> the address of the recently introduced Properties Table before it
+> appears in a release.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> 
+> Matt pointed out that there still needs to be a way for kexec/x86 to
+> access this data, since it needs to pass it on to the kexec kernel.
+> That is way out of my area of expertise, so I will leave it to you
+> to come up with something suitable there.
+> 
+>  drivers/firmware/efi/efi.c | 2 --
+>  1 file changed, 2 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 2eb31e28a35c..3804ecd4a77a 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -109,8 +109,6 @@ static ssize_t systab_show(struct kobject *kobj,
+>  		str += sprintf(str, "BOOTINFO=0x%lx\n", efi.boot_info);
+>  	if (efi.uga != EFI_INVALID_TABLE_ADDR)
+>  		str += sprintf(str, "UGA=0x%lx\n", efi.uga);
+> -	if (efi.properties_table != EFI_INVALID_TABLE_ADDR)
+> -		str += sprintf(str, "PROP=0x%lx\n", efi.properties_table);
+>  
+>  	return str - buf;
+>  }
+
+Ard, thanks, it looks good to me.
+
+Acked-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
