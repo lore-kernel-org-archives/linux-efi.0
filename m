@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 2/2] arm64/efi: isolate EFI stub from the kernel proper
-Date: Thu,  1 Oct 2015 14:18:21 +0200
-Message-ID: <1443701901-17625-3-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 1/2] arm64: use ENDPIPROC() to annotate position independent assembler routines
+Date: Thu,  1 Oct 2015 14:18:20 +0200
+Message-ID: <1443701901-17625-2-git-send-email-ard.biesheuvel@linaro.org>
 References: <1443701901-17625-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1443701901-17625-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,300 +10,159 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Since arm64 does not use a builtin decompressor, the EFI stub is built
-into the kernel proper. So far, this has been working fine, but actually,
-since the stub is in fact a PE/COFF relocatable binary that is executed
-at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
-should not be seamlessly sharing code with the kernel proper, which is a
-position dependent executable linked at a high virtual offset.
-
-So instead, separate the contents of libstub and its dependencies, by
-putting them into their own namespace by prefixing all of its symbols
-with __efistub. This way, we have tight control over what parts of the
-kernel proper are referenced by the stub.
+For more control over which functions are called with the MMU off or
+with the UEFI 1:1 mapping active, annotate some assembler routines as
+position independent. This is done by introducing ENDPIPROC(), which
+replaces the ENDPROC() declaration of those routines.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/kernel/Makefile            | 12 ++++-
- arch/arm64/kernel/efi-entry.S         | 10 ++--
- arch/arm64/kernel/head.S              | 14 ++---
- arch/arm64/kernel/image.h             | 27 ++++++++++
- drivers/firmware/efi/libstub/Makefile | 31 +++++++++--
- drivers/firmware/efi/libstub/string.c | 57 ++++++++++++++++++++
- 6 files changed, 134 insertions(+), 17 deletions(-)
+ arch/arm64/include/asm/assembler.h | 11 +++++++++++
+ arch/arm64/lib/memchr.S            |  2 +-
+ arch/arm64/lib/memcmp.S            |  2 +-
+ arch/arm64/lib/memcpy.S            |  2 +-
+ arch/arm64/lib/memmove.S           |  2 +-
+ arch/arm64/lib/memset.S            |  2 +-
+ arch/arm64/lib/strlen.S            |  2 +-
+ arch/arm64/lib/strncmp.S           |  2 +-
+ arch/arm64/mm/cache.S              | 10 +++++-----
+ 9 files changed, 23 insertions(+), 12 deletions(-)
 
-diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
-index 22dc9bc781be..7b17f6245f1e 100644
---- a/arch/arm64/kernel/Makefile
-+++ b/arch/arm64/kernel/Makefile
-@@ -20,6 +20,14 @@ arm64-obj-y		:= debug-monitors.o entry.o irq.o fpsimd.o		\
- 			   cpufeature.o alternative.o cacheinfo.o		\
- 			   smp.o smp_spin_table.o topology.o
+diff --git a/arch/arm64/include/asm/assembler.h b/arch/arm64/include/asm/assembler.h
+index b51f2cc22ca9..12eff928ef8b 100644
+--- a/arch/arm64/include/asm/assembler.h
++++ b/arch/arm64/include/asm/assembler.h
+@@ -193,4 +193,15 @@ lr	.req	x30		// link register
+ 	str	\src, [\tmp, :lo12:\sym]
+ 	.endm
  
-+stub-obj				:= efi-stub.o efi-entry.o
-+extra-y					:= $(stub-obj)
-+stub-obj				:= $(patsubst %.o,%.stub.o,$(stub-obj))
++/*
++ * Annotate a function as position independent, i.e., safe to be called before
++ * the kernel virtual mapping is activated.
++ */
++#define ENDPIPROC(x)			\
++	.globl	__pi_##x;		\
++	.type 	__pi_##x, %function;	\
++	.set	__pi_##x, x;		\
++	.size	__pi_##x, . - x;	\
++	ENDPROC(x)
 +
-+OBJCOPYFLAGS := --prefix-symbols=__efistub_
-+$(obj)/%.stub.o: $(obj)/%.o FORCE
-+	$(call if_changed,objcopy)
-+
- arm64-obj-$(CONFIG_COMPAT)		+= sys32.o kuser32.o signal32.o 	\
- 					   sys_compat.o entry32.o		\
- 					   ../../arm/kernel/opcodes.o
-@@ -32,7 +40,7 @@ arm64-obj-$(CONFIG_CPU_PM)		+= sleep.o suspend.o
- arm64-obj-$(CONFIG_CPU_IDLE)		+= cpuidle.o
- arm64-obj-$(CONFIG_JUMP_LABEL)		+= jump_label.o
- arm64-obj-$(CONFIG_KGDB)		+= kgdb.o
--arm64-obj-$(CONFIG_EFI)			+= efi.o efi-stub.o efi-entry.o
-+arm64-obj-$(CONFIG_EFI)			+= efi.o $(stub-obj)
- arm64-obj-$(CONFIG_PCI)			+= pci.o
- arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
- arm64-obj-$(CONFIG_ACPI)		+= acpi.o
-@@ -40,7 +48,7 @@ arm64-obj-$(CONFIG_ACPI)		+= acpi.o
- obj-y					+= $(arm64-obj-y) vdso/
- obj-m					+= $(arm64-obj-m)
- head-y					:= head.o
--extra-y					:= $(head-y) vmlinux.lds
-+extra-y					+= $(head-y) vmlinux.lds
- 
- # vDSO - this must be built first to generate the symbol offsets
- $(call objectify,$(arm64-obj-y)): $(obj)/vdso/vdso-offsets.h
-diff --git a/arch/arm64/kernel/efi-entry.S b/arch/arm64/kernel/efi-entry.S
-index 8ce9b0577442..a773db92908b 100644
---- a/arch/arm64/kernel/efi-entry.S
-+++ b/arch/arm64/kernel/efi-entry.S
-@@ -29,7 +29,7 @@
- 	 * we want to be. The kernel image wants to be placed at TEXT_OFFSET
- 	 * from start of RAM.
- 	 */
--ENTRY(efi_stub_entry)
-+ENTRY(entry)
- 	/*
- 	 * Create a stack frame to save FP/LR with extra space
- 	 * for image_addr variable passed to efi_entry().
-@@ -86,8 +86,8 @@ ENTRY(efi_stub_entry)
- 	 * entries for the VA range of the current image, so no maintenance is
- 	 * necessary.
- 	 */
--	adr	x0, efi_stub_entry
--	adr	x1, efi_stub_entry_end
-+	adr	x0, entry
-+	adr	x1, entry_end
- 	sub	x1, x1, x0
- 	bl	__flush_dcache_area
- 
-@@ -120,5 +120,5 @@ efi_load_fail:
- 	ldp	x29, x30, [sp], #32
+ #endif	/* __ASM_ASSEMBLER_H */
+diff --git a/arch/arm64/lib/memchr.S b/arch/arm64/lib/memchr.S
+index 8636b7549163..4444c1d25f4b 100644
+--- a/arch/arm64/lib/memchr.S
++++ b/arch/arm64/lib/memchr.S
+@@ -41,4 +41,4 @@ ENTRY(memchr)
  	ret
+ 2:	mov	x0, #0
+ 	ret
+-ENDPROC(memchr)
++ENDPIPROC(memchr)
+diff --git a/arch/arm64/lib/memcmp.S b/arch/arm64/lib/memcmp.S
+index 6ea0776ba6de..ffbdec00327d 100644
+--- a/arch/arm64/lib/memcmp.S
++++ b/arch/arm64/lib/memcmp.S
+@@ -255,4 +255,4 @@ CPU_LE( rev	data2, data2 )
+ .Lret0:
+ 	mov	result, #0
+ 	ret
+-ENDPROC(memcmp)
++ENDPIPROC(memcmp)
+diff --git a/arch/arm64/lib/memcpy.S b/arch/arm64/lib/memcpy.S
+index 8a9a96d3ddae..5d6ddb74454d 100644
+--- a/arch/arm64/lib/memcpy.S
++++ b/arch/arm64/lib/memcpy.S
+@@ -198,4 +198,4 @@ ENTRY(memcpy)
+ 	tst	count, #0x3f
+ 	b.ne	.Ltail63
+ 	ret
+-ENDPROC(memcpy)
++ENDPIPROC(memcpy)
+diff --git a/arch/arm64/lib/memmove.S b/arch/arm64/lib/memmove.S
+index 57b19ea2dad4..68e2f2035e23 100644
+--- a/arch/arm64/lib/memmove.S
++++ b/arch/arm64/lib/memmove.S
+@@ -194,4 +194,4 @@ ENTRY(memmove)
+ 	tst	count, #0x3f
+ 	b.ne	.Ltail63
+ 	ret
+-ENDPROC(memmove)
++ENDPIPROC(memmove)
+diff --git a/arch/arm64/lib/memset.S b/arch/arm64/lib/memset.S
+index 7c72dfd36b63..29f405f08792 100644
+--- a/arch/arm64/lib/memset.S
++++ b/arch/arm64/lib/memset.S
+@@ -213,4 +213,4 @@ ENTRY(memset)
+ 	ands	count, count, zva_bits_x
+ 	b.ne	.Ltail_maybe_long
+ 	ret
+-ENDPROC(memset)
++ENDPIPROC(memset)
+diff --git a/arch/arm64/lib/strlen.S b/arch/arm64/lib/strlen.S
+index 987b68b9ce44..55ccc8e24c08 100644
+--- a/arch/arm64/lib/strlen.S
++++ b/arch/arm64/lib/strlen.S
+@@ -123,4 +123,4 @@ CPU_LE( lsr	tmp2, tmp2, tmp1 )	/* Shift (tmp1 & 63).  */
+ 	csinv	data1, data1, xzr, le
+ 	csel	data2, data2, data2a, le
+ 	b	.Lrealigned
+-ENDPROC(strlen)
++ENDPIPROC(strlen)
+diff --git a/arch/arm64/lib/strncmp.S b/arch/arm64/lib/strncmp.S
+index 0224cf5a5533..e267044761c6 100644
+--- a/arch/arm64/lib/strncmp.S
++++ b/arch/arm64/lib/strncmp.S
+@@ -307,4 +307,4 @@ CPU_BE( orr	syndrome, diff, has_nul )
+ .Lret0:
+ 	mov	result, #0
+ 	ret
+-ENDPROC(strncmp)
++ENDPIPROC(strncmp)
+diff --git a/arch/arm64/mm/cache.S b/arch/arm64/mm/cache.S
+index eb48d5df4a0f..cfa44a6adc0a 100644
+--- a/arch/arm64/mm/cache.S
++++ b/arch/arm64/mm/cache.S
+@@ -98,7 +98,7 @@ ENTRY(__flush_dcache_area)
+ 	b.lo	1b
+ 	dsb	sy
+ 	ret
+-ENDPROC(__flush_dcache_area)
++ENDPIPROC(__flush_dcache_area)
  
--efi_stub_entry_end:
--ENDPROC(efi_stub_entry)
-+entry_end:
-+ENDPROC(entry)
-diff --git a/arch/arm64/kernel/head.S b/arch/arm64/kernel/head.S
-index a055be6125cf..e8f52943ac65 100644
---- a/arch/arm64/kernel/head.S
-+++ b/arch/arm64/kernel/head.S
-@@ -120,8 +120,8 @@ efi_head:
- #endif
+ /*
+  *	__inval_cache_range(start, end)
+@@ -131,7 +131,7 @@ __dma_inv_range:
+ 	b.lo	2b
+ 	dsb	sy
+ 	ret
+-ENDPROC(__inval_cache_range)
++ENDPIPROC(__inval_cache_range)
+ ENDPROC(__dma_inv_range)
  
- #ifdef CONFIG_EFI
--	.globl	stext_offset
--	.set	stext_offset, stext - efi_head
-+	.globl	__efistub_stext_offset
-+	.set	__efistub_stext_offset, stext - efi_head
- 	.align 3
- pe_header:
- 	.ascii	"PE"
-@@ -144,8 +144,8 @@ optional_header:
- 	.long	_end - stext			// SizeOfCode
- 	.long	0				// SizeOfInitializedData
- 	.long	0				// SizeOfUninitializedData
--	.long	efi_stub_entry - efi_head	// AddressOfEntryPoint
--	.long	stext_offset			// BaseOfCode
-+	.long	__efistub_entry - efi_head	// AddressOfEntryPoint
-+	.long	__efistub_stext_offset		// BaseOfCode
+ /*
+@@ -171,7 +171,7 @@ ENTRY(__dma_flush_range)
+ 	b.lo	1b
+ 	dsb	sy
+ 	ret
+-ENDPROC(__dma_flush_range)
++ENDPIPROC(__dma_flush_range)
  
- extra_header_fields:
- 	.quad	0				// ImageBase
-@@ -162,7 +162,7 @@ extra_header_fields:
- 	.long	_end - efi_head			// SizeOfImage
+ /*
+  *	__dma_map_area(start, size, dir)
+@@ -184,7 +184,7 @@ ENTRY(__dma_map_area)
+ 	cmp	w2, #DMA_FROM_DEVICE
+ 	b.eq	__dma_inv_range
+ 	b	__dma_clean_range
+-ENDPROC(__dma_map_area)
++ENDPIPROC(__dma_map_area)
  
- 	// Everything before the kernel image is considered part of the header
--	.long	stext_offset			// SizeOfHeaders
-+	.long	__efistub_stext_offset		// SizeOfHeaders
- 	.long	0				// CheckSum
- 	.short	0xa				// Subsystem (EFI application)
- 	.short	0				// DllCharacteristics
-@@ -207,9 +207,9 @@ section_table:
- 	.byte	0
- 	.byte	0        		// end of 0 padding of section name
- 	.long	_end - stext		// VirtualSize
--	.long	stext_offset		// VirtualAddress
-+	.long	__efistub_stext_offset	// VirtualAddress
- 	.long	_edata - stext		// SizeOfRawData
--	.long	stext_offset		// PointerToRawData
-+	.long	__efistub_stext_offset	// PointerToRawData
- 
- 	.long	0		// PointerToRelocations (0 for executables)
- 	.long	0		// PointerToLineNumbers (0 for executables)
-diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
-index 8fae0756e175..2f6a426de864 100644
---- a/arch/arm64/kernel/image.h
-+++ b/arch/arm64/kernel/image.h
-@@ -59,4 +59,31 @@
- 	_kernel_offset_le	= DATA_LE64(TEXT_OFFSET);	\
- 	_kernel_flags_le	= DATA_LE64(__HEAD_FLAGS);
- 
-+#ifdef CONFIG_EFI
-+
-+/*
-+ * The EFI stub has its own symbol namespace prefixed by __efistub_, to
-+ * isolate it from the kernel proper. The following symbols are legally
-+ * accessed by the stub, so provide some aliases to make them accessible.
-+ * Only include data symbols here, or text symbols of functions that are
-+ * guaranteed to be safe when executed at another offset than they were
-+ * linked at. The routines below are all implemented in assembler in a
-+ * position independent manner
-+ */
-+__efistub_memcmp		= __pi_memcmp;
-+__efistub_memchr		= __pi_memchr;
-+__efistub_memcpy		= __pi_memcpy;
-+__efistub_memmove		= __pi_memmove;
-+__efistub_memset		= __pi_memset;
-+__efistub_strlen		= __pi_strlen;
-+__efistub_strncmp		= __pi_strncmp;
-+__efistub___flush_dcache_area	= __pi___flush_dcache_area;
-+
-+__efistub_linux_banner		= linux_banner;
-+__efistub__text			= _text;
-+__efistub__end			= _end;
-+__efistub__edata		= _edata;
-+
-+#endif
-+
- #endif /* __ASM_IMAGE_H */
-diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
-index 816dbe9f4b82..50557f4d12db 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -14,6 +14,8 @@ cflags-$(CONFIG_ARM64)		:= $(subst -pg,,$(KBUILD_CFLAGS))
- cflags-$(CONFIG_ARM)		:= $(subst -pg,,$(KBUILD_CFLAGS)) \
- 				   -fno-builtin -fpic -mno-single-pic-base
- 
-+cflags-$(CONFIG_EFI_ARMSTUB)	+= -I$(srctree)/scripts/dtc/libfdt
-+
- KBUILD_CFLAGS			:= $(cflags-y) \
- 				   $(call cc-option,-ffreestanding) \
- 				   $(call cc-option,-fno-stack-protector)
-@@ -22,7 +24,15 @@ GCOV_PROFILE			:= n
- KASAN_SANITIZE			:= n
- 
- lib-y				:= efi-stub-helper.o
--lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
-+
-+# include the stub's generic dependencies from lib/ when building for ARM/arm64
-+arm-deps := fdt_rw.c fdt_ro.c fdt_wip.c fdt.c fdt_empty_tree.c fdt_sw.c sort.c
-+
-+$(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
-+	$(call if_changed_rule,cc_o_c)
-+
-+lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
-+				   $(patsubst %.c,lib-%.o,$(arm-deps))
- 
- #
- # arm64 puts the stub in the kernel proper, which will unnecessarily retain all
-@@ -30,10 +40,25 @@ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o
- # So let's apply the __init annotations at the section level, by prefixing
- # the section names directly. This will ensure that even all the inline string
- # literals are covered.
-+# The fact that the stub and the kernel proper are essentially the same binary
-+# also means that we need to be extra careful to make sure that the stub does
-+# not rely on any absolute symbol references, considering that the virtual
-+# kernel mapping that the linker uses is not active yet when the stub is
-+# executing. So build all C dependencies of the EFI stub into libstub, and do
-+# a verification pass to see if any absolute relocations exist in any of the
-+# object files.
- #
- extra-$(CONFIG_ARM64)		:= $(lib-y)
- lib-$(CONFIG_ARM64)		:= $(patsubst %.o,%.init.o,$(lib-y))
- 
--OBJCOPYFLAGS := --prefix-alloc-sections=.init
-+OBJCOPYFLAGS := --prefix-alloc-sections=.init --prefix-symbols=__efistub_ \
-+		-R .debug* -R *ksymtab*
-+
- $(obj)/%.init.o: $(obj)/%.o FORCE
--	$(call if_changed,objcopy)
-+	$(call if_changed,stubcopy)
-+
-+quiet_cmd_stubcopy = STUBCPY $@
-+      cmd_stubcopy = if $(OBJCOPY) $(OBJCOPYFLAGS) $< $@; then		\
-+		     $(OBJDUMP) -r $@ | grep R_AARCH64_ABS 		\
-+		     && (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
-+			 rm -f $@; /bin/false); else /bin/false; fi
-diff --git a/drivers/firmware/efi/libstub/string.c b/drivers/firmware/efi/libstub/string.c
-new file mode 100644
-index 000000000000..09d5a0894343
---- /dev/null
-+++ b/drivers/firmware/efi/libstub/string.c
-@@ -0,0 +1,57 @@
-+/*
-+ * Taken from:
-+ *  linux/lib/string.c
-+ *
-+ *  Copyright (C) 1991, 1992  Linus Torvalds
-+ */
-+
-+#include <linux/types.h>
-+#include <linux/string.h>
-+
-+#ifndef __HAVE_ARCH_STRSTR
-+/**
-+ * strstr - Find the first substring in a %NUL terminated string
-+ * @s1: The string to be searched
-+ * @s2: The string to search for
-+ */
-+char *strstr(const char *s1, const char *s2)
-+{
-+	size_t l1, l2;
-+
-+	l2 = strlen(s2);
-+	if (!l2)
-+		return (char *)s1;
-+	l1 = strlen(s1);
-+	while (l1 >= l2) {
-+		l1--;
-+		if (!memcmp(s1, s2, l2))
-+			return (char *)s1;
-+		s1++;
-+	}
-+	return NULL;
-+}
-+#endif
-+
-+#ifndef __HAVE_ARCH_STRNCMP
-+/**
-+ * strncmp - Compare two length-limited strings
-+ * @cs: One string
-+ * @ct: Another string
-+ * @count: The maximum number of bytes to compare
-+ */
-+int strncmp(const char *cs, const char *ct, size_t count)
-+{
-+	unsigned char c1, c2;
-+
-+	while (count) {
-+		c1 = *cs++;
-+		c2 = *ct++;
-+		if (c1 != c2)
-+			return c1 < c2 ? -1 : 1;
-+		if (!c1)
-+			break;
-+		count--;
-+	}
-+	return 0;
-+}
-+#endif
+ /*
+  *	__dma_unmap_area(start, size, dir)
+@@ -197,4 +197,4 @@ ENTRY(__dma_unmap_area)
+ 	cmp	w2, #DMA_TO_DEVICE
+ 	b.ne	__dma_inv_range
+ 	ret
+-ENDPROC(__dma_unmap_area)
++ENDPIPROC(__dma_unmap_area)
 -- 
 1.9.1
