@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 7/9] ARM: implement create_mapping_late() for EFI use
-Date: Thu,  1 Oct 2015 19:04:21 +0200
-Message-ID: <1443719063-6832-8-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 9/9] ARM: add UEFI stub support
+Date: Thu,  1 Oct 2015 19:04:23 +0200
+Message-ID: <1443719063-6832-10-git-send-email-ard.biesheuvel@linaro.org>
 References: <1443719063-6832-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1443719063-6832-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,63 +10,463 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This implements create_mapping_late(), which we will use to populate
-the UEFI Runtime Services page tables.
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
+This patch adds EFI stub support for the ARM Linux kernel.
+
+The EFI stub operates similarly to the x86 and arm64 stubs: it is a
+shim between the EFI firmware and the normal zImage entry point, and
+sets up the environment that the zImage is expecting. This includes
+optionally loading the initrd and device tree from the system partition
+based on the kernel command line.
+
+Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/include/asm/mach/map.h |  1 +
- arch/arm/mm/mmu.c               | 19 +++++++++++++++++++
- 2 files changed, 20 insertions(+)
+ arch/arm/Kconfig                       |  19 +++
+ arch/arm/boot/compressed/Makefile      |   5 +-
+ arch/arm/boot/compressed/efi-header.S  | 130 ++++++++++++++++++++
+ arch/arm/boot/compressed/efi-stub.c    |  89 ++++++++++++++
+ arch/arm/boot/compressed/head.S        |  54 +++++++-
+ arch/arm/boot/compressed/vmlinux.lds.S |   7 ++
+ arch/arm/include/asm/efi.h             |  23 ++++
+ drivers/firmware/efi/libstub/Makefile  |  12 ++
+ 8 files changed, 336 insertions(+), 3 deletions(-)
 
-diff --git a/arch/arm/include/asm/mach/map.h b/arch/arm/include/asm/mach/map.h
-index f98c7f32c9c8..14fe67bd0272 100644
---- a/arch/arm/include/asm/mach/map.h
-+++ b/arch/arm/include/asm/mach/map.h
-@@ -42,6 +42,7 @@ enum {
- extern void iotable_init(struct map_desc *, int);
- extern void vm_reserve_area_early(unsigned long addr, unsigned long size,
- 				  void *caller);
-+extern void create_mapping_late(struct mm_struct *mm, struct map_desc *md);
+diff --git a/arch/arm/Kconfig b/arch/arm/Kconfig
+index e4b7d6cfd8eb..6d7fd83c2ee4 100644
+--- a/arch/arm/Kconfig
++++ b/arch/arm/Kconfig
+@@ -2061,6 +2061,25 @@ config AUTO_ZRELADDR
+ 	  0xf8000000. This assumes the zImage being placed in the first 128MB
+ 	  from start of memory.
  
- #ifdef CONFIG_DEBUG_LL
- extern void debug_ll_addr(unsigned long *paddr, unsigned long *vaddr);
-diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index dd0967ee23b7..c5f0c0ade981 100644
---- a/arch/arm/mm/mmu.c
-+++ b/arch/arm/mm/mmu.c
-@@ -723,6 +723,14 @@ static void __init *early_alloc(unsigned long sz)
- 	return early_alloc_aligned(sz, sz);
- }
- 
-+static void *__init late_alloc(unsigned long sz)
-+{
-+	void *ptr = (void *)__get_free_pages(PGALLOC_GFP, get_order(sz));
++config EFI_STUB
++	bool
 +
-+	BUG_ON(!ptr);
-+	return ptr;
-+}
++config EFI
++	bool "UEFI runtime support"
++	depends on OF && !CPU_BIG_ENDIAN && MMU && AUTO_ZRELADDR && !XIP_KERNEL
++	select UCS2_STRING
++	select EFI_PARAMS_FROM_FDT
++	select EFI_STUB
++	select EFI_ARMSTUB
++	select EFI_RUNTIME_WRAPPERS
++	---help---
++	  This option provides support for runtime services provided
++	  by UEFI firmware (such as non-volatile variables, realtime
++	  clock, and platform reset). A UEFI stub is also provided to
++	  allow the kernel to be booted as an EFI application. This
++	  is only useful for kernels that may run on systems that have
++	  UEFI firmware.
 +
- static pte_t * __init pte_alloc(pmd_t *pmd, unsigned long addr,
- 				unsigned long prot,
- 				void *(*alloc)(unsigned long sz))
-@@ -954,6 +962,17 @@ static void __init create_mapping(struct map_desc *md)
- 	__create_mapping(&init_mm, md, early_alloc);
- }
+ endmenu
  
-+void __init create_mapping_late(struct mm_struct *mm, struct map_desc *md)
-+{
-+#ifdef CONFIG_ARM_LPAE
-+	pud_t *pud = pud_alloc(mm, pgd_offset(mm, md->virtual), md->virtual);
-+	if (WARN_ON(!pud))
-+		return;
-+	pmd_alloc(mm, pud, 0);
+ menu "CPU Power Management"
+diff --git a/arch/arm/boot/compressed/Makefile b/arch/arm/boot/compressed/Makefile
+index 3f9a9ebc77c3..0e5624d6215d 100644
+--- a/arch/arm/boot/compressed/Makefile
++++ b/arch/arm/boot/compressed/Makefile
+@@ -167,9 +167,12 @@ if [ $(words $(ZRELADDR)) -gt 1 -a "$(CONFIG_AUTO_ZRELADDR)" = "" ]; then \
+ 	false; \
+ fi
+ 
++efi-obj-$(CONFIG_EFI_STUB) := $(obj)/efi-stub.o $(obj)/efi-banner.o \
++			      $(objtree)/drivers/firmware/efi/libstub/lib.a
++
+ $(obj)/vmlinux: $(obj)/vmlinux.lds $(obj)/$(HEAD) $(obj)/piggy.$(suffix_y).o \
+ 		$(addprefix $(obj)/, $(OBJS)) $(lib1funcs) $(ashldi3) \
+-		$(bswapsdi2) FORCE
++		$(bswapsdi2) $(efi-obj-y) FORCE
+ 	@$(check_for_multiple_zreladdr)
+ 	$(call if_changed,ld)
+ 	@$(check_for_bad_syms)
+diff --git a/arch/arm/boot/compressed/efi-header.S b/arch/arm/boot/compressed/efi-header.S
+new file mode 100644
+index 000000000000..9d5dc4fda3c1
+--- /dev/null
++++ b/arch/arm/boot/compressed/efi-header.S
+@@ -0,0 +1,130 @@
++/*
++ * Copyright (C) 2013-2015 Linaro Ltd
++ * Authors: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ *          Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++		.macro	__nop
++#ifdef CONFIG_EFI_STUB
++		@ This is almost but not quite a NOP, since it does clobber the
++		@ condition flags. But it is the best we can do for EFI, since
++		@ PE/COFF expects the magic string "MZ" at offset 0, while the
++		@ ARM/Linux boot protocol expects an executable instruction
++		@ there.
++		.inst	'M' | ('Z' << 8) | (0x1310 << 16)   @ tstne r0, #0x4d000
++#else
++		mov	r0, r0
 +#endif
-+	__create_mapping(mm, md, late_alloc);
-+}
++		.endm
 +
- /*
-  * Create the architecture specific mappings
-  */
++		.macro	__EFI_HEADER
++#ifdef CONFIG_EFI_STUB
++		b	__efi_start
++
++		.set	start_offset, __efi_start - start
++		.org	start + 0x3c
++		@
++		@ The PE header can be anywhere in the file, but for
++		@ simplicity we keep it together with the MSDOS header
++		@ The offset to the PE/COFF header needs to be at offset
++		@ 0x3C in the MSDOS header.
++		@ The only 2 fields of the MSDOS header that are used are this
++		@ PE/COFF offset, and the "MZ" bytes at offset 0x0.
++		@
++		.long	pe_header - start	@ Offset to the PE header.
++
++pe_header:
++		.ascii	"PE\0\0"
++
++coff_header:
++		.short	0x01c2			@ ARM or Thumb
++		.short	2			@ nr_sections
++		.long	0 			@ TimeDateStamp
++		.long	0			@ PointerToSymbolTable
++		.long	1			@ NumberOfSymbols
++		.short	section_table - optional_header
++						@ SizeOfOptionalHeader
++		.short	0x306			@ Characteristics.
++						@ IMAGE_FILE_32BIT_MACHINE |
++						@ IMAGE_FILE_DEBUG_STRIPPED |
++						@ IMAGE_FILE_EXECUTABLE_IMAGE |
++						@ IMAGE_FILE_LINE_NUMS_STRIPPED
++
++optional_header:
++		.short	0x10b			@ PE32 format
++		.byte	0x02			@ MajorLinkerVersion
++		.byte	0x14			@ MinorLinkerVersion
++		.long	_end - __efi_start	@ SizeOfCode
++		.long	0			@ SizeOfInitializedData
++		.long	0			@ SizeOfUninitializedData
++		.long	efi_stub_entry - start	@ AddressOfEntryPoint
++		.long	start_offset		@ BaseOfCode
++		.long	0			@ data
++
++extra_header_fields:
++		.long	0			@ ImageBase
++		.long	0x200			@ SectionAlignment
++		.long	0x200			@ FileAlignment
++		.short	0			@ MajorOperatingSystemVersion
++		.short	0			@ MinorOperatingSystemVersion
++		.short	0			@ MajorImageVersion
++		.short	0			@ MinorImageVersion
++		.short	0			@ MajorSubsystemVersion
++		.short	0			@ MinorSubsystemVersion
++		.long	0			@ Win32VersionValue
++
++		.long	_end - start		@ SizeOfImage
++		.long	start_offset		@ SizeOfHeaders
++		.long	0			@ CheckSum
++		.short	0xa			@ Subsystem (EFI application)
++		.short	0			@ DllCharacteristics
++		.long	0			@ SizeOfStackReserve
++		.long	0			@ SizeOfStackCommit
++		.long	0			@ SizeOfHeapReserve
++		.long	0			@ SizeOfHeapCommit
++		.long	0			@ LoaderFlags
++		.long	0x6			@ NumberOfRvaAndSizes
++
++		.quad	0			@ ExportTable
++		.quad	0			@ ImportTable
++		.quad	0			@ ResourceTable
++		.quad	0			@ ExceptionTable
++		.quad	0			@ CertificationTable
++		.quad	0			@ BaseRelocationTable
++
++section_table:
++		@
++		@ The EFI application loader requires a relocation section
++		@ because EFI applications must be relocatable. This is a
++		@ dummy section as far as we are concerned.
++		@
++		.ascii	".reloc\0\0"
++		.long	0			@ VirtualSize
++		.long	0			@ VirtualAddress
++		.long	0			@ SizeOfRawData
++		.long	0			@ PointerToRawData
++		.long	0			@ PointerToRelocations
++		.long	0			@ PointerToLineNumbers
++		.short	0			@ NumberOfRelocations
++		.short	0			@ NumberOfLineNumbers
++		.long	0x42100040		@ Characteristics
++
++		.ascii	".text\0\0\0"
++		.long	_end - __efi_start	@ VirtualSize
++		.long	__efi_start		@ VirtualAddress
++		.long	_edata - __efi_start	@ SizeOfRawData
++		.long	__efi_start		@ PointerToRawData
++		.long	0			@ PointerToRelocations
++		.long	0			@ PointerToLineNumbers
++		.short	0			@ NumberOfRelocations
++		.short	0			@ NumberOfLineNumbers
++		.long	0xe0500020		@ Characteristics
++
++		.align	9
++__efi_start:
++#endif
++		.endm
+diff --git a/arch/arm/boot/compressed/efi-stub.c b/arch/arm/boot/compressed/efi-stub.c
+new file mode 100644
+index 000000000000..f1a3b1825337
+--- /dev/null
++++ b/arch/arm/boot/compressed/efi-stub.c
+@@ -0,0 +1,89 @@
++/*
++ * linux/arch/arm/boot/compressed/efi-stub.c
++ *
++ * Copyright (C) 2013 Linaro Ltd;  <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ *
++ * This file implements the EFI boot stub for the ARM kernel
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ *
++ */
++#include <linux/efi.h>
++#include <asm/efi.h>
++
++efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
++				 unsigned long *image_addr,
++				 unsigned long *image_size,
++				 unsigned long *reserve_addr,
++				 unsigned long *reserve_size,
++				 unsigned long dram_base,
++				 efi_loaded_image_t *image)
++{
++	unsigned long nr_pages;
++	efi_status_t status;
++	/* Use alloc_addr to tranlsate between types */
++	efi_physical_addr_t alloc_addr;
++
++	/*
++	 * Verify that the DRAM base address is compatible with the ARM
++	 * boot protocol, which determines the base of DRAM by masking
++	 * off the low 27 bits of the address at which the zImage is
++	 * loaded. These assumptions are made by the decompressor,
++	 * before any memory map is available.
++	 */
++	dram_base = round_up(dram_base, SZ_128M);
++
++	/*
++	 * Reserve memory for the uncompressed kernel image. This is
++	 * all that prevents any future allocations from conflicting
++	 * with the kernel. Since we can't tell from the compressed
++	 * image how much DRAM the kernel actually uses (due to BSS
++	 * size uncertainty) we allocate the maximum possible size.
++	 * Do this very early, as prints can cause memory allocations
++	 * that may conflict with this.
++	 */
++	alloc_addr = dram_base;
++	*reserve_size = MAX_UNCOMP_KERNEL_SIZE;
++	nr_pages = round_up(*reserve_size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++	status = sys_table->boottime->allocate_pages(EFI_ALLOCATE_ADDRESS,
++						     EFI_LOADER_DATA,
++						     nr_pages, &alloc_addr);
++	if (status != EFI_SUCCESS) {
++		*reserve_size = 0;
++		pr_efi_err(sys_table, "Unable to allocate memory for uncompressed kernel.\n");
++		return status;
++	}
++	*reserve_addr = alloc_addr;
++
++	/*
++	 * Relocate the zImage, if required. ARM doesn't have a
++	 * preferred address, so we set it to 0, as we want to allocate
++	 * as low in memory as possible.
++	 */
++	*image_size = image->image_size;
++	status = efi_relocate_kernel(sys_table, image_addr, *image_size,
++				     *image_size, 0, 0);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table, "Failed to relocate kernel.\n");
++		efi_free(sys_table, *reserve_size, *reserve_addr);
++		*reserve_size = 0;
++		return status;
++	}
++
++	/*
++	 * Check to see if we were able to allocate memory low enough
++	 * in memory. The kernel determines the base of DRAM from the
++	 * address at which the zImage is loaded.
++	 */
++	if (*image_addr + *image_size > dram_base + ZIMAGE_OFFSET_LIMIT) {
++		pr_efi_err(sys_table, "Failed to relocate kernel, no low memory available.\n");
++		efi_free(sys_table, *reserve_size, *reserve_addr);
++		*reserve_size = 0;
++		efi_free(sys_table, *image_size, *image_addr);
++		*image_size = 0;
++		return EFI_LOAD_ERROR;
++	}
++	return EFI_SUCCESS;
++}
+diff --git a/arch/arm/boot/compressed/head.S b/arch/arm/boot/compressed/head.S
+index 06e983f59980..af11c2f8f3b7 100644
+--- a/arch/arm/boot/compressed/head.S
++++ b/arch/arm/boot/compressed/head.S
+@@ -12,6 +12,8 @@
+ #include <asm/assembler.h>
+ #include <asm/v7m.h>
+ 
++#include "efi-header.S"
++
+  AR_CLASS(	.arch	armv7-a	)
+  M_CLASS(	.arch	armv7-m	)
+ 
+@@ -126,7 +128,7 @@
+ start:
+ 		.type	start,#function
+ 		.rept	7
+-		mov	r0, r0
++		__nop
+ 		.endr
+    ARM(		mov	r0, r0		)
+    ARM(		b	1f		)
+@@ -139,7 +141,8 @@ start:
+ 		.word	0x04030201	@ endianness flag
+ 
+  THUMB(		.thumb			)
+-1:
++1:		__EFI_HEADER
++
+  ARM_BE8(	setend	be		)	@ go BE8 if compiled for BE8
+  AR_CLASS(	mrs	r9, cpsr	)
+ #ifdef CONFIG_ARM_VIRT_EXT
+@@ -1353,6 +1356,53 @@ __enter_kernel:
+ 
+ reloc_code_end:
+ 
++#ifdef CONFIG_EFI_STUB
++		.align	2
++_start:		.long	start - .
++
++ENTRY(efi_stub_entry)
++		@ allocate space on stack for passing current zImage address
++		@ and for the EFI stub to return of new entry point of
++		@ zImage, as EFI stub may copy the kernel. Pointer address
++		@ is passed in r2. r0 and r1 are passed through from the
++		@ EFI firmware to efi_entry
++		adr	ip, _start
++		ldr	r3, [ip]
++		add	r3, r3, ip
++		stmfd	sp!, {r3, lr}
++		mov	r2, sp			@ pass zImage address in r2
++		bl	efi_entry
++
++		@ Check for error return from EFI stub. r0 has FDT address
++		@ or error code.
++		cmn	r0, #1
++		beq	efi_load_fail
++
++		@ Preserve return value of efi_entry() in r4
++		mov	r4, r0
++		bl	cache_clean_flush
++		bl	cache_off
++
++		@ Set parameters for booting zImage according to boot protocol
++		@ put FDT address in r2, it was returned by efi_entry()
++		@ r1 is the machine type, and r0 needs to be 0
++		mov	r0, #0
++		mov	r1, #0xFFFFFFFF
++		mov	r2, r4
++
++		@ Branch to (possibly) relocated zImage that is in [sp]
++		ldr	lr, [sp]
++		ldr	ip, =start_offset
++		add	lr, lr, ip
++		mov	pc, lr				@ no mode switch
++
++efi_load_fail:
++		@ Return EFI_LOAD_ERROR to EFI firmware on error.
++		ldr	r0, =0x80000001
++		ldmfd	sp!, {ip, pc}
++ENDPROC(efi_stub_entry)
++#endif
++
+ 		.align
+ 		.section ".stack", "aw", %nobits
+ .L_user_stack:	.space	4096
+diff --git a/arch/arm/boot/compressed/vmlinux.lds.S b/arch/arm/boot/compressed/vmlinux.lds.S
+index 2b60b843ac5e..81c493156ce8 100644
+--- a/arch/arm/boot/compressed/vmlinux.lds.S
++++ b/arch/arm/boot/compressed/vmlinux.lds.S
+@@ -48,6 +48,13 @@ SECTIONS
+     *(.rodata)
+     *(.rodata.*)
+   }
++  .data : {
++    /*
++     * The EFI stub always executes from RAM, and runs strictly before the
++     * decompressor, so we can make an exception for its r/w data, and keep it
++     */
++    *(.data.efistub)
++  }
+   .piggydata : {
+     *(.piggydata)
+   }
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index 2622322f1135..bf22d0d1d52d 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -66,4 +66,27 @@ void efi_virtmap_unload(void);
+ #define efi_parse_fdt(x)
+ #endif /* CONFIG_EFI */
+ 
++/* arch specific definitions used by the stub code */
++
++#define efi_call_early(f, ...) sys_table_arg->boottime->f(__VA_ARGS__)
++
++/*
++ * A reasonable upper bound for the uncompressed kernel size is 32 MBytes,
++ * so we will reserve that amount of memory. We have no easy way to tell what
++ * the actuall size of code + data the uncompressed kernel will use.
++ * If this is insufficient, the decompressor will relocate itself out of the
++ * way before performing the decompression.
++ */
++#define MAX_UNCOMP_KERNEL_SIZE	SZ_32M
++
++/*
++ * The kernel zImage should preferably be located between 32 MB and 128 MB
++ * from the base of DRAM. The min address leaves space for a maximal size
++ * uncompressed image, and the max address is due to how the zImage decompressor
++ * picks a destination address.
++ */
++#define ZIMAGE_OFFSET_LIMIT	SZ_128M
++#define MIN_ZIMAGE_OFFSET	MAX_UNCOMP_KERNEL_SIZE
++#define MAX_FDT_OFFSET		ZIMAGE_OFFSET_LIMIT
++
+ #endif /* _ASM_ARM_EFI_H */
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index 50557f4d12db..6d86e2713e9f 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -62,3 +62,15 @@ quiet_cmd_stubcopy = STUBCPY $@
+ 		     $(OBJDUMP) -r $@ | grep R_AARCH64_ABS 		\
+ 		     && (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
+ 			 rm -f $@; /bin/false); else /bin/false; fi
++
++#
++# ARM discards the .data section because it disallows r/w data in the
++# decompressor. So move our .data to .data.efistub, which is preserved
++# explicitly by the decompressor linker script.
++#
++extra-$(CONFIG_ARM)		:= $(lib-y)
++lib-$(CONFIG_ARM)		:= $(patsubst %.o,%.stub.o,$(lib-y))
++
++$(obj)/%.stub.o: OBJCOPYFLAGS := --rename-section .data=.data.efistub
++$(obj)/%.stub.o: $(obj)/%.o FORCE
++	$(call if_changed,objcopy)
 -- 
 1.9.1
