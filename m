@@ -1,51 +1,46 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 0/9] UEFI boot and runtime services support for 32-bit ARM
-Date: Fri, 2 Oct 2015 22:49:38 +0200
-Message-ID: <CAKv+Gu8Fin7h9LniFS+Q99UFd4+X_NbXD41432zU8xSz=UShjQ@mail.gmail.com>
-References: <1443719063-6832-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20151002203831.GE21513@n2100.arm.linux.org.uk>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v6 1/2] efi: export efi_capsule_supported() function
+ symbol
+Date: Sat, 3 Oct 2015 03:02:11 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A8641CE@PGSMSX102.gar.corp.intel.com>
+References: <1443733554-22743-1-git-send-email-hock.leong.kweh@intel.com>
+ <1443733554-22743-2-git-send-email-hock.leong.kweh@intel.com>
+ <20151002173716.GE16538@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151002203831.GE21513-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
+In-Reply-To: <20151002173716.GE16538-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ryan Harkin <ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 2 October 2015 at 22:38, Russell King - ARM Linux
-<linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
-> On Thu, Oct 01, 2015 at 07:04:14PM +0200, Ard Biesheuvel wrote:
->> There are a number of prerequisites for this series that have all been
->> sent to the linux-arm-kernel mailing list at some point (and mostly
->> ignored).
->
-> They've been ignored because they're UEFI and no one's said that it's
-> something that 32-bit ARM should get... until this series has come
-> along.  It might help if Linaro was more engaging with developers who
-> aren't part of Linaro.
->
-
-Actually, the first iteration of this series was sent out by Roy more
-than two years ago.
-But I am fully aware that these patches and the prerequisite series
-(plural) still need thorough review, I am just throwing this series
-out there early since it ties all of that together, so it puts the
-other stuff into context.
-
-> Now, I'm not going to suddenly drop what I'm working on to start trying
-> to gain an understanding of UEFI, and what its implications are for
-> 32-bit ARM so that I can reasonably review these patches - let me put
-> that another way: don't expect me to review this stuff quickly and
-> come out with review comments on something I have very ltitle clue
-> about.  I have precisely zero UEFI knowledge.
->
-
-I think the UEFI peculiarities are mostly covered by the common code
-shared with x86 and arm64. What I would appreciate your input on is
-the ARM specific thinks like early .data in the decompressor (even
-before the GOT fixups), the early_ioremap addition and the changes to
-create_mapping(). But no rush at all.
-
-Thanks,
-Ard.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFNhdHVyZGF5LCBPY3RvYmVyIDAzLCAyMDE1IDE6
+MzcgQU0NCj4gVG86IEt3ZWgsIEhvY2sgTGVvbmcNCj4gQ2M6IE1hdHQgRmxlbWluZzsgR3JlZyBL
+cm9haC1IYXJ0bWFuOyBPbmcsIEJvb24gTGVvbmc7IExLTUw7IGxpbnV4LQ0KPiBlZmlAdmdlci5r
+ZXJuZWwub3JnOyBTYW0gUHJvdHNlbmtvOyBQZXRlciBKb25lczsgQW5keSBMdXRvbWlyc2tpOyBS
+b3kNCj4gRnJhbno7IEphbWVzIEJvdHRvbWxleTsgTGludXggRlMgRGV2ZWw7IEZsZW1pbmcsIE1h
+dHQNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2NiAxLzJdIGVmaTogZXhwb3J0IGVmaV9jYXBzdWxl
+X3N1cHBvcnRlZCgpIGZ1bmN0aW9uDQo+IHN5bWJvbA0KPiANCj4gT24gRnJpLCBPY3QgMDIsIDIw
+MTUgYXQgMDU6MDU6NTNBTSArMDgwMCwgS3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBGcm9t
+OiAiS3dlaCwgSG9jayBMZW9uZyIgPGhvY2subGVvbmcua3dlaEBpbnRlbC5jb20+DQo+ID4NCj4g
+PiBUaGlzIHBhdGNoIGV4cG9ydCBlZmlfY2Fwc3VsZV9zdXBwb3J0ZWQoKSBmdW5jdGlvbiBzeW1i
+b2wgZm9yIGNhcHN1bGUNCj4gPiBrZXJuZWwgbW9kdWxlIHRvIHVzZS4NCj4gPg0KPiA+IENjOiBN
+YXR0IEZsZW1pbmcgPG1hdHQuZmxlbWluZ0BpbnRlbC5jb20+DQo+ID4gU2lnbmVkLW9mZi1ieTog
+S3dlaCwgSG9jayBMZW9uZyA8aG9jay5sZW9uZy5rd2VoQGludGVsLmNvbT4NCj4gPiAtLS0NCj4g
+PiAgZHJpdmVycy9maXJtd2FyZS9lZmkvY2Fwc3VsZS5jIHwgICAgMSArDQo+ID4gIDEgZmlsZSBj
+aGFuZ2VkLCAxIGluc2VydGlvbigrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL2RyaXZlcnMvZmly
+bXdhcmUvZWZpL2NhcHN1bGUuYw0KPiA+IGIvZHJpdmVycy9maXJtd2FyZS9lZmkvY2Fwc3VsZS5j
+IGluZGV4IGQ4Y2Q3NWMwLi43MzhkNDM3IDEwMDY0NA0KPiA+IC0tLSBhL2RyaXZlcnMvZmlybXdh
+cmUvZWZpL2NhcHN1bGUuYw0KPiA+ICsrKyBiL2RyaXZlcnMvZmlybXdhcmUvZWZpL2NhcHN1bGUu
+Yw0KPiA+IEBAIC0xMDEsNiArMTAxLDcgQEAgb3V0Og0KPiA+ICAJa2ZyZWUoY2Fwc3VsZSk7DQo+
+ID4gIAlyZXR1cm4gcnY7DQo+ID4gIH0NCj4gPiArRVhQT1JUX1NZTUJPTF9HUEwoZWZpX2NhcHN1
+bGVfc3VwcG9ydGVkKTsNCj4gPg0KPiA+ICAvKioNCj4gPiAgICogZWZpX2NhcHN1bGVfdXBkYXRl
+IC0gc2VuZCBhIGNhcHN1bGUgdG8gdGhlIGZpcm13YXJlDQo+IA0KPiBXaHkgaXMgdGhpcyBhIHNl
+cGFyYXRlIHBhdGNoPw0KPiANCg0KSXQgaXMgYmVjYXVzZSB0aGUgYXV0aG9yIG9mIHRoaXMgY29k
+ZSBpcyBNYXR0LiBTdWJtaXR0aW5nIHRoaXMsDQphbGxvd3MgaGltIHRvIGVhc2lseSBzcXVhc2gg
+aW50byBoaXMgcGF0Y2g6DQpodHRwczovL2xrbWwub3JnL2xrbWwvMjAxNC8xMC83LzM5MQ0KDQpU
+aGFua3MuDQo=
