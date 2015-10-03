@@ -1,30 +1,30 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH v6 1/2] efi: export efi_capsule_supported() function
- symbol
-Date: Sat, 3 Oct 2015 10:59:10 +0200
-Message-ID: <20151003085910.GA11942@pd.tnic>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v6 0/2] Enable capsule loader interface for efi firmware
+ updating
+Date: Sat, 3 Oct 2015 11:05:39 +0200
+Message-ID: <20151003090539.GC11942@pd.tnic>
 References: <1443733554-22743-1-git-send-email-hock.leong.kweh@intel.com>
- <1443733554-22743-2-git-send-email-hock.leong.kweh@intel.com>
- <20151002173716.GE16538@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A8641CE@PGSMSX102.gar.corp.intel.com>
+ <20151002173704.GD16538@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C4A8641E4@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A8641CE-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A8641E4@PGSMSX102.gar.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Oct 03, 2015 at 03:02:11AM +0000, Kweh, Hock Leong wrote:
-> It is because the author of this code is Matt. Submitting this,
-> allows him to easily squash into his patch:
-> https://lkml.org/lkml/2014/10/7/391
+On Sat, Oct 03, 2015 at 03:18:41AM +0000, Kweh, Hock Leong wrote:
+> > What does the error case look like? A standard glibc message about
+> > write(2) failing?
+> > 
+> 
+> Any upload fail error like -ENOMEM, -EINVAL, -EIO as well as error returned
+> by efi_capsule_update() API.
 
-Then you should say that in the commit message or above it or under the
-"---" line that this patch will either be merged into Matt's patchset or
-you should simply merge it into your 2/2 patch when submitting.
+All I'm asking is, how does the user know that the upload didn't succeed?
 
 -- 
 Regards/Gruss,
