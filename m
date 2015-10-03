@@ -1,46 +1,46 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v6 0/2] Enable capsule loader interface for efi firmware
- updating
-Date: Sat, 3 Oct 2015 03:18:41 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A8641E4@PGSMSX102.gar.corp.intel.com>
-References: <1443733554-22743-1-git-send-email-hock.leong.kweh@intel.com>
- <20151002173704.GD16538@pd.tnic>
+From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Subject: Re: [PATCH v6 0/2] Enable capsule loader interface for efi firmware updating
+Date: Fri, 2 Oct 2015 21:18:05 -0700
+Message-ID: <CALCETrVB_QbG3Se2YHqUQx2SiZBrsNw95wRJrtLtFPJmxn_svA@mail.gmail.com>
+References: <1443733554-22743-1-git-send-email-hock.leong.kweh@intel.com> <20151002173704.GD16538@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <20151002173704.GD16538-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ong Boon Leong <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Fleming Matt <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFNhdHVyZGF5LCBPY3RvYmVyIDAzLCAyMDE1IDE6
-MzcgQU0NCj4gVG86IEt3ZWgsIEhvY2sgTGVvbmcNCj4gQ2M6IE1hdHQgRmxlbWluZzsgR3JlZyBL
-cm9haC1IYXJ0bWFuOyBPbmcsIEJvb24gTGVvbmc7IExLTUw7IGxpbnV4LQ0KPiBlZmlAdmdlci5r
-ZXJuZWwub3JnOyBTYW0gUHJvdHNlbmtvOyBQZXRlciBKb25lczsgQW5keSBMdXRvbWlyc2tpOyBS
-b3kNCj4gRnJhbno7IEphbWVzIEJvdHRvbWxleTsgTGludXggRlMgRGV2ZWw7IEZsZW1pbmcsIE1h
-dHQNCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2NiAwLzJdIEVuYWJsZSBjYXBzdWxlIGxvYWRlciBp
-bnRlcmZhY2UgZm9yIGVmaSBmaXJtd2FyZQ0KPiB1cGRhdGluZw0KPiANCj4gT24gRnJpLCBPY3Qg
-MDIsIDIwMTUgYXQgMDU6MDU6NTJBTSArMDgwMCwgS3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4g
-PiBGcm9tOiAiS3dlaCwgSG9jayBMZW9uZyIgPGhvY2subGVvbmcua3dlaEBpbnRlbC5jb20+DQo+
-ID4NCj4gPiBEZWFyIG1haW50YWluZXJzICYgY29tbXVuaXRpZXMsDQo+ID4NCj4gPiBUaGlzIHBh
-dGNoc2V0IGlzIGNyZWF0ZWQgb24gdG9wIG9mIE1hdHQncyBwYXRjaHNldDoNCj4gPiAxLilodHRw
-czovL2xrbWwub3JnL2xrbWwvMjAxNC8xMC83LzM5MA0KPiA+ICJbUEFUQ0ggMS8yXSBlZmk6IE1v
-dmUgZWZpX3N0YXR1c190b19lcnIoKSB0byBlZmkuaCINCj4gPiAyLilodHRwczovL2xrbWwub3Jn
-L2xrbWwvMjAxNC8xMC83LzM5MQ0KPiA+ICJbUEFUQ0ggMi8yXSBlZmk6IENhcHN1bGUgdXBkYXRl
-IHN1cHBvcnQiDQo+ID4NCj4gPiBJdCBleHBvc2UgYSBtaXNjIGNoYXIgaW50ZXJmYWNlIGZvciB1
-c2VyIHRvIHVwbG9hZCB0aGUgY2Fwc3VsZSBiaW5hcnkNCj4gPiBhbmQgY2FsbGluZyBlZmlfY2Fw
-c3VsZV91cGRhdGUoKSBBUEkgdG8gcGFzcyB0aGUgYmluYXJ5IHRvIEVGSSBmaXJtd2FyZS4NCj4g
-Pg0KPiA+IFRoZSBzdGVwcyB0byB1cGRhdGUgZWZpIGZpcm13YXJlIGFyZToNCj4gPiAxLikgY2F0
-IGZpcm13YXJlLmNhcCA+IC9kZXYvZWZpX2NhcHN1bGVfbG9hZGVyDQo+ID4gMi4pIHJlYm9vdA0K
-PiA+DQo+ID4gQW55IGZhaWxlZCB1cGxvYWQgZXJyb3IgbWVzc2FnZSB3aWxsIGJlIHJldHVybmVk
-IHdoaWxlIGRvaW5nICJjYXQiDQo+ID4gdGhyb3VnaA0KPiA+IFdyaXRlKCkgZnVuY3Rpb24gY2Fs
-bC4NCj4gPg0KPiA+IFRlc3RlZCB0aGUgY29kZSB3aXRoIEludGVsIFF1YXJrIEdhbGlsZW8gcGxh
-dGZvcm0uDQo+IA0KPiBXaGF0IGRvZXMgdGhlIGVycm9yIGNhc2UgbG9vayBsaWtlPyBBIHN0YW5k
-YXJkIGdsaWJjIG1lc3NhZ2UgYWJvdXQNCj4gd3JpdGUoMikgZmFpbGluZz8NCj4gDQoNCkFueSB1
-cGxvYWQgZmFpbCBlcnJvciBsaWtlIC1FTk9NRU0sIC1FSU5WQUwsIC1FSU8gYXMgd2VsbCBhcyBl
-cnJvciByZXR1cm5lZA0KYnkgZWZpX2NhcHN1bGVfdXBkYXRlKCkgQVBJLg0KDQpUaGFua3MuDQoN
-Cg==
+On Oct 2, 2015 10:37 AM, "Borislav Petkov" <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org> wrote:
+>
+> On Fri, Oct 02, 2015 at 05:05:52AM +0800, Kweh, Hock Leong wrote:
+> > From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> >
+> > Dear maintainers & communities,
+> >
+> > This patchset is created on top of Matt's patchset:
+> > 1.)https://lkml.org/lkml/2014/10/7/390
+> > "[PATCH 1/2] efi: Move efi_status_to_err() to efi.h"
+> > 2.)https://lkml.org/lkml/2014/10/7/391
+> > "[PATCH 2/2] efi: Capsule update support"
+> >
+> > It expose a misc char interface for user to upload the capsule binary and
+> > calling efi_capsule_update() API to pass the binary to EFI firmware.
+> >
+> > The steps to update efi firmware are:
+> > 1.) cat firmware.cap > /dev/efi_capsule_loader
+> > 2.) reboot
+> >
+> > Any failed upload error message will be returned while doing "cat" through
+> > Write() function call.
+> >
+> > Tested the code with Intel Quark Galileo platform.
+>
+> What does the error case look like? A standard glibc message about
+> write(2) failing?
+>
+
+close(2), right?
+
+--Andy
