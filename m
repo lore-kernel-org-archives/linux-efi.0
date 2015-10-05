@@ -1,95 +1,132 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: RE: [PATCH v6 2/2] efi: a misc char interface for user to update
- efi firmware
-Date: Mon, 5 Oct 2015 16:07:28 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A864675@PGSMSX102.gar.corp.intel.com>
+From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Subject: Re: [PATCH v6 2/2] efi: a misc char interface for user to update efi firmware
+Date: Mon, 5 Oct 2015 12:05:47 -0700
+Message-ID: <CALCETrU4+UT_2z1J+WUwnweMSuAyA0=-qoc24b2QStqUzyL3mw@mail.gmail.com>
+References: <F54AEECA5E2B9541821D670476DAE19C4A864675@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Language: en-US
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Roy Franz <roy.franz@linaro.org>, Borislav Petkov <bp@alien8.de>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A864675-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
-aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBTdW5kYXksIE9jdG9iZXIgMDQsIDIw
-MTUgNzoxNiBBTQ0KPiA+ICsNCj4gPiArICAgICAgIC8qIHNldHVwIGNhcHN1bGUgYmluYXJ5IGlu
-Zm8gc3RydWN0dXJlICovDQo+ID4gKyAgICAgICBpZiAoY2FwX2luZm8uaGVhZGVyX29idGFpbmVk
-ID09IDAgJiYgY2FwX2luZm8uaW5kZXggPT0gMCkgew0KPiA+ICsgICAgICAgICAgICAgICBlZmlf
-Y2Fwc3VsZV9oZWFkZXJfdCAqY2FwX2hkciA9IGtidWZmOw0KPiA+ICsgICAgICAgICAgICAgICBp
-bnQgcmVzZXRfdHlwZTsNCj4gPiArICAgICAgICAgICAgICAgc2l6ZV90IHBhZ2VzX25lZWRlZCA9
-IEFMSUdOKGNhcF9oZHItPmltYWdlc2l6ZSwgUEFHRV9TSVpFKSA+Pg0KPiA+ICsgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICBQQUdFX1NISUZUOw0KPiA+ICsNCj4gPiArICAg
-ICAgICAgICAgICAgaWYgKHBhZ2VzX25lZWRlZCA9PSAwKSB7DQo+ID4gKyAgICAgICAgICAgICAg
-ICAgICAgICAgcHJfZXJyKCIlczogcGFnZXMgY291bnQgaW52YWxpZFxuIiwgX19mdW5jX18pOw0K
-PiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGt1bm1hcChrYnVmZl9wYWdlKTsNCj4gPiArICAg
-ICAgICAgICAgICAgICAgICAgICBlZmlfZnJlZV9hbGxfYnVmZl9wYWdlcyhrYnVmZl9wYWdlKTsN
-Cj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVJTlZBTDsNCj4gPiArICAgICAg
-ICAgICAgICAgfQ0KPiA+ICsNCj4gPiArICAgICAgICAgICAgICAgLyogY2hlY2sgaWYgdGhlIGNh
-cHN1bGUgYmluYXJ5IHN1cHBvcnRlZCAqLw0KPiA+ICsgICAgICAgICAgICAgICByZXQgPSBlZmlf
-Y2Fwc3VsZV9zdXBwb3J0ZWQoY2FwX2hkci0+Z3VpZCwgY2FwX2hkci0+ZmxhZ3MsDQo+ID4gKyAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjYXBfaGRyLT5pbWFnZXNp
-emUsDQo+ID4gKyAmcmVzZXRfdHlwZSk7DQo+IA0KPiBBbmQgd2hhdCBpZiBjYXBfaGRyIGlzbid0
-IHdyaXR0ZW4geWV0Pw0KDQpUaGlzIGRlc2lnbiBtYWlubHkgdGFyZ2V0aW5nIGEgc2ltcGxlc3Qg
-aW50ZXJmYWNlIHRoYXQgdXNlciBjb3VsZCB1cGxvYWQgZWZpDQpjYXBzdWxlIGluIGEgc2luZ2xl
-IGNvbW1hbmQgYWN0aW9uOiBjYXQgY2Fwc3VsZS5iaW4gPiAvZGV2L2VmaV9jYXBzdWxlX2xvYWRl
-cg0KDQpTbywgaXQgaXMgZXhwZWN0ZWQgdGhhdCBlZmkgY2Fwc3VsZSBoZWFkZXIgaXMgYXQgdGhl
-IHN0YXJ0aW5nIG9mIHRoZSBiaW5hcnkgZmlsZS4NCkFscmVhZHkgY2FwdHVyZSB0aGlzIGludG8g
-ZWZpX2NhcHN1bGVfd3JpdGUoKSBjb21tZW50IGluIHY3IHBhdGNoc2V0OiANCmh0dHBzOi8vbGtt
-bC5vcmcvbGttbC8yMDE1LzEwLzUvMjMyDQoNCklmIHlvdSB3YW50IHRvIGVuaGFuY2UgdGhpcyBt
-b2R1bGUgdG8gc3VwcG9ydCBjcmVhdGluZyBlZmkgY2Fwc3VsZSBoZWFkZXIgZm9yDQp5b3VyIGJp
-bmFyeSwgc3Ryb25nbHkgYmVsaWV2ZSB0aGlzIGRlc2lnbiBjYW4gY2F0ZXIgdGhlIGltcGxlbWVu
-dGF0aW9uIHN1Y2ggYXMNCmFkZGluZyBpb2N0bCB0byBwYXNzIGluIGVmaSBndWlkLCBmbGFncyBh
-bmQgc28gb24gcGFyYW1ldGVycyB0byBjcmVhdGUgdGhlIGhlYWRlci4NCg0KDQo+IA0KPiA+ICsg
-ICAgICAgICAgICAgICBpZiAocmV0KSB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcHJf
-ZXJyKCIlczogZWZpX2NhcHN1bGVfc3VwcG9ydGVkKCkgZmFpbGVkXG4iLA0KPiA+ICsgICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBfX2Z1bmNfXyk7DQo+ID4gKyAgICAgICAgICAgICAgICAg
-ICAgICAga3VubWFwKGtidWZmX3BhZ2UpOw0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGVm
-aV9mcmVlX2FsbF9idWZmX3BhZ2VzKGtidWZmX3BhZ2UpOw0KPiA+ICsgICAgICAgICAgICAgICAg
-ICAgICAgIHJldHVybiByZXQ7DQo+ID4gKyAgICAgICAgICAgICAgIH0NCj4gPiArDQo+ID4gKyAg
-ICAgICAgICAgICAgIGNhcF9pbmZvLnRvdGFsX3NpemUgPSBjYXBfaGRyLT5pbWFnZXNpemU7DQo+
-ID4gKyAgICAgICAgICAgICAgIGNhcF9pbmZvLnBhZ2VzID0ga21hbGxvY19hcnJheShwYWdlc19u
-ZWVkZWQsIHNpemVvZih2b2lkICopLA0KPiA+ICsgICAgICAgICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgIEdGUF9LRVJORUwpOw0KPiA+ICsgICAgICAgICAgICAgICBpZiAo
-IWNhcF9pbmZvLnBhZ2VzKSB7DQo+ID4gKyAgICAgICAgICAgICAgICAgICAgICAgcHJfZGVidWco
-IiVzOiBrbWFsbG9jX2FycmF5KCkgZmFpbGVkXG4iLCBfX2Z1bmNfXyk7DQo+ID4gKyAgICAgICAg
-ICAgICAgICAgICAgICAga3VubWFwKGtidWZmX3BhZ2UpOw0KPiA+ICsgICAgICAgICAgICAgICAg
-ICAgICAgIGVmaV9mcmVlX2FsbF9idWZmX3BhZ2VzKGtidWZmX3BhZ2UpOw0KPiA+ICsgICAgICAg
-ICAgICAgICAgICAgICAgIHJldHVybiAtRU5PTUVNOw0KPiA+ICsgICAgICAgICAgICAgICB9DQo+
-ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBjYXBfaW5mby5oZWFkZXJfb2J0YWluZWQgPSAxOw0K
-PiANCj4gSSBkb24ndCBzZWUgaG93IHlvdSBrbm93IHRoYXQgdGhlIGhlYWRlciBpcyBvYnRhaW5l
-ZC4NCg0KQ2Fwc3VsZSBoZWFkZXIgaXMgYXQgdGhlIHN0YXJ0aW5nIGJsb2NrIG9mIGltYWdlIGJp
-bmFyeS4gV2UgY2FuDQpvYnRhaW4gdGhlIGhlYWRlciB0aHJvdWdoIHRoZSAxc3QgYmxvY2sgb2Yg
-d3JpdGUgYWN0aW9uLiBTbywNCnVzZXIgYXBwIGlzIGV4cGVjdGVkIHRvIHVwbG9hZCB0aGUgaW1h
-Z2UgYmluYXJ5IHNlcXVlbnRpYWxseS4NCg0KQWxzbyBjYXB0dXJlZCB0aGlzIGludG8gZWZpX2Nh
-cHN1bGVfd3JpdGUoKSBjb21tZW50IGluIHY3IHBhdGNoc2V0OiANCmh0dHBzOi8vbGttbC5vcmcv
-bGttbC8yMDE1LzEwLzUvMjMyDQoNCj4gDQo+ID4gKyAgICAgICB9DQo+ID4gKw0KPiA+ICsgICAg
-ICAgY2FwX2luZm8ucGFnZXNbY2FwX2luZm8uaW5kZXgrK10gPSBrYnVmZl9wYWdlOw0KPiANCj4g
-SHVoPyAgWW91IG1pZ2h0IG5vdyBoYXZlIGFsbG9jYXRlZCBhIHdob2xlIHBhZ2UuDQoNClllcywg
-dGhlIGVmaSBjYXBzdWxlIGhlYWRlciBkb2VzIHRlbGwgdGhlIHdob2xlIGltYWdlIHNpemUuDQoN
-Cj4gDQo+ID4gKyAgICAgICBjYXBfaW5mby5jb3VudCArPSB3cml0ZV9ieXRlOw0KPiA+ICsgICAg
-ICAga3VubWFwKGtidWZmX3BhZ2UpOw0KPiA+ICsNCj4gPiArICAgICAgIC8qIHN1Ym1pdCB0aGUg
-ZnVsbCBiaW5hcnkgdG8gZWZpX2NhcHN1bGVfdXBkYXRlKCkgQVBJICovDQo+ID4gKyAgICAgICBp
-ZiAoY2FwX2luZm8uY291bnQgPj0gY2FwX2luZm8udG90YWxfc2l6ZSkgew0KPiA+ICsgICAgICAg
-ICAgICAgICB2b2lkICpjYXBfaGRyX3RlbXA7DQo+ID4gKw0KPiA+ICsgICAgICAgICAgICAgICBj
-YXBfaGRyX3RlbXAgPSBrbWFwKGNhcF9pbmZvLnBhZ2VzWzBdKTsNCj4gPiArICAgICAgICAgICAg
-ICAgaWYgKCFjYXBfaGRyX3RlbXApIHsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBwcl9k
-ZWJ1ZygiJXM6IGttYXAoKSBmYWlsZWRcbiIsIF9fZnVuY19fKTsNCj4gPiArICAgICAgICAgICAg
-ICAgICAgICAgICBlZmlfZnJlZV9hbGxfYnVmZl9wYWdlcyhOVUxMKTsNCj4gPiArICAgICAgICAg
-ICAgICAgICAgICAgICByZXR1cm4gLUVGQVVMVDsNCj4gPiArICAgICAgICAgICAgICAgfQ0KPiA+
-ICsgICAgICAgICAgICAgICByZXQgPSBlZmlfY2Fwc3VsZV91cGRhdGUoY2FwX2hkcl90ZW1wLCBj
-YXBfaW5mby5wYWdlcyk7DQo+ID4gKyAgICAgICAgICAgICAgIGt1bm1hcChjYXBfaW5mby5wYWdl
-c1swXSk7DQo+ID4gKyAgICAgICAgICAgICAgIGlmIChyZXQpIHsNCj4gPiArICAgICAgICAgICAg
-ICAgICAgICAgICBwcl9lcnIoIiVzOiBlZmlfY2Fwc3VsZV91cGRhdGUoKSBmYWlsZWRcbiIsIF9f
-ZnVuY19fKTsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlZmlfZnJlZV9hbGxfYnVmZl9w
-YWdlcyhOVUxMKTsNCj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gcmV0Ow0KPiA+
-ICsgICAgICAgICAgICAgICB9DQo+ID4gKyAgICAgICAgICAgICAgIC8qIGluZGljYXRlIGNhcHN1
-bGUgYmluYXJ5IHVwbG9hZGluZyBpcyBkb25lICovDQo+ID4gKyAgICAgICAgICAgICAgIGNhcF9p
-bmZvLmluZGV4ID0gLTE7DQo+IA0KPiBTaG91bGQgY291bnQgPiBjYXBfaW5mby50b3RhbF9zaXpl
-IGJlIGFuIGVycm9yPw0KPiANCj4gLS1BbmR5DQoNClllcywgdGhpcyBpcyB3aHkgYWZ0ZXIgdGhl
-IHdyaXRlIGNvdW50IGFscmVhZHkgcmVhY2hlcyB0aGUgaW1hZ2Ugc2l6ZSBzdGF0ZWQgaW4NCmVm
-aSBjYXBzdWxlIGhlYWRlciwgYW4gaW5kaWNhdG9yIHdpbGwgYmUgZmxhZ2dlZCBmb3Igc3Vic2Vx
-dWVuY2Ugd3JpdGUgdG8gYmUNCnJldHVybmVkIC1FSU8gYXMgd2hhdCBNYXR0IGhhcyBjb21tZW50
-ZWQuDQoNCg0KVGhhbmtzICYgUmVnYXJkcywNCldpbHNvbg0KDQo=
+On Mon, Oct 5, 2015 at 9:07 AM, Kweh, Hock Leong
+<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+>> -----Original Message-----
+>> From: Andy Lutomirski [mailto:luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org]
+>> Sent: Sunday, October 04, 2015 7:16 AM
+>> > +
+>> > +       /* setup capsule binary info structure */
+>> > +       if (cap_info.header_obtained == 0 && cap_info.index == 0) {
+>> > +               efi_capsule_header_t *cap_hdr = kbuff;
+>> > +               int reset_type;
+>> > +               size_t pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >>
+>> > +                                       PAGE_SHIFT;
+>> > +
+>> > +               if (pages_needed == 0) {
+>> > +                       pr_err("%s: pages count invalid\n", __func__);
+>> > +                       kunmap(kbuff_page);
+>> > +                       efi_free_all_buff_pages(kbuff_page);
+>> > +                       return -EINVAL;
+>> > +               }
+>> > +
+>> > +               /* check if the capsule binary supported */
+>> > +               ret = efi_capsule_supported(cap_hdr->guid, cap_hdr->flags,
+>> > +                                           cap_hdr->imagesize,
+>> > + &reset_type);
+>>
+>> And what if cap_hdr isn't written yet?
+>
+> This design mainly targeting a simplest interface that user could upload efi
+> capsule in a single command action: cat capsule.bin > /dev/efi_capsule_loader
+>
+> So, it is expected that efi capsule header is at the starting of the binary file.
+> Already capture this into efi_capsule_write() comment in v7 patchset:
+> https://lkml.org/lkml/2015/10/5/232
+>
+> If you want to enhance this module to support creating efi capsule header for
+> your binary, strongly believe this design can cater the implementation such as
+> adding ioctl to pass in efi guid, flags and so on parameters to create the header.
+>
+
+No, that's not what I mean.  What I mean is: what if cat writes too
+little in the first write call (e.g. 3 bytes).
+
+>
+>>
+>> > +               if (ret) {
+>> > +                       pr_err("%s: efi_capsule_supported() failed\n",
+>> > +                              __func__);
+>> > +                       kunmap(kbuff_page);
+>> > +                       efi_free_all_buff_pages(kbuff_page);
+>> > +                       return ret;
+>> > +               }
+>> > +
+>> > +               cap_info.total_size = cap_hdr->imagesize;
+>> > +               cap_info.pages = kmalloc_array(pages_needed, sizeof(void *),
+>> > +                                               GFP_KERNEL);
+>> > +               if (!cap_info.pages) {
+>> > +                       pr_debug("%s: kmalloc_array() failed\n", __func__);
+>> > +                       kunmap(kbuff_page);
+>> > +                       efi_free_all_buff_pages(kbuff_page);
+>> > +                       return -ENOMEM;
+>> > +               }
+>> > +
+>> > +               cap_info.header_obtained = 1;
+>>
+>> I don't see how you know that the header is obtained.
+>
+> Capsule header is at the starting block of image binary. We can
+> obtain the header through the 1st block of write action.
+
+That's quite an assumption to make.
+
+> So,
+> user app is expected to upload the image binary sequentially.
+>
+
+>> > +       cap_info.pages[cap_info.index++] = kbuff_page;
+>>
+>> Huh?  You might now have allocated a whole page.
+>
+> Yes, the efi capsule header does tell the whole image size.
+
+So what?  Did you allocate a page in this particular write call?  If
+so, then cap_info.index++, etc is okay.  If not, it's wrong.
+
+>> > +       cap_info.count += write_byte;
+>> > +       kunmap(kbuff_page);
+>> > +
+>> > +       /* submit the full binary to efi_capsule_update() API */
+>> > +       if (cap_info.count >= cap_info.total_size) {
+>> > +               void *cap_hdr_temp;
+>> > +
+>> > +               cap_hdr_temp = kmap(cap_info.pages[0]);
+>> > +               if (!cap_hdr_temp) {
+>> > +                       pr_debug("%s: kmap() failed\n", __func__);
+>> > +                       efi_free_all_buff_pages(NULL);
+>> > +                       return -EFAULT;
+>> > +               }
+>> > +               ret = efi_capsule_update(cap_hdr_temp, cap_info.pages);
+>> > +               kunmap(cap_info.pages[0]);
+>> > +               if (ret) {
+>> > +                       pr_err("%s: efi_capsule_update() failed\n", __func__);
+>> > +                       efi_free_all_buff_pages(NULL);
+>> > +                       return ret;
+>> > +               }
+>> > +               /* indicate capsule binary uploading is done */
+>> > +               cap_info.index = -1;
+>>
+>> Should count > cap_info.total_size be an error?
+>>
+>> --Andy
+>
+> Yes, this is why after the write count already reaches the image size stated in
+> efi capsule header, an indicator will be flagged for subsequence write to be
+> returned -EIO as what Matt has commented.
+
+What if *this very same write* writes too much data?
+
+--Andy
