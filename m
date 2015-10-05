@@ -1,47 +1,71 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [PATCH v6 0/2] Enable capsule loader interface for efi firmware updating
-Date: Mon, 5 Oct 2015 12:07:05 -0700
-Message-ID: <CALCETrWwqkGV+AM+TynetfRhPDtNm_zJeUov35+hUfbC=Uz92A@mail.gmail.com>
-References: <1443733554-22743-1-git-send-email-hock.leong.kweh@intel.com>
- <20151002173704.GD16538@pd.tnic> <F54AEECA5E2B9541821D670476DAE19C4A8641E4@PGSMSX102.gar.corp.intel.com>
- <20151003090539.GC11942@pd.tnic> <F54AEECA5E2B9541821D670476DAE19C4A864658@PGSMSX102.gar.corp.intel.com>
+From: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Subject: Re: [PATCH v7 1/2] efi: export efi_capsule_supported() function symbol
+Date: Mon, 05 Oct 2015 22:27:20 +0100
+Message-ID: <5612EB38.2050209@nexus-software.ie>
+References: <1444076155-19295-1-git-send-email-hock.leong.kweh@intel.com> <1444076155-19295-2-git-send-email-hock.leong.kweh@intel.com> <20151005131350.GA26329@nazgul.tnic> <F54AEECA5E2B9541821D670476DAE19C4A864613@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A864658-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A864613@PGSMSX102.gar.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Oct 5, 2015 at 8:33 AM, Kweh, Hock Leong
-<hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+On 05/10/15 16:19, Kweh, Hock Leong wrote:
 >> -----Original Message-----
->> From: Borislav Petkov [mailto:bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org]
->> Sent: Saturday, October 03, 2015 5:06 PM
->> On Sat, Oct 03, 2015 at 03:18:41AM +0000, Kweh, Hock Leong wrote:
->> > > What does the error case look like? A standard glibc message about
->> > > write(2) failing?
->> > >
->> >
->> > Any upload fail error like -ENOMEM, -EINVAL, -EIO as well as error
->> > returned by efi_capsule_update() API.
+>> From: Borislav Petkov [mailto:bp@alien8.de]
+>> Sent: Monday, October 05, 2015 9:14 PM
 >>
->> All I'm asking is, how does the user know that the upload didn't succeed?
+>> So this one is still a separate patch.
 >>
+>> If you're going to ignore review comments, maybe I should stop wasting my
+>> time reviewing your stuff...
+>>
+>> --
+>> Regards/Gruss,
+>>      Boris.
 >
-> I think it should depend on user app about which API they are using.
-> If they are using syscall then errors would be returned through write(2).
-> If they are using libc APIs fwrite, fputs and fprintf, then the errors would
-> return through those APIs. However, this design is targeting the simple
-> upload action "cat capsule.bin > /dev/efi_capsule_loader", so the errors
-> should be returned through cat() or I/O redirection mechanism from
-> shell terminal. Am I answered your question?
+> Already follow what you have suggested, put a note under --- line:
+> https://lkml.org/lkml/2015/10/5/230 (at line 25 - 27)
 >
-> Btw, I have an out topic question: I do notice you guys wrote in the message
-> that a function look like write(2) or close(2). What actually the "2" mean there?
+> Thanks for the review comments.
 
-It's the manpage section.  Typing 'man 2 write' will give you the
-manpage 'WRITE(2)'.  Section 2 is syscalls.
+Wilson - trying to test this out on a Galileo Gen2 - which branch are 
+you doing this against ?
 
---Andy
+I can apply the first patch you're proposing to squash your commit into
+
+https://lkml.org/lkml/diff/2014/10/7/390/1
+
+but then trying to apply the first in your series on top of that patch I get
+
+deckard@aineko:~/Development/linux$ git apply 
+../patches/capsule_wilson/1_2.eml
+../patches/capsule_wilson/1_2.eml:72: trailing whitespace.
+EXPORT_SYMBOL_GPL(efi_capsule_supported);
+error: drivers/firmware/efi/capsule.c: No such file or directory
+
+https://kernel.googlesource.com/pub/scm/linux/kernel/git/mfleming/efi/+/capsule/drivers/firmware/efi/capsule.c 
+
+
+??
+
+If so - then why not use the interface here ?
+https://kernel.googlesource.com/pub/scm/linux/kernel/git/mfleming/efi/+/capsule
+
+(Sorry I know I'm coming to this thread late)
+
+Aside from that, I'm curious which types of capsules you've used here 
+too - does it include the MFH header ? Keep in mind the initial firmware 
+that shipped with Galileo will depend on that MFH being present.
+
+http://download.intel.com/support/processors/quark/sb/quark_securebootprm_330234_001.pdf 
+- Section A1 - table 7 ?
+
+So if we boot a 4.x kernel with that initial firmware version 0.75 if 
+memory serves - it's important that the capsule.c code handles the MFH.
+
+--
+BOD
