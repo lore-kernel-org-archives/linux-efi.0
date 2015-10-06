@@ -1,82 +1,61 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v7 1/2] efi: export efi_capsule_supported() function
- symbol
-Date: Tue, 6 Oct 2015 10:53:46 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A864B5D@PGSMSX102.gar.corp.intel.com>
-References: <1444076155-19295-1-git-send-email-hock.leong.kweh@intel.com>
- <1444076155-19295-2-git-send-email-hock.leong.kweh@intel.com>
- <20151005131350.GA26329@nazgul.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A864613@PGSMSX102.gar.corp.intel.com>
- <5612EB38.2050209@nexus-software.ie>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v3 0/3] arm64: EFI stub isolation
+Date: Tue,  6 Oct 2015 12:03:41 +0100
+Message-ID: <1444129424-8284-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <5612EB38.2050209-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
+Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCcnlhbiBPJ0Rvbm9naHVlIFtt
-YWlsdG86cHVyZS5sb2dpY0BuZXh1cy1zb2Z0d2FyZS5pZV0NCj4gU2VudDogVHVlc2RheSwgT2N0
-b2JlciAwNiwgMjAxNSA1OjI3IEFNDQo+IA0KPiBXaWxzb24gLSB0cnlpbmcgdG8gdGVzdCB0aGlz
-IG91dCBvbiBhIEdhbGlsZW8gR2VuMiAtIHdoaWNoIGJyYW5jaCBhcmUgeW91IGRvaW5nDQo+IHRo
-aXMgYWdhaW5zdCA/DQo+IA0KPiBJIGNhbiBhcHBseSB0aGUgZmlyc3QgcGF0Y2ggeW91J3JlIHBy
-b3Bvc2luZyB0byBzcXVhc2ggeW91ciBjb21taXQgaW50bw0KPiANCj4gaHR0cHM6Ly9sa21sLm9y
-Zy9sa21sL2RpZmYvMjAxNC8xMC83LzM5MC8xDQo+IA0KPiBidXQgdGhlbiB0cnlpbmcgdG8gYXBw
-bHkgdGhlIGZpcnN0IGluIHlvdXIgc2VyaWVzIG9uIHRvcCBvZiB0aGF0IHBhdGNoIEkgZ2V0DQo+
-IA0KPiBkZWNrYXJkQGFpbmVrbzp+L0RldmVsb3BtZW50L2xpbnV4JCBnaXQNCj4gYXBwbHkgLi4v
-cGF0Y2hlcy9jYXBzdWxlX3dpbHNvbi8xXzIuZW1sDQo+IC4uL3BhdGNoZXMvY2Fwc3VsZV93aWxz
-b24vMV8yLmVtbDo3MjogdHJhaWxpbmcgd2hpdGVzcGFjZS4NCj4gRVhQT1JUX1NZTUJPTF9HUEwo
-ZWZpX2NhcHN1bGVfc3VwcG9ydGVkKTsNCj4gZXJyb3I6IGRyaXZlcnMvZmlybXdhcmUvZWZpL2Nh
-cHN1bGUuYzogTm8gc3VjaCBmaWxlIG9yIGRpcmVjdG9yeQ0KPiANCj4gaHR0cHM6Ly9rZXJuZWwu
-Z29vZ2xlc291cmNlLmNvbS9wdWIvc2NtL2xpbnV4L2tlcm5lbC9naXQvbWZsZW1pbmcvZWZpLysv
-DQo+IGNhcHN1bGUvZHJpdmVycy9maXJtd2FyZS9lZmkvY2Fwc3VsZS5jDQo+IA0KPiANCj4gPz8N
-Cg0KSWYgeW91IGFyZSBhcHBseWluZyBNYXR0J3MgcGF0Y2ggaHR0cHM6Ly9sa21sLm9yZy9sa21s
-L2RpZmYvMjAxNC8xMC83LzM5MC8xIHdoaWNoDQpoYWQgYmVlbiBjcmVhdGVkIDEgeWVhciBhZ28g
-dG8gbWFpbmxpbmUgdmFuaWxsYSBrZXJuZWwgKExpbnV4IDQuMy1yYzQpLCB5b3UgYXJlIG5vdA0K
-YWJsZSB0byBkaXJlY3QgcGF0Y2ggaW4gZHVlIHRvIHRoZSBNYWtlZmlsZSBlcnJvciBiZWxvdzoN
-Cg0Kfi9NeVdvcmtzL2xpbnV4X21haW5saW5lJCBnaXQgYXBwbHkgLmdpdC9yZWJhc2UtYXBwbHkv
-MDAwMSAtLXJlamVjdCANCkNoZWNraW5nIHBhdGNoIGFyY2gveDg2L2tlcm5lbC9yZWJvb3QuYy4u
-Lg0KSHVuayAjMSBzdWNjZWVkZWQgYXQgNTI3IChvZmZzZXQgMTEgbGluZXMpLg0KQ2hlY2tpbmcg
-cGF0Y2ggZHJpdmVycy9maXJtd2FyZS9lZmkvTWFrZWZpbGUuLi4NCmVycm9yOiB3aGlsZSBzZWFy
-Y2hpbmcgZm9yOg0KIw0KIyBNYWtlZmlsZSBmb3IgbGludXgga2VybmVsDQojDQpvYmotJChDT05G
-SUdfRUZJKSAgICAgICAgICAgICAgICAgICAgICAgKz0gZWZpLm8gdmFycy5vIHJlYm9vdC5vDQpv
-YmotJChDT05GSUdfRUZJX1ZBUlMpICAgICAgICAgICAgICAgICAgKz0gZWZpdmFycy5vDQpvYmot
-JChDT05GSUdfRUZJX1ZBUlNfUFNUT1JFKSAgICAgICAgICAgKz0gZWZpLXBzdG9yZS5vDQpvYmot
-JChDT05GSUdfVUVGSV9DUEVSKSAgICAgICAgICAgICAgICAgKz0gY3Blci5vDQogDQplcnJvcjog
-cGF0Y2ggZmFpbGVkOiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9NYWtlZmlsZToxDQpDaGVja2luZyBw
-YXRjaCBkcml2ZXJzL2Zpcm13YXJlL2VmaS9jYXBzdWxlLmMuLi4NCkNoZWNraW5nIHBhdGNoIGRy
-aXZlcnMvZmlybXdhcmUvZWZpL3JlYm9vdC5jLi4uDQpDaGVja2luZyBwYXRjaCBpbmNsdWRlL2xp
-bnV4L2VmaS5oLi4uDQpIdW5rICMxIHN1Y2NlZWRlZCBhdCAxMjIgKG9mZnNldCAzIGxpbmVzKS4N
-Ckh1bmsgIzIgc3VjY2VlZGVkIGF0IDk4MyAob2Zmc2V0IDIzIGxpbmVzKS4NCkh1bmsgIzMgc3Vj
-Y2VlZGVkIGF0IDEyMzUgKG9mZnNldCAyMyBsaW5lcykuDQpIdW5rICM0IHN1Y2NlZWRlZCBhdCAx
-MzE3IChvZmZzZXQgMjMgbGluZXMpLg0KQXBwbGllZCBwYXRjaCBhcmNoL3g4Ni9rZXJuZWwvcmVi
-b290LmMgY2xlYW5seS4NCkFwcGx5aW5nIHBhdGNoIGRyaXZlcnMvZmlybXdhcmUvZWZpL01ha2Vm
-aWxlIHdpdGggMSByZWplY3RzLi4uDQpSZWplY3RlZCBodW5rICMxLg0KQXBwbGllZCBwYXRjaCBk
-cml2ZXJzL2Zpcm13YXJlL2VmaS9jYXBzdWxlLmMgY2xlYW5seS4NCkFwcGxpZWQgcGF0Y2ggZHJp
-dmVycy9maXJtd2FyZS9lZmkvcmVib290LmMgY2xlYW5seS4NCkFwcGxpZWQgcGF0Y2ggaW5jbHVk
-ZS9saW51eC9lZmkuaCBjbGVhbmx5Lg0KDQpZb3Ugc2hvdWxkIHJlc29sdmUgdGhlIE1ha2VmaWxl
-IGVycm9yIGFuZCB0aGVuIGdpdCBhZGQgNSBmaWxlcyBiZWxvdzoNCi0gYXJjaC94ODYva2VybmVs
-L3JlYm9vdC5jDQotIGRyaXZlcnMvZmlybXdhcmUvZWZpL01ha2VmaWxlDQotIGRyaXZlcnMvZmly
-bXdhcmUvZWZpL3JlYm9vdC5jDQotIGluY2x1ZGUvbGludXgvZWZpLmgNCi0gZHJpdmVycy9maXJt
-d2FyZS9lZmkvY2Fwc3VsZS5jDQoNCnRoZW4geW91IGFyZSBhYmxlIHRvIHBhdGNoIGluIG15IHBh
-dGNoc2V0Lg0KDQo+IA0KPiBJZiBzbyAtIHRoZW4gd2h5IG5vdCB1c2UgdGhlIGludGVyZmFjZSBo
-ZXJlID8NCj4gaHR0cHM6Ly9rZXJuZWwuZ29vZ2xlc291cmNlLmNvbS9wdWIvc2NtL2xpbnV4L2tl
-cm5lbC9naXQvbWZsZW1pbmcvZWZpLysvDQo+IGNhcHN1bGUNCj4gDQo+IChTb3JyeSBJIGtub3cg
-SSdtIGNvbWluZyB0byB0aGlzIHRocmVhZCBsYXRlKQ0KPiANCj4gQXNpZGUgZnJvbSB0aGF0LCBJ
-J20gY3VyaW91cyB3aGljaCB0eXBlcyBvZiBjYXBzdWxlcyB5b3UndmUgdXNlZCBoZXJlIHRvbyAt
-DQo+IGRvZXMgaXQgaW5jbHVkZSB0aGUgTUZIIGhlYWRlciA/IEtlZXAgaW4gbWluZCB0aGUgaW5p
-dGlhbCBmaXJtd2FyZSB0aGF0DQo+IHNoaXBwZWQgd2l0aCBHYWxpbGVvIHdpbGwgZGVwZW5kIG9u
-IHRoYXQgTUZIIGJlaW5nIHByZXNlbnQuDQo+IA0KPiBodHRwOi8vZG93bmxvYWQuaW50ZWwuY29t
-L3N1cHBvcnQvcHJvY2Vzc29ycy9xdWFyay9zYi9xdWFya19zZWN1cmVib290DQo+IHBybV8zMzAy
-MzRfMDAxLnBkZg0KPiAtIFNlY3Rpb24gQTEgLSB0YWJsZSA3ID8NCj4gDQo+IFNvIGlmIHdlIGJv
-b3QgYSA0Lngga2VybmVsIHdpdGggdGhhdCBpbml0aWFsIGZpcm13YXJlIHZlcnNpb24gMC43NSBp
-ZiBtZW1vcnkNCj4gc2VydmVzIC0gaXQncyBpbXBvcnRhbnQgdGhhdCB0aGUgY2Fwc3VsZS5jIGNv
-ZGUgaGFuZGxlcyB0aGUgTUZILg0KPiANCg0KQWxyZWFkeSBnb3QgYWdyZWVtZW50IHdpdGggTWF0
-dCB0aGF0IFF1YXJrIFNlY3VyaXR5IEhlYWRlciBwYXRjaCB3aWxsIG5vdA0KYmUgdXBzdHJlYW0g
-dG8gbWFpbmxpbmUgYXMgaXQgaXMgbm90IGEgc3RhbmRhcmQgaGVhZGVyLiBTbyBJbnRlbCB3aWxs
-IGNhcnJ5IHRoaXMNCnBhdGNoIG91cnNlbHZlcy4NCg0KDQpUaGFua3MgJiBSZWdhcmRzLA0KV2ls
-c29uDQo=
+We need to ensure that the EFI stub only uses parts of the kernel proper
+that are safe to use when the kernel virtual mapping is not active yet.
+
+So move all C code dependencies to the libstub, and do a verification pass
+to ensure that no absolute relocations are used.
+
+On the arm64 side, annotate all the stub's dependencies as safe for PI
+(position independent
+
+Changes since v2:
+- fold patch that removes the linux_banner from the /chosen node UEFI specific
+  properties; if we are all in agreement that we can get rid of it (which I
+  think we are), it makes sense to do it straight away, and not export
+  linux_banner into the stub now only to remove it later
+- tweaked libstub Makefile rules for easier ARM reuse
+- rebase onto v4.3-rc4
+
+Changes since v1:
+- add .size and .type directives to correctly annotate the __pi_xxx aliases
+  as functions of the correct size
+- add '#ifndef __HAVE_ARCH_STRSTR' around strstr() definition
+- added linux-efi/Matt to cc
+
+Ard Biesheuvel (3):
+  arm64/efi: remove /chosen/linux,uefi-stub-kern-ver DT property
+  arm64: use ENDPIPROC() to annotate position independent assembler
+    routines
+  arm64/efi: isolate EFI stub from the kernel proper
+
+ Documentation/arm/uefi.txt            |  2 -
+ arch/arm64/include/asm/assembler.h    | 11 ++++
+ arch/arm64/kernel/Makefile            | 12 ++++-
+ arch/arm64/kernel/efi-entry.S         | 10 ++--
+ arch/arm64/kernel/head.S              | 14 ++---
+ arch/arm64/kernel/image.h             | 26 +++++++++
+ arch/arm64/lib/memchr.S               |  2 +-
+ arch/arm64/lib/memcmp.S               |  2 +-
+ arch/arm64/lib/memcpy.S               |  2 +-
+ arch/arm64/lib/memmove.S              |  2 +-
+ arch/arm64/lib/memset.S               |  2 +-
+ arch/arm64/lib/strlen.S               |  2 +-
+ arch/arm64/lib/strncmp.S              |  2 +-
+ arch/arm64/mm/cache.S                 | 10 ++--
+ drivers/firmware/efi/libstub/Makefile | 39 +++++++++++---
+ drivers/firmware/efi/libstub/fdt.c    |  9 ----
+ drivers/firmware/efi/libstub/string.c | 57 ++++++++++++++++++++
+ 17 files changed, 161 insertions(+), 43 deletions(-)
+ create mode 100644 drivers/firmware/efi/libstub/string.c
+
+-- 
+1.9.1
