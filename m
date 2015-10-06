@@ -1,71 +1,87 @@
-From: Bryan O'Donoghue <pure.logic@nexus-software.ie>
-Subject: Re: [PATCH v7 1/2] efi: export efi_capsule_supported() function symbol
-Date: Mon, 05 Oct 2015 22:27:20 +0100
-Message-ID: <5612EB38.2050209@nexus-software.ie>
-References: <1444076155-19295-1-git-send-email-hock.leong.kweh@intel.com> <1444076155-19295-2-git-send-email-hock.leong.kweh@intel.com> <20151005131350.GA26329@nazgul.tnic> <F54AEECA5E2B9541821D670476DAE19C4A864613@PGSMSX102.gar.corp.intel.com>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v6 2/2] efi: a misc char interface for user to update
+ efi firmware
+Date: Tue, 6 Oct 2015 03:03:54 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A8648AB@PGSMSX102.gar.corp.intel.com>
+References: <F54AEECA5E2B9541821D670476DAE19C4A864675@PGSMSX102.gar.corp.intel.com>
+ <CALCETrU4+UT_2z1J+WUwnweMSuAyA0=-qoc24b2QStqUzyL3mw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A864613@PGSMSX102.gar.corp.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CALCETrU4+UT_2z1J+WUwnweMSuAyA0=-qoc24b2QStqUzyL3mw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 05/10/15 16:19, Kweh, Hock Leong wrote:
->> -----Original Message-----
->> From: Borislav Petkov [mailto:bp@alien8.de]
->> Sent: Monday, October 05, 2015 9:14 PM
->>
->> So this one is still a separate patch.
->>
->> If you're going to ignore review comments, maybe I should stop wasting my
->> time reviewing your stuff...
->>
->> --
->> Regards/Gruss,
->>      Boris.
->
-> Already follow what you have suggested, put a note under --- line:
-> https://lkml.org/lkml/2015/10/5/230 (at line 25 - 27)
->
-> Thanks for the review comments.
-
-Wilson - trying to test this out on a Galileo Gen2 - which branch are 
-you doing this against ?
-
-I can apply the first patch you're proposing to squash your commit into
-
-https://lkml.org/lkml/diff/2014/10/7/390/1
-
-but then trying to apply the first in your series on top of that patch I get
-
-deckard@aineko:~/Development/linux$ git apply 
-../patches/capsule_wilson/1_2.eml
-../patches/capsule_wilson/1_2.eml:72: trailing whitespace.
-EXPORT_SYMBOL_GPL(efi_capsule_supported);
-error: drivers/firmware/efi/capsule.c: No such file or directory
-
-https://kernel.googlesource.com/pub/scm/linux/kernel/git/mfleming/efi/+/capsule/drivers/firmware/efi/capsule.c 
-
-
-??
-
-If so - then why not use the interface here ?
-https://kernel.googlesource.com/pub/scm/linux/kernel/git/mfleming/efi/+/capsule
-
-(Sorry I know I'm coming to this thread late)
-
-Aside from that, I'm curious which types of capsules you've used here 
-too - does it include the MFH header ? Keep in mind the initial firmware 
-that shipped with Galileo will depend on that MFH being present.
-
-http://download.intel.com/support/processors/quark/sb/quark_securebootprm_330234_001.pdf 
-- Section A1 - table 7 ?
-
-So if we boot a 4.x kernel with that initial firmware version 0.75 if 
-memory serves - it's important that the capsule.c code handles the MFH.
-
---
-BOD
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBBbmR5IEx1dG9taXJza2kgW21h
+aWx0bzpsdXRvQGFtYWNhcGl0YWwubmV0XQ0KPiBTZW50OiBUdWVzZGF5LCBPY3RvYmVyIDA2LCAy
+MDE1IDM6MDYgQU0NCj4NCj4gPj4gQW5kIHdoYXQgaWYgY2FwX2hkciBpc24ndCB3cml0dGVuIHll
+dD8NCj4gPg0KPiA+IFRoaXMgZGVzaWduIG1haW5seSB0YXJnZXRpbmcgYSBzaW1wbGVzdCBpbnRl
+cmZhY2UgdGhhdCB1c2VyIGNvdWxkDQo+ID4gdXBsb2FkIGVmaSBjYXBzdWxlIGluIGEgc2luZ2xl
+IGNvbW1hbmQgYWN0aW9uOiBjYXQgY2Fwc3VsZS5iaW4gPg0KPiA+IC9kZXYvZWZpX2NhcHN1bGVf
+bG9hZGVyDQo+ID4NCj4gPiBTbywgaXQgaXMgZXhwZWN0ZWQgdGhhdCBlZmkgY2Fwc3VsZSBoZWFk
+ZXIgaXMgYXQgdGhlIHN0YXJ0aW5nIG9mIHRoZSBiaW5hcnkgZmlsZS4NCj4gPiBBbHJlYWR5IGNh
+cHR1cmUgdGhpcyBpbnRvIGVmaV9jYXBzdWxlX3dyaXRlKCkgY29tbWVudCBpbiB2NyBwYXRjaHNl
+dDoNCj4gPiBodHRwczovL2xrbWwub3JnL2xrbWwvMjAxNS8xMC81LzIzMg0KPiA+DQo+ID4gSWYg
+eW91IHdhbnQgdG8gZW5oYW5jZSB0aGlzIG1vZHVsZSB0byBzdXBwb3J0IGNyZWF0aW5nIGVmaSBj
+YXBzdWxlDQo+ID4gaGVhZGVyIGZvciB5b3VyIGJpbmFyeSwgc3Ryb25nbHkgYmVsaWV2ZSB0aGlz
+IGRlc2lnbiBjYW4gY2F0ZXIgdGhlDQo+ID4gaW1wbGVtZW50YXRpb24gc3VjaCBhcyBhZGRpbmcg
+aW9jdGwgdG8gcGFzcyBpbiBlZmkgZ3VpZCwgZmxhZ3MgYW5kIHNvIG9uDQo+IHBhcmFtZXRlcnMg
+dG8gY3JlYXRlIHRoZSBoZWFkZXIuDQo+ID4NCj4gDQo+IE5vLCB0aGF0J3Mgbm90IHdoYXQgSSBt
+ZWFuLiAgV2hhdCBJIG1lYW4gaXM6IHdoYXQgaWYgY2F0IHdyaXRlcyB0b28gbGl0dGxlIGluIHRo
+ZQ0KPiBmaXJzdCB3cml0ZSBjYWxsIChlLmcuIDMgYnl0ZXMpLg0KDQpZZXMsIEkgY291bGQgYWRk
+IGEgY29uZGl0aW9uIGNoZWNraW5nIGZvciB0aGlzOg0KaWYgKHdyaXRlX2J5dGUgPCBzaXplb2Yo
+ZWZpX2NhcHN1bGVfaGVhZGVyX3QpIHsgLi4uIH0NCnRvIGVuc3VyZSB0aGUgMXN0IGJsb2NrIGNv
+dW50IGRvZXMgbm90IGxlc3MgdGhhbiB0aGUgY2Fwc3VsZSBoZWFkZXIgc2l6ZS4NCklmIG5vdCwg
+d2lsbCByZXR1cm4gZXJyb3IuDQoNCkRvIHlvdSBoYXZlIGFueSBpZGVhIHRoYXQgaW4gd2hhdCBr
+aW5kIG9mIHNpdHVhdGlvbiB1c2VyIGFwcCB3aWxsIHBhc3MgaW4gbGVzcyB0aGFuDQoyOCBieXRl
+cyBlYWNoIHRpbWU/DQoNCj4gDQo+ID4NCj4gPj4NCj4gPj4gPiArICAgICAgICAgICAgICAgaWYg
+KHJldCkgew0KPiA+PiA+ICsgICAgICAgICAgICAgICAgICAgICAgIHByX2VycigiJXM6IGVmaV9j
+YXBzdWxlX3N1cHBvcnRlZCgpIGZhaWxlZFxuIiwNCj4gPj4gPiArICAgICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgX19mdW5jX18pOw0KPiA+PiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGt1
+bm1hcChrYnVmZl9wYWdlKTsNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlZmlfZnJl
+ZV9hbGxfYnVmZl9wYWdlcyhrYnVmZl9wYWdlKTsNCj4gPj4gPiArICAgICAgICAgICAgICAgICAg
+ICAgICByZXR1cm4gcmV0Ow0KPiA+PiA+ICsgICAgICAgICAgICAgICB9DQo+ID4+ID4gKw0KPiA+
+PiA+ICsgICAgICAgICAgICAgICBjYXBfaW5mby50b3RhbF9zaXplID0gY2FwX2hkci0+aW1hZ2Vz
+aXplOw0KPiA+PiA+ICsgICAgICAgICAgICAgICBjYXBfaW5mby5wYWdlcyA9IGttYWxsb2NfYXJy
+YXkocGFnZXNfbmVlZGVkLCBzaXplb2Yodm9pZCAqKSwNCj4gPj4gPiArICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBHRlBfS0VSTkVMKTsNCj4gPj4gPiArICAg
+ICAgICAgICAgICAgaWYgKCFjYXBfaW5mby5wYWdlcykgew0KPiA+PiA+ICsgICAgICAgICAgICAg
+ICAgICAgICAgIHByX2RlYnVnKCIlczoga21hbGxvY19hcnJheSgpIGZhaWxlZFxuIiwgX19mdW5j
+X18pOw0KPiA+PiA+ICsgICAgICAgICAgICAgICAgICAgICAgIGt1bm1hcChrYnVmZl9wYWdlKTsN
+Cj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICBlZmlfZnJlZV9hbGxfYnVmZl9wYWdlcyhr
+YnVmZl9wYWdlKTsNCj4gPj4gPiArICAgICAgICAgICAgICAgICAgICAgICByZXR1cm4gLUVOT01F
+TTsNCj4gPj4gPiArICAgICAgICAgICAgICAgfQ0KPiA+PiA+ICsNCj4gPj4gPiArICAgICAgICAg
+ICAgICAgY2FwX2luZm8uaGVhZGVyX29idGFpbmVkID0gMTsNCj4gPj4NCj4gPj4gSSBkb24ndCBz
+ZWUgaG93IHlvdSBrbm93IHRoYXQgdGhlIGhlYWRlciBpcyBvYnRhaW5lZC4NCj4gPg0KPiA+IENh
+cHN1bGUgaGVhZGVyIGlzIGF0IHRoZSBzdGFydGluZyBibG9jayBvZiBpbWFnZSBiaW5hcnkuIFdl
+IGNhbiBvYnRhaW4NCj4gPiB0aGUgaGVhZGVyIHRocm91Z2ggdGhlIDFzdCBibG9jayBvZiB3cml0
+ZSBhY3Rpb24uDQo+IA0KPiBUaGF0J3MgcXVpdGUgYW4gYXNzdW1wdGlvbiB0byBtYWtlLg0KDQpB
+bnN3ZXJlZCBhcyBhYm92ZS4NCg0KPiANCj4gPj4gPiArICAgICAgIGNhcF9pbmZvLnBhZ2VzW2Nh
+cF9pbmZvLmluZGV4KytdID0ga2J1ZmZfcGFnZTsNCj4gPj4NCj4gPj4gSHVoPyAgWW91IG1pZ2h0
+IG5vdyBoYXZlIGFsbG9jYXRlZCBhIHdob2xlIHBhZ2UuDQo+ID4NCj4gPiBZZXMsIHRoZSBlZmkg
+Y2Fwc3VsZSBoZWFkZXIgZG9lcyB0ZWxsIHRoZSB3aG9sZSBpbWFnZSBzaXplLg0KPiANCj4gU28g
+d2hhdD8gIERpZCB5b3UgYWxsb2NhdGUgYSBwYWdlIGluIHRoaXMgcGFydGljdWxhciB3cml0ZSBj
+YWxsPyAgSWYgc28sIHRoZW4NCj4gY2FwX2luZm8uaW5kZXgrKywgZXRjIGlzIG9rYXkuICBJZiBu
+b3QsIGl0J3Mgd3JvbmcuDQoNClllcywgdGhlIGFsbG9jYXRpb24gaXMgYXQ6DQpjYXBfaW5mby5w
+YWdlcyA9IGttYWxsb2NfYXJyYXkocGFnZXNfbmVlZGVkLCBzaXplb2Yodm9pZCAqKSwNCiAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+ICAgR0ZQX0tFUk5FTCk7DQpiZWZvcmUgbGluZToNCmNhcF9pbmZvLmhlYWRlcl9vYnRhaW5lZCA9
+IDE7DQoNCj4gDQo+ID4+ID4gKyAgICAgICAgICAgICAgIH0NCj4gPj4gPiArICAgICAgICAgICAg
+ICAgLyogaW5kaWNhdGUgY2Fwc3VsZSBiaW5hcnkgdXBsb2FkaW5nIGlzIGRvbmUgKi8NCj4gPj4g
+PiArICAgICAgICAgICAgICAgY2FwX2luZm8uaW5kZXggPSAtMTsNCj4gPj4NCj4gPj4gU2hvdWxk
+IGNvdW50ID4gY2FwX2luZm8udG90YWxfc2l6ZSBiZSBhbiBlcnJvcj8NCj4gPj4NCj4gPj4gLS1B
+bmR5DQo+ID4NCj4gPiBZZXMsIHRoaXMgaXMgd2h5IGFmdGVyIHRoZSB3cml0ZSBjb3VudCBhbHJl
+YWR5IHJlYWNoZXMgdGhlIGltYWdlIHNpemUNCj4gPiBzdGF0ZWQgaW4gZWZpIGNhcHN1bGUgaGVh
+ZGVyLCBhbiBpbmRpY2F0b3Igd2lsbCBiZSBmbGFnZ2VkIGZvcg0KPiA+IHN1YnNlcXVlbmNlIHdy
+aXRlIHRvIGJlIHJldHVybmVkIC1FSU8gYXMgd2hhdCBNYXR0IGhhcyBjb21tZW50ZWQuDQo+IA0K
+PiBXaGF0IGlmICp0aGlzIHZlcnkgc2FtZSB3cml0ZSogd3JpdGVzIHRvbyBtdWNoIGRhdGE/DQo+
+IA0KDQpJIHRoaW5rIGl0IGlzIHN0aWxsIG9rYXkgYXMgdGhlIGRhdGEgaXMgc3RpbGwgd2l0aGlu
+IGEgcGFnZSBhbmQgdGhpcyBjb3VsZCBjYXRlciB0aGUgaW1hZ2UNCmJpbmFyeSB0aGF0IHBhZGRp
+bmcgdG8gcGFnZSBzaXplLiBXaGF0ZXZlciBuZXh0IHdyaXRlIHRoYXQgbW9yZSB0aGFuIHRoZSBj
+dXJyZW50DQpwYWdlLCB3aWxsIHJldHVybiBlcnJvciAtRUlPLg0KDQpJZiB5b3UgdGhpbmsgdGhh
+dCBzaG91bGQgZmxhZyBhbiBlcnJvciwgSSBjb3VsZCBzaW1wbHkgYWRkIHRoZSBjb25kaXRpb24g
+Y2hlY2tpbmcNCnRvIGl0Lg0KDQoNClRoYW5rcyAmIFJlZ2FyZHMsDQpXaWxzb24NCg0K
