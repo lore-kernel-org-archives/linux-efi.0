@@ -1,46 +1,91 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 0/3] UEFI stub FDT handling fixes
-Date: Wed,  7 Oct 2015 09:35:26 +0100
-Message-ID: <1444206929-13374-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/3] efi/libstub: move FDT sanity check out of allocation loop
+Date: Wed,  7 Oct 2015 09:35:27 +0100
+Message-ID: <1444206929-13374-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1444206929-13374-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1444206929-13374-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This is an alternative approach to some of the issues addressed by my series
-'arm64 UEFI early FDT handling', of which the latest version (v3) can be found
-here: http://thread.gmane.org/gmane.linux.kernel.efi/6334
+The memory allocation for the updated FDT may execute several times
+if the allocation turns out to be insufficiently large. There is no
+need to sanity check the original FDT each time, so take it out of
+the loop.
 
-The issues that are addressed by the original series are:
-- when booting via UEFI, memreserve entries are removed from the device tree but
-  the /reserved-memory node is not
-- memory nodes are removed from the device tree in a way that is not officially
-  supported by the libfdt API (i.e., you cannot delete nodes while traversing
-  the tree)
-- removal of memory nodes may discard annotations (such as NUMA topology) that
-  should ideally be retained, or may corrupt the tree by discarding nodes
-  referenced by phandles.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/libstub/fdt.c | 42 ++++++++++++--------
+ 1 file changed, 26 insertions(+), 16 deletions(-)
 
-After having discussed this offline between Grant, Leif and myself, we have come
-to the [preliminary] conclusion that discarding the /reserved-memory is not the
-way to go, and we will be far better off honoring those reservations to the
-extent possible. At the same time, the /memory node binding does not contain any
-annotations, so discarding those prevents more issues than it creates as long as
-we do it cautiously.
-
-This series addresses both issues: it it sanity check the /reserved-memory node
-to ensure that it does not contain any reservations we will not be able to
-honor (patch #1, #2) and updates the /memory removal loop to restart from the
-root of the tree each time a /memory node is found and removed (patch #3)
-
-Ard Biesheuvel (3):
-  efi/libstub: move FDT sanity check out of allocation loop
-  efi/libstub: sanity check the /reserved-memory DT node
-  efi/libstub: fix deletion of FDT memory nodes
-
- drivers/firmware/efi/libstub/fdt.c | 187 ++++++++++++++++++--
- 1 file changed, 169 insertions(+), 18 deletions(-)
-
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index ef5d764e2a27..354172bee81c 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -16,6 +16,26 @@
+ 
+ #include "efistub.h"
+ 
++static efi_status_t sanity_check_fdt(efi_system_table_t *sys_table,
++				     void *fdt, unsigned long fdt_size)
++{
++	if (fdt_check_header(fdt)) {
++		pr_efi_err(sys_table, "Device Tree header not valid!\n");
++		return EFI_LOAD_ERROR;
++	}
++
++	/*
++	 * We don't get the size of the FDT if we get if from a
++	 * configuration table.
++	 */
++	if (fdt_size && fdt_totalsize(fdt) > fdt_size) {
++		pr_efi_err(sys_table, "Truncated device tree! foo!\n");
++		return EFI_LOAD_ERROR;
++	}
++
++	return EFI_SUCCESS;
++}
++
+ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long orig_fdt_size,
+ 			void *fdt, int new_fdt_size, char *cmdline_ptr,
+@@ -29,22 +49,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	u32 fdt_val32;
+ 	u64 fdt_val64;
+ 
+-	/* Do some checks on provided FDT, if it exists*/
+-	if (orig_fdt) {
+-		if (fdt_check_header(orig_fdt)) {
+-			pr_efi_err(sys_table, "Device Tree header not valid!\n");
+-			return EFI_LOAD_ERROR;
+-		}
+-		/*
+-		 * We don't get the size of the FDT if we get if from a
+-		 * configuration table.
+-		 */
+-		if (orig_fdt_size && fdt_totalsize(orig_fdt) > orig_fdt_size) {
+-			pr_efi_err(sys_table, "Truncated device tree! foo!\n");
+-			return EFI_LOAD_ERROR;
+-		}
+-	}
+-
+ 	if (orig_fdt)
+ 		status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
+ 	else
+@@ -213,6 +217,12 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
+ 		return status;
+ 	}
+ 
++	if (fdt_addr) {
++		status = sanity_check_fdt(sys_table, (void*)fdt_addr, fdt_size);
++		if (status != EFI_SUCCESS)
++			goto fail;
++	}
++
+ 	pr_efi(sys_table,
+ 	       "Exiting boot services and installing virtual address map...\n");
+ 
 -- 
 1.9.1
