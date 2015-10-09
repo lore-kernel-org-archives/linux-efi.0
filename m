@@ -1,73 +1,90 @@
-From: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Subject: Re: [PATCH v6 0/6] KASAN for arm64
-Date: Fri, 9 Oct 2015 13:18:09 +0300
-Message-ID: <CAPAsAGzOXOXDu+K3VG31BgcKCkk0LPmRv_YE4syNLCwr9h+2ug@mail.gmail.com>
-References: <1442482692-6416-1-git-send-email-ryabinin.a.a@gmail.com>
-	<20151007100411.GG3069@e104818-lin.cambridge.arm.com>
-	<CAPAsAGxR-yqtmFeo65Xw_0RQyEy=mN1uG=GKtqoMLr_x_N0u5w@mail.gmail.com>
-	<20151008111144.GC7275@leverpostej>
-	<56165228.8060201@gmail.com>
-	<CAKv+Gu_v7J1BA+xFcowBrW05bRFs=_WFf_HCeCmWgdZVRo0eQw@mail.gmail.com>
-	<20151008151144.GM17192@e104818-lin.cambridge.arm.com>
-	<CAPAsAGxhcRtks40u3O29t=KMKkuLy4Pf8u8TeeBy2f2-MuSf+A@mail.gmail.com>
-	<561789A2.5050601@gmail.com>
-	<20151009094851.GA20507@leverpostej>
+Date: Fri, 9 Oct 2015 13:42:54 +0100
+Message-ID: <20151009124253.GA21629@leverpostej>
+References: <20151007100411.GG3069@e104818-lin.cambridge.arm.com>
+ <CAPAsAGxR-yqtmFeo65Xw_0RQyEy=mN1uG=GKtqoMLr_x_N0u5w@mail.gmail.com>
+ <20151008111144.GC7275@leverpostej>
+ <56165228.8060201@gmail.com>
+ <CAKv+Gu_v7J1BA+xFcowBrW05bRFs=_WFf_HCeCmWgdZVRo0eQw@mail.gmail.com>
+ <20151008151144.GM17192@e104818-lin.cambridge.arm.com>
+ <CAPAsAGxhcRtks40u3O29t=KMKkuLy4Pf8u8TeeBy2f2-MuSf+A@mail.gmail.com>
+ <561789A2.5050601@gmail.com>
+ <20151009094851.GA20507@leverpostej>
+ <CAPAsAGzOXOXDu+K3VG31BgcKCkk0LPmRv_YE4syNLCwr9h+2ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151009094851.GA20507@leverpostej>
+Content-Disposition: inline
+In-Reply-To: <CAPAsAGzOXOXDu+K3VG31BgcKCkk0LPmRv_YE4syNLCwr9h+2ug-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Yury <yury.norov-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, Linus Walleij <linus.walleij-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Alexey Klimov <klimov.linux-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexander Potapenko <glider-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Dmitry Vyukov <dvyukov-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Andrey Konovalov <andreyknvl-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, David Keitel <dkeitel-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-2015-10-09 12:48 GMT+03:00 Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>:
-> On Fri, Oct 09, 2015 at 12:32:18PM +0300, Andrey Ryabinin wrote:
-> [...]
->
->> I thought the EFI stub isolation patches create a copy of mem*() functions in the stub,
->> but they are just create aliases with __efistub_ prefix.
->>
->> We only need to create some more aliases for KASAN.
->> The following patch on top of the EFI stub isolation series works for me.
->>
->>
->> Signed-off-by: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
->> ---
->>  arch/arm64/kernel/image.h | 6 ++++++
->>  1 file changed, 6 insertions(+)
->>
->> diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
->> index e083af0..6eb8fee 100644
->> --- a/arch/arm64/kernel/image.h
->> +++ b/arch/arm64/kernel/image.h
->> @@ -80,6 +80,12 @@ __efistub_strcmp           = __pi_strcmp;
->>  __efistub_strncmp            = __pi_strncmp;
->>  __efistub___flush_dcache_area        = __pi___flush_dcache_area;
->>
->> +#ifdef CONFIG_KASAN
->> +__efistub___memcpy           = __pi_memcpy;
->> +__efistub___memmove          = __pi_memmove;
->> +__efistub___memset           = __pi_memset;
->> +#endif
->
-> Ard's v4 stub isolation series has these aliases [1], as the stub
-> requires these aliases regardless of KASAN in order to link.
+On Fri, Oct 09, 2015 at 01:18:09PM +0300, Andrey Ryabinin wrote:
+> 2015-10-09 12:48 GMT+03:00 Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>:
+> > On Fri, Oct 09, 2015 at 12:32:18PM +0300, Andrey Ryabinin wrote:
+> > [...]
+> >
+> >> I thought the EFI stub isolation patches create a copy of mem*() functions in the stub,
+> >> but they are just create aliases with __efistub_ prefix.
+> >>
+> >> We only need to create some more aliases for KASAN.
+> >> The following patch on top of the EFI stub isolation series works for me.
+> >>
+> >>
+> >> Signed-off-by: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+> >> ---
+> >>  arch/arm64/kernel/image.h | 6 ++++++
+> >>  1 file changed, 6 insertions(+)
+> >>
+> >> diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
+> >> index e083af0..6eb8fee 100644
+> >> --- a/arch/arm64/kernel/image.h
+> >> +++ b/arch/arm64/kernel/image.h
+> >> @@ -80,6 +80,12 @@ __efistub_strcmp           = __pi_strcmp;
+> >>  __efistub_strncmp            = __pi_strncmp;
+> >>  __efistub___flush_dcache_area        = __pi___flush_dcache_area;
+> >>
+> >> +#ifdef CONFIG_KASAN
+> >> +__efistub___memcpy           = __pi_memcpy;
+> >> +__efistub___memmove          = __pi_memmove;
+> >> +__efistub___memset           = __pi_memset;
+> >> +#endif
+> >
+> > Ard's v4 stub isolation series has these aliases [1], as the stub
+> > requires these aliases regardless of KASAN in order to link.
+> 
+> Stub isolation series has __efistub_memcpy, not __efistub___memcpy
+> (two additional '_').
 
-Stub isolation series has __efistub_memcpy, not __efistub___memcpy
-(two additional '_').
-The thing is, KASAN provides own implementation of memcpy() which
-checks memory before access.
-The original 'memcpy()' becomes __memcpy(), so we could still use it.
-In code that not instrumented by KASAN (like the EFI stub) we replace
-KASAN's memcpy() with the original __mempcy():
-#define memcpy() __memcpy()
+Ah, I see, sorry for my sloppy reading.
 
-So with CONFIG_KASAN=y the EFI stub uses __memcpy, thus we need to
-create the __efistub___memcpy alias.
+> The thing is, KASAN provides own implementation of memcpy() which
+> checks memory before access.
+> The original 'memcpy()' becomes __memcpy(), so we could still use it.
 
->
-> Thanks,
-> Mark.
->
-> [1] http://lists.infradead.org/pipermail/linux-arm-kernel/2015-October/375708.html
+Ok.
+
+> In code that not instrumented by KASAN (like the EFI stub) we replace
+> KASAN's memcpy() with the original __mempcy():
+> #define memcpy() __memcpy()
+
+I'm a little confused by this. Surely that doesn't override implicit
+calls generated by the compiler, leaving us with a mixture of calls to
+memcpy and __memcpy?
+
+That doesn't matter for the stub, as both __efistub_mem* and
+__efistub___mem* would point at __pe_mem*, but doesn't that matter for
+other users that shouldn't be instrumented?
+
+Is that not a problem, or do we inhibit/override that somehow?
+
+> So with CONFIG_KASAN=y the EFI stub uses __memcpy, thus we need to
+> create the __efistub___memcpy alias.
+
+Ok, that makes sense to me.
+
+Thanks,
+Mark.
