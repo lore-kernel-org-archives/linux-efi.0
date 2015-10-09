@@ -1,76 +1,65 @@
-From: Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
-Date: Fri, 9 Oct 2015 12:48:16 +0300
-Message-ID: <CAPAsAGw1CN5FMxnPTW+00jyF2Q5GCSeS8S7ygR35Ls7fWPpnYQ@mail.gmail.com>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
-	<CAPAsAGz7Tp6Z87tPq_NNh_mcwPF_DOaXzu0po5f6AQxPAcsALQ@mail.gmail.com>
-	<20151009091037.GC26278@arm.com>
-	<CAPAsAGzgqOZVdTfpBGADAhZjOJTCqdB1Paq-14vk-_1hu4DCyw@mail.gmail.com>
-	<20151009094324.GE26278@arm.com>
+From: Mark Rutland <mark.rutland@arm.com>
+Subject: Re: [PATCH v6 0/6] KASAN for arm64
+Date: Fri, 9 Oct 2015 10:48:51 +0100
+Message-ID: <20151009094851.GA20507@leverpostej>
+References: <1442482692-6416-1-git-send-email-ryabinin.a.a@gmail.com>
+ <20151007100411.GG3069@e104818-lin.cambridge.arm.com>
+ <CAPAsAGxR-yqtmFeo65Xw_0RQyEy=mN1uG=GKtqoMLr_x_N0u5w@mail.gmail.com>
+ <20151008111144.GC7275@leverpostej>
+ <56165228.8060201@gmail.com>
+ <CAKv+Gu_v7J1BA+xFcowBrW05bRFs=_WFf_HCeCmWgdZVRo0eQw@mail.gmail.com>
+ <20151008151144.GM17192@e104818-lin.cambridge.arm.com>
+ <CAPAsAGxhcRtks40u3O29t=KMKkuLy4Pf8u8TeeBy2f2-MuSf+A@mail.gmail.com>
+ <561789A2.5050601@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151009094324.GE26278-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <561789A2.5050601@gmail.com>
+Sender: owner-linux-mm@kvack.org
+To: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Yury <yury.norov@gmail.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Linus Walleij <linus.walleij@linaro.org>, Mark Salter <msalter@redhat.com>, Will Deacon <will.deacon@arm.com>, LKML <linux-kernel@vger.kernel.org>, Alexey Klimov <klimov.linux@gmail.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Andrey Konovalov <andreyknvl@google.com>, David Keitel <dkeitel@codeaurora.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-2015-10-09 12:43 GMT+03:00 Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>:
-> On Fri, Oct 09, 2015 at 12:40:21PM +0300, Andrey Ryabinin wrote:
->> 2015-10-09 12:10 GMT+03:00 Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>:
->> > On Fri, Oct 09, 2015 at 11:12:24AM +0300, Andrey Ryabinin wrote:
->> >> 2015-10-08 22:02 GMT+03:00 Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>:
->> >> > --- a/arch/arm64/kernel/image.h
->> >> > +++ b/arch/arm64/kernel/image.h
->> >> > @@ -59,4 +59,31 @@
->> >> >         _kernel_offset_le       = DATA_LE64(TEXT_OFFSET);       \
->> >> >         _kernel_flags_le        = DATA_LE64(__HEAD_FLAGS);
->> >> >
->> >> > +#ifdef CONFIG_EFI
->> >> > +
->> >> > +/*
->> >> > + * The EFI stub has its own symbol namespace prefixed by __efistub_, to
->> >> > + * isolate it from the kernel proper. The following symbols are legally
->> >> > + * accessed by the stub, so provide some aliases to make them accessible.
->> >> > + * Only include data symbols here, or text symbols of functions that are
->> >> > + * guaranteed to be safe when executed at another offset than they were
->> >> > + * linked at. The routines below are all implemented in assembler in a
->> >> > + * position independent manner
->> >> > + */
->> >> > +__efistub_memcmp               = __pi_memcmp;
->> >> > +__efistub_memchr               = __pi_memchr;
->> >> > +__efistub_memcpy               = __pi_memcpy;
->> >> > +__efistub_memmove              = __pi_memmove;
->> >> > +__efistub_memset               = __pi_memset;
->> >> > +__efistub_strlen               = __pi_strlen;
->> >> > +__efistub_strcmp               = __pi_strcmp;
->> >> > +__efistub_strncmp              = __pi_strncmp;
->> >> > +__efistub___flush_dcache_area  = __pi___flush_dcache_area;
->> >>
->> >> So why we need these __pi_* aliases?
->> >> We could just do __efistub_memcmp = memcmp; Right?
->> >
->> > We *could*, but that defeats the whole purpose of tagging
->> > position-independent functions explicitly in the kernel text.
->> >
->>
->> I just don't get that "the whole purpose of tagging".
->>
->> Yes, the EFI stub is allowed to call only PI kernel functions.
->> But the EFI stub already protected by __efistub_ namespace.
->> If we want to use some new PI function in the stub, we would need add
->> it into this list at first.
->> So that __pi_ namespace doesn't bring any protection or isolation.
->
-> What it does it force people making future changes to the __pi_* functions
-> to think about the stub, otherwise if the function happens to be
-> position-independent when efistub starts using it, it could easily break
-> due to some future patch where the author didn't realise that it was
-> being used in that manner.
->
+On Fri, Oct 09, 2015 at 12:32:18PM +0300, Andrey Ryabinin wrote:
+[...]
 
-That makes sense, thanks.
+> I thought the EFI stub isolation patches create a copy of mem*() functions in the stub,
+> but they are just create aliases with __efistub_ prefix.
+> 
+> We only need to create some more aliases for KASAN.
+> The following patch on top of the EFI stub isolation series works for me.
+> 
+> 
+> Signed-off-by: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+> ---
+>  arch/arm64/kernel/image.h | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
+> index e083af0..6eb8fee 100644
+> --- a/arch/arm64/kernel/image.h
+> +++ b/arch/arm64/kernel/image.h
+> @@ -80,6 +80,12 @@ __efistub_strcmp		= __pi_strcmp;
+>  __efistub_strncmp		= __pi_strncmp;
+>  __efistub___flush_dcache_area	= __pi___flush_dcache_area;
+>  
+> +#ifdef CONFIG_KASAN
+> +__efistub___memcpy		= __pi_memcpy;
+> +__efistub___memmove		= __pi_memmove;
+> +__efistub___memset		= __pi_memset;
+> +#endif
 
-> Will
+Ard's v4 stub isolation series has these aliases [1], as the stub
+requires these aliases regardless of KASAN in order to link.
+
+Thanks,
+Mark.
+
+[1] http://lists.infradead.org/pipermail/linux-arm-kernel/2015-October/375708.html
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
