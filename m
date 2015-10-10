@@ -1,64 +1,51 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 2/2] x86, efi: Add "efi_fake_mem" boot option
-Date: Sat, 10 Oct 2015 21:36:17 +0100
-Message-ID: <20151010203617.GE2723@codeblueprint.co.uk>
-References: <201509300948.PGoujrqX%fengguang.wu@intel.com>
- <1443621716-209818-1-git-send-email-izumi.taku@jp.fujitsu.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 1/9] arm64/efi: split off EFI init and runtime code for
+ reuse by 32-bit ARM
+Date: Sat, 10 Oct 2015 21:53:11 +0100
+Message-ID: <20151010205311.GF2723@codeblueprint.co.uk>
+References: <1443719063-6832-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1443719063-6832-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1443621716-209818-1-git-send-email-izumi.taku@jp.fujitsu.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Taku Izumi <izumi.taku@jp.fujitsu.com>
-Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, x86@kernel.org, matt.fleming@intel.com, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, tony.luck@intel.com, qiuxishi@huawei.com, kamezawa.hiroyu@jp.fujitsu.com, ard.biesheuvel@linaro.org
+In-Reply-To: <1443719063-6832-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 30 Sep, at 11:01:56PM, Taku Izumi wrote:
-> This patch introduces new boot option named "efi_fake_mem".
-> By specifying this parameter, you can add arbitrary attribute
-> to specific memory range.
-> This is useful for debugging of Address Range Mirroring feature.
+On Thu, 01 Oct, at 07:04:15PM, Ard Biesheuvel wrote:
+> This splits off the early EFI init and runtime code that
+> - discovers the EFI params and the memory map from the FDT, and installs
+>   the memblocks and config tables.
+> - prepares and installs the EFI page tables so that UEFI Runtime Services
+>   can be invoked at the virtual address installed by the stub.
 > 
-> For example, if "efi_fake_mem=2G@4G:0x10000,2G@0x10a0000000:0x10000"
-> is specified, the original (firmware provided) EFI memmap will be
-> updated so that the specified memory regions have
-> EFI_MEMORY_MORE_RELIABLE attribute (0x10000):
+> This will allow it to be reused for 32-bit ARM.
 > 
->  <original>
->    efi: mem36: [Conventional Memory|  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000100000000-0x00000020a0000000) (129536MB)
-> 
->  <updated>
->    efi: mem36: [Conventional Memory|  |MR|  |  |  |   |WB|WT|WC|UC] range=[0x0000000100000000-0x0000000180000000) (2048MB)
->    efi: mem37: [Conventional Memory|  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000180000000-0x00000010a0000000) (61952MB)
->    efi: mem38: [Conventional Memory|  |MR|  |  |  |   |WB|WT|WC|UC] range=[0x00000010a0000000-0x0000001120000000) (2048MB)
->    efi: mem39: [Conventional Memory|  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000001120000000-0x00000020a0000000) (63488MB)
-> 
-> And you will find that the following message is output:
-> 
->    efi: Memory: 4096M/131455M mirrored memory
-> 
-> Signed-off-by: Taku Izumi <izumi.taku@jp.fujitsu.com>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  Documentation/kernel-parameters.txt |  15 +++
->  arch/x86/kernel/setup.c             |   4 +-
->  drivers/firmware/efi/Kconfig        |  22 ++++
->  drivers/firmware/efi/Makefile       |   1 +
->  drivers/firmware/efi/fake_mem.c     | 238 ++++++++++++++++++++++++++++++++++++
->  include/linux/efi.h                 |   6 +
->  6 files changed, 285 insertions(+), 1 deletion(-)
->  create mode 100644 drivers/firmware/efi/fake_mem.c
- 
-Looks good to me! I've queued this up with one minor change...
+>  arch/arm64/kernel/efi.c            | 363 +-------------------
+>  drivers/firmware/efi/Makefile      |   4 +-
+>  drivers/firmware/efi/arm-init.c    | 214 ++++++++++++
+>  drivers/firmware/efi/arm-runtime.c | 191 ++++++++++
+>  4 files changed, 409 insertions(+), 363 deletions(-)
 
-> +config EFI_MAX_FAKE_MEM
-> +	int "maximum allowable number of ranges in efi_fake_mem boot option"
-> +	depends on EFI && X86 && EFI_FAKE_MEMMAP
+[...]
 
-We can simplify this depends line since EFI_FAKE_MEMMAP itself is
-dependent on EFI and X86, and we should use that level of indirection
-to our advantage to save updating this line if/when arm64 support is
-added.
+> +static int uefi_debug __initdata;
+> +static int __init uefi_debug_setup(char *str)
+> +{
+> +	uefi_debug = 1;
+> +
+> +	return 0;
+> +}
+> +early_param("uefi_debug", uefi_debug_setup);
+
+Was this hunk an unintentional reintroduction of the code Leif deleted
+in commit a9cc0cf5701b ("arm64: Use core efi=debug instead of
+uefi_debug command line parameter")?
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
