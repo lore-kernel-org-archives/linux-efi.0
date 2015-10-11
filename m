@@ -1,34 +1,34 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v4 0/3] arm64: EFI stub isolation
-Date: Sat, 10 Oct 2015 23:40:51 +0100
-Message-ID: <20151010224051.GK2723@codeblueprint.co.uk>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
+From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Subject: RE: [PATCH v7 1/2] efi: export efi_capsule_supported() function
+ symbol
+Date: Sun, 11 Oct 2015 14:28:30 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A875128@PGSMSX102.gar.corp.intel.com>
+References: <1444076155-19295-1-git-send-email-hock.leong.kweh@intel.com>
+ <1444076155-19295-2-git-send-email-hock.leong.kweh@intel.com>
+ <20151005131350.GA26329@nazgul.tnic>
+ <20151010220202.GH2723@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1444330924-17830-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+In-Reply-To: <20151010220202.GH2723@codeblueprint.co.uk>
+Content-Language: en-US
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: Matt Fleming <matt@console-pimps.org>, Borislav Petkov <bp@alien8.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 08 Oct, at 08:02:01PM, Ard Biesheuvel wrote:
-> We need to ensure that the EFI stub only uses parts of the kernel proper
-> that are safe to use when the kernel virtual mapping is not active yet.
+> -----Original Message-----
+> From: Matt Fleming [mailto:matt@console-pimps.org]
+> Sent: Sunday, October 11, 2015 6:02 AM
 > 
-> So move all C code dependencies to the libstub, which is built with all
-> instrumentation (gcov, kasan) disabled, and do a verification pass to
-> ensure that no absolute relocations are used.
+> I agree that it makes sense to fold this patch into your PATCH 2, because then
+> we know why we need the above symbol to be exported.
 > 
-> On the arm64 side, annotate all the stub's dependencies as safe for PI
-> (position independent
-> 
-> @Matt: if you are OK with these, may we please have your ack on patches #1 and
-> #2 so that Catalin can pick up the series? Thanks.
 
-I assumed you meant PATCH 1 and PATCH 3. If so, yeah, these look fine
-to be taken through Catalin's tree.
+Okay, I will squash that into my patch and re-submit v9. Before that,
+are there any comments to my v8 patchset?
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks & Regards,
+Wilson
+
