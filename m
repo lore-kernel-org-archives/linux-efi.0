@@ -1,102 +1,44 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH] x86/efi: Fix multiple GOP device support
-Date: Mon, 12 Oct 2015 15:13:56 +0100
-Message-ID: <1444659236-24837-2-git-send-email-matt@codeblueprint.co.uk>
-References: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
+Date: Mon, 12 Oct 2015 16:17:54 +0200
+Message-ID: <20151012141754.GA6621@gmail.com>
+References: <1443814185-21552-1-git-send-email-sds@tycho.nsa.gov>
+ <20151003112701.GA4531@gmail.com>
+ <5612CBE8.2010504@tycho.nsa.gov>
+ <20151006073205.GA11115@gmail.com>
+ <5613EAD5.2070405@tycho.nsa.gov>
+ <20151012113605.GB7384@pd.tnic>
+ <20151012124113.GD2579@codeblueprint.co.uk>
+ <20151012124936.GA6260@gmail.com>
+ <20151012125548.GE2579@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: stable-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <dirty.ice.hu@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <DirtY.iCE.hu@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, stable@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20151012125548.GE2579-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-=46rom: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <dirty.ice.hu@gmail.com>
 
-When multiple GOP devices exists, but none of them implements ConOut,
-the code should just choose the first GOP (according to the comments).
-But currently fb_base will refer to the last GOP, while other parameter=
-s
-to the first GOP, which will likely result in a garbled display.
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-I can reliably reproduce this bug using my ASRock Z87M Extreme4
-motherboard with CSM and integrated GPU disabled, and two PCIe video
-cards (NVidia GT640 and GTX980), booting from efi-stub (booting from
-grub works fine).  On the primary display the asrock logo remains and o=
-n
-the secondary screen is garbled up completely.
+> On Mon, 12 Oct, at 02:49:36PM, Ingo Molnar wrote:
+> > 
+> > 
+> > So why not unmap them after bootup? Is there any reason to call into EFI code 
+> > while the system is up and running?
+> 
+> That's where the runtime services code lives. So if you want things like EFI 
+> variables (used by the distro installer, among other things) you need to map the 
+> runtime regions.
 
-Signed-off-by: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <DirtY.iCE.hu@gmail.c=
-om>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: <stable@vger.kernel.org>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
----
- arch/x86/boot/compressed/eboot.c | 8 ++++++--
- 1 file changed, 6 insertions(+), 2 deletions(-)
+So EFI variables could be queried during bootup and saved on the Linux side.
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compresse=
-d/eboot.c
-index ee1b6d346b98..db51c1f27446 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -667,6 +667,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 		bool conout_found =3D false;
- 		void *dummy =3D NULL;
- 		u32 h =3D handles[i];
-+		u32 current_fb_base;
-=20
- 		status =3D efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop32);
-@@ -678,7 +679,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 		if (status =3D=3D EFI_SUCCESS)
- 			conout_found =3D true;
-=20
--		status =3D __gop_query32(gop32, &info, &size, &fb_base);
-+		status =3D __gop_query32(gop32, &info, &size, &current_fb_base);
- 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
-@@ -692,6 +693,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
-to,
- 			pixel_format =3D info->pixel_format;
- 			pixel_info =3D info->pixel_information;
- 			pixels_per_scan_line =3D info->pixels_per_scan_line;
-+			fb_base =3D current_fb_base;
-=20
- 			/*
- 			 * Once we've found a GOP supporting ConOut,
-@@ -770,6 +772,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 		bool conout_found =3D false;
- 		void *dummy =3D NULL;
- 		u64 h =3D handles[i];
-+		u32 current_fb_base;
-=20
- 		status =3D efi_call_early(handle_protocol, h,
- 					proto, (void **)&gop64);
-@@ -781,7 +784,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 		if (status =3D=3D EFI_SUCCESS)
- 			conout_found =3D true;
-=20
--		status =3D __gop_query64(gop64, &info, &size, &fb_base);
-+		status =3D __gop_query64(gop64, &info, &size, &current_fb_base);
- 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
- 			/*
- 			 * Systems that use the UEFI Console Splitter may
-@@ -795,6 +798,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
-to,
- 			pixel_format =3D info->pixel_format;
- 			pixel_info =3D info->pixel_information;
- 			pixels_per_scan_line =3D info->pixels_per_scan_line;
-+			fb_base =3D current_fb_base;
-=20
- 			/*
- 			 * Once we've found a GOP supporting ConOut,
---=20
-2.1.0
+Calling into firmware after the kernel has booted up is fragile in general - 
+beyond W+X the security considerations.
+
+Thanks,
+
+	Ingo
