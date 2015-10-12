@@ -1,94 +1,78 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 04/11] efi/arm64: Clean up efi_get_fdt_params() interface
-Date: Mon, 12 Oct 2015 14:56:07 +0100
-Message-ID: <1444658174-23378-5-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 01/11] drivers/firmware: Make efi/esrt.c driver explicitly non-modular
+Date: Mon, 12 Oct 2015 14:56:04 +0100
+Message-ID: <1444658174-23378-2-git-send-email-matt@codeblueprint.co.uk>
 References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1444658174-23378-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Leif Lindholm <leif.lindholm@linaro.org>
+From: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
 
-As we now have a common debug infrastructure between core and arm64 efi,
-drop the bit of the interface passing verbose output flags around.
+The Kconfig for this driver is currently hidden with:
 
-Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
-Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Mark Salter <msalter@redhat.com>
-Cc: Catalin Marinas <catalin.marinas@arm.com>
-Cc: Will Deacon <will.deacon@arm.com>
-Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+config EFI_ESRT
+        bool
+
+...meaning that it currently is not being built as a module by anyone.
+Lets remove the modular code that is essentially orphaned, so that
+when reading the driver there is no doubt it is builtin-only.
+
+Since module_init translates to device_initcall in the non-modular
+case, the init ordering remains unchanged with this commit.
+
+We leave some tags like MODULE_AUTHOR for documentation purposes.
+
+We don't replace module.h with init.h since the file already has that.
+
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/arm64/kernel/efi.c    | 2 +-
- drivers/firmware/efi/efi.c | 6 ++----
- include/linux/efi.h        | 2 +-
- 3 files changed, 4 insertions(+), 6 deletions(-)
+ drivers/firmware/efi/esrt.c | 19 +++----------------
+ 1 file changed, 3 insertions(+), 16 deletions(-)
 
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 612ad5ec1d2e..ab5eeb63e2ca 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -201,7 +201,7 @@ void __init efi_init(void)
- 	struct efi_fdt_params params;
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index a5b95d61ae71..22c5285f7705 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -20,7 +20,6 @@
+ #include <linux/kobject.h>
+ #include <linux/list.h>
+ #include <linux/memblock.h>
+-#include <linux/module.h>
+ #include <linux/slab.h>
+ #include <linux/types.h>
  
- 	/* Grab UEFI information placed in FDT by stub */
--	if (!efi_get_fdt_params(&params, efi_enabled(EFI_DBG)))
-+	if (!efi_get_fdt_params(&params))
- 		return;
- 
- 	efi_system_table = params.system_table;
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index f0372a022c86..a0a0469e2869 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -492,7 +492,6 @@ static __initdata struct {
- };
- 
- struct param_info {
--	int verbose;
- 	int found;
- 	void *params;
- };
-@@ -523,21 +522,20 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- 		else
- 			*(u64 *)dest = val;
- 
--		if (info->verbose)
-+		if (efi_enabled(EFI_DBG))
- 			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
- 				dt_params[i].size * 2, val);
- 	}
- 	return 1;
+@@ -450,22 +449,10 @@ err:
+ 	esrt = NULL;
+ 	return error;
  }
++device_initcall(esrt_sysfs_init);
  
--int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
-+int __init efi_get_fdt_params(struct efi_fdt_params *params)
- {
- 	struct param_info info;
- 	int ret;
- 
- 	pr_info("Getting EFI parameters from FDT:\n");
- 
--	info.verbose = verbose;
- 	info.found = 0;
- 	info.params = params;
- 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 26ca9e2fd30e..4677d8a1bfd0 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -902,7 +902,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
- 		struct resource *data_resource, struct resource *bss_resource);
- extern void efi_get_time(struct timespec *now);
- extern void efi_reserve_boot_services(void);
--extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
-+extern int efi_get_fdt_params(struct efi_fdt_params *params);
- extern struct efi_memory_map memmap;
- extern struct kobject *efi_kobj;
- 
+-static void __exit esrt_sysfs_exit(void)
+-{
+-	pr_debug("esrt-sysfs: unloading.\n");
+-	cleanup_entry_list();
+-	kset_unregister(esrt_kset);
+-	sysfs_remove_group(esrt_kobj, &esrt_attr_group);
+-	kfree(esrt);
+-	esrt = NULL;
+-	kobject_del(esrt_kobj);
+-	kobject_put(esrt_kobj);
+-}
+-
+-module_init(esrt_sysfs_init);
+-module_exit(esrt_sysfs_exit);
+-
++/*
+ MODULE_AUTHOR("Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>");
+ MODULE_DESCRIPTION("EFI System Resource Table support");
+ MODULE_LICENSE("GPL");
++*/
 -- 
 2.1.0
