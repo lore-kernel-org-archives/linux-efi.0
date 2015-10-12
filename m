@@ -1,190 +1,101 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 05/11] efifb: Add support for 64-bit frame buffer addresses
-Date: Mon, 12 Oct 2015 14:56:08 +0100
-Message-ID: <1444658174-23378-6-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 03/11] arm64: Use core efi=debug instead of uefi_debug command line parameter
+Date: Mon, 12 Oct 2015 14:56:06 +0100
+Message-ID: <1444658174-23378-4-git-send-email-matt@codeblueprint.co.uk>
 References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Pete Hawkins <pete.hawkins@znyx.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Chad Page <chad.page@znyx.com>, Peter Jones <pjones@redhat.com>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Mark Salter <msalter@redhat.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt.fleming@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+From: Leif Lindholm <leif.lindholm@linaro.org>
 
-The EFI Graphics Output Protocol uses 64-bit frame buffer addresses
-but these get truncated to 32-bit by the EFI boot stub when storing
-the address in the 'lfb_base' field of 'struct screen_info'.
+Now that we have an efi=debug command line option in the core code, use
+this instead of the arm64-specific uefi_debug option.
 
-Add a 'ext_lfb_base' field for the upper 32-bits of the frame buffer
-address and set VIDEO_TYPE_CAPABILITY_64BIT_BASE when the field is
-useable.
-
-It turns out that the reason no one has required this support so far
-is that there's actually code in tianocore to "downgrade" PCI
-resources that have option ROMs and 64-bit BARS from 64-bit to 32-bit
-to cope with legacy option ROMs that can't handle 64-bit addresses.
-The upshot is that basically all GOP devices in the wild use a 32-bit
-frame buffer address.
-
-Still, it is possible to build firmware that uses a full 64-bit GOP
-frame buffer address. Chad did, which led to him reporting this issue.
-
-Add support in anticipation of GOP devices using 64-bit addresses more
-widely, and so that efifb works out of the box when that happens.
-
-Reported-by: Chad Page <chad.page@znyx.com>
-Cc: Pete Hawkins <pete.hawkins@znyx.com>
-Acked-by: Peter Jones <pjones@redhat.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
+Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Tested-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Mark Salter <msalter@redhat.com>
+Cc: Catalin Marinas <catalin.marinas@arm.com>
+Cc: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Matt Fleming <matt.fleming@intel.com>
 ---
- arch/x86/boot/compressed/eboot.c | 24 ++++++++++++++++++++----
- drivers/video/fbdev/efifb.c      | 24 +++++++++++++++++++++++-
- include/uapi/linux/screen_info.h |  5 +++--
- 3 files changed, 46 insertions(+), 7 deletions(-)
+ Documentation/arm/uefi.txt |  2 --
+ arch/arm64/kernel/efi.c    | 19 +++++--------------
+ 2 files changed, 5 insertions(+), 16 deletions(-)
 
-diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compressed/eboot.c
-index 7d69afd8b6fa..43473bb86ac0 100644
---- a/arch/x86/boot/compressed/eboot.c
-+++ b/arch/x86/boot/compressed/eboot.c
-@@ -624,7 +624,7 @@ setup_pixel_info(struct screen_info *si, u32 pixels_per_scan_line,
- static efi_status_t
- __gop_query32(struct efi_graphics_output_protocol_32 *gop32,
- 	      struct efi_graphics_output_mode_info **info,
--	      unsigned long *size, u32 *fb_base)
-+	      unsigned long *size, u64 *fb_base)
- {
- 	struct efi_graphics_output_protocol_mode_32 *mode;
- 	efi_status_t status;
-@@ -650,7 +650,8 @@ setup_gop32(struct screen_info *si, efi_guid_t *proto,
- 	unsigned long nr_gops;
- 	u16 width, height;
- 	u32 pixels_per_scan_line;
--	u32 fb_base;
-+	u32 ext_lfb_base;
-+	u64 fb_base;
- 	struct efi_pixel_bitmask pixel_info;
- 	int pixel_format;
- 	efi_status_t status;
-@@ -713,6 +714,13 @@ setup_gop32(struct screen_info *si, efi_guid_t *proto,
- 	si->lfb_width = width;
- 	si->lfb_height = height;
- 	si->lfb_base = fb_base;
-+
-+	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
-+	if (ext_lfb_base) {
-+		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
-+		si->ext_lfb_base = ext_lfb_base;
-+	}
-+
- 	si->pages = 1;
- 
- 	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
-@@ -727,7 +735,7 @@ out:
- static efi_status_t
- __gop_query64(struct efi_graphics_output_protocol_64 *gop64,
- 	      struct efi_graphics_output_mode_info **info,
--	      unsigned long *size, u32 *fb_base)
-+	      unsigned long *size, u64 *fb_base)
- {
- 	struct efi_graphics_output_protocol_mode_64 *mode;
- 	efi_status_t status;
-@@ -753,7 +761,8 @@ setup_gop64(struct screen_info *si, efi_guid_t *proto,
- 	unsigned long nr_gops;
- 	u16 width, height;
- 	u32 pixels_per_scan_line;
--	u32 fb_base;
-+	u32 ext_lfb_base;
-+	u64 fb_base;
- 	struct efi_pixel_bitmask pixel_info;
- 	int pixel_format;
- 	efi_status_t status;
-@@ -816,6 +825,13 @@ setup_gop64(struct screen_info *si, efi_guid_t *proto,
- 	si->lfb_width = width;
- 	si->lfb_height = height;
- 	si->lfb_base = fb_base;
-+
-+	ext_lfb_base = (u64)(unsigned long)fb_base >> 32;
-+	if (ext_lfb_base) {
-+		si->capabilities |= VIDEO_CAPABILITY_64BIT_BASE;
-+		si->ext_lfb_base = ext_lfb_base;
-+	}
-+
- 	si->pages = 1;
- 
- 	setup_pixel_info(si, pixels_per_scan_line, pixel_info, pixel_format);
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index 4bfff349b1fb..95d293b7445a 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -114,6 +114,20 @@ static int efifb_setup(char *options)
- 	return 0;
- }
- 
-+static inline bool fb_base_is_valid(void)
-+{
-+	if (screen_info.lfb_base)
-+		return true;
-+
-+	if (!(screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE))
-+		return false;
-+
-+	if (screen_info.ext_lfb_base)
-+		return true;
-+
-+	return false;
-+}
-+
- static int efifb_probe(struct platform_device *dev)
- {
- 	struct fb_info *info;
-@@ -141,7 +155,7 @@ static int efifb_probe(struct platform_device *dev)
- 		screen_info.lfb_depth = 32;
- 	if (!screen_info.pages)
- 		screen_info.pages = 1;
--	if (!screen_info.lfb_base) {
-+	if (!fb_base_is_valid()) {
- 		printk(KERN_DEBUG "efifb: invalid framebuffer address\n");
- 		return -ENODEV;
- 	}
-@@ -160,6 +174,14 @@ static int efifb_probe(struct platform_device *dev)
- 	}
- 
- 	efifb_fix.smem_start = screen_info.lfb_base;
-+
-+	if (screen_info.capabilities & VIDEO_CAPABILITY_64BIT_BASE) {
-+		u64 ext_lfb_base;
-+
-+		ext_lfb_base = (u64)(unsigned long)screen_info.ext_lfb_base << 32;
-+		efifb_fix.smem_start |= ext_lfb_base;
-+	}
-+
- 	efifb_defined.bits_per_pixel = screen_info.lfb_depth;
- 	efifb_defined.xres = screen_info.lfb_width;
- 	efifb_defined.yres = screen_info.lfb_height;
-diff --git a/include/uapi/linux/screen_info.h b/include/uapi/linux/screen_info.h
-index 7530e7447620..8b8d39dfb67f 100644
---- a/include/uapi/linux/screen_info.h
-+++ b/include/uapi/linux/screen_info.h
-@@ -43,7 +43,8 @@ struct screen_info {
- 	__u16 pages;		/* 0x32 */
- 	__u16 vesa_attributes;	/* 0x34 */
- 	__u32 capabilities;     /* 0x36 */
--	__u8  _reserved[6];	/* 0x3a */
-+	__u32 ext_lfb_base;	/* 0x3a */
-+	__u8  _reserved[2];	/* 0x3e */
- } __attribute__((packed));
- 
- #define VIDEO_TYPE_MDA		0x10	/* Monochrome Text Display	*/
-@@ -69,6 +70,6 @@ struct screen_info {
- #define VIDEO_FLAGS_NOCURSOR	(1 << 0) /* The video mode has no cursor set */
- 
- #define VIDEO_CAPABILITY_SKIP_QUIRKS	(1 << 0)
+diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
+index d60030a1b909..7b3fdfe0f7ba 100644
+--- a/Documentation/arm/uefi.txt
++++ b/Documentation/arm/uefi.txt
+@@ -60,5 +60,3 @@ linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
+ --------------------------------------------------------------------------------
+ linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
+ --------------------------------------------------------------------------------
 -
-+#define VIDEO_CAPABILITY_64BIT_BASE	(1 << 1)	/* Frame buffer base is 64-bit */
+-For verbose debug messages, specify 'uefi_debug' on the kernel command line.
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index e8ca6eaedd02..612ad5ec1d2e 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -51,15 +51,6 @@ static struct mm_struct efi_mm = {
+ 	INIT_MM_CONTEXT(efi_mm)
+ };
  
- #endif /* _UAPI_SCREEN_INFO_H */
+-static int uefi_debug __initdata;
+-static int __init uefi_debug_setup(char *str)
+-{
+-	uefi_debug = 1;
+-
+-	return 0;
+-}
+-early_param("uefi_debug", uefi_debug_setup);
+-
+ static int __init is_normal_ram(efi_memory_desc_t *md)
+ {
+ 	if (md->attribute & EFI_MEMORY_WB)
+@@ -171,14 +162,14 @@ static __init void reserve_regions(void)
+ 	efi_memory_desc_t *md;
+ 	u64 paddr, npages, size;
+ 
+-	if (uefi_debug)
++	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
+ 
+ 	for_each_efi_memory_desc(&memmap, md) {
+ 		paddr = md->phys_addr;
+ 		npages = md->num_pages;
+ 
+-		if (uefi_debug) {
++		if (efi_enabled(EFI_DBG)) {
+ 			char buf[64];
+ 
+ 			pr_info("  0x%012llx-0x%012llx %s",
+@@ -194,11 +185,11 @@ static __init void reserve_regions(void)
+ 
+ 		if (is_reserve_region(md)) {
+ 			memblock_reserve(paddr, size);
+-			if (uefi_debug)
++			if (efi_enabled(EFI_DBG))
+ 				pr_cont("*");
+ 		}
+ 
+-		if (uefi_debug)
++		if (efi_enabled(EFI_DBG))
+ 			pr_cont("\n");
+ 	}
+ 
+@@ -210,7 +201,7 @@ void __init efi_init(void)
+ 	struct efi_fdt_params params;
+ 
+ 	/* Grab UEFI information placed in FDT by stub */
+-	if (!efi_get_fdt_params(&params, uefi_debug))
++	if (!efi_get_fdt_params(&params, efi_enabled(EFI_DBG)))
+ 		return;
+ 
+ 	efi_system_table = params.system_table;
 -- 
 2.1.0
