@@ -1,37 +1,58 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
-Date: Mon, 12 Oct 2015 13:55:48 +0100
-Message-ID: <20151012125548.GE2579@codeblueprint.co.uk>
-References: <1443814185-21552-1-git-send-email-sds@tycho.nsa.gov>
- <20151003112701.GA4531@gmail.com>
- <5612CBE8.2010504@tycho.nsa.gov>
- <20151006073205.GA11115@gmail.com>
- <5613EAD5.2070405@tycho.nsa.gov>
- <20151012113605.GB7384@pd.tnic>
- <20151012124113.GD2579@codeblueprint.co.uk>
- <20151012124936.GA6260@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 02/11] efi/x86: Move efi=debug option parsing to core
+Date: Mon, 12 Oct 2015 14:56:05 +0100
+Message-ID: <1444658174-23378-3-git-send-email-matt@codeblueprint.co.uk>
+References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20151012124936.GA6260-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1444658174-23378-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 12 Oct, at 02:49:36PM, Ingo Molnar wrote:
-> 
-> 
-> So why not unmap them after bootup? Is there any reason to call into EFI code 
-> while the system is up and running?
+From: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-That's where the runtime services code lives. So if you want things
-like EFI variables (used by the distro installer, among other things)
-you need to map the runtime regions.
+fed6cefe3b6e ("x86/efi: Add a "debug" option to the efi= cmdline")
+adds the DBG flag, but does so for x86 only. Move this early param
+parsing to core code.
 
-You can of course disable that by using the "noefi" kernel parameter,
-which should unmap everything for you once you've finished booting.
+Signed-off-by: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Tested-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/platform/efi/efi.c | 2 --
+ drivers/firmware/efi/efi.c  | 3 +++
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 2f61fcddcddb..4d0ff0f27a99 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -961,8 +961,6 @@ static int __init arch_parse_efi_cmdline(char *str)
+ 
+ 	if (parse_option_str(str, "old_map"))
+ 		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+-	if (parse_option_str(str, "debug"))
+-		set_bit(EFI_DBG, &efi.flags);
+ 
+ 	return 0;
+ }
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 16c4928e36af..f0372a022c86 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -63,6 +63,9 @@ static int __init parse_efi_cmdline(char *str)
+ 		return -EINVAL;
+ 	}
+ 
++	if (parse_option_str(str, "debug"))
++		set_bit(EFI_DBG, &efi.flags);
++
+ 	if (parse_option_str(str, "noruntime"))
+ 		disable_runtime = true;
+ 
 -- 
-Matt Fleming, Intel Open Source Technology Center
+2.1.0
