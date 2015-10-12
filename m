@@ -1,48 +1,102 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [GIT PULL] EFI urgent fix
-Date: Mon, 12 Oct 2015 15:13:55 +0100
-Message-ID: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH] x86/efi: Fix multiple GOP device support
+Date: Mon, 12 Oct 2015 15:13:56 +0100
+Message-ID: <1444659236-24837-2-git-send-email-matt@codeblueprint.co.uk>
+References: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: stable-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <DirtY.iCE.hu@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, stable@vger.kernel.org
+Cc: =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <dirty.ice.hu@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <DirtY.iCE.hu@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, stable@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-=46rom: Matt Fleming <matt.fleming@intel.com>
+=46rom: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <dirty.ice.hu@gmail.com>
 
-Please pull the following fix from Zolt=C3=A1n which addresses a bug th=
-at
-resulted in the the secondary GOP display being garbled when booting
-using the EFI boot stub.
+When multiple GOP devices exists, but none of them implements ConOut,
+the code should just choose the first GOP (according to the comments).
+But currently fb_base will refer to the last GOP, while other parameter=
+s
+to the first GOP, which will likely result in a garbled display.
 
-The following changes since commit 825fcfce81921c9cc4ef801d844793815721=
-e458:
+I can reliably reproduce this bug using my ASRock Z87M Extreme4
+motherboard with CSM and integrated GPU disabled, and two PCIe video
+cards (NVidia GT640 and GTX980), booting from efi-stub (booting from
+grub works fine).  On the primary display the asrock logo remains and o=
+n
+the secondary screen is garbled up completely.
 
-  MAINTAINERS: Change Matt Fleming's email address (2015-10-11 09:54:29=
- +0200)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/e=
-fi-urgent
-
-for you to fetch changes up to dc1ea95fd23c36dd6be284334a0c8327d11d8c52=
-:
-
-  x86/efi: Fix multiple GOP device support (2015-10-11 11:40:54 +0100)
-
-----------------------------------------------------------------
- * Fix booting using the EFI boot stub on platforms with multiple
-   Graphics Output Protocol devices because currently the secondary
-   display will be garbled on such systems - Zolt=C3=A1n K=C5=91v=C3=A1=
-g=C3=B3
-
-----------------------------------------------------------------
-K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n (1):
-      x86/efi: Fix multiple GOP device support
-
+Signed-off-by: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <DirtY.iCE.hu@gmail.c=
+om>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: <stable@vger.kernel.org>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+---
  arch/x86/boot/compressed/eboot.c | 8 ++++++--
  1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compresse=
+d/eboot.c
+index ee1b6d346b98..db51c1f27446 100644
+--- a/arch/x86/boot/compressed/eboot.c
++++ b/arch/x86/boot/compressed/eboot.c
+@@ -667,6 +667,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
+to,
+ 		bool conout_found =3D false;
+ 		void *dummy =3D NULL;
+ 		u32 h =3D handles[i];
++		u32 current_fb_base;
+=20
+ 		status =3D efi_call_early(handle_protocol, h,
+ 					proto, (void **)&gop32);
+@@ -678,7 +679,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
+to,
+ 		if (status =3D=3D EFI_SUCCESS)
+ 			conout_found =3D true;
+=20
+-		status =3D __gop_query32(gop32, &info, &size, &fb_base);
++		status =3D __gop_query32(gop32, &info, &size, &current_fb_base);
+ 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+@@ -692,6 +693,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *pro=
+to,
+ 			pixel_format =3D info->pixel_format;
+ 			pixel_info =3D info->pixel_information;
+ 			pixels_per_scan_line =3D info->pixels_per_scan_line;
++			fb_base =3D current_fb_base;
+=20
+ 			/*
+ 			 * Once we've found a GOP supporting ConOut,
+@@ -770,6 +772,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
+to,
+ 		bool conout_found =3D false;
+ 		void *dummy =3D NULL;
+ 		u64 h =3D handles[i];
++		u32 current_fb_base;
+=20
+ 		status =3D efi_call_early(handle_protocol, h,
+ 					proto, (void **)&gop64);
+@@ -781,7 +784,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
+to,
+ 		if (status =3D=3D EFI_SUCCESS)
+ 			conout_found =3D true;
+=20
+-		status =3D __gop_query64(gop64, &info, &size, &fb_base);
++		status =3D __gop_query64(gop64, &info, &size, &current_fb_base);
+ 		if (status =3D=3D EFI_SUCCESS && (!first_gop || conout_found)) {
+ 			/*
+ 			 * Systems that use the UEFI Console Splitter may
+@@ -795,6 +798,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *pro=
+to,
+ 			pixel_format =3D info->pixel_format;
+ 			pixel_info =3D info->pixel_information;
+ 			pixels_per_scan_line =3D info->pixels_per_scan_line;
++			fb_base =3D current_fb_base;
+=20
+ 			/*
+ 			 * Once we've found a GOP supporting ConOut,
+--=20
+2.1.0
