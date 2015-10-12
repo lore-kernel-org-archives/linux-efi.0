@@ -1,103 +1,65 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [GIT PULL 00/11] EFI changes for v4.4
-Date: Mon, 12 Oct 2015 14:56:03 +0100
-Message-ID: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 10/11] x86/efi: Rename print_efi_memmap() to efi_print_memmap()
+Date: Mon, 12 Oct 2015 14:56:13 +0100
+Message-ID: <1444658174-23378-11-git-send-email-matt@codeblueprint.co.uk>
+References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ben Hutchings <ben@decadent.org.uk>, Borislav Petkov <bp@suse.de>, Catalin Marinas <catalin.marinas@arm.com>, Chad Page <chad.page@znyx.com>, Dave Young <dyoung@redhat.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, "Lee, Chun-Yi" <jlee@suse.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pete Hawkins <pete.hawkins@znyx.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Xishi Qiu <qiuxishi@huawei.com>
+Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Tony Luck <tony.luck@intel.com>, Xishi Qiu <qiuxishi@huawei.com>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt.fleming@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Fleming <matt.fleming@intel.com>
+From: Taku Izumi <izumi.taku@jp.fujitsu.com>
 
-Folks, please pull the below patches. The largest thing is probably
-the introduction of Taku's "efi_fake_mem" kernel option which allows
-the EFI memory map passed from the firmware to the kernel to be
-modified with additional memory map attributes.
+This patch renames print_efi_memmap() to efi_print_memmap() and
+make it global function so that we can invoke it outside of
+arch/x86/platform/efi/efi.c
 
-There's also the ground work from Ard for supporting the
-EFI_PROPERTIES_TABLE feature, which allows us to use more strict page
-mapping attributes for the EFI runtime services regions (such as RO
-for code and NX for data). Actually doing that will come in the
-future.
+Signed-off-by: Taku Izumi <izumi.taku@jp.fujitsu.com>
+Cc: Tony Luck <tony.luck@intel.com>
+Cc: Xishi Qiu <qiuxishi@huawei.com>
+Cc: Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+---
+ arch/x86/include/asm/efi.h  | 1 +
+ arch/x86/platform/efi/efi.c | 4 ++--
+ 2 files changed, 3 insertions(+), 2 deletions(-)
 
-Other than that, it's small changes and cleanups.
-
-The following changes since commit 0ce423b6492a02be11662bfaa837dd16945aad3e:
-
-  efi: Use the generic efi.memmap instead of 'memmap' (2015-10-11 11:04:18 +0200)
-
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-
-for you to fetch changes up to 0f96a99dab366333439e110d6ad253bc7c557c09:
-
-  efi: Add "efi_fake_mem" boot option (2015-10-12 14:20:09 +0100)
-
-----------------------------------------------------------------
- * Make the EFI System Resource Table (ESRT) driver explicitly
-   non-modular by ripping out the module_* code since Kconfig doesn't
-   allow it to be built as a module anyway - Paul Gortmaker
-
- * Make the x86 efi=debug kernel parameter, which enables EFI debug
-   code and output, generic and usable by arm64 - Leif Lindholm
-
- * Add support to the x86 EFI boot stub for 64-bit Graphics Output
-   Protocol frame buffer addresses - Matt Fleming
-
- * Detect when the UEFI v2.5 EFI_PROPERTIES_TABLE feature is enabled
-   in the firmware and set an efi.flags bit so the kernel knows when
-   it can apply more strict runtime mapping attributes - Ard Biesheuvel
-
- * Auto-load the efi-pstore module on EFI systems, just like we
-   currently do for the efivars module - Ben Hutchings
-
- * Add "efi_fake_mem" kernel parameter which allows the system's EFI
-   memory map to be updated with additional attributes for specific
-   memory ranges. This is useful for testing the kernel code that handles
-   the EFI_MEMORY_MORE_RELIABLE memmap bit even if your firmware
-   doesn't include support - Taku Izumi
-
-----------------------------------------------------------------
-Ard Biesheuvel (2):
-      efi: Add support for UEFIv2.5 Properties table
-      efi: Introduce EFI_NX_PE_DATA bit and set it from properties table
-
-Ben Hutchings (1):
-      efi: Auto-load the efi-pstore module
-
-Leif Lindholm (3):
-      efi/x86: Move efi=debug option parsing to core
-      arm64: Use core efi=debug instead of uefi_debug command line parameter
-      efi/arm64: Clean up efi_get_fdt_params() interface
-
-Matt Fleming (1):
-      efifb: Add support for 64-bit frame buffer addresses
-
-Paul Gortmaker (1):
-      drivers/firmware: Make efi/esrt.c driver explicitly non-modular
-
-Taku Izumi (3):
-      efi: Add EFI_MEMORY_MORE_RELIABLE support to efi_md_typeattr_format()
-      x86/efi: Rename print_efi_memmap() to efi_print_memmap()
-      efi: Add "efi_fake_mem" boot option
-
- Documentation/arm/uefi.txt          |   2 -
- Documentation/kernel-parameters.txt |  15 +++
- arch/arm64/kernel/efi.c             |  19 +--
- arch/x86/boot/compressed/eboot.c    |  24 +++-
- arch/x86/include/asm/efi.h          |   1 +
- arch/x86/kernel/setup.c             |   4 +-
- arch/x86/platform/efi/efi.c         |   6 +-
- drivers/firmware/efi/Kconfig        |  22 ++++
- drivers/firmware/efi/Makefile       |   1 +
- drivers/firmware/efi/efi-pstore.c   |   1 +
- drivers/firmware/efi/efi.c          |  62 +++++++---
- drivers/firmware/efi/esrt.c         |  19 +--
- drivers/firmware/efi/fake_mem.c     | 238 ++++++++++++++++++++++++++++++++++++
- drivers/video/fbdev/efifb.c         |  24 +++-
- include/linux/efi.h                 |  22 +++-
- include/uapi/linux/screen_info.h    |   5 +-
- 16 files changed, 400 insertions(+), 65 deletions(-)
- create mode 100644 drivers/firmware/efi/fake_mem.c
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 155162ea0e00..cfee9d4b02af 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -93,6 +93,7 @@ extern void __init efi_set_executable(efi_memory_desc_t *md, bool executable);
+ extern int __init efi_memblock_x86_reserve_range(void);
+ extern pgd_t * __init efi_call_phys_prolog(void);
+ extern void __init efi_call_phys_epilog(pgd_t *save_pgd);
++extern void __init efi_print_memmap(void);
+ extern void __init efi_unmap_memmap(void);
+ extern void __init efi_memory_uc(u64 addr, unsigned long size);
+ extern void __init efi_map_region(efi_memory_desc_t *md);
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index 4d0ff0f27a99..c69e58fb7f19 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -222,7 +222,7 @@ int __init efi_memblock_x86_reserve_range(void)
+ 	return 0;
+ }
+ 
+-static void __init print_efi_memmap(void)
++void __init efi_print_memmap(void)
+ {
+ #ifdef EFI_DEBUG
+ 	efi_memory_desc_t *md;
+@@ -524,7 +524,7 @@ void __init efi_init(void)
+ 		return;
+ 
+ 	if (efi_enabled(EFI_DBG))
+-		print_efi_memmap();
++		efi_print_memmap();
+ 
+ 	efi_esrt_init();
+ }
+-- 
+2.1.0
