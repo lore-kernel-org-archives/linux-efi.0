@@ -1,7 +1,7 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 03/11] arm64: Use core efi=debug instead of uefi_debug command line parameter
-Date: Mon, 12 Oct 2015 14:56:06 +0100
-Message-ID: <1444658174-23378-4-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 04/11] efi/arm64: Clean up efi_get_fdt_params() interface
+Date: Mon, 12 Oct 2015 14:56:07 +0100
+Message-ID: <1444658174-23378-5-git-send-email-matt@codeblueprint.co.uk>
 References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
@@ -12,8 +12,8 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Leif Lindholm <leif.lindholm@linaro.org>
 
-Now that we have an efi=debug command line option in the core code, use
-this instead of the arm64-specific uefi_debug option.
+As we now have a common debug infrastructure between core and arm64 efi,
+drop the bit of the interface passing verbose output flags around.
 
 Signed-off-by: Leif Lindholm <leif.lindholm@linaro.org>
 Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
@@ -23,79 +23,72 @@ Cc: Catalin Marinas <catalin.marinas@arm.com>
 Cc: Will Deacon <will.deacon@arm.com>
 Signed-off-by: Matt Fleming <matt.fleming@intel.com>
 ---
- Documentation/arm/uefi.txt |  2 --
- arch/arm64/kernel/efi.c    | 19 +++++--------------
- 2 files changed, 5 insertions(+), 16 deletions(-)
+ arch/arm64/kernel/efi.c    | 2 +-
+ drivers/firmware/efi/efi.c | 6 ++----
+ include/linux/efi.h        | 2 +-
+ 3 files changed, 4 insertions(+), 6 deletions(-)
 
-diff --git a/Documentation/arm/uefi.txt b/Documentation/arm/uefi.txt
-index d60030a1b909..7b3fdfe0f7ba 100644
---- a/Documentation/arm/uefi.txt
-+++ b/Documentation/arm/uefi.txt
-@@ -60,5 +60,3 @@ linux,uefi-mmap-desc-ver  | 32-bit | Version of the mmap descriptor format.
- --------------------------------------------------------------------------------
- linux,uefi-stub-kern-ver  | string | Copy of linux_banner from build.
- --------------------------------------------------------------------------------
--
--For verbose debug messages, specify 'uefi_debug' on the kernel command line.
 diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index e8ca6eaedd02..612ad5ec1d2e 100644
+index 612ad5ec1d2e..ab5eeb63e2ca 100644
 --- a/arch/arm64/kernel/efi.c
 +++ b/arch/arm64/kernel/efi.c
-@@ -51,15 +51,6 @@ static struct mm_struct efi_mm = {
- 	INIT_MM_CONTEXT(efi_mm)
- };
- 
--static int uefi_debug __initdata;
--static int __init uefi_debug_setup(char *str)
--{
--	uefi_debug = 1;
--
--	return 0;
--}
--early_param("uefi_debug", uefi_debug_setup);
--
- static int __init is_normal_ram(efi_memory_desc_t *md)
- {
- 	if (md->attribute & EFI_MEMORY_WB)
-@@ -171,14 +162,14 @@ static __init void reserve_regions(void)
- 	efi_memory_desc_t *md;
- 	u64 paddr, npages, size;
- 
--	if (uefi_debug)
-+	if (efi_enabled(EFI_DBG))
- 		pr_info("Processing EFI memory map:\n");
- 
- 	for_each_efi_memory_desc(&memmap, md) {
- 		paddr = md->phys_addr;
- 		npages = md->num_pages;
- 
--		if (uefi_debug) {
-+		if (efi_enabled(EFI_DBG)) {
- 			char buf[64];
- 
- 			pr_info("  0x%012llx-0x%012llx %s",
-@@ -194,11 +185,11 @@ static __init void reserve_regions(void)
- 
- 		if (is_reserve_region(md)) {
- 			memblock_reserve(paddr, size);
--			if (uefi_debug)
-+			if (efi_enabled(EFI_DBG))
- 				pr_cont("*");
- 		}
- 
--		if (uefi_debug)
-+		if (efi_enabled(EFI_DBG))
- 			pr_cont("\n");
- 	}
- 
-@@ -210,7 +201,7 @@ void __init efi_init(void)
+@@ -201,7 +201,7 @@ void __init efi_init(void)
  	struct efi_fdt_params params;
  
  	/* Grab UEFI information placed in FDT by stub */
--	if (!efi_get_fdt_params(&params, uefi_debug))
-+	if (!efi_get_fdt_params(&params, efi_enabled(EFI_DBG)))
+-	if (!efi_get_fdt_params(&params, efi_enabled(EFI_DBG)))
++	if (!efi_get_fdt_params(&params))
  		return;
  
  	efi_system_table = params.system_table;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index f0372a022c86..a0a0469e2869 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -492,7 +492,6 @@ static __initdata struct {
+ };
+ 
+ struct param_info {
+-	int verbose;
+ 	int found;
+ 	void *params;
+ };
+@@ -523,21 +522,20 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 		else
+ 			*(u64 *)dest = val;
+ 
+-		if (info->verbose)
++		if (efi_enabled(EFI_DBG))
+ 			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
+ 				dt_params[i].size * 2, val);
+ 	}
+ 	return 1;
+ }
+ 
+-int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
++int __init efi_get_fdt_params(struct efi_fdt_params *params)
+ {
+ 	struct param_info info;
+ 	int ret;
+ 
+ 	pr_info("Getting EFI parameters from FDT:\n");
+ 
+-	info.verbose = verbose;
+ 	info.found = 0;
+ 	info.params = params;
+ 
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 26ca9e2fd30e..4677d8a1bfd0 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -902,7 +902,7 @@ extern void efi_initialize_iomem_resources(struct resource *code_resource,
+ 		struct resource *data_resource, struct resource *bss_resource);
+ extern void efi_get_time(struct timespec *now);
+ extern void efi_reserve_boot_services(void);
+-extern int efi_get_fdt_params(struct efi_fdt_params *params, int verbose);
++extern int efi_get_fdt_params(struct efi_fdt_params *params);
+ extern struct efi_memory_map memmap;
+ extern struct kobject *efi_kobj;
+ 
 -- 
 2.1.0
