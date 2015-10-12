@@ -1,78 +1,48 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 01/11] drivers/firmware: Make efi/esrt.c driver explicitly non-modular
-Date: Mon, 12 Oct 2015 14:56:04 +0100
-Message-ID: <1444658174-23378-2-git-send-email-matt@codeblueprint.co.uk>
-References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1444658174-23378-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL] EFI urgent fix
+Date: Mon, 12 Oct 2015 15:13:55 +0100
+Message-ID: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, =?UTF-8?q?K=C5=91v=C3=A1g=C3=B3=2C=20Zolt=C3=A1n?= <DirtY.iCE.hu@gmail.com>, Matthew Garrett <mjg59@srcf.ucam.org>, stable@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
+=46rom: Matt Fleming <matt.fleming@intel.com>
 
-The Kconfig for this driver is currently hidden with:
+Please pull the following fix from Zolt=C3=A1n which addresses a bug th=
+at
+resulted in the the secondary GOP display being garbled when booting
+using the EFI boot stub.
 
-config EFI_ESRT
-        bool
+The following changes since commit 825fcfce81921c9cc4ef801d844793815721=
+e458:
 
-...meaning that it currently is not being built as a module by anyone.
-Lets remove the modular code that is essentially orphaned, so that
-when reading the driver there is no doubt it is builtin-only.
+  MAINTAINERS: Change Matt Fleming's email address (2015-10-11 09:54:29=
+ +0200)
 
-Since module_init translates to device_initcall in the non-modular
-case, the init ordering remains unchanged with this commit.
+are available in the git repository at:
 
-We leave some tags like MODULE_AUTHOR for documentation purposes.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/e=
+fi-urgent
 
-We don't replace module.h with init.h since the file already has that.
+for you to fetch changes up to dc1ea95fd23c36dd6be284334a0c8327d11d8c52=
+:
 
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Signed-off-by: Paul Gortmaker <paul.gortmaker-CWA4WttNNZF54TAoqtyWWQ@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- drivers/firmware/efi/esrt.c | 19 +++----------------
- 1 file changed, 3 insertions(+), 16 deletions(-)
+  x86/efi: Fix multiple GOP device support (2015-10-11 11:40:54 +0100)
 
-diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
-index a5b95d61ae71..22c5285f7705 100644
---- a/drivers/firmware/efi/esrt.c
-+++ b/drivers/firmware/efi/esrt.c
-@@ -20,7 +20,6 @@
- #include <linux/kobject.h>
- #include <linux/list.h>
- #include <linux/memblock.h>
--#include <linux/module.h>
- #include <linux/slab.h>
- #include <linux/types.h>
- 
-@@ -450,22 +449,10 @@ err:
- 	esrt = NULL;
- 	return error;
- }
-+device_initcall(esrt_sysfs_init);
- 
--static void __exit esrt_sysfs_exit(void)
--{
--	pr_debug("esrt-sysfs: unloading.\n");
--	cleanup_entry_list();
--	kset_unregister(esrt_kset);
--	sysfs_remove_group(esrt_kobj, &esrt_attr_group);
--	kfree(esrt);
--	esrt = NULL;
--	kobject_del(esrt_kobj);
--	kobject_put(esrt_kobj);
--}
--
--module_init(esrt_sysfs_init);
--module_exit(esrt_sysfs_exit);
--
-+/*
- MODULE_AUTHOR("Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>");
- MODULE_DESCRIPTION("EFI System Resource Table support");
- MODULE_LICENSE("GPL");
-+*/
--- 
-2.1.0
+----------------------------------------------------------------
+ * Fix booting using the EFI boot stub on platforms with multiple
+   Graphics Output Protocol devices because currently the secondary
+   display will be garbled on such systems - Zolt=C3=A1n K=C5=91v=C3=A1=
+g=C3=B3
+
+----------------------------------------------------------------
+K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n (1):
+      x86/efi: Fix multiple GOP device support
+
+ arch/x86/boot/compressed/eboot.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
