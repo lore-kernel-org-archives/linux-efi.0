@@ -1,106 +1,77 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH] x86/efi: Fix kernel panic when CONFIG_DEBUG_VIRTUAL is
- enabled
-Date: Wed, 14 Oct 2015 16:41:34 +0200
-Message-ID: <20151014144134.GA8263@pd.tnic>
-References: <1444765377-29303-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Fix multiple GOP device support
+Date: Wed, 14 Oct 2015 16:47:15 +0200
+Message-ID: <20151014144715.GA17890@gmail.com>
+References: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
+ <1444659236-24837-2-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1444765377-29303-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1444659236-24837-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Glenn P Williamson <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, =?utf-8?B?S8WRdsOhZ8OzLCBab2x0w6Fu?= <dirty.ice.hu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Oct 13, 2015 at 12:42:57PM -0700, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> When CONFIG_DEBUG_VIRTUAL is turned on, all accesses to __pa(address)
-> are monitored to see whether address falls in direct mapping or kernel
-> mapping,
 
-make that
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-"... or kernel text mapping (see Documentation/x86/x86_64/mm.txt for
-details)"
-
-for more clarity please. It just took mfleming and me a while to figure
-out what what is.
-
-> if it does not kernel panics. During 1:1 mapping of EFI runtime
-> services we access addresses which are below 4G and hence when passed as
-
-not "below 4G" but "we access virtual adresses which are == physical
-addresses, thus the 1:1 mapping" - on a box with more than 4G, physical
-addresses can be above 4G too :)
-
-> arguments to __pa() kernel panics as reported by Dave Hansen here
-> https://lkml.org/lkml/2015/1/27/742.
-
-Please quote this mail with the k.org redirector:
-
-https://lkml.kernel.org/r/5462999A.7090706-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-
-lkml.org is unreliable.
-
-> So, before calling __pa() virtual
-> addresses should be validated which results in skipping call to
-> split_page_count() and that should be fine because it is used to keep
-> track of direct kernel mappings and not 1:1 mappings.
-
-I think that should say:
-
-"to keep track of everything *but* 1:1 mappings."
-
-The 1:1 mappings are EFI-specific thing and the physaddr.c checkers
-aren't aware of them.
-
-Again, IMHO.
-
-> Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Reported-by: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Glenn P Williamson <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> From: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <dirty.ice.hu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+>=20
+> When multiple GOP devices exists, but none of them implements ConOut,
+> the code should just choose the first GOP (according to the comments)=
+=2E
+> But currently fb_base will refer to the last GOP, while other paramet=
+ers
+> to the first GOP, which will likely result in a garbled display.
+>=20
+> I can reliably reproduce this bug using my ASRock Z87M Extreme4
+> motherboard with CSM and integrated GPU disabled, and two PCIe video
+> cards (NVidia GT640 and GTX980), booting from efi-stub (booting from
+> grub works fine).  On the primary display the asrock logo remains and=
+ on
+> the secondary screen is garbled up completely.
+>=20
+> Signed-off-by: K=C5=91v=C3=A1g=C3=B3, Zolt=C3=A1n <DirtY.iCE.hu@gmail=
+=2Ecom>
+> Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > ---
->  arch/x86/mm/pageattr.c | 8 +++++---
->  1 file changed, 5 insertions(+), 3 deletions(-)
-> 
-> diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-> index 727158cb3b3c..3a603830503a 100644
-> --- a/arch/x86/mm/pageattr.c
-> +++ b/arch/x86/mm/pageattr.c
-> @@ -648,9 +648,11 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
->  	for (i = 0; i < PTRS_PER_PTE; i++, pfn += pfninc)
->  		set_pte(&pbase[i], pfn_pte(pfn, canon_pgprot(ref_prot)));
->  
-> -	if (pfn_range_is_mapped(PFN_DOWN(__pa(address)),
-> -				PFN_DOWN(__pa(address)) + 1))
-> -		split_page_count(level);
-> +	if (virt_addr_valid(address)) {
-> +		if (pfn_range_is_mapped(PFN_DOWN(__pa(address)),
-> +					PFN_DOWN(__pa(address)) + 1))
-> +			split_page_count(level);
+>  arch/x86/boot/compressed/eboot.c | 8 ++++++--
+>  1 file changed, 6 insertions(+), 2 deletions(-)
+>=20
+> diff --git a/arch/x86/boot/compressed/eboot.c b/arch/x86/boot/compres=
+sed/eboot.c
+> index ee1b6d346b98..db51c1f27446 100644
+> --- a/arch/x86/boot/compressed/eboot.c
+> +++ b/arch/x86/boot/compressed/eboot.c
+> @@ -667,6 +667,7 @@ setup_gop32(struct screen_info *si, efi_guid_t *p=
+roto,
+>  		bool conout_found =3D false;
+>  		void *dummy =3D NULL;
+>  		u32 h =3D handles[i];
+> +		u32 current_fb_base;
 
-Maybe make it a bit more readable:
+Sigh, fb_base is u64...
 
-	if (virt_addr_valid(address)) {
-		unsigned long pfn = PFN_DOWN(__pa(address));
+> @@ -770,6 +772,7 @@ setup_gop64(struct screen_info *si, efi_guid_t *p=
+roto,
+>  		bool conout_found =3D false;
+>  		void *dummy =3D NULL;
+>  		u64 h =3D handles[i];
+> +		u32 current_fb_base;
 
-		if (pfn_range_is_mapped(pfn, pfn + 1))
-			split_page_count(level);
-	}
+Ditto.
 
+So I've applied it with that obvious bug fixed, but could you guys plea=
+se double=20
+check how on earth this patch could possibly have worked fine in testin=
+g, without=20
+crashing 64-bit kernels?
 
-But yeah, patch makes sense to me.
+Thanks,
 
-Thanks for fixing that!
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+	Ingo
