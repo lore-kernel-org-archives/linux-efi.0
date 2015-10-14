@@ -1,117 +1,50 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole
- kernel range
-Date: Wed, 14 Oct 2015 14:52:11 +0100
-Message-ID: <20151014135211.GB2782@codeblueprint.co.uk>
+From: Paolo Bonzini <pbonzini@redhat.com>
+Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole kernel
+ range
+Date: Wed, 14 Oct 2015 16:29:33 +0200
+Message-ID: <561E66CD.1050301@redhat.com>
 References: <1444822245-6784-1-git-send-email-pbonzini@redhat.com>
+ <20151014135211.GB2782@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
 Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1444822245-6784-1-git-send-email-pbonzini@redhat.com>
+In-Reply-To: <20151014135211.GB2782@codeblueprint.co.uk>
 Sender: stable-owner@vger.kernel.org
-To: Paolo Bonzini <pbonzini@redhat.com>
+To: Matt Fleming <matt@codeblueprint.co.uk>
 Cc: linux-kernel@vger.kernel.org, hpa@zytor.com, x86@kernel.org, stable@vger.kernel.org, lersek@redhat.com, matt.fleming@intel.com, bp@suse.de, linux-efi@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>
 List-Id: linux-efi@vger.kernel.org
 
-(Pulling in luto for low-level x86 fu)
 
-On Wed, 14 Oct, at 01:30:45PM, Paolo Bonzini wrote:
-> On 32-bit systems, the initial_page_table is reused by
-> efi_call_phys_prolog as an identity map to call
-> SetVirtualAddressMap.  efi_call_phys_prolog takes care of
-> converting the current CPU's GDT to a physical address too.
-> 
-> For PAE kernels the identity mapping is achieved by aliasing the
-> first PDPE for the kernel memory mapping into the first PDPE
-> of initial_page_table.  This makes the EFI stub's trick "just work".
-> 
-> However, for non-PAE kernels there is no guarantee that the identity
-> mapping in the initial_page_table extends as far as the GDT; in this
-> case, accesses to the GDT will cause a page fault (which quickly becomes
-> a triple fault).  Fix this by copying the kernel mappings from
-> swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
-> identity mapping.
- 
-Oops, good catch guys. This is clearly a bug, but...
 
-> For some reason, this is only reproducible with QEMU's dynamic translation
-> mode, and not for example with KVM.  However, even under KVM one can clearly
-> see that the page table is bogus:
-> 
->     $ qemu-system-i386 -pflash OVMF.fd -M q35 vmlinuz0 -s -S -daemonize
->     $ gdb
->     (gdb) target remote localhost:1234
->     (gdb) hb *0x02858f6f
->     Hardware assisted breakpoint 1 at 0x2858f6f
->     (gdb) c
->     Continuing.
-> 
->     Breakpoint 1, 0x02858f6f in ?? ()
->     (gdb) monitor info registers
->     ...
->     GDT=     0724e000 000000ff
->     IDT=     fffbb000 000007ff
->     CR0=0005003b CR2=ff896000 CR3=032b7000 CR4=00000690
->     ...
-> 
-> The page directory is sane:
-> 
->     (gdb) x/4wx 0x32b7000
->     0x32b7000:	0x03398063	0x03399063	0x0339a063	0x0339b063
->     (gdb) x/4wx 0x3398000
->     0x3398000:	0x00000163	0x00001163	0x00002163	0x00003163
->     (gdb) x/4wx 0x3399000
->     0x3399000:	0x00400003	0x00401003	0x00402003	0x00403003
-> 
-> but our particular page directory entry is empty:
-> 
->     (gdb) x/1wx 0x32b7000 + (0x724e000 >> 22) * 4
->     0x32b7070:	0x00000000
- 
-... I'm a little surprised you managed to trigger this at all, because
-the GDT we load in efi_call_phys_prolog() is part of the per-cpu data
-section and therefore part of the kernel image.
-
-The kernel image *is* mapped in the identity range, even for non-PAE
-kernels.
-
-So yes, you're right this is a bug but I'm not sure how you're
-actually triggering it.
-
-> Reported-by: Laszlo Ersek <lersek@redhat.com>
-> Cc: stable@vger.kernel.org
-> Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
-> ---
->  arch/x86/kernel/setup.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-> index 80f874bf999e..24154bd12307 100644
-> --- a/arch/x86/kernel/setup.c
-> +++ b/arch/x86/kernel/setup.c
-> @@ -1198,6 +1198,14 @@ void __init setup_arch(char **cmdline_p)
->  	clone_pgd_range(initial_page_table + KERNEL_PGD_BOUNDARY,
->  			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
->  			KERNEL_PGD_PTRS);
-> +
-> +	/*
-> +	 * sync back low identity map too.  It is used for example
-> +	 * in the 32-bit EFI stub.
-> +	 */
-> +	clone_pgd_range(initial_page_table,
-> +			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
-> +			KERNEL_PGD_PTRS);
->  #endif
+On 14/10/2015 15:52, Matt Fleming wrote:
+>> > However, for non-PAE kernels there is no guarantee that the identity
+>> > mapping in the initial_page_table extends as far as the GDT; in this
+>> > case, accesses to the GDT will cause a page fault (which quickly becomes
+>> > a triple fault).  Fix this by copying the kernel mappings from
+>> > swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
+>> > identity mapping.
 >  
->  	tboot_probe();
-> -- 
-> 2.5.0
+> Oops, good catch guys. This is clearly a bug, but...
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> ... I'm a little surprised you managed to trigger this at all, because
+> the GDT we load in efi_call_phys_prolog() is part of the per-cpu data
+> section and therefore part of the kernel image.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Only until setup_percpu, which is earlier than SetVirtualAddressMap.
+For example, I get:
+
+  setup_percpu: NR_CPUS:8 nr_cpumask_bits:8 nr_cpu_ids:1 nr_node_ids:1
+  PERCPU: Embedded 18 pages/cpu @c728e000 s41800 r0 d31928 u73728
+                                  ^^^^^^^
+but the kernel image ends at 0x037fffff.
+
+The GDT is 0xc728e000 in this run, so the GDT is at the beginning of the
+relocated percpu area.
+
+In the above run, the FS base that switch_to_new_gdt loads is 0x551C000.
+ You have 0x728E000 - 0x551C000 = 0x1D72000, and from tracing I see that
+one of the GDT values that is loaded very early is exactly 0xC1D72000.
+That _is_ inside the kernel image of course when you remove PAGE_OFFSET.
+
+Paolo
