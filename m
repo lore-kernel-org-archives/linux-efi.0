@@ -1,115 +1,79 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 00/11] EFI changes for v4.4
-Date: Wed, 14 Oct 2015 17:02:56 +0200
-Message-ID: <20151014150256.GB21330@gmail.com>
-References: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Fix multiple GOP device support
+Date: Wed, 14 Oct 2015 17:04:26 +0200
+Message-ID: <20151014150426.GC21330@gmail.com>
+References: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
+ <1444659236-24837-2-git-send-email-matt@codeblueprint.co.uk>
+ <20151014144715.GA17890@gmail.com>
+ <20151014145103.GB17890@gmail.com>
+ <20151014150215.GC2782@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1444658174-23378-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Matt Fleming <matt.fleming@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Ben Hutchings <ben@decadent.org.uk>, Borislav Petkov <bp@suse.de>, Catalin Marinas <catalin.marinas@arm.com>, Chad Page <chad.page@znyx.com>, Dave Young <dyoung@redhat.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Kamezawa Hiroyuki <kamezawa.hiroyu@jp.fujitsu.com>, "Lee, Chun-Yi" <jlee@suse.com>, Leif Lindholm <leif.lindholm@linaro.org>, Mark Salter <msalter@redhat.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pete Hawkins <pete.hawkins@znyx.com>, Peter Jones <pjones@redhat.com>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Tony Luck <tony.luck@intel.com>, Will Deacon <will.deacon@arm.com>, Xishi Qiu <qiuxishi@h>
+In-Reply-To: <20151014150215.GC2782-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, =?utf-8?B?S8WRdsOhZ8OzLCBab2x0w6Fu?= <dirty.ice.hu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-> From: Matt Fleming <matt.fleming@intel.com>
+> > So the fix patch is fine as-is for v4.3, but needs a conflict resolution for 
+> > the pending v4.4 commit.
+> > 
+> > I've applied it that way.
 > 
-> Folks, please pull the below patches. The largest thing is probably
-> the introduction of Taku's "efi_fake_mem" kernel option which allows
-> the EFI memory map passed from the firmware to the kernel to be
-> modified with additional memory map attributes.
-> 
-> There's also the ground work from Ard for supporting the
-> EFI_PROPERTIES_TABLE feature, which allows us to use more strict page
-> mapping attributes for the EFI runtime services regions (such as RO
-> for code and NX for data). Actually doing that will come in the
-> future.
-> 
-> Other than that, it's small changes and cleanups.
-> 
-> The following changes since commit 0ce423b6492a02be11662bfaa837dd16945aad3e:
-> 
->   efi: Use the generic efi.memmap instead of 'memmap' (2015-10-11 11:04:18 +0200)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
-> 
-> for you to fetch changes up to 0f96a99dab366333439e110d6ad253bc7c557c09:
-> 
->   efi: Add "efi_fake_mem" boot option (2015-10-12 14:20:09 +0100)
-> 
-> ----------------------------------------------------------------
->  * Make the EFI System Resource Table (ESRT) driver explicitly
->    non-modular by ripping out the module_* code since Kconfig doesn't
->    allow it to be built as a module anyway - Paul Gortmaker
-> 
->  * Make the x86 efi=debug kernel parameter, which enables EFI debug
->    code and output, generic and usable by arm64 - Leif Lindholm
-> 
->  * Add support to the x86 EFI boot stub for 64-bit Graphics Output
->    Protocol frame buffer addresses - Matt Fleming
-> 
->  * Detect when the UEFI v2.5 EFI_PROPERTIES_TABLE feature is enabled
->    in the firmware and set an efi.flags bit so the kernel knows when
->    it can apply more strict runtime mapping attributes - Ard Biesheuvel
-> 
->  * Auto-load the efi-pstore module on EFI systems, just like we
->    currently do for the efivars module - Ben Hutchings
-> 
->  * Add "efi_fake_mem" kernel parameter which allows the system's EFI
->    memory map to be updated with additional attributes for specific
->    memory ranges. This is useful for testing the kernel code that handles
->    the EFI_MEMORY_MORE_RELIABLE memmap bit even if your firmware
->    doesn't include support - Taku Izumi
-> 
-> ----------------------------------------------------------------
-> Ard Biesheuvel (2):
->       efi: Add support for UEFIv2.5 Properties table
->       efi: Introduce EFI_NX_PE_DATA bit and set it from properties table
-> 
-> Ben Hutchings (1):
->       efi: Auto-load the efi-pstore module
-> 
-> Leif Lindholm (3):
->       efi/x86: Move efi=debug option parsing to core
->       arm64: Use core efi=debug instead of uefi_debug command line parameter
->       efi/arm64: Clean up efi_get_fdt_params() interface
-> 
-> Matt Fleming (1):
->       efifb: Add support for 64-bit frame buffer addresses
-> 
-> Paul Gortmaker (1):
->       drivers/firmware: Make efi/esrt.c driver explicitly non-modular
-> 
-> Taku Izumi (3):
->       efi: Add EFI_MEMORY_MORE_RELIABLE support to efi_md_typeattr_format()
->       x86/efi: Rename print_efi_memmap() to efi_print_memmap()
->       efi: Add "efi_fake_mem" boot option
-> 
->  Documentation/arm/uefi.txt          |   2 -
->  Documentation/kernel-parameters.txt |  15 +++
->  arch/arm64/kernel/efi.c             |  19 +--
->  arch/x86/boot/compressed/eboot.c    |  24 +++-
->  arch/x86/include/asm/efi.h          |   1 +
->  arch/x86/kernel/setup.c             |   4 +-
->  arch/x86/platform/efi/efi.c         |   6 +-
->  drivers/firmware/efi/Kconfig        |  22 ++++
->  drivers/firmware/efi/Makefile       |   1 +
->  drivers/firmware/efi/efi-pstore.c   |   1 +
->  drivers/firmware/efi/efi.c          |  62 +++++++---
->  drivers/firmware/efi/esrt.c         |  19 +--
->  drivers/firmware/efi/fake_mem.c     | 238 ++++++++++++++++++++++++++++++++++++
->  drivers/video/fbdev/efifb.c         |  24 +++-
->  include/linux/efi.h                 |  22 +++-
->  include/uapi/linux/screen_info.h    |   5 +-
->  16 files changed, 400 insertions(+), 65 deletions(-)
->  create mode 100644 drivers/firmware/efi/fake_mem.c
+> Do you need me to send a patch on top or have you taken care of the
+> semantic conflict for v4.4? (the change you originally proposed,
+> s/u32/u64/, looked fine)
 
-Pulled, thanks Matt!
+So to not break bisection in hard to debug ways, I made this fixup in the merge 
+commit of your changes, and documented it all in the merge commit message:
+
+commit 790a2ee2427852cff50993c98f15ed88511e9af0
+Merge: c7d77a7980e4 0f96a99dab36
+Author: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Date:   Wed Oct 14 16:05:40 2015 +0200
+
+    Merge tag 'efi-next' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into core/efi
+    
+    Pull v4.4 EFI updates from Matt Fleming:
+    
+      - Make the EFI System Resource Table (ESRT) driver explicitly
+        non-modular by ripping out the module_* code since Kconfig doesn't
+        allow it to be built as a module anyway. (Paul Gortmaker)
+    
+      - Make the x86 efi=debug kernel parameter, which enables EFI debug
+        code and output, generic and usable by arm64. (Leif Lindholm)
+    
+      - Add support to the x86 EFI boot stub for 64-bit Graphics Output
+        Protocol frame buffer addresses. (Matt Fleming)
+    
+      - Detect when the UEFI v2.5 EFI_PROPERTIES_TABLE feature is enabled
+        in the firmware and set an efi.flags bit so the kernel knows when
+        it can apply more strict runtime mapping attributes - Ard Biesheuvel
+    
+      - Auto-load the efi-pstore module on EFI systems, just like we
+        currently do for the efivars module. (Ben Hutchings)
+    
+      - Add "efi_fake_mem" kernel parameter which allows the system's EFI
+        memory map to be updated with additional attributes for specific
+        memory ranges. This is useful for testing the kernel code that handles
+        the EFI_MEMORY_MORE_RELIABLE memmap bit even if your firmware
+        doesn't include support. (Taku Izumi)
+    
+    Note: there is a semantic conflict between the following two commits:
+    
+      8a53554e12e9 ("x86/efi: Fix multiple GOP device support")
+      ae2ee627dc87 ("efifb: Add support for 64-bit frame buffer addresses")
+    
+    I fixed up the interaction in the merge commit, changing the type of
+    current_fb_base from u32 to u64.
+    
+    Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+
+Thanks,
 
 	Ingo
