@@ -1,57 +1,61 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi: Fix multiple GOP device support
-Date: Wed, 14 Oct 2015 16:10:02 +0100
-Message-ID: <20151014151002.GD2782@codeblueprint.co.uk>
-References: <1444659236-24837-1-git-send-email-matt@codeblueprint.co.uk>
- <1444659236-24837-2-git-send-email-matt@codeblueprint.co.uk>
- <20151014144715.GA17890@gmail.com>
- <20151014145103.GB17890@gmail.com>
- <20151014150215.GC2782@codeblueprint.co.uk>
- <20151014150426.GC21330@gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
+Date: Wed, 14 Oct 2015 17:18:07 +0200
+Message-ID: <20151014151807.GA27013@gmail.com>
+References: <20151003112701.GA4531@gmail.com>
+ <5612CBE8.2010504@tycho.nsa.gov>
+ <20151006073205.GA11115@gmail.com>
+ <5613EAD5.2070405@tycho.nsa.gov>
+ <20151012113605.GB7384@pd.tnic>
+ <20151012124113.GD2579@codeblueprint.co.uk>
+ <20151012124936.GA6260@gmail.com>
+ <20151012125548.GE2579@codeblueprint.co.uk>
+ <20151012141754.GA6621@gmail.com>
+ <20151012144928.GF2579@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <stable-owner@vger.kernel.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20151014150426.GC21330@gmail.com>
-Sender: stable-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, =?utf-8?B?S8WRdsOhZ8OzLCBab2x0w6Fu?= <dirty.ice.hu@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, stable@vger.kernel.org, Matt Fleming <matt.fleming@intel.com>
+In-Reply-To: <20151012144928.GF2579@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>, Stephen Smalley <sds@tycho.nsa.gov>, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 14 Oct, at 05:04:26PM, Ingo Molnar wrote:
-> 
-> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> 
-> > > So the fix patch is fine as-is for v4.3, but needs a conflict resolution for 
-> > > the pending v4.4 commit.
-> > > 
-> > > I've applied it that way.
+
+* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+
+> On Mon, 12 Oct, at 04:17:54PM, Ingo Molnar wrote:
 > > 
-> > Do you need me to send a patch on top or have you taken care of the
-> > semantic conflict for v4.4? (the change you originally proposed,
-> > s/u32/u64/, looked fine)
-> 
-> So to not break bisection in hard to debug ways, I made this fixup in the merge 
-> commit of your changes, and documented it all in the merge commit message:
-> 
-> commit 790a2ee2427852cff50993c98f15ed88511e9af0
-> Merge: c7d77a7980e4 0f96a99dab36
-> Author: Ingo Molnar <mingo@kernel.org>
-> Date:   Wed Oct 14 16:05:40 2015 +0200
+> > * Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> > 
+> > > On Mon, 12 Oct, at 02:49:36PM, Ingo Molnar wrote:
+> > > > 
+> > > > 
+> > > > So why not unmap them after bootup? Is there any reason to call into EFI code 
+> > > > while the system is up and running?
+> > > 
+> > > That's where the runtime services code lives. So if you want things like EFI 
+> > > variables (used by the distro installer, among other things) you need to map the 
+> > > runtime regions.
+> > 
+> > So EFI variables could be queried during bootup and saved on the Linux side.
+>  
+> Right, we could do that, but then we wouldn't be able to support
+> creation/updating variables at runtime, such as when you install a
+> distribution for the first time, or want to boot a new kernel filename
+> directly from the firmware without a boot loader (and need to modify
+> the BootXXXX variables).
 
-[...]
+Do we know the precise position and address range of these variables?
 
->     Note: there is a semantic conflict between the following two commits:
->     
->       8a53554e12e9 ("x86/efi: Fix multiple GOP device support")
->       ae2ee627dc87 ("efifb: Add support for 64-bit frame buffer addresses")
->     
->     I fixed up the interaction in the merge commit, changing the type of
->     current_fb_base from u32 to u64.
->     
->     Signed-off-by: Ingo Molnar <mingo@kernel.org>
+We could map them writable (but not executable), and the rest executable (but not 
+writable).
 
-Awesome, thanks Ingo.
+That raises the question whether the same physical page ever mixes variables and 
+actual code - but the hope would be that it's suffiently page granular for this to 
+work.
 
--- 
-Matt Fleming, Intel Open Source Technology Center
+Thanks,
+
+	Ingo
