@@ -1,66 +1,71 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole
- kernel range
-Date: Wed, 14 Oct 2015 22:00:50 +0100
-Message-ID: <20151014210050.GE2782@codeblueprint.co.uk>
-References: <1444822245-6784-1-git-send-email-pbonzini@redhat.com>
- <20151014135211.GB2782@codeblueprint.co.uk>
- <CALCETrX=4NcbfnaQ7wf27v+xn8dY_=acJwX4EjWZVTTWZeJ_yg@mail.gmail.com>
+Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
+Date: Wed, 14 Oct 2015 22:02:57 +0100
+Message-ID: <20151014210257.GF2782@codeblueprint.co.uk>
+References: <5612CBE8.2010504@tycho.nsa.gov>
+ <20151006073205.GA11115@gmail.com>
+ <5613EAD5.2070405@tycho.nsa.gov>
+ <20151012113605.GB7384@pd.tnic>
+ <20151012124113.GD2579@codeblueprint.co.uk>
+ <20151012124936.GA6260@gmail.com>
+ <20151012125548.GE2579@codeblueprint.co.uk>
+ <20151012141754.GA6621@gmail.com>
+ <20151012144928.GF2579@codeblueprint.co.uk>
+ <20151014151807.GA27013@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CALCETrX=4NcbfnaQ7wf27v+xn8dY_=acJwX4EjWZVTTWZeJ_yg@mail.gmail.com>
+In-Reply-To: <20151014151807.GA27013@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andy Lutomirski <luto@amacapital.net>
-Cc: Paolo Bonzini <pbonzini@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, stable <stable@vger.kernel.org>, Laszlo Ersek <lersek@redhat.com>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>, Stephen Smalley <sds@tycho.nsa.gov>, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 14 Oct, at 09:22:03AM, Andy Lutomirski wrote:
-> On Wed, Oct 14, 2015 at 6:52 AM, Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> > (Pulling in luto for low-level x86 fu)
-> >
-> > On Wed, 14 Oct, at 01:30:45PM, Paolo Bonzini wrote:
-> >> On 32-bit systems, the initial_page_table is reused by
-> >> efi_call_phys_prolog as an identity map to call
-> >> SetVirtualAddressMap.  efi_call_phys_prolog takes care of
-> >> converting the current CPU's GDT to a physical address too.
-> >>
-> >> For PAE kernels the identity mapping is achieved by aliasing the
-> >> first PDPE for the kernel memory mapping into the first PDPE
-> >> of initial_page_table.  This makes the EFI stub's trick "just work".
-> >>
-> >> However, for non-PAE kernels there is no guarantee that the identity
-> >> mapping in the initial_page_table extends as far as the GDT; in this
-> >> case, accesses to the GDT will cause a page fault (which quickly becomes
-> >> a triple fault).  Fix this by copying the kernel mappings from
-> >> swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
-> >> identity mapping.
-> >
-> > Oops, good catch guys. This is clearly a bug, but...
-> >
-> >> For some reason, this is only reproducible with QEMU's dynamic translation
-> >> mode, and not for example with KVM.  However, even under KVM one can clearly
-> >> see that the page table is bogus:
+On Wed, 14 Oct, at 05:18:07PM, Ingo Molnar wrote:
 > 
-> I haven't looked at the code, but it wouldn't surprise me if this is
-> some kind of TLB issue.  With the hardware TLB (which is in use on
-> KVM), it seems quite likely that the GDT is pretty much always in the
-> TLB and, if nothing flushes global mappings, then it'll probably stick
-> around.
+> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> 
+> > On Mon, 12 Oct, at 04:17:54PM, Ingo Molnar wrote:
+> > > 
+> > > * Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> > > 
+> > > > On Mon, 12 Oct, at 02:49:36PM, Ingo Molnar wrote:
+> > > > > 
+> > > > > 
+> > > > > So why not unmap them after bootup? Is there any reason to call into EFI code 
+> > > > > while the system is up and running?
+> > > > 
+> > > > That's where the runtime services code lives. So if you want things like EFI 
+> > > > variables (used by the distro installer, among other things) you need to map the 
+> > > > runtime regions.
+> > > 
+> > > So EFI variables could be queried during bootup and saved on the Linux side.
+> >  
+> > Right, we could do that, but then we wouldn't be able to support
+> > creation/updating variables at runtime, such as when you install a
+> > distribution for the first time, or want to boot a new kernel filename
+> > directly from the firmware without a boot loader (and need to modify
+> > the BootXXXX variables).
+> 
+> Do we know the precise position and address range of these variables?
+> 
+> We could map them writable (but not executable), and the rest executable (but not 
+> writable).
+ 
+The variables are stored in NVRAM, which we don't map into the kernel
+virtual address space. We have to initiate the transaction of writing
+to the variables by executing EFI runtime services.
 
->From some quick experiments it appears that you can skate past this
-issue if you don't receive any interrupts while the bogus GDT pointer
-is loaded, or if you avoid reloading the segment registers in general.
-Which is interesting because I assumed that writing to GDTR took
-immediate effect.
+We obviously have buffers that we pass to the BIOS that contain
+variable data, but these should be NX anyway because they're regular
+kernel allocations.
 
-Up until commit 23a0d4e8fa6d ("efi: Disable interrupts around EFI
-calls, not in the epilog/prolog calls") interrupts were disabled
-around the prolog and epilog calls, and the functional GDT was
-re-installed before interrupts were re-enabled. 
+> That raises the question whether the same physical page ever mixes variables and 
+> actual code - but the hope would be that it's suffiently page granular for this to 
+> work.
 
-That does explain why no one has complained about this issue before.
+I don't think that would ever happen.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
