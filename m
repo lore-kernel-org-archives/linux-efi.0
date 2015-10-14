@@ -1,71 +1,50 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
-Date: Wed, 14 Oct 2015 22:02:57 +0100
-Message-ID: <20151014210257.GF2782@codeblueprint.co.uk>
-References: <5612CBE8.2010504@tycho.nsa.gov>
- <20151006073205.GA11115@gmail.com>
- <5613EAD5.2070405@tycho.nsa.gov>
- <20151012113605.GB7384@pd.tnic>
- <20151012124113.GD2579@codeblueprint.co.uk>
- <20151012124936.GA6260@gmail.com>
- <20151012125548.GE2579@codeblueprint.co.uk>
- <20151012141754.GA6621@gmail.com>
- <20151012144928.GF2579@codeblueprint.co.uk>
- <20151014151807.GA27013@gmail.com>
+Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole
+ kernel range
+Date: Wed, 14 Oct 2015 22:04:19 +0100
+Message-ID: <20151014210419.GG2782@codeblueprint.co.uk>
+References: <1444822245-6784-1-git-send-email-pbonzini@redhat.com>
+ <20151014135211.GB2782@codeblueprint.co.uk>
+ <561E66CD.1050301@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <stable-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20151014151807.GA27013@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Borislav Petkov <bp@alien8.de>, Stephen Smalley <sds@tycho.nsa.gov>, x86@kernel.org, linux-kernel@vger.kernel.org, keescook@chromium.org, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+In-Reply-To: <561E66CD.1050301@redhat.com>
+Sender: stable-owner@vger.kernel.org
+To: Paolo Bonzini <pbonzini@redhat.com>
+Cc: linux-kernel@vger.kernel.org, hpa@zytor.com, x86@kernel.org, stable@vger.kernel.org, lersek@redhat.com, matt.fleming@intel.com, bp@suse.de, linux-efi@vger.kernel.org, Andy Lutomirski <luto@amacapital.net>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 14 Oct, at 05:18:07PM, Ingo Molnar wrote:
+On Wed, 14 Oct, at 04:29:33PM, Paolo Bonzini wrote:
 > 
-> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> 
-> > On Mon, 12 Oct, at 04:17:54PM, Ingo Molnar wrote:
-> > > 
-> > > * Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> > > 
-> > > > On Mon, 12 Oct, at 02:49:36PM, Ingo Molnar wrote:
-> > > > > 
-> > > > > 
-> > > > > So why not unmap them after bootup? Is there any reason to call into EFI code 
-> > > > > while the system is up and running?
-> > > > 
-> > > > That's where the runtime services code lives. So if you want things like EFI 
-> > > > variables (used by the distro installer, among other things) you need to map the 
-> > > > runtime regions.
-> > > 
-> > > So EFI variables could be queried during bootup and saved on the Linux side.
+> On 14/10/2015 15:52, Matt Fleming wrote:
+> >> > However, for non-PAE kernels there is no guarantee that the identity
+> >> > mapping in the initial_page_table extends as far as the GDT; in this
+> >> > case, accesses to the GDT will cause a page fault (which quickly becomes
+> >> > a triple fault).  Fix this by copying the kernel mappings from
+> >> > swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
+> >> > identity mapping.
 > >  
-> > Right, we could do that, but then we wouldn't be able to support
-> > creation/updating variables at runtime, such as when you install a
-> > distribution for the first time, or want to boot a new kernel filename
-> > directly from the firmware without a boot loader (and need to modify
-> > the BootXXXX variables).
+> > Oops, good catch guys. This is clearly a bug, but...
+> > 
+> > ... I'm a little surprised you managed to trigger this at all, because
+> > the GDT we load in efi_call_phys_prolog() is part of the per-cpu data
+> > section and therefore part of the kernel image.
 > 
-> Do we know the precise position and address range of these variables?
+> Only until setup_percpu, which is earlier than SetVirtualAddressMap.
+> For example, I get:
 > 
-> We could map them writable (but not executable), and the rest executable (but not 
-> writable).
- 
-The variables are stored in NVRAM, which we don't map into the kernel
-virtual address space. We have to initiate the transaction of writing
-to the variables by executing EFI runtime services.
+>   setup_percpu: NR_CPUS:8 nr_cpumask_bits:8 nr_cpu_ids:1 nr_node_ids:1
+>   PERCPU: Embedded 18 pages/cpu @c728e000 s41800 r0 d31928 u73728
+>                                   ^^^^^^^
+> but the kernel image ends at 0x037fffff.
+>
+> The GDT is 0xc728e000 in this run, so the GDT is at the beginning of the
+> relocated percpu area.
 
-We obviously have buffers that we pass to the BIOS that contain
-variable data, but these should be NX anyway because they're regular
-kernel allocations.
-
-> That raises the question whether the same physical page ever mixes variables and 
-> actual code - but the hope would be that it's suffiently page granular for this to 
-> work.
-
-I don't think that would ever happen.
+Ah, good point. I completely missed that the percpu sections get
+relocated.
 
 -- 
 Matt Fleming, Intel Open Source Technology Center
