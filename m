@@ -1,74 +1,161 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole kernel range
-Date: Wed, 14 Oct 2015 14:39:58 -0700
-Message-ID: <CALCETrU=YL8yWpp29xO0N7TEVogX1j5Fyk5M_FpJTa9ZOS21Zw@mail.gmail.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] x86: setup: extend low identity map to cover whole
+ kernel range
+Date: Thu, 15 Oct 2015 10:45:48 +0100
+Message-ID: <20151015094548.GA2975@codeblueprint.co.uk>
 References: <1444822245-6784-1-git-send-email-pbonzini@redhat.com>
- <20151014135211.GB2782@codeblueprint.co.uk> <CALCETrX=4NcbfnaQ7wf27v+xn8dY_=acJwX4EjWZVTTWZeJ_yg@mail.gmail.com>
+ <20151014135211.GB2782@codeblueprint.co.uk>
+ <CALCETrX=4NcbfnaQ7wf27v+xn8dY_=acJwX4EjWZVTTWZeJ_yg@mail.gmail.com>
  <20151014210050.GE2782@codeblueprint.co.uk>
+ <CALCETrU=YL8yWpp29xO0N7TEVogX1j5Fyk5M_FpJTa9ZOS21Zw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151014210050.GE2782-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, X86 ML <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, stable <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CALCETrU=YL8yWpp29xO0N7TEVogX1j5Fyk5M_FpJTa9ZOS21Zw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andy Lutomirski <luto@amacapital.net>
+Cc: Paolo Bonzini <pbonzini@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "H. Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, stable <stable@vger.kernel.org>, Laszlo Ersek <lersek@redhat.com>, Matt Fleming <matt.fleming@intel.com>, Borislav Petkov <bp@suse.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 14, 2015 at 2:00 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Wed, 14 Oct, at 09:22:03AM, Andy Lutomirski wrote:
->> On Wed, Oct 14, 2015 at 6:52 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> > (Pulling in luto for low-level x86 fu)
->> >
->> > On Wed, 14 Oct, at 01:30:45PM, Paolo Bonzini wrote:
->> >> On 32-bit systems, the initial_page_table is reused by
->> >> efi_call_phys_prolog as an identity map to call
->> >> SetVirtualAddressMap.  efi_call_phys_prolog takes care of
->> >> converting the current CPU's GDT to a physical address too.
->> >>
->> >> For PAE kernels the identity mapping is achieved by aliasing the
->> >> first PDPE for the kernel memory mapping into the first PDPE
->> >> of initial_page_table.  This makes the EFI stub's trick "just work".
->> >>
->> >> However, for non-PAE kernels there is no guarantee that the identity
->> >> mapping in the initial_page_table extends as far as the GDT; in this
->> >> case, accesses to the GDT will cause a page fault (which quickly becomes
->> >> a triple fault).  Fix this by copying the kernel mappings from
->> >> swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
->> >> identity mapping.
->> >
->> > Oops, good catch guys. This is clearly a bug, but...
->> >
->> >> For some reason, this is only reproducible with QEMU's dynamic translation
->> >> mode, and not for example with KVM.  However, even under KVM one can clearly
->> >> see that the page table is bogus:
->>
->> I haven't looked at the code, but it wouldn't surprise me if this is
->> some kind of TLB issue.  With the hardware TLB (which is in use on
->> KVM), it seems quite likely that the GDT is pretty much always in the
->> TLB and, if nothing flushes global mappings, then it'll probably stick
->> around.
->
-> From some quick experiments it appears that you can skate past this
-> issue if you don't receive any interrupts while the bogus GDT pointer
-> is loaded, or if you avoid reloading the segment registers in general.
-> Which is interesting because I assumed that writing to GDTR took
-> immediate effect.
+On Wed, 14 Oct, at 02:39:58PM, Andy Lutomirski wrote:
+> 
+> Trivia for your amusement:
+> 
+> AFAICT it's entirely permissible for the GDTR and/or LDT descriptor to
+> point to unmapped memory.  Any attempt to use them (segment loads,
+> interrupts, IRET, etc) will try to access that memory as if the access
+> came from CPL 0 and, if the access fails, will generate a valid page
+> fault with CR2 pointing into the GDT or LDT.
+> 
+> Xen is nuts^Wclever and actually uses this.
+> 
+> Of course, if your #PF vector references a GDT or LDT descriptor and
+> trying to load that descriptor results in a page fault, you get a
+> double fault.
+> 
+> I learned this while trying to puzzle out why v1 of my LDT
+> synchronization patch caused random faults on Xen.
 
-Trivia for your amusement:
+Ha, interesting! Thanks Andy, it's good to get confirmation.
 
-AFAICT it's entirely permissible for the GDTR and/or LDT descriptor to
-point to unmapped memory.  Any attempt to use them (segment loads,
-interrupts, IRET, etc) will try to access that memory as if the access
-came from CPL 0 and, if the access fails, will generate a valid page
-fault with CR2 pointing into the GDT or LDT.
+OK, I think we understand this issue well enough to call this fixed.
+I've queued the following patch up in my urgent tree and I'll send a
+pull request to the tip folks tomorrow.
 
-Xen is nuts^Wclever and actually uses this.
+---
 
-Of course, if your #PF vector references a GDT or LDT descriptor and
-trying to load that descriptor results in a page fault, you get a
-double fault.
+>From 72ac9f242fad7c3bf3e06461e34c9a546d8cb411 Mon Sep 17 00:00:00 2001
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Wed, 14 Oct 2015 13:30:45 +0200
+Subject: [PATCH] x86/setup: Extend low identity map to cover whole kernel
+ range
 
-I learned this while trying to puzzle out why v1 of my LDT
-synchronization patch caused random faults on Xen.
+On 32-bit systems, the initial_page_table is reused by
+efi_call_phys_prolog as an identity map to call
+SetVirtualAddressMap.  efi_call_phys_prolog takes care of
+converting the current CPU's GDT to a physical address too.
 
---Andy
+For PAE kernels the identity mapping is achieved by aliasing the
+first PDPE for the kernel memory mapping into the first PDPE
+of initial_page_table.  This makes the EFI stub's trick "just work".
+
+However, for non-PAE kernels there is no guarantee that the identity
+mapping in the initial_page_table extends as far as the GDT; in this
+case, accesses to the GDT will cause a page fault (which quickly becomes
+a triple fault).  Fix this by copying the kernel mappings from
+swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
+identity mapping.
+
+For some reason, this is only reproducible with QEMU's dynamic translation
+mode, and not for example with KVM.  However, even under KVM one can clearly
+see that the page table is bogus:
+
+    $ qemu-system-i386 -pflash OVMF.fd -M q35 vmlinuz0 -s -S -daemonize
+    $ gdb
+    (gdb) target remote localhost:1234
+    (gdb) hb *0x02858f6f
+    Hardware assisted breakpoint 1 at 0x2858f6f
+    (gdb) c
+    Continuing.
+
+    Breakpoint 1, 0x02858f6f in ?? ()
+    (gdb) monitor info registers
+    ...
+    GDT=     0724e000 000000ff
+    IDT=     fffbb000 000007ff
+    CR0=0005003b CR2=ff896000 CR3=032b7000 CR4=00000690
+    ...
+
+The page directory is sane:
+
+    (gdb) x/4wx 0x32b7000
+    0x32b7000:	0x03398063	0x03399063	0x0339a063	0x0339b063
+    (gdb) x/4wx 0x3398000
+    0x3398000:	0x00000163	0x00001163	0x00002163	0x00003163
+    (gdb) x/4wx 0x3399000
+    0x3399000:	0x00400003	0x00401003	0x00402003	0x00403003
+
+but our particular page directory entry is empty:
+
+    (gdb) x/1wx 0x32b7000 + (0x724e000 >> 22) * 4
+    0x32b7070:	0x00000000
+
+[ It appears that you can skate past this issue if you don't receive
+  any interrupts while the bogus GDT pointer is loaded, or if you avoid
+  reloading the segment registers in general.
+
+  Andy Lutomirski provides some additional insight:
+
+   "AFAICT it's entirely permissible for the GDTR and/or LDT
+    descriptor to point to unmapped memory.  Any attempt to use them
+    (segment loads, interrupts, IRET, etc) will try to access that memory
+    as if the access came from CPL 0 and, if the access fails, will
+    generate a valid page fault with CR2 pointing into the GDT or
+    LDT."
+
+  Up until commit 23a0d4e8fa6d ("efi: Disable interrupts around EFI
+  calls, not in the epilog/prolog calls") interrupts were disabled
+  around the prolog and epilog calls, and the functional GDT was
+  re-installed before interrupts were re-enabled.
+
+  Which explains why no one has hit this issue until now. ]
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Reported-by: Laszlo Ersek <lersek@redhat.com>
+Cc: <stable@vger.kernel.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Andy Lutomirski <luto@amacapital.net>
+Signed-off-by: Matt Fleming <matt.fleming@intel.com>
+[ Updated changelog. ]
+---
+ arch/x86/kernel/setup.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index fdb7f2a2d328..a3cccbfc5f77 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1173,6 +1173,14 @@ void __init setup_arch(char **cmdline_p)
+ 	clone_pgd_range(initial_page_table + KERNEL_PGD_BOUNDARY,
+ 			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
+ 			KERNEL_PGD_PTRS);
++
++	/*
++	 * sync back low identity map too.  It is used for example
++	 * in the 32-bit EFI stub.
++	 */
++	clone_pgd_range(initial_page_table,
++			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
++			KERNEL_PGD_PTRS);
+ #endif
+ 
+ 	tboot_probe();
+-- 
+2.1.0
+
+-- 
+Matt Fleming, Intel Open Source Technology Center
