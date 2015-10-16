@@ -1,36 +1,39 @@
-From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: CPER support for 32GiB 64GiB DIMMs
-Date: Thu, 15 Oct 2015 21:56:04 +0000
-Message-ID: <3908561D78D1C84285E8C5FCA982C28F32B58478@ORSMSX114.amr.corp.intel.com>
-References: <A4930445748CDC43B8495613130746F43CBE2BAF@G9W0735.americas.hpqcorp.net>
+From: Ricardo Neri <ricardo.neri-calderon@linux.intel.com>
+Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
+Date: Thu, 15 Oct 2015 18:45:19 -0700
+Message-ID: <1444959919.28005.26.camel@ranerica-desk01>
+References: <20151012113605.GB7384@pd.tnic>
+	 <20151012124113.GD2579@codeblueprint.co.uk>
+	 <20151012124936.GA6260@gmail.com>
+	 <20151012125548.GE2579@codeblueprint.co.uk>
+	 <20151012141754.GA6621@gmail.com>
+	 <20151012144928.GF2579@codeblueprint.co.uk>
+	 <20151014151807.GA27013@gmail.com>
+	 <CALCETrU-_dJ3=+1nHN82mE==YpXGB8USWdrXDc=BVk_J5UdN3A@mail.gmail.com>
+	 <20151014153522.GC8218@pd.tnic> <20151015101016.GB2975@codeblueprint.co.uk>
+	 <20151015103332.GE4267@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <A4930445748CDC43B8495613130746F43CBE2BAF-s60kSRSX9iESZAcGdq5asR6epYMZPwEe5NbjCUgZEJk@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Croxon, Nigel" <nigel.croxon-ZPxbGqLxI0U@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151015103332.GE4267@pd.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Andy Lutomirski <luto@amacapital.net>, Ingo Molnar <mingo@kernel.org>, Stephen Smalley <sds@tycho.nsa.gov>, X86 ML <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, luv@lists.01.org
 List-Id: linux-efi@vger.kernel.org
 
-> Matt Fleming mentioned to me that Tony Luck recently fixed a 
-> compatibility issue with Memory Error Record structure.
-> I ask, how do we want to handle the processing of a CPER
-> memory error record with support for larger DIMMs?
+On Thu, 2015-10-15 at 12:33 +0200, Borislav Petkov wrote:
+> Yeah, that's actually a good idea. Why not upstream it for the wider
+> audience so that people can actually start reporting b0rked UEFIs?
+> With
+> a big and nice FW_BUG splat in there...
 
-I looked at this a bit when I was making the compatibility patch.
+We attempted to upstream in the past but later I discovered that my
+implementation in particular is causing warnings due to SMP. Also, I
+need to implement an alternative or extension to the current
+efi_map_region, which have the __init qualifier. This is because
+mappings might happen after the __inits have been discarded. I have this
+work currently in my scope.
 
-The problem is how to take the larger value and report it to
-user space.  We have all hard-coded field widths in the
-trace structure used that make this non-trivial at the moment.
-
-Supposedly there are changes coming to the perf infrastructure
-that will make it easier in the future to widen a field from u16 to
-u32.
-
-See http://lkml.org/lkml/2015/6/24/715
-
-Maybe the future Steven described is here now, and someone
-can go in and fix the logging event and rasdaemon?
-
--Tony
+Thanks and BR,
+Ricardo
