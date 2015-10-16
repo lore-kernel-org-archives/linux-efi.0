@@ -1,53 +1,64 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [GIT PULL] EFI urgent fix
-Date: Fri, 16 Oct 2015 12:04:18 +0200
-Message-ID: <20151016100418.GA23046@gmail.com>
-References: <1444989706-11602-1-git-send-email-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH V2] x86/efi: Fix kernel panic when CONFIG_DEBUG_VIRTUAL is enabled
+Date: Fri, 16 Oct 2015 16:20:27 -0700
+Message-ID: <1445037627-6488-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1444989706-11602-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Glenn P Williamson <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+When CONFIG_DEBUG_VIRTUAL is enabled, all accesses to __pa(address) are
+monitored to see whether address falls in direct mapping or kernel text
+mapping (see Documentation/x86/x86_64/mm.txt for details), if it does
+not kernel panics. During 1:1 mapping of EFI runtime services we access
+virtual addresses which are == physical addresses, thus the 1:1 mapping
+and these addresses donot fall in either of the above two regions and
+hence when passed as arguments to __pa() kernel panics as reported by
+Dave Hansen here https://lkml.kernel.org/r/5462999A.7090706-ral2JQCrhuFfmgfxC/sS/w@public.gmane.org
+So, before calling __pa() virtual addresses should be validated which
+results in skipping call to split_page_count() and that should be fine
+because it is used to keep track of everything *but* 1:1 mappings.
 
-> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> Folks, the below fix from Paolo addresses an issue causing 32-bit
-> non-PAE kernels to triple fault on EFI boot. The issue is that the
-> physical address of the GDT that gets used in efi_call_phys_prolog()
-> won't be covered by the identitty mapping in initial_page_table.
-> 
-> The following changes since commit 8a53554e12e98d1759205afd7b8e9e2ea0936f48:
-> 
->   x86/efi: Fix multiple GOP device support (2015-10-14 16:02:43 +0200)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to f5f3497cad8c8416a74b9aaceb127908755d020a:
-> 
->   x86/setup: Extend low identity map to cover whole kernel range (2015-10-16 10:52:29 +0100)
-> 
-> ----------------------------------------------------------------
->  * Ensure that the identity mapping in initial_page_table is updated
->    to cover the entire kernel range. This fixes a triple fault on
->    non-PAE kernels when booting on 32-bit EFI due to accessing an
->    unmapped GDT in efi_call_phys_prolog() - Paolo Bonzini
-> 
-> ----------------------------------------------------------------
-> Paolo Bonzini (1):
->       x86/setup: Extend low identity map to cover whole kernel range
-> 
->  arch/x86/kernel/setup.c | 8 ++++++++
->  1 file changed, 8 insertions(+)
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Reported-by: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Glenn P Williamson <glenn.p.williamson-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Pulled, thanks Matt!
+Changes since v1:
+Made commit message more clear by adding reference to
+Documentation/x86/x86_64/mm.txt, instead of addresses "below 4G"
+changed it to "virtual addresses == physical addresses" quoted
+mail with k.org redirector and changed last line "to keep track of
+evrything *but* 1:1 mappings." Also made code more readable by adding a
+variable.
+---
+ arch/x86/mm/pageattr.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-	Ingo
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 727158cb3b3c..9abe0c9b1098 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -648,9 +648,12 @@ __split_large_page(struct cpa_data *cpa, pte_t *kpte, unsigned long address,
+ 	for (i = 0; i < PTRS_PER_PTE; i++, pfn += pfninc)
+ 		set_pte(&pbase[i], pfn_pte(pfn, canon_pgprot(ref_prot)));
+ 
+-	if (pfn_range_is_mapped(PFN_DOWN(__pa(address)),
+-				PFN_DOWN(__pa(address)) + 1))
+-		split_page_count(level);
++	if (virt_addr_valid(address)) {
++		unsigned long pfn = PFN_DOWN(__pa(address));
++
++		if (pfn_range_is_mapped(pfn, pfn + 1))
++			split_page_count(level);
++	}
+ 
+ 	/*
+ 	 * Install the new, split up pagetable.
+-- 
+2.1.4
