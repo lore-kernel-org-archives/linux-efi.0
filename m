@@ -1,119 +1,53 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH] x86/setup: Extend low identity map to cover whole kernel range
-Date: Fri, 16 Oct 2015 11:01:46 +0100
-Message-ID: <1444989706-11602-2-git-send-email-matt@codeblueprint.co.uk>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Fri, 16 Oct 2015 12:04:18 +0200
+Message-ID: <20151016100418.GA23046@gmail.com>
 References: <1444989706-11602-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
 In-Reply-To: <1444989706-11602-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-On 32-bit systems, the initial_page_table is reused by
-efi_call_phys_prolog as an identity map to call
-SetVirtualAddressMap.  efi_call_phys_prolog takes care of
-converting the current CPU's GDT to a physical address too.
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-For PAE kernels the identity mapping is achieved by aliasing the
-first PDPE for the kernel memory mapping into the first PDPE
-of initial_page_table.  This makes the EFI stub's trick "just work".
+> From: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> Folks, the below fix from Paolo addresses an issue causing 32-bit
+> non-PAE kernels to triple fault on EFI boot. The issue is that the
+> physical address of the GDT that gets used in efi_call_phys_prolog()
+> won't be covered by the identitty mapping in initial_page_table.
+> 
+> The following changes since commit 8a53554e12e98d1759205afd7b8e9e2ea0936f48:
+> 
+>   x86/efi: Fix multiple GOP device support (2015-10-14 16:02:43 +0200)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to f5f3497cad8c8416a74b9aaceb127908755d020a:
+> 
+>   x86/setup: Extend low identity map to cover whole kernel range (2015-10-16 10:52:29 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Ensure that the identity mapping in initial_page_table is updated
+>    to cover the entire kernel range. This fixes a triple fault on
+>    non-PAE kernels when booting on 32-bit EFI due to accessing an
+>    unmapped GDT in efi_call_phys_prolog() - Paolo Bonzini
+> 
+> ----------------------------------------------------------------
+> Paolo Bonzini (1):
+>       x86/setup: Extend low identity map to cover whole kernel range
+> 
+>  arch/x86/kernel/setup.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
 
-However, for non-PAE kernels there is no guarantee that the identity
-mapping in the initial_page_table extends as far as the GDT; in this
-case, accesses to the GDT will cause a page fault (which quickly becomes
-a triple fault).  Fix this by copying the kernel mappings from
-swapper_pg_dir to initial_page_table twice, both at PAGE_OFFSET and at
-identity mapping.
+Pulled, thanks Matt!
 
-For some reason, this is only reproducible with QEMU's dynamic translation
-mode, and not for example with KVM.  However, even under KVM one can clearly
-see that the page table is bogus:
-
-    $ qemu-system-i386 -pflash OVMF.fd -M q35 vmlinuz0 -s -S -daemonize
-    $ gdb
-    (gdb) target remote localhost:1234
-    (gdb) hb *0x02858f6f
-    Hardware assisted breakpoint 1 at 0x2858f6f
-    (gdb) c
-    Continuing.
-
-    Breakpoint 1, 0x02858f6f in ?? ()
-    (gdb) monitor info registers
-    ...
-    GDT=     0724e000 000000ff
-    IDT=     fffbb000 000007ff
-    CR0=0005003b CR2=ff896000 CR3=032b7000 CR4=00000690
-    ...
-
-The page directory is sane:
-
-    (gdb) x/4wx 0x32b7000
-    0x32b7000:	0x03398063	0x03399063	0x0339a063	0x0339b063
-    (gdb) x/4wx 0x3398000
-    0x3398000:	0x00000163	0x00001163	0x00002163	0x00003163
-    (gdb) x/4wx 0x3399000
-    0x3399000:	0x00400003	0x00401003	0x00402003	0x00403003
-
-but our particular page directory entry is empty:
-
-    (gdb) x/1wx 0x32b7000 + (0x724e000 >> 22) * 4
-    0x32b7070:	0x00000000
-
-[ It appears that you can skate past this issue if you don't receive
-  any interrupts while the bogus GDT pointer is loaded, or if you avoid
-  reloading the segment registers in general.
-
-  Andy Lutomirski provides some additional insight:
-
-   "AFAICT it's entirely permissible for the GDTR and/or LDT
-    descriptor to point to unmapped memory.  Any attempt to use them
-    (segment loads, interrupts, IRET, etc) will try to access that memory
-    as if the access came from CPL 0 and, if the access fails, will
-    generate a valid page fault with CR2 pointing into the GDT or
-    LDT."
-
-  Up until commit 23a0d4e8fa6d ("efi: Disable interrupts around EFI
-  calls, not in the epilog/prolog calls") interrupts were disabled
-  around the prolog and epilog calls, and the functional GDT was
-  re-installed before interrupts were re-enabled.
-
-  Which explains why no one has hit this issue until now. ]
-
-Signed-off-by: Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Reported-by: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-[ Updated changelog. ]
----
- arch/x86/kernel/setup.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
-
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index fdb7f2a2d328..a3cccbfc5f77 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1173,6 +1173,14 @@ void __init setup_arch(char **cmdline_p)
- 	clone_pgd_range(initial_page_table + KERNEL_PGD_BOUNDARY,
- 			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
- 			KERNEL_PGD_PTRS);
-+
-+	/*
-+	 * sync back low identity map too.  It is used for example
-+	 * in the 32-bit EFI stub.
-+	 */
-+	clone_pgd_range(initial_page_table,
-+			swapper_pg_dir     + KERNEL_PGD_BOUNDARY,
-+			KERNEL_PGD_PTRS);
- #endif
- 
- 	tboot_probe();
--- 
-2.1.0
+	Ingo
