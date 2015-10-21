@@ -1,101 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
-Date: Wed, 21 Oct 2015 14:57:47 +0200
-Message-ID: <CAKv+Gu92iMzCq0zZfTBUVKfXQqDiVfO3WPiHVWNOYtGjTvOkmQ@mail.gmail.com>
-References: <5613EAD5.2070405@tycho.nsa.gov>
-	<20151012113605.GB7384@pd.tnic>
-	<20151012124113.GD2579@codeblueprint.co.uk>
-	<20151012124936.GA6260@gmail.com>
-	<20151012125548.GE2579@codeblueprint.co.uk>
-	<20151012141754.GA6621@gmail.com>
-	<20151012144928.GF2579@codeblueprint.co.uk>
-	<20151014151807.GA27013@gmail.com>
-	<20151014210257.GF2782@codeblueprint.co.uk>
-	<20151021094242.GA12155@gmail.com>
-	<20151021124924.GA19262@gmail.com>
+Date: Wed, 21 Oct 2015 15:24:31 +0200
+Message-ID: <20151021132430.GD3575@pd.tnic>
+References: <20151012124113.GD2579@codeblueprint.co.uk>
+ <20151012124936.GA6260@gmail.com>
+ <20151012125548.GE2579@codeblueprint.co.uk>
+ <20151012141754.GA6621@gmail.com>
+ <20151012144928.GF2579@codeblueprint.co.uk>
+ <20151014151807.GA27013@gmail.com>
+ <20151014210257.GF2782@codeblueprint.co.uk>
+ <20151021094242.GA12155@gmail.com>
+ <20151021124924.GA19262@gmail.com>
+ <CAKv+Gu92iMzCq0zZfTBUVKfXQqDiVfO3WPiHVWNOYtGjTvOkmQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151021124924.GA19262-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu92iMzCq0zZfTBUVKfXQqDiVfO3WPiHVWNOYtGjTvOkmQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Stephen Smalley <sds@tycho.nsa.gov>, "x86@kernel.org" <x86@kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Brian Gerst <brgerst@gmail.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 21 October 2015 at 14:49, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->
-> * Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->
->>
->> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->>
->> > > > Right, we could do that, but then we wouldn't be able to support
->> > > > creation/updating variables at runtime, such as when you install a
->> > > > distribution for the first time, or want to boot a new kernel filename
->> > > > directly from the firmware without a boot loader (and need to modify the
->> > > > BootXXXX variables).
->> > >
->> > > Do we know the precise position and address range of these variables?
->> > >
->> > > We could map them writable (but not executable), and the rest executable (but
->> > > not writable).
->> >
->> > The variables are stored in NVRAM, which we don't map into the kernel virtual
->> > address space. [...]
->>
->> Just curious: is there firmware that memory maps those variables privately?
->>
->> > [...] We have to initiate the transaction of writing to the variables by
->> > executing EFI runtime services.
->> >
->> > We obviously have buffers that we pass to the BIOS that contain variable data,
->> > but these should be NX anyway because they're regular kernel allocations.
->> >
->> > > That raises the question whether the same physical page ever mixes variables
->> > > and actual code - but the hope would be that it's suffiently page granular for
->> > > this to work.
->> >
->> > I don't think that would ever happen.
->>
->> Ok, that's promising, so how about this then to solve the security weakness the
->> new warning unearthed: map the whole EFI range as 'r-x (NX)', but detect writes
->> from the page fault handler and transparently allow them to flip over the range
->> to 'rw-'.
->
-> So I meant to say 'page' instead of 'range'.
->
-> I.e. this dynamic mechanism would flip pages over to 'rw-', as write faults occur
-> from EFI code that writes to them.
->
-> We don't need to know which regions are writable data, and which regions are
-> executable-code/readonly-data.
->
-> The following aspect would guarantee safety:
->
->> Note that for security reasons we don't allow a subsequent flipping back to NX
->> if there's an NX fault on the same page, i.e. this new mechanism is a monotonic
->> one-way process that should dynamically 'map out' data pages versus executable
->> pages.
->>
->> It should also be pretty robust, assuming we can take page faults while EFI code
->> is executing and is trying to modify EFI data: is that the case?
->
-> and this is why I asked whether boundaries between 'Code' and 'Writable data'
-> sections are page granular - which they do appear to be. (i.e. there are no
-> singular pages that are both writable data and code at once.)
->
+On Wed, Oct 21, 2015 at 02:57:47PM +0200, Ard Biesheuvel wrote:
+> ... For the remaining cases, which is the vast majority, no such
+> assumptions can be made, and since the UEFI runtime regions are
+> typically populated with a bunch of PE/COFF images (each of which
+> consists of text + data), inferring where the boundaries are between
+> them does not seem tractable (for instance, to only map 'boundary'
+> pages RWX)
 
-No, sadly they are not. Only in specific cases (which have to do with
-the new UEFIv2.5 memory protection feature that got this discussion
-started in the first place) can we assume that UEFI runtime pages are
-mappable either RW- or R-X but not RWX, and in those cases, we have
-the permissions bits that tell us unambiguously which pages are text
-and which are data. For the remaining cases, which is the vast
-majority, no such assumptions can be made, and since the UEFI runtime
-regions are typically populated with a bunch of PE/COFF images (each
-of which consists of text + data), inferring where the boundaries are
-between them does not seem tractable (for instance, to only map
-'boundary' pages RWX)
+How much of a problem would it be if we still do the on-demand page
+faulting and map a trailing piece of code together with the data in a
+page RWX?
+
+Still better than mapping the *whole* thing RWX, no?
 
 -- 
-Ard.
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
