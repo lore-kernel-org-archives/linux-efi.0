@@ -1,33 +1,88 @@
-From: Joonas Lahtinen <joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH] Documentation/efi-stub.txt: Fix a typo
-Date: Wed, 21 Oct 2015 15:26:44 +0300
-Message-ID: <1445430404-1908-1-git-send-email-joonas.lahtinen@linux.intel.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
+Date: Wed, 21 Oct 2015 14:49:24 +0200
+Message-ID: <20151021124924.GA19262@gmail.com>
+References: <5613EAD5.2070405@tycho.nsa.gov>
+ <20151012113605.GB7384@pd.tnic>
+ <20151012124113.GD2579@codeblueprint.co.uk>
+ <20151012124936.GA6260@gmail.com>
+ <20151012125548.GE2579@codeblueprint.co.uk>
+ <20151012141754.GA6621@gmail.com>
+ <20151012144928.GF2579@codeblueprint.co.uk>
+ <20151014151807.GA27013@gmail.com>
+ <20151014210257.GF2782@codeblueprint.co.uk>
+ <20151021094242.GA12155@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20151021094242.GA12155-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Linux EFI (Extensible Firmware Interface) development" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-In the command invocation "initrd=\Kernels\..." should really read
-"initrd=\Ramdisks\..." instead.
 
-Signed-off-by: Joonas Lahtinen <joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
----
- Documentation/efi-stub.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+* Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
 
-diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-index 7747024..e1ee764 100644
---- a/Documentation/efi-stub.txt
-+++ b/Documentation/efi-stub.txt
-@@ -68,7 +68,7 @@ fs0:>
- to boot with the initrd-large.img file if the current working
- directory is fs0:\Kernels, the following command must be used,
- 
--	fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
-+	fs0:\Kernels> bzImage.efi initrd=\Ramdisks\initrd-large.img
- 
- Notice how bzImage.efi can be specified with a relative path. That's
- because the image we're executing is interpreted by the EFI shell,
--- 
-2.4.3
+> 
+> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> 
+> > > > Right, we could do that, but then we wouldn't be able to support 
+> > > > creation/updating variables at runtime, such as when you install a 
+> > > > distribution for the first time, or want to boot a new kernel filename 
+> > > > directly from the firmware without a boot loader (and need to modify the 
+> > > > BootXXXX variables).
+> > > 
+> > > Do we know the precise position and address range of these variables?
+> > > 
+> > > We could map them writable (but not executable), and the rest executable (but 
+> > > not writable).
+> >  
+> > The variables are stored in NVRAM, which we don't map into the kernel virtual 
+> > address space. [...]
+> 
+> Just curious: is there firmware that memory maps those variables privately?
+> 
+> > [...] We have to initiate the transaction of writing to the variables by 
+> > executing EFI runtime services.
+> > 
+> > We obviously have buffers that we pass to the BIOS that contain variable data, 
+> > but these should be NX anyway because they're regular kernel allocations.
+> > 
+> > > That raises the question whether the same physical page ever mixes variables 
+> > > and actual code - but the hope would be that it's suffiently page granular for 
+> > > this to work.
+> > 
+> > I don't think that would ever happen.
+> 
+> Ok, that's promising, so how about this then to solve the security weakness the 
+> new warning unearthed: map the whole EFI range as 'r-x (NX)', but detect writes 
+> from the page fault handler and transparently allow them to flip over the range 
+> to 'rw-'.
+
+So I meant to say 'page' instead of 'range'.
+
+I.e. this dynamic mechanism would flip pages over to 'rw-', as write faults occur 
+from EFI code that writes to them.
+
+We don't need to know which regions are writable data, and which regions are 
+executable-code/readonly-data.
+
+The following aspect would guarantee safety:
+
+> Note that for security reasons we don't allow a subsequent flipping back to NX 
+> if there's an NX fault on the same page, i.e. this new mechanism is a monotonic 
+> one-way process that should dynamically 'map out' data pages versus executable 
+> pages.
+> 
+> It should also be pretty robust, assuming we can take page faults while EFI code 
+> is executing and is trying to modify EFI data: is that the case?
+
+and this is why I asked whether boundaries between 'Code' and 'Writable data' 
+sections are page granular - which they do appear to be. (i.e. there are no 
+singular pages that are both writable data and code at once.)
+
+Thanks,
+
+	Ingo
