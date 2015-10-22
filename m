@@ -1,52 +1,67 @@
-From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
-Subject: Re: [PATCH v2] x86/mm: warn on W+x mappings
-Date: Wed, 21 Oct 2015 13:49:07 -0700
-Message-ID: <CALCETrX=ddvegyK2_cvwHW=mXb3c8mGpfRT5WFP+qW_=nm_D-A@mail.gmail.com>
-References: <20151012144928.GF2579@codeblueprint.co.uk> <20151014151807.GA27013@gmail.com>
- <20151014210257.GF2782@codeblueprint.co.uk> <20151021094242.GA12155@gmail.com>
- <20151021124924.GA19262@gmail.com> <CAKv+Gu92iMzCq0zZfTBUVKfXQqDiVfO3WPiHVWNOYtGjTvOkmQ@mail.gmail.com>
- <20151021132430.GD3575@pd.tnic> <CAKv+Gu9GaLbexayuT81gM5=081a1gT57RaY_HiCzh9YYvy5SGg@mail.gmail.com>
- <20151021143651.GE3575@pd.tnic> <CALCETrWwHLnt6=MiyuQY48zEaOUMuFTg1oN3NDdEOxa6XYMgCw@mail.gmail.com>
- <20151021204522.GB20338@codeblueprint.co.uk>
+From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] Documentation/efi-stub.txt: Fix a typo
+Date: Thu, 22 Oct 2015 15:58:15 -0700
+Message-ID: <CAFECyb__gq0mYpTGH8sapQxLr89hKFTL8zvrixdfaYjGshVAVw@mail.gmail.com>
+References: <1445430404-1908-1-git-send-email-joonas.lahtinen@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151021204522.GB20338-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1445430404-1908-1-git-send-email-joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Joonas Lahtinen <joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: "Linux EFI (Extensible Firmware Interface) development" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Oct 21, 2015 at 1:45 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Wed, 21 Oct, at 11:46:53AM, Andy Lutomirski wrote:
->>
->> If the UEFI stuff is mapped in its own PGD entry, we could just RO
->> that entire PGD entry everywhere except the UEFI pgd (and make sure to
->> clear G so that the TLB entries get zapped).
+On Wed, Oct 21, 2015 at 5:26 AM, Joonas Lahtinen
+<joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> In the command invocation "initrd=\Kernels\..." should really read
+> "initrd=\Ramdisks\..." instead.
 >
-> What would be the benefit of making it RO as opposed to not having it
-> mapped at all?
+> Signed-off-by: Joonas Lahtinen <joonas.lahtinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> ---
+>  Documentation/efi-stub.txt | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+> index 7747024..e1ee764 100644
+> --- a/Documentation/efi-stub.txt
+> +++ b/Documentation/efi-stub.txt
+> @@ -68,7 +68,7 @@ fs0:>
+>  to boot with the initrd-large.img file if the current working
+>  directory is fs0:\Kernels, the following command must be used,
+>
+> -       fs0:\Kernels> bzImage.efi initrd=\Kernels\initrd-large.img
+> +       fs0:\Kernels> bzImage.efi initrd=\Ramdisks\initrd-large.img
+>
 
-Nothing.
+I don't think this change is correct.  From just above in efi-stub.txt:
 
-> The mappings only exist in the trampoline_pgd right now
-> for x86 which minimizes the potentially vulnerable code paths to the
-> EFI runtime calls and the suspend/resume code.
+ For example, given the following directory layout,
 
-Oh, I didn't realize it.
+fs0:>
+        Kernels\
+                        bzImage.efi
+                        initrd-large.img
 
-So what's the problem here?  Honestly, while UEFI is full of
-questionable things, I don't really see how an unprivileged user
-program should be able to cause malicious input to be send to UEFI
-code, so it should be quite difficult to exploit a buffer overflow or
-other errant write in UEFI to escalate privileges from user to
-anything else.  (Kernel -> SMM escalation is a whole different story,
-but preventing that is SMM's business, not the kernel's.  I've
-actually been a wee bit tempted to write a /dev/smram driver to expose
-SMRAM using a portfolio of old known exploits.)
+        Ramdisks\
+                        initrd-small.img
+                        initrd-medium.img
 
---Andy
 
--- 
-Andy Lutomirski
-AMA Capital Management, LLC
+The file initrd-large.img is in the Kernels directory, and the point
+of this section
+is to highlight that the path given to "initrd=" must be absolute.
+
+Roy
+
+
+
+>  Notice how bzImage.efi can be specified with a relative path. That's
+>  because the image we're executing is interpreted by the EFI shell,
+> --
+> 2.4.3
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-efi" in
+> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
