@@ -1,97 +1,86 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Fix warning of int-to-pointer-cast on x86
- 32-bit builds
-Date: Fri, 23 Oct 2015 12:33:29 +0200
-Message-ID: <20151023103328.GA3486@gmail.com>
-References: <20151023085011.GB21631@gmail.com>
- <1445593697-1342-1-git-send-email-ard.biesheuvel@linaro.org>
- <1445593697-1342-2-git-send-email-ard.biesheuvel@linaro.org>
- <20151023102728.GA1974@gmail.com>
- <20151023103022.GA2297@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] arm64/efi: move arm64 specific stub C code to libstub
+Date: Fri, 23 Oct 2015 16:48:14 +0200
+Message-ID: <1445611694-31838-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20151023103022.GA2297-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kamezawa.hiroyu-+CUm20s59erQFUHtdCDX3A@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, jeremy.linton-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org
+Cc: ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Now that we added special handling to the C files in libstub, move
+the one remaining arm64 specific EFI stub C file to libstub as
+well, so that it gets the same treatment. This should prevent future
+changes from resulting in binaries that may execute incorrectly in
+UEFI context.
 
-* Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+With efi-entry.S the only remaining EFI stub source file under
+arch/arm64, we can also simplify the Makefile logic somewhat.
 
-> 
-> * Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> 
-> > 
-> > * Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> > 
-> > > From: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-> > > 
-> > > Commit 0f96a99dab36 ("efi: Add "efi_fake_mem" boot option")
-> > > introduces the following warning message:
-> > > 
-> > >   drivers/firmware/efi/fake_mem.c:186:20: warning: cast to pointer
-> > >   from integer of different size [-Wint-to-pointer-cast]
-> > > 
-> > > new_memmap_phy was defined as a u64 value and cast to void*, causing
-> > > a int-to-pointer-cast warning on x86 32-bit builds.
-> > > However, since the void* type is inappropriate for a physical
-> > > address, the definition of struct efi_memory_map::phys_map has been
-> > > changed to phys_addr_t in the previous patch, and so the cast can be
-> > > dropped entirely.
-> > > 
-> > > This patch also changes the type of the "new_memmap_phy" variable
-> > > from "u64" to "phys_addr_t" to align with the types of
-> > > memblock_alloc() and struct efi_memory_map::phys_map.
-> > > 
-> > > Reported-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> > > Signed-off-by: Taku Izumi <izumi.taku-+CUm20s59erQFUHtdCDX3A@public.gmane.org>
-> > > [ard.biesheuvel: removed void* cast, updated commit log]
-> > > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > ---
-> > >  drivers/firmware/efi/fake_mem.c | 4 ++--
-> > >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/drivers/firmware/efi/fake_mem.c b/drivers/firmware/efi/fake_mem.c
-> > > index 32bcb14df2c8..ed3a854950cc 100644
-> > > --- a/drivers/firmware/efi/fake_mem.c
-> > > +++ b/drivers/firmware/efi/fake_mem.c
-> > > @@ -59,7 +59,7 @@ void __init efi_fake_memmap(void)
-> > >  	u64 start, end, m_start, m_end, m_attr;
-> > >  	int new_nr_map = memmap.nr_map;
-> > >  	efi_memory_desc_t *md;
-> > > -	u64 new_memmap_phy;
-> > > +	phys_addr_t new_memmap_phy;
-> > >  	void *new_memmap;
-> > >  	void *old, *new;
-> > >  	int i;
-> > > @@ -183,7 +183,7 @@ void __init efi_fake_memmap(void)
-> > >  	/* swap into new EFI memmap */
-> > >  	efi_unmap_memmap();
-> > >  	memmap.map = new_memmap;
-> > > -	memmap.phys_map = (void *)new_memmap_phy;
-> > > +	memmap.phys_map = new_memmap_phy;
-> > >  	memmap.nr_map = new_nr_map;
-> > >  	memmap.map_end = memmap.map + memmap.nr_map * memmap.desc_size;
-> > 
-> > Please guys, think for a change!
-> > 
-> > How is this supposed to work with:
-> > 
-> >    include/linux/efi.h:    void *phys_map;
-> > 
-> > ?
-> 
-> Ah, I take that back, now I see your patch 1/2 that changes it to phys_addr_t.
-> 
-> That's the right solution, and it also cleans up the code:
-> 
->   Reviewed-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
 
-Matt, do you want to take these fixes, or should I apply them directly?
+I would like to suggest that this be taken on top of the stuff that is
+queued for 4.4 at the moment (if it is not too late already).
 
-Thanks,
+ arch/arm64/kernel/Makefile                                                | 9 ++-------
+ drivers/firmware/efi/libstub/Makefile                                     | 3 +++
+ arch/arm64/kernel/efi-stub.c => drivers/firmware/efi/libstub/arm64-stub.c | 0
+ 3 files changed, 5 insertions(+), 7 deletions(-)
 
-	Ingo
+diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+index 1b6bda2ff102..474691f8b13a 100644
+--- a/arch/arm64/kernel/Makefile
++++ b/arch/arm64/kernel/Makefile
+@@ -4,11 +4,8 @@
+ 
+ CPPFLAGS_vmlinux.lds	:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ AFLAGS_head.o		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+-CFLAGS_efi-stub.o 	:= -DTEXT_OFFSET=$(TEXT_OFFSET)
+ CFLAGS_armv8_deprecated.o := -I$(src)
+ 
+-KASAN_SANITIZE_efi-stub.o	:= n
+-
+ CFLAGS_REMOVE_ftrace.o = -pg
+ CFLAGS_REMOVE_insn.o = -pg
+ CFLAGS_REMOVE_return_address.o = -pg
+@@ -22,9 +19,7 @@ arm64-obj-y		:= debug-monitors.o entry.o irq.o fpsimd.o		\
+ 			   cpufeature.o alternative.o cacheinfo.o		\
+ 			   smp.o smp_spin_table.o topology.o
+ 
+-stub-obj				:= efi-stub.o efi-entry.o
+-extra-y					:= $(stub-obj)
+-stub-obj				:= $(patsubst %.o,%.stub.o,$(stub-obj))
++extra-$(CONFIG_EFI)			:= efi-entry.o
+ 
+ OBJCOPYFLAGS := --prefix-symbols=__efistub_
+ $(obj)/%.stub.o: $(obj)/%.o FORCE
+@@ -42,7 +37,7 @@ arm64-obj-$(CONFIG_CPU_PM)		+= sleep.o suspend.o
+ arm64-obj-$(CONFIG_CPU_IDLE)		+= cpuidle.o
+ arm64-obj-$(CONFIG_JUMP_LABEL)		+= jump_label.o
+ arm64-obj-$(CONFIG_KGDB)		+= kgdb.o
+-arm64-obj-$(CONFIG_EFI)			+= efi.o $(stub-obj)
++arm64-obj-$(CONFIG_EFI)			+= efi.o efi-entry.stub.o
+ arm64-obj-$(CONFIG_PCI)			+= pci.o
+ arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
+ arm64-obj-$(CONFIG_ACPI)		+= acpi.o
+diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+index bca9a76cbd33..92ae557abbbc 100644
+--- a/drivers/firmware/efi/libstub/Makefile
++++ b/drivers/firmware/efi/libstub/Makefile
+@@ -34,6 +34,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+ lib-$(CONFIG_EFI_ARMSTUB)	+= arm-stub.o fdt.o string.o \
+ 				   $(patsubst %.c,lib-%.o,$(arm-deps))
+ 
++lib-$(CONFIG_ARM64)		+= arm64-stub.o
++CFLAGS_arm64-stub.o 		:= -DTEXT_OFFSET=$(TEXT_OFFSET)
++
+ #
+ # arm64 puts the stub in the kernel proper, which will unnecessarily retain all
+ # code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
+diff --git a/arch/arm64/kernel/efi-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+similarity index 100%
+rename from arch/arm64/kernel/efi-stub.c
+rename to drivers/firmware/efi/libstub/arm64-stub.c
+-- 
+2.1.4
