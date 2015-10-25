@@ -1,78 +1,47 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH] x86/efi: Preface all print statements with efi* tag
-Date: Sun, 25 Oct 2015 10:26:35 +0000
-Message-ID: <1445768795-5472-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [GIT PULL] EFI changes for v4.4
+Date: Sun, 25 Oct 2015 10:49:03 +0000
+Message-ID: <1445770144-22280-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@suse.de>, Dave Hansen <dave.hansen@intel.com>, Glenn P Williamson <glenn.p.williamson@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Ricardo Neri <ricardo.neri@intel.com>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-The pr_*() calls in the x86 EFI code may or may not include a
-subsystem tag, which makes it difficult to grep the kernel log for all
-relevant EFI messages and leads users to miss important information.
+Folks, please pull the following bugfix from Sai which prevents a
+kernel panic when booting an EFI machine with CONFIG_DEBUG_VIRTUAL
+enabled.
 
-Recently, a bug reporter provided all the EFI print messages from the
-kernel log when trying to diagnose an issue but missed the following
-statement because it wasn't prefixed with anything indicating it was
-related to EFI,
+This bug was reported last year by Dave Hansen,
 
-  pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
+  https://lkml.kernel.org/r/5462999A.7090706@intel.com
 
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
----
- arch/x86/platform/efi/efi-bgrt.c | 3 +++
- arch/x86/platform/efi/efi_64.c   | 2 ++
- arch/x86/platform/efi/quirks.c   | 4 +++-
- 3 files changed, 8 insertions(+), 1 deletion(-)
+and since nobody else has reported it, and given that it's only
+triggerable with a debug config option, I figured this should be
+targeted at v4.4.
 
-diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index ea48449b2e63..9a52b5c4438f 100644
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -10,6 +10,9 @@
-  * it under the terms of the GNU General Public License version 2 as
-  * published by the Free Software Foundation.
-  */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
- #include <linux/kernel.h>
- #include <linux/init.h>
- #include <linux/acpi.h>
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a0ac0f9c307f..d347e854a5e4 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -15,6 +15,8 @@
-  *
-  */
- 
-+#define pr_fmt(fmt) "efi: " fmt
-+
- #include <linux/kernel.h>
- #include <linux/init.h>
- #include <linux/mm.h>
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 1c7380da65ff..6452070f3025 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -1,3 +1,5 @@
-+#define pr_fmt(fmt) "efi: " fmt
-+
- #include <linux/init.h>
- #include <linux/kernel.h>
- #include <linux/string.h>
-@@ -256,7 +258,7 @@ void __init efi_apply_memmap_quirks(void)
- 	 * services.
- 	 */
- 	if (!efi_runtime_supported()) {
--		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
-+		pr_info("Setup done, disabling due to 32/64-bit mismatch\n");
- 		efi_unmap_memmap();
- 	}
- 
--- 
-2.6.0
+The following changes since commit 0f96a99dab366333439e110d6ad253bc7c557c09:
+
+  efi: Add "efi_fake_mem" boot option (2015-10-12 14:20:09 +0100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 2c66e24d75d424919c42288b418d2e593fa818b1:
+
+  x86/efi: Fix kernel panic when CONFIG_DEBUG_VIRTUAL is enabled (2015-10-25 10:22:25 +0000)
+
+----------------------------------------------------------------
+ * Fix a kernel panic by not passing EFI virtual mapping addresses to
+   __pa() in the x86 pageattr code. Since these virtual addreses are
+  not part of the direct mapping or kernel text mapping, passing them
+  to __pa() will trigger a BUG_ON() when CONFIG_DEBUG_VIRTUAL is
+  enabled - Sai Praneeth Prakhya
+
+----------------------------------------------------------------
+Sai Praneeth (1):
+      x86/efi: Fix kernel panic when CONFIG_DEBUG_VIRTUAL is enabled
+
+ arch/x86/mm/pageattr.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
