@@ -1,85 +1,51 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
-Date: Tue, 27 Oct 2015 11:20:51 +0900
-Message-ID: <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q@mail.gmail.com>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
-	<562EA894.8070505@arm.com>
-	<562EAA22.3010905@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2] efi: Fix warning of int-to-pointer-cast on x86 32-bit builds
+Date: Tue, 27 Oct 2015 11:33:55 +0900
+Message-ID: <CAKv+Gu-1MfUJiF5idd0KoziUxhrDStmRwXQZHuX+gwnJvq083g@mail.gmail.com>
+References: <1445593826-4578-1-git-send-email-izumi.taku@jp.fujitsu.com>
+	<CAKv+Gu8WPvG5rzBB57eK1_Ehj1wB19wR=zzBDRoQbmhRfpCGng@mail.gmail.com>
+	<20151026210235.GA3526@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <562EAA22.3010905-5wv7dgnIgG8@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151026210235.GA3526@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>, Ingo Molnar <mingo.kernel.org@gmail.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, kamezawa.hiroyu@jp.fujitsu.com, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 27 October 2015 at 07:33, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org> wrote:
-> On 10/26/2015 05:26 PM, Jeremy Linton wrote:
+On 27 October 2015 at 06:02, Matt Fleming <matt@codeblueprint.co.uk> wrote:
+> On Fri, 23 Oct, at 10:37:46AM, Ard Biesheuvel wrote:
 >>
->> On 10/08/2015 02:02 PM, Ard Biesheuvel wrote:
->>>
->>> Since arm64 does not use a builtin decompressor, the EFI stub is built
->>> into the kernel proper. So far, this has been working fine, but actually,
->>> since the stub is in fact a PE/COFF relocatable binary that is executed
->>> at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
->>> should not be seamlessly sharing code with the kernel proper, which is a
->>> position dependent executable linked at a high virtual offset.
+>> After looking at the original (already merged) patch 11/11 again, I
+>> realize this is still not right: the problem is that efi_memory_map's
+>> phys_map member uses a void* type to hold a physical address, which
+>> happens to be correct in the normal case even when phys_addr_t is
+>> larger than void* (like on ARM with LPAE enabled) since the address it
+>> holds is the address of an allocation performed by the firmware, which
+>> only uses 1:1 addressable memory.
 >>
->>
->> This patch appears to be causing a build break
->>
->>   STUBCPY drivers/firmware/efi/libstub/lib-sort.stub.o
->> 0000000000000000 R_AARCH64_ABS64   __efistub___crc_sort
->> drivers/firmware/efi/libstub/lib-sort.stub.o: absolute symbol references
->> not allowed in the EFI stub
->>
->> __kcrctab_sort:
->>      .xword    __crc_sort
->>      .weak    __crc_sort
->>      .text
->>
->>
->> Which is the EXPORT_SYMBOL() in sort.c combined with !CONFIG_MODVERSIONS.
+>> However, overwriting memmap.phys_map with a value produced my
+>> memblock_alloc() is problematic, since the allocation may be above 4
+>> GB on 32-bit (L)PAE platforms. So the correct way to do this would be
+>> to set the memblock limit to 4GB before memblock_alloc() on 32-bit
+>> platforms, and restore it afterwards. This is a bit of a kludge,
+>> though, and it would be more correct to change the type of
+>> efi_memory_map::phys_map to phys_addr_t, although I don't know what
+>> the potential fallout of that change is. Matt?
 >
+> I think that should be fine. The only potentially tricky situation we
+> could encounter is where 32-bit x86 firmware uses PAE but the kernel
+> is built without support.
 >
->         Sorry, I that should be CONFIG_MODVERSIONS..
+> But that's not something I've ever seen enabled in the firmware and
+> there's a bunch of assumptions in the kernel already that would break
+> in that case.
 >
 
-Hi Jeremy,
+Does UEFI even allow that? Even if it can describe memory over 4 GB,
+it uses a flat mapping so allocations done by the stub (which
+retrieves the memory map) should never reside at addresses over 4 GB.
 
-Thanks for the report. The following patch should fix it
-
------------------8<----------------
->From 1179099f89db54294f419493d152083fb8e5af3d Mon Sep 17 00:00:00 2001
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Date: Tue, 27 Oct 2015 11:12:51 +0900
-Subject: [PATCH] arm64/efi: fix libstub build under CONFIG_MODVERSIONS
-
-Now that we strictly forbid absolute relocations in libstub code,
-make sure that we don't emit any when CONFIG_MODVERSIONS is enabled,
-by stripping the kcrctab sections from the object file. This fixes
-a build problem under CONFIG_MODVERSIONS=y.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/drivers/firmware/efi/libstub/Makefile
-b/drivers/firmware/efi/libstub/Makefile
-index bca9a76cbd33..acc25d7c5da2 100644
---- a/drivers/firmware/efi/libstub/Makefile
-+++ b/drivers/firmware/efi/libstub/Makefile
-@@ -51,7 +51,7 @@ lib-$(CONFIG_EFI_ARMSTUB) += arm-stub.o fdt.o string.o \
- extra-$(CONFIG_EFI_ARMSTUB) := $(lib-y)
- lib-$(CONFIG_EFI_ARMSTUB) := $(patsubst %.o,%.stub.o,$(lib-y))
-
--STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab*
-+STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab* -R *kcrctab*
- STUBCOPY_FLAGS-$(CONFIG_ARM64) += --prefix-alloc-sections=.init \
-    --prefix-symbols=__efistub_
- STUBCOPY_RELOC-$(CONFIG_ARM64) := R_AARCH64_ABS
 -- 
-2.1.4
+Ard.
