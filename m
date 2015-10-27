@@ -1,42 +1,113 @@
-From: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
-Date: Mon, 26 Oct 2015 17:33:06 -0500
-Message-ID: <562EAA22.3010905@arm.com>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
- <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
- <562EA894.8070505@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] arm64/efi: move arm64 specific stub C code to libstub
+Date: Tue, 27 Oct 2015 11:10:43 +0900
+Message-ID: <CAKv+Gu-2-=b-+X8xRpVFO5oFE2_0Eho2-H6VWYWWqonOdaKL5w@mail.gmail.com>
+References: <1445611694-31838-1-git-send-email-ard.biesheuvel@linaro.org>
+	<20151026211133.GB3526@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=WINDOWS-1252; format=flowed
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <562EA894.8070505-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <20151026211133.GB3526-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Suzuki K. Poulose" <Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 10/26/2015 05:26 PM, Jeremy Linton wrote:
-> On 10/08/2015 02:02 PM, Ard Biesheuvel wrote:
->> Since arm64 does not use a builtin decompressor, the EFI stub is built
->> into the kernel proper. So far, this has been working fine, but actually,
->> since the stub is in fact a PE/COFF relocatable binary that is executed
->> at an unknown offset in the 1:1 mapping provided by the UEFI firmware, we
->> should not be seamlessly sharing code with the kernel proper, which is a
->> position dependent executable linked at a high virtual offset.
+On 27 October 2015 at 06:11, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Fri, 23 Oct, at 04:48:14PM, Ard Biesheuvel wrote:
+>> Now that we added special handling to the C files in libstub, move
+>> the one remaining arm64 specific EFI stub C file to libstub as
+>> well, so that it gets the same treatment. This should prevent future
+>> changes from resulting in binaries that may execute incorrectly in
+>> UEFI context.
 >
-> This patch appears to be causing a build break
+> Sorry, I'm coming at this cache-cold: What special handling was added
+> to libstub that you want to make use of here?
 >
->   STUBCPY drivers/firmware/efi/libstub/lib-sort.stub.o
-> 0000000000000000 R_AARCH64_ABS64   __efistub___crc_sort
-> drivers/firmware/efi/libstub/lib-sort.stub.o: absolute symbol references
-> not allowed in the EFI stub
->
-> __kcrctab_sort:
->      .xword    __crc_sort
->      .weak    __crc_sort
->      .text
->
->
-> Which is the EXPORT_SYMBOL() in sort.c combined with !CONFIG_MODVERSIONS.
 
-	Sorry, I that should be CONFIG_MODVERSIONS..
+This is about the libstub patches that you reviewed ~2 weeks ago and
+that have been queued in Catalin's arm64 tree for 4.4
+
+>> With efi-entry.S the only remaining EFI stub source file under
+>> arch/arm64, we can also simplify the Makefile logic somewhat.
+>>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>
+>> I would like to suggest that this be taken on top of the stuff that is
+>> queued for 4.4 at the moment (if it is not too late already).
+>
+> That's upto the tip folks (Cc'd). Ingo, would you consider applying
+> a minimal build cleanup patch like this for v4.4?
+>
+
+Actually, the suggestion was aimed at Catalin, who has all the libstub
+and KASAN patches queued that this patch depends on.
+Apologies for the confusion.
+
+Thanks,
+Ard.
+
+
+>>  arch/arm64/kernel/Makefile                                                | 9 ++-------
+>>  drivers/firmware/efi/libstub/Makefile                                     | 3 +++
+>>  arch/arm64/kernel/efi-stub.c => drivers/firmware/efi/libstub/arm64-stub.c | 0
+>>  3 files changed, 5 insertions(+), 7 deletions(-)
+>>
+>> diff --git a/arch/arm64/kernel/Makefile b/arch/arm64/kernel/Makefile
+>> index 1b6bda2ff102..474691f8b13a 100644
+>> --- a/arch/arm64/kernel/Makefile
+>> +++ b/arch/arm64/kernel/Makefile
+>> @@ -4,11 +4,8 @@
+>>
+>>  CPPFLAGS_vmlinux.lds := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>>  AFLAGS_head.o                := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>> -CFLAGS_efi-stub.o    := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>>  CFLAGS_armv8_deprecated.o := -I$(src)
+>>
+>> -KASAN_SANITIZE_efi-stub.o    := n
+>> -
+>>  CFLAGS_REMOVE_ftrace.o = -pg
+>>  CFLAGS_REMOVE_insn.o = -pg
+>>  CFLAGS_REMOVE_return_address.o = -pg
+>> @@ -22,9 +19,7 @@ arm64-obj-y         := debug-monitors.o entry.o irq.o fpsimd.o              \
+>>                          cpufeature.o alternative.o cacheinfo.o               \
+>>                          smp.o smp_spin_table.o topology.o
+>>
+>> -stub-obj                             := efi-stub.o efi-entry.o
+>> -extra-y                                      := $(stub-obj)
+>> -stub-obj                             := $(patsubst %.o,%.stub.o,$(stub-obj))
+>> +extra-$(CONFIG_EFI)                  := efi-entry.o
+>>
+>>  OBJCOPYFLAGS := --prefix-symbols=__efistub_
+>>  $(obj)/%.stub.o: $(obj)/%.o FORCE
+>> @@ -42,7 +37,7 @@ arm64-obj-$(CONFIG_CPU_PM)          += sleep.o suspend.o
+>>  arm64-obj-$(CONFIG_CPU_IDLE)         += cpuidle.o
+>>  arm64-obj-$(CONFIG_JUMP_LABEL)               += jump_label.o
+>>  arm64-obj-$(CONFIG_KGDB)             += kgdb.o
+>> -arm64-obj-$(CONFIG_EFI)                      += efi.o $(stub-obj)
+>> +arm64-obj-$(CONFIG_EFI)                      += efi.o efi-entry.stub.o
+>>  arm64-obj-$(CONFIG_PCI)                      += pci.o
+>>  arm64-obj-$(CONFIG_ARMV8_DEPRECATED) += armv8_deprecated.o
+>>  arm64-obj-$(CONFIG_ACPI)             += acpi.o
+>> diff --git a/drivers/firmware/efi/libstub/Makefile b/drivers/firmware/efi/libstub/Makefile
+>> index bca9a76cbd33..92ae557abbbc 100644
+>> --- a/drivers/firmware/efi/libstub/Makefile
+>> +++ b/drivers/firmware/efi/libstub/Makefile
+>> @@ -34,6 +34,9 @@ $(obj)/lib-%.o: $(srctree)/lib/%.c FORCE
+>>  lib-$(CONFIG_EFI_ARMSTUB)    += arm-stub.o fdt.o string.o \
+>>                                  $(patsubst %.c,lib-%.o,$(arm-deps))
+>>
+>> +lib-$(CONFIG_ARM64)          += arm64-stub.o
+>> +CFLAGS_arm64-stub.o          := -DTEXT_OFFSET=$(TEXT_OFFSET)
+>> +
+>>  #
+>>  # arm64 puts the stub in the kernel proper, which will unnecessarily retain all
+>>  # code indefinitely unless it is annotated as __init/__initdata/__initconst etc.
+>> diff --git a/arch/arm64/kernel/efi-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+>> similarity index 100%
+>> rename from arch/arm64/kernel/efi-stub.c
+>> rename to drivers/firmware/efi/libstub/arm64-stub.c
+>> --
+>> 2.1.4
+>>
