@@ -1,37 +1,38 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm64/efi: move arm64 specific stub C code to libstub
-Date: Fri, 30 Oct 2015 12:57:48 +0100
-Message-ID: <CAKv+Gu80ztGR88-FK5rBUgDJ9vk+c3Kz+L8wp7aUpx2FPE9-cw@mail.gmail.com>
-References: <1445611694-31838-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20151029183933.GU8899@e104818-lin.cambridge.arm.com>
+Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
+Date: Fri, 30 Oct 2015 13:17:24 +0100
+Message-ID: <CAKv+Gu-m7dJbiF=8i=+cN=bx+y8AKu_MgHrS29jNK0fTvuwQ5Q@mail.gmail.com>
+References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
+	<562EA894.8070505@arm.com>
+	<562EAA22.3010905@arm.com>
+	<CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q@mail.gmail.com>
+	<562F8DCE.4010308@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151029183933.GU8899-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+In-Reply-To: <562F8DCE.4010308-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Suzuki K. Poulose" <Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 October 2015 at 19:39, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Fri, Oct 23, 2015 at 04:48:14PM +0200, Ard Biesheuvel wrote:
->> Now that we added special handling to the C files in libstub, move
->> the one remaining arm64 specific EFI stub C file to libstub as
->> well, so that it gets the same treatment. This should prevent future
->> changes from resulting in binaries that may execute incorrectly in
->> UEFI context.
+On 27 October 2015 at 23:44, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org> wrote:
+> On 10/26/2015 09:20 PM, Ard Biesheuvel wrote:
 >>
->> With efi-entry.S the only remaining EFI stub source file under
->> arch/arm64, we can also simplify the Makefile logic somewhat.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>
->> I would like to suggest that this be taken on top of the stuff that is
->> queued for 4.4 at the moment (if it is not too late already).
+>> Thanks for the report. The following patch should fix it
 >
-> Applied. Thanks.
+>
+> Ard,
+>
+> Thanks, it does fix the build problem...
+>
+> Now to get the darn thing to boot (not related to this AFAIK).
 >
 
-Please note (before you push it out), that Will just pulled a 4.3-rc
-fix that changes arch/arm64/kernel/efi-stub.c
+Catalin,
+
+Would you like me to resend this as a separate patch?
+
+-- 
+Ard.
