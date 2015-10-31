@@ -1,42 +1,34 @@
-From: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
-Date: Fri, 30 Oct 2015 16:01:07 +0000
-Message-ID: <20151030160107.GA8899@e104818-lin.cambridge.arm.com>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
- <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
- <562EA894.8070505@arm.com>
- <562EAA22.3010905@arm.com>
- <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q@mail.gmail.com>
- <562F8DCE.4010308@arm.com>
- <CAKv+Gu-m7dJbiF=8i=+cN=bx+y8AKu_MgHrS29jNK0fTvuwQ5Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
+Subject: [PATCH 1/2] efi-pstore: fix kernel-doc argument name
+Date: Sat, 31 Oct 2015 23:23:14 +0800
+Message-ID: <f5d7694a7f25e936f97ef9d4870fbec5d89ab87d.1446304741.git.geliangtang@163.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-m7dJbiF=8i=+cN=bx+y8AKu_MgHrS29jNK0fTvuwQ5Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Oct 30, 2015 at 01:17:24PM +0100, Ard Biesheuvel wrote:
-> On 27 October 2015 at 23:44, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On 10/26/2015 09:20 PM, Ard Biesheuvel wrote:
-> >>
-> >> Thanks for the report. The following patch should fix it
-> >
-> >
-> > Ard,
-> >
-> > Thanks, it does fix the build problem...
-> >
-> > Now to get the darn thing to boot (not related to this AFAIK).
-> 
-> Would you like me to resend this as a separate patch?
+The first argument name in the kernel-doc argument list for
+efi_pstore_scan_sysfs_enter() was slightly off. Fix it for the
+kernel doc.
 
-No need to but it would be good to get an Ack from Matt since it touches
-drivers/firmware/efi/libstub/Makefile (the patch introducing
-STUBCOPY_FLAGS was already acked).
+Signed-off-by: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
+---
+ drivers/firmware/efi/efi-pstore.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index c8d794c..eac76a7 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -103,7 +103,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
+ 
+ /**
+  * efi_pstore_scan_sysfs_enter
+- * @entry: scanning entry
++ * @pos: scanning entry
+  * @next: next entry
+  * @head: list head
+  */
 -- 
-Catalin
+2.4.3
