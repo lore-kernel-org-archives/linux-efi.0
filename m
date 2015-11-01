@@ -1,237 +1,152 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v9 1/1] efi: a misc char interface for user to update efi
- firmware
-Date: Sun, 1 Nov 2015 11:29:45 +0100
-Message-ID: <20151101102944.GA12711@pd.tnic>
+From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Subject: RE: [PATCH v9 1/1] efi: a misc char interface for user to update
+ efi firmware
+Date: Sun, 1 Nov 2015 10:52:52 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A8799FB@PGSMSX102.gar.corp.intel.com>
 References: <1446055138-26047-1-git-send-email-hock.leong.kweh@intel.com>
  <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
+ <20151101102944.GA12711@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
+In-Reply-To: <20151101102944.GA12711@pd.tnic>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Ong Boon Leong <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, Fleming Matt <matt.fleming@intel.com>, h.peter.anvin@intel.com
+To: Borislav Petkov <bp@alien8.de>
+Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>, "Anvin, H Peter" <h.peter.anvin@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Oct 29, 2015 at 01:58:57AM +0800, Kweh, Hock Leong wrote:
-> From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-> 
-> Introducing a kernel module to expose capsule loader interface
-> (misc char device file note) for user to upload capsule binaries.
-> 
-> Example method to load the capsule binary:
-> cat firmware.bin > /dev/efi_capsule_loader
-
-$ cat "some_dumb_file" > /dev/efi_capsule_loader
-Killed
-
-and in dmesg:
-
-[   34.033982] efi_capsule_loader: efi_capsule_flush: capsule upload not complete
-[   58.765683] ------------[ cut here ]------------
-[   58.769349] WARNING: CPU: 5 PID: 3904 at drivers/firmware/efi/capsule.c:83 efi_capsule_supported+0x103/0x150()
-[   58.775063] Modules linked in:
-[   58.776474] CPU: 5 PID: 3904 Comm: cat Not tainted 4.3.0-rc7+ #3
-[   58.779044] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.7.5-20140531_083030-gandalf 04/01/2014
-[   58.783387]  ffffffff81957aa0 ffff880079793d78 ffffffff812cb2ea 0000000000000000
-[   58.786749]  ffff880079793db0 ffffffff81055981 00010102464c457f 0000000000000000
-[   58.790140]  0000000000401e3b 0000000000000001 ffff880078660704 ffff880079793dc0
-[   58.793353] Call Trace:
-[   58.794343]  [<ffffffff812cb2ea>] dump_stack+0x4e/0x84
-[   58.796416]  [<ffffffff81055981>] warn_slowpath_common+0x91/0xd0
-[   58.798773]  [<ffffffff81055a7a>] warn_slowpath_null+0x1a/0x20
-[   58.800962]  [<ffffffff8157ae93>] efi_capsule_supported+0x103/0x150
-[   58.803292]  [<ffffffff8157d559>] efi_capsule_write+0x269/0x390
-[   58.805563]  [<ffffffff81183ef8>] __vfs_write+0x28/0xe0
-[   58.807591]  [<ffffffff81183e9a>] ? __vfs_read+0xaa/0xe0
-[   58.809612]  [<ffffffff811847d5>] vfs_write+0xb5/0x1a0
-[   58.811272]  [<ffffffff811a33be>] ? __fget_light+0x6e/0x90
-[   58.813073]  [<ffffffff81185412>] SyS_write+0x52/0xc0
-[   58.814720]  [<ffffffff816cff5b>] entry_SYSCALL_64_fastpath+0x16/0x73
-[   58.816665] ---[ end trace 94c0c141f9b0ec01 ]---
-[   58.818179] BUG: unable to handle kernel NULL pointer dereference at           (null)
-[   58.820427] IP: [<          (null)>]           (null)
-[   58.820630] PGD 79af8067 PUD 79781067 PMD 0 
-[   58.820630] Oops: 0010 [#1] PREEMPT SMP 
-[   58.820630] Modules linked in:
-[   58.820630] CPU: 5 PID: 3904 Comm: cat Tainted: G        W       4.3.0-rc7+ #3
-[   58.820630] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.7.5-20140531_083030-gandalf 04/01/2014
-[   58.820630] task: ffff8800771417c0 ti: ffff880079790000 task.ti: ffff880079790000
-[   58.820630] RIP: 0010:[<0000000000000000>]  [<          (null)>]           (null)
-[   58.820630] RSP: 0018:ffff880079793dc8  EFLAGS: 00010282
-[   58.820630] RAX: ffff88007a01b4e0 RBX: 00010102464c457f RCX: ffff880078660704
-[   58.820630] RDX: ffff880079793dd8 RSI: 0000000000000001 RDI: ffff880079793dd0
-[   58.820630] RBP: ffff880079793e08 R08: 0000000000000000 R09: 0000000000000000
-[   58.820630] R10: 0000000000000000 R11: 0000000000000001 R12: 0000000000000000
-[   58.820630] R13: 0000000000401e3b R14: 0000000000000001 R15: ffff880078660704
-[   58.820630] FS:  00007ffff7fe1700(0000) GS:ffff88007c000000(0000) knlGS:0000000000000000
-[   58.820630] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
-[   58.820630] CR2: 0000000000000000 CR3: 000000007ab90000 CR4: 00000000000406e0
-[   58.820630] Stack:
-[   58.820630]  ffffffff8157ae24 ffff88007a01b4e0 0000000000000002 ffff880078660700
-[   58.820630]  ffff880077060000 0000000000001000 ffffea0001dc1800 ffff880077060000
-[   58.820630]  ffff880079793e48 ffffffff8157d559 0000000000000402 ffff8800799cbc00
-[   58.820630] Call Trace:
-[   58.820630]  [<ffffffff8157ae24>] ? efi_capsule_supported+0x94/0x150
-[   58.820630]  [<ffffffff8157d559>] efi_capsule_write+0x269/0x390
-[   58.820630]  [<ffffffff81183ef8>] __vfs_write+0x28/0xe0
-[   58.820630]  [<ffffffff81183e9a>] ? __vfs_read+0xaa/0xe0
-[   58.820630]  [<ffffffff811847d5>] vfs_write+0xb5/0x1a0
-[   58.820630]  [<ffffffff811a33be>] ? __fget_light+0x6e/0x90
-[   58.820630]  [<ffffffff81185412>] SyS_write+0x52/0xc0
-[   58.820630]  [<ffffffff816cff5b>] entry_SYSCALL_64_fastpath+0x16/0x73
-[   58.820630] Code:  Bad RIP value.
-[   58.820630] RIP  [<          (null)>]           (null)
-[   58.820630]  RSP <ffff880079793dc8>
-[   58.820630] CR2: 0000000000000000
-[   58.876221] ---[ end trace 94c0c141f9b0ec02 ]---
-
-> This patch also export efi_capsule_supported() function symbol for
-> verifying the submitted capsule header in this kernel module.
-> 
-> Cc: Matt Fleming <matt.fleming@intel.com>
-> Signed-off-by: Kweh, Hock Leong <hock.leong.kweh@intel.com>
-> ---
->  drivers/firmware/efi/Kconfig              |   10
->  drivers/firmware/efi/Makefile             |    1
->  drivers/firmware/efi/capsule.c            |    1
->  drivers/firmware/efi/efi-capsule-loader.c |  356 +++++++++++++++++++++++++++++
->  4 files changed, 368 insertions(+)
->  create mode 100644 drivers/firmware/efi/efi-capsule-loader.c
-
-Please integrate checkpatch into your workflow - it can be helpful
-sometimes:
-
-WARNING: 'OCCURED' may be misspelled - perhaps 'OCCURRED'?
-#114: FILE: drivers/firmware/efi/efi-capsule-loader.c:22:
-+#define ERR_OCCURED -2
-
-WARNING: 'OCCURED' may be misspelled - perhaps 'OCCURRED'?
-#132: FILE: drivers/firmware/efi/efi-capsule-loader.c:40:
-+ *     Besides freeing the buffer pages, it also flagged an ERR_OCCURED
-
-WARNING: 'OCCURED' may be misspelled - perhaps 'OCCURRED'?
-#144: FILE: drivers/firmware/efi/efi-capsule-loader.c:52:
-+       cap_info->index = ERR_OCCURED;
-
-WARNING: Possible unnecessary 'out of memory' message
-#399: FILE: drivers/firmware/efi/efi-capsule-loader.c:307:
-+       if (!cap_info) {
-+               pr_debug("%s: kzalloc() failed\n", __func__);
-
-
-> 
-> diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-> index f712d47..0be8ee3 100644
-> --- a/drivers/firmware/efi/Kconfig
-> +++ b/drivers/firmware/efi/Kconfig
-> @@ -60,6 +60,16 @@ config EFI_RUNTIME_WRAPPERS
->  config EFI_ARMSTUB
->  	bool
->  
-> +config EFI_CAPSULE_LOADER
-> +	tristate "EFI capsule loader"
-> +	depends on EFI
-> +	help
-> +	  This option exposes a loader interface "/dev/efi_capsule_loader" for
-> +	  user to load EFI capsule binary and update the EFI firmware through
-> +	  system reboot.
-
-Make this:
-
-	... and update the EFI firmware. After a successful loading, a system
-	reboot is required."
-
-> +
-> +	  If unsure, say N.
-> +
->  endmenu
->  
->  config UEFI_CPER
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 698846e..5ab031a 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -8,3 +8,4 @@ obj-$(CONFIG_UEFI_CPER)			+= cper.o
->  obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
->  obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
->  obj-$(CONFIG_EFI_STUB)			+= libstub/
-> +obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= efi-capsule-loader.o
-> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-> index d8cd75c0..738d437 100644
-> --- a/drivers/firmware/efi/capsule.c
-> +++ b/drivers/firmware/efi/capsule.c
-> @@ -101,6 +101,7 @@ out:
->  	kfree(capsule);
->  	return rv;
->  }
-> +EXPORT_SYMBOL_GPL(efi_capsule_supported);
->  
->  /**
->   * efi_capsule_update - send a capsule to the firmware
-> diff --git a/drivers/firmware/efi/efi-capsule-loader.c b/drivers/firmware/efi/efi-capsule-loader.c
-
-All those files under drivers/firmware/efi/ are EFI stuff so this one
-doesn't need the "efi-" name prefix either. efi-pstore.c I'm looking at
-you too.
-
-> new file mode 100644
-> index 0000000..23f7618
-> --- /dev/null
-> +++ b/drivers/firmware/efi/efi-capsule-loader.c
-> @@ -0,0 +1,356 @@
-> +/*
-> + * EFI capsule loader driver.
-> + *
-> + * Copyright 2015 Intel Corporation
-> + *
-> + * This file is part of the Linux kernel, and is made available under
-> + * the terms of the GNU General Public License version 2.
-> + */
-> +
-> +#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-
-I think this should be
-
-#define pr_fmt(fmt) "EFI: " fmt
-
-or something that all EFI code uses.
-
-> +
-> +#include <linux/kernel.h>
-> +#include <linux/module.h>
-> +#include <linux/miscdevice.h>
-> +#include <linux/highmem.h>
-> +#include <linux/slab.h>
-> +#include <linux/mutex.h>
-> +#include <linux/efi.h>
-> +
-> +#define DEV_NAME "efi_capsule_loader"
-
-Why a define if it is used only in one place? Just put the string there
-instead.
-
-> +#define UPLOAD_DONE -1
-
-Isn't the fact that upload was finished a success message? If so, why is
-it a negative value?
-
-> +#define ERR_OCCURED -2
-
-WARNING: 'OCCURED' may be misspelled - perhaps 'OCCURRED'?
-#114: FILE: drivers/firmware/efi/efi-capsule-loader.c:22:
-+#define ERR_OCCURED -2
-
-Ok, that should be enough review for now - I'll take a look at the rest
-once you've taken care of the splat above and those minor issues I
-pointed out.
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFN1bmRheSwgTm92ZW1iZXIgMDEsIDIwMTUgNjoz
+MCBQTQ0KPiA+DQo+ID4gRXhhbXBsZSBtZXRob2QgdG8gbG9hZCB0aGUgY2Fwc3VsZSBiaW5hcnk6
+DQo+ID4gY2F0IGZpcm13YXJlLmJpbiA+IC9kZXYvZWZpX2NhcHN1bGVfbG9hZGVyDQo+IA0KPiAk
+IGNhdCAic29tZV9kdW1iX2ZpbGUiID4gL2Rldi9lZmlfY2Fwc3VsZV9sb2FkZXIgS2lsbGVkDQo+
+IA0KPiBhbmQgaW4gZG1lc2c6DQo+IA0KPiBbICAgMzQuMDMzOTgyXSBlZmlfY2Fwc3VsZV9sb2Fk
+ZXI6IGVmaV9jYXBzdWxlX2ZsdXNoOiBjYXBzdWxlIHVwbG9hZCBub3QNCj4gY29tcGxldGUNCj4g
+WyAgIDU4Ljc2NTY4M10gLS0tLS0tLS0tLS0tWyBjdXQgaGVyZSBdLS0tLS0tLS0tLS0tDQo+IFsg
+ICA1OC43NjkzNDldIFdBUk5JTkc6IENQVTogNSBQSUQ6IDM5MDQgYXQNCj4gZHJpdmVycy9maXJt
+d2FyZS9lZmkvY2Fwc3VsZS5jOjgzIGVmaV9jYXBzdWxlX3N1cHBvcnRlZCsweDEwMy8weDE1MCgp
+DQo+IFsgICA1OC43NzUwNjNdIE1vZHVsZXMgbGlua2VkIGluOg0KPiBbICAgNTguNzc2NDc0XSBD
+UFU6IDUgUElEOiAzOTA0IENvbW06IGNhdCBOb3QgdGFpbnRlZCA0LjMuMC1yYzcrICMzDQo+IFsg
+ICA1OC43NzkwNDRdIEhhcmR3YXJlIG5hbWU6IFFFTVUgU3RhbmRhcmQgUEMgKGk0NDBGWCArIFBJ
+SVgsIDE5OTYpLCBCSU9TDQo+IDEuNy41LTIwMTQwNTMxXzA4MzAzMC1nYW5kYWxmIDA0LzAxLzIw
+MTQNCj4gWyAgIDU4Ljc4MzM4N10gIGZmZmZmZmZmODE5NTdhYTAgZmZmZjg4MDA3OTc5M2Q3OCBm
+ZmZmZmZmZjgxMmNiMmVhDQo+IDAwMDAwMDAwMDAwMDAwMDANCj4gWyAgIDU4Ljc4Njc0OV0gIGZm
+ZmY4ODAwNzk3OTNkYjAgZmZmZmZmZmY4MTA1NTk4MSAwMDAxMDEwMjQ2NGM0NTdmDQo+IDAwMDAw
+MDAwMDAwMDAwMDANCj4gWyAgIDU4Ljc5MDE0MF0gIDAwMDAwMDAwMDA0MDFlM2IgMDAwMDAwMDAw
+MDAwMDAwMSBmZmZmODgwMDc4NjYwNzA0DQo+IGZmZmY4ODAwNzk3OTNkYzANCj4gWyAgIDU4Ljc5
+MzM1M10gQ2FsbCBUcmFjZToNCj4gWyAgIDU4Ljc5NDM0M10gIFs8ZmZmZmZmZmY4MTJjYjJlYT5d
+IGR1bXBfc3RhY2srMHg0ZS8weDg0DQo+IFsgICA1OC43OTY0MTZdICBbPGZmZmZmZmZmODEwNTU5
+ODE+XSB3YXJuX3Nsb3dwYXRoX2NvbW1vbisweDkxLzB4ZDANCj4gWyAgIDU4Ljc5ODc3M10gIFs8
+ZmZmZmZmZmY4MTA1NWE3YT5dIHdhcm5fc2xvd3BhdGhfbnVsbCsweDFhLzB4MjANCj4gWyAgIDU4
+LjgwMDk2Ml0gIFs8ZmZmZmZmZmY4MTU3YWU5Mz5dIGVmaV9jYXBzdWxlX3N1cHBvcnRlZCsweDEw
+My8weDE1MA0KPiBbICAgNTguODAzMjkyXSAgWzxmZmZmZmZmZjgxNTdkNTU5Pl0gZWZpX2NhcHN1
+bGVfd3JpdGUrMHgyNjkvMHgzOTANCj4gWyAgIDU4LjgwNTU2M10gIFs8ZmZmZmZmZmY4MTE4M2Vm
+OD5dIF9fdmZzX3dyaXRlKzB4MjgvMHhlMA0KPiBbICAgNTguODA3NTkxXSAgWzxmZmZmZmZmZjgx
+MTgzZTlhPl0gPyBfX3Zmc19yZWFkKzB4YWEvMHhlMA0KPiBbICAgNTguODA5NjEyXSAgWzxmZmZm
+ZmZmZjgxMTg0N2Q1Pl0gdmZzX3dyaXRlKzB4YjUvMHgxYTANCj4gWyAgIDU4LjgxMTI3Ml0gIFs8
+ZmZmZmZmZmY4MTFhMzNiZT5dID8gX19mZ2V0X2xpZ2h0KzB4NmUvMHg5MA0KPiBbICAgNTguODEz
+MDczXSAgWzxmZmZmZmZmZjgxMTg1NDEyPl0gU3lTX3dyaXRlKzB4NTIvMHhjMA0KPiBbICAgNTgu
+ODE0NzIwXSAgWzxmZmZmZmZmZjgxNmNmZjViPl0gZW50cnlfU1lTQ0FMTF82NF9mYXN0cGF0aCsw
+eDE2LzB4NzMNCj4gWyAgIDU4LjgxNjY2NV0gLS0tWyBlbmQgdHJhY2UgOTRjMGMxNDFmOWIwZWMw
+MSBdLS0tDQo+IFsgICA1OC44MTgxNzldIEJVRzogdW5hYmxlIHRvIGhhbmRsZSBrZXJuZWwgTlVM
+TCBwb2ludGVyIGRlcmVmZXJlbmNlIGF0DQo+IChudWxsKQ0KPiBbICAgNTguODIwNDI3XSBJUDog
+WzwgICAgICAgICAgKG51bGwpPl0gICAgICAgICAgIChudWxsKQ0KPiBbICAgNTguODIwNjMwXSBQ
+R0QgNzlhZjgwNjcgUFVEIDc5NzgxMDY3IFBNRCAwDQo+IFsgICA1OC44MjA2MzBdIE9vcHM6IDAw
+MTAgWyMxXSBQUkVFTVBUIFNNUA0KPiBbICAgNTguODIwNjMwXSBNb2R1bGVzIGxpbmtlZCBpbjoN
+Cj4gWyAgIDU4LjgyMDYzMF0gQ1BVOiA1IFBJRDogMzkwNCBDb21tOiBjYXQgVGFpbnRlZDogRyAg
+ICAgICAgVyAgICAgICA0LjMuMC1yYzcrICMzDQo+IFsgICA1OC44MjA2MzBdIEhhcmR3YXJlIG5h
+bWU6IFFFTVUgU3RhbmRhcmQgUEMgKGk0NDBGWCArIFBJSVgsIDE5OTYpLCBCSU9TDQo+IDEuNy41
+LTIwMTQwNTMxXzA4MzAzMC1nYW5kYWxmIDA0LzAxLzIwMTQNCj4gWyAgIDU4LjgyMDYzMF0gdGFz
+azogZmZmZjg4MDA3NzE0MTdjMCB0aTogZmZmZjg4MDA3OTc5MDAwMCB0YXNrLnRpOg0KPiBmZmZm
+ODgwMDc5NzkwMDAwDQo+IFsgICA1OC44MjA2MzBdIFJJUDogMDAxMDpbPDAwMDAwMDAwMDAwMDAw
+MDA+XSAgWzwgICAgICAgICAgKG51bGwpPl0gICAgICAgICAgIChudWxsKQ0KPiBbICAgNTguODIw
+NjMwXSBSU1A6IDAwMTg6ZmZmZjg4MDA3OTc5M2RjOCAgRUZMQUdTOiAwMDAxMDI4Mg0KPiBbICAg
+NTguODIwNjMwXSBSQVg6IGZmZmY4ODAwN2EwMWI0ZTAgUkJYOiAwMDAxMDEwMjQ2NGM0NTdmIFJD
+WDoNCj4gZmZmZjg4MDA3ODY2MDcwNA0KPiBbICAgNTguODIwNjMwXSBSRFg6IGZmZmY4ODAwNzk3
+OTNkZDggUlNJOiAwMDAwMDAwMDAwMDAwMDAxIFJESToNCj4gZmZmZjg4MDA3OTc5M2RkMA0KPiBb
+ICAgNTguODIwNjMwXSBSQlA6IGZmZmY4ODAwNzk3OTNlMDggUjA4OiAwMDAwMDAwMDAwMDAwMDAw
+IFIwOToNCj4gMDAwMDAwMDAwMDAwMDAwMA0KPiBbICAgNTguODIwNjMwXSBSMTA6IDAwMDAwMDAw
+MDAwMDAwMDAgUjExOiAwMDAwMDAwMDAwMDAwMDAxIFIxMjoNCj4gMDAwMDAwMDAwMDAwMDAwMA0K
+PiBbICAgNTguODIwNjMwXSBSMTM6IDAwMDAwMDAwMDA0MDFlM2IgUjE0OiAwMDAwMDAwMDAwMDAw
+MDAxIFIxNToNCj4gZmZmZjg4MDA3ODY2MDcwNA0KPiBbICAgNTguODIwNjMwXSBGUzogIDAwMDA3
+ZmZmZjdmZTE3MDAoMDAwMCkgR1M6ZmZmZjg4MDA3YzAwMDAwMCgwMDAwKQ0KPiBrbmxHUzowMDAw
+MDAwMDAwMDAwMDAwDQo+IFsgICA1OC44MjA2MzBdIENTOiAgMDAxMCBEUzogMDAwMCBFUzogMDAw
+MCBDUjA6IDAwMDAwMDAwODAwNTAwM2INCj4gWyAgIDU4LjgyMDYzMF0gQ1IyOiAwMDAwMDAwMDAw
+MDAwMDAwIENSMzogMDAwMDAwMDA3YWI5MDAwMCBDUjQ6DQo+IDAwMDAwMDAwMDAwNDA2ZTANCj4g
+WyAgIDU4LjgyMDYzMF0gU3RhY2s6DQo+IFsgICA1OC44MjA2MzBdICBmZmZmZmZmZjgxNTdhZTI0
+IGZmZmY4ODAwN2EwMWI0ZTAgMDAwMDAwMDAwMDAwMDAwMg0KPiBmZmZmODgwMDc4NjYwNzAwDQo+
+IFsgICA1OC44MjA2MzBdICBmZmZmODgwMDc3MDYwMDAwIDAwMDAwMDAwMDAwMDEwMDAgZmZmZmVh
+MDAwMWRjMTgwMA0KPiBmZmZmODgwMDc3MDYwMDAwDQo+IFsgICA1OC44MjA2MzBdICBmZmZmODgw
+MDc5NzkzZTQ4IGZmZmZmZmZmODE1N2Q1NTkgMDAwMDAwMDAwMDAwMDQwMg0KPiBmZmZmODgwMDc5
+OWNiYzAwDQo+IFsgICA1OC44MjA2MzBdIENhbGwgVHJhY2U6DQo+IFsgICA1OC44MjA2MzBdICBb
+PGZmZmZmZmZmODE1N2FlMjQ+XSA/IGVmaV9jYXBzdWxlX3N1cHBvcnRlZCsweDk0LzB4MTUwDQo+
+IFsgICA1OC44MjA2MzBdICBbPGZmZmZmZmZmODE1N2Q1NTk+XSBlZmlfY2Fwc3VsZV93cml0ZSsw
+eDI2OS8weDM5MA0KPiBbICAgNTguODIwNjMwXSAgWzxmZmZmZmZmZjgxMTgzZWY4Pl0gX192ZnNf
+d3JpdGUrMHgyOC8weGUwDQo+IFsgICA1OC44MjA2MzBdICBbPGZmZmZmZmZmODExODNlOWE+XSA/
+IF9fdmZzX3JlYWQrMHhhYS8weGUwDQo+IFsgICA1OC44MjA2MzBdICBbPGZmZmZmZmZmODExODQ3
+ZDU+XSB2ZnNfd3JpdGUrMHhiNS8weDFhMA0KPiBbICAgNTguODIwNjMwXSAgWzxmZmZmZmZmZjgx
+MWEzM2JlPl0gPyBfX2ZnZXRfbGlnaHQrMHg2ZS8weDkwDQo+IFsgICA1OC44MjA2MzBdICBbPGZm
+ZmZmZmZmODExODU0MTI+XSBTeVNfd3JpdGUrMHg1Mi8weGMwDQo+IFsgICA1OC44MjA2MzBdICBb
+PGZmZmZmZmZmODE2Y2ZmNWI+XSBlbnRyeV9TWVNDQUxMXzY0X2Zhc3RwYXRoKzB4MTYvMHg3Mw0K
+PiBbICAgNTguODIwNjMwXSBDb2RlOiAgQmFkIFJJUCB2YWx1ZS4NCj4gWyAgIDU4LjgyMDYzMF0g
+UklQICBbPCAgICAgICAgICAobnVsbCk+XSAgICAgICAgICAgKG51bGwpDQo+IFsgICA1OC44MjA2
+MzBdICBSU1AgPGZmZmY4ODAwNzk3OTNkYzg+DQo+IFsgICA1OC44MjA2MzBdIENSMjogMDAwMDAw
+MDAwMDAwMDAwMA0KPiBbICAgNTguODc2MjIxXSAtLS1bIGVuZCB0cmFjZSA5NGMwYzE0MWY5YjBl
+YzAyIF0tLS0NCj4gDQoNCkNvdWxkIHlvdSBzaGFyZSBtZSB5b3VyIGR1bWIgZmlsZT8gSSBkaWQg
+cGVyZm9ybSBuZWdhdGl2ZSB0ZXN0LCBidXQgSSBkaWQNCm5vdCBnZXQgdGhlc2UgZHVtcCBzdGFj
+ayBpbiBkbWVzZy4gVGhhbmtzLg0KDQo+IA0KPiBQbGVhc2UgaW50ZWdyYXRlIGNoZWNrcGF0Y2gg
+aW50byB5b3VyIHdvcmtmbG93IC0gaXQgY2FuIGJlIGhlbHBmdWwNCj4gc29tZXRpbWVzOg0KPiAN
+Cj4gV0FSTklORzogJ09DQ1VSRUQnIG1heSBiZSBtaXNzcGVsbGVkIC0gcGVyaGFwcyAnT0NDVVJS
+RUQnPw0KPiAjMTE0OiBGSUxFOiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktY2Fwc3VsZS1sb2Fk
+ZXIuYzoyMjoNCj4gKyNkZWZpbmUgRVJSX09DQ1VSRUQgLTINCj4gDQo+IFdBUk5JTkc6ICdPQ0NV
+UkVEJyBtYXkgYmUgbWlzc3BlbGxlZCAtIHBlcmhhcHMgJ09DQ1VSUkVEJz8NCj4gIzEzMjogRklM
+RTogZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLWNhcHN1bGUtbG9hZGVyLmM6NDA6DQo+ICsgKiAg
+ICAgQmVzaWRlcyBmcmVlaW5nIHRoZSBidWZmZXIgcGFnZXMsIGl0IGFsc28gZmxhZ2dlZCBhbiBF
+UlJfT0NDVVJFRA0KPiANCj4gV0FSTklORzogJ09DQ1VSRUQnIG1heSBiZSBtaXNzcGVsbGVkIC0g
+cGVyaGFwcyAnT0NDVVJSRUQnPw0KPiAjMTQ0OiBGSUxFOiBkcml2ZXJzL2Zpcm13YXJlL2VmaS9l
+ZmktY2Fwc3VsZS1sb2FkZXIuYzo1MjoNCj4gKyAgICAgICBjYXBfaW5mby0+aW5kZXggPSBFUlJf
+T0NDVVJFRDsNCj4gDQo+IFdBUk5JTkc6IFBvc3NpYmxlIHVubmVjZXNzYXJ5ICdvdXQgb2YgbWVt
+b3J5JyBtZXNzYWdlDQo+ICMzOTk6IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1jYXBz
+dWxlLWxvYWRlci5jOjMwNzoNCj4gKyAgICAgICBpZiAoIWNhcF9pbmZvKSB7DQo+ICsgICAgICAg
+ICAgICAgICBwcl9kZWJ1ZygiJXM6IGt6YWxsb2MoKSBmYWlsZWRcbiIsIF9fZnVuY19fKTsNCj4g
+DQoNCkkgZGlkIHVzZSBjaGVja3BhdGNoLiBNYXkgYmUgbXkgdmVyc2lvbiBpcyBkaWZmZXJlbnQu
+IFdpbGwgZ2V0IHRoZQ0KbGF0ZXN0IHZlcnNpb24gYW5kIHJ1biBpdCBhZ2Fpbi4gVGhhbmtzLg0K
+DQo+ID4gK2NvbmZpZyBFRklfQ0FQU1VMRV9MT0FERVINCj4gPiArCXRyaXN0YXRlICJFRkkgY2Fw
+c3VsZSBsb2FkZXIiDQo+ID4gKwlkZXBlbmRzIG9uIEVGSQ0KPiA+ICsJaGVscA0KPiA+ICsJICBU
+aGlzIG9wdGlvbiBleHBvc2VzIGEgbG9hZGVyIGludGVyZmFjZSAiL2Rldi9lZmlfY2Fwc3VsZV9s
+b2FkZXIiDQo+IGZvcg0KPiA+ICsJICB1c2VyIHRvIGxvYWQgRUZJIGNhcHN1bGUgYmluYXJ5IGFu
+ZCB1cGRhdGUgdGhlIEVGSSBmaXJtd2FyZSB0aHJvdWdoDQo+ID4gKwkgIHN5c3RlbSByZWJvb3Qu
+DQo+IA0KPiBNYWtlIHRoaXM6DQo+IA0KPiAJLi4uIGFuZCB1cGRhdGUgdGhlIEVGSSBmaXJtd2Fy
+ZS4gQWZ0ZXIgYSBzdWNjZXNzZnVsIGxvYWRpbmcsIGEgc3lzdGVtDQo+IAlyZWJvb3QgaXMgcmVx
+dWlyZWQuIg0KPiANCg0KT2suIE5vdGVkLg0KDQo+ID4NCj4gPiAgLyoqDQo+ID4gICAqIGVmaV9j
+YXBzdWxlX3VwZGF0ZSAtIHNlbmQgYSBjYXBzdWxlIHRvIHRoZSBmaXJtd2FyZSBkaWZmIC0tZ2l0
+DQo+ID4gYS9kcml2ZXJzL2Zpcm13YXJlL2VmaS9lZmktY2Fwc3VsZS1sb2FkZXIuYw0KPiA+IGIv
+ZHJpdmVycy9maXJtd2FyZS9lZmkvZWZpLWNhcHN1bGUtbG9hZGVyLmMNCj4gDQo+IEFsbCB0aG9z
+ZSBmaWxlcyB1bmRlciBkcml2ZXJzL2Zpcm13YXJlL2VmaS8gYXJlIEVGSSBzdHVmZiBzbyB0aGlz
+IG9uZSBkb2Vzbid0DQo+IG5lZWQgdGhlICJlZmktIiBuYW1lIHByZWZpeCBlaXRoZXIuIGVmaS1w
+c3RvcmUuYyBJJ20gbG9va2luZyBhdCB5b3UgdG9vLg0KPiANCg0KT2suIE5vdGVkLg0KDQo+ID4g
+Kw0KPiA+ICsjZGVmaW5lIHByX2ZtdChmbXQpIEtCVUlMRF9NT0ROQU1FICI6ICIgZm10DQo+IA0K
+PiBJIHRoaW5rIHRoaXMgc2hvdWxkIGJlDQo+IA0KPiAjZGVmaW5lIHByX2ZtdChmbXQpICJFRkk6
+ICIgZm10DQo+IA0KPiBvciBzb21ldGhpbmcgdGhhdCBhbGwgRUZJIGNvZGUgdXNlcy4NCj4gDQoN
+Ck9rLiBOb3RlZC4NCg0KPiA+ICsNCj4gPiArI2luY2x1ZGUgPGxpbnV4L2tlcm5lbC5oPg0KPiA+
+ICsjaW5jbHVkZSA8bGludXgvbW9kdWxlLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9taXNjZGV2
+aWNlLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9oaWdobWVtLmg+DQo+ID4gKyNpbmNsdWRlIDxs
+aW51eC9zbGFiLmg+DQo+ID4gKyNpbmNsdWRlIDxsaW51eC9tdXRleC5oPg0KPiA+ICsjaW5jbHVk
+ZSA8bGludXgvZWZpLmg+DQo+ID4gKw0KPiA+ICsjZGVmaW5lIERFVl9OQU1FICJlZmlfY2Fwc3Vs
+ZV9sb2FkZXIiDQo+IA0KPiBXaHkgYSBkZWZpbmUgaWYgaXQgaXMgdXNlZCBvbmx5IGluIG9uZSBw
+bGFjZT8gSnVzdCBwdXQgdGhlIHN0cmluZyB0aGVyZSBpbnN0ZWFkLg0KDQpPay4gTm90ZWQuDQoN
+Cj4gDQo+ID4gKyNkZWZpbmUgVVBMT0FEX0RPTkUgLTENCj4gDQo+IElzbid0IHRoZSBmYWN0IHRo
+YXQgdXBsb2FkIHdhcyBmaW5pc2hlZCBhIHN1Y2Nlc3MgbWVzc2FnZT8gSWYgc28sIHdoeSBpcyBp
+dCBhDQo+IG5lZ2F0aXZlIHZhbHVlPw0KDQpUaGlzIGlzIHRvIGluZGljYXRlIGFuIHVwbG9hZCBp
+cyBkb25lIGFuZCBwZW5kaW5nIGZvciBjbG9zZSgyKS4gSWYgYSBzdWJzZXF1ZW5jZQ0Kd3JpdGUo
+MikgcGVyZm9ybSwgcmV0dXJuIGVycm9yLiBDb21tZW50cyBpbnB1dHRlZCBieSBNYXR0IGFuZCBB
+bmR5Lg0KDQo+IA0KPiA+ICsjZGVmaW5lIEVSUl9PQ0NVUkVEIC0yDQo+IA0KPiBXQVJOSU5HOiAn
+T0NDVVJFRCcgbWF5IGJlIG1pc3NwZWxsZWQgLSBwZXJoYXBzICdPQ0NVUlJFRCc/DQo+ICMxMTQ6
+IEZJTEU6IGRyaXZlcnMvZmlybXdhcmUvZWZpL2VmaS1jYXBzdWxlLWxvYWRlci5jOjIyOg0KPiAr
+I2RlZmluZSBFUlJfT0NDVVJFRCAtMg0KPiANCj4gT2ssIHRoYXQgc2hvdWxkIGJlIGVub3VnaCBy
+ZXZpZXcgZm9yIG5vdyAtIEknbGwgdGFrZSBhIGxvb2sgYXQgdGhlIHJlc3Qgb25jZQ0KPiB5b3Un
+dmUgdGFrZW4gY2FyZSBvZiB0aGUgc3BsYXQgYWJvdmUgYW5kIHRob3NlIG1pbm9yIGlzc3VlcyBJ
+IHBvaW50ZWQgb3V0Lg0KPiANCj4gVGhhbmtzLg0KPiANCg0KVGhhbmtzIGZvciB0aGUgcmV2aWV3
+Lg0KDQpSZWdhcmRzLA0KV2lsc29uDQoNCg==
