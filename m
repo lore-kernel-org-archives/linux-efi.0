@@ -1,39 +1,53 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: RE: [PATCH v9 1/1] efi: a misc char interface for user to update
- efi firmware
-Date: Mon, 2 Nov 2015 07:17:28 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
-References: <1446055138-26047-1-git-send-email-hock.leong.kweh@intel.com>
- <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
- <20151101102944.GA12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A8799FB@PGSMSX102.gar.corp.intel.com>
- <20151101105801.GB12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A879A18@PGSMSX102.gar.corp.intel.com>
- <20151101125835.GC12711@pd.tnic>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
+Date: Mon, 2 Nov 2015 12:49:52 +0000
+Message-ID: <20151102121618.GA2331@codeblueprint.co.uk>
+References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
+ <562EA894.8070505@arm.com>
+ <562EAA22.3010905@arm.com>
+ <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20151101125835.GC12711@pd.tnic>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>, "Anvin, H Peter" <h.peter.anvin@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFN1bmRheSwgTm92ZW1iZXIgMDEsIDIwMTUgODo1
-OSBQTQ0KPiANCj4gT24gU3VuLCBOb3YgMDEsIDIwMTUgYXQgMTE6MTE6MjNBTSArMDAwMCwgS3dl
-aCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBIbW0gLi4uLiBJZiBJIGNvbWJpbmUgdGhlc2UgMiBm
-bGFncyB0byBiZWNvbWUgb25lIGFzDQo+ID4gIk5PX01PUkVfV1JJVEVfQUNUSU9OIiB0byBiZXR0
-ZXIgZGVzY3JpYmluZyB0aGUgc2l0dWF0aW9uLCB5b3UgT2theQ0KPiA+IHdpdGggaXQ/DQo+IA0K
-PiBJIGRvbid0IHVuZGVyc3RhbmQsIHdoeSBjb21iaW5lPw0KPiANCj4gV2h5IG5vdCBzaW1wbHkg
-bWFrZSBVUExPQURfRE9ORSBhIHBvc2l0aXZlIHZhbHVlOg0KPiANCj4gI2RlZmluZSBVUExPQURf
-RE9ORQkxDQo+ICNkZWZpbmUgRVJSX09DQ1VSUkVECS0xDQo+IA0KPiAwIHdvdWxkIG9idmlvdXNs
-eSBtZWFuLCBubyBlcnJvcnMgb2NjdXJyZWQgd2hhdHNvZXZlci4NCj4gDQoNCkhpIEJvcmlzLA0K
-DQpUaGlzIGlzIG5vdCBhIHJldHVybiB2YWx1ZSB0byBpbmRpY2F0ZSB3aGF0IGlzIGdvaW5nIG5v
-dy4gSXQgaXMgYSBmbGFnIHVzZWQgaW4NCiJjYXBfaW5mby0+aW5kZXgiIHdoaWNoIHBvc2l0aXZl
-IHZhbHVlIGhhcyBhIG1lYW5pbmcgb2YgaW5kZXggbnVtYmVyLg0KSSBhbSB1c2luZyB0aGUgbmVn
-YXRpdmUgdmFsdWUgZm9yIHRoZSBmbGFnIHdoaWNoIHNpbWlsYXIgdG8gdGhlIGltcGxlbWVudGF0
-aW9uDQpvZiBwb2ludGVyICYgZXJyb3IgcG9pbnRlciAoRVJSX1BUUikuDQoNClRoYW5rcyAmIFJl
-Z2FyZHMsDQpXaWxzb24NCg0K
+On Tue, 27 Oct, at 11:20:51AM, Ard Biesheuvel wrote:
+> From 1179099f89db54294f419493d152083fb8e5af3d Mon Sep 17 00:00:00 2001
+> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Date: Tue, 27 Oct 2015 11:12:51 +0900
+> Subject: [PATCH] arm64/efi: fix libstub build under CONFIG_MODVERSIONS
+> 
+> Now that we strictly forbid absolute relocations in libstub code,
+> make sure that we don't emit any when CONFIG_MODVERSIONS is enabled,
+> by stripping the kcrctab sections from the object file. This fixes
+> a build problem under CONFIG_MODVERSIONS=y.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  drivers/firmware/efi/libstub/Makefile | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/firmware/efi/libstub/Makefile
+> b/drivers/firmware/efi/libstub/Makefile
+> index bca9a76cbd33..acc25d7c5da2 100644
+> --- a/drivers/firmware/efi/libstub/Makefile
+> +++ b/drivers/firmware/efi/libstub/Makefile
+> @@ -51,7 +51,7 @@ lib-$(CONFIG_EFI_ARMSTUB) += arm-stub.o fdt.o string.o \
+>  extra-$(CONFIG_EFI_ARMSTUB) := $(lib-y)
+>  lib-$(CONFIG_EFI_ARMSTUB) := $(patsubst %.o,%.stub.o,$(lib-y))
+> 
+> -STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab*
+> +STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab* -R *kcrctab*
+>  STUBCOPY_FLAGS-$(CONFIG_ARM64) += --prefix-alloc-sections=.init \
+>     --prefix-symbols=__efistub_
+>  STUBCOPY_RELOC-$(CONFIG_ARM64) := R_AARCH64_ABS
+
+I *think* this should be OK.
+
+Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
