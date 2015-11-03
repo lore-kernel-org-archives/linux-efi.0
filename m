@@ -1,54 +1,45 @@
-From: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi-pstore: fix kernel-doc argument name
-Date: Tue, 3 Nov 2015 12:05:16 -0800
-Message-ID: <CAGXu5jJG_qF=z6Q7v2nfdhxizOE5UciO=S9qcXDO3MowTuxMHw@mail.gmail.com>
-References: <f5d7694a7f25e936f97ef9d4870fbec5d89ab87d.1446304741.git.geliangtang@163.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v9 1/1] efi: a misc char interface for user to update efi
+ firmware
+Date: Tue, 3 Nov 2015 21:14:55 +0100
+Message-ID: <20151103201455.GD3620@pd.tnic>
+References: <1446055138-26047-1-git-send-email-hock.leong.kweh@intel.com>
+ <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
+ <20151101102944.GA12711@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C4A8799FB@PGSMSX102.gar.corp.intel.com>
+ <20151101105801.GB12711@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C4A879A18@PGSMSX102.gar.corp.intel.com>
+ <20151101125835.GC12711@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <f5d7694a7f25e936f97ef9d4870fbec5d89ab87d.1446304741.git.geliangtang-9Onoh4P/yGk@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
-Cc: Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>, "Anvin, H Peter" <h.peter.anvin@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Oct 31, 2015 at 8:23 AM, Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org> wrote:
-> The first argument name in the kernel-doc argument list for
-> efi_pstore_scan_sysfs_enter() was slightly off. Fix it for the
-> kernel doc.
->
-> Signed-off-by: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
+On Mon, Nov 02, 2015 at 07:17:28AM +0000, Kweh, Hock Leong wrote:
+> This is not a return value to indicate what is going now. It is a flag
+> used in "cap_info->index" which positive value has a meaning of index
+> number. I am using the negative value for the flag which similar to
+> the implementation of pointer & error pointer (ERR_PTR).
 
-Acked-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Ok, but that doesn't make any sense: you're assigning UPLOAD_DONE to
+cap_info->index only once in efi_capsule_submit_update() and you're not
+testing it anywhere. Yeah, yeah, you're implicitly testing for it by
+doing the "< 0" check.
 
-Thanks!
+So simply assign -1 to ->index to mean *any* type of error occurred,
+remove the defines and you can always test for "< 0" to mean "did
+something fail".
 
--Kees
-
-> ---
->  drivers/firmware/efi/efi-pstore.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-> index c8d794c..eac76a7 100644
-> --- a/drivers/firmware/efi/efi-pstore.c
-> +++ b/drivers/firmware/efi/efi-pstore.c
-> @@ -103,7 +103,7 @@ static int efi_pstore_read_func(struct efivar_entry *entry, void *data)
->
->  /**
->   * efi_pstore_scan_sysfs_enter
-> - * @entry: scanning entry
-> + * @pos: scanning entry
->   * @next: next entry
->   * @head: list head
->   */
-> --
-> 2.4.3
->
->
-
-
+You simply don't need two error values...
 
 -- 
-Kees Cook
-Chrome OS Security
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
