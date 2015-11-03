@@ -1,73 +1,61 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] efi: replace GFP_KERNEL with GFP_ATOMIC
-Date: Tue, 3 Nov 2015 16:36:56 +0000
-Message-ID: <20151103163650.GE2653@codeblueprint.co.uk>
-References: <saurabh.truth@gmail.com>
- <1446003747-3760-1-git-send-email-saurabh.truth@gmail.com>
+From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Subject: Re: [PATCH v9 1/1] efi: a misc char interface for user to update efi
+ firmware
+Date: Tue, 3 Nov 2015 20:59:34 +0100
+Message-ID: <20151103195934.GC3620@pd.tnic>
+References: <F54AEECA5E2B9541821D670476DAE19C4A879BFE@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1446003747-3760-1-git-send-email-saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A879BFE-j2khPEwRog0FyVwBAnZdSLfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Saurabh Sengar <saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Fleming, Matt" <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Anvin, H Peter" <h.peter.anvin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 28 Oct, at 09:12:27AM, Saurabh Sengar wrote:
-> replace GFP_KERNEL with GFP_ATOMIC, as code while holding a spinlock
-> should be atomic
-> GFP_KERNEL may sleep and can cause deadlock, where as GFP_ATOMIC may
-> fail but certainly avoids deadlock
-> 
-> Signed-off-by: Saurabh Sengar <saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
->  drivers/firmware/efi/vars.c | 12 +++++++++---
->  1 file changed, 9 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-> index 70a0fb1..d4eeebf 100644
-> --- a/drivers/firmware/efi/vars.c
-> +++ b/drivers/firmware/efi/vars.c
-> @@ -322,10 +322,11 @@ static unsigned long var_name_strnsize(efi_char16_t *variable_name,
->   * disable the sysfs workqueue since the firmware is buggy.
->   */
->  static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
-> -			     unsigned long len16)
-> +			     unsigned long len16, bool atomic)
->  {
->  	size_t i, len8 = len16 / sizeof(efi_char16_t);
->  	char *str8;
-> +	int gfp_mask;
->  
->  	/*
->  	 * Disable the workqueue since the algorithm it uses for
-> @@ -334,7 +335,12 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
->  	 */
->  	efivar_wq_enabled = false;
->  
-> -	str8 = kzalloc(len8, GFP_KERNEL);
-> +	if (atomic)
-> +		gfp_mask = GFP_ATOMIC;
-> +	else
-> +		gfp_mask = GFP_KERNEL;
-> +
-> +	str8 = kzalloc(len8, gfp_mask);
->  	if (!str8)
->  		return;
->  
-> @@ -408,7 +414,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
->  			if (duplicates &&
->  			    variable_is_present(variable_name, &vendor_guid, head)) {
->  				dup_variable_bug(variable_name, &vendor_guid,
-> -						 variable_name_size);
-> +						 variable_name_size, atomic);
->  				if (!atomic)
->  					spin_lock_irq(&__efivars->lock);
+On Mon, Nov 02, 2015 at 06:47:29AM +0000, Kweh, Hock Leong wrote:
+> By looking at your dmesg log, the above print out message seem that
+> someone has called the flush() after the write(2). In my environment, flush()
+> only being called in 2 places which are before write(2) and during close(2).
+> The dmesg log seems that your environment is running write(2) and flush() in
+> different threads and are parallel. Could you help me to double confirm this and it 
+> would be good if you could told me when the flush() is exactly being called in
+> your environment. The info really help me on debugging.
 
-It's slightly winding code, but if you look at the callers of
-efivar_init() you'll see that none of them set both 'atomic' and
-'duplicates', so dup_variable_bug() will never be called while holding
-a spinlock.
+I don't know what you mean: I simply do
 
-Or am I missing something?
+cat /bin/ls > /dev/efi_capsule_loader
+
+as root in an SMP kvm guest. And it explodes. Nothing special, just this
+one command.
+
+I guess you could try to reproduce it, here's how I start it:
+
+qemu-system-x86_64
+-enable-kvm
+-gdb tcp::1234
+-cpu Opteron_G5
+-m 2048
+-hda /home/boris/kvm/debian/sid-x86_64.img
+-hdb /home/boris/kvm/swap.img
+-boot menu=off,order=c
+-localtime
+-net nic,model=rtl8139
+-net user,hostfwd=tcp::1235-:22
+-usbdevice tablet
+-kernel /home/boris/kernel/linux-2.6/arch/x86/boot/bzImage
+-append "root=/dev/sda1 resume=/dev/sdb1 debug ignore_loglevel log_buf_len=16M earlyprintk=ttyS0,115200 console=ttyS0,115200 console=tty0"
+-monitor pty
+-virtfs local,path=/tmp,mount_tag=tmp,security_model=none
+-serial file:/home/boris/kvm/test-x86_64-1235.log
+-snapshot
+-smp 8
+
+HTH.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
