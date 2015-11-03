@@ -1,53 +1,73 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
-Date: Mon, 2 Nov 2015 12:49:52 +0000
-Message-ID: <20151102121618.GA2331@codeblueprint.co.uk>
-References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
- <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
- <562EA894.8070505@arm.com>
- <562EAA22.3010905@arm.com>
- <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q@mail.gmail.com>
+Subject: Re: [PATCH v2] efi: replace GFP_KERNEL with GFP_ATOMIC
+Date: Tue, 3 Nov 2015 16:36:56 +0000
+Message-ID: <20151103163650.GE2653@codeblueprint.co.uk>
+References: <saurabh.truth@gmail.com>
+ <1446003747-3760-1-git-send-email-saurabh.truth@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-G1YS9Ha=-rtnPKJTOxBTrdSq6=Tqwq_GPW742JUE+2Q-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1446003747-3760-1-git-send-email-saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrey Ryabinin <ryabinin.a.a-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+To: Saurabh Sengar <saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 27 Oct, at 11:20:51AM, Ard Biesheuvel wrote:
-> From 1179099f89db54294f419493d152083fb8e5af3d Mon Sep 17 00:00:00 2001
-> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Date: Tue, 27 Oct 2015 11:12:51 +0900
-> Subject: [PATCH] arm64/efi: fix libstub build under CONFIG_MODVERSIONS
+On Wed, 28 Oct, at 09:12:27AM, Saurabh Sengar wrote:
+> replace GFP_KERNEL with GFP_ATOMIC, as code while holding a spinlock
+> should be atomic
+> GFP_KERNEL may sleep and can cause deadlock, where as GFP_ATOMIC may
+> fail but certainly avoids deadlock
 > 
-> Now that we strictly forbid absolute relocations in libstub code,
-> make sure that we don't emit any when CONFIG_MODVERSIONS is enabled,
-> by stripping the kcrctab sections from the object file. This fixes
-> a build problem under CONFIG_MODVERSIONS=y.
-> 
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Saurabh Sengar <saurabh.truth-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 > ---
->  drivers/firmware/efi/libstub/Makefile | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  drivers/firmware/efi/vars.c | 12 +++++++++---
+>  1 file changed, 9 insertions(+), 3 deletions(-)
 > 
-> diff --git a/drivers/firmware/efi/libstub/Makefile
-> b/drivers/firmware/efi/libstub/Makefile
-> index bca9a76cbd33..acc25d7c5da2 100644
-> --- a/drivers/firmware/efi/libstub/Makefile
-> +++ b/drivers/firmware/efi/libstub/Makefile
-> @@ -51,7 +51,7 @@ lib-$(CONFIG_EFI_ARMSTUB) += arm-stub.o fdt.o string.o \
->  extra-$(CONFIG_EFI_ARMSTUB) := $(lib-y)
->  lib-$(CONFIG_EFI_ARMSTUB) := $(patsubst %.o,%.stub.o,$(lib-y))
-> 
-> -STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab*
-> +STUBCOPY_FLAGS-y := -R .debug* -R *ksymtab* -R *kcrctab*
->  STUBCOPY_FLAGS-$(CONFIG_ARM64) += --prefix-alloc-sections=.init \
->     --prefix-symbols=__efistub_
->  STUBCOPY_RELOC-$(CONFIG_ARM64) := R_AARCH64_ABS
+> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+> index 70a0fb1..d4eeebf 100644
+> --- a/drivers/firmware/efi/vars.c
+> +++ b/drivers/firmware/efi/vars.c
+> @@ -322,10 +322,11 @@ static unsigned long var_name_strnsize(efi_char16_t *variable_name,
+>   * disable the sysfs workqueue since the firmware is buggy.
+>   */
+>  static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+> -			     unsigned long len16)
+> +			     unsigned long len16, bool atomic)
+>  {
+>  	size_t i, len8 = len16 / sizeof(efi_char16_t);
+>  	char *str8;
+> +	int gfp_mask;
+>  
+>  	/*
+>  	 * Disable the workqueue since the algorithm it uses for
+> @@ -334,7 +335,12 @@ static void dup_variable_bug(efi_char16_t *str16, efi_guid_t *vendor_guid,
+>  	 */
+>  	efivar_wq_enabled = false;
+>  
+> -	str8 = kzalloc(len8, GFP_KERNEL);
+> +	if (atomic)
+> +		gfp_mask = GFP_ATOMIC;
+> +	else
+> +		gfp_mask = GFP_KERNEL;
+> +
+> +	str8 = kzalloc(len8, gfp_mask);
+>  	if (!str8)
+>  		return;
+>  
+> @@ -408,7 +414,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+>  			if (duplicates &&
+>  			    variable_is_present(variable_name, &vendor_guid, head)) {
+>  				dup_variable_bug(variable_name, &vendor_guid,
+> -						 variable_name_size);
+> +						 variable_name_size, atomic);
+>  				if (!atomic)
+>  					spin_lock_irq(&__efivars->lock);
 
-I *think* this should be OK.
+It's slightly winding code, but if you look at the callers of
+efivar_init() you'll see that none of them set both 'atomic' and
+'duplicates', so dup_variable_bug() will never be called while holding
+a spinlock.
 
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Or am I missing something?
