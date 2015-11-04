@@ -1,45 +1,44 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v9 1/1] efi: a misc char interface for user to update efi
- firmware
-Date: Tue, 3 Nov 2015 21:14:55 +0100
-Message-ID: <20151103201455.GD3620@pd.tnic>
-References: <1446055138-26047-1-git-send-email-hock.leong.kweh@intel.com>
- <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
- <20151101102944.GA12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A8799FB@PGSMSX102.gar.corp.intel.com>
- <20151101105801.GB12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A879A18@PGSMSX102.gar.corp.intel.com>
- <20151101125835.GC12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>, "Anvin, H Peter" <h.peter.anvin@intel.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL] EFI urgent fix
+Date: Wed,  4 Nov 2015 10:47:16 +0000
+Message-ID: <1446634037-10251-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Huang, Ying" <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Paolo Bonzini <pbonzini-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 02, 2015 at 07:17:28AM +0000, Kweh, Hock Leong wrote:
-> This is not a return value to indicate what is going now. It is a flag
-> used in "cap_info->index" which positive value has a meaning of index
-> number. I am using the negative value for the flag which similar to
-> the implementation of pointer & error pointer (ERR_PTR).
+Folks, the LKP robot reported an issue with Paolo's recent bug fix
+that syncs the identity mapping in 'initial_page_table'. Turns out
+that KERNEL_PGD_PTRS is not the correct constant to use when copying
+to the lower region because that's every PGD from PAGE_OFFSET to the
+end of the addressable memory.
 
-Ok, but that doesn't make any sense: you're assigning UPLOAD_DONE to
-cap_info->index only once in efi_capsule_submit_update() and you're not
-testing it anywhere. Yeah, yeah, you're implicitly testing for it by
-doing the "< 0" check.
+Crucially, KERNEL_PGD_PTRS > KERNEL_PGD_BOUNDARY and so the patch ends
+up trashing some of the kernel mappings in 'initial_page'table,
+leading to boot crashes on 32-bit SMP when bringing APs online.
 
-So simply assign -1 to ->index to mean *any* type of error occurred,
-remove the defines and you can always test for "< 0" to mean "did
-something fail".
+The following changes since commit 9ee870feaa9e0c6abef95a3b1fc518d88adfa2d3:
 
-You simply don't need two error values...
+  Merge branch 'x86/cpufeature' into x86/urgent, to pick up pending Intel MID change (2015-11-03 12:00:40 +0100)
 
--- 
-Regards/Gruss,
-    Boris.
+are available in the git repository at:
 
-ECO tip #101: Trim your mails when you reply.
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+
+for you to fetch changes up to 5965d1bbeba70fe3626e4537f4729283cb0e75f7:
+
+  x86/setup: Fix recent boot crash on 32-bit SMP machines (2015-11-04 09:26:24 +0000)
+
+----------------------------------------------------------------
+ * Avoid trashing the kernel mappings in 'initial_page_table' when
+   copying the identity mapping from 'swapper_pg_dir'. This bug was
+   introduced by a bug fix in v4.3 which erroneously copies too many
+   entries from 'swapper_pg_dir'.
+
+----------------------------------------------------------------
+Matt Fleming (1):
+      x86/setup: Fix recent boot crash on 32-bit SMP machines
+
+ arch/x86/kernel/setup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
