@@ -1,43 +1,63 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Subject: RE: [PATCH v9 1/1] efi: a misc char interface for user to update
- efi firmware
-Date: Thu, 5 Nov 2015 03:42:25 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A87A8D0@PGSMSX102.gar.corp.intel.com>
-References: <1446055138-26047-1-git-send-email-hock.leong.kweh@intel.com>
- <1446055138-26047-2-git-send-email-hock.leong.kweh@intel.com>
- <20151101102944.GA12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A8799FB@PGSMSX102.gar.corp.intel.com>
- <20151101105801.GB12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A879A18@PGSMSX102.gar.corp.intel.com>
- <20151101125835.GC12711@pd.tnic>
- <F54AEECA5E2B9541821D670476DAE19C4A879C38@PGSMSX102.gar.corp.intel.com>
- <20151103201455.GD3620@pd.tnic>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [GIT PULL] x86/mm changes for v4.4
+Date: Fri, 6 Nov 2015 11:39:43 +0000
+Message-ID: <20151106113943.GB2651@codeblueprint.co.uk>
+References: <20151103111649.GA3477@gmail.com>
+ <CA+55aFzcwO+RSLeHOwAYvjZ5AcVvD9Th2=G3R=ZQY1xf+MkDow@mail.gmail.com>
+ <20151104233907.GA25925@codemonkey.org.uk>
+ <CA+55aFxb14eM6b=ctq65Dx-Ujehj2dbtsVM9rrVOVfLgT=EoHg@mail.gmail.com>
+ <20151105021710.GA22941@codemonkey.org.uk>
+ <CA+55aFyXNFu_TfmBjGedCRujoAbhqiBcia7XOtzSq0uxbVv6MA@mail.gmail.com>
+ <CA+55aFyC7L85SYen3Uz6e1cvH0jXzQ9_MddHJ=7PxvpOR2U23w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-fsdevel-owner@vger.kernel.org>
-In-Reply-To: <20151103201455.GD3620@pd.tnic>
-Content-Language: en-US
-Sender: linux-fsdevel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Fleming, Matt" <matt.fleming@intel.com>, "Anvin, H Peter" <h.peter.anvin@intel.com>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CA+55aFyC7L85SYen3Uz6e1cvH0jXzQ9_MddHJ=7PxvpOR2U23w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Dave Jones <davej@codemonkey.org.uk>, Ingo Molnar <mingo@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgMDQsIDIwMTUg
-NDoxNSBBTQ0KPiANCj4gT24gTW9uLCBOb3YgMDIsIDIwMTUgYXQgMDc6MTc6MjhBTSArMDAwMCwg
-S3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBUaGlzIGlzIG5vdCBhIHJldHVybiB2YWx1ZSB0
-byBpbmRpY2F0ZSB3aGF0IGlzIGdvaW5nIG5vdy4gSXQgaXMgYSBmbGFnDQo+ID4gdXNlZCBpbiAi
-Y2FwX2luZm8tPmluZGV4IiB3aGljaCBwb3NpdGl2ZSB2YWx1ZSBoYXMgYSBtZWFuaW5nIG9mIGlu
-ZGV4DQo+ID4gbnVtYmVyLiBJIGFtIHVzaW5nIHRoZSBuZWdhdGl2ZSB2YWx1ZSBmb3IgdGhlIGZs
-YWcgd2hpY2ggc2ltaWxhciB0bw0KPiA+IHRoZSBpbXBsZW1lbnRhdGlvbiBvZiBwb2ludGVyICYg
-ZXJyb3IgcG9pbnRlciAoRVJSX1BUUikuDQo+IA0KPiBPaywgYnV0IHRoYXQgZG9lc24ndCBtYWtl
-IGFueSBzZW5zZTogeW91J3JlIGFzc2lnbmluZyBVUExPQURfRE9ORSB0bw0KPiBjYXBfaW5mby0+
-aW5kZXggb25seSBvbmNlIGluIGVmaV9jYXBzdWxlX3N1Ym1pdF91cGRhdGUoKSBhbmQgeW91J3Jl
-IG5vdA0KPiB0ZXN0aW5nIGl0IGFueXdoZXJlLiBZZWFoLCB5ZWFoLCB5b3UncmUgaW1wbGljaXRs
-eSB0ZXN0aW5nIGZvciBpdCBieQ0KPiBkb2luZyB0aGUgIjwgMCIgY2hlY2suDQo+IA0KPiBTbyBz
-aW1wbHkgYXNzaWduIC0xIHRvIC0+aW5kZXggdG8gbWVhbiAqYW55KiB0eXBlIG9mIGVycm9yIG9j
-Y3VycmVkLA0KPiByZW1vdmUgdGhlIGRlZmluZXMgYW5kIHlvdSBjYW4gYWx3YXlzIHRlc3QgZm9y
-ICI8IDAiIHRvIG1lYW4gImRpZA0KPiBzb21ldGhpbmcgZmFpbCIuDQo+IA0KPiBZb3Ugc2ltcGx5
-IGRvbid0IG5lZWQgdHdvIGVycm9yIHZhbHVlcy4uLg0KPiANCg0KT2suIE5vdGVkLg0KDQpUaGFu
-a3MgJiBSZWdhcmRzLA0KV2lsc29uDQoNCg==
+On Thu, 05 Nov, at 01:33:10PM, Linus Torvalds wrote:
+> 
+> And if this turns out to be due to EFI wanting those permissions, what
+> should we do? People have talked about running the EFI callbacks in
+> their own private page table setup, which sounds like the right idea,
+> but until that actually *happens*....
+
+We have separate page tables today, for a few reasons, but mainly it's
+so that we can have an identity mapping of memory present in the
+region usually used by user processes - broken firmware still uses
+those identity mappings even after the kernel tells it they're
+invalid.
+
+Note that when I say "separate" I'm talking about trampoline_pgd[]
+which is also used by the x86 suspend/resume code.
+
+However, turns out that the issue with the current scheme is the fact
+that trampoline_pgd[] actually shares a couple of PGD entries with
+swapper_pg_dir as can be seen in setup_real_mode(),
+
+
+        trampoline_pgd = (u64 *)__va(real_mode_header->trampoline_pgd);
+        trampoline_pgd[0] = init_level4_pgt[pgd_index(__PAGE_OFFSET)].pgd;
+        trampoline_pgd[511] = init_level4_pgt[511].pgd;
+
+
+So when we map the EFI regions in efi_map_regions() we're inserting
+them into swapper_pg_dir also, which is why you're seeing the
+warnings.
+
+If I remember correctly the rationale for using trampoline_pgd[] was
+that it already did what we wanted (provided the identity mapping) and
+would save us the overhead of maintaining more page tables for no good
+reason. Obviously this entire thread is a good reason.
+
+I suggest we stop using trampoline_pgd[] (since it has a good reason
+for sharing the kernel mapping PGD entries) and create our own so that
+we can isolate EFI completely.
+
+For the immediate problem of the warnings spewing forth on all UEFI
+machines, at the very least the config options needs to be disabled by
+default, if not the patch reverted.
