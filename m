@@ -1,30 +1,44 @@
-From: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>
-Subject: [PATCH v2 0/3] pstore: resend three patches
-Date: Sat,  7 Nov 2015 12:43:46 +0800
-Message-ID: <cover.1446869434.git.geliangtang@163.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Anton Vorontsov <anton-9xeibp6oKSgdnm+yROfE0A@public.gmane.org>, Colin Cross <ccross-z5hGa2qSFaRBDgjK7y7TUQ@public.gmane.org>, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Geliang Tang <geliangtang-9Onoh4P/yGk@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Geliang Tang <geliangtang@163.com>
+Subject: [PATCH v2 2/3] efi-pstore: implement efivars_pstore_exit()
+Date: Sat,  7 Nov 2015 12:43:48 +0800
+Message-ID: <c203e0cfee351d6f97c6a1a42c3e25b4be339f93.1446869434.git.geliangtang@163.com>
+References: <cover.1446869434.git.geliangtang@163.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <cover.1446869434.git.geliangtang@163.com>
+In-Reply-To: <337377a3fbcf855d6a5217e06fcd8c8a979f2853.1446869434.git.geliangtang@163.com>
+References: <cover.1446869434.git.geliangtang@163.com> <337377a3fbcf855d6a5217e06fcd8c8a979f2853.1446869434.git.geliangtang@163.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Kees Cook <keescook@chromium.org>, Tony Luck <tony.luck@intel.com>
+Cc: Geliang Tang <geliangtang@163.com>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-I sent these patches a few weeks ago. Due to the recent changes in pstore,
-these patched might not apply anymore. So I refresh and resend them.
+The original efivars_pstore_exit() is empty. I
+ 1) add a bufsize check statement.
+ 2) call pstore_unregister as it is defined now.
+ 3) free the memory and set bufsize to 0.
 
+Signed-off-by: Geliang Tang <geliangtang@163.com>
 ---
-Changes in v2:
- - refresh the patches.
----
-
-Geliang Tang (3):
-  pstore: check PSTORE_FLAGS_FRAGILE in pstore_unregister
-  efi-pstore: implement efivars_pstore_exit()
-  pstore: drop file opened reference count
-
  drivers/firmware/efi/efi-pstore.c | 7 +++++++
- fs/pstore/inode.c                 | 1 -
- fs/pstore/platform.c              | 9 ++++++---
- 3 files changed, 13 insertions(+), 4 deletions(-)
+ 1 file changed, 7 insertions(+)
 
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index eac76a7..62d57d8 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -393,6 +393,13 @@ static __init int efivars_pstore_init(void)
+ 
+ static __exit void efivars_pstore_exit(void)
+ {
++	if (!efi_pstore_info.bufsize)
++		return;
++
++	pstore_unregister(&efi_pstore_info);
++	kfree(efi_pstore_info.buf);
++	efi_pstore_info.buf = NULL;
++	efi_pstore_info.bufsize = 0;
+ }
+ 
+ module_init(efivars_pstore_init);
 -- 
 2.5.0
