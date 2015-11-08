@@ -1,7 +1,7 @@
-From: Kees Cook <keescook@chromium.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Subject: Re: [GIT PULL] x86/mm changes for v4.4
-Date: Sat, 7 Nov 2015 22:58:52 -0800
-Message-ID: <CAGXu5jKBqXCexzBmn9ykqRJkBvexcJ_aSJn-vAt8EQqzjwZ-=A@mail.gmail.com>
+Date: Sun, 8 Nov 2015 08:55:24 +0100
+Message-ID: <CAKv+Gu_TMKUBKt2zj7-XYmsN0m=6wPzUhfpvN0jbxGiyYnmgTg@mail.gmail.com>
 References: <20151103111649.GA3477@gmail.com>
 	<CA+55aFzcwO+RSLeHOwAYvjZ5AcVvD9Th2=G3R=ZQY1xf+MkDow@mail.gmail.com>
 	<20151104233907.GA25925@codemonkey.org.uk>
@@ -12,121 +12,142 @@ References: <20151103111649.GA3477@gmail.com>
 	<20151106123912.GC2651@codeblueprint.co.uk>
 	<20151107070922.GC6235@gmail.com>
 	<CAKv+Gu-s=91p2hVV-8r5AWQwgjD2sbXC86sPhtmq9UyqqcOz4w@mail.gmail.com>
+	<CAGXu5jKBqXCexzBmn9ykqRJkBvexcJ_aSJn-vAt8EQqzjwZ-=A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKv+Gu-s=91p2hVV-8r5AWQwgjD2sbXC86sPhtmq9UyqqcOz4w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ingo Molnar <mingo@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Stephen Smalley <sds@tycho.nsa.gov>, Dave Jones <davej@codemonkey.org.uk>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Borislav Petkov <bp@alien8.de>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matthew Garrett <mjg59@coreos.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAGXu5jKBqXCexzBmn9ykqRJkBvexcJ_aSJn-vAt8EQqzjwZ-=A@mail.gmail.com>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>, Dave Jones <davej-rdkfGonbjUTCLXcRTR1eJlpr/1R2p/CL@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Nov 6, 2015 at 11:39 PM, Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
-> On 7 November 2015 at 08:09, Ingo Molnar <mingo@kernel.org> wrote:
+On 8 November 2015 at 07:58, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+> On Fri, Nov 6, 2015 at 11:39 PM, Ard Biesheuvel
+> <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> On 7 November 2015 at 08:09, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+>>>
+>>> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+>>>
+>>>> On Fri, 06 Nov, at 07:55:50AM, Ingo Molnar wrote:
+>>>> >
+>>>> >  3) We should fix the EFI permission problem without relying on the firmware: it
+>>>> >     appears we could just mark everything R-X optimistically, and if a write fault
+>>>> >     happens (it's pretty rare in fact, only triggers when we write to an EFI
+>>>> >     variable and so), we can mark the faulting page RW- on the fly, because it
+>>>> >     appears that writable EFI sections, while not enumerated very well in 'old'
+>>>> >     firmware, are still supposed to be page granular. (Even 'new' firmware I
+>>>> >     wouldn't automatically trust to get the enumeration right...)
+>>>>
+>>>> Sorry, this isn't true. I misled you with one of my earlier posts on
+>>>> this topic. Let me try and clear things up...
+>>>>
+>>>> Writing to EFI regions has to do with every invocation of the EFI
+>>>> runtime services - it's not limited to when you read/write/delete EFI
+>>>> variables. In fact, EFI variables really have nothing to do with this
+>>>> discussion, they're a completely opaque concept to the OS, we have no
+>>>> idea how the firmware implements them. Everything is done via the EFI
+>>>> boot/runtime services.
+>>>>
+>>>> The firmware itself will attempt to write to EFI regions when we
+>>>> invoke the EFI services because that's where the PE/COFF ".data" and
+>>>> ".bss" sections live along with the heap. There's even some relocation
+>>>> fixups that occur as SetVirtualAddressMap() time so it'll write to
+>>>> ".text" too.
+>>>>
+>>>> Now, the above PE/COFF sections are usually (always?) contained within
+>>>> EFI regions of type EfiRuntimeServicesCode. We know this is true
+>>>> because the firmware folks have told us so, and because stopping that
+>>>> is the motivation behind the new EFI_PROPERTIES_TABLE feature in UEFI
+>>>> V2.5.
+>>>>
+>>>> The data sections within the region are also *not* guaranteed to be
+>>>> page granular because work was required in Tianocore for emitting
+>>>> sections with 4k alignment as part of the EFI_PROPERTIES_TABLE
+>>>> support.
+>>>>
+>>>> Ultimately, what this means is that if you were to attempt to
+>>>> dynamically fixup those regions that required write permission, you'd
+>>>> have to modify the mappings for the majority of the EFI regions
+>>>> anyway. And if you're blindly allowing write permission as a fixup,
+>>>> there's not much security to be had.
+>>>
+>>> I think you misunderstood my suggestion: the 'fixup' would be changing it from R-X
+>>> to RW-, i.e. it would add 'write' permission but remove 'execute' permission.
+>>>
+>>> Note that there would be no 'RWX' permission at any given moment - which is the
+>>> dangerous combination.
+>>>
 >>
->> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
->>
->>> On Fri, 06 Nov, at 07:55:50AM, Ingo Molnar wrote:
->>> >
->>> >  3) We should fix the EFI permission problem without relying on the firmware: it
->>> >     appears we could just mark everything R-X optimistically, and if a write fault
->>> >     happens (it's pretty rare in fact, only triggers when we write to an EFI
->>> >     variable and so), we can mark the faulting page RW- on the fly, because it
->>> >     appears that writable EFI sections, while not enumerated very well in 'old'
->>> >     firmware, are still supposed to be page granular. (Even 'new' firmware I
->>> >     wouldn't automatically trust to get the enumeration right...)
->>>
->>> Sorry, this isn't true. I misled you with one of my earlier posts on
->>> this topic. Let me try and clear things up...
->>>
->>> Writing to EFI regions has to do with every invocation of the EFI
->>> runtime services - it's not limited to when you read/write/delete EFI
->>> variables. In fact, EFI variables really have nothing to do with this
->>> discussion, they're a completely opaque concept to the OS, we have no
->>> idea how the firmware implements them. Everything is done via the EFI
->>> boot/runtime services.
->>>
->>> The firmware itself will attempt to write to EFI regions when we
->>> invoke the EFI services because that's where the PE/COFF ".data" and
->>> ".bss" sections live along with the heap. There's even some relocation
->>> fixups that occur as SetVirtualAddressMap() time so it'll write to
->>> ".text" too.
->>>
->>> Now, the above PE/COFF sections are usually (always?) contained within
->>> EFI regions of type EfiRuntimeServicesCode. We know this is true
->>> because the firmware folks have told us so, and because stopping that
->>> is the motivation behind the new EFI_PROPERTIES_TABLE feature in UEFI
->>> V2.5.
->>>
->>> The data sections within the region are also *not* guaranteed to be
->>> page granular because work was required in Tianocore for emitting
->>> sections with 4k alignment as part of the EFI_PROPERTIES_TABLE
->>> support.
->>>
->>> Ultimately, what this means is that if you were to attempt to
->>> dynamically fixup those regions that required write permission, you'd
->>> have to modify the mappings for the majority of the EFI regions
->>> anyway. And if you're blindly allowing write permission as a fixup,
->>> there's not much security to be had.
->>
->> I think you misunderstood my suggestion: the 'fixup' would be changing it from R-X
->> to RW-, i.e. it would add 'write' permission but remove 'execute' permission.
->>
->> Note that there would be no 'RWX' permission at any given moment - which is the
->> dangerous combination.
->>
+>> The problem with that is that /any/ page in the UEFI runtime region
+>> may intersect with both .text and .data of any of the PE/COFF images
+>> that make up the runtime firmware (since the PE/COFF sections are not
+>> necessarily page aligned). Such pages require RWX permissions. The
+>> UEFI memory map does not provide the information to identify those
+>> pages a priori (the entire region containing several PE/COFF images
+>> could be covered by a single entry) so it is hard to guess which pages
+>> should be allowed these RWX permissions.
 >
-> The problem with that is that /any/ page in the UEFI runtime region
-> may intersect with both .text and .data of any of the PE/COFF images
-> that make up the runtime firmware (since the PE/COFF sections are not
-> necessarily page aligned). Such pages require RWX permissions. The
-> UEFI memory map does not provide the information to identify those
-> pages a priori (the entire region containing several PE/COFF images
-> could be covered by a single entry) so it is hard to guess which pages
-> should be allowed these RWX permissions.
-
-I'm sad that UEFI was designed without even the most basic of memory
-protections in mind. UEFI _itself_ should be setting up protective
-page mappings. :(
-
-For a boot firmware, it seems to me that safe page table layout would
-be a top priority bug. The "reporting issues" page for TianoCore
-doesn't actually seem to link to the "Project Tracker":
-https://github.com/tianocore/tianocore.github.io/wiki/Reporting-Issues
-
-Does anyone know how to get this correctly reported so future UEFI
-releases don't suffer from this?
-
--Kees
-
+> I'm sad that UEFI was designed without even the most basic of memory
+> protections in mind. UEFI _itself_ should be setting up protective
+> page mappings. :(
 >
->>> >     If that 'supposed to be' turns out to be 'not true' (not unheard of in
->>> >     firmware land), then plan B would be to mark pages that generate write faults
->>> >     RWX as well, to not break functionality. (This 'mark it RWX' is not something
->>> >     that exploits would have easy access to, and we could also generate a warning
->>> >     [after the EFI call has finished] if it ever triggers.)
->>> >
->>> >     Admittedly this approach might not be without its own complications, but it
->>> >     looks reasonably simple (I don't think we need per EFI call page tables,
->>> >     etc.), and does not assume much about the firmware being able to enumerate its
->>> >     permissions properly. Were we to merge EFI support today I'd have insisted on
->>> >     trying such an approach from day 1 on.
->>>
->>> We already have separate EFI page tables, though with the caveat that
->>> we share some of swapper_pg_dir's PGD entries. The best solution would
->>> be to stop sharing entries and isolate the EFI mappings from every
->>> other page table structure, so that they're only used during the EFI
->>> service calls.
->>
->> Absolutely. Can you try to fix this for v4.3?
->>
->> Thanks,
->>
->>         Ingo
 
+Well, the 4 KB alignment of sections was considered prohibitive at the
+time from code size pov. But this was a long time ago, obviously.
 
+> For a boot firmware, it seems to me that safe page table layout would
+> be a top priority bug. The "reporting issues" page for TianoCore
+> doesn't actually seem to link to the "Project Tracker":
+> https://github.com/tianocore/tianocore.github.io/wiki/Reporting-Issues
+>
+> Does anyone know how to get this correctly reported so future UEFI
+> releases don't suffer from this?
+>
+
+Ugh. Don't get me started on that topic. I have been working with the
+UEFI forum since July to get a fundamentally broken implementation of
+memory protections fixed. UEFI v2.5 defines a memory protection scheme
+that is based on splitting PE/COFF images into separate memory regions
+so that R-X and RW- permissions can be applied. Unfortunately, that
+broke every OS in existence (including Windows 8), since the OS is
+allowed to reorder memory regions when it lays out the virtual
+remapping of the UEFI regions, resulting in PE/COFF .data and .text
+potentially appearing out of order.
+
+The good news is that we fixed it for the upcoming release (v2.6). I
+can't disclose any specifics, though :-(
 
 -- 
-Kees Cook
-Chrome OS Security
+Ard.
+
+
+>>>> >     If that 'supposed to be' turns out to be 'not true' (not unheard of in
+>>>> >     firmware land), then plan B would be to mark pages that generate write faults
+>>>> >     RWX as well, to not break functionality. (This 'mark it RWX' is not something
+>>>> >     that exploits would have easy access to, and we could also generate a warning
+>>>> >     [after the EFI call has finished] if it ever triggers.)
+>>>> >
+>>>> >     Admittedly this approach might not be without its own complications, but it
+>>>> >     looks reasonably simple (I don't think we need per EFI call page tables,
+>>>> >     etc.), and does not assume much about the firmware being able to enumerate its
+>>>> >     permissions properly. Were we to merge EFI support today I'd have insisted on
+>>>> >     trying such an approach from day 1 on.
+>>>>
+>>>> We already have separate EFI page tables, though with the caveat that
+>>>> we share some of swapper_pg_dir's PGD entries. The best solution would
+>>>> be to stop sharing entries and isolate the EFI mappings from every
+>>>> other page table structure, so that they're only used during the EFI
+>>>> service calls.
+>>>
+>>> Absolutely. Can you try to fix this for v4.3?
+>>>
+>>> Thanks,
+>>>
+>>>         Ingo
+>
+>
+>
+> --
+> Kees Cook
+> Chrome OS Security
