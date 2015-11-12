@@ -1,65 +1,67 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 3/6] x86/efi: Map RAM into the identity page table for mixed mode
-Date: Thu, 12 Nov 2015 15:40:20 +0000
-Message-ID: <1447342823-3612-4-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 6/6] Documentation/x86: Update EFI memory region description
+Date: Thu, 12 Nov 2015 15:40:23 +0000
+Message-ID: <1447342823-3612-7-git-send-email-matt@codeblueprint.co.uk>
 References: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@codemonkey.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>
 List-Id: linux-efi@vger.kernel.org
 
-We are relying on the pre-existing mappings in 'trampoline_pgd' when
-accessing function arguments in the EFI mixed mode thunking code.
+Make it clear that the EFI page tables are only available during EFI
+runtime calls since that subject has come up a fair numbers of times
+in the past.
 
-Instead let's map memory explicitly so that things will continue to
-work when we move to a separate page table in the future.
+Additionally, add the EFI region start and end addresses to the table
+so that it's possible to see at a glance where they fall in relation
+to other regions.
 
 Cc: Borislav Petkov <bp@alien8.de>
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Dave Jones <davej@codemonkey.org.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Andy Lutomirski <luto@kernel.org>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>,
+Cc: Stephen Smalley <sds@tycho.nsa.gov>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi_64.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
+ Documentation/x86/x86_64/mm.txt | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c8b58ac47b77..634536034e32 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -144,6 +144,7 @@ void efi_sync_low_kernel_mappings(void)
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long pfn, text;
-+	efi_memory_desc_t *md;
- 	struct page *page;
- 	unsigned npages;
- 	pgd_t *pgd;
-@@ -200,6 +201,25 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+diff --git a/Documentation/x86/x86_64/mm.txt b/Documentation/x86/x86_64/mm.txt
+index 05712ac83e38..a9885bb1ac22 100644
+--- a/Documentation/x86/x86_64/mm.txt
++++ b/Documentation/x86/x86_64/mm.txt
+@@ -16,6 +16,8 @@ ffffec0000000000 - fffffc0000000000 (=44 bits) kasan shadow memory (16TB)
+ ... unused hole ...
+ ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
+ ... unused hole ...
++ffffffef00000000 - ffffffff00000000 (=64 GB) EFI region mapping space
++... unused hole ...
+ ffffffff80000000 - ffffffffa0000000 (=512 MB)  kernel text mapping, from phys 0
+ ffffffffa0000000 - ffffffffff5fffff (=1525 MB) module mapping space
+ ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
+@@ -32,11 +34,9 @@ reference.
+ Current X86-64 implementations only support 40 bits of address space,
+ but we support up to 46 bits. This expands into MBZ space in the page tables.
  
- 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
+-->trampoline_pgd:
+-
+-We map EFI runtime services in the aforementioned PGD in the virtual
+-range of 64Gb (arbitrarily set, can be raised if needed)
+-
+-0xffffffef00000000 - 0xffffffff00000000
++We map EFI runtime services in the efi_pgd PGD in the virtual range of
++64Gb (arbitrarily set, can be raised if needed). The mappings are not
++part of any other kernel PGD and are only available during EFI runtime
++calls.
  
-+	/*
-+	 * Map all of RAM so that we can access arguments in the 1:1
-+	 * mapping when making EFI runtime calls.
-+	 */
-+	for_each_efi_memory_desc(&memmap, md) {
-+		if (md->type != EFI_CONVENTIONAL_MEMORY &&
-+		    md->type != EFI_LOADER_DATA &&
-+		    md->type != EFI_LOADER_CODE)
-+			continue;
-+
-+		pfn = md->phys_addr >> PAGE_SHIFT;
-+		npages = md->num_pages;
-+
-+		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, 0)) {
-+			pr_err("Failed to map 1:1 memory\n");
-+			return 1;
-+		}
-+	}
-+
- 	return 0;
- }
- 
+ -Andi Kleen, Jul 2004
 -- 
 2.6.2
