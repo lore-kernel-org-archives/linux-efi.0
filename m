@@ -1,99 +1,104 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 4/6] x86/efi: Hoist page table switching code into
- efi_call_virt()
-Date: Thu, 12 Nov 2015 20:15:42 +0000
-Message-ID: <20151112201542.GG2681@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 5/6] x86/efi: Build our own page table structures
+Date: Thu, 12 Nov 2015 21:38:57 +0000
+Message-ID: <20151112213857.GH2681@codeblueprint.co.uk>
 References: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
- <1447342823-3612-5-git-send-email-matt@codeblueprint.co.uk>
- <20151112184714.GH3838@pd.tnic>
+ <1447342823-3612-6-git-send-email-matt@codeblueprint.co.uk>
+ <20151112183813.GF3838@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20151112184714.GH3838@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@codemonkey.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>
+In-Reply-To: <20151112183813.GF3838-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Dave Jones <davej-rdkfGonbjUTCLXcRTR1eJlpr/1R2p/CL@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 12 Nov, at 07:47:14PM, Borislav Petkov wrote:
-> 
-> checkpatch is bitching here - not that I agree with it:
-> 
-> WARNING: please, no space before tabs
-> #87: FILE: arch/x86/include/asm/efi.h:88:
-> +^I^Iefi_scratch.prev_cr3 = read_cr3(); ^I^I^I\$
-> 
-> WARNING: please, no space before tabs
-> #89: FILE: arch/x86/include/asm/efi.h:90:
-> +^I^I__flush_tlb_all(); ^I^I^I^I^I\$
-> 
-> WARNING: please, no space before tabs
-> #94: FILE: arch/x86/include/asm/efi.h:95:
-> +^Iif (efi_scratch.use_pgd) { ^I^I^I^I^I\$
-> 
-> WARNING: please, no space before tabs
-> #96: FILE: arch/x86/include/asm/efi.h:97:
-> +^I^I__flush_tlb_all(); ^I^I^I^I^I\$
-> 
-> WARNING: please, no space before tabs
-> #97: FILE: arch/x86/include/asm/efi.h:98:
-> +^I} ^I^I^I^I^I^I^I^I\$
- 
-Crap. These look legit, I'll fix this up in v2.
-
-> > diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> > index 634536034e32..ab5f14a886cc 100644
-> > --- a/arch/x86/platform/efi/efi_64.c
-> > +++ b/arch/x86/platform/efi/efi_64.c
-> > @@ -47,16 +47,7 @@
-> >   */
-> >  static u64 efi_va = EFI_VA_START;
+On Thu, 12 Nov, at 07:38:13PM, Borislav Petkov wrote:
+> > @@ -831,6 +831,12 @@ static void __init __efi_enter_virtual_mode(void)
+> >  	efi.systab = NULL;
 > >  
-> > -/*
-> > - * Scratch space used for switching the pagetable in the EFI stub
-> > - */
-> > -struct efi_scratch {
-> > -	u64 r15;
-> > -	u64 prev_cr3;
-> > -	pgd_t *efi_pgt;
-> > -	bool use_pgd;
-> > -	u64 phys_stack;
-> > -} __packed;
-> > +struct efi_scratch efi_scratch;
-> >  
-> >  static void __init early_code_mapping_set_exec(int executable)
-> >  {
-> > @@ -83,8 +74,11 @@ pgd_t * __init efi_call_phys_prolog(void)
-> >  	int pgd;
-> >  	int n_pgds;
-> >  
-> > -	if (!efi_enabled(EFI_OLD_MEMMAP))
-> > -		return NULL;
-> > +	if (!efi_enabled(EFI_OLD_MEMMAP)) {
-> > +		save_pgd = (pgd_t *)read_cr3();
-> > +		write_cr3((unsigned long)efi_scratch.efi_pgt);
-> > +		goto out;
+> >  	efi_merge_regions();
+> > +	if (efi_alloc_page_tables()) {
+> > +		pr_err("Failed to allocate EFI page tables\n");
+> > +		clear_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+> > +		return;
 > > +	}
-> >  
-> >  	early_code_mapping_set_exec(1);
-> >  
-> > @@ -96,6 +90,7 @@ pgd_t * __init efi_call_phys_prolog(void)
-> >  		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
-> >  		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
-> >  	}
-> > +out:
-> >  	__flush_tlb_all();
-> >  
-> >  	return save_pgd;
-> > @@ -109,8 +104,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
 > 
-> There's a comment here:
-> 
->         /*
->          * After the lock is released, the original page table is restored.
->          */
-> 
-> Which lock are we talking about?
+> This should happen before efi_merge_regions() - no need to merge if we
+> can't alloc PGT.
+ 
+Fair point.
 
-No idea, we don't take any locks. Looks like a stale comment.
+> > +
+> >  	new_memmap = efi_map_regions(&count, &pg_shift);
+> >  	if (!new_memmap) {
+> >  		pr_err("Error reallocating memory, EFI runtime non-functional!\n");
+> > @@ -888,29 +894,12 @@ static void __init __efi_enter_virtual_mode(void)
+> >  
+> >  	efi_runtime_mkexec();
+> >  
+> > -	/*
+> > -	 * We mapped the descriptor array into the EFI pagetable above but we're
+> > -	 * not unmapping it here. Here's why:
+> > -	 *
+> > -	 * We're copying select PGDs from the kernel page table to the EFI page
+> > -	 * table and when we do so and make changes to those PGDs like unmapping
+> > -	 * stuff from them, those changes appear in the kernel page table and we
+> > -	 * go boom.
+> > -	 *
+> > -	 * From setup_real_mode():
+> > -	 *
+> > -	 * ...
+> > -	 * trampoline_pgd[0] = init_level4_pgt[pgd_index(__PAGE_OFFSET)].pgd;
+> > -	 *
+> > -	 * In this particular case, our allocation is in PGD 0 of the EFI page
+> > -	 * table but we've copied that PGD from PGD[272] of the EFI page table:
+> > -	 *
+> > -	 *	pgd_index(__PAGE_OFFSET = 0xffff880000000000) = 272
+> > -	 *
+> > -	 * where the direct memory mapping in kernel space is.
+> > -	 *
+> > -	 * new_memmap's VA comes from that direct mapping and thus clearing it,
+> > -	 * it would get cleared in the kernel page table too.
+> > +        /*
+> 
+> ERROR: code indent should use tabs where possible
+> #149: FILE: arch/x86/platform/efi/efi.c:897:
+> +        /*$
+> 
+> ...
+ 
+Dammit vim. I'll fix this.
+
+> >  void efi_sync_low_kernel_mappings(void)
+> >  {
+> > -	unsigned num_pgds;
+> > -	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+> > +	unsigned num_entries;
+> > +	pgd_t *pgd_k, *pgd_efi;
+> > +	pud_t *pud_k, *pud_efi;
+> >  
+> >  	if (efi_enabled(EFI_OLD_MEMMAP))
+> >  		return;
+> >  
+> > -	num_pgds = pgd_index(MODULES_END - 1) - pgd_index(PAGE_OFFSET);
+> > +	/*
+> > +	 * We can share all PGD entries apart from the one entry that
+> > +	 * covers the EFI runtime mapping space.
+> > +	 *
+> > +	 * Make sure the EFI runtime region mappings are guaranteed to
+> > +	 * only span a single PGD entry and that the entry also maps
+> > +	 * other important kernel regions.
+> > +	 */
+> > +	BUILD_BUG_ON(pgd_index(EFI_VA_END) != pgd_index(MODULES_END));
+> > +	BUILD_BUG_ON((EFI_VA_START & PGDIR_MASK) !=
+> > +				(EFI_VA_END & PGDIR_MASK));
+> 
+> You can align them in a more readable way:
+> 
+> 	BUILD_BUG_ON((EFI_VA_START & PGDIR_MASK) !=
+> 		       (EFI_VA_END & PGDIR_MASK));
+
+Sure.
