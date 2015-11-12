@@ -1,8 +1,8 @@
 From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Subject: Re: [PATCH 4/6] x86/efi: Hoist page table switching code into
  efi_call_virt()
-Date: Thu, 12 Nov 2015 19:44:32 +0100
-Message-ID: <20151112184432.GG3838@pd.tnic>
+Date: Thu, 12 Nov 2015 19:47:14 +0100
+Message-ID: <20151112184714.GH3838@pd.tnic>
 References: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
  <1447342823-3612-5-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
@@ -96,6 +96,30 @@ On Thu, Nov 12, 2015 at 03:40:21PM +0000, Matt Fleming wrote:
 >  	__kernel_fpu_end();						\
 >  	preempt_enable();						\
 >  	__s;								\
+
+checkpatch is bitching here - not that I agree with it:
+
+WARNING: please, no space before tabs
+#87: FILE: arch/x86/include/asm/efi.h:88:
++^I^Iefi_scratch.prev_cr3 = read_cr3(); ^I^I^I\$
+
+WARNING: please, no space before tabs
+#89: FILE: arch/x86/include/asm/efi.h:90:
++^I^I__flush_tlb_all(); ^I^I^I^I^I\$
+
+WARNING: please, no space before tabs
+#94: FILE: arch/x86/include/asm/efi.h:95:
++^Iif (efi_scratch.use_pgd) { ^I^I^I^I^I\$
+
+WARNING: please, no space before tabs
+#96: FILE: arch/x86/include/asm/efi.h:97:
++^I^I__flush_tlb_all(); ^I^I^I^I^I\$
+
+WARNING: please, no space before tabs
+#97: FILE: arch/x86/include/asm/efi.h:98:
++^I} ^I^I^I^I^I^I^I^I\$
+
+
 > diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
 > index 634536034e32..ab5f14a886cc 100644
 > --- a/arch/x86/platform/efi/efi_64.c
@@ -132,50 +156,36 @@ On Thu, Nov 12, 2015 at 03:40:21PM +0000, Matt Fleming wrote:
 >  
 >  	early_code_mapping_set_exec(1);
 >  
+> @@ -96,6 +90,7 @@ pgd_t * __init efi_call_phys_prolog(void)
+>  		vaddress = (unsigned long)__va(pgd * PGDIR_SIZE);
+>  		set_pgd(pgd_offset_k(pgd * PGDIR_SIZE), *pgd_offset_k(vaddress));
+>  	}
+> +out:
+>  	__flush_tlb_all();
+>  
+>  	return save_pgd;
+> @@ -109,8 +104,11 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
 
-So this one is called in phys_efi_set_virtual_address_map() like this:
+There's a comment here:
 
-----
-        save_pgd = efi_call_phys_prolog();
+        /*
+         * After the lock is released, the original page table is restored.
+         */
 
-        /* Disable interrupts around EFI calls: */
-        local_irq_save(flags);
+Which lock are we talking about?
 
-	<--- MARKER
-
-        status = efi_call_phys(efi_phys.set_virtual_address_map,
-                               memory_map_size, descriptor_size,
-                               descriptor_version, virtual_map);
-        local_irq_restore(flags);
-
-        efi_call_phys_epilog(save_pgd);
----
-
-
-Now, if you look at MARKER, the asm looks like this here:
-
-        .loc 1 91 0
-        call    efi_call_phys_prolog    #
-        movq    %rax, %r15      #, save_pgd
-
-        .file 6 "./arch/x86/include/asm/irqflags.h"
-        .loc 6 20 0
-#APP
-# 20 "./arch/x86/include/asm/irqflags.h" 1
-        # __raw_save_flags
-        pushf ; pop %r14        # flags
-
-
-That PUSHF implicitly pushes on the stack pointed by %rsp. But(!) we
-have switched the pagetable (i.e., %cr3 has efi_scratch.efi_pgt) and
-we're pushing to the VA where the stack *was* but is not anymore.
-
-Or maybe it is because you're copying all the PUDs. It is still not 100%
-clean, IMHO.
-
-Can you do the prolog/epilog calls inside the IRQs-off section?
-
-Btw, it was crap like that why I wanted to do SWITCH_PGT in asm...
+>  	int pgd_idx;
+>  	int nr_pgds;
+>  
+> -	if (!save_pgd)
+> +	if (!efi_enabled(EFI_OLD_MEMMAP)) {
+> +		write_cr3((unsigned long)save_pgd);
+> +		__flush_tlb_all();
+>  		return;
+> +	}
+>  
+>  	nr_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT) , PGDIR_SIZE);
+>  
 
 -- 
 Regards/Gruss,
