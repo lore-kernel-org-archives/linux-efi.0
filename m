@@ -1,51 +1,63 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 6/6] Documentation/x86: Update EFI memory region
- description
-Date: Fri, 13 Nov 2015 09:29:06 +0000
-Message-ID: <20151113092906.GD2716@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 4/6] x86/efi: Hoist page table switching code into
+ efi_call_virt()
+Date: Fri, 13 Nov 2015 16:19:13 +0000
+Message-ID: <20151113161913.GF2716@codeblueprint.co.uk>
 References: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
- <1447342823-3612-7-git-send-email-matt@codeblueprint.co.uk>
- <20151113092210.GB19922@gmail.com>
+ <1447342823-3612-5-git-send-email-matt@codeblueprint.co.uk>
+ <20151112184432.GG3838@pd.tnic>
+ <20151112200108.GF2681@codeblueprint.co.uk>
+ <20151113075943.GB23605@pd.tnic>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20151113092210.GB19922@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@codemonkey.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>
+In-Reply-To: <20151113075943.GB23605-fF5Pk5pvG8Y@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Dave Jones <davej-rdkfGonbjUTCLXcRTR1eJlpr/1R2p/CL@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Stephen Smalley <sds-+05T5uksL2qpZYMLLGbcSA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 13 Nov, at 10:22:10AM, Ingo Molnar wrote:
+On Fri, 13 Nov, at 08:59:43AM, Borislav Petkov wrote:
+> On Thu, Nov 12, 2015 at 08:01:08PM +0000, Matt Fleming wrote:
+> > > That PUSHF implicitly pushes on the stack pointed by %rsp. But(!) we
+> > > have switched the pagetable (i.e., %cr3 has efi_scratch.efi_pgt) and
+> > > we're pushing to the VA where the stack *was* but is not anymore.
+> >  
+> > All the kernel mappings will still exist in the page table we switch
+> > to, so pushing to the stack should be fine.
+> > 
+> > The mappings have to exist so that the firmware can dereference
+> > pointer arguments, e.g. when writing variable data to a kernel buffer.
+> > 
+> > Or have I misunderstood your point?
+> > 
+> > > Or maybe it is because you're copying all the PUDs. It is still not 100%
+> > > clean, IMHO.
+> ^^^^^^^^^^^^^^^^^
 > 
-> * Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> 
-> > +We map EFI runtime services in the efi_pgd PGD in the virtual range of
-> > +64Gb (arbitrarily set, can be raised if needed). The mappings are not
-> > +part of any other kernel PGD and are only available during EFI runtime
-> > +calls.
-> 
-> Is that virtual address range 0-64Gb, i.e.:
-> 
-> 	0x00000000.00000000 - 0x00000010.00000000
-> 
-> or is it somewhere else?
+> I think we're on the same page - you're copying the PUDs in
+> efi_sync_low_kernel_mappings() so the stack should be there.
 
-You've snipped the patch hunk that gives the address range used,
+Correct.
 
-diff --git a/Documentation/x86/x86_64/mm.txt
-b/Documentation/x86/x86_64/mm.txt
-index 05712ac83e38..a9885bb1ac22 100644
---- a/Documentation/x86/x86_64/mm.txt
-+++ b/Documentation/x86/x86_64/mm.txt
-@@ -16,6 +16,8 @@ ffffec0000000000 - fffffc0000000000 (=44 bits) kasan
-shadow memory (16TB)
- ... unused hole ...
- ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
- ... unused hole ...
-+ffffffef00000000 - ffffffff00000000 (=64 GB) EFI region mapping space
-+... unused hole ...
- ffffffff80000000 - ffffffffa0000000 (=512 MB)  kernel text mapping,
-from phys 0
- ffffffffa0000000 - ffffffffff5fffff (=1525 MB) module mapping space
- ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
+> > > Can you do the prolog/epilog calls inside the IRQs-off section?
+> > 
+> > Not really because in the efi_enabled(EFI_OLD_MEMMAP) case we perform
+> > kmalloc(), see commit 23a0d4e8fa6d ("efi: Disable interrupts around
+> > EFI calls, not in the epilog/prolog calls").
+> 
+>         n_pgds = DIV_ROUND_UP((max_pfn << PAGE_SHIFT), PGDIR_SIZE);
+>         save_pgd = kmalloc(n_pgds * sizeof(pgd_t), GFP_KERNEL);
+> 
+> This?
+> 
+> That n_pgds thing is of static size so you can pre-alloc it maybe even
+> once during boot and reuse it all the time when EFI_OLD_MEMMAP is
+> enabled.
+
+Well, this code is only executed once during boot anyway, for
+phys_efi_set_virtual_address_map().
+
+FYI, I'm still planning on ripping out all the EFI_OLD_MEMMAP code, as
+it's getting particularly crufty.
