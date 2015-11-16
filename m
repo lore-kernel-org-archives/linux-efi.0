@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 08/12] ARM: factor out allocation routine from __create_mapping()
-Date: Mon, 16 Nov 2015 19:32:33 +0100
-Message-ID: <1447698757-8762-9-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 11/12] ARM: wire up UEFI init and runtime support
+Date: Mon, 16 Nov 2015 19:32:36 +0100
+Message-ID: <1447698757-8762-12-git-send-email-ard.biesheuvel@linaro.org>
 References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1447698757-8762-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,120 +10,188 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-To allow __create_mapping() to be used for populating UEFI Runtime
-Services page tables, factor out the allocation routine 'early_alloc'
-and pass it down as a function pointer into alloc_init_[pud|pmd|pte].
-This way, new users of __create_mapping() can supply another allocation
-function.
+This adds support to the kernel proper for booting via UEFI. It shares
+most of the code with arm64, so this patch mostly just wires it up for
+use with ARM.
+
+Note that this does not include the EFI stub, it is added in a subsequent
+patch.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/mm/mmu.c | 34 +++++++++++++-------
- 1 file changed, 23 insertions(+), 11 deletions(-)
+ arch/arm/include/asm/efi.h    | 67 ++++++++++++++++++++
+ arch/arm/kernel/Makefile      |  1 +
+ arch/arm/kernel/efi.c         | 38 +++++++++++
+ arch/arm/kernel/setup.c       |  3 +
+ drivers/firmware/efi/Makefile |  1 +
+ 5 files changed, 110 insertions(+)
 
-diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index 3100de92148b..87dc49dbe231 100644
---- a/arch/arm/mm/mmu.c
-+++ b/arch/arm/mm/mmu.c
-@@ -724,21 +724,30 @@ static void __init *early_alloc(unsigned long sz)
- 	return early_alloc_aligned(sz, sz);
- }
- 
--static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr, unsigned long prot)
-+static pte_t * __init pte_alloc(pmd_t *pmd, unsigned long addr,
-+				unsigned long prot,
-+				void *(*alloc)(unsigned long sz))
- {
- 	if (pmd_none(*pmd)) {
--		pte_t *pte = early_alloc(PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE);
-+		pte_t *pte = alloc(PTE_HWTABLE_OFF + PTE_HWTABLE_SIZE);
- 		__pmd_populate(pmd, __pa(pte), prot);
- 	}
- 	BUG_ON(pmd_bad(*pmd));
- 	return pte_offset_kernel(pmd, addr);
- }
- 
-+static pte_t * __init early_pte_alloc(pmd_t *pmd, unsigned long addr,
-+				      unsigned long prot)
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+new file mode 100644
+index 000000000000..96cac28a6a24
+--- /dev/null
++++ b/arch/arm/include/asm/efi.h
+@@ -0,0 +1,67 @@
++/*
++ * Copyright (C) 2015 Linaro Ltd <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#ifndef __ASM_ARM_EFI_H
++#define __ASM_ARM_EFI_H
++
++#include <asm/cacheflush.h>
++#include <asm/cachetype.h>
++#include <asm/early_ioremap.h>
++#include <asm/fixmap.h>
++#include <asm/highmem.h>
++#include <asm/mach/map.h>
++#include <asm/mmu_context.h>
++#include <asm/pgtable.h>
++
++#ifdef CONFIG_EFI
++void efi_init(void);
++
++int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
++
++#define efi_call_virt(f, ...)						\
++({									\
++	efi_##f##_t *__f;						\
++	efi_status_t __s;						\
++									\
++	efi_virtmap_load();						\
++	__f = efi.systab->runtime->f;					\
++	__s = __f(__VA_ARGS__);						\
++	efi_virtmap_unload();						\
++	__s;								\
++})
++
++#define __efi_call_virt(f, ...)						\
++({									\
++	efi_##f##_t *__f;						\
++									\
++	efi_virtmap_load();						\
++	__f = efi.systab->runtime->f;					\
++	__f(__VA_ARGS__);						\
++	efi_virtmap_unload();						\
++})
++
++static inline void efi_set_pgd(struct mm_struct *mm)
 +{
-+	return pte_alloc(pmd, addr, prot, early_alloc);
++	if (unlikely(mm->context.vmalloc_seq != init_mm.context.vmalloc_seq))
++		__check_vmalloc_seq(mm);
++
++	cpu_switch_mm(mm->pgd, mm);
++
++	flush_tlb_all();
++	if (icache_is_vivt_asid_tagged())
++		__flush_icache_all();
 +}
 +
- static void __init alloc_init_pte(pmd_t *pmd, unsigned long addr,
- 				  unsigned long end, unsigned long pfn,
--				  const struct mem_type *type)
-+				  const struct mem_type *type,
-+				  void *(*alloc)(unsigned long sz))
- {
--	pte_t *pte = early_pte_alloc(pmd, addr, type->prot_l1);
-+	pte_t *pte = pte_alloc(pmd, addr, type->prot_l1, alloc);
- 	do {
- 		set_pte_ext(pte, pfn_pte(pfn, __pgprot(type->prot_pte)), 0);
- 		pfn++;
-@@ -774,7 +783,8 @@ static void __init __map_init_section(pmd_t *pmd, unsigned long addr,
++void efi_virtmap_load(void);
++void efi_virtmap_unload(void);
++
++#else
++#define efi_init()
++#endif /* CONFIG_EFI */
++
++#endif /* _ASM_ARM_EFI_H */
+diff --git a/arch/arm/kernel/Makefile b/arch/arm/kernel/Makefile
+index af9e59bf3831..c90f4a70d646 100644
+--- a/arch/arm/kernel/Makefile
++++ b/arch/arm/kernel/Makefile
+@@ -77,6 +77,7 @@ CFLAGS_pj4-cp0.o		:= -marm
+ AFLAGS_iwmmxt.o			:= -Wa,-mcpu=iwmmxt
+ obj-$(CONFIG_ARM_CPU_TOPOLOGY)  += topology.o
+ obj-$(CONFIG_VDSO)		+= vdso.o
++obj-$(CONFIG_EFI)		+= efi.o
  
- static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 				      unsigned long end, phys_addr_t phys,
--				      const struct mem_type *type)
-+				      const struct mem_type *type,
-+				      void *(*alloc)(unsigned long sz))
- {
- 	pmd_t *pmd = pmd_offset(pud, addr);
- 	unsigned long next;
-@@ -795,7 +805,7 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
- 			__map_init_section(pmd, addr, next, phys, type);
- 		} else {
- 			alloc_init_pte(pmd, addr, next,
--						__phys_to_pfn(phys), type);
-+				       __phys_to_pfn(phys), type, alloc);
- 		}
+ ifneq ($(CONFIG_ARCH_EBSA110),y)
+   obj-y		+= io.o
+diff --git a/arch/arm/kernel/efi.c b/arch/arm/kernel/efi.c
+new file mode 100644
+index 000000000000..743806dfdacc
+--- /dev/null
++++ b/arch/arm/kernel/efi.c
+@@ -0,0 +1,38 @@
++/*
++ * Copyright (C) 2015 Linaro Ltd <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
++ */
++
++#include <linux/efi.h>
++#include <asm/efi.h>
++#include <asm/mach/map.h>
++#include <asm/mmu_context.h>
++
++int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
++{
++	struct map_desc desc = {
++		.virtual	= md->virt_addr,
++		.pfn		= __phys_to_pfn(md->phys_addr),
++		.length		= md->num_pages * EFI_PAGE_SIZE,
++	};
++
++	/*
++	 * Order is important here: memory regions may have all of the
++	 * bits below set (and usually do), so we check them in order of
++	 * preference.
++	 */
++	if (md->attribute & EFI_MEMORY_WB)
++		desc.type = MT_MEMORY_RWX;
++	else if (md->attribute & EFI_MEMORY_WT)
++		desc.type = MT_MEMORY_RWX_NONCACHED;
++	else if (md->attribute & EFI_MEMORY_WC)
++		desc.type = MT_DEVICE_WC;
++	else
++		desc.type = MT_DEVICE;
++
++	create_mapping_late(mm, &desc);
++	return 0;
++}
+diff --git a/arch/arm/kernel/setup.c b/arch/arm/kernel/setup.c
+index 5df2bca57c42..b341b1c3b2fa 100644
+--- a/arch/arm/kernel/setup.c
++++ b/arch/arm/kernel/setup.c
+@@ -7,6 +7,7 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  */
++#include <linux/efi.h>
+ #include <linux/export.h>
+ #include <linux/kernel.h>
+ #include <linux/stddef.h>
+@@ -37,6 +38,7 @@
+ #include <asm/cp15.h>
+ #include <asm/cpu.h>
+ #include <asm/cputype.h>
++#include <asm/efi.h>
+ #include <asm/elf.h>
+ #include <asm/early_ioremap.h>
+ #include <asm/fixmap.h>
+@@ -966,6 +968,7 @@ void __init setup_arch(char **cmdline_p)
+ 	early_paging_init(mdesc);
+ #endif
+ 	setup_dma_zone(mdesc);
++	efi_init();
+ 	sanity_check_meminfo();
+ 	arm_memblock_init(mdesc);
  
- 		phys += next - addr;
-@@ -805,14 +815,15 @@ static void __init alloc_init_pmd(pud_t *pud, unsigned long addr,
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index f292917b00e7..62e654f255f4 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -20,4 +20,5 @@ obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
  
- static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
- 				  unsigned long end, phys_addr_t phys,
--				  const struct mem_type *type)
-+				  const struct mem_type *type,
-+				  void *(*alloc)(unsigned long sz))
- {
- 	pud_t *pud = pud_offset(pgd, addr);
- 	unsigned long next;
- 
- 	do {
- 		next = pud_addr_end(addr, end);
--		alloc_init_pmd(pud, addr, next, phys, type);
-+		alloc_init_pmd(pud, addr, next, phys, type, alloc);
- 		phys += next - addr;
- 	} while (pud++, addr = next, addr != end);
- }
-@@ -877,7 +888,8 @@ static void __init create_36bit_mapping(struct mm_struct *mm,
- }
- #endif	/* !CONFIG_ARM_LPAE */
- 
--static void __init __create_mapping(struct mm_struct *mm, struct map_desc *md)
-+static void __init __create_mapping(struct mm_struct *mm, struct map_desc *md,
-+				    void *(*alloc)(unsigned long sz))
- {
- 	unsigned long addr, length, end;
- 	phys_addr_t phys;
-@@ -911,7 +923,7 @@ static void __init __create_mapping(struct mm_struct *mm, struct map_desc *md)
- 	do {
- 		unsigned long next = pgd_addr_end(addr, end);
- 
--		alloc_init_pud(pgd, addr, next, phys, type);
-+		alloc_init_pud(pgd, addr, next, phys, type, alloc);
- 
- 		phys += next - addr;
- 		addr = next;
-@@ -940,7 +952,7 @@ static void __init create_mapping(struct map_desc *md)
- 			(long long)__pfn_to_phys((u64)md->pfn), md->virtual);
- 	}
- 
--	__create_mapping(&init_mm, md);
-+	__create_mapping(&init_mm, md, early_alloc);
- }
- 
- /*
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
++obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+ obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
 -- 
 1.9.1
