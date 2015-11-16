@@ -1,40 +1,51 @@
-From: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 1/5] x86/mm/pageattr: Ensure cpa->pfn only contains
- page frame numbers
-Date: Mon, 16 Nov 2015 07:56:17 -0800
-Message-ID: <5649FCA1.1000600@intel.com>
-References: <1447538451-5793-1-git-send-email-matt@codeblueprint.co.uk>
- <1447538451-5793-2-git-send-email-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Subject: [PATCH 1/2] Remove EFI memmap quirk for UV
+Date: Mon, 16 Nov 2015 11:59:40 -0600
+Message-ID: <1447696781-159611-1-git-send-email-athorlton@sgi.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447538451-5793-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Hedi Berriche <hedi-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-I'm glad you're looking at this. It obviously needed some love. :)
+Commit a5d90c923bcf ("x86/efi: Quirk out SGI UV") added a quirk to
+efi_apply_memmap_quirks to force SGI UV systems to fall back to the old
+EFI memmap mechanism.  We have a BIOS fix for this issue now, so we no
+longer need this quirk in the kernel.  This commit removes the quirk
+from the function in question.
 
-On 11/14/2015 02:00 PM, Matt Fleming wrote:
-> +	npages = (_end - _text) >> PAGE_SHIFT;
-> +	text = __pa(_text);
-> +	pfn = text >> PAGE_SHIFT;
-> +
-> +	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
-> +		pr_err("Failed to map kernel text 1:1\n");
-> +		return 1;
-> +	}
+Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
+Acked-by: Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
+Acked-by: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Hedi Berriche <hedi-sJ/iWh9BUns@public.gmane.org>
+Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
+Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 
-Are _end and _text guaranteed to be aligned?  If not, I think the
-calculation might be wrong.  Just for fun, imagine that _end=0xfff and
-_text=0x1001.  npages would be 0.
+---
+ arch/x86/platform/efi/quirks.c | 6 ------
+ 1 file changed, 6 deletions(-)
 
-Some other code like set_kernel_text_rw() does alignment on _text.
-
-One nit is that there's quite a bit going on here, like rearranging the
-phys_stack arithmetic ordering that is far beyond just simplifying the
-paddr vs. pfn issue, but that isn't called out in the changelog at all.
-
-Your fixes all look correct to me, fwiw.
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 1c7380d..96b417c 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -259,12 +259,6 @@ void __init efi_apply_memmap_quirks(void)
+ 		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
+ 		efi_unmap_memmap();
+ 	}
+-
+-	/*
+-	 * UV doesn't support the new EFI pagetable mapping yet.
+-	 */
+-	if (is_uv_system())
+-		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+ }
+ 
+ /*
+-- 
+1.8.5.6
