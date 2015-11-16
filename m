@@ -1,33 +1,73 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 01/12] mm/memblock: add MEMBLOCK_NOMAP attribute to memblock memory table
-Date: Mon, 16 Nov 2015 21:33:47 +0100
-Message-ID: <35E90006-1E43-4483-8B18-7123E12E68FF@linaro.org>
-References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org> <1447698757-8762-2-git-send-email-ard.biesheuvel@linaro.org> <20151116185859.GF8644@n2100.arm.linux.org.uk> <CAKv+Gu-COD0eSWqaTfV_QgCDEiBg5Af8FDVx+TMiYuVkqgTrvw@mail.gmail.com> <20151116194914.GK8644@n2100.arm.linux.org.uk>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-	charset=us-ascii
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151116194914.GK8644-l+eeeJia6m9vn6HldHNs0ANdhmdF6hFW@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ryan Harkin <ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>
+From: Borislav Petkov <bp@suse.de>
+Subject: Re: [PATCH v2 1/5] x86/mm/pageattr: Ensure cpa->pfn only contains
+ page frame numbers
+Date: Mon, 16 Nov 2015 22:20:42 +0100
+Message-ID: <20151116212042.GE20435@pd.tnic>
+References: <1447538451-5793-1-git-send-email-matt@codeblueprint.co.uk>
+ <1447538451-5793-2-git-send-email-matt@codeblueprint.co.uk>
+ <alpine.DEB.2.11.1511162010120.3761@nanos>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.11.1511162010120.3761@nanos>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Thomas Gleixner <tglx@linutronix.de>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ingo Molnar <mingo@kernel.org>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Dave Hansen <dave.hansen@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, Nov 16, 2015 at 09:19:01PM +0100, Thomas Gleixner wrote:
+> On Sat, 14 Nov 2015, Matt Fleming wrote:
+> > The x86 pageattr code is confused about the data that is stored
+> > cpa->pfn, sometimes it's treated as a page frame number, sometimes
+> > it's treated as an unshifted physical address, and in one place it'=
+s
+> > treated as a pte.
+>=20
+> Yuck.
 
+This paragraph should read like this instead:
 
-> On 16 nov. 2015, at 20:49, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org> wrote:
-> 
->> On Mon, Nov 16, 2015 at 08:09:38PM +0100, Ard Biesheuvel wrote:
->> The main difference is that memblock_is_memory() still returns true
->> for the region. This is useful in some cases, e.g., to decide which
->> attributes to use when mapping.
-> 
-> Ok, so we'd need to switch to using memblock_is_map_memory() instead
-> for pfn_valid() then.
+"Boris used cpa->pfn as a scratch variable to contain the physical
+address. He realizes now that he should've added a separate
+cpa_data.phys_addr then, instead of confusing everybody."
 
-Indeed, as is implemented by 10/12
+> > The result of this is that the mapping functions do not map the
+> > intended physical address.
+> >=20
+> > This isn't a problem in practice because most of the addresses we'r=
+e
+> > mapping in the EFI code paths are already mapped in 'trampoline_pgd=
+'
+> > and so the pageattr mappings functions don't actually do anything i=
+n
+> > this case. But when we move to using a separate page table for the =
+EFI
+> > runtime this will be an issue.
+>=20
+> Are you sure that this does not affect existing kernel versions?
 
-> -- 
-> FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-> according to speedtest.net.
+Shouldn't because with this new patchset we're copying all the PGDs fro=
+m
+the kernel page table before doing an EFI call, see
+efi_sync_low_kernel_mappings() in patch 5.
+
+> >  	while (num_pages-- && start < end) {
+> > -
+> > -		/* deal with the NX bit */
+> > -		if (!(pgprot_val(pgprot) & _PAGE_NX))
+> > -			cpa->pfn &=3D ~_PAGE_NX;
+>=20
+> That should be a seperate patch because this is just bogus code and
+> has nothing to do with the pfn confusion.
+
+Why bogus?
+
+--=20
+Regards/Gruss,
+    Boris.
+
+SUSE Linux GmbH, GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Nort=
+on, HRB 21284 (AG N=C3=BCrnberg)
+--=20
