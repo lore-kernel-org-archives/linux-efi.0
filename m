@@ -1,37 +1,38 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH v2 11/12] ARM: wire up UEFI init and runtime support
-Date: Mon, 16 Nov 2015 19:01:56 +0000
-Message-ID: <20151116190156.GH8644@n2100.arm.linux.org.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 10/12] ARM: only consider memblocks with NOMAP cleared
+ for linear mapping
+Date: Mon, 16 Nov 2015 20:02:38 +0100
+Message-ID: <CAKv+Gu8_AUX9FAUhLKvsuC=iuD0bqt+ZvXCRyxkC_BjFjvSspQ@mail.gmail.com>
 References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
- <1447698757-8762-12-git-send-email-ard.biesheuvel@linaro.org>
+	<1447698757-8762-11-git-send-email-ard.biesheuvel@linaro.org>
+	<20151116190003.GG8644@n2100.arm.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1447698757-8762-12-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20151116190003.GG8644@n2100.arm.linux.org.uk>
+Sender: owner-linux-mm@kvack.org
+To: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Will Deacon <will.deacon@arm.com>, Grant Likely <grant.likely@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Mark Rutland <mark.rutland@arm.com>, Leif Lindholm <leif.lindholm@linaro.org>, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, Ryan Harkin <ryan.harkin@linaro.org>, Andrew Morton <akpm@linux-foundation.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 16, 2015 at 07:32:36PM +0100, Ard Biesheuvel wrote:
-> +static inline void efi_set_pgd(struct mm_struct *mm)
-> +{
-> +	if (unlikely(mm->context.vmalloc_seq != init_mm.context.vmalloc_seq))
-> +		__check_vmalloc_seq(mm);
-> +
-> +	cpu_switch_mm(mm->pgd, mm);
-> +
-> +	flush_tlb_all();
-> +	if (icache_is_vivt_asid_tagged())
-> +		__flush_icache_all();
-> +}
+On 16 November 2015 at 20:00, Russell King - ARM Linux
+<linux@arm.linux.org.uk> wrote:
+> On Mon, Nov 16, 2015 at 07:32:35PM +0100, Ard Biesheuvel wrote:
+>> Take the new memblock attribute MEMBLOCK_NOMAP into account when
+>> deciding whether a certain region is or should be covered by the
+>> kernel direct mapping.
+>
+> It's probably worth looking at this as a replacement to the way
+> arm_memblock_steal() works, provided NOMAP doesn't result in the
+> memory being passed to the kernel allocators.  Thoughts?
+>
 
-I don't think that's sufficient.  There's a gap between switching the mm
-and flushing the TLBs where we could have different global TLB entries
-from those in the page tables - and that can cause problems with CPUs
-which speculatively prefetch.  Some CPUs raise exceptions for this...
+Yes. The primary reason for NOMAP is that the memory is not removed,
+so we don't lose the annotation that it is memory (which might be
+useful, for instance, for /dev/mem attribute handling)
 
--- 
-FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
-according to speedtest.net.
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
