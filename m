@@ -1,86 +1,40 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 0/6] arm64 UEFI early FDT handling
-Date: Mon, 16 Nov 2015 12:00:38 +0100
-Message-ID: <CAKv+Gu-4NPKrmQ0Q7Kn8eg67xSTP1OrUXYQEkm6aPT1uhVP8Xg@mail.gmail.com>
-References: <1442881288-13962-1-git-send-email-ard.biesheuvel@linaro.org>
-	<CAKv+Gu8m2M9920yPRcrjmPeJPXKj=xd7ypH+ZFcYEm+_t5a5ig@mail.gmail.com>
-	<20151116104352.GB1719@arm.com>
-	<20151116105725.GB6556@e104818-lin.cambridge.arm.com>
+From: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v2 1/5] x86/mm/pageattr: Ensure cpa->pfn only contains
+ page frame numbers
+Date: Mon, 16 Nov 2015 07:56:17 -0800
+Message-ID: <5649FCA1.1000600@intel.com>
+References: <1447538451-5793-1-git-send-email-matt@codeblueprint.co.uk>
+ <1447538451-5793-2-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151116105725.GB6556-M2fw3Uu6cmfZROr8t4l/smS4ubULX0JqMm0uRHvK7Nw@public.gmane.org>
+In-Reply-To: <1447538451-5793-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <Mark.Rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org" <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 16 November 2015 at 11:57, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Mon, Nov 16, 2015 at 10:43:52AM +0000, Will Deacon wrote:
->> On Tue, Sep 29, 2015 at 08:38:57AM +0100, Ard Biesheuvel wrote:
->> > On 22 September 2015 at 02:21, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > > This is a followup to the "arm64: update/clarify/relax Image and FDT placement
->> > > rules" series I sent a while ago:
->> > > (http://article.gmane.org/gmane.linux.ports.arm.kernel/407148)
->> > >
->> > > This has now been split in two series: this first series deals with the
->> > > early FDT handling, primarily in the context of UEFI, but not exclusively.
->> > >
->> > > A number of minor issues exist in the early UEFI/FDT handling path, such as:
->> > > - when booting via UEFI, memreserve entries are removed from the device tree but
->> > >   the /reserved-memory node is not
->> >
->> > After reading Documentation/devicetree/bindings/reserved-memory/reserved-memory.txt
->> > again, I think simply ignoring the reserved-memory node is not the way
->> > to go. The reason is that it may contain dynamic allocations that are
->> > referenced by other nodes in the DT, and there is no good technical
->> > reason IMO to disallow those. OTOH, static allocations may conflict
->> > with the UEFI memory map, so those need to be dropped or at least
->> > checked against the memory map. The problem here is that static nodes
->> > may also be referenced by phandle, so we need to handle the referring
->> > node in some way as well.
->> >
->> > So I think we have a number of options:
->> > - ignore /memreserve/s and reject static allocations in
->> > /reserved-memory (*) but honor dynamic ones
->> > - ignore /memreserve/s and honor all of /reserved-memory after
->> > checking that static allocations don't conflict
->> > - honor all /memreserve/s and /reserved-memory nodes and check all for conflicts
->> > - ...
->> >
->> > (*) static allocations for regions that the UEFI memory map does not
->> > describe should be OK, though
->> >
->> > I personally prefer the first one, since a dynamic allocation
->> > implicitly conveys that the region does not contain anything special
->> > when coming out of boot, and there is very little we need to do other
->> > than perform the actual reservation. Static allocations are ambiguous
->> > in the sense that there is no annotation that explains the choice of
->> > address.
->> >
->> > Thoughts, please?
->>
->> What's the status of this series? It was on my "list of patches to watch"
->> that I'm just refreshing for 4.5, but I can't see any comments on-list
->> about it.
->
-> I thought it's being taken over by this series:
->
-> http://lkml.kernel.org/r/1446126059-25336-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
->
+I'm glad you're looking at this. It obviously needed some love. :)
 
-No, that is a separate thing entirely.
+On 11/14/2015 02:00 PM, Matt Fleming wrote:
+> +	npages = (_end - _text) >> PAGE_SHIFT;
+> +	text = __pa(_text);
+> +	pfn = text >> PAGE_SHIFT;
+> +
+> +	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
+> +		pr_err("Failed to map kernel text 1:1\n");
+> +		return 1;
+> +	}
 
-That series deals with ways to remove ranges from the linear mapping
-without losing the annotation that it is memory (to ensure that things
-like page_is_ram() do the right thing)
+Are _end and _text guaranteed to be aligned?  If not, I think the
+calculation might be wrong.  Just for fun, imagine that _end=0xfff and
+_text=0x1001.  npages would be 0.
 
-This series deals with policy regarding memory nodes, memreserves and
-the /reserved-memory node (which are all different things, mind you)
-when booting via UEFI, since UEFI has its own method of conveying the
-same information. The primary problem is that, currently, the
-/reserved-memory node is *not* ignored, while its contents may
-conflict with reservation in the UEFI memory map.
+Some other code like set_kernel_text_rw() does alignment on _text.
 
--- 
-Ard.
+One nit is that there's quite a bit going on here, like rearranging the
+phys_stack arithmetic ordering that is far beyond just simplifying the
+paddr vs. pfn issue, but that isn't called out in the changelog at all.
+
+Your fixes all look correct to me, fwiw.
