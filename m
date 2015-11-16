@@ -1,61 +1,63 @@
-From: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] Remove EFI memmap quirk for UV
-Date: Mon, 16 Nov 2015 19:02:48 +0100 (CET)
-Message-ID: <alpine.DEB.2.11.1511161902050.3761@nanos>
-References: <1447696781-159611-1-git-send-email-athorlton@sgi.com>
-Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447696781-159611-1-git-send-email-athorlton-sJ/iWh9BUns@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Cc: LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Hedi Berriche <hedi-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 03/12] arm64/efi: mark UEFI reserved regions as MEMBLOCK_NOMAP
+Date: Mon, 16 Nov 2015 19:32:28 +0100
+Message-ID: <1447698757-8762-4-git-send-email-ard.biesheuvel@linaro.org>
+References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: owner-linux-mm@kvack.org
+To: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, linux@arm.linux.org.uk, will.deacon@arm.com, grant.likely@linaro.org, catalin.marinas@arm.com, mark.rutland@arm.com, leif.lindholm@linaro.org, roy.franz@linaro.org
+Cc: msalter@redhat.com, ryan.harkin@linaro.org, akpm@linux-foundation.org, linux-mm@kvack.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Nov 2015, Alex Thorlton wrote:
+Change the EFI memory reservation logic to use memblock_mark_nomap()
+rather than memblock_reserve() to mark UEFI reserved regions as
+occupied. In addition to reserving them against allocations done by
+memblock, this will also prevent them from being covered by the linear
+mapping.
 
-CC'ing Matt under his correct e-mail address.
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ arch/arm64/kernel/efi.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-> Commit a5d90c923bcf ("x86/efi: Quirk out SGI UV") added a quirk to
-> efi_apply_memmap_quirks to force SGI UV systems to fall back to the old
-> EFI memmap mechanism.  We have a BIOS fix for this issue now, so we no
-> longer need this quirk in the kernel.  This commit removes the quirk
-> from the function in question.
-> 
-> Signed-off-by: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-> Acked-by: Mike Travis <travis-sJ/iWh9BUns@public.gmane.org>
-> Acked-by: Russ Anderson <rja-sJ/iWh9BUns@public.gmane.org>
-> Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> Cc: Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-> Cc: Hedi Berriche <hedi-sJ/iWh9BUns@public.gmane.org>
-> Cc: Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>
-> Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
-> Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-> 
-> ---
->  arch/x86/platform/efi/quirks.c | 6 ------
->  1 file changed, 6 deletions(-)
-> 
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index 1c7380d..96b417c 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -259,12 +259,6 @@ void __init efi_apply_memmap_quirks(void)
->  		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
->  		efi_unmap_memmap();
->  	}
-> -
-> -	/*
-> -	 * UV doesn't support the new EFI pagetable mapping yet.
-> -	 */
-> -	if (is_uv_system())
-> -		set_bit(EFI_OLD_MEMMAP, &efi.flags);
->  }
->  
->  /*
-> -- 
-> 1.8.5.6
-> 
-> 
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index de46b50f4cdf..c7c7fb417110 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -183,7 +183,7 @@ static __init void reserve_regions(void)
+ 			early_init_dt_add_memory_arch(paddr, size);
+ 
+ 		if (is_reserve_region(md)) {
+-			memblock_reserve(paddr, size);
++			memblock_mark_nomap(paddr, size);
+ 			if (efi_enabled(EFI_DBG))
+ 				pr_cont("*");
+ 		}
+@@ -205,8 +205,6 @@ void __init efi_init(void)
+ 
+ 	efi_system_table = params.system_table;
+ 
+-	memblock_reserve(params.mmap & PAGE_MASK,
+-			 PAGE_ALIGN(params.mmap_size + (params.mmap & ~PAGE_MASK)));
+ 	memmap.phys_map = params.mmap;
+ 	memmap.map = early_memremap(params.mmap, params.mmap_size);
+ 	memmap.map_end = memmap.map + params.mmap_size;
+@@ -218,6 +216,9 @@ void __init efi_init(void)
+ 
+ 	reserve_regions();
+ 	early_memunmap(memmap.map, params.mmap_size);
++	memblock_mark_nomap(params.mmap & PAGE_MASK,
++			    PAGE_ALIGN(params.mmap_size +
++				       (params.mmap & ~PAGE_MASK)));
+ }
+ 
+ static bool __init efi_virtmap_init(void)
+-- 
+1.9.1
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
