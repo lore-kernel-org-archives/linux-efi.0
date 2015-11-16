@@ -1,35 +1,42 @@
-From: Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Subject: Re: [PATCH v2 05/12] arm64/efi: refactor EFI init and runtime code
- for reuse by 32-bit ARM
-Date: Mon, 16 Nov 2015 18:49:19 +0000
-Message-ID: <20151116184919.GD8644@n2100.arm.linux.org.uk>
+From: Russell King - ARM Linux <linux@arm.linux.org.uk>
+Subject: Re: [PATCH v2 07/12] ARM: split off core mapping logic from
+ create_mapping
+Date: Mon, 16 Nov 2015 18:55:19 +0000
+Message-ID: <20151116185519.GE8644@n2100.arm.linux.org.uk>
 References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
- <1447698757-8762-6-git-send-email-ard.biesheuvel@linaro.org>
+ <1447698757-8762-8-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <owner-linux-mm@kvack.org>
 Content-Disposition: inline
-In-Reply-To: <1447698757-8762-6-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org
+In-Reply-To: <1447698757-8762-8-git-send-email-ard.biesheuvel@linaro.org>
+Sender: owner-linux-mm@kvack.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, will.deacon@arm.com, grant.likely@linaro.org, catalin.marinas@arm.com, mark.rutland@arm.com, leif.lindholm@linaro.org, roy.franz@linaro.org, msalter@redhat.com, ryan.harkin@linaro.org, akpm@linux-foundation.org, linux-mm@kvack.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Nov 16, 2015 at 07:32:30PM +0100, Ard Biesheuvel wrote:
-> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-> index e62ee5df96ca..ad11ba6964f6 100644
-> --- a/drivers/firmware/efi/arm-runtime.c
-> +++ b/drivers/firmware/efi/arm-runtime.c
-> @@ -23,18 +23,15 @@
->  
->  #include <asm/cacheflush.h>
->  #include <asm/efi.h>
-> -#include <asm/tlbflush.h>
-> -#include <asm/mmu_context.h>
-> +#include <asm/io.h>
+On Mon, Nov 16, 2015 at 07:32:32PM +0100, Ard Biesheuvel wrote:
+> In order to be able to reuse the core mapping logic of create_mapping
+> for mapping the UEFI Runtime Services into a private set of page tables,
+> split it off from create_mapping() into a separate function
+> __create_mapping which we will wire up in a subsequent patch.
 
-Shouldn't this be linux/io.h ?
+I'm slightly worried about this.  Generally, these functions setup
+global mappings.  If you're wanting to have a private set of page
+tables for UEFI, and those private page tables contain global
+mappings which are different from the mappings in the kernel's page
+tables, then you need careful break-TLBflush-make handling when
+switching from the kernel's page tables to the private UEFI ones,
+and vice versa.
+
+Has this aspect been considered?
 
 -- 
 FTTC broadband for 0.8mile line: currently at 9.6Mbps down 400kbps up
 according to speedtest.net.
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
