@@ -1,65 +1,51 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 2/5] x86/efi: Map RAM into the identity page table for mixed mode
-Date: Sat, 14 Nov 2015 22:00:48 +0000
-Message-ID: <1447538451-5793-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1447538451-5793-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: Re: [x86] [EFI stub] Changing the kernel command line in the efi
+ application, without recompiling the kernel.
+Date: Mon, 16 Nov 2015 09:30:41 +0000
+Message-ID: <20151116093041.GA2817@codeblueprint.co.uk>
+References: <CAC_FEN0qfR47ST4xewf2hc7vgH7eNm1_d-K-ZMwJWd-yNo58jg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447538451-5793-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAC_FEN0qfR47ST4xewf2hc7vgH7eNm1_d-K-ZMwJWd-yNo58jg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+To: "Stoppa, Igor" <igor.stoppa-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-We are relying on the pre-existing mappings in 'trampoline_pgd' when
-accessing function arguments in the EFI mixed mode thunking code.
+On Wed, 04 Nov, at 01:35:16PM, Stoppa, Igor wrote:
+> Hi,
+> 
+> I'm currently building a combo efi application comprised of
+> 
+> * uefi stub from gummiboot
+> * linux kernel
+> * kernel command line
+> * microcode + initramfs
+> 
+> using the approach from mkrescue-uefi.sh [1]
+> 
+> However I'd like to replace the gummiboot stub with the one coming
+> with the kernel, and get rid of one dependency (gummiboot).
+> But it seems that the command line is handled differently:
+> 
+> * in the gummiboot way I can change the command line without having to
+> recompile the kernel, because it is contained in a separate section of
+> the application.
+> 
+> * in the kernel-only way, it is contained in the field "load_options"
+> from efi_loaded_image_t [2]
+> So for what I can understand, I would have to rebuild the kernel, to
+> change the command line of the combo application.
+> 
+> 
+> Is that correct?
 
-Instead let's map memory explicitly so that things will continue to
-work when we move to a separate page table in the future.
+Nope, you don't need to rebuild your kernel image. You can simply
+change the paramters passed in your EFI BootXXXX variable by the EFI
+boot manager, see efibootmgr(8).
 
-Reviewed-by: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
----
- arch/x86/platform/efi/efi_64.c | 20 ++++++++++++++++++++
- 1 file changed, 20 insertions(+)
-
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index c8b58ac47b77..634536034e32 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -144,6 +144,7 @@ void efi_sync_low_kernel_mappings(void)
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- {
- 	unsigned long pfn, text;
-+	efi_memory_desc_t *md;
- 	struct page *page;
- 	unsigned npages;
- 	pgd_t *pgd;
-@@ -200,6 +201,25 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 
- 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
- 
-+	/*
-+	 * Map all of RAM so that we can access arguments in the 1:1
-+	 * mapping when making EFI runtime calls.
-+	 */
-+	for_each_efi_memory_desc(&memmap, md) {
-+		if (md->type != EFI_CONVENTIONAL_MEMORY &&
-+		    md->type != EFI_LOADER_DATA &&
-+		    md->type != EFI_LOADER_CODE)
-+			continue;
-+
-+		pfn = md->phys_addr >> PAGE_SHIFT;
-+		npages = md->num_pages;
-+
-+		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, 0)) {
-+			pr_err("Failed to map 1:1 memory\n");
-+			return 1;
-+		}
-+	}
-+
- 	return 0;
- }
- 
--- 
-2.6.2
+However, if you're not using the load options argument and instead are
+relying on CONFG_CMDLINE, then yes, you will need to rebuild your
+kernel.
