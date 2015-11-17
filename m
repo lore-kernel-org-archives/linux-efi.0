@@ -1,148 +1,96 @@
 From: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Subject: [PATCH 05/13] Xen: ARM: Add support for mapping platform device mmio
-Date: Tue, 17 Nov 2015 17:57:03 +0800
-Message-ID: <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org>
-References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447754231-7772-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Subject: [PATCH 00/13] Add ACPI support for Xen Dom0 on ARM64
+Date: Tue, 17 Nov 2015 17:56:58 +0800
+Message-ID: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 Cc: xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Add a bus_notifier for platform bus device in order to map the device
-mmio regions when DOM0 booting with ACPI.
+This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
+ACPI on ARM64 design document could be found from [1].
 
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/xen/Makefile   |   1 +
- drivers/xen/platform.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 105 insertions(+)
+This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
+information. Introduce a bus notifier of AMBA and Platform bus to map
+the new added device's MMIO space. Make Xen domain use
+xlated_setup_gnttab_pages to setup grant table and a new hypercall to
+get event-channel irq.
+
+Regarding the initialization flow of Linux kernel, it needs to move
+xen_early_init() before efi_init(). Then xen_early_init() will check
+whether it runs on Xen through the /hypervisor node and efi_init() will
+call a new function fdt_find_xen_uefi_params(), to parse those
+xen,uefi-* parameters just like the existing efi_get_fdt_params().
+
+And in arm64_enable_runtime_services() it will check whether it runs on
+Xen and call another new function xen_efi_runtime_setup() to setup
+runtime service instead of efi_native_runtime_setup(). The
+xen_efi_runtime_setup() will assign the runtime function pointers with
+the functions of driver/xen/efi.c.
+
+And since we pass a /hypervisor node and a /chosen node to Dom0, it
+needs to check whether the DTS only contains a /hypervisor node and a
+/chosen node in acpi_boot_table_init().
+
+Patches are tested on FVP base model. This patch set can be found from
+[2] and the corresponding Xen patches can be found from [3].
+
+Thanks,
+Shannon
+
+[1] http://lists.xen.org/archives/html/xen-devel/2015-11/msg00488.html
+[2] http://git.linaro.org/people/shannon.zhao/linux-mainline.git  ACPI_XEN_ARM_Linux_V1
+[3] http://git.linaro.org/people/shannon.zhao/xen.git  ACPI_XEN_ARM_V3
+
+Shannon Zhao (13):
+  Xen : Hide UART used by Xen
+  xen/grant-table: Move xlated_setup_gnttab_pages to common place
+  arm/xen: Use xlated_setup_gnttab_pages to setup grant table
+  xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
+  Xen: ARM: Add support for mapping platform device mmio
+  Xen: ARM: Add support for mapping amba device mmio
+  ARM: Xen: Document UEFI support on Xen ARM virtual platforms
+  Xen: EFI: Parse DT parameters for Xen specific UEFI
+  ARM: Xen: Initialize Xen specific UEFI runtime services
+  ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
+  xen/hvm/params: Add a new dilivery type for event-channel in
+    HVM_PARAM_CALLBACK_IRQ
+  arm/xen: Get event-channel irq through HVM_PARAM when booting with
+    ACPI
+  ARM: XEN: Move xen_early_init() before efi_init()
+
+ Documentation/devicetree/bindings/arm/xen.txt |  25 +++++++
+ arch/arm/include/asm/xen/hypercall.h          |   1 +
+ arch/arm/xen/enlighten.c                      |  96 +++++++++++++++++-------
+ arch/arm/xen/hypercall.S                      |   1 +
+ arch/arm64/kernel/acpi.c                      |  12 ++-
+ arch/arm64/kernel/efi.c                       |  20 +++--
+ arch/arm64/kernel/setup.c                     |   2 +-
+ arch/arm64/xen/hypercall.S                    |   1 +
+ arch/x86/xen/grant-table.c                    |  51 -------------
+ drivers/acpi/bus.c                            |  22 ++++++
+ drivers/firmware/efi/efi.c                    |  67 +++++++++++++++--
+ drivers/xen/Kconfig                           |   2 +-
+ drivers/xen/Makefile                          |   2 +
+ drivers/xen/amba.c                            |  99 ++++++++++++++++++++++++
+ drivers/xen/efi.c                             |  22 ++++++
+ drivers/xen/grant-table.c                     |  49 ++++++++++++
+ drivers/xen/platform.c                        | 104 ++++++++++++++++++++++++++
+ include/xen/grant_table.h                     |   1 +
+ include/xen/interface/hvm/params.h            |   5 ++
+ include/xen/interface/memory.h                |   1 +
+ include/xen/xen-ops.h                         |  10 +++
+ 21 files changed, 498 insertions(+), 95 deletions(-)
+ create mode 100644 drivers/xen/amba.c
  create mode 100644 drivers/xen/platform.c
 
-diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
-index e293bc5..2f867e7 100644
---- a/drivers/xen/Makefile
-+++ b/drivers/xen/Makefile
-@@ -11,6 +11,7 @@ CFLAGS_features.o			:= $(nostackp)
- 
- CFLAGS_efi.o				+= -fshort-wchar
- 
-+dom0-$(CONFIG_ARM64) += platform.o
- dom0-$(CONFIG_PCI) += pci.o
- dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
- dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
-diff --git a/drivers/xen/platform.c b/drivers/xen/platform.c
-new file mode 100644
-index 0000000..0f95e7f
---- /dev/null
-+++ b/drivers/xen/platform.c
-@@ -0,0 +1,104 @@
-+/*
-+ * Copyright (c) 2015, Linaro Limited.
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along with
-+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-+ * Place - Suite 330, Boston, MA 02111-1307 USA.
-+ *
-+ * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-+ */
-+
-+#include <linux/platform_device.h>
-+#include <linux/acpi.h>
-+#include <xen/xen.h>
-+#include <xen/interface/memory.h>
-+#include <asm/xen/hypervisor.h>
-+#include <asm/xen/hypercall.h>
-+
-+static int xen_map_platform_device_mmio(struct platform_device *pdev)
-+{
-+	int i, rc = 0;
-+
-+	for (i = 0; i < pdev->num_resources; i++)
-+	{
-+		struct resource *r = &pdev->resource[i];
-+
-+		if (resource_type(r) == IORESOURCE_MEM)
-+		{
-+			int j;
-+			int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
-+			xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr,
-+						   GFP_KERNEL);
-+			xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
-+						    GFP_KERNEL);
-+			int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
-+			struct xen_add_to_physmap_range xatp;
-+
-+			for (j = 0; j < nr; j++) {
-+				gpfns[j] = (r->start >> PAGE_SHIFT) + j;
-+				idxs[j] = (r->start >> PAGE_SHIFT) + j;
-+				errs[j] = 0;
-+			}
-+
-+			xatp.domid = DOMID_SELF;
-+			xatp.size = nr;
-+			xatp.space = XENMAPSPACE_dev_mmio;
-+
-+			set_xen_guest_handle(xatp.gpfns, gpfns);
-+			set_xen_guest_handle(xatp.idxs, idxs);
-+			set_xen_guest_handle(xatp.errs, errs);
-+
-+			rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range,
-+						  &xatp);
-+			kfree(gpfns);
-+			kfree(idxs);
-+			kfree(errs);
-+			if (rc != 0)
-+				return rc;
-+		}
-+	}
-+
-+	return rc;
-+}
-+
-+static int xen_platform_notifier(struct notifier_block *nb,
-+				 unsigned long action, void *data)
-+{
-+	struct platform_device *pdev = to_platform_device(data);
-+	int r = 0;
-+
-+	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
-+		r = xen_map_platform_device_mmio(pdev);
-+
-+	if (r)
-+	{
-+		dev_err(&pdev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
-+			pdev->name);
-+		return NOTIFY_OK;
-+	}
-+
-+	return NOTIFY_DONE;
-+}
-+
-+static struct notifier_block platform_device_nb = {
-+	.notifier_call = xen_platform_notifier,
-+};
-+
-+static int __init register_xen_platform_notifier(void)
-+{
-+	if (!xen_initial_domain())
-+		return 0;
-+
-+	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
-+}
-+
-+arch_initcall(register_xen_platform_notifier);
 -- 
 2.1.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
