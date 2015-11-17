@@ -1,83 +1,53 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 08/13] Xen: EFI: Parse DT parameters for Xen specific UEFI
-Date: Tue, 17 Nov 2015 13:17:22 +0100
-Message-ID: <CAKv+Gu-hjj0Mh3vUv86Y5Mk7STKP+ykBD_MXGcQWH1quWJ1jMA@mail.gmail.com>
-References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
-	<1447754231-7772-9-git-send-email-shannon.zhao@linaro.org>
-	<CAKv+Gu98L_dQYVhvGQG=d9Uga-x3mJ=4oxtQqvgU-D3DvcrwHg@mail.gmail.com>
-	<20151117113701.GE12586@leverpostej>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: Re: [PATCH 09/13] ARM: Xen: Initialize Xen specific
+ UEFI runtime services
+Date: Tue, 17 Nov 2015 20:17:35 +0800
+Message-ID: <564B1ADF.70105@huawei.com>
+References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>	<1447754231-7772-10-git-send-email-shannon.zhao@linaro.org>
+	<CAKv+Gu9-g6fttchWkg_ptCGwUD-hbyM2F0x1Wrv=dAa6bsMVBQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151117113701.GE12586@leverpostej>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Julien Grall <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Huangpeng (Peter)" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Hangaohuai <hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <CAKv+Gu9-g6fttchWkg_ptCGwUD-hbyM2F0x1Wrv=dAa6bsMVBQ@mail.gmail.com>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Shannon Zhao <shannon.zhao@linaro.org>
+Cc: Mark Rutland <mark.rutland@arm.com>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, Hangaohuai <hangaohuai@huawei.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Ian Campbell <ian.campbell@citrix.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, "Huangpeng (Peter)" <peter.huangpeng@huawei.com>, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, Julien Grall <julien.grall@citrix.com>, Stefano Stabellini <stefano.stabellini@citrix.com>, Christoffer Dall <christoffer.dall@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 November 2015 at 12:37, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Tue, Nov 17, 2015 at 12:25:58PM +0100, Ard Biesheuvel wrote:
->> On 17 November 2015 at 10:57,  <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
->> > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> >
->> > Add a new function to parse DT parameters for Xen specific UEFI just
->> > like the way for normal UEFI. Then it could reuse the existing codes.
->> >
->> > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> > ---
->> >  drivers/firmware/efi/efi.c | 67 ++++++++++++++++++++++++++++++++++++++++++----
->> >  1 file changed, 62 insertions(+), 5 deletions(-)
->> >
->> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
->> > index d6144e3..629bd06 100644
->> > --- a/drivers/firmware/efi/efi.c
->> > +++ b/drivers/firmware/efi/efi.c
->> > @@ -24,6 +24,7 @@
->> >  #include <linux/of_fdt.h>
->> >  #include <linux/io.h>
->> >  #include <linux/platform_device.h>
->> > +#include <xen/xen.h>
->> >
->> >  struct efi __read_mostly efi = {
->> >         .mps        = EFI_INVALID_TABLE_ADDR,
->> > @@ -488,12 +489,60 @@ static __initdata struct {
->> >         UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
->> >  };
->> >
->> > +static __initdata struct {
->> > +       const char name[32];
->> > +       const char propname[32];
->> > +       int offset;
->> > +       int size;
->> > +} xen_dt_params[] = {
->> > +       UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
->> > +       UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
->> > +       UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
->> > +       UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
->> > +       UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
->> > +};
->> > +
->>
->> We discussed (and agreed afair) that dropping the "linux," prefix from
->> the DT properties was an acceptable change. If we do that, and reuse
->> the same names in the xen version (i.e., drop the "xen," prefix), we
->> could make this change a *lot* simpler.
->
-> Regardless of if we drop the "linux," prefix from the existing strings,
-> I think we need the "xen," prefix here.
->
-> The xen EFI interface comes with additional caveats, and we need to
-> treat it separately.
->
-> Unless you're suggesting that /hypervisor/uefi-* is handled differently
-> to /chosen/uefi-*?
->
-> I think I'd still prefer the "xen," prefix regardless.
->
 
-Well, we should still be able to reuse more of the existing code
-rather than duplicating a bunch of code in fdt_find_xen_uefi_params()
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+On 2015/11/17 19:28, Ard Biesheuvel wrote:
+>> @@ -308,13 +311,18 @@ static int __init arm64_enable_runtime_services(void)
+>> >         }
+>> >         set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+>> >
+>> > -       if (!efi_virtmap_init()) {
+>> > -               pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+>> > -               return -1;
+>> > -       }
+>> > +       if (!xen_initial_domain()) {
+>> > +               if (!efi_virtmap_init()) {
+>> > +                       pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+>> > +                       return -1;
+>> > +               }
+>> >
+> I'd prefer it if we could separate the code logically, rather than
+> putting xen_initial_domain() tests in all the code paths.
+> 
+> For instance, we could re-use the EFI_PARAVIRT flag, and set if from
+> the Xen init code. Then, we could simply test it here, and bail early.
+> That way, you can have a Xen specific alternative (which does not use
+> the virtmap etc anyway) in a xen source file.
+> 
+Ok, will do. Thanks.
+
+-- 
+Shannon
