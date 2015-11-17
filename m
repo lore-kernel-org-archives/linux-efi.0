@@ -1,7 +1,7 @@
 From: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Subject: [PATCH 03/13] arm/xen: Use xlated_setup_gnttab_pages to setup grant table
-Date: Tue, 17 Nov 2015 17:57:01 +0800
-Message-ID: <1447754231-7772-4-git-send-email-shannon.zhao@linaro.org>
+Subject: [PATCH 06/13] Xen: ARM: Add support for mapping amba device mmio
+Date: Tue, 17 Nov 2015 17:57:04 +0800
+Message-ID: <1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1447754231-7772-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -12,45 +12,132 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Use xlated_setup_gnttab_pages to setup grant table. Then it doesn't rely
-on DT or ACPI to pass the start address and size of grant table.
+Add a bus_notifier for AMBA bus device in order to map the device
+mmio regions when DOM0 booting with ACPI.
 
 Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/xen/enlighten.c | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+ drivers/xen/Makefile |  1 +
+ drivers/xen/amba.c   | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 100 insertions(+)
+ create mode 100644 drivers/xen/amba.c
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index eeeab07..7cb82f7 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -186,18 +186,10 @@ static int __init xen_guest_init(void)
- {
- 	struct xen_add_to_physmap xatp;
- 	struct shared_info *shared_info_page = NULL;
--	struct resource res;
--	phys_addr_t grant_frames;
+diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
+index 2f867e7..139bd0b 100644
+--- a/drivers/xen/Makefile
++++ b/drivers/xen/Makefile
+@@ -12,6 +12,7 @@ CFLAGS_features.o			:= $(nostackp)
+ CFLAGS_efi.o				+= -fshort-wchar
  
- 	if (!xen_domain())
- 		return 0;
- 
--	if (of_address_to_resource(xen_node, GRANT_TABLE_PHYSADDR, &res)) {
--		pr_err("Xen grant table base address not found\n");
--		return -ENODEV;
--	}
--	grant_frames = res.start;
--
- 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
- 	if (!xen_events_irq) {
- 		pr_err("Xen event channel interrupt not found\n");
-@@ -232,7 +224,7 @@ static int __init xen_guest_init(void)
- 	if (xen_vcpu_info == NULL)
- 		return -ENOMEM;
- 
--	if (gnttab_setup_auto_xlat_frames(grant_frames)) {
-+	if (xlated_setup_gnttab_pages()) {
- 		free_percpu(xen_vcpu_info);
- 		return -ENOMEM;
- 	}
+ dom0-$(CONFIG_ARM64) += platform.o
++dom0-$(CONFIG_ARM_AMBA) += amba.o
+ dom0-$(CONFIG_PCI) += pci.o
+ dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
+ dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
+diff --git a/drivers/xen/amba.c b/drivers/xen/amba.c
+new file mode 100644
+index 0000000..e491c8e
+--- /dev/null
++++ b/drivers/xen/amba.c
+@@ -0,0 +1,99 @@
++/*
++ * Copyright (c) 2015, Linaro Limited.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License along with
++ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
++ * Place - Suite 330, Boston, MA 02111-1307 USA.
++ *
++ * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
++ */
++
++#include <linux/amba/bus.h>
++#include <linux/acpi.h>
++#include <xen/xen.h>
++#include <xen/interface/memory.h>
++#include <asm/xen/hypervisor.h>
++#include <asm/xen/hypercall.h>
++
++static int xen_map_amba_device_mmio(struct amba_device *adev)
++{
++	int rc = 0;
++	struct resource *r = &adev->res;
++
++	if (resource_type(r) == IORESOURCE_MEM)
++	{
++		int j;
++		int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
++		xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
++		xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
++					    GFP_KERNEL);
++		int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
++		struct xen_add_to_physmap_range xatp;
++
++		for (j = 0; j < nr; j++) {
++			gpfns[j] = (r->start >> PAGE_SHIFT) + j;
++			idxs[j] = (r->start >> PAGE_SHIFT) + j;
++			errs[j] = 0;
++		}
++
++		xatp.domid = DOMID_SELF;
++		xatp.size = nr;
++		xatp.space = XENMAPSPACE_dev_mmio;
++
++		set_xen_guest_handle(xatp.gpfns, gpfns);
++		set_xen_guest_handle(xatp.idxs, idxs);
++		set_xen_guest_handle(xatp.errs, errs);
++
++		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
++
++		kfree(gpfns);
++		kfree(idxs);
++		kfree(errs);
++		if (rc != 0)
++			return rc;
++	}
++
++	return rc;
++}
++
++static int xen_amba_notifier(struct notifier_block *nb,
++			     unsigned long action, void *data)
++{
++	struct amba_device *adev = to_amba_device(data);
++	int r = 0;
++
++	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
++		r = xen_map_amba_device_mmio(adev);
++
++	if (r)
++	{
++		dev_err(&adev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
++			adev->dev.init_name);
++		return NOTIFY_OK;
++	}
++
++	return NOTIFY_DONE;
++}
++
++static struct notifier_block amba_device_nb = {
++	.notifier_call = xen_amba_notifier,
++};
++
++static int __init register_xen_amba_notifier(void)
++{
++	if (!xen_initial_domain())
++		return 0;
++
++	return bus_register_notifier(&amba_bustype, &amba_device_nb);
++}
++
++arch_initcall(register_xen_amba_notifier);
 -- 
 2.1.0
