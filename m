@@ -1,16 +1,16 @@
 From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
-Subject: Re: [PATCH 05/13] Xen: ARM: Add support for mapping
- platform device mmio
-Date: Tue, 17 Nov 2015 09:38:22 -0500
-Message-ID: <20151117143822.GH3003@char.us.oracle.com>
+Subject: Re: [PATCH 06/13] Xen: ARM: Add support for mapping
+ amba device mmio
+Date: Tue, 17 Nov 2015 09:40:40 -0500
+Message-ID: <20151117144040.GI3003@char.us.oracle.com>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
-	<1447754231-7772-6-git-send-email-shannon.zhao@linaro.org>
+	<1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <xen-devel-bounces@lists.xen.org>
 Content-Disposition: inline
-In-Reply-To: <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org>
+In-Reply-To: <1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
 List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
 	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
 List-Post: <mailto:xen-devel@lists.xen.org>
@@ -23,37 +23,37 @@ To: shannon.zhao@linaro.org
 Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, hangaohuai@huawei.com, linux-efi@vger.kernel.org, ian.campbell@citrix.com, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, julien.grall@citrix.com, stefano.stabellini@citrix.com, christoffer.dall@linaro.org, zhaoshenglong@huawei.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 17, 2015 at 05:57:03PM +0800, shannon.zhao@linaro.org wrote:
+On Tue, Nov 17, 2015 at 05:57:04PM +0800, shannon.zhao@linaro.org wrote:
 > From: Shannon Zhao <shannon.zhao@linaro.org>
 > 
-> Add a bus_notifier for platform bus device in order to map the device
+> Add a bus_notifier for AMBA bus device in order to map the device
 > mmio regions when DOM0 booting with ACPI.
 > 
 > Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 > ---
->  drivers/xen/Makefile   |   1 +
->  drivers/xen/platform.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 105 insertions(+)
->  create mode 100644 drivers/xen/platform.c
+>  drivers/xen/Makefile |  1 +
+>  drivers/xen/amba.c   | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 100 insertions(+)
+>  create mode 100644 drivers/xen/amba.c
 > 
 > diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
-> index e293bc5..2f867e7 100644
+> index 2f867e7..139bd0b 100644
 > --- a/drivers/xen/Makefile
 > +++ b/drivers/xen/Makefile
-> @@ -11,6 +11,7 @@ CFLAGS_features.o			:= $(nostackp)
->  
+> @@ -12,6 +12,7 @@ CFLAGS_features.o			:= $(nostackp)
 >  CFLAGS_efi.o				+= -fshort-wchar
 >  
-> +dom0-$(CONFIG_ARM64) += platform.o
+>  dom0-$(CONFIG_ARM64) += platform.o
+> +dom0-$(CONFIG_ARM_AMBA) += amba.o
 >  dom0-$(CONFIG_PCI) += pci.o
 >  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
 >  dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
-> diff --git a/drivers/xen/platform.c b/drivers/xen/platform.c
+> diff --git a/drivers/xen/amba.c b/drivers/xen/amba.c
 > new file mode 100644
-> index 0000000..0f95e7f
+> index 0000000..e491c8e
 > --- /dev/null
-> +++ b/drivers/xen/platform.c
-> @@ -0,0 +1,104 @@
+> +++ b/drivers/xen/amba.c
+> @@ -0,0 +1,99 @@
 > +/*
 > + * Copyright (c) 2015, Linaro Limited.
 > + *
@@ -73,115 +73,94 @@ On Tue, Nov 17, 2015 at 05:57:03PM +0800, shannon.zhao@linaro.org wrote:
 > + * Author: Shannon Zhao <shannon.zhao@linaro.org>
 > + */
 > +
-> +#include <linux/platform_device.h>
+> +#include <linux/amba/bus.h>
 > +#include <linux/acpi.h>
 > +#include <xen/xen.h>
 > +#include <xen/interface/memory.h>
 > +#include <asm/xen/hypervisor.h>
 > +#include <asm/xen/hypercall.h>
 > +
-> +static int xen_map_platform_device_mmio(struct platform_device *pdev)
+> +static int xen_map_amba_device_mmio(struct amba_device *adev)
 > +{
-> +	int i, rc = 0;
-
-unsigned int i;
+> +	int rc = 0;
+> +	struct resource *r = &adev->res;
 > +
-> +	for (i = 0; i < pdev->num_resources; i++)
+> +	if (resource_type(r) == IORESOURCE_MEM)
+
+This is like the 'xen_map_platform_device_mmio' code. Why don't you call
+that? Or at least make the 'xen_map_platform_device_mmio' internal parts be
+visible to both of these functions.
+
 > +	{
-> +		struct resource *r = &pdev->resource[i];
+> +		int j;
+> +		int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
+> +		xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
+> +		xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
+> +					    GFP_KERNEL);
+> +		int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
+> +		struct xen_add_to_physmap_range xatp;
 > +
-> +		if (resource_type(r) == IORESOURCE_MEM)
-
-Make this:
-
-	if (resource_type(r) != IORESOURCE_MEM)
-		continue;
-
-> +		{
-
-And then you don't have to move all of this code to the right.
-
-> +			int j;
-unsigned int
-> +			int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
-
-unsigned int
-> +			xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr,
-> +						   GFP_KERNEL);
-> +			xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
-> +						    GFP_KERNEL);
-> +			int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
-
-You can use kzalloc.
-> +			struct xen_add_to_physmap_range xatp;
-
-This declaration of variables and then setting does not look like that
-pretty to my mind. (And it is a headache to debug if for example 'nr' ends up
-being zero for example). Or worst -1U since you had it as 'int'.
-
-
-> +
-> +			for (j = 0; j < nr; j++) {
-> +				gpfns[j] = (r->start >> PAGE_SHIFT) + j;
-> +				idxs[j] = (r->start >> PAGE_SHIFT) + j;
-> +				errs[j] = 0;
-
-Then this can go away (because of kzalloc)
-> +			}
-> +
-> +			xatp.domid = DOMID_SELF;
-> +			xatp.size = nr;
-> +			xatp.space = XENMAPSPACE_dev_mmio;
-> +
-> +			set_xen_guest_handle(xatp.gpfns, gpfns);
-> +			set_xen_guest_handle(xatp.idxs, idxs);
-> +			set_xen_guest_handle(xatp.errs, errs);
-> +
-> +			rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range,
-> +						  &xatp);
-> +			kfree(gpfns);
-> +			kfree(idxs);
-> +			kfree(errs);
-> +			if (rc != 0)
-> +				return rc;
+> +		for (j = 0; j < nr; j++) {
+> +			gpfns[j] = (r->start >> PAGE_SHIFT) + j;
+> +			idxs[j] = (r->start >> PAGE_SHIFT) + j;
+> +			errs[j] = 0;
 > +		}
+> +
+> +		xatp.domid = DOMID_SELF;
+> +		xatp.size = nr;
+> +		xatp.space = XENMAPSPACE_dev_mmio;
+> +
+> +		set_xen_guest_handle(xatp.gpfns, gpfns);
+> +		set_xen_guest_handle(xatp.idxs, idxs);
+> +		set_xen_guest_handle(xatp.errs, errs);
+> +
+> +		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
+> +
+> +		kfree(gpfns);
+> +		kfree(idxs);
+> +		kfree(errs);
+> +		if (rc != 0)
+> +			return rc;
 > +	}
 > +
 > +	return rc;
 > +}
 > +
-> +static int xen_platform_notifier(struct notifier_block *nb,
-> +				 unsigned long action, void *data)
+> +static int xen_amba_notifier(struct notifier_block *nb,
+> +			     unsigned long action, void *data)
 > +{
-> +	struct platform_device *pdev = to_platform_device(data);
+> +	struct amba_device *adev = to_amba_device(data);
 > +	int r = 0;
 > +
 > +	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
-> +		r = xen_map_platform_device_mmio(pdev);
+> +		r = xen_map_amba_device_mmio(adev);
 > +
+
+What about the removal of a bus device? No need to handle that?
+
 > +	if (r)
 > +	{
-> +		dev_err(&pdev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
-> +			pdev->name);
+> +		dev_err(&adev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
+> +			adev->dev.init_name);
 > +		return NOTIFY_OK;
 > +	}
 > +
 > +	return NOTIFY_DONE;
 > +}
 > +
-> +static struct notifier_block platform_device_nb = {
-> +	.notifier_call = xen_platform_notifier,
+> +static struct notifier_block amba_device_nb = {
+> +	.notifier_call = xen_amba_notifier,
 > +};
 > +
-> +static int __init register_xen_platform_notifier(void)
+> +static int __init register_xen_amba_notifier(void)
 > +{
 > +	if (!xen_initial_domain())
 > +		return 0;
 > +
-> +	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
+> +	return bus_register_notifier(&amba_bustype, &amba_device_nb);
 > +}
 > +
-> +arch_initcall(register_xen_platform_notifier);
+> +arch_initcall(register_xen_amba_notifier);
 > -- 
 > 2.1.0
 > 
