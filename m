@@ -1,113 +1,83 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] efi/libstub: move FDT sanity check out of allocation loop
-Date: Tue, 17 Nov 2015 13:09:50 +0100
-Message-ID: <CAKv+Gu_329dVZrSF05QvSLv_vezDvT_AP3yK5FtVuhpJnqLSZQ@mail.gmail.com>
-References: <1444206929-13374-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1444206929-13374-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20151117114718.GF12586@leverpostej>
+Subject: Re: [PATCH 08/13] Xen: EFI: Parse DT parameters for Xen specific UEFI
+Date: Tue, 17 Nov 2015 13:17:22 +0100
+Message-ID: <CAKv+Gu-hjj0Mh3vUv86Y5Mk7STKP+ykBD_MXGcQWH1quWJ1jMA@mail.gmail.com>
+References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
+	<1447754231-7772-9-git-send-email-shannon.zhao@linaro.org>
+	<CAKv+Gu98L_dQYVhvGQG=d9Uga-x3mJ=4oxtQqvgU-D3DvcrwHg@mail.gmail.com>
+	<20151117113701.GE12586@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151117114718.GF12586@leverpostej>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20151117113701.GE12586@leverpostej>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Julien Grall <julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, Christoffer Dall <christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Huangpeng (Peter)" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, Hangaohuai <hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 November 2015 at 12:47, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Wed, Oct 07, 2015 at 09:35:27AM +0100, Ard Biesheuvel wrote:
->> The memory allocation for the updated FDT may execute several times
->> if the allocation turns out to be insufficiently large. There is no
->> need to sanity check the original FDT each time, so take it out of
->> the loop.
+On 17 November 2015 at 12:37, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
+> On Tue, Nov 17, 2015 at 12:25:58PM +0100, Ard Biesheuvel wrote:
+>> On 17 November 2015 at 10:57,  <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
+>> > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> >
+>> > Add a new function to parse DT parameters for Xen specific UEFI just
+>> > like the way for normal UEFI. Then it could reuse the existing codes.
+>> >
+>> > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> > ---
+>> >  drivers/firmware/efi/efi.c | 67 ++++++++++++++++++++++++++++++++++++++++++----
+>> >  1 file changed, 62 insertions(+), 5 deletions(-)
+>> >
+>> > diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+>> > index d6144e3..629bd06 100644
+>> > --- a/drivers/firmware/efi/efi.c
+>> > +++ b/drivers/firmware/efi/efi.c
+>> > @@ -24,6 +24,7 @@
+>> >  #include <linux/of_fdt.h>
+>> >  #include <linux/io.h>
+>> >  #include <linux/platform_device.h>
+>> > +#include <xen/xen.h>
+>> >
+>> >  struct efi __read_mostly efi = {
+>> >         .mps        = EFI_INVALID_TABLE_ADDR,
+>> > @@ -488,12 +489,60 @@ static __initdata struct {
+>> >         UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+>> >  };
+>> >
+>> > +static __initdata struct {
+>> > +       const char name[32];
+>> > +       const char propname[32];
+>> > +       int offset;
+>> > +       int size;
+>> > +} xen_dt_params[] = {
+>> > +       UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
+>> > +       UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
+>> > +       UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
+>> > +       UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
+>> > +       UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
+>> > +};
+>> > +
 >>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> We discussed (and agreed afair) that dropping the "linux," prefix from
+>> the DT properties was an acceptable change. If we do that, and reuse
+>> the same names in the xen version (i.e., drop the "xen," prefix), we
+>> could make this change a *lot* simpler.
 >
-> Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+> Regardless of if we drop the "linux," prefix from the existing strings,
+> I think we need the "xen," prefix here.
+>
+> The xen EFI interface comes with additional caveats, and we need to
+> treat it separately.
+>
+> Unless you're suggesting that /hypervisor/uefi-* is handled differently
+> to /chosen/uefi-*?
+>
+> I think I'd still prefer the "xen," prefix regardless.
 >
 
-Thanks.
-
-In the mean time, I noticed that this could be refactored even
-further, since checking the size only makes sense if the FDT was
-loaded from a file, and checking the header is redundant if the FDT
-was loaded from a config table.
-
--- 
-Ard.
-
-
->> ---
->>  drivers/firmware/efi/libstub/fdt.c | 42 ++++++++++++--------
->>  1 file changed, 26 insertions(+), 16 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
->> index ef5d764e2a27..354172bee81c 100644
->> --- a/drivers/firmware/efi/libstub/fdt.c
->> +++ b/drivers/firmware/efi/libstub/fdt.c
->> @@ -16,6 +16,26 @@
->>
->>  #include "efistub.h"
->>
->> +static efi_status_t sanity_check_fdt(efi_system_table_t *sys_table,
->> +                                  void *fdt, unsigned long fdt_size)
->> +{
->> +     if (fdt_check_header(fdt)) {
->> +             pr_efi_err(sys_table, "Device Tree header not valid!\n");
->> +             return EFI_LOAD_ERROR;
->> +     }
->> +
->> +     /*
->> +      * We don't get the size of the FDT if we get if from a
->> +      * configuration table.
->> +      */
->> +     if (fdt_size && fdt_totalsize(fdt) > fdt_size) {
->> +             pr_efi_err(sys_table, "Truncated device tree! foo!\n");
->> +             return EFI_LOAD_ERROR;
->> +     }
->> +
->> +     return EFI_SUCCESS;
->> +}
->> +
->>  efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->>                       unsigned long orig_fdt_size,
->>                       void *fdt, int new_fdt_size, char *cmdline_ptr,
->> @@ -29,22 +49,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
->>       u32 fdt_val32;
->>       u64 fdt_val64;
->>
->> -     /* Do some checks on provided FDT, if it exists*/
->> -     if (orig_fdt) {
->> -             if (fdt_check_header(orig_fdt)) {
->> -                     pr_efi_err(sys_table, "Device Tree header not valid!\n");
->> -                     return EFI_LOAD_ERROR;
->> -             }
->> -             /*
->> -              * We don't get the size of the FDT if we get if from a
->> -              * configuration table.
->> -              */
->> -             if (orig_fdt_size && fdt_totalsize(orig_fdt) > orig_fdt_size) {
->> -                     pr_efi_err(sys_table, "Truncated device tree! foo!\n");
->> -                     return EFI_LOAD_ERROR;
->> -             }
->> -     }
->> -
->>       if (orig_fdt)
->>               status = fdt_open_into(orig_fdt, fdt, new_fdt_size);
->>       else
->> @@ -213,6 +217,12 @@ efi_status_t allocate_new_fdt_and_exit_boot(efi_system_table_t *sys_table,
->>               return status;
->>       }
->>
->> +     if (fdt_addr) {
->> +             status = sanity_check_fdt(sys_table, (void*)fdt_addr, fdt_size);
->> +             if (status != EFI_SUCCESS)
->> +                     goto fail;
->> +     }
->> +
->>       pr_efi(sys_table,
->>              "Exiting boot services and installing virtual address map...\n");
->>
->> --
->> 1.9.1
->>
+Well, we should still be able to reuse more of the existing code
+rather than duplicating a bunch of code in fdt_find_xen_uefi_params()
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
