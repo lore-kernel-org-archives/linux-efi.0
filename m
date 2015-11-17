@@ -1,61 +1,82 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 1/2] Remove EFI memmap quirk for UV
-Date: Tue, 17 Nov 2015 09:52:08 +0000
-Message-ID: <20151117095208.GC2727@codeblueprint.co.uk>
-References: <1447696781-159611-1-git-send-email-athorlton@sgi.com>
- <alpine.DEB.2.11.1511161902050.3761@nanos>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.11.1511161902050.3761@nanos>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Thomas Gleixner <tglx@linutronix.de>
-Cc: Alex Thorlton <athorlton@sgi.com>, LKML <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, Hedi Berriche <hedi@sgi.com>, Dimitri Sivanich <sivanich@sgi.com>, x86@kernel.org, linux-efi@vger.kernel.org
+From: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Subject: [PATCH 01/13] Xen : Hide UART used by Xen
+Date: Tue, 17 Nov 2015 17:56:59 +0800
+Message-ID: <1447754231-7772-2-git-send-email-shannon.zhao@linaro.org>
+References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1447754231-7772-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 16 Nov, at 07:02:48PM, Thomas Gleixner wrote:
-> On Mon, 16 Nov 2015, Alex Thorlton wrote:
-> 
-> CC'ing Matt under his correct e-mail address.
-> 
-> > Commit a5d90c923bcf ("x86/efi: Quirk out SGI UV") added a quirk to
-> > efi_apply_memmap_quirks to force SGI UV systems to fall back to the old
-> > EFI memmap mechanism.  We have a BIOS fix for this issue now, so we no
-> > longer need this quirk in the kernel.  This commit removes the quirk
-> > from the function in question.
-> > 
-> > Signed-off-by: Alex Thorlton <athorlton@sgi.com>
-> > Acked-by: Mike Travis <travis@sgi.com>
-> > Acked-by: Russ Anderson <rja@sgi.com>
-> > Cc: Matt Fleming <matt.fleming@intel.com>
-> > Cc: Thomas Gleixner <tglx@linutronix.de>
-> > Cc: Ingo Molnar <mingo@redhat.com>
-> > Cc: "H. Peter Anvin" <hpa@zytor.com>
-> > Cc: Hedi Berriche <hedi@sgi.com>
-> > Cc: Dimitri Sivanich <sivanich@sgi.com>
-> > Cc: x86@kernel.org
-> > Cc: linux-efi@vger.kernel.org
-> > 
-> > ---
-> >  arch/x86/platform/efi/quirks.c | 6 ------
-> >  1 file changed, 6 deletions(-)
-> > 
-> > diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> > index 1c7380d..96b417c 100644
-> > --- a/arch/x86/platform/efi/quirks.c
-> > +++ b/arch/x86/platform/efi/quirks.c
-> > @@ -259,12 +259,6 @@ void __init efi_apply_memmap_quirks(void)
-> >  		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
-> >  		efi_unmap_memmap();
-> >  	}
-> > -
-> > -	/*
-> > -	 * UV doesn't support the new EFI pagetable mapping yet.
-> > -	 */
-> > -	if (is_uv_system())
-> > -		set_bit(EFI_OLD_MEMMAP, &efi.flags);
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Awesome! Thanks Alex.
+According to the STAO table, hide UART used by Xen from Dom0.
 
-Can I also close https://bugzilla.kernel.org/show_bug.cgi?id=75021 ?
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/acpi/bus.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+index a212cef..e93806b 100644
+--- a/drivers/acpi/bus.c
++++ b/drivers/acpi/bus.c
+@@ -46,6 +46,7 @@ ACPI_MODULE_NAME("bus");
+ struct acpi_device *acpi_root;
+ struct proc_dir_entry *acpi_root_dir;
+ EXPORT_SYMBOL(acpi_root_dir);
++static u64 uart_addr;
+ 
+ #ifdef CONFIG_X86
+ #ifdef CONFIG_ACPI_CUSTOM_DSDT
+@@ -93,6 +94,16 @@ acpi_status acpi_bus_get_status_handle(acpi_handle handle,
+ {
+ 	acpi_status status;
+ 
++	if (uart_addr) {
++		u64 addr;
++		status = acpi_evaluate_integer(handle, METHOD_NAME__ADR, NULL,
++					       &addr);
++		if (ACPI_SUCCESS(status) && (addr == uart_addr)) {
++			*sta = 0;
++			return AE_OK;
++		}
++	}
++
+ 	status = acpi_evaluate_integer(handle, "_STA", NULL, sta);
+ 	if (ACPI_SUCCESS(status))
+ 		return AE_OK;
+@@ -1069,6 +1080,7 @@ EXPORT_SYMBOL_GPL(acpi_kobj);
+ static int __init acpi_init(void)
+ {
+ 	int result;
++	struct acpi_table_stao *stao_ptr;
+ 
+ 	if (acpi_disabled) {
+ 		printk(KERN_INFO PREFIX "Interpreter disabled.\n");
+@@ -1081,6 +1093,16 @@ static int __init acpi_init(void)
+ 		acpi_kobj = NULL;
+ 	}
+ 
++	acpi_get_table(ACPI_SIG_STAO, 1,
++		       (struct acpi_table_header **)&stao_ptr);
++	if(stao_ptr->ignore_uart)
++	{
++		struct acpi_table_spcr *spcr_ptr;
++		acpi_get_table(ACPI_SIG_SPCR, 1,
++			       (struct acpi_table_header **)&spcr_ptr);
++		uart_addr = spcr_ptr->serial_port.address;
++	}
++
+ 	init_acpi_device_notify();
+ 	result = acpi_bus_init();
+ 	if (result) {
+-- 
+2.1.0
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
