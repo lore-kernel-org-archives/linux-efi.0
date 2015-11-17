@@ -1,70 +1,123 @@
 From: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Subject: [PATCH 07/13] ARM: Xen: Document UEFI support on Xen ARM virtual platforms
-Date: Tue, 17 Nov 2015 17:57:05 +0800
-Message-ID: <1447754231-7772-8-git-send-email-shannon.zhao@linaro.org>
+Subject: [PATCH 08/13] Xen: EFI: Parse DT parameters for Xen specific UEFI
+Date: Tue, 17 Nov 2015 17:57:06 +0800
+Message-ID: <1447754231-7772-9-git-send-email-shannon.zhao@linaro.org>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1447754231-7772-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 Cc: xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
-scan this to get the UEFI information.
+Add a new function to parse DT parameters for Xen specific UEFI just
+like the way for normal UEFI. Then it could reuse the existing codes.
 
 Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- Documentation/devicetree/bindings/arm/xen.txt | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ drivers/firmware/efi/efi.c | 67 ++++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 62 insertions(+), 5 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
-index 0f7b9c2..c375d67 100644
---- a/Documentation/devicetree/bindings/arm/xen.txt
-+++ b/Documentation/devicetree/bindings/arm/xen.txt
-@@ -15,6 +15,24 @@ the following properties:
- - interrupts: the interrupt used by Xen to inject event notifications.
-   A GIC node is also required.
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index d6144e3..629bd06 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -24,6 +24,7 @@
+ #include <linux/of_fdt.h>
+ #include <linux/io.h>
+ #include <linux/platform_device.h>
++#include <xen/xen.h>
  
-+To support UEFI on Xen ARM virtual platforms, Xen pupulates the FDT "uefi" node
-+under /hypervisor with following parameters:
-+
-+________________________________________________________________________________
-+Name                      | Size   | Description
-+================================================================================
-+xen,uefi-system-table     | 64-bit | Physical address of the UEFI System Table.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-start       | 64-bit | Physical address of the UEFI memory map.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
-+                          |        | pointed to in previous entry.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
-+                          |        | memory map.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
-+--------------------------------------------------------------------------------
- 
- Example (assuming #address-cells = <2> and #size-cells = <2>):
- 
-@@ -22,4 +40,11 @@ hypervisor {
- 	compatible = "xen,xen-4.3", "xen,xen";
- 	reg = <0 0xb0000000 0 0x20000>;
- 	interrupts = <1 15 0xf08>;
-+	uefi {
-+		xen,uefi-system-table = <0xXXXXXXXX>;
-+		xen,uefi-mmap-start = <0xXXXXXXXX>;
-+		xen,uefi-mmap-size = <0xXXXXXXXX>;
-+		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
-+		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
-+        };
+ struct efi __read_mostly efi = {
+ 	.mps        = EFI_INVALID_TABLE_ADDR,
+@@ -488,12 +489,60 @@ static __initdata struct {
+ 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
  };
+ 
++static __initdata struct {
++	const char name[32];
++	const char propname[32];
++	int offset;
++	int size;
++} xen_dt_params[] = {
++	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
++	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
++	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
++	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
++	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
++};
++
+ struct param_info {
+ 	int verbose;
+ 	int found;
+ 	void *params;
+ };
+ 
++static int __init fdt_find_xen_uefi_params(unsigned long node,
++					   const char *uname, int depth,
++					   void *data)
++{
++	struct param_info *info = data;
++	const void *prop;
++	void *dest;
++	u64 val;
++	int i, len;
++
++	if (xen_initial_domain() && (depth != 2 || strcmp(uname, "uefi") != 0))
++		return 0;
++
++	for (i = 0; i < ARRAY_SIZE(xen_dt_params); i++) {
++		prop = of_get_flat_dt_prop(node, xen_dt_params[i].propname,
++					   &len);
++		if (!prop)
++			return 0;
++		dest = info->params + xen_dt_params[i].offset;
++		info->found++;
++
++		val = of_read_number(prop, len / sizeof(u32));
++
++		if (dt_params[i].size == sizeof(u32))
++			*(u32 *)dest = val;
++		else
++			*(u64 *)dest = val;
++
++		if (info->verbose)
++			pr_info("  %s: 0x%0*llx\n", xen_dt_params[i].name,
++				xen_dt_params[i].size * 2, val);
++	}
++
++	return 1;
++}
+ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 				       int depth, void *data)
+ {
+@@ -538,12 +587,20 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params, int verbose)
+ 	info.found = 0;
+ 	info.params = params;
+ 
+-	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+-	if (!info.found)
++	if (xen_initial_domain())
++		ret = of_scan_flat_dt(fdt_find_xen_uefi_params, &info);
++	else
++		ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
++	if (!info.found) {
+ 		pr_info("UEFI not found.\n");
+-	else if (!ret)
+-		pr_err("Can't find '%s' in device tree!\n",
+-		       dt_params[info.found].name);
++	} else if (!ret) {
++		if (xen_initial_domain())
++			pr_err("Can't find '%s' in device tree!\n",
++			       xen_dt_params[info.found].name);
++		else
++			pr_err("Can't find '%s' in device tree!\n",
++			       xen_dt_params[info.found].name);
++	}
+ 
+ 	return ret;
+ }
 -- 
 2.1.0
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
