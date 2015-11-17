@@ -1,171 +1,93 @@
-From: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
-Subject: Re: [PATCH 06/13] Xen: ARM: Add support for mapping
- amba device mmio
-Date: Tue, 17 Nov 2015 09:40:40 -0500
-Message-ID: <20151117144040.GI3003@char.us.oracle.com>
+From: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [Xen-devel] [PATCH 02/13] xen/grant-table: Move xlated_setup_gnttab_pages
+ to common place
+Date: Tue, 17 Nov 2015 16:02:08 +0000
+Message-ID: <564B4F80.2020402@citrix.com>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
-	<1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
+ <1447754231-7772-3-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
-Content-Disposition: inline
-In-Reply-To: <1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
-To: shannon.zhao@linaro.org
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, hangaohuai@huawei.com, linux-efi@vger.kernel.org, ian.campbell@citrix.com, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, julien.grall@citrix.com, stefano.stabellini@citrix.com, christoffer.dall@linaro.org, zhaoshenglong@huawei.com, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 8bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1447754231-7772-3-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Nov 17, 2015 at 05:57:04PM +0800, shannon.zhao@linaro.org wrote:
-> From: Shannon Zhao <shannon.zhao@linaro.org>
+On 17/11/15 09:57, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
+> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> Add a bus_notifier for AMBA bus device in order to map the device
-> mmio regions when DOM0 booting with ACPI.
-> 
-> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-> ---
->  drivers/xen/Makefile |  1 +
->  drivers/xen/amba.c   | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 100 insertions(+)
->  create mode 100644 drivers/xen/amba.c
-> 
-> diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
-> index 2f867e7..139bd0b 100644
-> --- a/drivers/xen/Makefile
-> +++ b/drivers/xen/Makefile
-> @@ -12,6 +12,7 @@ CFLAGS_features.o			:= $(nostackp)
->  CFLAGS_efi.o				+= -fshort-wchar
+> Move xlated_setup_gnttab_pages to common place, so it can be reused by
+> ARM to setup grant table when booting with ACPI.
+[...]
+> --- a/drivers/xen/grant-table.c
+> +++ b/drivers/xen/grant-table.c
+> @@ -664,6 +664,55 @@ int gnttab_setup_auto_xlat_frames(phys_addr_t addr)
+>  }
+>  EXPORT_SYMBOL_GPL(gnttab_setup_auto_xlat_frames);
 >  
->  dom0-$(CONFIG_ARM64) += platform.o
-> +dom0-$(CONFIG_ARM_AMBA) += amba.o
->  dom0-$(CONFIG_PCI) += pci.o
->  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
->  dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
-> diff --git a/drivers/xen/amba.c b/drivers/xen/amba.c
-> new file mode 100644
-> index 0000000..e491c8e
-> --- /dev/null
-> +++ b/drivers/xen/amba.c
-> @@ -0,0 +1,99 @@
-> +/*
-> + * Copyright (c) 2015, Linaro Limited.
-> + *
-> + * This program is free software; you can redistribute it and/or modify it
-> + * under the terms and conditions of the GNU General Public License,
-> + * version 2, as published by the Free Software Foundation.
-> + *
-> + * This program is distributed in the hope it will be useful, but WITHOUT
-> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-> + * more details.
-> + *
-> + * You should have received a copy of the GNU General Public License along with
-> + * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
-> + * Place - Suite 330, Boston, MA 02111-1307 USA.
-> + *
-> + * Author: Shannon Zhao <shannon.zhao@linaro.org>
-> + */
-> +
-> +#include <linux/amba/bus.h>
-> +#include <linux/acpi.h>
-> +#include <xen/xen.h>
-> +#include <xen/interface/memory.h>
-> +#include <asm/xen/hypervisor.h>
-> +#include <asm/xen/hypercall.h>
-> +
-> +static int xen_map_amba_device_mmio(struct amba_device *adev)
+> +int __init xlated_setup_gnttab_pages(void)
 > +{
-> +	int rc = 0;
-> +	struct resource *r = &adev->res;
+> +	struct page **pages;
+> +	xen_pfn_t *pfns;
+> +	void *vaddr;
+> +	int rc;
+> +	unsigned int i;
+> +	unsigned long nr_grant_frames = gnttab_max_grant_frames();
 > +
-> +	if (resource_type(r) == IORESOURCE_MEM)
-
-This is like the 'xen_map_platform_device_mmio' code. Why don't you call
-that? Or at least make the 'xen_map_platform_device_mmio' internal parts be
-visible to both of these functions.
-
-> +	{
-> +		int j;
-> +		int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
-> +		xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
-> +		xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
-> +					    GFP_KERNEL);
-> +		int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
-> +		struct xen_add_to_physmap_range xatp;
+> +	BUG_ON(nr_grant_frames == 0);
+> +	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
+> +	if (!pages)
+> +		return -ENOMEM;
 > +
-> +		for (j = 0; j < nr; j++) {
-> +			gpfns[j] = (r->start >> PAGE_SHIFT) + j;
-> +			idxs[j] = (r->start >> PAGE_SHIFT) + j;
-> +			errs[j] = 0;
-> +		}
-> +
-> +		xatp.domid = DOMID_SELF;
-> +		xatp.size = nr;
-> +		xatp.space = XENMAPSPACE_dev_mmio;
-> +
-> +		set_xen_guest_handle(xatp.gpfns, gpfns);
-> +		set_xen_guest_handle(xatp.idxs, idxs);
-> +		set_xen_guest_handle(xatp.errs, errs);
-> +
-> +		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
-> +
-> +		kfree(gpfns);
-> +		kfree(idxs);
-> +		kfree(errs);
-> +		if (rc != 0)
-> +			return rc;
+> +	pfns = kcalloc(nr_grant_frames, sizeof(pfns[0]), GFP_KERNEL);
+> +	if (!pfns) {
+> +		kfree(pages);
+> +		return -ENOMEM;
 > +	}
-> +
-> +	return rc;
-> +}
-> +
-> +static int xen_amba_notifier(struct notifier_block *nb,
-> +			     unsigned long action, void *data)
-> +{
-> +	struct amba_device *adev = to_amba_device(data);
-> +	int r = 0;
-> +
-> +	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
-> +		r = xen_map_amba_device_mmio(adev);
-> +
-
-What about the removal of a bus device? No need to handle that?
-
-> +	if (r)
-> +	{
-> +		dev_err(&adev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
-> +			adev->dev.init_name);
-> +		return NOTIFY_OK;
+> +	rc = alloc_xenballooned_pages(nr_grant_frames, pages, 0 /* lowmem */);
+> +	if (rc) {
+> +		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
+> +			nr_grant_frames, rc);
+> +		kfree(pages);
+> +		kfree(pfns);
+> +		return rc;
 > +	}
+> +	for (i = 0; i < nr_grant_frames; i++)
+> +		pfns[i] = page_to_pfn(pages[i]);
 > +
-> +	return NOTIFY_DONE;
-> +}
-> +
-> +static struct notifier_block amba_device_nb = {
-> +	.notifier_call = xen_amba_notifier,
-> +};
-> +
-> +static int __init register_xen_amba_notifier(void)
-> +{
-> +	if (!xen_initial_domain())
-> +		return 0;
-> +
-> +	return bus_register_notifier(&amba_bustype, &amba_device_nb);
-> +}
-> +
-> +arch_initcall(register_xen_amba_notifier);
-> -- 
-> 2.1.0
-> 
-> 
-> _______________________________________________
-> Xen-devel mailing list
-> Xen-devel@lists.xen.org
-> http://lists.xen.org/xen-devel
+> +	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
+> +	if (!vaddr) {
+> +		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
+> +			nr_grant_frames, rc);
+> +		free_xenballooned_pages(nr_grant_frames, pages);
+> +		kfree(pages);
+> +		kfree(pfns);
+> +		return -ENOMEM;
+> +	}
+> +	kfree(pages);
+
+Can you move most of this function into drivers/xen/xlate_mmu.c in a
+function like:
+
+/**
+ * xen_xlate_map_ballooned_pages - map a new set of ballooned pages
+ * count: number of GFNs.
+ * pages: returns the array of (now) ballooned pages.
+ * gfns: returns the array of corresponding GFNs.
+ * virt: returns the virtual address of the mapped region.
+ *
+ * This allocate a set of ballooned pages and maps them into the
+ * kernel's address space.
+ */
+void *xen_xlate_map_ballooned_pages(
+    unsigned int count,
+    struct page **pages,
+    xen_pfn_t **gfns);
+
+David
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
