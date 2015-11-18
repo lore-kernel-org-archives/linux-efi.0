@@ -1,103 +1,73 @@
 From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH 05/13] Xen: ARM: Add support for mapping platform
- device mmio
-Date: Wed, 18 Nov 2015 14:11:13 +0800
-Message-ID: <564C1681.70903@huawei.com>
-References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org> <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org> <564B56B2.4030901@citrix.com>
+Subject: Re: [PATCH 07/13] ARM: Xen: Document UEFI support on Xen ARM virtual
+ platforms
+Date: Wed, 18 Nov 2015 14:24:22 +0800
+Message-ID: <564C1996.80806@huawei.com>
+References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org> <1447754231-7772-8-git-send-email-shannon.zhao@linaro.org> <20151117204457.GA31871@rob-hp-laptop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <564B56B2.4030901-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20151117204457.GA31871@rob-hp-laptop>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org
-Cc: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 2015/11/18 0:32, David Vrabel wrote:
-> On 17/11/15 09:57, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
+On 2015/11/18 4:44, Rob Herring wrote:
+> On Tue, Nov 17, 2015 at 05:57:05PM +0800, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
 >> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >>
->> Add a bus_notifier for platform bus device in order to map the device
->> mmio regions when DOM0 booting with ACPI.
-> [...]
->> --- /dev/null
->> +++ b/drivers/xen/platform.c
->> @@ -0,0 +1,104 @@
->> +/*
->> + * Copyright (c) 2015, Linaro Limited.
->> + *
->> + * This program is free software; you can redistribute it and/or modify it
->> + * under the terms and conditions of the GNU General Public License,
->> + * version 2, as published by the Free Software Foundation.
->> + *
->> + * This program is distributed in the hope it will be useful, but WITHOUT
->> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
->> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
->> + * more details.
->> + *
->> + * You should have received a copy of the GNU General Public License along with
->> + * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
->> + * Place - Suite 330, Boston, MA 02111-1307 USA.
-> 
-> "You should have received a copy of the GNU General Public License
-> along with this program.  If not, see <http://www.gnu.org/licenses/>."
-> 
->> + *
->> + * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> Omit this since it just becomes stale and git will know the correct
-> authorship.
-> 
->> +static int xen_platform_notifier(struct notifier_block *nb,
->> +				 unsigned long action, void *data)
->> +{
->> +	struct platform_device *pdev = to_platform_device(data);
->> +	int r = 0;
+>> Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
+>> scan this to get the UEFI information.
+>>
+>> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  Documentation/devicetree/bindings/arm/xen.txt | 25 +++++++++++++++++++++++++
+>>  1 file changed, 25 insertions(+)
+>>
+>> diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
+>> index 0f7b9c2..c375d67 100644
+>> --- a/Documentation/devicetree/bindings/arm/xen.txt
+>> +++ b/Documentation/devicetree/bindings/arm/xen.txt
+>> @@ -15,6 +15,24 @@ the following properties:
+>>  - interrupts: the interrupt used by Xen to inject event notifications.
+>>    A GIC node is also required.
+>>  
+>> +To support UEFI on Xen ARM virtual platforms, Xen pupulates the FDT "uefi" node
+>> +under /hypervisor with following parameters:
 >> +
->> +	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
->> +		r = xen_map_platform_device_mmio(pdev);
+>> +________________________________________________________________________________
+>> +Name                      | Size   | Description
+>> +================================================================================
+>> +xen,uefi-system-table     | 64-bit | Physical address of the UEFI System Table.
+>> +--------------------------------------------------------------------------------
+>> +xen,uefi-mmap-start       | 64-bit | Physical address of the UEFI memory map.
+>> +--------------------------------------------------------------------------------
+>> +xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
+>> +                          |        | pointed to in previous entry.
+>> +--------------------------------------------------------------------------------
+>> +xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
+>> +                          |        | memory map.
+>> +--------------------------------------------------------------------------------
+>> +xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
+>> +--------------------------------------------------------------------------------
 > 
-> Why even register the notifier if acpi_disabled?
+> Why aren't you using what is already populated by UEFI as defined in 
+> Documentation/arm/uefi.txt? Seems to be about the same thing.
 > 
->> +
->> +	if (r)
->> +	{
->> +		dev_err(&pdev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
->> +			pdev->name);
->> +		return NOTIFY_OK;
-> 
-> Return NOTIFY_BAD here?  The device will be unusable.
-> 
->> +	}
->> +
->> +	return NOTIFY_DONE;
->> +}
->> +
->> +static struct notifier_block platform_device_nb = {
->> +	.notifier_call = xen_platform_notifier,
->> +};
->> +
->> +static int __init register_xen_platform_notifier(void)
->> +{
->> +	if (!xen_initial_domain())
->> +		return 0;
->> +
->> +	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
-> 
-> Why only platform busses?  What about PCI devices?  Where will they get
-> added to dom0's physmap?
-> 
-I've said in the design doc[1] that "And for PCI bus devices, Linux
-could reuse the existing PCI bus_notifier like X86."
 
-Since currently Xen on ARM doesn't support PCI (IIRC) and if it adds the
-support in the future, we could make the codes in drivers/xen/pci.c
-common to ARM and x86 at that moment.
+Yes, the parameters are similar. But since we can't find a good way to
+use normal UEFI for Xen Dom0 on ARM(there are some aspects which are not
+consistent with the UEFI spec), we have to introduce a Xen specific
+UEFI. Then we want to separate this from the normal UEFI completely and
+don't affect the normal use. So we add these parameter under Xenia
+specific node /hypervisor.
+
+For details of the previous discussion, look at below link:
+
+http://lists.xenproject.org/archives/html/xen-devel/2015-09/msg03295.html
 
 Thanks,
-
-[1] http://lists.xen.org/archives/html/xen-devel/2015-11/msg00488.html
-
 -- 
 Shannon
