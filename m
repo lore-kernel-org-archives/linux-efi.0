@@ -1,95 +1,123 @@
 From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH 02/13] xen/grant-table: Move xlated_setup_gnttab_pages
- to common place
-Date: Wed, 18 Nov 2015 12:32:44 +0800
-Message-ID: <564BFF6C.3070208@huawei.com>
-References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org> <1447754231-7772-3-git-send-email-shannon.zhao@linaro.org> <564B4F80.2020402@citrix.com>
+Subject: Re: [Xen-devel] [PATCH 05/13] Xen: ARM: Add support for mapping platform
+ device mmio
+Date: Wed, 18 Nov 2015 13:48:06 +0800
+Message-ID: <564C1116.8000603@huawei.com>
+References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org> <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org> <20151117143822.GH3003@char.us.oracle.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
+Content-Type: text/plain; charset="ISO-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <564B4F80.2020402-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
-Cc: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20151117143822.GH3003-he5eyhs8q0BAdwtm4QZOy9BPR1lH4CV8@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Konrad Rzeszutek Wilk <konrad.wilk-QHcLZuEGTsvQT0dZR+AlfA@public.gmane.org>, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 2015/11/18 0:02, David Vrabel wrote:
-> On 17/11/15 09:57, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
+On 2015/11/17 22:38, Konrad Rzeszutek Wilk wrote:
+> On Tue, Nov 17, 2015 at 05:57:03PM +0800, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
 >> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >>
->> Move xlated_setup_gnttab_pages to common place, so it can be reused by
->> ARM to setup grant table when booting with ACPI.
-> [...]
->> --- a/drivers/xen/grant-table.c
->> +++ b/drivers/xen/grant-table.c
->> @@ -664,6 +664,55 @@ int gnttab_setup_auto_xlat_frames(phys_addr_t addr)
->>  }
->>  EXPORT_SYMBOL_GPL(gnttab_setup_auto_xlat_frames);
+>> Add a bus_notifier for platform bus device in order to map the device
+>> mmio regions when DOM0 booting with ACPI.
+>>
+>> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/xen/Makefile   |   1 +
+>>  drivers/xen/platform.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++
+>>  2 files changed, 105 insertions(+)
+>>  create mode 100644 drivers/xen/platform.c
+>>
+>> diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
+>> index e293bc5..2f867e7 100644
+>> --- a/drivers/xen/Makefile
+>> +++ b/drivers/xen/Makefile
+>> @@ -11,6 +11,7 @@ CFLAGS_features.o			:= $(nostackp)
 >>  
->> +int __init xlated_setup_gnttab_pages(void)
+>>  CFLAGS_efi.o				+= -fshort-wchar
+>>  
+>> +dom0-$(CONFIG_ARM64) += platform.o
+>>  dom0-$(CONFIG_PCI) += pci.o
+>>  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
+>>  dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
+>> diff --git a/drivers/xen/platform.c b/drivers/xen/platform.c
+>> new file mode 100644
+>> index 0000000..0f95e7f
+>> --- /dev/null
+>> +++ b/drivers/xen/platform.c
+>> @@ -0,0 +1,104 @@
+>> +/*
+>> + * Copyright (c) 2015, Linaro Limited.
+>> + *
+>> + * This program is free software; you can redistribute it and/or modify it
+>> + * under the terms and conditions of the GNU General Public License,
+>> + * version 2, as published by the Free Software Foundation.
+>> + *
+>> + * This program is distributed in the hope it will be useful, but WITHOUT
+>> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+>> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+>> + * more details.
+>> + *
+>> + * You should have received a copy of the GNU General Public License along with
+>> + * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+>> + * Place - Suite 330, Boston, MA 02111-1307 USA.
+>> + *
+>> + * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> + */
+>> +
+>> +#include <linux/platform_device.h>
+>> +#include <linux/acpi.h>
+>> +#include <xen/xen.h>
+>> +#include <xen/interface/memory.h>
+>> +#include <asm/xen/hypervisor.h>
+>> +#include <asm/xen/hypercall.h>
+>> +
+>> +static int xen_map_platform_device_mmio(struct platform_device *pdev)
 >> +{
->> +	struct page **pages;
->> +	xen_pfn_t *pfns;
->> +	void *vaddr;
->> +	int rc;
->> +	unsigned int i;
->> +	unsigned long nr_grant_frames = gnttab_max_grant_frames();
->> +
->> +	BUG_ON(nr_grant_frames == 0);
->> +	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
->> +	if (!pages)
->> +		return -ENOMEM;
->> +
->> +	pfns = kcalloc(nr_grant_frames, sizeof(pfns[0]), GFP_KERNEL);
->> +	if (!pfns) {
->> +		kfree(pages);
->> +		return -ENOMEM;
->> +	}
->> +	rc = alloc_xenballooned_pages(nr_grant_frames, pages, 0 /* lowmem */);
->> +	if (rc) {
->> +		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
->> +			nr_grant_frames, rc);
->> +		kfree(pages);
->> +		kfree(pfns);
->> +		return rc;
->> +	}
->> +	for (i = 0; i < nr_grant_frames; i++)
->> +		pfns[i] = page_to_pfn(pages[i]);
->> +
->> +	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
->> +	if (!vaddr) {
->> +		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
->> +			nr_grant_frames, rc);
->> +		free_xenballooned_pages(nr_grant_frames, pages);
->> +		kfree(pages);
->> +		kfree(pfns);
->> +		return -ENOMEM;
->> +	}
->> +	kfree(pages);
+>> +	int i, rc = 0;
 > 
-> Can you move most of this function into drivers/xen/xlate_mmu.c in a
-> function like:
+> unsigned int i;
+>> +
+>> +	for (i = 0; i < pdev->num_resources; i++)
+>> +	{
+>> +		struct resource *r = &pdev->resource[i];
+>> +
+>> +		if (resource_type(r) == IORESOURCE_MEM)
 > 
-> /**
->  * xen_xlate_map_ballooned_pages - map a new set of ballooned pages
->  * count: number of GFNs.
->  * pages: returns the array of (now) ballooned pages.
->  * gfns: returns the array of corresponding GFNs.
->  * virt: returns the virtual address of the mapped region.
->  *
->  * This allocate a set of ballooned pages and maps them into the
->  * kernel's address space.
->  */
-> void *xen_xlate_map_ballooned_pages(
->     unsigned int count,
->     struct page **pages,
->     xen_pfn_t **gfns);
+> Make this:
 > 
-Sure, but the parameter "pages" is not necessary I think, since the
-pages has been freed in the function and it doesn't need in
-xen_auto_xlat_grant_frames either. Right?
+> 	if (resource_type(r) != IORESOURCE_MEM)
+> 		continue;
+> 
+>> +		{
+> 
+> And then you don't have to move all of this code to the right.
+> 
+>> +			int j;
+> unsigned int
+>> +			int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
+> 
+> unsigned int
+>> +			xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr,
+>> +						   GFP_KERNEL);
+>> +			xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
+>> +						    GFP_KERNEL);
+>> +			int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
+> 
+> You can use kzalloc.
+>> +			struct xen_add_to_physmap_range xatp;
+> 
+> This declaration of variables and then setting does not look like that
+> pretty to my mind. (And it is a headache to debug if for example 'nr' ends up
+> being zero for example). Or worst -1U since you had it as 'int'.
+> 
+Yes, a little. Maybe I can add a check for nr. Would that be fine?
 
 Thanks,
 -- 
 Shannon
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
