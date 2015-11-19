@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 3/4] efi: runtime-wrappers: remove out of date comment regarding in_nmi()
-Date: Thu, 19 Nov 2015 14:36:30 +0100
-Message-ID: <1447940191-30705-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH 1/4] efi: expose non-blocking set_variable() wrapper to efivars
+Date: Thu, 19 Nov 2015 14:36:28 +0100
+Message-ID: <1447940191-30705-2-git-send-email-ard.biesheuvel@linaro.org>
 References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1447940191-30705-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,49 +10,30 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJtt
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This code is long gone, so remove the comment as well.
+Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
+operation") implemented a non-blocking alternative for the UEFI
+SetVariable() invocation performed by efivars, since it may occur
+in atomic context. However, this version of the function was never
+exposed via the efivars struct, so the non-blocking versions was
+not actually callable. Fix that.
 
+Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 26 --------------------
- 1 file changed, 26 deletions(-)
+ drivers/firmware/efi/efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 228bbf910461..a624f7445d11 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -62,32 +62,6 @@
- static DEFINE_SPINLOCK(efi_runtime_lock);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 027ca212179f..3b52677f459a 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -180,6 +180,7 @@ static int generic_ops_register(void)
+ {
+ 	generic_ops.get_variable = efi.get_variable;
+ 	generic_ops.set_variable = efi.set_variable;
++	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
+ 	generic_ops.get_next_variable = efi.get_next_variable;
+ 	generic_ops.query_variable_store = efi_query_variable_store;
  
- /*
-- * Some runtime services calls can be reentrant under NMI, even if the table
-- * above says they are not. (source: UEFI Specification v2.4A)
-- *
-- * Table 32. Functions that may be called after Machine Check, INIT and NMI
-- * +----------------------------+------------------------------------------+
-- * | Function			| Called after Machine Check, INIT and NMI |
-- * +----------------------------+------------------------------------------+
-- * | GetTime()			| Yes, even if previously busy.		   |
-- * | GetVariable()		| Yes, even if previously busy		   |
-- * | GetNextVariableName()	| Yes, even if previously busy		   |
-- * | QueryVariableInfo()	| Yes, even if previously busy		   |
-- * | SetVariable()		| Yes, even if previously busy		   |
-- * | UpdateCapsule()		| Yes, even if previously busy		   |
-- * | QueryCapsuleCapabilities()	| Yes, even if previously busy		   |
-- * | ResetSystem()		| Yes, even if previously busy		   |
-- * +----------------------------+------------------------------------------+
-- *
-- * In order to prevent deadlocks under NMI, the wrappers for these functions
-- * may only grab the efi_runtime_lock or rtc_lock spinlocks if !efi_in_nmi().
-- * However, not all of the services listed are reachable through NMI code paths,
-- * so the the special handling as suggested by the UEFI spec is only implemented
-- * for QueryVariableInfo() and SetVariable(), as these can be reached in NMI
-- * context through efi_pstore_write().
-- */
--
--/*
-  * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
-  * the EFI specification requires that callers of the time related runtime
-  * functions serialize with other CMOS accesses in the kernel, as the EFI time
 -- 
 1.9.1
