@@ -1,32 +1,34 @@
-From: Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>
-Subject: Re: [PATCH 1/2] Remove EFI memmap quirk for UV
-Date: Wed, 18 Nov 2015 11:00:13 -0600
-Message-ID: <20151118170013.GD161386@asylum.americas.sgi.com>
-References: <1447696781-159611-1-git-send-email-athorlton@sgi.com> <20151117193258.GB9374@pd.tnic> <20151118015630.GC161386@asylum.americas.sgi.com> <20151118080047.GA22813@gmail.com> <20151118092315.GB4138@pd.tnic>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH 6/6] Documentation/x86: Update EFI memory region
+ description
+Date: Thu, 19 Nov 2015 11:22:24 +0000
+Message-ID: <20151119112224.GA2577@codeblueprint.co.uk>
+References: <1447342823-3612-1-git-send-email-matt@codeblueprint.co.uk>
+ <1447342823-3612-7-git-send-email-matt@codeblueprint.co.uk>
+ <20151113092210.GB19922@gmail.com>
+ <20151113092906.GD2716@codeblueprint.co.uk>
+ <20151118081859.GB23844@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20151118092315.GB4138-fF5Pk5pvG8Y@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Alex Thorlton <athorlton-sJ/iWh9BUns@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Hedi Berriche <hedi-sJ/iWh9BUns@public.gmane.org>, Dimitri Sivanich <sivanich-sJ/iWh9BUns@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+In-Reply-To: <20151118081859.GB23844@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@codemonkey.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Nov 18, 2015 at 10:23:16AM +0100, Borislav Petkov wrote:
-> On Wed, Nov 18, 2015 at 09:00:47AM +0100, Ingo Molnar wrote:
-> > We should at least check the BIOS version via a DMI quirk and panic in some nicely 
-> > informative 'upgrade your BIOS!' way to ease the transition ...
+On Wed, 18 Nov, at 09:18:59AM, Ingo Molnar wrote:
 > 
-> Or since we're touching BIOS anyway, maybe stick a bit somewhere which
-> says "EFI is fixed/quirk not needed anymore" when set and software can
-> check that bit instead of checking BIOS versions...
+> Ah yes - but then the text is misleading, what does 'in the virtual range of 64Gb' 
+> mean? A virtual memory range is a specific range of addresses - like in the table 
+> you extended.
+> 
+> A better phrasing would be something like:
+> 
+>  We map EFI runtime services in the 'efi_pgd' PGD in a 64Gb large virtual memory
+>  window (this size is arbitrary, it can be raised later if needed).
+> 
+> Agreed?
 
-After talking through this with Russ, we agree that we should fix this
-up to play nice on UV1, without users needing to add the memmap quirk to
-the command line.  I'll figure out which check we need to make and spin
-another version.
-
-Thanks for looking over this, guys!
-
-- Alex
+Sounds OK to me.
