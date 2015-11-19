@@ -1,67 +1,128 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 2/4] efi: efivars: don't rely on blocking operations in non-blocking set_var()
-Date: Thu, 19 Nov 2015 14:36:29 +0100
-Message-ID: <1447940191-30705-3-git-send-email-ard.biesheuvel@linaro.org>
-References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447940191-30705-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH v2 04/12] arm64/efi: split off EFI init and runtime code
+ for reuse by 32-bit ARM
+Date: Thu, 19 Nov 2015 22:34:30 +0000
+Message-ID: <20151119223430.GB2577@codeblueprint.co.uk>
+References: <1447698757-8762-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1447698757-8762-5-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <1447698757-8762-5-git-send-email-ard.biesheuvel@linaro.org>
+Sender: owner-linux-mm@kvack.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, linux-efi@vger.kernel.org, matt.fleming@intel.com, linux@arm.linux.org.uk, will.deacon@arm.com, grant.likely@linaro.org, catalin.marinas@arm.com, mark.rutland@arm.com, leif.lindholm@linaro.org, roy.franz@linaro.org, msalter@redhat.com, ryan.harkin@linaro.org, akpm@linux-foundation.org, linux-mm@kvack.org
 List-Id: linux-efi@vger.kernel.org
 
-The non-blocking version of efivar_entry_set() gives up directly on
-failure to acquire __efivars->lock. However, it also calls check_var_size(),
-whose implementation calls the ordinary query_variable_info() and
-set_variable() runtime service wrappers, meaning we could still deadlock
-if efivar_entry_set_nonblocking() is called from an atomic context that
-interrupted a runtime service already in progress on the same CPU.
+On Mon, 16 Nov, at 07:32:29PM, Ard Biesheuvel wrote:
+> +
+> +	pr_info("EFI v%u.%.02u by %s\n",
+> +		efi.systab->hdr.revision >> 16,
+> +		efi.systab->hdr.revision & 0xffff, vendor);
+> +
+> +	table_size = sizeof(efi_config_table_64_t) * efi.systab->nr_tables;
+> +	config_tables = early_memremap(efi_to_phys(efi.systab->tables),
+> +				       table_size);
 
-So drop the call to check_var_size(). This is potentially unsafe on some
-UEFI implementations that fail to boot if the varstore fills up, but
-those systems are unlikely to be using efi-pstore in the first place.
+You should probably check the return value of early_memremap().
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/vars.c | 12 +++---------
- 1 file changed, 3 insertions(+), 9 deletions(-)
+> +
+> +	retval = efi_config_parse_tables(config_tables, efi.systab->nr_tables,
+> +					 sizeof(efi_config_table_64_t), NULL);
+> +
+> +	early_memunmap(config_tables, table_size);
+> +out:
+> +	early_memunmap(efi.systab,  sizeof(efi_system_table_t));
+> +	return retval;
+> +}
+> +
+> +/*
+> + * Return true for RAM regions we want to permanently reserve.
+> + */
+> +static __init int is_reserve_region(efi_memory_desc_t *md)
+> +{
+> +	switch (md->type) {
+> +	case EFI_LOADER_CODE:
+> +	case EFI_LOADER_DATA:
+> +	case EFI_BOOT_SERVICES_CODE:
+> +	case EFI_BOOT_SERVICES_DATA:
+> +	case EFI_CONVENTIONAL_MEMORY:
+> +	case EFI_PERSISTENT_MEMORY:
+> +		return 0;
+> +	default:
+> +		break;
+> +	}
+> +	return is_normal_ram(md);
+> +}
+> +
+> +static __init void reserve_regions(void)
+> +{
+> +	efi_memory_desc_t *md;
+> +	u64 paddr, npages, size;
+> +
+> +	if (efi_enabled(EFI_DBG))
+> +		pr_info("Processing EFI memory map:\n");
+> +
+> +	for_each_efi_memory_desc(&memmap, md) {
+> +		paddr = md->phys_addr;
+> +		npages = md->num_pages;
+> +
+> +		if (efi_enabled(EFI_DBG)) {
+> +			char buf[64];
+> +
+> +			pr_info("  0x%012llx-0x%012llx %s",
+> +				paddr, paddr + (npages << EFI_PAGE_SHIFT) - 1,
+> +				efi_md_typeattr_format(buf, sizeof(buf), md));
+> +		}
+> +
+> +		memrange_efi_to_native(&paddr, &npages);
+> +		size = npages << PAGE_SHIFT;
 
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 70a0fb10517f..caccdbffc1d0 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -615,12 +615,6 @@ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
- 	if (!spin_trylock_irqsave(&__efivars->lock, flags))
- 		return -EBUSY;
- 
--	status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
--	if (status != EFI_SUCCESS) {
--		spin_unlock_irqrestore(&__efivars->lock, flags);
--		return -ENOSPC;
--	}
--
- 	status = ops->set_variable_nonblocking(name, &vendor, attributes,
- 					       size, data);
- 
-@@ -652,9 +646,6 @@ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
- 	unsigned long flags;
- 	efi_status_t status;
- 
--	if (!ops->query_variable_store)
--		return -ENOSYS;
--
- 	/*
- 	 * If the EFI variable backend provides a non-blocking
- 	 * ->set_variable() operation and we're in a context where we
-@@ -669,6 +660,9 @@ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
- 		return efivar_entry_set_nonblocking(name, vendor, attributes,
- 						    size, data);
- 
-+	if (!ops->query_variable_store)
-+		return -ENOSYS;
-+
- 	if (!block) {
- 		if (!spin_trylock_irqsave(&__efivars->lock, flags))
- 			return -EBUSY;
--- 
-1.9.1
+The use of EFI_PAGE_SHIFT and PAGE_SHIFT seem to get mingled in this
+code. What's the correct constant to use throughout, because it
+doesn't look like PAGE_SHIFT == EFI_PAGE_SHIFT always?
+
+> +
+> +		if (is_normal_ram(md))
+> +			early_init_dt_add_memory_arch(paddr, size);
+> +
+> +		if (is_reserve_region(md)) {
+> +			memblock_mark_nomap(paddr, size);
+
+Hmm.. I was going to point out the fact that you're not checking the
+return value of memblock_mark_nomap() which can fail if you run out of
+memory when resizing the memblock arrays, until I realised that you
+haven't called memblock_allow_resize() yet. Oh well.
+
+> +			if (efi_enabled(EFI_DBG))
+> +				pr_cont("*");
+> +		}
+> +
+> +		if (efi_enabled(EFI_DBG))
+> +			pr_cont("\n");
+> +	}
+> +
+> +	set_bit(EFI_MEMMAP, &efi.flags);
+> +}
+> +
+> +void __init efi_init(void)
+> +{
+> +	struct efi_fdt_params params;
+> +
+> +	/* Grab UEFI information placed in FDT by stub */
+> +	if (!efi_get_fdt_params(&params))
+> +		return;
+> +
+> +	efi_system_table = params.system_table;
+> +
+> +	memmap.phys_map = params.mmap;
+> +	memmap.map = early_memremap(params.mmap, params.mmap_size);
+
+Better check the return value?
+
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
