@@ -1,15 +1,15 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH 05/13] Xen: ARM: Add support for mapping platform device
+Subject: Re: [PATCH 06/13] Xen: ARM: Add support for mapping amba device
  mmio
-Date: Fri, 20 Nov 2015 16:30:57 +0000
-Message-ID: <alpine.DEB.2.02.1511201628410.1107@kaball.uk.xensource.com>
+Date: Fri, 20 Nov 2015 16:39:17 +0000
+Message-ID: <alpine.DEB.2.02.1511201638330.1107@kaball.uk.xensource.com>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
- <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org>
+ <1447754231-7772-7-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447754231-7772-6-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1447754231-7772-7-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Cc: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
@@ -17,34 +17,37 @@ List-Id: linux-efi@vger.kernel.org
 On Tue, 17 Nov 2015, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
 > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> Add a bus_notifier for platform bus device in order to map the device
+> Add a bus_notifier for AMBA bus device in order to map the device
 > mmio regions when DOM0 booting with ACPI.
 > 
 > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/xen/Makefile   |   1 +
->  drivers/xen/platform.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 105 insertions(+)
->  create mode 100644 drivers/xen/platform.c
+
+Please use scripts/checkpatch.pl to check the coding style
+
+
+>  drivers/xen/Makefile |  1 +
+>  drivers/xen/amba.c   | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 100 insertions(+)
+>  create mode 100644 drivers/xen/amba.c
 > 
 > diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
-> index e293bc5..2f867e7 100644
+> index 2f867e7..139bd0b 100644
 > --- a/drivers/xen/Makefile
 > +++ b/drivers/xen/Makefile
-> @@ -11,6 +11,7 @@ CFLAGS_features.o			:= $(nostackp)
->  
+> @@ -12,6 +12,7 @@ CFLAGS_features.o			:= $(nostackp)
 >  CFLAGS_efi.o				+= -fshort-wchar
 >  
-> +dom0-$(CONFIG_ARM64) += platform.o
+>  dom0-$(CONFIG_ARM64) += platform.o
+> +dom0-$(CONFIG_ARM_AMBA) += amba.o
 >  dom0-$(CONFIG_PCI) += pci.o
 >  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
 >  dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
-> diff --git a/drivers/xen/platform.c b/drivers/xen/platform.c
+> diff --git a/drivers/xen/amba.c b/drivers/xen/amba.c
 > new file mode 100644
-> index 0000000..0f95e7f
+> index 0000000..e491c8e
 > --- /dev/null
-> +++ b/drivers/xen/platform.c
-> @@ -0,0 +1,104 @@
+> +++ b/drivers/xen/amba.c
+> @@ -0,0 +1,99 @@
 > +/*
 > + * Copyright (c) 2015, Linaro Limited.
 > + *
@@ -64,99 +67,95 @@ On Tue, 17 Nov 2015, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
 > + * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > + */
 > +
-> +#include <linux/platform_device.h>
+> +#include <linux/amba/bus.h>
 > +#include <linux/acpi.h>
 > +#include <xen/xen.h>
 > +#include <xen/interface/memory.h>
 > +#include <asm/xen/hypervisor.h>
 > +#include <asm/xen/hypercall.h>
 > +
-> +static int xen_map_platform_device_mmio(struct platform_device *pdev)
+> +static int xen_map_amba_device_mmio(struct amba_device *adev)
 > +{
-> +	int i, rc = 0;
+> +	int rc = 0;
+> +	struct resource *r = &adev->res;
 > +
-> +	for (i = 0; i < pdev->num_resources; i++)
+> +	if (resource_type(r) == IORESOURCE_MEM)
 > +	{
-> +		struct resource *r = &pdev->resource[i];
+> +		int j;
+> +		int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
+> +		xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
+> +		xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
+> +					    GFP_KERNEL);
+> +		int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
+> +		struct xen_add_to_physmap_range xatp;
 > +
-> +		if (resource_type(r) == IORESOURCE_MEM)
-> +		{
-> +			int j;
-> +			int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
-> +			xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr,
-> +						   GFP_KERNEL);
-> +			xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
-> +						    GFP_KERNEL);
-> +			int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
+> +		for (j = 0; j < nr; j++) {
+> +			gpfns[j] = (r->start >> PAGE_SHIFT) + j;
+> +			idxs[j] = (r->start >> PAGE_SHIFT) + j;
+> +			errs[j] = 0;
 
-please check for kmalloc returning NULL and return -ENOMEM
+same comments as before: use XEN_PFN_DOWN and check for return errors
+from kmalloc
 
 
-> +			struct xen_add_to_physmap_range xatp;
-> +
-> +			for (j = 0; j < nr; j++) {
-> +				gpfns[j] = (r->start >> PAGE_SHIFT) + j;
-> +				idxs[j] = (r->start >> PAGE_SHIFT) + j;
-
-XEN_PFN_DOWN
-
-
-> +				errs[j] = 0;
-> +			}
-> +
-> +			xatp.domid = DOMID_SELF;
-> +			xatp.size = nr;
-> +			xatp.space = XENMAPSPACE_dev_mmio;
-> +
-> +			set_xen_guest_handle(xatp.gpfns, gpfns);
-> +			set_xen_guest_handle(xatp.idxs, idxs);
-> +			set_xen_guest_handle(xatp.errs, errs);
-> +
-> +			rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range,
-> +						  &xatp);
-> +			kfree(gpfns);
-> +			kfree(idxs);
-> +			kfree(errs);
-> +			if (rc != 0)
-> +				return rc;
 > +		}
+> +
+> +		xatp.domid = DOMID_SELF;
+> +		xatp.size = nr;
+> +		xatp.space = XENMAPSPACE_dev_mmio;
+> +
+> +		set_xen_guest_handle(xatp.gpfns, gpfns);
+> +		set_xen_guest_handle(xatp.idxs, idxs);
+> +		set_xen_guest_handle(xatp.errs, errs);
+> +
+> +		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
+> +
+> +		kfree(gpfns);
+> +		kfree(idxs);
+> +		kfree(errs);
+> +		if (rc != 0)
+> +			return rc;
 > +	}
 > +
 > +	return rc;
 > +}
 > +
-> +static int xen_platform_notifier(struct notifier_block *nb,
-> +				 unsigned long action, void *data)
+> +static int xen_amba_notifier(struct notifier_block *nb,
+> +			     unsigned long action, void *data)
 > +{
-> +	struct platform_device *pdev = to_platform_device(data);
+> +	struct amba_device *adev = to_amba_device(data);
 > +	int r = 0;
 > +
 > +	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
-> +		r = xen_map_platform_device_mmio(pdev);
+> +		r = xen_map_amba_device_mmio(adev);
 > +
 > +	if (r)
 > +	{
-> +		dev_err(&pdev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
-> +			pdev->name);
+> +		dev_err(&adev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
+> +			adev->dev.init_name);
 > +		return NOTIFY_OK;
 > +	}
 > +
 > +	return NOTIFY_DONE;
 > +}
 > +
-> +static struct notifier_block platform_device_nb = {
-> +	.notifier_call = xen_platform_notifier,
+> +static struct notifier_block amba_device_nb = {
+> +	.notifier_call = xen_amba_notifier,
 > +};
 > +
-> +static int __init register_xen_platform_notifier(void)
+> +static int __init register_xen_amba_notifier(void)
 > +{
 > +	if (!xen_initial_domain())
 > +		return 0;
 > +
-> +	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
+> +	return bus_register_notifier(&amba_bustype, &amba_device_nb);
 > +}
 > +
-> +arch_initcall(register_xen_platform_notifier);
+> +arch_initcall(register_xen_amba_notifier);
 > -- 
 > 2.1.0
 > 
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
