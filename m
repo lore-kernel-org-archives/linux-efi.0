@@ -1,172 +1,71 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH 13/13] ARM: XEN: Move xen_early_init() before
- efi_init()
-Date: Fri, 20 Nov 2015 17:30:59 +0000
-Message-ID: <alpine.DEB.2.02.1511201720550.1107@kaball.uk.xensource.com>
+Subject: Re: [Xen-devel] [PATCH 11/13] xen/hvm/params: Add a new dilivery
+ type for event-channel in HVM_PARAM_CALLBACK_IRQ
+Date: Fri, 20 Nov 2015 17:32:38 +0000
+Message-ID: <alpine.DEB.2.02.1511201732070.1107@kaball.uk.xensource.com>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
- <1447754231-7772-14-git-send-email-shannon.zhao@linaro.org>
+ <1447754231-7772-12-git-send-email-shannon.zhao@linaro.org>
+ <alpine.DEB.2.02.1511201706070.1107@kaball.uk.xensource.com>
+ <564F56C9.8060007@citrix.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447754231-7772-14-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
-Cc: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <564F56C9.8060007-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Cooper <andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 17 Nov 2015, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Fri, 20 Nov 2015, Andrew Cooper wrote:
+> On 20/11/15 17:07, Stefano Stabellini wrote:
+> > On Tue, 17 Nov 2015, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
+> >> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >>
+> >> Add a new dilivery type:
+> > delivery
+> >
+> >> val[63:56] == 3: val[15:8] is flag: val[7:0] is a PPI.
+> >> To the flag, bit 0 stands the interrupt mode is edge(1) or level(0) and
+> >> bit 1 stands the interrupt polarity is active low(1) or high(0).
+> >>
+> >> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> ---
+> >>  include/xen/interface/hvm/params.h | 5 +++++
+> >>  1 file changed, 5 insertions(+)
+> >>
+> >> diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+> >> index a6c7991..550688a 100644
+> >> --- a/include/xen/interface/hvm/params.h
+> >> +++ b/include/xen/interface/hvm/params.h
+> >> @@ -34,6 +34,11 @@
+> >>   *                  Domain = val[47:32], Bus  = val[31:16],
+> >>   *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
+> >>   * val[63:56] == 2: val[7:0] is a vector number.
+> >> + * val[63:56] == 3: val[15:8] is flag of event-channel interrupt:
+> >> + *                      bit 0: interrupt is edge(1) or level(0) triggered
+> >> + *                      bit 1: interrupt is active low(1) or high(0)
+> >> + *                  val[7:0] is PPI number used by event-channel.
+> >> + *                  This is only used by ARM/ARM64.
+> >>   * If val == 0 then CPU0 event-channel notifications are not delivered.
+> >>   */
+> >>  #define HVM_PARAM_CALLBACK_IRQ 0
 > 
-> Move xen_early_init() before efi_init(), then when calling efi_init()
-> could initialize Xen specific UEFI.
+> Sadly NACK in this form.
 > 
-> Check if it runs on Xen hypervisor through the flat dts.
+> This is not your fault, but this particular field has hidden ABI which
+> the original submitter neglected to put into public API.
 > 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm/xen/enlighten.c  | 62 ++++++++++++++++++++++++++++++++++++-----------
->  arch/arm64/kernel/setup.c |  2 +-
->  2 files changed, 49 insertions(+), 15 deletions(-)
+> Bits 63:56 of this field currently have a hidden ABI with:
 > 
-> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-> index b8e9db8..d4f884c 100644
-> --- a/arch/arm/xen/enlighten.c
-> +++ b/arch/arm/xen/enlighten.c
-> @@ -19,6 +19,7 @@
->  #include <linux/irqreturn.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/of_fdt.h>
->  #include <linux/of_irq.h>
->  #include <linux/of_address.h>
->  #include <linux/cpuidle.h>
-> @@ -48,8 +49,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
->  
->  static __read_mostly unsigned int xen_events_irq;
->  
-> -static __initdata struct device_node *xen_node;
-> -
->  int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
->  			       unsigned long addr,
->  			       xen_pfn_t *gfn, int nr,
-> @@ -142,6 +141,34 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
->  	return IRQ_HANDLED;
->  }
->  
-> +struct xen_node_info {
-> +	const char *compat;
-> +	const char *prefix;
-> +	const char *version;
-> +	bool found;
-> +};
-> +
-> +static int __init fdt_find_xen_node(unsigned long node, const char *uname,
-> +				    int depth, void *data)
-> +{
-> +	struct xen_node_info *info = data;
-> +	const void *s = NULL;
-> +	int len;
-> +
-> +	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-> +		return 0;
-> +
-> +	if (of_flat_dt_is_compatible(node, info->compat))
-> +		info->found = true;
-> +
-> +	s = of_get_flat_dt_prop(node, "compatible", &len);
-> +	if (strlen(info->prefix) + 3  < len &&
-> +                        !strncmp(info->prefix, s, strlen(info->prefix)))
-> +                info->version = s + strlen(info->prefix);
-> +	return 0;
-> +}
-> +
->  /*
->   * see Documentation/devicetree/bindings/arm/xen.txt for the
->   * documentation of the Xen Device Tree format.
-> @@ -149,26 +176,25 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
->  #define GRANT_TABLE_PHYSADDR 0
->  void __init xen_early_init(void)
->  {
-> -	int len;
-> -	const char *s = NULL;
-> -	const char *version = NULL;
-> -	const char *xen_prefix = "xen,xen-";
-> +	struct xen_node_info info;
-> +
-> +	info.compat = "xen,xen";
-> +	info.prefix = "xen,xen-";
-> +	info.version = NULL;
-> +	info.found = false;
-
-Can you initialize the fields directly when you define xen_node_info and
-make it static?
-
-The rest looks good.
+> xen/include/asm-x86/hvm/irq.h
+> enum {
+>     HVMIRQ_callback_none,
+>     HVMIRQ_callback_gsi,
+>     HVMIRQ_callback_pci_intx,
+>     HVMIRQ_callback_vector
+> } callback_via_type;
+ 
+I take the value should be "4" then?
 
 
-> -	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-> -	if (!xen_node) {
-> +	of_scan_flat_dt(fdt_find_xen_node, &info);
-> +	if (!info.found) {
->  		pr_debug("No Xen support\n");
->  		return;
->  	}
-> -	s = of_get_property(xen_node, "compatible", &len);
-> -	if (strlen(xen_prefix) + 3  < len &&
-> -			!strncmp(xen_prefix, s, strlen(xen_prefix)))
-> -		version = s + strlen(xen_prefix);
->
-> -	if (version == NULL) {
-> +
-> +	if (info.version == NULL) {
->  		pr_debug("Xen version not found\n");
->  		return;
->  	}
->  
-> -	pr_info("Xen %s support found\n", version);
-> +	pr_info("Xen %s support found\n", info.version);
->  
->  	xen_domain_type = XEN_HVM_DOMAIN;
->  
-> @@ -204,6 +230,14 @@ static int __init xen_guest_init(void)
->  		}
->  		xen_events_irq = a.value & 0xff;
->  	} else {
-> +		struct device_node *xen_node;
-> +
-> +		xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-> +		if (!xen_node) {
-> +			pr_debug("No Xen support\n");
-> +			return -ENODEV;
-> +		}
-> +
->  		xen_events_irq = irq_of_parse_and_map(xen_node, 0);
->  		if (!xen_events_irq) {
->  			pr_err("Xen event channel interrupt not found\n");
-> diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-> index 2322479..ee95593 100644
-> --- a/arch/arm64/kernel/setup.c
-> +++ b/arch/arm64/kernel/setup.c
-> @@ -428,6 +428,7 @@ void __init setup_arch(char **cmdline_p)
->  	 */
->  	local_async_enable();
->  
-> +	xen_early_init();
->  	efi_init();
->  	arm64_memblock_init();
->  
-> @@ -446,7 +447,6 @@ void __init setup_arch(char **cmdline_p)
->  	} else {
->  		psci_acpi_init();
->  	}
-> -	xen_early_init();
->  
->  	cpu_read_bootcpu_ops();
->  	smp_init_cpus();
-> -- 
-> 2.1.0
-> 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> I will submit a patch to fix this this properly.
