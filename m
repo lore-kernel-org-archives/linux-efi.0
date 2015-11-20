@@ -1,14 +1,14 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH 03/13] arm/xen: Use xlated_setup_gnttab_pages to setup
- grant table
-Date: Fri, 20 Nov 2015 16:19:42 +0000
-Message-ID: <alpine.DEB.2.02.1511201618530.1107@kaball.uk.xensource.com>
+Subject: Re: [PATCH 05/13] Xen: ARM: Add support for mapping platform device
+ mmio
+Date: Fri, 20 Nov 2015 16:30:57 +0000
+Message-ID: <alpine.DEB.2.02.1511201628410.1107@kaball.uk.xensource.com>
 References: <1447754231-7772-1-git-send-email-shannon.zhao@linaro.org>
- <1447754231-7772-4-git-send-email-shannon.zhao@linaro.org>
+ <1447754231-7772-6-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1447754231-7772-4-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1447754231-7772-6-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 Cc: ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, christoffer.dall-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
@@ -17,50 +17,146 @@ List-Id: linux-efi@vger.kernel.org
 On Tue, 17 Nov 2015, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org wrote:
 > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> Use xlated_setup_gnttab_pages to setup grant table. Then it doesn't rely
-> on DT or ACPI to pass the start address and size of grant table.
+> Add a bus_notifier for platform bus device in order to map the device
+> mmio regions when DOM0 booting with ACPI.
 > 
 > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-It looks good. I'll wait for the final version of
-xlated_setup_gnttab_pages before acking it, but it is fine in principle.
-
-
->  arch/arm/xen/enlighten.c | 10 +---------
->  1 file changed, 1 insertion(+), 9 deletions(-)
+> ---
+>  drivers/xen/Makefile   |   1 +
+>  drivers/xen/platform.c | 104 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 105 insertions(+)
+>  create mode 100644 drivers/xen/platform.c
 > 
-> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-> index eeeab07..7cb82f7 100644
-> --- a/arch/arm/xen/enlighten.c
-> +++ b/arch/arm/xen/enlighten.c
-> @@ -186,18 +186,10 @@ static int __init xen_guest_init(void)
->  {
->  	struct xen_add_to_physmap xatp;
->  	struct shared_info *shared_info_page = NULL;
-> -	struct resource res;
-> -	phys_addr_t grant_frames;
+> diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
+> index e293bc5..2f867e7 100644
+> --- a/drivers/xen/Makefile
+> +++ b/drivers/xen/Makefile
+> @@ -11,6 +11,7 @@ CFLAGS_features.o			:= $(nostackp)
 >  
->  	if (!xen_domain())
->  		return 0;
+>  CFLAGS_efi.o				+= -fshort-wchar
 >  
-> -	if (of_address_to_resource(xen_node, GRANT_TABLE_PHYSADDR, &res)) {
-> -		pr_err("Xen grant table base address not found\n");
-> -		return -ENODEV;
-> -	}
-> -	grant_frames = res.start;
-> -
->  	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
->  	if (!xen_events_irq) {
->  		pr_err("Xen event channel interrupt not found\n");
-> @@ -232,7 +224,7 @@ static int __init xen_guest_init(void)
->  	if (xen_vcpu_info == NULL)
->  		return -ENOMEM;
->  
-> -	if (gnttab_setup_auto_xlat_frames(grant_frames)) {
-> +	if (xlated_setup_gnttab_pages()) {
->  		free_percpu(xen_vcpu_info);
->  		return -ENOMEM;
->  	}
+> +dom0-$(CONFIG_ARM64) += platform.o
+>  dom0-$(CONFIG_PCI) += pci.o
+>  dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
+>  dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
+> diff --git a/drivers/xen/platform.c b/drivers/xen/platform.c
+> new file mode 100644
+> index 0000000..0f95e7f
+> --- /dev/null
+> +++ b/drivers/xen/platform.c
+> @@ -0,0 +1,104 @@
+> +/*
+> + * Copyright (c) 2015, Linaro Limited.
+> + *
+> + * This program is free software; you can redistribute it and/or modify it
+> + * under the terms and conditions of the GNU General Public License,
+> + * version 2, as published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope it will be useful, but WITHOUT
+> + * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+> + * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+> + * more details.
+> + *
+> + * You should have received a copy of the GNU General Public License along with
+> + * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+> + * Place - Suite 330, Boston, MA 02111-1307 USA.
+> + *
+> + * Author: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> + */
+> +
+> +#include <linux/platform_device.h>
+> +#include <linux/acpi.h>
+> +#include <xen/xen.h>
+> +#include <xen/interface/memory.h>
+> +#include <asm/xen/hypervisor.h>
+> +#include <asm/xen/hypercall.h>
+> +
+> +static int xen_map_platform_device_mmio(struct platform_device *pdev)
+> +{
+> +	int i, rc = 0;
+> +
+> +	for (i = 0; i < pdev->num_resources; i++)
+> +	{
+> +		struct resource *r = &pdev->resource[i];
+> +
+> +		if (resource_type(r) == IORESOURCE_MEM)
+> +		{
+> +			int j;
+> +			int nr = DIV_ROUND_UP(resource_size(r), PAGE_SIZE);
+> +			xen_pfn_t *gpfns = kmalloc(sizeof(xen_pfn_t) * nr,
+> +						   GFP_KERNEL);
+> +			xen_ulong_t *idxs = kmalloc(sizeof(xen_ulong_t) * nr,
+> +						    GFP_KERNEL);
+> +			int *errs = kmalloc(sizeof(int) * nr, GFP_KERNEL);
+
+please check for kmalloc returning NULL and return -ENOMEM
+
+
+> +			struct xen_add_to_physmap_range xatp;
+> +
+> +			for (j = 0; j < nr; j++) {
+> +				gpfns[j] = (r->start >> PAGE_SHIFT) + j;
+> +				idxs[j] = (r->start >> PAGE_SHIFT) + j;
+
+XEN_PFN_DOWN
+
+
+> +				errs[j] = 0;
+> +			}
+> +
+> +			xatp.domid = DOMID_SELF;
+> +			xatp.size = nr;
+> +			xatp.space = XENMAPSPACE_dev_mmio;
+> +
+> +			set_xen_guest_handle(xatp.gpfns, gpfns);
+> +			set_xen_guest_handle(xatp.idxs, idxs);
+> +			set_xen_guest_handle(xatp.errs, errs);
+> +
+> +			rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range,
+> +						  &xatp);
+> +			kfree(gpfns);
+> +			kfree(idxs);
+> +			kfree(errs);
+> +			if (rc != 0)
+> +				return rc;
+> +		}
+> +	}
+> +
+> +	return rc;
+> +}
+> +
+> +static int xen_platform_notifier(struct notifier_block *nb,
+> +				 unsigned long action, void *data)
+> +{
+> +	struct platform_device *pdev = to_platform_device(data);
+> +	int r = 0;
+> +
+> +	if (!acpi_disabled && (action == BUS_NOTIFY_ADD_DEVICE))
+> +		r = xen_map_platform_device_mmio(pdev);
+> +
+> +	if (r)
+> +	{
+> +		dev_err(&pdev->dev, "Failed to add_to_physmap device (%s) mmio!\n",
+> +			pdev->name);
+> +		return NOTIFY_OK;
+> +	}
+> +
+> +	return NOTIFY_DONE;
+> +}
+> +
+> +static struct notifier_block platform_device_nb = {
+> +	.notifier_call = xen_platform_notifier,
+> +};
+> +
+> +static int __init register_xen_platform_notifier(void)
+> +{
+> +	if (!xen_initial_domain())
+> +		return 0;
+> +
+> +	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
+> +}
+> +
+> +arch_initcall(register_xen_platform_notifier);
 > -- 
 > 2.1.0
 > 
