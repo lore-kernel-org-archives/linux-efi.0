@@ -1,51 +1,146 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/6] x86/efi: PFN_ALIGN() _text and _end when calculating number of pages
-Date: Mon, 23 Nov 2015 13:33:09 +0000
-Message-ID: <1448285594-17617-2-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH v3 2/6] x86/mm/pageattr: Ensure cpa->pfn only contains page frame numbers
+Date: Mon, 23 Nov 2015 13:33:10 +0000
+Message-ID: <1448285594-17617-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1448285594-17617-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1448285594-17617-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@alien8.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, stable@vger.kernel.org, Dave Hansen <dave.hansen@intel.com>
+Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Dave Hansen <dave.hansen@intel.com>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-While _text is currently aligned to PAGE_SIZE in the vmlinux linker
-script because it's based on CONFIG_PHYSICAL_ALIGN, it's always better
-to be explicit about these things to be sure no alignment bugs are
-lurking. There's no analogous enforcement for _end.
+The x86 pageattr code is confused about the data that is stored in
+cpa->pfn, sometimes it's treated as a page frame number, sometimes
+it's treated as an unshifted physical address, and in one place it's
+treated as a pte.
 
-Dave provided an example of why the 'npages' calculation is wrong,
+The result of this is that the mapping functions do not map the
+intended physical address.
 
- "Just for fun, imagine that _end=0xfff and _text=0x1001.  npages
-  would be 0."
+This isn't a problem in practice because most of the addresses we're
+mapping in the EFI code paths are already mapped in 'trampoline_pgd'
+and so the pageattr mapping functions don't actually do anything in
+this case. But when we move to using a separate page table for the EFI
+runtime this will be an issue.
 
-Use PFN_ALIGN() to be sure the calculation is correctly aligned to
-PAGE_SIZE.
-
-Reported-by: Dave Hansen <dave.hansen@intel.com>
-Reported-by: Thomas Gleixner <tglx@linutronix.de>
-Cc: Borislav Petkov <bp@alien8.de>
+Reviewed-by: Borislav Petkov <bp@suse.de>
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: <stable@vger.kernel.org>
+Cc: Dave Hansen <dave.hansen@intel.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi_64.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
+Changes in v3:
+ - Dropped the superfluous hunk that mapped the stack.
+
+Changes in v2:
+ - Folded the deletion of the _PAGE_NX code into this patch.
+
+ arch/x86/mm/pageattr.c         | 17 ++++++-----------
+ arch/x86/platform/efi/efi_64.c | 16 ++++++++++------
+ 2 files changed, 16 insertions(+), 17 deletions(-)
+
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 9abe0c9b1098..d5240be55915 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -885,15 +885,10 @@ static void populate_pte(struct cpa_data *cpa,
+ 	pte = pte_offset_kernel(pmd, start);
+ 
+ 	while (num_pages-- && start < end) {
+-
+-		/* deal with the NX bit */
+-		if (!(pgprot_val(pgprot) & _PAGE_NX))
+-			cpa->pfn &= ~_PAGE_NX;
+-
+-		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
++		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
+ 
+ 		start	 += PAGE_SIZE;
+-		cpa->pfn += PAGE_SIZE;
++		cpa->pfn++;
+ 		pte++;
+ 	}
+ }
+@@ -949,11 +944,11 @@ static int populate_pmd(struct cpa_data *cpa,
+ 
+ 		pmd = pmd_offset(pud, start);
+ 
+-		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE |
++		set_pmd(pmd, __pmd(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pmd_pgprot)));
+ 
+ 		start	  += PMD_SIZE;
+-		cpa->pfn  += PMD_SIZE;
++		cpa->pfn  += PMD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PMD_SIZE >> PAGE_SHIFT;
+ 	}
+ 
+@@ -1022,11 +1017,11 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+ 	 * Map everything starting from the Gb boundary, possibly with 1G pages
+ 	 */
+ 	while (end - start >= PUD_SIZE) {
+-		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE |
++		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pud_pgprot)));
+ 
+ 		start	  += PUD_SIZE;
+-		cpa->pfn  += PUD_SIZE;
++		cpa->pfn  += PUD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PUD_SIZE >> PAGE_SHIFT;
+ 		pud++;
+ 	}
 diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a0ac0f9c307f..3a90eb72d153 100644
+index 3a90eb72d153..4fb0ba21d168 100644
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -183,7 +183,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
- 	efi_scratch.phys_stack = virt_to_phys(page_address(page));
- 	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
+@@ -143,7 +143,7 @@ void efi_sync_low_kernel_mappings(void)
  
--	npages = (_end - _text) >> PAGE_SHIFT;
-+	npages = (PFN_ALIGN(_end) - PFN_ALIGN(_text)) >> PAGE_SHIFT;
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+-	unsigned long text;
++	unsigned long pfn, text;
+ 	struct page *page;
+ 	unsigned npages;
+ 	pgd_t *pgd;
+@@ -160,7 +160,8 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * and ident-map those pages containing the map before calling
+ 	 * phys_efi_set_virtual_address_map().
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
++	pfn = pa_memmap >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX)) {
+ 		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
+ 		return 1;
+ 	}
+@@ -185,8 +186,9 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 
+ 	npages = (PFN_ALIGN(_end) - PFN_ALIGN(_text)) >> PAGE_SHIFT;
  	text = __pa(_text);
++	pfn = text >> PAGE_SHIFT;
  
- 	if (kernel_map_pages_in_pgd(pgd, text >> PAGE_SHIFT, text, npages, 0)) {
+-	if (kernel_map_pages_in_pgd(pgd, text >> PAGE_SHIFT, text, npages, 0)) {
++	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
+ 		pr_err("Failed to map kernel text 1:1\n");
+ 		return 1;
+ 	}
+@@ -204,12 +206,14 @@ void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+-	unsigned long pf = 0;
++	unsigned long flags = 0;
++	unsigned long pfn;
+ 
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+-		pf |= _PAGE_PCD;
++		flags |= _PAGE_PCD;
+ 
+-	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
++	pfn = md->phys_addr >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+ 			   md->phys_addr, va);
+ }
 -- 
 2.6.2
