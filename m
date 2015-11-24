@@ -1,65 +1,79 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/6] x86/efi: PFN_ALIGN() _text and _end when calculating
- number of pages
-Date: Tue, 24 Nov 2015 09:23:23 +0100
-Message-ID: <20151124082323.GA23451@gmail.com>
-References: <1448285594-17617-1-git-send-email-matt@codeblueprint.co.uk>
- <1448285594-17617-2-git-send-email-matt@codeblueprint.co.uk>
+From: Robert Richter <robert.richter@caviumnetworks.com>
+Subject: Re: [PATCH v4 3/3] arm64/efi: isolate EFI stub from the kernel proper
+Date: Tue, 24 Nov 2015 10:34:38 +0100
+Message-ID: <20151124093438.GA31343@rric.localdomain>
+References: <1444330924-17830-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <1448285594-17617-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Toshi Kani <toshi.kani-VXdhtT5mjnY@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1444330924-17830-4-git-send-email-ard.biesheuvel@linaro.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: mark.rutland@arm.com, linux-efi@vger.kernel.org, ryabinin.a.a@gmail.com, catalin.marinas@arm.com, will.deacon@arm.com, leif.lindholm@linaro.org, matt.fleming@intel.com, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
+Ard,
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+On 08.10.15 20:02:04, Ard Biesheuvel wrote:
+> +quiet_cmd_stubcopy = STUBCPY $@
+> +      cmd_stubcopy = if $(OBJCOPY) $(STUBCOPY_FLAGS-y) $< $@; then	\
+> +		     $(OBJDUMP) -r $@ | grep $(STUBCOPY_RELOC-y)	\
+> +		     && (echo >&2 "$@: absolute symbol references not allowed in the EFI stub"; \
+> +			 rm -f $@; /bin/false); else /bin/false; fi
 
-> While _text is currently aligned to PAGE_SIZE in the vmlinux linker
-> script because it's based on CONFIG_PHYSICAL_ALIGN, it's always better
-> to be explicit about these things to be sure no alignment bugs are
-> lurking. There's no analogous enforcement for _end.
-> 
-> Dave provided an example of why the 'npages' calculation is wrong,
-> 
->  "Just for fun, imagine that _end=0xfff and _text=0x1001.  npages
->   would be 0."
-> 
-> Use PFN_ALIGN() to be sure the calculation is correctly aligned to
-> PAGE_SIZE.
-> 
-> Reported-by: Dave Hansen <dave.hansen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Reported-by: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi_64.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-> index a0ac0f9c307f..3a90eb72d153 100644
-> --- a/arch/x86/platform/efi/efi_64.c
-> +++ b/arch/x86/platform/efi/efi_64.c
-> @@ -183,7 +183,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
->  	efi_scratch.phys_stack = virt_to_phys(page_address(page));
->  	efi_scratch.phys_stack += PAGE_SIZE; /* stack grows down */
->  
-> -	npages = (_end - _text) >> PAGE_SHIFT;
-> +	npages = (PFN_ALIGN(_end) - PFN_ALIGN(_text)) >> PAGE_SHIFT;
->  	text = __pa(_text);
-
-Didn't we want to do the _end alignment linker script fix instead?
-
-Alignment assumptions are easy to make when symbols are well aligned typically (as 
-in this case), so we should guarantee the alignment property instead of 
-complicating the code.
+This one is causing some more build errors for my setup. Any hint how
+to fix that?
 
 Thanks,
 
-	Ingo
+-Robert
+
+
+  STUBCPY drivers/firmware/efi/libstub/arm-stub.stub.o
+0000000000000006 R_AARCH64_ABS32   .debug_abbrev
+000000000000000c R_AARCH64_ABS32   .debug_str+0x0000000000000890
+0000000000000011 R_AARCH64_ABS32   .debug_str+0x0000000000004ecd
+0000000000000015 R_AARCH64_ABS32   .debug_str+0x0000000000000bb1
+0000000000000019 R_AARCH64_ABS64   .init.text
+0000000000000021 R_AARCH64_ABS64   .init.text+0x00000000000008cc
+0000000000000029 R_AARCH64_ABS32   .debug_line
+0000000000000030 R_AARCH64_ABS32   .debug_str+0x00000000000000eb
+0000000000000047 R_AARCH64_ABS32   .debug_str+0x0000000000003ca8
+0000000000000059 R_AARCH64_ABS32   .debug_str+0x0000000000004798
+0000000000000060 R_AARCH64_ABS32   .debug_str+0x0000000000005008
+...
+000000000000a4bb R_AARCH64_ABS32   .debug_str+0x0000000000004a75
+000000000000a4da R_AARCH64_ABS32   .debug_str+0x00000000000029ee
+000000000000a4f7 R_AARCH64_ABS32   .debug_str+0x0000000000001d95
+000000000000a519 R_AARCH64_ABS32   .debug_str+0x0000000000000773
+0000000000000006 R_AARCH64_ABS32   .debug_info
+0000000000000010 R_AARCH64_ABS64   .init.text
+0000000000000623 R_AARCH64_ABS64   .init.text
+0000000000000014 R_AARCH64_ABS32   .debug_frame
+0000000000000018 R_AARCH64_ABS64   .init.text
+000000000000002c R_AARCH64_ABS32   .debug_frame
+0000000000000030 R_AARCH64_ABS64   .init.text+0x0000000000000018
+0000000000000074 R_AARCH64_ABS32   .debug_frame
+0000000000000078 R_AARCH64_ABS64   .init.text+0x0000000000000140
+000000000000009c R_AARCH64_ABS32   .debug_frame
+00000000000000a0 R_AARCH64_ABS64   .init.text+0x0000000000000158
+00000000000000c4 R_AARCH64_ABS32   .debug_frame
+00000000000000c8 R_AARCH64_ABS64   .init.text+0x0000000000000170
+000000000000012c R_AARCH64_ABS32   .debug_frame
+0000000000000130 R_AARCH64_ABS64   .init.text+0x0000000000000390
+0000000000000154 R_AARCH64_ABS32   .debug_frame
+0000000000000158 R_AARCH64_ABS64   .init.text+0x00000000000003b0
+00000000000001a4 R_AARCH64_ABS32   .debug_frame
+00000000000001a8 R_AARCH64_ABS64   .init.text+0x0000000000000780
+drivers/firmware/efi/libstub/arm-stub.stub.o: absolute symbol references not allowed in the EFI stub
