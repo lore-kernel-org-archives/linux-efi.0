@@ -1,78 +1,57 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 4/4] efi: runtime-wrappers: run UEFI Runtime Services
- with interrupts enabled
-Date: Thu, 26 Nov 2015 10:23:45 +0000
-Message-ID: <20151126102345.GD2765@codeblueprint.co.uk>
-References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
- <1447940191-30705-5-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH] efi/esrt: don't preformat name
+Date: Thu, 26 Nov 2015 10:27:08 +0000
+Message-ID: <20151126102708.GE2765@codeblueprint.co.uk>
+References: <1448015417-16712-1-git-send-email-linux@rasmusvillemoes.dk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1447940191-30705-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1448015417-16712-1-git-send-email-linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+To: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 19 Nov, at 02:36:31PM, Ard Biesheuvel wrote:
-> The UEFI spec allows Runtime Services to be invoked with interrupts
-> enabled. The only reason we were disabling interrupts was to prevent
-> recursive calls into the services on the same CPU, which will lead to
-> deadlock. However, the only context where such invocations may occur
-> legally is from efi-pstore via efivars, and that code has been updated
-> to call a non-blocking alternative when invoked from a non-interruptible
-> context.
+On Fri, 20 Nov, at 11:30:17AM, Rasmus Villemoes wrote:
+> kobject_init_and_add takes a format string+args, so there's no reason
+> to do this formatting in advance.
 > 
-> So instead, update the ordinary, blocking UEFI Runtime Services wrappers
-> to execute with interrupts enabled.
- 
-Please document the justification for this change; why do you *need*
-interrupts enabled as opposed to doing it because the spec allows it.
-
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>
 > ---
->  drivers/firmware/efi/runtime-wrappers.c | 88 +++++++++++---------
->  1 file changed, 49 insertions(+), 39 deletions(-)
+>  drivers/firmware/efi/esrt.c | 5 +----
+>  1 file changed, 1 insertion(+), 4 deletions(-)
+ 
+Looks good to me. Thanks applied!
+
+> diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+> index 22c5285f7705..75feb3f5829b 100644
+> --- a/drivers/firmware/efi/esrt.c
+> +++ b/drivers/firmware/efi/esrt.c
+> @@ -167,14 +167,11 @@ static struct kset *esrt_kset;
+>  static int esre_create_sysfs_entry(void *esre, int entry_num)
+>  {
+>  	struct esre_entry *entry;
+> -	char name[20];
+>  
+>  	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
+>  	if (!entry)
+>  		return -ENOMEM;
+>  
+> -	sprintf(name, "entry%d", entry_num);
+> -
+>  	entry->kobj.kset = esrt_kset;
+>  
+>  	if (esrt->fw_resource_version == 1) {
+> @@ -182,7 +179,7 @@ static int esre_create_sysfs_entry(void *esre, int entry_num)
+>  
+>  		entry->esre.esre1 = esre;
+>  		rc = kobject_init_and_add(&entry->kobj, &esre1_ktype, NULL,
+> -					  "%s", name);
+> +					  "entry%d", entry_num);
+>  		if (rc) {
+>  			kfree(entry);
+>  			return rc;
+> -- 
+> 2.6.1
 > 
-> diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-> index a624f7445d11..31e131f09530 100644
-> --- a/drivers/firmware/efi/runtime-wrappers.c
-> +++ b/drivers/firmware/efi/runtime-wrappers.c
-> @@ -71,27 +71,29 @@ __weak DEFINE_SPINLOCK(rtc_lock);
->  
->  static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
->  {
-> -	unsigned long flags;
->  	efi_status_t status;
->  
-> -	spin_lock_irqsave(&rtc_lock, flags);
-> +	BUG_ON(in_irq());
-> +
-> +	spin_lock(&rtc_lock);
->  	spin_lock(&efi_runtime_lock);
->  	status = efi_call_virt(get_time, tm, tc);
->  	spin_unlock(&efi_runtime_lock);
-> -	spin_unlock_irqrestore(&rtc_lock, flags);
-> +	spin_unlock(&rtc_lock);
->  	return status;
->  }
-
-This looks wrong. rtc_lock can be grabbed from IRQ context. Maybe now
-is the time to rip out rtc_lock? It's __weak for arm64 anyway and x86
-doesn't even use these functions. Though I notice that arm also has an
-rtc_lock.
-
->  static efi_status_t virt_efi_set_time(efi_time_t *tm)
->  {
-> -	unsigned long flags;
->  	efi_status_t status;
->  
-> -	spin_lock_irqsave(&rtc_lock, flags);
-> +	BUG_ON(in_irq());
-> +
-> +	spin_lock(&rtc_lock);
-
-The thing about using BUG_ON() here is that you get no LOCKDEP info if
-you trigger it, nor any stack traces from the softlockup detector.
-It's much better to leave spin_lock() alone to do its thing.
