@@ -1,84 +1,111 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 4/4] efi: runtime-wrappers: run UEFI Runtime Services with
- interrupts enabled
-Date: Thu, 26 Nov 2015 13:09:27 +0100
-Message-ID: <CAKv+Gu80NdLLfXWJ4R9CvSpH6REnsirbUFfo6DTDr7DUT2OpDg@mail.gmail.com>
+Subject: Re: [PATCH 2/4] efi: efivars: don't rely on blocking operations in
+ non-blocking set_var()
+Date: Thu, 26 Nov 2015 13:06:27 +0100
+Message-ID: <CAKv+Gu8XqP+MgT1vkC-CLkEZ=p+X2tA3fQuprUCRJ1UhrFz-rg@mail.gmail.com>
 References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1447940191-30705-5-git-send-email-ard.biesheuvel@linaro.org>
-	<20151126102345.GD2765@codeblueprint.co.uk>
+	<1447940191-30705-3-git-send-email-ard.biesheuvel@linaro.org>
+	<20151126095441.GA2765@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151126102345.GD2765-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20151126095441.GA2765-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 November 2015 at 11:23, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Thu, 19 Nov, at 02:36:31PM, Ard Biesheuvel wrote:
->> The UEFI spec allows Runtime Services to be invoked with interrupts
->> enabled. The only reason we were disabling interrupts was to prevent
->> recursive calls into the services on the same CPU, which will lead to
->> deadlock. However, the only context where such invocations may occur
->> legally is from efi-pstore via efivars, and that code has been updated
->> to call a non-blocking alternative when invoked from a non-interruptible
->> context.
+On 26 November 2015 at 10:54, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Thu, 19 Nov, at 02:36:29PM, Ard Biesheuvel wrote:
+>> The non-blocking version of efivar_entry_set() gives up directly on
+>> failure to acquire __efivars->lock. However, it also calls check_var_size(),
+>> whose implementation calls the ordinary query_variable_info() and
+>> set_variable() runtime service wrappers, meaning we could still deadlock
+>> if efivar_entry_set_nonblocking() is called from an atomic context that
+>> interrupted a runtime service already in progress on the same CPU.
 >>
->> So instead, update the ordinary, blocking UEFI Runtime Services wrappers
->> to execute with interrupts enabled.
+>> So drop the call to check_var_size(). This is potentially unsafe on some
+>> UEFI implementations that fail to boot if the varstore fills up, but
+>> those systems are unlikely to be using efi-pstore in the first place.
 >
-> Please document the justification for this change; why do you *need*
-> interrupts enabled as opposed to doing it because the spec allows it.
+> There is simply no way you can make that assumption. The whole "my
+> NVRAM is full, now my machine is bricked" issue arose because
+> efi-pstore was filling the NVRAM with crash logs; that's how we
+> triggered the problem in the first place.
+>
+> The locking here is non-trivial, so it's worth spelling out. There are
+> two spinlocks we need to concern ourselves with,
+>
+>   1. __efivars->lock
+>   2. efi_runtime_lock
+>
+> All EFI variable operations are performed with __efivars->lock held,
+> apart from the x86 efi_delete_dummy_variable() call during boot when
+> we're UP anyway. For all intents and purposes, when we're SMP,
+> __efivars->lock is held for all EFI variable operations.
+>
+> So the only potential for deadlock if CPU A is doing variable calls is
+> if CPU A or CPU B is doing efi_reset() or efi_capsule_*(). That's not
+> an impossible scenario (particularly on arm64 where efi_reset() is
+> used more frequently), but it gives you some clue as to when deadlock
+> might be a problem.
 >
 
-The primary concern is EFI writes on a UP system to a variable store
-that is backed by RPMB/MMC storage through some marshalling layer in
-the secure OS. I will add that to the commit log for v2
+The likelihood for deadlock is low considering the existence of
+__efivars->lock, even on arm64, but I would still like to get this
+straightened out one way or the other.
 
 >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >> ---
->>  drivers/firmware/efi/runtime-wrappers.c | 88 +++++++++++---------
->>  1 file changed, 49 insertions(+), 39 deletions(-)
+>>  drivers/firmware/efi/vars.c | 12 +++---------
+>>  1 file changed, 3 insertions(+), 9 deletions(-)
 >>
->> diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
->> index a624f7445d11..31e131f09530 100644
->> --- a/drivers/firmware/efi/runtime-wrappers.c
->> +++ b/drivers/firmware/efi/runtime-wrappers.c
->> @@ -71,27 +71,29 @@ __weak DEFINE_SPINLOCK(rtc_lock);
+>> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+>> index 70a0fb10517f..caccdbffc1d0 100644
+>> --- a/drivers/firmware/efi/vars.c
+>> +++ b/drivers/firmware/efi/vars.c
+>> @@ -615,12 +615,6 @@ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
+>>       if (!spin_trylock_irqsave(&__efivars->lock, flags))
+>>               return -EBUSY;
 >>
->>  static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
->>  {
->> -     unsigned long flags;
->>       efi_status_t status;
->>
->> -     spin_lock_irqsave(&rtc_lock, flags);
->> +     BUG_ON(in_irq());
->> +
->> +     spin_lock(&rtc_lock);
->>       spin_lock(&efi_runtime_lock);
->>       status = efi_call_virt(get_time, tm, tc);
->>       spin_unlock(&efi_runtime_lock);
->> -     spin_unlock_irqrestore(&rtc_lock, flags);
->> +     spin_unlock(&rtc_lock);
->>       return status;
->>  }
+>> -     status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
+>> -     if (status != EFI_SUCCESS) {
+>> -             spin_unlock_irqrestore(&__efivars->lock, flags);
+>> -             return -ENOSPC;
+>> -     }
+>> -
+>>       status = ops->set_variable_nonblocking(name, &vendor, attributes,
+>>                                              size, data);
 >
-> This looks wrong. rtc_lock can be grabbed from IRQ context. Maybe now
-> is the time to rip out rtc_lock? It's __weak for arm64 anyway and x86
-> doesn't even use these functions. Though I notice that arm also has an
-> rtc_lock.
+> We still need some validation to occur if efi_no_storage_paranoia is
+> unset, i.e. "Be paranoid about how much NVRAM we use".
 >
->>  static efi_status_t virt_efi_set_time(efi_time_t *tm)
->>  {
->> -     unsigned long flags;
->>       efi_status_t status;
->>
->> -     spin_lock_irqsave(&rtc_lock, flags);
->> +     BUG_ON(in_irq());
->> +
->> +     spin_lock(&rtc_lock);
+> However, efi_query_variable_store() actually does two things,
 >
-> The thing about using BUG_ON() here is that you get no LOCKDEP info if
-> you trigger it, nor any stack traces from the softlockup detector.
-> It's much better to leave spin_lock() alone to do its thing.
+>   1. Check if the write pushes free NVRAM space below EFI_MIN_RESERVE
+>   2. If it does, attempt to trigger garbage collection
+>
+> Now, if you're in the belly of a kdump handler, attempting to trigger
+> garbage collection to ensure the write succeeds should be the last
+> thing on your mind. Everything you do is a last ditch attempt to
+> record the reason your machine is going down.
+>
+> I think the best solution would be to only perform step 1. above in
+> the efi_pstore_write() code path, and keep a cached copy of
+> query_variable_info() that we can perform lockless queries on. We can
+> initially grab it on boot and update it with every ->set_variable()
+> call.
+>
+> Thoughts?
+
+How would this be affected by things like suspend/resume, hibernation
+or variable accesses made in SMM context (i.e., which the kernel knows
+nothing about)
+If we need to take all of that into account as well, we're probably
+better off adding a nonblocking query_variable_info() call after all,
+and wiring it up to efi_query_variable_store(), i.e., make it take a
+'bool nonblocking' argument and choose between the two versions of
+each of the hooks it uses.
+
+-- 
+Ard.
