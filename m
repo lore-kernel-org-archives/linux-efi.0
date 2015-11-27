@@ -1,67 +1,139 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH v4 6/6] Documentation/x86: Update EFI memory region description
-Date: Fri, 27 Nov 2015 21:09:35 +0000
-Message-ID: <1448658575-17029-7-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH v4 2/6] x86/mm/pageattr: Ensure cpa->pfn only contains page frame numbers
+Date: Fri, 27 Nov 2015 21:09:31 +0000
+Message-ID: <1448658575-17029-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Jones <davej@codemonkey.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Denys Vlasenko <dvlasenk@redhat.com>, Stephen Smalley <sds@tycho.nsa.gov>, Borislav Petkov <bp@suse.de>
+Cc: Toshi Kani <toshi.kani@hp.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Dave Hansen <dave.hansen@intel.com>, Borislav Petkov <bp@suse.de>
 List-Id: linux-efi@vger.kernel.org
 
-Make it clear that the EFI page tables are only available during EFI
-runtime calls since that subject has come up a fair numbers of times
-in the past.
+The x86 pageattr code is confused about the data that is stored in
+cpa->pfn, sometimes it's treated as a page frame number, sometimes
+it's treated as an unshifted physical address, and in one place it's
+treated as a pte.
 
-Additionally, add the EFI region start and end addresses to the table
-so that it's possible to see at a glance where they fall in relation
-to other regions.
+The result of this is that the mapping functions do not map the
+intended physical address.
+
+This isn't a problem in practice because most of the addresses we're
+mapping in the EFI code paths are already mapped in 'trampoline_pgd'
+and so the pageattr mapping functions don't actually do anything in
+this case. But when we move to using a separate page table for the EFI
+runtime this will be an issue.
 
 Reviewed-by: Borislav Petkov <bp@suse.de>
 Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dave Jones <davej@codemonkey.org.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andy Lutomirski <luto@kernel.org>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>,
-Cc: Stephen Smalley <sds@tycho.nsa.gov>
+Cc: Dave Hansen <dave.hansen@intel.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- Documentation/x86/x86_64/mm.txt | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ arch/x86/mm/pageattr.c         | 17 ++++++-----------
+ arch/x86/platform/efi/efi_64.c | 16 ++++++++++------
+ 2 files changed, 16 insertions(+), 17 deletions(-)
 
-diff --git a/Documentation/x86/x86_64/mm.txt b/Documentation/x86/x86_64/mm.txt
-index 05712ac83e38..c518dce7da4d 100644
---- a/Documentation/x86/x86_64/mm.txt
-+++ b/Documentation/x86/x86_64/mm.txt
-@@ -16,6 +16,8 @@ ffffec0000000000 - fffffc0000000000 (=44 bits) kasan shadow memory (16TB)
- ... unused hole ...
- ffffff0000000000 - ffffff7fffffffff (=39 bits) %esp fixup stacks
- ... unused hole ...
-+ffffffef00000000 - ffffffff00000000 (=64 GB) EFI region mapping space
-+... unused hole ...
- ffffffff80000000 - ffffffffa0000000 (=512 MB)  kernel text mapping, from phys 0
- ffffffffa0000000 - ffffffffff5fffff (=1525 MB) module mapping space
- ffffffffff600000 - ffffffffffdfffff (=8 MB) vsyscalls
-@@ -32,11 +34,9 @@ reference.
- Current X86-64 implementations only support 40 bits of address space,
- but we support up to 46 bits. This expands into MBZ space in the page tables.
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index a3137a4feed1..c70e42014101 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -905,15 +905,10 @@ static void populate_pte(struct cpa_data *cpa,
+ 	pte = pte_offset_kernel(pmd, start);
  
--->trampoline_pgd:
+ 	while (num_pages-- && start < end) {
 -
--We map EFI runtime services in the aforementioned PGD in the virtual
--range of 64Gb (arbitrarily set, can be raised if needed)
+-		/* deal with the NX bit */
+-		if (!(pgprot_val(pgprot) & _PAGE_NX))
+-			cpa->pfn &= ~_PAGE_NX;
 -
--0xffffffef00000000 - 0xffffffff00000000
-+We map EFI runtime services in the 'efi_pgd' PGD in a 64Gb large virtual
-+memory window (this size is arbitrary, it can be raised later if needed).
-+The mappings are not part of any other kernel PGD and are only available
-+during EFI runtime calls.
+-		set_pte(pte, pfn_pte(cpa->pfn >> PAGE_SHIFT, pgprot));
++		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
  
- -Andi Kleen, Jul 2004
+ 		start	 += PAGE_SIZE;
+-		cpa->pfn += PAGE_SIZE;
++		cpa->pfn++;
+ 		pte++;
+ 	}
+ }
+@@ -969,11 +964,11 @@ static int populate_pmd(struct cpa_data *cpa,
+ 
+ 		pmd = pmd_offset(pud, start);
+ 
+-		set_pmd(pmd, __pmd(cpa->pfn | _PAGE_PSE |
++		set_pmd(pmd, __pmd(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pmd_pgprot)));
+ 
+ 		start	  += PMD_SIZE;
+-		cpa->pfn  += PMD_SIZE;
++		cpa->pfn  += PMD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PMD_SIZE >> PAGE_SHIFT;
+ 	}
+ 
+@@ -1042,11 +1037,11 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+ 	 * Map everything starting from the Gb boundary, possibly with 1G pages
+ 	 */
+ 	while (end - start >= PUD_SIZE) {
+-		set_pud(pud, __pud(cpa->pfn | _PAGE_PSE |
++		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pud_pgprot)));
+ 
+ 		start	  += PUD_SIZE;
+-		cpa->pfn  += PUD_SIZE;
++		cpa->pfn  += PUD_SIZE >> PAGE_SHIFT;
+ 		cur_pages += PUD_SIZE >> PAGE_SHIFT;
+ 		pud++;
+ 	}
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index a0ac0f9c307f..5aa186db59e3 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -143,7 +143,7 @@ void efi_sync_low_kernel_mappings(void)
+ 
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+-	unsigned long text;
++	unsigned long pfn, text;
+ 	struct page *page;
+ 	unsigned npages;
+ 	pgd_t *pgd;
+@@ -160,7 +160,8 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * and ident-map those pages containing the map before calling
+ 	 * phys_efi_set_virtual_address_map().
+ 	 */
+-	if (kernel_map_pages_in_pgd(pgd, pa_memmap, pa_memmap, num_pages, _PAGE_NX)) {
++	pfn = pa_memmap >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX)) {
+ 		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
+ 		return 1;
+ 	}
+@@ -185,8 +186,9 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 
+ 	npages = (_end - _text) >> PAGE_SHIFT;
+ 	text = __pa(_text);
++	pfn = text >> PAGE_SHIFT;
+ 
+-	if (kernel_map_pages_in_pgd(pgd, text >> PAGE_SHIFT, text, npages, 0)) {
++	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
+ 		pr_err("Failed to map kernel text 1:1\n");
+ 		return 1;
+ 	}
+@@ -204,12 +206,14 @@ void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
+ {
+ 	pgd_t *pgd = (pgd_t *)__va(real_mode_header->trampoline_pgd);
+-	unsigned long pf = 0;
++	unsigned long flags = 0;
++	unsigned long pfn;
+ 
+ 	if (!(md->attribute & EFI_MEMORY_WB))
+-		pf |= _PAGE_PCD;
++		flags |= _PAGE_PCD;
+ 
+-	if (kernel_map_pages_in_pgd(pgd, md->phys_addr, va, md->num_pages, pf))
++	pfn = md->phys_addr >> PAGE_SHIFT;
++	if (kernel_map_pages_in_pgd(pgd, pfn, va, md->num_pages, flags))
+ 		pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
+ 			   md->phys_addr, va);
+ }
 -- 
 2.6.2
