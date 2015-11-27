@@ -1,111 +1,74 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: efivars: don't rely on blocking operations in
- non-blocking set_var()
-Date: Thu, 26 Nov 2015 13:06:27 +0100
-Message-ID: <CAKv+Gu8XqP+MgT1vkC-CLkEZ=p+X2tA3fQuprUCRJ1UhrFz-rg@mail.gmail.com>
-References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1447940191-30705-3-git-send-email-ard.biesheuvel@linaro.org>
-	<20151126095441.GA2765@codeblueprint.co.uk>
+Subject: Re: [PATCH v3 13/13] ARM: add UEFI stub support
+Date: Fri, 27 Nov 2015 10:38:05 +0100
+Message-ID: <CAKv+Gu_RC5qG=BGPSEf=j7AV4SbjXELjBxmcboj1oVs-Dn87qw@mail.gmail.com>
+References: <1448269593-20758-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1448269593-20758-14-git-send-email-ard.biesheuvel@linaro.org>
+	<20151126104711.GH2765@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151126095441.GA2765-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20151126104711.GH2765-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Alexander Kuleshov <kuleshovmail-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, Ryan Harkin <ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 November 2015 at 10:54, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Thu, 19 Nov, at 02:36:29PM, Ard Biesheuvel wrote:
->> The non-blocking version of efivar_entry_set() gives up directly on
->> failure to acquire __efivars->lock. However, it also calls check_var_size(),
->> whose implementation calls the ordinary query_variable_info() and
->> set_variable() runtime service wrappers, meaning we could still deadlock
->> if efivar_entry_set_nonblocking() is called from an atomic context that
->> interrupted a runtime service already in progress on the same CPU.
+On 26 November 2015 at 11:47, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Mon, 23 Nov, at 10:06:33AM, Ard Biesheuvel wrote:
+>> From: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >>
->> So drop the call to check_var_size(). This is potentially unsafe on some
->> UEFI implementations that fail to boot if the varstore fills up, but
->> those systems are unlikely to be using efi-pstore in the first place.
->
-> There is simply no way you can make that assumption. The whole "my
-> NVRAM is full, now my machine is bricked" issue arose because
-> efi-pstore was filling the NVRAM with crash logs; that's how we
-> triggered the problem in the first place.
->
-> The locking here is non-trivial, so it's worth spelling out. There are
-> two spinlocks we need to concern ourselves with,
->
->   1. __efivars->lock
->   2. efi_runtime_lock
->
-> All EFI variable operations are performed with __efivars->lock held,
-> apart from the x86 efi_delete_dummy_variable() call during boot when
-> we're UP anyway. For all intents and purposes, when we're SMP,
-> __efivars->lock is held for all EFI variable operations.
->
-> So the only potential for deadlock if CPU A is doing variable calls is
-> if CPU A or CPU B is doing efi_reset() or efi_capsule_*(). That's not
-> an impossible scenario (particularly on arm64 where efi_reset() is
-> used more frequently), but it gives you some clue as to when deadlock
-> might be a problem.
->
-
-The likelihood for deadlock is low considering the existence of
-__efivars->lock, even on arm64, but I would still like to get this
-straightened out one way or the other.
-
+>> This patch adds EFI stub support for the ARM Linux kernel.
+>>
+>> The EFI stub operates similarly to the x86 and arm64 stubs: it is a
+>> shim between the EFI firmware and the normal zImage entry point, and
+>> sets up the environment that the zImage is expecting. This includes
+>> optionally loading the initrd and device tree from the system partition
+>> based on the kernel command line.
+>>
+>> Signed-off-by: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >> ---
->>  drivers/firmware/efi/vars.c | 12 +++---------
->>  1 file changed, 3 insertions(+), 9 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
->> index 70a0fb10517f..caccdbffc1d0 100644
->> --- a/drivers/firmware/efi/vars.c
->> +++ b/drivers/firmware/efi/vars.c
->> @@ -615,12 +615,6 @@ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
->>       if (!spin_trylock_irqsave(&__efivars->lock, flags))
->>               return -EBUSY;
->>
->> -     status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
->> -     if (status != EFI_SUCCESS) {
->> -             spin_unlock_irqrestore(&__efivars->lock, flags);
->> -             return -ENOSPC;
->> -     }
->> -
->>       status = ops->set_variable_nonblocking(name, &vendor, attributes,
->>                                              size, data);
+>>  arch/arm/Kconfig                          |  19 +++
+>>  arch/arm/boot/compressed/Makefile         |   4 +-
+>>  arch/arm/boot/compressed/efi-header.S     | 130 ++++++++++++++++++++
+>>  arch/arm/boot/compressed/head.S           |  54 +++++++-
+>>  arch/arm/boot/compressed/vmlinux.lds.S    |   7 ++
+>>  arch/arm/include/asm/efi.h                |  23 ++++
+>>  drivers/firmware/efi/libstub/Makefile     |   9 ++
+>>  drivers/firmware/efi/libstub/arm-stub.c   |   4 +-
+>>  drivers/firmware/efi/libstub/arm32-stub.c |  85 +++++++++++++
+>>  9 files changed, 331 insertions(+), 4 deletions(-)
 >
-> We still need some validation to occur if efi_no_storage_paranoia is
-> unset, i.e. "Be paranoid about how much NVRAM we use".
+> [...]
 >
-> However, efi_query_variable_store() actually does two things,
+>> +
+>> +     /*
+>> +      * Relocate the zImage, if required. ARM doesn't have a
+>> +      * preferred address, so we set it to 0, as we want to allocate
+>> +      * as low in memory as possible.
+>> +      */
+>> +     *image_size = image->image_size;
+>> +     status = efi_relocate_kernel(sys_table, image_addr, *image_size,
+>> +                                  *image_size, 0, 0);
+>> +     if (status != EFI_SUCCESS) {
+>> +             pr_efi_err(sys_table, "Failed to relocate kernel.\n");
+>> +             efi_free(sys_table, *reserve_size, *reserve_addr);
+>> +             *reserve_size = 0;
+>> +             return status;
+>> +     }
 >
->   1. Check if the write pushes free NVRAM space below EFI_MIN_RESERVE
->   2. If it does, attempt to trigger garbage collection
->
-> Now, if you're in the belly of a kdump handler, attempting to trigger
-> garbage collection to ensure the write succeeds should be the last
-> thing on your mind. Everything you do is a last ditch attempt to
-> record the reason your machine is going down.
->
-> I think the best solution would be to only perform step 1. above in
-> the efi_pstore_write() code path, and keep a cached copy of
-> query_variable_info() that we can perform lockless queries on. We can
-> initially grab it on boot and update it with every ->set_variable()
-> call.
->
-> Thoughts?
+> If efi_relocate_kernel() successfully allocates memory at address 0x0,
+> is that going to cause issues with NULL pointer checking?
 
-How would this be affected by things like suspend/resume, hibernation
-or variable accesses made in SMM context (i.e., which the kernel knows
-nothing about)
-If we need to take all of that into account as well, we're probably
-better off adding a nonblocking query_variable_info() call after all,
-and wiring it up to efi_query_variable_store(), i.e., make it take a
-'bool nonblocking' argument and choose between the two versions of
-each of the hooks it uses.
+Actually, it is the reservation done a bit earlier that could
+potentially end up at 0x0, and the [compressed] kernel is always at
+least 32 MB up in memory, so that it can be decompressed as close to
+the base of DRAM as possible.
+
+As far as I can tell, efi_free() deals correctly with allocations at
+address 0x0, and that is the only dealing we have with the
+reservation. So I don't think there is an issue here.
 
 -- 
 Ard.
