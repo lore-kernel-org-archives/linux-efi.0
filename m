@@ -1,51 +1,46 @@
-From: Alan Ott <alan@softiron.co.uk>
-Subject: Re: [PATCH] doc: efi-stub.txt: Fix arm64 paths
-Date: Sat, 28 Nov 2015 11:12:00 -0500
-Message-ID: <5659D250.3000609@softiron.co.uk>
-References: <1448726603-17600-1-git-send-email-alan@softiron.co.uk>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL v4 0/6] EFI page table isolation
+Date: Sun, 29 Nov 2015 09:18:20 +0100
+Message-ID: <20151129081820.GA24006@gmail.com>
+References: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1448726603-17600-1-git-send-email-alan@softiron.co.uk>
+Content-Disposition: inline
+In-Reply-To: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>, Jonathan Corbet <corbet@lwn.net>
-Cc: Roy Franz <roy.franz@linaro.org>, linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>
 List-Id: linux-efi@vger.kernel.org
 
-On 11/28/2015 11:03 AM, Alan Ott wrote:
-> Update documented paths for arm64 files to match current tree.
-> ---
->   Documentation/efi-stub.txt | 4 ++--
->   1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-> index 7747024..e157469 100644
-> --- a/Documentation/efi-stub.txt
-> +++ b/Documentation/efi-stub.txt
-> @@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
->   respectively. For ARM the EFI stub is implemented in
->   arch/arm/boot/compressed/efi-header.S and
->   arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
-> -between architectures is in drivers/firmware/efi/efi-stub-helper.c.
-> +between architectures is in drivers/firmware/efi/libstub.
->   
->   For arm64, there is no compressed kernel support, so the Image itself
->   masquerades as a PE/COFF image and the EFI stub is linked into the
->   kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
-> -and arch/arm64/kernel/efi-stub.c.
-> +and drivers/firmware/efi/libstub/arm64-stub.c.
->   
->   By using the EFI boot stub it's possible to boot a Linux kernel
->   without the use of a conventional EFI boot loader, such as grub or
 
-To follow up on this one, it additionally appears that commit 
-719e284369d23c3feb02d02ad58b3a516df47806 [1] was premature, as ARM 
-support for EFI never fully made it into mainline, and the files 
-referenced[2] do not exist anywhere in the history.
+* Matt Fleming <matt@codeblueprint.co.uk> wrote:
 
-Alan.
+> Folks,
+> 
+> This patch series is a response to the report that the EFI region
+> mappings trigger warnings when booting with CONFIG_DEBUG_WX enabled.
+> They allocate a new page table structure and ensure that all the
+> mappings we require during EFI runtime calls are only setup there.
+> 
+> It turns out that it still makes sense to share some page table
+> entries with 'swapper_pg_dir', just not the entries where we need to
+> allow security lax permissions. Sharing entries is useful for memory
+> hotplug, for example.
+> 
+> When writing this series I discovered a number of bugs in the existing
+> code that only became apparent when we stopped using 'trampoline_pgd'
+> which already mapped a bunch of things for us. I've put those bug
+> fixes at the start of the series.
+> 
+> Further testing would be very much appreciated as this is a
+> notoriously funky area of the EFI code.
 
-[1] https://lkml.org/lkml/2014/4/4/401
-[2] arch/arm/boot/compressed/efi-header.S, and 
-arch/arm/boot/compressed/efi-stub.c
+Ok, this series looks great to me - I've applied this to tip:x86/efi and will push 
+it out to linux-next after it passes some local testing.
+
+There should be time enough before v4.5 to figure out potential bugs.
+
+Thanks,
+
+	Ingo
