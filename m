@@ -1,29 +1,42 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: efivars: don't rely on blocking operations in
- non-blocking set_var()
-Date: Mon, 30 Nov 2015 11:12:30 +0000
-Message-ID: <20151130111230.GA2441@codeblueprint.co.uk>
-References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
- <1447940191-30705-3-git-send-email-ard.biesheuvel@linaro.org>
- <20151126095441.GA2765@codeblueprint.co.uk>
- <CAKv+Gu8XqP+MgT1vkC-CLkEZ=p+X2tA3fQuprUCRJ1UhrFz-rg@mail.gmail.com>
- <20151127211836.GB13918@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] doc: efi-stub.txt: Fix arm64 paths
+Date: Mon, 30 Nov 2015 11:28:59 +0000
+Message-ID: <20151130112859.GB2441@codeblueprint.co.uk>
+References: <1448726603-17600-1-git-send-email-alan@softiron.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-doc-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20151127211836.GB13918-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1448726603-17600-1-git-send-email-alan@softiron.co.uk>
+Sender: linux-doc-owner@vger.kernel.org
+To: Alan Ott <alan@softiron.co.uk>
+Cc: Jonathan Corbet <corbet@lwn.net>, Roy Franz <roy.franz@linaro.org>, linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 27 Nov, at 09:18:36PM, Matt Fleming wrote:
+On Sat, 28 Nov, at 11:03:23AM, Alan Ott wrote:
+> Update documented paths for arm64 files to match current tree.
+> ---
+>  Documentation/efi-stub.txt | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> I *think* that'd be OK. The thing I wanted to avoid was a
-> proliferation of nonblocking versions of the standard EFI calls, but
-> limiting it to adding query_variable_info() doesn't seem too bad.
-> 
-> Let me think about it over the weekend. 
+> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+> index 7747024..e157469 100644
+> --- a/Documentation/efi-stub.txt
+> +++ b/Documentation/efi-stub.txt
+> @@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+>  respectively. For ARM the EFI stub is implemented in
+>  arch/arm/boot/compressed/efi-header.S and
+>  arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
+> -between architectures is in drivers/firmware/efi/efi-stub-helper.c.
+> +between architectures is in drivers/firmware/efi/libstub.
+>  
+>  For arm64, there is no compressed kernel support, so the Image itself
+>  masquerades as a PE/COFF image and the EFI stub is linked into the
+>  kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
+> -and arch/arm64/kernel/efi-stub.c.
+> +and drivers/firmware/efi/libstub/arm64-stub.c.
+>  
+>  By using the EFI boot stub it's possible to boot a Linux kernel
+>  without the use of a conventional EFI boot loader, such as grub or
 
-I couldn't come up with anything better. Go for it!
+Thanks Alan, applied.
