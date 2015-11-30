@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v4 11/13] ARM: only consider memblocks with NOMAP cleared for linear mapping
-Date: Mon, 30 Nov 2015 13:28:25 +0100
-Message-ID: <1448886507-3216-12-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v4 07/13] ARM: split off core mapping logic from create_mapping
+Date: Mon, 30 Nov 2015 13:28:21 +0100
+Message-ID: <1448886507-3216-8-git-send-email-ard.biesheuvel@linaro.org>
 References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1448886507-3216-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,54 +10,125 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.
 Cc: akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, kuleshovmail-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Take the new memblock attribute MEMBLOCK_NOMAP into account when
-deciding whether a certain region is or should be covered by the
-kernel direct mapping.
+In order to be able to reuse the core mapping logic of create_mapping
+for mapping the UEFI Runtime Services into a private set of page tables,
+split it off from create_mapping() into a separate function
+__create_mapping which we will wire up in a subsequent patch.
 
 Tested-by: Ryan Harkin <ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/mm/init.c | 5 ++++-
- arch/arm/mm/mmu.c  | 3 +++
- 2 files changed, 7 insertions(+), 1 deletion(-)
+ arch/arm/mm/mmu.c | 56 +++++++++++---------
+ 1 file changed, 31 insertions(+), 25 deletions(-)
 
-diff --git a/arch/arm/mm/init.c b/arch/arm/mm/init.c
-index 8a63b4cdc0f2..16104b1e2661 100644
---- a/arch/arm/mm/init.c
-+++ b/arch/arm/mm/init.c
-@@ -191,7 +191,7 @@ static void __init zone_sizes_init(unsigned long min, unsigned long max_low,
- #ifdef CONFIG_HAVE_ARCH_PFN_VALID
- int pfn_valid(unsigned long pfn)
- {
--	return memblock_is_memory(__pfn_to_phys(pfn));
-+	return memblock_is_map_memory(__pfn_to_phys(pfn));
- }
- EXPORT_SYMBOL(pfn_valid);
- #endif
-@@ -432,6 +432,9 @@ static void __init free_highpages(void)
- 		if (end <= max_low)
- 			continue;
- 
-+		if (memblock_is_nomap(mem))
-+			continue;
-+
- 		/* Truncate partial highmem entries */
- 		if (start < max_low)
- 			start = max_low;
 diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index 8c69830e791a..c615d2eb9232 100644
+index de19f90221e2..3100de92148b 100644
 --- a/arch/arm/mm/mmu.c
 +++ b/arch/arm/mm/mmu.c
-@@ -1435,6 +1435,9 @@ static void __init map_lowmem(void)
- 		phys_addr_t end = start + reg->size;
- 		struct map_desc map;
+@@ -818,7 +818,8 @@ static void __init alloc_init_pud(pgd_t *pgd, unsigned long addr,
+ }
  
-+		if (memblock_is_nomap(reg))
-+			continue;
+ #ifndef CONFIG_ARM_LPAE
+-static void __init create_36bit_mapping(struct map_desc *md,
++static void __init create_36bit_mapping(struct mm_struct *mm,
++					struct map_desc *md,
+ 					const struct mem_type *type)
+ {
+ 	unsigned long addr, length, end;
+@@ -859,7 +860,7 @@ static void __init create_36bit_mapping(struct map_desc *md,
+ 	 */
+ 	phys |= (((md->pfn >> (32 - PAGE_SHIFT)) & 0xF) << 20);
+ 
+-	pgd = pgd_offset_k(addr);
++	pgd = pgd_offset(mm, addr);
+ 	end = addr + length;
+ 	do {
+ 		pud_t *pud = pud_offset(pgd, addr);
+@@ -876,33 +877,13 @@ static void __init create_36bit_mapping(struct map_desc *md,
+ }
+ #endif	/* !CONFIG_ARM_LPAE */
+ 
+-/*
+- * Create the page directory entries and any necessary
+- * page tables for the mapping specified by `md'.  We
+- * are able to cope here with varying sizes and address
+- * offsets, and we take full advantage of sections and
+- * supersections.
+- */
+-static void __init create_mapping(struct map_desc *md)
++static void __init __create_mapping(struct mm_struct *mm, struct map_desc *md)
+ {
+ 	unsigned long addr, length, end;
+ 	phys_addr_t phys;
+ 	const struct mem_type *type;
+ 	pgd_t *pgd;
+ 
+-	if (md->virtual != vectors_base() && md->virtual < TASK_SIZE) {
+-		pr_warn("BUG: not creating mapping for 0x%08llx at 0x%08lx in user region\n",
+-			(long long)__pfn_to_phys((u64)md->pfn), md->virtual);
+-		return;
+-	}
+-
+-	if ((md->type == MT_DEVICE || md->type == MT_ROM) &&
+-	    md->virtual >= PAGE_OFFSET && md->virtual < FIXADDR_START &&
+-	    (md->virtual < VMALLOC_START || md->virtual >= VMALLOC_END)) {
+-		pr_warn("BUG: mapping for 0x%08llx at 0x%08lx out of vmalloc space\n",
+-			(long long)__pfn_to_phys((u64)md->pfn), md->virtual);
+-	}
+-
+ 	type = &mem_types[md->type];
+ 
+ #ifndef CONFIG_ARM_LPAE
+@@ -910,7 +891,7 @@ static void __init create_mapping(struct map_desc *md)
+ 	 * Catch 36-bit addresses
+ 	 */
+ 	if (md->pfn >= 0x100000) {
+-		create_36bit_mapping(md, type);
++		create_36bit_mapping(mm, md, type);
+ 		return;
+ 	}
+ #endif
+@@ -925,7 +906,7 @@ static void __init create_mapping(struct map_desc *md)
+ 		return;
+ 	}
+ 
+-	pgd = pgd_offset_k(addr);
++	pgd = pgd_offset(mm, addr);
+ 	end = addr + length;
+ 	do {
+ 		unsigned long next = pgd_addr_end(addr, end);
+@@ -938,6 +919,31 @@ static void __init create_mapping(struct map_desc *md)
+ }
+ 
+ /*
++ * Create the page directory entries and any necessary
++ * page tables for the mapping specified by `md'.  We
++ * are able to cope here with varying sizes and address
++ * offsets, and we take full advantage of sections and
++ * supersections.
++ */
++static void __init create_mapping(struct map_desc *md)
++{
++	if (md->virtual != vectors_base() && md->virtual < TASK_SIZE) {
++		pr_warn("BUG: not creating mapping for 0x%08llx at 0x%08lx in user region\n",
++			(long long)__pfn_to_phys((u64)md->pfn), md->virtual);
++		return;
++	}
 +
- 		if (end > arm_lowmem_limit)
- 			end = arm_lowmem_limit;
- 		if (start >= end)
++	if ((md->type == MT_DEVICE || md->type == MT_ROM) &&
++	    md->virtual >= PAGE_OFFSET && md->virtual < FIXADDR_START &&
++	    (md->virtual < VMALLOC_START || md->virtual >= VMALLOC_END)) {
++		pr_warn("BUG: mapping for 0x%08llx at 0x%08lx out of vmalloc space\n",
++			(long long)__pfn_to_phys((u64)md->pfn), md->virtual);
++	}
++
++	__create_mapping(&init_mm, md);
++}
++
++/*
+  * Create the architecture specific mappings
+  */
+ void __init iotable_init(struct map_desc *io_desc, int nr)
 -- 
 1.9.1
