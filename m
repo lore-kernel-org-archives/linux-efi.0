@@ -1,82 +1,40 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v4 10/13] ARM: implement create_mapping_late() for EFI use
-Date: Mon, 30 Nov 2015 13:28:24 +0100
-Message-ID: <1448886507-3216-11-git-send-email-ard.biesheuvel@linaro.org>
-References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
-Sender: owner-linux-mm@kvack.org
-To: linux-arm-kernel@lists.infradead.org, catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, linux-efi@vger.kernel.org, leif.lindholm@linaro.org, matt@codeblueprint.co.uk, linux@arm.linux.org.uk
-Cc: akpm@linux-foundation.org, kuleshovmail@gmail.com, linux-mm@kvack.org, ryan.harkin@linaro.org, grant.likely@linaro.org, roy.franz@linaro.org, msalter@redhat.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Alan Ott <alan@softiron.co.uk>
+Subject: [PATCH v2] doc: efi-stub.txt: Fix arm64 paths
+Date: Mon, 30 Nov 2015 09:36:54 -0500
+Message-ID: <1448894214-23616-1-git-send-email-alan@softiron.co.uk>
+References: <20151130113237.GC2441@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151130113237.GC2441@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Jonathan Corbet <corbet@lwn.net>
+Cc: Roy Franz <roy.franz@linaro.org>, linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Alan Ott <alan@softiron.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-This implements create_mapping_late(), which we will use to populate
-the UEFI Runtime Services page tables.
+Update documented paths for arm64 files to match current tree.
 
-Tested-by: Ryan Harkin <ryan.harkin@linaro.org>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Alan Ott <alan@softiron.co.uk>
 ---
- arch/arm/include/asm/mach/map.h |  2 ++
- arch/arm/mm/mmu.c               | 20 ++++++++++++++++++++
- 2 files changed, 22 insertions(+)
+ Documentation/efi-stub.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/arm/include/asm/mach/map.h b/arch/arm/include/asm/mach/map.h
-index f98c7f32c9c8..9b7c328fb207 100644
---- a/arch/arm/include/asm/mach/map.h
-+++ b/arch/arm/include/asm/mach/map.h
-@@ -42,6 +42,8 @@ enum {
- extern void iotable_init(struct map_desc *, int);
- extern void vm_reserve_area_early(unsigned long addr, unsigned long size,
- 				  void *caller);
-+extern void create_mapping_late(struct mm_struct *mm, struct map_desc *md,
-+				bool ng);
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index 7747024..e157469 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+ respectively. For ARM the EFI stub is implemented in
+ arch/arm/boot/compressed/efi-header.S and
+ arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
+-between architectures is in drivers/firmware/efi/efi-stub-helper.c.
++between architectures is in drivers/firmware/efi/libstub.
  
- #ifdef CONFIG_DEBUG_LL
- extern void debug_ll_addr(unsigned long *paddr, unsigned long *vaddr);
-diff --git a/arch/arm/mm/mmu.c b/arch/arm/mm/mmu.c
-index 2d9f628a7fe8..8c69830e791a 100644
---- a/arch/arm/mm/mmu.c
-+++ b/arch/arm/mm/mmu.c
-@@ -724,6 +724,14 @@ static void __init *early_alloc(unsigned long sz)
- 	return early_alloc_aligned(sz, sz);
- }
+ For arm64, there is no compressed kernel support, so the Image itself
+ masquerades as a PE/COFF image and the EFI stub is linked into the
+ kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
+-and arch/arm64/kernel/efi-stub.c.
++and drivers/firmware/efi/libstub/arm64-stub.c.
  
-+static void *__init late_alloc(unsigned long sz)
-+{
-+	void *ptr = (void *)__get_free_pages(PGALLOC_GFP, get_order(sz));
-+
-+	BUG_ON(!ptr);
-+	return ptr;
-+}
-+
- static pte_t * __init pte_alloc(pmd_t *pmd, unsigned long addr,
- 				unsigned long prot,
- 				void *(*alloc)(unsigned long sz))
-@@ -960,6 +968,18 @@ static void __init create_mapping(struct map_desc *md)
- 	__create_mapping(&init_mm, md, early_alloc, false);
- }
- 
-+void __init create_mapping_late(struct mm_struct *mm, struct map_desc *md,
-+				bool ng)
-+{
-+#ifdef CONFIG_ARM_LPAE
-+	pud_t *pud = pud_alloc(mm, pgd_offset(mm, md->virtual), md->virtual);
-+	if (WARN_ON(!pud))
-+		return;
-+	pmd_alloc(mm, pud, 0);
-+#endif
-+	__create_mapping(mm, md, late_alloc, ng);
-+}
-+
- /*
-  * Create the architecture specific mappings
-  */
+ By using the EFI boot stub it's possible to boot a Linux kernel
+ without the use of a conventional EFI boot loader, such as grub or
 -- 
-1.9.1
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+2.5.0
