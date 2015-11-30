@@ -1,46 +1,29 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL v4 0/6] EFI page table isolation
-Date: Sun, 29 Nov 2015 09:18:20 +0100
-Message-ID: <20151129081820.GA24006@gmail.com>
-References: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 2/4] efi: efivars: don't rely on blocking operations in
+ non-blocking set_var()
+Date: Mon, 30 Nov 2015 11:12:30 +0000
+Message-ID: <20151130111230.GA2441@codeblueprint.co.uk>
+References: <1447940191-30705-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1447940191-30705-3-git-send-email-ard.biesheuvel@linaro.org>
+ <20151126095441.GA2765@codeblueprint.co.uk>
+ <CAKv+Gu8XqP+MgT1vkC-CLkEZ=p+X2tA3fQuprUCRJ1UhrFz-rg@mail.gmail.com>
+ <20151127211836.GB13918@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1448658575-17029-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Toshi Kani <toshi.kani@hp.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@intel.com>, Dave Jones <davej@codemonkey.org.uk>, Denys Vlasenko <dvlasenk@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Stephen Smalley <sds@tycho.nsa.gov>
+In-Reply-To: <20151127211836.GB13918-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
-
-> Folks,
+On Fri, 27 Nov, at 09:18:36PM, Matt Fleming wrote:
 > 
-> This patch series is a response to the report that the EFI region
-> mappings trigger warnings when booting with CONFIG_DEBUG_WX enabled.
-> They allocate a new page table structure and ensure that all the
-> mappings we require during EFI runtime calls are only setup there.
+> I *think* that'd be OK. The thing I wanted to avoid was a
+> proliferation of nonblocking versions of the standard EFI calls, but
+> limiting it to adding query_variable_info() doesn't seem too bad.
 > 
-> It turns out that it still makes sense to share some page table
-> entries with 'swapper_pg_dir', just not the entries where we need to
-> allow security lax permissions. Sharing entries is useful for memory
-> hotplug, for example.
-> 
-> When writing this series I discovered a number of bugs in the existing
-> code that only became apparent when we stopped using 'trampoline_pgd'
-> which already mapped a bunch of things for us. I've put those bug
-> fixes at the start of the series.
-> 
-> Further testing would be very much appreciated as this is a
-> notoriously funky area of the EFI code.
+> Let me think about it over the weekend. 
 
-Ok, this series looks great to me - I've applied this to tip:x86/efi and will push 
-it out to linux-next after it passes some local testing.
-
-There should be time enough before v4.5 to figure out potential bugs.
-
-Thanks,
-
-	Ingo
+I couldn't come up with anything better. Go for it!
