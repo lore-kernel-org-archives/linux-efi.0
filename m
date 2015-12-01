@@ -1,46 +1,39 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 0/7] efi: run UEFI services with interrupts enabled
-Date: Tue,  1 Dec 2015 11:50:13 +0100
-Message-ID: <1448967020-20190-1-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 1/7] efi: expose non-blocking set_variable() wrapper to efivars
+Date: Tue,  1 Dec 2015 11:50:14 +0100
+Message-ID: <1448967020-20190-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1448967020-20190-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1448967020-20190-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI spec does not require interrupts to be disabled when invoking
-runtime services. The reason we have been doing so is because EFI pstore
-may call SetVariable() from interrupt context, which may result in deadlock
-if another runtime services call was in progress on the same cpu.
+Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
+operation") implemented a non-blocking alternative for the UEFI
+SetVariable() invocation performed by efivars, since it may occur
+in atomic context. However, this version of the function was never
+exposed via the efivars struct, so the non-blocking versions was
+not actually callable. Fix that.
 
-The EFI pstore has already been updated to use a non-blocking path and fail
-gracefully rather than spin forever, so we can updated the ordinary blocking
-wrappers to run with interrupts enabled instead. This aims to prevent excessive
-interrupt latencies on uniprocessor platforms with slow variable stores.
+Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-Changes since v2:
-- added nonblocking QueryVariableInfo() wrapper variant, and updated
-  efi_query_variable_store() to use it when called in nonblocking context
-- add patch to drop the rtc_lock spinlock
-- add patch to drop redundant efi_set_variable_nonblocking_t typedef
-- drop BUG_ONs in patch #7
-
-Ard Biesheuvel (7):
-  efi: expose non-blocking set_variable() wrapper to efivars
-  efi: remove redundant efi_set_variable_nonblocking prototype
-  efi: runtime-wrappers: add a nonblocking version of QueryVariableInfo
-  efi: add nonblocking option to efi_query_variable_store()
-  efi: runtime-wrappers: remove out of date comment regarding in_nmi()
-  efi: runtime-wrapper: get rid of the rtc_lock spinlock
-  efi: runtime-wrappers: run UEFI Runtime Services with interrupts
-    enabled
-
- arch/x86/platform/efi/quirks.c          |  37 +++++--
- drivers/firmware/efi/efi.c              |   1 +
- drivers/firmware/efi/runtime-wrappers.c | 115 +++++++-------------
- drivers/firmware/efi/vars.c             |  16 ++-
- include/linux/efi.h                     |  21 ++--
- 5 files changed, 94 insertions(+), 96 deletions(-)
-
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 027ca212179f..3b52677f459a 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -180,6 +180,7 @@ static int generic_ops_register(void)
+ {
+ 	generic_ops.get_variable = efi.get_variable;
+ 	generic_ops.set_variable = efi.set_variable;
++	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
+ 	generic_ops.get_next_variable = efi.get_next_variable;
+ 	generic_ops.query_variable_store = efi_query_variable_store;
+ 
 -- 
 1.9.1
