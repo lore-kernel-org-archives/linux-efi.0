@@ -1,40 +1,46 @@
-From: Alan Ott <alan@softiron.co.uk>
-Subject: [PATCH v2] doc: efi-stub.txt: Fix arm64 paths
-Date: Mon, 30 Nov 2015 09:36:54 -0500
-Message-ID: <1448894214-23616-1-git-send-email-alan@softiron.co.uk>
-References: <20151130113237.GC2441@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20151130113237.GC2441@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>, Jonathan Corbet <corbet@lwn.net>
-Cc: Roy Franz <roy.franz@linaro.org>, linux-efi@vger.kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, Alan Ott <alan@softiron.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 0/7] efi: run UEFI services with interrupts enabled
+Date: Tue,  1 Dec 2015 11:50:13 +0100
+Message-ID: <1448967020-20190-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Update documented paths for arm64 files to match current tree.
+The UEFI spec does not require interrupts to be disabled when invoking
+runtime services. The reason we have been doing so is because EFI pstore
+may call SetVariable() from interrupt context, which may result in deadlock
+if another runtime services call was in progress on the same cpu.
 
-Signed-off-by: Alan Ott <alan@softiron.co.uk>
----
- Documentation/efi-stub.txt | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+The EFI pstore has already been updated to use a non-blocking path and fail
+gracefully rather than spin forever, so we can updated the ordinary blocking
+wrappers to run with interrupts enabled instead. This aims to prevent excessive
+interrupt latencies on uniprocessor platforms with slow variable stores.
 
-diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-index 7747024..e157469 100644
---- a/Documentation/efi-stub.txt
-+++ b/Documentation/efi-stub.txt
-@@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
- respectively. For ARM the EFI stub is implemented in
- arch/arm/boot/compressed/efi-header.S and
- arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
--between architectures is in drivers/firmware/efi/efi-stub-helper.c.
-+between architectures is in drivers/firmware/efi/libstub.
- 
- For arm64, there is no compressed kernel support, so the Image itself
- masquerades as a PE/COFF image and the EFI stub is linked into the
- kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
--and arch/arm64/kernel/efi-stub.c.
-+and drivers/firmware/efi/libstub/arm64-stub.c.
- 
- By using the EFI boot stub it's possible to boot a Linux kernel
- without the use of a conventional EFI boot loader, such as grub or
+Changes since v2:
+- added nonblocking QueryVariableInfo() wrapper variant, and updated
+  efi_query_variable_store() to use it when called in nonblocking context
+- add patch to drop the rtc_lock spinlock
+- add patch to drop redundant efi_set_variable_nonblocking_t typedef
+- drop BUG_ONs in patch #7
+
+Ard Biesheuvel (7):
+  efi: expose non-blocking set_variable() wrapper to efivars
+  efi: remove redundant efi_set_variable_nonblocking prototype
+  efi: runtime-wrappers: add a nonblocking version of QueryVariableInfo
+  efi: add nonblocking option to efi_query_variable_store()
+  efi: runtime-wrappers: remove out of date comment regarding in_nmi()
+  efi: runtime-wrapper: get rid of the rtc_lock spinlock
+  efi: runtime-wrappers: run UEFI Runtime Services with interrupts
+    enabled
+
+ arch/x86/platform/efi/quirks.c          |  37 +++++--
+ drivers/firmware/efi/efi.c              |   1 +
+ drivers/firmware/efi/runtime-wrappers.c | 115 +++++++-------------
+ drivers/firmware/efi/vars.c             |  16 ++-
+ include/linux/efi.h                     |  21 ++--
+ 5 files changed, 94 insertions(+), 96 deletions(-)
+
 -- 
-2.5.0
+1.9.1
