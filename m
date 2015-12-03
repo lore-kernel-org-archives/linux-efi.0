@@ -1,45 +1,153 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v4 00/13] UEFI boot and runtime services support for
- 32-bit ARM
-Date: Thu, 3 Dec 2015 10:18:24 +0000
-Message-ID: <20151203101823.GA11337@arm.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v4 01/13] mm/memblock: add MEMBLOCK_NOMAP attribute to
+ memblock memory table
+Date: Thu, 3 Dec 2015 11:55:53 +0100
+Message-ID: <CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
 References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1448886507-3216-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1448886507-3216-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org, kuleshovmail-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org, ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <1448886507-3216-2-git-send-email-ard.biesheuvel@linaro.org>
+Sender: owner-linux-mm@kvack.org
+To: Andrew Morton <akpm@linux-foundation.org>, Alexander Kuleshov <kuleshovmail@gmail.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>
+Cc: Ryan Harkin <ryan.harkin@linaro.org>, Grant Likely <grant.likely@linaro.org>, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
+On 30 November 2015 at 13:28, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+> This introduces the MEMBLOCK_NOMAP attribute and the required plumbing
+> to make it usable as an indicator that some parts of normal memory
+> should not be covered by the kernel direct mapping. It is up to the
+> arch to actually honor the attribute when laying out this mapping,
+> but the memblock code itself is modified to disregard these regions
+> for allocations and other general use.
+>
+> Cc: linux-mm@kvack.org
+> Cc: Alexander Kuleshov <kuleshovmail@gmail.com>
+> Cc: Andrew Morton <akpm@linux-foundation.org>
+> Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> ---
+>  include/linux/memblock.h |  8 ++++++
+>  mm/memblock.c            | 28 ++++++++++++++++++++
+>  2 files changed, 36 insertions(+)
+>
+> diff --git a/include/linux/memblock.h b/include/linux/memblock.h
+> index 24daf8fc4d7c..fec66f86eeff 100644
+> --- a/include/linux/memblock.h
+> +++ b/include/linux/memblock.h
+> @@ -25,6 +25,7 @@ enum {
+>         MEMBLOCK_NONE           = 0x0,  /* No special request */
+>         MEMBLOCK_HOTPLUG        = 0x1,  /* hotpluggable region */
+>         MEMBLOCK_MIRROR         = 0x2,  /* mirrored region */
+> +       MEMBLOCK_NOMAP          = 0x4,  /* don't add to kernel direct mapping */
+>  };
+>
+>  struct memblock_region {
+> @@ -82,6 +83,7 @@ bool memblock_overlaps_region(struct memblock_type *type,
+>  int memblock_mark_hotplug(phys_addr_t base, phys_addr_t size);
+>  int memblock_clear_hotplug(phys_addr_t base, phys_addr_t size);
+>  int memblock_mark_mirror(phys_addr_t base, phys_addr_t size);
+> +int memblock_mark_nomap(phys_addr_t base, phys_addr_t size);
+>  ulong choose_memblock_flags(void);
+>
+>  /* Low level functions */
+> @@ -184,6 +186,11 @@ static inline bool memblock_is_mirror(struct memblock_region *m)
+>         return m->flags & MEMBLOCK_MIRROR;
+>  }
+>
+> +static inline bool memblock_is_nomap(struct memblock_region *m)
+> +{
+> +       return m->flags & MEMBLOCK_NOMAP;
+> +}
+> +
+>  #ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP
+>  int memblock_search_pfn_nid(unsigned long pfn, unsigned long *start_pfn,
+>                             unsigned long  *end_pfn);
+> @@ -319,6 +326,7 @@ phys_addr_t memblock_start_of_DRAM(void);
+>  phys_addr_t memblock_end_of_DRAM(void);
+>  void memblock_enforce_memory_limit(phys_addr_t memory_limit);
+>  int memblock_is_memory(phys_addr_t addr);
+> +int memblock_is_map_memory(phys_addr_t addr);
+>  int memblock_is_region_memory(phys_addr_t base, phys_addr_t size);
+>  int memblock_is_reserved(phys_addr_t addr);
+>  bool memblock_is_region_reserved(phys_addr_t base, phys_addr_t size);
+> diff --git a/mm/memblock.c b/mm/memblock.c
+> index d300f1329814..07ff069fef25 100644
+> --- a/mm/memblock.c
+> +++ b/mm/memblock.c
+> @@ -822,6 +822,17 @@ int __init_memblock memblock_mark_mirror(phys_addr_t base, phys_addr_t size)
+>         return memblock_setclr_flag(base, size, 1, MEMBLOCK_MIRROR);
+>  }
+>
+> +/**
+> + * memblock_mark_nomap - Mark a memory region with flag MEMBLOCK_NOMAP.
+> + * @base: the base phys addr of the region
+> + * @size: the size of the region
+> + *
+> + * Return 0 on success, -errno on failure.
+> + */
+> +int __init_memblock memblock_mark_nomap(phys_addr_t base, phys_addr_t size)
+> +{
+> +       return memblock_setclr_flag(base, size, 1, MEMBLOCK_NOMAP);
+> +}
+>
+>  /**
+>   * __next_reserved_mem_region - next function for for_each_reserved_region()
+> @@ -913,6 +924,10 @@ void __init_memblock __next_mem_range(u64 *idx, int nid, ulong flags,
+>                 if ((flags & MEMBLOCK_MIRROR) && !memblock_is_mirror(m))
+>                         continue;
+>
+> +               /* skip nomap memory unless we were asked for it explicitly */
+> +               if (!(flags & MEMBLOCK_NOMAP) && memblock_is_nomap(m))
+> +                       continue;
+> +
+>                 if (!type_b) {
+>                         if (out_start)
+>                                 *out_start = m_start;
+> @@ -1022,6 +1037,10 @@ void __init_memblock __next_mem_range_rev(u64 *idx, int nid, ulong flags,
+>                 if ((flags & MEMBLOCK_MIRROR) && !memblock_is_mirror(m))
+>                         continue;
+>
+> +               /* skip nomap memory unless we were asked for it explicitly */
+> +               if (!(flags & MEMBLOCK_NOMAP) && memblock_is_nomap(m))
+> +                       continue;
+> +
+>                 if (!type_b) {
+>                         if (out_start)
+>                                 *out_start = m_start;
+> @@ -1519,6 +1538,15 @@ int __init_memblock memblock_is_memory(phys_addr_t addr)
+>         return memblock_search(&memblock.memory, addr) != -1;
+>  }
+>
+> +int __init_memblock memblock_is_map_memory(phys_addr_t addr)
+> +{
+> +       int i = memblock_search(&memblock.memory, addr);
+> +
+> +       if (i == -1)
+> +               return false;
+> +       return !memblock_is_nomap(&memblock.memory.regions[i]);
+> +}
+> +
+>  #ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP
+>  int __init_memblock memblock_search_pfn_nid(unsigned long pfn,
+>                          unsigned long *start_pfn, unsigned long *end_pfn)
 
-On Mon, Nov 30, 2015 at 01:28:14PM +0100, Ard Biesheuvel wrote:
-> This series adds support for booting the 32-bit ARM kernel directly from
-> UEFI firmware using a builtin UEFI stub. It mostly reuses refactored arm64
-> code, and the differences (primarily the PE/COFF header and entry point and
-> the efi_create_mapping() implementation) are split out into arm64 and ARM
-> versions.
-> 
-> Since I did not receive any further comments in reply to v3 from the people who
-> commented on v2, I think this series in now in sufficient shape to be pulled.
-> Note that patch #1 touches mm/memblock.c and include/linux/memblock.h, for which
-> get_maintainer.pl does not provide a maintainer, so it has been cc'ed to various
-> past editors of those files, and to the linux-mm mailing list.
-> 
-> Since the series affects both arm64 and ARM, it is up to the maintainers to let
-> me know how and when they wish to proceed with this. My suggestion would be to
-> send out pull request for patches #1 - #5 to the arm64 maintainer, and for the
-> whole series to the ARM maintainer. This should keep any conflicts on either
-> side confined to the respective maintainer tree, rather then propagating all the
-> way to -next.
+May I kindly ask team-mm/Andrew/Alexander to chime in here, and
+indicate whether you are ok with this patch going in for 4.5? If so,
+could you please provide your ack so the patch can be kept together
+with the rest of the series, which depends on it?
 
-For the arm64 bits (patches 2-5):
+I should note that this change should not affect any memblock users
+that never set the MEMBLOCK_NOMAP flag, but please, if you see any
+issues beyond 'this may conflict with other stuff we have queued for
+4.5', please do let me know.
 
-  Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Thanks,
+Ard.
 
-I'd really like an ack from the mm crowd on patch 1 before I queue it.
-
-Will
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
