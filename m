@@ -1,46 +1,30 @@
-From: Alexander Kuleshov <kuleshovmail@gmail.com>
-Subject: Re: [PATCH v4 01/13] mm/memblock: add MEMBLOCK_NOMAP attribute to
- memblock memory table
-Date: Thu, 3 Dec 2015 17:27:42 +0600
-Message-ID: <CANCZXo7rdYooBq3NV5xo8u+EpbbPjGDq3oTv=Yy0U9SDAReB9g@mail.gmail.com>
-References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
- <1448886507-3216-2-git-send-email-ard.biesheuvel@linaro.org> <CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
+From: Kosuke Tatsukawa <tatsu-zZGIbrA41Td8UrSeD/g0lQ@public.gmane.org>
+Subject: [PATCH 0/2] x86: Fix issues when eXecute Disable (XD) bit is
+ disabled in uEFI firmware
+Date: Thu, 3 Dec 2015 23:58:31 +0000
+Message-ID: <17EC94B0A072C34B8DCF0D30AD16044A0288E2C8@BPXM09GP.gisp.nec.co.jp>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Ryan Harkin <ryan.harkin@linaro.org>, Grant Likely <grant.likely@linaro.org>, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>
+Content-Type: text/plain; charset="iso-2022-jp"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Language: ja-JP
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hello Ard,
+The kernel panics early in boot on a x86_64 server if the eXecute
+Disable (XD) bit is set to disabled in the uEFI firmware.
 
-On Thu, Dec 3, 2015 at 4:55 PM, Ard Biesheuvel
-<ard.biesheuvel@linaro.org> wrote:
-> On 30 November 2015 at 13:28, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
->> This introduces the MEMBLOCK_NOMAP attribute and the required plumbing
->> to make it usable as an indicator that some parts of normal memory
->> should not be covered by the kernel direct mapping. It is up to the
->> arch to actually honor the attribute when laying out this mapping,
->> but the memblock code itself is modified to disregard these regions
->> for allocations and other general use.
->>....
-> May I kindly ask team-mm/Andrew/Alexander to chime in here, and
-> indicate whether you are ok with this patch going in for 4.5? If so,
-> could you please provide your ack so the patch can be kept together
-> with the rest of the series, which depends on it?
->
-> I should note that this change should not affect any memblock users
-> that never set the MEMBLOCK_NOMAP flag, but please, if you see any
-> issues beyond 'this may conflict with other stuff we have queued for
-> 4.5', please do let me know.
+The following patches fix the panic and also fix an error in
+kernel_map_pages_in_pgd() which would make the EFI runtime service
+unavailable when the XD bit is set to disabled.
 
-Just tested the kernel with this patch with qemu and real hardware and it
-works, nothing does not brake for me.
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Kosuke Tatsukawa (2):
+  x86: Fix kernel panic when booting with XD disabled in uEFI firmware
+  x86: Fix error in kernel_map_pages_in_pgd() when booting with XD disabled
+---
+ arch/x86/kernel/setup.c |   18 +++++++++---------
+ arch/x86/mm/ioremap.c   |    3 +++
+ arch/x86/mm/pageattr.c  |    6 +-----
+ 3 files changed, 13 insertions(+), 14 deletions(-)
