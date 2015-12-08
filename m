@@ -1,43 +1,32 @@
-From: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Subject: Re: [PATCH 1/2] x86: Fix kernel panic when booting with XD disabled
- in uEFI firmware
-Date: Tue, 8 Dec 2015 21:56:05 +0100
-Message-ID: <20151208205605.GB16417@pd.tnic>
-References: <20151204164057.GE2514@codeblueprint.co.uk>
- <17EC94B0A072C34B8DCF0D30AD16044A0288EFC7@BPXM09GP.gisp.nec.co.jp>
- <20151208122557.GA2518@codeblueprint.co.uk>
- <20151208141946.GD27180@pd.tnic>
- <CAGXu5jKF3fVc5rsU=+jRcoBGB+ZkeHjF6mmSeJN0SoP-MpFGow@mail.gmail.com>
+From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [PATCH v4 01/13] mm/memblock: add MEMBLOCK_NOMAP attribute to
+ memblock memory table
+Date: Tue, 8 Dec 2015 14:23:41 -0800
+Message-ID: <20151208142341.b91ab5728f244a68231e3b87@linux-foundation.org>
+References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1448886507-3216-2-git-send-email-ard.biesheuvel@linaro.org>
+	<CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
+	<20151208120743.GG19612@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAGXu5jKF3fVc5rsU=+jRcoBGB+ZkeHjF6mmSeJN0SoP-MpFGow-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <20151208120743.GG19612-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Kosuke Tatsukawa <tatsu-zZGIbrA41Td8UrSeD/g0lQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Alexander Kuleshov <kuleshovmail-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org" <linux-mm-Bw31MaZKKs3YtjvyW6yDsg@public.gmane.org>, Ryan Harkin <ryan.harkin-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Dec 08, 2015 at 12:30:06PM -0800, Kees Cook wrote:
-> If we add this for not-nx, I would like to add it for not-rodata too.
+On Tue, 8 Dec 2015 12:07:44 +0000 Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org> wrote:
 
-The W+X thing?
+> > I should note that this change should not affect any memblock users
+> > that never set the MEMBLOCK_NOMAP flag, but please, if you see any
+> > issues beyond 'this may conflict with other stuff we have queued for
+> > 4.5', please do let me know.
+> 
+> Indeed, I can't see that this would cause any issues, but I would really
+> like an Ack from one of the MM maintainers before taking this.
+> 
+> Please could somebody take a look?
 
-I was under the impression we want to fix all those so that the ptdump
-check doesn't fire anymore.
-
-> I've never seen anyone actually use it. I was asked to include it out
-> of fear of some kind of rogue imagined CPU configuration that mixed NX
-> and non-NX capable CPUs in a single machine where the forced NX
-> re-enablement code would cause problems. As you might imagine, I'm not
-> aware of this case ever being an issue. ;)
-
-Right. :)
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
-
-ECO tip #101: Trim your mails when you reply.
+It looks OK to me.  Please go ahead and merge it via an arm tree.
