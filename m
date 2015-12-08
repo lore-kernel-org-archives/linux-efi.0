@@ -1,66 +1,47 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH v4 01/13] mm/memblock: add MEMBLOCK_NOMAP attribute to
- memblock memory table
-Date: Tue, 8 Dec 2015 12:07:44 +0000
-Message-ID: <20151208120743.GG19612@arm.com>
-References: <1448886507-3216-1-git-send-email-ard.biesheuvel@linaro.org>
- <1448886507-3216-2-git-send-email-ard.biesheuvel@linaro.org>
- <CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 1/2] x86: Fix kernel panic when booting with XD disabled
+ in uEFI firmware
+Date: Tue, 8 Dec 2015 12:25:57 +0000
+Message-ID: <20151208122557.GA2518@codeblueprint.co.uk>
+References: <20151204164057.GE2514@codeblueprint.co.uk>
+ <17EC94B0A072C34B8DCF0D30AD16044A0288EFC7@BPXM09GP.gisp.nec.co.jp>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <owner-linux-mm@kvack.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9oboT_Lk8heJWRcM=oxRW=EWioVCvZLH7N0YCkfU5tJw@mail.gmail.com>
-Sender: owner-linux-mm@kvack.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Alexander Kuleshov <kuleshovmail@gmail.com>, "linux-mm@kvack.org" <linux-mm@kvack.org>, Ryan Harkin <ryan.harkin@linaro.org>, Grant Likely <grant.likely@linaro.org>, Roy Franz <roy.franz@linaro.org>, Mark Salter <msalter@redhat.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Mark Rutland <mark.rutland@arm.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Russell King - ARM Linux <linux@arm.linux.org.uk>, Leif Lindholm <leif.lindholm@linaro.org>
+In-Reply-To: <17EC94B0A072C34B8DCF0D30AD16044A0288EFC7-9lrffkYxhwTt6d3pZDjeaEtBU8KWyXPq@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Kosuke Tatsukawa <tatsu-zZGIbrA41Td8UrSeD/g0lQ@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Ard,
+On Mon, 07 Dec, at 11:10:43PM, Kosuke Tatsukawa wrote:
+> 
+> Thank you pointing that out.
+> 
+> linux-4.4-rc3 booted without a problem on a real server even with XD
+> turned off by the firmware.  I didn't notice this before because I was
+> using an older version of the kernel on the real server, and doing
+> investigation on a KVM guest.
+> 
+> The "noexec=off" kernel parameter still seems to come up with EFI
+> runtime service disabled though.  Do you think this should be left alone
+> as an disadvantage for using a bad option?
 
-On Thu, Dec 03, 2015 at 11:55:53AM +0100, Ard Biesheuvel wrote:
-> On 30 November 2015 at 13:28, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> > This introduces the MEMBLOCK_NOMAP attribute and the required plumbing
-> > to make it usable as an indicator that some parts of normal memory
-> > should not be covered by the kernel direct mapping. It is up to the
-> > arch to actually honor the attribute when laying out this mapping,
-> > but the memblock code itself is modified to disregard these regions
-> > for allocations and other general use.
-> >
-> > Cc: linux-mm@kvack.org
-> > Cc: Alexander Kuleshov <kuleshovmail@gmail.com>
-> > Cc: Andrew Morton <akpm@linux-foundation.org>
-> > Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
-> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> > ---
-> >  include/linux/memblock.h |  8 ++++++
-> >  mm/memblock.c            | 28 ++++++++++++++++++++
-> >  2 files changed, 36 insertions(+)
+Good question.
 
-[...]
+I couldn't find any other examples of code that returns an error if
+PAGE_NX isn't supported either by the hardware or via the noexec
+command line option. Things like set_memory_x() and set_memory_nx()
+return success without actually doing anything.
 
-> May I kindly ask team-mm/Andrew/Alexander to chime in here, and
-> indicate whether you are ok with this patch going in for 4.5? If so,
-> could you please provide your ack so the patch can be kept together
-> with the rest of the series, which depends on it?
+While I'm all for using hardware security features wherever possible,
+such as force-enabling it in commit 04633df0c43d ("x86/cpu: Call
+verify_cpu() after having entered long mode too"), if the user has
+explicitly turned it off on the kernel command line, we should still
+try and provide EFI services.
 
-I'm keen to queue this in the arm64 tree, since it's a prerequisite for
-cleaning up a bunch of our EFI code and sharing it with 32-bit ARM.
-
-> I should note that this change should not affect any memblock users
-> that never set the MEMBLOCK_NOMAP flag, but please, if you see any
-> issues beyond 'this may conflict with other stuff we have queued for
-> 4.5', please do let me know.
-
-Indeed, I can't see that this would cause any issues, but I would really
-like an Ack from one of the MM maintainers before taking this.
-
-Please could somebody take a look?
-
-Will
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+Borislav, what do you think about stripping PAGE_NX from 'page_flags'
+in kernel_map_pages_in_pgd() if NX isn't supported, rather than
+returning EINVAL? At least that way EFI runtime services would still
+work.
