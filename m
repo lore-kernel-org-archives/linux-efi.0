@@ -1,84 +1,95 @@
-From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Subject: Re: [PATCH] x86/efi-bgrt: Fix kernel panic when mapping BGRT data
-Date: Thu, 10 Dec 2015 13:42:58 -0800
-Message-ID: <20151210214258.GB9584@cloud>
+From: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH] x86/efi-bgrt: Fix kernel panic when mapping BGRT data
+Date: Fri, 11 Dec 2015 05:58:09 +0000
+Message-ID: <FFF73D592F13FD46B8700F0A279B802F014F2335@ORSMSX109.amr.corp.intel.com>
 References: <1449772021-983-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20151210214258.GB9584@cloud>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1449772021-983-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20151210214258.GB9584@cloud>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Shankar, Ravi V" <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Dec 10, 2015 at 10:27:01AM -0800, Sai Praneeth Prakhya wrote:
-> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> 
-> Starting with this commit 35eb8b81edd4 ("x86/efi: Build our own page
-> table structures") efi regions have a separate page directory called
-> "efi_pgd". In order to access any efi region we have to first shift %cr3
-> to this page table. In the bgrt code we are trying to copy bgrt_header
-> and image, but these regions fall under "EFI_BOOT_SERVICES_DATA"
-> and to access these regions we have to shift %cr3 to efi_pgd and not
-> doing so will cause page fault as shown below.
-> 
-> [    0.251599] Last level dTLB entries: 4KB 64, 2MB 0, 4MB 0, 1GB 4
-> [    0.259126] Freeing SMP alternatives memory: 32K (ffffffff8230e000 - ffffffff82316000)
-> [    0.271803] BUG: unable to handle kernel paging request at fffffffefce35002
-> [    0.279740] IP: [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-> [    0.286383] PGD 300f067 PUD 0
-> [    0.289879] Oops: 0000 [#1] SMP
-> [    0.293566] Modules linked in:
-> [    0.297039] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.4.0-rc1-eywa-eywa-built-in-47041+ #2
-> [    0.306619] Hardware name: Intel Corporation Skylake Client platform/Skylake Y LPDDR3 RVP3, BIOS SKLSE2R1.R00.B104.B01.1511110114 11/11/2015
-> [    0.320925] task: ffffffff820134c0 ti: ffffffff82000000 task.ti: ffffffff82000000
-> [    0.329420] RIP: 0010:[<ffffffff821bca49>]  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-> [    0.338821] RSP: 0000:ffffffff82003f18  EFLAGS: 00010246
-> [    0.344852] RAX: fffffffefce35000 RBX: fffffffefce35000 RCX: fffffffefce2b000
-> [    0.352952] RDX: 000000008a82b000 RSI: ffffffff8235bb80 RDI: 000000008a835000
-> [    0.361050] RBP: ffffffff82003f30 R08: 000000008a865000 R09: ffffffffff202850
-> [    0.369149] R10: ffffffff811ad62f R11: 0000000000000000 R12: 0000000000000000
-> [    0.377248] R13: ffff88016dbaea40 R14: ffffffff822622c0 R15: ffffffff82003fb0
-> [    0.385348] FS:  0000000000000000(0000) GS:ffff88016d800000(0000) knlGS:0000000000000000
-> [    0.394533] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> [    0.401054] CR2: fffffffefce35002 CR3: 000000000300c000 CR4: 00000000003406f0
-> [    0.409153] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-> [    0.417252] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-> [    0.425350] Stack:
-> [    0.427638]  ffffffffffffffff ffffffff82256900 ffff88016dbaea40 ffffffff82003f40
-> [    0.436086]  ffffffff821bbce0 ffffffff82003f88 ffffffff8219c0c2 0000000000000000
-> [    0.444533]  ffffffff8219ba4a ffffffff822622c0 0000000000083000 00000000ffffffff
-> [    0.452978] Call Trace:
-> [    0.455763]  [<ffffffff821bbce0>] efi_late_init+0x9/0xb
-> [    0.461697]  [<ffffffff8219c0c2>] start_kernel+0x463/0x47f
-> [    0.467928]  [<ffffffff8219ba4a>] ? set_init_arg+0x55/0x55
-> [    0.474159]  [<ffffffff8219b120>] ? early_idt_handler_array+0x120/0x120
-> [    0.481669]  [<ffffffff8219b5ee>] x86_64_start_reservations+0x2a/0x2c
-> [    0.488982]  [<ffffffff8219b72d>] x86_64_start_kernel+0x13d/0x14c
-> [    0.495897] Code: 00 41 b4 01 48 8b 78 28 e8 09 36 01 00 48 85 c0 48 89 c3 75 13 48 c7 c7 f8 ac d3 81 31 c0 e8 d7 3b fb fe e9 b5 00 00 00 45 84 e4 <44> 8b 6b 02 74 0d be 06 00 00 00 48 89 df e8 ae 34 0$
-> [    0.518151] RIP  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-> [    0.524888]  RSP <ffffffff82003f18>
-> [    0.528851] CR2: fffffffefce35002
-> [    0.532615] ---[ end trace 7b06521e6ebf2aea ]---
-> [    0.537852] Kernel panic - not syncing: Attempted to kill the idle task!
-> 
-> As said above one way to fix this bug is to shift %cr3 to efi_pgd but we
-> are not doing that way because it leaks inner details of how we switch
-> to EFI page tables into a new call site and it also adds duplicate code.
-> Instead, we remove the call to efi_lookup_mapped_addr() and always
-> perform early_mem*() instead of early_io*() because we want to remap RAM
-> regions and not I/O regions.
-> 
-> We also delete efi_lookup_mapped_addr() because it is impossible to
-> use it without also doing the page table switch to efi_pgd.
 
-The original motivation for efi_lookup_mapped_addr came from
-early_ioremap printing a warning if used on an address range already
-mapped as RAM.  Does early_mem* handle that case correctly without a
-warning?  Because not all firmware places the BGRT image in boot
-services memory; some firmware places the BGRT image variously in BIOS
-reserved memory, ACPI reclaim space, or other strange places.
+>>On Thu, Dec 10, 2015 at 10:27:01AM -0800, Sai Praneeth Prakhya wrote:
+>> From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+>> 
+>> Starting with this commit 35eb8b81edd4 ("x86/efi: Build our own page 
+>> table structures") efi regions have a separate page directory called 
+>> "efi_pgd". In order to access any efi region we have to first shift 
+>>%cr3 to this page table. In the bgrt code we are trying to copy 
+>> bgrt_header and image, but these regions fall under "EFI_BOOT_SERVICES_DATA"
+>> and to access these regions we have to shift %cr3 to efi_pgd and not 
+>> doing so will cause page fault as shown below.
+>> 
+>> [    0.251599] Last level dTLB entries: 4KB 64, 2MB 0, 4MB 0, 1GB 4
+>> [    0.259126] Freeing SMP alternatives memory: 32K (ffffffff8230e000 - ffffffff82316000)
+>> [    0.271803] BUG: unable to handle kernel paging request at fffffffefce35002
+>> [    0.279740] IP: [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
+>> [    0.286383] PGD 300f067 PUD 0
+>> [    0.289879] Oops: 0000 [#1] SMP
+>> [    0.293566] Modules linked in:
+>> [    0.297039] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.4.0-rc1-eywa-eywa-built-in-47041+ #2
+>> [    0.306619] Hardware name: Intel Corporation Skylake Client platform/Skylake Y LPDDR3 RVP3, BIOS SKLSE2R1.R00.B104.B01.1511110114 11/11/2015
+>> [    0.320925] task: ffffffff820134c0 ti: ffffffff82000000 task.ti: ffffffff82000000
+>> [    0.329420] RIP: 0010:[<ffffffff821bca49>]  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
+>> [    0.338821] RSP: 0000:ffffffff82003f18  EFLAGS: 00010246
+>> [    0.344852] RAX: fffffffefce35000 RBX: fffffffefce35000 RCX: fffffffefce2b000
+>> [    0.352952] RDX: 000000008a82b000 RSI: ffffffff8235bb80 RDI: 000000008a835000
+>> [    0.361050] RBP: ffffffff82003f30 R08: 000000008a865000 R09: ffffffffff202850
+>> [    0.369149] R10: ffffffff811ad62f R11: 0000000000000000 R12: 0000000000000000
+>> [    0.377248] R13: ffff88016dbaea40 R14: ffffffff822622c0 R15: ffffffff82003fb0
+>> [    0.385348] FS:  0000000000000000(0000) GS:ffff88016d800000(0000) knlGS:0000000000000000
+>> [    0.394533] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> [    0.401054] CR2: fffffffefce35002 CR3: 000000000300c000 CR4: 00000000003406f0
+>> [    0.409153] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
+>> [    0.417252] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
+>> [    0.425350] Stack:
+>> [    0.427638]  ffffffffffffffff ffffffff82256900 ffff88016dbaea40 ffffffff82003f40
+>> [    0.436086]  ffffffff821bbce0 ffffffff82003f88 ffffffff8219c0c2 0000000000000000
+>> [    0.444533]  ffffffff8219ba4a ffffffff822622c0 0000000000083000 00000000ffffffff
+>> [    0.452978] Call Trace:
+>> [    0.455763]  [<ffffffff821bbce0>] efi_late_init+0x9/0xb
+>> [    0.461697]  [<ffffffff8219c0c2>] start_kernel+0x463/0x47f
+>> [    0.467928]  [<ffffffff8219ba4a>] ? set_init_arg+0x55/0x55
+>> [    0.474159]  [<ffffffff8219b120>] ? early_idt_handler_array+0x120/0x120
+>> [    0.481669]  [<ffffffff8219b5ee>] x86_64_start_reservations+0x2a/0x2c
+>> [    0.488982]  [<ffffffff8219b72d>] x86_64_start_kernel+0x13d/0x14c
+>> [    0.495897] Code: 00 41 b4 01 48 8b 78 28 e8 09 36 01 00 48 85 c0 48 89 c3 75 13 48 c7 c7 f8 ac d3 81 31 c0 e8 d7 3b fb fe e9 b5 00 00 00 45 84 e4 <44> 8b 6b 02 74 0d be 06 00 00 00 48 89 df e8 ae 34 0$
+>> [    0.518151] RIP  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
+>> [    0.524888]  RSP <ffffffff82003f18>
+>> [    0.528851] CR2: fffffffefce35002
+>> [    0.532615] ---[ end trace 7b06521e6ebf2aea ]---
+>> [    0.537852] Kernel panic - not syncing: Attempted to kill the idle task!
+>> 
+>> As said above one way to fix this bug is to shift %cr3 to efi_pgd but 
+>> we are not doing that way because it leaks inner details of how we 
+>> switch to EFI page tables into a new call site and it also adds duplicate code.
+>> Instead, we remove the call to efi_lookup_mapped_addr() and always 
+>> perform early_mem*() instead of early_io*() because we want to remap 
+>> RAM regions and not I/O regions.
+>> 
+>> We also delete efi_lookup_mapped_addr() because it is impossible to 
+>> use it without also doing the page table switch to efi_pgd.
 
-- Josh Triplett
+>The original motivation for efi_lookup_mapped_addr came from early_ioremap printing a warning if used on an address range >already mapped as RAM.  Does early_mem* handle that case correctly without a warning?  
+
+Thanks a lot Josh for letting me know that. I don't think early_memremap() does that because early_memremap() and early_ioremap() both use __early_ioremap() but with different page protections (and I am not sure how those protections effect warning, but I will check that). Waiting for comments from Matt and Boris.
+
+>Because not all firmware places the BGRT image in boot services memory; some firmware places the BGRT image variously in BIOS >reserved memory, ACPI reclaim >space, or other strange places.
+>
+>- Josh Triplett
+
+I think we should not support buggy firmware implementations because it's same as encouraging them, instead we could let user know that he has got a buggy firmware and we skip bgrt code as if bgrt was disabled and carry on with normal boot process. One way of detecting buggy implementation without doing page table switch in efi_bgrt_init() is to enable a chicken bit if we find bgrt header and image address in EFI_BOOT_SERVICES_DATA regions while we are switching efi runtime services to virtual mode in __efi_enter_virtual_mode() and check for the same bit in efi_bgrt_init().
+
+This is just my thinking but Matt's opinion will definitely have a lot more weightage.
+
+Sorry for any formatting issues.
+
+Regards,
+Sai
