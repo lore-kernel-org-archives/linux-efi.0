@@ -1,7 +1,7 @@
 From: ard <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 3/7] efi: runtime-wrappers: add a nonblocking version of QueryVariableInfo
-Date: Mon, 14 Dec 2015 11:40:27 +0100
-Message-ID: <1450089631-26791-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 5/7] efi: runtime-wrappers: remove out of date comment regarding in_nmi()
+Date: Mon, 14 Dec 2015 11:40:29 +0100
+Message-ID: <1450089631-26791-6-git-send-email-ard.biesheuvel@linaro.org>
 References: <1450089631-26791-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1450089631-26791-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -12,67 +12,49 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-This introduces a new runtime wrapper for the QueryVariableInfo() UEFI
-Runtime Service, which gives up immediately rather than spins on failure
-to grab the efi_runtime spinlock.
+This code is long gone, so remove the comment as well.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 22 ++++++++++++++++++++
- include/linux/efi.h                     |  1 +
- 2 files changed, 23 insertions(+)
+ drivers/firmware/efi/runtime-wrappers.c | 26 --------------------
+ 1 file changed, 26 deletions(-)
 
 diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 228bbf910461..e9f2867f0d91 100644
+index e9f2867f0d91..311f415bff51 100644
 --- a/drivers/firmware/efi/runtime-wrappers.c
 +++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -230,6 +230,27 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
- 	return status;
- }
+@@ -62,32 +62,6 @@
+ static DEFINE_SPINLOCK(efi_runtime_lock);
  
-+static efi_status_t
-+virt_efi_query_variable_info_nonblocking(u32 attr,
-+					 u64 *storage_space,
-+					 u64 *remaining_space,
-+					 u64 *max_variable_size)
-+{
-+	unsigned long flags;
-+	efi_status_t status;
-+
-+	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
-+		return EFI_UNSUPPORTED;
-+
-+	if (!spin_trylock_irqsave(&efi_runtime_lock, flags))
-+		return EFI_NOT_READY;
-+
-+	status = efi_call_virt(query_variable_info, attr, storage_space,
-+			       remaining_space, max_variable_size);
-+	spin_unlock_irqrestore(&efi_runtime_lock, flags);
-+	return status;
-+}
-+
- static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
- {
- 	unsigned long flags;
-@@ -300,6 +321,7 @@ void efi_native_runtime_setup(void)
- 	efi.get_next_high_mono_count = virt_efi_get_next_high_mono_count;
- 	efi.reset_system = virt_efi_reset_system;
- 	efi.query_variable_info = virt_efi_query_variable_info;
-+	efi.query_variable_info_nonblocking = virt_efi_query_variable_info_nonblocking;
- 	efi.update_capsule = virt_efi_update_capsule;
- 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 8706e0aabedc..ad1e177ba48e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -849,6 +849,7 @@ extern struct efi {
- 	efi_set_variable_t *set_variable;
- 	efi_set_variable_t *set_variable_nonblocking;
- 	efi_query_variable_info_t *query_variable_info;
-+	efi_query_variable_info_t *query_variable_info_nonblocking;
- 	efi_update_capsule_t *update_capsule;
- 	efi_query_capsule_caps_t *query_capsule_caps;
- 	efi_get_next_high_mono_count_t *get_next_high_mono_count;
+ /*
+- * Some runtime services calls can be reentrant under NMI, even if the table
+- * above says they are not. (source: UEFI Specification v2.4A)
+- *
+- * Table 32. Functions that may be called after Machine Check, INIT and NMI
+- * +----------------------------+------------------------------------------+
+- * | Function			| Called after Machine Check, INIT and NMI |
+- * +----------------------------+------------------------------------------+
+- * | GetTime()			| Yes, even if previously busy.		   |
+- * | GetVariable()		| Yes, even if previously busy		   |
+- * | GetNextVariableName()	| Yes, even if previously busy		   |
+- * | QueryVariableInfo()	| Yes, even if previously busy		   |
+- * | SetVariable()		| Yes, even if previously busy		   |
+- * | UpdateCapsule()		| Yes, even if previously busy		   |
+- * | QueryCapsuleCapabilities()	| Yes, even if previously busy		   |
+- * | ResetSystem()		| Yes, even if previously busy		   |
+- * +----------------------------+------------------------------------------+
+- *
+- * In order to prevent deadlocks under NMI, the wrappers for these functions
+- * may only grab the efi_runtime_lock or rtc_lock spinlocks if !efi_in_nmi().
+- * However, not all of the services listed are reachable through NMI code paths,
+- * so the the special handling as suggested by the UEFI spec is only implemented
+- * for QueryVariableInfo() and SetVariable(), as these can be reached in NMI
+- * context through efi_pstore_write().
+- */
+-
+-/*
+  * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
+  * the EFI specification requires that callers of the time related runtime
+  * functions serialize with other CMOS accesses in the kernel, as the EFI time
 -- 
 2.5.0
