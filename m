@@ -1,80 +1,47 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 3/4] x86/efi: Preface all print statements with efi* tag
-Date: Mon, 14 Dec 2015 18:26:52 +0000
-Message-ID: <1450117613-15438-4-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 2/4] doc: efi-stub.txt: Fix arm64 paths
+Date: Mon, 14 Dec 2015 18:26:51 +0000
+Message-ID: <1450117613-15438-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1450117613-15438-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Alan Ott <alan@softiron.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Roy Franz <roy.franz@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-The pr_*() calls in the x86 EFI code may or may not include a
-subsystem tag, which makes it difficult to grep the kernel log for all
-relevant EFI messages and leads users to miss important information.
+From: Alan Ott <alan@softiron.co.uk>
 
-Recently, a bug reporter provided all the EFI print messages from the
-kernel log when trying to diagnose an issue but missed the following
-statement because it wasn't prefixed with anything indicating it was
-related to EFI,
+Update documented paths for arm64 files to match current tree.
 
-  pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
-
-Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
-Reviewed-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Alan Ott <alan@softiron.co.uk>
+Cc: Roy Franz <roy.franz@linaro.org>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Leif Lindholm <leif.lindholm@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/platform/efi/efi-bgrt.c | 3 +++
- arch/x86/platform/efi/efi_64.c   | 2 ++
- arch/x86/platform/efi/quirks.c   | 4 +++-
- 3 files changed, 8 insertions(+), 1 deletion(-)
+ Documentation/efi-stub.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index ea48449b2e63..9a52b5c4438f 100644
---- a/arch/x86/platform/efi/efi-bgrt.c
-+++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -10,6 +10,9 @@
-  * it under the terms of the GNU General Public License version 2 as
-  * published by the Free Software Foundation.
-  */
-+
-+#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
-+
- #include <linux/kernel.h>
- #include <linux/init.h>
- #include <linux/acpi.h>
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a0ac0f9c307f..d347e854a5e4 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -15,6 +15,8 @@
-  *
-  */
+diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
+index 7747024d3bb7..e15746988261 100644
+--- a/Documentation/efi-stub.txt
++++ b/Documentation/efi-stub.txt
+@@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
+ respectively. For ARM the EFI stub is implemented in
+ arch/arm/boot/compressed/efi-header.S and
+ arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
+-between architectures is in drivers/firmware/efi/efi-stub-helper.c.
++between architectures is in drivers/firmware/efi/libstub.
  
-+#define pr_fmt(fmt) "efi: " fmt
-+
- #include <linux/kernel.h>
- #include <linux/init.h>
- #include <linux/mm.h>
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index 1c7380da65ff..6452070f3025 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -1,3 +1,5 @@
-+#define pr_fmt(fmt) "efi: " fmt
-+
- #include <linux/init.h>
- #include <linux/kernel.h>
- #include <linux/string.h>
-@@ -256,7 +258,7 @@ void __init efi_apply_memmap_quirks(void)
- 	 * services.
- 	 */
- 	if (!efi_runtime_supported()) {
--		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
-+		pr_info("Setup done, disabling due to 32/64-bit mismatch\n");
- 		efi_unmap_memmap();
- 	}
+ For arm64, there is no compressed kernel support, so the Image itself
+ masquerades as a PE/COFF image and the EFI stub is linked into the
+ kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
+-and arch/arm64/kernel/efi-stub.c.
++and drivers/firmware/efi/libstub/arm64-stub.c.
  
+ By using the EFI boot stub it's possible to boot a Linux kernel
+ without the use of a conventional EFI boot loader, such as grub or
 -- 
 2.6.2
