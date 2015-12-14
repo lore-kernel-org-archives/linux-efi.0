@@ -1,194 +1,80 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 4/4] x86/efi-bgrt: Fix kernel panic when mapping BGRT data
-Date: Mon, 14 Dec 2015 18:26:53 +0000
-Message-ID: <1450117613-15438-5-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 3/4] x86/efi: Preface all print statements with efi* tag
+Date: Mon, 14 Dec 2015 18:26:52 +0000
+Message-ID: <1450117613-15438-4-git-send-email-matt@codeblueprint.co.uk>
 References: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Sai Praneeth <sai.praneeth.prakhya@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Borislav Petkov <bp@suse.de>, Josh Triplett <josh@joshtriplett.org>, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Wendy Wang <wendy.wang@intel.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1450117613-15438-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+The pr_*() calls in the x86 EFI code may or may not include a
+subsystem tag, which makes it difficult to grep the kernel log for all
+relevant EFI messages and leads users to miss important information.
 
-Starting with this commit 35eb8b81edd4 ("x86/efi: Build our own page
-table structures") efi regions have a separate page directory called
-"efi_pgd". In order to access any efi region we have to first shift %cr3
-to this page table. In the bgrt code we are trying to copy bgrt_header
-and image, but these regions fall under "EFI_BOOT_SERVICES_DATA"
-and to access these regions we have to shift %cr3 to efi_pgd and not
-doing so will cause page fault as shown below.
+Recently, a bug reporter provided all the EFI print messages from the
+kernel log when trying to diagnose an issue but missed the following
+statement because it wasn't prefixed with anything indicating it was
+related to EFI,
 
-[    0.251599] Last level dTLB entries: 4KB 64, 2MB 0, 4MB 0, 1GB 4
-[    0.259126] Freeing SMP alternatives memory: 32K (ffffffff8230e000 - ffffffff82316000)
-[    0.271803] BUG: unable to handle kernel paging request at fffffffefce35002
-[    0.279740] IP: [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-[    0.286383] PGD 300f067 PUD 0
-[    0.289879] Oops: 0000 [#1] SMP
-[    0.293566] Modules linked in:
-[    0.297039] CPU: 0 PID: 0 Comm: swapper/0 Not tainted 4.4.0-rc1-eywa-eywa-built-in-47041+ #2
-[    0.306619] Hardware name: Intel Corporation Skylake Client platform/Skylake Y LPDDR3 RVP3, BIOS SKLSE2R1.R00.B104.B01.1511110114 11/11/2015
-[    0.320925] task: ffffffff820134c0 ti: ffffffff82000000 task.ti: ffffffff82000000
-[    0.329420] RIP: 0010:[<ffffffff821bca49>]  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-[    0.338821] RSP: 0000:ffffffff82003f18  EFLAGS: 00010246
-[    0.344852] RAX: fffffffefce35000 RBX: fffffffefce35000 RCX: fffffffefce2b000
-[    0.352952] RDX: 000000008a82b000 RSI: ffffffff8235bb80 RDI: 000000008a835000
-[    0.361050] RBP: ffffffff82003f30 R08: 000000008a865000 R09: ffffffffff202850
-[    0.369149] R10: ffffffff811ad62f R11: 0000000000000000 R12: 0000000000000000
-[    0.377248] R13: ffff88016dbaea40 R14: ffffffff822622c0 R15: ffffffff82003fb0
-[    0.385348] FS:  0000000000000000(0000) GS:ffff88016d800000(0000) knlGS:0000000000000000
-[    0.394533] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[    0.401054] CR2: fffffffefce35002 CR3: 000000000300c000 CR4: 00000000003406f0
-[    0.409153] DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000
-[    0.417252] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400
-[    0.425350] Stack:
-[    0.427638]  ffffffffffffffff ffffffff82256900 ffff88016dbaea40 ffffffff82003f40
-[    0.436086]  ffffffff821bbce0 ffffffff82003f88 ffffffff8219c0c2 0000000000000000
-[    0.444533]  ffffffff8219ba4a ffffffff822622c0 0000000000083000 00000000ffffffff
-[    0.452978] Call Trace:
-[    0.455763]  [<ffffffff821bbce0>] efi_late_init+0x9/0xb
-[    0.461697]  [<ffffffff8219c0c2>] start_kernel+0x463/0x47f
-[    0.467928]  [<ffffffff8219ba4a>] ? set_init_arg+0x55/0x55
-[    0.474159]  [<ffffffff8219b120>] ? early_idt_handler_array+0x120/0x120
-[    0.481669]  [<ffffffff8219b5ee>] x86_64_start_reservations+0x2a/0x2c
-[    0.488982]  [<ffffffff8219b72d>] x86_64_start_kernel+0x13d/0x14c
-[    0.495897] Code: 00 41 b4 01 48 8b 78 28 e8 09 36 01 00 48 85 c0 48 89 c3 75 13 48 c7 c7 f8 ac d3 81 31 c0 e8 d7 3b fb fe e9 b5 00 00 00 45 84 e4 <44> 8b 6b 02 74 0d be 06 00 00 00 48 89 df e8 ae 34 0$
-[    0.518151] RIP  [<ffffffff821bca49>] efi_bgrt_init+0x144/0x1fd
-[    0.524888]  RSP <ffffffff82003f18>
-[    0.528851] CR2: fffffffefce35002
-[    0.532615] ---[ end trace 7b06521e6ebf2aea ]---
-[    0.537852] Kernel panic - not syncing: Attempted to kill the idle task!
+  pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
 
-As said above one way to fix this bug is to shift %cr3 to efi_pgd but we
-are not doing that way because it leaks inner details of how we switch
-to EFI page tables into a new call site and it also adds duplicate code.
-Instead, we remove the call to efi_lookup_mapped_addr() and always
-perform early_mem*() instead of early_io*() because we want to remap RAM
-regions and not I/O regions. We also delete efi_lookup_mapped_addr()
-because we are no longer using it.
-
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Reported-by: Wendy Wang <wendy.wang@intel.com>
-Cc: Borislav Petkov <bp@suse.de>
-Cc: Josh Triplett <josh@joshtriplett.org>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>
+Reviewed-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/platform/efi/efi-bgrt.c | 39 ++++++++++++++-------------------------
- drivers/firmware/efi/efi.c       | 32 --------------------------------
- 2 files changed, 14 insertions(+), 57 deletions(-)
+ arch/x86/platform/efi/efi-bgrt.c | 3 +++
+ arch/x86/platform/efi/efi_64.c   | 2 ++
+ arch/x86/platform/efi/quirks.c   | 4 +++-
+ 3 files changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/arch/x86/platform/efi/efi-bgrt.c b/arch/x86/platform/efi/efi-bgrt.c
-index 9a52b5c4438f..bf51f4c02562 100644
+index ea48449b2e63..9a52b5c4438f 100644
 --- a/arch/x86/platform/efi/efi-bgrt.c
 +++ b/arch/x86/platform/efi/efi-bgrt.c
-@@ -31,8 +31,7 @@ struct bmp_header {
- void __init efi_bgrt_init(void)
- {
- 	acpi_status status;
--	void __iomem *image;
--	bool ioremapped = false;
-+	void *image;
- 	struct bmp_header bmp_header;
+@@ -10,6 +10,9 @@
+  * it under the terms of the GNU General Public License version 2 as
+  * published by the Free Software Foundation.
+  */
++
++#define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
++
+ #include <linux/kernel.h>
+ #include <linux/init.h>
+ #include <linux/acpi.h>
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index a0ac0f9c307f..d347e854a5e4 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -15,6 +15,8 @@
+  *
+  */
  
- 	if (acpi_disabled)
-@@ -73,20 +72,14 @@ void __init efi_bgrt_init(void)
- 		return;
++#define pr_fmt(fmt) "efi: " fmt
++
+ #include <linux/kernel.h>
+ #include <linux/init.h>
+ #include <linux/mm.h>
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 1c7380da65ff..6452070f3025 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -1,3 +1,5 @@
++#define pr_fmt(fmt) "efi: " fmt
++
+ #include <linux/init.h>
+ #include <linux/kernel.h>
+ #include <linux/string.h>
+@@ -256,7 +258,7 @@ void __init efi_apply_memmap_quirks(void)
+ 	 * services.
+ 	 */
+ 	if (!efi_runtime_supported()) {
+-		pr_info("efi: Setup done, disabling due to 32/64-bit mismatch\n");
++		pr_info("Setup done, disabling due to 32/64-bit mismatch\n");
+ 		efi_unmap_memmap();
  	}
  
--	image = efi_lookup_mapped_addr(bgrt_tab->image_address);
-+	image = early_memremap(bgrt_tab->image_address, sizeof(bmp_header));
- 	if (!image) {
--		image = early_ioremap(bgrt_tab->image_address,
--				       sizeof(bmp_header));
--		ioremapped = true;
--		if (!image) {
--			pr_err("Ignoring BGRT: failed to map image header memory\n");
--			return;
--		}
-+		pr_err("Ignoring BGRT: failed to map image header memory\n");
-+		return;
- 	}
- 
--	memcpy_fromio(&bmp_header, image, sizeof(bmp_header));
--	if (ioremapped)
--		early_iounmap(image, sizeof(bmp_header));
-+	memcpy(&bmp_header, image, sizeof(bmp_header));
-+	early_memunmap(image, sizeof(bmp_header));
- 	bgrt_image_size = bmp_header.size;
- 
- 	bgrt_image = kmalloc(bgrt_image_size, GFP_KERNEL | __GFP_NOWARN);
-@@ -96,18 +89,14 @@ void __init efi_bgrt_init(void)
- 		return;
- 	}
- 
--	if (ioremapped) {
--		image = early_ioremap(bgrt_tab->image_address,
--				       bmp_header.size);
--		if (!image) {
--			pr_err("Ignoring BGRT: failed to map image memory\n");
--			kfree(bgrt_image);
--			bgrt_image = NULL;
--			return;
--		}
-+	image = early_memremap(bgrt_tab->image_address, bmp_header.size);
-+	if (!image) {
-+		pr_err("Ignoring BGRT: failed to map image memory\n");
-+		kfree(bgrt_image);
-+		bgrt_image = NULL;
-+		return;
- 	}
- 
--	memcpy_fromio(bgrt_image, image, bgrt_image_size);
--	if (ioremapped)
--		early_iounmap(image, bmp_header.size);
-+	memcpy(bgrt_image, image, bgrt_image_size);
-+	early_memunmap(image, bmp_header.size);
- }
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 027ca212179f..e9c458ba9353 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -324,38 +324,6 @@ u64 __init efi_mem_desc_end(efi_memory_desc_t *md)
- 	return end;
- }
- 
--/*
-- * We can't ioremap data in EFI boot services RAM, because we've already mapped
-- * it as RAM.  So, look it up in the existing EFI memory map instead.  Only
-- * callable after efi_enter_virtual_mode and before efi_free_boot_services.
-- */
--void __iomem *efi_lookup_mapped_addr(u64 phys_addr)
--{
--	struct efi_memory_map *map;
--	void *p;
--	map = efi.memmap;
--	if (!map)
--		return NULL;
--	if (WARN_ON(!map->map))
--		return NULL;
--	for (p = map->map; p < map->map_end; p += map->desc_size) {
--		efi_memory_desc_t *md = p;
--		u64 size = md->num_pages << EFI_PAGE_SHIFT;
--		u64 end = md->phys_addr + size;
--		if (!(md->attribute & EFI_MEMORY_RUNTIME) &&
--		    md->type != EFI_BOOT_SERVICES_CODE &&
--		    md->type != EFI_BOOT_SERVICES_DATA)
--			continue;
--		if (!md->virt_addr)
--			continue;
--		if (phys_addr >= md->phys_addr && phys_addr < end) {
--			phys_addr += md->virt_addr - md->phys_addr;
--			return (__force void __iomem *)(unsigned long)phys_addr;
--		}
--	}
--	return NULL;
--}
--
- static __initdata efi_config_table_type_t common_tables[] = {
- 	{ACPI_20_TABLE_GUID, "ACPI 2.0", &efi.acpi20},
- 	{ACPI_TABLE_GUID, "ACPI", &efi.acpi},
 -- 
 2.6.2
