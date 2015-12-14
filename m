@@ -1,51 +1,57 @@
-From: ard <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 0/7] efi: run UEFI services with interrupts enabled
-Date: Mon, 14 Dec 2015 11:40:24 +0100
-Message-ID: <1450089631-26791-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi-bgrt: Fix kernel panic when mapping BGRT data
+Date: Mon, 14 Dec 2015 15:08:17 +0000
+Message-ID: <20151214150817.GB2571@codeblueprint.co.uk>
+References: <1449772021-983-1-git-send-email-sai.praneeth.prakhya@intel.com>
+ <20151210214258.GB9584@cloud>
+ <FFF73D592F13FD46B8700F0A279B802F014F2335@ORSMSX109.amr.corp.intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <FFF73D592F13FD46B8700F0A279B802F014F2335-P5GAC/sN6hkd3b2yrw5b5LfspsVTdybXVpNB7YpNyf8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: ard <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Borislav Petkov <bp-l3A5Bk7waGM@public.gmane.org>, "Neri, Ricardo" <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Shankar, Ravi V" <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The UEFI spec does not require interrupts to be disabled when invoking
-runtime services. The reason we have been doing so is because EFI pstore
-may call SetVariable() from interrupt context, which may result in deadlock
-if another runtime services call was in progress on the same cpu.
+On Fri, 11 Dec, at 05:58:09AM, Sai Praneeth Prakhya wrote:
+> 
+> >The original motivation for efi_lookup_mapped_addr came from
+> >early_ioremap printing a warning if used on an address range
+> >already mapped as RAM.  Does early_mem* handle that case correctly
+> >without a warning?  
+> 
+> Thanks a lot Josh for letting me know that. I don't think
+> early_memremap() does that because early_memremap() and
+> early_ioremap() both use __early_ioremap() but with different page
+> protections (and I am not sure how those protections effect warning,
+> but I will check that). Waiting for comments from Matt and Boris.
 
-The EFI pstore has already been updated to use a non-blocking path and fail
-gracefully rather than spin forever, so we can update the ordinary blocking
-wrappers to run with interrupts enabled instead. This aims to prevent excessive
-interrupt latencies on uniprocessor platforms with slow variable stores.
+Right, early_memremap() was introduced for the purpose of mapping RAM,
+so we shouldn't be seeing any warning here.
 
-Changes since v2:
-- folded Matt's suggestion for patch #4, to bail rather than try to trigger a
-  garbage collection in the nonblocking case when there is insufficient space
-- rebased onto v4.4-rc5
+> >Because not all firmware places the BGRT image in boot services
+> >memory; some firmware places the BGRT image variously in BIOS
+> >reserved memory, ACPI reclaim >space, or other strange places.
+> >
+> >- Josh Triplett
+> 
+> I think we should not support buggy firmware implementations because
+> it's same as encouraging them, instead we could let user know that
+> he has got a buggy firmware and we skip bgrt code as if bgrt was
+> disabled and carry on with normal boot process. One way of detecting
+> buggy implementation without doing page table switch in
+> efi_bgrt_init() is to enable a chicken bit if we find bgrt header
+> and image address in EFI_BOOT_SERVICES_DATA regions while we are
+> switching efi runtime services to virtual mode in
+> __efi_enter_virtual_mode() and check for the same bit in
+> efi_bgrt_init().
 
-Changes since v1:
-- added nonblocking QueryVariableInfo() wrapper variant, and updated
-  efi_query_variable_store() to use it when called in nonblocking context
-- add patch to drop the rtc_lock spinlock
-- add patch to drop redundant efi_set_variable_nonblocking_t typedef
-- drop BUG_ONs in patch #7
+Trying to inform firmware developers that we noticed some buggy
+behaviour should definitely be discussed as a separate patch (because
+it's debatable whether there's any value in that in this scenario).
 
-Ard Biesheuvel (7):
-  efi: expose non-blocking set_variable() wrapper to efivars
-  efi: remove redundant efi_set_variable_nonblocking prototype
-  efi: runtime-wrappers: add a nonblocking version of QueryVariableInfo
-  efi: add nonblocking option to efi_query_variable_store()
-  efi: runtime-wrappers: remove out of date comment regarding in_nmi()
-  efi: runtime-wrapper: get rid of the rtc_lock spinlock
-  efi: runtime-wrappers: run UEFI Runtime Services with interrupts
-    enabled
-
- arch/x86/platform/efi/quirks.c          |  33 +++++-
- drivers/firmware/efi/efi.c              |   1 +
- drivers/firmware/efi/runtime-wrappers.c | 115 +++++++-------------
- drivers/firmware/efi/vars.c             |  16 ++-
- include/linux/efi.h                     |  21 ++--
- 5 files changed, 100 insertions(+), 86 deletions(-)
-
--- 
-2.5.0
+The changes in this patch look OK to me, and I think all of Josh's
+concerns have been addressed. So unless anyone complains soon, I'm
+going to apply it and send it to tip.
