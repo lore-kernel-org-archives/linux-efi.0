@@ -1,47 +1,74 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 2/4] doc: efi-stub.txt: Fix arm64 paths
-Date: Mon, 14 Dec 2015 18:26:51 +0000
-Message-ID: <1450117613-15438-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Alan Ott <alan@softiron.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Roy Franz <roy.franz@linaro.org>, Jonathan Corbet <corbet@lwn.net>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>
+From: Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>
+Subject: Re: [PATCH 1/2] x86: Fix kernel panic when booting with XD disabled
+ in uEFI firmware
+Date: Mon, 14 Dec 2015 16:07:17 -0800
+Message-ID: <CALCETrVv=rUS-6HmUxVEOHFnqVRi75BTaGuMWSYogcuLORWA7Q@mail.gmail.com>
+References: <20151204164057.GE2514@codeblueprint.co.uk> <17EC94B0A072C34B8DCF0D30AD16044A0288EFC7@BPXM09GP.gisp.nec.co.jp>
+ <20151208122557.GA2518@codeblueprint.co.uk> <20151208141946.GD27180@pd.tnic>
+ <CAGXu5jKF3fVc5rsU=+jRcoBGB+ZkeHjF6mmSeJN0SoP-MpFGow@mail.gmail.com> <19122B57-8052-4A92-801E-03CC84E66F06@zytor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <19122B57-8052-4A92-801E-03CC84E66F06-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Kosuke Tatsukawa <tatsu-zZGIbrA41Td8UrSeD/g0lQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Alan Ott <alan@softiron.co.uk>
+On Tue, Dec 8, 2015 at 12:39 PM, H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org> wrote:
+> On December 8, 2015 12:30:06 PM PST, Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org> wrote:
+>>On Tue, Dec 8, 2015 at 6:19 AM, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org> wrote:
+>>> On Tue, Dec 08, 2015 at 12:25:57PM +0000, Matt Fleming wrote:
+>>>> On Mon, 07 Dec, at 11:10:43PM, Kosuke Tatsukawa wrote:
+>>>> >
+>>>> > Thank you pointing that out.
+>>>> >
+>>>> > linux-4.4-rc3 booted without a problem on a real server even with
+>>XD
+>>>> > turned off by the firmware.  I didn't notice this before because I
+>>was
+>>>
+>>> The aforementioned patch reenables NX.
+>>>
+>>>> Borislav, what do you think about stripping PAGE_NX from
+>>'page_flags'
+>>>> in kernel_map_pages_in_pgd() if NX isn't supported, rather than
+>>>> returning EINVAL? At least that way EFI runtime services would still
+>>>> work.
+>>>
+>>> I guess we can - I mean, I don't see what can go wrong more when
+>>> allowing the kernel to execute even NX UEFI regions. Maybe easier
+>>> generation of "gadgets" in the ROP sense ...
+>>>
+>>> On a related node, I'm very sceptical of the existence of this
+>>"noexec"
+>>> chicken bit, if you ask me. It is a really bad idea, security-wise,
+>>to
+>>> disable NX. Is there even a valid use case to disable NX?
+>>>
+>>> Because if not, I'd vote for removing that chicken bit or at least
+>>> taining the kernel with
+>>>
+>>>         add_taint(TAINT_USER_MORON, ... );
+>>
+>>If we add this for not-nx, I would like to add it for not-rodata too.
+>>
+>>> Kees, has this NX disabling practice come up in the past, per
+>>chance... ?
+>>
+>>I've never seen anyone actually use it. I was asked to include it out
+>>of fear of some kind of rogue imagined CPU configuration that mixed NX
+>>and non-NX capable CPUs in a single machine where the forced NX
+>>re-enablement code would cause problems. As you might imagine, I'm not
+>>aware of this case ever being an issue. ;)
+>>
+>>-Kees
+>
+> Actually I think of it much more as a debug option - being able to mimic NX-unaware hardware and to track down problems in the field.
 
-Update documented paths for arm64 files to match current tree.
+Does that really work?  We don't respect noexec when setting up EFER.
 
-Signed-off-by: Alan Ott <alan@softiron.co.uk>
-Cc: Roy Franz <roy.franz@linaro.org>
-Cc: Jonathan Corbet <corbet@lwn.net>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- Documentation/efi-stub.txt | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+in any case, we should get plenty of coverage.  Non-PAE kernels are
+effectively running on non NX-supporting hardware no matter what.
 
-diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-index 7747024d3bb7..e15746988261 100644
---- a/Documentation/efi-stub.txt
-+++ b/Documentation/efi-stub.txt
-@@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
- respectively. For ARM the EFI stub is implemented in
- arch/arm/boot/compressed/efi-header.S and
- arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
--between architectures is in drivers/firmware/efi/efi-stub-helper.c.
-+between architectures is in drivers/firmware/efi/libstub.
- 
- For arm64, there is no compressed kernel support, so the Image itself
- masquerades as a PE/COFF image and the EFI stub is linked into the
- kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
--and arch/arm64/kernel/efi-stub.c.
-+and drivers/firmware/efi/libstub/arm64-stub.c.
- 
- By using the EFI boot stub it's possible to boot a Linux kernel
- without the use of a conventional EFI boot loader, such as grub or
--- 
-2.6.2
+--Andy
