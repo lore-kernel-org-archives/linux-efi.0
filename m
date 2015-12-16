@@ -1,56 +1,60 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/4] doc: efi-stub.txt: Fix arm64 paths
-Date: Tue, 15 Dec 2015 08:32:30 +0100
-Message-ID: <CAKv+Gu8UYrpUJ7wiRq8+R_BQ3ZpTXpSpFJ37emG7OcseWKVrEQ@mail.gmail.com>
-References: <1450117613-15438-1-git-send-email-matt@codeblueprint.co.uk>
-	<1450117613-15438-3-git-send-email-matt@codeblueprint.co.uk>
+From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v9 1/1] efi: a misc char interface for user to update
+ efi firmware
+Date: Wed, 16 Dec 2015 11:09:50 +0000
+Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A890F50@PGSMSX102.gar.corp.intel.com>
+References: <F54AEECA5E2B9541821D670476DAE19C4A879BFE@PGSMSX102.gar.corp.intel.com>
+ <20151103195934.GC3620@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1450117613-15438-3-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20151103195934.GC3620-fF5Pk5pvG8Y@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Alan Ott <alan-TH0P2DBAz1q9FHfhHBbuYA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Anvin, H Peter" <h.peter.anvin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, 'Matt Fleming' <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 14 December 2015 at 19:26, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> From: Alan Ott <alan-TH0P2DBAz1q9FHfhHBbuYA@public.gmane.org>
->
-> Update documented paths for arm64 files to match current tree.
->
-> Signed-off-by: Alan Ott <alan-TH0P2DBAz1q9FHfhHBbuYA@public.gmane.org>
-> Cc: Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Jonathan Corbet <corbet-T1hC0tSOHrs@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-
-Acked-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-
-> ---
->  Documentation/efi-stub.txt | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/Documentation/efi-stub.txt b/Documentation/efi-stub.txt
-> index 7747024d3bb7..e15746988261 100644
-> --- a/Documentation/efi-stub.txt
-> +++ b/Documentation/efi-stub.txt
-> @@ -10,12 +10,12 @@ arch/x86/boot/header.S and arch/x86/boot/compressed/eboot.c,
->  respectively. For ARM the EFI stub is implemented in
->  arch/arm/boot/compressed/efi-header.S and
->  arch/arm/boot/compressed/efi-stub.c. EFI stub code that is shared
-> -between architectures is in drivers/firmware/efi/efi-stub-helper.c.
-> +between architectures is in drivers/firmware/efi/libstub.
->
->  For arm64, there is no compressed kernel support, so the Image itself
->  masquerades as a PE/COFF image and the EFI stub is linked into the
->  kernel. The arm64 EFI stub lives in arch/arm64/kernel/efi-entry.S
-> -and arch/arm64/kernel/efi-stub.c.
-> +and drivers/firmware/efi/libstub/arm64-stub.c.
->
->  By using the EFI boot stub it's possible to boot a Linux kernel
->  without the use of a conventional EFI boot loader, such as grub or
-> --
-> 2.6.2
->
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
+aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgMDQsIDIwMTUg
+NDowMCBBTQ0KPiANCj4gT24gTW9uLCBOb3YgMDIsIDIwMTUgYXQgMDY6NDc6MjlBTSArMDAwMCwg
+S3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBCeSBsb29raW5nIGF0IHlvdXIgZG1lc2cgbG9n
+LCB0aGUgYWJvdmUgcHJpbnQgb3V0IG1lc3NhZ2Ugc2VlbSB0aGF0DQo+ID4gc29tZW9uZSBoYXMg
+Y2FsbGVkIHRoZSBmbHVzaCgpIGFmdGVyIHRoZSB3cml0ZSgyKS4gSW4gbXkgZW52aXJvbm1lbnQs
+DQo+IGZsdXNoKCkNCj4gPiBvbmx5IGJlaW5nIGNhbGxlZCBpbiAyIHBsYWNlcyB3aGljaCBhcmUg
+YmVmb3JlIHdyaXRlKDIpIGFuZCBkdXJpbmcgY2xvc2UoMikuDQo+ID4gVGhlIGRtZXNnIGxvZyBz
+ZWVtcyB0aGF0IHlvdXIgZW52aXJvbm1lbnQgaXMgcnVubmluZyB3cml0ZSgyKSBhbmQgZmx1c2go
+KQ0KPiBpbg0KPiA+IGRpZmZlcmVudCB0aHJlYWRzIGFuZCBhcmUgcGFyYWxsZWwuIENvdWxkIHlv
+dSBoZWxwIG1lIHRvIGRvdWJsZSBjb25maXJtIHRoaXMNCj4gYW5kIGl0DQo+ID4gd291bGQgYmUg
+Z29vZCBpZiB5b3UgY291bGQgdG9sZCBtZSB3aGVuIHRoZSBmbHVzaCgpIGlzIGV4YWN0bHkgYmVp
+bmcgY2FsbGVkDQo+IGluDQo+ID4geW91ciBlbnZpcm9ubWVudC4gVGhlIGluZm8gcmVhbGx5IGhl
+bHAgbWUgb24gZGVidWdnaW5nLg0KPiANCj4gSSBkb24ndCBrbm93IHdoYXQgeW91IG1lYW46IEkg
+c2ltcGx5IGRvDQo+IA0KPiBjYXQgL2Jpbi9scyA+IC9kZXYvZWZpX2NhcHN1bGVfbG9hZGVyDQo+
+IA0KPiBhcyByb290IGluIGFuIFNNUCBrdm0gZ3Vlc3QuIEFuZCBpdCBleHBsb2Rlcy4gTm90aGlu
+ZyBzcGVjaWFsLCBqdXN0IHRoaXMNCj4gb25lIGNvbW1hbmQuDQo+IA0KPiBJIGd1ZXNzIHlvdSBj
+b3VsZCB0cnkgdG8gcmVwcm9kdWNlIGl0LCBoZXJlJ3MgaG93IEkgc3RhcnQgaXQ6DQo+IA0KPiBx
+ZW11LXN5c3RlbS14ODZfNjQNCj4gLWVuYWJsZS1rdm0NCj4gLWdkYiB0Y3A6OjEyMzQNCj4gLWNw
+dSBPcHRlcm9uX0c1DQo+IC1tIDIwNDgNCj4gLWhkYSAvaG9tZS9ib3Jpcy9rdm0vZGViaWFuL3Np
+ZC14ODZfNjQuaW1nDQo+IC1oZGIgL2hvbWUvYm9yaXMva3ZtL3N3YXAuaW1nDQo+IC1ib290IG1l
+bnU9b2ZmLG9yZGVyPWMNCj4gLWxvY2FsdGltZQ0KPiAtbmV0IG5pYyxtb2RlbD1ydGw4MTM5DQo+
+IC1uZXQgdXNlcixob3N0ZndkPXRjcDo6MTIzNS06MjINCj4gLXVzYmRldmljZSB0YWJsZXQNCj4g
+LWtlcm5lbCAvaG9tZS9ib3Jpcy9rZXJuZWwvbGludXgtMi42L2FyY2gveDg2L2Jvb3QvYnpJbWFn
+ZQ0KPiAtYXBwZW5kICJyb290PS9kZXYvc2RhMSByZXN1bWU9L2Rldi9zZGIxIGRlYnVnIGlnbm9y
+ZV9sb2dsZXZlbA0KPiBsb2dfYnVmX2xlbj0xNk0gZWFybHlwcmludGs9dHR5UzAsMTE1MjAwIGNv
+bnNvbGU9dHR5UzAsMTE1MjAwDQo+IGNvbnNvbGU9dHR5MCINCj4gLW1vbml0b3IgcHR5DQo+IC12
+aXJ0ZnMgbG9jYWwscGF0aD0vdG1wLG1vdW50X3RhZz10bXAsc2VjdXJpdHlfbW9kZWw9bm9uZQ0K
+PiAtc2VyaWFsIGZpbGU6L2hvbWUvYm9yaXMva3ZtL3Rlc3QteDg2XzY0LTEyMzUubG9nDQo+IC1z
+bmFwc2hvdA0KPiAtc21wIDgNCj4gDQo+IEhUSC4NCj4gDQo+IC0tDQo+IFJlZ2FyZHMvR3J1c3Ms
+DQo+ICAgICBCb3Jpcy4NCg0KSGkgQm9yaXNsYXYsDQoNCkZpbmFsbHkgYWJsZSB0byBmcmVlIHVw
+IDI1R0Igc3BhY2UgdG8gc2V0dXAgYSBRRU1VIFZNIHdpdGggRGViaWFuIHY4LjIuMA0Kc3lzdGVt
+IGFuZCBsb29rIGludG8gdGhpcyBpc3N1ZS4gTG9jYXRlZCB0aGUgTlVMTCBwb2ludGVyIGhhcHBl
+bmVkIGF0IGNvZGUgbGluZToNCg0Kc3RhdHVzID0gZWZpLnF1ZXJ5X2NhcHN1bGVfY2FwcygmY2Fw
+c3VsZSwgMSwgJm1heF9zaXplLCByZXNldCk7DQoNCndoaWNoIGlzIGluc2lkZSBmdW5jdGlvbiBl
+ZmlfY2Fwc3VsZV9zdXBwb3J0ZWQoKS4gVGhpcyBmdW5jdGlvbiBjYWxsIGlzIGluaXRpYWxpemVk
+IGJ5DQpFRkkgRmlybXdhcmUgcnVuLXRpbWUgc2VydmljZSB0YWJsZS4gU28sIEkgYmVsaWV2ZSB0
+aGUgUUVNVSBkbyBub3QgZW11bGF0ZSB0aGUNCkVGSSBGaXJtd2FyZSBydW4tdGltZSBzZXJ2aWNl
+IEFQSSBjYWxscy4gVGhpcyBpcyB3aHkgd2hlbiBjb21lIHRvIHRoaXMgbGluZSBpdCBoaXQNCnRo
+ZSBOVUxMIHBvaW50ZXIgaXNzdWUuDQoNClNvLCBteSBjb25jbHVzaW9uIGlzIHRoYXQgdGhpcyBt
+b2R1bGUgaXMgbm90IGFibGUgdG8gYmUgdGVzdGVkIG9uIFFFTVUgZW52aXJvbm1lbnQuDQoNClRo
+YW5rcyAmIFJlZ2FyZHMsDQpXaWxzb24NCg0K
