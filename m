@@ -1,60 +1,41 @@
-From: "Kweh, Hock Leong" <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH v9 1/1] efi: a misc char interface for user to update
- efi firmware
-Date: Wed, 16 Dec 2015 11:09:50 +0000
-Message-ID: <F54AEECA5E2B9541821D670476DAE19C4A890F50@PGSMSX102.gar.corp.intel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v9 1/1] efi: a misc char interface for user to update efi
+ firmware
+Date: Wed, 16 Dec 2015 12:26:10 +0100
+Message-ID: <20151216112610.GC29775@pd.tnic>
 References: <F54AEECA5E2B9541821D670476DAE19C4A879BFE@PGSMSX102.gar.corp.intel.com>
  <20151103195934.GC3620@pd.tnic>
+ <F54AEECA5E2B9541821D670476DAE19C4A890F50@PGSMSX102.gar.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20151103195934.GC3620-fF5Pk5pvG8Y@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-HNK1S37rvNbeXh+fF434Mdi2O/JbrIOy@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, "Ong, Boon Leong" <boon.leong.ong-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Sam Protsenko <semen.protsenko-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Roy Franz <roy.franz-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Linux FS Devel <linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Anvin, H Peter" <h.peter.anvin-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, 'Matt Fleming' <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <F54AEECA5E2B9541821D670476DAE19C4A890F50@PGSMSX102.gar.corp.intel.com>
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Cc: Matt Fleming <matt@console-pimps.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Ong, Boon Leong" <boon.leong.ong@intel.com>, LKML <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Andy Lutomirski <luto@amacapital.net>, Roy Franz <roy.franz@linaro.org>, James Bottomley <James.Bottomley@hansenpartnership.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, "Anvin, H Peter" <h.peter.anvin@intel.com>, 'Matt Fleming' <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBCb3Jpc2xhdiBQZXRrb3YgW21h
-aWx0bzpicEBhbGllbjguZGVdDQo+IFNlbnQ6IFdlZG5lc2RheSwgTm92ZW1iZXIgMDQsIDIwMTUg
-NDowMCBBTQ0KPiANCj4gT24gTW9uLCBOb3YgMDIsIDIwMTUgYXQgMDY6NDc6MjlBTSArMDAwMCwg
-S3dlaCwgSG9jayBMZW9uZyB3cm90ZToNCj4gPiBCeSBsb29raW5nIGF0IHlvdXIgZG1lc2cgbG9n
-LCB0aGUgYWJvdmUgcHJpbnQgb3V0IG1lc3NhZ2Ugc2VlbSB0aGF0DQo+ID4gc29tZW9uZSBoYXMg
-Y2FsbGVkIHRoZSBmbHVzaCgpIGFmdGVyIHRoZSB3cml0ZSgyKS4gSW4gbXkgZW52aXJvbm1lbnQs
-DQo+IGZsdXNoKCkNCj4gPiBvbmx5IGJlaW5nIGNhbGxlZCBpbiAyIHBsYWNlcyB3aGljaCBhcmUg
-YmVmb3JlIHdyaXRlKDIpIGFuZCBkdXJpbmcgY2xvc2UoMikuDQo+ID4gVGhlIGRtZXNnIGxvZyBz
-ZWVtcyB0aGF0IHlvdXIgZW52aXJvbm1lbnQgaXMgcnVubmluZyB3cml0ZSgyKSBhbmQgZmx1c2go
-KQ0KPiBpbg0KPiA+IGRpZmZlcmVudCB0aHJlYWRzIGFuZCBhcmUgcGFyYWxsZWwuIENvdWxkIHlv
-dSBoZWxwIG1lIHRvIGRvdWJsZSBjb25maXJtIHRoaXMNCj4gYW5kIGl0DQo+ID4gd291bGQgYmUg
-Z29vZCBpZiB5b3UgY291bGQgdG9sZCBtZSB3aGVuIHRoZSBmbHVzaCgpIGlzIGV4YWN0bHkgYmVp
-bmcgY2FsbGVkDQo+IGluDQo+ID4geW91ciBlbnZpcm9ubWVudC4gVGhlIGluZm8gcmVhbGx5IGhl
-bHAgbWUgb24gZGVidWdnaW5nLg0KPiANCj4gSSBkb24ndCBrbm93IHdoYXQgeW91IG1lYW46IEkg
-c2ltcGx5IGRvDQo+IA0KPiBjYXQgL2Jpbi9scyA+IC9kZXYvZWZpX2NhcHN1bGVfbG9hZGVyDQo+
-IA0KPiBhcyByb290IGluIGFuIFNNUCBrdm0gZ3Vlc3QuIEFuZCBpdCBleHBsb2Rlcy4gTm90aGlu
-ZyBzcGVjaWFsLCBqdXN0IHRoaXMNCj4gb25lIGNvbW1hbmQuDQo+IA0KPiBJIGd1ZXNzIHlvdSBj
-b3VsZCB0cnkgdG8gcmVwcm9kdWNlIGl0LCBoZXJlJ3MgaG93IEkgc3RhcnQgaXQ6DQo+IA0KPiBx
-ZW11LXN5c3RlbS14ODZfNjQNCj4gLWVuYWJsZS1rdm0NCj4gLWdkYiB0Y3A6OjEyMzQNCj4gLWNw
-dSBPcHRlcm9uX0c1DQo+IC1tIDIwNDgNCj4gLWhkYSAvaG9tZS9ib3Jpcy9rdm0vZGViaWFuL3Np
-ZC14ODZfNjQuaW1nDQo+IC1oZGIgL2hvbWUvYm9yaXMva3ZtL3N3YXAuaW1nDQo+IC1ib290IG1l
-bnU9b2ZmLG9yZGVyPWMNCj4gLWxvY2FsdGltZQ0KPiAtbmV0IG5pYyxtb2RlbD1ydGw4MTM5DQo+
-IC1uZXQgdXNlcixob3N0ZndkPXRjcDo6MTIzNS06MjINCj4gLXVzYmRldmljZSB0YWJsZXQNCj4g
-LWtlcm5lbCAvaG9tZS9ib3Jpcy9rZXJuZWwvbGludXgtMi42L2FyY2gveDg2L2Jvb3QvYnpJbWFn
-ZQ0KPiAtYXBwZW5kICJyb290PS9kZXYvc2RhMSByZXN1bWU9L2Rldi9zZGIxIGRlYnVnIGlnbm9y
-ZV9sb2dsZXZlbA0KPiBsb2dfYnVmX2xlbj0xNk0gZWFybHlwcmludGs9dHR5UzAsMTE1MjAwIGNv
-bnNvbGU9dHR5UzAsMTE1MjAwDQo+IGNvbnNvbGU9dHR5MCINCj4gLW1vbml0b3IgcHR5DQo+IC12
-aXJ0ZnMgbG9jYWwscGF0aD0vdG1wLG1vdW50X3RhZz10bXAsc2VjdXJpdHlfbW9kZWw9bm9uZQ0K
-PiAtc2VyaWFsIGZpbGU6L2hvbWUvYm9yaXMva3ZtL3Rlc3QteDg2XzY0LTEyMzUubG9nDQo+IC1z
-bmFwc2hvdA0KPiAtc21wIDgNCj4gDQo+IEhUSC4NCj4gDQo+IC0tDQo+IFJlZ2FyZHMvR3J1c3Ms
-DQo+ICAgICBCb3Jpcy4NCg0KSGkgQm9yaXNsYXYsDQoNCkZpbmFsbHkgYWJsZSB0byBmcmVlIHVw
-IDI1R0Igc3BhY2UgdG8gc2V0dXAgYSBRRU1VIFZNIHdpdGggRGViaWFuIHY4LjIuMA0Kc3lzdGVt
-IGFuZCBsb29rIGludG8gdGhpcyBpc3N1ZS4gTG9jYXRlZCB0aGUgTlVMTCBwb2ludGVyIGhhcHBl
-bmVkIGF0IGNvZGUgbGluZToNCg0Kc3RhdHVzID0gZWZpLnF1ZXJ5X2NhcHN1bGVfY2FwcygmY2Fw
-c3VsZSwgMSwgJm1heF9zaXplLCByZXNldCk7DQoNCndoaWNoIGlzIGluc2lkZSBmdW5jdGlvbiBl
-ZmlfY2Fwc3VsZV9zdXBwb3J0ZWQoKS4gVGhpcyBmdW5jdGlvbiBjYWxsIGlzIGluaXRpYWxpemVk
-IGJ5DQpFRkkgRmlybXdhcmUgcnVuLXRpbWUgc2VydmljZSB0YWJsZS4gU28sIEkgYmVsaWV2ZSB0
-aGUgUUVNVSBkbyBub3QgZW11bGF0ZSB0aGUNCkVGSSBGaXJtd2FyZSBydW4tdGltZSBzZXJ2aWNl
-IEFQSSBjYWxscy4gVGhpcyBpcyB3aHkgd2hlbiBjb21lIHRvIHRoaXMgbGluZSBpdCBoaXQNCnRo
-ZSBOVUxMIHBvaW50ZXIgaXNzdWUuDQoNClNvLCBteSBjb25jbHVzaW9uIGlzIHRoYXQgdGhpcyBt
-b2R1bGUgaXMgbm90IGFibGUgdG8gYmUgdGVzdGVkIG9uIFFFTVUgZW52aXJvbm1lbnQuDQoNClRo
-YW5rcyAmIFJlZ2FyZHMsDQpXaWxzb24NCg0K
+On Wed, Dec 16, 2015 at 11:09:50AM +0000, Kweh, Hock Leong wrote:
+> So, my conclusion is that this module is not able to be tested on QEMU
+> environment.
+
+That's not the point.
+
+The module should better handle writing to the device file gracefully
+and not explode. Regardless of whether it is running on an EFI system or
+not.
+
+efi_capsule_loader_init() simply loads the driver on *any* system,
+even a !UEFI one. And when I write some garbage to the device file, it
+explodes.
+
+What it should do instead is check whether it is being loaded on en EFI
+system and whether all it needs to function properly is initialized
+already, like runtime services. If not, it should refuse to load.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+ECO tip #101: Trim your mails when you reply.
