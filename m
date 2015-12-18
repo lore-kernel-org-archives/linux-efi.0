@@ -1,31 +1,52 @@
-From: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
-Subject: (unknown)
-Date: Thu, 17 Dec 2015 19:28:30 -0600
-Message-ID: <1450402114-3606-1-git-send-email-elliott@hpe.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Subject: 
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
+From: Robert Elliott <elliott@hpe.com>
+Subject: [PATCH 1/4] x86/efi: show actual ending addresses in efi_print_memmap
+Date: Thu, 17 Dec 2015 19:28:31 -0600
+Message-ID: <1450402114-3606-2-git-send-email-elliott@hpe.com>
+References: <1450402114-3606-1-git-send-email-elliott@hpe.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1450402114-3606-1-git-send-email-elliott@hpe.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: matt@codeblueprint.co.uk, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com
+Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Elliott <elliott@hpe.com>
 List-Id: linux-efi@vger.kernel.org
 
-Date: Thu, 17 Dec 2015 17:40:55 -0600
-Subject: [PATCH 0/4] x86/efi: support persistent memory in efi_print_memmap
+Adjust efi_print_memmap to print the real end address of each
+range, not 1 byte beyond. This matches other prints like those for
+SRAT and nosave memory.
 
-This series adds support for persistent memory type and NV attribute 
-in the efi_print_memmap function, which is only used if EFI_DEBUG is true
-(which is the case for x86).
+Change the closing ) to ] to match the opening [.
 
-Robert Elliott (4):
-  x86/efi: show actual ending addresses in efi_print_memmap
-  efi: add NV memory attribute
-  efi: add Persistent Memory type name
-  x86/efi: print size and base in binary units in efi_print_memmap
+old:
+    efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c80000000) (16384MB)
 
- arch/x86/platform/efi/efi.c | 29 +++++++++++++++++++++++++----
- drivers/firmware/efi/efi.c  |  8 ++++++--
- include/linux/efi.h         |  1 +
- 3 files changed, 32 insertions(+), 6 deletions(-)
+new:
+    efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff] (16384MB)
 
+Example other address range prints:
+    SRAT: Node 1 PXM 1 [mem 0x480000000-0x87fffffff]
+    PM: Registered nosave memory: [mem 0x880000000-0xc7fffffff]
+
+Signed-off-by: Robert Elliott <elliott@hpe.com>
+---
+ arch/x86/platform/efi/efi.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ad28540..635a955 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -235,10 +235,10 @@ void __init efi_print_memmap(void)
+ 		char buf[64];
+ 
+ 		md = p;
+-		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx) (%lluMB)\n",
++		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
+ 			i, efi_md_typeattr_format(buf, sizeof(buf), md),
+ 			md->phys_addr,
+-			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
++			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
+ 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
+ 	}
+ #endif  /*  EFI_DEBUG  */
 -- 
 2.4.3
