@@ -1,64 +1,323 @@
-From: Robert Elliott <elliott@hpe.com>
-Subject: [PATCH 2/4] efi: add NV memory attribute
-Date: Thu, 17 Dec 2015 19:28:32 -0600
-Message-ID: <1450402114-3606-3-git-send-email-elliott@hpe.com>
-References: <1450402114-3606-1-git-send-email-elliott@hpe.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1450402114-3606-1-git-send-email-elliott@hpe.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: matt@codeblueprint.co.uk, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com
-Cc: x86@kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Elliott <elliott@hpe.com>
+From: sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
+Subject: [PATCH 2/2] efi: implement interruptible runtime services
+Date: Fri, 18 Dec 2015 11:29:51 +0100
+Message-ID: <1450434591-31104-2-git-send-email-sylvain.chouleur@gmail.com>
+References: <1450434591-31104-1-git-send-email-sylvain.chouleur@gmail.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1450434591-31104-1-git-send-email-sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Add the NV memory attribute introduced in UEFI 2.5 and add a column
-for it in the types and attributes string used when printing the UEFI
-memory map.
+From: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-old:
-efi: mem61: [type=14            |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff) (16384MB)
+This patch adds an implementation of EFI runtime services wappers which
+allow interrupts and preemption during execution of BIOS code.
 
-new:
-efi: mem61: [type=14            |   |  |NV|  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff) (16384MB)
+It's needed by Broxton platform which requires the OS to do the write
+of the non volatile variables. To do that, the OS will receive an
+interrupt coming from the firmware to notify that it must write the
+data.
 
-Signed-off-by: Robert Elliott <elliott@hpe.com>
+BIOS code must be executed using a specific PGD. This is currently
+done by efi_call() which force value of CR3 before calling BIOS and
+restore previous value after.
+
+We use a dedicated kthread which will execute all interruptible runtime
+services. This efi_kthread is special because it has it's own mm_struct
+whereas kthread should not have one. This mm_struct contains the EFI PGD
+so the scheduler will load it before running any BIOS code.
+
+Obviously, an interruptible runtime service must never be called from an
+interrupt context. EFI pstore is the only use case here, that's why we
+require it to be disabled when activating interruptible runtime services.
+
+Signed-off-by: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- drivers/firmware/efi/efi.c | 5 ++++-
- include/linux/efi.h        | 1 +
- 2 files changed, 5 insertions(+), 1 deletion(-)
+ arch/x86/Kconfig                          |  14 +++
+ arch/x86/include/asm/efi.h                |   1 +
+ arch/x86/platform/efi/Makefile            |   1 +
+ arch/x86/platform/efi/efi_32.c            |   5 +
+ arch/x86/platform/efi/efi_64.c            |   5 +
+ arch/x86/platform/efi/efi_interruptible.c | 191 ++++++++++++++++++++++++++++++
+ 6 files changed, 217 insertions(+)
+ create mode 100644 arch/x86/platform/efi/efi_interruptible.c
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 027ca21..4dd5464 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -611,13 +611,16 @@ char * __init efi_md_typeattr_format(char *buf, size_t size,
- 	if (attr & ~(EFI_MEMORY_UC | EFI_MEMORY_WC | EFI_MEMORY_WT |
- 		     EFI_MEMORY_WB | EFI_MEMORY_UCE | EFI_MEMORY_RO |
- 		     EFI_MEMORY_WP | EFI_MEMORY_RP | EFI_MEMORY_XP |
-+		     EFI_MEMORY_NV |
- 		     EFI_MEMORY_RUNTIME | EFI_MEMORY_MORE_RELIABLE))
- 		snprintf(pos, size, "|attr=0x%016llx]",
- 			 (unsigned long long)attr);
- 	else
--		snprintf(pos, size, "|%3s|%2s|%2s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
-+		snprintf(pos, size,
-+			 "|%3s|%2s|%2s|%2s|%2s|%2s|%2s|%3s|%2s|%2s|%2s|%2s]",
- 			 attr & EFI_MEMORY_RUNTIME ? "RUN" : "",
- 			 attr & EFI_MEMORY_MORE_RELIABLE ? "MR" : "",
-+			 attr & EFI_MEMORY_NV      ? "NV"  : "",
- 			 attr & EFI_MEMORY_XP      ? "XP"  : "",
- 			 attr & EFI_MEMORY_RP      ? "RP"  : "",
- 			 attr & EFI_MEMORY_WP      ? "WP"  : "",
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 569b5a8..9ce9e9e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -97,6 +97,7 @@ typedef	struct {
- #define EFI_MEMORY_WP		((u64)0x0000000000001000ULL)	/* write-protect */
- #define EFI_MEMORY_RP		((u64)0x0000000000002000ULL)	/* read-protect */
- #define EFI_MEMORY_XP		((u64)0x0000000000004000ULL)	/* execute-protect */
-+#define EFI_MEMORY_NV		((u64)0x0000000000008000ULL)	/* non-volatile */
- #define EFI_MEMORY_MORE_RELIABLE \
- 				((u64)0x0000000000010000ULL)	/* higher reliability */
- #define EFI_MEMORY_RO		((u64)0x0000000000020000ULL)	/* read-only */
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index db3622f22b61..3ddd5a9cab30 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1720,6 +1720,20 @@ config EFI_MIXED
+ 
+ 	   If unsure, say N.
+ 
++if X86_64
++config EFI_INTERRUPTIBLE
++	bool "Interruptible Efi Runtime Services"
++	depends on EFI && !EFI_VARS_PSTORE
++	default n
++	help
++          This is an interruptible implementation of efi runtime
++	  services wrappers. If you say Y, BIOS code could be
++	  interrupted and preempted as a standard process. Enable this
++	  only if you are sure that your BIOS will support
++	  interruptible efi calls
++	  In doubt, say "N".
++endif
++
+ config SECCOMP
+ 	def_bool y
+ 	prompt "Enable seccomp to safely compute untrusted bytecode"
+diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+index 0010c78c4998..5e9620b3688b 100644
+--- a/arch/x86/include/asm/efi.h
++++ b/arch/x86/include/asm/efi.h
+@@ -111,6 +111,7 @@ extern void __init efi_memory_uc(u64 addr, unsigned long size);
+ extern void __init efi_map_region(efi_memory_desc_t *md);
+ extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
+ extern void efi_sync_low_kernel_mappings(void);
++extern pgd_t *efi_get_pgd(void);
+ extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+ extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
+ extern void __init old_map_region(efi_memory_desc_t *md);
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index 2846aaab5103..dcc894d1e603 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -2,3 +2,4 @@ obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
+ obj-$(CONFIG_ACPI_BGRT) += efi-bgrt.o
+ obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
+ obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
++obj-$(CONFIG_EFI_INTERRUPTIBLE)		+= efi_interruptible.o
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index ed5b67338294..02a3c616c59e 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -56,6 +56,11 @@ void __init efi_map_region(efi_memory_desc_t *md)
+ void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
+ void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
+ 
++pgd_t *efi_get_pgd(void)
++{
++	return initial_page_table;
++}
++
+ pgd_t * __init efi_call_phys_prolog(void)
+ {
+ 	struct desc_ptr gdt_descr;
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index d347e854a5e4..67cffb69d405 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -143,6 +143,11 @@ void efi_sync_low_kernel_mappings(void)
+ 		sizeof(pgd_t) * num_pgds);
+ }
+ 
++pgd_t *efi_get_pgd(void)
++{
++	return __va(efi_scratch.efi_pgt);
++}
++
+ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ {
+ 	unsigned long text;
+diff --git a/arch/x86/platform/efi/efi_interruptible.c b/arch/x86/platform/efi/efi_interruptible.c
+new file mode 100644
+index 000000000000..c3cf72cd2ed6
+--- /dev/null
++++ b/arch/x86/platform/efi/efi_interruptible.c
+@@ -0,0 +1,191 @@
++/*
++ * Copyright (c) 2015 Intel Corporation
++ * Author: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
++ *
++ * Distributed under the terms of the GNU GPL, version 2
++ */
++
++#include <linux/module.h>
++#include <linux/kthread.h>
++#include <linux/efi.h>
++#include <asm/efi.h>
++
++static DEFINE_KTHREAD_WORKER(efi_kworker);
++
++#define efi_call_interruptible(f, ...)					\
++({									\
++	efi_status_t __s;						\
++	efi_sync_low_kernel_mappings();					\
++	__kernel_fpu_begin();						\
++	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
++	__kernel_fpu_end();						\
++	__s;								\
++})
++
++struct efi_work {
++	struct kthread_work work;
++	efi_status_t status;
++	unsigned long *name_size;
++	efi_char16_t *name;
++	efi_guid_t *vendor;
++	u32 *attr;
++	unsigned long *data_size;
++	void *data;
++};
++
++static void do_get_next_variable_interruptible(struct kthread_work *work)
++{
++	struct efi_work *ew = container_of(work, struct efi_work, work);
++
++	ew->status = efi_call_interruptible(get_next_variable, ew->name_size,
++					    ew->name, ew->vendor);
++}
++
++static void do_set_variable_interruptible(struct kthread_work *work)
++{
++	struct efi_work *ew = container_of(work, struct efi_work, work);
++
++	ew->status = efi_call_interruptible(set_variable, ew->name, ew->vendor,
++					    *ew->attr, *ew->data_size,
++					    ew->data);
++}
++
++static void do_get_variable_interruptible(struct kthread_work *work)
++{
++	struct efi_work *ew = container_of(work, struct efi_work, work);
++
++	ew->status = efi_call_interruptible(get_variable, ew->name, ew->vendor,
++					    ew->attr, ew->data_size, ew->data);
++}
++
++static efi_status_t execute_service(kthread_work_func_t service,
++				    unsigned long *name_size,
++				    efi_char16_t *name, efi_guid_t *vendor,
++				    u32 *attr, unsigned long *data_size,
++				    void *data)
++{
++	struct efi_work work = {
++		.name_size = name_size,
++		.name = name,
++		.vendor = vendor,
++		.attr = attr,
++		.data_size = data_size,
++		.data = data,
++	};
++
++	init_kthread_work(&work.work, service);
++	queue_kthread_work(&efi_kworker, &work.work);
++
++	flush_kthread_work(&work.work);
++	return work.status;
++}
++
++static efi_status_t get_next_variable_interruptible(unsigned long *name_size,
++					       efi_char16_t *name,
++					       efi_guid_t *vendor)
++{
++	return execute_service(do_get_next_variable_interruptible,
++			       name_size, name, vendor, NULL, NULL, NULL);
++}
++
++static efi_status_t set_variable_interruptible(efi_char16_t *name,
++					  efi_guid_t *vendor,
++					  u32 attr,
++					  unsigned long data_size,
++					  void *data)
++{
++	return execute_service(do_set_variable_interruptible,
++			       NULL, name, vendor, &attr, &data_size, data);
++}
++
++static efi_status_t
++non_blocking_not_allowed(__attribute__((unused)) efi_char16_t *name,
++			 __attribute__((unused)) efi_guid_t *vendor,
++			 __attribute__((unused)) u32 attr,
++			 __attribute__((unused)) unsigned long data_size,
++			 __attribute__((unused)) void *data)
++{
++	pr_err("efi_interruptible: non bloking operation is not allowed\n");
++	return EFI_UNSUPPORTED;
++}
++
++static efi_status_t get_variable_interruptible(efi_char16_t *name,
++					  efi_guid_t *vendor,
++					  u32 *attr,
++					  unsigned long *data_size,
++					  void *data)
++{
++	return execute_service(do_get_variable_interruptible,
++			       NULL, name, vendor, attr, data_size, data);
++}
++
++static struct efivars interruptible_efivars;
++
++static int efi_interruptible_panic_notifier_call(
++	struct notifier_block *notifier,
++	unsigned long what, void *data)
++{
++	static struct efivars generic_efivars;
++	static struct efivar_operations generic_ops;
++
++	generic_ops.get_variable = efi.get_variable;
++	generic_ops.set_variable = efi.set_variable;
++	generic_ops.get_next_variable = efi.get_next_variable;
++	generic_ops.query_variable_store = efi_query_variable_store;
++
++	efivars_register(&generic_efivars, &generic_ops, efivars_kobject());
++
++	return NOTIFY_DONE;
++}
++
++static struct notifier_block panic_nb = {
++	.notifier_call = efi_interruptible_panic_notifier_call,
++	.priority = 100,
++};
++
++static struct task_struct *efi_kworker_task;
++static struct efivar_operations interruptible_ops;
++static __init int efi_interruptible_init(void)
++{
++	int ret;
++
++	efi_kworker_task = kthread_create(kthread_worker_fn, &efi_kworker,
++					  "efi_kthread");
++	if (IS_ERR(efi_kworker_task)) {
++		pr_err("efi_interruptible: Failed to create kthread\n");
++		ret = PTR_ERR(efi_kworker_task);
++		efi_kworker_task = NULL;
++		return ret;
++	}
++
++	efi_kworker_task->mm = mm_alloc();
++	efi_kworker_task->active_mm = efi_kworker_task->mm;
++	efi_kworker_task->mm->pgd = efi_get_pgd();
++	wake_up_process(efi_kworker_task);
++
++	atomic_notifier_chain_register(&panic_notifier_list, &panic_nb);
++
++	interruptible_ops.get_variable = get_variable_interruptible;
++	interruptible_ops.set_variable = set_variable_interruptible;
++	interruptible_ops.set_variable_nonblocking = non_blocking_not_allowed;
++	interruptible_ops.get_next_variable = get_next_variable_interruptible;
++	interruptible_ops.query_variable_store = efi_query_variable_store;
++	return efivars_register(&interruptible_efivars, &interruptible_ops,
++				efivars_kobject());
++}
++
++static void __exit efi_interruptible_exit(void)
++{
++	efivars_unregister(&interruptible_efivars);
++	atomic_notifier_chain_unregister(&panic_notifier_list, &panic_nb);
++	if (efi_kworker_task) {
++		kthread_stop(efi_kworker_task);
++		mmdrop(efi_kworker_task->mm);
++	}
++}
++
++module_init(efi_interruptible_init);
++module_exit(efi_interruptible_exit);
++
++MODULE_AUTHOR("Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>");
++MODULE_LICENSE("GPL");
 -- 
-2.4.3
+2.6.3
