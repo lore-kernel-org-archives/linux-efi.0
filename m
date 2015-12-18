@@ -1,10 +1,8 @@
 From: sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Subject: [PATCH 2/2] efi: implement interruptible runtime services
-Date: Fri, 18 Dec 2015 11:29:51 +0100
-Message-ID: <1450434591-31104-2-git-send-email-sylvain.chouleur@gmail.com>
-References: <1450434591-31104-1-git-send-email-sylvain.chouleur@gmail.com>
+Subject: [PATCH 1/2] efi: Don't use spinlocks for efi vars
+Date: Fri, 18 Dec 2015 11:29:50 +0100
+Message-ID: <1450434591-31104-1-git-send-email-sylvain.chouleur@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1450434591-31104-1-git-send-email-sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
 Cc: sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
@@ -12,312 +10,634 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-This patch adds an implementation of EFI runtime services wappers which
-allow interrupts and preemption during execution of BIOS code.
+All efivars operations are protected by a spinlock which prevents
+interruptions and preemption. This is too restricted, we just need a
+lock preventing concurency.
+The idea is to use a semaphore of count 1 and to have two ways of
+locking, depending on the context:
+ - In interrupt context, we call down_trylock(), if it fails we return
+ an error
+ - In normal context, we call down_interruptible()
 
-It's needed by Broxton platform which requires the OS to do the write
-of the non volatile variables. To do that, the OS will receive an
-interrupt coming from the firmware to notify that it must write the
-data.
+We don't use a mutex here because the mutex_trylock() function must not
+be called from interrupt context, whereas the down_trylock() can.
 
-BIOS code must be executed using a specific PGD. This is currently
-done by efi_call() which force value of CR3 before calling BIOS and
-restore previous value after.
-
-We use a dedicated kthread which will execute all interruptible runtime
-services. This efi_kthread is special because it has it's own mm_struct
-whereas kthread should not have one. This mm_struct contains the EFI PGD
-so the scheduler will load it before running any BIOS code.
-
-Obviously, an interruptible runtime service must never be called from an
-interrupt context. EFI pstore is the only use case here, that's why we
-require it to be disabled when activating interruptible runtime services.
+This patch also remove the efivars lock to use a single lock for the
+whole vars.c file. The goal of this lock is to protect concurrent calls
+to efi variable services, registering and unregistering.
+This allows to register new efivars operations without having
+in-progress call.
 
 Signed-off-by: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/Kconfig                          |  14 +++
- arch/x86/include/asm/efi.h                |   1 +
- arch/x86/platform/efi/Makefile            |   1 +
- arch/x86/platform/efi/efi_32.c            |   5 +
- arch/x86/platform/efi/efi_64.c            |   5 +
- arch/x86/platform/efi/efi_interruptible.c | 191 ++++++++++++++++++++++++++++++
- 6 files changed, 217 insertions(+)
- create mode 100644 arch/x86/platform/efi/efi_interruptible.c
+ drivers/firmware/efi/efi-pstore.c |  34 +++++++---
+ drivers/firmware/efi/efivars.c    |  10 ++-
+ drivers/firmware/efi/vars.c       | 130 +++++++++++++++++++++++++-------------
+ fs/efivarfs/inode.c               |   5 +-
+ fs/efivarfs/super.c               |   8 ++-
+ include/linux/efi.h               |  12 +---
+ 6 files changed, 130 insertions(+), 69 deletions(-)
 
-diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index db3622f22b61..3ddd5a9cab30 100644
---- a/arch/x86/Kconfig
-+++ b/arch/x86/Kconfig
-@@ -1720,6 +1720,20 @@ config EFI_MIXED
- 
- 	   If unsure, say N.
- 
-+if X86_64
-+config EFI_INTERRUPTIBLE
-+	bool "Interruptible Efi Runtime Services"
-+	depends on EFI && !EFI_VARS_PSTORE
-+	default n
-+	help
-+          This is an interruptible implementation of efi runtime
-+	  services wrappers. If you say Y, BIOS code could be
-+	  interrupted and preempted as a standard process. Enable this
-+	  only if you are sure that your BIOS will support
-+	  interruptible efi calls
-+	  In doubt, say "N".
-+endif
-+
- config SECCOMP
- 	def_bool y
- 	prompt "Enable seccomp to safely compute untrusted bytecode"
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 0010c78c4998..5e9620b3688b 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -111,6 +111,7 @@ extern void __init efi_memory_uc(u64 addr, unsigned long size);
- extern void __init efi_map_region(efi_memory_desc_t *md);
- extern void __init efi_map_region_fixed(efi_memory_desc_t *md);
- extern void efi_sync_low_kernel_mappings(void);
-+extern pgd_t *efi_get_pgd(void);
- extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
-diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
-index 2846aaab5103..dcc894d1e603 100644
---- a/arch/x86/platform/efi/Makefile
-+++ b/arch/x86/platform/efi/Makefile
-@@ -2,3 +2,4 @@ obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
- obj-$(CONFIG_ACPI_BGRT) += efi-bgrt.o
- obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
- obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
-+obj-$(CONFIG_EFI_INTERRUPTIBLE)		+= efi_interruptible.o
-diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
-index ed5b67338294..02a3c616c59e 100644
---- a/arch/x86/platform/efi/efi_32.c
-+++ b/arch/x86/platform/efi/efi_32.c
-@@ -56,6 +56,11 @@ void __init efi_map_region(efi_memory_desc_t *md)
- void __init efi_map_region_fixed(efi_memory_desc_t *md) {}
- void __init parse_efi_setup(u64 phys_addr, u32 data_len) {}
- 
-+pgd_t *efi_get_pgd(void)
-+{
-+	return initial_page_table;
-+}
-+
- pgd_t * __init efi_call_phys_prolog(void)
+diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+index eac76a79a880..c604af1243fd 100644
+--- a/drivers/firmware/efi/efi-pstore.c
++++ b/drivers/firmware/efi/efi-pstore.c
+@@ -121,16 +121,19 @@ static void efi_pstore_scan_sysfs_enter(struct efivar_entry *pos,
+  * @entry: deleting entry
+  * @turn_off_scanning: Check if a scanning flag should be turned off
+  */
+-static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
++static inline int __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
+ 						bool turn_off_scanning)
  {
- 	struct desc_ptr gdt_descr;
-diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index d347e854a5e4..67cffb69d405 100644
---- a/arch/x86/platform/efi/efi_64.c
-+++ b/arch/x86/platform/efi/efi_64.c
-@@ -143,6 +143,11 @@ void efi_sync_low_kernel_mappings(void)
- 		sizeof(pgd_t) * num_pgds);
+ 	if (entry->deleting) {
+ 		list_del(&entry->list);
+ 		efivar_entry_iter_end();
+ 		efivar_unregister(entry);
+-		efivar_entry_iter_begin();
++		if (efivar_entry_iter_begin())
++			return -EINTR;
+ 	} else if (turn_off_scanning)
+ 		entry->scanning = false;
++
++	return 0;
  }
  
-+pgd_t *efi_get_pgd(void)
-+{
-+	return __va(efi_scratch.efi_pgt);
-+}
-+
- int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ /**
+@@ -140,13 +143,16 @@ static inline void __efi_pstore_scan_sysfs_exit(struct efivar_entry *entry,
+  * @head: list head
+  * @stop: a flag checking if scanning will stop
+  */
+-static void efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
++static int efi_pstore_scan_sysfs_exit(struct efivar_entry *pos,
+ 				       struct efivar_entry *next,
+ 				       struct list_head *head, bool stop)
  {
- 	unsigned long text;
-diff --git a/arch/x86/platform/efi/efi_interruptible.c b/arch/x86/platform/efi/efi_interruptible.c
-new file mode 100644
-index 000000000000..c3cf72cd2ed6
---- /dev/null
-+++ b/arch/x86/platform/efi/efi_interruptible.c
-@@ -0,0 +1,191 @@
-+/*
-+ * Copyright (c) 2015 Intel Corporation
-+ * Author: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-+ *
-+ * Distributed under the terms of the GNU GPL, version 2
-+ */
-+
-+#include <linux/module.h>
-+#include <linux/kthread.h>
-+#include <linux/efi.h>
-+#include <asm/efi.h>
-+
-+static DEFINE_KTHREAD_WORKER(efi_kworker);
-+
-+#define efi_call_interruptible(f, ...)					\
-+({									\
-+	efi_status_t __s;						\
-+	efi_sync_low_kernel_mappings();					\
-+	__kernel_fpu_begin();						\
-+	__s = efi_call((void *)efi.systab->runtime->f, __VA_ARGS__);	\
-+	__kernel_fpu_end();						\
-+	__s;								\
-+})
-+
-+struct efi_work {
-+	struct kthread_work work;
-+	efi_status_t status;
-+	unsigned long *name_size;
-+	efi_char16_t *name;
-+	efi_guid_t *vendor;
-+	u32 *attr;
-+	unsigned long *data_size;
-+	void *data;
-+};
-+
-+static void do_get_next_variable_interruptible(struct kthread_work *work)
-+{
-+	struct efi_work *ew = container_of(work, struct efi_work, work);
-+
-+	ew->status = efi_call_interruptible(get_next_variable, ew->name_size,
-+					    ew->name, ew->vendor);
-+}
-+
-+static void do_set_variable_interruptible(struct kthread_work *work)
-+{
-+	struct efi_work *ew = container_of(work, struct efi_work, work);
-+
-+	ew->status = efi_call_interruptible(set_variable, ew->name, ew->vendor,
-+					    *ew->attr, *ew->data_size,
-+					    ew->data);
-+}
-+
-+static void do_get_variable_interruptible(struct kthread_work *work)
-+{
-+	struct efi_work *ew = container_of(work, struct efi_work, work);
-+
-+	ew->status = efi_call_interruptible(get_variable, ew->name, ew->vendor,
-+					    ew->attr, ew->data_size, ew->data);
-+}
-+
-+static efi_status_t execute_service(kthread_work_func_t service,
-+				    unsigned long *name_size,
-+				    efi_char16_t *name, efi_guid_t *vendor,
-+				    u32 *attr, unsigned long *data_size,
-+				    void *data)
-+{
-+	struct efi_work work = {
-+		.name_size = name_size,
-+		.name = name,
-+		.vendor = vendor,
-+		.attr = attr,
-+		.data_size = data_size,
-+		.data = data,
-+	};
-+
-+	init_kthread_work(&work.work, service);
-+	queue_kthread_work(&efi_kworker, &work.work);
-+
-+	flush_kthread_work(&work.work);
-+	return work.status;
-+}
-+
-+static efi_status_t get_next_variable_interruptible(unsigned long *name_size,
-+					       efi_char16_t *name,
-+					       efi_guid_t *vendor)
-+{
-+	return execute_service(do_get_next_variable_interruptible,
-+			       name_size, name, vendor, NULL, NULL, NULL);
-+}
-+
-+static efi_status_t set_variable_interruptible(efi_char16_t *name,
-+					  efi_guid_t *vendor,
-+					  u32 attr,
-+					  unsigned long data_size,
-+					  void *data)
-+{
-+	return execute_service(do_set_variable_interruptible,
-+			       NULL, name, vendor, &attr, &data_size, data);
-+}
-+
-+static efi_status_t
-+non_blocking_not_allowed(__attribute__((unused)) efi_char16_t *name,
-+			 __attribute__((unused)) efi_guid_t *vendor,
-+			 __attribute__((unused)) u32 attr,
-+			 __attribute__((unused)) unsigned long data_size,
-+			 __attribute__((unused)) void *data)
-+{
-+	pr_err("efi_interruptible: non bloking operation is not allowed\n");
-+	return EFI_UNSUPPORTED;
-+}
-+
-+static efi_status_t get_variable_interruptible(efi_char16_t *name,
-+					  efi_guid_t *vendor,
-+					  u32 *attr,
-+					  unsigned long *data_size,
-+					  void *data)
-+{
-+	return execute_service(do_get_variable_interruptible,
-+			       NULL, name, vendor, attr, data_size, data);
-+}
-+
-+static struct efivars interruptible_efivars;
-+
-+static int efi_interruptible_panic_notifier_call(
-+	struct notifier_block *notifier,
-+	unsigned long what, void *data)
-+{
-+	static struct efivars generic_efivars;
-+	static struct efivar_operations generic_ops;
-+
-+	generic_ops.get_variable = efi.get_variable;
-+	generic_ops.set_variable = efi.set_variable;
-+	generic_ops.get_next_variable = efi.get_next_variable;
-+	generic_ops.query_variable_store = efi_query_variable_store;
-+
-+	efivars_register(&generic_efivars, &generic_ops, efivars_kobject());
-+
-+	return NOTIFY_DONE;
-+}
-+
-+static struct notifier_block panic_nb = {
-+	.notifier_call = efi_interruptible_panic_notifier_call,
-+	.priority = 100,
-+};
-+
-+static struct task_struct *efi_kworker_task;
-+static struct efivar_operations interruptible_ops;
-+static __init int efi_interruptible_init(void)
-+{
-+	int ret;
-+
-+	efi_kworker_task = kthread_create(kthread_worker_fn, &efi_kworker,
-+					  "efi_kthread");
-+	if (IS_ERR(efi_kworker_task)) {
-+		pr_err("efi_interruptible: Failed to create kthread\n");
-+		ret = PTR_ERR(efi_kworker_task);
-+		efi_kworker_task = NULL;
+-	__efi_pstore_scan_sysfs_exit(pos, true);
++	int ret = __efi_pstore_scan_sysfs_exit(pos, true);
++	if (ret)
 +		return ret;
+ 	if (stop)
+-		__efi_pstore_scan_sysfs_exit(next, &next->list != head);
++		ret = __efi_pstore_scan_sysfs_exit(next, &next->list != head);
++	return ret;
+ }
+ 
+ /**
+@@ -168,13 +174,17 @@ static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
+ 	struct efivar_entry *entry, *n;
+ 	struct list_head *head = &efivar_sysfs_list;
+ 	int size = 0;
++	int ret;
+ 
+ 	if (!*pos) {
+ 		list_for_each_entry_safe(entry, n, head, list) {
+ 			efi_pstore_scan_sysfs_enter(entry, n, head);
+ 
+ 			size = efi_pstore_read_func(entry, data);
+-			efi_pstore_scan_sysfs_exit(entry, n, head, size < 0);
++			ret = efi_pstore_scan_sysfs_exit(entry, n, head,
++							 size < 0);
++			if (ret)
++				return ret;
+ 			if (size)
+ 				break;
+ 		}
+@@ -186,7 +196,9 @@ static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
+ 		efi_pstore_scan_sysfs_enter((*pos), n, head);
+ 
+ 		size = efi_pstore_read_func((*pos), data);
+-		efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
++		ret = efi_pstore_scan_sysfs_exit((*pos), n, head, size < 0);
++		if (ret)
++			return ret;
+ 		if (size)
+ 			break;
+ 	}
+@@ -226,7 +238,10 @@ static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+ 	if (!*data.buf)
+ 		return -ENOMEM;
+ 
+-	efivar_entry_iter_begin();
++	if (efivar_entry_iter_begin()) {
++		kfree(*data.buf);
++		return -EINTR;
 +	}
+ 	size = efi_pstore_sysfs_entry_iter(&data,
+ 					   (struct efivar_entry **)&psi->data);
+ 	efivar_entry_iter_end();
+@@ -341,7 +356,8 @@ static int efi_pstore_erase(enum pstore_type_id type, u64 id, int count,
+ 	edata.time = time;
+ 	edata.name = efi_name;
+ 
+-	efivar_entry_iter_begin();
++	if (efivar_entry_iter_begin())
++		return -EINTR;
+ 	found = __efivar_entry_iter(efi_pstore_erase_func, &efivar_sysfs_list, &edata, &entry);
+ 
+ 	if (found && !entry->scanning) {
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index 756eca8c4cf8..3998373d92ef 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -509,7 +509,8 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
+ 		vendor = del_var->VendorGuid;
+ 	}
+ 
+-	efivar_entry_iter_begin();
++	if (efivar_entry_iter_begin())
++		return -EINTR;
+ 	entry = efivar_entry_find(name, vendor, &efivar_sysfs_list, true);
+ 	if (!entry)
+ 		err = -EINVAL;
+@@ -582,7 +583,8 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var)
+ 		return ret;
+ 
+ 	kobject_uevent(&new_var->kobj, KOBJ_ADD);
+-	efivar_entry_add(new_var, &efivar_sysfs_list);
++	if (efivar_entry_add(new_var, &efivar_sysfs_list))
++		return -EINTR;
+ 
+ 	return 0;
+ }
+@@ -697,7 +699,9 @@ static int efivars_sysfs_callback(efi_char16_t *name, efi_guid_t vendor,
+ 
+ static int efivar_sysfs_destroy(struct efivar_entry *entry, void *data)
+ {
+-	efivar_entry_remove(entry);
++	int err = efivar_entry_remove(entry);
++	if (err)
++		return err;
+ 	efivar_unregister(entry);
+ 	return 0;
+ }
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 70a0fb10517f..8a44351211e5 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -37,6 +37,13 @@
+ /* Private pointer to registered efivars */
+ static struct efivars *__efivars;
+ 
++/*
++ * ->lock protects two things:
++ * 1) efivarfs_list and efivars_sysfs_list
++ * 2) ->ops calls
++ */
++DEFINE_SEMAPHORE(efivars_lock);
 +
-+	efi_kworker_task->mm = mm_alloc();
-+	efi_kworker_task->active_mm = efi_kworker_task->mm;
-+	efi_kworker_task->mm->pgd = efi_get_pgd();
-+	wake_up_process(efi_kworker_task);
-+
-+	atomic_notifier_chain_register(&panic_notifier_list, &panic_nb);
-+
-+	interruptible_ops.get_variable = get_variable_interruptible;
-+	interruptible_ops.set_variable = set_variable_interruptible;
-+	interruptible_ops.set_variable_nonblocking = non_blocking_not_allowed;
-+	interruptible_ops.get_next_variable = get_next_variable_interruptible;
-+	interruptible_ops.query_variable_store = efi_query_variable_store;
-+	return efivars_register(&interruptible_efivars, &interruptible_ops,
-+				efivars_kobject());
-+}
-+
-+static void __exit efi_interruptible_exit(void)
-+{
-+	efivars_unregister(&interruptible_efivars);
-+	atomic_notifier_chain_unregister(&panic_notifier_list, &panic_nb);
-+	if (efi_kworker_task) {
-+		kthread_stop(efi_kworker_task);
-+		mmdrop(efi_kworker_task->mm);
+ static bool efivar_wq_enabled = true;
+ DECLARE_WORK(efivar_work, NULL);
+ EXPORT_SYMBOL_GPL(efivar_work);
+@@ -376,7 +383,10 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 		return -ENOMEM;
+ 	}
+ 
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock)) {
++		err = -EINTR;
++		goto free;
 +	}
-+}
+ 
+ 	/*
+ 	 * Per EFI spec, the maximum storage allocated for both
+@@ -392,7 +402,7 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 		switch (status) {
+ 		case EFI_SUCCESS:
+ 			if (!atomic)
+-				spin_unlock_irq(&__efivars->lock);
++				up(&efivars_lock);
+ 
+ 			variable_name_size = var_name_strnsize(variable_name,
+ 							       variable_name_size);
+@@ -410,7 +420,10 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 				dup_variable_bug(variable_name, &vendor_guid,
+ 						 variable_name_size);
+ 				if (!atomic)
+-					spin_lock_irq(&__efivars->lock);
++					if (down_interruptible(&efivars_lock)) {
++						err = -EINTR;
++						goto free;
++					}
+ 
+ 				status = EFI_NOT_FOUND;
+ 				break;
+@@ -421,7 +434,10 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 				status = EFI_NOT_FOUND;
+ 
+ 			if (!atomic)
+-				spin_lock_irq(&__efivars->lock);
++				if (down_interruptible(&efivars_lock)) {
++					err = -EINTR;
++					goto free;
++				}
+ 
+ 			break;
+ 		case EFI_NOT_FOUND:
+@@ -435,8 +451,8 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 
+ 	} while (status != EFI_NOT_FOUND);
+ 
+-	spin_unlock_irq(&__efivars->lock);
+-
++	up(&efivars_lock);
++free:
+ 	kfree(variable_name);
+ 
+ 	return err;
+@@ -447,24 +463,34 @@ EXPORT_SYMBOL_GPL(efivar_init);
+  * efivar_entry_add - add entry to variable list
+  * @entry: entry to add to list
+  * @head: list head
++ *
++ * Returns 0 on success, or a kernel error code on failure.
+  */
+-void efivar_entry_add(struct efivar_entry *entry, struct list_head *head)
++int efivar_entry_add(struct efivar_entry *entry, struct list_head *head)
+ {
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 	list_add(&entry->list, head);
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
 +
-+module_init(efi_interruptible_init);
-+module_exit(efi_interruptible_exit);
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(efivar_entry_add);
+ 
+ /**
+  * efivar_entry_remove - remove entry from variable list
+  * @entry: entry to remove from list
++ *
++ * Returns 0 on success, or a kernel error code on failure.
+  */
+-void efivar_entry_remove(struct efivar_entry *entry)
++int efivar_entry_remove(struct efivar_entry *entry)
+ {
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 	list_del(&entry->list);
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
 +
-+MODULE_AUTHOR("Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>");
-+MODULE_LICENSE("GPL");
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(efivar_entry_remove);
+ 
+@@ -481,10 +507,10 @@ EXPORT_SYMBOL_GPL(efivar_entry_remove);
+  */
+ static void efivar_entry_list_del_unlock(struct efivar_entry *entry)
+ {
+-	lockdep_assert_held(&__efivars->lock);
++	lockdep_assert_held(&efivars_lock.lock);
+ 
+ 	list_del(&entry->list);
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ }
+ 
+ /**
+@@ -507,7 +533,7 @@ int __efivar_entry_delete(struct efivar_entry *entry)
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	lockdep_assert_held(&__efivars->lock);
++	lockdep_assert_held(&efivars_lock.lock);
+ 
+ 	status = ops->set_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+@@ -533,12 +559,14 @@ int efivar_entry_delete(struct efivar_entry *entry)
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
++
+ 	status = ops->set_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+ 				   0, 0, NULL);
+ 	if (!(status == EFI_SUCCESS || status == EFI_NOT_FOUND)) {
+-		spin_unlock_irq(&__efivars->lock);
++		up(&efivars_lock);
+ 		return efi_status_to_err(status);
+ 	}
+ 
+@@ -576,10 +604,10 @@ int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
+ 	efi_char16_t *name = entry->var.VariableName;
+ 	efi_guid_t vendor = entry->var.VendorGuid;
+ 
+-	spin_lock_irq(&__efivars->lock);
+-
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 	if (head && efivar_entry_find(name, vendor, head, false)) {
+-		spin_unlock_irq(&__efivars->lock);
++		up(&efivars_lock);
+ 		return -EEXIST;
+ 	}
+ 
+@@ -588,7 +616,7 @@ int efivar_entry_set(struct efivar_entry *entry, u32 attributes,
+ 		status = ops->set_variable(name, &vendor,
+ 					   attributes, size, data);
+ 
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ 
+ 	return efi_status_to_err(status);
+ 
+@@ -602,29 +630,28 @@ EXPORT_SYMBOL_GPL(efivar_entry_set);
+  * from crash/panic handlers.
+  *
+  * Crucially, this function will not block if it cannot acquire
+- * __efivars->lock. Instead, it returns -EBUSY.
++ * efivars_lock. Instead, it returns -EBUSY.
+  */
+ static int
+ efivar_entry_set_nonblocking(efi_char16_t *name, efi_guid_t vendor,
+ 			     u32 attributes, unsigned long size, void *data)
+ {
+ 	const struct efivar_operations *ops = __efivars->ops;
+-	unsigned long flags;
+ 	efi_status_t status;
+ 
+-	if (!spin_trylock_irqsave(&__efivars->lock, flags))
++	if (down_trylock(&efivars_lock))
+ 		return -EBUSY;
+ 
+ 	status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
+ 	if (status != EFI_SUCCESS) {
+-		spin_unlock_irqrestore(&__efivars->lock, flags);
++		up(&efivars_lock);
+ 		return -ENOSPC;
+ 	}
+ 
+ 	status = ops->set_variable_nonblocking(name, &vendor, attributes,
+ 					       size, data);
+ 
+-	spin_unlock_irqrestore(&__efivars->lock, flags);
++	up(&efivars_lock);
+ 	return efi_status_to_err(status);
+ }
+ 
+@@ -649,7 +676,6 @@ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
+ 			  bool block, unsigned long size, void *data)
+ {
+ 	const struct efivar_operations *ops = __efivars->ops;
+-	unsigned long flags;
+ 	efi_status_t status;
+ 
+ 	if (!ops->query_variable_store)
+@@ -670,21 +696,22 @@ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
+ 						    size, data);
+ 
+ 	if (!block) {
+-		if (!spin_trylock_irqsave(&__efivars->lock, flags))
++		if (down_trylock(&efivars_lock))
+ 			return -EBUSY;
+ 	} else {
+-		spin_lock_irqsave(&__efivars->lock, flags);
++		if (down_interruptible(&efivars_lock))
++			return -EINTR;
+ 	}
+ 
+ 	status = check_var_size(attributes, size + ucs2_strsize(name, 1024));
+ 	if (status != EFI_SUCCESS) {
+-		spin_unlock_irqrestore(&__efivars->lock, flags);
++		up(&efivars_lock);
+ 		return -ENOSPC;
+ 	}
+ 
+ 	status = ops->set_variable(name, &vendor, attributes, size, data);
+ 
+-	spin_unlock_irqrestore(&__efivars->lock, flags);
++	up(&efivars_lock);
+ 
+ 	return efi_status_to_err(status);
+ }
+@@ -714,7 +741,7 @@ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
+ 	int strsize1, strsize2;
+ 	bool found = false;
+ 
+-	lockdep_assert_held(&__efivars->lock);
++	lockdep_assert_held(&efivars_lock.lock);
+ 
+ 	list_for_each_entry_safe(entry, n, head, list) {
+ 		strsize1 = ucs2_strsize(name, 1024);
+@@ -757,10 +784,11 @@ int efivar_entry_size(struct efivar_entry *entry, unsigned long *size)
+ 
+ 	*size = 0;
+ 
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 	status = ops->get_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid, NULL, size, NULL);
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ 
+ 	if (status != EFI_BUFFER_TOO_SMALL)
+ 		return efi_status_to_err(status);
+@@ -786,7 +814,7 @@ int __efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	lockdep_assert_held(&__efivars->lock);
++	lockdep_assert_held(&efivars_lock.lock);
+ 
+ 	status = ops->get_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+@@ -809,11 +837,12 @@ int efivar_entry_get(struct efivar_entry *entry, u32 *attributes,
+ 	const struct efivar_operations *ops = __efivars->ops;
+ 	efi_status_t status;
+ 
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 	status = ops->get_variable(entry->var.VariableName,
+ 				   &entry->var.VendorGuid,
+ 				   attributes, size, data);
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ 
+ 	return efi_status_to_err(status);
+ }
+@@ -860,7 +889,8 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 	 * set_variable call, and removal of the variable from the efivars
+ 	 * list (in the case of an authenticated delete).
+ 	 */
+-	spin_lock_irq(&__efivars->lock);
++	if (down_interruptible(&efivars_lock))
++		return -EINTR;
+ 
+ 	/*
+ 	 * Ensure that the available space hasn't shrunk below the safe level
+@@ -900,7 +930,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 	if (status == EFI_NOT_FOUND)
+ 		efivar_entry_list_del_unlock(entry);
+ 	else
+-		spin_unlock_irq(&__efivars->lock);
++		up(&efivars_lock);
+ 
+ 	if (status && status != EFI_BUFFER_TOO_SMALL)
+ 		return efi_status_to_err(status);
+@@ -908,7 +938,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 	return 0;
+ 
+ out:
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ 	return err;
+ 
+ }
+@@ -921,9 +951,9 @@ EXPORT_SYMBOL_GPL(efivar_entry_set_get_size);
+  * efivar_entry_iter_end() is called. This function is usually used in
+  * conjunction with __efivar_entry_iter() or efivar_entry_iter().
+  */
+-void efivar_entry_iter_begin(void)
++int efivar_entry_iter_begin(void)
+ {
+-	spin_lock_irq(&__efivars->lock);
++	return down_interruptible(&efivars_lock);
+ }
+ EXPORT_SYMBOL_GPL(efivar_entry_iter_begin);
+ 
+@@ -934,7 +964,7 @@ EXPORT_SYMBOL_GPL(efivar_entry_iter_begin);
+  */
+ void efivar_entry_iter_end(void)
+ {
+-	spin_unlock_irq(&__efivars->lock);
++	up(&efivars_lock);
+ }
+ EXPORT_SYMBOL_GPL(efivar_entry_iter_end);
+ 
+@@ -1010,7 +1040,9 @@ int efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
+ {
+ 	int err = 0;
+ 
+-	efivar_entry_iter_begin();
++	err = efivar_entry_iter_begin();
++	if (err)
++		return err;
+ 	err = __efivar_entry_iter(func, head, data, NULL);
+ 	efivar_entry_iter_end();
+ 
+@@ -1055,12 +1087,16 @@ int efivars_register(struct efivars *efivars,
+ 		     const struct efivar_operations *ops,
+ 		     struct kobject *kobject)
+ {
+-	spin_lock_init(&efivars->lock);
++	if (down_trylock(&efivars_lock))
++		return -EBUSY;
++
+ 	efivars->ops = ops;
+ 	efivars->kobject = kobject;
+ 
+ 	__efivars = efivars;
+ 
++	up(&efivars_lock);
++
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(efivars_register);
+@@ -1076,6 +1112,9 @@ int efivars_unregister(struct efivars *efivars)
+ {
+ 	int rv;
+ 
++	if (down_trylock(&efivars_lock))
++		return -EBUSY;
++
+ 	if (!__efivars) {
+ 		printk(KERN_ERR "efivars not registered\n");
+ 		rv = -EINVAL;
+@@ -1091,6 +1130,7 @@ int efivars_unregister(struct efivars *efivars)
+ 
+ 	rv = 0;
+ out:
++	up(&efivars_lock);
+ 	return rv;
+ }
+ EXPORT_SYMBOL_GPL(efivars_unregister);
+diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+index 3381b9da9ee6..5cea84ef7a44 100644
+--- a/fs/efivarfs/inode.c
++++ b/fs/efivarfs/inode.c
+@@ -132,7 +132,10 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+ 
+ 	inode->i_private = var;
+ 
+-	efivar_entry_add(var, &efivarfs_list);
++	err = efivar_entry_add(var, &efivarfs_list);
++	if (err)
++		goto out;
++
+ 	d_instantiate(dentry, inode);
+ 	dget(dentry);
+ out:
+diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+index 86a2121828c3..45ef421f545f 100644
+--- a/fs/efivarfs/super.c
++++ b/fs/efivarfs/super.c
+@@ -158,7 +158,9 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
+ 	kfree(name);
+ 
+ 	efivar_entry_size(entry, &size);
+-	efivar_entry_add(entry, &efivarfs_list);
++	err = efivar_entry_add(entry, &efivarfs_list);
++	if (err)
++		goto fail_inode;
+ 
+ 	mutex_lock(&inode->i_mutex);
+ 	inode->i_private = entry;
+@@ -179,7 +181,9 @@ fail:
+ 
+ static int efivarfs_destroy(struct efivar_entry *entry, void *data)
+ {
+-	efivar_entry_remove(entry);
++	int err = efivar_entry_remove(entry);
++	if (err)
++		return err;
+ 	kfree(entry);
+ 	return 0;
+ }
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 569b5a866bb1..2e60803fa4ba 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1096,12 +1096,6 @@ struct efivar_operations {
+ };
+ 
+ struct efivars {
+-	/*
+-	 * ->lock protects two things:
+-	 * 1) efivarfs_list and efivars_sysfs_list
+-	 * 2) ->ops calls
+-	 */
+-	spinlock_t lock;
+ 	struct kset *kset;
+ 	struct kobject *kobject;
+ 	const struct efivar_operations *ops;
+@@ -1169,8 +1163,8 @@ int efivar_init(int (*func)(efi_char16_t *, efi_guid_t, unsigned long, void *),
+ 		void *data, bool atomic, bool duplicates,
+ 		struct list_head *head);
+ 
+-void efivar_entry_add(struct efivar_entry *entry, struct list_head *head);
+-void efivar_entry_remove(struct efivar_entry *entry);
++int efivar_entry_add(struct efivar_entry *entry, struct list_head *head);
++int efivar_entry_remove(struct efivar_entry *entry);
+ 
+ int __efivar_entry_delete(struct efivar_entry *entry);
+ int efivar_entry_delete(struct efivar_entry *entry);
+@@ -1187,7 +1181,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ int efivar_entry_set_safe(efi_char16_t *name, efi_guid_t vendor, u32 attributes,
+ 			  bool block, unsigned long size, void *data);
+ 
+-void efivar_entry_iter_begin(void);
++int efivar_entry_iter_begin(void);
+ void efivar_entry_iter_end(void);
+ 
+ int __efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
 -- 
 2.6.3
