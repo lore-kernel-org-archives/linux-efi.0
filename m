@@ -1,71 +1,92 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 4/4] x86/efi: print size and base in binary units in
+From: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>
+Subject: RE: [PATCH 1/4] x86/efi: show actual ending addresses in
  efi_print_memmap
-Date: Mon, 21 Dec 2015 16:16:29 +0000
-Message-ID: <20151221161629.GG4227@codeblueprint.co.uk>
+Date: Mon, 21 Dec 2015 16:44:19 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B40295BEC3C9C@G9W0745.americas.hpqcorp.net>
 References: <1450402114-3606-1-git-send-email-elliott@hpe.com>
- <1450402114-3606-5-git-send-email-elliott@hpe.com>
+ <1450402114-3606-2-git-send-email-elliott@hpe.com>
+ <20151221155038.GD4227@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1450402114-3606-5-git-send-email-elliott-ZPxbGqLxI0U@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
-Cc: tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="Windows-1252"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20151221155038.GD4227@codeblueprint.co.uk>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: "tglx@linutronix.de" <tglx@linutronix.de>, "mingo@redhat.com" <mingo@redhat.com>, "hpa@zytor.com" <hpa@zytor.com>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 17 Dec, at 07:28:34PM, Robert Elliott wrote:
-> Print the base address for each range in decimal alongside the size.
-> Use a "(size @ base)" format similar to the fake_memmap kernel parameter.
+> -----Original Message-----
+> From: Matt Fleming [mailto:matt@codeblueprint.co.uk]
+> Sent: Monday, December 21, 2015 9:51 AM
+> To: Elliott, Robert (Persistent Memory) <elliott@hpe.com>
+> Cc: tglx@linutronix.de; mingo@redhat.com; hpa@zytor.com; x86@kernel.org;
+> linux-efi@vger.kernel.org; linux-kernel@vger.kernel.org
+> Subject: Re: [PATCH 1/4] x86/efi: show actual ending addresses in
+> efi_print_memmap
 > 
-> Print the range and base in the best-fit B, KiB, MiB, etc. units rather
-> than always MiB.  This avoids rounding, which can be misleading.
+> On Thu, 17 Dec, at 07:28:31PM, Robert Elliott wrote:
+> > Adjust efi_print_memmap to print the real end address of each
+> > range, not 1 byte beyond. This matches other prints like those for
+> > SRAT and nosave memory.
+> >
+> > Change the closing ) to ] to match the opening [.
+> >
+> > old:
+> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC]
+> range=[0x0000000880000000-0x0000000c80000000) (16384MB)
+> >
+> > new:
+> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC]
+> range=[0x0000000880000000-0x0000000c7fffffff] (16384MB)
+> >
+> > Example other address range prints:
+> >     SRAT: Node 1 PXM 1 [mem 0x480000000-0x87fffffff]
+> >     PM: Registered nosave memory: [mem 0x880000000-0xc7fffffff]
+> >
+> > Signed-off-by: Robert Elliott <elliott@hpe.com>
+> > ---
+> >  arch/x86/platform/efi/efi.c | 4 ++--
+> >  1 file changed, 2 insertions(+), 2 deletions(-)
 > 
-> Use proper IEC binary units (KiB, MiB, etc.) rather than misuse SI
-> decimal units (KB, MB, etc.).
-> 
-> old:
->     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff) (16384MB)
-> 
-> new:
->     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff] (16 GiB @ 34 GiB)
-> 
-> Signed-off-by: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
-> ---
->  arch/x86/platform/efi/efi.c | 27 ++++++++++++++++++++++++---
->  1 file changed, 24 insertions(+), 3 deletions(-)
- 
-I'm not at all sure of the value of printing the physical address as a
-size. I would have thought that you'd have to convert it back to an
-address whenever you wanted to use it anyway.
+> Is this change purely for aesthetic reasons? We're usually not in the
+> habit of changing the output of print messages without a good reason
+> because people downstream do rely on them being consistent.
 
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index 635a955..030ba91 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -222,6 +222,25 @@ int __init efi_memblock_x86_reserve_range(void)
->  	return 0;
->  }
->  
-> +char * __init efi_size_format(char *buf, size_t size, u64 bytes)
-> +{
-> +	if (!bytes || (bytes & 0x3ff))
-> +		snprintf(buf, size, "%llu B", bytes);
-> +	else if (bytes & 0xfffff)
-> +		snprintf(buf, size, "%llu KiB", bytes >> 10);
-> +	else if (bytes & 0x3fffffff)
-> +		snprintf(buf, size, "%llu MiB", bytes >> 20);
-> +	else if (bytes & 0xffffffffff)
-> +		snprintf(buf, size, "%llu GiB", bytes >> 30);
-> +	else if (bytes & 0x3ffffffffffff)
-> +		snprintf(buf, size, "%llu TiB", bytes >> 40);
-> +	else if (bytes & 0xfffffffffffffff)
-> +		snprintf(buf, size, "%llu PiB", bytes >> 50);
-> +	else
-> +		snprintf(buf, size, "%llu EiB", bytes >> 60);
-> +	return buf;
-> +}
-> +
+The format of that line is architecture-specific and only appears
+under the efi=debug kernel parameter, so I don't know how much
+anyone relies on the specific format.  Good question for the lists.
 
-Can we use string_get_size() instead of rolling our own function?
+arch/ia64/kernel/efi.c shares the range=[...) format, but prints
+the range after the bitmask rather than before:
+	printk("mem%02d: %s "
+		"range=[0x%016lx-0x%016lx) (%4lu%s)\n",
+		i, efi_md_typeattr_format(buf, sizeof(buf), md),
+		md->phys_addr,
+		md->phys_addr + efi_md_size(md), size, unit);
+
+arch/arm64/kernel/efi.c has no mem prefix, or range=[...) text
+surrounding the range:
+	pr_info("  0x%012llx-0x%012llx %s",
+		paddr, paddr + (npages << EFI_PAGE_SHIFT) - 1,
+		efi_md_typeattr_format(buf, sizeof(buf), md));
+	pr_cont("*");
+	pr_cont("\n");
+
+The x86 code is inside ifdef EFI_DEBUG, which is always
+defined in that file.  I wonder if it was supposed to change
+to efi_enabled(EFI_DBG) to be based off the efi=debug kernel
+parameter?  efi_init() qualified the call to this function
+based on that:
+        if (efi_enabled(EFI_DBG))
+                efi_print_memmap();
+
+In arch/ia64/kernel/efi.c efi_init(), EFI_DEBUG is set to 0
+so the print doesn't happen at all without editing the
+source code.  It doesn't use efi_enabled(EFI_DBG).
+
+arch/arm64/kernel/efi.c uses efi_enabled(EFI_DBG) exclusively.
+
+---
+Robert Elliott, HPE Persistent Memory
