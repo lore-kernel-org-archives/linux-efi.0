@@ -1,73 +1,68 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/4] x86/efi: show actual ending addresses in
+Subject: Re: [PATCH 4/4] x86/efi: print size and base in binary units in
  efi_print_memmap
-Date: Wed, 23 Dec 2015 12:47:11 +0000
-Message-ID: <20151223124711.GB2471@codeblueprint.co.uk>
+Date: Wed, 23 Dec 2015 15:52:55 +0000
+Message-ID: <20151223155255.GD2471@codeblueprint.co.uk>
 References: <1450402114-3606-1-git-send-email-elliott@hpe.com>
- <1450402114-3606-2-git-send-email-elliott@hpe.com>
- <20151221155038.GD4227@codeblueprint.co.uk>
- <94D0CD8314A33A4D9D801C0FE68B40295BEC3C9C@G9W0745.americas.hpqcorp.net>
+ <1450402114-3606-5-git-send-email-elliott@hpe.com>
+ <20151221161629.GG4227@codeblueprint.co.uk>
+ <94D0CD8314A33A4D9D801C0FE68B40295BEC79CB@G9W0745.americas.hpqcorp.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <94D0CD8314A33A4D9D801C0FE68B40295BEC3C9C-W1gbDvblbosSZAcGdq5asR6epYMZPwEe5NbjCUgZEJk@public.gmane.org>
+In-Reply-To: <94D0CD8314A33A4D9D801C0FE68B40295BEC79CB-W1gbDvblbosSZAcGdq5asR6epYMZPwEe5NbjCUgZEJk@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org" <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org" <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 21 Dec, at 04:44:19PM, Elliott, Robert (Persistent Memory) wrote:
+On Wed, 23 Dec, at 12:11:56AM, Elliott, Robert (Persistent Memory) wrote:
 > 
-> The format of that line is architecture-specific and only appears
-> under the efi=debug kernel parameter, so I don't know how much
-> anyone relies on the specific format.  Good question for the lists.
+> I was trying to make it resemble the memmap=size@address 
+> kernel parameter format for creating e820 entries, which
+> does accept abbreviations in addition to hex values:
+> 	memmap=nn[KMG]@ss[KMG] for usable DRAM
+> 	memmap=nn[KMG]#ss[KMG] for ACPI data
+> 	memmap=nn[KMG]$ss[KMG] for reserved
+> 	memmap=nn[KMG]!ss[KMG] for persistent memory
+> 
+> Mapping the UEFI type to the corresponding @, #, $, or ! was
+> more than I wanted to tackle, so it's not a drop-in
+> replacement string.
+> 
+> memparse() also accepts T, P, and E units; I guess those
+> need to be added to Documentation/kernel-parameters.txt.
  
-Both kernel and non-kernel developers are consumers of these debug
-statements, and people do come to rely on the format of the text.
+I think the value of the "@ address" portion of the string is
+questionable.
 
-I have certainly become acustomed to the current format we have,
-particularly when debugging issues via other users, i.e. when I'm not
-the person running the kernel being debugged.
-
-Just because it's a debug option doesn't mean it's completely open to
-modification. Reasonable Justification must be provided. Having said
-that, I think you provide a good argument in your other email,
-
-  https://lkml.kernel.org/r/94D0CD8314A33A4D9D801C0FE68B40295BEC74CF-W1gbDvblbosSZAcGdq5asR6epYMZPwEe5NbjCUgZEJk@public.gmane.org
-
-> arch/ia64/kernel/efi.c shares the range=[...) format, but prints
-> the range after the bitmask rather than before:
-> 	printk("mem%02d: %s "
-> 		"range=[0x%016lx-0x%016lx) (%4lu%s)\n",
-> 		i, efi_md_typeattr_format(buf, sizeof(buf), md),
-> 		md->phys_addr,
-> 		md->phys_addr + efi_md_size(md), size, unit);
+> Thanks for the pointer; I wondered if there was a similar
+> function somewhere.  However, that function throws away
+> precision in favor of printing just 3 significant digits;
+> I think that's dangerous.  Its non-integer output is not
+> supported by memmap=, and the function appears to use
+> assembly code to get CPU divide instructions, losing the
+> ability to use shifts for these power of two divisions.
 > 
-> arch/arm64/kernel/efi.c has no mem prefix, or range=[...) text
-> surrounding the range:
-> 	pr_info("  0x%012llx-0x%012llx %s",
-> 		paddr, paddr + (npages << EFI_PAGE_SHIFT) - 1,
-> 		efi_md_typeattr_format(buf, sizeof(buf), md));
-> 	pr_cont("*");
-> 	pr_cont("\n");
+> Example results...
 > 
-> The x86 code is inside ifdef EFI_DEBUG, which is always
-> defined in that file.  I wonder if it was supposed to change
-> to efi_enabled(EFI_DBG) to be based off the efi=debug kernel
-> parameter?  efi_init() qualified the call to this function
-> based on that:
->         if (efi_enabled(EFI_DBG))
->                 efi_print_memmap();
- 
-The EFI_DEBUG symbol should just be deleted. It's been enabled since
-forever and really provides no value, because as you point out,
-printing of the memory map is guarded by EFI_DBG anyway.
-
-I'll send out a patch for ripping that out.
-
-> In arch/ia64/kernel/efi.c efi_init(), EFI_DEBUG is set to 0
-> so the print doesn't happen at all without editing the
-> source code.  It doesn't use efi_enabled(EFI_DBG).
+> efi: mem01:... range=[0x0000000000093000-0x0000000000093fff] (4 KiB @ 588 KiB)
+> efi: mem01:... range=[0x0000000000093000-0x0000000000093fff] (4.00 KiB @ 588 KiB) SGS
 > 
-> arch/arm64/kernel/efi.c uses efi_enabled(EFI_DBG) exclusively.
+> efi: mem03:... range=[0x0000000000100000-0x00000000013e8fff] (19364 KiB @ 1 MiB)
+> efi: mem03:... range=[0x0000000000100000-0x00000000013e8fff] (18.9 MiB @ 1.00 MiB) SGS
+> (example of lost precision: 19364 KiB is really 18.91015625 MiB)
+> 
+> efi: mem04:... range=[0x00000000013e9000-0x0000000001ffffff] (12380 KiB @ 20388 KiB)
+> efi: mem04:... range=[0x00000000013e9000-0x0000000001ffffff] (12.0 MiB @ 19.9 MiB) SGS
+> 
+> efi: mem28:... range=[0x00000000717c2000-0x0000000072acafff] (19492 KiB @ 1859336 KiB)
+> efi: mem28:... range=[0x00000000717c2000-0x0000000072acafff] (19.0 MiB @ 1.77 GiB) SGS
+> 
+> efi: mem57:... range=[0x0000000880000000-0x0000000e7fffffff] (24 GiB @ 34 GiB)
+> efi: mem57:... range=[0x0000000880000000-0x0000000e7fffffff] (24.0 GiB @ 34.0 GiB) SGS
+
+Good points! I agree that string_get_size() (unfortunately) doesn't
+look useful in this scenario. The code in efi_size_format() looks
+fine.
