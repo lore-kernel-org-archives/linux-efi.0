@@ -1,67 +1,72 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/2] efi: Don't use spinlocks for efi vars
-Date: Fri, 8 Jan 2016 11:08:33 +0000
-Message-ID: <20160108110833.GC2532@codeblueprint.co.uk>
-References: <1450434591-31104-1-git-send-email-sylvain.chouleur@gmail.com>
- <20160106122421.GB2671@codeblueprint.co.uk>
- <CAD_mUW3Ws6+VrfXE-SnmSSzkqeCN0PVKeQJVXkRuJ8R_=pZ66g@mail.gmail.com>
+Subject: Re: [PATCH] x86/efi-bgrt: Don't ignore the BGRT if the 'valid' bit
+ is 0
+Date: Fri, 8 Jan 2016 11:30:47 +0000
+Message-ID: <20160108113047.GD2532@codeblueprint.co.uk>
+References: <1450648391-4631-1-git-send-email-me@moshe.nl>
+ <20160105154640.GB2714@codeblueprint.co.uk>
+ <568BF19E.3040701@moshe.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAD_mUW3Ws6+VrfXE-SnmSSzkqeCN0PVKeQJVXkRuJ8R_=pZ66g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <568BF19E.3040701-A/3C56C7qwM@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Sylvain Chouleur <sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 06 Jan, at 04:22:40PM, Sylvain Chouleur wrote:
-> 2016-01-06 13:24 GMT+01:00 Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>:
-> > > @@ -582,7 +583,8 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var)
-> > >               return ret;
-> > >
-> > >       kobject_uevent(&new_var->kobj, KOBJ_ADD);
-> > > -     efivar_entry_add(new_var, &efivar_sysfs_list);
-> > > +     if (efivar_entry_add(new_var, &efivar_sysfs_list))
-> > > +             return -EINTR;
-> > >
-> > >       return 0;
-> > >  }
-> >
-> > This looks like it's missing a call to efivar_unregister() in the
-> > -EINTR case.
-> 
-> I don't see why
-> It's returning an error code as other lines in the same function.
-> Can you develop your thoughts?
- 
-kobject_uevent() just notified userspace that a new object was
-available. But because it hasn't been put onto 'efivar_sysfs_list'
-when efivar_entry_add() fails, we'll never ever call kobject_put().
+On Tue, 05 Jan, at 05:38:54PM, M=C3=B4she van der Sterre wrote:
+> On 01/05/2016 04:46 PM, Matt Fleming wrote:
+> >Shouldn't this be pr_debug() instead of pr_err()?
+>=20
+> It is an actual error for the image to be anything else. I did look a=
+t your
+> commit "x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid BGRT"=
+, and
+> actually intentionally chose pr_err() instead of pr_debug() because o=
+f it.
+>=20
+> From that commit message:
+>     However, Josh points that out it still makes sense to test the
+>     validity of the upper 7 bits of the 'status' field, since
+>     they're marked as "reserved" in the spec and must be zero. If
+>     firmware violates this it really *is* an error.
+>=20
+> From the ACPI spec:
+>     If the value is 0, the Image Type is Bitmap. The format for a Bit=
+map is
+> defined at the reference located in the ACPI Link Document under the =
+heading
+> "Types of Bitmaps". All other values not defined in the table are res=
+erved
+> for future use.
+> and also:
+>     Implementations must present the image in a 24 bit bitmap with pi=
+xel
+> format 0xRRGGBB, or a 32-bit bitmap with the pixel format 0xrrRRGGBB,=
+ where
+> =E2=80=98rr=E2=80=99 is reserved.
+> Following the link to MSDN, the header id is definitely also required=
+ to be
+> "BM" for those types,
+> That said, I'm not 100% sure if pr_err() is right for any of the erro=
+rs in
 
-Before your changes efivar_entry_add() never failed and 'new_var' was
-always added to the list, and always removed in efivar_sysfs_destroy().
+OK, I'll queue this up. Josh, does this look OK to you?
 
-That invariant no longer holds. Now we leak new_var->kobj.
+> efi-bgrt.c. I don't really feel knowledgeable enough to suggest anyth=
+ing
+> about that, so I tried to follow the previous discussion outcome as c=
+losely
+> as possible.
+>=20
+> By the way... Now I'm thinking about the ID, what about endianness? T=
+his
+> code is under "arch/x86", does this always imply a little-endian
+> architecture? The new check will probably fail on big-endian but that=
+ should
+> never happen, right?
 
-> > > @@ -1055,12 +1087,16 @@ int efivars_register(struct efivars *efivars,
-> > >                    const struct efivar_operations *ops,
-> > >                    struct kobject *kobject)
-> > >  {
-> > > -     spin_lock_init(&efivars->lock);
-> > > +     if (down_trylock(&efivars_lock))
-> > > +             return -EBUSY;
-> > > +
-> >
-> > Is this correct? I would have assumed that you'd want to return -EINTR
-> > here, not -EBUSY since if an EFI variable operation is currently
-> > running we should spin waiting for the semaphore to be released.
-> 
-> No because this is a trylock, it will not wait for the semaphore to be release,
-> it will return as soon as it sees that the semaphore is locked.
-> We don't want to use down_interruptible() here because we want to be able to
-> (un)register efivars operation in an interrupt context.
-
-Like I said in the other mail, I think supporting registration from
-within a panic context is a bad idea. Using down_interruptible() here
-would be much better. 
+Yes, we can ignore big-endian.
