@@ -1,68 +1,43 @@
-From: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Subject: Re: [PATCH] x86/efi-bgrt: Don't ignore the BGRT if the 'valid' bit
- is 0
-Date: Fri, 8 Jan 2016 10:09:25 -0800
-Message-ID: <20160108180925.GA3488@cloud>
-References: <1450648391-4631-1-git-send-email-me@moshe.nl>
- <20160105154640.GB2714@codeblueprint.co.uk>
- <568BF19E.3040701@moshe.nl>
- <20160108113047.GD2532@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: [PATCH -next] efi: Do not include asm/efi.h if not needed
+Date: Sun, 10 Jan 2016 07:35:28 -0800
+Message-ID: <1452440128-15134-1-git-send-email-linux@roeck-us.net>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160108113047.GD2532-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Jan 08, 2016 at 11:30:47AM +0000, Matt Fleming wrote:
-> On Tue, 05 Jan, at 05:38:54PM, M=C3=B4she van der Sterre wrote:
-> > On 01/05/2016 04:46 PM, Matt Fleming wrote:
-> > >Shouldn't this be pr_debug() instead of pr_err()?
-> >=20
-> > It is an actual error for the image to be anything else. I did look=
- at your
-> > commit "x86/efi-bgrt: Switch pr_err() to pr_debug() for invalid BGR=
-T", and
-> > actually intentionally chose pr_err() instead of pr_debug() because=
- of it.
-> >=20
-> > From that commit message:
-> >     However, Josh points that out it still makes sense to test the
-> >     validity of the upper 7 bits of the 'status' field, since
-> >     they're marked as "reserved" in the spec and must be zero. If
-> >     firmware violates this it really *is* an error.
-> >=20
-> > From the ACPI spec:
-> >     If the value is 0, the Image Type is Bitmap. The format for a B=
-itmap is
-> > defined at the reference located in the ACPI Link Document under th=
-e heading
-> > "Types of Bitmaps". All other values not defined in the table are r=
-eserved
-> > for future use.
-> > and also:
-> >     Implementations must present the image in a 24 bit bitmap with =
-pixel
-> > format 0xRRGGBB, or a 32-bit bitmap with the pixel format 0xrrRRGGB=
-B, where
-> > =E2=80=98rr=E2=80=99 is reserved.
-> > Following the link to MSDN, the header id is definitely also requir=
-ed to be
-> > "BM" for those types,
-> > That said, I'm not 100% sure if pr_err() is right for any of the er=
-rors in
->=20
-> OK, I'll queue this up. Josh, does this look OK to you?
+Commit f7d924894265 ("arm64/efi: refactor EFI init and runtime code
+for reuse by 32-bit ARM") adds an include of asm/efi.h to efi.c.
+This causes a build failure for ia64, where asm/efi.h does not exist.
 
-Yes, checking the bitmap file header seems like a good additional
-cross-check.  And since the spec says that the image must be a bitmap
-(given the one possible value for the format field), and since we can't
-reliably know *how much* data to read without reading the bitmap header=
-,
-we should indeed error out if the data doesn't look like a bitmap.
+drivers/firmware/efi/efi.c:28:21: fatal error:
+	asm/efi.h: No such file or directory
 
-Reviewed-by: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
+asm/efi.h does not define or declare anything used by efi.c, thus
+including it should not be needed.
+
+Fixes: f7d924894265 ("arm64/efi: refactor EFI init and runtime code for reuse by 32-bit ARM")
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Signed-off-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+---
+ drivers/firmware/efi/efi.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index cffa89b3317b..027ca212179f 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -25,8 +25,6 @@
+ #include <linux/io.h>
+ #include <linux/platform_device.h>
+ 
+-#include <asm/efi.h>
+-
+ struct efi __read_mostly efi = {
+ 	.mps			= EFI_INVALID_TABLE_ADDR,
+ 	.acpi			= EFI_INVALID_TABLE_ADDR,
+-- 
+2.1.4
