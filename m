@@ -1,59 +1,77 @@
-From: Srikar Dronamraju <srikar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Subject: Re: v4.4-rc8 based tip tree kernel hangs on boot.
-Date: Mon, 11 Jan 2016 22:17:12 +0530
-Message-ID: <20160111164712.GE17012@linux.vnet.ibm.com>
-References: <20160110192921.GD17012@linux.vnet.ibm.com>
- <20160111140140.GA2644@codeblueprint.co.uk>
- <20160111151030.GA23096@gmail.com>
-Reply-To: Srikar Dronamraju <srikar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH] efi: add conditional include of asm/early_ioremap.h
+Date: Mon, 11 Jan 2016 18:35:44 +0100
+Message-ID: <CAKv+Gu9=yVNAVOLfuv135tu6anzNxGO8i7cdsLQ6PxUigNVU4g@mail.gmail.com>
+References: <1452456249-2974-1-git-send-email-ard.biesheuvel@linaro.org>
+	<20160111144004.GD2644@codeblueprint.co.uk>
+	<5693D52E.9090407@roeck-us.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160111151030.GA23096-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <5693D52E.9090407-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+To: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "Williams, Dan J" <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-> >  
-> > What info is there?
-> > 
+(+ Dan)
 
-https://goo.gl/photos/1izrwCtAWj8aK7hi7
-Unfortunately I am unable to get a text console. So this is all I see.
+On 11 January 2016 at 17:15, Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org> wrote:
+> On 01/11/2016 06:40 AM, Matt Fleming wrote:
+>>
+>> (Cc'ing ia64 maintainers)
+>>
+>> On Sun, 10 Jan, at 09:04:09PM, Ard Biesheuvel wrote:
+>>>
+>>> The code in efi.c uses early_memremap(), but relies on a transitive
+>>> include rather than including asm/early_ioremap.h directly.
+>>> Unfortunately, this header does not exist on ia64, so it cannot be
+>>> included directly.
+>>>
+>>> Commit f7d924894265 ("arm64/efi: refactor EFI init and runtime code
+>>> for reuse by 32-bit ARM") attempted to work around this by including
+>>> asm/efi.h, which transitively includes asm/early_ioremap.h on most
+>>> architectures. However, since asm/efi.h does not exist on ia64 either,
+>>> this is not much of an improvement.
+>>>
+>>> So instead, just include asm/early_ioremap.h directly, unless CONFIG_IA64
+>>> is defined.
+>>>
+>>> Fixes: f7d924894265 ("arm64/efi: refactor EFI init and runtime code for
+>>> reuse by 32-bit ARM")
+>>> Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+>>> Reported-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+>>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> ---
+>>>   drivers/firmware/efi/efi.c | 4 +++-
+>>>   1 file changed, 3 insertions(+), 1 deletion(-)
+>>>
+>>> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+>>> index cffa89b3317b..53f71177824f 100644
+>>> --- a/drivers/firmware/efi/efi.c
+>>> +++ b/drivers/firmware/efi/efi.c
+>>> @@ -25,7 +25,9 @@
+>>>   #include <linux/io.h>
+>>>   #include <linux/platform_device.h>
+>>>
+>>> -#include <asm/efi.h>
+>>> +#ifndef CONFIG_IA64
+>>> +#include <asm/early_ioremap.h>
+>>> +#endif
+>>>
+>>>   struct efi __read_mostly efi = {
+>>>         .mps                    = EFI_INVALID_TABLE_ADDR,
+>>
+>>
+>> I certainly can't think of a better way to fix this right now. Tony,
+>> Fenghua do you guys have any suggestions?
+>>
+>
+> How about including asm/early_ioremap.h from arch/arm/include/asm/io.h,
+> as it is done by arm64 and x86 ?
+>
 
-
-> > > Tried reverting Commit 21cdb6b56 "x86/mm: Page align the '_end'
-> > > symbol to avoid pfn conversion bugs" but that doesnt help.
-> > 
-> > Odd. Could you try booting the tip/x86/efi branch instead? There's
-> > only a handful of patches on that branch so it should be pretty easy
-> > to narrow down the problematic change.
-> 
-> Yes, that would be nice, you can get it via:
-> 
-
-# git reset --hard tip/x86/efi
-HEAD is now at e2c90dd x86/efi-bgrt: Replace early_memremap() with memremap()
-
-Tried to boot with the above commit; but it doesnt boot.
-
--- 
-Thanks and Regards
-Srikar
-
->   git checkout v4.4
->   git pull git://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/efi
-> 
-> Meanwhile I'm holding off on sending the pending EFI bits to Linus, conditional on 
-> the outcome of this regression report.
-> 
-> Thanks,
-> 
-> 	Ingo
-> 
-
--- 
-Thanks and Regards
-Srikar Dronamraju
+That would work as well, but it does not address how early_memremap()
+is so poorly defined. I think the correct way would be to add the
+include unconditionally, and move ia64's definition to a new ia64
+version of early_ioremap.h
