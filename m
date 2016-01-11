@@ -1,46 +1,40 @@
-From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [PATCH] efi: fix out-of-bounds null overwrite vulnerability
-Date: Mon, 11 Jan 2016 18:16:14 +0000
-Message-ID: <3908561D78D1C84285E8C5FCA982C28F39FA9B5C@ORSMSX114.amr.corp.intel.com>
-References: <1452193530-76672-1-git-send-email-wuninsu@gmail.com>
- <20160108101323.GA2532@codeblueprint.co.uk>
- <3908561D78D1C84285E8C5FCA982C28F39FA7208@ORSMSX114.amr.corp.intel.com>
- <20160111141605.GC2644@codeblueprint.co.uk>
+From: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
+Subject: Re: [PATCH] efi: add conditional include of asm/early_ioremap.h
+Date: Mon, 11 Jan 2016 10:47:49 -0800
+Message-ID: <20160111184749.GA15115@roeck-us.net>
+References: <1452456249-2974-1-git-send-email-ard.biesheuvel@linaro.org>
+ <20160111144004.GD2644@codeblueprint.co.uk>
+ <5693D52E.9090407@roeck-us.net>
+ <CAKv+Gu9=yVNAVOLfuv135tu6anzNxGO8i7cdsLQ6PxUigNVU4g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160111141605.GC2644-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu9=yVNAVOLfuv135tu6anzNxGO8i7cdsLQ6PxUigNVU4g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Insu Yun <wuninsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "taesoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <taesoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "yeongjin.jang-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <yeongjin.jang-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "insu-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <insu-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "changwoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <changwoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "Williams, Dan J" <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Fenghua Yu <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Tony Luck <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
->> What about using:
->> 
->> 	msg[len] = '\0';
->> 
->> to guarantee NUL termination?
->
-> But that may leave garbage bytes in 'rcd_decode_str' in the case where
-> the string isn't as long as 'len'.
->
-> How about memset()'ing the buffer to zero and deleting the NUL
-> termination line?
+On Mon, Jan 11, 2016 at 06:35:44PM +0100, Ard Biesheuvel wrote:
+[ ... ]
 
-Looks like overkill to me.  We only use this function in two places:
+> >>
+> >>
+> >> I certainly can't think of a better way to fix this right now. Tony,
+> >> Fenghua do you guys have any suggestions?
+> >>
+> >
+> > How about including asm/early_ioremap.h from arch/arm/include/asm/io.h,
+> > as it is done by arm64 and x86 ?
+> >
+> 
+> That would work as well, but it does not address how early_memremap()
+> is so poorly defined. I think the correct way would be to add the
+> include unconditionally, and move ia64's definition to a new ia64
+> version of early_ioremap.h
 
-        if (cper_dimm_err_location(cmem, rcd_decode_str))
-                trace_seq_printf(p, "%s", rcd_decode_str);
+Depends on the definition of "poorly". Is the API exported through
+asm/early_ioremap.h, or through asm/io.h ?
 
-        if (cper_dimm_err_location(&cmem, rcd_decode_str))
-                printk("%s%s\n", pfx, rcd_decode_str);
-
-Neither would care if there were garbage after the NUL and before the
-end of the rcd_decode_str[] array.
-
-This buffer isn't visible to user space, so we aren't leaking data by having
-garbage bytes after the NUL.
-
--Tony
+Guenter
