@@ -1,46 +1,30 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 2/2] efi: include asm/early_ioremap.h not asm/efi.h to get early_memremap
-Date: Tue, 12 Jan 2016 14:22:46 +0100
-Message-ID: <1452604966-9905-2-git-send-email-ard.biesheuvel@linaro.org>
+From: "Luck, Tony" <tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH v2 1/2] ia64: split off early_ioremap() declarations
+ into asm/early_ioremap.h
+Date: Tue, 12 Jan 2016 21:33:46 +0000
+Message-ID: <3908561D78D1C84285E8C5FCA982C28F39FAC179@ORSMSX114.amr.corp.intel.com>
 References: <1452604966-9905-1-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1452604966-9905-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
-Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org" <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>, "linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Yu, Fenghua" <fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "will.deacon-5wv7dgnIgG8@public.gmane.org" <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The code in efi.c uses early_memremap(), but relies on a transitive
-include rather than including asm/early_ioremap.h directly, since
-this header did not exist on ia64.
+> So create a <asm/early_ioremap.h> for ia64, and move the existing
+> definitions into it.
 
-Commit f7d924894265 ("arm64/efi: refactor EFI init and runtime code
-for reuse by 32-bit ARM") attempted to work around this by including
-asm/efi.h, which transitively includes asm/early_ioremap.h on most
-architectures. However, since asm/efi.h does not exist on ia64 either,
-this is not much of an improvement.
+These look OK.
 
-Now that we have created an asm/early_ioremap.h for ia64, we can just
-include it directly.
+Acked-by: Tony Luck <toy.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Reported-by: Guenter Roeck <linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/efi.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index cffa89b3317b..2cd37dad67a6 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -25,7 +25,7 @@
- #include <linux/io.h>
- #include <linux/platform_device.h>
- 
--#include <asm/efi.h>
-+#include <asm/early_ioremap.h>
- 
- struct efi __read_mostly efi = {
- 	.mps			= EFI_INVALID_TABLE_ADDR,
--- 
-2.5.0
+Can you put them into the same tree where the pending breakage is sitting?
+Then I don't have to worry about coordinating pull requests from the ia64
+tree.
+
+-Tony
