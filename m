@@ -1,37 +1,69 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH 4/4] x86/efi: print size and base in binary units in efi_print_memmap
-Date: Tue, 12 Jan 2016 15:17:31 +0200
-Message-ID: <CAHp75VfyeAP6vFcbqJhgbY=cjKsLsWnN0kLyBPvoxJh2uCMn+w@mail.gmail.com>
-References: <1450402114-3606-1-git-send-email-elliott@hpe.com>
-	<1450402114-3606-5-git-send-email-elliott@hpe.com>
-	<20151221161629.GG4227@codeblueprint.co.uk>
-	<CAHp75VffR6FO=s5JeVPUPepVRyn-mwXF=juf+y1j44J69i3RKw@mail.gmail.com>
-	<20160108121921.GI2532@codeblueprint.co.uk>
-	<CAHp75VcJ_gDs-Y3SO2Z7BRqPCwKXntBiW6UDF38Di5m5_HszWQ@mail.gmail.com>
-	<20160111140915.GB2644@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 1/2] ia64: split off early_ioremap() declarations into asm/early_ioremap.h
+Date: Tue, 12 Jan 2016 14:22:45 +0100
+Message-ID: <1452604966-9905-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160111140915.GB2644-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: tony.luck-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-0h96xk9xTtrk1uMJSBkQmQ@public.gmane.org, linux-ia64-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, fenghua.yu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Jan 11, 2016 at 4:09 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Fri, 08 Jan, at 06:39:28PM, Andy Shevchenko wrote:
->> On Fri, Jan 8, 2016 at 2:19 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->> > On Sun, 27 Dec, at 04:35:12PM, Andy Shevchenko wrote:
->> >> On Mon, Dec 21, 2015 at 6:16 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+Unlike x86, arm64 and ARM, ia64 does not declare its implementations
+of early_ioremap/early_iounmap/early_memremap/early_memunmap in a header
+file called <asm/early_ioremap.h>
 
->> I will prepare something this weekend, or latest next week.
->>
->> I suppose I can apply Robert's one on top of your efi/next and update it, right?
->
-> Yeah, that should work. Thanks.
+This complicates the use of these functions in generic code, since the
+header cannot be included directly, and we have to rely on transitive
+includes, which is fragile.
 
-Just sent as promised.
+So create a <asm/early_ioremap.h> for ia64, and move the existing
+definitions into it.
 
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/ia64/include/asm/early_ioremap.h | 10 ++++++++++
+ arch/ia64/include/asm/io.h            |  5 +----
+ 2 files changed, 11 insertions(+), 4 deletions(-)
+ create mode 100644 arch/ia64/include/asm/early_ioremap.h
+
+diff --git a/arch/ia64/include/asm/early_ioremap.h b/arch/ia64/include/asm/early_ioremap.h
+new file mode 100644
+index 000000000000..eec9e1d1b833
+--- /dev/null
++++ b/arch/ia64/include/asm/early_ioremap.h
+@@ -0,0 +1,10 @@
++#ifndef _ASM_IA64_EARLY_IOREMAP_H
++#define _ASM_IA64_EARLY_IOREMAP_H
++
++extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
++#define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
++
++extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
++#define early_memunmap(addr, size)             early_iounmap(addr, size)
++
++#endif
+diff --git a/arch/ia64/include/asm/io.h b/arch/ia64/include/asm/io.h
+index 9041bbe2b7b4..a865d2a04f75 100644
+--- a/arch/ia64/include/asm/io.h
++++ b/arch/ia64/include/asm/io.h
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include <asm/unaligned.h>
++#include <asm/early_ioremap.h>
+ 
+ /* We don't use IO slowdowns on the ia64, but.. */
+ #define __SLOW_DOWN_IO	do { } while (0)
+@@ -427,10 +428,6 @@ __writeq (unsigned long val, volatile void __iomem *addr)
+ extern void __iomem * ioremap(unsigned long offset, unsigned long size);
+ extern void __iomem * ioremap_nocache (unsigned long offset, unsigned long size);
+ extern void iounmap (volatile void __iomem *addr);
+-extern void __iomem * early_ioremap (unsigned long phys_addr, unsigned long size);
+-#define early_memremap(phys_addr, size)        early_ioremap(phys_addr, size)
+-extern void early_iounmap (volatile void __iomem *addr, unsigned long size);
+-#define early_memunmap(addr, size)             early_iounmap(addr, size)
+ static inline void __iomem * ioremap_cache (unsigned long phys_addr, unsigned long size)
+ {
+ 	return ioremap(phys_addr, size);
 -- 
-With Best Regards,
-Andy Shevchenko
+2.5.0
