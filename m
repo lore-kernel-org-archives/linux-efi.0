@@ -1,38 +1,37 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH v2 1/2] ia64: split off early_ioremap() declarations into
- asm/early_ioremap.h
-Date: Wed, 13 Jan 2016 10:34:55 +0000
-Message-ID: <20160113103454.GD25458@arm.com>
-References: <1452604966-9905-1-git-send-email-ard.biesheuvel@linaro.org>
- <3908561D78D1C84285E8C5FCA982C28F39FAC179@ORSMSX114.amr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-ia64-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <3908561D78D1C84285E8C5FCA982C28F39FAC179@ORSMSX114.amr.corp.intel.com>
-Sender: linux-ia64-owner@vger.kernel.org
-To: "Luck, Tony" <tony.luck@intel.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux@roeck-us.net" <linux@roeck-us.net>, "linux-ia64@vger.kernel.org" <linux-ia64@vger.kernel.org>, "matt@codeblueprint.co.uk" <matt@codeblueprint.co.uk>, "Yu, Fenghua" <fenghua.yu@intel.com>
+From: Sylvain Chouleur <sylvain.chouleur@gmail.com>
+Subject: [PATCH v3 0/3] efi interruptible runtime services
+Date: Wed, 13 Jan 2016 17:32:39 +0100
+Message-ID: <1452702762-27216-1-git-send-email-sylvain.chouleur@gmail.com>
+References: <1452119637-10958-1-git-send-email-sylvain.chouleur@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452119637-10958-1-git-send-email-sylvain.chouleur@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sylvain.chouleur@gmail.com
+Cc: Sylvain Chouleur <sylvain.chouleur@intel.com>, linux-efi@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 12, 2016 at 09:33:46PM +0000, Luck, Tony wrote:
-> > So create a <asm/early_ioremap.h> for ia64, and move the existing
-> > definitions into it.
-> 
-> These look OK.
-> 
-> Acked-by: Tony Luck <toy.luck@intel.com>
+From: Sylvain Chouleur <sylvain.chouleur@intel.com>
 
-s/toy/tony/ ;)
+Changes in v3:
+ - efivars_(un)register: use down_interruptible()
+ - efivar_create_sysfs_entry: unregister new_var in case of failure
+ - efi_interruptible: in case of panic call directly legacy handlers
 
-> Can you put them into the same tree where the pending breakage is sitting?
-> Then I don't have to worry about coordinating pull requests from the ia64
-> tree.
+Sylvain Chouleur (3):
+ efi: implement interruptible runtime services
+ efi: don't use spinlocks for efi vars
+ efi: use a file local lock for efivars
 
-The arm trees have already been pulled, so the breakage is in mainline.
-
-I think it makes the most sense to fix this either via the ia64 or the
-efi tree, but I'll queue something at -rc1 if it's still not resolved by
-then.
-
-Will
+ arch/x86/Kconfig                          |   17 +++
+ arch/x86/include/asm/efi.h                |    1 
+ arch/x86/platform/efi/Makefile            |    1 
+ arch/x86/platform/efi/efi_32.c            |    5 +
+ arch/x86/platform/efi/efi_64.c            |    5 +
+ arch/x86/platform/efi/efi_interruptible.c |  189 ++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi-pstore.c         |   36 +++++--
+ drivers/firmware/efi/efivars.c            |   22 +++-
+ drivers/firmware/efi/vars.c               |  315 ++++++++++++++++++++++++++++++++++++++++----------------------------
+ fs/efivarfs/inode.c                       |    5 -
+ fs/efivarfs/super.c                       |    9 +
+ include/linux/efi.h                       |   18 ---
+ 12 files changed, 463 insertions(+), 160 deletions(-)
