@@ -1,31 +1,30 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: v4.4-rc8 based tip tree kernel hangs on boot.
-Date: Thu, 14 Jan 2016 12:25:13 +0000
-Message-ID: <20160114122513.GA3602@codeblueprint.co.uk>
-References: <20160110192921.GD17012@linux.vnet.ibm.com>
- <20160111140140.GA2644@codeblueprint.co.uk>
- <20160112103043.GA5707@gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi-bgrt: Don't ignore the BGRT if the 'valid' bit
+ is 0
+Date: Thu, 14 Jan 2016 12:29:45 +0000
+Message-ID: <20160114122945.GB3602@codeblueprint.co.uk>
+References: <1450648391-4631-1-git-send-email-me@moshe.nl>
+ <20160105154640.GB2714@codeblueprint.co.uk>
+ <568BF19E.3040701@moshe.nl>
+ <20160108113047.GD2532@codeblueprint.co.uk>
+ <20160108114235.GE2532@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160112103043.GA5707@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Srikar Dronamraju <srikar@linux.vnet.ibm.com>, Ingo Molnar <mingo@elte.hu>, LKML <linux-kernel@vger.kernel.org>, linux-efi@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+In-Reply-To: <20160108114235.GE2532-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: =?iso-8859-1?Q?M=F4she?= van der Sterre <me-A/3C56C7qwM@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 12 Jan, at 11:30:44AM, Ingo Molnar wrote:
-> 
-> Srikar, could you please send the good and bad System.map files, so that we see 
-> what the effects of the aligning were? The two interesting sha1's to test are:
-> 
->   21cdb6b56843: first bad commit
->   6ffeba960734: last good commit (parent commit of 21cdb6b56843)
+On Fri, 08 Jan, at 11:42:35AM, Matt Fleming wrote:
+> On Fri, 08 Jan, at 11:30:47AM, Matt Fleming wrote:
+> >=20
+> > OK, I'll queue this up. Josh, does this look OK to you?
+>=20
+> Actually M=F4she, could you resend the patch with the correct
+> Signed-off-by line?
 
-Srikar any update here? This issue is holding up the merging of all
-new EFI material for v4.5.
-
-I was unable to reproduce your issue locally, what machine are you
-running? From the hang picture it looks like some IBM machine, but if
-you could provide more details that'd be useful.
+Ping?
