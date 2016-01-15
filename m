@@ -1,11 +1,14 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v2 00/16] Add ACPI support for Xen Dom0 on ARM64
-Date: Fri, 15 Jan 2016 14:55:13 +0800
-Message-ID: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v2 10/16] ARM: XEN: Move xen_early_init() before
+	efi_init()
+Date: Fri, 15 Jan 2016 14:55:23 +0800
+Message-ID: <1452840929-19612-11-git-send-email-zhaoshenglong@huawei.com>
+References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
 	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
 List-Post: <mailto:xen-devel@lists.xen.org>
@@ -20,90 +23,138 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
-ACPI on ARM64 design document could be found from [1].
+Move xen_early_init() before efi_init(), then when calling efi_init()
+could initialize Xen specific UEFI.
 
-This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
-information. Introduce a bus notifier of AMBA and Platform bus to map
-the new added device's MMIO space. Make Xen domain use
-xlated_setup_gnttab_pages to setup grant table and a new hypercall to
-get event-channel irq.
+Check if it runs on Xen hypervisor through the flat dts.
 
-Regarding the initialization flow of Linux kernel, it needs to move
-xen_early_init() before efi_init(). Then xen_early_init() will check
-whether it runs on Xen through the /hypervisor node and efi_init() will
-call a new function fdt_find_xen_uefi_params(), to parse those
-xen,uefi-* parameters just like the existing efi_get_fdt_params().
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+---
+ arch/arm/xen/enlighten.c  | 56 ++++++++++++++++++++++++++++++++++-------------
+ arch/arm64/kernel/setup.c |  2 +-
+ 2 files changed, 42 insertions(+), 16 deletions(-)
 
-And in arm64_enable_runtime_services() it will check whether it runs on
-Xen and call another new function xen_efi_runtime_setup() to setup
-runtime service instead of efi_native_runtime_setup(). The
-xen_efi_runtime_setup() will assign the runtime function pointers with
-the functions of driver/xen/efi.c.
-
-And since we pass a /hypervisor node and a /chosen node to Dom0, it
-needs to check whether the DTS only contains a /hypervisor node and a
-/chosen node in acpi_boot_table_init().
-
-Patches are tested on FVP base model. The corresponding Xen patches can
-be fetched from [2].
-
-Thanks,
-Shannon
-
-[1] http://lists.xen.org/archives/html/xen-devel/2015-11/msg00488.html
-[2] http://git.linaro.org/people/shannon.zhao/xen.git  ACPI_XEN_ARM_V3
-
-
-Changes since v1:
-* Rebase on linux mainline and wallclock patch from Stefano
-* Refactor AMBA and platform device MMIO map to one file
-* Use EFI_PARAVIRT to check if it supports XEN EFI
-* Refactor Xen EFI codes
-* Address other comments
-
-Shannon Zhao (16):
-  Xen: ACPI: Hide UART used by Xen
-  xen/grant-table: Move xlated_setup_gnttab_pages to common place
-  Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
-  arm/xen: Use xen_xlate_map_ballooned_pages to setup grant table
-  xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
-  Xen: ARM: Add support for mapping platform device mmio
-  Xen: ARM: Add support for mapping AMBA device mmio
-  xen/hvm/params: Add a new delivery type for event-channel in
-    HVM_PARAM_CALLBACK_IRQ
-  arm/xen: Get event-channel irq through HVM_PARAM when booting with
-    ACPI
-  ARM: XEN: Move xen_early_init() before efi_init()
-  ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
-  ARM: Xen: Document UEFI support on Xen ARM virtual platforms
-  ARM: XEN: Set EFI_PARAVIRT if Xen supports EFI
-  Xen: EFI: Parse DT parameters for Xen specific UEFI
-  XEN: EFI: Move x86 specific codes to architecture directory
-  ARM64: XEN: Initialize Xen specific UEFI runtime services
-
- Documentation/devicetree/bindings/arm/xen.txt |  42 ++++++
- arch/arm/xen/enlighten.c                      | 121 +++++++++++++----
- arch/arm64/kernel/acpi.c                      |  12 +-
- arch/arm64/kernel/efi.c                       |   5 +
- arch/arm64/kernel/setup.c                     |   2 +-
- arch/arm64/xen/Makefile                       |   1 +
- arch/arm64/xen/efi.c                          |  36 +++++
- arch/x86/xen/efi.c                            | 112 ++++++++++++++++
- arch/x86/xen/grant-table.c                    |  57 +-------
- drivers/acpi/bus.c                            |  30 +++++
- drivers/firmware/efi/efi.c                    |  45 ++++++-
- drivers/xen/Kconfig                           |   2 +-
- drivers/xen/Makefile                          |   1 +
- drivers/xen/arm-device.c                      | 183 ++++++++++++++++++++++++++
- drivers/xen/efi.c                             | 174 +++++-------------------
- drivers/xen/xlate_mmu.c                       |  61 +++++++++
- include/xen/interface/hvm/params.h            |   5 +
- include/xen/interface/memory.h                |   1 +
- include/xen/xen-ops.h                         |  33 +++--
- 19 files changed, 689 insertions(+), 234 deletions(-)
- create mode 100644 arch/arm64/xen/efi.c
- create mode 100644 drivers/xen/arm-device.c
-
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index 4e78c49..5d0fe68 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -19,6 +19,7 @@
+ #include <linux/irqreturn.h>
+ #include <linux/module.h>
+ #include <linux/of.h>
++#include <linux/of_fdt.h>
+ #include <linux/of_irq.h>
+ #include <linux/of_address.h>
+ #include <linux/cpuidle.h>
+@@ -52,8 +53,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
+ 
+ static __read_mostly unsigned int xen_events_irq;
+ 
+-static __initdata struct device_node *xen_node;
+-
+ int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
+ 			       unsigned long addr,
+ 			       xen_pfn_t *gfn, int nr,
+@@ -222,6 +221,33 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
+ 	return IRQ_HANDLED;
+ }
+ 
++static __initdata struct {
++	const char *compat;
++	const char *prefix;
++	const char *version;
++	bool found;
++} xen_node = {"xen,xen", "xen,xen-", NULL, false};
++
++static int __init fdt_find_xen_node(unsigned long node, const char *uname,
++				    int depth, void *data)
++{
++	const void *s = NULL;
++	int len;
++
++	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
++		return 0;
++
++	if (of_flat_dt_is_compatible(node, xen_node.compat))
++		xen_node.found = true;
++
++	s = of_get_flat_dt_prop(node, "compatible", &len);
++	if (strlen(xen_node.prefix) + 3  < len &&
++	    !strncmp(xen_node.prefix, s, strlen(xen_node.prefix)))
++		xen_node.version = s + strlen(xen_node.prefix);
++
++	return 0;
++}
++
+ /*
+  * see Documentation/devicetree/bindings/arm/xen.txt for the
+  * documentation of the Xen Device Tree format.
+@@ -229,26 +255,18 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
+ #define GRANT_TABLE_PHYSADDR 0
+ void __init xen_early_init(void)
+ {
+-	int len;
+-	const char *s = NULL;
+-	const char *version = NULL;
+-	const char *xen_prefix = "xen,xen-";
+-
+-	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
+-	if (!xen_node) {
++	of_scan_flat_dt(fdt_find_xen_node, NULL);
++	if (!xen_node.found) {
+ 		pr_debug("No Xen support\n");
+ 		return;
+ 	}
+-	s = of_get_property(xen_node, "compatible", &len);
+-	if (strlen(xen_prefix) + 3  < len &&
+-			!strncmp(xen_prefix, s, strlen(xen_prefix)))
+-		version = s + strlen(xen_prefix);
+-	if (version == NULL) {
++
++	if (xen_node.version == NULL) {
+ 		pr_debug("Xen version not found\n");
+ 		return;
+ 	}
+ 
+-	pr_info("Xen %s support found\n", version);
++	pr_info("Xen %s support found\n", xen_node.version);
+ 
+ 	xen_domain_type = XEN_HVM_DOMAIN;
+ 
+@@ -296,6 +314,14 @@ static int __init xen_guest_init(void)
+ 		}
+ #endif
+ 	} else {
++		struct device_node *xen_node;
++
++		xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
++		if (!xen_node) {
++			pr_debug("No Xen support\n");
++			return -ENODEV;
++		}
++
+ 		xen_events_irq = irq_of_parse_and_map(xen_node, 0);
+ 	}
+ 
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 8119479..a4a2878 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
+ 	 */
+ 	local_async_enable();
+ 
++	xen_early_init();
+ 	efi_init();
+ 	arm64_memblock_init();
+ 
+@@ -334,7 +335,6 @@ void __init setup_arch(char **cmdline_p)
+ 	} else {
+ 		psci_acpi_init();
+ 	}
+-	xen_early_init();
+ 
+ 	cpu_read_bootcpu_ops();
+ 	smp_init_cpus();
 -- 
 2.0.4
