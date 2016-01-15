@@ -1,8 +1,8 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v2 10/16] ARM: XEN: Move xen_early_init() before
-	efi_init()
-Date: Fri, 15 Jan 2016 14:55:23 +0800
-Message-ID: <1452840929-19612-11-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v2 07/16] Xen: ARM: Add support for mapping AMBA
+	device mmio
+Date: Fri, 15 Jan 2016 14:55:20 +0800
+Message-ID: <1452840929-19612-8-git-send-email-zhaoshenglong@huawei.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,138 +23,64 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Move xen_early_init() before efi_init(), then when calling efi_init()
-could initialize Xen specific UEFI.
-
-Check if it runs on Xen hypervisor through the flat dts.
+Add a bus_notifier for AMBA bus device in order to map the device
+mmio regions when DOM0 booting with ACPI.
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
- arch/arm/xen/enlighten.c  | 56 ++++++++++++++++++++++++++++++++++-------------
- arch/arm64/kernel/setup.c |  2 +-
- 2 files changed, 42 insertions(+), 16 deletions(-)
+ drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 43 insertions(+)
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 4e78c49..5d0fe68 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -19,6 +19,7 @@
- #include <linux/irqreturn.h>
- #include <linux/module.h>
- #include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/of_irq.h>
- #include <linux/of_address.h>
- #include <linux/cpuidle.h>
-@@ -52,8 +53,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
- 
- static __read_mostly unsigned int xen_events_irq;
- 
--static __initdata struct device_node *xen_node;
--
- int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
- 			       unsigned long addr,
- 			       xen_pfn_t *gfn, int nr,
-@@ -222,6 +221,33 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- 	return IRQ_HANDLED;
+diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
+index 7d902ea..9978f8d 100644
+--- a/drivers/xen/arm-device.c
++++ b/drivers/xen/arm-device.c
+@@ -138,3 +138,46 @@ static int __init register_xen_platform_notifier(void)
  }
  
-+static __initdata struct {
-+	const char *compat;
-+	const char *prefix;
-+	const char *version;
-+	bool found;
-+} xen_node = {"xen,xen", "xen,xen-", NULL, false};
+ arch_initcall(register_xen_platform_notifier);
 +
-+static int __init fdt_find_xen_node(unsigned long node, const char *uname,
-+				    int depth, void *data)
++#ifdef CONFIG_ARM_AMBA
++#include <linux/amba/bus.h>
++
++static int xen_amba_notifier(struct notifier_block *nb,
++			     unsigned long action, void *data)
 +{
-+	const void *s = NULL;
-+	int len;
++	struct amba_device *adev = to_amba_device(data);
++	int r = 0;
 +
-+	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-+		return 0;
++	switch (action) {
++	case BUS_NOTIFY_ADD_DEVICE:
++		r = xen_map_device_mmio(&adev->res, 1);
++		break;
++	case BUS_NOTIFY_DEL_DEVICE:
++		r = xen_unmap_device_mmio(&adev->res, 1);
++		break;
++	default:
++		return NOTIFY_DONE;
++	}
++	if (r)
++		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
++			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
++			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
++			adev->dev.init_name);
 +
-+	if (of_flat_dt_is_compatible(node, xen_node.compat))
-+		xen_node.found = true;
-+
-+	s = of_get_flat_dt_prop(node, "compatible", &len);
-+	if (strlen(xen_node.prefix) + 3  < len &&
-+	    !strncmp(xen_node.prefix, s, strlen(xen_node.prefix)))
-+		xen_node.version = s + strlen(xen_node.prefix);
-+
-+	return 0;
++	return NOTIFY_OK;
 +}
 +
- /*
-  * see Documentation/devicetree/bindings/arm/xen.txt for the
-  * documentation of the Xen Device Tree format.
-@@ -229,26 +255,18 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- #define GRANT_TABLE_PHYSADDR 0
- void __init xen_early_init(void)
- {
--	int len;
--	const char *s = NULL;
--	const char *version = NULL;
--	const char *xen_prefix = "xen,xen-";
--
--	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
--	if (!xen_node) {
-+	of_scan_flat_dt(fdt_find_xen_node, NULL);
-+	if (!xen_node.found) {
- 		pr_debug("No Xen support\n");
- 		return;
- 	}
--	s = of_get_property(xen_node, "compatible", &len);
--	if (strlen(xen_prefix) + 3  < len &&
--			!strncmp(xen_prefix, s, strlen(xen_prefix)))
--		version = s + strlen(xen_prefix);
--	if (version == NULL) {
++static struct notifier_block amba_device_nb = {
++	.notifier_call = xen_amba_notifier,
++};
 +
-+	if (xen_node.version == NULL) {
- 		pr_debug("Xen version not found\n");
- 		return;
- 	}
- 
--	pr_info("Xen %s support found\n", version);
-+	pr_info("Xen %s support found\n", xen_node.version);
- 
- 	xen_domain_type = XEN_HVM_DOMAIN;
- 
-@@ -296,6 +314,14 @@ static int __init xen_guest_init(void)
- 		}
- #endif
- 	} else {
-+		struct device_node *xen_node;
++static int __init register_xen_amba_notifier(void)
++{
++	if (!xen_initial_domain() || acpi_disabled)
++		return 0;
 +
-+		xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-+		if (!xen_node) {
-+			pr_debug("No Xen support\n");
-+			return -ENODEV;
-+		}
++	return bus_register_notifier(&amba_bustype, &amba_device_nb);
++}
 +
- 		xen_events_irq = irq_of_parse_and_map(xen_node, 0);
- 	}
- 
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 8119479..a4a2878 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
- 	 */
- 	local_async_enable();
- 
-+	xen_early_init();
- 	efi_init();
- 	arm64_memblock_init();
- 
-@@ -334,7 +335,6 @@ void __init setup_arch(char **cmdline_p)
- 	} else {
- 		psci_acpi_init();
- 	}
--	xen_early_init();
- 
- 	cpu_read_bootcpu_ops();
- 	smp_init_cpus();
++arch_initcall(register_xen_amba_notifier);
++#endif
 -- 
 2.0.4
