@@ -1,8 +1,8 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v2 05/16] xen: memory : Add new XENMAPSPACE type
-	XENMAPSPACE_dev_mmio
-Date: Fri, 15 Jan 2016 14:55:18 +0800
-Message-ID: <1452840929-19612-6-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v2 08/16] xen/hvm/params: Add a new delivery
+	type for event-channel in HVM_PARAM_CALLBACK_IRQ
+Date: Fri, 15 Jan 2016 14:55:21 +0800
+Message-ID: <1452840929-19612-9-git-send-email-zhaoshenglong@huawei.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,24 +23,31 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Add a new type of Xen map space for Dom0 to map device's MMIO region.
+Add a new delivery type:
+val[63:56] == 3: val[15:8] is flag: val[7:0] is a PPI.
+To the flag, bit 0 stands the interrupt mode is edge(1) or level(0) and
+bit 1 stands the interrupt polarity is active low(1) or high(0).
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
- include/xen/interface/memory.h | 1 +
- 1 file changed, 1 insertion(+)
+ include/xen/interface/hvm/params.h | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/include/xen/interface/memory.h b/include/xen/interface/memory.h
-index 2ecfe4f..9aa8988 100644
---- a/include/xen/interface/memory.h
-+++ b/include/xen/interface/memory.h
-@@ -160,6 +160,7 @@ DEFINE_GUEST_HANDLE_STRUCT(xen_machphys_mapping_t);
- #define XENMAPSPACE_gmfn_foreign 4 /* GMFN from another dom,
- 				    * XENMEM_add_to_physmap_range only.
- 				    */
-+#define XENMAPSPACE_dev_mmio     5 /* device mmio region */
- 
- /*
-  * Sets the GPFN at which a particular page appears in the specified guest's
+diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+index a6c7991..550688a 100644
+--- a/include/xen/interface/hvm/params.h
++++ b/include/xen/interface/hvm/params.h
+@@ -34,6 +34,11 @@
+  *                  Domain = val[47:32], Bus  = val[31:16],
+  *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
+  * val[63:56] == 2: val[7:0] is a vector number.
++ * val[63:56] == 3: val[15:8] is flag of event-channel interrupt:
++ *                      bit 0: interrupt is edge(1) or level(0) triggered
++ *                      bit 1: interrupt is active low(1) or high(0)
++ *                  val[7:0] is PPI number used by event-channel.
++ *                  This is only used by ARM/ARM64.
+  * If val == 0 then CPU0 event-channel notifications are not delivered.
+  */
+ #define HVM_PARAM_CALLBACK_IRQ 0
 -- 
 2.0.4
