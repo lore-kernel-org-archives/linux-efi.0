@@ -1,8 +1,8 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v2 14/16] Xen: EFI: Parse DT parameters for Xen
-	specific UEFI
-Date: Fri, 15 Jan 2016 14:55:27 +0800
-Message-ID: <1452840929-19612-15-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v2 02/16] xen/grant-table: Move
+	xlated_setup_gnttab_pages to common place
+Date: Fri, 15 Jan 2016 14:55:15 +0800
+Message-ID: <1452840929-19612-3-git-send-email-zhaoshenglong@huawei.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
@@ -23,118 +23,187 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Add a new function to parse DT parameters for Xen specific UEFI just
-like the way for normal UEFI. Then it could reuse the existing codes.
+Move xlated_setup_gnttab_pages to common place, so it can be reused by
+ARM to setup grant table.
+
+Rename it to xen_xlate_map_ballooned_pages.
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
- drivers/firmware/efi/efi.c | 45 ++++++++++++++++++++++++++++++++++++++-------
- 1 file changed, 38 insertions(+), 7 deletions(-)
+ arch/x86/xen/grant-table.c | 57 +++++--------------------------------------
+ drivers/xen/xlate_mmu.c    | 61 ++++++++++++++++++++++++++++++++++++++++++++++
+ include/xen/xen-ops.h      |  2 ++
+ 3 files changed, 69 insertions(+), 51 deletions(-)
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 027ca21..2dbc2ac 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -24,6 +24,7 @@
- #include <linux/of_fdt.h>
- #include <linux/io.h>
- #include <linux/platform_device.h>
-+#include <xen/xen.h>
- 
- struct efi __read_mostly efi = {
- 	.mps			= EFI_INVALID_TABLE_ADDR,
-@@ -498,12 +499,14 @@ device_initcall(efi_load_efivars);
- 		FIELD_SIZEOF(struct efi_fdt_params, field) \
- 	}
- 
--static __initdata struct {
-+struct params {
- 	const char name[32];
- 	const char propname[32];
- 	int offset;
- 	int size;
--} dt_params[] = {
-+};
-+
-+static struct params fdt_params[] __initdata = {
- 	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
- 	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
- 	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-@@ -511,6 +514,14 @@ static __initdata struct {
- 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
- };
- 
-+static struct params xen_fdt_params[] __initdata = {
-+	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
-+};
-+
- struct param_info {
- 	int found;
- 	void *params;
-@@ -520,15 +531,28 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- 				       int depth, void *data)
- {
- 	struct param_info *info = data;
-+	struct params *dt_params;
-+	unsigned int size;
- 	const void *prop;
- 	void *dest;
- 	u64 val;
- 	int i, len;
- 
--	if (depth != 1 || strcmp(uname, "chosen") != 0)
--		return 0;
-+	if (efi_enabled(EFI_PARAVIRT)) {
-+		if (depth != 2 || strcmp(uname, "uefi") != 0)
-+			return 0;
- 
--	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		dt_params = xen_fdt_params;
-+		size = ARRAY_SIZE(xen_fdt_params);
-+	} else {
-+		if (depth != 1 || strcmp(uname, "chosen") != 0)
-+			return 0;
-+
-+		dt_params = fdt_params;
-+		size = ARRAY_SIZE(fdt_params);
-+	}
-+
-+	for (i = 0; i < size; i++) {
- 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
- 		if (!prop)
- 			return 0;
-@@ -552,6 +576,7 @@ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- int __init efi_get_fdt_params(struct efi_fdt_params *params)
- {
- 	struct param_info info;
-+	struct params *dt_params;
- 	int ret;
- 
- 	pr_info("Getting EFI parameters from FDT:\n");
-@@ -559,12 +584,18 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
- 	info.found = 0;
- 	info.params = params;
- 
-+	if (efi_enabled(EFI_PARAVIRT))
-+		dt_params = xen_fdt_params;
-+	else
-+		dt_params = fdt_params;
-+
- 	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
--	if (!info.found)
-+	if (!info.found) {
- 		pr_info("UEFI not found.\n");
--	else if (!ret)
-+	} else if (!ret) {
- 		pr_err("Can't find '%s' in device tree!\n",
- 		       dt_params[info.found].name);
-+	}
- 
- 	return ret;
+diff --git a/arch/x86/xen/grant-table.c b/arch/x86/xen/grant-table.c
+index e079500..de4144c 100644
+--- a/arch/x86/xen/grant-table.c
++++ b/arch/x86/xen/grant-table.c
+@@ -111,63 +111,18 @@ int arch_gnttab_init(unsigned long nr_shared)
  }
+ 
+ #ifdef CONFIG_XEN_PVH
+-#include <xen/balloon.h>
+ #include <xen/events.h>
+-#include <linux/slab.h>
+-static int __init xlated_setup_gnttab_pages(void)
+-{
+-	struct page **pages;
+-	xen_pfn_t *pfns;
+-	void *vaddr;
+-	int rc;
+-	unsigned int i;
+-	unsigned long nr_grant_frames = gnttab_max_grant_frames();
+-
+-	BUG_ON(nr_grant_frames == 0);
+-	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
+-	if (!pages)
+-		return -ENOMEM;
+-
+-	pfns = kcalloc(nr_grant_frames, sizeof(pfns[0]), GFP_KERNEL);
+-	if (!pfns) {
+-		kfree(pages);
+-		return -ENOMEM;
+-	}
+-	rc = alloc_xenballooned_pages(nr_grant_frames, pages);
+-	if (rc) {
+-		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
+-			nr_grant_frames, rc);
+-		kfree(pages);
+-		kfree(pfns);
+-		return rc;
+-	}
+-	for (i = 0; i < nr_grant_frames; i++)
+-		pfns[i] = page_to_pfn(pages[i]);
+-
+-	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
+-	if (!vaddr) {
+-		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
+-			nr_grant_frames, rc);
+-		free_xenballooned_pages(nr_grant_frames, pages);
+-		kfree(pages);
+-		kfree(pfns);
+-		return -ENOMEM;
+-	}
+-	kfree(pages);
+-
+-	xen_auto_xlat_grant_frames.pfn = pfns;
+-	xen_auto_xlat_grant_frames.count = nr_grant_frames;
+-	xen_auto_xlat_grant_frames.vaddr = vaddr;
+-
+-	return 0;
+-}
+-
++#include <xen/xen-ops.h>
+ static int __init xen_pvh_gnttab_setup(void)
+ {
+ 	if (!xen_pvh_domain())
+ 		return -ENODEV;
+ 
+-	return xlated_setup_gnttab_pages();
++	xen_auto_xlat_grant_frames.count = gnttab_max_grant_frames();
++
++	return xen_xlate_map_ballooned_pages(&xen_auto_xlat_grant_frames.pfn,
++					     &xen_auto_xlat_grant_frames.vaddr,
++					     xen_auto_xlat_grant_frames.count);
+ }
+ /* Call it _before_ __gnttab_init as we need to initialize the
+  * xen_auto_xlat_grant_frames first. */
+diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
+index 5063c5e..9692656 100644
+--- a/drivers/xen/xlate_mmu.c
++++ b/drivers/xen/xlate_mmu.c
+@@ -29,6 +29,8 @@
+  */
+ #include <linux/kernel.h>
+ #include <linux/mm.h>
++#include <linux/slab.h>
++#include <linux/vmalloc.h>
+ 
+ #include <asm/xen/hypercall.h>
+ #include <asm/xen/hypervisor.h>
+@@ -37,6 +39,7 @@
+ #include <xen/page.h>
+ #include <xen/interface/xen.h>
+ #include <xen/interface/memory.h>
++#include <xen/balloon.h>
+ 
+ typedef void (*xen_gfn_fn_t)(unsigned long gfn, void *data);
+ 
+@@ -185,3 +188,61 @@ int xen_xlate_unmap_gfn_range(struct vm_area_struct *vma,
+ 	return 0;
+ }
+ EXPORT_SYMBOL_GPL(xen_xlate_unmap_gfn_range);
++
++/**
++ * xen_xlate_map_ballooned_pages - map a new set of ballooned pages
++ * @gfns: returns the array of corresponding GFNs
++ * @virt: returns the virtual address of the mapped region
++ * @nr_grant_frames: number of GFNs
++ * @return 0 on success, error otherwise
++ *
++ * This allocates a set of ballooned pages and maps them into the
++ * kernel's address space.
++ */
++int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
++					 unsigned long nr_grant_frames)
++{
++	struct page **pages;
++	xen_pfn_t *pfns;
++	void *vaddr;
++	int rc;
++	unsigned int i;
++
++	BUG_ON(nr_grant_frames == 0);
++	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
++	if (!pages)
++		return -ENOMEM;
++
++	pfns = kcalloc(nr_grant_frames, sizeof(pfns[0]), GFP_KERNEL);
++	if (!pfns) {
++		kfree(pages);
++		return -ENOMEM;
++	}
++	rc = alloc_xenballooned_pages(nr_grant_frames, pages);
++	if (rc) {
++		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
++			nr_grant_frames, rc);
++		kfree(pages);
++		kfree(pfns);
++		return rc;
++	}
++	for (i = 0; i < nr_grant_frames; i++)
++		pfns[i] = page_to_pfn(pages[i]);
++
++	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
++	if (!vaddr) {
++		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
++			nr_grant_frames, rc);
++		free_xenballooned_pages(nr_grant_frames, pages);
++		kfree(pages);
++		kfree(pfns);
++		return -ENOMEM;
++	}
++	kfree(pages);
++
++	*gfns = pfns;
++	*virt = vaddr;
++
++	return 0;
++}
++EXPORT_SYMBOL_GPL(xen_xlate_map_ballooned_pages);
+diff --git a/include/xen/xen-ops.h b/include/xen/xen-ops.h
+index e4e214a..42be31a 100644
+--- a/include/xen/xen-ops.h
++++ b/include/xen/xen-ops.h
+@@ -80,6 +80,8 @@ int xen_xlate_remap_gfn_array(struct vm_area_struct *vma,
+ 			      struct page **pages);
+ int xen_xlate_unmap_gfn_range(struct vm_area_struct *vma,
+ 			      int nr, struct page **pages);
++int xen_xlate_map_ballooned_pages(xen_pfn_t **pfns, void **vaddr,
++				  unsigned long nr_grant_frames);
+ 
+ bool xen_running_on_version_or_later(unsigned int major, unsigned int minor);
+ 
 -- 
 2.0.4
