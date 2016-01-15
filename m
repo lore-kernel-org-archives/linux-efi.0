@@ -1,33 +1,43 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v1 1/2] lib/string_helpers: export string_units_{2,10} for others
-Date: Fri, 15 Jan 2016 00:35:20 +0200
-Message-ID: <CAHp75Ve9RK9wwwZ+XLtCPe9wzJXMWXkkcjDue4AoP5kwaZz=2A@mail.gmail.com>
-References: <1452604386-13673-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1452764705.2521.29.camel@linux.intel.com>
-	<20160114154406.GC3602@codeblueprint.co.uk>
+From: Tony Luck <tony.luck-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH] efi: fix out-of-bounds null overwrite vulnerability
+Date: Thu, 14 Jan 2016 18:06:53 -0800
+Message-ID: <CA+8MBb+qpjMJNxWA8FCwNwrPUTZK1gU=GaXMEO3YKUaGo3qLUQ@mail.gmail.com>
+References: <1452193530-76672-1-git-send-email-wuninsu@gmail.com>
+	<20160108101323.GA2532@codeblueprint.co.uk>
+	<3908561D78D1C84285E8C5FCA982C28F39FA7208@ORSMSX114.amr.corp.intel.com>
+	<20160111141605.GC2644@codeblueprint.co.uk>
+	<3908561D78D1C84285E8C5FCA982C28F39FA9B5C@ORSMSX114.amr.corp.intel.com>
+	<20160114111200.GA2810@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160114154406.GC3602-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20160114111200.GA2810-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Cc: Insu Yun <wuninsu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "taesoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <taesoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "yeongjin.jang-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <yeongjin.jang-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "insu-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <insu-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>, "changwoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org" <changwoo-/4noJB3qBVQ3uPMLIKxrzw@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 14, 2016 at 5:44 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Thu, 14 Jan, at 11:45:05AM, Andy Shevchenko wrote:
->> On Tue, 2016-01-12 at 15:13 +0200, Andy Shevchenko wrote:
->> > There is one user coming which would like to use those string arrays.
->> > It might
->> > be useful for any other user in the future.
->>
->> Please, comment on the idea, but discard both patches, I'm cooking
->> better approach.
+On Thu, Jan 14, 2016 at 3:12 AM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> What about *before* the NUL? That was the point I was trying to make.
+> If the string you print into the buffer isn't 'len' bytes in size the
+> buffer will look like,
 >
-> I like this idea. I'm all for reusing existing code where possible.
+>   "DIMM location: Foo bar<garbage.....>\0"
 
-Just sent v2.
+Doesn't that actually look like:
 
--- 
-With Best Regards,
-Andy Shevchenko
+    "DIMM location: Foo bar\0<garbage.....>\0"
+
+snprintf() will NUL terminate what it writes into the buffer
+if the buffer is big enough for what you were trying to
+write there.  The problem happens when what you want
+to write is too big. Then you have
+
+    "DIMM location: ReallyLongFoo AlsoBar"
+
+
+at which point "msg[len] = '\0'; will zap that 'r'
+at the end to make sure printk() will stop at the
+end of the valid part of buffer.
+
+-Tony
