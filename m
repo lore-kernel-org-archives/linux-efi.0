@@ -1,103 +1,186 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v2 13/16] ARM: XEN: Set EFI_PARAVIRT if Xen supports EFI
-Date: Fri, 15 Jan 2016 14:55:26 +0800
-Message-ID: <1452840929-19612-14-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: [PATCH v2 06/16] Xen: ARM: Add support for mapping platform device mmio
+Date: Fri, 15 Jan 2016 14:55:19 +0800
+Message-ID: <1452840929-19612-7-git-send-email-zhaoshenglong@huawei.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452840929-19612-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Check if there is "uefi" node in the DT. If so, set EFI_PARAVIRT flag.
+Add a bus_notifier for platform bus device in order to map the device
+mmio regions when DOM0 booting with ACPI.
 
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
- arch/arm/xen/enlighten.c | 23 +++++++++++++++++++++++
- arch/arm64/kernel/efi.c  |  5 +++++
- 2 files changed, 28 insertions(+)
+ drivers/xen/Makefile     |   1 +
+ drivers/xen/arm-device.c | 140 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 141 insertions(+)
+ create mode 100644 drivers/xen/arm-device.c
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 5d0fe68..485e117 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -31,6 +31,7 @@
- #include <linux/timekeeping.h>
- #include <linux/timekeeper_internal.h>
- #include <linux/acpi.h>
-+#include <linux/efi.h>
+diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
+index aa8a7f7..0c087b1 100644
+--- a/drivers/xen/Makefile
++++ b/drivers/xen/Makefile
+@@ -9,6 +9,7 @@ CFLAGS_features.o			:= $(nostackp)
  
- #include <linux/mm.h>
+ CFLAGS_efi.o				+= -fshort-wchar
  
-@@ -248,6 +249,19 @@ static int __init fdt_find_xen_node(unsigned long node, const char *uname,
- 	return 0;
- }
- 
-+static int __init fdt_find_uefi_node(unsigned long node, const char *uname,
-+				     int depth, void *data)
++dom0-$(CONFIG_ARM64) += arm-device.o
+ dom0-$(CONFIG_PCI) += pci.o
+ dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
+ dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
+diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
+new file mode 100644
+index 0000000..7d902ea
+--- /dev/null
++++ b/drivers/xen/arm-device.c
+@@ -0,0 +1,140 @@
++/*
++ * Copyright (c) 2015, Linaro Limited, Shannon Zhao
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <linux/platform_device.h>
++#include <linux/acpi.h>
++#include <xen/xen.h>
++#include <xen/page.h>
++#include <xen/interface/memory.h>
++#include <asm/xen/hypervisor.h>
++#include <asm/xen/hypercall.h>
++
++static int xen_unmap_device_mmio(struct resource *resource, unsigned int count)
 +{
-+	bool *found = data;
++	unsigned int i, j, nr;
++	int rc = 0;
++	struct resource *r;
++	struct xen_remove_from_physmap xrp;
 +
-+	if (depth != 2 || strcmp(uname, "uefi") != 0)
-+		return 0;
++	for (i = 0; i < count; i++) {
++		r = &resource[i];
++		nr = DIV_ROUND_UP(resource_size(r), XEN_PAGE_SIZE);
++		if ((resource_type(r) != IORESOURCE_MEM) || (nr == 0))
++			continue;
 +
-+	*found = true;
++		for (j = 0; j < nr; j++) {
++			xrp.domid = DOMID_SELF;
++			xrp.gpfn = XEN_PFN_DOWN(r->start) + j;
++			rc = HYPERVISOR_memory_op(XENMEM_remove_from_physmap,
++						  &xrp);
++			if (rc)
++				return rc;
++		}
++	}
 +
-+	return 1;
++	return rc;
 +}
 +
- /*
-  * see Documentation/devicetree/bindings/arm/xen.txt for the
-  * documentation of the Xen Device Tree format.
-@@ -255,6 +269,8 @@ static int __init fdt_find_xen_node(unsigned long node, const char *uname,
- #define GRANT_TABLE_PHYSADDR 0
- void __init xen_early_init(void)
- {
-+	bool uefi_found = false;
++static int xen_map_device_mmio(struct resource *resource, unsigned int count)
++{
++	unsigned int i, j, nr;
++	int rc = 0;
++	struct resource *r;
++	xen_pfn_t *gpfns;
++	xen_ulong_t *idxs;
++	int *errs;
++	struct xen_add_to_physmap_range xatp;
 +
- 	of_scan_flat_dt(fdt_find_xen_node, NULL);
- 	if (!xen_node.found) {
- 		pr_debug("No Xen support\n");
-@@ -279,6 +295,13 @@ void __init xen_early_init(void)
- 
- 	if (!console_set_on_cmdline && !xen_initial_domain())
- 		add_preferred_console("hvc", 0, NULL);
++	for (i = 0; i < count; i++) {
++		r = &resource[i];
++		nr = DIV_ROUND_UP(resource_size(r), XEN_PAGE_SIZE);
++		if ((resource_type(r) != IORESOURCE_MEM) || (nr == 0))
++			continue;
 +
-+	if (IS_ENABLED(CONFIG_XEN_EFI)) {
-+		/* Check if Xen support UEFI */
-+		of_scan_flat_dt(fdt_find_uefi_node, &uefi_found);
-+		if (uefi_found)
-+			set_bit(EFI_PARAVIRT, &efi.flags);
++		gpfns = kzalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
++		idxs = kzalloc(sizeof(xen_ulong_t) * nr, GFP_KERNEL);
++		errs = kzalloc(sizeof(int) * nr, GFP_KERNEL);
++		if (!gpfns || !idxs || !errs) {
++			kfree(gpfns);
++			kfree(idxs);
++			return -ENOMEM;
++		}
++
++		for (j = 0; j < nr; j++) {
++			gpfns[j] = XEN_PFN_DOWN(r->start) + j;
++			idxs[j] = XEN_PFN_DOWN(r->start) + j;
++		}
++
++		xatp.domid = DOMID_SELF;
++		xatp.size = nr;
++		xatp.space = XENMAPSPACE_dev_mmio;
++
++		set_xen_guest_handle(xatp.gpfns, gpfns);
++		set_xen_guest_handle(xatp.idxs, idxs);
++		set_xen_guest_handle(xatp.errs, errs);
++
++		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
++		kfree(gpfns);
++		kfree(idxs);
++		kfree(errs);
++		if (rc)
++			return rc;
 +	}
- }
- 
- static int __init xen_guest_init(void)
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index 4eeb171..16c6b72 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -288,6 +288,11 @@ static int __init arm64_enable_runtime_services(void)
- 		return 0;
- 	}
- 
-+	if (efi_enabled(EFI_PARAVIRT)) {
-+		pr_info("EFI runtime services access via paravirt.\n");
-+		return -1;
-+	}
 +
- 	pr_info("Remapping and enabling EFI services.\n");
- 
- 	mapsize = memmap.map_end - memmap.map;
++	return rc;
++}
++
++static int xen_platform_notifier(struct notifier_block *nb,
++				 unsigned long action, void *data)
++{
++	struct platform_device *pdev = to_platform_device(data);
++	int r = 0;
++
++	if (pdev->num_resources == 0 || pdev->resource == NULL)
++		return NOTIFY_OK;
++
++	switch (action) {
++	case BUS_NOTIFY_ADD_DEVICE:
++		r = xen_map_device_mmio(pdev->resource, pdev->num_resources);
++		break;
++	case BUS_NOTIFY_DEL_DEVICE:
++		r = xen_unmap_device_mmio(pdev->resource, pdev->num_resources);
++		break;
++	default:
++		return NOTIFY_DONE;
++	}
++	if (r)
++		dev_err(&pdev->dev, "Platform: Failed to %s device %s MMIO!\n",
++			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
++			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
++			pdev->name);
++
++	return NOTIFY_OK;
++}
++
++static struct notifier_block platform_device_nb = {
++	.notifier_call = xen_platform_notifier,
++};
++
++static int __init register_xen_platform_notifier(void)
++{
++	if (!xen_initial_domain() || acpi_disabled)
++		return 0;
++
++	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
++}
++
++arch_initcall(register_xen_platform_notifier);
 -- 
 2.0.4
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
