@@ -1,173 +1,62 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH v2 10/16] ARM: XEN: Move xen_early_init()
- before efi_init()
-Date: Mon, 18 Jan 2016 14:59:31 +0000
-Message-ID: <alpine.DEB.2.02.1601181445210.16178@kaball.uk.xensource.com>
+Subject: Re: [PATCH v2 11/16] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Mon, 18 Jan 2016 15:07:58 +0000
+Message-ID: <alpine.DEB.2.02.1601181505200.16178@kaball.uk.xensource.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
- <1452840929-19612-11-git-send-email-zhaoshenglong@huawei.com>
+ <1452840929-19612-12-git-send-email-zhaoshenglong@huawei.com>
+ <20160118104142.GC21067@leverpostej>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452840929-19612-11-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160118104142.GC21067@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Cc: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Ian Campbell <Ian.Campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 15 Jan 2016, Shannon Zhao wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+On Mon, 18 Jan 2016, Mark Rutland wrote:
+> On Fri, Jan 15, 2016 at 02:55:24PM +0800, Shannon Zhao wrote:
+> > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > 
+> > When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+> > a /hypervisor node in DT. So check if it needs to enable ACPI.
+> > 
+> > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
+> >  arch/arm64/kernel/acpi.c | 12 ++++++++----
+> >  1 file changed, 8 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> > index d1ce8e2..4e92be0 100644
+> > --- a/arch/arm64/kernel/acpi.c
+> > +++ b/arch/arm64/kernel/acpi.c
+> > @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+> >  {
+> >  	/*
+> >  	 * Return 1 as soon as we encounter a node at depth 1 that is
+> > -	 * not the /chosen node.
+> > +	 * not the /chosen node, or /hypervisor node when running on Xen.
+> >  	 */
+> > -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+> > -		return 1;
+> > +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
+> > +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
+> > +			return 1;
+> > +	}
+> > +
+> >  	return 0;
+> >  }
 > 
-> Move xen_early_init() before efi_init(), then when calling efi_init()
-> could initialize Xen specific UEFI.
+> As this is changing the semantic of an "empty" DT, we should consider
+> now if there's anything else that might also need to exist in an "empty"
+> DT. We don't want to change this again in future if we don't have to,
+> given the compatiblity nightmare that's sure to result.
 > 
-> Check if it runs on Xen hypervisor through the flat dts.
-> 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm/xen/enlighten.c  | 56 ++++++++++++++++++++++++++++++++++-------------
->  arch/arm64/kernel/setup.c |  2 +-
->  2 files changed, 42 insertions(+), 16 deletions(-)
-> 
-> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-> index 4e78c49..5d0fe68 100644
-> --- a/arch/arm/xen/enlighten.c
-> +++ b/arch/arm/xen/enlighten.c
-> @@ -19,6 +19,7 @@
->  #include <linux/irqreturn.h>
->  #include <linux/module.h>
->  #include <linux/of.h>
-> +#include <linux/of_fdt.h>
->  #include <linux/of_irq.h>
->  #include <linux/of_address.h>
->  #include <linux/cpuidle.h>
-> @@ -52,8 +53,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
->  
->  static __read_mostly unsigned int xen_events_irq;
->  
-> -static __initdata struct device_node *xen_node;
-> -
->  int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
->  			       unsigned long addr,
->  			       xen_pfn_t *gfn, int nr,
-> @@ -222,6 +221,33 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
->  	return IRQ_HANDLED;
->  }
->  
-> +static __initdata struct {
-> +	const char *compat;
-> +	const char *prefix;
-> +	const char *version;
-> +	bool found;
-> +} xen_node = {"xen,xen", "xen,xen-", NULL, false};
-> +
-> +static int __init fdt_find_xen_node(unsigned long node, const char *uname,
-> +				    int depth, void *data)
-> +{
-> +	const void *s = NULL;
-> +	int len;
-> +
-> +	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-> +		return 0;
-> +
-> +	if (of_flat_dt_is_compatible(node, xen_node.compat))
-> +		xen_node.found = true;
-> +
-> +	s = of_get_flat_dt_prop(node, "compatible", &len);
-> +	if (strlen(xen_node.prefix) + 3  < len &&
-> +	    !strncmp(xen_node.prefix, s, strlen(xen_node.prefix)))
-> +		xen_node.version = s + strlen(xen_node.prefix);
-> +
-> +	return 0;
-> +}
-> +
->  /*
->   * see Documentation/devicetree/bindings/arm/xen.txt for the
->   * documentation of the Xen Device Tree format.
-> @@ -229,26 +255,18 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
->  #define GRANT_TABLE_PHYSADDR 0
->  void __init xen_early_init(void)
->  {
-> -	int len;
-> -	const char *s = NULL;
-> -	const char *version = NULL;
-> -	const char *xen_prefix = "xen,xen-";
-> -
-> -	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-> -	if (!xen_node) {
-> +	of_scan_flat_dt(fdt_find_xen_node, NULL);
-> +	if (!xen_node.found) {
->  		pr_debug("No Xen support\n");
->  		return;
->  	}
-> -	s = of_get_property(xen_node, "compatible", &len);
-> -	if (strlen(xen_prefix) + 3  < len &&
-> -			!strncmp(xen_prefix, s, strlen(xen_prefix)))
-> -		version = s + strlen(xen_prefix);
-> -	if (version == NULL) {
-> +
-> +	if (xen_node.version == NULL) {
->  		pr_debug("Xen version not found\n");
->  		return;
->  	}
+> We should also consider if the "hypervisor" node name is sufficient (I
+> think it is, but let's not assume anything).
 
-This is going to access data within the fdt, after it has been
-unflattened (by the unflatten_device_tree call). Is that allowed?
-
-If that's not allowed, then you could copy the version string to
-xen_node.version, rather than just copying the pointer. Otherwise you
-could move the version check entirely within fdt_find_xen_node and
-remove the version field from xen_node.
-
-
-> -	pr_info("Xen %s support found\n", version);
-> +	pr_info("Xen %s support found\n", xen_node.version);
->  
->  	xen_domain_type = XEN_HVM_DOMAIN;
->  
-> @@ -296,6 +314,14 @@ static int __init xen_guest_init(void)
->  		}
->  #endif
->  	} else {
-> +		struct device_node *xen_node;
-> +
-> +		xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-> +		if (!xen_node) {
-> +			pr_debug("No Xen support\n");
-> +			return -ENODEV;
-> +		}
-
-It makes sense to move this into a DT specific init function called from
-xen_guest_init. Also, given that at this point we know that a Xen node
-should be present, it makes sense to return EFAULT on error, instead of
-ENODEV. The error message could be changed to something like: "Xen
-support was detected before, but it has disappeared" and should be
-pr_err.
-
-
->  		xen_events_irq = irq_of_parse_and_map(xen_node, 0);
->  	}
->  
-> diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-> index 8119479..a4a2878 100644
-> --- a/arch/arm64/kernel/setup.c
-> +++ b/arch/arm64/kernel/setup.c
-> @@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
->  	 */
->  	local_async_enable();
->  
-> +	xen_early_init();
->  	efi_init();
->  	arm64_memblock_init();
->  
-> @@ -334,7 +335,6 @@ void __init setup_arch(char **cmdline_p)
->  	} else {
->  		psci_acpi_init();
->  	}
-> -	xen_early_init();
->  
->  	cpu_read_bootcpu_ops();
->  	smp_init_cpus();
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>From Xen point of view I think it is enough: real hardware is described
+in ACPI anyway and anything hypervisor related can be done via
+hypercalls once Xen support is discovered, for which the hypervisor node
+is sufficient.
