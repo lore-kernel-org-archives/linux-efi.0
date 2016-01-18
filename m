@@ -1,61 +1,91 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v2 01/16] Xen: ACPI: Hide UART used by Xen
-Date: Mon, 18 Jan 2016 11:38:08 +0000
-Message-ID: <alpine.DEB.2.02.1601181135260.16178@kaball.uk.xensource.com>
+Subject: Re: [Xen-devel] [PATCH v2 07/16] Xen: ARM: Add support for mapping
+ AMBA device mmio
+Date: Mon, 18 Jan 2016 11:58:48 +0000
+Message-ID: <alpine.DEB.2.02.1601181158210.16178@kaball.uk.xensource.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
- <1452840929-19612-2-git-send-email-zhaoshenglong@huawei.com>
- <20160118103216.GB21067@leverpostej>
+ <1452840929-19612-8-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160118103216.GB21067@leverpostej>
+In-Reply-To: <1452840929-19612-8-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "open list:ACPI" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 18 Jan 2016, Mark Rutland wrote:
-> On Fri, Jan 15, 2016 at 02:55:14PM +0800, Shannon Zhao wrote:
-> > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > 
-> > ACPI 6.0 introduces a new table STAO to list the devices which are used
-> > by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
-> > UART is used by Xen. So here it hides UART from Dom0.
-> > 
-> > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > ---
-> > CC: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org> (supporter:ACPI)
-> > CC: Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> (supporter:ACPI)
-> > CC: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (open list:ACPI)
-> > ---
-> >  drivers/acpi/bus.c | 30 ++++++++++++++++++++++++++++++
-> >  1 file changed, 30 insertions(+)
-> > 
-> > diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-> > index a212cef..d7a559f 100644
-> > --- a/drivers/acpi/bus.c
-> > +++ b/drivers/acpi/bus.c
-> > @@ -46,6 +46,7 @@ ACPI_MODULE_NAME("bus");
-> >  struct acpi_device *acpi_root;
-> >  struct proc_dir_entry *acpi_root_dir;
-> >  EXPORT_SYMBOL(acpi_root_dir);
-> > +static u64 spcr_uart_addr;
-> >  
-> >  #ifdef CONFIG_X86
-> >  #ifdef CONFIG_ACPI_CUSTOM_DSDT
-> > @@ -93,6 +94,17 @@ acpi_status acpi_bus_get_status_handle(acpi_handle handle,
-> >  {
-> >  	acpi_status status;
-> >  
-> > +	if (spcr_uart_addr != 0xffffffffffffffff) {
+On Fri, 15 Jan 2016, Shannon Zhao wrote:
+> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> The SPCR spec says that the Base Address fields being zero means that
-> console redirection is disabled (though I'm not clear on whether or not
-> that requires the whole acpi_generic_address to be zero).
+> Add a bus_notifier for AMBA bus device in order to map the device
+> mmio regions when DOM0 booting with ACPI.
 > 
-> Can we not use that here?
+> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Shannon changed the code from 0 to 0xffffffffffffffff following my
-suggestion to his previous series, but I didn't realize that the SPCR
-spec says 0 means no console redirection. In that case using 0 is
-better.
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+
+
+>  drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 43 insertions(+)
+> 
+> diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
+> index 7d902ea..9978f8d 100644
+> --- a/drivers/xen/arm-device.c
+> +++ b/drivers/xen/arm-device.c
+> @@ -138,3 +138,46 @@ static int __init register_xen_platform_notifier(void)
+>  }
+>  
+>  arch_initcall(register_xen_platform_notifier);
+> +
+> +#ifdef CONFIG_ARM_AMBA
+> +#include <linux/amba/bus.h>
+> +
+> +static int xen_amba_notifier(struct notifier_block *nb,
+> +			     unsigned long action, void *data)
+> +{
+> +	struct amba_device *adev = to_amba_device(data);
+> +	int r = 0;
+> +
+> +	switch (action) {
+> +	case BUS_NOTIFY_ADD_DEVICE:
+> +		r = xen_map_device_mmio(&adev->res, 1);
+> +		break;
+> +	case BUS_NOTIFY_DEL_DEVICE:
+> +		r = xen_unmap_device_mmio(&adev->res, 1);
+> +		break;
+> +	default:
+> +		return NOTIFY_DONE;
+> +	}
+> +	if (r)
+> +		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
+> +			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
+> +			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
+> +			adev->dev.init_name);
+> +
+> +	return NOTIFY_OK;
+> +}
+> +
+> +static struct notifier_block amba_device_nb = {
+> +	.notifier_call = xen_amba_notifier,
+> +};
+> +
+> +static int __init register_xen_amba_notifier(void)
+> +{
+> +	if (!xen_initial_domain() || acpi_disabled)
+> +		return 0;
+> +
+> +	return bus_register_notifier(&amba_bustype, &amba_device_nb);
+> +}
+> +
+> +arch_initcall(register_xen_amba_notifier);
+> +#endif
+> -- 
+> 2.0.4
+> 
+> 
+> 
+> _______________________________________________
+> Xen-devel mailing list
+> Xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
+> http://lists.xen.org/xen-devel
+> 
