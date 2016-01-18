@@ -1,91 +1,55 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH v2 07/16] Xen: ARM: Add support for mapping
- AMBA device mmio
-Date: Mon, 18 Jan 2016 11:58:48 +0000
-Message-ID: <alpine.DEB.2.02.1601181158210.16178@kaball.uk.xensource.com>
+Subject: Re: [Xen-devel] [PATCH v2 08/16] xen/hvm/params: Add a new delivery
+ type for event-channel in HVM_PARAM_CALLBACK_IRQ
+Date: Mon, 18 Jan 2016 12:38:55 +0000
+Message-ID: <alpine.DEB.2.02.1601181205110.16178@kaball.uk.xensource.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
- <1452840929-19612-8-git-send-email-zhaoshenglong@huawei.com>
+ <1452840929-19612-9-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452840929-19612-8-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1452840929-19612-9-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+To: andrew.cooper3-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
 On Fri, 15 Jan 2016, Shannon Zhao wrote:
 > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > 
-> Add a bus_notifier for AMBA bus device in order to map the device
-> mmio regions when DOM0 booting with ACPI.
+> Add a new delivery type:
+> val[63:56] == 3: val[15:8] is flag: val[7:0] is a PPI.
+> To the flag, bit 0 stands the interrupt mode is edge(1) or level(0) and
+> bit 1 stands the interrupt polarity is active low(1) or high(0).
 > 
 > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  include/xen/interface/hvm/params.h | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+> index a6c7991..550688a 100644
+> --- a/include/xen/interface/hvm/params.h
+> +++ b/include/xen/interface/hvm/params.h
+> @@ -34,6 +34,11 @@
+>   *                  Domain = val[47:32], Bus  = val[31:16],
+>   *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
+>   * val[63:56] == 2: val[7:0] is a vector number.
+> + * val[63:56] == 3: val[15:8] is flag of event-channel interrupt:
+> + *                      bit 0: interrupt is edge(1) or level(0) triggered
+> + *                      bit 1: interrupt is active low(1) or high(0)
+> + *                  val[7:0] is PPI number used by event-channel.
+> + *                  This is only used by ARM/ARM64.
+>   * If val == 0 then CPU0 event-channel notifications are not delivered.
+>   */
+>  #define HVM_PARAM_CALLBACK_IRQ 0
 
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Andrew, I think that this patch is correct. Looking back at your
+previous comment (http://marc.info/?l=devicetree&m=144804014214262&w=2),
+is it possible that you were confused by enum callback_via_type, which
+is internal to Xen and offset'ed by 1 compared to the described values
+in xen/include/public/hvm/params.h?
 
-
->  drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 43 insertions(+)
-> 
-> diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
-> index 7d902ea..9978f8d 100644
-> --- a/drivers/xen/arm-device.c
-> +++ b/drivers/xen/arm-device.c
-> @@ -138,3 +138,46 @@ static int __init register_xen_platform_notifier(void)
->  }
->  
->  arch_initcall(register_xen_platform_notifier);
-> +
-> +#ifdef CONFIG_ARM_AMBA
-> +#include <linux/amba/bus.h>
-> +
-> +static int xen_amba_notifier(struct notifier_block *nb,
-> +			     unsigned long action, void *data)
-> +{
-> +	struct amba_device *adev = to_amba_device(data);
-> +	int r = 0;
-> +
-> +	switch (action) {
-> +	case BUS_NOTIFY_ADD_DEVICE:
-> +		r = xen_map_device_mmio(&adev->res, 1);
-> +		break;
-> +	case BUS_NOTIFY_DEL_DEVICE:
-> +		r = xen_unmap_device_mmio(&adev->res, 1);
-> +		break;
-> +	default:
-> +		return NOTIFY_DONE;
-> +	}
-> +	if (r)
-> +		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
-> +			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
-> +			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
-> +			adev->dev.init_name);
-> +
-> +	return NOTIFY_OK;
-> +}
-> +
-> +static struct notifier_block amba_device_nb = {
-> +	.notifier_call = xen_amba_notifier,
-> +};
-> +
-> +static int __init register_xen_amba_notifier(void)
-> +{
-> +	if (!xen_initial_domain() || acpi_disabled)
-> +		return 0;
-> +
-> +	return bus_register_notifier(&amba_bustype, &amba_device_nb);
-> +}
-> +
-> +arch_initcall(register_xen_amba_notifier);
-> +#endif
-> -- 
-> 2.0.4
-> 
-> 
-> 
-> _______________________________________________
-> Xen-devel mailing list
-> Xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
-> http://lists.xen.org/xen-devel
-> 
+If not, and indeed somebody introduced one more field but failed to
+document it, then I suggest she sends a patch to fix the issue as soon
+as possible.
