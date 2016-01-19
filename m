@@ -1,166 +1,132 @@
 From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH v2 16/16] ARM64: XEN: Initialize Xen specific
- UEFI runtime services
-Date: Tue, 19 Jan 2016 14:24:53 +0000
-Message-ID: <alpine.DEB.2.02.1601191424270.9400@kaball.uk.xensource.com>
+Subject: Re: [Xen-devel] [PATCH v2 03/16] Xen: xlate: Use page_to_xen_pfn
+ instead of page_to_pfn
+Date: Tue, 19 Jan 2016 14:59:39 +0000
+Message-ID: <alpine.DEB.2.02.1601191456370.9400@kaball.uk.xensource.com>
 References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com>
- <1452840929-19612-17-git-send-email-zhaoshenglong@huawei.com>
- <alpine.DEB.2.02.1601181634070.9400@kaball.uk.xensource.com>
- <569E3654.90100@linaro.org>
+ <1452840929-19612-4-git-send-email-zhaoshenglong@huawei.com>
+ <alpine.DEB.2.02.1601151558010.16178@kaball.uk.xensource.com>
+ <569C7363.80106@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <569E3654.90100-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <569C7363.80106-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 19 Jan 2016, Shannon Zhao wrote:
-> On 2016/1/19 1:03, Stefano Stabellini wrote:
+On Mon, 18 Jan 2016, Shannon Zhao wrote:
+> On 2016/1/16 1:08, Stefano Stabellini wrote:
 > > On Fri, 15 Jan 2016, Shannon Zhao wrote:
-> > > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > 
-> > > When running on Xen hypervisor, runtime services are supported through
-> > > hypercall. So call Xen specific function to initialize runtime services.
-> > > 
-> > > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >>
+> >> Use page_to_xen_pfn in case of 64KB page.
+> >>
+> >> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >> ---
+> >>  drivers/xen/xlate_mmu.c | 2 +-
+> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+> >>
+> >> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
+> >> index 9692656..b9fcc2c 100644
+> >> --- a/drivers/xen/xlate_mmu.c
+> >> +++ b/drivers/xen/xlate_mmu.c
+> >> @@ -227,7 +227,7 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
+> >>  		return rc;
+> >>  	}
+> >>  	for (i = 0; i < nr_grant_frames; i++)
+> >> -		pfns[i] = page_to_pfn(pages[i]);
+> >> +		pfns[i] = page_to_xen_pfn(pages[i]);
 > > 
-> > Thanks Shannon, much much better!  Just a couple of questions.
+> > Shannon, thanks for the patch.
 > > 
+> > Keeping in mind that in the 64K case, kernel pages are 64K but xen pages
+> > are still 4K, I think you also need to allocate
+> > (nr_grant_frames/XEN_PFN_PER_PAGE) kernel pages (assuming that they are
+> > allocated contiguously): nr_grant_frames refers to 4K pages, while
+> > xen_xlate_map_ballooned_pages is allocating pages on a 64K granularity
+> > (sizeof(pages[0]) == 64K).
 > > 
-> > >   arch/arm/xen/enlighten.c |  5 +++++
-> > >   arch/arm64/xen/Makefile  |  1 +
-> > >   arch/arm64/xen/efi.c     | 36 ++++++++++++++++++++++++++++++++++++
-> > >   drivers/xen/Kconfig      |  2 +-
-> > >   include/xen/xen-ops.h    |  1 +
-> > >   5 files changed, 44 insertions(+), 1 deletion(-)
-> > >   create mode 100644 arch/arm64/xen/efi.c
-> > > 
-> > > diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-> > > index 485e117..84f27ec 100644
-> > > --- a/arch/arm/xen/enlighten.c
-> > > +++ b/arch/arm/xen/enlighten.c
-> > > @@ -414,6 +414,11 @@ static int __init xen_guest_init(void)
-> > >   	if (xen_initial_domain())
-> > >   		pvclock_gtod_register_notifier(&xen_pvclock_gtod_notifier);
-> > > 
-> > > +	if (IS_ENABLED(CONFIG_XEN_EFI)) {
-> > > +		if (efi_enabled(EFI_PARAVIRT))
-> > > +			xen_efi_runtime_setup();
-> > > +	}
-> > > +
-> > >   	return 0;
-> > >   }
-> > >   early_initcall(xen_guest_init);
-> > > diff --git a/arch/arm64/xen/Makefile b/arch/arm64/xen/Makefile
-> > > index 74a8d87..62e6fe2 100644
-> > > --- a/arch/arm64/xen/Makefile
-> > > +++ b/arch/arm64/xen/Makefile
-> > > @@ -1,2 +1,3 @@
-> > >   xen-arm-y	+= $(addprefix ../../arm/xen/, enlighten.o grant-table.o p2m.o
-> > > mm.o)
-> > >   obj-y		:= xen-arm.o hypercall.o
-> > > +obj-$(CONFIG_XEN_EFI) += efi.o
-> > > diff --git a/arch/arm64/xen/efi.c b/arch/arm64/xen/efi.c
-> > > new file mode 100644
-> > > index 0000000..33046b0
-> > > --- /dev/null
-> > > +++ b/arch/arm64/xen/efi.c
-> > > @@ -0,0 +1,36 @@
-> > > +/*
-> > > + * Copyright (c) 2015, Linaro Limited, Shannon Zhao
-> > > + *
-> > > + * This program is free software; you can redistribute it and/or modify
-> > > + * it under the terms of the GNU General Public License as published by
-> > > + * the Free Software Foundation; either version 2 of the License, or
-> > > + * (at your option) any later version.
-> > > + *
-> > > + * This program is distributed in the hope that it will be useful,
-> > > + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > + * GNU General Public License for more details.
-> > > + *
-> > > + * You should have received a copy of the GNU General Public License
-> > > along
-> > > + * with this program.  If not, see <http://www.gnu.org/licenses/>.
-> > > + */
-> > > +
-> > > +#include <linux/efi.h>
-> > > +#include <xen/xen-ops.h>
-> > > +
-> > > +void __init xen_efi_runtime_setup(void)
-> > > +{
-> > > +	efi.get_time                 = xen_efi_get_time;
-> > > +	efi.set_time                 = xen_efi_set_time;
-> > > +	efi.get_wakeup_time          = xen_efi_get_wakeup_time;
-> > > +	efi.set_wakeup_time          = xen_efi_set_wakeup_time;
-> > > +	efi.get_variable             = xen_efi_get_variable;
-> > > +	efi.get_next_variable        = xen_efi_get_next_variable;
-> > > +	efi.set_variable             = xen_efi_set_variable;
-> > > +	efi.query_variable_info      = xen_efi_query_variable_info;
-> > > +	efi.update_capsule           = xen_efi_update_capsule;
-> > > +	efi.query_capsule_caps       = xen_efi_query_capsule_caps;
-> > > +	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
-> > > +	efi.reset_system             = NULL;
-> > > +}
-> > > +EXPORT_SYMBOL_GPL(xen_efi_runtime_setup);
+> > Be careful that alloc_xenballooned_pages deals with 64K pages (because
+> > it deals with kernel pages), while xen_pfn_t is always 4K based (because
+> > it deals with Xen pfns).
 > > 
-> > This looks very similar to struct efi efi_xen previously in
-> > drivers/xen/efi.c.  Maybe it makes sense to leave struct efi efi_xen in
-> > drivers/xen/efi.c, export it in include/xen/xen-ops.h, then here just:
+> > Please test it with and without CONFIG_ARM64_64K_PAGES. Thanks!
 > > 
-> >    efi = efi_xen;
-> > 
-> > Would that improve code readability?
-> > 
-> Ok.
-> > 
-> > Correct me if I am wrong, but on ARM64 (differently from x86) it is not
-> > necessary to set efi.systab because it is not used, right? If so, it
-> > would be best to add a comment here to remember.
-> > 
-> Not set efi.systab here because it gets the system table through fdt and set
-> efi.systab there. See uefi_init() in arch/arm64/kernel.efi.c
+> Stefano, thanks for your explanation. How about below patch?
+
+Good work, it looks like you covered all bases, I think it should work,
+but I haven't tested it myself. Just one note below.
+
+
+> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
+> index 9692656..e1f7c95 100644
+> --- a/drivers/xen/xlate_mmu.c
+> +++ b/drivers/xen/xlate_mmu.c
+> @@ -207,9 +207,12 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t
+> **gfns, void **virt,
+>         void *vaddr;
+>         int rc;
+>         unsigned int i;
+> +       unsigned long nr_pages;
+> +       xen_pfn_t xen_pfn = 0;
 > 
-> 	efi.systab = early_memremap(efi_system_table,
-> 				    sizeof(efi_system_table_t));
+>         BUG_ON(nr_grant_frames == 0);
+> -       pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
+> +       nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
+> +       pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
+>         if (!pages)
+>                 return -ENOMEM;
+> 
+> @@ -218,22 +221,25 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t
+> **gfns, void **virt,
+>                 kfree(pages);
+>                 return -ENOMEM;
+>         }
+> -       rc = alloc_xenballooned_pages(nr_grant_frames, pages);
+> +       rc = alloc_xenballooned_pages(nr_pages, pages);
+>         if (rc) {
+> -               pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n",
+> __func__,
+> -                       nr_grant_frames, rc);
+> +               pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n",
+> __func__,
+> +                       nr_pages, rc);
+>                 kfree(pages);
+>                 kfree(pfns);
+>                 return rc;
+>         }
+> -       for (i = 0; i < nr_grant_frames; i++)
+> -               pfns[i] = page_to_pfn(pages[i]);
+> +       for (i = 0; i < nr_grant_frames; i++) {
+> +               if ((i % XEN_PFN_PER_PAGE) == 0)
+> +                       xen_pfn = page_to_xen_pfn(pages[i /
+> XEN_PFN_PER_PAGE]);
+> +               pfns[i] = xen_pfn++;
+> +       }
 
-I see now. Then it might be still good to add a comment about that.
+We might want to:
+
+  pfns[i] = pfn_to_gfn(xen_pfn++);
+
+for consistency, even though for autotranslate guests pfn_to_gfn always
+returns pfn.
 
 
-> > > diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
-> > > index 73708ac..27d216a 100644
-> > > --- a/drivers/xen/Kconfig
-> > > +++ b/drivers/xen/Kconfig
-> > > @@ -268,7 +268,7 @@ config XEN_HAVE_PVMMU
-> > > 
-> > >   config XEN_EFI
-> > >   	def_bool y
-> > > -	depends on X86_64 && EFI
-> > > +	depends on (ARM64 || X86_64) && EFI
-> > > 
-> > >   config XEN_AUTO_XLATE
-> > >   	def_bool y
-> > > diff --git a/include/xen/xen-ops.h b/include/xen/xen-ops.h
-> > > index c83a338..36ff8e4 100644
-> > > --- a/include/xen/xen-ops.h
-> > > +++ b/include/xen/xen-ops.h
-> > > @@ -107,6 +107,7 @@ efi_status_t
-> > > xen_efi_update_capsule(efi_capsule_header_t **capsules,
-> > >   efi_status_t xen_efi_query_capsule_caps(efi_capsule_header_t **capsules,
-> > >   					unsigned long count, u64 *max_size,
-> > >   					int *reset_type);
-> > > +void xen_efi_runtime_setup(void);
-> > 
-> > xen_efi_runtime_setup is not defined on x86, but this header is not arch
-> > specific.
-> > 
+> -       vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
+> +       vaddr = vmap(pages, nr_pages, 0, PAGE_KERNEL);
+>         if (!vaddr) {
+> -               pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
+> -                       nr_grant_frames, rc);
+> -               free_xenballooned_pages(nr_grant_frames, pages);
+> +               pr_warn("%s Couldn't map %ld pages rc:%d\n", __func__,
+> +                       nr_pages, rc);
+> +               free_xenballooned_pages(nr_pages, pages);
+>                 kfree(pages);
+>                 kfree(pfns);
+>                 return -ENOMEM;
 > 
 > -- 
 > Shannon
 > 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
