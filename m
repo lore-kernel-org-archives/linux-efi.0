@@ -1,142 +1,110 @@
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH v2 03/16] Xen: xlate: Use page_to_xen_pfn
- instead of page_to_pfn
-Date: Tue, 19 Jan 2016 23:10:12 +0800
-Message-ID: <569E51D4.9020209@linaro.org>
-References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com> <1452840929-19612-4-git-send-email-zhaoshenglong@huawei.com> <alpine.DEB.2.02.1601151558010.16178@kaball.uk.xensource.com> <569C7363.80106@huawei.com> <alpine.DEB.2.02.1601191456370.9400@kaball.uk.xensource.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: v4.4-rc8 based tip tree kernel hangs on boot.
+Date: Tue, 19 Jan 2016 15:42:41 +0000
+Message-ID: <20160119154241.GA3615@codeblueprint.co.uk>
+References: <20160110192921.GD17012@linux.vnet.ibm.com>
+ <20160111140140.GA2644@codeblueprint.co.uk>
+ <20160112103043.GA5707@gmail.com>
+ <20160115162011.GA2935@linux.vnet.ibm.com>
+ <20160115222921.GA5378@codeblueprint.co.uk>
+ <20160117173248.GA28841@linux.vnet.ibm.com>
+ <20160118154001.GA2607@codeblueprint.co.uk>
+ <20160119104715.GA15850@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <alpine.DEB.2.02.1601191456370.9400-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160119104715.GA15850-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Srikar Dronamraju <srikar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>, LKML <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Tue, 19 Jan, at 04:17:15PM, Srikar Dronamraju wrote:
+> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> [2016-01-18 15:40:01]:
+> 
+> > On Sun, 17 Jan, at 11:02:48PM, Srikar Dronamraju wrote:
+> > > 
+> > > Unfortunately even with your below patch on top of c9f2a9a ("x86/efi:
+> > > Hoist page table switching code into efi_call_virt()" also fails to boot
+> > > with and without CONFIG_DEBUG_WX=y. I have added CONFIG_EFI_PGT_DUMP.
+> > 
+> > What about if you comment out the call to efi_dump_pagetable()? What
+> > if you return early from efi_sync_low_kernel_mappings(), e.g.
+> 
+> This doesnt help but ....
+> 
+> > 
+> > diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+> > index 71121a9d06cf..e1f8ebb88f84 100644
+> > --- a/arch/x86/platform/efi/efi_64.c
+> > +++ b/arch/x86/platform/efi/efi_64.c
+> > @@ -177,6 +177,8 @@ void efi_sync_low_kernel_mappings(void)
+> >  		init_mm.pgd + pgd_index(PAGE_OFFSET),
+> >  		sizeof(pgd_t) * num_pgds);
+> > 
+> > +	return;
+> > +
+> 
+> This alone makes it boot. dmesg below
+> 
+> i.e git checkout tip/x86/efi
+> +
+> git am <your patch> + <the above fixlet>
+> 
 
+OK could you add efi=debug to your kernel cmdline and try this patch
+instead of the one that returns early from
+efi_sync_low_kernel_mappings()?
 
-On 2016/1/19 22:59, Stefano Stabellini wrote:
-> On Mon, 18 Jan 2016, Shannon Zhao wrote:
->> On 2016/1/16 1:08, Stefano Stabellini wrote:
->>> On Fri, 15 Jan 2016, Shannon Zhao wrote:
->>>> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>>
->>>> Use page_to_xen_pfn in case of 64KB page.
->>>>
->>>> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>>> ---
->>>>   drivers/xen/xlate_mmu.c | 2 +-
->>>>   1 file changed, 1 insertion(+), 1 deletion(-)
->>>>
->>>> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
->>>> index 9692656..b9fcc2c 100644
->>>> --- a/drivers/xen/xlate_mmu.c
->>>> +++ b/drivers/xen/xlate_mmu.c
->>>> @@ -227,7 +227,7 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
->>>>   		return rc;
->>>>   	}
->>>>   	for (i = 0; i < nr_grant_frames; i++)
->>>> -		pfns[i] = page_to_pfn(pages[i]);
->>>> +		pfns[i] = page_to_xen_pfn(pages[i]);
->>>
->>> Shannon, thanks for the patch.
->>>
->>> Keeping in mind that in the 64K case, kernel pages are 64K but xen pages
->>> are still 4K, I think you also need to allocate
->>> (nr_grant_frames/XEN_PFN_PER_PAGE) kernel pages (assuming that they are
->>> allocated contiguously): nr_grant_frames refers to 4K pages, while
->>> xen_xlate_map_ballooned_pages is allocating pages on a 64K granularity
->>> (sizeof(pages[0]) == 64K).
->>>
->>> Be careful that alloc_xenballooned_pages deals with 64K pages (because
->>> it deals with kernel pages), while xen_pfn_t is always 4K based (because
->>> it deals with Xen pfns).
->>>
->>> Please test it with and without CONFIG_ARM64_64K_PAGES. Thanks!
->>>
->> Stefano, thanks for your explanation. How about below patch?
->
-> Good work, it looks like you covered all bases, I think it should work,
-> but I haven't tested it myself. Just one note below.
->
->
->> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
->> index 9692656..e1f7c95 100644
->> --- a/drivers/xen/xlate_mmu.c
->> +++ b/drivers/xen/xlate_mmu.c
->> @@ -207,9 +207,12 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t
->> **gfns, void **virt,
->>          void *vaddr;
->>          int rc;
->>          unsigned int i;
->> +       unsigned long nr_pages;
->> +       xen_pfn_t xen_pfn = 0;
->>
->>          BUG_ON(nr_grant_frames == 0);
->> -       pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
->> +       nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
->> +       pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
->>          if (!pages)
->>                  return -ENOMEM;
->>
->> @@ -218,22 +221,25 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t
->> **gfns, void **virt,
->>                  kfree(pages);
->>                  return -ENOMEM;
->>          }
->> -       rc = alloc_xenballooned_pages(nr_grant_frames, pages);
->> +       rc = alloc_xenballooned_pages(nr_pages, pages);
->>          if (rc) {
->> -               pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n",
->> __func__,
->> -                       nr_grant_frames, rc);
->> +               pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n",
->> __func__,
->> +                       nr_pages, rc);
->>                  kfree(pages);
->>                  kfree(pfns);
->>                  return rc;
->>          }
->> -       for (i = 0; i < nr_grant_frames; i++)
->> -               pfns[i] = page_to_pfn(pages[i]);
->> +       for (i = 0; i < nr_grant_frames; i++) {
->> +               if ((i % XEN_PFN_PER_PAGE) == 0)
->> +                       xen_pfn = page_to_xen_pfn(pages[i /
->> XEN_PFN_PER_PAGE]);
->> +               pfns[i] = xen_pfn++;
->> +       }
->
-> We might want to:
->
->    pfns[i] = pfn_to_gfn(xen_pfn++);
->
-> for consistency, even though for autotranslate guests pfn_to_gfn always
-> returns pfn.
->
-Ok, will add. Thanks.
+I also pushed out all the changes to the following branch if that's
+easier to pull and build,
 
->
->> -       vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
->> +       vaddr = vmap(pages, nr_pages, 0, PAGE_KERNEL);
->>          if (!vaddr) {
->> -               pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
->> -                       nr_grant_frames, rc);
->> -               free_xenballooned_pages(nr_grant_frames, pages);
->> +               pr_warn("%s Couldn't map %ld pages rc:%d\n", __func__,
->> +                       nr_pages, rc);
->> +               free_xenballooned_pages(nr_pages, pages);
->>                  kfree(pages);
->>                  kfree(pfns);
->>                  return -ENOMEM;
->>
->> --
->> Shannon
->>
+  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/log/?h=bug/efi/srikar
 
--- 
-Shannon
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I have no idea why any of these entries would be empty, but this is
+the only thing I can imagine could go wrong with this code,
+
+diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
+index 71121a9d06cf..9b610aa17683 100644
+--- a/arch/x86/platform/efi/efi_64.c
++++ b/arch/x86/platform/efi/efi_64.c
+@@ -192,6 +192,9 @@ void efi_sync_low_kernel_mappings(void)
+ 	pgd_efi = efi_pgd + pgd_index(PAGE_OFFSET);
+ 	pgd_k = pgd_offset_k(PAGE_OFFSET);
+ 
++	if (WARN_ON_ONCE(pgd_none(*pgd_efi) || pgd_none(*pgd_k)))
++		return;
++
+ 	num_entries = pgd_index(EFI_VA_END) - pgd_index(PAGE_OFFSET);
+ 	memcpy(pgd_efi, pgd_k, sizeof(pgd_t) * num_entries);
+ 
+@@ -203,17 +206,26 @@ void efi_sync_low_kernel_mappings(void)
+ 	BUILD_BUG_ON((EFI_VA_END & ~PUD_MASK) != 0);
+ 
+ 	pgd_efi = efi_pgd + pgd_index(EFI_VA_END);
+-	pud_efi = pud_offset(pgd_efi, 0);
+-
+ 	pgd_k = pgd_offset_k(EFI_VA_END);
++
++	if (WARN_ON_ONCE(pgd_none(*pgd_efi) || pgd_none(*pgd_k)))
++		return;
++
++	pud_efi = pud_offset(pgd_efi, 0);
+ 	pud_k = pud_offset(pgd_k, 0);
+ 
++	if (WARN_ON_ONCE(pud_none(*pud_efi) || pud_none(*pud_k)))
++		return;
++
+ 	num_entries = pud_index(EFI_VA_END);
+ 	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
+ 
+ 	pud_efi = pud_offset(pgd_efi, EFI_VA_START);
+ 	pud_k = pud_offset(pgd_k, EFI_VA_START);
+ 
++	if (WARN_ON_ONCE(pud_none(*pud_efi) || pud_none(*pud_k)))
++		return;
++
+ 	num_entries = PTRS_PER_PUD - pud_index(EFI_VA_START);
+ 	memcpy(pud_efi, pud_k, sizeof(pud_t) * num_entries);
+ }
