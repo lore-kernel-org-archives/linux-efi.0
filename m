@@ -1,113 +1,97 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v1 2/2] x86/efi: print size and base in binary units in efi_print_memmap
-Date: Tue, 19 Jan 2016 09:32:26 +0200
-Message-ID: <CAHp75VfNttKVfVMdNO6EGcBiQmL+uY6QUEU1u4FV9Yi=3o=OGQ@mail.gmail.com>
-References: <1452604386-13673-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1452604386-13673-2-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [Xen-devel] [PATCH v2 09/16] arm/xen: Get event-channel irq through
+ HVM_PARAM when booting with ACPI
+Date: Tue, 19 Jan 2016 16:21:23 +0800
+Message-ID: <569DF203.8030104@huawei.com>
+References: <1452840929-19612-1-git-send-email-zhaoshenglong@huawei.com> <1452840929-19612-10-git-send-email-zhaoshenglong@huawei.com> <alpine.DEB.2.02.1601181351400.16178@kaball.uk.xensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1452604386-13673-2-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.02.1601181351400.16178-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Jan 12, 2016 at 3:13 PM, Andy Shevchenko
-<andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
-> From: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
->
-> Print the base address for each range in decimal alongside the size.
-> Use a "(size @ base)" format similar to the fake_memmap kernel parameter.
->
-> Print the range and base in the best-fit B, KiB, MiB, etc. units rather than
-> always MiB. This avoids rounding, which can be misleading.
->
-> Use proper IEC binary units (KiB, MiB, etc.) rather than misuse SI
-> decimal units (KB, MB, etc.).
->
-> old:
->     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff) (16384MB)
->
-> new:
->     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff] (16 GiB @ 34 GiB)
->
-> Signed-off-by: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-
-Matt, seems another approach is not in favour, which means we rather
-stick with this one. But see one comment below.
-
-> ---
->  arch/x86/platform/efi/efi.c | 23 ++++++++++++++++++++---
->  1 file changed, 20 insertions(+), 3 deletions(-)
->
-> diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-> index e0846b5..e762969 100644
-> --- a/arch/x86/platform/efi/efi.c
-> +++ b/arch/x86/platform/efi/efi.c
-> @@ -35,10 +35,12 @@
->  #include <linux/efi.h>
->  #include <linux/efi-bgrt.h>
->  #include <linux/export.h>
-> +#include <linux/bitops.h>
->  #include <linux/bootmem.h>
->  #include <linux/slab.h>
->  #include <linux/memblock.h>
->  #include <linux/spinlock.h>
-> +#include <linux/string_helpers.h>
->  #include <linux/uaccess.h>
->  #include <linux/time.h>
->  #include <linux/io.h>
-> @@ -222,6 +224,19 @@ int __init efi_memblock_x86_reserve_range(void)
->         return 0;
->  }
->
-> +static char * __init efi_size_format(char *buf, size_t size, u64 bytes)
-> +{
-> +       unsigned long i;
-> +
-> +       if (bytes)
-> +               i = __ffs64(bytes) / 10;
-> +       else
-> +               i = 0;
-> +
-> +       snprintf(buf, size, "%llu%s", bytes >> (i * 10), string_units_2[i]);
-
-Here is missed space, should be: "%llu %s"
-
-> +       return buf;
-> +}
-> +
->  void __init efi_print_memmap(void)
->  {
->  #ifdef EFI_DEBUG
-> @@ -232,14 +247,16 @@ void __init efi_print_memmap(void)
->         for (p = memmap.map, i = 0;
->              p < memmap.map_end;
->              p += memmap.desc_size, i++) {
-> -               char buf[64];
-> +               char buf[64], buf2[32], buf3[32];
->
->                 md = p;
-> -               pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
-> +               pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%s @ %s)\n",
->                         i, efi_md_typeattr_format(buf, sizeof(buf), md),
->                         md->phys_addr,
->                         md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
-> -                       (md->num_pages >> (20 - EFI_PAGE_SHIFT)));
-> +                       efi_size_format(buf3, sizeof(buf3),
-> +                               md->num_pages << EFI_PAGE_SHIFT),
-> +                       efi_size_format(buf2, sizeof(buf2), md->phys_addr));
->         }
->  #endif  /*  EFI_DEBUG  */
->  }
-> --
-> 2.6.4
->
 
 
+On 2016/1/18 22:38, Stefano Stabellini wrote:
+> On Fri, 15 Jan 2016, Shannon Zhao wrote:
+>> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>
+>> When booting with ACPI, it could get the event-channel irq through
+>> HVM_PARAM_CALLBACK_IRQ.
+>>
+>> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  arch/arm/xen/enlighten.c | 30 +++++++++++++++++++++++++++++-
+>>  1 file changed, 29 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+>> index 6d90a62..4e78c49 100644
+>> --- a/arch/arm/xen/enlighten.c
+>> +++ b/arch/arm/xen/enlighten.c
+>> @@ -29,6 +29,7 @@
+>>  #include <linux/time64.h>
+>>  #include <linux/timekeeping.h>
+>>  #include <linux/timekeeper_internal.h>
+>> +#include <linux/acpi.h>
+>>  
+>>  #include <linux/mm.h>
+>>  
+>> @@ -270,7 +271,34 @@ static int __init xen_guest_init(void)
+>>  	if (!xen_domain())
+>>  		return 0;
+>>  
+>> -	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
+>> +	if (!acpi_disabled) {
+>> +#ifdef CONFIG_ACPI
+> 
+> I think it would be best to move the acpi specific and DT specific
+> initializations out of xen_guest_init. Then at the beginning of
+> xen_guest_init, call only the one that applies.  The acpi init function
+> could be ifdef'ed CONFIG_ACPI. Making sure that acpi_disabled is 1 when
+> !CONFIG_ACPI, we could even avoid all ifdef's from xen_guest_init.
+> 
+Sure, will fix. Thanks.
+
+> The rest is good, thanks.
+> 
+> 
+>> +		struct xen_hvm_param a;
+>> +		int interrupt, trigger, polarity;
+>> +
+>> +		a.domid = DOMID_SELF;
+>> +		a.index = HVM_PARAM_CALLBACK_IRQ;
+>> +		xen_events_irq = 0;
+>> +		if (!HYPERVISOR_hvm_op(HVMOP_get_param, &a)) {
+>> +			if ((a.value >> 56) == 3) {
+>> +				interrupt = a.value & 0xff;
+>> +				trigger = ((a.value >> 8) & 0x1)
+>> +					  ? ACPI_EDGE_SENSITIVE
+>> +					  : ACPI_LEVEL_SENSITIVE;
+>> +				polarity = ((a.value >> 8) & 0x2)
+>> +					  ? ACPI_ACTIVE_LOW
+>> +					  : ACPI_ACTIVE_HIGH;
+>> +				xen_events_irq = acpi_register_gsi(NULL,
+>> +								   interrupt,
+>> +								   trigger,
+>> +								   polarity);
+>> +			}
+>> +		}
+>> +
+>> +#endif
+>> +	} else {
+>> +		xen_events_irq = irq_of_parse_and_map(xen_node, 0);
+>> +	}
+>> +
+>>  	if (!xen_events_irq) {
+>>  		pr_err("Xen event channel interrupt not found\n");
+>>  		return -ENODEV;
+> 
+> .
+> 
 
 -- 
-With Best Regards,
-Andy Shevchenko
+Shannon
