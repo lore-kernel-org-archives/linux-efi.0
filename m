@@ -1,53 +1,44 @@
-From: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v1 2/2] x86/efi: print size and base in binary units in efi_print_memmap
-Date: Thu, 21 Jan 2016 16:29:41 +0200
-Message-ID: <CAHp75VcLHKGkAPAjRABN_A3n4CaDayoFe9tG=a_Jm-F_ZXk4vg@mail.gmail.com>
-References: <1452604386-13673-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1452604386-13673-2-git-send-email-andriy.shevchenko@linux.intel.com>
-	<CAHp75VfNttKVfVMdNO6EGcBiQmL+uY6QUEU1u4FV9Yi=3o=OGQ@mail.gmail.com>
-	<20160121140531.GD2510@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH v2 2/4] lib/string_helpers: fix indentation in few places
+Date: Thu, 21 Jan 2016 17:22:30 +0200
+Message-ID: <1453389752-68175-2-git-send-email-andriy.shevchenko@linux.intel.com>
+References: <1453389752-68175-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160121140531.GD2510-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1453389752-68175-1-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Jan 21, 2016 at 4:05 PM, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org=
-> wrote:
-> On Tue, 19 Jan, at 09:32:26AM, Andy Shevchenko wrote:
->> On Tue, Jan 12, 2016 at 3:13 PM, Andy Shevchenko
->> <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+Fix the indentation of label and put snprintf() to one line.
 
-=E2=80=A6
+There is no functional change.
 
->> > old:
->> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|=
-WC|UC] range=3D[0x0000000880000000-0x0000000c7fffffff) (16384MB)
->> >
->> > new:
->> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|=
-WC|UC] range=3D[0x0000000880000000-0x0000000c7fffffff] (16 GiB @ 34 GiB=
-)
->> >
->> > Signed-off-by: Robert Elliott <elliott-ZPxbGqLxI0U@public.gmane.org>
->> > Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
->>
->> Matt, seems another approach is not in favour, which means we rather
->> stick with this one. But see one comment below.
->
-> Thanks Andy. I like the below patch (with the included space), but as
-> I said when reviewing Robert's version, I'm really not in favour of
-> the "@ address" portition of the string.
->
-> Andy, could you submit a v2 with the space fix and without the @
-> <addr> bit?
+Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+---
+ lib/string_helpers.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-Will do soon.
-
---=20
-With Best Regards,
-Andy Shevchenko
+diff --git a/lib/string_helpers.c b/lib/string_helpers.c
+index 7ee4644..51fcea2 100644
+--- a/lib/string_helpers.c
++++ b/lib/string_helpers.c
+@@ -94,14 +94,13 @@ void string_get_size(u64 size, u64 blk_size, const enum string_size_units units,
+ 		tmp[j+1] = '\0';
+ 	}
+ 
+- out:
++out:
+ 	if (i >= STRING_UNITS_2_NUM)
+ 		unit = "UNK";
+ 	else
+ 		unit = units_str[units][i];
+ 
+-	snprintf(buf, len, "%u%s %s", (u32)size,
+-		 tmp, unit);
++	snprintf(buf, len, "%u%s %s", (u32)size, tmp, unit);
+ }
+ EXPORT_SYMBOL(string_get_size);
+ 
+-- 
+2.7.0.rc3
