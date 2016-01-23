@@ -1,59 +1,78 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v3 12/17] ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
-Date: Sat, 23 Jan 2016 11:19:39 +0800
-Message-ID: <1453519184-11908-13-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v3 08/17] Xen: public/hvm: sync changes of
+	HVM_PARAM_CALLBACK_VIA ABI from Xen
+Date: Sat, 23 Jan 2016 11:19:35 +0800
+Message-ID: <1453519184-11908-9-git-send-email-zhaoshenglong@huawei.com>
 References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
 To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Hanjun Guo <hanjun.guo@linaro.org>
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, ian.campbell@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
-a /hypervisor node in DT. So check if it needs to enable ACPI.
+Sync the changes of HVM_PARAM_CALLBACK_VIA ABI introduced by
+Xen commit <ca5c54b6ff05> (public/hvm: export the HVM_PARAM_CALLBACK_VIA
+ABI in the API).
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
-CC: Hanjun Guo <hanjun.guo@linaro.org>
----
- arch/arm64/kernel/acpi.c | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ include/xen/interface/hvm/params.h | 27 +++++++++++++++++++++------
+ 1 file changed, 21 insertions(+), 6 deletions(-)
 
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index d1ce8e2..4e92be0 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
- {
- 	/*
- 	 * Return 1 as soon as we encounter a node at depth 1 that is
--	 * not the /chosen node.
-+	 * not the /chosen node, or /hypervisor node when running on Xen.
- 	 */
--	if (depth == 1 && (strcmp(uname, "chosen") != 0))
--		return 1;
-+	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
-+		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
-+			return 1;
-+	}
-+
- 	return 0;
- }
+diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+index a6c7991..70ad208 100644
+--- a/include/xen/interface/hvm/params.h
++++ b/include/xen/interface/hvm/params.h
+@@ -27,16 +27,31 @@
+  * Parameter space for HVMOP_{set,get}_param.
+  */
  
-@@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
- 	/*
- 	 * Enable ACPI instead of device tree unless
- 	 * - ACPI has been disabled explicitly (acpi=off), or
--	 * - the device tree is not empty (it has more than just a /chosen node)
-+	 * - the device tree is not empty (it has more than just a /chosen node,
-+	 *   and a /hypervisor node when running on Xen)
- 	 *   and ACPI has not been force enabled (acpi=force)
- 	 */
- 	if (param_acpi_off ||
++#define HVM_PARAM_CALLBACK_IRQ 0
+ /*
+  * How should CPU0 event-channel notifications be delivered?
+- * val[63:56] == 0: val[55:0] is a delivery GSI (Global System Interrupt).
+- * val[63:56] == 1: val[55:0] is a delivery PCI INTx line, as follows:
+- *                  Domain = val[47:32], Bus  = val[31:16],
+- *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
+- * val[63:56] == 2: val[7:0] is a vector number.
++ *
+  * If val == 0 then CPU0 event-channel notifications are not delivered.
++ * If val != 0, val[63:56] encodes the type, as follows:
++ */
++
++#define HVM_PARAM_CALLBACK_TYPE_GSI      0
++/*
++ * val[55:0] is a delivery GSI.  GSI 0 cannot be used, as it aliases val == 0,
++ * and disables all notifications.
++ */
++
++#define HVM_PARAM_CALLBACK_TYPE_PCI_INTX 1
++/*
++ * val[55:0] is a delivery PCI INTx line:
++ * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
++ */
++
++#define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
++/*
++ * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
++ * if this delivery method is available.
+  */
+-#define HVM_PARAM_CALLBACK_IRQ 0
+ 
+ #define HVM_PARAM_STORE_PFN    1
+ #define HVM_PARAM_STORE_EVTCHN 2
 -- 
 2.0.4
