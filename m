@@ -1,7 +1,7 @@
 From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v3 05/17] xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
-Date: Sat, 23 Jan 2016 11:19:32 +0800
-Message-ID: <1453519184-11908-6-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v3 09/17] xen/hvm/params: Add a new delivery type for event-channel in HVM_PARAM_CALLBACK_IRQ
+Date: Sat, 23 Jan 2016 11:19:36 +0800
+Message-ID: <1453519184-11908-10-git-send-email-zhaoshenglong@huawei.com>
 References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,25 +14,36 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Add a new type of Xen map space for Dom0 to map device's MMIO region.
+Add a new delivery type:
+val[63:56] == 3: val[15:8] is flag: val[7:0] is a PPI.
+To the flag, bit 0 stands the interrupt mode is edge(1) or level(0) and
+bit 1 stands the interrupt polarity is active low(1) or high(0).
 
 Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- include/xen/interface/memory.h | 1 +
- 1 file changed, 1 insertion(+)
+ include/xen/interface/hvm/params.h | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
-diff --git a/include/xen/interface/memory.h b/include/xen/interface/memory.h
-index 2ecfe4f..9aa8988 100644
---- a/include/xen/interface/memory.h
-+++ b/include/xen/interface/memory.h
-@@ -160,6 +160,7 @@ DEFINE_GUEST_HANDLE_STRUCT(xen_machphys_mapping_t);
- #define XENMAPSPACE_gmfn_foreign 4 /* GMFN from another dom,
- 				    * XENMEM_add_to_physmap_range only.
- 				    */
-+#define XENMAPSPACE_dev_mmio     5 /* device mmio region */
+diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+index 70ad208..5dd629f 100644
+--- a/include/xen/interface/hvm/params.h
++++ b/include/xen/interface/hvm/params.h
+@@ -53,6 +53,15 @@
+  * if this delivery method is available.
+  */
  
- /*
-  * Sets the GPFN at which a particular page appears in the specified guest's
++#define HVM_PARAM_CALLBACK_TYPE_EVENT    3
++/*
++ * val[15:8] is flag of event-channel interrupt:
++ *  bit 0: interrupt is edge(1) or level(0) triggered
++ *  bit 1: interrupt is active low(1) or high(0)
++ * val[7:0] is PPI number used by event-channel.
++ * This is only used by ARM/ARM64.
++ */
++
+ #define HVM_PARAM_STORE_PFN    1
+ #define HVM_PARAM_STORE_EVTCHN 2
+ 
 -- 
 2.0.4
 
