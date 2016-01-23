@@ -1,108 +1,73 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v3 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Sat, 23 Jan 2016 11:19:28 +0800
-Message-ID: <1453519184-11908-2-git-send-email-zhaoshenglong@huawei.com>
-References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Subject: Re: [PATCH v2 1/4] lib/string_helpers: export string_units_{2,10}
+ for others
+Date: Fri, 22 Jan 2016 21:13:19 -0800
+Message-ID: <1453525999.2339.56.camel@HansenPartnership.com>
+References: <1453389752-68175-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1453389752-68175-1-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
+On Thu, 2016-01-21 at 17:22 +0200, Andy Shevchenko wrote:
+> There is one user coming which would like to use those string arrays.
+> It might
+> be useful for any other user in the future.
 
-ACPI 6.0 introduces a new table STAO to list the devices which are used
-by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
-UART is used by Xen. So here it hides UART from Dom0.
+Well, let's not do it until we have an actual consumer because that
+will help us get the interface correct.
 
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
----
-CC: "Rafael J. Wysocki" <rjw@rjwysocki.net> (supporter:ACPI)
-CC: Len Brown <lenb@kernel.org> (supporter:ACPI)
-CC: linux-acpi@vger.kernel.org (open list:ACPI)
----
- drivers/acpi/bus.c | 36 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 35 insertions(+), 1 deletion(-)
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> ---
+>  include/linux/string_helpers.h |  6 ++++++
+>  lib/string_helpers.c           | 21 ++++++++++++---------
+>  2 files changed, 18 insertions(+), 9 deletions(-)
+> 
+> diff --git a/include/linux/string_helpers.h
+> b/include/linux/string_helpers.h
+> index dabe643..a55c9cc 100644
+> --- a/include/linux/string_helpers.h
+> +++ b/include/linux/string_helpers.h
+> @@ -10,6 +10,12 @@ enum string_size_units {
+>  	STRING_UNITS_2,		/* use binary powers of 2^10
+> */
+>  };
+>  
+> +#define STRING_UNITS_10_NUM	9
+> +#define STRING_UNITS_2_NUM	9
+> +
+> +extern const char *const string_units_10[STRING_UNITS_10_NUM];
+> +extern const char *const string_units_2[STRING_UNITS_2_NUM];
+> +
+>  void string_get_size(u64 size, u64 blk_size, enum string_size_units
+> units,
+>  		     char *buf, int len);
+>  
+> diff --git a/lib/string_helpers.c b/lib/string_helpers.c
+> index 5939f63..7ee4644 100644
+> --- a/lib/string_helpers.c
+> +++ b/lib/string_helpers.c
+> @@ -13,6 +13,15 @@
+>  #include <linux/string.h>
+>  #include <linux/string_helpers.h>
+>  
+> +const char * const string_units_10[STRING_UNITS_10_NUM] = {
+> +	"B", "kB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB",
+> +};
+> +EXPORT_SYMBOL(string_units_10);
+> +const char * const string_units_2[STRING_UNITS_2_NUM] = {
+> +	"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB",
+> +};
+> +EXPORT_SYMBOL(string_units_2);
+> +
 
-diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
-index a212cef..7f85b54 100644
---- a/drivers/acpi/bus.c
-+++ b/drivers/acpi/bus.c
-@@ -46,6 +46,7 @@ ACPI_MODULE_NAME("bus");
- struct acpi_device *acpi_root;
- struct proc_dir_entry *acpi_root_dir;
- EXPORT_SYMBOL(acpi_root_dir);
-+static u64 spcr_uart_addr;
- 
- #ifdef CONFIG_X86
- #ifdef CONFIG_ACPI_CUSTOM_DSDT
-@@ -105,6 +106,22 @@ acpi_status acpi_bus_get_status_handle(acpi_handle handle,
- 	return status;
- }
- 
-+static bool acpi_check_device_is_ignored(acpi_handle handle)
-+{
-+	acpi_status status;
-+	u64 addr;
-+
-+	/* Check if it should ignore the UART device */
-+	if (spcr_uart_addr != 0) {
-+		status = acpi_evaluate_integer(handle, METHOD_NAME__ADR, NULL,
-+					       &addr);
-+		if (ACPI_SUCCESS(status) && addr == spcr_uart_addr)
-+			return true;
-+	}
-+
-+	return false;
-+}
-+
- int acpi_bus_get_status(struct acpi_device *device)
- {
- 	acpi_status status;
-@@ -114,7 +131,8 @@ int acpi_bus_get_status(struct acpi_device *device)
- 	if (ACPI_FAILURE(status))
- 		return -ENODEV;
- 
--	acpi_set_device_status(device, sta);
-+	if (!acpi_check_device_is_ignored(device->handle))
-+		acpi_set_device_status(device, sta);
- 
- 	if (device->status.functional && !device->status.present) {
- 		ACPI_DEBUG_PRINT((ACPI_DB_INFO, "Device [%s] status [%08x]: "
-@@ -1069,6 +1087,8 @@ EXPORT_SYMBOL_GPL(acpi_kobj);
- static int __init acpi_init(void)
- {
- 	int result;
-+	acpi_status status;
-+	struct acpi_table_stao *stao_ptr;
- 
- 	if (acpi_disabled) {
- 		printk(KERN_INFO PREFIX "Interpreter disabled.\n");
-@@ -1081,6 +1101,20 @@ static int __init acpi_init(void)
- 		acpi_kobj = NULL;
- 	}
- 
-+	/* If there is STAO table, check whether it needs to ignore the UART
-+	 * device in SPCR table.
-+	 */
-+	status = acpi_get_table(ACPI_SIG_STAO, 0,
-+				(struct acpi_table_header **)&stao_ptr);
-+	if (ACPI_SUCCESS(status) && stao_ptr->ignore_uart) {
-+		struct acpi_table_spcr *spcr_ptr;
-+
-+		status = acpi_get_table(ACPI_SIG_SPCR, 0,
-+					(struct acpi_table_header **)&spcr_ptr);
-+		if (ACPI_SUCCESS(status))
-+			spcr_uart_addr = spcr_ptr->serial_port.address;
-+	}
-+
- 	init_acpi_device_notify();
- 	result = acpi_bus_init();
- 	if (result) {
--- 
-2.0.4
+This is a pretty silly thing to do; how does someone who adds a unit to
+one of the string_units know to increment STRING_UNITS_X_NUM?  Even if
+you add a comment admonishing them to do it, it's far better to have
+this calculated at compile time like it was before this patch.
 
-
+James
