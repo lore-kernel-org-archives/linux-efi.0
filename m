@@ -1,97 +1,179 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v3 16/17] FDT: Add a helper to get specified
-	name subnode
-Date: Sat, 23 Jan 2016 11:19:43 +0800
-Message-ID: <1453519184-11908-17-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v3 17/17] Xen: EFI: Parse DT parameters for Xen specific UEFI
+Date: Sat, 23 Jan 2016 11:19:44 +0800
+Message-ID: <1453519184-11908-18-git-send-email-zhaoshenglong@huawei.com>
 References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
-	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Sender: xen-devel-bounces@lists.xen.org
-Errors-To: xen-devel-bounces@lists.xen.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, ian.campbell@citrix.com, Rob Herring <robh@kernel.org>, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Sometimes it needs to check if there is a node in FDT by full path.
-Introduce this helper to get the specified name subnode if it exists.
+Add a new function to parse DT parameters for Xen specific UEFI just
+like the way for normal UEFI. Then it could reuse the existing codes.
+
+If Xen supports EFI, initialize runtime services.
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 ---
-CC: Rob Herring <robh@kernel.org>
+CC: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/of/fdt.c       | 35 +++++++++++++++++++++++++++++++++++
- include/linux/of_fdt.h |  2 ++
- 2 files changed, 37 insertions(+)
+ arch/arm/xen/enlighten.c   |  6 ++++++
+ arch/arm64/kernel/efi.c    | 17 ++++++++++++-----
+ drivers/firmware/efi/efi.c | 45 ++++++++++++++++++++++++++++++++++++++-------
+ 3 files changed, 56 insertions(+), 12 deletions(-)
 
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 655f79d..112ec16 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -645,6 +645,41 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index cdc0bd2..608d735 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -245,6 +245,12 @@ static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
+ 	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
+ 		hyper_node.version = s + strlen(hyper_node.prefix);
+ 
++	if (IS_ENABLED(CONFIG_XEN_EFI)) {
++		/* Check if Xen supports EFI */
++		if (of_get_flat_dt_subnode_by_name(node, "uefi") > 0)
++			set_bit(EFI_PARAVIRT, &efi.flags);
++	}
++
+ 	return 0;
  }
  
- /**
-+ * of_get_flat_dt_subnode_by_name - get subnode of specified node by name
-+ *
-+ * @node: the parent node
-+ * @uname: the name of subnode
-+ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
-+ */
+diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+index 4eeb171..3c46129 100644
+--- a/arch/arm64/kernel/efi.c
++++ b/arch/arm64/kernel/efi.c
+@@ -33,6 +33,7 @@
+ #include <asm/mmu_context.h>
+ #include <asm/mmu.h>
+ #include <asm/pgtable.h>
++#include <asm/xen/xen-ops.h>
+ 
+ struct efi_memory_map memmap;
+ 
+@@ -308,13 +309,19 @@ static int __init arm64_enable_runtime_services(void)
+ 	}
+ 	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+-	if (!efi_virtmap_init()) {
+-		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+-		return -ENOMEM;
++	if (IS_ENABLED(CONFIG_XEN_EFI) && efi_enabled(EFI_PARAVIRT)) {
++		/* Set up runtime services function pointers for Xen Dom0 */
++		xen_efi_runtime_setup();
++	} else {
++		if (!efi_virtmap_init()) {
++			pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
++			return -ENOMEM;
++		}
 +
-+int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
-+{
-+	const void *blob = initial_boot_params;
-+	int offset;
-+	const char *pathp;
++		/* Set up runtime services function pointers */
++		efi_native_runtime_setup();
+ 	}
+ 
+-	/* Set up runtime services function pointers */
+-	efi_native_runtime_setup();
+ 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 
+ 	efi.runtime_version = efi.systab->hdr.revision;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 027ca21..bdcf6d7 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -498,12 +498,14 @@ device_initcall(efi_load_efivars);
+ 		FIELD_SIZEOF(struct efi_fdt_params, field) \
+ 	}
+ 
+-static __initdata struct {
++struct params {
+ 	const char name[32];
+ 	const char propname[32];
+ 	int offset;
+ 	int size;
+-} dt_params[] = {
++};
 +
-+	/* Find first subnode if it exists */
-+	offset = fdt_first_subnode(blob, node);
-+	if (offset < 0)
-+		return -FDT_ERR_NOTFOUND;
-+	pathp = fdt_get_name(blob, offset, NULL);
-+	if (strncmp(pathp, uname, strlen(uname)) == 0)
-+		return offset;
++static struct params fdt_params[] __initdata = {
+ 	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
+ 	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
+ 	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
+@@ -511,24 +513,45 @@ static __initdata struct {
+ 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+ };
+ 
++static struct params xen_fdt_params[] __initdata = {
++	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
++	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
++	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
++	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
++	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
++};
 +
-+	/* Find other subnodes */
-+	do {
-+		offset = fdt_next_subnode(blob, offset);
+ struct param_info {
+ 	int found;
+ 	void *params;
++	struct params *dt_params;
++	int size;
+ };
+ 
+ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 				       int depth, void *data)
+ {
+ 	struct param_info *info = data;
++	struct params *dt_params = info->dt_params;
+ 	const void *prop;
+ 	void *dest;
+ 	u64 val;
+-	int i, len;
++	int i, len, offset;
+ 
+-	if (depth != 1 || strcmp(uname, "chosen") != 0)
+-		return 0;
++	if (efi_enabled(EFI_PARAVIRT)) {
++		if (depth != 1 || strcmp(uname, "hypervisor") != 0)
++			return 0;
+ 
+-	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
++		offset = of_get_flat_dt_subnode_by_name(node, "uefi");
 +		if (offset < 0)
-+			return -FDT_ERR_NOTFOUND;
-+		pathp = fdt_get_name(blob, offset, NULL);
-+		if (strncmp(pathp, uname, strlen(uname)) == 0)
-+			return offset;
-+	} while (offset >= 0);
++			return 0;
++		node = offset;
++	} else {
++		if (depth != 1 || strcmp(uname, "chosen") != 0)
++			return 0;
++	}
 +
-+	return -FDT_ERR_NOTFOUND;
-+}
++	for (i = 0; i < info->size; i++) {
+ 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+ 		if (!prop)
+ 			return 0;
+@@ -559,12 +582,20 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
+ 	info.found = 0;
+ 	info.params = params;
+ 
++	if (efi_enabled(EFI_PARAVIRT)) {
++		info.dt_params = xen_fdt_params;
++		info.size = ARRAY_SIZE(xen_fdt_params);
++	} else {
++		info.dt_params = fdt_params;
++		info.size = ARRAY_SIZE(fdt_params);
++	}
 +
-+/**
-  * of_get_flat_dt_root - find the root node in the flat blob
-  */
- unsigned long __init of_get_flat_dt_root(void)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index df9ef38..fc28162 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -52,6 +52,8 @@ extern char __dtb_end[];
- extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
- 				     int depth, void *data),
- 			   void *data);
-+extern int of_get_flat_dt_subnode_by_name(unsigned long node,
-+					  const char *uname);
- extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
- 				       int *size);
- extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
+ 	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+ 	if (!info.found)
+ 		pr_info("UEFI not found.\n");
+ 	else if (!ret)
+ 		pr_err("Can't find '%s' in device tree!\n",
+-		       dt_params[info.found].name);
++		       info.dt_params[info.found].name);
+ 
+ 	return ret;
+ }
 -- 
 2.0.4
