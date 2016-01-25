@@ -1,56 +1,54 @@
-From: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
-Subject: RE: [PATCH v3 3/4] x86/efi: print size in binary units in
+From: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Subject: Re: [PATCH v3 3/4] x86/efi: print size in binary units in
  efi_print_memmap
-Date: Mon, 25 Jan 2016 20:37:58 +0000
-Message-ID: <94D0CD8314A33A4D9D801C0FE68B40295BF3BBD3@G9W0745.americas.hpqcorp.net>
+Date: Mon, 25 Jan 2016 12:44:27 -0800
+Message-ID: <1453754667.2363.67.camel@HansenPartnership.com>
 References: <1453560913-134672-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1453567445.2470.24.camel@HansenPartnership.com>
-	<94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
-	<1453748172.2363.36.camel@HansenPartnership.com>
-	<CAHp75VdYRzC9TcDpKxq=xddA0zgVk=5_25uXaimn1tOMZVeK4Q@mail.gmail.com>
-	<1453751131.2363.54.camel@HansenPartnership.com>
- <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw@mail.gmail.com>
+	 <1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <1453567445.2470.24.camel@HansenPartnership.com>
+	 <94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
+	 <1453748172.2363.36.camel@HansenPartnership.com>
+	 <CAHp75VdYRzC9TcDpKxq=xddA0zgVk=5_25uXaimn1tOMZVeK4Q@mail.gmail.com>
+	 <1453751131.2363.54.camel@HansenPartnership.com>
+	 <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-DQoNCi0tLQ0KUm9iZXJ0IEVsbGlvdHQsIEhQRSBQZXJzaXN0ZW50IE1lbW9yeQ0KDQoNCj4gLS0t
-LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW5keSBTaGV2Y2hlbmtvIFttYWlsdG86
-YW5keS5zaGV2Y2hlbmtvQGdtYWlsLmNvbV0NCj4gU2VudDogTW9uZGF5LCBKYW51YXJ5IDI1LCAy
-MDE2IDI6MDEgUE0NCj4gVG86IEphbWVzIEJvdHRvbWxleSA8SmFtZXMuQm90dG9tbGV5QGhhbnNl
-bnBhcnRuZXJzaGlwLmNvbT4NCj4gQ2M6IEVsbGlvdHQsIFJvYmVydCAoUGVyc2lzdGVudCBNZW1v
-cnkpIDxlbGxpb3R0QGhwZS5jb20+OyBBbmR5IFNoZXZjaGVua28NCj4gPGFuZHJpeS5zaGV2Y2hl
-bmtvQGxpbnV4LmludGVsLmNvbT47IE1hdHQgRmxlbWluZw0KPiA8bWF0dEBjb2RlYmx1ZXByaW50
-LmNvLnVrPjsgVGhvbWFzIEdsZWl4bmVyIDx0Z2x4QGxpbnV0cm9uaXguZGU+OyBJbmdvDQo+IE1v
-bG5hciA8bWluZ29AcmVkaGF0LmNvbT47IEggLiBQZXRlciBBbnZpbiA8aHBhQHp5dG9yLmNvbT47
-IGxpbnV4LQ0KPiBlZmlAdmdlci5rZXJuZWwub3JnOyBSYXNtdXMgVmlsbGVtb2VzIDxsaW51eEBy
-YXNtdXN2aWxsZW1vZXMuZGs+OyBBbmRyZXcNCj4gTW9ydG9uIDxha3BtQGxpbnV4LWZvdW5kYXRp
-b24ub3JnPjsgbGludXgta2VybmVsIEAgdmdlciAuIGtlcm5lbCAuIG9yZw0KPiA8bGludXgta2Vy
-bmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MyAzLzRdIHg4Ni9l
-Zmk6IHByaW50IHNpemUgaW4gYmluYXJ5IHVuaXRzIGluDQo+IGVmaV9wcmludF9tZW1tYXANCj4g
-DQo+IE9uIE1vbiwgSmFuIDI1LCAyMDE2IGF0IDk6NDUgUE0sIEphbWVzIEJvdHRvbWxleQ0KPiA8
-SmFtZXMuQm90dG9tbGV5QGhhbnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4gT24gTW9u
-LCAyMDE2LTAxLTI1IGF0IDIxOjI4ICswMjAwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6DQo+ID4+
-IE9uIE1vbiwgSmFuIDI1LCAyMDE2IGF0IDg6NTYgUE0sIEphbWVzIEJvdHRvbWxleQ0KPiA+PiA8
-SmFtZXMuQm90dG9tbGV5QGhhbnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4+ID4gT24g
-TW9uLCAyMDE2LTAxLTI1IGF0IDE4OjAyICswMDAwLCBFbGxpb3R0LCBSb2JlcnQgKFBlcnNpc3Rl
-bnQNCj4gPj4gPiBNZW1vcnkpDQo+ID4+ID4gd3JvdGU6DQo+ID4+DQo+ID4+ID4gIFVzaW5nIGZm
-cyBsZWFkcyB0byBwcmVjaXNpb24gcnVuYXdheQ0KPiA+Pg0KPiA+PiBIb3cgZXhhY3RseT8hDQo+
-ID4NCj4gPiBPZmYgYnkgb25lLiAgQSBzaXplIG9mIDB4ZmZmZmZmZmZmZmZmZmZmZiBwcmludHMg
-MTg0NDY3NDQwNzM3MDk1NTE2MTUgQg0KPiA+IHJhdGhlciB0aGFuIDIwIEdpQi4NCj4gDQo+IEJl
-Y2F1c2UgaXQncyBub3QgYSAyMCBHaUIuIEl0J3MgZXhhY3RseSAyMCBHaUIgLSAxIEIuDQo+IA0K
-PiBBRkFJVSwgdGhlIGludGVudGlvbiB3YXMgdG8gc2hvdyBfZXhhY3RfIHNpemUuDQoNCkZvciB0
-aGUgVUVGSSBtZW1vcnkgbWFwLCB0aGF0IHdhcyBpbmRlZWQgbXkgaW50ZW50aW9uLiAgSQ0KZG9u
-J3Qgd2FudCBpdCBzaWxlbnRseSByb3VuZCB0byAiMjAgR2lCIi4gIEV2ZW4gcm91bmRpbmcNCnRv
-ICIxOS45OTkgR2lCIiBpcyBpbXByZWNpc2UuDQoNCkFub3RoZXIgb3B0aW9uIGNvdWxkIGJlIHRv
-IHVzZSBhICJ+IiBwcmVmaXggZm9yIGltcGVyZmVjdA0KdmFsdWVzLCBsaWtlICJ+MjAgR2lCIi4g
-IFRoYXQgd291bGQgc2VydmUgYXMgYSB3YXJuaW5nDQp0aGF0IHNvbWV0aGluZydzIG5vdCBxdWl0
-ZSByaWdodC4NCg0KDQo=
+On Mon, 2016-01-25 at 22:01 +0200, Andy Shevchenko wrote:
+> On Mon, Jan 25, 2016 at 9:45 PM, James Bottomley
+> <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org> wrote:
+> > On Mon, 2016-01-25 at 21:28 +0200, Andy Shevchenko wrote:
+> > > Also, in one version I tried to convert couple of other users
+> > > which
+> > > are using only KM (in general whatever range it would be) units.
+> > > Any
+> > > ideas how to modify to support them?
+> >=20
+> > You mean units in odd increments of 6 digits (so K, M, T ...)? no.=20
+> >  The logarithmic reduction is done to the base of the unit=20
+> > increment (1000 or 1024) so it doesn't really fit this case and it=20
+> > would be hard to adjust because we don't have enough precision in=20
+> > the remainder.  However, unless there's a huge need to keep it, I'd=
+=20
+> > just fit to the closest 3 digit increment and then everything would
+> > work.
+>=20
+> KM case:
+> K) if 1 MiB > value >=3D 0 =E2=80=94 prints in KiB
+> M) if =E2=88=9E > value >=3D 1 MiB =E2=80=94 prints in MiB.
+
+Actually there is a way to do this: add a fixed precision argument that
+would stop the logarithmic reduction when the desired precision were
+reached.  You'd still have to do the precision discrimination in the
+call, so something like
+
+num > 1Mib ? call for precision of 6 : call for precision of 3
+
+James
