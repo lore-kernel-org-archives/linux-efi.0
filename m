@@ -1,71 +1,89 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v3 12/17] ARM64: ACPI: Check if it runs on Xen to enable
- or disable ACPI
-Date: Mon, 25 Jan 2016 15:32:00 +0000
-Message-ID: <alpine.DEB.2.02.1601251531280.9687@kaball.uk.xensource.com>
+From: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Subject: Re: [PATCH v3 13/17] ARM: Xen: Document UEFI support on Xen ARM
+ virtual platforms
+Date: Mon, 25 Jan 2016 15:50:52 +0000
+Message-ID: <alpine.DEB.2.02.1601251539430.9687@kaball.uk.xensource.com>
 References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
- <1453519184-11908-13-git-send-email-zhaoshenglong@huawei.com>
+ <1453519184-11908-14-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453519184-11908-13-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1453519184-11908-14-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shannon Zhao <zhaoshenglong@huawei.com>
+Cc: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Rob Herring <robh@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 On Sat, 23 Jan 2016, Shannon Zhao wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> From: Shannon Zhao <shannon.zhao@linaro.org>
 > 
-> When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
-> a /hypervisor node in DT. So check if it needs to enable ACPI.
+> Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
+> scan this to get the UEFI information.
 > 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-
-
-> CC: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+> Acked-by: Rob Herring <robh@kernel.org>
 > ---
->  arch/arm64/kernel/acpi.c | 12 ++++++++----
->  1 file changed, 8 insertions(+), 4 deletions(-)
+> CC: Rob Herring <robh@kernel.org>
+> ---
+>  Documentation/devicetree/bindings/arm/xen.txt | 34 +++++++++++++++++++++++++++
+>  1 file changed, 34 insertions(+)
 > 
-> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-> index d1ce8e2..4e92be0 100644
-> --- a/arch/arm64/kernel/acpi.c
-> +++ b/arch/arm64/kernel/acpi.c
-> @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
->  {
->  	/*
->  	 * Return 1 as soon as we encounter a node at depth 1 that is
-> -	 * not the /chosen node.
-> +	 * not the /chosen node, or /hypervisor node when running on Xen.
->  	 */
-> -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
-> -		return 1;
-> +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
-> +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
-> +			return 1;
-> +	}
-> +
->  	return 0;
->  }
+> diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
+> index 0f7b9c2..aa69405 100644
+> --- a/Documentation/devicetree/bindings/arm/xen.txt
+> +++ b/Documentation/devicetree/bindings/arm/xen.txt
+> @@ -15,6 +15,26 @@ the following properties:
+>  - interrupts: the interrupt used by Xen to inject event notifications.
+>    A GIC node is also required.
 >  
-> @@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
->  	/*
->  	 * Enable ACPI instead of device tree unless
->  	 * - ACPI has been disabled explicitly (acpi=off), or
-> -	 * - the device tree is not empty (it has more than just a /chosen node)
-> +	 * - the device tree is not empty (it has more than just a /chosen node,
-> +	 *   and a /hypervisor node when running on Xen)
->  	 *   and ACPI has not been force enabled (acpi=force)
->  	 */
->  	if (param_acpi_off ||
-> -- 
-> 2.0.4
-> 
-> 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +To support UEFI on Xen ARM virtual platforms, Xen populates the FDT "uefi" node
+> +under /hypervisor with following parameters:
+> +
+> +________________________________________________________________________________
+> +Name                      | Size   | Description
+> +================================================================================
+> +xen,uefi-system-table     | 64-bit | Guest physical address of the UEFI System
+> +			  |	   | Table.
+> +--------------------------------------------------------------------------------
+> +xen,uefi-mmap-start       | 64-bit | Guest physical address of the UEFI memory
+> +			  |	   | map.
+> +--------------------------------------------------------------------------------
+> +xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
+> +                          |        | pointed to in previous entry.
+> +--------------------------------------------------------------------------------
+> +xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
+> +                          |        | memory map.
+> +--------------------------------------------------------------------------------
+> +xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
+> +--------------------------------------------------------------------------------
+>  
+>  Example (assuming #address-cells = <2> and #size-cells = <2>):
+>  
+> @@ -22,4 +42,18 @@ hypervisor {
+>  	compatible = "xen,xen-4.3", "xen,xen";
+>  	reg = <0 0xb0000000 0 0x20000>;
+>  	interrupts = <1 15 0xf08>;
+> +	uefi {
+> +		xen,uefi-system-table = <0xXXXXXXXX>;
+> +		xen,uefi-mmap-start = <0xXXXXXXXX>;
+> +		xen,uefi-mmap-size = <0xXXXXXXXX>;
+> +		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
+> +		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
+> +        };
+>  };
+> +
+> +The format and meaning of these "xen,uefi-*" parameters are similar to those in
+> +Documentation/arm/uefi.txt which are used by normal UEFI. But to distinguish
+> +from normal UEFI, for Xen ARM virtual platforms it needs to introduce a Xen
+> +specific UEFI which requires Xen hypervisor to provide hypercalls for Dom0 to
+> +make use of the runtime services. Therefore, it defines these parameters under
+> +/hypervisor node.
+
+Please replace the paragraph with the following which mentions
+include/xen/interface/platform.h and improves the wording:
+
+"The format and meaning of the "xen,uefi-*" parameters are similar to
+those in Documentation/arm/uefi.txt, which are provided by the regular
+UEFI stub. However they differ because they are provided by the Xen
+hypervisor, together with a set of UEFI runtime services implemented via
+hypercalls, see include/xen/interface/platform.h."
