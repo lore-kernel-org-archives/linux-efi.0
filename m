@@ -1,120 +1,78 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v3 15/17] ARM64: XEN: Add a function to initialize Xen
- specific UEFI runtime services
-Date: Mon, 25 Jan 2016 16:47:07 +0000
-Message-ID: <alpine.DEB.2.02.1601251646370.9687@kaball.uk.xensource.com>
-References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
- <1453519184-11908-16-git-send-email-zhaoshenglong@huawei.com>
+From: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
+Subject: RE: [PATCH v3 3/4] x86/efi: print size in binary units in
+ efi_print_memmap
+Date: Mon, 25 Jan 2016 18:02:19 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
+References: <1453560913-134672-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1453567445.2470.24.camel@HansenPartnership.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453519184-11908-16-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <1453567445.2470.24.camel-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+To: James Bottomley <James.Bottomley-d9PhHud1JfjCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 23 Jan 2016, Shannon Zhao wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> When running on Xen hypervisor, runtime services are supported through
-> hypercall. Add a Xen specific function to initialize runtime services.
-> 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  arch/arm64/include/asm/xen/xen-ops.h |  6 ++++++
->  arch/arm64/xen/Makefile              |  1 +
->  arch/arm64/xen/efi.c                 | 40 ++++++++++++++++++++++++++++++++++++
->  drivers/xen/Kconfig                  |  2 +-
->  4 files changed, 48 insertions(+), 1 deletion(-)
->  create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
->  create mode 100644 arch/arm64/xen/efi.c
-> 
-> diff --git a/arch/arm64/include/asm/xen/xen-ops.h b/arch/arm64/include/asm/xen/xen-ops.h
-> new file mode 100644
-> index 0000000..ec154e7
-> --- /dev/null
-> +++ b/arch/arm64/include/asm/xen/xen-ops.h
-> @@ -0,0 +1,6 @@
-> +#ifndef _ASM_XEN_OPS_H
-> +#define _ASM_XEN_OPS_H
-> +
-> +void xen_efi_runtime_setup(void);
-> +
-> +#endif /* _ASM_XEN_OPS_H */
-> diff --git a/arch/arm64/xen/Makefile b/arch/arm64/xen/Makefile
-> index 74a8d87..62e6fe2 100644
-> --- a/arch/arm64/xen/Makefile
-> +++ b/arch/arm64/xen/Makefile
-> @@ -1,2 +1,3 @@
->  xen-arm-y	+= $(addprefix ../../arm/xen/, enlighten.o grant-table.o p2m.o mm.o)
->  obj-y		:= xen-arm.o hypercall.o
-> +obj-$(CONFIG_XEN_EFI) += efi.o
-> diff --git a/arch/arm64/xen/efi.c b/arch/arm64/xen/efi.c
-> new file mode 100644
-> index 0000000..b9cae65
-> --- /dev/null
-> +++ b/arch/arm64/xen/efi.c
-> @@ -0,0 +1,40 @@
-> +/*
-> + * Copyright (c) 2015, Linaro Limited, Shannon Zhao
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + * You should have received a copy of the GNU General Public License along
-> + * with this program.  If not, see <http://www.gnu.org/licenses/>.
-> + */
-> +
-> +#include <linux/efi.h>
-> +#include <xen/xen-ops.h>
-> +#include <asm/xen/xen-ops.h>
-> +
-> +/* Set XEN EFI runtime services function pointers. Other fileds of struct efi,
-                                                              ^ fields
-
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-
-
-> + * e.g. efi.systab, will be set like normal EFI.
-> + */
-> +void __init xen_efi_runtime_setup(void)
-> +{
-> +	efi.get_time                 = xen_efi_get_time;
-> +	efi.set_time                 = xen_efi_set_time;
-> +	efi.get_wakeup_time          = xen_efi_get_wakeup_time;
-> +	efi.set_wakeup_time          = xen_efi_set_wakeup_time;
-> +	efi.get_variable             = xen_efi_get_variable;
-> +	efi.get_next_variable        = xen_efi_get_next_variable;
-> +	efi.set_variable             = xen_efi_set_variable;
-> +	efi.query_variable_info      = xen_efi_query_variable_info;
-> +	efi.update_capsule           = xen_efi_update_capsule;
-> +	efi.query_capsule_caps       = xen_efi_query_capsule_caps;
-> +	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
-> +	efi.reset_system             = NULL; /* Functionality provided by Xen. */
-> +}
-> +EXPORT_SYMBOL_GPL(xen_efi_runtime_setup);
-> diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
-> index 73708ac..27d216a 100644
-> --- a/drivers/xen/Kconfig
-> +++ b/drivers/xen/Kconfig
-> @@ -268,7 +268,7 @@ config XEN_HAVE_PVMMU
->  
->  config XEN_EFI
->  	def_bool y
-> -	depends on X86_64 && EFI
-> +	depends on (ARM64 || X86_64) && EFI
->  
->  config XEN_AUTO_XLATE
->  	def_bool y
-> -- 
-> 2.0.4
-> 
-> 
+DQoNCg0KPiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBKYW1lcyBCb3R0b21s
+ZXkgW21haWx0bzpKYW1lcy5Cb3R0b21sZXlASGFuc2VuUGFydG5lcnNoaXAuY29tXQ0KPiBTZW50
+OiBTYXR1cmRheSwgSmFudWFyeSAyMywgMjAxNiAxMDo0NCBBTQ0KPiBUbzogQW5keSBTaGV2Y2hl
+bmtvIDxhbmRyaXkuc2hldmNoZW5rb0BsaW51eC5pbnRlbC5jb20+OyBNYXR0IEZsZW1pbmcNCj4g
+PG1hdHRAY29kZWJsdWVwcmludC5jby51az47IFRob21hcyBHbGVpeG5lciA8dGdseEBsaW51dHJv
+bml4LmRlPjsgSW5nbw0KPiBNb2xuYXIgPG1pbmdvQHJlZGhhdC5jb20+OyBIIC4gUGV0ZXIgQW52
+aW4gPGhwYUB6eXRvci5jb20+OyBsaW51eC0NCj4gZWZpQHZnZXIua2VybmVsLm9yZzsgUmFzbXVz
+IFZpbGxlbW9lcyA8bGludXhAcmFzbXVzdmlsbGVtb2VzLmRrPjsgQW5kcmV3DQo+IE1vcnRvbiA8
+YWtwbUBsaW51eC1mb3VuZGF0aW9uLm9yZz47IGxpbnV4LWtlcm5lbCBAIHZnZXIgLiBrZXJuZWwg
+LiBvcmcNCj4gPGxpbnV4LWtlcm5lbEB2Z2VyLmtlcm5lbC5vcmc+DQo+IENjOiBFbGxpb3R0LCBS
+b2JlcnQgKFBlcnNpc3RlbnQgTWVtb3J5KSA8ZWxsaW90dEBocGUuY29tPg0KPiBTdWJqZWN0OiBS
+ZTogW1BBVENIIHYzIDMvNF0geDg2L2VmaTogcHJpbnQgc2l6ZSBpbiBiaW5hcnkgdW5pdHMgaW4N
+Cj4gZWZpX3ByaW50X21lbW1hcA0KPiANCj4gT24gU2F0LCAyMDE2LTAxLTIzIGF0IDE2OjU1ICsw
+MjAwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6DQo+ID4gRnJvbTogUm9iZXJ0IEVsbGlvdHQgPGVs
+bGlvdHRAaHBlLmNvbT4NCj4gPg0KPiA+IFByaW50IHRoZSBzaXplIGluIHRoZSBiZXN0LWZpdCBC
+LCBLaUIsIE1pQiwgZXRjLiB1bml0cyByYXRoZXIgdGhhbg0KPiA+IGFsd2F5cyBNaUIuIFRoaXMg
+YXZvaWRzIHJvdW5kaW5nLCB3aGljaCBjYW4gYmUgbWlzbGVhZGluZy4NCj4gPg0KDQouLi4NCj4g
+DQo+IFdoYXQgaWYgc2l6ZSBpcyB6ZXJvLCB3aGljaCBtaWdodCBoYXBwZW4gb24gYSBVRUZJIHNj
+cmV3IHVwPyAgDQoNCj4gQWxzbyBpdCBnaXZlcyByZWFsbHkgb2RkIHJlc3VsdHMgZm9yIG5vbiBw
+b3dlciBvZiB0d28gbWVtb3J5IHNpemVzLiANCj4gMTYzODRNQiBwcmludHMgYXMgMTZHaUIgYnV0
+IDE2Mzg1IHByaW50cyBhcyAxNjM4NU1pQi4NCj4gSWYgdGhlIGdvYWwgaXMgdG8gaGF2ZSBhIGNs
+ZWFuIGludGVyZmFjZSByZXBvcnRpbmcgb25seSB0aGUgZmlyc3QgZm91cg0KPiBzaWduaWZpY2Fu
+dCBmaWd1cmVzIGFuZCBhIHNpemUgZXhwb25lbnQsIHRoZW4gYSBoZWxwZXIgd291bGQgYmUgbXVj
+aA0KPiBiZXR0ZXIgdGhhbiB0cnlpbmcgdG8gb3BlbiBjb2RlIHRoaXMgYWQgaG9jLg0KDQpBbiBp
+bXBldHVzIGZvciB0aGUgcGF0Y2ggd2FzIHRvIHN0b3Agcm91bmRpbmcgdGhlIHN1Yi1NaUIgdmFs
+dWVzLA0Kd2hpY2ggaXMgbWlzbGVhZGluZyBhbmQgY2FuIGhpZGUgYnVncy4gIEZvciBteSBzeXN0
+ZW1zLCB0aGUNCm1pbmltdW0gc2l6ZSBvZiBhIHJhbmdlIGhhcHBlbnMgdG8gYmUgNCBLaUIsIHNv
+IEkgd2FudGVkIGF0IGxlYXN0DQp0aGF0IHJlc29sdXRpb24uIEhvd2V2ZXIsIEkgZG9uJ3Qgd2Fu
+dCB0byBwcmludCBldmVyeXRoaW5nIGFzIEtpQiwNCmJlY2F1c2UgdGhhdCBtYWtlcyBiaWcgc2l6
+ZXMgbGVzcyBjbGVhci4NCg0KRXhhbXBsZSAtIG9sZCBvdXRwdXQ6DQplZmk6IG1lbTAwOiBbQ29u
+dmVudGlvbmFsIE1lbW9yeS4uLl0gcmFuZ2U9WzB4MDAwMDAwMDAwMDAwMDAwMC0weDAwMDAwMDAw
+MDAwMDEwMDApICgwTUIpDQplZmk6IG1lbTAxOiBbTG9hZGVyIERhdGEgICAgICAgIC4uLl0gcmFu
+Z2U9WzB4MDAwMDAwMDAwMDAwMTAwMC0weDAwMDAwMDAwMDAwMDIwMDApICgwTUIpDQplZmk6IG1l
+bTAyOiBbQ29udmVudGlvbmFsIE1lbW9yeS4uLl0gcmFuZ2U9WzB4MDAwMDAwMDAwMDAwMjAwMC0w
+eDAwMDAwMDAwMDAwOTMwMDApICgwTUIpDQplZmk6IG1lbTAzOiBbUmVzZXJ2ZWQgICAgICAgICAg
+IC4uLl0gcmFuZ2U9WzB4MDAwMDAwMDAwMDA5MzAwMC0weDAwMDAwMDAwMDAwOTQwMDApICgwTUIp
+DQoNClByb3Bvc2VkIG91dHB1dDoNCmVmaTogbWVtMDA6IFtDb252ZW50aW9uYWwgTWVtb3J5Li4u
+XSByYW5nZT1bMHgwMDAwMDAwMDAwMDAwMDAwLTB4MDAwMDAwMDAwMDA5MmZmZl0gKDU4OCBLaUIg
+QCAwIEIpDQplZmk6IG1lbTAxOiBbUmVzZXJ2ZWQgICAgICAgICAgIC4uLl0gcmFuZ2U9WzB4MDAw
+MDAwMDAwMDA5MzAwMC0weDAwMDAwMDAwMDAwOTNmZmZdICg0IEtpQiBAIDU4OCBLaUIpDQplZmk6
+IG1lbTAyOiBbQ29udmVudGlvbmFsIE1lbW9yeS4uLl0gcmFuZ2U9WzB4MDAwMDAwMDAwMDA5NDAw
+MC0weDAwMDAwMDAwMDAwOWZmZmZdICg0OCBLaUIgQCA1OTIgS2lCKQ0KZWZpOiBtZW0wMzogW0xv
+YWRlciBEYXRhICAgICAgICAuLi5dIHJhbmdlPVsweDAwMDAwMDAwMDAxMDAwMDAtMHgwMDAwMDAw
+MDAxM2U4ZmZmXSAoMTkzNjQgS2lCIEAgMSBNaUIpDQoobm90ZXM6DQogLSBmcm9tIGEgZGlmZmVy
+ZW50IHN5c3RlbQ0KIC0gaW5jbHVkaW5nIGJvdGggYmFzZSBhbmQgc2l6ZQ0KIC0gTWF0dCBkaWRu
+J3QgbGlrZSBwcmludGluZyB0aGUgYmFzZSBzbyB0aGF0J3MgYmVlbiByZW1vdmVkKQ0KDQpXaXRo
+IHBlcnNpc3RlbnQgbWVtb3J5IChOVkRJTU1zKSBicmluZ2luZyBzdG9yYWdlIGRldmljZSBjYXBh
+Y2l0aWVzDQppbnRvIHRoZSBtZW1vcnkgc3Vic3lzdGVtLCBNaUIgaXMgdG9vIHNtYWxsLiAgU2Vl
+aW5nIGEgMSBUaUIgTlZESU1NDQphcyAxIFRpQiBpcyBhIGxvdCBjbGVhcmVyIHRoYW4gaGF2aW5n
+IHRvIHJlY29nbml6ZSAxMDQ4NTc2IE1pQiBhcw0KdGhlIHNhbWUgdmFsdWUgKGVzcGVjaWFsbHkg
+c2luY2UgdGhlc2UgcG93ZXItb2YtdHdvIHF1YW50aXRpZXMNCmRvbid0IGp1c3QgY2hvcCBvZmYg
+emVyb3Mgb24gdGhlIHJpZ2h0KS4NCg0KRXhhbXBsZXM6DQplZmk6IG1lbTUwOiBbUnVudGltZSBE
+YXRhICAgICAgIC4uLl0gcmFuZ2U9WzB4MDAwMDAwMDA3ODRmZjAwMC0weDAwMDAwMDAwNzg4ZmVm
+ZmZdICg0IE1pQiBAIDE5NzExOTYgS2lCKQ0KZWZpOiBtZW01NjogW0NvbnZlbnRpb25hbCBNZW1v
+cnkuLi5dIHJhbmdlPVsweDAwMDAwMDAxMDAwMDAwMDAtMHgwMDAwMDAwODdmZmZmZmZmXSAoMzAg
+R2lCIEAgNCBHaUIpDQplZmk6IG1lbTU4OiBbTWVtb3J5IE1hcHBlZCBJL08gIC4uLl0gcmFuZ2U9
+WzB4MDAwMDAwMDA4MDAwMDAwMC0weDAwMDAwMDAwOGZmZmZmZmZdICgyNTYgTWlCIEAgMiBHaUIp
+DQplZmk6IG1lbTYwOiBbUGVyc2lzdGVudCBNZW1vcnkgIC4uLl0gcmFuZ2U9WzB4MDAwMDAwMTQ4
+MDAwMDAwMC0weDAwMDAwMDFhN2ZmZmZmZmZdICgyNCBHaUIgQCA4MiBHaUIpDQoNCg0KLS0tDQpS
+b2JlcnQgRWxsaW90dCwgSFBFIFBlcnNpc3RlbnQgTWVtb3J5DQo=
