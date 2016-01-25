@@ -1,98 +1,77 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v3 03/17] Xen: xlate: Use page_to_xen_pfn instead of
- page_to_pfn
-Date: Mon, 25 Jan 2016 13:55:01 +0000
-Message-ID: <alpine.DEB.2.02.1601251351440.9687@kaball.uk.xensource.com>
+From: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Subject: Re: [PATCH v3 08/17] Xen: public/hvm: sync changes of HVM_PARAM_CALLBACK_VIA
+ ABI from Xen
+Date: Mon, 25 Jan 2016 15:06:05 +0000
+Message-ID: <alpine.DEB.2.02.1601251505530.9687@kaball.uk.xensource.com>
 References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
- <1453519184-11908-4-git-send-email-zhaoshenglong@huawei.com>
+ <1453519184-11908-9-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="US-ASCII"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453519184-11908-4-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1453519184-11908-9-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shannon Zhao <zhaoshenglong@huawei.com>
+Cc: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
 On Sat, 23 Jan 2016, Shannon Zhao wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> From: Shannon Zhao <shannon.zhao@linaro.org>
 > 
-> Use page_to_xen_pfn in case of 64KB page.
+> Sync the changes of HVM_PARAM_CALLBACK_VIA ABI introduced by
+> Xen commit <ca5c54b6ff05> (public/hvm: export the HVM_PARAM_CALLBACK_VIA
+> ABI in the API).
 > 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 
-Please update the commit message, something like:
-
-"Make xen_xlate_map_ballooned_pages work with 64K pages. In that case
-Kernel pages are 64K in size but Xen pages remain 4K in size. Xen pfns
-refer to 4K pages."
-
-Provided that you change the commit message:
-
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 
 
->  drivers/xen/xlate_mmu.c | 26 ++++++++++++++++----------
->  1 file changed, 16 insertions(+), 10 deletions(-)
+>  include/xen/interface/hvm/params.h | 27 +++++++++++++++++++++------
+>  1 file changed, 21 insertions(+), 6 deletions(-)
 > 
-> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
-> index 9692656..28f728b 100644
-> --- a/drivers/xen/xlate_mmu.c
-> +++ b/drivers/xen/xlate_mmu.c
-> @@ -207,9 +207,12 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
->  	void *vaddr;
->  	int rc;
->  	unsigned int i;
-> +	unsigned long nr_pages;
-> +	xen_pfn_t xen_pfn = 0;
+> diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+> index a6c7991..70ad208 100644
+> --- a/include/xen/interface/hvm/params.h
+> +++ b/include/xen/interface/hvm/params.h
+> @@ -27,16 +27,31 @@
+>   * Parameter space for HVMOP_{set,get}_param.
+>   */
 >  
->  	BUG_ON(nr_grant_frames == 0);
-> -	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
-> +	nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
-> +	pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
->  	if (!pages)
->  		return -ENOMEM;
+> +#define HVM_PARAM_CALLBACK_IRQ 0
+>  /*
+>   * How should CPU0 event-channel notifications be delivered?
+> - * val[63:56] == 0: val[55:0] is a delivery GSI (Global System Interrupt).
+> - * val[63:56] == 1: val[55:0] is a delivery PCI INTx line, as follows:
+> - *                  Domain = val[47:32], Bus  = val[31:16],
+> - *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
+> - * val[63:56] == 2: val[7:0] is a vector number.
+> + *
+>   * If val == 0 then CPU0 event-channel notifications are not delivered.
+> + * If val != 0, val[63:56] encodes the type, as follows:
+> + */
+> +
+> +#define HVM_PARAM_CALLBACK_TYPE_GSI      0
+> +/*
+> + * val[55:0] is a delivery GSI.  GSI 0 cannot be used, as it aliases val == 0,
+> + * and disables all notifications.
+> + */
+> +
+> +#define HVM_PARAM_CALLBACK_TYPE_PCI_INTX 1
+> +/*
+> + * val[55:0] is a delivery PCI INTx line:
+> + * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
+> + */
+> +
+> +#define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
+> +/*
+> + * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
+> + * if this delivery method is available.
+>   */
+> -#define HVM_PARAM_CALLBACK_IRQ 0
 >  
-> @@ -218,22 +221,25 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
->  		kfree(pages);
->  		return -ENOMEM;
->  	}
-> -	rc = alloc_xenballooned_pages(nr_grant_frames, pages);
-> +	rc = alloc_xenballooned_pages(nr_pages, pages);
->  	if (rc) {
-> -		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
-> -			nr_grant_frames, rc);
-> +		pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n", __func__,
-> +			nr_pages, rc);
->  		kfree(pages);
->  		kfree(pfns);
->  		return rc;
->  	}
-> -	for (i = 0; i < nr_grant_frames; i++)
-> -		pfns[i] = page_to_pfn(pages[i]);
-> +	for (i = 0; i < nr_grant_frames; i++) {
-> +		if ((i % XEN_PFN_PER_PAGE) == 0)
-> +			xen_pfn = page_to_xen_pfn(pages[i / XEN_PFN_PER_PAGE]);
-> +		pfns[i] = pfn_to_gfn(xen_pfn++);
-> +	}
->  
-> -	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
-> +	vaddr = vmap(pages, nr_pages, 0, PAGE_KERNEL);
->  	if (!vaddr) {
-> -		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
-> -			nr_grant_frames, rc);
-> -		free_xenballooned_pages(nr_grant_frames, pages);
-> +		pr_warn("%s Couldn't map %ld pages rc:%d\n", __func__,
-> +			nr_pages, rc);
-> +		free_xenballooned_pages(nr_pages, pages);
->  		kfree(pages);
->  		kfree(pfns);
->  		return -ENOMEM;
+>  #define HVM_PARAM_STORE_PFN    1
+>  #define HVM_PARAM_STORE_EVTCHN 2
 > -- 
 > 2.0.4
 > 
 > 
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
