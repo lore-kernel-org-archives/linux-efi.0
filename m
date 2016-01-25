@@ -1,135 +1,56 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] efi: make checkpatch complain less about efi.h GUID additions.
-Date: Mon, 25 Jan 2016 15:31:18 -0500
-Message-ID: <1453753878-2771-1-git-send-email-pjones@redhat.com>
+From: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
+Subject: RE: [PATCH v3 3/4] x86/efi: print size in binary units in
+ efi_print_memmap
+Date: Mon, 25 Jan 2016 20:37:58 +0000
+Message-ID: <94D0CD8314A33A4D9D801C0FE68B40295BF3BBD3@G9W0745.americas.hpqcorp.net>
+References: <1453560913-134672-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	<1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
+	<1453567445.2470.24.camel@HansenPartnership.com>
+	<94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
+	<1453748172.2363.36.camel@HansenPartnership.com>
+	<CAHp75VdYRzC9TcDpKxq=xddA0zgVk=5_25uXaimn1tOMZVeK4Q@mail.gmail.com>
+	<1453751131.2363.54.camel@HansenPartnership.com>
+ <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Language: en-US
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This reformats the GUID definitions in include/linux/efi.h so that if
-you add another one with the same style, checkpatch won't complain about
-it.
-
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- include/linux/efi.h | 63 +++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 42 insertions(+), 21 deletions(-)
-
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 569b5a8..8056a6c 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -537,67 +537,88 @@ void efi_native_runtime_setup(void);
-  *  EFI Configuration Table and GUID definitions
-  */
- #define NULL_GUID \
--    EFI_GUID(  0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 )
-+	EFI_GUID(0x00000000, 0x0000, 0x0000, \
-+		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
- 
- #define MPS_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d2f, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- 
- #define ACPI_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d30, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- 
- #define ACPI_20_TABLE_GUID    \
--    EFI_GUID(  0x8868e871, 0xe4f1, 0x11d3, 0xbc, 0x22, 0x0, 0x80, 0xc7, 0x3c, 0x88, 0x81 )
-+	EFI_GUID(0x8868e871, 0xe4f1, 0x11d3, \
-+		 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
- 
- #define SMBIOS_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d31, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- 
- #define SMBIOS3_TABLE_GUID    \
--    EFI_GUID(  0xf2fd1544, 0x9794, 0x4a2c, 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 )
-+	EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c, \
-+		 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
- 
- #define SAL_SYSTEM_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d32, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
- 
- #define HCDP_TABLE_GUID	\
--    EFI_GUID(  0xf951938d, 0x620b, 0x42ef, 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98 )
-+	EFI_GUID(0xf951938d, 0x620b, 0x42ef, \
-+		 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
- 
- #define UGA_IO_PROTOCOL_GUID \
--    EFI_GUID(  0x61a4d49e, 0x6f68, 0x4f1b, 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0xb, 0x7, 0xa2 )
-+	EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b, \
-+		 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
- 
- #define EFI_GLOBAL_VARIABLE_GUID \
--    EFI_GUID(  0x8be4df61, 0x93ca, 0x11d2, 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c )
-+	EFI_GUID(0x8be4df61, 0x93ca, 0x11d2, \
-+		 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
- 
- #define UV_SYSTEM_TABLE_GUID \
--    EFI_GUID(  0x3b13a7d4, 0x633e, 0x11dd, 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93 )
-+	EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd, \
-+		 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
- 
- #define LINUX_EFI_CRASH_GUID \
--    EFI_GUID(  0xcfc8fc79, 0xbe2e, 0x4ddc, 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0 )
-+	EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc, \
-+		 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
- 
- #define LOADED_IMAGE_PROTOCOL_GUID \
--    EFI_GUID(  0x5b1b31a1, 0x9562, 0x11d2, 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2, \
-+		 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID \
--    EFI_GUID(  0x9042a9de, 0x23dc, 0x4a38, 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a )
-+	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38, \
-+		 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
- 
- #define EFI_UGA_PROTOCOL_GUID \
--    EFI_GUID(  0x982c298b, 0xf4fa, 0x41cb, 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39 )
-+	EFI_GUID(0x982c298b, 0xf4fa, 0x41cb, \
-+		 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
- 
- #define EFI_PCI_IO_PROTOCOL_GUID \
--    EFI_GUID(  0x4cf5b200, 0x68b8, 0x4ca5, 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x2, 0x9a )
-+	EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5, \
-+		 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
- 
- #define EFI_FILE_INFO_ID \
--    EFI_GUID(  0x9576e92, 0x6d3f, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x9576e92, 0x6d3f, 0x11d2, \
-+		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define EFI_SYSTEM_RESOURCE_TABLE_GUID \
--    EFI_GUID(  0xb122a263, 0x3661, 0x4f68, 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80 )
-+	EFI_GUID(0xb122a263, 0x3661, 0x4f68, \
-+		 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
- 
- #define EFI_FILE_SYSTEM_GUID \
--    EFI_GUID(  0x964e5b22, 0x6459, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x964e5b22, 0x6459, 0x11d2, \
-+		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define DEVICE_TREE_GUID \
--    EFI_GUID(  0xb1b621d5, 0xf19c, 0x41a5, 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 )
-+	EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5, \
-+		 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
- 
- #define EFI_PROPERTIES_TABLE_GUID \
--    EFI_GUID(  0x880aaca3, 0x4adc, 0x4a04, 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5 )
-+	EFI_GUID(0x880aaca3, 0x4adc, 0x4a04, \
-+		 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
- 
- typedef struct {
- 	efi_guid_t guid;
--- 
-2.5.0
+DQoNCi0tLQ0KUm9iZXJ0IEVsbGlvdHQsIEhQRSBQZXJzaXN0ZW50IE1lbW9yeQ0KDQoNCj4gLS0t
+LS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTogQW5keSBTaGV2Y2hlbmtvIFttYWlsdG86
+YW5keS5zaGV2Y2hlbmtvQGdtYWlsLmNvbV0NCj4gU2VudDogTW9uZGF5LCBKYW51YXJ5IDI1LCAy
+MDE2IDI6MDEgUE0NCj4gVG86IEphbWVzIEJvdHRvbWxleSA8SmFtZXMuQm90dG9tbGV5QGhhbnNl
+bnBhcnRuZXJzaGlwLmNvbT4NCj4gQ2M6IEVsbGlvdHQsIFJvYmVydCAoUGVyc2lzdGVudCBNZW1v
+cnkpIDxlbGxpb3R0QGhwZS5jb20+OyBBbmR5IFNoZXZjaGVua28NCj4gPGFuZHJpeS5zaGV2Y2hl
+bmtvQGxpbnV4LmludGVsLmNvbT47IE1hdHQgRmxlbWluZw0KPiA8bWF0dEBjb2RlYmx1ZXByaW50
+LmNvLnVrPjsgVGhvbWFzIEdsZWl4bmVyIDx0Z2x4QGxpbnV0cm9uaXguZGU+OyBJbmdvDQo+IE1v
+bG5hciA8bWluZ29AcmVkaGF0LmNvbT47IEggLiBQZXRlciBBbnZpbiA8aHBhQHp5dG9yLmNvbT47
+IGxpbnV4LQ0KPiBlZmlAdmdlci5rZXJuZWwub3JnOyBSYXNtdXMgVmlsbGVtb2VzIDxsaW51eEBy
+YXNtdXN2aWxsZW1vZXMuZGs+OyBBbmRyZXcNCj4gTW9ydG9uIDxha3BtQGxpbnV4LWZvdW5kYXRp
+b24ub3JnPjsgbGludXgta2VybmVsIEAgdmdlciAuIGtlcm5lbCAuIG9yZw0KPiA8bGludXgta2Vy
+bmVsQHZnZXIua2VybmVsLm9yZz4NCj4gU3ViamVjdDogUmU6IFtQQVRDSCB2MyAzLzRdIHg4Ni9l
+Zmk6IHByaW50IHNpemUgaW4gYmluYXJ5IHVuaXRzIGluDQo+IGVmaV9wcmludF9tZW1tYXANCj4g
+DQo+IE9uIE1vbiwgSmFuIDI1LCAyMDE2IGF0IDk6NDUgUE0sIEphbWVzIEJvdHRvbWxleQ0KPiA8
+SmFtZXMuQm90dG9tbGV5QGhhbnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4gT24gTW9u
+LCAyMDE2LTAxLTI1IGF0IDIxOjI4ICswMjAwLCBBbmR5IFNoZXZjaGVua28gd3JvdGU6DQo+ID4+
+IE9uIE1vbiwgSmFuIDI1LCAyMDE2IGF0IDg6NTYgUE0sIEphbWVzIEJvdHRvbWxleQ0KPiA+PiA8
+SmFtZXMuQm90dG9tbGV5QGhhbnNlbnBhcnRuZXJzaGlwLmNvbT4gd3JvdGU6DQo+ID4+ID4gT24g
+TW9uLCAyMDE2LTAxLTI1IGF0IDE4OjAyICswMDAwLCBFbGxpb3R0LCBSb2JlcnQgKFBlcnNpc3Rl
+bnQNCj4gPj4gPiBNZW1vcnkpDQo+ID4+ID4gd3JvdGU6DQo+ID4+DQo+ID4+ID4gIFVzaW5nIGZm
+cyBsZWFkcyB0byBwcmVjaXNpb24gcnVuYXdheQ0KPiA+Pg0KPiA+PiBIb3cgZXhhY3RseT8hDQo+
+ID4NCj4gPiBPZmYgYnkgb25lLiAgQSBzaXplIG9mIDB4ZmZmZmZmZmZmZmZmZmZmZiBwcmludHMg
+MTg0NDY3NDQwNzM3MDk1NTE2MTUgQg0KPiA+IHJhdGhlciB0aGFuIDIwIEdpQi4NCj4gDQo+IEJl
+Y2F1c2UgaXQncyBub3QgYSAyMCBHaUIuIEl0J3MgZXhhY3RseSAyMCBHaUIgLSAxIEIuDQo+IA0K
+PiBBRkFJVSwgdGhlIGludGVudGlvbiB3YXMgdG8gc2hvdyBfZXhhY3RfIHNpemUuDQoNCkZvciB0
+aGUgVUVGSSBtZW1vcnkgbWFwLCB0aGF0IHdhcyBpbmRlZWQgbXkgaW50ZW50aW9uLiAgSQ0KZG9u
+J3Qgd2FudCBpdCBzaWxlbnRseSByb3VuZCB0byAiMjAgR2lCIi4gIEV2ZW4gcm91bmRpbmcNCnRv
+ICIxOS45OTkgR2lCIiBpcyBpbXByZWNpc2UuDQoNCkFub3RoZXIgb3B0aW9uIGNvdWxkIGJlIHRv
+IHVzZSBhICJ+IiBwcmVmaXggZm9yIGltcGVyZmVjdA0KdmFsdWVzLCBsaWtlICJ+MjAgR2lCIi4g
+IFRoYXQgd291bGQgc2VydmUgYXMgYSB3YXJuaW5nDQp0aGF0IHNvbWV0aGluZydzIG5vdCBxdWl0
+ZSByaWdodC4NCg0KDQo=
