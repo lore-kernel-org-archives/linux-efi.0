@@ -1,44 +1,190 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v3 3/4] x86/efi: print size in binary units in
- efi_print_memmap
-Date: Tue, 26 Jan 2016 13:59:26 +0200
-Message-ID: <1453809566.2521.239.camel@linux.intel.com>
-References: <1453560913-134672-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <1453567445.2470.24.camel@HansenPartnership.com>
-	 <94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
-	 <1453748172.2363.36.camel@HansenPartnership.com>
-	 <CAHp75VdYRzC9TcDpKxq=xddA0zgVk=5_25uXaimn1tOMZVeK4Q@mail.gmail.com>
-	 <1453751131.2363.54.camel@HansenPartnership.com>
-	 <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw@mail.gmail.com>
-	 <94D0CD8314A33A4D9D801C0FE68B40295BF3BBD3@G9W0745.americas.hpqcorp.net>
-	 <20160126115041.GA7478@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH v3 17/17] Xen: EFI: Parse DT parameters for Xen specific
+ UEFI
+Date: Tue, 26 Jan 2016 12:05:59 +0000
+Message-ID: <20160126120559.GB7478@codeblueprint.co.uk>
+References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
+ <1453519184-11908-18-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160126115041.GA7478-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>
-Cc: Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1453519184-11908-18-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shannon Zhao <zhaoshenglong@huawei.com>
+Cc: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Mark Salter <msalter@redhat.com>, Leif Lindholm <leif.lindholm@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2016-01-26 at 11:50 +0000, Matt Fleming wrote:
-> On Mon, 25 Jan, at 08:37:58PM, Elliott, Robert (Persistent Memory)
-> wrote:
-> >=20
-> > For the UEFI memory map, that was indeed my intention.=C2=A0=C2=A0I
-> > don't want it silently round to "20 GiB".=C2=A0=C2=A0Even rounding
-> > to "19.999 GiB" is imprecise.
->=20
-> OK, let's just go with your original patch Robert (minus the @ addr
-> bit) since it's pretty small and does what we want for this specific
-> case.
+On Sat, 23 Jan, at 11:19:44AM, Shannon Zhao wrote:
+> From: Shannon Zhao <shannon.zhao@linaro.org>
+> 
+> Add a new function to parse DT parameters for Xen specific UEFI just
+> like the way for normal UEFI. Then it could reuse the existing codes.
+> 
+> If Xen supports EFI, initialize runtime services.
+> 
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+> ---
+> CC: Matt Fleming <matt@codeblueprint.co.uk>
+> ---
+>  arch/arm/xen/enlighten.c   |  6 ++++++
+>  arch/arm64/kernel/efi.c    | 17 ++++++++++++-----
+>  drivers/firmware/efi/efi.c | 45 ++++++++++++++++++++++++++++++++++++++-------
+>  3 files changed, 56 insertions(+), 12 deletions(-)
+ 
+Looks OK to me, but I've added some people to Cc that have touched
+these files in the past, and it would be good to get their ACKs.
 
-However I am against this, but seems reviewers do not leave a chance to
-us, I would propose to copy-and-paste table of binary prefixes and use
-__ffs64().
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
 
---=20
-Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Intel Finland Oy
+> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+> index cdc0bd2..608d735 100644
+> --- a/arch/arm/xen/enlighten.c
+> +++ b/arch/arm/xen/enlighten.c
+> @@ -245,6 +245,12 @@ static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
+>  	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
+>  		hyper_node.version = s + strlen(hyper_node.prefix);
+>  
+> +	if (IS_ENABLED(CONFIG_XEN_EFI)) {
+> +		/* Check if Xen supports EFI */
+> +		if (of_get_flat_dt_subnode_by_name(node, "uefi") > 0)
+> +			set_bit(EFI_PARAVIRT, &efi.flags);
+> +	}
+> +
+>  	return 0;
+>  }
+>  
+> diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
+> index 4eeb171..3c46129 100644
+> --- a/arch/arm64/kernel/efi.c
+> +++ b/arch/arm64/kernel/efi.c
+> @@ -33,6 +33,7 @@
+>  #include <asm/mmu_context.h>
+>  #include <asm/mmu.h>
+>  #include <asm/pgtable.h>
+> +#include <asm/xen/xen-ops.h>
+>  
+>  struct efi_memory_map memmap;
+>  
+> @@ -308,13 +309,19 @@ static int __init arm64_enable_runtime_services(void)
+>  	}
+>  	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+>  
+> -	if (!efi_virtmap_init()) {
+> -		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+> -		return -ENOMEM;
+> +	if (IS_ENABLED(CONFIG_XEN_EFI) && efi_enabled(EFI_PARAVIRT)) {
+> +		/* Set up runtime services function pointers for Xen Dom0 */
+> +		xen_efi_runtime_setup();
+> +	} else {
+> +		if (!efi_virtmap_init()) {
+> +			pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+> +			return -ENOMEM;
+> +		}
+> +
+> +		/* Set up runtime services function pointers */
+> +		efi_native_runtime_setup();
+>  	}
+>  
+> -	/* Set up runtime services function pointers */
+> -	efi_native_runtime_setup();
+>  	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+>  
+>  	efi.runtime_version = efi.systab->hdr.revision;
+> diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+> index 027ca21..bdcf6d7 100644
+> --- a/drivers/firmware/efi/efi.c
+> +++ b/drivers/firmware/efi/efi.c
+> @@ -498,12 +498,14 @@ device_initcall(efi_load_efivars);
+>  		FIELD_SIZEOF(struct efi_fdt_params, field) \
+>  	}
+>  
+> -static __initdata struct {
+> +struct params {
+>  	const char name[32];
+>  	const char propname[32];
+>  	int offset;
+>  	int size;
+> -} dt_params[] = {
+> +};
+> +
+> +static struct params fdt_params[] __initdata = {
+>  	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
+>  	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
+>  	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
+> @@ -511,24 +513,45 @@ static __initdata struct {
+>  	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+>  };
+>  
+> +static struct params xen_fdt_params[] __initdata = {
+> +	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
+> +	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
+> +	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
+> +	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
+> +	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
+> +};
+> +
+>  struct param_info {
+>  	int found;
+>  	void *params;
+> +	struct params *dt_params;
+> +	int size;
+>  };
+>  
+>  static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+>  				       int depth, void *data)
+>  {
+>  	struct param_info *info = data;
+> +	struct params *dt_params = info->dt_params;
+>  	const void *prop;
+>  	void *dest;
+>  	u64 val;
+> -	int i, len;
+> +	int i, len, offset;
+>  
+> -	if (depth != 1 || strcmp(uname, "chosen") != 0)
+> -		return 0;
+> +	if (efi_enabled(EFI_PARAVIRT)) {
+> +		if (depth != 1 || strcmp(uname, "hypervisor") != 0)
+> +			return 0;
+>  
+> -	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+> +		offset = of_get_flat_dt_subnode_by_name(node, "uefi");
+> +		if (offset < 0)
+> +			return 0;
+> +		node = offset;
+> +	} else {
+> +		if (depth != 1 || strcmp(uname, "chosen") != 0)
+> +			return 0;
+> +	}
+> +
+> +	for (i = 0; i < info->size; i++) {
+>  		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+>  		if (!prop)
+>  			return 0;
+> @@ -559,12 +582,20 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
+>  	info.found = 0;
+>  	info.params = params;
+>  
+> +	if (efi_enabled(EFI_PARAVIRT)) {
+> +		info.dt_params = xen_fdt_params;
+> +		info.size = ARRAY_SIZE(xen_fdt_params);
+> +	} else {
+> +		info.dt_params = fdt_params;
+> +		info.size = ARRAY_SIZE(fdt_params);
+> +	}
+> +
+>  	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+>  	if (!info.found)
+>  		pr_info("UEFI not found.\n");
+>  	else if (!ret)
+>  		pr_err("Can't find '%s' in device tree!\n",
+> -		       dt_params[info.found].name);
+> +		       info.dt_params[info.found].name);
+>  
+>  	return ret;
+>  }
+> -- 
+> 2.0.4
+> 
+> 
