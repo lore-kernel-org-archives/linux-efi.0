@@ -1,112 +1,67 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v3 16/17] FDT: Add a helper to get specified name
- subnode
-Date: Tue, 26 Jan 2016 12:11:24 +0000
-Message-ID: <alpine.DEB.2.02.1601261156340.3619@kaball.uk.xensource.com>
-References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
- <1453519184-11908-17-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v3 14/17] XEN: EFI: Move x86 specific codes to architecture
+ directory
+Date: Tue, 26 Jan 2016 20:26:06 +0800
+Message-ID: <56A765DE.7040408@huawei.com>
+References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com> <1453519184-11908-15-git-send-email-zhaoshenglong@huawei.com> <alpine.DEB.2.02.1601251643230.9687@kaball.uk.xensource.com> <56A72B4F.2040909@huawei.com> <alpine.DEB.2.02.1601261117200.3619@kaball.uk.xensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1453519184-11908-17-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <alpine.DEB.2.02.1601261117200.3619-7Z66fg9igcxYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
 Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, 23 Jan 2016, Shannon Zhao wrote:
-> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> 
-> Sometimes it needs to check if there is a node in FDT by full path.
-> Introduce this helper to get the specified name subnode if it exists.
-> 
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
-> CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/of/fdt.c       | 35 +++++++++++++++++++++++++++++++++++
->  include/linux/of_fdt.h |  2 ++
->  2 files changed, 37 insertions(+)
-> 
-> diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-> index 655f79d..112ec16 100644
-> --- a/drivers/of/fdt.c
-> +++ b/drivers/of/fdt.c
-> @@ -645,6 +645,41 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
->  }
->  
->  /**
-> + * of_get_flat_dt_subnode_by_name - get subnode of specified node by name
-> + *
-> + * @node: the parent node
-> + * @uname: the name of subnode
-> + * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
-> + */
-> +
-> +int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
-> +{
-> +	const void *blob = initial_boot_params;
-> +	int offset;
-> +	const char *pathp;
-> +
-> +	/* Find first subnode if it exists */
-> +	offset = fdt_first_subnode(blob, node);
-> +	if (offset < 0)
-> +		return -FDT_ERR_NOTFOUND;
-> +	pathp = fdt_get_name(blob, offset, NULL);
-> +	if (strncmp(pathp, uname, strlen(uname)) == 0)
-> +		return offset;
-
-Wouldn't this check succeed even if uname is "uefi" and the node
-name is actually "uefiiiii"?  You might have to use strcmp.
 
 
-> +	/* Find other subnodes */
-> +	do {
-> +		offset = fdt_next_subnode(blob, offset);
-> +		if (offset < 0)
-> +			return -FDT_ERR_NOTFOUND;
-> +		pathp = fdt_get_name(blob, offset, NULL);
-> +		if (strncmp(pathp, uname, strlen(uname)) == 0)
-> +			return offset;
-> +	} while (offset >= 0);
+On 2016/1/26 19:31, Stefano Stabellini wrote:
+> On Tue, 26 Jan 2016, Shannon Zhao wrote:
+>> > On 2016/1/26 0:44, Stefano Stabellini wrote:
+>>> > > On Sat, 23 Jan 2016, Shannon Zhao wrote:
+>>>>> > >> > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>>> > >> >=20
+>>>>> > >> > Move x86 specific codes to architecture directory and expo=
+rt those EFI
+>>>>> > >> > runtime service functions. This will be useful for initial=
+izing runtime
+>>>>> > >> > service on ARM later.
+>>>>> > >> >=20
+>>>>> > >> > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>> > > This patch causes a build breakage on x86:
+>>> > >=20
+>>> > > arch/x86/xen/efi.c: In function =E2=80=98xen_efi_probe=E2=80=99=
+:
+>>> > > arch/x86/xen/efi.c:101:2: error: implicit declaration of functi=
+on =E2=80=98HYPERVISOR_platform_op=E2=80=99 [-Werror=3Dimplicit-functio=
+n-declaration]
+>>> > >=20
+>> > This patch is based on following patch [1]. Maybe you need to upda=
+te
+>> > your branch. :)
+>> >=20
+>> > [1] xen: rename dom0_op to platform_op
+>> > https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/co=
+mmit/?id=3Dcfafae940381207d48b11a73a211142dba5947d3
+> Sorry, I made a mistake rebasing the series. It doesn't help that I
+> couldn't find any Linux RCs on top of which it applies cleanly. As Li=
+nus
+> tags RCs often enough, it is usually helpful to base one's work on a =
+tag
+> so that it is easier for other people to work on it.
+>
+Ah, I'll rebase this series on top of the newest master at next version
+since the relevant patches are in master.
 
-Rather than writing the name check twice, I think it would be best to
-code this loop as:
+> Please add my Reviewed-by to this patch.
+Thanks a lot!
 
-    for (offset = fdt_first_subnode(blob, offset);
-         offset >= 0;
-         offset = fdt_next_subnode(blob, offset)) {
+--=20
+Shannon
 
-         /* do name check */
-
-
-
-> +	return -FDT_ERR_NOTFOUND;
-> +}
-> +
-> +/**
->   * of_get_flat_dt_root - find the root node in the flat blob
->   */
->  unsigned long __init of_get_flat_dt_root(void)
-> diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-> index df9ef38..fc28162 100644
-> --- a/include/linux/of_fdt.h
-> +++ b/include/linux/of_fdt.h
-> @@ -52,6 +52,8 @@ extern char __dtb_end[];
->  extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
->  				     int depth, void *data),
->  			   void *data);
-> +extern int of_get_flat_dt_subnode_by_name(unsigned long node,
-> +					  const char *uname);
->  extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
->  				       int *size);
->  extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
-> -- 
-> 2.0.4
-> 
-> 
 --
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
+To unsubscribe from this list: send the line "unsubscribe devicetree" i=
+n
 the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 More majordomo info at  http://vger.kernel.org/majordomo-info.html
