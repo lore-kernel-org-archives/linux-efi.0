@@ -1,56 +1,70 @@
-From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] x86/mm/pageattr: Use _PAGE_GLOBAL bit for EFI page table mappings
-Date: Wed, 27 Jan 2016 10:34:56 -0800
-Message-ID: <1453919696-13096-1-git-send-email-sai.praneeth.prakhya@intel.com>
+From: "Laison Computech Inc" <danny-nst7T5aFo3dBDgjK7y7TUQ@public.gmane.org>
+Subject: NEW ARRIVALS, CISCO,CPU's,Memory, LAPTOP AND AVAYA
+Date: Wed, 27 Jan 2016 12:41:51 +0700
+Message-ID: <201601270544.AQX06493__28929.5633011081$1453951476$gmane$org@razorgate1.infokom.net>
+Reply-To: <LaisonComputer-bdq14YP6qtT9W2o6/NvY6w@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain;
+	charset="Windows-1251"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Dear Sir/Madam,
 
-Since EFI page tables can be treated as kernel page tables they should
-be global. All the other page mapping functions in pageattr.c set the
-_PAGE_GLOBAL bit and we want to avoid inconsistencies when we map a page
-in the EFI code paths, for example when that page is split in
-__split_large_page(), etc. It also makes it easier to validate that the
-EFI region mappings have the correct attributes because there are fewer
-differences compared with regular kernel mappings.
+Clean tested working pulls CPUs and QTYs in stock.
 
-Cc: Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
- arch/x86/mm/pageattr.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+115  X   X5650
+65  X   E5410
+75  X   X5660
+145  X   E5530
+100  X   E5645
+40  X   X5680
+75  X   X5690
 
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 3052e72fa9f5..9256f6406a3c 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -904,6 +904,20 @@ static void populate_pte(struct cpa_data *cpa,
+Brand new sealed  IP phones and QTYs in stock.
+
+55 x CP-7937G
+77 x CP-7942G
+54 x CP-7945G
+75 x CP-7962G
+......
+45 x Avaya 9630
+65 x Avaya 9641
+55 x Avaya 9640
+
+All NIB.
+
+Here is our current stock list.
+
+ SSD drives and 750 gig 2.5" sata drives
+
+We also have
+250 x i5 dell
+133 x HP
+360 x Lenevo
+all grade A
+
+Here is the qty in stock for laptops
  
- 	pte = pte_offset_kernel(pmd, start);
- 
-+	/*
-+	 * Set the GLOBAL flags only if the PRESENT flag is
-+	 * set otherwise pte_present will return true even on
-+	 * a non present pte. The canon_pgprot will clear
-+	 * _PAGE_GLOBAL for the ancient hardware that doesn't
-+	 * support it.
-+	 */
-+	if (pgprot_val(pgprot) & _PAGE_PRESENT)
-+		pgprot_val(pgprot) |= _PAGE_GLOBAL;
-+	else
-+		pgprot_val(pgprot) &= ~_PAGE_GLOBAL;
-+
-+	pgprot = canon_pgprot(pgprot);
-+
- 	while (num_pages-- && start < end) {
- 		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
- 
--- 
-2.1.4
+150 x E6500 Dell Latitude E6500 Core 2 Duo 2.80GHz T9600 4GB 160GB DVD+/-RW Win 7
+ 60 x E6510 Dell Ltitude E6510. 15.6" Intel Core i5- M520 @ 2.40GHz. 4GB. 320GB DVD+/-RW Win 7
+30 X 8530P HP EliteBook 8530p 15.4" Laptop 2.53GHz Core 2 Duo T9400, 4GB RAM, 160GB HDD, Win
+100 x  8740W  HP EliteBook 8740w 17" 2.4Ghz Core i5 6GB 250GB Win 7 Pr
+45 x 8760W HP EliteBook 8760W 17.3" 2nd Gen Intel Core i7 2.70GHz 8GB 320GB Windows 7 Pro
+50 x DELL 6520Dell latitude e6520 15.6" i5-2520M 2.5Ghz, 8GB Ram, 500GB HD Win 7 @ $115
+120 x DELL 6420 Laptop Dell Latitude E6420 14" Intel Core i5 2.4Ghz 4GB RAM 250GB HDD DVD Win 7
+150 x T410 Lenovo ThinkPad Laptop T410s 14.1" 2.40GHz Core i5 4GB RAM 160GB Win 7
+180 x 8440P HP EliteBook 8440p 14" M520 Core i5 2.4GHz 4GB 250GB Win 7
+
+
+Let me know if you're interested. We are very open to offers and willing to work with you to make sure that we have a deal.
+
+Thank You
+Barbara Johnson
+Laison Computech Inc
+210 N Scoring Ave,
+Rialto California, 92376
+Tel: +1-657-232-7047
+Fax: +1-347-214-047
