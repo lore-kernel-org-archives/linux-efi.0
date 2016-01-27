@@ -1,126 +1,73 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: [PATCH 05/17] ia64: Set System RAM type and descriptor
-Date: Tue, 26 Jan 2016 21:57:21 +0100
-Message-ID: <1453841853-11383-6-git-send-email-bp@alien8.de>
-References: <1453841853-11383-1-git-send-email-bp@alien8.de>
+From: Hanjun Guo <hanjun.guo@linaro.org>
+Subject: Re: [PATCH v3 12/17] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Wed, 27 Jan 2016 16:27:35 +0800
+Message-ID: <56A87F77.8070506@linaro.org>
+References: <1453519184-11908-1-git-send-email-zhaoshenglong@huawei.com>
+ <1453519184-11908-13-git-send-email-zhaoshenglong@huawei.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1453841853-11383-1-git-send-email-bp@alien8.de>
+In-Reply-To: <1453519184-11908-13-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andrew Morton <akpm@linux-foundation.org>, Fenghua Yu <fenghua.yu@intel.com>, linux-arch@vger.kernel.org, linux-efi <linux-efi@vger.kernel.org>, linux-ia64@vger.kernel.org, linux-mm <linux-mm@kvack.org>, "Luis R. Rodriguez" <mcgrof@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Rusty Russell <rusty@rustcorp.com.au>
+To: Shannon Zhao <zhaoshenglong@huawei.com>, linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, mark.rutland@arm.com, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Toshi Kani <toshi.kani@hpe.com>
+Hi Shannon,
 
-Change efi_initialize_iomem_resources() to set 'flags' and 'desc' for
-EFI memory types. IORESOURCE_SYSRAM, a modifier bit, is set for System
-RAM as IORESOURCE_MEM is already set. IORESOURCE_SYSTEM_RAM is defined
-as (IORESOURCE_MEM|IORESOURCE_SYSRAM). I/O resource descriptor is set
-for "ACPI Non-volatile Storage" and "Persistent Memory".
+On 2016/1/23 11:19, Shannon Zhao wrote:
+> From: Shannon Zhao <shannon.zhao@linaro.org>
+>
+> When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+> a /hypervisor node in DT. So check if it needs to enable ACPI.
+>
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+> ---
+> CC: Hanjun Guo <hanjun.guo@linaro.org>
+> ---
+>   arch/arm64/kernel/acpi.c | 12 ++++++++----
+>   1 file changed, 8 insertions(+), 4 deletions(-)
+>
+> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> index d1ce8e2..4e92be0 100644
+> --- a/arch/arm64/kernel/acpi.c
+> +++ b/arch/arm64/kernel/acpi.c
+> @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+>   {
+>   	/*
+>   	 * Return 1 as soon as we encounter a node at depth 1 that is
+> -	 * not the /chosen node.
+> +	 * not the /chosen node, or /hypervisor node when running on Xen.
 
-Also set IORESOURCE_SYSTEM_RAM for "Kernel code", "Kernel data", and
-"Kernel bss".
+The comment is bit misleading, we need to specify two mode, running on
+Xen or not, if not on xen, then /chosen node is enough.
 
-Signed-off-by: Toshi Kani <toshi.kani@hpe.com>
-Acked-by: Tony Luck <tony.luck@intel.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>
-Cc: Fenghua Yu <fenghua.yu@intel.com>
-Cc: linux-arch@vger.kernel.org
-Cc: linux-efi <linux-efi@vger.kernel.org>
-Cc: linux-ia64@vger.kernel.org
-Cc: linux-mm <linux-mm@kvack.org>
-Cc: "Luis R. Rodriguez" <mcgrof@suse.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Rusty Russell <rusty@rustcorp.com.au>
-Link: http://lkml.kernel.org/r/1452020081-26534-5-git-send-email-toshi.kani@hpe.com
-Signed-off-by: Borislav Petkov <bp@suse.de>
----
- arch/ia64/kernel/efi.c   | 13 ++++++++++---
- arch/ia64/kernel/setup.c |  6 +++---
- 2 files changed, 13 insertions(+), 6 deletions(-)
+>   	 */
+> -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+> -		return 1;
+> +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
+> +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
+> +			return 1;
+> +	}
+> +
+>   	return 0;
+>   }
+>
+> @@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
+>   	/*
+>   	 * Enable ACPI instead of device tree unless
+>   	 * - ACPI has been disabled explicitly (acpi=off), or
+> -	 * - the device tree is not empty (it has more than just a /chosen node)
+> +	 * - the device tree is not empty (it has more than just a /chosen node,
+> +	 *   and a /hypervisor node when running on Xen)
 
-diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
-index caae3f4e4341..300dac3702f1 100644
---- a/arch/ia64/kernel/efi.c
-+++ b/arch/ia64/kernel/efi.c
-@@ -1178,7 +1178,7 @@ efi_initialize_iomem_resources(struct resource *code_resource,
- 	efi_memory_desc_t *md;
- 	u64 efi_desc_size;
- 	char *name;
--	unsigned long flags;
-+	unsigned long flags, desc;
- 
- 	efi_map_start = __va(ia64_boot_param->efi_memmap);
- 	efi_map_end   = efi_map_start + ia64_boot_param->efi_memmap_size;
-@@ -1193,6 +1193,8 @@ efi_initialize_iomem_resources(struct resource *code_resource,
- 			continue;
- 
- 		flags = IORESOURCE_MEM | IORESOURCE_BUSY;
-+		desc = IORES_DESC_NONE;
-+
- 		switch (md->type) {
- 
- 			case EFI_MEMORY_MAPPED_IO:
-@@ -1207,14 +1209,17 @@ efi_initialize_iomem_resources(struct resource *code_resource,
- 				if (md->attribute & EFI_MEMORY_WP) {
- 					name = "System ROM";
- 					flags |= IORESOURCE_READONLY;
--				} else if (md->attribute == EFI_MEMORY_UC)
-+				} else if (md->attribute == EFI_MEMORY_UC) {
- 					name = "Uncached RAM";
--				else
-+				} else {
- 					name = "System RAM";
-+					flags |= IORESOURCE_SYSRAM;
-+				}
- 				break;
- 
- 			case EFI_ACPI_MEMORY_NVS:
- 				name = "ACPI Non-volatile Storage";
-+				desc = IORES_DESC_ACPI_NV_STORAGE;
- 				break;
- 
- 			case EFI_UNUSABLE_MEMORY:
-@@ -1224,6 +1229,7 @@ efi_initialize_iomem_resources(struct resource *code_resource,
- 
- 			case EFI_PERSISTENT_MEMORY:
- 				name = "Persistent Memory";
-+				desc = IORES_DESC_PERSISTENT_MEMORY;
- 				break;
- 
- 			case EFI_RESERVED_TYPE:
-@@ -1246,6 +1252,7 @@ efi_initialize_iomem_resources(struct resource *code_resource,
- 		res->start = md->phys_addr;
- 		res->end = md->phys_addr + efi_md_size(md) - 1;
- 		res->flags = flags;
-+		res->desc = desc;
- 
- 		if (insert_resource(&iomem_resource, res) < 0)
- 			kfree(res);
-diff --git a/arch/ia64/kernel/setup.c b/arch/ia64/kernel/setup.c
-index 4f118b0d3091..2029a38a72ae 100644
---- a/arch/ia64/kernel/setup.c
-+++ b/arch/ia64/kernel/setup.c
-@@ -80,17 +80,17 @@ unsigned long vga_console_membase;
- 
- static struct resource data_resource = {
- 	.name	= "Kernel data",
--	.flags	= IORESOURCE_BUSY | IORESOURCE_MEM
-+	.flags	= IORESOURCE_BUSY | IORESOURCE_SYSTEM_RAM
- };
- 
- static struct resource code_resource = {
- 	.name	= "Kernel code",
--	.flags	= IORESOURCE_BUSY | IORESOURCE_MEM
-+	.flags	= IORESOURCE_BUSY | IORESOURCE_SYSTEM_RAM
- };
- 
- static struct resource bss_resource = {
- 	.name	= "Kernel bss",
--	.flags	= IORESOURCE_BUSY | IORESOURCE_MEM
-+	.flags	= IORESOURCE_BUSY | IORESOURCE_SYSTEM_RAM
- };
- 
- unsigned long ia64_max_cacheline_size;
--- 
-2.3.5
+and here too.
+
+if that is addressed,
+
+Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
+
+Thanks
+Hanjun
