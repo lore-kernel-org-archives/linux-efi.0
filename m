@@ -1,70 +1,53 @@
-From: "Laison Computech Inc" <danny-nst7T5aFo3dBDgjK7y7TUQ@public.gmane.org>
-Subject: NEW ARRIVALS, CISCO,CPU's,Memory, LAPTOP AND AVAYA
-Date: Wed, 27 Jan 2016 12:41:51 +0700
-Message-ID: <201601270544.AQX06493__28929.5633011081$1453951476$gmane$org@razorgate1.infokom.net>
-Reply-To: <LaisonComputer-bdq14YP6qtT9W2o6/NvY6w@public.gmane.org>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3 3/4] x86/efi: print size in binary units in
+ efi_print_memmap
+Date: Thu, 28 Jan 2016 09:29:59 +0000
+Message-ID: <20160128092959.GA2571@codeblueprint.co.uk>
+References: <1453560913-134672-4-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1453567445.2470.24.camel@HansenPartnership.com>
+ <94D0CD8314A33A4D9D801C0FE68B40295BF3B840@G9W0745.americas.hpqcorp.net>
+ <1453748172.2363.36.camel@HansenPartnership.com>
+ <CAHp75VdYRzC9TcDpKxq=xddA0zgVk=5_25uXaimn1tOMZVeK4Q@mail.gmail.com>
+ <1453751131.2363.54.camel@HansenPartnership.com>
+ <CAHp75VeXHoyOgFSb4vzWBmELH_yJx1mSN+quxue=tSZCh5sTXw@mail.gmail.com>
+ <94D0CD8314A33A4D9D801C0FE68B40295BF3BBD3@G9W0745.americas.hpqcorp.net>
+ <20160126115041.GA7478@codeblueprint.co.uk>
+ <1453809566.2521.239.camel@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="Windows-1251"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1453809566.2521.239.camel-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: "Elliott, Robert (Persistent Memory)" <elliott-ZPxbGqLxI0U@public.gmane.org>, Andy Shevchenko <andy.shevchenko-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, James Bottomley <James.Bottomley-JuX6DAaQMKPCXq6kfMZ53/egYHeGw8Jk@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, "linux-kernel @ vger . kernel . org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Dear Sir/Madam,
+On Tue, 26 Jan, at 01:59:26PM, Andy Shevchenko wrote:
+> On Tue, 2016-01-26 at 11:50 +0000, Matt Fleming wrote:
+> > On Mon, 25 Jan, at 08:37:58PM, Elliott, Robert (Persistent Memory)
+> > wrote:
+> > >=20
+> > > For the UEFI memory map, that was indeed my intention.=A0=A0I
+> > > don't want it silently round to "20 GiB".=A0=A0Even rounding
+> > > to "19.999 GiB" is imprecise.
+> >=20
+> > OK, let's just go with your original patch Robert (minus the @ addr
+> > bit) since it's pretty small and does what we want for this specifi=
+c
+> > case.
+>=20
+> However I am against this, but seems reviewers do not leave a chance =
+to
+> us, I would propose to copy-and-paste table of binary prefixes and us=
+e
+> __ffs64().
 
-Clean tested working pulls CPUs and QTYs in stock.
+Is there a benefit to this approach other than __ffs64() being faster?
+It is a neglibible performance gain anyway because this is hidden
+behind efi=3Ddebug, and so by definition you're not looking for ultra
+performance.
 
-115  X   X5650
-65  X   E5410
-75  X   X5660
-145  X   E5530
-100  X   E5645
-40  X   X5680
-75  X   X5690
-
-Brand new sealed  IP phones and QTYs in stock.
-
-55 x CP-7937G
-77 x CP-7942G
-54 x CP-7945G
-75 x CP-7962G
-......
-45 x Avaya 9630
-65 x Avaya 9641
-55 x Avaya 9640
-
-All NIB.
-
-Here is our current stock list.
-
- SSD drives and 750 gig 2.5" sata drives
-
-We also have
-250 x i5 dell
-133 x HP
-360 x Lenevo
-all grade A
-
-Here is the qty in stock for laptops
- 
-150 x E6500 Dell Latitude E6500 Core 2 Duo 2.80GHz T9600 4GB 160GB DVD+/-RW Win 7
- 60 x E6510 Dell Ltitude E6510. 15.6" Intel Core i5- M520 @ 2.40GHz. 4GB. 320GB DVD+/-RW Win 7
-30 X 8530P HP EliteBook 8530p 15.4" Laptop 2.53GHz Core 2 Duo T9400, 4GB RAM, 160GB HDD, Win
-100 x  8740W  HP EliteBook 8740w 17" 2.4Ghz Core i5 6GB 250GB Win 7 Pr
-45 x 8760W HP EliteBook 8760W 17.3" 2nd Gen Intel Core i7 2.70GHz 8GB 320GB Windows 7 Pro
-50 x DELL 6520Dell latitude e6520 15.6" i5-2520M 2.5Ghz, 8GB Ram, 500GB HD Win 7 @ $115
-120 x DELL 6420 Laptop Dell Latitude E6420 14" Intel Core i5 2.4Ghz 4GB RAM 250GB HDD DVD Win 7
-150 x T410 Lenovo ThinkPad Laptop T410s 14.1" 2.40GHz Core i5 4GB RAM 160GB Win 7
-180 x 8440P HP EliteBook 8440p 14" M520 Core i5 2.4GHz 4GB 250GB Win 7
-
-
-Let me know if you're interested. We are very open to offers and willing to work with you to make sure that we have a deal.
-
-Thank You
-Barbara Johnson
-Laison Computech Inc
-210 N Scoring Ave,
-Rialto California, 92376
-Tel: +1-657-232-7047
-Fax: +1-347-214-047
+Which makes picking between __ffs64() and non-__ffs64() a wash if
+we're not going to be reusing existing code.
