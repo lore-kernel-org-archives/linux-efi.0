@@ -1,78 +1,94 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm64: efistub: drop __init annotation from handle_kernel_image()
-Date: Fri, 29 Jan 2016 10:36:03 +0100
-Message-ID: <CAKv+Gu9sE4oJrFmSK8sEjTrU8A7k53Hj1S1pTyCqyA5Gsba2Kw@mail.gmail.com>
-References: <1453979254-25374-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1453979254-25374-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20160128225809.GF2571@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH] x86/mm/pageattr: Avoid truncation when converting cpa->numpages to address
+Date: Fri, 29 Jan 2016 11:36:10 +0000
+Message-ID: <1454067370-10374-1-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160128225809.GF2571-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, =?UTF-8?q?Viorel-C=C4=83t=C4=83lin=20R=C4=83pi=C8=9Beanu?= <rapiteanu.catalin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 28 January 2016 at 23:58, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Thu, 28 Jan, at 12:07:32PM, Ard Biesheuvel wrote:
->> After moving arm64-stub.c to libstub/, all of its sections are emitted
->> as .init.xxx sections automatically, and the __init annotation of
->> handle_kernel_image() causes it to end up in .init.init.text, which is
->> not recognized as an __init section by the linker scripts. So drop the
->> annotation.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/firmware/efi/libstub/arm64-stub.c | 14 +++++++-------
->>  1 file changed, 7 insertions(+), 7 deletions(-)
->>
->> diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
->> index 78dfbd34b6bf..9e0342745e4f 100644
->> --- a/drivers/firmware/efi/libstub/arm64-stub.c
->> +++ b/drivers/firmware/efi/libstub/arm64-stub.c
->> @@ -13,13 +13,13 @@
->>  #include <asm/efi.h>
->>  #include <asm/sections.h>
->>
->> -efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
->> -                                     unsigned long *image_addr,
->> -                                     unsigned long *image_size,
->> -                                     unsigned long *reserve_addr,
->> -                                     unsigned long *reserve_size,
->> -                                     unsigned long dram_base,
->> -                                     efi_loaded_image_t *image)
->> +efi_status_t handle_kernel_image(efi_system_table_t *sys_table_arg,
->> +                              unsigned long *image_addr,
->> +                              unsigned long *image_size,
->> +                              unsigned long *reserve_addr,
->> +                              unsigned long *reserve_size,
->> +                              unsigned long dram_base,
->> +                              efi_loaded_image_t *image)
->>  {
->>       efi_status_t status;
->>       unsigned long kernel_size, kernel_memsize = 0;
->> --
->> 2.5.0
->>
->
-> Would it make more sense to #undef __init in one of the arm64 efistub
-> header files? I'm thinking of the case where some poor unsuspecting
-> developer writes a new function and marks it as __init, and we miss it
-> during review.
->
+There are a couple of nasty truncation bugs lurking in the pageattr
+code that can be triggered when mapping EFI regions, e.g. when we pass
+a cpa->pgd pointer. Because cpa->numpages is a 32-bit value, shifting
+left by PAGE_SHIFT will truncate the resultant address to 32-bits.
 
-Yes, I can add it to efistub.h, and make sure it gets included in all the files
+Viorel-C=C4=83t=C4=83lin managed to trigger this bug on his Dell machin=
+e that
+provides a ~5GB EFI region which requires 1236992 pages to be mapped.
+When calling populate_pud() the end of the region gets calculated
+incorrectly in the following buggy expression,
 
-Should we #undef it and #define it to a string that is easily grep'ed
-for, so it is easy to find the explanatory comment that goes along
-with it?
-E.g.,
+  end =3D start + (cpa->numpages << PAGE_SHIFT);
 
-#define __init __init_not_supported_in_efi_stub
+And only 188416 pages are mapped. Next, populate_pud() gets invoked
+for a second time because of the loop in __change_page_attr_set_clr(),
+only this time no pages get mapped because shifting the remaining
+number of pages (1048576) by PAGE_SHIFT is zero. At which point the
+loop in __change_page_attr_set_clr() spins forever because we fail to
+map progress.
 
-> At least if we do the #undef we can document why __init makes no sense
-> in the EFI stub, and at the same time automatically fix things up.
->
-> An alternative would be to write some Kbuild magic that complains if
-> it sees __init, but that seems like more work than is reasonable.
+Hitting this bug depends very much on the virtual address we pick to
+map the large region at and how many pages we map on the initial run
+through the loop. This explains why this issue was only recently hit
+with the introduction of commit
+
+  a5caa209ba9c ("x86/efi: Fix boot crash by mapping EFI memmap entries =
+bottom-up at runtime, instead of top-down")
+
+It's interesting to note that safe uses of cpa->numpages do exist in
+the pageattr code. If instead of shifting ->numpages we multiply by
+PAGE_SIZE, no truncation occurs because PAGE_SIZE is a UL value, and
+so the result is unsigned long.
+
+To avoid surprises when users try to convert very large cpa->numpages
+values to addresses, change the data type from 'int' to 'unsigned
+long', thereby making it suitable for shifting by PAGE_SHIFT without
+any type casting.
+
+The alternative would be to make liberal use of casting, but that is
+far more likely to cause problems in the future when someone adds more
+code and fails to cast properly; this bug was difficult enough to
+track down in the first place.
+
+Reported-by: Viorel-C=C4=83t=C4=83lin R=C4=83pi=C8=9Beanu <rapiteanu.ca=
+talin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Tested-by: Viorel-C=C4=83t=C4=83lin R=C4=83pi=C8=9Beanu <rapiteanu.cata=
+lin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Link: https://bugzilla.kernel.org/show_bug.cgi?id=3D110131
+Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
+Cc: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: <stable-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ arch/x86/mm/pageattr.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index fc6a4c8f6e2a..2440814b0069 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -33,7 +33,7 @@ struct cpa_data {
+ 	pgd_t		*pgd;
+ 	pgprot_t	mask_set;
+ 	pgprot_t	mask_clr;
+-	int		numpages;
++	unsigned long	numpages;
+ 	int		flags;
+ 	unsigned long	pfn;
+ 	unsigned	force_split : 1;
+@@ -1350,7 +1350,7 @@ static int __change_page_attr_set_clr(struct cpa_=
+data *cpa, int checkalias)
+ 		 * CPA operation. Either a large page has been
+ 		 * preserved or a single page update happened.
+ 		 */
+-		BUG_ON(cpa->numpages > numpages);
++		BUG_ON(cpa->numpages > numpages || !cpa->numpages);
+ 		numpages -=3D cpa->numpages;
+ 		if (cpa->flags & (CPA_PAGES_ARRAY | CPA_ARRAY))
+ 			cpa->curpage++;
+--=20
+2.6.2
