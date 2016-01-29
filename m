@@ -1,69 +1,128 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 1/3] arm64: efistub: drop __init annotation from handle_kernel_image()
-Date: Fri, 29 Jan 2016 17:03:16 +0100
-Message-ID: <CAKv+Gu96tdf8ZrGHDi_YKacsRF_b336Nu4Anh61j4u3Lg18BHg@mail.gmail.com>
-References: <1453979254-25374-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1453979254-25374-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20160128225809.GF2571@codeblueprint.co.uk>
-	<CAKv+Gu9sE4oJrFmSK8sEjTrU8A7k53Hj1S1pTyCqyA5Gsba2Kw@mail.gmail.com>
-	<20160129160006.GD2611@codeblueprint.co.uk>
+Subject: Re: issue with MEMBLOCK_NOMAP
+Date: Fri, 29 Jan 2016 17:16:50 +0100
+Message-ID: <CAKv+Gu-QMewJT5wyKTYy3QsgsO3nWtSGJ3XKy-6DHsWEwJ-9xg@mail.gmail.com>
+References: <1454076020.2821.39.camel@redhat.com>
+	<CAKv+Gu97eRFX80+mvFpv85Zc0=B=aa-LXM6KcNAQ+6Kxz3ZTZQ@mail.gmail.com>
+	<1454082787.2821.58.camel@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160129160006.GD2611-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1454082787.2821.58.camel-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+To: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29 January 2016 at 17:00, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wr=
-ote:
-> On Fri, 29 Jan, at 10:36:03AM, Ard Biesheuvel wrote:
->> On 28 January 2016 at 23:58, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>=
- wrote:
+On 29 January 2016 at 16:53, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+> On Fri, 2016-01-29 at 15:06 +0100, Ard Biesheuvel wrote:
+>> On 29 January 2016 at 15:00, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org> wrote:
+>> > Hi Ard,
 >> >
->> > Would it make more sense to #undef __init in one of the arm64 efis=
-tub
->> > header files? I'm thinking of the case where some poor unsuspectin=
-g
->> > developer writes a new function and marks it as __init, and we mis=
-s it
->> > during review.
+>> > I ran into an issue with your MEMBLOCK_NOMAP changes on a particular
+>> > firmware. The symptom is the kernel panics at boot time when it hits
+>> > an unmapped page while unpacking the initramfs. As it turns out, the
+>> > start of the initramfs shares a 64k kernel page with the UEFI memmap.
+>> > I can avoid the problem with:
+>> >
+>> > @@ -203,7 +203,7 @@ void __init efi_init(void)
+>> >
+>> >         reserve_regions();
+>> >         early_memunmap(memmap.map, params.mmap_size);
+>> > -       memblock_mark_nomap(params.mmap & PAGE_MASK,
+>> > -                           PAGE_ALIGN(params.mmap_size +
+>> > -                                      (params.mmap & ~PAGE_MASK)));
+>> > +       memblock_reserve(params.mmap & PAGE_MASK,
+>> > +                        PAGE_ALIGN(params.mmap_size +
+>> > +                                   (params.mmap & ~PAGE_MASK)));
+>> >  }
+>> >
+>> >
+>> > But it makes me worry about the same potential problem with
+>> > other reserved regions which we nomap. What do you think?
 >> >
 >>
->> Yes, I can add it to efistub.h, and make sure it gets included in al=
-l the files
+>> So I take it this initramfs allocation is not made by the stub but by
+>> GRUB? Since the stub rounds all allocations to 64 KB ...
 >>
->> Should we #undef it and #define it to a string that is easily grep'e=
-d
->> for, so it is easy to find the explanatory comment that goes along
->> with it?
->> E.g.,
->>
->> #define __init __init_not_supported_in_efi_stub
+> Yes. GRUB.
 >
-> This would produce a compilation failure if someone tags something as
-> __init right? Looks fine to me.
 
-Yes, but it makes the error message difficult to decipher, since
-__init is printed and not what it resolves to. Locally, I tried this,
-which seems to work:
+We have already fixed EDK2 a while ago to round up all regions
+returned by AllocatePages() to round up to 64 KB. Do you know if this
+is a GRUB issue (i.e., it traverses the memory map and finds a free
+range and explicitly allocates it) or a firmware issue?
 
-#undef __init
-#define __init __attribute__((__init_not_supported_in_efi_stub))
-#pragma GCC diagnostic error "-Wattributes"
+>> In any case, regardless of the underlying cause, if any part of the
+>> initramfs turns out not to be covered by the linear mapping, we should
+>> invoke your code to move it. So I think it should be a matter of
+>> refining the logic in relocate_initrd() to do the right thing in this
+>> case
+>
+> That thought had crossed my mind. I think it would be easy enough to
+> trigger the copy if first or last page of initrd is unmapped.
 
-which produces
+Indeed. If some page in the middle is missing, then you're really
+doing something fishy, so I don't see why we should care about that as
+well.
 
-  CC      drivers/firmware/efi/libstub/arm-stub.o
-/home/ard/linux-2.6/drivers/firmware/efi/libstub/arm-stub.c:24:1:
-error: =E2=80=98__init_not_supported_in_efi_stub=E2=80=99 attribute dir=
-ective ignored
-[-Werror=3Dattributes]
- {
- ^
-cc1: some warnings being treated as errors
+> Somewhat
+> related to this is that I want to rework this old patch to deal with
+> acpi tables outside mapped ram:
+>
+>   https://lkml.org/lkml/2015/5/14/357
+>
+> Basically, we should be able to just do:
+>
+> diff --git a/arch/arm64/include/asm/acpi.h b/arch/arm64/include/asm/acpi.h
+> index 15e0aad..4ea638c 100644
+> --- a/arch/arm64/include/asm/acpi.h
+> +++ b/arch/arm64/include/asm/acpi.h
+> @@ -32,7 +32,7 @@
+>  static inline void __iomem *acpi_os_ioremap(acpi_physical_address phys,
+>                                             acpi_size size)
+>  {
+> -       if (!page_is_ram(phys >> PAGE_SHIFT))
+> +       if (!memblock_is_memory(phys))
+>                 return ioremap(phys, size);
+>
+>         return ioremap_cache(phys, size);
+>
 
-which is slightly dodgy, but at least puts the string right in the erro=
-r message
+I think we should fix acpi_os_ioremap(). IIRC it is used via two
+different code paths that distinguish between memory and I/O, and end
+up using the same function for no good reason.
+
+> But this doesn't currently work wrt mem= which works by removing
+> the end range of memblocks. If I have mem= use the nomap flag
+> rather than removing the range, the above acpi_os_ioremap change
+> works, but other issues crop up due to memblock_end_of_DRAM()
+> returning end of all DRAM regardless of mem=. So we end up with
+> PFNs and struct pages for memory which will never be in linear
+> map. Fixing memblock_end_of_DRAM() to look at the flags and
+> return end of mapped DRAM gets things working but I wonder about
+> other potential trouble spots with this approach. Any thoughts?
+>
+
+Actually, I think mem= should be considered a development feature, not
+a production feature, and if its use is suboptimal in this respect, so
+be it.
+
+But to address this particular issue, it would probably be better to
+fix page_is_ram(). I have made some attempts in that direction in the
+past, but that never landed anywhere. Since ACPI on arm64 is tightly
+coupled to UEFI, implementing page_is_ram() as something that
+interrogates the UEFI memory map if efi_enabled(EFI_MEMMAP) would be
+reasonable imo. (Or perhaps putting that in acpi_os_ioremap()
+directly?)
+
+>
+>>
+>> Your suggested change will break 32-bit ARM, since we use
+>> ioremap_nocache() to map the UEFI memory map, and ARM does not allow
+>> that on ranges that are part of the linear mapping.
+>
+> okay. I'll put together a patch to the initrd relocating code.
+>
+
+Great!
