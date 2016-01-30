@@ -1,7 +1,7 @@
 From: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH 2/2] x86/efi: Map EFI_MEMORY_{XP,RO} memory region bits to EFI page tables
-Date: Fri, 29 Jan 2016 17:04:40 -0800
-Message-ID: <1454115880-6914-3-git-send-email-sai.praneeth.prakhya@intel.com>
+Subject: [PATCH 1/2] x86/mm/pageattr: Don't implicitly allow _PAGE_RW in kernel_map_pages_in_pgd()
+Date: Fri, 29 Jan 2016 17:04:39 -0800
+Message-ID: <1454115880-6914-2-git-send-email-sai.praneeth.prakhya@intel.com>
 References: <1454115880-6914-1-git-send-email-sai.praneeth.prakhya@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1454115880-6914-1-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
@@ -12,22 +12,13 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 
-Now that we have EFI memory region bits that indicate which regions do
-not need execute permission or read/write permission in the page tables,
-let's use them.
+As part of the preparation for the EFI_MEMORY_RO flag added in the UEFI
+2.5 specification, we need the ability to map pages in kernel page
+tables without _PAGE_RW being set.
 
-We also check for EFI_NX_PE_DATA and only enforce the restrictive
-mappings if it's present (to allow us to ignore buggy firmware that sets
-bits it didn't mean to and to preserve backwards compatibility).
-
-Instead of assuming that firmware would set appropriate attributes in
-memory descriptor like EFI_MEMORY_RO for code and EFI_MEMORY_XP for
-data, we can expect some firmware out there which might only set *type*
-in memory descriptor to be EFI_RUNTIME_SERVICES_CODE or
-EFI_RUNTIME_SERVICES_DATA leaving away attribute. This will lead to
-improper mappings of EFI runtime regions. In order to avoid it, we check
-attribute and type of memory descriptor to update mappings and moreover
-Windows works this way.
+Modify kernel_map_pages_in_pgd() to require its callers to pass _PAGE_RW
+if the pages need to be mapped read/write. Otherwise, we'll map the
+pages as read-only.
 
 Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
@@ -36,109 +27,63 @@ Cc: Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
- arch/x86/include/asm/efi.h     |  2 +-
- arch/x86/platform/efi/efi.c    |  9 +++++++--
- arch/x86/platform/efi/efi_64.c | 45 ++++++++++++++++++++++++++++++++++++++----
- 3 files changed, 49 insertions(+), 7 deletions(-)
+ arch/x86/mm/pageattr.c         | 3 +++
+ arch/x86/platform/efi/efi_64.c | 8 ++++----
+ 2 files changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 8fd9e637629a..7bb206f73915 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -141,7 +141,7 @@ extern int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pa
- extern void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages);
- extern void __init old_map_region(efi_memory_desc_t *md);
- extern void __init runtime_code_page_mkexec(void);
--extern void __init efi_runtime_mkexec(void);
-+extern void __init efi_runtime_update_mappings(void);
- extern void __init efi_dump_pagetable(void);
- extern void __init efi_apply_memmap_quirks(void);
- extern int __init efi_reuse_config(u64 tables, int nr_tables);
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 52ca4615826c..c18df5441305 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -943,7 +943,6 @@ static void __init __efi_enter_virtual_mode(void)
- 	}
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 63dd44979d56..9256f6406a3c 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -1966,6 +1966,9 @@ int kernel_map_pages_in_pgd(pgd_t *pgd, u64 pfn, unsigned long address,
+ 	if (!(page_flags & _PAGE_NX))
+ 		cpa.mask_clr = __pgprot(_PAGE_NX);
  
- 	efi_sync_low_kernel_mappings();
--	efi_dump_pagetable();
++	if (!(page_flags & _PAGE_RW))
++		cpa.mask_clr = __pgprot(_PAGE_RW);
++
+ 	cpa.mask_set = __pgprot(_PAGE_PRESENT | page_flags);
  
- 	if (efi_is_native()) {
- 		status = phys_efi_set_virtual_address_map(
-@@ -981,7 +980,13 @@ static void __init __efi_enter_virtual_mode(void)
- 
- 	efi.set_virtual_address_map = NULL;
- 
--	efi_runtime_mkexec();
-+	/*
-+	 * Apply more restrictive page table mapping attributes now that
-+	 * SVAM() has been called and the firmware has performed all
-+	 * necessary relocation fixups for the new virtual addresses.
-+	 */
-+	efi_runtime_update_mappings();
-+	efi_dump_pagetable();
- 
- 	/*
- 	 * We mapped the descriptor array into the EFI pagetable above
+ 	retval = __change_page_attr_set_clr(&cpa, 0);
 diff --git a/arch/x86/platform/efi/efi_64.c b/arch/x86/platform/efi/efi_64.c
-index a6277b79aa99..49e4dd4a1f58 100644
+index 040fff163d96..a6277b79aa99 100644
 --- a/arch/x86/platform/efi/efi_64.c
 +++ b/arch/x86/platform/efi/efi_64.c
-@@ -393,13 +393,50 @@ void __init parse_efi_setup(u64 phys_addr, u32 data_len)
- 	efi_setup = phys_addr + sizeof(struct setup_data);
- }
+@@ -233,7 +233,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	 * phys_efi_set_virtual_address_map().
+ 	 */
+ 	pfn = pa_memmap >> PAGE_SHIFT;
+-	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX)) {
++	if (kernel_map_pages_in_pgd(pgd, pfn, pa_memmap, num_pages, _PAGE_NX | _PAGE_RW)) {
+ 		pr_err("Error ident-mapping new memmap (0x%lx)!\n", pa_memmap);
+ 		return 1;
+ 	}
+@@ -262,7 +262,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 		pfn = md->phys_addr >> PAGE_SHIFT;
+ 		npages = md->num_pages;
  
--void __init efi_runtime_mkexec(void)
-+void __init efi_runtime_update_mappings(void)
+-		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, 0)) {
++		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, npages, _PAGE_RW)) {
+ 			pr_err("Failed to map 1:1 memory\n");
+ 			return 1;
+ 		}
+@@ -279,7 +279,7 @@ int __init efi_setup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 	text = __pa(_text);
+ 	pfn = text >> PAGE_SHIFT;
+ 
+-	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, 0)) {
++	if (kernel_map_pages_in_pgd(pgd, pfn, text, npages, _PAGE_RW)) {
+ 		pr_err("Failed to map kernel text 1:1\n");
+ 		return 1;
+ 	}
+@@ -294,7 +294,7 @@ void __init efi_cleanup_page_tables(unsigned long pa_memmap, unsigned num_pages)
+ 
+ static void __init __map_region(efi_memory_desc_t *md, u64 va)
  {
--	if (!efi_enabled(EFI_OLD_MEMMAP))
-+	unsigned long pfn;
-+	pgd_t *pgd = efi_pgd;
-+	efi_memory_desc_t *md;
-+	void *p;
-+
-+	if (efi_enabled(EFI_OLD_MEMMAP)) {
-+		if (__supported_pte_mask & _PAGE_NX)
-+			runtime_code_page_mkexec();
-+		return;
-+	}
-+
-+	if (!efi_enabled(EFI_NX_PE_DATA))
- 		return;
+-	unsigned long flags = 0;
++	unsigned long flags = _PAGE_RW;
+ 	unsigned long pfn;
+ 	pgd_t *pgd = efi_pgd;
  
--	if (__supported_pte_mask & _PAGE_NX)
--		runtime_code_page_mkexec();
-+	for (p = memmap.map; p < memmap.map_end; p += memmap.desc_size) {
-+		unsigned long pf = 0;
-+		md = p;
-+
-+		if (!(md->attribute & EFI_MEMORY_RUNTIME))
-+			continue;
-+
-+		if (!(md->attribute & EFI_MEMORY_WB))
-+			pf |= _PAGE_PCD;
-+
-+		if ((md->attribute & EFI_MEMORY_XP) ||
-+			(md->type == EFI_RUNTIME_SERVICES_DATA))
-+			pf |= _PAGE_NX;
-+
-+		if (!(md->attribute & EFI_MEMORY_RO) &&
-+			(md->type != EFI_RUNTIME_SERVICES_CODE))
-+			pf |= _PAGE_RW;
-+
-+		/* Update the 1:1 mapping */
-+		pfn = md->phys_addr >> PAGE_SHIFT;
-+		if (kernel_map_pages_in_pgd(pgd, pfn, md->phys_addr, md->num_pages, pf))
-+			pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
-+				   md->phys_addr, md->virt_addr);
-+
-+		if (kernel_map_pages_in_pgd(pgd, pfn, md->virt_addr, md->num_pages, pf))
-+			pr_warn("Error mapping PA 0x%llx -> VA 0x%llx!\n",
-+				   md->phys_addr, md->virt_addr);
-+	}
- }
- 
- void __init efi_dump_pagetable(void)
 -- 
 2.1.4
