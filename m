@@ -1,74 +1,141 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 11/14] x86/efi: Show actual ending addresses in efi_print_memmap
-Date: Mon,  1 Feb 2016 22:07:05 +0000
-Message-ID: <1454364428-494-12-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [PATCH 10/14] efi: Make checkpatch complain less about efi.h GUID additions
+Date: Mon,  1 Feb 2016 22:07:04 +0000
+Message-ID: <1454364428-494-11-git-send-email-matt@codeblueprint.co.uk>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Elliott <elliott@hpe.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Leif Lindholm <leif.lindholm@linaro.org>, Laszlo Ersek <lersek@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1454364428-494-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Robert Elliott <elliott@hpe.com>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-Adjust efi_print_memmap to print the real end address of each
-range, not 1 byte beyond. This matches other prints like those for
-SRAT and nosave memory.
+This reformats the GUID definitions in include/linux/efi.h so that if
+you add another one with the same style, checkpatch won't complain about
+it.
 
-While investigating grub persistent memory corruption issues, it
-was helpful to make this table match the ending address convention
-used by:
-* the kernel's e820 table prints
-	BIOS-e820: [mem 0x0000001680000000-0x0000001c7fffffff] reserved
-* the kernel's nosave memory prints
-	PM: Registered nosave memory: [mem 0x880000000-0xc7fffffff]
-* the kernel's ACPI System Resource Affinity Table prints
-	SRAT: Node 1 PXM 1 [mem 0x480000000-0x87fffffff]
-* grub's lsmmap and lsefimmap commands
-	reserved  0000001680000000-0000001c7fffffff 00600000     24GiB UC WC WT WB NV
-* the UEFI shell's memmap command
-	Reserved   000000007FC00000-000000007FFFFFFF 0000000000000400 0000000000000001
-
-For example, if you grep all the various logs for c7fffffff, you
-won't find the kernel's line if it uses c80000000.
-
-Also, change the closing ) to ] to match the opening [.
-
-old:
-    efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c80000000) (16384MB)
-
-new:
-    efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff] (16384MB)
-
-Signed-off-by: Robert Elliott <elliott@hpe.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Leif Lindholm <leif.lindholm@linaro.org>
-Cc: Laszlo Ersek <lersek@redhat.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- arch/x86/platform/efi/efi.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ include/linux/efi.h | 63 +++++++++++++++++++++++++++++++++++------------------
+ 1 file changed, 42 insertions(+), 21 deletions(-)
 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index bdd9477f937c..e80826e6f3a9 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -235,10 +235,10 @@ void __init efi_print_memmap(void)
- 		char buf[64];
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 09f1559e7525..f468f7c53236 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -535,67 +535,88 @@ void efi_native_runtime_setup(void);
+  *  EFI Configuration Table and GUID definitions
+  */
+ #define NULL_GUID \
+-    EFI_GUID(  0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 )
++	EFI_GUID(0x00000000, 0x0000, 0x0000, \
++		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
  
- 		md = p;
--		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx) (%lluMB)\n",
-+		pr_info("mem%02u: %s range=[0x%016llx-0x%016llx] (%lluMB)\n",
- 			i, efi_md_typeattr_format(buf, sizeof(buf), md),
- 			md->phys_addr,
--			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT),
-+			md->phys_addr + (md->num_pages << EFI_PAGE_SHIFT) - 1,
- 			(md->num_pages >> (20 - EFI_PAGE_SHIFT)));
- 	}
- #endif  /*  EFI_DEBUG  */
+ #define MPS_TABLE_GUID    \
+-    EFI_GUID(  0xeb9d2d2f, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
++	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
++		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ 
+ #define ACPI_TABLE_GUID    \
+-    EFI_GUID(  0xeb9d2d30, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
++	EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3, \
++		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ 
+ #define ACPI_20_TABLE_GUID    \
+-    EFI_GUID(  0x8868e871, 0xe4f1, 0x11d3, 0xbc, 0x22, 0x0, 0x80, 0xc7, 0x3c, 0x88, 0x81 )
++	EFI_GUID(0x8868e871, 0xe4f1, 0x11d3, \
++		 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
+ 
+ #define SMBIOS_TABLE_GUID    \
+-    EFI_GUID(  0xeb9d2d31, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
++	EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3, \
++		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ 
+ #define SMBIOS3_TABLE_GUID    \
+-    EFI_GUID(  0xf2fd1544, 0x9794, 0x4a2c, 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 )
++	EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c, \
++		 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
+ 
+ #define SAL_SYSTEM_TABLE_GUID    \
+-    EFI_GUID(  0xeb9d2d32, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
++	EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3, \
++		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+ 
+ #define HCDP_TABLE_GUID	\
+-    EFI_GUID(  0xf951938d, 0x620b, 0x42ef, 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98 )
++	EFI_GUID(0xf951938d, 0x620b, 0x42ef, \
++		 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
+ 
+ #define UGA_IO_PROTOCOL_GUID \
+-    EFI_GUID(  0x61a4d49e, 0x6f68, 0x4f1b, 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0xb, 0x7, 0xa2 )
++	EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b, \
++		 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
+ 
+ #define EFI_GLOBAL_VARIABLE_GUID \
+-    EFI_GUID(  0x8be4df61, 0x93ca, 0x11d2, 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c )
++	EFI_GUID(0x8be4df61, 0x93ca, 0x11d2, \
++		 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
+ 
+ #define UV_SYSTEM_TABLE_GUID \
+-    EFI_GUID(  0x3b13a7d4, 0x633e, 0x11dd, 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93 )
++	EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd, \
++		 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
+ 
+ #define LINUX_EFI_CRASH_GUID \
+-    EFI_GUID(  0xcfc8fc79, 0xbe2e, 0x4ddc, 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0 )
++	EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc, \
++		 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
+ 
+ #define LOADED_IMAGE_PROTOCOL_GUID \
+-    EFI_GUID(  0x5b1b31a1, 0x9562, 0x11d2, 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
++	EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2, \
++		 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+ 
+ #define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID \
+-    EFI_GUID(  0x9042a9de, 0x23dc, 0x4a38, 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a )
++	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38, \
++		 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
+ 
+ #define EFI_UGA_PROTOCOL_GUID \
+-    EFI_GUID(  0x982c298b, 0xf4fa, 0x41cb, 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39 )
++	EFI_GUID(0x982c298b, 0xf4fa, 0x41cb, \
++		 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
+ 
+ #define EFI_PCI_IO_PROTOCOL_GUID \
+-    EFI_GUID(  0x4cf5b200, 0x68b8, 0x4ca5, 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x2, 0x9a )
++	EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5, \
++		 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
+ 
+ #define EFI_FILE_INFO_ID \
+-    EFI_GUID(  0x9576e92, 0x6d3f, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
++	EFI_GUID(0x9576e92, 0x6d3f, 0x11d2, \
++		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+ 
+ #define EFI_SYSTEM_RESOURCE_TABLE_GUID \
+-    EFI_GUID(  0xb122a263, 0x3661, 0x4f68, 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80 )
++	EFI_GUID(0xb122a263, 0x3661, 0x4f68, \
++		 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
+ 
+ #define EFI_FILE_SYSTEM_GUID \
+-    EFI_GUID(  0x964e5b22, 0x6459, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
++	EFI_GUID(0x964e5b22, 0x6459, 0x11d2, \
++		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
+ 
+ #define DEVICE_TREE_GUID \
+-    EFI_GUID(  0xb1b621d5, 0xf19c, 0x41a5, 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 )
++	EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5, \
++		 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
+ 
+ #define EFI_PROPERTIES_TABLE_GUID \
+-    EFI_GUID(  0x880aaca3, 0x4adc, 0x4a04, 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5 )
++	EFI_GUID(0x880aaca3, 0x4adc, 0x4a04, \
++		 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
+ 
+ typedef struct {
+ 	efi_guid_t guid;
 -- 
 2.6.2
