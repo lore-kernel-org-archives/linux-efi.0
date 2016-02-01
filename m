@@ -1,141 +1,102 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 10/14] efi: Make checkpatch complain less about efi.h GUID additions
-Date: Mon,  1 Feb 2016 22:07:04 +0000
-Message-ID: <1454364428-494-11-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 06/14] efi: runtime-wrapper: Get rid of the rtc_lock spinlock
+Date: Mon,  1 Feb 2016 22:07:00 +0000
+Message-ID: <1454364428-494-7-git-send-email-matt@codeblueprint.co.uk>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1454364428-494-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-This reformats the GUID definitions in include/linux/efi.h so that if
-you add another one with the same style, checkpatch won't complain about
-it.
+The rtc_lock spinlock aims to serialize access to the CMOS RTC between
+the UEFI firmware and the kernel drivers that use it directly. However,
+x86 is the only arch that performs such direct accesses, and that never
+uses the time related UEFI runtime services. Since no other UEFI enlightened
+architectures have a legcay CMOS RTC anyway, we can remove the rtc_lock
+spinlock entirely.
 
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 ---
- include/linux/efi.h | 63 +++++++++++++++++++++++++++++++++++------------------
- 1 file changed, 42 insertions(+), 21 deletions(-)
+ drivers/firmware/efi/runtime-wrappers.c | 32 ++++++++------------------------
+ 1 file changed, 8 insertions(+), 24 deletions(-)
 
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 09f1559e7525..f468f7c53236 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -535,67 +535,88 @@ void efi_native_runtime_setup(void);
-  *  EFI Configuration Table and GUID definitions
+diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
+index 311f415bff51..7b8b2f2702ca 100644
+--- a/drivers/firmware/efi/runtime-wrappers.c
++++ b/drivers/firmware/efi/runtime-wrappers.c
+@@ -61,24 +61,14 @@
   */
- #define NULL_GUID \
--    EFI_GUID(  0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 )
-+	EFI_GUID(0x00000000, 0x0000, 0x0000, \
-+		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+ static DEFINE_SPINLOCK(efi_runtime_lock);
  
- #define MPS_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d2f, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-/*
+- * As per commit ef68c8f87ed1 ("x86: Serialize EFI time accesses on rtc_lock"),
+- * the EFI specification requires that callers of the time related runtime
+- * functions serialize with other CMOS accesses in the kernel, as the EFI time
+- * functions may choose to also use the legacy CMOS RTC.
+- */
+-__weak DEFINE_SPINLOCK(rtc_lock);
+-
+ static efi_status_t virt_efi_get_time(efi_time_t *tm, efi_time_cap_t *tc)
+ {
+ 	unsigned long flags;
+ 	efi_status_t status;
  
- #define ACPI_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d30, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d30, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-	spin_lock_irqsave(&rtc_lock, flags);
+-	spin_lock(&efi_runtime_lock);
++	spin_lock_irqsave(&efi_runtime_lock, flags);
+ 	status = efi_call_virt(get_time, tm, tc);
+-	spin_unlock(&efi_runtime_lock);
+-	spin_unlock_irqrestore(&rtc_lock, flags);
++	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+ 	return status;
+ }
  
- #define ACPI_20_TABLE_GUID    \
--    EFI_GUID(  0x8868e871, 0xe4f1, 0x11d3, 0xbc, 0x22, 0x0, 0x80, 0xc7, 0x3c, 0x88, 0x81 )
-+	EFI_GUID(0x8868e871, 0xe4f1, 0x11d3, \
-+		 0xbc, 0x22, 0x00, 0x80, 0xc7, 0x3c, 0x88, 0x81)
+@@ -87,11 +77,9 @@ static efi_status_t virt_efi_set_time(efi_time_t *tm)
+ 	unsigned long flags;
+ 	efi_status_t status;
  
- #define SMBIOS_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d31, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d31, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-	spin_lock_irqsave(&rtc_lock, flags);
+-	spin_lock(&efi_runtime_lock);
++	spin_lock_irqsave(&efi_runtime_lock, flags);
+ 	status = efi_call_virt(set_time, tm);
+-	spin_unlock(&efi_runtime_lock);
+-	spin_unlock_irqrestore(&rtc_lock, flags);
++	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+ 	return status;
+ }
  
- #define SMBIOS3_TABLE_GUID    \
--    EFI_GUID(  0xf2fd1544, 0x9794, 0x4a2c, 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94 )
-+	EFI_GUID(0xf2fd1544, 0x9794, 0x4a2c, \
-+		 0x99, 0x2e, 0xe5, 0xbb, 0xcf, 0x20, 0xe3, 0x94)
+@@ -102,11 +90,9 @@ static efi_status_t virt_efi_get_wakeup_time(efi_bool_t *enabled,
+ 	unsigned long flags;
+ 	efi_status_t status;
  
- #define SAL_SYSTEM_TABLE_GUID    \
--    EFI_GUID(  0xeb9d2d32, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-+	EFI_GUID(0xeb9d2d32, 0x2d88, 0x11d3, \
-+		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+-	spin_lock_irqsave(&rtc_lock, flags);
+-	spin_lock(&efi_runtime_lock);
++	spin_lock_irqsave(&efi_runtime_lock, flags);
+ 	status = efi_call_virt(get_wakeup_time, enabled, pending, tm);
+-	spin_unlock(&efi_runtime_lock);
+-	spin_unlock_irqrestore(&rtc_lock, flags);
++	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+ 	return status;
+ }
  
- #define HCDP_TABLE_GUID	\
--    EFI_GUID(  0xf951938d, 0x620b, 0x42ef, 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98 )
-+	EFI_GUID(0xf951938d, 0x620b, 0x42ef, \
-+		 0x82, 0x79, 0xa8, 0x4b, 0x79, 0x61, 0x78, 0x98)
+@@ -115,11 +101,9 @@ static efi_status_t virt_efi_set_wakeup_time(efi_bool_t enabled, efi_time_t *tm)
+ 	unsigned long flags;
+ 	efi_status_t status;
  
- #define UGA_IO_PROTOCOL_GUID \
--    EFI_GUID(  0x61a4d49e, 0x6f68, 0x4f1b, 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0xb, 0x7, 0xa2 )
-+	EFI_GUID(0x61a4d49e, 0x6f68, 0x4f1b, \
-+		 0xb9, 0x22, 0xa8, 0x6e, 0xed, 0x0b, 0x07, 0xa2)
+-	spin_lock_irqsave(&rtc_lock, flags);
+-	spin_lock(&efi_runtime_lock);
++	spin_lock_irqsave(&efi_runtime_lock, flags);
+ 	status = efi_call_virt(set_wakeup_time, enabled, tm);
+-	spin_unlock(&efi_runtime_lock);
+-	spin_unlock_irqrestore(&rtc_lock, flags);
++	spin_unlock_irqrestore(&efi_runtime_lock, flags);
+ 	return status;
+ }
  
- #define EFI_GLOBAL_VARIABLE_GUID \
--    EFI_GUID(  0x8be4df61, 0x93ca, 0x11d2, 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c )
-+	EFI_GUID(0x8be4df61, 0x93ca, 0x11d2, \
-+		 0xaa, 0x0d, 0x00, 0xe0, 0x98, 0x03, 0x2b, 0x8c)
- 
- #define UV_SYSTEM_TABLE_GUID \
--    EFI_GUID(  0x3b13a7d4, 0x633e, 0x11dd, 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93 )
-+	EFI_GUID(0x3b13a7d4, 0x633e, 0x11dd, \
-+		 0x93, 0xec, 0xda, 0x25, 0x56, 0xd8, 0x95, 0x93)
- 
- #define LINUX_EFI_CRASH_GUID \
--    EFI_GUID(  0xcfc8fc79, 0xbe2e, 0x4ddc, 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0 )
-+	EFI_GUID(0xcfc8fc79, 0xbe2e, 0x4ddc, \
-+		 0x97, 0xf0, 0x9f, 0x98, 0xbf, 0xe2, 0x98, 0xa0)
- 
- #define LOADED_IMAGE_PROTOCOL_GUID \
--    EFI_GUID(  0x5b1b31a1, 0x9562, 0x11d2, 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x5b1b31a1, 0x9562, 0x11d2, \
-+		 0x8e, 0x3f, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID \
--    EFI_GUID(  0x9042a9de, 0x23dc, 0x4a38, 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a )
-+	EFI_GUID(0x9042a9de, 0x23dc, 0x4a38, \
-+		 0x96, 0xfb, 0x7a, 0xde, 0xd0, 0x80, 0x51, 0x6a)
- 
- #define EFI_UGA_PROTOCOL_GUID \
--    EFI_GUID(  0x982c298b, 0xf4fa, 0x41cb, 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39 )
-+	EFI_GUID(0x982c298b, 0xf4fa, 0x41cb, \
-+		 0xb8, 0x38, 0x77, 0xaa, 0x68, 0x8f, 0xb8, 0x39)
- 
- #define EFI_PCI_IO_PROTOCOL_GUID \
--    EFI_GUID(  0x4cf5b200, 0x68b8, 0x4ca5, 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x2, 0x9a )
-+	EFI_GUID(0x4cf5b200, 0x68b8, 0x4ca5, \
-+		 0x9e, 0xec, 0xb2, 0x3e, 0x3f, 0x50, 0x02, 0x9a)
- 
- #define EFI_FILE_INFO_ID \
--    EFI_GUID(  0x9576e92, 0x6d3f, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x9576e92, 0x6d3f, 0x11d2, \
-+		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define EFI_SYSTEM_RESOURCE_TABLE_GUID \
--    EFI_GUID(  0xb122a263, 0x3661, 0x4f68, 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80 )
-+	EFI_GUID(0xb122a263, 0x3661, 0x4f68, \
-+		 0x99, 0x29, 0x78, 0xf8, 0xb0, 0xd6, 0x21, 0x80)
- 
- #define EFI_FILE_SYSTEM_GUID \
--    EFI_GUID(  0x964e5b22, 0x6459, 0x11d2, 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b )
-+	EFI_GUID(0x964e5b22, 0x6459, 0x11d2, \
-+		 0x8e, 0x39, 0x00, 0xa0, 0xc9, 0x69, 0x72, 0x3b)
- 
- #define DEVICE_TREE_GUID \
--    EFI_GUID(  0xb1b621d5, 0xf19c, 0x41a5, 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0 )
-+	EFI_GUID(0xb1b621d5, 0xf19c, 0x41a5, \
-+		 0x83, 0x0b, 0xd9, 0x15, 0x2c, 0x69, 0xaa, 0xe0)
- 
- #define EFI_PROPERTIES_TABLE_GUID \
--    EFI_GUID(  0x880aaca3, 0x4adc, 0x4a04, 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5 )
-+	EFI_GUID(0x880aaca3, 0x4adc, 0x4a04, \
-+		 0x90, 0x79, 0xb7, 0x47, 0x34, 0x08, 0x25, 0xe5)
- 
- typedef struct {
- 	efi_guid_t guid;
 -- 
 2.6.2
