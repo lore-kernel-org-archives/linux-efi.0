@@ -1,81 +1,42 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 03/14] efi: runtime-wrappers: Add a nonblocking version of QueryVariableInfo
-Date: Mon,  1 Feb 2016 22:06:57 +0000
-Message-ID: <1454364428-494-4-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 01/14] efi: Expose non-blocking set_variable() wrapper to efivars
+Date: Mon,  1 Feb 2016 22:06:55 +0000
+Message-ID: <1454364428-494-2-git-send-email-matt@codeblueprint.co.uk>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1454364428-494-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-This introduces a new runtime wrapper for the QueryVariableInfo() UEFI
-Runtime Service, which gives up immediately rather than spins on failure
-to grab the efi_runtime spinlock.
+Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
+operation") implemented a non-blocking alternative for the UEFI
+SetVariable() invocation performed by efivars, since it may occur
+in atomic context. However, this version of the function was never
+exposed via the efivars struct, so the non-blocking versions was
+not actually callable. Fix that.
 
-This is required in the non-blocking path of the efi-pstore code.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/runtime-wrappers.c | 22 ++++++++++++++++++++++
- include/linux/efi.h                     |  1 +
- 2 files changed, 23 insertions(+)
+ drivers/firmware/efi/efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/firmware/efi/runtime-wrappers.c b/drivers/firmware/efi/runtime-wrappers.c
-index 228bbf910461..e9f2867f0d91 100644
---- a/drivers/firmware/efi/runtime-wrappers.c
-+++ b/drivers/firmware/efi/runtime-wrappers.c
-@@ -230,6 +230,27 @@ static efi_status_t virt_efi_query_variable_info(u32 attr,
- 	return status;
- }
- 
-+static efi_status_t
-+virt_efi_query_variable_info_nonblocking(u32 attr,
-+					 u64 *storage_space,
-+					 u64 *remaining_space,
-+					 u64 *max_variable_size)
-+{
-+	unsigned long flags;
-+	efi_status_t status;
-+
-+	if (efi.runtime_version < EFI_2_00_SYSTEM_TABLE_REVISION)
-+		return EFI_UNSUPPORTED;
-+
-+	if (!spin_trylock_irqsave(&efi_runtime_lock, flags))
-+		return EFI_NOT_READY;
-+
-+	status = efi_call_virt(query_variable_info, attr, storage_space,
-+			       remaining_space, max_variable_size);
-+	spin_unlock_irqrestore(&efi_runtime_lock, flags);
-+	return status;
-+}
-+
- static efi_status_t virt_efi_get_next_high_mono_count(u32 *count)
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index e9c458ba9353..0cd8f039602e 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -180,6 +180,7 @@ static int generic_ops_register(void)
  {
- 	unsigned long flags;
-@@ -300,6 +321,7 @@ void efi_native_runtime_setup(void)
- 	efi.get_next_high_mono_count = virt_efi_get_next_high_mono_count;
- 	efi.reset_system = virt_efi_reset_system;
- 	efi.query_variable_info = virt_efi_query_variable_info;
-+	efi.query_variable_info_nonblocking = virt_efi_query_variable_info_nonblocking;
- 	efi.update_capsule = virt_efi_update_capsule;
- 	efi.query_capsule_caps = virt_efi_query_capsule_caps;
- }
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index 8706e0aabedc..ad1e177ba48e 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -849,6 +849,7 @@ extern struct efi {
- 	efi_set_variable_t *set_variable;
- 	efi_set_variable_t *set_variable_nonblocking;
- 	efi_query_variable_info_t *query_variable_info;
-+	efi_query_variable_info_t *query_variable_info_nonblocking;
- 	efi_update_capsule_t *update_capsule;
- 	efi_query_capsule_caps_t *query_capsule_caps;
- 	efi_get_next_high_mono_count_t *get_next_high_mono_count;
+ 	generic_ops.get_variable = efi.get_variable;
+ 	generic_ops.set_variable = efi.set_variable;
++	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
+ 	generic_ops.get_next_variable = efi.get_next_variable;
+ 	generic_ops.query_variable_store = efi_query_variable_store;
+ 
 -- 
 2.6.2
