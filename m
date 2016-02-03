@@ -1,97 +1,72 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH] efi: use ucs2_as_utf8 in efivarfs instead of open coding a bad version (v2)
-Date: Wed,  3 Feb 2016 11:55:53 -0500
-Message-ID: <1454518553-18662-1-git-send-email-pjones@redhat.com>
-References: <20160203164245.GA15385@codeblueprint.co.uk>
+From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
+Subject: Re: [PATCH 4/5] efi: make our variable validation list include the
+ guid (v2)
+Date: Thu, 4 Feb 2016 01:51:28 +0800
+Message-ID: <20160203175128.GP26698@linux-rxt1.site>
+References: <1454517834-13736-1-git-send-email-pjones@redhat.com>
+ <1454517834-13736-4-git-send-email-pjones@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160203164245.GA15385-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1454517834-13736-4-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Translate EFI's UCS-2 variable names to UTF-8 instead of just assuming
-all variable names fit in ASCII.
+Hi Peter,=20
 
-v2: fix where I'd accidentally left some of the sizes off when
-    converting the variable name strings.
+On Wed, Feb 03, 2016 at 11:43:53AM -0500, Peter Jones wrote:
+> v2 correctly checks the guid for validation *as well as* attribute
+> whitelisting.
+>=20
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efivars.c |  5 +++--
+>  drivers/firmware/efi/vars.c    | 43 +++++++++++++++++++++++---------=
+----------
+>  include/linux/efi.h            |  3 ++-
+>  3 files changed, 29 insertions(+), 22 deletions(-)
+>=20
+> diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/ef=
+ivars.c
+> index eef6331..707b0fd 100644
+> --- a/drivers/firmware/efi/efivars.c
+> +++ b/drivers/firmware/efi/efivars.c
+> @@ -221,7 +221,7 @@ sanity_check(struct efi_variable *var, efi_char16=
+_t *name, efi_guid_t vendor,
+>  	}
+> =20
+>  	if ((attributes & ~EFI_VARIABLE_MASK) !=3D 0 ||
+> -	    efivar_validate(name, data, size) =3D=3D false) {
+> +	    efivar_validate(vendor, name, data, size) =3D=3D false) {
+>  		printk(KERN_ERR "efivars: Malformed variable content\n");
+>  		return -EINVAL;
+>  	}
+> @@ -447,7 +447,8 @@ static ssize_t efivar_create(struct file *filp, s=
+truct kobject *kobj,
+>  	}
+> =20
+>  	if ((attributes & ~EFI_VARIABLE_MASK) !=3D 0 ||
+> -	    efivar_validate(name, data, size) =3D=3D false) {
+> +	    efivar_validate(new_var->var.VendorGuid, name, data,
+> +			    size) =3D=3D false) {
 
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
----
- drivers/firmware/efi/efivars.c | 14 +++++---------
- fs/efivarfs/super.c            |  7 +++----
- 2 files changed, 8 insertions(+), 13 deletions(-)
+I just built fail here:
 
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 756eca8..cd53c4d 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -540,7 +540,7 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
- static int
- efivar_create_sysfs_entry(struct efivar_entry *new_var)
- {
--	int i, short_name_size;
-+	int short_name_size;
- 	char *short_name;
- 	unsigned long variable_name_size;
- 	efi_char16_t *variable_name;
-@@ -553,22 +553,18 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var)
- 	 * Length of the variable bytes in ASCII, plus the '-' separator,
- 	 * plus the GUID, plus trailing NUL
- 	 */
--	short_name_size = variable_name_size / sizeof(efi_char16_t)
--				+ 1 + EFI_VARIABLE_GUID_LEN + 1;
-+	short_name_size = ucs2_utf8size(new_var->var.VariableName)
-+					+ 1 + EFI_VARIABLE_GUID_LEN + 1;
- 
- 	short_name = kzalloc(short_name_size, GFP_KERNEL);
- 
- 	if (!short_name)
- 		return -ENOMEM;
- 
--	/* Convert Unicode to normal chars (assume top bits are 0),
--	   ala UTF-8 */
--	for (i=0; i < (int)(variable_name_size / sizeof(efi_char16_t)); i++) {
--		short_name[i] = variable_name[i] & 0xFF;
--	}
-+	ucs2_as_utf8(short_name, variable_name, short_name_size);
-+
- 	/* This is ugly, but necessary to separate one vendor's
- 	   private variables from another's.         */
--
- 	*(short_name + strlen(short_name)) = '-';
- 	efi_guid_to_str(&new_var->var.VendorGuid,
- 			 short_name + strlen(short_name));
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index b8a564f..8651ac2 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -118,7 +118,7 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
- 	struct dentry *dentry, *root = sb->s_root;
- 	unsigned long size = 0;
- 	char *name;
--	int len, i;
-+	int len;
- 	int err = -ENOMEM;
- 
- 	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
-@@ -128,15 +128,14 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
- 	memcpy(entry->var.VariableName, name16, name_size);
- 	memcpy(&(entry->var.VendorGuid), &vendor, sizeof(efi_guid_t));
- 
--	len = ucs2_strlen(entry->var.VariableName);
-+	len = ucs2_utf8size(entry->var.VariableName);
- 
- 	/* name, plus '-', plus GUID, plus NUL*/
- 	name = kmalloc(len + 1 + EFI_VARIABLE_GUID_LEN + 1, GFP_KERNEL);
- 	if (!name)
- 		goto fail;
- 
--	for (i = 0; i < len; i++)
--		name[i] = entry->var.VariableName[i] & 0xFF;
-+	ucs2_as_utf8(name, entry->var.VariableName, len);
- 
- 	name[len] = '-';
- 
--- 
-2.5.0
+  CC      drivers/firmware/efi/efivars.o
+drivers/firmware/efi/efivars.c: In function =E2=80=98efivar_create=E2=80=
+=99:
+drivers/firmware/efi/efivars.c:450:29: error: =E2=80=98struct efi_varia=
+ble=E2=80=99 has no member named =E2=80=98var=E2=80=99
+  efivar_validate(new_var->var.VendorGuid, name, data,
+                         ^
+scripts/Makefile.build:258: recipe for target 'drivers/firmware/efi/efi=
+vars.o' failed
+
+
+Regards
+
+Joey Lee
