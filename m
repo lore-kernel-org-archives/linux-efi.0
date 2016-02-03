@@ -1,85 +1,64 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 07/14] efi: runtime-wrappers: Run UEFI Runtime Services
- with interrupts enabled
-Date: Wed, 3 Feb 2016 10:57:24 +0100
-Message-ID: <CAKv+Gu-AWTQNG3ObSZt0cHV1YFb8UbYpkq-uVBqMW0wryfv_ig@mail.gmail.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 10/14] efi: Make checkpatch complain less about efi.h
+ GUID additions
+Date: Wed, 3 Feb 2016 11:33:35 +0100
+Message-ID: <20160203103335.GA7310@gmail.com>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
-	<1454364428-494-8-git-send-email-matt@codeblueprint.co.uk>
-	<20160203094340.GA15890@gmail.com>
+ <1454364428-494-11-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160203094340.GA15890-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1454364428-494-11-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Andy Lutomirski <luto-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Peter Zijlstra <a.p.zijlstra-/NLkJaSkS4VmR6Xm/wNWPw@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 3 February 2016 at 10:43, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->
-> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
->
->> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->>
->> The UEFI spec allows Runtime Services to be invoked with interrupts
->> enabled. The only reason we were disabling interrupts was to prevent
->> recursive calls into the services on the same CPU, which will lead to
->> deadlock. However, the only context where such invocations may occur
->> legally is from efi-pstore via efivars, and that code has been updated
->> to call a non-blocking alternative when invoked from a non-interruptible
->> context.
->>
->> So instead, update the ordinary, blocking UEFI Runtime Services wrappers
->> to execute with interrupts enabled. This aims to prevent excessive interrupt
->> latencies on uniprocessor platforms with slow variable stores.
->
-> Well, those excessive latencies would affect SMP platforms as well, just that
-> there are (usually) other CPUs free to do execution, right?
->
 
-Correct.
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-> More fundamentally, this makes me nervous:
->
->  > The UEFI spec allows Runtime Services to be invoked with interrupts enabled.
->  > [...]
->
-> So what really matters is not what the spec says, but how Windows executes UEFI
-> firmware code in practice.
->
-> If major versions of Windows calls UEFI firmware with interrupts disabled, then
-> frankly I don't think we should interrupt them under Linux either, regardless of
-> what the spec says ...
->
-> Random firmware code getting interrupted by the OS changes timings and might have
-> other side effects the firmware code might not expect - so the question is, does
-> Windows already de facto allow the IRQ preemption of firmware calls?
->
+> From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> 
+> This reformats the GUID definitions in include/linux/efi.h so that if
+> you add another one with the same style, checkpatch won't complain about
+> it.
+> 
+> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+> ---
+>  include/linux/efi.h | 63 +++++++++++++++++++++++++++++++++++------------------
+>  1 file changed, 42 insertions(+), 21 deletions(-)
+> 
+> diff --git a/include/linux/efi.h b/include/linux/efi.h
+> index 09f1559e7525..f468f7c53236 100644
+> --- a/include/linux/efi.h
+> +++ b/include/linux/efi.h
+> @@ -535,67 +535,88 @@ void efi_native_runtime_setup(void);
+>   *  EFI Configuration Table and GUID definitions
+>   */
+>  #define NULL_GUID \
+> -    EFI_GUID(  0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 )
+> +	EFI_GUID(0x00000000, 0x0000, 0x0000, \
+> +		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
+>  
+>  #define MPS_TABLE_GUID    \
+> -    EFI_GUID(  0xeb9d2d2f, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
+> +	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
+> +		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
 
-Good question. I will try to find out.
+So I really think this is a step backwards.
 
-> Also, this:
->
->> -     unsigned long flags;
->>       efi_status_t status;
->>
->> -     spin_lock_irqsave(&efi_runtime_lock, flags);
->> +     BUG_ON(in_irq());
->> +
->> +     spin_lock(&efi_runtime_lock);
->
-> ... how does crashing the kernel help debuggability?
->
-> Please use WARN_ON_ONCE() - or in fact, this assert is probably not needed at all,
-> as lockdep will warn about IRQ unsafe lock usage.
->
+Checkpatch should be fixed/enhanced to allow targeted exemption. Something like:
 
-Actually, reading back the original thread, Matt had already
-identified this problem, and v2/v3 of this patch removed all of them
-but one, so thanks for spotting that.
 
-> I'd add comments to the efi_runtime_lock definition site explaining that this is
-> never taken from IRQ contexts.
->
+	#define CHECKPATCH_IGNORE
+	...
+	#undef CHECKPATCH_IGNORE
 
-OK.
+... which checkpatch would parse and interpret accordingly.
+
+Thanks,
+
+	Ingo
