@@ -1,102 +1,139 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 1/5] Add ucs2 -> utf8 helper functions
-Date: Wed,  3 Feb 2016 11:43:50 -0500
-Message-ID: <1454517834-13736-1-git-send-email-pjones@redhat.com>
+Subject: [PATCH 4/5] efi: make our variable validation list include the guid (v2)
+Date: Wed,  3 Feb 2016 11:43:53 -0500
+Message-ID: <1454517834-13736-4-git-send-email-pjones@redhat.com>
+References: <1454517834-13736-1-git-send-email-pjones@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1454517834-13736-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This adds ucs2_utf8size(), which tells us how big our ucs2 string is in
-bytes, and ucs2_as_utf8, which translates from ucs2 to utf8..
----
- include/linux/ucs2_string.h |  4 +++
- lib/ucs2_string.c           | 62 +++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 66 insertions(+)
+v2 correctly checks the guid for validation *as well as* attribute
+whitelisting.
 
-diff --git a/include/linux/ucs2_string.h b/include/linux/ucs2_string.h
-index cbb20af..bb679b4 100644
---- a/include/linux/ucs2_string.h
-+++ b/include/linux/ucs2_string.h
-@@ -11,4 +11,8 @@ unsigned long ucs2_strlen(const ucs2_char_t *s);
- unsigned long ucs2_strsize(const ucs2_char_t *data, unsigned long maxlength);
- int ucs2_strncmp(const ucs2_char_t *a, const ucs2_char_t *b, size_t len);
+Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+---
+ drivers/firmware/efi/efivars.c |  5 +++--
+ drivers/firmware/efi/vars.c    | 43 +++++++++++++++++++++++-------------------
+ include/linux/efi.h            |  3 ++-
+ 3 files changed, 29 insertions(+), 22 deletions(-)
+
+diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
+index eef6331..707b0fd 100644
+--- a/drivers/firmware/efi/efivars.c
++++ b/drivers/firmware/efi/efivars.c
+@@ -221,7 +221,7 @@ sanity_check(struct efi_variable *var, efi_char16_t *name, efi_guid_t vendor,
+ 	}
  
-+unsigned long ucs2_utf8size(const ucs2_char_t *src);
-+unsigned long ucs2_as_utf8(u8 *dest, const ucs2_char_t *src,
-+			   unsigned long maxlength);
-+
- #endif /* _LINUX_UCS2_STRING_H_ */
-diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
-index 6f500ef..17dd74e 100644
---- a/lib/ucs2_string.c
-+++ b/lib/ucs2_string.c
-@@ -49,3 +49,65 @@ ucs2_strncmp(const ucs2_char_t *a, const ucs2_char_t *b, size_t len)
-         }
+ 	if ((attributes & ~EFI_VARIABLE_MASK) != 0 ||
+-	    efivar_validate(name, data, size) == false) {
++	    efivar_validate(vendor, name, data, size) == false) {
+ 		printk(KERN_ERR "efivars: Malformed variable content\n");
+ 		return -EINVAL;
+ 	}
+@@ -447,7 +447,8 @@ static ssize_t efivar_create(struct file *filp, struct kobject *kobj,
+ 	}
+ 
+ 	if ((attributes & ~EFI_VARIABLE_MASK) != 0 ||
+-	    efivar_validate(name, data, size) == false) {
++	    efivar_validate(new_var->var.VendorGuid, name, data,
++			    size) == false) {
+ 		printk(KERN_ERR "efivars: Malformed variable content\n");
+ 		return -EINVAL;
+ 	}
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 36c5a6e..5a88ce0 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -165,31 +165,33 @@ validate_ascii_string(efi_char16_t *var_name, int match, u8 *buffer,
  }
- EXPORT_SYMBOL(ucs2_strncmp);
+ 
+ struct variable_validate {
++	efi_guid_t vendor;
+ 	char *name;
+ 	bool (*validate)(efi_char16_t *var_name, int match, u8 *data,
+ 			 unsigned long len);
+ };
+ 
+ static const struct variable_validate variable_validate[] = {
+-	{ "BootNext", validate_uint16 },
+-	{ "BootOrder", validate_boot_order },
+-	{ "DriverOrder", validate_boot_order },
+-	{ "Boot*", validate_load_option },
+-	{ "Driver*", validate_load_option },
+-	{ "ConIn", validate_device_path },
+-	{ "ConInDev", validate_device_path },
+-	{ "ConOut", validate_device_path },
+-	{ "ConOutDev", validate_device_path },
+-	{ "ErrOut", validate_device_path },
+-	{ "ErrOutDev", validate_device_path },
+-	{ "Timeout", validate_uint16 },
+-	{ "Lang", validate_ascii_string },
+-	{ "PlatformLang", validate_ascii_string },
+-	{ "", NULL },
++	{ EFI_GLOBAL_VARIABLE_GUID, "BootNext", validate_uint16 },
++	{ EFI_GLOBAL_VARIABLE_GUID, "BootOrder", validate_boot_order },
++	{ EFI_GLOBAL_VARIABLE_GUID, "DriverOrder", validate_boot_order },
++	{ EFI_GLOBAL_VARIABLE_GUID, "Boot*", validate_load_option },
++	{ EFI_GLOBAL_VARIABLE_GUID, "Driver*", validate_load_option },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ConIn", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ConInDev", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ConOut", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ConOutDev", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOut", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOutDev", validate_device_path },
++	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
++	{ EFI_GLOBAL_VARIABLE_GUID, "Lang", validate_ascii_string },
++	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
++	{ NULL_GUID, "", NULL },
+ };
+ 
+ bool
+-efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
++efivar_validate(efi_guid_t vendor, efi_char16_t *var_name, u8 *data,
++		unsigned long len)
+ {
+ 	int i;
+ 	unsigned long utf8_size;
+@@ -202,9 +204,12 @@ efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
+ 
+ 	ucs2_as_utf8(utf8_name, var_name, len);
+ 
+-	for (i = 0; variable_validate[i].validate != NULL; i++) {
++	for (i = 0; variable_validate[i].name[0] != '\0'; i++) {
+ 		const char *name = variable_validate[i].name;
+-		int match;
++		int match = 0;
 +
-+unsigned long
-+ucs2_utf8size(const ucs2_char_t *src)
-+{
-+	unsigned long i;
-+	unsigned long j = 0;
-+
-+	for (i = 0; i < ucs2_strlen(src); i++) {
-+		u16 c = src[i];
-+
-+		if (c > 0x800)
-+			j += 3;
-+		else if (c > 0x80)
-+			j += 2;
-+		else
-+			j += 1;
-+	}
-+
-+	return j;
-+}
-+EXPORT_SYMBOL(ucs2_utf8size);
-+
-+/*
-+ * copy at most maxlength bytes of whole utf8 characters to dest from the
-+ * ucs2 string src.
-+ *
-+ * The return value is the number of characters copied, not including the
-+ * final NUL character.
-+ */
-+unsigned long
-+ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
-+{
-+	unsigned int i;
-+	unsigned long j = 0;
-+	unsigned long limit = ucs2_strnlen(src, maxlength);
-+
-+	for (i = 0; maxlength && i < limit; i++) {
-+		u16 c = src[i];
-+
-+		if (c > 0x800) {
-+			if (maxlength < 3)
-+				break;
-+			maxlength -= 3;
-+			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
-+			dest[j++] = 0x80 | (c & 0x0fc0) >> 8;
-+			dest[j++] = 0x80 | (c & 0x003f);
-+		} else if (c > 0x80) {
-+			if (maxlength < 2)
-+				break;
-+			maxlength -= 2;
-+			dest[j++] = 0xc0 | (c & 0xfe0) >> 5;
-+			dest[j++] = 0x80 | (c & 0x01f);
-+		} else {
-+			maxlength -= 1;
-+			dest[j++] = c & 0x7f;
-+		}
-+	}
-+	if (maxlength)
-+		dest[j] = '\0';
-+	return j;
-+}
-+EXPORT_SYMBOL(ucs2_as_utf8);
++		if (efi_guidcmp(vendor, variable_validate[i].vendor))
++			continue;
+ 
+ 		for (match = 0; ; match++) {
+ 			char c = name[match];
+@@ -861,7 +866,7 @@ int efivar_entry_set_get_size(struct efivar_entry *entry, u32 attributes,
+ 
+ 	*set = false;
+ 
+-	if (efivar_validate(name, data, *size) == false)
++	if (efivar_validate(*vendor, name, data, *size) == false)
+ 		return -EINVAL;
+ 
+ 	/*
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 569b5a8..52444fd 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1199,7 +1199,8 @@ int efivar_entry_iter(int (*func)(struct efivar_entry *, void *),
+ struct efivar_entry *efivar_entry_find(efi_char16_t *name, efi_guid_t guid,
+ 				       struct list_head *head, bool remove);
+ 
+-bool efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len);
++bool efivar_validate(efi_guid_t vendor, efi_char16_t *var_name, u8 *data,
++		     unsigned long len);
+ 
+ extern struct work_struct efivar_work;
+ void efivar_run_worker(void);
 -- 
 2.5.0
