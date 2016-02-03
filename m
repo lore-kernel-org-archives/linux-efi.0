@@ -1,7 +1,7 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 4/5] efi: make our variable validation list include the guid
-Date: Wed,  3 Feb 2016 08:02:46 -0500
-Message-ID: <1454504567-2826-4-git-send-email-pjones@redhat.com>
+Subject: [PATCH 3/5] efi: do variable name validation tests in utf8
+Date: Wed,  3 Feb 2016 08:02:45 -0500
+Message-ID: <1454504567-2826-3-git-send-email-pjones@redhat.com>
 References: <1454504567-2826-1-git-send-email-pjones@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1454504567-2826-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
@@ -10,70 +10,71 @@ To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-We're not actually checking the guid in the validation code, but it
-makes it easier to use the list for other things later.
+Actually translate from ucs2 to utf8 before doing the test, and then
+test against our other utf8 data, instead of fudging it.
 
 Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 ---
- drivers/firmware/efi/vars.c | 33 +++++++++++++++++----------------
- 1 file changed, 17 insertions(+), 16 deletions(-)
+ drivers/firmware/efi/vars.c | 25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 36c5a6e..e084d08 100644
+index 70a0fb1..36c5a6e 100644
 --- a/drivers/firmware/efi/vars.c
 +++ b/drivers/firmware/efi/vars.c
-@@ -165,27 +165,28 @@ validate_ascii_string(efi_char16_t *var_name, int match, u8 *buffer,
- }
+@@ -192,7 +192,15 @@ bool
+ efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
+ {
+ 	int i;
+-	u16 *unicode_name = var_name;
++	unsigned long utf8_size;
++	u8 *utf8_name;
++
++	utf8_size = ucs2_utf8size(var_name);
++	utf8_name = kmalloc(utf8_size + 1, GFP_KERNEL);
++	if (!utf8_name)
++		return false;
++
++	ucs2_as_utf8(utf8_name, var_name, len);
  
- struct variable_validate {
-+	efi_guid_t guid;
- 	char *name;
- 	bool (*validate)(efi_char16_t *var_name, int match, u8 *data,
- 			 unsigned long len);
- };
- 
- static const struct variable_validate variable_validate[] = {
--	{ "BootNext", validate_uint16 },
--	{ "BootOrder", validate_boot_order },
--	{ "DriverOrder", validate_boot_order },
--	{ "Boot*", validate_load_option },
--	{ "Driver*", validate_load_option },
--	{ "ConIn", validate_device_path },
--	{ "ConInDev", validate_device_path },
--	{ "ConOut", validate_device_path },
--	{ "ConOutDev", validate_device_path },
--	{ "ErrOut", validate_device_path },
--	{ "ErrOutDev", validate_device_path },
--	{ "Timeout", validate_uint16 },
--	{ "Lang", validate_ascii_string },
--	{ "PlatformLang", validate_ascii_string },
--	{ "", NULL },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "BootNext", validate_uint16 },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "BootOrder", validate_boot_order },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "DriverOrder", validate_boot_order },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "Boot*", validate_load_option },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "Driver*", validate_load_option },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ConIn", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ConInDev", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ConOut", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ConOutDev", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOut", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOutDev", validate_device_path },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "Lang", validate_ascii_string },
-+	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
-+	{ NULL_GUID, "", NULL },
- };
- 
- bool
-@@ -202,7 +203,7 @@ efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
- 
- 	ucs2_as_utf8(utf8_name, var_name, len);
- 
--	for (i = 0; variable_validate[i].validate != NULL; i++) {
-+	for (i = 0; variable_validate[i].name[0] != '\0'; i++) {
+ 	for (i = 0; variable_validate[i].validate != NULL; i++) {
  		const char *name = variable_validate[i].name;
- 		int match;
+@@ -200,28 +208,29 @@ efivar_validate(efi_char16_t *var_name, u8 *data, unsigned long len)
  
+ 		for (match = 0; ; match++) {
+ 			char c = name[match];
+-			u16 u = unicode_name[match];
+-
+-			/* All special variables are plain ascii */
+-			if (u > 127)
+-				return true;
++			char u = utf8_name[match];
+ 
+ 			/* Wildcard in the matching name means we've matched */
+-			if (c == '*')
++			if (c == '*') {
++				kfree(utf8_name);
+ 				return variable_validate[i].validate(var_name,
+ 							     match, data, len);
++			}
+ 
+ 			/* Case sensitive match */
+ 			if (c != u)
+ 				break;
+ 
+ 			/* Reached the end of the string while matching */
+-			if (!c)
++			if (!c) {
++				kfree(utf8_name);
+ 				return variable_validate[i].validate(var_name,
+ 							     match, data, len);
++			}
+ 		}
+ 	}
+ 
++	kfree(utf8_name);
+ 	return true;
+ }
+ EXPORT_SYMBOL_GPL(efivar_validate);
 -- 
 2.5.0
