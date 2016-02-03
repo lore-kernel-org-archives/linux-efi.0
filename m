@@ -1,32 +1,62 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH 14/14] x86/efi: Print size in binary units in
- efi_print_memmap
-Date: Wed, 3 Feb 2016 11:28:29 +0000
-Message-ID: <20160203112829.GC2597@codeblueprint.co.uk>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH 07/14] efi: runtime-wrappers: Run UEFI Runtime Services
+ with interrupts enabled
+Date: Wed, 3 Feb 2016 12:33:10 +0100
+Message-ID: <CAKv+Gu8KZW4m1O5KheBpteOr6tCgNT-FnVkXK-g05=qrzT5xiA@mail.gmail.com>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
- <1454364428-494-15-git-send-email-matt@codeblueprint.co.uk>
- <56B0756E.9010603@redhat.com>
- <20160203104045.GB7310@gmail.com>
+	<1454364428-494-8-git-send-email-matt@codeblueprint.co.uk>
+	<20160203094340.GA15890@gmail.com>
+	<CAKv+Gu-AWTQNG3ObSZt0cHV1YFb8UbYpkq-uVBqMW0wryfv_ig@mail.gmail.com>
+	<20160203105851.GA22159@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160203104045.GB7310@gmail.com>
+In-Reply-To: <20160203105851.GA22159@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>
-Cc: Laszlo Ersek <lersek@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Elliott <elliott@hpe.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 03 Feb, at 11:40:45AM, Ingo Molnar wrote:
-> 
-> So I kind of agree. Memory is almost never measured in marketing bytes, we should 
-> simply output KB/MB/GB/TB/PB/EB like the rest of the memory management code does 
-> and ignore all the 'i' silliness that infests storage sizes ...
+On 3 February 2016 at 11:58, Ingo Molnar <mingo@kernel.org> wrote:
+>
+> * Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
+>
+>> > More fundamentally, this makes me nervous:
+>> >
+>> >  > The UEFI spec allows Runtime Services to be invoked with interrupts
+>> >  > enabled. [...]
+>> >
+>> > So what really matters is not what the spec says, but how Windows executes
+>> > UEFI firmware code in practice.
+>> >
+>> > If major versions of Windows calls UEFI firmware with interrupts disabled,
+>> > then frankly I don't think we should interrupt them under Linux either,
+>> > regardless of what the spec says ...
+>> >
+>> > Random firmware code getting interrupted by the OS changes timings and might
+>> > have other side effects the firmware code might not expect - so the question
+>> > is, does Windows already de facto allow the IRQ preemption of firmware calls?
+>> >
+>>
+>> Good question. I will try to find out.
+>
+> Note that if there's a reasonable (but not 100%) case in favor of keeping irqs
+> enabled, we can try your patch, with the possibility that we might have to revert
+> it, should it cause problems.
+>
 
-Thanks guys.
+I think this might have been the reason Matt wanted this in -next
+early, but I will let him confirm whether that was the case.
 
-OK, this patch has caused enough headaches. Let's drop it from this
-series.
+> In practice we probably already interrupt EFI services with NMI interrupts, which
+> can be pretty heavy as well if they for example generate printks.
+>
+> So I'm not against this change in a strong fashion - I'm just a bit cautious and
+> it would be nice to know how Windows behaves here.
+>
 
-Robert, Andy, feel free to resubmit it after you've addressed
-everyone's concerns and we can discuss it in isolation.
+I am not sure how yet, but I am going to try and figure out what
+Windows does. I suppose hacking OVMF to record some IRQ mask
+information when RT services are being invoked should be sufficient,
+but I am going to need some help from someone that understands OVMF
+and x86 (Matt?)
