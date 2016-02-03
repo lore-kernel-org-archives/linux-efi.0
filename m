@@ -1,63 +1,82 @@
-From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 10/14] efi: Make checkpatch complain less about efi.h
- GUID additions
-Date: Wed, 3 Feb 2016 11:33:35 +0100
-Message-ID: <20160203103335.GA7310@gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 14/14] x86/efi: Print size in binary units in
+ efi_print_memmap
+Date: Wed, 3 Feb 2016 11:40:45 +0100
+Message-ID: <20160203104045.GB7310@gmail.com>
 References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
- <1454364428-494-11-git-send-email-matt@codeblueprint.co.uk>
+ <1454364428-494-15-git-send-email-matt@codeblueprint.co.uk>
+ <56B0756E.9010603@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1454364428-494-11-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <56B0756E.9010603@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Laszlo Ersek <lersek@redhat.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, Robert Elliott <elliott@hpe.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-efi@vger.kernel.org
 
 
-* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+* Laszlo Ersek <lersek@redhat.com> wrote:
 
-> From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> I'll take being CC'd as "please offer an opinion", so I'll offer one. :)
 > 
-> This reformats the GUID definitions in include/linux/efi.h so that if
-> you add another one with the same style, checkpatch won't complain about
-> it.
+> On 02/01/16 23:07, Matt Fleming wrote:
+> > From: Robert Elliott <elliott@hpe.com>
+> > 
+> > Print the size in the best-fit B, KiB, MiB, etc. units rather than
+> > always MiB. This avoids rounding, which can be misleading.
+> > 
+> > Use proper IEC binary units (KiB, MiB, etc.) rather than misuse SI
+> > decimal units (KB, MB, etc.).
+> > 
+> > old:
+> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff) (16384MB)
+> > 
+> > new:
+> >     efi: mem61: [Persistent Memory  |   |  |  |  |  |  |   |WB|WT|WC|UC] range=[0x0000000880000000-0x0000000c7fffffff] (16 GiB)
+> > 
+> > Signed-off-by: Robert Elliott <elliott@hpe.com>
+> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+> > Cc: Thomas Gleixner <tglx@linutronix.de>
+> > Cc: Ingo Molnar <mingo@kernel.org>
+> > Cc: "H. Peter Anvin" <hpa@zytor.com>
+> > Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> > Cc: Taku Izumi <izumi.taku@jp.fujitsu.com>
+> > Cc: Laszlo Ersek <lersek@redhat.com>
+> > Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+> > ---
+> >  arch/x86/platform/efi/efi.c | 25 ++++++++++++++++++-------
+> >  1 file changed, 18 insertions(+), 7 deletions(-)
+> > 
+> > diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+> > index e80826e6f3a9..2c457c5e8203 100644
+> > --- a/arch/x86/platform/efi/efi.c
+> > +++ b/arch/x86/platform/efi/efi.c
+> > @@ -35,6 +35,7 @@
+> >  #include <linux/efi.h>
+> >  #include <linux/efi-bgrt.h>
+> >  #include <linux/export.h>
+> > +#include <linux/bitops.h>
+> >  #include <linux/bootmem.h>
+> >  #include <linux/slab.h>
+> >  #include <linux/memblock.h>
+> > @@ -117,6 +118,17 @@ void efi_get_time(struct timespec *now)
+> >  	now->tv_nsec = 0;
+> >  }
+> >  
+> > +static char * __init efi_size_format(char *buf, size_t size, u64 bytes)
+> > +{
+> > +	static const char *const units_2[] = {
+> > +		"B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB"
+> > +	};
 > 
-> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-> ---
->  include/linux/efi.h | 63 +++++++++++++++++++++++++++++++++++------------------
->  1 file changed, 42 insertions(+), 21 deletions(-)
-> 
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 09f1559e7525..f468f7c53236 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -535,67 +535,88 @@ void efi_native_runtime_setup(void);
->   *  EFI Configuration Table and GUID definitions
->   */
->  #define NULL_GUID \
-> -    EFI_GUID(  0x00000000, 0x0000, 0x0000, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 )
-> +	EFI_GUID(0x00000000, 0x0000, 0x0000, \
-> +		 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00)
->  
->  #define MPS_TABLE_GUID    \
-> -    EFI_GUID(  0xeb9d2d2f, 0x2d88, 0x11d3, 0x9a, 0x16, 0x0, 0x90, 0x27, 0x3f, 0xc1, 0x4d )
-> +	EFI_GUID(0xeb9d2d2f, 0x2d88, 0x11d3, \
-> +		 0x9a, 0x16, 0x00, 0x90, 0x27, 0x3f, 0xc1, 0x4d)
+> Blech. Blech blech blech. As far as I'm concerned, "IEC binary units"
+> rewrite history. I propose to just say "KB" & friends.
 
-So I really think this is a step backwards.
-
-Checkpatch should be fixed/enhanced to allow targeted exemption. Something like:
-
-
-	#define CHECKPATCH_IGNORE
-	...
-	#undef CHECKPATCH_IGNORE
-
-... which checkpatch would parse and interpret accordingly.
+So I kind of agree. Memory is almost never measured in marketing bytes, we should 
+simply output KB/MB/GB/TB/PB/EB like the rest of the memory management code does 
+and ignore all the 'i' silliness that infests storage sizes ...
 
 Thanks,
 
