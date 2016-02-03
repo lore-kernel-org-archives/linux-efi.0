@@ -1,40 +1,102 @@
-From: Andy Shevchenko <andy.shevchenko@gmail.com>
-Subject: Re: [PATCH 14/14] x86/efi: Print size in binary units in efi_print_memmap
-Date: Wed, 3 Feb 2016 14:36:22 +0200
-Message-ID: <CAHp75VexzDnXocGCwqv3ii_7_9UqspZEWCnMyyXMtwErD5Hd5A@mail.gmail.com>
-References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
-	<1454364428-494-15-git-send-email-matt@codeblueprint.co.uk>
-	<56B0756E.9010603@redhat.com>
-	<20160203104045.GB7310@gmail.com>
-	<20160203112829.GC2597@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160203112829.GC2597@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Ingo Molnar <mingo@kernel.org>, Laszlo Ersek <lersek@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Robert Elliott <elliott@hpe.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 1/5] Add ucs2 -> utf8 helper functions
+Date: Wed,  3 Feb 2016 08:02:43 -0500
+Message-ID: <1454504567-2826-1-git-send-email-pjones@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 3, 2016 at 1:28 PM, Matt Fleming <matt@codeblueprint.co.uk> wrote:
-> On Wed, 03 Feb, at 11:40:45AM, Ingo Molnar wrote:
->>
->> So I kind of agree. Memory is almost never measured in marketing bytes, we should
->> simply output KB/MB/GB/TB/PB/EB like the rest of the memory management code does
->> and ignore all the 'i' silliness that infests storage sizes ...
->
-> Thanks guys.
->
-> OK, this patch has caused enough headaches. Let's drop it from this
-> series.
->
-> Robert, Andy, feel free to resubmit it after you've addressed
-> everyone's concerns and we can discuss it in isolation.
+This adds ucs2_utf8size(), which tells us how big our ucs2 string is in
+bytes, and ucs2_as_utf8, which translates from ucs2 to utf8..
+---
+ include/linux/ucs2_string.h |  4 +++
+ lib/ucs2_string.c           | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 66 insertions(+)
 
-Personally I gave up to promote standards. I have started with KB, MB,
-etc, but I like that eventually we have a distinct standard for binary
-vs. decimal units.
-
+diff --git a/include/linux/ucs2_string.h b/include/linux/ucs2_string.h
+index cbb20af..bb679b4 100644
+--- a/include/linux/ucs2_string.h
++++ b/include/linux/ucs2_string.h
+@@ -11,4 +11,8 @@ unsigned long ucs2_strlen(const ucs2_char_t *s);
+ unsigned long ucs2_strsize(const ucs2_char_t *data, unsigned long maxlength);
+ int ucs2_strncmp(const ucs2_char_t *a, const ucs2_char_t *b, size_t len);
+ 
++unsigned long ucs2_utf8size(const ucs2_char_t *src);
++unsigned long ucs2_as_utf8(u8 *dest, const ucs2_char_t *src,
++			   unsigned long maxlength);
++
+ #endif /* _LINUX_UCS2_STRING_H_ */
+diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
+index 6f500ef..17dd74e 100644
+--- a/lib/ucs2_string.c
++++ b/lib/ucs2_string.c
+@@ -49,3 +49,65 @@ ucs2_strncmp(const ucs2_char_t *a, const ucs2_char_t *b, size_t len)
+         }
+ }
+ EXPORT_SYMBOL(ucs2_strncmp);
++
++unsigned long
++ucs2_utf8size(const ucs2_char_t *src)
++{
++	unsigned long i;
++	unsigned long j = 0;
++
++	for (i = 0; i < ucs2_strlen(src); i++) {
++		u16 c = src[i];
++
++		if (c > 0x800)
++			j += 3;
++		else if (c > 0x80)
++			j += 2;
++		else
++			j += 1;
++	}
++
++	return j;
++}
++EXPORT_SYMBOL(ucs2_utf8size);
++
++/*
++ * copy at most maxlength bytes of whole utf8 characters to dest from the
++ * ucs2 string src.
++ *
++ * The return value is the number of characters copied, not including the
++ * final NUL character.
++ */
++unsigned long
++ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
++{
++	unsigned int i;
++	unsigned long j = 0;
++	unsigned long limit = ucs2_strnlen(src, maxlength);
++
++	for (i = 0; maxlength && i < limit; i++) {
++		u16 c = src[i];
++
++		if (c > 0x800) {
++			if (maxlength < 3)
++				break;
++			maxlength -= 3;
++			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
++			dest[j++] = 0x80 | (c & 0x0fc0) >> 8;
++			dest[j++] = 0x80 | (c & 0x003f);
++		} else if (c > 0x80) {
++			if (maxlength < 2)
++				break;
++			maxlength -= 2;
++			dest[j++] = 0xc0 | (c & 0xfe0) >> 5;
++			dest[j++] = 0x80 | (c & 0x01f);
++		} else {
++			maxlength -= 1;
++			dest[j++] = c & 0x7f;
++		}
++	}
++	if (maxlength)
++		dest[j] = '\0';
++	return j;
++}
++EXPORT_SYMBOL(ucs2_as_utf8);
 -- 
-With Best Regards,
-Andy Shevchenko
+2.5.0
