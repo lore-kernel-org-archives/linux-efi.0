@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 4/7] efi: arm-init: use read-only early mappings
-Date: Thu,  4 Feb 2016 16:50:27 +0100
-Message-ID: <1454601030-9093-5-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 3/7] efi: efistub: prevent __init annotations from being used
+Date: Thu,  4 Feb 2016 16:50:26 +0100
+Message-ID: <1454601030-9093-4-git-send-email-ard.biesheuvel@linaro.org>
 References: <1454601030-9093-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1454601030-9093-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,62 +10,39 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-ef
 Cc: will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, jeremy.linton-5wv7dgnIgG8@public.gmane.org, suzuki.poulose-5wv7dgnIgG8@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The early mappings of the EFI system table contents and the UEFI memory
-map are read-only from the OS point of view. So map them read-only to
-protect them from inadvertent modification.
+__init annotations should not be used in the EFI stub, since the code is
+either included in the decompressor (x86, ARM) where they have no effect,
+or the whole stub is __init annotated at the section level (arm64), by
+renaming the sections, in which case the __init annotations will be
+redundant, and will result in section names like .init.init.text, and our
+linker script does not expect that. So un-#define __init so that its
+inadvertent use will force a build error.
 
-Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/arm-init.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ drivers/firmware/efi/libstub/efistub.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 9e15d571b53c..aa1f743152a2 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -61,8 +61,8 @@ static int __init uefi_init(void)
- 	char vendor[100] = "unknown";
- 	int i, retval;
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 6b6548fda089..275f395c886d 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -5,6 +5,16 @@
+ /* error code which can't be mistaken for valid address */
+ #define EFI_ERROR	(~0UL)
  
--	efi.systab = early_memremap(efi_system_table,
--				    sizeof(efi_system_table_t));
-+	efi.systab = early_memremap_ro(efi_system_table,
-+				       sizeof(efi_system_table_t));
- 	if (efi.systab == NULL) {
- 		pr_warn("Unable to map EFI system table.\n");
- 		return -ENOMEM;
-@@ -86,8 +86,8 @@ static int __init uefi_init(void)
- 			efi.systab->hdr.revision & 0xffff);
++/*
++ * __init annotations should not be used in the EFI stub, since the code is
++ * either included in the decompressor (x86, ARM) where they have no effect,
++ * or the whole stub is __init annotated at the section level (arm64), by
++ * renaming the sections, in which case the __init annotation will be
++ * redundant, and will result in section names like .init.init.text, and our
++ * linker script does not expect that.
++ */
++#undef __init
++
+ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
  
- 	/* Show what we know for posterity */
--	c16 = early_memremap(efi_to_phys(efi.systab->fw_vendor),
--			     sizeof(vendor) * sizeof(efi_char16_t));
-+	c16 = early_memremap_ro(efi_to_phys(efi.systab->fw_vendor),
-+				sizeof(vendor) * sizeof(efi_char16_t));
- 	if (c16) {
- 		for (i = 0; i < (int) sizeof(vendor) - 1 && *c16; ++i)
- 			vendor[i] = c16[i];
-@@ -100,8 +100,8 @@ static int __init uefi_init(void)
- 		efi.systab->hdr.revision & 0xffff, vendor);
- 
- 	table_size = sizeof(efi_config_table_64_t) * efi.systab->nr_tables;
--	config_tables = early_memremap(efi_to_phys(efi.systab->tables),
--				       table_size);
-+	config_tables = early_memremap_ro(efi_to_phys(efi.systab->tables),
-+					  table_size);
- 	if (config_tables == NULL) {
- 		pr_warn("Unable to map EFI config table array.\n");
- 		retval = -ENOMEM;
-@@ -185,7 +185,7 @@ void __init efi_init(void)
- 	efi_system_table = params.system_table;
- 
- 	memmap.phys_map = params.mmap;
--	memmap.map = early_memremap(params.mmap, params.mmap_size);
-+	memmap.map = early_memremap_ro(params.mmap, params.mmap_size);
- 	if (memmap.map == NULL) {
- 		/*
- 		* If we are booting via UEFI, the UEFI memory map is the only
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
 -- 
 2.5.0
