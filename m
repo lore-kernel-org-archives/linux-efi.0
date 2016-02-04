@@ -1,99 +1,30 @@
 From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH 2/5] efi: use ucs2_as_utf8 in efivarfs instead of open coding a bad version (v2)
-Date: Thu,  4 Feb 2016 10:34:31 -0500
-Message-ID: <1454600074-14854-3-git-send-email-pjones@redhat.com>
-References: <1454600074-14854-1-git-send-email-pjones@redhat.com>
+Subject: efivarfs immutable files patch set.
+Date: Thu,  4 Feb 2016 10:34:29 -0500
+Message-ID: <1454600074-14854-1-git-send-email-pjones@redhat.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1454600074-14854-1-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Translate EFI's UCS-2 variable names to UTF-8 instead of just assuming
-all variable names fit in ASCII.
+Hi Matt,
+The next few emails are the latest (and hopefully final) version of my
+efivarfs immutability patch set, all shiny and chrome.  This version
+has:
 
-v2: fix where I'd accidentally left some of the sizes off when
-    converting the variable name strings.
+- everything you and I talked about fixed
+- *probably* that oops you saw fixed - at least there was one oops in
+  that patch that is fixed.
+- everything fixed that Leif Lindholm noticed 
+- everything fixed Joey Li noticed
+- an inode locking error Mateusz Guzik noticed
+- a bug where from _create() we were including the guid in the name, so
+  the check for is_removable failed.
 
-Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
-Acked-by: Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
----
- drivers/firmware/efi/efivars.c | 14 +++++---------
- fs/efivarfs/super.c            |  7 +++----
- 2 files changed, 8 insertions(+), 13 deletions(-)
+Also it seems to work for Joey, Leif, and I.  So please go ahead and
+throw it on your test server and whatnot.  If all goes well, I'll send
+you a version against Linus' v4.4 for stable, based on just the last two
+patches.  (I'm testing that one now.)
 
-diff --git a/drivers/firmware/efi/efivars.c b/drivers/firmware/efi/efivars.c
-index 756eca8..cd53c4d 100644
---- a/drivers/firmware/efi/efivars.c
-+++ b/drivers/firmware/efi/efivars.c
-@@ -540,7 +540,7 @@ static ssize_t efivar_delete(struct file *filp, struct kobject *kobj,
- static int
- efivar_create_sysfs_entry(struct efivar_entry *new_var)
- {
--	int i, short_name_size;
-+	int short_name_size;
- 	char *short_name;
- 	unsigned long variable_name_size;
- 	efi_char16_t *variable_name;
-@@ -553,22 +553,18 @@ efivar_create_sysfs_entry(struct efivar_entry *new_var)
- 	 * Length of the variable bytes in ASCII, plus the '-' separator,
- 	 * plus the GUID, plus trailing NUL
- 	 */
--	short_name_size = variable_name_size / sizeof(efi_char16_t)
--				+ 1 + EFI_VARIABLE_GUID_LEN + 1;
-+	short_name_size = ucs2_utf8size(new_var->var.VariableName)
-+					+ 1 + EFI_VARIABLE_GUID_LEN + 1;
- 
- 	short_name = kzalloc(short_name_size, GFP_KERNEL);
- 
- 	if (!short_name)
- 		return -ENOMEM;
- 
--	/* Convert Unicode to normal chars (assume top bits are 0),
--	   ala UTF-8 */
--	for (i=0; i < (int)(variable_name_size / sizeof(efi_char16_t)); i++) {
--		short_name[i] = variable_name[i] & 0xFF;
--	}
-+	ucs2_as_utf8(short_name, variable_name, short_name_size);
-+
- 	/* This is ugly, but necessary to separate one vendor's
- 	   private variables from another's.         */
--
- 	*(short_name + strlen(short_name)) = '-';
- 	efi_guid_to_str(&new_var->var.VendorGuid,
- 			 short_name + strlen(short_name));
-diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
-index b8a564f..8651ac2 100644
---- a/fs/efivarfs/super.c
-+++ b/fs/efivarfs/super.c
-@@ -118,7 +118,7 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
- 	struct dentry *dentry, *root = sb->s_root;
- 	unsigned long size = 0;
- 	char *name;
--	int len, i;
-+	int len;
- 	int err = -ENOMEM;
- 
- 	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
-@@ -128,15 +128,14 @@ static int efivarfs_callback(efi_char16_t *name16, efi_guid_t vendor,
- 	memcpy(entry->var.VariableName, name16, name_size);
- 	memcpy(&(entry->var.VendorGuid), &vendor, sizeof(efi_guid_t));
- 
--	len = ucs2_strlen(entry->var.VariableName);
-+	len = ucs2_utf8size(entry->var.VariableName);
- 
- 	/* name, plus '-', plus GUID, plus NUL*/
- 	name = kmalloc(len + 1 + EFI_VARIABLE_GUID_LEN + 1, GFP_KERNEL);
- 	if (!name)
- 		goto fail;
- 
--	for (i = 0; i < len; i++)
--		name[i] = entry->var.VariableName[i] & 0xFF;
-+	ucs2_as_utf8(name, entry->var.VariableName, len);
- 
- 	name[len] = '-';
- 
--- 
-2.5.0
+Thanks!
