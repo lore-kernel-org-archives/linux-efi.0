@@ -1,104 +1,59 @@
-From: Dave Young <dyoung@redhat.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Subject: Re: [PATCH] x86/efi: skip bgrt init for kexec reboot
-Date: Thu, 4 Feb 2016 19:09:03 +0800
-Message-ID: <20160204110903.GA2977@dhcp-128-65.nay.redhat.com>
+Date: Thu, 4 Feb 2016 11:56:56 +0000
+Message-ID: <20160204115656.GB2586@codeblueprint.co.uk>
 References: <20160127112044.GA2961@dhcp-128-65.nay.redhat.com>
  <20160203214200.GA15110@dhcp-128-65.nay.redhat.com>
  <20160203225333.GA31246@codeblueprint.co.uk>
  <20160204100329.GA2586@codeblueprint.co.uk>
+ <20160204110903.GA2977@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160204100329.GA2586@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-acpi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>
+In-Reply-To: <20160204110903.GA2977-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/kexec/>
+List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
+ <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi, Matt
-
-Thanks for the feedback.
-
-On 02/04/16 at 10:03am, Matt Fleming wrote:
-> On Wed, 03 Feb, at 10:53:33PM, Matt Fleming wrote:
-> > On Thu, 04 Feb, at 05:42:00AM, Dave Young wrote:
-> > > 
-> > > On 01/27/16 at 07:20pm, Dave Young wrote:
-> > > > For kexec reboot the bgrt image address could contains random data because
-> > > > we have freed boot service areas in 1st kernel boot phase. One possible
-> > > > result is kmalloc fail in efi_bgrt_init due to large random image size.
-> > > > 
-> > > > So change efi_late_init to avoid efi_bgrt_init in case kexec boot.
-> > > > 
-> > > > Signed-off-by: Dave Young <dyoung@redhat.com>
-> > > > ---
-> > > >  arch/x86/platform/efi/efi.c |    3 ++-
-> > > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > > > 
-> > > > --- linux-x86.orig/arch/x86/platform/efi/efi.c
-> > > > +++ linux-x86/arch/x86/platform/efi/efi.c
-> > > > @@ -531,7 +531,8 @@ void __init efi_init(void)
-> > > >  
-> > > >  void __init efi_late_init(void)
-> > > >  {
-> > > > -	efi_bgrt_init();
-> > > > +	if (!efi_setup)
-> > > > +		efi_bgrt_init();
-> > > >  }
-> > > >  
-> > > >  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
-> > > 
-> > > Matt, opinions about this patch?
-> > 
-> > Yeah, I'm not happy seeing efi_setup escaping into even more places,
-> > nor am I happy to see more code paths introduced where kexec boot is
-> > special-cased.
-> > 
-> > I'll reply with more details tomorrow.
+On Thu, 04 Feb, at 07:09:03PM, Dave Young wrote:
 > 
-> OK, let me expand upon that rather terse feedback. 
-> 
-> This patch highlights a general problem I see in the EFI code which is
-> that we're continuously increasing the number of execution paths
-> through the boot code. This makes it increasingly difficult to modify
-> the code without introducing bugs and regressions.
-> 
-> I was bitten by this recently with the EFI separate page table rework,
-> which led to commit 753b11ef8e92 ("x86/efi: Setup separate EFI page
-> tables in kexec paths"), i.e I forgot to update the special kexec
-> virtual mapping function.
-> 
-> We should be reducing the use of 'efi_setup', not adding more uses.
+> Consider the original code path, maybe change it to efi_kexec_setup will
+> be better to remind people? Or something else like a wraper function with
+> similar name..
+ 
+Possibly. I had considered adding a new efi_enabled() bit for
+KEXEC_BOOT, but I'm worried that'll just encourage more uses.
 
-I agree with you the less special case the better.
+The best approach is going to be to see whether we can reduce the uses
+of efi_setup and the associated special code. Once we've completed
+that exercise, we can think about the best name for this variable.
 
-> 
-> As an aside, I've always had a problem with using 'efi_setup' to
-> indicate when we've been booted via kexec. If a developer with no
-> prior knowledge reads those if conditions they are going to have zero
-> clue what the code means. 
+> For building ACPI tables we need do it in kernel instead of kexec-tools
+> because of kexec_file_load for secure boot case so we still need a conditional
+> code path for kexec..
 
-Consider the original code path, maybe change it to efi_kexec_setup will
-be better to remind people? Or something else like a wraper function with
-similar name..
+Note that it may not be necessary to build any ACPI tables at all,
+provided that things like acpi_get_table() fail gracefully for kexec.
+I'm assuming that's the problem that you discovered when writing this
+patch.
 
-> 
-> Now, specifically for the issue you've raised, would it not make more
-> sense for kexec to build its own ACPI tables and omit those entries
-> that are not valid, e.g. BGRT? I can imagine that the BGRT driver
-> won't be the only driver with this problem. Let's re-use the existing
-> error paths that handle missing/invalid tables.
-> 
-> Fundamentally I don't think there should be a discernible difference
-> between "Booted via kexec" and "That ACPI table does not exist".
+And yes, I don't expect you can build the ACPI table from userspace,
+but it should at least be possible to do it in setup_boot_parameters()
+or so when you setup the EFI table pointers (efi.config_tables), etc.
+I think that would be a natural home for this feature.
 
-For building ACPI tables we need do it in kernel instead of kexec-tools
-because of kexec_file_load for secure boot case so we still need a conditional
-code path for kexec..
+> Also I'm not sure how to rebuild ACPI tables, it is easy or hard. Let me
+> checking the detail and think more about it.
 
-Also I'm not sure how to rebuild ACPI tables, it is easy or hard. Let me
-checking the detail and think more about it.
-
-Thanks a lot
-Dave
+Thanks.
