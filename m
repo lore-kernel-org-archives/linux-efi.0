@@ -1,63 +1,80 @@
-From: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-Subject: Re: [PATCH 5/5] efi: Make efivarfs entries immutable by default. (v3)
-Date: Thu, 4 Feb 2016 11:40:15 +0800
-Message-ID: <20160204034015.GR26698@linux-rxt1.site>
-References: <1454517834-13736-1-git-send-email-pjones@redhat.com>
- <1454517834-13736-5-git-send-email-pjones@redhat.com>
- <20160203180016.GQ26698@linux-rxt1.site>
- <20160203181759.GB19297@redhat.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: skip bgrt init for kexec reboot
+Date: Thu, 4 Feb 2016 10:03:29 +0000
+Message-ID: <20160204100329.GA2586@codeblueprint.co.uk>
+References: <20160127112044.GA2961@dhcp-128-65.nay.redhat.com>
+ <20160203214200.GA15110@dhcp-128-65.nay.redhat.com>
+ <20160203225333.GA31246@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160203181759.GB19297-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <20160203225333.GA31246-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 03, 2016 at 01:18:00PM -0500, Peter Jones wrote:
-> On Thu, Feb 04, 2016 at 02:00:16AM +0800, joeyli wrote:
-> > On Wed, Feb 03, 2016 at 11:43:54AM -0500, Peter Jones wrote:
-> > > "rm -rf" is bricking some peoples' laptops because of variables being
-> > > used to store non-reinitializable firmware driver data that's required
-> > > to POST the hardware.
-> > > 
-> > > These are 100% bugs, and they need to be fixed, but in the mean time it
-> > > shouldn't be easy to *accidentally* brick machines.
-> > > 
-> > > We have to have delete working, and picking which variables do and don't
-> > > work for deletion is quite intractable, so instead make everything
-> > > immutable by default (except for a whitelist), and make tools that
-> > > aren't quite so broad-spectrum unset the immutable flag.
-> > > 
-> > > v2: adds Timeout to our whitelist.
-> > > v3:
-> > >  - takes the extra Timeout out of the whitelist
-> > >  - fixes whitelist matching to actually work
-> > >  - inverts the flag on efivarfs_get_inode() and calls it is_removable
-> > >  - adds documentation and test cases
-> > > 
-> > > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+On Wed, 03 Feb, at 10:53:33PM, Matt Fleming wrote:
+> On Thu, 04 Feb, at 05:42:00AM, Dave Young wrote:
 > > 
-> > Tested-by: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
+> > On 01/27/16 at 07:20pm, Dave Young wrote:
+> > > For kexec reboot the bgrt image address could contains random data because
+> > > we have freed boot service areas in 1st kernel boot phase. One possible
+> > > result is kmalloc fail in efi_bgrt_init due to large random image size.
+> > > 
+> > > So change efi_late_init to avoid efi_bgrt_init in case kexec boot.
+> > > 
+> > > Signed-off-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > > ---
+> > >  arch/x86/platform/efi/efi.c |    3 ++-
+> > >  1 file changed, 2 insertions(+), 1 deletion(-)
+> > > 
+> > > --- linux-x86.orig/arch/x86/platform/efi/efi.c
+> > > +++ linux-x86/arch/x86/platform/efi/efi.c
+> > > @@ -531,7 +531,8 @@ void __init efi_init(void)
+> > >  
+> > >  void __init efi_late_init(void)
+> > >  {
+> > > -	efi_bgrt_init();
+> > > +	if (!efi_setup)
+> > > +		efi_bgrt_init();
+> > >  }
+> > >  
+> > >  void __init efi_set_executable(efi_memory_desc_t *md, bool executable)
+> > 
+> > Matt, opinions about this patch?
 > 
-> Is this to say on 4/5 you did s/new_var->var./new_var->/ and then tested
-> the whole set?
->
+> Yeah, I'm not happy seeing efi_setup escaping into even more places,
+> nor am I happy to see more code paths introduced where kexec boot is
+> special-cased.
+> 
+> I'll reply with more details tomorrow.
 
-Yes, I changed the code then built whole patch set success. And, I tested
-this set on OVMF to remove some variables in whitelist or not. It works to
-me to avoid root removes non-whitelist variables.
+OK, let me expand upon that rather terse feedback. 
 
-Actually I tested your last version, it doesn't have compiler problem but
-I found there have some whitelist variables that can not be removed because
-variable_matches() has issue to compare name. Looks you fixed it in this
-version.
+This patch highlights a general problem I see in the EFI code which is
+that we're continuously increasing the number of execution paths
+through the boot code. This makes it increasingly difficult to modify
+the code without introducing bugs and regressions.
 
-So I put Tested-by tag to this set.
+I was bitten by this recently with the EFI separate page table rework,
+which led to commit 753b11ef8e92 ("x86/efi: Setup separate EFI page
+tables in kexec paths"), i.e I forgot to update the special kexec
+virtual mapping function.
 
+We should be reducing the use of 'efi_setup', not adding more uses.
 
-Thanks a lot!
+As an aside, I've always had a problem with using 'efi_setup' to
+indicate when we've been booted via kexec. If a developer with no
+prior knowledge reads those if conditions they are going to have zero
+clue what the code means. 
 
-Joey Lee 
+Now, specifically for the issue you've raised, would it not make more
+sense for kexec to build its own ACPI tables and omit those entries
+that are not valid, e.g. BGRT? I can imagine that the BGRT driver
+won't be the only driver with this problem. Let's re-use the existing
+error paths that handle missing/invalid tables.
+
+Fundamentally I don't think there should be a discernible difference
+between "Booted via kexec" and "That ACPI table does not exist".
