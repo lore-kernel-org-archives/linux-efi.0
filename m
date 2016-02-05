@@ -1,70 +1,139 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v4 08/17] Xen: public/hvm: sync changes of HVM_PARAM_CALLBACK_VIA ABI from Xen
-Date: Fri, 5 Feb 2016 11:05:43 +0800
-Message-ID: <1454641552-12576-9-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v4 15/17] ARM64: XEN: Add a function to initialize Xen specific UEFI runtime services
+Date: Fri, 5 Feb 2016 11:05:50 +0800
+Message-ID: <1454641552-12576-16-git-send-email-zhaoshenglong@huawei.com>
 References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1454641552-12576-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Sync the changes of HVM_PARAM_CALLBACK_VIA ABI introduced by
-Xen commit <ca5c54b6ff05> (public/hvm: export the HVM_PARAM_CALLBACK_VIA
-ABI in the API).
+When running on Xen hypervisor, runtime services are supported through
+hypercall. Add a Xen specific function to initialize runtime services.
 
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
 ---
- include/xen/interface/hvm/params.h | 27 +++++++++++++++++++++------
- 1 file changed, 21 insertions(+), 6 deletions(-)
+ arch/arm/include/asm/xen/xen-ops.h   |  6 ++++++
+ arch/arm/xen/Makefile                |  1 +
+ arch/arm/xen/efi.c                   | 40 ++++++++++++++++++++++++++++++++++++
+ arch/arm64/include/asm/xen/xen-ops.h |  6 ++++++
+ arch/arm64/xen/Makefile              |  1 +
+ drivers/xen/Kconfig                  |  2 +-
+ 6 files changed, 55 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/include/asm/xen/xen-ops.h
+ create mode 100644 arch/arm/xen/efi.c
+ create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
 
-diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
-index a6c7991..70ad208 100644
---- a/include/xen/interface/hvm/params.h
-+++ b/include/xen/interface/hvm/params.h
-@@ -27,16 +27,31 @@
-  * Parameter space for HVMOP_{set,get}_param.
-  */
- 
-+#define HVM_PARAM_CALLBACK_IRQ 0
- /*
-  * How should CPU0 event-channel notifications be delivered?
-- * val[63:56] == 0: val[55:0] is a delivery GSI (Global System Interrupt).
-- * val[63:56] == 1: val[55:0] is a delivery PCI INTx line, as follows:
-- *                  Domain = val[47:32], Bus  = val[31:16],
-- *                  DevFn  = val[15: 8], IntX = val[ 1: 0]
-- * val[63:56] == 2: val[7:0] is a vector number.
+diff --git a/arch/arm/include/asm/xen/xen-ops.h b/arch/arm/include/asm/xen/xen-ops.h
+new file mode 100644
+index 0000000..ec154e7
+--- /dev/null
++++ b/arch/arm/include/asm/xen/xen-ops.h
+@@ -0,0 +1,6 @@
++#ifndef _ASM_XEN_OPS_H
++#define _ASM_XEN_OPS_H
++
++void xen_efi_runtime_setup(void);
++
++#endif /* _ASM_XEN_OPS_H */
+diff --git a/arch/arm/xen/Makefile b/arch/arm/xen/Makefile
+index 1296952..2279521 100644
+--- a/arch/arm/xen/Makefile
++++ b/arch/arm/xen/Makefile
+@@ -1 +1,2 @@
+ obj-y		:= enlighten.o hypercall.o grant-table.o p2m.o mm.o
++obj-$(CONFIG_XEN_EFI) += efi.o
+diff --git a/arch/arm/xen/efi.c b/arch/arm/xen/efi.c
+new file mode 100644
+index 0000000..16db419
+--- /dev/null
++++ b/arch/arm/xen/efi.c
+@@ -0,0 +1,40 @@
++/*
++ * Copyright (c) 2015, Linaro Limited, Shannon Zhao
 + *
-  * If val == 0 then CPU0 event-channel notifications are not delivered.
-+ * If val != 0, val[63:56] encodes the type, as follows:
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program.  If not, see <http://www.gnu.org/licenses/>.
 + */
 +
-+#define HVM_PARAM_CALLBACK_TYPE_GSI      0
-+/*
-+ * val[55:0] is a delivery GSI.  GSI 0 cannot be used, as it aliases val == 0,
-+ * and disables all notifications.
-+ */
++#include <linux/efi.h>
++#include <xen/xen-ops.h>
++#include <asm/xen/xen-ops.h>
 +
-+#define HVM_PARAM_CALLBACK_TYPE_PCI_INTX 1
-+/*
-+ * val[55:0] is a delivery PCI INTx line:
-+ * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
++/* Set XEN EFI runtime services function pointers. Other fields of struct efi,
++ * e.g. efi.systab, will be set like normal EFI.
 + */
++void __init xen_efi_runtime_setup(void)
++{
++	efi.get_time                 = xen_efi_get_time;
++	efi.set_time                 = xen_efi_set_time;
++	efi.get_wakeup_time          = xen_efi_get_wakeup_time;
++	efi.set_wakeup_time          = xen_efi_set_wakeup_time;
++	efi.get_variable             = xen_efi_get_variable;
++	efi.get_next_variable        = xen_efi_get_next_variable;
++	efi.set_variable             = xen_efi_set_variable;
++	efi.query_variable_info      = xen_efi_query_variable_info;
++	efi.update_capsule           = xen_efi_update_capsule;
++	efi.query_capsule_caps       = xen_efi_query_capsule_caps;
++	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
++	efi.reset_system             = NULL; /* Functionality provided by Xen. */
++}
++EXPORT_SYMBOL_GPL(xen_efi_runtime_setup);
+diff --git a/arch/arm64/include/asm/xen/xen-ops.h b/arch/arm64/include/asm/xen/xen-ops.h
+new file mode 100644
+index 0000000..ec154e7
+--- /dev/null
++++ b/arch/arm64/include/asm/xen/xen-ops.h
+@@ -0,0 +1,6 @@
++#ifndef _ASM_XEN_OPS_H
++#define _ASM_XEN_OPS_H
 +
-+#define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
-+/*
-+ * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
-+ * if this delivery method is available.
-  */
--#define HVM_PARAM_CALLBACK_IRQ 0
++void xen_efi_runtime_setup(void);
++
++#endif /* _ASM_XEN_OPS_H */
+diff --git a/arch/arm64/xen/Makefile b/arch/arm64/xen/Makefile
+index 74a8d87..8ff8aa9 100644
+--- a/arch/arm64/xen/Makefile
++++ b/arch/arm64/xen/Makefile
+@@ -1,2 +1,3 @@
+ xen-arm-y	+= $(addprefix ../../arm/xen/, enlighten.o grant-table.o p2m.o mm.o)
+ obj-y		:= xen-arm.o hypercall.o
++obj-$(CONFIG_XEN_EFI) += $(addprefix ../../arm/xen/, efi.o)
+diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
+index 73708ac..d50571c 100644
+--- a/drivers/xen/Kconfig
++++ b/drivers/xen/Kconfig
+@@ -268,7 +268,7 @@ config XEN_HAVE_PVMMU
  
- #define HVM_PARAM_STORE_PFN    1
- #define HVM_PARAM_STORE_EVTCHN 2
+ config XEN_EFI
+ 	def_bool y
+-	depends on X86_64 && EFI
++	depends on (ARM || ARM64 || X86_64) && EFI
+ 
+ config XEN_AUTO_XLATE
+ 	def_bool y
 -- 
 2.0.4
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
