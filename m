@@ -1,60 +1,81 @@
-From: Dave Young <dyoung@redhat.com>
-Subject: Re: [PATCH] x86/efi: skip bgrt init for kexec reboot
-Date: Fri, 5 Feb 2016 08:41:15 +0800
-Message-ID: <20160205004115.GA3651@dhcp-128-65.nay.redhat.com>
-References: <20160127112044.GA2961@dhcp-128-65.nay.redhat.com>
- <20160203214200.GA15110@dhcp-128-65.nay.redhat.com>
- <20160203225333.GA31246@codeblueprint.co.uk>
- <20160204100329.GA2586@codeblueprint.co.uk>
- <20160204110903.GA2977@dhcp-128-65.nay.redhat.com>
- <20160204115656.GB2586@codeblueprint.co.uk>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v4 03/17] Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
+Date: Fri, 5 Feb 2016 11:05:38 +0800
+Message-ID: <1454641552-12576-4-git-send-email-zhaoshenglong@huawei.com>
+References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20160204115656.GB2586@codeblueprint.co.uk>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-acpi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1454641552-12576-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 02/04/16 at 11:56am, Matt Fleming wrote:
-> On Thu, 04 Feb, at 07:09:03PM, Dave Young wrote:
-> > 
-> > Consider the original code path, maybe change it to efi_kexec_setup will
-> > be better to remind people? Or something else like a wraper function with
-> > similar name..
->  
-> Possibly. I had considered adding a new efi_enabled() bit for
-> KEXEC_BOOT, but I'm worried that'll just encourage more uses.
-> 
-> The best approach is going to be to see whether we can reduce the uses
-> of efi_setup and the associated special code. Once we've completed
-> that exercise, we can think about the best name for this variable.
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-Ok, thanks.
+Make xen_xlate_map_ballooned_pages work with 64K pages. In that case
+Kernel pages are 64K in size but Xen pages remain 4K in size. Xen pfns
+refer to 4K pages.
 
-> 
-> > For building ACPI tables we need do it in kernel instead of kexec-tools
-> > because of kexec_file_load for secure boot case so we still need a conditional
-> > code path for kexec..
-> 
-> Note that it may not be necessary to build any ACPI tables at all,
-> provided that things like acpi_get_table() fail gracefully for kexec.
-> I'm assuming that's the problem that you discovered when writing this
-> patch.
-> 
-> And yes, I don't expect you can build the ACPI table from userspace,
-> but it should at least be possible to do it in setup_boot_parameters()
-> or so when you setup the EFI table pointers (efi.config_tables), etc.
-> I think that would be a natural home for this feature.
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+---
+ drivers/xen/xlate_mmu.c | 26 ++++++++++++++++----------
+ 1 file changed, 16 insertions(+), 10 deletions(-)
 
-Thing is we support both kexec_load and kexec_file_load, if we do something
-in kernel loader we will need do same in userspace kexec-tools as well.
-
-Another way is we probably can retain the boot service areas for kexec
-boot, but yes it is another special handling for kexec :(. Is this way
-better to you?
-
-Thanks
-Dave
+diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
+index 9692656..28f728b 100644
+--- a/drivers/xen/xlate_mmu.c
++++ b/drivers/xen/xlate_mmu.c
+@@ -207,9 +207,12 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
+ 	void *vaddr;
+ 	int rc;
+ 	unsigned int i;
++	unsigned long nr_pages;
++	xen_pfn_t xen_pfn = 0;
+ 
+ 	BUG_ON(nr_grant_frames == 0);
+-	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
++	nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
++	pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
+ 	if (!pages)
+ 		return -ENOMEM;
+ 
+@@ -218,22 +221,25 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
+ 		kfree(pages);
+ 		return -ENOMEM;
+ 	}
+-	rc = alloc_xenballooned_pages(nr_grant_frames, pages);
++	rc = alloc_xenballooned_pages(nr_pages, pages);
+ 	if (rc) {
+-		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
+-			nr_grant_frames, rc);
++		pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n", __func__,
++			nr_pages, rc);
+ 		kfree(pages);
+ 		kfree(pfns);
+ 		return rc;
+ 	}
+-	for (i = 0; i < nr_grant_frames; i++)
+-		pfns[i] = page_to_pfn(pages[i]);
++	for (i = 0; i < nr_grant_frames; i++) {
++		if ((i % XEN_PFN_PER_PAGE) == 0)
++			xen_pfn = page_to_xen_pfn(pages[i / XEN_PFN_PER_PAGE]);
++		pfns[i] = pfn_to_gfn(xen_pfn++);
++	}
+ 
+-	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
++	vaddr = vmap(pages, nr_pages, 0, PAGE_KERNEL);
+ 	if (!vaddr) {
+-		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
+-			nr_grant_frames, rc);
+-		free_xenballooned_pages(nr_grant_frames, pages);
++		pr_warn("%s Couldn't map %ld pages rc:%d\n", __func__,
++			nr_pages, rc);
++		free_xenballooned_pages(nr_pages, pages);
+ 		kfree(pages);
+ 		kfree(pfns);
+ 		return -ENOMEM;
+-- 
+2.0.4
