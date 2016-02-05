@@ -1,78 +1,71 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v4 16/17] FDT: Add a helper to get specified name subnode
-Date: Fri, 5 Feb 2016 11:05:51 +0800
-Message-ID: <1454641552-12576-17-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v4 04/17] arm/xen: Use
+	xen_xlate_map_ballooned_pages to setup grant table
+Date: Fri, 5 Feb 2016 11:05:39 +0800
+Message-ID: <1454641552-12576-5-git-send-email-zhaoshenglong@huawei.com>
 References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+	<mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Sender: xen-devel-bounces@lists.xen.org
+Errors-To: xen-devel-bounces@lists.xen.org
 To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, julien.grall@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Rob Herring <robh@kernel.org>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, ian.campbell@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Sometimes it needs to check if there is a node in FDT by full path.
-Introduce this helper to get the specified name subnode if it exists.
+Use xen_xlate_map_ballooned_pages to setup grant table. Then it doesn't
+rely on DT or ACPI to pass the start address and size of grant table.
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 ---
-CC: Rob Herring <robh@kernel.org>
----
- drivers/of/fdt.c       | 25 +++++++++++++++++++++++++
- include/linux/of_fdt.h |  2 ++
- 2 files changed, 27 insertions(+)
+ arch/arm/xen/enlighten.c | 13 ++++---------
+ 1 file changed, 4 insertions(+), 9 deletions(-)
 
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 655f79d..eacb188 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -645,6 +645,31 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
- }
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index 75cd734..d94f726 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -282,18 +282,10 @@ static int __init xen_guest_init(void)
+ {
+ 	struct xen_add_to_physmap xatp;
+ 	struct shared_info *shared_info_page = NULL;
+-	struct resource res;
+-	phys_addr_t grant_frames;
  
- /**
-+ * of_get_flat_dt_subnode_by_name - get subnode of specified node by name
-+ *
-+ * @node: the parent node
-+ * @uname: the name of subnode
-+ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
-+ */
-+
-+int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
-+{
-+	const void *blob = initial_boot_params;
-+	int offset;
-+	const char *pathp;
-+
-+	for (offset = fdt_first_subnode(blob, node);
-+	     offset >= 0;
-+	     offset = fdt_next_subnode(blob, offset)) {
-+		pathp = fdt_get_name(blob, offset, NULL);
-+		if (strcmp(pathp, uname) == 0)
-+			return offset;
-+	}
-+
-+	return -FDT_ERR_NOTFOUND;
-+}
-+
-+/**
-  * of_get_flat_dt_root - find the root node in the flat blob
-  */
- unsigned long __init of_get_flat_dt_root(void)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index df9ef38..fc28162 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -52,6 +52,8 @@ extern char __dtb_end[];
- extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
- 				     int depth, void *data),
- 			   void *data);
-+extern int of_get_flat_dt_subnode_by_name(unsigned long node,
-+					  const char *uname);
- extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
- 				       int *size);
- extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
+ 	if (!xen_domain())
+ 		return 0;
+ 
+-	if (of_address_to_resource(xen_node, GRANT_TABLE_PHYSADDR, &res)) {
+-		pr_err("Xen grant table base address not found\n");
+-		return -ENODEV;
+-	}
+-	grant_frames = res.start;
+-
+ 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
+ 	if (!xen_events_irq) {
+ 		pr_err("Xen event channel interrupt not found\n");
+@@ -328,7 +320,10 @@ static int __init xen_guest_init(void)
+ 	if (xen_vcpu_info == NULL)
+ 		return -ENOMEM;
+ 
+-	if (gnttab_setup_auto_xlat_frames(grant_frames)) {
++	xen_auto_xlat_grant_frames.count = gnttab_max_grant_frames();
++	if (xen_xlate_map_ballooned_pages(&xen_auto_xlat_grant_frames.pfn,
++					  &xen_auto_xlat_grant_frames.vaddr,
++					  xen_auto_xlat_grant_frames.count)) {
+ 		free_percpu(xen_vcpu_info);
+ 		return -ENOMEM;
+ 	}
 -- 
 2.0.4
