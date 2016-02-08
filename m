@@ -1,42 +1,32 @@
-From: Andy Lutomirski <luto@amacapital.net>
-Subject: Re: [PATCH] efi: runtime-wrappers: run UEFI Runtime Services with
- interrupts enabled
-Date: Mon, 8 Feb 2016 11:37:58 -0800
-Message-ID: <CALCETrWWLGjqXmPKs7wF3uJ+jR-xctU0eYOESdVxMm5b4w8JMw@mail.gmail.com>
-References: <20160203105851.GA22159@gmail.com> <1454594327-5444-1-git-send-email-ard.biesheuvel@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1454594327-5444-1-git-send-email-ard.biesheuvel@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, "H. Peter Anvin" <hpa@zytor.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>, Ingo Molnar <mingo@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: efi: make most efivarfs files immutable by default
+Date: Mon,  8 Feb 2016 14:48:10 -0500
+Message-ID: <1454960895-3473-1-git-send-email-pjones@redhat.com>
+References: <20160204234211.GI2586@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160204234211.GI2586-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-fsdevel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Feb 4, 2016 5:58 AM, "Ard Biesheuvel" <ard.biesheuvel@linaro.org> wrote:
->
-> OK, since Sai has confirmed that Windows leaves interrupts enabled when
-> calling the EFI variable store related runtime services, we should be able
-> to do the same for Linux, or at least be slightly more confident that we
-> won't have to back out this change later.
+Hi,
+Here's the latest version of my patch series to make efivarfs make files
+be immutable by default unless they're on our whitelist.  As you might
+expect, this version has a couple of differences from the previous one:
 
-Could this use a mutex instead of a spinlock?
+In patch 2/5:
+- efivar_create_sysfs_entry() was reworked to use the length it computes
+  instead of lots of calls to strlen(), and it doesn't have unused
+  variables any more.
+In 3/5:
+- "len" was renamed to "data_size" for clarity, and we calculate the
+  variable name's size correctly instead now.
+In 4/5:
+- The commit message was reworded based largely on mfleming's suggestions.
+In 5/5:
+- An old comment from a previous version was fixed to not be confusing.
+- the inode lock is now taken when we're modifying inode metadata.
 
-Can someone with a mixed mode setup read a variable in a loop and make
-sure it doesn't crash and burn?  It should work fine, but explicit
-testing would be nice.  (It's interesting mainly because doing a mixed
-mode call with interrupts on can result in a non-IST CPL0 to CPL0
-exception delivery, which won't result in a stack switch.  This could
-easily trigger a stack overflow, logic bug, microcode bug, or
-as-yet-unknown CPU "feature".
-
-Hmm.  We should also audit the mixed mode entry code to make sure that
-the high bits of RSP are explicitly clear before switching into compat
-mode.  If I had to make a guess about how CPUs behave, I'd guess
-pessimistically: Intel CPUs clear the high bits of RSP when switching
-into long mode due to interrupt delivery, and AMD CPUs leave them set
-just to mess with us.
-
-Also, a WARN_ON(in_interrupt()) somewhere might be a good sanity check.
-
---Andy
+Thanks,
+Peter
