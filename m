@@ -1,69 +1,78 @@
-From: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-Subject: Re: [PATCH v4 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Tue, 9 Feb 2016 11:19:02 +0000
-Message-ID: <alpine.DEB.2.02.1602091116240.27008@kaball.uk.xensource.com>
-References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
- <CAJZ5v0id-035AtyQ_SccPuCxD7+pa6GCgj3WBAojM+rFqssGQQ@mail.gmail.com>
- <alpine.DEB.2.02.1602081054350.27008@kaball.uk.xensource.com>
- <2213954.ztOe55fprN@vostro.rjw.lan>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [PATCH 14/14] x86/efi: Print size in binary units in
+ efi_print_memmap
+Date: Tue, 9 Feb 2016 13:20:18 +0100
+Message-ID: <20160209122018.GA4178@gmail.com>
+References: <1454364428-494-1-git-send-email-matt@codeblueprint.co.uk>
+ <1454364428-494-15-git-send-email-matt@codeblueprint.co.uk>
+ <56B0756E.9010603@redhat.com>
+ <20160203104045.GB7310@gmail.com>
+ <20160203112829.GC2597@codeblueprint.co.uk>
+ <94D0CD8314A33A4D9D801C0FE68B40295BF72A9F@G4W3202.americas.hpqcorp.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <2213954.ztOe55fprN@vostro.rjw.lan>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Cc: Stefano Stabellini <stefano.stabellini@eu.citrix.com>, "Rafael J. Wysocki" <rafael@kernel.org>, Shannon Zhao <zhaoshenglong@huawei.com>, "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, julien.grall@citrix.com, xen-devel@lists.xen.org, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, ian.campbell@citrix.com, Shannon Zhao <shannon.zhao@linaro.org>, peter.huangpeng@huawei.com, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <94D0CD8314A33A4D9D801C0FE68B40295BF72A9F@G4W3202.americas.hpqcorp.net>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Elliott, Robert (Persistent Memory)" <elliott@hpe.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Laszlo Ersek <lersek@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Thomas Gleixner <tglx@linutronix.de>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Taku Izumi <izumi.taku@jp.fujitsu.com>, Linus Torvalds <torvalds@linux-foundation.org>, Andrew Morton <akpm@linux-foundation.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 8 Feb 2016, Rafael J. Wysocki wrote:
-> On Monday, February 08, 2016 10:57:01 AM Stefano Stabellini wrote:
-> > On Sat, 6 Feb 2016, Rafael J. Wysocki wrote:
-> > > On Fri, Feb 5, 2016 at 4:05 AM, Shannon Zhao <zhaoshenglong@huawei.com> wrote:
-> > > > From: Shannon Zhao <shannon.zhao@linaro.org>
-> > > >
-> > > > ACPI 6.0 introduces a new table STAO to list the devices which are used
-> > > > by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
-> > > > UART is used by Xen. So here it hides UART from Dom0.
-> > > >
-> > > > Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-> > > > Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-> > > 
-> > > Well, this doesn't look right to me.
-> > > 
-> > > We need to find a nicer way to achieve what you want.
+
+* Elliott, Robert (Persistent Memory) <elliott@hpe.com> wrote:
+
+> 
+> > -----Original Message-----
+> > From: Matt Fleming [mailto:matt@codeblueprint.co.uk]
+> > Sent: Wednesday, February 3, 2016 5:28 AM
+> > To: Ingo Molnar <mingo@kernel.org>
+> > Cc: Laszlo Ersek <lersek@redhat.com>; H . Peter Anvin <hpa@zytor.com>;
+> > Thomas Gleixner <tglx@linutronix.de>; linux-efi@vger.kernel.org; linux-
+> > kernel@vger.kernel.org; Elliott, Robert (Persistent Memory)
+> > <elliott@hpe.com>; Andy Shevchenko <andriy.shevchenko@linux.intel.com>;
+> > Ard Biesheuvel <ard.biesheuvel@linaro.org>; Taku Izumi
+> > <izumi.taku@jp.fujitsu.com>; Linus Torvalds <torvalds@linux-
+> > foundation.org>; Andrew Morton <akpm@linux-foundation.org>
+> > Subject: Re: [PATCH 14/14] x86/efi: Print size in binary units in
+> > efi_print_memmap
+> ...
+> > OK, this patch has caused enough headaches. Let's drop it from this
+> > series.
 > > 
-> > I take that you are talking about how to honor the STAO table in Linux.
-> > Do you have any concrete suggestions?
+> > Robert, Andy, feel free to resubmit it after you've addressed
+> > everyone's concerns and we can discuss it in isolation.
 > 
-> I do.
+> We could just delete the size print altogether - better to print
+> nothing than a silently rounded number.  The end address already
+> communicates the size - it's just not as readable.  
 > 
-> The last hunk of the patch is likely what it needs to be, although I'm
-> not sure if the place it is added to is the right one.  That's a minor thing,
-> though.
+> The e820 table prints don't bother with a size print. 
 > 
-> The other part is problematic.  Not that as it doesn't work, but because of
-> how it works.  With these changes the device will be visible to the OS (in
-> fact to user space even), but will never be "present".  I'm not sure if
-> that's what you want?
+> That would also shorten these extremely wide prints to 116
+> characters (131 if printk time is enabled).
 > 
-> It might be better to add a check to acpi_bus_type_and_status() that will
-> evaluate the "should ignore?" thing and return -ENODEV if this is true.  This
-> way the device won't be visible at all.
+> [    0.000000] BIOS-e820: [mem 0x0000001880000000-0x000000207fffffff] reserved
+> vs.
+> [    0.000000] efi: mem62: [Reserved           |   |  |NV|  |  |  |  |   |WB|WT|WC|UC] range=[0x0000001880000000-0x000000207fffffff] (32 GiB)
 
-Something like below?  Actually your suggestion is better, thank you!
+So I find the latter a lot more readable - my terminals are wide enough ;-)
 
-diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-index 78d5f02..4778c51 100644
---- a/drivers/acpi/scan.c
-+++ b/drivers/acpi/scan.c
-@@ -1455,6 +1455,9 @@ static int acpi_bus_type_and_status(acpi_handle handle, int *type,
- 	if (ACPI_FAILURE(status))
- 		return -ENODEV;
- 
-+	if (acpi_check_device_is_ignored(handle))
-+		return -ENODEV;
-+
- 	switch (acpi_type) {
- 	case ACPI_TYPE_ANY:		/* for ACPI_ROOT_OBJECT */
- 	case ACPI_TYPE_DEVICE:
+Humans are also rather bad at parsing 64-bit hexa address ranges at a glance, so 
+the size display is very useful.
 
+But the flags portion should be shortened via appropriately chosen 
+single-character abbreviations for the flags. Anyone deeply intimate with the code 
+will recognize the flags - others won't care one way or another.
+
+plus there's no need to write out 'range='.
+  
+... and please keep the size and just use GB/TB for chrissake.
+
+I.e. something like this would work for me:
+
+> [    0.000000] efi: mem62: 0x0000001880000000-0x000000207fffffff (  32 GB) .N....BTCU "Reserved"
+
+Thanks,
+
+	Ingo
