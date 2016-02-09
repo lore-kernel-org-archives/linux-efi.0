@@ -1,14 +1,11 @@
 From: Robert Richter <rrichter@caviumnetworks.com>
-Subject: [PATCH v4 1/6] of/fdt: make generic early_init_dt_add_memory_arch() a
- weak alias
-Date: Tue, 9 Feb 2016 14:53:41 +0100
-Message-ID: <1455026026-11571-2-git-send-email-rrichter@caviumnetworks.com>
-References: <1455026026-11571-1-git-send-email-rrichter@caviumnetworks.com>
+Subject: [PATCH v4 0/6] arm64 UEFI early FDT handling
+Date: Tue, 9 Feb 2016 14:53:40 +0100
+Message-ID: <1455026026-11571-1-git-send-email-rrichter@caviumnetworks.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <1455026026-11571-1-git-send-email-rrichter@caviumnetworks.com>
 List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
 List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
@@ -18,70 +15,85 @@ List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
  <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
 Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
 Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Robert Richter <rrichter@cavium.com>, Mark Salter <msalter@redhat.com>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, linux-arm-kernel@lists.infradead.org
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Mark Rutland <mark.rutland@arm.com>, linux-efi@vger.kernel.org, Catalin Marinas <catalin.marinas@arm.com>, linux-kernel@vger.kernel.org, Leif Lindholm <leif.lindholm@linaro.org>, Robert Richter <rrichter@cavium.com>, Mark Salter <msalter@redhat.com>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, linux-arm-kernel@lists.infradead.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+From: Robert Richter <rrichter@cavium.com>
 
-The function early_init_dt_add_memory_arch() is defined as __weak
-so that archs can override it. However, in this override implementation,
-it may still be useful to invoke the generic implementation, so instead,
-rename the generic version to early_init_dt_add_memory() and turn the
-original definition into a weak alias. This way, the generic version can
-still be called even in the presence of an arch specific override.
+Reposting an updated version of this patches ported to 4.5-rc1. It is
+a followup to the version 3 from:
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Message-Id: <1442881288-13962-2-git-send-email-ard.biesheuvel@linaro.org>
-Signed-off-by: Robert Richter <rrichter@cavium.com>
----
- drivers/of/fdt.c       | 7 +++++--
- include/linux/of_fdt.h | 1 +
- 2 files changed, 6 insertions(+), 2 deletions(-)
+ http://lkml.kernel.org/r/1442881288-13962-1-git-send-email-ard.biesheuvel@linaro.org
 
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 655f79db7899..cba8281ab5fd 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -980,7 +980,7 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
- #define MAX_MEMBLOCK_ADDR	((phys_addr_t)~0)
- #endif
- 
--void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
-+void __init early_init_dt_add_memory(u64 base, u64 size)
- {
- 	const u64 phys_offset = __pa(PAGE_OFFSET);
- 
-@@ -1038,7 +1038,7 @@ void * __init __weak early_init_dt_alloc_memory_arch(u64 size, u64 align)
- 	return __va(memblock_alloc(size, align));
- }
- #else
--void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
-+void __init early_init_dt_add_memory(u64 base, u64 size)
- {
- 	WARN_ON(1);
- }
-@@ -1058,6 +1058,9 @@ void * __init __weak early_init_dt_alloc_memory_arch(u64 size, u64 align)
- }
- #endif
- 
-+__weak __alias(early_init_dt_add_memory)
-+void early_init_dt_add_memory_arch(u64 base, u64 size);
-+
- bool __init early_init_dt_verify(void *params)
- {
- 	if (!params)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index df9ef3801812..463a06ba87ac 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -65,6 +65,7 @@ extern int early_init_dt_scan_memory(unsigned long node, const char *uname,
- 				     int depth, void *data);
- extern void early_init_fdt_scan_reserved_mem(void);
- extern void early_init_fdt_reserve_self(void);
-+extern void early_init_dt_add_memory(u64 base, u64 size);
- extern void early_init_dt_add_memory_arch(u64 base, u64 size);
- extern int early_init_dt_reserve_memory_arch(phys_addr_t base, phys_addr_t size,
- 					     bool no_map);
+The series is essential for NUMA on arm64. Early FDT handling is
+required to make system topology data from firmware, esp. for cpus and
+memory available to the early boot process. Ganapat's numa patches
+depend on it. This series has been tested with his series v10 posted
+here:
+
+ http://lkml.kernel.org/r/1454407763-1017-1-git-send-email-gkulkarni@caviumnetworks.com
+
+A number of minor issues exist in the early UEFI/FDT handling path, such as:
+- when booting via UEFI, memreserve entries are removed from the device tree but
+  the /reserved-memory node is not
+- memory nodes are removed from the device tree in a way that is not officially
+  supported by the libfdt API (i.e., you cannot delete nodes while traversing
+  the tree)
+- removal of memory nodes may discard annotations (such as NUMA topology) that
+  should ideally be retained, or may corrupt the tree by discarding nodes
+  referenced by phandles.
+
+Patches #1 and #2 introduce an arm64 specific version of
+early_init_dt_add_memory_arch() so that we can modify it later to ignore DT
+memory nodes if booting via UEFI.
+
+Patch #3 moves some UEFI+FDT init code around before making changes to it.
+
+Patch #4 moves the UEFI initialization to before the early FDT scanning so we
+know at that point whether we are booting via UEFI or not.
+
+Patch #5 changes the UEFI init code so that memory nodes are simply ignored, so
+that they don't have to be removed by the stub anymore.
+
+Patch #6 does the same as #5, but for memreserves and the /reserved-memory
+node.
+
+Changes since v3:
+- prorted to v4.5-rc1
+
+Changes since v2:
+- instead of copying the generic implementation, turn
+  early_init_dt_add_memory_arch() into a weak alias so that it is still
+  accessible to overrides
+
+Changes since v1:
+- dropped first two patches, they have been merged into v4.2-rc1
+- dropped last patch regarding FDT placement by the stub, this is not entirely
+  relevant to the primary issue targeted by this series
+- rebased onto for-next/core (arm64) as of today
+
+Ard Biesheuvel (6):
+  of/fdt: make generic early_init_dt_add_memory_arch() a weak alias
+  arm64: override generic version of early_init_dt_add_memory_arch()
+  efi: move FDT handling to separate object file
+  arm64/efi: move EFI /chosen node parsing before early FDT processing
+  arm64/efi: ignore DT memory nodes instead of removing them
+  arm64/efi: ignore DT memreserve entries instead of removing them
+
+ arch/arm64/include/asm/efi.h       |  2 +
+ arch/arm64/kernel/setup.c          |  3 ++
+ arch/arm64/mm/init.c               | 12 +++++-
+ drivers/firmware/efi/Makefile      |  1 +
+ drivers/firmware/efi/arm-init.c    | 36 ++++++++++------
+ drivers/firmware/efi/efi-fdt.c     | 73 +++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi.c         | 84 --------------------------------------
+ drivers/firmware/efi/libstub/fdt.c | 33 +--------------
+ drivers/of/fdt.c                   |  7 +++-
+ include/linux/efi.h                |  2 +-
+ include/linux/of_fdt.h             |  1 +
+ 11 files changed, 121 insertions(+), 133 deletions(-)
+ create mode 100644 drivers/firmware/efi/efi-fdt.c
+
 -- 
 2.7.0.rc3
