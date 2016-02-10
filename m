@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5sub3 2/4] efi: stub: add implementation of efi_random_alloc()
-Date: Wed, 10 Feb 2016 18:55:03 +0100
-Message-ID: <1455126905-22688-3-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v5sub3 4/4] arm64: efi: invoke EFI_RNG_PROTOCOL to supply KASLR randomness
+Date: Wed, 10 Feb 2016 18:55:05 +0100
+Message-ID: <1455126905-22688-5-git-send-email-ard.biesheuvel@linaro.org>
 References: <1455126905-22688-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1455126905-22688-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,144 +10,267 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This implements efi_random_alloc(), which allocates a chunk of memory of
-a certain size at a certain alignment, and uses the random_seed argument
-it receives to randomize the address of the allocation.
+Since arm64 does not use a decompressor that supplies an execution
+environment where it is feasible to some extent to provide a source of
+randomness, the arm64 KASLR kernel depends on the bootloader to supply
+some random bits in the /chosen/kaslr-seed DT property upon kernel entry.
 
-This is implemented by iterating over the UEFI memory map, counting the
-number of suitable slots (aligned offsets) within each region, and picking
-a random number between 0 and 'number of slots - 1' to select the slot,
-This should guarantee that each possible offset is chosen equally likely.
+On UEFI systems, we can use the EFI_RNG_PROTOCOL, if supplied, to obtain
+some random bits. At the same time, use it to randomize the offset of the
+kernel Image in physical memory.
 
-Suggested-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/libstub/efistub.h |   4 +
- drivers/firmware/efi/libstub/random.c  | 100 ++++++++++++++++++++
- 2 files changed, 104 insertions(+)
+ arch/arm64/Kconfig                        |  5 ++
+ drivers/firmware/efi/libstub/arm-stub.c   | 40 ++++++----
+ drivers/firmware/efi/libstub/arm64-stub.c | 78 ++++++++++++++------
+ drivers/firmware/efi/libstub/fdt.c        | 14 ++++
+ 4 files changed, 102 insertions(+), 35 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
-index 206b7252b9d1..5ed3d3f38166 100644
---- a/drivers/firmware/efi/libstub/efistub.h
-+++ b/drivers/firmware/efi/libstub/efistub.h
-@@ -46,4 +46,8 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
- efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table,
- 				  unsigned long size, u8 *out);
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 666aacc4c763..630b078a0f73 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -785,6 +785,11 @@ config RANDOMIZE_BASE
+ 	  It is the bootloader's job to provide entropy, by passing a
+ 	  random u64 value in /chosen/kaslr-seed at kernel entry.
  
-+efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
-+			      unsigned long size, unsigned long align,
-+			      unsigned long *addr, unsigned long random_seed);
++	  When booting via the UEFI stub, it will invoke the firmware's
++	  EFI_RNG_PROTOCOL implementation (if available) to supply entropy
++	  to the kernel proper. In addition, it will randomise the physical
++	  location of the kernel Image as well.
 +
- #endif
-diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
-index 97941ee5954f..53f6d3fe6d86 100644
---- a/drivers/firmware/efi/libstub/random.c
-+++ b/drivers/firmware/efi/libstub/random.c
-@@ -33,3 +33,103 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
+ 	  If unsure, say N.
  
- 	return rng->get_rng(rng, NULL, size, out);
+ config RANDOMIZE_MODULE_REGION_FULL
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 3397902e4040..4deb3e7faa0e 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -18,6 +18,8 @@
+ 
+ #include "efistub.h"
+ 
++bool __nokaslr;
++
+ static int efi_secureboot_enabled(efi_system_table_t *sys_table_arg)
+ {
+ 	static efi_guid_t const var_guid = EFI_GLOBAL_VARIABLE_GUID;
+@@ -207,14 +209,6 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 		pr_efi_err(sys_table, "Failed to find DRAM base\n");
+ 		goto fail;
+ 	}
+-	status = handle_kernel_image(sys_table, image_addr, &image_size,
+-				     &reserve_addr,
+-				     &reserve_size,
+-				     dram_base, image);
+-	if (status != EFI_SUCCESS) {
+-		pr_efi_err(sys_table, "Failed to relocate kernel\n");
+-		goto fail;
+-	}
+ 
+ 	/*
+ 	 * Get the command line from EFI, using the LOADED_IMAGE
+@@ -224,7 +218,28 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	cmdline_ptr = efi_convert_cmdline(sys_table, image, &cmdline_size);
+ 	if (!cmdline_ptr) {
+ 		pr_efi_err(sys_table, "getting command line via LOADED_IMAGE_PROTOCOL\n");
+-		goto fail_free_image;
++		goto fail;
++	}
++
++	/* check whether 'nokaslr' was passed on the command line */
++	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
++		static const u8 default_cmdline[] = CONFIG_CMDLINE;
++		const u8 *str, *cmdline = cmdline_ptr;
++
++		if (IS_ENABLED(CONFIG_CMDLINE_FORCE))
++			cmdline = default_cmdline;
++		str = strstr(cmdline, "nokaslr");
++		if (str == cmdline || (str > cmdline && *(str - 1) == ' '))
++			__nokaslr = true;
++	}
++
++	status = handle_kernel_image(sys_table, image_addr, &image_size,
++				     &reserve_addr,
++				     &reserve_size,
++				     dram_base, image);
++	if (status != EFI_SUCCESS) {
++		pr_efi_err(sys_table, "Failed to relocate kernel\n");
++		goto fail_free_cmdline;
+ 	}
+ 
+ 	status = efi_parse_options(cmdline_ptr);
+@@ -244,7 +259,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 
+ 		if (status != EFI_SUCCESS) {
+ 			pr_efi_err(sys_table, "Failed to load device tree!\n");
+-			goto fail_free_cmdline;
++			goto fail_free_image;
+ 		}
+ 	}
+ 
+@@ -286,12 +301,11 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	efi_free(sys_table, initrd_size, initrd_addr);
+ 	efi_free(sys_table, fdt_size, fdt_addr);
+ 
+-fail_free_cmdline:
+-	efi_free(sys_table, cmdline_size, (unsigned long)cmdline_ptr);
+-
+ fail_free_image:
+ 	efi_free(sys_table, image_size, *image_addr);
+ 	efi_free(sys_table, reserve_size, reserve_addr);
++fail_free_cmdline:
++	efi_free(sys_table, cmdline_size, (unsigned long)cmdline_ptr);
+ fail:
+ 	return EFI_ERROR;
  }
+diff --git a/drivers/firmware/efi/libstub/arm64-stub.c b/drivers/firmware/efi/libstub/arm64-stub.c
+index 78dfbd34b6bf..e0e6b74fef8f 100644
+--- a/drivers/firmware/efi/libstub/arm64-stub.c
++++ b/drivers/firmware/efi/libstub/arm64-stub.c
+@@ -13,6 +13,10 @@
+ #include <asm/efi.h>
+ #include <asm/sections.h>
+ 
++#include "efistub.h"
 +
-+/*
-+ * Return the number of slots covered by this entry, i.e., the number of
-+ * addresses it covers that are suitably aligned and supply enough room
-+ * for the allocation.
-+ */
-+static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
-+					 unsigned long size,
-+					 unsigned long align)
-+{
-+	u64 start, end;
++extern bool __nokaslr;
 +
-+	if (md->type != EFI_CONVENTIONAL_MEMORY)
-+		return 0;
+ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 					unsigned long *image_addr,
+ 					unsigned long *image_size,
+@@ -23,26 +27,52 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+ {
+ 	efi_status_t status;
+ 	unsigned long kernel_size, kernel_memsize = 0;
+-	unsigned long nr_pages;
+ 	void *old_image_addr = (void *)*image_addr;
+ 	unsigned long preferred_offset;
++	u64 phys_seed = 0;
 +
-+	start = round_up(md->phys_addr, align);
-+	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
-+			 align);
-+
-+	if (start > end)
-+		return 0;
-+
-+	return (end - start + 1) / align;
-+}
-+
-+/*
-+ * The UEFI memory descriptors have a virtual address field that is only used
-+ * when installing the virtual mapping using SetVirtualAddressMap(). Since it
-+ * is unused here, we can reuse it to keep track of each descriptor's slot
-+ * count.
-+ */
-+#define MD_NUM_SLOTS(md)	((md)->virt_addr)
-+
-+efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
-+			      unsigned long size,
-+			      unsigned long align,
-+			      unsigned long *addr,
-+			      unsigned long random_seed)
-+{
-+	unsigned long map_size, desc_size, total_slots = 0, target_slot;
-+	efi_status_t status;
-+	efi_memory_desc_t *memory_map;
-+	int map_offset;
-+
-+	status = efi_get_memory_map(sys_table_arg, &memory_map, &map_size,
-+				    &desc_size, NULL, NULL);
-+	if (status != EFI_SUCCESS)
-+		return status;
-+
-+	if (align < EFI_ALLOC_ALIGN)
-+		align = EFI_ALLOC_ALIGN;
-+
-+	/* count the suitable slots in each memory map entry */
-+	for (map_offset = 0; map_offset < map_size; map_offset += desc_size) {
-+		efi_memory_desc_t *md = (void *)memory_map + map_offset;
-+		unsigned long slots;
-+
-+		slots = get_entry_num_slots(md, size, align);
-+		MD_NUM_SLOTS(md) = slots;
-+		total_slots += slots;
-+	}
-+
-+	/* find a random number between 0 and total_slots */
-+	target_slot = (total_slots * (u16)random_seed) >> 16;
-+
-+	/*
-+	 * target_slot is now a value in the range [0, total_slots), and so
-+	 * it corresponds with exactly one of the suitable slots we recorded
-+	 * when iterating over the memory map the first time around.
-+	 *
-+	 * So iterate over the memory map again, subtracting the number of
-+	 * slots of each entry at each iteration, until we have found the entry
-+	 * that covers our chosen slot. Use the residual value of target_slot
-+	 * to calculate the randomly chosen address, and allocate it directly
-+	 * using EFI_ALLOCATE_ADDRESS.
-+	 */
-+	for (map_offset = 0; map_offset < map_size; map_offset += desc_size) {
-+		efi_memory_desc_t *md = (void *)memory_map + map_offset;
-+		efi_physical_addr_t target;
-+		unsigned long pages;
-+
-+		if (target_slot >= MD_NUM_SLOTS(md)) {
-+			target_slot -= MD_NUM_SLOTS(md);
-+			continue;
++	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
++		if (!__nokaslr) {
++			status = efi_get_random_bytes(sys_table_arg,
++						      sizeof(phys_seed),
++						      (u8 *)&phys_seed);
++			if (status == EFI_NOT_FOUND) {
++				pr_efi(sys_table_arg, "EFI_RNG_PROTOCOL unavailable, no randomness supplied\n");
++			} else if (status != EFI_SUCCESS) {
++				pr_efi_err(sys_table_arg, "efi_get_random_bytes() failed\n");
++				return status;
++			}
++		} else {
++			pr_efi(sys_table_arg, "KASLR disabled on kernel command line\n");
 +		}
-+
-+		target = round_up(md->phys_addr, align) + target_slot * align;
-+		pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
-+
-+		status = efi_call_early(allocate_pages, EFI_ALLOCATE_ADDRESS,
-+					EFI_LOADER_DATA, pages, &target);
-+		if (status == EFI_SUCCESS)
-+			*addr = target;
-+		break;
 +	}
+ 
+ 	/*
+ 	 * The preferred offset of the kernel Image is TEXT_OFFSET bytes beyond
+ 	 * a 2 MB aligned base, which itself may be lower than dram_base, as
+ 	 * long as the resulting offset equals or exceeds it.
+ 	 */
+-	preferred_offset = round_down(dram_base, SZ_2M) + TEXT_OFFSET;
++	preferred_offset = round_down(dram_base, MIN_KIMG_ALIGN) + TEXT_OFFSET;
+ 	if (preferred_offset < dram_base)
+-		preferred_offset += SZ_2M;
++		preferred_offset += MIN_KIMG_ALIGN;
+ 
+-	/* Relocate the image, if required. */
+ 	kernel_size = _edata - _text;
+-	if (*image_addr != preferred_offset) {
+-		kernel_memsize = kernel_size + (_end - _edata);
++	kernel_memsize = kernel_size + (_end - _edata);
 +
-+	efi_call_early(free_pool, memory_map);
++	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE) && phys_seed != 0) {
++		/*
++		 * If KASLR is enabled, and we have some randomness available,
++		 * locate the kernel at a randomized offset in physical memory.
++		 */
++		*reserve_size = kernel_memsize + TEXT_OFFSET;
++		status = efi_random_alloc(sys_table_arg, *reserve_size,
++					  MIN_KIMG_ALIGN, reserve_addr,
++					  phys_seed);
+ 
++		*image_addr = *reserve_addr + TEXT_OFFSET;
++	} else {
+ 		/*
+-		 * First, try a straight allocation at the preferred offset.
++		 * Else, try a straight allocation at the preferred offset.
+ 		 * This will work around the issue where, if dram_base == 0x0,
+ 		 * efi_low_alloc() refuses to allocate at 0x0 (to prevent the
+ 		 * address of the allocation to be mistaken for a FAIL return
+@@ -52,27 +82,31 @@ efi_status_t __init handle_kernel_image(efi_system_table_t *sys_table_arg,
+ 		 * Mustang), we can still place the kernel at the address
+ 		 * 'dram_base + TEXT_OFFSET'.
+ 		 */
++		if (*image_addr == preferred_offset)
++			return EFI_SUCCESS;
 +
-+	return status;
-+}
+ 		*image_addr = *reserve_addr = preferred_offset;
+-		nr_pages = round_up(kernel_memsize, EFI_ALLOC_ALIGN) /
+-			   EFI_PAGE_SIZE;
++		*reserve_size = round_up(kernel_memsize, EFI_ALLOC_ALIGN);
++
+ 		status = efi_call_early(allocate_pages, EFI_ALLOCATE_ADDRESS,
+-					EFI_LOADER_DATA, nr_pages,
++					EFI_LOADER_DATA,
++					*reserve_size / EFI_PAGE_SIZE,
+ 					(efi_physical_addr_t *)reserve_addr);
+-		if (status != EFI_SUCCESS) {
+-			kernel_memsize += TEXT_OFFSET;
+-			status = efi_low_alloc(sys_table_arg, kernel_memsize,
+-					       SZ_2M, reserve_addr);
++	}
+ 
+-			if (status != EFI_SUCCESS) {
+-				pr_efi_err(sys_table_arg, "Failed to relocate kernel\n");
+-				return status;
+-			}
+-			*image_addr = *reserve_addr + TEXT_OFFSET;
++	if (status != EFI_SUCCESS) {
++		*reserve_size = kernel_memsize + TEXT_OFFSET;
++		status = efi_low_alloc(sys_table_arg, *reserve_size,
++				       MIN_KIMG_ALIGN, reserve_addr);
++
++		if (status != EFI_SUCCESS) {
++			pr_efi_err(sys_table_arg, "Failed to relocate kernel\n");
++			*reserve_size = 0;
++			return status;
+ 		}
+-		memcpy((void *)*image_addr, old_image_addr, kernel_size);
+-		*reserve_size = kernel_memsize;
++		*image_addr = *reserve_addr + TEXT_OFFSET;
+ 	}
+-
++	memcpy((void *)*image_addr, old_image_addr, kernel_size);
+ 
+ 	return EFI_SUCCESS;
+ }
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index cf7b7d46302a..6dba78aef337 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -147,6 +147,20 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 	if (status)
+ 		goto fdt_set_fail;
+ 
++	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE)) {
++		efi_status_t efi_status;
++
++		efi_status = efi_get_random_bytes(sys_table, sizeof(fdt_val64),
++						  (u8 *)&fdt_val64);
++		if (efi_status == EFI_SUCCESS) {
++			status = fdt_setprop(fdt, node, "kaslr-seed",
++					     &fdt_val64, sizeof(fdt_val64));
++			if (status)
++				goto fdt_set_fail;
++		} else if (efi_status != EFI_NOT_FOUND) {
++			return efi_status;
++		}
++	}
+ 	return EFI_SUCCESS;
+ 
+ fdt_set_fail:
 -- 
 2.5.0
