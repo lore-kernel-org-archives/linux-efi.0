@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v5sub3 3/4] efi: stub: use high allocation for converted command line
-Date: Wed, 10 Feb 2016 18:55:04 +0100
-Message-ID: <1455126905-22688-4-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v5sub3 2/4] efi: stub: add implementation of efi_random_alloc()
+Date: Wed, 10 Feb 2016 18:55:03 +0100
+Message-ID: <1455126905-22688-3-git-send-email-ard.biesheuvel@linaro.org>
 References: <1455126905-22688-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1455126905-22688-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,58 +10,144 @@ To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.
 Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Before we can move the command line processing before the allocation
-of the kernel, which is required for detecting the 'nokaslr' option
-which controls that allocation, move the converted command line higher
-up in memory, to prevent it from interfering with the kernel itself.
+This implements efi_random_alloc(), which allocates a chunk of memory of
+a certain size at a certain alignment, and uses the random_seed argument
+it receives to randomize the address of the allocation.
 
-Since x86 needs the address to fit in 32 bits, use UINT_MAX as the upper
-bound there. Otherwise, use ULONG_MAX (i.e., no limit)
+This is implemented by iterating over the UEFI memory map, counting the
+number of suitable slots (aligned offsets) within each region, and picking
+a random number between 0 and 'number of slots - 1' to select the slot,
+This should guarantee that each possible offset is chosen equally likely.
 
+Suggested-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Reviewed-by: Kees Cook <keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/x86/include/asm/efi.h                     | 2 ++
- drivers/firmware/efi/libstub/efi-stub-helper.c | 7 ++++++-
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ drivers/firmware/efi/libstub/efistub.h |   4 +
+ drivers/firmware/efi/libstub/random.c  | 100 ++++++++++++++++++++
+ 2 files changed, 104 insertions(+)
 
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 0010c78c4998..08b1f2f6ea50 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -25,6 +25,8 @@
- #define EFI32_LOADER_SIGNATURE	"EL32"
- #define EFI64_LOADER_SIGNATURE	"EL64"
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 206b7252b9d1..5ed3d3f38166 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -46,4 +46,8 @@ void efi_get_virtmap(efi_memory_desc_t *memory_map, unsigned long map_size,
+ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table,
+ 				  unsigned long size, u8 *out);
  
-+#define MAX_CMDLINE_ADDRESS	UINT_MAX
++efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
++			      unsigned long size, unsigned long align,
++			      unsigned long *addr, unsigned long random_seed);
 +
- #ifdef CONFIG_X86_32
+ #endif
+diff --git a/drivers/firmware/efi/libstub/random.c b/drivers/firmware/efi/libstub/random.c
+index 97941ee5954f..53f6d3fe6d86 100644
+--- a/drivers/firmware/efi/libstub/random.c
++++ b/drivers/firmware/efi/libstub/random.c
+@@ -33,3 +33,103 @@ efi_status_t efi_get_random_bytes(efi_system_table_t *sys_table_arg,
  
- 
-diff --git a/drivers/firmware/efi/libstub/efi-stub-helper.c b/drivers/firmware/efi/libstub/efi-stub-helper.c
-index f07d4a67fa76..29ed2f9b218c 100644
---- a/drivers/firmware/efi/libstub/efi-stub-helper.c
-+++ b/drivers/firmware/efi/libstub/efi-stub-helper.c
-@@ -649,6 +649,10 @@ static u8 *efi_utf16_to_utf8(u8 *dst, const u16 *src, int n)
- 	return dst;
+ 	return rng->get_rng(rng, NULL, size, out);
  }
- 
-+#ifndef MAX_CMDLINE_ADDRESS
-+#define MAX_CMDLINE_ADDRESS	ULONG_MAX
-+#endif
 +
- /*
-  * Convert the unicode UEFI command line to ASCII to pass to kernel.
-  * Size of memory allocated return in *cmd_line_len.
-@@ -684,7 +688,8 @@ char *efi_convert_cmdline(efi_system_table_t *sys_table_arg,
- 
- 	options_bytes++;	/* NUL termination */
- 
--	status = efi_low_alloc(sys_table_arg, options_bytes, 0, &cmdline_addr);
-+	status = efi_high_alloc(sys_table_arg, options_bytes, 0,
-+				&cmdline_addr, MAX_CMDLINE_ADDRESS);
- 	if (status != EFI_SUCCESS)
- 		return NULL;
- 
++/*
++ * Return the number of slots covered by this entry, i.e., the number of
++ * addresses it covers that are suitably aligned and supply enough room
++ * for the allocation.
++ */
++static unsigned long get_entry_num_slots(efi_memory_desc_t *md,
++					 unsigned long size,
++					 unsigned long align)
++{
++	u64 start, end;
++
++	if (md->type != EFI_CONVENTIONAL_MEMORY)
++		return 0;
++
++	start = round_up(md->phys_addr, align);
++	end = round_down(md->phys_addr + md->num_pages * EFI_PAGE_SIZE - size,
++			 align);
++
++	if (start > end)
++		return 0;
++
++	return (end - start + 1) / align;
++}
++
++/*
++ * The UEFI memory descriptors have a virtual address field that is only used
++ * when installing the virtual mapping using SetVirtualAddressMap(). Since it
++ * is unused here, we can reuse it to keep track of each descriptor's slot
++ * count.
++ */
++#define MD_NUM_SLOTS(md)	((md)->virt_addr)
++
++efi_status_t efi_random_alloc(efi_system_table_t *sys_table_arg,
++			      unsigned long size,
++			      unsigned long align,
++			      unsigned long *addr,
++			      unsigned long random_seed)
++{
++	unsigned long map_size, desc_size, total_slots = 0, target_slot;
++	efi_status_t status;
++	efi_memory_desc_t *memory_map;
++	int map_offset;
++
++	status = efi_get_memory_map(sys_table_arg, &memory_map, &map_size,
++				    &desc_size, NULL, NULL);
++	if (status != EFI_SUCCESS)
++		return status;
++
++	if (align < EFI_ALLOC_ALIGN)
++		align = EFI_ALLOC_ALIGN;
++
++	/* count the suitable slots in each memory map entry */
++	for (map_offset = 0; map_offset < map_size; map_offset += desc_size) {
++		efi_memory_desc_t *md = (void *)memory_map + map_offset;
++		unsigned long slots;
++
++		slots = get_entry_num_slots(md, size, align);
++		MD_NUM_SLOTS(md) = slots;
++		total_slots += slots;
++	}
++
++	/* find a random number between 0 and total_slots */
++	target_slot = (total_slots * (u16)random_seed) >> 16;
++
++	/*
++	 * target_slot is now a value in the range [0, total_slots), and so
++	 * it corresponds with exactly one of the suitable slots we recorded
++	 * when iterating over the memory map the first time around.
++	 *
++	 * So iterate over the memory map again, subtracting the number of
++	 * slots of each entry at each iteration, until we have found the entry
++	 * that covers our chosen slot. Use the residual value of target_slot
++	 * to calculate the randomly chosen address, and allocate it directly
++	 * using EFI_ALLOCATE_ADDRESS.
++	 */
++	for (map_offset = 0; map_offset < map_size; map_offset += desc_size) {
++		efi_memory_desc_t *md = (void *)memory_map + map_offset;
++		efi_physical_addr_t target;
++		unsigned long pages;
++
++		if (target_slot >= MD_NUM_SLOTS(md)) {
++			target_slot -= MD_NUM_SLOTS(md);
++			continue;
++		}
++
++		target = round_up(md->phys_addr, align) + target_slot * align;
++		pages = round_up(size, EFI_PAGE_SIZE) / EFI_PAGE_SIZE;
++
++		status = efi_call_early(allocate_pages, EFI_ALLOCATE_ADDRESS,
++					EFI_LOADER_DATA, pages, &target);
++		if (status == EFI_SUCCESS)
++			*addr = target;
++		break;
++	}
++
++	efi_call_early(free_pool, memory_map);
++
++	return status;
++}
 -- 
 2.5.0
