@@ -1,70 +1,30 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH] x86/efi: skip bgrt init for kexec reboot
-Date: Thu, 11 Feb 2016 16:09:31 +0000
-Message-ID: <20160211160931.GL4134@codeblueprint.co.uk>
-References: <20160127112044.GA2961@dhcp-128-65.nay.redhat.com>
- <20160203214200.GA15110@dhcp-128-65.nay.redhat.com>
- <20160203225333.GA31246@codeblueprint.co.uk>
- <20160204100329.GA2586@codeblueprint.co.uk>
- <20160204110903.GA2977@dhcp-128-65.nay.redhat.com>
- <20160204115656.GB2586@codeblueprint.co.uk>
- <20160205004115.GA3651@dhcp-128-65.nay.redhat.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v2 0/7] ARM/efi minor fixes + stub pre-boot compat checks
+Date: Thu, 11 Feb 2016 16:16:21 +0000
+Message-ID: <20160211161621.GM4134@codeblueprint.co.uk>
+References: <1454601030-9093-1-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160205004115.GA3651@dhcp-128-65.nay.redhat.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Dave Young <dyoung@redhat.com>
-Cc: linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-acpi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>
+In-Reply-To: <1454601030-9093-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, jeremy.linton-5wv7dgnIgG8@public.gmane.org, suzuki.poulose-5wv7dgnIgG8@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 05 Feb, at 08:41:15AM, Dave Young wrote:
-> On 02/04/16 at 11:56am, Matt Fleming wrote:
-> > On Thu, 04 Feb, at 07:09:03PM, Dave Young wrote:
-> > > 
-> > > Consider the original code path, maybe change it to efi_kexec_setup will
-> > > be better to remind people? Or something else like a wraper function with
-> > > similar name..
-> >  
-> > Possibly. I had considered adding a new efi_enabled() bit for
-> > KEXEC_BOOT, but I'm worried that'll just encourage more uses.
-> > 
-> > The best approach is going to be to see whether we can reduce the uses
-> > of efi_setup and the associated special code. Once we've completed
-> > that exercise, we can think about the best name for this variable.
+On Thu, 04 Feb, at 04:50:23PM, Ard Biesheuvel wrote:
+> I merged two EFI/ARM related series, whose v1's I sent out last week:
 > 
-> Ok, thanks.
+> Changes since v1:
+> - added various tags from various people
+> - new patch #3 to undefine __init
 > 
-> > 
-> > > For building ACPI tables we need do it in kernel instead of kexec-tools
-> > > because of kexec_file_load for secure boot case so we still need a conditional
-> > > code path for kexec..
-> > 
-> > Note that it may not be necessary to build any ACPI tables at all,
-> > provided that things like acpi_get_table() fail gracefully for kexec.
-> > I'm assuming that's the problem that you discovered when writing this
-> > patch.
-> > 
-> > And yes, I don't expect you can build the ACPI table from userspace,
-> > but it should at least be possible to do it in setup_boot_parameters()
-> > or so when you setup the EFI table pointers (efi.config_tables), etc.
-> > I think that would be a natural home for this feature.
-> 
-> Thing is we support both kexec_load and kexec_file_load, if we do something
-> in kernel loader we will need do same in userspace kexec-tools as well.
- 
-Actually, on thinking about it a little bit more, any changes we make
-would have to be on the second kernel side, because otherwise you end
-up with incompatibilities between kernel versions.
+> @Matt: are you happy with all of this going through the arm64 tree? I don't
+> think it clashes with anything else we've got queued up for v4.6 in tip/efi/core
 
-For example, changing the data we pass in the SETUP_EFI chain is a bad
-idea becuase you then have to care about exactly which kernel version
-you kexec loaded.
+How come this is going through the arm64 tree? Are there other patch
+series that this depends on or that depend on it?
 
-> Another way is we probably can retain the boot service areas for kexec
-> boot, but yes it is another special handling for kexec :(. Is this way
-> better to you?
-
-Unfortunately retaining Boot Services areas is infeasible because they
-can be *really* large, i.e. multiple gigabytes in size.
+If it makes the most sense to take it through that tree, then I'm fine
+with it but I'd like to hear a rationale.
