@@ -1,38 +1,43 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v3 1/3] efi: use a file local lock for efivars
-Date: Thu, 11 Feb 2016 14:16:16 +0100
-Message-ID: <CAKv+Gu9aTPm3CHLOsC98xLwhPhHq0t5Bt3B0zmTmgFAGt8=OVw@mail.gmail.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH v3 2/3] efi: don't use spinlocks for efi vars
+Date: Thu, 11 Feb 2016 13:45:51 +0000
+Message-ID: <20160211134551.GC4134@codeblueprint.co.uk>
 References: <1452119637-10958-1-git-send-email-sylvain.chouleur@gmail.com>
-	<1452702762-27216-1-git-send-email-sylvain.chouleur@gmail.com>
-	<1452702762-27216-2-git-send-email-sylvain.chouleur@gmail.com>
-	<20160211131422.GB4134@codeblueprint.co.uk>
+ <1452702762-27216-1-git-send-email-sylvain.chouleur@gmail.com>
+ <1452702762-27216-3-git-send-email-sylvain.chouleur@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160211131422.GB4134-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1452702762-27216-3-git-send-email-sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Sylvain Chouleur <sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+To: Sylvain Chouleur <sylvain.chouleur-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Cc: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 11 February 2016 at 14:14, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Wed, 13 Jan, at 05:32:40PM, Sylvain Chouleur wrote:
->> From: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->>
->> This patch remove the efivars lock to use a single lock for the whole
->> vars.c file.  The goal of this lock is to protect concurrent calls to
->> efi variable services, registering and unregistering.  This allows to
->> register new efivars operations without having in-progress call.
->>
->> Signed-off-by: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
->> ---
->>  drivers/firmware/efi/vars.c | 85 +++++++++++++++++++++++++--------------------
->>  include/linux/efi.h         |  6 ----
->>  2 files changed, 48 insertions(+), 43 deletions(-)
->
-> Sorry for the delay in reviewing this. I wasn't on Cc so I only found
-> it when searching through the linux-efi archive.
->
-> This change looks fine to me and a nice clean up. Ard any comments?
+On Wed, 13 Jan, at 05:32:41PM, Sylvain Chouleur wrote:
+> From: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> 
+> All efivars operations are protected by a spinlock which prevents
+> interruptions and preemption. This is too restricted, we just need a
+> lock preventing concurency.
+> The idea is to use a semaphore of count 1 and to have two ways of
+> locking, depending on the context:
+>  - In interrupt context, we call down_trylock(), if it fails we return
+>  an error
+>  - In normal context, we call down_interruptible()
+> 
+> We don't use a mutex here because the mutex_trylock() function must not
+> be called from interrupt context, whereas the down_trylock() can.
+> 
+> Signed-off-by: Sylvain Chouleur <sylvain.chouleur-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> ---
+>  drivers/firmware/efi/efi-pstore.c |  36 +++++++---
+>  drivers/firmware/efi/efivars.c    |  22 ++++--
+>  drivers/firmware/efi/vars.c       | 145 +++++++++++++++++++++++---------------
+>  fs/efivarfs/inode.c               |   5 +-
+>  fs/efivarfs/super.c               |   9 ++-
+>  include/linux/efi.h               |   6 +-
+>  6 files changed, 149 insertions(+), 74 deletions(-)
 
-No looks good to me
+Looks fine to me.
