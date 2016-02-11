@@ -1,8 +1,8 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Subject: Re: [PATCH 2/2] x86/efi: Map EFI_MEMORY_{XP,RO} memory region bits
  to EFI page tables
-Date: Thu, 11 Feb 2016 14:42:34 +0000
-Message-ID: <20160211144234.GF4134@codeblueprint.co.uk>
+Date: Thu, 11 Feb 2016 14:57:37 +0000
+Message-ID: <20160211145737.GG4134@codeblueprint.co.uk>
 References: <1454115880-6914-1-git-send-email-sai.praneeth.prakhya@intel.com>
  <1454115880-6914-3-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
@@ -47,4 +47,24 @@ On Fri, 29 Jan, at 05:04:40PM, Sai Praneeth Prakhya wrote:
 >  arch/x86/platform/efi/efi_64.c | 45 ++++++++++++++++++++++++++++++++++++++----
 >  3 files changed, 49 insertions(+), 7 deletions(-)
 
-Applied.
+I just hit the following build error,
+
+arch/x86/built-in.o: In function `efi_enter_virtual_mode':
+(.init.text+0x12ac0): undefined reference to `efi_runtime_update_mappings'
+make[1]: *** [vmlinux] Error 1
+
+I fixed it up like so,
+
+diff --git a/arch/x86/platform/efi/efi_32.c b/arch/x86/platform/efi/efi_32.c
+index 58d669bc8250..338402b91d2e 100644
+--- a/arch/x86/platform/efi/efi_32.c
++++ b/arch/x86/platform/efi/efi_32.c
+@@ -90,7 +90,7 @@ void __init efi_call_phys_epilog(pgd_t *save_pgd)
+ 	__flush_tlb_all();
+ }
+ 
+-void __init efi_runtime_mkexec(void)
++void __init efi_runtime_update_mappings(void)
+ {
+ 	if (__supported_pte_mask & _PAGE_NX)
+ 		runtime_code_page_mkexec();
