@@ -1,18 +1,18 @@
 From: LAURENT-aOLfTzvfSPh81dzp8sp80Hd/aTyc4CdzJpSdj+wVz21fJ/NunPodnw@public.gmane.org,
 	"EYADEMA <berndmenker"@versanet.de
 Subject: Business Partnership
-Date: Thu, 11 Feb 2016 08:02:24 +0700
-Message-ID: <20160211010610.34D2DF89AD4__46412.822235334$1455154804$gmane$org@srv-zimbra1.globalinformatica.com.br>
+Date: Thu, 11 Feb 2016 08:30:50 +0700
+Message-ID: <20160211013436.D50C2F8AF60__28907.9674905681$1455157322$gmane$org@srv-zimbra1.globalinformatica.com.br>
 Reply-To: lau.eya66-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="===============1713564094=="
+Content-Type: multipart/mixed; boundary="===============1143693509=="
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Recipients <berndmenker-t/9kahPp1Zsb1SvskN2V4Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 You will not see this in a MIME-aware mail reader.
---===============1713564094==
+--===============1143693509==
 Content-Type: text/plain; charset="iso-8859-1"
 MIME-Version: 1.0
 Content-Transfer-Encoding: quoted-printable
@@ -26,7 +26,7 @@ Thanks in anticipation of your urgent response,
 
 
 LAURENT EYADEMA
---===============1713564094==
+--===============1143693509==
 Content-Type: application/octet-stream
 MIME-Version: 1.0
 Content-Transfer-Encoding: base64
@@ -88,4 +88,4 @@ AAATCAAAd29yZC9udW1iZXJpbmcueG1sUEsBAi0AFAAIAAgAVShLSK9TyEF5AAAAigAAAA8AAAAA
 AAAAAAAAAAAAzwgAAHdvcmQvc3R5bGVzLnhtbFBLAQItABQACAAIAFUoS0i17ehY5AAAAEgCAAAT
 AAAAAAAAAAAAAAAAAIUJAABbQ29udGVudF9UeXBlc10ueG1sUEsFBgAAAAAGAAYAgAEAAKoKAAAA
 AA==
---===============1713564094==--
+--===============1143693509==--
