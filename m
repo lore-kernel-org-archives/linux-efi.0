@@ -1,30 +1,39 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 1/2] x86/mm/pageattr: Don't implicitly allow _PAGE_RW in
- kernel_map_pages_in_pgd()
-Date: Thu, 11 Feb 2016 14:40:38 +0000
-Message-ID: <20160211144038.GE4134@codeblueprint.co.uk>
+Subject: Re: [PATCH 2/2] x86/efi: Map EFI_MEMORY_{XP,RO} memory region bits
+ to EFI page tables
+Date: Thu, 11 Feb 2016 14:42:34 +0000
+Message-ID: <20160211144234.GF4134@codeblueprint.co.uk>
 References: <1454115880-6914-1-git-send-email-sai.praneeth.prakhya@intel.com>
- <1454115880-6914-2-git-send-email-sai.praneeth.prakhya@intel.com>
+ <1454115880-6914-3-git-send-email-sai.praneeth.prakhya@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1454115880-6914-2-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1454115880-6914-3-git-send-email-sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, 29 Jan, at 05:04:39PM, Sai Praneeth Prakhya wrote:
+On Fri, 29 Jan, at 05:04:40PM, Sai Praneeth Prakhya wrote:
 > From: Sai Praneeth <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > 
-> As part of the preparation for the EFI_MEMORY_RO flag added in the UEFI
-> 2.5 specification, we need the ability to map pages in kernel page
-> tables without _PAGE_RW being set.
+> Now that we have EFI memory region bits that indicate which regions do
+> not need execute permission or read/write permission in the page tables,
+> let's use them.
 > 
-> Modify kernel_map_pages_in_pgd() to require its callers to pass _PAGE_RW
-> if the pages need to be mapped read/write. Otherwise, we'll map the
-> pages as read-only.
+> We also check for EFI_NX_PE_DATA and only enforce the restrictive
+> mappings if it's present (to allow us to ignore buggy firmware that sets
+> bits it didn't mean to and to preserve backwards compatibility).
+> 
+> Instead of assuming that firmware would set appropriate attributes in
+> memory descriptor like EFI_MEMORY_RO for code and EFI_MEMORY_XP for
+> data, we can expect some firmware out there which might only set *type*
+> in memory descriptor to be EFI_RUNTIME_SERVICES_CODE or
+> EFI_RUNTIME_SERVICES_DATA leaving away attribute. This will lead to
+> improper mappings of EFI runtime regions. In order to avoid it, we check
+> attribute and type of memory descriptor to update mappings and moreover
+> Windows works this way.
 > 
 > Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
 > Cc: Lee, Chun-Yi <jlee-IBi9RG/b67k@public.gmane.org>
@@ -33,8 +42,9 @@ On Fri, 29 Jan, at 05:04:39PM, Sai Praneeth Prakhya wrote:
 > Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 > Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > ---
->  arch/x86/mm/pageattr.c         | 3 +++
->  arch/x86/platform/efi/efi_64.c | 8 ++++----
->  2 files changed, 7 insertions(+), 4 deletions(-)
+>  arch/x86/include/asm/efi.h     |  2 +-
+>  arch/x86/platform/efi/efi.c    |  9 +++++++--
+>  arch/x86/platform/efi/efi_64.c | 45 ++++++++++++++++++++++++++++++++++++++----
+>  3 files changed, 49 insertions(+), 7 deletions(-)
 
-Thanks Sai, applied.
+Applied.
