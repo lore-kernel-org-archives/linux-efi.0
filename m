@@ -1,88 +1,70 @@
-From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Subject: Re: [PATCH v4 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Thu, 11 Feb 2016 16:04:14 +0000
-Message-ID: <alpine.DEB.2.02.1602111557430.27008@kaball.uk.xensource.com>
-References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
- <2213954.ztOe55fprN@vostro.rjw.lan>
- <alpine.DEB.2.02.1602091116240.27008@kaball.uk.xensource.com>
- <44113385.2QnPtvxQx0@vostro.rjw.lan>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH] x86/efi: skip bgrt init for kexec reboot
+Date: Thu, 11 Feb 2016 16:09:31 +0000
+Message-ID: <20160211160931.GL4134@codeblueprint.co.uk>
+References: <20160127112044.GA2961@dhcp-128-65.nay.redhat.com>
+ <20160203214200.GA15110@dhcp-128-65.nay.redhat.com>
+ <20160203225333.GA31246@codeblueprint.co.uk>
+ <20160204100329.GA2586@codeblueprint.co.uk>
+ <20160204110903.GA2977@dhcp-128-65.nay.redhat.com>
+ <20160204115656.GB2586@codeblueprint.co.uk>
+ <20160205004115.GA3651@dhcp-128-65.nay.redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <44113385.2QnPtvxQx0-sKB8Sp2ER+y1GS7QM15AGw@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "open list:ACPI" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160205004115.GA3651@dhcp-128-65.nay.redhat.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: linux-efi@vger.kernel.org, kexec@lists.infradead.org, linux-kernel@vger.kernel.org, Borislav Petkov <bp@alien8.de>, linux-acpi@vger.kernel.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Josh Triplett <josh@joshtriplett.org>, Matthew Garrett <mjg59@srcf.ucam.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 10 Feb 2016, Rafael J. Wysocki wrote:
-> On Tuesday, February 09, 2016 11:19:02 AM Stefano Stabellini wrote:
-> > On Mon, 8 Feb 2016, Rafael J. Wysocki wrote:
-> > > On Monday, February 08, 2016 10:57:01 AM Stefano Stabellini wrote:
-> > > > On Sat, 6 Feb 2016, Rafael J. Wysocki wrote:
-> > > > > On Fri, Feb 5, 2016 at 4:05 AM, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org> wrote:
-> > > > > > From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > > > >
-> > > > > > ACPI 6.0 introduces a new table STAO to list the devices which are used
-> > > > > > by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
-> > > > > > UART is used by Xen. So here it hides UART from Dom0.
-> > > > > >
-> > > > > > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > > > > > Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-> > > > > 
-> > > > > Well, this doesn't look right to me.
-> > > > > 
-> > > > > We need to find a nicer way to achieve what you want.
-> > > > 
-> > > > I take that you are talking about how to honor the STAO table in Linux.
-> > > > Do you have any concrete suggestions?
+On Fri, 05 Feb, at 08:41:15AM, Dave Young wrote:
+> On 02/04/16 at 11:56am, Matt Fleming wrote:
+> > On Thu, 04 Feb, at 07:09:03PM, Dave Young wrote:
 > > > 
-> > > I do.
-> > > 
-> > > The last hunk of the patch is likely what it needs to be, although I'm
-> > > not sure if the place it is added to is the right one.  That's a minor thing,
-> > > though.
-> > > 
-> > > The other part is problematic.  Not that as it doesn't work, but because of
-> > > how it works.  With these changes the device will be visible to the OS (in
-> > > fact to user space even), but will never be "present".  I'm not sure if
-> > > that's what you want?
-> > > 
-> > > It might be better to add a check to acpi_bus_type_and_status() that will
-> > > evaluate the "should ignore?" thing and return -ENODEV if this is true.  This
-> > > way the device won't be visible at all.
-> > 
-> > Something like below?  Actually your suggestion is better, thank you!
-> > 
-> > diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-> > index 78d5f02..4778c51 100644
-> > --- a/drivers/acpi/scan.c
-> > +++ b/drivers/acpi/scan.c
-> > @@ -1455,6 +1455,9 @@ static int acpi_bus_type_and_status(acpi_handle handle, int *type,
-> >  	if (ACPI_FAILURE(status))
-> >  		return -ENODEV;
+> > > Consider the original code path, maybe change it to efi_kexec_setup will
+> > > be better to remind people? Or something else like a wraper function with
+> > > similar name..
 > >  
-> > +	if (acpi_check_device_is_ignored(handle))
-> > +		return -ENODEV;
-> > +
-> >  	switch (acpi_type) {
-> >  	case ACPI_TYPE_ANY:		/* for ACPI_ROOT_OBJECT */
-> >  	case ACPI_TYPE_DEVICE:
+> > Possibly. I had considered adding a new efi_enabled() bit for
+> > KEXEC_BOOT, but I'm worried that'll just encourage more uses.
 > > 
+> > The best approach is going to be to see whether we can reduce the uses
+> > of efi_setup and the associated special code. Once we've completed
+> > that exercise, we can think about the best name for this variable.
 > 
-> I thought about doing that under ACPI_TYPE_DEVICE, because it shouldn't be
-> applicable to the other types.  But generally, yes.
+> Ok, thanks.
+> 
+> > 
+> > > For building ACPI tables we need do it in kernel instead of kexec-tools
+> > > because of kexec_file_load for secure boot case so we still need a conditional
+> > > code path for kexec..
+> > 
+> > Note that it may not be necessary to build any ACPI tables at all,
+> > provided that things like acpi_get_table() fail gracefully for kexec.
+> > I'm assuming that's the problem that you discovered when writing this
+> > patch.
+> > 
+> > And yes, I don't expect you can build the ACPI table from userspace,
+> > but it should at least be possible to do it in setup_boot_parameters()
+> > or so when you setup the EFI table pointers (efi.config_tables), etc.
+> > I think that would be a natural home for this feature.
+> 
+> Thing is we support both kexec_load and kexec_file_load, if we do something
+> in kernel loader we will need do same in userspace kexec-tools as well.
+ 
+Actually, on thinking about it a little bit more, any changes we make
+would have to be on the second kernel side, because otherwise you end
+up with incompatibilities between kernel versions.
 
-I was pondering about it myself. Maybe an ACPI_TYPE_PROCESSOR object
-could theoretically be hidden with the STAO? I added the check before
-the switch because I thought that there would be no harm in being
-caution about it.
+For example, changing the data we pass in the SETUP_EFI chain is a bad
+idea becuase you then have to care about exactly which kernel version
+you kexec loaded.
 
+> Another way is we probably can retain the boot service areas for kexec
+> boot, but yes it is another special handling for kexec :(. Is this way
+> better to you?
 
-> Plus I'd move the table checks to acpi_scan_init(), so the UART address can
-> be a static variable in scan.c.
->
-> Also maybe rename acpi_check_device_is_ignored() to something like
-> acpi_device_should_be_hidden().
-
-Both make sense. Shannon, are you happy to make these changes?
+Unfortunately retaining Boot Services areas is infeasible because they
+can be *really* large, i.e. multiple gigabytes in size.
