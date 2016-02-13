@@ -1,59 +1,37 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 5/5] efi: Make efivarfs entries immutable by default. (v5)
-Date: Fri, 12 Feb 2016 10:09:49 -0500
-Message-ID: <20160212150948.GC31573@redhat.com>
-References: <1454600074-14854-1-git-send-email-pjones@redhat.com>
- <1454600074-14854-6-git-send-email-pjones@redhat.com>
- <56BDDFDC.406@redhat.com>
+From: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Subject: =?utf-8?Q?=D0=9A=D0=9B=D0=98=D0=95=D0=9D=D0=A2=D0=A1=D0?=
+	=?utf-8?Q?=9A=D0=98=D0=95_=D0=91=D0=90=D0=97=D0=AB!_=D0?=
+	=?utf-8?Q?=A2=D0=B5=D0=BB=5CViber=5CWhatsapp=3A_+79139393?=
+	=?utf-8?Q?506_Email=3A_usitnikov94=40gmail=2Ecom_Skype=3A?=
+	=?utf-8?Q?_prodawez389?=
+Date: Sat, 13 Feb 2016 14:46:21 +0600
+Message-ID: <ED16A27AE33718DB07024BF4005A1F79@vger.kernel.org>
+Reply-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <usitnikov94-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <56BDDFDC.406-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, efi kernel list <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Feb 12, 2016 at 02:36:28PM +0100, Laszlo Ersek wrote:
-> On 02/04/16 16:34, Peter Jones wrote:
-> > "rm -rf" is bricking some peoples' laptops because of variables being
-> > used to store non-reinitializable firmware driver data that's required
-> > to POST the hardware.
-> > 
-> > These are 100% bugs, and they need to be fixed, but in the mean time it
-> > shouldn't be easy to *accidentally* brick machines.
-> > 
-> > We have to have delete working, and picking which variables do and don't
-> > work for deletion is quite intractable, so instead make everything
-> > immutable by default (except for a whitelist), and make tools that
-> > aren't quite so broad-spectrum unset the immutable flag.
-> 
-> I think that the whitelist should include the following pattern
-> (permitting deletion):
-> - GUID:                  LINUX_EFI_CRASH_GUID
-> - variable name pattern: "dump-type*"
-> 
-> This is because the pstore filesystem can be backed by UEFI variables,
-> and (for example) a crash might dump the last kilobytes of the dmesg
-> into a number of pstore entries, each entry backed by a separate UEFI
-> variable in the above GUID namespace, and with a variable name according
-> to the above pattern.
-> 
-> Please see "drivers/firmware/efi/efi-pstore.c".
-> 
-> While this patch series will not prevent the user from deleting those
-> UEFI variables via the pstore filesystem (i.e., deleting a pstore fs
-> entry will continue to delete the backing UEFI variable), I think it
-> would be nice to preserve the possibility for the sysadmin to delete
-> Linux-created UEFI variables that carry portions of the crash log,
-> *without* having to mount the pstore filesystem.
+=D0=9A=D0=9B=D0=98=D0=95=D0=9D=D0=A2=D0=A1=D0=9A=D0=98=D0=95 =D0=91=D0=90=
+=D0=97=D0=AB!
 
-They still have that ability with this patch - they have to chattr -i it
-manually, or use libefivar's efi_del_variable() with a suitably new
-libefivar, but we aren't ever actually stopping deletion.
-
-Which doesn't mean you're wrong, mind you, but it does remove urgency.
-
--- 
-        Peter
+=D0=A1=D0=BE=D0=B1=D0=B5=D1=80=D0=B5=D0=BC =D0=B4=D0=BB=D1=8F =D0=92=D0=
+=B0=D1=81 =D0=BF=D0=BE =D0=B8=D0=BD=D1=82=D0=B5=D1=80=D0=BD=D0=B5=D1=82=
+ =D0=B1=D0=B0=D0=B7=D1=83 =D0=B4=D0=B0=D0=BD=D0=BD=D1=8B=D1=85 =D0=BF=D0=
+=BE=D1=82=D0=B5=D0=BD=D1=86=D0=B8=D0=B0=D0=BB=D1=8C=D0=BD=D1=8B=D1=85 =D0=
+=BA=D0=BB=D0=B8=D0=B5=D0=BD=D1=82=D0=BE=D0=B2=20
+=D0=B4=D0=BB=D1=8F =D0=92=D0=B0=D1=88=D0=B5=D0=B3=D0=BE =D0=91=D0=B8=D0=
+=B7=D0=BD=D0=B5=D1=81=D0=B0!
+=D0=9C=D0=BD=D0=BE=D0=B3=D0=BE! =D0=91=D1=8B=D1=81=D1=82=D1=80=D0=BE! =D0=
+=9D=D0=B5=D0=B4=D0=BE=D1=80=D0=BE=D0=B3=D0=BE!=20
+=D0=A3=D0=B7=D0=BD=D0=B0=D0=B9=D1=82=D0=B5 =D0=BE=D0=B1 =D1=8D=D1=82=D0=
+=BE=D0=BC =D0=BF=D0=BE=D0=B4=D1=80=D0=BE=D0=B1=D0=BD=D0=B5=D0=B5 =D0=BF=
+=D0=BE=20
+=D0=A2=D0=B5=D0=BB: +79139393506
+Viber: +79139393506
+Whatsapp: +79139393506
+Skype: prodawez389
+Email: usitnikov94-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
