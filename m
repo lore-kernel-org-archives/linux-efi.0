@@ -1,82 +1,88 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] lib/ucs2_string: Correct ucs2 -> utf8 conversion
-Date: Mon, 15 Feb 2016 11:12:49 +0000
-Message-ID: <20160215111249.GD2591@codeblueprint.co.uk>
-References: <1455318813-30667-1-git-send-email-jandryuk@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access ESRT table in memory
+Date: Mon, 15 Feb 2016 12:32:32 +0100
+Message-ID: <1455535953-5056-2-git-send-email-ard.biesheuvel@linaro.org>
+References: <1455535953-5056-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1455318813-30667-1-git-send-email-jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <1455535953-5056-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>, Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-(Cc'ing Laszlo and linux-efi)
+On ARM and arm64, ioremap() and memremap() are not interchangeable like
+on x86, and the use of ioremap() on ordinary RAM is typically flagged
+as an error if the memory region being mapped is also covered by the
+linear mapping, since that would lead to aliases with conflicting
+cacheability attributes.
 
-On Fri, 12 Feb, at 11:13:33PM, Jason Andryuk wrote:
-> The comparisons should be >= since 0x800 and 0x80 require an additional bit
-> to store.
-> 
-> For the 3 byte case, the existing shift would drop off 2 more bits than
-> intended.
-> 
-> For the 2 byte case, there should be 5 bits bits in byte 1, and 6 bits in
-> byte 2.
-> 
-> Signed-off-by: Jason Andryuk <jandryuk-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-> ---
-> 
-> Tested in user space, but not in the kernel.  Conversions now match
-> python's unicode conversions.
-> 
->  lib/ucs2_string.c | 14 +++++++-------
->  1 file changed, 7 insertions(+), 7 deletions(-)
+Since what we are dealing with is not an I/O region with side effects,
+using ioremap() here is arguably incorrect anyway, so let's replace
+it with memremap instead. Also add a missing unmap on the success path,
+and drop a memblock_remove() call which does not belong here, this far
+into the boot sequence.
+
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/esrt.c | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/drivers/firmware/efi/esrt.c b/drivers/firmware/efi/esrt.c
+index 22c5285f7705..f096a0a26dbd 100644
+--- a/drivers/firmware/efi/esrt.c
++++ b/drivers/firmware/efi/esrt.c
+@@ -16,6 +16,7 @@
+ #include <linux/device.h>
+ #include <linux/efi.h>
+ #include <linux/init.h>
++#include <linux/io.h>
+ #include <linux/kernel.h>
+ #include <linux/kobject.h>
+ #include <linux/list.h>
+@@ -385,15 +386,15 @@ static void cleanup_entry_list(void)
+ static int __init esrt_sysfs_init(void)
+ {
+ 	int error;
+-	struct efi_system_resource_table __iomem *ioesrt;
++	struct efi_system_resource_table *memesrt;
  
-Thanks Jason. Peter, Laszlo, any comments?
-
-> diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
-> index 17dd74e..f0b323a 100644
-> --- a/lib/ucs2_string.c
-> +++ b/lib/ucs2_string.c
-> @@ -59,9 +59,9 @@ ucs2_utf8size(const ucs2_char_t *src)
->  	for (i = 0; i < ucs2_strlen(src); i++) {
->  		u16 c = src[i];
->  
-> -		if (c > 0x800)
-> +		if (c >= 0x800)
->  			j += 3;
-> -		else if (c > 0x80)
-> +		else if (c >= 0x80)
->  			j += 2;
->  		else
->  			j += 1;
-> @@ -88,19 +88,19 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
->  	for (i = 0; maxlength && i < limit; i++) {
->  		u16 c = src[i];
->  
-> -		if (c > 0x800) {
-> +		if (c >= 0x800) {
->  			if (maxlength < 3)
->  				break;
->  			maxlength -= 3;
->  			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
-> -			dest[j++] = 0x80 | (c & 0x0fc0) >> 8;
-> +			dest[j++] = 0x80 | (c & 0x0fc0) >> 6;
->  			dest[j++] = 0x80 | (c & 0x003f);
-> -		} else if (c > 0x80) {
-> +		} else if (c >= 0x80) {
->  			if (maxlength < 2)
->  				break;
->  			maxlength -= 2;
-> -			dest[j++] = 0xc0 | (c & 0xfe0) >> 5;
-> -			dest[j++] = 0x80 | (c & 0x01f);
-> +			dest[j++] = 0xc0 | (c & 0x7c0) >> 6;
-> +			dest[j++] = 0x80 | (c & 0x03f);
->  		} else {
->  			maxlength -= 1;
->  			dest[j++] = c & 0x7f;
-> -- 
-> 2.4.3
-> 
+ 	pr_debug("esrt-sysfs: loading.\n");
+ 	if (!esrt_data || !esrt_data_size)
+ 		return -ENOSYS;
+ 
+-	ioesrt = ioremap(esrt_data, esrt_data_size);
+-	if (!ioesrt) {
+-		pr_err("ioremap(%pa, %zu) failed.\n", &esrt_data,
++	memesrt = memremap(esrt_data, esrt_data_size, MEMREMAP_WB);
++	if (!memesrt) {
++		pr_err("memremap(%pa, %zu, MEMREMAP_WB) failed.\n", &esrt_data,
+ 		       esrt_data_size);
+ 		return -ENOMEM;
+ 	}
+@@ -401,11 +402,12 @@ static int __init esrt_sysfs_init(void)
+ 	esrt = kmalloc(esrt_data_size, GFP_KERNEL);
+ 	if (!esrt) {
+ 		pr_err("kmalloc failed. (wanted %zu bytes)\n", esrt_data_size);
+-		iounmap(ioesrt);
++		memunmap(memesrt);
+ 		return -ENOMEM;
+ 	}
+ 
+-	memcpy_fromio(esrt, ioesrt, esrt_data_size);
++	memcpy(esrt, memesrt, esrt_data_size);
++	memunmap(memesrt);
+ 
+ 	esrt_kobj = kobject_create_and_add("esrt", efi_kobj);
+ 	if (!esrt_kobj) {
+@@ -432,8 +434,6 @@ static int __init esrt_sysfs_init(void)
+ 	if (error)
+ 		goto err_cleanup_list;
+ 
+-	memblock_remove(esrt_data, esrt_data_size);
+-
+ 	pr_debug("esrt-sysfs: loaded.\n");
+ 
+ 	return 0;
+-- 
+2.5.0
