@@ -1,61 +1,76 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/2] efi: Add pstore variables to the deletion whitelist
-Date: Tue, 16 Feb 2016 12:59:19 +0000
-Message-ID: <1455627560-10576-2-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 2/2] lib/ucs2_string: Correct ucs2 -> utf8 conversion
+Date: Tue, 16 Feb 2016 12:59:20 +0000
+Message-ID: <1455627560-10576-3-git-send-email-matt@codeblueprint.co.uk>
 References: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matthew Garrett <mjg59@srcf.ucam.org>, "Lee, Chun-Yi" <jlee@suse.com>, Laszlo Ersek <lersek@redhat.com>, Peter Jones <pjones@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jason Andryuk <jandryuk@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, Matthew Garrett <mjg59@coreos.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Laszlo Ersek <lersek@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Laszlo explains why this is a good idea,
+From: Jason Andryuk <jandryuk@gmail.com>
 
- 'This is because the pstore filesystem can be backed by UEFI variables,
-  and (for example) a crash might dump the last kilobytes of the dmesg
-  into a number of pstore entries, each entry backed by a separate UEFI
-  variable in the above GUID namespace, and with a variable name
-  according to the above pattern.
+The comparisons should be >= since 0x800 and 0x80 require an additional bit
+to store.
 
-  Please see "drivers/firmware/efi/efi-pstore.c".
+For the 3 byte case, the existing shift would drop off 2 more bits than
+intended.
 
-  While this patch series will not prevent the user from deleting those
-  UEFI variables via the pstore filesystem (i.e., deleting a pstore fs
-  entry will continue to delete the backing UEFI variable), I think it
-  would be nice to preserve the possibility for the sysadmin to delete
-  Linux-created UEFI variables that carry portions of the crash log,
-  *without* having to mount the pstore filesystem.'
+For the 2 byte case, there should be 5 bits bits in byte 1, and 6 bits in
+byte 2.
 
-There's also no chance of causing machines to become bricked by
-deleting these variables, which is the whole purpose of excluding
-things from the whitelist.
-
-Use the LINUX_EFI_CRASH_GUID guid and a wildcard '*' for the match so
-that we don't have to update the string in the future if new variable
-name formats are created for crash dump variables.
-
-Reported-by: Laszlo Ersek <lersek@redhat.com>
-Acked-by: Peter Jones <pjones@redhat.com>
-Tested-by: Peter Jones <pjones@redhat.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Signed-off-by: Jason Andryuk <jandryuk@gmail.com>
+Reviewed-by: Laszlo Ersek <lersek@redhat.com>
+Cc: Peter Jones <pjones@redhat.com>
+Cc: Matthew Garrett <mjg59@coreos.com>
 Cc: "Lee, Chun-Yi" <jlee@suse.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/vars.c | 1 +
- 1 file changed, 1 insertion(+)
+ lib/ucs2_string.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 50f10bad2604..7f2ea21c730d 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -198,6 +198,7 @@ static const struct variable_validate variable_validate[] = {
- 	{ EFI_GLOBAL_VARIABLE_GUID, "OsIndications", NULL },
- 	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
- 	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
-+	{ LINUX_EFI_CRASH_GUID, "*", NULL },
- 	{ NULL_GUID, "", NULL },
- };
+diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
+index 17dd74e21ef9..f0b323abb4c6 100644
+--- a/lib/ucs2_string.c
++++ b/lib/ucs2_string.c
+@@ -59,9 +59,9 @@ ucs2_utf8size(const ucs2_char_t *src)
+ 	for (i = 0; i < ucs2_strlen(src); i++) {
+ 		u16 c = src[i];
  
+-		if (c > 0x800)
++		if (c >= 0x800)
+ 			j += 3;
+-		else if (c > 0x80)
++		else if (c >= 0x80)
+ 			j += 2;
+ 		else
+ 			j += 1;
+@@ -88,19 +88,19 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
+ 	for (i = 0; maxlength && i < limit; i++) {
+ 		u16 c = src[i];
+ 
+-		if (c > 0x800) {
++		if (c >= 0x800) {
+ 			if (maxlength < 3)
+ 				break;
+ 			maxlength -= 3;
+ 			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
+-			dest[j++] = 0x80 | (c & 0x0fc0) >> 8;
++			dest[j++] = 0x80 | (c & 0x0fc0) >> 6;
+ 			dest[j++] = 0x80 | (c & 0x003f);
+-		} else if (c > 0x80) {
++		} else if (c >= 0x80) {
+ 			if (maxlength < 2)
+ 				break;
+ 			maxlength -= 2;
+-			dest[j++] = 0xc0 | (c & 0xfe0) >> 5;
+-			dest[j++] = 0x80 | (c & 0x01f);
++			dest[j++] = 0xc0 | (c & 0x7c0) >> 6;
++			dest[j++] = 0x80 | (c & 0x03f);
+ 		} else {
+ 			maxlength -= 1;
+ 			dest[j++] = c & 0x7f;
 -- 
 2.6.2
