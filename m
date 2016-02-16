@@ -1,76 +1,43 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 2/2] lib/ucs2_string: Correct ucs2 -> utf8 conversion
-Date: Tue, 16 Feb 2016 12:59:20 +0000
-Message-ID: <1455627560-10576-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: [GIT PULL 0/2] EFI urgent fixes
+Date: Tue, 16 Feb 2016 12:59:18 +0000
+Message-ID: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Jason Andryuk <jandryuk@gmail.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Peter Jones <pjones@redhat.com>, Matthew Garrett <mjg59@coreos.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Laszlo Ersek <lersek@redhat.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Laszlo Ersek <lersek@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Jason Andryuk <jandryuk@gmail.com>
+Folks, here are some bug fixes that missed the previous pull request
+but that are related to those patches.
 
-The comparisons should be >= since 0x800 and 0x80 require an additional bit
-to store.
+The following changes since commit 4682c211a80ee93214b72d95f861b0f6e90e5445:
 
-For the 3 byte case, the existing shift would drop off 2 more bits than
-intended.
+  Merge tag 'efi-urgent' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into x86/urgent (2016-02-16 13:14:57 +0100)
 
-For the 2 byte case, there should be 5 bits bits in byte 1, and 6 bits in
-byte 2.
+are available in the git repository at:
 
-Signed-off-by: Jason Andryuk <jandryuk@gmail.com>
-Reviewed-by: Laszlo Ersek <lersek@redhat.com>
-Cc: Peter Jones <pjones@redhat.com>
-Cc: Matthew Garrett <mjg59@coreos.com>
-Cc: "Lee, Chun-Yi" <jlee@suse.com>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- lib/ucs2_string.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
 
-diff --git a/lib/ucs2_string.c b/lib/ucs2_string.c
-index 17dd74e21ef9..f0b323abb4c6 100644
---- a/lib/ucs2_string.c
-+++ b/lib/ucs2_string.c
-@@ -59,9 +59,9 @@ ucs2_utf8size(const ucs2_char_t *src)
- 	for (i = 0; i < ucs2_strlen(src); i++) {
- 		u16 c = src[i];
- 
--		if (c > 0x800)
-+		if (c >= 0x800)
- 			j += 3;
--		else if (c > 0x80)
-+		else if (c >= 0x80)
- 			j += 2;
- 		else
- 			j += 1;
-@@ -88,19 +88,19 @@ ucs2_as_utf8(u8 *dest, const ucs2_char_t *src, unsigned long maxlength)
- 	for (i = 0; maxlength && i < limit; i++) {
- 		u16 c = src[i];
- 
--		if (c > 0x800) {
-+		if (c >= 0x800) {
- 			if (maxlength < 3)
- 				break;
- 			maxlength -= 3;
- 			dest[j++] = 0xe0 | (c & 0xf000) >> 12;
--			dest[j++] = 0x80 | (c & 0x0fc0) >> 8;
-+			dest[j++] = 0x80 | (c & 0x0fc0) >> 6;
- 			dest[j++] = 0x80 | (c & 0x003f);
--		} else if (c > 0x80) {
-+		} else if (c >= 0x80) {
- 			if (maxlength < 2)
- 				break;
- 			maxlength -= 2;
--			dest[j++] = 0xc0 | (c & 0xfe0) >> 5;
--			dest[j++] = 0x80 | (c & 0x01f);
-+			dest[j++] = 0xc0 | (c & 0x7c0) >> 6;
-+			dest[j++] = 0x80 | (c & 0x03f);
- 		} else {
- 			maxlength -= 1;
- 			dest[j++] = c & 0x7f;
--- 
-2.6.2
+for you to fetch changes up to a68075908a37850918ad96b056acc9ac4ce1bd90:
+
+  lib/ucs2_string: Correct ucs2 -> utf8 conversion (2016-02-16 12:49:05 +0000)
+
+----------------------------------------------------------------
+ * Fix bugs in our code that converts ucs2 strings to utf8 where we
+   unintentionally drop bits from the original string - Jason Andryuk
+
+ * Add the efi-pstore variables to the variable whitelist so that
+   users can continue to delete them via efivarfs without needing to
+   manipulate the immutable flag - Matt Fleming
+
+----------------------------------------------------------------
+Jason Andryuk (1):
+      lib/ucs2_string: Correct ucs2 -> utf8 conversion
+
+Matt Fleming (1):
+      efi: Add pstore variables to the deletion whitelist
+
+ drivers/firmware/efi/vars.c |  1 +
+ lib/ucs2_string.c           | 14 +++++++-------
+ 2 files changed, 8 insertions(+), 7 deletions(-)
