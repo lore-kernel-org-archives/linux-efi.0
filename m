@@ -1,55 +1,39 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 0/2] EFI urgent fixes
-Date: Tue, 16 Feb 2016 16:47:23 +0100
-Message-ID: <20160216154723.GA20369@gmail.com>
-References: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Laszlo Ersek <lersek@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH 0/2] make efivarfs files immutable by default (for stable)
+Date: Tue, 16 Feb 2016 11:09:41 -0500
+Message-ID: <1455638983-30455-1-git-send-email-pjones@redhat.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Hi Matt,
+Here's a version of the immutable efivarfs patch set for stable.  It
+keeps most of the unicode problems we've already got, and just changes
+our matching so we can match guids correctly, and then adds the
+immutability bits and the whitelist.  I went ahead and folded the pstore
+bits in to the second patch, as well.
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+This is against the 'v4.4' tag in git.  I've built all of the touched
+.c files in that tree, but not actually built and run a full kernel.
 
-> Folks, here are some bug fixes that missed the previous pull request
-> but that are related to those patches.
-> 
-> The following changes since commit 4682c211a80ee93214b72d95f861b0f6e90e5445:
-> 
->   Merge tag 'efi-urgent' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into x86/urgent (2016-02-16 13:14:57 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to a68075908a37850918ad96b056acc9ac4ce1bd90:
-> 
->   lib/ucs2_string: Correct ucs2 -> utf8 conversion (2016-02-16 12:49:05 +0000)
-> 
-> ----------------------------------------------------------------
->  * Fix bugs in our code that converts ucs2 strings to utf8 where we
->    unintentionally drop bits from the original string - Jason Andryuk
-> 
->  * Add the efi-pstore variables to the variable whitelist so that
->    users can continue to delete them via efivarfs without needing to
->    manipulate the immutable flag - Matt Fleming
-> 
-> ----------------------------------------------------------------
-> Jason Andryuk (1):
->       lib/ucs2_string: Correct ucs2 -> utf8 conversion
-> 
-> Matt Fleming (1):
->       efi: Add pstore variables to the deletion whitelist
-> 
->  drivers/firmware/efi/vars.c |  1 +
->  lib/ucs2_string.c           | 14 +++++++-------
->  2 files changed, 8 insertions(+), 7 deletions(-)
+The differences are roughly:
+1) none of the unicode cleanup so we've got a couple of open coded
+   ucs2->utf8 loops that don't handle half of the UCS-2 codepoints
+2) because of that, in this version, for some functions we're passing in
+   the variable name in both character sets.
+3) if we see something like L"Boot\x0130000" as an EFI variable name in
+   the global guidspace, we will treat it exactly like L"Boot0000" in
+   terms of validation and the immutable flag.  I don't think this is a
+   big risk, but who knows, maybe some firmware bricks itself if you
+   delete high-byte-set UCS-2 names.  Note that this property is only
+   true in the case where the matching rule is a glob.
+   I'm still reasonably sure the bug we're actually seeing is about UEFI
+   driver initialization not being able to recreate data in pre-existing
+   variables.
+4) v4.4 doesn't have inode_lock() and inode_unlock(), so that code is
+   using mutex_lock() and mutex_unlock() instead.
 
-Pulled, thanks Matt!
-
-	Ingo
+Thanks,
+Peter
