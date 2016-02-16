@@ -1,72 +1,138 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [GIT PULL 0/5] EFI urgent fixes
-Date: Tue, 16 Feb 2016 13:15:45 +0100
-Message-ID: <20160216121545.GA9395@gmail.com>
-References: <1455276432-9931-1-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 5/5] efi: Make efivarfs entries immutable by default. (v5)
+Date: Tue, 16 Feb 2016 12:49:57 +0000
+Message-ID: <20160216124957.GA2769@codeblueprint.co.uk>
+References: <1454600074-14854-1-git-send-email-pjones@redhat.com>
+ <1454600074-14854-6-git-send-email-pjones@redhat.com>
+ <56BDDFDC.406@redhat.com>
+ <20160212150948.GC31573@redhat.com>
+ <20160215104801.GB2591@codeblueprint.co.uk>
+ <20160215170215.GC785@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1455276432-9931-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, "Lee, Chun-Yi" <jlee@suse.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+In-Reply-To: <20160215170215.GC785-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, efi kernel list <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Mon, 15 Feb, at 12:02:16PM, Peter Jones wrote:
+> On Mon, Feb 15, 2016 at 10:48:01AM +0000, Matt Fleming wrote:
+> > On Fri, 12 Feb, at 10:09:49AM, Peter Jones wrote:
+> > > On Fri, Feb 12, 2016 at 02:36:28PM +0100, Laszlo Ersek wrote:
+> > > > On 02/04/16 16:34, Peter Jones wrote:
+> > > > > "rm -rf" is bricking some peoples' laptops because of variables being
+> > > > > used to store non-reinitializable firmware driver data that's required
+> > > > > to POST the hardware.
+> > > > > 
+> > > > > These are 100% bugs, and they need to be fixed, but in the mean time it
+> > > > > shouldn't be easy to *accidentally* brick machines.
+> > > > > 
+> > > > > We have to have delete working, and picking which variables do and don't
+> > > > > work for deletion is quite intractable, so instead make everything
+> > > > > immutable by default (except for a whitelist), and make tools that
+> > > > > aren't quite so broad-spectrum unset the immutable flag.
+> > > > 
+> > > > I think that the whitelist should include the following pattern
+> > > > (permitting deletion):
+> > > > - GUID:                  LINUX_EFI_CRASH_GUID
+> > > > - variable name pattern: "dump-type*"
+> > > > 
+> > > > This is because the pstore filesystem can be backed by UEFI variables,
+> > > > and (for example) a crash might dump the last kilobytes of the dmesg
+> > > > into a number of pstore entries, each entry backed by a separate UEFI
+> > > > variable in the above GUID namespace, and with a variable name according
+> > > > to the above pattern.
+> > > > 
+> > > > Please see "drivers/firmware/efi/efi-pstore.c".
+> > > > 
+> > > > While this patch series will not prevent the user from deleting those
+> > > > UEFI variables via the pstore filesystem (i.e., deleting a pstore fs
+> > > > entry will continue to delete the backing UEFI variable), I think it
+> > > > would be nice to preserve the possibility for the sysadmin to delete
+> > > > Linux-created UEFI variables that carry portions of the crash log,
+> > > > *without* having to mount the pstore filesystem.
+> > > 
+> > > They still have that ability with this patch - they have to chattr -i it
+> > > manually, or use libefivar's efi_del_variable() with a suitably new
+> > > libefivar, but we aren't ever actually stopping deletion.
+> > > 
+> > > Which doesn't mean you're wrong, mind you, but it does remove urgency.
+> > 
+> > Well, we should avoid having different whitelists in different kernel
+> > versions, so I think there is some urgency in fixing the efi-pstore
+> > case now.
+> > 
+> > Remember, we're breaking userspace ABI with these changes, which is a
+> > major downside that is only offset by the risk of bricking the
+> > machine. There's no chance of bricking by deleting the efi-pstore
+> > variables, so we'd be breaking userspace ABI for no reason.
+> > 
+> > Would something like this allow efi-pstore variables to be deleted
+> > (and anything else that uses LINUX_EFI_CRASH_GUID in future)?
+> 
+> Yes, this patch works as expected:
+> 
+> Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Tested-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 
-* Matt Fleming <matt@codeblueprint.co.uk> wrote:
+Thanks Peter. This is what I've got queued up,
 
-> Folks,
-> 
-> Please pull the following EFI patches from Peter that prevent
-> accidental deletion of EFI variables through efivarfs which can lead
-> to bricked machines.
-> 
-> These obviously need backporting to stable, so I'll take care of
-> sending the backports separately because we don't need to send the
-> entire 5 patch series.
-> 
-> The following changes since commit 59fd1214561921343305a0e9dc218bf3d40068f3:
-> 
->   x86/mm/numa: Fix 32-bit memblock range truncation bug on 32-bit NUMA kernels (2016-02-08 12:10:03 +0100)
-> 
-> are available in the git repository at:
-> 
->   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-> 
-> for you to fetch changes up to ed8b0de5a33d2a2557dce7f9429dca8cb5bc5879:
-> 
->   efi: Make efivarfs entries immutable by default (2016-02-10 16:25:52 +0000)
-> 
-> ----------------------------------------------------------------
->  * Prevent accidental deletion of EFI variables through efivarfs that
->    may brick machines. We use a whitelist of known-safe variables to
->    allow things like installing distributions to work out of the box, and
->    instead restrict vendor-specific variable deletion by making
->    non-whitelist variables immutable - Peter Jones
-> 
-> ----------------------------------------------------------------
-> Peter Jones (5):
->       lib/ucs2_string: Add ucs2 -> utf8 helper functions
->       efi: Use ucs2_as_utf8 in efivarfs instead of open coding a bad version
->       efi: Do variable name validation tests in utf8
->       efi: Make our variable validation list include the guid
->       efi: Make efivarfs entries immutable by default
-> 
->  Documentation/filesystems/efivarfs.txt         |   7 ++
->  drivers/firmware/efi/efivars.c                 |  35 +++---
->  drivers/firmware/efi/vars.c                    | 143 ++++++++++++++++++-------
->  fs/efivarfs/file.c                             |  70 ++++++++++++
->  fs/efivarfs/inode.c                            |  30 ++++--
->  fs/efivarfs/internal.h                         |   3 +-
->  fs/efivarfs/super.c                            |  16 +--
->  include/linux/efi.h                            |   5 +-
->  include/linux/ucs2_string.h                    |   4 +
->  lib/ucs2_string.c                              |  62 +++++++++++
->  tools/testing/selftests/efivarfs/efivarfs.sh   |  19 +++-
->  tools/testing/selftests/efivarfs/open-unlink.c |  72 ++++++++++++-
->  12 files changed, 383 insertions(+), 83 deletions(-)
+---
 
-Pulled, thanks Matt!
+>From e246eb568bc4cbbdd8a30a3c11151ff9b7ca7312 Mon Sep 17 00:00:00 2001
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Date: Mon, 15 Feb 2016 10:34:05 +0000
+Subject: [PATCH] efi: Add pstore variables to the deletion whitelist
 
-	Ingo
+Laszlo explains why this is a good idea,
+
+ 'This is because the pstore filesystem can be backed by UEFI variables,
+  and (for example) a crash might dump the last kilobytes of the dmesg
+  into a number of pstore entries, each entry backed by a separate UEFI
+  variable in the above GUID namespace, and with a variable name
+  according to the above pattern.
+
+  Please see "drivers/firmware/efi/efi-pstore.c".
+
+  While this patch series will not prevent the user from deleting those
+  UEFI variables via the pstore filesystem (i.e., deleting a pstore fs
+  entry will continue to delete the backing UEFI variable), I think it
+  would be nice to preserve the possibility for the sysadmin to delete
+  Linux-created UEFI variables that carry portions of the crash log,
+  *without* having to mount the pstore filesystem.'
+
+There's also no chance of causing machines to become bricked by
+deleting these variables, which is the whole purpose of excluding
+things from the whitelist.
+
+Use the LINUX_EFI_CRASH_GUID guid and a wildcard '*' for the match so
+that we don't have to update the string in the future if new variable
+name formats are created for crash dump variables.
+
+Reported-by: Laszlo Ersek <lersek-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Acked-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Tested-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Cc: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+---
+ drivers/firmware/efi/vars.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 50f10bad2604..7f2ea21c730d 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -198,6 +198,7 @@ static const struct variable_validate variable_validate[] = {
+ 	{ EFI_GLOBAL_VARIABLE_GUID, "OsIndications", NULL },
+ 	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
+ 	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
++	{ LINUX_EFI_CRASH_GUID, "*", NULL },
+ 	{ NULL_GUID, "", NULL },
+ };
+ 
+-- 
+2.6.2
