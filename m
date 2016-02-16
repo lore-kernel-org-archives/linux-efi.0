@@ -1,45 +1,55 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH] efi: libstub: add strnlen() implementation
-Date: Tue, 16 Feb 2016 16:29:19 +0100
-Message-ID: <1455636559-7542-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: [GIT PULL 0/2] EFI urgent fixes
+Date: Tue, 16 Feb 2016 16:47:23 +0100
+Message-ID: <20160216154723.GA20369@gmail.com>
+References: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Laszlo Ersek <lersek@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-Commit 91feabc2e224 ("scripts/dtc: Update to upstream commit
-b06e55c88b9b") introduces references to the strnlen() string function,
-which is not currently defined in the EFI stub. So add it to our string.c
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- drivers/firmware/efi/libstub/string.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+* Matt Fleming <matt@codeblueprint.co.uk> wrote:
 
-diff --git a/drivers/firmware/efi/libstub/string.c b/drivers/firmware/efi/libstub/string.c
-index 09d5a0894343..d4055ab80116 100644
---- a/drivers/firmware/efi/libstub/string.c
-+++ b/drivers/firmware/efi/libstub/string.c
-@@ -55,3 +55,19 @@ int strncmp(const char *cs, const char *ct, size_t count)
- 	return 0;
- }
- #endif
-+
-+#ifndef __HAVE_ARCH_STRNLEN
-+/**
-+ * strnlen - Find the length of a length-limited string
-+ * @s: The string to be sized
-+ * @count: The maximum number of bytes to search
-+ */
-+size_t strnlen(const char *s, size_t count)
-+{
-+	const char *sc;
-+
-+	for (sc = s; count-- && *sc != '\0'; ++sc)
-+		/* nothing */;
-+	return sc - s;
-+}
-+#endif
--- 
-2.5.0
+> Folks, here are some bug fixes that missed the previous pull request
+> but that are related to those patches.
+> 
+> The following changes since commit 4682c211a80ee93214b72d95f861b0f6e90e5445:
+> 
+>   Merge tag 'efi-urgent' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into x86/urgent (2016-02-16 13:14:57 +0100)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to a68075908a37850918ad96b056acc9ac4ce1bd90:
+> 
+>   lib/ucs2_string: Correct ucs2 -> utf8 conversion (2016-02-16 12:49:05 +0000)
+> 
+> ----------------------------------------------------------------
+>  * Fix bugs in our code that converts ucs2 strings to utf8 where we
+>    unintentionally drop bits from the original string - Jason Andryuk
+> 
+>  * Add the efi-pstore variables to the variable whitelist so that
+>    users can continue to delete them via efivarfs without needing to
+>    manipulate the immutable flag - Matt Fleming
+> 
+> ----------------------------------------------------------------
+> Jason Andryuk (1):
+>       lib/ucs2_string: Correct ucs2 -> utf8 conversion
+> 
+> Matt Fleming (1):
+>       efi: Add pstore variables to the deletion whitelist
+> 
+>  drivers/firmware/efi/vars.c |  1 +
+>  lib/ucs2_string.c           | 14 +++++++-------
+>  2 files changed, 8 insertions(+), 7 deletions(-)
+
+Pulled, thanks Matt!
+
+	Ingo
