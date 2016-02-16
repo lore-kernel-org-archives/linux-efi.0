@@ -1,43 +1,81 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [GIT PULL 0/2] EFI urgent fixes
-Date: Tue, 16 Feb 2016 12:59:18 +0000
-Message-ID: <1455627560-10576-1-git-send-email-matt@codeblueprint.co.uk>
+Subject: Re: [PATCH RFC 1/1] x86: fix bad memory access in
+ fb_is_primary_device()
+Date: Tue, 16 Feb 2016 13:49:18 +0000
+Message-ID: <20160216134918.GD2769@codeblueprint.co.uk>
+References: <1455528649-26629-1-git-send-email-alpopov@ptsecurity.com>
+ <20160216075521.GA27491@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20160216075521.GA27491@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Jason Andryuk <jandryuk@gmail.com>, Laszlo Ersek <lersek@redhat.com>, "Lee, Chun-Yi" <jlee@suse.com>, Matthew Garrett <mjg59@coreos.com>, Peter Jones <pjones@redhat.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Alexander Popov <alpopov@ptsecurity.com>, Arnd Bergmann <arnd@arndb.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-kernel@vger.kernel.org, Peter Jones <pjones@redhat.com>, linux-efi@vger.kernel.org
 List-Id: linux-efi@vger.kernel.org
 
-Folks, here are some bug fixes that missed the previous pull request
-but that are related to those patches.
+[ Including Peter, the efifb maintainer. Original email is here,
 
-The following changes since commit 4682c211a80ee93214b72d95f861b0f6e90e5445:
+    http://marc.info/?l=linux-kernel&m=145552936131335&w=2
 
-  Merge tag 'efi-urgent' of git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi into x86/urgent (2016-02-16 13:14:57 +0100)
+  I've snipped some of the quoted text ]
 
-are available in the git repository at:
+On Tue, 16 Feb, at 08:55:22AM, Ingo Molnar wrote:
+> 
+> (I've Cc:-ed the EFI-FB and FB gents. Mail quoted below.)
+> 
+> * Alexander Popov <alpopov@ptsecurity.com> wrote:
+> 
+> > Currently the code in fb_is_primary_device() contains to_pci_dev() macro
+> > which is applied to dev from struct fb_info. In some cases this causes
+> > bad memory access when fb_is_primary_device() handles fb_info of efifb.
+> > The reason is that fb dev of efifb is embedded into struct platform_device
+> > but not into struct pci_dev.
+> > 
+> > We can fix this by checking fb dev bus name in fb_is_primary_device().
+> > 
+> > It seems that this bug reveals some bigger problem with to_pci_dev(),
+> > to_platform_device() and others, which just do container_of() and
+> > don't check whether struct device is a part of the appropriate structure.
+> > Should we do something more about it?
+> > 
+> > KASan report:
 
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+[...]
 
-for you to fetch changes up to a68075908a37850918ad96b056acc9ac4ce1bd90:
+> > 
+> > Signed-off-by: Alexander Popov <alpopov@ptsecurity.com>
+> > ---
+> >  arch/x86/video/fbdev.c | 9 +++++----
+> >  1 file changed, 5 insertions(+), 4 deletions(-)
+> > 
+> > diff --git a/arch/x86/video/fbdev.c b/arch/x86/video/fbdev.c
+> > index d5644bb..4999f78 100644
+> > --- a/arch/x86/video/fbdev.c
+> > +++ b/arch/x86/video/fbdev.c
+> > @@ -18,11 +18,12 @@ int fb_is_primary_device(struct fb_info *info)
+> >  	struct pci_dev *default_device = vga_default_device();
+> >  	struct resource *res = NULL;
+> >  
+> > -	if (device)
+> > -		pci_dev = to_pci_dev(device);
+> > -
+> > -	if (!pci_dev)
+> > +	if (!device || !device->bus ||
+> > +		    !device->bus->name || strcmp(device->bus->name, "pci")) {
+> >  		return 0;
+> > +	}
+> > +
+> > +	pci_dev = to_pci_dev(device);
+> >  
+> >  	if (default_device) {
+> >  		if (pci_dev == default_device)
+> > -- 
+> > 1.9.1
+> > 
 
-  lib/ucs2_string: Correct ucs2 -> utf8 conversion (2016-02-16 12:49:05 +0000)
-
-----------------------------------------------------------------
- * Fix bugs in our code that converts ucs2 strings to utf8 where we
-   unintentionally drop bits from the original string - Jason Andryuk
-
- * Add the efi-pstore variables to the variable whitelist so that
-   users can continue to delete them via efivarfs without needing to
-   manipulate the immutable flag - Matt Fleming
-
-----------------------------------------------------------------
-Jason Andryuk (1):
-      lib/ucs2_string: Correct ucs2 -> utf8 conversion
-
-Matt Fleming (1):
-      efi: Add pstore variables to the deletion whitelist
-
- drivers/firmware/efi/vars.c |  1 +
- lib/ucs2_string.c           | 14 +++++++-------
- 2 files changed, 8 insertions(+), 7 deletions(-)
+I wonder if this issue could explain some of the efifb issues we've
+seen reported on bugzilla.kernel.org in the past where switching from
+efifb to some other framebuffer device caused hangs during boot. I'm
+struggling to find the relevant bugzilla entries now, though.
