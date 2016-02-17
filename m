@@ -1,134 +1,128 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 2/2] x86/efi: Delete ACPI BGRT when booting via kexec
-Date: Wed, 17 Feb 2016 15:45:10 +0000
-Message-ID: <1455723910-16710-3-git-send-email-matt@codeblueprint.co.uk>
-References: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
+From: Dan Williams <dan.j.williams@intel.com>
+Subject: Re: [PATCH v1 05/10] ACPI: switch to use generic UUID API
+Date: Wed, 17 Feb 2016 09:49:35 -0800
+Message-ID: <CAPcyv4inMjmt8eH_=bNE_=NMeYGmS75B5LxB=f7Cd762=3UKyQ@mail.gmail.com>
+References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1455711448-124103-6-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-In-Reply-To: <1455723910-16710-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/kexec/>
-List-Post: <mailto:kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-List-Help: <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/kexec>,
- <mailto:kexec-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
-Sender: "kexec" <kexec-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Errors-To: kexec-bounces+glkk-kexec=m.gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <dri-devel-bounces@lists.freedesktop.org>
+In-Reply-To: <1455711448-124103-6-git-send-email-andriy.shevchenko@linux.intel.com>
+List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
+List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
+List-Post: <mailto:dri-devel@lists.freedesktop.org>
+List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
+List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
+ <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
+Errors-To: dri-devel-bounces@lists.freedesktop.org
+Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: linux-efi@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Maling list - DRI developers <dri-devel@lists.freedesktop.org>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Lv Zheng <lv.zheng@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Arnd Bergmann <arnd@arndb.de>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, Linux ACPI <linux-acpi@vger.kernel.org>, Zhang Rui <rui.zhang@intel.com>, Mathias Nyman <mathias.nyman@intel.com>, Mark Brown <broonie@kernel.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Theodore Ts'o <tytso@mit.edu>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-api@vger.kernel.org, Andrew Morton <akpm@linux-foundation>
 List-Id: linux-efi@vger.kernel.org
 
-Dave reports that for kexec reboot the ACPI BGRT image region may
-contain garbage data, because the image lives in EFI Boot Services
-regions that were released and freed when the first kernel called
-efi_free_boot_services().
-
-Since the EFI Boot Services regions can be large (multiple gigabytes)
-preserving them throughout the kernel's lifetime and across kexec
-reboot is not a viable solution. Instead we need to avoid accessing
-the BGRT image regions under kexec.
-
-Rather than dirtying the ACPI BGRT driver with conditionals that check
-whether we're booting via kexec, we can execute the existing code path
-that exits if the table cannot be found - by removing the BGRT table.
-
-It is unfortunate that this logic cannot be folded into the existing
-kexec-specific EFI code, but there are dependencies on having loaded
-the ACPI tables, which happens much later.
-
-Reported-by: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Rafael J. Wysocki <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
-Cc: Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: <kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
----
- arch/x86/include/asm/efi.h  |  1 +
- arch/x86/kernel/setup.c     |  4 +++-
- arch/x86/platform/efi/efi.c | 38 ++++++++++++++++++++++++++++++++++++++
- 3 files changed, 42 insertions(+), 1 deletion(-)
-
-diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
-index 7bb206f73915..0e813da58be6 100644
---- a/arch/x86/include/asm/efi.h
-+++ b/arch/x86/include/asm/efi.h
-@@ -146,6 +146,7 @@ extern void __init efi_dump_pagetable(void);
- extern void __init efi_apply_memmap_quirks(void);
- extern int __init efi_reuse_config(u64 tables, int nr_tables);
- extern void efi_delete_dummy_variable(void);
-+extern void __init efi_kexec_remove_acpi_tables(void);
- 
- struct efi_setup_data {
- 	u64 fw_vendor;
-diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index d3d80e6d42a2..8131962ce8c2 100644
---- a/arch/x86/kernel/setup.c
-+++ b/arch/x86/kernel/setup.c
-@@ -1249,8 +1249,10 @@ void __init setup_arch(char **cmdline_p)
- 	register_refined_jiffies(CLOCK_TICK_RATE);
- 
- #ifdef CONFIG_EFI
--	if (efi_enabled(EFI_BOOT))
-+	if (efi_enabled(EFI_BOOT)) {
- 		efi_apply_memmap_quirks();
-+		efi_kexec_remove_acpi_tables();
-+	}
- #endif
- }
- 
-diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
-index 39748d228e34..d87f42697ad0 100644
---- a/arch/x86/platform/efi/efi.c
-+++ b/arch/x86/platform/efi/efi.c
-@@ -485,6 +485,44 @@ static int __init efi_kexec_override(void)
- 	return 0;
- }
- 
-+/*
-+ * The BGRT table, if present, refers to memory regions that are no
-+ * longer reserved during kexec boot, having been released by the
-+ * previous kernel. The BGRT image likely contains garbage.
-+ *
-+ * Delete the ACPI table, since it is useless for kexec, and so that
-+ * it is impossible for the ACPI BGRT driver to distinguish between
-+ * "Platform has no BGRT" and "We were booted via kexec".
-+ *
-+ * Note that this function must only be called after the ACPI tables
-+ * have been initialised.
-+ */
-+void __init efi_kexec_remove_acpi_tables(void)
-+{
-+	struct acpi_table_header *header;
-+	acpi_status status;
-+
-+	if (!efi_setup)
-+		return;
-+
-+	status = acpi_get_table(ACPI_SIG_BGRT, 0, &header);
-+	if (ACPI_FAILURE(status))
-+		return;
-+
-+	status = acpi_remove_table(ACPI_SIG_BGRT, 0);
-+	if (ACPI_FAILURE(status)) {
-+		pr_err("Failed to remove ACPI BGRT table\n");
-+		return;
-+	}
-+
-+	/*
-+	 * Since we've probably already told the user that we have a
-+	 * BGRT when parsing the ACPI tables, inform them that we have
-+	 * intentionally removed it now.
-+	 */
-+	pr_info("Removed ACPI BGRT table for kexec\n");
-+}
-+
- void __init efi_init(void)
- {
- 	efi_char16_t *c16;
--- 
-2.6.2
+T24gV2VkLCBGZWIgMTcsIDIwMTYgYXQgNDoxNyBBTSwgQW5keSBTaGV2Y2hlbmtvCjxhbmRyaXku
+c2hldmNoZW5rb0BsaW51eC5pbnRlbC5jb20+IHdyb3RlOgo+IEluc3RlYWQgb2Ygb3BlbmNvZGlu
+ZyB0aGUgZXhpc3RpbmcgbGlicmFyeSBmdW5jdGlvbnMgbGV0J3MgdXNlIHRoZW0gZGlyZWN0bHku
+Cj4KPiBUaGUgY29udmVyc2lvbiBmaXhlcyBhIHBvdGVudGlhbCBidWcgaW4gaW50MzQweF90aGVy
+bWFsIGFzIHdlbGwgc2luY2Ugd2UgaGF2ZQo+IHRvIHVzZSBtZW1jbXAoKSBvbiBiaW5hcnkgZGF0
+YS4KPgo+IFNpZ25lZC1vZmYtYnk6IEFuZHkgU2hldmNoZW5rbyA8YW5kcml5LnNoZXZjaGVua29A
+bGludXguaW50ZWwuY29tPgo+IC0tLQo+ICBkcml2ZXJzL2FjcGkvYWNwaV9leHRsb2cuYyAgICAg
+ICAgICAgICAgICAgICAgICAgIHwgIDggKysrLS0tCj4gIGRyaXZlcnMvYWNwaS9idXMuYyAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAyOSArKy0tLS0tLS0tLS0tLS0tLS0tCj4gIGRy
+aXZlcnMvYWNwaS9uZml0LmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAzNCArKysr
+KysrKysrKy0tLS0tLS0tLS0tLQo+ICBkcml2ZXJzL2FjcGkvbmZpdC5oICAgICAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIHwgIDMgKy0KPiAgZHJpdmVycy9hY3BpL3V0aWxzLmMgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICB8ICA0ICstLQo+ICBkcml2ZXJzL2NoYXIvdHBtL3RwbV9jcmIu
+YyAgICAgICAgICAgICAgICAgICAgICAgIHwgIDkgKysrLS0tCj4gIGRyaXZlcnMvY2hhci90cG0v
+dHBtX3BwaS5jICAgICAgICAgICAgICAgICAgICAgICAgfCAyMCArKysrKystLS0tLS0tCj4gIGRy
+aXZlcnMvZ3B1L2RybS9pOTE1L2ludGVsX2FjcGkuYyAgICAgICAgICAgICAgICAgfCAxNCArKysr
+LS0tLS0tCj4gIGRyaXZlcnMvZ3B1L2RybS9ub3V2ZWF1L25vdXZlYXVfYWNwaS5jICAgICAgICAg
+ICAgfCAyMCArKysrKystLS0tLS0tCj4gIGRyaXZlcnMvZ3B1L2RybS9ub3V2ZWF1L252a20vc3Vi
+ZGV2L214bS9iYXNlLmMgICAgfCAgOSArKystLS0KPiAgZHJpdmVycy9oaWQvaTJjLWhpZC9pMmMt
+aGlkLmMgICAgICAgICAgICAgICAgICAgICB8ICA5ICsrKy0tLQo+ICBkcml2ZXJzL2lvbW11L2Rt
+YXIuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTEgKysrKy0tLS0KPiAgZHJpdmVy
+cy9wY2kvcGNpLWFjcGkuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICB8IDExICsrKystLS0t
+Cj4gIGRyaXZlcnMvcGNpL3BjaS1sYWJlbC5jICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAg
+NCArLS0KPiAgZHJpdmVycy90aGVybWFsL2ludDM0MHhfdGhlcm1hbC9pbnQzNDAwX3RoZXJtYWwu
+YyB8ICA2ICsrLS0KPiAgZHJpdmVycy91c2IvaG9zdC94aGNpLXBjaS5jICAgICAgICAgICAgICAg
+ICAgICAgICB8ICA5ICsrKy0tLQo+ICBpbmNsdWRlL2FjcGkvYWNwaV9idXMuaCAgICAgICAgICAg
+ICAgICAgICAgICAgICAgIHwgMTAgKysrKy0tLQo+ICBpbmNsdWRlL2xpbnV4L2FjcGkuaCAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDIgKy0KPiAgaW5jbHVkZS9saW51eC9wY2ktYWNw
+aS5oICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAyICstCj4gIHNvdW5kL3NvYy9pbnRlbC9z
+a3lsYWtlL3NrbC1uaGx0LmMgICAgICAgICAgICAgICAgfCAgNyArKystLQo+ICAyMCBmaWxlcyBj
+aGFuZ2VkLCA5MiBpbnNlcnRpb25zKCspLCAxMjkgZGVsZXRpb25zKC0pCj4KWy4uXQo+IGRpZmYg
+LS1naXQgYS9kcml2ZXJzL2FjcGkvbmZpdC5jIGIvZHJpdmVycy9hY3BpL25maXQuYwo+IGluZGV4
+IGFkNmQ4YzYuLjNiZWI5OWIgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9hY3BpL25maXQuYwo+ICsr
+KyBiL2RyaXZlcnMvYWNwaS9uZml0LmMKPiBAQCAtNDMsMTEgKzQzLDExIEBAIHN0cnVjdCBuZml0
+X3RhYmxlX3ByZXYgewo+ICAgICAgICAgc3RydWN0IGxpc3RfaGVhZCBmbHVzaGVzOwo+ICB9Owo+
+Cj4gLXN0YXRpYyB1OCBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF1bMTZdOwo+ICtzdGF0aWMgdXVp
+ZF9sZSBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF07Cj4KPiAtY29uc3QgdTggKnRvX25maXRfdXVp
+ZChlbnVtIG5maXRfdXVpZHMgaWQpCj4gK2NvbnN0IHV1aWRfbGUgKnRvX25maXRfdXVpZChlbnVt
+IG5maXRfdXVpZHMgaWQpCj4gIHsKPiAtICAgICAgIHJldHVybiBuZml0X3V1aWRbaWRdOwo+ICsg
+ICAgICAgcmV0dXJuICZuZml0X3V1aWRbaWRdOwo+ICB9Cj4gIEVYUE9SVF9TWU1CT0wodG9fbmZp
+dF91dWlkKTsKPgo+IEBAIC04Myw3ICs4Myw3IEBAIHN0YXRpYyBpbnQgYWNwaV9uZml0X2N0bChz
+dHJ1Y3QgbnZkaW1tX2J1c19kZXNjcmlwdG9yICpuZF9kZXNjLAo+ICAgICAgICAgY29uc3QgY2hh
+ciAqY21kX25hbWUsICogZGltbV9uYW1lOwo+ICAgICAgICAgdW5zaWduZWQgbG9uZyBkc21fbWFz
+azsKPiAgICAgICAgIGFjcGlfaGFuZGxlIGhhbmRsZTsKPiAtICAgICAgIGNvbnN0IHU4ICp1dWlk
+Owo+ICsgICAgICAgY29uc3QgdXVpZF9sZSAqdXVpZDsKPiAgICAgICAgIHUzMiBvZmZzZXQ7Cj4g
+ICAgICAgICBpbnQgcmMsIGk7Cj4KPiBAQCAtMjI1LDcgKzIyNSw3IEBAIHN0YXRpYyBpbnQgbmZp
+dF9zcGFfdHlwZShzdHJ1Y3QgYWNwaV9uZml0X3N5c3RlbV9hZGRyZXNzICpzcGEpCj4gICAgICAg
+ICBpbnQgaTsKPgo+ICAgICAgICAgZm9yIChpID0gMDsgaSA8IE5GSVRfVVVJRF9NQVg7IGkrKykK
+PiAtICAgICAgICAgICAgICAgaWYgKG1lbWNtcCh0b19uZml0X3V1aWQoaSksIHNwYS0+cmFuZ2Vf
+Z3VpZCwgMTYpID09IDApCj4gKyAgICAgICAgICAgICAgIGlmICghdXVpZF9sZV9jbXAoKnRvX25m
+aXRfdXVpZChpKSwgKih1dWlkX2xlICopc3BhLT5yYW5nZV9ndWlkKSkKPiAgICAgICAgICAgICAg
+ICAgICAgICAgICByZXR1cm4gaTsKPiAgICAgICAgIHJldHVybiAtMTsKPiAgfQo+IEBAIC04Mjks
+NyArODI5LDcgQEAgc3RhdGljIGludCBhY3BpX25maXRfYWRkX2RpbW0oc3RydWN0IGFjcGlfbmZp
+dF9kZXNjICphY3BpX2Rlc2MsCj4gIHsKPiAgICAgICAgIHN0cnVjdCBhY3BpX2RldmljZSAqYWRl
+diwgKmFkZXZfZGltbTsKPiAgICAgICAgIHN0cnVjdCBkZXZpY2UgKmRldiA9IGFjcGlfZGVzYy0+
+ZGV2Owo+IC0gICAgICAgY29uc3QgdTggKnV1aWQgPSB0b19uZml0X3V1aWQoTkZJVF9ERVZfRElN
+TSk7Cj4gKyAgICAgICBjb25zdCB1dWlkX2xlICp1dWlkID0gdG9fbmZpdF91dWlkKE5GSVRfREVW
+X0RJTU0pOwo+ICAgICAgICAgaW50IGk7Cj4KPiAgICAgICAgIG5maXRfbWVtLT5kc21fbWFzayA9
+IGFjcGlfZGVzYy0+ZGltbV9kc21fZm9yY2VfZW47Cj4gQEAgLTkwOSw3ICs5MDksNyBAQCBzdGF0
+aWMgaW50IGFjcGlfbmZpdF9yZWdpc3Rlcl9kaW1tcyhzdHJ1Y3QgYWNwaV9uZml0X2Rlc2MgKmFj
+cGlfZGVzYykKPiAgc3RhdGljIHZvaWQgYWNwaV9uZml0X2luaXRfZHNtcyhzdHJ1Y3QgYWNwaV9u
+Zml0X2Rlc2MgKmFjcGlfZGVzYykKPiAgewo+ICAgICAgICAgc3RydWN0IG52ZGltbV9idXNfZGVz
+Y3JpcHRvciAqbmRfZGVzYyA9ICZhY3BpX2Rlc2MtPm5kX2Rlc2M7Cj4gLSAgICAgICBjb25zdCB1
+OCAqdXVpZCA9IHRvX25maXRfdXVpZChORklUX0RFVl9CVVMpOwo+ICsgICAgICAgY29uc3QgdXVp
+ZF9sZSAqdXVpZCA9IHRvX25maXRfdXVpZChORklUX0RFVl9CVVMpOwo+ICAgICAgICAgc3RydWN0
+IGFjcGlfZGV2aWNlICphZGV2Owo+ICAgICAgICAgaW50IGk7Cj4KPiBAQCAtMjA3OSwxNiArMjA3
+OSwxNiBAQCBzdGF0aWMgX19pbml0IGludCBuZml0X2luaXQodm9pZCkKPiAgICAgICAgIEJVSUxE
+X0JVR19PTihzaXplb2Yoc3RydWN0IGFjcGlfbmZpdF9jb250cm9sX3JlZ2lvbikgIT0gODApOwo+
+ICAgICAgICAgQlVJTERfQlVHX09OKHNpemVvZihzdHJ1Y3QgYWNwaV9uZml0X2RhdGFfcmVnaW9u
+KSAhPSA0MCk7Cj4KPiAtICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9WT0xBVElMRV9NRU1P
+UlksIG5maXRfdXVpZFtORklUX1NQQV9WT0xBVElMRV0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9f
+dXVpZChVVUlEX1BFUlNJU1RFTlRfTUVNT1JZLCBuZml0X3V1aWRbTkZJVF9TUEFfUE1dKTsKPiAt
+ICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9DT05UUk9MX1JFR0lPTiwgbmZpdF91dWlkW05G
+SVRfU1BBX0RDUl0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9fdXVpZChVVUlEX0RBVEFfUkVHSU9O
+LCBuZml0X3V1aWRbTkZJVF9TUEFfQkRXXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVV
+SURfVk9MQVRJTEVfVklSVFVBTF9ESVNLLCBuZml0X3V1aWRbTkZJVF9TUEFfVkRJU0tdKTsKPiAt
+ICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9WT0xBVElMRV9WSVJUVUFMX0NELCBuZml0X3V1
+aWRbTkZJVF9TUEFfVkNEXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVVSURfUEVSU0lT
+VEVOVF9WSVJUVUFMX0RJU0ssIG5maXRfdXVpZFtORklUX1NQQV9QRElTS10pOwo+IC0gICAgICAg
+YWNwaV9zdHJfdG9fdXVpZChVVUlEX1BFUlNJU1RFTlRfVklSVFVBTF9DRCwgbmZpdF91dWlkW05G
+SVRfU1BBX1BDRF0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9fdXVpZChVVUlEX05GSVRfQlVTLCBu
+Zml0X3V1aWRbTkZJVF9ERVZfQlVTXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVVSURf
+TkZJVF9ESU1NLCBuZml0X3V1aWRbTkZJVF9ERVZfRElNTV0pOwo+ICsgICAgICAgdXVpZF9sZV90
+b19iaW4oVVVJRF9WT0xBVElMRV9NRU1PUlksICZuZml0X3V1aWRbTkZJVF9TUEFfVk9MQVRJTEVd
+KTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfUEVSU0lTVEVOVF9NRU1PUlksICZuZml0
+X3V1aWRbTkZJVF9TUEFfUE1dKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfQ09OVFJP
+TF9SRUdJT04sICZuZml0X3V1aWRbTkZJVF9TUEFfRENSXSk7Cj4gKyAgICAgICB1dWlkX2xlX3Rv
+X2JpbihVVUlEX0RBVEFfUkVHSU9OLCAmbmZpdF91dWlkW05GSVRfU1BBX0JEV10pOwo+ICsgICAg
+ICAgdXVpZF9sZV90b19iaW4oVVVJRF9WT0xBVElMRV9WSVJUVUFMX0RJU0ssICZuZml0X3V1aWRb
+TkZJVF9TUEFfVkRJU0tdKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfVk9MQVRJTEVf
+VklSVFVBTF9DRCwgJm5maXRfdXVpZFtORklUX1NQQV9WQ0RdKTsKPiArICAgICAgIHV1aWRfbGVf
+dG9fYmluKFVVSURfUEVSU0lTVEVOVF9WSVJUVUFMX0RJU0ssICZuZml0X3V1aWRbTkZJVF9TUEFf
+UERJU0tdKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfUEVSU0lTVEVOVF9WSVJUVUFM
+X0NELCAmbmZpdF91dWlkW05GSVRfU1BBX1BDRF0pOwo+ICsgICAgICAgdXVpZF9sZV90b19iaW4o
+VVVJRF9ORklUX0JVUywgJm5maXRfdXVpZFtORklUX0RFVl9CVVNdKTsKPiArICAgICAgIHV1aWRf
+bGVfdG9fYmluKFVVSURfTkZJVF9ESU1NLCAmbmZpdF91dWlkW05GSVRfREVWX0RJTU1dKTsKCkkg
+ZG9uJ3Qgc2VlIHRoZSBiZW5lZml0IG9mIHRoaXMgY2hhbmdlLiAgRm9yIHRoZSBORklUIGRyaXZl
+ciB3ZSB3ZW50CnRocm91Z2ggYSBmaXJlIGRyaWxsIHRyeWluZyB0byBtYWtlIHN1cmUgdGhlIEFD
+UEkgc3BlYyBmb3JtYXQgb2YgYQpVVUlEIG1hdGNoZWQgdGhlIExpbnV4IGludGVycHJldGF0aW9u
+LCBhbmQgdGhpcyBjaGFuZ2UgbWFrZXMgdGhhdApoYXJkZXIgdG8gZGV0ZXJtaW5lLiAgQUNQSSBk
+cml2ZXJzIHNob3VsZCB1c2UgQUNQSUNBIHV1aWQgaGVscGVyCnJvdXRpbmVzIGluIG15IG9waW5p
+b24uCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRyaS1k
+ZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpodHRwczov
+L2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
