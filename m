@@ -1,60 +1,74 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 08/13] efi/arm: Check for LPAE support before booting a LPAE kernel
-Date: Wed, 17 Feb 2016 12:36:01 +0000
-Message-ID: <1455712566-16727-9-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 07/13] efi/arm-init: Use read-only early mappings
+Date: Wed, 17 Feb 2016 12:36:00 +0000
+Message-ID: <1455712566-16727-8-git-send-email-matt@codeblueprint.co.uk>
 References: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Jeremy Linton <jeremy.linton@arm.com>, Mark Rutland <mark.rutland@arm.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-A kernel built with support for LPAE cannot boot to a state where it
-can inform the user about it if it fails due to missing LPAE support
-in the hardware.
+The early mappings of the EFI system table contents and the UEFI memory
+map are read-only from the OS point of view. So map them read-only to
+protect them from inadvertent modification.
 
-If we happen to be booting via UEFI, we can fail gracefully so check
-for LPAE support in the hardware on CONFIG_ARM_LPAE builds before
-entering the kernel proper.
-
-Reviewed-by: Jeremy Linton <jeremy.linton@arm.com>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Acked-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/libstub/arm32-stub.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/firmware/efi/arm-init.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
-index 495ebd657e38..6f42be4d0084 100644
---- a/drivers/firmware/efi/libstub/arm32-stub.c
-+++ b/drivers/firmware/efi/libstub/arm32-stub.c
-@@ -9,6 +9,23 @@
- #include <linux/efi.h>
- #include <asm/efi.h>
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9e15d571b53c..aa1f743152a2 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -61,8 +61,8 @@ static int __init uefi_init(void)
+ 	char vendor[100] = "unknown";
+ 	int i, retval;
  
-+efi_status_t check_platform_features(efi_system_table_t *sys_table_arg)
-+{
-+	int block;
-+
-+	/* non-LPAE kernels can run anywhere */
-+	if (!IS_ENABLED(CONFIG_ARM_LPAE))
-+		return EFI_SUCCESS;
-+
-+	/* LPAE kernels need compatible hardware */
-+	block = cpuid_feature_extract(CPUID_EXT_MMFR0, 0);
-+	if (block < 5) {
-+		pr_efi_err(sys_table_arg, "This LPAE kernel is not supported by your CPU\n");
-+		return EFI_UNSUPPORTED;
-+	}
-+	return EFI_SUCCESS;
-+}
-+
- efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
- 				 unsigned long *image_addr,
- 				 unsigned long *image_size,
+-	efi.systab = early_memremap(efi_system_table,
+-				    sizeof(efi_system_table_t));
++	efi.systab = early_memremap_ro(efi_system_table,
++				       sizeof(efi_system_table_t));
+ 	if (efi.systab == NULL) {
+ 		pr_warn("Unable to map EFI system table.\n");
+ 		return -ENOMEM;
+@@ -86,8 +86,8 @@ static int __init uefi_init(void)
+ 			efi.systab->hdr.revision & 0xffff);
+ 
+ 	/* Show what we know for posterity */
+-	c16 = early_memremap(efi_to_phys(efi.systab->fw_vendor),
+-			     sizeof(vendor) * sizeof(efi_char16_t));
++	c16 = early_memremap_ro(efi_to_phys(efi.systab->fw_vendor),
++				sizeof(vendor) * sizeof(efi_char16_t));
+ 	if (c16) {
+ 		for (i = 0; i < (int) sizeof(vendor) - 1 && *c16; ++i)
+ 			vendor[i] = c16[i];
+@@ -100,8 +100,8 @@ static int __init uefi_init(void)
+ 		efi.systab->hdr.revision & 0xffff, vendor);
+ 
+ 	table_size = sizeof(efi_config_table_64_t) * efi.systab->nr_tables;
+-	config_tables = early_memremap(efi_to_phys(efi.systab->tables),
+-				       table_size);
++	config_tables = early_memremap_ro(efi_to_phys(efi.systab->tables),
++					  table_size);
+ 	if (config_tables == NULL) {
+ 		pr_warn("Unable to map EFI config table array.\n");
+ 		retval = -ENOMEM;
+@@ -185,7 +185,7 @@ void __init efi_init(void)
+ 	efi_system_table = params.system_table;
+ 
+ 	memmap.phys_map = params.mmap;
+-	memmap.map = early_memremap(params.mmap, params.mmap_size);
++	memmap.map = early_memremap_ro(params.mmap, params.mmap_size);
+ 	if (memmap.map == NULL) {
+ 		/*
+ 		* If we are booting via UEFI, the UEFI memory map is the only
 -- 
 2.6.2
