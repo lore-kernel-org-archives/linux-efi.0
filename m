@@ -1,58 +1,52 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 03/13] x86/mm/pageattr: Use _PAGE_GLOBAL bit for EFI page table mappings
-Date: Wed, 17 Feb 2016 12:35:56 +0000
-Message-ID: <1455712566-16727-4-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 06/13] efi/efistub: Prevent __init annotations from being used
+Date: Wed, 17 Feb 2016 12:35:59 +0000
+Message-ID: <1455712566-16727-7-git-send-email-matt@codeblueprint.co.uk>
 References: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth <sai.praneeth.prakhya@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Since EFI page tables can be treated as kernel page tables they should
-be global. All the other page mapping functions in pageattr.c set the
-_PAGE_GLOBAL bit and we want to avoid inconsistencies when we map a page
-in the EFI code paths, for example when that page is split in
-__split_large_page(), etc. It also makes it easier to validate that the
-EFI region mappings have the correct attributes because there are fewer
-differences compared with regular kernel mappings.
+__init annotations should not be used in the EFI stub, since the code is
+either included in the decompressor (x86, ARM) where they have no effect,
+or the whole stub is __init annotated at the section level (arm64), by
+renaming the sections, in which case the __init annotations will be
+redundant, and will result in section names like .init.init.text, and our
+linker script does not expect that. So un-#define __init so that its
+inadvertent use will force a build error.
 
-Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
-Cc: Ricardo Neri <ricardo.neri@intel.com>
-Cc: Ravi Shankar <ravi.v.shankar@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Acked-by: Mark Rutland <mark.rutland@arm.com>
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/x86/mm/pageattr.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
+ drivers/firmware/efi/libstub/efistub.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 632d34d20237..bf312da41a6d 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -909,6 +909,20 @@ static void populate_pte(struct cpa_data *cpa,
+diff --git a/drivers/firmware/efi/libstub/efistub.h b/drivers/firmware/efi/libstub/efistub.h
+index 6b6548fda089..86ff7bfa6ace 100644
+--- a/drivers/firmware/efi/libstub/efistub.h
++++ b/drivers/firmware/efi/libstub/efistub.h
+@@ -5,6 +5,16 @@
+ /* error code which can't be mistaken for valid address */
+ #define EFI_ERROR	(~0UL)
  
- 	pte = pte_offset_kernel(pmd, start);
- 
-+	/*
-+	 * Set the GLOBAL flags only if the PRESENT flag is
-+	 * set otherwise pte_present will return true even on
-+	 * a non present pte. The canon_pgprot will clear
-+	 * _PAGE_GLOBAL for the ancient hardware that doesn't
-+	 * support it.
-+	 */
-+	if (pgprot_val(pgprot) & _PAGE_PRESENT)
-+		pgprot_val(pgprot) |= _PAGE_GLOBAL;
-+	else
-+		pgprot_val(pgprot) &= ~_PAGE_GLOBAL;
++/*
++ * __init annotations should not be used in the EFI stub, since the code is
++ * either included in the decompressor (x86, ARM) where they have no effect,
++ * or the whole stub is __init annotated at the section level (arm64), by
++ * renaming the sections, in which case the __init annotation will be
++ * redundant, and will result in section names like .init.init.text, and our
++ * linker script does not expect that.
++ */
++#undef __init
 +
-+	pgprot = canon_pgprot(pgprot);
-+
- 	while (num_pages-- && start < end) {
- 		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
+ void efi_char16_printk(efi_system_table_t *, efi_char16_t *);
  
+ efi_status_t efi_open_volume(efi_system_table_t *sys_table_arg, void *__image,
 -- 
 2.6.2
