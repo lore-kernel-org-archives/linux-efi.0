@@ -1,66 +1,90 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v1 06/10] device property: switch to use UUID API
-Date: Wed, 17 Feb 2016 14:17:24 +0200
-Message-ID: <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
-References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Theodore Ts'o <tytso@mit.edu>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Jani Nikula <jani.nikula@linux.intel.com>, David Airlie <airlied@linux.ie>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Bjorn Helgaas <bhelgaas@google.com>, Mathias Nyman <mathias.nyman@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Lv Zheng <lv.zheng@intel.com>, Mark Brown <broonie@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org, linux-api@vger.kernel.org, linux-nvdimm@lists.01.org
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: [GIT PULL 00/13] EFI changes for v4.6 part 2
+Date: Wed, 17 Feb 2016 12:35:53 +0000
+Message-ID: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andy Lutomirski <luto-kltTT9wpgjJwATOyAt5JVQ@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Ravi Shankar <ravi.v.shankar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ricardo Neri <ricardo.neri-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Sai Praneeth Prakhya <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Suzuki K Poulose <suzuki.poulose-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Switch to use a generic UUID API instead of custom approach. It allows to
-define UUIDs, compare them, and validate.
+Folks, here are the remaining EFI changes for v4.6.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- drivers/acpi/property.c | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+Two of the patches were sent in the previous v4.6 pull request on 1st
+February. Those include running EFI runtime services with interrupts
+enabled (just like Windows does) and aligning the EFI GUID formats in
+include/linux/efi.h to match the way they're written in the UEFI spec.
+They've both been reworked to address comments.
 
-diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
-index 2aee416..1e75305 100644
---- a/drivers/acpi/property.c
-+++ b/drivers/acpi/property.c
-@@ -25,15 +25,13 @@ static int acpi_data_get_property_array(struct acpi_device_data *data,
- 					const union acpi_object **obj);
- 
- /* ACPI _DSD device properties UUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
--static const u8 prp_uuid[16] = {
--	0x14, 0xd8, 0xff, 0xda, 0xba, 0x6e, 0x8c, 0x4d,
--	0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01
--};
-+static const uuid_le prp_uuid =
-+	UUID_LE(0xdaffd814, 0x6eba, 0x4d8c,
-+		0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01);
- /* ACPI _DSD data subnodes UUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
--static const u8 ads_uuid[16] = {
--	0xe6, 0xe3, 0xb8, 0xdb, 0x86, 0x58, 0xa6, 0x4b,
--	0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b
--};
-+static const uuid_le ads_uuid =
-+	UUID_LE(0xdbb8e3e6, 0x5886, 0x4ba6,
-+		0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
- 
- static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
- 					   const union acpi_object *desc,
-@@ -138,7 +136,7 @@ static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
- 		    || links->type != ACPI_TYPE_PACKAGE)
- 			break;
- 
--		if (memcmp(uuid->buffer.pointer, ads_uuid, sizeof(ads_uuid)))
-+		if (uuid_le_cmp(*(uuid_le *)uuid->buffer.pointer, ads_uuid))
- 			continue;
- 
- 		return acpi_add_nondev_subnodes(scope, links, &data->subnodes);
-@@ -245,7 +243,7 @@ static bool acpi_extract_properties(const union acpi_object *desc,
- 		    || properties->type != ACPI_TYPE_PACKAGE)
- 			break;
- 
--		if (memcmp(uuid->buffer.pointer, prp_uuid, sizeof(prp_uuid)))
-+		if (uuid_le_cmp(*(uuid_le *)uuid->buffer.pointer, prp_uuid))
- 			continue;
- 
- 		/*
--- 
-2.7.0
+The rest of the changes are all over the tree, and range from simple
+fixes and cleanups to support for EFI_PROPERTIES_TABLE on x86.
+
+The following changes since commit 35575e0e8ba633fc8276509a21f89b599b4f9006:
+
+  efi: Add Persistent Memory type name (2016-02-03 11:41:20 +0100)
+
+are available in the git repository at:
+
+  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-next
+
+for you to fetch changes up to 83a901db98e790e5682b85b8ee85f9e545d84e27:
+
+  x86/efi: Only map kernel text for EFI mixed mode (2016-02-15 11:37:02 +0000)
+
+----------------------------------------------------------------
+ * checkpatch.pl cleanup of the GUIDs in efi.h which has the added
+   benefit of making them more closely resemble how they're presented
+   in the UEFI specification - Peter Jones
+
+ * Now that we've verified that Windows works this way, leave
+   interrupts enabled when invoking EFI runtime services which
+   also reduces interrupt latencies - Ard Biesheuvel
+
+ * Reduce page table attribute inconsistencies between the EFI page
+   tables and the standard kernel page tables by ensuring we also set
+   _PAGE_GLOBAL in the EFI-specific paths - Sai Praneeth Prakhya
+
+ * A bunch of small fixes to the generic EFI stub and some early boot
+   platform compatibility checks for ARM and arm64 - Ard Biesheuvel
+
+ * Add support for EFI_PROPERTIES_TABLE to x86, allowing us to apply
+   more secure memory mapping permissions for firmware that ships with
+   the feature enabled - Sai Praneeth Prakhya
+
+ * Fix an EFI mixed mode bug where we intend to only map the kernel
+   image's text but end up mapping the entire image - Sai Praneeth Prakhya
+
+----------------------------------------------------------------
+Ard Biesheuvel (8):
+      efi/runtime-wrappers: Run UEFI Runtime Services with interrupts enabled
+      efi/arm64: Drop __init annotation from handle_kernel_image()
+      arm64: vmlinux.lds.S: Handle .init.rodata.xxx and .init.bss sections
+      efi/efistub: Prevent __init annotations from being used
+      efi/arm-init: Use read-only early mappings
+      efi/arm: Check for LPAE support before booting a LPAE kernel
+      efi/arm64: Check for h/w support before booting a >4 KB granule kernel
+      efi/arm*: Perform hardware compatibility check
+
+Peter Jones (1):
+      efi: Reformat GUID tables to follow the format in UEFI spec
+
+Sai Praneeth (4):
+      x86/mm/pageattr: Use _PAGE_GLOBAL bit for EFI page table mappings
+      x86/mm/pageattr: Don't implicitly allow _PAGE_RW in kernel_map_pages_in_pgd()
+      x86/efi: Map EFI_MEMORY_{XP,RO} memory region bits to EFI page tables
+      x86/efi: Only map kernel text for EFI mixed mode
+
+ arch/arm64/kernel/vmlinux.lds.S           |  1 +
+ arch/x86/include/asm/efi.h                |  2 +-
+ arch/x86/mm/pageattr.c                    | 17 ++++++++
+ arch/x86/platform/efi/efi.c               |  9 +++-
+ arch/x86/platform/efi/efi_32.c            |  2 +-
+ arch/x86/platform/efi/efi_64.c            | 55 ++++++++++++++++++++----
+ drivers/firmware/efi/arm-init.c           | 14 +++---
+ drivers/firmware/efi/libstub/arm-stub.c   |  4 ++
+ drivers/firmware/efi/libstub/arm32-stub.c | 17 ++++++++
+ drivers/firmware/efi/libstub/arm64-stub.c | 34 ++++++++++++---
+ drivers/firmware/efi/libstub/efistub.h    | 12 ++++++
+ drivers/firmware/efi/runtime-wrappers.c   | 71 ++++++++++++-------------------
+ include/linux/efi.h                       | 63 ++++++++++++++++++---------
+ 13 files changed, 210 insertions(+), 91 deletions(-)
