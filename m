@@ -1,46 +1,58 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 05/13] arm64: vmlinux.lds.S: Handle .init.rodata.xxx and .init.bss sections
-Date: Wed, 17 Feb 2016 12:35:58 +0000
-Message-ID: <1455712566-16727-6-git-send-email-matt@codeblueprint.co.uk>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 03/13] x86/mm/pageattr: Use _PAGE_GLOBAL bit for EFI page table mappings
+Date: Wed, 17 Feb 2016 12:35:56 +0000
+Message-ID: <1455712566-16727-4-git-send-email-matt@codeblueprint.co.uk>
 References: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1455712566-16727-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1455712566-16727-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Sai Praneeth <sai.praneeth.prakhya@intel.com>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ricardo Neri <ricardo.neri@intel.com>, Ravi Shankar <ravi.v.shankar@intel.com>, Borislav Petkov <bp@alien8.de>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Sai Praneeth <sai.praneeth.prakhya@intel.com>
 
-The EFI stub is typically built into the decompressor (x86, ARM) so none
-of its symbols are annotated as __init. However, on arm64, the stub is
-linked into the kernel proper, and the code is __init annotated at the
-section level by prepending all names of SHF_ALLOC sections with '.init'.
+Since EFI page tables can be treated as kernel page tables they should
+be global. All the other page mapping functions in pageattr.c set the
+_PAGE_GLOBAL bit and we want to avoid inconsistencies when we map a page
+in the EFI code paths, for example when that page is split in
+__split_large_page(), etc. It also makes it easier to validate that the
+EFI region mappings have the correct attributes because there are fewer
+differences compared with regular kernel mappings.
 
-This results in section names like .init.rodata.str1.8 (for string literals)
-and .init.bss (which is tiny), both of which can be moved into the .init.data
-output section.
-
-Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Acked-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Tested-by: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Signed-off-by: Sai Praneeth Prakhya <sai.praneeth.prakhya@intel.com>
+Cc: Ricardo Neri <ricardo.neri@intel.com>
+Cc: Ravi Shankar <ravi.v.shankar@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- arch/arm64/kernel/vmlinux.lds.S | 1 +
- 1 file changed, 1 insertion(+)
+ arch/x86/mm/pageattr.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-diff --git a/arch/arm64/kernel/vmlinux.lds.S b/arch/arm64/kernel/vmlinux.lds.S
-index e3928f578891..cbf4db440e9c 100644
---- a/arch/arm64/kernel/vmlinux.lds.S
-+++ b/arch/arm64/kernel/vmlinux.lds.S
-@@ -134,6 +134,7 @@ SECTIONS
- 		CON_INITCALL
- 		SECURITY_INITCALL
- 		INIT_RAM_FS
-+		*(.init.rodata.* .init.bss)	/* from the EFI stub */
- 	}
- 	.exit.data : {
- 		ARM_EXIT_KEEP(EXIT_DATA)
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 632d34d20237..bf312da41a6d 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -909,6 +909,20 @@ static void populate_pte(struct cpa_data *cpa,
+ 
+ 	pte = pte_offset_kernel(pmd, start);
+ 
++	/*
++	 * Set the GLOBAL flags only if the PRESENT flag is
++	 * set otherwise pte_present will return true even on
++	 * a non present pte. The canon_pgprot will clear
++	 * _PAGE_GLOBAL for the ancient hardware that doesn't
++	 * support it.
++	 */
++	if (pgprot_val(pgprot) & _PAGE_PRESENT)
++		pgprot_val(pgprot) |= _PAGE_GLOBAL;
++	else
++		pgprot_val(pgprot) &= ~_PAGE_GLOBAL;
++
++	pgprot = canon_pgprot(pgprot);
++
+ 	while (num_pages-- && start < end) {
+ 		set_pte(pte, pfn_pte(cpa->pfn, pgprot));
+ 
 -- 
 2.6.2
