@@ -1,128 +1,492 @@
-From: Dan Williams <dan.j.williams@intel.com>
-Subject: Re: [PATCH v1 05/10] ACPI: switch to use generic UUID API
-Date: Wed, 17 Feb 2016 09:49:35 -0800
-Message-ID: <CAPcyv4inMjmt8eH_=bNE_=NMeYGmS75B5LxB=f7Cd762=3UKyQ@mail.gmail.com>
-References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
- <1455711448-124103-6-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH] pstore: add lzo/lz4 compression support
+Date: Wed, 17 Feb 2016 15:11:46 -0800
+Message-ID: <CAGXu5jJJ+VN7g6w8G-Sgi-5a9ATnARZrbbwheKLc4chZzBFaJQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <dri-devel-bounces@lists.freedesktop.org>
-In-Reply-To: <1455711448-124103-6-git-send-email-andriy.shevchenko@linux.intel.com>
-List-Unsubscribe: <https://lists.freedesktop.org/mailman/options/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=unsubscribe>
-List-Archive: <https://lists.freedesktop.org/archives/dri-devel>
-List-Post: <mailto:dri-devel@lists.freedesktop.org>
-List-Help: <mailto:dri-devel-request@lists.freedesktop.org?subject=help>
-List-Subscribe: <https://lists.freedesktop.org/mailman/listinfo/dri-devel>,
- <mailto:dri-devel-request@lists.freedesktop.org?subject=subscribe>
-Errors-To: dri-devel-bounces@lists.freedesktop.org
-Sender: "dri-devel" <dri-devel-bounces@lists.freedesktop.org>
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: linux-efi@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Maling list - DRI developers <dri-devel@lists.freedesktop.org>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Lv Zheng <lv.zheng@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Arnd Bergmann <arnd@arndb.de>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, Linux ACPI <linux-acpi@vger.kernel.org>, Zhang Rui <rui.zhang@intel.com>, Mathias Nyman <mathias.nyman@intel.com>, Mark Brown <broonie@kernel.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Bjorn Helgaas <bhelgaas@google.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Theodore Ts'o <tytso@mit.edu>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-api@vger.kernel.org, Andrew Morton <akpm@linux-foundation>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Geliang Tang <geliangtang@163.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gV2VkLCBGZWIgMTcsIDIwMTYgYXQgNDoxNyBBTSwgQW5keSBTaGV2Y2hlbmtvCjxhbmRyaXku
-c2hldmNoZW5rb0BsaW51eC5pbnRlbC5jb20+IHdyb3RlOgo+IEluc3RlYWQgb2Ygb3BlbmNvZGlu
-ZyB0aGUgZXhpc3RpbmcgbGlicmFyeSBmdW5jdGlvbnMgbGV0J3MgdXNlIHRoZW0gZGlyZWN0bHku
-Cj4KPiBUaGUgY29udmVyc2lvbiBmaXhlcyBhIHBvdGVudGlhbCBidWcgaW4gaW50MzQweF90aGVy
-bWFsIGFzIHdlbGwgc2luY2Ugd2UgaGF2ZQo+IHRvIHVzZSBtZW1jbXAoKSBvbiBiaW5hcnkgZGF0
-YS4KPgo+IFNpZ25lZC1vZmYtYnk6IEFuZHkgU2hldmNoZW5rbyA8YW5kcml5LnNoZXZjaGVua29A
-bGludXguaW50ZWwuY29tPgo+IC0tLQo+ICBkcml2ZXJzL2FjcGkvYWNwaV9leHRsb2cuYyAgICAg
-ICAgICAgICAgICAgICAgICAgIHwgIDggKysrLS0tCj4gIGRyaXZlcnMvYWNwaS9idXMuYyAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAyOSArKy0tLS0tLS0tLS0tLS0tLS0tCj4gIGRy
-aXZlcnMvYWNwaS9uZml0LmMgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAzNCArKysr
-KysrKysrKy0tLS0tLS0tLS0tLQo+ICBkcml2ZXJzL2FjcGkvbmZpdC5oICAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHwgIDMgKy0KPiAgZHJpdmVycy9hY3BpL3V0aWxzLmMgICAgICAgICAg
-ICAgICAgICAgICAgICAgICAgICB8ICA0ICstLQo+ICBkcml2ZXJzL2NoYXIvdHBtL3RwbV9jcmIu
-YyAgICAgICAgICAgICAgICAgICAgICAgIHwgIDkgKysrLS0tCj4gIGRyaXZlcnMvY2hhci90cG0v
-dHBtX3BwaS5jICAgICAgICAgICAgICAgICAgICAgICAgfCAyMCArKysrKystLS0tLS0tCj4gIGRy
-aXZlcnMvZ3B1L2RybS9pOTE1L2ludGVsX2FjcGkuYyAgICAgICAgICAgICAgICAgfCAxNCArKysr
-LS0tLS0tCj4gIGRyaXZlcnMvZ3B1L2RybS9ub3V2ZWF1L25vdXZlYXVfYWNwaS5jICAgICAgICAg
-ICAgfCAyMCArKysrKystLS0tLS0tCj4gIGRyaXZlcnMvZ3B1L2RybS9ub3V2ZWF1L252a20vc3Vi
-ZGV2L214bS9iYXNlLmMgICAgfCAgOSArKystLS0KPiAgZHJpdmVycy9oaWQvaTJjLWhpZC9pMmMt
-aGlkLmMgICAgICAgICAgICAgICAgICAgICB8ICA5ICsrKy0tLQo+ICBkcml2ZXJzL2lvbW11L2Rt
-YXIuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgMTEgKysrKy0tLS0KPiAgZHJpdmVy
-cy9wY2kvcGNpLWFjcGkuYyAgICAgICAgICAgICAgICAgICAgICAgICAgICB8IDExICsrKystLS0t
-Cj4gIGRyaXZlcnMvcGNpL3BjaS1sYWJlbC5jICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAg
-NCArLS0KPiAgZHJpdmVycy90aGVybWFsL2ludDM0MHhfdGhlcm1hbC9pbnQzNDAwX3RoZXJtYWwu
-YyB8ICA2ICsrLS0KPiAgZHJpdmVycy91c2IvaG9zdC94aGNpLXBjaS5jICAgICAgICAgICAgICAg
-ICAgICAgICB8ICA5ICsrKy0tLQo+ICBpbmNsdWRlL2FjcGkvYWNwaV9idXMuaCAgICAgICAgICAg
-ICAgICAgICAgICAgICAgIHwgMTAgKysrKy0tLQo+ICBpbmNsdWRlL2xpbnV4L2FjcGkuaCAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDIgKy0KPiAgaW5jbHVkZS9saW51eC9wY2ktYWNw
-aS5oICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAyICstCj4gIHNvdW5kL3NvYy9pbnRlbC9z
-a3lsYWtlL3NrbC1uaGx0LmMgICAgICAgICAgICAgICAgfCAgNyArKystLQo+ICAyMCBmaWxlcyBj
-aGFuZ2VkLCA5MiBpbnNlcnRpb25zKCspLCAxMjkgZGVsZXRpb25zKC0pCj4KWy4uXQo+IGRpZmYg
-LS1naXQgYS9kcml2ZXJzL2FjcGkvbmZpdC5jIGIvZHJpdmVycy9hY3BpL25maXQuYwo+IGluZGV4
-IGFkNmQ4YzYuLjNiZWI5OWIgMTAwNjQ0Cj4gLS0tIGEvZHJpdmVycy9hY3BpL25maXQuYwo+ICsr
-KyBiL2RyaXZlcnMvYWNwaS9uZml0LmMKPiBAQCAtNDMsMTEgKzQzLDExIEBAIHN0cnVjdCBuZml0
-X3RhYmxlX3ByZXYgewo+ICAgICAgICAgc3RydWN0IGxpc3RfaGVhZCBmbHVzaGVzOwo+ICB9Owo+
-Cj4gLXN0YXRpYyB1OCBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF1bMTZdOwo+ICtzdGF0aWMgdXVp
-ZF9sZSBuZml0X3V1aWRbTkZJVF9VVUlEX01BWF07Cj4KPiAtY29uc3QgdTggKnRvX25maXRfdXVp
-ZChlbnVtIG5maXRfdXVpZHMgaWQpCj4gK2NvbnN0IHV1aWRfbGUgKnRvX25maXRfdXVpZChlbnVt
-IG5maXRfdXVpZHMgaWQpCj4gIHsKPiAtICAgICAgIHJldHVybiBuZml0X3V1aWRbaWRdOwo+ICsg
-ICAgICAgcmV0dXJuICZuZml0X3V1aWRbaWRdOwo+ICB9Cj4gIEVYUE9SVF9TWU1CT0wodG9fbmZp
-dF91dWlkKTsKPgo+IEBAIC04Myw3ICs4Myw3IEBAIHN0YXRpYyBpbnQgYWNwaV9uZml0X2N0bChz
-dHJ1Y3QgbnZkaW1tX2J1c19kZXNjcmlwdG9yICpuZF9kZXNjLAo+ICAgICAgICAgY29uc3QgY2hh
-ciAqY21kX25hbWUsICogZGltbV9uYW1lOwo+ICAgICAgICAgdW5zaWduZWQgbG9uZyBkc21fbWFz
-azsKPiAgICAgICAgIGFjcGlfaGFuZGxlIGhhbmRsZTsKPiAtICAgICAgIGNvbnN0IHU4ICp1dWlk
-Owo+ICsgICAgICAgY29uc3QgdXVpZF9sZSAqdXVpZDsKPiAgICAgICAgIHUzMiBvZmZzZXQ7Cj4g
-ICAgICAgICBpbnQgcmMsIGk7Cj4KPiBAQCAtMjI1LDcgKzIyNSw3IEBAIHN0YXRpYyBpbnQgbmZp
-dF9zcGFfdHlwZShzdHJ1Y3QgYWNwaV9uZml0X3N5c3RlbV9hZGRyZXNzICpzcGEpCj4gICAgICAg
-ICBpbnQgaTsKPgo+ICAgICAgICAgZm9yIChpID0gMDsgaSA8IE5GSVRfVVVJRF9NQVg7IGkrKykK
-PiAtICAgICAgICAgICAgICAgaWYgKG1lbWNtcCh0b19uZml0X3V1aWQoaSksIHNwYS0+cmFuZ2Vf
-Z3VpZCwgMTYpID09IDApCj4gKyAgICAgICAgICAgICAgIGlmICghdXVpZF9sZV9jbXAoKnRvX25m
-aXRfdXVpZChpKSwgKih1dWlkX2xlICopc3BhLT5yYW5nZV9ndWlkKSkKPiAgICAgICAgICAgICAg
-ICAgICAgICAgICByZXR1cm4gaTsKPiAgICAgICAgIHJldHVybiAtMTsKPiAgfQo+IEBAIC04Mjks
-NyArODI5LDcgQEAgc3RhdGljIGludCBhY3BpX25maXRfYWRkX2RpbW0oc3RydWN0IGFjcGlfbmZp
-dF9kZXNjICphY3BpX2Rlc2MsCj4gIHsKPiAgICAgICAgIHN0cnVjdCBhY3BpX2RldmljZSAqYWRl
-diwgKmFkZXZfZGltbTsKPiAgICAgICAgIHN0cnVjdCBkZXZpY2UgKmRldiA9IGFjcGlfZGVzYy0+
-ZGV2Owo+IC0gICAgICAgY29uc3QgdTggKnV1aWQgPSB0b19uZml0X3V1aWQoTkZJVF9ERVZfRElN
-TSk7Cj4gKyAgICAgICBjb25zdCB1dWlkX2xlICp1dWlkID0gdG9fbmZpdF91dWlkKE5GSVRfREVW
-X0RJTU0pOwo+ICAgICAgICAgaW50IGk7Cj4KPiAgICAgICAgIG5maXRfbWVtLT5kc21fbWFzayA9
-IGFjcGlfZGVzYy0+ZGltbV9kc21fZm9yY2VfZW47Cj4gQEAgLTkwOSw3ICs5MDksNyBAQCBzdGF0
-aWMgaW50IGFjcGlfbmZpdF9yZWdpc3Rlcl9kaW1tcyhzdHJ1Y3QgYWNwaV9uZml0X2Rlc2MgKmFj
-cGlfZGVzYykKPiAgc3RhdGljIHZvaWQgYWNwaV9uZml0X2luaXRfZHNtcyhzdHJ1Y3QgYWNwaV9u
-Zml0X2Rlc2MgKmFjcGlfZGVzYykKPiAgewo+ICAgICAgICAgc3RydWN0IG52ZGltbV9idXNfZGVz
-Y3JpcHRvciAqbmRfZGVzYyA9ICZhY3BpX2Rlc2MtPm5kX2Rlc2M7Cj4gLSAgICAgICBjb25zdCB1
-OCAqdXVpZCA9IHRvX25maXRfdXVpZChORklUX0RFVl9CVVMpOwo+ICsgICAgICAgY29uc3QgdXVp
-ZF9sZSAqdXVpZCA9IHRvX25maXRfdXVpZChORklUX0RFVl9CVVMpOwo+ICAgICAgICAgc3RydWN0
-IGFjcGlfZGV2aWNlICphZGV2Owo+ICAgICAgICAgaW50IGk7Cj4KPiBAQCAtMjA3OSwxNiArMjA3
-OSwxNiBAQCBzdGF0aWMgX19pbml0IGludCBuZml0X2luaXQodm9pZCkKPiAgICAgICAgIEJVSUxE
-X0JVR19PTihzaXplb2Yoc3RydWN0IGFjcGlfbmZpdF9jb250cm9sX3JlZ2lvbikgIT0gODApOwo+
-ICAgICAgICAgQlVJTERfQlVHX09OKHNpemVvZihzdHJ1Y3QgYWNwaV9uZml0X2RhdGFfcmVnaW9u
-KSAhPSA0MCk7Cj4KPiAtICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9WT0xBVElMRV9NRU1P
-UlksIG5maXRfdXVpZFtORklUX1NQQV9WT0xBVElMRV0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9f
-dXVpZChVVUlEX1BFUlNJU1RFTlRfTUVNT1JZLCBuZml0X3V1aWRbTkZJVF9TUEFfUE1dKTsKPiAt
-ICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9DT05UUk9MX1JFR0lPTiwgbmZpdF91dWlkW05G
-SVRfU1BBX0RDUl0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9fdXVpZChVVUlEX0RBVEFfUkVHSU9O
-LCBuZml0X3V1aWRbTkZJVF9TUEFfQkRXXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVV
-SURfVk9MQVRJTEVfVklSVFVBTF9ESVNLLCBuZml0X3V1aWRbTkZJVF9TUEFfVkRJU0tdKTsKPiAt
-ICAgICAgIGFjcGlfc3RyX3RvX3V1aWQoVVVJRF9WT0xBVElMRV9WSVJUVUFMX0NELCBuZml0X3V1
-aWRbTkZJVF9TUEFfVkNEXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVVSURfUEVSU0lT
-VEVOVF9WSVJUVUFMX0RJU0ssIG5maXRfdXVpZFtORklUX1NQQV9QRElTS10pOwo+IC0gICAgICAg
-YWNwaV9zdHJfdG9fdXVpZChVVUlEX1BFUlNJU1RFTlRfVklSVFVBTF9DRCwgbmZpdF91dWlkW05G
-SVRfU1BBX1BDRF0pOwo+IC0gICAgICAgYWNwaV9zdHJfdG9fdXVpZChVVUlEX05GSVRfQlVTLCBu
-Zml0X3V1aWRbTkZJVF9ERVZfQlVTXSk7Cj4gLSAgICAgICBhY3BpX3N0cl90b191dWlkKFVVSURf
-TkZJVF9ESU1NLCBuZml0X3V1aWRbTkZJVF9ERVZfRElNTV0pOwo+ICsgICAgICAgdXVpZF9sZV90
-b19iaW4oVVVJRF9WT0xBVElMRV9NRU1PUlksICZuZml0X3V1aWRbTkZJVF9TUEFfVk9MQVRJTEVd
-KTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfUEVSU0lTVEVOVF9NRU1PUlksICZuZml0
-X3V1aWRbTkZJVF9TUEFfUE1dKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfQ09OVFJP
-TF9SRUdJT04sICZuZml0X3V1aWRbTkZJVF9TUEFfRENSXSk7Cj4gKyAgICAgICB1dWlkX2xlX3Rv
-X2JpbihVVUlEX0RBVEFfUkVHSU9OLCAmbmZpdF91dWlkW05GSVRfU1BBX0JEV10pOwo+ICsgICAg
-ICAgdXVpZF9sZV90b19iaW4oVVVJRF9WT0xBVElMRV9WSVJUVUFMX0RJU0ssICZuZml0X3V1aWRb
-TkZJVF9TUEFfVkRJU0tdKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfVk9MQVRJTEVf
-VklSVFVBTF9DRCwgJm5maXRfdXVpZFtORklUX1NQQV9WQ0RdKTsKPiArICAgICAgIHV1aWRfbGVf
-dG9fYmluKFVVSURfUEVSU0lTVEVOVF9WSVJUVUFMX0RJU0ssICZuZml0X3V1aWRbTkZJVF9TUEFf
-UERJU0tdKTsKPiArICAgICAgIHV1aWRfbGVfdG9fYmluKFVVSURfUEVSU0lTVEVOVF9WSVJUVUFM
-X0NELCAmbmZpdF91dWlkW05GSVRfU1BBX1BDRF0pOwo+ICsgICAgICAgdXVpZF9sZV90b19iaW4o
-VVVJRF9ORklUX0JVUywgJm5maXRfdXVpZFtORklUX0RFVl9CVVNdKTsKPiArICAgICAgIHV1aWRf
-bGVfdG9fYmluKFVVSURfTkZJVF9ESU1NLCAmbmZpdF91dWlkW05GSVRfREVWX0RJTU1dKTsKCkkg
-ZG9uJ3Qgc2VlIHRoZSBiZW5lZml0IG9mIHRoaXMgY2hhbmdlLiAgRm9yIHRoZSBORklUIGRyaXZl
-ciB3ZSB3ZW50CnRocm91Z2ggYSBmaXJlIGRyaWxsIHRyeWluZyB0byBtYWtlIHN1cmUgdGhlIEFD
-UEkgc3BlYyBmb3JtYXQgb2YgYQpVVUlEIG1hdGNoZWQgdGhlIExpbnV4IGludGVycHJldGF0aW9u
-LCBhbmQgdGhpcyBjaGFuZ2UgbWFrZXMgdGhhdApoYXJkZXIgdG8gZGV0ZXJtaW5lLiAgQUNQSSBk
-cml2ZXJzIHNob3VsZCB1c2UgQUNQSUNBIHV1aWQgaGVscGVyCnJvdXRpbmVzIGluIG15IG9waW5p
-b24uCl9fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fCmRyaS1k
-ZXZlbCBtYWlsaW5nIGxpc3QKZHJpLWRldmVsQGxpc3RzLmZyZWVkZXNrdG9wLm9yZwpodHRwczov
-L2xpc3RzLmZyZWVkZXNrdG9wLm9yZy9tYWlsbWFuL2xpc3RpbmZvL2RyaS1kZXZlbAo=
+On Tue, Feb 16, 2016 at 5:52 AM, Geliang Tang <geliangtang@163.com> wrote:
+> Like zlib compression in pstore, this patch added lzo and lz4
+> compression support so that users can have more options and better
+> compression ratio.
+
+Cool! This looks really good. Some comments below...
+
+>
+> The original code treats the compressed data together with the
+> uncompressed ECC correction notice by using zlib decompress. The
+> ECC correction notice is missing in the decompression process. The
+> treatment also makes lzo and lz4 not working. So I treat them
+> separately by using pstore_decompress() to treat the compressed
+> data, and memcpy() to treat the uncompressed ECC correction notice.
+>
+> Signed-off-by: Geliang Tang <geliangtang@163.com>
+> ---
+>  drivers/firmware/efi/efi-pstore.c |   1 +
+>  fs/pstore/Kconfig                 |  34 +++++-
+>  fs/pstore/platform.c              | 217 ++++++++++++++++++++++++++++++++++++--
+>  fs/pstore/ram.c                   |  10 +-
+>  include/linux/pstore.h            |   3 +-
+>  5 files changed, 250 insertions(+), 15 deletions(-)
+>
+> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
+> index eac76a7..cd8c35f 100644
+> --- a/drivers/firmware/efi/efi-pstore.c
+> +++ b/drivers/firmware/efi/efi-pstore.c
+> @@ -210,6 +210,7 @@ static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
+>  static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
+>                                int *count, struct timespec *timespec,
+>                                char **buf, bool *compressed,
+> +                              ssize_t *ecc_notice_size,
+>                                struct pstore_info *psi)
+>  {
+>         struct pstore_read_data data;
+> diff --git a/fs/pstore/Kconfig b/fs/pstore/Kconfig
+> index 360ae43..8777616 100644
+> --- a/fs/pstore/Kconfig
+> +++ b/fs/pstore/Kconfig
+> @@ -1,8 +1,6 @@
+>  config PSTORE
+>         tristate "Persistent store support"
+>         default n
+> -       select ZLIB_DEFLATE
+> -       select ZLIB_INFLATE
+>         help
+>            This option enables generic access to platform level
+>            persistent storage via "pstore" filesystem that can
+> @@ -14,6 +12,38 @@ config PSTORE
+>            If you don't have a platform persistent store driver,
+>            say N.
+>
+> +choice
+> +        prompt "Choose compression algorithm"
+> +        depends on PSTORE
+> +        default PSTORE_ZLIB_COMPRESS
+> +        help
+> +          This option chooses compression algorithm.
+> +
+> +config PSTORE_ZLIB_COMPRESS
+> +        bool "ZLIB"
+> +        depends on PSTORE
+
+I don't think each config choice here needs to have the PSTORE depends
+repeated, as it's already listed under the choice prompt.
+
+> +        select ZLIB_DEFLATE
+> +        select ZLIB_INFLATE
+> +        help
+> +          This option enables ZLIB compression algorithm support.
+> +
+> +config PSTORE_LZO_COMPRESS
+> +        bool "LZO"
+> +        depends on PSTORE
+> +        select LZO_COMPRESS
+> +        select LZO_DECOMPRESS
+> +        help
+> +          This option enables LZO compression algorithm support.
+> +
+> +config PSTORE_LZ4_COMPRESS
+> +        bool "LZ4"
+> +        depends on PSTORE
+> +        select LZ4_COMPRESS
+> +        select LZ4_DECOMPRESS
+> +        help
+> +          This option enables LZ4 compression algorithm support.
+> +endchoice
+> +
+>  config PSTORE_CONSOLE
+>         bool "Log kernel console messages"
+>         depends on PSTORE
+> diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
+> index 588461b..ce09f5b 100644
+> --- a/fs/pstore/platform.c
+> +++ b/fs/pstore/platform.c
+> @@ -28,7 +28,15 @@
+>  #include <linux/console.h>
+>  #include <linux/module.h>
+>  #include <linux/pstore.h>
+> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+>  #include <linux/zlib.h>
+> +#endif
+> +#ifdef CONFIG_PSTORE_LZO_COMPRESS
+> +#include <linux/lzo.h>
+> +#endif
+> +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
+> +#include <linux/lz4.h>
+> +#endif
+>  #include <linux/string.h>
+>  #include <linux/timer.h>
+>  #include <linux/slab.h>
+> @@ -69,10 +77,23 @@ struct pstore_info *psinfo;
+>  static char *backend;
+>
+>  /* Compression parameters */
+> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+>  #define COMPR_LEVEL 6
+>  #define WINDOW_BITS 12
+>  #define MEM_LEVEL 4
+>  static struct z_stream_s stream;
+> +#else
+> +static unsigned char *workspace;
+> +#endif
+> +
+> +struct pstore_zbackend {
+> +       int (*compress)(const void *in, void *out, size_t inlen, size_t outlen);
+> +       int (*decompress)(void *in, void *out, size_t inlen, size_t outlen);
+> +       void (*allocate)(void);
+> +       void (*free)(void);
+> +
+> +       const char *name;
+> +};
+>
+>  static char *big_oops_buf;
+>  static size_t big_oops_buf_sz;
+> @@ -129,9 +150,9 @@ bool pstore_cannot_block_path(enum kmsg_dump_reason reason)
+>  }
+>  EXPORT_SYMBOL_GPL(pstore_cannot_block_path);
+>
+> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+>  /* Derived from logfs_compress() */
+> -static int pstore_compress(const void *in, void *out, size_t inlen,
+> -                                                       size_t outlen)
+> +static int compress_zlib(const void *in, void *out, size_t inlen, size_t outlen)
+>  {
+>         int err, ret;
+>
+> @@ -165,7 +186,7 @@ error:
+>  }
+>
+>  /* Derived from logfs_uncompress */
+> -static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
+> +static int decompress_zlib(void *in, void *out, size_t inlen, size_t outlen)
+>  {
+>         int err, ret;
+>
+> @@ -194,7 +215,7 @@ error:
+>         return ret;
+>  }
+>
+> -static void allocate_buf_for_compression(void)
+> +static void allocate_zlib(void)
+>  {
+>         size_t size;
+>         size_t cmpr;
+> @@ -237,7 +258,7 @@ static void allocate_buf_for_compression(void)
+>
+>  }
+>
+> -static void free_buf_for_compression(void)
+> +static void free_zlib(void)
+>  {
+>         kfree(stream.workspace);
+>         stream.workspace = NULL;
+> @@ -245,6 +266,183 @@ static void free_buf_for_compression(void)
+>         big_oops_buf = NULL;
+>  }
+>
+> +static struct pstore_zbackend backend_zlib = {
+> +       .compress       = compress_zlib,
+> +       .decompress     = decompress_zlib,
+> +       .allocate       = allocate_zlib,
+> +       .free           = free_zlib,
+> +       .name           = "zlib",
+> +};
+> +#endif
+> +
+> +#ifdef CONFIG_PSTORE_LZO_COMPRESS
+> +static int compress_lzo(const void *in, void *out, size_t inlen, size_t outlen)
+> +{
+> +       int ret;
+> +
+> +       ret = lzo1x_1_compress(in, inlen, out, &outlen, workspace);
+> +       if (ret != LZO_E_OK) {
+> +               pr_err("lzo_compress error, ret = %d!\n", ret);
+> +               return -EIO;
+> +       }
+> +
+> +       return outlen;
+> +}
+> +
+> +static int decompress_lzo(void *in, void *out, size_t inlen, size_t outlen)
+> +{
+> +       int ret;
+> +
+> +       ret = lzo1x_decompress_safe(in, inlen, out, &outlen);
+> +       if (ret != LZO_E_OK) {
+> +               pr_err("lzo_decompress error, ret = %d!\n", ret);
+> +               return -EIO;
+> +       }
+> +
+> +       return outlen;
+> +}
+> +
+> +static void allocate_lzo(void)
+> +{
+> +       big_oops_buf_sz = lzo1x_worst_compress(psinfo->bufsize);
+> +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
+> +       if (big_oops_buf) {
+> +               workspace = kmalloc(LZO1X_MEM_COMPRESS, GFP_KERNEL);
+> +               if (!workspace) {
+> +                       pr_err("No memory for compression workspace; skipping compression\n");
+> +                       kfree(big_oops_buf);
+> +                       big_oops_buf = NULL;
+> +               }
+> +       } else {
+> +               pr_err("No memory for uncompressed data; skipping compression\n");
+> +               workspace = NULL;
+> +       }
+> +}
+> +
+> +static void free_lzo(void)
+> +{
+> +       kfree(workspace);
+> +       kfree(big_oops_buf);
+> +       big_oops_buf = NULL;
+
+Please set big_oops_buf_sz to 0 here too, just to be sure.
+
+> +}
+> +
+> +static struct pstore_zbackend backend_lzo = {
+> +       .compress       = compress_lzo,
+> +       .decompress     = decompress_lzo,
+> +       .allocate       = allocate_lzo,
+> +       .free           = free_lzo,
+> +       .name           = "lzo",
+> +};
+> +#endif
+> +
+> +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
+> +static int compress_lz4(const void *in, void *out, size_t inlen, size_t outlen)
+> +{
+> +       int ret;
+> +
+> +       ret = lz4_compress(in, inlen, out, &outlen, workspace);
+> +       if (ret) {
+> +               pr_err("lz4_compress error, ret = %d!\n", ret);
+> +               return -EIO;
+> +       }
+> +
+> +       return outlen;
+> +}
+> +
+> +static int decompress_lz4(void *in, void *out, size_t inlen, size_t outlen)
+> +{
+> +       int ret;
+> +
+> +       ret = lz4_decompress_unknownoutputsize(in, inlen, out, &outlen);
+> +       if (ret) {
+> +               pr_err("lz4_decompress error, ret = %d!\n", ret);
+> +               return -EIO;
+> +       }
+> +
+> +       return outlen;
+> +}
+> +
+> +static void allocate_lz4(void)
+> +{
+> +       big_oops_buf_sz = lz4_compressbound(psinfo->bufsize);
+> +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
+> +       if (big_oops_buf) {
+> +               workspace = kmalloc(LZ4_MEM_COMPRESS, GFP_KERNEL);
+> +               if (!workspace) {
+> +                       pr_err("No memory for compression workspace; skipping compression\n");
+> +                       kfree(big_oops_buf);
+> +                       big_oops_buf = NULL;
+> +               }
+> +       } else {
+> +               pr_err("No memory for uncompressed data; skipping compression\n");
+> +               workspace = NULL;
+> +       }
+> +}
+> +
+> +static void free_lz4(void)
+> +{
+> +       kfree(workspace);
+> +       kfree(big_oops_buf);
+> +       big_oops_buf = NULL;
+
+Same thing here.
+
+> +}
+> +
+> +static struct pstore_zbackend backend_lz4 = {
+> +       .compress       = compress_lz4,
+> +       .decompress     = decompress_lz4,
+> +       .allocate       = allocate_lz4,
+> +       .free           = free_lz4,
+> +       .name           = "lz4",
+> +};
+> +#endif
+> +
+> +static struct pstore_zbackend *zbackend[] = {
+> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+> +       &backend_zlib,
+> +#endif
+> +#ifdef CONFIG_PSTORE_LZO_COMPRESS
+> +       &backend_lzo,
+> +#endif
+> +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
+> +       &backend_lz4,
+> +#endif
+> +       NULL
+> +};
+
+I'm confused about the use of an array here (and the [0] and [1] tests
+below). Since they're mutually exclusive, and one must be defined.
+(Should it be possible to select no compression?)
+
+static struct pstore_zbackend *zbackend =
+#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
+    &backend_zlib;
+#elif ....
+...
+#else
+    NULL;
+#endif
+
+And make the tests below just "if (zbackend)" etc?
+
+> +
+> +static int pstore_compress(const void *in, void *out,
+> +                          size_t inlen, size_t outlen)
+> +{
+> +       if (zbackend[0] && !zbackend[1])
+> +               return zbackend[0]->compress(in, out, inlen, outlen);
+> +       else
+> +               return -EIO;
+> +}
+> +
+> +static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
+> +{
+> +       if (zbackend[0] && !zbackend[1])
+> +               return zbackend[0]->decompress(in, out, inlen, outlen);
+> +       else
+> +               return -EIO;
+> +}
+> +
+> +static void allocate_buf_for_compression(void)
+> +{
+> +       if (zbackend[0] && !zbackend[1]) {
+> +               pr_info("using %s compression\n", zbackend[0]->name);
+> +               zbackend[0]->allocate();
+> +       } else {
+> +               pr_err("allocate compression buffer error!\n");
+> +       }
+> +}
+> +
+> +static void free_buf_for_compression(void)
+> +{
+> +       if (zbackend[0] && !zbackend[1])
+> +               zbackend[0]->free();
+> +       else
+> +               pr_err("free compression buffer error!\n");
+> +}
+> +
+>  /*
+>   * Called when compression fails, since the printk buffer
+>   * would be fetched for compression calling it again when
+> @@ -527,6 +725,7 @@ void pstore_get_records(int quiet)
+>         int                     failed = 0, rc;
+>         bool                    compressed;
+>         int                     unzipped_len = -1;
+> +       ssize_t                 ecc_notice_size = 0;
+>
+>         if (!psi)
+>                 return;
+> @@ -536,7 +735,7 @@ void pstore_get_records(int quiet)
+>                 goto out;
+>
+>         while ((size = psi->read(&id, &type, &count, &time, &buf, &compressed,
+> -                               psi)) > 0) {
+> +                                &ecc_notice_size, psi)) > 0) {
+>                 if (compressed && (type == PSTORE_TYPE_DMESG)) {
+>                         if (big_oops_buf)
+>                                 unzipped_len = pstore_decompress(buf,
+> @@ -544,6 +743,9 @@ void pstore_get_records(int quiet)
+>                                                         big_oops_buf_sz);
+>
+>                         if (unzipped_len > 0) {
+> +                               if (ecc_notice_size)
+> +                                       memcpy(big_oops_buf + unzipped_len,
+> +                                              buf + size, ecc_notice_size);
+>                                 kfree(buf);
+>                                 buf = big_oops_buf;
+>                                 size = unzipped_len;
+> @@ -555,7 +757,8 @@ void pstore_get_records(int quiet)
+>                         }
+>                 }
+>                 rc = pstore_mkfile(type, psi->name, id, count, buf,
+> -                                 compressed, (size_t)size, time, psi);
+> +                                  compressed, size + ecc_notice_size,
+> +                                  time, psi);
+>                 if (unzipped_len < 0) {
+>                         /* Free buffer other than big oops */
+>                         kfree(buf);
+> diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
+> index 319c3a6..11ec024 100644
+> --- a/fs/pstore/ram.c
+> +++ b/fs/pstore/ram.c
+> @@ -181,10 +181,10 @@ static bool prz_ok(struct persistent_ram_zone *prz)
+>  static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
+>                                    int *count, struct timespec *time,
+>                                    char **buf, bool *compressed,
+> +                                  ssize_t *ecc_notice_size,
+>                                    struct pstore_info *psi)
+>  {
+>         ssize_t size;
+> -       ssize_t ecc_notice_size;
+>         struct ramoops_context *cxt = psi->data;
+>         struct persistent_ram_zone *prz = NULL;
+>         int header_length = 0;
+> @@ -229,16 +229,16 @@ static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
+>         size = persistent_ram_old_size(prz) - header_length;
+>
+>         /* ECC correction notice */
+> -       ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
+> +       *ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
+>
+> -       *buf = kmalloc(size + ecc_notice_size + 1, GFP_KERNEL);
+> +       *buf = kmalloc(size + *ecc_notice_size + 1, GFP_KERNEL);
+>         if (*buf == NULL)
+>                 return -ENOMEM;
+>
+>         memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
+> -       persistent_ram_ecc_string(prz, *buf + size, ecc_notice_size + 1);
+> +       persistent_ram_ecc_string(prz, *buf + size, *ecc_notice_size + 1);
+>
+> -       return size + ecc_notice_size;
+> +       return size;
+>  }
+>
+>  static size_t ramoops_write_kmsg_hdr(struct persistent_ram_zone *prz,
+> diff --git a/include/linux/pstore.h b/include/linux/pstore.h
+> index 831479f..899e95e 100644
+> --- a/include/linux/pstore.h
+> +++ b/include/linux/pstore.h
+> @@ -58,7 +58,8 @@ struct pstore_info {
+>         int             (*close)(struct pstore_info *psi);
+>         ssize_t         (*read)(u64 *id, enum pstore_type_id *type,
+>                         int *count, struct timespec *time, char **buf,
+> -                       bool *compressed, struct pstore_info *psi);
+> +                       bool *compressed, ssize_t *ecc_notice_size,
+> +                       struct pstore_info *psi);
+>         int             (*write)(enum pstore_type_id type,
+>                         enum kmsg_dump_reason reason, u64 *id,
+>                         unsigned int part, int count, bool compressed,
+> --
+> 2.5.0
+>
+>
+
+-Kees
+
+
+-- 
+Kees Cook
+Chrome OS & Brillo Security
