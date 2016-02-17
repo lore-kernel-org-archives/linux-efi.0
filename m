@@ -1,36 +1,115 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [PATCH 0/2] ACPI, x86/efi: Remove ACPI BGRT tables for kexec
-Date: Wed, 17 Feb 2016 15:45:08 +0000
-Message-ID: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kexec-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, "Rafael J . Wysocki" <rafael.j.wysocki-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Josh Triplett <josh-iaAMLnmF4UmaiuxdJuQwMA@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Vivek Goyal <vgoyal-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
+Date: Wed, 17 Feb 2016 15:45:09 +0000
+Message-ID: <1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
+References: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dave Young <dyoung@redhat.com>
+Cc: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-acpi@vger.kernel.org, kexec@lists.infradead.org, "Rafael J . Wysocki" <rafael.j.wysocki@intel.com>, Josh Triplett <josh@joshtriplett.org>, Borislav Petkov <bp@alien8.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-Based on Dave's report that the BGRT image regions are being accessed
-on kexec reboot (which by that time contain garbage),
+There are existing internal functions that allow the removal of ACPI
+tables, but they're not exposed to the OS in any useful way.
 
-  https://lkml.kernel.org/r/20160127112044.GA2961-0VdLhd/A9Pl+NNSt+8eSiB/sF2h8X+2i0E9HWUfgJXw@public.gmane.org
+Introduce acpi_remove_table() which allows tables to be invalidated in
+the global table list, resulting in failure of subsequent calls to
+acpi_get_table() for those tables.
 
-the following patches simply delete the table when doing a kexec boot.
+The rationale for this change is the ability to remove the BGRT table
+during kexec boot. The BGRT table refers to memory regions that are no
+longer reserved by the firmware once the kexec kernel boots, having
+been released for general allocation by the previous kernel.
 
-This is part of a wider compaign to stop kexec-specific code from
-leaking into all parts of arch/x86. Instead of sprinkling "if
-(efi_setup)", kexec should be shaping the platform information to more
-accurately describe which features are still available, so that
-existing drivers work transparently without kexec quirks.
-
-Matt Fleming (2):
-  ACPICA: Tables: Add function to remove ACPI tables
-  x86/efi: Delete ACPI BGRT when booting via kexec
-
- arch/x86/include/asm/efi.h    |  1 +
- arch/x86/kernel/setup.c       |  4 +++-
- arch/x86/platform/efi/efi.c   | 38 ++++++++++++++++++++++++++++++
+Cc: Dave Young <dyoung@redhat.com>
+Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+Cc: Josh Triplett <josh@joshtriplett.org>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Vivek Goyal <vgoyal@redhat.com>
+Cc: <kexec@lists.infradead.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
  drivers/acpi/acpica/tbxface.c | 54 +++++++++++++++++++++++++++++++++++++++++++
  include/acpi/acpixf.h         |  3 +++
- 5 files changed, 99 insertions(+), 1 deletion(-)
+ 2 files changed, 57 insertions(+)
 
+diff --git a/drivers/acpi/acpica/tbxface.c b/drivers/acpi/acpica/tbxface.c
+index 326df65decef..999eecd89601 100644
+--- a/drivers/acpi/acpica/tbxface.c
++++ b/drivers/acpi/acpica/tbxface.c
+@@ -480,3 +480,57 @@ cleanup:
+ }
+ 
+ ACPI_EXPORT_SYMBOL(acpi_remove_table_handler)
++
++/*******************************************************************************
++ *
++ * FUNCTION:    acpi_remove_table
++ *
++ * PARAMETERS:  signature           - ACPI signature of needed table
++ *              instance            - Which instance (for SSDTs)
++ *
++ * RETURN:      Status
++ *
++ * DESCRIPTION: Finds and removes an ACPI table.
++ *
++ ******************************************************************************/
++acpi_status acpi_remove_table(char *signature, u32 instance)
++{
++	struct acpi_table_desc *table_desc;
++	acpi_status status;
++	u32 i;
++	u32 j;
++
++	/* Parameter validation */
++	if (!signature) {
++		return (AE_BAD_PARAMETER);
++	}
++
++	/* Walk the root table list */
++
++	for (i = 0, j = 0; i < acpi_gbl_root_table_list.current_table_count;
++	     i++) {
++		if (!ACPI_COMPARE_NAME
++		    (&(acpi_gbl_root_table_list.tables[i].signature),
++		     signature)) {
++			continue;
++		}
++
++		if (++j < instance) {
++			continue;
++		}
++
++		table_desc = &acpi_gbl_root_table_list.tables[i];
++
++		status = acpi_tb_validate_table(table_desc);
++		if (ACPI_FAILURE(status)) {
++			return (status);
++		}
++
++		acpi_tb_uninstall_table(table_desc);
++		return (AE_OK);
++	}
++
++	return (AE_NOT_FOUND);
++}
++
++ACPI_EXPORT_SYMBOL(acpi_remove_table);
+diff --git a/include/acpi/acpixf.h b/include/acpi/acpixf.h
+index c96621e87c19..47e51612293e 100644
+--- a/include/acpi/acpixf.h
++++ b/include/acpi/acpixf.h
+@@ -505,6 +505,9 @@ ACPI_EXTERNAL_RETURN_STATUS(acpi_status
+ ACPI_EXTERNAL_RETURN_STATUS(acpi_status
+ 			     acpi_remove_table_handler(acpi_table_handler
+ 						       handler))
++ACPI_EXTERNAL_RETURN_STATUS(acpi_status
++			     acpi_remove_table(acpi_string signature,
++					       u32 instance))
+ 
+ /*
+  * Namespace and name interfaces
 -- 
 2.6.2
