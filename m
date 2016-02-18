@@ -1,474 +1,186 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH v2] pstore: add lzo/lz4 compression support
-Date: Thu, 18 Feb 2016 09:37:26 -0800
-Message-ID: <CAGXu5jKSf5Jw5sNjniQz9aSres4kG3X3Ypj_e8V5MThLz7+nJQ@mail.gmail.com>
-References: <CAGXu5jJJ+VN7g6w8G-Sgi-5a9ATnARZrbbwheKLc4chZzBFaJQ@mail.gmail.com>
-	<ebfd596d5cb01997420a49ed20571bc254c14ac0.1455803858.git.geliangtang@163.com>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access
+ ESRT table in memory
+Date: Thu, 18 Feb 2016 14:16:24 -0500
+Message-ID: <20160218191624.GA1515@redhat.com>
+References: <1455535953-5056-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1455535953-5056-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20160218104407.GC2651@codeblueprint.co.uk>
+ <CAKv+Gu_AW7PKJJOd2mbEu3LKJe+gNaPHnH=sgO=YXM_KWFyKxw@mail.gmail.com>
+ <20160218132824.GE2651@codeblueprint.co.uk>
+ <CAKv+Gu-s1pzYBzuDG-Z7s3gyo8dPOfeidZQ+rim-uAWZCBcKQQ@mail.gmail.com>
+ <20160218134324.GG2651@codeblueprint.co.uk>
+ <CAKv+Gu875r9RkDC723kNsG4XC0eSE9RPPmSFZrD0sx0QxS+V4g@mail.gmail.com>
+ <20160218141544.GH2651@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <ebfd596d5cb01997420a49ed20571bc254c14ac0.1455803858.git.geliangtang@163.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geliang Tang <geliangtang@163.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Anton Vorontsov <anton@enomsg.org>, Colin Cross <ccross@android.com>, Tony Luck <tony.luck@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160218141544.GH2651-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 18, 2016 at 6:04 AM, Geliang Tang <geliangtang@163.com> wrote:
-> Like zlib compression in pstore, this patch added lzo and lz4
-> compression support so that users can have more options and better
-> compression ratio.
->
-> The original code treats the compressed data together with the
-> uncompressed ECC correction notice by using zlib decompress. The
-> ECC correction notice is missing in the decompression process. The
-> treatment also makes lzo and lz4 not working. So I treat them
-> separately by using pstore_decompress() to treat the compressed
-> data, and memcpy() to treat the uncompressed ECC correction notice.
->
-> Signed-off-by: Geliang Tang <geliangtang@163.com>
+On Thu, Feb 18, 2016 at 02:15:44PM +0000, Matt Fleming wrote:
+> On Thu, 18 Feb, at 02:44:02PM, Ard Biesheuvel wrote:
+> > On 18 February 2016 at 14:43, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > > On Thu, 18 Feb, at 02:29:32PM, Ard Biesheuvel wrote:
+> > >> On 18 February 2016 at 14:28, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > >> > On Thu, 18 Feb, at 01:16:05PM, Ard Biesheuvel wrote:
+> > >> >> On 18 February 2016 at 11:44, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> > >> >> > On Mon, 15 Feb, at 12:32:32PM, Ard Biesheuvel wrote:
+> > >> >> >> On ARM and arm64, ioremap() and memremap() are not interchangeable like
+> > >> >> >> on x86, and the use of ioremap() on ordinary RAM is typically flagged
+> > >> >> >> as an error if the memory region being mapped is also covered by the
+> > >> >> >> linear mapping, since that would lead to aliases with conflicting
+> > >> >> >> cacheability attributes.
+> > >> >> >>
+> > >> >> >> Since what we are dealing with is not an I/O region with side effects,
+> > >> >> >> using ioremap() here is arguably incorrect anyway, so let's replace
+> > >> >> >> it with memremap instead. Also add a missing unmap on the success path,
+> > >> >> >> and drop a memblock_remove() call which does not belong here, this far
+> > >> >> >> into the boot sequence.
+> > >> >> >>
+> > >> >> >> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> > >> >> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > >> >> >> ---
+> > >> >> >>  drivers/firmware/efi/esrt.c | 16 ++++++++--------
+> > >> >> >>  1 file changed, 8 insertions(+), 8 deletions(-)
+> > >> >> >>
+> > >> >> >
+> > >> >> > [...]
+> > >> >> >
+> > >> >> >> @@ -432,8 +434,6 @@ static int __init esrt_sysfs_init(void)
+> > >> >> >>       if (error)
+> > >> >> >>               goto err_cleanup_list;
+> > >> >> >>
+> > >> >> >> -     memblock_remove(esrt_data, esrt_data_size);
+> > >> >> >> -
+> > >> >> >>       pr_debug("esrt-sysfs: loaded.\n");
+> > >> >> >>
+> > >> >> >>       return 0;
+> > >> >> >
+> > >> >> > Shouldn't we be replacing memblock_remove() with free_bootmem_late()?
+> > >> >> > The original ESRT region is still reserved at this point, so we should
+> > >> >> > do our best to release it to the page allocator.
+> > >> >>
+> > >> >> I'd rather we keep it reserved. That way, the config table entry still
+> > >> >> points to something valid, which could be useful for kexec(), I think?
+> > >> >> At least, that is how I intended to handle config tables on ARM ...
+> > >> >
+> > >> > If we're going to reserve it why do we need to copy the data out at
+> > >> > all in esrt_sysfs_init()?
+> > >>
+> > >> Excellent question. I don't think there is any point to doing that.
+> > >
+> > > ... Unless the data is contained in an EFI Boot Services region ;-)
+> > >
+> > > Peter?
+> > 
+> > Yes, it usually is. Is that a problem?
+> 
+> Yes, we free the Boot Services regions before hitting userspace on
+> x86, see efi_free_boot_services(). We do this map/copy/unmap trick in
+> the ACPI BGRT driver for that reason.
+> 
+> The Boot Services regions can be many gigabytes in size, which makes
+> leaving them alone impractical.
+> 
+> For kexec on x86 we simply discard the BGRT table, which isn't the end
+> of the world because who really needs access to the BGRT image on
+> kexec reboot? However, I can see the value of preserving the ESRT.
+> 
+> I guess we've got two options, 1) copy out the chunks of Boot Services
+> regions we're interested in and rewrite the EFI tables to point at
+> these new allocations and free/discard all of the original Boot
+> Services regions or 2) only selectively free the Boot Services
+> regions.
 
-Thanks for the updates!
+I think we've got to copy them out anyway and give a new copy to any
+kexec'd kernel.  In 5.6 in the spec, it says of the table data:
 
-Reviewed-by: Kees Cook <keescook@chromium.org>
+  The VendorGuid associated with a given VendorTable pointer defines
+  whether or not a particular address reported in the table gets fixed
+  up when a call to SetVirtualAddressMap() is made. It is the
+  responsibility of the specification defining the VendorTable to
+  specify whether to convert the addresses reported in the table.
 
--Kees
+Of course the ESRT definition doesn't say anything about that, since
+it actually says it's in BootServicesData, and so remapping its address
+doesn't really make a lot of sense.  Unfortunately the others are
+actually *less* well defined.  Here's a list of the tables defined in
+the 2.6 spec, and what they say about either their allocation region
+or their remap policy:
 
-> ---
-> Changes in v2:
->  revise the patch as Kees suggested:
->  - drop 'depends on PSTORE' in config choice PSTORE_ZLIB/LZO/LZ4_COMPRESS;
->  - set big_oops_buf_sz to 0 in free_zlib/lzo/lz4;
->  - change zbackend[] to zbackend.
-> ---
->  drivers/firmware/efi/efi-pstore.c |   1 +
->  fs/pstore/Kconfig                 |  31 +++++-
->  fs/pstore/platform.c              | 218 ++++++++++++++++++++++++++++++++++++--
->  fs/pstore/ram.c                   |  10 +-
->  include/linux/pstore.h            |   3 +-
->  5 files changed, 248 insertions(+), 15 deletions(-)
->
-> diff --git a/drivers/firmware/efi/efi-pstore.c b/drivers/firmware/efi/efi-pstore.c
-> index eac76a7..cd8c35f 100644
-> --- a/drivers/firmware/efi/efi-pstore.c
-> +++ b/drivers/firmware/efi/efi-pstore.c
-> @@ -210,6 +210,7 @@ static int efi_pstore_sysfs_entry_iter(void *data, struct efivar_entry **pos)
->  static ssize_t efi_pstore_read(u64 *id, enum pstore_type_id *type,
->                                int *count, struct timespec *timespec,
->                                char **buf, bool *compressed,
-> +                              ssize_t *ecc_notice_size,
->                                struct pstore_info *psi)
->  {
->         struct pstore_read_data data;
-> diff --git a/fs/pstore/Kconfig b/fs/pstore/Kconfig
-> index 360ae43..be40813 100644
-> --- a/fs/pstore/Kconfig
-> +++ b/fs/pstore/Kconfig
-> @@ -1,8 +1,6 @@
->  config PSTORE
->         tristate "Persistent store support"
->         default n
-> -       select ZLIB_DEFLATE
-> -       select ZLIB_INFLATE
->         help
->            This option enables generic access to platform level
->            persistent storage via "pstore" filesystem that can
-> @@ -14,6 +12,35 @@ config PSTORE
->            If you don't have a platform persistent store driver,
->            say N.
->
-> +choice
-> +        prompt "Choose compression algorithm"
-> +        depends on PSTORE
-> +        default PSTORE_ZLIB_COMPRESS
-> +        help
-> +          This option chooses compression algorithm.
-> +
-> +config PSTORE_ZLIB_COMPRESS
-> +        bool "ZLIB"
-> +        select ZLIB_DEFLATE
-> +        select ZLIB_INFLATE
-> +        help
-> +          This option enables ZLIB compression algorithm support.
-> +
-> +config PSTORE_LZO_COMPRESS
-> +        bool "LZO"
-> +        select LZO_COMPRESS
-> +        select LZO_DECOMPRESS
-> +        help
-> +          This option enables LZO compression algorithm support.
-> +
-> +config PSTORE_LZ4_COMPRESS
-> +        bool "LZ4"
-> +        select LZ4_COMPRESS
-> +        select LZ4_DECOMPRESS
-> +        help
-> +          This option enables LZ4 compression algorithm support.
-> +endchoice
-> +
->  config PSTORE_CONSOLE
->         bool "Log kernel console messages"
->         depends on PSTORE
-> diff --git a/fs/pstore/platform.c b/fs/pstore/platform.c
-> index 588461b..7246d50 100644
-> --- a/fs/pstore/platform.c
-> +++ b/fs/pstore/platform.c
-> @@ -28,7 +28,15 @@
->  #include <linux/console.h>
->  #include <linux/module.h>
->  #include <linux/pstore.h>
-> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
->  #include <linux/zlib.h>
-> +#endif
-> +#ifdef CONFIG_PSTORE_LZO_COMPRESS
-> +#include <linux/lzo.h>
-> +#endif
-> +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
-> +#include <linux/lz4.h>
-> +#endif
->  #include <linux/string.h>
->  #include <linux/timer.h>
->  #include <linux/slab.h>
-> @@ -69,10 +77,23 @@ struct pstore_info *psinfo;
->  static char *backend;
->
->  /* Compression parameters */
-> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
->  #define COMPR_LEVEL 6
->  #define WINDOW_BITS 12
->  #define MEM_LEVEL 4
->  static struct z_stream_s stream;
-> +#else
-> +static unsigned char *workspace;
-> +#endif
-> +
-> +struct pstore_zbackend {
-> +       int (*compress)(const void *in, void *out, size_t inlen, size_t outlen);
-> +       int (*decompress)(void *in, void *out, size_t inlen, size_t outlen);
-> +       void (*allocate)(void);
-> +       void (*free)(void);
-> +
-> +       const char *name;
-> +};
->
->  static char *big_oops_buf;
->  static size_t big_oops_buf_sz;
-> @@ -129,9 +150,9 @@ bool pstore_cannot_block_path(enum kmsg_dump_reason reason)
->  }
->  EXPORT_SYMBOL_GPL(pstore_cannot_block_path);
->
-> +#ifdef CONFIG_PSTORE_ZLIB_COMPRESS
->  /* Derived from logfs_compress() */
-> -static int pstore_compress(const void *in, void *out, size_t inlen,
-> -                                                       size_t outlen)
-> +static int compress_zlib(const void *in, void *out, size_t inlen, size_t outlen)
->  {
->         int err, ret;
->
-> @@ -165,7 +186,7 @@ error:
->  }
->
->  /* Derived from logfs_uncompress */
-> -static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
-> +static int decompress_zlib(void *in, void *out, size_t inlen, size_t outlen)
->  {
->         int err, ret;
->
-> @@ -194,7 +215,7 @@ error:
->         return ret;
->  }
->
-> -static void allocate_buf_for_compression(void)
-> +static void allocate_zlib(void)
->  {
->         size_t size;
->         size_t cmpr;
-> @@ -237,12 +258,190 @@ static void allocate_buf_for_compression(void)
->
->  }
->
-> -static void free_buf_for_compression(void)
-> +static void free_zlib(void)
->  {
->         kfree(stream.workspace);
->         stream.workspace = NULL;
->         kfree(big_oops_buf);
->         big_oops_buf = NULL;
-> +       big_oops_buf_sz = 0;
-> +}
-> +
-> +static struct pstore_zbackend backend_zlib = {
-> +       .compress       = compress_zlib,
-> +       .decompress     = decompress_zlib,
-> +       .allocate       = allocate_zlib,
-> +       .free           = free_zlib,
-> +       .name           = "zlib",
-> +};
-> +#endif
-> +
-> +#ifdef CONFIG_PSTORE_LZO_COMPRESS
-> +static int compress_lzo(const void *in, void *out, size_t inlen, size_t outlen)
-> +{
-> +       int ret;
-> +
-> +       ret = lzo1x_1_compress(in, inlen, out, &outlen, workspace);
-> +       if (ret != LZO_E_OK) {
-> +               pr_err("lzo_compress error, ret = %d!\n", ret);
-> +               return -EIO;
-> +       }
-> +
-> +       return outlen;
-> +}
-> +
-> +static int decompress_lzo(void *in, void *out, size_t inlen, size_t outlen)
-> +{
-> +       int ret;
-> +
-> +       ret = lzo1x_decompress_safe(in, inlen, out, &outlen);
-> +       if (ret != LZO_E_OK) {
-> +               pr_err("lzo_decompress error, ret = %d!\n", ret);
-> +               return -EIO;
-> +       }
-> +
-> +       return outlen;
-> +}
-> +
-> +static void allocate_lzo(void)
-> +{
-> +       big_oops_buf_sz = lzo1x_worst_compress(psinfo->bufsize);
-> +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
-> +       if (big_oops_buf) {
-> +               workspace = kmalloc(LZO1X_MEM_COMPRESS, GFP_KERNEL);
-> +               if (!workspace) {
-> +                       pr_err("No memory for compression workspace; skipping compression\n");
-> +                       kfree(big_oops_buf);
-> +                       big_oops_buf = NULL;
-> +               }
-> +       } else {
-> +               pr_err("No memory for uncompressed data; skipping compression\n");
-> +               workspace = NULL;
-> +       }
-> +}
-> +
-> +static void free_lzo(void)
-> +{
-> +       kfree(workspace);
-> +       kfree(big_oops_buf);
-> +       big_oops_buf = NULL;
-> +       big_oops_buf_sz = 0;
-> +}
-> +
-> +static struct pstore_zbackend backend_lzo = {
-> +       .compress       = compress_lzo,
-> +       .decompress     = decompress_lzo,
-> +       .allocate       = allocate_lzo,
-> +       .free           = free_lzo,
-> +       .name           = "lzo",
-> +};
-> +#endif
-> +
-> +#ifdef CONFIG_PSTORE_LZ4_COMPRESS
-> +static int compress_lz4(const void *in, void *out, size_t inlen, size_t outlen)
-> +{
-> +       int ret;
-> +
-> +       ret = lz4_compress(in, inlen, out, &outlen, workspace);
-> +       if (ret) {
-> +               pr_err("lz4_compress error, ret = %d!\n", ret);
-> +               return -EIO;
-> +       }
-> +
-> +       return outlen;
-> +}
-> +
-> +static int decompress_lz4(void *in, void *out, size_t inlen, size_t outlen)
-> +{
-> +       int ret;
-> +
-> +       ret = lz4_decompress_unknownoutputsize(in, inlen, out, &outlen);
-> +       if (ret) {
-> +               pr_err("lz4_decompress error, ret = %d!\n", ret);
-> +               return -EIO;
-> +       }
-> +
-> +       return outlen;
-> +}
-> +
-> +static void allocate_lz4(void)
-> +{
-> +       big_oops_buf_sz = lz4_compressbound(psinfo->bufsize);
-> +       big_oops_buf = kmalloc(big_oops_buf_sz, GFP_KERNEL);
-> +       if (big_oops_buf) {
-> +               workspace = kmalloc(LZ4_MEM_COMPRESS, GFP_KERNEL);
-> +               if (!workspace) {
-> +                       pr_err("No memory for compression workspace; skipping compression\n");
-> +                       kfree(big_oops_buf);
-> +                       big_oops_buf = NULL;
-> +               }
-> +       } else {
-> +               pr_err("No memory for uncompressed data; skipping compression\n");
-> +               workspace = NULL;
-> +       }
-> +}
-> +
-> +static void free_lz4(void)
-> +{
-> +       kfree(workspace);
-> +       kfree(big_oops_buf);
-> +       big_oops_buf = NULL;
-> +       big_oops_buf_sz = 0;
-> +}
-> +
-> +static struct pstore_zbackend backend_lz4 = {
-> +       .compress       = compress_lz4,
-> +       .decompress     = decompress_lz4,
-> +       .allocate       = allocate_lz4,
-> +       .free           = free_lz4,
-> +       .name           = "lz4",
-> +};
-> +#endif
-> +
-> +static struct pstore_zbackend *zbackend =
-> +#if defined(CONFIG_PSTORE_ZLIB_COMPRESS)
-> +       &backend_zlib;
-> +#elif defined(CONFIG_PSTORE_LZO_COMPRESS)
-> +       &backend_lzo;
-> +#elif defined(CONFIG_PSTORE_LZ4_COMPRESS)
-> +       &backend_lz4;
-> +#else
-> +       NULL;
-> +#endif
-> +
-> +static int pstore_compress(const void *in, void *out,
-> +                          size_t inlen, size_t outlen)
-> +{
-> +       if (zbackend)
-> +               return zbackend->compress(in, out, inlen, outlen);
-> +       else
-> +               return -EIO;
-> +}
-> +
-> +static int pstore_decompress(void *in, void *out, size_t inlen, size_t outlen)
-> +{
-> +       if (zbackend)
-> +               return zbackend->decompress(in, out, inlen, outlen);
-> +       else
-> +               return -EIO;
-> +}
-> +
-> +static void allocate_buf_for_compression(void)
-> +{
-> +       if (zbackend) {
-> +               pr_info("using %s compression\n", zbackend->name);
-> +               zbackend->allocate();
-> +       } else {
-> +               pr_err("allocate compression buffer error!\n");
-> +       }
-> +}
-> +
-> +static void free_buf_for_compression(void)
-> +{
-> +       if (zbackend)
-> +               zbackend->free();
-> +       else
-> +               pr_err("free compression buffer error!\n");
->  }
->
->  /*
-> @@ -527,6 +726,7 @@ void pstore_get_records(int quiet)
->         int                     failed = 0, rc;
->         bool                    compressed;
->         int                     unzipped_len = -1;
-> +       ssize_t                 ecc_notice_size = 0;
->
->         if (!psi)
->                 return;
-> @@ -536,7 +736,7 @@ void pstore_get_records(int quiet)
->                 goto out;
->
->         while ((size = psi->read(&id, &type, &count, &time, &buf, &compressed,
-> -                               psi)) > 0) {
-> +                                &ecc_notice_size, psi)) > 0) {
->                 if (compressed && (type == PSTORE_TYPE_DMESG)) {
->                         if (big_oops_buf)
->                                 unzipped_len = pstore_decompress(buf,
-> @@ -544,6 +744,9 @@ void pstore_get_records(int quiet)
->                                                         big_oops_buf_sz);
->
->                         if (unzipped_len > 0) {
-> +                               if (ecc_notice_size)
-> +                                       memcpy(big_oops_buf + unzipped_len,
-> +                                              buf + size, ecc_notice_size);
->                                 kfree(buf);
->                                 buf = big_oops_buf;
->                                 size = unzipped_len;
-> @@ -555,7 +758,8 @@ void pstore_get_records(int quiet)
->                         }
->                 }
->                 rc = pstore_mkfile(type, psi->name, id, count, buf,
-> -                                 compressed, (size_t)size, time, psi);
-> +                                  compressed, size + ecc_notice_size,
-> +                                  time, psi);
->                 if (unzipped_len < 0) {
->                         /* Free buffer other than big oops */
->                         kfree(buf);
-> diff --git a/fs/pstore/ram.c b/fs/pstore/ram.c
-> index 319c3a6..11ec024 100644
-> --- a/fs/pstore/ram.c
-> +++ b/fs/pstore/ram.c
-> @@ -181,10 +181,10 @@ static bool prz_ok(struct persistent_ram_zone *prz)
->  static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
->                                    int *count, struct timespec *time,
->                                    char **buf, bool *compressed,
-> +                                  ssize_t *ecc_notice_size,
->                                    struct pstore_info *psi)
->  {
->         ssize_t size;
-> -       ssize_t ecc_notice_size;
->         struct ramoops_context *cxt = psi->data;
->         struct persistent_ram_zone *prz = NULL;
->         int header_length = 0;
-> @@ -229,16 +229,16 @@ static ssize_t ramoops_pstore_read(u64 *id, enum pstore_type_id *type,
->         size = persistent_ram_old_size(prz) - header_length;
->
->         /* ECC correction notice */
-> -       ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
-> +       *ecc_notice_size = persistent_ram_ecc_string(prz, NULL, 0);
->
-> -       *buf = kmalloc(size + ecc_notice_size + 1, GFP_KERNEL);
-> +       *buf = kmalloc(size + *ecc_notice_size + 1, GFP_KERNEL);
->         if (*buf == NULL)
->                 return -ENOMEM;
->
->         memcpy(*buf, (char *)persistent_ram_old(prz) + header_length, size);
-> -       persistent_ram_ecc_string(prz, *buf + size, ecc_notice_size + 1);
-> +       persistent_ram_ecc_string(prz, *buf + size, *ecc_notice_size + 1);
->
-> -       return size + ecc_notice_size;
-> +       return size;
->  }
->
->  static size_t ramoops_write_kmsg_hdr(struct persistent_ram_zone *prz,
-> diff --git a/include/linux/pstore.h b/include/linux/pstore.h
-> index 831479f..899e95e 100644
-> --- a/include/linux/pstore.h
-> +++ b/include/linux/pstore.h
-> @@ -58,7 +58,8 @@ struct pstore_info {
->         int             (*close)(struct pstore_info *psi);
->         ssize_t         (*read)(u64 *id, enum pstore_type_id *type,
->                         int *count, struct timespec *time, char **buf,
-> -                       bool *compressed, struct pstore_info *psi);
-> +                       bool *compressed, ssize_t *ecc_notice_size,
-> +                       struct pstore_info *psi);
->         int             (*write)(enum pstore_type_id type,
->                         enum kmsg_dump_reason reason, u64 *id,
->                         unsigned int part, int count, bool compressed,
-> --
-> 2.5.0
->
->
+ACPI20		nada			Physical Address (PA)
+ACPI		nada			PA
+SAL		nada			PA
+SMBIOS		nada			PA
+SMBIOS3		nada			PA
+MPS		nada			PA
+properties	nada			PA
+memory attrs	nada			nada
+debugimage info	nada			nada
+IEIT		nada			nada
+ESRT		BootServicesData	nada
 
+So... for the ones specified by physical addresses, we know we can
+access them early on, and it probably doesn't matter what allocation
+pool they're in, because we're reserving them anyway.  Memory attributes
+I would /guess/ have to also be specified by PAs; it's in the very next
+subsection of the spec from all the other ones, and I think it just got
+omitted from the list.  That leaves the last three.  As an aside, since
+these definitions are so very poor, I'm going to put it on my TODO for
+USST to clarify and fix these up, as well as to look at systemic fixes
+for this problem in the future.
 
+Anyway, the last three.  I think it's safe to assume that they are
+mapped to virtual addresses we can read from *before*
+SetVirtualAddressMap() and ExitBootServices() are called, especially
+since we generally have an identity map before then anyway, but we
+really don't know anything at all after that.  We also don't know the
+sizes without parsing the tables themselves, which continues to be a
+pain in the ass.
+
+> I've always stayed clear of 2) in case there exists cross-region
+> references in the data that isn't obvious. I'd like to think that
+> would never happen, but, you know, dragons lurk here, etc.
+> 
+> Though actually, now I think about it, cross-region references can't
+> possibly exist because they'd cause issues with the current code.
+
+I would think any single table has to be entirely within the same
+region, yes.
+
+> So maybe the best solution is actually 2), where we preserve the Boot
+> Services regions if any of the drivers (ESRT, BGRT) request them but
+> free all the others? 
+
+Note that BGRT is an ACPI table rather than an EFI Configuration Table,
+and as such we actually have bounds for it.  The others are... special.
+
+- Debug Image Info actually has a size.  That's nice of it.  It's also
+  the table we've never talked about using.
+- ESRT you have to compute the size as your parse it, and it has
+  variable length members, so the driver for it needs to figure it out.
+- IEIT has a number of entries at the top level, and then each entry has
+  a size.  Probably still best to have the driver that's parsing it
+  figure the size out.
+- the Memory Attributes Table has a number of entries and a size of each
+  entry, so you can just multiply.
+
+> What are the lifetime rules for Boot Services regions on arm*?
+
+I'll leave this for Ard and friends.
+
+So the question I have is: would you rather chop up regions and reserve
+the space, or allocate a new copy and update the configuration table
+(after ExitBootServices()) to point to it?  The latter makes it pretty
+easy to do from an API that all these drivers can use, and it makes the
+kexec case completely transparent.
+
+Up to you.
 
 -- 
-Kees Cook
-Chrome OS & Brillo Security
+  Peter
