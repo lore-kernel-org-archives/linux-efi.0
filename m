@@ -1,87 +1,92 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Make efivarfs entries immutable by default.
-Date: Thu, 18 Feb 2016 14:56:50 +0000
-Message-ID: <20160218145650.GJ2651@codeblueprint.co.uk>
-References: <1455638983-30455-1-git-send-email-pjones@redhat.com>
- <1455638983-30455-3-git-send-email-pjones@redhat.com>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: Re: [PATCH v1 10/10] efivars: use generic UUID library
+Date: Thu, 18 Feb 2016 15:07:27 +0000
+Message-ID: <20160218150727.GK2651@codeblueprint.co.uk>
+References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
+ <1455711448-124103-11-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-acpi-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1455638983-30455-3-git-send-email-pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+In-Reply-To: <1455711448-124103-11-git-send-email-andriy.shevchenko@linux.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Theodore Ts'o <tytso@mit.edu>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Jani Nikula <jani.nikula@linux.intel.com>, David Airlie <airlied@linux.ie>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Bjorn Helgaas <bhelgaas@google.com>, Mathias Nyman <mathias.nyman@intel.com>, Lv Zheng <lv.zheng@intel.com>, Mark Brown <broonie@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org, linux-api@vger.kernel.org, linux-nvdimm@lists.01.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 16 Feb, at 11:09:43AM, Peter Jones wrote:
-> "rm -rf" is bricking some peoples' laptops because of variables being
-> used to store non-reinitializable firmware driver data that's required
-> to POST the hardware.
+On Wed, 17 Feb, at 02:17:28PM, Andy Shevchenko wrote:
+> Instead of opencoding let's use generic UUID library functions here.
 > 
-> These are 100% bugs, and they need to be fixed, but in the mean time it
-> shouldn't be easy to *accidentally* brick machines.
-> 
-> We have to have delete working, and picking which variables do and don't
-> work for deletion is quite intractable, so instead make everything
-> immutable by default (except for a whitelist), and make tools that
-> aren't quite so broad-spectrum unset the immutable flag.
-> 
-> Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 > ---
->  Documentation/filesystems/efivarfs.txt         |   7 ++
->  drivers/firmware/efi/vars.c                    | 115 ++++++++++++++++++++-----
->  fs/efivarfs/file.c                             |  70 +++++++++++++++
->  fs/efivarfs/inode.c                            |  30 ++++---
->  fs/efivarfs/internal.h                         |   3 +-
->  fs/efivarfs/super.c                            |   9 +-
->  include/linux/efi.h                            |   4 +-
->  tools/testing/selftests/efivarfs/efivarfs.sh   |  19 +++-
->  tools/testing/selftests/efivarfs/open-unlink.c |  72 +++++++++++++++-
->  9 files changed, 287 insertions(+), 42 deletions(-)
- 
-[...]
-
-> @@ -193,17 +195,59 @@ static const struct variable_validate variable_validate[] = {
->  	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOut", validate_device_path },
->  	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOutDev", validate_device_path },
->  	{ EFI_GLOBAL_VARIABLE_GUID, "Lang", validate_ascii_string },
-> +	{ EFI_GLOBAL_VARIABLE_GUID, "OsIndications", NULL },
->  	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
->  	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
-> +	{ LINUX_EFI_CRASH_GUID, "*", NULL },
->  	{ NULL_GUID, "", NULL },
->  };
+>  fs/efivarfs/inode.c | 40 +++-------------------------------------
+>  1 file changed, 3 insertions(+), 37 deletions(-)
+> 
+> diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+> index 3381b9d..b579e3a 100644
+> --- a/fs/efivarfs/inode.c
+> +++ b/fs/efivarfs/inode.c
+> @@ -11,6 +11,7 @@
+>  #include <linux/fs.h>
+>  #include <linux/ctype.h>
+>  #include <linux/slab.h>
+> +#include <linux/uuid.h>
 >  
+>  #include "internal.h"
+>  
+> @@ -44,11 +45,7 @@ struct inode *efivarfs_get_inode(struct super_block *sb,
+>   */
+>  bool efivarfs_valid_name(const char *str, int len)
+>  {
+> -	static const char dashes[EFI_VARIABLE_GUID_LEN] = {
+> -		[8] = 1, [13] = 1, [18] = 1, [23] = 1
+> -	};
+>  	const char *s = str + len - EFI_VARIABLE_GUID_LEN;
+> -	int i;
+>  
+>  	/*
+>  	 * We need a GUID, plus at least one letter for the variable name,
+> @@ -66,37 +63,7 @@ bool efivarfs_valid_name(const char *str, int len)
+>  	 *
+>  	 *	12345678-1234-1234-1234-123456789abc
+>  	 */
+> -	for (i = 0; i < EFI_VARIABLE_GUID_LEN; i++) {
+> -		if (dashes[i]) {
+> -			if (*s++ != '-')
+> -				return false;
+> -		} else {
+> -			if (!isxdigit(*s++))
+> -				return false;
+> -		}
+> -	}
+> -
+> -	return true;
+> -}
+> -
+> -static void efivarfs_hex_to_guid(const char *str, efi_guid_t *guid)
+> -{
+> -	guid->b[0] = hex_to_bin(str[6]) << 4 | hex_to_bin(str[7]);
+> -	guid->b[1] = hex_to_bin(str[4]) << 4 | hex_to_bin(str[5]);
+> -	guid->b[2] = hex_to_bin(str[2]) << 4 | hex_to_bin(str[3]);
+> -	guid->b[3] = hex_to_bin(str[0]) << 4 | hex_to_bin(str[1]);
+> -	guid->b[4] = hex_to_bin(str[11]) << 4 | hex_to_bin(str[12]);
+> -	guid->b[5] = hex_to_bin(str[9]) << 4 | hex_to_bin(str[10]);
+> -	guid->b[6] = hex_to_bin(str[16]) << 4 | hex_to_bin(str[17]);
+> -	guid->b[7] = hex_to_bin(str[14]) << 4 | hex_to_bin(str[15]);
+> -	guid->b[8] = hex_to_bin(str[19]) << 4 | hex_to_bin(str[20]);
+> -	guid->b[9] = hex_to_bin(str[21]) << 4 | hex_to_bin(str[22]);
+> -	guid->b[10] = hex_to_bin(str[24]) << 4 | hex_to_bin(str[25]);
+> -	guid->b[11] = hex_to_bin(str[26]) << 4 | hex_to_bin(str[27]);
+> -	guid->b[12] = hex_to_bin(str[28]) << 4 | hex_to_bin(str[29]);
+> -	guid->b[13] = hex_to_bin(str[30]) << 4 | hex_to_bin(str[31]);
+> -	guid->b[14] = hex_to_bin(str[32]) << 4 | hex_to_bin(str[33]);
+> -	guid->b[15] = hex_to_bin(str[34]) << 4 | hex_to_bin(str[35]);
+> +	return uuid_is_valid(s);
+>  }
 
-You don't need to fold in patches that can be applied verbatim from
-upstream. It makes validation of backports harder and the git history
-bizarre.
+I think you've confused yourself here. You've inverted the return
+value meaning for efivarfs_valid_name().
 
-> +static bool
-> +variable_matches(const efi_char16_t *ucs2_name, const char *var_name,
-> +		 size_t len, const char *match_name, int *match)
-> +{
-> +	for (*match = 0; ; (*match)++) {
-> +		char c = match_name[*match];
-> +		char u = var_name[*match];
-> +
-> +		/* Wildcard in the matching name means we've matched */
-> +		if (c == '*')
-> +			return true;
-> +
-> +		/* All special variables are plain ascii unless they were
-> +		 * wildcards. */
-> +		if (ucs2_name[*match] > 127)
-> +			return false;
-> +
-
-This caught my eye. You've inverted the check from here,
-
-[...]
-  
-> -			/* All special variables are plain ascii */
-> -			if (u > 127)
-> -				return true;
-
-Was that intentional?
+Normally I would expect this change to be correct but uuid_is_valid()
+returns 0 for success, -EINVAL for failure. Either the function is
+misnamed or the return value semantics are wrong.
