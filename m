@@ -1,169 +1,126 @@
-From: "Zheng, Lv" <lv.zheng@intel.com>
-Subject: RE: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
-Date: Thu, 18 Feb 2016 02:34:46 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB4D2A6@SHSMSX101.ccr.corp.intel.com>
-References: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
- <1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
+From: "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH 2/5] efi: Use ucs2_as_utf8 in efivarfs instead of open coding a bad version
+Date: Wed, 17 Feb 2016 21:34:26 -0800
+Message-ID: <12473B1F-5227-4E83-BAF9-06B69CF74D77@zytor.com>
+References: <1455276432-9931-1-git-send-email-matt@codeblueprint.co.uk> <1455276432-9931-3-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
-Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
-To: Matt Fleming <matt@codeblueprint.co.uk>, Dave Young <dyoung@redhat.com>
-Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, Josh Triplett <josh@joshtriplett.org>, Borislav Petkov <bp@alien8.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>
+Content-Type: text/plain;
+ charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1455276432-9931-3-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>, Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi, 
-
-> From: linux-acpi-owner@vger.kernel.org [mailto:linux-acpi-
-> owner@vger.kernel.org] On Behalf Of Matt Fleming
-[Lv Zheng] 
-First, is it possible for you to submit an ACPICA patch instead of a Linux patch.
-The reasoning for doing this can be found at:
-https://acpica.org/Licensing
-
-> Subject: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
+On February 12, 2016 3:27:09 AM PST, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+>From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>
+>Translate EFI's UCS-2 variable names to UTF-8 instead of just assuming
+>all variable names fit in ASCII.
+>
+>Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>Acked-by: Matthew Garrett <mjg59-JW9irJGTvgXQT0dZR+AlfA@public.gmane.org>
+>Tested-by: "Lee, Chun-Yi" <jlee-IBi9RG/b67k@public.gmane.org>
+>Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+>---
+> drivers/firmware/efi/efivars.c | 30 +++++++++++-------------------
+> fs/efivarfs/super.c            |  7 +++----
+> 2 files changed, 14 insertions(+), 23 deletions(-)
+>
+>diff --git a/drivers/firmware/efi/efivars.c
+>b/drivers/firmware/efi/efivars.c
+>index 756eca8c4cf8..f4ff8abc5f3e 100644
+>--- a/drivers/firmware/efi/efivars.c
+>+++ b/drivers/firmware/efi/efivars.c
+>@@ -540,38 +540,30 @@ static ssize_t efivar_delete(struct file *filp,
+>struct kobject *kobj,
+> static int
+> efivar_create_sysfs_entry(struct efivar_entry *new_var)
+> {
+>-	int i, short_name_size;
+>+	int short_name_size;
+> 	char *short_name;
+>-	unsigned long variable_name_size;
+>-	efi_char16_t *variable_name;
+>+	unsigned long utf8_name_size;
+>+	efi_char16_t *variable_name = new_var->var.VariableName;
+> 	int ret;
 > 
-> There are existing internal functions that allow the removal of ACPI
-> tables, but they're not exposed to the OS in any useful way.
+>-	variable_name = new_var->var.VariableName;
+>-	variable_name_size = ucs2_strlen(variable_name) *
+>sizeof(efi_char16_t);
+>-
+> 	/*
+>-	 * Length of the variable bytes in ASCII, plus the '-' separator,
+>+	 * Length of the variable bytes in UTF8, plus the '-' separator,
+> 	 * plus the GUID, plus trailing NUL
+> 	 */
+>-	short_name_size = variable_name_size / sizeof(efi_char16_t)
+>-				+ 1 + EFI_VARIABLE_GUID_LEN + 1;
+>-
+>-	short_name = kzalloc(short_name_size, GFP_KERNEL);
+>+	utf8_name_size = ucs2_utf8size(variable_name);
+>+	short_name_size = utf8_name_size + 1 + EFI_VARIABLE_GUID_LEN + 1;
 > 
-> Introduce acpi_remove_table() which allows tables to be invalidated in
-> the global table list, resulting in failure of subsequent calls to
-> acpi_get_table() for those tables.
+>+	short_name = kmalloc(short_name_size, GFP_KERNEL);
+> 	if (!short_name)
+> 		return -ENOMEM;
 > 
-> The rationale for this change is the ability to remove the BGRT table
-> during kexec boot. The BGRT table refers to memory regions that are no
-> longer reserved by the firmware once the kexec kernel boots, having
-> been released for general allocation by the previous kernel.
+>-	/* Convert Unicode to normal chars (assume top bits are 0),
+>-	   ala UTF-8 */
+>-	for (i=0; i < (int)(variable_name_size / sizeof(efi_char16_t)); i++)
+>{
+>-		short_name[i] = variable_name[i] & 0xFF;
+>-	}
+>+	ucs2_as_utf8(short_name, variable_name, short_name_size);
+>+
+> 	/* This is ugly, but necessary to separate one vendor's
+> 	   private variables from another's.         */
+>-
+>-	*(short_name + strlen(short_name)) = '-';
+>+	short_name[utf8_name_size] = '-';
+> 	efi_guid_to_str(&new_var->var.VendorGuid,
+>-			 short_name + strlen(short_name));
+>+			 short_name + utf8_name_size + 1);
 > 
-> Cc: Dave Young <dyoung@redhat.com>
-> Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
-> Cc: Josh Triplett <josh@joshtriplett.org>
-> Cc: Borislav Petkov <bp@alien8.de>
-> Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-> Cc: Vivek Goyal <vgoyal@redhat.com>
-> Cc: <kexec@lists.infradead.org>
-> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-> ---
->  drivers/acpi/acpica/tbxface.c | 54
-> +++++++++++++++++++++++++++++++++++++++++++
->  include/acpi/acpixf.h         |  3 +++
->  2 files changed, 57 insertions(+)
+> 	new_var->kobj.kset = efivars_kset;
 > 
-> diff --git a/drivers/acpi/acpica/tbxface.c b/drivers/acpi/acpica/tbxface.c
-> index 326df65decef..999eecd89601 100644
-> --- a/drivers/acpi/acpica/tbxface.c
-> +++ b/drivers/acpi/acpica/tbxface.c
-> @@ -480,3 +480,57 @@ cleanup:
->  }
+>diff --git a/fs/efivarfs/super.c b/fs/efivarfs/super.c
+>index b8a564f29107..8651ac28ec0d 100644
+>--- a/fs/efivarfs/super.c
+>+++ b/fs/efivarfs/super.c
+>@@ -118,7 +118,7 @@ static int efivarfs_callback(efi_char16_t *name16,
+>efi_guid_t vendor,
+> 	struct dentry *dentry, *root = sb->s_root;
+> 	unsigned long size = 0;
+> 	char *name;
+>-	int len, i;
+>+	int len;
+> 	int err = -ENOMEM;
 > 
->  ACPI_EXPORT_SYMBOL(acpi_remove_table_handler)
-> +
-> +/**************************************************************
-> *****************
-> + *
-> + * FUNCTION:    acpi_remove_table
-[Lv Zheng] 
-I'd prefer acpi_uninstall_table() in order to keep the consistencies of the function naming.
-There is in fact a state machine defined by the table manager design:
-UNINSTALLED - install -> INSTALLED/INVALIDATED - validate -> VALIDATED/UNLOADED - load -> LOADED
-LOADED -> unload -> UNLOADED/VALIDATED -> invalidate - INVALIDATED/INSTALLED -> uninstall -> UNINSTALLED
-
-> + *
-> + * PARAMETERS:  signature           - ACPI signature of needed table
-> + *              instance            - Which instance (for SSDTs)
-> + *
-> + * RETURN:      Status
-> + *
-> + * DESCRIPTION: Finds and removes an ACPI table.
-> + *
-> +
-> ****************************************************************
-> **************/
-> +acpi_status
-[Lv Zheng] 
-You need to put __init here.
-Otherwise another API (for example, acpi_unload_table()) should be provided instead of this.
-
-> acpi_remove_table(char *signature, u32 instance)
-[Lv Zheng] 
-I'm not sure if using instance is a good idea here.
-We have extensions not upstreamed that have something to do with the table indexing.
-But well, it doesn't look bad for now.
-
-> +{
-> +	struct acpi_table_desc *table_desc;
-> +	acpi_status status;
-> +	u32 i;
-> +	u32 j;
-> +
-> +	/* Parameter validation */
-> +	if (!signature) {
-> +		return (AE_BAD_PARAMETER);
-> +	}
-> +
-> +	/* Walk the root table list */
-> +
-> +	for (i = 0, j = 0; i < acpi_gbl_root_table_list.current_table_count;
-> +	     i++) {
-> +		if (!ACPI_COMPARE_NAME
-> +		    (&(acpi_gbl_root_table_list.tables[i].signature),
-> +		     signature)) {
-> +			continue;
-> +		}
-[Lv Zheng] 
-After removing a table, the instance no remains 2 for the next table of the same signature.
-Is it intentional?
-
-> +
-> +		if (++j < instance) {
-> +			continue;
-> +		}
-> +
-> +		table_desc = &acpi_gbl_root_table_list.tables[i];
-> +
-> +		status = acpi_tb_validate_table(table_desc);
-> +		if (ACPI_FAILURE(status)) {
-> +			return (status);
-> +		}
-[Lv Zheng] 
-You needn't invoke acpi_tb_validate_table() here.
-
-> +
-> +		acpi_tb_uninstall_table(table_desc);
-> +		return (AE_OK);
-> +	}
-> +
-> +	return (AE_NOT_FOUND);
-> +}
-> +
-> +ACPI_EXPORT_SYMBOL(acpi_remove_table);
-> diff --git a/include/acpi/acpixf.h b/include/acpi/acpixf.h
-> index c96621e87c19..47e51612293e 100644
-> --- a/include/acpi/acpixf.h
-> +++ b/include/acpi/acpixf.h
-> @@ -505,6 +505,9 @@ ACPI_EXTERNAL_RETURN_STATUS(acpi_status
->  ACPI_EXTERNAL_RETURN_STATUS(acpi_status
->  			     acpi_remove_table_handler(acpi_table_handler
->  						       handler))
-> +ACPI_EXTERNAL_RETURN_STATUS(acpi_status
-> +			     acpi_remove_table(acpi_string signature,
-> +					       u32 instance))
+> 	entry = kzalloc(sizeof(*entry), GFP_KERNEL);
+>@@ -128,15 +128,14 @@ static int efivarfs_callback(efi_char16_t
+>*name16, efi_guid_t vendor,
+> 	memcpy(entry->var.VariableName, name16, name_size);
+> 	memcpy(&(entry->var.VendorGuid), &vendor, sizeof(efi_guid_t));
 > 
-[Lv Zheng] 
-It is better to move this declaration close to acpi_install_table().
-
-Thanks and best regards
--Lv
-
->  /*
->   * Namespace and name interfaces
-> --
-> 2.6.2
+>-	len = ucs2_strlen(entry->var.VariableName);
+>+	len = ucs2_utf8size(entry->var.VariableName);
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 	/* name, plus '-', plus GUID, plus NUL*/
+> 	name = kmalloc(len + 1 + EFI_VARIABLE_GUID_LEN + 1, GFP_KERNEL);
+> 	if (!name)
+> 		goto fail;
+> 
+>-	for (i = 0; i < len; i++)
+>-		name[i] = entry->var.VariableName[i] & 0xFF;
+>+	ucs2_as_utf8(name, entry->var.VariableName, len);
+> 
+> 	name[len] = '-';
+> 
+
+However, I think we should treat this "ucs2" as utf16, because sooner or later someone will enter utf16 characters.
+-- 
+Sent from my Android device with K-9 Mail. Please excuse brevity and formatting.
