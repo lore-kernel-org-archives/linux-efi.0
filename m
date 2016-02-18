@@ -1,58 +1,57 @@
-From: Mika Westerberg <mika.westerberg@linux.intel.com>
-Subject: Re: [PATCH v1 06/10] device property: switch to use UUID API
-Date: Thu, 18 Feb 2016 13:07:54 +0200
-Message-ID: <20160218110754.GG1742@lahna.fi.intel.com>
-References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
- <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access ESRT
+ table in memory
+Date: Thu, 18 Feb 2016 13:16:05 +0100
+Message-ID: <CAKv+Gu_AW7PKJJOd2mbEu3LKJe+gNaPHnH=sgO=YXM_KWFyKxw@mail.gmail.com>
+References: <1455535953-5056-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1455535953-5056-2-git-send-email-ard.biesheuvel@linaro.org>
+	<20160218104407.GC2651@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-acpi-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Theodore Ts'o <tytso@mit.edu>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Jani Nikula <jani.nikula@linux.intel.com>, David Airlie <airlied@linux.ie>, Benjamin Tissoires <benjamin.tissoires@redhat.com>, Bjorn Helgaas <bhelgaas@google.com>, Mathias Nyman <mathias.nyman@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>, Lv Zheng <lv.zheng@intel.com>, Mark Brown <broonie@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Andrew Morton <akpm@linux-foundation.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, linux-acpi@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org, linux-efi@vger.kernel.org, linux-api@vger.kernel.org, linux-nvdimm@lists.01.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160218104407.GC2651-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Feb 17, 2016 at 02:17:24PM +0200, Andy Shevchenko wrote:
-> Switch to use a generic UUID API instead of custom approach. It allows to
-> define UUIDs, compare them, and validate.
-> 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> ---
->  drivers/acpi/property.c | 18 ++++++++----------
->  1 file changed, 8 insertions(+), 10 deletions(-)
-> 
-> diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
-> index 2aee416..1e75305 100644
-> --- a/drivers/acpi/property.c
-> +++ b/drivers/acpi/property.c
-> @@ -25,15 +25,13 @@ static int acpi_data_get_property_array(struct acpi_device_data *data,
->  					const union acpi_object **obj);
->  
->  /* ACPI _DSD device properties UUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
-> -static const u8 prp_uuid[16] = {
-> -	0x14, 0xd8, 0xff, 0xda, 0xba, 0x6e, 0x8c, 0x4d,
-> -	0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01
-> -};
-> +static const uuid_le prp_uuid =
-> +	UUID_LE(0xdaffd814, 0x6eba, 0x4d8c,
-> +		0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01);
->  /* ACPI _DSD data subnodes UUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
-> -static const u8 ads_uuid[16] = {
-> -	0xe6, 0xe3, 0xb8, 0xdb, 0x86, 0x58, 0xa6, 0x4b,
-> -	0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b
-> -};
-> +static const uuid_le ads_uuid =
-> +	UUID_LE(0xdbb8e3e6, 0x5886, 0x4ba6,
-> +		0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
+On 18 February 2016 at 11:44, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Mon, 15 Feb, at 12:32:32PM, Ard Biesheuvel wrote:
+>> On ARM and arm64, ioremap() and memremap() are not interchangeable like
+>> on x86, and the use of ioremap() on ordinary RAM is typically flagged
+>> as an error if the memory region being mapped is also covered by the
+>> linear mapping, since that would lead to aliases with conflicting
+>> cacheability attributes.
+>>
+>> Since what we are dealing with is not an I/O region with side effects,
+>> using ioremap() here is arguably incorrect anyway, so let's replace
+>> it with memremap instead. Also add a missing unmap on the success path,
+>> and drop a memblock_remove() call which does not belong here, this far
+>> into the boot sequence.
+>>
+>> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/firmware/efi/esrt.c | 16 ++++++++--------
+>>  1 file changed, 8 insertions(+), 8 deletions(-)
+>>
+>
+> [...]
+>
+>> @@ -432,8 +434,6 @@ static int __init esrt_sysfs_init(void)
+>>       if (error)
+>>               goto err_cleanup_list;
+>>
+>> -     memblock_remove(esrt_data, esrt_data_size);
+>> -
+>>       pr_debug("esrt-sysfs: loaded.\n");
+>>
+>>       return 0;
+>
+> Shouldn't we be replacing memblock_remove() with free_bootmem_late()?
+> The original ESRT region is still reserved at this point, so we should
+> do our best to release it to the page allocator.
 
-This looks better than the original but it is still not too readable.
-
-I think it would be better to have uuid as string like:
-
-static const char *ads_uuid = "dbb8e3e6-5886-4ba6-8795-1319f52a966b";
-
-and then convert that to the right byte presentation when first time
-used. That would match the uuid format in the ACPI (and device
-properties) spec. and thus make it easier to read and understand.
+I'd rather we keep it reserved. That way, the config table entry still
+points to something valid, which could be useful for kexec(), I think?
+At least, that is how I intended to handle config tables on ARM ...
