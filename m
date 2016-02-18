@@ -1,64 +1,169 @@
-From: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Subject: Re: [PATCH v1 06/10] device property: switch to use UUID API
-Date: Thu, 18 Feb 2016 01:03:39 +0100
-Message-ID: <7544228.v4QPX4F7J7@vostro.rjw.lan>
-References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com> <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
+From: "Zheng, Lv" <lv.zheng@intel.com>
+Subject: RE: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
+Date: Thu, 18 Feb 2016 02:34:46 +0000
+Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB4D2A6@SHSMSX101.ccr.corp.intel.com>
+References: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
+ <1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1455711448-124103-7-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jani Nikula <jani.nikula-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Benjamin Tissoires <benjamin.tissoires-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Mathias Nyman <mathias.nyman-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Lv Zheng <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
+Content-Language: en-US
+Sender: linux-acpi-owner@vger.kernel.org
+To: Matt Fleming <matt@codeblueprint.co.uk>, Dave Young <dyoung@redhat.com>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, Josh Triplett <josh@joshtriplett.org>, Borislav Petkov <bp@alien8.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Wednesday, February 17, 2016 02:17:24 PM Andy Shevchenko wrote:
-> Switch to use a generic UUID API instead of custom approach. It allows to
-> define UUIDs, compare them, and validate.
+Hi, 
+
+> From: linux-acpi-owner@vger.kernel.org [mailto:linux-acpi-
+> owner@vger.kernel.org] On Behalf Of Matt Fleming
+[Lv Zheng] 
+First, is it possible for you to submit an ACPICA patch instead of a Linux patch.
+The reasoning for doing this can be found at:
+https://acpica.org/Licensing
+
+> Subject: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
 > 
-> Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+> There are existing internal functions that allow the removal of ACPI
+> tables, but they're not exposed to the OS in any useful way.
+> 
+> Introduce acpi_remove_table() which allows tables to be invalidated in
+> the global table list, resulting in failure of subsequent calls to
+> acpi_get_table() for those tables.
+> 
+> The rationale for this change is the ability to remove the BGRT table
+> during kexec boot. The BGRT table refers to memory regions that are no
+> longer reserved by the firmware once the kexec kernel boots, having
+> been released for general allocation by the previous kernel.
+> 
+> Cc: Dave Young <dyoung@redhat.com>
+> Cc: Rafael J. Wysocki <rafael.j.wysocki@intel.com>
+> Cc: Josh Triplett <josh@joshtriplett.org>
+> Cc: Borislav Petkov <bp@alien8.de>
+> Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+> Cc: Vivek Goyal <vgoyal@redhat.com>
+> Cc: <kexec@lists.infradead.org>
+> Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 > ---
->  drivers/acpi/property.c | 18 ++++++++----------
->  1 file changed, 8 insertions(+), 10 deletions(-)
+>  drivers/acpi/acpica/tbxface.c | 54
+> +++++++++++++++++++++++++++++++++++++++++++
+>  include/acpi/acpixf.h         |  3 +++
+>  2 files changed, 57 insertions(+)
 > 
-> diff --git a/drivers/acpi/property.c b/drivers/acpi/property.c
-> index 2aee416..1e75305 100644
-> --- a/drivers/acpi/property.c
-> +++ b/drivers/acpi/property.c
-> @@ -25,15 +25,13 @@ static int acpi_data_get_property_array(struct acpi_device_data *data,
->  					const union acpi_object **obj);
->  
->  /* ACPI _DSD device properties UUID: daffd814-6eba-4d8c-8a91-bc9bbf4aa301 */
-> -static const u8 prp_uuid[16] = {
-> -	0x14, 0xd8, 0xff, 0xda, 0xba, 0x6e, 0x8c, 0x4d,
-> -	0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01
-> -};
-> +static const uuid_le prp_uuid =
-> +	UUID_LE(0xdaffd814, 0x6eba, 0x4d8c,
-> +		0x8a, 0x91, 0xbc, 0x9b, 0xbf, 0x4a, 0xa3, 0x01);
->  /* ACPI _DSD data subnodes UUID: dbb8e3e6-5886-4ba6-8795-1319f52a966b */
-> -static const u8 ads_uuid[16] = {
-> -	0xe6, 0xe3, 0xb8, 0xdb, 0x86, 0x58, 0xa6, 0x4b,
-> -	0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b
-> -};
-> +static const uuid_le ads_uuid =
-> +	UUID_LE(0xdbb8e3e6, 0x5886, 0x4ba6,
-> +		0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
->  
->  static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
->  					   const union acpi_object *desc,
-> @@ -138,7 +136,7 @@ static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
->  		    || links->type != ACPI_TYPE_PACKAGE)
->  			break;
->  
-> -		if (memcmp(uuid->buffer.pointer, ads_uuid, sizeof(ads_uuid)))
-> +		if (uuid_le_cmp(*(uuid_le *)uuid->buffer.pointer, ads_uuid))
+> diff --git a/drivers/acpi/acpica/tbxface.c b/drivers/acpi/acpica/tbxface.c
+> index 326df65decef..999eecd89601 100644
+> --- a/drivers/acpi/acpica/tbxface.c
+> +++ b/drivers/acpi/acpica/tbxface.c
+> @@ -480,3 +480,57 @@ cleanup:
+>  }
+> 
+>  ACPI_EXPORT_SYMBOL(acpi_remove_table_handler)
+> +
+> +/**************************************************************
+> *****************
+> + *
+> + * FUNCTION:    acpi_remove_table
+[Lv Zheng] 
+I'd prefer acpi_uninstall_table() in order to keep the consistencies of the function naming.
+There is in fact a state machine defined by the table manager design:
+UNINSTALLED - install -> INSTALLED/INVALIDATED - validate -> VALIDATED/UNLOADED - load -> LOADED
+LOADED -> unload -> UNLOADED/VALIDATED -> invalidate - INVALIDATED/INSTALLED -> uninstall -> UNINSTALLED
 
-Maybe it's too late, but I don't quite understand the pointer manipulations here.
+> + *
+> + * PARAMETERS:  signature           - ACPI signature of needed table
+> + *              instance            - Which instance (for SSDTs)
+> + *
+> + * RETURN:      Status
+> + *
+> + * DESCRIPTION: Finds and removes an ACPI table.
+> + *
+> +
+> ****************************************************************
+> **************/
+> +acpi_status
+[Lv Zheng] 
+You need to put __init here.
+Otherwise another API (for example, acpi_unload_table()) should be provided instead of this.
 
-I can see why you need a type conversion (although it looks ugly), but why do you
-need to dereference it too?
+> acpi_remove_table(char *signature, u32 instance)
+[Lv Zheng] 
+I'm not sure if using instance is a good idea here.
+We have extensions not upstreamed that have something to do with the table indexing.
+But well, it doesn't look bad for now.
 
-Thanks,
-Rafael
+> +{
+> +	struct acpi_table_desc *table_desc;
+> +	acpi_status status;
+> +	u32 i;
+> +	u32 j;
+> +
+> +	/* Parameter validation */
+> +	if (!signature) {
+> +		return (AE_BAD_PARAMETER);
+> +	}
+> +
+> +	/* Walk the root table list */
+> +
+> +	for (i = 0, j = 0; i < acpi_gbl_root_table_list.current_table_count;
+> +	     i++) {
+> +		if (!ACPI_COMPARE_NAME
+> +		    (&(acpi_gbl_root_table_list.tables[i].signature),
+> +		     signature)) {
+> +			continue;
+> +		}
+[Lv Zheng] 
+After removing a table, the instance no remains 2 for the next table of the same signature.
+Is it intentional?
+
+> +
+> +		if (++j < instance) {
+> +			continue;
+> +		}
+> +
+> +		table_desc = &acpi_gbl_root_table_list.tables[i];
+> +
+> +		status = acpi_tb_validate_table(table_desc);
+> +		if (ACPI_FAILURE(status)) {
+> +			return (status);
+> +		}
+[Lv Zheng] 
+You needn't invoke acpi_tb_validate_table() here.
+
+> +
+> +		acpi_tb_uninstall_table(table_desc);
+> +		return (AE_OK);
+> +	}
+> +
+> +	return (AE_NOT_FOUND);
+> +}
+> +
+> +ACPI_EXPORT_SYMBOL(acpi_remove_table);
+> diff --git a/include/acpi/acpixf.h b/include/acpi/acpixf.h
+> index c96621e87c19..47e51612293e 100644
+> --- a/include/acpi/acpixf.h
+> +++ b/include/acpi/acpixf.h
+> @@ -505,6 +505,9 @@ ACPI_EXTERNAL_RETURN_STATUS(acpi_status
+>  ACPI_EXTERNAL_RETURN_STATUS(acpi_status
+>  			     acpi_remove_table_handler(acpi_table_handler
+>  						       handler))
+> +ACPI_EXTERNAL_RETURN_STATUS(acpi_status
+> +			     acpi_remove_table(acpi_string signature,
+> +					       u32 instance))
+> 
+[Lv Zheng] 
+It is better to move this declaration close to acpi_install_table().
+
+Thanks and best regards
+-Lv
+
+>  /*
+>   * Namespace and name interfaces
+> --
+> 2.6.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
