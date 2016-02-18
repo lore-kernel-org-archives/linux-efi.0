@@ -1,36 +1,52 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v5sub3 4/4] arm64: efi: invoke EFI_RNG_PROTOCOL to supply
- KASLR randomness
-Date: Thu, 18 Feb 2016 10:15:01 +0000
-Message-ID: <20160218101501.GA2651@codeblueprint.co.uk>
-References: <1455126905-22688-1-git-send-email-ard.biesheuvel@linaro.org>
- <1455126905-22688-5-git-send-email-ard.biesheuvel@linaro.org>
+Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access
+ ESRT table in memory
+Date: Thu, 18 Feb 2016 10:44:07 +0000
+Message-ID: <20160218104407.GC2651@codeblueprint.co.uk>
+References: <1455535953-5056-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1455535953-5056-2-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <1455126905-22688-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1455535953-5056-2-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, keescook-F7+t8E8rja9g9hUCZPvPmw@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 10 Feb, at 06:55:05PM, Ard Biesheuvel wrote:
-> Since arm64 does not use a decompressor that supplies an execution
-> environment where it is feasible to some extent to provide a source of
-> randomness, the arm64 KASLR kernel depends on the bootloader to supply
-> some random bits in the /chosen/kaslr-seed DT property upon kernel entry.
+On Mon, 15 Feb, at 12:32:32PM, Ard Biesheuvel wrote:
+> On ARM and arm64, ioremap() and memremap() are not interchangeable like
+> on x86, and the use of ioremap() on ordinary RAM is typically flagged
+> as an error if the memory region being mapped is also covered by the
+> linear mapping, since that would lead to aliases with conflicting
+> cacheability attributes.
 > 
-> On UEFI systems, we can use the EFI_RNG_PROTOCOL, if supplied, to obtain
-> some random bits. At the same time, use it to randomize the offset of the
-> kernel Image in physical memory.
+> Since what we are dealing with is not an I/O region with side effects,
+> using ioremap() here is arguably incorrect anyway, so let's replace
+> it with memremap instead. Also add a missing unmap on the success path,
+> and drop a memblock_remove() call which does not belong here, this far
+> into the boot sequence.
 > 
+> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 > ---
->  arch/arm64/Kconfig                        |  5 ++
->  drivers/firmware/efi/libstub/arm-stub.c   | 40 ++++++----
->  drivers/firmware/efi/libstub/arm64-stub.c | 78 ++++++++++++++------
->  drivers/firmware/efi/libstub/fdt.c        | 14 ++++
->  4 files changed, 102 insertions(+), 35 deletions(-)
+>  drivers/firmware/efi/esrt.c | 16 ++++++++--------
+>  1 file changed, 8 insertions(+), 8 deletions(-)
+> 
 
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+[...]
+
+> @@ -432,8 +434,6 @@ static int __init esrt_sysfs_init(void)
+>  	if (error)
+>  		goto err_cleanup_list;
+>  
+> -	memblock_remove(esrt_data, esrt_data_size);
+> -
+>  	pr_debug("esrt-sysfs: loaded.\n");
+>  
+>  	return 0;
+
+Shouldn't we be replacing memblock_remove() with free_bootmem_late()?
+The original ESRT region is still reserved at this point, so we should
+do our best to release it to the page allocator.
