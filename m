@@ -1,107 +1,41 @@
-From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH 2/2] efi: Make efivarfs entries immutable by default.
-Date: Thu, 18 Feb 2016 14:25:39 -0500
-Message-ID: <20160218192539.GB1515@redhat.com>
-References: <1455638983-30455-1-git-send-email-pjones@redhat.com>
- <1455638983-30455-3-git-send-email-pjones@redhat.com>
- <20160218145650.GJ2651@codeblueprint.co.uk>
+From: "Rafael J. Wysocki" <rafael@kernel.org>
+Subject: Re: [PATCH 1/2] ACPICA: Tables: Add function to remove ACPI tables
+Date: Thu, 18 Feb 2016 21:15:28 +0100
+Message-ID: <CAJZ5v0hAmCKc8Qn7sKQhdGhoAXH=zmXubx295K_Nbm9npOYzBw@mail.gmail.com>
+References: <1455723910-16710-1-git-send-email-matt@codeblueprint.co.uk>
+	<1455723910-16710-2-git-send-email-matt@codeblueprint.co.uk>
+	<1AE640813FDE7649BE1B193DEA596E883BB4D2A6@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160218145650.GJ2651-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <1AE640813FDE7649BE1B193DEA596E883BB4D2A6@SHSMSX101.ccr.corp.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Zheng, Lv" <lv.zheng@intel.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Dave Young <dyoung@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "kexec@lists.infradead.org" <kexec@lists.infradead.org>, "Wysocki, Rafael J" <rafael.j.wysocki@intel.com>, Josh Triplett <josh@joshtriplett.org>, Borislav Petkov <bp@alien8.de>, Matthew Garrett <mjg59@srcf.ucam.org>, Vivek Goyal <vgoyal@redhat.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Feb 18, 2016 at 02:56:50PM +0000, Matt Fleming wrote:
-> On Tue, 16 Feb, at 11:09:43AM, Peter Jones wrote:
-> > "rm -rf" is bricking some peoples' laptops because of variables being
-> > used to store non-reinitializable firmware driver data that's required
-> > to POST the hardware.
-> > 
-> > These are 100% bugs, and they need to be fixed, but in the mean time it
-> > shouldn't be easy to *accidentally* brick machines.
-> > 
-> > We have to have delete working, and picking which variables do and don't
-> > work for deletion is quite intractable, so instead make everything
-> > immutable by default (except for a whitelist), and make tools that
-> > aren't quite so broad-spectrum unset the immutable flag.
-> > 
-> > Signed-off-by: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> > ---
-> >  Documentation/filesystems/efivarfs.txt         |   7 ++
-> >  drivers/firmware/efi/vars.c                    | 115 ++++++++++++++++++++-----
-> >  fs/efivarfs/file.c                             |  70 +++++++++++++++
-> >  fs/efivarfs/inode.c                            |  30 ++++---
-> >  fs/efivarfs/internal.h                         |   3 +-
-> >  fs/efivarfs/super.c                            |   9 +-
-> >  include/linux/efi.h                            |   4 +-
-> >  tools/testing/selftests/efivarfs/efivarfs.sh   |  19 +++-
-> >  tools/testing/selftests/efivarfs/open-unlink.c |  72 +++++++++++++++-
-> >  9 files changed, 287 insertions(+), 42 deletions(-)
->  
-> [...]
-> 
-> > @@ -193,17 +195,59 @@ static const struct variable_validate variable_validate[] = {
-> >  	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOut", validate_device_path },
-> >  	{ EFI_GLOBAL_VARIABLE_GUID, "ErrOutDev", validate_device_path },
-> >  	{ EFI_GLOBAL_VARIABLE_GUID, "Lang", validate_ascii_string },
-> > +	{ EFI_GLOBAL_VARIABLE_GUID, "OsIndications", NULL },
-> >  	{ EFI_GLOBAL_VARIABLE_GUID, "PlatformLang", validate_ascii_string },
-> >  	{ EFI_GLOBAL_VARIABLE_GUID, "Timeout", validate_uint16 },
-> > +	{ LINUX_EFI_CRASH_GUID, "*", NULL },
-> >  	{ NULL_GUID, "", NULL },
-> >  };
-> >  
-> 
-> You don't need to fold in patches that can be applied verbatim from
-> upstream. It makes validation of backports harder and the git history
-> bizarre.
+On Thu, Feb 18, 2016 at 3:34 AM, Zheng, Lv <lv.zheng@intel.com> wrote:
+> Hi,
+>
+>> From: linux-acpi-owner@vger.kernel.org [mailto:linux-acpi-
+>> owner@vger.kernel.org] On Behalf Of Matt Fleming
+> [Lv Zheng]
+> First, is it possible for you to submit an ACPICA patch instead of a Linux patch.
+> The reasoning for doing this can be found at:
+> https://acpica.org/Licensing
 
-Fair enough.
+Actually, the reason is that, as a rule, the process for ACPICA
+patches is that they first go to upstream ACPICA and they are acquired
+by Linux from there.
 
-> > +static bool
-> > +variable_matches(const efi_char16_t *ucs2_name, const char *var_name,
-> > +		 size_t len, const char *match_name, int *match)
-> > +{
-> > +	for (*match = 0; ; (*match)++) {
-> > +		char c = match_name[*match];
-> > +		char u = var_name[*match];
-> > +
-> > +		/* Wildcard in the matching name means we've matched */
-> > +		if (c == '*')
-> > +			return true;
-> > +
-> > +		/* All special variables are plain ascii unless they were
-> > +		 * wildcards. */
-> > +		if (ucs2_name[*match] > 127)
-> > +			return false;
-> > +
-> 
-> This caught my eye. You've inverted the check from here,
-> 
-> [...]
->   
-> > -			/* All special variables are plain ascii */
-> > -			if (u > 127)
-> > -				return true;
-> 
-> Was that intentional?
+While there are some exceptions from that process, there also are good
+reasons for that process to be followed, including the licensing one
+mentioned by Lv.
 
-Yes - the original one (the bottom here) the return is "is the variable
-valid", and we're declaring that anything outside of our list does not
-/need/ to be validated, and is thus valid.  
+All that said, Matt, if you agree that the patch can be applied under
+the BSD license, I think we can offer help with converting it to the
+upstream ACPICA coding conventions and applying it there.  Lv, would
+you be able to take care of that?
 
-In the new one (top), the function is "does the variable match this
-entry in the table", and we're saying any case that isn't ASCII does not
-match, except by globbing.  The calling function, efivar_validate(),
-then never runs a ->validate() method on the variable data, eventually
-exits the loop having matched nothing, and returns true.
-
-Do you want me to resend with the crash guid one line fix as its own
-separate patch?
-
--- 
-  Peter
+Thanks,
+Rafael
