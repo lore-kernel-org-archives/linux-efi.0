@@ -1,138 +1,37 @@
-From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access
- ESRT table in memory
-Date: Fri, 19 Feb 2016 17:27:38 +0800
-Message-ID: <20160219092738.GA18240@dhcp-128-65.nay.redhat.com>
-References: <1455535953-5056-1-git-send-email-ard.biesheuvel@linaro.org>
- <1455535953-5056-2-git-send-email-ard.biesheuvel@linaro.org>
- <20160218104407.GC2651@codeblueprint.co.uk>
- <CAKv+Gu_AW7PKJJOd2mbEu3LKJe+gNaPHnH=sgO=YXM_KWFyKxw@mail.gmail.com>
- <20160218132824.GE2651@codeblueprint.co.uk>
- <CAKv+Gu-s1pzYBzuDG-Z7s3gyo8dPOfeidZQ+rim-uAWZCBcKQQ@mail.gmail.com>
- <20160218134324.GG2651@codeblueprint.co.uk>
- <CAKv+Gu875r9RkDC723kNsG4XC0eSE9RPPmSFZrD0sx0QxS+V4g@mail.gmail.com>
- <20160218141544.GH2651@codeblueprint.co.uk>
- <CAKv+Gu8RP21vw1Ht7UtkHsen2GMUNx8DikH-hLaezV+uZvWO-g@mail.gmail.com>
+From: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Subject: =?utf-8?Q?=D0=9A=D0=9B=D0=98=D0=95=D0=9D=D0=A2=D0=A1=D0?=
+	=?utf-8?Q?=9A=D0=98=D0=95_=D0=91=D0=90=D0=97=D0=AB!_=D0?=
+	=?utf-8?Q?=A2=D0=B5=D0=BB=5CViber=5CWhatsapp=3A_+79133913?=
+	=?utf-8?Q?837_Email=3A_vavdeev17=40gmail=2Ecom_Skype=3A_p?=
+	=?utf-8?Q?rodawez389?=
+Date: Fri, 19 Feb 2016 15:27:13 +0600
+Message-ID: <BD46F22AB367488B57521BA4501C4C60@vger.kernel.org>
+Reply-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <vavdeev17-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8RP21vw1Ht7UtkHsen2GMUNx8DikH-hLaezV+uZvWO-g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 02/18/16 at 03:21pm, Ard Biesheuvel wrote:
-> On 18 February 2016 at 15:15, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> > On Thu, 18 Feb, at 02:44:02PM, Ard Biesheuvel wrote:
-> >> On 18 February 2016 at 14:43, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> >> > On Thu, 18 Feb, at 02:29:32PM, Ard Biesheuvel wrote:
-> >> >> On 18 February 2016 at 14:28, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> >> >> > On Thu, 18 Feb, at 01:16:05PM, Ard Biesheuvel wrote:
-> >> >> >> On 18 February 2016 at 11:44, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> >> >> >> > On Mon, 15 Feb, at 12:32:32PM, Ard Biesheuvel wrote:
-> >> >> >> >> On ARM and arm64, ioremap() and memremap() are not interchangeable like
-> >> >> >> >> on x86, and the use of ioremap() on ordinary RAM is typically flagged
-> >> >> >> >> as an error if the memory region being mapped is also covered by the
-> >> >> >> >> linear mapping, since that would lead to aliases with conflicting
-> >> >> >> >> cacheability attributes.
-> >> >> >> >>
-> >> >> >> >> Since what we are dealing with is not an I/O region with side effects,
-> >> >> >> >> using ioremap() here is arguably incorrect anyway, so let's replace
-> >> >> >> >> it with memremap instead. Also add a missing unmap on the success path,
-> >> >> >> >> and drop a memblock_remove() call which does not belong here, this far
-> >> >> >> >> into the boot sequence.
-> >> >> >> >>
-> >> >> >> >> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> >> >> >> >> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> >> >> >> >> ---
-> >> >> >> >>  drivers/firmware/efi/esrt.c | 16 ++++++++--------
-> >> >> >> >>  1 file changed, 8 insertions(+), 8 deletions(-)
-> >> >> >> >>
-> >> >> >> >
-> >> >> >> > [...]
-> >> >> >> >
-> >> >> >> >> @@ -432,8 +434,6 @@ static int __init esrt_sysfs_init(void)
-> >> >> >> >>       if (error)
-> >> >> >> >>               goto err_cleanup_list;
-> >> >> >> >>
-> >> >> >> >> -     memblock_remove(esrt_data, esrt_data_size);
-> >> >> >> >> -
-> >> >> >> >>       pr_debug("esrt-sysfs: loaded.\n");
-> >> >> >> >>
-> >> >> >> >>       return 0;
-> >> >> >> >
-> >> >> >> > Shouldn't we be replacing memblock_remove() with free_bootmem_late()?
-> >> >> >> > The original ESRT region is still reserved at this point, so we should
-> >> >> >> > do our best to release it to the page allocator.
-> >> >> >>
-> >> >> >> I'd rather we keep it reserved. That way, the config table entry still
-> >> >> >> points to something valid, which could be useful for kexec(), I think?
-> >> >> >> At least, that is how I intended to handle config tables on ARM ...
-> >> >> >
-> >> >> > If we're going to reserve it why do we need to copy the data out at
-> >> >> > all in esrt_sysfs_init()?
-> >> >>
-> >> >> Excellent question. I don't think there is any point to doing that.
-> >> >
-> >> > ... Unless the data is contained in an EFI Boot Services region ;-)
-> >> >
-> >> > Peter?
-> >>
-> >> Yes, it usually is. Is that a problem?
-> >
-> > Yes, we free the Boot Services regions before hitting userspace on
-> > x86, see efi_free_boot_services(). We do this map/copy/unmap trick in
-> > the ACPI BGRT driver for that reason.
-> >
-> > The Boot Services regions can be many gigabytes in size, which makes
-> > leaving them alone impractical.
-> >
-> > For kexec on x86 we simply discard the BGRT table, which isn't the end
-> > of the world because who really needs access to the BGRT image on
-> > kexec reboot? However, I can see the value of preserving the ESRT.
-> >
-> > I guess we've got two options, 1) copy out the chunks of Boot Services
-> > regions we're interested in and rewrite the EFI tables to point at
-> > these new allocations and free/discard all of the original Boot
-> > Services regions or 2) only selectively free the Boot Services
-> > regions.
-> >
-> > I've always stayed clear of 2) in case there exists cross-region
-> > references in the data that isn't obvious. I'd like to think that
-> > would never happen, but, you know, dragons lurk here, etc.
-> >
-> > Though actually, now I think about it, cross-region references can't
-> > possibly exist because they'd cause issues with the current code.
-> >
-> > So maybe the best solution is actually 2), where we preserve the Boot
-> > Services regions if any of the drivers (ESRT, BGRT) request them but
-> > free all the others?
+=D0=9A=D0=9B=D0=98=D0=95=D0=9D=D0=A2=D0=A1=D0=9A=D0=98=D0=95 =D0=91=D0=90=
+=D0=97=D0=AB!
 
-It is a good idea so that drivers can add their useful sections to
-a list or an array, they can avoid another copy of the memory also.
-
-> >
-> > What are the lifetime rules for Boot Services regions on arm*?
-> 
-> We treat all Boot Services regions like Loader Code/Data or free
-> regions: it is all recorded in memblock as usable memory, and only the
-> regions that are explicitly reserved are protected from further
-> general use.
-> 
-> I am currently looking into the memory attribute table, and the use
-> case is very similar. It would be very useful from our pov to simply
-> memblock_reserve() the region right after having called
-> efi_config_parse_tables(), and actually consume its data when we get
-> around to it later. The ESRT handling is already split down the middle
-> in the same way.
-
-A question is how can make a general way for both x86 and arm*.
-
-Maybe change the efi_free_boot_mem to something like efi_clean_boot_mem?
-It can first call efi_free_boot_mem, then reserve the ranges to be reserved
-again, but it sounds odd though.
-
-Thanks
-Dave
+=D0=A1=D0=BE=D0=B1=D0=B5=D1=80=D0=B5=D0=BC =D0=B4=D0=BB=D1=8F =D0=92=D0=
+=B0=D1=81 =D0=BF=D0=BE =D0=B8=D0=BD=D1=82=D0=B5=D1=80=D0=BD=D0=B5=D1=82=
+ =D0=B1=D0=B0=D0=B7=D1=83 =D0=B4=D0=B0=D0=BD=D0=BD=D1=8B=D1=85 =D0=BF=D0=
+=BE=D1=82=D0=B5=D0=BD=D1=86=D0=B8=D0=B0=D0=BB=D1=8C=D0=BD=D1=8B=D1=85 =D0=
+=BA=D0=BB=D0=B8=D0=B5=D0=BD=D1=82=D0=BE=D0=B2=20
+=D0=B4=D0=BB=D1=8F =D0=92=D0=B0=D1=88=D0=B5=D0=B3=D0=BE =D0=91=D0=B8=D0=
+=B7=D0=BD=D0=B5=D1=81=D0=B0!
+=D0=9C=D0=BD=D0=BE=D0=B3=D0=BE! =D0=91=D1=8B=D1=81=D1=82=D1=80=D0=BE! =D0=
+=9D=D0=B5=D0=B4=D0=BE=D1=80=D0=BE=D0=B3=D0=BE!=20
+=D0=A3=D0=B7=D0=BD=D0=B0=D0=B9=D1=82=D0=B5 =D0=BE=D0=B1 =D1=8D=D1=82=D0=
+=BE=D0=BC =D0=BF=D0=BE=D0=B4=D1=80=D0=BE=D0=B1=D0=BD=D0=B5=D0=B5 =D0=BF=
+=D0=BE=20
+=D0=A2=D0=B5=D0=BB: +79133913837
+Viber: +79133913837
+Whatsapp: +79133913837
+Skype: prodawez389
+Email: vavdeev17-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
