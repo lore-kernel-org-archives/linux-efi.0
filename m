@@ -1,65 +1,255 @@
 From: David Daney <ddaney.cavm@gmail.com>
-Subject: [PATCH v11 10/10] arm64, mm, numa: Add NUMA balancing support for arm64.
-Date: Fri, 19 Feb 2016 17:13:19 -0800
-Message-ID: <1455930799-5371-11-git-send-email-ddaney.cavm@gmail.com>
+Subject: [PATCH v11 03/10] efi: move FDT handling to separate object file
+Date: Fri, 19 Feb 2016 17:13:12 -0800
+Message-ID: <1455930799-5371-4-git-send-email-ddaney.cavm@gmail.com>
 References: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, devicetree@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>
 Cc: linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Enable NUMA balancing for arm64 platforms.
-Add pte, pmd protnone helpers for use by automatic NUMA balancing.
+The EFI specific FDT handling is compiled conditionally, and is
+logically independent of the rest of efi.o. So move it to a separate
+file before making changes to it in subsequent patches.
 
-Reviewed-by: Robert Richter <rrichter@cavium.com>
-Signed-off-by: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+Acked-by: Matt Fleming <matt.fleming@intel.com>
+Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+[ rric: Ported to v4.5-rc1 ]
+Signed-off-by: Robert Richter <rrichter@cavium.com>
 Signed-off-by: David Daney <david.daney@cavium.com>
 ---
- arch/arm64/Kconfig               |  1 +
- arch/arm64/include/asm/pgtable.h | 15 +++++++++++++++
- 2 files changed, 16 insertions(+)
+ drivers/firmware/efi/Makefile  |  1 +
+ drivers/firmware/efi/efi-fdt.c | 91 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/efi.c     | 84 --------------------------------------
+ 3 files changed, 92 insertions(+), 84 deletions(-)
+ create mode 100644 drivers/firmware/efi/efi-fdt.c
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 9f0972a..6e22503 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -11,6 +11,7 @@ config ARM64
- 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
- 	select ARCH_USE_CMPXCHG_LOCKREF
- 	select ARCH_SUPPORTS_ATOMIC_RMW
-+	select ARCH_SUPPORTS_NUMA_BALANCING
- 	select ARCH_WANT_OPTIONAL_GPIOLIB
- 	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION
- 	select ARCH_WANT_FRAME_POINTERS
-diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
-index bf464de..5af9db2 100644
---- a/arch/arm64/include/asm/pgtable.h
-+++ b/arch/arm64/include/asm/pgtable.h
-@@ -346,6 +346,21 @@ static inline pgprot_t mk_sect_prot(pgprot_t prot)
- 	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
- }
+diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
+index 62e654f..bb7ec2f 100644
+--- a/drivers/firmware/efi/Makefile
++++ b/drivers/firmware/efi/Makefile
+@@ -18,6 +18,7 @@ obj-$(CONFIG_EFI_RUNTIME_MAP)		+= runtime-map.o
+ obj-$(CONFIG_EFI_RUNTIME_WRAPPERS)	+= runtime-wrappers.o
+ obj-$(CONFIG_EFI_STUB)			+= libstub/
+ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
++obj-$(CONFIG_EFI_PARAMS_FROM_FDT)	+= efi-fdt.o
  
-+#ifdef CONFIG_NUMA_BALANCING
+ arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
+ obj-$(CONFIG_ARM)			+= $(arm-obj-y)
+diff --git a/drivers/firmware/efi/efi-fdt.c b/drivers/firmware/efi/efi-fdt.c
+new file mode 100644
+index 0000000..8f3ce66
+--- /dev/null
++++ b/drivers/firmware/efi/efi-fdt.c
+@@ -0,0 +1,91 @@
 +/*
-+ * See the comment in include/asm-generic/pgtable.h
++ * Copyright (C) 2013 - 2015 Linaro Ltd.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 as
++ * published by the Free Software Foundation.
 + */
-+static inline int pte_protnone(pte_t pte)
++
++#include <linux/init.h>
++#include <linux/efi.h>
++#include <linux/of.h>
++#include <linux/of_fdt.h>
++
++#define UEFI_PARAM(name, prop, field)			   \
++	{						   \
++		{ name },				   \
++		{ prop },				   \
++		offsetof(struct efi_fdt_params, field),    \
++		FIELD_SIZEOF(struct efi_fdt_params, field) \
++	}
++
++static __initdata struct {
++	const char name[32];
++	const char propname[32];
++	int offset;
++	int size;
++} dt_params[] = {
++	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
++	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
++	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
++	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
++	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
++};
++
++struct param_info {
++	int found;
++	void *params;
++};
++
++static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
++				       int depth, void *data)
 +{
-+	return (pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)) == PTE_PROT_NONE;
++	struct param_info *info = data;
++	const void *prop;
++	void *dest;
++	u64 val;
++	int i, len;
++
++	if (depth != 1 || strcmp(uname, "chosen") != 0)
++		return 0;
++
++	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
++		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
++		if (!prop)
++			return 0;
++		dest = info->params + dt_params[i].offset;
++		info->found++;
++
++		val = of_read_number(prop, len / sizeof(u32));
++
++		if (dt_params[i].size == sizeof(u32))
++			*(u32 *)dest = val;
++		else
++			*(u64 *)dest = val;
++
++		if (efi_enabled(EFI_DBG))
++			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
++				dt_params[i].size * 2, val);
++	}
++	return 1;
 +}
 +
-+static inline int pmd_protnone(pmd_t pmd)
++int __init efi_get_fdt_params(struct efi_fdt_params *params)
 +{
-+	return pte_protnone(pmd_pte(pmd));
-+}
-+#endif
++	struct param_info info;
++	int ret;
 +
- /*
-  * THP definitions.
-  */
++	pr_info("Getting EFI parameters from FDT:\n");
++
++	info.found = 0;
++	info.params = params;
++
++	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
++	if (!info.found)
++		pr_info("UEFI not found.\n");
++	else if (!ret)
++		pr_err("Can't find '%s' in device tree!\n",
++		       dt_params[info.found].name);
++
++	return ret;
++}
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 2cd37da..7c41c428 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -20,8 +20,6 @@
+ #include <linux/init.h>
+ #include <linux/device.h>
+ #include <linux/efi.h>
+-#include <linux/of.h>
+-#include <linux/of_fdt.h>
+ #include <linux/io.h>
+ #include <linux/platform_device.h>
+ 
+@@ -490,88 +488,6 @@ static int __init efi_load_efivars(void)
+ device_initcall(efi_load_efivars);
+ #endif
+ 
+-#ifdef CONFIG_EFI_PARAMS_FROM_FDT
+-
+-#define UEFI_PARAM(name, prop, field)			   \
+-	{						   \
+-		{ name },				   \
+-		{ prop },				   \
+-		offsetof(struct efi_fdt_params, field),    \
+-		FIELD_SIZEOF(struct efi_fdt_params, field) \
+-	}
+-
+-static __initdata struct {
+-	const char name[32];
+-	const char propname[32];
+-	int offset;
+-	int size;
+-} dt_params[] = {
+-	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
+-	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
+-	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
+-	UEFI_PARAM("MemMap Desc. Size", "linux,uefi-mmap-desc-size", desc_size),
+-	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+-};
+-
+-struct param_info {
+-	int found;
+-	void *params;
+-};
+-
+-static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+-				       int depth, void *data)
+-{
+-	struct param_info *info = data;
+-	const void *prop;
+-	void *dest;
+-	u64 val;
+-	int i, len;
+-
+-	if (depth != 1 || strcmp(uname, "chosen") != 0)
+-		return 0;
+-
+-	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
+-		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+-		if (!prop)
+-			return 0;
+-		dest = info->params + dt_params[i].offset;
+-		info->found++;
+-
+-		val = of_read_number(prop, len / sizeof(u32));
+-
+-		if (dt_params[i].size == sizeof(u32))
+-			*(u32 *)dest = val;
+-		else
+-			*(u64 *)dest = val;
+-
+-		if (efi_enabled(EFI_DBG))
+-			pr_info("  %s: 0x%0*llx\n", dt_params[i].name,
+-				dt_params[i].size * 2, val);
+-	}
+-	return 1;
+-}
+-
+-int __init efi_get_fdt_params(struct efi_fdt_params *params)
+-{
+-	struct param_info info;
+-	int ret;
+-
+-	pr_info("Getting EFI parameters from FDT:\n");
+-
+-	info.found = 0;
+-	info.params = params;
+-
+-	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+-	if (!info.found)
+-		pr_info("UEFI not found.\n");
+-	else if (!ret)
+-		pr_err("Can't find '%s' in device tree!\n",
+-		       dt_params[info.found].name);
+-
+-	return ret;
+-}
+-#endif /* CONFIG_EFI_PARAMS_FROM_FDT */
+-
+ static __initdata char memory_type_name[][20] = {
+ 	"Reserved",
+ 	"Loader Code",
 -- 
 1.8.3.1
