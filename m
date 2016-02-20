@@ -1,79 +1,121 @@
 From: David Daney <ddaney.cavm@gmail.com>
-Subject: [PATCH v11 06/10] arm64/efi: ignore DT memreserve entries instead of removing them
-Date: Fri, 19 Feb 2016 17:13:15 -0800
-Message-ID: <1455930799-5371-7-git-send-email-ddaney.cavm@gmail.com>
+Subject: [PATCH v11 05/10] arm64/efi: ignore DT memory nodes instead of
+ removing them
+Date: Fri, 19 Feb 2016 17:13:14 -0800
+Message-ID: <1455930799-5371-6-git-send-email-ddaney.cavm@gmail.com>
 References: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, devicetree@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>
 Cc: linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Now that the reservation of the FDT image itself is split off from
-the processing of memory reservations described by the device tree,
-we can make the DT scanning of memreserves conditional on whether
-we booted via UEFI and have its memory map available. This allows
-us to drop deletion of these memreserves in the stub. It also fixes
-the issue where the /reserved-memory node (which offers another
-way of reserving memory ranges) was not being ignored under UEFI.
+There are two problems with the UEFI stub DT memory node removal
+routine:
+- it deletes nodes as it traverses the tree, which happens to work
+  but is not supported, as deletion invalidates the node iterator;
+- deleting memory nodes entirely may discard annotations in the form
+  of additional properties on the nodes.
 
-Note that this reverts commit 0ceac9e094b0 ("efi/arm64: Fix
-fdt-related memory reservation").
+Now that the UEFI initialization has moved to an earlier stage, we can
+actually just ignore any memblocks that are installed after we have
+processed the UEFI memory map. This way, it is no longer necessary to
+remove the nodes, so we can remove that logic from the stub as well.
 
 Acked-by: Leif Lindholm <leif.lindholm@linaro.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+[ rric: Ported to v4.5-rc1 ]
 Signed-off-by: Robert Richter <rrichter@cavium.com>
 Signed-off-by: David Daney <david.daney@cavium.com>
 ---
- arch/arm64/mm/init.c               |  3 ++-
- drivers/firmware/efi/libstub/fdt.c | 11 +----------
- 2 files changed, 3 insertions(+), 11 deletions(-)
+ arch/arm64/mm/init.c               |  6 +++++-
+ drivers/firmware/efi/arm-init.c    |  2 +-
+ drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+ 3 files changed, 7 insertions(+), 25 deletions(-)
 
 diff --git a/arch/arm64/mm/init.c b/arch/arm64/mm/init.c
-index eda226e..ee06165 100644
+index 208c1d3..eda226e 100644
 --- a/arch/arm64/mm/init.c
 +++ b/arch/arm64/mm/init.c
-@@ -171,7 +171,8 @@ void __init arm64_memblock_init(void)
- 		memblock_reserve(__virt_to_phys(initrd_start), initrd_end - initrd_start);
- #endif
+@@ -383,5 +383,9 @@ __setup("keepinitrd", keepinitrd_setup);
  
--	early_init_fdt_scan_reserved_mem();
+ void __init early_init_dt_add_memory_arch(u64 base, u64 size)
+ {
+-	early_init_dt_add_memory(base, size);
++	/*
++	 * Ignore DT memory nodes if we are booting via UEFI.
++	 */
 +	if (!efi_enabled(EFI_MEMMAP))
-+		early_init_fdt_scan_reserved_mem();
++		early_init_dt_add_memory(base, size);
+ }
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9fe0464..ded8957 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -159,7 +159,7 @@ static __init void reserve_regions(void)
+ 		size = npages << PAGE_SHIFT;
  
- 	/* 4GB maximum for 32-bit only capable devices */
- 	if (IS_ENABLED(CONFIG_ZONE_DMA))
+ 		if (is_normal_ram(md))
+-			early_init_dt_add_memory_arch(paddr, size);
++			early_init_dt_add_memory(paddr, size);
+ 
+ 		if (is_reserve_region(md)) {
+ 			memblock_mark_nomap(paddr, size);
 diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
-index 9df1560..12cb2a3 100644
+index cf7b7d4..9df1560 100644
 --- a/drivers/firmware/efi/libstub/fdt.c
 +++ b/drivers/firmware/efi/libstub/fdt.c
-@@ -24,8 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+@@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
  			unsigned long map_size, unsigned long desc_size,
  			u32 desc_ver)
  {
--	int node, num_rsv;
--	int status;
-+	int node, status;
+-	int node, prev, num_rsv;
++	int node, num_rsv;
+ 	int status;
  	u32 fdt_val32;
  	u64 fdt_val64;
- 
-@@ -53,14 +52,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
- 	if (status != 0)
+@@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
  		goto fdt_set_fail;
  
--	/*
--	 * Delete all memory reserve map entries. When booting via UEFI,
--	 * kernel will use the UEFI memory map to find reserved regions.
+ 	/*
+-	 * Delete any memory nodes present. We must delete nodes which
+-	 * early_init_dt_scan_memory may try to use.
 -	 */
--	num_rsv = fdt_num_mem_rsv(fdt);
--	while (num_rsv-- > 0)
--		fdt_del_mem_rsv(fdt, num_rsv);
+-	prev = 0;
+-	for (;;) {
+-		const char *type;
+-		int len;
 -
- 	node = fdt_subnode_offset(fdt, 0, "chosen");
- 	if (node < 0) {
- 		node = fdt_add_subnode(fdt, 0, "chosen");
+-		node = fdt_next_node(fdt, prev, NULL);
+-		if (node < 0)
+-			break;
+-
+-		type = fdt_getprop(fdt, node, "device_type", &len);
+-		if (type && strncmp(type, "memory", len) == 0) {
+-			fdt_del_node(fdt, node);
+-			continue;
+-		}
+-
+-		prev = node;
+-	}
+-
+-	/*
+ 	 * Delete all memory reserve map entries. When booting via UEFI,
+ 	 * kernel will use the UEFI memory map to find reserved regions.
+ 	 */
 -- 
 1.8.3.1
