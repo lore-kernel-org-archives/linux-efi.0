@@ -1,69 +1,129 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH] arm*: efi: drop permanent mapping of the UEFI System table
-Date: Mon, 22 Feb 2016 17:24:11 +0100
-Message-ID: <CAKv+Gu-S1hMuLgE+bumnXVC1QpHYu7aWUzHtzbDy3HkUS_WS6w@mail.gmail.com>
-References: <1456153179-27214-1-git-send-email-ard.biesheuvel@linaro.org>
-	<20160222154314.GJ3435@leverpostej>
-	<CAKv+Gu_pnjL557dE1xez_y2tESOjZj9_2XEbNtm_b4yAA-WdYg@mail.gmail.com>
-	<20160222160910.GK3435@leverpostej>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160222160910.GK3435@leverpostej>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH v12 0/5] arm64, numa: Add numa support for arm64 platforms
+Date: Mon, 22 Feb 2016 17:58:18 -0800
+Message-ID: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Pawel Moll <pawel.moll@arm.com>, Mark Rutland <mark.rutland@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, devicetree@vger.kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Catalin Marinas <catalin.marinas@arm.com>, Matt Fleming <matt@codeblueprint.co.uk>, linux-efi@vger.kernel.org, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>
+Cc: linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 22 February 2016 at 17:09, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> On Mon, Feb 22, 2016 at 04:56:57PM +0100, Ard Biesheuvel wrote:
->> On 22 February 2016 at 16:43, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
->> > On Mon, Feb 22, 2016 at 03:59:39PM +0100, Ard Biesheuvel wrote:
->> >> The permanent, writable mapping of the UEFI System table is only
->> >> referenced during invocations of UEFI Runtime Services, at which time
->> >> the UEFI virtual mapping is available, which also covers the system
->> >> table (since the runtime services themselves need access to it)
->> >
->> > I'm not sure it's strictly true that the runtime services themselves
->> > need access to the system table. Why would that be necessary? Are
->> > runtime services mandated to indirect calls via the system table?
->> >
->>
->> They don't need access per se, but they are allowed to reference it,
->> and so the memory remapping layer must make it accessible after
->> SetVirtualAddressMap(). The spec lists explicitly which fields are
->> still valid after ExitBootServices()
->
-> I was language-lawyering ;)
->
-> I appreciate that they _can_, I just didn't think it was true that they
-> _must_ (i.e. that they always "need to access it"). Per the below that's
-> likely moot.
->
+From: David Daney <david.daney@cavium.com>
 
-Runtime services drivers must call ConvertPointer() to translate the
-pointer variables in their global state to their virtual equivalents.
-So unless a Runtime driver does not have such state at all, it needs
-access to the runtime services table, which is usually retrieved
-through the system table. So yes, you're right. And yes, it's moot :-)
+v12:
 
->> SetVirtualAddressMap() is a runtime service, and one of the things it
->> does is update the pointers in the system table, hence it must be
->> located in RuntimeService memory, because anything else may be gone by
->> this time.
->
-> Good point. That does imply that it must be in EfiRuntimeServices*
-> memory.
->
->> > From the spec, I couldn't find a mandate that the system table (nor the
->> > runtime services table) were in a region of EfiRuntimeServicesData
->> > memory. I suspect I'm looking in the wrong place...
->>
->> We should clarify it if it is not clear (or if I turn out to be wrong)
->
-> I'm hoping that I've simply missed something. Perhaps the implication
-> above was intentional, albeit rather opaque.
->
-> Otherwise, I certainly agree a clarification would be a good thing!
->
-> Mark.
+	- Replaced 6 patches from Ard Biesheuvel with new simpler, and
+          more correct, single patch, also from Ard.
+
+v11:
+	- Dropped cleanup patches for other architectures, they will be
+          submitted as a separate set after more testing.
+
+	- Added patch set from Ard Biesheuvel that are needed to make
+          the whole thing actually work.  Previously this was a
+          separate set.
+
+	- Kconfig and other fixes and simplifications as suggested by Rob Herring.
+
+	- Rearranged, refactored and reordered so that we don't patch
+          new files multiple times.
+
+	- Summary:
+
+		o 6 patches from Ard Biesheuvel to allow use of
+		  "memory" nodes with efi stub.
+
+		o 2 patches to document and add of_numa.c
+
+		o 1 patch to add arm64 NUMA support.
+
+		o 1 patch to add NUMA balancing support for arm64.
+
+v10:
+	- Incorporated review comments from Rob Herring.
+	- Moved numa binding and implementation to devicetree core.
+	- Added cleanup patch to remove redundant NODE_DATA macro from asm header files
+	- Include numa balancing support for arm64 patch in this series.
+	- Fix tile build issue reported by the kbuild robot(patch 7)
+
+v9:	- Added cleanup patch to reuse and avoid redefinition of cpumask_of_pcibus
+	  as suggested from Will Deacon and Bjorn Helgaas.
+	  - Including patch to Make pci-host-generic driver numa aware.
+	  - Incorporated comment from Shannon Zhao.
+
+v8:
+	- Incorporated review comments of Mark Rutland and Will Deacon.
+	- Added pci helper function and macro for numa.
+
+v7:
+	- managing numa memory mapping using memblock.
+	- Incorporated review comments of Mark Rutland.
+
+v6:
+	- defined and implemented the numa dt binding using
+	node property proximity and device node distance-map.
+	- renamed dt_numa to of_numa
+
+v5:
+        - created base verion of numa.c which creates dummy numa without using dt
+          on single socket platforms. Then added patches for dt support.
+        - Incorporated review comments from Hanjun Guo.
+
+v4:
+done changes as per Arnd review comments.
+
+v3:
+Added changes to support numa on arm64 based platforms.
+Tested these patches on cavium's multinode(2 node topology) platform.
+In this patchset, defined and implemented dt bindings for numa mapping
+for core and memory using device node property arm,associativity.
+
+v2:
+Defined and implemented numa map for memory, cores to node and
+proximity distance matrix of nodes.
+
+v1:
+Initial patchset to support numa on arm64 platforms.
+
+Note: 1. This patchset is tested for NUMA and without NUMA with dt
+        (both with and without NUMA bindings) on thunderx single
+        socket and dual socket boards.
+
+
+Ard Biesheuvel (1):
+  efi: ARM/arm64: ignore DT memory nodes instead of removing them
+
+Ganapatrao Kulkarni (4):
+  Documentation, dt, numa: dt bindings for NUMA.
+  dt, numa: Add NUMA dt binding implementation.
+  arm64, numa: Add NUMA support for arm64 platforms.
+  arm64, mm, numa: Add NUMA balancing support for arm64.
+
+ Documentation/devicetree/bindings/numa.txt | 272 +++++++++++++++++++
+ arch/arm64/Kconfig                         |  27 ++
+ arch/arm64/include/asm/mmzone.h            |  12 +
+ arch/arm64/include/asm/numa.h              |  45 ++++
+ arch/arm64/include/asm/pgtable.h           |  15 ++
+ arch/arm64/include/asm/topology.h          |  10 +
+ arch/arm64/kernel/pci.c                    |  10 +
+ arch/arm64/kernel/setup.c                  |   4 +
+ arch/arm64/kernel/smp.c                    |   4 +
+ arch/arm64/mm/Makefile                     |   1 +
+ arch/arm64/mm/init.c                       |  34 ++-
+ arch/arm64/mm/mmu.c                        |   1 +
+ arch/arm64/mm/numa.c                       | 403 +++++++++++++++++++++++++++++
+ drivers/firmware/efi/arm-init.c            |   8 +
+ drivers/firmware/efi/libstub/fdt.c         |  24 +-
+ drivers/of/Kconfig                         |   3 +
+ drivers/of/Makefile                        |   1 +
+ drivers/of/of_numa.c                       | 211 +++++++++++++++
+ include/linux/of.h                         |   9 +
+ 19 files changed, 1066 insertions(+), 28 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/numa.txt
+ create mode 100644 arch/arm64/include/asm/mmzone.h
+ create mode 100644 arch/arm64/include/asm/numa.h
+ create mode 100644 arch/arm64/mm/numa.c
+ create mode 100644 drivers/of/of_numa.c
+
+-- 
+1.8.3.1
