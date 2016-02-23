@@ -1,73 +1,121 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v12 4/5] arm64, numa: Add NUMA support for arm64
- platforms.
-Date: Tue, 23 Feb 2016 10:26:11 +0000
-Message-ID: <20160223102610.GD3966@arm.com>
-References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com>
- <1456192703-2274-5-git-send-email-ddaney.cavm@gmail.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: Re: [PATCH v4 16/17] FDT: Add a helper to get specified name subnode
+Date: Tue, 23 Feb 2016 19:13:29 +0800
+Message-ID: <56CC3ED9.5000101@huawei.com>
+References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com> <1454641552-12576-17-git-send-email-zhaoshenglong@huawei.com> <CAL_JsqK8F6PQX2kC_+CtDk1-ykKRB3YB54o4FaypsRY_tNzK5w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1456192703-2274-5-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAL_JsqK8F6PQX2kC_+CtDk1-ykKRB3YB54o4FaypsRY_tNzK5w@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Rob Herring <robh@kernel.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Stefano Stabellini <stefano.stabellini@citrix.com>, david.vrabel@citrix.com, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, julien.grall@citrix.com, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ian Campbell <ian.campbell@citrix.com>, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, Feb 22, 2016 at 05:58:22PM -0800, David Daney wrote:
-> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-> 
-> Attempt to get the memory and CPU NUMA node via of_numa.  If that
-> fails, default the dummy NUMA node and map all memory and CPUs to node
-> 0.
-> 
-> Tested-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> ---
->  arch/arm64/Kconfig                |  26 +++
->  arch/arm64/include/asm/mmzone.h   |  12 ++
->  arch/arm64/include/asm/numa.h     |  45 +++++
->  arch/arm64/include/asm/topology.h |  10 +
->  arch/arm64/kernel/pci.c           |  10 +
->  arch/arm64/kernel/setup.c         |   4 +
->  arch/arm64/kernel/smp.c           |   4 +
->  arch/arm64/mm/Makefile            |   1 +
->  arch/arm64/mm/init.c              |  34 +++-
->  arch/arm64/mm/mmu.c               |   1 +
->  arch/arm64/mm/numa.c              | 403 ++++++++++++++++++++++++++++++++++++++
->  11 files changed, 545 insertions(+), 5 deletions(-)
->  create mode 100644 arch/arm64/include/asm/mmzone.h
->  create mode 100644 arch/arm64/include/asm/numa.h
->  create mode 100644 arch/arm64/mm/numa.c
 
-[...]
 
-> diff --git a/arch/arm64/include/asm/mmzone.h b/arch/arm64/include/asm/mmzone.h
-> new file mode 100644
-> index 0000000..a0de9e6
-> --- /dev/null
-> +++ b/arch/arm64/include/asm/mmzone.h
-> @@ -0,0 +1,12 @@
-> +#ifndef __ASM_MMZONE_H
-> +#define __ASM_MMZONE_H
-> +
-> +#ifdef CONFIG_NUMA
-> +
-> +#include <asm/numa.h>
-> +
-> +extern struct pglist_data *node_data[];
-> +#define NODE_DATA(nid)		(node_data[(nid)])
-> +
-> +#endif /* CONFIG_NUMA */
-> +#endif /* __ASM_MMZONE_H */
+On 2016/2/9 13:04, Rob Herring wrote:
+> On Thu, Feb 4, 2016 at 9:05 PM, Shannon Zhao <zhaoshenglong@huawei.co=
+m> wrote:
+>> From: Shannon Zhao <shannon.zhao@linaro.org>
+>>
+>> Sometimes it needs to check if there is a node in FDT by full path.
+>=20
+> I'm confused. Are you searching by full path or...
+>=20
+>> Introduce this helper to get the specified name subnode if it exists=
+=2E
+>=20
+> name of sub node?
+>=20
+get the offset of sub node by specified name.
 
-What happened to the patch cleaning this up in generic code?
+> Either way, fdt_subnode_offset or fdt_path_offset doesn't work?
+>=20
+Ah=EF=BC=8Cright=EF=BC=8Cboth of them should work. Does it need to add =
+a wrapper in
+drivers/of/fdt.c for them or directly use them with the parameter
+initial_boot_params?
 
-Will
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+>>
+>> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+>> ---
+>> CC: Rob Herring <robh@kernel.org>
+>> ---
+>>  drivers/of/fdt.c       | 25 +++++++++++++++++++++++++
+>>  include/linux/of_fdt.h |  2 ++
+>>  2 files changed, 27 insertions(+)
+>>
+>> diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+>> index 655f79d..eacb188 100644
+>> --- a/drivers/of/fdt.c
+>> +++ b/drivers/of/fdt.c
+>> @@ -645,6 +645,31 @@ int __init of_scan_flat_dt(int (*it)(unsigned l=
+ong node,
+>>  }
+>>
+>>  /**
+>> + * of_get_flat_dt_subnode_by_name - get subnode of specified node b=
+y name
+>> + *
+>> + * @node: the parent node
+>> + * @uname: the name of subnode
+>> + * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is =
+none
+>> + */
+>> +
+>> +int of_get_flat_dt_subnode_by_name(unsigned long node, const char *=
+uname)
+>> +{
+>> +       const void *blob =3D initial_boot_params;
+>> +       int offset;
+>> +       const char *pathp;
+>> +
+>> +       for (offset =3D fdt_first_subnode(blob, node);
+>> +            offset >=3D 0;
+>> +            offset =3D fdt_next_subnode(blob, offset)) {
+>> +               pathp =3D fdt_get_name(blob, offset, NULL);
+>> +               if (strcmp(pathp, uname) =3D=3D 0)
+>> +                       return offset;
+>> +       }
+>> +
+>> +       return -FDT_ERR_NOTFOUND;
+>> +}
+>> +
+>> +/**
+>>   * of_get_flat_dt_root - find the root node in the flat blob
+>>   */
+>>  unsigned long __init of_get_flat_dt_root(void)
+>> diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+>> index df9ef38..fc28162 100644
+>> --- a/include/linux/of_fdt.h
+>> +++ b/include/linux/of_fdt.h
+>> @@ -52,6 +52,8 @@ extern char __dtb_end[];
+>>  extern int of_scan_flat_dt(int (*it)(unsigned long node, const char=
+ *uname,
+>>                                      int depth, void *data),
+>>                            void *data);
+>> +extern int of_get_flat_dt_subnode_by_name(unsigned long node,
+>> +                                         const char *uname);
+>>  extern const void *of_get_flat_dt_prop(unsigned long node, const ch=
+ar *name,
+>>                                        int *size);
+>>  extern int of_flat_dt_is_compatible(unsigned long node, const char =
+*name);
+>> --
+>> 2.0.4
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe devicetree=
+" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> .
+>=20
+
+--=20
+Shannon
