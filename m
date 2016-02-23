@@ -1,121 +1,127 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: Re: [PATCH v4 16/17] FDT: Add a helper to get specified name subnode
-Date: Tue, 23 Feb 2016 19:13:29 +0800
-Message-ID: <56CC3ED9.5000101@huawei.com>
-References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com> <1454641552-12576-17-git-send-email-zhaoshenglong@huawei.com> <CAL_JsqK8F6PQX2kC_+CtDk1-ykKRB3YB54o4FaypsRY_tNzK5w@mail.gmail.com>
+From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Subject: Re: [PATCH v12 1/5] efi: ARM/arm64: ignore DT memory nodes instead
+ of removing them
+Date: Tue, 23 Feb 2016 11:58:05 +0000
+Message-ID: <20160223115805.GB4989@leverpostej>
+References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com>
+ <1456192703-2274-2-git-send-email-ddaney.cavm@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAL_JsqK8F6PQX2kC_+CtDk1-ykKRB3YB54o4FaypsRY_tNzK5w@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Rob Herring <robh@kernel.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Stefano Stabellini <stefano.stabellini@citrix.com>, david.vrabel@citrix.com, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Mark Rutland <mark.rutland@arm.com>, julien.grall@citrix.com, "xen-devel@lists.xen.org" <xen-devel@lists.xen.org>, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Ian Campbell <ian.campbell@citrix.com>, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1456192703-2274-2-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Hi,
 
+On Mon, Feb 22, 2016 at 05:58:19PM -0800, David Daney wrote:
+> From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> 
+> There are two problems with the UEFI stub DT memory node removal
+> routine:
+> - it deletes nodes as it traverses the tree, which happens to work
+>   but is not supported, as deletion invalidates the node iterator;
+> - deleting memory nodes entirely may discard annotations in the form
+>   of additional properties on the nodes.
+> 
+> Since the discovery of DT memory nodes occurs strictly before the
+> UEFI init sequence, we can simply clear the memblock memory table
+> before parsing the UEFI memory map. This way, it is no longer
+> necessary to remove the nodes, so we can remove that logic from the
+> stub as well.
 
-On 2016/2/9 13:04, Rob Herring wrote:
-> On Thu, Feb 4, 2016 at 9:05 PM, Shannon Zhao <zhaoshenglong@huawei.co=
-m> wrote:
->> From: Shannon Zhao <shannon.zhao@linaro.org>
->>
->> Sometimes it needs to check if there is a node in FDT by full path.
->=20
-> I'm confused. Are you searching by full path or...
->=20
->> Introduce this helper to get the specified name subnode if it exists=
-=2E
->=20
-> name of sub node?
->=20
-get the offset of sub node by specified name.
+This is a little bit scary, but I guess this works.
 
-> Either way, fdt_subnode_offset or fdt_path_offset doesn't work?
->=20
-Ah=EF=BC=8Cright=EF=BC=8Cboth of them should work. Does it need to add =
-a wrapper in
-drivers/of/fdt.c for them or directly use them with the parameter
-initial_boot_params?
+My only concern is that when we get kexec, a subsequent kernel must also
+have EFI memory map support, or things go bad for the next EFI-aware
+kernel after that (as things like the runtime services may have been
+corrupted by the kernel in the middle). It's difficult to fix the
+general case later.
 
-Thanks,
->>
->> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
->> ---
->> CC: Rob Herring <robh@kernel.org>
->> ---
->>  drivers/of/fdt.c       | 25 +++++++++++++++++++++++++
->>  include/linux/of_fdt.h |  2 ++
->>  2 files changed, 27 insertions(+)
->>
->> diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
->> index 655f79d..eacb188 100644
->> --- a/drivers/of/fdt.c
->> +++ b/drivers/of/fdt.c
->> @@ -645,6 +645,31 @@ int __init of_scan_flat_dt(int (*it)(unsigned l=
-ong node,
->>  }
->>
->>  /**
->> + * of_get_flat_dt_subnode_by_name - get subnode of specified node b=
-y name
->> + *
->> + * @node: the parent node
->> + * @uname: the name of subnode
->> + * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is =
-none
->> + */
->> +
->> +int of_get_flat_dt_subnode_by_name(unsigned long node, const char *=
-uname)
->> +{
->> +       const void *blob =3D initial_boot_params;
->> +       int offset;
->> +       const char *pathp;
->> +
->> +       for (offset =3D fdt_first_subnode(blob, node);
->> +            offset >=3D 0;
->> +            offset =3D fdt_next_subnode(blob, offset)) {
->> +               pathp =3D fdt_get_name(blob, offset, NULL);
->> +               if (strcmp(pathp, uname) =3D=3D 0)
->> +                       return offset;
->> +       }
->> +
->> +       return -FDT_ERR_NOTFOUND;
->> +}
->> +
->> +/**
->>   * of_get_flat_dt_root - find the root node in the flat blob
->>   */
->>  unsigned long __init of_get_flat_dt_root(void)
->> diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
->> index df9ef38..fc28162 100644
->> --- a/include/linux/of_fdt.h
->> +++ b/include/linux/of_fdt.h
->> @@ -52,6 +52,8 @@ extern char __dtb_end[];
->>  extern int of_scan_flat_dt(int (*it)(unsigned long node, const char=
- *uname,
->>                                      int depth, void *data),
->>                            void *data);
->> +extern int of_get_flat_dt_subnode_by_name(unsigned long node,
->> +                                         const char *uname);
->>  extern const void *of_get_flat_dt_prop(unsigned long node, const ch=
-ar *name,
->>                                        int *size);
->>  extern int of_flat_dt_is_compatible(unsigned long node, const char =
-*name);
->> --
->> 2.0.4
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe devicetree=
-" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-> .
->=20
+A different option would be to support status="disabled" for the memory
+nodes, and ignore these in early_init_dt_scan_memory. That way a kernel
+cannot use memory without first having parsed the EFI memory map, and we
+can still get NUMA info from the disabled nodes.
 
---=20
-Shannon
+You'd still need a new kernel to take into account status, but at least
+we'd know all kernels would avoid using RAM that potentially needs to be
+preserved.
+
+Ard, Rob, thoughts?
+
+Mark.
+
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> ---
+>  drivers/firmware/efi/arm-init.c    |  8 ++++++++
+>  drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+>  2 files changed, 9 insertions(+), 23 deletions(-)
+> 
+> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+> index 9e15d57..40c9d85 100644
+> --- a/drivers/firmware/efi/arm-init.c
+> +++ b/drivers/firmware/efi/arm-init.c
+> @@ -143,6 +143,14 @@ static __init void reserve_regions(void)
+>  	if (efi_enabled(EFI_DBG))
+>  		pr_info("Processing EFI memory map:\n");
+>  
+> +	/*
+> +	 * Discard memblocks discovered so far: if there are any at this
+> +	 * point, they originate from memory nodes in the DT, and UEFI
+> +	 * uses its own memory map instead.
+> +	 */
+> +	memblock_dump_all();
+> +	memblock_remove(0, ULLONG_MAX);
+> +
+>  	for_each_efi_memory_desc(&memmap, md) {
+>  		paddr = md->phys_addr;
+>  		npages = md->num_pages;
+> diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+> index cf7b7d4..9df1560 100644
+> --- a/drivers/firmware/efi/libstub/fdt.c
+> +++ b/drivers/firmware/efi/libstub/fdt.c
+> @@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>  			unsigned long map_size, unsigned long desc_size,
+>  			u32 desc_ver)
+>  {
+> -	int node, prev, num_rsv;
+> +	int node, num_rsv;
+>  	int status;
+>  	u32 fdt_val32;
+>  	u64 fdt_val64;
+> @@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+>  		goto fdt_set_fail;
+>  
+>  	/*
+> -	 * Delete any memory nodes present. We must delete nodes which
+> -	 * early_init_dt_scan_memory may try to use.
+> -	 */
+> -	prev = 0;
+> -	for (;;) {
+> -		const char *type;
+> -		int len;
+> -
+> -		node = fdt_next_node(fdt, prev, NULL);
+> -		if (node < 0)
+> -			break;
+> -
+> -		type = fdt_getprop(fdt, node, "device_type", &len);
+> -		if (type && strncmp(type, "memory", len) == 0) {
+> -			fdt_del_node(fdt, node);
+> -			continue;
+> -		}
+> -
+> -		prev = node;
+> -	}
+> -
+> -	/*
+>  	 * Delete all memory reserve map entries. When booting via UEFI,
+>  	 * kernel will use the UEFI memory map to find reserved regions.
+>  	 */
+> -- 
+> 1.8.3.1
+> 
