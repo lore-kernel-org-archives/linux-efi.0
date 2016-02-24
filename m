@@ -1,64 +1,47 @@
 From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v12 1/5] efi: ARM/arm64: ignore DT memory nodes instead
- of removing them
-Date: Tue, 23 Feb 2016 16:12:02 -0600
-Message-ID: <20160223221202.GA32031@rob-hp-laptop>
-References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com>
- <1456192703-2274-2-git-send-email-ddaney.cavm@gmail.com>
- <20160223115805.GB4989@leverpostej>
+Subject: Re: [PATCH v4 16/17] FDT: Add a helper to get specified name subnode
+Date: Wed, 24 Feb 2016 08:53:46 -0600
+Message-ID: <CAL_JsqJJx_agcQRa=vU25Db33t8LtaoBw+dZB5jS2N7LA2KX2g@mail.gmail.com>
+References: <1454641552-12576-1-git-send-email-zhaoshenglong@huawei.com>
+ <1454641552-12576-17-git-send-email-zhaoshenglong@huawei.com>
+ <CAL_JsqK8F6PQX2kC_+CtDk1-ykKRB3YB54o4FaypsRY_tNzK5w@mail.gmail.com> <56CC3ED9.5000101@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <20160223115805.GB4989@leverpostej>
+In-Reply-To: <56CC3ED9.5000101-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, julien.grall-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Feb 23, 2016 at 11:58:05AM +0000, Mark Rutland wrote:
-> Hi,
-> 
-> On Mon, Feb 22, 2016 at 05:58:19PM -0800, David Daney wrote:
-> > From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> > 
-> > There are two problems with the UEFI stub DT memory node removal
-> > routine:
-> > - it deletes nodes as it traverses the tree, which happens to work
-> >   but is not supported, as deletion invalidates the node iterator;
-> > - deleting memory nodes entirely may discard annotations in the form
-> >   of additional properties on the nodes.
-> > 
-> > Since the discovery of DT memory nodes occurs strictly before the
-> > UEFI init sequence, we can simply clear the memblock memory table
-> > before parsing the UEFI memory map. This way, it is no longer
-> > necessary to remove the nodes, so we can remove that logic from the
-> > stub as well.
-> 
-> This is a little bit scary, but I guess this works.
+On Tue, Feb 23, 2016 at 5:13 AM, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org=
+> wrote:
+>
+>
+> On 2016/2/9 13:04, Rob Herring wrote:
+>> On Thu, Feb 4, 2016 at 9:05 PM, Shannon Zhao <zhaoshenglong@huawei.c=
+om> wrote:
+>>> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>>>
+>>> Sometimes it needs to check if there is a node in FDT by full path.
+>>
+>> I'm confused. Are you searching by full path or...
+>>
+>>> Introduce this helper to get the specified name subnode if it exist=
+s.
+>>
+>> name of sub node?
+>>
+> get the offset of sub node by specified name.
+>
+>> Either way, fdt_subnode_offset or fdt_path_offset doesn't work?
+>>
+> Ah=EF=BC=8Cright=EF=BC=8Cboth of them should work. Does it need to ad=
+d a wrapper in
+> drivers/of/fdt.c for them or directly use them with the parameter
+> initial_boot_params?
 
-The way it is worded/implemented is, I agree. But if we simply say both 
-can be present and the kernel will default to UEFI memory map, that 
-seems sufficient to me.
- 
-> My only concern is that when we get kexec, a subsequent kernel must also
-> have EFI memory map support, or things go bad for the next EFI-aware
-> kernel after that (as things like the runtime services may have been
-> corrupted by the kernel in the middle). It's difficult to fix the
-> general case later.
-> 
-> A different option would be to support status="disabled" for the memory
-> nodes, and ignore these in early_init_dt_scan_memory. That way a kernel
-> cannot use memory without first having parsed the EFI memory map, and we
-> can still get NUMA info from the disabled nodes.
+Add a wrapper in fdt.c.
 
-That would be a bit strange that the node is disabled, but still used. 
-
-What if DT and UEFI tables are out of sync somehow? RAM is multiple 
-mapped and different addresses were picked for example.
-
-> You'd still need a new kernel to take into account status, but at least
-> we'd know all kernels would avoid using RAM that potentially needs to be
-> preserved.
-> 
-> Ard, Rob, thoughts?
+Rob
