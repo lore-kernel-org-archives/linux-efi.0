@@ -1,60 +1,71 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH] arm*: efi: drop permanent mapping of the UEFI System
- table
-Date: Wed, 24 Feb 2016 16:05:52 +0000
-Message-ID: <20160224160552.GB2603@codeblueprint.co.uk>
-References: <1456153179-27214-1-git-send-email-ard.biesheuvel@linaro.org>
- <20160222154314.GJ3435@leverpostej>
- <CAKv+Gu_pnjL557dE1xez_y2tESOjZj9_2XEbNtm_b4yAA-WdYg@mail.gmail.com>
+Subject: Re: [PATCH] efivarfs: Eliminate dead code in efivarfs_create()
+Date: Wed, 24 Feb 2016 16:47:34 +0000
+Message-ID: <20160224164734.GC2603@codeblueprint.co.uk>
+References: <1456243630-24834-1-git-send-email-tklauser@distanz.ch>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_pnjL557dE1xez_y2tESOjZj9_2XEbNtm_b4yAA-WdYg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+In-Reply-To: <1456243630-24834-1-git-send-email-tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
+Cc: Matthew Garrett <matthew.garrett-05XSO3Yj/JvQT0dZR+AlfA@public.gmane.org>, Jeremy Kerr <jk-mnsaURCQ41sdnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Mon, 22 Feb, at 04:56:57PM, Ard Biesheuvel wrote:
-> On 22 February 2016 at 16:43, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org> wrote:
-> > On Mon, Feb 22, 2016 at 03:59:39PM +0100, Ard Biesheuvel wrote:
-> >> diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-> >> index 848ede1587dc..6ce13d6b7122 100644
-> >> --- a/drivers/firmware/efi/arm-runtime.c
-> >> +++ b/drivers/firmware/efi/arm-runtime.c
-> >> @@ -64,6 +64,16 @@ static bool __init efi_virtmap_init(void)
-> >>                               &phys, ret);
-> >>                       return false;
-> >>               }
-> >> +             /*
-> >> +              * If this entry covers the address of the UEFI system table,
-> >> +              * calculate and record its virtual address.
-> >> +              */
-> >> +             if (efi_system_table >= phys &&
-> >> +                 efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
-> >> +                     efi.systab = (void *)(efi_system_table - phys +
-> >> +                                           md->virt_addr);
-> >> +                     set_bit(EFI_SYSTEM_TABLES, &efi.flags);
-> >> +             }
-> >
-> > It seems very odd to me to set this given it's currently unused, and we
-> > don't have permanent access to the table. That sounds like we're just
-> > setting ourselves up for future fragility as users appear.
-> >
+On Tue, 23 Feb, at 05:07:10PM, Tobias Klauser wrote:
+> After commit ed8b0de5a33d ("efi: Make efivarfs entries immutable by
+> default"), inode will always be NULL in the error check before iput(),
+> thus remove the check and the call to iput() alltogether. Also directly
+> fold the error handling code into the only place it is needed, which
+> makes the code a bit smaller.
 > 
-> I wondered about the purpose as well. It is only ever set, and never
-> tested (until this patch)
+> Found by the Coverity scanner (CID 1353443).
 > 
-> @Matt: any thoughts?
+> Signed-off-by: Tobias Klauser <tklauser-93Khv+1bN0NyDzI6CaY1VQ@public.gmane.org>
+> ---
+>  fs/efivarfs/inode.c | 15 +++++----------
+>  1 file changed, 5 insertions(+), 10 deletions(-)
+> 
+> diff --git a/fs/efivarfs/inode.c b/fs/efivarfs/inode.c
+> index e2ab6d0497f2..43321c9cd71b 100644
+> --- a/fs/efivarfs/inode.c
+> +++ b/fs/efivarfs/inode.c
+> @@ -106,7 +106,7 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+>  {
+>  	struct inode *inode = NULL;
+>  	struct efivar_entry *var;
+> -	int namelen, i = 0, err = 0;
+> +	int namelen, i = 0;
+>  	bool is_removable = false;
+>  
+>  	if (!efivarfs_valid_name(dentry->d_name.name, dentry->d_name.len))
+> @@ -128,8 +128,8 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+>  
+>  	inode = efivarfs_get_inode(dir->i_sb, dir, mode, 0, is_removable);
+>  	if (!inode) {
+> -		err = -ENOMEM;
+> -		goto out;
+> +		kfree(var);
+> +		return -ENOMEM;
+>  	}
+>  
+>  	for (i = 0; i < namelen; i++)
+> @@ -142,13 +142,8 @@ static int efivarfs_create(struct inode *dir, struct dentry *dentry,
+>  	efivar_entry_add(var, &efivarfs_list);
+>  	d_instantiate(dentry, inode);
+>  	dget(dentry);
+> -out:
+> -	if (err) {
+> -		kfree(var);
+> -		if (inode)
+> -			iput(inode);
+> -	}
+> -	return err;
+> +
+> +	return 0;
+>  }
+>  
+>  static int efivarfs_unlink(struct inode *dir, struct dentry *dentry)
 
-Good question. EFI_SYSTEM_TABLES was introduced over 4 years ago, but
-it looks like it has never had any users. I don't remember why I added
-it, probably just be to be "complete" since we had bits for all the
-other tables.
-
-If somebody wants to rip it out, I wouldn't object.
-
-To be fair, we don't have permanent access to any of the tables - you
-always have to switch to the dedicated EFI page tables before
-accessing regions.
+Looks good to me. Thanks, applied!
