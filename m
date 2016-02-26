@@ -1,59 +1,74 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v1 06/10] device property: switch to use UUID API
-Date: Fri, 26 Feb 2016 16:11:37 +0200
-Message-ID: <1456495897.13244.144.camel@linux.intel.com>
-References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <1455711448-124103-7-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <7544228.v4QPX4F7J7@vostro.rjw.lan>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH 1/2] efi: get rid of EFI_SYSTEM_TABLES status bit
+Date: Fri, 26 Feb 2016 15:20:34 +0100
+Message-ID: <1456496435-12679-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <7544228.v4QPX4F7J7-sKB8Sp2ER+y1GS7QM15AGw@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
-Cc: Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jani Nikula <jani.nikula-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Benjamin Tissoires <benjamin.tissoires-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Mathias Nyman <mathias.nyman-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Lv Zheng <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-nvdimm-hn68Rpc1hR1g9hUCZPvPmw@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 2016-02-18 at 01:03 +0100, Rafael J. Wysocki wrote:
-> On Wednesday, February 17, 2016 02:17:24 PM Andy Shevchenko wrote:
-> > Switch to use a generic UUID API instead of custom approach. It
-> > allows to
-> > define UUIDs, compare them, and validate.
+The EFI_SYSTEM_TABLES status bit is set by all EFI supporting architectures
+upon discovery of the EFI system table, but the bit is never tested in any
+code we have in the tree. So remove it.
 
-[]
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/ia64/kernel/efi.c             | 2 --
+ arch/x86/platform/efi/efi.c        | 2 --
+ drivers/firmware/efi/arm-runtime.c | 1 -
+ include/linux/efi.h                | 1 -
+ 4 files changed, 6 deletions(-)
 
-> > +static const uuid_le ads_uuid =3D
-> > +	UUID_LE(0xdbb8e3e6, 0x5886, 0x4ba6,
-> > +		0x87, 0x95, 0x13, 0x19, 0xf5, 0x2a, 0x96, 0x6b);
-> > =C2=A0
-> > =C2=A0static bool acpi_enumerate_nondev_subnodes(acpi_handle scope,
-> > =C2=A0					=C2=A0=C2=A0=C2=A0const union acpi_object
-> > *desc,
-> > @@ -138,7 +136,7 @@ static bool
-> > acpi_enumerate_nondev_subnodes(acpi_handle scope,
-> > =C2=A0		=C2=A0=C2=A0=C2=A0=C2=A0|| links->type !=3D ACPI_TYPE_PACKA=
-GE)
-> > =C2=A0			break;
-> > =C2=A0
-> > -		if (memcmp(uuid->buffer.pointer, ads_uuid,
-> > sizeof(ads_uuid)))
-> > +		if (uuid_le_cmp(*(uuid_le *)uuid->buffer.pointer,
-> > ads_uuid))
->=20
-> Maybe it's too late, but I don't quite understand the pointer
-> manipulations here.
->=20
-> I can see why you need a type conversion (although it looks ugly),
-> but why do you
-> need to dereference it too?
-
-The function takes that kind of type on input. The other variants are
-not compiled.
-Perhaps we better change uuid_{lb}e_cmp() first to take normal
-pointers, though I think the initial idea was to get type checking at
-compile time.
-
---=20
-Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Intel Finland Oy
+diff --git a/arch/ia64/kernel/efi.c b/arch/ia64/kernel/efi.c
+index caae3f4e4341..e3456698a2a7 100644
+--- a/arch/ia64/kernel/efi.c
++++ b/arch/ia64/kernel/efi.c
+@@ -531,8 +531,6 @@ efi_init (void)
+ 	       efi.systab->hdr.revision >> 16,
+ 	       efi.systab->hdr.revision & 0xffff, vendor);
+ 
+-	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+-
+ 	palo_phys      = EFI_INVALID_TABLE_ADDR;
+ 
+ 	if (efi_config_init(arch_tables) != 0)
+diff --git a/arch/x86/platform/efi/efi.c b/arch/x86/platform/efi/efi.c
+index ad285404ea7f..48dd701dacf6 100644
+--- a/arch/x86/platform/efi/efi.c
++++ b/arch/x86/platform/efi/efi.c
+@@ -352,8 +352,6 @@ static int __init efi_systab_init(void *phys)
+ 		       efi.systab->hdr.revision >> 16,
+ 		       efi.systab->hdr.revision & 0xffff);
+ 
+-	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+-
+ 	return 0;
+ }
+ 
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 6ae21e41a429..16c7d2a71156 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -105,7 +105,6 @@ static int __init arm_enable_runtime_services(void)
+ 		pr_err("Failed to remap EFI System Table\n");
+ 		return -ENOMEM;
+ 	}
+-	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+ 	if (!efi_virtmap_init()) {
+ 		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index e747eb08b2be..99bc85f708d4 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -975,7 +975,6 @@ extern int __init efi_setup_pcdp_console(char *);
+  * possible, remove EFI-related code altogether.
+  */
+ #define EFI_BOOT		0	/* Were we booted from EFI? */
+-#define EFI_SYSTEM_TABLES	1	/* Can we use EFI system tables? */
+ #define EFI_CONFIG_TABLES	2	/* Can we use EFI config tables? */
+ #define EFI_RUNTIME_SERVICES	3	/* Can we use runtime services? */
+ #define EFI_MEMMAP		4	/* Can we use EFI memory map? */
+-- 
+2.5.0
