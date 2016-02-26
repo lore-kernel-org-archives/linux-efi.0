@@ -1,66 +1,56 @@
-From: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v11 08/10] dt, numa: Add NUMA dt binding implementation.
-Date: Thu, 25 Feb 2016 17:26:34 -0800
-Message-ID: <56CFA9CA.6090803@caviumnetworks.com>
-References: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com> <1455930799-5371-9-git-send-email-ddaney.cavm@gmail.com> <20160223193651.GA8491@rob-hp-laptop>
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v1 05/10] ACPI: switch to use generic UUID API
+Date: Fri, 26 Feb 2016 15:46:31 +0200
+Message-ID: <1456494391.13244.137.camel@linux.intel.com>
+References: <1455711448-124103-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <1455711448-124103-6-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <CAPcyv4inMjmt8eH_=bNE_=NMeYGmS75B5LxB=f7Cd762=3UKyQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160223193651.GA8491@rob-hp-laptop>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAPcyv4inMjmt8eH_=bNE_=NMeYGmS75B5LxB=f7Cd762=3UKyQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Dan Williams <dan.j.williams-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Greg Kroah-Hartman <gregkh-hQyY1W1yCW8ekmWlsbkhG0B+6BGkLq7r@public.gmane.org>, Jarkko Sakkinen <jarkko.sakkinen-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Jani Nikula <jani.nikula-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, David Airlie <airlied-cv59FeDIM0c@public.gmane.org>, Benjamin Tissoires <benjamin.tissoires-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bjorn Helgaas <bhelgaas-hpIqsD4AKlfQT0dZR+AlfA@public.gmane.org>, Mathias Nyman <mathias.nyman-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Lv Zheng <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Zhang Rui <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Mika Westerberg <mika.westerberg-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, Linux ACPI <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Maling list - DRI developers <dri-devel-PD4FTy7X32lNgt0PjOBp9y5qC8QIuHrW@public.gmane.org>, linux-efi-u79uwXL29TbrhsbdSgBK9A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On 02/23/2016 11:36 AM, Rob Herring wrote:
-> On Fri, Feb 19, 2016 at 05:13:17PM -0800, David Daney wrote:
->> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->>
->> ADD device tree node parsing for NUMA topology using device
->> "numa-node-id" property distance-map.
->
-> I still want an adequate explanation why NUMA setup cannot be done with
-> an unflattened tree. PowerPC manages to do that and should have a
-> similar init flow being memblock based, so I would expect arm64 can too.
+On Wed, 2016-02-17 at 09:49 -0800, Dan Williams wrote:
+> On Wed, Feb 17, 2016 at 4:17 AM, Andy Shevchenko
+> <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
+> > Instead of opencoding the existing library functions let's use them
+> > directly.
+> >=20
+> > The conversion fixes a potential bug in int340x_thermal as well
+> > since we have
+> > to use memcmp() on binary data.
 
-Many things could be done.  Really, we want to know what *should* be done.
+[..]
 
-In the context of the current arm64 memory initialization we (more or 
-less) do:
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0uuid_le_to_bin(UUID_NFIT=
+_BUS, &nfit_uuid[NFIT_DEV_BUS]);
+> > +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0uuid_le_to_bin(UUID_NFIT=
+_DIMM, &nfit_uuid[NFIT_DEV_DIMM]);
+>=20
+> I don't see the benefit of this change.
 
-  1) early_init_fdt_scan_reserved_mem();
-  2) memory_present()
-  3) sparse_init()
-  4) other things
-  5) unflatten_device_tree()
+The benefit is to have less places (ideally one) which provides UUID
+helper routines for kernel.
 
-We are already reading information out of the FDT at #1.
+> =C2=A0=C2=A0For the NFIT driver we went
+> through a fire drill trying to make sure the ACPI spec format of a
+> UUID matched the Linux interpretation, and this change makes that
+> harder to determine.=C2=A0=C2=A0
 
-This patch set adds a step between 1 and 2 where we read NUMA 
-information out of the FDT.
+How harder? At least you look into one place and see exactly all
+functions related. Besides this series actually uses the same approach
+that was used in ACPI.
 
-Hypothetically, it might be possible to rewrite the arm64 setup code so 
-that the ordering was different, and the NUMA setup was done on the 
-unflattened tree, but that would certainly be a much more invasive patch.
+> ACPI drivers should use ACPICA uuid helper
+> routines in my opinion.
 
-If the arm64 maintainers would like a rewrite of:
+As far as I can see ACPICA lacks of needed API.
 
-   arch/arm64/kernel/setup.c
-   arch/arm64/mm/init.c
-   arch/arm64/mm/mm/mmu.c
-   .
-   .
-   .
-
-we can discuss doing NUMA setup with the unflattened tree.  With the 
-current memory initialization code, I think it makes more sense to parse 
-the NUMA information out of the flattened form.
-
-David Daney
-
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--=20
+Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Intel Finland Oy
