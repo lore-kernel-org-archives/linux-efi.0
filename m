@@ -1,96 +1,131 @@
 From: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v12 5/5] arm64, mm, numa: Add NUMA balancing support for
- arm64.
-Date: Fri, 26 Feb 2016 11:26:01 -0800
-Message-ID: <56D0A6C9.40907@caviumnetworks.com>
-References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com> <1456192703-2274-6-git-send-email-ddaney.cavm@gmail.com> <20160226185356.GO29125@arm.com>
+Subject: Re: [PATCH v12 4/5] arm64, numa: Add NUMA support for arm64 platforms.
+Date: Fri, 26 Feb 2016 11:51:32 -0800
+Message-ID: <56D0ACC4.1060605@caviumnetworks.com>
+References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com> <1456192703-2274-5-git-send-email-ddaney.cavm@gmail.com> <20160226185341.GN29125@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160226185356.GO29125-5wv7dgnIgG8@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160226185341.GN29125-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
 On 02/26/2016 10:53 AM, Will Deacon wrote:
-> On Mon, Feb 22, 2016 at 05:58:23PM -0800, David Daney wrote:
->> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->>
->> Enable NUMA balancing for arm64 platforms.
->> Add pte, pmd protnone helpers for use by automatic NUMA balancing.
->>
->> Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->> Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->> ---
->>   arch/arm64/Kconfig               |  1 +
->>   arch/arm64/include/asm/pgtable.h | 15 +++++++++++++++
->>   2 files changed, 16 insertions(+)
->>
->> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
->> index 9f0972a..6e22503 100644
->> --- a/arch/arm64/Kconfig
->> +++ b/arch/arm64/Kconfig
->> @@ -11,6 +11,7 @@ config ARM64
->>   	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
->>   	select ARCH_USE_CMPXCHG_LOCKREF
->>   	select ARCH_SUPPORTS_ATOMIC_RMW
->> +	select ARCH_SUPPORTS_NUMA_BALANCING
->>   	select ARCH_WANT_OPTIONAL_GPIOLIB
->>   	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION
->>   	select ARCH_WANT_FRAME_POINTERS
->> diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
->> index bf464de..5af9db2 100644
->> --- a/arch/arm64/include/asm/pgtable.h
->> +++ b/arch/arm64/include/asm/pgtable.h
->> @@ -346,6 +346,21 @@ static inline pgprot_t mk_sect_prot(pgprot_t prot)
->>   	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
->>   }
->>
->> +#ifdef CONFIG_NUMA_BALANCING
->> +/*
->> + * See the comment in include/asm-generic/pgtable.h
->> + */
->> +static inline int pte_protnone(pte_t pte)
+[...]
+>> diff --git a/arch/arm64/mm/numa.c b/arch/arm64/mm/numa.c
+>> new file mode 100644
+>> index 0000000..604e886
+>> --- /dev/null
+>> +++ b/arch/arm64/mm/numa.c
+>> @@ -0,0 +1,403 @@
+[...]
+>> +
+>> +static int numa_off;
+>> +static int numa_distance_cnt;
+>> +static u8 *numa_distance;
+>> +
+>> +static __init int numa_parse_early_param(char *opt)
 >> +{
->> +	return (pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)) == PTE_PROT_NONE;
+>> +	if (!opt)
+>> +		return -EINVAL;
+>> +	if (!strncmp(opt, "off", 3)) {
+>> +		pr_info("%s\n", "NUMA turned off");
+>> +		numa_off = 1;
+>> +	}
+>> +	return 0;
+>> +}
+>> +early_param("numa", numa_parse_early_param);
+>
+> Curious, but when is this option actually useful?
+>
+
+Good point.  I will remove that bit, it was used as an aid in debugging 
+while bringing up the patch set.
+
+
+>> +
+>> +cpumask_var_t node_to_cpumask_map[MAX_NUMNODES];
+>> +EXPORT_SYMBOL(node_to_cpumask_map);
+>> +
+>> +#ifdef CONFIG_DEBUG_PER_CPU_MAPS
+>> +
+>> +/*
+>> + * Returns a pointer to the bitmask of CPUs on Node 'node'.
+>> + */
+>> +const struct cpumask *cpumask_of_node(int node)
+>> +{
+>> +	if (WARN_ON(node >= nr_node_ids))
+>> +		return cpu_none_mask;
+>> +
+>> +	if (WARN_ON(node_to_cpumask_map[node] == NULL))
+>> +		return cpu_online_mask;
+>> +
+>> +	return node_to_cpumask_map[node];
+>> +}
+>> +EXPORT_SYMBOL(cpumask_of_node);
+>> +
+>> +#endif
+>> +
+>> +static void map_cpu_to_node(unsigned int cpu, int nid)
+>> +{
+>> +	set_cpu_numa_node(cpu, nid);
+>> +	if (nid >= 0)
+>> +		cpumask_set_cpu(cpu, node_to_cpumask_map[nid]);
 >> +}
 >> +
->> +static inline int pmd_protnone(pmd_t pmd)
+>> +static void unmap_cpu_to_node(unsigned int cpu)
 >> +{
->> +	return pte_protnone(pmd_pte(pmd));
+>> +	int nid = cpu_to_node(cpu);
+>> +
+>> +	if (nid >= 0)
+>> +		cpumask_clear_cpu(cpu, node_to_cpumask_map[nid]);
+>> +	set_cpu_numa_node(cpu, NUMA_NO_NODE);
 >> +}
->> +#endif
 >
-> Can these not be macros, like our other pte_* and pmd_* predicates in
-> this header file?
+> How do you end up with negative nids this late in the game?
+>
 
-They probably could be.  However there is precedence for the static 
-inline form:
+It might be possible with some of the hot plugging code.  It is a little 
+paranoia programming.
 
-$ git grep pte_protnone | grep '\.h' | grep -v return
-arch/arm64/include/asm/pgtable.h:static inline int pte_protnone(pte_t pte)
-arch/powerpc/include/asm/book3s/64/hash.h:static inline int 
-pte_protnone(pte_t pte)
-arch/powerpc/include/asm/nohash/pgtable.h:static inline int 
-pte_protnone(pte_t pte)
-arch/s390/include/asm/pgtable.h:static inline int pte_protnone(pte_t pte)
-arch/x86/include/asm/pgtable.h:static inline int pte_protnone(pte_t pte)
-include/asm-generic/pgtable.h:static inline int pte_protnone(pte_t pte)
+If you really don't like it, we can remove it.
 
+>> +
+>> +void numa_clear_node(unsigned int cpu)
+>> +{
+>> +	unmap_cpu_to_node(cpu);
+>
+> Why don't you just inline this function?
 
-Actually I am a little surprised that all the arm64 pte_* and pmd_* 
-things are not written as static inline to achieve added type safety. 
-The generated code should be identical.
+Good point, I will do that.
 
+[...]
+>> +int __init numa_add_memblk(int nid, u64 start, u64 size)
+>> +{
+>> +	int ret;
+>> +
+>> +	ret = memblock_set_node(start, size, &memblock.memory, nid);
+>> +	if (ret < 0) {
+>> +		pr_err("NUMA: memblock [0x%llx - 0x%llx] failed to add on node %d\n",
+>> +			start, (start + size - 1), nid);
+>> +		return ret;
+>> +	}
+>> +
+>> +	node_set(nid, numa_nodes_parsed);
+>> +	pr_info("NUMA: Adding memblock [0x%llx - 0x%llx] on node %d\n",
+>> +			start, (start + size - 1), nid);
+>> +	return ret;
+>> +}
+>> +EXPORT_SYMBOL(numa_add_memblk);
+>
+> But this is marked __init... (and you've done this elsewhere in the patch
+> too).
+
+I will fix these.
 
 >
 > Will
 >
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
