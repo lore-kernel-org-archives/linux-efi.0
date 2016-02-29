@@ -1,88 +1,100 @@
-From: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v12 3/5] dt, numa: Add NUMA dt binding implementation.
-Date: Mon, 29 Feb 2016 14:56:55 -0800
-Message-ID: <56D4CCB7.2020505@caviumnetworks.com>
-References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com> <1456192703-2274-4-git-send-email-ddaney.cavm@gmail.com> <20160229172956.GF31343@rric.localdomain> <56D48A5C.6040709@caviumnetworks.com> <20160229194522.GH31343@rric.localdomain>
+From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: [PATCH v12 4/5] arm64, numa: Add NUMA support for arm64 platforms.
+Date: Mon, 29 Feb 2016 15:42:58 -0800
+Message-ID: <56D4D782.3010503@gmail.com>
+References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com> <1456192703-2274-5-git-send-email-ddaney.cavm@gmail.com> <20160229173446.GG31343@rric.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160229194522.GH31343-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
+In-Reply-To: <20160229173446.GG31343-vWBEXY7mpu582hYKe6nXyg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 02/29/2016 11:45 AM, Robert Richter wrote:
-> On 29.02.16 10:13:48, David Daney wrote:
->> On 02/29/2016 09:29 AM, Robert Richter wrote:
->>> On 22.02.16 17:58:21, David Daney wrote:
->>>> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->>>>
->>>> ADD device tree node parsing for NUMA topology using device
->>>> "numa-node-id" property distance-map.
->>>>
->>>> Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->>>> Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
->>>> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->>>> ---
->>>>   drivers/of/Kconfig   |   3 +
->>>>   drivers/of/Makefile  |   1 +
->>>>   drivers/of/of_numa.c | 211 +++++++++++++++++++++++++++++++++++++++++++++++++++
->>>>   include/linux/of.h   |   9 +++
->>>>   4 files changed, 224 insertions(+)
->>>>   create mode 100644 drivers/of/of_numa.c
->>>>
->>>> diff --git a/drivers/of/Kconfig b/drivers/of/Kconfig
->>>> index e2a4841..b3bec3a 100644
->>>> --- a/drivers/of/Kconfig
->>>> +++ b/drivers/of/Kconfig
->>>> @@ -112,4 +112,7 @@ config OF_OVERLAY
->>>>   	  While this option is selected automatically when needed, you can
->>>>   	  enable it manually to improve device tree unit test coverage.
->>>>
->>>> +config OF_NUMA
->>>
->>> In arch/arm64/Kconfig you now need to:
->>>
->>> 	select OF_NUMA if NUMA && OF
->>>
->>> This should depend here on OF and NUMA and enabled in that case. Why
->>> moving that to arch code?
+On 02/29/2016 09:34 AM, Robert Richter wrote:
+> On 22.02.16 17:58:22, David Daney wrote:
+>> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
 >>
->> The dependency on of_numa.o is in the architecture specific code, so that is
->> where the Kconfig select should be too.
+>> Attempt to get the memory and CPU NUMA node via of_numa.  If that
+>> fails, default the dummy NUMA node and map all memory and CPUs to node
+>> 0.
+>>
+>> Tested-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+>> Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+>> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+>> ---
+>>   arch/arm64/Kconfig                |  26 +++
+>>   arch/arm64/include/asm/mmzone.h   |  12 ++
+>>   arch/arm64/include/asm/numa.h     |  45 +++++
+>>   arch/arm64/include/asm/topology.h |  10 +
+>>   arch/arm64/kernel/pci.c           |  10 +
+>>   arch/arm64/kernel/setup.c         |   4 +
+>>   arch/arm64/kernel/smp.c           |   4 +
+>>   arch/arm64/mm/Makefile            |   1 +
+>>   arch/arm64/mm/init.c              |  34 +++-
+>>   arch/arm64/mm/mmu.c               |   1 +
+>>   arch/arm64/mm/numa.c              | 403 ++++++++++++++++++++++++++++++++++++++
+>>   11 files changed, 545 insertions(+), 5 deletions(-)
+>>   create mode 100644 arch/arm64/include/asm/mmzone.h
+>>   create mode 100644 arch/arm64/include/asm/numa.h
+>>   create mode 100644 arch/arm64/mm/numa.c
 >
-> If you grep for select in Kconfig files you will see that dependency
-> checkers in the form of select ... if ... are very rare.
+>> +static int __init numa_init(int (*init_func)(void))
+>> +{
+>> +	int ret;
+>> +
+>> +	nodes_clear(numa_nodes_parsed);
+>> +	nodes_clear(node_possible_map);
+>> +	nodes_clear(node_online_map);
+>> +	numa_free_distance();
 
-You are right...
+         ^^^^^^^^^^^^^
+      Cleanup for any previous numa_alloc_distance()
 
-$ find . -name Kconfig | xargs grep -e 'select.*if' | wc -l
-1513
-$ find . -name Kconfig | xargs grep -e 'select' | wc -l
-14179
-
-The 'if' variety is encountered in fewer than 11% of the cases.
-
-That said, I am not sure if this type of statistic should be used to 
-evaluate code "goodness".
-
-[...]
+>> +
+>> +	ret = numa_alloc_distance();
+>> +	if (ret < 0)
+>> +		return ret;
 >
-> But to avoid arch configs in generic Kconfigs, define HAVE_OF_NUMA,
-> add it as dependency to OF_NUMA and select it in arch/arm64/Kconfig.
-> OF_NUMA is then enabled with defbool y if all requirements are met.
+> If you move this before the remaining initializers, you will need to
+> clean this up on error.
+
+Yes, we do this.  See above.
+
+> So better move it back after
+> numa_register_nodes() as it was in v10. This should work since
+> distances are used not earlier than numa is enabled.
+
+I moved it here for a reason.
+
+The init_func (of_numa_init() in this case) makes callbacks that use the 
+numa_distance object.  We need to allocate it before using it. 
+Allocating it after calling the init_func() is too late.
+
+
 >
-
-Really, what we want is NEEDS_OF_NUMA.  That is exactly what "select 
-OF_NUMA" means.
-
-There is no need to build a Rube Goldberg device out of these Kconfig 
-things.  The "select OF_NUMA if NUMA && OF" is concise, allowed by the 
-Kconfig system and exactly expresses when the file should be compiled.
-
-Unless there are other objections, I am going to use the the Kconfig 
-changes in the v12 form.
-
-David.
+> -Robert
+>
+>> +
+>> +	ret = init_func();
+>> +	if (ret < 0)
+>> +		return ret;
+>> +
+>> +	if (nodes_empty(numa_nodes_parsed))
+>> +		return -EINVAL;
+>> +
+>> +	ret = numa_register_nodes();
+>> +	if (ret < 0)
+>> +		return ret;
+>> +
+>> +	setup_node_to_cpumask_map();
+>> +
+>> +	/* init boot processor */
+>> +	cpu_to_node_map[0] = 0;
+>> +	map_cpu_to_node(0, 0);
+>> +
+>> +	return 0;
+>> +}
