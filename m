@@ -1,61 +1,53 @@
-From: Robert Richter <robert.richter-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v12 4/5] arm64, numa: Add NUMA support for arm64
- platforms.
-Date: Tue, 1 Mar 2016 13:21:12 +0100
-Message-ID: <20160301122112.GU24726@rric.localdomain>
-References: <1456192703-2274-1-git-send-email-ddaney.cavm@gmail.com>
- <1456192703-2274-5-git-send-email-ddaney.cavm@gmail.com>
- <20160229173446.GG31343@rric.localdomain>
- <56D4D782.3010503@gmail.com>
+From: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v11 08/10] dt, numa: Add NUMA dt binding implementation.
+Date: Tue, 1 Mar 2016 10:47:19 -0600
+Message-ID: <CAL_JsqLoTh_ZTUT26g4wz=6sofuRpFDCc_Aw+Oq66p8cGMp19g@mail.gmail.com>
+References: <1455930799-5371-1-git-send-email-ddaney.cavm@gmail.com>
+ <1455930799-5371-9-git-send-email-ddaney.cavm@gmail.com> <20160223193651.GA8491@rob-hp-laptop>
+ <56CFA9CA.6090803@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <56D4D782.3010503-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <56CFA9CA.6090803-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Robert Richter <rric-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+To: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Cc: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 29.02.16 15:42:58, David Daney wrote:
-> On 02/29/2016 09:34 AM, Robert Richter wrote:
-> >On 22.02.16 17:58:22, David Daney wrote:
-> >>From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+On Thu, Feb 25, 2016 at 7:26 PM, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org> wrote:
+> On 02/23/2016 11:36 AM, Rob Herring wrote:
+>>
+>> On Fri, Feb 19, 2016 at 05:13:17PM -0800, David Daney wrote:
+>>>
+>>> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+>>>
+>>> ADD device tree node parsing for NUMA topology using device
+>>> "numa-node-id" property distance-map.
+>>
+>>
+>> I still want an adequate explanation why NUMA setup cannot be done with
+>> an unflattened tree. PowerPC manages to do that and should have a
+>> similar init flow being memblock based, so I would expect arm64 can too.
+>
+>
+> Many things could be done.  Really, we want to know what *should* be done.
+>
+> In the context of the current arm64 memory initialization we (more or less)
+> do:
+>
+>  1) early_init_fdt_scan_reserved_mem();
+>  2) memory_present()
+>  3) sparse_init()
+>  4) other things
+>  5) unflatten_device_tree()
+>
+> We are already reading information out of the FDT at #1.
+>
+> This patch set adds a step between 1 and 2 where we read NUMA information
+> out of the FDT.
 
-> >>+static int __init numa_init(int (*init_func)(void))
-> >>+{
-> >>+	int ret;
-> >>+
-> >>+	nodes_clear(numa_nodes_parsed);
-> >>+	nodes_clear(node_possible_map);
-> >>+	nodes_clear(node_online_map);
-> >>+	numa_free_distance();
-> 
->         ^^^^^^^^^^^^^
->      Cleanup for any previous numa_alloc_distance()
-> 
-> >>+
-> >>+	ret = numa_alloc_distance();
-> >>+	if (ret < 0)
-> >>+		return ret;
-> >
-> >If you move this before the remaining initializers, you will need to
-> >clean this up on error.
-> 
-> Yes, we do this.  See above.
-> 
-> >So better move it back after
-> >numa_register_nodes() as it was in v10. This should work since
-> >distances are used not earlier than numa is enabled.
-> 
-> I moved it here for a reason.
-> 
-> The init_func (of_numa_init() in this case) makes callbacks that use the
-> numa_distance object.  We need to allocate it before using it. Allocating it
-> after calling the init_func() is too late.
+The dependency on unflattening is that memblock is up and we can
+allocate a chunk from it. Isn't that dependency met by step 1 or is
+there a dependency on sparsemem (or something else)?
 
-Sounds reasonable and looks sane now.
-
-Thanks,
-
--Robert
+Rob
