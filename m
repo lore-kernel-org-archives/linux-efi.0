@@ -1,65 +1,109 @@
 From: David Daney <ddaney.cavm@gmail.com>
-Subject: [PATCH v13 6/6] arm64, mm, numa: Add NUMA balancing support for arm64.
-Date: Wed,  2 Mar 2016 14:56:02 -0800
-Message-ID: <1456959362-2036-7-git-send-email-ddaney.cavm@gmail.com>
+Subject: [PATCH v13 1/6] efi: ARM/arm64: ignore DT memory nodes instead of
+ removing them
+Date: Wed,  2 Mar 2016 14:55:57 -0800
+Message-ID: <1456959362-2036-2-git-send-email-ddaney.cavm@gmail.com>
 References: <1456959362-2036-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 In-Reply-To: <1456959362-2036-1-git-send-email-ddaney.cavm@gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
 To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
-Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Enable NUMA balancing for arm64 platforms.
-Add pte, pmd protnone helpers for use by automatic NUMA balancing.
+There are two problems with the UEFI stub DT memory node removal
+routine:
+- it deletes nodes as it traverses the tree, which happens to work
+  but is not supported, as deletion invalidates the node iterator;
+- deleting memory nodes entirely may discard annotations in the form
+  of additional properties on the nodes.
 
-Reviewed-by: Robert Richter <rrichter@cavium.com>
-Signed-off-by: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+Since the discovery of DT memory nodes occurs strictly before the
+UEFI init sequence, we can simply clear the memblock memory table
+before parsing the UEFI memory map. This way, it is no longer
+necessary to remove the nodes, so we can remove that logic from the
+stub as well.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 Signed-off-by: David Daney <david.daney@cavium.com>
 ---
- arch/arm64/Kconfig               |  1 +
- arch/arm64/include/asm/pgtable.h | 15 +++++++++++++++
- 2 files changed, 16 insertions(+)
+ drivers/firmware/efi/arm-init.c    |  8 ++++++++
+ drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+ 2 files changed, 9 insertions(+), 23 deletions(-)
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 7013087..20f5192 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -11,6 +11,7 @@ config ARM64
- 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
- 	select ARCH_USE_CMPXCHG_LOCKREF
- 	select ARCH_SUPPORTS_ATOMIC_RMW
-+	select ARCH_SUPPORTS_NUMA_BALANCING
- 	select ARCH_WANT_OPTIONAL_GPIOLIB
- 	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION
- 	select ARCH_WANT_FRAME_POINTERS
-diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
-index bf464de..5af9db2 100644
---- a/arch/arm64/include/asm/pgtable.h
-+++ b/arch/arm64/include/asm/pgtable.h
-@@ -346,6 +346,21 @@ static inline pgprot_t mk_sect_prot(pgprot_t prot)
- 	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
- }
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9e15d57..40c9d85 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -143,6 +143,14 @@ static __init void reserve_regions(void)
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
  
-+#ifdef CONFIG_NUMA_BALANCING
-+/*
-+ * See the comment in include/asm-generic/pgtable.h
-+ */
-+static inline int pte_protnone(pte_t pte)
-+{
-+	return (pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)) == PTE_PROT_NONE;
-+}
++	/*
++	 * Discard memblocks discovered so far: if there are any at this
++	 * point, they originate from memory nodes in the DT, and UEFI
++	 * uses its own memory map instead.
++	 */
++	memblock_dump_all();
++	memblock_remove(0, ULLONG_MAX);
 +
-+static inline int pmd_protnone(pmd_t pmd)
-+{
-+	return pte_protnone(pmd_pte(pmd));
-+}
-+#endif
-+
- /*
-  * THP definitions.
-  */
+ 	for_each_efi_memory_desc(&memmap, md) {
+ 		paddr = md->phys_addr;
+ 		npages = md->num_pages;
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index cf7b7d4..9df1560 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long map_size, unsigned long desc_size,
+ 			u32 desc_ver)
+ {
+-	int node, prev, num_rsv;
++	int node, num_rsv;
+ 	int status;
+ 	u32 fdt_val32;
+ 	u64 fdt_val64;
+@@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 		goto fdt_set_fail;
+ 
+ 	/*
+-	 * Delete any memory nodes present. We must delete nodes which
+-	 * early_init_dt_scan_memory may try to use.
+-	 */
+-	prev = 0;
+-	for (;;) {
+-		const char *type;
+-		int len;
+-
+-		node = fdt_next_node(fdt, prev, NULL);
+-		if (node < 0)
+-			break;
+-
+-		type = fdt_getprop(fdt, node, "device_type", &len);
+-		if (type && strncmp(type, "memory", len) == 0) {
+-			fdt_del_node(fdt, node);
+-			continue;
+-		}
+-
+-		prev = node;
+-	}
+-
+-	/*
+ 	 * Delete all memory reserve map entries. When booting via UEFI,
+ 	 * kernel will use the UEFI memory map to find reserved regions.
+ 	 */
 -- 
 1.8.3.1
