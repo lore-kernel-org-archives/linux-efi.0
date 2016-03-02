@@ -1,57 +1,70 @@
-From: Laison Computech Inc <7sales-mT95+eBjLkWwyptSkfDYNlaTQe2KTcn/@public.gmane.org>
-Subject: CISCO AND AVAYA IP Phones
-Date: Wed, 02 Mar 2016 03:10:34 +0700
-Message-ID: <20160301210941.D8278574BAE__26722.6349832074$1456877688$gmane$org@srv-mta.gcmillenium.com.br>
-Reply-To: sales-mT95+eBjLkWwyptSkfDYNlaTQe2KTcn/@public.gmane.org
+From: Dave Young <dyoung-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v2 1/2] efi: esrt: use memremap not ioremap to access
+ ESRT table in memory
+Date: Wed, 2 Mar 2016 09:16:19 +0800
+Message-ID: <20160302011619.GA3192@dhcp-128-65.nay.redhat.com>
+References: <20160218104407.GC2651@codeblueprint.co.uk>
+ <CAKv+Gu_AW7PKJJOd2mbEu3LKJe+gNaPHnH=sgO=YXM_KWFyKxw@mail.gmail.com>
+ <20160218132824.GE2651@codeblueprint.co.uk>
+ <CAKv+Gu-s1pzYBzuDG-Z7s3gyo8dPOfeidZQ+rim-uAWZCBcKQQ@mail.gmail.com>
+ <20160218134324.GG2651@codeblueprint.co.uk>
+ <CAKv+Gu875r9RkDC723kNsG4XC0eSE9RPPmSFZrD0sx0QxS+V4g@mail.gmail.com>
+ <20160218141544.GH2651@codeblueprint.co.uk>
+ <20160218191624.GA1515@redhat.com>
+ <20160226144114.GA7475@codeblueprint.co.uk>
+ <20160301233040.GA31476@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Description: Mail message body
+Content-Disposition: inline
+In-Reply-To: <20160301233040.GA31476-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Recipients <7sales-mT95+eBjLkWwyptSkfDYNlaTQe2KTcn/@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Hi,
+On 03/01/16 at 11:30pm, Matt Fleming wrote:
+> On Fri, 26 Feb, at 02:41:14PM, Matt Fleming wrote:
+> > On Thu, 18 Feb, at 02:16:24PM, Peter Jones wrote:
+> > > 
+> > > So the question I have is: would you rather chop up regions and reserve
+> > > the space, or allocate a new copy and update the configuration table
+> > > (after ExitBootServices()) to point to it?  The latter makes it pretty
+> > > easy to do from an API that all these drivers can use, and it makes the
+> > > kexec case completely transparent.
+> > > 
+> > > Up to you.
+> > 
+> > I think it makes the most sense to chop up the regions we care about
+> > (i.e. the ones we have drivers for) because not only does that save us
+> > the effort of copying out the data on every kexec reboot, it also
+> > prevents us from leaking each copy since we don't free them at the
+> > moment.
+> > 
+> > Then we just need to maintain a separate list of regions to free in
+> > efi_free_boot_services() or have some other way to distinguish between
+> > them.
+> > 
+> > Oh, and save_runtime_map() would need updating to save Boot Services
+> > regions too.
+> 
+> I have a very rough draft of patches that implement this strategy on
+> the 'experiemntal/efi-memmap' branch in the EFI tree if anyone is
+> curious and wants to take a look. The series will be sent out soon.
+> 
+> I wouldn't necessarily try running them or anything as there's a few
+> things that I know are broken; ia64 build, EFI mixed mode boot,
+> probably arm64 regressions.
+> 
+> The upshot of the patch series is that there's a whole lot of code we
+> can share for manipulating memory maps between all EFI architectures
+> and by fixing this "reserve boot services regions" in a generic way it
+> should mean kexec under EFI on arm64 should be fairly trivial to
+> implement, along with ESRT, etc.
 
-Clean tested working pulls CPUs and QTYs in stock.
+Matt, thanks. One question is for the acpi patches you sent before, do you
+think they are still necessary as a fix for the bgrt problem and coexist
+with the "reserve useful boot services" proposal?
 
-115 X X5650
-65 X E5410
-75 X X5660
-145 X E5530
-100 X E5645
-40 X X5680
-75 X X5690
-
-Brand new sealed IP phones and QTYs in stock.
-
-55 x CP-7937G
-77 x CP-7942G
-54 x CP-7945G
-75 x CP-7962G
-=2E.....
-45 x Avaya 9630
-65 x Avaya 9641
-55 x Avaya 9640=20
-
-USED IT HARDWARE FROM:
-
-=46UJITSU       IBM         SUN        HP
-QUANTUM   DELL       HDS        STK
-NETAPP      SGI         Oracle      EMC=B2
-
-3Com, ADVA, Alcatel, Brocade, Cisco,
-Cabletron, Enterasys, Extreme Networks,
-Huawei, Marconi, Nortel, Qlogic, Avaya
-
-Let me know if you're interested. We are very open to offers and willin=
-g to work with you to make sure that we have a deal.
-
-Sincerely
-Barbara Johnson
-Laison Computech Inc
-Tel: +1-657-205-7860
-=46ax: +1-347-214-0478
-Email: sales-mT95+eBjLkWwyptSkfDYNlaTQe2KTcn/@public.gmane.org
-Web: www.laisoncomputech.com
+Thanks
+Dave
