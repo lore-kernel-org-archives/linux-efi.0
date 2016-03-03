@@ -1,7 +1,7 @@
 From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v14 2/6] Documentation, dt, numa: dt bindings for NUMA.
-Date: Thu,  3 Mar 2016 15:55:35 -0800
-Message-ID: <1457049339-23351-3-git-send-email-ddaney.cavm@gmail.com>
+Subject: [PATCH v14 4/6] arm64: Move unflatten_device_tree() call earlier.
+Date: Thu,  3 Mar 2016 15:55:37 -0800
+Message-ID: <1457049339-23351-5-git-send-email-ddaney.cavm@gmail.com>
 References: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1457049339-23351-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
@@ -10,295 +10,107 @@ To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAP
 Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 
-Add DT bindings for numa mapping of memory, CPUs and IOs.
+In order to extract NUMA information from the device tree, we need to
+have the tree in its unflattened form.
 
-Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Split paging_init() into two pieces.  The first piece maps memory so
+that unflatten_device_tree(), can allocate memory.  The second piece
+containing the bootmem_init() call that will be patched in a follow-on
+patch to add NUMA handling.
+
+Move the unflatten_device_tree() call between the two new pieces.
+
 Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 ---
- Documentation/devicetree/bindings/numa.txt | 272 +++++++++++++++++++++++++++++
- 1 file changed, 272 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/numa.txt
+ arch/arm64/include/asm/mmu.h |  3 ++-
+ arch/arm64/kernel/setup.c    | 15 ++++++++++-----
+ arch/arm64/mm/mmu.c          | 17 +++++++++++------
+ 3 files changed, 23 insertions(+), 12 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/numa.txt b/Documentation/devicetree/bindings/numa.txt
-new file mode 100644
-index 0000000..ec5ed7c
---- /dev/null
-+++ b/Documentation/devicetree/bindings/numa.txt
-@@ -0,0 +1,272 @@
-+==============================================================================
-+NUMA binding description.
-+==============================================================================
+diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
+index 990124a..e6e40ac 100644
+--- a/arch/arm64/include/asm/mmu.h
++++ b/arch/arm64/include/asm/mmu.h
+@@ -28,7 +28,8 @@ typedef struct {
+  */
+ #define ASID(mm)	((mm)->context.id.counter & 0xffff)
+ 
+-extern void paging_init(void);
++extern void paging_init_map_mem(void);
++extern void paging_init_rest(void);
+ extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
+ extern void init_mem_pgprot(void);
+ extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
+diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
+index 8119479..753ae90 100644
+--- a/arch/arm64/kernel/setup.c
++++ b/arch/arm64/kernel/setup.c
+@@ -319,7 +319,13 @@ void __init setup_arch(char **cmdline_p)
+ 	/* Parse the ACPI tables for possible boot-time configuration */
+ 	acpi_boot_table_init();
+ 
+-	paging_init();
++	paging_init_map_mem();
 +
-+==============================================================================
-+1 - Introduction
-+==============================================================================
++	if (acpi_disabled)
++		unflatten_device_tree();
 +
-+Systems employing a Non Uniform Memory Access (NUMA) architecture contain
-+collections of hardware resources including processors, memory, and I/O buses,
-+that comprise what is commonly known as a NUMA node.
-+Processor accesses to memory within the local NUMA node is generally faster
-+than processor accesses to memory outside of the local NUMA node.
-+DT defines interfaces that allow the platform to convey NUMA node
-+topology information to OS.
++	paging_init_rest();
 +
-+==============================================================================
-+2 - numa-node-id
-+==============================================================================
+ 	relocate_initrd();
+ 
+ 	kasan_init();
+@@ -328,12 +334,11 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	early_ioremap_reset();
+ 
+-	if (acpi_disabled) {
+-		unflatten_device_tree();
++	if (acpi_disabled)
+ 		psci_dt_init();
+-	} else {
++	else
+ 		psci_acpi_init();
+-	}
 +
-+For the purpose of identification, each NUMA node is associated with a unique
-+token known as a node id. For the purpose of this binding
-+a node id is a 32-bit integer.
-+
-+A device node is associated with a NUMA node by the presence of a
-+numa-node-id property which contains the node id of the device.
-+
-+Example:
-+	/* numa node 0 */
-+	numa-node-id = <0>;
-+
-+	/* numa node 1 */
-+	numa-node-id = <1>;
-+
-+==============================================================================
-+3 - distance-map
-+==============================================================================
-+
-+The device tree node distance-map describes the relative
-+distance (memory latency) between all numa nodes.
-+
-+- compatible : Should at least contain "numa-distance-map-v1".
-+
-+- distance-matrix
-+  This property defines a matrix to describe the relative distances
-+  between all numa nodes.
-+  It is represented as a list of node pairs and their relative distance.
-+
-+  Note:
-+	1. Each entry represents distance from first node to second node.
-+	The distances are equal in either direction.
-+	2. The distance from a node to self (local distance) is represented
-+	with value 10 and all internode distance should be represented with
-+	a value greater than 10.
-+	3. distance-matrix should have entries in lexicographical ascending
-+	order of nodes.
-+	4. There must be only one device node distance-map which must reside in the root node.
-+
-+Example:
-+	4 nodes connected in mesh/ring topology as below,
-+
-+		0_______20______1
-+		|               |
-+		|               |
-+		20             20
-+		|               |
-+		|               |
-+		|_______________|
-+		3       20      2
-+
-+	if relative distance for each hop is 20,
-+	then internode distance would be,
-+	      0 -> 1 = 20
-+	      1 -> 2 = 20
-+	      2 -> 3 = 20
-+	      3 -> 0 = 20
-+	      0 -> 2 = 40
-+	      1 -> 3 = 40
-+
-+     and dt presentation for this distance matrix is,
-+
-+		distance-map {
-+			 compatible = "numa-distance-map-v1";
-+			 distance-matrix = <0 0  10>,
-+					   <0 1  20>,
-+					   <0 2  40>,
-+					   <0 3  20>,
-+					   <1 0  20>,
-+					   <1 1  10>,
-+					   <1 2  20>,
-+					   <1 3  40>,
-+					   <2 0  40>,
-+					   <2 1  20>,
-+					   <2 2  10>,
-+					   <2 3  20>,
-+					   <3 0  20>,
-+					   <3 1  40>,
-+					   <3 2  20>,
-+					   <3 3  10>;
-+		};
-+
-+==============================================================================
-+4 - Example dts
-+==============================================================================
-+
-+Dual socket system consists of 2 boards connected through ccn bus and
-+each board having one socket/soc of 8 cpus, memory and pci bus.
-+
-+	memory@c00000 {
-+		device_type = "memory";
-+		reg = <0x0 0xc00000 0x0 0x80000000>;
-+		/* node 0 */
-+		numa-node-id = <0>;
-+	};
-+
-+	memory@10000000000 {
-+		device_type = "memory";
-+		reg = <0x100 0x0 0x0 0x80000000>;
-+		/* node 1 */
-+		numa-node-id = <1>;
-+	};
-+
-+	cpus {
-+		#address-cells = <2>;
-+		#size-cells = <0>;
-+
-+		cpu@0 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x0>;
-+			enable-method = "psci";
-+			/* node 0 */
-+			numa-node-id = <0>;
-+		};
-+		cpu@1 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x1>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@2 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x2>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@3 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x3>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@4 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x4>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@5 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x5>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@6 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x6>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@7 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x7>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@8 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x8>;
-+			enable-method = "psci";
-+			/* node 1 */
-+			numa-node-id = <1>;
-+		};
-+		cpu@9 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x9>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@a {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xa>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@b {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xb>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@c {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xc>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@d {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xd>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@e {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xe>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@f {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xf>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+	};
-+
-+	pcie0: pcie0@848000000000 {
-+		compatible = "arm,armv8";
-+		device_type = "pci";
-+		bus-range = <0 255>;
-+		#size-cells = <2>;
-+		#address-cells = <3>;
-+		reg = <0x8480 0x00000000 0 0x10000000>;  /* Configuration space */
-+		ranges = <0x03000000 0x8010 0x00000000 0x8010 0x00000000 0x70 0x00000000>;
-+		/* node 0 */
-+		numa-node-id = <0>;
-+        };
-+
-+	pcie1: pcie1@948000000000 {
-+		compatible = "arm,armv8";
-+		device_type = "pci";
-+		bus-range = <0 255>;
-+		#size-cells = <2>;
-+		#address-cells = <3>;
-+		reg = <0x9480 0x00000000 0 0x10000000>;  /* Configuration space */
-+		ranges = <0x03000000 0x9010 0x00000000 0x9010 0x00000000 0x70 0x00000000>;
-+		/* node 1 */
-+		numa-node-id = <1>;
-+        };
-+
-+	distance-map {
-+		compatible = "numa-distance-map-v1";
-+		distance-matrix = <0 0 10>,
-+				  <0 1 20>,
-+				  <1 1 10>;
-+	};
+ 	xen_early_init();
+ 
+ 	cpu_read_bootcpu_ops();
+diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
+index 58faeaa..5c6dd0a 100644
+--- a/arch/arm64/mm/mmu.c
++++ b/arch/arm64/mm/mmu.c
+@@ -449,18 +449,23 @@ void fixup_init(void)
+ }
+ 
+ /*
+- * paging_init() sets up the page tables, initialises the zone memory
+- * maps and sets up the zero page.
++ * paging_init_map_mem() sets up the page tables so that memblock
++ * memory is usable.
+  */
+-void __init paging_init(void)
++void __init paging_init_map_mem(void)
+ {
+-	void *zero_page;
+-
+ 	map_mem();
+ 	fixup_executable();
++}
+ 
++/*
++ * paging_init_rest() finishes setting up the page tables, initializes
++ * the zone memory maps and sets up the zero page.
++ */
++void __init paging_init_rest(void)
++{
+ 	/* allocate the zero page. */
+-	zero_page = early_alloc(PAGE_SIZE);
++	void *zero_page = early_alloc(PAGE_SIZE);
+ 
+ 	bootmem_init();
+ 
 -- 
 1.8.3.1
