@@ -1,116 +1,109 @@
-From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v14 4/6] arm64: Move unflatten_device_tree() call earlier.
-Date: Thu,  3 Mar 2016 15:55:37 -0800
-Message-ID: <1457049339-23351-5-git-send-email-ddaney.cavm@gmail.com>
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH v14 1/6] efi: ARM/arm64: ignore DT memory nodes instead of
+ removing them
+Date: Thu,  3 Mar 2016 15:55:34 -0800
+Message-ID: <1457049339-23351-2-git-send-email-ddaney.cavm@gmail.com>
 References: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1457049339-23351-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-In order to extract NUMA information from the device tree, we need to
-have the tree in its unflattened form.
+There are two problems with the UEFI stub DT memory node removal
+routine:
+- it deletes nodes as it traverses the tree, which happens to work
+  but is not supported, as deletion invalidates the node iterator;
+- deleting memory nodes entirely may discard annotations in the form
+  of additional properties on the nodes.
 
-Split paging_init() into two pieces.  The first piece maps memory so
-that unflatten_device_tree(), can allocate memory.  The second piece
-containing the bootmem_init() call that will be patched in a follow-on
-patch to add NUMA handling.
+Since the discovery of DT memory nodes occurs strictly before the
+UEFI init sequence, we can simply clear the memblock memory table
+before parsing the UEFI memory map. This way, it is no longer
+necessary to remove the nodes, so we can remove that logic from the
+stub as well.
 
-Move the unflatten_device_tree() call between the two new pieces.
-
-Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: David Daney <david.daney@cavium.com>
 ---
- arch/arm64/include/asm/mmu.h |  3 ++-
- arch/arm64/kernel/setup.c    | 15 ++++++++++-----
- arch/arm64/mm/mmu.c          | 17 +++++++++++------
- 3 files changed, 23 insertions(+), 12 deletions(-)
+ drivers/firmware/efi/arm-init.c    |  8 ++++++++
+ drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+ 2 files changed, 9 insertions(+), 23 deletions(-)
 
-diff --git a/arch/arm64/include/asm/mmu.h b/arch/arm64/include/asm/mmu.h
-index 990124a..e6e40ac 100644
---- a/arch/arm64/include/asm/mmu.h
-+++ b/arch/arm64/include/asm/mmu.h
-@@ -28,7 +28,8 @@ typedef struct {
-  */
- #define ASID(mm)	((mm)->context.id.counter & 0xffff)
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9e15d57..40c9d85 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -143,6 +143,14 @@ static __init void reserve_regions(void)
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
  
--extern void paging_init(void);
-+extern void paging_init_map_mem(void);
-+extern void paging_init_rest(void);
- extern void __iomem *early_io_map(phys_addr_t phys, unsigned long virt);
- extern void init_mem_pgprot(void);
- extern void create_pgd_mapping(struct mm_struct *mm, phys_addr_t phys,
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 8119479..753ae90 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -319,7 +319,13 @@ void __init setup_arch(char **cmdline_p)
- 	/* Parse the ACPI tables for possible boot-time configuration */
- 	acpi_boot_table_init();
- 
--	paging_init();
-+	paging_init_map_mem();
++	/*
++	 * Discard memblocks discovered so far: if there are any at this
++	 * point, they originate from memory nodes in the DT, and UEFI
++	 * uses its own memory map instead.
++	 */
++	memblock_dump_all();
++	memblock_remove(0, ULLONG_MAX);
 +
-+	if (acpi_disabled)
-+		unflatten_device_tree();
-+
-+	paging_init_rest();
-+
- 	relocate_initrd();
- 
- 	kasan_init();
-@@ -328,12 +334,11 @@ void __init setup_arch(char **cmdline_p)
- 
- 	early_ioremap_reset();
- 
--	if (acpi_disabled) {
--		unflatten_device_tree();
-+	if (acpi_disabled)
- 		psci_dt_init();
--	} else {
-+	else
- 		psci_acpi_init();
--	}
-+
- 	xen_early_init();
- 
- 	cpu_read_bootcpu_ops();
-diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 58faeaa..5c6dd0a 100644
---- a/arch/arm64/mm/mmu.c
-+++ b/arch/arm64/mm/mmu.c
-@@ -449,18 +449,23 @@ void fixup_init(void)
- }
- 
- /*
-- * paging_init() sets up the page tables, initialises the zone memory
-- * maps and sets up the zero page.
-+ * paging_init_map_mem() sets up the page tables so that memblock
-+ * memory is usable.
-  */
--void __init paging_init(void)
-+void __init paging_init_map_mem(void)
+ 	for_each_efi_memory_desc(&memmap, md) {
+ 		paddr = md->phys_addr;
+ 		npages = md->num_pages;
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index cf7b7d4..9df1560 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long map_size, unsigned long desc_size,
+ 			u32 desc_ver)
  {
--	void *zero_page;
+-	int node, prev, num_rsv;
++	int node, num_rsv;
+ 	int status;
+ 	u32 fdt_val32;
+ 	u64 fdt_val64;
+@@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 		goto fdt_set_fail;
+ 
+ 	/*
+-	 * Delete any memory nodes present. We must delete nodes which
+-	 * early_init_dt_scan_memory may try to use.
+-	 */
+-	prev = 0;
+-	for (;;) {
+-		const char *type;
+-		int len;
 -
- 	map_mem();
- 	fixup_executable();
-+}
- 
-+/*
-+ * paging_init_rest() finishes setting up the page tables, initializes
-+ * the zone memory maps and sets up the zero page.
-+ */
-+void __init paging_init_rest(void)
-+{
- 	/* allocate the zero page. */
--	zero_page = early_alloc(PAGE_SIZE);
-+	void *zero_page = early_alloc(PAGE_SIZE);
- 
- 	bootmem_init();
- 
+-		node = fdt_next_node(fdt, prev, NULL);
+-		if (node < 0)
+-			break;
+-
+-		type = fdt_getprop(fdt, node, "device_type", &len);
+-		if (type && strncmp(type, "memory", len) == 0) {
+-			fdt_del_node(fdt, node);
+-			continue;
+-		}
+-
+-		prev = node;
+-	}
+-
+-	/*
+ 	 * Delete all memory reserve map entries. When booting via UEFI,
+ 	 * kernel will use the UEFI memory map to find reserved regions.
+ 	 */
 -- 
 1.8.3.1
