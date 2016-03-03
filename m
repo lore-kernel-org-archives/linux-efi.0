@@ -1,147 +1,65 @@
-From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v14 0/6] arm64, numa: Add numa support for arm64 platforms
-Date: Thu,  3 Mar 2016 15:55:33 -0800
-Message-ID: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH v14 6/6] arm64, mm, numa: Add NUMA balancing support for arm64.
+Date: Thu,  3 Mar 2016 15:55:39 -0800
+Message-ID: <1457049339-23351-7-git-send-email-ddaney.cavm@gmail.com>
+References: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+From: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
 
-v14:
-	- Revised patch to unflatten the device tree earlier.
+Enable NUMA balancing for arm64 platforms.
+Add pte, pmd protnone helpers for use by automatic NUMA balancing.
 
-	- Cleanups and added EXPORT_SYMBOL to of_numa.c as suggested
-          by Rob Harring
+Reviewed-by: Robert Richter <rrichter@cavium.com>
+Signed-off-by: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
+Signed-off-by: David Daney <david.daney@cavium.com>
+---
+ arch/arm64/Kconfig               |  1 +
+ arch/arm64/include/asm/pgtable.h | 15 +++++++++++++++
+ 2 files changed, 16 insertions(+)
 
-v13:
-	- Added patch to unflatten the device tree earlier.
-
-	- Rewrote of_numa.c to work on unflattened the device tree.
-
-	- Cleanup of EXPORTs in arch/arm64/mm/numa.c as suggested by
-          Will Deacon.
-
-v12:
-
-	- Replaced 6 patches from Ard Biesheuvel with new simpler, and
-          more correct, single patch, also from Ard.
-
-v11:
-	- Dropped cleanup patches for other architectures, they will be
-          submitted as a separate set after more testing.
-
-	- Added patch set from Ard Biesheuvel that are needed to make
-          the whole thing actually work.  Previously this was a
-          separate set.
-
-	- Kconfig and other fixes and simplifications as suggested by
-          Rob Herring.
-
-	- Rearranged, refactored and reordered so that we don't patch
-          new files multiple times.
-
-	- Summary:
-
-		o 6 patches from Ard Biesheuvel to allow use of
-		  "memory" nodes with efi stub.
-
-		o 2 patches to document and add of_numa.c
-
-		o 1 patch to add arm64 NUMA support.
-
-		o 1 patch to add NUMA balancing support for arm64.
-
-v10:
-	- Incorporated review comments from Rob Herring.
-	- Moved numa binding and implementation to devicetree core.
-	- Added cleanup patch to remove redundant NODE_DATA macro from asm header files
-	- Include numa balancing support for arm64 patch in this series.
-	- Fix tile build issue reported by the kbuild robot(patch 7)
-
-v9:	- Added cleanup patch to reuse and avoid redefinition of cpumask_of_pcibus
-	  as suggested from Will Deacon and Bjorn Helgaas.
-	  - Including patch to Make pci-host-generic driver numa aware.
-	  - Incorporated comment from Shannon Zhao.
-
-v8:
-	- Incorporated review comments of Mark Rutland and Will Deacon.
-	- Added pci helper function and macro for numa.
-
-v7:
-	- managing numa memory mapping using memblock.
-	- Incorporated review comments of Mark Rutland.
-
-v6:
-	- defined and implemented the numa dt binding using
-	node property proximity and device node distance-map.
-	- renamed dt_numa to of_numa
-
-v5:
-        - created base verion of numa.c which creates dummy numa without using dt
-          on single socket platforms. Then added patches for dt support.
-        - Incorporated review comments from Hanjun Guo.
-
-v4:
-done changes as per Arnd review comments.
-
-v3:
-Added changes to support numa on arm64 based platforms.
-Tested these patches on cavium's multinode(2 node topology) platform.
-In this patchset, defined and implemented dt bindings for numa mapping
-for core and memory using device node property arm,associativity.
-
-v2:
-Defined and implemented numa map for memory, cores to node and
-proximity distance matrix of nodes.
-
-v1:
-Initial patchset to support numa on arm64 platforms.
-
-Note: 1. This patchset is tested for NUMA and without NUMA with dt
-        (both with and without NUMA bindings) on thunderx single
-        socket and dual socket boards.
-
-Ard Biesheuvel (1):
-  efi: ARM/arm64: ignore DT memory nodes instead of removing them
-
-David Daney (2):
-  of, numa: Add NUMA of binding implementation.
-  arm64: Move unflatten_device_tree() call earlier.
-
-Ganapatrao Kulkarni (3):
-  Documentation, dt, numa: dt bindings for NUMA.
-  arm64, numa: Add NUMA support for arm64 platforms.
-  arm64, mm, numa: Add NUMA balancing support for arm64.
-
- Documentation/devicetree/bindings/numa.txt | 272 ++++++++++++++++++++
- arch/arm64/Kconfig                         |  27 ++
- arch/arm64/include/asm/mmu.h               |   3 +-
- arch/arm64/include/asm/mmzone.h            |  12 +
- arch/arm64/include/asm/numa.h              |  45 ++++
- arch/arm64/include/asm/pgtable.h           |  15 ++
- arch/arm64/include/asm/topology.h          |  10 +
- arch/arm64/kernel/pci.c                    |  10 +
- arch/arm64/kernel/setup.c                  |  19 +-
- arch/arm64/kernel/smp.c                    |   4 +
- arch/arm64/mm/Makefile                     |   1 +
- arch/arm64/mm/init.c                       |  34 ++-
- arch/arm64/mm/mmu.c                        |  18 +-
- arch/arm64/mm/numa.c                       | 396 +++++++++++++++++++++++++++++
- drivers/firmware/efi/arm-init.c            |   8 +
- drivers/firmware/efi/libstub/fdt.c         |  24 +-
- drivers/of/Kconfig                         |   3 +
- drivers/of/Makefile                        |   1 +
- drivers/of/of_numa.c                       | 202 +++++++++++++++
- include/linux/of.h                         |   9 +
- 20 files changed, 1073 insertions(+), 40 deletions(-)
- create mode 100644 Documentation/devicetree/bindings/numa.txt
- create mode 100644 arch/arm64/include/asm/mmzone.h
- create mode 100644 arch/arm64/include/asm/numa.h
- create mode 100644 arch/arm64/mm/numa.c
- create mode 100644 drivers/of/of_numa.c
-
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 7013087..20f5192 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -11,6 +11,7 @@ config ARM64
+ 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
+ 	select ARCH_USE_CMPXCHG_LOCKREF
+ 	select ARCH_SUPPORTS_ATOMIC_RMW
++	select ARCH_SUPPORTS_NUMA_BALANCING
+ 	select ARCH_WANT_OPTIONAL_GPIOLIB
+ 	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION
+ 	select ARCH_WANT_FRAME_POINTERS
+diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
+index bf464de..5af9db2 100644
+--- a/arch/arm64/include/asm/pgtable.h
++++ b/arch/arm64/include/asm/pgtable.h
+@@ -346,6 +346,21 @@ static inline pgprot_t mk_sect_prot(pgprot_t prot)
+ 	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
+ }
+ 
++#ifdef CONFIG_NUMA_BALANCING
++/*
++ * See the comment in include/asm-generic/pgtable.h
++ */
++static inline int pte_protnone(pte_t pte)
++{
++	return (pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)) == PTE_PROT_NONE;
++}
++
++static inline int pmd_protnone(pmd_t pmd)
++{
++	return pte_protnone(pmd_pte(pmd));
++}
++#endif
++
+ /*
+  * THP definitions.
+  */
 -- 
 1.8.3.1
