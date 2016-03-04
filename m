@@ -1,55 +1,65 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v5 07/17] Xen: ARM: Add support for mapping AMBA
-	device mmio
-Date: Fri, 4 Mar 2016 14:37:25 +0800
-Message-ID: <1457073455-11516-8-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v5 16/17] FDT: Add a helper to get the subnode by given name
+Date: Fri, 4 Mar 2016 14:37:34 +0800
+Message-ID: <1457073455-11516-17-git-send-email-zhaoshenglong@huawei.com>
 References: <1457073455-11516-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1457073455-11516-1-git-send-email-zhaoshenglong@huawei.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, hangaohuai@huawei.com, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, shannon.zhao@linaro.org
+Content-Type: text/plain
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1457073455-11516-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCkFkZCBhIGJ1c19u
-b3RpZmllciBmb3IgQU1CQSBidXMgZGV2aWNlIGluIG9yZGVyIHRvIG1hcCB0aGUgZGV2aWNlCm1t
-aW8gcmVnaW9ucyB3aGVuIERPTTAgYm9vdGluZyB3aXRoIEFDUEkuCgpTaWduZWQtb2ZmLWJ5OiBT
-aGFubm9uIFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpSZXZpZXdlZC1ieTogU3RlZmFu
-byBTdGFiZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KLS0tCiBkcml2
-ZXJzL3hlbi9hcm0tZGV2aWNlLmMgfCA0MyArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdlZCwgNDMgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdp
-dCBhL2RyaXZlcnMveGVuL2FybS1kZXZpY2UuYyBiL2RyaXZlcnMveGVuL2FybS1kZXZpY2UuYwpp
-bmRleCA3NmUyNmU1Li4zODU0MDQzIDEwMDY0NAotLS0gYS9kcml2ZXJzL3hlbi9hcm0tZGV2aWNl
-LmMKKysrIGIvZHJpdmVycy94ZW4vYXJtLWRldmljZS5jCkBAIC0xMzksMyArMTM5LDQ2IEBAIHN0
-YXRpYyBpbnQgX19pbml0IHJlZ2lzdGVyX3hlbl9wbGF0Zm9ybV9ub3RpZmllcih2b2lkKQogfQog
-CiBhcmNoX2luaXRjYWxsKHJlZ2lzdGVyX3hlbl9wbGF0Zm9ybV9ub3RpZmllcik7CisKKyNpZmRl
-ZiBDT05GSUdfQVJNX0FNQkEKKyNpbmNsdWRlIDxsaW51eC9hbWJhL2J1cy5oPgorCitzdGF0aWMg
-aW50IHhlbl9hbWJhX25vdGlmaWVyKHN0cnVjdCBub3RpZmllcl9ibG9jayAqbmIsCisJCQkgICAg
-IHVuc2lnbmVkIGxvbmcgYWN0aW9uLCB2b2lkICpkYXRhKQoreworCXN0cnVjdCBhbWJhX2Rldmlj
-ZSAqYWRldiA9IHRvX2FtYmFfZGV2aWNlKGRhdGEpOworCWludCByID0gMDsKKworCXN3aXRjaCAo
-YWN0aW9uKSB7CisJY2FzZSBCVVNfTk9USUZZX0FERF9ERVZJQ0U6CisJCXIgPSB4ZW5fbWFwX2Rl
-dmljZV9tbWlvKCZhZGV2LT5yZXMsIDEpOworCQlicmVhazsKKwljYXNlIEJVU19OT1RJRllfREVM
-X0RFVklDRToKKwkJciA9IHhlbl91bm1hcF9kZXZpY2VfbW1pbygmYWRldi0+cmVzLCAxKTsKKwkJ
-YnJlYWs7CisJZGVmYXVsdDoKKwkJcmV0dXJuIE5PVElGWV9ET05FOworCX0KKwlpZiAocikKKwkJ
-ZGV2X2VycigmYWRldi0+ZGV2LCAiQU1CQTogRmFpbGVkIHRvICVzIGRldmljZSAlcyBNTUlPIVxu
-IiwKKwkJCWFjdGlvbiA9PSBCVVNfTk9USUZZX0FERF9ERVZJQ0UgPyAibWFwIiA6CisJCQkoYWN0
-aW9uID09IEJVU19OT1RJRllfREVMX0RFVklDRSA/ICJ1bm1hcCIgOiAiPyIpLAorCQkJYWRldi0+
-ZGV2LmluaXRfbmFtZSk7CisKKwlyZXR1cm4gTk9USUZZX09LOworfQorCitzdGF0aWMgc3RydWN0
-IG5vdGlmaWVyX2Jsb2NrIGFtYmFfZGV2aWNlX25iID0geworCS5ub3RpZmllcl9jYWxsID0geGVu
-X2FtYmFfbm90aWZpZXIsCit9OworCitzdGF0aWMgaW50IF9faW5pdCByZWdpc3Rlcl94ZW5fYW1i
-YV9ub3RpZmllcih2b2lkKQoreworCWlmICgheGVuX2luaXRpYWxfZG9tYWluKCkgfHwgYWNwaV9k
-aXNhYmxlZCkKKwkJcmV0dXJuIDA7CisKKwlyZXR1cm4gYnVzX3JlZ2lzdGVyX25vdGlmaWVyKCZh
-bWJhX2J1c3R5cGUsICZhbWJhX2RldmljZV9uYik7Cit9CisKK2FyY2hfaW5pdGNhbGwocmVnaXN0
-ZXJfeGVuX2FtYmFfbm90aWZpZXIpOworI2VuZGlmCi0tIAoyLjAuNAoKCgpfX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0
-Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+
+Sometimes it needs to check if there is a subnode of given node in FDT
+by given name. Introduce this helper to get the subnode if it exists.
+
+CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/of/fdt.c       | 13 +++++++++++++
+ include/linux/of_fdt.h |  2 ++
+ 2 files changed, 15 insertions(+)
+
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 655f79d..09001db 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -645,6 +645,19 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
+ }
+ 
+ /**
++ * of_get_flat_dt_subnode_by_name - get the subnode by given name
++ *
++ * @node: the parent node
++ * @uname: the name of subnode
++ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
++ */
++
++int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
++{
++	return fdt_subnode_offset(initial_boot_params, node, uname);
++}
++
++/**
+  * of_get_flat_dt_root - find the root node in the flat blob
+  */
+ unsigned long __init of_get_flat_dt_root(void)
+diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+index df9ef38..fc28162 100644
+--- a/include/linux/of_fdt.h
++++ b/include/linux/of_fdt.h
+@@ -52,6 +52,8 @@ extern char __dtb_end[];
+ extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
+ 				     int depth, void *data),
+ 			   void *data);
++extern int of_get_flat_dt_subnode_by_name(unsigned long node,
++					  const char *uname);
+ extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
+ 				       int *size);
+ extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
+-- 
+2.0.4
