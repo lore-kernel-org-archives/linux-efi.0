@@ -1,45 +1,79 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH][RFC] ACPI / PM: Fix poweroff issue on HW-full platforms
- without _S5
-Date: Fri, 4 Mar 2016 13:33:06 +0000
-Message-ID: <20160304133306.GB2715@codeblueprint.co.uk>
-References: <1456925357-2899-1-git-send-email-yu.c.chen@intel.com>
+From: Shannon Zhao <shannon.zhao@linaro.org>
+Subject: Re: [PATCH v5 01/17] Xen: ACPI: Hide UART used by Xen
+Date: Fri, 04 Mar 2016 23:56:51 +0800
+Message-ID: <56D9B043.1090301@linaro.org>
+References: <1457073455-11516-1-git-send-email-zhaoshenglong@huawei.com>
+ <1457073455-11516-2-git-send-email-zhaoshenglong@huawei.com>
+ <alpine.DEB.2.02.1603041213400.17938@kaball.uk.xensource.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1456925357-2899-1-git-send-email-yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, rjw-KKrjLPT3xs0@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+Content-Type: text/plain; charset="us-ascii"; Format="flowed"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <alpine.DEB.2.02.1603041213400.17938@kaball.uk.xensource.com>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stefano Stabellini <stefano.stabellini@eu.citrix.com>, Shannon Zhao <zhaoshenglong@huawei.com>
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, hangaohuai@huawei.com, linux-efi@vger.kernel.org, ard.biesheuvel@linaro.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, ACPI <linux-acpi@vger.kernel.org>, stefano.stabellini@citrix.com, david.vrabel@citrix.com, "Rafael J. Wysocki" <rjw@rjwysocki.net>, linux-arm-kernel@lists.infradead.org, Len Brown <lenb@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, 02 Mar, at 09:29:17PM, Chen Yu wrote:
-> The problem is Linux registers pm_power_off = efi_power_off
-> only if we are in hardware reduced mode. Actually, what we also
-> want is to do this when ACPI S5 is simply not supported.
-> That should handle both the HW reduced mode, and the HW-full
-> mode where the DSDT fails to supply an _S5 object.
-> 
-> This patch fixes this issue by introducing a new flag acpi_no_s5 which
-> indicates the non-existence of _S5. The initial state of acpi_no_s5 is
-> false and probed in acpi_sleep_init, then we'll later see the updated
-> value in efi_poweroff_required, according to which we can set pm_power_off
-> to efi_power_off in efi_shutdown_init.
-> 
-> Suggested-by: Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
->  arch/x86/platform/efi/quirks.c | 3 ++-
->  drivers/acpi/sleep.c           | 2 ++
->  include/acpi/acpixf.h          | 6 ++++++
->  3 files changed, 10 insertions(+), 1 deletion(-)
 
-Are there legacy platforms without _S5 where we currently handle
-reboot via some other means that are going to break if we attempt an
-EFI reboot?
 
-I ask because historically performing an EFI reboot has been all kinds
-of buggy on x86.
+On 2016/3/4 20:24, Stefano Stabellini wrote:
+> On Fri, 4 Mar 2016, Shannon Zhao wrote:
+>> >From: Shannon Zhao<shannon.zhao@linaro.org>
+>> >
+>> >ACPI 6.0 introduces a new table STAO to list the devices which are used
+>> >by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
+>> >UART is used by Xen. So here it hides UART from Dom0.
+>> >
+>> >Signed-off-by: Shannon Zhao<shannon.zhao@linaro.org>
+>> >---
+>> >CC: "Rafael J. Wysocki"<rjw@rjwysocki.net>  (supporter:ACPI)
+>> >CC: Len Brown<lenb@kernel.org>  (supporter:ACPI)
+>> >CC:linux-acpi@vger.kernel.org  (open list:ACPI)
+>> >---
+>> >  drivers/acpi/scan.c | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>> >  1 file changed, 68 insertions(+)
+>> >
+>> >diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+>> >index 407a376..31d794c 100644
+>> >--- a/drivers/acpi/scan.c
+>> >+++ b/drivers/acpi/scan.c
+>> >@@ -45,6 +45,7 @@ static LIST_HEAD(acpi_scan_handlers_list);
+>> >  DEFINE_MUTEX(acpi_device_lock);
+>> >  LIST_HEAD(acpi_wakeup_device_list);
+>> >  static DEFINE_MUTEX(acpi_hp_context_lock);
+>> >+static u64 spcr_uart_addr;
+>> >
+>> >  struct acpi_dep_data {
+>> >  	struct list_head node;
+>> >@@ -1453,6 +1454,47 @@ static int acpi_add_single_object(struct acpi_device **child,
+>> >  	return 0;
+>> >  }
+>> >
+>> >+static acpi_status acpi_get_resource_fixed_memory32(struct acpi_resource *res,
+>> >+						    void *context)
+>> >+{
+>> >+	struct acpi_resource_fixed_memory32 *fixed_memory32;
+>> >+
+>> >+	if (res->type != ACPI_RESOURCE_TYPE_FIXED_MEMORY32)
+>> >+		return AE_OK;
+>> >+
+>> >+	fixed_memory32 = &res->data.fixed_memory32;
+> Should we call acpi_resource_to_address64 instead?
+> Aside from this the rest looks good.
+>
+You mean the resource type could be other types? like 
+ACPI_RESOURCE_TYPE_ADDRESS64 or ACPI_RESOURCE_TYPE_ADDRESS32? So it 
+needs to convert them to ACPI_RESOURCE_TYPE_ADDRESS64 firstly?
 
-Also, is this what Windows does if _S5 is absent?
+Thanks,
+-- 
+Shannon
