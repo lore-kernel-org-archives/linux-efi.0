@@ -1,59 +1,59 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v5 12/17] ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
-Date: Fri, 4 Mar 2016 14:37:30 +0800
-Message-ID: <1457073455-11516-13-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: [PATCH v5 08/17] Xen: public/hvm: sync changes of
+	HVM_PARAM_CALLBACK_VIA ABI from Xen
+Date: Fri, 4 Mar 2016 14:37:26 +0800
+Message-ID: <1457073455-11516-9-git-send-email-zhaoshenglong@huawei.com>
 References: <1457073455-11516-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1457073455-11516-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, hangaohuai-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1457073455-11516-1-git-send-email-zhaoshenglong@huawei.com>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, hangaohuai@huawei.com, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, shannon.zhao@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
-a /hypervisor node in DT. So check if it needs to enable ACPI.
-
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
-Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm64/kernel/acpi.c | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
-
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index d1ce8e2..4e92be0 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
- {
- 	/*
- 	 * Return 1 as soon as we encounter a node at depth 1 that is
--	 * not the /chosen node.
-+	 * not the /chosen node, or /hypervisor node when running on Xen.
- 	 */
--	if (depth == 1 && (strcmp(uname, "chosen") != 0))
--		return 1;
-+	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
-+		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
-+			return 1;
-+	}
-+
- 	return 0;
- }
- 
-@@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
- 	/*
- 	 * Enable ACPI instead of device tree unless
- 	 * - ACPI has been disabled explicitly (acpi=off), or
--	 * - the device tree is not empty (it has more than just a /chosen node)
-+	 * - the device tree is not empty (it has more than just a /chosen node,
-+	 *   and a /hypervisor node when running on Xen)
- 	 *   and ACPI has not been force enabled (acpi=force)
- 	 */
- 	if (param_acpi_off ||
--- 
-2.0.4
+RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KClN5bmMgdGhlIGNo
+YW5nZXMgb2YgSFZNX1BBUkFNX0NBTExCQUNLX1ZJQSBBQkkgaW50cm9kdWNlZCBieQpYZW4gY29t
+bWl0IDxjYTVjNTRiNmZmMDU+IChwdWJsaWMvaHZtOiBleHBvcnQgdGhlIEhWTV9QQVJBTV9DQUxM
+QkFDS19WSUEKQUJJIGluIHRoZSBBUEkpLgoKU2lnbmVkLW9mZi1ieTogU2hhbm5vbiBaaGFvIDxz
+aGFubm9uLnpoYW9AbGluYXJvLm9yZz4KQWNrZWQtYnk6IFN0ZWZhbm8gU3RhYmVsbGluaSA8c3Rl
+ZmFuby5zdGFiZWxsaW5pQGV1LmNpdHJpeC5jb20+Ci0tLQogaW5jbHVkZS94ZW4vaW50ZXJmYWNl
+L2h2bS9wYXJhbXMuaCB8IDI3ICsrKysrKysrKysrKysrKysrKysrKy0tLS0tLQogMSBmaWxlIGNo
+YW5nZWQsIDIxIGluc2VydGlvbnMoKyksIDYgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvaW5j
+bHVkZS94ZW4vaW50ZXJmYWNlL2h2bS9wYXJhbXMuaCBiL2luY2x1ZGUveGVuL2ludGVyZmFjZS9o
+dm0vcGFyYW1zLmgKaW5kZXggYTZjNzk5MS4uNzBhZDIwOCAxMDA2NDQKLS0tIGEvaW5jbHVkZS94
+ZW4vaW50ZXJmYWNlL2h2bS9wYXJhbXMuaAorKysgYi9pbmNsdWRlL3hlbi9pbnRlcmZhY2UvaHZt
+L3BhcmFtcy5oCkBAIC0yNywxNiArMjcsMzEgQEAKICAqIFBhcmFtZXRlciBzcGFjZSBmb3IgSFZN
+T1Bfe3NldCxnZXR9X3BhcmFtLgogICovCiAKKyNkZWZpbmUgSFZNX1BBUkFNX0NBTExCQUNLX0lS
+USAwCiAvKgogICogSG93IHNob3VsZCBDUFUwIGV2ZW50LWNoYW5uZWwgbm90aWZpY2F0aW9ucyBi
+ZSBkZWxpdmVyZWQ/Ci0gKiB2YWxbNjM6NTZdID09IDA6IHZhbFs1NTowXSBpcyBhIGRlbGl2ZXJ5
+IEdTSSAoR2xvYmFsIFN5c3RlbSBJbnRlcnJ1cHQpLgotICogdmFsWzYzOjU2XSA9PSAxOiB2YWxb
+NTU6MF0gaXMgYSBkZWxpdmVyeSBQQ0kgSU5UeCBsaW5lLCBhcyBmb2xsb3dzOgotICogICAgICAg
+ICAgICAgICAgICBEb21haW4gPSB2YWxbNDc6MzJdLCBCdXMgID0gdmFsWzMxOjE2XSwKLSAqICAg
+ICAgICAgICAgICAgICAgRGV2Rm4gID0gdmFsWzE1OiA4XSwgSW50WCA9IHZhbFsgMTogMF0KLSAq
+IHZhbFs2Mzo1Nl0gPT0gMjogdmFsWzc6MF0gaXMgYSB2ZWN0b3IgbnVtYmVyLgorICoKICAqIElm
+IHZhbCA9PSAwIHRoZW4gQ1BVMCBldmVudC1jaGFubmVsIG5vdGlmaWNhdGlvbnMgYXJlIG5vdCBk
+ZWxpdmVyZWQuCisgKiBJZiB2YWwgIT0gMCwgdmFsWzYzOjU2XSBlbmNvZGVzIHRoZSB0eXBlLCBh
+cyBmb2xsb3dzOgorICovCisKKyNkZWZpbmUgSFZNX1BBUkFNX0NBTExCQUNLX1RZUEVfR1NJICAg
+ICAgMAorLyoKKyAqIHZhbFs1NTowXSBpcyBhIGRlbGl2ZXJ5IEdTSS4gIEdTSSAwIGNhbm5vdCBi
+ZSB1c2VkLCBhcyBpdCBhbGlhc2VzIHZhbCA9PSAwLAorICogYW5kIGRpc2FibGVzIGFsbCBub3Rp
+ZmljYXRpb25zLgorICovCisKKyNkZWZpbmUgSFZNX1BBUkFNX0NBTExCQUNLX1RZUEVfUENJX0lO
+VFggMQorLyoKKyAqIHZhbFs1NTowXSBpcyBhIGRlbGl2ZXJ5IFBDSSBJTlR4IGxpbmU6CisgKiBE
+b21haW4gPSB2YWxbNDc6MzJdLCBCdXMgPSB2YWxbMzE6MTZdIERldkZuID0gdmFsWzE1OjhdLCBJ
+bnRYID0gdmFsWzE6MF0KKyAqLworCisjZGVmaW5lIEhWTV9QQVJBTV9DQUxMQkFDS19UWVBFX1ZF
+Q1RPUiAgIDIKKy8qCisgKiB2YWxbNzowXSBpcyBhIHZlY3RvciBudW1iZXIuICBDaGVjayBmb3Ig
+WEVORkVBVF9odm1fY2FsbGJhY2tfdmVjdG9yIHRvIGtub3cKKyAqIGlmIHRoaXMgZGVsaXZlcnkg
+bWV0aG9kIGlzIGF2YWlsYWJsZS4KICAqLwotI2RlZmluZSBIVk1fUEFSQU1fQ0FMTEJBQ0tfSVJR
+IDAKIAogI2RlZmluZSBIVk1fUEFSQU1fU1RPUkVfUEZOICAgIDEKICNkZWZpbmUgSFZNX1BBUkFN
+X1NUT1JFX0VWVENITiAyCi0tIAoyLjAuNAoKCgpfX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0Clhlbi1kZXZlbEBsaXN0
+cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
