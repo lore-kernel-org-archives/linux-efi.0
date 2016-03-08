@@ -1,140 +1,73 @@
-From: Robert Richter <robert.richter-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v14 2/6] Documentation, dt, numa: dt bindings for NUMA.
-Date: Tue, 8 Mar 2016 09:34:36 +0100
-Message-ID: <20160308083436.GC24726@rric.localdomain>
-References: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
- <1457049339-23351-3-git-send-email-ddaney.cavm@gmail.com>
- <20160307192220.GA1535@rric.localdomain>
- <56DDDAC9.1010600@caviumnetworks.com>
- <CAFpQJXWHXxa2DLKHpLHqnURUJqY-+P-vLintUoCmm3Fmh6xsZQ@mail.gmail.com>
+From: "Chen, Yu C" <yu.c.chen@intel.com>
+Subject: RE: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full
+ platforms without _S5
+Date: Tue, 8 Mar 2016 16:25:30 +0000
+Message-ID: <36DF59CE26D8EE47B0655C516E9CE640286D370A@shsmsx102.ccr.corp.intel.com>
+References: <1457319045-25434-1-git-send-email-yu.c.chen@intel.com>
+ <CAJZ5v0iWjW_XJEsVBM1yyimxUQMDaWapQ_OrN45TeFXFySd0rw@mail.gmail.com>
+ <36DF59CE26D8EE47B0655C516E9CE640286D329F@shsmsx102.ccr.corp.intel.com>
+ <2414254.VhAiD01BTS@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAFpQJXWHXxa2DLKHpLHqnURUJqY-+P-vLintUoCmm3Fmh6xsZQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ganapatrao Kulkarni <gpkulkarni-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-pm-owner@vger.kernel.org>
+In-Reply-To: <2414254.VhAiD01BTS@vostro.rjw.lan>
+Content-Language: en-US
+Sender: linux-pm-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Zhang, Rui" <rui.zhang@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 08.03.16 10:31:33, Ganapatrao Kulkarni wrote:
-> On Tue, Mar 8, 2016 at 1:17 AM, David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org> wrote:
-> > On 03/07/2016 11:22 AM, Robert Richter wrote:
-> >>
-> >> On 03.03.16 15:55:35, David Daney wrote:
-> >>>
-> >>> From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-> >>>
-> >>> Add DT bindings for numa mapping of memory, CPUs and IOs.
-> >>>
-> >>> Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> >>> Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-> >>> Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-> >>> ---
-> >>>   Documentation/devicetree/bindings/numa.txt | 272
-> >>> +++++++++++++++++++++++++++++
-> >>>   1 file changed, 272 insertions(+)
-> >>>   create mode 100644 Documentation/devicetree/bindings/numa.txt
-> >>>
-> >>> diff --git a/Documentation/devicetree/bindings/numa.txt
-> >>> b/Documentation/devicetree/bindings/numa.txt
-> >>> new file mode 100644
-> >>> index 0000000..ec5ed7c
-> >>> --- /dev/null
-> >>> +++ b/Documentation/devicetree/bindings/numa.txt
-> >>
-> >>
-> >>>
-> >>> +==============================================================================
-> >>> +3 - distance-map
-> >>>
-> >>> +==============================================================================
-> >>> +
-> >>> +The device tree node distance-map describes the relative
-> >>> +distance (memory latency) between all numa nodes.
-> >>> +
-> >>> +- compatible : Should at least contain "numa-distance-map-v1".
-> >>> +
-> >>> +- distance-matrix
-> >>> +  This property defines a matrix to describe the relative distances
-> >>> +  between all numa nodes.
-> >>> +  It is represented as a list of node pairs and their relative distance.
-> >>> +
-> >>> +  Note:
-> >>> +       1. Each entry represents distance from first node to second node.
-> >>> +       The distances are equal in either direction.
-> >>> +       2. The distance from a node to self (local distance) is
-> >>> represented
-> >>> +       with value 10 and all internode distance should be represented
-> >>> with
-> >>> +       a value greater than 10.
-> >>> +       3. distance-matrix should have entries in lexicographical
-> >>> ascending
-> >>> +       order of nodes.
-> >>> +       4. There must be only one device node distance-map which must
-> >>> reside in the root node.
-> >>
-> >>
-> >> There is no note that this one is optional, but is it right? The
-> >> default is 10 for local and 20 for remote connections.
-> >>
-> >
-> > Do we need to explicitly state that it is optional?  Many node types are
-> > optional, and their binding specifications don't really talk about their
-> > being optional.
-> >
-> > If the node is present then it has the meaning specified.
-> >
-> > If the node is *not* present, then the special meaning described in the
-> > bindings document does not apply.
-> >
-> > In the case of NUMA, this means that all memory is equally distant (i.e. it
-> > is *Uniform*), and we are not talking about a *Non* *Uniform* Memory
-> > Architecture (NUMA) system.
-> >
-> >
-> >> If so, then ...
-> >>
-> >> static int __init of_numa_parse_distance_map(void)
-> >> {
-> >>         int ret = -EINVAL;
-> >>         struct device_node *np = of_find_node_by_path("/distance-map");
-> >>
-> >>         if (!np)
-> >>                 return ret;
-> >>
-> >> must return 0 instead of -EINVAL here.
-> >
-> >
-> > No, I don't think doing that would be correct.
-> >
-> > If there is no "distance-map", then of_numa_init() returns the error code.
-> > This causes the code in arch/arm64/kernel/numa.c to fall back to the
-> > non-NUMA "dummy_numa" case.
-
-Which means distance-map is not optional for numa.
-
-> IMO, return 0 will allow 2 node system to have distance-map optional.
-> by default node distance is set to 10 for local node and for remote node is 20
-> and this will suffice the need of 2 node system.
-> by returning EINVAL, we are forcing 2 node system (and even for
-> systems which has equal remote distances)
-> to define distance-map.
-
-This is exaclty the problem. numa_init() fails if there is no
-distance-map node.
-
-> > By adding your Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org> tag to
-> > patch 5/6, where we select between "real" and "dummy_numa", I had assumed
-> > that you agreed with this approach.
-
-This is from v6:
-
-       if (strcmp(uname, "distance-map") != 0)
-               return 0;
-
--Robert
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1wbS1vd25lckB2Z2Vy
+Lmtlcm5lbC5vcmcgW21haWx0bzpsaW51eC1wbS0NCj4gb3duZXJAdmdlci5rZXJuZWwub3JnXSBP
+biBCZWhhbGYgT2YgUmFmYWVsIEouIFd5c29ja2kNCj4gU2VudDogVHVlc2RheSwgTWFyY2ggMDgs
+IDIwMTYgOTo1NCBBTQ0KPiBUbzogQ2hlbiwgWXUgQw0KPiBDYzogUmFmYWVsIEouIFd5c29ja2k7
+IEFDUEkgRGV2ZWwgTWFsaW5nIExpc3Q7IHg4NkBrZXJuZWwub3JnOyBsaW51eC0NCj4gZWZpQHZn
+ZXIua2VybmVsLm9yZzsgTGludXggS2VybmVsIE1haWxpbmcgTGlzdDsgbGludXgtcG1Admdlci5r
+ZXJuZWwub3JnOw0KPiBMZW4gQnJvd247IE1hdHQgRmxlbWluZzsgVGhvbWFzIEdsZWl4bmVyOyBJ
+bmdvIE1vbG5hcjsgSC4gUGV0ZXIgQW52aW47DQo+IFpoYW5nLCBSdWkNCj4gU3ViamVjdDogUmU6
+IFtQQVRDSF1bUkZDIHYzXSBBQ1BJIC8gUE06IEZpeCBwb3dlcm9mZiBpc3N1ZSBvbiBIVy1mdWxs
+DQo+IHBsYXRmb3JtcyB3aXRob3V0IF9TNQ0KPiANCj4gT24gTW9uZGF5LCBNYXJjaCAwNywgMjAx
+NiAwMzo1MzoxMyBQTSBDaGVuLCBZdSBDIHdyb3RlOg0KPiA+IEhpIFJhZmFlbCwNCj4gPiAocmVz
+ZW5kIGZvciBicm9rZW4gY29udGVudCkNCj4gPg0KPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdl
+LS0tLS0NCj4gPiA+IEZyb206IHJqd3lzb2NraUBnbWFpbC5jb20gW21haWx0bzpyand5c29ja2lA
+Z21haWwuY29tXSBPbiBCZWhhbGYgT2YNCj4gPiA+IFJhZmFlbCBKLiBXeXNvY2tpDQo+ID4gPiBT
+ZW50OiBNb25kYXksIE1hcmNoIDA3LCAyMDE2IDk6MTkgUE0NCj4gPiA+IFRvOiBDaGVuLCBZdSBD
+DQo+ID4gPiBDYzogQUNQSSBEZXZlbCBNYWxpbmcgTGlzdDsgeDg2QGtlcm5lbC5vcmc7DQo+ID4g
+PiBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBMaW51eCBLZXJuZWwgTWFpbGluZyBMaXN0Ow0K
+PiA+ID4gbGludXgtcG1Admdlci5rZXJuZWwub3JnOyBSYWZhZWwgSi4gV3lzb2NraTsgTGVuIEJy
+b3duOyBNYXR0DQo+ID4gPiBGbGVtaW5nOyBUaG9tYXMgR2xlaXhuZXI7IEluZ28gTW9sbmFyOyBI
+LiBQZXRlciBBbnZpbjsgWmhhbmcsIFJ1aQ0KPiA+ID4gU3ViamVjdDogUmU6IFtQQVRDSF1bUkZD
+IHYzXSBBQ1BJIC8gUE06IEZpeCBwb3dlcm9mZiBpc3N1ZSBvbg0KPiA+ID4gSFctZnVsbCBwbGF0
+Zm9ybXMgd2l0aG91dCBfUzUNCj4gPiA+DQo+ID4gW2N1dF0NCj4gPiA+ID4gIGJvb2wgZWZpX3Bv
+d2Vyb2ZmX3JlcXVpcmVkKHZvaWQpDQo+ID4gPiA+ICB7DQo+ID4gPiA+IC0gICAgICAgcmV0dXJu
+ICEhYWNwaV9nYmxfcmVkdWNlZF9oYXJkd2FyZTsNCj4gPiA+ID4gKyAgICAgICByZXR1cm4gYWNw
+aV9nYmxfcmVkdWNlZF9oYXJkd2FyZSB8fCAoYWNwaV9ub19zNSAmJg0KPiA+ID4gPiArICFwbV9w
+b3dlcl9vZmYpOw0KPiA+ID4NCj4gPiA+IFdoYXQgaWYgQ09ORklHX0FDUEkgaXMgbm90IHNldCBo
+ZXJlPw0KPiA+IElmIENPTkZJR19BQ1BJIGlzIG5vdCBzZXQsIHRoaXMgZmlsZSB3b3VsZCBub3Qg
+YmUgY29tcGlsZWQsIGJlY2F1c2UNCj4gPiBDT05GSUdfRUZJIGRlcGVuZHMgb24gQ09ORklHX0FD
+UEkuDQo+IA0KPiBPSw0KPiANCj4gU28gdGhlIG5leHQgcXVlc3Rpb24gd2lsbCBiZSBpZiBlZmlf
+cG93ZXJvZmZfcmVxdWlyZWQoKSBpcyBndWFyYW50ZWVkIHRvIHJ1bg0KPiBhZnRlciBhbGwgb2Yg
+dGhlIG90aGVyIGNvZGUgdGhhdCBtYXkgcmVnaXN0ZXIgYWx0ZXJuYXRpdmUgcG93ZXIgb2ZmIGhh
+bmRsaW5nLg0KSHVtLiB1bmZvcnR1bmF0ZWx5IGl0IGlzIG5vdCBndWFyYW50ZWVkIHRvIHJ1biBh
+ZnRlciBhbGwgb2YgdGhlIG90aGVyIGNvZGUsDQpiZWNhdXNlIG90aGVyIGNvbXBvbmVudHMgd2hv
+IHJlZ2lzdGVyIHBtX3Bvd2VyX29mZiBtYXkgYmUgYnVpbHQgYXMgbW9kdWxlcywgYW5kDQp3ZSBj
+YW4gbm90IHByZWRpY3QvY29udHJvbCB0aGUgc2VxdWVuY2UgcmVnaXN0cmF0aW9uLiAgIFNvIHRo
+aXMgcGF0Y2ggbWF5DQpicmVhayB0aGUgRUZJIHBsYXRmb3JtcyB3aG8gdXNlIG5vbi1lZmkgcG93
+ZXJvZmYgZHVlIHRvIHVuc3RhYmxlIEVGSSBzZXJ2aWNlDQosICBub3Qgc3VyZSBpZiB0aGVyZSBh
+cmUgYW55IHJlbGVhc2VkLXByb2R1Y3RzIG9mIHRoaXMga2luZC4NCg0KQ3VycmVudGx5IEknbSB0
+aGlua2luZyBvZiAzIHBvc3NpYmxlIHNvbHV0aW9ucywgIGNvdWxkIHlvdSBwbGVhc2UgZ2l2ZSBz
+b21lIGFkdmljZXMgb24gdGhlbToNCg0KMS4gSW50cm9kdWNlIGJvb3RvcHQgb2YgJ3Bvd2Vyb2Zm
+PWVmaScNCiAgICAgU2V0IHRoZSBwbV9wb3dlcl9vZmYgdG8gZWZpX3Bvd2VyX29mZiBubyBtYXR0
+ZXIgd2hldGhlciB0aGVyZSBpcyBfUzUgb3Igbm90DQoNCjIuIEludHJvZHVjZSAvc3lzL3Bvd2Vy
+L3Bvd2Vyb2ZmDQogICAgQWxsb3cgdGhlIHVzZXIgdG8gY2hvb3NlIHdoaWNoICBwbV9wb3dlcl9v
+ZmYsIGZvciBleGFtcGxlOg0KIA0KIyBjYXQgL3N5cy9wb3dlci9wb3dlcm9mZg0KKmFjcGkJCWFj
+cGlfcG93ZXJfb2ZmDQplZmkJCWVmaV9wb3dlcl9vZmYJDQpncGlvCQlncGlvX3Bvd2Vyb2ZmX2Rv
+X3Bvd2Vyb2ZmDQp1c2VyIGNhbiBlY2hvIHN0cmluZyB0byBlbmFibGUgd2hpY2ggb25lLg0KDQpB
+bmQgdHdvIEFQSXM6DQpyZWdpc3Rlcl9wb3dlcl9vZmYoY2hhciAqbmFtZSwgcG93ZXJfb2ZmIGZ1
+bmMpDQp1bnJlZ2lzdGVyX3Bvd2VyX29mZihjaGFyICpuYW1lKSAgDQoNCg0KMy4gcmVwbGFjZSBh
+bGwgdGhlIGNvZGVzIG9mICBwbV9wb3dlcl9vZmYoKSB3aXRoIHJlbGlhYmxlX3BtX3Bvd2VyX29m
+ZigpDQoNCnZvaWQgcmVsaWFibGVfcG1fcG93ZXJfb2ZmKHZvaWQpDQp7DQoJaWYgKCFwbV9wb3dl
+cl9vZmYpIHsNCgkJaWYgKGFjcGlfbm9fczUpDQoJCQlwbV9wb3dlcl9vZmYgPSBlZmlfcG93ZXJf
+b2ZmOw0KCS8qIE90aGVyIGNvbmRpdGlvbnMgYWRkZWQgaW4gdGhlIGZ1dHVyZS4gKi8NCgl9DQoJ
+cG1fcG93ZXJfb2ZmKCk7DQp9DQoNCg0KdGhhbmtzLA0KeXUNCg==
