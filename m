@@ -1,110 +1,49 @@
-From: David Daney <ddaney@caviumnetworks.com>
-Subject: Re: [PATCH v14 2/6] Documentation, dt, numa: dt bindings for NUMA.
-Date: Mon, 7 Mar 2016 11:47:21 -0800
-Message-ID: <56DDDAC9.1010600@caviumnetworks.com>
-References: <1457049339-23351-1-git-send-email-ddaney.cavm@gmail.com>
- <1457049339-23351-3-git-send-email-ddaney.cavm@gmail.com>
- <20160307192220.GA1535@rric.localdomain>
+From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full platforms without _S5
+Date: Tue, 08 Mar 2016 02:53:46 +0100
+Message-ID: <2414254.VhAiD01BTS@vostro.rjw.lan>
+References: <1457319045-25434-1-git-send-email-yu.c.chen@intel.com> <CAJZ5v0iWjW_XJEsVBM1yyimxUQMDaWapQ_OrN45TeFXFySd0rw@mail.gmail.com> <36DF59CE26D8EE47B0655C516E9CE640286D329F@shsmsx102.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"; Format="flowed"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20160307192220.GA1535@rric.localdomain>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Robert Richter <robert.richter@caviumnetworks.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, David Daney <david.daney@cavium.com>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Matt Fleming <matt@codeblueprint.co.uk>, Catalin Marinas <catalin.marinas@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, David Daney <ddaney.cavm@gmail.com>, Kumar Gala <galak@codeaurora.org>, Grant Likely <grant.likely@linaro.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Frank Rowand <frowand.list@gmail.com>, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7Bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <36DF59CE26D8EE47B0655C516E9CE640286D329F@shsmsx102.ccr.corp.intel.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Chen, Yu C" <yu.c.chen@intel.com>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Zhang, Rui" <rui.zhang@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/07/2016 11:22 AM, Robert Richter wrote:
-> On 03.03.16 15:55:35, David Daney wrote:
->> From: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
->>
->> Add DT bindings for numa mapping of memory, CPUs and IOs.
->>
->> Reviewed-by: Robert Richter <rrichter@cavium.com>
->> Signed-off-by: Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>
->> Signed-off-by: David Daney <david.daney@cavium.com>
->> ---
->>   Documentation/devicetree/bindings/numa.txt | 272 +++++++++++++++++++++++++++++
->>   1 file changed, 272 insertions(+)
->>   create mode 100644 Documentation/devicetree/bindings/numa.txt
->>
->> diff --git a/Documentation/devicetree/bindings/numa.txt b/Documentation/devicetree/bindings/numa.txt
->> new file mode 100644
->> index 0000000..ec5ed7c
->> --- /dev/null
->> +++ b/Documentation/devicetree/bindings/numa.txt
->
->> +==============================================================================
->> +3 - distance-map
->> +==============================================================================
->> +
->> +The device tree node distance-map describes the relative
->> +distance (memory latency) between all numa nodes.
->> +
->> +- compatible : Should at least contain "numa-distance-map-v1".
->> +
->> +- distance-matrix
->> +  This property defines a matrix to describe the relative distances
->> +  between all numa nodes.
->> +  It is represented as a list of node pairs and their relative distance.
->> +
->> +  Note:
->> +	1. Each entry represents distance from first node to second node.
->> +	The distances are equal in either direction.
->> +	2. The distance from a node to self (local distance) is represented
->> +	with value 10 and all internode distance should be represented with
->> +	a value greater than 10.
->> +	3. distance-matrix should have entries in lexicographical ascending
->> +	order of nodes.
->> +	4. There must be only one device node distance-map which must reside in the root node.
->
-> There is no note that this one is optional, but is it right? The
-> default is 10 for local and 20 for remote connections.
->
+On Monday, March 07, 2016 03:53:13 PM Chen, Yu C wrote:
+> Hi Rafael,
+> (resend for broken content)
+> 
+> > -----Original Message-----
+> > From: rjwysocki@gmail.com [mailto:rjwysocki@gmail.com] On Behalf Of
+> > Rafael J. Wysocki
+> > Sent: Monday, March 07, 2016 9:19 PM
+> > To: Chen, Yu C
+> > Cc: ACPI Devel Maling List; x86@kernel.org; linux-efi@vger.kernel.org; Linux
+> > Kernel Mailing List; linux-pm@vger.kernel.org; Rafael J. Wysocki; Len Brown;
+> > Matt Fleming; Thomas Gleixner; Ingo Molnar; H. Peter Anvin; Zhang, Rui
+> > Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full
+> > platforms without _S5
+> > 
+> [cut]
+> > >  bool efi_poweroff_required(void)
+> > >  {
+> > > -       return !!acpi_gbl_reduced_hardware;
+> > > +       return acpi_gbl_reduced_hardware || (acpi_no_s5 &&
+> > > + !pm_power_off);
+> > 
+> > What if CONFIG_ACPI is not set here?
+> If CONFIG_ACPI is not set, this file would not 
+> be compiled, because CONFIG_EFI depends on CONFIG_ACPI.
 
-Do we need to explicitly state that it is optional?  Many node types are 
-optional, and their binding specifications don't really talk about their 
-being optional.
+OK
 
-If the node is present then it has the meaning specified.
+So the next question will be if efi_poweroff_required() is guaranteed to run
+after all of the other code that may register alternative power off handling.
 
-If the node is *not* present, then the special meaning described in the 
-bindings document does not apply.
+Thanks,
+Rafael
 
-In the case of NUMA, this means that all memory is equally distant (i.e. 
-it is *Uniform*), and we are not talking about a *Non* *Uniform* Memory 
-Architecture (NUMA) system.
-
-
-> If so, then ...
->
-> static int __init of_numa_parse_distance_map(void)
-> {
-> 	int ret = -EINVAL;
-> 	struct device_node *np = of_find_node_by_path("/distance-map");
->
-> 	if (!np)
-> 		return ret;
->
-> must return 0 instead of -EINVAL here.
-
-No, I don't think doing that would be correct.
-
-If there is no "distance-map", then of_numa_init() returns the error 
-code.  This causes the code in arch/arm64/kernel/numa.c to fall back to 
-the non-NUMA "dummy_numa" case.
-
-By adding your Reviewed-by: Robert Richter <rrichter@cavium.com> tag to 
-patch 5/6, where we select between "real" and "dummy_numa", I had 
-assumed that you agreed with this approach.
-
-David Daney
