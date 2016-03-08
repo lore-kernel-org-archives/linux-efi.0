@@ -1,102 +1,154 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
-Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full platforms without _S5
-Date: Tue, 08 Mar 2016 23:56:50 +0100
-Message-ID: <1867318.3ivAYsjD7D@vostro.rjw.lan>
-References: <1457319045-25434-1-git-send-email-yu.c.chen@intel.com> <2414254.VhAiD01BTS@vostro.rjw.lan> <36DF59CE26D8EE47B0655C516E9CE640286D370A@shsmsx102.ccr.corp.intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <36DF59CE26D8EE47B0655C516E9CE640286D370A@shsmsx102.ccr.corp.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Chen, Yu C" <yu.c.chen@intel.com>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Zhang, Rui" <rui.zhang@intel.com>
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH v15 0/6] arm64, numa: Add numa support for arm64 platforms
+Date: Tue,  8 Mar 2016 15:59:41 -0800
+Message-ID: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Tuesday, March 08, 2016 04:25:30 PM Chen, Yu C wrote:
-> > -----Original Message-----
-> > From: linux-pm-owner@vger.kernel.org [mailto:linux-pm-
-> > owner@vger.kernel.org] On Behalf Of Rafael J. Wysocki
-> > Sent: Tuesday, March 08, 2016 9:54 AM
-> > To: Chen, Yu C
-> > Cc: Rafael J. Wysocki; ACPI Devel Maling List; x86@kernel.org; linux-
-> > efi@vger.kernel.org; Linux Kernel Mailing List; linux-pm@vger.kernel.org;
-> > Len Brown; Matt Fleming; Thomas Gleixner; Ingo Molnar; H. Peter Anvin;
-> > Zhang, Rui
-> > Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full
-> > platforms without _S5
-> > 
-> > On Monday, March 07, 2016 03:53:13 PM Chen, Yu C wrote:
-> > > Hi Rafael,
-> > > (resend for broken content)
-> > >
-> > > > -----Original Message-----
-> > > > From: rjwysocki@gmail.com [mailto:rjwysocki@gmail.com] On Behalf Of
-> > > > Rafael J. Wysocki
-> > > > Sent: Monday, March 07, 2016 9:19 PM
-> > > > To: Chen, Yu C
-> > > > Cc: ACPI Devel Maling List; x86@kernel.org;
-> > > > linux-efi@vger.kernel.org; Linux Kernel Mailing List;
-> > > > linux-pm@vger.kernel.org; Rafael J. Wysocki; Len Brown; Matt
-> > > > Fleming; Thomas Gleixner; Ingo Molnar; H. Peter Anvin; Zhang, Rui
-> > > > Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on
-> > > > HW-full platforms without _S5
-> > > >
-> > > [cut]
-> > > > >  bool efi_poweroff_required(void)
-> > > > >  {
-> > > > > -       return !!acpi_gbl_reduced_hardware;
-> > > > > +       return acpi_gbl_reduced_hardware || (acpi_no_s5 &&
-> > > > > + !pm_power_off);
-> > > >
-> > > > What if CONFIG_ACPI is not set here?
-> > > If CONFIG_ACPI is not set, this file would not be compiled, because
-> > > CONFIG_EFI depends on CONFIG_ACPI.
-> > 
-> > OK
-> > 
-> > So the next question will be if efi_poweroff_required() is guaranteed to run
-> > after all of the other code that may register alternative power off handling.
-> Hum. unfortunately it is not guaranteed to run after all of the other code,
-> because other components who register pm_power_off may be built as modules, and
-> we can not predict/control the sequence registration.   So this patch may
-> break the EFI platforms who use non-efi poweroff due to unstable EFI service
-> ,  not sure if there are any released-products of this kind.
-> 
-> Currently I'm thinking of 3 possible solutions,  could you please give some advices on them:
-> 
-> 1. Introduce bootopt of 'poweroff=efi'
->      Set the pm_power_off to efi_power_off no matter whether there is _S5 or not
-> 
-> 2. Introduce /sys/power/poweroff
->     Allow the user to choose which  pm_power_off, for example:
->  
-> # cat /sys/power/poweroff
-> *acpi		acpi_power_off
-> efi		efi_power_off	
-> gpio		gpio_poweroff_do_poweroff
-> user can echo string to enable which one.
-> 
-> And two APIs:
-> register_power_off(char *name, power_off func)
-> unregister_power_off(char *name)  
-> 
-> 
-> 3. replace all the codes of  pm_power_off() with reliable_pm_power_off()
-> 
-> void reliable_pm_power_off(void)
-> {
-> 	if (!pm_power_off) {
-> 		if (acpi_no_s5)
-> 			pm_power_off = efi_power_off;
-> 	/* Other conditions added in the future. */
-> 	}
-> 	pm_power_off();
-> }
+From: David Daney <david.daney@cavium.com>
 
-What about something like adding something like default_power_off that would
-be used by pm_power_off if nothing else is available?
+v15:
 
-Thanks,
-Rafael
+	- Make the distance-map node optional (again), if it is not in
+          the device tree, default values are used.
 
+	- Minor cleanups to of_numa.c as suggested by Rob Harring.
+
+v14:
+	- Revised patch to unflatten the device tree earlier.
+
+	- Cleanups and added EXPORT_SYMBOL to of_numa.c as suggested
+          by Rob Harring
+
+v13:
+	- Added patch to unflatten the device tree earlier.
+
+	- Rewrote of_numa.c to work on unflattened the device tree.
+
+	- Cleanup of EXPORTs in arch/arm64/mm/numa.c as suggested by
+          Will Deacon.
+
+v12:
+
+	- Replaced 6 patches from Ard Biesheuvel with new simpler, and
+          more correct, single patch, also from Ard.
+
+v11:
+	- Dropped cleanup patches for other architectures, they will be
+          submitted as a separate set after more testing.
+
+	- Added patch set from Ard Biesheuvel that are needed to make
+          the whole thing actually work.  Previously this was a
+          separate set.
+
+	- Kconfig and other fixes and simplifications as suggested by
+          Rob Herring.
+
+	- Rearranged, refactored and reordered so that we don't patch
+          new files multiple times.
+
+	- Summary:
+
+		o 6 patches from Ard Biesheuvel to allow use of
+		  "memory" nodes with efi stub.
+
+		o 2 patches to document and add of_numa.c
+
+		o 1 patch to add arm64 NUMA support.
+
+		o 1 patch to add NUMA balancing support for arm64.
+
+v10:
+	- Incorporated review comments from Rob Herring.
+	- Moved numa binding and implementation to devicetree core.
+	- Added cleanup patch to remove redundant NODE_DATA macro from asm header files
+	- Include numa balancing support for arm64 patch in this series.
+	- Fix tile build issue reported by the kbuild robot(patch 7)
+
+v9:	- Added cleanup patch to reuse and avoid redefinition of cpumask_of_pcibus
+	  as suggested from Will Deacon and Bjorn Helgaas.
+	  - Including patch to Make pci-host-generic driver numa aware.
+	  - Incorporated comment from Shannon Zhao.
+
+v8:
+	- Incorporated review comments of Mark Rutland and Will Deacon.
+	- Added pci helper function and macro for numa.
+
+v7:
+	- managing numa memory mapping using memblock.
+	- Incorporated review comments of Mark Rutland.
+
+v6:
+	- defined and implemented the numa dt binding using
+	node property proximity and device node distance-map.
+	- renamed dt_numa to of_numa
+
+v5:
+        - created base verion of numa.c which creates dummy numa without using dt
+          on single socket platforms. Then added patches for dt support.
+        - Incorporated review comments from Hanjun Guo.
+
+v4:
+done changes as per Arnd review comments.
+
+v3:
+Added changes to support numa on arm64 based platforms.
+Tested these patches on cavium's multinode(2 node topology) platform.
+In this patchset, defined and implemented dt bindings for numa mapping
+for core and memory using device node property arm,associativity.
+
+v2:
+Defined and implemented numa map for memory, cores to node and
+proximity distance matrix of nodes.
+
+v1:
+Initial patchset to support numa on arm64 platforms.
+
+Note: 1. This patchset is tested for NUMA and without NUMA with dt
+        (both with and without NUMA bindings) on thunderx single
+        socket and dual socket boards.
+
+Ard Biesheuvel (1):
+  efi: ARM/arm64: ignore DT memory nodes instead of removing them
+
+David Daney (2):
+  of, numa: Add NUMA of binding implementation.
+  arm64: Move unflatten_device_tree() call earlier.
+
+Ganapatrao Kulkarni (3):
+  Documentation, dt, numa: dt bindings for NUMA.
+  arm64, numa: Add NUMA support for arm64 platforms.
+  arm64, mm, numa: Add NUMA balancing support for arm64.
+
+ Documentation/devicetree/bindings/numa.txt | 275 ++++++++++++++++++++
+ arch/arm64/Kconfig                         |  27 ++
+ arch/arm64/include/asm/mmu.h               |   3 +-
+ arch/arm64/include/asm/mmzone.h            |  12 +
+ arch/arm64/include/asm/numa.h              |  45 ++++
+ arch/arm64/include/asm/pgtable.h           |  15 ++
+ arch/arm64/include/asm/topology.h          |  10 +
+ arch/arm64/kernel/pci.c                    |  10 +
+ arch/arm64/kernel/setup.c                  |  19 +-
+ arch/arm64/kernel/smp.c                    |   4 +
+ arch/arm64/mm/Makefile                     |   1 +
+ arch/arm64/mm/init.c                       |  34 ++-
+ arch/arm64/mm/mmu.c                        |  18 +-
+ arch/arm64/mm/numa.c                       | 396 +++++++++++++++++++++++++++++
+ drivers/firmware/efi/arm-init.c            |   8 +
+ drivers/firmware/efi/libstub/fdt.c         |  24 +-
+ drivers/of/Kconfig                         |   3 +
+ drivers/of/Makefile                        |   1 +
+ drivers/of/of_numa.c                       | 211 +++++++++++++++
+ include/linux/of.h                         |   9 +
+ 20 files changed, 1085 insertions(+), 40 deletions(-)
+ create mode 100644 Documentation/devicetree/bindings/numa.txt
+ create mode 100644 arch/arm64/include/asm/mmzone.h
+ create mode 100644 arch/arm64/include/asm/numa.h
+ create mode 100644 arch/arm64/mm/numa.c
+ create mode 100644 drivers/of/of_numa.c
+
+-- 
+1.8.3.1
