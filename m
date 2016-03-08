@@ -1,308 +1,97 @@
-From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v15 2/6] Documentation, dt, numa: dt bindings for NUMA.
-Date: Tue,  8 Mar 2016 15:59:43 -0800
-Message-ID: <1457481587-8976-3-git-send-email-ddaney.cavm@gmail.com>
+From: David Daney <ddaney.cavm@gmail.com>
+Subject: [PATCH v15 1/6] efi: ARM/arm64: ignore DT memory nodes instead of removing them
+Date: Tue,  8 Mar 2016 15:59:42 -0800
+Message-ID: <1457481587-8976-2-git-send-email-ddaney.cavm@gmail.com>
 References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1457481587-8976-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Will Deacon <will.deacon@arm.com>, linux-arm-kernel@lists.infradead.org, Rob Herring <robh+dt@kernel.org>, Frank Rowand <frowand.list@gmail.com>, Grant Likely <grant.likely@linaro.org>, Pawel Moll <pawel.moll@arm.com>, Ian Campbell <ijc+devicetree@hellion.org.uk>, Kumar Gala <galak@codeaurora.org>, Ganapatrao Kulkarni <gkulkarni@caviumnetworks.com>, Robert Richter <rrichter@cavium.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Rutland <mark.rutland@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
+Cc: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, David Daney <david.daney@cavium.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-Add DT bindings for numa mapping of memory, CPUs and IOs.
+There are two problems with the UEFI stub DT memory node removal
+routine:
+- it deletes nodes as it traverses the tree, which happens to work
+  but is not supported, as deletion invalidates the node iterator;
+- deleting memory nodes entirely may discard annotations in the form
+  of additional properties on the nodes.
 
-Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Since the discovery of DT memory nodes occurs strictly before the
+UEFI init sequence, we can simply clear the memblock memory table
+before parsing the UEFI memory map. This way, it is no longer
+necessary to remove the nodes, so we can remove that logic from the
+stub as well.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: David Daney <david.daney@cavium.com>
 ---
- Documentation/devicetree/bindings/numa.txt | 275 +++++++++++++++++++++++++++++
- 1 file changed, 275 insertions(+)
- create mode 100644 Documentation/devicetree/bindings/numa.txt
+ drivers/firmware/efi/arm-init.c    |  8 ++++++++
+ drivers/firmware/efi/libstub/fdt.c | 24 +-----------------------
+ 2 files changed, 9 insertions(+), 23 deletions(-)
 
-diff --git a/Documentation/devicetree/bindings/numa.txt b/Documentation/devicetree/bindings/numa.txt
-new file mode 100644
-index 0000000..21b3505
---- /dev/null
-+++ b/Documentation/devicetree/bindings/numa.txt
-@@ -0,0 +1,275 @@
-+==============================================================================
-+NUMA binding description.
-+==============================================================================
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index 9e15d57..40c9d85 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -143,6 +143,14 @@ static __init void reserve_regions(void)
+ 	if (efi_enabled(EFI_DBG))
+ 		pr_info("Processing EFI memory map:\n");
+ 
++	/*
++	 * Discard memblocks discovered so far: if there are any at this
++	 * point, they originate from memory nodes in the DT, and UEFI
++	 * uses its own memory map instead.
++	 */
++	memblock_dump_all();
++	memblock_remove(0, ULLONG_MAX);
 +
-+==============================================================================
-+1 - Introduction
-+==============================================================================
-+
-+Systems employing a Non Uniform Memory Access (NUMA) architecture contain
-+collections of hardware resources including processors, memory, and I/O buses,
-+that comprise what is commonly known as a NUMA node.
-+Processor accesses to memory within the local NUMA node is generally faster
-+than processor accesses to memory outside of the local NUMA node.
-+DT defines interfaces that allow the platform to convey NUMA node
-+topology information to OS.
-+
-+==============================================================================
-+2 - numa-node-id
-+==============================================================================
-+
-+For the purpose of identification, each NUMA node is associated with a unique
-+token known as a node id. For the purpose of this binding
-+a node id is a 32-bit integer.
-+
-+A device node is associated with a NUMA node by the presence of a
-+numa-node-id property which contains the node id of the device.
-+
-+Example:
-+	/* numa node 0 */
-+	numa-node-id = <0>;
-+
-+	/* numa node 1 */
-+	numa-node-id = <1>;
-+
-+==============================================================================
-+3 - distance-map
-+==============================================================================
-+
-+The optional device tree node distance-map describes the relative
-+distance (memory latency) between all numa nodes.
-+
-+- compatible : Should at least contain "numa-distance-map-v1".
-+
-+- distance-matrix
-+  This property defines a matrix to describe the relative distances
-+  between all numa nodes.
-+  It is represented as a list of node pairs and their relative distance.
-+
-+  Note:
-+	1. Each entry represents distance from first node to second node.
-+	The distances are equal in either direction.
-+	2. The distance from a node to self (local distance) is represented
-+	with value 10 and all internode distance should be represented with
-+	a value greater than 10.
-+	3. distance-matrix should have entries in lexicographical ascending
-+	order of nodes.
-+	4. There must be only one device node distance-map which must
-+	reside in the root node.
-+	5. If the distance-map node is not present, a default
-+	distance-matrix is used.
-+
-+Example:
-+	4 nodes connected in mesh/ring topology as below,
-+
-+		0_______20______1
-+		|               |
-+		|               |
-+		20             20
-+		|               |
-+		|               |
-+		|_______________|
-+		3       20      2
-+
-+	if relative distance for each hop is 20,
-+	then internode distance would be,
-+	      0 -> 1 = 20
-+	      1 -> 2 = 20
-+	      2 -> 3 = 20
-+	      3 -> 0 = 20
-+	      0 -> 2 = 40
-+	      1 -> 3 = 40
-+
-+     and dt presentation for this distance matrix is,
-+
-+		distance-map {
-+			 compatible = "numa-distance-map-v1";
-+			 distance-matrix = <0 0  10>,
-+					   <0 1  20>,
-+					   <0 2  40>,
-+					   <0 3  20>,
-+					   <1 0  20>,
-+					   <1 1  10>,
-+					   <1 2  20>,
-+					   <1 3  40>,
-+					   <2 0  40>,
-+					   <2 1  20>,
-+					   <2 2  10>,
-+					   <2 3  20>,
-+					   <3 0  20>,
-+					   <3 1  40>,
-+					   <3 2  20>,
-+					   <3 3  10>;
-+		};
-+
-+==============================================================================
-+4 - Example dts
-+==============================================================================
-+
-+Dual socket system consists of 2 boards connected through ccn bus and
-+each board having one socket/soc of 8 cpus, memory and pci bus.
-+
-+	memory@c00000 {
-+		device_type = "memory";
-+		reg = <0x0 0xc00000 0x0 0x80000000>;
-+		/* node 0 */
-+		numa-node-id = <0>;
-+	};
-+
-+	memory@10000000000 {
-+		device_type = "memory";
-+		reg = <0x100 0x0 0x0 0x80000000>;
-+		/* node 1 */
-+		numa-node-id = <1>;
-+	};
-+
-+	cpus {
-+		#address-cells = <2>;
-+		#size-cells = <0>;
-+
-+		cpu@0 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x0>;
-+			enable-method = "psci";
-+			/* node 0 */
-+			numa-node-id = <0>;
-+		};
-+		cpu@1 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x1>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@2 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x2>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@3 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x3>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@4 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x4>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@5 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x5>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@6 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x6>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@7 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x7>;
-+			enable-method = "psci";
-+			numa-node-id = <0>;
-+		};
-+		cpu@8 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x8>;
-+			enable-method = "psci";
-+			/* node 1 */
-+			numa-node-id = <1>;
-+		};
-+		cpu@9 {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0x9>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@a {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xa>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@b {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xb>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@c {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xc>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@d {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xd>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@e {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xe>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+		cpu@f {
-+			device_type = "cpu";
-+			compatible =  "arm,armv8";
-+			reg = <0x0 0xf>;
-+			enable-method = "psci";
-+			numa-node-id = <1>;
-+		};
-+	};
-+
-+	pcie0: pcie0@848000000000 {
-+		compatible = "arm,armv8";
-+		device_type = "pci";
-+		bus-range = <0 255>;
-+		#size-cells = <2>;
-+		#address-cells = <3>;
-+		reg = <0x8480 0x00000000 0 0x10000000>;  /* Configuration space */
-+		ranges = <0x03000000 0x8010 0x00000000 0x8010 0x00000000 0x70 0x00000000>;
-+		/* node 0 */
-+		numa-node-id = <0>;
-+        };
-+
-+	pcie1: pcie1@948000000000 {
-+		compatible = "arm,armv8";
-+		device_type = "pci";
-+		bus-range = <0 255>;
-+		#size-cells = <2>;
-+		#address-cells = <3>;
-+		reg = <0x9480 0x00000000 0 0x10000000>;  /* Configuration space */
-+		ranges = <0x03000000 0x9010 0x00000000 0x9010 0x00000000 0x70 0x00000000>;
-+		/* node 1 */
-+		numa-node-id = <1>;
-+        };
-+
-+	distance-map {
-+		compatible = "numa-distance-map-v1";
-+		distance-matrix = <0 0 10>,
-+				  <0 1 20>,
-+				  <1 1 10>;
-+	};
+ 	for_each_efi_memory_desc(&memmap, md) {
+ 		paddr = md->phys_addr;
+ 		npages = md->num_pages;
+diff --git a/drivers/firmware/efi/libstub/fdt.c b/drivers/firmware/efi/libstub/fdt.c
+index cf7b7d4..9df1560 100644
+--- a/drivers/firmware/efi/libstub/fdt.c
++++ b/drivers/firmware/efi/libstub/fdt.c
+@@ -24,7 +24,7 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 			unsigned long map_size, unsigned long desc_size,
+ 			u32 desc_ver)
+ {
+-	int node, prev, num_rsv;
++	int node, num_rsv;
+ 	int status;
+ 	u32 fdt_val32;
+ 	u64 fdt_val64;
+@@ -54,28 +54,6 @@ efi_status_t update_fdt(efi_system_table_t *sys_table, void *orig_fdt,
+ 		goto fdt_set_fail;
+ 
+ 	/*
+-	 * Delete any memory nodes present. We must delete nodes which
+-	 * early_init_dt_scan_memory may try to use.
+-	 */
+-	prev = 0;
+-	for (;;) {
+-		const char *type;
+-		int len;
+-
+-		node = fdt_next_node(fdt, prev, NULL);
+-		if (node < 0)
+-			break;
+-
+-		type = fdt_getprop(fdt, node, "device_type", &len);
+-		if (type && strncmp(type, "memory", len) == 0) {
+-			fdt_del_node(fdt, node);
+-			continue;
+-		}
+-
+-		prev = node;
+-	}
+-
+-	/*
+ 	 * Delete all memory reserve map entries. When booting via UEFI,
+ 	 * kernel will use the UEFI memory map to find reserved regions.
+ 	 */
 -- 
 1.8.3.1
