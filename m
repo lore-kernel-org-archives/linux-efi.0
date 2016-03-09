@@ -1,65 +1,136 @@
-From: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v15 6/6] arm64, mm, numa: Add NUMA balancing support for arm64.
-Date: Tue,  8 Mar 2016 15:59:47 -0800
-Message-ID: <1457481587-8976-7-git-send-email-ddaney.cavm@gmail.com>
-References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1457481587-8976-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+From: Alexander Popov <alpopov@ptsecurity.com>
+Subject: Re: [PATCH RFC 1/1] x86: fix bad memory access in
+ fb_is_primary_device()
+Date: Wed, 9 Mar 2016 15:46:07 +0300
+Message-ID: <56E01B0F.3000306@ptsecurity.com>
+References: <1455528649-26629-1-git-send-email-alpopov@ptsecurity.com>
+ <20160216075521.GA27491@gmail.com>
+ <20160216134918.GD2769@codeblueprint.co.uk>
+ <20160216151859.GB11373@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20160216151859.GB11373@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Jones <pjones@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Ingo Molnar <mingo@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Tomi Valkeinen <tomi.valkeinen@ti.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Alexander Popov <alpopov@ptsecurity.com>
 List-Id: linux-efi@vger.kernel.org
 
-From: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+On 16.02.2016 18:18, Peter Jones wrote:
+> On Tue, Feb 16, 2016 at 01:49:18PM +0000, Matt Fleming wrote:
+>> [ Including Peter, the efifb maintainer. Original email is here,
+>>
+>>     http://marc.info/?l=linux-kernel&m=145552936131335&w=2
+>>
+>>   I've snipped some of the quoted text ]
+>>
+>> On Tue, 16 Feb, at 08:55:22AM, Ingo Molnar wrote:
+>>>
+>>> (I've Cc:-ed the EFI-FB and FB gents. Mail quoted below.)
+>>>
+>>> * Alexander Popov <alpopov@ptsecurity.com> wrote:
+>>>
+>>>> Currently the code in fb_is_primary_device() contains to_pci_dev() macro
+>>>> which is applied to dev from struct fb_info. In some cases this causes
+>>>> bad memory access when fb_is_primary_device() handles fb_info of efifb.
+>>>> The reason is that fb dev of efifb is embedded into struct platform_device
+>>>> but not into struct pci_dev.
+>>>>
+>>>> We can fix this by checking fb dev bus name in fb_is_primary_device().
+>>>>
+>>>> It seems that this bug reveals some bigger problem with to_pci_dev(),
+>>>> to_platform_device() and others, which just do container_of() and
+>>>> don't check whether struct device is a part of the appropriate structure.
+>>>> Should we do something more about it?
+>>>>
+>>>> KASan report:
+>>
+>> [...]
+>>
+>>>>
+>>>> Signed-off-by: Alexander Popov <alpopov@ptsecurity.com>
+>>>> ---
+>>>>  arch/x86/video/fbdev.c | 9 +++++----
+>>>>  1 file changed, 5 insertions(+), 4 deletions(-)
+>>>>
+>>>> diff --git a/arch/x86/video/fbdev.c b/arch/x86/video/fbdev.c
+>>>> index d5644bb..4999f78 100644
+>>>> --- a/arch/x86/video/fbdev.c
+>>>> +++ b/arch/x86/video/fbdev.c
+>>>> @@ -18,11 +18,12 @@ int fb_is_primary_device(struct fb_info *info)
+>>>>  	struct pci_dev *default_device = vga_default_device();
+>>>>  	struct resource *res = NULL;
+>>>>  
+>>>> -	if (device)
+>>>> -		pci_dev = to_pci_dev(device);
+>>>> -
+>>>> -	if (!pci_dev)
+>>>> +	if (!device || !device->bus ||
+>>>> +		    !device->bus->name || strcmp(device->bus->name, "pci")) {
+>>>>  		return 0;
+>>>> +	}
+>>>> +
+>>>> +	pci_dev = to_pci_dev(device);
+>>>>  
+>>>>  	if (default_device) {
+>>>>  		if (pci_dev == default_device)
+>>>> -- 
+>>>> 1.9.1
+>>>>
+>>
+>> I wonder if this issue could explain some of the efifb issues we've
+>> seen reported on bugzilla.kernel.org in the past where switching from
+>> efifb to some other framebuffer device caused hangs during boot. I'm
+>> struggling to find the relevant bugzilla entries now, though.
+> 
+> It's possible it could, but I don't have them handy either.  I've also
+> wondered if some of them were due to bad data from the firmware - at
+> plugfests we've seen some cases where the actual video mode as measured
+> with a ruler is clearly not what the firmware claims it to be, so it's
+> entirely possible we're occasionally told a memory region that is not
+> what's actually mapped, or that's mapped but is only partially backed
+> by the actual frame buffer memory.
+> 
+> But aside from that diversion, I think Alexander has a legitimate
+> question about use of to_pci_dev().  If I ask the question: can we fix
+> this in efifb by making it live on a pci_dev, I have a couple of
+> fundamental problems:
+> 
+> 1) technically it doesn't have to be a pci_dev at all (but, practically,
+>    so far it always is on PCI...)
+> 2) From EFI, we can't necessarily pin it down to a single PCI device
+>    even if it is PCI.  Before we do EFI's ExitBootServices() call, we
+>    can try to find the PCI_IO handle our GOP instance is connected to,
+>    but not all firmware GOP drivers use that, so it doesn't always work.
+>    And even if it did, there can be more than one instance pointing to
+>    the same memory with different PCI devices - lots of laptops have
+>    this sort of thing.
+> 3) Ignoring the EFI side and just focusing on PCI, if there's two
+>    devices configured that could do scanout, it can be mapped to one
+>    device's BAR but the other device be the actual device using it.  In
+>    this case either choice is probably wrong for something, and the
+>    things that have the information to resolve which one don't include
+>    efifb - they're the drivers we'll likely hand off to later.
+> 
+> So it's most likely right for efifb to be embedded in a platform_device
+> instead of a pci_dev.  Which leads back to Alexander's question - if it
+> isn't in a pci_dev, that means fb_is_primary_device() needs to not
+> assume it is.  So the patch appears correct, but so is the question -
+> should to_pci_dev() be checking this and returning NULL here?
 
-Enable NUMA balancing for arm64 platforms.
-Add pte, pmd protnone helpers for use by automatic NUMA balancing.
+The discussion has suspended. May I activate it again?
 
-Reviewed-by: Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
-Signed-off-by: Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Signed-off-by: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
----
- arch/arm64/Kconfig               |  1 +
- arch/arm64/include/asm/pgtable.h | 15 +++++++++++++++
- 2 files changed, 16 insertions(+)
+So there are two ways to fix the bad memory access in fb_is_primary_device().
 
-diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
-index 7013087..20f5192 100644
---- a/arch/arm64/Kconfig
-+++ b/arch/arm64/Kconfig
-@@ -11,6 +11,7 @@ config ARM64
- 	select ARCH_HAS_TICK_BROADCAST if GENERIC_CLOCKEVENTS_BROADCAST
- 	select ARCH_USE_CMPXCHG_LOCKREF
- 	select ARCH_SUPPORTS_ATOMIC_RMW
-+	select ARCH_SUPPORTS_NUMA_BALANCING
- 	select ARCH_WANT_OPTIONAL_GPIOLIB
- 	select ARCH_WANT_COMPAT_IPC_PARSE_VERSION
- 	select ARCH_WANT_FRAME_POINTERS
-diff --git a/arch/arm64/include/asm/pgtable.h b/arch/arm64/include/asm/pgtable.h
-index 819aff5..2150cb7 100644
---- a/arch/arm64/include/asm/pgtable.h
-+++ b/arch/arm64/include/asm/pgtable.h
-@@ -348,6 +348,21 @@ static inline pgprot_t mk_sect_prot(pgprot_t prot)
- 	return __pgprot(pgprot_val(prot) & ~PTE_TABLE_BIT);
- }
- 
-+#ifdef CONFIG_NUMA_BALANCING
-+/*
-+ * See the comment in include/asm-generic/pgtable.h
-+ */
-+static inline int pte_protnone(pte_t pte)
-+{
-+	return (pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)) == PTE_PROT_NONE;
-+}
-+
-+static inline int pmd_protnone(pmd_t pmd)
-+{
-+	return pte_protnone(pmd_pte(pmd));
-+}
-+#endif
-+
- /*
-  * THP definitions.
-  */
--- 
-1.8.3.1
+The first one is proposed in my patch. Checking the bus name string doesn't
+look good but I didn't manage to come up with anything better.
+
+The second way is changing to_pci_dev() similarly. It may return NULL or
+call BUG() when struct device is a part of an inappropriate structure.
+
+Which way is better? Do we need to do anything with other similar macros?
+
+Thanks.
+Best regards,
+Alexander
