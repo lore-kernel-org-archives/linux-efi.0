@@ -1,84 +1,81 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH 8/8] efi/arm: populate screen_info based on data provided by the UEFI stub
-Date: Thu, 10 Mar 2016 12:40:08 +0700
-Message-ID: <1457588408-19309-9-git-send-email-ard.biesheuvel@linaro.org>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 6/8] efi/arm*: libstub: wire up GOP handling into the ARM
+ UEFI stub
+Date: Thu, 10 Mar 2016 09:25:22 +0100
+Message-ID: <20160310082522.GB8618@gmail.com>
 References: <1457588408-19309-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1457588408-19309-7-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1457588408-19309-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1457588408-19309-7-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org
-Cc: x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Unlike on arm64, where we can simply access the screen_info struct directly,
-ARM requires an intermediate step to get the information discovered by the
-GOP code in the UEFI stub into the screen_info struct.
 
-So retrieve the dedicated config table we invented for this purpose, and
-put its contents into the core kernel's copy of struct screen_info.
+* Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- arch/arm/kernel/efi.c           | 24 ++++++++++++++++++++
- drivers/firmware/efi/arm-init.c |  6 +++++
- 2 files changed, 30 insertions(+)
+> diff --git a/drivers/firmware/efi/libstub/arm32-stub.c b/drivers/firmware/efi/libstub/arm32-stub.c
+> index 495ebd657e38..0fbe00f13186 100644
+> --- a/drivers/firmware/efi/libstub/arm32-stub.c
+> +++ b/drivers/firmware/efi/libstub/arm32-stub.c
+> @@ -9,6 +9,44 @@
+>  #include <linux/efi.h>
+>  #include <asm/efi.h>
+>  
+> +static const efi_guid_t screen_info_guid = LINUX_ARM32_SCREEN_INFO_TABLE_GUID;
+> +
+> +struct screen_info *alloc_screen_info(efi_system_table_t *sys_table_arg)
+> +{
+> +	struct screen_info *si;
+> +	efi_status_t status;
+> +
+> +	/*
+> +	 * Unlike on arm64, where we can directly fill out the screen_info
+> +	 * structure from the stub, we need to allocate a buffer to hold
+> +	 * its contents while we hand over to the kernel proper from the
+> +	 * decompressor.
+> +	 */
+> +	status = efi_call_early(allocate_pool, EFI_RUNTIME_SERVICES_DATA,
+> +				sizeof(*si), (void **)&si);
+> +
+> +	if (status != EFI_SUCCESS)
+> +		return NULL;
+> +
+> +	status = efi_call_early(install_configuration_table,
+> +				(efi_guid_t *)&screen_info_guid, si);
+> +	if (status == EFI_SUCCESS)
+> +		return si;
+> +
+> +	efi_call_early(free_pool, si);
+> +	return NULL;
+> +}
+> +
+> +void free_screen_info(efi_system_table_t *sys_table_arg, struct screen_info *si)
+> +{
+> +	if (!si)
+> +		return;
+> +
+> +	efi_call_early(install_configuration_table,
+> +		       (efi_guid_t *)&screen_info_guid, NULL);
+> +	efi_call_early(free_pool, si);
+> +}
+> +
+>  efi_status_t handle_kernel_image(efi_system_table_t *sys_table,
+>  				 unsigned long *image_addr,
+>  				 unsigned long *image_size,
 
-diff --git a/arch/arm/kernel/efi.c b/arch/arm/kernel/efi.c
-index ff8a9d8acfac..8d1119259654 100644
---- a/arch/arm/kernel/efi.c
-+++ b/arch/arm/kernel/efi.c
-@@ -6,11 +6,35 @@
-  * published by the Free Software Foundation.
-  */
- 
-+#define pr_fmt(fmt)     "efi: " fmt
-+
- #include <linux/efi.h>
-+#include <linux/screen_info.h>
- #include <asm/efi.h>
- #include <asm/mach/map.h>
- #include <asm/mmu_context.h>
- 
-+static const efi_guid_t __initconst si_tbl = LINUX_ARM32_SCREEN_INFO_TABLE_GUID;
-+
-+void __init efi_find_screen_info(efi_config_table_t *tbl, u32 num_tables)
-+{
-+	struct screen_info *si;
-+
-+	while (num_tables--) {
-+		if (efi_guidcmp(tbl->guid, si_tbl) == 0) {
-+			si = early_memremap_ro(tbl->table, sizeof(*si));
-+			if (!si) {
-+				pr_warn("Failed to remap screen_info config table\n");
-+				return;
-+			}
-+			screen_info = *si;
-+			early_memunmap(si, sizeof(*si));
-+			break;
-+		}
-+		tbl++;
-+	}
-+}
-+
- int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- {
- 	struct map_desc desc = {
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index eca9b4f826ee..689bf65f8ddf 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -112,6 +112,12 @@ static int __init uefi_init(void)
- 	retval = efi_config_parse_tables(config_tables, efi.systab->nr_tables,
- 					 sizeof(efi_config_table_t), NULL);
- 
-+	if (IS_ENABLED(CONFIG_ARM)) {
-+		extern void efi_find_screen_info(efi_config_table_t *, u32);
-+
-+		efi_find_screen_info(config_tables, efi.systab->nr_tables);
-+	}
-+
- 	early_memunmap(config_tables, table_size);
- out:
- 	early_memunmap(efi.systab,  sizeof(efi_system_table_t));
--- 
-1.9.1
+So screen_info_guid should probably not be a 'const': you have to cast it away 
+anyway, adding artificial linebreaks and uglifying the code. It's also a bad 
+practice to cast away const-ness, it hinders move-consts-to-readonly-sections 
+efforts.
+
+Otherwise the series looks mostly good to me. Time for new v4.6 merges is short, 
+but if Matt acks it I can still take it into tip:efi/core.
+
+Thanks,
+
+	Ingo
