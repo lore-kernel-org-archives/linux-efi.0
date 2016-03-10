@@ -1,73 +1,94 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full
+From: "Chen, Yu C" <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: RE: [PATCH][RFC v3] ACPI / PM: Fix poweroff issue on HW-full
  platforms without _S5
-Date: Wed, 9 Mar 2016 15:34:36 +0000
-Message-ID: <20160309153436.GB15775@codeblueprint.co.uk>
+Date: Thu, 10 Mar 2016 02:16:44 +0000
+Message-ID: <36DF59CE26D8EE47B0655C516E9CE640286D3E69@shsmsx102.ccr.corp.intel.com>
 References: <1457319045-25434-1-git-send-email-yu.c.chen@intel.com>
- <CAJZ5v0iWjW_XJEsVBM1yyimxUQMDaWapQ_OrN45TeFXFySd0rw@mail.gmail.com>
- <36DF59CE26D8EE47B0655C516E9CE640286D329F@shsmsx102.ccr.corp.intel.com>
  <2414254.VhAiD01BTS@vostro.rjw.lan>
  <36DF59CE26D8EE47B0655C516E9CE640286D370A@shsmsx102.ccr.corp.intel.com>
+ <1867318.3ivAYsjD7D@vostro.rjw.lan>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-pm-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <36DF59CE26D8EE47B0655C516E9CE640286D370A@shsmsx102.ccr.corp.intel.com>
-Sender: linux-pm-owner@vger.kernel.org
-To: "Chen, Yu C" <yu.c.chen@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, "Rafael J. Wysocki" <rafael@kernel.org>, ACPI Devel Maling List <linux-acpi@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "linux-pm@vger.kernel.org" <linux-pm@vger.kernel.org>, Len Brown <lenb@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, "Zhang, Rui" <rui.zhang@intel.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1867318.3ivAYsjD7D-sKB8Sp2ER+y1GS7QM15AGw@public.gmane.org>
+Content-Language: en-US
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, "Zhang, Rui" <rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 08 Mar, at 04:25:30PM, Chen, Yu C wrote:
-> Hum. unfortunately it is not guaranteed to run after all of the other code,
-> because other components who register pm_power_off may be built as modules, and
-> we can not predict/control the sequence registration.   So this patch may
-> break the EFI platforms who use non-efi poweroff due to unstable EFI service
-> ,  not sure if there are any released-products of this kind.
- 
-Certainly the majority of x86 client machines do not use EFI power
-off, because it hardly ever functions correctly.
-
-> Currently I'm thinking of 3 possible solutions,  could you please give some advices on them:
-> 
-> 1. Introduce bootopt of 'poweroff=efi'
->      Set the pm_power_off to efi_power_off no matter whether there is _S5 or not
-> 
-> 2. Introduce /sys/power/poweroff
->     Allow the user to choose which  pm_power_off, for example:
->  
-> # cat /sys/power/poweroff
-> *acpi		acpi_power_off
-> efi		efi_power_off	
-> gpio		gpio_poweroff_do_poweroff
-> user can echo string to enable which one.
-> 
-> And two APIs:
-> register_power_off(char *name, power_off func)
-> unregister_power_off(char *name)  
-> 
-> 
-> 3. replace all the codes of  pm_power_off() with reliable_pm_power_off()
-> 
-> void reliable_pm_power_off(void)
-> {
-> 	if (!pm_power_off) {
-> 		if (acpi_no_s5)
-> 			pm_power_off = efi_power_off;
-> 	/* Other conditions added in the future. */
-> 	}
-> 	pm_power_off();
-> }
-
-Be wary of adding all these control knobs. People just want their
-machines to reboot properly without having to mess with boot
-parameters.
-
-Let's go back to the start. What prompted this patch? Do Intel have
-(or are planning) machines that do not have _S5 and are expected to
-use EFI to reset the system? Or is this some new configuration
-discussed in the ACPI spec that Linux needs to be support? 
-
-Can we remove the ambiguity and options to force EFI reset if _S5 is
-missing? Afterall, that's why the function is called
-efi_poweroff_*required*.
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBSYWZhZWwgSi4gV3lzb2NraSBb
+bWFpbHRvOnJqd0Byand5c29ja2kubmV0XQ0KPiBTZW50OiBXZWRuZXNkYXksIE1hcmNoIDA5LCAy
+MDE2IDY6NTcgQU0NCj4gVG86IENoZW4sIFl1IEMNCj4gQ2M6IFJhZmFlbCBKLiBXeXNvY2tpOyBB
+Q1BJIERldmVsIE1hbGluZyBMaXN0OyB4ODZAa2VybmVsLm9yZzsgbGludXgtDQo+IGVmaUB2Z2Vy
+Lmtlcm5lbC5vcmc7IExpbnV4IEtlcm5lbCBNYWlsaW5nIExpc3Q7IGxpbnV4LXBtQHZnZXIua2Vy
+bmVsLm9yZzsNCj4gTGVuIEJyb3duOyBNYXR0IEZsZW1pbmc7IFRob21hcyBHbGVpeG5lcjsgSW5n
+byBNb2xuYXI7IEguIFBldGVyIEFudmluOw0KPiBaaGFuZywgUnVpDQo+IFN1YmplY3Q6IFJlOiBb
+UEFUQ0hdW1JGQyB2M10gQUNQSSAvIFBNOiBGaXggcG93ZXJvZmYgaXNzdWUgb24gSFctZnVsbA0K
+PiBwbGF0Zm9ybXMgd2l0aG91dCBfUzUNCj4gDQo+IE9uIFR1ZXNkYXksIE1hcmNoIDA4LCAyMDE2
+IDA0OjI1OjMwIFBNIENoZW4sIFl1IEMgd3JvdGU6DQo+ID4gPiAtLS0tLU9yaWdpbmFsIE1lc3Nh
+Z2UtLS0tLQ0KPiA+ID4gRnJvbTogbGludXgtcG0tb3duZXJAdmdlci5rZXJuZWwub3JnIFttYWls
+dG86bGludXgtcG0tDQo+ID4gPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBS
+YWZhZWwgSi4gV3lzb2NraQ0KPiA+ID4gU2VudDogVHVlc2RheSwgTWFyY2ggMDgsIDIwMTYgOTo1
+NCBBTQ0KPiA+ID4gVG86IENoZW4sIFl1IEMNCj4gPiA+IENjOiBSYWZhZWwgSi4gV3lzb2NraTsg
+QUNQSSBEZXZlbCBNYWxpbmcgTGlzdDsgeDg2QGtlcm5lbC5vcmc7DQo+ID4gPiBsaW51eC0gZWZp
+QHZnZXIua2VybmVsLm9yZzsgTGludXggS2VybmVsIE1haWxpbmcgTGlzdDsNCj4gPiA+IGxpbnV4
+LXBtQHZnZXIua2VybmVsLm9yZzsgTGVuIEJyb3duOyBNYXR0IEZsZW1pbmc7IFRob21hcyBHbGVp
+eG5lcjsNCj4gPiA+IEluZ28gTW9sbmFyOyBILiBQZXRlciBBbnZpbjsgWmhhbmcsIFJ1aQ0KPiA+
+ID4gU3ViamVjdDogUmU6IFtQQVRDSF1bUkZDIHYzXSBBQ1BJIC8gUE06IEZpeCBwb3dlcm9mZiBp
+c3N1ZSBvbg0KPiA+ID4gSFctZnVsbCBwbGF0Zm9ybXMgd2l0aG91dCBfUzUNCj4gPiA+DQo+ID4g
+PiBPbiBNb25kYXksIE1hcmNoIDA3LCAyMDE2IDAzOjUzOjEzIFBNIENoZW4sIFl1IEMgd3JvdGU6
+DQo+ID4gPiA+IEhpIFJhZmFlbCwNCj4gPiA+ID4gKHJlc2VuZCBmb3IgYnJva2VuIGNvbnRlbnQp
+DQo+ID4gPiA+DQo+ID4gPiA+ID4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gPiA+ID4g
+PiBGcm9tOiByand5c29ja2lAZ21haWwuY29tIFttYWlsdG86cmp3eXNvY2tpQGdtYWlsLmNvbV0g
+T24gQmVoYWxmDQo+ID4gPiA+ID4gT2YgUmFmYWVsIEouIFd5c29ja2kNCj4gPiA+ID4gPiBTZW50
+OiBNb25kYXksIE1hcmNoIDA3LCAyMDE2IDk6MTkgUE0NCj4gPiA+ID4gPiBUbzogQ2hlbiwgWXUg
+Qw0KPiA+ID4gPiA+IENjOiBBQ1BJIERldmVsIE1hbGluZyBMaXN0OyB4ODZAa2VybmVsLm9yZzsN
+Cj4gPiA+ID4gPiBsaW51eC1lZmlAdmdlci5rZXJuZWwub3JnOyBMaW51eCBLZXJuZWwgTWFpbGlu
+ZyBMaXN0Ow0KPiA+ID4gPiA+IGxpbnV4LXBtQHZnZXIua2VybmVsLm9yZzsgUmFmYWVsIEouIFd5
+c29ja2k7IExlbiBCcm93bjsgTWF0dA0KPiA+ID4gPiA+IEZsZW1pbmc7IFRob21hcyBHbGVpeG5l
+cjsgSW5nbyBNb2xuYXI7IEguIFBldGVyIEFudmluOyBaaGFuZywNCj4gPiA+ID4gPiBSdWkNCj4g
+PiA+ID4gPiBTdWJqZWN0OiBSZTogW1BBVENIXVtSRkMgdjNdIEFDUEkgLyBQTTogRml4IHBvd2Vy
+b2ZmIGlzc3VlIG9uDQo+ID4gPiA+ID4gSFctZnVsbCBwbGF0Zm9ybXMgd2l0aG91dCBfUzUNCj4g
+PiA+ID4gPg0KPiA+ID4gPiBbY3V0XQ0KPiA+ID4gPiA+ID4gIGJvb2wgZWZpX3Bvd2Vyb2ZmX3Jl
+cXVpcmVkKHZvaWQpICB7DQo+ID4gPiA+ID4gPiAtICAgICAgIHJldHVybiAhIWFjcGlfZ2JsX3Jl
+ZHVjZWRfaGFyZHdhcmU7DQo+ID4gPiA+ID4gPiArICAgICAgIHJldHVybiBhY3BpX2dibF9yZWR1
+Y2VkX2hhcmR3YXJlIHx8IChhY3BpX25vX3M1ICYmDQo+ID4gPiA+ID4gPiArICFwbV9wb3dlcl9v
+ZmYpOw0KPiA+ID4gPiA+DQo+ID4gPiA+ID4gV2hhdCBpZiBDT05GSUdfQUNQSSBpcyBub3Qgc2V0
+IGhlcmU/DQo+ID4gPiA+IElmIENPTkZJR19BQ1BJIGlzIG5vdCBzZXQsIHRoaXMgZmlsZSB3b3Vs
+ZCBub3QgYmUgY29tcGlsZWQsDQo+ID4gPiA+IGJlY2F1c2UgQ09ORklHX0VGSSBkZXBlbmRzIG9u
+IENPTkZJR19BQ1BJLg0KPiA+ID4NCj4gPiA+IE9LDQo+ID4gPg0KPiA+ID4gU28gdGhlIG5leHQg
+cXVlc3Rpb24gd2lsbCBiZSBpZiBlZmlfcG93ZXJvZmZfcmVxdWlyZWQoKSBpcw0KPiA+ID4gZ3Vh
+cmFudGVlZCB0byBydW4gYWZ0ZXIgYWxsIG9mIHRoZSBvdGhlciBjb2RlIHRoYXQgbWF5IHJlZ2lz
+dGVyIGFsdGVybmF0aXZlDQo+IHBvd2VyIG9mZiBoYW5kbGluZy4NCj4gPiBIdW0uIHVuZm9ydHVu
+YXRlbHkgaXQgaXMgbm90IGd1YXJhbnRlZWQgdG8gcnVuIGFmdGVyIGFsbCBvZiB0aGUgb3RoZXIN
+Cj4gPiBjb2RlLCBiZWNhdXNlIG90aGVyIGNvbXBvbmVudHMgd2hvIHJlZ2lzdGVyIHBtX3Bvd2Vy
+X29mZiBtYXkgYmUNCj4gYnVpbHQgYXMgbW9kdWxlcywgYW5kDQo+ID4gd2UgY2FuIG5vdCBwcmVk
+aWN0L2NvbnRyb2wgdGhlIHNlcXVlbmNlIHJlZ2lzdHJhdGlvbi4gICBTbyB0aGlzIHBhdGNoIG1h
+eQ0KPiA+IGJyZWFrIHRoZSBFRkkgcGxhdGZvcm1zIHdobyB1c2Ugbm9uLWVmaSBwb3dlcm9mZiBk
+dWUgdG8gdW5zdGFibGUgRUZJDQo+ID4gc2VydmljZSAsICBub3Qgc3VyZSBpZiB0aGVyZSBhcmUg
+YW55IHJlbGVhc2VkLXByb2R1Y3RzIG9mIHRoaXMga2luZC4NCj4gPg0KPiA+IEN1cnJlbnRseSBJ
+J20gdGhpbmtpbmcgb2YgMyBwb3NzaWJsZSBzb2x1dGlvbnMsICBjb3VsZCB5b3UgcGxlYXNlIGdp
+dmUgc29tZQ0KPiBhZHZpY2VzIG9uIHRoZW06DQo+ID4NCj4gPiAxLiBJbnRyb2R1Y2UgYm9vdG9w
+dCBvZiAncG93ZXJvZmY9ZWZpJw0KPiA+ICAgICAgU2V0IHRoZSBwbV9wb3dlcl9vZmYgdG8gZWZp
+X3Bvd2VyX29mZiBubyBtYXR0ZXIgd2hldGhlciB0aGVyZSBpcw0KPiA+IF9TNSBvciBub3QNCj4g
+Pg0KPiA+IDIuIEludHJvZHVjZSAvc3lzL3Bvd2VyL3Bvd2Vyb2ZmDQo+ID4gICAgIEFsbG93IHRo
+ZSB1c2VyIHRvIGNob29zZSB3aGljaCAgcG1fcG93ZXJfb2ZmLCBmb3IgZXhhbXBsZToNCj4gPg0K
+PiA+ICMgY2F0IC9zeXMvcG93ZXIvcG93ZXJvZmYNCj4gPiAqYWNwaQkJYWNwaV9wb3dlcl9vZmYN
+Cj4gPiBlZmkJCWVmaV9wb3dlcl9vZmYNCj4gPiBncGlvCQlncGlvX3Bvd2Vyb2ZmX2RvX3Bvd2Vy
+b2ZmDQo+ID4gdXNlciBjYW4gZWNobyBzdHJpbmcgdG8gZW5hYmxlIHdoaWNoIG9uZS4NCj4gPg0K
+PiA+IEFuZCB0d28gQVBJczoNCj4gPiByZWdpc3Rlcl9wb3dlcl9vZmYoY2hhciAqbmFtZSwgcG93
+ZXJfb2ZmIGZ1bmMpDQo+ID4gdW5yZWdpc3Rlcl9wb3dlcl9vZmYoY2hhciAqbmFtZSkNCj4gPg0K
+PiA+DQo+ID4gMy4gcmVwbGFjZSBhbGwgdGhlIGNvZGVzIG9mICBwbV9wb3dlcl9vZmYoKSB3aXRo
+DQo+ID4gcmVsaWFibGVfcG1fcG93ZXJfb2ZmKCkNCj4gPg0KPiA+IHZvaWQgcmVsaWFibGVfcG1f
+cG93ZXJfb2ZmKHZvaWQpDQo+ID4gew0KPiA+IAlpZiAoIXBtX3Bvd2VyX29mZikgew0KPiA+IAkJ
+aWYgKGFjcGlfbm9fczUpDQo+ID4gCQkJcG1fcG93ZXJfb2ZmID0gZWZpX3Bvd2VyX29mZjsNCj4g
+PiAJLyogT3RoZXIgY29uZGl0aW9ucyBhZGRlZCBpbiB0aGUgZnV0dXJlLiAqLw0KPiA+IAl9DQo+
+ID4gCXBtX3Bvd2VyX29mZigpOw0KPiA+IH0NCj4gDQo+IFdoYXQgYWJvdXQgc29tZXRoaW5nIGxp
+a2UgYWRkaW5nIHNvbWV0aGluZyBsaWtlIGRlZmF1bHRfcG93ZXJfb2ZmIHRoYXQNCj4gd291bGQg
+YmUgdXNlZCBieSBwbV9wb3dlcl9vZmYgaWYgbm90aGluZyBlbHNlIGlzIGF2YWlsYWJsZT8NCk9L
+LCAgSSdsbCB0cnkgYW5vdGhlciB2ZXJzaW9uLCBpbiB3aGljaCBvdGhlciBjb21wb25lbnRzIGNh
+biBzZXQgIGl0cyBkZWZhdWx0X3Bvd2VyX29mZiwNCnRoZW4gcG1fcG93ZXJfb2ZmIGhhcyBhIGNo
+YW5jZSB0byBiZSBzZXQgdG8gZGVmYXVsdF9wb3dlcl9vZmYgaWYgcG1fcG93ZXJfb2ZmIGlzIE5V
+TEwuDQoNCg0K
