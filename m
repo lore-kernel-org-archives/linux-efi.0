@@ -1,75 +1,178 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 6/8] efi/arm*: libstub: wire up GOP handling into the ARM
- UEFI stub
-Date: Thu, 10 Mar 2016 14:49:08 +0000
-Message-ID: <20160310144908.GG15775@codeblueprint.co.uk>
-References: <1457588408-19309-1-git-send-email-ard.biesheuvel@linaro.org>
- <1457588408-19309-7-git-send-email-ard.biesheuvel@linaro.org>
- <20160310082522.GB8618@gmail.com>
- <CAKv+Gu8hTSbZVgGj6epquwf6kkSJV+imAFvNobowFVtB5AUe2Q@mail.gmail.com>
- <20160310090345.GA19834@gmail.com>
- <CAKv+Gu_rtQjWJ-=Nf-dEYEHVB5dwKMA_Mv2rVujBz9t=3qnUrA@mail.gmail.com>
- <20160310092552.GA19588@gmail.com>
- <CAKv+Gu9ephpDq_KE_xxV+dXSit+VgBxqgXyAeKt4eXpb5KRJnw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: [PATCH][RFC,v4] ACPI / PM: Introduce efi poweroff for HW-full platforms without _S5
+Date: Fri, 11 Mar 2016 17:05:33 +0800
+Message-ID: <1457687133-3730-1-git-send-email-yu.c.chen@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu9ephpDq_KE_xxV+dXSit+VgBxqgXyAeKt4eXpb5KRJnw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org" <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, rui.zhang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 10 Mar, at 05:25:08PM, Ard Biesheuvel wrote:
-> 
-> Indeed. I think the efi_early struct is a separate structure that is
-> set up by the early boot code, and has a number of function pointers
-> of EFI boot services copied into it. Matt should know the details.
+The problem is Linux registers pm_power_off = efi_power_off
+only if we are in hardware reduced mode. Actually, what we also
+want is to do this when ACPI S5 is simply not supported on
+non-legacy platforms. That should handle both the HW reduced mode,
+and the HW-full mode where the DSDT fails to supply an _S5 object.
+
+This patch introduces pm_power_off_default which would be used by
+pm_power_off if nothing else is available. And in this case we
+leverage efi power off to be this role. However since efi power off
+may not be stable enough thus in order not to interfere with other
+poweroff path, we only make a minimum enhancement for x86 in
+native_machine_power_off.
+
+Suggested-by: Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Signed-off-by: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+v4:
+ - Since in v3 efi_poweroff_required() is not guaranteed to run
+   after all of the other code that may register alternative
+   power off handling, add the pm_power_off_default that would
+   be used by pm_power_off if nothing else is available.
+v3:
+ - Only assign pm_power_off to efi_power_off when there are no
+   other pm_power_off registered at that time, in case other
+   commponents would like to customize their own implementation.
+---
+v2:
+ - Convert the acpi_no_s5 to a global bool variable in sleep.c and
+   add a declaration to include/linux/acpi.h.
+---
+ arch/x86/kernel/reboot.c       | 3 +++
+ arch/x86/platform/efi/quirks.c | 5 +++++
+ drivers/acpi/sleep.c           | 7 +++++++
+ drivers/firmware/efi/reboot.c  | 8 ++++++++
+ include/linux/acpi.h           | 1 +
+ include/linux/efi.h            | 1 +
+ include/linux/pm.h             | 1 +
+ kernel/reboot.c                | 1 +
+ 8 files changed, 27 insertions(+)
+
+diff --git a/arch/x86/kernel/reboot.c b/arch/x86/kernel/reboot.c
+index ab0adc0..bec3047 100644
+--- a/arch/x86/kernel/reboot.c
++++ b/arch/x86/kernel/reboot.c
+@@ -666,6 +666,9 @@ static void native_machine_halt(void)
  
-If you look at where the efi_early stuff came from originally, you'll
-see it was merged as part of the mixed mode code for running 64-bit
-kernels on 32-bit EFI,
-
-commit 54b52d872680
-Author: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Date:   Fri Jan 10 15:27:14 2014 +0000
-
-    x86/efi: Build our own EFI services pointer table
-    
-    It's not possible to dereference the EFI System table directly when
-    booting a 64-bit kernel on a 32-bit EFI firmware because the size of
-    pointers don't match.
-    
-    In preparation for supporting the above use case, build a list of
-    function pointers on boot so that callers don't have to worry about
-    converting pointer sizes through multiple levels of indirection.
-    
-    Signed-off-by: Matt Fleming <matt.fleming-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-
-
-You basically cannot ever dereference a pointer in that mode, it's
-crazy.
+ static void native_machine_power_off(void)
+ {
++	if (!pm_power_off)
++		pm_power_off = pm_power_off_default;
++
+ 	if (pm_power_off) {
+ 		if (!reboot_force)
+ 			machine_shutdown();
+diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+index 2d66db8..8c8e3c9 100644
+--- a/arch/x86/platform/efi/quirks.c
++++ b/arch/x86/platform/efi/quirks.c
+@@ -297,3 +297,8 @@ bool efi_poweroff_required(void)
+ {
+ 	return !!acpi_gbl_reduced_hardware;
+ }
++
++bool efi_poweroff_default(void)
++{
++	return (!pm_power_off_default && acpi_no_s5);
++}
+diff --git a/drivers/acpi/sleep.c b/drivers/acpi/sleep.c
+index 9cb9752..a244f15 100644
+--- a/drivers/acpi/sleep.c
++++ b/drivers/acpi/sleep.c
+@@ -25,6 +25,11 @@
+ #include "internal.h"
+ #include "sleep.h"
  
-The subsequent efi_early() wrapper came when some of the EFI boot stub
-code was migrated out of arch/x86 into drivers/firmware/efi/libstub.
-
-I'm not suggesting it's the most beautiful code in the world, far from
-it. It is a massive eyesore that has resulted in type bugs in the past
-because of all the casting.
-
-I've just never come up with a cleanup patch series that I was happy
-with.
-
-> > Furthermore, my suggestion would work with arbitrarily structured thunking: my
-> > suggestion was to put a typed C layer in there - and the layer itself could then
-> > call the vararg construct internally. It's a C type demuxing, only a syntactic
-> > effort, it does not change any real call signature.
-> >
-> 
-> I would welcome any improvement in this regard. Happy to contribute as well.
++/*
++ * Some HW-full platforms do not have _S5, they may have
++ * to leverage other methods rather than acpi for a shutdown.
++ */
++bool acpi_no_s5;
+ static u8 sleep_states[ACPI_S_STATE_COUNT];
  
-The only way I think a typed C layer would be maintainable is if it
-was automatically generated. We're already suffering from the
-multitude of different bitness functions, i.e. __setup_efi_pci32() vs
-__setup_efi_pci64().
+ static void acpi_sleep_tts_switch(u32 acpi_state)
+@@ -846,6 +851,8 @@ int __init acpi_sleep_init(void)
+ 		sleep_states[ACPI_STATE_S5] = 1;
+ 		pm_power_off_prepare = acpi_power_off_prepare;
+ 		pm_power_off = acpi_power_off;
++	} else {
++		acpi_no_s5 = true;
+ 	}
+ 
+ 	supported[0] = 0;
+diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
+index 9c59d1c..b3345e2 100644
+--- a/drivers/firmware/efi/reboot.c
++++ b/drivers/firmware/efi/reboot.c
+@@ -38,6 +38,11 @@ bool __weak efi_poweroff_required(void)
+ 	return false;
+ }
+ 
++bool __weak efi_poweroff_default(void)
++{
++	return false;
++}
++
+ static void efi_power_off(void)
+ {
+ 	efi.reset_system(EFI_RESET_SHUTDOWN, EFI_SUCCESS, 0, NULL);
+@@ -51,6 +56,9 @@ static int __init efi_shutdown_init(void)
+ 	if (efi_poweroff_required())
+ 		pm_power_off = efi_power_off;
+ 
++	if (efi_poweroff_default())
++		pm_power_off_default = efi_power_off;
++
+ 	return 0;
+ }
+ late_initcall(efi_shutdown_init);
+diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+index 06ed7e5..4d2e67f 100644
+--- a/include/linux/acpi.h
++++ b/include/linux/acpi.h
+@@ -278,6 +278,7 @@ void acpi_irq_stats_init(void);
+ extern u32 acpi_irq_handled;
+ extern u32 acpi_irq_not_handled;
+ extern unsigned int acpi_sci_irq;
++extern bool acpi_no_s5;
+ #define INVALID_ACPI_IRQ	((unsigned)-1)
+ static inline bool acpi_sci_irq_valid(void)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 47be3ad..5aad9be 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -921,6 +921,7 @@ extern struct kobject *efi_kobj;
+ 
+ extern int efi_reboot_quirk_mode;
+ extern bool efi_poweroff_required(void);
++extern bool efi_poweroff_default(void);
+ 
+ #ifdef CONFIG_EFI_FAKE_MEMMAP
+ extern void __init efi_fake_memmap(void);
+diff --git a/include/linux/pm.h b/include/linux/pm.h
+index 6a5d654..b58719f 100644
+--- a/include/linux/pm.h
++++ b/include/linux/pm.h
+@@ -33,6 +33,7 @@
+  */
+ extern void (*pm_power_off)(void);
+ extern void (*pm_power_off_prepare)(void);
++extern void (*pm_power_off_default)(void);
+ 
+ struct device; /* we have a circular dep with device.h */
+ #ifdef CONFIG_VT_CONSOLE_SLEEP
+diff --git a/kernel/reboot.c b/kernel/reboot.c
+index bd30a97..b9a0f36 100644
+--- a/kernel/reboot.c
++++ b/kernel/reboot.c
+@@ -49,6 +49,7 @@ int reboot_force;
+  */
+ 
+ void (*pm_power_off_prepare)(void);
++void (*pm_power_off_default)(void);
+ 
+ /**
+  *	emergency_restart - reboot the system
+-- 
+1.8.4.2
