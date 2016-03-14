@@ -1,48 +1,69 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: [GIT PULL] EFI urgent fix for v4.6 queue
-Date: Mon, 14 Mar 2016 10:33:00 +0000
-Message-ID: <1457951581-27353-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Maarten Lankhorst <maarten.lankhorst-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Raphael Hertzog <hertzog-8fiUuRrzOP0dnm+yROfE0A@public.gmane.org>, Roger Shimizu <rogershimizu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Scott Ashcroft <scott.ashcroft-qw6QB7/foO7QT0dZR+AlfA@public.gmane.org>
+From: Matt Fleming <matt@codeblueprint.co.uk>
+Subject: [PATCH] x86/mm/pat: Fix boot crash when 1GB pages are not supported by cpu
+Date: Mon, 14 Mar 2016 10:33:01 +0000
+Message-ID: <1457951581-27353-2-git-send-email-matt@codeblueprint.co.uk>
+References: <1457951581-27353-1-git-send-email-matt@codeblueprint.co.uk>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1457951581-27353-1-git-send-email-matt@codeblueprint.co.uk>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
+Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ben Hutchings <ben@decadent.org.uk>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Peter Zijlstra <peterz@infradead.org>, Raphael Hertzog <hertzog@debian.org>, Roger Shimizu <rogershimizu@gmail.com>, Scott Ashcroft <scott.ashcroft@talk21.com>
 List-Id: linux-efi@vger.kernel.org
 
-Scott has reported another bug in the EFI mapping code which caused
-page faults during SetVirtualAddressMap() because we're using 1GB
-pages at the PUD level even though they may not be supported by the
-cpu.
+Scott reports that with the new separate EFI page tables he's seeing
+the following error on boot, caused by setting reserved bits in the
+page table structures (fault code is PF_RSVD | PF_PROT),
 
-This patch is against tip/efi/core even though the bug has existed
-since populate_pud() was first written in 2013. The reason I didn't
-base it on tip/x86/urgent is because it would generate conflicts when
-the stuff in tip/efi/core gets merged and since no one has ever
-reported hitting it until now.
+  swapper/0: Corrupted page table at address 17b102020
+  PGD 17b0e5063 PUD 1400000e3
+  Bad pagetable: 0009 [#1] SMP
 
-Let me know if you'd like me to respin this patch on top of something
-else.
+On first inspection the PUD is using a 1GB page size (_PAGE_PSE) and
+looks fine but that's only true if support for 1GB PUD pages
+("pdpe1gb") is present in the cpu.
 
-The following changes since commit 2ad510dc372c2caac9aada9ff6dd10e787616e1d:
+Scott's Intel Celeron N2820 does not have that feature and so the
+_PAGE_PSE bit is reserved. Fix this issue by making the 1GB mapping
+code in conditional on "cpu_has_gbpages".
 
-  x86/efi: Only map kernel text for EFI mixed mode (2016-02-22 08:26:28 +0100)
+This issue didn't come up in the past because the required mapping for
+the faulting address (0x17b102020) will already have been setup by the
+kernel in early boot before we got to efi_map_regions(), but we no
+longer use the standard kernel page tables during EFI calls.
 
-are available in the git repository at:
-
-  git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
-
-for you to fetch changes up to a239b3605abff1457005b413047ddeef057a0831:
-
-  x86/mm/pat: Fix boot crash when 1GB pages are not supported by cpu (2016-03-14 10:13:05 +0000)
-
-----------------------------------------------------------------
- * We currently always assume that 1GB PUD pages are supported by the
-   cpu which has resulted in reports of boot crashes (PF_RSVD faults)
-   during SetVirtualAddressMap() when that assumption turns out to be
-   false. Only use 1GB pages if supported by the cpu - Matt Fleming
-
-----------------------------------------------------------------
-Matt Fleming (1):
-      x86/mm/pat: Fix boot crash when 1GB pages are not supported by cpu
-
+Reported-by: Scott Ashcroft <scott.ashcroft@talk21.com>
+Tested-by: Scott Ashcroft <scott.ashcroft@talk21.com>
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Ben Hutchings <ben@decadent.org.uk>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
+Cc: Matthew Garrett <mjg59@srcf.ucam.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Raphael Hertzog <hertzog@debian.org>
+Cc: Roger Shimizu <rogershimizu@gmail.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+---
  arch/x86/mm/pageattr.c | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+index 14c38ae80409..fcf8e290740a 100644
+--- a/arch/x86/mm/pageattr.c
++++ b/arch/x86/mm/pageattr.c
+@@ -1055,7 +1055,7 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+ 	/*
+ 	 * Map everything starting from the Gb boundary, possibly with 1G pages
+ 	 */
+-	while (end - start >= PUD_SIZE) {
++	while (cpu_has_gbpages && end - start >= PUD_SIZE) {
+ 		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+ 				   massage_pgprot(pud_pgprot)));
+ 
+-- 
+2.6.2
