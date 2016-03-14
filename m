@@ -1,69 +1,48 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH] x86/mm/pat: Fix boot crash when 1GB pages are not supported by cpu
-Date: Mon, 14 Mar 2016 10:33:01 +0000
-Message-ID: <1457951581-27353-2-git-send-email-matt@codeblueprint.co.uk>
-References: <1457951581-27353-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1457951581-27353-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Ingo Molnar <mingo@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, Ben Hutchings <ben@decadent.org.uk>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Maarten Lankhorst <maarten.lankhorst@linux.intel.com>, Matthew Garrett <mjg59@srcf.ucam.org>, Peter Zijlstra <peterz@infradead.org>, Raphael Hertzog <hertzog@debian.org>, Roger Shimizu <rogershimizu@gmail.com>, Scott Ashcroft <scott.ashcroft@talk21.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH] x86/efi: Always map boot service regions into new EFI
+ page tables
+Date: Mon, 14 Mar 2016 11:35:02 +0000
+Message-ID: <20160314113502.GC2619@codeblueprint.co.uk>
+References: <1457695163-29632-1-git-send-email-matt@codeblueprint.co.uk>
+ <1457695163-29632-2-git-send-email-matt@codeblueprint.co.uk>
+ <1457888975.3884.9.camel@talk21.com>
+ <20160313215847.GA2619@codeblueprint.co.uk>
+ <20160313230736.GB2619@codeblueprint.co.uk>
+ <20160314103019.GA32573@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160314103019.GA32573-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Cc: Scott Ashcroft <scott.ashcroft-qw6QB7/foO7QT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Maarten Lankhorst <maarten.lankhorst-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>, Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Ben Hutchings <ben-/+tVBieCtBitmTQ+vhA3Yw@public.gmane.org>, Raphael Hertzog <hertzog-8fiUuRrzOP0dnm+yROfE0A@public.gmane.org>, Roger Shimizu <rogershimizu-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexis Murzeau <amurzeau-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Scott reports that with the new separate EFI page tables he's seeing
-the following error on boot, caused by setting reserved bits in the
-page table structures (fault code is PF_RSVD | PF_PROT),
+On Mon, 14 Mar, at 11:30:19AM, Ingo Molnar wrote:
+> 
+> * Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> 
+> > diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
+> > index 8fee5b6f8f66..af74849e8c0f 100644
+> > --- a/arch/x86/mm/pageattr.c
+> > +++ b/arch/x86/mm/pageattr.c
+> > @@ -1055,7 +1055,7 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
+> >  	/*
+> >  	 * Map everything starting from the Gb boundary, possibly with 1G pages
+> >  	 */
+> > -	while (end - start >= PUD_SIZE) {
+> > +	while (cpu_has_gbpages && end - start >= PUD_SIZE) {
+> >  		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
+> >  				   massage_pgprot(pud_pgprot)));
+> 
+> Btw., can 'cpa->pfn << PAGE_SHIFT' possibly work on 32-bit systems?
+> 
+> cpa->pfn is unsigned long, so the result gets truncated to 32 bits ...
+> 
+> cpa->pfn should be u64.
 
-  swapper/0: Corrupted page table at address 17b102020
-  PGD 17b0e5063 PUD 1400000e3
-  Bad pagetable: 0009 [#1] SMP
+That is a nice catch.
 
-On first inspection the PUD is using a 1GB page size (_PAGE_PSE) and
-looks fine but that's only true if support for 1GB PUD pages
-("pdpe1gb") is present in the cpu.
-
-Scott's Intel Celeron N2820 does not have that feature and so the
-_PAGE_PSE bit is reserved. Fix this issue by making the 1GB mapping
-code in conditional on "cpu_has_gbpages".
-
-This issue didn't come up in the past because the required mapping for
-the faulting address (0x17b102020) will already have been setup by the
-kernel in early boot before we got to efi_map_regions(), but we no
-longer use the standard kernel page tables during EFI calls.
-
-Reported-by: Scott Ashcroft <scott.ashcroft@talk21.com>
-Tested-by: Scott Ashcroft <scott.ashcroft@talk21.com>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Cc: Ben Hutchings <ben@decadent.org.uk>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Maarten Lankhorst <maarten.lankhorst@linux.intel.com>
-Cc: Matthew Garrett <mjg59@srcf.ucam.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Raphael Hertzog <hertzog@debian.org>
-Cc: Roger Shimizu <rogershimizu@gmail.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- arch/x86/mm/pageattr.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/mm/pageattr.c b/arch/x86/mm/pageattr.c
-index 14c38ae80409..fcf8e290740a 100644
---- a/arch/x86/mm/pageattr.c
-+++ b/arch/x86/mm/pageattr.c
-@@ -1055,7 +1055,7 @@ static int populate_pud(struct cpa_data *cpa, unsigned long start, pgd_t *pgd,
- 	/*
- 	 * Map everything starting from the Gb boundary, possibly with 1G pages
- 	 */
--	while (end - start >= PUD_SIZE) {
-+	while (cpu_has_gbpages && end - start >= PUD_SIZE) {
- 		set_pud(pud, __pud(cpa->pfn << PAGE_SHIFT | _PAGE_PSE |
- 				   massage_pgprot(pud_pgprot)));
- 
--- 
-2.6.2
+Note that we never run this code on 32-bit right now. Moving 32-bit to
+this code and away from the old_map scheme is on my TODO list.
