@@ -1,7 +1,7 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v6 04/17] arm/xen: Use xen_xlate_map_ballooned_pages to setup grant table
-Date: Thu, 17 Mar 2016 17:57:03 +0800
-Message-ID: <1458208636-12960-5-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v6 12/17] ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
+Date: Thu, 17 Mar 2016 17:57:11 +0800
+Message-ID: <1458208636-12960-13-git-send-email-zhaoshenglong@huawei.com>
 References: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -14,49 +14,46 @@ List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Use xen_xlate_map_ballooned_pages to setup grant table. Then it doesn't
-rely on DT or ACPI to pass the start address and size of grant table.
+When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+a /hypervisor node in DT. So check if it needs to enable ACPI.
 
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
 ---
- arch/arm/xen/enlighten.c | 13 ++++---------
- 1 file changed, 4 insertions(+), 9 deletions(-)
+ arch/arm64/kernel/acpi.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 75cd734..d94f726 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -282,18 +282,10 @@ static int __init xen_guest_init(void)
+diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+index d1ce8e2..4e92be0 100644
+--- a/arch/arm64/kernel/acpi.c
++++ b/arch/arm64/kernel/acpi.c
+@@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
  {
- 	struct xen_add_to_physmap xatp;
- 	struct shared_info *shared_info_page = NULL;
--	struct resource res;
--	phys_addr_t grant_frames;
+ 	/*
+ 	 * Return 1 as soon as we encounter a node at depth 1 that is
+-	 * not the /chosen node.
++	 * not the /chosen node, or /hypervisor node when running on Xen.
+ 	 */
+-	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+-		return 1;
++	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
++		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
++			return 1;
++	}
++
+ 	return 0;
+ }
  
- 	if (!xen_domain())
- 		return 0;
- 
--	if (of_address_to_resource(xen_node, GRANT_TABLE_PHYSADDR, &res)) {
--		pr_err("Xen grant table base address not found\n");
--		return -ENODEV;
--	}
--	grant_frames = res.start;
--
- 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
- 	if (!xen_events_irq) {
- 		pr_err("Xen event channel interrupt not found\n");
-@@ -328,7 +320,10 @@ static int __init xen_guest_init(void)
- 	if (xen_vcpu_info == NULL)
- 		return -ENOMEM;
- 
--	if (gnttab_setup_auto_xlat_frames(grant_frames)) {
-+	xen_auto_xlat_grant_frames.count = gnttab_max_grant_frames();
-+	if (xen_xlate_map_ballooned_pages(&xen_auto_xlat_grant_frames.pfn,
-+					  &xen_auto_xlat_grant_frames.vaddr,
-+					  xen_auto_xlat_grant_frames.count)) {
- 		free_percpu(xen_vcpu_info);
- 		return -ENOMEM;
- 	}
+@@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
+ 	/*
+ 	 * Enable ACPI instead of device tree unless
+ 	 * - ACPI has been disabled explicitly (acpi=off), or
+-	 * - the device tree is not empty (it has more than just a /chosen node)
++	 * - the device tree is not empty (it has more than just a /chosen node,
++	 *   and a /hypervisor node when running on Xen)
+ 	 *   and ACPI has not been force enabled (acpi=force)
+ 	 */
+ 	if (param_acpi_off ||
 -- 
 2.0.4
