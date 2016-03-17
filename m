@@ -1,66 +1,78 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v6 16/17] FDT: Add a helper to get the subnode by given name
-Date: Thu, 17 Mar 2016 17:57:15 +0800
-Message-ID: <1458208636-12960-17-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: [PATCH v6 13/17] ARM: Xen: Document UEFI support on Xen
+	ARM virtual platforms
+Date: Thu, 17 Mar 2016 17:57:12 +0800
+Message-ID: <1458208636-12960-14-git-send-email-zhaoshenglong@huawei.com>
 References: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458208636-12960-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: mark.rutland@arm.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, ian.campbell@citrix.com, Rob Herring <robh@kernel.org>, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-
-Sometimes it needs to check if there is a subnode of given node in FDT
-by given name. Introduce this helper to get the subnode if it exists.
-
-CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
----
- drivers/of/fdt.c       | 13 +++++++++++++
- include/linux/of_fdt.h |  2 ++
- 2 files changed, 15 insertions(+)
-
-diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
-index 655f79d..09001db 100644
---- a/drivers/of/fdt.c
-+++ b/drivers/of/fdt.c
-@@ -645,6 +645,19 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
- }
- 
- /**
-+ * of_get_flat_dt_subnode_by_name - get the subnode by given name
-+ *
-+ * @node: the parent node
-+ * @uname: the name of subnode
-+ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
-+ */
-+
-+int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
-+{
-+	return fdt_subnode_offset(initial_boot_params, node, uname);
-+}
-+
-+/**
-  * of_get_flat_dt_root - find the root node in the flat blob
-  */
- unsigned long __init of_get_flat_dt_root(void)
-diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
-index df9ef38..fc28162 100644
---- a/include/linux/of_fdt.h
-+++ b/include/linux/of_fdt.h
-@@ -52,6 +52,8 @@ extern char __dtb_end[];
- extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
- 				     int depth, void *data),
- 			   void *data);
-+extern int of_get_flat_dt_subnode_by_name(unsigned long node,
-+					  const char *uname);
- extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
- 				       int *size);
- extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
--- 
-2.0.4
+RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCkFkZCBhICJ1ZWZp
+IiBub2RlIHVuZGVyIC9oeXBlcnZpc29yIG5vZGUgaW4gRkRULCB0aGVuIExpbnV4IGtlcm5lbCBj
+b3VsZApzY2FuIHRoaXMgdG8gZ2V0IHRoZSBVRUZJIGluZm9ybWF0aW9uLgoKU2lnbmVkLW9mZi1i
+eTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KQWNrZWQtYnk6IFJvYiBI
+ZXJyaW5nIDxyb2JoQGtlcm5lbC5vcmc+ClJldmlld2VkLWJ5OiBTdGVmYW5vIFN0YWJlbGxpbmkg
+PHN0ZWZhbm8uc3RhYmVsbGluaUBldS5jaXRyaXguY29tPgotLS0KQ0M6IFJvYiBIZXJyaW5nIDxy
+b2JoQGtlcm5lbC5vcmc+Ci0tLQogRG9jdW1lbnRhdGlvbi9kZXZpY2V0cmVlL2JpbmRpbmdzL2Fy
+bS94ZW4udHh0IHwgMzMgKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAxIGZpbGUgY2hhbmdl
+ZCwgMzMgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL0RvY3VtZW50YXRpb24vZGV2aWNldHJl
+ZS9iaW5kaW5ncy9hcm0veGVuLnR4dCBiL0RvY3VtZW50YXRpb24vZGV2aWNldHJlZS9iaW5kaW5n
+cy9hcm0veGVuLnR4dAppbmRleCAwZjdiOWMyLi42ZjgzZjc2IDEwMDY0NAotLS0gYS9Eb2N1bWVu
+dGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvYXJtL3hlbi50eHQKKysrIGIvRG9jdW1lbnRhdGlv
+bi9kZXZpY2V0cmVlL2JpbmRpbmdzL2FybS94ZW4udHh0CkBAIC0xNSw2ICsxNSwyNiBAQCB0aGUg
+Zm9sbG93aW5nIHByb3BlcnRpZXM6CiAtIGludGVycnVwdHM6IHRoZSBpbnRlcnJ1cHQgdXNlZCBi
+eSBYZW4gdG8gaW5qZWN0IGV2ZW50IG5vdGlmaWNhdGlvbnMuCiAgIEEgR0lDIG5vZGUgaXMgYWxz
+byByZXF1aXJlZC4KIAorVG8gc3VwcG9ydCBVRUZJIG9uIFhlbiBBUk0gdmlydHVhbCBwbGF0Zm9y
+bXMsIFhlbiBwb3B1bGF0ZXMgdGhlIEZEVCAidWVmaSIgbm9kZQordW5kZXIgL2h5cGVydmlzb3Ig
+d2l0aCBmb2xsb3dpbmcgcGFyYW1ldGVyczoKKworX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KK05h
+bWUgICAgICAgICAgICAgICAgICAgICAgfCBTaXplICAgfCBEZXNjcmlwdGlvbgorPT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT0KK3hlbix1ZWZpLXN5c3RlbS10YWJsZSAgICAgfCA2NC1iaXQgfCBHdWVz
+dCBwaHlzaWNhbCBhZGRyZXNzIG9mIHRoZSBVRUZJIFN5c3RlbQorCQkJICB8CSAgIHwgVGFibGUu
+CistLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoreGVuLHVlZmktbW1hcC1zdGFydCAgICAgICB8IDY0
+LWJpdCB8IEd1ZXN0IHBoeXNpY2FsIGFkZHJlc3Mgb2YgdGhlIFVFRkkgbWVtb3J5CisJCQkgIHwJ
+ICAgfCBtYXAuCistLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoreGVuLHVlZmktbW1hcC1zaXplICAg
+ICAgICB8IDMyLWJpdCB8IFNpemUgaW4gYnl0ZXMgb2YgdGhlIFVFRkkgbWVtb3J5IG1hcAorICAg
+ICAgICAgICAgICAgICAgICAgICAgICB8ICAgICAgICB8IHBvaW50ZWQgdG8gaW4gcHJldmlvdXMg
+ZW50cnkuCistLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoreGVuLHVlZmktbW1hcC1kZXNjLXNpemUg
+ICB8IDMyLWJpdCB8IFNpemUgaW4gYnl0ZXMgb2YgZWFjaCBlbnRyeSBpbiB0aGUgVUVGSQorICAg
+ICAgICAgICAgICAgICAgICAgICAgICB8ICAgICAgICB8IG1lbW9yeSBtYXAuCistLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLQoreGVuLHVlZmktbW1hcC1kZXNjLXZlciAgICB8IDMyLWJpdCB8IFZlcnNp
+b24gb2YgdGhlIG1tYXAgZGVzY3JpcHRvciBmb3JtYXQuCistLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LQogCiBFeGFtcGxlIChhc3N1bWluZyAjYWRkcmVzcy1jZWxscyA9IDwyPiBhbmQgI3NpemUtY2Vs
+bHMgPSA8Mj4pOgogCkBAIC0yMiw0ICs0MiwxNyBAQCBoeXBlcnZpc29yIHsKIAljb21wYXRpYmxl
+ID0gInhlbix4ZW4tNC4zIiwgInhlbix4ZW4iOwogCXJlZyA9IDwwIDB4YjAwMDAwMDAgMCAweDIw
+MDAwPjsKIAlpbnRlcnJ1cHRzID0gPDEgMTUgMHhmMDg+OworCXVlZmkgeworCQl4ZW4sdWVmaS1z
+eXN0ZW0tdGFibGUgPSA8MHhYWFhYWFhYWD47CisJCXhlbix1ZWZpLW1tYXAtc3RhcnQgPSA8MHhY
+WFhYWFhYWD47CisJCXhlbix1ZWZpLW1tYXAtc2l6ZSA9IDwweFhYWFhYWFhYPjsKKwkJeGVuLHVl
+ZmktbW1hcC1kZXNjLXNpemUgPSA8MHhYWFhYWFhYWD47CisJCXhlbix1ZWZpLW1tYXAtZGVzYy12
+ZXIgPSA8MHhYWFhYWFhYWD47CisgICAgICAgIH07CiB9OworCitUaGUgZm9ybWF0IGFuZCBtZWFu
+aW5nIG9mIHRoZSAieGVuLHVlZmktKiIgcGFyYW1ldGVycyBhcmUgc2ltaWxhciB0byB0aG9zZSBp
+bgorRG9jdW1lbnRhdGlvbi9hcm0vdWVmaS50eHQsIHdoaWNoIGFyZSBwcm92aWRlZCBieSB0aGUg
+cmVndWxhciBVRUZJIHN0dWIuIEhvd2V2ZXIKK3RoZXkgZGlmZmVyIGJlY2F1c2UgdGhleSBhcmUg
+cHJvdmlkZWQgYnkgdGhlIFhlbiBoeXBlcnZpc29yLCB0b2dldGhlciB3aXRoIGEgc2V0CitvZiBV
+RUZJIHJ1bnRpbWUgc2VydmljZXMgaW1wbGVtZW50ZWQgdmlhIGh5cGVyY2FsbHMsIHNlZQoraHR0
+cDovL3hlbmJpdHMueGVuLm9yZy9kb2NzL3Vuc3RhYmxlL2h5cGVyY2FsbC94ODZfNjQvaW5jbHVk
+ZSxwdWJsaWMscGxhdGZvcm0uaC5odG1sLgotLSAKMi4wLjQKCgoKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4t
+ZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMueGVuLm9yZy94ZW4tZGV2ZWwK
