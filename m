@@ -1,59 +1,66 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v6 12/17] ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
-Date: Thu, 17 Mar 2016 17:57:11 +0800
-Message-ID: <1458208636-12960-13-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: [PATCH v6 16/17] FDT: Add a helper to get the subnode by given name
+Date: Thu, 17 Mar 2016 17:57:15 +0800
+Message-ID: <1458208636-12960-17-git-send-email-zhaoshenglong@huawei.com>
 References: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, ard.biesheuvel@linaro.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, mark.rutland@arm.com, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, ian.campbell@citrix.com, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1458208636-12960-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 
-When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
-a /hypervisor node in DT. So check if it needs to enable ACPI.
+Sometimes it needs to check if there is a subnode of given node in FDT
+by given name. Introduce this helper to get the subnode if it exists.
 
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
+CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
 ---
- arch/arm64/kernel/acpi.c | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ drivers/of/fdt.c       | 13 +++++++++++++
+ include/linux/of_fdt.h |  2 ++
+ 2 files changed, 15 insertions(+)
 
-diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
-index d1ce8e2..4e92be0 100644
---- a/arch/arm64/kernel/acpi.c
-+++ b/arch/arm64/kernel/acpi.c
-@@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
- {
- 	/*
- 	 * Return 1 as soon as we encounter a node at depth 1 that is
--	 * not the /chosen node.
-+	 * not the /chosen node, or /hypervisor node when running on Xen.
- 	 */
--	if (depth == 1 && (strcmp(uname, "chosen") != 0))
--		return 1;
-+	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
-+		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
-+			return 1;
-+	}
-+
- 	return 0;
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 655f79d..09001db 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -645,6 +645,19 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
  }
  
-@@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
- 	/*
- 	 * Enable ACPI instead of device tree unless
- 	 * - ACPI has been disabled explicitly (acpi=off), or
--	 * - the device tree is not empty (it has more than just a /chosen node)
-+	 * - the device tree is not empty (it has more than just a /chosen node,
-+	 *   and a /hypervisor node when running on Xen)
- 	 *   and ACPI has not been force enabled (acpi=force)
- 	 */
- 	if (param_acpi_off ||
+ /**
++ * of_get_flat_dt_subnode_by_name - get the subnode by given name
++ *
++ * @node: the parent node
++ * @uname: the name of subnode
++ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
++ */
++
++int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
++{
++	return fdt_subnode_offset(initial_boot_params, node, uname);
++}
++
++/**
+  * of_get_flat_dt_root - find the root node in the flat blob
+  */
+ unsigned long __init of_get_flat_dt_root(void)
+diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+index df9ef38..fc28162 100644
+--- a/include/linux/of_fdt.h
++++ b/include/linux/of_fdt.h
+@@ -52,6 +52,8 @@ extern char __dtb_end[];
+ extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
+ 				     int depth, void *data),
+ 			   void *data);
++extern int of_get_flat_dt_subnode_by_name(unsigned long node,
++					  const char *uname);
+ extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
+ 				       int *size);
+ extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
 -- 
 2.0.4
