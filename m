@@ -1,126 +1,148 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 1/4] efi: Move efi_status_to_err() to drivers/firmware/efi/
-Date: Thu, 17 Mar 2016 12:57:08 +0000
-Message-ID: <1458219431-24741-2-git-send-email-matt@codeblueprint.co.uk>
-References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: joeyli <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>
+From: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH v6 01/17] Xen: ACPI: Hide UART used by Xen
+Date: Thu, 17 Mar 2016 13:59:44 +0100
+Message-ID: <CAJZ5v0jw=R4n7qMk4ibZAeC=tkat6O-cgWiQnRb4o02Hy6ehpA@mail.gmail.com>
+References: <1458208636-12960-1-git-send-email-zhaoshenglong@huawei.com>
+	<1458208636-12960-2-git-send-email-zhaoshenglong@huawei.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1458208636-12960-2-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, julien.grall-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Ian Campbell <ian.campbell-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "open list:ACPI" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Move efi_status_to_err() to the architecture independent code as it's
-generally useful in all bits of EFI code where there is a need to
-convert an efi_status_t to a kernel error value.
+On Thu, Mar 17, 2016 at 10:57 AM, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org> wrote:
+> From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>
+> ACPI 6.0 introduces a new table STAO to list the devices which are used
+> by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
+> UART is used by Xen. So here it hides UART from Dom0.
+>
+> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+> CC: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org> (supporter:ACPI)
+> CC: Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> (supporter:ACPI)
+> CC: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org (open list:ACPI)
+> ---
+>  drivers/acpi/scan.c | 63 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 63 insertions(+)
+>
+> diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
+> index 5f28cf7..55ceb69 100644
+> --- a/drivers/acpi/scan.c
+> +++ b/drivers/acpi/scan.c
+> @@ -45,6 +45,7 @@ static LIST_HEAD(acpi_scan_handlers_list);
+>  DEFINE_MUTEX(acpi_device_lock);
+>  LIST_HEAD(acpi_wakeup_device_list);
+>  static DEFINE_MUTEX(acpi_hp_context_lock);
+> +static u64 spcr_uart_addr;
+>
+>  struct acpi_dep_data {
+>         struct list_head node;
+> @@ -1453,6 +1454,41 @@ static int acpi_add_single_object(struct acpi_device **child,
+>         return 0;
+>  }
+>
+> +static acpi_status acpi_get_resource_memory(struct acpi_resource *ares,
+> +                                           void *context)
+> +{
+> +       struct resource *res = context;
+> +
+> +       if (acpi_dev_resource_memory(ares, res))
+> +               return AE_CTRL_TERMINATE;
+> +
+> +       return AE_OK;
+> +}
+> +
+> +static bool acpi_device_should_be_hidden(acpi_handle handle)
+> +{
+> +       acpi_status status;
+> +       struct resource res;
+> +
+> +       /* Check if it should ignore the UART device */
+> +       if (spcr_uart_addr != 0) {
+> +               if (!acpi_has_method(handle, METHOD_NAME__CRS))
+> +                       return false;
+> +
+> +               status = acpi_walk_resources(handle, METHOD_NAME__CRS,
+> +                                            acpi_get_resource_memory, &res);
+> +               if (ACPI_FAILURE(status))
+> +                       return false;
+> +
+> +               if (res.start == spcr_uart_addr) {
+> +                       printk(KERN_INFO PREFIX "The UART device in SPCR table will be hidden\n");
+> +                       return true;
+> +               }
+> +       }
+> +
+> +       return false;
+> +}
+> +
+>  static int acpi_bus_type_and_status(acpi_handle handle, int *type,
+>                                     unsigned long long *sta)
+>  {
+> @@ -1466,6 +1502,9 @@ static int acpi_bus_type_and_status(acpi_handle handle, int *type,
+>         switch (acpi_type) {
+>         case ACPI_TYPE_ANY:             /* for ACPI_ROOT_OBJECT */
+>         case ACPI_TYPE_DEVICE:
+> +               if (acpi_device_should_be_hidden(handle))
+> +                       return -ENODEV;
+> +
+>                 *type = ACPI_BUS_TYPE_DEVICE;
+>                 status = acpi_bus_get_status_handle(handle, sta);
+>                 if (ACPI_FAILURE(status))
+> @@ -1919,6 +1958,8 @@ static int acpi_bus_scan_fixed(void)
+>  int __init acpi_scan_init(void)
+>  {
+>         int result;
+> +       acpi_status status;
+> +       struct acpi_table_stao *stao_ptr;
+>
+>         acpi_pci_root_init();
+>         acpi_pci_link_init();
+> @@ -1934,6 +1975,28 @@ int __init acpi_scan_init(void)
+>
+>         acpi_scan_add_handler(&generic_device_handler);
+>
+> +       /*
+> +        * If there is STAO table, check whether it needs to ignore the UART
+> +        * device in SPCR table.
+> +        */
+> +       status = acpi_get_table(ACPI_SIG_STAO, 0,
+> +                               (struct acpi_table_header **)&stao_ptr);
+> +       if (ACPI_SUCCESS(status)) {
+> +               if (stao_ptr->header.length > sizeof(struct acpi_table_stao))
+> +                       printk(KERN_INFO PREFIX "STAO Name List not yet supported.");
+> +
+> +               if (stao_ptr->ignore_uart) {
+> +                       struct acpi_table_spcr *spcr_ptr;
+> +
+> +                       status = acpi_get_table(ACPI_SIG_SPCR, 0,
+> +                                       (struct acpi_table_header **)&spcr_ptr);
+> +                       if (ACPI_SUCCESS(status))
+> +                               spcr_uart_addr = spcr_ptr->serial_port.address;
+> +                       else
+> +                               printk(KERN_WARNING PREFIX "STAO table present, but SPCR is missing\n");
+> +               }
+> +       }
 
-Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
----
- drivers/firmware/efi/efi.c  | 33 +++++++++++++++++++++++++++++++++
- drivers/firmware/efi/vars.c | 33 ---------------------------------
- include/linux/efi.h         |  2 ++
- 3 files changed, 35 insertions(+), 33 deletions(-)
+I'd put the above part into a separate function and call that from
+here.  You'd be able to reduce the indentation level then slightly
+without using gotos.
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3a69ed5ecfcb..b73222a52a9d 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -637,3 +637,36 @@ u64 __weak efi_mem_attributes(unsigned long phys_addr)
- 	}
- 	return 0;
- }
-+
-+int efi_status_to_err(efi_status_t status)
-+{
-+	int err;
-+
-+	switch (status) {
-+	case EFI_SUCCESS:
-+		err = 0;
-+		break;
-+	case EFI_INVALID_PARAMETER:
-+		err = -EINVAL;
-+		break;
-+	case EFI_OUT_OF_RESOURCES:
-+		err = -ENOSPC;
-+		break;
-+	case EFI_DEVICE_ERROR:
-+		err = -EIO;
-+		break;
-+	case EFI_WRITE_PROTECTED:
-+		err = -EROFS;
-+		break;
-+	case EFI_SECURITY_VIOLATION:
-+		err = -EACCES;
-+		break;
-+	case EFI_NOT_FOUND:
-+		err = -ENOENT;
-+		break;
-+	default:
-+		err = -EINVAL;
-+	}
-+
-+	return err;
-+}
-diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
-index 0ac594c0a234..4911d5697844 100644
---- a/drivers/firmware/efi/vars.c
-+++ b/drivers/firmware/efi/vars.c
-@@ -314,39 +314,6 @@ check_var_size_nonblocking(u32 attributes, unsigned long size)
- 	return fops->query_variable_store(attributes, size, true);
- }
- 
--static int efi_status_to_err(efi_status_t status)
--{
--	int err;
--
--	switch (status) {
--	case EFI_SUCCESS:
--		err = 0;
--		break;
--	case EFI_INVALID_PARAMETER:
--		err = -EINVAL;
--		break;
--	case EFI_OUT_OF_RESOURCES:
--		err = -ENOSPC;
--		break;
--	case EFI_DEVICE_ERROR:
--		err = -EIO;
--		break;
--	case EFI_WRITE_PROTECTED:
--		err = -EROFS;
--		break;
--	case EFI_SECURITY_VIOLATION:
--		err = -EACCES;
--		break;
--	case EFI_NOT_FOUND:
--		err = -ENOENT;
--		break;
--	default:
--		err = -EINVAL;
--	}
--
--	return err;
--}
--
- static bool variable_is_present(efi_char16_t *variable_name, efi_guid_t *vendor,
- 				struct list_head *head)
- {
-diff --git a/include/linux/efi.h b/include/linux/efi.h
-index c55c452b991a..9c8aae0e3b51 100644
---- a/include/linux/efi.h
-+++ b/include/linux/efi.h
-@@ -1023,6 +1023,8 @@ static inline void
- efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
- #endif
- 
-+extern int efi_status_to_err(efi_status_t status);
-+
- /*
-  * Variable Attributes
-  */
--- 
-2.6.2
+Apart from this minor point the patch is fine by me.
+
+> +
+>         mutex_lock(&acpi_scan_lock);
+>         /*
+>          * Enumerate devices in the ACPI namespace.
+> --
+
+Thanks,
+Rafael
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
