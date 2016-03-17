@@ -1,424 +1,126 @@
 From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: [PATCH 4/4] efi: A misc char interface to update EFI firmware
-Date: Thu, 17 Mar 2016 12:57:11 +0000
-Message-ID: <1458219431-24741-5-git-send-email-matt@codeblueprint.co.uk>
+Subject: [PATCH 1/4] efi: Move efi_status_to_err() to drivers/firmware/efi/
+Date: Thu, 17 Mar 2016 12:57:08 +0000
+Message-ID: <1458219431-24741-2-git-send-email-matt@codeblueprint.co.uk>
 References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: joeyli <jlee@suse.com>, "Kweh, Hock Leong" <hock.leong.kweh@intel.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Bryan O'Donoghue <pure.logic@nexus-software.ie>, Borislav Petkov <bp@alien8.de>, Andy Lutomirski <luto@amacapital.net>, Sam Protsenko <semen.protsenko@linaro.org>, Peter Jones <pjones@redhat.com>, Matt Fleming <matt@codeblueprint.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: joeyli <jlee@suse.com>, Matt Fleming <matt@codeblueprint.co.uk>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Kweh Hock Leong <hock.leong.kweh@intel.com>, Borislav Petkov <bp@alien8.de>
 List-Id: linux-efi@vger.kernel.org
 
-From: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
+Move efi_status_to_err() to the architecture independent code as it's
+generally useful in all bits of EFI code where there is a need to
+convert an efi_status_t to a kernel error value.
 
-This patch introduces a kernel module to expose a capsule loader
-interface (misc char device file note) for users to upload capsule
-binaries.
-
-Example:
-cat firmware.bin > /dev/efi_capsule_loader
-
-Any upload error will be returned while doing "cat" through file
-operation write() function call.
-
-Tested with Intel Quark Galileo GEN1 platform.
-
-Signed-off-by: "Kweh, Hock Leong" <hock.leong.kweh@intel.com>
-Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Bryan O'Donoghue <pure.logic@nexus-software.ie>
+Cc: Kweh Hock Leong <hock.leong.kweh@intel.com>
 Cc: Borislav Petkov <bp@alien8.de>
-Cc: Andy Lutomirski <luto@amacapital.net>
-Cc: Sam Protsenko <semen.protsenko@linaro.org>
-Cc: Peter Jones <pjones@redhat.com>
 Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-[ Update comments and Kconfig text ]
 Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
 ---
- drivers/firmware/efi/Kconfig          |  10 +
- drivers/firmware/efi/Makefile         |   1 +
- drivers/firmware/efi/capsule-loader.c | 343 ++++++++++++++++++++++++++++++++++
- 3 files changed, 354 insertions(+)
- create mode 100644 drivers/firmware/efi/capsule-loader.c
+ drivers/firmware/efi/efi.c  | 33 +++++++++++++++++++++++++++++++++
+ drivers/firmware/efi/vars.c | 33 ---------------------------------
+ include/linux/efi.h         |  2 ++
+ 3 files changed, 35 insertions(+), 33 deletions(-)
 
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index e1670d533f97..de221bbde9c9 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -87,6 +87,16 @@ config EFI_RUNTIME_WRAPPERS
- config EFI_ARMSTUB
- 	bool
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3a69ed5ecfcb..b73222a52a9d 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -637,3 +637,36 @@ u64 __weak efi_mem_attributes(unsigned long phys_addr)
+ 	}
+ 	return 0;
+ }
++
++int efi_status_to_err(efi_status_t status)
++{
++	int err;
++
++	switch (status) {
++	case EFI_SUCCESS:
++		err = 0;
++		break;
++	case EFI_INVALID_PARAMETER:
++		err = -EINVAL;
++		break;
++	case EFI_OUT_OF_RESOURCES:
++		err = -ENOSPC;
++		break;
++	case EFI_DEVICE_ERROR:
++		err = -EIO;
++		break;
++	case EFI_WRITE_PROTECTED:
++		err = -EROFS;
++		break;
++	case EFI_SECURITY_VIOLATION:
++		err = -EACCES;
++		break;
++	case EFI_NOT_FOUND:
++		err = -ENOENT;
++		break;
++	default:
++		err = -EINVAL;
++	}
++
++	return err;
++}
+diff --git a/drivers/firmware/efi/vars.c b/drivers/firmware/efi/vars.c
+index 0ac594c0a234..4911d5697844 100644
+--- a/drivers/firmware/efi/vars.c
++++ b/drivers/firmware/efi/vars.c
+@@ -314,39 +314,6 @@ check_var_size_nonblocking(u32 attributes, unsigned long size)
+ 	return fops->query_variable_store(attributes, size, true);
+ }
  
-+config EFI_CAPSULE_LOADER
-+	tristate "EFI capsule loader"
-+	depends on EFI
-+	help
-+	  This option exposes a loader interface "/dev/efi_capsule_loader" for
-+	  users to load EFI capsules. This driver requires working runtime
-+	  capsule support in the firmware, which many OEMs do not provide.
-+
-+	  Most users should say N.
-+
- endmenu
+-static int efi_status_to_err(efi_status_t status)
+-{
+-	int err;
+-
+-	switch (status) {
+-	case EFI_SUCCESS:
+-		err = 0;
+-		break;
+-	case EFI_INVALID_PARAMETER:
+-		err = -EINVAL;
+-		break;
+-	case EFI_OUT_OF_RESOURCES:
+-		err = -ENOSPC;
+-		break;
+-	case EFI_DEVICE_ERROR:
+-		err = -EIO;
+-		break;
+-	case EFI_WRITE_PROTECTED:
+-		err = -EROFS;
+-		break;
+-	case EFI_SECURITY_VIOLATION:
+-		err = -EACCES;
+-		break;
+-	case EFI_NOT_FOUND:
+-		err = -ENOENT;
+-		break;
+-	default:
+-		err = -EINVAL;
+-	}
+-
+-	return err;
+-}
+-
+ static bool variable_is_present(efi_char16_t *variable_name, efi_guid_t *vendor,
+ 				struct list_head *head)
+ {
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index c55c452b991a..9c8aae0e3b51 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -1023,6 +1023,8 @@ static inline void
+ efi_reboot(enum reboot_mode reboot_mode, const char *__unused) {}
+ #endif
  
- config UEFI_CPER
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index e4468c7c16b5..a0f99f51626f 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -22,3 +22,4 @@ obj-$(CONFIG_EFI_FAKE_MEMMAP)		+= fake_mem.o
- arm-obj-$(CONFIG_EFI)			:= arm-init.o arm-runtime.o
- obj-$(CONFIG_ARM)			+= $(arm-obj-y)
- obj-$(CONFIG_ARM64)			+= $(arm-obj-y)
-+obj-$(CONFIG_EFI_CAPSULE_LOADER)	+= capsule-loader.o
-diff --git a/drivers/firmware/efi/capsule-loader.c b/drivers/firmware/efi/capsule-loader.c
-new file mode 100644
-index 000000000000..c99c24bc79b0
---- /dev/null
-+++ b/drivers/firmware/efi/capsule-loader.c
-@@ -0,0 +1,343 @@
-+/*
-+ * EFI capsule loader driver.
-+ *
-+ * Copyright 2015 Intel Corporation
-+ *
-+ * This file is part of the Linux kernel, and is made available under
-+ * the terms of the GNU General Public License version 2.
-+ */
++extern int efi_status_to_err(efi_status_t status);
 +
-+#define pr_fmt(fmt) "efi: " fmt
-+
-+#include <linux/kernel.h>
-+#include <linux/module.h>
-+#include <linux/miscdevice.h>
-+#include <linux/highmem.h>
-+#include <linux/slab.h>
-+#include <linux/mutex.h>
-+#include <linux/efi.h>
-+
-+#define NO_FURTHER_WRITE_ACTION -1
-+
-+struct capsule_info {
-+	bool		header_obtained;
-+	int		reset_type;
-+	long		index;
-+	size_t		count;
-+	size_t		total_size;
-+	struct page	**pages;
-+	size_t		page_bytes_remain;
-+};
-+
-+/**
-+ * efi_free_all_buff_pages - free all previous allocated buffer pages
-+ * @cap_info: pointer to current instance of capsule_info structure
-+ *
-+ *	In addition to freeing buffer pages, it flags NO_FURTHER_WRITE_ACTION
-+ *	to cease processing data in subsequent write(2) calls until close(2)
-+ *	is called.
-+ **/
-+static void efi_free_all_buff_pages(struct capsule_info *cap_info)
-+{
-+	while (cap_info->index > 0)
-+		__free_page(cap_info->pages[--cap_info->index]);
-+
-+	cap_info->index = NO_FURTHER_WRITE_ACTION;
-+}
-+
-+/**
-+ * efi_capsule_setup_info - obtain the efi capsule header in the binary and
-+ *			    setup capsule_info structure
-+ * @cap_info: pointer to current instance of capsule_info structure
-+ * @kbuff: a mapped first page buffer pointer
-+ * @hdr_bytes: the total received number of bytes for efi header
-+ **/
-+static ssize_t efi_capsule_setup_info(struct capsule_info *cap_info,
-+				      void *kbuff, size_t hdr_bytes)
-+{
-+	efi_capsule_header_t *cap_hdr;
-+	size_t pages_needed;
-+	int ret;
-+	void *temp_page;
-+
-+	/* Only process data block that is larger than efi header size */
-+	if (hdr_bytes < sizeof(efi_capsule_header_t))
-+		return 0;
-+
-+	/* Reset back to the correct offset of header */
-+	cap_hdr = kbuff - cap_info->count;
-+	pages_needed = ALIGN(cap_hdr->imagesize, PAGE_SIZE) >> PAGE_SHIFT;
-+
-+	if (pages_needed == 0) {
-+		pr_err("%s: pages count invalid\n", __func__);
-+		return -EINVAL;
-+	}
-+
-+	/* Check if the capsule binary supported */
-+	ret = efi_capsule_supported(cap_hdr->guid, cap_hdr->flags,
-+				    cap_hdr->imagesize,
-+				    &cap_info->reset_type);
-+	if (ret) {
-+		pr_err("%s: efi_capsule_supported() failed\n",
-+		       __func__);
-+		return ret;
-+	}
-+
-+	cap_info->total_size = cap_hdr->imagesize;
-+	temp_page = krealloc(cap_info->pages,
-+			     pages_needed * sizeof(void *),
-+			     GFP_KERNEL | __GFP_ZERO);
-+	if (!temp_page) {
-+		pr_debug("%s: krealloc() failed\n", __func__);
-+		return -ENOMEM;
-+	}
-+
-+	cap_info->pages = temp_page;
-+	cap_info->header_obtained = true;
-+
-+	return 0;
-+}
-+
-+/**
-+ * efi_capsule_submit_update - invoke the efi_capsule_update API once binary
-+ *			       upload done
-+ * @cap_info: pointer to current instance of capsule_info structure
-+ **/
-+static ssize_t efi_capsule_submit_update(struct capsule_info *cap_info)
-+{
-+	int ret;
-+	void *cap_hdr_temp;
-+
-+	cap_hdr_temp = kmap(cap_info->pages[0]);
-+	if (!cap_hdr_temp) {
-+		pr_debug("%s: kmap() failed\n", __func__);
-+		return -EFAULT;
-+	}
-+
-+	ret = efi_capsule_update(cap_hdr_temp, cap_info->pages);
-+	kunmap(cap_info->pages[0]);
-+	if (ret) {
-+		pr_err("%s: efi_capsule_update() failed\n", __func__);
-+		return ret;
-+	}
-+
-+	/* Indicate capsule binary uploading is done */
-+	cap_info->index = NO_FURTHER_WRITE_ACTION;
-+	pr_info("%s: Successfully upload capsule file with reboot type '%s'\n",
-+		__func__, !cap_info->reset_type ? "RESET_COLD" :
-+		cap_info->reset_type == 1 ? "RESET_WARM" :
-+		"RESET_SHUTDOWN");
-+	return 0;
-+}
-+
-+/**
-+ * efi_capsule_write - store the capsule binary and pass it to
-+ *		       efi_capsule_update() API
-+ * @file: file pointer
-+ * @buff: buffer pointer
-+ * @count: number of bytes in @buff
-+ * @offp: not used
-+ *
-+ *	Expectation:
-+ *	- A user space tool should start at the beginning of capsule binary and
-+ *	  pass data in sequentially.
-+ *	- Users should close and re-open this file note in order to upload more
-+ *	  capsules.
-+ *	- After an error returned, user should close the file and restart the
-+ *	  operation for the next try otherwise -EIO will be returned until the
-+ *	  file is closed.
-+ *	- An EFI capsule header must be located at the beginning of capsule
-+ *	  binary file and passed in as first block data of write operation.
-+ **/
-+static ssize_t efi_capsule_write(struct file *file, const char __user *buff,
-+				 size_t count, loff_t *offp)
-+{
-+	int ret = 0;
-+	struct capsule_info *cap_info = file->private_data;
-+	struct page *page;
-+	void *kbuff = NULL;
-+	size_t write_byte;
-+
-+	if (count == 0)
-+		return 0;
-+
-+	/* Return error while NO_FURTHER_WRITE_ACTION is flagged */
-+	if (cap_info->index < 0)
-+		return -EIO;
-+
-+	/* Only alloc a new page when previous page is full */
-+	if (!cap_info->page_bytes_remain) {
-+		page = alloc_page(GFP_KERNEL);
-+		if (!page) {
-+			pr_debug("%s: alloc_page() failed\n", __func__);
-+			ret = -ENOMEM;
-+			goto failed;
-+		}
-+
-+		cap_info->pages[cap_info->index++] = page;
-+		cap_info->page_bytes_remain = PAGE_SIZE;
-+	}
-+
-+	page = cap_info->pages[cap_info->index - 1];
-+
-+	kbuff = kmap(page);
-+	if (!kbuff) {
-+		pr_debug("%s: kmap() failed\n", __func__);
-+		ret = -EFAULT;
-+		goto failed;
-+	}
-+	kbuff += PAGE_SIZE - cap_info->page_bytes_remain;
-+
-+	/* Copy capsule binary data from user space to kernel space buffer */
-+	write_byte = min_t(size_t, count, cap_info->page_bytes_remain);
-+	if (copy_from_user(kbuff, buff, write_byte)) {
-+		pr_debug("%s: copy_from_user() failed\n", __func__);
-+		ret = -EFAULT;
-+		goto fail_unmap;
-+	}
-+	cap_info->page_bytes_remain -= write_byte;
-+
-+	/* Setup capsule binary info structure */
-+	if (!cap_info->header_obtained) {
-+		ret = efi_capsule_setup_info(cap_info, kbuff,
-+					     cap_info->count + write_byte);
-+		if (ret)
-+			goto fail_unmap;
-+	}
-+
-+	cap_info->count += write_byte;
-+	kunmap(page);
-+
-+	/* Submit the full binary to efi_capsule_update() API */
-+	if (cap_info->header_obtained &&
-+	    cap_info->count >= cap_info->total_size) {
-+		if (cap_info->count > cap_info->total_size) {
-+			pr_err("%s: upload size exceeded header defined size\n",
-+			       __func__);
-+			ret = -EINVAL;
-+			goto failed;
-+		}
-+
-+		ret = efi_capsule_submit_update(cap_info);
-+		if (ret)
-+			goto failed;
-+	}
-+
-+	return write_byte;
-+
-+fail_unmap:
-+	kunmap(page);
-+failed:
-+	efi_free_all_buff_pages(cap_info);
-+	return ret;
-+}
-+
-+/**
-+ * efi_capsule_flush - called by file close or file flush
-+ * @file: file pointer
-+ * @id: not used
-+ *
-+ *	If a capsule is being partially uploaded then calling this function
-+ *	will be treated as upload termination and will free those completed
-+ *	buffer pages and -ECANCELED will be returned.
-+ **/
-+static int efi_capsule_flush(struct file *file, fl_owner_t id)
-+{
-+	int ret = 0;
-+	struct capsule_info *cap_info = file->private_data;
-+
-+	if (cap_info->index > 0) {
-+		pr_err("%s: capsule upload not complete\n", __func__);
-+		efi_free_all_buff_pages(cap_info);
-+		ret = -ECANCELED;
-+	}
-+
-+	return ret;
-+}
-+
-+/**
-+ * efi_capsule_release - called by file close
-+ * @inode: not used
-+ * @file: file pointer
-+ *
-+ *	We will not free successfully submitted pages since efi update
-+ *	requires data to be maintained across system reboot.
-+ **/
-+static int efi_capsule_release(struct inode *inode, struct file *file)
-+{
-+	struct capsule_info *cap_info = file->private_data;
-+
-+	kfree(cap_info->pages);
-+	kfree(file->private_data);
-+	file->private_data = NULL;
-+	return 0;
-+}
-+
-+/**
-+ * efi_capsule_open - called by file open
-+ * @inode: not used
-+ * @file: file pointer
-+ *
-+ *	Will allocate each capsule_info memory for each file open call.
-+ *	This provided the capability to support multiple file open feature
-+ *	where user is not needed to wait for others to finish in order to
-+ *	upload their capsule binary.
-+ **/
-+static int efi_capsule_open(struct inode *inode, struct file *file)
-+{
-+	struct capsule_info *cap_info;
-+
-+	cap_info = kzalloc(sizeof(*cap_info), GFP_KERNEL);
-+	if (!cap_info)
-+		return -ENOMEM;
-+
-+	cap_info->pages = kzalloc(sizeof(void *), GFP_KERNEL);
-+	if (!cap_info->pages) {
-+		kfree(cap_info);
-+		return -ENOMEM;
-+	}
-+
-+	file->private_data = cap_info;
-+
-+	return 0;
-+}
-+
-+static const struct file_operations efi_capsule_fops = {
-+	.owner = THIS_MODULE,
-+	.open = efi_capsule_open,
-+	.write = efi_capsule_write,
-+	.flush = efi_capsule_flush,
-+	.release = efi_capsule_release,
-+	.llseek = no_llseek,
-+};
-+
-+static struct miscdevice efi_capsule_misc = {
-+	.minor = MISC_DYNAMIC_MINOR,
-+	.name = "efi_capsule_loader",
-+	.fops = &efi_capsule_fops,
-+};
-+
-+static int __init efi_capsule_loader_init(void)
-+{
-+	int ret;
-+
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-+		return -ENODEV;
-+
-+	ret = misc_register(&efi_capsule_misc);
-+	if (ret)
-+		pr_err("%s: Failed to register misc char file note\n",
-+		       __func__);
-+
-+	return ret;
-+}
-+module_init(efi_capsule_loader_init);
-+
-+static void __exit efi_capsule_loader_exit(void)
-+{
-+	misc_deregister(&efi_capsule_misc);
-+}
-+module_exit(efi_capsule_loader_exit);
-+
-+MODULE_DESCRIPTION("EFI capsule firmware binary loader");
-+MODULE_LICENSE("GPL v2");
+ /*
+  * Variable Attributes
+  */
 -- 
 2.6.2
