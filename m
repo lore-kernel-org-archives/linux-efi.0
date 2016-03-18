@@ -1,332 +1,120 @@
-From: Daniel Baluta <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH v2] efi: Introduce EFI bootloader control driver
-Date: Fri, 18 Mar 2016 12:11:50 +0200
-Message-ID: <1458295910-26557-1-git-send-email-daniel.baluta@intel.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 4/8] efi/x86: efifb: move DMI based quirks handling out
+ of generic code
+Date: Fri, 18 Mar 2016 10:50:07 +0000
+Message-ID: <20160318105007.GM2619@codeblueprint.co.uk>
+References: <1457588408-19309-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1457588408-19309-5-git-send-email-ard.biesheuvel@linaro.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1457588408-19309-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, mohamed.abbas-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, constantin.musca-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-From: Matt Gumbel <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+(Cc'ing efifb maintainer and sysfb_efi.c author)
 
-This driver intercepts system reboot requests and populates the
-LoaderEntryOneShot EFI variable with the user-supplied reboot
-argument. EFI bootloaders such as Gummiboot will consume this
-variable and use it to control which OS is booted next.
-
-We use this with Android where reboot() tells the kernel that
-we want to boot into recovery or other non-default OS environment.
-
-It is the bootloader's job to guard against this variable being
-uninitialzed or containing invalid data, and just boot normally
-if that is the case.
-
-Signed-off-by: Matt Gumbel <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Mohamed Abbas <mohamed.abbas-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Constantin Musca <constantin.musca-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Signed-off-by: Daniel Baluta <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
-Changes since v1:
-	* updated Makefile after changing source name from efibc.c -> efi-bc.c
-	to comply with naming rules in drivers/firmware/efi/
-
- drivers/firmware/efi/Kconfig  |  11 ++
- drivers/firmware/efi/Makefile |   1 +
- drivers/firmware/efi/efi-bc.c | 251 ++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 263 insertions(+)
- create mode 100644 drivers/firmware/efi/efi-bc.c
-
-diff --git a/drivers/firmware/efi/Kconfig b/drivers/firmware/efi/Kconfig
-index e1670d5..0f21af4 100644
---- a/drivers/firmware/efi/Kconfig
-+++ b/drivers/firmware/efi/Kconfig
-@@ -18,6 +18,17 @@ config EFI_VARS
- 	  Subsequent efibootmgr releases may be found at:
- 	  <http://github.com/vathpela/efibootmgr>
+On Thu, 10 Mar, at 12:40:04PM, Ard Biesheuvel wrote:
+> The efifb quirks handling based on DMI identification of the platform is
+> specific to x86, so move it to x86 arch code.
+> 
+> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> ---
+>  arch/x86/include/asm/efi.h  |  2 ++
+>  arch/x86/kernel/sysfb_efi.c | 15 +++++++++++++++
+>  drivers/video/fbdev/efifb.c | 15 ++++-----------
+>  3 files changed, 21 insertions(+), 11 deletions(-)
  
-+config EFI_BOOTLOADER_CONTROL
-+	tristate "EFI Bootloader Control module"
-+	depends on EFI_VARS
-+	default n
-+	help
-+	  This driver installs a reboot hook, such that if reboot() is
-+	  invoked with a string argument NNN, "bootonce-NNN" is copied to
-+	  the EFI variable, to be read by the bootloader. If the string
-+	  matches one of the boot labels defined in its configuration,
-+	  the bootloader will boot once to that label.
-+
- config EFI_ESRT
- 	bool
- 	depends on EFI && !IA64
-diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 62e654f..50cfac2 100644
---- a/drivers/firmware/efi/Makefile
-+++ b/drivers/firmware/efi/Makefile
-@@ -10,6 +10,7 @@
- KASAN_SANITIZE_runtime-wrappers.o	:= n
- 
- obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o
-+obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efi-bc.o
- obj-$(CONFIG_EFI_VARS)			+= efivars.o
- obj-$(CONFIG_EFI_ESRT)			+= esrt.o
- obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
-diff --git a/drivers/firmware/efi/efi-bc.c b/drivers/firmware/efi/efi-bc.c
-new file mode 100644
-index 0000000..7550fee
---- /dev/null
-+++ b/drivers/firmware/efi/efi-bc.c
-@@ -0,0 +1,251 @@
-+/*
-+ * efi-bc.c - EFI bootloader control
-+ *
-+ * Copyright (c) 2013, Intel Corporation.
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ */
-+#include <linux/efi.h>
-+#include <linux/module.h>
-+#include <linux/moduleparam.h>
-+#include <linux/reboot.h>
-+#include <linux/kexec.h>
-+#include <linux/slab.h>
-+
-+#define LOADER_ENTRY_ONE_SHOT	"LoaderEntryOneShot"
-+#define LOADER_ENTRY_REBOOT	"LoaderEntryRebootReason"
-+#define LOADER_GUID EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf, 0xb6, 0xc7, \
-+				0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f)
-+
-+#define REBOOT_REASON_CRASH	"kernel_panic"
-+#define REBOOT_REASON_NORMAL	"reboot"
-+#define REBOOT_REASON_SHUTDOWN	"shutdown"
-+#define REBOOT_REASON_HALT	"halt"
-+#define REBOOT_REASON_WATCHDOG	"watchdog"
-+
-+#define WATCHDOG_KERNEL_H	"Watchdog"
-+#define WATCHDOG_KERNEL_S	"softlockup"
-+#define WATCHDOG_KERNEL_D	"Software Watchdog"
-+
-+/*
-+ * Convert char string to efi_char16_t string. NULL byte at end is always
-+ * preserved.
-+ */
-+static unsigned long
-+efichar_from_char(efi_char16_t *dest, const char *src, size_t dest_len)
-+{
-+	int i;
-+
-+	for (i = 0; src[i] && i < (dest_len / sizeof(*dest)) - 1; i++)
-+		dest[i] = src[i];
-+	dest[i] = 0; /* Gummiboot does need null-terminated strings */
-+	return i;
-+}
-+
-+/*
-+ *  Returns required size of utf16 buffer for given char string. Space for
-+ *  trailing nul is included. str must not be NULL.
-+ */
-+static size_t efi_char16_bufsz(char *str)
-+{
-+	return (1 + strlen(str)) * sizeof(efi_char16_t);
-+}
-+
-+/*
-+ * Set EFI variable to specify next boot target for EFI bootloader. Meant to be
-+ * called as a reboot notifier. DO NOT call this function without guaranteeing
-+ * efi_enabled == true; it will crash.
-+ */
-+static int
-+efibc_reboot_notifier_call(struct notifier_block *notifier, unsigned long what,
-+			   void *data)
-+{
-+	int ret = NOTIFY_DONE;
-+	char *cmd = data;
-+	efi_status_t status;
-+	efi_char16_t *name_efichar = NULL, *cmd_efichar = NULL;
-+	size_t name_efichar_blen, cmd_efichar_blen;
-+
-+	if (what != SYS_RESTART || !cmd)
-+		goto out;
-+
-+	name_efichar_blen = efi_char16_bufsz(LOADER_ENTRY_ONE_SHOT);
-+	cmd_efichar_blen = efi_char16_bufsz(cmd);
-+
-+	name_efichar = kzalloc(name_efichar_blen, GFP_KERNEL);
-+	if (!name_efichar)
-+		goto out;
-+
-+	cmd_efichar = kzalloc(cmd_efichar_blen, GFP_KERNEL);
-+	if (!cmd_efichar)
-+		goto out;
-+
-+	if (efichar_from_char(
-+			name_efichar, LOADER_ENTRY_ONE_SHOT, name_efichar_blen)
-+			!= strlen(LOADER_ENTRY_ONE_SHOT)) {
-+		pr_err(
-+			"efibc: %s: Failed to convert char to efi_char16_t. length=%lu",
-+			__func__, name_efichar_blen);
-+		goto out;
-+	}
-+
-+	if (efichar_from_char(cmd_efichar, cmd, cmd_efichar_blen)
-+			!= strlen(cmd)) {
-+		pr_err(
-+			"efibc: %s: Failed to convert char to efi_char16_t. length=%lu",
-+			__func__, cmd_efichar_blen);
-+		goto out;
-+	}
-+
-+	status = efi.set_variable(name_efichar, &LOADER_GUID,
-+				  EFI_VARIABLE_NON_VOLATILE |
-+				  EFI_VARIABLE_BOOTSERVICE_ACCESS |
-+				  EFI_VARIABLE_RUNTIME_ACCESS,
-+				  cmd_efichar_blen, cmd_efichar);
-+	if (status != EFI_SUCCESS) {
-+		pr_err("efibc: set_variable() failed. status=%lx\n", status);
-+		goto out;
-+	}
-+
-+	ret = NOTIFY_OK;
-+out:
-+	kfree(cmd_efichar);
-+	kfree(name_efichar);
-+	return ret;
-+}
-+
-+static int efibc_reboot_reason(unsigned long what, char *cmd)
-+{
-+	int ret = NOTIFY_DONE;
-+	efi_status_t status;
-+	efi_char16_t name_efichar[40];
-+	efi_char16_t cmd_efichar[20];
-+	size_t name_efichar_blen, cmd_efichar_blen;
-+
-+	name_efichar_blen = efi_char16_bufsz(LOADER_ENTRY_REBOOT);
-+	cmd_efichar_blen = efi_char16_bufsz(cmd);
-+
-+	if (efichar_from_char(
-+			name_efichar, LOADER_ENTRY_REBOOT,
-+			name_efichar_blen) != strlen(LOADER_ENTRY_REBOOT)) {
-+		pr_err("efibc: %s: Failed to convert char to u16.", __func__);
-+		goto out;
-+	}
-+
-+	if (efichar_from_char(cmd_efichar, cmd, cmd_efichar_blen)
-+			!= strlen(cmd)) {
-+		pr_err("efibc: %s: Failed to convert char to u16", __func__);
-+		goto out;
-+	}
-+
-+	status = efi.set_variable(name_efichar, &LOADER_GUID,
-+				  EFI_VARIABLE_NON_VOLATILE |
-+				  EFI_VARIABLE_BOOTSERVICE_ACCESS |
-+				  EFI_VARIABLE_RUNTIME_ACCESS,
-+				  cmd_efichar_blen,
-+				  cmd_efichar);
-+	if (status != EFI_SUCCESS) {
-+		pr_err("efibc: set_variable() failed. status=%lx\n", status);
-+		goto out;
-+	}
-+
-+	ret = NOTIFY_OK;
-+out:
-+	return ret;
-+}
-+
-+static int
-+efibc_reboot_reason_notifier_call(struct notifier_block *notifier,
-+				  unsigned long what, void *data)
-+{
-+	int ret;
-+
-+	switch (what) {
-+	case SYS_RESTART:
-+		ret = efibc_reboot_reason(what, REBOOT_REASON_NORMAL);
-+		break;
-+	case SYS_HALT:
-+		ret = efibc_reboot_reason(what, REBOOT_REASON_HALT);
-+		break;
-+	default:
-+		ret = efibc_reboot_reason(what, REBOOT_REASON_SHUTDOWN);
-+		break;
-+	}
-+
-+	return ret;
-+}
-+
-+static int
-+efibc_panic_notifier_call(struct notifier_block *notifier, unsigned long what,
-+			  void *data)
-+{
-+	int ret;
-+	char *str = data;
-+
-+	if (str &&
-+	    (!strncmp(str, WATCHDOG_KERNEL_H, strlen(WATCHDOG_KERNEL_H)) ||
-+	    !strncmp(str, WATCHDOG_KERNEL_S, strlen(WATCHDOG_KERNEL_S)) ||
-+	    !strncmp(str, WATCHDOG_KERNEL_D, strlen(WATCHDOG_KERNEL_D))))
-+		ret = efibc_reboot_reason(what, REBOOT_REASON_WATCHDOG);
-+	else
-+		ret = efibc_reboot_reason(what, REBOOT_REASON_CRASH);
-+
-+	return ret;
-+}
-+
-+static struct notifier_block efibc_reboot_notifier = {
-+	.notifier_call = efibc_reboot_notifier_call,
-+};
-+
-+static struct notifier_block efibc_reboot_reason_notifier = {
-+	.notifier_call = efibc_reboot_reason_notifier_call,
-+};
-+
-+static struct notifier_block paniced = {
-+	.notifier_call  = efibc_panic_notifier_call,
-+};
-+
-+static int __init efibc_init(void)
-+{
-+	int ret;
-+
-+	if (!efi_enabled(EFI_RUNTIME_SERVICES))
-+		return 0;
-+
-+	ret = register_reboot_notifier(&efibc_reboot_notifier);
-+	if (ret) {
-+		pr_err("efibc: unable to register reboot notifier\n");
-+		return ret;
-+	}
-+
-+	ret = register_reboot_notifier(&efibc_reboot_reason_notifier);
-+	if (ret) {
-+		pr_err("efibc: unable to register reboot notifier\n");
-+		unregister_reboot_notifier(&efibc_reboot_notifier);
-+		return ret;
-+	}
-+
-+	 atomic_notifier_chain_register(&panic_notifier_list, &paniced);
-+
-+	return 0;
-+}
-+module_init(efibc_init);
-+
-+static void __exit efibc_exit(void)
-+{
-+	unregister_reboot_notifier(&efibc_reboot_notifier);
-+	unregister_reboot_notifier(&efibc_reboot_reason_notifier);
-+	atomic_notifier_chain_unregister(&panic_notifier_list, &paniced);
-+}
-+module_exit(efibc_exit);
-+
-+MODULE_AUTHOR("Matt Gumbel <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org");
-+MODULE_DESCRIPTION("EFI bootloader communication module");
-+MODULE_LICENSE("GPL v2");
--- 
-2.5.0
+I've left the patch content intact below. This looks like a worthwhile
+change to me. David, Peter, any comments?
+
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 7d5187b66108..790adbc3a64a 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -154,6 +154,8 @@ static inline bool efi_runtime_supported(void)
+>  extern struct console early_efi_console;
+>  extern void parse_efi_setup(u64 phys_addr, u32 data_len);
+>  
+> +extern void efifb_setup_from_dmi(struct screen_info *si, const char *opt);
+> +
+>  #ifdef CONFIG_EFI_MIXED
+>  extern void efi_thunk_runtime_setup(void);
+>  extern efi_status_t efi_thunk_set_virtual_address_map(
+> diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
+> index b285d4e8c68e..e21a8a7ddcff 100644
+> --- a/arch/x86/kernel/sysfb_efi.c
+> +++ b/arch/x86/kernel/sysfb_efi.c
+> @@ -68,6 +68,21 @@ struct efifb_dmi_info efifb_dmi_list[] = {
+>  	[M_UNKNOWN] = { NULL, 0, 0, 0, 0, OVERRIDE_NONE }
+>  };
+>  
+> +void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+> +{
+> +	int i;
+> +
+> +	for (i = 0; i < M_UNKNOWN; i++) {
+> +		if (efifb_dmi_list[i].base != 0 &&
+> +		    !strcmp(opt, efifb_dmi_list[i].optname)) {
+> +			si->lfb_base = efifb_dmi_list[i].base;
+> +			si->lfb_linelength = efifb_dmi_list[i].stride;
+> +			si->lfb_width = efifb_dmi_list[i].width;
+> +			si->lfb_height = efifb_dmi_list[i].height;
+> +		}
+> +	}
+> +}
+> +
+>  #define choose_value(dmivalue, fwvalue, field, flags) ({	\
+>  		typeof(fwvalue) _ret_ = fwvalue;		\
+>  		if ((flags) & (field))				\
+> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+> index 95d293b7445a..dd594369b8a6 100644
+> --- a/drivers/video/fbdev/efifb.c
+> +++ b/drivers/video/fbdev/efifb.c
+> @@ -8,6 +8,7 @@
+>  
+>  #include <linux/module.h>
+>  #include <linux/kernel.h>
+> +#include <linux/efi.h>
+>  #include <linux/errno.h>
+>  #include <linux/fb.h>
+>  #include <linux/platform_device.h>
+> @@ -15,7 +16,7 @@
+>  #include <linux/dmi.h>
+>  #include <linux/pci.h>
+>  #include <video/vga.h>
+> -#include <asm/sysfb.h>
+> +#include <asm/efi.h>
+>  
+>  static bool request_mem_succeeded = false;
+>  
+> @@ -85,21 +86,13 @@ static struct fb_ops efifb_ops = {
+>  static int efifb_setup(char *options)
+>  {
+>  	char *this_opt;
+> -	int i;
+>  
+>  	if (options && *options) {
+>  		while ((this_opt = strsep(&options, ",")) != NULL) {
+>  			if (!*this_opt) continue;
+>  
+> -			for (i = 0; i < M_UNKNOWN; i++) {
+> -				if (efifb_dmi_list[i].base != 0 &&
+> -				    !strcmp(this_opt, efifb_dmi_list[i].optname)) {
+> -					screen_info.lfb_base = efifb_dmi_list[i].base;
+> -					screen_info.lfb_linelength = efifb_dmi_list[i].stride;
+> -					screen_info.lfb_width = efifb_dmi_list[i].width;
+> -					screen_info.lfb_height = efifb_dmi_list[i].height;
+> -				}
+> -			}
+> +			efifb_setup_from_dmi(&screen_info, this_opt);
+> +
+>  			if (!strncmp(this_opt, "base:", 5))
+>  				screen_info.lfb_base = simple_strtoul(this_opt+5, NULL, 0);
+>  			else if (!strncmp(this_opt, "stride:", 7))
+> -- 
+> 1.9.1
+> 
