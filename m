@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v2 5/9] efi/arm64: libstub: make screen_info accessible to the UEFI stub
-Date: Fri, 18 Mar 2016 17:47:37 +0100
-Message-ID: <1458319661-19762-6-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 7/9] efi/arm*: libstub: wire up GOP protocol to struct screen_info
+Date: Fri, 18 Mar 2016 17:47:39 +0100
+Message-ID: <1458319661-19762-8-git-send-email-ard.biesheuvel@linaro.org>
 References: <1458319661-19762-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1458319661-19762-1-git-send-email-ard.biesheuvel@linaro.org>
@@ -10,57 +10,69 @@ To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@li
 Cc: leif.lindholm@linaro.org, mark.rutland@arm.com, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Unlike on 32-bit ARM, where we need to pass the stub's version of struct
-screen_info to the kernel proper via a configuration table, on 64-bit ARM
-it simply involves making the core kernel's copy of struct screen_info
-visible to the stub by exposing an __efistub_ alias for it.
+This adds the code to the ARM and arm64 versions of the UEFI stub to
+populate struct screen_info based on the information received from the
+firmware via the GOP protocol.
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- arch/arm64/include/asm/efi.h | 3 +++
- arch/arm64/kernel/efi.c      | 3 +++
- arch/arm64/kernel/image.h    | 1 +
- 3 files changed, 7 insertions(+)
+ drivers/firmware/efi/libstub/arm-stub.c | 23 ++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index bb26f2205973..ed6c85d3a583 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -54,6 +54,9 @@ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
- #define __efi_call_early(f, ...)	f(__VA_ARGS__)
- #define efi_is_64bit()			(true)
+diff --git a/drivers/firmware/efi/libstub/arm-stub.c b/drivers/firmware/efi/libstub/arm-stub.c
+index 4deb3e7faa0e..94bd51cfb71e 100644
+--- a/drivers/firmware/efi/libstub/arm-stub.c
++++ b/drivers/firmware/efi/libstub/arm-stub.c
+@@ -147,6 +147,25 @@ void efi_char16_printk(efi_system_table_t *sys_table_arg,
+ 	out->output_string(out, str);
+ }
  
-+#define alloc_screen_info(x...)		&screen_info
-+#define free_screen_info(x...)
++static struct screen_info *setup_graphics(efi_system_table_t *sys_table_arg)
++{
++	efi_guid_t gop_proto = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
++	efi_status_t status;
++	unsigned long size;
++	void **gop_handle = NULL;
++	struct screen_info *si = NULL;
 +
- #define EFI_ALLOC_ALIGN		SZ_64K
++	size = 0;
++	status = efi_call_early(locate_handle, EFI_LOCATE_BY_PROTOCOL,
++				&gop_proto, NULL, &size, gop_handle);
++	if (status == EFI_BUFFER_TOO_SMALL) {
++		si = alloc_screen_info(sys_table_arg);
++		if (!si)
++			return NULL;
++		efi_setup_gop(sys_table_arg, si, &gop_proto, size);
++	}
++	return si;
++}
  
  /*
-diff --git a/arch/arm64/kernel/efi.c b/arch/arm64/kernel/efi.c
-index b6abc852f2a1..6f4b3ea359db 100644
---- a/arch/arm64/kernel/efi.c
-+++ b/arch/arm64/kernel/efi.c
-@@ -17,6 +17,9 @@
+  * This function handles the architcture specific differences between arm and
+@@ -185,6 +204,7 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 	efi_guid_t loaded_image_proto = LOADED_IMAGE_PROTOCOL_GUID;
+ 	unsigned long reserve_addr = 0;
+ 	unsigned long reserve_size = 0;
++	struct screen_info *si;
  
- #include <asm/efi.h>
+ 	/* Check if we were booted by the EFI firmware */
+ 	if (sys_table->hdr.signature != EFI_SYSTEM_TABLE_SIGNATURE)
+@@ -233,6 +253,8 @@ unsigned long efi_entry(void *handle, efi_system_table_t *sys_table,
+ 			__nokaslr = true;
+ 	}
  
-+/* we will fill this structure from the stub, so don't put it in .bss */
-+struct screen_info screen_info __section(.data);
++	si = setup_graphics(sys_table);
 +
- int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- {
- 	pteval_t prot_val;
-diff --git a/arch/arm64/kernel/image.h b/arch/arm64/kernel/image.h
-index 5e360ce88f10..1428849aece8 100644
---- a/arch/arm64/kernel/image.h
-+++ b/arch/arm64/kernel/image.h
-@@ -112,6 +112,7 @@ __efistub___memset		= KALLSYMS_HIDE(__pi_memset);
- __efistub__text			= KALLSYMS_HIDE(_text);
- __efistub__end			= KALLSYMS_HIDE(_end);
- __efistub__edata		= KALLSYMS_HIDE(_edata);
-+__efistub_screen_info		= KALLSYMS_HIDE(screen_info);
- 
- #endif
- 
+ 	status = handle_kernel_image(sys_table, image_addr, &image_size,
+ 				     &reserve_addr,
+ 				     &reserve_size,
+@@ -305,6 +327,7 @@ fail_free_image:
+ 	efi_free(sys_table, image_size, *image_addr);
+ 	efi_free(sys_table, reserve_size, reserve_addr);
+ fail_free_cmdline:
++	free_screen_info(sys_table, si);
+ 	efi_free(sys_table, cmdline_size, (unsigned long)cmdline_ptr);
+ fail:
+ 	return EFI_ERROR;
 -- 
 2.5.0
