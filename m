@@ -1,7 +1,7 @@
 From: Daniel Baluta <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH] efi: Introduce EFI bootloader control driver
-Date: Fri, 18 Mar 2016 11:59:47 +0200
-Message-ID: <1458295187-1750-1-git-send-email-daniel.baluta@intel.com>
+Subject: [PATCH v2] efi: Introduce EFI bootloader control driver
+Date: Fri, 18 Mar 2016 12:11:50 +0200
+Message-ID: <1458295910-26557-1-git-send-email-daniel.baluta@intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
@@ -27,6 +27,10 @@ Signed-off-by: Mohamed Abbas <mohamed.abbas-ral2JQCrhuEAvxtiuMwx3w@public.gmane.
 Signed-off-by: Constantin Musca <constantin.musca-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Signed-off-by: Daniel Baluta <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 ---
+Changes since v1:
+	* updated Makefile after changing source name from efibc.c -> efi-bc.c
+	to comply with naming rules in drivers/firmware/efi/
+
  drivers/firmware/efi/Kconfig  |  11 ++
  drivers/firmware/efi/Makefile |   1 +
  drivers/firmware/efi/efi-bc.c | 251 ++++++++++++++++++++++++++++++++++++++++++
@@ -56,14 +60,14 @@ index e1670d5..0f21af4 100644
  	bool
  	depends on EFI && !IA64
 diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-index 62e654f..db096a4 100644
+index 62e654f..50cfac2 100644
 --- a/drivers/firmware/efi/Makefile
 +++ b/drivers/firmware/efi/Makefile
 @@ -10,6 +10,7 @@
  KASAN_SANITIZE_runtime-wrappers.o	:= n
  
  obj-$(CONFIG_EFI)			+= efi.o vars.o reboot.o
-+obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
++obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efi-bc.o
  obj-$(CONFIG_EFI_VARS)			+= efivars.o
  obj-$(CONFIG_EFI_ESRT)			+= esrt.o
  obj-$(CONFIG_EFI_VARS_PSTORE)		+= efi-pstore.o
