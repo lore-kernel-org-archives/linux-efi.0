@@ -1,50 +1,65 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 4/9] efi: efifb: use builtin_platform_driver and drop unused includes
-Date: Fri, 18 Mar 2016 17:47:36 +0100
-Message-ID: <1458319661-19762-5-git-send-email-ard.biesheuvel@linaro.org>
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 8/9] efi/arm*: wire up struct screen_info to efi-framebuffer platform device
+Date: Fri, 18 Mar 2016 17:47:40 +0100
+Message-ID: <1458319661-19762-9-git-send-email-ard.biesheuvel@linaro.org>
 References: <1458319661-19762-1-git-send-email-ard.biesheuvel@linaro.org>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458319661-19762-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org
-Cc: leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1458319661-19762-1-git-send-email-ard.biesheuvel@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-efi@vger.kernel.org, linux-arm-kernel@lists.infradead.org, matt@codeblueprint.co.uk, catalin.marinas@arm.com, will.deacon@arm.com, linux@arm.linux.org.uk, pjones@redhat.com, dh.herrmann@gmail.com
+Cc: leif.lindholm@linaro.org, mark.rutland@arm.com, x86@kernel.org, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 List-Id: linux-efi@vger.kernel.org
 
-Since efifb can only be built directly into the kernel, drop the module
-specific includes and definitions. Drop some other includes we don't need
-as well.
+This adds code to the ARM and arm64 EFI init routines to expose a platform
+device of type 'efi-framebuffer' if struct screen_info has been populated
+appropriately from the GOP protocol by the stub. Since the framebuffer may
+potentially be located in system RAM, make sure that the region is reserved
+and marked MEMBLOCK_NOMAP.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 ---
- drivers/video/fbdev/efifb.c | 6 +-----
- 1 file changed, 1 insertion(+), 5 deletions(-)
+ drivers/firmware/efi/arm-init.c | 18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
 
-diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
-index dd594369b8a6..f4c045c0051c 100644
---- a/drivers/video/fbdev/efifb.c
-+++ b/drivers/video/fbdev/efifb.c
-@@ -6,15 +6,12 @@
-  *
-  */
- 
--#include <linux/module.h>
- #include <linux/kernel.h>
- #include <linux/efi.h>
- #include <linux/errno.h>
- #include <linux/fb.h>
- #include <linux/platform_device.h>
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index acd44de30504..f5f13b871d42 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -19,6 +19,7 @@
+ #include <linux/mm_types.h>
+ #include <linux/of.h>
+ #include <linux/of_fdt.h>
++#include <linux/platform_device.h>
  #include <linux/screen_info.h>
--#include <linux/dmi.h>
--#include <linux/pci.h>
- #include <video/vga.h>
+ 
  #include <asm/efi.h>
+@@ -76,6 +77,10 @@ static void __init init_screen_info(void)
+ 		screen_info = *si;
+ 		early_memunmap(si, sizeof(*si));
+ 	}
++
++	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
++	    memblock_is_map_memory(screen_info.lfb_base))
++		memblock_mark_nomap(screen_info.lfb_base, screen_info.lfb_size);
+ }
  
-@@ -331,5 +328,4 @@ static struct platform_driver efifb_driver = {
- 	.remove = efifb_remove,
- };
+ static int __init uefi_init(void)
+@@ -235,3 +240,16 @@ void __init efi_init(void)
  
--module_platform_driver(efifb_driver);
--MODULE_LICENSE("GPL");
-+builtin_platform_driver(efifb_driver);
+ 	init_screen_info();
+ }
++
++static int __init register_gop_device(void)
++{
++	void *pd;
++
++	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
++		return 0;
++
++	/* the efifb driver accesses screen_info directly, no need to pass it */
++	pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
++	return PTR_ERR_OR_ZERO(pd);
++}
++subsys_initcall(register_gop_device);
 -- 
 2.5.0
