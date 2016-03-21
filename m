@@ -1,107 +1,130 @@
-From: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH][v5] ACPI / PM: Introduce efi poweroff for HW-full
- platforms without _S5
-Date: Mon, 21 Mar 2016 13:43:18 +0100
-Message-ID: <CAJZ5v0j1TpjQ8nD3gr7NYA_dpcghDidsvSoAOuobLMw6-3waCg@mail.gmail.com>
-References: <1458484268-18311-1-git-send-email-yu.c.chen@intel.com>
+From: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH 4/8] efi/x86: efifb: move DMI based quirks handling out
+ of generic code
+Date: Mon, 21 Mar 2016 09:42:23 -0400
+Message-ID: <20160321134222.GA21791@redhat.com>
+References: <1457588408-19309-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1457588408-19309-5-git-send-email-ard.biesheuvel@linaro.org>
+ <20160318105007.GM2619@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458484268-18311-1-git-send-email-yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160318105007.GM2619-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sun, Mar 20, 2016 at 3:31 PM, Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
-> The problem is Linux registers pm_power_off = efi_power_off
-> only if we are in hardware reduced mode. Actually, what we also
-> want is to do this when ACPI S5 is simply not supported on
-> non-legacy platforms. Since there will be HW-full mode where
-> the DSDT fails to supply an _S5 object(without SLP_TYP), we
-> should let such kind of platform to leverage efi runtime service
-> to poweroff.
->
-> This patch uses efi power off as first choice when S5 is
-> unavailable, even if there is a customized poweroff(driver provided, eg).
-> Meanwhile, the legacy platforms will not be affected because there is no
-> path for them to overwrite the pm_power_off to efi power off.
->
-> Suggested-by: Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Signed-off-by: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> ---
-> v5:
->  - Revert to version 2, enforce EFI poweroff for such kind
->    of platforms.
-> v4:
->  - Since in v3 efi_poweroff_required() is not guaranteed to run
->    after all of the other code that may register alternative
->    power off handling, add the pm_power_off_default that would
->    be used by pm_power_off if nothing else is available.
-> v3:
->  - Only assign pm_power_off to efi_power_off when there are no
->    other pm_power_off registered at that time, in case other
->    commponents would like to customize their own implementation.
-> ---
-> v2:
->  - Convert the acpi_no_s5 to a global bool variable in sleep.c and
->    add a declaration to include/linux/acpi.h.
-> ---
->  arch/x86/platform/efi/quirks.c | 2 +-
->  drivers/acpi/sleep.c           | 7 +++++++
->  include/linux/acpi.h           | 1 +
->  3 files changed, 9 insertions(+), 1 deletion(-)
->
-> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-> index ed30e79..7e5ec62 100644
-> --- a/arch/x86/platform/efi/quirks.c
-> +++ b/arch/x86/platform/efi/quirks.c
-> @@ -340,5 +340,5 @@ bool efi_reboot_required(void)
->
->  bool efi_poweroff_required(void)
->  {
-> -       return !!acpi_gbl_reduced_hardware;
-> +       return acpi_gbl_reduced_hardware || acpi_no_s5;
->  }
-> diff --git a/drivers/acpi/sleep.c b/drivers/acpi/sleep.c
-> index 9cb9752..a33859c 100644
-> --- a/drivers/acpi/sleep.c
-> +++ b/drivers/acpi/sleep.c
-> @@ -25,6 +25,11 @@
->  #include "internal.h"
->  #include "sleep.h"
->
-> +/*
-> + * Some HW-full platforms do not have _S5, so they may need
-> + * to leverage efi power off for a shutdown.
-> + */
-> +bool acpi_no_s5;
->  static u8 sleep_states[ACPI_S_STATE_COUNT];
->
->  static void acpi_sleep_tts_switch(u32 acpi_state)
-> @@ -846,6 +851,8 @@ int __init acpi_sleep_init(void)
->                 sleep_states[ACPI_STATE_S5] = 1;
->                 pm_power_off_prepare = acpi_power_off_prepare;
->                 pm_power_off = acpi_power_off;
-> +       } else {
-> +               acpi_no_s5 = true;
->         }
->
->         supported[0] = 0;
-> diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-> index 06ed7e5..4d2e67f 100644
-> --- a/include/linux/acpi.h
-> +++ b/include/linux/acpi.h
-> @@ -278,6 +278,7 @@ void acpi_irq_stats_init(void);
->  extern u32 acpi_irq_handled;
->  extern u32 acpi_irq_not_handled;
->  extern unsigned int acpi_sci_irq;
-> +extern bool acpi_no_s5;
->  #define INVALID_ACPI_IRQ       ((unsigned)-1)
->  static inline bool acpi_sci_irq_valid(void)
->  {
-> --
+On Fri, Mar 18, 2016 at 10:50:07AM +0000, Matt Fleming wrote:
+> (Cc'ing efifb maintainer and sysfb_efi.c author)
+> 
+> On Thu, 10 Mar, at 12:40:04PM, Ard Biesheuvel wrote:
+> > The efifb quirks handling based on DMI identification of the platform is
+> > specific to x86, so move it to x86 arch code.
+> > 
+> > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> > ---
+> >  arch/x86/include/asm/efi.h  |  2 ++
+> >  arch/x86/kernel/sysfb_efi.c | 15 +++++++++++++++
+> >  drivers/video/fbdev/efifb.c | 15 ++++-----------
+> >  3 files changed, 21 insertions(+), 11 deletions(-)
+>  
+> I've left the patch content intact below. This looks like a worthwhile
+> change to me. David, Peter, any comments?
 
-OK, this is fine by me.
+It looks right to me as well:
 
-Matt, what do you think?
+Acked-By: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+
+> 
+> > diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> > index 7d5187b66108..790adbc3a64a 100644
+> > --- a/arch/x86/include/asm/efi.h
+> > +++ b/arch/x86/include/asm/efi.h
+> > @@ -154,6 +154,8 @@ static inline bool efi_runtime_supported(void)
+> >  extern struct console early_efi_console;
+> >  extern void parse_efi_setup(u64 phys_addr, u32 data_len);
+> >  
+> > +extern void efifb_setup_from_dmi(struct screen_info *si, const char *opt);
+> > +
+> >  #ifdef CONFIG_EFI_MIXED
+> >  extern void efi_thunk_runtime_setup(void);
+> >  extern efi_status_t efi_thunk_set_virtual_address_map(
+> > diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
+> > index b285d4e8c68e..e21a8a7ddcff 100644
+> > --- a/arch/x86/kernel/sysfb_efi.c
+> > +++ b/arch/x86/kernel/sysfb_efi.c
+> > @@ -68,6 +68,21 @@ struct efifb_dmi_info efifb_dmi_list[] = {
+> >  	[M_UNKNOWN] = { NULL, 0, 0, 0, 0, OVERRIDE_NONE }
+> >  };
+> >  
+> > +void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+> > +{
+> > +	int i;
+> > +
+> > +	for (i = 0; i < M_UNKNOWN; i++) {
+> > +		if (efifb_dmi_list[i].base != 0 &&
+> > +		    !strcmp(opt, efifb_dmi_list[i].optname)) {
+> > +			si->lfb_base = efifb_dmi_list[i].base;
+> > +			si->lfb_linelength = efifb_dmi_list[i].stride;
+> > +			si->lfb_width = efifb_dmi_list[i].width;
+> > +			si->lfb_height = efifb_dmi_list[i].height;
+> > +		}
+> > +	}
+> > +}
+> > +
+> >  #define choose_value(dmivalue, fwvalue, field, flags) ({	\
+> >  		typeof(fwvalue) _ret_ = fwvalue;		\
+> >  		if ((flags) & (field))				\
+> > diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+> > index 95d293b7445a..dd594369b8a6 100644
+> > --- a/drivers/video/fbdev/efifb.c
+> > +++ b/drivers/video/fbdev/efifb.c
+> > @@ -8,6 +8,7 @@
+> >  
+> >  #include <linux/module.h>
+> >  #include <linux/kernel.h>
+> > +#include <linux/efi.h>
+> >  #include <linux/errno.h>
+> >  #include <linux/fb.h>
+> >  #include <linux/platform_device.h>
+> > @@ -15,7 +16,7 @@
+> >  #include <linux/dmi.h>
+> >  #include <linux/pci.h>
+> >  #include <video/vga.h>
+> > -#include <asm/sysfb.h>
+> > +#include <asm/efi.h>
+> >  
+> >  static bool request_mem_succeeded = false;
+> >  
+> > @@ -85,21 +86,13 @@ static struct fb_ops efifb_ops = {
+> >  static int efifb_setup(char *options)
+> >  {
+> >  	char *this_opt;
+> > -	int i;
+> >  
+> >  	if (options && *options) {
+> >  		while ((this_opt = strsep(&options, ",")) != NULL) {
+> >  			if (!*this_opt) continue;
+> >  
+> > -			for (i = 0; i < M_UNKNOWN; i++) {
+> > -				if (efifb_dmi_list[i].base != 0 &&
+> > -				    !strcmp(this_opt, efifb_dmi_list[i].optname)) {
+> > -					screen_info.lfb_base = efifb_dmi_list[i].base;
+> > -					screen_info.lfb_linelength = efifb_dmi_list[i].stride;
+> > -					screen_info.lfb_width = efifb_dmi_list[i].width;
+> > -					screen_info.lfb_height = efifb_dmi_list[i].height;
+> > -				}
+> > -			}
+> > +			efifb_setup_from_dmi(&screen_info, this_opt);
+> > +
+> >  			if (!strncmp(this_opt, "base:", 5))
+> >  				screen_info.lfb_base = simple_strtoul(this_opt+5, NULL, 0);
+> >  			else if (!strncmp(this_opt, "stride:", 7))
+> > -- 
+> > 1.9.1
+> > 
+
+-- 
+        Peter
