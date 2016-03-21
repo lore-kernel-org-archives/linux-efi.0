@@ -1,426 +1,107 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: Capsule update support
-Date: Mon, 21 Mar 2016 11:19:50 +0100
-Message-ID: <CAKv+Gu8fX7x1x3Od5ThxyFxux_NKDx59PNedkgSfn_V0yg_NQQ@mail.gmail.com>
-References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
-	<1458219431-24741-3-git-send-email-matt@codeblueprint.co.uk>
+From: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH][v5] ACPI / PM: Introduce efi poweroff for HW-full
+ platforms without _S5
+Date: Mon, 21 Mar 2016 13:43:18 +0100
+Message-ID: <CAJZ5v0j1TpjQ8nD3gr7NYA_dpcghDidsvSoAOuobLMw6-3waCg@mail.gmail.com>
+References: <1458484268-18311-1-git-send-email-yu.c.chen@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458219431-24741-3-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <1458484268-18311-1-git-send-email-yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+To: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: ACPI Devel Maling List <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Linux Kernel Mailing List <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 17 March 2016 at 13:57, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> The EFI capsule mechanism allows data blobs to be passed to the EFI
-> firmware. A common use case is performing firmware updates. This patch
-> just introduces the main infrastructure for interacting with the
-> firmware, and a driver that allows users to upload capsules will come
-> in a later patch.
+On Sun, Mar 20, 2016 at 3:31 PM, Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> The problem is Linux registers pm_power_off = efi_power_off
+> only if we are in hardware reduced mode. Actually, what we also
+> want is to do this when ACPI S5 is simply not supported on
+> non-legacy platforms. Since there will be HW-full mode where
+> the DSDT fails to supply an _S5 object(without SLP_TYP), we
+> should let such kind of platform to leverage efi runtime service
+> to poweroff.
 >
-> Once a capsule has been passed to the firmware, the next reboot must
-> be performed using the ResetSystem() EFI runtime service, which may
-> involve overriding the reboot type specified by reboot=. This ensures
-> the reset value returned by QueryCapsuleCapabilities() is used to
-> reset the system, which is required for the capsule to be processed.
-> efi_capsule_pending() is provided for this purpose.
+> This patch uses efi power off as first choice when S5 is
+> unavailable, even if there is a customized poweroff(driver provided, eg).
+> Meanwhile, the legacy platforms will not be affected because there is no
+> path for them to overwrite the pm_power_off to efi power off.
 >
-> At the moment we only allow a single capsule blob to be sent to the
-> firmware despite the fact that UpdateCapsule() takes a 'CapsuleCount'
-> parameter. This simplifies the API and shouldn't result in any
-> downside since it is still possible to send multiple capsules by
-> repeatedly calling UpdateCapsule().
->
-> Cc: Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-> Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-> Cc: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Cc: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Cc: joeyli <jlee-IBi9RG/b67k@public.gmane.org>
-> Cc: Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
-> Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-
-How are capsules with the CAPSULE_FLAGS_INITIATE_RESET flag handled?
-The runtime service will never return in that case, so I suppose we
-need some explicit handling somewhere?
-
+> Suggested-by: Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> Signed-off-by: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 > ---
->  drivers/firmware/efi/Makefile  |   2 +-
->  drivers/firmware/efi/capsule.c | 286 +++++++++++++++++++++++++++++++++++++++++
->  drivers/firmware/efi/reboot.c  |  12 +-
->  include/linux/efi.h            |  14 ++
->  4 files changed, 312 insertions(+), 2 deletions(-)
->  create mode 100644 drivers/firmware/efi/capsule.c
+> v5:
+>  - Revert to version 2, enforce EFI poweroff for such kind
+>    of platforms.
+> v4:
+>  - Since in v3 efi_poweroff_required() is not guaranteed to run
+>    after all of the other code that may register alternative
+>    power off handling, add the pm_power_off_default that would
+>    be used by pm_power_off if nothing else is available.
+> v3:
+>  - Only assign pm_power_off to efi_power_off when there are no
+>    other pm_power_off registered at that time, in case other
+>    commponents would like to customize their own implementation.
+> ---
+> v2:
+>  - Convert the acpi_no_s5 to a global bool variable in sleep.c and
+>    add a declaration to include/linux/acpi.h.
+> ---
+>  arch/x86/platform/efi/quirks.c | 2 +-
+>  drivers/acpi/sleep.c           | 7 +++++++
+>  include/linux/acpi.h           | 1 +
+>  3 files changed, 9 insertions(+), 1 deletion(-)
 >
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 62e654f255f4..e4468c7c16b5 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -9,7 +9,7 @@
->  #
->  KASAN_SANITIZE_runtime-wrappers.o      := n
+> diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
+> index ed30e79..7e5ec62 100644
+> --- a/arch/x86/platform/efi/quirks.c
+> +++ b/arch/x86/platform/efi/quirks.c
+> @@ -340,5 +340,5 @@ bool efi_reboot_required(void)
 >
-> -obj-$(CONFIG_EFI)                      += efi.o vars.o reboot.o
-> +obj-$(CONFIG_EFI)                      += efi.o vars.o reboot.o capsule.o
->  obj-$(CONFIG_EFI_VARS)                 += efivars.o
->  obj-$(CONFIG_EFI_ESRT)                 += esrt.o
->  obj-$(CONFIG_EFI_VARS_PSTORE)          += efi-pstore.o
-> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-> new file mode 100644
-> index 000000000000..dac25208ad5e
-> --- /dev/null
-> +++ b/drivers/firmware/efi/capsule.c
-> @@ -0,0 +1,286 @@
-> +/*
-> + * EFI capsule support.
-> + *
-> + * Copyright 2013 Intel Corporation; author Matt Fleming
-> + *
-> + * This file is part of the Linux kernel, and is made available under
-> + * the terms of the GNU General Public License version 2.
-> + */
-> +
-> +#define pr_fmt(fmt) "efi: " fmt
-> +
-> +#include <linux/slab.h>
-> +#include <linux/mutex.h>
-> +#include <linux/highmem.h>
-> +#include <linux/efi.h>
-> +#include <linux/vmalloc.h>
-> +#include <asm/io.h>
-> +
-> +typedef struct {
-> +       u64 length;
-> +       u64 data;
-> +} efi_capsule_block_desc_t;
-> +
-> +static bool capsule_pending;
-> +static int efi_reset_type = -1;
-> +
-> +/*
-> + * capsule_mutex serialises access to both capsule_pending and
-> + * efi_reset_type.
-> + */
-> +static DEFINE_MUTEX(capsule_mutex);
-> +
-> +/**
-> + * efi_capsule_pending - has a capsule been passed to the firmware?
-> + * @reset_type: store the type of EFI reset if capsule is pending
-> + *
-> + * To ensure that the registered capsule is processed correctly by the
-> + * firmware we need to perform a specific type of reset. If a capsule is
-> + * pending return the reset type in @reset_type.
-> + *
-> + * This function will race with callers of efi_capsule_update(), for
-> + * example, calling this function while somebody else is in
-> + * efi_capsule_update() but hasn't reached efi_capsue_update_locked()
-> + * will miss the updates to capsule_pending and efi_reset_type after
-> + * efi_capsule_update_locked() completes.
-> + *
-> + * A non-racy use is from platform reboot code because we use
-> + * system_state to ensure no capsules can be sent to the firmware once
-> + * we're at SYSTEM_RESTART. See efi_capsule_update_locked().
-> + */
-> +bool efi_capsule_pending(int *reset_type)
-> +{
-> +       bool rv = false;
-> +
-> +       mutex_lock(&capsule_mutex);
-> +       if (!capsule_pending)
-> +               goto out;
-> +
-> +       if (reset_type)
-> +               *reset_type = efi_reset_type;
-> +       rv = true;
-> +out:
-> +       mutex_unlock(&capsule_mutex);
-> +       return rv;
-> +}
-> +
-> +/**
-> + * efi_capsule_supported - does the firmware support the capsule?
-> + * @guid: vendor guid of capsule
-> + * @flags: capsule flags
-> + * @size: size of capsule data
-> + * @reset: the reset type required for this capsule
-> + *
-> + * Check whether a capsule with @flags is supported by the firmware
-> + * and that @size doesn't exceed the maximum size for a capsule.
-> + *
-> + * No attempt is made to check @reset against the reset type required
-> + * by any pending capsules because of the races involved.
-> + */
-> +int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
-> +{
-> +       efi_capsule_header_t *capsule;
-> +       efi_status_t status;
-> +       u64 max_size;
-> +       int rv = 0;
-> +
-> +       capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
-> +       if (!capsule)
-> +               return -ENOMEM;
-> +
-> +       capsule->headersize = capsule->imagesize = sizeof(*capsule);
-> +       memcpy(&capsule->guid, &guid, sizeof(efi_guid_t));
-> +       capsule->flags = flags;
-> +
-> +       status = efi.query_capsule_caps(&capsule, 1, &max_size, reset);
-> +       if (status != EFI_SUCCESS) {
-> +               rv = efi_status_to_err(status);
-> +               goto out;
-> +       }
-> +
-> +       if (size > max_size)
-> +               rv = -ENOSPC;
-> +out:
-> +       kfree(capsule);
-> +       return rv;
-> +}
-> +EXPORT_SYMBOL_GPL(efi_capsule_supported);
-> +
-> +/*
-> + * Every scatter gather list (block descriptor) page must end with a
-> + * continuation pointer. The last continuation pointer of the last
-> + * page must be zero to mark the end of the chain.
-> + */
-> +#define SGLIST_PER_PAGE        ((PAGE_SIZE / sizeof(efi_capsule_block_desc_t)) - 1)
-> +
-> +/*
-> + * How many scatter gather list (block descriptor) pages do we need
-> + * to map @count pages?
-> + */
-> +static inline unsigned int sg_pages_num(unsigned int count)
-> +{
-> +       return DIV_ROUND_UP(count, SGLIST_PER_PAGE);
-> +}
-> +
-> +/**
-> + * efi_capsule_update_locked - pass a single capsule to the firmware
-> + * @capsule: capsule to send to the firmware
-> + * @sg_pages: array of scatter gather (block descriptor) pages
-> + * @reset: the reset type required for @capsule
-> + *
-> + * Since this function must be called under capsule_mutex check
-> + * whether efi_reset_type will conflict with @reset, and atomically
-> + * set it and capsule_pending if a capsule was successfully sent to
-> + * the firmware.
-> + *
-> + * We also check to see if the system is about to restart, and if so,
-> + * abort. This avoids races between efi_capsule_update() and
-> + * efi_capsule_pending().
-> + */
-> +static int
-> +efi_capsule_update_locked(efi_capsule_header_t *capsule,
-> +                         struct page **sg_pages, int reset)
-> +{
-> +       efi_physical_addr_t sglist_phys;
-> +       efi_status_t status;
-> +
-> +       lockdep_assert_held(&capsule_mutex);
-> +
-> +       /*
-> +        * If someone has already registered a capsule that requires a
-> +        * different reset type, we're out of luck and must abort.
-> +        */
-> +       if (efi_reset_type >= 0 && efi_reset_type != reset) {
-> +               pr_err("Conflicting capsule reset type %d (%d).\n",
-> +                      reset, efi_reset_type);
-> +               return -EINVAL;
-> +       }
-> +
-> +       /*
-> +        * If the system is getting ready to restart it may have
-> +        * called efi_capsule_pending() to make decisions (such as
-> +        * whether to force an EFI reboot), and we're racing against
-> +        * that call. Abort in that case.
-> +        */
-> +       if (unlikely(system_state == SYSTEM_RESTART)) {
-> +               pr_warn("Capsule update raced with reboot, aborting.\n");
-> +               return -EINVAL;
-> +       }
-> +
-> +       sglist_phys = page_to_phys(sg_pages[0]);
-> +
-> +       status = efi.update_capsule(&capsule, 1, sglist_phys);
-> +       if (status == EFI_SUCCESS) {
-> +               capsule_pending = true;
-> +               efi_reset_type = reset;
-> +       }
-> +
-> +       return efi_status_to_err(status);
-> +}
-> +
-> +/**
-> + * efi_capsule_update - send a capsule to the firmware
-> + * @capsule: capsule to send to firmware
-> + * @pages: an array of capsule data pages
-> + *
-> + * Build a scatter gather list with EFI capsule block descriptors to
-> + * map the capsule described by @capsule with its data in @pages and
-> + * send it to the firmware via the UpdateCapsule() runtime service.
-> + *
-> + * @capsule must be a virtual mapping of the first page in @pages
-> + * (@pages[0]) in the kernel address space. That is, a
-> + * capsule_header_t that describes the entire contents of the capsule
-> + * must be at the start of the first data page.
-> + *
-> + * Even though this function will validate that the firmware supports
-> + * the capsule guid, users will likely want to check that
-> + * efi_capsule_supported() returns true before calling this function
-> + * because it makes it easier to print helpful error messages.
-> + *
-> + * If the capsule is successfully submitted to the firmware, any
-> + * subsequent calls to efi_capsule_pending() will return true. @pages
-> + * must not be released or modified if this function returns
-> + * successfully.
-> + *
-> + * Callers must be prepared for this function to fail, which can
-> + * happen if we raced with system reboot or if there is already a
-> + * pending capsule that has a reset type that conflicts with the one
-> + * required by @capsule. Do NOT use efi_capsule_pending() to detect
-> + * this conflict since that would be racy. Instead, submit the capsule
-> + * to efi_capsule_update() and check the return value.
-> + *
-> + * Return 0 on success, a converted EFI status code on failure.
-> + */
-> +int efi_capsule_update(efi_capsule_header_t *capsule, struct page **pages)
-> +{
-> +       u32 imagesize = capsule->imagesize;
-> +       efi_guid_t guid = capsule->guid;
-> +       unsigned int count, sg_count;
-> +       u32 flags = capsule->flags;
-> +       struct page **sg_pages;
-> +       int rv, reset_type;
-> +       int i, j;
-> +
-> +       rv = efi_capsule_supported(guid, flags, imagesize, &reset_type);
-> +       if (rv)
-> +               return rv;
-> +
-> +       count = DIV_ROUND_UP(imagesize, PAGE_SIZE);
-> +       sg_count = sg_pages_num(count);
-> +
-> +       sg_pages = kzalloc(sg_count * sizeof(*sg_pages), GFP_KERNEL);
-> +       if (!sg_pages)
-> +               return -ENOMEM;
-> +
-> +       for (i = 0; i < sg_count; i++) {
-> +               sg_pages[i] = alloc_page(GFP_KERNEL);
-> +               if (!sg_pages[i]) {
-> +                       rv = -ENOMEM;
-> +                       goto out;
-> +               }
-> +       }
-> +
-> +       for (i = 0; i < sg_count; i++) {
-> +               efi_capsule_block_desc_t *sglist;
-> +
-> +               sglist = kmap(sg_pages[i]);
-> +               if (!sglist) {
-> +                       rv = -ENOMEM;
-> +                       goto out;
-> +               }
-> +
-> +               for (j = 0; j < SGLIST_PER_PAGE && count > 0; j++) {
-> +                       u64 sz = min_t(u64, imagesize, PAGE_SIZE);
-> +
-> +                       sglist[j].length = sz;
-> +                       sglist[j].data = page_to_phys(*pages++);
-> +
-> +                       imagesize -= sz;
-> +                       count--;
-> +               }
-> +
-> +               /* Continuation pointer */
-> +               sglist[j].length = 0;
-> +
-> +               if (i + 1 == sg_count)
-> +                       sglist[j].data = 0;
-> +               else
-> +                       sglist[j].data = page_to_phys(sg_pages[i + 1]);
-> +
-> +               kunmap(sg_pages[i]);
-> +       }
-> +
-> +       mutex_lock(&capsule_mutex);
-> +       rv = efi_capsule_update_locked(capsule, sg_pages, reset_type);
-> +       mutex_unlock(&capsule_mutex);
-> +
-> +out:
-> +       for (i = 0; rv && i < sg_count; i++) {
-> +               if (sg_pages[i])
-> +                       __free_page(sg_pages[i]);
-> +       }
-> +
-> +       kfree(sg_pages);
-> +       return rv;
-> +}
-> +EXPORT_SYMBOL_GPL(efi_capsule_update);
-> diff --git a/drivers/firmware/efi/reboot.c b/drivers/firmware/efi/reboot.c
-> index 9c59d1c795d1..62ead9b9d871 100644
-> --- a/drivers/firmware/efi/reboot.c
-> +++ b/drivers/firmware/efi/reboot.c
-> @@ -9,7 +9,8 @@ int efi_reboot_quirk_mode = -1;
->
->  void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
+>  bool efi_poweroff_required(void)
 >  {
-> -       int efi_mode;
-> +       const char *str[] = { "cold", "warm", "shutdown", "platform" };
-> +       int efi_mode, cap_reset_mode;
->
->         if (!efi_enabled(EFI_RUNTIME_SERVICES))
->                 return;
-> @@ -30,6 +31,15 @@ void efi_reboot(enum reboot_mode reboot_mode, const char *__unused)
->         if (efi_reboot_quirk_mode != -1)
->                 efi_mode = efi_reboot_quirk_mode;
->
-> +       if (efi_capsule_pending(&cap_reset_mode)) {
-> +               if (efi_mode != cap_reset_mode)
-> +                       printk(KERN_CRIT "efi: %s reset requested but pending "
-> +                              "capsule update requires %s reset... Performing "
-> +                              "%s reset.\n", str[efi_mode], str[cap_reset_mode],
-> +                              str[cap_reset_mode]);
-> +               efi_mode = cap_reset_mode;
-> +       }
-> +
->         efi.reset_system(efi_mode, EFI_SUCCESS, 0, NULL);
+> -       return !!acpi_gbl_reduced_hardware;
+> +       return acpi_gbl_reduced_hardware || acpi_no_s5;
 >  }
+> diff --git a/drivers/acpi/sleep.c b/drivers/acpi/sleep.c
+> index 9cb9752..a33859c 100644
+> --- a/drivers/acpi/sleep.c
+> +++ b/drivers/acpi/sleep.c
+> @@ -25,6 +25,11 @@
+>  #include "internal.h"
+>  #include "sleep.h"
 >
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 9c8aae0e3b51..a28053e71e99 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -124,6 +124,13 @@ typedef struct {
->  } efi_capsule_header_t;
->
->  /*
-> + * EFI capsule flags
-> + */
-> +#define EFI_CAPSULE_PERSIST_ACROSS_RESET       0x00010000
-> +#define EFI_CAPSULE_POPULATE_SYSTEM_TABLE      0x00020000
-> +#define EFI_CAPSULE_INITIATE_RESET             0x00040000
-> +
 > +/*
->   * Allocation types for calls to boottime->allocate_pages.
->   */
->  #define EFI_ALLOCATE_ANY_PAGES         0
-> @@ -1239,6 +1246,13 @@ int efivars_sysfs_init(void);
->  #define EFIVARS_DATA_SIZE_MAX 1024
+> + * Some HW-full platforms do not have _S5, so they may need
+> + * to leverage efi power off for a shutdown.
+> + */
+> +bool acpi_no_s5;
+>  static u8 sleep_states[ACPI_S_STATE_COUNT];
 >
->  #endif /* CONFIG_EFI_VARS */
-> +extern bool efi_capsule_pending(int *reset_type);
-> +
-> +extern int efi_capsule_supported(efi_guid_t guid, u32 flags,
-> +                                size_t size, int *reset);
-> +
-> +extern int efi_capsule_update(efi_capsule_header_t *capsule,
-> +                             struct page **pages);
+>  static void acpi_sleep_tts_switch(u32 acpi_state)
+> @@ -846,6 +851,8 @@ int __init acpi_sleep_init(void)
+>                 sleep_states[ACPI_STATE_S5] = 1;
+>                 pm_power_off_prepare = acpi_power_off_prepare;
+>                 pm_power_off = acpi_power_off;
+> +       } else {
+> +               acpi_no_s5 = true;
+>         }
 >
->  #ifdef CONFIG_EFI_RUNTIME_MAP
->  int efi_runtime_map_init(struct kobject *);
+>         supported[0] = 0;
+> diff --git a/include/linux/acpi.h b/include/linux/acpi.h
+> index 06ed7e5..4d2e67f 100644
+> --- a/include/linux/acpi.h
+> +++ b/include/linux/acpi.h
+> @@ -278,6 +278,7 @@ void acpi_irq_stats_init(void);
+>  extern u32 acpi_irq_handled;
+>  extern u32 acpi_irq_not_handled;
+>  extern unsigned int acpi_sci_irq;
+> +extern bool acpi_no_s5;
+>  #define INVALID_ACPI_IRQ       ((unsigned)-1)
+>  static inline bool acpi_sci_irq_valid(void)
+>  {
 > --
-> 2.6.2
->
+
+OK, this is fine by me.
+
+Matt, what do you think?
