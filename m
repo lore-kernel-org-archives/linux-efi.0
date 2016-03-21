@@ -1,14 +1,14 @@
 From: David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2 8/9] efi/arm*: wire up struct screen_info to
- efi-framebuffer platform device
-Date: Mon, 21 Mar 2016 14:53:11 +0100
-Message-ID: <CANq1E4RUWKe=fF=9+9qq46ZeU1cgfXU+WmraXKnGLM5zyTVCoQ@mail.gmail.com>
+Subject: Re: [PATCH v2 3/9] efi/x86: efifb: move DMI based quirks handling out
+ of generic code
+Date: Mon, 21 Mar 2016 14:54:10 +0100
+Message-ID: <CANq1E4SGfZeLdFPab-cA7zz=AHS59z9pfWt3defqhDqroY2WaQ@mail.gmail.com>
 References: <1458319661-19762-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1458319661-19762-9-git-send-email-ard.biesheuvel@linaro.org>
+	<1458319661-19762-4-git-send-email-ard.biesheuvel@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458319661-19762-9-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+In-Reply-To: <1458319661-19762-4-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Cc: linux-kernel <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, the arch/x86 maintainers <x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
@@ -18,59 +18,108 @@ Hi
 
 On Fri, Mar 18, 2016 at 5:47 PM, Ard Biesheuvel
 <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This adds code to the ARM and arm64 EFI init routines to expose a platform
-> device of type 'efi-framebuffer' if struct screen_info has been populated
-> appropriately from the GOP protocol by the stub. Since the framebuffer may
-> potentially be located in system RAM, make sure that the region is reserved
-> and marked MEMBLOCK_NOMAP.
+> The efifb quirks handling based on DMI identification of the platform is
+> specific to x86, so move it to x86 arch code.
 >
 > Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/arm-init.c | 18 ++++++++++++++++++
->  1 file changed, 18 insertions(+)
->
-> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-> index acd44de30504..f5f13b871d42 100644
-> --- a/drivers/firmware/efi/arm-init.c
-> +++ b/drivers/firmware/efi/arm-init.c
-> @@ -19,6 +19,7 @@
->  #include <linux/mm_types.h>
->  #include <linux/of.h>
->  #include <linux/of_fdt.h>
-> +#include <linux/platform_device.h>
->  #include <linux/screen_info.h>
->
->  #include <asm/efi.h>
-> @@ -76,6 +77,10 @@ static void __init init_screen_info(void)
->                 screen_info = *si;
->                 early_memunmap(si, sizeof(*si));
->         }
-> +
-> +       if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
-> +           memblock_is_map_memory(screen_info.lfb_base))
-> +               memblock_mark_nomap(screen_info.lfb_base, screen_info.lfb_size);
->  }
->
->  static int __init uefi_init(void)
-> @@ -235,3 +240,16 @@ void __init efi_init(void)
->
->         init_screen_info();
->  }
-> +
-> +static int __init register_gop_device(void)
-> +{
-> +       void *pd;
-> +
-> +       if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-> +               return 0;
-> +
-> +       /* the efifb driver accesses screen_info directly, no need to pass it */
-> +       pd = platform_device_register_simple("efi-framebuffer", 0, NULL, 0);
 
-I'd really appreciate if you pass "screen_info" as data, just like x86
-does. Sure, we still use the global screen_info variable from efifb,
-but we should try to reduce the number of global variables and rather
-make drivers use the platform-data of the platform device.
+Fine with me:
+
+Acked-by: David Herrmann <dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
 
 Thanks
 David
+
+> ---
+>  arch/x86/include/asm/efi.h  |  2 ++
+>  arch/x86/kernel/sysfb_efi.c | 15 +++++++++++++++
+>  drivers/video/fbdev/efifb.c | 15 ++++-----------
+>  3 files changed, 21 insertions(+), 11 deletions(-)
+>
+> diff --git a/arch/x86/include/asm/efi.h b/arch/x86/include/asm/efi.h
+> index 7d5187b66108..790adbc3a64a 100644
+> --- a/arch/x86/include/asm/efi.h
+> +++ b/arch/x86/include/asm/efi.h
+> @@ -154,6 +154,8 @@ static inline bool efi_runtime_supported(void)
+>  extern struct console early_efi_console;
+>  extern void parse_efi_setup(u64 phys_addr, u32 data_len);
+>
+> +extern void efifb_setup_from_dmi(struct screen_info *si, const char *opt);
+> +
+>  #ifdef CONFIG_EFI_MIXED
+>  extern void efi_thunk_runtime_setup(void);
+>  extern efi_status_t efi_thunk_set_virtual_address_map(
+> diff --git a/arch/x86/kernel/sysfb_efi.c b/arch/x86/kernel/sysfb_efi.c
+> index b285d4e8c68e..e21a8a7ddcff 100644
+> --- a/arch/x86/kernel/sysfb_efi.c
+> +++ b/arch/x86/kernel/sysfb_efi.c
+> @@ -68,6 +68,21 @@ struct efifb_dmi_info efifb_dmi_list[] = {
+>         [M_UNKNOWN] = { NULL, 0, 0, 0, 0, OVERRIDE_NONE }
+>  };
+>
+> +void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
+> +{
+> +       int i;
+> +
+> +       for (i = 0; i < M_UNKNOWN; i++) {
+> +               if (efifb_dmi_list[i].base != 0 &&
+> +                   !strcmp(opt, efifb_dmi_list[i].optname)) {
+> +                       si->lfb_base = efifb_dmi_list[i].base;
+> +                       si->lfb_linelength = efifb_dmi_list[i].stride;
+> +                       si->lfb_width = efifb_dmi_list[i].width;
+> +                       si->lfb_height = efifb_dmi_list[i].height;
+> +               }
+> +       }
+> +}
+> +
+>  #define choose_value(dmivalue, fwvalue, field, flags) ({       \
+>                 typeof(fwvalue) _ret_ = fwvalue;                \
+>                 if ((flags) & (field))                          \
+> diff --git a/drivers/video/fbdev/efifb.c b/drivers/video/fbdev/efifb.c
+> index 95d293b7445a..dd594369b8a6 100644
+> --- a/drivers/video/fbdev/efifb.c
+> +++ b/drivers/video/fbdev/efifb.c
+> @@ -8,6 +8,7 @@
+>
+>  #include <linux/module.h>
+>  #include <linux/kernel.h>
+> +#include <linux/efi.h>
+>  #include <linux/errno.h>
+>  #include <linux/fb.h>
+>  #include <linux/platform_device.h>
+> @@ -15,7 +16,7 @@
+>  #include <linux/dmi.h>
+>  #include <linux/pci.h>
+>  #include <video/vga.h>
+> -#include <asm/sysfb.h>
+> +#include <asm/efi.h>
+>
+>  static bool request_mem_succeeded = false;
+>
+> @@ -85,21 +86,13 @@ static struct fb_ops efifb_ops = {
+>  static int efifb_setup(char *options)
+>  {
+>         char *this_opt;
+> -       int i;
+>
+>         if (options && *options) {
+>                 while ((this_opt = strsep(&options, ",")) != NULL) {
+>                         if (!*this_opt) continue;
+>
+> -                       for (i = 0; i < M_UNKNOWN; i++) {
+> -                               if (efifb_dmi_list[i].base != 0 &&
+> -                                   !strcmp(this_opt, efifb_dmi_list[i].optname)) {
+> -                                       screen_info.lfb_base = efifb_dmi_list[i].base;
+> -                                       screen_info.lfb_linelength = efifb_dmi_list[i].stride;
+> -                                       screen_info.lfb_width = efifb_dmi_list[i].width;
+> -                                       screen_info.lfb_height = efifb_dmi_list[i].height;
+> -                               }
+> -                       }
+> +                       efifb_setup_from_dmi(&screen_info, this_opt);
+> +
+>                         if (!strncmp(this_opt, "base:", 5))
+>                                 screen_info.lfb_base = simple_strtoul(this_opt+5, NULL, 0);
+>                         else if (!strncmp(this_opt, "stride:", 7))
+> --
+> 2.5.0
+>
