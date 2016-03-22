@@ -1,68 +1,37 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm*: efi: drop writable mapping of the UEFI System table
-Date: Tue, 22 Mar 2016 16:08:24 +0100
-Message-ID: <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg@mail.gmail.com>
-References: <1456496435-12679-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1456496435-12679-2-git-send-email-ard.biesheuvel@linaro.org>
-	<20160226150156.GC7475@codeblueprint.co.uk>
+From: Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v15 0/6] arm64, numa: Add numa support for arm64 platforms
+Date: Tue, 22 Mar 2016 14:48:14 -0400
+Message-ID: <56F1936E.1090407@redhat.com>
+References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160226150156.GC7475-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1457481587-8976-1-git-send-email-ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Daney <ddaney.cavm-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 26 February 2016 at 16:01, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
-> On Fri, 26 Feb, at 03:20:35PM, Ard Biesheuvel wrote:
->> Commit 2eec5dedf770 ("efi/arm-init: Use read-only early mappings")
->> updated the early ARM UEFI init code to create the temporary, early
->> mapping of the UEFI System table using read-only attributes, as a
->> hardening measure against inadvertent modification.
->>
->> However, this still leaves the permanent, writable mapping of the UEFI
->> System table, which is only ever referenced during invocations of UEFI
->> Runtime Services, at which time the UEFI virtual mapping is available,
->> which also covers the system table. (This is guaranteed by the fact that
->> SetVirtualAddressMap(), which is a runtime service itself, converts
->> various entries in the table to their virtual equivalents, which implies
->> that the table must be covered by a RuntimeServicesData region that has
->> the EFI_MEMORY_RUNTIME attribute.)
->>
->> So instead of creating this permanent mapping, record the virtual address
->> of the system table inside the UEFI virtual mapping, and dereference that
->> when accessing the table. This protects the contents of the system table
->> from inadvertent (or deliberate) modification when no UEFI Runtime
->> Services calls are in progress.
->>
->> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> ---
->>  drivers/firmware/efi/arm-init.c    |  2 ++
->>  drivers/firmware/efi/arm-runtime.c | 27 ++++++++++++++++-----------
->>  2 files changed, 18 insertions(+), 11 deletions(-)
->
-> Looks like a nice cleanup. Applied.
+On 03/08/2016 06:59 PM, David Daney wrote:
 
-This patch causes a warning I hadn't spotted before sending it out.
-Could you fold this in please?
+> From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+> 
+> v15:
+> 
+> 	- Make the distance-map node optional (again), if it is not in
+>           the device tree, default values are used.
+> 
+> 	- Minor cleanups to of_numa.c as suggested by Rob Harring.
 
-diff --git a/drivers/firmware/efi/arm-runtime.c
-b/drivers/firmware/efi/arm-runtime.c
-index 6c97d4884fc7..fe749da9997e 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -72,8 +72,8 @@ static bool __init efi_virtmap_init(void)
-                 */
-                if (efi_system_table >= phys &&
-                    efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
--                       efi.systab = (void *)(efi_system_table - phys +
--                                             md->virt_addr);
-+                       efi.systab = (void *)(unsigned long)(efi_system_table -
-+                                                         phys + md->virt_addr);
-                        systab_found = true;
-                }
-        }
+Hi David, all,
 
-Thanks,
-Ard.
+Wondering what the status of this patch series is currently?
+
+Jon.
+
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
