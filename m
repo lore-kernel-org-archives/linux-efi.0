@@ -1,100 +1,68 @@
-From: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: [PATCH][v6] ACPI / PM: Introduce efi poweroff for HW-full platforms without _S5
-Date: Tue, 22 Mar 2016 08:51:10 +0800
-Message-ID: <1458607870-22522-1-git-send-email-yu.c.chen@intel.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/2] arm*: efi: drop writable mapping of the UEFI System table
+Date: Tue, 22 Mar 2016 16:08:24 +0100
+Message-ID: <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg@mail.gmail.com>
+References: <1456496435-12679-1-git-send-email-ard.biesheuvel@linaro.org>
+	<1456496435-12679-2-git-send-email-ard.biesheuvel@linaro.org>
+	<20160226150156.GC7475@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160226150156.GC7475-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-pm-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The problem is Linux registers pm_power_off = efi_power_off only if
-we are in hardware reduced mode. Actually, what we also want is to do
-this when ACPI S5 is simply not supported on non-legacy platforms.
-Since some future Intel platforms are HW-full mode where the DSDT
-fails to supply an _S5 object(without SLP_TYP), we should let such
-kind of platform to leverage efi runtime service to poweroff.
+On 26 February 2016 at 16:01, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Fri, 26 Feb, at 03:20:35PM, Ard Biesheuvel wrote:
+>> Commit 2eec5dedf770 ("efi/arm-init: Use read-only early mappings")
+>> updated the early ARM UEFI init code to create the temporary, early
+>> mapping of the UEFI System table using read-only attributes, as a
+>> hardening measure against inadvertent modification.
+>>
+>> However, this still leaves the permanent, writable mapping of the UEFI
+>> System table, which is only ever referenced during invocations of UEFI
+>> Runtime Services, at which time the UEFI virtual mapping is available,
+>> which also covers the system table. (This is guaranteed by the fact that
+>> SetVirtualAddressMap(), which is a runtime service itself, converts
+>> various entries in the table to their virtual equivalents, which implies
+>> that the table must be covered by a RuntimeServicesData region that has
+>> the EFI_MEMORY_RUNTIME attribute.)
+>>
+>> So instead of creating this permanent mapping, record the virtual address
+>> of the system table inside the UEFI virtual mapping, and dereference that
+>> when accessing the table. This protects the contents of the system table
+>> from inadvertent (or deliberate) modification when no UEFI Runtime
+>> Services calls are in progress.
+>>
+>> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> ---
+>>  drivers/firmware/efi/arm-init.c    |  2 ++
+>>  drivers/firmware/efi/arm-runtime.c | 27 ++++++++++++++++-----------
+>>  2 files changed, 18 insertions(+), 11 deletions(-)
+>
+> Looks like a nice cleanup. Applied.
 
-This patch uses efi power off as first choice when S5 is unavailable,
-even if there is a customized poweroff(driver provided, eg).
-Meanwhile, the legacy platforms will not be affected because there is
-no path for them to overwrite the pm_power_off to efi power off.
+This patch causes a warning I hadn't spotted before sending it out.
+Could you fold this in please?
 
-Suggested-by: Len Brown <len.brown-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Reviewed-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Signed-off-by: Chen Yu <yu.c.chen-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
----
-v6:
- - Some modifications in the commit message.
-v5:
- - Revert to version 2, enforce EFI poweroff for such kind
-   of platforms.
-v4:
- - Since in v3 efi_poweroff_required() is not guaranteed to run
-   after all of the other code that may register alternative
-   power off handling, add the pm_power_off_default that would
-   be used by pm_power_off if nothing else is available.
-v3:
- - Only assign pm_power_off to efi_power_off when there are no
-   other pm_power_off registered at that time, in case other
-   commponents would like to customize their own implementation.
----
-v2:
- - Convert the acpi_no_s5 to a global bool variable in sleep.c and
-   add a declaration to include/linux/acpi.h.
----
- arch/x86/platform/efi/quirks.c | 2 +-
- drivers/acpi/sleep.c           | 7 +++++++
- include/linux/acpi.h           | 1 +
- 3 files changed, 9 insertions(+), 1 deletion(-)
+diff --git a/drivers/firmware/efi/arm-runtime.c
+b/drivers/firmware/efi/arm-runtime.c
+index 6c97d4884fc7..fe749da9997e 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -72,8 +72,8 @@ static bool __init efi_virtmap_init(void)
+                 */
+                if (efi_system_table >= phys &&
+                    efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
+-                       efi.systab = (void *)(efi_system_table - phys +
+-                                             md->virt_addr);
++                       efi.systab = (void *)(unsigned long)(efi_system_table -
++                                                         phys + md->virt_addr);
+                        systab_found = true;
+                }
+        }
 
-diff --git a/arch/x86/platform/efi/quirks.c b/arch/x86/platform/efi/quirks.c
-index ed30e79..7e5ec62 100644
---- a/arch/x86/platform/efi/quirks.c
-+++ b/arch/x86/platform/efi/quirks.c
-@@ -340,5 +340,5 @@ bool efi_reboot_required(void)
- 
- bool efi_poweroff_required(void)
- {
--	return !!acpi_gbl_reduced_hardware;
-+	return acpi_gbl_reduced_hardware || acpi_no_s5;
- }
-diff --git a/drivers/acpi/sleep.c b/drivers/acpi/sleep.c
-index 9cb9752..a33859c 100644
---- a/drivers/acpi/sleep.c
-+++ b/drivers/acpi/sleep.c
-@@ -25,6 +25,11 @@
- #include "internal.h"
- #include "sleep.h"
- 
-+/*
-+ * Some HW-full platforms do not have _S5, so they may need
-+ * to leverage efi power off for a shutdown.
-+ */
-+bool acpi_no_s5;
- static u8 sleep_states[ACPI_S_STATE_COUNT];
- 
- static void acpi_sleep_tts_switch(u32 acpi_state)
-@@ -846,6 +851,8 @@ int __init acpi_sleep_init(void)
- 		sleep_states[ACPI_STATE_S5] = 1;
- 		pm_power_off_prepare = acpi_power_off_prepare;
- 		pm_power_off = acpi_power_off;
-+	} else {
-+		acpi_no_s5 = true;
- 	}
- 
- 	supported[0] = 0;
-diff --git a/include/linux/acpi.h b/include/linux/acpi.h
-index 06ed7e5..4d2e67f 100644
---- a/include/linux/acpi.h
-+++ b/include/linux/acpi.h
-@@ -278,6 +278,7 @@ void acpi_irq_stats_init(void);
- extern u32 acpi_irq_handled;
- extern u32 acpi_irq_not_handled;
- extern unsigned int acpi_sci_irq;
-+extern bool acpi_no_s5;
- #define INVALID_ACPI_IRQ	((unsigned)-1)
- static inline bool acpi_sci_irq_valid(void)
- {
--- 
-1.8.4.2
+Thanks,
+Ard.
