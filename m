@@ -1,44 +1,82 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/2] arm*: efi: drop writable mapping of the UEFI System
- table
-Date: Wed, 23 Mar 2016 16:16:24 +0000
-Message-ID: <20160323161624.GG11676@codeblueprint.co.uk>
-References: <1456496435-12679-1-git-send-email-ard.biesheuvel@linaro.org>
- <1456496435-12679-2-git-send-email-ard.biesheuvel@linaro.org>
- <20160226150156.GC7475@codeblueprint.co.uk>
- <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg@mail.gmail.com>
+From: Laison-2WGxrPcL6/av+0K4mfL3GVAUjnlXr6A1@public.gmane.org, Computech-2WGxrPcL6/av+0K4mfL3GVAUjnlXr6A1@public.gmane.org,
+	"Inc <support"@ensuretech.com
+Subject: CISCO IP PHONES AND CPU's
+Date: Thu, 24 Mar 2016 01:45:21 +0700
+Message-ID: <20160323200920.25EDBA66AB__26028.4129916274$1458765600$gmane$org@seymour.toledo.br>
+Reply-To: sales-69Ibs8hIYaLnzTGioTClidREWwmQVq3b@public.gmane.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Content-Description: Mail message body
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
+To: Recipients <support-lhT63EwJ3xcqDJ6do+/SaQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 22 Mar, at 04:08:24PM, Ard Biesheuvel wrote:
-> 
-> This patch causes a warning I hadn't spotted before sending it out.
-> Could you fold this in please?
-> 
-> diff --git a/drivers/firmware/efi/arm-runtime.c
-> b/drivers/firmware/efi/arm-runtime.c
-> index 6c97d4884fc7..fe749da9997e 100644
-> --- a/drivers/firmware/efi/arm-runtime.c
-> +++ b/drivers/firmware/efi/arm-runtime.c
-> @@ -72,8 +72,8 @@ static bool __init efi_virtmap_init(void)
->                  */
->                 if (efi_system_table >= phys &&
->                     efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
-> -                       efi.systab = (void *)(efi_system_table - phys +
-> -                                             md->virt_addr);
-> +                       efi.systab = (void *)(unsigned long)(efi_system_table -
-> +                                                         phys + md->virt_addr);
->                         systab_found = true;
->                 }
->         }
+Hi,
 
-Done, please check,
+Our Stock list.
 
-  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=4fd5c619dcf4f3d2c86d4a686ce66fc01e877a08
+Brand NEW
+96 x Cisco 7900 IP Phone
+87 x Unified IP Phone 6900
+12 x Unified IP Phone 8900
+76 x Unified IP Phone 9900
+55 x Unified IP Phone 8800
+67 x Cisco 1921
+67 x Cisco 1941
+56 x Cisco CP-7961G 7961G
+34 x Cisco CP-7971G-GE 7971G
+19 x Cisco Unified IP Conference Station 7937G Model: 7937 CP-7937G
+20 x Cisco CP-7975G 7975G
+
+Brand New Sealed :
+
+23 x  CISCO1921-SEC/K9
+Conditions: Brand New Sealed
+Description: CISCO 1921 Security Bundle w/SEC license PAK
+
+45 x CISCO1921/K9
+Conditions: Brand New Sealed
+Description: CISCO 1921 Modular Router, 2 GE, 2 EHWIC slots, 512DRAM, IP Base
+
+(1)  WS-C4500X-16SFP+
+Serial number:  JAE183501L3
+US&#36;2600
+
+(1)  WS-C3850-48PW-S
+Serial number:  FCW1823C0EW
+US&#36;2650
+
+(1)  WS-X6908-10G-2T
+Serial number:  SAL1620CKUB
+US&#36;3650
+
+(1)  ASR1000-ESP10
+Serial number:  JAE181306C3
+US&#36;3800
+
+(1)  AIR-CT5508-250-K9   (this is new but box is open!)
+Serial number:  FCW1521L038
+US&#36;4000
+
+CPUs part number below
+
+89 x  X5650
+
+975 x  X5660
+
+150 x  X5680
+
+265 x  X5690
+
+Kindly make your price offers.
+
+Sincerely
+Barbara Johnson
+Laison Computech
+210 N Scoring Ave,
+Rialto California, 92376
+Tel: +1-657-232-7047
+Fax: +1-347-214-0478
+Email: sales-69Ibs8hIYaLnzTGioTClidREWwmQVq3b@public.gmane.org
