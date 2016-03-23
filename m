@@ -1,8 +1,8 @@
 From: Laison-2WGxrPcL6/av+0K4mfL3GVAUjnlXr6A1@public.gmane.org, Computech-2WGxrPcL6/av+0K4mfL3GVAUjnlXr6A1@public.gmane.org,
 	"Inc <support"@ensuretech.com
 Subject: CISCO IP PHONES AND CPU's
-Date: Thu, 24 Mar 2016 01:45:21 +0700
-Message-ID: <20160323200920.25EDBA66AB__26028.4129916274$1458765600$gmane$org@seymour.toledo.br>
+Date: Thu, 24 Mar 2016 02:12:04 +0700
+Message-ID: <20160323203603.912BAA7B5D__21762.0737538256$1458768359$gmane$org@seymour.toledo.br>
 Reply-To: sales-69Ibs8hIYaLnzTGioTClidREWwmQVq3b@public.gmane.org
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
