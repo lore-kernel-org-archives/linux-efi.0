@@ -1,38 +1,44 @@
-From: David Daney <ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
-Subject: Re: [PATCH v15 0/6] arm64, numa: Add numa support for arm64 platforms
-Date: Tue, 22 Mar 2016 14:45:57 -0700
-Message-ID: <56F1BD15.4000701@caviumnetworks.com>
-References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com> <56F1936E.1090407@redhat.com>
+From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Subject: Re: [PATCH 2/2] arm*: efi: drop writable mapping of the UEFI System
+ table
+Date: Wed, 23 Mar 2016 16:16:24 +0000
+Message-ID: <20160323161624.GG11676@codeblueprint.co.uk>
+References: <1456496435-12679-1-git-send-email-ard.biesheuvel@linaro.org>
+ <1456496435-12679-2-git-send-email-ard.biesheuvel@linaro.org>
+ <20160226150156.GC7475@codeblueprint.co.uk>
+ <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56F1936E.1090407-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAKv+Gu8+pYR_jxjcVeXgekVqD_BugtRLgNNhOkvhuaEpddbHRg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Jon Masters <jcm-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, Rob Herring <robh+dt-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Frank Rowand <frowand.list-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Grant Likely <grant.likely-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Pawel Moll <pawel.moll-5wv7dgnIgG8@public.gmane.org>, Ian Campbell <ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg@public.gmane.org>, Kumar Gala <galak-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Ganapatrao Kulkarni <gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>, Robert Richter <rrichter-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 03/22/2016 11:48 AM, Jon Masters wrote:
-> On 03/08/2016 06:59 PM, David Daney wrote:
->
->> From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA@public.gmane.org>
->>
->> v15:
->>
->> 	- Make the distance-map node optional (again), if it is not in
->>            the device tree, default values are used.
->>
->> 	- Minor cleanups to of_numa.c as suggested by Rob Harring.
->
-> Hi David, all,
->
-> Wondering what the status of this patch series is currently?
+On Tue, 22 Mar, at 04:08:24PM, Ard Biesheuvel wrote:
+> 
+> This patch causes a warning I hadn't spotted before sending it out.
+> Could you fold this in please?
+> 
+> diff --git a/drivers/firmware/efi/arm-runtime.c
+> b/drivers/firmware/efi/arm-runtime.c
+> index 6c97d4884fc7..fe749da9997e 100644
+> --- a/drivers/firmware/efi/arm-runtime.c
+> +++ b/drivers/firmware/efi/arm-runtime.c
+> @@ -72,8 +72,8 @@ static bool __init efi_virtmap_init(void)
+>                  */
+>                 if (efi_system_table >= phys &&
+>                     efi_system_table < phys + (md->num_pages * EFI_PAGE_SIZE)) {
+> -                       efi.systab = (void *)(efi_system_table - phys +
+> -                                             md->virt_addr);
+> +                       efi.systab = (void *)(unsigned long)(efi_system_table -
+> +                                                         phys + md->virt_addr);
+>                         systab_found = true;
+>                 }
+>         }
 
-I haven't seen any feedback on v15.  My assumption was that the relevant 
-arm64 maintainers would take some sort of action after the merge window 
-quiets down.
+Done, please check,
 
-In any event, I am happy to make any improvements that may be suggested.
-
-David Daney
+  https://git.kernel.org/cgit/linux/kernel/git/mfleming/efi.git/commit/?h=next&id=4fd5c619dcf4f3d2c86d4a686ce66fc01e877a08
