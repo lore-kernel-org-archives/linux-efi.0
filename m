@@ -1,148 +1,60 @@
 From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v7 11/17] ARM: XEN: Move xen_early_init() before efi_init()
-Date: Thu, 24 Mar 2016 22:44:30 +0800
-Message-ID: <1458830676-27075-12-git-send-email-shannon.zhao@linaro.org>
+Subject: [PATCH v7 10/17] arm/xen: Get event-channel irq through
+	HVM_PARAM when booting with ACPI
+Date: Thu, 24 Mar 2016 22:44:29 +0800
+Message-ID: <1458830676-27075-11-git-send-email-shannon.zhao@linaro.org>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
 To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, shannon.zhao@linaro.org
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
 List-Id: linux-efi@vger.kernel.org
 
-Move xen_early_init() before efi_init(), then when calling efi_init()
-could initialize Xen specific UEFI.
-
-Check if it runs on Xen hypervisor through the flat dts.
-
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
----
- arch/arm/xen/enlighten.c  | 56 ++++++++++++++++++++++++++++++++++-------------
- arch/arm64/kernel/setup.c |  2 +-
- 2 files changed, 42 insertions(+), 16 deletions(-)
-
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 680aae0..c43617f 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -20,6 +20,7 @@
- #include <linux/irqreturn.h>
- #include <linux/module.h>
- #include <linux/of.h>
-+#include <linux/of_fdt.h>
- #include <linux/of_irq.h>
- #include <linux/of_address.h>
- #include <linux/cpuidle.h>
-@@ -53,8 +54,6 @@ struct xen_memory_region xen_extra_mem[XEN_EXTRA_MEM_MAX_REGIONS] __initdata;
- 
- static __read_mostly unsigned int xen_events_irq;
- 
--static __initdata struct device_node *xen_node;
--
- int xen_remap_domain_gfn_array(struct vm_area_struct *vma,
- 			       unsigned long addr,
- 			       xen_pfn_t *gfn, int nr,
-@@ -238,6 +237,33 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- 	return IRQ_HANDLED;
- }
- 
-+static __initdata struct {
-+	const char *compat;
-+	const char *prefix;
-+	const char *version;
-+	bool found;
-+} hyper_node = {"xen,xen", "xen,xen-", NULL, false};
-+
-+static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
-+				      int depth, void *data)
-+{
-+	const void *s = NULL;
-+	int len;
-+
-+	if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-+		return 0;
-+
-+	if (of_flat_dt_is_compatible(node, hyper_node.compat))
-+		hyper_node.found = true;
-+
-+	s = of_get_flat_dt_prop(node, "compatible", &len);
-+	if (strlen(hyper_node.prefix) + 3  < len &&
-+	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
-+		hyper_node.version = s + strlen(hyper_node.prefix);
-+
-+	return 0;
-+}
-+
- /*
-  * see Documentation/devicetree/bindings/arm/xen.txt for the
-  * documentation of the Xen Device Tree format.
-@@ -245,26 +271,18 @@ static irqreturn_t xen_arm_callback(int irq, void *arg)
- #define GRANT_TABLE_PHYSADDR 0
- void __init xen_early_init(void)
- {
--	int len;
--	const char *s = NULL;
--	const char *version = NULL;
--	const char *xen_prefix = "xen,xen-";
--
--	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
--	if (!xen_node) {
-+	of_scan_flat_dt(fdt_find_hyper_node, NULL);
-+	if (!hyper_node.found) {
- 		pr_debug("No Xen support\n");
- 		return;
- 	}
--	s = of_get_property(xen_node, "compatible", &len);
--	if (strlen(xen_prefix) + 3  < len &&
--			!strncmp(xen_prefix, s, strlen(xen_prefix)))
--		version = s + strlen(xen_prefix);
--	if (version == NULL) {
-+
-+	if (hyper_node.version == NULL) {
- 		pr_debug("Xen version not found\n");
- 		return;
- 	}
- 
--	pr_info("Xen %s support found\n", version);
-+	pr_info("Xen %s support found\n", hyper_node.version);
- 
- 	xen_domain_type = XEN_HVM_DOMAIN;
- 
-@@ -305,6 +323,14 @@ static void __init xen_acpi_guest_init(void)
- 
- static void __init xen_dt_guest_init(void)
- {
-+	struct device_node *xen_node;
-+
-+	xen_node = of_find_compatible_node(NULL, NULL, "xen,xen");
-+	if (!xen_node) {
-+		pr_err("Xen support was detected before, but it has disappeared\n");
-+		return;
-+	}
-+
- 	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
- }
- 
-diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-index 450987d..6cf5051 100644
---- a/arch/arm64/kernel/setup.c
-+++ b/arch/arm64/kernel/setup.c
-@@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
- 	 */
- 	local_async_enable();
- 
-+	xen_early_init();
- 	efi_init();
- 	arm64_memblock_init();
- 
-@@ -334,7 +335,6 @@ void __init setup_arch(char **cmdline_p)
- 	} else {
- 		psci_acpi_init();
- 	}
--	xen_early_init();
- 
- 	cpu_read_bootcpu_ops();
- 	smp_init_cpus();
--- 
-2.1.4
+V2hlbiBib290aW5nIHdpdGggQUNQSSwgaXQgY291bGQgZ2V0IHRoZSBldmVudC1jaGFubmVsIGly
+cSB0aHJvdWdoCkhWTV9QQVJBTV9DQUxMQkFDS19JUlEuCgpTaWduZWQtb2ZmLWJ5OiBTaGFubm9u
+IFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpSZXZpZXdlZC1ieTogU3RlZmFubyBTdGFi
+ZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KLS0tCiBhcmNoL2FybS94
+ZW4vZW5saWdodGVuLmMgfCAzNiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0K
+IDEgZmlsZSBjaGFuZ2VkLCAzNSBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0t
+Z2l0IGEvYXJjaC9hcm0veGVuL2VubGlnaHRlbi5jIGIvYXJjaC9hcm0veGVuL2VubGlnaHRlbi5j
+CmluZGV4IGQ5NGY3MjYuLjY4MGFhZTAgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL3hlbi9lbmxpZ2h0
+ZW4uYworKysgYi9hcmNoL2FybS94ZW4vZW5saWdodGVuLmMKQEAgLTMwLDYgKzMwLDcgQEAKICNp
+bmNsdWRlIDxsaW51eC90aW1lNjQuaD4KICNpbmNsdWRlIDxsaW51eC90aW1la2VlcGluZy5oPgog
+I2luY2x1ZGUgPGxpbnV4L3RpbWVrZWVwZXJfaW50ZXJuYWwuaD4KKyNpbmNsdWRlIDxsaW51eC9h
+Y3BpLmg+CiAKICNpbmNsdWRlIDxsaW51eC9tbS5oPgogCkBAIC0yNzgsNiArMjc5LDM1IEBAIHZv
+aWQgX19pbml0IHhlbl9lYXJseV9pbml0KHZvaWQpCiAJCWFkZF9wcmVmZXJyZWRfY29uc29sZSgi
+aHZjIiwgMCwgTlVMTCk7CiB9CiAKK3N0YXRpYyB2b2lkIF9faW5pdCB4ZW5fYWNwaV9ndWVzdF9p
+bml0KHZvaWQpCit7CisjaWZkZWYgQ09ORklHX0FDUEkKKwlzdHJ1Y3QgeGVuX2h2bV9wYXJhbSBh
+OworCWludCBpbnRlcnJ1cHQsIHRyaWdnZXIsIHBvbGFyaXR5OworCisJYS5kb21pZCA9IERPTUlE
+X1NFTEY7CisJYS5pbmRleCA9IEhWTV9QQVJBTV9DQUxMQkFDS19JUlE7CisJeGVuX2V2ZW50c19p
+cnEgPSAwOworCisJaWYgKCFIWVBFUlZJU09SX2h2bV9vcChIVk1PUF9nZXRfcGFyYW0sICZhKSkg
+eworCQlpZiAoKGEudmFsdWUgPj4gNTYpID09IEhWTV9QQVJBTV9DQUxMQkFDS19UWVBFX1BQSSkg
+eworCQkJaW50ZXJydXB0ID0gYS52YWx1ZSAmIDB4ZmY7CisJCQl0cmlnZ2VyID0gKChhLnZhbHVl
+ID4+IDgpICYgMHgxKSA/IEFDUElfRURHRV9TRU5TSVRJVkUKKwkJCQkJCQkgOiBBQ1BJX0xFVkVM
+X1NFTlNJVElWRTsKKwkJCXBvbGFyaXR5ID0gKChhLnZhbHVlID4+IDgpICYgMHgyKSA/IEFDUElf
+QUNUSVZFX0xPVworCQkJCQkJCSAgOiBBQ1BJX0FDVElWRV9ISUdIOworCQkJeGVuX2V2ZW50c19p
+cnEgPSBhY3BpX3JlZ2lzdGVyX2dzaShOVUxMLCBpbnRlcnJ1cHQsCisJCQkJCQkJICAgdHJpZ2dl
+ciwgcG9sYXJpdHkpOworCQl9CisJfQorI2VuZGlmCit9CisKK3N0YXRpYyB2b2lkIF9faW5pdCB4
+ZW5fZHRfZ3Vlc3RfaW5pdCh2b2lkKQoreworCXhlbl9ldmVudHNfaXJxID0gaXJxX29mX3BhcnNl
+X2FuZF9tYXAoeGVuX25vZGUsIDApOworfQorCiBzdGF0aWMgaW50IF9faW5pdCB4ZW5fZ3Vlc3Rf
+aW5pdCh2b2lkKQogewogCXN0cnVjdCB4ZW5fYWRkX3RvX3BoeXNtYXAgeGF0cDsKQEAgLTI4Niw3
+ICszMTYsMTEgQEAgc3RhdGljIGludCBfX2luaXQgeGVuX2d1ZXN0X2luaXQodm9pZCkKIAlpZiAo
+IXhlbl9kb21haW4oKSkKIAkJcmV0dXJuIDA7CiAKLQl4ZW5fZXZlbnRzX2lycSA9IGlycV9vZl9w
+YXJzZV9hbmRfbWFwKHhlbl9ub2RlLCAwKTsKKwlpZiAoIWFjcGlfZGlzYWJsZWQpCisJCXhlbl9h
+Y3BpX2d1ZXN0X2luaXQoKTsKKwllbHNlCisJCXhlbl9kdF9ndWVzdF9pbml0KCk7CisKIAlpZiAo
+IXhlbl9ldmVudHNfaXJxKSB7CiAJCXByX2VycigiWGVuIGV2ZW50IGNoYW5uZWwgaW50ZXJydXB0
+IG5vdCBmb3VuZFxuIik7CiAJCXJldHVybiAtRU5PREVWOwotLSAKMi4xLjQKCgpfX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBs
+aXN0Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZl
+bAo=
