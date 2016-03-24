@@ -1,38 +1,64 @@
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v7 05/17] xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
-Date: Thu, 24 Mar 2016 22:44:24 +0800
-Message-ID: <1458830676-27075-6-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao@linaro.org>
+Subject: [PATCH v7 03/17] Xen: xlate: Use page_to_xen_pfn
+	instead of page_to_pfn
+Date: Thu, 24 Mar 2016 22:44:22 +0800
+Message-ID: <1458830676-27075-4-git-send-email-shannon.zhao@linaro.org>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
 List-Id: linux-efi@vger.kernel.org
 
-Add a new type of Xen map space for Dom0 to map device's MMIO region.
-
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
----
- include/xen/interface/memory.h | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/include/xen/interface/memory.h b/include/xen/interface/memory.h
-index 2ecfe4f..9aa8988 100644
---- a/include/xen/interface/memory.h
-+++ b/include/xen/interface/memory.h
-@@ -160,6 +160,7 @@ DEFINE_GUEST_HANDLE_STRUCT(xen_machphys_mapping_t);
- #define XENMAPSPACE_gmfn_foreign 4 /* GMFN from another dom,
- 				    * XENMEM_add_to_physmap_range only.
- 				    */
-+#define XENMAPSPACE_dev_mmio     5 /* device mmio region */
- 
- /*
-  * Sets the GPFN at which a particular page appears in the specified guest's
--- 
-2.1.4
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+TWFrZSB4ZW5feGxhdGVfbWFwX2JhbGxvb25lZF9wYWdlcyB3b3JrIHdpdGggNjRLIHBhZ2VzLiBJ
+biB0aGF0IGNhc2UKS2VybmVsIHBhZ2VzIGFyZSA2NEsgaW4gc2l6ZSBidXQgWGVuIHBhZ2VzIHJl
+bWFpbiA0SyBpbiBzaXplLiBYZW4gcGZucwpyZWZlciB0byA0SyBwYWdlcy4KClNpZ25lZC1vZmYt
+Ynk6IFNoYW5ub24gWmhhbyA8c2hhbm5vbi56aGFvQGxpbmFyby5vcmc+ClJldmlld2VkLWJ5OiBT
+dGVmYW5vIFN0YWJlbGxpbmkgPHN0ZWZhbm8uc3RhYmVsbGluaUBldS5jaXRyaXguY29tPgotLS0K
+IGRyaXZlcnMveGVuL3hsYXRlX21tdS5jIHwgMjYgKysrKysrKysrKysrKysrKy0tLS0tLS0tLS0K
+IDEgZmlsZSBjaGFuZ2VkLCAxNiBpbnNlcnRpb25zKCspLCAxMCBkZWxldGlvbnMoLSkKCmRpZmYg
+LS1naXQgYS9kcml2ZXJzL3hlbi94bGF0ZV9tbXUuYyBiL2RyaXZlcnMveGVuL3hsYXRlX21tdS5j
+CmluZGV4IDk2OTI2NTYuLjI4ZjcyOGIgMTAwNjQ0Ci0tLSBhL2RyaXZlcnMveGVuL3hsYXRlX21t
+dS5jCisrKyBiL2RyaXZlcnMveGVuL3hsYXRlX21tdS5jCkBAIC0yMDcsOSArMjA3LDEyIEBAIGlu
+dCBfX2luaXQgeGVuX3hsYXRlX21hcF9iYWxsb29uZWRfcGFnZXMoeGVuX3Bmbl90ICoqZ2Zucywg
+dm9pZCAqKnZpcnQsCiAJdm9pZCAqdmFkZHI7CiAJaW50IHJjOwogCXVuc2lnbmVkIGludCBpOwor
+CXVuc2lnbmVkIGxvbmcgbnJfcGFnZXM7CisJeGVuX3Bmbl90IHhlbl9wZm4gPSAwOwogCiAJQlVH
+X09OKG5yX2dyYW50X2ZyYW1lcyA9PSAwKTsKLQlwYWdlcyA9IGtjYWxsb2MobnJfZ3JhbnRfZnJh
+bWVzLCBzaXplb2YocGFnZXNbMF0pLCBHRlBfS0VSTkVMKTsKKwlucl9wYWdlcyA9IERJVl9ST1VO
+RF9VUChucl9ncmFudF9mcmFtZXMsIFhFTl9QRk5fUEVSX1BBR0UpOworCXBhZ2VzID0ga2NhbGxv
+Yyhucl9wYWdlcywgc2l6ZW9mKHBhZ2VzWzBdKSwgR0ZQX0tFUk5FTCk7CiAJaWYgKCFwYWdlcykK
+IAkJcmV0dXJuIC1FTk9NRU07CiAKQEAgLTIxOCwyMiArMjIxLDI1IEBAIGludCBfX2luaXQgeGVu
+X3hsYXRlX21hcF9iYWxsb29uZWRfcGFnZXMoeGVuX3Bmbl90ICoqZ2Zucywgdm9pZCAqKnZpcnQs
+CiAJCWtmcmVlKHBhZ2VzKTsKIAkJcmV0dXJuIC1FTk9NRU07CiAJfQotCXJjID0gYWxsb2NfeGVu
+YmFsbG9vbmVkX3BhZ2VzKG5yX2dyYW50X2ZyYW1lcywgcGFnZXMpOworCXJjID0gYWxsb2NfeGVu
+YmFsbG9vbmVkX3BhZ2VzKG5yX3BhZ2VzLCBwYWdlcyk7CiAJaWYgKHJjKSB7Ci0JCXByX3dhcm4o
+IiVzIENvdWxkbid0IGJhbGxvb24gYWxsb2MgJWxkIHBmbnMgcmM6JWRcbiIsIF9fZnVuY19fLAot
+CQkJbnJfZ3JhbnRfZnJhbWVzLCByYyk7CisJCXByX3dhcm4oIiVzIENvdWxkbid0IGJhbGxvb24g
+YWxsb2MgJWxkIHBhZ2VzIHJjOiVkXG4iLCBfX2Z1bmNfXywKKwkJCW5yX3BhZ2VzLCByYyk7CiAJ
+CWtmcmVlKHBhZ2VzKTsKIAkJa2ZyZWUocGZucyk7CiAJCXJldHVybiByYzsKIAl9Ci0JZm9yIChp
+ID0gMDsgaSA8IG5yX2dyYW50X2ZyYW1lczsgaSsrKQotCQlwZm5zW2ldID0gcGFnZV90b19wZm4o
+cGFnZXNbaV0pOworCWZvciAoaSA9IDA7IGkgPCBucl9ncmFudF9mcmFtZXM7IGkrKykgeworCQlp
+ZiAoKGkgJSBYRU5fUEZOX1BFUl9QQUdFKSA9PSAwKQorCQkJeGVuX3BmbiA9IHBhZ2VfdG9feGVu
+X3BmbihwYWdlc1tpIC8gWEVOX1BGTl9QRVJfUEFHRV0pOworCQlwZm5zW2ldID0gcGZuX3RvX2dm
+bih4ZW5fcGZuKyspOworCX0KIAotCXZhZGRyID0gdm1hcChwYWdlcywgbnJfZ3JhbnRfZnJhbWVz
+LCAwLCBQQUdFX0tFUk5FTCk7CisJdmFkZHIgPSB2bWFwKHBhZ2VzLCBucl9wYWdlcywgMCwgUEFH
+RV9LRVJORUwpOwogCWlmICghdmFkZHIpIHsKLQkJcHJfd2FybigiJXMgQ291bGRuJ3QgbWFwICVs
+ZCBwZm5zIHJjOiVkXG4iLCBfX2Z1bmNfXywKLQkJCW5yX2dyYW50X2ZyYW1lcywgcmMpOwotCQlm
+cmVlX3hlbmJhbGxvb25lZF9wYWdlcyhucl9ncmFudF9mcmFtZXMsIHBhZ2VzKTsKKwkJcHJfd2Fy
+bigiJXMgQ291bGRuJ3QgbWFwICVsZCBwYWdlcyByYzolZFxuIiwgX19mdW5jX18sCisJCQlucl9w
+YWdlcywgcmMpOworCQlmcmVlX3hlbmJhbGxvb25lZF9wYWdlcyhucl9wYWdlcywgcGFnZXMpOwog
+CQlrZnJlZShwYWdlcyk7CiAJCWtmcmVlKHBmbnMpOwogCQlyZXR1cm4gLUVOT01FTTsKLS0gCjIu
+MS40CgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVu
+LWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMu
+eGVuLm9yZy94ZW4tZGV2ZWwK
