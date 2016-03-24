@@ -1,60 +1,74 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v7 10/17] arm/xen: Get event-channel irq through
-	HVM_PARAM when booting with ACPI
-Date: Thu, 24 Mar 2016 22:44:29 +0800
-Message-ID: <1458830676-27075-11-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v7 13/17] ARM: Xen: Document UEFI support on Xen ARM virtual platforms
+Date: Thu, 24 Mar 2016 22:44:32 +0800
+Message-ID: <1458830676-27075-14-git-send-email-shannon.zhao@linaro.org>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-V2hlbiBib290aW5nIHdpdGggQUNQSSwgaXQgY291bGQgZ2V0IHRoZSBldmVudC1jaGFubmVsIGly
-cSB0aHJvdWdoCkhWTV9QQVJBTV9DQUxMQkFDS19JUlEuCgpTaWduZWQtb2ZmLWJ5OiBTaGFubm9u
-IFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpSZXZpZXdlZC1ieTogU3RlZmFubyBTdGFi
-ZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KLS0tCiBhcmNoL2FybS94
-ZW4vZW5saWdodGVuLmMgfCAzNiArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0K
-IDEgZmlsZSBjaGFuZ2VkLCAzNSBpbnNlcnRpb25zKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0t
-Z2l0IGEvYXJjaC9hcm0veGVuL2VubGlnaHRlbi5jIGIvYXJjaC9hcm0veGVuL2VubGlnaHRlbi5j
-CmluZGV4IGQ5NGY3MjYuLjY4MGFhZTAgMTAwNjQ0Ci0tLSBhL2FyY2gvYXJtL3hlbi9lbmxpZ2h0
-ZW4uYworKysgYi9hcmNoL2FybS94ZW4vZW5saWdodGVuLmMKQEAgLTMwLDYgKzMwLDcgQEAKICNp
-bmNsdWRlIDxsaW51eC90aW1lNjQuaD4KICNpbmNsdWRlIDxsaW51eC90aW1la2VlcGluZy5oPgog
-I2luY2x1ZGUgPGxpbnV4L3RpbWVrZWVwZXJfaW50ZXJuYWwuaD4KKyNpbmNsdWRlIDxsaW51eC9h
-Y3BpLmg+CiAKICNpbmNsdWRlIDxsaW51eC9tbS5oPgogCkBAIC0yNzgsNiArMjc5LDM1IEBAIHZv
-aWQgX19pbml0IHhlbl9lYXJseV9pbml0KHZvaWQpCiAJCWFkZF9wcmVmZXJyZWRfY29uc29sZSgi
-aHZjIiwgMCwgTlVMTCk7CiB9CiAKK3N0YXRpYyB2b2lkIF9faW5pdCB4ZW5fYWNwaV9ndWVzdF9p
-bml0KHZvaWQpCit7CisjaWZkZWYgQ09ORklHX0FDUEkKKwlzdHJ1Y3QgeGVuX2h2bV9wYXJhbSBh
-OworCWludCBpbnRlcnJ1cHQsIHRyaWdnZXIsIHBvbGFyaXR5OworCisJYS5kb21pZCA9IERPTUlE
-X1NFTEY7CisJYS5pbmRleCA9IEhWTV9QQVJBTV9DQUxMQkFDS19JUlE7CisJeGVuX2V2ZW50c19p
-cnEgPSAwOworCisJaWYgKCFIWVBFUlZJU09SX2h2bV9vcChIVk1PUF9nZXRfcGFyYW0sICZhKSkg
-eworCQlpZiAoKGEudmFsdWUgPj4gNTYpID09IEhWTV9QQVJBTV9DQUxMQkFDS19UWVBFX1BQSSkg
-eworCQkJaW50ZXJydXB0ID0gYS52YWx1ZSAmIDB4ZmY7CisJCQl0cmlnZ2VyID0gKChhLnZhbHVl
-ID4+IDgpICYgMHgxKSA/IEFDUElfRURHRV9TRU5TSVRJVkUKKwkJCQkJCQkgOiBBQ1BJX0xFVkVM
-X1NFTlNJVElWRTsKKwkJCXBvbGFyaXR5ID0gKChhLnZhbHVlID4+IDgpICYgMHgyKSA/IEFDUElf
-QUNUSVZFX0xPVworCQkJCQkJCSAgOiBBQ1BJX0FDVElWRV9ISUdIOworCQkJeGVuX2V2ZW50c19p
-cnEgPSBhY3BpX3JlZ2lzdGVyX2dzaShOVUxMLCBpbnRlcnJ1cHQsCisJCQkJCQkJICAgdHJpZ2dl
-ciwgcG9sYXJpdHkpOworCQl9CisJfQorI2VuZGlmCit9CisKK3N0YXRpYyB2b2lkIF9faW5pdCB4
-ZW5fZHRfZ3Vlc3RfaW5pdCh2b2lkKQoreworCXhlbl9ldmVudHNfaXJxID0gaXJxX29mX3BhcnNl
-X2FuZF9tYXAoeGVuX25vZGUsIDApOworfQorCiBzdGF0aWMgaW50IF9faW5pdCB4ZW5fZ3Vlc3Rf
-aW5pdCh2b2lkKQogewogCXN0cnVjdCB4ZW5fYWRkX3RvX3BoeXNtYXAgeGF0cDsKQEAgLTI4Niw3
-ICszMTYsMTEgQEAgc3RhdGljIGludCBfX2luaXQgeGVuX2d1ZXN0X2luaXQodm9pZCkKIAlpZiAo
-IXhlbl9kb21haW4oKSkKIAkJcmV0dXJuIDA7CiAKLQl4ZW5fZXZlbnRzX2lycSA9IGlycV9vZl9w
-YXJzZV9hbmRfbWFwKHhlbl9ub2RlLCAwKTsKKwlpZiAoIWFjcGlfZGlzYWJsZWQpCisJCXhlbl9h
-Y3BpX2d1ZXN0X2luaXQoKTsKKwllbHNlCisJCXhlbl9kdF9ndWVzdF9pbml0KCk7CisKIAlpZiAo
-IXhlbl9ldmVudHNfaXJxKSB7CiAJCXByX2VycigiWGVuIGV2ZW50IGNoYW5uZWwgaW50ZXJydXB0
-IG5vdCBmb3VuZFxuIik7CiAJCXJldHVybiAtRU5PREVWOwotLSAKMi4xLjQKCgpfX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBs
-aXN0Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZl
-bAo=
+Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
+scan this to get the UEFI information.
+
+CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+---
+ Documentation/devicetree/bindings/arm/xen.txt | 33 +++++++++++++++++++++++++++
+ 1 file changed, 33 insertions(+)
+
+diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
+index 0f7b9c2..6f83f76 100644
+--- a/Documentation/devicetree/bindings/arm/xen.txt
++++ b/Documentation/devicetree/bindings/arm/xen.txt
+@@ -15,6 +15,26 @@ the following properties:
+ - interrupts: the interrupt used by Xen to inject event notifications.
+   A GIC node is also required.
+ 
++To support UEFI on Xen ARM virtual platforms, Xen populates the FDT "uefi" node
++under /hypervisor with following parameters:
++
++________________________________________________________________________________
++Name                      | Size   | Description
++================================================================================
++xen,uefi-system-table     | 64-bit | Guest physical address of the UEFI System
++			  |	   | Table.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-start       | 64-bit | Guest physical address of the UEFI memory
++			  |	   | map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
++                          |        | pointed to in previous entry.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
++                          |        | memory map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
++--------------------------------------------------------------------------------
+ 
+ Example (assuming #address-cells = <2> and #size-cells = <2>):
+ 
+@@ -22,4 +42,17 @@ hypervisor {
+ 	compatible = "xen,xen-4.3", "xen,xen";
+ 	reg = <0 0xb0000000 0 0x20000>;
+ 	interrupts = <1 15 0xf08>;
++	uefi {
++		xen,uefi-system-table = <0xXXXXXXXX>;
++		xen,uefi-mmap-start = <0xXXXXXXXX>;
++		xen,uefi-mmap-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
++        };
+ };
++
++The format and meaning of the "xen,uefi-*" parameters are similar to those in
++Documentation/arm/uefi.txt, which are provided by the regular UEFI stub. However
++they differ because they are provided by the Xen hypervisor, together with a set
++of UEFI runtime services implemented via hypercalls, see
++http://xenbits.xen.org/docs/unstable/hypercall/x86_64/include,public,platform.h.html.
+-- 
+2.1.4
