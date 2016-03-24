@@ -1,58 +1,55 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v7 08/17] Xen: public/hvm: sync changes of
-	HVM_PARAM_CALLBACK_VIA ABI from Xen
-Date: Thu, 24 Mar 2016 22:44:27 +0800
-Message-ID: <1458830676-27075-9-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
+Date: Thu, 24 Mar 2016 22:44:31 +0800
+Message-ID: <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-U3luYyB0aGUgY2hhbmdlcyBvZiBIVk1fUEFSQU1fQ0FMTEJBQ0tfVklBIEFCSSBpbnRyb2R1Y2Vk
-IGJ5ClhlbiBjb21taXQgPGNhNWM1NGI2ZmYwNT4gKHB1YmxpYy9odm06IGV4cG9ydCB0aGUgSFZN
-X1BBUkFNX0NBTExCQUNLX1ZJQQpBQkkgaW4gdGhlIEFQSSkuCgpTaWduZWQtb2ZmLWJ5OiBTaGFu
-bm9uIFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpBY2tlZC1ieTogU3RlZmFubyBTdGFi
-ZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KLS0tCiBpbmNsdWRlL3hl
-bi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oIHwgMjcgKysrKysrKysrKysrKysrKysrKysrLS0tLS0t
-CiAxIGZpbGUgY2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgNiBkZWxldGlvbnMoLSkKCmRpZmYg
-LS1naXQgYS9pbmNsdWRlL3hlbi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oIGIvaW5jbHVkZS94ZW4v
-aW50ZXJmYWNlL2h2bS9wYXJhbXMuaAppbmRleCBhNmM3OTkxLi43MGFkMjA4IDEwMDY0NAotLS0g
-YS9pbmNsdWRlL3hlbi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oCisrKyBiL2luY2x1ZGUveGVuL2lu
-dGVyZmFjZS9odm0vcGFyYW1zLmgKQEAgLTI3LDE2ICsyNywzMSBAQAogICogUGFyYW1ldGVyIHNw
-YWNlIGZvciBIVk1PUF97c2V0LGdldH1fcGFyYW0uCiAgKi8KIAorI2RlZmluZSBIVk1fUEFSQU1f
-Q0FMTEJBQ0tfSVJRIDAKIC8qCiAgKiBIb3cgc2hvdWxkIENQVTAgZXZlbnQtY2hhbm5lbCBub3Rp
-ZmljYXRpb25zIGJlIGRlbGl2ZXJlZD8KLSAqIHZhbFs2Mzo1Nl0gPT0gMDogdmFsWzU1OjBdIGlz
-IGEgZGVsaXZlcnkgR1NJIChHbG9iYWwgU3lzdGVtIEludGVycnVwdCkuCi0gKiB2YWxbNjM6NTZd
-ID09IDE6IHZhbFs1NTowXSBpcyBhIGRlbGl2ZXJ5IFBDSSBJTlR4IGxpbmUsIGFzIGZvbGxvd3M6
-Ci0gKiAgICAgICAgICAgICAgICAgIERvbWFpbiA9IHZhbFs0NzozMl0sIEJ1cyAgPSB2YWxbMzE6
-MTZdLAotICogICAgICAgICAgICAgICAgICBEZXZGbiAgPSB2YWxbMTU6IDhdLCBJbnRYID0gdmFs
-WyAxOiAwXQotICogdmFsWzYzOjU2XSA9PSAyOiB2YWxbNzowXSBpcyBhIHZlY3RvciBudW1iZXIu
-CisgKgogICogSWYgdmFsID09IDAgdGhlbiBDUFUwIGV2ZW50LWNoYW5uZWwgbm90aWZpY2F0aW9u
-cyBhcmUgbm90IGRlbGl2ZXJlZC4KKyAqIElmIHZhbCAhPSAwLCB2YWxbNjM6NTZdIGVuY29kZXMg
-dGhlIHR5cGUsIGFzIGZvbGxvd3M6CisgKi8KKworI2RlZmluZSBIVk1fUEFSQU1fQ0FMTEJBQ0tf
-VFlQRV9HU0kgICAgICAwCisvKgorICogdmFsWzU1OjBdIGlzIGEgZGVsaXZlcnkgR1NJLiAgR1NJ
-IDAgY2Fubm90IGJlIHVzZWQsIGFzIGl0IGFsaWFzZXMgdmFsID09IDAsCisgKiBhbmQgZGlzYWJs
-ZXMgYWxsIG5vdGlmaWNhdGlvbnMuCisgKi8KKworI2RlZmluZSBIVk1fUEFSQU1fQ0FMTEJBQ0tf
-VFlQRV9QQ0lfSU5UWCAxCisvKgorICogdmFsWzU1OjBdIGlzIGEgZGVsaXZlcnkgUENJIElOVHgg
-bGluZToKKyAqIERvbWFpbiA9IHZhbFs0NzozMl0sIEJ1cyA9IHZhbFszMToxNl0gRGV2Rm4gPSB2
-YWxbMTU6OF0sIEludFggPSB2YWxbMTowXQorICovCisKKyNkZWZpbmUgSFZNX1BBUkFNX0NBTExC
-QUNLX1RZUEVfVkVDVE9SICAgMgorLyoKKyAqIHZhbFs3OjBdIGlzIGEgdmVjdG9yIG51bWJlci4g
-IENoZWNrIGZvciBYRU5GRUFUX2h2bV9jYWxsYmFja192ZWN0b3IgdG8ga25vdworICogaWYgdGhp
-cyBkZWxpdmVyeSBtZXRob2QgaXMgYXZhaWxhYmxlLgogICovCi0jZGVmaW5lIEhWTV9QQVJBTV9D
-QUxMQkFDS19JUlEgMAogCiAjZGVmaW5lIEhWTV9QQVJBTV9TVE9SRV9QRk4gICAgMQogI2RlZmlu
-ZSBIVk1fUEFSQU1fU1RPUkVfRVZUQ0hOIDIKLS0gCjIuMS40CgoKX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4t
-ZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMueGVuLm9yZy94ZW4tZGV2ZWwK
+When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+a /hypervisor node in DT. So check if it needs to enable ACPI.
+
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/kernel/acpi.c | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+index d1ce8e2..4e92be0 100644
+--- a/arch/arm64/kernel/acpi.c
++++ b/arch/arm64/kernel/acpi.c
+@@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+ {
+ 	/*
+ 	 * Return 1 as soon as we encounter a node at depth 1 that is
+-	 * not the /chosen node.
++	 * not the /chosen node, or /hypervisor node when running on Xen.
+ 	 */
+-	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+-		return 1;
++	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
++		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
++			return 1;
++	}
++
+ 	return 0;
+ }
+ 
+@@ -184,7 +187,8 @@ void __init acpi_boot_table_init(void)
+ 	/*
+ 	 * Enable ACPI instead of device tree unless
+ 	 * - ACPI has been disabled explicitly (acpi=off), or
+-	 * - the device tree is not empty (it has more than just a /chosen node)
++	 * - the device tree is not empty (it has more than just a /chosen node,
++	 *   and a /hypervisor node when running on Xen)
+ 	 *   and ACPI has not been force enabled (acpi=force)
+ 	 */
+ 	if (param_acpi_off ||
+-- 
+2.1.4
