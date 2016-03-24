@@ -1,56 +1,58 @@
-From: Matt Fleming <matt@codeblueprint.co.uk>
-Subject: Re: [PATCH v2] efi: Introduce EFI bootloader control driver
-Date: Thu, 24 Mar 2016 14:47:41 +0000
-Message-ID: <20160324144741.GA4328@codeblueprint.co.uk>
-References: <1458295910-26557-1-git-send-email-daniel.baluta@intel.com>
- <20160318161505.GU2619@codeblueprint.co.uk>
- <1458328697.16385.21.camel@intel.com>
+From: Shannon Zhao <shannon.zhao@linaro.org>
+Subject: [PATCH v7 08/17] Xen: public/hvm: sync changes of
+	HVM_PARAM_CALLBACK_VIA ABI from Xen
+Date: Thu, 24 Mar 2016 22:44:27 +0800
+Message-ID: <1458830676-27075-9-git-send-email-shannon.zhao@linaro.org>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1458328697.16385.21.camel@intel.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Stanacar, Stefan" <stefan.stanacar@intel.com>
-Cc: "Baluta, Daniel" <daniel.baluta@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Abbas, Mohamed" <mohamed.abbas@intel.com>, "Gumbel, Matthew K" <matthew.k.gumbel@intel.com>, "Musca, Constantin" <constantin.musca@intel.com>, "Purdila, Octavian" <octavian.purdila@intel.com>, Darren Hart <dvhart@infradead.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
 List-Id: linux-efi@vger.kernel.org
 
-(Sorry for the delay)
-
-On Fri, 18 Mar, at 07:18:17PM, Stanacar, Stefan wrote:
->=20
-> Hi Matt,
->=20
-> It is possible, but that means modifying those userspace apps :)
-> There are reboot implementations that do "reboot <reason>", such as
-> Android's reboot command [1] and Upstart's reboot replacement [2], wh=
-ich
-> pass the reason as an argument to the reboot syscall.=A0
-> Probably your first question will be - "Why don't you modify those
-> apps?"
-
-Your guess is correct ;)
-
-> Well, I don't see platform-agnostic way how those could be
-> modified to pass the reason to the bootloader, regardless of platform=
- or
-> bootloader.
-
-This is true. But then again, what you're proposing isn't boot loader
-or platform agnostic anyway. Yes it's transparent to both the app and
-boot loader, but it's only going to work on EFI platforms running
-gummiboot.
-
-And because of that, if this is going to be merged upstream I think
-something like drivers/power/reset/ would be a more appropriate place,
-or drivers/platform/x86.
-
-If this does get merged, please rework the patch to use the efivar API
-instead of accessing efi.set_variable() directly. We've also got a
-bunch of ucs2 string functions in lib/ucs2_string.c that you could
-use. In fact, this version of the driver I found on the net is much
-more like what I had in mind,
-
-  https://github.com/BORETS24/Kernel-for-Asus-Zenfone-2/blob/master/dri=
-vers/external_drivers/drivers/platform/x86/reboot_target_uefi.c
+U3luYyB0aGUgY2hhbmdlcyBvZiBIVk1fUEFSQU1fQ0FMTEJBQ0tfVklBIEFCSSBpbnRyb2R1Y2Vk
+IGJ5ClhlbiBjb21taXQgPGNhNWM1NGI2ZmYwNT4gKHB1YmxpYy9odm06IGV4cG9ydCB0aGUgSFZN
+X1BBUkFNX0NBTExCQUNLX1ZJQQpBQkkgaW4gdGhlIEFQSSkuCgpTaWduZWQtb2ZmLWJ5OiBTaGFu
+bm9uIFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpBY2tlZC1ieTogU3RlZmFubyBTdGFi
+ZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KLS0tCiBpbmNsdWRlL3hl
+bi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oIHwgMjcgKysrKysrKysrKysrKysrKysrKysrLS0tLS0t
+CiAxIGZpbGUgY2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgNiBkZWxldGlvbnMoLSkKCmRpZmYg
+LS1naXQgYS9pbmNsdWRlL3hlbi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oIGIvaW5jbHVkZS94ZW4v
+aW50ZXJmYWNlL2h2bS9wYXJhbXMuaAppbmRleCBhNmM3OTkxLi43MGFkMjA4IDEwMDY0NAotLS0g
+YS9pbmNsdWRlL3hlbi9pbnRlcmZhY2UvaHZtL3BhcmFtcy5oCisrKyBiL2luY2x1ZGUveGVuL2lu
+dGVyZmFjZS9odm0vcGFyYW1zLmgKQEAgLTI3LDE2ICsyNywzMSBAQAogICogUGFyYW1ldGVyIHNw
+YWNlIGZvciBIVk1PUF97c2V0LGdldH1fcGFyYW0uCiAgKi8KIAorI2RlZmluZSBIVk1fUEFSQU1f
+Q0FMTEJBQ0tfSVJRIDAKIC8qCiAgKiBIb3cgc2hvdWxkIENQVTAgZXZlbnQtY2hhbm5lbCBub3Rp
+ZmljYXRpb25zIGJlIGRlbGl2ZXJlZD8KLSAqIHZhbFs2Mzo1Nl0gPT0gMDogdmFsWzU1OjBdIGlz
+IGEgZGVsaXZlcnkgR1NJIChHbG9iYWwgU3lzdGVtIEludGVycnVwdCkuCi0gKiB2YWxbNjM6NTZd
+ID09IDE6IHZhbFs1NTowXSBpcyBhIGRlbGl2ZXJ5IFBDSSBJTlR4IGxpbmUsIGFzIGZvbGxvd3M6
+Ci0gKiAgICAgICAgICAgICAgICAgIERvbWFpbiA9IHZhbFs0NzozMl0sIEJ1cyAgPSB2YWxbMzE6
+MTZdLAotICogICAgICAgICAgICAgICAgICBEZXZGbiAgPSB2YWxbMTU6IDhdLCBJbnRYID0gdmFs
+WyAxOiAwXQotICogdmFsWzYzOjU2XSA9PSAyOiB2YWxbNzowXSBpcyBhIHZlY3RvciBudW1iZXIu
+CisgKgogICogSWYgdmFsID09IDAgdGhlbiBDUFUwIGV2ZW50LWNoYW5uZWwgbm90aWZpY2F0aW9u
+cyBhcmUgbm90IGRlbGl2ZXJlZC4KKyAqIElmIHZhbCAhPSAwLCB2YWxbNjM6NTZdIGVuY29kZXMg
+dGhlIHR5cGUsIGFzIGZvbGxvd3M6CisgKi8KKworI2RlZmluZSBIVk1fUEFSQU1fQ0FMTEJBQ0tf
+VFlQRV9HU0kgICAgICAwCisvKgorICogdmFsWzU1OjBdIGlzIGEgZGVsaXZlcnkgR1NJLiAgR1NJ
+IDAgY2Fubm90IGJlIHVzZWQsIGFzIGl0IGFsaWFzZXMgdmFsID09IDAsCisgKiBhbmQgZGlzYWJs
+ZXMgYWxsIG5vdGlmaWNhdGlvbnMuCisgKi8KKworI2RlZmluZSBIVk1fUEFSQU1fQ0FMTEJBQ0tf
+VFlQRV9QQ0lfSU5UWCAxCisvKgorICogdmFsWzU1OjBdIGlzIGEgZGVsaXZlcnkgUENJIElOVHgg
+bGluZToKKyAqIERvbWFpbiA9IHZhbFs0NzozMl0sIEJ1cyA9IHZhbFszMToxNl0gRGV2Rm4gPSB2
+YWxbMTU6OF0sIEludFggPSB2YWxbMTowXQorICovCisKKyNkZWZpbmUgSFZNX1BBUkFNX0NBTExC
+QUNLX1RZUEVfVkVDVE9SICAgMgorLyoKKyAqIHZhbFs3OjBdIGlzIGEgdmVjdG9yIG51bWJlci4g
+IENoZWNrIGZvciBYRU5GRUFUX2h2bV9jYWxsYmFja192ZWN0b3IgdG8ga25vdworICogaWYgdGhp
+cyBkZWxpdmVyeSBtZXRob2QgaXMgYXZhaWxhYmxlLgogICovCi0jZGVmaW5lIEhWTV9QQVJBTV9D
+QUxMQkFDS19JUlEgMAogCiAjZGVmaW5lIEhWTV9QQVJBTV9TVE9SRV9QRk4gICAgMQogI2RlZmlu
+ZSBIVk1fUEFSQU1fU1RPUkVfRVZUQ0hOIDIKLS0gCjIuMS40CgoKX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4t
+ZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwOi8vbGlzdHMueGVuLm9yZy94ZW4tZGV2ZWwK
