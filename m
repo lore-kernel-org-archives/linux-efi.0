@@ -1,79 +1,109 @@
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v7 07/17] Xen: ARM: Add support for mapping AMBA device mmio
-Date: Thu, 24 Mar 2016 22:44:26 +0800
-Message-ID: <1458830676-27075-8-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao@linaro.org>
+Subject: [PATCH v7 06/17] Xen: ARM: Add support for mapping
+	platform device mmio
+Date: Thu, 24 Mar 2016 22:44:25 +0800
+Message-ID: <1458830676-27075-7-git-send-email-shannon.zhao@linaro.org>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
+Mime-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+In-Reply-To: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, peter.huangpeng@huawei.com, julien.grall@arm.com, shannon.zhao@linaro.org, zhaoshenglong@huawei.com, xen-devel@lists.xen.org
 List-Id: linux-efi@vger.kernel.org
 
-Add a bus_notifier for AMBA bus device in order to map the device
-mmio regions when DOM0 booting with ACPI.
-
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
----
- drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 43 insertions(+)
-
-diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
-index 76e26e5..3854043 100644
---- a/drivers/xen/arm-device.c
-+++ b/drivers/xen/arm-device.c
-@@ -139,3 +139,46 @@ static int __init register_xen_platform_notifier(void)
- }
- 
- arch_initcall(register_xen_platform_notifier);
-+
-+#ifdef CONFIG_ARM_AMBA
-+#include <linux/amba/bus.h>
-+
-+static int xen_amba_notifier(struct notifier_block *nb,
-+			     unsigned long action, void *data)
-+{
-+	struct amba_device *adev = to_amba_device(data);
-+	int r = 0;
-+
-+	switch (action) {
-+	case BUS_NOTIFY_ADD_DEVICE:
-+		r = xen_map_device_mmio(&adev->res, 1);
-+		break;
-+	case BUS_NOTIFY_DEL_DEVICE:
-+		r = xen_unmap_device_mmio(&adev->res, 1);
-+		break;
-+	default:
-+		return NOTIFY_DONE;
-+	}
-+	if (r)
-+		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
-+			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
-+			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
-+			adev->dev.init_name);
-+
-+	return NOTIFY_OK;
-+}
-+
-+static struct notifier_block amba_device_nb = {
-+	.notifier_call = xen_amba_notifier,
-+};
-+
-+static int __init register_xen_amba_notifier(void)
-+{
-+	if (!xen_initial_domain() || acpi_disabled)
-+		return 0;
-+
-+	return bus_register_notifier(&amba_bustype, &amba_device_nb);
-+}
-+
-+arch_initcall(register_xen_amba_notifier);
-+#endif
--- 
-2.1.4
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+QWRkIGEgYnVzX25vdGlmaWVyIGZvciBwbGF0Zm9ybSBidXMgZGV2aWNlIGluIG9yZGVyIHRvIG1h
+cCB0aGUgZGV2aWNlCm1taW8gcmVnaW9ucyB3aGVuIERPTTAgYm9vdGluZyB3aXRoIEFDUEkuCgpT
+aWduZWQtb2ZmLWJ5OiBTaGFubm9uIFpoYW8gPHNoYW5ub24uemhhb0BsaW5hcm8ub3JnPgpBY2tl
+ZC1ieTogU3RlZmFubyBTdGFiZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNv
+bT4KLS0tCiBkcml2ZXJzL3hlbi9NYWtlZmlsZSAgICAgfCAgIDEgKwogZHJpdmVycy94ZW4vYXJt
+LWRldmljZS5jIHwgMTQxICsrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrCiAyIGZpbGVzIGNoYW5nZWQsIDE0MiBpbnNlcnRpb25zKCspCiBjcmVhdGUgbW9kZSAx
+MDA2NDQgZHJpdmVycy94ZW4vYXJtLWRldmljZS5jCgpkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4v
+TWFrZWZpbGUgYi9kcml2ZXJzL3hlbi9NYWtlZmlsZQppbmRleCA5YjdhMzVjLi40MTVmMjg2IDEw
+MDY0NAotLS0gYS9kcml2ZXJzL3hlbi9NYWtlZmlsZQorKysgYi9kcml2ZXJzL3hlbi9NYWtlZmls
+ZQpAQCAtOSw2ICs5LDcgQEAgQ0ZMQUdTX2ZlYXR1cmVzLm8JCQk6PSAkKG5vc3RhY2twKQogCiBD
+RkxBR1NfZWZpLm8JCQkJKz0gLWZzaG9ydC13Y2hhcgogCitkb20wLSQoQ09ORklHX0FSTTY0KSAr
+PSBhcm0tZGV2aWNlLm8KIGRvbTAtJChDT05GSUdfUENJKSArPSBwY2kubwogZG9tMC0kKENPTkZJ
+R19VU0JfU1VQUE9SVCkgKz0gZGJncC5vCiBkb20wLSQoQ09ORklHX1hFTl9BQ1BJKSArPSBhY3Bp
+Lm8gJCh4ZW4tcGFkLXkpCmRpZmYgLS1naXQgYS9kcml2ZXJzL3hlbi9hcm0tZGV2aWNlLmMgYi9k
+cml2ZXJzL3hlbi9hcm0tZGV2aWNlLmMKbmV3IGZpbGUgbW9kZSAxMDA2NDQKaW5kZXggMDAwMDAw
+MC4uNzZlMjZlNQotLS0gL2Rldi9udWxsCisrKyBiL2RyaXZlcnMveGVuL2FybS1kZXZpY2UuYwpA
+QCAtMCwwICsxLDE0MSBAQAorLyoKKyAqIENvcHlyaWdodCAoYykgMjAxNSwgTGluYXJvIExpbWl0
+ZWQsIFNoYW5ub24gWmhhbworICoKKyAqIFRoaXMgcHJvZ3JhbSBpcyBmcmVlIHNvZnR3YXJlOyB5
+b3UgY2FuIHJlZGlzdHJpYnV0ZSBpdCBhbmQvb3IgbW9kaWZ5IGl0CisgKiB1bmRlciB0aGUgdGVy
+bXMgYW5kIGNvbmRpdGlvbnMgb2YgdGhlIEdOVSBHZW5lcmFsIFB1YmxpYyBMaWNlbnNlLAorICog
+dmVyc2lvbiAyLCBhcyBwdWJsaXNoZWQgYnkgdGhlIEZyZWUgU29mdHdhcmUgRm91bmRhdGlvbi4K
+KyAqCisgKiBUaGlzIHByb2dyYW0gaXMgZGlzdHJpYnV0ZWQgaW4gdGhlIGhvcGUgaXQgd2lsbCBi
+ZSB1c2VmdWwsIGJ1dCBXSVRIT1VUCisgKiBBTlkgV0FSUkFOVFk7IHdpdGhvdXQgZXZlbiB0aGUg
+aW1wbGllZCB3YXJyYW50eSBvZiBNRVJDSEFOVEFCSUxJVFkgb3IKKyAqIEZJVE5FU1MgRk9SIEEg
+UEFSVElDVUxBUiBQVVJQT1NFLiAgU2VlIHRoZSBHTlUgR2VuZXJhbCBQdWJsaWMgTGljZW5zZSBm
+b3IKKyAqIG1vcmUgZGV0YWlscy4KKyAqCisgKiBZb3Ugc2hvdWxkIGhhdmUgcmVjZWl2ZWQgYSBj
+b3B5IG9mIHRoZSBHTlUgR2VuZXJhbCBQdWJsaWMgTGljZW5zZQorICogYWxvbmcgd2l0aCB0aGlz
+IHByb2dyYW0uICBJZiBub3QsIHNlZSA8aHR0cDovL3d3dy5nbnUub3JnL2xpY2Vuc2VzLz4uCisg
+Ki8KKworI2luY2x1ZGUgPGxpbnV4L3BsYXRmb3JtX2RldmljZS5oPgorI2luY2x1ZGUgPGxpbnV4
+L2FjcGkuaD4KKyNpbmNsdWRlIDx4ZW4veGVuLmg+CisjaW5jbHVkZSA8eGVuL3BhZ2UuaD4KKyNp
+bmNsdWRlIDx4ZW4vaW50ZXJmYWNlL21lbW9yeS5oPgorI2luY2x1ZGUgPGFzbS94ZW4vaHlwZXJ2
+aXNvci5oPgorI2luY2x1ZGUgPGFzbS94ZW4vaHlwZXJjYWxsLmg+CisKK3N0YXRpYyBpbnQgeGVu
+X3VubWFwX2RldmljZV9tbWlvKHN0cnVjdCByZXNvdXJjZSAqcmVzb3VyY2UsIHVuc2lnbmVkIGlu
+dCBjb3VudCkKK3sKKwl1bnNpZ25lZCBpbnQgaSwgaiwgbnI7CisJaW50IHJjID0gMDsKKwlzdHJ1
+Y3QgcmVzb3VyY2UgKnI7CisJc3RydWN0IHhlbl9yZW1vdmVfZnJvbV9waHlzbWFwIHhycDsKKwor
+CWZvciAoaSA9IDA7IGkgPCBjb3VudDsgaSsrKSB7CisJCXIgPSAmcmVzb3VyY2VbaV07CisJCW5y
+ID0gRElWX1JPVU5EX1VQKHJlc291cmNlX3NpemUociksIFhFTl9QQUdFX1NJWkUpOworCQlpZiAo
+KHJlc291cmNlX3R5cGUocikgIT0gSU9SRVNPVVJDRV9NRU0pIHx8IChuciA9PSAwKSkKKwkJCWNv
+bnRpbnVlOworCisJCWZvciAoaiA9IDA7IGogPCBucjsgaisrKSB7CisJCQl4cnAuZG9taWQgPSBE
+T01JRF9TRUxGOworCQkJeHJwLmdwZm4gPSBYRU5fUEZOX0RPV04oci0+c3RhcnQpICsgajsKKwkJ
+CXJjID0gSFlQRVJWSVNPUl9tZW1vcnlfb3AoWEVOTUVNX3JlbW92ZV9mcm9tX3BoeXNtYXAsCisJ
+CQkJCQkgICZ4cnApOworCQkJaWYgKHJjKQorCQkJCXJldHVybiByYzsKKwkJfQorCX0KKworCXJl
+dHVybiByYzsKK30KKworc3RhdGljIGludCB4ZW5fbWFwX2RldmljZV9tbWlvKHN0cnVjdCByZXNv
+dXJjZSAqcmVzb3VyY2UsIHVuc2lnbmVkIGludCBjb3VudCkKK3sKKwl1bnNpZ25lZCBpbnQgaSwg
+aiwgbnI7CisJaW50IHJjID0gMDsKKwlzdHJ1Y3QgcmVzb3VyY2UgKnI7CisJeGVuX3Bmbl90ICpn
+cGZuczsKKwl4ZW5fdWxvbmdfdCAqaWR4czsKKwlpbnQgKmVycnM7CisJc3RydWN0IHhlbl9hZGRf
+dG9fcGh5c21hcF9yYW5nZSB4YXRwOworCisJZm9yIChpID0gMDsgaSA8IGNvdW50OyBpKyspIHsK
+KwkJciA9ICZyZXNvdXJjZVtpXTsKKwkJbnIgPSBESVZfUk9VTkRfVVAocmVzb3VyY2Vfc2l6ZShy
+KSwgWEVOX1BBR0VfU0laRSk7CisJCWlmICgocmVzb3VyY2VfdHlwZShyKSAhPSBJT1JFU09VUkNF
+X01FTSkgfHwgKG5yID09IDApKQorCQkJY29udGludWU7CisKKwkJZ3BmbnMgPSBremFsbG9jKHNp
+emVvZih4ZW5fcGZuX3QpICogbnIsIEdGUF9LRVJORUwpOworCQlpZHhzID0ga3phbGxvYyhzaXpl
+b2YoeGVuX3Vsb25nX3QpICogbnIsIEdGUF9LRVJORUwpOworCQllcnJzID0ga3phbGxvYyhzaXpl
+b2YoaW50KSAqIG5yLCBHRlBfS0VSTkVMKTsKKwkJaWYgKCFncGZucyB8fCAhaWR4cyB8fCAhZXJy
+cykgeworCQkJa2ZyZWUoZ3BmbnMpOworCQkJa2ZyZWUoaWR4cyk7CisJCQlrZnJlZShlcnJzKTsK
+KwkJCXJldHVybiAtRU5PTUVNOworCQl9CisKKwkJZm9yIChqID0gMDsgaiA8IG5yOyBqKyspIHsK
+KwkJCWdwZm5zW2pdID0gWEVOX1BGTl9ET1dOKHItPnN0YXJ0KSArIGo7CisJCQlpZHhzW2pdID0g
+WEVOX1BGTl9ET1dOKHItPnN0YXJ0KSArIGo7CisJCX0KKworCQl4YXRwLmRvbWlkID0gRE9NSURf
+U0VMRjsKKwkJeGF0cC5zaXplID0gbnI7CisJCXhhdHAuc3BhY2UgPSBYRU5NQVBTUEFDRV9kZXZf
+bW1pbzsKKworCQlzZXRfeGVuX2d1ZXN0X2hhbmRsZSh4YXRwLmdwZm5zLCBncGZucyk7CisJCXNl
+dF94ZW5fZ3Vlc3RfaGFuZGxlKHhhdHAuaWR4cywgaWR4cyk7CisJCXNldF94ZW5fZ3Vlc3RfaGFu
+ZGxlKHhhdHAuZXJycywgZXJycyk7CisKKwkJcmMgPSBIWVBFUlZJU09SX21lbW9yeV9vcChYRU5N
+RU1fYWRkX3RvX3BoeXNtYXBfcmFuZ2UsICZ4YXRwKTsKKwkJa2ZyZWUoZ3BmbnMpOworCQlrZnJl
+ZShpZHhzKTsKKwkJa2ZyZWUoZXJycyk7CisJCWlmIChyYykKKwkJCXJldHVybiByYzsKKwl9CisK
+KwlyZXR1cm4gcmM7Cit9CisKK3N0YXRpYyBpbnQgeGVuX3BsYXRmb3JtX25vdGlmaWVyKHN0cnVj
+dCBub3RpZmllcl9ibG9jayAqbmIsCisJCQkJIHVuc2lnbmVkIGxvbmcgYWN0aW9uLCB2b2lkICpk
+YXRhKQoreworCXN0cnVjdCBwbGF0Zm9ybV9kZXZpY2UgKnBkZXYgPSB0b19wbGF0Zm9ybV9kZXZp
+Y2UoZGF0YSk7CisJaW50IHIgPSAwOworCisJaWYgKHBkZXYtPm51bV9yZXNvdXJjZXMgPT0gMCB8
+fCBwZGV2LT5yZXNvdXJjZSA9PSBOVUxMKQorCQlyZXR1cm4gTk9USUZZX09LOworCisJc3dpdGNo
+IChhY3Rpb24pIHsKKwljYXNlIEJVU19OT1RJRllfQUREX0RFVklDRToKKwkJciA9IHhlbl9tYXBf
+ZGV2aWNlX21taW8ocGRldi0+cmVzb3VyY2UsIHBkZXYtPm51bV9yZXNvdXJjZXMpOworCQlicmVh
+azsKKwljYXNlIEJVU19OT1RJRllfREVMX0RFVklDRToKKwkJciA9IHhlbl91bm1hcF9kZXZpY2Vf
+bW1pbyhwZGV2LT5yZXNvdXJjZSwgcGRldi0+bnVtX3Jlc291cmNlcyk7CisJCWJyZWFrOworCWRl
+ZmF1bHQ6CisJCXJldHVybiBOT1RJRllfRE9ORTsKKwl9CisJaWYgKHIpCisJCWRldl9lcnIoJnBk
+ZXYtPmRldiwgIlBsYXRmb3JtOiBGYWlsZWQgdG8gJXMgZGV2aWNlICVzIE1NSU8hXG4iLAorCQkJ
+YWN0aW9uID09IEJVU19OT1RJRllfQUREX0RFVklDRSA/ICJtYXAiIDoKKwkJCShhY3Rpb24gPT0g
+QlVTX05PVElGWV9ERUxfREVWSUNFID8gInVubWFwIiA6ICI/IiksCisJCQlwZGV2LT5uYW1lKTsK
+KworCXJldHVybiBOT1RJRllfT0s7Cit9CisKK3N0YXRpYyBzdHJ1Y3Qgbm90aWZpZXJfYmxvY2sg
+cGxhdGZvcm1fZGV2aWNlX25iID0geworCS5ub3RpZmllcl9jYWxsID0geGVuX3BsYXRmb3JtX25v
+dGlmaWVyLAorfTsKKworc3RhdGljIGludCBfX2luaXQgcmVnaXN0ZXJfeGVuX3BsYXRmb3JtX25v
+dGlmaWVyKHZvaWQpCit7CisJaWYgKCF4ZW5faW5pdGlhbF9kb21haW4oKSB8fCBhY3BpX2Rpc2Fi
+bGVkKQorCQlyZXR1cm4gMDsKKworCXJldHVybiBidXNfcmVnaXN0ZXJfbm90aWZpZXIoJnBsYXRm
+b3JtX2J1c190eXBlLCAmcGxhdGZvcm1fZGV2aWNlX25iKTsKK30KKworYXJjaF9pbml0Y2FsbChy
+ZWdpc3Rlcl94ZW5fcGxhdGZvcm1fbm90aWZpZXIpOwotLSAKMi4xLjQKCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0
+Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
