@@ -1,60 +1,31 @@
-From: "Stanacar, Stefan" <stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [PATCH v2] efi: Introduce EFI bootloader control driver
-Date: Thu, 24 Mar 2016 16:15:56 +0000
-Message-ID: <1458836156.14677.9.camel@intel.com>
-References: <1458295910-26557-1-git-send-email-daniel.baluta@intel.com>
-	 <20160318161505.GU2619@codeblueprint.co.uk>
-	 <1458328697.16385.21.camel@intel.com>
-	 <20160324144741.GA4328@codeblueprint.co.uk>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: Re: [PATCH v7 01/17] Xen: ACPI: Hide UART used by Xen
+Date: Fri, 25 Mar 2016 15:38:54 +0800
+Message-ID: <56F4EB0E.4090009@huawei.com>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>	<1458830676-27075-2-git-send-email-shannon.zhao@linaro.org> <CAJZ5v0iGHj1Hb3s=uJ34j0m88+3xtBQhbX47got=z1Ah_=LrkQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160324144741.GA4328-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Content-Language: en-US
-Content-ID: <C2571A392F1B1B42AB243AAD2A30123D-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org" <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: "Baluta, Daniel" <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "dvhart-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org" <dvhart-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "Gumbel, Matthew K" <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Purdila, Octavian" <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Abbas, Mohamed" <mohamed.abbas-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Musca, Constantin" <constantin.musca-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <CAJZ5v0iGHj1Hb3s=uJ34j0m88+3xtBQhbX47got=z1Ah_=LrkQ@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rafael@kernel.org>, Shannon Zhao <shannon.zhao@linaro.org>
+Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, stefano.stabellini@citrix.com, david.vrabel@citrix.com, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, ACPI <linux-acpi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gVGh1LCAyMDE2LTAzLTI0IGF0IDE0OjQ3ICswMDAwLCBNYXR0IEZsZW1pbmcgd3JvdGU6DQo+
-IChTb3JyeSBmb3IgdGhlIGRlbGF5KQ0KPiANCj4gT24gRnJpLCAxOCBNYXIsIGF0IDA3OjE4OjE3
-UE0sIFN0YW5hY2FyLCBTdGVmYW4gd3JvdGU6DQo+ID4gDQo+ID4gDQo+ID4gSGkgTWF0dCwNCj4g
-PiANCj4gPiBJdCBpcyBwb3NzaWJsZSwgYnV0IHRoYXQgbWVhbnMgbW9kaWZ5aW5nIHRob3NlIHVz
-ZXJzcGFjZSBhcHBzIDopDQo+ID4gVGhlcmUgYXJlIHJlYm9vdCBpbXBsZW1lbnRhdGlvbnMgdGhh
-dCBkbyAicmVib290IDxyZWFzb24+Iiwgc3VjaCBhcw0KPiA+IEFuZHJvaWQncyByZWJvb3QgY29t
-bWFuZCBbMV0gYW5kIFVwc3RhcnQncyByZWJvb3QgcmVwbGFjZW1lbnQgWzJdLA0KPiA+IHdoaWNo
-DQo+ID4gcGFzcyB0aGUgcmVhc29uIGFzIGFuIGFyZ3VtZW50IHRvIHRoZSByZWJvb3Qgc3lzY2Fs
-bC7CoA0KPiA+IFByb2JhYmx5IHlvdXIgZmlyc3QgcXVlc3Rpb24gd2lsbCBiZSAtICJXaHkgZG9u
-J3QgeW91IG1vZGlmeSB0aG9zZQ0KPiA+IGFwcHM/Ig0KPiBZb3VyIGd1ZXNzIGlzIGNvcnJlY3Qg
-OykNCj4gDQo+ID4gDQo+ID4gV2VsbCwgSSBkb24ndCBzZWUgcGxhdGZvcm0tYWdub3N0aWMgd2F5
-IGhvdyB0aG9zZSBjb3VsZCBiZQ0KPiA+IG1vZGlmaWVkIHRvIHBhc3MgdGhlIHJlYXNvbiB0byB0
-aGUgYm9vdGxvYWRlciwgcmVnYXJkbGVzcyBvZg0KPiA+IHBsYXRmb3JtIG9yDQo+ID4gYm9vdGxv
-YWRlci4NCj4gVGhpcyBpcyB0cnVlLiBCdXQgdGhlbiBhZ2Fpbiwgd2hhdCB5b3UncmUgcHJvcG9z
-aW5nIGlzbid0IGJvb3QgbG9hZGVyDQo+IG9yIHBsYXRmb3JtIGFnbm9zdGljIGFueXdheS4gWWVz
-IGl0J3MgdHJhbnNwYXJlbnQgdG8gYm90aCB0aGUgYXBwIGFuZA0KPiBib290IGxvYWRlciwgYnV0
-IGl0J3Mgb25seSBnb2luZyB0byB3b3JrIG9uIEVGSSBwbGF0Zm9ybXMgcnVubmluZw0KPiBndW1t
-aWJvb3QuDQoNCll1cCwgdGhhdCdzIHRydWUuIEl0J3MgZ29pbmcgdG8gd29yayBvbmx5IG9uIEVG
-SSBwbGF0Zm9ybXMuIFRoZQ0KYm9vdGxvYWRlciBhY3R1YWxseSBkb2Vzbid0IG1hdHRlciAoYW55
-IGVmaSBib290bG9hZGVyIHNob3VsZCB3b3JrKSBhcw0KbG9uZyBhcyBpdCByZWFkcyB0aGUgcmVh
-c29uIGFuZCBkb2VzIHdoYXQncyBzdXBwb3NlZCB0byBkbyB3aXRoIGl0IChib290DQppbiByZWNv
-dmVyeSwgZXRjKQ0KDQo+IA0KPiBBbmQgYmVjYXVzZSBvZiB0aGF0LCBpZiB0aGlzIGlzIGdvaW5n
-IHRvIGJlIG1lcmdlZCB1cHN0cmVhbSBJIHRoaW5rDQo+IHNvbWV0aGluZyBsaWtlIGRyaXZlcnMv
-cG93ZXIvcmVzZXQvIHdvdWxkIGJlIGEgbW9yZSBhcHByb3ByaWF0ZSBwbGFjZSwNCj4gb3IgZHJp
-dmVycy9wbGF0Zm9ybS94ODYuDQo+IA0KDQpBZ3JlZWQuIEl0IHNlZW1zIHRoYXQgZHJpdmVycy9w
-b3dlci9yZXNldCBpcyBwcmVmZXJyZWQgYnkgQVJNIGJvYXJkczoNCmh0dHBzOi8vZ2l0LmxpbmFy
-by5vcmcvcGVvcGxlL2pvaG4uc3R1bHR6L2Zsby5naXQvY29tbWl0L2YxZTcxMmJlMmJlOWY0Mg0K
-OTcyMTVmYzRhZjYxOTRlMGY3NWYwNWRmYg0KDQoNCj4gSWYgdGhpcyBkb2VzIGdldCBtZXJnZWQs
-IHBsZWFzZSByZXdvcmsgdGhlIHBhdGNoIHRvIHVzZSB0aGUgZWZpdmFyIEFQSQ0KPiBpbnN0ZWFk
-IG9mIGFjY2Vzc2luZyBlZmkuc2V0X3ZhcmlhYmxlKCkgZGlyZWN0bHkuIFdlJ3ZlIGFsc28gZ290
-IGENCj4gYnVuY2ggb2YgdWNzMiBzdHJpbmcgZnVuY3Rpb25zIGluIGxpYi91Y3MyX3N0cmluZy5j
-IHRoYXQgeW91IGNvdWxkDQoNCk9rLg0KDQo+IHVzZS4gSW4gZmFjdCwgdGhpcyB2ZXJzaW9uIG9m
-IHRoZSBkcml2ZXIgSSBmb3VuZCBvbiB0aGUgbmV0IGlzIG11Y2gNCj4gbW9yZSBsaWtlIHdoYXQg
-SSBoYWQgaW4gbWluZCwNCj4gDQo+IMKgIGh0dHBzOi8vZ2l0aHViLmNvbS9CT1JFVFMyNC9LZXJu
-ZWwtZm9yLUFzdXMtWmVuZm9uZS0yL2Jsb2IvbWFzdGVyL2RyDQo+IGl2ZXJzL2V4dGVybmFsX2Ry
-aXZlcnMvZHJpdmVycy9wbGF0Zm9ybS94ODYvcmVib290X3RhcmdldF91ZWZpLmMNCg0KT2ssIHRo
-YXQncyBmdW5ueSBzb21laG93Li4uIEkgd291bGRuJ3QgYmUgc3VycHJpc2VkIGlmIEknZCBmaW5k
-IDMgbW9yZQ0KdmFyaWF0aW9ucyBvZiB0aGUgc2FtZSBkcml2ZXIgaW4gZGlmZmVyZW50IHZlbmRv
-ciB0cmVlcyA6KC4NCkknbGwgcGluZyB0aGUgYXV0aG9yIG9mIHRoZSBwYXRjaCwgdGhhbmtzIQ0K
-DQpDaGVlcnMsDQpTdGVmYW4NCg==
+
+
+On 2016/3/24 23:08, Rafael J. Wysocki wrote:
+> On Thu, Mar 24, 2016 at 3:44 PM, Shannon Zhao <shannon.zhao@linaro.org> wrote:
+>> > +static void acpi_get_spcr_uart_addr(void)
+> static void __init acpi_get_spcr_uart_addr(void)
+> 
+> I suppose?
+> 
+> Apart from this it looks fine.
+> 
+Thanks, I'll update this one and resend it later.
+
+-- 
+Shannon
+
