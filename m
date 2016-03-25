@@ -1,19 +1,20 @@
-From: "Rafael J. Wysocki" <rjw@rjwysocki.net>
+From: Bjorn Helgaas <helgaas@kernel.org>
 Subject: Re: [PATCH v8 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Fri, 25 Mar 2016 18:00:03 +0100
-Message-ID: <7418231.W9aSFKr1zs@vostro.rjw.lan>
-References: <1458830676-27075-2-git-send-email-shannon.zhao@linaro.org> <1458893149-17388-1-git-send-email-zhaoshenglong@huawei.com>
+Date: Fri, 25 Mar 2016 12:15:47 -0500
+Message-ID: <20160325171547.GB29822@localhost>
+References: <1458830676-27075-2-git-send-email-shannon.zhao@linaro.org>
+ <1458893149-17388-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <1458893149-17388-1-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-acpi-owner@vger.kernel.org
 To: Shannon Zhao <zhaoshenglong@huawei.com>
-Cc: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
+Cc: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, catalin.marinas@arm.com, will.deacon@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Friday, March 25, 2016 04:05:49 PM Shannon Zhao wrote:
+On Fri, Mar 25, 2016 at 04:05:49PM +0800, Shannon Zhao wrote:
 > From: Shannon Zhao <shannon.zhao@linaro.org>
 > 
 > ACPI 6.0 introduces a new table STAO to list the devices which are used
@@ -24,9 +25,6 @@ On Friday, March 25, 2016 04:05:49 PM Shannon Zhao wrote:
 > CC: Len Brown <lenb@kernel.org> (supporter:ACPI)
 > CC: linux-acpi@vger.kernel.org (open list:ACPI)
 > Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-
-So I said it looked good, but now that I think about it, I have a question. ->
-
 > ---
 >  drivers/acpi/scan.c | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 >  1 file changed, 68 insertions(+)
@@ -54,16 +52,6 @@ So I said it looked good, but now that I think about it, I have a question. ->
 > +
 > +	if (acpi_dev_resource_memory(ares, res))
 > +		return AE_CTRL_TERMINATE;
-
--> It looks like this will terminate on the first memory resource found,
-but what if there are more of them?
-
-Or is it guaranteed that there will be only one for the device objects in
-question?
-
-If not, then it would better to check res.start == spcr_uart_addr here too
-and only terminate if there's a match.
-
 > +
 > +	return AE_OK;
 > +}
@@ -85,6 +73,12 @@ and only terminate if there's a match.
 > +
 > +		if (res.start == spcr_uart_addr) {
 > +			printk(KERN_INFO PREFIX "The UART device in SPCR table will be hidden\n");
+
+Can we at least print out the ACPI device path and address here for
+debugging purposes?  IMHO, kernel messages that contain only static
+text are always dubious.  There's almost always a useful address, IRQ,
+return value, etc., that could be included.
+
 > +			return true;
 > +		}
 > +	}
@@ -147,9 +141,19 @@ and only terminate if there's a match.
 > +		if (stao_ptr->ignore_uart)
 > +			acpi_get_spcr_uart_addr();
 > +	}
-> +
+
+This all seems sort of ad hoc.  Are UARTs the only things that can be
+listed in STAO?  If STAO can contain things other than UARTs, are we
+going to see more patches adding special-case code like this?
+
 >  	mutex_lock(&acpi_scan_lock);
 >  	/*
 >  	 * Enumerate devices in the ACPI namespace.
+> -- 
+> 2.0.4
 > 
-
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
