@@ -1,31 +1,68 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH v2] efi: Introduce EFI bootloader control driver
-Date: Tue, 29 Mar 2016 13:53:45 +0100
-Message-ID: <20160329125345.GD3625@codeblueprint.co.uk>
-References: <1458295910-26557-1-git-send-email-daniel.baluta@intel.com>
- <20160318161505.GU2619@codeblueprint.co.uk>
- <1458328697.16385.21.camel@intel.com>
- <20160324144741.GA4328@codeblueprint.co.uk>
- <1458836156.14677.9.camel@intel.com>
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH 2/4] efi: Capsule update support
+Date: Tue, 29 Mar 2016 15:50:39 +0200
+Message-ID: <CAKv+Gu_S-BBo8yinQmbEcag43krKBZGxf-0OC=WkZASgS5_Cdg@mail.gmail.com>
+References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
+	<1458219431-24741-3-git-send-email-matt@codeblueprint.co.uk>
+	<CAKv+Gu8fX7x1x3Od5ThxyFxux_NKDx59PNedkgSfn_V0yg_NQQ@mail.gmail.com>
+	<20160321203159.GF11676@codeblueprint.co.uk>
+	<20160329122658.GC3625@codeblueprint.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1458836156.14677.9.camel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <20160329122658.GC3625-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Stanacar, Stefan" <stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Baluta, Daniel" <daniel.baluta-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "dvhart-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org" <dvhart-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, "Gumbel, Matthew K" <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Purdila, Octavian" <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Abbas, Mohamed" <mohamed.abbas-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Musca, Constantin" <constantin.musca-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 24 Mar, at 04:15:56PM, Stanacar, Stefan wrote:
-> 
-> Ok, that's funny somehow... I wouldn't be surprised if I'd find 3 more
-> variations of the same driver in different vendor trees :(.
+On 29 March 2016 at 14:26, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
+> On Mon, 21 Mar, at 08:31:59PM, Matt Fleming wrote:
+>>
+>> Good question. They're not handled in any special way with this patch
+>> series, so the firmware will just initiate its own reset inside of
+>> UpdateCapsule().
+>>
+>> That's probably not what we want, because things like on-disk
+>> consistency are not guaranteed if the machine spontaneously reboots
+>> without assistance from the kernel.
+>>
+>> The simplest thing to do is to refuse to pass such capsules to the
+>> firmware, since it's likely not going to be a common use case. But
+>> maybe that's overly restrictive.
+>>
+>> Let me have a think about that one.
+>
+> OK, I did think about this, and until someone actually requests the
+> ability to handle CAPSULE_FLAGS_INITIATE_RESET, I'm happy to just punt
+> on the problem. Anyone got any objections?
+>
 
-Right. And that does add weight to getting a version merged upstream;
-to discourage people carrying their own.
+Nope
 
-> I'll ping the author of the patch, thanks!
+> ---
+>
+> diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+> index dac25208ad5e..84450e9cdf41 100644
+> --- a/drivers/firmware/efi/capsule.c
+> +++ b/drivers/firmware/efi/capsule.c
+> @@ -84,6 +84,14 @@ int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
+>         u64 max_size;
+>         int rv = 0;
+>
+> +       /*
+> +        * We do not handle firmware-initiated reset because that
+> +        * would require us to prepare the kernel for reboot. Refuse
+> +        * to load any capsules with that flag.
+> +        */
+> +       if (flags & EFI_CAPSULE_INITIATE_RESET)
+> +               return -EINVAL;
+> +
 
-I haven't reviewed the patch in detail, but it did look like the
-correct general approach.
+Should we perhaps whitelist rather than blacklist these flags? If a
+'EFI_CAPSULE_INITIATE_RESET_TOO' surfaces at some point, or flags that
+do other nasty things, at least we won't be caught off guard.
+
+>         capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
+>         if (!capsule)
+>                 return -ENOMEM;
