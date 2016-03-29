@@ -1,34 +1,59 @@
 From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH RFC 1/1] x86: fix bad memory access in
- fb_is_primary_device()
-Date: Tue, 29 Mar 2016 13:12:01 +0100
-Message-ID: <20160329121201.GB3625@codeblueprint.co.uk>
-References: <1455528649-26629-1-git-send-email-alpopov@ptsecurity.com>
- <20160216075521.GA27491@gmail.com>
- <20160216134918.GD2769@codeblueprint.co.uk>
- <20160216151859.GB11373@redhat.com>
- <56E01B0F.3000306@ptsecurity.com>
- <56F52111.6050500@ptsecurity.com>
- <20160329115347.GA3625@codeblueprint.co.uk>
+Subject: Re: [PATCH 2/4] efi: Capsule update support
+Date: Tue, 29 Mar 2016 13:26:58 +0100
+Message-ID: <20160329122658.GC3625@codeblueprint.co.uk>
+References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
+ <1458219431-24741-3-git-send-email-matt@codeblueprint.co.uk>
+ <CAKv+Gu8fX7x1x3Od5ThxyFxux_NKDx59PNedkgSfn_V0yg_NQQ@mail.gmail.com>
+ <20160321203159.GF11676@codeblueprint.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <20160329115347.GA3625-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+In-Reply-To: <20160321203159.GF11676-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Alexander Popov <alpopov-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org>
-Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Vitaly Kuznetsov <vkuznets-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 29 Mar, at 12:53:47PM, Matt Fleming wrote:
-> On Fri, 25 Mar, at 02:29:21PM, Alexander Popov wrote:
-> > 
-> > Excuse me, there is no reply for a long time. Did I touch any taboo topic?
-> > Hope to fix this bug. Thanks.
+On Mon, 21 Mar, at 08:31:59PM, Matt Fleming wrote:
 > 
-> Unless anyone complains soonish I'll send this to tip as part of the
-> EFI urgent queue.
+> Good question. They're not handled in any special way with this patch
+> series, so the firmware will just initiate its own reset inside of
+> UpdateCapsule().
+> 
+> That's probably not what we want, because things like on-disk
+> consistency are not guaranteed if the machine spontaneously reboots
+> without assistance from the kernel.
+> 
+> The simplest thing to do is to refuse to pass such capsules to the
+> firmware, since it's likely not going to be a common use case. But
+> maybe that's overly restrictive.
+> 
+> Let me have a think about that one.
 
-Oh, looks like this issue was already fixed here,
+OK, I did think about this, and until someone actually requests the
+ability to handle CAPSULE_FLAGS_INITIATE_RESET, I'm happy to just punt
+on the problem. Anyone got any objections?
 
-  https://lkml.kernel.org/r/tip-743146db071c4a828159211a295d12ff4f61752f-Ckxz5ZWcFp/9qxiX1TGQuw@public.gmane.org
+---
+
+diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
+index dac25208ad5e..84450e9cdf41 100644
+--- a/drivers/firmware/efi/capsule.c
++++ b/drivers/firmware/efi/capsule.c
+@@ -84,6 +84,14 @@ int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
+ 	u64 max_size;
+ 	int rv = 0;
+ 
++	/*
++	 * We do not handle firmware-initiated reset because that
++	 * would require us to prepare the kernel for reboot. Refuse
++	 * to load any capsules with that flag.
++	 */
++	if (flags & EFI_CAPSULE_INITIATE_RESET)
++		return -EINVAL;
++
+ 	capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
+ 	if (!capsule)
+ 		return -ENOMEM;
