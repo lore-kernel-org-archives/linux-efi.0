@@ -1,46 +1,54 @@
 From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH v7 11/17] ARM: XEN: Move xen_early_init() before
- efi_init()
-Date: Tue, 29 Mar 2016 17:07:57 +0100
-Message-ID: <20160329160756.GG6745@arm.com>
+Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Tue, 29 Mar 2016 17:18:38 +0100
+Message-ID: <20160329161837.GH6745@arm.com>
 References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
- <1458830676-27075-12-git-send-email-shannon.zhao@linaro.org>
- <alpine.DEB.2.02.1603261252510.18380@kaball.uk.xensource.com>
+ <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.02.1603261252510.18380@kaball.uk.xensource.com>
+In-Reply-To: <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
-Cc: catalin.marinas@arm.com, linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, shannon.zhao@linaro.org
+To: Shannon Zhao <shannon.zhao@linaro.org>
+Cc: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, mark.rutland@arm.com
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Mar 26, 2016 at 12:54:09PM +0000, Stefano Stabellini wrote:
-> are you OK with this patch?
+On Thu, Mar 24, 2016 at 10:44:31PM +0800, Shannon Zhao wrote:
+> When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+> a /hypervisor node in DT. So check if it needs to enable ACPI.
+> 
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+> Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+> Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
+> ---
+>  arch/arm64/kernel/acpi.c | 12 ++++++++----
+>  1 file changed, 8 insertions(+), 4 deletions(-)
+> 
+> diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> index d1ce8e2..4e92be0 100644
+> --- a/arch/arm64/kernel/acpi.c
+> +++ b/arch/arm64/kernel/acpi.c
+> @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+>  {
+>  	/*
+>  	 * Return 1 as soon as we encounter a node at depth 1 that is
+> -	 * not the /chosen node.
+> +	 * not the /chosen node, or /hypervisor node when running on Xen.
+>  	 */
+> -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+> -		return 1;
+> +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
+> +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
+> +			return 1;
+> +	}
 
-Nothing against it, but the only arm64 bit is:
+Hmm, but xen_initial_domain() is false when xen isn't being used at all,
+so it feels to me like this is a bit too far-reaching and is basically
+claiming the "/hypervisor" namespace for Xen. Couldn't it be renamed to
+"xen,hypervisor" or something?
 
-> > diff --git a/arch/arm64/kernel/setup.c b/arch/arm64/kernel/setup.c
-> > index 450987d..6cf5051 100644
-> > --- a/arch/arm64/kernel/setup.c
-> > +++ b/arch/arm64/kernel/setup.c
-> > @@ -313,6 +313,7 @@ void __init setup_arch(char **cmdline_p)
-> >  	 */
-> >  	local_async_enable();
-> >  
-> > +	xen_early_init();
-> >  	efi_init();
-> >  	arm64_memblock_init();
-> >  
-> > @@ -334,7 +335,6 @@ void __init setup_arch(char **cmdline_p)
-> >  	} else {
-> >  		psci_acpi_init();
-> >  	}
-> > -	xen_early_init();
-
-so it's difficult to care too much ;) I do hope that there won't be a
-need to split up efi_init() in future because some of it has to happen
-before xen_early_init, but that doesn't sound likely at the moment.
+Mark, got any thoughts on this?
 
 Will
