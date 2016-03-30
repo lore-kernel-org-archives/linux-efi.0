@@ -1,83 +1,88 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v7 03/17] Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
-Date: Wed, 30 Mar 2016 15:38:00 +0800
-Message-ID: <56FB8258.7030303@huawei.com>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-4-git-send-email-shannon.zhao@linaro.org> <56FAAD48.2010401@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH] efi/arm64: don't apply MEMBLOCK_NOMAP to UEFI memory map mapping
+Date: Wed, 30 Mar 2016 09:46:23 +0200
+Message-ID: <1459323983-9120-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56FAAD48.2010401-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
+Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, jeremy.linton-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+Hi Matt,
 
-
-On 2016/3/30 0:28, Julien Grall wrote:
-> Hi Shannon,
-> 
-> On 24/03/16 14:44, Shannon Zhao wrote:
->> Make xen_xlate_map_ballooned_pages work with 64K pages. In that case
->> Kernel pages are 64K in size but Xen pages remain 4K in size. Xen pfns
->> refer to 4K pages.
->>
->> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
->> Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
->> ---
->>   drivers/xen/xlate_mmu.c | 26 ++++++++++++++++----------
->>   1 file changed, 16 insertions(+), 10 deletions(-)
->>
->> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
->> index 9692656..28f728b 100644
->> --- a/drivers/xen/xlate_mmu.c
->> +++ b/drivers/xen/xlate_mmu.c
->> @@ -207,9 +207,12 @@ int __init
->> xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
->>       void *vaddr;
->>       int rc;
->>       unsigned int i;
->> +    unsigned long nr_pages;
->> +    xen_pfn_t xen_pfn = 0;
->>
->>       BUG_ON(nr_grant_frames == 0);
->> -    pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
->> +    nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
->> +    pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
->>       if (!pages)
->>           return -ENOMEM;
->>
->> @@ -218,22 +221,25 @@ int __init
->> xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
->>           kfree(pages);
->>           return -ENOMEM;
->>       }
->> -    rc = alloc_xenballooned_pages(nr_grant_frames, pages);
->> +    rc = alloc_xenballooned_pages(nr_pages, pages);
->>       if (rc) {
->> -        pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
->> -            nr_grant_frames, rc);
->> +        pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n", __func__,
->> +            nr_pages, rc);
->>           kfree(pages);
->>           kfree(pfns);
->>           return rc;
->>       }
->> -    for (i = 0; i < nr_grant_frames; i++)
->> -        pfns[i] = page_to_pfn(pages[i]);
->> +    for (i = 0; i < nr_grant_frames; i++) {
->> +        if ((i % XEN_PFN_PER_PAGE) == 0)
->> +            xen_pfn = page_to_xen_pfn(pages[i / XEN_PFN_PER_PAGE]);
->> +        pfns[i] = pfn_to_gfn(xen_pfn++);
->> +    }
-> 
-> Would it be possible to re-use xen_for_each_gfn? This will avoid
-> open-coding the loop to break down the Linux page.
-I don't think so. Using xen_acpi_guest_init will require factoring
-"pfns[i] = pfn_to_gfn(xen_pfn++)" to a function with parameter pfns[i].
-How can we pass pfns[i]?
+Could we queue this as a fix for v4.6 with a cc:stable for v4.5, please?
+(assuming no objections from any of the cc'ees)
 
 Thanks,
+Ard.
+
+----------8<--------------
+Commit 4dffbfc48d65 ("arm64/efi: mark UEFI reserved regions as
+MEMBLOCK_NOMAP") updated the mapping logic of both the RuntimeServices
+regions as well as the kernel's copy of the UEFI memory map to set the
+MEMBLOCK_NOMAP flag, which causes these regions to be omitted from the
+kernel direct mapping, and from being covered by a struct page.
+For the RuntimeServices regions, this is an obvious win, since the contents
+of these regions have significance to the firmware executable code itself,
+and are mapped in the EFI page tables using attributes that are described in
+the UEFI memory map, and which may differ from the attributes we use for
+mapping system RAM. It also prevents the contents from being modified
+inadvertently, since the EFI page tables are only live during runtime
+service invocations.
+
+None of these concerns apply to the allocation that covers the UEFI memory
+map, since it is entirely owned by the kernel. Setting the MEMBLOCK_NOMAP on
+the region did allow us to use ioremap_cache() to map it both on arm64 and
+on ARM, since the latter does not allow ioremap_cache() to be used on
+regions that are covered by a struct page.
+
+The ioremap_cache() on ARM restriction will be lifted in the v4.7 timeframe,
+but in the mean time, it has been reported that commit 4dffbfc48d65 causes
+a regression on 64k granule kernels. This is due to the fact that, given
+the 64 KB page size, the region that we end up removing from the kernel
+direct mapping is rounded up to 64 KB, and this 64 KB page frame may be
+shared with the initrd when booting via GRUB (which does not align its
+EFI_LOADER_DATA allocations to 64 KB like the stub does). This will crash
+the kernel as soon as it tries to access the initrd.
+
+Since the issue is specific to arm64, revert back to memblock_reserve()'ing
+the UEFI memory map when running on arm64. This is a temporary fix for v4.5
+and v4.6, and will be superseded in the v4.7 timeframe when we will be able
+to move back to memblock_reserve() unconditionally.
+
+Fixes: 4dffbfc48d65 ("arm64/efi: mark UEFI reserved regions as MEMBLOCK_NOMAP")
+Reported-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ drivers/firmware/efi/arm-init.c | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index aa1f743152a2..8714f8c271ba 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -203,7 +203,19 @@ void __init efi_init(void)
+ 
+ 	reserve_regions();
+ 	early_memunmap(memmap.map, params.mmap_size);
+-	memblock_mark_nomap(params.mmap & PAGE_MASK,
+-			    PAGE_ALIGN(params.mmap_size +
+-				       (params.mmap & ~PAGE_MASK)));
++
++	if (IS_ENABLED(CONFIG_ARM)) {
++		/*
++		 * ARM currently does not allow ioremap_cache() to be called on
++		 * memory regions that are covered by struct page. So remove the
++		 * UEFI memory map from the linear mapping.
++		 */
++		memblock_mark_nomap(params.mmap & PAGE_MASK,
++				    PAGE_ALIGN(params.mmap_size +
++					       (params.mmap & ~PAGE_MASK)));
++	} else {
++		memblock_reserve(params.mmap & PAGE_MASK,
++				 PAGE_ALIGN(params.mmap_size +
++					    (params.mmap & ~PAGE_MASK)));
++	}
+ }
 -- 
-Shannon
+2.5.0
