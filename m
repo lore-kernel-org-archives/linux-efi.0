@@ -1,73 +1,80 @@
-From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
- or disable ACPI
-Date: Wed, 30 Mar 2016 15:19:28 +0800
-Message-ID: <56FB7E00.7030400@huawei.com>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org> <20160329161837.GH6745@arm.com> <20160329163147.GB27223@leverpostej>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v7 10/17] arm/xen: Get event-channel irq through HVM_PARAM
+ when booting with ACPI
+Date: Wed, 30 Mar 2016 15:34:24 +0800
+Message-ID: <56FB8180.5040205@huawei.com>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-11-git-send-email-shannon.zhao@linaro.org> <56FAAEED.7060108@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20160329163147.GB27223@leverpostej>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Mark Rutland <mark.rutland@arm.com>, Will Deacon <will.deacon@arm.com>
-Cc: Shannon Zhao <shannon.zhao@linaro.org>, linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56FAAEED.7060108-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hi Will, Mark,
 
-On 2016/3/30 0:31, Mark Rutland wrote:
-> On Tue, Mar 29, 2016 at 05:18:38PM +0100, Will Deacon wrote:
->> > On Thu, Mar 24, 2016 at 10:44:31PM +0800, Shannon Zhao wrote:
->>> > > When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
->>> > > a /hypervisor node in DT. So check if it needs to enable ACPI.
->>> > > 
->>> > > Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
->>> > > Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
->>> > > Acked-by: Hanjun Guo <hanjun.guo@linaro.org>
->>> > > ---
->>> > >  arch/arm64/kernel/acpi.c | 12 ++++++++----
->>> > >  1 file changed, 8 insertions(+), 4 deletions(-)
->>> > > 
->>> > > diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
->>> > > index d1ce8e2..4e92be0 100644
->>> > > --- a/arch/arm64/kernel/acpi.c
->>> > > +++ b/arch/arm64/kernel/acpi.c
->>> > > @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
->>> > >  {
->>> > >  	/*
->>> > >  	 * Return 1 as soon as we encounter a node at depth 1 that is
->>> > > -	 * not the /chosen node.
->>> > > +	 * not the /chosen node, or /hypervisor node when running on Xen.
->>> > >  	 */
->>> > > -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
->>> > > -		return 1;
->>> > > +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
->>> > > +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
->>> > > +			return 1;
->>> > > +	}
->> > 
->> > Hmm, but xen_initial_domain() is false when xen isn't being used at all,
->> > so it feels to me like this is a bit too far-reaching and is basically
->> > claiming the "/hypervisor" namespace for Xen. Couldn't it be renamed to
->> > "xen,hypervisor" or something?
->> > 
->> > Mark, got any thoughts on this?
-> The node has a compatible string, "xen,xen" per [1], which would tell us
-> absolutely that xen is present. I'd be happy checking for that
-> explicitly.
-> 
-I think actually the xen_initial_domain is the result of the
-fdt_find_hyper_node. If the compatible string "xen,xen" doesn't exist,
-the xen_initial_domain() will return false and whatever the current node
-is the above check will return 1 since the device tree is not empty.
 
-> In patch 11 fdt_find_hyper_node checks the compatible string. We could
-> factor that out into a helper like is_xen_node(node) and use it here
-> too.
+On 2016/3/30 0:35, Julien Grall wrote:
+> Hi Shannon,
 > 
-I don't think so because we already check the compatible string before
-and we could get the result simply via xen_initial_domain().
+> On 24/03/16 14:44, Shannon Zhao wrote:
+>> When booting with ACPI, it could get the event-channel irq through
+> 
+> The kernel will always get the event-channel IRQ through
+> HVM_PARAM_CALLBACK_IRQ.
+> 
+> So I would say: ", the kernel will get the event-channel..."
+> 
+>> HVM_PARAM_CALLBACK_IRQ.
+>>
+>> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+>> Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+>> ---
+>>   arch/arm/xen/enlighten.c | 36 +++++++++++++++++++++++++++++++++++-
+>>   1 file changed, 35 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+>> index d94f726..680aae0 100644
+>> --- a/arch/arm/xen/enlighten.c
+>> +++ b/arch/arm/xen/enlighten.c
+>> @@ -30,6 +30,7 @@
+>>   #include <linux/time64.h>
+>>   #include <linux/timekeeping.h>
+>>   #include <linux/timekeeper_internal.h>
+>> +#include <linux/acpi.h>
+>>
+>>   #include <linux/mm.h>
+>>
+>> @@ -278,6 +279,35 @@ void __init xen_early_init(void)
+>>           add_preferred_console("hvc", 0, NULL);
+>>   }
+>>
+>> +static void __init xen_acpi_guest_init(void)
+>> +{
+>> +#ifdef CONFIG_ACPI
+>> +    struct xen_hvm_param a;
+>> +    int interrupt, trigger, polarity;
+>> +
+>> +    a.domid = DOMID_SELF;
+>> +    a.index = HVM_PARAM_CALLBACK_IRQ;
+>> +    xen_events_irq = 0;
+>> +
+>> +    if (!HYPERVISOR_hvm_op(HVMOP_get_param, &a)) {
+>> +        if ((a.value >> 56) == HVM_PARAM_CALLBACK_TYPE_PPI) {
+>> +            interrupt = a.value & 0xff;
+>> +            trigger = ((a.value >> 8) & 0x1) ? ACPI_EDGE_SENSITIVE
+>> +                             : ACPI_LEVEL_SENSITIVE;
+>> +            polarity = ((a.value >> 8) & 0x2) ? ACPI_ACTIVE_LOW
+>> +                              : ACPI_ACTIVE_HIGH;
+>> +            xen_events_irq = acpi_register_gsi(NULL, interrupt,
+>> +                               trigger, polarity);
+>> +        }
+>> +    }
+> 
+> Can you invert the condition to remove one layer of indentation?
+Sure, will update.
 
 Thanks,
 -- 
