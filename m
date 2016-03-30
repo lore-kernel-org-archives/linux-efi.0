@@ -1,65 +1,97 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 5/5] arm*: efi: take the Memory Attributes table into account
-Date: Wed, 30 Mar 2016 18:38:53 +0200
-Message-ID: <1459355933-13529-6-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 1/5] ARM: efi: apply strict permissons for UEFI Runtime Services regions
+Date: Wed, 30 Mar 2016 18:38:49 +0200
+Message-ID: <1459355933-13529-2-git-send-email-ard.biesheuvel@linaro.org>
 References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1459355933-13529-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Call into the generic memory attributes table support code at the
-appropriate times during the init sequence so that the UEFI Runtime
-Services region are mapped according to the strict permissions it
-specifies.
+Recent UEFI versions expose permission attributes for runtime services
+memory regions, either in the UEFI memory map or in the separate memory
+attributes table.  This allows the kernel to map these regions with
+stricter permissions, rather than the RWX permissions that are used by
+default. So wire this up in our mapping routine.
 
+Cc: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm64/include/asm/efi.h       | 2 ++
- drivers/firmware/efi/arm-init.c    | 1 +
- drivers/firmware/efi/arm-runtime.c | 3 +++
- 3 files changed, 6 insertions(+)
+ arch/arm/include/asm/efi.h |  1 +
+ arch/arm/kernel/efi.c      | 41 ++++++++++++++++++++
+ 2 files changed, 42 insertions(+)
 
-diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
-index 8e88a696c9cb..4dafc89f373a 100644
---- a/arch/arm64/include/asm/efi.h
-+++ b/arch/arm64/include/asm/efi.h
-@@ -14,6 +14,8 @@ extern void efi_init(void);
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index e0eea72deb87..b0c341d7ceee 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -22,6 +22,7 @@
+ void efi_init(void);
  
  int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
++int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
  
-+#define efi_set_mapping_permissions	efi_create_mapping
-+
  #define efi_call_virt(f, ...)						\
  ({									\
- 	efi_##f##_t *__f;						\
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index d5df9849544c..9941a4f2f66f 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -204,6 +204,7 @@ void __init efi_init(void)
- 		return;
+diff --git a/arch/arm/kernel/efi.c b/arch/arm/kernel/efi.c
+index ff8a9d8acfac..9f43ba012d10 100644
+--- a/arch/arm/kernel/efi.c
++++ b/arch/arm/kernel/efi.c
+@@ -11,6 +11,41 @@
+ #include <asm/mach/map.h>
+ #include <asm/mmu_context.h>
  
- 	reserve_regions();
-+	efi_memattr_init();
- 	early_memunmap(memmap.map, params.mmap_size);
- 	memblock_reserve(params.mmap & PAGE_MASK,
- 			 PAGE_ALIGN(params.mmap_size +
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index b0cfe208c14c..bf1f6ffc9218 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -75,6 +75,9 @@ static bool __init efi_virtmap_init(void)
- 			set_bit(EFI_SYSTEM_TABLES, &efi.flags);
- 		}
- 	}
++static int __init set_permissions(pte_t *ptep, pgtable_t token,
++				  unsigned long addr, void *data)
++{
++	efi_memory_desc_t *md = data;
++	pte_t pte = *ptep;
 +
-+	if (efi_memattr_apply_permissions(&efi_mm, efi_set_mapping_permissions))
-+		return false;
- 	return true;
- }
++	if (md->attribute & EFI_MEMORY_RO)
++		pte = set_pte_bit(pte, __pgprot(L_PTE_RDONLY));
++	if (md->attribute & EFI_MEMORY_XP)
++		pte = set_pte_bit(pte, __pgprot(L_PTE_XN));
++	set_pte_ext(ptep, pte, PTE_EXT_NG);
++	return 0;
++}
++
++int __init efi_set_mapping_permissions(struct mm_struct *mm,
++				       efi_memory_desc_t *md)
++{
++	unsigned long base, size;
++
++	base = md->virt_addr;
++	size = md->num_pages << EFI_PAGE_SHIFT;
++
++	/*
++	 * We can only use apply_to_page_range() if we can guarantee that the
++	 * entire region was mapped using pages. This should be the case if the
++	 * region does not cover any naturally aligned SECTION_SIZE sized
++	 * blocks.
++	 */
++	if (round_down(base + size, SECTION_SIZE) <
++	    round_up(base, SECTION_SIZE) + SECTION_SIZE)
++		return apply_to_page_range(mm, base, size, set_permissions, md);
++
++	return 0;
++}
++
+ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+ {
+ 	struct map_desc desc = {
+@@ -34,5 +69,11 @@ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
+ 		desc.type = MT_DEVICE;
  
+ 	create_mapping_late(mm, &desc, true);
++
++	/*
++	 * If stricter permissions were specified, apply them now.
++	 */
++	if (md->attribute & (EFI_MEMORY_RO | EFI_MEMORY_XP))
++		return efi_set_mapping_permissions(mm, md);
+ 	return 0;
+ }
 -- 
 2.5.0
