@@ -1,87 +1,65 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: Re: [PATCH v7 03/17] Xen: xlate: Use page_to_xen_pfn instead of
- page_to_pfn
-Date: Wed, 30 Mar 2016 20:42:20 +0800
-Message-ID: <56FBC9AC.1070203@linaro.org>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
- <1458830676-27075-4-git-send-email-shannon.zhao@linaro.org>
- <56FAAD48.2010401@arm.com> <56FB8258.7030303@huawei.com>
- <56FBB709.5050802@arm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <56FBB709.5050802@arm.com>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Julien Grall <julien.grall@arm.com>, Shannon Zhao <zhaoshenglong@huawei.com>, linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, peter.huangpeng@huawei.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org
+From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v2 5/5] arm*: efi: take the Memory Attributes table into account
+Date: Wed, 30 Mar 2016 18:38:53 +0200
+Message-ID: <1459355933-13529-6-git-send-email-ard.biesheuvel@linaro.org>
+References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459355933-13529-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-T24gMjAxNuW5tDAz5pyIMzDml6UgMTk6MjIsIEp1bGllbiBHcmFsbCB3cm90ZToKPiBIaSBTaGFu
-bm9uLAo+IAo+IE9uIDMwLzAzLzE2IDA4OjM4LCBTaGFubm9uIFpoYW8gd3JvdGU6Cj4+Cj4+Cj4+
-IE9uIDIwMTYvMy8zMCAwOjI4LCBKdWxpZW4gR3JhbGwgd3JvdGU6Cj4+PiBPbiAyNC8wMy8xNiAx
-NDo0NCwgU2hhbm5vbiBaaGFvIHdyb3RlOgo+Pj4+IE1ha2UgeGVuX3hsYXRlX21hcF9iYWxsb29u
-ZWRfcGFnZXMgd29yayB3aXRoIDY0SyBwYWdlcy4gSW4gdGhhdCBjYXNlCj4+Pj4gS2VybmVsIHBh
-Z2VzIGFyZSA2NEsgaW4gc2l6ZSBidXQgWGVuIHBhZ2VzIHJlbWFpbiA0SyBpbiBzaXplLiBYZW4g
-cGZucwo+Pj4+IHJlZmVyIHRvIDRLIHBhZ2VzLgo+Pj4+Cj4+Pj4gU2lnbmVkLW9mZi1ieTogU2hh
-bm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KPj4+PiBSZXZpZXdlZC1ieTogU3Rl
-ZmFubyBTdGFiZWxsaW5pIDxzdGVmYW5vLnN0YWJlbGxpbmlAZXUuY2l0cml4LmNvbT4KPj4+PiAt
-LS0KPj4+PiAgICBkcml2ZXJzL3hlbi94bGF0ZV9tbXUuYyB8IDI2ICsrKysrKysrKysrKysrKyst
-LS0tLS0tLS0tCj4+Pj4gICAgMSBmaWxlIGNoYW5nZWQsIDE2IGluc2VydGlvbnMoKyksIDEwIGRl
-bGV0aW9ucygtKQo+Pj4+Cj4+Pj4gZGlmZiAtLWdpdCBhL2RyaXZlcnMveGVuL3hsYXRlX21tdS5j
-IGIvZHJpdmVycy94ZW4veGxhdGVfbW11LmMKPj4+PiBpbmRleCA5NjkyNjU2Li4yOGY3MjhiIDEw
-MDY0NAo+Pj4+IC0tLSBhL2RyaXZlcnMveGVuL3hsYXRlX21tdS5jCj4+Pj4gKysrIGIvZHJpdmVy
-cy94ZW4veGxhdGVfbW11LmMKPj4+PiBAQCAtMjA3LDkgKzIwNywxMiBAQCBpbnQgX19pbml0Cj4+
-Pj4geGVuX3hsYXRlX21hcF9iYWxsb29uZWRfcGFnZXMoeGVuX3Bmbl90ICoqZ2Zucywgdm9pZCAq
-KnZpcnQsCj4+Pj4gICAgICAgIHZvaWQgKnZhZGRyOwo+Pj4+ICAgICAgICBpbnQgcmM7Cj4+Pj4g
-ICAgICAgIHVuc2lnbmVkIGludCBpOwo+Pj4+ICsgICAgdW5zaWduZWQgbG9uZyBucl9wYWdlczsK
-Pj4+PiArICAgIHhlbl9wZm5fdCB4ZW5fcGZuID0gMDsKPj4+Pgo+Pj4+ICAgICAgICBCVUdfT04o
-bnJfZ3JhbnRfZnJhbWVzID09IDApOwo+Pj4+IC0gICAgcGFnZXMgPSBrY2FsbG9jKG5yX2dyYW50
-X2ZyYW1lcywgc2l6ZW9mKHBhZ2VzWzBdKSwgR0ZQX0tFUk5FTCk7Cj4+Pj4gKyAgICBucl9wYWdl
-cyA9IERJVl9ST1VORF9VUChucl9ncmFudF9mcmFtZXMsIFhFTl9QRk5fUEVSX1BBR0UpOwo+Pj4+
-ICsgICAgcGFnZXMgPSBrY2FsbG9jKG5yX3BhZ2VzLCBzaXplb2YocGFnZXNbMF0pLCBHRlBfS0VS
-TkVMKTsKPj4+PiAgICAgICAgaWYgKCFwYWdlcykKPj4+PiAgICAgICAgICAgIHJldHVybiAtRU5P
-TUVNOwo+Pj4+Cj4+Pj4gQEAgLTIxOCwyMiArMjIxLDI1IEBAIGludCBfX2luaXQKPj4+PiB4ZW5f
-eGxhdGVfbWFwX2JhbGxvb25lZF9wYWdlcyh4ZW5fcGZuX3QgKipnZm5zLCB2b2lkICoqdmlydCwK
-Pj4+PiAgICAgICAgICAgIGtmcmVlKHBhZ2VzKTsKPj4+PiAgICAgICAgICAgIHJldHVybiAtRU5P
-TUVNOwo+Pj4+ICAgICAgICB9Cj4+Pj4gLSAgICByYyA9IGFsbG9jX3hlbmJhbGxvb25lZF9wYWdl
-cyhucl9ncmFudF9mcmFtZXMsIHBhZ2VzKTsKPj4+PiArICAgIHJjID0gYWxsb2NfeGVuYmFsbG9v
-bmVkX3BhZ2VzKG5yX3BhZ2VzLCBwYWdlcyk7Cj4+Pj4gICAgICAgIGlmIChyYykgewo+Pj4+IC0g
-ICAgICAgIHByX3dhcm4oIiVzIENvdWxkbid0IGJhbGxvb24gYWxsb2MgJWxkIHBmbnMgcmM6JWRc
-biIsCj4+Pj4gX19mdW5jX18sCj4+Pj4gLSAgICAgICAgICAgIG5yX2dyYW50X2ZyYW1lcywgcmMp
-Owo+Pj4+ICsgICAgICAgIHByX3dhcm4oIiVzIENvdWxkbid0IGJhbGxvb24gYWxsb2MgJWxkIHBh
-Z2VzIHJjOiVkXG4iLAo+Pj4+IF9fZnVuY19fLAo+Pj4+ICsgICAgICAgICAgICBucl9wYWdlcywg
-cmMpOwo+Pj4+ICAgICAgICAgICAga2ZyZWUocGFnZXMpOwo+Pj4+ICAgICAgICAgICAga2ZyZWUo
-cGZucyk7Cj4+Pj4gICAgICAgICAgICByZXR1cm4gcmM7Cj4+Pj4gICAgICAgIH0KPj4+PiAtICAg
-IGZvciAoaSA9IDA7IGkgPCBucl9ncmFudF9mcmFtZXM7IGkrKykKPj4+PiAtICAgICAgICBwZm5z
-W2ldID0gcGFnZV90b19wZm4ocGFnZXNbaV0pOwo+Pj4+ICsgICAgZm9yIChpID0gMDsgaSA8IG5y
-X2dyYW50X2ZyYW1lczsgaSsrKSB7Cj4+Pj4gKyAgICAgICAgaWYgKChpICUgWEVOX1BGTl9QRVJf
-UEFHRSkgPT0gMCkKPj4+PiArICAgICAgICAgICAgeGVuX3BmbiA9IHBhZ2VfdG9feGVuX3Bmbihw
-YWdlc1tpIC8gWEVOX1BGTl9QRVJfUEFHRV0pOwo+Pj4+ICsgICAgICAgIHBmbnNbaV0gPSBwZm5f
-dG9fZ2ZuKHhlbl9wZm4rKyk7Cj4+Pj4gKyAgICB9Cj4+Pgo+Pj4gV291bGQgaXQgYmUgcG9zc2li
-bGUgdG8gcmUtdXNlIHhlbl9mb3JfZWFjaF9nZm4/IFRoaXMgd2lsbCBhdm9pZAo+Pj4gb3Blbi1j
-b2RpbmcgdGhlIGxvb3AgdG8gYnJlYWsgZG93biB0aGUgTGludXggcGFnZS4KPj4gSSBkb24ndCB0
-aGluayBzby4gVXNpbmcgeGVuX2FjcGlfZ3Vlc3RfaW5pdCB3aWxsIHJlcXVpcmUgZmFjdG9yaW5n
-Cj4+ICJwZm5zW2ldID0gcGZuX3RvX2dmbih4ZW5fcGZuKyspIiB0byBhIGZ1bmN0aW9uIHdpdGgg
-cGFyYW1ldGVyIHBmbnNbaV0uCj4+IEhvdyBjYW4gd2UgcGFzcyBwZm5zW2ldPwo+IAo+IEJ5IHVz
-aW5nIHRoZSB2YXJpYWJsZSBkYXRhLiBTb21ldGhpbmcgYWxvbmcgdGhvc2UgbGluZXM6Cj4gCj4g
-c3RydWN0IG1hcF9iYWxsb29uX3BhZ2VzCj4gewo+ICAgICAgIHhlbl9wZm5fdCAqcGZuczsKPiAg
-ICAgICB1bnNpZ25lZCBpbnQgaWR4Owo+IH07Cj4gCj4gc3RhdGljIHZvaWQgc2V0dXBfYmFsbG9v
-bl9nZm4odW5zaWduZWQgbG9uZyBnZm4sIHZvaWQgKmRhdGEpCj4gewo+ICAgICAgIHN0cnVjdCBt
-YXBfYmFsbG9vbl9wYWdlcyAqaW5mbyA9IGRhdGE7Cj4gCj4gCj4gICAgICAgZGF0YS0+cGZuc1tk
-YXRhLT5pZHhdID0gZ2ZuOwo+ICAgICAgIGRhdGEtPmlkeCsrOwo+IH0KPiAKPiBBbmQgdGhlbiBp
-biB4ZW5feGxhdGVfbWFwX2JhbGxvb25lZF9wYWdlcwo+IAo+IHhlbl9mb3JfZWFjaF9nZm4ocGFn
-ZXMsIG5yX2dyYW50X2ZyYW1lcywgc2V0dXBfYmFsbG9vbl9nZm4sICZkYXRhKTsKSSB0aGluayB0
-aGlzIGxvb2tzIGxpa2UgbGVzcyBkaXJlY3QuIEFueXdheSBJIHdpbGwgdXBkYXRlIHRoaXMgcGF0
-Y2ggYXMKeW91IHNhaWQuCgpUaGFua3MsCi0tIApTaGFubm9uCgpfX19fX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fXwpsaW51eC1hcm0ta2VybmVsIG1haWxpbmcgbGlz
-dApsaW51eC1hcm0ta2VybmVsQGxpc3RzLmluZnJhZGVhZC5vcmcKaHR0cDovL2xpc3RzLmluZnJh
-ZGVhZC5vcmcvbWFpbG1hbi9saXN0aW5mby9saW51eC1hcm0ta2VybmVsCg==
+Call into the generic memory attributes table support code at the
+appropriate times during the init sequence so that the UEFI Runtime
+Services region are mapped according to the strict permissions it
+specifies.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+---
+ arch/arm64/include/asm/efi.h       | 2 ++
+ drivers/firmware/efi/arm-init.c    | 1 +
+ drivers/firmware/efi/arm-runtime.c | 3 +++
+ 3 files changed, 6 insertions(+)
+
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index 8e88a696c9cb..4dafc89f373a 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -14,6 +14,8 @@ extern void efi_init(void);
+ 
+ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
+ 
++#define efi_set_mapping_permissions	efi_create_mapping
++
+ #define efi_call_virt(f, ...)						\
+ ({									\
+ 	efi_##f##_t *__f;						\
+diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
+index d5df9849544c..9941a4f2f66f 100644
+--- a/drivers/firmware/efi/arm-init.c
++++ b/drivers/firmware/efi/arm-init.c
+@@ -204,6 +204,7 @@ void __init efi_init(void)
+ 		return;
+ 
+ 	reserve_regions();
++	efi_memattr_init();
+ 	early_memunmap(memmap.map, params.mmap_size);
+ 	memblock_reserve(params.mmap & PAGE_MASK,
+ 			 PAGE_ALIGN(params.mmap_size +
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index b0cfe208c14c..bf1f6ffc9218 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -75,6 +75,9 @@ static bool __init efi_virtmap_init(void)
+ 			set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 		}
+ 	}
++
++	if (efi_memattr_apply_permissions(&efi_mm, efi_set_mapping_permissions))
++		return false;
+ 	return true;
+ }
+ 
+-- 
+2.5.0
