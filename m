@@ -1,14 +1,13 @@
 From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v7 10/17] arm/xen: Get event-channel irq through HVM_PARAM
- when booting with ACPI
-Date: Wed, 30 Mar 2016 15:34:24 +0800
-Message-ID: <56FB8180.5040205@huawei.com>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-11-git-send-email-shannon.zhao@linaro.org> <56FAAEED.7060108@arm.com>
+Subject: Re: [PATCH v7 03/17] Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
+Date: Wed, 30 Mar 2016 15:38:00 +0800
+Message-ID: <56FB8258.7030303@huawei.com>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-4-git-send-email-shannon.zhao@linaro.org> <56FAAD48.2010401@arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="windows-1252"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56FAAEED.7060108-5wv7dgnIgG8@public.gmane.org>
+In-Reply-To: <56FAAD48.2010401-5wv7dgnIgG8@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
 Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
@@ -16,65 +15,68 @@ List-Id: linux-efi@vger.kernel.org
 
 
 
-On 2016/3/30 0:35, Julien Grall wrote:
+On 2016/3/30 0:28, Julien Grall wrote:
 > Hi Shannon,
 > 
 > On 24/03/16 14:44, Shannon Zhao wrote:
->> When booting with ACPI, it could get the event-channel irq through
-> 
-> The kernel will always get the event-channel IRQ through
-> HVM_PARAM_CALLBACK_IRQ.
-> 
-> So I would say: ", the kernel will get the event-channel..."
-> 
->> HVM_PARAM_CALLBACK_IRQ.
+>> Make xen_xlate_map_ballooned_pages work with 64K pages. In that case
+>> Kernel pages are 64K in size but Xen pages remain 4K in size. Xen pfns
+>> refer to 4K pages.
 >>
 >> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 >> Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
 >> ---
->>   arch/arm/xen/enlighten.c | 36 +++++++++++++++++++++++++++++++++++-
->>   1 file changed, 35 insertions(+), 1 deletion(-)
+>>   drivers/xen/xlate_mmu.c | 26 ++++++++++++++++----------
+>>   1 file changed, 16 insertions(+), 10 deletions(-)
 >>
->> diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
->> index d94f726..680aae0 100644
->> --- a/arch/arm/xen/enlighten.c
->> +++ b/arch/arm/xen/enlighten.c
->> @@ -30,6 +30,7 @@
->>   #include <linux/time64.h>
->>   #include <linux/timekeeping.h>
->>   #include <linux/timekeeper_internal.h>
->> +#include <linux/acpi.h>
+>> diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
+>> index 9692656..28f728b 100644
+>> --- a/drivers/xen/xlate_mmu.c
+>> +++ b/drivers/xen/xlate_mmu.c
+>> @@ -207,9 +207,12 @@ int __init
+>> xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
+>>       void *vaddr;
+>>       int rc;
+>>       unsigned int i;
+>> +    unsigned long nr_pages;
+>> +    xen_pfn_t xen_pfn = 0;
 >>
->>   #include <linux/mm.h>
+>>       BUG_ON(nr_grant_frames == 0);
+>> -    pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
+>> +    nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
+>> +    pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
+>>       if (!pages)
+>>           return -ENOMEM;
 >>
->> @@ -278,6 +279,35 @@ void __init xen_early_init(void)
->>           add_preferred_console("hvc", 0, NULL);
->>   }
->>
->> +static void __init xen_acpi_guest_init(void)
->> +{
->> +#ifdef CONFIG_ACPI
->> +    struct xen_hvm_param a;
->> +    int interrupt, trigger, polarity;
->> +
->> +    a.domid = DOMID_SELF;
->> +    a.index = HVM_PARAM_CALLBACK_IRQ;
->> +    xen_events_irq = 0;
->> +
->> +    if (!HYPERVISOR_hvm_op(HVMOP_get_param, &a)) {
->> +        if ((a.value >> 56) == HVM_PARAM_CALLBACK_TYPE_PPI) {
->> +            interrupt = a.value & 0xff;
->> +            trigger = ((a.value >> 8) & 0x1) ? ACPI_EDGE_SENSITIVE
->> +                             : ACPI_LEVEL_SENSITIVE;
->> +            polarity = ((a.value >> 8) & 0x2) ? ACPI_ACTIVE_LOW
->> +                              : ACPI_ACTIVE_HIGH;
->> +            xen_events_irq = acpi_register_gsi(NULL, interrupt,
->> +                               trigger, polarity);
->> +        }
+>> @@ -218,22 +221,25 @@ int __init
+>> xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
+>>           kfree(pages);
+>>           return -ENOMEM;
+>>       }
+>> -    rc = alloc_xenballooned_pages(nr_grant_frames, pages);
+>> +    rc = alloc_xenballooned_pages(nr_pages, pages);
+>>       if (rc) {
+>> -        pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
+>> -            nr_grant_frames, rc);
+>> +        pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n", __func__,
+>> +            nr_pages, rc);
+>>           kfree(pages);
+>>           kfree(pfns);
+>>           return rc;
+>>       }
+>> -    for (i = 0; i < nr_grant_frames; i++)
+>> -        pfns[i] = page_to_pfn(pages[i]);
+>> +    for (i = 0; i < nr_grant_frames; i++) {
+>> +        if ((i % XEN_PFN_PER_PAGE) == 0)
+>> +            xen_pfn = page_to_xen_pfn(pages[i / XEN_PFN_PER_PAGE]);
+>> +        pfns[i] = pfn_to_gfn(xen_pfn++);
 >> +    }
 > 
-> Can you invert the condition to remove one layer of indentation?
-Sure, will update.
+> Would it be possible to re-use xen_for_each_gfn? This will avoid
+> open-coding the loop to break down the Linux page.
+I don't think so. Using xen_acpi_guest_init will require factoring
+"pfns[i] = pfn_to_gfn(xen_pfn++)" to a function with parameter pfns[i].
+How can we pass pfns[i]?
 
 Thanks,
 -- 
