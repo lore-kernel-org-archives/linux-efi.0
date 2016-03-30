@@ -1,97 +1,82 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v2 1/5] ARM: efi: apply strict permissons for UEFI Runtime Services regions
-Date: Wed, 30 Mar 2016 18:38:49 +0200
-Message-ID: <1459355933-13529-2-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v2 3/5] efi: add support for the EFI_MEMORY_ATTRIBUTES_TABLE config table
+Date: Wed, 30 Mar 2016 18:38:51 +0200
+Message-ID: <1459355933-13529-4-git-send-email-ard.biesheuvel@linaro.org>
 References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1459355933-13529-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
+Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-Recent UEFI versions expose permission attributes for runtime services
-memory regions, either in the UEFI memory map or in the separate memory
-attributes table.  This allows the kernel to map these regions with
-stricter permissions, rather than the RWX permissions that are used by
-default. So wire this up in our mapping routine.
+This declares the GUID and struct typedef for the new memory attributes
+table which contains the permissions that can be used to apply stricter
+permissions to UEFI Runtime Services memory regions.
 
-Cc: Russell King <rmk+kernel-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- arch/arm/include/asm/efi.h |  1 +
- arch/arm/kernel/efi.c      | 41 ++++++++++++++++++++
- 2 files changed, 42 insertions(+)
+ drivers/firmware/efi/efi.c |  2 ++
+ include/linux/efi.h        | 13 +++++++++++++
+ 2 files changed, 15 insertions(+)
 
-diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
-index e0eea72deb87..b0c341d7ceee 100644
---- a/arch/arm/include/asm/efi.h
-+++ b/arch/arm/include/asm/efi.h
-@@ -22,6 +22,7 @@
- void efi_init(void);
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3a69ed5ecfcb..5683865baa92 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -43,6 +43,7 @@ struct efi __read_mostly efi = {
+ 	.config_table		= EFI_INVALID_TABLE_ADDR,
+ 	.esrt			= EFI_INVALID_TABLE_ADDR,
+ 	.properties_table	= EFI_INVALID_TABLE_ADDR,
++	.mem_attr_table		= EFI_INVALID_TABLE_ADDR,
+ };
+ EXPORT_SYMBOL(efi);
  
- int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
-+int efi_set_mapping_permissions(struct mm_struct *mm, efi_memory_desc_t *md);
+@@ -338,6 +339,7 @@ static __initdata efi_config_table_type_t common_tables[] = {
+ 	{UGA_IO_PROTOCOL_GUID, "UGA", &efi.uga},
+ 	{EFI_SYSTEM_RESOURCE_TABLE_GUID, "ESRT", &efi.esrt},
+ 	{EFI_PROPERTIES_TABLE_GUID, "PROP", &efi.properties_table},
++	{EFI_MEMORY_ATTRIBUTES_TABLE_GUID, "MEMATTR", &efi.mem_attr_table},
+ 	{NULL_GUID, NULL, NULL},
+ };
  
- #define efi_call_virt(f, ...)						\
- ({									\
-diff --git a/arch/arm/kernel/efi.c b/arch/arm/kernel/efi.c
-index ff8a9d8acfac..9f43ba012d10 100644
---- a/arch/arm/kernel/efi.c
-+++ b/arch/arm/kernel/efi.c
-@@ -11,6 +11,41 @@
- #include <asm/mach/map.h>
- #include <asm/mmu_context.h>
+diff --git a/include/linux/efi.h b/include/linux/efi.h
+index 1626474567ac..346d01ad7cca 100644
+--- a/include/linux/efi.h
++++ b/include/linux/efi.h
+@@ -623,6 +623,10 @@ void efi_native_runtime_setup(void);
+ 	EFI_GUID(0x3152bca5, 0xeade, 0x433d, \
+ 		 0x86, 0x2e, 0xc0, 0x1c, 0xdc, 0x29, 0x1f, 0x44)
  
-+static int __init set_permissions(pte_t *ptep, pgtable_t token,
-+				  unsigned long addr, void *data)
-+{
-+	efi_memory_desc_t *md = data;
-+	pte_t pte = *ptep;
++#define EFI_MEMORY_ATTRIBUTES_TABLE_GUID \
++	EFI_GUID(0xdcfa911d, 0x26eb, 0x469f, \
++		 0xa2, 0x20, 0x38, 0xb7, 0xdc, 0x46, 0x12, 0x20)
 +
-+	if (md->attribute & EFI_MEMORY_RO)
-+		pte = set_pte_bit(pte, __pgprot(L_PTE_RDONLY));
-+	if (md->attribute & EFI_MEMORY_XP)
-+		pte = set_pte_bit(pte, __pgprot(L_PTE_XN));
-+	set_pte_ext(ptep, pte, PTE_EXT_NG);
-+	return 0;
-+}
-+
-+int __init efi_set_mapping_permissions(struct mm_struct *mm,
-+				       efi_memory_desc_t *md)
-+{
-+	unsigned long base, size;
-+
-+	base = md->virt_addr;
-+	size = md->num_pages << EFI_PAGE_SHIFT;
-+
-+	/*
-+	 * We can only use apply_to_page_range() if we can guarantee that the
-+	 * entire region was mapped using pages. This should be the case if the
-+	 * region does not cover any naturally aligned SECTION_SIZE sized
-+	 * blocks.
-+	 */
-+	if (round_down(base + size, SECTION_SIZE) <
-+	    round_up(base, SECTION_SIZE) + SECTION_SIZE)
-+		return apply_to_page_range(mm, base, size, set_permissions, md);
-+
-+	return 0;
-+}
-+
- int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- {
- 	struct map_desc desc = {
-@@ -34,5 +69,11 @@ int __init efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md)
- 		desc.type = MT_DEVICE;
+ typedef struct {
+ 	efi_guid_t guid;
+ 	u64 table;
+@@ -847,6 +851,14 @@ typedef struct {
  
- 	create_mapping_late(mm, &desc, true);
+ #define EFI_INVALID_TABLE_ADDR		(~0UL)
+ 
++typedef struct {
++	u32 version;
++	u32 num_entries;
++	u32 desc_size;
++	u32 reserved;
++	efi_memory_desc_t entry[0];
++} efi_memory_attributes_table_t;
 +
-+	/*
-+	 * If stricter permissions were specified, apply them now.
-+	 */
-+	if (md->attribute & (EFI_MEMORY_RO | EFI_MEMORY_XP))
-+		return efi_set_mapping_permissions(mm, md);
- 	return 0;
- }
+ /*
+  * All runtime access to EFI goes through this structure:
+  */
+@@ -868,6 +880,7 @@ extern struct efi {
+ 	unsigned long config_table;	/* config tables */
+ 	unsigned long esrt;		/* ESRT table */
+ 	unsigned long properties_table;	/* properties table */
++	unsigned long mem_attr_table;	/* memory attributes table */
+ 	efi_get_time_t *get_time;
+ 	efi_set_time_t *set_time;
+ 	efi_get_wakeup_time_t *get_wakeup_time;
 -- 
 2.5.0
