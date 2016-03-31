@@ -1,188 +1,60 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: [PATCH v9 06/17] Xen: ARM: Add support for mapping platform device mmio
-Date: Thu, 31 Mar 2016 19:23:34 +0800
-Message-ID: <1459423425-1220-7-git-send-email-zhaoshenglong@huawei.com>
+From: Shannon Zhao <zhaoshenglong@huawei.com>
+Subject: [PATCH v9 09/17] xen/hvm/params: Add a new delivery type for event-channel in HVM_PARAM_CALLBACK_IRQ
+Date: Thu, 31 Mar 2016 19:23:37 +0800
+Message-ID: <1459423425-1220-10-git-send-email-zhaoshenglong@huawei.com>
 References: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459423425-1220-1-git-send-email-zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Add a bus_notifier for platform bus device in order to map the device
-mmio regions when DOM0 booting with ACPI.
+This new delivery type which is for ARM shares the same value with
+HVM_PARAM_CALLBACK_TYPE_VECTOR which is for x86.
 
-Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Acked-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+val[15:8] is flag: val[7:0] is a PPI.
+To the flag, bit 8 stands the interrupt mode is edge(1) or level(0) and
+bit 9 stands the interrupt polarity is active low(1) or high(0).
+
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 ---
- drivers/xen/Makefile     |   1 +
- drivers/xen/arm-device.c | 141 +++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 142 insertions(+)
- create mode 100644 drivers/xen/arm-device.c
+ include/xen/interface/hvm/params.h | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
 
-diff --git a/drivers/xen/Makefile b/drivers/xen/Makefile
-index 9b7a35c..415f286 100644
---- a/drivers/xen/Makefile
-+++ b/drivers/xen/Makefile
-@@ -9,6 +9,7 @@ CFLAGS_features.o			:= $(nostackp)
+diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
+index 70ad208..4d61fc5 100644
+--- a/include/xen/interface/hvm/params.h
++++ b/include/xen/interface/hvm/params.h
+@@ -47,11 +47,24 @@
+  * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
+  */
  
- CFLAGS_efi.o				+= -fshort-wchar
- 
-+dom0-$(CONFIG_ARM64) += arm-device.o
- dom0-$(CONFIG_PCI) += pci.o
- dom0-$(CONFIG_USB_SUPPORT) += dbgp.o
- dom0-$(CONFIG_XEN_ACPI) += acpi.o $(xen-pad-y)
-diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
-new file mode 100644
-index 0000000..76e26e5
---- /dev/null
-+++ b/drivers/xen/arm-device.c
-@@ -0,0 +1,141 @@
++#if defined(__i386__) || defined(__x86_64__)
+ #define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
+ /*
+  * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
+  * if this delivery method is available.
+  */
++#elif defined(__arm__) || defined(__aarch64__)
++#define HVM_PARAM_CALLBACK_TYPE_PPI      2
 +/*
-+ * Copyright (c) 2015, Linaro Limited, Shannon Zhao
-+ *
-+ * This program is free software; you can redistribute it and/or modify it
-+ * under the terms and conditions of the GNU General Public License,
-+ * version 2, as published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope it will be useful, but WITHOUT
-+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
-+ * more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ * val[55:16] needs to be zero.
++ * val[15:8] is interrupt flag of the PPI used by event-channel:
++ *  bit 8: the PPI is edge(1) or level(0) triggered
++ *  bit 9: the PPI is active low(1) or high(0)
++ * val[7:0] is a PPI number used by event-channel.
++ * This is only used by ARM/ARM64 and masking/eoi the interrupt associated to
++ * the notification is handled by the interrupt controller.
 + */
-+
-+#include <linux/platform_device.h>
-+#include <linux/acpi.h>
-+#include <xen/xen.h>
-+#include <xen/page.h>
-+#include <xen/interface/memory.h>
-+#include <asm/xen/hypervisor.h>
-+#include <asm/xen/hypercall.h>
-+
-+static int xen_unmap_device_mmio(struct resource *resource, unsigned int count)
-+{
-+	unsigned int i, j, nr;
-+	int rc = 0;
-+	struct resource *r;
-+	struct xen_remove_from_physmap xrp;
-+
-+	for (i = 0; i < count; i++) {
-+		r = &resource[i];
-+		nr = DIV_ROUND_UP(resource_size(r), XEN_PAGE_SIZE);
-+		if ((resource_type(r) != IORESOURCE_MEM) || (nr == 0))
-+			continue;
-+
-+		for (j = 0; j < nr; j++) {
-+			xrp.domid = DOMID_SELF;
-+			xrp.gpfn = XEN_PFN_DOWN(r->start) + j;
-+			rc = HYPERVISOR_memory_op(XENMEM_remove_from_physmap,
-+						  &xrp);
-+			if (rc)
-+				return rc;
-+		}
-+	}
-+
-+	return rc;
-+}
-+
-+static int xen_map_device_mmio(struct resource *resource, unsigned int count)
-+{
-+	unsigned int i, j, nr;
-+	int rc = 0;
-+	struct resource *r;
-+	xen_pfn_t *gpfns;
-+	xen_ulong_t *idxs;
-+	int *errs;
-+	struct xen_add_to_physmap_range xatp;
-+
-+	for (i = 0; i < count; i++) {
-+		r = &resource[i];
-+		nr = DIV_ROUND_UP(resource_size(r), XEN_PAGE_SIZE);
-+		if ((resource_type(r) != IORESOURCE_MEM) || (nr == 0))
-+			continue;
-+
-+		gpfns = kzalloc(sizeof(xen_pfn_t) * nr, GFP_KERNEL);
-+		idxs = kzalloc(sizeof(xen_ulong_t) * nr, GFP_KERNEL);
-+		errs = kzalloc(sizeof(int) * nr, GFP_KERNEL);
-+		if (!gpfns || !idxs || !errs) {
-+			kfree(gpfns);
-+			kfree(idxs);
-+			kfree(errs);
-+			return -ENOMEM;
-+		}
-+
-+		for (j = 0; j < nr; j++) {
-+			gpfns[j] = XEN_PFN_DOWN(r->start) + j;
-+			idxs[j] = XEN_PFN_DOWN(r->start) + j;
-+		}
-+
-+		xatp.domid = DOMID_SELF;
-+		xatp.size = nr;
-+		xatp.space = XENMAPSPACE_dev_mmio;
-+
-+		set_xen_guest_handle(xatp.gpfns, gpfns);
-+		set_xen_guest_handle(xatp.idxs, idxs);
-+		set_xen_guest_handle(xatp.errs, errs);
-+
-+		rc = HYPERVISOR_memory_op(XENMEM_add_to_physmap_range, &xatp);
-+		kfree(gpfns);
-+		kfree(idxs);
-+		kfree(errs);
-+		if (rc)
-+			return rc;
-+	}
-+
-+	return rc;
-+}
-+
-+static int xen_platform_notifier(struct notifier_block *nb,
-+				 unsigned long action, void *data)
-+{
-+	struct platform_device *pdev = to_platform_device(data);
-+	int r = 0;
-+
-+	if (pdev->num_resources == 0 || pdev->resource == NULL)
-+		return NOTIFY_OK;
-+
-+	switch (action) {
-+	case BUS_NOTIFY_ADD_DEVICE:
-+		r = xen_map_device_mmio(pdev->resource, pdev->num_resources);
-+		break;
-+	case BUS_NOTIFY_DEL_DEVICE:
-+		r = xen_unmap_device_mmio(pdev->resource, pdev->num_resources);
-+		break;
-+	default:
-+		return NOTIFY_DONE;
-+	}
-+	if (r)
-+		dev_err(&pdev->dev, "Platform: Failed to %s device %s MMIO!\n",
-+			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
-+			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
-+			pdev->name);
-+
-+	return NOTIFY_OK;
-+}
-+
-+static struct notifier_block platform_device_nb = {
-+	.notifier_call = xen_platform_notifier,
-+};
-+
-+static int __init register_xen_platform_notifier(void)
-+{
-+	if (!xen_initial_domain() || acpi_disabled)
-+		return 0;
-+
-+	return bus_register_notifier(&platform_bus_type, &platform_device_nb);
-+}
-+
-+arch_initcall(register_xen_platform_notifier);
++#endif
+ 
+ #define HVM_PARAM_STORE_PFN    1
+ #define HVM_PARAM_STORE_EVTCHN 2
 -- 
 2.0.4
