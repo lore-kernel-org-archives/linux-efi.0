@@ -1,108 +1,103 @@
-From: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH] efi/arm64: don't apply MEMBLOCK_NOMAP to UEFI memory map
- mapping
-Date: Thu, 31 Mar 2016 11:53:18 +0100
-Message-ID: <20160331105318.GC18910@arm.com>
-References: <1459323983-9120-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Thu, 31 Mar 2016 12:04:42 +0100
+Message-ID: <alpine.DEB.2.02.1603311155450.11739@kaball.uk.xensource.com>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
+ <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org>
+ <20160329161837.GH6745@arm.com> <20160329163147.GB27223@leverpostej>
+ <56FB7E00.7030400@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1459323983-9120-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, mark.rutland-5wv7dgnIgG8@public.gmane.org, mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, jeremy.linton-5wv7dgnIgG8@public.gmane.org, msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org
+Content-Type: text/plain; charset="US-ASCII"
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56FB7E00.7030400-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Cc: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Mar 30, 2016 at 09:46:23AM +0200, Ard Biesheuvel wrote:
-> Hi Matt,
+On Wed, 30 Mar 2016, Shannon Zhao wrote:
+> Hi Will, Mark,
 > 
-> Could we queue this as a fix for v4.6 with a cc:stable for v4.5, please?
-> (assuming no objections from any of the cc'ees)
+> On 2016/3/30 0:31, Mark Rutland wrote:
+> > On Tue, Mar 29, 2016 at 05:18:38PM +0100, Will Deacon wrote:
+> >> > On Thu, Mar 24, 2016 at 10:44:31PM +0800, Shannon Zhao wrote:
+> >>> > > When it's a Xen domain0 booting with ACPI, it will supply a /chosen and
+> >>> > > a /hypervisor node in DT. So check if it needs to enable ACPI.
+> >>> > > 
+> >>> > > Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >>> > > Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+> >>> > > Acked-by: Hanjun Guo <hanjun.guo-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+> >>> > > ---
+> >>> > >  arch/arm64/kernel/acpi.c | 12 ++++++++----
+> >>> > >  1 file changed, 8 insertions(+), 4 deletions(-)
+> >>> > > 
+> >>> > > diff --git a/arch/arm64/kernel/acpi.c b/arch/arm64/kernel/acpi.c
+> >>> > > index d1ce8e2..4e92be0 100644
+> >>> > > --- a/arch/arm64/kernel/acpi.c
+> >>> > > +++ b/arch/arm64/kernel/acpi.c
+> >>> > > @@ -67,10 +67,13 @@ static int __init dt_scan_depth1_nodes(unsigned long node,
+> >>> > >  {
+> >>> > >  	/*
+> >>> > >  	 * Return 1 as soon as we encounter a node at depth 1 that is
+> >>> > > -	 * not the /chosen node.
+> >>> > > +	 * not the /chosen node, or /hypervisor node when running on Xen.
+> >>> > >  	 */
+> >>> > > -	if (depth == 1 && (strcmp(uname, "chosen") != 0))
+> >>> > > -		return 1;
+> >>> > > +	if (depth == 1 && (strcmp(uname, "chosen") != 0)) {
+> >>> > > +		if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
+> >>> > > +			return 1;
+> >>> > > +	}
+> >> > 
+> >> > Hmm, but xen_initial_domain() is false when xen isn't being used at all,
+> >> > so it feels to me like this is a bit too far-reaching and is basically
+> >> > claiming the "/hypervisor" namespace for Xen. Couldn't it be renamed to
+> >> > "xen,hypervisor" or something?
+> >> > 
+> >> > Mark, got any thoughts on this?
+> > The node has a compatible string, "xen,xen" per [1], which would tell us
+> > absolutely that xen is present. I'd be happy checking for that
+> > explicitly.
+> > 
+> I think actually the xen_initial_domain is the result of the
+> fdt_find_hyper_node. If the compatible string "xen,xen" doesn't exist,
+> the xen_initial_domain() will return false and whatever the current node
+> is the above check will return 1 since the device tree is not empty.
 
-FWIW:
+Right.
 
-Acked-by: Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
+xen_initial_domain implies both "xen,xen" and XENFEAT_dom0 (which is a
+feature retrieved by making a XENVER_get_features hypercall, see
+drivers/xen/features.c:xen_setup_features).
 
-Yes, this is a temporary hack, but it's small, fixes a real issue and
-you're already working on a proper solution anyway.
+So the following check:
 
-Will
+ +     if (!xen_initial_domain() || (strcmp(uname, "hypervisor") != 0))
+ +         return 1;
 
-> ----------8<--------------
-> Commit 4dffbfc48d65 ("arm64/efi: mark UEFI reserved regions as
-> MEMBLOCK_NOMAP") updated the mapping logic of both the RuntimeServices
-> regions as well as the kernel's copy of the UEFI memory map to set the
-> MEMBLOCK_NOMAP flag, which causes these regions to be omitted from the
-> kernel direct mapping, and from being covered by a struct page.
-> For the RuntimeServices regions, this is an obvious win, since the contents
-> of these regions have significance to the firmware executable code itself,
-> and are mapped in the EFI page tables using attributes that are described in
-> the UEFI memory map, and which may differ from the attributes we use for
-> mapping system RAM. It also prevents the contents from being modified
-> inadvertently, since the EFI page tables are only live during runtime
-> service invocations.
-> 
-> None of these concerns apply to the allocation that covers the UEFI memory
-> map, since it is entirely owned by the kernel. Setting the MEMBLOCK_NOMAP on
-> the region did allow us to use ioremap_cache() to map it both on arm64 and
-> on ARM, since the latter does not allow ioremap_cache() to be used on
-> regions that are covered by a struct page.
-> 
-> The ioremap_cache() on ARM restriction will be lifted in the v4.7 timeframe,
-> but in the mean time, it has been reported that commit 4dffbfc48d65 causes
-> a regression on 64k granule kernels. This is due to the fact that, given
-> the 64 KB page size, the region that we end up removing from the kernel
-> direct mapping is rounded up to 64 KB, and this 64 KB page frame may be
-> shared with the initrd when booting via GRUB (which does not align its
-> EFI_LOADER_DATA allocations to 64 KB like the stub does). This will crash
-> the kernel as soon as it tries to access the initrd.
-> 
-> Since the issue is specific to arm64, revert back to memblock_reserve()'ing
-> the UEFI memory map when running on arm64. This is a temporary fix for v4.5
-> and v4.6, and will be superseded in the v4.7 timeframe when we will be able
-> to move back to memblock_reserve() unconditionally.
-> 
-> Fixes: 4dffbfc48d65 ("arm64/efi: mark UEFI reserved regions as MEMBLOCK_NOMAP")
-> Reported-by: Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/arm-init.c | 18 +++++++++++++++---
->  1 file changed, 15 insertions(+), 3 deletions(-)
-> 
-> diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-> index aa1f743152a2..8714f8c271ba 100644
-> --- a/drivers/firmware/efi/arm-init.c
-> +++ b/drivers/firmware/efi/arm-init.c
-> @@ -203,7 +203,19 @@ void __init efi_init(void)
->  
->  	reserve_regions();
->  	early_memunmap(memmap.map, params.mmap_size);
-> -	memblock_mark_nomap(params.mmap & PAGE_MASK,
-> -			    PAGE_ALIGN(params.mmap_size +
-> -				       (params.mmap & ~PAGE_MASK)));
-> +
-> +	if (IS_ENABLED(CONFIG_ARM)) {
-> +		/*
-> +		 * ARM currently does not allow ioremap_cache() to be called on
-> +		 * memory regions that are covered by struct page. So remove the
-> +		 * UEFI memory map from the linear mapping.
-> +		 */
-> +		memblock_mark_nomap(params.mmap & PAGE_MASK,
-> +				    PAGE_ALIGN(params.mmap_size +
-> +					       (params.mmap & ~PAGE_MASK)));
-> +	} else {
-> +		memblock_reserve(params.mmap & PAGE_MASK,
-> +				 PAGE_ALIGN(params.mmap_size +
-> +					    (params.mmap & ~PAGE_MASK)));
-> +	}
->  }
-> -- 
-> 2.5.0
-> 
-> 
-> _______________________________________________
-> linux-arm-kernel mailing list
-> linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
-> http://lists.infradead.org/mailman/listinfo/linux-arm-kernel
-> 
+means that even if it's xen_initial_domain(), return error unless the
+node found is "hypervisor". In other words, even if
+xen_initial_domain(), no other nodes are allowed except /chosen and
+/hypervisor.
+
+This doesn't look far reaching to me, but yes, we could check explicitly
+for the node to be compatible "xen,xen", in addition to be named
+"hypervisor", even though the check is already done elsewhere
+(arch/arm/xen/enlighten.c).
+
+But I would keep it as it is.
+
+> > In patch 11 fdt_find_hyper_node checks the compatible string. We could
+> > factor that out into a helper like is_xen_node(node) and use it here
+> > too.
+> > 
+> I don't think so because we already check the compatible string before
+> and we could get the result simply via xen_initial_domain().
+
+We could add a comment saying xen_initial_domain() implies "xen,xen" or
+something.
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
