@@ -1,60 +1,122 @@
-From: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
- or disable ACPI
-Date: Thu, 31 Mar 2016 13:42:16 +0100
-Message-ID: <20160331124216.GE26532@leverpostej>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org>
- <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org>
- <20160329161837.GH6745@arm.com>
- <20160329163147.GB27223@leverpostej>
- <56FB7E00.7030400@huawei.com>
- <alpine.DEB.2.02.1603311155450.11739@kaball.uk.xensource.com>
- <CAKv+Gu-wPq_FzO3sm7bhSFuu7EVxHWB_v6HOn1GqNbdaE-iBoQ@mail.gmail.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [PATCH RFC 1/1] x86: fix bad memory access in
+ fb_is_primary_device()
+Date: Thu, 31 Mar 2016 15:31:42 +0200
+Message-ID: <20160331133142.GA22357@gmail.com>
+References: <1455528649-26629-1-git-send-email-alpopov@ptsecurity.com>
+ <20160216075521.GA27491@gmail.com>
+ <20160216134918.GD2769@codeblueprint.co.uk>
+ <20160216151859.GB11373@redhat.com>
+ <56E01B0F.3000306@ptsecurity.com>
+ <56F52111.6050500@ptsecurity.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 Content-Disposition: inline
-In-Reply-To: <CAKv+Gu-wPq_FzO3sm7bhSFuu7EVxHWB_v6HOn1GqNbdaE-iBoQ-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Huangpeng (Peter)" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, julien.grall-5wv7dgnIgG8@public.gmane.org, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+In-Reply-To: <56F52111.6050500-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Alexander Popov <alpopov-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org>
+Cc: Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Tomi Valkeinen <tomi.valkeinen-l0cyMroinI0@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, Ingo Molnar <mingo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H. Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, x86-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, Mar 31, 2016 at 01:44:08PM +0200, Ard Biesheuvel wrote:
-> The heuristic is there to decide whether some DTB image contains a
-> complete description of the platform, or only some data handed over by
-> the bootloader. Arguably, a DT containing both /chosen and /hypervisor
-> but nothing else can still not describe an actual platform, and
-> whether we execute under Xen or not is completely irrelevant.
 
-I disagree somewhat.
+* Alexander Popov <alpopov-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org> wrote:
 
-In general, a /hypervisor node may not be a Xen node, and could
-potentially imply some platform description. As /hypervisor is a generic
-name up for grabs by any hypervisor, we simply cannot make assumptions
-about it.
+> On 09.03.2016 15:46, Alexander Popov wrote:
+> > On 16.02.2016 18:18, Peter Jones wrote:
+> >> On Tue, Feb 16, 2016 at 01:49:18PM +0000, Matt Fleming wrote:
+> >>> [ Including Peter, the efifb maintainer. Original email is here,
+> >>>
+> >>>     http://marc.info/?l=linux-kernel&m=145552936131335&w=2
+> >>>
+> >>>   I've snipped some of the quoted text ]
+> >>>
+> >>> On Tue, 16 Feb, at 08:55:22AM, Ingo Molnar wrote:
+> >>>>
+> >>>> (I've Cc:-ed the EFI-FB and FB gents. Mail quoted below.)
+> >>>>
+> >>>> * Alexander Popov <alpopov-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org> wrote:
+> >>>>
+> >>>>> Currently the code in fb_is_primary_device() contains to_pci_dev() macro
+> >>>>> which is applied to dev from struct fb_info. In some cases this causes
+> >>>>> bad memory access when fb_is_primary_device() handles fb_info of efifb.
+> >>>>> The reason is that fb dev of efifb is embedded into struct platform_device
+> >>>>> but not into struct pci_dev.
+> >>>>>
+> >>>>> We can fix this by checking fb dev bus name in fb_is_primary_device().
+> >>>>>
+> >>>>> It seems that this bug reveals some bigger problem with to_pci_dev(),
+> >>>>> to_platform_device() and others, which just do container_of() and
+> >>>>> don't check whether struct device is a part of the appropriate structure.
+> >>>>> Should we do something more about it?
+> >>>>>
+> >>>>> KASan report:
+> >>>
+> >>> [...]
+> >>>
+> >>>>>
+> >>>>> Signed-off-by: Alexander Popov <alpopov-rHsQqRFQpp1OSnsfY10OVw@public.gmane.org>
+> >>>>> ---
+> >>>>>  arch/x86/video/fbdev.c | 9 +++++----
+> >>>>>  1 file changed, 5 insertions(+), 4 deletions(-)
+> >>>>>
+> >>>>> diff --git a/arch/x86/video/fbdev.c b/arch/x86/video/fbdev.c
+> >>>>> index d5644bb..4999f78 100644
+> >>>>> --- a/arch/x86/video/fbdev.c
+> >>>>> +++ b/arch/x86/video/fbdev.c
+> >>>>> @@ -18,11 +18,12 @@ int fb_is_primary_device(struct fb_info *info)
+> >>>>>  	struct pci_dev *default_device = vga_default_device();
+> >>>>>  	struct resource *res = NULL;
+> >>>>>  
+> >>>>> -	if (device)
+> >>>>> -		pci_dev = to_pci_dev(device);
+> >>>>> -
+> >>>>> -	if (!pci_dev)
+> >>>>> +	if (!device || !device->bus ||
+> >>>>> +		    !device->bus->name || strcmp(device->bus->name, "pci")) {
+> >>>>>  		return 0;
+> >>>>> +	}
+> >>>>> +
+> >>>>> +	pci_dev = to_pci_dev(device);
+> >>>>>  
+> >>>>>  	if (default_device) {
+> >>>>>  		if (pci_dev == default_device)
+> >>>>> -- 
+> >>>>> 1.9.1
+> >>>>>
+> >>>
+> >>> I wonder if this issue could explain some of the efifb issues we've
+> >>> seen reported on bugzilla.kernel.org in the past where switching from
+> >>> efifb to some other framebuffer device caused hangs during boot. I'm
+> >>> struggling to find the relevant bugzilla entries now, though.
+> >>
+> >> It's possible it could, but I don't have them handy either. 
+> 
+> [...]
+> 
+> >> So it's most likely right for efifb to be embedded in a platform_device
+> >> instead of a pci_dev.  Which leads back to Alexander's question - if it
+> >> isn't in a pci_dev, that means fb_is_primary_device() needs to not
+> >> assume it is.  So the patch appears correct, but so is the question -
+> >> should to_pci_dev() be checking this and returning NULL here?
+> > 
+> > The discussion has suspended. May I activate it again?
+> > 
+> > So there are two ways to fix the bad memory access in fb_is_primary_device().
+> > 
+> > The first one is proposed in my patch. Checking the bus name string doesn't
+> > look good but I didn't manage to come up with anything better.
+> > 
+> > The second way is changing to_pci_dev() similarly. It may return NULL or
+> > call BUG() when struct device is a part of an inappropriate structure.
+> > 
+> > Which way is better? Do we need to do anything with other similar macros?
+> 
+> Excuse me, there is no reply for a long time. Did I touch any taboo topic?
+> Hope to fix this bug. Thanks.
 
-As /chosen is a special reserved path that implies a particular binding
-and has no compatible string, so checking its path alone is correct.
-
-While we do check that the /hypervisor node is "xen,xen" compatible
-elsewhere, the canonical mechanism of checking for a Xen node (as
-opposed to any hypervisor's node) is to check the compatible string.
-
-If we are going to handle nodes for other hypervisors while treating the
-DTB as empty, we need code and discussion regarding said hypervisor.
-
-Hence, for checking for a Xen /hypervisor node, I would prefer we
-checked the compatible string rather than the path.
-
-An is_xen_node() helper (which could also check that the path is
-"/hypervisor") would avoid having redundant, subtly distinct ways of
-checking, and would explicitly document precisely what we are checking
-for.
+No need to worry, it's all upstream already.
 
 Thanks,
-Mark.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+	Ingo
