@@ -1,106 +1,180 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v9 11/17] ARM: XEN: Move xen_early_init() before
-	efi_init()
-Date: Thu, 31 Mar 2016 19:23:39 +0800
-Message-ID: <1459423425-1220-12-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v9 17/17] Xen: EFI: Parse DT parameters for Xen specific UEFI
+Date: Thu, 31 Mar 2016 19:23:45 +0800
+Message-ID: <1459423425-1220-18-git-send-email-zhaoshenglong@huawei.com>
 References: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
-List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: devicetree@vger.kernel.org, sstabellini@kernel.org, Russell King <linux@arm.linux.org.uk>, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, linux-efi@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Matt Fleming <matt@codeblueprint.co.uk>
 List-Id: linux-efi@vger.kernel.org
 
-RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCk1vdmUgeGVuX2Vh
-cmx5X2luaXQoKSBiZWZvcmUgZWZpX2luaXQoKSwgdGhlbiB3aGVuIGNhbGxpbmcgZWZpX2luaXQo
-KQpjb3VsZCBpbml0aWFsaXplIFhlbiBzcGVjaWZpYyBVRUZJLgoKQ2hlY2sgaWYgaXQgcnVucyBv
-biBYZW4gaHlwZXJ2aXNvciB0aHJvdWdoIHRoZSBmbGF0IGR0cy4KCkNjOiBSdXNzZWxsIEtpbmcg
-PGxpbnV4QGFybS5saW51eC5vcmcudWs+ClNpZ25lZC1vZmYtYnk6IFNoYW5ub24gWmhhbyA8c2hh
-bm5vbi56aGFvQGxpbmFyby5vcmc+ClJldmlld2VkLWJ5OiBTdGVmYW5vIFN0YWJlbGxpbmkgPHN0
-ZWZhbm8uc3RhYmVsbGluaUBldS5jaXRyaXguY29tPgotLS0KIGFyY2gvYXJtL2tlcm5lbC9zZXR1
-cC5jICAgfCAgMiArLQogYXJjaC9hcm0veGVuL2VubGlnaHRlbi5jICB8IDU2ICsrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tCiBhcmNoL2FybTY0L2tlcm5lbC9z
-ZXR1cC5jIHwgIDIgKy0KIDMgZmlsZXMgY2hhbmdlZCwgNDMgaW5zZXJ0aW9ucygrKSwgMTcgZGVs
-ZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0va2VybmVsL3NldHVwLmMgYi9hcmNoL2Fy
-bS9rZXJuZWwvc2V0dXAuYwppbmRleCAxMzk3OTFlLi41YmM3NTE2IDEwMDY0NAotLS0gYS9hcmNo
-L2FybS9rZXJuZWwvc2V0dXAuYworKysgYi9hcmNoL2FybS9rZXJuZWwvc2V0dXAuYwpAQCAtMTAz
-NSw2ICsxMDM1LDcgQEAgdm9pZCBfX2luaXQgc2V0dXBfYXJjaChjaGFyICoqY21kbGluZV9wKQog
-CWVhcmx5X3BhZ2luZ19pbml0KG1kZXNjKTsKICNlbmRpZgogCXNldHVwX2RtYV96b25lKG1kZXNj
-KTsKKwl4ZW5fZWFybHlfaW5pdCgpOwogCWVmaV9pbml0KCk7CiAJc2FuaXR5X2NoZWNrX21lbWlu
-Zm8oKTsKIAlhcm1fbWVtYmxvY2tfaW5pdChtZGVzYyk7CkBAIC0xMDUxLDcgKzEwNTIsNiBAQCB2
-b2lkIF9faW5pdCBzZXR1cF9hcmNoKGNoYXIgKipjbWRsaW5lX3ApCiAKIAlhcm1fZHRfaW5pdF9j
-cHVfbWFwcygpOwogCXBzY2lfZHRfaW5pdCgpOwotCXhlbl9lYXJseV9pbml0KCk7CiAjaWZkZWYg
-Q09ORklHX1NNUAogCWlmIChpc19zbXAoKSkgewogCQlpZiAoIW1kZXNjLT5zbXBfaW5pdCB8fCAh
-bWRlc2MtPnNtcF9pbml0KCkpIHsKZGlmZiAtLWdpdCBhL2FyY2gvYXJtL3hlbi9lbmxpZ2h0ZW4u
-YyBiL2FyY2gvYXJtL3hlbi9lbmxpZ2h0ZW4uYwppbmRleCAwNmJkNjFhLi4xM2UzZTlmIDEwMDY0
-NAotLS0gYS9hcmNoL2FybS94ZW4vZW5saWdodGVuLmMKKysrIGIvYXJjaC9hcm0veGVuL2VubGln
-aHRlbi5jCkBAIC0yMCw2ICsyMCw3IEBACiAjaW5jbHVkZSA8bGludXgvaXJxcmV0dXJuLmg+CiAj
-aW5jbHVkZSA8bGludXgvbW9kdWxlLmg+CiAjaW5jbHVkZSA8bGludXgvb2YuaD4KKyNpbmNsdWRl
-IDxsaW51eC9vZl9mZHQuaD4KICNpbmNsdWRlIDxsaW51eC9vZl9pcnEuaD4KICNpbmNsdWRlIDxs
-aW51eC9vZl9hZGRyZXNzLmg+CiAjaW5jbHVkZSA8bGludXgvY3B1aWRsZS5oPgpAQCAtNTMsOCAr
-NTQsNiBAQCBzdHJ1Y3QgeGVuX21lbW9yeV9yZWdpb24geGVuX2V4dHJhX21lbVtYRU5fRVhUUkFf
-TUVNX01BWF9SRUdJT05TXSBfX2luaXRkYXRhOwogCiBzdGF0aWMgX19yZWFkX21vc3RseSB1bnNp
-Z25lZCBpbnQgeGVuX2V2ZW50c19pcnE7CiAKLXN0YXRpYyBfX2luaXRkYXRhIHN0cnVjdCBkZXZp
-Y2Vfbm9kZSAqeGVuX25vZGU7Ci0KIGludCB4ZW5fcmVtYXBfZG9tYWluX2dmbl9hcnJheShzdHJ1
-Y3Qgdm1fYXJlYV9zdHJ1Y3QgKnZtYSwKIAkJCSAgICAgICB1bnNpZ25lZCBsb25nIGFkZHIsCiAJ
-CQkgICAgICAgeGVuX3Bmbl90ICpnZm4sIGludCBuciwKQEAgLTIzOCw2ICsyMzcsMzMgQEAgc3Rh
-dGljIGlycXJldHVybl90IHhlbl9hcm1fY2FsbGJhY2soaW50IGlycSwgdm9pZCAqYXJnKQogCXJl
-dHVybiBJUlFfSEFORExFRDsKIH0KIAorc3RhdGljIF9faW5pdGRhdGEgc3RydWN0IHsKKwljb25z
-dCBjaGFyICpjb21wYXQ7CisJY29uc3QgY2hhciAqcHJlZml4OworCWNvbnN0IGNoYXIgKnZlcnNp
-b247CisJYm9vbCBmb3VuZDsKK30gaHlwZXJfbm9kZSA9IHsieGVuLHhlbiIsICJ4ZW4seGVuLSIs
-IE5VTEwsIGZhbHNlfTsKKworc3RhdGljIGludCBfX2luaXQgZmR0X2ZpbmRfaHlwZXJfbm9kZSh1
-bnNpZ25lZCBsb25nIG5vZGUsIGNvbnN0IGNoYXIgKnVuYW1lLAorCQkJCSAgICAgIGludCBkZXB0
-aCwgdm9pZCAqZGF0YSkKK3sKKwljb25zdCB2b2lkICpzID0gTlVMTDsKKwlpbnQgbGVuOworCisJ
-aWYgKGRlcHRoICE9IDEgfHwgc3RyY21wKHVuYW1lLCAiaHlwZXJ2aXNvciIpICE9IDApCisJCXJl
-dHVybiAwOworCisJaWYgKG9mX2ZsYXRfZHRfaXNfY29tcGF0aWJsZShub2RlLCBoeXBlcl9ub2Rl
-LmNvbXBhdCkpCisJCWh5cGVyX25vZGUuZm91bmQgPSB0cnVlOworCisJcyA9IG9mX2dldF9mbGF0
-X2R0X3Byb3Aobm9kZSwgImNvbXBhdGlibGUiLCAmbGVuKTsKKwlpZiAoc3RybGVuKGh5cGVyX25v
-ZGUucHJlZml4KSArIDMgIDwgbGVuICYmCisJICAgICFzdHJuY21wKGh5cGVyX25vZGUucHJlZml4
-LCBzLCBzdHJsZW4oaHlwZXJfbm9kZS5wcmVmaXgpKSkKKwkJaHlwZXJfbm9kZS52ZXJzaW9uID0g
-cyArIHN0cmxlbihoeXBlcl9ub2RlLnByZWZpeCk7CisKKwlyZXR1cm4gMDsKK30KKwogLyoKICAq
-IHNlZSBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvYXJtL3hlbi50eHQgZm9yIHRo
-ZQogICogZG9jdW1lbnRhdGlvbiBvZiB0aGUgWGVuIERldmljZSBUcmVlIGZvcm1hdC4KQEAgLTI0
-NSwyNiArMjcxLDE4IEBAIHN0YXRpYyBpcnFyZXR1cm5fdCB4ZW5fYXJtX2NhbGxiYWNrKGludCBp
-cnEsIHZvaWQgKmFyZykKICNkZWZpbmUgR1JBTlRfVEFCTEVfUEhZU0FERFIgMAogdm9pZCBfX2lu
-aXQgeGVuX2Vhcmx5X2luaXQodm9pZCkKIHsKLQlpbnQgbGVuOwotCWNvbnN0IGNoYXIgKnMgPSBO
-VUxMOwotCWNvbnN0IGNoYXIgKnZlcnNpb24gPSBOVUxMOwotCWNvbnN0IGNoYXIgKnhlbl9wcmVm
-aXggPSAieGVuLHhlbi0iOwotCi0JeGVuX25vZGUgPSBvZl9maW5kX2NvbXBhdGlibGVfbm9kZShO
-VUxMLCBOVUxMLCAieGVuLHhlbiIpOwotCWlmICgheGVuX25vZGUpIHsKKwlvZl9zY2FuX2ZsYXRf
-ZHQoZmR0X2ZpbmRfaHlwZXJfbm9kZSwgTlVMTCk7CisJaWYgKCFoeXBlcl9ub2RlLmZvdW5kKSB7
-CiAJCXByX2RlYnVnKCJObyBYZW4gc3VwcG9ydFxuIik7CiAJCXJldHVybjsKIAl9Ci0JcyA9IG9m
-X2dldF9wcm9wZXJ0eSh4ZW5fbm9kZSwgImNvbXBhdGlibGUiLCAmbGVuKTsKLQlpZiAoc3RybGVu
-KHhlbl9wcmVmaXgpICsgMyAgPCBsZW4gJiYKLQkJCSFzdHJuY21wKHhlbl9wcmVmaXgsIHMsIHN0
-cmxlbih4ZW5fcHJlZml4KSkpCi0JCXZlcnNpb24gPSBzICsgc3RybGVuKHhlbl9wcmVmaXgpOwot
-CWlmICh2ZXJzaW9uID09IE5VTEwpIHsKKworCWlmIChoeXBlcl9ub2RlLnZlcnNpb24gPT0gTlVM
-TCkgewogCQlwcl9kZWJ1ZygiWGVuIHZlcnNpb24gbm90IGZvdW5kXG4iKTsKIAkJcmV0dXJuOwog
-CX0KIAotCXByX2luZm8oIlhlbiAlcyBzdXBwb3J0IGZvdW5kXG4iLCB2ZXJzaW9uKTsKKwlwcl9p
-bmZvKCJYZW4gJXMgc3VwcG9ydCBmb3VuZFxuIiwgaHlwZXJfbm9kZS52ZXJzaW9uKTsKIAogCXhl
-bl9kb21haW5fdHlwZSA9IFhFTl9IVk1fRE9NQUlOOwogCkBAIC0zMDUsNiArMzIzLDE0IEBAIHN0
-YXRpYyB2b2lkIF9faW5pdCB4ZW5fYWNwaV9ndWVzdF9pbml0KHZvaWQpCiAKIHN0YXRpYyB2b2lk
-IF9faW5pdCB4ZW5fZHRfZ3Vlc3RfaW5pdCh2b2lkKQogeworCXN0cnVjdCBkZXZpY2Vfbm9kZSAq
-eGVuX25vZGU7CisKKwl4ZW5fbm9kZSA9IG9mX2ZpbmRfY29tcGF0aWJsZV9ub2RlKE5VTEwsIE5V
-TEwsICJ4ZW4seGVuIik7CisJaWYgKCF4ZW5fbm9kZSkgeworCQlwcl9lcnIoIlhlbiBzdXBwb3J0
-IHdhcyBkZXRlY3RlZCBiZWZvcmUsIGJ1dCBpdCBoYXMgZGlzYXBwZWFyZWRcbiIpOworCQlyZXR1
-cm47CisJfQorCiAJeGVuX2V2ZW50c19pcnEgPSBpcnFfb2ZfcGFyc2VfYW5kX21hcCh4ZW5fbm9k
-ZSwgMCk7CiB9CiAKZGlmZiAtLWdpdCBhL2FyY2gvYXJtNjQva2VybmVsL3NldHVwLmMgYi9hcmNo
-L2FybTY0L2tlcm5lbC9zZXR1cC5jCmluZGV4IDlkYzY3NzYuLjdjZjk5MmYgMTAwNjQ0Ci0tLSBh
-L2FyY2gvYXJtNjQva2VybmVsL3NldHVwLmMKKysrIGIvYXJjaC9hcm02NC9rZXJuZWwvc2V0dXAu
-YwpAQCAtMzIwLDYgKzMyMCw3IEBAIHZvaWQgX19pbml0IHNldHVwX2FyY2goY2hhciAqKmNtZGxp
-bmVfcCkKIAkgKi8KIAljcHVfdW5pbnN0YWxsX2lkbWFwKCk7CiAKKwl4ZW5fZWFybHlfaW5pdCgp
-OwogCWVmaV9pbml0KCk7CiAJYXJtNjRfbWVtYmxvY2tfaW5pdCgpOwogCkBAIC0zNDEsNyArMzQy
-LDYgQEAgdm9pZCBfX2luaXQgc2V0dXBfYXJjaChjaGFyICoqY21kbGluZV9wKQogCX0gZWxzZSB7
-CiAJCXBzY2lfYWNwaV9pbml0KCk7CiAJfQotCXhlbl9lYXJseV9pbml0KCk7CiAKIAljcHVfcmVh
-ZF9ib290Y3B1X29wcygpOwogCXNtcF9pbml0X2NwdXMoKTsKLS0gCjIuMC40CgoKCl9fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5n
-IGxpc3QKWGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cDovL2xpc3RzLnhlbi5vcmcveGVuLWRl
-dmVsCg==
+From: Shannon Zhao <shannon.zhao@linaro.org>
+
+Add a new function to parse DT parameters for Xen specific UEFI just
+like the way for normal UEFI. Then it could reuse the existing codes.
+
+If Xen supports EFI, initialize runtime services.
+
+CC: Matt Fleming <matt@codeblueprint.co.uk>
+Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
+Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+---
+ arch/arm/xen/enlighten.c           |  6 +++++
+ drivers/firmware/efi/arm-runtime.c | 17 +++++++++-----
+ drivers/firmware/efi/efi.c         | 45 ++++++++++++++++++++++++++++++++------
+ 3 files changed, 56 insertions(+), 12 deletions(-)
+
+diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
+index 13e3e9f..e130562 100644
+--- a/arch/arm/xen/enlighten.c
++++ b/arch/arm/xen/enlighten.c
+@@ -261,6 +261,12 @@ static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
+ 	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
+ 		hyper_node.version = s + strlen(hyper_node.prefix);
+ 
++	if (IS_ENABLED(CONFIG_XEN_EFI)) {
++		/* Check if Xen supports EFI */
++		if (of_get_flat_dt_subnode_by_name(node, "uefi") > 0)
++			set_bit(EFI_PARAVIRT, &efi.flags);
++	}
++
+ 	return 0;
+ }
+ 
+diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
+index 6ae21e4..ac609b9 100644
+--- a/drivers/firmware/efi/arm-runtime.c
++++ b/drivers/firmware/efi/arm-runtime.c
+@@ -27,6 +27,7 @@
+ #include <asm/mmu.h>
+ #include <asm/pgalloc.h>
+ #include <asm/pgtable.h>
++#include <asm/xen/xen-ops.h>
+ 
+ extern u64 efi_system_table;
+ 
+@@ -107,13 +108,19 @@ static int __init arm_enable_runtime_services(void)
+ 	}
+ 	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
+ 
+-	if (!efi_virtmap_init()) {
+-		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
+-		return -ENOMEM;
++	if (IS_ENABLED(CONFIG_XEN_EFI) && efi_enabled(EFI_PARAVIRT)) {
++		/* Set up runtime services function pointers for Xen Dom0 */
++		xen_efi_runtime_setup();
++	} else {
++		if (!efi_virtmap_init()) {
++			pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
++			return -ENOMEM;
++		}
++
++		/* Set up runtime services function pointers */
++		efi_native_runtime_setup();
+ 	}
+ 
+-	/* Set up runtime services function pointers */
+-	efi_native_runtime_setup();
+ 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
+ 
+ 	efi.runtime_version = efi.systab->hdr.revision;
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index 3a69ed5..519c096 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -469,12 +469,14 @@ device_initcall(efi_load_efivars);
+ 		FIELD_SIZEOF(struct efi_fdt_params, field) \
+ 	}
+ 
+-static __initdata struct {
++struct params {
+ 	const char name[32];
+ 	const char propname[32];
+ 	int offset;
+ 	int size;
+-} dt_params[] = {
++};
++
++static struct params fdt_params[] __initdata = {
+ 	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
+ 	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
+ 	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
+@@ -482,24 +484,45 @@ static __initdata struct {
+ 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
+ };
+ 
++static struct params xen_fdt_params[] __initdata = {
++	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
++	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
++	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
++	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
++	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
++};
++
+ struct param_info {
+ 	int found;
+ 	void *params;
++	struct params *dt_params;
++	int size;
+ };
+ 
+ static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
+ 				       int depth, void *data)
+ {
+ 	struct param_info *info = data;
++	struct params *dt_params = info->dt_params;
+ 	const void *prop;
+ 	void *dest;
+ 	u64 val;
+-	int i, len;
++	int i, len, offset;
+ 
+-	if (depth != 1 || strcmp(uname, "chosen") != 0)
+-		return 0;
++	if (efi_enabled(EFI_PARAVIRT)) {
++		if (depth != 1 || strcmp(uname, "hypervisor") != 0)
++			return 0;
+ 
+-	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
++		offset = of_get_flat_dt_subnode_by_name(node, "uefi");
++		if (offset < 0)
++			return 0;
++		node = offset;
++	} else {
++		if (depth != 1 || strcmp(uname, "chosen") != 0)
++			return 0;
++	}
++
++	for (i = 0; i < info->size; i++) {
+ 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
+ 		if (!prop)
+ 			return 0;
+@@ -530,12 +553,20 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
+ 	info.found = 0;
+ 	info.params = params;
+ 
++	if (efi_enabled(EFI_PARAVIRT)) {
++		info.dt_params = xen_fdt_params;
++		info.size = ARRAY_SIZE(xen_fdt_params);
++	} else {
++		info.dt_params = fdt_params;
++		info.size = ARRAY_SIZE(fdt_params);
++	}
++
+ 	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
+ 	if (!info.found)
+ 		pr_info("UEFI not found.\n");
+ 	else if (!ret)
+ 		pr_err("Can't find '%s' in device tree!\n",
+-		       dt_params[info.found].name);
++		       info.dt_params[info.found].name);
+ 
+ 	return ret;
+ }
+-- 
+2.0.4
