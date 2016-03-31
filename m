@@ -1,53 +1,55 @@
-From: Stefano Stabellini <sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [Xen-devel] [PATCH v7 12/17] ARM64: ACPI: Check if it runs on
- Xen to enable or disable ACPI
-Date: Thu, 31 Mar 2016 16:21:45 +0100 (BST)
-Message-ID: <alpine.DEB.2.10.1603311620260.31571@sstabellini-ThinkPad-X230>
-References: <20160331144418.GR27408@perard.uk.xensource.com>
+From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
+ notifications
+Date: Thu, 31 Mar 2016 10:29:35 -0700
+Message-ID: <20160331172935.GL2350@sirena.org.uk>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+ <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160331144418.GR27408-8qNLNerzPuZYtxbxJUhB2Dgeux46jI+i@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: mark.rutland-5wv7dgnIgG8@public.gmane.org
-Cc: devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, sstabellini-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="vYlOGI1a8wP+YbIl"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1459417026-6697-7-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Thu, 31 Mar 2016, Mark Rutland wrote:
-> On Thu, Mar 31, 2016 at 01:44:08PM +0200, Ard Biesheuvel wrote:
-> > The heuristic is there to decide whether some DTB image contains a
-> > complete description of the platform, or only some data handed over by
-> > the bootloader. Arguably, a DT containing both /chosen and /hypervisor
-> > but nothing else can still not describe an actual platform, and
-> > whether we execute under Xen or not is completely irrelevant.
-> 
-> I disagree somewhat.
-> 
-> In general, a /hypervisor node may not be a Xen node, and could
-> potentially imply some platform description. As /hypervisor is a generic
-> name up for grabs by any hypervisor, we simply cannot make assumptions
-> about it.
-> 
-> As /chosen is a special reserved path that implies a particular binding
-> and has no compatible string, so checking its path alone is correct.
-> 
-> While we do check that the /hypervisor node is "xen,xen" compatible
-> elsewhere, the canonical mechanism of checking for a Xen node (as
-> opposed to any hypervisor's node) is to check the compatible string.
-> 
-> If we are going to handle nodes for other hypervisors while treating the
-> DTB as empty, we need code and discussion regarding said hypervisor.
-> 
-> Hence, for checking for a Xen /hypervisor node, I would prefer we
-> checked the compatible string rather than the path.
-> 
-> An is_xen_node() helper (which could also check that the path is
-> "/hypervisor") would avoid having redundant, subtly distinct ways of
-> checking, and would explicitly document precisely what we are checking
-> for.
 
-That's also OK for me.
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--vYlOGI1a8wP+YbIl
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+On Thu, Mar 31, 2016 at 12:37:02PM +0300, Octavian Purdila wrote:
+
+> +#if IS_ENABLED(CONFIG_ACPI)
+> +static int acpi_spi_table_load(struct device *dev, const void *data)
+> +{
+> +	struct spi_master *master = container_of(dev, struct spi_master, dev);
+> +
+> +	acpi_register_spi_devices(master);
+> +	return 0;
+> +}
+
+Why do we have a separate code path for this coompared to the initial
+startup?  The handling appears to be identical so it seems we should
+drive this from the ACPI code so we don't have to add this to every
+single bus with ACPI bindings.
+
+--vYlOGI1a8wP+YbIl
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJW/V50AAoJECTWi3JdVIfQaYwH/1w1D1N5NRZxoG8yE8B48DU6
+dPRkmhxGlcoz5A0COfqjPMbEdccEcSod1bNjAzoBdIElblKWkpqakv55oLU81Gbc
+mkVkVVusnB7QGrc9dsw9PY2ydDlP4CM9UWcxPUa3SHGnS0L2fUy82Vq5rkc5Fss4
+8vW8W6GSVRGfATDsZlLegCP4GiKCEO68EbqZXm2gXQEQuphn4dRGHc+Wk+1hfMiF
+VGt1hVL/edlU8EDRGeLYN548OYrkbRPQjkq1YI2+JmYj3mRO8/vDj60hvajQ04hd
+3mQcwrkNAXn+6vmgl8ZP+FiFAHcUpxHB3Py5djkRqPfuN9HdSzstJleGX4VtvuA=
+=57Lr
+-----END PGP SIGNATURE-----
+
+--vYlOGI1a8wP+YbIl--
