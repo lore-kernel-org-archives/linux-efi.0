@@ -1,55 +1,59 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
- notifications
-Date: Thu, 31 Mar 2016 10:29:35 -0700
-Message-ID: <20160331172935.GL2350@sirena.org.uk>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
- <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="vYlOGI1a8wP+YbIl"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <1459417026-6697-7-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: [PATCH 4.2.y-ckt 186/218] efi: Expose non-blocking set_variable() wrapper to efivars
+Date: Thu, 31 Mar 2016 13:16:39 -0700
+Message-ID: <1459455431-12687-187-git-send-email-kamal@canonical.com>
+References: <1459455431-12687-1-git-send-email-kamal@canonical.com>
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <1459455431-12687-1-git-send-email-kamal@canonical.com>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
+4.2.8-ckt7 -stable review patch.  If anyone has any objections, please let me know.
 
---vYlOGI1a8wP+YbIl
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+---8<------------------------------------------------------------
 
-On Thu, Mar 31, 2016 at 12:37:02PM +0300, Octavian Purdila wrote:
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-> +#if IS_ENABLED(CONFIG_ACPI)
-> +static int acpi_spi_table_load(struct device *dev, const void *data)
-> +{
-> +	struct spi_master *master = container_of(dev, struct spi_master, dev);
-> +
-> +	acpi_register_spi_devices(master);
-> +	return 0;
-> +}
+commit 9c6672ac9c91f7eb1ec436be1442b8c26d098e55 upstream.
 
-Why do we have a separate code path for this coompared to the initial
-startup?  The handling appears to be identical so it seems we should
-drive this from the ACPI code so we don't have to add this to every
-single bus with ACPI bindings.
+Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
+operation") implemented a non-blocking alternative for the UEFI
+SetVariable() invocation performed by efivars, since it may
+occur in atomic context. However, this version of the function
+was never exposed via the efivars struct, so the non-blocking
+versions was not actually callable. Fix that.
 
---vYlOGI1a8wP+YbIl
-Content-Type: application/pgp-signature; name="signature.asc"
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
+Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
+Link: http://lkml.kernel.org/r/1454364428-494-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Kamal Mostafa <kamal@canonical.com>
+---
+ drivers/firmware/efi/efi.c | 1 +
+ 1 file changed, 1 insertion(+)
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJW/V50AAoJECTWi3JdVIfQaYwH/1w1D1N5NRZxoG8yE8B48DU6
-dPRkmhxGlcoz5A0COfqjPMbEdccEcSod1bNjAzoBdIElblKWkpqakv55oLU81Gbc
-mkVkVVusnB7QGrc9dsw9PY2ydDlP4CM9UWcxPUa3SHGnS0L2fUy82Vq5rkc5Fss4
-8vW8W6GSVRGfATDsZlLegCP4GiKCEO68EbqZXm2gXQEQuphn4dRGHc+Wk+1hfMiF
-VGt1hVL/edlU8EDRGeLYN548OYrkbRPQjkq1YI2+JmYj3mRO8/vDj60hvajQ04hd
-3mQcwrkNAXn+6vmgl8ZP+FiFAHcUpxHB3Py5djkRqPfuN9HdSzstJleGX4VtvuA=
-=57Lr
------END PGP SIGNATURE-----
-
---vYlOGI1a8wP+YbIl--
+diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
+index d6144e3..2eb2f57 100644
+--- a/drivers/firmware/efi/efi.c
++++ b/drivers/firmware/efi/efi.c
+@@ -176,6 +176,7 @@ static int generic_ops_register(void)
+ {
+ 	generic_ops.get_variable = efi.get_variable;
+ 	generic_ops.set_variable = efi.set_variable;
++	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
+ 	generic_ops.get_next_variable = efi.get_next_variable;
+ 	generic_ops.query_variable_store = efi_query_variable_store;
+ 
+-- 
+2.7.4
