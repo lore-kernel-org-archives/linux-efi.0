@@ -1,7 +1,7 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v9 09/17] xen/hvm/params: Add a new delivery type for event-channel in HVM_PARAM_CALLBACK_IRQ
-Date: Thu, 31 Mar 2016 19:23:37 +0800
-Message-ID: <1459423425-1220-10-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v9 16/17] FDT: Add a helper to get the subnode by given name
+Date: Thu, 31 Mar 2016 19:23:44 +0800
+Message-ID: <1459423425-1220-17-git-send-email-zhaoshenglong@huawei.com>
 References: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -9,52 +9,59 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Rob Herring <robh@kernel.org>
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-This new delivery type which is for ARM shares the same value with
-HVM_PARAM_CALLBACK_TYPE_VECTOR which is for x86.
+Sometimes it needs to check if there is a subnode of given node in FDT
+by given name. Introduce this helper to get the subnode if it exists.
 
-val[15:8] is flag: val[7:0] is a PPI.
-To the flag, bit 8 stands the interrupt mode is edge(1) or level(0) and
-bit 9 stands the interrupt polarity is active low(1) or high(0).
-
+CC: Rob Herring <robh@kernel.org>
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
 Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Acked-by: Rob Herring <robh@kernel.org>
 ---
- include/xen/interface/hvm/params.h | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/of/fdt.c       | 13 +++++++++++++
+ include/linux/of_fdt.h |  2 ++
+ 2 files changed, 15 insertions(+)
 
-diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
-index 70ad208..4d61fc5 100644
---- a/include/xen/interface/hvm/params.h
-+++ b/include/xen/interface/hvm/params.h
-@@ -47,11 +47,24 @@
-  * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
-  */
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 3349d2a..5c8b2f2 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -645,6 +645,19 @@ int __init of_scan_flat_dt(int (*it)(unsigned long node,
+ }
  
-+#if defined(__i386__) || defined(__x86_64__)
- #define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
- /*
-  * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
-  * if this delivery method is available.
-  */
-+#elif defined(__arm__) || defined(__aarch64__)
-+#define HVM_PARAM_CALLBACK_TYPE_PPI      2
-+/*
-+ * val[55:16] needs to be zero.
-+ * val[15:8] is interrupt flag of the PPI used by event-channel:
-+ *  bit 8: the PPI is edge(1) or level(0) triggered
-+ *  bit 9: the PPI is active low(1) or high(0)
-+ * val[7:0] is a PPI number used by event-channel.
-+ * This is only used by ARM/ARM64 and masking/eoi the interrupt associated to
-+ * the notification is handled by the interrupt controller.
+ /**
++ * of_get_flat_dt_subnode_by_name - get the subnode by given name
++ *
++ * @node: the parent node
++ * @uname: the name of subnode
++ * @return offset of the subnode, or -FDT_ERR_NOTFOUND if there is none
 + */
-+#endif
- 
- #define HVM_PARAM_STORE_PFN    1
- #define HVM_PARAM_STORE_EVTCHN 2
++
++int of_get_flat_dt_subnode_by_name(unsigned long node, const char *uname)
++{
++	return fdt_subnode_offset(initial_boot_params, node, uname);
++}
++
++/**
+  * of_get_flat_dt_root - find the root node in the flat blob
+  */
+ unsigned long __init of_get_flat_dt_root(void)
+diff --git a/include/linux/of_fdt.h b/include/linux/of_fdt.h
+index 2fbe868..2c3707e 100644
+--- a/include/linux/of_fdt.h
++++ b/include/linux/of_fdt.h
+@@ -52,6 +52,8 @@ extern char __dtb_end[];
+ extern int of_scan_flat_dt(int (*it)(unsigned long node, const char *uname,
+ 				     int depth, void *data),
+ 			   void *data);
++extern int of_get_flat_dt_subnode_by_name(unsigned long node,
++					  const char *uname);
+ extern const void *of_get_flat_dt_prop(unsigned long node, const char *name,
+ 				       int *size);
+ extern int of_flat_dt_is_compatible(unsigned long node, const char *name);
 -- 
 2.0.4
