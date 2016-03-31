@@ -1,84 +1,106 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v9 13/17] ARM: Xen: Document UEFI support on Xen ARM virtual platforms
-Date: Thu, 31 Mar 2016 19:23:41 +0800
-Message-ID: <1459423425-1220-14-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v9 11/17] ARM: XEN: Move xen_early_init() before
+	efi_init()
+Date: Thu, 31 Mar 2016 19:23:39 +0800
+Message-ID: <1459423425-1220-12-git-send-email-zhaoshenglong@huawei.com>
 References: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1459423425-1220-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
 To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com, david.vrabel@citrix.com
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, sstabellini@kernel.org, julien.grall@arm.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Rob Herring <robh@kernel.org>
+Cc: devicetree@vger.kernel.org, sstabellini@kernel.org, Russell King <linux@arm.linux.org.uk>, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, linux-efi@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
-
-Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
-scan this to get the UEFI information.
-
-CC: Rob Herring <robh@kernel.org>
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Acked-by: Rob Herring <robh@kernel.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
----
- Documentation/devicetree/bindings/arm/xen.txt | 35 +++++++++++++++++++++++++++
- 1 file changed, 35 insertions(+)
-
-diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
-index 0f7b9c2..c9b9321 100644
---- a/Documentation/devicetree/bindings/arm/xen.txt
-+++ b/Documentation/devicetree/bindings/arm/xen.txt
-@@ -11,10 +11,32 @@ the following properties:
-   memory where the grant table should be mapped to, using an
-   HYPERVISOR_memory_op hypercall. The memory region is large enough to map
-   the whole grant table (it is larger or equal to gnttab_max_grant_frames()).
-+  This property is unnecessary when booting Dom0 using ACPI.
- 
- - interrupts: the interrupt used by Xen to inject event notifications.
-   A GIC node is also required.
-+  This property is unnecessary when booting Dom0 using ACPI.
- 
-+To support UEFI on Xen ARM virtual platforms, Xen populates the FDT "uefi" node
-+under /hypervisor with following parameters:
-+
-+________________________________________________________________________________
-+Name                      | Size   | Description
-+================================================================================
-+xen,uefi-system-table     | 64-bit | Guest physical address of the UEFI System
-+			  |	   | Table.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-start       | 64-bit | Guest physical address of the UEFI memory
-+			  |	   | map.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
-+                          |        | pointed to in previous entry.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
-+                          |        | memory map.
-+--------------------------------------------------------------------------------
-+xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
-+--------------------------------------------------------------------------------
- 
- Example (assuming #address-cells = <2> and #size-cells = <2>):
- 
-@@ -22,4 +44,17 @@ hypervisor {
- 	compatible = "xen,xen-4.3", "xen,xen";
- 	reg = <0 0xb0000000 0 0x20000>;
- 	interrupts = <1 15 0xf08>;
-+	uefi {
-+		xen,uefi-system-table = <0xXXXXXXXX>;
-+		xen,uefi-mmap-start = <0xXXXXXXXX>;
-+		xen,uefi-mmap-size = <0xXXXXXXXX>;
-+		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
-+		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
-+        };
- };
-+
-+The format and meaning of the "xen,uefi-*" parameters are similar to those in
-+Documentation/arm/uefi.txt, which are provided by the regular UEFI stub. However
-+they differ because they are provided by the Xen hypervisor, together with a set
-+of UEFI runtime services implemented via hypercalls, see
-+http://xenbits.xen.org/docs/unstable/hypercall/x86_64/include,public,platform.h.html.
--- 
-2.0.4
+RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCk1vdmUgeGVuX2Vh
+cmx5X2luaXQoKSBiZWZvcmUgZWZpX2luaXQoKSwgdGhlbiB3aGVuIGNhbGxpbmcgZWZpX2luaXQo
+KQpjb3VsZCBpbml0aWFsaXplIFhlbiBzcGVjaWZpYyBVRUZJLgoKQ2hlY2sgaWYgaXQgcnVucyBv
+biBYZW4gaHlwZXJ2aXNvciB0aHJvdWdoIHRoZSBmbGF0IGR0cy4KCkNjOiBSdXNzZWxsIEtpbmcg
+PGxpbnV4QGFybS5saW51eC5vcmcudWs+ClNpZ25lZC1vZmYtYnk6IFNoYW5ub24gWmhhbyA8c2hh
+bm5vbi56aGFvQGxpbmFyby5vcmc+ClJldmlld2VkLWJ5OiBTdGVmYW5vIFN0YWJlbGxpbmkgPHN0
+ZWZhbm8uc3RhYmVsbGluaUBldS5jaXRyaXguY29tPgotLS0KIGFyY2gvYXJtL2tlcm5lbC9zZXR1
+cC5jICAgfCAgMiArLQogYXJjaC9hcm0veGVuL2VubGlnaHRlbi5jICB8IDU2ICsrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKystLS0tLS0tLS0tLS0tCiBhcmNoL2FybTY0L2tlcm5lbC9z
+ZXR1cC5jIHwgIDIgKy0KIDMgZmlsZXMgY2hhbmdlZCwgNDMgaW5zZXJ0aW9ucygrKSwgMTcgZGVs
+ZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvYXJjaC9hcm0va2VybmVsL3NldHVwLmMgYi9hcmNoL2Fy
+bS9rZXJuZWwvc2V0dXAuYwppbmRleCAxMzk3OTFlLi41YmM3NTE2IDEwMDY0NAotLS0gYS9hcmNo
+L2FybS9rZXJuZWwvc2V0dXAuYworKysgYi9hcmNoL2FybS9rZXJuZWwvc2V0dXAuYwpAQCAtMTAz
+NSw2ICsxMDM1LDcgQEAgdm9pZCBfX2luaXQgc2V0dXBfYXJjaChjaGFyICoqY21kbGluZV9wKQog
+CWVhcmx5X3BhZ2luZ19pbml0KG1kZXNjKTsKICNlbmRpZgogCXNldHVwX2RtYV96b25lKG1kZXNj
+KTsKKwl4ZW5fZWFybHlfaW5pdCgpOwogCWVmaV9pbml0KCk7CiAJc2FuaXR5X2NoZWNrX21lbWlu
+Zm8oKTsKIAlhcm1fbWVtYmxvY2tfaW5pdChtZGVzYyk7CkBAIC0xMDUxLDcgKzEwNTIsNiBAQCB2
+b2lkIF9faW5pdCBzZXR1cF9hcmNoKGNoYXIgKipjbWRsaW5lX3ApCiAKIAlhcm1fZHRfaW5pdF9j
+cHVfbWFwcygpOwogCXBzY2lfZHRfaW5pdCgpOwotCXhlbl9lYXJseV9pbml0KCk7CiAjaWZkZWYg
+Q09ORklHX1NNUAogCWlmIChpc19zbXAoKSkgewogCQlpZiAoIW1kZXNjLT5zbXBfaW5pdCB8fCAh
+bWRlc2MtPnNtcF9pbml0KCkpIHsKZGlmZiAtLWdpdCBhL2FyY2gvYXJtL3hlbi9lbmxpZ2h0ZW4u
+YyBiL2FyY2gvYXJtL3hlbi9lbmxpZ2h0ZW4uYwppbmRleCAwNmJkNjFhLi4xM2UzZTlmIDEwMDY0
+NAotLS0gYS9hcmNoL2FybS94ZW4vZW5saWdodGVuLmMKKysrIGIvYXJjaC9hcm0veGVuL2VubGln
+aHRlbi5jCkBAIC0yMCw2ICsyMCw3IEBACiAjaW5jbHVkZSA8bGludXgvaXJxcmV0dXJuLmg+CiAj
+aW5jbHVkZSA8bGludXgvbW9kdWxlLmg+CiAjaW5jbHVkZSA8bGludXgvb2YuaD4KKyNpbmNsdWRl
+IDxsaW51eC9vZl9mZHQuaD4KICNpbmNsdWRlIDxsaW51eC9vZl9pcnEuaD4KICNpbmNsdWRlIDxs
+aW51eC9vZl9hZGRyZXNzLmg+CiAjaW5jbHVkZSA8bGludXgvY3B1aWRsZS5oPgpAQCAtNTMsOCAr
+NTQsNiBAQCBzdHJ1Y3QgeGVuX21lbW9yeV9yZWdpb24geGVuX2V4dHJhX21lbVtYRU5fRVhUUkFf
+TUVNX01BWF9SRUdJT05TXSBfX2luaXRkYXRhOwogCiBzdGF0aWMgX19yZWFkX21vc3RseSB1bnNp
+Z25lZCBpbnQgeGVuX2V2ZW50c19pcnE7CiAKLXN0YXRpYyBfX2luaXRkYXRhIHN0cnVjdCBkZXZp
+Y2Vfbm9kZSAqeGVuX25vZGU7Ci0KIGludCB4ZW5fcmVtYXBfZG9tYWluX2dmbl9hcnJheShzdHJ1
+Y3Qgdm1fYXJlYV9zdHJ1Y3QgKnZtYSwKIAkJCSAgICAgICB1bnNpZ25lZCBsb25nIGFkZHIsCiAJ
+CQkgICAgICAgeGVuX3Bmbl90ICpnZm4sIGludCBuciwKQEAgLTIzOCw2ICsyMzcsMzMgQEAgc3Rh
+dGljIGlycXJldHVybl90IHhlbl9hcm1fY2FsbGJhY2soaW50IGlycSwgdm9pZCAqYXJnKQogCXJl
+dHVybiBJUlFfSEFORExFRDsKIH0KIAorc3RhdGljIF9faW5pdGRhdGEgc3RydWN0IHsKKwljb25z
+dCBjaGFyICpjb21wYXQ7CisJY29uc3QgY2hhciAqcHJlZml4OworCWNvbnN0IGNoYXIgKnZlcnNp
+b247CisJYm9vbCBmb3VuZDsKK30gaHlwZXJfbm9kZSA9IHsieGVuLHhlbiIsICJ4ZW4seGVuLSIs
+IE5VTEwsIGZhbHNlfTsKKworc3RhdGljIGludCBfX2luaXQgZmR0X2ZpbmRfaHlwZXJfbm9kZSh1
+bnNpZ25lZCBsb25nIG5vZGUsIGNvbnN0IGNoYXIgKnVuYW1lLAorCQkJCSAgICAgIGludCBkZXB0
+aCwgdm9pZCAqZGF0YSkKK3sKKwljb25zdCB2b2lkICpzID0gTlVMTDsKKwlpbnQgbGVuOworCisJ
+aWYgKGRlcHRoICE9IDEgfHwgc3RyY21wKHVuYW1lLCAiaHlwZXJ2aXNvciIpICE9IDApCisJCXJl
+dHVybiAwOworCisJaWYgKG9mX2ZsYXRfZHRfaXNfY29tcGF0aWJsZShub2RlLCBoeXBlcl9ub2Rl
+LmNvbXBhdCkpCisJCWh5cGVyX25vZGUuZm91bmQgPSB0cnVlOworCisJcyA9IG9mX2dldF9mbGF0
+X2R0X3Byb3Aobm9kZSwgImNvbXBhdGlibGUiLCAmbGVuKTsKKwlpZiAoc3RybGVuKGh5cGVyX25v
+ZGUucHJlZml4KSArIDMgIDwgbGVuICYmCisJICAgICFzdHJuY21wKGh5cGVyX25vZGUucHJlZml4
+LCBzLCBzdHJsZW4oaHlwZXJfbm9kZS5wcmVmaXgpKSkKKwkJaHlwZXJfbm9kZS52ZXJzaW9uID0g
+cyArIHN0cmxlbihoeXBlcl9ub2RlLnByZWZpeCk7CisKKwlyZXR1cm4gMDsKK30KKwogLyoKICAq
+IHNlZSBEb2N1bWVudGF0aW9uL2RldmljZXRyZWUvYmluZGluZ3MvYXJtL3hlbi50eHQgZm9yIHRo
+ZQogICogZG9jdW1lbnRhdGlvbiBvZiB0aGUgWGVuIERldmljZSBUcmVlIGZvcm1hdC4KQEAgLTI0
+NSwyNiArMjcxLDE4IEBAIHN0YXRpYyBpcnFyZXR1cm5fdCB4ZW5fYXJtX2NhbGxiYWNrKGludCBp
+cnEsIHZvaWQgKmFyZykKICNkZWZpbmUgR1JBTlRfVEFCTEVfUEhZU0FERFIgMAogdm9pZCBfX2lu
+aXQgeGVuX2Vhcmx5X2luaXQodm9pZCkKIHsKLQlpbnQgbGVuOwotCWNvbnN0IGNoYXIgKnMgPSBO
+VUxMOwotCWNvbnN0IGNoYXIgKnZlcnNpb24gPSBOVUxMOwotCWNvbnN0IGNoYXIgKnhlbl9wcmVm
+aXggPSAieGVuLHhlbi0iOwotCi0JeGVuX25vZGUgPSBvZl9maW5kX2NvbXBhdGlibGVfbm9kZShO
+VUxMLCBOVUxMLCAieGVuLHhlbiIpOwotCWlmICgheGVuX25vZGUpIHsKKwlvZl9zY2FuX2ZsYXRf
+ZHQoZmR0X2ZpbmRfaHlwZXJfbm9kZSwgTlVMTCk7CisJaWYgKCFoeXBlcl9ub2RlLmZvdW5kKSB7
+CiAJCXByX2RlYnVnKCJObyBYZW4gc3VwcG9ydFxuIik7CiAJCXJldHVybjsKIAl9Ci0JcyA9IG9m
+X2dldF9wcm9wZXJ0eSh4ZW5fbm9kZSwgImNvbXBhdGlibGUiLCAmbGVuKTsKLQlpZiAoc3RybGVu
+KHhlbl9wcmVmaXgpICsgMyAgPCBsZW4gJiYKLQkJCSFzdHJuY21wKHhlbl9wcmVmaXgsIHMsIHN0
+cmxlbih4ZW5fcHJlZml4KSkpCi0JCXZlcnNpb24gPSBzICsgc3RybGVuKHhlbl9wcmVmaXgpOwot
+CWlmICh2ZXJzaW9uID09IE5VTEwpIHsKKworCWlmIChoeXBlcl9ub2RlLnZlcnNpb24gPT0gTlVM
+TCkgewogCQlwcl9kZWJ1ZygiWGVuIHZlcnNpb24gbm90IGZvdW5kXG4iKTsKIAkJcmV0dXJuOwog
+CX0KIAotCXByX2luZm8oIlhlbiAlcyBzdXBwb3J0IGZvdW5kXG4iLCB2ZXJzaW9uKTsKKwlwcl9p
+bmZvKCJYZW4gJXMgc3VwcG9ydCBmb3VuZFxuIiwgaHlwZXJfbm9kZS52ZXJzaW9uKTsKIAogCXhl
+bl9kb21haW5fdHlwZSA9IFhFTl9IVk1fRE9NQUlOOwogCkBAIC0zMDUsNiArMzIzLDE0IEBAIHN0
+YXRpYyB2b2lkIF9faW5pdCB4ZW5fYWNwaV9ndWVzdF9pbml0KHZvaWQpCiAKIHN0YXRpYyB2b2lk
+IF9faW5pdCB4ZW5fZHRfZ3Vlc3RfaW5pdCh2b2lkKQogeworCXN0cnVjdCBkZXZpY2Vfbm9kZSAq
+eGVuX25vZGU7CisKKwl4ZW5fbm9kZSA9IG9mX2ZpbmRfY29tcGF0aWJsZV9ub2RlKE5VTEwsIE5V
+TEwsICJ4ZW4seGVuIik7CisJaWYgKCF4ZW5fbm9kZSkgeworCQlwcl9lcnIoIlhlbiBzdXBwb3J0
+IHdhcyBkZXRlY3RlZCBiZWZvcmUsIGJ1dCBpdCBoYXMgZGlzYXBwZWFyZWRcbiIpOworCQlyZXR1
+cm47CisJfQorCiAJeGVuX2V2ZW50c19pcnEgPSBpcnFfb2ZfcGFyc2VfYW5kX21hcCh4ZW5fbm9k
+ZSwgMCk7CiB9CiAKZGlmZiAtLWdpdCBhL2FyY2gvYXJtNjQva2VybmVsL3NldHVwLmMgYi9hcmNo
+L2FybTY0L2tlcm5lbC9zZXR1cC5jCmluZGV4IDlkYzY3NzYuLjdjZjk5MmYgMTAwNjQ0Ci0tLSBh
+L2FyY2gvYXJtNjQva2VybmVsL3NldHVwLmMKKysrIGIvYXJjaC9hcm02NC9rZXJuZWwvc2V0dXAu
+YwpAQCAtMzIwLDYgKzMyMCw3IEBAIHZvaWQgX19pbml0IHNldHVwX2FyY2goY2hhciAqKmNtZGxp
+bmVfcCkKIAkgKi8KIAljcHVfdW5pbnN0YWxsX2lkbWFwKCk7CiAKKwl4ZW5fZWFybHlfaW5pdCgp
+OwogCWVmaV9pbml0KCk7CiAJYXJtNjRfbWVtYmxvY2tfaW5pdCgpOwogCkBAIC0zNDEsNyArMzQy
+LDYgQEAgdm9pZCBfX2luaXQgc2V0dXBfYXJjaChjaGFyICoqY21kbGluZV9wKQogCX0gZWxzZSB7
+CiAJCXBzY2lfYWNwaV9pbml0KCk7CiAJfQotCXhlbl9lYXJseV9pbml0KCk7CiAKIAljcHVfcmVh
+ZF9ib290Y3B1X29wcygpOwogCXNtcF9pbml0X2NwdXMoKTsKLS0gCjIuMC40CgoKCl9fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5n
+IGxpc3QKWGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cDovL2xpc3RzLnhlbi5vcmcveGVuLWRl
+dmVsCg==
