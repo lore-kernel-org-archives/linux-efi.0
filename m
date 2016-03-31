@@ -1,78 +1,89 @@
-From: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: [4.2.y-ckt stable] Patch "efi: Expose non-blocking set_variable() wrapper to efivars" has been added to the 4.2.y-ckt tree
-Date: Wed, 30 Mar 2016 16:54:37 -0700
-Message-ID: <1459382077-7903-1-git-send-email-kamal@canonical.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, kernel-team-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: [RFC PATCH 00/10] ACPI overlays
+Date: Thu, 31 Mar 2016 12:36:56 +0300
+Message-ID: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, linux-i2c@vger.kernel.org, linux-spi@vger.kernel.org, linux-kernel@vger.kernel.org, irina.tirdea@intel.com, Octavian Purdila <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-This is a note to let you know that I have just added a patch titled
+This patch set enables custom ACPI board configuration by adding
+mechanisms in the Linux kernel for loading user defined SSDTs.
 
-    efi: Expose non-blocking set_variable() wrapper to efivars
+In order to support ACPI open-ended hardware configurations we need a
+way to augment the ACPI configuration provided by the firmware
+image. A common example is connecting sensors on I2C / SPI buses on
+development boards.
 
-to the linux-4.2.y-queue branch of the 4.2.y-ckt extended stable tree 
-which can be found at:
+Although this can be accomplished by creating a kernel platform driver
+or recompiling the firmware image with updated ACPI tables, neither is
+practical: the former proliferates board specific kernel code while
+the latter requires access to firmware tools which are often not
+publicly available.
 
-    http://kernel.ubuntu.com/git/ubuntu/linux.git/log/?h=linux-4.2.y-queue
+Because ACPI supports external references in AML code a more practical
+way to augment firmware ACPI configuration is by dynamically loading
+user defined SSDT tables that contain the board specific information.
 
-This patch is scheduled to be released in version 4.2.8-ckt7.
+This patch sets provides three methods for loading custom SSDTs:
 
-If you, or anyone else, feels it should not be added to this tree, please 
-reply to this email.
+* From an EFI variable
 
-For more information about the 4.2.y-ckt tree, see
-https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
+  This is the preferred method, when EFI is supported on the platform,
+  because it allows a persistent, OS independent way of storing and
+  updating the user defined SSDTs. There is also work underway to
+  implement EFI support for loading user defined SSDTs and using this
+  method will make it easier to convert to the EFI loading mechanism
+  when that will arrive.
 
-Thanks.
--Kamal
+* From the first uncompressed initrd (similar with the override
+  functionality)
 
----8<------------------------------------------------------------
+  This is useful when EFI is not supported on the platform and when it
+  is not possible to defer the loading to userspace.
 
->From 3acb85adaf3f6c0d9d5c6d4271d1897c82d63afb Mon Sep 17 00:00:00 2001
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Date: Mon, 1 Feb 2016 22:06:55 +0000
-Subject: efi: Expose non-blocking set_variable() wrapper to efivars
+* From userspace via configfs 
 
-commit 9c6672ac9c91f7eb1ec436be1442b8c26d098e55 upstream.
+  This is useful when we want to defer the operation to userspace for
+  platform detection, loading the SSDTs from a custom partition, etc.
 
-Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
-operation") implemented a non-blocking alternative for the UEFI
-SetVariable() invocation performed by efivars, since it may
-occur in atomic context. However, this version of the function
-was never exposed via the efivars struct, so the non-blocking
-versions was not actually callable. Fix that.
+Octavian Purdila (10):
+  kernel: add TAINT_OVERLAY_ACPI_TABLE
+  acpi: install SSDT tables from initrd
+  acpi: add support for ACPI reconfiguration notifiers
+  acpi: fix enumeration (visited) flags for bus rescans
+  i2c: add support for ACPI reconfigure notifications
+  spi: add support for ACPI reconfigure notifications
+  efi: load SSTDs from EFI variables
+  configfs: fix CONFIGFS_BIN_ATTR_[RW]O definitions
+  acpi: add support for configfs
+  acpi: add support for loading SSDTs via configfs
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
-Link: http://lkml.kernel.org/r/1454364428-494-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
----
- drivers/firmware/efi/efi.c | 1 +
- 1 file changed, 1 insertion(+)
+ Documentation/ABI/testing/configfs-acpi |  23 +++++
+ Documentation/acpi/ssdt-overlays.txt    | 174 ++++++++++++++++++++++++++++++++
+ Documentation/kernel-parameters.txt     |   7 ++
+ Documentation/oops-tracing.txt          |   2 +
+ Documentation/sysctl/kernel.txt         |   1 +
+ MAINTAINERS                             |   1 +
+ drivers/acpi/Kconfig                    |   9 ++
+ drivers/acpi/Makefile                   |   1 +
+ drivers/acpi/bus.c                      |  72 +++++++++++++
+ drivers/acpi/configfs.c                 | 143 ++++++++++++++++++++++++++
+ drivers/acpi/internal.h                 |   3 +
+ drivers/acpi/scan.c                     |  73 +++++++++++++-
+ drivers/acpi/sysfs.c                    |   6 +-
+ drivers/firmware/efi/efi.c              | 107 ++++++++++++++++++++
+ drivers/i2c/i2c-core.c                  |  38 ++++++-
+ drivers/spi/spi.c                       |  36 ++++++-
+ include/acpi/acpi_bus.h                 |   8 ++
+ include/linux/configfs.h                |   4 +-
+ include/linux/kernel.h                  |   1 +
+ kernel/panic.c                          |   2 +
+ 20 files changed, 699 insertions(+), 12 deletions(-)
+ create mode 100644 Documentation/ABI/testing/configfs-acpi
+ create mode 100644 Documentation/acpi/ssdt-overlays.txt
+ create mode 100644 drivers/acpi/configfs.c
 
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index d6144e3..2eb2f57 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -176,6 +176,7 @@ static int generic_ops_register(void)
- {
- 	generic_ops.get_variable = efi.get_variable;
- 	generic_ops.set_variable = efi.set_variable;
-+	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
- 	generic_ops.get_next_variable = efi.get_next_variable;
- 	generic_ops.query_variable_store = efi_query_variable_store;
-
---
-2.7.4
+-- 
+1.9.1
