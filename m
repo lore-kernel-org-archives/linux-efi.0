@@ -1,29 +1,61 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: Re: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
-Date: Fri, 1 Apr 2016 13:11:55 +0300
-Message-ID: <CAE1zotJ1fa4m-_FO3PUQK8_p0vHcfWD5TmuMdxOSHDjku421pA@mail.gmail.com>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
+From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
+Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
+ or disable ACPI
+Date: Fri, 1 Apr 2016 17:25:25 +0800
+Message-ID: <56FE3E85.60403@huawei.com>
+References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org> <20160329161837.GH6745@arm.com> <20160329163147.GB27223@leverpostej> <56FB7E00.7030400@huawei.com> <alpine.DEB.2.02.1603311155450.11739@kaball.uk.xensource.com> <CAKv+Gu-wPq_FzO3sm7bhSFuu7EVxHWB_v6HOn1GqNbdaE-iBoQ@mail.gmail.com> <20160331124216.GE26532@leverpostej>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Zheng, Lv" <lv.zheng@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Tirdea, Irina" <irina.tirdea@intel.com>
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160331124216.GE26532@leverpostej>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Huangpeng (Peter)" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, julien.grall-5wv7dgnIgG8@public.gmane.org, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 1, 2016 at 8:05 AM, Zheng, Lv <lv.zheng@intel.com> wrote:
-> Hi,
->
-> IMO, there is already a similar function upstreamed:
-> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c85cc81
-> Could it work for your use case?
 
-Yes, it is basically the same.
 
-The only difference is on how we handle taint. I think we should use a
-new taint for overlays and that we don't need to disable lockdep.
+On 2016/3/31 20:42, Mark Rutland wrote:
+> On Thu, Mar 31, 2016 at 01:44:08PM +0200, Ard Biesheuvel wrote:
+>> > The heuristic is there to decide whether some DTB image contains a
+>> > complete description of the platform, or only some data handed over by
+>> > the bootloader. Arguably, a DT containing both /chosen and /hypervisor
+>> > but nothing else can still not describe an actual platform, and
+>> > whether we execute under Xen or not is completely irrelevant.
+> I disagree somewhat.
+> 
+> In general, a /hypervisor node may not be a Xen node, and could
+> potentially imply some platform description. As /hypervisor is a generic
+> name up for grabs by any hypervisor, we simply cannot make assumptions
+> about it.
+> 
+> As /chosen is a special reserved path that implies a particular binding
+> and has no compatible string, so checking its path alone is correct.
+> 
+> While we do check that the /hypervisor node is "xen,xen" compatible
+> elsewhere, the canonical mechanism of checking for a Xen node (as
+> opposed to any hypervisor's node) is to check the compatible string.
+> 
+> If we are going to handle nodes for other hypervisors while treating the
+> DTB as empty, we need code and discussion regarding said hypervisor.
+> 
+> Hence, for checking for a Xen /hypervisor node, I would prefer we
+> checked the compatible string rather than the path.
+> 
+> An is_xen_node() helper (which could also check that the path is
+> "/hypervisor") would avoid having redundant, subtly distinct ways of
+> checking, and would explicitly document precisely what we are checking
+> for.
 
-BTW, why is lockdep disabled when we override?
+So if we use is_xen_node(), do we need to call xen_initial_domain()
+again? I still think here is_xen_node() and xen_initial_domain() have
+same meaning. Why do we need that?
+
+If it really needs is_xen_node(), I will not factor
+fdt_find_hyper_node() in patch 11 since it uses flat DT while here it's
+going to use unflatten DT.
+
+Thanks,
+-- 
+Shannon
