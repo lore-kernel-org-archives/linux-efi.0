@@ -1,240 +1,257 @@
-From: "Zheng, Lv" <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [RFC PATCH 10/10] acpi: add support for loading SSDTs via
- configfs
-Date: Fri, 1 Apr 2016 04:55:41 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB66233@SHSMSX101.ccr.corp.intel.com>
+From: "Zheng, Lv" <lv.zheng@intel.com>
+Subject: RE: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
+Date: Fri, 1 Apr 2016 05:05:03 +0000
+Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
 References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
- <1459417026-6697-11-git-send-email-octavian.purdila@intel.com>
+ <1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 8BIT
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459417026-6697-11-git-send-email-octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
 Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>
-Cc: Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Tirdea, Irina" <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, "Purdila, Octavian" <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Sender: linux-i2c-owner@vger.kernel.org
+To: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>
+Cc: Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Tirdea, Irina" <irina.tirdea@intel.com>, "Purdila, Octavian" <octavian.purdila@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
 Hi,
 
-> From: linux-acpi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org [mailto:linux-acpi-
-> owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org] On Behalf Of Octavian Purdila
-> Subject: [RFC PATCH 10/10] acpi: add support for loading SSDTs via configfs
-> 
-> Add support for acpi_user_table configfs items that allows the user to
-> load new tables. The data attributes contains the table data and once it
-> is filled from userspace the table is loaded and ACPI devices are
-> enumerated.
-[Lv Zheng] 
-We've been considering to implement this facility before.
-The 2 alternative solutions are:
-1. implement LOAD/UNLOAD ioctl for /sys/kernel/debug/acpi/acpidbg - this will be useful for extracting AML byte stream from kernel to be used by a userspace disassembler.
-2. transition /sys/firmware/acpi/tables/xxx into directory and implement /sys/firmware/acpi/tables/load, /sys/firmware/acpi/tables/unload - this should be able to meet your requirement.
+IMO, there is already a similar function upstreamed:
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c85cc81
+Could it work for your use case?
 
-So my first question is:
-Why do you use configfs rather than the existing mechanisms?
-
+> From: linux-acpi-owner@vger.kernel.org [mailto:linux-acpi-
+> owner@vger.kernel.org] On Behalf Of Octavian Purdila
+> Subject: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
 > 
-> Signed-off-by: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+> This patch allows loading user defined SSDTs from the first,
+> uncompressed, initrd. The SSDT aml code must be stored in files under
+> the /kernel/firmware/acpi/overlay path.
+> 
+> Signed-off-by: Octavian Purdila <octavian.purdila@intel.com>
 > ---
->  Documentation/ABI/testing/configfs-acpi |  16 +++++
->  Documentation/acpi/ssdt-overlays.txt    |  14 +++++
->  drivers/acpi/configfs.c                 | 104 ++++++++++++++++++++++++++++++++
->  3 files changed, 134 insertions(+)
+>  Documentation/acpi/ssdt-overlays.txt | 94
+> ++++++++++++++++++++++++++++++++++++
+>  drivers/acpi/bus.c                   | 63 ++++++++++++++++++++++++
+>  2 files changed, 157 insertions(+)
+>  create mode 100644 Documentation/acpi/ssdt-overlays.txt
 > 
-> diff --git a/Documentation/ABI/testing/configfs-acpi
-> b/Documentation/ABI/testing/configfs-acpi
-> index 0c806aa..34a205e 100644
-> --- a/Documentation/ABI/testing/configfs-acpi
-> +++ b/Documentation/ABI/testing/configfs-acpi
-> @@ -5,3 +5,19 @@ Contact:	linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
->  Description:
->  		This represents the ACPI subsystem entry point directory. It
->  		contains sub-groups corresponding to ACPI configurable
-> options.
-> +
-> +What:		/config/acpi/table
-> +Date:		April 2016
-> +KernelVersion:	4.6
-> +Description:
-> +
-> +		This group contains the configuration for user defined ACPI
-> +		tables. The attributes of a user define table are:
-> +
-> +		data - a binary write only attribute that the user can use to
-> +		       fill in the ACPI aml definitions. Once the aml data is
-> +		       written to this file and the file is closed the table
-> +		       will be loaded and ACPI device will be enumerated. To
-> +		       check if the operation is successful the user must check
-> +		       the error code for close(). If the operation is
-> +		       successful, subsequent writes to this attribute will fail.
 > diff --git a/Documentation/acpi/ssdt-overlays.txt b/Documentation/acpi/ssdt-
 > overlays.txt
-> index 7c588be..a88a2ce 100644
-> --- a/Documentation/acpi/ssdt-overlays.txt
+> new file mode 100644
+> index 0000000..a94c3f9
+> --- /dev/null
 > +++ b/Documentation/acpi/ssdt-overlays.txt
-> @@ -158,3 +158,17 @@ tmp=$(mktemp)
->  /bin/echo -ne "\007\000\000\000" | cat - $filename > $tmp
->  dd if=$tmp of="$EFIVARFS/$name-$guid" bs=$(stat -c %s $tmp)
->  rm $tmp
+> @@ -0,0 +1,94 @@
 > +
-> +== Loading ACPI SSDTs from configfs ==
+> +In order to support ACPI open-ended hardware configurations (e.g.
+> development
+> +boards) we need a way to augment the ACPI configuration provided by the
+> firmware
+> +image. A common example is connecting sensors on I2C / SPI buses on
+> development
+> +boards.
 > +
-> +This option allows loading of user defined SSDTs from userspace via the
-> configfs
-> +interface. The CONFIG_ACPI_CONFIGFS option must be select and configfs
-> must be
-> +mounted. In the following examples, we assume that configfs has been
-> mounted in
-> +/config.
+> +Although this can be accomplished by creating a kernel platform driver or
+> +recompiling the firmware image with updated ACPI tables, neither is practical:
+> +the former proliferates board specific kernel code while the latter requires
+> +access to firmware tools which are often not publicly available.
 > +
-> +New tables can be loading by creating new directories in /config/acpi/table/
-> and
-> +writing the SSDT aml code in the data attribute:
+> +Because ACPI supports external references in AML code a more practical
+> +way to augment firmware ACPI configuration is by dynamically loading
+> +user defined SSDT tables that contain the board specific information.
 > +
-> +cd /config/acpi/table
-> +mkdir my_ssdt
-> +cat ~/ssdt.aml > my_ssdt/data
-[Lv Zheng] 
-Good to see the table as a directory.
-So that we can put more attributes under it.
-
-Thanks
--Lv
-
-> diff --git a/drivers/acpi/configfs.c b/drivers/acpi/configfs.c
-> index 96aa3d8..3a194806 100644
-> --- a/drivers/acpi/configfs.c
-> +++ b/drivers/acpi/configfs.c
-> @@ -13,6 +13,104 @@
->  #include <linux/configfs.h>
->  #include <linux/acpi.h>
-> 
-> +static struct config_group *acpi_table_group;
+> +For example, to enumerate a Bosch BMA222E accelerometer on the I2C bus
+> of the
+> +Minnowboard MAX development board exposed via the LSE connector [1],
+> the
+> +following ASL code can be used:
 > +
-> +struct acpi_user_table {
-> +	struct config_item cfg;
-> +	struct acpi_table_header *table;
-> +};
-> +
-> +static ssize_t acpi_table_data_write(struct config_item *cfg,
-> +				     const void *data, size_t size)
+> +DefinitionBlock ("minnowmax.aml", "SSDT", 1, "Vendor", "Accel", 0x00000003)
 > +{
-> +	struct acpi_table_header *header = (struct acpi_table_header *)data;
-> +	struct acpi_user_table *table;
-> +	int ret;
+> +    External (\_SB.I2C6, DeviceObj)
 > +
-> +	table = container_of(cfg, struct acpi_user_table, cfg);
+> +    Scope (\_SB.I2C6)
+> +    {
+> +        Device (STAC)
+> +        {
+> +            Name (_ADR, Zero)
+> +            Name (_HID, "BMA222E")
 > +
-> +	if (table->table) {
-> +		pr_err("ACPI configfs table: table already loaded\n");
-> +		return -EBUSY;
-> +	}
-> +
-> +	if (header->length != size) {
-> +		pr_err("ACPI configfs table: invalid table length\n");
-> +		return -EINVAL;
-> +	}
-> +
-> +	if (memcmp(header->signature, ACPI_SIG_SSDT, 4)) {
-> +		pr_err("ACPI configfs table: invalid table signature\n");
-> +		return -EINVAL;
-> +	}
-> +
-> +	table = container_of(cfg, struct acpi_user_table, cfg);
-> +
-> +	table->table = kmemdup(header, header->length, GFP_KERNEL);
-> +	if (!table->table)
-> +		return -ENOMEM;
-> +
-> +	ret = acpi_load_table(table->table);
-> +	if (ret) {
-> +		kfree(table->table);
-> +		table->table = NULL;
-> +	}
-> +
-> +	add_taint(TAINT_OVERLAY_ACPI_TABLE, LOCKDEP_STILL_OK);
-> +
-> +	return ret;
+> +            Method (_CRS, 0, Serialized)
+> +            {
+> +                Name (RBUF, ResourceTemplate ()
+> +                {
+> +                    I2cSerialBus (0x0018, ControllerInitiated, 0x00061A80,
+> +                                  AddressingMode7Bit, "\\_SB.I2C6", 0x00,
+> +                                  ResourceConsumer, ,)
+> +                    GpioInt (Edge, ActiveHigh, Exclusive, PullDown, 0x0000,
+> +                             "\\_SB.GPO2", 0x00, ResourceConsumer, , )
+> +                    { // Pin list
+> +                        0
+> +                    }
+> +                })
+> +                Return (RBUF)
+> +            }
+> +        }
+> +    }
 > +}
 > +
-> +#define MAX_ACPI_TABLE_SIZE (128 * 1024)
+> +which can then be compiled to AML binary format:
 > +
-> +CONFIGFS_BIN_ATTR_WO(acpi_table_, data, NULL, MAX_ACPI_TABLE_SIZE);
+> +$ iasl minnowmax.asl
 > +
-> +struct configfs_bin_attribute *acpi_table_bin_attrs[] = {
-> +	&acpi_table_attr_data,
-> +	NULL,
-> +};
+> +Intel ACPI Component Architecture
+> +ASL Optimizing Compiler version 20140214-64 [Mar 29 2014]
+> +Copyright (c) 2000 - 2014 Intel Corporation
 > +
-> +static struct config_item_type acpi_table_type = {
-> +	.ct_owner = THIS_MODULE,
-> +	.ct_bin_attrs = acpi_table_bin_attrs,
-> +};
+> +ASL Input:     minnomax.asl - 30 lines, 614 bytes, 7 keywords
+> +AML Output:    minnowmax.aml - 165 bytes, 6 named objects, 1 executable
+> opcodes
 > +
-> +static struct config_item *acpi_table_make_item(struct config_group *group,
-> +						const char *name)
-> +{
-> +	struct acpi_user_table *table;
+> +[1]
+> http://wiki.minnowboard.org/MinnowBoard_MAX#Low_Speed_Expansion_Co
+> nnector_.28Top.29
 > +
-> +	table = kzalloc(sizeof(*table), GFP_KERNEL);
-> +	if (!table)
-> +		return ERR_PTR(-ENOMEM);
+> +The resulting AML code can then be loaded by the kernel using one of the
+> methods
+> +below.
 > +
-> +	config_item_init_type_name(&table->cfg, name, &acpi_table_type);
-> +	return &table->cfg;
-> +}
+> +== Loading ACPI SSDTs from initrd ==
 > +
-> +struct configfs_group_operations acpi_table_group_ops = {
-> +	.make_item = acpi_table_make_item,
-> +};
+> +This option allows loading of user defined SSDTs from initrd and it is useful
+> +when the system does not support EFI or when there is not enough EFI
+> storage.
 > +
-> +static struct config_item_type acpi_tables_type = {
-> +	.ct_owner = THIS_MODULE,
-> +	.ct_group_ops = &acpi_table_group_ops,
-> +};
+> +It works in a similar way with initrd based ACPI tables overrides: SSDT aml
+> code
+> +must be placed in the first, uncompressed, initrd under the
+> +"kernel/firmware/acpi/overlay" path. We use a different path than the initrd
+> +tables override to avoid conflicts with the override feature.
 > +
-> +static struct config_item_type acpi_root_group_type = {
-> +	.ct_owner	= THIS_MODULE,
-> +};
+> +Multiple files can be used and this will translate in loading multiple
+> +tables. Only tables with the SSDT signature will be loaded.
 > +
-> +static struct configfs_subsystem acpi_configfs = {
-> +	.su_group = {
-> +		.cg_item = {
-> +			.ci_namebuf = "acpi",
-> +			.ci_type = &acpi_root_group_type,
-> +		},
-> +	},
-> +	.su_mutex = __MUTEX_INITIALIZER(acpi_configfs.su_mutex),
-> +};
+> +Here is an example:
 > +
->  static int __init acpi_configfs_init(void)
->  {
->  	int ret;
-> @@ -24,12 +122,18 @@ static int __init acpi_configfs_init(void)
->  	if (ret)
->  		return ret;
+> +# Add the raw ACPI tables to an uncompressed cpio archive.
+> +# They must be put into a /kernel/firmware/acpi/overlay directory inside the
+> +# cpio archive.
+> +# The uncompressed cpio archive must be the first.
+> +# Other, typically compressed cpio archives, must be
+> +# concatenated on top of the uncompressed one.
+> +mkdir -p kernel/firmware/acpi
+> +cp ssdt.aml kernel/firmware/acpi
+> +
+> +# Create the uncompressed cpio archive and concatenate the original initrd
+> +# on top:
+> +find kernel | cpio -H newc --create > /boot/instrumented_initrd
+> +cat /boot/initrd >>/boot/instrumented_initrd
+> +
+> diff --git a/drivers/acpi/bus.c b/drivers/acpi/bus.c
+> index 891c42d..5e0d076 100644
+> --- a/drivers/acpi/bus.c
+> +++ b/drivers/acpi/bus.c
+> @@ -37,9 +37,14 @@
+>  #include <acpi/apei.h>
+>  #include <linux/dmi.h>
+>  #include <linux/suspend.h>
+> +#include <linux/initrd.h>
+> +#include <linux/earlycpio.h>
 > 
-> +	acpi_table_group = configfs_register_default_group(root, "table",
-> +							   &acpi_tables_type);
-> +	if (IS_ERR(acpi_table_group))
-> +		return PTR_ERR(acpi_table_group);
+>  #include "internal.h"
+> 
+> +#undef pr_fmt
+> +#define pr_fmt(fmt) "ACPI: " fmt
 > +
+>  #define _COMPONENT		ACPI_BUS_COMPONENT
+>  ACPI_MODULE_NAME("bus");
+> 
+> @@ -863,6 +868,62 @@ static int __init acpi_bus_init_irq(void)
 >  	return 0;
 >  }
->  module_init(acpi_configfs_init);
 > 
->  static void __exit acpi_configfs_exit(void)
->  {
-> +	configfs_unregister_default_group(acpi_table_group);
->  	configfs_unregister_subsystem(&acpi_configfs);
->  }
->  module_exit(acpi_configfs_exit);
+> +void __init acpi_load_initrd_ssdts(void)
+> +{
+> +	void *data = (void *)initrd_start;
+> +	int size = initrd_end - initrd_start;
+> +	const char *path = "kernel/firmware/acpi/overlay";
+> +	long offset = 0;
+> +	struct cpio_data file;
+> +	struct acpi_table_header *header;
+> +	void *table;
+> +	acpi_status status;
+> +
+> +	while (true) {
+> +		file = find_cpio_data(path, data, size, &offset);
+> +		if (!file.data)
+> +			break;
+> +
+> +		data += offset;
+> +		size -= offset;
+> +
+> +		if (file.size < sizeof(struct acpi_table_header)) {
+> +			pr_err("initrd table smaller than ACPI header
+> [%s%s]\n",
+> +			       path, file.name);
+> +			continue;
+> +		}
+> +
+> +		header = file.data;
+> +
+> +		if (file.size != header->length) {
+> +			pr_err("initrd file / table length mismatch [%s%s]\n",
+> +			       path, file.name);
+> +			continue;
+> +		}
+> +
+> +		if (memcmp(header->signature, ACPI_SIG_SSDT, 4)) {
+> +			pr_warn("skipping non-SSDT initrd table [%s%s]\n",
+> +				path, file.name);
+> +			continue;
+> +		}
+> +
+> +		table = kmemdup(file.data, file.size, GFP_KERNEL);
+> +		if (!table)
+> +			continue;
+> +
+> +		status = acpi_install_table((uintptr_t)table, 0);
+> +		if (ACPI_FAILURE(status)) {
+> +			pr_err("failed to install SSDT from initrd [%s%s]\n",
+> +			       path, file.name);
+> +			kfree(table);
+> +		}
+> +
+> +		pr_info("installed SSDT table found in initrd [%s%s][0x%x]\n",
+> +			path, file.name, header->length);
+> +		add_taint(TAINT_OVERLAY_ACPI_TABLE, LOCKDEP_STILL_OK);
+> +	}
+> +}
+> +
+[Lv Zheng] 
+I can see that this is so similar to the acpi_initrd_initialize_tables() which is in the drivers/acpi/osl.c.
+Please check.
+
+Thanks and best regards
+-Lv
+
+>  /**
+>   * acpi_early_init - Initialize ACPICA and populate the ACPI namespace.
+>   *
+> @@ -911,6 +972,8 @@ void __init acpi_early_init(void)
+>  		goto error0;
+>  	}
+> 
+> +	acpi_load_initrd_ssdts();
+> +
+>  	status = acpi_load_tables();
+>  	if (ACPI_FAILURE(status)) {
+>  		printk(KERN_ERR PREFIX
 > --
 > 1.9.1
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-acpi" in
-> the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+> the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
