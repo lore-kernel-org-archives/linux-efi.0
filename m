@@ -1,60 +1,157 @@
-From: Mark Brown <broonie@kernel.org>
-Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
- notifications
-Date: Fri, 1 Apr 2016 07:08:56 -0700
-Message-ID: <20160401140856.GW2350@sirena.org.uk>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
- <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
- <20160331172935.GL2350@sirena.org.uk>
- <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="hjRTvux2945W8dyK"
-Return-path: <linux-i2c-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Octavian Purdila <octavian.purdila@intel.com>
-Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v10 00/17] Add ACPI support for Xen Dom0 on ARM64
+Date: Fri,  1 Apr 2016 23:48:58 +0800
+Message-ID: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
+This patch set adds ACPI support for Xen Dom0 on ARM64. The relevant Xen
+ACPI on ARM64 design document could be found from [1].
 
---hjRTvux2945W8dyK
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This patch set adds a new FDT node "uefi" under /hypervisor to pass UEFI
+information. Introduce a bus notifier of AMBA and Platform bus to map
+the new added device's MMIO space. Make Xen domain use
+xlated_setup_gnttab_pages to setup grant table and a new hypercall to
+get event-channel irq.
 
-On Fri, Apr 01, 2016 at 01:54:28PM +0300, Octavian Purdila wrote:
+Regarding the initialization flow of Linux kernel, it needs to move
+xen_early_init() before efi_init(). Then xen_early_init() will check
+whether it runs on Xen through the /hypervisor node and efi_init() will
+call a new function fdt_find_xen_uefi_params(), to parse those
+xen,uefi-* parameters just like the existing efi_get_fdt_params().
 
-> I probably don't fully understand your question, but I don't see a way
-> of how we can create a new SPI device from generic ACPI code. For
-> example, in acpi_spi_add_device() we need the spi_master node so that
-> we can allocate the spi device.
+And in arm64_enable_runtime_services() it will check whether it runs on
+Xen and call another new function xen_efi_runtime_setup() to setup
+runtime service instead of efi_native_runtime_setup(). The
+xen_efi_runtime_setup() will assign the runtime function pointers with
+the functions of driver/xen/efi.c.
 
-Right, but the same applies to initial enumeration so we also have to
-manually instantiate ACPI devices on startup.  Why do we need to do
-that?
+And since we pass a /hypervisor node and a /chosen node to Dom0, it
+needs to check whether the DTS only contains a /hypervisor node and a
+/chosen node in acpi_boot_table_init().
 
-> The handling is identical because we don't have yet have a way to
-> identify what where the new nodes added when a new ACPI table /
-> overlay has been loaded, so we have to rescan the ACPI namespace under
-> each controller.
+Patches are tested on FVP base model. They can be fetched from[2].
 
-That's not the point.  The point is that since the handling is identical
-why are we handling it through exactly the same code?
+Thanks,
+Shannon
 
---hjRTvux2945W8dyK
-Content-Type: application/pgp-signature; name="signature.asc"
+[1] http://lists.xen.org/archives/html/xen-devel/2015-11/msg00488.html
+[2] https://git.linaro.org/people/shannon.zhao/linux-mainline.git ACPI_XEN_ARM_Linux_V10
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Changes since v9:
+* address Rafael's comments on patch 1
+* check the compatible string of hypervisor node in patch 12
 
-iQEcBAEBCAAGBQJW/oD0AAoJECTWi3JdVIfQaRAH/jeQz8zKvAX6aepL5CfzNu3V
-o6yItlKEvj0noTBht+Qpw2MRWvpjZHMEWGV5XEmLZC3S7ft8apurWTGDppJkRsf+
-I1fSxifDFMoEhMA3tN39ruRBcSajBrF7zroElYR6WgTbtcbSPYtxCAJHbjHdJyEB
-/XG6bSk4due7Vezl/jKE0ap/hOWXa3qBzfA7rXIWWw+TbvtyYXlHSJHdZZttRH07
-gVNcsLhfRBwp8EqbSnUM3WxvVx6xMTsNtKLnu1q4e9YNL69ZbS0MpEIoNBOJJnl9
-97WntPF+mgoufsRLvnUFkggxHZu1Q1a0oO4kWezuYmgqvXzoNc+XDvamSJ3LsX0=
-=PJGW
------END PGP SIGNATURE-----
+Changes since v8:
+* rebased on v4.6-rc1
+* print UART device address (PATCH 1)
+* use xen_for_each_gfn (PATCH 3)
+* reduce indentation by inverting the condition (PATCH 10)
+* move xen_early_init() before efi_init() as well for ARM (PATCH 11)
+* sync the document with Xen (PATCH 13)
 
---hjRTvux2945W8dyK--
+Changes since v7:
+* add __init prefix for acpi_get_spcr_uart_addr (PATCH 1)
+
+Changes since v6:
+* rebase on linux master
+* refactor codes as acpi_get_spcr_uart_addr (PATCH 1)
+* sync with Xen (patch 9)
+
+Changes since v5:
+* rebase on linux master
+* use acpi_dev_resource_memory to parse the device memory info(patch 1)
+* sync with Xen (patch 9)
+
+Changes since v4:
+* rebase on linux master
+* move the check acpi_device_should_be_hidden into
+  acpi_bus_type_and_status (patch 1)
+* use existing function fdt_subnode_offset (patch 16)
+
+Changes since v3:
+* rebase on linux master
+* print a warning when there is no SPCR table
+* rephase the commit message of PATCH 3
+* rephase the words of PATCH 13
+* use strcmp and factor the function in PATCH 16
+* Add several ACKs and RBs, thanks a lot
+
+
+Changes since v2:
+* Use 0 to check if it should ignore the UART
+* Fix the use of page_to_xen_pfn
+* Factor ACPI and DT parts in xen_guest_init
+* Check "uefi" node by full path
+* Fix the statement of Documentation/devicetree/bindings/arm/xen.txt
+
+Changes since v1:
+* Rebase on linux mainline and wallclock patch from Stefano
+* Refactor AMBA and platform device MMIO map to one file
+* Use EFI_PARAVIRT to check if it supports XEN EFI
+* Refactor Xen EFI codes
+* Address other comments
+
+Shannon Zhao (17):
+  Xen: ACPI: Hide UART used by Xen
+  xen/grant-table: Move xlated_setup_gnttab_pages to common place
+  Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
+  arm/xen: Use xen_xlate_map_ballooned_pages to setup grant table
+  xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
+  Xen: ARM: Add support for mapping platform device mmio
+  Xen: ARM: Add support for mapping AMBA device mmio
+  Xen: public/hvm: sync changes of HVM_PARAM_CALLBACK_VIA ABI from Xen
+  xen/hvm/params: Add a new delivery type for event-channel in
+    HVM_PARAM_CALLBACK_IRQ
+  arm/xen: Get event-channel irq through HVM_PARAM when booting with
+    ACPI
+  ARM: XEN: Move xen_early_init() before efi_init()
+  ARM64: ACPI: Check if it runs on Xen to enable or disable ACPI
+  ARM: Xen: Document UEFI support on Xen ARM virtual platforms
+  XEN: EFI: Move x86 specific codes to architecture directory
+  ARM64: XEN: Add a function to initialize Xen specific UEFI runtime
+    services
+  FDT: Add a helper to get the subnode by given name
+  Xen: EFI: Parse DT parameters for Xen specific UEFI
+
+ Documentation/devicetree/bindings/arm/xen.txt |  35 +++++
+ arch/arm/include/asm/xen/xen-ops.h            |   6 +
+ arch/arm/kernel/setup.c                       |   2 +-
+ arch/arm/xen/Makefile                         |   1 +
+ arch/arm/xen/efi.c                            |  40 ++++++
+ arch/arm/xen/enlighten.c                      | 109 +++++++++++----
+ arch/arm64/include/asm/xen/xen-ops.h          |   6 +
+ arch/arm64/kernel/acpi.c                      |  14 +-
+ arch/arm64/kernel/setup.c                     |   2 +-
+ arch/arm64/xen/Makefile                       |   1 +
+ arch/x86/xen/efi.c                            | 112 ++++++++++++++++
+ arch/x86/xen/grant-table.c                    |  57 +-------
+ drivers/acpi/scan.c                           |  71 ++++++++++
+ drivers/firmware/efi/arm-runtime.c            |  17 ++-
+ drivers/firmware/efi/efi.c                    |  45 ++++++-
+ drivers/of/fdt.c                              |  13 ++
+ drivers/xen/Kconfig                           |   2 +-
+ drivers/xen/Makefile                          |   1 +
+ drivers/xen/arm-device.c                      | 184 ++++++++++++++++++++++++++
+ drivers/xen/efi.c                             | 174 +++++-------------------
+ drivers/xen/xlate_mmu.c                       |  77 +++++++++++
+ include/linux/of_fdt.h                        |   2 +
+ include/xen/interface/hvm/params.h            |  40 +++++-
+ include/xen/interface/memory.h                |   1 +
+ include/xen/xen-ops.h                         |  32 +++--
+ 25 files changed, 796 insertions(+), 248 deletions(-)
+ create mode 100644 arch/arm/include/asm/xen/xen-ops.h
+ create mode 100644 arch/arm/xen/efi.c
+ create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
+ create mode 100644 drivers/xen/arm-device.c
+
+-- 
+2.1.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
