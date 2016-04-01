@@ -1,56 +1,74 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v10 09/17] xen/hvm/params: Add a new delivery type for event-channel in HVM_PARAM_CALLBACK_IRQ
-Date: Fri,  1 Apr 2016 23:49:07 +0800
-Message-ID: <1459525755-36968-10-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v10 07/17] Xen: ARM: Add support for mapping AMBA device mmio
+Date: Fri,  1 Apr 2016 23:49:05 +0800
+Message-ID: <1459525755-36968-8-git-send-email-shannon.zhao@linaro.org>
 References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com
-Cc: david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, shannon.zhao@linaro.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-This new delivery type which is for ARM shares the same value with
-HVM_PARAM_CALLBACK_TYPE_VECTOR which is for x86.
+Add a bus_notifier for AMBA bus device in order to map the device
+mmio regions when DOM0 booting with ACPI.
 
-val[15:8] is flag: val[7:0] is a PPI.
-To the flag, bit 8 stands the interrupt mode is edge(1) or level(0) and
-bit 9 stands the interrupt polarity is active low(1) or high(0).
-
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Acked-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
 ---
- include/xen/interface/hvm/params.h | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ drivers/xen/arm-device.c | 43 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 43 insertions(+)
 
-diff --git a/include/xen/interface/hvm/params.h b/include/xen/interface/hvm/params.h
-index 70ad208..4d61fc5 100644
---- a/include/xen/interface/hvm/params.h
-+++ b/include/xen/interface/hvm/params.h
-@@ -47,11 +47,24 @@
-  * Domain = val[47:32], Bus = val[31:16] DevFn = val[15:8], IntX = val[1:0]
-  */
+diff --git a/drivers/xen/arm-device.c b/drivers/xen/arm-device.c
+index 76e26e5..3854043 100644
+--- a/drivers/xen/arm-device.c
++++ b/drivers/xen/arm-device.c
+@@ -139,3 +139,46 @@ static int __init register_xen_platform_notifier(void)
+ }
  
-+#if defined(__i386__) || defined(__x86_64__)
- #define HVM_PARAM_CALLBACK_TYPE_VECTOR   2
- /*
-  * val[7:0] is a vector number.  Check for XENFEAT_hvm_callback_vector to know
-  * if this delivery method is available.
-  */
-+#elif defined(__arm__) || defined(__aarch64__)
-+#define HVM_PARAM_CALLBACK_TYPE_PPI      2
-+/*
-+ * val[55:16] needs to be zero.
-+ * val[15:8] is interrupt flag of the PPI used by event-channel:
-+ *  bit 8: the PPI is edge(1) or level(0) triggered
-+ *  bit 9: the PPI is active low(1) or high(0)
-+ * val[7:0] is a PPI number used by event-channel.
-+ * This is only used by ARM/ARM64 and masking/eoi the interrupt associated to
-+ * the notification is handled by the interrupt controller.
-+ */
+ arch_initcall(register_xen_platform_notifier);
++
++#ifdef CONFIG_ARM_AMBA
++#include <linux/amba/bus.h>
++
++static int xen_amba_notifier(struct notifier_block *nb,
++			     unsigned long action, void *data)
++{
++	struct amba_device *adev = to_amba_device(data);
++	int r = 0;
++
++	switch (action) {
++	case BUS_NOTIFY_ADD_DEVICE:
++		r = xen_map_device_mmio(&adev->res, 1);
++		break;
++	case BUS_NOTIFY_DEL_DEVICE:
++		r = xen_unmap_device_mmio(&adev->res, 1);
++		break;
++	default:
++		return NOTIFY_DONE;
++	}
++	if (r)
++		dev_err(&adev->dev, "AMBA: Failed to %s device %s MMIO!\n",
++			action == BUS_NOTIFY_ADD_DEVICE ? "map" :
++			(action == BUS_NOTIFY_DEL_DEVICE ? "unmap" : "?"),
++			adev->dev.init_name);
++
++	return NOTIFY_OK;
++}
++
++static struct notifier_block amba_device_nb = {
++	.notifier_call = xen_amba_notifier,
++};
++
++static int __init register_xen_amba_notifier(void)
++{
++	if (!xen_initial_domain() || acpi_disabled)
++		return 0;
++
++	return bus_register_notifier(&amba_bustype, &amba_device_nb);
++}
++
++arch_initcall(register_xen_amba_notifier);
 +#endif
- 
- #define HVM_PARAM_STORE_PFN    1
- #define HVM_PARAM_STORE_EVTCHN 2
 -- 
 2.1.4
