@@ -1,92 +1,45 @@
 From: "Rafael J. Wysocki" <rafael@kernel.org>
-Subject: Re: [PATCH v10 01/17] Xen: ACPI: Hide UART used by Xen
-Date: Fri, 1 Apr 2016 21:21:52 +0200
-Message-ID: <CAJZ5v0i_h2Y+upRE1LgMiuj2srJ8Z0BJMBk4mrTppMd7V1LXbQ@mail.gmail.com>
-References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-	<1459525755-36968-2-git-send-email-shannon.zhao@linaro.org>
+Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure notifications
+Date: Fri, 1 Apr 2016 21:26:38 +0200
+Message-ID: <CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+	<1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
+	<20160331172935.GL2350@sirena.org.uk>
+	<CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
+	<20160401140856.GW2350@sirena.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <1459525755-36968-2-git-send-email-shannon.zhao@linaro.org>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Shannon Zhao <shannon.zhao@linaro.org>
-Cc: "linux-arm-kernel@lists.infradead.org" <linux-arm-kernel@lists.infradead.org>, stefano.stabellini@citrix.com, david.vrabel@citrix.com, "devicetree@vger.kernel.org" <devicetree@vger.kernel.org>, linux-efi@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, Shannon Zhao <zhaoshenglong@huawei.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, "open list:ACPI" <linux-acpi@vger.kernel.org>
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <20160401140856.GW2350@sirena.org.uk>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>
+Cc: Octavian Purdila <octavian.purdila@intel.com>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-On Fri, Apr 1, 2016 at 5:48 PM, Shannon Zhao <shannon.zhao@linaro.org> wrote:
-> ACPI 6.0 introduces a new table STAO to list the devices which are used
-> by Xen and can't be used by Dom0. On Xen virtual platforms, the physical
-> UART is used by Xen. So here it hides UART from Dom0.
+On Fri, Apr 1, 2016 at 4:08 PM, Mark Brown <broonie@kernel.org> wrote:
+> On Fri, Apr 01, 2016 at 01:54:28PM +0300, Octavian Purdila wrote:
 >
-> CC: "Rafael J. Wysocki" <rjw@rjwysocki.net> (supporter:ACPI)
-> CC: Len Brown <lenb@kernel.org> (supporter:ACPI)
-> CC: linux-acpi@vger.kernel.org (open list:ACPI)
-> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-> ---
->  drivers/acpi/scan.c | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 71 insertions(+)
+>> I probably don't fully understand your question, but I don't see a way
+>> of how we can create a new SPI device from generic ACPI code. For
+>> example, in acpi_spi_add_device() we need the spi_master node so that
+>> we can allocate the spi device.
 >
-> diff --git a/drivers/acpi/scan.c b/drivers/acpi/scan.c
-> index 5f28cf7..4d2d9eb 100644
-> --- a/drivers/acpi/scan.c
-> +++ b/drivers/acpi/scan.c
-> @@ -45,6 +45,7 @@ static LIST_HEAD(acpi_scan_handlers_list);
->  DEFINE_MUTEX(acpi_device_lock);
->  LIST_HEAD(acpi_wakeup_device_list);
->  static DEFINE_MUTEX(acpi_hp_context_lock);
-
-A comment here would be useful explaining that the below is an
-exceptional thing an nothing like it is expected to be needed if
-foreseeable future.
-
-> +static u64 spcr_uart_addr;
+> Right, but the same applies to initial enumeration so we also have to
+> manually instantiate ACPI devices on startup.  Why do we need to do
+> that?
 >
->  struct acpi_dep_data {
->         struct list_head node;
-> @@ -1453,6 +1454,44 @@ static int acpi_add_single_object(struct acpi_device **child,
->         return 0;
->  }
+>> The handling is identical because we don't have yet have a way to
+>> identify what where the new nodes added when a new ACPI table /
+>> overlay has been loaded, so we have to rescan the ACPI namespace under
+>> each controller.
 >
-> +static acpi_status acpi_get_resource_memory(struct acpi_resource *ares,
-> +                                           void *context)
-> +{
-> +       struct resource *res = context;
-> +
-> +       if (acpi_dev_resource_memory(ares, res))
-> +               return AE_CTRL_TERMINATE;
-> +
-> +       return AE_OK;
-> +}
-> +
-> +static bool acpi_device_should_be_hidden(acpi_handle handle)
-> +{
-> +       acpi_status status;
-> +       struct resource res;
-> +
-> +       /* Check if it should ignore the UART device */
-> +       if (!(spcr_uart_addr && acpi_has_method(handle, METHOD_NAME__CRS)))
-> +               return false;
-> +
-> +       /*
-> +        * The UART device described in SPCR table is assumed to have only one
-> +        * memory resource present. So we only look for the first one here.
-> +        */
-> +       status = acpi_walk_resources(handle, METHOD_NAME__CRS,
-> +                                    acpi_get_resource_memory, &res);
-> +       if (ACPI_FAILURE(status))
-> +               return false;
-> +
-> +       if (res.start == spcr_uart_addr) {
+> That's not the point.  The point is that since the handling is identical
+> why are we handling it through exactly the same code?
 
-What about restructuring that a bit.
+I think that during the initial enumeration the controller driver's
+probe walks the children and creates device objects for them.  When a
+table is loaded later, the controller driver has been probed already
+and there needs to be a way to trigger a walk over the (new) children
+from it.
 
-      if (ACPI_FAILURE(status) || res.start != spcr_uart_addr)
-            return false;
-
-> +               printk(KERN_INFO PREFIX "The UART device @%pa in SPCR table will be hidden\n",
-> +                      &res.start);
-
-And maybe use acpi_handle_info() for this message?
-
-Thanks,
-Rafael
+Or a hook somewhere around acpi_platform_notify() is needed.
