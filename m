@@ -1,97 +1,33 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v10 03/17] Xen: xlate: Use page_to_xen_pfn instead of page_to_pfn
-Date: Fri,  1 Apr 2016 23:49:01 +0800
-Message-ID: <1459525755-36968-4-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v10 05/17] xen: memory : Add new XENMAPSPACE type XENMAPSPACE_dev_mmio
+Date: Fri,  1 Apr 2016 23:49:03 +0800
+Message-ID: <1459525755-36968-6-git-send-email-shannon.zhao@linaro.org>
 References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com
-Cc: david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, shannon.zhao@linaro.org
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Make xen_xlate_map_ballooned_pages work with 64K pages. In that case
-Kernel pages are 64K in size but Xen pages remain 4K in size. Xen pfns
-refer to 4K pages.
+Add a new type of Xen map space for Dom0 to map device's MMIO region.
 
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/xen/xlate_mmu.c | 38 +++++++++++++++++++++++++++-----------
- 1 file changed, 27 insertions(+), 11 deletions(-)
+ include/xen/interface/memory.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/drivers/xen/xlate_mmu.c b/drivers/xen/xlate_mmu.c
-index 9692656..23f1387 100644
---- a/drivers/xen/xlate_mmu.c
-+++ b/drivers/xen/xlate_mmu.c
-@@ -189,6 +189,18 @@ int xen_xlate_unmap_gfn_range(struct vm_area_struct *vma,
- }
- EXPORT_SYMBOL_GPL(xen_xlate_unmap_gfn_range);
+diff --git a/include/xen/interface/memory.h b/include/xen/interface/memory.h
+index 2ecfe4f..9aa8988 100644
+--- a/include/xen/interface/memory.h
++++ b/include/xen/interface/memory.h
+@@ -160,6 +160,7 @@ DEFINE_GUEST_HANDLE_STRUCT(xen_machphys_mapping_t);
+ #define XENMAPSPACE_gmfn_foreign 4 /* GMFN from another dom,
+ 				    * XENMEM_add_to_physmap_range only.
+ 				    */
++#define XENMAPSPACE_dev_mmio     5 /* device mmio region */
  
-+struct map_balloon_pages {
-+	xen_pfn_t *pfns;
-+	unsigned int idx;
-+};
-+
-+static void setup_balloon_gfn(unsigned long gfn, void *data)
-+{
-+	struct map_balloon_pages *info = data;
-+
-+	info->pfns[info->idx++] = gfn;
-+}
-+
- /**
-  * xen_xlate_map_ballooned_pages - map a new set of ballooned pages
-  * @gfns: returns the array of corresponding GFNs
-@@ -205,11 +217,13 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
- 	struct page **pages;
- 	xen_pfn_t *pfns;
- 	void *vaddr;
-+	struct map_balloon_pages data;
- 	int rc;
--	unsigned int i;
-+	unsigned long nr_pages;
- 
- 	BUG_ON(nr_grant_frames == 0);
--	pages = kcalloc(nr_grant_frames, sizeof(pages[0]), GFP_KERNEL);
-+	nr_pages = DIV_ROUND_UP(nr_grant_frames, XEN_PFN_PER_PAGE);
-+	pages = kcalloc(nr_pages, sizeof(pages[0]), GFP_KERNEL);
- 	if (!pages)
- 		return -ENOMEM;
- 
-@@ -218,22 +232,24 @@ int __init xen_xlate_map_ballooned_pages(xen_pfn_t **gfns, void **virt,
- 		kfree(pages);
- 		return -ENOMEM;
- 	}
--	rc = alloc_xenballooned_pages(nr_grant_frames, pages);
-+	rc = alloc_xenballooned_pages(nr_pages, pages);
- 	if (rc) {
--		pr_warn("%s Couldn't balloon alloc %ld pfns rc:%d\n", __func__,
--			nr_grant_frames, rc);
-+		pr_warn("%s Couldn't balloon alloc %ld pages rc:%d\n", __func__,
-+			nr_pages, rc);
- 		kfree(pages);
- 		kfree(pfns);
- 		return rc;
- 	}
--	for (i = 0; i < nr_grant_frames; i++)
--		pfns[i] = page_to_pfn(pages[i]);
- 
--	vaddr = vmap(pages, nr_grant_frames, 0, PAGE_KERNEL);
-+	data.pfns = pfns;
-+	data.idx = 0;
-+	xen_for_each_gfn(pages, nr_grant_frames, setup_balloon_gfn, &data);
-+
-+	vaddr = vmap(pages, nr_pages, 0, PAGE_KERNEL);
- 	if (!vaddr) {
--		pr_warn("%s Couldn't map %ld pfns rc:%d\n", __func__,
--			nr_grant_frames, rc);
--		free_xenballooned_pages(nr_grant_frames, pages);
-+		pr_warn("%s Couldn't map %ld pages rc:%d\n", __func__,
-+			nr_pages, rc);
-+		free_xenballooned_pages(nr_pages, pages);
- 		kfree(pages);
- 		kfree(pfns);
- 		return -ENOMEM;
+ /*
+  * Sets the GPFN at which a particular page appears in the specified guest's
 -- 
 2.1.4
