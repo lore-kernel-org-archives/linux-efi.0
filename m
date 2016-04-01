@@ -1,37 +1,44 @@
-From: Shannon Zhao <zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Subject: Re: [PATCH v7 12/17] ARM64: ACPI: Check if it runs on Xen to enable
- or disable ACPI
-Date: Fri, 1 Apr 2016 17:32:39 +0800
-Message-ID: <56FE4037.5060305@huawei.com>
-References: <1458830676-27075-1-git-send-email-shannon.zhao@linaro.org> <1458830676-27075-13-git-send-email-shannon.zhao@linaro.org> <20160329161837.GH6745@arm.com> <20160329163147.GB27223@leverpostej> <56FB7E00.7030400@huawei.com> <alpine.DEB.2.02.1603311155450.11739@kaball.uk.xensource.com> <CAKv+Gu-wPq_FzO3sm7bhSFuu7EVxHWB_v6HOn1GqNbdaE-iBoQ@mail.gmail.com> <20160331124216.GE26532@leverpostej> <56FE3E85.60403@huawei.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure notifications
+Date: Fri, 1 Apr 2016 13:54:28 +0300
+Message-ID: <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+	<1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
+	<20160331172935.GL2350@sirena.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56FE3E85.60403-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>
-Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>, "devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Huangpeng (Peter)" <peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org>, julien.grall-5wv7dgnIgG8@public.gmane.org, Stefano Stabellini <stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>, Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, "xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org" <xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, David Vrabel <david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-acpi-owner@vger.kernel.org>
+In-Reply-To: <20160331172935.GL2350@sirena.org.uk>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Mark Brown <broonie@kernel.org>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
+On Thu, Mar 31, 2016 at 8:29 PM, Mark Brown <broonie@kernel.org> wrote:
+> On Thu, Mar 31, 2016 at 12:37:02PM +0300, Octavian Purdila wrote:
+>
+>> +#if IS_ENABLED(CONFIG_ACPI)
+>> +static int acpi_spi_table_load(struct device *dev, const void *data)
+>> +{
+>> +     struct spi_master *master = container_of(dev, struct spi_master, dev);
+>> +
+>> +     acpi_register_spi_devices(master);
+>> +     return 0;
+>> +}
+>
+> Why do we have a separate code path for this coompared to the initial
+> startup?  The handling appears to be identical so it seems we should
+> drive this from the ACPI code so we don't have to add this to every
+> single bus with ACPI bindings.
 
+Hi Mark,
 
-On 2016/4/1 17:25, Shannon Zhao wrote:
-> If it really needs is_xen_node(), I will not factor
-> fdt_find_hyper_node() in patch 11 since it uses flat DT while here it's
-> going to use unflatten DT.
-Sorry, I'm wrong. They both use flat DT. But it's no need to factor
-fdt_find_hyper_node() since is_xen_node is very simple like below I think.
+I probably don't fully understand your question, but I don't see a way
+of how we can create a new SPI device from generic ACPI code. For
+example, in acpi_spi_add_device() we need the spi_master node so that
+we can allocate the spi device.
 
-of_flat_dt_is_compatible(node, "xen,xen");
-
-And maybe it cloud directly use above check in dt_scan_depth1_nodes.
-
-Thanks,
--- 
-Shannon
-
---
-To unsubscribe from this list: send the line "unsubscribe devicetree" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The handling is identical because we don't have yet have a way to
+identify what where the new nodes added when a new ACPI table /
+overlay has been loaded, so we have to rescan the ACPI namespace under
+each controller.
