@@ -1,284 +1,238 @@
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: Re: [PATCH v2 4/5] efi: implement generic support for the Memory
- Attributes table
-Date: Fri, 1 Apr 2016 14:36:33 +0200
-Message-ID: <CAKv+Gu-ncY=edbP0tD13m_Fogqrh+BFKW+ACSwGTu+7JtuKGWA@mail.gmail.com>
-References: <1459355933-13529-1-git-send-email-ard.biesheuvel@linaro.org>
-	<1459355933-13529-5-git-send-email-ard.biesheuvel@linaro.org>
+From: jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org (Compostella, Jeremy)
+Subject: [PATCH] efibc: EFI Bootloader Control
+Date: Fri, 01 Apr 2016 15:09:51 +0200
+Message-ID: <87bn5tlbkw.fsf@jcompost-MOBL1.tl.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459355933-13529-5-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org" <linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Russell King - ARM Linux <linux-lFZ/pmaqli7XmaaqVzeoHQ@public.gmane.org>
-Cc: Catalin Marinas <catalin.marinas-5wv7dgnIgG8@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "Prakhya, Sai Praneeth" <sai.praneeth.prakhya-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, "Stanacar, Stefan" <stefan.stanacar-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On 30 March 2016 at 18:38, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org> wrote:
-> This implements shared support for discovering the presence of the
-> Memory Attributes table, and for parsing and validating its contents.
->
-> The table is validated against the construction rules in the UEFI spec.
-> Since this is a new table, it makes sense to complain if we encounter
-> a table that does not follow those rules.
->
-> The parsing and validation routine takes a callback that can be specified
-> per architecture, that gets passed each unique validated region, with the
-> virtual address retrieved from the ordinary memory map.
->
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> ---
->  drivers/firmware/efi/Makefile  |   2 +-
->  drivers/firmware/efi/memattr.c | 170 ++++++++++++++++++++
->  include/linux/efi.h            |  13 ++
->  3 files changed, 184 insertions(+), 1 deletion(-)
->
-> diff --git a/drivers/firmware/efi/Makefile b/drivers/firmware/efi/Makefile
-> index 62e654f255f4..d5be62399130 100644
-> --- a/drivers/firmware/efi/Makefile
-> +++ b/drivers/firmware/efi/Makefile
-> @@ -9,7 +9,7 @@
->  #
->  KASAN_SANITIZE_runtime-wrappers.o      := n
->
-> -obj-$(CONFIG_EFI)                      += efi.o vars.o reboot.o
-> +obj-$(CONFIG_EFI)                      += efi.o vars.o reboot.o memattr.o
->  obj-$(CONFIG_EFI_VARS)                 += efivars.o
->  obj-$(CONFIG_EFI_ESRT)                 += esrt.o
->  obj-$(CONFIG_EFI_VARS_PSTORE)          += efi-pstore.o
-> diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-> new file mode 100644
-> index 000000000000..c55683937f4a
-> --- /dev/null
-> +++ b/drivers/firmware/efi/memattr.c
-> @@ -0,0 +1,170 @@
-> +/*
-> + * Copyright (C) 2016 Linaro Ltd. <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License version 2 as
-> + * published by the Free Software Foundation.
-> + */
-> +
-> +#define pr_fmt(fmt)    "efi: " fmt
-> +
-> +#include <linux/efi.h>
-> +#include <linux/init.h>
-> +#include <linux/io.h>
-> +#include <linux/memblock.h>
-> +
-> +#include <asm/early_ioremap.h>
-> +
-> +static int __initdata tbl_size;
-> +
-> +/*
-> + * Reserve the memory associated with the Memory Attributes configuration
-> + * table, if it exists.
-> + */
-> +int __init efi_memattr_init(void)
-> +{
-> +       efi_memory_attributes_table_t *tbl;
-> +
-> +       if (efi.mem_attr_table == EFI_INVALID_TABLE_ADDR)
-> +               return 0;
-> +
-> +       tbl = early_memremap(efi.mem_attr_table, sizeof(*tbl));
-> +       if (!tbl) {
-> +               pr_err("Failed to map EFI Memory Attribute table @ 0x%lx\n",
-> +                      efi.mem_attr_table);
-> +               return -ENOMEM;
-> +       }
-> +
-> +       if (tbl->version > 1) {
-> +               pr_warn("Unexpected EFI Memory Attribute table version %d\n",
-> +                       tbl->version);
-> +               tbl_size = 0;
-> +               goto unmap;
-> +       }
-> +
-> +       tbl_size = sizeof(*tbl) + tbl->num_entries * tbl->desc_size;
-> +       memblock_reserve(efi.mem_attr_table, tbl_size);
-> +
-> +unmap:
-> +       early_memunmap(tbl, sizeof(*tbl));
-> +       return 0;
-> +}
-> +
-> +/*
-> + * Returns a copy @out of the UEFI memory descriptor @in if it is covered
-> + * entirely by a UEFI memory map entry with matching attributes. The virtual
-> + * address of @out is set according to the matching entry that was found.
-> + */
-> +static bool entry_is_valid(const efi_memory_desc_t *in, efi_memory_desc_t *out)
-> +{
-> +       u64 in_paddr = in->phys_addr;
-> +       u64 in_size = in->num_pages << EFI_PAGE_SHIFT;
-> +       efi_memory_desc_t *md;
-> +
-> +       if (in->type != EFI_RUNTIME_SERVICES_CODE &&
-> +           in->type != EFI_RUNTIME_SERVICES_DATA) {
-> +               pr_warn("MEMATTR table entry type should be RuntimeServiceCode/Data\n");
-> +               return false;
-> +       }
-> +
-> +       if (!(in->attribute & (EFI_MEMORY_RO | EFI_MEMORY_XP))) {
-> +               pr_warn("MEMATTR table entry attributes invalid: RO and XP bits both cleared\n");
-> +               return false;
-> +       }
-> +
-> +       if (PAGE_SIZE > EFI_PAGE_SIZE &&
-> +           (!PAGE_ALIGNED(in->phys_addr) ||
-> +            !PAGE_ALIGNED(in->num_pages << EFI_PAGE_SHIFT))) {
-> +               /*
-> +                * Since arm64 may execute with page sizes of up to 64 KB, the
-> +                * UEFI spec mandates that RuntimeServices memory regions must
-> +                * be 64 KB aligned. We need to validate this here since we will
-> +                * not be able to tighten permissions on such regions without
-> +                * affecting adjacent regions.
-> +                */
-> +               pr_warn("MEMATTR table entry misaligned\n");
-> +               return false;
-> +       }
-> +
-> +       for_each_efi_memory_desc(&memmap, md) {
-> +               u64 md_paddr = md->phys_addr;
-> +               u64 md_size = md->num_pages << EFI_PAGE_SHIFT;
-> +
-> +               if (!(md->attribute & EFI_MEMORY_RUNTIME))
-> +                       continue;
-> +               if (md->virt_addr == 0) {
-> +                       /* no virtual mapping has been installed by the stub */
-> +                       break;
-> +               }
-> +
-> +               if (md_paddr > in_paddr || (in_paddr - md_paddr) >= md_size)
-> +                       continue;
-> +
-> +               /*
-> +                * This entry covers the start of @in, check whether
-> +                * it covers the end as well.
-> +                */
-> +               if (md_paddr + md_size < in_paddr + in_size) {
-> +                       pr_warn("MEMATTR table entry covers multiple UEFI memory map regions\n");
-> +                       return false;
-> +               }
-> +
-> +               if (md->type != in->type) {
-> +                       pr_warn("MEMATTR table entry type deviates from UEFI memory map region type\n");
-> +                       return false;
-> +               }
-> +
-> +               *out = *in;
-> +               out->virt_addr = in_paddr +
-> +                                (md->virt_addr - md->phys_addr);
-> +               return true;
-> +       }
-> +       return false;
-> +}
-> +
-> +/*
-> + * To be called after the EFI page tables have been populated. If a memory
-> + * attributes table is available, its contents will be used to update the
-> + * mappings with tightened permissions as described by the table.
-> + * This requires the UEFI memory map to have already been populated with
-> + * virtual addresses.
-> + */
-> +int __init efi_memattr_apply_permissions(struct mm_struct *mm,
-> +                                        efi_memattr_perm_setter fn)
-> +{
-> +       efi_memory_attributes_table_t *tbl;
-> +       int i, ret;
-> +
-> +       if (tbl_size <= sizeof(*tbl))
-> +               return 0;
-> +
-> +       tbl = memremap(efi.mem_attr_table, tbl_size, MEMREMAP_WB);
-> +       if (!tbl) {
-> +               pr_err("Failed to map EFI Memory Attribute table @ 0x%lx\n",
-> +                      efi.mem_attr_table);
-> +               return -ENOMEM;
-> +       }
-> +
-> +       if (efi_enabled(EFI_DBG))
-> +               pr_info("Processing UEFI Memory Attributes table:\n");
-> +
-> +       for (i = ret = 0; ret == 0 && i < tbl->num_entries; i++) {
-> +               efi_memory_desc_t md;
-> +               unsigned long size;
-> +               bool valid;
-> +               char buf[64];
-> +
-> +               valid = entry_is_valid((void *)tbl->entry + i * tbl->desc_size,
-> +                                      &md);
-> +               size = md.num_pages << EFI_PAGE_SHIFT;
-> +               if (efi_enabled(EFI_DBG) || !valid)
-> +                       pr_info("  0x%012llx-0x%012llx %s\n", md.phys_addr,
-> +                               md.phys_addr + size - 1,
-> +                               efi_md_typeattr_format(buf, sizeof(buf), &md));
-> +
-> +               if (valid)
-> +                       ret = fn(mm, &md);
-> +       }
-> +       memunmap(tbl);
-> +       return ret;
-> +}
-> diff --git a/include/linux/efi.h b/include/linux/efi.h
-> index 346d01ad7cca..277a9bb4e587 100644
-> --- a/include/linux/efi.h
-> +++ b/include/linux/efi.h
-> @@ -970,6 +970,19 @@ extern void __init efi_fake_memmap(void);
->  static inline void efi_fake_memmap(void) { }
->  #endif
->
-> +/*
-> + * efi_memattr_perm_setter - arch specific callback function passed into
-> + *                           efi_memattr_apply_permissions() that updates the
-> + *                           mapping permissions described by the second
-> + *                           argument in the page tables referrred to by the
-> + *                           first argument
-> + */
-> +typedef int (*efi_memattr_perm_setter)(struct mm_struct *, efi_memory_desc_t *);
-> +
-> +extern int efi_memattr_init(void);
-> +extern int efi_memattr_apply_permissions(struct mm_struct *mm,
-> +                                        efi_memattr_perm_setter fn);
-> +
->  /* Iterate through an efi_memory_map */
->  #define for_each_efi_memory_desc(m, md)                                           \
->         for ((md) = (m)->map;                                              \
-> --
-> 2.5.0
->
+This module installs a reboot hook, such that if reboot() is invoked
+with a string argument NNN, "NNN" is copied to the
+"LoaderEntryOneShot" EFI variable, to be read by the bootloader. If
+the string matches one of the boot labels defined in its
+configuration, the bootloader will boot once to that label.  The
+"LoaderEntryRebootReason" EFI variable is set with the reboot reason:
+"reboot", "shutdown", "kernel_panic" or "watchdog".  The bootloader
+reads this reboot reason and takes particular action according to its
+policy.
 
-This patch needs the following folded on top to deal with tables where
-the memory attribute table entry has not counterpart in the memory map
+Signed-off-by: Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+---
+ arch/x86/Kconfig               |  16 ++++
+ arch/x86/platform/efi/Makefile |   1 +
+ arch/x86/platform/efi/efibc.c  | 164 +++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 181 insertions(+)
+ create mode 100644 arch/x86/platform/efi/efibc.c
 
-diff --git a/drivers/firmware/efi/memattr.c b/drivers/firmware/efi/memattr.c
-index c55683937f4a..4dfef78e64d8 100644
---- a/drivers/firmware/efi/memattr.c
-+++ b/drivers/firmware/efi/memattr.c
-@@ -61,6 +61,8 @@ static bool entry_is_valid(const efi_memory_desc_t
-*in, efi_memory_desc_t *out)
-        u64 in_size = in->num_pages << EFI_PAGE_SHIFT;
-        efi_memory_desc_t *md;
-
-+       *out = *in;
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index 2dc18605..cd4b6e4 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -432,6 +432,22 @@ config X86_EXTENDED_PLATFORM
+ 	  generic distribution kernel, say Y here - otherwise say N.
+ endif
+ 
++config EFI_BOOTLOADER_CONTROL
++	tristate "EFI Bootloader Control"
++	depends on EFI_VARS
++	default n
++	---help---
++	  This module installs a reboot hook, such that if reboot() is
++	  invoked with a string argument NNN, "NNN" is copied to the
++	  "LoaderEntryOneShot" EFI variable, to be read by the
++	  bootloader. If the string matches one of the boot labels
++	  defined in its configuration, the bootloader will boot once
++	  to that label. The "LoaderEntryRebootReason" EFI variable is
++	  set with the reboot reason: "reboot", "shutdown",
++	  "kernel_panic" or "watchdog". The bootloader reads this
++	  reboot reason and takes particular action according to its
++	  policy.
 +
-        if (in->type != EFI_RUNTIME_SERVICES_CODE &&
-            in->type != EFI_RUNTIME_SERVICES_DATA) {
-                pr_warn("MEMATTR table entry type should be
-RuntimeServiceCode/Data\n");
-@@ -114,11 +116,11 @@ static bool entry_is_valid(const
-efi_memory_desc_t *in, efi_memory_desc_t *out)
-                        return false;
-                }
-
--               *out = *in;
-                out->virt_addr = in_paddr +
-                                 (md->virt_addr - md->phys_addr);
-                return true;
-        }
-+       pr_warn("MEMATTR table entry does not having a matching entry
-in the memory map\n");
-        return false;
- }
+ if X86_64
+ config X86_EXTENDED_PLATFORM
+ 	bool "Support for extended (non-PC) x86 platforms"
+diff --git a/arch/x86/platform/efi/Makefile b/arch/x86/platform/efi/Makefile
+index 066619b..05cf769 100644
+--- a/arch/x86/platform/efi/Makefile
++++ b/arch/x86/platform/efi/Makefile
+@@ -4,3 +4,4 @@ obj-$(CONFIG_EFI) 		+= quirks.o efi.o efi_$(BITS).o efi_stub_$(BITS).o
+ obj-$(CONFIG_ACPI_BGRT) += efi-bgrt.o
+ obj-$(CONFIG_EARLY_PRINTK_EFI)	+= early_printk.o
+ obj-$(CONFIG_EFI_MIXED)		+= efi_thunk_$(BITS).o
++obj-$(CONFIG_EFI_BOOTLOADER_CONTROL)	+= efibc.o
+diff --git a/arch/x86/platform/efi/efibc.c b/arch/x86/platform/efi/efibc.c
+new file mode 100644
+index 0000000..8ca8b43
+--- /dev/null
++++ b/arch/x86/platform/efi/efibc.c
+@@ -0,0 +1,164 @@
++/*
++ * efibc: control EFI bootloaders which obey LoaderEntryOneShot var
++ * Copyright (c) 2013-2016, Intel Corporation.
++ *
++ * This program is free software; you can redistribute it and/or modify it
++ * under the terms and conditions of the GNU General Public License,
++ * version 2, as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope it will be useful, but WITHOUT
++ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
++ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
++ * more details.
++ */
++
++#include <linux/efi.h>
++#include <linux/module.h>
++#include <linux/moduleparam.h>
++#include <linux/reboot.h>
++#include <linux/kexec.h>
++#include <linux/slab.h>
++#include <linux/nls.h>
++
++#define MODULE_NAME "efibc"
++
++static const efi_guid_t LOADER_GUID =
++	EFI_GUID(0x4a67b082, 0x0a4c, 0x41cf,
++		 0xb6, 0xc7, 0x44, 0x0b, 0x29, 0xbb, 0x8c, 0x4f);
++
++static const char REBOOT_TARGET[] = "LoaderEntryOneShot";
++static const char REBOOT_REASON[] = "LoaderEntryRebootReason";
++
++static const char * const WDT_SOURCE_PREFIX[] = {
++	"Kernel Watchdog", "Watchdog", "softlockup", "Software Watchdog"
++};
++
++static void efibc_str_to_str16(const char *str, wchar_t *str16)
++{
++	size_t size = strlen(str) + 1;
++
++	utf8s_to_utf16s(str, size, UTF16_LITTLE_ENDIAN, str16,
++			size * sizeof(*str16) / sizeof(*str));
++	str16[size - 1] = '\0';
++}
++
++static struct efivar_entry *efibc_get_var_entry(const char *name)
++{
++	wchar_t name16[strlen(name) + 1];
++	struct efivar_entry *entry;
++
++	efibc_str_to_str16(name, name16);
++
++	efivar_entry_iter_begin();
++	entry = efivar_entry_find(name16, LOADER_GUID,
++				  &efivar_sysfs_list, false);
++	efivar_entry_iter_end();
++
++	return entry;
++}
++
++static void efibc_set_variable(const char *name, const char *value)
++{
++	u32 attributes = EFI_VARIABLE_NON_VOLATILE
++		| EFI_VARIABLE_BOOTSERVICE_ACCESS
++		| EFI_VARIABLE_RUNTIME_ACCESS;
++	wchar_t name16[strlen(name) + 1];
++	wchar_t value16[strlen(value) + 1];
++	int ret;
++
++	efibc_str_to_str16(name, name16);
++	efibc_str_to_str16(value, value16);
++
++	ret = efivar_entry_set_safe(name16, LOADER_GUID, attributes, true,
++				    sizeof(value16), value16);
++	if (ret)
++		pr_err(MODULE_NAME ": failed to set %s EFI variable: 0x%x\n",
++		       name, ret);
++}
++
++static int efibc_reboot_notifier_call(struct notifier_block *notifier,
++				      unsigned long what, void *data)
++{
++	char *reason = what == SYS_RESTART ? "reboot" : "shutdown";
++
++	efibc_set_variable(REBOOT_REASON, reason);
++
++	if (!data)
++		return NOTIFY_DONE;
++
++	efibc_set_variable(REBOOT_TARGET, (char *)data);
++
++	return NOTIFY_DONE;
++}
++
++static bool is_watchdog_source(const char *str)
++{
++	size_t i;
++
++	for (i = 0; i < ARRAY_SIZE(WDT_SOURCE_PREFIX); i++)
++		if (!strncmp(str, WDT_SOURCE_PREFIX[i],
++			     strlen(WDT_SOURCE_PREFIX[i])))
++			return true;
++
++	return false;
++}
++
++static int efibc_panic_notifier_call(struct notifier_block *notifier,
++				     unsigned long what, void *data)
++{
++	char *reason;
++
++	/* If the reboot reason has already been supplied, keep it. */
++	if (efibc_get_var_entry(REBOOT_REASON))
++		return NOTIFY_DONE;
++
++	if (data && is_watchdog_source((char *)data))
++		reason = "watchdog";
++	else
++		reason = "kernel_panic";
++
++	efibc_set_variable(REBOOT_REASON, reason);
++
++	return NOTIFY_DONE;
++}
++
++static struct notifier_block efibc_reboot_notifier = {
++	.notifier_call = efibc_reboot_notifier_call,
++};
++
++static struct notifier_block efibc_panic_notifier = {
++	.notifier_call  = efibc_panic_notifier_call,
++};
++
++static int __init efibc_init(void)
++{
++	int ret;
++
++	if (!efi_enabled(EFI_RUNTIME_SERVICES))
++		return -ENODEV;
++
++	ret = register_reboot_notifier(&efibc_reboot_notifier);
++	if (ret) {
++		pr_err(MODULE_NAME ": unable to register reboot notifier\n");
++		return ret;
++	}
++
++	atomic_notifier_chain_register(&panic_notifier_list,
++				       &efibc_panic_notifier);
++
++	return 0;
++}
++module_init(efibc_init);
++
++static void __exit efibc_exit(void)
++{
++	unregister_reboot_notifier(&efibc_reboot_notifier);
++	atomic_notifier_chain_unregister(&panic_notifier_list,
++					 &efibc_panic_notifier);
++}
++module_exit(efibc_exit);
++
++MODULE_AUTHOR("Jeremy Compostella <jeremy.compostella-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>");
++MODULE_AUTHOR("Matt Gumbel <matthew.k.gumbel-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org");
++MODULE_DESCRIPTION("EFI Bootloader Control");
++MODULE_LICENSE("GPL v2");
+-- 
+1.9.1
