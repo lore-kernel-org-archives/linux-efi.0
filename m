@@ -1,7 +1,7 @@
 From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Subject: [PATCH v3 8/9] efi/arm*: wire up struct screen_info to efi-framebuffer platform device
-Date: Fri,  1 Apr 2016 18:05:34 +0200
-Message-ID: <1459526735-24936-9-git-send-email-ard.biesheuvel@linaro.org>
+Subject: [PATCH v3 9/9] efifb: enable the efi-framebuffer platform driver for ARM and arm64
+Date: Fri,  1 Apr 2016 18:05:35 +0200
+Message-ID: <1459526735-24936-10-git-send-email-ard.biesheuvel@linaro.org>
 References: <1459526735-24936-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
 In-Reply-To: <1459526735-24936-1-git-send-email-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
@@ -10,56 +10,59 @@ To: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-arm-kernel-IAPFreCv
 Cc: mark.rutland-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, dh.herrmann-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org, pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-This adds code to the ARM and arm64 EFI init routines to expose a platform
-device of type 'efi-framebuffer' if struct screen_info has been populated
-appropriately from the GOP protocol by the stub. Since the framebuffer may
-potentially be located in system RAM, make sure that the region is reserved
-and marked MEMBLOCK_NOMAP.
+Allows the efifb driver to be built for ARM and arm64. This simply involves
+updating the Kconfig dependency expression, and supplying dummy versions of
+efifb_setup_from_dmi().
 
 Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
 ---
- drivers/firmware/efi/arm-init.c | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+ arch/arm/include/asm/efi.h   | 4 ++++
+ arch/arm64/include/asm/efi.h | 4 ++++
+ drivers/video/fbdev/Kconfig  | 2 +-
+ 3 files changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/drivers/firmware/efi/arm-init.c b/drivers/firmware/efi/arm-init.c
-index 34bbad23da86..7c5a38c60037 100644
---- a/drivers/firmware/efi/arm-init.c
-+++ b/drivers/firmware/efi/arm-init.c
-@@ -19,6 +19,7 @@
- #include <linux/mm_types.h>
- #include <linux/of.h>
- #include <linux/of_fdt.h>
-+#include <linux/platform_device.h>
- #include <linux/screen_info.h>
+diff --git a/arch/arm/include/asm/efi.h b/arch/arm/include/asm/efi.h
+index be12877e8609..76ce7adde990 100644
+--- a/arch/arm/include/asm/efi.h
++++ b/arch/arm/include/asm/efi.h
+@@ -66,6 +66,10 @@ void efi_virtmap_unload(void);
+ struct screen_info *alloc_screen_info(efi_system_table_t *sys_table_arg);
+ void free_screen_info(efi_system_table_t *sys_table, struct screen_info *si);
  
- #include <asm/efi.h>
-@@ -80,6 +81,10 @@ static void __init init_screen_info(void)
- 		screen_info.orig_video_cols = 80;
- 		screen_info.orig_video_lines = 25;
- 	}
-+
-+	if (screen_info.orig_video_isVGA == VIDEO_TYPE_EFI &&
-+	    memblock_is_map_memory(screen_info.lfb_base))
-+		memblock_mark_nomap(screen_info.lfb_base, screen_info.lfb_size);
- }
- 
- static int __init uefi_init(void)
-@@ -241,3 +246,16 @@ void __init efi_init(void)
- 
- 	init_screen_info();
- }
-+
-+static int __init register_gop_device(void)
++static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
 +{
-+	void *pd;
-+
-+	if (screen_info.orig_video_isVGA != VIDEO_TYPE_EFI)
-+		return 0;
-+
-+	pd = platform_device_register_data(NULL, "efi-framebuffer", 0,
-+					   &screen_info, sizeof(screen_info));
-+	return PTR_ERR_OR_ZERO(pd);
 +}
-+subsys_initcall(register_gop_device);
++
+ /*
+  * A reasonable upper bound for the uncompressed kernel size is 32 MBytes,
+  * so we will reserve that amount of memory. We have no easy way to tell what
+diff --git a/arch/arm64/include/asm/efi.h b/arch/arm64/include/asm/efi.h
+index ed6c85d3a583..ec43456e3ef1 100644
+--- a/arch/arm64/include/asm/efi.h
++++ b/arch/arm64/include/asm/efi.h
+@@ -57,6 +57,10 @@ int efi_create_mapping(struct mm_struct *mm, efi_memory_desc_t *md);
+ #define alloc_screen_info(x...)		&screen_info
+ #define free_screen_info(x...)
+ 
++static inline void efifb_setup_from_dmi(struct screen_info *si, const char *opt)
++{
++}
++
+ #define EFI_ALLOC_ALIGN		SZ_64K
+ 
+ /*
+diff --git a/drivers/video/fbdev/Kconfig b/drivers/video/fbdev/Kconfig
+index 983280e8d93f..e5a391aecde1 100644
+--- a/drivers/video/fbdev/Kconfig
++++ b/drivers/video/fbdev/Kconfig
+@@ -761,7 +761,7 @@ config FB_VESA
+ 
+ config FB_EFI
+ 	bool "EFI-based Framebuffer Support"
+-	depends on (FB = y) && X86 && EFI
++	depends on (FB = y) && !IA64 && EFI
+ 	select FB_CFB_FILLRECT
+ 	select FB_CFB_COPYAREA
+ 	select FB_CFB_IMAGEBLIT
 -- 
 2.5.0
