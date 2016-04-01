@@ -1,84 +1,85 @@
-From: Shannon Zhao <shannon.zhao@linaro.org>
-Subject: [PATCH v10 10/17] arm/xen: Get event-channel irq through HVM_PARAM when booting with ACPI
-Date: Fri,  1 Apr 2016 23:49:08 +0800
-Message-ID: <1459525755-36968-11-git-send-email-shannon.zhao@linaro.org>
+From: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Subject: [PATCH v10 13/17] ARM: Xen: Document UEFI support on Xen ARM virtual platforms
+Date: Fri,  1 Apr 2016 23:49:11 +0800
+Message-ID: <1459525755-36968-14-git-send-email-shannon.zhao@linaro.org>
 References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com
-Cc: david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, shannon.zhao@linaro.org
+Return-path: <devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459525755-36968-1-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Sender: devicetree-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
+Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, julien.grall-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-The kernel will get the event-channel IRQ through
-HVM_PARAM_CALLBACK_IRQ.
+Add a "uefi" node under /hypervisor node in FDT, then Linux kernel could
+scan this to get the UEFI information.
 
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
+CC: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
+Acked-by: Rob Herring <robh-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
 ---
- arch/arm/xen/enlighten.c | 36 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 35 insertions(+), 1 deletion(-)
+ Documentation/devicetree/bindings/arm/xen.txt | 35 +++++++++++++++++++++++++++
+ 1 file changed, 35 insertions(+)
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index d94f726..06bd61a 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -30,6 +30,7 @@
- #include <linux/time64.h>
- #include <linux/timekeeping.h>
- #include <linux/timekeeper_internal.h>
-+#include <linux/acpi.h>
+diff --git a/Documentation/devicetree/bindings/arm/xen.txt b/Documentation/devicetree/bindings/arm/xen.txt
+index 0f7b9c2..c9b9321 100644
+--- a/Documentation/devicetree/bindings/arm/xen.txt
++++ b/Documentation/devicetree/bindings/arm/xen.txt
+@@ -11,10 +11,32 @@ the following properties:
+   memory where the grant table should be mapped to, using an
+   HYPERVISOR_memory_op hypercall. The memory region is large enough to map
+   the whole grant table (it is larger or equal to gnttab_max_grant_frames()).
++  This property is unnecessary when booting Dom0 using ACPI.
  
- #include <linux/mm.h>
+ - interrupts: the interrupt used by Xen to inject event notifications.
+   A GIC node is also required.
++  This property is unnecessary when booting Dom0 using ACPI.
  
-@@ -278,6 +279,35 @@ void __init xen_early_init(void)
- 		add_preferred_console("hvc", 0, NULL);
- }
++To support UEFI on Xen ARM virtual platforms, Xen populates the FDT "uefi" node
++under /hypervisor with following parameters:
++
++________________________________________________________________________________
++Name                      | Size   | Description
++================================================================================
++xen,uefi-system-table     | 64-bit | Guest physical address of the UEFI System
++			  |	   | Table.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-start       | 64-bit | Guest physical address of the UEFI memory
++			  |	   | map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-size        | 32-bit | Size in bytes of the UEFI memory map
++                          |        | pointed to in previous entry.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-size   | 32-bit | Size in bytes of each entry in the UEFI
++                          |        | memory map.
++--------------------------------------------------------------------------------
++xen,uefi-mmap-desc-ver    | 32-bit | Version of the mmap descriptor format.
++--------------------------------------------------------------------------------
  
-+static void __init xen_acpi_guest_init(void)
-+{
-+#ifdef CONFIG_ACPI
-+	struct xen_hvm_param a;
-+	int interrupt, trigger, polarity;
-+
-+	a.domid = DOMID_SELF;
-+	a.index = HVM_PARAM_CALLBACK_IRQ;
-+
-+	if (HYPERVISOR_hvm_op(HVMOP_get_param, &a)
-+	    || (a.value >> 56) != HVM_PARAM_CALLBACK_TYPE_PPI) {
-+		xen_events_irq = 0;
-+		return;
-+	}
-+
-+	interrupt = a.value & 0xff;
-+	trigger = ((a.value >> 8) & 0x1) ? ACPI_EDGE_SENSITIVE
-+					 : ACPI_LEVEL_SENSITIVE;
-+	polarity = ((a.value >> 8) & 0x2) ? ACPI_ACTIVE_LOW
-+					  : ACPI_ACTIVE_HIGH;
-+	xen_events_irq = acpi_register_gsi(NULL, interrupt, trigger, polarity);
-+#endif
-+}
-+
-+static void __init xen_dt_guest_init(void)
-+{
-+	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
-+}
-+
- static int __init xen_guest_init(void)
- {
- 	struct xen_add_to_physmap xatp;
-@@ -286,7 +316,11 @@ static int __init xen_guest_init(void)
- 	if (!xen_domain())
- 		return 0;
+ Example (assuming #address-cells = <2> and #size-cells = <2>):
  
--	xen_events_irq = irq_of_parse_and_map(xen_node, 0);
-+	if (!acpi_disabled)
-+		xen_acpi_guest_init();
-+	else
-+		xen_dt_guest_init();
+@@ -22,4 +44,17 @@ hypervisor {
+ 	compatible = "xen,xen-4.3", "xen,xen";
+ 	reg = <0 0xb0000000 0 0x20000>;
+ 	interrupts = <1 15 0xf08>;
++	uefi {
++		xen,uefi-system-table = <0xXXXXXXXX>;
++		xen,uefi-mmap-start = <0xXXXXXXXX>;
++		xen,uefi-mmap-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-size = <0xXXXXXXXX>;
++		xen,uefi-mmap-desc-ver = <0xXXXXXXXX>;
++        };
+ };
 +
- 	if (!xen_events_irq) {
- 		pr_err("Xen event channel interrupt not found\n");
- 		return -ENODEV;
++The format and meaning of the "xen,uefi-*" parameters are similar to those in
++Documentation/arm/uefi.txt, which are provided by the regular UEFI stub. However
++they differ because they are provided by the Xen hypervisor, together with a set
++of UEFI runtime services implemented via hypercalls, see
++http://xenbits.xen.org/docs/unstable/hypercall/x86_64/include,public,platform.h.html.
 -- 
 2.1.4
+
+--
+To unsubscribe from this list: send the line "unsubscribe devicetree" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
