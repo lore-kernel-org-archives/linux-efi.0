@@ -1,59 +1,50 @@
-From: Kamal Mostafa <kamal@canonical.com>
-Subject: [PATCH 3.19.y-ckt 147/170] efi: Expose non-blocking set_variable() wrapper to efivars
-Date: Fri,  1 Apr 2016 17:53:53 -0700
-Message-ID: <1459558456-24452-148-git-send-email-kamal@canonical.com>
-References: <1459558456-24452-1-git-send-email-kamal@canonical.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1459558456-24452-1-git-send-email-kamal@canonical.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
+From: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [GIT PULL] EFI urgent fix
+Date: Sat, 2 Apr 2016 09:32:14 +0200
+Message-ID: <20160402073214.GA27202@gmail.com>
+References: <1459537395-4523-1-git-send-email-matt@codeblueprint.co.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <1459537395-4523-1-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
+Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Jeremy Linton <jeremy.linton-5wv7dgnIgG8@public.gmane.org>, Leif Lindholm <leif.lindholm-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, Mark Langsdorf <mlangsdo-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Mark Rutland <mark.rutland-5wv7dgnIgG8@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Will Deacon <will.deacon-5wv7dgnIgG8@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-3.19.8-ckt18 -stable review patch.  If anyone has any objections, please let me know.
 
----8<------------------------------------------------------------
+* Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org> wrote:
 
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+> Folks,
+> 
+> Please pull the following fix for an arm64 boot crash reported by Mark
+> Salter with 64KB granule kernels. It is also tagged for stable.
+> 
+> The following changes since commit 591b1d8d86074ac3a3163d89bcfe7b232cf83902:
+> 
+>   x86/mm/pkeys: Add missing Documentation (2016-03-29 11:21:17 +0200)
+> 
+> are available in the git repository at:
+> 
+>   git://git.kernel.org/pub/scm/linux/kernel/git/mfleming/efi.git tags/efi-urgent
+> 
+> for you to fetch changes up to 7cc8cbcf82d165dd658d89a7a287140948e76413:
+> 
+>   efi/arm64: Don't apply MEMBLOCK_NOMAP to UEFI memory map mapping (2016-03-31 21:33:50 +0100)
+> 
+> ----------------------------------------------------------------
+>  * Fix a boot crash on arm64 caused by a recent commit to mark the EFI
+>    memory map as 'MEMBLOCK_NOMAP' which causes the regions to be
+>    omitted from the kernel direct mapping - Ard Biesheuvel
+> 
+> ----------------------------------------------------------------
+> Ard Biesheuvel (1):
+>       efi/arm64: Don't apply MEMBLOCK_NOMAP to UEFI memory map mapping
+> 
+>  drivers/firmware/efi/arm-init.c | 18 +++++++++++++++---
+>  1 file changed, 15 insertions(+), 3 deletions(-)
 
-commit 9c6672ac9c91f7eb1ec436be1442b8c26d098e55 upstream.
+Pulled, thanks Matt!
 
-Commit 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable()
-operation") implemented a non-blocking alternative for the UEFI
-SetVariable() invocation performed by efivars, since it may
-occur in atomic context. However, this version of the function
-was never exposed via the efivars struct, so the non-blocking
-versions was not actually callable. Fix that.
-
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
-Cc: Borislav Petkov <bp@alien8.de>
-Cc: Brian Gerst <brgerst@gmail.com>
-Cc: Denys Vlasenko <dvlasenk@redhat.com>
-Cc: H. Peter Anvin <hpa@zytor.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-efi@vger.kernel.org
-Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
-Link: http://lkml.kernel.org/r/1454364428-494-2-git-send-email-matt@codeblueprint.co.uk
-Signed-off-by: Ingo Molnar <mingo@kernel.org>
-Signed-off-by: Kamal Mostafa <kamal@canonical.com>
----
- drivers/firmware/efi/efi.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 0ade9dc..65e3d13 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -161,6 +161,7 @@ static int generic_ops_register(void)
- {
- 	generic_ops.get_variable = efi.get_variable;
- 	generic_ops.set_variable = efi.set_variable;
-+	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
- 	generic_ops.get_next_variable = efi.get_next_variable;
- 	generic_ops.query_variable_store = efi_query_variable_store;
- 
--- 
-2.7.4
+	Ingo
