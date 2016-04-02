@@ -1,39 +1,20 @@
-From: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
-Subject: [3.19.y-ckt stable] Patch "efi: Expose non-blocking set_variable() wrapper to efivars" has been added to the 3.19.y-ckt tree
-Date: Fri,  1 Apr 2016 17:52:10 -0700
-Message-ID: <1459558330-22925-1-git-send-email-kamal@canonical.com>
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, "H . Peter Anvin" <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>, Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>, kernel-team-nLRlyDuq1AZFpShjVBNYrg@public.gmane.org
+From: Kamal Mostafa <kamal@canonical.com>
+Subject: [PATCH 3.19.y-ckt 147/170] efi: Expose non-blocking set_variable() wrapper to efivars
+Date: Fri,  1 Apr 2016 17:53:53 -0700
+Message-ID: <1459558456-24452-148-git-send-email-kamal@canonical.com>
+References: <1459558456-24452-1-git-send-email-kamal@canonical.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1459558456-24452-1-git-send-email-kamal@canonical.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org, kernel-team@lists.ubuntu.com
+Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt@codeblueprint.co.uk>, Borislav Petkov <bp@alien8.de>, Brian Gerst <brgerst@gmail.com>, Denys Vlasenko <dvlasenk@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Linus Torvalds <torvalds@linux-foundation.org>, Peter Zijlstra <peterz@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, linux-efi@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Kamal Mostafa <kamal@canonical.com>
 List-Id: linux-efi@vger.kernel.org
 
-This is a note to let you know that I have just added a patch titled
-
-    efi: Expose non-blocking set_variable() wrapper to efivars
-
-to the linux-3.19.y-queue branch of the 3.19.y-ckt extended stable tree 
-which can be found at:
-
-    http://kernel.ubuntu.com/git/ubuntu/linux.git/log/?h=linux-3.19.y-queue
-
-This patch is scheduled to be released in version 3.19.8-ckt18.
-
-If you, or anyone else, feels it should not be added to this tree, please 
-reply to this email.
-
-For more information about the 3.19.y-ckt tree, see
-https://wiki.ubuntu.com/Kernel/Dev/ExtendedStable
-
-Thanks.
--Kamal
+3.19.8-ckt18 -stable review patch.  If anyone has any objections, please let me know.
 
 ---8<------------------------------------------------------------
 
->From ab8ca010a47ac67ea37889a11c633b5229dd467e Mon Sep 17 00:00:00 2001
-From: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Date: Mon, 1 Feb 2016 22:06:55 +0000
-Subject: efi: Expose non-blocking set_variable() wrapper to efivars
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
 commit 9c6672ac9c91f7eb1ec436be1442b8c26d098e55 upstream.
 
@@ -44,20 +25,20 @@ occur in atomic context. However, this version of the function
 was never exposed via the efivars struct, so the non-blocking
 versions was not actually callable. Fix that.
 
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Signed-off-by: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Cc: Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>
-Cc: Brian Gerst <brgerst-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Denys Vlasenko <dvlasenk-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>
-Cc: H. Peter Anvin <hpa-YMNOUZJC4hwAvxtiuMwx3w@public.gmane.org>
-Cc: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Peter Zijlstra <peterz-wEGCiKHe2LqWVfeAwA7xHQ@public.gmane.org>
-Cc: Thomas Gleixner <tglx-hfZtesqFncYOwBW4kG4KsQ@public.gmane.org>
-Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Signed-off-by: Matt Fleming <matt@codeblueprint.co.uk>
+Cc: Borislav Petkov <bp@alien8.de>
+Cc: Brian Gerst <brgerst@gmail.com>
+Cc: Denys Vlasenko <dvlasenk@redhat.com>
+Cc: H. Peter Anvin <hpa@zytor.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: linux-efi@vger.kernel.org
 Fixes: 6d80dba1c9fe ("efi: Provide a non-blocking SetVariable() operation")
-Link: http://lkml.kernel.org/r/1454364428-494-2-git-send-email-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org
-Signed-off-by: Ingo Molnar <mingo-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Signed-off-by: Kamal Mostafa <kamal-Z7WLFzj8eWMS+FvcfC7Uqw@public.gmane.org>
+Link: http://lkml.kernel.org/r/1454364428-494-2-git-send-email-matt@codeblueprint.co.uk
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Signed-off-by: Kamal Mostafa <kamal@canonical.com>
 ---
  drivers/firmware/efi/efi.c | 1 +
  1 file changed, 1 insertion(+)
@@ -73,6 +54,6 @@ index 0ade9dc..65e3d13 100644
 +	generic_ops.set_variable_nonblocking = efi.set_variable_nonblocking;
  	generic_ops.get_next_variable = efi.get_next_variable;
  	generic_ops.query_variable_store = efi_query_variable_store;
-
---
+ 
+-- 
 2.7.4
