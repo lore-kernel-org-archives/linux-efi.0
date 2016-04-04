@@ -1,48 +1,40 @@
-From: Octavian Purdila <octavian.purdila@intel.com>
-Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure notifications
-Date: Mon, 4 Apr 2016 13:25:56 +0300
-Message-ID: <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
+From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Subject: Re: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
+Date: Mon, 4 Apr 2016 16:07:31 +0300
+Message-ID: <CAE1zotLX8L=jpJRYtUddtpYmgc0NxqmtdDjcQPWWg8KTO8PH5A@mail.gmail.com>
 References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
-	<20160331172935.GL2350@sirena.org.uk>
-	<CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
-	<20160401140856.GW2350@sirena.org.uk>
-	<CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
-	<20160402162449.GB2350@sirena.org.uk>
+	<1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
+	<CAE1zotJ1fa4m-_FO3PUQK8_p0vHcfWD5TmuMdxOSHDjku421pA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-i2c-owner@vger.kernel.org>
-In-Reply-To: <20160402162449.GB2350@sirena.org.uk>
-Sender: linux-i2c-owner@vger.kernel.org
-To: Mark Brown <broonie@kernel.org>
-Cc: "Rafael J. Wysocki" <rafael@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <CAE1zotJ1fa4m-_FO3PUQK8_p0vHcfWD5TmuMdxOSHDjku421pA-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: "Zheng, Lv" <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Tirdea, Irina" <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Sat, Apr 2, 2016 at 7:24 PM, Mark Brown <broonie@kernel.org> wrote:
-> On Fri, Apr 01, 2016 at 09:26:38PM +0200, Rafael J. Wysocki wrote:
->> On Fri, Apr 1, 2016 at 4:08 PM, Mark Brown <broonie@kernel.org> wrote:
+On Fri, Apr 1, 2016 at 1:11 PM, Octavian Purdila
+<octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+> On Fri, Apr 1, 2016 at 8:05 AM, Zheng, Lv <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+>> Hi,
+>>
+>> IMO, there is already a similar function upstreamed:
+>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c85cc81
+>> Could it work for your use case?
 >
->> > That's not the point.  The point is that since the handling is identical
->> > why are we handling it through exactly the same code?
+> Yes, it is basically the same.
 >
->> I think that during the initial enumeration the controller driver's
->> probe walks the children and creates device objects for them.  When a
->> table is loaded later, the controller driver has been probed already
->> and there needs to be a way to trigger a walk over the (new) children
->> from it.
+> The only difference is on how we handle taint. I think we should use a
+> new taint for overlays and that we don't need to disable lockdep.
 >
->> Or a hook somewhere around acpi_platform_notify() is needed.
->
-> What I don't understand is why the flow on inital probe isn't simply to
-> register the controller which then triggers the walk of the children.
-> That way any bus that supports initial probe also supports hotplug
-> without needing to go and manually add a second code path.
+> BTW, why is lockdep disabled when we override?
 
-Do you mean register the notifier per controller instead of per
-subsystem? Either way we need changes at the subsystem level and I
-choose to follow the device tree implementation for consistency.
+The other thing I forgot to mention is that I think we should allow
+installing new tables even if CONFIG_ACPI_INITRD_TABLE_OVERRIDE is not
+selected. IMO the override and overlay functionality is different,
+with the latter being more then a debug option.
 
-The other reason is that (pending other ACPICA changes) we can add
-other notification events in the future such as node added or removed
-(just like device tree), and in that case the probe and hotplug
-handling would be different (and a bit more efficient).
+I will prepare a patch for the next version of the series to decouple
+installing new tables from CONFIG_ACPI_INITRD_TABLE_OVERRIDE.
