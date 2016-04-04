@@ -1,62 +1,67 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: [PATCH v2 5/8] sysctl: drop away useless label
-Date: Mon,  4 Apr 2016 16:30:07 +0300
-Message-ID: <1459776610-68469-6-git-send-email-andriy.shevchenko@linux.intel.com>
-References: <1459776610-68469-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459776610-68469-1-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+From: Mark Brown <broonie@kernel.org>
+Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
+ notifications
+Date: Mon, 4 Apr 2016 09:03:27 -0700
+Message-ID: <20160404160327.GH2350@sirena.org.uk>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+ <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
+ <20160331172935.GL2350@sirena.org.uk>
+ <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
+ <20160401140856.GW2350@sirena.org.uk>
+ <CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
+ <20160402162449.GB2350@sirena.org.uk>
+ <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="GH2w3bbsGmSMo31z"
+Return-path: <linux-acpi-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
+Sender: linux-acpi-owner@vger.kernel.org
+To: Octavian Purdila <octavian.purdila@intel.com>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-We have no locking in bin_uuid(). Thus, we may remove the out label and use
-return statements directly.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
----
- kernel/sysctl_binary.c | 12 ++++--------
- 1 file changed, 4 insertions(+), 8 deletions(-)
+--GH2w3bbsGmSMo31z
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/kernel/sysctl_binary.c b/kernel/sysctl_binary.c
-index 10a1d7d..055ad65 100644
---- a/kernel/sysctl_binary.c
-+++ b/kernel/sysctl_binary.c
-@@ -1123,15 +1123,14 @@ static ssize_t bin_uuid(struct file *file,
- 
- 		result = kernel_read(file, 0, buf, sizeof(buf) - 1);
- 		if (result < 0)
--			goto out;
-+			return result;
- 
- 		buf[result] = '\0';
- 
- 		/* Convert the uuid to from a string to binary */
- 		for (i = 0; i < 16; i++) {
--			result = -EIO;
- 			if (!isxdigit(str[0]) || !isxdigit(str[1]))
--				goto out;
-+				return -EIO;
- 
- 			uuid[i] = (hex_to_bin(str[0]) << 4) |
- 					hex_to_bin(str[1]);
-@@ -1143,15 +1142,12 @@ static ssize_t bin_uuid(struct file *file,
- 		if (oldlen > 16)
- 			oldlen = 16;
- 
--		result = -EFAULT;
- 		if (copy_to_user(oldval, uuid, oldlen))
--			goto out;
-+			return -EFAULT;
- 
- 		copied = oldlen;
- 	}
--	result = copied;
--out:
--	return result;
-+	return copied;
- }
- 
- static ssize_t bin_dn_node_address(struct file *file,
--- 
-2.8.0.rc3
+On Mon, Apr 04, 2016 at 01:25:56PM +0300, Octavian Purdila wrote:
+> On Sat, Apr 2, 2016 at 7:24 PM, Mark Brown <broonie@kernel.org> wrote:
+
+> > What I don't understand is why the flow on inital probe isn't simply to
+> > register the controller which then triggers the walk of the children.
+> > That way any bus that supports initial probe also supports hotplug
+> > without needing to go and manually add a second code path.
+
+> Do you mean register the notifier per controller instead of per
+> subsystem? Either way we need changes at the subsystem level and I
+> choose to follow the device tree implementation for consistency.
+
+No!  I mean use the exact same callback you've got now for everything.
+
+> The other reason is that (pending other ACPICA changes) we can add
+> other notification events in the future such as node added or removed
+> (just like device tree), and in that case the probe and hotplug
+> handling would be different (and a bit more efficient).
+
+Why is probe different to hotplug?  We don't need to do that in the
+normal driver model.
+
+--GH2w3bbsGmSMo31z
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJXApBKAAoJECTWi3JdVIfQi4UH/0n5ctuTiNy19NukG3EILHSB
+mD92PAk3ysfpgYqCY3v+x0V3UiEhbhDIflrSpi0IiKIaMu8M+7K3gJKjeVo1Jd6b
+JSKVE0lsLzXkM9cQs7nE/eg0zXcpSx/uHE5ilfxZsZpPcaWG0demluZmHDtAczKb
+saOInORaXf5JtzjVlwHWa001SFRSRuDciSCRZS9lm5XHjgFgzlXLrMbA3tbsHh1W
+pKVnoddslbAL8DDxZU59NtizJhc9HTA74JIG50ZqNRgsb1aa8cD+ez3drA5pnLMD
+AVLhHy5IwWjCKVf3CphJAEYXKdWiLYekFZpnFVDVelzQ7qt4IyKYG+x80S/rIJU=
+=fMiN
+-----END PGP SIGNATURE-----
+
+--GH2w3bbsGmSMo31z--
