@@ -1,73 +1,93 @@
-From: Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>
-Subject: Re: [PATCH 2/4] efi: Capsule update support
-Date: Tue, 5 Apr 2016 11:09:29 +0100
-Message-ID: <20160405100929.GB2701@codeblueprint.co.uk>
-References: <1458219431-24741-1-git-send-email-matt@codeblueprint.co.uk>
- <1458219431-24741-3-git-send-email-matt@codeblueprint.co.uk>
- <CAKv+Gu8fX7x1x3Od5ThxyFxux_NKDx59PNedkgSfn_V0yg_NQQ@mail.gmail.com>
- <20160321203159.GF11676@codeblueprint.co.uk>
- <20160329122658.GC3625@codeblueprint.co.uk>
- <CAKv+Gu_S-BBo8yinQmbEcag43krKBZGxf-0OC=WkZASgS5_Cdg@mail.gmail.com>
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: Re: [PATCH v2 3/8] lib/uuid: introduce few more generic helpers for
+ UUID
+Date: Tue, 05 Apr 2016 13:51:50 +0300
+Message-ID: <1459853510.12843.8.camel@linux.intel.com>
+References: <1459776610-68469-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <1459776610-68469-4-git-send-email-andriy.shevchenko@linux.intel.com>
+	 <20160404164029.9c72a93cb29d619766fbb2d2@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAKv+Gu_S-BBo8yinQmbEcag43krKBZGxf-0OC=WkZASgS5_Cdg-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Ard Biesheuvel <ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Cc: "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, joeyli <jlee-IBi9RG/b67k@public.gmane.org>, Kweh Hock Leong <hock.leong.kweh-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>, Borislav Petkov <bp-Gina5bIWoIWzQB+pC5nmwQ@public.gmane.org>, Mark Salter <msalter-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Peter Jones <pjones-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org>, Bryan O'Donoghue <pure.logic-SyKdqv6vbfZdzvEItQ6vdLNAH6kLmebB@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20160404164029.9c72a93cb29d619766fbb2d2-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 29 Mar, at 03:50:39PM, Ard Biesheuvel wrote:
-> 
-> Should we perhaps whitelist rather than blacklist these flags? If a
-> 'EFI_CAPSULE_INITIATE_RESET_TOO' surfaces at some point, or flags that
-> do other nasty things, at least we won't be caught off guard.
- 
-I spent a while thinking about this and was originally going to go
-with the blacklist. The idea being that we wouldn't need to update the
-kernel to allow new capsule flags to be passed through to the
-firmware, even when the kernel doesn't care about them.
+On Mon, 2016-04-04 at 16:40 -0700, Andrew Morton wrote:
+> On Mon,=C2=A0=C2=A04 Apr 2016 16:30:05 +0300 Andy Shevchenko <andriy.=
+shevchenko
+> @linux.intel.com> wrote:
+>=20
+> >=20
+> > There are new helpers in this patch:
+> >=20
+> > uuid_is_valid		checks if a UUID is valid
+> > uuid_be_to_bin		converts from string to binary (big
+> > endian)
+> > uuid_le_to_bin		converts from string to binary
+> > (little endian)
+> 	>=C2=A0
+> >=20
+> > They will be used in future, i.e. in the following patches in the
+> > series.
+> >=20
+> > This also moves indices arrays to lib/uuid.c to be shared accross
+> > modules.
+> >=20
+> > ...
+> >=20
+> > --- a/include/linux/uuid.h
+> > +++ b/include/linux/uuid.h
+> Nit:
+>=20
+> >=20
+> > +/**
+> > +=C2=A0=C2=A0* uuid_is_valid - checks if UUID string valid
+> > +=C2=A0=C2=A0* @uuid:	UUID string to check
+> > +=C2=A0=C2=A0*
+> > +=C2=A0=C2=A0* Description:
+> > +=C2=A0=C2=A0* It checks if the UUID string is following the format=
+:
+> > +=C2=A0=C2=A0*	xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+> > +=C2=A0=C2=A0* where x is a hex digit.
+> > +=C2=A0=C2=A0*
+> > +=C2=A0=C2=A0* Return: 0 on success, %-EINVAL otherwise.
+> > +=C2=A0=C2=A0*/
+> > +int uuid_is_valid(const char *uuid)
+> > +{
+> > +	unsigned int i;
+> > +
+> > +	if (strnlen(uuid, UUID_STRING_LEN) < UUID_STRING_LEN)
+> > +		return -EINVAL;
+> > +
+> > +	for (i =3D 0; i < UUID_STRING_LEN; i++) {
+> > +		if (i =3D=3D 8 || i =3D=3D 13 || i =3D=3D 18 || i =3D=3D 23) {
+> > +			if (uuid[i] !=3D '-')
+> > +				return -EINVAL;
+> > +		} else if (!isxdigit(uuid[i])) {
+> > +			return -EINVAL;
+> > +		}
+> > +	}
+> Could add
+>=20
+> 	if (uuid[i])
+> 		return -EINVAL;
+>=20
+> here and lose the additional pass across the input (strlen).
 
-But then the thought of having to apply patches to stable to disallow
-new capsule flags that don't work correctly with the current patches
-left me feeling a cold chill.
+Others suggested a boolean. I would send a fixup later.
 
-So yes, it's a good suggestion Ard. Let's go with the whitelist, which
-gives us the power to opt-in to any new capsule flags, whatever they
-may be.
+>=20
+> >=20
+> > +	return 0;
+> > +}
+> >=20
+> > ...
+> >=20
 
----
-
-diff --git a/drivers/firmware/efi/capsule.c b/drivers/firmware/efi/capsule.c
-index dac25208ad5e..0de55944ac0b 100644
---- a/drivers/firmware/efi/capsule.c
-+++ b/drivers/firmware/efi/capsule.c
-@@ -64,6 +64,17 @@ out:
- 	return rv;
- }
- 
-+/*
-+ * Whitelist of EFI capsule flags that we support.
-+ *
-+ * We do not handle EFI_CAPSULE_INITIATE_RESET because that would
-+ * require us to prepare the kernel for reboot. Refuse to load any
-+ * capsules with that flag and any other flags that we do not know how
-+ * to handle.
-+ */
-+#define EFI_CAPSULE_SUPPORTED_FLAG_MASK			\
-+	(EFI_CAPSULE_PERSIST_ACROSS_RESET | EFI_CAPSULE_POPULATE_SYSTEM_TABLE)
-+
- /**
-  * efi_capsule_supported - does the firmware support the capsule?
-  * @guid: vendor guid of capsule
-@@ -84,6 +95,9 @@ int efi_capsule_supported(efi_guid_t guid, u32 flags, size_t size, int *reset)
- 	u64 max_size;
- 	int rv = 0;
- 
-+	if (flags & ~EFI_CAPSULE_SUPPORTED_FLAG_MASK)
-+		return -EINVAL;
-+
- 	capsule = kmalloc(sizeof(*capsule), GFP_KERNEL);
- 	if (!capsule)
- 		return -ENOMEM;
+--=20
+Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Intel Finland Oy
