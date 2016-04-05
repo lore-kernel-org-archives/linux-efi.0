@@ -1,49 +1,89 @@
-From: Graeme Gregory <graeme-/SyDAi3Rz4f10XsdtD+oqA@public.gmane.org>
-Subject: Re: [PATCH v15 0/6] arm64, numa: Add numa support for arm64 platforms
-Date: Tue, 5 Apr 2016 14:08:56 +0100
-Message-ID: <5703B8E8.3080408@xora.org.uk>
-References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
- <56F1936E.1090407@redhat.com> <56F1BD15.4000701@caviumnetworks.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Subject: [PATCH v3 05/10] lib/uuid: remove FSF address
+Date: Tue,  5 Apr 2016 16:56:14 +0300
+Message-ID: <1459864579-55988-6-git-send-email-andriy.shevchenko@linux.intel.com>
+References: <1459864579-55988-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <56F1BD15.4000701-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+In-Reply-To: <1459864579-55988-1-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: David Daney <public-ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Jon Masters <public-jcm-H+wXaHxf7aLQT0dZR+AlfA-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>
-Cc: Will Deacon <public-will.deacon-5wv7dgnIgG8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, public-linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r-wOFGN7rlS/M9smdsby/KFg@public.gmane.org, Rob Herring <public-robh+dt-DgEjT+Ai2ygdnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Frank Rowand <public-frowand.list-Re5JQEeQqe8AvxtiuMwx3w-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Grant Likely <public-grant.likely-QSEj5FYQhm4dnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Pawel Moll <public-pawel.moll-5wv7dgnIgG8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ian Campbell <public-ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Kumar Gala <public-galak-sgV2jX0FEOL9JmXXK+q4OQ-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ganapatrao Kulkarni <public-gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Robert Richter <public-rrichter-YGCgFSpz5w/QT0dZR+AlfA-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ard Biesheuvel <public-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Matt Fleming <public-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io-wOFGN7rlS/OO27LBFnlIag@public.gmane.org>
+To: Dmitry Kasatkin <dmitry.kasatkin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Cc: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+There is no point to keep an address in the file since it's a subject to
+change.
 
+While here, update Intel Copyright years.
 
+Signed-off-by: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+---
+ include/linux/uuid.h      | 6 +-----
+ include/uapi/linux/uuid.h | 4 ----
+ lib/uuid.c                | 6 +-----
+ 3 files changed, 2 insertions(+), 14 deletions(-)
 
-On 22/03/16 21:45, David Daney wrote:
-> On 03/22/2016 11:48 AM, Jon Masters wrote:
->> On 03/08/2016 06:59 PM, David Daney wrote:
->>
->>> From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
->>>
->>> v15:
->>>
->>>     - Make the distance-map node optional (again), if it is not in
->>>            the device tree, default values are used.
->>>
->>>     - Minor cleanups to of_numa.c as suggested by Rob Harring.
->>
->> Hi David, all,
->>
->> Wondering what the status of this patch series is currently?
->
-> I haven't seen any feedback on v15.  My assumption was that the relevant
-> arm64 maintainers would take some sort of action after the merge window
-> quiets down.
->
-> In any event, I am happy to make any improvements that may be suggested.
->
-Post merge window series does not apply to 4.6-rc2 or next.
-
-Patch 4 collides in arch/arm64/mm/mmu.c
-
-Thanks
-
-Graeme
+diff --git a/include/linux/uuid.h b/include/linux/uuid.h
+index e0b95e7..2d095fc 100644
+--- a/include/linux/uuid.h
++++ b/include/linux/uuid.h
+@@ -1,7 +1,7 @@
+ /*
+  * UUID/GUID definition
+  *
+- * Copyright (C) 2010, Intel Corp.
++ * Copyright (C) 2010, 2016 Intel Corp.
+  *	Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+  *
+  * This program is free software; you can redistribute it and/or
+@@ -12,10 +12,6 @@
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ #ifndef _LINUX_UUID_H_
+ #define _LINUX_UUID_H_
+diff --git a/include/uapi/linux/uuid.h b/include/uapi/linux/uuid.h
+index 786f077..3738e5f 100644
+--- a/include/uapi/linux/uuid.h
++++ b/include/uapi/linux/uuid.h
+@@ -12,10 +12,6 @@
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
+ #ifndef _UAPI_LINUX_UUID_H_
+diff --git a/lib/uuid.c b/lib/uuid.c
+index 11f467e..7442d43 100644
+--- a/lib/uuid.c
++++ b/lib/uuid.c
+@@ -1,7 +1,7 @@
+ /*
+  * Unified UUID/GUID definition
+  *
+- * Copyright (C) 2009, Intel Corp.
++ * Copyright (C) 2009, 2016 Intel Corp.
+  *	Huang Ying <ying.huang-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+  *
+  * This program is free software; you can redistribute it and/or
+@@ -12,10 +12,6 @@
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
+ #include <linux/kernel.h>
+-- 
+2.8.0.rc3
