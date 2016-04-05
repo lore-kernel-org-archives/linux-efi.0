@@ -1,80 +1,64 @@
-From: Stephen Rothwell <sfr-3FnU+UHB4dNDw9hX6IcOSA@public.gmane.org>
-Subject: Re: [PATCH v2 3/8] lib/uuid: introduce few more generic helpers for
- UUID
-Date: Tue, 5 Apr 2016 10:48:44 +1000
-Message-ID: <20160405104844.3cc45db8@canb.auug.org.au>
-References: <1459776610-68469-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	<1459776610-68469-4-git-send-email-andriy.shevchenko@linux.intel.com>
-	<20160404164029.9c72a93cb29d619766fbb2d2@linux-foundation.org>
+From: "Zheng, Lv" <lv.zheng@intel.com>
+Subject: RE: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
+Date: Tue, 5 Apr 2016 00:49:30 +0000
+Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB66700@SHSMSX101.ccr.corp.intel.com>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+	<1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
+	<CAE1zotJ1fa4m-_FO3PUQK8_p0vHcfWD5TmuMdxOSHDjku421pA@mail.gmail.com>
+ <CAE1zotLX8L=jpJRYtUddtpYmgc0NxqmtdDjcQPWWg8KTO8PH5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20160404164029.9c72a93cb29d619766fbb2d2-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Cc: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-i2c-owner@vger.kernel.org>
+In-Reply-To: <CAE1zotLX8L=jpJRYtUddtpYmgc0NxqmtdDjcQPWWg8KTO8PH5A@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-i2c-owner@vger.kernel.org
+To: "Purdila, Octavian" <octavian.purdila@intel.com>
+Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Tirdea, Irina" <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-Hi Andy,
-
-On Mon, 4 Apr 2016 16:40:29 -0700 Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
->
-> On Mon,  4 Apr 2016 16:30:05 +0300 Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
-> 
-> > There are new helpers in this patch:
-> > 
-> > uuid_is_valid		checks if a UUID is valid
-> > uuid_be_to_bin		converts from string to binary (big endian)
-> > uuid_le_to_bin		converts from string to binary (little endian)
-> 	> 
-> > They will be used in future, i.e. in the following patches in the series.
-> > 
-> > This also moves indices arrays to lib/uuid.c to be shared accross modules.
-> > 
-> > ...
-> >
-> > --- a/include/linux/uuid.h
-> > +++ b/include/linux/uuid.h  
-> 
-> Nit:
-> 
-> > +/**
-> > +  * uuid_is_valid - checks if UUID string valid
-> > +  * @uuid:	UUID string to check
-> > +  *
-> > +  * Description:
-> > +  * It checks if the UUID string is following the format:
-> > +  *	xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-> > +  * where x is a hex digit.
-> > +  *
-> > +  * Return: 0 on success, %-EINVAL otherwise.
-> > +  */
-> > +int uuid_is_valid(const char *uuid)
-> > +{
-> > +	unsigned int i;
-> > +
-> > +	if (strnlen(uuid, UUID_STRING_LEN) < UUID_STRING_LEN)
-> > +		return -EINVAL;
-> > +
-> > +	for (i = 0; i < UUID_STRING_LEN; i++) {
-> > +		if (i == 8 || i == 13 || i == 18 || i == 23) {
-> > +			if (uuid[i] != '-')
-> > +				return -EINVAL;
-> > +		} else if (!isxdigit(uuid[i])) {
-> > +			return -EINVAL;
-> > +		}
-> > +	}  
-> 
-> Could add
-> 
-> 	if (uuid[i])
-> 		return -EINVAL;
-> 
-> here and lose the additional pass across the input (strlen).
-
-also, why is this not a bool function?
-
--- 
-Cheers,
-Stephen Rothwell
+SGksDQoNCj4gRnJvbTogT2N0YXZpYW4gUHVyZGlsYSBbbWFpbHRvOm9jdGF2aWFuLnB1cmRpbGFA
+aW50ZWwuY29tXQ0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAwMi8xMF0gYWNwaTogaW5zdGFs
+bCBTU0RUIHRhYmxlcyBmcm9tIGluaXRyZA0KPiANCj4gT24gRnJpLCBBcHIgMSwgMjAxNiBhdCAx
+OjExIFBNLCBPY3RhdmlhbiBQdXJkaWxhDQo+IDxvY3Rhdmlhbi5wdXJkaWxhQGludGVsLmNvbT4g
+d3JvdGU6DQo+ID4gT24gRnJpLCBBcHIgMSwgMjAxNiBhdCA4OjA1IEFNLCBaaGVuZywgTHYgPGx2
+LnpoZW5nQGludGVsLmNvbT4gd3JvdGU6DQo+ID4+IEhpLA0KPiA+Pg0KPiA+PiBJTU8sIHRoZXJl
+IGlzIGFscmVhZHkgYSBzaW1pbGFyIGZ1bmN0aW9uIHVwc3RyZWFtZWQ6DQo+ID4+DQo+IGh0dHBz
+Oi8vZ2l0Lmtlcm5lbC5vcmcvY2dpdC9saW51eC9rZXJuZWwvZ2l0L3RvcnZhbGRzL2xpbnV4Lmdp
+dC9jb21taXQvP2lkPWM4NWMNCj4gYzgxDQo+ID4+IENvdWxkIGl0IHdvcmsgZm9yIHlvdXIgdXNl
+IGNhc2U/DQo+ID4NCj4gPiBZZXMsIGl0IGlzIGJhc2ljYWxseSB0aGUgc2FtZS4NCj4gPg0KPiA+
+IFRoZSBvbmx5IGRpZmZlcmVuY2UgaXMgb24gaG93IHdlIGhhbmRsZSB0YWludC4gSSB0aGluayB3
+ZSBzaG91bGQgdXNlIGENCj4gPiBuZXcgdGFpbnQgZm9yIG92ZXJsYXlzIGFuZCB0aGF0IHdlIGRv
+bid0IG5lZWQgdG8gZGlzYWJsZSBsb2NrZGVwLg0KPiA+DQo+ID4gQlRXLCB3aHkgaXMgbG9ja2Rl
+cCBkaXNhYmxlZCB3aGVuIHdlIG92ZXJyaWRlPw0KPiANCj4gVGhlIG90aGVyIHRoaW5nIEkgZm9y
+Z290IHRvIG1lbnRpb24gaXMgdGhhdCBJIHRoaW5rIHdlIHNob3VsZCBhbGxvdw0KPiBpbnN0YWxs
+aW5nIG5ldyB0YWJsZXMgZXZlbiBpZiBDT05GSUdfQUNQSV9JTklUUkRfVEFCTEVfT1ZFUlJJREUg
+aXMgbm90DQo+IHNlbGVjdGVkLiBJTU8gdGhlIG92ZXJyaWRlIGFuZCBvdmVybGF5IGZ1bmN0aW9u
+YWxpdHkgaXMgZGlmZmVyZW50LA0KPiB3aXRoIHRoZSBsYXR0ZXIgYmVpbmcgbW9yZSB0aGVuIGEg
+ZGVidWcgb3B0aW9uLg0KW0x2IFpoZW5nXSANCkkgZG9uJ3QgdGhpbmsgc28uIFRoZSBpbml0cmQg
+b3ZlcnJpZGUgbWVjaGFuaXNtIGlzIG5vdCBkZXBlbmRlbnQgb24gQ09ORklHX0FDUElfREVCVUcu
+DQpBY2NvcmRpbmcgdG8gdGhlIHNwZWMsIHdlIGNhbiBhbGxvdyBhIGhpZ2hlciB2ZXJzaW9uaW5n
+IHNhbWUgdGFibGUgKHNhbWUgdGFibGUgc2lnLCB0YWJsZSBpZCwgdGFibGUgb2VtIGlkKSB0byBv
+dmVycmlkZSB0aGUgb2xkIHRhYmxlcyBhcyBhIHBhdGNoaW5nIGZ1bmN0aW9uYWxpdHkuDQpTbyBi
+b3RoIHRoZSBmdW5jdGlvbmFsaXRpZXMgYXJlIG5vdCBkZWJ1ZyBvcHRpb25zIGFuZCBzZXJ2ZSBm
+b3IgdGhlIHNhbWUgcHVycG9zZSBmcm9tIHRoaXMgcG9pbnQgb2Ygdmlldy4NCkFuZCBJTU8gdGhh
+dCdzIHdoeSB0aGUgaW5pdHJkIG92ZXJyaWRlIG1lY2hhbmlzbSBuZWVkbid0IGJlIGRlcGVuZGVu
+dCBvbiBDT05GSUdfQUNQSV9ERUJVRy4NCg0KSSdtIHJlYWxseSBPSyB3aXRoIHJlbW92aW5nIHRo
+ZSBhY3BpX3RhYmxlX3RhaW50KCkgZm9yIENPTkZJR19BQ1BJX0lOSVRSRF9UQUJMRV9PVkVSUklE
+RSBidXQgbGVhdmluZyBzb21lIGluZm8gbWVzc2FnZXMgaW5kaWNhdGluZyB0aGUgdGFibGUgdXBn
+cmFkZXMuDQpJIGRvbid0IHRoaW5rIHRoaXMgbWVjaGFuaXNtIGlzIHVuc2FmZS4NCkl0IGhhcHBl
+bnMgZHVyaW5nIGEgaW5pdGlhbGl6YXRpb24gc3RlcCBvY2N1cnJpbmcgYmVmb3JlIHRoZSB0YWJs
+ZSBpcyBsb2FkZWQgYW5kIGhlbmNlIHNob3VsZCBiZSBzYWZlIGV2ZW4gdGhlIHN5bmNocm9uaXph
+dGlvbiBpcyBub3Qgc28gcm9idXN0IGluIEFDUElDQS4NCkFuZCB3aXRoIHRoZSByZXZpc2lvbiBz
+dXBwb3J0IGFkZGVkLCB3ZSBzaG91bGQgYmUgYWJsZSB0byBhbGxvdyB2ZW5kb3JzIHRvIHVwZGF0
+ZSB0aGUgYnVnZ3kgdGFibGVzLg0KVGhhdCBtZWFucyB0aGUgdGFibGVzIG1heSBiZSBvcmlnaW5h
+dGVkIGZyb20gdGhlIHNhZmUgc291cmNlcyAtIHRoZSB2ZW5kb3JzLg0KDQo+IA0KPiBJIHdpbGwg
+cHJlcGFyZSBhIHBhdGNoIGZvciB0aGUgbmV4dCB2ZXJzaW9uIG9mIHRoZSBzZXJpZXMgdG8gZGVj
+b3VwbGUNCj4gaW5zdGFsbGluZyBuZXcgdGFibGVzIGZyb20gQ09ORklHX0FDUElfSU5JVFJEX1RB
+QkxFX09WRVJSSURFLg0KW0x2IFpoZW5nXSANCkkgZG9uJ3QgdGhpbmsgdGhleSBuZWVkIHRvIGJl
+IGRlY291cGxlZC4NClRoZSB1c2UgY2FzZSBpczoNCklmIHRoZXJlIGlzIGFuIEFDUEkgdGFibGUg
+aW4gaW5pdHJkIGltYWdlIGFuZDoNCjEuIGlmIHRoZSB0YWJsZSdzIHJldmlzaW9uIGlzIGhpZ2hl
+ciB0aGFuIHRoZSBleGlzdGluZyBvbmUsIG92ZXJyaWRlIHRoZSBleGlzdGluZyBvbmU7DQoyLiBp
+ZiB0aGUgdGFibGUgaXMgYSBicmFuZCBuZXcgb25lLCBpbnN0YWxsIGl0Lg0KDQpUaGFua3MgYW5k
+IGJlc3QgcmVnYXJkcw0KLUx2DQo=
