@@ -1,105 +1,49 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure notifications
-Date: Tue, 5 Apr 2016 14:49:13 +0300
-Message-ID: <CAE1zot+wvU_he-6cFQi1np9X1=FcXWoF-mbxYDRYUkyOT+7nyQ@mail.gmail.com>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
-	<20160331172935.GL2350@sirena.org.uk>
-	<CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
-	<20160401140856.GW2350@sirena.org.uk>
-	<CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
-	<20160402162449.GB2350@sirena.org.uk>
-	<CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
-	<20160404160327.GH2350@sirena.org.uk>
-	<CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw@mail.gmail.com>
-	<CAJZ5v0gV8N6zgVrwtRFaY98Wv1HsoKs+4=U-s_V29FSpCdFW3g@mail.gmail.com>
+From: Graeme Gregory <graeme-/SyDAi3Rz4f10XsdtD+oqA@public.gmane.org>
+Subject: Re: [PATCH v15 0/6] arm64, numa: Add numa support for arm64 platforms
+Date: Tue, 5 Apr 2016 14:08:56 +0100
+Message-ID: <5703B8E8.3080408@xora.org.uk>
+References: <1457481587-8976-1-git-send-email-ddaney.cavm@gmail.com>
+ <56F1936E.1090407@redhat.com> <56F1BD15.4000701@caviumnetworks.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAJZ5v0gV8N6zgVrwtRFaY98Wv1HsoKs+4=U-s_V29FSpCdFW3g-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Cc: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <56F1BD15.4000701-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: David Daney <public-ddaney-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Jon Masters <public-jcm-H+wXaHxf7aLQT0dZR+AlfA-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>
+Cc: Will Deacon <public-will.deacon-5wv7dgnIgG8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, public-linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r-wOFGN7rlS/M9smdsby/KFg@public.gmane.org, Rob Herring <public-robh+dt-DgEjT+Ai2ygdnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Frank Rowand <public-frowand.list-Re5JQEeQqe8AvxtiuMwx3w-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Grant Likely <public-grant.likely-QSEj5FYQhm4dnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Pawel Moll <public-pawel.moll-5wv7dgnIgG8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ian Campbell <public-ijc+devicetree-KcIKpvwj1kUDXYZnReoRVg-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Kumar Gala <public-galak-sgV2jX0FEOL9JmXXK+q4OQ-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ganapatrao Kulkarni <public-gkulkarni-M3mlKVOIwJVv6pq1l3V1OdBPR1lH4CV8-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Robert Richter <public-rrichter-YGCgFSpz5w/QT0dZR+AlfA-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Ard Biesheuvel <public-ard.biesheuvel-QSEj5FYQhm4dnm+yROfE0A-wOFGN7rlS/M9smdsby/KFg@public.gmane.org>, Matt Fleming <public-matt-mF/unelCI9GS6iBeEJttW/XRex20P6io-wOFGN7rlS/OO27LBFnlIag@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, Apr 5, 2016 at 12:18 AM, Rafael J. Wysocki <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-> On Mon, Apr 4, 2016 at 9:34 PM, Octavian Purdila
-> <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
->> On Mon, Apr 4, 2016 at 7:03 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>> On Mon, Apr 04, 2016 at 01:25:56PM +0300, Octavian Purdila wrote:
->>>> On Sat, Apr 2, 2016 at 7:24 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
->>>
->>>> > What I don't understand is why the flow on inital probe isn't simply to
->>>> > register the controller which then triggers the walk of the children.
->>>> > That way any bus that supports initial probe also supports hotplug
->>>> > without needing to go and manually add a second code path.
->>>
->>>> Do you mean register the notifier per controller instead of per
->>>> subsystem? Either way we need changes at the subsystem level and I
->>>> choose to follow the device tree implementation for consistency.
->>>
->>> No!  I mean use the exact same callback you've got now for everything.
->>>
->>>> The other reason is that (pending other ACPICA changes) we can add
->>>> other notification events in the future such as node added or removed
->>>> (just like device tree), and in that case the probe and hotplug
->>>> handling would be different (and a bit more efficient).
->>>
->>> Why is probe different to hotplug?  We don't need to do that in the
->>> normal driver model.
+
+
+
+On 22/03/16 21:45, David Daney wrote:
+> On 03/22/2016 11:48 AM, Jon Masters wrote:
+>> On 03/08/2016 06:59 PM, David Daney wrote:
 >>
->> There might be some confusion with the term, I am referring to slave
->> hotplug, not controller hotplug.
+>>> From: David Daney <david.daney-YGCgFSpz5w/QT0dZR+AlfA-XMD5yJDbdMReXY1tMh2IBg@public.gmane.org>
+>>>
+>>> v15:
+>>>
+>>>     - Make the distance-map node optional (again), if it is not in
+>>>            the device tree, default values are used.
+>>>
+>>>     - Minor cleanups to of_numa.c as suggested by Rob Harring.
 >>
->> The way I see it, there are two logical operations: probe of a
->> controller and the associated enumeration of the SPI slaves for that
->> bus and "hotplug" of new SPI slaves and the enumeration of those
->> particular slaves.
+>> Hi David, all,
 >>
->> When we probe the controller we search DT/ACPI and enumerate all the
->> slaves for *that* controller.
->>
->> When a slave hotplug happens for device tree we get a device node
->> notification and we can instantiate the SPI slave based on that info.
->> In case of ACPI, (at this point) we get a global callback and in that
->> callback we need to iterate through *all* controllers.
+>> Wondering what the status of this patch series is currently?
 >
-> Is that really necessary?
+> I haven't seen any feedback on v15.  My assumption was that the relevant
+> arm64 maintainers would take some sort of action after the merge window
+> quiets down.
 >
-> The namespace rescan could notify the parent of a new node in
-> acpi_default_enumeration(), couldn't it?
+> In any event, I am happy to make any improvements that may be suggested.
+>
+Post merge window series does not apply to 4.6-rc2 or next.
 
-We could do that, with some complexity, but I am not sure if it is
-worth it - see below. And in either case I still don't see how we can
-avoid two enumeration paths: one from the probe of the controller ->
-spi_register_master() -> acpi_register_spi_devices()  and one from the
-notification handler -> acpi_register_spi_devices(). Both will end up
-are calling the same enumeration function but there are still two
-paths.
+Patch 4 collides in arch/arm64/mm/mmu.c
 
-Even right now, in the case of dynamic DT, we have the two enumeration paths.
+Thanks
 
-If we really want to have a single path for ACPI enumeration we could
-do that by using an ACPI SPI bridge driver or scan handlers after
-extending the matching mechanisms. But we would still need to modify
-the SPI subsystem and I don't think its worth it just to save a call
-to acpi_register_spi_devices() from spi_register_master().
-
-Now for parent notification complexity: in the case of SPI we can
-easily to this because current ACPI SPI enumeration supports only
-direct children as slaves. However, on I2C we can have an unrelated
-node as a slave - that is why the I2C scanning searches the whole
-namespaces for references to a particular i2c_adapter. So, we would
-need to retrieve the parent node from the namespace node information
-which means that we will do SPI specific stuff in ACPI generic code. I
-don't think it is a big issue, because we already treat SPI / I2C
-special, right?
-
-Once we have the parent handle we would still have to iterate through
-all controllers to get the spi_master matching the ACPI handle. It is
-a bit more efficient then global notification, but probably won't
-matter in practice.
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Graeme
