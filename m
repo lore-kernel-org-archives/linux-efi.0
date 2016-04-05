@@ -1,71 +1,80 @@
-From: "Zheng, Lv" <lv.zheng@intel.com>
-Subject: RE: [RFC PATCH 10/10] acpi: add support for loading SSDTs via
- configfs
-Date: Tue, 5 Apr 2016 03:11:21 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB6677B@SHSMSX101.ccr.corp.intel.com>
+From: Octavian Purdila <octavian.purdila@intel.com>
+Subject: Re: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
+Date: Tue, 5 Apr 2016 10:23:08 +0300
+Message-ID: <CAE1zotJL9QW0V+k-4VJBBFuQ+kCcjGNUJ8W1LKd54Xdp++z3SQ@mail.gmail.com>
 References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-11-git-send-email-octavian.purdila@intel.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66233@SHSMSX101.ccr.corp.intel.com>
- <CAE1zotLgjfKvFr0W9CjFbbkxqM6erLGwv-aHzTt=qwdCPzGOhw@mail.gmail.com>
+	<1459417026-6697-3-git-send-email-octavian.purdila@intel.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66258@SHSMSX101.ccr.corp.intel.com>
+	<CAE1zotJ1fa4m-_FO3PUQK8_p0vHcfWD5TmuMdxOSHDjku421pA@mail.gmail.com>
+	<CAE1zotLX8L=jpJRYtUddtpYmgc0NxqmtdDjcQPWWg8KTO8PH5A@mail.gmail.com>
+	<1AE640813FDE7649BE1B193DEA596E883BB66700@SHSMSX101.ccr.corp.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <CAE1zotLgjfKvFr0W9CjFbbkxqM6erLGwv-aHzTt=qwdCPzGOhw@mail.gmail.com>
-Content-Language: en-US
-Sender: linux-acpi-owner@vger.kernel.org
-To: "Purdila, Octavian" <octavian.purdila@intel.com>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1AE640813FDE7649BE1B193DEA596E883BB66700@SHSMSX101.ccr.corp.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Zheng, Lv" <lv.zheng@intel.com>
 Cc: "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Mark Brown <broonie@kernel.org>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, "linux-i2c@vger.kernel.org" <linux-i2c@vger.kernel.org>, "linux-spi@vger.kernel.org" <linux-spi@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "Tirdea, Irina" <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
-SGksDQoNCj4gRnJvbTogT2N0YXZpYW4gUHVyZGlsYSBbbWFpbHRvOm9jdGF2aWFuLnB1cmRpbGFA
-aW50ZWwuY29tXQ0KPiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAxMC8xMF0gYWNwaTogYWRkIHN1
-cHBvcnQgZm9yIGxvYWRpbmcgU1NEVHMgdmlhIGNvbmZpZ2ZzDQo+IA0KPiBPbiBGcmksIEFwciAx
-LCAyMDE2IGF0IDc6NTUgQU0sIFpoZW5nLCBMdiA8bHYuemhlbmdAaW50ZWwuY29tPiB3cm90ZToN
-Cj4gPiBIaSwNCj4gDQo+IEhpIEx2LA0KPiANCj4gPj4gQWRkIHN1cHBvcnQgZm9yIGFjcGlfdXNl
-cl90YWJsZSBjb25maWdmcyBpdGVtcyB0aGF0IGFsbG93cyB0aGUgdXNlciB0bw0KPiA+PiBsb2Fk
-IG5ldyB0YWJsZXMuIFRoZSBkYXRhIGF0dHJpYnV0ZXMgY29udGFpbnMgdGhlIHRhYmxlIGRhdGEg
-YW5kIG9uY2UgaXQNCj4gPj4gaXMgZmlsbGVkIGZyb20gdXNlcnNwYWNlIHRoZSB0YWJsZSBpcyBs
-b2FkZWQgYW5kIEFDUEkgZGV2aWNlcyBhcmUNCj4gPj4gZW51bWVyYXRlZC4NCj4gPiBbTHYgWmhl
-bmddDQo+ID4gV2UndmUgYmVlbiBjb25zaWRlcmluZyB0byBpbXBsZW1lbnQgdGhpcyBmYWNpbGl0
-eSBiZWZvcmUuDQo+ID4gVGhlIDIgYWx0ZXJuYXRpdmUgc29sdXRpb25zIGFyZToNCj4gPiAxLiBp
-bXBsZW1lbnQgTE9BRC9VTkxPQUQgaW9jdGwgZm9yIC9zeXMva2VybmVsL2RlYnVnL2FjcGkvYWNw
-aWRiZyAtIHRoaXMNCj4gd2lsbCBiZSB1c2VmdWwgZm9yIGV4dHJhY3RpbmcgQU1MIGJ5dGUgc3Ry
-ZWFtIGZyb20ga2VybmVsIHRvIGJlIHVzZWQgYnkgYQ0KPiB1c2Vyc3BhY2UgZGlzYXNzZW1ibGVy
-Lg0KPiANCj4gQUZBSUsgYWRkaW5nIG5ldyBpb2N0bHMgaXMgZGlzY291cmFnZWQuDQpbTHYgWmhl
-bmddIA0KVG9vbHMvcG93ZXIvYWNwaS90b29scy9hY3BpZGJnIGlzIGEgZmlsZSBkZXNjcmlwdG9y
-IGJhc2VkIHV0aWxpdHkuDQpBbmQgaXQgbmVlZHMgYSBtZXRob2QgdG8gb2J0YWluIGFuIEFNTCBi
-eXRlIHN0cmVhbSBmcm9tIGtlcm5lbC4NClVzaW5nIGlvY3RsIGlzIGEgYmVzdCBmaXQgZGVzaWdu
-IGZvciBhY3BpZGJnIHNvIHRoYXQgaXQgbmVlZG4ndCB0byBhY2Nlc3MgYW55IG90aGVyIGZpbGVz
-Lg0KDQo+IA0KPiA+IDIuIHRyYW5zaXRpb24gL3N5cy9maXJtd2FyZS9hY3BpL3RhYmxlcy94eHgg
-aW50byBkaXJlY3RvcnkgYW5kIGltcGxlbWVudA0KPiAvc3lzL2Zpcm13YXJlL2FjcGkvdGFibGVz
-L2xvYWQsIC9zeXMvZmlybXdhcmUvYWNwaS90YWJsZXMvdW5sb2FkIC0gdGhpcyBzaG91bGQNCj4g
-YmUgYWJsZSB0byBtZWV0IHlvdXIgcmVxdWlyZW1lbnQuDQo+IA0KPiBXZSBjYW4ndCBkbyB0aGF0
-IGFzIGl0IHdvdWxkIGJyZWFrIHRoZSBBQkkuDQpbTHYgWmhlbmddIA0KVGhlIG9ubHkgdXNlciBv
-ZiB0aGlzIGRpcmVjdG9yeSBoaWVyYXJjaHkgaXMgYWNwaWR1bXAuDQpBbmQgdGhlIHVzZXIgb2Yg
-dGhpcyB0b29sIGFyZSBhbGwgZGV2ZWxvcGVycy9yZXBvcnRlcnMgb24gdGhlIGtlcm5lbCBidWd6
-aWxsYS4NCldlJ3ZlIGJlZW4gYXNraW5nIHRoZSBCdWd6aWxsYSB1c2VycyB0byB1c2UgdGhlIHVw
-LXRvLWRhdGUgYWNwaWR1bXAgaW5zdGVhZCBvZiB0aGUgZGlzdHJpYnV0aW9uIHZlbmRvciBwcm92
-aWRlZCBvbmUgZm9yIHNvIG1hbnkgeWVhcnMuDQpTbyBJTU8sIHRoaXMgaXMgbm90IGEgc2VyaW91
-cyBwcm9ibGVtIHlvdSBzaG91bGQgY29uc2lkZXIuDQpZb3Ugb25seSBuZWVkIHRvIHRoaW5rIGFi
-b3V0IGFuIGFjY2VwdGFibGUgd2F5IGZvciB0aGUgZGlzdHJpYnV0aW9uIHZlbmRvcnMgdG8gc3lu
-Y2hyb25pemUgdGhlIGtlcm5lbCBjaGFuZ2UgYW5kIHRoZSBhY3BpZHVtcCBjaGFuZ2UuDQoNCklN
-TzoNCllvdSBtYXkgZXhwb3NlIGEgdmVyc2lvbiBmaWxlIGZyb20gL3N5cy9maXJtd2FyZS9hY3Bp
-Lg0KYWNwaWR1bXAgY2FuIGJlIGNoYW5nZWQgYWNjb3JkaW5nbHkgYnkgcmVmZXJlbmNpbmcgdGhl
-IHZlcnNpb24gZmlsZS4NCkFuZCBvbGQgZGlyZWN0b3J5IGhpZXJhcmNoeSBzdXBwb3J0IGNvdWxk
-IGJlIGtlcHQgaW4gYWNwaWR1bXAuDQoNCk5vdGUgdGhhdCBhY3BpZHVtcCBpcyBhbHNvIGEgcGFy
-dCBvZiB0aGUga2VybmVsLCBzbyB5b3VyIGNoYW5nZSBjb3VsZCBiZSBjb25zaXN0ZW50Lg0KRm9y
-IGV4YW1wbGUsDQpJZiB5b3UgY2hhbmdlZCBhY3BpZHVtcCBwcmlvciB0aGFuIG1ha2luZyB0aGUg
-a2VybmVsIGNoYW5nZSwgdGhlIGRpc3RyaWJ1dGlvbiB2ZW5kb3JzIG1pZ2h0IGhhdmUgYWxyZWFk
-eSByZWxlYXNlZCB0aGUgbmV3IGFjcGlkdW1wIGZvciBhbGwgb2xkIGtlcm5lbHMgYmVmb3JlIHlv
-dSB0cmFuc2l0aW9uZWQgdGhlIGRpcmVjdG9yeSBoaWVyYXJjaHkuDQoNCj4gDQo+ID4gU28gbXkg
-Zmlyc3QgcXVlc3Rpb24gaXM6DQo+ID4gV2h5IGRvIHlvdSB1c2UgY29uZmlnZnMgcmF0aGVyIHRo
-YW4gdGhlIGV4aXN0aW5nIG1lY2hhbmlzbXM/DQo+IA0KPiBzeXNmcyBpcyBub3QgYSBnb29kIGNo
-b2ljZSBmb3IgZGVhbGluZyB3aXRoIG9iamVjdHMgY3JlYXRlZCBmcm9tDQo+IHVzZXJzcGFjZSwg
-Y29uZmlnZnMgd2FzIGNyZWF0ZWQgdG8gYWRkcmVzcyB0aGlzIHNwZWNpZmljIG5lZWQuIFNpbmNl
-DQo+IHdlIHdhbnQgdG8gYmUgYWJsZSB0byBjcmVhdGUgYW5kIGxvYWQgbmV3IHRhYmxlcyBmcm9t
-IHVzZXJzcGFjZSB0aGlzDQo+IHVzZS1jYXNlIGZpdHMgdmVyeSB3ZWxsIHdpdGggY29uZmlnZnMu
-DQpbTHYgWmhlbmddIA0KV2FzIHRoZSB0YWJsZSBiaW5hcnkgc3RyZWFtIHN0aWxsIG1haW50YWlu
-ZWQgYnkgdGhlIHVzZXJzcGFjZT8NCklmIG5vdCwgSSBjb3VsZG4ndCBzZWUgdGhlIGRpZmZlcmVu
-Y2UvYWR2YW50YWdlcyBmcm9tIHVzaW5nIC9zeXMvZmlybXdhcmUvYWNwaS90YWJsZXMgdG8gdXNp
-bmcgY29uZmlnZnMuDQoNClRoYW5rcyBhbmQgYmVzdCByZWdhcmRzDQotTHYNCg==
+On Tue, Apr 5, 2016 at 3:49 AM, Zheng, Lv <lv.zheng@intel.com> wrote:
+> Hi,
+>
+>> From: Octavian Purdila [mailto:octavian.purdila@intel.com]
+>> Subject: Re: [RFC PATCH 02/10] acpi: install SSDT tables from initrd
+>>
+>> On Fri, Apr 1, 2016 at 1:11 PM, Octavian Purdila
+>> <octavian.purdila@intel.com> wrote:
+>> > On Fri, Apr 1, 2016 at 8:05 AM, Zheng, Lv <lv.zheng@intel.com> wrote:
+>> >> Hi,
+>> >>
+>> >> IMO, there is already a similar function upstreamed:
+>> >>
+>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=c85c
+>> c81
+>> >> Could it work for your use case?
+>> >
+>> > Yes, it is basically the same.
+>> >
+>> > The only difference is on how we handle taint. I think we should use a
+>> > new taint for overlays and that we don't need to disable lockdep.
+>> >
+>> > BTW, why is lockdep disabled when we override?
+>>
+>> The other thing I forgot to mention is that I think we should allow
+>> installing new tables even if CONFIG_ACPI_INITRD_TABLE_OVERRIDE is not
+>> selected. IMO the override and overlay functionality is different,
+>> with the latter being more then a debug option.
+> [Lv Zheng]
+> I don't think so. The initrd override mechanism is not dependent on CONFIG_ACPI_DEBUG.
+> According to the spec, we can allow a higher versioning same table (same table sig, table id, table oem id) to override the old tables as a patching functionality.
+> So both the functionalities are not debug options and serve for the same purpose from this point of view.
+> And IMO that's why the initrd override mechanism needn't be dependent on CONFIG_ACPI_DEBUG.
+>
+
+The problem is that CONFIG_ACPI_INITRD_TABLE_OVERRIDE is presented as
+a debug option in Documentation/initrd_table_override.txt and most
+distributions are not selecting it which makes it hard to use it in
+practice.
+
+> I'm really OK with removing the acpi_table_taint() for CONFIG_ACPI_INITRD_TABLE_OVERRIDE but leaving some info messages indicating the table upgrades.
+> I don't think this mechanism is unsafe.
+> It happens during a initialization step occurring before the table is loaded and hence should be safe even the synchronization is not so robust in ACPICA.
+> And with the revision support added, we should be able to allow vendors to update the buggy tables.
+> That means the tables may be originated from the safe sources - the vendors.
+>
+>>
+>> I will prepare a patch for the next version of the series to decouple
+>> installing new tables from CONFIG_ACPI_INITRD_TABLE_OVERRIDE.
+> [Lv Zheng]
+> I don't think they need to be decoupled.
+> The use case is:
+> If there is an ACPI table in initrd image and:
+> 1. if the table's revision is higher than the existing one, override the existing one;
+> 2. if the table is a brand new one, install it.
+>
+
+The implementation will stay the same of course, I was just suggesting
+to move CONFIG_ACPI_INITRD_TABLE_OVERRIDE in
+acpi_os_physical_table_override to allow new tables to be loaded even
+if the option is not selected.
