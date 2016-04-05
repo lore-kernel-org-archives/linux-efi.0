@@ -1,75 +1,63 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
-Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
- notifications
-Date: Tue, 5 Apr 2016 14:20:54 -0700
-Message-ID: <20160405212054.GK1924@sirena.org.uk>
-References: <20160401140856.GW2350@sirena.org.uk>
- <CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
- <20160402162449.GB2350@sirena.org.uk>
- <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
- <20160404160327.GH2350@sirena.org.uk>
- <CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw@mail.gmail.com>
- <CAJZ5v0gV8N6zgVrwtRFaY98Wv1HsoKs+4=U-s_V29FSpCdFW3g@mail.gmail.com>
- <CAE1zot+wvU_he-6cFQi1np9X1=FcXWoF-mbxYDRYUkyOT+7nyQ@mail.gmail.com>
- <20160405183255.GH1924@sirena.org.uk>
- <CAE1zotL7X+di4rHecRW_G-45wUPbbNb9jvn3C_zjD4XttZ4v3w@mail.gmail.com>
+From: Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Subject: Re: [PATCH v3 06/10] sysctl: drop away useless label
+Date: Tue, 5 Apr 2016 15:17:52 -0700
+Message-ID: <20160405151752.de82f221f1c70ff901b2b958@linux-foundation.org>
+References: <1459864579-55988-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	<1459864579-55988-7-git-send-email-andriy.shevchenko@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="rnP2AJ7yb1j09OW/"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-Content-Disposition: inline
-In-Reply-To: <CAE1zotL7X+di4rHecRW_G-45wUPbbNb9jvn3C_zjD4XttZ4v3w-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <1459864579-55988-7-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
+Cc: Dmitry Kasatkin <dmitry.kasatkin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
+On Tue,  5 Apr 2016 16:56:15 +0300 Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org> wrote:
 
---rnP2AJ7yb1j09OW/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+> We have no locking in bin_uuid(). Thus, we may remove the out label and use
+> return statements directly.
+> 
+> ...
+>
+> --- a/kernel/sysctl_binary.c
+> +++ b/kernel/sysctl_binary.c
+> @@ -1123,15 +1123,14 @@ static ssize_t bin_uuid(struct file *file,
+>  
+>  		result = kernel_read(file, 0, buf, sizeof(buf) - 1);
+>  		if (result < 0)
+> -			goto out;
+> +			return result;
+>  
+>  		buf[result] = '\0';
+>  
+>  		/* Convert the uuid to from a string to binary */
+>  		for (i = 0; i < 16; i++) {
+> -			result = -EIO;
+>  			if (!isxdigit(str[0]) || !isxdigit(str[1]))
+> -				goto out;
+> +				return -EIO;
+>  
+>  			uuid[i] = (hex_to_bin(str[0]) << 4) |
+>  					hex_to_bin(str[1]);
+> @@ -1143,15 +1142,12 @@ static ssize_t bin_uuid(struct file *file,
+>  		if (oldlen > 16)
+>  			oldlen = 16;
+>  
+> -		result = -EFAULT;
+>  		if (copy_to_user(oldval, uuid, oldlen))
+> -			goto out;
+> +			return -EFAULT;
+>  
+>  		copied = oldlen;
+>  	}
+> -	result = copied;
+> -out:
+> -	return result;
+> +	return copied;
+>  }
 
-On Tue, Apr 05, 2016 at 10:16:16PM +0300, Octavian Purdila wrote:
-> On Tue, Apr 5, 2016 at 9:32 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
-
-> > It's not specifically for SPI, it's the fact that you're asking every
-> > single bus type which might be described in ACPI to handle both hotplug
-> > and coldplug paths separately.  Given that the code that's being added
-> > just seems like trivial boilerplate it seems like we're doing this
-> > wrong, we should be factoring this out so there's nothing bus types can
-> > get wrong.
-
-> AFAICS this is exactly the same case for DT: one code path for
-> coldplug and one for hotplug.
-
-In the DT case the DT code understands a bit more of what's going on
-with the firmware parsing which makes things better (the code in the two
-paths is not identical, unlike ACPI) but yes, that's another aspect of
-why I'm not thrilled with this - if it's not the hotplug and coldplug
-that should be sharing code then perhaps it's along the firmware
-interface axis that we need to be sharing things.
-
-> Which makes me think that it is not possible to have a single path for
-> both, or maybe its not worth it. Do I miss something obvious?
-
-I think at a very high level what I'm looking at here is that we're
-having to write too much boilerplate per firmware interface.  Perhaps
-the hotplug vs coldplug path isn't it, it looked like it from your
-patch, but there must be something here we're spending too much time on.
-
---rnP2AJ7yb1j09OW/
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQEcBAEBCAAGBQJXBCwoAAoJECTWi3JdVIfQsHkH/j7eyKHnPB34Mj3uvd2cG5/P
-xHVEpoy7uAfZ9kV6st7j1OzO/T8rvuPNQN4H8nqPeKAPEzSGP8mWlg8NWLNIbx7o
-WQmoJFj2QBOHS0Bctj5M729SqlhG+CxyuAjb1E0lqG9cJXWu7SI8JO5gFzkV0lDH
-oeMlp1KOuim2nkan6o7oxqgixHlH1pp5g8soeRHjzOlMghGBmQNAVO42zieP9GVy
-JYFxy/8MdcINnS7Vi4TcxngdtHSeLzs6pbzvna6q2ZfsjrMGl7Qai1Brt12rjt7R
-SElNKtsSMzgOz7t7RbqEyxbc0h4pJJDBn9YiyEzdH8DTwHxL2ehy6VuS+nxmm6Y=
-=EMam
------END PGP SIGNATURE-----
-
---rnP2AJ7yb1j09OW/--
+Sure, but we may add locking or resource allocation in the future, in
+which case this change will need to be undone.  I think it's better to
+leave the code as-is.  It's presently quite typical kernel code.
