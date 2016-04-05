@@ -1,11 +1,9 @@
-From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+From: Mark Brown <broonie@kernel.org>
 Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
  notifications
-Date: Tue, 5 Apr 2016 11:24:54 -0700
-Message-ID: <20160405182454.GG1924@sirena.org.uk>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
- <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
- <20160331172935.GL2350@sirena.org.uk>
+Date: Tue, 5 Apr 2016 11:32:55 -0700
+Message-ID: <20160405183255.GH1924@sirena.org.uk>
+References: <20160331172935.GL2350@sirena.org.uk>
  <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
  <20160401140856.GW2350@sirena.org.uk>
  <CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
@@ -13,63 +11,65 @@ References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
  <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
  <20160404160327.GH2350@sirena.org.uk>
  <CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw@mail.gmail.com>
+ <CAJZ5v0gV8N6zgVrwtRFaY98Wv1HsoKs+4=U-s_V29FSpCdFW3g@mail.gmail.com>
+ <CAE1zot+wvU_he-6cFQi1np9X1=FcXWoF-mbxYDRYUkyOT+7nyQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-	protocol="application/pgp-signature"; boundary="1giRMj6yz/+FOIRq"
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+	protocol="application/pgp-signature"; boundary="X+8siUETKMkW99st"
+Return-path: <linux-i2c-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+In-Reply-To: <CAE1zot+wvU_he-6cFQi1np9X1=FcXWoF-mbxYDRYUkyOT+7nyQ@mail.gmail.com>
+Sender: linux-i2c-owner@vger.kernel.org
+To: Octavian Purdila <octavian.purdila@intel.com>
+Cc: "Rafael J. Wysocki" <rafael@kernel.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, Len Brown <lenb@kernel.org>, Matt Fleming <matt@codeblueprint.co.uk>, Wolfram Sang <wsa@the-dreams.de>, Joel Becker <jlbec@evilplan.org>, Christoph Hellwig <hch@lst.de>, "linux-acpi@vger.kernel.org" <linux-acpi@vger.kernel.org>, linux-efi@vger.kernel.org, linux-i2c <linux-i2c@vger.kernel.org>, linux-spi@vger.kernel.org, lkml <linux-kernel@vger.kernel.org>, Irina Tirdea <irina.tirdea@intel.com>
 List-Id: linux-efi@vger.kernel.org
 
 
---1giRMj6yz/+FOIRq
+--X+8siUETKMkW99st
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 
-On Mon, Apr 04, 2016 at 10:34:56PM +0300, Octavian Purdila wrote:
-> On Mon, Apr 4, 2016 at 7:03 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
+On Tue, Apr 05, 2016 at 02:49:13PM +0300, Octavian Purdila wrote:
 
-> > Why is probe different to hotplug?  We don't need to do that in the
-> > normal driver model.
+> If we really want to have a single path for ACPI enumeration we could
+> do that by using an ACPI SPI bridge driver or scan handlers after
+> extending the matching mechanisms. But we would still need to modify
+> the SPI subsystem and I don't think its worth it just to save a call
+> to acpi_register_spi_devices() from spi_register_master().
 
-> There might be some confusion with the term, I am referring to slave
-> hotplug, not controller hotplug.
+It's not specifically for SPI, it's the fact that you're asking every
+single bus type which might be described in ACPI to handle both hotplug
+and coldplug paths separately.  Given that the code that's being added
+just seems like trivial boilerplate it seems like we're doing this
+wrong, we should be factoring this out so there's nothing bus types can
+get wrong.
 
-That's what I was talking about too.
+> Now for parent notification complexity: in the case of SPI we can
+> easily to this because current ACPI SPI enumeration supports only
+> direct children as slaves. However, on I2C we can have an unrelated
+> node as a slave - that is why the I2C scanning searches the whole
+> namespaces for references to a particular i2c_adapter. So, we would
+> need to retrieve the parent node from the namespace node information
+> which means that we will do SPI specific stuff in ACPI generic code. I
+> don't think it is a big issue, because we already treat SPI / I2C
+> special, right?
 
-> The way I see it, there are two logical operations: probe of a
-> controller and the associated enumeration of the SPI slaves for that
-> bus and "hotplug" of new SPI slaves and the enumeration of those
-> particular slaves.
+Or perhaps the issue is that we can't make our mind up if the bus
+specific code should go in the bus or in the ACPI core?
 
-I don't see a distinction here.  The firmware finds some new slaves to
-tell the framework about.  Quite why it decided to go looking shouldn't
-matter.
-
-> When a slave hotplug happens for device tree we get a device node
-> notification and we can instantiate the SPI slave based on that info.
-> In case of ACPI, (at this point) we get a global callback and in that
-> callback we need to iterate through *all* controllers.
-
-That's not really helping me understand why you need every bus to open
-code enumeration twice?
-
---1giRMj6yz/+FOIRq
+--X+8siUETKMkW99st
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2
 
-iQEcBAEBCAAGBQJXBAL0AAoJECTWi3JdVIfQirEIAIYk7r6B53dH3hythb8IZc0I
-anQDvflPcYiwiQj139n4m+5oA8L8264jlFcf26CjqSpSfCR4ctgK28mImwGHnuNs
-sfTR7Jy91JnkhWchPYJfhYud9KiehXthilONbYcUWYCkDFBgqG7yU9NE78CQfpnN
-E6Dt3xapZigPEK1vhjghOYUr9Y5iG13rEGOWKVfnG/heOdMLhJRBpYrUoYRjM/CS
-6NDDzCwt1zdqHm8eXUYjKFJS0jDusvYglveGKA8zup6FZgxbW/1Zr/0/A/f7Micg
-lMaEAoeVv4vMlUSvgqz8uHWk2gxh66mulC4fEwCwL+8T6052Ic3bl4YW6UUrE6A=
-=2nCu
+iQEcBAEBCAAGBQJXBATWAAoJECTWi3JdVIfQXl4H/0BzWIDQKWOqLzpt7x5yOPOl
+QkkiK0BMXoGfMwzvb6ykmztzT0zkkfFGCCPS3EpGC7TZWQOIaniKavxDyVl0tYo2
+0/em4gdafI11N3uns6MCsnP/JU2frcJqoNHdPc0PlrOcFy3aQbwm9Uw/Ya2uFNZJ
+hhKRX5lym6Pp+3kwFnZSAp+GCvn8cw2wv+AnnrPZY5K4efDY9jUS34NedT9NvywR
+fZAH72ZuoLwK+dpx1fkPrJg3o71h+nlGm5lEKG+VKfQUcnEBcoTxXJm5CE66emVp
+cpPs921uqQJPGCwNxuG6L7pPu048F8FdJc29DOVZ8sX3CX0nuSsr8TfTQXtHIAg=
+=MLeI
 -----END PGP SIGNATURE-----
 
---1giRMj6yz/+FOIRq--
+--X+8siUETKMkW99st--
