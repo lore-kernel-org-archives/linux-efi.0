@@ -1,64 +1,75 @@
-From: Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Subject: Re: [PATCH v3 04/10] lib/uuid: introduce few more generic helpers
- for UUID
-Date: Tue, 05 Apr 2016 17:15:58 +0300
-Message-ID: <1459865758.17884.19.camel@linux.intel.com>
-References: <1459864579-55988-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <1459864579-55988-5-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>
+Subject: Re: [RFC PATCH 06/10] spi: add support for ACPI reconfigure
+ notifications
+Date: Tue, 5 Apr 2016 11:24:54 -0700
+Message-ID: <20160405182454.GG1924@sirena.org.uk>
+References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
+ <1459417026-6697-7-git-send-email-octavian.purdila@intel.com>
+ <20160331172935.GL2350@sirena.org.uk>
+ <CAE1zotJbUGBOUF-4-XAx0DUkj55egOMXVn9FzjV3Fdj4MYxD0Q@mail.gmail.com>
+ <20160401140856.GW2350@sirena.org.uk>
+ <CAJZ5v0itmFDdPi6vJmsheEHADEwmeTNgCQ5iVroJfV=o6Wof3A@mail.gmail.com>
+ <20160402162449.GB2350@sirena.org.uk>
+ <CAE1zotKDZd2mYmzoQvCPgVrZ5vfOrPDtBRzTscdsqrZbT8Z+cg@mail.gmail.com>
+ <20160404160327.GH2350@sirena.org.uk>
+ <CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459864579-55988-5-git-send-email-andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Sender: linux-api-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Dmitry Kasatkin <dmitry.kasatkin-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Mimi Zohar <zohar-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-api-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Andrew Morton <akpm-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>, Rasmus Villemoes <linux-qQsb+v5E8BnlAoU/VqSP6n9LOBIZ5rWg@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Arnd Bergmann <arnd-r2nGTMty4D4@public.gmane.org>, Theodore Ts'o <tytso-3s7WtUTddSA@public.gmane.org>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+	protocol="application/pgp-signature"; boundary="1giRMj6yz/+FOIRq"
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <CAE1zot+ESGBEYeUbLTreKfkc-6B45uQq3PWhhRfBo1AWd-7Vxw-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Cc: "Rafael J. Wysocki" <rafael-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-i2c <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, lkml <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, Irina Tirdea <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Tue, 2016-04-05 at 16:56 +0300, Andy Shevchenko wrote:
-> There are new helpers in this patch:
-> 
-> uuid_is_valid		checks if a UUID is valid
-> uuid_be_to_bin		converts from string to binary (big
-> endian)
-> uuid_le_to_bin		converts from string to binary (little
-> endian)
-> 
-> They will be used in future, i.e. in the following patches in the
-> series.
-> 
-> This also moves indices arrays to lib/uuid.c to be shared accross
-> modules.
-> 
 
-> --- a/lib/uuid.c
-> +++ b/lib/uuid.c
+--1giRMj6yz/+FOIRq
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> +static int __uuid_to_bin(const char *uuid, __u8 b[16], const u8
-> ei[16])
-> +{
-> +	static const u8 si[16] =
-> {0,2,4,6,9,11,14,16,19,21,24,26,28,30,32,34};
-> +	unsigned int i;
-> +
-> +	if (uuid_is_valid(uuid))
+On Mon, Apr 04, 2016 at 10:34:56PM +0300, Octavian Purdila wrote:
+> On Mon, Apr 4, 2016 at 7:03 PM, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org> wrote:
 
-Oops, sorry, typo is here, should be negative check.
+> > Why is probe different to hotplug?  We don't need to do that in the
+> > normal driver model.
 
-if (!uuid_is_valid(uuid))
+> There might be some confusion with the term, I am referring to slave
+> hotplug, not controller hotplug.
 
+That's what I was talking about too.
 
-> +		return -EINVAL;
-> +
-> +	for (i = 0; i < 16; i++) {
-> +		int hi = hex_to_bin(uuid[si[i]] + 0);
-> +		int lo = hex_to_bin(uuid[si[i]] + 1);
-> +
-> +		b[ei[i]] = (hi << 4) | lo;
-> +	}
-> +
-> +	return 0;
-> +}
+> The way I see it, there are two logical operations: probe of a
+> controller and the associated enumeration of the SPI slaves for that
+> bus and "hotplug" of new SPI slaves and the enumeration of those
+> particular slaves.
 
--- 
-Andy Shevchenko <andriy.shevchenko-VuQAYsv1563Yd54FQh9/CA@public.gmane.org>
-Intel Finland Oy
+I don't see a distinction here.  The firmware finds some new slaves to
+tell the framework about.  Quite why it decided to go looking shouldn't
+matter.
+
+> When a slave hotplug happens for device tree we get a device node
+> notification and we can instantiate the SPI slave based on that info.
+> In case of ACPI, (at this point) we get a global callback and in that
+> callback we need to iterate through *all* controllers.
+
+That's not really helping me understand why you need every bus to open
+code enumeration twice?
+
+--1giRMj6yz/+FOIRq
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQEcBAEBCAAGBQJXBAL0AAoJECTWi3JdVIfQirEIAIYk7r6B53dH3hythb8IZc0I
+anQDvflPcYiwiQj139n4m+5oA8L8264jlFcf26CjqSpSfCR4ctgK28mImwGHnuNs
+sfTR7Jy91JnkhWchPYJfhYud9KiehXthilONbYcUWYCkDFBgqG7yU9NE78CQfpnN
+E6Dt3xapZigPEK1vhjghOYUr9Y5iG13rEGOWKVfnG/heOdMLhJRBpYrUoYRjM/CS
+6NDDzCwt1zdqHm8eXUYjKFJS0jDusvYglveGKA8zup6FZgxbW/1Zr/0/A/f7Micg
+lMaEAoeVv4vMlUSvgqz8uHWk2gxh66mulC4fEwCwL+8T6052Ic3bl4YW6UUrE6A=
+=2nCu
+-----END PGP SIGNATURE-----
+
+--1giRMj6yz/+FOIRq--
