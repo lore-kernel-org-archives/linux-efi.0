@@ -1,30 +1,33 @@
-From: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
-Subject: Re: [PATCH v10 10/17] arm/xen: Get event-channel irq through
- HVM_PARAM when booting with ACPI
-Date: Wed, 6 Apr 2016 13:31:11 +0100
-Message-ID: <5705018F.9060702@arm.com>
+From: Julien Grall <julien.grall@arm.com>
+Subject: Re: [PATCH v10 11/17] ARM: XEN: Move xen_early_init() before
+ efi_init()
+Date: Wed, 6 Apr 2016 13:35:17 +0100
+Message-ID: <57050285.90701@arm.com>
 References: <1459525755-36968-1-git-send-email-shannon.zhao@linaro.org>
- <1459525755-36968-11-git-send-email-shannon.zhao@linaro.org>
+ <1459525755-36968-12-git-send-email-shannon.zhao@linaro.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1459525755-36968-11-git-send-email-shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, stefano.stabellini-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org
-Cc: david.vrabel-Sxgqhf6Nn4DQT0dZR+AlfA@public.gmane.org, devicetree-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, peter.huangpeng-hv44wF8Li93QT0dZR+AlfA@public.gmane.org, xen-devel-GuqFBffKawuEi8DpZVb4nw@public.gmane.org, zhaoshenglong-hv44wF8Li93QT0dZR+AlfA@public.gmane.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1459525755-36968-12-git-send-email-shannon.zhao@linaro.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Shannon Zhao <shannon.zhao@linaro.org>, linux-arm-kernel@lists.infradead.org, stefano.stabellini@citrix.com
+Cc: david.vrabel@citrix.com, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, peter.huangpeng@huawei.com, xen-devel@lists.xen.org, zhaoshenglong@huawei.com, Russell King <linux@arm.linux.org.uk>
 List-Id: linux-efi@vger.kernel.org
 
 Hi Shannon,
 
 On 01/04/2016 16:49, Shannon Zhao wrote:
-> The kernel will get the event-channel IRQ through
-> HVM_PARAM_CALLBACK_IRQ.
+> Move xen_early_init() before efi_init(), then when calling efi_init()
+> could initialize Xen specific UEFI.
 >
-> Signed-off-by: Shannon Zhao <shannon.zhao-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org>
-> Reviewed-by: Stefano Stabellini <stefano.stabellini-mvvWK6WmYclDPfheJLI6IQ@public.gmane.org>
+> Check if it runs on Xen hypervisor through the flat dts.
+>
+> Cc: Russell King <linux@arm.linux.org.uk>
+> Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
+> Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 
-Reviewed-by: Julien Grall <julien.grall-5wv7dgnIgG8@public.gmane.org>
+Reviewed-by: Julien Grall <julien.grall@arm.com>
 
 Regards,
 
