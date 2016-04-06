@@ -1,87 +1,67 @@
-From: Octavian Purdila <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: Re: [RFC PATCH 10/10] acpi: add support for loading SSDTs via configfs
-Date: Wed, 6 Apr 2016 21:46:51 +0300
-Message-ID: <CAE1zotKa+t5cxznWfPyQ599k9ZB=akOuEDZusWcJgzux8wqp5A@mail.gmail.com>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-11-git-send-email-octavian.purdila@intel.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66233@SHSMSX101.ccr.corp.intel.com>
-	<CAE1zotLgjfKvFr0W9CjFbbkxqM6erLGwv-aHzTt=qwdCPzGOhw@mail.gmail.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB6677B@SHSMSX101.ccr.corp.intel.com>
-	<CAE1zotKDFLNP5JTnMiWOstE4DYBHVeyP902J9ixD+fJbFqSZ6Q@mail.gmail.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66B8C@SHSMSX101.ccr.corp.intel.com>
+From: "Baicar, Tyler" <tbaicar-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
+Subject: Re: [PATCH V2 1/9] acpi: apei: read ack upon ghes record consumption
+Date: Wed, 6 Apr 2016 14:43:04 -0600
+Message-ID: <570574D8.8060402@codeaurora.org>
+References: <1459955578-24602-1-git-send-email-tbaicar@codeaurora.org>
+ <1459955578-24602-2-git-send-email-tbaicar@codeaurora.org>
+ <57053100.7050305@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1AE640813FDE7649BE1B193DEA596E883BB66B8C-0J0gbvR4kThpB2pF5aRoyrfspsVTdybXVpNB7YpNyf8@public.gmane.org>
-Sender: linux-spi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Zheng, Lv" <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Tirdea, Irina" <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <57053100.7050305-5wv7dgnIgG8@public.gmane.org>
+Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Suzuki K Poulose <Suzuki.Poulose-5wv7dgnIgG8@public.gmane.org>, fu.wei-QSEj5FYQhm4dnm+yROfE0A@public.gmane.org, timur-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, harba-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, rruigrok-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org, ahs3-H+wXaHxf7aLQT0dZR+AlfA@public.gmane.org, catalin.marinas-5wv7dgnIgG8@public.gmane.org, will.deacon-5wv7dgnIgG8@public.gmane.org, rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org, lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org, matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org, robert.moore-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-arm-kernel-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, devel-E0kO6a4B6psdnm+yROfE0A@public.gmane.org
+Cc: "Jonathan (Zhixiong) Zhang" <zjzhang-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>, Naveen Kaje <nkaje-sgV2jX0FEOL9JmXXK+q4OQ@public.gmane.org>
 List-Id: linux-efi@vger.kernel.org
 
-On Wed, Apr 6, 2016 at 9:05 AM, Zheng, Lv <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org> wrote:
+Hello Suzuki,
 
->> It is hard to create new kernel objects from sysfs. You need to resort
->> to hacks like using new_table sysfs entries which does not map to a
->> kernel object. Writes larger then PAGE_SIZE are impossible to handle
->> with multiple open files because you have no open callback to create a
->> file context. It is also not possible to do any clean-up because there
->> is no close callback and if something goes wrong for example when
->> trying to install the table you will leak the allocated memory.
->>
->> configfs was designed for the specific purpose of creating kernel
->> objects from userspace and addresses all of the limitations above (and
->> some more).
->>
->> Initially I started to implement this functionality via sysfs but I
->> run into the issues mentioned above and decided to use configfs.
-> [Lv Zheng]
-> I can sense different difficulties from your descriptions.
-> Let me break it down into details.
+On 4/6/2016 9:53 AM, Suzuki K Poulose wrote:
+> On 06/04/16 16:12, Tyler Baicar wrote:
+>> +    hest_hdr = (struct acpi_hest_header *)generic;
+>> +    if (hest_hdr->type == ACPI_HEST_TYPE_GENERIC_ERROR_V2) {
+>> +        ghes->generic_v2 = (struct acpi_hest_generic_v2 *)generic;
+>> +        rc = apei_map_generic_address(
+>> +            &ghes->generic_v2->read_ack_register);
+>> +        if (rc)
+>> +            goto err_unmap;
+>> +    } else
+>> +        ghes->generic_v2 = NULL;
+> ...
+>>   err_unmap:
+>> apei_unmap_generic_address(&generic->error_status_address);
+>> +    if (ghes->generic_v2)
+>> +        apei_unmap_generic_address(
+>> +            &ghes->generic_v2->read_ack_register);
+>>   err_free:
+>>       kfree(ghes);
+>>       return ERR_PTR(rc);
+>> @@ -279,6 +295,9 @@ static void ghes_fini(struct ghes *ghes)
+>>   {
+>>       kfree(ghes->estatus);
+>> apei_unmap_generic_address(&ghes->generic->error_status_address);
+>> +    if (ghes->generic_v2)
+>> +        apei_unmap_generic_address(
+>> +            &ghes->generic_v2->error_status_address);
 >
-> We already have acpi_table_handler working there for creating new ACPI table entries for us.
-> Based on this facility, let's think about the following solution:
-> 1. sysfs presenting change
-> We can change the table file to a table directory whose name is in the following format:
-> TableSignature-OemId-OemTableId
-> Then we can get rid of the annoying numbered table name suffix first.
-> The numbered table name suffix cannot be kept consistent to reflect the real index if we allow tables to be dynamically loaded/unloaded.
+> I am not familiar with the APEI code, but is this error_status_address or
+> read_ack_register ? We don't seem to be mapping error_status_address 
+> in generic_v2 header
+> which is introduced in this patch ? Am I missing something ?
 >
-> This is the first design difficulty we need to solve.
->
-> 2. acpi_table_handler change
-> Now we can append 2 new events to acpi_table_handler - ACPI_TABLE_INSTALL/ACPI_TABLE_UNINSTALL.
-> With which, the sysfs entries can be created/deleted when the table is added to/removed from the global table list.
-> And this should be the working mechanism for us
-> So we actually don't have the trouble to deal with the new kernel object creation/deletion from sysfs.
->
-> I agree the dynamic kernel object creation/deletion need special care.
-> But this actually is what a kernel engineer should do because this kind of things happen here and there throughout the kernel.
-> We should have already been used to that.
->
-> This is the second engineering difficulty we need to face.
->
-> 3. load/unload commanding
-> Now we need a character device in sysfs to handle load/unload command.
-> Well, there are many such kind of files in sysfs, for example, device nodes.
-> So this is not a non-achievable task, but just a difficult engineering task.
-> The system engineers need to be skillful enough to implement this.
-> Like the dynamic kernel object handling, we should have already been used to this.
->
->
-> If you still think this is difficult, the alternative choice is to use acpidbg char device's ioctl interface.
-> That could simplifies this task.
-> And since the ioctl interface is required by ACPICA disassembler, the work on that will be inherited by the disassembler porting.
->
+> Suzuki
 
-Why can't the dissembler access the tables through the existing sysfs interface?
+Thank you for your feedback. This does look like an error; it should be 
+&ghes->generic_v2->read_ack_register. The variable 
+&ghes->generic_v2->error_status_address is the same as 
+&ghes->generic->error_status_address which is unmapped on the line above 
+the if statement here.
 
-> This is the last engineering difficulty we need to face.
->
-> So why can't these solutions work for us?
->
+Thanks,
+Tyler
 
-It can be done, but it is not the right way to do it, IMO.
---
-To unsubscribe from this list: send the line "unsubscribe linux-spi" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Qualcomm Innovation Center, Inc.
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
