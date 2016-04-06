@@ -1,106 +1,40 @@
-From: "Baicar, Tyler" <tbaicar@codeaurora.org>
-Subject: Re: [PATCH V2 5/9] arm64: exception: handle instruction abort at
- current EL
-Date: Wed, 6 Apr 2016 15:36:00 -0600
-Message-ID: <57058140.5040507@codeaurora.org>
-References: <1459955578-24602-1-git-send-email-tbaicar@codeaurora.org>
- <1459955578-24602-6-git-send-email-tbaicar@codeaurora.org>
- <57052D0E.5070903@arm.com>
+From: Matthew Garrett <mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org>
+Subject: Re: [PATCH] PCI: Add Broadcom 4331 reset quirk to prevent IRQ storm
+Date: Wed, 6 Apr 2016 23:19:43 +0100
+Message-ID: <20160406221943.GA10955@srcf.ucam.org>
+References: <811539524df8b5ed7e2817c1c3e3e08560c97964.1459275517.git.lukas@wunner.de>
+ <20160405194015.GC15353@localhost>
+ <20160406213029.GA12421@wunner.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-acpi-owner@vger.kernel.org>
-In-Reply-To: <57052D0E.5070903@arm.com>
-Sender: linux-acpi-owner@vger.kernel.org
-To: Marc Zyngier <marc.zyngier@arm.com>, fu.wei@linaro.org, timur@codeaurora.org, harba@codeaurora.org, rruigrok@codeaurora.org, ahs3@redhat.com, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org
-Cc: Naveen Kaje <nkaje@codeaurora.org>
+Return-path: <b43-dev-bounces+gldbd-bcm43xx-dev=gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20160406213029.GA12421-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/b43-dev>,
+ <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/b43-dev/>
+List-Post: <mailto:b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+List-Help: <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/b43-dev>,
+ <mailto:b43-dev-request-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org?subject=subscribe>
+Sender: "b43-dev" <b43-dev-bounces-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org>
+Errors-To: b43-dev-bounces+gldbd-bcm43xx-dev=gmane.org-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
+To: Lukas Wunner <lukas-JFq808J9C/izQB+pC5nmwQ@public.gmane.org>
+Cc: linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, linux-pci-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Bjorn Helgaas <helgaas-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, b43-dev-IAPFreCvJWM7uuMidbF8XUB+6BGkLq7r@public.gmane.org
 List-Id: linux-efi@vger.kernel.org
 
-Hello Marc,
+On Wed, Apr 06, 2016 at 11:30:29PM +0200, Lukas Wunner wrote:
 
-On 4/6/2016 9:36 AM, Marc Zyngier wrote:
-> On 06/04/16 16:12, Tyler Baicar wrote:
->> Add a handler for instruction aborts at the current EL
->> (ESR_ELx_EC_IABT_CUR) so they are no longer handled in el1_inv.
->> This allows firmware first handling for possible SEA
->> (Synchronous External Abort) caused instruction abort at
->> current EL.
->>
->> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
->> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
->> ---
->>   arch/arm64/kernel/entry.S | 19 +++++++++++++++++++
->>   1 file changed, 19 insertions(+)
->>
->> diff --git a/arch/arm64/kernel/entry.S b/arch/arm64/kernel/entry.S
->> index 12e8d2b..f257856 100644
->> --- a/arch/arm64/kernel/entry.S
->> +++ b/arch/arm64/kernel/entry.S
->> @@ -336,6 +336,8 @@ el1_sync:
->>   	lsr	x24, x1, #ESR_ELx_EC_SHIFT	// exception class
->>   	cmp	x24, #ESR_ELx_EC_DABT_CUR	// data abort in EL1
->>   	b.eq	el1_da
->> +	cmp	x24, #ESR_ELx_EC_IABT_CUR	// instruction abort in EL1
->> +	b.eq	el1_ia
->>   	cmp	x24, #ESR_ELx_EC_SYS64		// configurable trap
->>   	b.eq	el1_undef
->>   	cmp	x24, #ESR_ELx_EC_SP_ALIGN	// stack alignment exception
->> @@ -363,6 +365,23 @@ el1_da:
->>   	// disable interrupts before pulling preserved data off the stack
->>   	disable_irq
->>   	kernel_exit 1
->> +el1_ia:
->> +	/*
->> +	 * Instruction abort handling
->> +	 */
->> +	mrs	x0, far_el1
->> +	enable_dbg
->> +	// re-enable interrupts if they were enabled in the aborted context
->> +	tbnz	x23, #7, 1f			// PSR_I_BIT
->> +	enable_irq
->> +1:
->> +	orr	x1, x1, #1 << 24		// use reserved ISS bit for instruction aborts
->> +	mov	x2, sp				// struct pt_regs
->> +	bl	do_mem_abort
->> +
->> +	// disable interrupts before pulling preserved data off the stack
->> +	disable_irq
->> +	kernel_exit 1
->>   el1_sp_pc:
->>   	/*
->>   	 * Stack or PC alignment exception handling
->>
-> What happens if you were running at EL2 when this faults gets injected?
-> It looks like KVM needs something similar, doesn't it?
->
-> Thanks,
->
-> 	M.
-Thank you for your comment. I don't think this case is possible, or at 
-least the current KVM code suggests that this case should never happen.  
-In the EL1 code, we get to this case via the vector:
+> Matthew's grub patch puts the wireless card into D3hot, which does not
+> stop the interrupts. I have tested this. (It may stop the DMA, I cannot
+> verify that as it doesn't occur on my machine for lack of an access point.)
 
-ventry  el1_sync                        // Synchronous EL1h
-
-The EL2 KVM equivalent appears to be in arch/arm64/kvm/hyp-entry.S and is:
-
-ventry  el2h_sync_invalid               // Synchronous EL2h
-
-This vector is defined as an invalid_vector and has a comment suggesting 
-that it should never happen:
-
-/* None of these should ever happen */
-...
-         invalid_vector  el2h_sync_invalid
-
-Please correct me if I am wrong, but it looks like this case should not 
-be possible.
-
-Thanks,
-Tyler
+Ah, interesting. One thing to note (and which I've just noticed) is that 
+it looks like this fixup is only called when you boot with the "linux" 
+command and not with the "linuxefi" command. If you're using Ubuntu, 
+"linux" may fall back to "linuxefi" without executing this fixup. So we 
+need to add it to the kernel EFI stub anyway.
 
 -- 
-Qualcomm Innovation Center, Inc.
-Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
-
+Matthew Garrett | mjg59-1xO5oi07KQx4cg9Nei1l7Q@public.gmane.org
