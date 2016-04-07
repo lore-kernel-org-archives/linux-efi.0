@@ -1,133 +1,115 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 15/17] ARM64: XEN: Add a function to initialize Xen specific UEFI runtime services
-Date: Thu, 7 Apr 2016 20:03:32 +0800
-Message-ID: <1460030614-16112-16-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v11 06/17] Xen: ARM: Add support for mapping
+	platform device mmio
+Date: Thu, 7 Apr 2016 20:03:23 +0800
+Message-ID: <1460030614-16112-7-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
 In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
-Sender: linux-kernel-owner@vger.kernel.org
+List-Unsubscribe: <http://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <http://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
 To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
+Cc: devicetree@vger.kernel.org, linux-efi@vger.kernel.org, catalin.marinas@arm.com, will.deacon@arm.com, linux-kernel@vger.kernel.org, xen-devel@lists.xen.org, julien.grall@arm.com, david.vrabel@citrix.com, peter.huangpeng@huawei.com, shannon.zhao@linaro.org
 List-Id: linux-efi@vger.kernel.org
 
-From: Shannon Zhao <shannon.zhao@linaro.org>
-
-When running on Xen hypervisor, runtime services are supported through
-hypercall. Add a Xen specific function to initialize runtime services.
-
-Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
----
- arch/arm/include/asm/xen/xen-ops.h   |  6 ++++++
- arch/arm/xen/Makefile                |  1 +
- arch/arm/xen/efi.c                   | 40 ++++++++++++++++++++++++++++++++++++
- arch/arm64/include/asm/xen/xen-ops.h |  6 ++++++
- arch/arm64/xen/Makefile              |  1 +
- drivers/xen/Kconfig                  |  2 +-
- 6 files changed, 55 insertions(+), 1 deletion(-)
- create mode 100644 arch/arm/include/asm/xen/xen-ops.h
- create mode 100644 arch/arm/xen/efi.c
- create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
-
-diff --git a/arch/arm/include/asm/xen/xen-ops.h b/arch/arm/include/asm/xen/xen-ops.h
-new file mode 100644
-index 0000000..ec154e7
---- /dev/null
-+++ b/arch/arm/include/asm/xen/xen-ops.h
-@@ -0,0 +1,6 @@
-+#ifndef _ASM_XEN_OPS_H
-+#define _ASM_XEN_OPS_H
-+
-+void xen_efi_runtime_setup(void);
-+
-+#endif /* _ASM_XEN_OPS_H */
-diff --git a/arch/arm/xen/Makefile b/arch/arm/xen/Makefile
-index 1296952..2279521 100644
---- a/arch/arm/xen/Makefile
-+++ b/arch/arm/xen/Makefile
-@@ -1 +1,2 @@
- obj-y		:= enlighten.o hypercall.o grant-table.o p2m.o mm.o
-+obj-$(CONFIG_XEN_EFI) += efi.o
-diff --git a/arch/arm/xen/efi.c b/arch/arm/xen/efi.c
-new file mode 100644
-index 0000000..16db419
---- /dev/null
-+++ b/arch/arm/xen/efi.c
-@@ -0,0 +1,40 @@
-+/*
-+ * Copyright (c) 2015, Linaro Limited, Shannon Zhao
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2 of the License, or
-+ * (at your option) any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License along
-+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
-+ */
-+
-+#include <linux/efi.h>
-+#include <xen/xen-ops.h>
-+#include <asm/xen/xen-ops.h>
-+
-+/* Set XEN EFI runtime services function pointers. Other fields of struct efi,
-+ * e.g. efi.systab, will be set like normal EFI.
-+ */
-+void __init xen_efi_runtime_setup(void)
-+{
-+	efi.get_time                 = xen_efi_get_time;
-+	efi.set_time                 = xen_efi_set_time;
-+	efi.get_wakeup_time          = xen_efi_get_wakeup_time;
-+	efi.set_wakeup_time          = xen_efi_set_wakeup_time;
-+	efi.get_variable             = xen_efi_get_variable;
-+	efi.get_next_variable        = xen_efi_get_next_variable;
-+	efi.set_variable             = xen_efi_set_variable;
-+	efi.query_variable_info      = xen_efi_query_variable_info;
-+	efi.update_capsule           = xen_efi_update_capsule;
-+	efi.query_capsule_caps       = xen_efi_query_capsule_caps;
-+	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
-+	efi.reset_system             = NULL; /* Functionality provided by Xen. */
-+}
-+EXPORT_SYMBOL_GPL(xen_efi_runtime_setup);
-diff --git a/arch/arm64/include/asm/xen/xen-ops.h b/arch/arm64/include/asm/xen/xen-ops.h
-new file mode 100644
-index 0000000..ec154e7
---- /dev/null
-+++ b/arch/arm64/include/asm/xen/xen-ops.h
-@@ -0,0 +1,6 @@
-+#ifndef _ASM_XEN_OPS_H
-+#define _ASM_XEN_OPS_H
-+
-+void xen_efi_runtime_setup(void);
-+
-+#endif /* _ASM_XEN_OPS_H */
-diff --git a/arch/arm64/xen/Makefile b/arch/arm64/xen/Makefile
-index 74a8d87..8ff8aa9 100644
---- a/arch/arm64/xen/Makefile
-+++ b/arch/arm64/xen/Makefile
-@@ -1,2 +1,3 @@
- xen-arm-y	+= $(addprefix ../../arm/xen/, enlighten.o grant-table.o p2m.o mm.o)
- obj-y		:= xen-arm.o hypercall.o
-+obj-$(CONFIG_XEN_EFI) += $(addprefix ../../arm/xen/, efi.o)
-diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
-index 979a831..f15bb3b7 100644
---- a/drivers/xen/Kconfig
-+++ b/drivers/xen/Kconfig
-@@ -275,7 +275,7 @@ config XEN_HAVE_PVMMU
- 
- config XEN_EFI
- 	def_bool y
--	depends on X86_64 && EFI
-+	depends on (ARM || ARM64 || X86_64) && EFI
- 
- config XEN_AUTO_XLATE
- 	def_bool y
--- 
-2.0.4
+RnJvbTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KCkFkZCBhIGJ1c19u
+b3RpZmllciBmb3IgcGxhdGZvcm0gYnVzIGRldmljZSBpbiBvcmRlciB0byBtYXAgdGhlIGRldmlj
+ZQptbWlvIHJlZ2lvbnMgd2hlbiBET00wIGJvb3Rpbmcgd2l0aCBBQ1BJLgoKU2lnbmVkLW9mZi1i
+eTogU2hhbm5vbiBaaGFvIDxzaGFubm9uLnpoYW9AbGluYXJvLm9yZz4KQWNrZWQtYnk6IFN0ZWZh
+bm8gU3RhYmVsbGluaSA8c3RlZmFuby5zdGFiZWxsaW5pQGV1LmNpdHJpeC5jb20+Ci0tLQogZHJp
+dmVycy94ZW4vTWFrZWZpbGUgICAgIHwgICAxICsKIGRyaXZlcnMveGVuL2FybS1kZXZpY2UuYyB8
+IDE1MyArKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKwogMiBm
+aWxlcyBjaGFuZ2VkLCAxNTQgaW5zZXJ0aW9ucygrKQogY3JlYXRlIG1vZGUgMTAwNjQ0IGRyaXZl
+cnMveGVuL2FybS1kZXZpY2UuYwoKZGlmZiAtLWdpdCBhL2RyaXZlcnMveGVuL01ha2VmaWxlIGIv
+ZHJpdmVycy94ZW4vTWFrZWZpbGUKaW5kZXggOWI3YTM1Yy4uNDE1ZjI4NiAxMDA2NDQKLS0tIGEv
+ZHJpdmVycy94ZW4vTWFrZWZpbGUKKysrIGIvZHJpdmVycy94ZW4vTWFrZWZpbGUKQEAgLTksNiAr
+OSw3IEBAIENGTEFHU19mZWF0dXJlcy5vCQkJOj0gJChub3N0YWNrcCkKIAogQ0ZMQUdTX2VmaS5v
+CQkJCSs9IC1mc2hvcnQtd2NoYXIKIAorZG9tMC0kKENPTkZJR19BUk02NCkgKz0gYXJtLWRldmlj
+ZS5vCiBkb20wLSQoQ09ORklHX1BDSSkgKz0gcGNpLm8KIGRvbTAtJChDT05GSUdfVVNCX1NVUFBP
+UlQpICs9IGRiZ3AubwogZG9tMC0kKENPTkZJR19YRU5fQUNQSSkgKz0gYWNwaS5vICQoeGVuLXBh
+ZC15KQpkaWZmIC0tZ2l0IGEvZHJpdmVycy94ZW4vYXJtLWRldmljZS5jIGIvZHJpdmVycy94ZW4v
+YXJtLWRldmljZS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLmI5MThlOGUK
+LS0tIC9kZXYvbnVsbAorKysgYi9kcml2ZXJzL3hlbi9hcm0tZGV2aWNlLmMKQEAgLTAsMCArMSwx
+NTMgQEAKKy8qCisgKiBDb3B5cmlnaHQgKGMpIDIwMTUsIExpbmFybyBMaW1pdGVkLCBTaGFubm9u
+IFpoYW8KKyAqCisgKiBUaGlzIHByb2dyYW0gaXMgZnJlZSBzb2Z0d2FyZTsgeW91IGNhbiByZWRp
+c3RyaWJ1dGUgaXQgYW5kL29yIG1vZGlmeSBpdAorICogdW5kZXIgdGhlIHRlcm1zIGFuZCBjb25k
+aXRpb25zIG9mIHRoZSBHTlUgR2VuZXJhbCBQdWJsaWMgTGljZW5zZSwKKyAqIHZlcnNpb24gMiwg
+YXMgcHVibGlzaGVkIGJ5IHRoZSBGcmVlIFNvZnR3YXJlIEZvdW5kYXRpb24uCisgKgorICogVGhp
+cyBwcm9ncmFtIGlzIGRpc3RyaWJ1dGVkIGluIHRoZSBob3BlIGl0IHdpbGwgYmUgdXNlZnVsLCBi
+dXQgV0lUSE9VVAorICogQU5ZIFdBUlJBTlRZOyB3aXRob3V0IGV2ZW4gdGhlIGltcGxpZWQgd2Fy
+cmFudHkgb2YgTUVSQ0hBTlRBQklMSVRZIG9yCisgKiBGSVRORVNTIEZPUiBBIFBBUlRJQ1VMQVIg
+UFVSUE9TRS4gIFNlZSB0aGUgR05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UgZm9yCisgKiBtb3Jl
+IGRldGFpbHMuCisgKgorICogWW91IHNob3VsZCBoYXZlIHJlY2VpdmVkIGEgY29weSBvZiB0aGUg
+R05VIEdlbmVyYWwgUHVibGljIExpY2Vuc2UKKyAqIGFsb25nIHdpdGggdGhpcyBwcm9ncmFtLiAg
+SWYgbm90LCBzZWUgPGh0dHA6Ly93d3cuZ251Lm9yZy9saWNlbnNlcy8+LgorICovCisKKyNpbmNs
+dWRlIDxsaW51eC9wbGF0Zm9ybV9kZXZpY2UuaD4KKyNpbmNsdWRlIDxsaW51eC9hY3BpLmg+Cisj
+aW5jbHVkZSA8eGVuL3hlbi5oPgorI2luY2x1ZGUgPHhlbi9wYWdlLmg+CisjaW5jbHVkZSA8eGVu
+L2ludGVyZmFjZS9tZW1vcnkuaD4KKyNpbmNsdWRlIDxhc20veGVuL2h5cGVydmlzb3IuaD4KKyNp
+bmNsdWRlIDxhc20veGVuL2h5cGVyY2FsbC5oPgorCitzdGF0aWMgaW50IHhlbl91bm1hcF9kZXZp
+Y2VfbW1pbyhjb25zdCBzdHJ1Y3QgcmVzb3VyY2UgKnJlc291cmNlcywKKwkJCQkgdW5zaWduZWQg
+aW50IGNvdW50KQoreworCXVuc2lnbmVkIGludCBpLCBqLCBucjsKKwlpbnQgcmMgPSAwOworCWNv
+bnN0IHN0cnVjdCByZXNvdXJjZSAqcjsKKwlzdHJ1Y3QgeGVuX3JlbW92ZV9mcm9tX3BoeXNtYXAg
+eHJwOworCisJZm9yIChpID0gMDsgaSA8IGNvdW50OyBpKyspIHsKKwkJciA9ICZyZXNvdXJjZXNb
+aV07CisJCW5yID0gRElWX1JPVU5EX1VQKHJlc291cmNlX3NpemUociksIFhFTl9QQUdFX1NJWkUp
+OworCQlpZiAoKHJlc291cmNlX3R5cGUocikgIT0gSU9SRVNPVVJDRV9NRU0pIHx8IChuciA9PSAw
+KSkKKwkJCWNvbnRpbnVlOworCisJCWZvciAoaiA9IDA7IGogPCBucjsgaisrKSB7CisJCQl4cnAu
+ZG9taWQgPSBET01JRF9TRUxGOworCQkJeHJwLmdwZm4gPSBYRU5fUEZOX0RPV04oci0+c3RhcnQp
+ICsgajsKKwkJCXJjID0gSFlQRVJWSVNPUl9tZW1vcnlfb3AoWEVOTUVNX3JlbW92ZV9mcm9tX3Bo
+eXNtYXAsCisJCQkJCQkgICZ4cnApOworCQkJaWYgKHJjKQorCQkJCXJldHVybiByYzsKKwkJfQor
+CX0KKworCXJldHVybiByYzsKK30KKworc3RhdGljIGludCB4ZW5fbWFwX2RldmljZV9tbWlvKGNv
+bnN0IHN0cnVjdCByZXNvdXJjZSAqcmVzb3VyY2VzLAorCQkJICAgICAgIHVuc2lnbmVkIGludCBj
+b3VudCkKK3sKKwl1bnNpZ25lZCBpbnQgaSwgaiwgbnI7CisJaW50IHJjID0gMDsKKwljb25zdCBz
+dHJ1Y3QgcmVzb3VyY2UgKnI7CisJeGVuX3Bmbl90ICpncGZuczsKKwl4ZW5fdWxvbmdfdCAqaWR4
+czsKKwlpbnQgKmVycnM7CisJc3RydWN0IHhlbl9hZGRfdG9fcGh5c21hcF9yYW5nZSB4YXRwOwor
+CisJZm9yIChpID0gMDsgaSA8IGNvdW50OyBpKyspIHsKKwkJciA9ICZyZXNvdXJjZXNbaV07CisJ
+CW5yID0gRElWX1JPVU5EX1VQKHJlc291cmNlX3NpemUociksIFhFTl9QQUdFX1NJWkUpOworCQlp
+ZiAoKHJlc291cmNlX3R5cGUocikgIT0gSU9SRVNPVVJDRV9NRU0pIHx8IChuciA9PSAwKSkKKwkJ
+CWNvbnRpbnVlOworCisJCWdwZm5zID0ga3phbGxvYyhzaXplb2YoeGVuX3Bmbl90KSAqIG5yLCBH
+RlBfS0VSTkVMKTsKKwkJaWR4cyA9IGt6YWxsb2Moc2l6ZW9mKHhlbl91bG9uZ190KSAqIG5yLCBH
+RlBfS0VSTkVMKTsKKwkJZXJycyA9IGt6YWxsb2Moc2l6ZW9mKGludCkgKiBuciwgR0ZQX0tFUk5F
+TCk7CisJCWlmICghZ3BmbnMgfHwgIWlkeHMgfHwgIWVycnMpIHsKKwkJCWtmcmVlKGdwZm5zKTsK
+KwkJCWtmcmVlKGlkeHMpOworCQkJa2ZyZWUoZXJycyk7CisJCQlyYyA9IC1FTk9NRU07CisJCQln
+b3RvIHVubWFwOworCQl9CisKKwkJZm9yIChqID0gMDsgaiA8IG5yOyBqKyspIHsKKwkJCS8qCisJ
+CQkgKiBUaGUgcmVnaW9ucyBhcmUgYWx3YXlzIG1hcHBlZCAxOjEgdG8gRE9NMCBhbmQgdGhpcyBp
+cworCQkJICogZmluZSBiZWNhdXNlIHRoZSBtZW1vcnkgbWFwIGZvciBET00wIGlzIHRoZSBzYW1l
+IGFzCisJCQkgKiB0aGUgaG9zdCAoZXhjZXB0IGZvciB0aGUgUkFNKS4KKwkJCSAqLworCQkJZ3Bm
+bnNbal0gPSBYRU5fUEZOX0RPV04oci0+c3RhcnQpICsgajsKKwkJCWlkeHNbal0gPSBYRU5fUEZO
+X0RPV04oci0+c3RhcnQpICsgajsKKwkJfQorCisJCXhhdHAuZG9taWQgPSBET01JRF9TRUxGOwor
+CQl4YXRwLnNpemUgPSBucjsKKwkJeGF0cC5zcGFjZSA9IFhFTk1BUFNQQUNFX2Rldl9tbWlvOwor
+CisJCXNldF94ZW5fZ3Vlc3RfaGFuZGxlKHhhdHAuZ3BmbnMsIGdwZm5zKTsKKwkJc2V0X3hlbl9n
+dWVzdF9oYW5kbGUoeGF0cC5pZHhzLCBpZHhzKTsKKwkJc2V0X3hlbl9ndWVzdF9oYW5kbGUoeGF0
+cC5lcnJzLCBlcnJzKTsKKworCQlyYyA9IEhZUEVSVklTT1JfbWVtb3J5X29wKFhFTk1FTV9hZGRf
+dG9fcGh5c21hcF9yYW5nZSwgJnhhdHApOworCQlrZnJlZShncGZucyk7CisJCWtmcmVlKGlkeHMp
+OworCQlrZnJlZShlcnJzKTsKKwkJaWYgKHJjKQorCQkJZ290byB1bm1hcDsKKwl9CisKKwlyZXR1
+cm4gcmM7CisKK3VubWFwOgorCXhlbl91bm1hcF9kZXZpY2VfbW1pbyhyZXNvdXJjZXMsIGkpOwor
+CXJldHVybiByYzsKK30KKworc3RhdGljIGludCB4ZW5fcGxhdGZvcm1fbm90aWZpZXIoc3RydWN0
+IG5vdGlmaWVyX2Jsb2NrICpuYiwKKwkJCQkgdW5zaWduZWQgbG9uZyBhY3Rpb24sIHZvaWQgKmRh
+dGEpCit7CisJc3RydWN0IHBsYXRmb3JtX2RldmljZSAqcGRldiA9IHRvX3BsYXRmb3JtX2Rldmlj
+ZShkYXRhKTsKKwlpbnQgciA9IDA7CisKKwlpZiAocGRldi0+bnVtX3Jlc291cmNlcyA9PSAwIHx8
+IHBkZXYtPnJlc291cmNlID09IE5VTEwpCisJCXJldHVybiBOT1RJRllfT0s7CisKKwlzd2l0Y2gg
+KGFjdGlvbikgeworCWNhc2UgQlVTX05PVElGWV9BRERfREVWSUNFOgorCQlyID0geGVuX21hcF9k
+ZXZpY2VfbW1pbyhwZGV2LT5yZXNvdXJjZSwgcGRldi0+bnVtX3Jlc291cmNlcyk7CisJCWJyZWFr
+OworCWNhc2UgQlVTX05PVElGWV9ERUxfREVWSUNFOgorCQlyID0geGVuX3VubWFwX2RldmljZV9t
+bWlvKHBkZXYtPnJlc291cmNlLCBwZGV2LT5udW1fcmVzb3VyY2VzKTsKKwkJYnJlYWs7CisJZGVm
+YXVsdDoKKwkJcmV0dXJuIE5PVElGWV9ET05FOworCX0KKwlpZiAocikKKwkJZGV2X2VycigmcGRl
+di0+ZGV2LCAiUGxhdGZvcm06IEZhaWxlZCB0byAlcyBkZXZpY2UgJXMgTU1JTyFcbiIsCisJCQlh
+Y3Rpb24gPT0gQlVTX05PVElGWV9BRERfREVWSUNFID8gIm1hcCIgOgorCQkJKGFjdGlvbiA9PSBC
+VVNfTk9USUZZX0RFTF9ERVZJQ0UgPyAidW5tYXAiIDogIj8iKSwKKwkJCXBkZXYtPm5hbWUpOwor
+CisJcmV0dXJuIE5PVElGWV9PSzsKK30KKworc3RhdGljIHN0cnVjdCBub3RpZmllcl9ibG9jayBw
+bGF0Zm9ybV9kZXZpY2VfbmIgPSB7CisJLm5vdGlmaWVyX2NhbGwgPSB4ZW5fcGxhdGZvcm1fbm90
+aWZpZXIsCit9OworCitzdGF0aWMgaW50IF9faW5pdCByZWdpc3Rlcl94ZW5fcGxhdGZvcm1fbm90
+aWZpZXIodm9pZCkKK3sKKwlpZiAoIXhlbl9pbml0aWFsX2RvbWFpbigpIHx8IGFjcGlfZGlzYWJs
+ZWQpCisJCXJldHVybiAwOworCisJcmV0dXJuIGJ1c19yZWdpc3Rlcl9ub3RpZmllcigmcGxhdGZv
+cm1fYnVzX3R5cGUsICZwbGF0Zm9ybV9kZXZpY2VfbmIpOworfQorCithcmNoX2luaXRjYWxsKHJl
+Z2lzdGVyX3hlbl9wbGF0Zm9ybV9ub3RpZmllcik7Ci0tIAoyLjAuNAoKCgpfX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fXwpYZW4tZGV2ZWwgbWFpbGluZyBsaXN0
+Clhlbi1kZXZlbEBsaXN0cy54ZW4ub3JnCmh0dHA6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
