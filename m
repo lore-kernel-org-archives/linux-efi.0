@@ -1,7 +1,7 @@
 From: Shannon Zhao <zhaoshenglong@huawei.com>
-Subject: [PATCH v11 17/17] Xen: EFI: Parse DT parameters for Xen specific UEFI
-Date: Thu, 7 Apr 2016 20:03:34 +0800
-Message-ID: <1460030614-16112-18-git-send-email-zhaoshenglong@huawei.com>
+Subject: [PATCH v11 15/17] ARM64: XEN: Add a function to initialize Xen specific UEFI runtime services
+Date: Thu, 7 Apr 2016 20:03:32 +0800
+Message-ID: <1460030614-16112-16-git-send-email-zhaoshenglong@huawei.com>
 References: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Mime-Version: 1.0
 Content-Type: text/plain
@@ -9,172 +9,125 @@ Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1460030614-16112-1-git-send-email-zhaoshenglong@huawei.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-arm-kernel@lists.infradead.org, sstabellini@kernel.org
-Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com, Matt Fleming <matt@codeblueprint.co.uk>
+Cc: catalin.marinas@arm.com, will.deacon@arm.com, julien.grall@arm.com, david.vrabel@citrix.com, xen-devel@lists.xen.org, devicetree@vger.kernel.org, linux-efi@vger.kernel.org, linux-kernel@vger.kernel.org, shannon.zhao@linaro.org, peter.huangpeng@huawei.com
 List-Id: linux-efi@vger.kernel.org
 
 From: Shannon Zhao <shannon.zhao@linaro.org>
 
-Add a new function to parse DT parameters for Xen specific UEFI just
-like the way for normal UEFI. Then it could reuse the existing codes.
+When running on Xen hypervisor, runtime services are supported through
+hypercall. Add a Xen specific function to initialize runtime services.
 
-If Xen supports EFI, initialize runtime services.
-
-CC: Matt Fleming <matt@codeblueprint.co.uk>
 Signed-off-by: Shannon Zhao <shannon.zhao@linaro.org>
-Reviewed-by: Matt Fleming <matt@codeblueprint.co.uk>
 Reviewed-by: Stefano Stabellini <stefano.stabellini@eu.citrix.com>
 ---
- arch/arm/xen/enlighten.c           |  6 +++++
- drivers/firmware/efi/arm-runtime.c | 17 +++++++++-----
- drivers/firmware/efi/efi.c         | 45 ++++++++++++++++++++++++++++++++------
- 3 files changed, 56 insertions(+), 12 deletions(-)
+ arch/arm/include/asm/xen/xen-ops.h   |  6 ++++++
+ arch/arm/xen/Makefile                |  1 +
+ arch/arm/xen/efi.c                   | 40 ++++++++++++++++++++++++++++++++++++
+ arch/arm64/include/asm/xen/xen-ops.h |  6 ++++++
+ arch/arm64/xen/Makefile              |  1 +
+ drivers/xen/Kconfig                  |  2 +-
+ 6 files changed, 55 insertions(+), 1 deletion(-)
+ create mode 100644 arch/arm/include/asm/xen/xen-ops.h
+ create mode 100644 arch/arm/xen/efi.c
+ create mode 100644 arch/arm64/include/asm/xen/xen-ops.h
 
-diff --git a/arch/arm/xen/enlighten.c b/arch/arm/xen/enlighten.c
-index 13e3e9f..e130562 100644
---- a/arch/arm/xen/enlighten.c
-+++ b/arch/arm/xen/enlighten.c
-@@ -261,6 +261,12 @@ static int __init fdt_find_hyper_node(unsigned long node, const char *uname,
- 	    !strncmp(hyper_node.prefix, s, strlen(hyper_node.prefix)))
- 		hyper_node.version = s + strlen(hyper_node.prefix);
- 
-+	if (IS_ENABLED(CONFIG_XEN_EFI)) {
-+		/* Check if Xen supports EFI */
-+		if (of_get_flat_dt_subnode_by_name(node, "uefi") > 0)
-+			set_bit(EFI_PARAVIRT, &efi.flags);
-+	}
+diff --git a/arch/arm/include/asm/xen/xen-ops.h b/arch/arm/include/asm/xen/xen-ops.h
+new file mode 100644
+index 0000000..ec154e7
+--- /dev/null
++++ b/arch/arm/include/asm/xen/xen-ops.h
+@@ -0,0 +1,6 @@
++#ifndef _ASM_XEN_OPS_H
++#define _ASM_XEN_OPS_H
 +
- 	return 0;
- }
- 
-diff --git a/drivers/firmware/efi/arm-runtime.c b/drivers/firmware/efi/arm-runtime.c
-index 6ae21e4..ac609b9 100644
---- a/drivers/firmware/efi/arm-runtime.c
-+++ b/drivers/firmware/efi/arm-runtime.c
-@@ -27,6 +27,7 @@
- #include <asm/mmu.h>
- #include <asm/pgalloc.h>
- #include <asm/pgtable.h>
++void xen_efi_runtime_setup(void);
++
++#endif /* _ASM_XEN_OPS_H */
+diff --git a/arch/arm/xen/Makefile b/arch/arm/xen/Makefile
+index 1296952..2279521 100644
+--- a/arch/arm/xen/Makefile
++++ b/arch/arm/xen/Makefile
+@@ -1 +1,2 @@
+ obj-y		:= enlighten.o hypercall.o grant-table.o p2m.o mm.o
++obj-$(CONFIG_XEN_EFI) += efi.o
+diff --git a/arch/arm/xen/efi.c b/arch/arm/xen/efi.c
+new file mode 100644
+index 0000000..16db419
+--- /dev/null
++++ b/arch/arm/xen/efi.c
+@@ -0,0 +1,40 @@
++/*
++ * Copyright (c) 2015, Linaro Limited, Shannon Zhao
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License along
++ * with this program.  If not, see <http://www.gnu.org/licenses/>.
++ */
++
++#include <linux/efi.h>
++#include <xen/xen-ops.h>
 +#include <asm/xen/xen-ops.h>
- 
- extern u64 efi_system_table;
- 
-@@ -107,13 +108,19 @@ static int __init arm_enable_runtime_services(void)
- 	}
- 	set_bit(EFI_SYSTEM_TABLES, &efi.flags);
- 
--	if (!efi_virtmap_init()) {
--		pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
--		return -ENOMEM;
-+	if (IS_ENABLED(CONFIG_XEN_EFI) && efi_enabled(EFI_PARAVIRT)) {
-+		/* Set up runtime services function pointers for Xen Dom0 */
-+		xen_efi_runtime_setup();
-+	} else {
-+		if (!efi_virtmap_init()) {
-+			pr_err("No UEFI virtual mapping was installed -- runtime services will not be available\n");
-+			return -ENOMEM;
-+		}
 +
-+		/* Set up runtime services function pointers */
-+		efi_native_runtime_setup();
- 	}
- 
--	/* Set up runtime services function pointers */
--	efi_native_runtime_setup();
- 	set_bit(EFI_RUNTIME_SERVICES, &efi.flags);
- 
- 	efi.runtime_version = efi.systab->hdr.revision;
-diff --git a/drivers/firmware/efi/efi.c b/drivers/firmware/efi/efi.c
-index 3a69ed5..519c096 100644
---- a/drivers/firmware/efi/efi.c
-+++ b/drivers/firmware/efi/efi.c
-@@ -469,12 +469,14 @@ device_initcall(efi_load_efivars);
- 		FIELD_SIZEOF(struct efi_fdt_params, field) \
- 	}
- 
--static __initdata struct {
-+struct params {
- 	const char name[32];
- 	const char propname[32];
- 	int offset;
- 	int size;
--} dt_params[] = {
-+};
++/* Set XEN EFI runtime services function pointers. Other fields of struct efi,
++ * e.g. efi.systab, will be set like normal EFI.
++ */
++void __init xen_efi_runtime_setup(void)
++{
++	efi.get_time                 = xen_efi_get_time;
++	efi.set_time                 = xen_efi_set_time;
++	efi.get_wakeup_time          = xen_efi_get_wakeup_time;
++	efi.set_wakeup_time          = xen_efi_set_wakeup_time;
++	efi.get_variable             = xen_efi_get_variable;
++	efi.get_next_variable        = xen_efi_get_next_variable;
++	efi.set_variable             = xen_efi_set_variable;
++	efi.query_variable_info      = xen_efi_query_variable_info;
++	efi.update_capsule           = xen_efi_update_capsule;
++	efi.query_capsule_caps       = xen_efi_query_capsule_caps;
++	efi.get_next_high_mono_count = xen_efi_get_next_high_mono_count;
++	efi.reset_system             = NULL; /* Functionality provided by Xen. */
++}
++EXPORT_SYMBOL_GPL(xen_efi_runtime_setup);
+diff --git a/arch/arm64/include/asm/xen/xen-ops.h b/arch/arm64/include/asm/xen/xen-ops.h
+new file mode 100644
+index 0000000..ec154e7
+--- /dev/null
++++ b/arch/arm64/include/asm/xen/xen-ops.h
+@@ -0,0 +1,6 @@
++#ifndef _ASM_XEN_OPS_H
++#define _ASM_XEN_OPS_H
 +
-+static struct params fdt_params[] __initdata = {
- 	UEFI_PARAM("System Table", "linux,uefi-system-table", system_table),
- 	UEFI_PARAM("MemMap Address", "linux,uefi-mmap-start", mmap),
- 	UEFI_PARAM("MemMap Size", "linux,uefi-mmap-size", mmap_size),
-@@ -482,24 +484,45 @@ static __initdata struct {
- 	UEFI_PARAM("MemMap Desc. Version", "linux,uefi-mmap-desc-ver", desc_ver)
- };
- 
-+static struct params xen_fdt_params[] __initdata = {
-+	UEFI_PARAM("System Table", "xen,uefi-system-table", system_table),
-+	UEFI_PARAM("MemMap Address", "xen,uefi-mmap-start", mmap),
-+	UEFI_PARAM("MemMap Size", "xen,uefi-mmap-size", mmap_size),
-+	UEFI_PARAM("MemMap Desc. Size", "xen,uefi-mmap-desc-size", desc_size),
-+	UEFI_PARAM("MemMap Desc. Version", "xen,uefi-mmap-desc-ver", desc_ver)
-+};
++void xen_efi_runtime_setup(void);
 +
- struct param_info {
- 	int found;
- 	void *params;
-+	struct params *dt_params;
-+	int size;
- };
++#endif /* _ASM_XEN_OPS_H */
+diff --git a/arch/arm64/xen/Makefile b/arch/arm64/xen/Makefile
+index 74a8d87..8ff8aa9 100644
+--- a/arch/arm64/xen/Makefile
++++ b/arch/arm64/xen/Makefile
+@@ -1,2 +1,3 @@
+ xen-arm-y	+= $(addprefix ../../arm/xen/, enlighten.o grant-table.o p2m.o mm.o)
+ obj-y		:= xen-arm.o hypercall.o
++obj-$(CONFIG_XEN_EFI) += $(addprefix ../../arm/xen/, efi.o)
+diff --git a/drivers/xen/Kconfig b/drivers/xen/Kconfig
+index 979a831..f15bb3b7 100644
+--- a/drivers/xen/Kconfig
++++ b/drivers/xen/Kconfig
+@@ -275,7 +275,7 @@ config XEN_HAVE_PVMMU
  
- static int __init fdt_find_uefi_params(unsigned long node, const char *uname,
- 				       int depth, void *data)
- {
- 	struct param_info *info = data;
-+	struct params *dt_params = info->dt_params;
- 	const void *prop;
- 	void *dest;
- 	u64 val;
--	int i, len;
-+	int i, len, offset;
+ config XEN_EFI
+ 	def_bool y
+-	depends on X86_64 && EFI
++	depends on (ARM || ARM64 || X86_64) && EFI
  
--	if (depth != 1 || strcmp(uname, "chosen") != 0)
--		return 0;
-+	if (efi_enabled(EFI_PARAVIRT)) {
-+		if (depth != 1 || strcmp(uname, "hypervisor") != 0)
-+			return 0;
- 
--	for (i = 0; i < ARRAY_SIZE(dt_params); i++) {
-+		offset = of_get_flat_dt_subnode_by_name(node, "uefi");
-+		if (offset < 0)
-+			return 0;
-+		node = offset;
-+	} else {
-+		if (depth != 1 || strcmp(uname, "chosen") != 0)
-+			return 0;
-+	}
-+
-+	for (i = 0; i < info->size; i++) {
- 		prop = of_get_flat_dt_prop(node, dt_params[i].propname, &len);
- 		if (!prop)
- 			return 0;
-@@ -530,12 +553,20 @@ int __init efi_get_fdt_params(struct efi_fdt_params *params)
- 	info.found = 0;
- 	info.params = params;
- 
-+	if (efi_enabled(EFI_PARAVIRT)) {
-+		info.dt_params = xen_fdt_params;
-+		info.size = ARRAY_SIZE(xen_fdt_params);
-+	} else {
-+		info.dt_params = fdt_params;
-+		info.size = ARRAY_SIZE(fdt_params);
-+	}
-+
- 	ret = of_scan_flat_dt(fdt_find_uefi_params, &info);
- 	if (!info.found)
- 		pr_info("UEFI not found.\n");
- 	else if (!ret)
- 		pr_err("Can't find '%s' in device tree!\n",
--		       dt_params[info.found].name);
-+		       info.dt_params[info.found].name);
- 
- 	return ret;
- }
+ config XEN_AUTO_XLATE
+ 	def_bool y
 -- 
 2.0.4
