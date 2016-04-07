@@ -1,98 +1,125 @@
-From: "Zheng, Lv" <lv.zheng-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Subject: RE: [RFC PATCH 10/10] acpi: add support for loading SSDTs via
- configfs
-Date: Thu, 7 Apr 2016 02:42:50 +0000
-Message-ID: <1AE640813FDE7649BE1B193DEA596E883BB66E60@SHSMSX101.ccr.corp.intel.com>
-References: <1459417026-6697-1-git-send-email-octavian.purdila@intel.com>
-	<1459417026-6697-11-git-send-email-octavian.purdila@intel.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66233@SHSMSX101.ccr.corp.intel.com>
-	<CAE1zotLgjfKvFr0W9CjFbbkxqM6erLGwv-aHzTt=qwdCPzGOhw@mail.gmail.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB6677B@SHSMSX101.ccr.corp.intel.com>
-	<CAE1zotKDFLNP5JTnMiWOstE4DYBHVeyP902J9ixD+fJbFqSZ6Q@mail.gmail.com>
-	<1AE640813FDE7649BE1B193DEA596E883BB66B8C@SHSMSX101.ccr.corp.intel.com>
- <CAE1zotKa+t5cxznWfPyQ599k9ZB=akOuEDZusWcJgzux8wqp5A@mail.gmail.com>
+From: Marc Zyngier <marc.zyngier@arm.com>
+Subject: Re: [PATCH V2 5/9] arm64: exception: handle instruction abort at
+ current EL
+Date: Thu, 7 Apr 2016 08:54:14 +0100
+Message-ID: <20160407085414.5be649f0@arm.com>
+References: <1459955578-24602-1-git-send-email-tbaicar@codeaurora.org>
+	<1459955578-24602-6-git-send-email-tbaicar@codeaurora.org>
+	<57052D0E.5070903@arm.com>
+	<57058140.5040507@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <CAE1zotKa+t5cxznWfPyQ599k9ZB=akOuEDZusWcJgzux8wqp5A-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Content-Language: en-US
-Sender: linux-efi-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: "Purdila, Octavian" <octavian.purdila-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
-Cc: "Rafael J. Wysocki" <rjw-LthD3rsA81gm4RdzfppkhA@public.gmane.org>, Len Brown <lenb-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Matt Fleming <matt-mF/unelCI9GS6iBeEJttW/XRex20P6io@public.gmane.org>, Mark Brown <broonie-DgEjT+Ai2ygdnm+yROfE0A@public.gmane.org>, Wolfram Sang <wsa-z923LK4zBo2bacvFa/9K2g@public.gmane.org>, Joel Becker <jlbec-aKy9MeLSZ9dg9hUCZPvPmw@public.gmane.org>, Christoph Hellwig <hch-jcswGhMUV9g@public.gmane.org>, "linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-acpi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-efi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-i2c-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-spi-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org" <linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>, "Tirdea, Irina" <irina.tirdea-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org>
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <57058140.5040507@codeaurora.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Baicar, Tyler" <tbaicar@codeaurora.org>
+Cc: fu.wei@linaro.org, timur@codeaurora.org, harba@codeaurora.org, rruigrok@codeaurora.org, ahs3@redhat.com, catalin.marinas@arm.com, will.deacon@arm.com, rjw@rjwysocki.net, lenb@kernel.org, matt@codeblueprint.co.uk, robert.moore@intel.com, lv.zheng@intel.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, linux-acpi@vger.kernel.org, linux-efi@vger.kernel.org, devel@acpica.org, Naveen Kaje <nkaje@codeaurora.org>
 List-Id: linux-efi@vger.kernel.org
 
-SGksDQoNCj4gRnJvbTogbGludXgtYWNwaS1vd25lckB2Z2VyLmtlcm5lbC5vcmcgW21haWx0bzps
-aW51eC1hY3BpLQ0KPiBvd25lckB2Z2VyLmtlcm5lbC5vcmddIE9uIEJlaGFsZiBPZiBPY3Rhdmlh
-biBQdXJkaWxhDQo+IFN1YmplY3Q6IFJlOiBbUkZDIFBBVENIIDEwLzEwXSBhY3BpOiBhZGQgc3Vw
-cG9ydCBmb3IgbG9hZGluZyBTU0RUcyB2aWEgY29uZmlnZnMNCj4gDQo+IE9uIFdlZCwgQXByIDYs
-IDIwMTYgYXQgOTowNSBBTSwgWmhlbmcsIEx2IDxsdi56aGVuZ0BpbnRlbC5jb20+IHdyb3RlOg0K
-PiANCj4gPj4gSXQgaXMgaGFyZCB0byBjcmVhdGUgbmV3IGtlcm5lbCBvYmplY3RzIGZyb20gc3lz
-ZnMuIFlvdSBuZWVkIHRvIHJlc29ydA0KPiA+PiB0byBoYWNrcyBsaWtlIHVzaW5nIG5ld190YWJs
-ZSBzeXNmcyBlbnRyaWVzIHdoaWNoIGRvZXMgbm90IG1hcCB0byBhDQo+ID4+IGtlcm5lbCBvYmpl
-Y3QuIFdyaXRlcyBsYXJnZXIgdGhlbiBQQUdFX1NJWkUgYXJlIGltcG9zc2libGUgdG8gaGFuZGxl
-DQo+ID4+IHdpdGggbXVsdGlwbGUgb3BlbiBmaWxlcyBiZWNhdXNlIHlvdSBoYXZlIG5vIG9wZW4g
-Y2FsbGJhY2sgdG8gY3JlYXRlIGENCj4gPj4gZmlsZSBjb250ZXh0LiBJdCBpcyBhbHNvIG5vdCBw
-b3NzaWJsZSB0byBkbyBhbnkgY2xlYW4tdXAgYmVjYXVzZSB0aGVyZQ0KPiA+PiBpcyBubyBjbG9z
-ZSBjYWxsYmFjayBhbmQgaWYgc29tZXRoaW5nIGdvZXMgd3JvbmcgZm9yIGV4YW1wbGUgd2hlbg0K
-PiA+PiB0cnlpbmcgdG8gaW5zdGFsbCB0aGUgdGFibGUgeW91IHdpbGwgbGVhayB0aGUgYWxsb2Nh
-dGVkIG1lbW9yeS4NCj4gPj4NCj4gPj4gY29uZmlnZnMgd2FzIGRlc2lnbmVkIGZvciB0aGUgc3Bl
-Y2lmaWMgcHVycG9zZSBvZiBjcmVhdGluZyBrZXJuZWwNCj4gPj4gb2JqZWN0cyBmcm9tIHVzZXJz
-cGFjZSBhbmQgYWRkcmVzc2VzIGFsbCBvZiB0aGUgbGltaXRhdGlvbnMgYWJvdmUgKGFuZA0KPiA+
-PiBzb21lIG1vcmUpLg0KPiA+Pg0KPiA+PiBJbml0aWFsbHkgSSBzdGFydGVkIHRvIGltcGxlbWVu
-dCB0aGlzIGZ1bmN0aW9uYWxpdHkgdmlhIHN5c2ZzIGJ1dCBJDQo+ID4+IHJ1biBpbnRvIHRoZSBp
-c3N1ZXMgbWVudGlvbmVkIGFib3ZlIGFuZCBkZWNpZGVkIHRvIHVzZSBjb25maWdmcy4NCj4gPiBb
-THYgWmhlbmddDQo+ID4gSSBjYW4gc2Vuc2UgZGlmZmVyZW50IGRpZmZpY3VsdGllcyBmcm9tIHlv
-dXIgZGVzY3JpcHRpb25zLg0KPiA+IExldCBtZSBicmVhayBpdCBkb3duIGludG8gZGV0YWlscy4N
-Cj4gPg0KPiA+IFdlIGFscmVhZHkgaGF2ZSBhY3BpX3RhYmxlX2hhbmRsZXIgd29ya2luZyB0aGVy
-ZSBmb3IgY3JlYXRpbmcgbmV3IEFDUEkNCj4gdGFibGUgZW50cmllcyBmb3IgdXMuDQo+ID4gQmFz
-ZWQgb24gdGhpcyBmYWNpbGl0eSwgbGV0J3MgdGhpbmsgYWJvdXQgdGhlIGZvbGxvd2luZyBzb2x1
-dGlvbjoNCj4gPiAxLiBzeXNmcyBwcmVzZW50aW5nIGNoYW5nZQ0KPiA+IFdlIGNhbiBjaGFuZ2Ug
-dGhlIHRhYmxlIGZpbGUgdG8gYSB0YWJsZSBkaXJlY3Rvcnkgd2hvc2UgbmFtZSBpcyBpbiB0aGUN
-Cj4gZm9sbG93aW5nIGZvcm1hdDoNCj4gPiBUYWJsZVNpZ25hdHVyZS1PZW1JZC1PZW1UYWJsZUlk
-DQo+ID4gVGhlbiB3ZSBjYW4gZ2V0IHJpZCBvZiB0aGUgYW5ub3lpbmcgbnVtYmVyZWQgdGFibGUg
-bmFtZSBzdWZmaXggZmlyc3QuDQo+ID4gVGhlIG51bWJlcmVkIHRhYmxlIG5hbWUgc3VmZml4IGNh
-bm5vdCBiZSBrZXB0IGNvbnNpc3RlbnQgdG8gcmVmbGVjdCB0aGUgcmVhbA0KPiBpbmRleCBpZiB3
-ZSBhbGxvdyB0YWJsZXMgdG8gYmUgZHluYW1pY2FsbHkgbG9hZGVkL3VubG9hZGVkLg0KPiA+DQo+
-ID4gVGhpcyBpcyB0aGUgZmlyc3QgZGVzaWduIGRpZmZpY3VsdHkgd2UgbmVlZCB0byBzb2x2ZS4N
-Cj4gPg0KPiA+IDIuIGFjcGlfdGFibGVfaGFuZGxlciBjaGFuZ2UNCj4gPiBOb3cgd2UgY2FuIGFw
-cGVuZCAyIG5ldyBldmVudHMgdG8gYWNwaV90YWJsZV9oYW5kbGVyIC0NCj4gQUNQSV9UQUJMRV9J
-TlNUQUxML0FDUElfVEFCTEVfVU5JTlNUQUxMLg0KPiA+IFdpdGggd2hpY2gsIHRoZSBzeXNmcyBl
-bnRyaWVzIGNhbiBiZSBjcmVhdGVkL2RlbGV0ZWQgd2hlbiB0aGUgdGFibGUgaXMgYWRkZWQNCj4g
-dG8vcmVtb3ZlZCBmcm9tIHRoZSBnbG9iYWwgdGFibGUgbGlzdC4NCj4gPiBBbmQgdGhpcyBzaG91
-bGQgYmUgdGhlIHdvcmtpbmcgbWVjaGFuaXNtIGZvciB1cw0KPiA+IFNvIHdlIGFjdHVhbGx5IGRv
-bid0IGhhdmUgdGhlIHRyb3VibGUgdG8gZGVhbCB3aXRoIHRoZSBuZXcga2VybmVsIG9iamVjdA0K
-PiBjcmVhdGlvbi9kZWxldGlvbiBmcm9tIHN5c2ZzLg0KPiA+DQo+ID4gSSBhZ3JlZSB0aGUgZHlu
-YW1pYyBrZXJuZWwgb2JqZWN0IGNyZWF0aW9uL2RlbGV0aW9uIG5lZWQgc3BlY2lhbCBjYXJlLg0K
-PiA+IEJ1dCB0aGlzIGFjdHVhbGx5IGlzIHdoYXQgYSBrZXJuZWwgZW5naW5lZXIgc2hvdWxkIGRv
-IGJlY2F1c2UgdGhpcyBraW5kIG9mDQo+IHRoaW5ncyBoYXBwZW4gaGVyZSBhbmQgdGhlcmUgdGhy
-b3VnaG91dCB0aGUga2VybmVsLg0KPiA+IFdlIHNob3VsZCBoYXZlIGFscmVhZHkgYmVlbiB1c2Vk
-IHRvIHRoYXQuDQo+ID4NCj4gPiBUaGlzIGlzIHRoZSBzZWNvbmQgZW5naW5lZXJpbmcgZGlmZmlj
-dWx0eSB3ZSBuZWVkIHRvIGZhY2UuDQo+ID4NCj4gPiAzLiBsb2FkL3VubG9hZCBjb21tYW5kaW5n
-DQo+ID4gTm93IHdlIG5lZWQgYSBjaGFyYWN0ZXIgZGV2aWNlIGluIHN5c2ZzIHRvIGhhbmRsZSBs
-b2FkL3VubG9hZCBjb21tYW5kLg0KPiA+IFdlbGwsIHRoZXJlIGFyZSBtYW55IHN1Y2gga2luZCBv
-ZiBmaWxlcyBpbiBzeXNmcywgZm9yIGV4YW1wbGUsIGRldmljZSBub2Rlcy4NCj4gPiBTbyB0aGlz
-IGlzIG5vdCBhIG5vbi1hY2hpZXZhYmxlIHRhc2ssIGJ1dCBqdXN0IGEgZGlmZmljdWx0IGVuZ2lu
-ZWVyaW5nIHRhc2suDQo+ID4gVGhlIHN5c3RlbSBlbmdpbmVlcnMgbmVlZCB0byBiZSBza2lsbGZ1
-bCBlbm91Z2ggdG8gaW1wbGVtZW50IHRoaXMuDQo+ID4gTGlrZSB0aGUgZHluYW1pYyBrZXJuZWwg
-b2JqZWN0IGhhbmRsaW5nLCB3ZSBzaG91bGQgaGF2ZSBhbHJlYWR5IGJlZW4gdXNlZCB0bw0KPiB0
-aGlzLg0KPiA+DQo+ID4NCj4gPiBJZiB5b3Ugc3RpbGwgdGhpbmsgdGhpcyBpcyBkaWZmaWN1bHQs
-IHRoZSBhbHRlcm5hdGl2ZSBjaG9pY2UgaXMgdG8gdXNlIGFjcGlkYmcgY2hhcg0KPiBkZXZpY2Un
-cyBpb2N0bCBpbnRlcmZhY2UuDQo+ID4gVGhhdCBjb3VsZCBzaW1wbGlmaWVzIHRoaXMgdGFzay4N
-Cj4gPiBBbmQgc2luY2UgdGhlIGlvY3RsIGludGVyZmFjZSBpcyByZXF1aXJlZCBieSBBQ1BJQ0Eg
-ZGlzYXNzZW1ibGVyLCB0aGUgd29yayBvbg0KPiB0aGF0IHdpbGwgYmUgaW5oZXJpdGVkIGJ5IHRo
-ZSBkaXNhc3NlbWJsZXIgcG9ydGluZy4NCj4gPg0KPiANCj4gV2h5IGNhbid0IHRoZSBkaXNzZW1i
-bGVyIGFjY2VzcyB0aGUgdGFibGVzIHRocm91Z2ggdGhlIGV4aXN0aW5nIHN5c2ZzIGludGVyZmFj
-ZT8NCltMdiBaaGVuZ10gDQpUaGUgYWNwaWRiZyB1dGlsaXR5IHNob3VsZCBiZSBzZWxmLWNvbnRh
-aW5lZC4NCkl0IHdpbGwgYmUgYmFjayBwb3J0ZWQgdG8gQUNQSUNBLg0KU28gaXQgbWlnaHQgYmUg
-cG9ydGVkIHRvIG90aGVyIE9TUE1zLg0KRnJvbSB0aGlzIHBvaW50IG9mIHZpZXcsIGFjcGlkYmcg
-bmVlZCBzdWNoIGtpbmQgb2YgZGVzaWduIC0gZG9pbmcgZXZlcnl0aGluZyBpdCBuZWVkIGZyb20g
-YW4gT1NQTSBrZXJuZWwgdXNpbmcgYSBzaW5nbGUgY2hhciBkZXZpY2UuDQoNClRoYW5rcyBhbmQg
-YmVzdCByZWdhcmRzDQotTHYNCg0KPiANCj4gPiBUaGlzIGlzIHRoZSBsYXN0IGVuZ2luZWVyaW5n
-IGRpZmZpY3VsdHkgd2UgbmVlZCB0byBmYWNlLg0KPiA+DQo+ID4gU28gd2h5IGNhbid0IHRoZXNl
-IHNvbHV0aW9ucyB3b3JrIGZvciB1cz8NCj4gPg0KPiANCj4gSXQgY2FuIGJlIGRvbmUsIGJ1dCBp
-dCBpcyBub3QgdGhlIHJpZ2h0IHdheSB0byBkbyBpdCwgSU1PLg0KPiAtLQ0KPiBUbyB1bnN1YnNj
-cmliZSBmcm9tIHRoaXMgbGlzdDogc2VuZCB0aGUgbGluZSAidW5zdWJzY3JpYmUgbGludXgtYWNw
-aSIgaW4NCj4gdGhlIGJvZHkgb2YgYSBtZXNzYWdlIHRvIG1ham9yZG9tb0B2Z2VyLmtlcm5lbC5v
-cmcNCj4gTW9yZSBtYWpvcmRvbW8gaW5mbyBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
-cmRvbW8taW5mby5odG1sDQo=
+On Wed, 6 Apr 2016 15:36:00 -0600
+"Baicar, Tyler" <tbaicar@codeaurora.org> wrote:
+
+Hi Tyler,
+
+> Hello Marc,
+> 
+> On 4/6/2016 9:36 AM, Marc Zyngier wrote:
+> > On 06/04/16 16:12, Tyler Baicar wrote:
+> >> Add a handler for instruction aborts at the current EL
+> >> (ESR_ELx_EC_IABT_CUR) so they are no longer handled in el1_inv.
+> >> This allows firmware first handling for possible SEA
+> >> (Synchronous External Abort) caused instruction abort at
+> >> current EL.
+> >>
+> >> Signed-off-by: Tyler Baicar <tbaicar@codeaurora.org>
+> >> Signed-off-by: Naveen Kaje <nkaje@codeaurora.org>
+> >> ---
+> >>   arch/arm64/kernel/entry.S | 19 +++++++++++++++++++
+> >>   1 file changed, 19 insertions(+)
+> >>
+> >> diff --git a/arch/arm64/kernel/entry.S b/arch/arm64/kernel/entry.S
+> >> index 12e8d2b..f257856 100644
+> >> --- a/arch/arm64/kernel/entry.S
+> >> +++ b/arch/arm64/kernel/entry.S
+> >> @@ -336,6 +336,8 @@ el1_sync:
+> >>   	lsr	x24, x1, #ESR_ELx_EC_SHIFT	// exception class
+> >>   	cmp	x24, #ESR_ELx_EC_DABT_CUR	// data abort in EL1
+> >>   	b.eq	el1_da
+> >> +	cmp	x24, #ESR_ELx_EC_IABT_CUR	// instruction abort in EL1
+> >> +	b.eq	el1_ia
+> >>   	cmp	x24, #ESR_ELx_EC_SYS64		// configurable trap
+> >>   	b.eq	el1_undef
+> >>   	cmp	x24, #ESR_ELx_EC_SP_ALIGN	// stack alignment exception
+> >> @@ -363,6 +365,23 @@ el1_da:
+> >>   	// disable interrupts before pulling preserved data off the stack
+> >>   	disable_irq
+> >>   	kernel_exit 1
+> >> +el1_ia:
+> >> +	/*
+> >> +	 * Instruction abort handling
+> >> +	 */
+> >> +	mrs	x0, far_el1
+> >> +	enable_dbg
+> >> +	// re-enable interrupts if they were enabled in the aborted context
+> >> +	tbnz	x23, #7, 1f			// PSR_I_BIT
+> >> +	enable_irq
+> >> +1:
+> >> +	orr	x1, x1, #1 << 24		// use reserved ISS bit for instruction aborts
+> >> +	mov	x2, sp				// struct pt_regs
+> >> +	bl	do_mem_abort
+> >> +
+> >> +	// disable interrupts before pulling preserved data off the stack
+> >> +	disable_irq
+> >> +	kernel_exit 1
+> >>   el1_sp_pc:
+> >>   	/*
+> >>   	 * Stack or PC alignment exception handling
+> >>
+> > What happens if you were running at EL2 when this faults gets injected?
+> > It looks like KVM needs something similar, doesn't it?
+> >
+> > Thanks,
+> >
+> > 	M.
+> Thank you for your comment. I don't think this case is possible, or at 
+> least the current KVM code suggests that this case should never happen.  
+> In the EL1 code, we get to this case via the vector:
+> 
+> ventry  el1_sync                        // Synchronous EL1h
+> 
+> The EL2 KVM equivalent appears to be in arch/arm64/kvm/hyp-entry.S and is:
+> 
+> ventry  el2h_sync_invalid               // Synchronous EL2h
+> 
+> This vector is defined as an invalid_vector and has a comment suggesting 
+> that it should never happen:
+> 
+> /* None of these should ever happen */
+> ...
+>          invalid_vector  el2h_sync_invalid
+> 
+> Please correct me if I am wrong, but it looks like this case should not 
+> be possible.
+
+This comments really means that we shouldn't ever take any of these
+exception. If we do, we'll crash and burn (just like the kernel didn't
+expect to take an instruction fault from the kernel itself, up until
+this patch).
+
+I expect that the firmware does inject the fault into the exception
+level it has preempted. So let me turn the question the other way
+around: what guarantees that we will never have to handle such a fault
+at EL2?
+
+As a corollary, what happens when the firmware injects a fault
+triggered by a VM running at EL1, under the control of a hypervisor
+running at EL2? There should be some form of exception delegation to
+the hypervisor, which makes the lack of handling at EL2 even more
+worrying.
+
+Thanks,
+
+	M.
+-- 
+Jazz is not dead. It just smells funny.
